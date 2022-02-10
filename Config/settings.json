@@ -1,0 +1,33 @@
+{
+	"owner_number": "6289607055246@s.whatsapp.net",
+	"team_number": [],
+	"state": "public",
+	"maintenance": false,
+	"main_session": "debug",
+	"max_group": 20,
+	"min_members": 20,
+	"limit": 20,
+	"reset_time": {
+		"minute": "6",
+		"hour": "00"
+	},
+	"tebak_gambar": {
+		"expired_time": 20
+	},
+	"prefix": {
+		"multi": true,
+		"nopref": false,
+		"pref": "z"
+	},
+	"debugger": false,
+	"session": [
+		{
+			"jid": "62896070552462@s.whatsapp.net",
+			"status": "Main_Bot",
+			"session_name": "debug",
+			"uptime": 1644383248000
+		}
+	],
+	"insta_sesi": "Please login to your Instagram Account and put the sessionId here",
+	"delay": 2
+}

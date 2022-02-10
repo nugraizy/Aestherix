@@ -1,19 +1,14 @@
-import fs from "fs";
-const SETTINGS = JSON.parse(fs.readFileSync("./config/settings.json"));
+import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined } from "./functions.js";
+import moment from "moment-timezone";
+moment.tz.setDefault("Asia/Jakarta").locale("id");
 
-function isSame(a, b) {
-	return a === b;
-}
-
-function isNotSame(a, b) {
-	return a !== b;
-}
-
-function isNotNull(a) {
-	return a !== null;
-}
-
-async function reassign(m, client) {
+export async function reassign(m, client) {
+	const SETTINGS = readJSON("./Config/settings.json");
+	if (m.message && m.message.protocolMessage && m.message.protocolMessage.type == "REVOKE") return m;
+	if (m.message && m.messageTimestamp) {
+		if (moment(m.messageTimestamp * 1000).unix() < moment(moment().subtract("5", "seconds").valueOf()).unix()) return "OLD MESSAGE";
+	} else if (moment(JSON.parse(m.messageTimestamp * 1000)).unix() < moment(moment().subtract("5", "seconds").valueOf()).unix()) return "OLD MESSAGE";
+	if (!m.message) return m;
 	m.message = isSame(Object.keys(m.message)[0], "ephemeralMessage") ? m.message.ephemeralMessage.message : m.message;
 	const isFromMe = m.key.fromMe;
 	const from = m.key.remoteJid;
@@ -29,6 +24,7 @@ async function reassign(m, client) {
 	const botNumber = `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net`;
 	const ownerNumbers = [SETTINGS.owner_number, ...SETTINGS.team_number, botNumber];
 	const isOwner = ownerNumbers.includes(sender);
+	const timeStamp = m.messageTimestamp;
 	let type = Object.keys(m.message)[0];
 	type = isSame(type, "messageContextInfo") ? (type = Object.keys(m.message)[1]) : type;
 	type = isSame(type, "extendedTextMessage") && m.message.extendedTextMessage.text.includes("@") ? (type = "mentionText") : type;
@@ -42,7 +38,6 @@ async function reassign(m, client) {
 	participants.map((v) => isNotNull(v.admin) && adminGroups.push(v.id));
 	const isAdmin = adminGroups.includes(sender);
 	const isBotAdmin = adminGroups.includes(botNumber);
-
 	const body = isSame(type, "conversation")
 		? mText.message.conversation
 		: isSame(type, "mentionText")
@@ -82,23 +77,14 @@ async function reassign(m, client) {
 		: isSame(type, "buttonsResponseMessage")
 		? mText.message.buttonsResponseMessage.selectedButtonId
 		: isSame(type, "imageMessage")
-		? isEmpty(mText.message.imageMessage.caption)
-			? "Image Message"
-			: mText.message.imageMessage.caption
+		? mText.message.imageMessage.caption || "No Caption"
 		: isSame(type, "videoMessage")
-		? isEmpty(mText.message.videoMessage.caption)
-			? "Video Message"
-			: mText.message.videoMessage.caption
+		? mText.message.videoMessage.caption || "No Caption"
 		: isSame(type, "viewOnceMessage") && mText.message.viewOnceMessage.message.imageMessage
-		? isEmpty(mText.message.viewOnceMessage.message.imageMessage.caption)
-			? "View Once Image"
-			: mText.message.viewOnceMessage.message.imageMessage.caption
+		? mText.message.viewOnceMessage.message.imageMessage.caption || "No Caption"
 		: isSame(type, "viewOnceMessage") && mText.message.viewOnceMessage.message.videoMessage
-		? isEmpty(mText.message.viewOnceMessage.message.videoMessage.caption)
-			? "View Once Video"
-			: mText.message.viewOnceMessage.message.videoMessage.caption
+		? mText.message.viewOnceMessage.message.videoMessage.caption || "No Caption"
 		: "Unknown body";
-
 	const args = body.split(/ +/g);
 	const cmd = body.toLowerCase().split(" ")[0] || "";
 	const multi = SETTINGS.prefix.multi;
@@ -193,7 +179,7 @@ async function reassign(m, client) {
 			: isSame(typeQuoted, "buttonsMessage")
 			? mMediaData.message.buttonsMessage
 			: isSame(typeQuoted, "buttonsResponseMessage")
-			? mMediaData.message.buttonsResponseMessage.contentText + "\n" + mMediaData.message.buttonsResponseMessage.footerText
+			? `${mMediaData.message.buttonsResponseMessage.contentText}\n${mMediaData.message.buttonsResponseMessage.footerText}`
 			: isSame(typeQuoted, "templateButtonReplyMessage") && mMediaData.message.templateButtonReplyMessage
 			? mMediaData.message.templateButtonReplyMessage.selectedId
 			: isSame(typeQuoted, "templateMessage") && mMediaData.message.templateMessage
@@ -237,20 +223,19 @@ async function reassign(m, client) {
 			: isQuotedViewOnce && (isQuotedViewOnceImage || isQuotedViewOnceVideo)
 			? mediaData.message[typeQuoted].message && mediaData.message[typeQuoted].message[typeViewOnce]
 			: "";
-	const reply = async (dari, text) => {
-		return await client[botNum].sendMessage(dari, { text }, { quoted: m });
-	};
+	const reply = async (dari, text) => await client[botNum].sendMessage(dari, { text }, { quoted: m });
 	client[botNum] = {
 		...client[botNum],
 		reply,
 	};
-	m = {
-		...m,
+	return {
+		message: m,
 		isFromMe,
 		from,
 		isGroup,
 		isBaileys,
 		sender,
+		timeStamp,
 		groupMetadata,
 		groupName,
 		groupId,
@@ -268,6 +253,7 @@ async function reassign(m, client) {
 		args,
 		cmd,
 		isCmd,
+		prefix: prf,
 		query,
 		isMedia,
 		isQuotedImage,
@@ -298,7 +284,4 @@ async function reassign(m, client) {
 		extractMediaData,
 		BodyQuoted,
 	};
-	return m;
 }
-
-export { reassign };
