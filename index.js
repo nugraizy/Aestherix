@@ -12,9 +12,12 @@ import * as Discord from "@discordjs/collection";
 import { Boom } from "@hapi/boom";
 import Spinnies from "spinnies";
 import { getSpinner } from "./Helper/Misc/spinners.js";
+import path from "path";
 
 const { default: makeWASocket, DisconnectReason, delay, BufferJSON, makeInMemoryStore, AnyMessageContent, useSingleFileAuthState, DEFAULT_CONNECTION_CONFIG } = baileys;
 const { state, saveState } = useSingleFileAuthState("./session/Session-debug.json");
+const moduleURL = new URL(import.meta.url);
+export const __dirname = path.dirname(moduleURL.pathname);
 const CMD = {};
 CMD.commands = new Discord.Collection();
 CMD.aliases = [];

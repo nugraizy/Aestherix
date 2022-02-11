@@ -75,7 +75,7 @@ export default {
 					console.log(e);
 				}
 			}
-		} else if (!message.isGroup) INFOLOG(`[${color(time, "cyan")}]`, `${color(message.pushname, "white")} ${color(message.prettyNumber, "#ff71ce")} :`, `${color(message.body.substr(0, 20), "#05ffa1")}`, `${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`);
+		} else if (!message.isGroup) INFOLOG(`[${color(time, "cyan")}]`, `${color(message.pushname, "white")} ${color(message.prettyNumber, "#ff71ce")} :`, `${color(message.body, "#05ffa1")}`, `${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`);
 		else {
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(message.pushname, "white")} ${color(message.prettyNumber, "#ff71ce")} :`, `${color(message.body.substr(0, 20), "#05ffa1")}`, `${color(message.from, "#b967ff")}`, `${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`);
 		}

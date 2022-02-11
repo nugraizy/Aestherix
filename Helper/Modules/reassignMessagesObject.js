@@ -1,6 +1,8 @@
-import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined } from "./functions.js";
+import { toBuffer, downloadContentFromMessage } from "@adiwajshing/baileys";
+import fs from "fs";
 import moment from "moment-timezone";
 import PhoneNumber from "awesome-phonenumber";
+import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined } from "./functions.js";
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 
 export async function reassign(m, client) {
@@ -27,6 +29,7 @@ export async function reassign(m, client) {
 	const ownerNumbers = [SETTINGS.owner_number, ...SETTINGS.team_number, botNumber];
 	const isOwner = ownerNumbers.includes(sender);
 	const timeStamp = m.messageTimestamp;
+	const filename = sender + m.key.id;
 	let type = Object.keys(m.message)[0];
 	type = isSame(type, "messageContextInfo") ? (type = Object.keys(m.message)[1]) : type;
 	type = isSame(type, "extendedTextMessage") && m.message.extendedTextMessage.text.includes("@") ? (type = "mentionText") : type;
@@ -226,9 +229,22 @@ export async function reassign(m, client) {
 			? mediaData.message[typeQuoted].message && mediaData.message[typeQuoted].message[typeViewOnce]
 			: "";
 	const reply = async (dari, text) => await client[botNum].sendMessage(dari, { text }, { quoted: m });
+	const downloadAndSaveMediaMessage = async (media, path) => {
+		const msg = await downloadContentFromMessage(media, typeQuoted.replace(/Message/g, ""));
+		const buffer = await toBuffer(msg);
+		await fs.writeFileSync(path, buffer);
+		return path;
+	};
+	const downloadMediaMessage = async (media) => {
+		const msg = await downloadContentFromMessage(media, typeQuoted.replace(/Message/g, ""));
+		const buffer = await toBuffer(msg);
+		return buffer;
+	};
 	client[botNum] = {
 		...client[botNum],
 		reply,
+		downloadAndSaveMediaMessage,
+		downloadMediaMessage,
 	};
 	return {
 		message: m,
@@ -239,6 +255,7 @@ export async function reassign(m, client) {
 		sender,
 		prettyNumber,
 		timeStamp,
+		filename,
 		groupMetadata,
 		groupName,
 		groupId,
