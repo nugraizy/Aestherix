@@ -1,5 +1,6 @@
 import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined } from "./functions.js";
 import moment from "moment-timezone";
+import PhoneNumber from "awesome-phonenumber";
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 
 export async function reassign(m, client) {
@@ -15,6 +16,7 @@ export async function reassign(m, client) {
 	const isGroup = from.endsWith("@g.us");
 	const isBaileys = (m.key.id.startsWith("BAE5") && isSame(m.key.id.length, 16)) || (isFromMe && m.key.id.startsWith("VOID"));
 	const sender = isFromMe ? `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net` : isGroup ? m.key.participant : m.key.remoteJid;
+	const prettyNumber = PhoneNumber(`+${sender.replace("@s.whatsapp.net", "")}`).getNumber("international");
 	const groupMetadata = isGroup ? await client[botNum].groupMetadata(from) : "";
 	const groupName = isGroup ? groupMetadata.subject : "";
 	const groupId = isGroup ? groupMetadata.id : "";
@@ -235,6 +237,7 @@ export async function reassign(m, client) {
 		isGroup,
 		isBaileys,
 		sender,
+		prettyNumber,
 		timeStamp,
 		groupMetadata,
 		groupName,

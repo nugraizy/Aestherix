@@ -1,8 +1,8 @@
-"use strict";
-
 import dotenv from "dotenv";
 dotenv.config();
 console.clear();
+import { spawn } from "child_process";
+printRandomAscii();
 
 import fs from "fs";
 import baileys from "@adiwajshing/baileys";
@@ -199,4 +199,11 @@ function parseCli() {
 			},
 		},
 	);
+}
+
+function printRandomAscii() {
+	const randomAscii = fs.readdirSync("./Helper/Ascii/");
+	spawn("bash", [`./Helper/Ascii/${randomAscii[Math.floor(Math.random() * randomAscii.length)]}`], {
+		stdio: "inherit",
+	});
 }

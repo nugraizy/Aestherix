@@ -1,10 +1,8 @@
-"use strict";
-
 import fs from "fs";
 import moment from "moment-timezone";
 import similarity from "similarity";
 import PhoneNumber from "awesome-phonenumber";
-import { isBigger, isNotSame, isNotZero, isSame, INFOLOG, color } from "../Helper/Modules/functions.js";
+import { isBigger, isNotSame, isNotZero, isSame, INFOLOG, ERRLOG, color } from "../Helper/Modules/functions.js";
 
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 
@@ -53,40 +51,33 @@ export default {
 				}
 			}
 			CMD = CMD.commands.get(message.cmd.slice(1).trim().toLowerCase()) || CMD.commands.find((v) => v.aliases.includes(message.cmd.slice(1).trim().toLowerCase())) || false;
+			if (message.isGroup) {
+				INFOLOG(
+					`[${color(time, "cyan")}]`,
+					`${color(message.pushname, "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
+					`${color(message.prefix, "white")}${color(CMD.name || message.cmd.slice(1), "#01cdfe")}`,
+					`${color(message.query.substr(0, 20), "#05ffa1")}`,
+					`${color(message.from, "#b967ff")}`,
+					`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
+				);
+			} else
+				INFOLOG(
+					`[${color(time, "cyan")}]`,
+					`${color(message.pushname, "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
+					`${color(message.prefix, "white")}${color(CMD.name || message.cmd.slice(1), "#01cdfe")}`,
+					`${color(message.query.substr(0, 20), "#05ffa1")}`,
+					`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
+				);
 			if (CMD) {
 				try {
-					if (message.isGroup) {
-						INFOLOG(
-							`[${color(time, "cyan")}]`,
-							`${color(message.pushname, "white")} ${color(PhoneNumber(`+${message.sender.replace("@s.whatsapp.net", "")}`).getNumber("international"), "#ff71ce")} :`,
-							`${color(message.prefix, "white")}${color(CMD.name, "#01cdfe")}`,
-							`${color(message.query, "#05ffa1")}`,
-							`${color(message.from, "#b967ff")}`,
-							`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
-						);
-					} else
-						INFOLOG(
-							`[${color(time, "cyan")}]`,
-							`${color(message.pushname, "white")} ${color(PhoneNumber(`+${message.sender.replace("@s.whatsapp.net", "")}`).getNumber("international"), "#ff71ce")} :`,
-							`${color(message.prefix, "white")}${color(CMD.name, "#01cdfe")}`,
-							`${color(message.query, "#05ffa1")}`,
-							`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
-						);
 					CMD.run(message, client, message.query);
 				} catch (e) {
 					console.log(e);
 				}
 			}
-		} else if (!message.isGroup)
-			INFOLOG(`[${color(time, "cyan")}]`, `${color(message.pushname, "white")} ${color(PhoneNumber(`+${message.sender.replace("@s.whatsapp.net", "")}`).getNumber("international"), "#ff71ce")} :`, `${color(message.body, "#05ffa1")}`, `${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`);
+		} else if (!message.isGroup) INFOLOG(`[${color(time, "cyan")}]`, `${color(message.pushname, "white")} ${color(message.prettyNumber, "#ff71ce")} :`, `${color(message.body.substr(0, 20), "#05ffa1")}`, `${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`);
 		else {
-			INFOLOG(
-				`[${color(time, "cyan")}]`,
-				`${color(message.pushname, "white")} ${color(PhoneNumber(`+${message.sender.replace("@s.whatsapp.net", "")}`).getNumber("international"), "#ff71ce")} :`,
-				`${color(message.body, "#05ffa1")}`,
-				`${color(message.from, "#b967ff")}`,
-				`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
-			);
+			INFOLOG(`[${color(time, "cyan")}]`, `${color(message.pushname, "white")} ${color(message.prettyNumber, "#ff71ce")} :`, `${color(message.body.substr(0, 20), "#05ffa1")}`, `${color(message.from, "#b967ff")}`, `${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`);
 		}
 	},
 };

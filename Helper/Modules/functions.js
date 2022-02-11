@@ -493,5 +493,6 @@ export function isURL(input) {
 }
 
 export function parseCode(input) {
-	return input.match(/([-_0-9a-zA-Z]{11})/)[0];
+	const parse = input.match(/([-_0-9a-zA-Z]{11})/);
+	return parse == null ? false : parse[0];
 }
