@@ -7,7 +7,7 @@ export default {
 	description: "Downloads the story of the user",
 	usage: "!igstory <username>",
 	aliases: ["igstory", "igs"],
-	category: "Social",
+	category: "Downloader",
 	async run(message, client, args) {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!message.query) return client[botNum].reply(message.from, "Please specify a url");
@@ -20,8 +20,9 @@ export default {
 				const story = await getStory(username);
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading Instagram Story`, "cyan")} for ${color(message.prettyNumber, "#ff71ce")}`);
 				if ("error" in story) {
-					client[botNum].reply(message.from, story.error);
+					client[botNum].reply(message.from, `Error while downloading Instagram story\n\n${story.error}\n${username}`);
 					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Instagram Story", "cyan")} for ${color(message.prettyNumber, "#ff71ce")}`);
+					continue;
 				} else {
 					let capt = "``` • Instagram Story```\n\n";
 					capt += `Username  : ${story.user.username}\n`;

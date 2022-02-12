@@ -484,7 +484,7 @@ export function INFOLOG(...info) {
 
 export function ERRLOG(...info) {
 	if (!isLOGS) {
-		console.log(...info);
+		console.error(...info);
 	}
 }
 

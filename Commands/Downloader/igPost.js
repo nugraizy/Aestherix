@@ -7,7 +7,7 @@ export default {
 	description: "Downloads the post of the user",
 	usage: "!igpost <url>",
 	aliases: ["igpost", "igp"],
-	category: "Social",
+	category: "Downloader",
 	async run(message, client, args) {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!message.query) return client[botNum].reply(message.from, "Please specify a url");
@@ -28,8 +28,9 @@ export default {
 			if (parse) {
 				const post = await getPost(parse);
 				if ("error" in post) {
-					client[botNum].reply(message.from, post.error);
+					client[botNum].reply(message.from, `Error while downloading Instagram post\n\n${post.error}\n${url}`);
 					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Instagram Post", "red")} for ${color(message.prettyNumber, "#ff71ce")}`);
+					continue;
 				} else {
 					let capt = "``` • Instagram Post```\n\n";
 					capt += `Username : ${post.username}\n`;

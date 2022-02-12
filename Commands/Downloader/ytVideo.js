@@ -7,27 +7,29 @@ export default {
 	description: "Downloads a YouTube video",
 	usage: "!ytvideo <url>",
 	aliases: ["ytv"],
-	category: "Social",
+	category: "Downloader",
 	async run(message, client, args) {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!message.query) return client[botNum].reply(message.from, "Please provide a URL");
-		const urls = message.query.split(",");
-		const { isOne, isURL, INFOLOG, ERRLOG, color, numberWithCommas } = await import("../../Helper/Modules/functions.js");
+		let urls = message.query.split(",");
+		const { isOne, isURL, INFOLOG, ERRLOG, color, numberWithCommas, removeDuplicatesArray } = await import("../../Helper/Modules/functions.js");
 		if (isOne(urls.length) && !isURL(message.query)) return client[botNum].reply(message.from, "Please specify a valid url");
 		if (isOne(urls.length) && !regex(message.query)) return client[botNum].reply(message.from, "Please specify a valid YouTube url");
+		urls = removeDuplicatesArray(urls.map((url) => url.trim()));
 		for (const url of urls) {
-			if (!isURL(url.trim())) {
+			if (!isURL(url)) {
 				await client[botNum].reply(message.from, "Please specify a valid url");
 				continue;
-			} else if (!regex(url.trim())) {
+			} else if (!regex(url)) {
 				await client[botNum].reply(message.from, "Please specify a valid YouTube url");
 				continue;
 			}
-			const video = await ytv(url.trim());
+			const video = await ytv(url);
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading YouTube Video`, "#01cdfe")} for ${color(message.prettyNumber, "#ff71ce")}`);
 			if ("error" in video) {
-				client[botNum].reply(message.from, video.error);
+				client[botNum].reply(message.from, `Error while downloading YouTube Video\n\b${video.error}\n${url}`);
 				ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download YouTube Video", "red")} for ${color(message.prettyNumber, "#ff71ce")}`);
+				continue;
 			} else {
 				const { title, description, timestamp, uploaded, views, author, urlChannel, dl_link, filesize, filesizeF } = video;
 				let capt = "``` • YouTube Video```\n\n";

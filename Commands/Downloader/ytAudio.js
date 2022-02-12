@@ -9,24 +9,25 @@ export default {
 	description: "Downloads a YouTube audio",
 	usage: "!ytaudio <url>",
 	aliases: ["yta"],
-	category: "Social",
+	category: "Downloader",
 	async run(message, client, args) {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!message.query) return client[botNum].reply(message.from, "Please provide a URL");
-		const urls = message.query.split(",");
-		const { isOne, isURL, INFOLOG, ERRLOG, color, numberWithCommas } = await import("../../Helper/Modules/functions.js");
+		let urls = message.query.split(",");
+		const { isOne, isURL, INFOLOG, ERRLOG, color, numberWithCommas, removeDuplicatesArray } = await import("../../Helper/Modules/functions.js");
 		const { toOpus } = await import("../../Utils/Converter/fileProcessing.js");
 		if (isOne(urls.length) && !isURL(message.query)) return client[botNum].reply(message.from, "Please specify a valid url");
 		if (isOne(urls.length) && !regex(message.query)) return client[botNum].reply(message.from, "Please specify a valid YouTube url");
+		urls = removeDuplicatesArray(urls.map((url) => url.trim()));
 		for (const url of urls) {
-			if (!isURL(url.trim())) {
+			if (!isURL(url)) {
 				await client[botNum].reply(message.from, "Please specify a valid url");
 				continue;
-			} else if (!regex(url.trim())) {
+			} else if (!regex(url)) {
 				await client[botNum].reply(message.from, "Please specify a valid YouTube url");
 				continue;
 			}
-			const audio = await yta(url.trim());
+			const audio = await yta(url);
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading YouTube Audio`, "#01cdfe")} for ${color(message.prettyNumber, "#ff71ce")}`);
 			if ("error" in audio) {
 				client[botNum].reply(message.from, audio.error);

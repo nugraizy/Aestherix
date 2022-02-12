@@ -7,7 +7,7 @@ export default {
 	description: "Downloads a Facebook post",
 	usage: "!fbpost <url>",
 	aliases: ["fbpost", "fbp"],
-	category: "Social",
+	category: "Downloader",
 	async run(message, client, args) {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!message.query) return client[botNum].reply(message.from, "Please provide a URL");
@@ -26,8 +26,9 @@ export default {
 			const post = await fbDl(url.trim());
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading Facebook Post`, "#01cdfe")} for ${color(message.prettyNumber, "#ff71ce")}`);
 			if ("error" in post) {
-				client[botNum].reply(message.from, post.error);
-				ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Instagram Post", "red")} for ${color(message.prettyNumber, "#ff71ce")}`);
+				client[botNum].reply(message.from, `Failed while downloading Facebook post\n\n${post.error}\n${url}`);
+				ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Facebook Post", "red")} for ${color(message.prettyNumber, "#ff71ce")}`);
+				continue;
 			} else {
 				await client[botNum].sendMessage(message.from, { video: { url: post.url }, caption: `Post Uploaded : ${post.datePosted}\nDuration : ${post.duration}` });
 				await delay(300);

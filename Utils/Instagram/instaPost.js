@@ -1,6 +1,3 @@
-import dotenv from "dotenv";
-dotenv.config();
-
 import Axios from "axios";
 const sessionId = process.env.INSTAGRAM_SESI;
 
