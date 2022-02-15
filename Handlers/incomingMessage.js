@@ -1,8 +1,7 @@
-import fs from "fs";
 import moment from "moment-timezone";
 import similarity from "similarity";
-import PhoneNumber from "awesome-phonenumber";
-import { isBigger, isNotSame, isNotZero, isSame, INFOLOG, ERRLOG, color } from "../Helper/Modules/functions.js";
+import { delay } from "@adiwajshing/baileys";
+import { isBigger, isNotSame, isNotZero, isSame, INFOLOG, color } from "../Helper/Modules/functions.js";
 
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 
@@ -10,6 +9,7 @@ export default {
 	async handler(message, client, CMD) {
 		const time = moment().format("HH:mm:ss DD/MM");
 		const { reassign } = await import("../Helper/Modules/reassignMessagesObject.js");
+		const { tebak } = await import("./index.js");
 		message = await reassign(JSON.parse(JSON.stringify(message.messages[0])), client);
 		if (isSame(typeof message, "string")) return;
 		if (!message.message) return;
@@ -49,35 +49,49 @@ export default {
 					);
 					message.cmd = message.prf + HIGH_SCORE.command.toLowerCase().split(" ")[0].trim() || "";
 				}
+				const TempCMD = CMD.commands.get(message.cmd.slice(1).trim().toLowerCase()) || CMD.commands.find((v) => v.aliases.includes(message.cmd.slice(1).trim().toLowerCase())) || false;
+				if (message.isGroup) {
+					INFOLOG(
+						`[${color(time, "cyan")}]`,
+						`${color(message.pushname, "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
+						`${color(message.prefix, "white")}${color(CMD.name || message.cmd.slice(1), "#01cdfe")}`,
+						`${color(message.query.substr(0, 20), "#05ffa1")}`,
+						`${color(message.from, "#b967ff")}`,
+						`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
+					);
+				} else
+					INFOLOG(
+						`[${color(time, "cyan")}]`,
+						`${color(message.pushname, "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
+						`${color(message.prefix, "white")}${color(CMD.name || message.cmd.slice(1), "#01cdfe")}`,
+						`${color(message.query.substr(0, 20), "#05ffa1")}`,
+						`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
+					);
+				if (TempCMD) {
+					try {
+						TempCMD.run(message, client);
+						await delay(200);
+					} catch (err) {
+						let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
+						str += `Type : ${err.name}\n`;
+						str += `Message : ${err.message}`;
+						await client[botNum].reply(message.from, str);
+						console.log(err);
+					}
+				}
 			}
-			CMD = CMD.commands.get(message.cmd.slice(1).trim().toLowerCase()) || CMD.commands.find((v) => v.aliases.includes(message.cmd.slice(1).trim().toLowerCase())) || false;
-			if (message.isGroup) {
+		} else {
+			if (!message.isGroup) INFOLOG(`[${color(time, "cyan")}]`, `${color(message.pushname, "white")} ${color(message.prettyNumber, "#ff71ce")} :`, `${color(message.body.trim().replace("\n", "").substr(0, 20), "#05ffa1")}`, `${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`);
+			else {
 				INFOLOG(
 					`[${color(time, "cyan")}]`,
 					`${color(message.pushname, "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
-					`${color(message.prefix, "white")}${color(CMD.name || message.cmd.slice(1), "#01cdfe")}`,
-					`${color(message.query.substr(0, 20), "#05ffa1")}`,
+					`${color(message.body.trim().replace("\n", "").substr(0, 20), "#05ffa1")}`,
 					`${color(message.from, "#b967ff")}`,
 					`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
 				);
-			} else
-				INFOLOG(
-					`[${color(time, "cyan")}]`,
-					`${color(message.pushname, "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
-					`${color(message.prefix, "white")}${color(CMD.name || message.cmd.slice(1), "#01cdfe")}`,
-					`${color(message.query.substr(0, 20), "#05ffa1")}`,
-					`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
-				);
-			if (CMD) {
-				try {
-					CMD.run(message, client, message.query);
-				} catch (e) {
-					console.log(e);
-				}
 			}
-		} else if (!message.isGroup) INFOLOG(`[${color(time, "cyan")}]`, `${color(message.pushname, "white")} ${color(message.prettyNumber, "#ff71ce")} :`, `${color(message.body, "#05ffa1")}`, `${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`);
-		else {
-			INFOLOG(`[${color(time, "cyan")}]`, `${color(message.pushname, "white")} ${color(message.prettyNumber, "#ff71ce")} :`, `${color(message.body.substr(0, 20), "#05ffa1")}`, `${color(message.from, "#b967ff")}`, `${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`);
+			tebak(message, client);
 		}
 	},
 };

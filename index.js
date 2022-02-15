@@ -13,16 +13,18 @@ import { Boom } from "@hapi/boom";
 import Spinnies from "spinnies";
 import { getSpinner } from "./Helper/Misc/spinners.js";
 import path from "path";
+import { EventEmitter } from "events";
+EventEmitter.prototype.setMaxListeners(0);
 
 const { default: makeWASocket, DisconnectReason, delay, BufferJSON, makeInMemoryStore, AnyMessageContent, useSingleFileAuthState, DEFAULT_CONNECTION_CONFIG } = baileys;
 const { state, saveState } = useSingleFileAuthState("./Session/Session-debug.json");
 const moduleURL = new URL(import.meta.url);
 export const __dirname = path.dirname(moduleURL.pathname);
-const CMD = {};
+global.CMD = {};
 CMD.commands = new Discord.Collection();
 CMD.aliases = [];
 
-const spinners = new Spinnies({ color: "blue", succeedColor: "green", failColor: "redBright", spinner: getSpinner("aesthetic") });
+const spinners = new Spinnies({ color: "blue", succeedColor: "green", failColor: "redBright", spinner: getSpinner("mindblown") });
 const addSpinner = (name, options) => spinners.add(name, options);
 const successSpinner = (name, options) => spinners.succeed(name, options);
 const failSpinner = (name, options) => spinners.fail(name, options);
@@ -70,7 +72,7 @@ const start = async () => {
 							break;
 					}
 				}
-				start();
+				start().catch((e) => console.log(e));
 			}
 		} else if (connection == "open") {
 			global.client = {};
@@ -89,7 +91,7 @@ const start = async () => {
 
 	Client.ev.on("auth-state.update", () => saveStated);
 };
-start().catch(console.error);
+start().catch((e) => console.log(e));
 
 function loadFiles(dir) {
 	let files = [];

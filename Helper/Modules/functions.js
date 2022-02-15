@@ -48,7 +48,7 @@ export const print = (code = {}) => {
 	return JSON.stringify(code, null, "\t");
 };
 
-export const numberWithCommas = (number = 0) => number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+export const numberWithCommas = (number = 0, region = "id") => parseFloat(number).toLocaleString(region);
 
 export const randomCase = (string = "") => {
 	const container = [];

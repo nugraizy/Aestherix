@@ -1,6 +1,6 @@
 import Axios from "axios";
 import cheerio from "cheerio";
-import { COOKIE } from "../../Utils/TikTok/cookie.js";
+//import { COOKIE } from "../../Utils/TikTok/cookie.js";
 
 export function tiktokProfileBRAINANS(username) {
 	return new Promise((resolve, reject) => {
@@ -8,7 +8,7 @@ export function tiktokProfileBRAINANS(username) {
 		Axios.get(URL_BASE(username), {
 			headers: {
 				"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
-				Cookie: COOKIE.BRAINANS_COOKIE,
+				Cookie: "_tiktok_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYNXVqYUNMSG45NHVvWW1XS0prNlBRZE8y.ZO2MBELa8GVyfiGsR3OlGlMDIiChcfSinC6LDhDyvBg", //COOKIE.BRAINANS_COOKIE,
 			},
 		})
 			.then(({ data }) => {

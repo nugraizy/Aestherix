@@ -96,7 +96,7 @@ export async function reassign(m, client) {
 	const noPref = SETTINGS.prefix.nopref;
 	const pref = SETTINGS.prefix.pref || ".";
 	let prf;
-	if (multi) prf = /^[°π÷×¶∆£¢€¥®™✓_=+|~!#$%^&.\/\\©^]/.test(cmd) ? cmd.match(/^[°π÷×¶∆£¢€¥®™✓_=+|~!#$%^&.\/\\©^]/gi) : "-";
+	if (multi) prf = /^[°π÷×¶∆£¢€¥®™✓_=+|~!#$%^&.\/\\©^>]/.test(cmd) ? cmd.match(/^[°π÷×¶∆£¢€¥®™✓_=+|~!#$%^&.\/\\©^>]/gi) : "-";
 	else if (noPref) prf = "";
 	else prf = pref;
 	const isCmd = body.startsWith(prf);
@@ -152,7 +152,7 @@ export async function reassign(m, client) {
 		"messageContextInfo",
 		"groupInviteMessage",
 	];
-	const BodyQuoted = typeMessage.includes(isSame(type, "extendedTextMessage") && mMediaData ? Object.keys(mMediaData.message ? mMediaData.message : { CLIENT: "m" })[0] : "none")
+	const bodyQuoted = typeMessage.includes(isSame(type, "extendedTextMessage") && mMediaData ? Object.keys(mMediaData.message ? mMediaData.message : { CLIENT: "m" })[0] : "none")
 		? isSame(typeQuoted, "conversation")
 			? mMediaData.message.conversation
 			: isSame(typeQuoted, "extendedTextMessage")
@@ -228,7 +228,10 @@ export async function reassign(m, client) {
 			: isQuotedViewOnce && (isQuotedViewOnceImage || isQuotedViewOnceVideo)
 			? mediaData.message[typeQuoted].message && mediaData.message[typeQuoted].message[typeViewOnce]
 			: "";
-	const reply = async (dari, text) => await client[botNum].sendMessage(dari, { text }, { quoted: m });
+	const reply = async (dari, text, opts) => {
+		if (opts !== unefined) return await client[botNum].sendMessage(dari, { text }, { quoted: opts });
+		else return await client[botNum].sendMessage(dari, { text }, { quoted: m });
+	};
 	const downloadAndSaveMediaMessage = async (media, path) => {
 		const msg = await downloadContentFromMessage(media, typeQuoted.replace(/Message/g, ""));
 		const buffer = await toBuffer(msg);
@@ -302,6 +305,6 @@ export async function reassign(m, client) {
 		mention,
 		mediaData,
 		extractMediaData,
-		BodyQuoted,
+		bodyQuoted,
 	};
 }
