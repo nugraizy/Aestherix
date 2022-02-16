@@ -1,4 +1,14 @@
-export function makePuzzle(board) {
+const LEVEL = {
+	easy: 60,
+	medium: 50,
+	hard: 30,
+	insane: 15,
+};
+
+export function makePuzzle(level) {
+	let board;
+	if (level == undefined) level = LEVEL["easy"];
+	else level = LEVEL[level] || LEVEL["easy"];
 	board = solvePuzzle(Array(81).fill(null));
 	let puzzle = [];
 	let deduced = Array(81).fill(null);
@@ -30,7 +40,7 @@ export function makePuzzle(board) {
 		}
 	}
 	let boards = boardforentries(puzzle);
-	boards = makeItEasy(boards);
+	boards = makeItEasy(boards, level);
 	return boards;
 }
 
@@ -375,7 +385,7 @@ function removeElement(array, from, to) {
 	return array.push.apply(array, rest);
 }
 
-function makeItEasy(board) {
+function makeItEasy(board, level) {
 	let emptyCells = [];
 	let solve = solvePuzzle(board);
 	for (let i = 0; i < board.length; i++) {
@@ -383,7 +393,7 @@ function makeItEasy(board) {
 			emptyCells.push(i);
 		}
 	}
-	for (let i = 0; i < 50; i++) {
+	for (let i = 0; i < level; i++) {
 		let randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
 		board[randomIndex] = solve[randomIndex];
 		emptyCells.splice(randomIndex, 1);

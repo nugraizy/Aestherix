@@ -11,6 +11,7 @@ export default {
 		const { reassign } = await import("../Helper/Modules/reassignMessagesObject.js");
 		const { tebak } = await import("./index.js");
 		message = await reassign(JSON.parse(JSON.stringify(message.messages[0])), client);
+		if ("error" in message) return console.log(message.error);
 		if (isSame(typeof message, "string")) return;
 		if (!message.message) return;
 		if (message.isBaileys) return;
@@ -49,7 +50,7 @@ export default {
 					);
 					message.cmd = message.prf + HIGH_SCORE.command.toLowerCase().split(" ")[0].trim() || "";
 				}
-				const TempCMD = CMD.commands.get(message.cmd.slice(1).trim().toLowerCase()) || CMD.commands.find((v) => v.aliases.includes(message.cmd.slice(1).trim().toLowerCase())) || false;
+				const TempCMD = CMD.commands.get(message.cmd.slice(1).trim().toLowerCase()) || CMD.commands.find((v) => v.aliases.includes(message.cmd.slice(1).trim().toLowerCase())) || CMD.commands.find((v) => v.aliases.includes(message.cmd.trim().toLowerCase())) || false;
 				if (message.isGroup) {
 					INFOLOG(
 						`[${color(time, "cyan")}]`,

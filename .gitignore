@@ -1,4 +1,4 @@
 .env
-config/*.json
+Config/*.json
 node_modules/
-session/
+Session/

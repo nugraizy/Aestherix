@@ -20,12 +20,13 @@ export async function attp(sender, texts, color, fonts) {
 	const images = [];
 	for (const color of colors) {
 		const reassignColor = color.startsWith("#") ? color : `#${color}`;
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		ctx.fillStyle = reassignColor;
 		ctx.shadowOffsetX = 1;
 		ctx.shadowOffsetY = 1;
 		ctx.shadowColor = reassignColor;
 		ctx.shadowBlur = 2;
-		CanvasTextWrapper(canvas, texts, { font: `48px ${fonts}`, textAlign: "center", verticalAlign: "middle", sizeToFill: true });
+		CanvasTextWrapper(canvas, texts, { font: `56px ${fonts}`, textAlign: "center", verticalAlign: "middle", sizeToFill: true });
 		const buffer = canvas.toDataURL("image/png").replace(/^data:image\/png;base64,/, "");
 		const saved = saveImages(new Buffer.from(buffer, "base64"), i);
 		images.push(saved);
@@ -37,7 +38,7 @@ export async function attp(sender, texts, color, fonts) {
 }
 
 function saveImages(buffer, sequence) {
-	const fileName = `./Temporary Files/Animated Images-${sequence}.webp`;
+	const fileName = path.join(__dirname, `./Temporary Files/Animated Images-${sequence}.webp`);
 	writeFileSync(fileName, buffer);
 	return fileName;
 }
@@ -50,7 +51,6 @@ async function createSequence(images, sender) {
 		const pathResults = path.join(__dirname, `Temporary Files/Animated Images-${Date.now()}`);
 		const commands = ["-loop", "3", ...images.map((v) => v, "-d 0.1"), "-o", `${pathResults}.webp`];
 		createExif("Made by Nanda", "Void Animated Sticker using Canvas and WebP");
-		func.INFOLOG(`[${func.color(time, "cyan")}]`, `${func.color(`Animated Image is Done`, "#01cdfe")} for ${func.color(sender, "#ff71ce")}`);
 		spawn("img2webp", commands)
 			.on("error", (err) => {
 				func.ERRLOG(`[${func.color(time, "cyan")}]`, `${func.color("Failed to Convert Media to Sticker", "red")} for ${func.color(sender, "#ff71ce")}`);
@@ -78,7 +78,7 @@ function createCanvasTemplates(fonts) {
 	if (fonts == "texgy") registerFont("./Media Files/Fonts/texgyreadventor-bold.otf", { family: "texgy" });
 	if (fonts == "sanspro") registerFont("./Media Files/Fonts/SourceSansPro-Italic.ttf", { family: "sanspro" });
 	if (fonts == "calm") registerFont("./Media Files/Fonts/KeepCalm-Medium.ttf", { family: "calm" });
-	const canvas = createCanvas(256, 256);
+	const canvas = createCanvas(360, 360);
 	const ctx = canvas.getContext("2d");
 	return { ctx, canvas };
 }
