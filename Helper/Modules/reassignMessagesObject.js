@@ -1,8 +1,8 @@
-import { toBuffer, downloadContentFromMessage, generateWAMessageFromContent } from "@adiwajshing/baileys";
+import { toBuffer, downloadContentFromMessage, generateWAMessageFromContent, generateWAMessage } from "@adiwajshing/baileys";
 import fs from "fs";
 import moment from "moment-timezone";
 import PhoneNumber from "awesome-phonenumber";
-import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined } from "./functions.js";
+import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined, isURL } from "./functions.js";
 const ZERO = "0@s.whatsapp.net";
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 
@@ -11,8 +11,8 @@ export async function reassign(m, client) {
 		const SETTINGS = readJSON("./Config/settings.json");
 		if (m.message && m.message.protocolMessage && m.message.protocolMessage.type == "REVOKE") return m;
 		if (m.message && m.messageTimestamp) {
-			if (moment(m.messageTimestamp * 1000).unix() < moment(moment().subtract("5", "seconds").valueOf()).unix()) return "OLD MESSAGE";
-		} else if (moment(JSON.parse(m.messageTimestamp * 1000)).unix() < moment(moment().subtract("5", "seconds").valueOf()).unix()) return "OLD MESSAGE";
+			if (moment(m.messageTimestamp * 1000).unix() < moment(moment().subtract("5", "seconds").valueOf()).unix()) return { error: "OLD MESSAGE" };
+		} else if (moment(JSON.parse(m.messageTimestamp * 1000)).unix() < moment(moment().subtract("5", "seconds").valueOf()).unix()) return { error: "OLD MESSAGE" };
 		if (!m.message) return m;
 		m.message = isSame(Object.keys(m.message)[0], "ephemeralMessage") ? m.message.ephemeralMessage.message : m.message;
 		const isFromMe = m.key.fromMe;
@@ -263,12 +263,55 @@ export async function reassign(m, client) {
 			client[botNum].relayMessage(dari, message.message, { messageId: message.key.id });
 			return message;
 		};
+		const prepareMedia = async (media, type, opts) => {
+			switch (type) {
+				case "imageMessage": {
+					return isURL(media) ? await generateWAMessage(ZERO, { image: { url: media } }, { ...opts, upload: client[botNum].waUploadToServer }) : await generateWAMessage(ZERO, { image: media }, { ...opts, upload: client[botNum].waUploadToServer });
+				}
+				case "videoMessage": {
+					return isURL(media) ? await generateWAMessage(ZERO, { video: { url: media } }, { ...opts, upload: client[botNum].waUploadToServer }) : await generateWAMessage(ZERO, { video: media }, { ...opts, upload: client[botNum].waUploadToServer });
+				}
+				case "audioMessage": {
+					return isURL(media) ? await generateWAMessage(ZERO, { audio: { url: media } }, { ...opts, upload: client[botNum].waUploadToServer }) : await generateWAMessage(ZERO, { audio: media }, { ...opts, upload: client[botNum].waUploadToServer });
+				}
+				case "documentMessage": {
+					return isURL(media)
+						? await generateWAMessage(ZERO, { document: { url: media }, fileName: opts.fileName, mimetype: opts.mimetype }, { ...opts, upload: client[botNum].waUploadToServer })
+						: await generateWAMessage(ZERO, { document: media, fileName: opts.fileName, mimetype: opts.mimetype }, { ...opts, upload: client[botNum].waUploadToServer });
+				}
+				case "stickerMessage": {
+					return isURL(media) ? await generateWAMessage(ZERO, { sticker: { url: media } }, { ...opts, upload: client[botNum].waUploadToServer }) : await generateWAMessage(ZERO, { sticker: media }, { ...opts, upload: client[botNum].waUploadToServer });
+				}
+			}
+		};
+		const buttonDocument = async (dari, contentText, footerText, buttons, media, opts) => {
+			if (buttons.length == 0) return new Error("Buttons is empty");
+			const document = await prepareMedia(media, "documentMessage", opts);
+			const message = generateWAMessageFromContent(
+				ZERO,
+				{
+					buttonsMessage: {
+						buttons,
+						contentText,
+						footerText,
+						headerType: 3,
+						contextInfo: opts.contextInfo,
+						documentMessage: document.message.documentMessage,
+					},
+				},
+				opts,
+			);
+			client[botNum].relayMessage(dari, message.message, { messageId: message.key.id });
+			return message;
+		};
+
 		client[botNum] = {
 			...client[botNum],
 			reply,
 			downloadAndSaveMediaMessage,
 			downloadMediaMessage,
 			buttonText,
+			buttonDocument,
 		};
 		return {
 			message: m,

@@ -11,7 +11,7 @@ export default {
 		const { reassign } = await import("../Helper/Modules/reassignMessagesObject.js");
 		const { tebak } = await import("./index.js");
 		message = await reassign(JSON.parse(JSON.stringify(message.messages[0])), client);
-		if ("error" in message) return console.log(message.error);
+		if ("error" in message) return;
 		if (isSame(typeof message, "string")) return;
 		if (!message.message) return;
 		if (message.isBaileys) return;

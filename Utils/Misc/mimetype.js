@@ -1,4 +1,4 @@
-import { lookup } from "mime-types";
+import { lookup, extension as extensi } from "mime-types";
 export function mime(input) {
 	switch (input) {
 		case "mp3":
@@ -11,5 +11,20 @@ export function mime(input) {
 			return "audio/opus";
 		default:
 			return lookup(input) || "application/octet-stream";
+	}
+}
+
+export function extension(input) {
+	switch (input) {
+		case "audio/mpeg":
+			return "mp3";
+		case "audio/ogg":
+			return "ogg";
+		case "audio/wav":
+			return "wav";
+		case "audio/opus":
+			return "opus";
+		default:
+			return extensi(input) || "mp3";
 	}
 }
