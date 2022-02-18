@@ -1,8 +1,7 @@
 import { toBuffer, downloadContentFromMessage, generateWAMessageFromContent, generateWAMessage } from "@adiwajshing/baileys";
-import fs from "fs";
 import moment from "moment-timezone";
 import PhoneNumber from "awesome-phonenumber";
-import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined, isURL } from "./functions.js";
+import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined, isURL, writeBuffer, writeJSON } from "./functions.js";
 const ZERO = "0@s.whatsapp.net";
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 
@@ -18,6 +17,13 @@ export async function reassign(m, client) {
 		const isFromMe = m.key.fromMe;
 		const from = m.key.remoteJid;
 		const isGroup = from.endsWith("@g.us");
+		let groupSettings;
+		if (isGroup) {
+			if (typeof checkJSON(from) == "boolean") {
+				groupSettings = pushDefaultSettings(from);
+			}
+			groupSettings = checkJSON(from);
+		}
 		const isBaileys = (m.key.id.startsWith("BAE5") && isSame(m.key.id.length, 16)) || (isFromMe && m.key.id.startsWith("VOID"));
 		const sender = isFromMe ? `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net` : isGroup ? m.key.participant : m.key.remoteJid;
 		const prettyNumber = PhoneNumber(`+${sender.replace("@s.whatsapp.net", "")}`).getNumber("international");
@@ -122,6 +128,8 @@ export async function reassign(m, client) {
 		const isContactsArray = isSame(type, "contactsArrayMessage");
 		const isDocument = isSame(type, "documentMessage");
 		const isViewOnce = isSame(type, "viewOnceMessage");
+		const isLocation = isSame(type, "locationMessage");
+		const isLiveLocation = isSame(type, "liveLocationMessage");
 		const isViewOnceImage = isViewOnce && isSame(Object.keys(JSON.parse(JSON.stringify(m.message[type].message)))[0], "imageMessage");
 		const isViewOnceVideo = isViewOnce && isSame(Object.keys(JSON.parse(JSON.stringify(m.message[type].message)))[0], "videoMessage");
 		const isQuotedViewOnce = isSame(type, "extendedTextMessage") && content.includes("viewOnceMessage");
@@ -133,7 +141,7 @@ export async function reassign(m, client) {
 			typeQuoted = Object.keys(JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message.ephemeralMessage.message.extendedTextMessage.contextInfo.message);
 			mMediaData = JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message.ephemeralMessage.message.extendedTextMessage.contextInfo;
 		}
-		const mediaData = isSame(type, "extendedTextMessage") ? (isSame(typeQuoted, "thumbnailMessage") ? mText : mMediaData) : mText;
+		const mediaData = isSame(type, "extendedTextMessage") ? (isSame(typeQuoted, "thumbnailMessage") ? mText : mMediaData || {}) : mText || {};
 		const typeMessage = [
 			"conversation",
 			"extendedTextMessage",
@@ -223,13 +231,13 @@ export async function reassign(m, client) {
 		const extractMediaData =
 			isQuotedImage || isQuotedVideo || isQuotedAudio || isQuotedContact || isQuotedContactsArray || isQuotedDocument || isQuotedLiveLocation || isQuotedLocation || isQuotedSticker
 				? mediaData.message[typeQuoted]
-				: isMedia || isSticker || isAudio || isContact || isContactsArray || isDocument
+				: isMedia || isSticker || isAudio || isContact || isContactsArray || isDocument || isLocation || isLiveLocation
 				? JSON.parse(JSON.stringify(m.message[type]))
 				: isViewOnce && (isViewOnceImage || isViewOnceVideo)
 				? JSON.parse(JSON.stringify(m.message[type].message)) && JSON.parse(JSON.stringify(m.message[type].message[typeViewOnce]))
 				: isQuotedViewOnce && (isQuotedViewOnceImage || isQuotedViewOnceVideo)
 				? mediaData.message[typeQuoted].message && mediaData.message[typeQuoted].message[typeViewOnce]
-				: "";
+				: {};
 		const reply = async (dari, text, opts) => {
 			if (opts !== undefined) return await client[botNum].sendMessage(dari, { text }, { quoted: opts });
 			else return await client[botNum].sendMessage(dari, { text }, { quoted: m });
@@ -237,7 +245,7 @@ export async function reassign(m, client) {
 		const downloadAndSaveMediaMessage = async (media, path) => {
 			const msg = await downloadContentFromMessage(media, typeQuoted.replace(/Message/g, ""));
 			const buffer = await toBuffer(msg);
-			fs.writeFileSync(path, buffer);
+			writeBuffer(path, buffer);
 			return path;
 		};
 		const downloadMediaMessage = async (media) => {
@@ -324,6 +332,7 @@ export async function reassign(m, client) {
 			timeStamp,
 			filename,
 			groupMetadata,
+			...groupSettings,
 			groupName,
 			groupId,
 			isGroupOwner,
@@ -331,6 +340,7 @@ export async function reassign(m, client) {
 			botNumber,
 			ownerNumbers,
 			isOwner,
+			settings: SETTINGS,
 			type,
 			isAdmin,
 			adminGroups,
@@ -377,3 +387,41 @@ export async function reassign(m, client) {
 		};
 	}
 }
+
+const checkJSON = (dari) => {
+	const data = readJSON("./Databases/Groups/settingsManager.json");
+	if (data.findIndex((v) => Object.keys(v)[0] == dari) != -1) {
+		return data[data.findIndex((v) => Object.keys(v)[0] == dari)];
+	}
+	return false;
+};
+
+const pushDefaultSettings = (dari) => {
+	const data = readJSON("./Databases/Groups/settingsManager.json");
+	const index = data.findIndex((v) => Object.keys(v)[0] == dari);
+	if (index == -1) {
+		data.push({
+			[dari]: {
+				welcome1: "disable",
+				welcome1msg: "Welcome to {groupName}",
+				welcome2: "disable",
+				welcome2msg: "Welcome to {groupName}",
+				left1: "disable",
+				left1msg: "Bye bye {groupName}",
+				left2: "disable",
+				left2msg: "Bye bye {groupName}",
+				antiDelete: "disable",
+				antiGroupURL: "disable",
+				antiURL: "disable",
+				antiSpam: "disable",
+				antiVirus: "disable",
+				autoReader: "disable",
+				games: "disable",
+				URLSender: [],
+			},
+		});
+		writeJSON("./Databases/Groups/settingsManager.json", data);
+		return data[index];
+	}
+	return data[index];
+};

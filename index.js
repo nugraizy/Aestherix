@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 console.clear();
 import { spawn } from "child_process";
-printRandomAscii();
+await printRandomAscii();
 
 import fs from "fs";
 import baileys from "@adiwajshing/baileys";
@@ -16,7 +16,7 @@ import path from "path";
 import { EventEmitter } from "events";
 EventEmitter.prototype.setMaxListeners(0);
 
-const { default: makeWASocket, DisconnectReason, delay, BufferJSON, makeInMemoryStore, AnyMessageContent, useSingleFileAuthState, DEFAULT_CONNECTION_CONFIG } = baileys;
+const { default: makeWASocket, DisconnectReason, delay, BufferJSON, makeInMemoryStore, useSingleFileAuthState, DEFAULT_CONNECTION_CONFIG } = baileys;
 const { state, saveState } = useSingleFileAuthState("./Session/Session-debug.json");
 const moduleURL = new URL(import.meta.url);
 export const __dirname = path.dirname(moduleURL.pathname);
@@ -24,7 +24,7 @@ global.CMD = {};
 CMD.commands = new Discord.Collection();
 CMD.aliases = [];
 
-const spinners = new Spinnies({ color: "blue", succeedColor: "green", failColor: "redBright", spinner: getSpinner("mindblown") });
+const spinners = new Spinnies({ color: "blue", succeedColor: "green", failColor: "redBright", spinner: getSpinner("dots") });
 const addSpinner = (name, options) => spinners.add(name, options);
 const successSpinner = (name, options) => spinners.succeed(name, options);
 const failSpinner = (name, options) => spinners.fail(name, options);
@@ -34,6 +34,13 @@ const cli = parseCli();
 global.OPTIONS = cli.flags;
 const regexOption = ["prefix", "readOnly", "autoRead", "autoCorrect", "restrict", "onlyLogs", "noLogs", "selfMode", "debugMode", "multiCmd", "rainbow", "trace", "help"];
 
+const store = makeInMemoryStore({
+	logger: P().child({
+		level: "fatal",
+		stream: "store",
+	}),
+});
+
 const start = async () => {
 	if (OPTIONS.help) return console.log(cli.help);
 	await loadCommands();
@@ -41,6 +48,7 @@ const start = async () => {
 	successSpinner("commands", { text: `Loaded ${CMD.commands.size} commands` });
 
 	const Client = makeWASocket({ printQRInTerminal: true, version: DEFAULT_CONNECTION_CONFIG.version, logger: P({ level: "fatal" }), auth: state });
+	store.bind(Client.ev);
 
 	Client.ev.on("connection.update", (connections) => {
 		const { lastDisconnect, qr, connection } = connections;
@@ -85,11 +93,19 @@ const start = async () => {
 	Client.ev.on("messages.upsert", async (message) => {
 		const {
 			default: { handler: Handler },
-		} = await import("./Handlers/incomingMessage.js");
-		Handler(message, client, CMD);
+		} = await import("./Handlers/Messages Event/incomingMessage.js");
+		Handler(message, client, CMD, store);
 	});
 
-	Client.ev.on("auth-state.update", () => saveStated);
+	Client.ev.on("auth-state.update", () => saveState);
+
+	Client.ev.on("messages.update", async (message) => {
+		const {
+			default: { handler: Handler },
+		} = await import("./Handlers/Messages Event/deletedMessage.js");
+		message = store.messages[message[0].key.remoteJid].get(message[0].key.id);
+		Handler(client, message, store);
+	});
 };
 start().catch((e) => console.log(e));
 
@@ -110,9 +126,11 @@ function loadFiles(dir) {
 
 async function loadCommands() {
 	addSpinner("files", { text: "Loading Files..." });
+	await delay(1_200);
 	const commands = loadFiles("./Commands");
 	successSpinner("files", { text: `Loaded ${commands.length} files` });
 	addSpinner("commands", { text: "Loading Commands..." });
+	await delay(1_200);
 	for (const command of commands) {
 		const { default: commandModule } = await import(command);
 		CMD.commands.set(commandModule.name, commandModule);
@@ -206,7 +224,7 @@ function parseCli() {
 	);
 }
 
-function printRandomAscii() {
+async function printRandomAscii() {
 	const randomAscii = fs.readdirSync("./Helper/Ascii/");
 	spawn("bash", [`./Helper/Ascii/${randomAscii[Math.floor(Math.random() * randomAscii.length)]}`], {
 		stdio: "inherit",

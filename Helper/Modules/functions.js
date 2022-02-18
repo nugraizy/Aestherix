@@ -421,8 +421,7 @@ export function writeJSON(path, data) {
 	if (isUndefined(data)) {
 		throw new Error("you need the data to write!");
 	}
-	fs.writeFileSync(path, JSON.stringify(data, undefined, 2));
-	return true;
+	return fs.writeFileSync(path, JSON.stringify(data, undefined, 2));
 }
 
 // write buffer to file using fs. If the data is undefined then throw new error saying "you need the buffer to write!"

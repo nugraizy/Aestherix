@@ -1,2 +1,3 @@
 import { handler as tebak } from "./Game Handlers/tebakGambar.js";
-export { tebak };
+import { handler as url } from "./Misc/groupURL.js";
+export { tebak, url };

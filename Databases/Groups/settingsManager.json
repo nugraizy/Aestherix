@@ -1,0 +1,22 @@
+[
+  {
+    "120363038592680998@g.us": {
+      "welcome1": "disable",
+      "welcome1msg": "Welcome to {groupName}",
+      "welcome2": "disable",
+      "welcome2msg": "Welcome to {groupName}",
+      "left1": "disable",
+      "left1msg": "Bye bye {groupName}",
+      "left2": "disable",
+      "left2msg": "Bye bye {groupName}",
+      "antiDelete": "disable",
+      "antiGroupURL": "disable",
+      "antiURL": "enable",
+      "antiSpam": "disable",
+      "antiVirus": "disable",
+      "autoReader": "disable",
+      "games": "disable",
+      "URLSender": []
+    }
+  }
+]
