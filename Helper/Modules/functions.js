@@ -3,8 +3,6 @@ import request from "request";
 import fs from "fs";
 import gradient from "gradient-string";
 
-const isLOGS = OPTIONS.noLog || false;
-
 export const download = (url, path, callback) => {
 	request.head(url, () => {
 		request(url).pipe(fs.createWriteStream(path)).on("close", callback);
@@ -42,11 +40,6 @@ export const capitalizeFirstLetter = (string = "") =>
 		.toLowerCase()
 		.split(" ")
 		.map((str) => str.charAt(0).toUpperCase() + str.slice(1));
-
-export const print = (code = {}) => {
-	if (typeof code == "string") code = JSON.parse(code);
-	return JSON.stringify(code, null, "\t");
-};
 
 export const numberWithCommas = (number = 0, region = "id") => parseFloat(number).toLocaleString(region);
 
@@ -476,12 +469,14 @@ export const color = (text, color) => {
 };
 
 export function INFOLOG(...info) {
+	const isLOGS = OPTIONS.noLog || false;
 	if (!isLOGS) {
 		console.log(...info);
 	}
 }
 
 export function ERRLOG(...info) {
+	const isLOGS = OPTIONS.noLog || false;
 	if (!isLOGS) {
 		console.error(...info);
 	}

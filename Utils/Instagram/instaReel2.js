@@ -20,4 +20,3 @@ export async function getReels2(url) {
 		}
 	});
 }
-getReels2("https://www.instagram.com/reel/CZ6kTpeJljE/?utm_source=ig_web_copy_link").then(console.log);

@@ -1,4 +1,5 @@
 import { lookup, extension as extensi } from "mime-types";
+
 export function mime(input) {
 	switch (input) {
 		case "mp3":

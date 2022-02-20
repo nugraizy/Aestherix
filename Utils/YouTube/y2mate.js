@@ -1,7 +1,6 @@
 import fetch from "node-fetch";
 import { JSDOM } from "jsdom";
 import yts from "yt-search";
-import util from "util";
 
 function post(url, formdata) {
 	return fetch(url, {
@@ -25,57 +24,48 @@ export function yt(url, quality, type, bitrate, server = "en60") {
 			if (!ytIdRegex.test(url)) throw "Invalid URL";
 			const ytId = ytIdRegex.exec(url);
 			url = `https://youtu.be/${ytId[1]}`;
-			post(`https://www.y2mate.com/mates/${server}/analyze/ajax`, {
+			const json = await post(`https://www.y2mate.com/mates/${server}/analyze/ajax`, {
 				url,
 				q_auto: 0,
 				ajax: 1,
-			})
-				.then((res) => res.json())
-				.then((json) => {
-					if (json.result.includes("Error: </span>This video is copyrighted.")) return reject({ error: "```Error : Video ini dilarang didownload bajakan```", internal: false });
-					if (json.result.includes("Error: </span>We can not convert your video.")) return reject({ error: "```Error : Link yang kamu masukkan tidak dapat ditemukan.```", internal: false });
-					let { document } = new JSDOM(json.result).window;
-					const tables = document.querySelectorAll("table");
-					const table = tables[{ mp4: 0, mp3: 1 }[type] || 0];
-					let list;
-					switch (type) {
-						case "mp4":
-							list = Object.fromEntries([...table.querySelectorAll('td > a[href="#"]')].filter((v) => !/\.3gp/.test(v.innerHTML)).map((v) => [v.innerHTML.match(/.*?(?=\()/)[0].trim(), v.parentElement.nextSibling.nextSibling.innerHTML]));
-							break;
-						case "mp3":
-							list = {
-								"128kbps": table.querySelector('td > a[href="#"]').parentElement.nextSibling.nextSibling.innerHTML,
-							};
-							break;
-						default:
-							list = {};
-					}
-					const filesize = list[quality];
-					const id = /var k__id = "(.*?)"/.exec(document.body.innerHTML) || ["", ""];
-					const thumb = document.querySelector("img").src;
-					const title = document.querySelector("b").innerHTML;
-					post(`https://www.y2mate.com/mates/${server}/convert`, {
-						type: "youtube",
-						_id: id[1],
-						v_id: ytId[1],
-						ajax: "1",
-						token: "",
-						ftype: type,
-						fquality: bitrate,
-					})
-						.then((res2) => res2.json())
-						.then((json2) => {
-							const KB = parseFloat(filesize) * (1000 * /MB$/.test(filesize));
-							resolve({
-								title,
-								dl_link: /<a.+?href="(.+?)"/.exec(json2.result)[1],
-								filesizeF: filesize,
-								filesize: KB,
-							});
-						})
-						.catch((e) => reject({ error: e.stack, internal: false }));
-				})
-				.catch((e) => reject({ error: e.stack, internal: false }));
+			}).then((res) => res.json());
+			if (json.result.includes("Error: </span>This video is copyrighted.")) return reject({ error: "```Error : Video ini dilarang didownload bajakan```", internal: false });
+			if (json.result.includes("Error: </span>We can not convert your video.")) return reject({ error: "```Error : Link yang kamu masukkan tidak dapat ditemukan.```", internal: false });
+			let { document } = new JSDOM(json.result).window;
+			const tables = document.querySelectorAll("table");
+			const table = tables[{ mp4: 0, mp3: 1 }[type] || 0];
+			let list;
+			switch (type) {
+				case "mp4":
+					list = Object.fromEntries([...table.querySelectorAll('td > a[href="#"]')].filter((v) => !/\.3gp/.test(v.innerHTML)).map((v) => [v.innerHTML.match(/.*?(?=\()/)[0].trim(), v.parentElement.nextSibling.nextSibling.innerHTML]));
+					break;
+				case "mp3":
+					list = {
+						"128kbps": table.querySelector('td > a[href="#"]').parentElement.nextSibling.nextSibling.innerHTML,
+					};
+					break;
+				default:
+					list = {};
+			}
+			const filesize = list[quality];
+			const id = /var k__id = "(.*?)"/.exec(document.body.innerHTML) || ["", ""];
+			const title = document.querySelector("b").innerHTML;
+			const json2 = await post(`https://www.y2mate.com/mates/${server}/convert`, {
+				type: "youtube",
+				_id: id[1],
+				v_id: ytId[1],
+				ajax: "1",
+				token: "",
+				ftype: type,
+				fquality: bitrate,
+			}).then((res) => res.json());
+			const KB = parseFloat(filesize) * (1000 * /MB$/.test(filesize));
+			resolve({
+				title,
+				dl_link: /<a.+?href="(.+?)"/.exec(json2.result)[1],
+				filesizeF: filesize,
+				filesize: KB,
+			});
 		} catch (e) {
 			reject({
 				error: e.stacj,
