@@ -1,11 +1,8 @@
-import dotenv from "dotenv";
-dotenv.config();
-
 import Axios from "axios";
 const sessionId = process.env.INSTAGRAM_SESI;
 
-export function searchUser(query) {
-	return new Promise((resolve, reject) => {
+export const searchUser = (query) =>
+	new Promise((resolve, reject) => {
 		Axios.get(`https://www.instagram.com/web/search/topsearch/?query=${query}`, {
 			headers: {
 				Cookie: `sessionid=${sessionId}`,
@@ -29,4 +26,3 @@ export function searchUser(query) {
 			})
 			.catch((_) => reject({ error: _ }));
 	});
-}

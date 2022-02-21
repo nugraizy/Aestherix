@@ -2,8 +2,8 @@ import fetch from "node-fetch";
 import { JSDOM } from "jsdom";
 import yts from "yt-search";
 
-function post(url, formdata) {
-	return fetch(url, {
+const post = (url, formdata) =>
+	fetch(url, {
 		method: "POST",
 		headers: {
 			accept: "*/*",
@@ -14,12 +14,11 @@ function post(url, formdata) {
 		},
 		body: new URLSearchParams(Object.entries(formdata)),
 	});
-}
 const ytIdRegex = /(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:\-nocookie|)\.com\/(?:shorts\/)?(?:watch\?.*(?:|\&)v=|embed\/|v\/)|youtu\.be\/)([-_0-9A-Za-z]{11})/;
 export const isUrl = (url) => url.match(new RegExp(/(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:\-nocookie|)\.com\/(?:shorts\/)?(?:watch\?.*(?:|\&)v=|embed\/|v\/)|youtu\.be\/)\/.+/, "gi"));
 
-export function yt(url, quality, type, bitrate, server = "en60") {
-	return new Promise(async (resolve, reject) => {
+export const yt = async (url, quality, type, bitrate, server = "en60") =>
+	new Promise(async (resolve, reject) => {
 		try {
 			if (!ytIdRegex.test(url)) throw "Invalid URL";
 			const ytId = ytIdRegex.exec(url);
@@ -73,10 +72,9 @@ export function yt(url, quality, type, bitrate, server = "en60") {
 			});
 		}
 	});
-}
 
-export function ytsr(query, all = true) {
-	return new Promise((resolve, reject) => {
+export const ytsr = (query, all = true) =>
+	new Promise((resolve, reject) => {
 		try {
 			if (all) {
 				yts(query)
@@ -112,10 +110,9 @@ export function ytsr(query, all = true) {
 			});
 		}
 	});
-}
 
-export function ytv(query) {
-	return new Promise((resolve, reject) => {
+export const ytv = (query) =>
+	new Promise((resolve, reject) => {
 		try {
 			if (ytIdRegex.test(query)) {
 				yt(query, "360p", "mp4", "360")
@@ -149,10 +146,9 @@ export function ytv(query) {
 			});
 		}
 	});
-}
 
-export function yta(query) {
-	return new Promise((resolve, reject) => {
+export const yta = (query) =>
+	new Promise((resolve, reject) => {
 		try {
 			if (ytIdRegex.test(query)) {
 				yt(query, "128kbps", "mp3", "128")
@@ -188,4 +184,3 @@ export function yta(query) {
 			});
 		}
 	});
-}

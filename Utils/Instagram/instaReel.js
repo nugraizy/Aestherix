@@ -2,8 +2,8 @@ import Axios from "axios";
 import cheerio from "cheerio";
 import qs from "qs";
 
-export function getReels(url) {
-	return new Promise((resolve, reject) => {
+export const getReels = (url) =>
+	new Promise((resolve, reject) => {
 		const regUrl = url.match(/([-_0-9A-Za-z]{11})/);
 		url = `https://www.instagram.com/reel/${regUrl[0]}`;
 		Axios.get("https://www.instagramsave.com/reels-downloader.php", {
@@ -39,4 +39,3 @@ export function getReels(url) {
 			})
 			.catch((_) => reject({ error: _ }));
 	});
-}

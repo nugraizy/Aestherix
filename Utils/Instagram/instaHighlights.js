@@ -2,8 +2,8 @@ import Axios from "axios";
 import cheerio from "cheerio";
 import qs from "qs";
 
-export function getHighlights(username) {
-	return new Promise((resolve, reject) => {
+export const getHighlights = (username) =>
+	new Promise((resolve, reject) => {
 		if (!username) return reject({ status: false, message: "Insert username!" });
 		if (username.startsWith("@")) {
 			username = username.replace("@", "");
@@ -41,4 +41,3 @@ export function getHighlights(username) {
 			})
 			.catch((_) => reject({ error: _ }));
 	});
-}

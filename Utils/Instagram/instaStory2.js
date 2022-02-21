@@ -1,8 +1,8 @@
 import fetch from "node-fetch";
 import cheerio from "cheerio";
 
-export function getStory2(username) {
-	return new Promise(async (resolve, reject) => {
+export const getStory2 = (username) =>
+	new Promise(async (resolve, reject) => {
 		let data = null;
 		if (username.startsWith("@")) {
 			username = username.replace("@", "");
@@ -24,6 +24,5 @@ export function getStory2(username) {
 			reject({ error: e });
 		}
 	});
-}
 
 const URL_BASE = (username, tries) => `https://www.insta-stories.net/data.php?username=${username}&b=${tries}&t=${Date.now()}`;

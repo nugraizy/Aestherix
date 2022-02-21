@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 
-export async function getSurahAudio(nomor) {
-	return new Promise(async (resolve, reject) => {
+export const getSurahAudio = (nomor) =>
+	new Promise(async (resolve, reject) => {
 		try {
 			const data = await fetch(`${URL_BASE}/surat/${nomor}`).then((res) => res.json());
 			resolve({
@@ -12,6 +12,5 @@ export async function getSurahAudio(nomor) {
 			reject({ error: err });
 		}
 	});
-}
 
 const URL_BASE = "https://equran.id/api";

@@ -1,8 +1,8 @@
 import fetch from "node-fetch";
 import cheerio from "cheerio";
 
-export function getIgtv2(url) {
-	return new Promise(async (resolve, reject) => {
+export const getIgtv2 = (url) =>
+	new Promise(async (resolve, reject) => {
 		try {
 			const response = await fetch("https://downloadgram.org/", {
 				method: "post",
@@ -19,4 +19,3 @@ export function getIgtv2(url) {
 			reject({ error: e });
 		}
 	});
-}

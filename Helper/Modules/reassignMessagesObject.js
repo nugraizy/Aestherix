@@ -5,7 +5,7 @@ import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined, isURL, wr
 const ZERO = "0@s.whatsapp.net";
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 
-export async function reassign(m, client) {
+export const reassign = async (m, client) => {
 	try {
 		const SETTINGS = readJSON("./Config/settings.json");
 		if (m.message && m.message.protocolMessage && m.message.protocolMessage.type == "REVOKE") return m;
@@ -26,7 +26,7 @@ export async function reassign(m, client) {
 		}
 		const isBaileys = (m.key.id.startsWith("BAE5") && isSame(m.key.id.length, 16)) || (isFromMe && m.key.id.startsWith("VOID"));
 		const sender = isFromMe ? `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net` : isGroup ? m.key.participant : m.key.remoteJid;
-		const prettyNumber = PhoneNumber(`+${sender.replace("@s.whatsapp.net", "")}`).getNumber("international");
+		const prettyNumber = PhoneNumber(`+${sender.replace("@s.whatsapp.net", "")}`).getNumber("international") ?? PhoneNumber(`+${m.message.key.participant.replace("@s.whatsapp.net", "")}`).getNumber("international");
 		const groupMetadata = isGroup ? await client[botNum].groupMetadata(from) : "";
 		const groupName = isGroup ? groupMetadata.subject : "";
 		const groupId = isGroup ? groupMetadata.id : "";
@@ -422,7 +422,7 @@ export async function reassign(m, client) {
 			error: e,
 		};
 	}
-}
+};
 
 const checkJSON = (dari) => {
 	const data = readJSON("./Databases/Groups/settingsManager.json");

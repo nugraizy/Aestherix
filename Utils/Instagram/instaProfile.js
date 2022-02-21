@@ -2,8 +2,8 @@ import Axios from "axios";
 
 const sessionId = process.env.INSTAGRAM_SESI;
 
-export function getUser(username) {
-	return new Promise((resolve, reject) => {
+export const getUser = (username) =>
+	new Promise((resolve, reject) => {
 		try {
 			Axios.get(`https://www.instagram.com/${username}/?__a=1`, {
 				headers: {
@@ -63,4 +63,3 @@ export function getUser(username) {
 			reject({ error: e });
 		}
 	});
-}

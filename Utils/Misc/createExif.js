@@ -6,7 +6,7 @@ const stickerPackID = "com.snowcorp.stickerly.android.stickercontentprovider b5e
 const googleLink = "https://play.google.com/store/apps/details?id=com.marsconstd.stickermakerforwhatsapp";
 const appleLink = "https://itunes.apple.com/app/sticker-maker-studio/id1443326857";
 
-export function createExif(packname, author) {
+export const createExif = (packname, author) => {
 	const json = {
 		"sticker-pack-id": stickerPackID,
 		"sticker-pack-name": packname,
@@ -39,4 +39,4 @@ export function createExif(packname, author) {
 	fs.writeFile(path.join(__dirname, "Temporary Files/data.exif"), buffer, function (err) {
 		if (err) return console.error(err);
 	});
-}
+};

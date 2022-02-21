@@ -3,18 +3,20 @@ import moment from "moment-timezone";
 
 const URL_BASE = "https://api.onlinevideoconverter.pro/api/convert";
 
-export function fbDl(url) {
-	return new Promise(async (resolve, reject) => {
+export const fbDl = (url) =>
+	new Promise(async (resolve, reject) => {
 		try {
-			const data = await fetch(URL_BASE, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					url,
-				}),
-			}).then((res) => res.json());
+			const data = await (
+				await fetch(URL_BASE, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						url,
+					}),
+				})
+			).json();
 			if (data.code == 102) reject({ error: data.message });
 			else {
 				let { url } = data.url[0];
@@ -32,4 +34,3 @@ export function fbDl(url) {
 			reject({ error: err });
 		}
 	});
-}

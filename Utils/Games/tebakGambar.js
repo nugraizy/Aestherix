@@ -3,7 +3,7 @@ import moment from "moment-timezone";
 import { __dirname } from "../../index.js";
 import { readJSON, randomize, writeJSON, isFileExist, unlinkFile } from "../../Helper/Modules/functions.js";
 
-export async function startTG(client, id, { from, message, sender }, remainingTime) {
+export const startTG = async (client, id, { from, message, sender }, remainingTime) => {
 	if (isFileExist(path.join(__dirname, `Helper/Games/Tebak Gambar/${id}.json`)))
 		return {
 			status: "playing",
@@ -26,7 +26,7 @@ export async function startTG(client, id, { from, message, sender }, remainingTi
 	caption += `You have ${remainingTime} seconds to guess the image.\n`;
 	caption += `Clue : ${answer.replace(/[aiueoAIUEO]/g, "_")}\n`;
 	await client[botNum].sendMessage(id, { image: { url: image }, caption }, { quoted: message }).then(async (data) => {
-		await pushMessageData(object, message);
+		pushMessageData(object, message);
 	});
 	var interval = setInterval(function () {
 		if (!isFileExist(path.join(__dirname, `Helper/Games/Tebak Gambar/${id}.json`))) clearInterval(interval);
@@ -48,15 +48,13 @@ export async function startTG(client, id, { from, message, sender }, remainingTi
 	return {
 		status: "started",
 	};
-}
+};
 
-async function pushMessageData(data, message) {
+const pushMessageData = (data, message) => {
 	writeJSON(path.join(__dirname, `Helper/Games/Tebak Gambar/${data.id}.json`), data);
 	const dataAfter = readJSON(path.join(__dirname, `Helper/Games/Tebak Gambar/${data.id}.json`));
 	dataAfter.message = message;
 	writeJSON(path.join(__dirname, `Helper/Games/Tebak Gambar/${data.id}.json`), dataAfter);
-}
+};
 
-function getData() {
-	return randomize(readJSON(path.join(__dirname, "Helper/Games/Tebak Gambar/gambar.json")));
-}
+const getData = () => randomize(readJSON(path.join(__dirname, "Helper/Games/Tebak Gambar/gambar.json")));

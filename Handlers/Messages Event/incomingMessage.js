@@ -52,7 +52,7 @@ export default {
 				if (message.isGroup) {
 					INFOLOG(
 						`[${color(time, "cyan")}]`,
-						`${color(message.pushname, "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
+						`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
 						`${color(message.prefix, "white")}${color(CMD.name || message.cmd.slice(1).trim(), "#01cdfe")}`,
 						`${color(message.query.substr(0, 20), "#05ffa1")}`,
 						`${color(message.from, "#b967ff")}`,
@@ -61,7 +61,7 @@ export default {
 				} else
 					INFOLOG(
 						`[${color(time, "cyan")}]`,
-						`${color(message.pushname, "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
+						`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
 						`${color(message.prefix, "white")}${color(CMD.name || message.cmd.slice(1).trim(), "#01cdfe")}`,
 						`${color(message.query.trim().substr(0, 20), "#05ffa1")}`,
 						`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
@@ -81,20 +81,21 @@ export default {
 					}
 				}
 			}
-		} else {
-			if (!message.isGroup) INFOLOG(`[${color(time, "cyan")}]`, `${color(message.pushname, "white")} ${color(message.prettyNumber, "#ff71ce")} :`, `${color(message.body.trim().replace("\n", "").substr(0, 20), "#05ffa1")}`, `${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`);
-			else {
-				INFOLOG(
-					`[${color(time, "cyan")}]`,
-					`${color(message.pushname, "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
-					`${color(message.body.trim().replace("\n", "").substr(0, 20), "#05ffa1")}`,
-					`${color(message.from, "#b967ff")}`,
-					`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
-				);
-			}
-			if (message.isGroup && message[message.from].games == "enable" && message.isAdmin) tebak(message, client);
-			else if (!message.isGroup) tebak(message, client);
-			if (message.isGroup && message[message.from].antiURL == "enable" && !message.isAdmin && message.isBotAdmin) url(message, client);
+			return;
 		}
+		console.log(message);
+		if (!message.isGroup) INFOLOG(`[${color(time, "cyan")}]`, `${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`, `${color(message.body.trim().replace("\n", "").substr(0, 20), "#05ffa1")}`, `${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`);
+		else {
+			INFOLOG(
+				`[${color(time, "cyan")}]`,
+				`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
+				`${color(message.body.trim().replace("\n", "").substr(0, 20), "#05ffa1")}`,
+				`${color(message.from, "#b967ff")}`,
+				`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
+			);
+		}
+		if (message.isGroup && message[message.from].games == "enable" && message.isAdmin) tebak(message, client);
+		else if (!message.isGroup) tebak(message, client);
+		if (message.isGroup && message[message.from].antiURL == "enable" && !message.isAdmin && message.isBotAdmin) url(message, client);
 	},
 };

@@ -1,12 +1,12 @@
 import fetch from "node-fetch";
 
-export async function searchHashtag(query) {
-	return new Promise(async (resolve, reject) => {
+export const searchHashtag = (query) =>
+	new Promise(async (resolve, reject) => {
 		try {
 			if (query.includes("#")) {
 				query = query.replace("#", "");
 			}
-			const response = await fetch(`https://www.instagram.com/explore/tags/${query}/?__a=1`).then((res) => res.json());
+			const response = await (await fetch(`https://www.instagram.com/explore/tags/${query}/?__a=1`)).json();
 			const result = [];
 			const dataNode = response.graphql.hashtag.edge_hashtag_to_media.edges;
 			for (const data of dataNode) {
@@ -33,7 +33,6 @@ export async function searchHashtag(query) {
 			reject({ error: e });
 		}
 	});
-}
 
 // benchmark.
 // Axios 1.829s, 2.378s, 2.183s, avg. 2.064s

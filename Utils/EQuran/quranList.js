@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 
-export async function getListSurah() {
-	return new Promise(async (resolve, reject) => {
+export const getListSurah = () =>
+	new Promise(async (resolve, reject) => {
 		try {
 			const data = await fetch(`${URL_BASE}/surat`).then((res) => res.json());
 			resolve(data);
@@ -9,6 +9,5 @@ export async function getListSurah() {
 			reject({ error: err });
 		}
 	});
-}
 
 const URL_BASE = "https://equran.id/api";

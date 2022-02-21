@@ -1,6 +1,6 @@
 import { lookup, extension as extensi } from "mime-types";
 
-export function mime(input) {
+export const mime = (input) => {
 	switch (input) {
 		case "mp3":
 			return "audio/mpeg";
@@ -13,9 +13,9 @@ export function mime(input) {
 		default:
 			return lookup(input) || "application/octet-stream";
 	}
-}
+};
 
-export function extension(input) {
+export const extension = (input) => {
 	switch (input) {
 		case "audio/mpeg":
 			return "mp3";
@@ -28,4 +28,4 @@ export function extension(input) {
 		default:
 			return extensi(input) || "mp3";
 	}
-}
+};

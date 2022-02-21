@@ -2,11 +2,11 @@ import Axios from "axios";
 import cheerio from "cheerio";
 import qs from "qs";
 
-export function getIgtv(username) {
-	return new Promise((resolve, reject) => {
+export const getIgtv = (username) =>
+	new Promise((resolve, reject) => {
 		if (!username) return reject({ status: false, message: "Insert username!" });
 		if (username.startsWith("@")) {
-			username.replace("@", "");
+			username = username.replace("@", "");
 		}
 		Axios.get(`https://www.instagramsave.com/instagram-story-downloader.php?input=${username}`, {
 			headers: {
@@ -41,4 +41,3 @@ export function getIgtv(username) {
 			})
 			.catch((_) => reject({ error: _ }));
 	});
-}

@@ -1,8 +1,8 @@
 import fetch from "node-fetch";
 import cheerio from "cheerio";
 
-export async function getReels2(url) {
-	return new Promise(async (resolve, reject) => {
+export const getReels2 = (url) =>
+	new Promise(async (resolve, reject) => {
 		try {
 			const response = await fetch("https://instasave.website/", {
 				method: "post",
@@ -19,4 +19,3 @@ export async function getReels2(url) {
 			reject({ error: e });
 		}
 	});
-}

@@ -2,8 +2,8 @@ import Axios from "axios";
 import cheerio from "cheerio";
 import { COOKIE } from "../../Utils/TikTok/cookie.js";
 
-export function tiktokProfileTIKTOK(username) {
-	return new Promise((resolve, reject) => {
+export const tiktokProfileTIKTOK = (username) =>
+	new Promise((resolve, reject) => {
 		if (username.startsWith("@")) username = username.substr(1);
 		Axios.get(URL_BASE(username), {
 			headers: {
@@ -26,7 +26,6 @@ export function tiktokProfileTIKTOK(username) {
 			resolve(results);
 		});
 	});
-}
 
 const URL_BASE = (input) => {
 	if (input) return `https://www.tiktok.com/${input}`;

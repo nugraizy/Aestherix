@@ -1,8 +1,7 @@
 import Axios from "axios";
-import cheerio from "cheerio";
 
-export function tiktokDownloader(url) {
-	return new Promise(async (resolve, reject) => {
+export const tiktokDownloader = (url) =>
+	new Promise(async (resolve, reject) => {
 		Axios.get(URL_KEY_PARSER(url))
 			.then(async ({ data }) => {
 				if (data.status !== "success") reject(data);
@@ -22,7 +21,6 @@ export function tiktokDownloader(url) {
 			})
 			.catch((e) => reject({ error: e }));
 	});
-}
 const URL_KEY_PARSER = (input) => `https://api.snaptik.site/video-key?video_url=${input}`;
 const URL_DETAIL_PARSER = (input) => `https://api.snaptik.site/video-details-by-key?key=${input}`;
 const URL_BASE_DOWNLOAD = (input) => `https://api.snaptik.site/download?key=${input}&type=video`;

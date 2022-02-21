@@ -3,12 +3,13 @@ import { spawn, exec } from "child_process";
 import path from "path";
 import moment from "moment-timezone";
 import { __dirname } from "../../index.js";
+import { webp2mp4File } from "./EZGifs/index.js";
 
-export function toOpus(ext, opts = {}) {
-	return new Promise(async (resolve, reject) => {
+export const toOpus = (ext, opts = {}) =>
+	new Promise(async (resolve, reject) => {
 		let container;
 		let tmp;
-		const { isURL } = await import("../../Helper/Modules/functions.js");
+		const { isURL } = await import("../../Helper/Modules/index.js");
 		if (typeof opts.media == "string" && isURL(opts.media)) {
 			tmp = `${opts.input}.${ext}`;
 			container = ["-y", "-i", opts.media, "-vn", "-c:a", "libopus", "-b:a", "128k", "-vbr", "on", "-compression_level", "10", `${opts.output}.${ext}`];
@@ -26,14 +27,13 @@ export function toOpus(ext, opts = {}) {
 				if (fs.existsSync(`${opts.output}.${ext}`)) fs.unlinkSync(`${opts.output}.${ext}`);
 			});
 	});
-}
 
-export function convertMediaToSticker(filePath, sender) {
-	return new Promise(async (resolve, reject) => {
+export const convertMediaToSticker = (filePath, sender) =>
+	new Promise(async (resolve, reject) => {
 		const time = moment().format("HH:mm:ss DD/MM");
 		const pathExif = path.join(__dirname, "Temporary Files/data.exif");
 		const pathSticker = filePath;
-		const { readBuffer, unlinkFile, INFOLOG, ERRLOG, color } = await import("../../Helper/Modules/functions.js");
+		const { readBuffer, unlinkFile, INFOLOG, ERRLOG, color } = await import("../../Helper/Modules/index.js");
 		INFOLOG(`[${color(time, "cyan")}]`, `${color(`Converting Media`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
 		if (filePath.endsWith("webp")) {
 			exec(`webpmux -set exif "${pathExif}" "${pathSticker}" -o "${pathSticker}-done.webp"`, (err, stdout, stderr) => {
@@ -97,4 +97,37 @@ export function convertMediaToSticker(filePath, sender) {
 			);
 		}
 	});
-}
+
+export const convertStickerToMedia = (filePath, sender, mediaData) =>
+	new Promise(async (resolve, reject) => {
+		const time = moment().format("HH:mm:ss DD/MM");
+		const pathResults = path.join(__dirname, "Temporary Files/Sticker-Conversion.png");
+		const { readBuffer, unlinkFile, INFOLOG, ERRLOG, color } = await import("../../Helper/Modules/index.js");
+		if (mediaData.isAnimated) {
+			const { result } = await webp2mp4File(filePath);
+			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Converted Media`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
+			unlinkFile(filePath);
+			resolve({
+				result,
+			});
+		} else {
+			exec(`dwebp '${filePath}' -o '${pathResults}'`, async (err) => {
+				if (err) {
+					const { result } = await webp2mp4File(filePath);
+					INFOLOG(`[${color(time, "cyan")}]`, `${color(`Converted Media`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
+					unlinkFile(filePath);
+					resolve({
+						result,
+					});
+					return;
+				}
+				const buffer = readBuffer(pathResults);
+				unlinkFile(pathResults);
+				unlinkFile(filePath);
+				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Converted Media`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
+				resolve({
+					result: buffer,
+				});
+			});
+		}
+	});

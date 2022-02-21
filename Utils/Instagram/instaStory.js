@@ -2,8 +2,8 @@ import Axios from "axios";
 import cheerio from "cheerio";
 import qs from "qs";
 
-export function getStory(username) {
-	return new Promise((resolve, reject) => {
+export const getStory = (username) =>
+	new Promise((resolve, reject) => {
 		if (!username) return reject({ status: false, message: "Insert username!" });
 		if (username.startsWith("@")) username.substr(1);
 		Axios.get(URL_BASE(username), {
@@ -39,7 +39,6 @@ export function getStory(username) {
 			})
 			.catch((_) => reject({ error: _ }));
 	});
-}
 
 const URL_ORIGIN = () => `https://www.instagramsave.com`;
 const URL_BASE = (input) => `https://www.instagramsave.com/instagram-story-downloader.php?input=${input}`;

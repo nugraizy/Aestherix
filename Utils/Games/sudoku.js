@@ -5,7 +5,7 @@ const LEVEL = {
 	insane: 15,
 };
 
-export function makePuzzle(level) {
+export const makePuzzle = (level) => {
 	let board;
 	if (level == undefined) level = LEVEL["easy"];
 	else level = LEVEL[level] || LEVEL["easy"];
@@ -42,7 +42,7 @@ export function makePuzzle(level) {
 	let boards = boardforentries(puzzle);
 	boards = makeItEasy(boards, level);
 	return boards;
-}
+};
 
 function ratepuzzle(puzzle, samples) {
 	let total = 0;
@@ -85,9 +85,7 @@ function checkpuzzle(puzzle, board) {
 	return difficulty;
 }
 
-export function solvePuzzle(board) {
-	return solveboard(board).answer;
-}
+export const solvePuzzle = (board) => solveboard(board).answer;
 
 function solveboard(original) {
 	let board = [].concat(original);
@@ -401,7 +399,7 @@ function makeItEasy(board, level) {
 	return board;
 }
 
-export function revealOneElement(board, solvedBoard) {
+export const revealOneElement = (board, solvedBoard) => {
 	let emptyCells = [];
 	let tempBoard = board;
 	for (let i = 0; i < board.length; i++) {
@@ -411,15 +409,15 @@ export function revealOneElement(board, solvedBoard) {
 	}
 	let randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
 	board[randomIndex] = solvedBoard[randomIndex];
-	tempBoard[randomIndex] = "(" + solvedBoard[randomIndex] + ")";
+	tempBoard[randomIndex] = `(${solvedBoard[randomIndex]})`;
 	return { board, tempBoard };
-}
+};
 
 function allowedMove(post, num, board, solvedBoard) {
 	let postAx = post[0].toLowerCase();
 	let postNum = Number(post[1]);
 	num = Number(num);
-	if (postAx === "a") postNum = postNum - 1;
+	if (postAx === "a") postNum -= 1;
 	else if (postAx === "b") postNum = postNum + 9 * 1 - 1;
 	else if (postAx === "c") postNum = postNum + 9 * 2 - 1;
 	else if (postAx === "d") postNum = postNum + 9 * 3 - 1;
@@ -433,12 +431,12 @@ function allowedMove(post, num, board, solvedBoard) {
 	else return { status: true, statusPlay: "Playing", post: postNum, message: `Kamu benar. Grid ${post} adalah ${num}` };
 }
 
-export function checkWin(board) {
+export const checkWin = (board) => {
 	if (board.filter((x) => x == "X").length == 0) return { status: true, message: "Selamat, kamu berhasil menyelesaikan puzzle ini." };
 	else return { status: false };
-}
+};
 
-export function stringifyGrid(grid) {
+export const stringifyGrid = (grid) => {
 	let capt = "\n   1  2  3      4  5  6      7  8  9\n";
 	let abjad = "ABCDEFGHI".split("").map((v) => v + ".");
 	for (let i = 0; i < grid.length; i++) {
@@ -459,14 +457,14 @@ export function stringifyGrid(grid) {
 		}
 	}
 	return capt;
-}
+};
 
-export function fillGrid(post, num, board, solvedBoard) {
+export const fillGrid = (post, num, board, solvedBoard) => {
 	let grids = allowedMove(post, num, board, solvedBoard);
 	let tempBoard = board;
 	if (grids.status && grids.statusPlay === "Playing") {
 		board[grids.post] = Number(num);
-		tempBoard[grids.post] = "(" + num + ")";
+		tempBoard[grids.post] = `(${num})`;
 		return { status: true, statusPlaying: grids.statusPlay, grid: board, gridSolved: solvedBoard, tempBoard };
 	} else {
 		return {
@@ -474,4 +472,4 @@ export function fillGrid(post, num, board, solvedBoard) {
 			message: grids.message,
 		};
 	}
-}
+};
