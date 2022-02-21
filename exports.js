@@ -67,6 +67,7 @@ export {
 	parseCode,
 } from "./Helper/index.js";
 export {
+	getScreenshot,
 	yta,
 	ytsr,
 	ytv,
