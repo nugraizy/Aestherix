@@ -1,4 +1,4 @@
-import { getTafsirSurah } from "../../Utils/EQuran/quranTafsir.js";
+import { getTafsirSurah } from "../../Utils/EQuran/index.js";
 
 export default {
 	name: "getsurahtafsir",

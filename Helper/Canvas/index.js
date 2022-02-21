@@ -1,3 +1,2 @@
-import { attp } from "./animatedImage.js";
-
-export { attp };
+export { attp } from "./animatedImage.js";
+export { ttp } from "./staticImage.js";

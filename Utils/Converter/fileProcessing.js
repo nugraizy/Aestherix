@@ -33,7 +33,7 @@ export function convertMediaToSticker(filePath, sender) {
 		const time = moment().format("HH:mm:ss DD/MM");
 		const pathExif = path.join(__dirname, "Temporary Files/data.exif");
 		const pathSticker = filePath;
-		const { readBuffer, unlinkFile, INFOLOG, ERRLOR, color } = await import("../../Helper/Modules/functions.js");
+		const { readBuffer, unlinkFile, INFOLOG, ERRLOG, color } = await import("../../Helper/Modules/functions.js");
 		INFOLOG(`[${color(time, "cyan")}]`, `${color(`Converting Media`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
 		if (filePath.endsWith("webp")) {
 			exec(`webpmux -set exif "${pathExif}" "${pathSticker}" -o "${pathSticker}-done.webp"`, (err, stdout, stderr) => {

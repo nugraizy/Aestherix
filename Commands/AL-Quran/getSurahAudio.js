@@ -1,7 +1,5 @@
-import { mime, extension } from "../../Utils/Misc/mimetype.js";
-import { getSurahAudio } from "../../Utils/EQuran/quranAudio.js";
-import { getAyat } from "../../Utils/EQuran/quranAyat.js";
-import { getSurahDetail } from "../../Utils/EQuran/quranDetail.js";
+import { mime, extension } from "../../Utils/Misc/index.js";
+import { getSurahAudio, getAyat, getSurahDetail } from "../../Utils/EQuran/index.js";
 
 export default {
 	name: "surahaudio",

@@ -1,4 +1,4 @@
-import { writeJSON, readJSON } from "../../Helper/Modules/functions.js";
+import { writeJSON, readJSON } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "games",

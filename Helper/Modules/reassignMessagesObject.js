@@ -238,7 +238,7 @@ export async function reassign(m, client) {
 				: isQuotedViewOnce && (isQuotedViewOnceImage || isQuotedViewOnceVideo)
 				? mediaData.message[typeQuoted].message && mediaData.message[typeQuoted].message[typeViewOnce]
 				: {};
-		const reply = async (dari, text, opts) => {
+		const reply = async (dari, text, opts = undefined) => {
 			if (opts !== undefined) return await client[botNum].sendMessage(dari, { text }, { quoted: opts });
 			else return await client[botNum].sendMessage(dari, { text }, { quoted: m });
 		};
@@ -253,7 +253,7 @@ export async function reassign(m, client) {
 			const buffer = await toBuffer(msg);
 			return buffer;
 		};
-		const buttonText = async (dari, contentText, footerText, buttons, opts) => {
+		const buttonText = async (dari, contentText, footerText, buttons, opts = {}) => {
 			if (buttons.length == 0) return new Error("Buttons is empty");
 			const message = generateWAMessageFromContent(
 				ZERO,
@@ -271,7 +271,7 @@ export async function reassign(m, client) {
 			client[botNum].relayMessage(dari, message.message, { messageId: message.key.id });
 			return message;
 		};
-		const prepareMedia = async (media, type, opts) => {
+		const prepareMedia = async (media, type, opts = {}) => {
 			switch (type) {
 				case "imageMessage": {
 					return isURL(media) ? await generateWAMessage(ZERO, { image: { url: media } }, { ...opts, upload: client[botNum].waUploadToServer }) : await generateWAMessage(ZERO, { image: media }, { ...opts, upload: client[botNum].waUploadToServer });
@@ -290,9 +290,12 @@ export async function reassign(m, client) {
 				case "stickerMessage": {
 					return isURL(media) ? await generateWAMessage(ZERO, { sticker: { url: media } }, { ...opts, upload: client[botNum].waUploadToServer }) : await generateWAMessage(ZERO, { sticker: media }, { ...opts, upload: client[botNum].waUploadToServer });
 				}
+				case "locationMessage": {
+					return await generateWAMessage(ZERO, { ...media }, { ...opts, upload: client[botNum].waUploadToServer });
+				}
 			}
 		};
-		const buttonDocument = async (dari, contentText, footerText, buttons, media, opts) => {
+		const buttonDocument = async (dari, contentText, footerText, buttons, media, opts = {}) => {
 			if (buttons.length == 0) return new Error("Buttons is empty");
 			const document = await prepareMedia(media, "documentMessage", opts);
 			const message = generateWAMessageFromContent(
@@ -313,6 +316,38 @@ export async function reassign(m, client) {
 			return message;
 		};
 
+		const buttonLocation = async (dari, contentText, footerText, buttons, media, opts = {}) => {
+			if (buttons.length == 0) return new Error("Buttons is empty");
+			const location = await generateWAMessage(
+				ZERO,
+				{
+					location: {
+						degreesLatitude: 0,
+						degreesLongitude: 0,
+						jpegThumbnail: media,
+						name: "provided by nanda",
+					},
+				},
+				opts,
+			);
+			const message = generateWAMessageFromContent(
+				ZERO,
+				{
+					buttonsMessage: {
+						buttons,
+						contentText,
+						footerText,
+						headerType: 6,
+						contextInfo: opts.contextInfo,
+						locationMessage: location.message.locationMessage,
+					},
+				},
+				opts,
+			);
+			client[botNum].relayMessage(dari, message.message, { messageId: message.key.id });
+			return message;
+		};
+
 		client[botNum] = {
 			...client[botNum],
 			reply,
@@ -320,6 +355,7 @@ export async function reassign(m, client) {
 			downloadMediaMessage,
 			buttonText,
 			buttonDocument,
+			buttonLocation,
 		};
 		return {
 			message: m,

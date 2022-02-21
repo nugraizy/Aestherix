@@ -1,4 +1,4 @@
-import { getSurahDetail } from "../../Utils/EQuran/quranDetail.js";
+import { getSurahDetail } from "../../Utils/EQuran/index.js";
 
 export default {
 	name: "surahdetails",

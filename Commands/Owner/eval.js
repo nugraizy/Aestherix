@@ -164,7 +164,7 @@ export default {
 				} else if (body.includes("/as")) {
 					body = body.replace(/\/as/g, "");
 					const evaled = body.slice(3);
-					print(from, await eval(`(async () => {${evaled}})().catch(err => print(from, err))`));
+					print(from, eval(`(async () => {${evaled}})().catch(err => print(from, err))`));
 				} else {
 					print(from, eval(body.slice(3)));
 				}

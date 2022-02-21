@@ -1,5 +1,4 @@
-import { getAyat } from "../../Utils/EQuran/quranAyat.js";
-import { getSurahDetail } from "../../Utils/EQuran/quranDetail.js";
+import { getAyat, getSurahDetail } from "../../Utils/EQuran/index.js";
 
 export default {
 	name: "surahayat",

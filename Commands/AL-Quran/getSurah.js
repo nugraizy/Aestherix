@@ -1,4 +1,4 @@
-import { getListSurah } from "../../Utils/EQuran/quranList.js";
+import { getListSurah } from "../../Utils/EQuran/index.js";
 
 export default {
 	name: "getsurah",

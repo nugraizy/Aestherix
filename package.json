@@ -1,6 +1,6 @@
 {
 	"name": "simplebotpro3",
-	"version": "1.9.14",
+	"version": "1.9.17",
 	"description": "WhatsApp bot using Baileys library with Javascript language.",
 	"exports": "./index.js",
 	"type": "module",
@@ -9,7 +9,16 @@
 		"pm2kill": "pm2 kill",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
-	"keywords": [],
+	"keywords": [
+		"whatsapp",
+		"bot",
+		"javascript",
+		"nodejs",
+		"baileys",
+		"baileysbot",
+		"baileysbotjs",
+		"whatsappbot"
+	],
 	"author": "nanda",
 	"license": "MIT",
 	"dependencies": {
@@ -39,6 +48,7 @@
 		"parse-ms": "^3.0.0",
 		"qs": "^6.10.3",
 		"request": "^2.88.2",
+		"rgb-color": "^2.1.2",
 		"similarity": "^1.2.1",
 		"smart-timeout": "^2.6.1",
 		"spinnies": "^0.5.1",

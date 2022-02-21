@@ -1,4 +1,2 @@
-import { getSpinner } from "./spinners.js";
-import { scheme } from "./Palettes/index.js";
-
-export { getSpinner, scheme };
+export { getSpinner } from "./spinners.js";
+export { scheme } from "./Palettes/index.js";

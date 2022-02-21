@@ -1,19 +1,19 @@
 import { delay } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
-import { fbDl } from "../../Utils/Facebook/fbDownloader.js";
+import { fbDl } from "../../Utils/Facebook/index.js";
 
 export default {
 	name: "fbpost",
 	description: "Downloads a Facebook post",
 	usage: "!fbpost <url>",
-	aliases: ["fbpost", "fbp"],
+	aliases: ["fbpost", "fbp", "fb"],
 	category: "Downloader",
 	async run({ from, query, prettyNumber }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!query) return client[botNum].reply(from, "Please provide a URL");
 		try {
 			const urls = query.split(",");
-			const { isOne, isURL, INFOLOG, ERRLOG, color } = await import("../../Helper/Modules/functions.js");
+			const { isOne, isURL, INFOLOG, ERRLOG, color } = await import("../../Helper/Modules/index.js");
 			if (isOne(urls.length) && !isURL(query)) return client[botNum].reply(from, "Please specify a valid url");
 			if (isOne(urls.length) && !regex(query)) return client[botNum].reply(from, "Please specify a valid Facebook url");
 			for (const url of urls) {
@@ -38,8 +38,8 @@ export default {
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloaded Facebook Post`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
-			str += `Type : ${err.name}\n`;
-			str += `Message : ${err.message}`;
+			str += `Type : ${err.name ?? "Converting"}\n`;
+			str += `Message : ${err.message ?? err.error}`;
 			await client[botNum].reply(from, str);
 			console.log(err);
 		}

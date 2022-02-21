@@ -1,14 +1,15 @@
 import moment from "moment-timezone";
 import rgbcolor from "rgb-color";
-import { attp } from "../../Helper/Canvas/index.js";
+import { ttp } from "../../Helper/Canvas/index.js";
 
 export default {
-	name: "animatedsticker",
-	description: "Generate animated sticker",
+	name: "staticsticker",
+	description: "Generate static sticker",
 	category: "Converter",
-	usage: "attp <text> [--color] [--fonts]",
-	aliases: ["attp"],
+	usage: "ttp <text> [--color] [--fonts]",
+	aliases: ["ttp"],
 	async run({ from, query, message, sender, prettyNumber, bodyQuoted }, client) {
+		if (!query) query = "Mana text nya?";
 		try {
 			const time = moment().format("HH:mm:ss DD/MM");
 			const parseOptions = query.includes("--") ? query.split("--") : query;
@@ -32,13 +33,13 @@ export default {
 				}
 			}
 			if (bodyQuoted) {
-				const { buffer } = await attp(sender, bodyQuoted, colors);
+				const { buffer } = await ttp(sender, bodyQuoted, colors);
 				await client[botNum].sendMessage(from, { sticker: new Buffer.from(buffer, "base64") }, { quoted: message });
 				const { INFOLOG, color } = await import("../../Helper/Modules/index.js");
 				return INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
 			}
 			if (query) {
-				const { buffer } = await attp(sender, query, colors);
+				const { buffer } = await ttp(sender, query, colors);
 				await client[botNum].sendMessage(from, { sticker: new Buffer.from(buffer, "base64") }, { quoted: message });
 				const { INFOLOG, color } = await import("../../Helper/Modules/index.js");
 				return INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);

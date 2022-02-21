@@ -1,5 +1,6 @@
 export {
 	attp,
+	ttp,
 	getSpinner,
 	scheme,
 	download,

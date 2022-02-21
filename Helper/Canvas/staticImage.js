@@ -6,69 +6,63 @@ import path from "path";
 import moment from "moment-timezone";
 import { createExif } from "../../Utils/Misc/index.js";
 import { __dirname } from "../../index.js";
+
 const { createCanvas, registerFont } = Canvas;
 const { CanvasTextWrapper } = Wrap;
 
-export async function attp(sender, texts, color, fonts) {
+export async function ttp(sender, texts, colors, fonts) {
 	const time = moment().format("HH:mm:ss DD/MM");
 	fonts = fonts !== undefined ? fonts.toLowerCase() : "chevin";
-	color = color.length == 0 ? null : color;
+	colors = colors.length == 0 ? null : colors;
 	const func = await import("../Modules/functions.js");
-	func.INFOLOG(`[${func.color(time, "cyan")}]`, `${func.color(`Making Animated Image`, "#01cdfe")} for ${func.color(sender, "#ff71ce")}`);
-	const colors = await loadColorsPalette(color);
+	func.INFOLOG(`[${func.color(time, "cyan")}]`, `${func.color(`Making Static Image`, "#01cdfe")} for ${func.color(sender, "#ff71ce")}`);
+	const color = await loadColorsPalette(colors);
 	let { ctx, canvas } = createCanvasTemplates(fonts);
-	let i = 0;
-	const images = [];
-	for (const color of colors) {
-		const reassignColor = color.startsWith("#") ? color : `#${color}`;
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		ctx.fillStyle = reassignColor;
-		ctx.shadowOffsetX = 1;
-		ctx.shadowOffsetY = 1;
-		ctx.shadowColor = reassignColor;
-		ctx.shadowBlur = 2;
-		CanvasTextWrapper(canvas, texts, { font: `56px ${fonts}`, textAlign: "center", verticalAlign: "middle", sizeToFill: true });
-		const buffer = canvas.toDataURL("image/png").replace(/^data:image\/png;base64,/, "");
-		const saved = saveImages(new Buffer.from(buffer, "base64"), i);
-		images.push(saved);
-		i++;
-	}
-	const { buffers } = await createSequence(images, sender);
-	func.INFOLOG(`[${func.color(time, "cyan")}]`, `${func.color(`Animated Image is Done`, "#01cdfe")} for ${func.color(sender, "#ff71ce")}`);
+	const reassignColor = color.startsWith("#") ? color : `#${color}`;
+	ctx.fillStyle = reassignColor;
+	ctx.shadowOffsetX = 1;
+	ctx.shadowOffsetY = 1;
+	ctx.shadowColor = reassignColor;
+	ctx.shadowBlur = 2;
+	CanvasTextWrapper(canvas, texts.trim(), { font: `48px ${fonts}`, textAlign: "center", verticalAlign: "middle", sizeToFill: true });
+	const buffer = canvas.toDataURL("image/png").replace(/^data:image\/png;base64,/, "");
+	const saved = saveImages(new Buffer.from(buffer, "base64"), sender);
+	const { buffers } = await insertExif(saved, sender);
+	func.INFOLOG(`[${func.color(time, "cyan")}]`, `${func.color(`Static Image is Done`, "#01cdfe")} for ${func.color(sender, "#ff71ce")}`);
 	return buffers;
 }
 
 const saveImages = (buffer, sequence) => {
-	const fileName = path.join(__dirname, `./Temporary Files/Animated Images-${sequence}.webp`);
+	const paths = `Temporary Files/Static Images-${sequence}.png`;
+	const fileName = path.join(__dirname, paths);
 	writeFileSync(fileName, buffer);
 	return fileName;
 };
 
-const createSequence = async (images, sender) =>
+const insertExif = async (paths, sender) =>
 	new Promise(async (resolve, reject) => {
 		const time = moment().format("HH:mm:ss DD/MM");
 		const func = await import("../Modules/functions.js");
 		const pathExif = path.join(__dirname, "Temporary Files/data.exif");
-		const pathResults = path.join(__dirname, `Temporary Files/Animated Images-${Date.now()}`);
-		const commands = ["-loop", "3", ...images.map((v) => v, "-d 0.1"), "-o", `${pathResults}.webp`];
-		createExif("Made by Nanda", "Void Animated Sticker using Canvas and WebP");
+		const pathResults = path.join(__dirname, `Temporary Files/Static Images-${Date.now()}`);
+		createExif("Made by Nanda", "Void Static Sticker using Canvas and WebP");
+		const commands = [paths, "-o", `${pathResults}.webp`];
 		spawn("img2webp", commands)
 			.on("error", (err) => {
 				func.ERRLOG(`[${func.color(time, "cyan")}]`, `${func.color("Failed to Convert Media to Sticker", "red")} for ${func.color(sender, "#ff71ce")}`);
 				reject(err);
 			})
 			.on("close", async () => {
-				for (const paths of images) {
-					unlinkSync(paths);
-				}
 				exec(`webpmux -set exif '${pathExif}' '${pathResults}.webp' -o '${pathResults}-done.webp'`, (err, stdout, stderr) => {
 					if (err) {
+						console.log(err);
 						func.ERRLOG(`[${func.color(time, "cyan")}]`, `${func.color("Failed to Convert Media to Sticker", "red")} for ${func.color(sender, "#ff71ce")}`);
 						reject(err);
 					}
 					const buffers = readFileSync(`${pathResults}-done.webp`);
 					unlinkSync(`${pathResults}-done.webp`);
 					unlinkSync(`${pathResults}.webp`);
+					unlinkSync(paths);
 					resolve({
 						buffers,
 					});
@@ -86,7 +80,7 @@ const createCanvasTemplates = (fonts) => {
 	return { ctx, canvas };
 };
 
-const loadColorsPalette = async (color) => {
+const loadColorsPalette = async (color = null) => {
 	const { scheme } = await import("../Misc/Palettes/colors.js");
 	const defaultColors = [
 		["047af6", "7401df", "202532", "32fa00", "ff00d5"],
@@ -100,6 +94,13 @@ const loadColorsPalette = async (color) => {
 		["6500ff", "ffe04e", "8b00ff", "bd93ed", "7400ff"],
 		scheme().map((v) => v.replace("#", "")), // for more randomize
 	];
-	const sequenceColor = [].concat(...Array(3).fill(color ?? defaultColors[Math.floor(Math.random() * defaultColors.length)]));
-	return sequenceColor;
+	if (color) {
+		return random(color);
+	}
+	return random([].concat(...Array(3).fill(defaultColors[Math.floor(Math.random() * defaultColors.length)])));
 };
+
+const random = (input) => input[Math.floor(Math.random() * input.length)];
+
+//console.log(await fetch("https://wallpaperflare.com").then((res) => res.text()));
+//console.log(await fetch("https://deviantart.com").then((res) => res.text()));

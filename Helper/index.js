@@ -1,4 +1,4 @@
-export { attp } from "./Canvas/index.js";
+export { attp, ttp } from "./Canvas/index.js";
 export { getSpinner, scheme } from "./Misc/index.js";
 export {
 	download,

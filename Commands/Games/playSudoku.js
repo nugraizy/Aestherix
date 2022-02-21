@@ -10,12 +10,12 @@ export default {
 	async run({ args, sender, from, message, isOwner, cmd }, client) {
 		try {
 			const buttons = [{ buttonId: "", buttonText: { displayText: "" }, type: 1 }];
-			const { readJSON, writeJSON, getTimeSince } = await import("../../Helper/Modules/functions.js");
+			const { readJSON, writeJSON, getTimeSince } = await import("../../Helper/Modules/index.js");
 			const data = readJSON(path.join(__dirname, "Databases/Games/Sudoku/sudoku.json"));
 			if (/(play|main)/.test(args[1])) {
 				const index = data.length == 0 ? -1 : data.findIndex((v) => v.id == from);
 				if (index == -1) {
-					const { makePuzzle, solvePuzzle, stringifyGrid } = await import("../../Utils/Games/sudoku.js");
+					const { makePuzzle, solvePuzzle, stringifyGrid } = await import("../../Utils/Games/index.js");
 					const puzzle = makePuzzle("easy");
 					const solved = solvePuzzle(puzzle);
 					const grid = stringifyGrid(puzzle);
@@ -30,7 +30,7 @@ export default {
 						clue: 5,
 						startedAt: Date.now(),
 						guessedBy: [],
-						message,
+						messages,
 						puzzle,
 						solved,
 					});
@@ -42,7 +42,7 @@ export default {
 				if (!args[2]) return client[botNum].reply(from, `Tolong masukkan nomor kolom\n\nex : ${cmd} A2 7`);
 				const index = data.length == 0 ? -1 : data.findIndex((v) => v.id == from);
 				if (index !== -1) {
-					const { fillGrid, stringifyGrid, checkWin } = await import("../../Utils/Games/sudoku.js");
+					const { fillGrid, stringifyGrid, checkWin } = await import("../../Utils/Games/index.js");
 					const fill = fillGrid(args[1], args[2], data[index].puzzle, data[index].solved);
 					if (fill.statusPlaying == "Playing") {
 						const isWin = checkWin(fill.grid);
@@ -58,7 +58,7 @@ export default {
 						buttons[0].buttonId = ".sd clue";
 						buttons[0].buttonText.displayText = `Sisa Clue : ${data[index].clue == 0 ? "Habis" : data[index].clue}`;
 						const messages = client[botNum].buttonText(from, `${grid}\nGame ini masi di tahap beta.\nKesulitan masi dalam proses perbaikan.\nGunakan Nomor 0 untuk mengganti nomor 9.`, "Made by nanda", buttons, { quoted: message });
-						data[index].message = messages;
+						data[index].messages = messages;
 						return writeJSON(path.join(__dirname, "Databases/Games/Sudoku/sudoku.json"), data);
 					}
 					return client[botNum].reply(from, fill.message);
@@ -69,7 +69,7 @@ export default {
 			} else if (/clue/.test(args[1])) {
 				const index = data.length == 0 ? -1 : data.findIndex((v) => v.id == from);
 				if (index !== -1) {
-					const { revealOneElement, checkWin, stringifyGrid } = await import("../../Utils/Games/sudoku.js");
+					const { revealOneElement, checkWin, stringifyGrid } = await import("../../Utils/Games/index.js");
 					if (data[index].clue !== 0) {
 						data[index].clue -= 1;
 						writeJSON(path.join(__dirname, "Databases/Games/Sudoku/sudoku.json"), data);
@@ -85,7 +85,7 @@ export default {
 						buttons[0].buttonId = ".sd clue";
 						buttons[0].buttonText.displayText = `Sisa Clue : ${data[index].clue == 0 ? "Habis" : data[index].clue}`;
 						const messages = client[botNum].buttonText(from, `${grid}\nGame ini masi di tahap beta.\nKesulitan masi dalam proses perbaikan.\nGunakan Nomor 0 untuk mengganti nomor 9.`, "Made by nanda", buttons, { quoted: message });
-						data[index].message = messages;
+						data[index].messages = messages;
 						return writeJSON(path.join(__dirname, "Databases/Games/Sudoku/sudoku.json"), data);
 					}
 					return client[botNum].reply(from, "Clue is out!");
@@ -96,12 +96,12 @@ export default {
 			} else if (/ch?ec?k?/.test(args[1])) {
 				const index = data.length == 0 ? -1 : data.findIndex((v) => v.id == from);
 				if (index !== -1) {
-					const { stringifyGrid } = await import("../../Utils/Games/sudoku.js");
+					const { stringifyGrid } = await import("../../Utils/Games/index.js");
 					const grid = stringifyGrid(data[index].puzzle);
 					buttons[0].buttonId = ".sd clue";
 					buttons[0].buttonText.displayText = `Sisa Clue : ${data[index].clue == 0 ? "Habis" : data[index].clue}`;
 					const messages = client[botNum].buttonText(from, `${grid}\nGame ini masi di tahap beta.\nKesulitan masi dalam proses perbaikan.\nGunakan Nomor 0 untuk mengganti nomor 9.`, "Made by nanda", buttons, { quoted: message });
-					data[index].message = messages;
+					data[index].messages = messages;
 					return writeJSON(path.join(__dirname, "Databases/Games/Sudoku/sudoku.json"), data);
 				}
 				buttons[0].buttonId = ".sd play";

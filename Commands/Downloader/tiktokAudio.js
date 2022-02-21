@@ -2,8 +2,8 @@ import { delay } from "@adiwajshing/baileys";
 import path from "path";
 import moment from "moment-timezone";
 import { __dirname } from "../../index.js";
-import { tiktokDownloader } from "../../Utils/TikTok/tiktokDownloader.js";
-import { mime } from "../../Utils/Misc/mimetype.js";
+import { tiktokDownloader } from "../../Utils/TikTok/index.js";
+import { mime } from "../../Utils/Misc/index.js";
 
 export default {
 	name: "tiktokaudio",
@@ -16,8 +16,8 @@ export default {
 		if (!query) return client[botNum].reply(from, "Please provide a URL");
 		try {
 			let urls = query.split(",");
-			const { isOne, isURL, INFOLOG, ERRLOG, color, removeDuplicatesArray } = await import("../../Helper/Modules/functions.js");
-			const { toOpus } = await import("../../Utils/Converter/fileProcessing.js");
+			const { isOne, isURL, INFOLOG, ERRLOG, color, removeDuplicatesArray } = await import("../../Helper/Modules/index.js");
+			const { toOpus } = await import("../../Utils/Converter/index.js");
 			if (isOne(urls.length) && !isURL(query)) return client[botNum].reply(from, "Please specify a valid url");
 			if (isOne(urls.length) && !regex(query)) return client[botNum].reply(from, "Please specify a valid TikTok url");
 			urls = removeDuplicatesArray(urls.map((url) => url.trim()));
