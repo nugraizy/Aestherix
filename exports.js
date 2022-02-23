@@ -67,6 +67,9 @@ export {
 	parseCode,
 } from "./Helper/index.js";
 export {
+	pet,
+	mp42mp3,
+	soundRemover,
 	webp2mp4File,
 	convertStickerToMedia,
 	getScreenshot,

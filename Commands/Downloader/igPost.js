@@ -1,6 +1,7 @@
 import { delay } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
 import { getPost } from "../../Utils/Instagram/index.js";
+import { isOne, isURL, parseCode, numberWithCommas, INFOLOG, ERRLOG, color } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "igpost",
@@ -13,7 +14,6 @@ export default {
 		if (!query) return client[botNum].reply(from, "Please specify a url");
 		try {
 			const urls = query.split(",");
-			const { isOne, isURL, parseCode, numberWithCommas, INFOLOG, ERRLOG, color } = await import("../../Helper/Modules/index.js");
 			if (isOne(urls.length) && !isURL(query)) return client[botNum].reply(from, "Please specify a valid url");
 			if (isOne(urls.length) && !regex(query)) return client[botNum].reply(from, "Please specify a valid Instagram url");
 			for (const url of urls) {

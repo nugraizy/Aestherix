@@ -1,7 +1,9 @@
 import moment from "moment-timezone";
 import similarity from "similarity";
 import { delay } from "@adiwajshing/baileys";
-import { INFOLOG, color } from "../../Helper/Modules/functions.js";
+import { INFOLOG, color } from "../../Helper/Modules/index.js";
+import { reassign } from "../../Helper/Modules/reassignMessagesObject.js";
+import { tebak, url } from "../index.js";
 
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 
@@ -9,8 +11,6 @@ export default {
 	async handler(message, client, CMD, store) {
 		if (message == undefined) return;
 		const time = moment().format("HH:mm:ss DD/MM");
-		const { reassign } = await import("../../Helper/Modules/reassignMessagesObject.js");
-		const { tebak, url } = await import("../index.js");
 		message = await reassign(JSON.parse(JSON.stringify(message.messages[0])), client);
 		if ("error" in message) return;
 		if (!message.message) return;
@@ -83,7 +83,6 @@ export default {
 			}
 			return;
 		}
-		console.log(message);
 		if (!message.isGroup) INFOLOG(`[${color(time, "cyan")}]`, `${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`, `${color(message.body.trim().replace("\n", "").substr(0, 20), "#05ffa1")}`, `${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`);
 		else {
 			INFOLOG(

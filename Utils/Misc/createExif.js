@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { __dirname } from "../../index.js";
+import { __dirname } from "../../connect.js";
 
 const stickerPackID = "com.snowcorp.stickerly.android.stickercontentprovider b5e7275f-f1de-4137-961f-57becfad34f2"; //not sure what this does
 const googleLink = "https://play.google.com/store/apps/details?id=com.marsconstd.stickermakerforwhatsapp";

@@ -1,6 +1,6 @@
 import path from "path";
 import moment from "moment-timezone";
-import { __dirname } from "../../index.js";
+import { __dirname } from "../../connect.js";
 import { readJSON, randomize, writeJSON, isFileExist, unlinkFile } from "../../Helper/Modules/functions.js";
 
 export const startTG = async (client, id, { from, message, sender }, remainingTime) => {

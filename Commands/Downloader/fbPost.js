@@ -1,6 +1,7 @@
 import { delay } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
 import { fbDl } from "../../Utils/Facebook/index.js";
+import { isOne, isURL, INFOLOG, ERRLOG, color } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "fbpost",
@@ -13,7 +14,6 @@ export default {
 		if (!query) return client[botNum].reply(from, "Please provide a URL");
 		try {
 			const urls = query.split(",");
-			const { isOne, isURL, INFOLOG, ERRLOG, color } = await import("../../Helper/Modules/index.js");
 			if (isOne(urls.length) && !isURL(query)) return client[botNum].reply(from, "Please specify a valid url");
 			if (isOne(urls.length) && !regex(query)) return client[botNum].reply(from, "Please specify a valid Facebook url");
 			for (const url of urls) {

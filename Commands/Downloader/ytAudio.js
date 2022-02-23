@@ -1,7 +1,9 @@
 import path from "path";
 import moment from "moment-timezone";
-import { __dirname } from "../../index.js";
+import { __dirname } from "../../connect.js";
 import { yta } from "../../Utils/YouTube/index.js";
+import { toOpus } from "../../Utils/Converter/index.js";
+import { isOne, isURL, INFOLOG, ERRLOG, color, numberWithCommas, removeDuplicatesArray } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "ytaudio",
@@ -14,8 +16,6 @@ export default {
 		if (!query) return client[botNum].reply(from, "Please provide a URL");
 		try {
 			let urls = query.split(",");
-			const { isOne, isURL, INFOLOG, ERRLOG, color, numberWithCommas, removeDuplicatesArray } = await import("../../Helper/Modules/index.js");
-			const { toOpus } = await import("../../Utils/Converter/index.js");
 			if (isOne(urls.length) && !isURL(query)) return client[botNum].reply(from, "Please specify a valid url");
 			if (isOne(urls.length) && !regex(query)) return client[botNum].reply(from, "Please specify a valid YouTube url");
 			urls = removeDuplicatesArray(urls.map((url) => url.trim()));

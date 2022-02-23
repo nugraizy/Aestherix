@@ -1,7 +1,8 @@
 import path from "path";
 import moment from "moment-timezone";
 import { convertMediaToSticker } from "../../Utils/Converter/index.js";
-import { __dirname } from "../../index.js";
+import { INFOLOG, color } from "../../Helper/Modules/index.js";
+import { __dirname } from "../../connect.js";
 import { createExif } from "../../Utils/Misc/index.js";
 
 export default {
@@ -18,7 +19,6 @@ export default {
 			createExif("Made by Nanda", "Void bot");
 			const sticker = await convertMediaToSticker(file, prettyNumber);
 			await client[botNum].sendMessage(from, { sticker }, { quoted: message });
-			const { INFOLOG, color } = await import("../../Helper/Modules/index.js");
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";

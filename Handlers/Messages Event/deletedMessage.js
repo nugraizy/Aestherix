@@ -1,16 +1,16 @@
 import path from "path";
 import moment from "moment-timezone";
 import Timeout from "smart-timeout";
-import { __dirname } from "../../index.js";
-import { createExif } from "../../Utils/Misc/createExif.js";
-import { convertMediaToSticker } from "../../Utils/Converter/fileProcessing.js";
-const { getFilesize, readBuffer, unlinkFile, readJSON, writeJSON } = await import("../../Helper/Modules/functions.js");
+import { __dirname } from "../../connect.js";
+import { createExif } from "../../Utils/Misc/index.js";
+import { convertMediaToSticker } from "../../Utils/Converter/index.js";
+import { getFilesize, readBuffer, unlinkFile, readJSON, writeJSON } from "../../Helper/Modules/index.js";
+import { reassign } from "../../Helper/Modules/reassignMessagesObject.js";
 
 export default {
 	async handler(client, message) {
 		try {
 			const data = readJSON(path.join(__dirname, "Databases/Groups/settingsManager.json"));
-			const { reassign } = await import("../../Helper/Modules/reassignMessagesObject.js");
 			if (message == undefined) return;
 			message = await reassign(JSON.parse(JSON.stringify(message)), client);
 			if ("error" in message) return;

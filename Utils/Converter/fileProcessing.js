@@ -2,29 +2,32 @@ import fs from "fs";
 import { spawn, exec } from "child_process";
 import path from "path";
 import moment from "moment-timezone";
-import { __dirname } from "../../index.js";
+import FormData from "form-data";
+import fetch from "node-fetch";
+import petting from "pet-pet-gif";
+import { __dirname } from "../../connect.js";
 import { webp2mp4File } from "./EZGifs/index.js";
+import { writeBuffer, unlinkFile, INFOLOG, ERRLOG, color, isURL, readBuffer } from "../../Helper/Modules/index.js";
 
 export const toOpus = (ext, opts = {}) =>
 	new Promise(async (resolve, reject) => {
 		let container;
 		let tmp;
-		const { isURL } = await import("../../Helper/Modules/index.js");
 		if (typeof opts.media == "string" && isURL(opts.media)) {
 			tmp = `${opts.input}.${ext}`;
 			container = ["-y", "-i", opts.media, "-vn", "-c:a", "libopus", "-b:a", "128k", "-vbr", "on", "-compression_level", "10", `${opts.output}.${ext}`];
 		} else {
 			tmp = `${opts.input}.${ext}`;
-			fs.writeFileSync(tmp, opts.media);
+			writeBuffer(tmp, opts.media);
 			container = ["-y", "-i", tmp, "-vn", "-c:a", "libopus", "-b:a", "128k", "-vbr", "on", "-compression_level", "10", `${opts.output}.${ext}`];
 		}
 		spawn("ffmpeg", container)
 			.on("error", reject)
-			.on("error", () => fs.unlinkSync(tmp))
+			.on("error", () => unlinkFile(tmp))
 			.on("close", () => {
-				if (fs.existsSync(tmp)) fs.unlinkSync(tmp);
-				resolve(fs.readFileSync(`${opts.output}.${ext}`));
-				if (fs.existsSync(`${opts.output}.${ext}`)) fs.unlinkSync(`${opts.output}.${ext}`);
+				unlinkFile(tmp);
+				resolve(readBuffer(`${opts.output}.${ext}`));
+				unlinkFile(`${opts.output}.${ext}`);
 			});
 	});
 
@@ -33,7 +36,6 @@ export const convertMediaToSticker = (filePath, sender) =>
 		const time = moment().format("HH:mm:ss DD/MM");
 		const pathExif = path.join(__dirname, "Temporary Files/data.exif");
 		const pathSticker = filePath;
-		const { readBuffer, unlinkFile, INFOLOG, ERRLOG, color } = await import("../../Helper/Modules/index.js");
 		INFOLOG(`[${color(time, "cyan")}]`, `${color(`Converting Media`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
 		if (filePath.endsWith("webp")) {
 			exec(`webpmux -set exif "${pathExif}" "${pathSticker}" -o "${pathSticker}-done.webp"`, (err, stdout, stderr) => {
@@ -102,7 +104,6 @@ export const convertStickerToMedia = (filePath, sender, mediaData) =>
 	new Promise(async (resolve, reject) => {
 		const time = moment().format("HH:mm:ss DD/MM");
 		const pathResults = path.join(__dirname, "Temporary Files/Sticker-Conversion.png");
-		const { readBuffer, unlinkFile, INFOLOG, ERRLOG, color } = await import("../../Helper/Modules/index.js");
 		if (mediaData.isAnimated) {
 			const { result } = await webp2mp4File(filePath);
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Converted Media`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
@@ -129,5 +130,78 @@ export const convertStickerToMedia = (filePath, sender, mediaData) =>
 					result: buffer,
 				});
 			});
+		}
+	});
+
+export const mp42mp3 = (input, output, sender) =>
+	new Promise(async (resolve, reject) => {
+		const time = moment().format("HH:mm:ss DD/MM");
+		exec(`ffmpeg -i "${input}" "${output.slice(-3) != "mp3" ? `${output}.mp3` : output}"`, (err, stdout, stderr) => {
+			if (err) {
+				ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Video to Audio", "red")} for ${color(sender, "#ff71ce")}`);
+				reject(err);
+				return;
+			}
+			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Converted Media`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
+			resolve({ output: `${output.slice(-3) != "mp3" ? `${output}.mp3` : output}` });
+		});
+	});
+
+export const gif2mp4 = (input, output, opts = {}) =>
+	new Promise((resolve, reject) => {
+		const time = moment().format("HH:mm:ss DD/MM");
+		exec(`ffmpeg -stream_loop -1 -i "${input}" -vcodec libx264 -acodec libmp3lame -pix_fmt yuv420p -crf 23 -ss 00:00:00.000 -t 00:00:${opts.duration || 4}.000 "${output}"`, (err, stdout, stderr) => {
+			if (err) {
+				ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Video to Video", "red")}`);
+				reject(err);
+				return;
+			}
+			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Converted Media`, "#01cdfe")}`);
+			resolve({ output: `${output}` });
+		});
+	});
+
+export const soundRemover = (input, sender) =>
+	new Promise(async (resolve, reject) => {
+		const time = moment().format("HH:mm:ss DD/MM");
+		try {
+			const bodyForm = new FormData();
+			bodyForm.append("fileName", fs.createReadStream(input));
+			const data = await (await fetch("https://aivocalremover.com/FileTest", { method: "post", body: bodyForm, headers: { "Content-Type": `multipart/form-data; boundary=${bodyForm._boundary}` } })).json();
+			const { vocal_path: vocal, instrumental_path: instrumental } = await (await fetch("https://aivocalremover.com/ProcessM", { method: "post", body: `file_name=${data.file_name}&action=watermark_video`, headers: { "Content-Type": "application/x-www-form-urlencoded;charset=utf-8" } })).json();
+			unlinkFile(input);
+			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Removed Sound`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
+			resolve({ result: { vocal, instrumental } });
+		} catch (err) {
+			ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Remove Sound", "red")} for ${color(sender, "#ff71ce")}`);
+			reject(err);
+		}
+	});
+
+export const pet = (input, sender, opts = {}) =>
+	new Promise(async (resolve, reject) => {
+		const time = moment().format("HH:mm:ss DD/MM");
+		try {
+			const tempInput = input;
+			const petted = await petting(input, opts);
+			input = opts.filename ? `${opts.filename}` : `${input}.gif`;
+			writeBuffer(`${input}.gif`, petted);
+			if (opts.output == "sticker") {
+				const sticker = await convertMediaToSticker(`${input}.gif`, sender);
+				resolve(sticker);
+				unlinkFile(input);
+				unlinkFile(tempInput);
+				unlinkFile(`${input}.gif`);
+				return;
+			}
+			const { output } = await gif2mp4(`${input}.gif`, `${input}.mp4`, opts);
+			resolve(readBuffer(output));
+			unlinkFile(input);
+			unlinkFile(tempInput);
+			unlinkFile(`${input}.gif`);
+			unlinkFile(output);
+		} catch (err) {
+			ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Pet Image", "red")} for ${color(sender, "#ff71ce")}`);
+			reject(err);
 		}
 	});

@@ -1,9 +1,9 @@
 import similarity from "similarity";
 import path from "path";
-import { __dirname } from "../../index.js";
+import { __dirname } from "../../connect.js";
+import { readJSON, readDir, unlinkFile } from "../../Helper/Modules/index.js";
 
 export async function handler({ message, from, body }, client) {
-	const { readJSON, readDir, unlinkFile } = await import(path.join(__dirname, "Helper/Modules/functions.js"));
 	if (readDir(path.join(__dirname, "Databases/Games/Tebak Gambar/")).includes(`${from}.json`)) {
 		const minScore = 0.75;
 		const data = readJSON(path.join(__dirname, `Databases/Games/Tebak Gambar/${from}.json`));

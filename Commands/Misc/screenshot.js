@@ -11,7 +11,6 @@ export default {
 		if (!message.query) return client[botNum].reply(message, "Please specify a website URL");
 		const parseOptions = message.query.includes("--") ? message.query.split("--") : message.query;
 		let type = "desktop";
-
 		if (Array.isArray(parseOptions)) {
 			if (!isURL(parseOptions[0])) return client[botNum].reply(message, "Please specify a valid URL");
 			message.query = parseOptions[0];

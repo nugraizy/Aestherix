@@ -1,6 +1,7 @@
 import { delay } from "@adiwajshing/baileys";
 import { tiktokDownloader } from "../../Utils/TikTok/index.js";
 import moment from "moment-timezone";
+import { isOne, isURL, INFOLOG, ERRLOG, color, removeDuplicatesArray } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "tiktokvideo",
@@ -14,7 +15,6 @@ export default {
 		try {
 			let urls = query.split(",");
 			let options = "";
-			const { isOne, isURL, INFOLOG, ERRLOG, color, removeDuplicatesArray } = await import("../../Helper/Modules/index.js");
 			if (urls.some((v) => /-?-(wm|watermark|nowm|nowatermark)/.test(v))) {
 				options = urls.find((v) => /-?-(wm|watermark|nowm|nowatermark)/.test(v)).match(/-?-(wm|watermark|nowm|nowatermark)/gi)[0];
 				urls = urls.map((v) => v.replace(/(-?-(wm|watermark|nowm|nowatermark))/g, ""));

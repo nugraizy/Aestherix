@@ -1,6 +1,7 @@
 import moment from "moment-timezone";
 import rgbcolor from "rgb-color";
 import { ttp } from "../../Helper/Canvas/index.js";
+import { INFOLOG, color } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "staticsticker",
@@ -35,13 +36,11 @@ export default {
 			if (bodyQuoted) {
 				const { buffer } = await ttp(sender, bodyQuoted, colors);
 				await client[botNum].sendMessage(from, { sticker: new Buffer.from(buffer, "base64") }, { quoted: message });
-				const { INFOLOG, color } = await import("../../Helper/Modules/index.js");
 				return INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
 			}
 			if (query) {
 				const { buffer } = await ttp(sender, query, colors);
 				await client[botNum].sendMessage(from, { sticker: new Buffer.from(buffer, "base64") }, { quoted: message });
-				const { INFOLOG, color } = await import("../../Helper/Modules/index.js");
 				return INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
 			}
 			return message.reply("Please enter text to convert to sticker");

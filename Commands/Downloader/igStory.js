@@ -1,6 +1,7 @@
 import { delay } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
 import { getStory } from "../../Utils/Instagram/index.js";
+import { isOne, isURL, isEmpty, isSame, numberWithCommas, INFOLOG, ERRLOG, color } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "igstory",
@@ -13,7 +14,7 @@ export default {
 		if (!query) return client[botNum].reply(from, "Please specify a url");
 		try {
 			const usernames = query.split(",");
-			const { isOne, isURL, isEmpty, isSame, numberWithCommas, INFOLOG, ERRLOG, color } = await import("../../Helper/Modules/index.js");
+
 			if (isOne(usernames) && isURL(usernames)) return client[botNum].reply(from, "Please specify a valid url");
 			for (const username of usernames) {
 				if (isURL(username)) await client[botNum].reply(from, "Please specify a username");

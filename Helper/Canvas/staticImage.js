@@ -5,8 +5,9 @@ import { spawn, exec } from "child_process";
 import path from "path";
 import moment from "moment-timezone";
 import { createExif } from "../../Utils/Misc/index.js";
-import { __dirname } from "../../index.js";
-
+import { __dirname } from "../../connect.js";
+import { scheme } from "../Misc/Palettes/colors.js";
+import { INFOLOG, ERRLOG, color } from "../Modules/functions.js";
 const { createCanvas, registerFont } = Canvas;
 const { CanvasTextWrapper } = Wrap;
 
@@ -14,8 +15,7 @@ export async function ttp(sender, texts, colors, fonts) {
 	const time = moment().format("HH:mm:ss DD/MM");
 	fonts = fonts !== undefined ? fonts.toLowerCase() : "chevin";
 	colors = colors.length == 0 ? null : colors;
-	const func = await import("../Modules/functions.js");
-	func.INFOLOG(`[${func.color(time, "cyan")}]`, `${func.color(`Making Static Image`, "#01cdfe")} for ${func.color(sender, "#ff71ce")}`);
+	INFOLOG(`[${color(time, "cyan")}]`, `${color(`Making Static Image`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
 	const color = await loadColorsPalette(colors);
 	let { ctx, canvas } = createCanvasTemplates(fonts);
 	const reassignColor = color.startsWith("#") ? color : `#${color}`;
@@ -28,7 +28,7 @@ export async function ttp(sender, texts, colors, fonts) {
 	const buffer = canvas.toDataURL("image/png").replace(/^data:image\/png;base64,/, "");
 	const saved = saveImages(new Buffer.from(buffer, "base64"), sender);
 	const { buffers } = await insertExif(saved, sender);
-	func.INFOLOG(`[${func.color(time, "cyan")}]`, `${func.color(`Static Image is Done`, "#01cdfe")} for ${func.color(sender, "#ff71ce")}`);
+	INFOLOG(`[${color(time, "cyan")}]`, `${color(`Static Image is Done`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
 	return buffers;
 }
 
@@ -42,21 +42,20 @@ const saveImages = (buffer, sequence) => {
 const insertExif = async (paths, sender) =>
 	new Promise(async (resolve, reject) => {
 		const time = moment().format("HH:mm:ss DD/MM");
-		const func = await import("../Modules/functions.js");
 		const pathExif = path.join(__dirname, "Temporary Files/data.exif");
 		const pathResults = path.join(__dirname, `Temporary Files/Static Images-${Date.now()}`);
 		createExif("Made by Nanda", "Void Static Sticker using Canvas and WebP");
 		const commands = [paths, "-o", `${pathResults}.webp`];
 		spawn("img2webp", commands)
 			.on("error", (err) => {
-				func.ERRLOG(`[${func.color(time, "cyan")}]`, `${func.color("Failed to Convert Media to Sticker", "red")} for ${func.color(sender, "#ff71ce")}`);
+				ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);
 				reject(err);
 			})
 			.on("close", async () => {
 				exec(`webpmux -set exif '${pathExif}' '${pathResults}.webp' -o '${pathResults}-done.webp'`, (err, stdout, stderr) => {
 					if (err) {
 						console.log(err);
-						func.ERRLOG(`[${func.color(time, "cyan")}]`, `${func.color("Failed to Convert Media to Sticker", "red")} for ${func.color(sender, "#ff71ce")}`);
+						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);
 						reject(err);
 					}
 					const buffers = readFileSync(`${pathResults}-done.webp`);
@@ -81,7 +80,6 @@ const createCanvasTemplates = (fonts) => {
 };
 
 const loadColorsPalette = async (color = null) => {
-	const { scheme } = await import("../Misc/Palettes/colors.js");
 	const defaultColors = [
 		["047af6", "7401df", "202532", "32fa00", "ff00d5"],
 		["4db1c3", "046084", "35b07e", "f0a7aa", "e74758"],
