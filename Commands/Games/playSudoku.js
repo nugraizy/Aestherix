@@ -9,6 +9,8 @@ export default {
 	usage: "!sudoku",
 	aliases: ["sd"],
 	category: "Games",
+	cooldown: 2,
+	limit: 0,
 	async run({ args, sender, from, message, isOwner, cmd }, client) {
 		try {
 			const buttons = [{ buttonId: "", buttonText: { displayText: "" }, type: 1 }];

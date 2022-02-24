@@ -10,6 +10,8 @@ export default {
 	usage: "textrecognition <Image(reply/send)>",
 	category: "Converter",
 	aliases: ["ocr"],
+	cooldown: 5,
+	limit: 1,
 	async run({ isMediaImage, from, prettyNumber, message, filename, query, extractMediaData }, client) {
 		if (!isMediaImage) return client[botNum].reply(from, "Please send/reply an image to recognize text");
 		try {

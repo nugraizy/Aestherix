@@ -1,108 +1,8 @@
 import * as util from "util";
 import fs from "fs";
 import { exec } from "child_process";
-import {
-	attp,
-	getSpinner,
-	scheme,
-	download,
-	clampFloat,
-	distordFX,
-	clamp,
-	shuffleArray,
-	randomArray,
-	removeDuplicatesArray,
-	reverseWord,
-	reverseArray,
-	capitalizeFirstLetter,
-	numberWithCommas,
-	randomCase,
-	identity,
-	wordWrapping,
-	calcCrow,
-	getFilesizeFromBytes,
-	getFilesize,
-	extractFilesize,
-	closestNumberFromArray,
-	getTimeSince,
-	getRuntime,
-	generateHex,
-	speedText,
-	randomNumber,
-	zalgo,
-	isZilgoo,
-	regexNumber,
-	regexAlphabet,
-	isSame,
-	isUndefined,
-	isNotUndefined,
-	isNotZero,
-	isNotSame,
-	isNotMinusOne,
-	isNotNull,
-	isNull,
-	isZero,
-	isEmpty,
-	isNotEmpty,
-	isMinusOne,
-	isOne,
-	isNotOne,
-	isBigger,
-	isSmaller,
-	isSameOrBigger,
-	isSameOrSmaller,
-	randomize,
-	readJSON,
-	readBuffer,
-	writeJSON,
-	writeBuffer,
-	getFunctions,
-	unlinkFile,
-	isFileExist,
-	delaySync,
-	makeDir,
-	readDir,
-	color,
-	INFOLOG,
-	ERRLOG,
-	isURL,
-	parseCode,
-	yta,
-	ytsr,
-	ytv,
-	searchHashtag,
-	getHighlights,
-	getPost,
-	getUser,
-	getReels,
-	getReels2,
-	searchUser,
-	getStory,
-	getStory2,
-	getIgtv,
-	getIgtv2,
-	tiktokDownloader,
-	tiktokProfileBRAINANS,
-	tiktokProfileTIKTOK,
-	createExif,
-	mime,
-	extension,
-	startTG,
-	makePuzzle,
-	solvePuzzle,
-	revealOneElement,
-	checkWin,
-	stringifyGrid,
-	fillGrid,
-	fbDl,
-	getSurahAudio,
-	getAyat,
-	getSurahDetail,
-	getListSurah,
-	getTafsirSurah,
-	toOpus,
-	convertMediaToSticker,
-} from "../../exports.js";
+import prettier from "js-beautify";
+import * as func from "../../exports.js";
 
 export default {
 	name: "eval",
@@ -110,6 +10,8 @@ export default {
 	usage: "!eval <code>",
 	aliases: ["/>", "$>", "=>"],
 	category: "Owner",
+	cooldown: 0,
+	limit: 0,
 	async run(message, client) {
 		let { isOwner, query, isBaileys, from, extractMediaData, mediaData, type, typeQuoted, body, adminGroups, participants, pushname, bodyQuoted } = message;
 		if (!isOwner) return client[botNum].reply(from, "You are not allowed to use this command");
@@ -180,3 +82,20 @@ export default {
 const col = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 const print = (dari, ...args) => client[botNum].reply(dari, util.format(...args));
+const temp = (names, func) => {
+	if (!/^[a-z0-9_]+$/i.test(names)) return new Error("Invalid name.");
+	if (Object.keys(func).includes(names)) return new Error("Function already exists in the script.");
+	if (Object.keys(functions).includes(names)) return new Error("Function already exists in the temporary functions.");
+	if (typeof func !== "function") return new Error("Argument is not a function.");
+	func = prettier.js_beautify(func.toString());
+	functions[names] = Function(`return ${func}`)();
+	return func;
+};
+
+const clear = (names) => {
+	if (!/^[a-z0-9_]+$/i.test(names)) return new Error("Invalid name.");
+	if (!Object.keys(functions).includes(names)) return new Error("Function does not exist.");
+	const capt = `Function is deleted\n\n${functions[names]}`;
+	delete functions[names];
+	return capt;
+};

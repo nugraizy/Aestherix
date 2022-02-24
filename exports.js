@@ -1,4 +1,12 @@
 export {
+	checkUser,
+	addUser,
+	indexUser,
+	updateUser,
+	addLimit,
+	addAllLimit,
+	resetAllLimit,
+	checkLimit,
 	attp,
 	ttp,
 	getSpinner,
@@ -12,7 +20,6 @@ export {
 	removeDuplicatesArray,
 	reverseWord,
 	reverseArray,
-	capitalizeFirstLetter,
 	numberWithCommas,
 	randomCase,
 	identity,
@@ -67,6 +74,7 @@ export {
 	parseCode,
 } from "./Helper/index.js";
 export {
+	textToSpeech,
 	pet,
 	mp42mp3,
 	soundRemover,

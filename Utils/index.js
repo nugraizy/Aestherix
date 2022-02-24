@@ -5,5 +5,5 @@ export { createExif, mime, extension, getScreenshot, tesseract } from "./Misc/in
 export { startTG, makePuzzle, solvePuzzle, revealOneElement, checkWin, stringifyGrid, fillGrid } from "./Games/index.js";
 export { fbDl } from "./Facebook/index.js";
 export { getSurahAudio, getAyat, getSurahDetail, getListSurah, getTafsirSurah } from "./EQuran/index.js";
-export { toOpus, convertMediaToSticker, convertStickerToMedia, webp2mp4File, mp42mp3, soundRemover, pet } from "./Converter/index.js";
+export { toOpus, convertMediaToSticker, convertStickerToMedia, webp2mp4File, mp42mp3, soundRemover, pet, textToSpeech } from "./Converter/index.js";
 export { getEarthquake } from "./News/index.js";

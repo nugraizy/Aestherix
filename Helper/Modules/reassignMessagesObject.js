@@ -1,4 +1,4 @@
-import { toBuffer, downloadContentFromMessage, generateWAMessageFromContent, generateWAMessage } from "@adiwajshing/baileys";
+import { toBuffer, downloadContentFromMessage, generateWAMessageFromContent, generateWAMessage, getContentType } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
 import PhoneNumber from "awesome-phonenumber";
 import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined, isURL, writeBuffer, writeJSON } from "./functions.js";
@@ -38,7 +38,7 @@ export const reassign = async (m, client) => {
 		const isOwner = ownerNumbers.includes(sender);
 		const timeStamp = m.messageTimestamp;
 		const filename = sender + m.key.id;
-		let type = Object.keys(m.message)[0];
+		let type = getContentType(m.message);
 		type = isSame(type, "messageContextInfo") ? (type = Object.keys(m.message)[1]) : type;
 		type = isSame(type, "extendedTextMessage") && m.message.extendedTextMessage.text.includes("@") ? (type = "mentionText") : type;
 		let mText = m;
@@ -298,52 +298,15 @@ export const reassign = async (m, client) => {
 		const buttonDocument = async (dari, contentText, footerText, buttons, media, opts = {}) => {
 			if (buttons.length == 0) return new Error("Buttons is empty");
 			const document = await prepareMedia(media, "documentMessage", opts);
-			const message = generateWAMessageFromContent(
-				ZERO,
-				{
-					buttonsMessage: {
-						buttons,
-						contentText,
-						footerText,
-						headerType: 3,
-						contextInfo: opts.contextInfo,
-						documentMessage: document.message.documentMessage,
-					},
-				},
-				opts,
-			);
+			const message = generateWAMessageFromContent(ZERO, { buttonsMessage: { buttons, contentText, footerText, headerType: 3, contextInfo: opts.contextInfo, documentMessage: document.message.documentMessage } }, opts);
 			client[botNum].relayMessage(dari, message.message, { messageId: message.key.id });
 			return message;
 		};
 
 		const buttonLocation = async (dari, contentText, footerText, buttons, media, opts = {}) => {
 			if (buttons.length == 0) return new Error("Buttons is empty");
-			const location = await generateWAMessage(
-				ZERO,
-				{
-					location: {
-						degreesLatitude: 0,
-						degreesLongitude: 0,
-						jpegThumbnail: media,
-						name: "provided by nanda",
-					},
-				},
-				opts,
-			);
-			const message = generateWAMessageFromContent(
-				ZERO,
-				{
-					buttonsMessage: {
-						buttons,
-						contentText,
-						footerText,
-						headerType: 6,
-						contextInfo: opts.contextInfo,
-						locationMessage: location.message.locationMessage,
-					},
-				},
-				opts,
-			);
+			const location = await generateWAMessage(ZERO, { location: { degreesLatitude: 0, degreesLongitude: 0, jpegThumbnail: media, name: "provided by nanda" } }, opts);
+			const message = generateWAMessageFromContent(ZERO, { buttonsMessage: { buttons, contentText, footerText, headerType: 6, contextInfo: opts.contextInfo, locationMessage: location.message.locationMessage } }, opts);
 			client[botNum].relayMessage(dari, message.message, { messageId: message.key.id });
 			return message;
 		};

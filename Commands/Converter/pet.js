@@ -18,6 +18,8 @@ export default {
 	category: "Converter",
 	aliases: ["pet", "petpetpet"],
 	usage: "petpet <@user/(reply/send image)>",
+	cooldown: 5,
+	limit: 1,
 	async run({ bodyQuoted, mention, isMediaImage, from, extractMediaData, mediaData, filename, prettyNumber, sender, query }, client) {
 		if (mention.length == 0 && !isMediaImage) return client[botNum].reply(from, "Please mention or send/reply an image to pet");
 		createExif("Made by Nanda", "Void bot");

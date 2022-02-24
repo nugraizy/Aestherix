@@ -9,6 +9,8 @@ export default {
 	category: "Converter",
 	usage: "attp <text> [--color] [--fonts]",
 	aliases: ["attp"],
+	cooldown: 5,
+	limit: 1,
 	async run({ from, query, message, sender, prettyNumber, bodyQuoted }, client) {
 		try {
 			const time = moment().format("HH:mm:ss DD/MM");

@@ -8,7 +8,6 @@ export {
 	removeDuplicatesArray,
 	reverseWord,
 	reverseArray,
-	capitalizeFirstLetter,
 	numberWithCommas,
 	randomCase,
 	identity,
@@ -62,3 +61,5 @@ export {
 	isURL,
 	parseCode,
 } from "./functions.js";
+export { reassign } from "./reassignMessagesObject.js";
+export { checkUser, addUser, indexUser, updateUser, addLimit, addAllLimit, resetAllLimit, checkLimit } from "./limit.js";

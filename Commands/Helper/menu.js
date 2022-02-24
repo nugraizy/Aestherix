@@ -4,13 +4,16 @@ export default {
 	usage: "!menu",
 	aliases: ["menu"],
 	category: "Helper",
-	async run({ from }, client) {
-		let capt = "Void Bot Menu\n\n";
-		let i = 0;
+	cooldown: 10,
+	limit: 5,
+	async run({ from, prefix }, client) {
+		let capt = `Void Bot Menu\n\nUse ${prefix}${getRandomCommand()} -H\n~> to see the detail of the command.\n\n`;
+		let i = 1;
 		for (const command of CMD.commands) {
-			capt += `${i + 1}. ${command[1].name}\ndesc : ${command[1].description}\naliases : ${command[1].aliases.join(", ")}\n\n`;
-			i++;
+			capt += `${i++}. ${command[1].name.capitalize()}\n`;
 		}
 		await client[botNum].reply(from, capt.trim());
 	},
 };
+
+const getRandomCommand = () => Array.from(CMD.commands.keys())[Math.floor(Math.random() * CMD.commands.size)];

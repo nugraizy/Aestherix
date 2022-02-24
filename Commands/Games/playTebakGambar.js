@@ -6,6 +6,8 @@ export default {
 	usage: "!tebakgambar",
 	aliases: ["tg"],
 	category: "Games",
+	cooldown: 2,
+	limit: 2,
 	async run(message, client) {
 		const games = await startTG(client, message.from, message, 20);
 		if (games.status == "playing") {

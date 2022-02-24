@@ -11,6 +11,8 @@ export default {
 	usage: "!ytaudio <url>",
 	aliases: ["yta"],
 	category: "Downloader",
+	cooldown: 6,
+	limit: 3,
 	async run({ from, query, prettyNumber, filename }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!query) return client[botNum].reply(from, "Please provide a URL");

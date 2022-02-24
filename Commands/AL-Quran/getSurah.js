@@ -6,6 +6,8 @@ export default {
 	category: "AL-Quran",
 	usage: "getsurah",
 	aliases: ["surah"],
+	cooldown: 0,
+	limit: 0,
 	async run({ from }, client) {
 		try {
 			const lists = await getListSurah();

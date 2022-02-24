@@ -18,7 +18,7 @@ export const toOpus = (ext, opts = {}) =>
 			container = ["-y", "-i", opts.media, "-vn", "-c:a", "libopus", "-b:a", "128k", "-vbr", "on", "-compression_level", "10", `${opts.output}.${ext}`];
 		} else {
 			tmp = `${opts.input}.${ext}`;
-			writeBuffer(tmp, opts.media);
+			if (Buffer.isBuffer(opts.media)) writeBuffer(tmp, opts.media);
 			container = ["-y", "-i", tmp, "-vn", "-c:a", "libopus", "-b:a", "128k", "-vbr", "on", "-compression_level", "10", `${opts.output}.${ext}`];
 		}
 		spawn("ffmpeg", container)

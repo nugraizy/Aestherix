@@ -12,6 +12,8 @@ export default {
 	category: "Converter",
 	usage: "soundremover <Audio/Video(reply/send)>",
 	aliases: ["soundremove", "soundrem", "soundremoveaudio", "soundremovevideo", "soundremoveaudiovideo", "vrm", "srm"],
+	cooldown: 5,
+	limit: 1,
 	async run({ isQuotedAudio, isQuotedDocument, isMediaVid, from, prettyNumber, message, filename, query, extractMediaData }, client) {
 		if (!isQuotedAudio && !isQuotedDocument && !isMediaVid) return client[botNum].reply(from, "Please send/reply an audio/video to remove voice");
 		try {

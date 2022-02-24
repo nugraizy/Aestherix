@@ -21,6 +21,9 @@ const { state, saveState } = useSingleFileAuthState("./Session/Session-debug.jso
 const moduleURL = new URL(import.meta.url);
 export const __dirname = path.dirname(moduleURL.pathname);
 global.CMD = {};
+global.cooldown = {};
+global.functions = {};
+cooldown.user = new Discord.Collection();
 CMD.commands = new Discord.Collection();
 CMD.aliases = [];
 
@@ -94,7 +97,7 @@ const start = async () => {
 		const {
 			default: { handler: Handler },
 		} = await import("./Handlers/Messages Event/incomingMessage.js");
-		Handler(message, client, CMD, store);
+		Handler(message, client, CMD, store, cooldown);
 	});
 
 	Client.ev.on("auth-state.update", () => saveState);

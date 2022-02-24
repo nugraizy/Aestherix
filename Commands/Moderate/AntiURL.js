@@ -6,6 +6,8 @@ export default {
 	description: "Enable or disable anti-url",
 	category: "Moderation",
 	usage: "antiurl <enable/disable>",
+	cooldown: 2,
+	limit: 2,
 	async run(message, client) {
 		if (!message.query) return client[botNum].reply(message.from, "Please specify a command\n\nEx: antiurl <enable/disable>");
 		const data = readJSON("./Databases/Groups/settingsManager.json");

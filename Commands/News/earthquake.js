@@ -5,6 +5,8 @@ export default {
 	description: "Showing latest earthquake in Indonesia",
 	category: "News",
 	aliases: ["earthquake"],
+	cooldown: 2,
+	limit: 1,
 	async run(message, client) {
 		const data = await getEarthquake();
 		let caption = "Latest Earthquake in Indonesia\n\n";

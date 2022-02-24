@@ -7,6 +7,8 @@ export default {
 	category: "Misc",
 	usage: "screenshot <url> --<?type> (phone, tablet, desktop) default is desktop.",
 	aliases: ["screenshot", "ss"],
+	cooldown: 3,
+	limit: 2,
 	async run(message, client) {
 		if (!message.query) return client[botNum].reply(message, "Please specify a website URL");
 		const parseOptions = message.query.includes("--") ? message.query.split("--") : message.query;

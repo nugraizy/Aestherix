@@ -2,6 +2,7 @@ import ms from "parse-ms";
 import request from "request";
 import fs from "fs";
 import gradient from "gradient-string";
+import beautifyJSON from "json-stable-stringify";
 
 export const download = (url, path, callback) => {
 	request.head(url, () => {
@@ -35,11 +36,12 @@ export const reverseWord = (string = "") => string.split("").reverse().join("");
 
 export const reverseArray = (array = []) => array.reverse();
 
-export const capitalizeFirstLetter = (string = "") =>
-	string
-		.toLowerCase()
+String.prototype.capitalize = function () {
+	return this.toLowerCase()
 		.split(" ")
-		.map((str) => str.charAt(0).toUpperCase() + str.slice(1));
+		.map((str) => str.charAt(0).toUpperCase() + str.slice(1))
+		.join(" ");
+};
 
 export const numberWithCommas = (number = 0, region = "id") => parseFloat(number).toLocaleString(region);
 
@@ -366,7 +368,7 @@ export const writeJSON = (path, data) => {
 	if (isUndefined(data)) {
 		throw new Error("you need the data to write!");
 	}
-	return fs.writeFileSync(path, JSON.stringify(data, undefined, 2));
+	return fs.writeFileSync(path, JSON.stringify(JSON.parse(beautifyJSON(data)), undefined, 2));
 };
 
 // write buffer to file using fs. If the data is undefined then throw new error saying "you need the buffer to write!"

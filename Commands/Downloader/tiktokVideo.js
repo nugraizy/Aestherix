@@ -9,6 +9,8 @@ export default {
 	usage: "!tiktokvideo <url> [options]\nOptions:\n-wm, --watermark: Download with watermark\n-nowm, --nowatermark: Download without watermark",
 	aliases: ["tiktokvideo", "ttvideo"],
 	category: "Downloader",
+	cooldown: 6,
+	limit: 3,
 	async run({ from, query, prettyNumber, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!query) return client[botNum].reply(from, "Please provide a URL");

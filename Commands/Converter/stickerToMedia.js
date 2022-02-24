@@ -10,6 +10,8 @@ export default {
 	usage: "decrypt <reply sticker/send sticker>",
 	aliases: ["d"],
 	category: "Converter",
+	cooldown: 5,
+	limit: 1,
 	async run({ isQuotedSticker, from, message, filename, extractMediaData, sender, prettyNumber }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!isQuotedSticker) return client[botNum].reply(from, "Please reply a sticker to decrypt");

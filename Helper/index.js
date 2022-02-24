@@ -1,6 +1,15 @@
 export { attp, ttp } from "./Canvas/index.js";
 export { getSpinner, scheme } from "./Misc/index.js";
 export {
+	reassign,
+	checkUser,
+	addUser,
+	indexUser,
+	updateUser,
+	addLimit,
+	addAllLimit,
+	resetAllLimit,
+	checkLimit,
 	download,
 	clampFloat,
 	distordFX,
@@ -10,7 +19,6 @@ export {
 	removeDuplicatesArray,
 	reverseWord,
 	reverseArray,
-	capitalizeFirstLetter,
 	numberWithCommas,
 	randomCase,
 	identity,

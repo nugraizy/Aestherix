@@ -6,6 +6,8 @@ export default {
 	description: "Play games with your friends",
 	category: "Moderation",
 	usage: "games <enable/disable>",
+	cooldown: 2,
+	limit: 2,
 	async run(message, client) {
 		if (!message.query) return client[botNum].reply(message.from, `Please specify a command\n\nEx: ${message.cmd} <enable/disable>`);
 		const data = readJSON("./Databases/Groups/settingsManager.json");
