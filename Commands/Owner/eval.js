@@ -92,7 +92,8 @@ const temp = (names, func) => {
 	if (Object.keys(func).includes(names)) return new Error("Function already exists in the script.");
 	if (Object.keys(global).includes(names)) return new Error("Function already exists in the temporary functions.");
 	if (typeof func !== "function") return new Error("Argument is not a function.");
-	func = prettier.js_beautify(func.toString().split("\n").insert(1, "try {").insert(-1, "} catch(e) { prints(false, e)}").join("\n"));
+	func = prettier.js_beautify(func.toString());
+	func = prettier.js_beautify(func.split("\n").insert(1, "try {").insert(-1, "} catch(e) { prints(false, e)}").join("\n"));
 	global[names] = new Function(`return ${func}`)();
 	return func;
 };
