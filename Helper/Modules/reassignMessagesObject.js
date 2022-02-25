@@ -16,6 +16,7 @@ export const reassign = async (m, client) => {
 		m.message = isSame(Object.keys(m.message)[0], "ephemeralMessage") ? m.message.ephemeralMessage.message : m.message;
 		const isFromMe = m.key.fromMe;
 		const from = m.key.remoteJid;
+		global.where = from;
 		const isGroup = from.endsWith("@g.us");
 		let groupSettings;
 		if (isGroup) {
@@ -46,9 +47,9 @@ export const reassign = async (m, client) => {
 			type = Object.keys(m.message.ephemeralMessage.message);
 			mText = m.message.ephemeralMessage;
 		}
-		const adminGroups = [];
-		const participants = groupMetadata.participants ? groupMetadata.participants : [];
-		participants.map((v) => isNotNull(v.admin) && adminGroups.push(v.id));
+		const rawParticipants = groupMetadata.participants ? groupMetadata.participants : [];
+		const adminGroups = rawParticipants.filter((v) => isNotNull(v.admin)).map((v) => v.id);
+		const participantsGroups = rawParticipants.map((v) => v.id);
 		const isAdmin = adminGroups.includes(sender);
 		const isBotAdmin = adminGroups.includes(botNumber);
 		const body = isSame(type, "conversation")
@@ -342,8 +343,9 @@ export const reassign = async (m, client) => {
 			settings: SETTINGS,
 			type,
 			isAdmin,
+			rawParticipants,
 			adminGroups,
-			participants,
+			participantsGroups,
 			isBotAdmin,
 			body,
 			args,

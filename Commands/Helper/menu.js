@@ -9,11 +9,11 @@ export default {
 	async run({ from, prefix }, client) {
 		let capt = `Void Bot Menu\n\nUse ${prefix}${getRandomCommand()} -H\n~> to see the detail of the command.\n\n`;
 		let i = 1;
-		for (const command of CMD.commands) {
+		for (const command of cmds.commands) {
 			capt += `${i++}. ${command[1].name.capitalize()}\n`;
 		}
 		await client[botNum].reply(from, capt.trim());
 	},
 };
 
-const getRandomCommand = () => Array.from(CMD.commands.keys())[Math.floor(Math.random() * CMD.commands.size)];
+const getRandomCommand = () => Array.from(cmds.commands.keys())[Math.floor(Math.random() * cmds.commands.size)];

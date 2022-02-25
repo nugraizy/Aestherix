@@ -11,21 +11,24 @@ import meow from "meow";
 import * as Discord from "@discordjs/collection";
 import { Boom } from "@hapi/boom";
 import Spinnies from "spinnies";
-import { getSpinner } from "./Helper/Misc/spinners.js";
 import path from "path";
 import { EventEmitter } from "events";
+import center from "center-align";
+import moment from "moment-timezone";
+import { getSpinner } from "./Helper/Misc/spinners.js";
+import { readJSON, INFOLOG, color, romanize } from "./Helper/Modules/functions.js";
 EventEmitter.prototype.setMaxListeners(0);
 
 const { default: makeWASocket, DisconnectReason, delay, BufferJSON, makeInMemoryStore, useSingleFileAuthState, DEFAULT_CONNECTION_CONFIG } = baileys;
 const { state, saveState } = useSingleFileAuthState("./Session/Session-debug.json");
 const moduleURL = new URL(import.meta.url);
 export const __dirname = path.dirname(moduleURL.pathname);
-global.CMD = {};
-global.cooldown = {};
-global.functions = {};
-cooldown.user = new Discord.Collection();
-CMD.commands = new Discord.Collection();
-CMD.aliases = [];
+const { stdout } = process;
+global.cmds = {};
+global.user = {};
+user.cooldown = new Discord.Collection();
+cmds.commands = new Discord.Collection();
+cmds.aliases = [];
 
 const spinners = new Spinnies({ color: "blue", succeedColor: "green", failColor: "redBright", spinner: getSpinner("dots") });
 const addSpinner = (name, options) => spinners.add(name, options);
@@ -44,11 +47,13 @@ const store = makeInMemoryStore({
 	}),
 });
 
+export const runtime = Date.now();
+
 const start = async () => {
 	if (OPTIONS.help) return console.log(cli.help);
 	await loadCommands();
 	await loadEveryCommand();
-	successSpinner("commands", { text: `Loaded ${CMD.commands.size} commands` });
+	successSpinner("commands", { text: `Loaded ${cmds.commands.size} commands` });
 
 	const Client = makeWASocket({ printQRInTerminal: true, version: DEFAULT_CONNECTION_CONFIG.version, logger: P({ level: "fatal" }), auth: state });
 	store.bind(Client.ev);
@@ -90,6 +95,7 @@ const start = async () => {
 			global.botNum = Client.user.id;
 			client[Client.user.id] = Client;
 			successSpinner("Connecting", { text: "Connected to WASocket" });
+			INFOLOG(color(center(`λ ʙᴏᴛ  ᴠᴇʀꜱɪᴏɴ  ${romanize(readJSON("./package.json").version)}\n\n`, stdout.columns), "#9f53ea"));
 		}
 	});
 
@@ -97,7 +103,7 @@ const start = async () => {
 		const {
 			default: { handler: Handler },
 		} = await import("./Handlers/Messages Event/incomingMessage.js");
-		Handler(message, client, CMD, store, cooldown);
+		Handler(message, client, cmds, store, user);
 	});
 
 	Client.ev.on("auth-state.update", () => saveState);
@@ -136,14 +142,14 @@ async function loadCommands() {
 	await delay(1_200);
 	for (const command of commands) {
 		const { default: commandModule } = await import(command);
-		CMD.commands.set(commandModule.name, commandModule);
+		cmds.commands.set(commandModule.name, commandModule);
 	}
 }
 
 async function loadEveryCommand() {
-	for (const command of CMD.commands) {
+	for (const command of cmds.commands) {
 		for (const aliases of command[1].aliases) {
-			CMD.aliases.push(aliases);
+			cmds.aliases.push(aliases);
 		}
 	}
 }

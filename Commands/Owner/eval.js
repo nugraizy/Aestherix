@@ -12,7 +12,7 @@ export default {
 	category: "Owner",
 	cooldown: 0,
 	limit: 0,
-	async run(message, client) {
+	async run(message, client, store) {
 		let { isOwner, query, isBaileys, from, extractMediaData, mediaData, type, typeQuoted, body, adminGroups, participants, pushname, bodyQuoted } = message;
 		if (!isOwner) return client[botNum].reply(from, "You are not allowed to use this command");
 		if (!query) return client[botNum].reply(from, "Please specify code to evaluate");
@@ -79,23 +79,34 @@ export default {
 	},
 };
 
+Array.prototype.insert = function (index) {
+	this.splice(...[index, 0].concat(Array.prototype.slice.call(arguments, 1)));
+	return this;
+};
 const col = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
-const print = (dari, ...args) => client[botNum].reply(dari, util.format(...args));
+const print = (dari, ...args) => client[botNum].reply(dari || where, util.format(...args));
+global.prints = print;
 const temp = (names, func) => {
 	if (!/^[a-z0-9_]+$/i.test(names)) return new Error("Invalid name.");
 	if (Object.keys(func).includes(names)) return new Error("Function already exists in the script.");
-	if (Object.keys(functions).includes(names)) return new Error("Function already exists in the temporary functions.");
+	if (Object.keys(global).includes(names)) return new Error("Function already exists in the temporary functions.");
 	if (typeof func !== "function") return new Error("Argument is not a function.");
-	func = prettier.js_beautify(func.toString());
-	functions[names] = Function(`return ${func}`)();
+	func = prettier.js_beautify(func.toString().split("\n").insert(1, "try {").insert(-1, "} catch(e) { prints(false, e)}").join("\n"));
+	global[names] = new Function(`return ${func}`)();
 	return func;
 };
 
 const clear = (names) => {
 	if (!/^[a-z0-9_]+$/i.test(names)) return new Error("Invalid name.");
-	if (!Object.keys(functions).includes(names)) return new Error("Function does not exist.");
-	const capt = `Function is deleted\n\n${functions[names]}`;
-	delete functions[names];
+	if (!Object.keys(global).includes(names)) return new Error("Function does not exist.");
+	const capt = `Function is deleted\n\n${global[names]}`;
+	delete global[names];
 	return capt;
+};
+
+const check = (names) => {
+	if (!/^[a-z0-9_]+$/i.test(names)) return new Error("Invalid name.");
+	if (!Object.keys(global).includes(names)) return new Error("Function does not exist.");
+	return global[names].toString();
 };

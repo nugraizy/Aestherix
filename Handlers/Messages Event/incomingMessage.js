@@ -4,11 +4,12 @@ import { delay } from "@adiwajshing/baileys";
 import * as Discord from "@discordjs/collection";
 import { INFOLOG, color, reassign, addLimit } from "../../Helper/Modules/index.js";
 import { tebak, url } from "../index.js";
+import { runtime } from "../../connect.js";
 
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 
 export default {
-	async handler(message, client, CMD, store, cooldown) {
+	async handler(message, client, cmds, store, user) {
 		if (message == undefined) return;
 		const time = moment().format("HH:mm:ss DD/MM");
 		message = await reassign(JSON.parse(JSON.stringify(message.messages[0])), client);
@@ -17,6 +18,7 @@ export default {
 		if (message.isBaileys) return;
 		if (message.key && message.key.remoteJid == "status@broadcast") return;
 		if (message.type == "protocolMessage" || message.type == "senderKeyDistributionMessage" || !message.type) return;
+		const runtimes = ((Date.now() - runtime) / 1000).toFixed(0);
 		if (message.isCmd) {
 			let bodies = [];
 			if (OPTIONS.multiCmd) {
@@ -29,7 +31,7 @@ export default {
 				message.query = message.args.slice(1).join(" ").trim();
 				const correctedCommand = [];
 				if (OPTIONS.autoCorrect && message.args[0] !== `${message.prf}menu`) {
-					for (const aliases of CMD.aliases) {
+					for (const aliases of cmds.aliases) {
 						const correcting = similarity(message.args[0], aliases);
 						if (correcting > Math.min(0.67))
 							correctedCommand.push({
@@ -48,50 +50,52 @@ export default {
 					);
 					message.cmd = message.prefix + HIGH_SCORE.command.toLowerCase().split(" ")[0].trim() || "";
 				}
-				const TempCMD = CMD.commands.get(message.cmd.slice(1).trim().toLowerCase()) || CMD.commands.find((v) => v.aliases.includes(message.cmd.slice(1).trim().toLowerCase())) || CMD.commands.find((v) => v.aliases.includes(message.cmd.trim().toLowerCase())) || false;
-				if (TempCMD && !message.isOwner) {
-					const limit = addLimit({ id: message.sender, limit: TempCMD.limit, type: "MIN" });
+				const Tempcmds = cmds.commands.get(message.cmd.slice(1).trim().toLowerCase()) || cmds.commands.find((v) => v.aliases.includes(message.cmd.slice(1).trim().toLowerCase())) || cmds.commands.find((v) => v.aliases.includes(message.cmd.trim().toLowerCase())) || false;
+				if (Tempcmds && !message.isOwner) {
+					const limit = addLimit({ id: message.sender, limit: Tempcmds.limit, type: "MIN" });
 					if (typeof limit == "object" && "message" in limit) {
-						client[botNum].reply(message.from, `${limit.message}\nYour limit is ${limit.limits}\nBut this command (${TempCMD.name}) need ${TempCMD.limit}`);
+						client[botNum].reply(message.from, `${limit.message}\nYour limit is ${limit.limits}\nBut this command (${Tempcmds.name}) need ${Tempcmds.limit}`);
 						continue;
 					}
 					if (limit == false) return client[botNum].reply(message.from, "You have reached the limit of this command.");
-					if (cooldown.user.has(message.sender) && cooldown.user.get(message.sender).has(TempCMD.name)) {
-						const time = cooldown.user.get(message.sender).get(TempCMD.name);
-						if (Date.now() > time) cooldown.user.get(message.sender).delete(TempCMD.name);
-						else return client[botNum].reply(message.from, `${TempCMD.name} is on cooldown for ${((time - Date.now()) / 1000).toFixed(1)} seconds.`);
+					if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).has(Tempcmds.name)) {
+						const time = user.cooldown.get(message.sender).get(Tempcmds.name);
+						if (Date.now() > time) user.cooldown.get(message.sender).delete(Tempcmds.name);
+						else return client[botNum].reply(message.from, `${Tempcmds.name} is on cooldown for ${((time - Date.now()) / 1000).toFixed(1)} seconds.`);
 					}
-					if (!cooldown.user.has(message.sender)) cooldown.user.set(message.sender, new Discord.Collection());
-					if (!cooldown.user.get(message.sender).has(TempCMD.name)) cooldown.user.get(message.sender).set(TempCMD.name, Date.now() + TempCMD.cooldown * 1000);
-					cooldown.user.get(message.sender).get(TempCMD.name);
+					if (!user.cooldown.has(message.sender)) user.cooldown.set(message.sender, new Discord.Collection());
+					if (!user.cooldown.get(message.sender).has(Tempcmds.name)) user.cooldown.get(message.sender).set(Tempcmds.name, Date.now() + Tempcmds.cooldown * 1000);
+					user.cooldown.get(message.sender).get(Tempcmds.name);
 				}
 				if (message.isGroup) {
 					INFOLOG(
 						`[${color(time, "cyan")}]`,
 						`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
-						`${color(message.prefix, "white")}${color(CMD.name || message.cmd.slice(1).trim(), "#01cdfe")}`,
+						`${color(message.prefix, "white")}${color(cmds.name || message.cmd.slice(1).trim(), "#01cdfe")}`,
 						`${color(message.query.substr(0, 20), "#05ffa1")}`,
 						`${color(message.from, "#b967ff")}`,
 						`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
+						`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
 					);
 				} else
 					INFOLOG(
 						`[${color(time, "cyan")}]`,
 						`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
-						`${color(message.prefix, "white")}${color(CMD.name || message.cmd.slice(1).trim(), "#01cdfe")}`,
+						`${color(message.prefix, "white")}${color(cmds.name || message.cmd.slice(1).trim(), "#01cdfe")}`,
 						`${color(message.query.trim().substr(0, 20), "#05ffa1")}`,
 						`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
+						`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
 					);
-				if (TempCMD) {
+				if (Tempcmds) {
 					try {
 						if (/(--?(help(s)?|info|des(c|k)rip(t|s)i(on)?)|-H)/.test(message.query)) {
-							const help = `Description : ${TempCMD.description}\nUsage : ${TempCMD.usage}\nCooldown : ${TempCMD.cooldown}s\nAliases : ${message.prefix}${TempCMD.aliases.join(`, ${message.prefix}`)}`;
+							const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${Tempcmds.cooldown}s\nAliases : ${message.prefix}${Tempcmds.aliases.join(`, ${message.prefix}`).capitalize()}`;
 							client[botNum].reply(message.from, help);
 							continue;
 						}
-						if (TempCMD.category == "Games" && message.isGroup && !message.isAdmin && message[message.from].games == "disable") return client[botNum].reply(message.from, "Mode games belum dihidupkan");
-						if (TempCMD.category == "Moderation" && message.isGroup && !message.isAdmin && !message.isOwner) return client[botNum].reply(message.from, "Kamu bukan admin");
-						TempCMD.run(message, client);
+						if (Tempcmds.category == "Games" && message.isGroup && !message.isAdmin && message[message.from].games == "disable") return client[botNum].reply(message.from, "Mode games belum dihidupkan");
+						if (Tempcmds.category == "Moderation" && message.isGroup && !message.isAdmin && !message.isOwner) return client[botNum].reply(message.from, "Kamu bukan admin");
+						Tempcmds.run(message, client, store);
 						await delay(200);
 					} catch (err) {
 						let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
@@ -104,7 +108,14 @@ export default {
 			}
 			return;
 		}
-		if (!message.isGroup) INFOLOG(`[${color(time, "cyan")}]`, `${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`, `${color(message.body.trim().replace("\n", "").substr(0, 20), "#05ffa1")}`, `${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`);
+		if (!message.isGroup)
+			INFOLOG(
+				`[${color(time, "cyan")}]`,
+				`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
+				`${color(message.body.trim().replace("\n", "").substr(0, 20), "#05ffa1")}`,
+				`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
+				`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
+			);
 		else {
 			INFOLOG(
 				`[${color(time, "cyan")}]`,
@@ -112,6 +123,7 @@ export default {
 				`${color(message.body.trim().replace("\n", "").substr(0, 20), "#05ffa1")}`,
 				`${color(message.from, "#b967ff")}`,
 				`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
+				`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
 			);
 		}
 		if (message.isGroup && message[message.from].games == "enable" && message.isAdmin) tebak(message, client);

@@ -286,12 +286,6 @@ const loadFiles = (dir) => {
 // make a function to check if the string contains zilgoo unicode
 export const isZilgoo = (str) => str.match(/\u{1F1E6}/g);
 
-// make a function to regex number from a string then return every number on it joined with nothing
-export const regexNumber = (str) => (str.match(/\d+/g).length !== 0 ? str.match(/\d+/g).join("") : str);
-
-// make a function to regex only a alphabet unicode then return every alphabet joined with nothing
-export const regexAlphabet = (str) => (str.match(/[a-zA-Z]+/g).length !== 0 ? str.match(/[a-zA-Z]+/g).join("") : str);
-
 // check if one value is the same to the other
 export const isSame = (value1, value2) => value1 == value2;
 
@@ -438,3 +432,34 @@ export const parseCode = (input) => {
 	const parse = input.match(/([-_0-9a-zA-Z]{11})/);
 	return parse == null ? false : parse[0];
 };
+
+function convertToRoman(num) {
+	var lookup = { M: 1000, CM: 900, D: 500, CD: 400, C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1 },
+		roman = "",
+		i;
+	for (i in lookup) {
+		while (num >= lookup[i]) {
+			roman += i;
+			num -= lookup[i];
+		}
+	}
+	return roman;
+}
+
+export const romanize = (num) => {
+	const container = [];
+	num = String(num);
+	num = num.includes(".") ? num.split(".") : [num];
+	for (const number of num) {
+		if (number.split(/[a-zA-Z]/g).length > 1) {
+			container.push(regexAlphabet(number).toUpperCase());
+		} else {
+			container.push(convertToRoman(Number(regexNumber(number))));
+		}
+	}
+	return container.join(" • ");
+};
+
+export const regexNumber = (str) => (str.match(/\d+/g) !== null ? str.match(/\d+/g).join("") : "");
+
+export const regexAlphabet = (str) => (str.match(/[a-zA-Z]+/g) !== null ? str.match(/[a-zA-Z]+/g).join("") : "");
