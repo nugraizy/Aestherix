@@ -14,7 +14,6 @@ import Spinnies from "spinnies";
 import path from "path";
 import { EventEmitter } from "events";
 import center from "center-align";
-import moment from "moment-timezone";
 import { getSpinner } from "./Helper/Misc/spinners.js";
 import { readJSON, INFOLOG, color, romanize } from "./Helper/Modules/functions.js";
 EventEmitter.prototype.setMaxListeners(0);
@@ -133,7 +132,7 @@ function loadFiles(dir) {
 	return files;
 }
 
-async function loadCommands() {
+async function loadCommands(isReload = false, module = "") {
 	addSpinner("files", { text: "Loading Files..." });
 	await delay(1_200);
 	const commands = loadFiles("./Commands");
@@ -141,8 +140,9 @@ async function loadCommands() {
 	addSpinner("commands", { text: "Loading Commands..." });
 	await delay(1_200);
 	for (const command of commands) {
-		const { default: commandModule } = await import(command);
-		cmds.commands.set(commandModule.name, commandModule);
+		const cmd = (await import(command)).default;
+		await watchFile(path.join(__dirname, command), cmd.name);
+		cmds.commands.set(cmd.name, cmd);
 	}
 }
 
@@ -153,6 +153,23 @@ async function loadEveryCommand() {
 		}
 	}
 }
+
+async function watchFile(module, name) {
+	fs.watchFile(module, () => {
+		INFOLOG(color(`${name} has been changed`, "#9f53ea"));
+		reloadModule(module, name);
+	});
+}
+
+async function reloadModule(module, name) {
+	const cmd = (await nocache(module)).default;
+	cmds.commands.set(cmd.name, cmd);
+}
+
+const nocache = async (module) => {
+	const tempModules = `${module}?update=${Date.now()}`;
+	return await import(tempModules);
+};
 
 function parseCli() {
 	return meow(
