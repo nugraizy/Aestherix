@@ -9,3 +9,5 @@ export { getStory } from "./instaStory.js";
 export { getStory2 } from "./instaStory2.js";
 export { getIgtv } from "./instaTV.js";
 export { getIgtv2 } from "./instaTV2.js";
+export { getStory3 } from "./instaStory3.js";
+export { getHighlights2 } from "./instaHighlights2.js";

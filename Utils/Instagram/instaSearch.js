@@ -1,28 +1,15 @@
-import Axios from "axios";
+import fetch from "node-fetch";
 const sessionId = process.env.INSTAGRAM_SESI;
 
-export const searchUser = (query) =>
-	new Promise((resolve, reject) => {
-		Axios.get(`https://www.instagram.com/web/search/topsearch/?query=${query}`, {
-			headers: {
-				Cookie: `sessionid=${sessionId}`,
-			},
-		})
-			.then(({ data: { users: all } }) => {
-				const result = [];
-				for (let i = 0; i < all.length; i++) {
-					result.push({
-						number: all[i].position + 1,
-						pk_id: all[i].user.pk,
-						username: all[i].user.username,
-						name: all[i].user.full_name,
-						latest_reel: all[i].user.latest_reel_media,
-						is_private: all[i].user.is_private,
-						is_verified: all[i].user.is_verified,
-						pic: all[i].user.profile_pic_url,
-					});
-				}
-				resolve(result);
-			})
-			.catch((_) => reject({ error: _ }));
+export const searchUser = (username) =>
+	new Promise(async (resolve, reject) => {
+		try {
+			if (username.startsWith("@")) username = username.replace("@", "");
+			const { users: items } = await (await fetch(`https://www.instagram.com/web/search/topsearch/?query=${username}`, { headers: { Cookie: `sessionid=${sessionId}` } })).json();
+			const result = [];
+			for (const item of items) result.push({ number: item.position + 1, pk_id: item.user.pk, username: item.user.username, name: item.user.full_name, latest_reel: item.user.latest_reel_media, is_private: item.user.is_private, is_verified: item.user.is_verified, pic: item.user.profile_pic_url });
+			resolve(result);
+		} catch (err) {
+			reject({ error: err });
+		}
 	});

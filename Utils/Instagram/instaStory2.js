@@ -4,9 +4,7 @@ import cheerio from "cheerio";
 export const getStory2 = (username) =>
 	new Promise(async (resolve, reject) => {
 		let data = null;
-		if (username.startsWith("@")) {
-			username = username.replace("@", "");
-		}
+		if (username.startsWith("@")) username = username.replace("@", "");
 		try {
 			for (let i = 0; i < 5; i++) {
 				data = await fetch(URL_BASE(username, i)).then((res) => res.text());

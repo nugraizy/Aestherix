@@ -96,6 +96,8 @@ export {
 	getStory2,
 	getIgtv,
 	getIgtv2,
+	getStory3,
+	getHighlights2,
 	tiktokDownloader,
 	tiktokProfileBRAINANS,
 	tiktokProfileTIKTOK,

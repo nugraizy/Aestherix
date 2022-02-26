@@ -3,9 +3,7 @@ import fetch from "node-fetch";
 export const searchHashtag = (query) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			if (query.includes("#")) {
-				query = query.replace("#", "");
-			}
+			if (query.includes("#")) query = query.replace("#", "");
 			const response = await (await fetch(`https://www.instagram.com/explore/tags/${query}/?__a=1`)).json();
 			const result = [];
 			const dataNode = response.graphql.hashtag.edge_hashtag_to_media.edges;

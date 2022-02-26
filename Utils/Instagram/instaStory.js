@@ -5,7 +5,7 @@ import qs from "qs";
 export const getStory = (username) =>
 	new Promise((resolve, reject) => {
 		if (!username) return reject({ status: false, message: "Insert username!" });
-		if (username.startsWith("@")) username.substr(1);
+		if (username.startsWith("@")) username = username.replace("@", "");
 		Axios.get(URL_BASE(username), {
 			headers: {
 				"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",
