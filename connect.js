@@ -15,7 +15,7 @@ import path from "path";
 import { EventEmitter } from "events";
 import center from "center-align";
 import { getSpinner } from "./Helper/Misc/spinners.js";
-import { readJSON, INFOLOG, color, romanize } from "./Helper/Modules/functions.js";
+import { readJSON, INFOLOG, color, romanize, ERRLOG } from "./Helper/Modules/functions.js";
 EventEmitter.prototype.setMaxListeners(0);
 
 const { default: makeWASocket, DisconnectReason, delay, BufferJSON, makeInMemoryStore, useSingleFileAuthState, DEFAULT_CONNECTION_CONFIG } = baileys;
@@ -23,8 +23,10 @@ const { state, saveState } = useSingleFileAuthState("./Session/Session-debug.jso
 const moduleURL = new URL(import.meta.url);
 export const __dirname = path.dirname(moduleURL.pathname);
 const { stdout } = process;
+global.commandsPath = [];
 global.cmds = {};
 global.user = {};
+global.presences = {};
 user.cooldown = new Discord.Collection();
 cmds.commands = new Discord.Collection();
 cmds.aliases = [];
@@ -35,24 +37,19 @@ const successSpinner = (name, options) => spinners.succeed(name, options);
 const failSpinner = (name, options) => spinners.fail(name, options);
 
 const cli = parseCli();
-
 global.OPTIONS = cli.flags;
-const regexOption = ["prefix", "readOnly", "autoRead", "autoCorrect", "restrict", "onlyLogs", "noLogs", "selfMode", "debugMode", "multiCmd", "rainbow", "trace", "help"];
+const regexOption = ["prefix", "readOnly", "autoRead", "autoCorrect", "restrict", "onlyLogs", "noLogs", "selfMode", "debugMode", "multiCmd", "rainbow", "trace", "help", "watch"];
 
-const store = makeInMemoryStore({
-	logger: P().child({
-		level: "fatal",
-		stream: "store",
-	}),
-});
+const store = makeInMemoryStore({ logger: P().child({ level: "fatal", stream: "store" }) });
 
 export const runtime = Date.now();
+
+for (const option of Object.keys(OPTIONS).filter((key) => OPTIONS[key] == true)) if (!regexOption.includes(option)) ERRLOG(` ${color(option, "red")} ${color("is not a valid option", "white")}`);
 
 const start = async () => {
 	if (OPTIONS.help) return console.log(cli.help);
 	await loadCommands();
 	await loadEveryCommand();
-	successSpinner("commands", { text: `Loaded ${cmds.commands.size} commands` });
 
 	const Client = makeWASocket({ printQRInTerminal: true, version: DEFAULT_CONNECTION_CONFIG.version, logger: P({ level: "fatal" }), auth: state });
 	store.bind(Client.ev);
@@ -60,33 +57,17 @@ const start = async () => {
 	Client.ev.on("connection.update", (connections) => {
 		const { lastDisconnect, qr, connection } = connections;
 		const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
-		if (connection == "connecting") {
-			addSpinner("Connecting", { text: "Connecting to WASocket..." });
-		}
+		if (connection == "connecting") addSpinner("Connecting", { text: "Connecting to WASocket..." });
 		if (connection == "close") {
-			if (reason == DisconnectReason.badSession) {
-				console.log("Bad session, Please delete your previous session and do a rescan...");
-			} else if (reason == DisconnectReason.connectionClose) {
-				console.log("Connection closed, Quick reconnecting...");
-			} else if (reason == DisconnectReason.connectionLose) {
-				console.log("Connection lost, Quick reconnecting...");
-			} else if (reason == DisconnectReason.connectionReplaced) {
-				console.log("Connection replaced, Quick reconnecting...");
-			} else if (reason == DisconnectReason.loggedOut) {
-				console.log("Logged out, Please delete your previous session and do a rescan...");
-			} else {
-				if (reason == DisconnectReason.restartRequired) {
-					console.log("Restart required, Restarting your WebScoket...");
-				} else {
-					switch (reason) {
-						case DisconnectReason.timedOut:
-							console.log("Timed out, Quick reconnecting...");
-							break;
-						default:
-							console.log("Unknown reason, Quick reconnecting...");
-							break;
-					}
-				}
+			if (reason == DisconnectReason.badSession) console.log("Bad session, Please delete your previous session and do a rescan...");
+			else if (reason == DisconnectReason.connectionClose) console.log("Connection closed, Quick reconnecting...");
+			else if (reason == DisconnectReason.connectionLose) console.log("Connection lost, Quick reconnecting...");
+			else if (reason == DisconnectReason.connectionReplaced) console.log("Connection replaced, Quick reconnecting...");
+			else if (reason == DisconnectReason.loggedOut) console.log("Logged out, Please delete your previous session and do a rescan...");
+			else {
+				if (reason == DisconnectReason.restartRequired) console.log("Restart required, Restarting your WebScoket...");
+				else if (reason == DisconnectReason.timedOut) console.log("Timed out, Quick reconnecting...");
+				else console.log("Unknown reason, Quick reconnecting...");
 				start().catch((e) => console.log(e));
 			}
 		} else if (connection == "open") {
@@ -132,18 +113,20 @@ function loadFiles(dir) {
 	return files;
 }
 
-async function loadCommands(isReload = false, module = "") {
+async function loadCommands() {
 	addSpinner("files", { text: "Loading Files..." });
-	await delay(1_200);
 	const commands = loadFiles("./Commands");
 	successSpinner("files", { text: `Loaded ${commands.length} files` });
 	addSpinner("commands", { text: "Loading Commands..." });
-	await delay(1_200);
+	if (OPTIONS.watch) addSpinner("watch", { text: "Watching for changes..." });
 	for (const command of commands) {
-		const cmd = (await import(command)).default;
-		await watchFile(path.join(__dirname, command), cmd.name);
+		const cmd = (await import(path.join(__dirname, command))).default;
+		if (OPTIONS.watch) await watchFile(path.join(__dirname, command), cmd.name);
 		cmds.commands.set(cmd.name, cmd);
+		commandsPath.push(path.join(__dirname, command));
 	}
+	successSpinner("commands", { text: `Loaded ${cmds.commands.size} commands` });
+	if (OPTIONS.watch) successSpinner("watch", { text: `Watched ${cmds.commands.size} commands` });
 }
 
 async function loadEveryCommand() {
@@ -154,16 +137,41 @@ async function loadEveryCommand() {
 	}
 }
 
-async function watchFile(module, name) {
+async function watchFile(module) {
 	fs.watchFile(module, () => {
-		INFOLOG(color(`${name} has been changed`, "#9f53ea"));
-		reloadModule(module, name);
+		if (fs.existsSync(module)) {
+			INFOLOG(color(`${module.split("/").reverse()[0]} has been changed`, "#9f53ea"));
+			reloadModule(module, false);
+		} else {
+			fs.unwatchFile(module);
+			reloadModule(module, true);
+		}
 	});
 }
 
-async function reloadModule(module, name) {
-	const cmd = (await nocache(module)).default;
-	cmds.commands.set(cmd.name, cmd);
+async function reloadModule(module, isNewFile) {
+	if (isNewFile) {
+		try {
+			const commands = loadFiles("./Commands");
+			const afterCommands = commands.filter((v) => commandsPath.indexOf(path.join(__dirname, v)) < 0)[0];
+			const cmd = (await import(path.join(__dirname, afterCommands))).default;
+			cmds.commands.set(cmd.name, cmd);
+			cmds.commands.delete(cmds.commands.get(cmd.name));
+			commandsPath.push(path.join(__dirname, afterCommands));
+			commandsPath.splice(commandsPath.indexOf(module), 1);
+			watchFile(path.join(__dirname, afterCommands), cmd.name);
+			INFOLOG(color(`${module.split("/").reverse()[0]} has been renamed to ${afterCommands.split("/").reverse()[0]}`, "#9f53ea"));
+			return;
+		} catch (e) {
+			console.log(e);
+		}
+	}
+	try {
+		const cmd = (await nocache(module)).default;
+		cmds.commands.set(cmd.name, cmd);
+	} catch (e) {
+		console.log(e);
+	}
 }
 
 const nocache = async (module) => {
@@ -172,10 +180,37 @@ const nocache = async (module) => {
 };
 
 function parseCli() {
-	return meow(
-		`
+	return meow(help(), {
+		importMeta: import.meta,
+		flags: {
+			read_only: { type: "boolean", alias: "y" },
+			auto_read: { type: "boolean", alias: "r" },
+			restrict: { type: "boolean", alias: "e" },
+			only_logs: { type: "boolean", alias: "o" },
+			no_logs: { type: "boolean", alias: "n" },
+			self_mode: { type: "boolean", alias: "s" },
+			debug_mode: { type: "boolean", alias: "g" },
+			multi_cmd: { type: "boolean", alias: "m" },
+			rainbow: { type: "boolean", alias: "b" },
+			trace: { type: "boolean", alias: "t" },
+			help: { type: "boolean", alias: "h" },
+			prefix: { type: "string", alias: "p" },
+			watch: { type: "boolean", alias: "w" },
+		},
+	});
+}
+
+async function printRandomAscii() {
+	const randomAscii = fs.readdirSync("./Helper/Ascii/");
+	spawn("bash", [`./Helper/Ascii/${randomAscii[Math.floor(Math.random() * randomAscii.length)]}`], {
+		stdio: "inherit",
+	});
+}
+
+function help() {
+	return `
 	Usage
-	  $ node . <session>  <options>
+	  $ node . <session> <options>
 
 	Options
 	  --prefix, -p       Set your custom prefix
@@ -189,70 +224,10 @@ function parseCli() {
 	  --multi_cmd, -m    Loop every command on your script. Use | to seperate each commands
 	  --rainbow, -b      make your logs rainbow colors
 	  --trace, -t        Show errors
+	  --watch, -w        Watch every file on your script and reload it when it changed
 	  --help, -h         Show this message.
 
 	Examples
 	  $ node . --read_only -tr
-`,
-		{
-			importMeta: import.meta,
-			flags: {
-				read_only: {
-					type: "boolean",
-					alias: "y",
-				},
-				auto_read: {
-					type: "boolean",
-					alias: "r",
-				},
-				restrict: {
-					type: "boolean",
-					alias: "e",
-				},
-				only_logs: {
-					type: "boolean",
-					alias: "o",
-				},
-				no_logs: {
-					type: "boolean",
-					alias: "n",
-				},
-				self_mode: {
-					type: "boolean",
-					alias: "s",
-				},
-				debug_mode: {
-					type: "boolean",
-					alias: "g",
-				},
-				multi_cmd: {
-					type: "boolean",
-					alias: "m",
-				},
-				rainbow: {
-					type: "boolean",
-					alias: "b",
-				},
-				trace: {
-					type: "boolean",
-					alias: "t",
-				},
-				help: {
-					type: "boolean",
-					alias: "h",
-				},
-				prefix: {
-					type: "string",
-					alias: "p",
-				},
-			},
-		},
-	);
-}
-
-async function printRandomAscii() {
-	const randomAscii = fs.readdirSync("./Helper/Ascii/");
-	spawn("bash", [`./Helper/Ascii/${randomAscii[Math.floor(Math.random() * randomAscii.length)]}`], {
-		stdio: "inherit",
-	});
+`;
 }

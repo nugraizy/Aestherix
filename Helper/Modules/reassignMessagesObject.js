@@ -3,6 +3,7 @@ import moment from "moment-timezone";
 import PhoneNumber from "awesome-phonenumber";
 import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined, isURL, writeBuffer, writeJSON } from "./functions.js";
 const ZERO = "0@s.whatsapp.net";
+const S_WHATSAPP_NET = "@s.whatsapp.net";
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 
 export const reassign = async (m, client) => {
@@ -312,6 +313,11 @@ export const reassign = async (m, client) => {
 			return message;
 		};
 
+		const setStatus = async (status) => {
+			if (!status) return new Error("Status is empty");
+			return client[botNum].query({ tag: "iq", attrs: { to: S_WHATSAPP_NET, type: "set", xmlns: "status" }, content: [{ tag: "status", attrs: {}, content: Buffer.from(status, "utf-8") }] });
+		};
+
 		client[botNum] = {
 			...client[botNum],
 			reply,
@@ -320,6 +326,7 @@ export const reassign = async (m, client) => {
 			buttonText,
 			buttonDocument,
 			buttonLocation,
+			setStatus,
 		};
 		return {
 			message: m,
