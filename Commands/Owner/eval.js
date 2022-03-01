@@ -95,18 +95,36 @@ const temp = (names, func) => {
 	func = prettier.js_beautify(func.toString());
 	func = prettier.js_beautify(func.split("\n").insert(1, "try {").insert(-1, "} catch(e) { prints(false, e)}").join("\n"));
 	global[names] = new Function(`return ${func}`)();
+	global.functions = { ...global.functions, [names]: global[names] };
 	return func;
 };
 
 const clear = (names) => {
+	if (typeof names == "function") {
+		for (const key in global.functions) {
+			if (global.functions[key] == names) {
+				names = key;
+				break;
+			}
+		}
+	}
 	if (!/^[a-z0-9_]+$/i.test(names)) return new Error("Invalid name.");
 	if (!Object.keys(global).includes(names)) return new Error("Function does not exist.");
 	const capt = `Function is deleted\n\n${global[names]}`;
 	delete global[names];
+	delete global.functions[names];
 	return capt;
 };
 
 const check = (names) => {
+	if (typeof names == "function") {
+		for (const key in global.functions) {
+			if (global.functions[key] == names) {
+				names = key;
+				break;
+			}
+		}
+	}
 	if (!/^[a-z0-9_]+$/i.test(names)) return new Error("Invalid name.");
 	if (!Object.keys(global).includes(names)) return new Error("Function does not exist.");
 	return global[names].toString();

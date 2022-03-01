@@ -4,6 +4,22 @@ import PhoneNumber from "awesome-phonenumber";
 import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined, isURL, writeBuffer, writeJSON } from "./functions.js";
 const ZERO = "0@s.whatsapp.net";
 const S_WHATSAPP_NET = "@s.whatsapp.net";
+const UPDATE = {
+	ADD: "groupParticipantsUpdate",
+	REMOVE: "groupParticipantsUpdate",
+	DEMOTE: "groupParticipantsUpdate",
+	PROMOTE: "groupParticipantsUpdate",
+	SUBJECT: "groupUpdateSubject",
+	DESCRIPTION: "groupUpdateDescription",
+	ANNOUNCEMENT: "groupSettingUpdate",
+	UNLOCKED: "groupSettingUpdate",
+	LOCKED: "groupSettingUpdate",
+	RETRIEVE: "groupInviteCode",
+	REVOKE: "groupRevokeInvite",
+};
+String.prototype.PARSE_EVENTS = function (...args) {
+	return args.some((v) => v == this);
+};
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 
 export const reassign = async (m, client) => {
@@ -318,6 +334,36 @@ export const reassign = async (m, client) => {
 			return client[botNum].query({ tag: "iq", attrs: { to: S_WHATSAPP_NET, type: "set", xmlns: "status" }, content: [{ tag: "status", attrs: {}, content: Buffer.from(status, "utf-8") }] });
 		};
 
+		const updateGroup = async (dari, containers, update, texts) => {
+			const responses = [];
+			if (update.PARSE_EVENTS("ADD", "REMOVE", "DEMOTE", "PROMOTE")) {
+				for (const container of containers) {
+					try {
+						const response = await client[botNum][UPDATE[update]](dari, [container], update.toLowerCase());
+						console.log(response);
+						responses.push(response);
+					} catch (e) {
+						responses.push({ error: e.message, id: container });
+						client[botNum].reply(from, `${container} is not a valid number`);
+					}
+				}
+			}
+			if (update.PARSE_EVENTS("SUBJECT", "DESCRIPTION")) {
+				const response = await client[botNum][UPDATE[update]](dari, texts);
+				responses.push(response);
+			}
+			if (update.PARSE_EVENTS("ANNOUNCEMENT", "UNLOCKED", "LOCKED")) {
+				const response = await client[botNum][UPDATE[update]](dari, update.toLowerCase());
+				responses.push(response);
+			}
+			if (update.PARSE_EVENTS("RETRIEVE", "REVOKE")) {
+				const response = await client[botNum][UPDATE[update]](dari);
+
+				responses.push(response);
+			}
+			return responses;
+		};
+
 		client[botNum] = {
 			...client[botNum],
 			reply,
@@ -327,6 +373,7 @@ export const reassign = async (m, client) => {
 			buttonDocument,
 			buttonLocation,
 			setStatus,
+			updateGroup,
 		};
 		return {
 			message: m,

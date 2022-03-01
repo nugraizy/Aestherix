@@ -18,7 +18,7 @@ import { getSpinner } from "./Helper/Misc/spinners.js";
 import { readJSON, INFOLOG, color, romanize, ERRLOG } from "./Helper/Modules/functions.js";
 EventEmitter.prototype.setMaxListeners(0);
 
-const { default: makeWASocket, DisconnectReason, delay, BufferJSON, makeInMemoryStore, useSingleFileAuthState, DEFAULT_CONNECTION_CONFIG } = baileys;
+const { default: makeWASocket, DisconnectReason, makeInMemoryStore, useSingleFileAuthState, DEFAULT_CONNECTION_CONFIG } = baileys;
 const { state, saveState } = useSingleFileAuthState("./Session/Session-debug.json");
 const moduleURL = new URL(import.meta.url);
 export const __dirname = path.dirname(moduleURL.pathname);
@@ -27,6 +27,7 @@ global.commandsPath = [];
 global.cmds = {};
 global.user = {};
 global.presences = {};
+global.functions = {};
 user.cooldown = new Discord.Collection();
 cmds.commands = new Discord.Collection();
 cmds.aliases = [];
@@ -80,18 +81,14 @@ const start = async () => {
 	});
 
 	Client.ev.on("messages.upsert", async (message) => {
-		const {
-			default: { handler: Handler },
-		} = await import("./Handlers/Messages Event/incomingMessage.js");
+		const Handler = (await import("./Handlers/Messages Event/incomingMessage.js")).default.handler;
 		Handler(message, client, cmds, store, user);
 	});
 
 	Client.ev.on("auth-state.update", () => saveState);
 
 	Client.ev.on("messages.update", async (message) => {
-		const {
-			default: { handler: Handler },
-		} = await import("./Handlers/Messages Event/deletedMessage.js");
+		const Handler = (await import("./Handlers/Messages Event/deletedMessage.js")).default.handler;
 		message = store.messages[message[0].key.remoteJid].get(message[0].key.id);
 		Handler(client, message, store);
 	});
@@ -120,10 +117,14 @@ async function loadCommands() {
 	addSpinner("commands", { text: "Loading Commands..." });
 	if (OPTIONS.watch) addSpinner("watch", { text: "Watching for changes..." });
 	for (const command of commands) {
-		const cmd = (await import(path.join(__dirname, command))).default;
-		if (OPTIONS.watch) await watchFile(path.join(__dirname, command), cmd.name);
-		cmds.commands.set(cmd.name, cmd);
-		commandsPath.push(path.join(__dirname, command));
+		try {
+			const cmd = (await import(path.join(__dirname, command))).default;
+			if (OPTIONS.watch) await watchFile(path.join(__dirname, command), cmd.name);
+			cmds.commands.set(cmd.name, { ...cmd, pathname: path.join(__dirname, command) });
+			commandsPath.push(path.join(__dirname, command));
+		} catch (e) {
+			ERRLOG(`${color(command, "red")} ${color("is causing error. Please check the file before running.", "white")}`);
+		}
 	}
 	successSpinner("commands", { text: `Loaded ${cmds.commands.size} commands` });
 	if (OPTIONS.watch) successSpinner("watch", { text: `Watched ${cmds.commands.size} commands` });
@@ -138,13 +139,12 @@ async function loadEveryCommand() {
 }
 
 async function watchFile(module) {
-	fs.watchFile(module, () => {
+	fs.watchFile(module, async (event, filename) => {
 		if (fs.existsSync(module)) {
 			INFOLOG(color(`${module.split("/").reverse()[0]} has been changed`, "#9f53ea"));
-			reloadModule(module, false);
+			await reloadModule(module, false);
 		} else {
-			fs.unwatchFile(module);
-			reloadModule(module, true);
+			await reloadModule(module, true);
 		}
 	});
 }
@@ -154,21 +154,31 @@ async function reloadModule(module, isNewFile) {
 		try {
 			const commands = loadFiles("./Commands");
 			const afterCommands = commands.filter((v) => commandsPath.indexOf(path.join(__dirname, v)) < 0)[0];
-			const cmd = (await import(path.join(__dirname, afterCommands))).default;
-			cmds.commands.set(cmd.name, cmd);
-			cmds.commands.delete(cmds.commands.get(cmd.name));
-			commandsPath.push(path.join(__dirname, afterCommands));
-			commandsPath.splice(commandsPath.indexOf(module), 1);
-			watchFile(path.join(__dirname, afterCommands), cmd.name);
-			INFOLOG(color(`${module.split("/").reverse()[0]} has been renamed to ${afterCommands.split("/").reverse()[0]}`, "#9f53ea"));
-			return;
+			try {
+				commandsPath.push(path.join(__dirname, afterCommands));
+				commandsPath.splice(commandsPath.indexOf(module), 1);
+				const cmd = (await import(path.join(__dirname, afterCommands))).default;
+				cmds.commands.set(cmd.name, cmd);
+				watchFile(path.join(__dirname, afterCommands), cmd.name);
+			} catch (e) {
+				commandsPath.splice(commandsPath.indexOf(module), 1);
+				cmds.commands.delete(Array.from(cmds.commands.values()).find((v) => v.pathname == module).name);
+				fs.unwatchFile(module);
+				return ERRLOG(color(`${module.split("/").reverse()[0]} is deleted`, "red"));
+			} finally {
+				INFOLOG(color(`${module.split("/").reverse()[0]} has been renamed to ${afterCommands.split("/").reverse()[0]}`, "#9f53ea"));
+			}
 		} catch (e) {
 			console.log(e);
 		}
+		return;
 	}
 	try {
+		fs.unwatchFile(module);
 		const cmd = (await nocache(module)).default;
+		cmds.commands.delete(cmd.name);
 		cmds.commands.set(cmd.name, cmd);
+		watchFile(module);
 	} catch (e) {
 		console.log(e);
 	}
