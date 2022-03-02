@@ -14,6 +14,7 @@ import Spinnies from "spinnies";
 import path from "path";
 import { EventEmitter } from "events";
 import center from "center-align";
+import moment from "moment-timezone";
 import { getSpinner } from "./Helper/Misc/spinners.js";
 import { readJSON, INFOLOG, color, romanize, ERRLOG } from "./Helper/Modules/functions.js";
 EventEmitter.prototype.setMaxListeners(0);
@@ -140,8 +141,9 @@ async function loadEveryCommand() {
 
 async function watchFile(module) {
 	fs.watchFile(module, async (event, filename) => {
+		const time = moment().format("HH:mm:ss DD/MM");
 		if (fs.existsSync(module)) {
-			INFOLOG(color(`${module.split("/").reverse()[0]} has been changed`, "#9f53ea"));
+			INFOLOG(`[${color(time, "cyan")}]`, color(`${module.split("/").reverse()[0]} has been changed`, "#9f53ea"));
 			await reloadModule(module, false);
 		} else {
 			await reloadModule(module, true);
@@ -152,6 +154,7 @@ async function watchFile(module) {
 async function reloadModule(module, isNewFile) {
 	if (isNewFile) {
 		try {
+			const time = moment().format("HH:mm:ss DD/MM");
 			const commands = loadFiles("./Commands");
 			const afterCommands = commands.filter((v) => commandsPath.indexOf(path.join(__dirname, v)) < 0)[0];
 			try {
@@ -164,9 +167,9 @@ async function reloadModule(module, isNewFile) {
 				commandsPath.splice(commandsPath.indexOf(module), 1);
 				cmds.commands.delete(Array.from(cmds.commands.values()).find((v) => v.pathname == module).name);
 				fs.unwatchFile(module);
-				return ERRLOG(color(`${module.split("/").reverse()[0]} is deleted`, "red"));
+				return ERRLOG(`[${color(time, "cyan")}]`, color(`${module.split("/").reverse()[0]} is deleted`, "red"));
 			} finally {
-				INFOLOG(color(`${module.split("/").reverse()[0]} has been renamed to ${afterCommands.split("/").reverse()[0]}`, "#9f53ea"));
+				INFOLOG(`[${color(time, "cyan")}]`, color(`${module.split("/").reverse()[0]} has been renamed to ${afterCommands.split("/").reverse()[0]}`, "#9f53ea"));
 			}
 		} catch (e) {
 			console.log(e);

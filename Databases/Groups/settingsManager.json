@@ -1,22 +1,42 @@
 [
   {
     "120363038592680998@g.us": {
-      "welcome1": "disable",
-      "welcome1msg": "Welcome to {groupName}",
-      "welcome2": "disable",
-      "welcome2msg": "Welcome to {groupName}",
+      "URLSender": [],
+      "antiDelete": "disable",
+      "antiGroupURL": "disable",
+      "antiSpam": "disable",
+      "antiURL": "enable",
+      "antiVirus": "disable",
+      "autoReader": "disable",
+      "games": "disable",
       "left1": "disable",
       "left1msg": "Bye bye {groupName}",
       "left2": "disable",
       "left2msg": "Bye bye {groupName}",
+      "welcome1": "disable",
+      "welcome1msg": "Welcome to {groupName}",
+      "welcome2": "disable",
+      "welcome2msg": "Welcome to {groupName}"
+    }
+  },
+  {
+    "120363039589336612@g.us": {
+      "URLSender": [],
       "antiDelete": "disable",
       "antiGroupURL": "disable",
-      "antiURL": "enable",
       "antiSpam": "disable",
+      "antiURL": "disable",
       "antiVirus": "disable",
       "autoReader": "disable",
       "games": "disable",
-      "URLSender": []
+      "left1": "disable",
+      "left1msg": "Bye bye {groupName}",
+      "left2": "disable",
+      "left2msg": "Bye bye {groupName}",
+      "welcome1": "disable",
+      "welcome1msg": "Welcome to {groupName}",
+      "welcome2": "disable",
+      "welcome2msg": "Welcome to {groupName}"
     }
   }
 ]

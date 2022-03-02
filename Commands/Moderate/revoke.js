@@ -6,14 +6,14 @@ export default {
 	category: "Moderation",
 	cooldown: 2,
 	limit: 2,
-	async run(message, client, store) {
-		if (!message.isAdmin) return client[botNum].reply(message.from, "You are not admin. This commands is only for admins.");
-		if (!message.isBotAdmin) return client[botNum].reply(message.from, "Bot is not admin, Please promote admin before using moderation commands.");
-		const code = (await client[botNum].updateGroup(message.from, undefined, "REVOKE"))[0];
+	async run({ isAdmin, isBotAdmin, from, query, type, body, message }, client, store) {
+		if (!isAdmin) return client[botNum].reply(from, "You are not admin. This commands is only for admins.");
+		if (!isBotAdmin) return client[botNum].reply(from, "Bot is not admin, Please promote admin before using moderation commands.");
+		const code = (await client[botNum].updateGroup(from, undefined, "REVOKE"))[0];
 		const buttons = [{ buttonId: `.retrieve Absolute URL : https://chat.whatsapp.com/${code}\nRAW : ${code}`, buttonText: { displayText: "SHOW URL" }, type: 1 }];
-		if (message.query && message.type == "buttonsResponseMessage") {
-			return await client[botNum].reply(message.from, message.body);
+		if (query && type == "buttonsResponseMessage") {
+			return await client[botNum].reply(from, body);
 		}
-		await client[botNum].buttonText(message.from, "URL is successfully revoked.", "Made by nanda", buttons, { quoted: message.message });
+		await client[botNum].buttonText(from, "URL is successfully revoked.", "Made by nanda", buttons, { quoted: message });
 	},
 };

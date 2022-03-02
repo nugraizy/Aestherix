@@ -1,7 +1,7 @@
 import { toBuffer, downloadContentFromMessage, generateWAMessageFromContent, generateWAMessage, getContentType } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
 import PhoneNumber from "awesome-phonenumber";
-import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined, isURL, writeBuffer, writeJSON } from "./functions.js";
+import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined, isURL, writeBuffer, writeJSON, delaySync } from "./functions.js";
 const ZERO = "0@s.whatsapp.net";
 const S_WHATSAPP_NET = "@s.whatsapp.net";
 const UPDATE = {
@@ -12,6 +12,7 @@ const UPDATE = {
 	SUBJECT: "groupUpdateSubject",
 	DESCRIPTION: "groupUpdateDescription",
 	ANNOUNCEMENT: "groupSettingUpdate",
+	NOT_ANNOUNCEMENT: "groupSettingUpdate",
 	UNLOCKED: "groupSettingUpdate",
 	LOCKED: "groupSettingUpdate",
 	RETRIEVE: "groupInviteCode",
@@ -334,17 +335,21 @@ export const reassign = async (m, client) => {
 			return client[botNum].query({ tag: "iq", attrs: { to: S_WHATSAPP_NET, type: "set", xmlns: "status" }, content: [{ tag: "status", attrs: {}, content: Buffer.from(status, "utf-8") }] });
 		};
 
-		const updateGroup = async (dari, containers, update, texts) => {
+		const updateGroup = async (dari, containers, update, texts, force) => {
 			const responses = [];
 			if (update.PARSE_EVENTS("ADD", "REMOVE", "DEMOTE", "PROMOTE")) {
 				for (const container of containers) {
 					try {
+						if (!force && adminGroups.inlucdes(container)) {
+							await client[botnum].sendMessage(dari, { text: `You can't update group @${container.split("@")[0]} because it's admin group.\nadd --force flag to force update admin`, contextInfo: { mentionedJid: [container] } }, { quoted: m });
+							continue;
+						}
 						const response = await client[botNum][UPDATE[update]](dari, [container], update.toLowerCase());
-						console.log(response);
+						delaySync(120);
 						responses.push(response);
 					} catch (e) {
 						responses.push({ error: e.message, id: container });
-						client[botNum].reply(from, `${container} is not a valid number`);
+						client[botNum].reply(dari, `${container} is not a valid number`);
 					}
 				}
 			}
@@ -352,7 +357,7 @@ export const reassign = async (m, client) => {
 				const response = await client[botNum][UPDATE[update]](dari, texts);
 				responses.push(response);
 			}
-			if (update.PARSE_EVENTS("ANNOUNCEMENT", "UNLOCKED", "LOCKED")) {
+			if (update.PARSE_EVENTS("ANNOUNCEMENT", "NOT_ANNOUNCEMENT", "UNLOCKED", "LOCKED")) {
 				const response = await client[botNum][UPDATE[update]](dari, update.toLowerCase());
 				responses.push(response);
 			}
