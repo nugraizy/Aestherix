@@ -75,6 +75,11 @@ export {
 	parseCode,
 } from "./Helper/index.js";
 export {
+	SetIntervals,
+	CheckIntervals,
+	CheckAllIntervals,
+	DeleteIntervals,
+	tesseract,
 	textToSpeech,
 	pet,
 	mp42mp3,

@@ -29,8 +29,12 @@ global.cmds = {};
 global.user = {};
 global.presences = {};
 global.functions = {};
-user.cooldown = new Discord.Collection();
-cmds.commands = new Discord.Collection();
+global.intervals = new Map();
+global.games = {};
+games.tebakGambar = new Map();
+games.sudoku = new Map();
+user.cooldown = new Map();
+cmds.commands = new Map();
 cmds.aliases = [];
 
 const spinners = new Spinnies({ color: "blue", succeedColor: "green", failColor: "redBright", spinner: getSpinner("dots") });
@@ -124,6 +128,7 @@ async function loadCommands() {
 			cmds.commands.set(cmd.name, { ...cmd, pathname: path.join(__dirname, command) });
 			commandsPath.push(path.join(__dirname, command));
 		} catch (e) {
+			console.log(e);
 			ERRLOG(`${color(command, "red")} ${color("is causing error. Please check the file before running.", "white")}`);
 		}
 	}

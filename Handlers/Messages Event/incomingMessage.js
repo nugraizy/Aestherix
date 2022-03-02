@@ -1,7 +1,6 @@
 import moment from "moment-timezone";
 import similarity from "similarity";
 import { delay } from "@adiwajshing/baileys";
-import * as Discord from "@discordjs/collection";
 import { INFOLOG, color, reassign, addLimit } from "../../Helper/Modules/index.js";
 import { tebak, url } from "../index.js";
 import { runtime } from "../../connect.js";
@@ -63,7 +62,7 @@ export default {
 						if (Date.now() > time) user.cooldown.get(message.sender).delete(Tempcmds.name);
 						else return client[botNum].reply(message.from, `${Tempcmds.name} is on cooldown for ${((time - Date.now()) / 1000).toFixed(1)} seconds.`);
 					}
-					if (!user.cooldown.has(message.sender)) user.cooldown.set(message.sender, new Discord.Collection());
+					if (!user.cooldown.has(message.sender)) user.cooldown.set(message.sender, new Map());
 					if (!user.cooldown.get(message.sender).has(Tempcmds.name)) user.cooldown.get(message.sender).set(Tempcmds.name, Date.now() + Tempcmds.cooldown * 1000);
 					user.cooldown.get(message.sender).get(Tempcmds.name);
 				}

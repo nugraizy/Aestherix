@@ -9,9 +9,9 @@ export default {
 	cooldown: 2,
 	limit: 2,
 	async run(message, client) {
-		const games = await startTG(client, message.from, message, 20);
-		if (games.status == "playing") {
-			return client[botNum].reply(message.from, "Your game is already playing!", games.data);
+		const game = await startTG(client, message.from, message, 20);
+		if (game.status == "playing") {
+			return client[botNum].reply(message.from, `Your game is already playing!\n${game.remaining}s left`, game.data);
 		}
 	},
 };
