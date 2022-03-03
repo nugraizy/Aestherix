@@ -1,18 +1,22 @@
 import moment from "moment-timezone";
 
-const intervals = global.intervals;
-
-export const SetIntervals = async (dari, time, callback) => {
-	intervals.set(dari, {
+export const SetIntervals = async (key, time, type, callback) => {
+	if (intervals[type] === undefined) throw new Error("Interval type not found");
+	const starts = new Date().getTime();
+	const ends = moment(starts).add(parseInt(time), "seconds").valueOf();
+	intervals[type].set(key, {
 		timer: null,
-		startsAt: new Date().getTime(),
-		endsAt: moment(new Date()).add(parseInt(time), "seconds").valueOf(),
+		startsTimestamp: starts,
+		endsTimestamp: ends,
+		startsReadable: moment(starts).format("HH:mm:ss DD/MM"),
+		endsReadable: moment(ends).format("HH:mm:ss DD/MM"),
 		intervals: setInterval(callback, 1000),
 	});
 };
 
-export const CheckIntervals = (dari) => {
-	const interval = intervals.get(dari);
+export const CheckIntervals = (key, type) => {
+	if (intervals[type] === undefined) throw new Error("Interval type not found");
+	const interval = intervals[type].get(key);
 	if (interval == undefined) return 0;
 	return {
 		timer: interval.timer,
@@ -24,14 +28,23 @@ export const CheckIntervals = (dari) => {
 	};
 };
 
-export const CheckAllIntervals = () =>
-	Array.from(intervals.entries()).map(([key, value]) => ({
-		[key]: value,
-	}));
+export const CheckAllIntervals = () => {
+	const result = [];
+	for (const type in intervals) {
+		if (intervals[type] === undefined) throw new Error("Interval type not found");
+		result.push({
+			[type]: Array.from(intervals[type].entries()).map(([key, value]) => ({
+				[key]: value,
+			})),
+		});
+	}
+	return result;
+};
 
-export const DeleteIntervals = (dari) => {
-	const interval = intervals.get(dari);
+export const DeleteIntervals = (key, type) => {
+	if (intervals[type] === undefined) throw new Error("Interval type not found");
+	const interval = intervals[type].get(key);
 	if (interval == undefined) return 0;
 	clearInterval(interval.intervals);
-	intervals.delete(dari);
+	intervals[type].delete(key);
 };

@@ -25,7 +25,7 @@
       "antiDelete": "disable",
       "antiGroupURL": "disable",
       "antiSpam": "disable",
-      "antiURL": "disable",
+      "antiURL": "enable",
       "antiVirus": "disable",
       "autoReader": "disable",
       "games": "disable",

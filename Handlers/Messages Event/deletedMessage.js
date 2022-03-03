@@ -1,6 +1,5 @@
 import path from "path";
 import moment from "moment-timezone";
-import Timeout from "smart-timeout";
 import { __dirname } from "../../connect.js";
 import { createExif } from "../../Utils/Misc/index.js";
 import { convertMediaToSticker } from "../../Utils/Converter/index.js";
@@ -29,20 +28,16 @@ export default {
 				isFromMe,
 			} = message;
 			const type = Object.keys(messages)[0];
-
 			if (!messages) return;
 			if (isBaileys) return;
 			if (isFromMe) return;
 			if (from == "status@broadcast") return;
 			if (type == "protocolMessage" || type == "senderKeyDistributionMessage" || !type) return;
-			if (data[data.findIndex((v) => Object.keys(v)[0] == from)].URLSender.some((v) => v.sender == sender && v.id == message.message.key.id) && Timeout.exists(sender)) {
-				Timeout.clear(sender);
+			if (intervals["url"].has(sender) && intervals["url"].get(sender).has(from) && intervals["url"].get(sender).get(from).id !== undefined) {
 				await client[botNum].reply(from, "Good. Do not send URLs next time or i will kick you.");
-				data[data.findIndex((v) => Object.keys(v)[0] == from)][from].URLSender.splice(
-					data[data.findIndex((v) => Object.keys(v)[0] == from)][from].URLSender.findIndex((v) => v.sender == sender && v.id == message.message.key.id),
-					1,
-				);
-				writeJSON(path.join(__dirname, "Databases/Groups/settingsManager.json"), data);
+				const data = intervals["url"].get(sender).get(from);
+				clearInterval(data.intervals);
+				intervals["url"].get(sender).delete(from);
 				return;
 			}
 			if (message[from].antiDelete == "enable") {

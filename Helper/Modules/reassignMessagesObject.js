@@ -477,7 +477,6 @@ const pushDefaultSettings = (dari) => {
 				antiVirus: "disable",
 				autoReader: "disable",
 				games: "disable",
-				URLSender: [],
 			},
 		});
 		writeJSON("./Databases/Groups/settingsManager.json", data);
