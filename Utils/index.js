@@ -7,3 +7,4 @@ export { fbDl } from "./Facebook/index.js";
 export { getSurahAudio, getAyat, getSurahDetail, getListSurah, getTafsirSurah } from "./EQuran/index.js";
 export { toOpus, convertMediaToSticker, convertStickerToMedia, webp2mp4File, mp42mp3, soundRemover, pet, textToSpeech } from "./Converter/index.js";
 export { getEarthquake } from "./News/index.js";
+export { line, telegram } from "./Stickers/index.js";

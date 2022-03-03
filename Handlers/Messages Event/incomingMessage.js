@@ -49,7 +49,8 @@ export default {
 					);
 					message.cmd = message.prefix + HIGH_SCORE.command.toLowerCase().split(" ")[0].trim() || "";
 				}
-				const Tempcmds = cmds.commands.get(message.cmd.slice(1).trim().toLowerCase()) || cmds.commands.find((v) => v.aliases.includes(message.cmd.slice(1).trim().toLowerCase())) || cmds.commands.find((v) => v.aliases.includes(message.cmd.trim().toLowerCase())) || false;
+				const Tempcmds =
+					cmds.commands.get(message.cmd.slice(1).trim().toLowerCase()) || Array.from(cmds.commands.values()).find((v) => v.aliases.includes(message.cmd.slice(1).trim().toLowerCase())) || Array.from(cmds.commands.values()).find((v) => v.aliases.includes(message.cmd.trim().toLowerCase())) || false;
 				if (Tempcmds && !message.isOwner) {
 					const limit = addLimit({ id: message.sender, limit: Tempcmds.limit, type: "MIN" });
 					if (typeof limit == "object" && "message" in limit) {

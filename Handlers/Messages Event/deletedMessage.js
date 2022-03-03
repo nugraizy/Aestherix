@@ -1,9 +1,10 @@
 import path from "path";
 import moment from "moment-timezone";
+import { CheckIntervals, DeleteIntervals } from "../../Utils/Misc/index.js";
 import { __dirname } from "../../connect.js";
 import { createExif } from "../../Utils/Misc/index.js";
 import { convertMediaToSticker } from "../../Utils/Converter/index.js";
-import { getFilesize, readBuffer, unlinkFile, readJSON, writeJSON } from "../../Helper/Modules/index.js";
+import { getFilesize, readBuffer, unlinkFile, readJSON } from "../../Helper/Modules/index.js";
 import { reassign } from "../../Helper/Modules/reassignMessagesObject.js";
 
 export default {
@@ -33,11 +34,9 @@ export default {
 			if (isFromMe) return;
 			if (from == "status@broadcast") return;
 			if (type == "protocolMessage" || type == "senderKeyDistributionMessage" || !type) return;
-			if (intervals["url"].has(sender) && intervals["url"].get(sender).has(from) && intervals["url"].get(sender).get(from).id !== undefined) {
+			if (CheckIntervals(intervals["url"].get(sender)) !== 0 && CheckIntervals(intervals["url"].get(sender).get(from)) !== 0 && CheckIntervals(intervals["url"].get(sender).get(from)).id == message.message.key.id) {
 				await client[botNum].reply(from, "Good. Do not send URLs next time or i will kick you.");
-				const data = intervals["url"].get(sender).get(from);
-				clearInterval(data.intervals);
-				intervals["url"].get(sender).delete(from);
+				DeleteIntervals(intervals["url"].get(sender).get(from), intervals["url"].get(sender), from);
 				return;
 			}
 			if (message[from].antiDelete == "enable") {

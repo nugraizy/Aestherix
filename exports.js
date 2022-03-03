@@ -75,6 +75,8 @@ export {
 	parseCode,
 } from "./Helper/index.js";
 export {
+	telegram,
+	line,
 	SetIntervals,
 	CheckIntervals,
 	CheckAllIntervals,

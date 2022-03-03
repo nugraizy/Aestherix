@@ -1,4 +1,5 @@
 import moment from "moment-timezone";
+import { CheckIntervals, DeleteIntervals, SetIntervals } from "../../Utils/Misc/index.js";
 
 export async function handler(message, client) {
 	const {
@@ -14,9 +15,14 @@ export async function handler(message, client) {
 	} = message;
 	if (!regex(body)) return;
 	if (!(await checkURL(client, body.match(/chat.whatsapp.com\/([0-9A-Za-z]{20,24})/i)[0].replace("chat.whatsapp.com/", "")))) return;
-	if (intervals["url"].get(sender)?.has(id)) {
+	if (CheckIntervals(intervals["url"].get(sender)) !== 0 && CheckIntervals(intervals["url"]?.get(sender)?.get(id)) !== 0) {
 		await client[botNum].groupParticipantsUpdate(from, [sender], "remove");
-		intervals["url"].get(sender).delete(id);
+		DeleteIntervals(intervals["url"].get(sender).get(id), intervals["url"].get(sender), id);
+		return;
+	}
+	if (CheckIntervals(intervals["url"].get(sender)) !== 0 && !CheckIntervals(intervals["url"].get(sender).has(from))) {
+		await client[botNum].reply(from, "You already on blacklist");
+		await client[botNum].groupParticipantsUpdate(from, [sender], "remove");
 		return;
 	}
 	if (message[from].antiURL == "enable" && !isAdmin && !isFromMe && !intervals["url"].get(sender)?.has(id)) {
@@ -25,26 +31,24 @@ export async function handler(message, client) {
 			.add(10 + 2, "seconds")
 			.valueOf();
 		await client[botNum].reply(from, "Please revoke your URL or you'll be kicked in 10 seconds");
-		intervals["url"].set(sender, new Map());
-		intervals["url"].get(sender).set(from, {
-			timer: null,
-			id,
-			startsTimestamp: starts,
-			endsTimestamp: ends,
-			startsReadable: moment(starts).format("HH:mm:ss DD/MM"),
-			endsReadable: moment(ends).format("HH:mm:ss DD/MM"),
-			intervals: setInterval(async (remaining = ends, froms = from, ids = sender, isBotAdmins = isBotAdmin, clients = client, messages = message) => {
+		SetIntervals(
+			intervals["url"].set(sender, new Map()).get(sender),
+			from,
+			10,
+			async (remaining = ends, froms = from, ids = sender, isBotAdmins = isBotAdmin, clients = client, messages = message) => {
+				if (intervals["url"].get(ids)?.get(froms) === undefined) return;
 				const second = Math.floor(((remaining - new Date().getTime()) % (1000 * 60)) / 1000);
 				intervals["url"].get(ids).get(froms).timer = second;
 				if (second == 5 && isBotAdmins) await client[botNum].sendMessage(froms, { text: "Remaining time 5 seconds. Or you'll be kicked." }, { quoted: messages.message });
 				if (second <= 0) {
 					if (isBotAdmins) await clients[botNum].groupParticipantsUpdate(froms, [ids], "remove");
-					const data = intervals["url"].get(ids).get(froms);
-					clearInterval(data.intervals);
-					intervals["url"].get(ids).delete(froms);
+					DeleteIntervals(intervals["url"].get(ids).get(froms), intervals["url"].get(ids), froms);
 				}
-			}, 1000),
-		});
+			},
+			{
+				id,
+			},
+		);
 	}
 }
 

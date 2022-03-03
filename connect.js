@@ -139,11 +139,7 @@ async function loadCommands() {
 }
 
 async function loadEveryCommand() {
-	for (const command of cmds.commands) {
-		for (const aliases of command[1].aliases) {
-			cmds.aliases.push(aliases);
-		}
-	}
+	for (const command of cmds.commands) for (const aliases of command[1].aliases) cmds.aliases.push(aliases);
 }
 
 async function watchFile(module) {

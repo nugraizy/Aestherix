@@ -5,7 +5,7 @@ import { readJSON, randomize } from "../../Helper/Modules/functions.js";
 import { CheckIntervals, DeleteIntervals, SetIntervals } from "../Misc/intervals.js";
 
 export const startTG = async (client, id, { message, sender }, remainingTime) => {
-	const Data = CheckIntervals(id, "tebakGambar");
+	const Data = CheckIntervals(intervals["tebakGambar"].get(id));
 	if (Data !== 0) {
 		const data = games.tebakGambar.get(id);
 		return { status: "playing", messages: data.message, remaining: data.timer };
@@ -20,13 +20,15 @@ export const startTG = async (client, id, { message, sender }, remainingTime) =>
 	const remainings = moment(new Date())
 		.add(parseInt(remainingTime + 2), "seconds")
 		.valueOf();
-	SetIntervals(id, remainingTime + 2, "tebakGambar", (clients = client, ids = id, answers = answer, remainingTimes = remainings) => {
+
+	SetIntervals(intervals["tebakGambar"], id, remainingTime + 2, (clients = client, ids = id, answers = answer, remainingTimes = remainings) => {
+		if (intervals["tebakGambar"].get(ids) === undefined) return;
 		const second = Math.floor(((remainingTimes - new Date().getTime()) % (1000 * 60)) / 1000);
 		intervals["tebakGambar"].get(ids).timer = second;
 		games.tebakGambar.get(ids).timer = second;
-		const { timer } = CheckIntervals(ids, "tebakGambar");
+		const { timer } = CheckIntervals(intervals["tebakGambar"].get(ids));
 		if (timer <= 0) {
-			DeleteIntervals(ids, "tebakGambar");
+			DeleteIntervals(intervals["tebakGambar"].get(ids), intervals["tebakGambar"], ids);
 			clients[botNum].reply(ids, `Time's up! The answer is ${answers}`);
 			games.tebakGambar.delete(games.tebakGambar.get(ids));
 		}
