@@ -18,7 +18,7 @@ const ytIdRegex = /(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:\-nocookie|)\.com\
 export const isUrl = (url) => url.match(new RegExp(/(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:\-nocookie|)\.com\/(?:shorts\/)?(?:watch\?.*(?:|\&)v=|embed\/|v\/)|youtu\.be\/)\/.+/, "gi"));
 
 export const yt = async (url, quality, type, bitrate, server = "en60") =>
-	new Promise(async (resolve, reject) => {
+	new Promise(async (resolve) => {
 		try {
 			if (!ytIdRegex.test(url)) throw "Invalid URL";
 			const ytId = ytIdRegex.exec(url);
@@ -28,8 +28,8 @@ export const yt = async (url, quality, type, bitrate, server = "en60") =>
 				q_auto: 0,
 				ajax: 1,
 			}).then((res) => res.json());
-			if (json.result.includes("Error: </span>This video is copyrighted.")) return reject({ error: "```Error : Video ini dilarang didownload bajakan```", internal: false });
-			if (json.result.includes("Error: </span>We can not convert your video.")) return reject({ error: "```Error : Link yang kamu masukkan tidak dapat ditemukan.```", internal: false });
+			if (json.result.includes("Error: </span>This video is copyrighted.")) return resolve({ error: "```Error : Video ini dilarang didownload bajakan```", internal: false });
+			if (json.result.includes("Error: </span>We can not convert your video.")) return resolve({ error: "```Error : Link yang kamu masukkan tidak dapat ditemukan.```", internal: false });
 			let { document } = new JSDOM(json.result).window;
 			const tables = document.querySelectorAll("table");
 			const table = tables[{ mp4: 0, mp3: 1 }[type] || 0];
@@ -66,7 +66,7 @@ export const yt = async (url, quality, type, bitrate, server = "en60") =>
 				filesize: KB,
 			});
 		} catch (e) {
-			reject({
+			resolve({
 				error: e.stacj,
 				internal: true,
 			});
@@ -74,14 +74,14 @@ export const yt = async (url, quality, type, bitrate, server = "en60") =>
 	});
 
 export const ytsr = (query, all = true) =>
-	new Promise((resolve, reject) => {
+	new Promise((resolve) => {
 		try {
 			if (all) {
 				yts(query)
 					.then((res) => {
 						resolve(res.all);
 					})
-					.catch((e) => reject({ error: e, internal: false }));
+					.catch((e) => resolve({ error: e, internal: false }));
 			} else {
 				yts(query)
 					.then((res) => {
@@ -101,10 +101,10 @@ export const ytsr = (query, all = true) =>
 						} = data;
 						resolve({ videoId, url, title, description, thumbnail, timestamp, times, uploaded, views, author, urlChannel });
 					})
-					.catch((e) => reject({ error: e, internal: false }));
+					.catch((e) => resolve({ error: e, internal: false }));
 			}
 		} catch (e) {
-			reject({
+			resolve({
 				error: e.stack,
 				internal: true,
 			});
@@ -112,7 +112,7 @@ export const ytsr = (query, all = true) =>
 	});
 
 export const ytv = (query) =>
-	new Promise((resolve, reject) => {
+	new Promise((resolve) => {
 		try {
 			if (ytIdRegex.test(query)) {
 				yt(query, "360p", "mp4", "360")
@@ -122,10 +122,10 @@ export const ytv = (query) =>
 							.then((res) => {
 								resolve({ ...container, ...res });
 							})
-							.catch((e) => reject({ error: e.error, internal: false }));
+							.catch((e) => resolve({ error: e.error, internal: false }));
 					})
-					.catch((e) => reject({ error: e.error, internal: false }));
-			} else if (isUrl(query)) reject({ error: "Link YouTube tidak valid.", internal: false });
+					.catch((e) => resolve({ error: e.error, internal: false }));
+			} else if (isUrl(query)) resolve({ error: "Link YouTube tidak valid.", internal: false });
 			else {
 				ytsr(query, false)
 					.then((res) => {
@@ -135,12 +135,12 @@ export const ytv = (query) =>
 							.then((res) => {
 								resolve({ ...container, ...res });
 							})
-							.catch((e) => reject({ error: e.error, internal: false }));
+							.catch((e) => resolve({ error: e.error, internal: false }));
 					})
-					.catch((e) => reject({ error: e.error, internal: false }));
+					.catch((e) => resolve({ error: e.error, internal: false }));
 			}
 		} catch (e) {
-			reject({
+			resolve({
 				error: e.stack,
 				internal: true,
 			});
@@ -148,7 +148,7 @@ export const ytv = (query) =>
 	});
 
 export const yta = (query) =>
-	new Promise((resolve, reject) => {
+	new Promise((resolve) => {
 		try {
 			if (ytIdRegex.test(query)) {
 				yt(query, "128kbps", "mp3", "128")
@@ -158,10 +158,10 @@ export const yta = (query) =>
 							.then((res) => {
 								resolve({ ...container, ...res });
 							})
-							.catch((e) => reject({ error: e.error, internal: false }));
+							.catch((e) => resolve({ error: e.error, internal: false }));
 					})
-					.catch((e) => reject({ error: e.error, internal: false }));
-			} else if (isUrl(query)) reject({ error: "Link YouTube tidak valid.", internal: false });
+					.catch((e) => resolve({ error: e.error, internal: false }));
+			} else if (isUrl(query)) resolve({ error: "Link YouTube tidak valid.", internal: false });
 			else {
 				ytsr(query, false)
 					.then((res) => {
@@ -171,14 +171,14 @@ export const yta = (query) =>
 							.then((res) => {
 								resolve({ ...container, ...res });
 							})
-							.catch((e) => reject({ error: e.error, internal: false }));
+							.catch((e) => resolve({ error: e.error, internal: false }));
 					})
 					.catch((e) => {
-						reject({ error: e.error, internal: false });
+						resolve({ error: e.error, internal: false });
 					});
 			}
 		} catch (e) {
-			reject({
+			resolve({
 				error: e.stack,
 				internal: true,
 			});

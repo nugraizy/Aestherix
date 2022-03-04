@@ -3,6 +3,7 @@ import { generateWAMessageFromContent } from "@adiwajshing/baileys";
 export default {
 	name: "test",
 	description: "TEST",
+	category: "Debugging",
 	usage: "TEST",
 	aliases: ["testt"],
 	cooldown: 5,

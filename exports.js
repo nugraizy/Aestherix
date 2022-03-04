@@ -75,6 +75,8 @@ export {
 	parseCode,
 } from "./Helper/index.js";
 export {
+	startAkinator,
+	handleAnswer,
 	telegram,
 	line,
 	SetIntervals,

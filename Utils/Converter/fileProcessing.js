@@ -5,9 +5,10 @@ import moment from "moment-timezone";
 import FormData from "form-data";
 import fetch from "node-fetch";
 import petting from "pet-pet-gif";
+import cheerio from "cheerio";
 import { __dirname } from "../../connect.js";
 import { webp2mp4File } from "./EZGifs/index.js";
-import { writeBuffer, unlinkFile, INFOLOG, ERRLOG, color, isURL, readBuffer } from "../../Helper/Modules/index.js";
+import { writeBuffer, unlinkFile, INFOLOG, ERRLOG, color, isURL, readBuffer, isFileExist } from "../../Helper/Modules/index.js";
 
 export const toOpus = (ext, opts = {}) =>
 	new Promise(async (resolve, reject) => {
@@ -31,13 +32,14 @@ export const toOpus = (ext, opts = {}) =>
 			});
 	});
 
-export const convertMediaToSticker = (filePath, sender) =>
+export const convertMediaToSticker = (filePath, sender, output) =>
 	new Promise(async (resolve, reject) => {
 		const time = moment().format("HH:mm:ss DD/MM");
 		const pathExif = path.join(__dirname, "Temporary Files/data.exif");
-		const pathSticker = filePath;
+		let pathSticker = filePath;
+		if (!isFileExist(pathSticker)) pathSticker = path.join(__dirname, `Temporary Files/${pathSticker}`);
 		INFOLOG(`[${color(time, "cyan")}]`, `${color(`Converting Media`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
-		if (filePath.endsWith("webp")) {
+		if (filePath.endsWith("webp") && isFileExist(filePath)) {
 			exec(`webpmux -set exif "${pathExif}" "${pathSticker}" -o "${pathSticker}-done.webp"`, (err, stdout, stderr) => {
 				if (err) {
 					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);
@@ -74,15 +76,18 @@ export const convertMediaToSticker = (filePath, sender) =>
 				});
 			});
 		} else {
+			pathSticker = output ? output : pathSticker;
 			exec(
-				`ffmpeg -i "${pathSticker}" -vcodec libwebp -vf "scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1,fps=fps=10" -lossless 0 -preset default -ss 00:00:00 -t 00:00:10 -an -vsync 0 -s 512:512 "${pathSticker}.webp"`,
+				`ffmpeg -i "${filePath}" ${
+					!pathSticker.includes(".webp") ? `-vcodec libwebp -vf "scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1,fps=fps=10" -lossless 0 -preset default -ss 00:00:00 -t 00:00:10 -an -vsync 0 -s 512:512` : ""
+				} "${pathSticker}"`,
 				(err, stdout, stderr) => {
 					if (err) {
 						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);
 						unlinkFile(pathSticker);
 						reject(err);
 					}
-					exec(`webpmux -set exif "${pathExif}" "${pathSticker}.webp" -o "${pathSticker}-done.webp"`, (err, stdout, stderr) => {
+					exec(`webpmux -set exif "${pathExif}" "${pathSticker}" -o "${pathSticker}-done.webp"`, (err, stdout, stderr) => {
 						if (err) {
 							ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);
 							unlinkFile(pathSticker);
@@ -91,7 +96,6 @@ export const convertMediaToSticker = (filePath, sender) =>
 						const buffer = readBuffer(`${pathSticker}-done.webp`);
 						unlinkFile(`${pathSticker}-done.webp`);
 						unlinkFile(pathSticker);
-						unlinkFile(`${pathSticker}.webp`);
 						INFOLOG(`[${color(time, "cyan")}]`, `${color(`Converted Media`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
 						resolve(buffer);
 					});
@@ -203,5 +207,27 @@ export const pet = (input, sender, opts = {}) =>
 		} catch (err) {
 			ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Pet Image", "red")} for ${color(sender, "#ff71ce")}`);
 			reject(err);
+		}
+	});
+
+export const apng2webpUrl = (url) =>
+	new Promise(async (resolve) => {
+		try {
+			const data = await (await fetch(`https://ezgif.com/apng-to-webp?url=${url}`)).text();
+			const $ = cheerio.load(data);
+			const bodyFormThen = new FormData();
+			const file = $('input[name="file"]').attr("value");
+			const convert = $('input[name="file"]').attr("value");
+			const gotdata = { file, convert };
+			bodyFormThen.append("file", gotdata.file);
+			bodyFormThen.append("convert", gotdata.convert);
+			const dataResult = await (await fetch(`https://ezgif.com/apng-to-webp/${gotdata.file}`, { method: "post", body: bodyFormThen, headers: { "Content-Type": `multipart/form-data; boundary=${bodyFormThen._boundary}` } })).text();
+			const $$ = cheerio.load(dataResult);
+			const result = `https:${$$("div#output > p.outfile > img").attr("src")}`;
+			resolve({
+				result,
+			});
+		} catch (err) {
+			resolve(err);
 		}
 	});

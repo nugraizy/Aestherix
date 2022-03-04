@@ -1,6 +1,6 @@
 {
 	"name": "simplebotpro3",
-	"version": "1.11.34",
+	"version": "1.11.41",
 	"description": "WhatsApp bot using Baileys library with Javascript language.",
 	"exports": "./connect.js",
 	"type": "module",
@@ -23,6 +23,7 @@
 	"license": "MIT",
 	"dependencies": {
 		"@adiwajshing/baileys": "github:adiwajshing/baileys",
+		"aki-api": "^6.0.8",
 		"awesome-phonenumber": "^2.68.0",
 		"axios": "^0.25.0",
 		"canvas": "^2.9.0",

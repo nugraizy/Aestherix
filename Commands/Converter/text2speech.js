@@ -5,6 +5,7 @@ import { textToSpeech } from "../../Utils/Converter/index.js";
 export default {
 	name: "text2speech",
 	description: "Convert text to speech",
+	category: "Converter",
 	usage: "text2speech <text> [--language]",
 	aliases: ["tts", "gtts", "t2s"],
 	cooldown: 5,

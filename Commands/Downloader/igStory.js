@@ -13,11 +13,10 @@ export default {
 	limit: 3,
 	async run({ from, query, prettyNumber, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!query) return client[botNum].reply(from, "Please specify a url");
+		if (!query) return client[botNum].reply(from, "Please specify a username");
 		try {
 			const usernames = query.split(",");
-
-			if (isOne(usernames) && isURL(usernames)) return client[botNum].reply(from, "Please specify a valid url");
+			if (isOne(usernames) && isURL(usernames)) return client[botNum].reply(from, "Please specify a valid username");
 			for (const username of usernames) {
 				if (isURL(username)) await client[botNum].reply(from, "Please specify a username");
 				else {
@@ -34,20 +33,7 @@ export default {
 						capt += `Follower  : ${numberWithCommas(story.user.followers)}\n`;
 						capt += `Following : ${numberWithCommas(story.user.following)}\n`;
 						capt += isEmpty(story.user.biography) ? "" : `Biography : ${story.user.biography}\n`;
-						if (isOne(story.medias.length))
-							await client[botNum].sendMessage(
-								from,
-								isSame(story.medias[0].type, "video")
-									? {
-											video: { url: story.medias[0].url },
-											caption: capt.trim(),
-									  }
-									: {
-											image: { url: story.medias[0].url },
-											caption: capt.trim(),
-									  },
-								{ quoted: message },
-							);
+						if (isOne(story.medias.length)) await client[botNum].sendMessage(from, isSame(story.medias[0].type, "video") ? { video: { url: story.medias[0].url }, caption: capt.trim() } : { image: { url: story.medias[0].url }, caption: capt.trim() }, { quoted: message });
 						else {
 							capt += `Tot. Media : ${story.medias.length}`;
 							await client[botNum].sendMessage(from, { text: capt.trim() }, { quoted: message });

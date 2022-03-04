@@ -58,7 +58,6 @@ export const reassign = async (m, client) => {
 		const timeStamp = m.messageTimestamp;
 		const filename = sender + m.key.id;
 		let type = getContentType(m.message);
-		console.log(type)
 		type = isSame(type, "messageContextInfo") ? (type = Object.keys(m.message)[1]) : type;
 		type = isSame(type, "extendedTextMessage") && m.message.extendedTextMessage.text.includes("@") ? (type = "mentionText") : type;
 		let mText = m;

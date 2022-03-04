@@ -34,6 +34,7 @@ intervals.sudoku = new Map();
 intervals.url = new Map();
 games.tebakGambar = new Map();
 games.sudoku = new Map();
+games.akinator = new Map();
 user.cooldown = new Map();
 cmds.commands = new Map();
 global.commandsPath = [];

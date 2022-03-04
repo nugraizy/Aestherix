@@ -14,7 +14,7 @@ export default {
 	description: "Simulates an event update",
 	usage: "simulates <events>",
 	aliases: ["simulate"],
-	category: "owner",
+	category: "Owner",
 	cooldown: 0,
 	limit: 0,
 	async run({ isOwner, from, args }, client, store) {

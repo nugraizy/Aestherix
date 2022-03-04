@@ -2,8 +2,9 @@ import moment from "moment-timezone";
 import similarity from "similarity";
 import { delay } from "@adiwajshing/baileys";
 import { INFOLOG, color, reassign, addLimit } from "../../Helper/Modules/index.js";
-import { tebak, url } from "../index.js";
+import { tebak, url, akinator } from "../index.js";
 import { runtime } from "../../connect.js";
+import { getSession } from "../../Utils/Games/index.js";
 
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 
@@ -126,8 +127,13 @@ export default {
 				`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
 			);
 		}
-		if (message.isGroup && message[message.from].games == "enable" && message.isAdmin) tebak(message, client);
-		else if (!message.isGroup) tebak(message, client);
+		if (message.isGroup && message[message.from].games == "enable" && message.isAdmin) {
+			if (getSession(message.from)) akinator(message, client);
+			tebak(message, client);
+		} else if (!message.isGroup) {
+			if (getSession(message.from)) akinator(message, client);
+			tebak(message, client);
+		}
 		if (message.isGroup && message[message.from].antiURL == "enable" && !message.isAdmin && message.isBotAdmin) url(message, client);
 	},
 };

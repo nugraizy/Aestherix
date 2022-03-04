@@ -1,8 +1,7 @@
 import similarity from "similarity";
-import { __dirname } from "../../connect.js";
 import { DeleteIntervals } from "../../Utils/Misc/intervals.js";
 
-export async function handler({ message, from, body }, client) {
+export const handler = ({ message, from, body }, client) => {
 	if (games.tebakGambar.has(from)) {
 		const minScore = 0.75;
 		const data = games.tebakGambar.get(from);
@@ -13,4 +12,4 @@ export async function handler({ message, from, body }, client) {
 		}
 		if (similarity(body.toLowerCase(), data.data.answer.toLowerCase()) >= minScore) return client[botNum].sendMessage(from, { text: "The answer is close!" }, { quoted: message });
 	}
-}
+};

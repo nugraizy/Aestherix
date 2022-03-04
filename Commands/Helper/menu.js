@@ -8,10 +8,15 @@ export default {
 	limit: 5,
 	async run({ from, prefix }, client) {
 		let capt = `Void Bot Menu\n\nUse ${prefix}${getRandomCommand()} -H\n~> to see the detail of the command.\n\n`;
-		let i = 1;
-		for (const command of cmds.commands) {
-			capt += `${i++}. ${command[1].name.capitalize()}\n`;
-		}
+		const Container = [];
+		for (const [key, value] of cmds.commands)
+			if (Object.keys(Container).includes(value.category)) Container[value.category].push(key);
+			else Container[value.category] = [key];
+		for (const key of Object.keys(Container).sort((a, b) => a.localeCompare(b)))
+			capt += `${key.toLocaleUpperCase()}\n\n${Container[key]
+				.sort((a, b) => a.localeCompare(b))
+				.map((v, i) => `${i + 1}. ${v.capitalize()}`)
+				.join("\n")}\n\n\n`;
 		await client[botNum].reply(from, capt.trim());
 	},
 };
