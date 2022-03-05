@@ -5,6 +5,7 @@ import { INFOLOG, color, reassign, addLimit } from "../../Helper/Modules/index.j
 import { tebak, url, akinator } from "../index.js";
 import { runtime } from "../../connect.js";
 import { getSession } from "../../Utils/Games/index.js";
+const { handler: anonymous } = (await import("./anonymousMessage.js")).default;
 
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 
@@ -12,7 +13,7 @@ export default {
 	async handler(message, client, cmds, store, user) {
 		if (message == undefined) return;
 		const time = moment().format("HH:mm:ss DD/MM");
-		message = await reassign(JSON.parse(JSON.stringify(message.messages[0])), client);
+		message = await reassign(JSON.parse(JSON.stringify(message.messages[0])), client, store);
 		if ("error" in message) return;
 		if (!message.message) return;
 		if (message.isBaileys) return;
@@ -59,14 +60,16 @@ export default {
 						continue;
 					}
 					if (limit == false) return client[botNum].reply(message.from, "You have reached the limit of this command.");
-					if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).has(Tempcmds.name)) {
-						const time = user.cooldown.get(message.sender).get(Tempcmds.name);
-						if (Date.now() > time) user.cooldown.get(message.sender).delete(Tempcmds.name);
-						else return client[botNum].reply(message.from, `${Tempcmds.name} is on cooldown for ${((time - Date.now()) / 1000).toFixed(1)} seconds.`);
+					if (OPTIONS.coolDown) {
+						if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).has(Tempcmds.name)) {
+							const time = user.cooldown.get(message.sender).get(Tempcmds.name);
+							if (Date.now() > time) user.cooldown.get(message.sender).delete(Tempcmds.name);
+							else return client[botNum].reply(message.from, `${Tempcmds.name} is on cooldown for ${((time - Date.now()) / 1000).toFixed(1)} seconds.`);
+						}
+						if (!user.cooldown.has(message.sender)) user.cooldown.set(message.sender, new Map());
+						if (!user.cooldown.get(message.sender).has(Tempcmds.name)) user.cooldown.get(message.sender).set(Tempcmds.name, Date.now() + Tempcmds.cooldown * 1000);
+						user.cooldown.get(message.sender).get(Tempcmds.name);
 					}
-					if (!user.cooldown.has(message.sender)) user.cooldown.set(message.sender, new Map());
-					if (!user.cooldown.get(message.sender).has(Tempcmds.name)) user.cooldown.get(message.sender).set(Tempcmds.name, Date.now() + Tempcmds.cooldown * 1000);
-					user.cooldown.get(message.sender).get(Tempcmds.name);
 				}
 				if (message.isGroup) {
 					INFOLOG(
@@ -132,6 +135,7 @@ export default {
 			tebak(message, client);
 		} else if (!message.isGroup) {
 			if (getSession(message.from)) akinator(message, client);
+			anonymous(message, client);
 			tebak(message, client);
 		}
 		if (message.isGroup && message[message.from].antiURL == "enable" && !message.isAdmin && message.isBotAdmin) url(message, client);

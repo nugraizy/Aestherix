@@ -8,3 +8,4 @@ export { getSurahAudio, getAyat, getSurahDetail, getListSurah, getTafsirSurah } 
 export { toOpus, convertMediaToSticker, convertStickerToMedia, webp2mp4File, mp42mp3, soundRemover, pet, textToSpeech, apng2webpUrl } from "./Converter/index.js";
 export { getEarthquake } from "./News/index.js";
 export { line, telegram } from "./Stickers/index.js";
+export { search, skip, handlers, stop } from "./Anonymous/index.js";

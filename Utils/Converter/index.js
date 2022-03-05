@@ -1,3 +1,3 @@
-export { toOpus, convertMediaToSticker, convertStickerToMedia, mp42mp3, soundRemover, pet, apng2webpUrl } from "./fileProcessing.js";
-export { webp2mp4File } from "./EZGifs/index.js";
+export { toOpus, convertMediaToSticker, convertStickerToMedia, mp42mp3, soundRemover, pet } from "./fileProcessing.js";
+export { webp2mp4File, apng2webpUrl } from "./EZGifs/index.js";
 export { textToSpeech } from "./Node-gtts/index.js";

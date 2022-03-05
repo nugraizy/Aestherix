@@ -84,6 +84,14 @@ node . <session_name> <--options>
 
 > "Make your console colorful."
 
+### --watch
+
+> "Watch files for changes and will auto remove previous cache. WARNING : THIS CAN SLOWS YOUR SCRIPT."
+
+## --cool_down
+
+> "Enable or disable cooldown for each commands."
+
 ---
 
 # additional context

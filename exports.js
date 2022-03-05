@@ -75,6 +75,11 @@ export {
 	parseCode,
 } from "./Helper/index.js";
 export {
+	search,
+	skip,
+	handlers,
+	stop,
+	apng2webpUrl,
 	startAkinator,
 	handleAnswer,
 	telegram,

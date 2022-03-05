@@ -20,7 +20,6 @@ export const startTG = async (client, id, { message, sender }, remainingTime) =>
 	const remainings = moment(new Date())
 		.add(parseInt(remainingTime + 2), "seconds")
 		.valueOf();
-
 	SetIntervals(intervals["tebakGambar"], id, remainingTime + 2, (clients = client, ids = id, answers = answer, remainingTimes = remainings) => {
 		if (intervals["tebakGambar"].get(ids) === undefined) return;
 		const second = Math.floor(((remainingTimes - new Date().getTime()) % (1000 * 60)) / 1000);

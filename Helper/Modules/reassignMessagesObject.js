@@ -23,7 +23,7 @@ String.prototype.PARSE_EVENTS = function (...args) {
 };
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 
-export const reassign = async (m, client) => {
+export const reassign = async (m, client, store) => {
 	try {
 		const SETTINGS = readJSON("./Config/settings.json");
 		if (m.message && m.message.protocolMessage && m.message.protocolMessage.type == "REVOKE") return m;

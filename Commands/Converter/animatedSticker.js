@@ -7,7 +7,7 @@ export default {
 	name: "animatedsticker",
 	description: "Generate animated sticker",
 	category: "Converter",
-	usage: "attp <text> [--color] [--fonts]",
+	usage: "!attp <text> [--color] [--fonts]",
 	aliases: ["attp"],
 	cooldown: 5,
 	limit: 1,

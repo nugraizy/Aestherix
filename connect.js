@@ -29,9 +29,11 @@ global.presences = {};
 global.functions = {};
 global.games = {};
 global.intervals = {};
+global.anonymous = new Map();
 intervals.tebakGambar = new Map();
 intervals.sudoku = new Map();
 intervals.url = new Map();
+intervals.anonymous = new Map();
 games.tebakGambar = new Map();
 games.sudoku = new Map();
 games.akinator = new Map();
@@ -47,7 +49,7 @@ const failSpinner = (name, options) => spinners.fail(name, options);
 
 const cli = parseCli();
 global.OPTIONS = cli.flags;
-const regexOption = ["prefix", "readOnly", "autoRead", "autoCorrect", "restrict", "onlyLogs", "noLogs", "selfMode", "debugMode", "multiCmd", "rainbow", "trace", "help", "watch"];
+const regexOption = ["prefix", "readOnly", "autoRead", "autoCorrect", "restrict", "onlyLogs", "noLogs", "selfMode", "debugMode", "multiCmd", "rainbow", "trace", "help", "watch", "coolDown"];
 
 const store = makeInMemoryStore({ logger: P().child({ level: "fatal", stream: "store" }) });
 
@@ -213,6 +215,7 @@ function parseCli() {
 			help: { type: "boolean", alias: "h" },
 			prefix: { type: "string", alias: "p" },
 			watch: { type: "boolean", alias: "w" },
+			cool_down: { type: "boolean", alias: "c" },
 		},
 	});
 }
