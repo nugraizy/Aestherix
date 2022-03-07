@@ -11,7 +11,6 @@ export default {
 	async run(message, client) {
 		if (!message.query) {
 			const starts = start(message.from);
-			console.log(starts);
 			if (!starts && (!message.query || message.mention.length > 0)) return client[botNum].reply(message.from, "You already have a game running!");
 			client[botNum].reply(message.from, "You have started a game of Tic Tac Toe!");
 			const board = starts.board.map((v, i) => (i == 2 || i == 5 || i == 8 ? `${v}\n` : v));
