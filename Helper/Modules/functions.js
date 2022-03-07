@@ -463,3 +463,11 @@ export const romanize = (num) => {
 export const regexNumber = (str) => (str.match(/\d+/g) !== null ? str.match(/\d+/g).join("") : "");
 
 export const regexAlphabet = (str) => (str.match(/[a-zA-Z]+/g) !== null ? str.match(/[a-zA-Z]+/g).join("") : "");
+
+export const getSeconds = (dates) => {
+	const time = Date.now() - dates;
+	const dateString = ms(time);
+	return dateString.seconds;
+};
+
+export const getAverage = (nums) => (nums.reduce((a, b) => a + b) / nums.length).toFixed(2);

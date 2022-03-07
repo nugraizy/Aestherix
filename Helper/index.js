@@ -1,6 +1,8 @@
 export { attp, ttp } from "./Canvas/index.js";
 export { getSpinner, scheme } from "./Misc/index.js";
 export {
+	getSeconds,
+	getAverage,
 	romanize,
 	reassign,
 	checkUser,

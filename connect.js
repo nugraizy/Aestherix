@@ -37,6 +37,7 @@ intervals.anonymous = new Map();
 games.tebakGambar = new Map();
 games.sudoku = new Map();
 games.akinator = new Map();
+games.tictactoe = new Map();
 user.cooldown = new Map();
 cmds.commands = new Map();
 global.commandsPath = [];
@@ -245,6 +246,7 @@ function help() {
 	  --rainbow, -b      make your logs rainbow colors
 	  --trace, -t        Show errors
 	  --watch, -w        Watch every file on your script and reload it when it changed
+	  --cool_down, -c    Set cool down for every command
 	  --help, -h         Show this message.
 
 	Examples

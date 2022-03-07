@@ -7,6 +7,19 @@ const ANSWERS = {
 	4: 3, // MUNGKIN
 	5: 4, // MUNGKIN TIDAK
 	6: 5, // EXIT
+	7: 6, // BACK
+};
+
+const BARS = {
+	1: "▰",
+	2: "▱",
+};
+
+const progressBar = (progress) => {
+	const bar = BARS[1].repeat(10);
+	const filled = Math.floor(progress / 10);
+	const empty = bar.length - filled;
+	return `${BARS[1].repeat(filled)}${BARS[2].repeat(empty)}`;
 };
 
 export const startAkinator = async (key) => {
@@ -14,11 +27,11 @@ export const startAkinator = async (key) => {
 	setSession(key);
 	const session = getSession(key);
 	await session.start();
-	return session;
+	return { progressBar: progressBar(0), arrow: "⇵", ...session };
 };
 
 export const getSession = (key) => {
-	const session = games.akinator.get(key);
+	const session = games.akinator.get(key) || null;
 	return session;
 };
 
@@ -38,32 +51,48 @@ export const handleAnswer = async (key, answer) => {
 	const session = getSession(key);
 	if (!session) return;
 	if (!answer) return true;
+	let progress;
+	let arrow;
+	const tempProgress = session.progress;
 	if (isNaN(answer)) {
-		if (/^((t(?:rue)?|i?y(ak?|e)?(?:es|p)?|ok(?:ay)?)|(be?(tul|n(a|e)?r)))$/i.test(answer)) {
-			answer = ANSWERS[1];
-		} else if (/^((t(i?da?k|dk))|g(a?|k)?|n(o?|ope))$/i.test(answer)) {
-			answer = ANSWERS[2];
-		} else if (/^(((t(i?da?k|dk))|g(a?|k)?) (t(a?|h?|w)u?)|nt(a?h))/i.test(answer)) {
-			answer = ANSWERS[3];
-		} else if (/^(((m(u?ng?k(i)?n|a?(y)?b(e|i))?) ((t(i?da?k|dk))|g(a?|k)?|n(o?|ope))))/i.test(answer)) {
-			answer = ANSWERS[5];
-		} else if (/^((m(u?ng?k(i)?n|a?(y)?b(e|i))?))/i.test(answer)) {
-			answer = ANSWERS[4];
-		} else if (/^((e(xit)?|out|b(a?|t(a)?)l))/i.test(answer)) {
+		if (/^((t(?:rue)?|i?y(ak?|e)?(?:es|p)?|ok(?:ay)?)|(be?(tul|n(a|e)?r)))$/i.test(answer)) answer = ANSWERS[1];
+		else if (/^((t(i?da?k|dk))|g(a?|k)?|n(o?|ope))$/i.test(answer)) answer = ANSWERS[2];
+		else if (/^(((t(i?da?k|dk))|g(a?|k)?) (t(a?|h?|w)u?)|nt(a?h))/i.test(answer)) answer = ANSWERS[3];
+		else if (/^(((m(u?ng?k(i)?n|a?(y)?b(e|i))?) ((t(i?da?k|dk))|g(a?|k)?|n(o?|ope))))/i.test(answer)) answer = ANSWERS[5];
+		else if (/^((m(u?ng?k(i)?n|a?(y)?b(e|i))?))/i.test(answer)) answer = ANSWERS[4];
+		else if (/^(b(a?c?)k|undo|k(e?mb(a?)li))$/i.test(answer)) answer = ANSWERS[7];
+		else if (/^((e(xit)?|out|b(a?|t(a)?)l))$/i.test(answer)) {
 			await session.win();
+			if (session.progress == 0) arrow = "⇵";
+			else if (session.progress > tempProgress) arrow = "↑";
+			else arrow = "↓";
+			progress = progressBar(session.progress);
 			await deleteSession(key);
-			return { status: "exitted", ...session };
-		} else {
-			return { status: "invalid" };
-		}
-	} else {
-		answer = ANSWERS[parseInt(answer)];
+			return { status: "exitted", arrow, progressBar: progress, ...session };
+		} else return { status: "invalid" };
+	} else answer = ANSWERS[parseInt(answer)];
+	if (answer == 6) {
+		if (session.currentStep == 0) return { status: "back", arrow: "⇵", isFailed: true, ...session };
+		await session.back();
+		if (session.progress == 0) arrow = "⇵";
+		else if (session.progress > tempProgress) arrow = "↑";
+		else arrow = "↓";
+		progress = progressBar(session.progress);
+		return { status: "back", arrow, progressBar: progress, isFailed: false, ...session };
 	}
-	await session.step(answer);
-	if (session.progress >= 70 || session.currentStep >= 78) {
+	try {
+		await session.step(answer);
+	} catch (e) {
+		return { status: "waiting" };
+	}
+	if (session.progress == 0) arrow = "⇵";
+	else if (session.progress > tempProgress) arrow = "↑";
+	else arrow = "↓";
+	progress = progressBar(session.progress);
+	if (session.progress >= 90 || session.currentStep >= 87) {
 		await session.win();
 		await deleteSession(key);
-		return { status: "win", ...session };
+		return { status: "win", arrow, progressBar: progress, ...session };
 	}
-	return { status: "playing", ...session };
+	return { status: "playing", arrow, progressBar: progress, ...session };
 };

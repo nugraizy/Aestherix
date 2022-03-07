@@ -8,9 +8,10 @@ export default {
 	aliases: ["aki", "playaki", "playakinator"],
 	cooldown: 2,
 	limit: 2,
-	async run({ from, sender }, client) {
+	async run({ from }, client) {
 		const aki = await startAkinator(from);
-		const { question, answers, progress } = aki;
-		await client[botNum].reply(from, `${question}\n\n${answers.map((v, i) => `${i + 1}. ${v}`).join("\n")}\n6. Exit\n\nProgress : ${progress.toFixed(2)}%`);
+		if ("error" in aki) return await client[botNum].reply(from, aki.error);
+		const { question, answers, progress, progressBar, arrow } = aki;
+		await client[botNum].reply(from, `${question}\n\n${answers.map((v, i) => `${i + 1}. ${v}`).join("\n")}\n6. Exit\n7. Back/Undo\n\nProgress : ${progress.toFixed(2)}% ${arrow}\n${progressBar}`);
 	},
 };

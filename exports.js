@@ -1,4 +1,6 @@
 export {
+	getSeconds,
+	getAverage,
 	romanize,
 	checkUser,
 	addUser,
@@ -75,6 +77,9 @@ export {
 	parseCode,
 } from "./Helper/index.js";
 export {
+	play,
+	move,
+	start,
 	search,
 	skip,
 	handlers,

@@ -1,4 +1,6 @@
 export {
+	getSeconds,
+	getAverage,
 	romanize,
 	download,
 	clampFloat,
