@@ -1,4 +1,7 @@
 export {
+	extractZalgo,
+	uploadToTelegraph,
+	isFilePath,
 	getSeconds,
 	getAverage,
 	romanize,

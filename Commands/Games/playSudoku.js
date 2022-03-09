@@ -120,7 +120,7 @@ export default {
 				return client[botNum].reply(from, "Belum ada sesi game sudoku");
 			}
 		} catch (err) {
-			console.log(err);
+			log(err);
 		}
 	},
 };

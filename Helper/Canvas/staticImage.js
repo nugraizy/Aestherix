@@ -54,7 +54,7 @@ const insertExif = async (paths, sender) =>
 			.on("close", async () => {
 				exec(`webpmux -set exif '${pathExif}' '${pathResults}.webp' -o '${pathResults}-done.webp'`, (err, stdout, stderr) => {
 					if (err) {
-						console.log(err);
+						log(err);
 						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);
 						reject(err);
 					}
@@ -100,5 +100,5 @@ const loadColorsPalette = async (color = null) => {
 
 const random = (input) => input[Math.floor(Math.random() * input.length)];
 
-//console.log(await fetch("https://wallpaperflare.com").then((res) => res.text()));
-//console.log(await fetch("https://deviantart.com").then((res) => res.text()));
+//log(await fetch("https://wallpaperflare.com").then((res) => res.text()));
+//log(await fetch("https://deviantart.com").then((res) => res.text()));

@@ -43,7 +43,7 @@ export default {
 			str += `Type : ${err.name ?? "Converting"}\n`;
 			str += `Message : ${err.message ?? err.error}`;
 			await client[botNum].reply(from, str);
-			console.log(err);
+			log(err);
 		}
 	},
 };

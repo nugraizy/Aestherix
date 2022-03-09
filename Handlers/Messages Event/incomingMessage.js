@@ -61,6 +61,9 @@ export default {
 					}
 					if (limit == false) return client[botNum].reply(message.from, "You have reached the limit of this command.");
 					if (OPTIONS.coolDown) {
+						if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) {
+							return client[botNum].reply(message.from, `Please wait until your request is done`);
+						}
 						if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).has(Tempcmds.name)) {
 							const time = user.cooldown.get(message.sender).get(Tempcmds.name);
 							if (Date.now() > time) user.cooldown.get(message.sender).delete(Tempcmds.name);
@@ -69,6 +72,7 @@ export default {
 						if (!user.cooldown.has(message.sender)) user.cooldown.set(message.sender, new Map());
 						if (!user.cooldown.get(message.sender).has(Tempcmds.name)) user.cooldown.get(message.sender).set(Tempcmds.name, Date.now() + Tempcmds.cooldown * 1000);
 						user.cooldown.get(message.sender).get(Tempcmds.name);
+						user.cooldown.get(message.sender).requests = true;
 					}
 				}
 				if (message.isGroup) {
@@ -99,14 +103,18 @@ export default {
 						}
 						if (Tempcmds.category == "Games" && message.isGroup && !message.isAdmin && message[message.from].games == "disable") return client[botNum].reply(message.from, "Mode games belum dihidupkan");
 						if (Tempcmds.category == "Moderation" && message.isGroup && !message.isAdmin && !message.isOwner) return client[botNum].reply(message.from, "Kamu bukan admin");
-						Tempcmds.run(message, client, store);
+						await Tempcmds.run(message, client, store);
+						if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) user.cooldown.get(message.sender).requests = false;
+						if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).has(Tempcmds.name)) user.cooldown.get(message.sender).delete(Tempcmds.name);
 						await delay(200);
 					} catch (err) {
+						if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) user.cooldown.get(message.sender).requests = false;
+						if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).has(Tempcmds.name)) user.cooldown.get(message.sender).delete(Tempcmds.name);
 						let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 						str += `Type : ${err.name}\n`;
 						str += `Message : ${err.message}`;
 						await client[botNum].reply(message.from, str);
-						console.log(err);
+						log(err);
 					}
 				}
 			}
@@ -120,7 +128,7 @@ export default {
 				`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
 				`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
 			);
-		else {
+		else
 			INFOLOG(
 				`[${color(time, "cyan")}]`,
 				`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
@@ -129,7 +137,6 @@ export default {
 				`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
 				`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
 			);
-		}
 		if (message.isGroup && message[message.from].games == "enable" && message.isAdmin) {
 			if (getSession(message.from)) akinator(message, client);
 			tebak(message, client);

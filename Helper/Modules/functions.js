@@ -3,6 +3,9 @@ import request from "request";
 import fs from "fs";
 import gradient from "gradient-string";
 import beautifyJSON from "json-stable-stringify";
+import { fileTypeFromBuffer } from "file-type";
+import Axios from "axios";
+import FormData from "form-data";
 
 export const download = (url, path, callback) => {
 	request.head(url, () => {
@@ -195,80 +198,76 @@ export const speedText = (speed) => {
 	return `${bits.toFixed(places[unit])} ${units[unit]}bps`;
 };
 
-export const randomNumber = (range) => {
-	const n = Math.floor(Math.random() * range);
-	return n;
+export const randomNumber = (max) => ~~(Math.random() * max);
+
+const chars = () => {
+	const char = {
+		up: ["̍", "̎", "̄", "̅", "̿", "̑", "̆", "̐", "͒", "͗", "͑", "̇", "̈", "̊", "͂", "̓", "̈́", "͊", "͋", "͌", "̃", "̂", "̌", "͐", "̀", "́", "̋", "̏", "̒", "̓", "̔", "̽", "̉", "ͣ", "ͤ", "ͥ", "ͦ", "ͧ", "ͨ", "ͩ", "ͪ", "ͫ", "ͬ", "ͭ", "ͮ", "ͯ", "̾", "͛", "͆", "̚"],
+		middle: ["̕", "̛", "̀", "́", "͘", "̡", "̢", "̧", "̨", "̴", "̵", "̶", "͏", "͜", "͝", "͞", "͟", "͠", "͢", "̸", "̷", "͡", "҉"],
+		down: ["̖", "̗", "̘", "̙", "̜", "̝", "̞", "̟", "̠", "̤", "̥", "̦", "̩", "̪", "̫", "̬", "̭", "̮", "̯", "̰", "̱", "̲", "̳", "̹", "̺", "̻", "̼", "ͅ", "͇", "͈", "͉", "͍", "͎", "͓", "͔", "͕", "͖", "͙", "͚", "̣"],
+	};
+	char.all = [].concat(char.up, char.middle, char.down);
+	char.pattern = RegExp("(" + char.all.join("|") + ")", "g");
+	return char;
 };
 
 export const zalgo = (text = "Mana textnya?", options) => {
-	const char = {
-		up: ["̍", "̎", "̄", "̅", "̿", "̑", "̆", "̐", "͒", "͗", "͑", "̇", "̈", "̊", "͂", "̓", "̈", "͊", "͋", "͌", "̃", "̂", "̌", "͐", "̀", "́", "̋", "̏", "̒", "̓", "̔", "̽", "̉", "ͣ", "ͤ", "ͥ", "ͦ", "ͧ", "ͨ", "ͩ", "ͪ", "ͫ", "ͬ", "ͭ", "ͮ", "ͯ", "̾", "͛", "͆", "̚"],
-		down: ["̖", "̗", "̘", "̙", "̜", "̝", "̞", "̟", "̠", "̤", "̥", "̦", "̩", "̪", "̫", "̬", "̭", "̮", "̯", "̰", "̱", "̲", "̳", "̹", "̺", "̻", "̼", "ͅ", "͇", "͈", "͉", "͍", "͎", "͓", "͔", "͕", "͖", "͙", "͚", "̣"],
-		mid: ["̕", "̛", "̀", "́", "͘", "̡", "̢", "̧", "̨", "̴", "̵", "̶", "͜", "͝", "͞", "͟", "͠", "͢", "̸", "̷", "͡", " ҉"],
-	};
-	const all = [].concat(char.up, char.down, char.mid);
-
-	const isChar = (character) => {
-		let bool = false;
-		all.filter(function (i) {
-			bool = i === character;
-		});
-		return bool;
-	};
-	let result = "";
-	let counts;
-	let l;
-	options = options || {};
-	options.up = typeof options.up !== "undefined" ? options.up : true;
-	options.mid = typeof options.mid !== "undefined" ? options.mid : true;
-	options["down"] = typeof options["down"] !== "undefined" ? options["down"] : true;
-	options.size = typeof options.size !== "undefined" ? options.size : "maxi";
 	text = text.split("");
-	for (l in text) {
-		if (isChar(l)) {
+	options = options || {};
+	let counts;
+	let result = "";
+	const types = [];
+	if (options.up !== false) types.push("up");
+	if (options.middle !== false) types.push("middle");
+	if (options.down !== false) types.push("down");
+	for (let i = 0, l = text.length; i < l; i++) {
+		if (chars().pattern.test(text[i])) {
 			continue;
 		}
-		result += text[l];
-		counts = { up: 0, down: 0, mid: 0 };
-		switch (options.size) {
-			case "mini":
-				counts.up = randomNumber(8);
-				counts.mid = randomNumber(2);
-				counts.down = randomNumber(8);
-				break;
-			case "maxi":
-				counts.up = randomNumber(16) + 3;
-				counts.mid = randomNumber(4) + 1;
-				counts.down = randomNumber(64) + 3;
-				break;
-			default:
-				counts.up = randomNumber(8) + 1;
-				counts.mid = randomNumber(6) / 2;
-				counts.down = randomNumber(8) + 1;
-				break;
+		counts = {
+			up: 0,
+			middle: 0,
+			down: 0,
+		};
+		if (options.size === "mini") {
+			counts.up = randomNumber(8);
+			counts.middle = randomNumber(2);
+			counts.down = randomNumber(8);
+		} else if (options.size === "maxi") {
+			counts.up = randomNumber(16) + 3;
+			counts.middle = randomNumber(4) + 1;
+			counts.down = randomNumber(64) + 3;
+		} else {
+			counts.up = randomNumber(8) + 1;
+			counts.middle = randomNumber(3);
+			counts.down = randomNumber(8) + 1;
 		}
-
-		const arr = ["up", "mid", "down"];
-		for (const d in arr) {
-			const index = arr[d];
-			for (let i = 0; i <= counts[index]; i++) {
-				if (options[index]) {
-					result += char[index][randomNumber(char[index].length)];
-				}
+		result += text[i];
+		for (let j = 0, m = types.length; j < m; j++) {
+			const type = types[j];
+			let count = counts[type];
+			const tchars = chars()[type];
+			const max = tchars.length - 1;
+			while (count--) {
+				result += tchars[randomNumber(max)];
 			}
 		}
 	}
 	return result;
 };
 
-const convertToOrdinal = (number) => {
+export const extractZalgo = (text) => {
+	return text.replace(chars().pattern, "");
+};
+
+export const convertToOrdinal = (number) => {
 	const ordinal = ["th", "st", "nd", "rd"];
 	const Metta = number % 100;
 	return number + (ordinal[(Metta - 20) % 10] || ordinal[Metta] || ordinal[0]);
 };
 
 // make a function to load every each of the files from local files directory
-const loadFiles = (dir) => {
+export const loadFiles = (dir) => {
 	let files = [];
 	const list = fs.readdirSync(dir);
 	for (const file of list) {
@@ -415,7 +414,7 @@ export const color = (text, color) => {
 export const INFOLOG = (...info) => {
 	const isLOGS = OPTIONS.noLog || false;
 	if (!isLOGS) {
-		console.log(...info);
+		log(...info);
 	}
 };
 
@@ -434,9 +433,9 @@ export const parseCode = (input) => {
 };
 
 function convertToRoman(num) {
-	var lookup = { M: 1000, CM: 900, D: 500, CD: 400, C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1 },
-		roman = "",
-		i;
+	const lookup = { M: 1000, CM: 900, D: 500, CD: 400, C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1 };
+	let roman = "";
+	let i;
 	for (i in lookup) {
 		while (num >= lookup[i]) {
 			roman += i;
@@ -471,3 +470,21 @@ export const getSeconds = (dates) => {
 };
 
 export const getAverage = (nums) => (nums.reduce((a, b) => a + b) / nums.length).toFixed(2);
+
+export const isFilePath = (file) => /^(?:[a-z]:\\|\/|\.)/i.test(file);
+
+export const uploadToTelegraph = async (file) => {
+	try {
+		const tempFile = file;
+		if (Buffer.isBuffer(file)) file = file.toString("base64");
+		else if (isFilePath(file)) (file = Buffer.from(fs.readFileSync(file), "base64")) && unlinkFile(tempFile);
+		else if (typeof file === "string") file = Buffer.from(file, "base64");
+		let { ext } = await fileTypeFromBuffer(file);
+		const form = new FormData();
+		form.append("file", file, `file.${ext}`);
+		const { data } = await Axios.post("https://telegra.ph/upload", form, { headers: form.getHeaders() });
+		return `https://telegra.ph${data[0].src}`;
+	} catch (error) {
+		log(error);
+	}
+};

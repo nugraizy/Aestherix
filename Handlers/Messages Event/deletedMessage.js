@@ -202,7 +202,7 @@ Long : ${extractMediaData.degreesLongitude}${quotedMessage}
 				}
 			}
 		} catch (err) {
-			console.log(err);
+			log(err);
 		}
 	},
 };

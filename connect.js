@@ -14,7 +14,7 @@ import path from "path";
 import { EventEmitter } from "events";
 import center from "center-align";
 import moment from "moment-timezone";
-import { getSpinner } from "./Helper/Misc/spinners.js";
+import { getSpinner } from "./Helper/Misc/Spinner/spinners.js";
 import { readJSON, INFOLOG, color, romanize, ERRLOG } from "./Helper/Modules/functions.js";
 EventEmitter.prototype.setMaxListeners(0);
 
@@ -42,6 +42,7 @@ user.cooldown = new Map();
 cmds.commands = new Map();
 global.commandsPath = [];
 cmds.aliases = [];
+global.log = console.log;
 
 const spinners = new Spinnies({ color: "blue", succeedColor: "green", failColor: "redBright", spinner: getSpinner("dots") });
 const addSpinner = (name, options) => spinners.add(name, options);
@@ -59,7 +60,7 @@ export const runtime = Date.now();
 for (const option of Object.keys(OPTIONS).filter((key) => OPTIONS[key] == true)) if (!regexOption.includes(option)) ERRLOG(` ${color(option, "red")} ${color("is not a valid option", "white")}`);
 
 const start = async () => {
-	if (OPTIONS.help) return console.log(cli.help);
+	if (OPTIONS.help) return log(cli.help);
 	await loadCommands();
 	await loadEveryCommand();
 
@@ -71,16 +72,17 @@ const start = async () => {
 		const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
 		if (connection == "connecting") addSpinner("Connecting", { text: "Connecting to WASocket..." });
 		if (connection == "close") {
-			if (reason == DisconnectReason.badSession) console.log("Bad session, Please delete your previous session and do a rescan...");
-			else if (reason == DisconnectReason.connectionClose) console.log("Connection closed, Quick reconnecting...");
-			else if (reason == DisconnectReason.connectionLose) console.log("Connection lost, Quick reconnecting...");
-			else if (reason == DisconnectReason.connectionReplaced) console.log("Connection replaced, Quick reconnecting...");
-			else if (reason == DisconnectReason.loggedOut) console.log("Logged out, Please delete your previous session and do a rescan...");
+			if (reason == DisconnectReason.badSession) log("Bad session, Please delete your previous session and do a rescan...");
+			else if (reason == DisconnectReason.connectionClose) log("Connection closed, Quick reconnecting...");
+			else if (reason == DisconnectReason.connectionLose) log("Connection lost, Quick reconnecting...");
+			else if (reason == DisconnectReason.connectionReplaced) log("Connection replaced, Quick reconnecting...");
+			else if (reason == DisconnectReason.loggedOut) log("Logged out, Please delete your previous session and do a rescan...");
 			else {
-				if (reason == DisconnectReason.restartRequired) console.log("Restart required, Restarting your WebScoket...");
-				else if (reason == DisconnectReason.timedOut) console.log("Timed out, Quick reconnecting...");
-				else console.log("Unknown reason, Quick reconnecting...");
-				start().catch((e) => console.log(e));
+				if (reason == DisconnectReason.restartRequired) log("Restart required, Restarting your WebScoket...");
+				else if (reason == DisconnectReason.timedOut) log("Timed out, Quick reconnecting...");
+				else log("Unknown reason, Quick reconnecting...");
+				console.log(connections);
+				start().catch((e) => log(e));
 			}
 		} else if (connection == "open") {
 			global.client = {};
@@ -104,7 +106,7 @@ const start = async () => {
 		Handler(client, message, store);
 	});
 };
-start().catch((e) => console.log(e));
+start().catch((e) => log(e));
 
 function loadFiles(dir) {
 	let files = [];
@@ -134,7 +136,7 @@ async function loadCommands() {
 			cmds.commands.set(cmd.name, { ...cmd, pathname: path.join(__dirname, command) });
 			commandsPath.push(path.join(__dirname, command));
 		} catch (e) {
-			console.log(e);
+			log(e);
 			ERRLOG(`${color(command, "red")} ${color("is causing error. Please check the file before running.", "white")}`);
 		}
 	}
@@ -179,7 +181,7 @@ async function reloadModule(module, isNewFile) {
 				INFOLOG(`[${color(time, "cyan")}]`, color(`${module.split("/").reverse()[0]} has been renamed to ${afterCommands.split("/").reverse()[0]}`, "#9f53ea"));
 			}
 		} catch (e) {
-			console.log(e);
+			log(e);
 		}
 		return;
 	}
@@ -190,7 +192,7 @@ async function reloadModule(module, isNewFile) {
 		cmds.commands.set(cmd.name, cmd);
 		watchFile(module);
 	} catch (e) {
-		console.log(e);
+		log(e);
 	}
 }
 

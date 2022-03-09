@@ -111,7 +111,7 @@ Go to `node_modules\@adiwajshing\baileys-md\lib\Utils\auth-utils.js:99`
 Comment the
 
 ```js
-//console.log('saving auth state');
+//log('saving auth state');
 ```
 
 ---

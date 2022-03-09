@@ -1,2 +1,3 @@
-export { getSpinner } from "./spinners.js";
+export { getSpinner } from "./Spinner/index.js";
 export { scheme } from "./Palettes/index.js";
+export { UA } from "./User-Agent/index.js";

@@ -25,7 +25,7 @@ export default {
 			str += `Type : ${err.name ?? "Recognizing"}\n`;
 			str += `Message : ${err.message ?? err.error}`;
 			await client[botNum].reply(from, str + (err.languages ? err.languages.map((v) => `\n${v.code} - ${v.name}`).join("\n") : ""));
-			console.log(err);
+			log(err);
 		}
 	},
 };

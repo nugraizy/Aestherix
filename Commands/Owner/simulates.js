@@ -188,7 +188,7 @@ export default {
 					break;
 			}
 		} catch (e) {
-			console.log(e);
+			log(e);
 		}
 	},
 };
@@ -207,7 +207,7 @@ const events = async (client, containers, presence) => {
 			await client[botNum].sendPresenceUpdate(WAPresence[presence], container);
 		}
 	} catch (e) {
-		console.log(e);
+		log(e);
 	}
 };
 
@@ -215,6 +215,6 @@ const pause = async (client, containers) => {
 	try {
 		for (const container of containers) await client[botNum].sendPresenceUpdate(WAPresence.paused, container);
 	} catch (e) {
-		console.log(e);
+		log(e);
 	}
 };

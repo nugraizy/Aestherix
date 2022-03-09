@@ -71,6 +71,7 @@ export default {
 					print(from, eval(body.slice(3)));
 				}
 			} catch (err) {
+				console.log(err);
 				let str = `Type : ${err.name}\n`;
 				str += `Message : ${err.message}`;
 				return client[botNum].reply(from, `\`ERROR\` \`\`\`\n\n${str}\`\`\``);

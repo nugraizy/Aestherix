@@ -54,7 +54,7 @@ export default {
 			str += `Type : ${err.name}\n`;
 			str += `Message : ${err.message}`;
 			await client[botNum].reply(from, str);
-			console.log(err);
+			log(err);
 		}
 	},
 };

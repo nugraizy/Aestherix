@@ -1,3 +1,5 @@
+import { readJSON, romanize } from "../../Helper/Modules/index.js";
+
 export default {
 	name: "menu",
 	description: "Shows the menu.",
@@ -7,7 +9,7 @@ export default {
 	cooldown: 10,
 	limit: 5,
 	async run({ from, prefix }, client) {
-		let capt = `Void Bot Menu\n\nUse ${prefix}${getRandomCommand()} -H\n~> to see the detail of the command.\n\n`;
+		let capt = `Void Bot Menu v.${romanize(readJSON("./package.json").version)}\n\nUse ${prefix}${getRandomCommand()} -H\n~> to see the detail of the command.\n\n`;
 		const Container = [];
 		for (const [key, value] of cmds.commands)
 			if (Object.keys(Container).includes(value.category)) Container[value.category].push(key);

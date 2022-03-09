@@ -24,6 +24,6 @@ export const getPost = (code) =>
 			}
 			resolve(result);
 		} catch (e) {
-			console.log(e);
+			log(e);
 		}
 	});

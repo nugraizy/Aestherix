@@ -1,6 +1,9 @@
 export { attp, ttp } from "./Canvas/index.js";
-export { getSpinner, scheme } from "./Misc/index.js";
+export { getSpinner, scheme, UA } from "./Misc/index.js";
 export {
+	extractZalgo,
+	uploadToTelegraph,
+	isFilePath,
 	getSeconds,
 	getAverage,
 	romanize,

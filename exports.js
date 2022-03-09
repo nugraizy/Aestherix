@@ -1,4 +1,8 @@
 export {
+	UA,
+	extractZalgo,
+	uploadToTelegraph,
+	isFilePath,
 	getSeconds,
 	getAverage,
 	romanize,
@@ -77,6 +81,8 @@ export {
 	parseCode,
 } from "./Helper/index.js";
 export {
+	tiny,
+	reverseImageSearch,
 	play,
 	move,
 	start,

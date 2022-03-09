@@ -22,14 +22,15 @@ String.prototype.PARSE_EVENTS = function (...args) {
 	return args.some((v) => v == this);
 };
 moment.tz.setDefault("Asia/Jakarta").locale("id");
-
-export const reassign = async (m, client, store) => {
+export const reassign = async (m, client, store, search) => {
 	try {
 		const SETTINGS = readJSON("./Config/settings.json");
 		if (m.message && m.message.protocolMessage && m.message.protocolMessage.type == "REVOKE") return m;
-		if (m.message && m.messageTimestamp) {
-			if (moment(m.messageTimestamp * 1000).unix() < moment(moment().subtract("5", "seconds").valueOf()).unix()) return { error: "OLD MESSAGE" };
-		} else if (moment(JSON.parse(m.messageTimestamp * 1000)).unix() < moment(moment().subtract("5", "seconds").valueOf()).unix()) return { error: "OLD MESSAGE" };
+		if (!search) {
+			if (m.message && m.messageTimestamp) {
+				if (moment(m.messageTimestamp * 1000).unix() < moment(moment().subtract("5", "seconds").valueOf()).unix()) return { error: "OLD MESSAGE" };
+			} else if (moment(JSON.parse(m.messageTimestamp * 1000)).unix() < moment(moment().subtract("5", "seconds").valueOf()).unix()) return { error: "OLD MESSAGE" };
+		}
 		if (!m.message) return m;
 		m.message = isSame(Object.keys(m.message)[0], "ephemeralMessage") ? m.message.ephemeralMessage.message : m.message;
 		const isFromMe = m.key.fromMe;
@@ -258,8 +259,9 @@ export const reassign = async (m, client, store) => {
 				? mediaData.message[typeQuoted].message && mediaData.message[typeQuoted].message[typeViewOnce]
 				: {};
 		const reply = async (dari, text, opts = undefined) => {
-			if (opts !== undefined) return await client[botNum].sendMessage(dari, { text }, { quoted: opts });
-			else return await client[botNum].sendMessage(dari, { text }, { quoted: m });
+			if (opts !== undefined) {
+				return await client[botNum].sendMessage(dari, { text }, { quoted: opts });
+			} else return await client[botNum].sendMessage(dari, { text }, { quoted: m });
 		};
 		const downloadAndSaveMediaMessage = async (media, path) => {
 			const msg = await downloadContentFromMessage(media, typeQuoted.replace(/Message/g, ""));
@@ -332,7 +334,22 @@ export const reassign = async (m, client, store) => {
 
 		const setStatus = async (status) => {
 			if (!status) return new Error("Status is empty");
-			return client[botNum].query({ tag: "iq", attrs: { to: S_WHATSAPP_NET, type: "set", xmlns: "status" }, content: [{ tag: "status", attrs: {}, content: Buffer.from(status, "utf-8") }] });
+			const response = await client[botNum].query({
+				tag: "iq",
+				attrs: {
+					to: S_WHATSAPP_NET,
+					type: "set",
+					xmlns: "status",
+				},
+				content: [
+					{
+						tag: "status",
+						attrs: {},
+						content: Buffer.from(status, "utf-8"),
+					},
+				],
+			});
+			return response;
 		};
 
 		const updateGroup = async (dari, containers, update, texts, force) => {
@@ -369,6 +386,20 @@ export const reassign = async (m, client, store) => {
 			return responses;
 		};
 
+		const searchMessage = async (dari, query) => {
+			const containers = await store.loadMessages(dari);
+			const keys = [];
+			let i = 0;
+			if (containers.length == 0) return keys;
+			for (const messages of containers) {
+				if (i == 20) break;
+				const { message, body } = await reassign(JSON.parse(JSON.stringify(messages)), client, store, true);
+				if (body.includes(query)) keys.push(message);
+				i++;
+			}
+			return keys;
+		};
+
 		client[botNum] = {
 			...client[botNum],
 			reply,
@@ -379,6 +410,7 @@ export const reassign = async (m, client, store) => {
 			buttonLocation,
 			setStatus,
 			updateGroup,
+			searchMessage,
 		};
 		return {
 			message: m,

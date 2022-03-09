@@ -29,7 +29,7 @@ export default {
 						.map((key, i) => `${i + 1}. ${key}   :  ${e.lang[key]}`)
 						.join("\n")}`,
 				);
-			console.log(e);
+			log(e);
 			client[botNum].reply(from, "Error while converting text to speech");
 		}
 	},

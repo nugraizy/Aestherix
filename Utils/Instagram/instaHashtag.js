@@ -27,7 +27,7 @@ export const searchHashtag = (query) =>
 			}
 			resolve(result);
 		} catch (e) {
-			console.log(e);
+			log(e);
 			reject({ error: e });
 		}
 	});
