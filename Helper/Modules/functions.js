@@ -207,7 +207,7 @@ const chars = () => {
 		down: ["̖", "̗", "̘", "̙", "̜", "̝", "̞", "̟", "̠", "̤", "̥", "̦", "̩", "̪", "̫", "̬", "̭", "̮", "̯", "̰", "̱", "̲", "̳", "̹", "̺", "̻", "̼", "ͅ", "͇", "͈", "͉", "͍", "͎", "͓", "͔", "͕", "͖", "͙", "͚", "̣"],
 	};
 	char.all = [].concat(char.up, char.middle, char.down);
-	char.pattern = RegExp("(" + char.all.join("|") + ")", "g");
+	char.pattern = RegExp(`(${char.all.join("|")})`, "g");
 	return char;
 };
 
@@ -222,6 +222,10 @@ export const zalgo = (text = "Mana textnya?", options) => {
 	if (options.down !== false) types.push("down");
 	for (let i = 0, l = text.length; i < l; i++) {
 		if (chars().pattern.test(text[i])) {
+			continue;
+		}
+		if (text[i].length > 1) {
+			result += text[i];
 			continue;
 		}
 		counts = {
@@ -256,9 +260,7 @@ export const zalgo = (text = "Mana textnya?", options) => {
 	return result;
 };
 
-export const extractZalgo = (text) => {
-	return text.replace(chars().pattern, "");
-};
+export const extractZalgo = (text) => text.replace(chars().pattern, "");
 
 export const convertToOrdinal = (number) => {
 	const ordinal = ["th", "st", "nd", "rd"];
@@ -433,7 +435,7 @@ export const parseCode = (input) => {
 };
 
 function convertToRoman(num) {
-	const lookup = { M: 1000, CM: 900, D: 500, CD: 400, C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1 };
+	const lookup = { M̄: 1_000_000, D̄: 500_000, C̄: 100_000, L̄: 50_000, X̄: 10_000, V̄: 5000, Ī: 1000, M: 1000, CM: 900, D: 500, CD: 400, C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1 };
 	let roman = "";
 	let i;
 	for (i in lookup) {

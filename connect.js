@@ -69,9 +69,9 @@ const start = async () => {
 
 	Client.ev.on("connection.update", (connections) => {
 		const { lastDisconnect, qr, connection } = connections;
-		const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
 		if (connection == "connecting") addSpinner("Connecting", { text: "Connecting to WASocket..." });
 		if (connection == "close") {
+			const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
 			if (reason == DisconnectReason.badSession) log("Bad session, Please delete your previous session and do a rescan...");
 			else if (reason == DisconnectReason.connectionClose) log("Connection closed, Quick reconnecting...");
 			else if (reason == DisconnectReason.connectionLose) log("Connection lost, Quick reconnecting...");
@@ -81,7 +81,6 @@ const start = async () => {
 				if (reason == DisconnectReason.restartRequired) log("Restart required, Restarting your WebScoket...");
 				else if (reason == DisconnectReason.timedOut) log("Timed out, Quick reconnecting...");
 				else log("Unknown reason, Quick reconnecting...");
-				console.log(connections);
 				start().catch((e) => log(e));
 			}
 		} else if (connection == "open") {

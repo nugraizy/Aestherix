@@ -69,6 +69,7 @@ export const reassign = async (m, client, store, search) => {
 		const rawParticipants = groupMetadata.participants ? groupMetadata.participants : [];
 		const adminGroups = rawParticipants.filter((v) => isNotNull(v.admin)).map((v) => v.id);
 		const participantsGroups = rawParticipants.map((v) => v.id);
+		const ownerGroups = rawParticipants.find((v) => v.admin == "superadmin")?.id || null;
 		const isAdmin = adminGroups.includes(sender);
 		const isBotAdmin = adminGroups.includes(botNumber);
 		const body = isSame(type, "conversation")
@@ -437,6 +438,7 @@ export const reassign = async (m, client, store, search) => {
 			rawParticipants,
 			adminGroups,
 			participantsGroups,
+			ownerGroups,
 			isBotAdmin,
 			body,
 			args,

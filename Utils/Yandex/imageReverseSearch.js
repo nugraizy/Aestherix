@@ -23,14 +23,16 @@ export const reverseImageSearch = async (file, { limit = 20 } = {}) =>
 			const $information = cheerio.load(dataInformation);
 			const now = new Date();
 			const container = { status: "OK", responseTime: 0, information: [] };
-			$images("div > a > img").each(function () {
-				const images = `https:${$images(this).attr("src")}`;
+			$information("div.CbirSites-Items > div.CbirSites-Item").each(function () {
 				if (container.information.length >= limit && limit !== "infinite") return;
-				$information("div.CbirSites-Items > div.CbirSites-Item").each(function () {
-					const title = $information(this).find("div.CbirSites-ItemInfo > div.CbirSites-ItemTitle").text();
-					const description = $information(this).find("div.CbirSites-ItemInfo > div.CbirSites-ItemDescription").text() || "NO DESCRIPTION";
-					container.information.push({ images, title, description });
-				});
+				const title = $information(this).find("div.CbirSites-ItemInfo > div.CbirSites-ItemTitle").text();
+				const description = $information(this).find("div.CbirSites-ItemInfo > div.CbirSites-ItemDescription").text() || "NO DESCRIPTION";
+				container.information.push({ images: "", title, description });
+			});
+			$images("div > a.serp-item__link > img.serp-item__thumb.justifier__thumb").each((i, el) => {
+				if (container.information[i] == undefined) return;
+				const images = `https:${$images(el).attr("src")}`;
+				container.information[i].images = images;
 			});
 			container.responseTime = (new Date() - now) / 1000;
 			resolve(container);

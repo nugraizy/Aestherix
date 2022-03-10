@@ -54,6 +54,10 @@ export default {
 				const Tempcmds =
 					cmds.commands.get(message.cmd.slice(1).trim().toLowerCase()) || Array.from(cmds.commands.values()).find((v) => v.aliases.includes(message.cmd.slice(1).trim().toLowerCase())) || Array.from(cmds.commands.values()).find((v) => v.aliases.includes(message.cmd.trim().toLowerCase())) || false;
 				if (Tempcmds && !message.isOwner) {
+					if (OPTIONS.restrict && Tempcmds.restrict) {
+						await client[botNum].reply(message.from, "This command is restricted and currently bot are on restricted mode.");
+						continue;
+					}
 					const limit = addLimit({ id: message.sender, limit: Tempcmds.limit, type: "MIN" });
 					if (typeof limit == "object" && "message" in limit) {
 						client[botNum].reply(message.from, `${limit.message}\nYour limit is ${limit.limits}\nBut this command (${Tempcmds.name}) need ${Tempcmds.limit}`);
@@ -97,7 +101,7 @@ export default {
 				if (Tempcmds) {
 					try {
 						if (/(--?(help(s)?|info|des(c|k)rip(t|s)i(on)?)|-H)/.test(message.query)) {
-							const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${Tempcmds.cooldown}s\nAliases : ${message.prefix}${Tempcmds.aliases.join(`, ${message.prefix}`).capitalize()}`;
+							const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${Tempcmds.cooldown}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v.capitalize()}`).join(", ")}.`;
 							client[botNum].reply(message.from, help);
 							continue;
 						}
