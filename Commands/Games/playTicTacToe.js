@@ -2,7 +2,7 @@ import { delay } from "@adiwajshing/baileys";
 import { TicTacToe, GetTicTacToeSession, DeleteTicTacToeSession } from "../../Utils/Games/index.js";
 
 export default {
-	name: "buu",
+	name: "playtictactoe",
 	description: "Play Tic Tac Toe",
 	usage: "!playtictactoe",
 	category: "Games",
