@@ -24,6 +24,7 @@ export const getPost = (code) =>
 			}
 			resolve(result);
 		} catch (e) {
+			resolve({ error: code.includes("/p/") ? e.message : "Invalid code" });
 			log(e);
 		}
 	});

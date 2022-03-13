@@ -1,85 +1,57 @@
-import { start, move } from "../../Utils/Games/ticTacToe.js";
+import { delay } from "@adiwajshing/baileys";
+import { TicTacToe, GetTicTacToeSession, DeleteTicTacToeSession } from "../../Utils/Games/index.js";
 
 export default {
-	name: "playtictactoe",
+	name: "buu",
 	description: "Play Tic Tac Toe",
 	usage: "!playtictactoe",
 	category: "Games",
 	aliases: ["ttt"],
 	limit: 2,
 	cooldown: 2,
-	async run(message, client) {
-		if (!message.query) {
-			const starts = start(message.from);
-			if (!starts && (!message.query || message.mention.length > 0)) return client[botNum].reply(message.from, "You already have a game running!");
-			client[botNum].reply(message.from, "You have started a game of Tic Tac Toe!");
-			const board = starts.board.map((v, i) => (i == 2 || i == 5 || i == 8 ? `${v}\n` : v));
-			client[botNum].sendMessage(
-				message.from,
-				{
-					text: `@${starts.player1.split("@")[0]} vs ${starts.player2 == "computer" ? "computer" : `@${starts.player2.split("@")[0]}`}\n@${starts.player1.split("@")[0]} ${starts[starts.player1]}\n${starts.player2 == "computer" ? "computer" : `@${starts.player2.split("@")[0]}`} ${
-						starts.player2 == "computer" ? starts["computer"] : starts[starts.player2]
-					}\n\n${board.join("")}`,
-					contextInfo: { mentionedJid: [starts.player1, starts.player2] },
-				},
-				{ quoted: message.message },
-			);
-		}
-		if (/[1-9]/.test(message.query)) {
-			let statistic = [];
-			const moveResult = await move(message.from, message.query);
-			if (moveResult.status == "NO_GAME") return client[botNum].reply(message.from, "You don't have a game running!");
-			if (moveResult.status == "WRONG_TURN") return client[botNum].reply(message.from, "It's not your turn!");
-			if (moveResult.status == "WRONG_MOVE") return client[botNum].reply(message.from, "That's not a valid move!");
-			if (moveResult.status == "WINNER") {
-				statistic = statistic = `Avg. P1 : ${moveResult.avgP1}${moveResult.avgP2 ? `\nAvg. P2 : ${moveResult.avgP2}` : ""}`;
-				if (moveResult.botWinner) {
-					return client[botNum].sendMessage(
-						message.from,
-						{
-							text: `Computer won!\n\n@${moveResult.player1.split("@")[0]} vs ${moveResult.player2 == "computer" ? "computer" : `@${moveResult.player2.split("@")[0]}`}\n@${moveResult.player1.split("@")[0]} ${moveResult[moveResult.player1]}\n${
-								moveResult.player2 == "computer" ? "computer" : `@${moveResult.player2.split("@")[0]}`
-							} ${moveResult.player2 == "computer" ? moveResult["computer"] : moveResult[moveResult.player2]}\n\n${moveResult.board.map((v, i) => (i == 2 || i == 5 || i == 8 ? `${v}\n` : v)).join("")}\n\n${statistic}`,
-							contextInfo: { mentionedJid: [moveResult.player1, moveResult.player2] },
-						},
-						{ quoted: message.message },
-					);
+	async run({ message, query, from, sender }, client) {
+		try {
+			if (/(del|dlt|d)/i.test(query)) DeleteTicTacToeSession(sender);
+			if (!query) {
+				const game = new TicTacToe(sender, undefined, true);
+				if ("error" in game) return client[botNum].reply(from, game.error);
+				const capt = (game) => `TicTacToe Games by Void Bot.
+				
+	${game.PLAYER_1_MODEL} @${game.PLAYER_1.split("@")[0]} vs ${game.PLAYER_2_MODEL} ${game.PLAYER_2 == "Void Bot" ? "Void Bot" : `@${game.PLAYER_2.split("@")[0]}`}
+	
+	${game.BOARD.map((v, i) => (i == 2 || i == 5 || i == 8 ? `${v}\n` : v)).join("")}`;
+				await client[botNum].sendMessage(from, { text: capt(game), contextInfo: { mentionedJid: [game.PLAYER_1, game.PLAYER_2] } }, { quoted: message });
+			}
+			if (/[1-9]/.test(query)) {
+				const game = GetTicTacToeSession(sender);
+				if (!game) return client[botNum].reply(from, "You don't have a game");
+				const move = game.playMove(query, sender);
+				if ("error" in move) return client[botNum].reply(from, move.error);
+				const capt = (game) => `TicTacToe Games by Void Bot.
+	${
+		game.status == "WINNER"
+			? `${game.winner == "Void Bot" ? "Void Bot" : `@${game.winner.split("@")[0]}`} wins!`
+			: game.status == "DRAW"
+			? "Game is Draw!"
+			: `${game.PLAYER_TURN == game.PLAYER_1 ? game.PLAYER_1_MODEL : game.PLAYER_2_MODEL} ${game.PLAYER_TURN == "Void Bot" ? "Void Bot" : `@${game.PLAYER_TURN.split("@")[0]}`}'s turn`
+	}
+				
+	${game.PLAYER_1_MODEL} @${game.PLAYER_1.split("@")[0]} vs ${game.PLAYER_2_MODEL} ${game.PLAYER_2 == "Void Bot" ? "Void Bot" : `@${game.PLAYER_2.split("@")[0]}`}
+	
+	${game.BOARD.map((v, i) => (i == 2 || i == 5 || i == 8 ? `${v}\n` : v)).join("")}`;
+				await client[botNum].sendMessage(from, { text: capt(move), contextInfo: { mentionedJid: [game.PLAYER_1, game.PLAYER_2] } }, { quoted: message });
+				if (game.status == "WINNER" || game.status == "DRAW") return DeleteTicTacToeSession(sender);
+				if (move.PLAYER_TURN == "Void Bot") {
+					const botGames = GetTicTacToeSession(sender);
+					await client[botNum].reply(from, "Void Bot's TURN");
+					await delay(1000);
+					const botMove = botGames.playMove(botGames.displayPlayBoard(), "Void Bot", sender);
+					await client[botNum].sendMessage(from, { text: capt(botMove), contextInfo: { mentionedJid: [botGames.PLAYER_1, botGames.PLAYER_2] } }, { quoted: message });
 				}
-				return client[botNum].sendMessage(
-					message.from,
-					{
-						text: `You Won!\n\n@${moveResult.player1.split("@")[0]} vs ${moveResult.player2 == "computer" ? "computer" : `@${moveResult.player2.split("@")[0]}`}\n@${moveResult.player1.split("@")[0]} ${moveResult[moveResult.player1]}\n${
-							moveResult.player2 == "computer" ? "computer" : `@${moveResult.player2.split("@")[0]}`
-						} ${moveResult.player2 == "computer" ? moveResult["computer"] : moveResult[moveResult.player2]}\n\n${moveResult.board.map((v, i) => (i == 2 || i == 5 || i == 8 ? `${v}\n` : v)).join("")}\n\n${statistic}`,
-						contextInfo: { mentionedJid: [moveResult.player1, moveResult.player2] },
-					},
-					{ quoted: message.message },
-				);
 			}
-			if (moveResult.status == "DRAW") {
-				statistic = `Avg. P1 : ${moveResult.avgP1}${moveResult.avgP2 ? `\nAvg. P2 : ${moveResult.avgP2}` : ""}`;
-				return client[botNum].sendMessage(
-					message.from,
-					{
-						text: `It's a draw!\n\n@${moveResult.player1.split("@")[0]} vs ${moveResult.player2 == "computer" ? "computer" : `@${moveResult.player2.split("@")[0]}`}\n@${moveResult.player1.split("@")[0]} ${moveResult[moveResult.player1]}\n${
-							moveResult.player2 == "computer" ? "computer" : `@${moveResult.player2.split("@")[0]}`
-						} ${moveResult.player2 == "computer" ? moveResult["computer"] : moveResult[moveResult.player2]}\n\n${moveResult.board.map((v, i) => (i == 2 || i == 5 || i == 8 ? `${v}\n` : v)).join("")}\n\n${statistic}`,
-						contextInfo: { mentionedJid: [moveResult.player1, moveResult.player2] },
-					},
-					{ quoted: message.message },
-				);
-			}
-			if (moveResult.status == "OK")
-				return client[botNum].sendMessage(
-					message.from,
-					{
-						text: `@${moveResult.player1.split("@")[0]} vs ${moveResult.player2 == "computer" ? "computer" : `@${moveResult.player2.split("@")[0]}`}\n@${moveResult.player1.split("@")[0]} ${moveResult[moveResult.player1]}\n${
-							moveResult.player2 == "computer" ? "computer" : `@${moveResult.player2.split("@")[0]}`
-						} ${moveResult.player2 == "computer" ? moveResult["computer"] : moveResult[moveResult.player2]}\n\n${moveResult.board.map((v, i) => (i == 2 || i == 5 || i == 8 ? `${v}\n` : v)).join("")}`,
-						contextInfo: { mentionedJid: [moveResult.player1, moveResult.player2] },
-					},
-					{ quoted: message.message },
-				);
+		} catch (error) {
+			console.log(error);
+			client[botNum].reply(from, `An error occured\n\n${error.message}`);
 		}
 	},
 };

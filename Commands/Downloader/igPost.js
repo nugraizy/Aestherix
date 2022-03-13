@@ -70,7 +70,7 @@ export default {
 					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Parse Instagram Post URL", "red")} for ${color(prettyNumber, "#ff71ce")}`);
 				}
 			}
-		} catch (error) {
+		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name}\n`;
 			str += `Message : ${err.message}`;

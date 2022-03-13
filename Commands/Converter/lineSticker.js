@@ -1,10 +1,10 @@
 import path from "path";
+import { exec } from "child_process";
 import { line } from "../../Utils/Stickers/index.js";
 import { convertMediaToSticker } from "../../Utils/Converter/index.js";
 import { createExif } from "../../Utils/Misc/index.js";
 import { __dirname } from "../../connect.js";
 import { unlinkFile } from "../../Helper/Modules/index.js";
-import { exec } from "child_process";
 
 export default {
 	name: "linesticker",

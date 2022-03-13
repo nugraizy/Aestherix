@@ -31,10 +31,18 @@ export default {
 				message.cmd = message.body.toLowerCase().split(" ")[0].trim() || "";
 				message.query = message.args.slice(1).join(" ").trim();
 				const correctedCommand = [];
-				if (OPTIONS.autoCorrect && message.args[0] !== `${message.prf}menu`) {
+				if (OPTIONS.autoCorrect) {
+					for (const cmd of Array.from(cmds.commands.keys())) {
+						const correcting = similarity(message.args[0], cmd);
+						if (correcting >= Math.min(0.6))
+							correctedCommand.push({
+								score: correcting,
+								command: cmd,
+							});
+					}
 					for (const aliases of cmds.aliases) {
 						const correcting = similarity(message.args[0], aliases);
-						if (correcting > Math.min(0.67))
+						if (correcting >= Math.min(0.67))
 							correctedCommand.push({
 								score: correcting,
 								command: aliases,

@@ -218,6 +218,7 @@ function parseCli() {
 			prefix: { type: "string", alias: "p" },
 			watch: { type: "boolean", alias: "w" },
 			cool_down: { type: "boolean", alias: "c" },
+			auto_correct: { type: "boolean", alias: "a" },
 		},
 	});
 }

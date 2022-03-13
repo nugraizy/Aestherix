@@ -8,7 +8,7 @@ export default {
 	aliases: ["testt"],
 	cooldown: 5,
 	async run({ from, message }, client) {
-		const messages = generateWAMessageFromContent("0@s.whatsapp.net", { reactionMessage: { reaction: { key: message.key, text: "Nice", unread: false }, key: message.key, text: "NANDA" } }, {});
+		const messages = generateWAMessageFromContent("0@s.whatsapp.net", { reactionMessage: { key: message.key, text: "😮" } }, {});
 		client[botNum].relayMessage(from, messages.message, { messageId: messages.key.id });
 	},
 };

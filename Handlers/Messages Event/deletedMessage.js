@@ -39,7 +39,7 @@ export default {
 				DeleteIntervals(intervals["url"].get(sender).get(from), intervals["url"].get(sender), from);
 				return;
 			}
-			if (message[from].antiDelete == "enable") {
+			if (message[from]?.antiDelete == "enable") {
 				const options = {
 					quoted: message.message,
 					contextInfo: {

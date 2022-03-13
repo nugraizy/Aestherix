@@ -6,14 +6,15 @@ export const getReels = (url) =>
 	new Promise(async (resolve) => {
 		try {
 			url = PARSE_URL(url);
-			if (!url) resolve({ status: "error", message: "Invalid URL" });
-			const data = await (await fetch(URL_BASE),
-			{
-				headers: {
-					"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",
-					Cookie: "PHPSESSID=hj2p3i96va7kqs7csbq16a5tip; _ga=GA1.2.1623964880.1642090612; _gid=GA1.2.553723423.1642090612; _gat=1",
-				},
-			}).text();
+			const data = await (
+				await fetch(URL_BASE(), {
+					method: "get",
+					headers: {
+						"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",
+						Cookie: "PHPSESSID=hj2p3i96va7kqs7csbq16a5tip; _ga=GA1.2.1623964880.1642090612; _gid=GA1.2.553723423.1642090612; _gat=1",
+					},
+				})
+			).text();
 			const $ = cheerio.load(data);
 			const token = $("input#token").attr("value");
 			const dataResult = await (
@@ -35,6 +36,7 @@ export const getReels = (url) =>
 			).json();
 			resolve(dataResult);
 		} catch (err) {
+			console.log(err);
 			resolve({ status: false, error: err.message });
 		}
 	});

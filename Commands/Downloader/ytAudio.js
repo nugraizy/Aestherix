@@ -3,7 +3,7 @@ import moment from "moment-timezone";
 import { __dirname } from "../../connect.js";
 import { yta } from "../../Utils/YouTube/index.js";
 import { toOpus } from "../../Utils/Converter/index.js";
-import { isOne, isURL, INFOLOG, ERRLOG, color, numberWithCommas, removeDuplicatesArray } from "../../Helper/Modules/index.js";
+import { INFOLOG, ERRLOG, color, numberWithCommas, removeDuplicatesArray } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "ytaudio",
@@ -17,19 +17,10 @@ export default {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!query) return client[botNum].reply(from, "Please provide a URL");
 		try {
-			let urls = query.split(",");
-			if (isOne(urls.length) && !isURL(query)) return client[botNum].reply(from, "Please specify a valid url");
-			if (isOne(urls.length) && !regex(query)) return client[botNum].reply(from, "Please specify a valid YouTube url");
-			urls = removeDuplicatesArray(urls.map((url) => url.trim()));
-			for (const url of urls) {
-				if (!isURL(url)) {
-					await client[botNum].reply(from, "Please specify a valid url");
-					continue;
-				} else if (!regex(url)) {
-					await client[botNum].reply(from, "Please specify a valid YouTube url");
-					continue;
-				}
-				const audio = await yta(url);
+			let queries = query.split(",");
+			queries = removeDuplicatesArray(queries.map((q) => q.trim()));
+			for (const Query of queries) {
+				const audio = await yta(Query);
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading YouTube Audio`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 				if ("error" in audio) {
 					client[botNum].reply(from, audio.error);

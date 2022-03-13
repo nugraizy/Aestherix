@@ -81,11 +81,12 @@ export {
 	parseCode,
 } from "./Helper/index.js";
 export {
+	emojimix,
 	tiny,
 	reverseImageSearch,
-	play,
-	move,
-	start,
+	TicTacToe,
+	GetTicTacToeSession,
+	DeleteTicTacToeSession,
 	search,
 	skip,
 	handlers,
