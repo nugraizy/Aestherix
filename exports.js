@@ -1,4 +1,8 @@
 export {
+	checkAfk,
+	getAfk,
+	setAfk,
+	deleteAfk,
 	UA,
 	extractZalgo,
 	uploadToTelegraph,

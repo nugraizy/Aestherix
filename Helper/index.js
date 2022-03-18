@@ -1,5 +1,5 @@
 export { attp, ttp } from "./Canvas/index.js";
-export { getSpinner, scheme, UA } from "./Misc/index.js";
+export { getSpinner, scheme, UA, checkAfk, getAfk, setAfk, deleteAfk } from "./Misc/index.js";
 export {
 	extractZalgo,
 	uploadToTelegraph,

@@ -3,7 +3,6 @@ import { extractZalgo } from "../../Helper/Modules/index.js";
 export default {
 	name: "extractzalgo",
 	description: "Extract Zalgo text to Text",
-	category: "Misc",
 	usage: "!extractzalgo <query>",
 	category: "Misc",
 	aliases: ["conzalgo", "conzalg"],

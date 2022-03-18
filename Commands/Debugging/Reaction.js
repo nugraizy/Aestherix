@@ -1,14 +1,36 @@
 import { generateWAMessageFromContent } from "@adiwajshing/baileys";
+import emojiReg from "emoji-regex";
 
 export default {
-	name: "test",
-	description: "TEST",
+	name: "reaction",
+	description: "Send reaction to a message.",
 	category: "Debugging",
-	usage: "TEST",
-	aliases: ["testt"],
+	usage: "!reaction <emoji>",
+	aliases: ["react", "reactwith"],
 	cooldown: 5,
-	async run({ from, message }, client) {
-		const messages = generateWAMessageFromContent("0@s.whatsapp.net", { reactionMessage: { key: message.key, text: "😮" } }, {});
-		client[botNum].relayMessage(from, messages.message, { messageId: messages.key.id });
+	async run({ from, message, bodyQuoted, mediaData, query }, client, store) {
+		if (bodyQuoted) {
+			const emojis = query.match(emojiReg());
+			if (emojis) {
+				const chat = store.messages[from].get(mediaData.stanzaId);
+				const messages = generateWAMessageFromContent(
+					"0@s.whatsapp.net",
+					{ reactionMessage: { key: chat.key, text: emojis[0] } },
+					{
+						quoted: message,
+					},
+				);
+				client[botNum].relayMessage(from, messages.message, { messageId: messages.key.id });
+			}
+			return;
+		}
+		const emojis = query.match(emojiReg());
+		if (emojis) {
+			const chats = (await store.loadMessages(from)).map((m) => m.key);
+			for (const chat of chats) {
+				const messages = generateWAMessageFromContent("0@s.whatsapp.net", { reactionMessage: { key: chat, text: emojis[0] } }, {});
+				client[botNum].relayMessage(from, messages.message, { messageId: messages.key.id });
+			}
+		}
 	},
 };

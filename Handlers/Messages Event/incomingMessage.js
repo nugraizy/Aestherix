@@ -1,10 +1,11 @@
 import moment from "moment-timezone";
 import similarity from "similarity";
 import { delay } from "@adiwajshing/baileys";
-import { INFOLOG, color, reassign, addLimit } from "../../Helper/Modules/index.js";
+import { INFOLOG, color, reassign, addLimit, getTimeSince } from "../../Helper/Modules/index.js";
 import { tebak, url, akinator } from "../index.js";
 import { runtime } from "../../connect.js";
 import { getSession } from "../../Utils/Games/index.js";
+import { checkAfk, getAfk, deleteAfk } from "../../Helper/Misc/index.js";
 const { handler: anonymous } = (await import("./anonymousMessage.js")).default;
 
 moment.tz.setDefault("Asia/Jakarta").locale("id");
@@ -19,6 +20,32 @@ export default {
 		if (message.isBaileys) return;
 		if (message.key && message.key.remoteJid == "status@broadcast") return;
 		if (message.type == "protocolMessage" || message.type == "senderKeyDistributionMessage" || !message.type) return;
+		if (checkAfk(message.sender, message.from)) {
+			const { reasons, since } = getAfk(message.sender, message.from);
+			const time = getTimeSince(since);
+			await client[botNum].sendMessage(message.from, { text: `@${message.sender.split("@")[0]} is AFK since ${time} ago. Now they are out from AFK. Reason: ${reasons}`, contextInfo: { mentionedJid: [message.sender] } }, { quoted: message.message });
+			deleteAfk(message.sender, message.from);
+		}
+		if (message.bodyQuoted && checkAfk(message.mediaData.participant)) {
+			const { reasons, since, name } = getAfk(message.mediaData.participant);
+			const time = getTimeSince(since);
+			await client[botNum].reply(message.from, `${name} is AFK since ${time} ago. Reason: ${reasons}`);
+		}
+		if (message.mention.length > 0) {
+			let caption = `You're Tagging People That Are AFK.\n\n`;
+			const container = [];
+			for (const mention of message.mention) {
+				if (checkAfk(mention, message.from)) {
+					const { reasons, since, name } = getAfk(mention, message.from);
+					const time = getTimeSince(since);
+					caption += `${name}\nSince : ${time} ago.\nReason : ${reasons}\n\n`;
+					container.push(mention);
+				}
+			}
+			if (container.length > 0) {
+				await client[botNum].reply(message.from, caption.trim());
+			}
+		}
 		const runtimes = ((Date.now() - runtime) / 1000).toFixed(0);
 		if (message.isCmd) {
 			let bodies = [];

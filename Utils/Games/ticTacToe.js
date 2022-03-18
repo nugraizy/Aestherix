@@ -39,7 +39,7 @@ export const GetTicTacToeSession = (session) => {
 	else return null;
 };
 
-export class TicTacToe {
+export default class TicTacToe {
 	constructor(player1, player2 = "Void Bot", newGame) {
 		const container = RANDOM_TURN_BASED_ON_MODEL(player1, player2);
 		this.COMBO = COMBOS;

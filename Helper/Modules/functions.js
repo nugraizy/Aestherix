@@ -155,28 +155,21 @@ export const closestNumberFromArray = (number, array = []) => {
 export const getTimeSince = (dates) => {
 	const time = Date.now() - dates;
 	const dateString = ms(time);
-	const base = [];
-	if (dateString.days > 0) base.push(`${dateString.days} Hari`);
-	if (dateString.hours > 0) base.push(`${dateString.hours} Jam`);
-	if (dateString.minutes > 0) base.push(`${dateString.minutes} Menit`);
-	if (dateString.seconds > 0) base.push(`${dateString.seconds} Detik`);
-	return base.join(", ");
+	const container = [];
+	`${dateString.days ? container.push(`${dateString.days} Day${dateString.days > 1 ? "s" : ""}`) : ""}${dateString.hours ? container.push(`${dateString.hours} Hour${dateString.hours > 1 ? "s" : ""}`) : ""}${
+		dateString.minutes ? container.push(`${dateString.minutes} Minute${dateString.minutes > 1 ? "s" : ""}`) : ""
+	}${dateString.seconds ? container.push(`${dateString.seconds} Second${dateString.seconds > 1 ? "s" : ""}`) : ""}`;
+	return container.join(", ");
 };
 
 export const getRuntime = (time) => {
 	const uptime = time;
 	const date = new Date(uptime * 1000);
-	const days = date.getUTCDate() - 1;
-	const hours = date.getUTCHours();
-	const minutes = date.getUTCMinutes();
-	const seconds = date.getUTCSeconds();
-	const milliseconds = date.getUTCMilliseconds();
-	const segments = [];
-	if (days > 0) segments.push(`${days} Hari`);
-	if (hours > 0) segments.push(`${hours} Jam`);
-	if (minutes > 0) segments.push(`${minutes} Menit`);
-	if (seconds > 0) segments.push(`${seconds} Detik`);
-	return segments.join(", ");
+	const container = [];
+	`${date.getUTCDate() - 1 > 0 ? container.push(`${date.getUTCDate() - 1} Day${data.getUTCDate() - 1 > 1 ? "s" : ""}`) : ""}${date.getUTCHours() > 0 ? container.push(`${date.getUTCHours()} Hour${date.getUTCHours() > 1 ? "s" : ""}`) : ""}${
+		date.getUTCMinutes() > 0 ? container.push(`${date.getUTCMinutes()} Minute${date.getUTCMinutes() > 1 ? "s" : ""}`) : ""
+	}${date.getUTCSeconds() > 0 ? container.push(`${date.getUTCSeconds()} Second${date.getUTCSeconds() > 1 ? "s" : ""}`) : ""}`;
+	return container.join(", ");
 };
 
 export const generateHex = (length) =>
