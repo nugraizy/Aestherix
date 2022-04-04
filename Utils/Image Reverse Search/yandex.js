@@ -12,7 +12,7 @@ const isValidImageURL = async (url) => {
 	}
 };
 
-export const reverseImageSearch = async (file, { limit = 20 } = {}) =>
+export const yandex = async (file, { limit = 20 } = {}) =>
 	new Promise(async (resolve) => {
 		try {
 			if (!isURL(file)) file = await uploadToTelegraph(file);

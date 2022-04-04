@@ -85,9 +85,11 @@ export {
 	parseCode,
 } from "./Helper/index.js";
 export {
+	sauceNao,
+	traceMoe,
 	emojimix,
 	tiny,
-	reverseImageSearch,
+	yandex,
 	TicTacToe,
 	GetTicTacToeSession,
 	DeleteTicTacToeSession,

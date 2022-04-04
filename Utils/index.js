@@ -9,6 +9,6 @@ export { toOpus, convertMediaToSticker, convertStickerToMedia, webp2mp4File, mp4
 export { getEarthquake } from "./News/index.js";
 export { line, telegram } from "./Stickers/index.js";
 export { search, skip, handlers, stop } from "./Anonymous/index.js";
-export { reverseImageSearch } from "./Yandex/index.js";
+export { yandex, sauceNao, traceMoe } from "./Image Reverse Search/index.js";
 export { tiny } from "./Shortener/tinyURL.js";
 export { brainlySearch } from "./Brainly/searchAnswer.js";

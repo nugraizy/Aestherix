@@ -1,12 +1,12 @@
 import path from "path";
 import { __dirname } from "../../connect.js";
 import { isURL, removeDuplicatesArray } from "../../Helper/index.js";
-import { reverseImageSearch } from "../../Utils/Yandex/index.js";
+import { yandex } from "../../Utils/Image Reverse Search/index.js";
 
 export default {
-	name: "reverseimagesearch",
+	name: "yandex",
 	description: "Reverse image search",
-	usage: "!reverseimagesearch <reply image/send image>",
+	usage: "!yandex <reply image/send image>",
 	category: "Search",
 	aliases: ["ri", "similar", "whatimage", "whatimg", "findimg"],
 	limit: 2,
@@ -17,7 +17,7 @@ export default {
 			let media = query && isURL(query) ? query : null;
 			await client[botNum].reply(from, "Searching. Please wait...");
 			if (isMediaImage) media = await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`));
-			const result = await reverseImageSearch(media);
+			const result = await yandex(media);
 			if ("error" in result) return client[botNum].reply(from, result.error);
 			let capt = "Reverse Image Search\n";
 			capt += "Will sending a few similar or the actual images itself. Please wait...\n\n";
