@@ -4,6 +4,7 @@
 # SimplebotPRO3
 
 ### Next-gen bot using Baileys-md, and latest version of simplebotPRO
+` (remove showing bash function if script won't start)`
 
 ---
 
