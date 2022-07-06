@@ -5,6 +5,7 @@ import { spawn } from "child_process";
 await printRandomAscii();
 
 import fs from "fs";
+import { pathToFileURL } from "url"
 import baileys from "@adiwajshing/baileys";
 import P from "pino";
 import meow from "meow";
@@ -142,7 +143,7 @@ async function loadCommands() {
 	if (OPTIONS.watch) addSpinner("watch", { text: "Watching for changes..." });
 	for (const command of commands) {
 		try {
-			const cmd = (await import(path.join(__dirname, command))).default;
+			const cmd = (await import(pathToFileURL(path.join(__dirname, command)))).default;
 			if (OPTIONS.watch) await watchFile(path.join(__dirname, command), cmd.name);
 			cmds.commands.set(cmd.name, { ...cmd, pathname: path.join(__dirname, command) });
 			commandsPath.push(path.join(__dirname, command));
