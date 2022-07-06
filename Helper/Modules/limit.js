@@ -7,7 +7,7 @@ const PATH = {
 	files: path.join(__dirname, "Databases/Users/data.json"),
 };
 
-const LIMIT = 2;
+const LIMIT = 30;
 
 if (!readDir(PATH.folder)) makeDir(PATH.folder);
 if (!isFileExist(PATH.files)) writeJSON(PATH.files, []);
@@ -32,7 +32,7 @@ export const indexUser = (obj) => {
 	return {
 		index,
 		limit: data[index].limit,
-		type: data[index].type,
+		type: data[index].role,
 	};
 };
 
