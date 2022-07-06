@@ -149,6 +149,7 @@ export {
 	getSurahDetail,
 	getListSurah,
 	getTafsirSurah,
+	getEarthquake,
 	toOpus,
 	convertMediaToSticker,
 } from "./Utils/index.js";
