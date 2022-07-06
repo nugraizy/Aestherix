@@ -5,7 +5,7 @@ import { spawn } from "child_process";
 await printRandomAscii();
 
 import fs from "fs";
-import { pathToFileURL } from "url"
+import { pathToFileURL } from "url";
 import baileys from "@adiwajshing/baileys";
 import P from "pino";
 import meow from "meow";

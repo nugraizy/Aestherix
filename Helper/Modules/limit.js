@@ -84,14 +84,5 @@ export const resetAllLimit = (limit) => {
 };
 
 export const checkLimit = (users) => {
-	const container = [];
-	if (Array.isArray(users)) {
-		for (const user of users) {
-			container.push(indexUser({ id: user }));
-		}
-	}
-	if (typeof users == "string") {
-		container.push(indexUser({ id: users }));
-	}
-	return container;
+	return indexUser({ id: users });
 };

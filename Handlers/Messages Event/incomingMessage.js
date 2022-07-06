@@ -93,7 +93,7 @@ export default {
 						await client[botNum].reply(message.from, "This command is restricted and currently bot are on restricted mode.");
 						continue;
 					}
-					const limit = addLimit({ id: message.sender, limit: Tempcmds.limit, type: "MIN" });
+					const limit = addLimit({ id: message.sender, limit: Tempcmds.limit ?? 0, type: "MIN" });
 					if (typeof limit == "object" && "message" in limit) {
 						client[botNum].reply(message.from, `${limit.message}\nYour limit is ${limit.limits}\nBut this command (${Tempcmds.name}) need ${Tempcmds.limit}`);
 						continue;
