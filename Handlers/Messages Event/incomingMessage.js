@@ -90,23 +90,23 @@ export default {
 					cmds.commands.get(message.cmd.slice(1).trim().toLowerCase()) || Array.from(cmds.commands.values()).find((v) => v.aliases.includes(message.cmd.slice(1).trim().toLowerCase())) || Array.from(cmds.commands.values()).find((v) => v.aliases.includes(message.cmd.trim().toLowerCase())) || false;
 				if (Tempcmds && !message.isOwner) {
 					if (OPTIONS.restrict && Tempcmds.restrict) {
-						await client[botNum].reply(message.from, "This command is restricted and currently bot are on restricted mode.");
+						await client[botNum].reply({ from: message.from, quoted: message.message }, "This command is restricted and currently bot are on restricted mode.");
 						continue;
 					}
 					const limit = addLimit({ id: message.sender, limit: Tempcmds.limit ?? 0, type: "MIN" });
 					if (typeof limit == "object" && "message" in limit) {
-						client[botNum].reply(message.from, `${limit.message}\nYour limit is ${limit.limits}\nBut this command (${Tempcmds.name}) need ${Tempcmds.limit}`);
+						client[botNum].reply({ from: message.from, quoted: message.message }, `${limit.message}\nYour limit is ${limit.limits}\nBut this command (${Tempcmds.name}) need ${Tempcmds.limit}`);
 						continue;
 					}
-					if (limit == false) return client[botNum].reply(message.from, "You have reached the limit of this command.");
+					if (limit == false) return client[botNum].reply({ from: message.from, quoted: message.message }, "You have reached the limit of this command.");
 					if (OPTIONS.coolDown) {
 						if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) {
-							return client[botNum].reply(message.from, `Please wait until your request is done`);
+							return client[botNum].reply({ from: message.from, quoted: message.message }, `Please wait until your request is done`);
 						}
 						if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).has(Tempcmds.name)) {
 							const time = user.cooldown.get(message.sender).get(Tempcmds.name);
 							if (Date.now() > time) user.cooldown.get(message.sender).delete(Tempcmds.name);
-							else return client[botNum].reply(message.from, `${Tempcmds.name} is on cooldown for ${((time - Date.now()) / 1000).toFixed(1)} seconds.`);
+							else return client[botNum].reply({ from: message.from, quoted: message.message }, `${Tempcmds.name} is on cooldown for ${((time - Date.now()) / 1000).toFixed(1)} seconds.`);
 						}
 						if (!user.cooldown.has(message.sender)) user.cooldown.set(message.sender, new Map());
 						if (!user.cooldown.get(message.sender).has(Tempcmds.name)) user.cooldown.get(message.sender).set(Tempcmds.name, Date.now() + Tempcmds.cooldown * 1000);
@@ -137,7 +137,7 @@ export default {
 					try {
 						if (/(--?(help(s)?|info|des(c|k)rip(t|s)i(on)?)|-H)/.test(message.query)) {
 							const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${Tempcmds.cooldown}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v.capitalize()}`).join(", ")}.`;
-							client[botNum].reply(message.from, help);
+							client[botNum].reply({ from: message.from, quoted: message.message }, help);
 							continue;
 						}
 						if (Tempcmds.category == "Games" && message.isGroup && !message.isAdmin && message[message.from].games == "disable") return client[botNum].reply(message.from, "Mode games belum dihidupkan");
@@ -152,7 +152,7 @@ export default {
 						let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 						str += `Type : ${err.name}\n`;
 						str += `Message : ${err.message}`;
-						await client[botNum].reply(message.from, str);
+						await client[botNum].reply({ from: message.from, quoted: message.message }, str);
 						log(err);
 					}
 				}
