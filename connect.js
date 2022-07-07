@@ -70,21 +70,22 @@ const start = async () => {
 	const Client = makeWASocket({ printQRInTerminal: true, version: DEFAULT_CONNECTION_CONFIG.version, logger: P({ level: "fatal" }), auth: state });
 	store.bind(Client.ev);
 
-	Client.ev.on("connection.update", (connections) => {
+	Client.ev.on("connection.update", async (connections) => {
 		const { lastDisconnect, qr, connection } = connections;
 		if (connection == "connecting") addSpinner("Connecting", { text: "Connecting to WASocket..." });
 		if (connection == "close") {
 			const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
+			console.log(reason, DisconnectReason);
 			if (reason == DisconnectReason.badSession) log("Bad session, Please delete your previous session and do a rescan...");
-			else if (reason == DisconnectReason.connectionClose) log("Connection closed, Quick reconnecting...");
-			else if (reason == DisconnectReason.connectionLose) log("Connection lost, Quick reconnecting...");
+			else if (reason == DisconnectReason.connectionLost) log("Connection lost, Quick reconnecting...");
 			else if (reason == DisconnectReason.connectionReplaced) log("Connection replaced, Quick reconnecting...");
 			else if (reason == DisconnectReason.loggedOut) log("Logged out, Please delete your previous session and do a rescan...");
 			else {
 				if (reason == DisconnectReason.restartRequired) log("Restart required, Restarting your WebScoket...");
 				else if (reason == DisconnectReason.timedOut) log("Timed out, Quick reconnecting...");
+				else if (reason == DisconnectReason.connectionClosed) log("Connection closed, Quick reconnecting...");
 				else log("Unknown reason, Quick reconnecting...");
-				start().catch((e) => log(e));
+				await start().catch((e) => log(e));
 			}
 		} else if (connection == "open") {
 			global.client = {};

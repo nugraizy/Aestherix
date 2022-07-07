@@ -27,33 +27,33 @@ ${game.BOARD.map((v, i) => (i == 2 || i == 5 || i == 8 ? (i == 8 ? v : `${v}\n  
 `;
 			if (/(del|dlt|d)/i.test(query)) {
 				const status = GetTicTacToeSession(sender);
-				if (!status) return client[botNum].reply(from, "You don't have a game");
+				if (!status) return client[botNum].reply({ from, quoted: message }, "You don't have a game");
 				DeleteTicTacToeSession(sender);
-				await client[botNum].reply(from, "Game deleted");
+				await client[botNum].reply({ from, quoted: message }, "Game deleted");
 			}
 			if (!query) {
 				const game = new TicTacToe(sender, undefined, true);
-				if ("error" in game) return client[botNum].reply(from, game.error);
+				if ("error" in game) return client[botNum].reply({ from, quoted: message }, game.error);
 				await client[botNum].sendMessage(from, { text: capt(game, false), contextInfo: { mentionedJid: [game.PLAYER_1, game.PLAYER_2] } }, { quoted: message });
 			}
 			if (/[1-9]/.test(query)) {
 				const game = GetTicTacToeSession(sender);
-				if (!game) return client[botNum].reply(from, "You don't have a game");
+				if (!game) return client[botNum].reply({ from, quoted: message }, "You don't have a game");
 				const move = game.playMove(query, sender);
-				if ("error" in move) return client[botNum].reply(from, move.error);
+				if ("error" in move) return client[botNum].reply({ from, quoted: message }, move.error);
 				await client[botNum].sendMessage(from, { text: capt(move), contextInfo: { mentionedJid: [game.PLAYER_1, game.PLAYER_2] } }, { quoted: message });
 				if (game.status == "WINNER" || game.status == "DRAW") return DeleteTicTacToeSession(sender);
 				if (move.PLAYER_TURN == "Void Bot") {
 					const botGames = GetTicTacToeSession(sender);
-					await client[botNum].reply(from, "Void Bot's TURN");
+					await client[botNum].reply({ from, quoted: message }, "Void Bot's TURN");
 					await delay(1000);
 					const botMove = botGames.playMove(botGames.displayPlayBoard(), "Void Bot", sender);
 					await client[botNum].sendMessage(from, { text: capt(botMove, true), contextInfo: { mentionedJid: [botGames.PLAYER_1, botGames.PLAYER_2] } }, { quoted: message });
 				}
 			}
 		} catch (error) {
-			console.log(error);
-			client[botNum].reply(from, `An error occured\n\n${error.message}`);
+			log(error);
+			client[botNum].reply({ from, quoted: message }, `An error occured\n\n${error.message}`);
 		}
 	},
 };

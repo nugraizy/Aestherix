@@ -73,8 +73,8 @@ export default {
 			extractMediaData,
 			bodyQuoted,
 		} = message;
-		if (!isOwner) return client[botNum].reply(from, "You are not allowed to use this command");
-		if (!query) return client[botNum].reply(from, "Please specify code to evaluate");
+		if (!isOwner) return client[botNum].reply({ from, quoted: message.message }, "You are not allowed to use this command");
+		if (!query) return client[botNum].reply({ from, quoted: message.message }, "Please specify code to evaluate");
 		if (isBaileys) return;
 		if (body.startsWith("/> ")) {
 			try {
@@ -84,10 +84,10 @@ export default {
 				const func = new types("print", "client", "message", "fs", "from", "extractMediaData", "mediaData", "type", "typeQuoted", "body", "adminGroups", "participants", "pushname", "bodyQuoted", body.slice(3));
 				output = func(
 					(...args) => {
-						client[botNum].reply(from, util.format(...args));
+						client[botNum].reply({ from, quoted: message.message }, util.format(...args));
 					},
 					client[botNum],
-					message,
+					message[message],
 					fs,
 					from,
 					extractMediaData,
@@ -103,18 +103,18 @@ export default {
 			} catch (err) {
 				let str = `Type : ${err.name}\n`;
 				str += `Message : ${err.message}`;
-				return client[botNum].reply(from, `\`ERROR\` \`\`\`\n\n${str}\`\`\``);
+				return client[botNum].reply({ from, quoted: message.message }, `\`ERROR\` \`\`\`\n\n${str}\`\`\``);
 			}
 		} else if (body.startsWith("$> ")) {
 			try {
 				exec(body.slice(3), async (err, stdout, stderr) => {
-					if (err) return client[botNum].reply(from, util.format(err));
-					await client[botNum].reply(from, util.format(stdout.replace(col, "").trim()));
+					if (err) return client[botNum].reply({ from, quoted: message.message }, util.format(err));
+					await client[botNum].reply({ from, quoted: message.message }, util.format(stdout.replace(col, "").trim()));
 				});
 			} catch (err) {
 				let str = `Type : ${err.name}\n`;
 				str += `Message : ${err.message}`;
-				return client[botNum].reply(from, `\`ERROR\` \`\`\`\n\n${str}\`\`\``);
+				return client[botNum].reply({ from, quoted: message.message }, `\`ERROR\` \`\`\`\n\n${str}\`\`\``);
 			}
 		} else if (body.startsWith("=> ")) {
 			try {
@@ -130,10 +130,10 @@ export default {
 					print(from, eval(body.slice(3)));
 				}
 			} catch (err) {
-				console.log(err);
+				log(err);
 				let str = `Type : ${err.name}\n`;
 				str += `Message : ${err.message}`;
-				return client[botNum].reply(from, `\`ERROR\` \`\`\`\n\n${str}\`\`\``);
+				return client[botNum].reply({ from, quoted: message.message }, `\`ERROR\` \`\`\`\n\n${str}\`\`\``);
 			}
 		}
 	},
@@ -145,7 +145,7 @@ Array.prototype.insert = function (index) {
 };
 const col = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
-const print = (dari, ...args) => client[botNum].reply(dari || where, util.format(...args));
+const print = ({ from, quoted }, ...args) => client[botNum].reply({ from: from || where, quoted }, util.format(...args));
 global.prints = print;
 const temp = (names, func) => {
 	if (!/^[a-z0-9_]+$/i.test(names)) return new Error("Invalid name.");

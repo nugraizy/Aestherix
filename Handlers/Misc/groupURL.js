@@ -21,7 +21,7 @@ export async function handler(message, client) {
 		return;
 	}
 	if (CheckIntervals(intervals["url"].get(sender)) !== 0 && !CheckIntervals(intervals["url"].get(sender).has(from))) {
-		await client[botNum].reply(from, "You already on blacklist");
+		await client[botNum].reply({ from, quoted: message }, "You already on blacklist");
 		await client[botNum].groupParticipantsUpdate(from, [sender], "remove");
 		return;
 	}
@@ -30,7 +30,7 @@ export async function handler(message, client) {
 		const ends = moment(starts)
 			.add(10 + 2, "seconds")
 			.valueOf();
-		await client[botNum].reply(from, "Please revoke your URL or you'll be kicked in 10 seconds");
+		await client[botNum].reply({ from, quoted: message }, "Please revoke your URL or you'll be kicked in 10 seconds");
 		SetIntervals(
 			intervals["url"].set(sender, new Map()).get(sender),
 			from,

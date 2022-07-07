@@ -14,7 +14,7 @@ export default {
 	limit: 1,
 	async run({ isQuotedSticker, from, message, filename, extractMediaData, sender, prettyNumber }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!isQuotedSticker) return client[botNum].reply(from, "Please reply a sticker to decrypt");
+		if (!isQuotedSticker) return client[botNum].reply({ from, quoted: message }, "Please reply a sticker to decrypt");
 		try {
 			const file = await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`));
 			const { result } = await convertStickerToMedia(file, sender, extractMediaData);
@@ -36,7 +36,7 @@ export default {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name}\n`;
 			str += `Message : ${err.message}`;
-			await client[botNum].reply(from, str);
+			await client[botNum].reply({ from, quoted: message }, str);
 			log(err);
 		}
 	},

@@ -8,8 +8,8 @@ export default {
 	aliases: ["brainli", "brainly-search", "tugas"],
 	limit: 4,
 	cooldown: 5,
-	async run({ query, from }, client) {
-		if (!query) return client[botNum].reply(from, "You must provide a query");
+	async run({ query, from, message }, client) {
+		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query");
 		const parseOptions = query.includes("--") ? query.split("--") : query;
 		const options = { lang: undefined, count: undefined };
 		if (Array.isArray(parseOptions)) {
@@ -29,7 +29,7 @@ export default {
 		}
 		try {
 			const brainly = await brainlySearch(query, options);
-			if ("error" in brainly) return client[botNum].reply(from, brainly.error);
+			if ("error" in brainly) return client[botNum].reply({ from, quoted: message }, brainly.error);
 			let capt = "Void Bot Brainly\n\n";
 			for (const { pertanyaan, jawaban } of brainly) {
 				capt += `Pertanyaan : ${pertanyaan.replace(/[\n\t\r]/g, "")}\n`;
@@ -38,10 +38,10 @@ export default {
 					.join("")
 					.trim()}\n\n\n`;
 			}
-			await client[botNum].reply(from, capt.trim());
+			await client[botNum].reply({ from, quoted: message }, capt.trim());
 		} catch (err) {
 			log(e);
-			client[botNum].reply(from, "Error while searching your question");
+			client[botNum].reply({ from, quoted: message }, "Error while searching your question");
 		}
 	},
 };

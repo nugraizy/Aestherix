@@ -11,9 +11,9 @@ export default {
 	category: "Downloader",
 	cooldown: 6,
 	limit: 8,
-	async run({ from, query, prettyNumber }, client) {
+	async run({ from, query, prettyNumber, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!query) return client[botNum].reply(from, "Please provide a URL");
+		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a URL");
 		try {
 			let queries = query.split(",");
 			queries = removeDuplicatesArray(queries.map((q) => q.trim()));
@@ -21,7 +21,7 @@ export default {
 				const video = await ytv(Query);
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading YouTube Video`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 				if ("error" in video) {
-					client[botNum].reply(from, `Error while downloading YouTube Video\n\b${video.error}\n${Query}`);
+					client[botNum].reply({ from, quoted: message }, `Error while downloading YouTube Video\n\b${video.error}\n${Query}`);
 					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download YouTube Video", "red")} for ${color(prettyNumber, "#ff71ce")}`);
 					continue;
 				} else {
@@ -44,7 +44,7 @@ export default {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name}\n`;
 			str += `Message : ${err.message}`;
-			await client[botNum].reply(from, str);
+			await client[botNum].reply({ from, quoted: message }, str);
 			log(err);
 		}
 	},

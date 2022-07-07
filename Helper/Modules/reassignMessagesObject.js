@@ -259,10 +259,8 @@ export const reassign = async (m, client, store, search) => {
 				: isQuotedViewOnce && (isQuotedViewOnceImage || isQuotedViewOnceVideo)
 				? mediaData.message[typeQuoted].message && mediaData.message[typeQuoted].message[typeViewOnce]
 				: {};
-		const reply = async (dari, text, opts = undefined) => {
-			if (opts !== undefined) {
-				return await client[botNum].sendMessage(dari, { text }, { quoted: opts });
-			} else return await client[botNum].sendMessage(dari, { text }, { quoted: m });
+		const reply = async ({ from, quoted }, text, opts = undefined) => {
+			return await client[botNum].sendMessage(from, { text }, { quoted });
 		};
 		const downloadAndSaveMediaMessage = async (media, path) => {
 			const msg = await downloadContentFromMessage(media, typeQuoted.replace(/Message/g, ""));

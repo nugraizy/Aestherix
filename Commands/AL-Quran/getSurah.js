@@ -8,12 +8,12 @@ export default {
 	aliases: ["surah"],
 	cooldown: 0,
 	limit: 0,
-	async run({ from }, client) {
+	async run({ from, message }, client) {
 		try {
 			const lists = await getListSurah();
-			await client[botNum].reply(from, lists.map((v, i) => `${i + 1}. ${v.nama_latin}\nTot. Ayat : ${v.jumlah_ayat}\nArti : ${v.arti}\nTurun Di : ${v.tempat_turun}\nAudio : ${v.audio}\n`).join("\n"));
+			await client[botNum].reply({ from, quoted: message }, lists.map((v, i) => `${i + 1}. ${v.nama_latin}\nTot. Ayat : ${v.jumlah_ayat}\nArti : ${v.arti}\nTurun Di : ${v.tempat_turun}\nAudio : ${v.audio}\n`).join("\n"));
 		} catch (err) {
-			return client.reply(from, "Something went wrong");
+			return client[botNum].reply({ from, quoted: message }, "Something went wrong");
 		}
 	},
 };

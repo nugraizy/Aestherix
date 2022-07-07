@@ -13,17 +13,17 @@ export default {
 	limit: 9,
 	async run({ from, query, prettyNumber, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!query) return client[botNum].reply(from, "Please specify a username");
+		if (!query) return client[botNum].reply({ from, quoted: message }, "Please specify a username");
 		try {
 			const usernames = query.split(",");
-			if (isOne(usernames) && isURL(usernames)) return client[botNum].reply(from, "Please specify a valid username");
+			if (isOne(usernames) && isURL(usernames)) return client[botNum].reply({ from, quoted: message }, "Please specify a valid username");
 			for (const username of usernames) {
-				if (isURL(username)) await client[botNum].reply(from, "Please specify a username");
+				if (isURL(username)) await client[botNum].reply({ from, quoted: message }, "Please specify a username");
 				else {
 					const highlights = await getHighlights(username);
 					INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading Instagram highlights`, "cyan")} for ${color(prettyNumber, "#ff71ce")}`);
 					if ("error" in highlights) {
-						client[botNum].reply(from, `Error while downloading Instagram highlights\n\n${highlights.error}\n${username}`);
+						client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram highlights\n\n${highlights.error}\n${username}`);
 						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Instagram highlights", "cyan")} for ${color(prettyNumber, "#ff71ce")}`);
 						continue;
 					} else {
@@ -50,7 +50,7 @@ export default {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name}\n`;
 			str += `Message : ${err.message}`;
-			await client[botNum].reply(from, str);
+			await client[botNum].reply({ from, quoted: message }, str);
 			log(err);
 		}
 	},

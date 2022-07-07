@@ -22,7 +22,7 @@ export default {
 					const solved = solvePuzzle(puzzle);
 					const grid = stringifyGrid(puzzle);
 					const gridSolved = stringifyGrid(solved);
-					if (isOwner) client[botNum].reply(from, gridSolved);
+					if (isOwner) client[botNum].reply({ from, quoted: message }, gridSolved);
 					buttons[0].buttonId = ".sd clue";
 					buttons[0].buttonText.displayText = "Sisa Clue : 5";
 					const messages = client[botNum].buttonText(from, `${grid}\nGame ini masi di tahap beta.\nKesulitan masi dalam proses perbaikan.\nGunakan Nomor 0 untuk mengganti nomor 9.`, "Made by nanda", buttons, { quoted: message });
@@ -38,10 +38,10 @@ export default {
 					});
 					return writeJSON(path.join(__dirname, "Databases/Games/Sudoku/sudoku.json"), data);
 				}
-				client[botNum].reply(from, "Kamu sudah ada permainan Sudoku yang sedang berjalan.");
+				client[botNum].reply({ from, quoted: message }, "Kamu sudah ada permainan Sudoku yang sedang berjalan.");
 			} else if (/([A-Ia-i])[1-9]/.test(args[1])) {
-				if (args[2].length > 2) return client[botNum].reply(from, `Format salah\n\nex : ${cmd} A2 7`);
-				if (!args[2]) return client[botNum].reply(from, `Tolong masukkan nomor kolom\n\nex : ${cmd} A2 7`);
+				if (args[2].length > 2) return client[botNum].reply({ from, quoted: message }, `Format salah\n\nex : ${cmd} A2 7`);
+				if (!args[2]) return client[botNum].reply({ from, quoted: message }, `Tolong masukkan nomor kolom\n\nex : ${cmd} A2 7`);
 				const index = data.length == 0 ? -1 : data.findIndex((v) => v.id == from);
 				if (index !== -1) {
 					const fill = fillGrid(args[1], args[2], data[index].puzzle, data[index].solved);
@@ -50,7 +50,7 @@ export default {
 						if (isWin.status) {
 							data.splice(index, 1);
 							writeJSON(path.join(__dirname, "Databases/Games/Sudoku/sudoku.json"), data);
-							return client[botNum].reply(from, `${isWin.message}\n${stringifyGrid(fill.grid)}\n\nGame Time : ${getTimeSince(data[index].startedAt)}`);
+							return client[botNum].reply({ from, quoted: message }, `${isWin.message}\n${stringifyGrid(fill.grid)}\n\nGame Time : ${getTimeSince(data[index].startedAt)}`);
 						}
 						data[index].puzzle = fill.grid;
 						data[index].guessedBy.push(sender);
@@ -62,7 +62,7 @@ export default {
 						data[index].messages = messages;
 						return writeJSON(path.join(__dirname, "Databases/Games/Sudoku/sudoku.json"), data);
 					}
-					return client[botNum].reply(from, fill.message);
+					return client[botNum].reply({ from, quoted: message }, fill.message);
 				}
 				buttons[0].buttonId = ".sudoku play";
 				buttons[0].buttonText.displayText = "Play Sudoku!";
@@ -78,7 +78,7 @@ export default {
 						if (isWin.status) {
 							data.splice(index, 1);
 							writeJSON(path.join(__dirname, "Databases/Games/Sudoku/sudoku.json"), data);
-							return client[botNum].reply(from, `${isWin.message}\n${stringifyGrid(reveal.board)}\n\nGame Time : ${getTimeSince(data[index].startedAt)}`);
+							return client[botNum].reply({ from, quoted: message }, `${isWin.message}\n${stringifyGrid(reveal.board)}\n\nGame Time : ${getTimeSince(data[index].startedAt)}`);
 						}
 						data[index].puzzle = reveal.board;
 						const grid = stringifyGrid(reveal.tempBoard);
@@ -88,7 +88,7 @@ export default {
 						data[index].messages = messages;
 						return writeJSON(path.join(__dirname, "Databases/Games/Sudoku/sudoku.json"), data);
 					}
-					return client[botNum].reply(from, "Clue is out!");
+					return client[botNum].reply({ from, quoted: message }, "Clue is out!");
 				}
 				buttons[0].buttonId = ".sd play";
 				buttons[0].buttonText.displayText = "Play Sudoku!";
@@ -117,7 +117,7 @@ export default {
 					data.splice(index, 1);
 					return writeJSON(path.join(__dirname, "Databases/Games/Sudoku/sudoku.json"), data);
 				}
-				return client[botNum].reply(from, "Belum ada sesi game sudoku");
+				return client[botNum].reply({ from, quoted: message }, "Belum ada sesi game sudoku");
 			}
 		} catch (err) {
 			log(err);

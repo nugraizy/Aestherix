@@ -11,10 +11,10 @@ export default {
 	limit: 2,
 	restrict: true,
 	async run(message, client, store) {
-		if (!message.isAdmin) return client[botNum].reply(message.from, "You are not admin. This commands is only for admins.");
-		if (!message.query && message.mention.length == 0 && !message.bodyQuoted) return client[botNum].reply(message.from, "Please reply people message or mention people.");
-		if (!message.isBotAdmin) return client[botNum].reply(message.from, "Bot is not admin, Please promote admin before using moderation commands.");
-		if (message.mention.includes(botNum) || message.mediaData.participant.includes(botNum)) return client[botNum].reply(message.from, "You can't kick me by myself.");
+		if (!message.isAdmin) return client[botNum].reply({ from: message.from, quoted: message.message }, "You are not admin. This commands is only for admins.");
+		if (!message.query && message.mention.length == 0 && !message.bodyQuoted) return client[botNum].reply({ from: message.from, quoted: message.message }, "Please reply people message or mention people.");
+		if (!message.isBotAdmin) return client[botNum].reply({ from: message.from, quoted: message.message }, "Bot is not admin, Please promote admin before using moderation commands.");
+		if (message.mention.includes(botNum) || message.mediaData.participant.includes(botNum)) return client[botNum].reply({ from: message.from, quoted: message.message }, "You can't kick me by myself.");
 		if (message.query || message.mention.length > 0) {
 			await client[botNum].updateGroup(message.from, message.mention.length > 0 ? message.mention : message.query.split(",").parse(), "REMOVE", false, /--?(force|-F)/.test(message.query));
 		}

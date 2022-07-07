@@ -13,9 +13,9 @@ export default {
 	category: "Downloader",
 	cooldown: 6,
 	limit: 8,
-	async run({ from, query, prettyNumber, filename }, client) {
+	async run({ from, query, prettyNumber, filename, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!query) return client[botNum].reply(from, "Please provide a URL");
+		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a URL");
 		try {
 			let queries = query.split(",");
 			queries = removeDuplicatesArray(queries.map((q) => q.trim()));
@@ -23,7 +23,7 @@ export default {
 				const audio = await yta(Query);
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading YouTube Audio`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 				if ("error" in audio) {
-					client[botNum].reply(from, audio.error);
+					client[botNum].reply({ from, quoted: message }, audio.error);
 					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download YouTube Audio", "red")} for ${color(prettyNumber, "#ff71ce")}`);
 				} else {
 					const { title, description, timestamp, uploaded, views, author, urlChannel, dl_link, filesize, filesizeF } = audio;
@@ -36,7 +36,7 @@ export default {
 					capt += `File Size : ${filesize} (${filesizeF})\n`;
 					capt += `Duration : ${timestamp}\n`;
 					capt += `Description : ${description}\n`;
-					await client[botNum].reply(from, capt.trim());
+					await client[botNum].reply({ from, quoted: message }, capt.trim());
 					await client[botNum].sendMessage(from, { audio: await toOpus("opus", { input: path.join(__dirname, `Temporary Files/${filename}`), output: path.join(__dirname, `Temporary Files/${filename}-done`), media: dl_link.replace("https", "http") }), caption: capt.trim() });
 				}
 			}
@@ -45,7 +45,7 @@ export default {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name}\n`;
 			str += `Message : ${err.message}`;
-			await client[botNum].reply(from, str);
+			await client[botNum].reply({ from, quoted: message }, str);
 			log(err);
 		}
 	},

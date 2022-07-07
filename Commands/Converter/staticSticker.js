@@ -50,7 +50,7 @@ export default {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name}\n`;
 			str += `Message : ${err.message}`;
-			await client[botNum].reply(from, str);
+			await client[botNum].reply({ from, quoted: message }, str);
 			log(err);
 		}
 	},

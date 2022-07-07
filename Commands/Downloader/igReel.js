@@ -13,23 +13,23 @@ export default {
 	limit: 9,
 	async run({ from, query, prettyNumber, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!query) return client[botNum].reply(from, "Please specify a url");
+		if (!query) return client[botNum].reply({ from, quoted: message }, "Please specify a url");
 		try {
 			const urls = query.split(",");
-			if (isOne(urls.length) && !isURL(query)) return client[botNum].reply(from, "Please specify a valid url");
-			if (isOne(urls.length) && !regex(query)) return client[botNum].reply(from, "Please specify a valid Instagram url");
+			if (isOne(urls.length) && !isURL(query)) return client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
+			if (isOne(urls.length) && !regex(query)) return client[botNum].reply({ from, quoted: message }, "Please specify a valid Instagram url");
 			for (const url of urls) {
 				if (!isURL(url.trim())) {
-					await client[botNum].reply(from, "Please specify a valid url");
+					await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
 					continue;
 				} else if (!regex(url.trim())) {
-					await client[botNum].reply(from, "Please specify a valid Instagram url");
+					await client[botNum].reply({ from, quoted: message }, "Please specify a valid Instagram url");
 					continue;
 				}
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading Instagram reel`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 				const reel = await getReels(url);
 				if ("error" in reel) {
-					client[botNum].reply(from, `Error while downloading Instagram reel\n\n${reel.error}\n${url}`);
+					client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram reel\n\n${reel.error}\n${url}`);
 					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Instagram reel", "red")} for ${color(prettyNumber, "#ff71ce")}`);
 					continue;
 				} else {
@@ -55,7 +55,7 @@ export default {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${error.name}\n`;
 			str += `Message : ${error.message}`;
-			await client[botNum].reply(from, str);
+			await client[botNum].reply({ from, quoted: message }, str);
 			log(error);
 		}
 	},

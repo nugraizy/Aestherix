@@ -13,17 +13,17 @@ export default {
 	limit: 9,
 	async run({ from, query, prettyNumber, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!query) return client[botNum].reply(from, "Please specify a url");
+		if (!query) return client[botNum].reply({ from, quoted: message }, "Please specify a url");
 		try {
 			const urls = query.split(",");
-			if (isOne(urls.length) && !isURL(query)) return client[botNum].reply(from, "Please specify a valid url");
-			if (isOne(urls.length) && !regex(query)) return client[botNum].reply(from, "Please specify a valid Instagram url");
+			if (isOne(urls.length) && !isURL(query)) return client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
+			if (isOne(urls.length) && !regex(query)) return client[botNum].reply({ from, quoted: message }, "Please specify a valid Instagram url");
 			for (const url of urls) {
 				if (!isURL(url.trim())) {
-					await client[botNum].reply(from, "Please specify a valid url");
+					await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
 					continue;
 				} else if (!regex(url.trim())) {
-					await client[botNum].reply(from, "Please specify a valid Instagram url");
+					await client[botNum].reply({ from, quoted: message }, "Please specify a valid Instagram url");
 					continue;
 				}
 				const parse = parseCode(url.trim());
@@ -31,7 +31,7 @@ export default {
 				if (parse) {
 					const post = await getPost(parse);
 					if ("error" in post) {
-						client[botNum].reply(from, `Error while downloading Instagram post\n\n${post.error}\n${url}`);
+						client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram post\n\n${post.error}\n${url}`);
 						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Instagram Post", "red")} for ${color(prettyNumber, "#ff71ce")}`);
 						continue;
 					} else {
@@ -74,7 +74,7 @@ export default {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name}\n`;
 			str += `Message : ${err.message}`;
-			await client[botNum].reply(from, str);
+			await client[botNum].reply({ from, quoted: message }, str);
 			log(err);
 		}
 	},

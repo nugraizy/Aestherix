@@ -10,9 +10,9 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	async run({ query, from, cmd, message }, client) {
-		if (!query) return client[botNum].reply(from, "Please specify a surah number");
-		if (!regex(query)) return client[botNum].reply(from, "Please specify a valid surah number");
-		if (parseInt(query) > 114) return client[botNum].reply(from, "Surah number must be less than 114");
+		if (!query) return client[botNum].reply({ from, quoted: message }, "Please specify a surah number");
+		if (!regex(query)) return client[botNum].reply({ from, quoted: message }, "Please specify a valid surah number");
+		if (parseInt(query) > 114) return client[botNum].reply({ from, quoted: message }, "Surah number must be less than 114");
 		try {
 			const audio = await getSurahAudio(query);
 			const ayat = await getAyat(query);
@@ -32,7 +32,7 @@ export default {
 			}
 			await client[botNum].buttonDocument(from, ayat.map((v) => ` • ${v.arab}\n؜ • ${v.latin}\n؜ • ${v.indonesia}`).join("\n\n"), "Made by nanda", buttons, audio.url, { quoted: message, mimetype: mime(audio.url), fileName: `${detail.namaLatin}.${extension(mime(audio.url))}` });
 		} catch (err) {
-			return client[botNum].reply(from, "Surah not found");
+			return client[botNum].reply({ from, quoted: message }, "Surah not found");
 		}
 	},
 };

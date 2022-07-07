@@ -11,7 +11,7 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	async run({ query, from, filename, message }, client) {
-		if (!query) return client[botNum].reply(from, "Please provide some text to convert to speech");
+		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide some text to convert to speech");
 		const parseOptions = query.includes("--") ? query.split("--") : query;
 		let language = "id";
 		if (Array.isArray(parseOptions)) {
@@ -30,7 +30,7 @@ export default {
 						.join("\n")}`,
 				);
 			log(e);
-			client[botNum].reply(from, "Error while converting text to speech");
+			client[botNum].reply({ from, quoted: message }, "Error while converting text to speech");
 		}
 	},
 };

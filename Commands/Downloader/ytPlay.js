@@ -7,7 +7,7 @@ export default {
 	cooldown: 5,
 	limit: 4,
 	async run(message, client) {
-		if (!message.query) return client[botNum].reply(message.from, "Please enter a query");
+		if (!message.query) return client[botNum].reply({ quoted: message.message, from: message.from }, "Please enter a query");
 		if (/--?(aud(io)?|mp3|lagu|song(s)?)/.test(message.query)) {
 			cmds.commands.get("ytaudio").run(message, client);
 		} else if (/--?(vid(eo)?s?|mp4|clips?)/.test(message.query)) {

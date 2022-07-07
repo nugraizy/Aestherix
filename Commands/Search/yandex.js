@@ -12,13 +12,13 @@ export default {
 	limit: 2,
 	cooldown: 2,
 	async run({ isMediaImage, query, extractMediaData, filename, from, message }, client) {
-		if (!isURL(query) && !isMediaImage) return client[botNum].reply(from, "Please send/reply a image to find the similar image");
+		if (!isURL(query) && !isMediaImage) return client[botNum].reply({ from, quoted: message }, "Please send/reply a image to find the similar image");
 		try {
 			let media = query && isURL(query) ? query : null;
-			await client[botNum].reply(from, "Searching. Please wait...");
+			await client[botNum].reply({ from, quoted: message }, "Searching. Please wait...");
 			if (isMediaImage) media = await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`));
 			const result = await yandex(media);
-			if ("error" in result) return client[botNum].reply(from, result.error);
+			if ("error" in result) return client[botNum].reply({ from, quoted: message }, result.error);
 			let capt = "Reverse Image Search\n";
 			capt += "Will sending a few similar or the actual images itself. Please wait...\n\n";
 			for (const item of result.information) {

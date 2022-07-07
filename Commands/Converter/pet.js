@@ -20,8 +20,8 @@ export default {
 	usage: "petpet <@user/(reply/send image)>",
 	cooldown: 5,
 	limit: 1,
-	async run({ bodyQuoted, mention, isMediaImage, from, extractMediaData, mediaData, filename, prettyNumber, sender, query }, client) {
-		if (mention.length == 0 && !isMediaImage) return client[botNum].reply(from, "Please mention or send/reply an image to pet");
+	async run({ bodyQuoted, mention, isMediaImage, from, extractMediaData, mediaData, filename, prettyNumber, sender, query, message }, client) {
+		if (mention.length == 0 && !isMediaImage) return client[botNum].reply({ from, quoted: message }, "Please mention or send/reply an image to pet");
 		createExif("Made by Nanda", "Void bot");
 		try {
 			const time = moment().format("HH:mm:ss DD/MM");
@@ -62,7 +62,7 @@ export default {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name ?? "Petting"}\n`;
 			str += `Message : ${err.message ?? err.error}`;
-			await client[botNum].reply(from, str + (err.languages ? err.languages.map((v) => `\n${v.code} - ${v.name}`).join("\n") : ""));
+			await client[botNum].reply({ from, quoted: message }, str + (err.languages ? err.languages.map((v) => `\n${v.code} - ${v.name}`).join("\n") : ""));
 			log(err);
 		}
 	},

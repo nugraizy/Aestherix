@@ -15,7 +15,7 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	async run({ query, message, from, prettyNumber, filename }, client) {
-		if (!query) return client[botNum].reply(from, "Please enter a query");
+		if (!query) return client[botNum].reply({ from, quoted: message }, "Please enter a query");
 		let result = await line(query);
 		if (result.length > 10) result = result.slice(0, 10);
 		const capt = `Line Stickers\n\nAuthor : ${result[0].author.capitalize()}\nTot. Stickers : ${result.length}`;

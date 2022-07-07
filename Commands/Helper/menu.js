@@ -8,7 +8,8 @@ export default {
 	category: "Helper",
 	cooldown: 10,
 	limit: 5,
-	async run({ from, prefix }, client) {
+	async run({ from, prefix, message }, client) {
+		log(message);
 		let capt = `Void Bot Menu v.${romanize(readJSON("./package.json").version)}\n\nUse ${prefix}${getRandomCommand()} -H\n~> to see the detail of the command.\n\n`;
 		const Container = [];
 		for (const [key, value] of cmds.commands)
@@ -19,7 +20,7 @@ export default {
 				.sort((a, b) => a.localeCompare(b))
 				.map((v, i) => `${i + 1}. ${v.capitalize()}`)
 				.join("\n")}\n\n\n`;
-		await client[botNum].reply(from, capt.trim());
+		await client[botNum].reply({ from, quoted: message }, capt.trim());
 	},
 };
 

@@ -17,9 +17,9 @@ export default {
 	category: "Owner",
 	cooldown: 0,
 	limit: 0,
-	async run({ isOwner, from, args }, client, store) {
-		if (!isOwner) return client[botNum].reply(from, "You are not allowed to use this command");
-		if (args.length == 1) return client[botNum].reply(from, "You must provide a status to simulate");
+	async run({ isOwner, from, args, message }, client, store) {
+		if (!isOwner) return client[botNum].reply({ from, quoted: message }, "You are not allowed to use this command");
+		if (args.length == 1) return client[botNum].reply({ from, quoted: message }, "You must provide a status to simulate");
 		const started = Date.now();
 		try {
 			switch (args[1]?.toLowerCase()) {
@@ -30,30 +30,30 @@ export default {
 							case "status":
 							case "stats":
 								{
-									client[botNum].reply(from, Object.keys(global.presences).includes("available") ? "Available" : "Unavailable");
+									client[botNum].reply({ from, quoted: message }, Object.keys(global.presences).includes("available") ? "Available" : "Unavailable");
 								}
 								break;
 							case "disable":
 							case "off":
 								{
-									if ("unavailable" in global.presences) return client[botNum].reply(from, "Already offline");
+									if ("unavailable" in global.presences) return client[botNum].reply({ from, quoted: message }, "Already offline");
 									if ("available" in global.presences) delete global.presences.available;
 									global.presences.unavailable = { status: WAPresence.unavailable, started };
-									client[botNum].reply(from, "Simulate Available Presence Disabled");
+									client[botNum].reply({ from, quoted: message }, "Simulate Available Presence Disabled");
 								}
 								break;
 							case "enable":
 							case "on":
 								{
-									if ("available" in global.presences) return client[botNum].reply(from, "Already online");
+									if ("available" in global.presences) return client[botNum].reply({ from, quoted: message }, "Already online");
 									if ("unavailable" in global.presences) delete global.presences.unavailable;
 									global.presences.available = { status: WAPresence.available, started };
-									client[botNum].reply(from, "Simulate Available Presence Enabled");
+									client[botNum].reply({ from, quoted: message }, "Simulate Available Presence Enabled");
 								}
 								break;
 							default:
 								{
-									client[botNum].reply(from, "Usage: !presence online [enable|disable|status]");
+									client[botNum].reply({ from, quoted: message }, "Usage: !presence online [enable|disable|status]");
 								}
 								break;
 						}
@@ -67,24 +67,24 @@ export default {
 							case "status":
 							case "stats":
 								{
-									client[botNum].reply(from, Object.keys(global.presences).includes("composing") ? "Composing" : "Not composing");
+									client[botNum].reply({ from, quoted: message }, Object.keys(global.presences).includes("composing") ? "Composing" : "Not composing");
 								}
 								break;
 							case "disable":
 							case "off":
 								{
-									if (!("composing" in global.presences)) return client[botNum].reply(from, "Already not writing");
+									if (!("composing" in global.presences)) return client[botNum].reply({ from, quoted: message }, "Already not writing");
 									const messages = Object.keys(store.messages);
 									pause(client, messages);
 									clearInterval(global.presences.composing.interval);
 									delete global.presences.composing;
-									client[botNum].reply(from, "Simulate Composing Disabled");
+									client[botNum].reply({ from, quoted: message }, "Simulate Composing Disabled");
 								}
 								break;
 							case "enable":
 							case "on":
 								{
-									if ("composing" in global.presences) return client[botNum].reply(from, "Already writing");
+									if ("composing" in global.presences) return client[botNum].reply({ from, quoted: message }, "Already writing");
 									global.presences.composing = {
 										status: WAPresence.composing,
 										started,
@@ -93,12 +93,12 @@ export default {
 											events(client, messages, "composing");
 										}, 8_000),
 									};
-									client[botNum].reply(from, "Simulate Composing Enabled");
+									client[botNum].reply({ from, quoted: message }, "Simulate Composing Enabled");
 								}
 								break;
 							default:
 								{
-									client[botNum].reply(from, "Usage: !presence composing [enable|disable|status]");
+									client[botNum].reply({ from, quoted: message }, "Usage: !presence composing [enable|disable|status]");
 								}
 								break;
 						}
@@ -111,24 +111,24 @@ export default {
 							case "status":
 							case "stats":
 								{
-									client[botNum].reply(from, Object.keys(global.presences).includes("recording") ? "Recording" : "Not recording");
+									client[botNum].reply({ from, quoted: message }, Object.keys(global.presences).includes("recording") ? "Recording" : "Not recording");
 								}
 								break;
 							case "disable":
 							case "off":
 								{
-									if (!("recording" in global.presences)) return client[botNum].reply(from, "Already not recording");
+									if (!("recording" in global.presences)) return client[botNum].reply({ from, quoted: message }, "Already not recording");
 									const messages = Object.keys(store.messages);
 									pause(client, messages);
 									clearInterval(global.presences.recording.interval);
 									delete global.presences.recording;
-									client[botNum].reply(from, "Simulate Recording Disabled");
+									client[botNum].reply({ from, quoted: message }, "Simulate Recording Disabled");
 								}
 								break;
 							case "enable":
 							case "on":
 								{
-									if ("recording" in global.presences) return client[botNum].reply(from, "Already recording");
+									if ("recording" in global.presences) return client[botNum].reply({ from, quoted: message }, "Already recording");
 									global.presences.recording = {
 										status: WAPresence.recording,
 										started,
@@ -137,12 +137,12 @@ export default {
 											events(client, messages, "recording");
 										}, 10_000),
 									};
-									client[botNum].reply(from, "Simulate Recording Enabled");
+									client[botNum].reply({ from, quoted: message }, "Simulate Recording Enabled");
 								}
 								break;
 							default:
 								{
-									client[botNum].reply(from, "Usage: !presence recording [enable|disable|status]");
+									client[botNum].reply({ from, quoted: message }, "Usage: !presence recording [enable|disable|status]");
 								}
 								break;
 						}
@@ -153,29 +153,29 @@ export default {
 						case "status":
 						case "stats":
 							{
-								client[botNum].reply(from, Object.keys(global.presences).includes("bio") ? "Enabled" : "Disabled");
+								client[botNum].reply({ from, quoted: message }, Object.keys(global.presences).includes("bio") ? "Enabled" : "Disabled");
 							}
 							break;
 						case "disable":
 						case "off":
 							{
-								if (!("bio" in global.presences)) return client[botNum].reply(from, "Already disabled");
+								if (!("bio" in global.presences)) return client[botNum].reply({ from, quoted: message }, "Already disabled");
 								clearInterval(global.presences.bio.interval);
 								delete global.presences.bio;
-								client[botNum].reply(from, "Simulate Bio Disabled");
+								client[botNum].reply({ from, quoted: message }, "Simulate Bio Disabled");
 							}
 							break;
 						case "enable":
 						case "on":
 							{
-								if ("bio" in global.presences) return client[botNum].reply(from, "Already enabled");
+								if ("bio" in global.presences) return client[botNum].reply({ from, quoted: message }, "Already enabled");
 								global.presences.bio = { status: WAPresence.bio, started, interval: setInterval(() => events(client, [], "bio"), 10_000) };
-								client[botNum].reply(from, "Simulate Bio Enabled");
+								client[botNum].reply({ from, quoted: message }, "Simulate Bio Enabled");
 							}
 							break;
 						default:
 							{
-								client[botNum].reply(from, "Usage: !presence bio [enable|disable|status]");
+								client[botNum].reply({ from, quoted: message }, "Usage: !presence bio [enable|disable|status]");
 							}
 							break;
 					}
@@ -183,7 +183,7 @@ export default {
 				}
 				default:
 					{
-						client[botNum].reply(from, "Invalid command");
+						client[botNum].reply({ from, quoted: message }, "Invalid command");
 					}
 					break;
 			}

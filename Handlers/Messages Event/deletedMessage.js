@@ -35,7 +35,7 @@ export default {
 			if (from == "status@broadcast") return;
 			if (type == "protocolMessage" || type == "senderKeyDistributionMessage" || !type) return;
 			if (CheckIntervals(intervals["url"].get(sender)) !== 0 && CheckIntervals(intervals["url"].get(sender).get(from)) !== 0 && CheckIntervals(intervals["url"].get(sender).get(from)).id == message.message.key.id) {
-				await client[botNum].reply(from, "Good. Do not send URLs next time or i will kick you.");
+				await client[botNum].reply({ from, quoted: message }, "Good. Do not send URLs next time or i will kick you.");
 				DeleteIntervals(intervals["url"].get(sender).get(from), intervals["url"].get(sender), from);
 				return;
 			}

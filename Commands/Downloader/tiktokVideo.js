@@ -13,7 +13,7 @@ export default {
 	limit: 6,
 	async run({ from, query, prettyNumber, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!query) return client[botNum].reply(from, "Please provide a URL");
+		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a URL");
 		try {
 			let urls = query.split(",");
 			let options = "";
@@ -21,22 +21,22 @@ export default {
 				options = urls.find((v) => /-?-(wm|watermark|nowm|nowatermark)/.test(v)).match(/-?-(wm|watermark|nowm|nowatermark)/gi)[0];
 				urls = urls.map((v) => v.replace(/(-?-(wm|watermark|nowm|nowatermark))/g, ""));
 			}
-			if (isOne(urls.length) && !isURL(query)) return client[botNum].reply(from, "Please specify a valid url");
-			if (isOne(urls.length) && !regex(query)) return client[botNum].reply(from, "Please specify a valid TikTok url");
+			if (isOne(urls.length) && !isURL(query)) return client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
+			if (isOne(urls.length) && !regex(query)) return client[botNum].reply({ from, quoted: message }, "Please specify a valid TikTok url");
 			urls = removeDuplicatesArray(urls.map((v) => v.trim()));
 			for (const url of urls) {
 				if (!isURL(url)) {
-					await client[botNum].reply(from, "Please specify a valid url");
+					await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
 					continue;
 				} else if (!regex(url)) {
-					await client[botNum].reply(from, "Please specify a valid TikTok url");
+					await client[botNum].reply({ from, quoted: message }, "Please specify a valid TikTok url");
 					continue;
 				}
 				const videos = await tiktokDownloader(url);
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading TikTok Video`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 				if ("error" in videos) {
 					ERRLOG(`[${color(time, "cyan")}]`, `${color(`Error while downloading TikTok Video`, "#ff0000")} for ${color(prettyNumber, "#ff71ce")}`);
-					client[botNum].reply(from, `Error while downloading TikTok Video\n\n${url}`);
+					client[botNum].reply({ from, quoted: message }, `Error while downloading TikTok Video\n\n${url}`);
 					continue;
 				}
 				let capt = "``` • TikTok Video```\n\n";
@@ -63,7 +63,7 @@ export default {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name}\n`;
 			str += `Message : ${err.message}`;
-			await client[botNum].reply(from, str);
+			await client[botNum].reply({ from, quoted: message }, str);
 			log(err);
 		}
 	},

@@ -9,15 +9,15 @@ export default {
 	aliases: ["tinyurl", "urlshort", "short", "shorten"],
 	limit: 2,
 	cooldown: 3,
-	async run({ query, from }, client) {
-		if (!query) return client[botNum].reply(from, "You must provide a URL");
-		if (!isURL(query)) return client[botNum].reply(from, "Please specify a valid URL");
+	async run({ query, from, message }, client) {
+		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a URL");
+		if (!isURL(query)) return client[botNum].reply({ from, quoted: message }, "Please specify a valid URL");
 		try {
 			const urls = await tiny(query);
-			await client[botNum].reply(from, urls);
+			await client[botNum].reply({ from, quoted: message }, urls);
 		} catch (err) {
 			log(e);
-			client[botNum].reply(from, "Error while shortening your URL");
+			client[botNum].reply({ from, quoted: message }, "Error while shortening your URL");
 		}
 	},
 };

@@ -15,7 +15,7 @@ export default {
 	limit: 1,
 	async run({ isMediaImage, isMediaVid, from, prettyNumber, message, filename, extractMediaData }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!isMediaImage && !isMediaVid) return client[botNum].reply(from, "Please send/reply a media to convert to sticker");
+		if (!isMediaImage && !isMediaVid) return client[botNum].reply({ from, quoted: message }, "Please send/reply a media to convert to sticker");
 		try {
 			const file = await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`));
 			createExif("Made by Nanda", "Void bot");
@@ -26,7 +26,7 @@ export default {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name}\n`;
 			str += `Message : ${err.message}`;
-			await client[botNum].reply(from, str);
+			await client[botNum].reply({ from, quoted: message }, str);
 			log(err);
 		}
 	},

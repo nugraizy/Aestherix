@@ -11,17 +11,17 @@ import { INFOLOG, ERRLOG, color } from "../Modules/functions.js";
 const { createCanvas, registerFont } = Canvas;
 const { CanvasTextWrapper } = Wrap;
 
-export async function attp(sender, texts, color, fonts) {
+export async function attp(sender, texts, colored, fonts) {
 	const time = moment().format("HH:mm:ss DD/MM");
 	fonts = fonts !== undefined ? fonts.toLowerCase() : "chevin";
-	color = color.length == 0 ? null : color;
+	colored = colored.length == 0 ? null : colored;
 	INFOLOG(`[${color(time, "cyan")}]`, `${color(`Making Animated Image`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
-	const colors = await loadColorsPalette(color);
+	const colors = await loadColorsPalette(colored);
 	let { ctx, canvas } = createCanvasTemplates(fonts);
 	let i = 0;
 	const images = [];
-	for (const color of colors) {
-		const reassignColor = color.startsWith("#") ? color : `#${color}`;
+	for (const colori of colors) {
+		const reassignColor = colori.startsWith("#") ? colori : `#${colori}`;
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		ctx.fillStyle = reassignColor;
 		ctx.shadowOffsetX = 1;
@@ -50,7 +50,7 @@ const createSequence = async (images, sender) =>
 		const time = moment().format("HH:mm:ss DD/MM");
 		const pathExif = path.join(__dirname, "Temporary Files/data.exif");
 		const pathResults = path.join(__dirname, `Temporary Files/Animated Images-${Date.now()}`);
-		const commands = ["-loop", "3", ...images.map((v) => v, "-d 0.1"), "-o", `${pathResults}.webp`];
+		const commands = ["-loop", "1", ...images.map((v) => v, "-d 0.1"), "-o", `${pathResults}.webp`];
 		createExif("Made by Nanda", "Void Animated Sticker using Canvas and WebP");
 		spawn("img2webp", commands)
 			.on("error", (err) => {

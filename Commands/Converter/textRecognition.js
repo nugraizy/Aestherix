@@ -13,7 +13,7 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	async run({ isMediaImage, from, prettyNumber, message, filename, query, extractMediaData }, client) {
-		if (!isMediaImage) return client[botNum].reply(from, "Please send/reply an image to recognize text");
+		if (!isMediaImage) return client[botNum].reply({ from, quoted: message }, "Please send/reply an image to recognize text");
 		try {
 			const time = moment().format("HH:mm:ss DD/MM");
 			const file = await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`));
@@ -24,7 +24,7 @@ export default {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name ?? "Recognizing"}\n`;
 			str += `Message : ${err.message ?? err.error}`;
-			await client[botNum].reply(from, str + (err.languages ? err.languages.map((v) => `\n${v.code} - ${v.name}`).join("\n") : ""));
+			await client[botNum].reply({ from, quoted: message }, str + (err.languages ? err.languages.map((v) => `\n${v.code} - ${v.name}`).join("\n") : ""));
 			log(err);
 		}
 	},
