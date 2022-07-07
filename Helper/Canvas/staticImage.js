@@ -16,9 +16,9 @@ export async function ttp(sender, texts, colors, fonts) {
 	fonts = fonts !== undefined ? fonts.toLowerCase() : "chevin";
 	colors = colors.length == 0 ? null : colors;
 	INFOLOG(`[${color(time, "cyan")}]`, `${color(`Making Static Image`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
-	const color = await loadColorsPalette(colors);
+	const colori = await loadColorsPalette(colors);
 	let { ctx, canvas } = createCanvasTemplates(fonts);
-	const reassignColor = color.startsWith("#") ? color : `#${color}`;
+	const reassignColor = colori.startsWith("#") ? colori : `#${colori}`;
 	ctx.fillStyle = reassignColor;
 	ctx.shadowOffsetX = 1;
 	ctx.shadowOffsetY = 1;

@@ -7,8 +7,8 @@ export default {
 	name: "staticsticker",
 	description: "Generate static sticker",
 	category: "Converter",
-	usage: "ttp <text> [--color] [--fonts]",
-	aliases: ["ttp"],
+	usage: "sttp <text> [--color] [--fonts]",
+	aliases: ["statp"],
 	cooldown: 5,
 	limit: 1,
 	async run({ from, query, message, sender, prettyNumber, bodyQuoted }, client) {

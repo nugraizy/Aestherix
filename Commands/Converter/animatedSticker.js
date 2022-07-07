@@ -5,10 +5,10 @@ import { INFOLOG, color } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "animatedsticker",
-	description: "Generate animated sticker",
+	description: "Generate animated gif sticker",
 	category: "Converter",
-	usage: "!attp <text> [--color] [--fonts]",
-	aliases: ["attp"],
+	usage: "!gittp <text> [--color] [--fonts]",
+	aliases: ["gittp"],
 	cooldown: 5,
 	limit: 1,
 	async run({ from, query, message, sender, prettyNumber, bodyQuoted }, client) {
