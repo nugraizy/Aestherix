@@ -15,7 +15,7 @@ export const tiktokDownloader = (url) =>
 			music: URL_BASE_MUSIC(dataResult.data.music),
 		});
 	});
-const URL_KEY_PARSER = (input) => `https://api.snaptik.site/video-key?video_url=${input}`;
-const URL_DETAIL_PARSER = (input) => `https://api.snaptik.site/video-details-by-key?key=${input}`;
-const URL_BASE_DOWNLOAD = (input) => `https://api.snaptik.site/download?key=${input}&type=video`;
-const URL_BASE_MUSIC = (input) => `https://api.snaptik.site/download?key=${input}&type=music`;
+const URL_KEY_PARSER = (input) => `https://api.ngutek.com/video-key?video_url=${input}`;
+const URL_DETAIL_PARSER = (input) => `https://api.ngutek.com/video-details-by-key?key=${input}`;
+const URL_BASE_DOWNLOAD = (input) => `https://api.ngutek.com/download?key=${input}&type=video`;
+const URL_BASE_MUSIC = (input) => `https://api.ngutek.com/download?key=${input}&type=music`;
