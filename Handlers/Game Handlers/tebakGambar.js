@@ -6,7 +6,7 @@ export const handler = ({ message, from, body }, client) => {
 		const minScore = 0.75;
 		const data = games.tebakGambar.get(from);
 		if (body.toLowerCase() == data.data.answer.toLowerCase()) {
-			DeleteIntervals(from);
+			DeleteIntervals(intervals["tebakGambar"].get(from), intervals["tebakGambar"], from);
 			games.tebakGambar.delete(games.tebakGambar.get(from));
 			return client[botNum].sendMessage(from, { text: "Correct!" }, { quoted: message });
 		}

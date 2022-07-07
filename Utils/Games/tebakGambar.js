@@ -1,10 +1,11 @@
 import path from "path";
 import moment from "moment-timezone";
 import { __dirname } from "../../connect.js";
-import { readJSON, randomize } from "../../Helper/Modules/functions.js";
+import { readJSON, randomize, color, INFOLOG } from "../../Helper/Modules/functions.js";
 import { CheckIntervals, DeleteIntervals, SetIntervals } from "../Misc/intervals.js";
 
 export const startTG = async (client, id, { message, sender }, remainingTime) => {
+	const time = moment().format("HH:mm:ss DD/MM");
 	const Data = CheckIntervals(intervals["tebakGambar"].get(id));
 	if (Data !== 0) {
 		const data = games.tebakGambar.get(id);
@@ -20,7 +21,8 @@ export const startTG = async (client, id, { message, sender }, remainingTime) =>
 	const remainings = moment(new Date())
 		.add(parseInt(remainingTime + 2), "seconds")
 		.valueOf();
-	SetIntervals(intervals["tebakGambar"], id, remainingTime + 2, (clients = client, ids = id, answers = answer, remainingTimes = remainings) => {
+	INFOLOG(`[${color(time, "cyan")}]`, `${color(`The Answer is : ${answer}`, "#01cdfe")}`);
+	SetIntervals(intervals["tebakGambar"], id, remainingTime + 2, (clients = client, ids = id, answers = answer, messages = message, remainingTimes = remainings) => {
 		if (intervals["tebakGambar"].get(ids) === undefined) return;
 		const second = Math.floor(((remainingTimes - new Date().getTime()) % (1000 * 60)) / 1000);
 		intervals["tebakGambar"].get(ids).timer = second;
@@ -28,7 +30,7 @@ export const startTG = async (client, id, { message, sender }, remainingTime) =>
 		const { timer } = CheckIntervals(intervals["tebakGambar"].get(ids));
 		if (timer <= 0) {
 			DeleteIntervals(intervals["tebakGambar"].get(ids), intervals["tebakGambar"], ids);
-			clients[botNum].reply(ids, `Time's up! The answer is ${answers}`);
+			clients[botNum].reply({ from: ids, quoted: messages }, `Time's up! The answer is ${answers}`);
 			games.tebakGambar.delete(games.tebakGambar.get(ids));
 		}
 	});

@@ -259,7 +259,7 @@ export const reassign = async (m, client, store, search) => {
 				: isQuotedViewOnce && (isQuotedViewOnceImage || isQuotedViewOnceVideo)
 				? mediaData.message[typeQuoted].message && mediaData.message[typeQuoted].message[typeViewOnce]
 				: {};
-		const reply = async ({ from, quoted }, text, opts = undefined) => {
+		const reply = async ({ from, quoted }, text) => {
 			return await client[botNum].sendMessage(from, { text }, { quoted });
 		};
 		const downloadAndSaveMediaMessage = async (media, path) => {

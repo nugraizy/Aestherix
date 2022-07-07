@@ -1,11 +1,45 @@
 import fetch from "node-fetch";
+import bigInt from "big-integer";
+
+const INFO_URL_API = () => `https://www.instagram.com`;
+const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36";
 const sessionId = process.env.INSTAGRAM_SESI;
 
-export const getPost = (code) =>
+const lower = "abcdefghijklmnopqrstuvwxyz";
+const upper = lower.toUpperCase();
+const numbers = "0123456789";
+const ig_alphabet = `${upper + lower + numbers}-_`;
+const bigint_alphabet = numbers + lower;
+
+export const shortcodeToMediaID = (shortcode) => {
+	const o = shortcode.replace(/\S/g, (m) => {
+		const c = ig_alphabet.indexOf(m);
+		const b = bigint_alphabet.charAt(c);
+		return b != "" ? b : `<${c}>`;
+	});
+	return bigInt(o, 64).toString(10);
+};
+
+export const shortcodeFormatter = (url) => {
+	const re = /(?:https?:\/\/)?(?:www\.)?(?:instagram\.com(?:\/.+?)?\/(p|reel|tv)\/)([\w-]+)(?:\/)?(\?.*)?$/gim.exec(url) || "";
+	return {
+		type: re[1],
+		shortcode: re[2],
+		url: `https://www.instagram.com/${re[1]}/${re[2]}`,
+		media_id: shortcodeToMediaID(re[2]),
+	};
+};
+
+export const getPost = (url) =>
 	new Promise(async (resolve, reject) => {
-		if (!code) return reject(new Error('Argument "code" must be specified'));
+		if (!url) return reject(new Error('Argument "code" must be specified'));
 		try {
-			const data = await (await fetch(`https://www.instagram.com/p/${code}/?__a=1`, { headers: { Cookie: `sessionid=${sessionId}` } })).json();
+			const c = `${INFO_URL_API()}/${shortcodeFormatter(url).type}/${shortcodeFormatter(url).shortcode}/?__a=1&__d=dis`;
+			console.log(c);
+			const data = await fetch(c, {
+				method: "GET",
+				headers: { "user-agent": UA, cookie: `sessionid=${sessionId};` },
+			});
 			let { username, full_name, is_private, is_verified } = data.items[0].user;
 			let { like_count, carousel_media_count, taken_at, comment_count, media_type } = data.items[0];
 			const captions = data.items[0].caption?.text ?? "No captions";
@@ -24,7 +58,7 @@ export const getPost = (code) =>
 			}
 			resolve(result);
 		} catch (e) {
-			resolve({ error: code.includes("/p/") ? e.message : "Invalid code" });
+			resolve({ error: url.includes("/p/") ? e.message : "Invalid code" });
 			log(e);
 		}
 	});

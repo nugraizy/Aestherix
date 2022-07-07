@@ -1,5 +1,6 @@
 import fetch from "node-fetch";
 
+const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36";
 const sessionId = process.env.INSTAGRAM_SESI;
 
 export const getUser = (username) =>
@@ -9,7 +10,8 @@ export const getUser = (username) =>
 			const { graphql } = await (
 				await fetch(`https://www.instagram.com/${username}/?__a=1`, {
 					headers: {
-						Cookie: `sessionid=${sessionId}`,
+						"user-agent": UA,
+						cookie: `sessionid=${sessionId}`,
 					},
 				})
 			).json();

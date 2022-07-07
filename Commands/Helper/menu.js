@@ -9,7 +9,6 @@ export default {
 	cooldown: 10,
 	limit: 5,
 	async run({ from, prefix, message }, client) {
-		log(message);
 		let capt = `Void Bot Menu v.${romanize(readJSON("./package.json").version)}\n\nUse ${prefix}${getRandomCommand()} -H\n~> to see the detail of the command.\n\n`;
 		const Container = [];
 		for (const [key, value] of cmds.commands)
