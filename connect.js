@@ -104,7 +104,7 @@ const start = async () => {
 
 	Client.ev.on("messages.update", async (message) => {
 		const Handler = (await import("./Handlers/Messages Event/deletedMessage.js")).default.handler;
-		message = store.messages[message[0].key.remoteJid].get(message[0].key.id);
+		message = store.messages[message[0].key.remoteJid]?.get(message[0].key.id);
 		Handler(client, message, store);
 	});
 

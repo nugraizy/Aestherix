@@ -1,7 +1,7 @@
 import Brainly from "brainly-scraper-v2";
 const LANG = ["id", "us", "es", "ru", "ro", "pt", "tr", "ph", "pl", "hi"];
 
-export const brainlySearch = (query, { lang = "id", count = Number(5) } = {}) =>
+export const brainlySearch = (query, { lang = "id", count = Number(5) }) =>
 	new Promise(async (resolve) => {
 		try {
 			if (count > 30) resolve({ error: "Max count is 30" });

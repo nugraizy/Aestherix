@@ -13,5 +13,15 @@
     "id": "6289607055246@s.whatsapp.net",
     "limit": 2,
     "role": "FREE"
+  },
+  {
+    "id": "6281311850715@s.whatsapp.net",
+    "limit": 30,
+    "role": "FREE"
+  },
+  {
+    "id": "6281220439155@s.whatsapp.net",
+    "limit": 0,
+    "role": "FREE"
   }
 ]

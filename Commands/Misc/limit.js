@@ -9,7 +9,6 @@ export default {
 	cooldown: 3,
 	limit: 0,
 	async run({ from, sender }, client) {
-		log(checkLimit(sender));
 		await client[botNum].reply(from, checkLimit(sender) ? `Your limit : ${checkLimit(sender).limit}\nType user : ${checkLimit(sender).type}` : "404"); // cma simple la, kalo mau update bole contribute.
 	},
 };

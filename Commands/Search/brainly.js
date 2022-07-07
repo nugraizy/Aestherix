@@ -3,7 +3,7 @@ import { brainlySearch } from "../../Utils/Brainly/index.js";
 export default {
 	name: "brainly",
 	description: "Search answers from brainly",
-	usage: "!brainly <query> --<?lang> (id, us, es, ru, ro, pt, tr, ph, pl, hi) <?count> (1-30)",
+	usage: "!brainly <query> --<?lang> (id, us, es, ru, ro, pt, tr, ph, pl, hi) --<?count> (1-30)",
 	category: "Search",
 	aliases: ["brainli", "brainly-search", "tugas"],
 	limit: 4,
@@ -11,7 +11,7 @@ export default {
 	async run({ query, from }, client) {
 		if (!query) return client[botNum].reply(from, "You must provide a query");
 		const parseOptions = query.includes("--") ? query.split("--") : query;
-		const options = { lang: null, count: null };
+		const options = { lang: undefined, count: undefined };
 		if (Array.isArray(parseOptions)) {
 			query = parseOptions[0];
 			options.lang = parseOptions
@@ -29,7 +29,6 @@ export default {
 		}
 		try {
 			const brainly = await brainlySearch(query, options);
-			console.log(brainly);
 			if ("error" in brainly) return client[botNum].reply(from, brainly.error);
 			let capt = "Void Bot Brainly\n\n";
 			for (const { pertanyaan, jawaban } of brainly) {

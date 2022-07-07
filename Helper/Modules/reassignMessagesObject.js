@@ -48,8 +48,8 @@ export const reassign = async (m, client, store, search) => {
 		const sender = isFromMe ? `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net` : isGroup ? m.key.participant : m.key.remoteJid;
 		const prettyNumber = PhoneNumber(`+${sender.replace("@s.whatsapp.net", "")}`).getNumber("international") ?? PhoneNumber(`+${m.key.participant.replace("@s.whatsapp.net", "")}`).getNumber("international");
 		const groupMetadata = isGroup ? await client[botNum].groupMetadata(from).catch((e) => {}) : "";
-		const groupName = isGroup ? groupMetadata.subject : "";
-		const groupId = isGroup ? groupMetadata.id : "";
+		const groupName = isGroup ? groupMetadata?.subject : "";
+		const groupId = isGroup ? groupMetadata?.id : "";
 		const isGroupOwner = isGroup ? (isSame((await client[botNum].groupMetadata(from)).owner, sender) ? true : false) : "";
 		const content = JSON.stringify(m.message, null, 2);
 		const pushname = m.pushName;
@@ -157,10 +157,10 @@ export const reassign = async (m, client, store, search) => {
 		const isQuotedViewOnceImage = isQuotedViewOnce && content.includes("viewOnceMessage") && content.includes("imageMessage");
 		const isQuotedViewOnceVideo = isQuotedViewOnce && content.includes("viewOnceMessage") && content.includes("videoMessage");
 		const typeViewOnce = isQuotedViewOnce && isQuotedViewOnceImage ? "imageMessage" : isQuotedViewOnce && isQuotedViewOnceVideo ? "videoMessage" : isViewOnce && isViewOnceImage ? "imageMessage" : isViewOnce && isViewOnceVideo ? "videoMessage" : "";
-		let mMediaData = isSame(type, "extendedTextMessage") && isNotSame(Object.keys(JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message), "ephemeralMessage") ? JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message.extendedTextMessage.contextInfo : mText;
-		if (isSame(type, "extendedTextMessage") && isSame(Object.keys(JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message), "ephemeralMessage") && JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message.ephemeralMessage.message.extendedTextMessage.contextInfo.message) {
+		let mMediaData = isSame(type, "extendedTextMessage") && isNotSame(Object.keys(JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message), "ephemeralMessage") ? JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message.extendedTextMessage?.contextInfo : mText;
+		if (isSame(type, "extendedTextMessage") && isSame(Object.keys(JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message), "ephemeralMessage") && JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message.ephemeralMessage.message.extendedTextMessage?.contextInfo.message) {
 			typeQuoted = Object.keys(JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message.ephemeralMessage.message.extendedTextMessage.contextInfo.message);
-			mMediaData = JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message.ephemeralMessage.message.extendedTextMessage.contextInfo;
+			mMediaData = JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message.ephemeralMessage.message.extendedTextMessage?.contextInfo;
 		}
 		const mediaData = isSame(type, "extendedTextMessage") ? (isSame(typeQuoted, "thumbnailMessage") ? mText : mMediaData || {}) : mText || {};
 		const typeMessage = [
@@ -230,8 +230,8 @@ export const reassign = async (m, client, store, search) => {
 					: mMediaData.message.viewOnceMessage.message.videoMessage.caption
 				: ""
 			: "";
-		const mention = mText.message[isSame(type, "mentionText") ? "extendedTextMessage" : type]?.contextInfo
-			? mText.message[isSame(type, "mentionText") ? "extendedTextMessage" : type].contextInfo.mentionedJid
+		const mention = mText?.message[isSame(type, "mentionText") ? "extendedTextMessage" : type]?.contextInfo
+			? mText.message[isSame(type, "mentionText") ? "extendedTextMessage" : type]?.contextInfo?.mentionedJid
 				? isSame(type, "extendedTextMessage") || isSame(type, "mentionText")
 					? mText.message.extendedTextMessage.contextInfo.mentionedJid
 					: isSame(type, "imageMessage")
