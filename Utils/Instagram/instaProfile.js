@@ -1,7 +1,47 @@
 import fetch from "node-fetch";
+import cheerio from "cheerio";
 
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36";
 const sessionId = process.env.INSTAGRAM_SESI;
+
+// Scrape by Alphanum404.
+export const getProfile = (username) =>
+	new Promise(async (resolve, reject) => {
+		try {
+			const data = await (await fetch(`https://www.picuki.com/profile/${username}`)).text();
+			const $ = cheerio.load(data);
+			const media = [];
+			$(".photo")
+				.find("a > img")
+				.each((_, elem) => media.push({ url: $(elem).attr("src") }));
+			$(".photo-info")
+				.find(".photo-description")
+				.each((i, elem) => (media[i].caption = $(elem).text().trim()));
+			$(".post-footer")
+				.find(".likes_photo")
+				.each((i, elem) => (media[i].likes = $(elem).text().trim()));
+			$(".post-footer")
+				.find(".comments_photo")
+				.each((i, elem) => (media[i].comments = $(elem).text().trim()))
+				.text();
+			if ($(".profile-name-top").text().trim() == "" && $(".follows").text().trim() == "") reject({ error: "User not found." });
+			resolve({
+				fullName: $(".profile-name-bottom").text().trim() !== "" ? $(".profile-name-bottom").text().trim() : "Not Available.",
+				userName: $(".profile-name-top").text().trim(),
+				following: $(".follows").text().trim(),
+				followers: $(".followed_by").text().trim(),
+				bio: $(".profile-description").text().trim() !== "" ? $(".profile-description").text().trim() : "Not Available.",
+				post: $(".total_posts").text().trim(),
+				thumb: $(".profile-hd-link.launchLightbox").attr("data-video-poster"),
+				latestPost: media,
+			});
+		} catch (e) {
+			log(e);
+			reject({
+				error: e,
+			});
+		}
+	});
 
 export const getUser = (username) =>
 	new Promise(async (resolve, reject) => {
@@ -62,6 +102,7 @@ export const getUser = (username) =>
 					}) || [],
 			});
 		} catch (e) {
+			log(e);
 			reject({ error: e });
 		}
 	});
