@@ -351,13 +351,21 @@ export const reassign = async (m, client, store, search) => {
 			return response;
 		};
 
-		const updateGroup = async (dari, containers, update, texts, force) => {
+		const updateGroup = async (dari, containers, update, texts, force, message) => {
 			const responses = [];
 			if (update.PARSE_EVENTS("ADD", "REMOVE", "DEMOTE", "PROMOTE")) {
 				for (const container of containers) {
 					try {
-						if (!force && adminGroups.inlucdes(container)) {
-							await client[botnum].sendMessage(dari, { text: `You can't update group @${container.split("@")[0]} because it's admin group.\nadd --force flag to force update admin`, contextInfo: { mentionedJid: [container] } }, { quoted: m });
+						if (!force && adminGroups.includes(container) && update == "REMOVE") {
+							await client[botNum].sendMessage(dari, { text: `You can't ${update} @${container.split("@")[0]} because it's admin group.\nadd --force flag to force update admin`, contextInfo: { mentionedJid: [container] } }, { quoted: message });
+							continue;
+						}
+						if (adminGroups.includes(container) && update == "PROMOTE") {
+							await client[botNum].sendMessage(dari, { text: `You can't ${update} @${container.split("@")[0]} because they already an admin group.`, contextInfo: { mentionedJid: [container] } }, { quoted: message });
+							continue;
+						}
+						if (!adminGroups.includes(container) && update == "DEMOTE") {
+							await client[botNum].sendMessage(dari, { text: `You can't ${update} @${container.split("@")[0]} because they already a member group.`, contextInfo: { mentionedJid: [container] } }, { quoted: message });
 							continue;
 						}
 						const response = await client[botNum][UPDATE[update]](dari, [container], update.toLowerCase());
@@ -365,7 +373,8 @@ export const reassign = async (m, client, store, search) => {
 						responses.push(response);
 					} catch (e) {
 						responses.push({ error: e.message, id: container });
-						client[botNum].reply(dari, `${container} is not a valid number`);
+						log(e);
+						client[botNum].reply({ from: dari, quoted: message }, `${container} is not a valid number`);
 					}
 				}
 			}
@@ -379,7 +388,6 @@ export const reassign = async (m, client, store, search) => {
 			}
 			if (update.PARSE_EVENTS("RETRIEVE", "REVOKE")) {
 				const response = await client[botNum][UPDATE[update]](dari);
-
 				responses.push(response);
 			}
 			return responses;

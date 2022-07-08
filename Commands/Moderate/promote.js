@@ -14,12 +14,12 @@ export default {
 		if (!isAdmin) return client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
 		if (!query && mention.length == 0 && !bodyQuoted) return client[botNum].reply({ from, quoted: message }, "Please reply people message or mention people.");
 		if (!isBotAdmin) return client[botNum].reply({ from, quoted: message }, "Bot is not admin, Please promote admin before using moderation commands.");
-		if (mention.includes(botNum) || mediaData.participant.includes(botNum)) return client[botNum].reply({ from, quoted: message }, "You can't promote me by myself.");
+		if (mention?.includes(botNum) || mediaData?.participant?.includes(botNum)) return client[botNum].reply({ from, quoted: message }, "You can't promote me by myself.");
 		if (query || mention.length > 0) {
-			await client[botNum].updateGroup(from, mention.length > 0 ? mention : query.split(",").parse(), "PROMOTE");
+			await client[botNum].updateGroup(from, mention.length > 0 ? mention : query.split(",").parse(), "PROMOTE", false, false, message);
 		}
 		if (bodyQuoted) {
-			await client[botNum].updateGroup(from, [mediaData.participant], "PROMOTE");
+			await client[botNum].updateGroup(from, [mediaData.participant], "PROMOTE", false, false, message);
 		}
 	},
 };

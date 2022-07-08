@@ -59,7 +59,7 @@ export default {
 				await delay(300);
 			}
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloaded TikTok Video`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
-		} catch (e) {
+		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name}\n`;
 			str += `Message : ${err.message}`;

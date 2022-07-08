@@ -75,7 +75,6 @@ const start = async () => {
 		if (connection == "connecting") addSpinner("Connecting", { text: "Connecting to WASocket..." });
 		if (connection == "close") {
 			const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
-			console.log(reason, DisconnectReason);
 			if (reason == DisconnectReason.badSession) log("Bad session, Please delete your previous session and do a rescan...");
 			else if (reason == DisconnectReason.connectionLost) log("Connection lost, Quick reconnecting...");
 			else if (reason == DisconnectReason.connectionReplaced) log("Connection replaced, Quick reconnecting...");

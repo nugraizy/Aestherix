@@ -1,7 +1,9 @@
 import fetch from "node-fetch";
+const URL = "https://vm.tiktok.com/ZSRJjDsgB/?k=1";
 
 export const tiktokDownloader = (url) =>
 	new Promise(async (resolve) => {
+		url = url.includes("vm.tiktok.com") ? url.replace("vm.tiktok.com", "vt.tiktok.com") : url;
 		const data = await (await fetch(URL_KEY_PARSER(url))).json();
 		if (data.status !== "success") resolve(data);
 		const dataResult = await (await fetch(URL_DETAIL_PARSER(data.data.key))).json();

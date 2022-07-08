@@ -5,7 +5,7 @@ export default {
 	name: "demote",
 	description: "Demote admin to member.",
 	usage: "!demote <reply/tag member>",
-	aliases: ["demt", "member", "mem"],
+	aliases: ["demt", "member", "mem", "dmt"],
 	category: "Moderation",
 	cooldown: 2,
 	limit: 2,
@@ -14,12 +14,12 @@ export default {
 		if (!isAdmin) return client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
 		if (!query && mention.length == 0 && !bodyQuoted) return client[botNum].reply({ from, quoted: message }, "Please reply people message or mention people.");
 		if (!isBotAdmin) return client[botNum].reply({ from, quoted: message }, "Bot is not admin, Please promote admin before using moderation commands.");
-		if (mention.includes(botNum) || mediaData.participant.includes(botNum)) return client[botNum].reply({ from, quoted: message }, "You can't demote me by myself.");
+		if (mention?.includes(botNum) || mediaData?.participant?.includes(botNum)) return client[botNum].reply({ from, quoted: message }, "You can't demote me by myself.");
 		if (query || mention.length > 0) {
-			await client[botNum].updateGroup(from, mention.length > 0 ? mention : query.split(",").parse(), "DEMOTE", false, /--?(force|F)/.test(query));
+			await client[botNum].updateGroup(from, mention.length > 0 ? mention : query.split(",").parse(), "DEMOTE", false, false, message);
 		}
 		if (bodyQuoted) {
-			await client[botNum].updateGroup(from, [mediaData.participant], "DEMOTE", false, /--?(force|F)/.test(query));
+			await client[botNum].updateGroup(from, [mediaData.participant], "DEMOTE", false, false, message);
 		}
 	},
 };
