@@ -171,12 +171,19 @@ export const soundRemover = (input, sender) =>
 		try {
 			const bodyForm = new FormData();
 			bodyForm.append("fileName", fs.createReadStream(input));
-			const data = await (await fetch("https://aivocalremover.com/FileTest", { method: "post", body: bodyForm, headers: { "Content-Type": `multipart/form-data; boundary=${bodyForm._boundary}` } })).json();
-			const { vocal_path: vocal, instrumental_path: instrumental } = await (await fetch("https://aivocalremover.com/ProcessM", { method: "post", body: `file_name=${data.file_name}&action=watermark_video`, headers: { "Content-Type": "application/x-www-form-urlencoded;charset=utf-8" } })).json();
+			const data = await (await fetch("https://aivocalremover.com/api/v2/FileUpload", { method: "post", body: bodyForm, headers: { "Content-Type": `multipart/form-data; boundary=${bodyForm._boundary}` } })).json();
+			const { vocal_path: vocal, instrumental_path: instrumental } = await (
+				await fetch("https://aivocalremover.com/api/v2/ProcessFile", {
+					method: "post",
+					body: `file_name=${data.file_name}&action=watermark_video&key=X9QXlU9PaCqGWpnP1Q4IzgXoKinMsKvMuMn3RYXnKHFqju8VfScRmLnIGQsJBnbZFdcKyzeCDOcnJ3StBmtT9nDEXJn`,
+					headers: { "Content-Type": "application/x-www-form-urlencoded;charset=utf-8" },
+				})
+			).json();
 			unlinkFile(input);
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Removed Sound`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
 			resolve({ result: { vocal, instrumental } });
 		} catch (err) {
+			log(err);
 			ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Remove Sound", "red")} for ${color(sender, "#ff71ce")}`);
 			reject(err);
 		}

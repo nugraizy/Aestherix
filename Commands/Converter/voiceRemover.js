@@ -24,9 +24,9 @@ export default {
 				return client[botNum].reply({ from, quoted: message }, "This file is not an audio/video");
 			const { result } = await soundRemover(file, prettyNumber);
 			if (/--?(voice|suara)/.test(query) && /--?(instrument(s)?)/.test(query)) return client[botNum].reply({ from, quoted: message }, `${time}\n${result.vocal}\n${result.instrumental}`);
-			else if (/--?(voice|suara)/.test(query)) await client[botNum].sendMessage(from, { document: { url: result.instrumental }, fileName: extractMediaData.fileName.replace(extension(extractMediaData.mimetype), "mp3"), mimetype: "audio/mp3" }, { quoted: message });
-			else if (/--?(instrumen(ts)?)/.test(query)) await client[botNum].sendMessage(from, { document: { url: result.vocal }, fileName: extractMediaData.fileName.replace(extension(extractMediaData.mimetype), "mp3"), mimetype: "audio/mp3" }, { quoted: message });
-			else await client[botNum].sendMessage(from, { document: { url: result.instrumental }, fileName: extractMediaData.fileName, mimetype: "audio/mp3" }, { quoted: message });
+			else if (/--?(voice|suara)/.test(query)) await client[botNum].sendMessage(from, { document: { url: result.instrumental }, fileName: extractMediaData?.fileName?.replace(extension(extractMediaData.mimetype), "mp3") ?? "Made by Nanda.mp3", mimetype: "audio/mp3" }, { quoted: message });
+			else if (/--?(instrumen(ts)?)/.test(query)) await client[botNum].sendMessage(from, { document: { url: result.vocal }, fileName: extractMediaData?.fileName?.replace(extension(extractMediaData.mimetype), "mp3") ?? "Made by Nanda.mp3", mimetype: "audio/mp3" }, { quoted: message });
+			else await client[botNum].sendMessage(from, { document: { url: result.instrumental }, fileName: extractMediaData.fileName ?? "Made by Nanda.mp3", mimetype: "audio/mp3" }, { quoted: message });
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sound is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";

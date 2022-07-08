@@ -1,8 +1,9 @@
 import dotenv from "dotenv";
+import { platform } from "process";
 dotenv.config();
 console.clear();
 import { spawn } from "child_process";
-await printRandomAscii();
+if (platform !== "win32") await printRandomAscii();
 
 import fs from "fs";
 import { pathToFileURL } from "url";
@@ -15,7 +16,6 @@ import path from "path";
 import { EventEmitter } from "events";
 import center from "center-align";
 import moment from "moment-timezone";
-import { platform } from "process";
 import { getSpinner } from "./Helper/Misc/Spinner/spinners.js";
 import { readJSON, INFOLOG, color, romanize, ERRLOG } from "./Helper/Modules/functions.js";
 EventEmitter.prototype.setMaxListeners(0);
@@ -48,19 +48,32 @@ cmds.aliases = [];
 global.log = console.log;
 
 const spinners = new Spinnies({ color: "blue", succeedColor: "green", failColor: "redBright", spinner: getSpinner("dots") });
-const addSpinner = (name, options) => spinners.add(name, options);
-const successSpinner = (name, options) => spinners.succeed(name, options);
-const failSpinner = (name, options) => spinners.fail(name, options);
 
 const cli = parseCli();
 global.OPTIONS = cli.flags;
-const regexOption = ["prefix", "readOnly", "autoRead", "autoCorrect", "restrict", "onlyLogs", "noLogs", "selfMode", "debugMode", "multiCmd", "rainbow", "trace", "help", "watch", "coolDown"];
+const regexOption = ["prefix", "readOnly", "autoRead", "autoCorrect", "restrict", "onlyLogs", "noLogs", "selfMode", "debugMode", "multiCmd", "rainbow", "trace", "help", "watch", "coolDown", "noLoad"];
 
 const store = makeInMemoryStore({ logger: P().child({ level: "fatal", stream: "store" }) });
 
 export const runtime = Date.now();
 
 for (const option of Object.keys(OPTIONS).filter((key) => OPTIONS[key] == true)) if (!regexOption.includes(option)) ERRLOG(` ${color(option, "red")} ${color("is not a valid option", "white")}`);
+
+const addSpinner = (name, options) => {
+	if (!OPTIONS.noLoad) {
+		spinners.add(name, options);
+	}
+};
+const successSpinner = (name, options) => {
+	if (!OPTIONS.noLoad) {
+		spinners.succeed(name, options);
+	}
+};
+const failSpinner = (name, options) => {
+	if (!OPTIONS.noLoad) {
+		spinners.fail(name, options);
+	}
+};
 
 const start = async () => {
 	if (OPTIONS.help) return log(cli.help);
@@ -232,6 +245,7 @@ function parseCli() {
 			watch: { type: "boolean", alias: "w" },
 			cool_down: { type: "boolean", alias: "c" },
 			auto_correct: { type: "boolean", alias: "a" },
+			no_load: { type: "boolean", alias: "v" },
 		},
 	});
 }
@@ -262,6 +276,7 @@ function help() {
 	  --trace, -t        Show errors
 	  --watch, -w        Watch every file on your script and reload it when it changed
 	  --cool_down, -c    Set cool down for every command
+	  --no_load, -v      Disable module load animation
 	  --help, -h         Show this message.
 
 	Examples
