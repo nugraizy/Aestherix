@@ -2,7 +2,7 @@ import fetch from "node-fetch";
 import cheerio from "cheerio";
 
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36";
-const sessionId = process.env.INSTAGRAM_SESI;
+const sessionId = process.env.INSTAGRAM_SESI || (await (await import("./instaCookie.js")).getCookie(process.env.INSTAGRAM_USERNAME, process.env.INSTAGRAM_PASSWORD));
 
 // Scrape by Alphanum404.
 export const getProfile = (username) =>
@@ -48,10 +48,10 @@ export const getUser = (username) =>
 		try {
 			if (username.startsWith("@")) username = username.replace("@", "");
 			const { graphql } = await (
-				await fetch(`https://www.instagram.com/${username}/?__a=1`, {
+				await fetch(`https://www.instagram.com/${username}/?__a=1&__d=dis`, {
 					headers: {
 						"user-agent": UA,
-						cookie: `sessionid=${sessionId}`,
+						cookie: sessionId,
 					},
 				})
 			).json();
