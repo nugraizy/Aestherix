@@ -1,5 +1,6 @@
 import { Aki } from "aki-api";
 
+const TOTAL_ANSWER = 7;
 const ANSWERS = {
 	1: 0, // IYA
 	2: 1, // TIDAK
@@ -54,14 +55,15 @@ export const handleAnswer = async (key, answer) => {
 	let progress;
 	let arrow;
 	const tempProgress = session.progress;
-	if (isNaN(answer)) {
+	if (parseInt(answer) > TOTAL_ANSWER) return { status: "waiting" };
+	if (isNaN(answer) || answer == 6) {
 		if (/^((t(?:rue)?|i?y(ak?|e)?(?:es|p)?|ok(?:ay)?)|(be?(tul|n(a|e)?r)))$/i.test(answer)) answer = ANSWERS[1];
 		else if (/^((t(i?da?k|dk))|g(a?|k)?|n(o?|ope))$/i.test(answer)) answer = ANSWERS[2];
 		else if (/^(((t(i?da?k|dk))|g(a?|k)?) (t(a?|h?|w)u?)|nt(a?h))/i.test(answer)) answer = ANSWERS[3];
 		else if (/^(((m(u?ng?k(i)?n|a?(y)?b(e|i))?) ((t(i?da?k|dk))|g(a?|k)?|n(o?|ope))))/i.test(answer)) answer = ANSWERS[5];
 		else if (/^((m(u?ng?k(i)?n|a?(y)?b(e|i))?))/i.test(answer)) answer = ANSWERS[4];
 		else if (/^(b(a?c?)k|undo|k(e?mb(a?)li))$/i.test(answer)) answer = ANSWERS[7];
-		else if (/^((e(xit)?|out|b(a?|t(a)?)l))$/i.test(answer)) {
+		else if (/^((e(xit)?|out|b(a?|t(a)?)l))$/i.test(answer) || answer == 6) {
 			await session.win();
 			if (session.progress == 0) arrow = "⇵";
 			else if (session.progress > tempProgress) arrow = "↑";

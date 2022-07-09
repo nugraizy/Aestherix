@@ -1,3 +1,5 @@
+import { delay } from "@adiwajshing/baileys";
+
 export default {
 	name: "searchmessage",
 	description: "Search for a message in the current group",
@@ -13,8 +15,9 @@ export default {
 		else {
 			capt += `Found ${messages.length} messages.\n\n`;
 			await client[botNum].reply({ from, quoted: message }, capt.trim());
-			for (let i = 0; i < messages.length; i++) {
-				const a = await client[botNum].reply({ from, quoted: message }, "Found it.", messages[i]);
+			for (const messageElement of messages) {
+				await delay(300);
+				await client[botNum].reply({ from, quoted: messageElement }, "Found it.");
 			}
 			return messages;
 		}

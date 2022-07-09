@@ -50,6 +50,7 @@ export default class TicTacToe {
 		this.TURN = "O";
 		this.PLAYER_TURN = container.player1;
 		this.BOARD = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"];
+		this.WINNING_ORDER = [null, null, null];
 		this.PLAY_BOARD = new Array(9).fill("");
 		if (this.checkGameStatus() && newGame) return { error: "Game already exists" };
 		this.setGame();
@@ -100,7 +101,10 @@ export default class TicTacToe {
 	isWinner(player) {
 		for (let i = 0; i < this.COMBO.length; i++) {
 			const [a, b, c] = this.COMBO[i];
-			if (this.PLAY_BOARD[a] === player && this.PLAY_BOARD[b] === player && this.PLAY_BOARD[c] === player) return true;
+			if (this.PLAY_BOARD[a] === player && this.PLAY_BOARD[b] === player && this.PLAY_BOARD[c] === player) {
+				this.WINNING_ORDER = [a, b, c];
+				return true;
+			}
 		}
 		return false;
 	}

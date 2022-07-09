@@ -176,7 +176,7 @@ export default {
 				`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
 				`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
 			);
-		if (message.isGroup && message[message.from].games == "enable" && message.isAdmin) {
+		if (message.isGroup && (message[message.from].games == "enable" || message.isAdmin)) {
 			if (getSession(message.from)) akinator(message, client);
 			tebak(message, client);
 		} else if (!message.isGroup) {

@@ -1,6 +1,11 @@
 import { delay } from "@adiwajshing/baileys";
 import { TicTacToe, GetTicTacToeSession, DeleteTicTacToeSession } from "../../Utils/Games/index.js";
 
+const WINNER_SETS = {
+	O: "🚫",
+	X: "❎",
+};
+
 export default {
 	name: "playtictactoe",
 	description: "Play Tic Tac Toe",
@@ -23,7 +28,15 @@ export default {
 	}
 	${game.PLAYER_1_MODEL} @${game.PLAYER_1.split("@")[0]} vs ${game.PLAYER_2_MODEL} ${game.PLAYER_2 == "Void Bot" ? "Void Bot" : `@${game.PLAYER_2.split("@")[0]}`}
 	
-${game.BOARD.map((v, i) => (i == 2 || i == 5 || i == 8 ? (i == 8 ? v : `${v}\n          ---------\n          `) : i == 0 ? `          ${v}|` : `${v}|`)).join("")}
+${game.BOARD.map((v, i) => {
+	const ICON = WINNER_SETS[game.TURN];
+	if (status && game.status !== "DRAW") {
+		v = i == game.WINNING_ORDER[0] || i == game.WINNING_ORDER[1] || i == game.WINNING_ORDER[2] ? v.replace(v, ICON) : v;
+	}
+	v = i == 2 || i == 5 || i == 8 ? (i == 8 ? v : `${v}\n          ---------\n          `) : i == 0 ? `          ${v}|` : `${v}|`;
+	return v;
+}).join("")}
+
 `;
 			if (/(del|dlt|d)/i.test(query)) {
 				const status = GetTicTacToeSession(sender);
@@ -41,14 +54,19 @@ ${game.BOARD.map((v, i) => (i == 2 || i == 5 || i == 8 ? (i == 8 ? v : `${v}\n  
 				if (!game) return client[botNum].reply({ from, quoted: message }, "You don't have a game");
 				const move = game.playMove(query, sender);
 				if ("error" in move) return client[botNum].reply({ from, quoted: message }, move.error);
-				await client[botNum].sendMessage(from, { text: capt(move), contextInfo: { mentionedJid: [game.PLAYER_1, game.PLAYER_2] } }, { quoted: message });
-				if (game.status == "WINNER" || game.status == "DRAW") return DeleteTicTacToeSession(sender);
+				if (move.status == "WINNER" || move.status == "DRAW") {
+					await client[botNum].sendMessage(from, { text: capt(move, true), contextInfo: { mentionedJid: [game.PLAYER_1, game.PLAYER_2] } }, { quoted: message });
+					return DeleteTicTacToeSession(sender);
+				} else await client[botNum].sendMessage(from, { text: capt(move), contextInfo: { mentionedJid: [game.PLAYER_1, game.PLAYER_2] } }, { quoted: message });
 				if (move.PLAYER_TURN == "Void Bot") {
 					const botGames = GetTicTacToeSession(sender);
 					await client[botNum].reply({ from, quoted: message }, "Void Bot's TURN");
 					await delay(1000);
 					const botMove = botGames.playMove(botGames.displayPlayBoard(), "Void Bot", sender);
-					await client[botNum].sendMessage(from, { text: capt(botMove, true), contextInfo: { mentionedJid: [botGames.PLAYER_1, botGames.PLAYER_2] } }, { quoted: message });
+					if (botMove.status == "WINNER" || botMove.status == "DRAW") {
+						await client[botNum].sendMessage(from, { text: capt(botMove, true), contextInfo: { mentionedJid: [botGames.PLAYER_1, botGames.PLAYER_2] } }, { quoted: message });
+						return DeleteTicTacToeSession(sender);
+					} else await client[botNum].sendMessage(from, { text: capt(botMove, false), contextInfo: { mentionedJid: [botGames.PLAYER_1, botGames.PLAYER_2] } }, { quoted: message });
 				}
 			}
 		} catch (error) {

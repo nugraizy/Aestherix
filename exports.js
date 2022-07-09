@@ -117,6 +117,7 @@ export {
 	yta,
 	ytsr,
 	ytv,
+	pinterest,
 	searchHashtag,
 	getHighlights,
 	getPost,

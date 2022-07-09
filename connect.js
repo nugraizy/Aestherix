@@ -1,3 +1,19 @@
+/**
+ *   @BANNER  |  @BANNER  |  @BANNER  |  @BANNER  |  @BANNER  |  @BANNER  |  @BANNER  |  @BANNER  |
+ *   @BANNER [ INFO ] this is a work done by @NANDA, coded by several people as team.
+ *   @BANNER [ INFO ] this project starts at the beginning of 2022 by @NANDA. coded by our team since February 9, 2022.
+ *   @BANNER [ INFO ] please do not remove this banner of information.
+ */
+
+/**
+ *   @AUTHOR  |  @AUTHOR  |  @AUTHOR  |  @AUTHOR  |  @AUTHOR  |  @AUTHOR  |  @AUTHOR  |  @AUTHOR  |
+ *   @NANDA         [ @GitHub ] https://github.com/nugraizy      [ @Instagram ] https://instagram.com/ngrdzy_
+ *   @MRHRTZ        [ @GitHub ] https://github.com/MRHRTZ        [ @Instagram ] https://instagram.com/hanif_az.sq.62
+ *   @Alphanum404   [ @GitHub ] https://github.com/Alphanum404   [ @Instagram ] https://instagram.com/aldiflynns
+ *   @TobyG74       [ @GitHub ] https://github.com/TobyG74       [ @Instagram ] https://instagram.com/ini.tobz
+ *   @Nafiz         [ @GitHub ] https://github.com/xbnfz01       [ @Instagram ] https://instagram.com/nfz.01
+ */
+
 import dotenv from "dotenv";
 import { platform } from "process";
 dotenv.config();

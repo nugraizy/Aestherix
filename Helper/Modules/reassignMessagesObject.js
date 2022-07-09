@@ -60,10 +60,10 @@ export const reassign = async (m, client, store, search) => {
 		const filename = sender + m.key.id;
 		let type = getContentType(m.message);
 		type = isSame(type, "messageContextInfo") ? (type = Object.keys(m.message)[1]) : type;
-		type = isSame(type, "extendedTextMessage") && m.message.extendedTextMessage.text.includes("@") ? (type = "mentionText") : type;
+		type = isSame(type, "extendedTextMessage") && m.message?.extendedTextMessage?.text?.includes("@") ? (type = "mentionText") : type;
 		let mText = m;
 		if (isSame(type, "ephemeralMessage")) {
-			type = Object.keys(m.message.ephemeralMessage.message);
+			type = Object.keys(m.message?.ephemeralMessage?.message);
 			mText = m.message.ephemeralMessage;
 		}
 		const rawParticipants = groupMetadata.participants ? groupMetadata.participants : [];
@@ -119,8 +119,8 @@ export const reassign = async (m, client, store, search) => {
 			: isSame(type, "viewOnceMessage") && mText.message.viewOnceMessage.message.videoMessage
 			? mText.message.viewOnceMessage.message.videoMessage.caption || "No Caption"
 			: "Unknown body";
-		const args = body.split(/ +/g);
-		const cmd = body.toLowerCase().split(" ")[0] || "";
+		const args = body?.split(/ +/g);
+		const cmd = body?.toLowerCase()?.split(" ")[0] || "";
 		const multi = SETTINGS.prefix.multi;
 		const noPref = SETTINGS.prefix.nopref;
 		const pref = SETTINGS.prefix.pref || ".";
@@ -128,8 +128,8 @@ export const reassign = async (m, client, store, search) => {
 		if (multi) prf = /^[°π÷×¶∆£¢€¥®™✓_=+|~!#$%^&.\/\\©^>]/.test(cmd) ? cmd.match(/^[°π÷×¶∆£¢€¥®™✓_=+|~!#$%^&.\/\\©^>]/gi) : "-";
 		else if (noPref) prf = "";
 		else prf = pref;
-		const isCmd = body.startsWith(prf);
-		const query = args.slice(1).join(" ");
+		const isCmd = body?.startsWith(prf);
+		const query = args?.slice(1)?.join(" ");
 		const isMedia = isSame(type, "imageMessage") || isSame(type, "videoMessage");
 		const isQuotedImage = isSame(type, "extendedTextMessage") && !content.includes("viewOnceMessage") && content.includes("imageMessage");
 		const isQuotedVideo = isSame(type, "extendedTextMessage") && !content.includes("viewOnceMessage") && content.includes("videoMessage");

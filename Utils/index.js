@@ -12,3 +12,4 @@ export { search, skip, handlers, stop } from "./Anonymous/index.js";
 export { yandex, sauceNao, traceMoe } from "./Image Reverse Search/index.js";
 export { tiny } from "./Shortener/tinyURL.js";
 export { brainlySearch } from "./Brainly/searchAnswer.js";
+export { pinterest } from "./Pinterest/index.js";
