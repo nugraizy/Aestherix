@@ -99,6 +99,6 @@ const loadColorsPalette = async (color) => {
 		["6500ff", "ffe04e", "8b00ff", "bd93ed", "7400ff"],
 		scheme().map((v) => v.replace("#", "")), // for more randomize
 	];
-	const sequenceColor = [].concat(...Array(3).fill(color ?? defaultColors[Math.floor(Math.random() * defaultColors.length)]));
+	const sequenceColor = [].concat(...Array(1).fill(color ?? defaultColors[Math.floor(Math.random() * defaultColors.length)]));
 	return sequenceColor;
 };
