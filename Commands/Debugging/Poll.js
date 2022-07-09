@@ -1,4 +1,4 @@
-import { generateWAMessageFromContent } from "@adiwajshing/baileys";
+import { generateWAMessageFromContent, generateMessageID } from "@adiwajshing/baileys";
 
 export default {
 	name: "polling",
@@ -12,7 +12,7 @@ export default {
 			from,
 			{
 				pollCreationMessage: {
-					encKey: randomString(16),
+					encKey: generateMessageID(),
 					name: "Poll",
 					selectableOptionsCount: 2,
 					options: [],
@@ -23,13 +23,3 @@ export default {
 		await client[botNum].relayMessage(from, messages.message, { messageId: messages.key.id });
 	},
 };
-
-function randomString(length) {
-	let result = "";
-	const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-	const charactersLength = characters.length;
-	for (let i = 0; i < length; i++) {
-		result += characters.charAt(Math.floor(Math.random() * charactersLength));
-	}
-	return result;
-}

@@ -151,16 +151,16 @@ export const reassign = async (m, client, store, search) => {
 		const isViewOnce = isSame(type, "viewOnceMessage");
 		const isLocation = isSame(type, "locationMessage");
 		const isLiveLocation = isSame(type, "liveLocationMessage");
-		const isViewOnceImage = isViewOnce && isSame(Object.keys(JSON.parse(JSON.stringify(m.message[type].message)))[0], "imageMessage");
-		const isViewOnceVideo = isViewOnce && isSame(Object.keys(JSON.parse(JSON.stringify(m.message[type].message)))[0], "videoMessage");
+		const isViewOnceImage = isViewOnce && isSame(Object.keys(JSON.parse(JSON.stringify(m?.message?.[type]?.message)))[0], "imageMessage");
+		const isViewOnceVideo = isViewOnce && isSame(Object.keys(JSON.parse(JSON.stringify(m?.message?.[type]?.message)))[0], "videoMessage");
 		const isQuotedViewOnce = isSame(type, "extendedTextMessage") && content.includes("viewOnceMessage");
 		const isQuotedViewOnceImage = isQuotedViewOnce && content.includes("viewOnceMessage") && content.includes("imageMessage");
 		const isQuotedViewOnceVideo = isQuotedViewOnce && content.includes("viewOnceMessage") && content.includes("videoMessage");
 		const typeViewOnce = isQuotedViewOnce && isQuotedViewOnceImage ? "imageMessage" : isQuotedViewOnce && isQuotedViewOnceVideo ? "videoMessage" : isViewOnce && isViewOnceImage ? "imageMessage" : isViewOnce && isViewOnceVideo ? "videoMessage" : "";
-		let mMediaData = isSame(type, "extendedTextMessage") && isNotSame(Object.keys(JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message), "ephemeralMessage") ? JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message.extendedTextMessage?.contextInfo : mText;
-		if (isSame(type, "extendedTextMessage") && isSame(Object.keys(JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message), "ephemeralMessage") && JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message.ephemeralMessage.message.extendedTextMessage?.contextInfo.message) {
-			typeQuoted = Object.keys(JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message.ephemeralMessage.message.extendedTextMessage.contextInfo.message);
-			mMediaData = JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message.ephemeralMessage.message.extendedTextMessage?.contextInfo;
+		let mMediaData = isSame(type, "extendedTextMessage") && isNotSame(Object.keys(JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message), "ephemeralMessage") ? JSON.parse(JSON.stringify(m).replace("quotedM", "m"))?.message?.extendedTextMessage?.contextInfo : mText;
+		if (isSame(type, "extendedTextMessage") && isSame(Object.keys(JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message), "ephemeralMessage") && JSON.parse(JSON.stringify(m).replace("quotedM", "m"))?.message?.ephemeralMessage?.message?.extendedTextMessage?.contextInfo.message) {
+			typeQuoted = Object.keys(JSON.parse(JSON.stringify(m).replace("quotedM", "m"))?.message?.ephemeralMessage?.message?.extendedTextMessage?.contextInfo?.message);
+			mMediaData = JSON.parse(JSON.stringify(m).replace("quotedM", "m"))?.message?.ephemeralMessage?.message?.extendedTextMessage?.contextInfo;
 		}
 		const mediaData = isSame(type, "extendedTextMessage") ? (isSame(typeQuoted, "thumbnailMessage") ? mText : mMediaData || {}) : mText || {};
 		const typeMessage = [

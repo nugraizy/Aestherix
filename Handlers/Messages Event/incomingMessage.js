@@ -88,7 +88,27 @@ export default {
 				}
 				const Tempcmds =
 					cmds.commands.get(message.cmd.slice(1).trim().toLowerCase()) || Array.from(cmds.commands.values()).find((v) => v.aliases.includes(message.cmd.slice(1).trim().toLowerCase())) || Array.from(cmds.commands.values()).find((v) => v.aliases.includes(message.cmd.trim().toLowerCase())) || false;
+				if (message.isGroup) {
+					INFOLOG(
+						`[${color(time, "cyan")}]`,
+						`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
+						`${color(message.prefix, "white")}${color(cmds.name || message.cmd.slice(1).trim(), "#01cdfe")}`,
+						`${color(message.query.substr(0, 20), "#05ffa1")}`,
+						`${color(message.from, "#b967ff")}`,
+						`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
+						`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
+					);
+				} else
+					INFOLOG(
+						`[${color(time, "cyan")}]`,
+						`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
+						`${color(message.prefix, "white")}${color(cmds.name || message.cmd.slice(1).trim(), "#01cdfe")}`,
+						`${color(message.query.trim().substr(0, 20), "#05ffa1")}`,
+						`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
+						`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
+					);
 				if (Tempcmds && !message.isOwner) {
+					if (OPTIONS["selfMode"]) return;
 					if (OPTIONS.restrict && Tempcmds.restrict) {
 						await client[botNum].reply({ from: message.from, quoted: message.message }, "This command is restricted and currently bot are on restricted mode.");
 						continue;
@@ -114,26 +134,8 @@ export default {
 						user.cooldown.get(message.sender).requests = true;
 					}
 				}
-				if (message.isGroup) {
-					INFOLOG(
-						`[${color(time, "cyan")}]`,
-						`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
-						`${color(message.prefix, "white")}${color(cmds.name || message.cmd.slice(1).trim(), "#01cdfe")}`,
-						`${color(message.query.substr(0, 20), "#05ffa1")}`,
-						`${color(message.from, "#b967ff")}`,
-						`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
-						`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
-					);
-				} else
-					INFOLOG(
-						`[${color(time, "cyan")}]`,
-						`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
-						`${color(message.prefix, "white")}${color(cmds.name || message.cmd.slice(1).trim(), "#01cdfe")}`,
-						`${color(message.query.trim().substr(0, 20), "#05ffa1")}`,
-						`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
-						`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
-					);
 				if (Tempcmds) {
+					if (!message.isOwner && OPTIONS["selfMode"]) return;
 					try {
 						if (/(--?(help(s)?|info|des(c|k)rip(t|s)i(on)?)|-H)/.test(message.query)) {
 							const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${Tempcmds.cooldown}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v.capitalize()}`).join(", ")}.`;

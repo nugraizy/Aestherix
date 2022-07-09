@@ -28,8 +28,8 @@ export default {
 				isBaileys,
 				isFromMe,
 			} = message;
-			const type = Object.keys(messages)[0];
 			if (!messages) return;
+			const type = Object.keys(messages)[0];
 			if (isBaileys) return;
 			if (isFromMe) return;
 			if (from == "status@broadcast") return;
