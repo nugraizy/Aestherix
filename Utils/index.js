@@ -13,3 +13,4 @@ export { yandex, sauceNao, traceMoe } from "./Image Reverse Search/index.js";
 export { tiny } from "./Shortener/tinyURL.js";
 export { brainlySearch } from "./Brainly/searchAnswer.js";
 export { pinterest } from "./Pinterest/index.js";
+export { bilibiliSearch } from "./Bilibili/index.js";
