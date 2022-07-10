@@ -75,4 +75,4 @@ function convertSecondstoTime(s) {
 const URL_BASE = (code) => `https://www.bilibili.com/video/${code}`;
 const URL_SEARCH = (keyword) => `https://api.bilibili.com/x/web-interface/search/type?keyword=${keyword}&page=1&pagesize=3&search_type=video&order=totalrank`;
 const URL_VIDEO_DETAILS = (aid) => `https://api.bilibili.com/x/web-interface/view?aid=${aid}&bvid=`;
-const URL_VIDEO = (aid, cid) => `https://api.bilibili.com/x/player/playurl?cid=${cid}&avid=${aid}&platform=html5&otype=json&qn=16&type=mp4&html5=1`;
+const URL_VIDEO = (aid, cid) => `https://api.bilibili.com/x/player/playurl?cid=${cid}&avid=${aid}&type=flv`;
