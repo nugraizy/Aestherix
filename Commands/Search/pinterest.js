@@ -19,7 +19,7 @@ export default {
 					image: { url: args[2] == "next" ? IMAGES[INDEX] : IMAGES[INDEX] },
 					caption: `\`\`\` • Pinterest \`\`\``,
 					templateButtons: [
-						{ urlButton: { displayText: "Source", url: query } },
+						{ urlButton: { displayText: "Source", url: args[2] == "next" ? IMAGES[INDEX] : IMAGES[INDEX] } },
 						INDEX !== IMAGES.length ? { quickReplyButton: { displayText: "Next Image", id: `.pinterest ${IMAGES[INDEX + 1]} next ${IMAGES.join("*")}` } } : {},
 						INDEX !== 0 ? { quickReplyButton: { displayText: "Previous Image", id: `.pinterest ${IMAGES[INDEX - 1]} prev ${IMAGES.join("*")}` } } : {},
 					],

@@ -263,6 +263,7 @@ export const reassign = async (m, client, store, search) => {
 			return await client[botNum].sendMessage(from, { text }, { quoted });
 		};
 		const downloadAndSaveMediaMessage = async (media, path) => {
+			console.log(typeQuoted);
 			const msg = await downloadContentFromMessage(media, typeQuoted.replace(/Message/g, ""));
 			const buffer = await toBuffer(msg);
 			writeBuffer(path, buffer);

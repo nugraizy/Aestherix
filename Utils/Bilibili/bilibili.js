@@ -4,10 +4,10 @@ export const bilibiliSearch = (keyword) =>
 	new Promise(async (resolve) => {
 		try {
 			const { data } = (await Axios.get(URL_SEARCH(keyword))).data;
-			if (data.result == undefined) resolve({ error: "Videos Not Found" });
+			if (data.result == undefined) resolve({ error: "Videos Not Found", cus_message: "Error when searching Bilibili videos." });
 			resolve(bilibiliVideo(data.result));
 		} catch (err) {
-			resolve({ error: err.message });
+			resolve({ error: err.message, cus_message: "Error when searching Bilibili videos." });
 		}
 	});
 
@@ -25,7 +25,7 @@ const bilibiliParseMetadata = (arr) =>
 					duration: convertSecondstoTime(duration),
 					favorite,
 					view,
-					thumbnail: `https:${thumbnail}`,
+					thumbnail: thumbnail,
 					description: description == "" ? "No Description" : description,
 					original_video_link: URL_BASE(bvid),
 					download_link,

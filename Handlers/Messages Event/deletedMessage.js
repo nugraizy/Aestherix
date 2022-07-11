@@ -14,20 +14,8 @@ export default {
 			if (message == undefined) return;
 			message = await reassign(JSON.parse(JSON.stringify(message)), client);
 			if ("error" in message) return;
-			const {
-				from,
-				mention: mentioning,
-				timeStamp,
-				sender,
-				message: { message: messages },
-				body,
-				pushname,
-				extractMediaData,
-				filename,
-				prettyNumber,
-				isBaileys,
-				isFromMe,
-			} = message;
+			const { from, mention: mentioning, timeStamp, sender, body, pushname, extractMediaData, filename, prettyNumber, isBaileys, isFromMe } = message;
+			const messages = message?.message;
 			if (!messages) return;
 			const type = Object.keys(messages)[0];
 			if (isBaileys) return;

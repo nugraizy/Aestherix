@@ -19,14 +19,16 @@ export const shopeeProduct = (key, total = 5) =>
 					"user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",
 				},
 			});
+			if (DATA.data.items.length == 0) return resolve({ error: "No product found" });
 			DATA.data.items.forEach((element) => {
 				CONTAINER.items.push({
+					productName: element.item_basic.name,
 					stock: element.item_basic.stock,
 					sold: element.item_basic.sold,
-					brand: element.item_basic.brand,
+					brand: element.item_basic.brand == "" ? "No Brand" : element.item_basic.brand,
 					prices: Number(String(element.item_basic.price_min_before_discount).slice(0, -5)),
 					pricesDiscount: Number(String(element.item_basic.price_min).slice(0, -5)),
-					discountPercent: element.item_basic.discount,
+					discountPercent: element.item_basic.discount ?? "No Discount",
 					likes: element.item_basic.liked_count,
 					ratings: element.item_basic.item_rating.rating_star,
 					location: element.item_basic.shop_location,
