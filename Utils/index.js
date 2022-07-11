@@ -14,3 +14,4 @@ export { tiny } from "./Shortener/tinyURL.js";
 export { brainlySearch } from "./Brainly/searchAnswer.js";
 export { pinterest } from "./Pinterest/index.js";
 export { bilibiliSearch } from "./Bilibili/index.js";
+export { wp_search, wp_latest, wp_download } from "./Waifuplay/waifuplay.js";
