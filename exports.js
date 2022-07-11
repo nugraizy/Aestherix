@@ -137,6 +137,9 @@ export {
 	tiktokDownloader,
 	tiktokProfileBRAINANS,
 	tiktokProfileTIKTOK,
+	wp_search, 
+	wp_latest, 
+	wp_download
 	createExif,
 	mime,
 	extension,
