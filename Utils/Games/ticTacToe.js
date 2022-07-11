@@ -85,7 +85,15 @@ export default class TicTacToe {
 
 	playMove(location, player, pcRival) {
 		if (!this.isTurn(player)) return { error: "It's not your turn" };
-		if (player == "Void Bot") location = this.minimax(location, 0, true, pcRival).move;
+		if (player == "Void Bot") {
+			location = this.minimax(location, 0, true, pcRival).move;
+			this.BOARD[player == "Void Bot" ? location : location - 1] = this.PLAYER_TURN == this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL;
+			this.PLAY_BOARD[player == "Void Bot" ? location : location - 1] = this.PLAYER_TURN == this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL;
+			if (this.isWinner(this.PLAYER_TURN == this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL)) return { status: "WINNER", winner: player, ...this };
+			if (this.isDraw()) return { status: "DRAW", ...this };
+			this.changeTurn();
+			return this;
+		}
 		if (this.isCorrectMove(location)) {
 			this.BOARD[player == "Void Bot" ? location : location - 1] = this.PLAYER_TURN == this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL;
 			this.PLAY_BOARD[player == "Void Bot" ? location : location - 1] = this.PLAYER_TURN == this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL;
@@ -99,8 +107,8 @@ export default class TicTacToe {
 	}
 
 	isWinner(player) {
-		for (let i = 0; i < this.COMBO.length; i++) {
-			const [a, b, c] = this.COMBO[i];
+		for (const combo of this.COMBO) {
+			const [a, b, c] = combo;
 			if (this.PLAY_BOARD[a] === player && this.PLAY_BOARD[b] === player && this.PLAY_BOARD[c] === player) {
 				this.WINNING_ORDER = [a, b, c];
 				return true;
@@ -110,7 +118,8 @@ export default class TicTacToe {
 	}
 
 	isCorrectMove(location) {
-		return this.BOARD[location] !== "X" && this.BOARD[location] !== "O";
+		const model = this.BOARD[location - 1];
+		return model !== "❌" && model !== "⭕";
 	}
 
 	isTurn(player) {
@@ -118,7 +127,7 @@ export default class TicTacToe {
 	}
 
 	isDraw() {
-		return this.PLAY_BOARD.every((row) => row == "X" || row == "O");
+		return this.PLAY_BOARD.every((row) => row == "❌" || row == "⭕");
 	}
 
 	changeTurn() {
@@ -135,7 +144,7 @@ export default class TicTacToe {
 		for (let i = 0; i < board.length; i++) {
 			if (board[i] === "") {
 				board[i] = isMaximizing ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL;
-				const score = this.minimax(board, depth + 1, !isMaximizing, players).score;
+				const { score } = this.minimax(board, depth + 1, !isMaximizing, players);
 				board[i] = "";
 				if (isMaximizing && score > bestScore) {
 					bestScore = score;

@@ -14,7 +14,7 @@ export default {
 	async handler(message, client, cmds, store, user) {
 		if (message == undefined) return;
 		const time = moment().format("HH:mm:ss DD/MM");
-		message = await reassign(JSON.parse(JSON.stringify(message.messages[0])), client, store);
+		message = await reassign(JSON.parse(JSON.stringify(message.messages[0])), client, store, false);
 		if ("error" in message) return;
 		if (!message.message) return;
 		if (message.isBaileys) return;

@@ -25,7 +25,7 @@ moment.tz.setDefault("Asia/Jakarta").locale("id");
 export const reassign = async (m, client, store, search) => {
 	try {
 		const SETTINGS = readJSON("./Config/settings.json");
-		if (m.message && m.message.protocolMessage && m.message.protocolMessage.type == "REVOKE") return m;
+		if (m.message?.protocolMessage && m.message.protocolMessage.type == "REVOKE") return m;
 		if (!search) {
 			if (m.message && m.messageTimestamp) {
 				if (moment(m.messageTimestamp * 1000).unix() < moment(moment().subtract("5", "seconds").valueOf()).unix()) return { error: "OLD MESSAGE" };

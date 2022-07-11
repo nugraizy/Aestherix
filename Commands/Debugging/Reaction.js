@@ -8,14 +8,13 @@ export default {
 	usage: "!reaction <emoji>",
 	aliases: ["react", "reactwith"],
 	cooldown: 5,
-	async run({ from, message, bodyQuoted, mediaData, query }, client, store) {
+	async run({ from, message, bodyQuoted, mediaData, query, fromMe }, client, store) {
 		if (bodyQuoted) {
 			const emojis = query.match(emojiReg());
 			if (emojis) {
-				const chat = store.messages[from].get(mediaData.stanzaId);
 				const messages = generateWAMessageFromContent(
 					"0@s.whatsapp.net",
-					{ reactionMessage: { key: chat.key, text: emojis[0] } },
+					{ reactionMessage: { key: { id: mediaData.stanzaId, remoteJid: from, fromMe, participant: mediaData.participant }, text: emojis[0] } },
 					{
 						quoted: message,
 					},
