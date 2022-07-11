@@ -1,6 +1,5 @@
 import Axios from "axios";
 import cheerio from "cheerio";
-const log = console.log;
 
 export const wpSearch = (text) =>
 	new Promise(async (resolve) => {
