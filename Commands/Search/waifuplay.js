@@ -6,7 +6,7 @@ export default {
 	aliases: ["wp"],
 	category: "Search",
 	cooldown: 3,
-	usage: "!waifuplay <option> \n\nOptions:\n- search <title>\nEx: .myanimelist search paripi koumei\n- latest",
+	usage: "!waifuplay <search/src> <title>",
 	async run({ args, from, message, sender, type }, client) {
 		try {
 			switch (true) {
