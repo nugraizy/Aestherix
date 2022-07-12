@@ -28,7 +28,7 @@
 		"axios": "^0.25.0",
 		"big-integer": "^1.6.51",
 		"brainly-scraper-v2": "^1.1.2",
-		"canvas": "^2.9.0",
+		"canvas": "^2.9.3",
 		"canvas-text-wrapper": "^0.10.2",
 		"center-align": "^1.0.1",
 		"chalk": "^5.0.0",
