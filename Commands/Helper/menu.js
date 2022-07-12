@@ -4,7 +4,7 @@ export default {
 	name: "menu",
 	description: "Shows the menu.",
 	usage: "!menu",
-	aliases: ["menu"],
+	aliases: ["help"],
 	category: "Helper",
 	cooldown: 10,
 	limit: 5,

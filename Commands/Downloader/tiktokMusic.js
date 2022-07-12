@@ -2,21 +2,21 @@ import { delay } from "@adiwajshing/baileys";
 import path from "path";
 import moment from "moment-timezone";
 import parser from "yargs-parser";
+import { tiktokAPI } from "../../Utils/TikTok/index.js";
 import { __dirname } from "../../connect.js";
-import { tiktokDownloader } from "../../Utils/TikTok/index.js";
 import { mime } from "../../Utils/Misc/index.js";
 import { toOpus } from "../../Utils/Converter/index.js";
 import { isOne, isURL, INFOLOG, ERRLOG, color, removeDuplicatesArray } from "../../Helper/Modules/index.js";
 
 export default {
-	name: "tiktokaudio",
-	description: "Downloads TikTok audio.",
-	usage: "!tiktokaudio <url> (you can send multiple link using space in between)",
-	aliases: ["tiktokaudio", "ttaudio", "ttaud"],
+	name: "tiktokmusic",
+	description: "Downloads TikTok music that used in the video.",
+	usage: "!tiktokmusic <url> (you can send multiple link using space in between) [options]\nOptions:\n-wm, --watermark: Download with watermark\n-nowm, --nowatermark: Download without watermark\n-v2 : Download videos with better description",
+	aliases: ["tiktokmusics", "tiktokmusik", "ttmusic", "ttmusik", "ttm"],
 	category: "Downloader",
 	cooldown: 6,
 	limit: 6,
-	async run({ from, query, prettyNumber, filename, message }, client) {
+	async run({ from, query, prettyNumber, message, filename }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a URL");
 		try {
@@ -31,21 +31,25 @@ export default {
 					await client[botNum].reply({ from, quoted: message }, "Please specify a valid TikTok url");
 					continue;
 				}
-				const audio = await tiktokDownloader(url);
-				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading TikTok Audio`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
-				if ("error" in audio) {
-					client[botNum].reply({ from, quoted: message }, audio.error);
-					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download TikTok Audio", "red")} for ${color(prettyNumber, "#ff71ce")}`);
-				} else {
-					await client[botNum].sendMessage(
-						from,
-						{ document: await toOpus("opus", { input: path.join(__dirname, `Temporary Files/${filename}`), output: path.join(__dirname, `Temporary Files/${filename}-done`), media: audio.music }), fileName: `${audio.description}.mp3`, mimetype: mime("mp3") },
-						{ quotes: message },
-					);
-					await delay(300);
+				const music = await tiktokAPI(url);
+				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading TikTok Music`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
+				if ("error" in music) {
+					ERRLOG(`[${color(time, "cyan")}]`, `${color(`Error while downloading TikTok Music`, "#ff0000")} for ${color(prettyNumber, "#ff71ce")}`);
+					client[botNum].reply({ from, quoted: message }, `Error while downloading TikTok Music\n\n${url.split(" ")[0]}`);
+					continue;
 				}
+				await client[botNum].sendMessage(
+					from,
+					{
+						document: await toOpus("opus", { input: path.join(__dirname, `Temporary Files/${filename}`), output: path.join(__dirname, `Temporary Files/${filename}-done`), media: music.url.music.replace("https", "http") }),
+						fileName: `${music.authorMusic} - ${music.musicTitle}.mp3`,
+						mimetype: mime("mp3"),
+					},
+					{ quoted: message },
+				);
+				await delay(300);
+				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloaded TikTok Music`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 			}
-			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloaded TikTok Audio`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name}\n`;

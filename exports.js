@@ -135,6 +135,7 @@ export {
 	getStory3,
 	getHighlights2,
 	tiktokDownloader,
+	tiktokAPI,
 	tiktokProfileBRAINANS,
 	tiktokProfileTIKTOK,
 	wpSearch,

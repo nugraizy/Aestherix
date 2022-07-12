@@ -1,4 +1,5 @@
 import fetch from "node-fetch";
+import cheerio from "cheerio";
 
 export const tiktokDownloader = (url) =>
 	new Promise(async (resolve) => {
@@ -7,7 +8,6 @@ export const tiktokDownloader = (url) =>
 			const data = await (await fetch(URL_KEY_PARSER(url))).json();
 			if (data.status !== "success") resolve(data);
 			const dataResult = await (await fetch(URL_DETAIL_PARSER(data.data.key))).json();
-			console.log(dataResult);
 			if (dataResult.status !== "success") resolve(dataResult);
 			resolve({
 				...dataResult.data.author,
@@ -36,6 +36,7 @@ export const tiktokAPI = (url) =>
 			const $ = cheerio.load(res);
 			const parsed = parseData(JSON.parse($("#SIGI_STATE").html()));
 			const with_no_watermark = (await (await fetch(URL_API(parsed.keyword))).json()).aweme_detail.video.play_addr.url_list[Math.floor(Math.random() * 3)];
+			parsed.published = Number(parsed.published);
 			parsed.url = {
 				...parsed.url,
 				with_no_watermark,
