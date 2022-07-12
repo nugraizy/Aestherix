@@ -30,7 +30,7 @@ export default {
 					wm: ["with-watermark", "with_watermark", "watermark"],
 				},
 			});
-			if (Array.isArray(V2)) V2 = removeDuplicatesArray(v2)[0];
+			if (Array.isArray(V2)) V2 = removeDuplicatesArray(V2)[0];
 			if (Array.isArray(NO_WM)) NO_WM = removeDuplicatesArray(NO_WM)[0];
 			if (Array.isArray(WITH_WM)) WITH_WM = removeDuplicatesArray(WITH_WM)[0];
 			if (isOne(urls.length) && !isURL(urls[0])) return client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
