@@ -1,4 +1,4 @@
-import { toBuffer, downloadContentFromMessage, generateWAMessageFromContent, generateWAMessage, getContentType } from "@adiwajshing/baileys";
+import { toBuffer, downloadContentFromMessage, generateWAMessageFromContent, generateWAMessage, getContentType, WAProto } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
 import PhoneNumber from "awesome-phonenumber";
 import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined, isURL, writeBuffer, writeJSON, delaySync } from "./functions.js";
@@ -52,7 +52,7 @@ export const reassign = async (m, client, store, search) => {
 		const groupId = isGroup ? groupMetadata?.id : "";
 		const isGroupOwner = isGroup ? (isSame((await client[botNum].groupMetadata(from)).owner, sender) ? true : false) : "";
 		const content = JSON.stringify(m.message, null, 2);
-		const pushname = m.pushName;
+		const pushname = m.pushName ? m.pushName.trim() : prettyNumber;
 		const botNumber = `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net`;
 		const ownerNumbers = [SETTINGS.owner_number, ...SETTINGS.team_number, botNumber];
 		const isOwner = ownerNumbers.includes(sender);
@@ -121,8 +121,7 @@ export const reassign = async (m, client, store, search) => {
 			: "Unknown body";
 		const args = body?.split(/ +/g);
 		const cmd = body?.toLowerCase()?.split(" ")[0] || "";
-		const multi = SETTINGS.prefix.multi;
-		const noPref = SETTINGS.prefix.nopref;
+		const { multi, noPref } = SETTINGS.prefix;
 		const pref = SETTINGS.prefix.pref || ".";
 		let prf;
 		if (multi) prf = /^[°π÷×¶∆£¢€¥®™✓_=+|~!#$%^&.\/\\©^>]/.test(cmd) ? cmd.match(/^[°π÷×¶∆£¢€¥®™✓_=+|~!#$%^&.\/\\©^>]/gi) : "-";
@@ -251,19 +250,18 @@ export const reassign = async (m, client, store, search) => {
 			: [];
 		const extractMediaData =
 			isQuotedImage || isQuotedVideo || isQuotedAudio || isQuotedContact || isQuotedContactsArray || isQuotedDocument || isQuotedLiveLocation || isQuotedLocation || isQuotedSticker
-				? mediaData.message[typeQuoted]
+				? mediaData?.message?.[typeQuoted]
 				: isMedia || isSticker || isAudio || isContact || isContactsArray || isDocument || isLocation || isLiveLocation
-				? JSON.parse(JSON.stringify(m.message[type]))
+				? JSON.parse(JSON.stringify(m?.message?.[type]))
 				: isViewOnce && (isViewOnceImage || isViewOnceVideo)
-				? JSON.parse(JSON.stringify(m.message[type].message)) && JSON.parse(JSON.stringify(m.message[type].message[typeViewOnce]))
+				? JSON.parse(JSON.stringify(m?.message?.[type]?.message)) && JSON.parse(JSON.stringify(m?.message?.[type]?.message?.[typeViewOnce]))
 				: isQuotedViewOnce && (isQuotedViewOnceImage || isQuotedViewOnceVideo)
-				? mediaData.message[typeQuoted].message && mediaData.message[typeQuoted].message[typeViewOnce]
+				? mediaData?.message?.[typeQuoted]?.message?.[typeViewOnce]
 				: {};
 		const reply = async ({ from, quoted }, text) => {
 			return await client[botNum].sendMessage(from, { text }, { quoted });
 		};
 		const downloadAndSaveMediaMessage = async (media, path) => {
-			console.log(typeQuoted);
 			const msg = await downloadContentFromMessage(media, typeQuoted.replace(/Message/g, ""));
 			const buffer = await toBuffer(msg);
 			writeBuffer(path, buffer);
@@ -271,8 +269,7 @@ export const reassign = async (m, client, store, search) => {
 		};
 		const downloadMediaMessage = async (media) => {
 			const msg = await downloadContentFromMessage(media, typeQuoted.replace(/Message/g, ""));
-			const buffer = await toBuffer(msg);
-			return buffer;
+			return await toBuffer(msg);
 		};
 		const buttonText = async (dari, contentText, footerText, buttons, opts = {}) => {
 			if (buttons.length == 0) return new Error("Buttons is empty");
@@ -334,7 +331,7 @@ export const reassign = async (m, client, store, search) => {
 
 		const setStatus = async (status) => {
 			if (!status) return new Error("Status is empty");
-			const response = await client[botNum].query({
+			return await client[botNum].query({
 				tag: "iq",
 				attrs: {
 					to: S_WHATSAPP_NET,
@@ -349,7 +346,6 @@ export const reassign = async (m, client, store, search) => {
 					},
 				],
 			});
-			return response;
 		};
 
 		const updateGroup = async (dari, containers, update, texts, force, message) => {
@@ -401,9 +397,11 @@ export const reassign = async (m, client, store, search) => {
 			if (containers.length == 0) return keys;
 			for (const messages of containers) {
 				if (i == 20) break;
-				const { message, body } = await reassign(JSON.parse(JSON.stringify(messages)), client, store, true);
-				if (body.includes(query)) keys.push(message);
-				i++;
+				const { message, body, isCmd } = await reassign(JSON.parse(JSON.stringify(messages)), client, store, true);
+				if (body.includes(query) && !isCmd) {
+					keys.push(message);
+					i++;
+				}
 			}
 			return keys;
 		};
@@ -441,6 +439,7 @@ export const reassign = async (m, client, store, search) => {
 			isOwner,
 			settings: SETTINGS,
 			type,
+			typeQuoted,
 			isAdmin,
 			rawParticipants,
 			adminGroups,
@@ -483,7 +482,7 @@ export const reassign = async (m, client, store, search) => {
 			bodyQuoted,
 		};
 	} catch (e) {
-		console.log(e);
+		log(e);
 		return {
 			error: e,
 		};

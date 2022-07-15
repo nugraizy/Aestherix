@@ -85,6 +85,8 @@ export {
 	parseCode,
 } from "./Helper/index.js";
 export {
+	twitterUser,
+	twitterDownload,
 	slot,
 	bilibiliSearch,
 	shopeeProduct,

@@ -1,6 +1,7 @@
 import { delay } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
-import { getStory } from "../../Utils/Instagram/index.js";
+import parser from "yargs-parser";
+import { getStory, getStory3 } from "../../Utils/Instagram/index.js";
 import { isOne, isURL, isEmpty, isSame, numberWithCommas, INFOLOG, ERRLOG, color } from "../../Helper/Modules/index.js";
 
 export default {
@@ -15,12 +16,14 @@ export default {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please specify a username");
 		try {
-			const usernames = query.split(",");
-			if (isOne(usernames) && isURL(usernames)) return client[botNum].reply({ from, quoted: message }, "Please specify a valid username");
+			const { _: usernames } = parser(query);
+			if (isOne(usernames.length) && isURL(usernames[0]) && !/\/stories\//.test(usernames[0])) return client[botNum].reply({ from, quoted: message }, "Please specify a valid username or a valid url instagram story");
 			for (const username of usernames) {
-				if (isURL(username)) await client[botNum].reply({ from, quoted: message }, "Please specify a username");
+				if (isURL(username) && !/\/stories\//.test(username)) await client[botNum].reply({ from, quoted: message }, "Please specify a username or a valid url instagram story");
 				else {
-					const story = await getStory(username);
+					let story;
+					if (isURL(username) && /\/stories\//.test(username)) story = await getStory3(username);
+					else story = await getStory(username);
 					INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading Instagram Story`, "cyan")} for ${color(prettyNumber, "#ff71ce")}`);
 					if ("error" in story) {
 						client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram story\n\n${story.error}\n${username}`);
@@ -28,6 +31,13 @@ export default {
 						continue;
 					} else {
 						let capt = "``` • Instagram Story```\n\n";
+						if (isURL(username) && /\/stories\//.test(username)) {
+							capt += `Username : ${story.username}\n`;
+							capt += `Fullname : ${story.fullName}`;
+							await client[botNum].sendMessage(from, story.stories[0].isVideo ? { video: { url: story.stories[0].url }, caption: capt.trim() } : { image: { url: story.stories[0].url }, caption: capt.trim() });
+							await delay(300);
+							continue;
+						}
 						capt += `Username  : ${story.user.username}\n`;
 						capt += `Fullname  : ${story.user.fullName}\n`;
 						capt += `Follower  : ${numberWithCommas(story.user.followers)}\n`;

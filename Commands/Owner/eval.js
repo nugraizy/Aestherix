@@ -1,5 +1,6 @@
 import * as util from "util";
 import fs from "fs";
+import { WAProto } from "@adiwajshing/baileys";
 import { exec } from "child_process";
 import prettier from "js-beautify";
 import * as func from "../../exports.js";

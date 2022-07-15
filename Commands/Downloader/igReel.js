@@ -1,7 +1,8 @@
 import { delay } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
+import parser from "yargs-parser";
 import { getReels } from "../../Utils/Instagram/index.js";
-import { isOne, isURL, numberWithCommas, INFOLOG, ERRLOG, color } from "../../Helper/Modules/index.js";
+import { isOne, isURL, INFOLOG, ERRLOG, color } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "igreel",
@@ -15,9 +16,9 @@ export default {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please specify a url");
 		try {
-			const urls = query.split(",");
-			if (isOne(urls.length) && !isURL(query)) return client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
-			if (isOne(urls.length) && !regex(query)) return client[botNum].reply({ from, quoted: message }, "Please specify a valid Instagram url");
+			const { _: urls } = parser(query);
+			if (isOne(urls.length) && !isURL(urls[0])) return client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
+			if (isOne(urls.length) && !regex(urls[0])) return client[botNum].reply({ from, quoted: message }, "Please specify a valid Instagram url");
 			for (const url of urls) {
 				if (!isURL(url.trim())) {
 					await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
@@ -49,6 +50,7 @@ export default {
 						);
 					}
 					INFOLOG(`[${color(time, "cyan")}]`, `${color("Downloaded Instagram reel", "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
+					await delay(100);
 				}
 			}
 		} catch (error) {

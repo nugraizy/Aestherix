@@ -1,5 +1,6 @@
 import { delay } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
+import parser from "yargs-parser";
 import { ytv } from "../../Utils/YouTube/index.js";
 import { INFOLOG, ERRLOG, color, numberWithCommas, removeDuplicatesArray } from "../../Helper/Modules/index.js";
 
@@ -15,9 +16,8 @@ export default {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a URL");
 		try {
-			let queries = query.split(",");
-			queries = removeDuplicatesArray(queries.map((q) => q.trim()));
-			for (const Query of queries) {
+			let { _: queries } = parser(query);
+			for (const Query of removeDuplicatesArray(queries.map((q) => q.trim()))) {
 				const video = await ytv(Query);
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading YouTube Video`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 				if ("error" in video) {
@@ -35,7 +35,7 @@ export default {
 					capt += `File Size : ${filesize} (${filesizeF})\n`;
 					capt += `Duration : ${timestamp}\n`;
 					capt += `Description : ${description}\n`;
-					await client[botNum].sendMessage(from, { video: { Query: dl_link.replace("https", "http") }, caption: capt.trim() });
+					await client[botNum].sendMessage(from, { video: { url: dl_link.replace("https", "http") }, caption: capt.trim() });
 					await delay(300);
 				}
 			}

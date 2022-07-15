@@ -96,7 +96,7 @@ const start = async () => {
 	await loadCommands();
 	await loadEveryCommand();
 
-	const Client = makeWASocket({ printQRInTerminal: true, version: DEFAULT_CONNECTION_CONFIG.version, logger: P({ level: "fatal" }), auth: state });
+	const Client = makeWASocket({ printQRInTerminal: true, version: DEFAULT_CONNECTION_CONFIG.version, logger: P({ level: OPTIONS.trace ? "trace" : "fatal" }), auth: state });
 	store.bind(Client.ev);
 
 	Client.ev.on("connection.update", async (connections) => {

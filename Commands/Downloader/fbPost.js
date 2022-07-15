@@ -1,5 +1,6 @@
 import { delay } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
+import parser from "yargs-parser";
 import { fbDl } from "../../Utils/Facebook/index.js";
 import { isOne, isURL, INFOLOG, ERRLOG, color } from "../../Helper/Modules/index.js";
 
@@ -15,9 +16,9 @@ export default {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a URL");
 		try {
-			const urls = query.split(",");
-			if (isOne(urls.length) && !isURL(query)) return client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
-			if (isOne(urls.length) && !regex(query)) return client[botNum].reply({ from, quoted: message }, "Please specify a valid Facebook url");
+			const { _: urls } = parser(query);
+			if (isOne(urls.length) && !isURL(urls[0])) return client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
+			if (isOne(urls.length) && !regex(urls[0])) return client[botNum].reply({ from, quoted: message }, "Please specify a valid Facebook url");
 			for (const url of urls) {
 				if (!isURL(url.trim())) {
 					await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");

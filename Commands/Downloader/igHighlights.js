@@ -1,5 +1,6 @@
 import moment from "moment-timezone";
 import { delay } from "@adiwajshing/baileys";
+import parser from "yargs-parser";
 import { getHighlights } from "../../Utils/Instagram/index.js";
 import { isOne, isURL, isEmpty, isSame, numberWithCommas, INFOLOG, ERRLOG, color } from "../../Helper/Modules/index.js";
 
@@ -15,8 +16,8 @@ export default {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please specify a username");
 		try {
-			const usernames = query.split(",");
-			if (isOne(usernames) && isURL(usernames)) return client[botNum].reply({ from, quoted: message }, "Please specify a valid username");
+			const { _: usernames } = parser(query);
+			if (isOne(usernames.length) && isURL(usernames[0])) return client[botNum].reply({ from, quoted: message }, "Please specify a valid username");
 			for (const username of usernames) {
 				if (isURL(username)) await client[botNum].reply({ from, quoted: message }, "Please specify a username");
 				else {

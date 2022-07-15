@@ -16,12 +16,11 @@ export default {
 			capt += `Found ${messages.length} messages.\n\n`;
 			await client[botNum].reply({ from, quoted: message }, capt.trim());
 			for (const messageElement of messages) {
-				await delay(300);
 				await client[botNum].reply({ from, quoted: messageElement }, "Found it.");
 			}
-			return messages;
+			return;
 		}
 		await client[botNum].reply({ from, quoted: message }, capt.trim());
-		return messages;
+		return;
 	},
 };

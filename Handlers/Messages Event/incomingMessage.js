@@ -20,6 +20,9 @@ export default {
 		if (message.isBaileys) return;
 		if (message.key && message.key.remoteJid == "status@broadcast") return;
 		if (message.type == "protocolMessage" || message.type == "senderKeyDistributionMessage" || !message.type) return;
+		if (OPTIONS.autoRead) {
+			await client[botNum].readMessages([message.message.key]);
+		}
 		if (checkAfk(message.sender, message.from)) {
 			const { reasons, since } = getAfk(message.sender, message.from);
 			const time = getTimeSince(since);
@@ -88,7 +91,7 @@ export default {
 				}
 				const Tempcmds =
 					cmds.commands.get(message.cmd.slice(1).trim().toLowerCase()) || Array.from(cmds.commands.values()).find((v) => v.aliases.includes(message.cmd.slice(1).trim().toLowerCase())) || Array.from(cmds.commands.values()).find((v) => v.aliases.includes(message.cmd.trim().toLowerCase())) || false;
-				if (message.isGroup) {
+				if (message.isGroup && !OPTIONS.noLogs) {
 					INFOLOG(
 						`[${color(time, "cyan")}]`,
 						`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
@@ -98,7 +101,7 @@ export default {
 						`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
 						`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
 					);
-				} else
+				} else if (!message.isGroup && !OPTIONS.noLogs)
 					INFOLOG(
 						`[${color(time, "cyan")}]`,
 						`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
@@ -135,33 +138,35 @@ export default {
 					}
 				}
 				if (Tempcmds) {
-					if (!message.isOwner && OPTIONS["selfMode"]) return;
-					try {
-						if (/(--?(help(s)?|info|des(c|k)rip(t|s)i(on)?)|-H)/.test(message.query)) {
-							const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${Tempcmds.cooldown}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v.capitalize()}`).join(", ")}.`;
-							client[botNum].reply({ from: message.from, quoted: message.message }, help);
-							continue;
+					if (OPTIONS.onlyLogs ? (message.cmd.startsWith("==>") || message.cmd.startsWith("//>") || message.cmd.startsWith("$$>") ? true : false) : true) {
+						if (!message.isOwner && OPTIONS["selfMode"]) return;
+						try {
+							if (/(--?(help(s)?|info|des(c|k)rip(t|s)i(on)?)|-H)/.test(message.query) && Tempcmds.name !== "eval") {
+								const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${Tempcmds.cooldown}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v.capitalize()}`).join(", ")}.`;
+								client[botNum].reply({ from: message.from, quoted: message.message }, help);
+								continue;
+							}
+							if (Tempcmds.category == "Games" && message.isGroup && !message.isAdmin && message[message.from].games == "disable") return client[botNum].reply({ from: message.from, quoted: message.message }, "Mode games belum dihidupkan");
+							if (Tempcmds.category == "Moderation" && message.isGroup && !message.isAdmin && !message.isOwner) return client[botNum].reply({ from: message.from, quoted: message.message }, "Kamu bukan admin");
+							await Tempcmds.run(message, client, store);
+							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) user.cooldown.get(message.sender).requests = false;
+							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).has(Tempcmds.name)) user.cooldown.get(message.sender).delete(Tempcmds.name);
+							await delay(200);
+						} catch (err) {
+							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) user.cooldown.get(message.sender).requests = false;
+							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).has(Tempcmds.name)) user.cooldown.get(message.sender).delete(Tempcmds.name);
+							let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
+							str += `Type : ${err.name}\n`;
+							str += `Message : ${err.message}`;
+							await client[botNum].reply({ from: message.from, quoted: message.message }, str);
+							log(err);
 						}
-						if (Tempcmds.category == "Games" && message.isGroup && !message.isAdmin && message[message.from].games == "disable") return client[botNum].reply({ from: message.from, quoted: message.message }, "Mode games belum dihidupkan");
-						if (Tempcmds.category == "Moderation" && message.isGroup && !message.isAdmin && !message.isOwner) return client[botNum].reply({ from: message.from, quoted: message.message }, "Kamu bukan admin");
-						await Tempcmds.run(message, client, store);
-						if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) user.cooldown.get(message.sender).requests = false;
-						if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).has(Tempcmds.name)) user.cooldown.get(message.sender).delete(Tempcmds.name);
-						await delay(200);
-					} catch (err) {
-						if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) user.cooldown.get(message.sender).requests = false;
-						if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).has(Tempcmds.name)) user.cooldown.get(message.sender).delete(Tempcmds.name);
-						let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
-						str += `Type : ${err.name}\n`;
-						str += `Message : ${err.message}`;
-						await client[botNum].reply({ from: message.from, quoted: message.message }, str);
-						log(err);
 					}
 				}
 			}
 			return;
 		}
-		if (!message.isGroup)
+		if (!message.isGroup && !OPTIONS.noLogs)
 			INFOLOG(
 				`[${color(time, "cyan")}]`,
 				`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
@@ -169,7 +174,7 @@ export default {
 				`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
 				`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
 			);
-		else
+		else if (message.isGroup && !OPTIONS.noLogs)
 			INFOLOG(
 				`[${color(time, "cyan")}]`,
 				`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
@@ -178,14 +183,14 @@ export default {
 				`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
 				`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
 			);
-		if (message.isGroup && (message[message.from].games == "enable" || message.isAdmin)) {
+		if (message.isGroup && (message[message.from].games == "enable" || message.isAdmin) && !OPTIONS.onlyLogs) {
 			if (getSession(message.from)) akinator(message, client);
 			tebak(message, client);
-		} else if (!message.isGroup) {
+		} else if (!message.isGroup && !OPTIONS.onlyLogs) {
 			if (getSession(message.from)) akinator(message, client);
 			anonymous(message, client);
 			tebak(message, client);
 		}
-		if (message.isGroup && message[message.from].antiURL == "enable" && !message.isAdmin && message.isBotAdmin) url(message, client);
+		if (message.isGroup && message[message.from].antiURL == "enable" && !message.isAdmin && message.isBotAdmin && !OPTIONS.onlyLogs) url(message, client);
 	},
 };

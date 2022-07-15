@@ -1,5 +1,6 @@
 import path from "path";
 import moment from "moment-timezone";
+import parser from "yargs-parser";
 import { __dirname } from "../../connect.js";
 import { yta } from "../../Utils/YouTube/index.js";
 import { toOpus } from "../../Utils/Converter/index.js";
@@ -17,9 +18,8 @@ export default {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a URL");
 		try {
-			let queries = query.split(",");
-			queries = removeDuplicatesArray(queries.map((q) => q.trim()));
-			for (const Query of queries) {
+			let { _: queries } = parser(query);
+			for (const Query of removeDuplicatesArray(queries.map((q) => q.trim()))) {
 				const audio = await yta(Query);
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading YouTube Audio`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 				if ("error" in audio) {

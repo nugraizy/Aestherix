@@ -1,3 +1,5 @@
+import parser from "yargs-parser";
+
 export default {
 	name: "ytplay",
 	description: "Play a youtube video.",
@@ -8,10 +10,9 @@ export default {
 	limit: 4,
 	async run(message, client) {
 		if (!message.query) return client[botNum].reply({ quoted: message.message, from: message.from }, "Please enter a query");
-		if (/--?(aud(io)?|mp3|lagu|song(s)?)/.test(message.query)) {
-			cmds.commands.get("ytaudio").run(message, client);
-		} else if (/--?(vid(eo)?s?|mp4|clips?)/.test(message.query)) {
-			cmds.commands.get("ytvideo").run(message, client);
-		} else cmds.commands.get("ytaudio").run(message, client);
+		let { audio, video } = parser(message.query.toLowerCase(), { configuration: { "short-option-groups": false }, alias: { audio: ["aud", "mp3", "musik", "music"], video: ["vid", "mp4", "video", "videos"] } });
+		if (audio) cmds.commands.get("ytaudio").run(message, client);
+		if (video) cmds.commands.get("ytvideo").run(message, client);
+		if (!audio && !video) cmds.commands.get("ytaudio").run(message, client);
 	},
 };
