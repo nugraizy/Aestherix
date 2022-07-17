@@ -11,7 +11,7 @@ import { isOne, isURL, INFOLOG, ERRLOG, color, removeDuplicatesArray } from "../
 export default {
 	name: "tiktokmusic",
 	description: "Downloads TikTok music that used in the video.",
-	usage: "!tiktokmusic <url> (you can send multiple link using space in between) [options]\nOptions:\n-wm, --watermark: Download with watermark\n-nowm, --nowatermark: Download without watermark\n-v2 : Download videos with better description",
+	usage: "!tiktokmusic <url> (you can send multiple link using space in between) [options]\nOptions:\n-wm, --watermark: Download with watermark\n-nowm, --nowatermark: Download without watermark",
 	aliases: ["tiktokmusics", "tiktokmusik", "ttmusic", "ttmusik", "ttm"],
 	category: "Downloader",
 	cooldown: 6,
@@ -38,15 +38,26 @@ export default {
 					client[botNum].reply({ from, quoted: message }, `Error while downloading TikTok Music\n\n${url.split(" ")[0]}`);
 					continue;
 				}
-				await client[botNum].sendMessage(
-					from,
-					{
-						document: await toOpus("opus", { input: path.join(__dirname, `Temporary Files/${filename}`), output: path.join(__dirname, `Temporary Files/${filename}-done`), media: music.url.music.replace("https", "http") }),
-						fileName: `${music.authorMusic} - ${music.musicTitle}.mp3`,
-						mimetype: mime("mp3"),
-					},
-					{ quoted: message },
-				);
+				if (music.type == "images") {
+					await client[botNum].sendMessage(
+						from,
+						{
+							document: await toOpus("opus", { input: path.join(__dirname, `Temporary Files/${filename}`), output: path.join(__dirname, `Temporary Files/${filename}-done`), media: music.music.music.replace("https", "http") }),
+							fileName: `${music.music.authorMusic} - ${music.music.musicTitle}.mp3`,
+							mimetype: mime("mp3"),
+						},
+						{ quoted: message },
+					);
+				} else
+					await client[botNum].sendMessage(
+						from,
+						{
+							document: await toOpus("opus", { input: path.join(__dirname, `Temporary Files/${filename}`), output: path.join(__dirname, `Temporary Files/${filename}-done`), media: music.url.music.replace("https", "http") }),
+							fileName: `${music.authorMusic} - ${music.musicTitle}.mp3`,
+							mimetype: mime("mp3"),
+						},
+						{ quoted: message },
+					);
 				await delay(300);
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloaded TikTok Music`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 			}

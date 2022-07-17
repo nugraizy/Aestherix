@@ -2,11 +2,8 @@ import moment from "moment-timezone";
 import similarity from "similarity";
 import { delay } from "@adiwajshing/baileys";
 import { INFOLOG, color, reassign, addLimit, getTimeSince } from "../../Helper/Modules/index.js";
-import { tebak, url, akinator } from "../index.js";
 import { runtime } from "../../connect.js";
-import { getSession } from "../../Utils/Games/index.js";
 import { checkAfk, getAfk, deleteAfk } from "../../Helper/Misc/index.js";
-const { handler: anonymous } = (await import("./anonymousMessage.js")).default;
 
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 
@@ -183,14 +180,9 @@ export default {
 				`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
 				`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
 			);
-		if (message.isGroup && (message[message.from].games == "enable" || message.isAdmin) && !OPTIONS.onlyLogs) {
-			if (getSession(message.from)) akinator(message, client);
-			tebak(message, client);
-		} else if (!message.isGroup && !OPTIONS.onlyLogs) {
-			if (getSession(message.from)) akinator(message, client);
-			anonymous(message, client);
-			tebak(message, client);
-		}
-		if (message.isGroup && message[message.from].antiURL == "enable" && !message.isAdmin && message.isBotAdmin && !OPTIONS.onlyLogs) url(message, client);
+		(await import("../Game Handlers/akinator.js")).default.handler(message, client);
+		(await import("../Game Handlers/tebakGambar.js")).default.handler(message, client);
+		(await import("./anonymousMessage.js")).default.handler(message, client);
+		(await import("../Misc/groupURL.js")).default.handler(message, client);
 	},
 };

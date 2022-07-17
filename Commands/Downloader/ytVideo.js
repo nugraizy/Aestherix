@@ -1,8 +1,7 @@
 import { delay } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
-import parser from "yargs-parser";
 import { ytv } from "../../Utils/YouTube/index.js";
-import { INFOLOG, ERRLOG, color, numberWithCommas, removeDuplicatesArray } from "../../Helper/Modules/index.js";
+import { INFOLOG, ERRLOG, color, numberWithCommas, removeDuplicatesArray, isURL } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "ytvideo",
@@ -16,8 +15,11 @@ export default {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a URL");
 		try {
-			let { _: queries } = parser(query);
-			for (const Query of removeDuplicatesArray(queries.map((q) => q.trim()))) {
+			let queries = query.split(",");
+			queries = removeDuplicatesArray(queries);
+			if (queries.length == 1 && isURL(queries) && !regex(queries)) return client[botNum].reply({ from, quoted: message }, "This isn't a valid YouTube URL.");
+			for (const Query of queries) {
+				if (isURL(Query) && !regex(Query)) return client[botNum].reply({ from, quoted: message }, `[ ${Query} ] This isn't a valid YouTube URL.`);
 				const video = await ytv(Query);
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading YouTube Video`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 				if ("error" in video) {

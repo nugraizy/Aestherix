@@ -4,13 +4,12 @@ import { CheckIntervals, DeleteIntervals } from "../../Utils/Misc/index.js";
 import { __dirname } from "../../connect.js";
 import { createExif } from "../../Utils/Misc/index.js";
 import { convertMediaToSticker } from "../../Utils/Converter/index.js";
-import { getFilesize, readBuffer, unlinkFile, readJSON } from "../../Helper/Modules/index.js";
+import { getFilesize, readBuffer, unlinkFile } from "../../Helper/Modules/index.js";
 import { reassign } from "../../Helper/Modules/reassignMessagesObject.js";
 
 export default {
 	async handler(client, message) {
 		try {
-			const data = readJSON(path.join(__dirname, "Databases/Groups/settingsManager.json"));
 			if (message == undefined) return;
 			message = await reassign(JSON.parse(JSON.stringify(message)), client);
 			if ("error" in message) return;

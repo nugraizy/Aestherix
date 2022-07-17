@@ -10,8 +10,8 @@ export default {
 	cooldown: 2,
 	limit: 2,
 	restrict: true,
-	async run({ isAdmin, isBotAdmin, from, query, mention, bodyQuoted, mediaData, message }, client) {
-		if (!isAdmin) return client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
+	async run({ isAdmin, isBotAdmin, isOwner, from, query, mention, bodyQuoted, mediaData, message }, client) {
+		if (!isAdmin && !isOwner) return client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
 		if (!query && !bodyQuoted) return client[botNum].reply({ from, quoted: message }, "Please reply people message or reply people's ");
 		if (!isBotAdmin) return client[botNum].reply({ from, quoted: message }, "Bot is not admin, Please promote admin before using moderation commands.");
 		if (mention?.includes(botNum) || mediaData?.participant?.includes(botNum)) return client[botNum].reply({ from, quoted: message }, "You can't add me by myself.");

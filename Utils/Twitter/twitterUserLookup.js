@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 
 export const twitterUser = (input) =>
-	new Promise(async (resolve) => {
+	new Promise(async (resolve, reject) => {
 		try {
 			const data = await (
 				await fetch(URL_API(input), {
@@ -18,7 +18,7 @@ export const twitterUser = (input) =>
 			resolve({ biograph, username, name, joined, verified, imageProfile, personalUrl });
 		} catch (err) {
 			log(err);
-			resolve({ error: err.messaage });
+			reject(e);
 		}
 	});
 

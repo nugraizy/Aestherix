@@ -34,7 +34,10 @@ export const tiktokAPI = (url) =>
 				})
 			).text();
 			const $ = cheerio.load(res);
-			const parsed = parseData(JSON.parse($("#SIGI_STATE").html()));
+			const parsed = await parseData(JSON.parse($("#SIGI_STATE").html()));
+			if (parsed.type == "images") {
+				resolve(parsed);
+			}
 			const with_no_watermark = (await (await fetch(URL_API(parsed.keyword))).json()).aweme_detail.video.play_addr.url_list[Math.floor(Math.random() * 3)];
 			parsed.published = Number(parsed.published);
 			parsed.url = {
@@ -47,12 +50,56 @@ export const tiktokAPI = (url) =>
 		}
 	});
 
-const parseData = (arr) => {
+const parseData = async (arr) => {
 	const {
 		ItemList: {
 			video: { keyword },
 		},
 	} = arr;
+	if (arr.ItemModule[keyword] == undefined) {
+		const data = await (await fetch(URL_API(keyword))).json();
+		const {
+			nickname,
+			unique_id: author,
+			signature: biograph,
+			avatar_larger: { url_list: profilePicture },
+		} = data.aweme_detail.author;
+		const { digg_count: liked, share_count: shared, comment_count: comment, play_count: view } = data.aweme_detail.statistics;
+		const {
+			desc: videoDescription,
+			image_post_info: { images },
+			music: {
+				play_url: { uri: music },
+				duration: musicDuration,
+				matched_song: { author: authorMusic, title: musicTitle },
+			},
+		} = data.aweme_detail;
+		return {
+			keyword,
+			nickname,
+			type: "images",
+			author,
+			liked,
+			shared,
+			comment,
+			view,
+			biograph,
+			videoDescription,
+			music: {
+				authorMusic,
+				musicTitle,
+				musicDuration,
+				music,
+			},
+			profilePicture: profilePicture[0],
+			images: images.map((v, i) => {
+				return {
+					url: v.display_image.url_list[1],
+					index: i + 1,
+				};
+			}),
+		};
+	}
 	const {
 		desc: videoDescription,
 		createTime: published,
@@ -64,8 +111,8 @@ const parseData = (arr) => {
 		avatarThumb: profilePicture,
 		video: { downloadAddr: with_watermark, duration: videoDuration, ratio, cover: videoThumbnail },
 		music: { title: musicTitle, authorName: authorMusic, playUrl: music, duration: musicDuration },
-	} = arr.ItemModule[keyword];
-	const { signature: biograph, verified } = arr.UserModule.users[author];
+	} = arr?.ItemModule?.[keyword];
+	const { signature: biograph, verified } = arr?.UserModule?.users?.[author];
 	return {
 		keyword,
 		author,

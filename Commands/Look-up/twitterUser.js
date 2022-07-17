@@ -4,11 +4,11 @@ import { twitterUser } from "../../Utils/Twitter/index.js";
 import { isOne, isURL, ERRLOG, color } from "../../Helper/Modules/index.js";
 
 export default {
-	name: "twitteruser",
+	name: "twitstalk",
 	description: "Lookup Twitter user",
-	usage: "!twitteruser <username>",
+	usage: "!twitstalk <username>",
 	aliases: ["twtlu", "twtlookup", "twtuser"],
-	category: "Downloader",
+	category: "Look-up",
 	cooldown: 6,
 	limit: 9,
 	async run({ from, query, prettyNumber, message }, client) {
@@ -24,7 +24,7 @@ export default {
 				}
 				const user = await twitterUser(username);
 				if ("error" in user) {
-					client[botNum].reply({ from, quoted: message }, `Error while searching Twitter user\n\n${post.error}\n${url}`);
+					client[botNum].reply({ from, quoted: message }, `Error while searching Twitter user\n\n${user.error}\n${username}`);
 					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Searching Twitter User", "red")} for ${color(prettyNumber, "#ff71ce")}`);
 					continue;
 				} else {
@@ -32,7 +32,7 @@ export default {
 					let capt = "``` • Twitter User Lookup```\n\n";
 					capt += `Username : ${username}\n`;
 					capt += `Fullname : ${name}\n`;
-					capt += `Verified : ${verified ? "Verified" : "Not Verified"}\n`;
+					capt += `Verified? : ${verified ? "Yes" : "No"}\n`;
 					capt += `Joined : ${joined}\n`;
 					capt += `Personal URL : ${personalUrl}\n`;
 					capt += `Biograph : ${biograph}`;

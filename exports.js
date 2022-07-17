@@ -85,6 +85,7 @@ export {
 	parseCode,
 } from "./Helper/index.js";
 export {
+	IPLookup,
 	twitterUser,
 	twitterDownload,
 	slot,

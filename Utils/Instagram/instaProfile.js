@@ -55,13 +55,14 @@ export const getUser = (username) =>
 					},
 				})
 			).json();
+			if (graphql == undefined) resolve({ error: `User [ ${username} ] not found.` });
 			const user = graphql.user;
 			resolve({
 				id: user.id,
 				biography: user.biography,
-				subscribersCount: user.edge_followed_by.count,
-				subscribtions: user.edge_follow.count,
-				fullName: user.full_name,
+				followers: user.edge_followed_by.count,
+				following: user.edge_follow.count,
+				fullName: user.full_name == "" ? "No Fullname" : user.full_name,
 				highlightCount: user.highlight_reel_count,
 				isBusinessAccount: user.is_business_account,
 				isRecentUser: user.is_joined_recently,
@@ -103,6 +104,6 @@ export const getUser = (username) =>
 			});
 		} catch (e) {
 			log(e);
-			reject({ error: e });
+			reject(e);
 		}
 	});

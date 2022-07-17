@@ -1,10 +1,9 @@
 import path from "path";
 import moment from "moment-timezone";
-import parser from "yargs-parser";
 import { __dirname } from "../../connect.js";
 import { yta } from "../../Utils/YouTube/index.js";
 import { toOpus } from "../../Utils/Converter/index.js";
-import { INFOLOG, ERRLOG, color, numberWithCommas, removeDuplicatesArray } from "../../Helper/Modules/index.js";
+import { INFOLOG, ERRLOG, color, numberWithCommas, removeDuplicatesArray, isURL } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "ytaudio",
@@ -18,8 +17,11 @@ export default {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a URL");
 		try {
-			let { _: queries } = parser(query);
-			for (const Query of removeDuplicatesArray(queries.map((q) => q.trim()))) {
+			let queries = query.split(",");
+			queries = removeDuplicatesArray(queries);
+			if (queries.length == 1 && isURL(queries) && !regex(queries)) return client[botNum].reply({ from, quoted: message }, "This isn't a valid YouTube URL.");
+			for (const Query of queries) {
+				if (isURL(Query) && !regex(Query)) return client[botNum].reply({ from, quoted: message }, `[ ${Query} ] This isn't a valid YouTube URL.`);
 				const audio = await yta(Query);
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading YouTube Audio`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 				if ("error" in audio) {

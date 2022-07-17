@@ -2,8 +2,8 @@ import parser from "yargs-parser";
 
 export default {
 	name: "ytplay",
-	description: "Play a youtube video.",
-	usage: "!ytplay <query>",
+	description: "Instantly Download a YouTube video/audio.",
+	usage: "!ytplay <query> [options]\nOptions:\n-mp3, Download as Audio\n-mp4, Download as Video",
 	aliases: ["ytp", "yt", "play"],
 	category: "Downloader",
 	cooldown: 5,

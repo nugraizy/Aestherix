@@ -503,6 +503,7 @@ const pushDefaultSettings = (dari) => {
 	if (index == -1) {
 		data.push({
 			[dari]: {
+				URLSender: [],
 				welcome1: "disable",
 				welcome1msg: "Welcome to {groupName}",
 				welcome2: "disable",

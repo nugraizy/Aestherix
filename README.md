@@ -4,6 +4,7 @@
 # SimplebotPRO3
 
 ### Next-gen bot using Baileys-md, and latest version of simplebotPRO
+
 ` (remove showing bash function if script won't start)`
 
 ---
@@ -37,61 +38,73 @@ Please install the latest Baileys-md commit
 node . <session_name> <--options>
 `options :`
 
-### --prf { YOUR_PREFIX }
+### --prf YOUR_PREFIX / -p YOUR_PREFIX
 
 > "Set your custom prefix. Don't use it if you want multi-prefixes."
 
-### --read_only
+### --read_only / -y
 
 > "Bot will ignore every incoming command and only read the chat with no logs."
 
-### --auto_read
+### --auto_read / -r
 
 > "Bot will enable auto-read chat."
 
-### --restrict
+### --restrict / -e
 
 > "Bot will ignore restricted command. Such Add, Promote, Demote."
 
-### --only_logs
+### --only_logs / -o
 
 > "Only shows logs for incoming message and command. But will ignore message and command."
 
-### --no_logs
+### --no_logs / -n
 
 > "This will disable the logs. But not ignore the incoming messages and command."
 
-### --self_mode
+### --self_mode / -s
 
 > "This mode will only listening to your own message and command."
 
-### --debug_mode
+### --debug_mode / -g
 
 > "Every incoming message will be extracted the metadata and showed to the logs."
 
-### --multi_cmd
+### --multi_cmd / -m
 
 > "You can use multiple command. Use | to separate each command."
 
-### --h / --help
+### --help / -h
 
 > "Will show this message in the console."
 
-### --auto_correct
+### --auto_correct / -a
 
 > "Automatically correcting every incoming command."
 
-## --rainbow
+## --rainbow / -b
 
 > "Make your console colorful."
 
-### --watch
+### --watch / -w
 
 > "Watch files for changes and will auto remove previous cache. WARNING : THIS CAN SLOWS YOUR SCRIPT."
 
-## --cool_down
+## --cool_down / -c
 
-> "Enable or disable cooldown for each commands."
+> "Enable cooldown for each commands."
+
+## --no_load / -v
+
+> "Disable load animation."
+
+## --json / -j
+
+> "Store WhatsApp data into JSON File."
+
+## --reset / -k
+
+> "Reset WhatsApp session and start a new one."
 
 ---
 
@@ -197,4 +210,14 @@ const generateProfilePicture = async (mediaUpload, options) => {
 		img: await img,
 	};
 };
+```
+
+---
+
+### fix anti-delete handler if you aren't using json options :
+
+Go to `\node_modules\@adiwajshing\baileys\lib\Store\make-in-memory-store.js:141`
+
+```js
+ev.on("messages.update", (updates) => {});
 ```

@@ -37,7 +37,6 @@ import { readJSON, INFOLOG, color, romanize, ERRLOG } from "./Helper/Modules/fun
 EventEmitter.prototype.setMaxListeners(0);
 
 const { default: makeWASocket, DisconnectReason, makeInMemoryStore, useSingleFileAuthState, DEFAULT_CONNECTION_CONFIG } = baileys;
-const { state, saveState } = useSingleFileAuthState("./Session/Session-debug.json");
 const moduleURL = new URL(import.meta.url);
 export const __dirname = platform == "win32" ? path.dirname(moduleURL.pathname).slice(1) : path.dirname(moduleURL.pathname);
 const { stdout } = process;
@@ -67,9 +66,23 @@ const spinners = new Spinnies({ color: "blue", succeedColor: "green", failColor:
 
 const cli = parseCli();
 global.OPTIONS = cli.flags;
-const regexOption = ["prefix", "readOnly", "autoRead", "autoCorrect", "restrict", "onlyLogs", "noLogs", "selfMode", "debugMode", "multiCmd", "rainbow", "trace", "help", "watch", "coolDown", "noLoad"];
+const regexOption = ["prefix", "readOnly", "autoRead", "autoCorrect", "restrict", "onlyLogs", "noLogs", "selfMode", "debugMode", "multiCmd", "rainbow", "trace", "help", "watch", "coolDown", "noLoad", "json", "reset"];
 
+if (OPTIONS.reset) {
+	const sessionName = `${cli.input[0] ?? "Session-debug"}`;
+	if (fs.existsSync(`./Session/${sessionName}.json`)) fs.unlinkSync(`./Session/${sessionName}.json`);
+	if (fs.existsSync(`./Media Files/Connection Databases/${sessionName}.json`)) fs.unlinkSync(`./Media Files/Connection Databases/${sessionName}.json`);
+}
+
+const { state, saveState } = useSingleFileAuthState(`./Session/${cli.input[0] ?? "Session-debug"}.json`);
 const store = makeInMemoryStore({ logger: P().child({ level: "fatal", stream: "store" }) });
+if (OPTIONS.json) {
+	if (!fs.existsSync("./Media Files/Connection Databases/")) fs.mkdirSync("./Media Files/Connection Databases/");
+	store.readFromFile(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`);
+	setInterval(() => {
+		store.writeToFile(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`);
+	}, 10_000);
+}
 
 export const runtime = Date.now();
 
@@ -262,6 +275,8 @@ function parseCli() {
 			cool_down: { type: "boolean", alias: "c" },
 			auto_correct: { type: "boolean", alias: "a" },
 			no_load: { type: "boolean", alias: "v" },
+			json: { type: "boolean", alias: "j" },
+			reset: { type: "boolean", alias: "k" },
 		},
 	});
 }
@@ -279,21 +294,24 @@ function help() {
 	  $ node . <session> <options>
 
 	Options
-	  --prefix, -p       Set your custom prefix
-	  --read_only, -y    Read only
-	  --auto_read, -r    Auto read every incoming message
-	  --restrict, -e     Restrict every moderator commands
-	  --only_logs, -o    Only showing logs but will ignore every message and commands
-	  --no_logs, -n      Not showing any logs in the meantime still respond for any commands
-	  --self_mode, -s    Set self mode that only owner and the bot can use
-	  --debug_mode, -g   Show every metadata of any message
-	  --multi_cmd, -m    Loop every command on your script. Use | to seperate each commands
-	  --rainbow, -b      make your logs rainbow colors
-	  --trace, -t        Show errors
-	  --watch, -w        Watch every file on your script and reload it when it changed
-	  --cool_down, -c    Set cool down for every command
-	  --no_load, -v      Disable module load animation
-	  --help, -h         Show this message.
+	  --prefix, -p         Set your custom prefix
+	  --read_only, -y      Read only
+	  --auto_read, -r      Auto read every incoming message
+	  --restrict, -e       Restrict every moderator commands
+	  --only_logs, -o      Only showing logs but will ignore every message and commands
+	  --no_logs, -n        Not showing any logs in the meantime still respond for any commands
+	  --self_mode, -s      Set self mode that only owner and the bot can use
+	  --debug_mode, -g     Show every metadata of any message
+	  --multi_cmd, -m      Loop every command on your script. Use | to seperate each commands
+	  --rainbow, -b        make your logs rainbow colors
+	  --trace, -t          Show errors
+	  --watch, -w          Watch every file on your script and reload it when it changed
+	  --cool_down, -c      Set cool down for every command
+	  --auto_correct, -a   Enable a
+	  --no_load, -v        Disable module load animation
+	  --json, -j           Use JSON DB to store data of the WhatsApp connection
+	  --reset, -k          Reset your WhatsApp connection session, and restart the script
+	  --help, -h           Show this message.
 
 	Examples
 	  $ node . --read_only -tr

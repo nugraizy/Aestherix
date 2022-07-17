@@ -36,7 +36,7 @@ export const getReels = (url) =>
 			).json();
 			resolve(dataResult);
 		} catch (err) {
-			console.log(err);
+			log(err);
 			resolve({ status: false, error: err.message });
 		}
 	});
