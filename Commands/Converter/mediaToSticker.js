@@ -17,11 +17,12 @@ export default {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!isMediaImage && !isMediaVid) return client[botNum].reply({ from, quoted: message }, "Please send/reply a media to convert to sticker");
 		try {
-			const file = await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`));
-			createExif("Made by Nanda", "Void bot");
-			const sticker = await convertMediaToSticker(file, prettyNumber);
-			await client[botNum].sendMessage(from, { sticker }, { quoted: message });
-			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
+			client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`)).then(async (result) => {
+				createExif("Made by Nanda", "Void bot");
+				const sticker = await convertMediaToSticker(result, prettyNumber);
+				await client[botNum].sendMessage(from, { sticker }, { quoted: message });
+				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
+			});
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name}\n`;

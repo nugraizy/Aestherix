@@ -7,8 +7,8 @@ export default {
 	name: "staticsticker",
 	description: "Generate static sticker",
 	category: "Converter",
-	usage: "sttp <text> [--color] [--fonts]",
-	aliases: ["statp"],
+	usage: "staticsticker <text> [--color] [--fonts]",
+	aliases: ["sittp"],
 	cooldown: 5,
 	limit: 1,
 	async run({ from, query, message, sender, prettyNumber, bodyQuoted }, client) {
@@ -36,16 +36,16 @@ export default {
 				}
 			}
 			if (bodyQuoted) {
-				const { buffer } = await ttp(sender, bodyQuoted, colors);
-				await client[botNum].sendMessage(from, { sticker: new Buffer.from(buffer, "base64") }, { quoted: message });
-				return INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
-			}
-			if (query) {
-				const { buffer } = await ttp(sender, query, colors);
-				await client[botNum].sendMessage(from, { sticker: new Buffer.from(buffer, "base64") }, { quoted: message });
-				return INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
-			}
-			return message.reply("Please enter text to convert to sticker");
+				ttp(sender, bodyQuoted, colors).then(async (buffer) => {
+					await client[botNum].sendMessage(from, { sticker: new Buffer.from(buffer, "base64") }, { quoted: message });
+					return INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
+				});
+			} else if (query) {
+				ttp(sender, query, colors).then(async (buffer) => {
+					await client[botNum].sendMessage(from, { sticker: new Buffer.from(buffer, "base64") }, { quoted: message });
+					return INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
+				});
+			} else return client[botNum].reply({ from, quoted: message }, "Please enter text to convert to sticker");
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name}\n`;

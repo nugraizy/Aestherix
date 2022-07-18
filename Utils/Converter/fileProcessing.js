@@ -33,7 +33,7 @@ export const toOpus = (ext, opts = {}) =>
 	});
 
 export const convertMediaToSticker = (filePath, sender, output) =>
-	new Promise(async (resolve, reject) => {
+	new Promise((resolve, reject) => {
 		const time = moment().format("HH:mm:ss DD/MM");
 		const pathExif = path.join(__dirname, "Temporary Files/data.exif");
 		let pathSticker = filePath;
@@ -80,7 +80,7 @@ export const convertMediaToSticker = (filePath, sender, output) =>
 			exec(
 				`ffmpeg -i "${filePath}" ${
 					!pathSticker.includes(".webp") ? `-vcodec libwebp -vf "scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1,fps=fps=10" -lossless 0 -preset default -ss 00:00:00 -t 00:00:10 -an -vsync 0 -s 512:512` : ""
-				} "${pathSticker}"`,
+				} "${pathSticker}.webp"`,
 				(err, stdout, stderr) => {
 					if (err) {
 						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);
@@ -96,6 +96,7 @@ export const convertMediaToSticker = (filePath, sender, output) =>
 						const buffer = readBuffer(`${pathSticker}-done.webp`);
 						unlinkFile(`${pathSticker}-done.webp`);
 						unlinkFile(pathSticker);
+						unlinkFile(`${pathSticker}.webp`);
 						INFOLOG(`[${color(time, "cyan")}]`, `${color(`Converted Media`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
 						resolve(buffer);
 					});

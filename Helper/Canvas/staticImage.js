@@ -11,28 +11,35 @@ import { INFOLOG, ERRLOG, color } from "../Modules/functions.js";
 const { createCanvas, registerFont } = Canvas;
 const { CanvasTextWrapper } = Wrap;
 
-export async function ttp(sender, texts, colors, fonts) {
-	const time = moment().format("HH:mm:ss DD/MM");
-	fonts = fonts !== undefined ? fonts.toLowerCase() : "chevin";
-	colors = colors.length == 0 ? null : colors;
-	INFOLOG(`[${color(time, "cyan")}]`, `${color(`Making Static Image`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
-	const colori = await loadColorsPalette(colors);
-	let { ctx, canvas } = createCanvasTemplates(fonts);
-	const reassignColor = colori.startsWith("#") ? colori : `#${colori}`;
-	ctx.fillStyle = reassignColor;
-	ctx.shadowOffsetX = 1;
-	ctx.shadowOffsetY = 1;
-	ctx.shadowColor = reassignColor;
-	ctx.shadowBlur = 2;
-	CanvasTextWrapper(canvas, texts.trim(), { font: `48px ${fonts}`, textAlign: "center", verticalAlign: "middle", sizeToFill: true });
-	const buffer = canvas.toDataURL("image/png").replace(/^data:image\/png;base64,/, "");
-	const saved = saveImages(new Buffer.from(buffer, "base64"), sender);
-	const { buffers } = await insertExif(saved, sender);
-	INFOLOG(`[${color(time, "cyan")}]`, `${color(`Static Image is Done`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
-	return buffers;
-}
+export const ttp = (sender, texts, colors, fonts) =>
+	new Promise(async (resolve, reject) => {
+		const time = moment().format("HH:mm:ss DD/MM");
+		fonts = fonts !== undefined ? fonts.toLowerCase() : "chevin";
+		colors = colors.length == 0 ? null : colors;
+		INFOLOG(`[${color(time, "cyan")}]`, `${color(`Making Static Image`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
+		const colori = await loadColorsPalette(colors);
+		let { ctx, canvas } = createCanvasTemplates(fonts);
+		const reassignColor = colori.startsWith("#") ? colori : `#${colori}`;
+		ctx.fillStyle = reassignColor;
+		ctx.shadowOffsetX = 1;
+		ctx.shadowOffsetY = 1;
+		ctx.shadowColor = reassignColor;
+		ctx.shadowBlur = 2;
+		CanvasTextWrapper(canvas, texts.trim(), { font: `56px ${fonts}`, textAlign: "center", verticalAlign: "middle", sizeToFill: true /* paddingX: 20 */ });
+		const buffer = canvas.toDataURL("image/png").replace(/^data:image\/png;base64,/, "");
+		saveImages(new Buffer.from(buffer, "base64"), sender)
+			.then((saved) => {
+				insertExif(saved, sender)
+					.then(({ buffers }) => {
+						INFOLOG(`[${color(time, "cyan")}]`, `${color(`Static Image is Done`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
+						resolve(buffers);
+					})
+					.catch(reject);
+			})
+			.catch(reject);
+	});
 
-const saveImages = (buffer, sequence) => {
+const saveImages = async (buffer, sequence) => {
 	const paths = `Temporary Files/Static Images-${sequence}.png`;
 	const fileName = path.join(__dirname, paths);
 	writeFileSync(fileName, buffer);
@@ -99,6 +106,3 @@ const loadColorsPalette = async (color = null) => {
 };
 
 const random = (input) => input[Math.floor(Math.random() * input.length)];
-
-//log(await fetch("https://wallpaperflare.com").then((res) => res.text()));
-//log(await fetch("https://deviantart.com").then((res) => res.text()));

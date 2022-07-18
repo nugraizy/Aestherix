@@ -16,22 +16,23 @@ export default {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!isQuotedSticker) return client[botNum].reply({ from, quoted: message }, "Please reply a sticker to decrypt");
 		try {
-			const file = await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`));
-			const { result } = await convertStickerToMedia(file, sender, extractMediaData);
-			await client[botNum].sendMessage(
-				from,
-				Buffer.isBuffer(result)
-					? {
-							image: new Buffer.from(result, "base64"),
-					  }
-					: {
-							video: {
-								url: result,
-							},
-					  },
-				{ quoted: message },
-			);
-			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Media is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
+			client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`)).then(async (results) => {
+				const { result } = await convertStickerToMedia(results, sender, extractMediaData);
+				await client[botNum].sendMessage(
+					from,
+					Buffer.isBuffer(result)
+						? {
+								image: new Buffer.from(result, "base64"),
+						  }
+						: {
+								video: {
+									url: result,
+								},
+						  },
+					{ quoted: message },
+				);
+				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Media is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
+			});
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name}\n`;

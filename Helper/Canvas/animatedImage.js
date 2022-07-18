@@ -1,7 +1,7 @@
 import Canvas from "canvas";
 import { writeFileSync, unlinkSync, readFileSync } from "fs";
 import Wrap from "canvas-text-wrapper";
-import { spawn, exec } from "child_process";
+import { exec } from "child_process";
 import path from "path";
 import moment from "moment-timezone";
 import { createExif } from "../../Utils/Misc/index.js";
@@ -11,33 +11,35 @@ import { INFOLOG, ERRLOG, color } from "../Modules/functions.js";
 const { createCanvas, registerFont } = Canvas;
 const { CanvasTextWrapper } = Wrap;
 
-export async function attp(sender, texts, colored, fonts) {
-	const time = moment().format("HH:mm:ss DD/MM");
-	fonts = fonts !== undefined ? fonts.toLowerCase() : "chevin";
-	colored = colored.length == 0 ? null : colored;
-	INFOLOG(`[${color(time, "cyan")}]`, `${color(`Making Animated Image`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
-	const colors = await loadColorsPalette(colored);
-	let { ctx, canvas } = createCanvasTemplates(fonts);
-	let i = 0;
-	const images = [];
-	for (const colori of colors) {
-		const reassignColor = colori.startsWith("#") ? colori : `#${colori}`;
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		ctx.fillStyle = reassignColor;
-		ctx.shadowOffsetX = 1;
-		ctx.shadowOffsetY = 1;
-		ctx.shadowColor = reassignColor;
-		ctx.shadowBlur = 2;
-		CanvasTextWrapper(canvas, texts, { font: `56px ${fonts}`, textAlign: "center", verticalAlign: "middle", sizeToFill: true });
-		const buffer = canvas.toDataURL("image/png").replace(/^data:image\/png;base64,/, "");
-		const saved = saveImages(new Buffer.from(buffer, "base64"), i);
-		images.push(saved);
-		i++;
-	}
-	const { buffers } = await createSequence(images, sender);
-	INFOLOG(`[${color(time, "cyan")}]`, `${color(`Animated Image is Done`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
-	return buffers;
-}
+export const attp = (sender, texts, colored, fonts) =>
+	new Promise(async (resolve, reject) => {
+		const time = moment().format("HH:mm:ss DD/MM");
+		fonts = fonts !== undefined ? fonts.toLowerCase() : "chevin";
+		colored = colored.length == 0 ? null : colored;
+		INFOLOG(`[${color(time, "cyan")}]`, `${color(`Making Animated Image`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
+		const colors = await loadColorsPalette(colored);
+		let { ctx, canvas } = createCanvasTemplates(fonts);
+		let i = 0;
+		let bufferContainer = [];
+		for (const colori of colors) {
+			const reassignColor = colori.startsWith("#") ? colori : `#${colori}`;
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			ctx.fillStyle = reassignColor;
+			ctx.shadowOffsetX = 1;
+			ctx.shadowOffsetY = 1;
+			ctx.shadowColor = reassignColor;
+			ctx.shadowBlur = 2;
+			CanvasTextWrapper(canvas, texts, { font: `56px ${fonts}`, textAlign: "center", verticalAlign: "middle", sizeToFill: true /* paddingX: 20 */ });
+			const buffer = canvas.toDataURL("image/png").replace(/^data:image\/png;base64,/, "");
+			const saved = saveImages(new Buffer.from(buffer, "base64"), i);
+			bufferContainer.push(saved);
+			i++;
+		}
+		createSequence(bufferContainer, sender).then(({ buffers }) => {
+			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Animated Image is Done`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
+			resolve(buffers);
+		});
+	});
 
 const saveImages = (buffer, sequence) => {
 	const fileName = path.join(__dirname, `./Temporary Files/Animated Images-${sequence}.webp`);
@@ -47,33 +49,31 @@ const saveImages = (buffer, sequence) => {
 
 const createSequence = async (images, sender) =>
 	new Promise(async (resolve, reject) => {
+		createExif("Made by Nanda", "Void Animated Sticker using Canvas and WebP");
 		const time = moment().format("HH:mm:ss DD/MM");
 		const pathExif = path.join(__dirname, "Temporary Files/data.exif");
 		const pathResults = path.join(__dirname, `Temporary Files/Animated Images-${Date.now()}`);
-		const commands = ["-loop", "1", ...images.map((v) => v, "-d 0.1"), "-o", `${pathResults}.webp`];
-		createExif("Made by Nanda", "Void Animated Sticker using Canvas and WebP");
-		spawn("img2webp", commands)
-			.on("error", (err) => {
+		exec(`img2webp -loop 1 ${images.map((v) => `"${v}"`).join(" ")} -o "${pathResults}.webp"`, (er, std, stdr) => {
+			if (er) {
 				ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);
-				reject(err);
-			})
-			.on("close", async () => {
+				reject(er);
+			}
+			exec(`webpmux -set exif "${pathExif}" "${pathResults}.webp" -o "${pathResults}-done.webp"`, (err, stdout, stderr) => {
+				if (err) {
+					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);
+					reject(err);
+				}
+				const buffers = readFileSync(`${pathResults}-done.webp`);
+				unlinkSync(`${pathResults}-done.webp`);
+				unlinkSync(`${pathResults}.webp`);
 				for (const paths of images) {
 					unlinkSync(paths);
 				}
-				exec(`webpmux -set exif '${pathExif}' '${pathResults}.webp' -o '${pathResults}-done.webp'`, (err, stdout, stderr) => {
-					if (err) {
-						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);
-						reject(err);
-					}
-					const buffers = readFileSync(`${pathResults}-done.webp`);
-					unlinkSync(`${pathResults}-done.webp`);
-					unlinkSync(`${pathResults}.webp`);
-					resolve({
-						buffers,
-					});
+				resolve({
+					buffers,
 				});
 			});
+		});
 	});
 
 const createCanvasTemplates = (fonts) => {
