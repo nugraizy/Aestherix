@@ -1,2 +1,3 @@
 export { attp } from "./animatedImage.js";
 export { ttp } from "./staticImage.js";
+export { textStory } from "./textStory.js";

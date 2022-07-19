@@ -15,7 +15,7 @@ export default {
 					{ image: { url: answers[answers.length - 1].absolute_picture_path }, caption: `Name : ${answers[answers.length - 1].name}\nDescription : ${answers[answers.length - 1].description}\nProgress : ${progress}\n${progressBar}` },
 					{ quted: message.message },
 				);
-			if (status == "exitted") await client[botNum].reply({ from, quoted: message }, "You have exitted the game.");
+			if (status == "exitted") await client[botNum].reply({ from: message.from, quoted: message }, "You have exitted the game.");
 			if (status == "back") {
 				if (handle.isFailed) return await client[botNum].reply({ from: message.from, quoted: message.message }, "You can't go back.");
 				await client[botNum].reply({ from: message.from, quoted: message.message }, `${question}\n\n${answers.map((v, i) => `${i + 1}. ${v}`).join("\n")}\n6. Exit\n7. Back/Undo\n\Progress : ${progress.toFixed(2)}% ${arrow}\n${progressBar}`);

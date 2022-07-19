@@ -1,4 +1,4 @@
-export { attp, ttp } from "./Canvas/index.js";
+export { attp, ttp, textStory } from "./Canvas/index.js";
 export { getSpinner, scheme, UA, checkAfk, getAfk, setAfk, deleteAfk } from "./Misc/index.js";
 export {
 	extractZalgo,
@@ -78,3 +78,4 @@ export {
 	isURL,
 	parseCode,
 } from "./Modules/index.js";
+export { WebMessageInfoStubType } from "./Misc/WAProto/index.js";

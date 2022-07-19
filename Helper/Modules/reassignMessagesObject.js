@@ -1,4 +1,4 @@
-import { toBuffer, downloadContentFromMessage, generateWAMessageFromContent, generateWAMessage, getContentType, WAProto } from "@adiwajshing/baileys";
+import { toBuffer, downloadContentFromMessage, generateWAMessageFromContent, generateWAMessage, getContentType } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
 import PhoneNumber from "awesome-phonenumber";
 import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined, isURL, writeBuffer, writeJSON, delaySync } from "./functions.js";

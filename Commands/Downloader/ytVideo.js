@@ -35,8 +35,8 @@ export default {
 					capt += `Author : ${author}\n`;
 					capt += `Channel : ${urlChannel}\n`;
 					capt += `File Size : ${filesize} (${filesizeF})\n`;
-					capt += `Duration : ${timestamp}\n`;
-					capt += `Description : ${description}\n`;
+					capt += `Duration : ${timestamp ?? "No Data"}\n`;
+					capt += `Description : ${description ?? "No Data"}\n`;
 					await client[botNum].sendMessage(from, { video: { url: dl_link.replace("https", "http") }, caption: capt.trim() });
 					await delay(300);
 				}

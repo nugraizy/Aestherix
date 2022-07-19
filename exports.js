@@ -18,6 +18,7 @@ export {
 	addAllLimit,
 	resetAllLimit,
 	checkLimit,
+	textStory,
 	attp,
 	ttp,
 	getSpinner,

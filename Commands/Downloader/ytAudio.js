@@ -36,8 +36,8 @@ export default {
 					capt += `Author : ${author}\n`;
 					capt += `Channel : ${urlChannel}\n`;
 					capt += `File Size : ${filesize} (${filesizeF})\n`;
-					capt += `Duration : ${timestamp}\n`;
-					capt += `Description : ${description}\n`;
+					capt += `Duration : ${timestamp ?? "No Data"}\n`;
+					capt += `Description : ${description ?? "No Data"}\n`;
 					await client[botNum].reply({ from, quoted: message }, capt.trim());
 					await client[botNum].sendMessage(from, { audio: await toOpus("opus", { input: path.join(__dirname, `Temporary Files/${filename}`), output: path.join(__dirname, `Temporary Files/${filename}-done`), media: dl_link.replace("https", "http") }), caption: capt.trim() });
 				}

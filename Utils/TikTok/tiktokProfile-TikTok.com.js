@@ -15,7 +15,6 @@ export const tiktokProfileTIKTOK = (username) =>
 			).text();
 			const $ = cheerio.load(res);
 			const data = parseUserInfo(JSON.parse($("#SIGI_STATE").html()));
-			(await import("fs")).writeFileSync("./test.json", JSON.stringify(JSON.parse($("#SIGI_STATE").html()), undefined, 2));
 			if ("error" in data) resolve({ error: data.error });
 			resolve(data);
 		} catch (err) {

@@ -11,11 +11,12 @@ export default {
 	async handler(message, client, cmds, store, user) {
 		if (message == undefined) return;
 		const time = moment().format("HH:mm:ss DD/MM");
+		if (message.messages[0] && "messageStubParameters" in message.messages[0]) (await import("./stubMessage.js")).default.handler(client, message.messages[0]);
 		message = await reassign(JSON.parse(JSON.stringify(message.messages[0])), client, store, false);
 		if ("error" in message) return;
 		if (!message.message) return;
 		if (message.isBaileys) return;
-		if (message.key && message.key.remoteJid == "status@broadcast") return;
+		if (message.message.key && message.message.key.remoteJid == "status@broadcast" && OPTIONS.story) return (await import("./storyMessage.js")).default.handler(client, message);
 		if (message.type == "protocolMessage" || message.type == "senderKeyDistributionMessage" || !message.type) return;
 		if (OPTIONS.autoRead) {
 			await client[botNum].readMessages([message.message.key]);
@@ -47,7 +48,7 @@ export default {
 			}
 		}
 		const runtimes = ((Date.now() - runtime) / 1000).toFixed(0);
-		if (message.isCmd) {
+		if (message.isCmd && message.from !== "status@broadcast") {
 			let bodies = [];
 			if (OPTIONS.multiCmd) {
 				bodies = message.body.split("|");
@@ -167,7 +168,7 @@ export default {
 			INFOLOG(
 				`[${color(time, "cyan")}]`,
 				`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
-				`${color(message.body.trim().replace("\n", "").substr(0, 20), "#05ffa1")}`,
+				`${color(message.body?.trim()?.replace("\n", "")?.substr(0, 20), "#05ffa1")}`,
 				`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
 				`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
 			);
@@ -175,7 +176,7 @@ export default {
 			INFOLOG(
 				`[${color(time, "cyan")}]`,
 				`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
-				`${color(message.body.trim().replace("\n", "").substr(0, 20), "#05ffa1")}`,
+				`${color(message.body?.trim()?.replace("\n", "")?.substr(0, 20), "#05ffa1")}`,
 				`${color(message.from, "#b967ff")}`,
 				`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
 				`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
