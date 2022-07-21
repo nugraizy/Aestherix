@@ -46,15 +46,8 @@ String.prototype.capitalize = function () {
 		.join(" ");
 };
 
-export const numberWithCommas = (number = 0, region = "id") => parseFloat(number).toLocaleString(region);
-
-export const randomCase = (string = "") => {
-	const container = [];
-	string.split("").map((str) => {
-		if (Math.floor(Math.random() * 2) + 1 == 1) container.push(str.toLowerCase());
-		else container.push(str.toUpperCase());
-	});
-	return container.join("");
+String.prototype.PARSE_EVENTS = function (...args) {
+	return args.some((v) => v == this);
 };
 
 String.prototype.mocking = function () {
@@ -68,6 +61,20 @@ String.prototype.mocking = function () {
 			else container.push(str);
 		});
 
+	return container.join("");
+};
+
+export const numberWithCommas = (number = 0, region = "id", type = "comma") => {
+	if (type == "comma") return parseInt(number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+	else if (type == "dot") return parseFloat(number).toLocaleString(region);
+};
+
+export const randomCase = (string = "") => {
+	const container = [];
+	string.split("").map((str) => {
+		if (Math.floor(Math.random() * 2) + 1 == 1) container.push(str.toLowerCase());
+		else container.push(str.toUpperCase());
+	});
 	return container.join("");
 };
 

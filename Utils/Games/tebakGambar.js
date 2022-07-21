@@ -28,10 +28,13 @@ export const startTG = async (client, id, { message, sender }, remainingTime) =>
 		intervals["tebakGambar"].get(ids).timer = second;
 		games.tebakGambar.get(ids).timer = second;
 		const { timer } = CheckIntervals(intervals["tebakGambar"].get(ids));
+		if (timer <= 5) {
+			clients[botNum].reply({ from: ids, quoted: messages }, `Time's almost over! 5 seconds`);
+		}
 		if (timer <= 0) {
 			DeleteIntervals(intervals["tebakGambar"].get(ids), intervals["tebakGambar"], ids);
 			clients[botNum].reply({ from: ids, quoted: messages }, `Time's up! The answer is ${answers}`);
-			games.tebakGambar.delete(games.tebakGambar.get(ids));
+			games.tebakGambar.delete(games.tebakGambar.get(ids).id);
 		}
 	});
 	return {
@@ -46,4 +49,4 @@ const pushMessageData = (id, data, message) => {
 	return true;
 };
 
-const getData = () => randomize(readJSON(path.join(__dirname, "Helper/Games/Tebak Gambar/gambar.json")));
+const getData = () => randomize(readJSON(path.join(__dirname, "Databases/Games/Tebak Gambar/db.json")));

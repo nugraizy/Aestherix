@@ -7,7 +7,16 @@ export default {
 	usage: "!list",
 	aliases: ["lst"],
 	cooldown: 5,
-	async run({ from, message, bodyQuoted, mediaData, query }, client, store) {
+	async run({ from, query }, client, store) {
+		const row = Array(Number(query)).fill({
+			rows: [
+				{
+					title: "🔥",
+					rowId: `.menu`,
+				},
+			],
+			title: "VOID BOT | Hello World!",
+		});
 		const messages = generateWAMessageFromContent(
 			from,
 			{
@@ -16,17 +25,7 @@ export default {
 					description: "List Message",
 					listType: 1,
 					footerText: "Void Bot",
-					sections: [
-						{
-							rows: [
-								{
-									title: "This is a Test",
-									rowId: `.menu`,
-								},
-							],
-							title: "VOID BOT | Hello World!",
-						},
-					],
+					sections: row,
 				},
 			},
 			{},

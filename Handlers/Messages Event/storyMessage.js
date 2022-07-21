@@ -6,6 +6,9 @@ import { textStory } from "../../Helper/Canvas/index.js";
 
 export default {
 	async handler(client, message) {
+		if (OPTIONS.autoRead) {
+			await client[botNum].readMessages([message.message.key]);
+		}
 		const time = moment().format("HH:mm:ss DD/MM");
 		const runtimes = ((Date.now() - runtime) / 1000).toFixed(0);
 		let caption = `\`\`\`Auto Fetch WhatsApp Story\`\`\`\n\n`;

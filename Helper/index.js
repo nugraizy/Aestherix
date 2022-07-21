@@ -78,4 +78,4 @@ export {
 	isURL,
 	parseCode,
 } from "./Modules/index.js";
-export { WebMessageInfoStubType } from "./Misc/WAProto/index.js";
+export { WebMessageInfoStubType, NO_DATA, ZERO, S_WHATSAPP_NET, UPDATE } from "./Misc/WAData/index.js";

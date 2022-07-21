@@ -2,25 +2,8 @@ import { toBuffer, downloadContentFromMessage, generateWAMessageFromContent, gen
 import moment from "moment-timezone";
 import PhoneNumber from "awesome-phonenumber";
 import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined, isURL, writeBuffer, writeJSON, delaySync } from "./functions.js";
-const ZERO = "0@s.whatsapp.net";
-const S_WHATSAPP_NET = "@s.whatsapp.net";
-const UPDATE = {
-	ADD: "groupParticipantsUpdate",
-	REMOVE: "groupParticipantsUpdate",
-	DEMOTE: "groupParticipantsUpdate",
-	PROMOTE: "groupParticipantsUpdate",
-	SUBJECT: "groupUpdateSubject",
-	DESCRIPTION: "groupUpdateDescription",
-	ANNOUNCEMENT: "groupSettingUpdate",
-	NOT_ANNOUNCEMENT: "groupSettingUpdate",
-	UNLOCKED: "groupSettingUpdate",
-	LOCKED: "groupSettingUpdate",
-	RETRIEVE: "groupInviteCode",
-	REVOKE: "groupRevokeInvite",
-};
-String.prototype.PARSE_EVENTS = function (...args) {
-	return args.some((v) => v == this);
-};
+import { NO_DATA, ZERO, S_WHATSAPP_NET, UPDATE } from "../Misc/WAData/index.js";
+
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 export const reassign = async (m, client, store, search) => {
 	try {
@@ -47,10 +30,10 @@ export const reassign = async (m, client, store, search) => {
 		const isBaileys = (m.key.id.startsWith("BAE5") && isSame(m.key.id.length, 16)) || (isFromMe && m.key.id.startsWith("VOID"));
 		const sender = isFromMe ? `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net` : isGroup ? m.key.participant : m.key.remoteJid;
 		const prettyNumber = PhoneNumber(`+${sender.replace("@s.whatsapp.net", "")}`).getNumber("international") ?? PhoneNumber(`+${m.key.participant.replace("@s.whatsapp.net", "")}`).getNumber("international");
-		const groupMetadata = isGroup ? await client[botNum].groupMetadata(from).catch((e) => {}) : "";
-		const groupName = isGroup ? groupMetadata?.subject : "";
-		const groupId = isGroup ? groupMetadata?.id : "";
-		const isGroupOwner = isGroup ? (isSame((await client[botNum].groupMetadata(from)).owner, sender) ? true : false) : "";
+		const groupMetadata = isGroup ? await client[botNum].groupMetadata(from).catch((e) => {}) : {};
+		const groupName = isGroup ? groupMetadata?.subject : NO_DATA;
+		const groupId = isGroup ? groupMetadata?.id : NO_DATA;
+		const isGroupOwner = isGroup ? (isSame((await client[botNum].groupMetadata(from).catch((e) => {}))?.owner, sender) ? true : false) : false;
 		const content = JSON.stringify(m.message, null, 2);
 		const pushname = m.pushName ? m.pushName.trim() : prettyNumber;
 		const botNumber = `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net`;
@@ -66,12 +49,12 @@ export const reassign = async (m, client, store, search) => {
 			type = Object.keys(m.message?.ephemeralMessage?.message);
 			mText = m.message.ephemeralMessage;
 		}
-		const rawParticipants = groupMetadata.participants ? groupMetadata.participants : [];
-		const adminGroups = rawParticipants.filter((v) => isNotNull(v.admin)).map((v) => v.id);
-		const participantsGroups = rawParticipants.map((v) => v.id);
-		const ownerGroups = rawParticipants.find((v) => v.admin == "superadmin")?.id || null;
-		const isAdmin = adminGroups.includes(sender);
-		const isBotAdmin = adminGroups.includes(botNumber);
+		const rawParticipants = groupMetadata?.participants ? groupMetadata?.participants : [];
+		const adminGroups = rawParticipants?.filter((v) => isNotNull(v.admin)).map((v) => v.id);
+		const participantsGroups = rawParticipants?.map((v) => v.id);
+		const ownerGroups = rawParticipants?.find((v) => v.admin == "superadmin")?.id || null;
+		const isAdmin = adminGroups?.includes(sender);
+		const isBotAdmin = adminGroups?.includes(botNumber);
 		const body = isSame(type, "conversation")
 			? mText.message.conversation
 			: isSame(type, "mentionText")

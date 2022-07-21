@@ -86,6 +86,8 @@ export {
 	parseCode,
 } from "./Helper/index.js";
 export {
+	GetSambungKataSession,
+	SambungKata,
 	IPLookup,
 	twitterUser,
 	twitterDownload,

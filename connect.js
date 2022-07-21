@@ -51,10 +51,12 @@ intervals.tebakGambar = new Map();
 intervals.sudoku = new Map();
 intervals.url = new Map();
 intervals.anonymous = new Map();
+intervals.word = new Map();
 games.tebakGambar = new Map();
 games.sudoku = new Map();
 games.akinator = new Map();
 games.tictactoe = new Map();
+games.word = new Map();
 user.cooldown = new Map();
 cmds.commands = new Map();
 user.afk = new Map();
@@ -64,7 +66,7 @@ global.log = console.log;
 
 const spinners = new Spinnies({ color: "blue", succeedColor: "green", failColor: "redBright", spinner: getSpinner("dots") });
 
-const cli = parseCli();
+global.cli = parseCli();
 global.OPTIONS = cli.flags;
 const regexOption = ["prefix", "readOnly", "autoRead", "autoCorrect", "restrict", "onlyLogs", "noLogs", "selfMode", "debugMode", "multiCmd", "rainbow", "trace", "help", "watch", "coolDown", "noLoad", "json", "reset", "story"];
 

@@ -181,8 +181,9 @@ export default {
 				`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
 				`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
 			);
-		(await import("../Game Handlers/akinator.js")).default.handler(message, client);
-		(await import("../Game Handlers/tebakGambar.js")).default.handler(message, client);
+		(await import("../Game Handlers/akinator.js")).default.handler(message, client, message);
+		(await import("../Game Handlers/tebakGambar.js")).default.handler(message, client, message);
+		(await import("../Game Handlers/sambungKata.js")).default.handler(message, client, message);
 		(await import("./anonymousMessage.js")).default.handler(message, client);
 		(await import("../Misc/groupURL.js")).default.handler(message, client);
 	},
