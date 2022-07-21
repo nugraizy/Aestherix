@@ -68,7 +68,7 @@ const spinners = new Spinnies({ color: "blue", succeedColor: "green", failColor:
 
 global.cli = parseCli();
 global.OPTIONS = cli.flags;
-const regexOption = ["prefix", "readOnly", "autoRead", "autoCorrect", "restrict", "onlyLogs", "noLogs", "selfMode", "debugMode", "multiCmd", "rainbow", "trace", "help", "watch", "coolDown", "noLoad", "json", "reset", "story"];
+const regexOption = ["prefix", "readOnly", "autoRead", "autoCorrect", "restrict", "onlyLogs", "noLogs", "selfMode", "debugMode", "multiCmd", "rainbow", "trace", "help", "watch", "coolDown", "noLoad", "json", "reset", "story", "offline"];
 
 if (OPTIONS.reset) {
 	const sessionName = `${cli.input[0] ?? "Session-debug"}`;
@@ -280,6 +280,7 @@ function parseCli() {
 			json: { type: "boolean", alias: "j" },
 			reset: { type: "boolean", alias: "k" },
 			story: { type: "boolean", alias: "q" },
+			offline: { type: "boolean", alias: "f" },
 		},
 	});
 }
@@ -315,6 +316,7 @@ function help() {
 	  --json, -j           Use JSON DB to store data of the WhatsApp connection
 	  --reset, -k          Reset your WhatsApp connection session, and restart the script
 	  --story, q           Auto download people story after the bot received the story
+	  --offline, -f        Set your current presence to offline
 	  --help, -h           Show this message.
 
 	Examples

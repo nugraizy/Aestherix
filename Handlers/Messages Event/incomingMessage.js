@@ -18,8 +18,9 @@ export default {
 		if (message.isBaileys) return;
 		if (message.message.key && message.message.key.remoteJid == "status@broadcast" && OPTIONS.story) return (await import("./storyMessage.js")).default.handler(client, message);
 		if (message.type == "protocolMessage" || message.type == "senderKeyDistributionMessage" || !message.type) return;
+		if (OPTIONS.offline) (await import("./offlineMessage.js")).default.handler(client, message);
 		if (OPTIONS.autoRead) {
-			await client[botNum].readMessages([message.message.key]);
+			if (!OPTIONS.offline) await client[botNum].readMessages([message.message.key]);
 		}
 		if (checkAfk(message.sender, message.from)) {
 			const { reasons, since } = getAfk(message.sender, message.from);

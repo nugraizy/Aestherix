@@ -152,5 +152,25 @@
       "welcome2": "disable",
       "welcome2msg": "Welcome to {groupName}"
     }
+  },
+  {
+    "120363043002737271@g.us": {
+      "URLSender": [],
+      "antiDelete": "disable",
+      "antiGroupURL": "disable",
+      "antiSpam": "disable",
+      "antiURL": "disable",
+      "antiVirus": "disable",
+      "autoReader": "disable",
+      "games": "disable",
+      "left1": "disable",
+      "left1msg": "Bye bye {groupName}",
+      "left2": "disable",
+      "left2msg": "Bye bye {groupName}",
+      "welcome1": "disable",
+      "welcome1msg": "Welcome to {groupName}",
+      "welcome2": "disable",
+      "welcome2msg": "Welcome to {groupName}"
+    }
   }
 ]
