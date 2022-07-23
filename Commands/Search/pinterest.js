@@ -21,7 +21,7 @@ export default {
 					templateButtons: [
 						{ urlButton: { displayText: "Image Source", url: args[1] == "next" ? data[index].image : data[index].image } },
 						{ urlButton: { displayText: "Pinterest Source", url: args[1] == "next" ? data[index].pinSource : data[index].pinSource } },
-						index !== data.length ? { quickReplyButton: { displayText: "Next Image", id: `.pinterest next ${data[index + 1].image} ${JSON.stringify(data)}` } } : {},
+						index + 1 !== data.length ? { quickReplyButton: { displayText: "Next Image", id: `.pinterest next ${data[index + 1].image} ${JSON.stringify(data)}` } } : {},
 						index !== 0 ? { quickReplyButton: { displayText: "Previous Image", id: `.pinterest prev ${data[index - 1].image} ${JSON.stringify(data)}` } } : {},
 					],
 					footer: `Author : ${data[index].authorUsername}
