@@ -56,4 +56,3 @@ const URL_BASE = (input) => `https://www.tiktok.com/${input}`;
 const URL_ID_API = (input) => `https://m.tiktok.com/share/item/list?id=${input}&type=1&count=10000&minCursor=0&maxCursor=0`;
 const URL_VIDEO_PAGE = (...input) => `https://www.tiktok.com/@${input[0]}/video/${input[1]}`;
 const UA = () => "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36";
-await tiktokProfileTIKTOK("okekekeei");

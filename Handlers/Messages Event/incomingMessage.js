@@ -4,6 +4,7 @@ import { delay } from "@adiwajshing/baileys";
 import { INFOLOG, color, reassign, addLimit, getTimeSince } from "../../Helper/Modules/index.js";
 import { runtime } from "../../connect.js";
 import { checkAfk, getAfk, deleteAfk } from "../../Helper/Misc/index.js";
+let STATS_OFFLINE = true;
 
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 
@@ -18,7 +19,13 @@ export default {
 		if (message.isBaileys) return;
 		if (message.message.key && message.message.key.remoteJid == "status@broadcast" && OPTIONS.story) return (await import("./storyMessage.js")).default.handler(client, message);
 		if (message.type == "protocolMessage" || message.type == "senderKeyDistributionMessage" || !message.type) return;
-		if (OPTIONS.offline) (await import("./offlineMessage.js")).default.handler(client, message);
+		if (OPTIONS.offline) {
+			if (STATS_OFFLINE) {
+				await cmds.commands.get("simulates").run({ args: [".simulates", "online", "disable"], isOwner: true, from: false, message: message.message }, client, store);
+				STATS_OFFLINE = false;
+			}
+			(await import("./offlineMessage.js")).default.handler(client, message);
+		}
 		if (OPTIONS.autoRead) {
 			if (!OPTIONS.offline) await client[botNum].readMessages([message.message.key]);
 		}

@@ -11,8 +11,8 @@ export const startTG = async (client, id, { message, sender }, remainingTime) =>
 		const data = games.tebakGambar.get(id);
 		return { status: "playing", messages: data.message, remaining: data.timer };
 	}
-	const { img: image, jawaban: answer } = getData();
-	const obj = { id, startsBy: sender, message: null, timer: null, data: { image, answer } };
+	const { image, answer } = getData();
+	const obj = { id, startsBy: sender, message: null, timer: null, data: { image, answer: answer.trim() } };
 	const caption = `Guess The Image!\n\nYou have ${remainingTime} seconds to guess the image.\nClue : ${answer.replace(/[aiueoAIUEO]/g, "_")}\n`;
 	await client[botNum].sendMessage(id, { image: { url: image }, caption }, { quoted: message }).then((data) => {
 		obj.message = data;
@@ -21,14 +21,14 @@ export const startTG = async (client, id, { message, sender }, remainingTime) =>
 	const remainings = moment(new Date())
 		.add(parseInt(remainingTime + 2), "seconds")
 		.valueOf();
-	INFOLOG(`[${color(time, "cyan")}]`, `${color(`The Answer is : ${answer}`, "#01cdfe")}`);
+	INFOLOG(`[${color(time, "cyan")}]`, `${color(`The Answer is : ${answer.trim()}`, "#01cdfe")}`);
 	SetIntervals(intervals["tebakGambar"], id, remainingTime + 2, (clients = client, ids = id, answers = answer, messages = message, remainingTimes = remainings) => {
 		if (intervals["tebakGambar"].get(ids) === undefined) return;
 		const second = Math.floor(((remainingTimes - new Date().getTime()) % (1000 * 60)) / 1000);
 		intervals["tebakGambar"].get(ids).timer = second;
 		games.tebakGambar.get(ids).timer = second;
 		const { timer } = CheckIntervals(intervals["tebakGambar"].get(ids));
-		if (timer <= 5) {
+		if (timer == 5) {
 			clients[botNum].reply({ from: ids, quoted: messages }, `Time's almost over! 5 seconds`);
 		}
 		if (timer <= 0) {

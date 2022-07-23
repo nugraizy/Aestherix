@@ -18,6 +18,7 @@ export {
 	addAllLimit,
 	resetAllLimit,
 	checkLimit,
+	memeGenerator,
 	textStory,
 	attp,
 	ttp,
@@ -86,6 +87,8 @@ export {
 	parseCode,
 } from "./Helper/index.js";
 export {
+	getCharacters,
+	genshinProfile,
 	GetSambungKataSession,
 	SambungKata,
 	IPLookup,

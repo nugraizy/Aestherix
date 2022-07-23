@@ -38,17 +38,28 @@ export default {
 								{
 									if ("unavailable" in global.presences) return client[botNum].reply({ from, quoted: message }, "Already offline");
 									if ("available" in global.presences) delete global.presences.available;
-									global.presences.unavailable = { status: WAPresence.unavailable, started };
-									client[botNum].reply({ from, quoted: message }, "Simulate Available Presence Disabled");
+									global.presences.unavailable = {
+										status: WAPresence.unavailable,
+										started,
+										interval: setInterval(() => {
+											const messages = Object.keys(store.messages);
+											events(client, messages, "unavailable");
+										}, 8_000),
+									};
+									if (from) client[botNum].reply({ from, quoted: message }, "Simulate Available Presence Disabled");
 								}
 								break;
 							case "enable":
 							case "on":
 								{
 									if ("available" in global.presences) return client[botNum].reply({ from, quoted: message }, "Already online");
-									if ("unavailable" in global.presences) delete global.presences.unavailable;
-									global.presences.available = { status: WAPresence.available, started };
-									client[botNum].reply({ from, quoted: message }, "Simulate Available Presence Enabled");
+									if ("unavailable" in global.presences) {
+										const messages = Object.keys(store.messages);
+										pause(client, messages);
+										clearInterval(global.presences.unavailable.interval);
+										delete global.presences.unavailable;
+									}
+									if (from) client[botNum].reply({ from, quoted: message }, "Simulate Available Presence Enabled");
 								}
 								break;
 							default:

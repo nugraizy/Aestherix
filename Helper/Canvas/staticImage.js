@@ -52,28 +52,26 @@ const insertExif = async (paths, sender) =>
 		const pathExif = path.join(__dirname, "Temporary Files/data.exif");
 		const pathResults = path.join(__dirname, `Temporary Files/Static Images-${Date.now()}`);
 		createExif("Made by Nanda", "Void Static Sticker using Canvas and WebP");
-		const commands = [paths, "-o", `${pathResults}.webp`];
-		spawn("img2webp", commands)
-			.on("error", (err) => {
+		exec(`ffmpeg -i "${paths}" -vcodec libwebp -vf "scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1,fps=fps=30" -lossless 0 -an -vsync 0 -s 512:512 "${pathResults}.webp"`, (er, std, stdr) => {
+			if (er) {
 				ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);
-				reject(err);
-			})
-			.on("close", async () => {
-				exec(`webpmux -set exif '${pathExif}' '${pathResults}.webp' -o '${pathResults}-done.webp'`, (err, stdout, stderr) => {
-					if (err) {
-						log(err);
-						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);
-						reject(err);
-					}
-					const buffers = readFileSync(`${pathResults}-done.webp`);
-					unlinkSync(`${pathResults}-done.webp`);
-					unlinkSync(`${pathResults}.webp`);
-					unlinkSync(paths);
-					resolve({
-						buffers,
-					});
+				reject(er);
+			}
+			exec(`webpmux -set exif '${pathExif}' '${pathResults}.webp' -o '${pathResults}-done.webp'`, (err, stdout, stderr) => {
+				if (err) {
+					log(err);
+					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);
+					reject(err);
+				}
+				const buffers = readFileSync(`${pathResults}-done.webp`);
+				unlinkSync(`${pathResults}-done.webp`);
+				unlinkSync(`${pathResults}.webp`);
+				unlinkSync(paths);
+				resolve({
+					buffers,
 				});
 			});
+		});
 	});
 
 const createCanvasTemplates = (fonts) => {
