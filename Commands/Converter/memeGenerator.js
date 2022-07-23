@@ -6,6 +6,7 @@ import { memeGenerator } from "../../Helper/Canvas/index.js";
 import { INFOLOG, ERRLOG, color } from "../../Helper/Modules/index.js";
 import { __dirname } from "../../connect.js";
 import { convertStickerToMedia } from "../../Utils/Converter/index.js";
+const WATERMARK = "made by void bot";
 
 export default {
 	name: "memegen",
@@ -38,7 +39,7 @@ export default {
 						writeFileSync(path.join(__dirname, `Temporary Files/${filename}.png`), new Buffer.from(result, "base64"));
 						image = path.join(__dirname, `Temporary Files/${filename}.png`);
 					}
-					const buffer = await memeGenerator(sender, image, query.split("&")[0], query.split("&")[1], parsed.isStickers ? "sticker" : "image");
+					const buffer = await memeGenerator(sender, image, query.split("&")[0], query.split("&")[1], parsed.isStickers ? "sticker" : "image", WATERMARK);
 					if (parsed.isStickers) {
 						await client[botNum].sendMessage(from, { sticker: buffer }, { quoted: message });
 					} else {

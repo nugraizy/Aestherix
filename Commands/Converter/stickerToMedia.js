@@ -17,7 +17,7 @@ export default {
 		if (!isQuotedSticker) return client[botNum].reply({ from, quoted: message }, "Please reply a sticker to decrypt");
 		try {
 			client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`)).then(async (results) => {
-				const { result } = await convertStickerToMedia(results, sender, extractMediaData); //
+				const { result } = await convertStickerToMedia(results, sender, extractMediaData);
 				await client[botNum].sendMessage(
 					from,
 					Buffer.isBuffer(result)

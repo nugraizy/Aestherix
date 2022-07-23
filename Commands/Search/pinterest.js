@@ -35,12 +35,19 @@ Void Bot     ${index + 1}/${data.length}`,
 		}
 		const result = await pinterest(query);
 		if ("error" in result) return client[botNum].reply({ from, quoted: message }, result.message);
+		result.forEach((v) => {
+			return (v.caption = v.caption == "" ? "No caption" : v.caption);
+		});
 		await client[botNum].sendMessage(
 			from,
 			{
 				image: { url: result[0].image },
 				caption: `\`\`\` • Pinterest \`\`\``,
-				templateButtons: [{ urlButton: { displayText: "Image Source", url: result[0].image } }, { urlButton: { displayText: "Pinterest Source", url: result[0].pinSource } }, { quickReplyButton: { displayText: "Next Image", id: `.pinterest next ${result[1].image} ${JSON.stringify(result)}` } }],
+				templateButtons: [
+					{ urlButton: { displayText: "Image Source", url: result[0].image } },
+					{ urlButton: { displayText: "Pinterest Source", url: result[0].pinSource } },
+					{ quickReplyButton: { displayText: "Next Image", id: `.pinterest next ${result[1].image} ${JSON.stringify(result).replace(/\|/g, "")}` } },
+				],
 				footer: `Author : ${result[0].authorUsername}
 Author Fullname : ${result[0].authorFullname}
 Follower : ${result[0].follower}

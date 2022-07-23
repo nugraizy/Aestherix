@@ -11,7 +11,7 @@ import { INFOLOG, ERRLOG, color } from "../Modules/functions.js";
 const { createCanvas, registerFont, loadImage } = Canvas;
 const { CanvasTextWrapper } = Wrap;
 
-export const memeGenerator = (sender, input, topTexts = "Made by Nanda", bottomTexts = "Using Canvas", type = "image") =>
+export const memeGenerator = (sender, input, topTexts = "Made by Nanda", bottomTexts = "Using Canvas", type = "image", WATERMARK) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			const time = moment().format("HH:mm:ss DD/MM");
@@ -19,6 +19,7 @@ export const memeGenerator = (sender, input, topTexts = "Made by Nanda", bottomT
 			topTexts = topTexts.substring(0, 40);
 			bottomTexts = bottomTexts.substring(0, 40);
 			registerFont("./Media Files/Fonts/impact.ttf", { family: "impact" });
+			registerFont("./Media Files/Fonts/SourceSansPro-Light.ttf", { family: "source" });
 			const canvas = createCanvas(width, height);
 			const ctx = canvas.getContext("2d");
 			await loadImage(input).then(async (images) => {
@@ -28,11 +29,15 @@ export const memeGenerator = (sender, input, topTexts = "Made by Nanda", bottomT
 			ctx.fillStyle = "#FFFFFF";
 			ctx.strokeStyle = "#000000";
 			ctx.lineWidth = 5;
-			const MULTIPLE = 1.3;
+			const MULTIPLE = 1.5;
 			let fontSize = String(height).length <= 3 ? String(height).substring(0, 2) : String(height).substring(0, 3);
 			fontSize = 2 * Math.round((parseInt(fontSize) * MULTIPLE) / 2);
-			CanvasTextWrapper(canvas, topTexts, { font: `${fontSize}px impact`, textAlign: "center", verticalAlign: "top", paddingY: 10, maxFontSizeToFill: 42, strokeText: true });
-			CanvasTextWrapper(canvas, bottomTexts, { font: `${fontSize}px impact`, textAlign: "center", verticalAlign: "bottom", paddingY: 10, maxFontSizeToFill: 42, strokeText: true });
+			CanvasTextWrapper(canvas, topTexts, { font: `${fontSize}px impact`, textAlign: "center", verticalAlign: "top", paddingY: 20, maxFontSizeToFill: 42, strokeText: true });
+			CanvasTextWrapper(canvas, bottomTexts, { font: `${fontSize}px impact`, textAlign: "center", verticalAlign: "bottom", paddingY: 20, maxFontSizeToFill: 42, strokeText: true });
+			ctx.fillStyle = "#000000";
+			ctx.strokeStyle = "#FFFFFF";
+			ctx.lineWidth = 1;
+			CanvasTextWrapper(canvas, WATERMARK, { font: `18px source`, textAlign: "center", verticalAlign: "middle", textAlign: "left", paddingX: 20, maxFontSizeToFill: 42, strokeText: true });
 			if (type == "sticker") {
 				saveImages(new Buffer.from(canvas.toDataURL("image/png").replace(/^data:image\/png;base64,/, ""), "base64"), sender)
 					.then((saved) => {

@@ -104,7 +104,7 @@ export const convertMediaToSticker = (filePath, sender, output) =>
 			);
 		}
 	});
-//
+
 export const convertStickerToMedia = (filePath, sender, mediaData) =>
 	new Promise(async (resolve, reject) => {
 		const time = moment().format("HH:mm:ss DD/MM");
