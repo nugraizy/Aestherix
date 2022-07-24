@@ -9,6 +9,7 @@ export default {
 	category: "Moderation",
 	cooldown: 2,
 	limit: 2,
+	status: "enable",
 	restrict: true,
 	async run({ isAdmin, isBotAdmin, isOwner, mention, from, mediaData, query, bodyQuoted, message }, client, store) {
 		if (!isAdmin && !isOwner) return client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");

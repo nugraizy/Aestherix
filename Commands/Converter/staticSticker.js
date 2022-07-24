@@ -11,6 +11,7 @@ export default {
 	aliases: ["sittp"],
 	cooldown: 5,
 	limit: 1,
+	status: "enable",
 	async run({ from, query, message, sender, prettyNumber, bodyQuoted }, client) {
 		if (!query) query = "Mana text nya?";
 		try {

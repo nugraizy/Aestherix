@@ -9,6 +9,7 @@ export default {
 	aliases: ["tinyurl", "urlshort", "short", "shorten"],
 	limit: 2,
 	cooldown: 3,
+	status: "enable",
 	async run({ query, from, message }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a URL");
 		if (!isURL(query)) return client[botNum].reply({ from, quoted: message }, "Please specify a valid URL");

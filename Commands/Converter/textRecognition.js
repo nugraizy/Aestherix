@@ -12,6 +12,7 @@ export default {
 	aliases: ["ocr"],
 	cooldown: 5,
 	limit: 1,
+	status: "enable",
 	async run({ isMediaImage, from, prettyNumber, message, filename, query, extractMediaData }, client) {
 		if (!isMediaImage) return client[botNum].reply({ from, quoted: message }, "Please send/reply an image to recognize text");
 		try {

@@ -14,6 +14,7 @@ export default {
 	category: "Converter",
 	cooldown: 5,
 	limit: 1,
+	status: "enable",
 	async run({ isMediaImage, from, prettyNumber, message, filename, extractMediaData }, client) {
 		if (!isMediaImage) return client[botNum].reply({ from, quoted: message }, "Please send/reply an image to recognize text");
 		try {

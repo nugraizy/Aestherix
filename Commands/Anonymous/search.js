@@ -9,6 +9,7 @@ export default {
 	aliases: ["find", "findpartner"],
 	cooldown: 5,
 	limit: 1,
+	status: "enable",
 	async run({ from, message }, client) {
 		const searching = await search(from, 20, client, message);
 		if (typeof searching == "boolean" && searching) {

@@ -8,6 +8,7 @@ export default {
 	category: "Helper",
 	cooldown: 10,
 	limit: 3,
+	status: "enable",
 	async run({ from, query, message }, client) {
 		let capt = `Void Bot Search\n\n`;
 		const messages = await client[botNum].searchMessage(from, query);

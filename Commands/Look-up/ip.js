@@ -10,7 +10,8 @@ export default {
 	aliases: ["iplook", "ipfind"],
 	category: "Look-up",
 	cooldown: 6,
-	limit: 9,
+	limit: 3,
+	status: "enable",
 	async run({ from, query, prettyNumber, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please specify a IP Address");

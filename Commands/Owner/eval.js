@@ -12,7 +12,7 @@ export default {
 	aliases: ["/>", "$>", "=>"],
 	category: "Owner",
 	cooldown: 0,
-	limit: 0,
+	limit: 0,status: "enable",
 	async run(message, client, store) {
 		let {
 			isFromMe,

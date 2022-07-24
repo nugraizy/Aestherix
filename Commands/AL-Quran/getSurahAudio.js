@@ -9,6 +9,7 @@ export default {
 	aliases: ["surah"],
 	cooldown: 0,
 	limit: 0,
+	status: "enable",
 	async run({ query, from, cmd, message }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please specify a surah number");
 		if (!regex(query)) return client[botNum].reply({ from, quoted: message }, "Please specify a valid surah number");

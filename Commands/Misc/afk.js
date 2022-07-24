@@ -8,6 +8,7 @@ export default {
 	aliases: ["away", "idle"],
 	limit: 2,
 	cooldown: 3,
+	status: "enable",
 	async run({ message, from, query, isGroup, sender, pushname }, client) {
 		if (!isGroup) return client[botNum].reply({ from, quoted: message }, "This command is only available in group chat.");
 		setAfk(sender, from, query, pushname);

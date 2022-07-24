@@ -12,6 +12,7 @@ export default {
 	category: "Converter",
 	cooldown: 5,
 	limit: 1,
+	status: "enable",
 	async run({ isQuotedSticker, from, message, filename, extractMediaData, sender, prettyNumber }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!isQuotedSticker) return client[botNum].reply({ from, quoted: message }, "Please reply a sticker to decrypt");

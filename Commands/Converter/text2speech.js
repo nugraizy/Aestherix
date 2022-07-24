@@ -10,6 +10,7 @@ export default {
 	aliases: ["tts", "gtts", "t2s"],
 	cooldown: 5,
 	limit: 1,
+	status: "enable",
 	async run({ query, from, filename, message }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide some text to convert to speech");
 		const parseOptions = query.includes("--") ? query.split("--") : query;

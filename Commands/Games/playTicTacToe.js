@@ -14,6 +14,7 @@ export default {
 	aliases: ["ttt"],
 	limit: 2,
 	cooldown: 2,
+	status: "enable",
 	async run({ message, query, from, sender }, client) {
 		try {
 			const capt = (game, status) => `TicTacToe Games by Void Bot.

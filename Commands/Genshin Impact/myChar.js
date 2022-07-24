@@ -10,6 +10,7 @@ export default {
 	category: "Genshin Impact",
 	cooldown: 6,
 	limit: 2,
+	status: "enable",
 	async run({ sender, query, message, from }, client) {
 		try {
 			const data = readJSON(path.join(__dirname, "Databases/Games/Genshin Impact/data.json"));

@@ -7,6 +7,8 @@ export default {
 	category: "Search",
 	cooldown: 3,
 	usage: "!waifuplay <search/src> <title>",
+	limit: 4,
+	status: "enable",
 	async run({ args, from, message, sender, type }, client) {
 		try {
 			switch (true) {

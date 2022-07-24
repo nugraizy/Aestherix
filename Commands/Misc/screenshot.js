@@ -9,6 +9,7 @@ export default {
 	aliases: ["screenshot", "ss"],
 	cooldown: 3,
 	limit: 2,
+	status: "enable",
 	async run(message, client) {
 		if (!message.query) return client[botNum].reply({ from: message.from, quoted: message.message }, "Please specify a website URL");
 		const parseOptions = message.query.includes("--") ? message.query.split("--") : message.query;

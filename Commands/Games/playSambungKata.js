@@ -10,6 +10,7 @@ export default {
 	category: "Games",
 	cooldown: 2,
 	limit: 2,
+	status: "enable",
 	async run({ isGroup, message, from, sender, query }, client) {
 		if (!isGroup) return client[botNum].reply({ from, quoted: message }, "This feature only for groups");
 		const statusGame = GetSambungKataSession(from);

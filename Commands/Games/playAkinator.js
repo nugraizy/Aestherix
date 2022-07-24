@@ -8,6 +8,7 @@ export default {
 	aliases: ["aki", "playaki", "playakinator"],
 	cooldown: 2,
 	limit: 2,
+	status: "enable",
 	async run({ from, message }, client) {
 		const aki = await startAkinator(from);
 		if ("error" in aki) return await client[botNum].reply({ from, quoted: message }, aki.error);

@@ -80,12 +80,12 @@ export const convertMediaToSticker = (filePath, sender, output) =>
 			exec(
 				`ffmpeg -i "${filePath}" ${
 					!pathSticker.includes(".webp") ? `-vcodec libwebp -vf "scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1,fps=fps=10" -lossless 0 -preset default -ss 00:00:00 -t 00:00:10 -an -vsync 0 -s 512:512` : ""
-				} "${pathSticker}.webp"`,
-				(err, stdout, stderr) => {
-					if (err) {
+				} "${pathSticker}"`,
+				(er, stdout, stderr) => {
+					if (er) {
 						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);
 						unlinkFile(pathSticker);
-						reject(err);
+						reject(er);
 					}
 					exec(`webpmux -set exif "${pathExif}" "${pathSticker}" -o "${pathSticker}-done.webp"`, (err, stdout, stderr) => {
 						if (err) {

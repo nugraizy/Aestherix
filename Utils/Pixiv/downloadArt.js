@@ -12,7 +12,7 @@ export const downloadArtworks = (input) =>
 			container.userId = userId;
 			container.userName = userName;
 			container.pageCount = pageCount;
-			container.url = pageCount !== 1 ? await downloadManga(input) : [body.urls.original];
+			container.url = pageCount !== 1 ? (await downloadManga(input)).url : { original: [body.urls.original], sd: [body.urls.regular], low: [body.urls.thumb] };
 			resolve(container);
 		} catch (err) {
 			log(err);

@@ -10,6 +10,7 @@ export default {
 	aliases: ["bili", "bli"],
 	limit: 4,
 	cooldown: 5,
+	status: "enable",
 	async run({ query, from, message }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");
 		try {

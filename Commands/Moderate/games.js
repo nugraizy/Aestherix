@@ -8,6 +8,7 @@ export default {
 	usage: "games <enable/disable>",
 	cooldown: 2,
 	limit: 2,
+	status: "enable",
 	async run(message, client) {
 		if (!message.isAdmin && !message.isOwner) return client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
 		if (!message.query) return client[botNum].reply({ from: message.from, quoted: message.message }, `Please specify a command\n\nEx: ${message.cmd} <enable/disable>`);

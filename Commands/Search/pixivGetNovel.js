@@ -9,6 +9,7 @@ export default {
 	category: "Search",
 	limit: 4,
 	cooldown: 5,
+	status: "enable",
 	async run({ from, query, message }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");
 		try {
@@ -23,8 +24,7 @@ export default {
 					continue;
 				}
 				const { title, likeCount, userName, viewCount, userId, content } = data;
-				const caption = `\`\`\` • Pixiv Novel Content\`\`\`\n\n
-Title : ${title.capitalize()}
+				const caption = `Title : ${title.capitalize()}
 Author : ${userName}
 ID Artwork : ${regexs.message}
 ID Author : ${userId}
@@ -32,7 +32,15 @@ Tot. Like : ${numberWithCommas(likeCount)}
 Tot. View : ${numberWithCommas(viewCount)}
 
 ${content}`;
-				client[botNum].reply({ from, quoted: message }, caption);
+				await client[botNum].sendMessage(
+					from,
+					{
+						text: caption,
+						templateButtons: [{ urlButton: { displayText: "Novel Source", url: `https://www.pixiv.net/novel/show.php?id=${regexs.message}` } }],
+						footer: " • Pixiv Novel Content",
+					},
+					{ quoted: message },
+				);
 			}
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";

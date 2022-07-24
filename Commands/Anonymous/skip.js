@@ -8,6 +8,7 @@ export default {
 	aliases: ["skippartner"],
 	cooldown: 5,
 	limit: 1,
+	status: "enable",
 	async run({ from, message }, client) {
 		const skipping = skip(from, 20, client, message);
 		if (typeof skipping == "boolean" && !skipping) {

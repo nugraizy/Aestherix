@@ -11,6 +11,7 @@ export default {
 	category: "Genshin Impact",
 	cooldown: 6,
 	limit: 2,
+	status: "enable",
 	async run({ sender, query, message, from }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please specify an UID");
 		try {

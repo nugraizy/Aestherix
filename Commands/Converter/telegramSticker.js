@@ -11,7 +11,8 @@ export default {
 	aliases: ["ts", "telestick", "telegramstickers"],
 	category: "Converter",
 	cooldown: 5,
-	limit: 1,
+	limit: 4,
+	status: "enable",
 	async run({ query, message, from, prettyNumber, filename }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please enter a query");
 		const result = await telegram(query);

@@ -8,6 +8,7 @@ export default {
 	category: "Helper",
 	cooldown: 10,
 	limit: 5,
+	status: "enable",
 	async run({ from, prefix, message }, client) {
 		let capt = `Void Bot Menu\n${romanize(readJSON("./package.json").version)}\n\nUse : ${prefix}${getRandomCommand()} -H\n~> to see the detail of the command.\n\n`;
 		const Container = [];

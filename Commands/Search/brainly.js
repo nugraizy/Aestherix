@@ -8,6 +8,7 @@ export default {
 	aliases: ["brainli", "brainly-search", "tugas"],
 	limit: 4,
 	cooldown: 5,
+	status: "enable",
 	async run({ query, from, message }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query");
 		const parseOptions = query.includes("--") ? query.split("--") : query;

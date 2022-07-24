@@ -8,6 +8,7 @@ export default {
 	aliases: ["surah"],
 	cooldown: 0,
 	limit: 0,
+	status: "enable",
 	async run({ from, message }, client) {
 		try {
 			const lists = await getListSurah();

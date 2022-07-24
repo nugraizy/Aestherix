@@ -8,6 +8,7 @@ export default {
 	aliases: ["conzalgo", "conzalg"],
 	limit: 2,
 	cooldown: 3,
+	status: "enable",
 	async run({ query, from, message }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "You need to provide text to extract the zalgo");
 		await client[botNum].reply({ from, quoted: message }, extractZalgo(query));

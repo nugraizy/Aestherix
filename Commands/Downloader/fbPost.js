@@ -12,6 +12,7 @@ export default {
 	category: "Downloader",
 	cooldown: 6,
 	limit: 6,
+	status: "enable",
 	async run({ from, query, prettyNumber, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a URL");

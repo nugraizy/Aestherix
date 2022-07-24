@@ -12,6 +12,7 @@ export default {
 	aliases: ["ri", "similar", "whatimage", "whatimg", "findimg"],
 	limit: 2,
 	cooldown: 2,
+	status: "enable",
 	async run({ isMediaImage, query, extractMediaData, filename, from, message }, client) {
 		if (!isURL(query) && !isMediaImage) return client[botNum].reply({ from, quoted: message }, "Please send/reply a image to find the similar image");
 		let media = query && isURL(query) ? query : null;
@@ -23,7 +24,7 @@ export default {
 				if (isMediaImage) fs.unlinkSync(media);
 				return client[botNum].reply({ from, quoted: message }, result.error);
 			}
-			let capt = "Reverse Image Search\n";
+			let capt = "``` • Reverse Image Search```\n";
 			capt += "Will sending a few similar or the actual images itself. Please wait...\n\n";
 			for (const item of result.information) {
 				capt += `Title: ${item.title}\nDescription: ${item.description}\n\n`;

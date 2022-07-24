@@ -7,6 +7,7 @@ export default {
 	aliases: ["earthquake"],
 	cooldown: 2,
 	limit: 1,
+	status: "enable",
 	async run(message, client) {
 		const data = await getEarthquake();
 		let caption = "Latest Earthquake in Indonesia\n\n";

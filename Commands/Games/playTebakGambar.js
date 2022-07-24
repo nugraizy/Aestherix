@@ -10,6 +10,7 @@ export default {
 	category: "Games",
 	cooldown: 2,
 	limit: 2,
+	status: "enable",
 	async run(message, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
 		INFOLOG(`[${color(time, "cyan")}]`, `${color(`Starting Guess The Image Games.`, "#01cdfe")}  to ${color(message.prettyNumber, "#ff71ce")}`);

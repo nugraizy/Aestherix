@@ -9,6 +9,7 @@ export default {
 	category: "Moderation",
 	cooldown: 2,
 	limit: 2,
+	status: "enable",
 	restrict: true,
 	async run(message, client, store) {
 		if (!message.isAdmin && !message.isOwner) return client[botNum].reply({ from: message.from, quoted: message.message }, "You are not admin. This commands is only for admins.");

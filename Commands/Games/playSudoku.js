@@ -11,6 +11,7 @@ export default {
 	category: "Games",
 	cooldown: 2,
 	limit: 0,
+	status: "enable",
 	async run({ args, sender, from, message, isOwner, cmd }, client) {
 		try {
 			const buttons = [{ buttonId: "", buttonText: { displayText: "" }, type: 1 }];

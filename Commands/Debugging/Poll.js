@@ -7,6 +7,7 @@ export default {
 	usage: "!polling <emoji>",
 	aliases: ["poll", "pollwith"],
 	cooldown: 5,
+	limit:0,status: "enable",
 	async run({ from, message, bodyQuoted, mediaData, query }, client, store) {
 		const messages = generateWAMessageFromContent(
 			from,

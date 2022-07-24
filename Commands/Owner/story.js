@@ -11,13 +11,13 @@ export default {
 	aliases: ["sw"],
 	cooldown: 0,
 	limit: 0,
+	status: "enable",
 	async run({ from, message, isOwner }, client, store) {
 		if (!isOwner) return client[botNum].reply({ from, quoted: message }, "You are not allowed to use this command");
 		const messages = OPTIONS.json ? JSON.parse(readFileSync(STATUS_PATH)).messages[STATUS] : await store.loadMessages(STATUS);
 		const tempContainer = new Map();
 		let caption = `\`\`\` • Fetch WhatsApp Story\`\`\`\n\n`;
-		let i = 0;
-		let rows = [];
+		const rows = [];
 		for (const message of messages) {
 			const type = message.message ? Object.keys(message.message)[0] : undefined;
 			if (!["extendedTextMessage", "imageMessage", "videoMessage"].includes(type)) continue;
@@ -48,6 +48,7 @@ export default {
 				});
 			}
 		}
+		if (tempContainer.size == 0) return client[botNum].reply({ from, quoted: message }, "No story are found.");
 		for (const value of Array.from(tempContainer.entries())) {
 			caption += ` • ${value[1].stories?.extendedTextMessage?.[0].pushName ?? value[1].stories?.imageMessage?.[0].pushName ?? value[1].stories?.videoMessage?.[0].pushName ?? "No Name"}\n`;
 			caption += `Texts : ${value[1].stories?.extendedTextMessage?.length ?? 0}\n`;

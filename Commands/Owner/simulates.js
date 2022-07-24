@@ -16,7 +16,7 @@ export default {
 	aliases: ["simulate"],
 	category: "Owner",
 	cooldown: 0,
-	limit: 0,
+	limit: 0,status: "enable",
 	async run({ isOwner, from, args, message }, client, store) {
 		if (!isOwner) return client[botNum].reply({ from, quoted: message }, "You are not allowed to use this command");
 		if (args.length == 1) return client[botNum].reply({ from, quoted: message }, "You must provide a status to simulate");

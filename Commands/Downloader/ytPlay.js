@@ -8,6 +8,7 @@ export default {
 	category: "Downloader",
 	cooldown: 5,
 	limit: 4,
+	status: "enable",
 	async run(message, client) {
 		if (!message.query) return client[botNum].reply({ quoted: message.message, from: message.from }, "Please enter a query");
 		let { audio, video } = parser(message.query.toLowerCase(), { configuration: { "short-option-groups": false }, alias: { audio: ["aud", "mp3", "musik", "music"], video: ["vid", "mp4", "video", "videos"] } });

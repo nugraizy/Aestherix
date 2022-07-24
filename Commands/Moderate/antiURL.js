@@ -7,7 +7,7 @@ export default {
 	category: "Moderation",
 	usage: "antiurl <enable/disable>",
 	cooldown: 2,
-	limit: 2,
+	limit: 2,status: "enable",
 	async run(message, client) {
 		if (!message.isAdmin && !message.isOwner) return client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
 		if (!message.isBotAdmin) return client[botNum].reply({ from, quoted: message }, "Bot is not admin, Please promote admin before using moderation commands.");

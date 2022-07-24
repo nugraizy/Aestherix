@@ -8,6 +8,7 @@ export default {
 	aliases: ["stoppartner"],
 	cooldown: 5,
 	limit: 1,
+	status: "enable",
 	async run({ from, message }, client) {
 		const stopping = stop(from, 0, client);
 		if (typeof stopping == "boolean" && !stopping) {

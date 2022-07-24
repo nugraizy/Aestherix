@@ -8,6 +8,8 @@ export default {
 	usage: "!reaction <emoji>",
 	aliases: ["react", "reactwith"],
 	cooldown: 5,
+	limit: 0,
+	status: "enable",
 	async run({ from, message, bodyQuoted, mediaData, query, fromMe }, client, store) {
 		if (bodyQuoted) {
 			const emojis = query.match(emojiReg());

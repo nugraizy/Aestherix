@@ -10,6 +10,7 @@ export default {
 	category: "Downloader",
 	limit: 4,
 	cooldown: 5,
+	status: "enable",
 	async run({ from, query, message }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");
 		try {
@@ -23,23 +24,39 @@ export default {
 					client[botNum].reply({ from, quoted: message }, `Failed while downloading Pixiv artworks\n\n${data.error}\n${querie}`);
 					continue;
 				}
+				let i = 0;
 				const { id, title, userId, userName, pageCount, url: urls } = data;
-				const caption = `\`\`\` • Pixiv Artworks Downloader\`\`\`\n\n
-Title : ${title.capitalize()}
+				let caption = `Title : ${title.capitalize()}
 Author : ${userName}
 ID Artwork : ${id}
 ID Author : ${userId}
 Total Media : ${pageCount}`;
-				client[botNum].reply({ from, quoted: message }, caption);
-				for (const url of urls) {
-					const buffer = await (
-						await fetch(url, {
-							headers: {
-								referer: `https://www.pixiv.net/ajax/illust/${id}`,
-							},
-						})
-					).arrayBuffer();
-					await client[botNum].sendMessage(from, { image: new Buffer.from(buffer, "base64") }, { quoted: message });
+				const images = await (await fetch(urls.original[0], { headers: { referer: `https://www.pixiv.net/ajax/illust/${id}` } })).arrayBuffer();
+				if (urls.original.length == 1)
+					return await client[botNum].sendMessage(
+						from,
+						{
+							image: new Buffer.from(images, "base64"),
+							caption: `\`\`\` • Pixiv Artworks Downloader\`\`\`\n\n`,
+							templateButtons: [{ urlButton: { displayText: "Artwork Source", url: `https://www.pixiv.net/en/artworks/${id}` } }],
+							footer: caption,
+						},
+						{ quoted: message },
+					);
+				for (const url of urls.original) {
+					caption = i == 0 ? caption : "\t";
+					const buffer = await (await fetch(url, { headers: { referer: `https://www.pixiv.net/ajax/illust/${id}` } })).arrayBuffer();
+					await client[botNum].sendMessage(
+						from,
+						{
+							image: new Buffer.from(buffer, "base64"),
+							caption: `\`\`\` • Pixiv Artworks Downloader\`\`\`\n\n`,
+							templateButtons: [{ urlButton: { displayText: "Artwork Source", url: `https://www.pixiv.net/en/artworks/${id}` } }],
+							footer: caption,
+						},
+						{ quoted: message },
+					);
+					i++;
 				}
 			}
 		} catch (err) {

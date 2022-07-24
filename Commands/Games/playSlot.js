@@ -8,6 +8,7 @@ export default {
 	aliases: ["slot"],
 	cooldown: 2,
 	limit: 2,
+	status: "enable",
 	async run({ from, message, query }, client) {
 		let capt;
 		const slot = slots(query);

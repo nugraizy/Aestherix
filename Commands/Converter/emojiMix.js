@@ -13,6 +13,7 @@ export default {
 	category: "Converter",
 	cooldown: 5,
 	limit: 1,
+	status: "enable",
 	async run({ query, from, filename, message, prettyNumber }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please enter a query");
 		const regex = query.match(emojiReg());

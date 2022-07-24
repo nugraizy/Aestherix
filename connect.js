@@ -188,9 +188,11 @@ async function loadCommands() {
 	for (const command of commands) {
 		try {
 			const cmd = (await import(pathToFileURL(path.join(__dirname, command)))).default;
-			if (OPTIONS.watch) await watchFile(path.join(__dirname, command), cmd.name);
-			cmds.commands.set(cmd.name, { ...cmd, pathname: path.join(__dirname, command) });
-			commandsPath.push(path.join(__dirname, command));
+			if (cmd.status != "disable") {
+				if (OPTIONS.watch) await watchFile(path.join(__dirname, command), cmd.name);
+				cmds.commands.set(cmd.name, { ...cmd, pathname: path.join(__dirname, command) });
+				commandsPath.push(path.join(__dirname, command));
+			}
 		} catch (e) {
 			log(e);
 			ERRLOG(`${color(command, "red")} ${color("is causing error. Please check the file before running.", "white")}`);
