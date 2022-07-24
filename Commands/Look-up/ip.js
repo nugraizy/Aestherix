@@ -22,7 +22,7 @@ export default {
 					await client[botNum].reply({ from, quoted: message }, "Please specify a valid IP Address");
 					continue;
 				}
-				const data = await IPLookup(IP);
+				const data = await IPLookup(IP.trim());
 				if ("error" in data) {
 					client[botNum].reply({ from, quoted: message }, `Error while searching IP Address\n\n${data.error}`);
 					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Searching IP Address", "red")} for ${color(prettyNumber, "#ff71ce")}`);

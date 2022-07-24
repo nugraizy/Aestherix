@@ -2,7 +2,7 @@ import { readJSON, romanize } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "menu",
-	description: "Shows the menu.",
+	description: "Shows the menu",
 	usage: "!menu",
 	aliases: ["help"],
 	category: "Helper",

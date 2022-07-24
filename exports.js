@@ -87,6 +87,12 @@ export {
 	parseCode,
 } from "./Helper/index.js";
 export {
+	searchManga,
+	searchArtwork,
+	searchNovel,
+	downloadArtworks,
+	downloadManga,
+	getNovelContent,
 	getCharacters,
 	genshinProfile,
 	GetSambungKataSession,

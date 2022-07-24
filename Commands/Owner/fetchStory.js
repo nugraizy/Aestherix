@@ -44,7 +44,8 @@ export default {
 					i++;
 				}
 			}
-			const data = tempContainer.get(query) || Array.from(tempContainer.values()).find((v) => v.index == Number(query) - 1);
+			const data = tempContainer.get(query) || Array.from(tempContainer.values()).find((v) => v.index == Number(query) - 1) || null;
+			if (!data) return client[botNum].reply({ from, quoted: message }, "Story not found");
 			caption += ` • ${data.stories?.extendedTextMessage?.[0].pushName ?? data.stories?.imageMessage?.[0].pushName ?? data.stories?.videoMessage?.[0].pushName}\n`;
 			caption += `Texts : ${data.stories?.extendedTextMessage?.length ?? 0}\n`;
 			caption += `Images : ${data.stories?.imageMessage?.length ?? 0}\n`;

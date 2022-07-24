@@ -7,6 +7,7 @@ import { INFOLOG, ERRLOG, color } from "../../Helper/Modules/index.js";
 import { __dirname } from "../../connect.js";
 import { convertStickerToMedia } from "../../Utils/Converter/index.js";
 const WATERMARK = "made by void bot";
+const DEFAULT_TYPE = "image";
 
 export default {
 	name: "memegen",
@@ -27,6 +28,7 @@ export default {
 				},
 				alias: {
 					isStickers: ["stk", "stick", "sticker", "sticks", "stc"],
+					isImage: ["img", "image", "foto", "images"],
 				},
 			});
 			const regexs = new RegExp(`--?(${Object.keys(parsed).join("|")})`, "g");
@@ -39,7 +41,7 @@ export default {
 						writeFileSync(path.join(__dirname, `Temporary Files/${filename}.png`), new Buffer.from(result, "base64"));
 						image = path.join(__dirname, `Temporary Files/${filename}.png`);
 					}
-					const buffer = await memeGenerator(sender, image, query.split("&")[0], query.split("&")[1], parsed.isStickers ? "sticker" : "image", WATERMARK);
+					const buffer = await memeGenerator(sender, image, query.split("&")[0], query.split("&")[1], parsed.isStickers ? "sticker" : parsed.isImage ? "image" : DEFAULT_TYPE, WATERMARK);
 					if (parsed.isStickers) {
 						await client[botNum].sendMessage(from, { sticker: buffer }, { quoted: message });
 					} else {

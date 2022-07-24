@@ -16,3 +16,4 @@ export { pinterest } from "./Pinterest/index.js";
 export { bilibiliSearch } from "./Bilibili/index.js";
 export { wpSearch, wpLatest, wpDownload } from "./Waifuplay/index.js";
 export { twitterUser, twitterDownload } from "./Twitter/index.js";
+export { searchManga, searchArtwork, searchNovel, downloadArtworks, downloadManga, getNovelContent } from "./Pixiv/index.js";
