@@ -3,9 +3,7 @@ import { spawn, exec } from "child_process";
 import path from "path";
 import moment from "moment-timezone";
 import FormData from "form-data";
-import fetch from "node-fetch";
 import petting from "pet-pet-gif";
-import cheerio from "cheerio";
 import { __dirname } from "../../connect.js";
 import { webp2mp4File } from "./EZGifs/index.js";
 import { writeBuffer, unlinkFile, INFOLOG, ERRLOG, color, isURL, readBuffer, isFileExist } from "../../Helper/Modules/index.js";
@@ -172,14 +170,12 @@ export const soundRemover = (input, sender) =>
 		try {
 			const bodyForm = new FormData();
 			bodyForm.append("fileName", fs.createReadStream(input));
-			const data = await (await fetch("https://aivocalremover.com/api/v2/FileUpload", { method: "post", body: bodyForm, headers: { "Content-Type": `multipart/form-data; boundary=${bodyForm._boundary}` } })).json();
-			const { vocal_path: vocal, instrumental_path: instrumental } = await (
-				await fetch("https://aivocalremover.com/api/v2/ProcessFile", {
-					method: "post",
-					body: `file_name=${data.file_name}&action=watermark_video&key=X9QXlU9PaCqGWpnP1Q4IzgXoKinMsKvMuMn3RYXnKHFqju8VfScRmLnIGQsJBnbZFdcKyzeCDOcnJ3StBmtT9nDEXJn`,
-					headers: { "Content-Type": "application/x-www-form-urlencoded;charset=utf-8" },
-				})
-			).json();
+			const data = await fetchJSON("https://aivocalremover.com/api/v2/FileUpload", { method: "post", body: bodyForm, headers: { "Content-Type": `multipart/form-data; boundary=${bodyForm._boundary}` } });
+			const { vocal_path: vocal, instrumental_path: instrumental } = await fetchJSON("https://aivocalremover.com/api/v2/ProcessFile", {
+				method: "post",
+				body: `file_name=${data.file_name}&action=watermark_video&key=X9QXlU9PaCqGWpnP1Q4IzgXoKinMsKvMuMn3RYXnKHFqju8VfScRmLnIGQsJBnbZFdcKyzeCDOcnJ3StBmtT9nDEXJn`,
+				headers: { "Content-Type": "application/x-www-form-urlencoded;charset=utf-8" },
+			});
 			unlinkFile(input);
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Removed Sound`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
 			resolve({ result: { vocal, instrumental } });

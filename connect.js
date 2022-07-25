@@ -32,6 +32,8 @@ import path from "path";
 import { EventEmitter } from "events";
 import center from "center-align";
 import moment from "moment-timezone";
+import fetch from "node-fetch";
+import cheerio from "cheerio";
 import { getSpinner } from "./Helper/Misc/Spinner/spinners.js";
 import { readJSON, INFOLOG, color, romanize, ERRLOG } from "./Helper/Modules/functions.js";
 EventEmitter.prototype.setMaxListeners(0);
@@ -63,6 +65,12 @@ user.afk = new Map();
 global.commandsPath = [];
 cmds.aliases = [];
 global.log = console.log;
+
+global.fetch = fetch;
+global.fetchJSON = async (_, __) => await (await fetch(_, __)).json();
+global.fetchTEXT = async (_, __) => await (await fetch(_, __)).text();
+global.fetchBUFFER = async (_, __) => await (await fetch(_, __)).arrayBuffer();
+global.cheerioLOAD = (_) => cheerio.load(_);
 
 const spinners = new Spinnies({ color: "blue", succeedColor: "green", failColor: "redBright", spinner: getSpinner("dots") });
 

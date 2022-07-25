@@ -1,9 +1,9 @@
-import { _fetch, URL_API_SEARCH_NOVEL } from "./index.js";
+import { URL_API_SEARCH_NOVEL } from "./index.js";
 
 export const searchNovel = (keyword) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { body } = await _fetch(URL_API_SEARCH_NOVEL(keyword));
+			const { body } = await fetchJSON(URL_API_SEARCH_NOVEL(keyword));
 			if (body.novel.data.length == 0) resolve({ error: "No novel found with this keyword." });
 			const container = [];
 			for (const { id, title, userId, userName } of body.novel.data) {

@@ -241,6 +241,8 @@ export const reassign = async (m, client, store, search) => {
 				: isQuotedViewOnce && (isQuotedViewOnceImage || isQuotedViewOnceVideo)
 				? mediaData?.message?.[typeQuoted]?.message?.[typeViewOnce]
 				: {};
+		const typeSticker = ["imageMessage", "videoMessage", "stickerMessage"];
+		const stickerAble = typeSticker.includes(typeQuoted);
 		const reply = async ({ from, quoted }, text) => {
 			return await client[botNum].sendMessage(from, { text }, { quoted });
 		};
@@ -423,6 +425,8 @@ export const reassign = async (m, client, store, search) => {
 			settings: SETTINGS,
 			type,
 			typeQuoted,
+			typeSticker,
+			stickerAble,
 			isAdmin,
 			rawParticipants,
 			adminGroups,

@@ -21,7 +21,7 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	status: "enable",
-	async run({ bodyQuoted, mention, isMediaImage, from, extractMediaData, mediaData, filename, prettyNumber, sender, query, message }, client) {
+	async run({ bodyQuoted, mention, isMediaImage, from, extractMediaData, mediaData, filename, prettyNumber, sender, query, message, stickerAble, typeQuoted, typeSticker }, client) {
 		if (mention.length == 0 && !isMediaImage) return client[botNum].reply({ from, quoted: message }, "Please mention or send/reply an image to pet");
 		createExif("Made by Nanda", "Void bot");
 		try {
@@ -41,6 +41,17 @@ export default {
 				return;
 			}
 			if (isMediaImage) {
+				if (!stickerAble)
+					return client[botNum].reply(
+						{ from, quoted: message },
+						`Please send/reply a regular media to be petted. Can't convert ${typeQuoted}, only : ${typeSticker
+							.slice(
+								typeSticker.findIndex((v) => v == "videoMessage"),
+								1,
+							)
+							.join(", ")
+							.capitalize()}`,
+					);
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Petting`, "#01cdfe")} ${color(prettyNumber, "#ff71ce")}`);
 				const file = await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`));
 				const result = await pet(file, sender, options);

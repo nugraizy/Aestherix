@@ -1,12 +1,10 @@
-import fetch from "node-fetch";
-
 export const getSurahAudio = (nomor) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const data = await fetch(`${URL_BASE}/surat/${nomor}`).then((res) => res.json());
+			const data = await fetchJSON(`${URL_BASE}/surat/${nomor}`);
 			resolve({
 				url: data.audio,
-				buffer: Buffer.from(await fetch(data.audio).then((res) => res.arrayBuffer())),
+				buffer: Buffer.from(await fetchBUFFER(data.audio)),
 			});
 		} catch (err) {
 			reject({ error: err });

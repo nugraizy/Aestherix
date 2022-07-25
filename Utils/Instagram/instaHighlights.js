@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-import cheerio from "cheerio";
 import qs from "qs";
 
 export const getHighlights = (username) =>
@@ -7,26 +5,22 @@ export const getHighlights = (username) =>
 		try {
 			if (!username) return resolve({ status: false, error: "Insert username!" });
 			if (username.startsWith("@")) username = username.replace("@", "");
-			const data = await (
-				await fetch(URL_BASE(username), {
-					headers: { "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36", Cookie: "PHPSESSID=hj2p3i96va7kqs7csbq16a5tip; _ga=GA1.2.1623964880.1642090612; _gid=GA1.2.553723423.1642090612; _gat=1" },
-				})
-			).text();
+			const data = await fetchTEXT(URL_BASE(username), {
+				headers: { "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36", Cookie: "PHPSESSID=hj2p3i96va7kqs7csbq16a5tip; _ga=GA1.2.1623964880.1642090612; _gid=GA1.2.553723423.1642090612; _gat=1" },
+			});
 			const $ = cheerio.load(data);
 			const token = $("input#token").attr("value");
-			const dataResult = await (
-				await fetch(URL_POST(), {
-					method: "POST",
-					headers: {
-						"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",
-						origin: URL_ORIGIN(),
-						referer: URL_BASE(username),
-						"Content-Type": `application/x-www-form-urlencoded; charset=UTF-8`,
-						Cookie: "PHPSESSID=hj2p3i96va7kqs7csbq16a5tip; _ga=GA1.2.1623964880.1642090612; _gid=GA1.2.553723423.1642090612; _gat=1",
-					},
-					body: qs.stringify({ url: URL_INSTA(username), action: "highlights", token }),
-				})
-			).json();
+			const dataResult = await fetchJSON(URL_POST(), {
+				method: "POST",
+				headers: {
+					"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",
+					origin: URL_ORIGIN(),
+					referer: URL_BASE(username),
+					"Content-Type": `application/x-www-form-urlencoded; charset=UTF-8`,
+					Cookie: "PHPSESSID=hj2p3i96va7kqs7csbq16a5tip; _ga=GA1.2.1623964880.1642090612; _gid=GA1.2.553723423.1642090612; _gat=1",
+				},
+				body: qs.stringify({ url: URL_INSTA(username), action: "highlights", token }),
+			});
 			resolve(dataResult);
 		} catch (err) {
 			resolve({ status: false, error: err.message });

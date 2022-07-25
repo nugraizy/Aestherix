@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-import cheerio from "cheerio";
 import { isURL, uploadToTelegraph } from "../../Helper/Modules/index.js";
 
 const isValidImageURL = async (url) => {
@@ -17,7 +15,7 @@ export const sauceNao = async (file) =>
 		try {
 			if (!isURL(file)) file = await uploadToTelegraph(file);
 			else if (isURL(file) && !(await isValidImageURL(file))) return resolve({ error: "Invalid image URL" });
-			const data = await (await fetch(URL_BASE(file))).text();
+			const data = await fetchTEXT(URL_BASE(file));
 			const $ = cheerio.load(data);
 			const result = $("#middle > div:nth-child(2)");
 			const results = {

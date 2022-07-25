@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-import cheerio from "cheerio";
 import moment from "moment-timezone";
 import { randomize } from "../../Helper/Modules/index.js";
 import { SetIntervals, DeleteIntervals, CheckIntervals } from "../Misc/intervals.js";
@@ -126,7 +124,7 @@ export class SambungKata {
 
 	async randomWord() {
 		try {
-			const WORDS = await (await fetch(URL_RANDOM_WORD)).json();
+			const WORDS = await fetchJSON(URL_RANDOM_WORD);
 			const RANDOM_WORD = randomize(RegexEndWord(WORDS));
 			this.words = RANDOM_WORD;
 			this.clue = this.random(RANDOM_WORD);
@@ -135,7 +133,7 @@ export class SambungKata {
 			return { value: RANDOM_WORD, clue: this.clue.trim() };
 		} catch (err) {
 			try {
-				const WORDS = await (await fetch(URL_RANDOM_WORD)).json();
+				const WORDS = await fetchJSON(URL_RANDOM_WORD);
 				const RANDOM_WORD = randomize(RegexEndWord(WORDS));
 				this.words = RANDOM_WORD;
 				this.clue = this.random(RANDOM_WORD);
@@ -143,7 +141,7 @@ export class SambungKata {
 				this.turn = randomize([this.player1, this.player2]);
 				return { value: RANDOM_WORD, clue: this.clue.trim() };
 			} catch (err) {
-				const WORDS = await (await fetch(URL_RANDOM_WORD)).json();
+				const WORDS = await fetchJSON(URL_RANDOM_WORD);
 				const RANDOM_WORD = randomize(RegexEndWord(WORDS));
 				this.words = RANDOM_WORD;
 				this.clue = this.random(RANDOM_WORD);
@@ -158,7 +156,7 @@ export class SambungKata {
 		if (word.includes(" ")) return RESPONSE.INVALID_ANSWER;
 		if (this.checkIsGuessed(word)) return RESPONSE.ALREADY_GUESSED;
 		if (!this.checkValidClue(word, prev_clue)) return RESPONSE.CLUE_DOESNT_MATCH;
-		const data = await (await fetch(URL_BASE(word))).text();
+		const data = await fetchTEXT(URL_BASE(word));
 		const $ = cheerio.load(data);
 		if ($("body > div.container.body-content > h4:nth-child(6)").text() == WORD_NOT_FOUND) return RESPONSE.FAIL_TO_FIND_WORD;
 		const value = $("body > div.container.body-content > h2:nth-child(5)").text().replace(/[0-9]/g, "");

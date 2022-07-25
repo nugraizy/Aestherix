@@ -1,17 +1,13 @@
-import fetch from "node-fetch";
-import cheerio from "cheerio";
-//import { COOKIE } from "../../Utils/TikTok/cookie.js";
-
 export const tiktokProfileBRAINANS = (username) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			if (username.startsWith("@")) username = username.substr(1);
-			const data = await fetch(URL_BASE(username), {
+			const data = await fetchTEXT(URL_BASE(username), {
 				headers: {
 					"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
 					Cookie: "_tiktok_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYNXVqYUNMSG45NHVvWW1XS0prNlBRZE8y.ZO2MBELa8GVyfiGsR3OlGlMDIiChcfSinC6LDhDyvBg" /*COOKIE.BRAINANS_COOKIE*/,
 				},
-			}).then((res) => res.text());
+			});
 			const $ = cheerio.load(data);
 			const userName = $("div.user__title > a > h1").text();
 			const fullName = $("div.user__title > h4").text();

@@ -1,6 +1,7 @@
 import * as util from "util";
 import fs from "fs";
 import { WAProto } from "@adiwajshing/baileys";
+import * as _ from "@adiwajshing/baileys";
 import { exec } from "child_process";
 import prettier from "js-beautify";
 import * as func from "../../exports.js";
@@ -12,7 +13,8 @@ export default {
 	aliases: ["/>", "$>", "=>"],
 	category: "Owner",
 	cooldown: 0,
-	limit: 0,status: "enable",
+	limit: 0,
+	status: "enable",
 	async run(message, client, store) {
 		let {
 			isFromMe,
@@ -33,6 +35,7 @@ export default {
 			isOwner,
 			settings,
 			type,
+			typeQuoted,
 			isAdmin,
 			rawParticipants,
 			adminGroups,

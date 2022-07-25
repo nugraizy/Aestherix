@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { generateMessageID } from "@adiwajshing/baileys";
 import { removeDuplicatesArray } from "../../Helper/Modules/index.js";
 import { searchArtwork, downloadArtworks } from "../../Utils/Pixiv/index.js";
@@ -26,7 +25,7 @@ export default {
 				}
 				const container = [];
 				let i = 0;
-				const images = await (await fetch(dataImage.url.original[0], { headers: { referer: `https://www.pixiv.net/ajax/illust/${dataImage.id}` } })).arrayBuffer();
+				const images = await fetchBUFFER(dataImage.url.original[0], { headers: { referer: `https://www.pixiv.net/ajax/illust/${dataImage.id}` } });
 				await client[botNum].sendMessage(
 					from,
 					{
@@ -43,7 +42,7 @@ Total Media : ${dataImage.pageCount}`,
 				);
 				for (let j = 0; j < dataImage.url.original.length; j++) {
 					if (j != 0) {
-						const images = await (await fetch(dataImage.url.original[j], { headers: { referer: `https://www.pixiv.net/ajax/illust/${dataImage.id}` } })).arrayBuffer();
+						const images = await fetchBUFFER(dataImage.url.original[j], { headers: { referer: `https://www.pixiv.net/ajax/illust/${dataImage.id}` } });
 						await client[botNum].sendMessage(
 							from,
 							{

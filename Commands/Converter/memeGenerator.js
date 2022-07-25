@@ -21,6 +21,17 @@ export default {
 	async run({ query, isMediaImage, isSticker, isQuotedSticker, from, prettyNumber, message, filename, extractMediaData, sender }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!isMediaImage && !(isQuotedSticker || isSticker)) return client[botNum].reply({ from, quoted: message }, "Please send/reply a media to convert to sticker");
+		if (!stickerAble)
+			return client[botNum].reply(
+				{ from, quoted: message },
+				`Please send/reply a regular media to be meme'd. Can't convert ${typeQuoted}, only : ${typeSticker
+					.slice(
+						typeSticker.findIndex((v) => v == "videoMessage"),
+						1,
+					)
+					.join(", ")
+					.capitalize()}`,
+			);
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a query, use & to split top/bottom text");
 		try {
 			const parsed = parser(query.toLowerCase(), {

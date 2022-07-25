@@ -1,23 +1,8 @@
-import fetch from "node-fetch";
-
 export const getEarthquake = async () =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { gempa } = (await (await fetch(URL_INDONESIA_WITHOUT_IMAGE)).json()).Infogempa;
-			let {
-				Tanggal: date,
-				Jam: time,
-				DateTime: dateTime,
-				Coordinates: coordinates,
-				Lintang: latitude,
-				Bujur: longitude,
-				Magnitude: magnitude,
-				Kedalaman: depth,
-				Wilayah: region,
-				Potensi: potency,
-				Dirasakan: feel,
-				Shakemap: shakemap,
-			} = (await (await fetch(URL_INDONESIA_WITH_IMAGE)).json()).Infogempa.gempa;
+			const { gempa } = (await fetchJSON(URL_INDONESIA_WITHOUT_IMAGE)).Infogempa;
+			let { Tanggal: date, Jam: time, DateTime: dateTime, Coordinates: coordinates, Lintang: latitude, Bujur: longitude, Magnitude: magnitude, Kedalaman: depth, Wilayah: region, Potensi: potency, Dirasakan: feel, Shakemap: shakemap } = (await fetchJSON(URL_INDONESIA_WITH_IMAGE)).Infogempa.gempa;
 			shakemap = `https://ews.bmkg.go.id/TEWS/data/${shakemap}`;
 			const results = [
 				{

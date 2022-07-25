@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-import cheerio from "cheerio";
 import FormData from "form-data";
 import fs from "fs";
 
@@ -9,7 +7,7 @@ export const webp2mp4File = async (path) =>
 			const bodyForm = new FormData();
 			bodyForm.append("new-image-url", "");
 			bodyForm.append("new-image", fs.createReadStream(path));
-			const data = await fetch("https://s6.ezgif.com/webp-to-mp4", { method: "post", body: bodyForm, headers: { "Content-Type": `multipart/form-data; boundary=${bodyForm._boundary}` } }).then((res) => res.text());
+			const data = await fetchTEXT("https://s6.ezgif.com/webp-to-mp4", { method: "post", body: bodyForm, headers: { "Content-Type": `multipart/form-data; boundary=${bodyForm._boundary}` } });
 			const bodyFormThen = new FormData();
 			const $ = cheerio.load(data);
 			const file = $('input[name="file"]').attr("value");
@@ -20,7 +18,7 @@ export const webp2mp4File = async (path) =>
 			};
 			bodyFormThen.append("file", gotdata.file);
 			bodyFormThen.append("convert", gotdata.convert);
-			const dataRes = await fetch(`https://ezgif.com/webp-to-mp4/${gotdata.file}`, { method: "post", body: bodyFormThen, headers: { "Content-Type": `multipart/form-data; boundary=${bodyFormThen._boundary}` } }).then((res) => res.text());
+			const dataRes = await fetchTEXT(`https://ezgif.com/webp-to-mp4/${gotdata.file}`, { method: "post", body: bodyFormThen, headers: { "Content-Type": `multipart/form-data; boundary=${bodyFormThen._boundary}` } });
 			const $$ = cheerio.load(dataRes);
 			const result = `https:${$$("div#output > p.outfile > video > source").attr("src")}`;
 			resolve({

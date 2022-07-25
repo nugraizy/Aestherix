@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { removeDuplicatesArray } from "../../Helper/Modules/index.js";
 import { downloadManga } from "../../Utils/Pixiv/index.js";
 
@@ -31,26 +30,27 @@ Author : ${userName}
 ID Artwork : ${id}
 ID Author : ${userId}
 Total Media : ${pageCount}`;
-				const images = await (await fetch(urls.original[0], { headers: { referer: `https://www.pixiv.net/ajax/manga/${id}` } })).arrayBuffer();
-				if (urls.original.length == 1)
+				if (urls.original.length == 1) {
+					const images = await fetchBUFFER(urls.original[0], { headers: { referer: `https://www.pixiv.net/ajax/manga/${id}` } });
 					return await client[botNum].sendMessage(
 						from,
 						{
 							image: new Buffer.from(images, "base64"),
-							caption: `\`\`\` • Pixiv Manga Downloader\`\`\`\n\n`,
+							caption: `\`\`\` • Pixiv Manga Downloader\`\`\``,
 							templateButtons: [{ urlButton: { displayText: "Manga Source", url: `https://www.pixiv.net/en/artworks/${id}` } }],
 							footer: caption,
 						},
 						{ quoted: message },
 					);
+				}
 				for (const url of urls.original) {
 					caption = i == 0 ? caption : "\t";
-					const buffer = await (await fetch(url, { headers: { referer: `https://www.pixiv.net/ajax/manga/${id}` } })).arrayBuffer();
+					const buffer = await fetchBUFFER(url, { headers: { referer: `https://www.pixiv.net/ajax/manga/${id}` } });
 					await client[botNum].sendMessage(
 						from,
 						{
 							image: new Buffer.from(buffer, "base64"),
-							caption: `\`\`\` • Pixiv Manga Downloader\`\`\`\n\n`,
+							caption: `\`\`\` • Pixiv Manga Downloader\`\`\``,
 							templateButtons: [{ urlButton: { displayText: "Manga Source", url: `https://www.pixiv.net/en/artworks/${id}` } }],
 							footer: caption,
 						},

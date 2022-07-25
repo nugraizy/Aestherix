@@ -1,9 +1,8 @@
-import fetch from "node-fetch";
 import { JSDOM } from "jsdom";
 import yts from "yt-search";
 
-const post = (url, formdata) =>
-	fetch(url, {
+const post = async (url, formdata) => {
+	return await fetchJSON(url, {
 		method: "POST",
 		headers: {
 			accept: "*/*",
@@ -14,6 +13,7 @@ const post = (url, formdata) =>
 		},
 		body: new URLSearchParams(Object.entries(formdata)),
 	});
+};
 const ytIdRegex = /(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:\-nocookie|)\.com\/(?:shorts\/)?(?:watch\?.*(?:|\&)v=|embed\/|v\/)|youtu\.be\/)([-_0-9A-Za-z]{11})/;
 export const isUrl = (url) => url.match(new RegExp(/(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:\-nocookie|)\.com\/(?:shorts\/)?(?:watch\?.*(?:|\&)v=|embed\/|v\/)|youtu\.be\/)\/.+/, "gi"));
 
@@ -27,7 +27,7 @@ export const yt = async (url, quality, type, bitrate, server = "en60") =>
 				url,
 				q_auto: 0,
 				ajax: 1,
-			}).then((res) => res.json());
+			});
 			if (json.result.includes("Error: </span>This video is copyrighted.")) return resolve({ error: "```Error : Video ini dilarang didownload bajakan```", internal: false });
 			if (json.result.includes("Error: </span>We can not convert your video.")) return resolve({ error: "```Error : Link yang kamu masukkan tidak dapat ditemukan.```", internal: false });
 			let { document } = new JSDOM(json.result).window;
@@ -57,7 +57,7 @@ export const yt = async (url, quality, type, bitrate, server = "en60") =>
 				token: "",
 				ftype: type,
 				fquality: bitrate,
-			}).then((res) => res.json());
+			});
 			const KB = parseFloat(filesize) * (1000 * /MB$/.test(filesize));
 			resolve({
 				title,

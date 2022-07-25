@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import moment from "moment-timezone";
 
 const URL_BASE = "https://api.onlinevideoconverter.pro/api/convert";
@@ -6,17 +5,7 @@ const URL_BASE = "https://api.onlinevideoconverter.pro/api/convert";
 export const fbDl = (url) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const data = await (
-				await fetch(URL_BASE, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						url,
-					}),
-				})
-			).json();
+			const data = await fetchJSON(URL_BASE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) });
 			if (data.code == 102) reject({ error: data.message });
 			else {
 				let { url } = data.url[0];

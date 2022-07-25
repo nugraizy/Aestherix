@@ -11,12 +11,11 @@ export default {
 	usage: "!fetchstory",
 	aliases: ["getstory", "getsw"],
 	cooldown: 0,
-	limit: 0,status: "enable",
+	limit: 0,
+	status: "enable",
 	async run({ from, message, isOwner, query }, client, store) {
 		if (!isOwner) return client[botNum].reply({ from, quoted: message }, "You are not allowed to use this command");
 		try {
-			{
-			}
 			const messages = OPTIONS.json ? JSON.parse(readFileSync(STATUS_PATH)).messages[STATUS] : await store.loadMessages(STATUS);
 			const tempContainer = new Map();
 			let caption = `\`\`\` • Fetch WhatsApp Story\`\`\`\n\n`;

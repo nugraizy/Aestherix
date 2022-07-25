@@ -1,6 +1,3 @@
-import fetch from "node-fetch";
-import cheerio from "cheerio";
-
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36";
 const sessionId = process.env.INSTAGRAM_SESI || (await (await import("./instaCookie.js")).getCookie(process.env.INSTAGRAM_USERNAME, process.env.INSTAGRAM_PASSWORD));
 
@@ -8,7 +5,7 @@ const sessionId = process.env.INSTAGRAM_SESI || (await (await import("./instaCoo
 export const getProfile = (username) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const data = await (await fetch(`https://www.picuki.com/profile/${username}`)).text();
+			const data = await fetchTEXT(`https://www.picuki.com/profile/${username}`);
 			const $ = cheerio.load(data);
 			const media = [];
 			$(".photo")
@@ -47,16 +44,14 @@ export const getUser = (username) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			if (username.startsWith("@")) username = username.replace("@", "");
-			const { graphql } = await (
-				await fetch(`https://www.instagram.com/${username}/?__a=1&__d=dis`, {
-					headers: {
-						"user-agent": UA,
-						cookie: sessionId,
-					},
-				})
-			).json();
-			if (graphql == undefined) resolve({ error: `User [ ${username} ] not found.` });
-			const user = graphql.user;
+			const { graphql } = await fetchJSON(`https://www.instagram.com/${username}/?__a=1&__d=dis`, {
+				headers: {
+					"user-agent": UA,
+					cookie: sessionId,
+				},
+			});
+			if (graphql == undefined) resolve({ error: `User ${username} not found.` });
+			const { user } = graphql;
 			resolve({
 				id: user.id,
 				biography: user.biography,

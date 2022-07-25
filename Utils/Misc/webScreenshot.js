@@ -1,7 +1,3 @@
-import dotenv from "dotenv";
-dotenv.config();
-import fetch from "node-fetch";
-
 export const getScreenshot = async (url, type) =>
 	new Promise(async (resolve, reject) => {
 		try {
@@ -19,7 +15,7 @@ export const getScreenshot = async (url, type) =>
 					type = "dimension=1024x768&device=desktop";
 					break;
 			}
-			const response = await fetch(`https://api.screenshotmachine.com/?key=${process.env.WEB_SCREENSHOT}&url=${url}&${type}`).then((res) => res.arrayBuffer());
+			const response = await fetchBUFFER(`https://api.screenshotmachine.com/?key=${process.env.WEB_SCREENSHOT}&url=${url}&${type}`);
 			const buffer = Buffer.from(response);
 			resolve({
 				buffer,

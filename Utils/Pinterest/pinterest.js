@@ -1,9 +1,7 @@
-import fetch from "node-fetch";
-
 export const pinterest = (query) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const RAW_DATA = await (await fetch(API_URL_BASE(query))).json();
+			const RAW_DATA = await fetchJSON(API_URL_BASE(query));
 			const container = [];
 			let RAW_RESULTS = RAW_DATA.resource_response.data.results;
 			RAW_RESULTS = RAW_RESULTS.filter((v) => v.images?.orig !== undefined);

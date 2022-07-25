@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import { getUser } from "./index.js";
 
 const URL_BASE = (input) => `https://i.instagram.com/api/v1/feed/user/${input}/reel_media/`;
@@ -19,7 +18,7 @@ export const getStory3 = (input) =>
 			id = _.id;
 			fullName = _.fullName;
 			username = _.username;
-			const data = await (await fetch(URL_BASE(id), { method: "GET", headers: { "user-agent": UA_IP, cookie: `${sessionId};` } })).json();
+			const data = await fetchJSON(URL_BASE(id), { method: "GET", headers: { "user-agent": UA_IP, cookie: `${sessionId};` } });
 			const result = { username, fullName, totalStories: data.media_count, stories: [] };
 			for (const item of data.items) {
 				if (regex(tempURL) && item.id.split("_")[0] === idStory) {

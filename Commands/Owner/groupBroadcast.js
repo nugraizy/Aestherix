@@ -7,7 +7,8 @@ export default {
 	aliases: ["gcbc"],
 	category: "Owner",
 	cooldown: 0,
-	limit: 0,status: "enable",
+	limit: 0,
+	status: "enable",
 	async run({ isOwner, from, query, message, sender }, client) {
 		try {
 			if (!isOwner) return client[botNum].reply({ from, quoted: message }, "You are not allowed to use this command");

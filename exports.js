@@ -87,6 +87,8 @@ export {
 	parseCode,
 } from "./Helper/index.js";
 export {
+	searchDeviantArt,
+	downloadDeviantArt,
 	searchManga,
 	searchArtwork,
 	searchNovel,

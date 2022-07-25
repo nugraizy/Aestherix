@@ -1,10 +1,8 @@
-import fetch from "node-fetch";
-
 export const IPLookup = (input) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			const noData = "No Data";
-			const { status, continent, continentCode, country, countryCode, region, regionName, city, district, zip, lat, lon, timezone, offset, currency, isp, org, as, asname, reverse, mobile, proxy, hosting, message } = await (await fetch(URL_API(input))).json();
+			const { status, continent, continentCode, country, countryCode, region, regionName, city, district, zip, lat, lon, timezone, offset, currency, isp, org, as, asname, reverse, mobile, proxy, hosting, message } = await fetchJSON(URL_API(input));
 			if (status != "success") resolve({ error: message });
 			resolve({
 				continent,

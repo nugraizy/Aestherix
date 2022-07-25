@@ -1,10 +1,16 @@
-import fetch from "node-fetch";
+const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36";
+const sessionId = process.env.INSTAGRAM_SESI || (await (await import("./instaCookie.js")).getCookie(process.env.INSTAGRAM_USERNAME, process.env.INSTAGRAM_PASSWORD));
 
 export const searchHashtag = (query) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			if (query.includes("#")) query = query.replace("#", "");
-			const response = await (await fetch(`https://www.instagram.com/explore/tags/${query}/?__a=1`)).json();
+			const response = await fetchJSON(`https://www.instagram.com/explore/tags/${query}/?__a=1&__d=dis`, {
+				headers: {
+					"user-agent": UA,
+					cookie: sessionId,
+				},
+			});
 			const result = [];
 			const dataNode = response.graphql.hashtag.edge_hashtag_to_media.edges;
 			for (const data of dataNode) {
@@ -31,7 +37,3 @@ export const searchHashtag = (query) =>
 			reject({ error: e });
 		}
 	});
-
-// benchmark.
-// Axios 1.829s, 2.378s, 2.183s, avg. 2.064s
-// fetch 1.591s, 2.048s, 1.860s, avg. 1.829s

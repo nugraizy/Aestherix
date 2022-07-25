@@ -1,12 +1,10 @@
-import fetch from "node-fetch";
-
 export const twitterDownload = (input) =>
 	new Promise(async (resolve) => {
 		if (!regex(input)) return resolve({ error: "This is not a valid Twitter URL." });
 		const { id } = regex(input);
 		try {
 			let container = {};
-			const data = await (await fetch(URL_API_DOWNLOAD(id), { headers: { cookie: "_fbp=fb.1.1657783842199.544637810" } })).text();
+			const data = await fetchTEXT(URL_API_DOWNLOAD(id), { headers: { cookie: "_fbp=fb.1.1657783842199.544637810" } });
 			if (data == "") return resolve({ error: "Something went wrong with the URL." });
 			const { name, username, verified, text, created_at, like_count, retweet_count, reply_count, media: medias } = JSON.parse(data);
 			container = { author: name, username, verified, caption: text, published: created_at, liked: like_count, retweet: retweet_count, replies: reply_count, medias: [] };
@@ -18,7 +16,7 @@ export const twitterDownload = (input) =>
 					});
 					continue;
 				}
-				const data = await (await fetch(URL_API_DOWNLOAD(`${id}/video`), { headers: { cookie: "_fbp=fb.1.1657783842199.544637810" } })).json();
+				const data = await fetchJSON(URL_API_DOWNLOAD(`${id}/video`), { headers: { cookie: "_fbp=fb.1.1657783842199.544637810" } });
 				container.medias.push({
 					url: data.variants.slice(-1)[0].url,
 					type: "video",

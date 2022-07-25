@@ -1,9 +1,7 @@
-import fetch from "node-fetch";
-
 export const emojimix = (emoji1, emoji2) =>
 	new Promise(async (resolve) => {
 		try {
-			const data = await (await fetch(URL_BASE(emoji1, emoji2))).json();
+			const data = await fetchJSON(URL_BASE(emoji1, emoji2));
 			if (data.results.length == 0) return resolve({ error: "No results found." });
 			const { url } = data.results[0];
 			resolve(url);

@@ -1,13 +1,10 @@
-import fetch from "node-fetch";
-import cheerio from "cheerio";
-
 export const getStory2 = (username) =>
 	new Promise(async (resolve, reject) => {
 		let data = null;
 		if (username.startsWith("@")) username = username.replace("@", "");
 		try {
 			for (let i = 0; i < 5; i++) {
-				data = await fetch(URL_BASE(username, i)).then((res) => res.text());
+				data = await fetchTEXT(URL_BASE(username, i));
 				if (!data.includes("nostory")) break;
 			}
 			const $ = cheerio.load(data);

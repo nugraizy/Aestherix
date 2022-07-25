@@ -6,7 +6,9 @@ export default {
 	category: "Debugging",
 	usage: "!list",
 	aliases: ["lst"],
-	cooldown: 5, limit:0,status: "enable",
+	cooldown: 5,
+	limit: 0,
+	status: "enable",
 	async run({ from, query }, client, store) {
 		const row = Array(Number(query)).fill({
 			rows: [

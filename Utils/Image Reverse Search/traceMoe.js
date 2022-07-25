@@ -1,6 +1,5 @@
 import FormData from "form-data";
 import Axios from "axios";
-import fetch from "node-fetch";
 import fs from "fs";
 import { isURL } from "../../Helper/Modules/index.js";
 
@@ -17,7 +16,7 @@ const isValidImageURL = async (url) => {
 export const traceMoe = async (file) =>
 	new Promise(async (resolve) => {
 		try {
-			if (isURL(file) && isValidImageURL(file)) file = await (await fetch(file)).arrayBuffer();
+			if (isURL(file) && isValidImageURL(file)) file = await fetchBUFFER(file);
 			else if (isURL(file) && !(await isValidImageURL(file))) return resolve({ error: "Invalid image URL" });
 			else file = fs.readFileSync(file);
 			const form = new FormData();

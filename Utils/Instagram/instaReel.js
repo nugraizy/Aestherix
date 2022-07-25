@@ -1,39 +1,33 @@
-import fetch from "node-fetch";
-import cheerio from "cheerio";
 import qs from "qs";
 
 export const getReels = (url) =>
 	new Promise(async (resolve) => {
 		try {
 			url = PARSE_URL(url);
-			const data = await (
-				await fetch(URL_BASE(), {
-					method: "get",
-					headers: {
-						"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",
-						Cookie: "PHPSESSID=hj2p3i96va7kqs7csbq16a5tip; _ga=GA1.2.1623964880.1642090612; _gid=GA1.2.553723423.1642090612; _gat=1",
-					},
-				})
-			).text();
+			const data = await fetchTEXT(URL_BASE(), {
+				method: "get",
+				headers: {
+					"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",
+					Cookie: "PHPSESSID=hj2p3i96va7kqs7csbq16a5tip; _ga=GA1.2.1623964880.1642090612; _gid=GA1.2.553723423.1642090612; _gat=1",
+				},
+			});
 			const $ = cheerio.load(data);
 			const token = $("input#token").attr("value");
-			const dataResult = await (
-				await fetch(URL_POST(), {
-					method: "POST",
-					headers: {
-						"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",
-						origin: "https://www.instagramsave.com",
-						referer: "https://www.instagramsave.com/reels-downloader.php",
-						"Content-Type": `application/x-www-form-urlencoded; charset=UTF-8`,
-						Cookie: "PHPSESSID=hj2p3i96va7kqs7csbq16a5tip; _ga=GA1.2.1623964880.1642090612; _gid=GA1.2.553723423.1642090612; _gat=1",
-					},
-					body: qs.stringify({
-						action: "post",
-						token,
-						url,
-					}),
-				})
-			).json();
+			const dataResult = await fetchJSON(URL_POST(), {
+				method: "POST",
+				headers: {
+					"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",
+					origin: "https://www.instagramsave.com",
+					referer: "https://www.instagramsave.com/reels-downloader.php",
+					"Content-Type": `application/x-www-form-urlencoded; charset=UTF-8`,
+					Cookie: "PHPSESSID=hj2p3i96va7kqs7csbq16a5tip; _ga=GA1.2.1623964880.1642090612; _gid=GA1.2.553723423.1642090612; _gat=1",
+				},
+				body: qs.stringify({
+					action: "post",
+					token,
+					url,
+				}),
+			});
 			resolve(dataResult);
 		} catch (err) {
 			log(err);

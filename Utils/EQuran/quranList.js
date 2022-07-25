@@ -1,9 +1,7 @@
-import fetch from "node-fetch";
-
 export const getListSurah = () =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const data = await fetch(`${URL_BASE}/surat`).then((res) => res.json());
+			const data = await fetchJSON(`${URL_BASE}/surat`);
 			resolve(data);
 		} catch (err) {
 			reject({ error: err });

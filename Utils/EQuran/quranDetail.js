@@ -1,9 +1,7 @@
-import fetch from "node-fetch";
-
 export const getSurahDetail = (nomor) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const data = await fetch(`${URL_BASE}/surat/${nomor}`).then((res) => res.json());
+			const data = await fetchJSON(`${URL_BASE}/surat/${nomor}`);
 			resolve({
 				namaArab: data.nama,
 				namaLatin: data.nama_latin,
