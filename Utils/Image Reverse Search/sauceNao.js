@@ -16,7 +16,7 @@ export const sauceNao = async (file) =>
 			if (!isURL(file)) file = await uploadToTelegraph(file);
 			else if (isURL(file) && !(await isValidImageURL(file))) return resolve({ error: "Invalid image URL" });
 			const data = await fetchTEXT(URL_BASE(file));
-			const $ = cheerio.load(data);
+			const $ = cheerioLOAD(data);
 			const result = $("#middle > div:nth-child(2)");
 			const results = {
 				title: result.find("div.resulttitle > strong").text(),

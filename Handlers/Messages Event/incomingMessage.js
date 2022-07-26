@@ -5,6 +5,7 @@ import { INFOLOG, color, reassign, addLimit, getTimeSince } from "../../Helper/M
 import { runtime } from "../../connect.js";
 import { checkAfk, getAfk, deleteAfk } from "../../Helper/Misc/index.js";
 let STATS_OFFLINE = true;
+const EVALY = ["/>", "$>", "=>", "!>"];
 
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 
@@ -59,7 +60,7 @@ export default {
 		if (message.isCmd && message.from !== "status@broadcast") {
 			let bodies = [];
 			if (OPTIONS.multiCmd) {
-				bodies = message.body.split("|");
+				bodies = EVALY.includes(message.cmd) ? [message.body] : message.body.split("|");
 			} else bodies.push(message.body);
 			for (const body of bodies) {
 				message.body = body.trim();
@@ -101,7 +102,7 @@ export default {
 					INFOLOG(
 						`[${color(time, "cyan")}]`,
 						`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
-						`${color(message.prefix, "white")}${color(cmds.name || message.cmd.slice(1).trim(), "#01cdfe")}`,
+						`${color(message.prefix, "white")}${color(Tempcmds.name || message.cmd.slice(1).trim(), "#01cdfe")}`,
 						`${color(message.query.substr(0, 20), "#05ffa1")}`,
 						`${color(message.from, "#b967ff")}`,
 						`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
@@ -111,7 +112,7 @@ export default {
 					INFOLOG(
 						`[${color(time, "cyan")}]`,
 						`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
-						`${color(message.prefix, "white")}${color(cmds.name || message.cmd.slice(1).trim(), "#01cdfe")}`,
+						`${color(message.prefix, "white")}${color(Tempcmds.name || message.cmd.slice(1).trim(), "#01cdfe")}`,
 						`${color(message.query.trim().substr(0, 20), "#05ffa1")}`,
 						`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
 						`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,

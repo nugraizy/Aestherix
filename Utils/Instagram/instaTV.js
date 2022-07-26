@@ -12,7 +12,7 @@ export const getIgtv = (username) =>
 			},
 		})
 			.then(({ data }) => {
-				const $ = cheerio.load(data);
+				const $ = cheerioLOAD(data);
 				const token = $("input#token").attr("value");
 				Axios.post(
 					"https://www.instagramsave.com/system/action.php",

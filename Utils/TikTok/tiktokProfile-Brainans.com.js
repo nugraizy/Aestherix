@@ -8,7 +8,7 @@ export const tiktokProfileBRAINANS = (username) =>
 					Cookie: "_tiktok_key=SFMyNTY.g3QAAAABbQAAAAtfY3NyZl90b2tlbm0AAAAYNXVqYUNMSG45NHVvWW1XS0prNlBRZE8y.ZO2MBELa8GVyfiGsR3OlGlMDIiChcfSinC6LDhDyvBg" /*COOKIE.BRAINANS_COOKIE*/,
 				},
 			});
-			const $ = cheerio.load(data);
+			const $ = cheerioLOAD(data);
 			const userName = $("div.user__title > a > h1").text();
 			const fullName = $("div.user__title > h4").text();
 			const bio = $("div.user__info-desc").text();

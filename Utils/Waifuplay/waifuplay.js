@@ -5,7 +5,7 @@ export const wpSearch = (text) =>
 	new Promise(async (resolve) => {
 		try {
 			const { data } = await Axios.get(`https://waifuplay.my.id/?s=${text}`);
-			const $ = cheerio.load(data);
+			const $ = cheerioLOAD(data);
 			if ($("div.pagenon > h2").text() == "No Post Found") return resolve({ error: "Anime not found. Try another keyword. If you sure if this keyword belongs to a few Anime title and you see this error keep happening, please report to owner ASAP." });
 			const listEpisode = await wpList($(".flexbox2-item").find("a").attr("href"));
 			resolve({
@@ -35,7 +35,7 @@ export const wpList = (url) =>
 			switch (url) {
 				case url.includes("batch"): {
 					const { data } = await Axios.get(url);
-					const $ = cheerio.load(data);
+					const $ = cheerioLOAD(data);
 					const result = $("div#download > ul > li")
 						.get()
 						.map((res) => {
@@ -48,7 +48,7 @@ export const wpList = (url) =>
 				}
 				default:
 					const { data } = await Axios.get(url);
-					const $ = cheerio.load(data);
+					const $ = cheerioLOAD(data);
 					const result = $(".series-episodelist > li")
 						.get()
 						.map((res) => {
@@ -76,7 +76,7 @@ export const wpDownload = (url) =>
 	new Promise(async (resolve) => {
 		try {
 			const { data } = await Axios.get(url);
-			const $ = cheerio.load(data);
+			const $ = cheerioLOAD(data);
 			const result = $(".dlbox2 > a")
 				.get()
 				.map((res) => {
@@ -96,7 +96,7 @@ export const wpLatest = () =>
 	new Promise(async (resolve) => {
 		try {
 			const { data } = await Axios.get("https://waifuplay.my.id/");
-			const $ = cheerio.load(data);
+			const $ = cheerioLOAD(data);
 			resolve({
 				results: $(".flexbox")
 					.map((_, element) => $(element).find(".flexbox-item"))

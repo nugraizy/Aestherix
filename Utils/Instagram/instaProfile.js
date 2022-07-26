@@ -6,7 +6,7 @@ export const getProfile = (username) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			const data = await fetchTEXT(`https://www.picuki.com/profile/${username}`);
-			const $ = cheerio.load(data);
+			const $ = cheerioLOAD(data);
 			const media = [];
 			$(".photo")
 				.find("a > img")

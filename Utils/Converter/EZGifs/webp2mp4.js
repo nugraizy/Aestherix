@@ -9,7 +9,7 @@ export const webp2mp4File = async (path) =>
 			bodyForm.append("new-image", fs.createReadStream(path));
 			const data = await fetchTEXT("https://s6.ezgif.com/webp-to-mp4", { method: "post", body: bodyForm, headers: { "Content-Type": `multipart/form-data; boundary=${bodyForm._boundary}` } });
 			const bodyFormThen = new FormData();
-			const $ = cheerio.load(data);
+			const $ = cheerioLOAD(data);
 			const file = $('input[name="file"]').attr("value");
 			const convert = $('input[name="file"]').attr("value");
 			const gotdata = {
@@ -19,7 +19,7 @@ export const webp2mp4File = async (path) =>
 			bodyFormThen.append("file", gotdata.file);
 			bodyFormThen.append("convert", gotdata.convert);
 			const dataRes = await fetchTEXT(`https://ezgif.com/webp-to-mp4/${gotdata.file}`, { method: "post", body: bodyFormThen, headers: { "Content-Type": `multipart/form-data; boundary=${bodyFormThen._boundary}` } });
-			const $$ = cheerio.load(dataRes);
+			const $$ = cheerioLOAD(dataRes);
 			const result = `https:${$$("div#output > p.outfile > video > source").attr("src")}`;
 			resolve({
 				result,

@@ -9,7 +9,7 @@ export const getReels2 = (url) =>
 				},
 				body: `link=${encodeURIComponent(url)}&submit=`,
 			});
-			const $ = cheerio.load(response);
+			const $ = cheerioLOAD(response);
 			const data = $("#downloadBox > a").attr("href");
 			resolve(data);
 		} catch (e) {

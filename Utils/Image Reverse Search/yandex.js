@@ -44,8 +44,8 @@ export const yandex = async (file, { limit = 20 } = {}) =>
 						"is_gdpr=0; yandexuid=8061117791646679247; i=TOzP/iLfxpPtpYkc5o5+cmu9eR3EDL5vmX4zTFE1ZwOWXlchamsv/NiInft9B0YjJO7E3Um0LeSfEk5s1tFyQ09b0Hc=; is_gdpr_b=CPrlYRCWZigC; mda=0; my=YwA=; ys=wprid.1646826348600464-10355450763662077070-man1-2641-ced-man-l7-balancer-8080-BAL-672; yandex_gid=10574; bltsr=1; MGphYZof=1; _yasc=sobSth10AqC1wS/0p/c/jfAgad0tDPrJpHcdENiwq6g/q+BF0Ruy9tIiJ1dVUA==;",
 				},
 			});
-			const $images = cheerio.load(dataImages);
-			const $information = cheerio.load(dataInformation);
+			const $images = cheerioLOAD(dataImages);
+			const $information = cheerioLOAD(dataInformation);
 			const now = new Date();
 			const container = { status: "OK", responseTime: 0, information: [] };
 			$information("div.CbirSites-Items > div.CbirSites-Item").each(function () {

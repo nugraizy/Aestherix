@@ -1,1 +1,37 @@
+import dotenv from "dotenv";
+import fetch from "node-fetch";
+import cheerio from "cheerio";
+import { EventEmitter } from "events";
+
+dotenv.config();
+global.cmds = {};
+global.user = {};
+global.presences = {};
+global.functions = {};
+global.games = {};
+global.intervals = {};
+global.anonymous = new Map();
+intervals.tebakGambar = new Map();
+intervals.sudoku = new Map();
+intervals.url = new Map();
+intervals.anonymous = new Map();
+intervals.word = new Map();
+games.tebakGambar = new Map();
+games.sudoku = new Map();
+games.akinator = new Map();
+games.tictactoe = new Map();
+games.word = new Map();
+user.cooldown = new Map();
+cmds.commands = new Map();
+user.afk = new Map();
+global.commandsPath = [];
+cmds.aliases = [];
+global.log = console.log;
+global.fetch = fetch;
+global.fetchJSON = async (_, __) => await (await fetch(_, __)).json();
+global.fetchTEXT = async (_, __) => await (await fetch(_, __)).text();
+global.fetchBUFFER = async (_, __) => await (await fetch(_, __)).arrayBuffer();
+global.cheerioLOAD = (_) => cheerio.load(_);
+EventEmitter.prototype.setMaxListeners(0);
+
 await import("./connect.js");

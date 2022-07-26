@@ -14,9 +14,7 @@
  *   @Nafiz         [ @GitHub ] https://github.com/xbnfz01       [ @Instagram ] https://instagram.com/nfz.01
  */
 
-import dotenv from "dotenv";
 import { platform } from "process";
-dotenv.config();
 console.clear();
 import { spawn } from "child_process";
 if (platform !== "win32") await printRandomAscii();
@@ -29,48 +27,15 @@ import meow from "meow";
 import { Boom } from "@hapi/boom";
 import Spinnies from "spinnies";
 import path from "path";
-import { EventEmitter } from "events";
 import center from "center-align";
 import moment from "moment-timezone";
-import fetch from "node-fetch";
-import cheerio from "cheerio";
 import { getSpinner } from "./Helper/Misc/Spinner/spinners.js";
 import { readJSON, INFOLOG, color, romanize, ERRLOG } from "./Helper/Modules/functions.js";
-EventEmitter.prototype.setMaxListeners(0);
 
 const { default: makeWASocket, DisconnectReason, makeInMemoryStore, useSingleFileAuthState, DEFAULT_CONNECTION_CONFIG } = baileys;
 const moduleURL = new URL(import.meta.url);
 export const __dirname = platform == "win32" ? path.dirname(moduleURL.pathname).slice(1) : path.dirname(moduleURL.pathname);
 const { stdout } = process;
-global.cmds = {};
-global.user = {};
-global.presences = {};
-global.functions = {};
-global.games = {};
-global.intervals = {};
-global.anonymous = new Map();
-intervals.tebakGambar = new Map();
-intervals.sudoku = new Map();
-intervals.url = new Map();
-intervals.anonymous = new Map();
-intervals.word = new Map();
-games.tebakGambar = new Map();
-games.sudoku = new Map();
-games.akinator = new Map();
-games.tictactoe = new Map();
-games.word = new Map();
-user.cooldown = new Map();
-cmds.commands = new Map();
-user.afk = new Map();
-global.commandsPath = [];
-cmds.aliases = [];
-global.log = console.log;
-
-global.fetch = fetch;
-global.fetchJSON = async (_, __) => await (await fetch(_, __)).json();
-global.fetchTEXT = async (_, __) => await (await fetch(_, __)).text();
-global.fetchBUFFER = async (_, __) => await (await fetch(_, __)).arrayBuffer();
-global.cheerioLOAD = (_) => cheerio.load(_);
 
 const spinners = new Spinnies({ color: "blue", succeedColor: "green", failColor: "redBright", spinner: getSpinner("dots") });
 
@@ -118,12 +83,12 @@ const start = async () => {
 	if (OPTIONS.help) return log(cli.help);
 	await loadCommands();
 	await loadEveryCommand();
-
-	const Client = makeWASocket({ printQRInTerminal: true, version: DEFAULT_CONNECTION_CONFIG.version, logger: P({ level: OPTIONS.trace ? "trace" : "fatal" }), auth: state });
+	const CONNECTION_CONFIG = { printQRInTerminal: true, version: DEFAULT_CONNECTION_CONFIG.version, logger: P({ level: OPTIONS.trace ? "trace" : "fatal" }), auth: state, markOnlineOnConnect: false };
+	const Client = makeWASocket(CONNECTION_CONFIG);
 	store.bind(Client.ev);
 
 	Client.ev.on("connection.update", async (connections) => {
-		const { lastDisconnect, qr, connection } = connections;
+		const { lastDisconnect, connection } = connections;
 		if (connection == "connecting") addSpinner("Connecting", { text: "Connecting to WASocket..." });
 		if (connection == "close") {
 			const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
@@ -143,7 +108,7 @@ const start = async () => {
 			global.botNum = Client.user.id;
 			client[Client.user.id] = Client;
 			successSpinner("Connecting", { text: "Connected to WASocket" });
-			INFOLOG(color(center(`λ ʙᴏᴛ  ᴠᴇʀꜱɪᴏɴ  ${romanize(readJSON("./package.json").version)}\n\n`, stdout.columns), "#9f53ea"));
+			INFOLOG(color(center(`Bot Version  ${romanize(readJSON("./package.json").version)}\n\n`, stdout.columns), "#9f53ea"));
 		}
 	});
 

@@ -101,6 +101,8 @@ export const reassign = async (m, client, store, search) => {
 			? mText.message.viewOnceMessage.message.imageMessage.caption || "No Caption"
 			: isSame(type, "viewOnceMessage") && mText.message.viewOnceMessage.message.videoMessage
 			? mText.message.viewOnceMessage.message.videoMessage.caption || "No Caption"
+			: isSame(type, "reactionMessage")
+			? mText.message.reactionMessage.text
 			: "Unknown body";
 		const args = body?.split(/ +/g);
 		const cmd = body?.toLowerCase()?.split(" ")[0] || "";

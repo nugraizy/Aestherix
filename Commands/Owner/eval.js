@@ -4,13 +4,15 @@ import { WAProto } from "@adiwajshing/baileys";
 import * as _ from "@adiwajshing/baileys";
 import { exec } from "child_process";
 import prettier from "js-beautify";
+import { format } from "util";
+import syntaxerror from "syntax-error";
 import * as func from "../../exports.js";
 
 export default {
 	name: "eval",
 	description: "Evaluates code.",
 	usage: "!eval <code>",
-	aliases: ["/>", "$>", "=>"],
+	aliases: ["/>", "$>", "=>", "!>"],
 	category: "Owner",
 	cooldown: 0,
 	limit: 0,
@@ -139,6 +141,44 @@ export default {
 				str += `Message : ${err.message}`;
 				return client[botNum].reply({ from, quoted: message.message }, `\`ERROR\` \`\`\`\n\n${str}\`\`\``);
 			}
+		} else if (body.startsWith("!> ")) {
+			let returning;
+			let syntaxes = "";
+			const queries = `return ${query}`;
+			try {
+				let i = 15;
+				const exportsly = {
+					exports: {},
+				};
+				const exec = new (async () => {}).constructor("print", "message", "client", "store", "Array", "process", "args", "groupMetadata", "exports", "argument", queries);
+				returning = await exec.call(
+					client,
+					(...args) => {
+						if (--i < 1) return;
+						return client[botNum].reply({ from, quoted: message.message }, format(...args));
+					},
+					message,
+					client,
+					store,
+					CustomArray,
+					process,
+					args,
+					groupMetadata,
+					exportsly,
+					exportsly.exports,
+					[client, message],
+				);
+			} catch (e) {
+				const err = syntaxerror(query, "Execution Function", {
+					allowReturnOutsideFunction: true,
+					allowAwaitOutsideFunction: true,
+					sourceType: "module",
+				});
+				if (err) syntaxes = `\`\`\`${err}\`\`\`\n\n`;
+				returning = e;
+			} finally {
+				client[botNum].reply({ from, quoted: message.message }, syntaxes + format(returning));
+			}
 		}
 	},
 };
@@ -193,3 +233,10 @@ const check = (names) => {
 	if (!Object.keys(global).includes(names)) return new Error("Function does not exist.");
 	return global[names].toString();
 };
+
+class CustomArray extends Array {
+	constructor(...args) {
+		if (typeof args[0] == "number") return super(Math.min(args[0], 10000));
+		else return super(...args);
+	}
+}

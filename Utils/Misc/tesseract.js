@@ -8,7 +8,7 @@ export const tesseract = async (image, sender, lang = "ind") =>
 			if (lang == "") lang = "ind";
 			const time = moment().format("HH:mm:ss DD/MM");
 			const languages = [];
-			const $ = cheerio.load(await fetchTEXT("https://github.com/tesseract-ocr/tessdoc/blob/main/Data-Files-in-different-versions.md"));
+			const $ = cheerioLOAD(await fetchTEXT("https://github.com/tesseract-ocr/tessdoc/blob/main/Data-Files-in-different-versions.md"));
 			$("#readme > article > table:nth-child(2) > tbody > tr").each(function () {
 				if ($(this).find("td:nth-child(1)").text() === "") return;
 				languages.push({

@@ -9,7 +9,7 @@ export const getIgtv2 = (url) =>
 				},
 				body: `url=${encodeURIComponent(url)}&submit=`,
 			});
-			const $ = cheerio.load(response);
+			const $ = cheerioLOAD(response);
 			const data = $("#downloadBox > a").attr("href");
 			resolve(data);
 		} catch (e) {

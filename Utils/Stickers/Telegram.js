@@ -7,7 +7,7 @@ const telegramFind = (query) =>
 		try {
 			const data = await fetchTEXT(COMBOT_URL_BASE(query));
 			const results = [];
-			const $ = cheerio.load(data);
+			const $ = cheerioLOAD(data);
 			const bound = $("body > div > main > div.page > div > div.stickers-catalogue > div.tab-content > div > div");
 			bound.each(function () {
 				const title = $(this).find(".sticker-pack__title").text()?.trim();

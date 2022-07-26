@@ -157,7 +157,7 @@ export class SambungKata {
 		if (this.checkIsGuessed(word)) return RESPONSE.ALREADY_GUESSED;
 		if (!this.checkValidClue(word, prev_clue)) return RESPONSE.CLUE_DOESNT_MATCH;
 		const data = await fetchTEXT(URL_BASE(word));
-		const $ = cheerio.load(data);
+		const $ = cheerioLOAD(data);
 		if ($("body > div.container.body-content > h4:nth-child(6)").text() == WORD_NOT_FOUND) return RESPONSE.FAIL_TO_FIND_WORD;
 		const value = $("body > div.container.body-content > h2:nth-child(5)").text().replace(/[0-9]/g, "");
 		return {

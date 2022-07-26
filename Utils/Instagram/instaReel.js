@@ -11,7 +11,7 @@ export const getReels = (url) =>
 					Cookie: "PHPSESSID=hj2p3i96va7kqs7csbq16a5tip; _ga=GA1.2.1623964880.1642090612; _gid=GA1.2.553723423.1642090612; _gat=1",
 				},
 			});
-			const $ = cheerio.load(data);
+			const $ = cheerioLOAD(data);
 			const token = $("input#token").attr("value");
 			const dataResult = await fetchJSON(URL_POST(), {
 				method: "POST",

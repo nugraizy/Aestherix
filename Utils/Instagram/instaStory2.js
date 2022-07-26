@@ -7,7 +7,7 @@ export const getStory2 = (username) =>
 				data = await fetchTEXT(URL_BASE(username, i));
 				if (!data.includes("nostory")) break;
 			}
-			const $ = cheerio.load(data);
+			const $ = cheerioLOAD(data);
 			const results = [];
 			$("center").each((i, el) => {
 				if ($(el).find("a.download-btn").attr("href") !== undefined) {
