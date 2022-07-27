@@ -279,21 +279,19 @@ export const reassign = async (m, client, store, search) => {
 		const prepareMedia = async (media, type, opts = {}) => {
 			switch (type) {
 				case "imageMessage": {
-					return isURL(media) ? await generateWAMessage(ZERO, { image: { url: media } }, { ...opts, upload: client[botNum].waUploadToServer }) : await generateWAMessage(ZERO, { image: media }, { ...opts, upload: client[botNum].waUploadToServer });
+					return await generateWAMessage(ZERO, { image: isURL(media) ? { url: media } : media }, { ...opts, upload: client[botNum].waUploadToServer });
 				}
 				case "videoMessage": {
-					return isURL(media) ? await generateWAMessage(ZERO, { video: { url: media } }, { ...opts, upload: client[botNum].waUploadToServer }) : await generateWAMessage(ZERO, { video: media }, { ...opts, upload: client[botNum].waUploadToServer });
+					return await generateWAMessage(ZERO, { video: isURL(media) ? { url: media } : media }, { ...opts, upload: client[botNum].waUploadToServer });
 				}
 				case "audioMessage": {
-					return isURL(media) ? await generateWAMessage(ZERO, { audio: { url: media } }, { ...opts, upload: client[botNum].waUploadToServer }) : await generateWAMessage(ZERO, { audio: media }, { ...opts, upload: client[botNum].waUploadToServer });
+					return await generateWAMessage(ZERO, { audio: isURL(media) ? { url: media } : media }, { ...opts, upload: client[botNum].waUploadToServer });
 				}
 				case "documentMessage": {
-					return isURL(media)
-						? await generateWAMessage(ZERO, { document: { url: media }, fileName: opts.fileName, mimetype: opts.mimetype }, { ...opts, upload: client[botNum].waUploadToServer })
-						: await generateWAMessage(ZERO, { document: media, fileName: opts.fileName, mimetype: opts.mimetype }, { ...opts, upload: client[botNum].waUploadToServer });
+					return await generateWAMessage(ZERO, { document: isURL(media) ? { url: media } : media, fileName: opts.fileName, mimetype: opts.mimetype }, { ...opts, upload: client[botNum].waUploadToServer });
 				}
 				case "stickerMessage": {
-					return isURL(media) ? await generateWAMessage(ZERO, { sticker: { url: media } }, { ...opts, upload: client[botNum].waUploadToServer }) : await generateWAMessage(ZERO, { sticker: media }, { ...opts, upload: client[botNum].waUploadToServer });
+					return await generateWAMessage(ZERO, { sticker: isURL(media) ? { url: media } : media }, { ...opts, upload: client[botNum].waUploadToServer });
 				}
 				case "locationMessage": {
 					return await generateWAMessage(ZERO, { ...media }, { ...opts, upload: client[botNum].waUploadToServer });

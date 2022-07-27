@@ -6,7 +6,8 @@ import FormData from "form-data";
 import petting from "pet-pet-gif";
 import { __dirname } from "../../connect.js";
 import { webp2mp4File } from "./EZGifs/index.js";
-import { writeBuffer, unlinkFile, INFOLOG, ERRLOG, color, isURL, readBuffer, isFileExist } from "../../Helper/Modules/index.js";
+import { writeBuffer, unlinkFile, INFOLOG, ERRLOG, color, isURL, readBuffer, isFileExist, readJSON } from "../../Helper/Modules/index.js";
+const VIDEO_MIMETYPE = readJSON(path.join(__dirname, "Databases/Mimetypes/Video.json"));
 
 export const toOpus = (ext, opts = {}) =>
 	new Promise(async (resolve, reject) => {
@@ -30,7 +31,7 @@ export const toOpus = (ext, opts = {}) =>
 			});
 	});
 
-export const convertMediaToSticker = (filePath, sender, output) =>
+export const convertMediaToSticker = (filePath, sender, output, mimetype) =>
 	new Promise((resolve, reject) => {
 		const time = moment().format("HH:mm:ss DD/MM");
 		const pathExif = path.join(__dirname, "Temporary Files/data.exif");
@@ -78,14 +79,14 @@ export const convertMediaToSticker = (filePath, sender, output) =>
 			exec(
 				`ffmpeg -i "${filePath}" ${
 					!pathSticker.includes(".webp") ? `-vcodec libwebp -vf "scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1,fps=fps=10" -lossless 0 -preset default -ss 00:00:00 -t 00:00:10 -an -vsync 0 -s 512:512` : ""
-				} "${pathSticker}"`,
+				} "${mimetype && VIDEO_MIMETYPE.includes(mimetype) ? `${pathSticker}.webp` : pathSticker}"`,
 				(er, stdout, stderr) => {
 					if (er) {
 						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);
 						unlinkFile(pathSticker);
 						reject(er);
 					}
-					exec(`webpmux -set exif "${pathExif}" "${pathSticker}" -o "${pathSticker}-done.webp"`, (err, stdout, stderr) => {
+					exec(`webpmux -set exif "${pathExif}" "${VIDEO_MIMETYPE.includes(mimetype) ? `${pathSticker}.webp` : pathSticker}" -o "${pathSticker}-done.webp"`, (err, stdout, stderr) => {
 						if (err) {
 							ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);
 							unlinkFile(pathSticker);
@@ -195,7 +196,7 @@ export const pet = (input, sender, opts = {}) =>
 			input = opts.filename ? `${opts.filename}` : `${input}.gif`;
 			writeBuffer(`${input}.gif`, petted);
 			if (opts.output == "sticker") {
-				const sticker = await convertMediaToSticker(`${input}.gif`, sender);
+				const sticker = await convertMediaToSticker(`${input}.gif`, sender, undefined, "video/mp4");
 				resolve(sticker);
 				unlinkFile(input);
 				unlinkFile(tempInput);

@@ -9,7 +9,7 @@ import { createExif } from "../../Utils/Misc/index.js";
 const defaultOptions = {
 	output: "sticker",
 	duration: 5,
-	resolution: 521,
+	resolution: 512,
 };
 
 export default {
@@ -27,7 +27,6 @@ export default {
 		try {
 			const time = moment().format("HH:mm:ss DD/MM");
 			let options = {};
-			let i = 0;
 			if (/--?images?/.test(query)) options = _.defaults({ output: "image" }, defaultOptions);
 			else options = _.defaults({ output: "sticker" }, defaultOptions);
 			if (bodyQuoted && !isMediaImage) {
@@ -53,22 +52,22 @@ export default {
 							.capitalize()}`,
 					);
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Petting`, "#01cdfe")} ${color(prettyNumber, "#ff71ce")}`);
-				const file = await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`));
-				const result = await pet(file, sender, options);
-				if (options.output == "sticker") client[botNum].sendMessage(from, { sticker: Buffer.from(result, "base64") });
-				else client[botNum].sendMessage(from, { video: Buffer.from(result, "base64"), mimetype: "video/mp4" });
-				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Converted Media`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
-				return;
+				client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`)).then(async (file) => {
+					const result = await pet(file, sender, options);
+					if (options.output == "sticker") client[botNum].sendMessage(from, { sticker: Buffer.from(result, "base64") });
+					else client[botNum].sendMessage(from, { video: Buffer.from(result, "base64"), mimetype: "video/mp4" });
+					INFOLOG(`[${color(time, "cyan")}]`, `${color(`Converted Media`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
+					return;
+				});
 			}
 			for (const mentioned of mention) {
-				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Petting`, "#01cdfe")} ${color(mention[i], "#ff71ce")}`);
-				const profile = await client[botNum].profilePictureUrl(mentioned[i], "image").catch(() => readBuffer(path.join(__dirname, "Media Files/blank.png")));
+				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Petting`, "#01cdfe")} ${color(mentioned, "#ff71ce")}`);
+				const profile = await client[botNum].profilePictureUrl(mentioned, "image").catch(() => readBuffer(path.join(__dirname, "Media Files/blank.png")));
 				options = _.defaults({ filename: path.join(__dirname, `Temporary Files/${filename}`) }, defaultOptions);
 				const result = await pet(profile, sender, options);
 				if (options.output == "sticker") client[botNum].sendMessage(from, { sticker: Buffer.from(result, "base64") });
 				else client[botNum].sendMessage(from, { video: Buffer.from(result, "base64"), mimetype: "video/mp4" });
-				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Petted`, "#01cdfe")} ${color(mention[i], "#ff71ce")}`);
-				i++;
+				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Petted`, "#01cdfe")} ${color(mentioned, "#ff71ce")}`);
 			}
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";

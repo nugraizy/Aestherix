@@ -1,6 +1,6 @@
 {
 	"name": "simplebotpro3",
-	"version": "1.13.23",
+	"version": "1.13.24",
 	"description": "WhatsApp bot using Baileys library with Javascript language.",
 	"exports": "./connect.js",
 	"type": "module",
@@ -21,8 +21,9 @@
 	],
 	"author": "nanda",
 	"license": "MIT",
+	"__comment": "If you happen to occur cld package installation error, install the version 2.8.2 or below.",
 	"dependencies": {
-		"@adiwajshing/baileys": "github:adiwajshing/baileys",
+		"@adiwajshing/baileys": "github:nugraizy/baileys",
 		"aki-api": "^6.0.8",
 		"awesome-phonenumber": "^2.68.0",
 		"axios": "^0.25.0",
@@ -34,7 +35,7 @@
 		"chalk": "^5.0.0",
 		"cheerio": "^1.0.0-rc.10",
 		"child_process": "^1.0.2",
-		"cld": "^2.8.0",
+		"cld": "^2.8.1",
 		"dotenv": "^16.0.0",
 		"esm": "^3.2.25",
 		"ffmpeg": "^0.0.4",

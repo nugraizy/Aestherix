@@ -20,10 +20,14 @@ export default {
 		if (!stickerAble) return client[botNum].reply({ from, quoted: message }, `Please send/reply a regular media to convert to sticker. Can't convert ${typeQuoted} to sticker, only : ${typeSticker.join(", ").capitalize()}`);
 		try {
 			client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`)).then(async (result) => {
-				createExif("Made by Nanda", "Void bot");
-				const sticker = await convertMediaToSticker(result, prettyNumber);
-				await client[botNum].sendMessage(from, { sticker }, { quoted: message });
-				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
+				try {
+					createExif("Made by Nanda", "Void bot");
+					const sticker = await convertMediaToSticker(result, prettyNumber, undefined, extractMediaData.mimetype);
+					await client[botNum].sendMessage(from, { sticker }, { quoted: message });
+					INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
+				} catch (err) {
+					log(err);
+				}
 			});
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
