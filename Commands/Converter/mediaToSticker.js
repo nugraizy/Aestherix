@@ -26,6 +26,11 @@ export default {
 					await client[botNum].sendMessage(from, { sticker }, { quoted: message });
 					INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
 				} catch (err) {
+					let str = "Something went wrong :\n\n";
+					str += `Type : ${err.name}\n`;
+					str += `Message : ${err.message}`;
+					await client[botNum].reply({ from, quoted: message }, str);
+					ERRLOG(`[${color(time, "cyan")}]`, `${color(`Failed to Convert Media to Sticker. Reason : ${err.name}`, "red")} for ${color(sender, "#ff71ce")}`);
 					log(err);
 				}
 			});
