@@ -4,6 +4,7 @@ import path from "path";
 import moment from "moment-timezone";
 import FormData from "form-data";
 import petting from "pet-pet-gif";
+import sharp from "sharp";
 import { __dirname } from "../../connect.js";
 import { webp2mp4File } from "./EZGifs/index.js";
 import { writeBuffer, unlinkFile, INFOLOG, ERRLOG, color, isURL, readBuffer, isFileExist, readJSON } from "../../Helper/Modules/index.js";
@@ -191,22 +192,19 @@ export const pet = (input, sender, opts = {}) =>
 	new Promise(async (resolve, reject) => {
 		const time = moment().format("HH:mm:ss DD/MM");
 		try {
-			const tempInput = input;
 			const petted = await petting(input, opts);
-			input = opts.filename ? `${opts.filename}` : `${input}.gif`;
-			writeBuffer(`${input}.gif`, petted);
 			if (opts.output == "sticker") {
-				const sticker = await convertMediaToSticker(`${input}.gif`, sender, undefined, "video/mp4");
+				await sharp(petted, { animated: true }).toFile(`${isURL(input) ? `./Temporary Files/${sender}` : input}.webp`);
+				const sticker = await convertMediaToSticker(`${isURL(input) ? `./Temporary Files/${sender}` : input}.webp`, sender, undefined);
 				resolve(sticker);
-				unlinkFile(input);
-				unlinkFile(tempInput);
-				unlinkFile(`${input}.gif`);
+				unlinkFile(`${isURL(input) ? `./Temporary Files/${sender}` : input}.webp`);
 				return;
 			}
+			input = opts.filename ? `${opts.filename}` : `${input}.gif`;
+			writeBuffer(`${input}.gif`, petted);
 			const { output } = await gif2mp4(`${input}.gif`, `${input}.mp4`, opts);
 			resolve(readBuffer(output));
 			unlinkFile(input);
-			unlinkFile(tempInput);
 			unlinkFile(`${input}.gif`);
 			unlinkFile(output);
 		} catch (err) {

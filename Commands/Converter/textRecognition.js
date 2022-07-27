@@ -25,7 +25,7 @@ export default {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name ?? "Recognizing"}\n`;
 			str += `Message : ${err.message ?? err.error}`;
-			await client[botNum].reply({ from, quoted: message }, str + (err.languages ? err.languages.map((v) => `\n${v.code} - ${v.name}`).join("\n") : ""));
+			await client[botNum].reply({ from, quoted: message }, str);
 			log(err);
 		}
 	},

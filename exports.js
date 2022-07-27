@@ -1,4 +1,5 @@
 export {
+	trigger,
 	checkAfk,
 	getAfk,
 	setAfk,

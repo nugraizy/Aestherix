@@ -56,7 +56,7 @@ if (OPTIONS.json) {
 	store.readFromFile(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`);
 	setInterval(() => {
 		store.writeToFile(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`);
-	}, 10_000);
+	}, 4 * 1000);
 }
 
 export const runtime = Date.now();
