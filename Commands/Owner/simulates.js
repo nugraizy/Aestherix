@@ -12,7 +12,7 @@ const WAPresence = {
 export default {
 	name: "simulates",
 	description: "Simulates an event update",
-	usage: "simulates <events>",
+	usage: "!simulates <events>",
 	aliases: ["simulate"],
 	category: "Owner",
 	cooldown: 0,

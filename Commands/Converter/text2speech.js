@@ -6,7 +6,7 @@ export default {
 	name: "text2speech",
 	description: "Convert text to speech",
 	category: "Converter",
-	usage: "text2speech <text> [--language]",
+	usage: "!text2speech <text> [--language]",
 	aliases: ["tts", "gtts", "t2s"],
 	cooldown: 5,
 	limit: 1,

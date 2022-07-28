@@ -8,7 +8,7 @@ import { createExif } from "../../Utils/Misc/index.js";
 export default {
 	name: "sticker",
 	description: "Convert media to sticker",
-	usage: "sticker <reply media/send media>",
+	usage: "!sticker <reply media/send media>",
 	aliases: ["stickers", "st", "stk", "s", "sgif", "sgifs", "stickergif", "stickergifs", "tosticker", "tostickers", "tosticker", "tostickers", "tosticker"],
 	category: "Converter",
 	cooldown: 5,

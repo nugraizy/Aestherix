@@ -245,6 +245,7 @@ export const reassign = async (m, client, store, search) => {
 				: {};
 		const typeSticker = ["imageMessage", "videoMessage", "stickerMessage"];
 		const stickerAble = typeSticker.includes(typeQuoted);
+
 		const reply = async ({ from, quoted }, text) => {
 			return await client[botNum].sendMessage(from, { text }, { quoted });
 		};

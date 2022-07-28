@@ -4,7 +4,7 @@ export default {
 	name: "getsurahtafsir",
 	description: "Get Surah Tafsir",
 	category: "AL-Quran",
-	usage: "getsurahtafsir <surah number>",
+	usage: "!getsurahtafsir <surah number>",
 	aliases: ["gettafsir", "tafsir"],
 	cooldown: 0,
 	limit: 0,

@@ -7,7 +7,7 @@ import { INFOLOG, color } from "../../Helper/Modules/index.js";
 export default {
 	name: "textrecognition",
 	description: "Recognize text from image",
-	usage: "textrecognition <Image(reply/send)>",
+	usage: "!textrecognition <Image(reply/send)>",
 	category: "Converter",
 	aliases: ["ocr"],
 	cooldown: 5,

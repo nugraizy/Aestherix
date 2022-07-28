@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs, { readFile } from "fs";
 import { spawn, exec } from "child_process";
 import path from "path";
 import moment from "moment-timezone";
@@ -9,6 +9,26 @@ import { __dirname } from "../../connect.js";
 import { webp2mp4File } from "./EZGifs/index.js";
 import { writeBuffer, unlinkFile, INFOLOG, ERRLOG, color, isURL, readBuffer, isFileExist, readJSON } from "../../Helper/Modules/index.js";
 const VIDEO_MIMETYPE = readJSON(path.join(__dirname, "Databases/Mimetypes/Video.json"));
+
+export const toMp4 = (input, sender) =>
+	new Promise(async (resolve, reject) => {
+		try {
+			const time = moment().unix();
+			exec(`ffmpeg -i "${input}" "./Temporary Files/${sender}${time}.mp4"`, async (err, stdout, stderr) => {
+				if (err) {
+					if (!isURL(input)) unlinkFile(input);
+					log(err);
+					reject(err);
+				}
+				const buffer = readBuffer(`./Temporary Files/${sender}${time}.mp4`);
+				unlinkFile(`./Temporary Files/${sender}${time}.mp4`);
+				resolve(buffer);
+			});
+		} catch (err) {
+			log(err);
+			reject(err);
+		}
+	});
 
 export const toOpus = (ext, opts = {}) =>
 	new Promise(async (resolve, reject) => {

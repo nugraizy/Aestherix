@@ -2,13 +2,13 @@ import { generateWAMessageFromContent, generateMessageID } from "@adiwajshing/ba
 
 export default {
 	name: "bug",
-	description: "Send polling to a message.",
+	description: "Send bug.",
 	category: "Debugging",
-	usage: "!polling <emoji>",
-	aliases: ["poll", "pollwith"],
+	usage: "!bug",
+	aliases: ["bug"],
 	cooldown: 5,
 	limit: 0,
-	status: "disable",
+	status: "enable",
 	async run({ from, message, bodyQuoted, mediaData, query }, client, store) {
 		return;
 		const messages = generateWAMessageFromContent(

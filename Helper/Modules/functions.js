@@ -39,6 +39,17 @@ export const reverseWord = (string = "") => string.split("").reverse().join("");
 
 export const reverseArray = (array = []) => array.reverse();
 
+String.prototype.toReadAble = function () {
+	const sec = parseInt(this, 10);
+	let hours = Math.floor(sec / 3600);
+	let minutes = Math.floor((sec - hours * 3600) / 60);
+	let seconds = sec - hours * 3600 - minutes * 60;
+	if (hours < 10) hours = `0${hours}`;
+	if (minutes < 10) minutes = `0${minutes}`;
+	if (seconds < 10) seconds = `0${seconds}`;
+	return `${hours}:${minutes}:${seconds}`;
+};
+
 String.prototype.capitalize = function () {
 	return this.toLowerCase()
 		.split(" ")
@@ -434,7 +445,7 @@ export const parseCode = (input) => {
 	return parse == null ? false : parse[0];
 };
 
-function convertToRoman(num) {
+const convertToRoman = (num) => {
 	const lookup = { M̄: 1_000_000, D̄: 500_000, C̄: 100_000, L̄: 50_000, X̄: 10_000, V̄: 5000, Ī: 1000, M: 1000, CM: 900, D: 500, CD: 400, C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1 };
 	let roman = "";
 	let i;
@@ -445,7 +456,7 @@ function convertToRoman(num) {
 		}
 	}
 	return roman;
-}
+};
 
 export const romanize = (num) => {
 	const container = [];

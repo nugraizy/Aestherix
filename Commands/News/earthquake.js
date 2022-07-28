@@ -4,6 +4,7 @@ export default {
 	name: "gempa",
 	description: "Showing latest earthquake in Indonesia",
 	category: "News",
+	usage: "!news",
 	aliases: ["earthquake"],
 	cooldown: 2,
 	limit: 1,

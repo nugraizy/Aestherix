@@ -12,7 +12,7 @@ const DEFAULT_TYPE = "image";
 export default {
 	name: "memegen",
 	description: "Meme Generator, Y'know the drill",
-	usage: "memegen <reply media/send media> <[Top Texts] & [Bottom Texts]> [options]\nOptions:\n-stk / -img",
+	usage: "!memegen <reply media/send media> <[Top Texts] & [Bottom Texts]> [options]\nOptions:\n-stk / -img",
 	aliases: ["mgen", "memgen", "memegen"],
 	category: "Converter",
 	cooldown: 5,

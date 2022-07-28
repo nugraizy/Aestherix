@@ -4,7 +4,7 @@ export default {
 	name: "getsurah",
 	description: "Get List of Surah from The Quran",
 	category: "AL-Quran",
-	usage: "getsurah",
+	usage: "!getsurah",
 	aliases: ["surah"],
 	cooldown: 0,
 	limit: 0,

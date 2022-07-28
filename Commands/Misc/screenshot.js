@@ -5,7 +5,7 @@ export default {
 	name: "screenshots",
 	description: "Get a screenshot of a website",
 	category: "Misc",
-	usage: "screenshot <url> --<?type> (phone, tablet, desktop) default is desktop.",
+	usage: "!screenshot <url> --<?type> (phone, tablet, desktop) default is desktop.",
 	aliases: ["screenshot", "ss"],
 	cooldown: 3,
 	limit: 2,

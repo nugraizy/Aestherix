@@ -4,7 +4,7 @@ export default {
 	name: "surahdetails",
 	description: "Get surah details",
 	category: "AL-Quran",
-	usage: "surahdetail <surah number>",
+	usage: "!surahdetail <surah number>",
 	aliases: ["surahdetail"],
 	cooldown: 0,
 	limit: 0,

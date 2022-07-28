@@ -10,7 +10,7 @@ export default {
 	name: "soundremover",
 	description: "Remove specific sound from audio/video",
 	category: "Converter",
-	usage: "soundremover <Audio/Video(reply/send)>",
+	usage: "!soundremover <Audio/Video(reply/send)>",
 	aliases: ["soundremove", "soundrem", "soundremoveaudio", "soundremovevideo", "soundremoveaudiovideo", "vrm", "srm"],
 	cooldown: 5,
 	limit: 1,

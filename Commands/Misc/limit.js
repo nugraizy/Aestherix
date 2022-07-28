@@ -4,7 +4,7 @@ export default {
 	name: "limit",
 	description: "Check your daily limit.",
 	category: "Misc",
-	usage: "limit",
+	usage: "!limit",
 	aliases: ["limit", "lim"],
 	cooldown: 3,
 	limit: 0,

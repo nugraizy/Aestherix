@@ -15,7 +15,7 @@ export default {
 	description: "Trigger someone profile picture or send/reply an image to trigger",
 	category: "Converter",
 	aliases: ["trig", "t"],
-	usage: "trigger <@user/(reply/send image)>",
+	usage: "!trigger <@user/(reply/send image)>",
 	cooldown: 5,
 	limit: 1,
 	status: "enable",

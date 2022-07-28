@@ -7,7 +7,7 @@ import { INFOLOG, color } from "../../Helper/Modules/index.js";
 export default {
 	name: "decrypt",
 	description: "Decrypt a sticker to media",
-	usage: "decrypt <reply sticker/send sticker>",
+	usage: "!decrypt <reply sticker/send sticker>",
 	aliases: ["d"],
 	category: "Converter",
 	cooldown: 5,

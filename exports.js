@@ -176,7 +176,8 @@ export {
 	getListSurah,
 	getTafsirSurah,
 	getEarthquake,
-	openWeatherAPI,
+	getWeather,
+	toMp4,
 	toOpus,
 	convertMediaToSticker,
 } from "./Utils/index.js";
