@@ -501,3 +501,24 @@ export const uploadToTelegraph = async (file) => {
 		log(error);
 	}
 };
+
+export const formatViews = (s) => {
+	const reg = /[A-Z]/g;
+	const MULTIPLIER = {
+		K: 1000,
+		M: 1_000_000,
+		B: 1_000_000_000,
+		T: 1_000_000_000,
+	};
+	const matrix = s.split("").findIndex((v) => Object.keys(MULTIPLIER).includes(v));
+	if (matrix == -1) return Number(s);
+	return Number(s.replace(reg, "")) * MULTIPLIER[s[matrix]];
+};
+
+export const convertSecondstoTime = (s) => {
+	const dateObj = new Date(s * 1000);
+	const hours = dateObj.getUTCHours();
+	const minutes = dateObj.getUTCMinutes();
+	const seconds = dateObj.getSeconds();
+	return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+};

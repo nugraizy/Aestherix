@@ -25,7 +25,20 @@ export default {
 						{
 							image: { url: imageURL },
 							caption: `\`\`\` • Shopee \`\`\``,
-							templateButtons: [{ urlButton: { displayText: "Product Source", url: productURL } }, { urlButton: { displayText: "Image Source", url: imageURL } }],
+							templateButtons: [
+								{
+									urlButton: {
+										displayText: "Product Source",
+										url: productURL,
+									},
+								},
+								{
+									urlButton: {
+										displayText: "Image Source",
+										url: imageURL,
+									},
+								},
+							],
 							footer: `Name : ${productName}
 Stock : ${numberWithCommas(stock)}
 Sold : ${numberWithCommas(sold)}

@@ -5,7 +5,7 @@ export { createExif, mime, extension, getScreenshot, tesseract, SetIntervals, Ch
 export { startTG, makePuzzle, solvePuzzle, revealOneElement, checkWin, stringifyGrid, fillGrid, startAkinator, handleAnswer, getSession, TicTacToe, GetTicTacToeSession, DeleteTicTacToeSession, slot, SambungKata, GetSambungKataSession, genshinProfile, getCharacters } from "./Games/index.js";
 export { fbDl } from "./Facebook/index.js";
 export { getSurahAudio, getAyat, getSurahDetail, getListSurah, getTafsirSurah } from "./EQuran/index.js";
-export { toMp4, toOpus, convertMediaToSticker, convertStickerToMedia, webp2mp4File, mp42mp3, soundRemover, pet, textToSpeech, apng2webpUrl, emojimix } from "./Converter/index.js";
+export { toMp4, toOpus, convertMediaToSticker, convertStickerToMedia, webp2mp4File, mp42mp3, soundRemover, pet, textToSpeech, apng2webpUrl, emojimix, mergeVideoWithAudio } from "./Converter/index.js";
 export { getEarthquake, getWeather } from "./News/index.js";
 export { line, telegram } from "./Stickers/index.js";
 export { search, skip, handlers, stop } from "./Anonymous/index.js";
@@ -13,7 +13,7 @@ export { yandex, sauceNao, traceMoe } from "./Image Reverse Search/index.js";
 export { tiny } from "./Shortener/tinyURL.js";
 export { brainlySearch } from "./Brainly/searchAnswer.js";
 export { pinterest } from "./Pinterest/index.js";
-export { bilibiliSearch } from "./Bilibili/index.js";
+export { bilibiliSearchCOM, bilibiliSearchTV, detailSourceFormat } from "./Bilibili/index.js";
 export { wpSearch, wpLatest, wpDownload } from "./Waifuplay/index.js";
 export { twitterUser, twitterDownload } from "./Twitter/index.js";
 export { searchManga, searchArtwork, searchNovel, downloadArtworks, downloadManga, getNovelContent } from "./Pixiv/index.js";

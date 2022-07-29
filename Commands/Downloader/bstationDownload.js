@@ -1,0 +1,45 @@
+import path from "path";
+import { __dirname } from "../../connect.js";
+import { detailSourceFormat } from "../../Utils/Bilibili/index.js";
+import { mergeVideoWithAudio } from "../../Utils/Converter/index.js";
+import { removeDuplicatesArray, getFilesizeFromBytes } from "../../Helper/Modules/index.js";
+
+export default {
+	name: "bstationdl",
+	description: "Download videos from Bilibili/Bstation",
+	usage: "!bstationdl <url|code>",
+	category: "Downloader",
+	aliases: ["bstatdl", "bsdl"],
+	limit: 4,
+	cooldown: 5,
+	status: "enable",
+	async run({ query, from, message, filename }, client) {
+		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");
+		try {
+			let queries = query.split(",");
+			queries = removeDuplicatesArray(queries);
+			for (const querie of queries) {
+				const regexs = regex(querie.trim());
+				if (!regexs.status) return client[botNum].reply({ from, quoted: message }, regexs.message);
+				const result = await detailSourceFormat(regexs.message.trim());
+				if ("error" in result) return client[botNum].reply({ from, quoted: message }, `${result.error}\n${result.cus_error}`);
+				client[botNum].reply({ from, quoted: message }, ` • Converting videos, this might take a while please wait.\n\nResolution : ${result.resolution}\nSize : ${getFilesizeFromBytes(result.size)}`);
+				const merge = await mergeVideoWithAudio(result.video, result.audio, path.join(__dirname, `Temporary Files/${filename}.mp4`));
+				await client[botNum].sendMessage(from, { video: new Buffer.from(merge, "base64"), caption: `\`\`\` • Bstation Downloader \`\`\`` }, { quoted: message });
+			}
+		} catch (err) {
+			log(err);
+		}
+	},
+};
+
+const regex = (input) => {
+	const reg = /^https?:\/\/(www\.)?bilibili\.tv\/[a-bA-Z-?]*\/play?\/\d$/gi;
+	const isBili = reg.test(input) || /\d{5,10}/g.test(input);
+	if (isBili) {
+		const match = input.match(/\d{5,10}/g) || input.match(/\d{5,10}/g);
+		if (!match) return { status: false, message: "Bstation code not found on your URL. Try another URL or Input a Code." };
+		return { status: true, message: match[0] };
+	}
+	return { status: false, message: "This URL isn't a valid Bstation Art URL. Try another URL." };
+};

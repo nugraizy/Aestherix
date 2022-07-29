@@ -177,7 +177,7 @@ export const gif2mp4 = (input, output, opts = {}) =>
 		const time = moment().format("HH:mm:ss DD/MM");
 		exec(`ffmpeg -stream_loop -1 -i "${input}" -vcodec libx264 -acodec libmp3lame -pix_fmt yuv420p -crf 23 -ss 00:00:00.000 -t 00:00:${opts.duration || 4}.000 "${output}"`, (err, stdout, stderr) => {
 			if (err) {
-				ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Video to Video", "red")}`);
+				ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Gif to Video", "red")}`);
 				reject(err);
 				return;
 			}
@@ -229,6 +229,28 @@ export const pet = (input, sender, opts = {}) =>
 			unlinkFile(output);
 		} catch (err) {
 			ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Pet Image", "red")} for ${color(sender, "#ff71ce")}`);
+			reject(err);
+		}
+	});
+
+export const mergeVideoWithAudio = (video, audio, output) =>
+	new Promise(async (resolve, reject) => {
+		const time = moment().format("HH:mm:ss DD/MM");
+		try {
+			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Merging files`, "#01cdfe")}`);
+			exec(`ffmpeg -i "${video}" -i "${audio}" -c:v copy -c:a copy "${output}"`, (err, stdout, stderr) => {
+				if (err) {
+					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Merge Audio to Video", "red")}`);
+					reject(err);
+					return;
+				}
+				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Completed merging`, "#01cdfe")}`);
+				const buffer = readBuffer(output);
+				unlinkFile(output);
+				resolve(buffer);
+			});
+		} catch (err) {
+			ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Merge Audio to Video", "red")} for ${color(sender, "#ff71ce")}`);
 			reject(err);
 		}
 	});

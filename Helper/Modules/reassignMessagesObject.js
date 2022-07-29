@@ -1,9 +1,9 @@
 import { toBuffer, downloadContentFromMessage, generateWAMessageFromContent, generateWAMessage, getContentType } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
 import PhoneNumber from "awesome-phonenumber";
-import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined, isURL, writeBuffer, writeJSON, delaySync } from "./functions.js";
+import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined, isURL, writeBuffer, delaySync } from "./index.js";
 import { NO_DATA, ZERO, S_WHATSAPP_NET, UPDATE } from "../Misc/WAData/index.js";
-
+import { checkJSON, pushDefaultSettings } from "./groupDefaultSettings.js";
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 export const reassign = async (m, client, store, search) => {
 	try {
@@ -475,42 +475,4 @@ export const reassign = async (m, client, store, search) => {
 			error: e,
 		};
 	}
-};
-
-const checkJSON = (dari) => {
-	const data = readJSON("./Databases/Groups/settingsManager.json");
-	if (data.findIndex((v) => Object.keys(v)[0] == dari) != -1) {
-		return data[data.findIndex((v) => Object.keys(v)[0] == dari)];
-	}
-	return false;
-};
-
-const pushDefaultSettings = (dari) => {
-	const data = readJSON("./Databases/Groups/settingsManager.json");
-	const index = data.findIndex((v) => Object.keys(v)[0] == dari);
-	if (index == -1) {
-		data.push({
-			[dari]: {
-				URLSender: [],
-				welcome1: "disable",
-				welcome1msg: "Welcome to {groupName}",
-				welcome2: "disable",
-				welcome2msg: "Welcome to {groupName}",
-				left1: "disable",
-				left1msg: "Bye bye {groupName}",
-				left2: "disable",
-				left2msg: "Bye bye {groupName}",
-				antiDelete: "disable",
-				antiGroupURL: "disable",
-				antiURL: "disable",
-				antiSpam: "disable",
-				antiVirus: "disable",
-				autoReader: "disable",
-				games: "disable",
-			},
-		});
-		writeJSON("./Databases/Groups/settingsManager.json", data);
-		return data[index];
-	}
-	return data[index];
 };

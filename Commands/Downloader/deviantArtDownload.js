@@ -5,7 +5,7 @@ export default {
 	name: "deviantartdl",
 	description: "Download images from Deviant Art",
 	usage: "!deviantartdl <url>",
-	category: "Search",
+	category: "Downloader",
 	aliases: ["dvartdl", "devartdl"],
 	limit: 4,
 	cooldown: 5,

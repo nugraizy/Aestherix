@@ -77,5 +77,7 @@ export {
 	ERRLOG,
 	isURL,
 	parseCode,
+	formatViews,
+	convertSecondstoTime,
 } from "./Modules/index.js";
 export { WebMessageInfoStubType, NO_DATA, ZERO, S_WHATSAPP_NET, UPDATE } from "./Misc/WAData/index.js";

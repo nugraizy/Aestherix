@@ -117,7 +117,9 @@ const start = async () => {
 		Handler(message, client, cmds, store, user);
 	});
 
-	Client.ev.on("auth-state.update", () => saveState);
+	Client.ev.on("auth-state.update", saveState);
+
+	Client.ev.on("creds.update", saveState);
 
 	Client.ev.on("messages.update", async (message) => {
 		const Handler = (await import("./Handlers/Messages Event/deletedMessage.js")).default.handler;
@@ -129,6 +131,7 @@ const start = async () => {
 		const from = presence.id;
 		const participant = Object.keys(presence.presences)[0];
 		const presences = presence.presences[participant].lastKnownPresence;
+		console.log(presence);
 		if (presences == "composing") {
 			const Handler = (await import("./Handlers/Message Presence/composing.js")).default.handler;
 			Handler(client, from, participant);
@@ -143,7 +146,7 @@ function loadFiles(dir) {
 	for (const file of list) {
 		const path = `${dir}/${file}`;
 		const stat = fs.statSync(path);
-		if (stat && stat.isDirectory()) {
+		if (stat?.isDirectory()) {
 			files = files.concat(loadFiles(path));
 		} else {
 			files.push(path);

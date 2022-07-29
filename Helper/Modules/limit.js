@@ -4,7 +4,7 @@ import { readJSON, writeJSON, isFileExist, readDir } from "../index.js";
 
 const PATH = {
 	folder: path.join(__dirname, "Databases/Users"),
-	files: path.join(__dirname, "Databases/Users/data.json"),
+	files: path.join(__dirname, "Databases/Users/limit.json"),
 };
 
 const LIMIT = 30;
@@ -14,7 +14,8 @@ if (!isFileExist(PATH.files)) writeJSON(PATH.files, []);
 
 export const checkUser = (obj) => {
 	const data = readJSON(PATH.files);
-	if (!data.some((v) => v.id == obj.id)) return false;
+	const status = data.some((v) => v.id == obj.id);
+	if (!status) return false;
 	return true;
 };
 
@@ -55,8 +56,7 @@ export const addLimit = (obj) => {
 	const data = readJSON(PATH.files);
 	if (indexUser(obj) !== false) {
 		if (data[indexUser(obj).index].limit <= 0) return false;
-		const updated = updateUser(obj);
-		return updated;
+		return updateUser(obj);
 	}
 	return addUser({
 		id: obj.id,

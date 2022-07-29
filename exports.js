@@ -86,8 +86,11 @@ export {
 	ERRLOG,
 	isURL,
 	parseCode,
+	formatViews,
+	convertSecondstoTime,
 } from "./Helper/index.js";
 export {
+	mergeVideoWithAudio,
 	searchDeviantArt,
 	downloadDeviantArt,
 	searchManga,
@@ -104,7 +107,9 @@ export {
 	twitterUser,
 	twitterDownload,
 	slot,
-	bilibiliSearch,
+	bilibiliSearchCOM,
+	bilibiliSearchTV,
+	detailSourceFormat,
 	shopeeProduct,
 	sauceNao,
 	traceMoe,

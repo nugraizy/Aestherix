@@ -1,4 +1,4 @@
-import { bilibiliSearch } from "../../Utils/Bilibili/index.js";
+import { bilibiliSearchCOM } from "../../Utils/Bilibili/index.js";
 import { numberWithCommas, getFilesizeFromBytes } from "../../Helper/Modules/index.js";
 import { delay } from "@adiwajshing/baileys";
 
@@ -17,7 +17,7 @@ export default {
 			let queries = query.split(",");
 			queries = removeDuplicatesArray(queries);
 			for (const querie of queries) {
-				const videos = await bilibiliSearch(querie.trim());
+				const videos = await bilibiliSearchCOM(querie.trim());
 				if ("error" in videos) return await client[botNum].reply({ from, quoted: message }, `${videos.error}\n${videos.cus_error}`);
 				let i = 0;
 				for (const { title, author, author_id, like, share, duration, favorite, view, thumbnail, description, original_video_link, download_link, size } of videos) {
