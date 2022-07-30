@@ -1,0 +1,270 @@
+import * as util from "util";
+import fs from "fs";
+import { WAProto } from "@adiwajshing/baileys";
+import * as _ from "@adiwajshing/baileys";
+import { exec } from "child_process";
+import prettier from "js-beautify";
+import { format } from "util";
+import syntaxerror from "syntax-error";
+import * as func from "../../exports.js";
+
+export default {
+	name: "eval",
+	description: "Evaluates code.",
+	usage: "!eval <code>",
+	aliases: ["/>", "$>", "=>", "!>"],
+	category: "Owner",
+	cooldown: 0,
+	limit: 0,
+	status: "enable",
+	async run(message, client, store) {
+		let {
+			isFromMe,
+			from,
+			isGroup,
+			isBaileys,
+			sender,
+			prettyNumber,
+			timeStamp,
+			filename,
+			groupMetadata,
+			groupName,
+			groupId,
+			isGroupOwner,
+			pushname,
+			botNumber,
+			ownerNumbers,
+			isOwner,
+			settings,
+			type,
+			typeQuoted,
+			isAdmin,
+			rawParticipants,
+			adminGroups,
+			participantsGroups,
+			ownerGroups,
+			isBotAdmin,
+			body,
+			args,
+			cmd,
+			isCmd,
+			prefix,
+			query,
+			isMedia,
+			isQuotedImage,
+			isQuotedVideo,
+			isQuotedAudio,
+			isQuotedContact,
+			isQuotedContactsArray,
+			isQuotedDocument,
+			isQuotedLiveLocation,
+			isQuotedLocation,
+			isQuotedSticker,
+			isMediaVid,
+			isMediaImage,
+			isSticker,
+			isAudio,
+			isContact,
+			isContactsArray,
+			isDocument,
+			isViewOnce,
+			isViewOnceImage,
+			isViewOnceVideo,
+			isQuotedViewOnce,
+			isQuotedViewOnceImage,
+			isQuotedViewOnceVideo,
+			typeViewOnce,
+			mention,
+			mediaData,
+			extractMediaData,
+			bodyQuoted,
+		} = message;
+		if (!isOwner) return client[botNum].reply({ from, quoted: message.message }, "You are not allowed to use this command");
+		if (!query) return client[botNum].reply({ from, quoted: message.message }, "Please specify code to evaluate");
+		if (isBaileys) return;
+		if (body.startsWith("/> ")) {
+			let types = Function;
+			let output;
+			let syntaxes = "";
+			try {
+				if (/await/.test(body)) types = AsyncFunction;
+				query = `return ${query}`;
+				const func = new types("print", "client", "message", "fs", "from", "extractMediaData", "mediaData", "type", "typeQuoted", "body", "adminGroups", "participants", "pushname", "bodyQuoted", query);
+				output = await func(
+					client,
+					(...args) => {
+						return client[botNum].reply({ from, quoted: message.message }, format(...args));
+					},
+					client,
+					message,
+					fs,
+					from,
+					extractMediaData,
+					mediaData,
+					type,
+					typeQuoted,
+					body,
+					adminGroups,
+					participantsGroups,
+					pushname,
+					bodyQuoted,
+				);
+			} catch (e) {
+				const err = syntaxerror(query, "Execution Function", {
+					allowReturnOutsideFunction: true,
+					allowAwaitOutsideFunction: true,
+					sourceType: "module",
+				});
+				if (err) syntaxes = `\`\`\`${err}\`\`\`\n\n`;
+				output = e;
+			} finally {
+				client[botNum].reply({ from, quoted: message.message }, syntaxes + format(output));
+			}
+		} else if (body.startsWith("$> ")) {
+			try {
+				exec(body.slice(3), async (err, stdout, stderr) => {
+					if (err) return client[botNum].reply({ from, quoted: message.message }, format(err));
+					await client[botNum].reply({ from, quoted: message.message }, format(stdout.replace(col, "").trim()));
+				});
+			} catch (err) {
+				let str = `Type : ${err.name}\n`;
+				str += `Message : ${err.message}`;
+				return client[botNum].reply({ from, quoted: message.message }, `\`ERROR\` \`\`\`\n\n${str}\`\`\``);
+			}
+		} else if (body.startsWith("=> ")) {
+			try {
+				if (body.includes("/s")) {
+					body = body.replace(/\/s/g, "");
+					const evaled = body.slice(3);
+					print(from, eval(evaled));
+				} else {
+					if (body.includes("/as")) {
+						body = body.replace(/\/as/g, "");
+					}
+					print(
+						from,
+						await eval(
+							`(async () => {
+						${query}
+					})()
+					.catch(err => print(from, err))`,
+						),
+					);
+				}
+			} catch (e) {
+				const err = syntaxerror(
+					`(async () => {
+					${query}
+				})()
+				.catch(err => print(from, err))`,
+					"Execution Function",
+					{
+						allowReturnOutsideFunction: true,
+						allowAwaitOutsideFunction: true,
+						sourceType: "module",
+					},
+				);
+				let str = `Type : ${e.name}\n`;
+				str += `Message : ${e.message}`;
+				if (err) str += `\`\`\`${err}\`\`\`\n\n`;
+				return client[botNum].reply({ from, quoted: message.message }, `\`ERROR\` \`\`\`\n\n${str}\`\`\``);
+			}
+		} else if (body.startsWith("!> ")) {
+			let returning;
+			let syntaxes = "";
+			const queries = `return ${query}`;
+			try {
+				let i = 15;
+				const exportsly = {
+					exports: {},
+				};
+				const exec = new (async () => {}).constructor("print", "message", "client", "store", "Array", "process", "args", "groupMetadata", "exports", "argument", queries);
+				returning = await exec.call(
+					client,
+					(...args) => {
+						if (--i < 1) return;
+						return client[botNum].reply({ from, quoted: message.message }, format(...args));
+					},
+					message,
+					client,
+					store,
+					CustomArray,
+					process,
+					args,
+					groupMetadata,
+					exportsly,
+					exportsly.exports,
+					[client, message],
+				);
+			} catch (e) {
+				const err = syntaxerror(query, "Execution Function", {
+					allowReturnOutsideFunction: true,
+					allowAwaitOutsideFunction: true,
+					sourceType: "module",
+				});
+				if (err) syntaxes = `\`\`\`${err}\`\`\`\n\n`;
+				returning = e;
+			} finally {
+				client[botNum].reply({ from, quoted: message.message }, syntaxes + format(returning));
+			}
+		}
+	},
+};
+
+Array.prototype.insert = function (index) {
+	this.splice(...[index, 0].concat(Array.prototype.slice.call(arguments, 1)));
+	return this;
+};
+const col = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+const print = ({ from, quoted }, ...args) => client[botNum].reply({ from: from || where, quoted }, format(...args));
+global.prints = print;
+const temp = async (names, func) => {
+	if (!/^[a-z0-9_]+$/i.test(names)) return new Error("Invalid name.");
+	if (Object.keys(func).includes(names)) return new Error("Function already exists in the script.");
+	if (Object.keys(global).includes(names)) return new Error("Function already exists in the temporary functions.");
+	if (typeof func !== "function") return new Error("Argument is not a function.");
+	func = prettier.js_beautify(func.toString());
+	func = prettier.js_beautify(func.split("\n").insert(1, "try {").insert(-1, "} catch(e) { prints(false, format(e))}").join("\n"));
+	global[names] = func.includes("await") ? await new AsyncFunction(`return ${func}`)() : new Function(`return ${func}`)();
+	global.functions = { ...global.functions, [names]: global[names] };
+	return func;
+};
+
+const clear = (names) => {
+	if (typeof names == "function") {
+		for (const key in global.functions) {
+			if (global.functions[key] == names) {
+				names = key;
+				break;
+			}
+		}
+	}
+	if (!/^[a-z0-9_]+$/i.test(names)) return new Error("Invalid name.");
+	if (!Object.keys(global).includes(names)) return new Error("Function does not exist.");
+	const capt = `Function is deleted\n\n${global[names]}`;
+	delete global[names];
+	delete global.functions[names];
+	return capt;
+};
+
+const check = (names) => {
+	if (typeof names == "function") {
+		for (const key in global.functions) {
+			if (global.functions[key] == names) {
+				names = key;
+				break;
+			}
+		}
+	}
+	if (!/^[a-z0-9_]+$/i.test(names)) return new Error("Invalid name.");
+	if (!Object.keys(global).includes(names)) return new Error("Function does not exist.");
+	return global[names].toString();
+};
+
+class CustomArray extends Array {
+	constructor(...args) {
+		if (typeof args[0] == "number") return super(Math.min(args[0], 10000));
+		else return super(...args);
+	}
+}

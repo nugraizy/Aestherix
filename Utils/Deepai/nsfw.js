@@ -1,0 +1,36 @@
+import Axios from "axios";
+import FormData from "form-data";
+import fs from "fs";
+import { randomize } from "../../Helper/index.js";
+
+const URL_API = "https://api.deepai.org/api/nsfw-detector";
+
+export const isNsfw = (input, filename) =>
+	new Promise(async (resolve) => {
+		try {
+			input = fs.writeFileSync(filename, input);
+			input = fs.createReadStream(filename);
+			const KEY = randomize(process.env.DEEP_KEY.split("\n"));
+			const form = new FormData();
+			const axiosInstance = Axios.create({ headers: { "client-library": "deepai-js-client" } });
+			axiosInstance.defaults.headers.common["api-key"] = KEY;
+			const reqOptions = {
+				withCredentials: true,
+			};
+			form.append("image", input);
+			reqOptions.headers = form.getHeaders();
+			const {
+				data: { output },
+			} = await axiosInstance.post(URL_API, form, reqOptions);
+			const outputPercentageNSFW = output?.detections?.some((v) => Number(v.confidence) > 0.6) || output.nsfw_score >= 0.4;
+			if (outputPercentageNSFW) {
+				fs.unlinkSync(filename);
+				return resolve(true);
+			}
+			fs.unlinkSync(filename);
+			resolve(false);
+		} catch (err) {
+			fs.unlinkSync(filename);
+			resolve(false);
+		}
+	});

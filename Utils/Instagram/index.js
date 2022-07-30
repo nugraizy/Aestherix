@@ -1,0 +1,13 @@
+export { searchHashtag } from "./instaHashtag.js";
+export { getHighlights } from "./instaHighlights.js";
+export { getPost } from "./instaPost.js";
+export { getUser } from "./instaProfile.js";
+export { getReels } from "./instaReel.js";
+export { getReels2 } from "./instaReel2.js";
+export { searchUser } from "./instaSearch.js";
+export { getStory } from "./instaStory.js";
+export { getStory2 } from "./instaStory2.js";
+export { getIgtv } from "./instaTV.js";
+export { getIgtv2 } from "./instaTV2.js";
+export { getStory3 } from "./instaStory3.js";
+export { getHighlights2 } from "./instaHighlights2.js";

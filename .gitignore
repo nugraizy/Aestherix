@@ -1,0 +1,8 @@
+.env
+node_modules/
+Session/*.json
+package-lock.json
+Session/*.json
+Databases/Groups/
+Databases/Users/
+Media Files/Connection Databases/
