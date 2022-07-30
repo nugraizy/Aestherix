@@ -1,4 +1,4 @@
-import { readJSON, writeJSON } from "./index.js";
+import { readJSON, writeJSON } from "../../index.js";
 
 export const checkJSON = (dari) => {
 	const data = readJSON("./Databases/Groups/settingsManager.json");
@@ -15,7 +15,7 @@ export const pushDefaultSettings = (dari) => {
 	if (index == -1) {
 		data.push({
 			[dari]: {
-				URLSender: [],
+				banned: [],
 				welcome1: "disable",
 				welcome1msg: "Welcome to {groupName}",
 				welcome2: "disable",
@@ -30,6 +30,7 @@ export const pushDefaultSettings = (dari) => {
 				antiSpam: "disable",
 				antiVirus: "disable",
 				autoReader: "disable",
+				antiNSFW: "disable",
 				games: "disable",
 			},
 		});

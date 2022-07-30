@@ -90,6 +90,9 @@ export {
 	convertSecondstoTime,
 } from "./Helper/index.js";
 export {
+	gifToMp4,
+	isNsfw,
+	createImage,
 	mergeVideoWithAudio,
 	searchDeviantArt,
 	downloadDeviantArt,

@@ -1,4 +1,4 @@
-import { checkAfk, getAfk, setAfk } from "../../Helper/Misc/AFK/afk.js";
+import { setAfk } from "../../Helper/index.js";
 
 export default {
 	name: "afk",
@@ -12,6 +12,6 @@ export default {
 	async run({ message, from, query, isGroup, sender, pushname }, client) {
 		if (!isGroup) return client[botNum].reply({ from, quoted: message }, "This command is only available in group chat.");
 		setAfk(sender, from, query, pushname);
-		await client[botNum].sendMessage(from, { text: `@${sender.split("@")[0]} is now AFK.`, contextInfo: { mentionedJid: [sender] } }, { quoted: message });
+		await client[botNum].sendMessage(from, { text: `@${sender.split("@")[0]} is now AFK.`, mentions: [sender] }, { quoted: message });
 	},
 };

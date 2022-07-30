@@ -1,5 +1,6 @@
 export { attp, ttp, textStory, memeGenerator, trigger } from "./Canvas/index.js";
-export { getSpinner, scheme, UA, checkAfk, getAfk, setAfk, deleteAfk } from "./Misc/index.js";
+export { getSpinner, scheme, UA } from "./Misc/index.js";
+export { checkAfk, getAfk, setAfk, deleteAfk, checkUser, checkLimit, addUser, indexUser, updateUser, addLimit, addAllLimit, resetAllLimit } from "./Groups/index.js";
 export {
 	extractZalgo,
 	uploadToTelegraph,
@@ -8,14 +9,6 @@ export {
 	getAverage,
 	romanize,
 	reassign,
-	checkUser,
-	addUser,
-	indexUser,
-	updateUser,
-	addLimit,
-	addAllLimit,
-	resetAllLimit,
-	checkLimit,
 	download,
 	clampFloat,
 	distordFX,

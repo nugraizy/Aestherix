@@ -1,9 +1,8 @@
 import moment from "moment-timezone";
 import similarity from "similarity";
 import { delay } from "@adiwajshing/baileys";
-import { INFOLOG, color, reassign, addLimit, getTimeSince } from "../../Helper/Modules/index.js";
+import { INFOLOG, color, reassign, addLimit, getTimeSince, checkAfk, getAfk, deleteAfk } from "../../Helper/index.js";
 import { runtime } from "../../connect.js";
-import { checkAfk, getAfk, deleteAfk } from "../../Helper/Misc/index.js";
 let STATS_OFFLINE = true;
 const EVALY = ["/>", "$>", "=>", "!>"];
 
@@ -33,7 +32,7 @@ export default {
 		if (checkAfk(message.sender, message.from)) {
 			const { reasons, since } = getAfk(message.sender, message.from);
 			const time = getTimeSince(since);
-			await client[botNum].sendMessage(message.from, { text: `@${message.sender.split("@")[0]} is AFK since ${time} ago. Now they are out from AFK. Reason: ${reasons}`, contextInfo: { mentionedJid: [message.sender] } }, { quoted: message.message });
+			await client[botNum].sendMessage(message.from, { text: `@${message.sender.split("@")[0]} is AFK since ${time} ago. Now they are out from AFK. Reason: ${reasons}`, mentions: [message.sender] }, { quoted: message.message });
 			deleteAfk(message.sender, message.from);
 		}
 		if (message.bodyQuoted && checkAfk(message.mediaData.participant)) {
@@ -195,5 +194,7 @@ export default {
 		(await import("../Game Handlers/sambungKata.js")).default.handler(message, client, message);
 		(await import("./anonymousMessage.js")).default.handler(message, client);
 		(await import("../Misc/groupURL.js")).default.handler(message, client);
+		(await import("../Misc/groupURL.js")).default.handler(message, client);
+		(await import("../Misc/antiNSFW.js")).default.handler(message, client);
 	},
 };

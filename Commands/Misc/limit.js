@@ -1,4 +1,4 @@
-import { checkLimit } from "../../Helper/Modules/index.js";
+import { checkLimit } from "../../Helper/index.js";
 
 export default {
 	name: "limit",

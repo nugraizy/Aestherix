@@ -11,14 +11,17 @@ export default {
 	status: "enable",
 	async run({ from, message }, client) {
 		const stopping = stop(from, 0, client);
-		if (typeof stopping == "boolean" && !stopping) {
-			return await client[botNum].reply({ from, quoted: message }, "You are not in a search!");
-		}
-		if (typeof stopping == "object" && stopping.partner2) {
-			await client[botNum].reply({ quoted: message, from: stopping.partner1 }, "You've stopped the chat!");
-			await client[botNum].sendMessage(stopping.partner2, { text: "Your partner stoped the chat!" });
-		} else {
+		try {
+			if (typeof stopping == "boolean" && !stopping) {
+				return await client[botNum].reply({ from, quoted: message }, "You are not in a search!");
+			}
+			if (typeof stopping == "object" && stopping.partner2) {
+				await client[botNum].reply({ quoted: message, from: stopping.partner1 }, "You've stopped the chat!");
+				return await client[botNum].sendMessage(stopping.partner2, { text: "Your partner stoped the chat!" });
+			}
 			await client[botNum].reply({ from, quoted: message }, `You already searching for a partner!\nPlease wait for ${stopping.seconds}s`);
+		} catch (err) {
+			log(err);
 		}
 	},
 };

@@ -24,7 +24,7 @@ export default {
 			await client[botNum].reply({ quoted: searching.messages1, from: searching.partner1 }, "Your partner is found!");
 			await client[botNum].reply({ quoted: searching.messages2, from: searching.partner2 }, "Your partner is found!");
 		} else if (searching.status == "chatting") {
-			return await client[botNum].reply({ from, quoted: message }, "You are already chatting with someone!");
+			await client[botNum].reply({ from, quoted: message }, "You are already chatting with someone!");
 		} else {
 			await client[botNum].reply({ from, quoted: message }, "You are already searching for a partner!");
 		}

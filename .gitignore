@@ -1,6 +1,10 @@
 .env
+.gitignore
 Config/*.json
 node_modules/
 Session/*.json
 package-lock.json
-Session/Session-debug.json
+Session/*.json
+Databases/Groups/
+Databases/Users/
+Media Files/Connection Databases/

@@ -48,7 +48,7 @@ ${game.BOARD.map((v, i) => {
 			if (!query) {
 				const game = new TicTacToe(sender, undefined, true);
 				if ("error" in game) return client[botNum].reply({ from, quoted: message }, game.error);
-				await client[botNum].sendMessage(from, { text: capt(game, false), contextInfo: { mentionedJid: [game.PLAYER_1, game.PLAYER_2] } }, { quoted: message });
+				await client[botNum].sendMessage(from, { text: capt(game, false), mentions: [game.PLAYER_1, game.PLAYER_2] }, { quoted: message });
 			}
 			if (/[1-9]/.test(query)) {
 				const game = GetTicTacToeSession(sender);
@@ -56,18 +56,18 @@ ${game.BOARD.map((v, i) => {
 				const move = game.playMove(query, sender);
 				if ("error" in move) return client[botNum].reply({ from, quoted: message }, move.error);
 				if (move.status == "WINNER" || move.status == "DRAW") {
-					await client[botNum].sendMessage(from, { text: capt(move, true), contextInfo: { mentionedJid: [game.PLAYER_1, game.PLAYER_2] } }, { quoted: message });
+					await client[botNum].sendMessage(from, { text: capt(move, true), mentions: [game.PLAYER_1, game.PLAYER_2] }, { quoted: message });
 					return DeleteTicTacToeSession(sender);
-				} else await client[botNum].sendMessage(from, { text: capt(move), contextInfo: { mentionedJid: [game.PLAYER_1, game.PLAYER_2] } }, { quoted: message });
+				} else await client[botNum].sendMessage(from, { text: capt(move), mentions: [game.PLAYER_1, game.PLAYER_2] }, { quoted: message });
 				if (move.PLAYER_TURN == "Void Bot") {
 					const botGames = GetTicTacToeSession(sender);
 					await client[botNum].reply({ from, quoted: message }, "Void Bot's TURN");
 					await delay(1000);
 					const botMove = botGames.playMove(botGames.displayPlayBoard(), "Void Bot", sender);
 					if (botMove.status == "WINNER" || botMove.status == "DRAW") {
-						await client[botNum].sendMessage(from, { text: capt(botMove, true), contextInfo: { mentionedJid: [botGames.PLAYER_1, botGames.PLAYER_2] } }, { quoted: message });
+						await client[botNum].sendMessage(from, { text: capt(botMove, true), mentions: [botGames.PLAYER_1, botGames.PLAYER_2] }, { quoted: message });
 						return DeleteTicTacToeSession(sender);
-					} else await client[botNum].sendMessage(from, { text: capt(botMove, false), contextInfo: { mentionedJid: [botGames.PLAYER_1, botGames.PLAYER_2] } }, { quoted: message });
+					} else await client[botNum].sendMessage(from, { text: capt(botMove, false), mentions: [botGames.PLAYER_1, botGames.PLAYER_2] }, { quoted: message });
 				}
 			}
 		} catch (error) {

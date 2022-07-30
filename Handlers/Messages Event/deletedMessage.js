@@ -83,7 +83,7 @@ Type : ${type}
 Time : ${moment.unix(timeStamp).format("HH:mm:ss DD/MM/YYYY")}
 Message : ${body ? body : "Unknown"}${quotedMessage}
 `.trim();
-							client[botNum].sendMessage(from, { text: stringDeleted, contextInfo: { mentionedJid: options.contextInfo.mentionedJid } }, options);
+							client[botNum].sendMessage(from, { text: stringDeleted, mentions: options.contextInfo.mentionedJid }, options);
 						}
 						break;
 					case "stickerMessage":
@@ -113,7 +113,7 @@ Time : ${moment.unix(timeStamp).format("HH:mm:ss DD/MM/YYYY")}
 Size : ${fileSize}
 Caption : ${body ? body : "Unknown"}${quotedMessage}
 `.trim();
-							await client[botNum].sendMessage(from, { image: readBuffer(image), caption: stringDeleted, contextInfo: { mentionedJid: options.contextInfo.mentionedJid } }, options);
+							await client[botNum].sendMessage(from, { image: readBuffer(image), caption: stringDeleted, mentions: options.contextInfo.mentionedJid }, options);
 							unlinkFile(image);
 						}
 						break;
@@ -128,7 +128,7 @@ Time : ${moment.unix(timeStamp).format("HH:mm:ss DD/MM/YYYY")}
 Size : ${fileSize}
 Caption : ${body ? body : "Unknown"}${quotedMessage}
 `.trim();
-							await client[botNum].sendMessage(from, { video: readBuffer(video), caption: stringDeleted, contextInfo: { mentionedJid: options.contextInfo.mentionedJid } }, options);
+							await client[botNum].sendMessage(from, { video: readBuffer(video), caption: stringDeleted, mentions: options.contextInfo.mentionedJid }, options);
 							unlinkFile(video);
 						}
 						break;

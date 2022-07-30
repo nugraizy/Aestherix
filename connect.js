@@ -131,7 +131,6 @@ const start = async () => {
 		const from = presence.id;
 		const participant = Object.keys(presence.presences)[0];
 		const presences = presence.presences[participant].lastKnownPresence;
-		console.log(presence);
 		if (presences == "composing") {
 			const Handler = (await import("./Handlers/Message Presence/composing.js")).default.handler;
 			Handler(client, from, participant);

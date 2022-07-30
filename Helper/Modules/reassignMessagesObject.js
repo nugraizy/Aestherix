@@ -3,7 +3,7 @@ import moment from "moment-timezone";
 import PhoneNumber from "awesome-phonenumber";
 import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined, isURL, writeBuffer, delaySync } from "./index.js";
 import { NO_DATA, ZERO, S_WHATSAPP_NET, UPDATE } from "../Misc/WAData/index.js";
-import { checkJSON, pushDefaultSettings } from "./groupDefaultSettings.js";
+import { checkJSON, pushDefaultSettings } from "../Groups/Settings/index.js";
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 export const reassign = async (m, client, store, search) => {
 	try {
@@ -340,15 +340,15 @@ export const reassign = async (m, client, store, search) => {
 				for (const container of containers) {
 					try {
 						if (!force && adminGroups.includes(container) && update == "REMOVE") {
-							await client[botNum].sendMessage(dari, { text: `You can't ${update} @${container.split("@")[0]} because it's admin group.\nadd --force flag to force update admin`, contextInfo: { mentionedJid: [container] } }, { quoted: message });
+							await client[botNum].sendMessage(dari, { text: `You can't ${update} @${container.split("@")[0]} because it's admin group.\nadd --force flag to force update admin`, mentions: [container] }, { quoted: message });
 							continue;
 						}
 						if (adminGroups.includes(container) && update == "PROMOTE") {
-							await client[botNum].sendMessage(dari, { text: `You can't ${update} @${container.split("@")[0]} because they already an admin group.`, contextInfo: { mentionedJid: [container] } }, { quoted: message });
+							await client[botNum].sendMessage(dari, { text: `You can't ${update} @${container.split("@")[0]} because they already an admin group.`, mentions: [container] }, { quoted: message });
 							continue;
 						}
 						if (!adminGroups.includes(container) && update == "DEMOTE") {
-							await client[botNum].sendMessage(dari, { text: `You can't ${update} @${container.split("@")[0]} because they already a member group.`, contextInfo: { mentionedJid: [container] } }, { quoted: message });
+							await client[botNum].sendMessage(dari, { text: `You can't ${update} @${container.split("@")[0]} because they already a member group.`, mentions: [container] }, { quoted: message });
 							continue;
 						}
 						const response = await client[botNum][UPDATE[update]](dari, [container], update.toLowerCase());

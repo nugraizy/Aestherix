@@ -31,7 +31,7 @@ export const search = async (key, timer, client, message) => {
 				return;
 			}
 			if (second <= 0) {
-				clients[botNum].reply(partner1, "Your partner is not found! Try again later!", partner1Message);
+				clients[botNum].reply({ from: partner1, quoted: partner1Message }, "Your partner is not found! Try again later!");
 				anonymous.delete(id);
 				DeleteIntervals(intervals["anonymous"].get(id), intervals["anonymous"], id);
 				return;

@@ -33,7 +33,7 @@ Guess the word for given clue :
 Word : ${data.value}
 Clue : ${data.clue}
 Turn : @${data.turn.split("@")[0]}`,
-					contextInfo: { mentionedJid: [data.turn] },
+					mentions: [data.turn],
 				});
 			}
 		}

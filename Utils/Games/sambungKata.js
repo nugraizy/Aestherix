@@ -101,12 +101,12 @@ export class SambungKata {
 			dataGame.timer = second;
 			const { timer } = CheckIntervals(data);
 			if (timer == 10) {
-				clients[botNum].sendMessage(group, { text: `Time's almost over! 10 second @${dataGame.turn.split("@")[0]}`, contextInfo: { mentionedJid: [dataGame.turn] } });
+				clients[botNum].sendMessage(group, { text: `Time's almost over! 10 second @${dataGame.turn.split("@")[0]}`, mentions: [dataGame.turn] });
 			}
 			if (timer <= 0) {
 				DeleteIntervals(data, intervals["word"], group);
 				const winner = dataGame.changeTurn();
-				clients[botNum].sendMessage(group, { text: `Time's up! The winner is : @${winner.split("@")[0]}`, contextInfo: { mentionedJid: [winner] } });
+				clients[botNum].sendMessage(group, { text: `Time's up! The winner is : @${winner.split("@")[0]}`, mentions: [winner] });
 				games["word"].delete(games["word"].get(group));
 			}
 		});
@@ -187,12 +187,12 @@ export class SambungKata {
 			dataGame.timer = second;
 			const { timer } = CheckIntervals(data);
 			if (timer == 10) {
-				clients[botNum].sendMessage(group, { text: `Time's almost over! 10 second @${dataGame.turn.split("@")[0]}`, contextInfo: { mentionedJid: [dataGame.turn] } });
+				clients[botNum].sendMessage(group, { text: `Time's almost over! 10 second @${dataGame.turn.split("@")[0]}`, mentions: [dataGame.turn] });
 			}
 			if (timer <= 0) {
 				DeleteIntervals(data, intervals["word"], group);
 				const winner = dataGame.changeTurn();
-				clients[botNum].sendMessage(group, { text: `Time's up! The winner is : @${winner.split("@")[0]}`, contextInfo: { mentionedJid: [winner] } });
+				clients[botNum].sendMessage(group, { text: `Time's up! The winner is : @${winner.split("@")[0]}`, mentions: [winner] });
 				games["word"].delete(group);
 			}
 		});

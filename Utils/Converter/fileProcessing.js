@@ -30,6 +30,26 @@ export const toMp4 = (input, sender) =>
 		}
 	});
 
+export const gifToMp4 = (input, sender) =>
+	new Promise(async (resolve, reject) => {
+		try {
+			const time = moment().unix();
+			exec(`ffmpeg -i "${input}" -movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" "./Temporary Files/${sender}${time}.mp4"`, async (err, stdout, stderr) => {
+				if (err) {
+					if (!isURL(input)) unlinkFile(input);
+					log(err);
+					reject(err);
+				}
+				const buffer = readBuffer(`./Temporary Files/${sender}${time}.mp4`);
+				unlinkFile(`./Temporary Files/${sender}${time}.mp4`);
+				resolve(buffer);
+			});
+		} catch (err) {
+			log(err);
+			reject(err);
+		}
+	});
+
 export const toOpus = (ext, opts = {}) =>
 	new Promise(async (resolve, reject) => {
 		let container;

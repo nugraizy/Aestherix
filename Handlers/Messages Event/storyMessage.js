@@ -37,7 +37,7 @@ export default {
 			`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
 			`${color(message.body == "Unknown body" ? "Bug Story" : message.body?.trim()?.replace("\n", "")?.substr(0, 20), "#05ffa1")}`,
 			`${color(message.from, "#b967ff")}`,
-			`${color("type", "#ff71ce")} : Story ${color(message.type, "#b967ff")}`,
+			`${color("type", "#ff71ce")} ${color(`: Story`, "#b967ff")} ${color(message.type, "#b967ff")}`,
 			`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
 		);
 	},
