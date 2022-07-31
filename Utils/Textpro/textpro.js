@@ -1,5 +1,8 @@
 import Axios from "axios";
 import FormData from "form-data";
+import fs from "fs";
+import cheerio from "cheerio";
+const cheerioLOAD = (_) => cheerio.load(_);
 
 export const textpro = (api, texts) =>
 	new Promise(async (resolve, reject) => {
@@ -10,8 +13,7 @@ export const textpro = (api, texts) =>
 			let token = $('input[name="token"]').attr("value");
 			const howManyText = $("li.item-content").get().length;
 			const cookie = headers["set-cookie"][0].split(";")[0];
-			const textSplitted = texts.split(" ");
-			const textsParsedByLength = [textSplitted.slice(0, Math.round(textSplitted.length / howManyText)).join(" "), textSplitted.slice(-Math.abs(Math.floor(textSplitted.length / howManyText))).join(" ")];
+			const textsParsedByLength = split(texts, howManyText);
 			for (const text of textsParsedByLength) {
 				form.append("text[]", text);
 			}
@@ -22,7 +24,7 @@ export const textpro = (api, texts) =>
 			data = (
 				await Axios.post(api, form, {
 					headers: {
-						cookie,
+						Cookie: cookie,
 						...form.getHeaders(),
 					},
 				})
@@ -45,7 +47,7 @@ export const textpro = (api, texts) =>
 			data = (
 				await Axios.post(CREATE_URL(), form, {
 					headers: {
-						cookie,
+						Cookie: cookie,
 						...form.getHeaders(),
 					},
 				})
@@ -60,4 +62,60 @@ const CREATE_URL = () => "https://textpro.me/effect/create-image";
 const NO_VAL = (v) => v == "" || v == undefined || v == null || v == false;
 const parseUrlDownload = ({ image_code, session_id, code, image }) => {
 	return { preview: `https://textpro.me${image}`, dl: `https://textpro.me/save-images/${image_code}/${session_id}/${code}` };
+};
+const split = (text, len) => {
+	if (len == 1) return [text];
+	const arr = text.split(/\s+/);
+	let length = len;
+	len = arr.length;
+	const out = [];
+	let i = 0;
+	let size;
+	if (len % length === 0) {
+		size = Math.floor(len / length);
+		while (i < len) {
+			out.push(arr.slice(i, (i += size)));
+		}
+	} else {
+		while (i < len) {
+			size = Math.ceil((len - i) / length--);
+			out.push(arr.slice(i, (i += size)));
+		}
+	}
+	return out.map((v) => v.join(" "));
+};
+
+let BASE = (page) => `https://textpro.me/home-p${page}`;
+const scrapeUrl = async (page) => {
+	if (!fs.existsSync("./textprourl.json")) fs.writeFileSync("./textprourl.json", JSON.stringify([]));
+	const dataJSON = JSON.parse(fs.readFileSync("./textprourl.json"));
+	if (page == 13) return console.log("scraping is done. saved in './textprourl.json' total page scraped :", page);
+	console.log("scraping page", page);
+	const { data } = await Axios.get(BASE(page));
+	const $ = cheerioLOAD(data);
+	let container = [];
+	$("div.col-md-12 > div.row")
+		.find("div.col-md-4.col-sm-6")
+		.each((i, e) => {
+			const url = `https://textpro.me/${$(e).find("a").attr("href")}`;
+			const name = url
+				.replace("https://textpro.me/", "")
+				.replace(/-/g, " ")
+				.replace(/[^a-zA-Z0-9\s]/g, "")
+				.replace(/([0-9](d|D)?|create|a |style|(text|effect(s)?)|artistic|write on|cool|on the|realistic( on the)?|html|online|for|free|logo|)/gi, "")
+				.replace(/ +(?= )/g, "")
+				.trimStart()
+				.trimEnd();
+			dataJSON.push({ effectName: name, url });
+			container.push({ effectName: name, url });
+			fs.writeFileSync("./textprourl.json", JSON.stringify(dataJSON, undefined, 2));
+		});
+	console.log("page ", page, "scraped. result :\n" + container.map((v) => `effect name : ${v.effectName} url : ${v.url}`).join("\n"));
+	container = [];
+	if (page != 13) {
+		page++;
+	}
+	// import delay from baileys
+	await delay(2000);
+	await scrapeUrl(page);
 };
