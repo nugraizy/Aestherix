@@ -1,8 +1,13 @@
 import fs from "fs";
 import * as jsSplit from "js-split";
 import yargsParser from "yargs-parser";
+import Axios from "axios";
+import sharp from "sharp";
+import imageSize from "image-size";
+import path from "path";
 import { randomize } from "../../Helper/index.js";
-import { textpro } from "../../Utils/Textpro/index.js";
+import { textpro, convertMediaToSticker } from "../../Utils/index.js";
+import { __dirname } from "../../connect.js";
 const dataJSON = JSON.parse(fs.readFileSync("./Databases/Textpro/textprourl.json"));
 const defaulType = "image";
 
@@ -15,7 +20,7 @@ export default {
 	cooldown: 4,
 	limit: 3,
 	status: "enable",
-	async run({ from, message, query, args, cmd }, client) {
+	async run({ from, message, query, args, cmd, filename, prettyNumber }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a query");
 		try {
 			const {
@@ -77,9 +82,23 @@ Use ${cmd} ${randomize(numbers)}`;
 					client[botNum].reply({ from, quoted: message }, `something went wrong:\n\n${result.error}`);
 					continue;
 				}
-				if (isImage) await client[botNum].sendMessage(from, { image: { url: result.dl } });
-				else if (isStickers) await client[botNum].sendMessage(from, { sticker: { url: result.dl } });
-				else await client[botNum].sendMessage(from, { [defaulType]: { url: result.dl } });
+				const { data } = await Axios.get(result.dl, {
+					responseType: "arraybuffer",
+				});
+				const { width, height } = imageSize(data);
+				const buffer = isStickers
+					? await sharp(data)
+							.extract({ width: width - 40, height: height - 40, top: 0, left: 0 })
+							.toFormat("webp")
+							.toFile(path.join(__dirname, `Temporary Files/${filename}.webp`))
+					: await sharp(data)
+							.extract({ width: width - 40, height: height - 40, left: 0, top: 0 })
+							.toBuffer();
+				if (isImage) await client[botNum].sendMessage(from, { image: buffer }, { quoted: message });
+				else if (isStickers) {
+					const sticker = await convertMediaToSticker(path.join(__dirname, `Temporary Files/${filename}.webp`), prettyNumber, "image/webp");
+					await client[botNum].sendMessage(from, { sticker }, { quoted: message });
+				} else await client[botNum].sendMessage(from, { [defaulType]: buffer }, { quoted: message });
 			}
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";

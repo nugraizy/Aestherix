@@ -1,6 +1,7 @@
 import Axios from "axios";
 import FormData from "form-data";
 import fs from "fs";
+import { randomize } from "../../Helper/index.js";
 
 export const textpro = (api, texts) =>
 	new Promise(async (resolve, reject) => {
@@ -15,7 +16,13 @@ export const textpro = (api, texts) =>
 			for (const text of textsParsedByLength) {
 				form.append("text[]", text);
 			}
-			log(texts);
+			let tokenStyle = "";
+			tokenStyle = randomize(
+				$('input[name="radio0[radio]"]')
+					.map((i, el) => $(el).attr("value"))
+					.get(),
+			);
+			if (tokenStyle) form.append("radio0[radio]", tokenStyle);
 			form.append("submit", "Go");
 			form.append("token", token);
 			form.append("build_server", "https://textpro.me");
@@ -41,6 +48,7 @@ export const textpro = (api, texts) =>
 			}
 			form.append("submit", "Go");
 			form.append("token", token);
+			if (tokenStyle) form.append("radio0[radio]", tokenStyle);
 			form.append("build_server", "https://textpro.me");
 			form.append("build_server_id", 1);
 			data = (
