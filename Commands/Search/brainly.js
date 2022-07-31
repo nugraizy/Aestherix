@@ -1,9 +1,10 @@
+import yargsParser from "yargs-parser";
 import { brainlySearch } from "../../Utils/Brainly/index.js";
 
 export default {
 	name: "brainly",
 	description: "Search answers from brainly",
-	usage: "!brainly <query> --<?lang> (id, us, es, ru, ro, pt, tr, ph, pl, hi) --<?count> (1-30)",
+	usage: "!brainly <query> -<?lang> (id, us, es, ru, ro, pt, tr, ph, pl, hi) -<?count> (1-30)",
 	category: "Search",
 	aliases: ["brainli", "brainly-search", "tugas"],
 	limit: 4,
@@ -11,23 +12,15 @@ export default {
 	status: "enable",
 	async run({ query, from, message }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query");
-		const parseOptions = query.includes("--") ? query.split("--") : query;
+		const parseOptions = yargsParser(query, {
+			configuration: {
+				"short-option-groups": false,
+			},
+		});
 		const options = { lang: undefined, count: undefined };
-		if (Array.isArray(parseOptions)) {
-			query = parseOptions[0];
-			options.lang = parseOptions
-				.find((item) => {
-					if (/^([a-zA-Z]{0,2})$/g.test(item.trim())) return item;
-				})
-				?.trim();
-			options.count = Number(
-				parseOptions
-					.find((item) => {
-						if (/[0-9]/.test(item.trim())) return item;
-					})
-					?.trim(),
-			);
-		}
+		delete parseOptions._;
+		options.lang = Objec.keys(parseOptions).find((v) => /\w{2,2}/i.test(v))?.[0] || undefined;
+		options.count = Objec.keys(parseOptions).find((v) => /\d{2,2}/i.test(v))?.[0] || undefined;
 		try {
 			const brainly = await brainlySearch(query, options);
 			if ("error" in brainly) return client[botNum].reply({ from, quoted: message }, brainly.error);

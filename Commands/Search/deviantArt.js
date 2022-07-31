@@ -39,7 +39,10 @@ Void Bot     ${index + 1}/${data.length}`,
 		queries = removeDuplicatesArray(queries);
 		for (const querie of queries) {
 			const result = await searchDeviantArt(querie.trim());
-			if ("error" in result) return client[botNum].reply({ from, quoted: message }, result.error);
+			if ("error" in result) {
+				await client[botNum].reply({ from, quoted: message }, result.error);
+				continue;
+			}
 			await client[botNum].sendMessage(
 				from,
 				{

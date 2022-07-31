@@ -31,6 +31,7 @@ import center from "center-align";
 import moment from "moment-timezone";
 import { getSpinner } from "./Helper/Misc/Spinner/spinners.js";
 import { readJSON, INFOLOG, color, romanize, ERRLOG } from "./Helper/Modules/functions.js";
+import { createExif } from "./Utils/Misc/createExif.js";
 
 const { default: makeWASocket, DisconnectReason, makeInMemoryStore, useSingleFileAuthState, DEFAULT_CONNECTION_CONFIG } = baileys;
 const moduleURL = new URL(import.meta.url);
@@ -83,6 +84,7 @@ const start = async () => {
 	if (OPTIONS.help) return log(cli.help);
 	await loadCommands();
 	await loadEveryCommand();
+	createExif("Made by Nanda", "Void bot");
 	const CONNECTION_CONFIG = { printQRInTerminal: true, version: DEFAULT_CONNECTION_CONFIG.version, logger: P({ level: OPTIONS.trace ? "trace" : "fatal" }), auth: state, markOnlineOnConnect: false };
 	const Client = makeWASocket(CONNECTION_CONFIG);
 	store.bind(Client.ev);
@@ -124,7 +126,7 @@ const start = async () => {
 	Client.ev.on("messages.update", async (message) => {
 		const Handler = (await import("./Handlers/Messages Event/deletedMessage.js")).default.handler;
 		message = store.messages[message[0].key.remoteJid]?.get(message[0].key.id);
-		Handler(client, message, store);
+		Handler(client, message, false, store);
 	});
 
 	Client.ev.on("presence.update", async (presence) => {

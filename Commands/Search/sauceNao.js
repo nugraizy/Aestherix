@@ -25,10 +25,11 @@ export default {
 				return client[botNum].reply({ from, quoted: message }, result.error);
 			}
 			if (result.title == "") return await client[botNum].reply({ from, quoted: message }, `Can't discover what anime is this. Try moe instead.`);
-			const capt = `\`\`\` • What Anime ? (powered by sauce.nao)\`\`\`
+			const capt = `\`\`\` • What Anime ?\`\`\`
 Title : ${result.title}
 Description : ${result.description}
-Similarity : ${result.similarity}%`;
+Similarity : ${result.similarity}%
+Powered by sauce.nao`;
 			await client[botNum].reply({ from, quoted: message }, capt.trim());
 			if (isMediaImage) fs.unlinkSync(media);
 		} catch (err) {

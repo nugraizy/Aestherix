@@ -2,19 +2,18 @@ import path from "path";
 import moment from "moment-timezone";
 import { CheckIntervals, DeleteIntervals } from "../../Utils/Misc/index.js";
 import { __dirname } from "../../connect.js";
-import { createExif } from "../../Utils/Misc/index.js";
 import { convertMediaToSticker } from "../../Utils/Converter/index.js";
 import { getFilesize, readBuffer, unlinkFile } from "../../Helper/Modules/index.js";
 import { reassign } from "../../Helper/Modules/reassignMessagesObject.js";
 
 export default {
-	async handler(client, message) {
+	async handler(client, message, fetches) {
 		try {
 			if (message == undefined) return;
-			message = await reassign(JSON.parse(JSON.stringify(message)), client);
+			message = await reassign(JSON.parse(JSON.stringify(message)), client, false, true);
 			if ("error" in message) return;
 			const { from, mention: mentioning, timeStamp, sender, body, pushname, extractMediaData, filename, prettyNumber, isBaileys, isFromMe } = message;
-			const messages = message?.message;
+			const messages = message?.message?.message;
 			if (!messages) return;
 			const type = Object.keys(messages)[0];
 			if (isBaileys) return;
@@ -26,7 +25,8 @@ export default {
 				DeleteIntervals(intervals["url"].get(sender).get(from), intervals["url"].get(sender), from);
 				return;
 			}
-			if (message[from]?.antiDelete == "enable") {
+			const stats = message[from]?.antiDelete == "enable" ? true : fetches ? true : false;
+			if (stats) {
 				const options = {
 					quoted: message.message,
 					contextInfo: {
@@ -72,7 +72,6 @@ export default {
 									: ""
 						  }`
 						: "";
-
 				switch (type) {
 					case "extendedTextMessage":
 					case "conversation":
@@ -88,18 +87,18 @@ Message : ${body ? body : "Unknown"}${quotedMessage}
 						break;
 					case "stickerMessage":
 						{
-							const file = await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`));
-							createExif("Made by Nanda", "Void bot");
-							const fileSize = getFilesize(file);
-							const sticker = await convertMediaToSticker(file, prettyNumber);
-							const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
+							client[botNum].downloadAndSaveMediaMessage(extractMediaData, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`).then(async (result) => {
+								const fileSize = getFilesize(result);
+								const sticker = await convertMediaToSticker(result, prettyNumber, undefined, extractMediaData.mimetype);
+								const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
 Name : ${pushname}			
 Type : ${type}
 Time : ${moment.unix(timeStamp).format("HH:mm:ss DD/MM/YYYY")}
 Size : ${fileSize}${quotedMessage}
 `.trim();
 
-							await client[botNum].sendMessage(from, { sticker }, options).then(() => client[botNum].sendMessage(from, { text: stringDeleted }, options));
+								await client[botNum].sendMessage(from, { sticker }, options).then(() => client[botNum].sendMessage(from, { text: stringDeleted }, options));
+							});
 						}
 						break;
 					case "imageMessage":

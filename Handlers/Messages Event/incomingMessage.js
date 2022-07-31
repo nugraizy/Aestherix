@@ -1,7 +1,7 @@
 import moment from "moment-timezone";
 import similarity from "similarity";
 import { delay } from "@adiwajshing/baileys";
-import { INFOLOG, color, reassign, addLimit, getTimeSince, checkAfk, getAfk, deleteAfk } from "../../Helper/index.js";
+import { INFOLOG, color, reassign, addLimit, getTimeSince, checkAfk, getAfk, deleteAfk, readJSON } from "../../Helper/index.js";
 import { runtime } from "../../connect.js";
 let STATS_OFFLINE = true;
 const EVALY = ["/>", "$>", "=>", "!>"];

@@ -1,4 +1,4 @@
-import fs, { readFile } from "fs";
+import fs from "fs";
 import { spawn, exec } from "child_process";
 import path from "path";
 import moment from "moment-timezone";
@@ -84,7 +84,7 @@ export const convertMediaToSticker = (filePath, sender, output, mimetype) =>
 				if (err) {
 					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);
 					unlinkFile(pathSticker);
-					reject(err);
+					reject(stderr);
 				}
 				const buffer = readBuffer(`${pathSticker}-done.webp`);
 				unlinkFile(`${pathSticker}-done.webp`);

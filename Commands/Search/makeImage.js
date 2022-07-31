@@ -14,7 +14,7 @@ export default {
 		try {
 			await client[botNum].reply({ from, quoted: message }, "Creating. Please wait...");
 			const result = await createImage(query);
-			const caption = `\`\`\` • A.I Image Generator (powered by deepai.org)\`\`\``;
+			const caption = `\`\`\` • A.I Image Generator\`\`\`\n\nPowered by deepai.org`;
 			await client[botNum].sendMessage(from, { image: { url: result }, caption }, { quoted: message });
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";

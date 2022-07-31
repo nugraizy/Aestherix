@@ -4,7 +4,6 @@ import _ from "lodash";
 import { pet } from "../../Utils/Converter/index.js";
 import { __dirname } from "../../connect.js";
 import { INFOLOG, color, readBuffer } from "../../Helper/Modules/index.js";
-import { createExif } from "../../Utils/Misc/index.js";
 
 const defaultOptions = {
 	output: "sticker",
@@ -23,7 +22,6 @@ export default {
 	status: "enable",
 	async run({ bodyQuoted, mention, isMediaImage, from, extractMediaData, mediaData, filename, prettyNumber, sender, query, message, stickerAble, typeQuoted, typeSticker }, client) {
 		if (mention.length == 0 && !isMediaImage) return client[botNum].reply({ from, quoted: message }, "Please mention or send/reply an image to pet");
-		createExif("Made by Nanda", "Void bot");
 		try {
 			const time = moment().format("HH:mm:ss DD/MM");
 			let options = {};

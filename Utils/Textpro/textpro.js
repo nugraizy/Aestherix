@@ -1,8 +1,6 @@
 import Axios from "axios";
 import FormData from "form-data";
 import fs from "fs";
-import cheerio from "cheerio";
-const cheerioLOAD = (_) => cheerio.load(_);
 
 export const textpro = (api, texts) =>
 	new Promise(async (resolve, reject) => {
@@ -17,6 +15,7 @@ export const textpro = (api, texts) =>
 			for (const text of textsParsedByLength) {
 				form.append("text[]", text);
 			}
+			log(texts);
 			form.append("submit", "Go");
 			form.append("token", token);
 			form.append("build_server", "https://textpro.me");
@@ -102,7 +101,7 @@ const scrapeUrl = async (page) => {
 				.replace("https://textpro.me/", "")
 				.replace(/-/g, " ")
 				.replace(/[^a-zA-Z0-9\s]/g, "")
-				.replace(/([0-9](d|D)?|create|a |style|(text|effect(s)?)|artistic|write on|cool|on the|realistic( on the)?|html|online|for|free|logo|)/gi, "")
+				.replace(/([0-9](d|D)?|create|a |style|(text|effect(s)?)|artistic|write on|cool|on the|realistic( on the)?|html|online|for|free|logo|status and quote with your photos|creation)/gi, "")
 				.replace(/ +(?= )/g, "")
 				.trimStart()
 				.trimEnd();

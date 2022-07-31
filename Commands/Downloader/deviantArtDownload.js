@@ -19,7 +19,10 @@ export default {
 				const regexs = regex(querie.trim());
 				if (!regexs.status) return client[botNum].reply({ from, quoted: message }, regexs.message);
 				const result = await downloadDeviantArt(regexs.message.trim());
-				if ("error" in result) return client[botNum].reply({ from, quoted: message }, result.error);
+				if ("error" in result) {
+					await client[botNum].reply({ from, quoted: message }, result.error);
+					continue;
+				}
 				await client[botNum].sendMessage(
 					from,
 					{

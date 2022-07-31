@@ -74,9 +74,9 @@ ${
 					from,
 					{
 						video: new Buffer.from(buffer, "base64"),
-						caption: `\`\`\` • What Anime ? (powered by trace.moe)\`\`\`\n\n${capt.trim()}`,
+						caption: `\`\`\` • What Anime ?\`\`\`\n\n${capt.trim()}`,
 						templateButtons: [{ urlButton: { displayText: "Image Source", url: large } }, { urlButton: { displayText: "Video Source", url: args.video } }, { urlButton: { displayText: "Anilist Source", url: siteUrl } }],
-						footer: "\t",
+						footer: "Powered by trace.moe",
 					},
 					{ quoted: message },
 				);
@@ -140,9 +140,9 @@ ${externalLinks
 				from,
 				{
 					video: new Buffer.from(buffer, "base64"),
-					caption: `\`\`\` • What Anime ? (powered by trace.moe)\`\`\`\n\n${capt.trim()}`,
+					caption: `\`\`\` • What Anime ?\`\`\`\n\n${capt.trim()}`,
 					templateButtons: [{ urlButton: { displayText: "Image Source", url: large } }, { urlButton: { displayText: "Video Source", url: result[0].video } }, { urlButton: { displayText: "Anilist Source", url: siteUrl } }],
-					footer: "\t",
+					footer: "Powered by trace.moe",
 				},
 				{ quoted: message },
 			);

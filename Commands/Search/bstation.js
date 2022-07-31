@@ -18,7 +18,10 @@ export default {
 			queries = removeDuplicatesArray(queries);
 			for (const querie of queries) {
 				const videos = await bilibiliSearchTV(querie.trim());
-				if ("error" in videos) return await client[botNum].reply({ from, quoted: message }, `${videos.error}\n${videos.cus_error}`);
+				if ("error" in videos) {
+					 await client[botNum].reply({ from, quoted: message }, `${videos.error}\n${videos.cus_error}`);
+					 continue
+				}
 				let i = 0;
 				const row = [];
 				for (const { title, aid, cover, source, author, view, duration, score } of videos) {

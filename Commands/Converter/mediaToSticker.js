@@ -3,7 +3,6 @@ import moment from "moment-timezone";
 import { convertMediaToSticker } from "../../Utils/Converter/index.js";
 import { INFOLOG, color } from "../../Helper/Modules/index.js";
 import { __dirname } from "../../connect.js";
-import { createExif } from "../../Utils/Misc/index.js";
 
 export default {
 	name: "sticker",
@@ -21,7 +20,6 @@ export default {
 		try {
 			client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`)).then(async (result) => {
 				try {
-					createExif("Made by Nanda", "Void bot");
 					const sticker = await convertMediaToSticker(result, prettyNumber, undefined, extractMediaData.mimetype);
 					await client[botNum].sendMessage(from, { sticker }, { quoted: message });
 					INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);

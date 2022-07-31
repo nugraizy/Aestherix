@@ -184,7 +184,7 @@ export const getRuntime = (time) => {
 	const uptime = time;
 	const date = new Date(uptime * 1000);
 	const container = [];
-	`${date.getUTCDate() - 1 > 0 ? container.push(`${date.getUTCDate() - 1} Day${data.getUTCDate() - 1 > 1 ? "s" : ""}`) : ""}${date.getUTCHours() > 0 ? container.push(`${date.getUTCHours()} Hour${date.getUTCHours() > 1 ? "s" : ""}`) : ""}${
+	`${date.getUTCDate() - 1 > 0 ? container.push(`${date.getUTCDate() - 1} Day${date.getUTCDate() - 1 > 1 ? "s" : ""}`) : ""}${date.getUTCHours() > 0 ? container.push(`${date.getUTCHours()} Hour${date.getUTCHours() > 1 ? "s" : ""}`) : ""}${
 		date.getUTCMinutes() > 0 ? container.push(`${date.getUTCMinutes()} Minute${date.getUTCMinutes() > 1 ? "s" : ""}`) : ""
 	}${date.getUTCSeconds() > 0 ? container.push(`${date.getUTCSeconds()} Second${date.getUTCSeconds() > 1 ? "s" : ""}`) : ""}`;
 	return container.join(", ");

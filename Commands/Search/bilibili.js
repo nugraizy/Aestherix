@@ -18,7 +18,10 @@ export default {
 			queries = removeDuplicatesArray(queries);
 			for (const querie of queries) {
 				const videos = await bilibiliSearchCOM(querie.trim());
-				if ("error" in videos) return await client[botNum].reply({ from, quoted: message }, `${videos.error}\n${videos.cus_error}`);
+				if ("error" in videos) {
+					await client[botNum].reply({ from, quoted: message }, `${videos.error}\n${videos.cus_error}`);
+					continue;
+				}
 				let i = 0;
 				for (const { title, author, author_id, like, share, duration, favorite, view, thumbnail, description, original_video_link, download_link, size } of videos) {
 					if (i == 3) break;

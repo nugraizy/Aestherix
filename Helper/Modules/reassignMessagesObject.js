@@ -5,11 +5,11 @@ import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined, isURL, wr
 import { NO_DATA, ZERO, S_WHATSAPP_NET, UPDATE } from "../Misc/WAData/index.js";
 import { checkJSON, pushDefaultSettings } from "../Groups/Settings/index.js";
 moment.tz.setDefault("Asia/Jakarta").locale("id");
-export const reassign = async (m, client, store, search) => {
+export const reassign = async (m, client, store, search, deleted) => {
 	try {
 		const SETTINGS = readJSON("./Config/settings.json");
 		if (m.message?.protocolMessage && m.message.protocolMessage.type == "REVOKE") return m;
-		if (!search) {
+		if (!search && deleted) {
 			if (m.message && m.messageTimestamp) {
 				if (moment(m.messageTimestamp * 1000).unix() < moment(moment().subtract("5", "seconds").valueOf()).unix()) return { error: "OLD MESSAGE" };
 			} else if (moment(JSON.parse(m.messageTimestamp * 1000)).unix() < moment(moment().subtract("5", "seconds").valueOf()).unix()) return { error: "OLD MESSAGE" };

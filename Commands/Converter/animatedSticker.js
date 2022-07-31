@@ -1,5 +1,6 @@
 import moment from "moment-timezone";
 import rgbcolor from "rgb-color";
+import yargsParser from "yargs-parser";
 import { attp } from "../../Helper/Canvas/index.js";
 import { INFOLOG, color } from "../../Helper/Modules/index.js";
 
@@ -7,41 +8,47 @@ export default {
 	name: "animatedsticker",
 	description: "Generate animated gif sticker",
 	category: "Converter",
-	usage: "!gittp <text> [--color] [--fonts]",
+	usage: "!gittp <text> [--color]",
 	aliases: ["gittp"],
 	cooldown: 5,
 	limit: 1,
 	status: "enable",
 	async run({ from, query, message, sender, prettyNumber, bodyQuoted }, client) {
 		try {
+			if (!query && !bodyQuoted) query = "Mana text nya?";
 			const time = moment().format("HH:mm:ss DD/MM");
-			const parseOptions = query.includes("--") ? query.split("--") : query;
-			let colors = [];
-			if (Array.isArray(parseOptions)) {
-				query = parseOptions[0];
-				colors.push(...parseOptions.slice(1));
-				for (const color of colors) {
+			let parseOptions = yargsParser(query, { configuration: { "short-option-groups": false } });
+			parseOptions = {
+				text: parseOptions._.join(" "),
+				color:
+					Object.keys(parseOptions)
+						.filter((v) => v !== "_")?.[0]
+						?.split(",") || [],
+			};
+			query = parseOptions.text;
+			if (parseOptions.color) {
+				for (const color of parseOptions.color) {
 					if (color.trim() == "rainbow") {
-						colors = ["3fffff", "3fff3f", "ff3fff", "ff3f3f", "3f3fff"];
+						parseOptions.color = ["3fffff", "3fff3f", "ff3fff", "ff3f3f", "3f3fff"];
 						break;
 					} else {
 						const check = rgbcolor(color.trim());
-						const index = colors.findIndex((v) => v == color);
+						const index = parseOptions.color.findIndex((v) => v == color);
 						if (check.isValid()) {
-							colors[index] = check.hex();
+							parseOptions.color[index] = check.hex();
 						} else {
-							colors.splice(index, 1);
+							parseOptions.color.splice(index, 1);
 						}
 					}
 				}
 			}
 			if (bodyQuoted) {
-				const { buffer } = await attp(sender, bodyQuoted, colors);
+				const { buffer } = await attp(sender, bodyQuoted, parseOptions.color);
 				await client[botNum].sendMessage(from, { sticker: new Buffer.from(buffer, "base64") }, { quoted: message });
 				return INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
 			}
 			if (query) {
-				const { buffer } = await attp(sender, query, colors);
+				const { buffer } = await attp(sender, query, parseOptions.color);
 				await client[botNum].sendMessage(from, { sticker: new Buffer.from(buffer, "base64") }, { quoted: message });
 				return INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
 			}

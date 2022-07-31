@@ -29,7 +29,7 @@ export default {
 						index + 1 !== data.length ? { quickReplyButton: { displayText: "Next Image", id: `.waifupic next ${args[2]} ${args[3]} ${data[index + 1]} ${JSON.stringify(data)}` } } : { quickReplyButton: { displayText: `Search More ${args[2].capitalize()}`, id: `.waifupic ${args[2]} -${args[3]}` } },
 						index !== 0 ? { quickReplyButton: { displayText: "Previous Image", id: `.waifupic prev ${args[2]} ${args[3]} ${data[index - 1]} ${JSON.stringify(data)}` } } : {},
 					],
-					footer: `(powered by waifu.pics)\nVoid Bot     ${index + 1}/${data.length}`,
+					footer: `Powered by waifu.pics\nVoid Bot     ${index + 1}/${data.length}`,
 				},
 				{ quoted: message },
 			);
@@ -46,7 +46,10 @@ export default {
 		queries = removeDuplicatesArray(queries);
 		for (const querie of queries) {
 			const result = await getWaifu(querie.trim(), nsfw ? "nsfw" : "sfw");
-			if ("error" in result) return client[botNum].reply({ from, quoted: message }, result.error);
+			if ("error" in result) {
+				await client[botNum].reply({ from, quoted: message }, result.error);
+				continue;
+			}
 			let buffer;
 			const isGif = result[0].endsWith("gif");
 			if (isGif) buffer = await gifToMp4(result[0], sender);
@@ -57,7 +60,7 @@ export default {
 					image: { url: result[0] },
 					caption: `\`\`\` • Waifu Pics \`\`\``,
 					templateButtons: [{ urlButton: { displayText: "Image Source", url: result[0] } }, { quickReplyButton: { displayText: "Next Image", id: `.waifupic next ${querie} ${nsfw ? "nsfw" : "sfw"} ${result[1]} ${JSON.stringify(result)}` } }],
-					footer: `(powered by waifu.pics)\nVoid Bot     1/${result.length}`,
+					footer: `Powered by waifu.pics\nVoid Bot     1/${result.length}`,
 				},
 				{ quoted: message },
 			);

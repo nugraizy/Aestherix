@@ -39,7 +39,10 @@ Void Bot     ${index + 1}/${data.length}`,
 		queries = removeDuplicatesArray(queries);
 		for (const querie of queries) {
 			const result = await pinterest(querie.trim());
-			if ("error" in result) return client[botNum].reply({ from, quoted: message }, result.message);
+			if ("error" in result) {
+				await client[botNum].reply({ from, quoted: message }, result.message);
+				continue;
+			}
 			result.forEach((v) => {
 				return (v.caption = v.caption == "" ? "No caption" : v.caption);
 			});

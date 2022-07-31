@@ -17,7 +17,10 @@ export default {
 			queries = removeDuplicatesArray(queries);
 			for (const querie of queries) {
 				const product = await shopeeProduct(querie.trim());
-				if ("error" in product) return client[botNum].reply({ from, quoted: message }, product.error);
+				if ("error" in product) {
+					await client[botNum].reply({ from, quoted: message }, product.error);
+					continue;
+				}
 				let { items } = product;
 				for (const { productName, stock, sold, brand, prices, pricesDiscount, discountPercent, likes, ratings, location, productURL, imageURL } of items) {
 					await client[botNum].sendMessage(

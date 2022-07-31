@@ -2,7 +2,6 @@ import path from "path";
 import { exec } from "child_process";
 import { line } from "../../Utils/Stickers/index.js";
 import { convertMediaToSticker } from "../../Utils/Converter/index.js";
-import { createExif } from "../../Utils/Misc/index.js";
 import { __dirname } from "../../connect.js";
 import { unlinkFile } from "../../Helper/Modules/index.js";
 
@@ -21,7 +20,6 @@ export default {
 		if (result.length > 10) result = result.slice(0, 10);
 		const capt = `Line Stickers\n\nAuthor : ${result[0].author.capitalize()}\nTot. Stickers : ${result.length}`;
 		await client[botNum].sendMessage(from, { text: capt }, { quoted: message });
-		createExif("Made by Nanda", "Void bot");
 		for (const { stickers } of result) {
 			if (stickers.animated) {
 				exec(`wget -O "${path.join(__dirname, `Temporary Files/${filename}`)}" "${stickers.animated}"`, async (err) => {
