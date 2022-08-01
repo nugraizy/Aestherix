@@ -90,6 +90,7 @@ export {
 	convertSecondstoTime,
 } from "./Helper/index.js";
 export {
+	spotify,
 	textpro,
 	gifToMp4,
 	isNsfw,

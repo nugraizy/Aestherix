@@ -21,3 +21,4 @@ export { searchDeviantArt, downloadDeviantArt } from "./DeviantArt/index.js";
 export { isNsfw, createImage } from "./Deepai/index.js";
 export { getWaifu } from "./Waifu Pic/index.js";
 export { textpro } from "./Textpro/index.js";
+export { spotify } from "./Spotifier/index.js";
