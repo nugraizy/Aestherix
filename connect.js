@@ -21,7 +21,7 @@ if (platform !== "win32") await printRandomAscii();
 
 import fs from "fs";
 import { pathToFileURL } from "url";
-import baileys from "@adiwajshing/baileys";
+import baileys, { delay } from "@adiwajshing/baileys";
 import P from "pino";
 import meow from "meow";
 import { Boom } from "@hapi/boom";
@@ -29,9 +29,12 @@ import Spinnies from "spinnies";
 import path from "path";
 import center from "center-align";
 import moment from "moment-timezone";
+import mqtt from "mqtt";
+import async from "async";
 import { getSpinner } from "./Helper/Misc/Spinner/spinners.js";
 import { readJSON, INFOLOG, color, romanize, ERRLOG } from "./Helper/Modules/functions.js";
 import { createExif } from "./Utils/Misc/createExif.js";
+import { spotifier } from "./Utils/Spotifier/index.js";
 
 const { default: makeWASocket, DisconnectReason, makeInMemoryStore, useSingleFileAuthState, DEFAULT_CONNECTION_CONFIG } = baileys;
 const moduleURL = new URL(import.meta.url);
@@ -80,6 +83,17 @@ const failSpinner = (name, options) => {
 	}
 };
 
+const clientMqttListen = mqtt.connect(process.env.MQTT_URL);
+clientMqttListen.on("connect", () => {
+	clientMqttListen.subscribe(process.env.MQTT_TOPIC, async (err) => {});
+});
+
+Number.prototype.toTime = function () {
+	const minutes = Math.floor(this / 60_000);
+	const seconds = ((this % 60_000) / 1000).toFixed(0);
+	return seconds == 60 ? `${minutes + 1}:00` : `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+};
+
 const start = async () => {
 	if (OPTIONS.help) return log(cli.help);
 	await loadCommands();
@@ -111,6 +125,7 @@ const start = async () => {
 			client[Client.user.id] = Client;
 			successSpinner("Connecting", { text: "Connected to WASocket" });
 			INFOLOG(color(center(`Bot Version  ${romanize(readJSON("./package.json").version)}\n\n`, stdout.columns), "#9f53ea"));
+			await updateSpotifyTracks();
 		}
 	});
 
@@ -137,6 +152,13 @@ const start = async () => {
 			const Handler = (await import("./Handlers/Message Presence/composing.js")).default.handler;
 			Handler(client, from, participant);
 		}
+	});
+
+	clientMqttListen.on("message", async (topic, message) => {
+		const data = JSON.parse(message.toString());
+		const content = `Spotify On ${data.is_playing ? "Play" : "Paused"} :                                                       
+${data.artists} - ${data.trackTitle}  ( ${data.progress_ms.toTime()} - ${data.duration_ms.toTime()} )`;
+		await client[botNum].query({ tag: "iq", attrs: { to: "@s.whatsapp.net", type: "set", xmlns: "status" }, content: [{ tag: "status", attrs: {}, content: Buffer.from(content, "utf-8") }] });
 	});
 };
 start().catch((e) => log(e));
@@ -269,6 +291,20 @@ async function printRandomAscii() {
 	spawn("bash", [`./Helper/Ascii/${randomAscii[Math.floor(Math.random() * randomAscii.length)]}`], {
 		stdio: "inherit",
 	});
+}
+
+async function updateSpotifyTracks() {
+	await delay(2000);
+	async.forever(
+		async () => {
+			await delay(5_000);
+			const data = await spotifier.updateNowPlayingStates();
+			if (data !== false) clientMqttListen.publish(process.env.MQTT_TOPIC, JSON.stringify(data));
+		},
+		async (err) => {
+			log(err.message);
+		},
+	);
 }
 
 function help() {

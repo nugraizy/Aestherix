@@ -55,6 +55,7 @@ export const reassign = async (m, client, store, search, deleted) => {
 		const ownerGroups = rawParticipants?.find((v) => v.admin == "superadmin")?.id || null;
 		const isAdmin = adminGroups?.includes(sender);
 		const isBotAdmin = adminGroups?.includes(botNumber);
+		const isDisappearingChat = m.message?.[type]?.contextInfo?.expiration !== 0;
 		const body = isSame(type, "conversation")
 			? mText.message.conversation
 			: isSame(type, "mentionText")
@@ -410,6 +411,7 @@ export const reassign = async (m, client, store, search, deleted) => {
 			from,
 			isGroup,
 			isBaileys,
+			isDisappearingChat,
 			sender,
 			prettyNumber,
 			timeStamp,

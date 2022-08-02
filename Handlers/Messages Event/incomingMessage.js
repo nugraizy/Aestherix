@@ -35,6 +35,7 @@ export default {
 			await client[botNum].sendMessage(message.from, { text: `@${message.sender.split("@")[0]} is AFK since ${time} ago. Now they are out from AFK. Reason: ${reasons}`, mentions: [message.sender] }, { quoted: message.message });
 			deleteAfk(message.sender, message.from);
 		}
+		if (!message.isDisappearingChat && !message.isGroup) await client[botNum].sendMessage(message.from, { disappearingMessagesInChat: 24 * 60 * 60 });
 		if (message.bodyQuoted && checkAfk(message.mediaData.participant)) {
 			const { reasons, since, name } = getAfk(message.mediaData.participant);
 			const time = getTimeSince(since);

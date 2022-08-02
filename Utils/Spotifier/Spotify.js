@@ -2,8 +2,6 @@ import Axios from "axios";
 import dotenv from "dotenv";
 dotenv.config();
 
-const log = console.log;
-
 class Spotifier {
 	#clientId = process.env.CLIENT_ID;
 	#clientSecret = process.env.CLIENT_SECRET;
@@ -65,6 +63,23 @@ class Spotifier {
 		} catch (err) {
 			return { status: false, message: err.message };
 		}
+	}
+
+	async getAccessTokenFromRefreshToken() {
+		const params = new URLSearchParams();
+		params.append("client_id", this.#clientId);
+		params.append("client_secret", this.#clientSecret);
+		params.append("grant_type", "refresh_token");
+		params.append("refresh_token", this.#refreshToken);
+		const {
+			data: { access_token },
+		} = await Axios({
+			url: "https://accounts.spotify.com/api/token",
+			method: "POST",
+			params,
+		});
+		this.#accessToken = access_token;
+		return { status: true, message: "Success getting access token" };
 	}
 
 	async getPlaylists(playlistsID) {
@@ -138,23 +153,6 @@ class Spotifier {
 		}
 	}
 
-	async getAccessTokenFromRefreshToken() {
-		const params = new URLSearchParams();
-		params.append("client_id", this.#clientId);
-		params.append("client_secret", this.#clientSecret);
-		params.append("grant_type", "refresh_token");
-		params.append("refresh_token", this.#refreshToken);
-		const {
-			data: { access_token },
-		} = await Axios({
-			url: "https://accounts.spotify.com/api/token",
-			method: "post",
-			params,
-		});
-		this.#accessToken = access_token;
-		return { status: true, message: "Success getting access token" };
-	}
-
 	async getCurrentlyPlaying() {
 		try {
 			await this.getAccessTokenFromRefreshToken();
@@ -165,9 +163,80 @@ class Spotifier {
 					Authorization: `Bearer ${this.#accessToken}`,
 				},
 			});
+			return data !== "" ? data : null;
+		} catch (err) {
+			return { status: false, message: err.response.data.error.message };
+		}
+	}
+
+	async getDevices() {
+		try {
+			await this.getAccessTokenFromRefreshToken();
+			const { data } = await Axios({
+				url: this.#BASE_API + `/me/player/devices`,
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${this.#accessToken}`,
+				},
+			});
 			return data;
 		} catch (err) {
-			return { status: false, message: err };
+			return { status: false, message: err.response?.data?.error?.message };
+		}
+	}
+
+	async getPlaybackState() {
+		try {
+			await this.getAccessTokenFromRefreshToken();
+			const { data } = await Axios({
+				url: this.#BASE_API + `/me/player`,
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${this.#accessToken}`,
+				},
+			});
+			return data;
+		} catch (err) {
+			return { status: false, message: err.response?.data?.error?.message };
+		}
+	}
+
+	async updateNowPlayingStates() {
+		try {
+			await this.getAccessTokenFromRefreshToken();
+			const { data } = await Axios({
+				url: this.#BASE_API + `/me/player/currently-playing`,
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${this.#accessToken}`,
+				},
+			});
+			if (!data) return false;
+			if (data.currently_playing_type == "ad")
+				return {
+					trackTitle: "Advertisement",
+					artists: "Spotify",
+					duration_ms: 0,
+					progress_ms: 0,
+					is_playing: true,
+				};
+			const { name: trackTitle, artists, duration_ms } = data.item;
+			this.#currentlyPlaying = data.item.name;
+			if (!this.#currentlyPlaying) return false;
+			const { progress_ms, is_playing } = data;
+			return {
+				trackTitle,
+				artists: artists
+					.slice(0, 3)
+					.map((v) => v.name)
+					.map((v, i) => (artists.length !== 1 && i + 1 == artists.length ? `and ${v}` : v))
+					.join(", "),
+				duration_ms,
+				progress_ms,
+				is_playing,
+			};
+		} catch (err) {
+			return { status: false, message: err.response?.data?.error?.message };
 		}
 	}
 }
