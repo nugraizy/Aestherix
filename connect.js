@@ -139,6 +139,7 @@ const start = async () => {
 	Client.ev.on("creds.update", saveState);
 
 	Client.ev.on("messages.update", async (message) => {
+		if (message?.[0]?.update?.status == 4 || message?.[0]?.update?.status == 3) return;
 		const Handler = (await import("./Handlers/Messages Event/deletedMessage.js")).default.handler;
 		message = store.messages[message[0].key.remoteJid]?.get(message[0].key.id);
 		Handler(client, message, false, store);
@@ -183,6 +184,7 @@ const start = async () => {
 	clientMqttListen.on("message", async (topic, message) => {
 		message = message.toString();
 		const data = JSON.parse(message);
+		if (!data.status) return;
 		const content = `Spotify On ${data.is_playing ? "Play" : "Paused"} :                                                       ${data.artists} - ${data.trackTitle}  ( ${data.progress_ms.toTime()}${` - ${data?.duration_ms.toTime()}` ?? ""} )`;
 		const myStatus = await client[botNum].fetchStatus(`${botNum.split(":")[0]}@s.whatsapp.net`);
 		if (myStatus.status == content) return;
