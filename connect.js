@@ -21,7 +21,7 @@ if (platform !== "win32") await printRandomAscii();
 
 import fs from "fs";
 import { pathToFileURL } from "url";
-import baileys, { delay } from "@adiwajshing/baileys";
+import baileys, { delay, jidDecode } from "@adiwajshing/baileys";
 import P from "pino";
 import meow from "meow";
 import { Boom } from "@hapi/boom";
@@ -30,11 +30,9 @@ import path from "path";
 import center from "center-align";
 import moment from "moment-timezone";
 import mqtt from "mqtt";
-import async from "async";
 import { getSpinner } from "./Helper/Misc/Spinner/spinners.js";
 import { readJSON, INFOLOG, color, romanize, ERRLOG } from "./Helper/Modules/functions.js";
 import { createExif } from "./Utils/Misc/createExif.js";
-import { spotifier } from "./Utils/Spotifier/index.js";
 
 const { default: makeWASocket, DisconnectReason, makeInMemoryStore, useSingleFileAuthState, DEFAULT_CONNECTION_CONFIG } = baileys;
 const moduleURL = new URL(import.meta.url);
@@ -45,7 +43,7 @@ const spinners = new Spinnies({ color: "blue", succeedColor: "green", failColor:
 
 global.cli = parseCli();
 global.OPTIONS = cli.flags;
-const regexOption = ["prefix", "readOnly", "autoRead", "autoCorrect", "restrict", "onlyLogs", "noLogs", "selfMode", "debugMode", "multiCmd", "rainbow", "trace", "help", "watch", "coolDown", "noLoad", "json", "reset", "story", "offline"];
+const regexOption = ["prefix", "readOnly", "autoRead", "autoCorrect", "restrict", "onlyLogs", "noLogs", "selfMode", "debugMode", "multiCmd", "rainbow", "trace", "help", "watch", "coolDown", "noLoad", "json", "reset", "story", "offline", "noCall"];
 
 if (OPTIONS.reset) {
 	const sessionName = `${cli.input[0] ?? "Session-debug"}`;
@@ -95,7 +93,10 @@ Number.prototype.toTime = function () {
 };
 
 const start = async () => {
-	if (OPTIONS.help) return log(cli.help);
+	if (OPTIONS.help) {
+		log(cli.help);
+		process.exit(0);
+	}
 	await loadCommands();
 	await loadEveryCommand();
 	createExif("Made by Nanda", "Void bot");
@@ -125,7 +126,6 @@ const start = async () => {
 			client[Client.user.id] = Client;
 			successSpinner("Connecting", { text: "Connected to WASocket" });
 			INFOLOG(color(center(`Bot Version  ${romanize(readJSON("./package.json").version)}\n\n`, stdout.columns), "#9f53ea"));
-			await updateSpotifyTracks();
 		}
 	});
 
@@ -154,10 +154,38 @@ const start = async () => {
 		}
 	});
 
+	Client.ev.on("call", async ([{ isGroup, status, id, from }]) => {
+		if (OPTIONS.noCall && !isGroup && status == "offer") {
+			const { user, server } = jidDecode(botNum);
+			await client[botNum].sendNode({
+				tag: "call",
+				attrs: {
+					from: `${user}@${server}`,
+					to: from,
+					id: client[botNum].generateMessageTag(),
+				},
+				content: [
+					{
+						tag: "reject",
+						attrs: {
+							"call-id": id,
+							"call-creator": from,
+							count: "512202",
+						},
+						content: null,
+					},
+				],
+			});
+			await client[botNum].updateBlockStatus(from, "block");
+		}
+	});
+
 	clientMqttListen.on("message", async (topic, message) => {
-		const data = JSON.parse(message.toString());
-		const content = `Spotify On ${data.is_playing ? "Play" : "Paused"} :                                                       
-${data.artists} - ${data.trackTitle}  ( ${data.progress_ms.toTime()} - ${data.duration_ms.toTime()} )`;
+		message = message.toString();
+		const data = JSON.parse(message);
+		const content = `Spotify On ${data.is_playing ? "Play" : "Paused"} :                                                       ${data.artists} - ${data.trackTitle}  ( ${data.progress_ms.toTime()}${` - ${data?.duration_ms.toTime()}` ?? ""} )`;
+		const myStatus = await client[botNum].fetchStatus(`${botNum.split(":")[0]}@s.whatsapp.net`);
+		if (myStatus.status == content) return;
 		await client[botNum].query({ tag: "iq", attrs: { to: "@s.whatsapp.net", type: "set", xmlns: "status" }, content: [{ tag: "status", attrs: {}, content: Buffer.from(content, "utf-8") }] });
 	});
 };
@@ -282,6 +310,7 @@ function parseCli() {
 			reset: { type: "boolean", alias: "k" },
 			story: { type: "boolean", alias: "q" },
 			offline: { type: "boolean", alias: "f" },
+			no_call: { type: "boolean", alias: "d" },
 		},
 	});
 }
@@ -291,20 +320,6 @@ async function printRandomAscii() {
 	spawn("bash", [`./Helper/Ascii/${randomAscii[Math.floor(Math.random() * randomAscii.length)]}`], {
 		stdio: "inherit",
 	});
-}
-
-async function updateSpotifyTracks() {
-	await delay(2000);
-	async.forever(
-		async () => {
-			await delay(5_000);
-			const data = await spotifier.updateNowPlayingStates();
-			if (data !== false) clientMqttListen.publish(process.env.MQTT_TOPIC, JSON.stringify(data));
-		},
-		async (err) => {
-			log(err.message);
-		},
-	);
 }
 
 function help() {
@@ -332,6 +347,7 @@ function help() {
 	  --reset, -k          Reset your WhatsApp connection session, and restart the script
 	  --story, q           Auto download people story after the bot received the story
 	  --offline, -f        Set your current presence to offline
+	  --no_call, -d        Reject incoming call.
 	  --help, -h           Show this message.
 
 	Examples

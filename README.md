@@ -106,6 +106,18 @@ node . <session_name> <--options>
 
 > "Reset WhatsApp session and start a new one."
 
+## --story / -q
+
+> "Fetch every incoming Story from your contacts."
+
+## --offline / -f
+
+> "Set your current client devices to offline"
+
+## --no_call / -d
+
+> "Do not disturb. Every incoming call will be rejected and the caller will be blocked."
+
 ---
 
 # additional context

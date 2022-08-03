@@ -153,6 +153,26 @@ class Spotifier {
 		}
 	}
 
+	async searchTracks(query) {
+		try {
+			const data = await this.req(`/search?q=track:${query}&type=track&include_external=audio`, "GET");
+			if (data.tracks.items.length == 0) return { status: false, message: "Not Found" };
+			return { status: true, data: data.tracks };
+		} catch (err) {
+			return { status: false, message: err };
+		}
+	}
+
+	async searchAlbum(query) {
+		try {
+			const data = await this.req(`/search?q=album:${query}&type=album&include_external=audio`, "GET");
+			if (data.albums.items.length == 0) return { status: false, message: "Not Found" };
+			return { status: true, data: data.albums };
+		} catch (err) {
+			return { status: false, message: err };
+		}
+	}
+
 	async getCurrentlyPlaying() {
 		try {
 			await this.getAccessTokenFromRefreshToken();
@@ -216,8 +236,7 @@ class Spotifier {
 				return {
 					trackTitle: "Advertisement",
 					artists: "Spotify",
-					duration_ms: 0,
-					progress_ms: 0,
+					progress_ms: data.progress_ms,
 					is_playing: true,
 				};
 			const { name: trackTitle, artists, duration_ms } = data.item;

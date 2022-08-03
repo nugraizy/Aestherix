@@ -14,7 +14,7 @@ export default {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (message.messages[0] && "messageStubParameters" in message.messages[0]) (await import("./stubMessage.js")).default.handler(client, message.messages[0]);
 		message = await reassign(JSON.parse(JSON.stringify(message.messages[0])), client, store, false);
-		if ("error" in message) return;
+		if (!message || "error" in message) return;
 		if (!message.message) return;
 		if (message.isBaileys) return;
 		if (message.message.key && message.message.key.remoteJid == "status@broadcast" && OPTIONS.story) return (await import("./storyMessage.js")).default.handler(client, message);

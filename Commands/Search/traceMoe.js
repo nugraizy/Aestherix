@@ -164,7 +164,7 @@ ${externalLinks
 				});
 				i++;
 			}
-			await client[botNum].relayMessage(from, { listMessage: { buttonText: " • Fetch More  Moe", description: "\t", footerText: "```Looking for some more? Choose between these options.```", listType: 1, sections: row } }, { messageId: generateMessageID() });
+			await client[botNum].relayMessage(from, { listMessage: { buttonText: " • Fetch More Moe", description: "\t", footerText: "```Looking for some more? Choose between these options.```", listType: 1, sections: row } }, { messageId: generateMessageID() });
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name}\n`;

@@ -29,7 +29,9 @@ export const reassign = async (m, client, store, search, deleted) => {
 		}
 		const isBaileys = (m.key.id.startsWith("BAE5") && isSame(m.key.id.length, 16)) || (isFromMe && m.key.id.startsWith("VOID"));
 		const sender = isFromMe ? `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net` : isGroup ? m.key.participant : m.key.remoteJid;
-		const prettyNumber = PhoneNumber(`+${sender.replace("@s.whatsapp.net", "")}`).getNumber("international") ?? PhoneNumber(`+${m.key.participant.replace("@s.whatsapp.net", "")}`).getNumber("international");
+		const isBlocked = (await client[botNum].fetchBlocklist()).includes(sender);
+		if (isBlocked) return;
+		const prettyNumber = PhoneNumber(`+${sender?.replace("@s.whatsapp.net", "")}`)?.getNumber("international") ?? PhoneNumber(`+${m?.key?.participant?.replace("@s.whatsapp.net", "")}`)?.getNumber("international") ?? "No Data";
 		const groupMetadata = isGroup ? await client[botNum].groupMetadata(from).catch((e) => {}) : {};
 		const groupName = isGroup ? groupMetadata?.subject : NO_DATA;
 		const groupId = isGroup ? groupMetadata?.id : NO_DATA;
