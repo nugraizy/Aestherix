@@ -155,6 +155,7 @@ class Spotifier {
 
 	async searchTracks(query) {
 		try {
+			query = encodeURI(query);
 			const data = await this.req(`/search?q=track:${query}&type=track&include_external=audio`, "GET");
 			if (data.tracks.items.length == 0) return { status: false, message: "Not Found" };
 			return { status: true, data: data.tracks };
@@ -165,9 +166,21 @@ class Spotifier {
 
 	async searchAlbum(query) {
 		try {
+			query = encodeURI(query);
 			const data = await this.req(`/search?q=album:${query}&type=album&include_external=audio`, "GET");
 			if (data.albums.items.length == 0) return { status: false, message: "Not Found" };
 			return { status: true, data: data.albums };
+		} catch (err) {
+			return { status: false, message: err };
+		}
+	}
+
+	async searchArtist(query) {
+		try {
+			query = encodeURI(query);
+			const data = await this.req(`/search?q=artist:${query}&type=artist&include_external=audio`, "GET");
+			if (data.artists.items.length == 0) return { status: false, message: "Not Found" };
+			return { status: true, data: data.artists };
 		} catch (err) {
 			return { status: false, message: err };
 		}

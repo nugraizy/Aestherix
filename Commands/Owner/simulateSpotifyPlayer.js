@@ -61,7 +61,7 @@ async function updateSpotifyTracks() {
 			if (presences?.spotify?.timeout == undefined) next();
 			await delay(4_000);
 			const data = await spotifier.updateNowPlayingStates();
-			if (data !== false) clientMqttListen.publish(process.env.MQTT_TOPIC, JSON.stringify(data));
+			if (data !== false) clientMqttListen.publish(process.env.MQTT_TOPIC, JSON.stringify({...data,status:true}));
 		},
 		async (err) => {},
 	);

@@ -148,7 +148,7 @@ export default {
 					if (OPTIONS.onlyLogs ? (message.cmd.startsWith("==>") || message.cmd.startsWith("//>") || message.cmd.startsWith("$$>") ? true : false) : true) {
 						if (!message.isOwner && OPTIONS["selfMode"]) return;
 						try {
-							if (/(--?(help(s)?|info|des(c|k)rip(t|s)i(on)?)|-H)/.test(message.args[1]) && Tempcmds.name !== "eval") {
+							if (/-{1,2}((help(s)?|info|des(c|k)rip(t|s)i(on)?)|H)$/i.test(message.args[1]) && Tempcmds.name !== "eval") {
 								const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${Tempcmds.cooldown}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v.capitalize()}`).join(", ")}.`;
 								client[botNum].reply({ from: message.from, quoted: message.message }, help);
 								continue;

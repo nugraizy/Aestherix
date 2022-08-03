@@ -1,7 +1,7 @@
 import moment from "moment-timezone";
 import { delay } from "@adiwajshing/baileys";
 import parser from "yargs-parser";
-import { getHighlights } from "../../Utils/Instagram/index.js";
+import { getHighlights2 } from "../../Utils/Instagram/index.js";
 import { isOne, isURL, isEmpty, isSame, numberWithCommas, INFOLOG, ERRLOG, color } from "../../Helper/Modules/index.js";
 
 export default {
@@ -22,7 +22,7 @@ export default {
 			for (const username of usernames) {
 				if (isURL(username)) await client[botNum].reply({ from, quoted: message }, "Please specify a username");
 				else {
-					const highlights = await getHighlights(username);
+					const highlights = await getHighlights2(username);
 					INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading Instagram highlights`, "cyan")} for ${color(prettyNumber, "#ff71ce")}`);
 					if ("error" in highlights) {
 						client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram highlights\n\n${highlights.error}\n${username}`);

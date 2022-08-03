@@ -17,11 +17,9 @@
 import { platform } from "process";
 console.clear();
 import { spawn } from "child_process";
-if (platform !== "win32") await printRandomAscii();
-
 import fs from "fs";
 import { pathToFileURL } from "url";
-import baileys, { delay, jidDecode } from "@adiwajshing/baileys";
+import baileys, { jidDecode } from "@adiwajshing/baileys";
 import P from "pino";
 import meow from "meow";
 import { Boom } from "@hapi/boom";
@@ -44,7 +42,7 @@ const spinners = new Spinnies({ color: "blue", succeedColor: "green", failColor:
 global.cli = parseCli();
 global.OPTIONS = cli.flags;
 const regexOption = ["prefix", "readOnly", "autoRead", "autoCorrect", "restrict", "onlyLogs", "noLogs", "selfMode", "debugMode", "multiCmd", "rainbow", "trace", "help", "watch", "coolDown", "noLoad", "json", "reset", "story", "offline", "noCall"];
-
+if (platform !== "win32" && !OPTIONS.noLoad) await printRandomAscii();
 if (OPTIONS.reset) {
 	const sessionName = `${cli.input[0] ?? "Session-debug"}`;
 	if (fs.existsSync(`./Session/${sessionName}.json`)) fs.unlinkSync(`./Session/${sessionName}.json`);

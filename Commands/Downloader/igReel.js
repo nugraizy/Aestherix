@@ -1,8 +1,8 @@
 import { delay } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
 import parser from "yargs-parser";
-import { getReels } from "../../Utils/Instagram/index.js";
-import { isOne, isURL, INFOLOG, ERRLOG, color } from "../../Helper/Modules/index.js";
+import { getPost } from "../../Utils/Instagram/index.js";
+import { isOne, isURL, parseCode, INFOLOG, ERRLOG, color } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "igreel",
@@ -28,30 +28,33 @@ export default {
 					await client[botNum].reply({ from, quoted: message }, "Please specify a valid Instagram url");
 					continue;
 				}
+				const parse = parseCode(url.trim());
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading Instagram reel`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
-				const reel = await getReels(url);
-				if ("error" in reel) {
-					client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram reel\n\n${reel.error}\n${url}`);
-					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Instagram reel", "red")} for ${color(prettyNumber, "#ff71ce")}`);
-					continue;
-				} else {
-					let capt = "``` • Instagram reel```\n\n";
-					capt += `Username : ${reel.user.username}\n`;
-					capt += `Fullname : ${reel.user.fullName}\n`;
-					if (isOne(reel.medias.length)) {
-						await client[botNum].sendMessage(
-							from,
-							reel.medias[0].type == "video"
-								? { video: { url: reel.medias[0].url }, caption: capt.trim() }
-								: {
-										image: { url: reel.medias[0].url },
-										caption: capt.trim(),
-								  },
-							{ quoted: message },
-						);
+				if (parse) {
+					const reel = await getPost(url);
+					if ("error" in reel) {
+						client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram reel\n\n${reel.error}\n${url}`);
+						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Instagram reel", "red")} for ${color(prettyNumber, "#ff71ce")}`);
+						continue;
+					} else {
+						let capt = "``` • Instagram reel```\n\n";
+						capt += `Username : ${reel.user.username}\n`;
+						capt += `Fullname : ${reel.user.fullName}\n`;
+						if (isOne(reel.medias.length)) {
+							await client[botNum].sendMessage(
+								from,
+								reel.medias[0].type == "video"
+									? { video: { url: reel.medias[0].url }, caption: capt.trim() }
+									: {
+											image: { url: reel.medias[0].url },
+											caption: capt.trim(),
+									  },
+								{ quoted: message },
+							);
+						}
+						INFOLOG(`[${color(time, "cyan")}]`, `${color("Downloaded Instagram reel", "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
+						await delay(100);
 					}
-					INFOLOG(`[${color(time, "cyan")}]`, `${color("Downloaded Instagram reel", "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
-					await delay(100);
 				}
 			}
 		} catch (error) {
