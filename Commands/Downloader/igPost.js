@@ -36,38 +36,37 @@ export default {
 						client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram post\n\n${post.error}\n${url}`);
 						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Instagram Post", "red")} for ${color(prettyNumber, "#ff71ce")}`);
 						continue;
-					} else {
-						let capt = "``` • Instagram Post```\n\n";
-						capt += `Username : ${post.username}\n`;
-						capt += `Fullname : ${post.full_name}\n`;
-						capt += `Privacy : ${post.is_private ? "Private" : "Public"}\n`;
-						capt += `Verified : ${post.is_verified ? "Verified" : "Not Verified"}\n`;
-						capt += `Published : ${moment(post.taken_at * 1000).format("HH:mm:ss DD/MM/YYYY")}\n`;
-						capt += `Tot. Comment : ${numberWithCommas(post.comment_count)}\n`;
-						capt += `Tot. Like : ${numberWithCommas(post.like_count)}\n`;
-						if (isOne(post.post.length)) {
-							capt += `Caption : ${post.captions.trim()}\n`;
-							await client[botNum].sendMessage(
-								from,
-								post.post[0].isVideo
-									? { video: { url: post.post[0].url }, caption: capt.trim() }
-									: {
-											image: { url: post.post[0].url },
-											caption: capt.trim(),
-									  },
-								{ quoted: message },
-							);
-						} else {
-							capt += `Tot. Media : ${post.post.length}\n`;
-							capt += `Caption : ${post.captions.trim()}\n`;
-							await client[botNum].sendMessage(from, { text: capt.trim() }, { quoted: message });
-							for (let j = 0; j < post.post.length; j++) {
-								await client[botNum].sendMessage(from, post.post[j].isVideo ? { video: { url: post.post[j].url } } : { image: { url: post.post[j].url } });
-								await delay(300);
-							}
-						}
-						INFOLOG(`[${color(time, "cyan")}]`, `${color("Downloaded Instagram Post", "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 					}
+					let capt = "``` • Instagram Post```\n\n";
+					capt += `Username : ${post.username}\n`;
+					capt += `Fullname : ${post.full_name}\n`;
+					capt += `Privacy : ${post.is_private ? "Private" : "Public"}\n`;
+					capt += `Verified : ${post.is_verified ? "Verified" : "Not Verified"}\n`;
+					capt += `Published : ${moment(post.taken_at * 1000).format("HH:mm:ss DD/MM/YYYY")}\n`;
+					capt += `Tot. Comment : ${numberWithCommas(post.comment_count)}\n`;
+					capt += `Tot. Like : ${numberWithCommas(post.like_count)}\n`;
+					if (isOne(post.post.length)) {
+						capt += `Caption : ${post.captions.trim()}\n`;
+						await client[botNum].sendMessage(
+							from,
+							post.post[0].isVideo
+								? { video: { url: post.post[0].url }, caption: capt.trim() }
+								: {
+										image: { url: post.post[0].url },
+										caption: capt.trim(),
+								  },
+							{ quoted: message },
+						);
+					} else {
+						capt += `Tot. Media : ${post.post.length}\n`;
+						capt += `Caption : ${post.captions.trim()}\n`;
+						await client[botNum].sendMessage(from, { text: capt.trim() }, { quoted: message });
+						for (const media of post.post) {
+							await client[botNum].sendMessage(from, media.isVideo ? { video: { url: media.url } } : { image: { url: media.url } });
+							await delay(300);
+						}
+					}
+					INFOLOG(`[${color(time, "cyan")}]`, `${color("Downloaded Instagram Post", "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 				} else {
 					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Parse Instagram Post URL", "red")} for ${color(prettyNumber, "#ff71ce")}`);
 				}

@@ -4,14 +4,14 @@ export default {
 	name: "gempa",
 	description: "Showing latest earthquake in Indonesia",
 	category: "News",
-	usage: "!news",
+	usage: "!gempa",
 	aliases: ["earthquake"],
 	cooldown: 2,
 	limit: 1,
 	status: "enable",
 	async run(message, client) {
 		const data = await getEarthquake();
-		let caption = "Latest Earthquake in Indonesia\n\n";
+		let caption = `\`\`\` • Latest Earthquake\`\`\`\n\n`;
 		for (const res of data) {
 			caption += `Tanggal : ${res.date}\n`;
 			caption += `Jam : ${res.time}\n`;

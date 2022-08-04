@@ -36,25 +36,24 @@ export default {
 						client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram reel\n\n${reel.error}\n${url}`);
 						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Instagram reel", "red")} for ${color(prettyNumber, "#ff71ce")}`);
 						continue;
-					} else {
-						let capt = "``` • Instagram reel```\n\n";
-						capt += `Username : ${reel.user.username}\n`;
-						capt += `Fullname : ${reel.user.fullName}\n`;
-						if (isOne(reel.medias.length)) {
-							await client[botNum].sendMessage(
-								from,
-								reel.medias[0].type == "video"
-									? { video: { url: reel.medias[0].url }, caption: capt.trim() }
-									: {
-											image: { url: reel.medias[0].url },
-											caption: capt.trim(),
-									  },
-								{ quoted: message },
-							);
-						}
-						INFOLOG(`[${color(time, "cyan")}]`, `${color("Downloaded Instagram reel", "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
-						await delay(100);
 					}
+					let capt = "``` • Instagram reel```\n\n";
+					capt += `Username : ${reel.user.username}\n`;
+					capt += `Fullname : ${reel.user.fullName}\n`;
+					if (isOne(reel.medias.length)) {
+						await client[botNum].sendMessage(
+							from,
+							reel.medias[0].type == "video"
+								? { video: { url: reel.medias[0].url }, caption: capt.trim() }
+								: {
+										image: { url: reel.medias[0].url },
+										caption: capt.trim(),
+								  },
+							{ quoted: message },
+						);
+					}
+					INFOLOG(`[${color(time, "cyan")}]`, `${color("Downloaded Instagram reel", "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
+					await delay(100);
 				}
 			}
 		} catch (error) {

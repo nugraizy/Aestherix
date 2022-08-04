@@ -8,7 +8,7 @@ export default {
 	name: "fbpost",
 	description: "Downloads a Facebook post",
 	usage: "!fbpost <url>",
-	aliases: ["fbpost", "fbp", "fb"],
+	aliases: ["fbpost", "fbp", "fb", "fbdl"],
 	category: "Downloader",
 	cooldown: 6,
 	limit: 6,
@@ -34,10 +34,14 @@ export default {
 					client[botNum].reply({ from, quoted: message }, `Failed while downloading Facebook post\n\n${post.error}\n${url}`);
 					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Facebook Post", "red")} for ${color(prettyNumber, "#ff71ce")}`);
 					continue;
-				} else {
-					await client[botNum].sendMessage(from, { video: { url: post.url }, caption: `Post Uploaded : ${post.datePosted}\nDuration : ${post.duration}` });
-					await delay(300);
 				}
+				await client[botNum].sendMessage(
+					from,
+					post.isVideo
+						? { video: new Buffer.from(await fetchBUFFER(post.url)), caption: `\`\`\` • Facebook Video Downloader\`\`\`\n\n${post.datePosted ? `Post Uploaded : ${post.datePosted}\n` : ""}Res : ${post.resolution}${post.duration ? `\nDuration : ${post.duration}` : ""}` }
+						: { image: new Buffer.from(await fetchBUFFER(post.url)), caption: `\`\`\` • Facebook Image Downloader\`\`\`\n\n${post.datePosted ? `Post Uploaded : ${post.datePosted}\n` : ""}Res : ${post.resolution}` },
+				);
+				await delay(300);
 			}
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloaded Facebook Post`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 		} catch (err) {
@@ -51,5 +55,5 @@ export default {
 };
 
 function regex(input) {
-	return /^(https?:\/\/)?((w{3}\.)?)facebook.com\/.*/.test(input);
+	return /^(https?:\/\/)?((w{3}\.)|(m\.)?)?(facebook|fb)\.(com|watch)\/.*/.test(input);
 }

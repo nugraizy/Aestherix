@@ -29,7 +29,7 @@ export default {
 						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Instagram highlights", "cyan")} for ${color(prettyNumber, "#ff71ce")}`);
 						continue;
 					} else {
-						let capt = "``` • Instagram highlights```\n\n";
+						let capt = "``` • Instagram Highlights```\n\n";
 						capt += `Username  : ${highlights.user.username}\n`;
 						capt += `Fullname  : ${highlights.user.fullName}\n`;
 						capt += `Follower  : ${numberWithCommas(highlights.user.followers)}\n`;

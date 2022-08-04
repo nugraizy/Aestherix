@@ -22,3 +22,5 @@ export { isNsfw, createImage } from "./Deepai/index.js";
 export { getWaifu } from "./Waifu Pic/index.js";
 export { textpro } from "./Textpro/index.js";
 export { spotifier } from "./Spotifier/index.js";
+export { cnnindonesia, cnninternational } from "./CNN/index.js";
+export { iflixSearch, trueidSearch } from "./Movies/index.js";

@@ -1,5 +1,6 @@
 import path from "path";
 import emojiReg from "emoji-regex";
+import jsSplit from "js-split";
 import { emojimix } from "../../Utils/Converter/index.js";
 import { convertMediaToSticker } from "../../Utils/Converter/index.js";
 import { __dirname } from "../../connect.js";
@@ -17,10 +18,14 @@ export default {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please enter a query");
 		const regex = query.match(emojiReg());
 		if (!regex) return client[botNum].reply({ from, quoted: message }, "Please enter a valid emoji");
-		if (regex.length != 2) return client[botNum].reply({ from, quoted: message }, "Please enter 2 valid emoji");
-		const result = await emojimix(regex[0], regex[1]);
-		if (typeof result == "object" && "error" in result) return client[botNum].reply({ from, quoted: message }, result.error);
-		const sticker = await convertMediaToSticker(result, prettyNumber, path.join(__dirname, `Temporary Files/${filename}${result.split("/")[result.split("/").length - 1].split(".")[0]}.webp`));
-		await client[botNum].sendMessage(from, { sticker }, { quoted: message });
+		if (regex.length < 2) return client[botNum].reply({ from, quoted: message }, "Please enter 2 valid emoji");
+		const emojis = jsSplit(regex, 2);
+		for (const arr of emojis) {
+			if (arr.length == 1) continue;
+			const result = await emojimix(arr[0], arr[1]);
+			if (typeof result == "object" && "error" in result) return client[botNum].reply({ from, quoted: message }, result.error);
+			const sticker = await convertMediaToSticker(result, prettyNumber, path.join(__dirname, `Temporary Files/${filename}${result.split("/")[result.split("/").length - 1].split(".")[0]}.webp`));
+			await client[botNum].sendMessage(from, { sticker }, { quoted: message });
+		}
 	},
 };

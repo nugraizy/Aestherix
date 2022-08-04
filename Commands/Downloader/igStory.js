@@ -28,21 +28,20 @@ export default {
 						client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram story\n\n${story.error}\n${username}`);
 						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Instagram Story", "cyan")} for ${color(prettyNumber, "#ff71ce")}`);
 						continue;
-					} else {
-						let capt = "``` • Instagram Story```\n\n";
-						capt += `Username : ${story.username}\n`;
-						capt += `Fullname : ${story.fullName}\n`;
-						if (isOne(story.stories.length)) await client[botNum].sendMessage(from, story.stories[0].isVideo ? { video: { url: story.stories[0].url }, caption: capt.trim() } : { image: { url: story.stories[0].url }, caption: capt.trim() }, { quoted: message });
-						else {
-							capt += `Tot. Media : ${story.stories.length}`;
-							await client[botNum].sendMessage(from, { text: capt.trim() }, { quoted: message });
-							for (const medias of story.stories) {
-								await client[botNum].sendMessage(from, medias.isVideo ? { video: { url: medias.url } } : { image: { url: medias.url } });
-								await delay(300);
-							}
-						}
-						INFOLOG(`[${color(time, "cyan")}]`, `${color("Downloaded Instagram Story", "cyan")} for ${color(prettyNumber, "#ff71ce")}`);
 					}
+					let capt = "``` • Instagram Story```\n\n";
+					capt += `Username : ${story.username}\n`;
+					capt += `Fullname : ${story.fullName}\n`;
+					if (isOne(story.stories.length)) await client[botNum].sendMessage(from, story.stories[0].isVideo ? { video: { url: story.stories[0].url }, caption: capt.trim() } : { image: { url: story.stories[0].url }, caption: capt.trim() }, { quoted: message });
+					else {
+						capt += `Tot. Media : ${story.stories.length}`;
+						await client[botNum].sendMessage(from, { text: capt.trim() }, { quoted: message });
+						for (const medias of story.stories) {
+							await client[botNum].sendMessage(from, medias.isVideo ? { video: { url: medias.url } } : { image: { url: medias.url } });
+							await delay(300);
+						}
+					}
+					INFOLOG(`[${color(time, "cyan")}]`, `${color("Downloaded Instagram Story", "cyan")} for ${color(prettyNumber, "#ff71ce")}`);
 				}
 			}
 		} catch (err) {

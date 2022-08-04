@@ -98,7 +98,7 @@ const start = async () => {
 	await loadCommands();
 	await loadEveryCommand();
 	createExif("Made by Nanda", "Void bot");
-	const CONNECTION_CONFIG = { printQRInTerminal: true, version: DEFAULT_CONNECTION_CONFIG.version, logger: P({ level: OPTIONS.trace ? "trace" : "fatal" }), auth: state, markOnlineOnConnect: false };
+	const CONNECTION_CONFIG = { printQRInTerminal: true, version: DEFAULT_CONNECTION_CONFIG.version, logger: P({ level: OPTIONS.trace ? "trace" : "fatal" }), auth: state, markOnlineOnConnect: false, syncFullHistory: true };
 	const Client = makeWASocket(CONNECTION_CONFIG);
 	store.bind(Client.ev);
 

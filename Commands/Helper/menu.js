@@ -21,7 +21,7 @@ export default {
 				.sort((a, b) => a.localeCompare(b))
 				.map((v, i) => `${i + 1}. ${v.capitalize()}`)
 				.join("\n")}\n\n\n`;
-		capt = `${capt.trim()}\n\nUse : ${prefix}${getRandomCommand()} -H\n~> to see the detail of the command.`;
+		capt = `${capt.trim()}\n\nUse : ${prefix}${getRandomCommand()} -H\n~> to see the detail of the command.\n~> total command : ${cmds.commands.size}`;
 		await client[botNum].reply({ from, quoted: message }, capt.trim());
 	},
 };

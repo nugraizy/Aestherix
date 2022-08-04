@@ -90,6 +90,10 @@ export {
 	convertSecondstoTime,
 } from "./Helper/index.js";
 export {
+	iflixSearch,
+	trueidSearch,
+	cnnindonesia,
+	cnninternational,
 	spotifier,
 	textpro,
 	gifToMp4,

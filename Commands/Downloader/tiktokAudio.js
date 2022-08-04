@@ -37,14 +37,14 @@ export default {
 				if ("error" in audio) {
 					client[botNum].reply({ from, quoted: message }, audio.error);
 					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download TikTok Audio", "red")} for ${color(prettyNumber, "#ff71ce")}`);
-				} else {
-					await client[botNum].sendMessage(
-						from,
-						{ document: await toOpus("opus", { input: path.join(__dirname, `Temporary Files/${filename}`), output: path.join(__dirname, `Temporary Files/${filename}-done`), media: audio.music }), fileName: `${audio.description}.mp3`, mimetype: mime("mp3") },
-						{ quotes: message },
-					);
-					await delay(300);
+					continue;
 				}
+				await client[botNum].sendMessage(
+					from,
+					{ document: await toOpus("opus", { input: path.join(__dirname, `Temporary Files/${filename}`), output: path.join(__dirname, `Temporary Files/${filename}-done`), media: audio.music }), fileName: `${audio.description}.mp3`, mimetype: mime("mp3") },
+					{ quotes: message },
+				);
+				await delay(300);
 			}
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloaded TikTok Audio`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 		} catch (err) {
