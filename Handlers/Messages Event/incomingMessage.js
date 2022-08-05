@@ -1,7 +1,7 @@
 import moment from "moment-timezone";
 import similarity from "similarity";
 import { delay } from "@adiwajshing/baileys";
-import { INFOLOG, color, reassign, addLimit, getTimeSince, checkAfk, getAfk, deleteAfk, readJSON } from "../../Helper/index.js";
+import { INFOLOG, color, reassign, addLimit, getTimeSince, checkAfk, getAfk, deleteAfk } from "../../Helper/index.js";
 import { runtime } from "../../connect.js";
 let STATS_OFFLINE = true;
 const EVALY = ["/>", "$>", "=>", "!>"];
@@ -12,7 +12,7 @@ export default {
 	async handler(message, client, cmds, store, user) {
 		if (message == undefined) return;
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (message.messages[0] && "messageStubParameters" in message.messages[0]) (await import("./stubMessage.js")).default.handler(client, message.messages[0]);
+		if (message.messages[0] && "messageStubParameters" in message.messages[0]) return (await import("./stubMessage.js")).default.handler(client, message.messages[0]);
 		message = await reassign(JSON.parse(JSON.stringify(message.messages[0])), client, store, false);
 		if (!message || "error" in message) return;
 		if (!message.message) return;

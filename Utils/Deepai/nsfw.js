@@ -25,12 +25,12 @@ export const isNsfw = (input, filename) =>
 			const outputPercentageNSFW = output?.detections?.some((v) => Number(v.confidence) > 0.6) || output.nsfw_score >= 0.4;
 			if (outputPercentageNSFW) {
 				fs.unlinkSync(filename);
-				return resolve(true);
+				return resolve({ status: true, ...output });
 			}
 			fs.unlinkSync(filename);
-			resolve(false);
+			resolve({ status: false, ...output });
 		} catch (err) {
 			fs.unlinkSync(filename);
-			resolve(false);
+			resolve({ status: false });
 		}
 	});

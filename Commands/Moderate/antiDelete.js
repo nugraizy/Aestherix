@@ -10,7 +10,7 @@ export default {
 	limit: 2,
 	status: "enable",
 	async run(message, client) {
-		if (!message.isAdmin && !message.isOwner) return client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
+		if (!message.isAdmin && !message.isOwner) return client[botNum].reply({ from: message.from, quoted: message.message }, "You are not admin. This commands is only for admins.");
 		if (!message.query) return client[botNum].reply({ from: message.from, quoted: message.message }, "Please specify a command\n\nEx: antidelete <enable/disable>");
 		const data = readJSON("./Databases/Groups/settingsManager.json");
 		switch (message.query.toLowerCase()) {

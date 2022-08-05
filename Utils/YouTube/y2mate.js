@@ -14,15 +14,12 @@ const post = async (url, formdata) => {
 		body: new URLSearchParams(Object.entries(formdata)),
 	});
 };
-const ytIdRegex = /(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:\-nocookie|)\.com\/(?:shorts\/)?(?:watch\?.*(?:|\&)v=|embed\/|v\/)|youtu\.be\/)([-_0-9A-Za-z]{11})/;
-export const isUrl = (url) => url.match(new RegExp(/(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:\-nocookie|)\.com\/(?:shorts\/)?(?:watch\?.*(?:|\&)v=|embed\/|v\/)|youtu\.be\/)\/.+/, "gi"));
+export const isUrl = (url) => url.match(new RegExp(/^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/)|(?:(?:watch)?\?v(?:i)?=|\&v(?:i)?=))([^#\&\?]*).*/, "g"));
 
 export const yt = async (url, quality, type, bitrate, server = "en60") =>
 	new Promise(async (resolve) => {
 		try {
-			if (!ytIdRegex.test(url)) throw "Invalid URL";
-			const ytId = ytIdRegex.exec(url);
-			url = `https://youtu.be/${ytId[1]}`;
+			if (!isUrl(url)) return resolve({ error: "Invalid URL" });
 			const json = await post(`https://www.y2mate.com/mates/${server}/analyze/ajax`, {
 				url,
 				q_auto: 0,
@@ -48,11 +45,12 @@ export const yt = async (url, quality, type, bitrate, server = "en60") =>
 			}
 			const filesize = list[quality];
 			const id = /var k__id = "(.*?)"/.exec(document.body.innerHTML) || ["", ""];
+			const vId = /var k_data_vid = "(.*?)"/.exec(document.body.innerHTML) || ["", ""];
 			const title = document.querySelector("b").innerHTML;
 			const json2 = await post(`https://www.y2mate.com/mates/${server}/convert`, {
 				type: "youtube",
 				_id: id[1],
-				v_id: ytId[1],
+				v_id: vId[1],
 				ajax: "1",
 				token: "",
 				ftype: type,
@@ -114,7 +112,7 @@ export const ytsr = (query, all = true) =>
 export const ytv = (query) =>
 	new Promise((resolve) => {
 		try {
-			if (ytIdRegex.test(query)) {
+			if (isUrl(query)) {
 				yt(query, "360p", "mp4", "360")
 					.then((res) => {
 						const container = res;
@@ -150,7 +148,7 @@ export const ytv = (query) =>
 export const yta = (query) =>
 	new Promise((resolve) => {
 		try {
-			if (ytIdRegex.test(query)) {
+			if (isUrl(query)) {
 				yt(query, "128kbps", "mp3", "128")
 					.then((res) => {
 						const container = res;

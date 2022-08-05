@@ -9,13 +9,14 @@ export const checkJSON = (dari) => {
 	return false;
 };
 
-export const pushDefaultSettings = (dari) => {
+export const pushDefaultSettings = (dari, groupName, groupDescription) => {
 	const data = readJSON("./Databases/Groups/settingsManager.json");
 	const index = data.findIndex((v) => Object.keys(v)[0] == dari);
 	if (index == -1) {
 		data.push({
 			[dari]: {
-				banned: [],
+				groupName,
+				groupDescription,
 				welcome1: "disable",
 				welcome1msg: "Welcome to {groupName}",
 				welcome2: "disable",
@@ -32,10 +33,23 @@ export const pushDefaultSettings = (dari) => {
 				autoReader: "disable",
 				antiNSFW: "disable",
 				games: "disable",
+				notification: "disable",
+				banned: [],
 			},
 		});
 		writeJSON("./Databases/Groups/settingsManager.json", data);
 		return data[index];
 	}
+	return data[index];
+};
+
+export const updateSettings = (setting, value, dari) => {
+	const data = readJSON("./Databases/Groups/settingsManager.json");
+	const index = data.findIndex((v) => Object.keys(v)[0] == dari);
+	if (index == -1) {
+		return false;
+	}
+	data[index][dari][setting] = value;
+	writeJSON("./Databases/Groups/settingsManager.json", data);
 	return data[index];
 };

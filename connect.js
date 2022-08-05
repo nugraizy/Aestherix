@@ -56,7 +56,7 @@ if (OPTIONS.json) {
 	store.readFromFile(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`);
 	setInterval(() => {
 		store.writeToFile(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`);
-	}, 4 * 1000);
+	}, 2 * 1000);
 }
 
 export const runtime = Date.now();
@@ -179,6 +179,38 @@ const start = async () => {
 		}
 	});
 
+	Client.ev.on("group.participants.update", async (message) => {
+		const Handler = (await import("./Handlers/Notification Handlers/participantsNotification.js")).default.handler;
+		Handler(client, message, store);
+	});
+
+	Client.ev.on("group.settings.update", async (message) => {
+		const Handler = (await import("./Handlers/Notification Handlers/groupSettingsNotification.js")).default.handler;
+		Handler(client, message, store);
+	});
+
+	Client.ws.on("CB:notification,type:w:gp2", (update) => {
+		if (update?.content?.[0].tag !== "description" && update?.content?.[0].tag !== "invite") return;
+		const from = update?.attrs?.from || update?.content?.[0]?.attrs?.author;
+		const name = update?.attrs?.notify;
+		const action = update?.attrs?.content?.[0]?.tag || update?.content?.[0].tag;
+		const content = update?.content?.[0]?.content?.[0]?.content?.toString() || update?.content?.[0]?.attrs.code || "";
+		const participant = update?.attrs?.participant;
+		client[botNum].ev.emit("group.settings.update", { from, name, action, participant, content });
+	});
+
+	Client.ws.on("CB:notification,type:picture", async (update) => {
+		const from = update?.attrs?.from || update?.content?.[0]?.attrs?.author;
+		const name = update?.attrs?.notify;
+		const action = update?.content?.[0]?.tag;
+		const participant = update?.content?.[0]?.attrs?.author;
+		const content = action == "delete" ? null : await client[botNum].profilePictureUrl(from, "image").catch((e) => null);
+		if (from.endsWith("@g.us")) client[botNum].ev.emit("group.settings.update", { from, name, action, participant, content });
+		else client[botNum].ev.emit("profile.update", { from, name, action, participant, content });
+	});
+
+	Client.ev.on("contacts.update", () => {});
+
 	clientMqttListen.on("message", async (topic, message) => {
 		message = message.toString();
 		const data = JSON.parse(message);
@@ -250,7 +282,7 @@ async function reloadModule(module, isNewFile) {
 		try {
 			const time = moment().format("HH:mm:ss DD/MM");
 			const commands = loadFiles("./Commands");
-			const afterCommands = commands.filter((v) => commandsPath.indexOf(path.join(__dirname, v)) < 0)[0];
+			const afterCommands = commands.filter((v) => !commandsPath.includes(path.join(__dirname, v)))[0];
 			try {
 				commandsPath.push(path.join(__dirname, afterCommands));
 				commandsPath.splice(commandsPath.indexOf(module), 1);

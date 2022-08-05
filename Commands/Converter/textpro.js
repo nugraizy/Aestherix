@@ -23,7 +23,7 @@ export default {
 	async run({ from, message, query, args, cmd, filename, prettyNumber }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a query");
 		try {
-			const {
+			let {
 				_: parsed,
 				isStickers,
 				isImage,
@@ -35,7 +35,8 @@ export default {
 				},
 			});
 			let models = query.match(/(\d+|model)/g);
-			if (models.includes("model")) {
+			parsed = models !== null ? parsed.slice(1) : parsed;
+			if (models?.includes("model")) {
 				if (args[1] == "next") args[2] = Number(args[2]);
 				else if (args[1] == "prev") args[2] = Number(args[2]);
 				const numbers = [];
@@ -66,8 +67,9 @@ Use ${cmd} ${randomize(numbers)}`;
 				}
 				return await client[botNum].sendMessage(from, { text: texts, footer: `Void bot   page : ${Number(index) + 1}/${data.length}`, buttons, headerType: 1 });
 			}
+
 			models =
-				models.length == 0
+				models == null
 					? [randomize(dataJSON).url]
 					: jsSplit
 							.select(
@@ -75,7 +77,7 @@ Use ${cmd} ${randomize(numbers)}`;
 								models?.map((v) => Number(v) - 1),
 							)
 							?.map((v) => v.url);
-			if (models.length == 0) return client[botNum].reply({ from, quoted: message }, `Model ${models[0]} not found\n Type : !${this.name} -type`);
+			if (models?.length == 0) return client[botNum].reply({ from, quoted: message }, `Model ${models[0]} not found\n Type : !${this.name} -type`);
 			for (const model of models) {
 				const result = await textpro(model, parsed.join(" "));
 				if ("error" in result) {

@@ -2,8 +2,9 @@ import { toBuffer, downloadContentFromMessage, generateWAMessageFromContent, gen
 import moment from "moment-timezone";
 import PhoneNumber from "awesome-phonenumber";
 import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined, isURL, writeBuffer, delaySync } from "./index.js";
-import { NO_DATA, ZERO, S_WHATSAPP_NET, UPDATE } from "../Misc/WAData/index.js";
-import { checkJSON, pushDefaultSettings } from "../Groups/Settings/index.js";
+import { NO_DATA, ZERO, S_WHATSAPP_NET, UPDATE, WebMessageInfoStubType } from "../Misc/WAData/index.js";
+import { checkJSON, pushDefaultSettings, updateSettings } from "../Groups/Settings/index.js";
+
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 export const reassign = async (m, client, store, search, deleted) => {
 	try {
@@ -14,35 +15,46 @@ export const reassign = async (m, client, store, search, deleted) => {
 				if (moment(m.messageTimestamp * 1000).unix() < moment(moment().subtract("5", "seconds").valueOf()).unix()) return { error: "OLD MESSAGE" };
 			} else if (moment(JSON.parse(m.messageTimestamp * 1000)).unix() < moment(moment().subtract("5", "seconds").valueOf()).unix()) return { error: "OLD MESSAGE" };
 		}
-		if (!m.message) return m;
-		m.message = isSame(Object.keys(m.message)[0], "ephemeralMessage") ? m.message.ephemeralMessage.message : m.message;
-		const isFromMe = m.key.fromMe;
-		const from = m.key.remoteJid;
+		delete m?.message?.messageContextInfo;
+		delete m?.message?.senderKeyDistributionMessage;
+		const isFromMe = m?.key?.fromMe;
+		const from = m?.key?.remoteJid || m.from;
 		global.where = from;
 		const isGroup = from.endsWith("@g.us");
 		let groupSettings;
-		if (isGroup) {
-			if (typeof checkJSON(from) == "boolean") {
-				groupSettings = pushDefaultSettings(from);
-			}
-			groupSettings = checkJSON(from);
-		}
-		const isBaileys = (m.key.id.startsWith("BAE5") && isSame(m.key.id.length, 16)) || (isFromMe && m.key.id.startsWith("VOID"));
-		const sender = isFromMe ? `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net` : isGroup ? m.key.participant : m.key.remoteJid;
+		const isBaileys = (m?.key?.id?.startsWith("BAE5") && isSame(m?.key?.id?.length, 16)) || (isFromMe && m?.key?.id?.startsWith("VOID"));
+		const sender = isFromMe ? `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net` : isGroup ? m?.key?.participant : m?.key?.remoteJid;
 		const isBlocked = (await client[botNum].fetchBlocklist()).includes(sender);
 		if (isBlocked) return;
 		const prettyNumber = PhoneNumber(`+${sender?.replace("@s.whatsapp.net", "")}`)?.getNumber("international") ?? PhoneNumber(`+${m?.key?.participant?.replace("@s.whatsapp.net", "")}`)?.getNumber("international") ?? "No Data";
 		const groupMetadata = isGroup ? await client[botNum].groupMetadata(from).catch((e) => {}) : {};
 		const groupName = isGroup ? groupMetadata?.subject : NO_DATA;
+		const groupDescription = isGroup ? groupMetadata?.desc?.toString() : NO_DATA;
 		const groupId = isGroup ? groupMetadata?.id : NO_DATA;
+		if (isGroup) {
+			if (typeof checkJSON(from) == "boolean") {
+				pushDefaultSettings(from, groupName, groupDescription);
+				groupSettings = checkJSON(from);
+			} else if ("GROUP_CHANGE_SUBJECT" == m.messageStubType) {
+				groupSettings = checkJSON(from);
+				updateSettings("groupName", groupName, from);
+			} else if ("GROUP_CHANGE_DESCRIPTION" == m.messageStubType) {
+				groupSettings = checkJSON(from);
+				updateSettings("groupDescription", groupDescription, from);
+			} else {
+				groupSettings = checkJSON(from);
+			}
+		}
 		const isGroupOwner = isGroup ? (isSame((await client[botNum].groupMetadata(from).catch((e) => {}))?.owner, sender) ? true : false) : false;
-		const content = JSON.stringify(m.message, null, 2);
-		const pushname = m.pushName ? m.pushName.trim() : prettyNumber;
+		const content = JSON.stringify(m?.message, null, 2);
+		const pushname = m?.pushName ? m?.pushName.trim() : store?.messages?.[sender]?.toJSON?.()?.reverse?.()?.[0]?.pushName || prettyNumber;
 		const botNumber = `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net`;
 		const ownerNumbers = [SETTINGS.owner_number, ...SETTINGS.team_number, botNumber];
 		const isOwner = ownerNumbers.includes(sender);
-		const timeStamp = m.messageTimestamp;
-		const filename = sender + m.key.id;
+		const timeStamp = m?.messageTimestamp || Date.now();
+		const filename = sender + (m?.key?.id || Date.now());
+		if (!m.message) return { ...m, settings: SETTINGS, isFromMe, from, isGroup, ...groupSettings, isBaileys, sender, isBlocked, prettyNumber, groupName, groupId, isGroupOwner, pushname, botNumber, isOwner, timeStamp, filename };
+		m.message = isSame(Object.keys(m.message)[0], "ephemeralMessage") ? m.message.ephemeralMessage.message : m.message;
 		let type = getContentType(m.message);
 		type = isSame(type, "messageContextInfo") ? (type = Object.keys(m.message)[1]) : type;
 		type = isSame(type, "extendedTextMessage") && m.message?.extendedTextMessage?.text?.includes("@") ? (type = "mentionText") : type;

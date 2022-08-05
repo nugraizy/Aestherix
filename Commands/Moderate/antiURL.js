@@ -10,8 +10,8 @@ export default {
 	limit: 2,
 	status: "enable",
 	async run(message, client) {
-		if (!message.isAdmin && !message.isOwner) return client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
-		if (!message.isBotAdmin) return client[botNum].reply({ from, quoted: message }, "Bot is not admin, Please promote admin before using moderation commands.");
+		if (!message.isAdmin && !message.isOwner) return client[botNum].reply({ from: message.from, quoted: message.message }, "You are not admin. This commands is only for admins.");
+		if (!message.isBotAdmin) return client[botNum].reply({ from: message.from, quoted: message.message }, "Bot is not admin, Please promote admin before using moderation commands.");
 		if (!message.query) return client[botNum].reply({ from: message.from, quoted: message.message }, "Please specify a command\n\nEx: antiurl <enable/disable>");
 		const data = readJSON("./Databases/Groups/settingsManager.json");
 		switch (message.query.toLowerCase()) {
