@@ -12,7 +12,7 @@ export const getSurahDetail = (nomor) =>
 				deskripsi: data.deskripsi.replace(regex, ""),
 			});
 		} catch (err) {
-			reject({ error: err });
+			reject(err);
 		}
 	});
 

@@ -25,6 +25,6 @@ export const webp2mp4File = async (path) =>
 				result,
 			});
 		} catch (err) {
-			reject({ error: err });
+			reject(err);
 		}
 	});

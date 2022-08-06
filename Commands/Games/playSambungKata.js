@@ -16,7 +16,11 @@ export default {
 		const statusGame = GetSambungKataSession(from);
 		if (!statusGame) {
 			const game = new SambungKata(sender, undefined, from);
-			await client[botNum].relayMessage(from, { listMessage: { buttonText: "Void Bot", description: "List Message", listType: 1, footerText: "Void Bot", sections: [{ rows: [{ title: "Play", rowId: `.sambung player 2` }], title: "VOID BOT | Word Game" }] } }, { messageId: generateMessageID() });
+			await client[botNum].relayMessage(
+				from,
+				{ listMessage: { buttonText: "Void Bot Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪", description: "List Message", listType: 1, footerText: "Void Bot", sections: [{ rows: [{ title: "Play", rowId: `.sambung player 2` }], title: "VOID BOT | Word Game" }] } },
+				{ messageId: generateMessageID() },
+			);
 		} else if (query == "player 2") {
 			if (statusGame.checkStatus() == "waiting" && (statusGame.player1 == sender || statusGame.player2 == sender)) {
 				await client[botNum].reply({ from, quoted: message }, statusGame.throwResponse().message);

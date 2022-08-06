@@ -38,7 +38,7 @@ ${game.BOARD.map((v, i) => {
 	return v;
 }).join("")}
 
-`;
+Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 			if (/(del|dlt|d)/i.test(query)) {
 				const status = GetTicTacToeSession(sender);
 				if (!status) return client[botNum].reply({ from, quoted: message }, "You don't have a game");

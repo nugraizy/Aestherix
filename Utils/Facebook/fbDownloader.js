@@ -58,7 +58,7 @@ export const fbDl = (url) =>
 			}
 		} catch (err) {
 			const data = await fetchJSON(URL_BASE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) });
-			if (data.code == 102) return reject({ error: data.message });
+			if (data.code == 102) return resolve({ error: data.message });
 			let { url, subname } = data.url.filter((x) => x.subname == "HD")?.[0] ?? data.url.filter((x) => x.subname == "SD")?.[0] ?? data.url[0];
 			let { duration, title } = data.meta;
 			let { timestamp: datePosted } = data;

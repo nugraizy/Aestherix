@@ -6,11 +6,11 @@ const sessionId = process.env.INSTAGRAM_SESI;
 export const getHighlights2 = (username) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const items = await fetchId(username);
+			const { user, items } = await fetchId(username);
 			const Container = await Promise.all(items.map((v) => fetchHighlights(v.highlight_id)));
-			resolve(Container.map((v, i) => ({ title: items[i].title, thumbnail: items[i].cover, totalHighlight: Container[i].length, dataHighlight: Container[i] })));
+			resolve({ user, highlights: Container.map((v, i) => ({ title: items[i].title, thumbnail: items[i].cover, totalHighlight: v.length, dataHighlight: v })) });
 		} catch (err) {
-			reject({ error: err });
+			reject(err);
 		}
 	});
 
@@ -21,18 +21,18 @@ const appendParams = (url, params) => {
 };
 
 const fetchId = async (usernames) => {
-	const { id } = await getUser(usernames);
+	const dataUser = await getUser(usernames);
 	const data = await fetchJSON(
 		appendParams("https://www.instagram.com/graphql/query/", {
 			query_hash: "c9100bf9110dd6361671f113dd02e7d6",
-			variables: JSON.stringify({ user_id: id, include_chaining: false, include_reel: true, include_suggested_users: false, include_logged_out_extras: false, include_highlight_reels: true, include_live_status: false }),
+			variables: JSON.stringify({ user_id: dataUser.id, include_chaining: false, include_reel: true, include_suggested_users: false, include_logged_out_extras: false, include_highlight_reels: true, include_live_status: false }),
 		}),
 		{
 			method: "GET",
 			headers: { "user-agent": UA_IP, cookie: `sessionid=${sessionId};` },
 		},
 	);
-	return data.data.user.edge_highlight_reels.edges.map((edge) => ({ highlight_id: edge.node.id, cover: edge.node.cover_media.thumbnail_src, title: edge.node.title }));
+	return { user: dataUser, items: data.data.user.edge_highlight_reels.edges.map((edge) => ({ highlight_id: edge.node.id, cover: edge.node.cover_media.thumbnail_src, title: edge.node.title })) };
 };
 
 const fetchHighlights = async (id) => {

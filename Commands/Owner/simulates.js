@@ -210,7 +210,7 @@ const events = async (client, containers, presence) => {
 		if (presence === "bio") {
 			const time = moment().format("HH:mm:ss DD/MM");
 			const uptime = getRuntime(process.uptime());
-			const bio = `Made by nanda | Void bot info : UPTIME : ${uptime} | TIME : ${time}`;
+			const bio = `Made by nanda | Void bot info : UPTIME : ${uptime} | TIME : ${time} | Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 			await client[botNum].setStatus(bio);
 			return;
 		}

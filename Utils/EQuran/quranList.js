@@ -4,7 +4,7 @@ export const getListSurah = () =>
 			const data = await fetchJSON(`${URL_BASE}/surat`);
 			resolve(data);
 		} catch (err) {
-			reject({ error: err });
+			reject(err);
 		}
 	});
 

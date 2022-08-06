@@ -7,7 +7,7 @@ export const getSurahAudio = (nomor) =>
 				buffer: Buffer.from(await fetchBUFFER(data.audio)),
 			});
 		} catch (err) {
-			reject({ error: err });
+			reject(err);
 		}
 	});
 

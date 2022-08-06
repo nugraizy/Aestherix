@@ -30,7 +30,7 @@ export default {
 Author Fullname : ${data[index].authorFullname}
 Follower : ${data[index].follower}
 Caption : ${data[index].caption}
-Void Bot     ${index + 1}/${data.length}`,
+Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 				},
 				{ quoted: message },
 			);
@@ -60,7 +60,7 @@ Void Bot     ${index + 1}/${data.length}`,
 Author Fullname : ${result[0].authorFullname}
 Follower : ${result[0].follower}
 Caption : ${result[0].caption}
-Void Bot     1/${result.length}`,
+Void Bot     1/${result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 				},
 				{ quoted: message },
 			);

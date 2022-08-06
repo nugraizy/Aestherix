@@ -29,7 +29,7 @@ export default {
 						index + 1 !== data.length ? { quickReplyButton: { displayText: "Next Image", id: `.waifupic next ${args[2]} ${args[3]} ${data[index + 1]} ${JSON.stringify(data)}` } } : { quickReplyButton: { displayText: `Search More ${args[2].capitalize()}`, id: `.waifupic ${args[2]} -${args[3]}` } },
 						index !== 0 ? { quickReplyButton: { displayText: "Previous Image", id: `.waifupic prev ${args[2]} ${args[3]} ${data[index - 1]} ${JSON.stringify(data)}` } } : {},
 					],
-					footer: `Powered by waifu.pics\nVoid Bot     ${index + 1}/${data.length}`,
+					footer: `Provided by waifu.pics\nVoid Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 				},
 				{ quoted: message },
 			);
@@ -60,7 +60,7 @@ export default {
 					image: { url: result[0] },
 					caption: `\`\`\` • Waifu Pics \`\`\``,
 					templateButtons: [{ urlButton: { displayText: "Image Source", url: result[0] } }, { quickReplyButton: { displayText: "Next Image", id: `.waifupic next ${querie} ${nsfw ? "nsfw" : "sfw"} ${result[1]} ${JSON.stringify(result)}` } }],
-					footer: `Powered by waifu.pics\nVoid Bot     1/${result.length}`,
+					footer: `Provided by waifu.pics\nVoid Bot     1/${result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 				},
 				{ quoted: message },
 			);

@@ -30,7 +30,7 @@ export default {
 Author : ${data[index].author}
 Favourites : ${numberWithCommas(data[index].favourites)}
 Views : ${numberWithCommas(data[index].views)}
-Void Bot     ${index + 1}/${data.length}`,
+Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 				},
 				{ quoted: message },
 			);
@@ -57,7 +57,7 @@ Void Bot     ${index + 1}/${data.length}`,
 Author : ${result[0].author}
 Favourites : ${numberWithCommas(result[0].favourites)}
 Views : ${numberWithCommas(result[0].views)}
-Void Bot     1/${result.length}`,
+Void Bot     1/${result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 				},
 				{ quoted: message },
 			);

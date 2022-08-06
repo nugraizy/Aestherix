@@ -57,7 +57,7 @@ export default {
 					if (parsed.isStickers) {
 						await client[botNum].sendMessage(from, { sticker: buffer }, { quoted: message });
 					} else {
-						await client[botNum].sendMessage(from, { image: buffer, caption: "Meme Generator Made by Void bot using Canvas" }, { quoted: message });
+						await client[botNum].sendMessage(from, { image: buffer, caption: "Meme Generator Made by Void Bot using Canvas. Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪" }, { quoted: message });
 					}
 					INFOLOG(`[${color(time, "cyan")}]`, `${color(`${parsed.isStickers ? "Sticker" : "Image"} is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
 				} catch (err) {

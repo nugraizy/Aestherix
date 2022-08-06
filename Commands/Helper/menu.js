@@ -11,7 +11,7 @@ export default {
 	limit: 5,
 	status: "enable",
 	async run({ from, prefix, message }, client) {
-		let capt = `𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪\n${center(`V ${readJSON("./package.json").version.toUpperCase()}`, 23)}\n\n`;
+		let capt = `Void Bot\n${center(`V ${readJSON("./package.json").version.toUpperCase()}`, 23)}\n\n`;
 		const Container = [];
 		for (const [key, value] of cmds.commands)
 			if (Object.keys(Container).includes(value.category)) Container[value.category].push(key);
@@ -22,7 +22,16 @@ export default {
 				.map((v, i) => `${i + 1}. ${v.capitalize()}`)
 				.join("\n")}\n\n\n`;
 		capt = `${capt.trim()}\n\nUse : ${prefix}${getRandomCommand()} -H\n~> to see the detail of the command.\n~> total command : ${cmds.commands.size}`;
-		await client[botNum].reply({ from, quoted: message }, capt.trim());
+		await client[botNum].sendMessage(
+			from,
+			{
+				text: capt.trim(),
+				footer: "Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪",
+				buttons: [{ buttonId: `.about`, buttonText: { displayText: "About Us." }, type: 1 }],
+				headerType: 1,
+			},
+			{ quoted: message },
+		);
 	},
 };
 

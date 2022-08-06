@@ -27,7 +27,7 @@ export default {
 						index + 1 !== data.length ? { quickReplyButton: { displayText: "Next Article", id: `${cmd} next ${data[index + 1].image ?? data[index + 1].link} ${JSON.stringify(data)}` } } : {},
 						index !== 0 ? { quickReplyButton: { displayText: "Previous Article", id: `${cmd} prev ${data[index - 1].image ?? data[index + 1].link} ${JSON.stringify(data)}` } } : {},
 					],
-					footer: `Void Bot     ${index + 1}/${data.length}`,
+					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 				},
 				{ quoted: message },
 			);
@@ -49,7 +49,7 @@ export default {
 					{ urlButton: { displayText: "Article Source", url: data[0].link } },
 					{ quickReplyButton: { displayText: "Next Article", id: `${cmd} next ${data[1].image ?? data[1].link} ${JSON.stringify(data)}` } },
 				],
-				footer: `Void Bot     1/${data.length}`,
+				footer: `Void Bot     1/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 			},
 			{ quoted: message },
 		);

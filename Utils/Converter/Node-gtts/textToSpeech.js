@@ -7,12 +7,12 @@ export const textToSpeech = (text, language, filename) =>
 		try {
 			gtts = Text2Speech(language);
 		} catch (e) {
-			reject({ error: "lang not found", lang: LANGUAGES });
+			reject({ name: "lang not found", message: LANGUAGES });
 			return;
 		}
 		gtts.save(`${filename}.opus`, text, async (err) => {
 			if (err) {
-				reject({ error: "error while converting text to speech", err });
+				reject({ message: "error while converting text to speech", name: err });
 				return;
 			}
 			const buffer = await toOpus("opus", { input: `${filename}`, output: `${filename}-done` });

@@ -181,7 +181,7 @@ Lat : ${extractMediaData.degreesLatitude}
 Long : ${extractMediaData.degreesLongitude}${quotedMessage}
 `.trim();
 							await client[botNum]
-								.sendMessage(from, { location: { degreesLatitude: extractMediaData.degreesLatitude, degreesLongitude: extractMediaData.degreesLongitude, jpegThumbnail: extractMediaData.jpegThumbnail, name: "Provided by Nanda, From Void Bot." } }, options)
+								.sendMessage(from, { location: { degreesLatitude: extractMediaData.degreesLatitude, degreesLongitude: extractMediaData.degreesLongitude, jpegThumbnail: extractMediaData.jpegThumbnail, name: "Provided by Nanda, Void Bot. Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪" } }, options)
 								.then(() => client[botNum].sendMessage(from, { text: string_deleted }, options));
 						}
 						break;

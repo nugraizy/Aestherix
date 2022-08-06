@@ -24,7 +24,7 @@ export default {
 		try {
 			const brainly = await brainlySearch(query, options);
 			if ("error" in brainly) return client[botNum].reply({ from, quoted: message }, brainly.error);
-			let capt = "Void Bot Brainly\n\n";
+			let capt = "``` • Brainly```\n\n";
 			for (const { pertanyaan, jawaban } of brainly) {
 				capt += `Pertanyaan : ${pertanyaan.replace(/[\n\t\r]/g, "")}\n`;
 				capt += `Jawaban : ${jawaban
@@ -32,6 +32,7 @@ export default {
 					.join("")
 					.trim()}\n\n\n`;
 			}
+			capt += `\nBrainly by Void Bot. Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 			await client[botNum].reply({ from, quoted: message }, capt.trim());
 		} catch (err) {
 			log(e);

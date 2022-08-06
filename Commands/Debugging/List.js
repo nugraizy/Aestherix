@@ -10,23 +10,23 @@ export default {
 	limit: 0,
 	status: "enable",
 	async run({ from, query }, client, store) {
-		const row = Array(Number(query)).fill({
+		const row = Array(Number(query || 1)).fill({
 			rows: [
 				{
-					title: "🔥",
-					rowId: `.menu`,
+					title: "Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪",
+					rowId: `Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 				},
 			],
-			title: "VOID BOT | Hello World!",
+			title: "Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪",
 		});
 		const messages = generateWAMessageFromContent(
 			from,
 			{
 				listMessage: {
-					buttonText: "Void Bot",
+					buttonText: "Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪",
 					description: "List Message",
 					listType: 1,
-					footerText: "Void Bot",
+					footerText: "Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪",
 					sections: row,
 				},
 			},

@@ -4,7 +4,7 @@ export const getAyat = (nomor) =>
 			const data = await fetchJSON(`${URL_BASE}/surat/${nomor}`);
 			resolve(data.ayat.map((v) => ({ arab: v.ar, indonesia: v.idn, latin: v.tr.replace(regex, "") })));
 		} catch (err) {
-			reject({ error: err });
+			reject(err);
 		}
 	});
 

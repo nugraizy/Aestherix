@@ -14,7 +14,7 @@ export const getTafsirSurah = (nomor) =>
 				})),
 			);
 		} catch (err) {
-			reject({ error: err });
+			reject(err);
 		}
 	});
 

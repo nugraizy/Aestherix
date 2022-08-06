@@ -65,7 +65,7 @@ Use ${cmd} ${randomize(numbers)}`;
 				if (isParam && index !== 0) {
 					buttons.push({ buttonId: `${cmd} prev ${index - 1} -model`, buttonText: { displayText: "Previous" }, type: 1 });
 				}
-				return await client[botNum].sendMessage(from, { text: texts, footer: `Void bot   page : ${Number(index) + 1}/${data.length}`, buttons, headerType: 1 });
+				return await client[botNum].sendMessage(from, { text: texts, footer: `Void Bot   page : ${Number(index) + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`, buttons, headerType: 1 });
 			}
 
 			models =

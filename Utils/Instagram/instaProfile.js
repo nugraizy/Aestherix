@@ -21,7 +21,7 @@ export const getProfile = (username) =>
 				.find(".comments_photo")
 				.each((i, elem) => (media[i].comments = $(elem).text().trim()))
 				.text();
-			if ($(".profile-name-top").text().trim() == "" && $(".follows").text().trim() == "") reject({ error: "User not found." });
+			if ($(".profile-name-top").text().trim() == "" && $(".follows").text().trim() == "") return resolve({ error: "User not found." });
 			resolve({
 				fullName: $(".profile-name-bottom").text().trim() !== "" ? $(".profile-name-bottom").text().trim() : "Not Available.",
 				userName: $(".profile-name-top").text().trim(),
@@ -33,10 +33,7 @@ export const getProfile = (username) =>
 				latestPost: media,
 			});
 		} catch (e) {
-			log(e);
-			reject({
-				error: e,
-			});
+			reject(e);
 		}
 	});
 
@@ -50,7 +47,7 @@ export const getUser = (username) =>
 					cookie: sessionId,
 				},
 			});
-			if (graphql == undefined) resolve({ error: `User ${username} not found.` });
+			if (!graphql) return resolve({ error: `User ${username} not found.` });
 			const { user } = graphql;
 			resolve({
 				id: user.id,

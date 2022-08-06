@@ -122,7 +122,8 @@ Ex : .waifuplay search yofukashi no uta
 
 !waifuplay latest
 
-This Utility Provided by waifuplay.my.id`,
+This Utility Provided by waifuplay.my.id
+Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 						},
 						{ quoted: message },
 					);
