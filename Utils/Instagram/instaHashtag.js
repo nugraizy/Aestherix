@@ -6,7 +6,7 @@ export const searchHashtag = (query) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			if (query.includes("#")) query = query.replace("#", "");
-			const { data } = await fetchJSON(`https://www.instagram.com/explore/tags/${keyword}/?__a=1&__d=dis`, {
+			const { data } = await fetchJSON(`https://www.instagram.com/explore/tags/${query}/?__a=1&__d=dis`, {
 				headers: {
 					"user-agent": UA,
 					cookie: sessionId,
@@ -14,7 +14,7 @@ export const searchHashtag = (query) =>
 			});
 			resolve(parse(data));
 		} catch (e) {
-			if (Object.keys(e?.response?.data)?.length == 0) return resolve({ error: "Hashtag not found" });
+			if (e.response?.data && Object.keys(e?.response?.data)?.length == 0) return resolve({ error: "Hashtag not found" });
 			reject(e);
 		}
 	});

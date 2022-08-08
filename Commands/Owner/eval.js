@@ -7,6 +7,7 @@ import prettier from "js-beautify";
 import { format } from "util";
 import syntaxerror from "syntax-error";
 import * as func from "../../exports.js";
+import { spotifier } from "../../Utils/Spotifier/index.js";
 
 export default {
 	name: "eval",

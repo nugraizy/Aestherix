@@ -11,7 +11,7 @@ export default {
 		try {
 			if (message == undefined) return;
 			message = await reassign(JSON.parse(JSON.stringify(message)), client, false, true);
-			if ("error" in message) return;
+			if (message && "error" in message) return;
 			const { from, mention: mentioning, timeStamp, sender, body, pushname, extractMediaData, filename, prettyNumber, isBaileys, isFromMe } = message;
 			const messages = message?.message?.message;
 			if (!messages) return;

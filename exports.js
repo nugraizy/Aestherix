@@ -90,6 +90,7 @@ export {
 	convertSecondstoTime,
 } from "./Helper/index.js";
 export {
+	instafier,
 	iflixSearch,
 	trueidSearch,
 	cnnindonesia,

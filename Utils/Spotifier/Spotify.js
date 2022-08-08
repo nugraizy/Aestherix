@@ -13,7 +13,9 @@ class Spotifier {
 	#BASE_API = "https://api.spotify.com/v1";
 	#BASE_API_AUTH = "https://accounts.spotify.com/api/token";
 	constructor() {
-		if (this.#clientId == undefined || this.#clientSecret == undefined) throw new Error("Please add CLIENT_ID and CLIENT_SECRET to your .env files");
+		if (!(this.#clientId || this.#clientSecret)) {
+			throw new Error("Please add CLIENT_ID and CLIENT_SECRET to your .env files");
+		}
 	}
 
 	tokenize() {
@@ -36,13 +38,14 @@ class Spotifier {
 				url: this.#BASE_API + path,
 				method,
 				headers: {
-					...opts,
+					...(opts !== undefined && "headers" in opts ? opts.headers : {}),
 					Authorization: `Bearer ${this.#bearerToken}`,
 				},
+				...(opts !== undefined && "data" in opts ? { data: opts } : {}),
 			});
 			return { status: true, ...data };
 		} catch (err) {
-			log(err.response.data);
+			log(err.response);
 			return { status: false, message: err.message };
 		}
 	}
@@ -145,6 +148,24 @@ class Spotifier {
 		}
 	}
 
+	async getTracksAudioAnalysis(tracksID) {
+		try {
+			if (!tracksID) return { status: false, message: "Parameter tracksID must provided" };
+			return { status: true, ...(await this.req(`/audio-analysis/${tracksID}`, "GET")) };
+		} catch (err) {
+			return { status: false, message: err };
+		}
+	}
+
+	async getTracksAudioFeatures(tracksID) {
+		try {
+			if (!tracksID) return { status: false, message: "Parameter tracksID must provided" };
+			return { status: true, ...(await this.req(`/audio-features?ids=${tracksID}`, "GET")) };
+		} catch (err) {
+			return { status: false, message: err };
+		}
+	}
+
 	async getNewReleases() {
 		try {
 			return { status: true, ...(await this.req(`/browse/new-releases`, "GET")) };
@@ -153,10 +174,10 @@ class Spotifier {
 		}
 	}
 
-	async searchTracks(query) {
+	async searchTracks(query, artists) {
 		try {
 			query = encodeURI(query);
-			const data = await this.req(`/search?q=track:${query}&type=track&include_external=audio`, "GET");
+			const data = await this.req(`/search?q=track:${query}+artist:${artists}&type=track&include_external=audio`, "GET");
 			if (data.tracks.items.length == 0) return { status: false, message: "Not Found" };
 			return { status: true, data: data.tracks };
 		} catch (err) {
@@ -190,7 +211,7 @@ class Spotifier {
 		try {
 			await this.getAccessTokenFromRefreshToken();
 			const { data } = await Axios({
-				url: this.#BASE_API + `/me/player/currently-playing`,
+				url: `${this.#BASE_API}/me/player/currently-playing`,
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${this.#accessToken}`,
@@ -206,7 +227,7 @@ class Spotifier {
 		try {
 			await this.getAccessTokenFromRefreshToken();
 			const { data } = await Axios({
-				url: this.#BASE_API + `/me/player/devices`,
+				url: `${this.#BASE_API}/me/player/devices`,
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${this.#accessToken}`,
@@ -222,7 +243,7 @@ class Spotifier {
 		try {
 			await this.getAccessTokenFromRefreshToken();
 			const { data } = await Axios({
-				url: this.#BASE_API + `/me/player`,
+				url: `${this.#BASE_API}/me/player`,
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${this.#accessToken}`,
@@ -238,7 +259,7 @@ class Spotifier {
 		try {
 			await this.getAccessTokenFromRefreshToken();
 			const { data } = await Axios({
-				url: this.#BASE_API + `/me/player/currently-playing`,
+				url: `${this.#BASE_API}/me/player/currently-playing`,
 				method: "GET",
 				headers: {
 					Authorization: `Bearer ${this.#accessToken}`,
@@ -269,6 +290,84 @@ class Spotifier {
 			};
 		} catch (err) {
 			return { status: false, message: err.response?.data?.error?.message };
+		}
+	}
+
+	async skipPlayback() {
+		try {
+			await this.getAccessTokenFromRefreshToken();
+			const { data } = await Axios({
+				url: `${this.#BASE_API}/me/player/next`,
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${this.#accessToken}`,
+				},
+				params: {
+					device_id: "d9fe42af9e32ef6748395b0cf0479cc8642a5640",
+				},
+			});
+			return data;
+		} catch (err) {
+			return { status: false, message: err };
+		}
+	}
+
+	async pausePlayback() {
+		try {
+			await this.getAccessTokenFromRefreshToken();
+			const { data } = await Axios({
+				url: `${this.#BASE_API}/me/player/pause`,
+				method: "PUT",
+				headers: {
+					Authorization: `Bearer ${this.#accessToken}`,
+				},
+				params: {
+					device_id: "d9fe42af9e32ef6748395b0cf0479cc8642a5640",
+				},
+			});
+			return data;
+		} catch (err) {
+			return { status: false, message: err };
+		}
+	}
+
+	async resumePlayback() {
+		try {
+			await this.getAccessTokenFromRefreshToken();
+			const { data } = await Axios({
+				url: `${this.#BASE_API}/me/player/play`,
+				method: "PUT",
+				headers: {
+					Authorization: `Bearer ${this.#accessToken}`,
+				},
+				params: {
+					device_id: "d9fe42af9e32ef6748395b0cf0479cc8642a5640",
+				},
+			});
+			return data;
+		} catch (err) {
+			return { status: false, message: err };
+		}
+	}
+
+	async startNewPlayback(trackId) {
+		try {
+			await this.getAccessTokenFromRefreshToken();
+			const { data } = await Axios({
+				url: `${this.#BASE_API}/me/player/play`,
+				method: "PUT",
+				headers: {
+					Authorization: `Bearer ${this.#accessToken}`,
+				},
+				params: {
+					device_id: "d9fe42af9e32ef6748395b0cf0479cc8642a5640",
+					context_uri: `spotify:track:${trackId}`,
+					position_ms: 0,
+				},
+			});
+			return data;
+		} catch (err) {
+			return { status: false, message: err };
 		}
 	}
 }

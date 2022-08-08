@@ -1,6 +1,6 @@
 {
 	"name": "simplebotpro3",
-	"version": "1.13.43",
+	"version": "1.13.44",
 	"description": "WhatsApp bot using Baileys library with Javascript language.",
 	"exports": "./connect.js",
 	"type": "module",
@@ -45,6 +45,8 @@
 		"gradient-string": "^2.0.0",
 		"https": "^1.0.0",
 		"image-size": "^1.0.2",
+		"instagram_mqtt": "^1.2.2",
+		"instagram-private-api": "^1.45.3",
 		"js-beautify": "^1.14.0",
 		"js-split": "^1.0.1",
 		"jsdom": "^19.0.0",

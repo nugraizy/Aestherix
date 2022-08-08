@@ -124,6 +124,7 @@ const start = async () => {
 			client[Client.user.id] = Client;
 			successSpinner("Connecting", { text: "Connected to WASocket" });
 			INFOLOG(color(center(`Bot Version  ${romanize(readJSON("./package.json").version)}\n\n`, stdout.columns), "#9f53ea"));
+			await (await import("./Handlers/Instagram Notifier/handlers.js")).handler();
 		}
 	});
 
