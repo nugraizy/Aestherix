@@ -7,7 +7,7 @@ import petting from "pet-pet-gif";
 import sharp from "sharp";
 import { __dirname } from "../../connect.js";
 import { webp2mp4File } from "./EZGifs/index.js";
-import { writeBuffer, unlinkFile, INFOLOG, ERRLOG, color, isURL, readBuffer, isFileExist, readJSON } from "../../Helper/Modules/index.js";
+import { writeBuffer, unlinkFile, INFOLOG, ERRLOG, color, isURL, readBuffer, isFileExist, readJSON, fetchJSON } from "../../Helper/Modules/index.js";
 const VIDEO_MIMETYPE = readJSON(path.join(__dirname, "Databases/Mimetypes/Video.json"));
 
 export const toMp4 = (input, sender) =>

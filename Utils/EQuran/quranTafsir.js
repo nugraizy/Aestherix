@@ -1,3 +1,4 @@
+import { fetchJSON } from "../../Helper/index.js";
 import { getAyat } from "./index.js";
 
 export const getTafsirSurah = (nomor) =>

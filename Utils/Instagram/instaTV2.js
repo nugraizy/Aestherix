@@ -1,3 +1,5 @@
+import { fetchTEXT, cheerioLOAD } from "../../Helper/index.js";
+
 export const getIgtv2 = (url) =>
 	new Promise(async (resolve, reject) => {
 		try {

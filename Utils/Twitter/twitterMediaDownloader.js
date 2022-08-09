@@ -1,3 +1,5 @@
+import { fetchJSON, fetchTEXT } from "../../Helper/index.js";
+
 export const twitterDownload = (input) =>
 	new Promise(async (resolve) => {
 		if (!regex(input)) return resolve({ error: "This is not a valid Twitter URL." });

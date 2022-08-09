@@ -1,3 +1,4 @@
+import { fetchJSON } from "../../Helper/index.js";
 import { getUser } from "./index.js";
 
 const URL_BASE = (input) => `https://i.instagram.com/api/v1/feed/user/${input}/reel_media/`;
@@ -32,8 +33,7 @@ export const getStory3 = (input) =>
 			}
 			resolve(result);
 		} catch (err) {
-			log(err);
-			reject({ error: err });
+			reject(err);
 		}
 	});
 

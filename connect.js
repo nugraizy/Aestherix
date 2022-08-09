@@ -107,11 +107,15 @@ const start = async () => {
 		if (connection == "connecting") addSpinner("Connecting", { text: "Connecting to WASocket..." });
 		if (connection == "close") {
 			const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
-			if (reason == DisconnectReason.badSession) log("Bad session, Please delete your previous session and do a rescan...");
-			else if (reason == DisconnectReason.connectionLost) log("Connection lost, Quick reconnecting...");
+			if (reason == DisconnectReason.badSession) {
+				log("Bad session, Please delete your previous session and do a rescan...");
+				process.exit(0);
+			} else if (reason == DisconnectReason.connectionLost) log("Connection lost, Quick reconnecting...");
 			else if (reason == DisconnectReason.connectionReplaced) log("Connection replaced, Quick reconnecting...");
-			else if (reason == DisconnectReason.loggedOut) log("Logged out, Please delete your previous session and do a rescan...");
-			else {
+			else if (reason == DisconnectReason.loggedOut) {
+				log("Logged out, Please delete your previous session and do a rescan...");
+				process.exit(0);
+			} else {
 				if (reason == DisconnectReason.restartRequired) log("Restart required, Restarting your WebScoket...");
 				else if (reason == DisconnectReason.timedOut) log("Timed out, Quick reconnecting...");
 				else if (reason == DisconnectReason.connectionClosed) log("Connection closed, Quick reconnecting...");
@@ -124,7 +128,6 @@ const start = async () => {
 			client[Client.user.id] = Client;
 			successSpinner("Connecting", { text: "Connected to WASocket" });
 			INFOLOG(color(center(`Bot Version  ${romanize(readJSON("./package.json").version)}\n\n`, stdout.columns), "#9f53ea"));
-			await (await import("./Handlers/Instagram Notifier/handlers.js")).handler();
 		}
 	});
 

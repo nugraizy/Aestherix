@@ -1,3 +1,5 @@
+import { fetchJSON, fetchTEXT, cheerioLOAD } from "../../Helper/index.js";
+
 export const tiktokDownloader = (url) =>
 	new Promise(async (resolve) => {
 		try {

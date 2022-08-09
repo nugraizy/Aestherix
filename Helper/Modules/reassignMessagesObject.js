@@ -1,4 +1,4 @@
-import { toBuffer, downloadContentFromMessage, generateWAMessageFromContent, generateWAMessage, getContentType } from "@adiwajshing/baileys";
+import { toBuffer, downloadContentFromMessage, downloadMediaMessage as downloadMessage, generateWAMessageFromContent, generateWAMessage, getContentType } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
 import PhoneNumber from "awesome-phonenumber";
 import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined, isURL, writeBuffer, delaySync } from "./index.js";
@@ -265,14 +265,15 @@ export const reassign = async (m, client, store, search, deleted) => {
 			return await client[botNum].sendMessage(from, { text }, { quoted });
 		};
 		const downloadAndSaveMediaMessage = async (media, path) => {
-			const msg = await downloadContentFromMessage(media, typeQuoted.replace(/Message/g, ""));
-			const buffer = await toBuffer(msg);
-			writeBuffer(path, buffer);
-			return path;
+			return new Promise(async (resolve) => {
+				const msg = await downloadContentFromMessage(media, typeQuoted.replace(/Message/g, ""));
+				const buffer = await toBuffer(msg);
+				writeBuffer(path, buffer);
+				resolve(path);
+			});
 		};
-		const downloadMediaMessage = async (media) => {
-			const msg = await downloadContentFromMessage(media, typeQuoted.replace(/Message/g, ""));
-			return await toBuffer(msg);
+		const downloadMediaMessage = async (media, typeDownloadable = "buffer") => {
+			return await downloadMessage(media, typeDownloadable);
 		};
 		const buttonText = async (dari, contentText, footerText, buttons, opts = {}) => {
 			if (buttons.length == 0) return new Error("Buttons is empty");

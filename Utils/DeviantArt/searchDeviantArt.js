@@ -1,3 +1,4 @@
+import { fetchJSON } from "../../Helper/index.js";
 import { URL_API_SEARCH } from "./api.js";
 
 export const searchDeviantArt = (keyword) =>

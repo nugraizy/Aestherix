@@ -1,4 +1,4 @@
-import { removeDuplicatesArray } from "../../Helper/Modules/index.js";
+import { removeDuplicatesArray, fetchBUFFER } from "../../Helper/Modules/index.js";
 import { downloadManga } from "../../Utils/Pixiv/index.js";
 
 export default {

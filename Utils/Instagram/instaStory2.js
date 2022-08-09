@@ -1,3 +1,5 @@
+import { fetchTEXT, cheerioLOAD } from "../../Helper/index.js";
+
 export const getStory2 = (username) =>
 	new Promise(async (resolve, reject) => {
 		let data = null;

@@ -1,3 +1,5 @@
+import { fetchJSON } from "../../../Helper/index.js";
+
 export const emojimix = (emoji1, emoji2) =>
 	new Promise(async (resolve) => {
 		try {

@@ -6,21 +6,22 @@ import sharp from "sharp";
 import imageSize from "image-size";
 import path from "path";
 import { randomize } from "../../Helper/index.js";
-import { textpro, convertMediaToSticker } from "../../Utils/index.js";
+import { ephoto360, convertMediaToSticker } from "../../Utils/index.js";
 import { __dirname } from "../../connect.js";
-const dataJSON = JSON.parse(fs.readFileSync("./Databases/Textmaker/textprourl.json"));
+const { writeFile } = fs;
+const dataJSON = JSON.parse(fs.readFileSync("./Databases/Textmaker/ephoto360url.json"));
 const defaulType = "image";
 
 export default {
-	name: "textpro",
+	name: "ephoto360",
 	description: "Image maker using texts",
-	usage: `!textpro <query> <model/number[REQUIRED]> [options]\nOptions:\n-stk / -img\nAvailable Model Type : !textpro -model`,
-	aliases: ["imgmake", "maker", "tpro"],
+	usage: `!ephoto360 <query> <model/number[REQUIRED]> [options]\nOptions:\n-stk / -img\nAvailable Model Type : !ephoto360 -model`,
+	aliases: ["ephoto", "epht"],
 	category: "Converter",
 	cooldown: 4,
 	limit: 3,
 	status: "enable",
-	async run({ from, message, query, args, cmd, filename, prettyNumber }, client) {
+	async run({ from, message, query, args, cmd, filename, prettyNumber, isMediaImage, extractMediaData }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a query");
 		try {
 			let {
@@ -67,7 +68,6 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 				buttons = buttons.reverse();
 				return await client[botNum].sendMessage(from, { text: texts, footer: `Void Bot   page : ${Number(index) + 1}/${splitData.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`, buttons, headerType: 1 });
 			}
-
 			models =
 				models == null
 					? [randomize(dataJSON).url]
@@ -79,12 +79,17 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 							?.map((v) => v.url);
 			if (models?.length == 0) return client[botNum].reply({ from, quoted: message }, `Model ${models[0]} not found\n Type : !${this.name} -type`);
 			for (const model of models) {
-				const result = await textpro(model, parsed.join(" "));
+				let buffers = null;
+				if (isMediaImage) {
+					await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}`));
+					buffers = path.join(__dirname, `Temporary Files/${filename}`);
+				}
+				const result = await ephoto360(model, parsed.join(" "), buffers);
 				if ("error" in result) {
 					client[botNum].reply({ from, quoted: message }, `something went wrong:\n\n${result.error}`);
 					continue;
 				}
-				const { data } = await Axios.get(result.dl, {
+				const { data } = await Axios.get(result.preview, {
 					responseType: "arraybuffer",
 				});
 				const { width, height } = imageSize(data);

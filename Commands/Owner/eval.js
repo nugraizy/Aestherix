@@ -6,8 +6,11 @@ import { exec } from "child_process";
 import prettier from "js-beautify";
 import { format } from "util";
 import syntaxerror from "syntax-error";
-import * as func from "../../exports.js";
+import * as a from "../../Helper/index.js";
+import * as b from "../../Utils/index.js";
 import { spotifier } from "../../Utils/Spotifier/index.js";
+import { instafier } from "../../Utils/Instagram Notifier/index.js";
+const func = { ...a, ...b };
 
 export default {
 	name: "eval",

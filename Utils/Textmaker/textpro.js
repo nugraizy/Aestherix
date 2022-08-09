@@ -1,7 +1,7 @@
 import Axios from "axios";
 import FormData from "form-data";
 import fs from "fs";
-import { randomize } from "../../Helper/index.js";
+import { randomize, cheerioLOAD } from "../../Helper/index.js";
 
 export const textpro = (api, texts) =>
 	new Promise(async (resolve, reject) => {
@@ -94,8 +94,8 @@ const split = (text, len) => {
 
 let BASE = (page) => `https://textpro.me/home-p${page}`;
 const scrapeUrl = async (page) => {
-	if (!fs.existsSync("./textprourl.json")) fs.writeFileSync("./textprourl.json", JSON.stringify([]));
-	const dataJSON = JSON.parse(fs.readFileSync("./textprourl.json"));
+	if (!fs.existsSync("./Databases/Textmaker/textprourl.json")) fs.writeFileSync("./Databases/Textmaker/textprourl.json", JSON.stringify([]));
+	const dataJSON = JSON.parse(fs.readFileSync("./Databases/Textmaker/textprourl.json"));
 	if (page == 13) return console.log("scraping is done. saved in './textprourl.json' total page scraped :", page);
 	console.log("scraping page", page);
 	const { data } = await Axios.get(BASE(page));
@@ -115,7 +115,7 @@ const scrapeUrl = async (page) => {
 				.trimEnd();
 			dataJSON.push({ effectName: name, url });
 			container.push({ effectName: name, url });
-			fs.writeFileSync("./textprourl.json", JSON.stringify(dataJSON, undefined, 2));
+			fs.writeFileSync("./Databases/Textmaker/textprourl.json", JSON.stringify(dataJSON, undefined, 2));
 		});
 	console.log("page ", page, "scraped. result :\n" + container.map((v) => `effect name : ${v.effectName} url : ${v.url}`).join("\n"));
 	container = [];

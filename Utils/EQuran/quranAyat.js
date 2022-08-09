@@ -1,3 +1,5 @@
+import { fetchJSON } from "../../Helper/index.js";
+
 export const getAyat = (nomor) =>
 	new Promise(async (resolve, reject) => {
 		try {

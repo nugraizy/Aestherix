@@ -1,3 +1,5 @@
+import { fetchBUFFER } from "../../Helper/index.js";
+
 export const getScreenshot = async (url, type) =>
 	new Promise(async (resolve, reject) => {
 		try {

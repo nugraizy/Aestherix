@@ -1,3 +1,5 @@
+import { fetchJSON } from "../../Helper/index.js";
+
 const INFO_URL_API = (code) => `https://www.instagram.com/p/${code}/?__a=1&__d=dis`;
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36";
 const sessionId = process.env.INSTAGRAM_SESI || (await (await import("./instaCookie.js")).getCookie(process.env.INSTAGRAM_USERNAME, process.env.INSTAGRAM_PASSWORD));
@@ -29,7 +31,6 @@ export const getPost = (code) =>
 			}
 			resolve(result);
 		} catch (e) {
-			log(e);
 			resolve({ error: url.includes("/p/") ? e.message : "Invalid code" });
 		}
 	});

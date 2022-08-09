@@ -1,3 +1,5 @@
+import { fetchJSON, fetchBUFFER } from "../../Helper/index.js";
+
 export const getSurahAudio = (nomor) =>
 	new Promise(async (resolve, reject) => {
 		try {

@@ -1,6 +1,6 @@
 import Axios from "axios";
-import cheerio from "cheerio";
 import qs from "qs";
+import { cheerioLOAD } from "../../Helper/index.js";
 
 export const getIgtv = (username) =>
 	new Promise((resolve, reject) => {

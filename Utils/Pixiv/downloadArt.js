@@ -1,3 +1,4 @@
+import { fetchJSON } from "../../Helper/index.js";
 import { URL_API_DOWNLOAD_ARTWORKS, downloadManga } from "./index.js";
 
 export const downloadArtworks = (input) =>

@@ -1,6 +1,6 @@
 import moment from "moment-timezone";
 import Tesseract from "tesseract.js";
-import { INFOLOG, color, unlinkFile } from "../../Helper/Modules/index.js";
+import { INFOLOG, color, unlinkFile, cheerioLOAD, fetchTEXT } from "../../Helper/Modules/index.js";
 
 export const tesseract = async (image, sender, lang = "ind") =>
 	new Promise(async (resolve, reject) => {

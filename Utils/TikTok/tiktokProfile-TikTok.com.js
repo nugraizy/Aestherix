@@ -1,3 +1,5 @@
+import { fetchJSON, fetchTEXT, cheerioLOAD } from "../../Helper/index.js";
+
 export const tiktokProfileTIKTOK = (username) =>
 	new Promise(async (resolve, reject) => {
 		try {
@@ -13,7 +15,6 @@ export const tiktokProfileTIKTOK = (username) =>
 			if ("error" in data) resolve({ error: data.error });
 			resolve(data);
 		} catch (err) {
-			log(err);
 			reject(err);
 		}
 	});

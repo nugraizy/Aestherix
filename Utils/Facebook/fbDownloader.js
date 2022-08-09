@@ -1,6 +1,6 @@
 import moment from "moment-timezone";
-import cheerio from "cheerio";
 import Axios from "axios";
+import { fetchJSON, cheerioLOAD } from "../../Helper/index.js";
 
 const URL_BASE = "https://api.onlinevideoconverter.pro/api/convert";
 const FB_DL = "https://snapsave.app/action.php";
@@ -38,7 +38,7 @@ export const fbDl = (url) =>
 					?.split("</section><div class=")[0]
 					?.replace(/\\(\\)?/g, "");
 				if (!html) return resolve({ error: "Cant find downloadable media" });
-				const $ = cheerio.load(html);
+				const $ = cheerioLOAD(html);
 				let result = [];
 				$("table.table > tbody > tr").each(function () {
 					const el = $(this).find("td");

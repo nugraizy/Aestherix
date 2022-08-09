@@ -20,7 +20,7 @@ export { searchManga, searchArtwork, searchNovel, downloadArtworks, downloadMang
 export { searchDeviantArt, downloadDeviantArt } from "./DeviantArt/index.js";
 export { isNsfw, createImage } from "./Deepai/index.js";
 export { getWaifu } from "./Waifu Pic/index.js";
-export { textpro } from "./Textpro/index.js";
+export { textpro, ephoto360 } from "./Textmaker/index.js";
 export { spotifier } from "./Spotifier/index.js";
 export { cnnindonesia, cnninternational } from "./CNN/index.js";
 export { iflixSearch, trueidSearch } from "./Movies/index.js";

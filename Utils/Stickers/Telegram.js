@@ -1,3 +1,5 @@
+import { fetchJSON, fetchTEXT, cheerioLOAD } from "../../Helper/index.js";
+
 const TELEGRAM_URL_BASE = (input) => `https://api.telegram.org/bot1324131825:AAFA5kj-T55WZ6nnOmU35A4iKhRsPVyLAU8/${input}`;
 const TELEGRAM_URL_DATABASES = (input) => `https://api.telegram.org/file/bot1324131825:AAFA5kj-T55WZ6nnOmU35A4iKhRsPVyLAU8/${input}`;
 const COMBOT_URL_BASE = (input) => `https://combot.org/telegram/stickers?q=${encodeURI(input)}`;

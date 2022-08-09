@@ -1,3 +1,4 @@
+import { fetchJSON } from "../../Helper/index.js";
 import { URL_API_SEARCH_MANGA } from "./index.js";
 
 export const searchManga = (keyword) =>

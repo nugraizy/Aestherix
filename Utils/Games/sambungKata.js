@@ -1,5 +1,5 @@
 import moment from "moment-timezone";
-import { randomize } from "../../Helper/Modules/index.js";
+import { randomize, fetchJSON, fetchTEXT, cheerioLOAD } from "../../Helper/Modules/index.js";
 import { SetIntervals, DeleteIntervals, CheckIntervals } from "../Misc/intervals.js";
 
 const URL_BASE = (input) => `https://kbbi.kemdikbud.go.id/entri/${input}`;

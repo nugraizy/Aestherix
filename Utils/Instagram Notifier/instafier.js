@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 import { IgApiClient } from "instagram-private-api";
-import { withFbns, withRealtime } from "instagram_mqtt";
+import { withFbns, withRealtime, GraphQLSubscriptions, SkywalkerSubscriptions } from "instagram_mqtt";
 import fs from "fs";
 import sharp from "sharp";
 import { fileTypeFromBuffer } from "file-type";
@@ -18,13 +18,12 @@ class Instafier {
 		this.Container = new Map();
 		this.Instagram = withFbns(withRealtime(new IgApiClient()));
 		this.Instagram.state.generateDevice(process.env.INSTAGRAM_USERNAME);
-		this.readState();
 	}
 
 	async login() {
 		try {
-			await this.Instagram.simulate.preLoginFlow();
-			return { error: false, ...(await this.Instagram.account.login(this.#username, this.#password)) };
+			await this.Instagram.account.login(this.#username, this.#password);
+			return { error: false };
 		} catch {
 			return { error: true, message: "Login Failed" };
 		}
@@ -36,6 +35,15 @@ class Instafier {
 				error: false,
 				...(await this.Instagram.fbns.connect()),
 				...(await this.Instagram.realtime.connect({
+					graphQlSubs: [
+						GraphQLSubscriptions.getAppPresenceSubscription(),
+						GraphQLSubscriptions.getClientConfigUpdateSubscription(),
+						GraphQLSubscriptions.getZeroProvisionSubscription(this.Instagram.state.phoneId),
+						GraphQLSubscriptions.getDirectStatusSubscription(),
+						GraphQLSubscriptions.getDirectTypingSubscription(this.Instagram.state.cookieUserId),
+						GraphQLSubscriptions.getAsyncAdSubscription(this.Instagram.state.cookieUserId),
+					],
+					skywalkerSubs: [SkywalkerSubscriptions.directSub(this.Instagram.state.cookieUserId), SkywalkerSubscriptions.liveSub(this.Instagram.state.cookieUserId)],
 					irisData: await this.Instagram.feed.directInbox().request(),
 				})),
 			};
@@ -44,20 +52,28 @@ class Instafier {
 		}
 	}
 
+	closeConnection() {
+		try {
+			this.Instagram.realtime.removeAllListeners();
+			this.Instagram.fbns.removeAllListeners();
+			return { error: false, message: "Connection successfully closed" };
+		} catch (err) {
+			return { error: false, message: err.message };
+		}
+	}
+
 	async saveState() {
 		if (!fs.existsSync("./Session/Instagram Auth/")) fs.mkdirSync("./Session/Instagram Auth/");
-		return fs.writeFileSync("./Session/Instagram Auth/auth.json", await this.Instagram.exportState(), { encoding: "utf8" });
+		return fs.writeFileSync(`./Session/Instagram Auth/${process.env.INSTAGRAM_USERNAME}.json`, await this.Instagram.exportState(), { encoding: "utf8" });
 	}
 
 	async readState() {
-		if (!fs.existsSync("./Session/Instagram Auth/auth.json")) {
+		if (!fs.existsSync(`./Session/Instagram Auth/${process.env.INSTAGRAM_USERNAME}.json`)) {
 			await this.login();
 			await this.saveState();
-			this.#authorId = (await this.Instagram.account.currentUser()).pk;
-			return;
-		}
-		await this.Instagram.importState(fs.readFileSync("./Session/Instagram Auth/auth.json", { encoding: "utf8" }));
+		} else await this.Instagram.importState(fs.readFileSync(`./Session/Instagram Auth/${process.env.INSTAGRAM_USERNAME}.json`, { encoding: "utf8" }));
 		this.#authorId = (await this.Instagram.account.currentUser()).pk;
+		return { error: false, message: "State read" };
 	}
 
 	async changeBiography(texts) {
@@ -162,12 +178,22 @@ class Instafier {
 	}
 
 	async ev() {
+		await this.readState();
 		this.Instagram.realtime.on("message", async (data) => {
 			if (data.message.op == "add") {
 				data = await this._parseIncomingMessage(data.message);
 				this.Instagram.realtime.emit("onMessage", { model: "received", ...data });
 			}
 		});
+
+		this.Instagram.realtime.on("realtimeSub", (message) => {
+			log("[EVENT REALTIME REALTIMESUB]", JSON.stringify(message));
+		});
+
+		this.Instagram.realtime.on("receive", (data) => {
+			log("[EVENT REALTIME RECEIVE]", JSON.stringify(data));
+		});
+
 		this.Instagram.realtime.on("error", (e) => log("REALTIME Error :", e));
 
 		this.Instagram.realtime.on("close", (d) => log("REALTIME Disconnected :", d));

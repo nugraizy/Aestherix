@@ -1,5 +1,5 @@
-import cheerio from "cheerio";
 import FormData from "form-data";
+import { fetchTEXT, cheerioLOAD } from "../../../Helper/index.js";
 
 export const apng2webpUrl = (url) =>
 	new Promise(async (resolve) => {

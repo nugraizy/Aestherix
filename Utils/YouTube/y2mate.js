@@ -1,5 +1,6 @@
 import { JSDOM } from "jsdom";
 import yts from "yt-search";
+import { fetchJSON } from "../../Helper/index.js";
 
 const post = async (url, formdata) => {
 	return await fetchJSON(url, {

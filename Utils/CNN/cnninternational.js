@@ -1,4 +1,5 @@
 import moment from "moment-timezone";
+import { fetchJSON } from "../../Helper/index.js";
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 
 export const cnninternational = (keyword) =>

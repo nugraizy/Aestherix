@@ -1,4 +1,5 @@
 import { cnninternational } from "../../Utils/index.js";
+import { fetchBUFFER } from "../../Helper/index.js";
 
 export default {
 	name: "cnninternational",

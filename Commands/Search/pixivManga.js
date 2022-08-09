@@ -1,5 +1,5 @@
 import { generateMessageID } from "@adiwajshing/baileys";
-import { removeDuplicatesArray } from "../../Helper/Modules/index.js";
+import { removeDuplicatesArray, fetchBUFFER } from "../../Helper/Modules/index.js";
 import { searchManga, downloadManga } from "../../Utils/Pixiv/index.js";
 
 export default {

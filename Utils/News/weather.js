@@ -1,3 +1,5 @@
+import { fetchJSON } from "../../Helper/index.js";
+
 export const getWeather = (type, ...q) =>
 	new Promise(async (resolve, reject) => {
 		try {

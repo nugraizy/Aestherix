@@ -2,6 +2,10 @@ export { attp, ttp, textStory, memeGenerator, trigger } from "./Canvas/index.js"
 export { getSpinner, scheme, UA } from "./Misc/index.js";
 export { checkAfk, getAfk, setAfk, deleteAfk, checkUser, checkLimit, addUser, indexUser, updateUser, addLimit, addAllLimit, resetAllLimit } from "./Groups/index.js";
 export {
+	cheerioLOAD,
+	fetchBUFFER,
+	fetchJSON,
+	fetchTEXT,
 	extractZalgo,
 	uploadToTelegraph,
 	isFilePath,

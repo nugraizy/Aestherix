@@ -1,4 +1,8 @@
 export {
+	cheerioLOAD,
+	fetchBUFFER,
+	fetchJSON,
+	fetchTEXT,
 	extractZalgo,
 	uploadToTelegraph,
 	isFilePath,

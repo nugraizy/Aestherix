@@ -1,6 +1,6 @@
 import { generateMessageID } from "@adiwajshing/baileys";
 import { spotifier } from "../../Utils/Spotifier/index.js";
-import { removeDuplicatesArray } from "../../Helper/index.js";
+import { removeDuplicatesArray, fetchBUFFER } from "../../Helper/index.js";
 
 export default {
 	name: "spotifyalbum",

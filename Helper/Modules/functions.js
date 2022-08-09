@@ -6,6 +6,24 @@ import beautifyJSON from "json-stable-stringify";
 import { fileTypeFromBuffer } from "file-type";
 import Axios from "axios";
 import FormData from "form-data";
+import cheerio from "cheerio";
+import fetch from "node-fetch";
+
+export const fetchTEXT = async (_, __) => {
+	return await (await fetch(_, __)).text();
+};
+
+export const fetchJSON = async (_, __) => {
+	return await (await fetch(_, __)).json();
+};
+
+export const fetchBUFFER = async (_, __) => {
+	return await (await fetch(_, __)).text();
+};
+
+export const cheerioLOAD = (html) => {
+	return cheerio.load(html);
+};
 
 export const download = (url, path, callback) => {
 	request.head(url, () => {

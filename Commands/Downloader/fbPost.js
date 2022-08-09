@@ -2,7 +2,7 @@ import { delay } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
 import parser from "yargs-parser";
 import { fbDl } from "../../Utils/Facebook/index.js";
-import { isOne, isURL, INFOLOG, ERRLOG, color } from "../../Helper/Modules/index.js";
+import { isOne, isURL, INFOLOG, ERRLOG, color,fetchBUFFER } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "fbpost",

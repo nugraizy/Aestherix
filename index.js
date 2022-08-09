@@ -1,6 +1,4 @@
 import dotenv from "dotenv";
-import fetch from "node-fetch";
-import cheerio from "cheerio";
 import { EventEmitter } from "events";
 
 dotenv.config();
@@ -27,11 +25,6 @@ user.afk = new Map();
 global.commandsPath = [];
 cmds.aliases = [];
 global.log = console.log;
-global.fetch = fetch;
-global.fetchJSON = async (_, __) => await (await fetch(_, __)).json();
-global.fetchTEXT = async (_, __) => await (await fetch(_, __)).text();
-global.fetchBUFFER = async (_, __) => await (await fetch(_, __)).arrayBuffer();
-global.cheerioLOAD = (_) => cheerio.load(_);
 EventEmitter.prototype.setMaxListeners(0);
 
 await import("./connect.js");

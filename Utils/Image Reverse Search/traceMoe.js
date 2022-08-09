@@ -4,7 +4,7 @@ import sharp from "sharp";
 import path from "path";
 import { __dirname } from "../../connect.js";
 import { readFileSync } from "fs";
-import { isURL } from "../../Helper/Modules/index.js";
+import { isURL, fetchBUFFER, fetchJSON } from "../../Helper/Modules/index.js";
 
 const isValidImageURL = async (url) => {
 	try {

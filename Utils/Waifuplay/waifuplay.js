@@ -1,5 +1,5 @@
 import Axios from "axios";
-import cheerio from "cheerio";
+import { cheerioLOAD } from "../../Helper/index.js";
 
 export const wpSearch = (text) =>
 	new Promise(async (resolve) => {

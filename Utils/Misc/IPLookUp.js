@@ -1,3 +1,5 @@
+import { fetchJSON } from "../../Helper/index.js";
+
 export const IPLookup = (input) =>
 	new Promise(async (resolve, reject) => {
 		try {
@@ -29,7 +31,6 @@ export const IPLookup = (input) =>
 				hosting,
 			});
 		} catch (err) {
-			log(err);
 			reject(err);
 		}
 	});
