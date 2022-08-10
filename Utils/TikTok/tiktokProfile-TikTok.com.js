@@ -1,4 +1,4 @@
-import { fetchJSON, fetchTEXT, cheerioLOAD } from "../../Helper/index.js";
+import { cheerioLOAD, fetchJSON, fetchTEXT } from "../../Helper/index.js";
 
 export const tiktokProfileTIKTOK = (username) =>
 	new Promise(async (resolve, reject) => {
@@ -21,7 +21,16 @@ export const tiktokProfileTIKTOK = (username) =>
 
 const parseUserInfo = async (arr) => {
 	try {
-		const { id: keyword, signature: biography, verified: isVerified, avatarLarger: profileHD, avatarMedium: profileSD, avatarThumb: profileLOW, nickname: fullName, uniqueId: username } = arr.UserModule.users[arr.UserPage.uniqueId];
+		const {
+			id: keyword,
+			signature: biography,
+			verified: isVerified,
+			avatarLarger: profileHD,
+			avatarMedium: profileSD,
+			avatarThumb: profileLOW,
+			nickname: fullName,
+			uniqueId: username,
+		} = arr.UserModule.users[arr.UserPage.uniqueId];
 		const { followerCount: followers, followingCount: following, heart, videoCount: totalVideo } = arr.UserModule.stats[arr.UserPage.uniqueId];
 		let data = await fetchJSON(URL_ID_API(keyword));
 		data = data.body.itemListData.map((v) => {

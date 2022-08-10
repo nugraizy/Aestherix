@@ -1,5 +1,5 @@
 import FormData from "form-data";
-import { fetchTEXT, cheerioLOAD } from "../../../Helper/index.js";
+import { cheerioLOAD, fetchTEXT } from "../../../Helper/index.js";
 
 export const apng2webpUrl = (url) =>
 	new Promise(async (resolve) => {
@@ -12,7 +12,11 @@ export const apng2webpUrl = (url) =>
 			const gotdata = { file, convert };
 			bodyFormThen.append("file", gotdata.file);
 			bodyFormThen.append("convert", gotdata.convert);
-			const dataResult = await fetchTEXT(`https://ezgif.com/apng-to-webp/${gotdata.file}`, { method: "post", body: bodyFormThen, headers: { "Content-Type": `multipart/form-data; boundary=${bodyFormThen._boundary}` } });
+			const dataResult = await fetchTEXT(`https://ezgif.com/apng-to-webp/${gotdata.file}`, {
+				method: "post",
+				body: bodyFormThen,
+				headers: { "Content-Type": `multipart/form-data; boundary=${bodyFormThen._boundary}` },
+			});
 			const $$ = cheerioLOAD(dataResult);
 			const result = `https:${$$("div#output > p.outfile > img").attr("src")}`;
 			resolve({

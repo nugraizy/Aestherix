@@ -1,5 +1,5 @@
 import { delay } from "@adiwajshing/baileys";
-import { TicTacToe, GetTicTacToeSession, DeleteTicTacToeSession } from "../../Utils/Games/index.js";
+import { DeleteTicTacToeSession, GetTicTacToeSession, TicTacToe } from "../../Utils/Games/index.js";
 
 const WINNER_SETS = {
 	O: "🚫",
@@ -24,7 +24,9 @@ export default {
 				? `${game.winner == "Void Bot" ? "Void Bot" : `@${game.winner.split("@")[0]}`} wins!`
 				: game.status == "DRAW"
 				? "Game is Draw!"
-				: `${game.PLAYER_TURN == game.PLAYER_1 ? game.PLAYER_1_MODEL : game.PLAYER_2_MODEL} ${game.PLAYER_TURN == "Void Bot" ? "Void Bot" : `@${game.PLAYER_TURN.split("@")[0]}`}'s turn\n\n`
+				: `${game.PLAYER_TURN == game.PLAYER_1 ? game.PLAYER_1_MODEL : game.PLAYER_2_MODEL} ${
+						game.PLAYER_TURN == "Void Bot" ? "Void Bot" : `@${game.PLAYER_TURN.split("@")[0]}`
+				  }'s turn\n\n`
 			: ""
 	}
 	${game.PLAYER_1_MODEL} @${game.PLAYER_1.split("@")[0]} vs ${game.PLAYER_2_MODEL} ${game.PLAYER_2 == "Void Bot" ? "Void Bot" : `@${game.PLAYER_2.split("@")[0]}`}

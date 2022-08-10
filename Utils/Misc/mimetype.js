@@ -1,4 +1,4 @@
-import { lookup, extension as extensi } from "mime-types";
+import { extension as extensi, lookup } from "mime-types";
 
 export const mime = (input) => {
 	switch (input) {

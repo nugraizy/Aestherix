@@ -1,9 +1,9 @@
-import path from "path";
 import moment from "moment-timezone";
+import path from "path";
 import { __dirname } from "../../connect.js";
-import { ytsr, yta } from "../../Utils/YouTube/index.js";
+import { color, ERRLOG, INFOLOG, isURL, removeDuplicatesArray } from "../../Helper/Modules/index.js";
 import { toOpus } from "../../Utils/Converter/index.js";
-import { INFOLOG, ERRLOG, color, removeDuplicatesArray, isURL } from "../../Helper/Modules/index.js";
+import { yta, ytsr } from "../../Utils/YouTube/index.js";
 
 export default {
 	name: "spotifydl",
@@ -35,7 +35,14 @@ export default {
 					capt += `Title : ${title}\n`;
 					capt += `Duration : ${timestamp ?? "No Data"}\n`;
 					await client[botNum].reply({ from, quoted: message }, capt.trim());
-					await client[botNum].sendMessage(from, { audio: await toOpus("opus", { input: path.join(__dirname, `Temporary Files/${filename}`), output: path.join(__dirname, `Temporary Files/${filename}-done`), media: dl_link.replace("https", "http") }), caption: capt.trim() });
+					await client[botNum].sendMessage(from, {
+						audio: await toOpus("opus", {
+							input: path.join(__dirname, `Temporary Files/${filename}`),
+							output: path.join(__dirname, `Temporary Files/${filename}-done`),
+							media: dl_link.replace("https", "http"),
+						}),
+						caption: capt.trim(),
+					});
 				}
 			}
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloaded Spotify Audio`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
@@ -50,5 +57,7 @@ export default {
 };
 
 function regex(input) {
-	return /(https?:\/\/open.spotify.com\/(track|user|artist|album)\/[a-zA-Z0-9]+(\/playlist\/[a-zA-Z0-9]+|)|spotify:(track|user|artist|album):[a-zA-Z0-9]+(:playlist:[a-zA-Z0-9]+|))/.test(input);
+	return /(https?:\/\/open.spotify.com\/(track|user|artist|album)\/[a-zA-Z0-9]+(\/playlist\/[a-zA-Z0-9]+|)|spotify:(track|user|artist|album):[a-zA-Z0-9]+(:playlist:[a-zA-Z0-9]+|))/.test(
+		input,
+	);
 }

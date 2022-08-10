@@ -8,7 +8,9 @@ export const searchDeviantArt = (keyword) =>
 			if ("errorCode" in data) return resolve({ error: "No art found with this keyword." });
 			resolve(
 				data.deviations.map((v) => {
-					const image = `${v.media.baseUri}${v.media.types[check(v.media.types.findIndex((w) => w.t == "fullview" && w.c != undefined)) ?? v.media.types.findIndex((w) => w.t == "social_preview")].c?.replace("<prettyName>", v.media.prettyName)}${v.media.token?.[0] ? `?token=${v.media.token[0]}` : ""}`;
+					const image = `${v.media.baseUri}${v.media.types[
+						check(v.media.types.findIndex((w) => w.t == "fullview" && w.c != undefined)) ?? v.media.types.findIndex((w) => w.t == "social_preview")
+					].c?.replace("<prettyName>", v.media.prettyName)}${v.media.token?.[0] ? `?token=${v.media.token[0]}` : ""}`;
 					return {
 						id: v.deviationId,
 						title: v.title,

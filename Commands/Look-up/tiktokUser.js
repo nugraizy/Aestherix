@@ -1,7 +1,7 @@
 import moment from "moment-timezone";
 import parser from "yargs-parser";
+import { color, ERRLOG, isOne, isURL, numberWithCommas } from "../../Helper/Modules/index.js";
 import { tiktokProfileTIKTOK } from "../../Utils/TikTok/index.js";
-import { isOne, isURL, ERRLOG, color, numberWithCommas } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "tikstalk",
@@ -44,7 +44,11 @@ export default {
 						{
 							image: { url: profileHD },
 							caption: `\`\`\` • TikTok User Lookup \`\`\``,
-							templateButtons: [{ urlButton: { displayText: "Profile Picture HD Source", url: profileHD } }, { urlButton: { displayText: "Profile Picture SD Source", url: profileSD } }, { urlButton: { displayText: "Profile Picture Low Source", url: profileLOW } }],
+							templateButtons: [
+								{ urlButton: { displayText: "Profile Picture HD Source", url: profileHD } },
+								{ urlButton: { displayText: "Profile Picture SD Source", url: profileSD } },
+								{ urlButton: { displayText: "Profile Picture Low Source", url: profileLOW } },
+							],
 							footer: capt.trim(),
 						},
 						{ quoted: message },

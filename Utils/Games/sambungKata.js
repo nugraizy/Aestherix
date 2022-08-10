@@ -1,6 +1,6 @@
 import moment from "moment-timezone";
-import { randomize, fetchJSON, fetchTEXT, cheerioLOAD } from "../../Helper/Modules/index.js";
-import { SetIntervals, DeleteIntervals, CheckIntervals } from "../Misc/intervals.js";
+import { cheerioLOAD, fetchJSON, fetchTEXT, randomize } from "../../Helper/Modules/index.js";
+import { CheckIntervals, DeleteIntervals, SetIntervals } from "../Misc/intervals.js";
 
 const URL_BASE = (input) => `https://kbbi.kemdikbud.go.id/entri/${input}`;
 const URL_RANDOM_WORD = `https://gist.githubusercontent.com/sipalingkoding/ca07ee6116d5ed5bdddfbe2d1a3a0e56/raw/3b4fb33bc60bbb42089cc75bed93e7477fe4ab5c/list-kata.json`;

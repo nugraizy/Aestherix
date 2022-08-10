@@ -1,4 +1,4 @@
-import { fetchJSON, fetchTEXT, cheerioLOAD } from "../../Helper/index.js";
+import { cheerioLOAD, fetchJSON, fetchTEXT } from "../../Helper/index.js";
 
 const TELEGRAM_URL_BASE = (input) => `https://api.telegram.org/bot1324131825:AAFA5kj-T55WZ6nnOmU35A4iKhRsPVyLAU8/${input}`;
 const TELEGRAM_URL_DATABASES = (input) => `https://api.telegram.org/file/bot1324131825:AAFA5kj-T55WZ6nnOmU35A4iKhRsPVyLAU8/${input}`;
@@ -37,7 +37,9 @@ export const telegram = (query) =>
 					containername: data.result.name,
 					title: data.result.title,
 					isAnimated: data.result.is_animated,
-					stickers: await Promise.all(data.result.stickers.map(async (v) => TELEGRAM_URL_DATABASES((await fetchJSON(TELEGRAM_URL_BASE(`getFile?file_id=${v.thumb.file_id}`))).result.file_path))),
+					stickers: await Promise.all(
+						data.result.stickers.map(async (v) => TELEGRAM_URL_DATABASES((await fetchJSON(TELEGRAM_URL_BASE(`getFile?file_id=${v.thumb.file_id}`))).result.file_path)),
+					),
 				});
 				return;
 			}
@@ -48,7 +50,9 @@ export const telegram = (query) =>
 				name: data.result.name,
 				title: data.result.title,
 				isAnimated: data.result.is_animated,
-				stickers: await Promise.all(data.result.stickers.map(async (v) => TELEGRAM_URL_DATABASES((await fetchJSON(TELEGRAM_URL_BASE(`getFile?file_id=${v.thumb.file_id}`))).result.file_path))),
+				stickers: await Promise.all(
+					data.result.stickers.map(async (v) => TELEGRAM_URL_DATABASES((await fetchJSON(TELEGRAM_URL_BASE(`getFile?file_id=${v.thumb.file_id}`))).result.file_path)),
+				),
 			});
 		} catch (e) {
 			resolve({ error: e.message });

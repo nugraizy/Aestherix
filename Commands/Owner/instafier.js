@@ -19,7 +19,6 @@ export default {
 				await (await import("../../Handlers/Instagram Notifier/handlers.js")).handler();
 				instafierState = true;
 				return client[botNum].reply({ from, quoted: message }, "Instafier is now enabled");
-				break;
 			case "disable":
 				if (!instafierState) return client[botNum].reply({ from, quoted: message }, "Instafier is already disabled");
 				const clients = instafier.closeConnection();

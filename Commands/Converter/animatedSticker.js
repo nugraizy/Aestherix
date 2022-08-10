@@ -2,7 +2,7 @@ import moment from "moment-timezone";
 import rgbcolor from "rgb-color";
 import yargsParser from "yargs-parser";
 import { attp } from "../../Helper/Canvas/index.js";
-import { INFOLOG, color } from "../../Helper/Modules/index.js";
+import { color, INFOLOG } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "animatedsticker",

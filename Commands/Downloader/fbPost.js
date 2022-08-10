@@ -1,8 +1,8 @@
 import { delay } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
 import parser from "yargs-parser";
+import { color, ERRLOG, fetchBUFFER, INFOLOG, isOne, isURL } from "../../Helper/Modules/index.js";
 import { fbDl } from "../../Utils/Facebook/index.js";
-import { isOne, isURL, INFOLOG, ERRLOG, color,fetchBUFFER } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "fbpost",
@@ -38,8 +38,16 @@ export default {
 				await client[botNum].sendMessage(
 					from,
 					post.isVideo
-						? { video: new Buffer.from(await fetchBUFFER(post.url)), caption: `\`\`\` • Facebook Video Downloader\`\`\`\n\n${post.datePosted ? `Post Uploaded : ${post.datePosted}\n` : ""}Res : ${post.resolution}${post.duration ? `\nDuration : ${post.duration}` : ""}` }
-						: { image: new Buffer.from(await fetchBUFFER(post.url)), caption: `\`\`\` • Facebook Image Downloader\`\`\`\n\n${post.datePosted ? `Post Uploaded : ${post.datePosted}\n` : ""}Res : ${post.resolution}` },
+						? {
+								video: new Buffer.from(await fetchBUFFER(post.url)),
+								caption: `\`\`\` • Facebook Video Downloader\`\`\`\n\n${post.datePosted ? `Post Uploaded : ${post.datePosted}\n` : ""}Res : ${post.resolution}${
+									post.duration ? `\nDuration : ${post.duration}` : ""
+								}`,
+						  }
+						: {
+								image: new Buffer.from(await fetchBUFFER(post.url)),
+								caption: `\`\`\` • Facebook Image Downloader\`\`\`\n\n${post.datePosted ? `Post Uploaded : ${post.datePosted}\n` : ""}Res : ${post.resolution}`,
+						  },
 				);
 				await delay(300);
 			}

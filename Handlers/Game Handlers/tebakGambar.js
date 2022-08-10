@@ -15,7 +15,7 @@ export default {
 				if (similarity(body.toLowerCase(), data.data.answer.toLowerCase()) >= minScore) return client[botNum].sendMessage(from, { text: "The answer is close!" }, { quoted: message });
 			}
 		};
-		if (isGroup && (settings[from].games == "enable" || isAdmin) && !OPTIONS.onlyLogs) play();
+		if (isGroup && (settings[from].games == "enable" || isAdmin) && !OPTIONS.onlyLogs) await play();
 		else if (!isGroup && !OPTIONS.onlyLogs) await play();
 	},
 };

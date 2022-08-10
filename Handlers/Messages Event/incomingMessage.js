@@ -1,8 +1,8 @@
+import { delay } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
 import similarity from "similarity";
-import { delay } from "@adiwajshing/baileys";
-import { INFOLOG, color, reassign, addLimit, getTimeSince, checkAfk, getAfk, deleteAfk } from "../../Helper/index.js";
 import { runtime } from "../../connect.js";
+import { addLimit, checkAfk, color, deleteAfk, getAfk, getTimeSince, INFOLOG, reassign } from "../../Helper/index.js";
 let STATS_OFFLINE = true;
 const EVALY = ["/>", "$>", "=>", "!>"];
 
@@ -32,7 +32,11 @@ export default {
 		if (checkAfk(message.sender, message.from)) {
 			const { reasons, since } = getAfk(message.sender, message.from);
 			const time = getTimeSince(since);
-			await client[botNum].sendMessage(message.from, { text: `@${message.sender.split("@")[0]} is AFK since ${time} ago. Now they are out from AFK. Reason: ${reasons}`, mentions: [message.sender] }, { quoted: message.message });
+			await client[botNum].sendMessage(
+				message.from,
+				{ text: `@${message.sender.split("@")[0]} is AFK since ${time} ago. Now they are out from AFK. Reason: ${reasons}`, mentions: [message.sender] },
+				{ quoted: message.message },
+			);
 			deleteAfk(message.sender, message.from);
 		}
 		if (!message.isDisappearingChat && !message.isGroup) await client[botNum].sendMessage(message.from, { disappearingMessagesInChat: 24 * 60 * 60 });
@@ -97,7 +101,10 @@ export default {
 					message.cmd = message.prefix + HIGH_SCORE.command.toLowerCase().split(" ")[0].trim() || "";
 				}
 				const Tempcmds =
-					cmds.commands.get(message.cmd.slice(1).trim().toLowerCase()) || Array.from(cmds.commands.values()).find((v) => v.aliases.includes(message.cmd.slice(1).trim().toLowerCase())) || Array.from(cmds.commands.values()).find((v) => v.aliases.includes(message.cmd.trim().toLowerCase())) || false;
+					cmds.commands.get(message.cmd.slice(1).trim().toLowerCase()) ||
+					Array.from(cmds.commands.values()).find((v) => v.aliases.includes(message.cmd.slice(1).trim().toLowerCase())) ||
+					Array.from(cmds.commands.values()).find((v) => v.aliases.includes(message.cmd.trim().toLowerCase())) ||
+					false;
 				if (message.isGroup && !OPTIONS.noLogs) {
 					INFOLOG(
 						`[${color(time, "cyan")}]`,
@@ -125,7 +132,10 @@ export default {
 					}
 					const limit = addLimit({ id: message.sender, limit: Tempcmds.limit ?? 0, type: "MIN" });
 					if (typeof limit == "object" && "message" in limit) {
-						client[botNum].reply({ from: message.from, quoted: message.message }, `${limit.message}\nYour limit is ${limit.limits}\nBut this command (${Tempcmds.name}) need ${Tempcmds.limit}`);
+						client[botNum].reply(
+							{ from: message.from, quoted: message.message },
+							`${limit.message}\nYour limit is ${limit.limits}\nBut this command (${Tempcmds.name}) need ${Tempcmds.limit}`,
+						);
 						continue;
 					}
 					if (limit == false) return client[botNum].reply({ from: message.from, quoted: message.message }, "You have reached the limit of this command.");
@@ -149,12 +159,16 @@ export default {
 						if (!message.isOwner && OPTIONS["selfMode"]) return;
 						try {
 							if (/-{1,2}((help(s)?|info|des(c|k)rip(t|s)i(on)?)|H)$/i.test(message.args[1]) && Tempcmds.name !== "eval") {
-								const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${Tempcmds.cooldown}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v.capitalize()}`).join(", ")}.`;
+								const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${Tempcmds.cooldown}s\nAliases : ${Tempcmds.aliases
+									.map((v) => `!${v.capitalize()}`)
+									.join(", ")}.`;
 								client[botNum].reply({ from: message.from, quoted: message.message }, help);
 								continue;
 							}
-							if (Tempcmds.category == "Games" && message.isGroup && !message.isAdmin && message[message.from].games == "disable") return client[botNum].reply({ from: message.from, quoted: message.message }, "Mode games belum dihidupkan");
-							if (Tempcmds.category == "Moderation" && message.isGroup && !message.isAdmin && !message.isOwner) return client[botNum].reply({ from: message.from, quoted: message.message }, "Kamu bukan admin");
+							if (Tempcmds.category == "Games" && message.isGroup && !message.isAdmin && message[message.from].games == "disable")
+								return client[botNum].reply({ from: message.from, quoted: message.message }, "Mode games belum dihidupkan");
+							if (Tempcmds.category == "Moderation" && message.isGroup && !message.isAdmin && !message.isOwner)
+								return client[botNum].reply({ from: message.from, quoted: message.message }, "Kamu bukan admin");
 							await Tempcmds.run(message, client, store);
 							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) user.cooldown.get(message.sender).requests = false;
 							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).has(Tempcmds.name)) user.cooldown.get(message.sender).delete(Tempcmds.name);

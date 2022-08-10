@@ -1,4 +1,4 @@
-import { removeDuplicatesArray, fetchBUFFER } from "../../Helper/Modules/index.js";
+import { fetchBUFFER, removeDuplicatesArray } from "../../Helper/Modules/index.js";
 import { downloadArtworks } from "../../Utils/Pixiv/index.js";
 
 export default {

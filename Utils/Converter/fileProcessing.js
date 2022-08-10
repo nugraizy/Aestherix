@@ -1,13 +1,13 @@
-import fs from "fs";
-import { spawn, exec } from "child_process";
-import path from "path";
-import moment from "moment-timezone";
+import { exec, spawn } from "child_process";
 import FormData from "form-data";
+import fs from "fs";
+import moment from "moment-timezone";
+import path from "path";
 import petting from "pet-pet-gif";
 import sharp from "sharp";
 import { __dirname } from "../../connect.js";
+import { color, ERRLOG, fetchJSON, INFOLOG, isFileExist, isURL, readBuffer, readJSON, unlinkFile, writeBuffer } from "../../Helper/Modules/index.js";
 import { webp2mp4File } from "./EZGifs/index.js";
-import { writeBuffer, unlinkFile, INFOLOG, ERRLOG, color, isURL, readBuffer, isFileExist, readJSON, fetchJSON } from "../../Helper/Modules/index.js";
 const VIDEO_MIMETYPE = readJSON(path.join(__dirname, "Databases/Mimetypes/Video.json"));
 
 export const toMp4 = (input, sender) =>
@@ -34,16 +34,19 @@ export const gifToMp4 = (input, sender) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			const time = moment().unix();
-			exec(`ffmpeg -i "${input}" -movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" "./Temporary Files/${sender}${time}.mp4"`, async (err, stdout, stderr) => {
-				if (err) {
-					if (!isURL(input)) unlinkFile(input);
-					log(err);
-					reject(err);
-				}
-				const buffer = readBuffer(`./Temporary Files/${sender}${time}.mp4`);
-				unlinkFile(`./Temporary Files/${sender}${time}.mp4`);
-				resolve(buffer);
-			});
+			exec(
+				`ffmpeg -i "${input}" -movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" "./Temporary Files/${sender}${time}.mp4"`,
+				async (err, stdout, stderr) => {
+					if (err) {
+						if (!isURL(input)) unlinkFile(input);
+						log(err);
+						reject(err);
+					}
+					const buffer = readBuffer(`./Temporary Files/${sender}${time}.mp4`);
+					unlinkFile(`./Temporary Files/${sender}${time}.mp4`);
+					resolve(buffer);
+				},
+			);
 		} catch (err) {
 			log(err);
 			reject(err);
@@ -93,33 +96,38 @@ export const convertMediaToSticker = (filePath, sender, output, mimetype) =>
 				resolve(buffer);
 			});
 		} else if (filePath.endsWith("jpeg")) {
-			exec(`ffmpeg -i "${pathSticker}" -vcodec libwebp -vf "scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1,fps=fps=30" -lossless 0 -an -vsync 0 -s 512:512 "${pathSticker}.webp"`, (err, stdout, stderr) => {
-				if (err) {
-					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);
-					unlinkFile(pathSticker);
-					reject(err);
-				}
-				exec(`webpmux -set exif "${pathExif}" "${pathSticker}.webp" -o "${pathSticker}-done.webp"`, (err, stdout, stderr) => {
+			exec(
+				`ffmpeg -i "${pathSticker}" -vcodec libwebp -vf "scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1,fps=fps=30" -lossless 0 -an -vsync 0 -s 512:512 "${pathSticker}.webp"`,
+				(err, stdout, stderr) => {
 					if (err) {
 						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);
+						unlinkFile(pathSticker);
+						reject(err);
+					}
+					exec(`webpmux -set exif "${pathExif}" "${pathSticker}.webp" -o "${pathSticker}-done.webp"`, (err, stdout, stderr) => {
+						if (err) {
+							ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);
+							unlinkFile(`${pathSticker}-done.webp`);
+							unlinkFile(pathSticker);
+							unlinkFile(`${pathSticker}.webp`);
+							reject(err);
+						}
+						const buffer = readBuffer(`${pathSticker}-done.webp`);
 						unlinkFile(`${pathSticker}-done.webp`);
 						unlinkFile(pathSticker);
 						unlinkFile(`${pathSticker}.webp`);
-						reject(err);
-					}
-					const buffer = readBuffer(`${pathSticker}-done.webp`);
-					unlinkFile(`${pathSticker}-done.webp`);
-					unlinkFile(pathSticker);
-					unlinkFile(`${pathSticker}.webp`);
-					INFOLOG(`[${color(time, "cyan")}]`, `${color(`Converted Media`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
-					resolve(buffer);
-				});
-			});
+						INFOLOG(`[${color(time, "cyan")}]`, `${color(`Converted Media`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
+						resolve(buffer);
+					});
+				},
+			);
 		} else {
 			pathSticker = output ? output : pathSticker;
 			exec(
 				`ffmpeg -i "${filePath}" ${
-					!pathSticker.includes(".webp") ? `-vcodec libwebp -vf "scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1,fps=fps=10" -lossless 0 -preset default -ss 00:00:00 -t 00:00:10 -an -vsync 0 -s 512:512` : ""
+					!pathSticker.includes(".webp")
+						? `-vcodec libwebp -vf "scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1,fps=fps=10" -lossless 0 -preset default -ss 00:00:00 -t 00:00:10 -an -vsync 0 -s 512:512`
+						: ""
 				} "${mimetype && VIDEO_MIMETYPE.includes(mimetype) ? `${pathSticker}.webp` : pathSticker}"`,
 				(er, stdout, stderr) => {
 					if (er) {
@@ -195,15 +203,18 @@ export const mp42mp3 = (input, output, sender) =>
 export const gif2mp4 = (input, output, opts = {}) =>
 	new Promise((resolve, reject) => {
 		const time = moment().format("HH:mm:ss DD/MM");
-		exec(`ffmpeg -stream_loop -1 -i "${input}" -vcodec libx264 -acodec libmp3lame -pix_fmt yuv420p -crf 23 -ss 00:00:00.000 -t 00:00:${opts.duration || 4}.000 "${output}"`, (err, stdout, stderr) => {
-			if (err) {
-				ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Gif to Video", "red")}`);
-				reject(err);
-				return;
-			}
-			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Converted Media`, "#01cdfe")}`);
-			resolve({ output: `${output}` });
-		});
+		exec(
+			`ffmpeg -stream_loop -1 -i "${input}" -vcodec libx264 -acodec libmp3lame -pix_fmt yuv420p -crf 23 -ss 00:00:00.000 -t 00:00:${opts.duration || 4}.000 "${output}"`,
+			(err, stdout, stderr) => {
+				if (err) {
+					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Gif to Video", "red")}`);
+					reject(err);
+					return;
+				}
+				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Converted Media`, "#01cdfe")}`);
+				resolve({ output: `${output}` });
+			},
+		);
 	});
 
 export const soundRemover = (input, sender) =>
@@ -212,7 +223,11 @@ export const soundRemover = (input, sender) =>
 		try {
 			const bodyForm = new FormData();
 			bodyForm.append("fileName", fs.createReadStream(input));
-			const data = await fetchJSON("https://aivocalremover.com/api/v2/FileUpload", { method: "post", body: bodyForm, headers: { "Content-Type": `multipart/form-data; boundary=${bodyForm._boundary}` } });
+			const data = await fetchJSON("https://aivocalremover.com/api/v2/FileUpload", {
+				method: "post",
+				body: bodyForm,
+				headers: { "Content-Type": `multipart/form-data; boundary=${bodyForm._boundary}` },
+			});
 			const { vocal_path: vocal, instrumental_path: instrumental } = await fetchJSON("https://aivocalremover.com/api/v2/ProcessFile", {
 				method: "post",
 				body: `file_name=${data.file_name}&action=watermark_video&key=X9QXlU9PaCqGWpnP1Q4IzgXoKinMsKvMuMn3RYXnKHFqju8VfScRmLnIGQsJBnbZFdcKyzeCDOcnJ3StBmtT9nDEXJn`,

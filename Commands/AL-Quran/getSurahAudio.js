@@ -1,5 +1,5 @@
-import { mime, extension } from "../../Utils/Misc/index.js";
-import { getSurahAudio, getAyat, getSurahDetail } from "../../Utils/EQuran/index.js";
+import { getAyat, getSurahAudio, getSurahDetail } from "../../Utils/EQuran/index.js";
+import { extension, mime } from "../../Utils/Misc/index.js";
 
 export default {
 	name: "surahaudio",
@@ -31,7 +31,11 @@ export default {
 				buttons.push({ buttonId: `${cmd} ${parseInt(query) + 1}` });
 				buttons.push({ buttonText: { displayText: "Next" } });
 			}
-			await client[botNum].buttonDocument(from, ayat.map((v) => ` • ${v.arab}\n؜ • ${v.latin}\n؜ • ${v.indonesia}`).join("\n\n"), "Made by nanda", buttons, audio.url, { quoted: message, mimetype: mime(audio.url), fileName: `${detail.namaLatin}.${extension(mime(audio.url))}` });
+			await client[botNum].buttonDocument(from, ayat.map((v) => ` • ${v.arab}\n؜ • ${v.latin}\n؜ • ${v.indonesia}`).join("\n\n"), "Made by nanda", buttons, audio.url, {
+				quoted: message,
+				mimetype: mime(audio.url),
+				fileName: `${detail.namaLatin}.${extension(mime(audio.url))}`,
+			});
 		} catch (err) {
 			return client[botNum].reply({ from, quoted: message }, "Surah not found");
 		}

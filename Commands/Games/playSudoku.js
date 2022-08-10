@@ -1,7 +1,7 @@
 import path from "path";
 import { __dirname } from "../../connect.js";
-import { readJSON, writeJSON, getTimeSince } from "../../Helper/Modules/index.js";
-import { makePuzzle, solvePuzzle, stringifyGrid, fillGrid, checkWin, revealOneElement } from "../../Utils/Games/index.js";
+import { getTimeSince, readJSON, writeJSON } from "../../Helper/Modules/index.js";
+import { checkWin, fillGrid, makePuzzle, revealOneElement, solvePuzzle, stringifyGrid } from "../../Utils/Games/index.js";
 
 export default {
 	name: "sudoku",
@@ -26,7 +26,13 @@ export default {
 					if (isOwner) client[botNum].reply({ from, quoted: message }, gridSolved);
 					buttons[0].buttonId = ".sd clue";
 					buttons[0].buttonText.displayText = "Sisa Clue : 5";
-					const messages = client[botNum].buttonText(from, `${grid}\nGame ini masi di tahap beta.\nKesulitan masi dalam proses perbaikan.\nGunakan Nomor 0 untuk mengganti nomor 9.`, "Made by nanda", buttons, { quoted: message });
+					const messages = client[botNum].buttonText(
+						from,
+						`${grid}\nGame ini masi di tahap beta.\nKesulitan masi dalam proses perbaikan.\nGunakan Nomor 0 untuk mengganti nomor 9.`,
+						"Made by nanda",
+						buttons,
+						{ quoted: message },
+					);
 					data.push({
 						id: from,
 						startsBy: sender,
@@ -59,7 +65,13 @@ export default {
 						const grid = stringifyGrid(fill.tempBoard);
 						buttons[0].buttonId = ".sd clue";
 						buttons[0].buttonText.displayText = `Sisa Clue : ${data[index].clue == 0 ? "Habis" : data[index].clue}`;
-						const messages = client[botNum].buttonText(from, `${grid}\nGame ini masi di tahap beta.\nKesulitan masi dalam proses perbaikan.\nGunakan Nomor 0 untuk mengganti nomor 9.`, "Made by nanda", buttons, { quoted: message });
+						const messages = client[botNum].buttonText(
+							from,
+							`${grid}\nGame ini masi di tahap beta.\nKesulitan masi dalam proses perbaikan.\nGunakan Nomor 0 untuk mengganti nomor 9.`,
+							"Made by nanda",
+							buttons,
+							{ quoted: message },
+						);
 						data[index].messages = messages;
 						return writeJSON(path.join(__dirname, "Databases/Games/Sudoku/sudoku.json"), data);
 					}
@@ -67,7 +79,9 @@ export default {
 				}
 				buttons[0].buttonId = ".sudoku play";
 				buttons[0].buttonText.displayText = "Play Sudoku!";
-				return client[botNum].buttonText(from, `Belum ada sesi game sudoku. Mulai permainan dengan mengetik ${cmd} play atau pencet tombol dibawah`, "Made by nanda", buttons, { quoted: message });
+				return client[botNum].buttonText(from, `Belum ada sesi game sudoku. Mulai permainan dengan mengetik ${cmd} play atau pencet tombol dibawah`, "Made by nanda", buttons, {
+					quoted: message,
+				});
 			} else if (/clue/.test(args[1])) {
 				const index = data.length == 0 ? -1 : data.findIndex((v) => v.id == from);
 				if (index !== -1) {
@@ -85,7 +99,13 @@ export default {
 						const grid = stringifyGrid(reveal.tempBoard);
 						buttons[0].buttonId = ".sd clue";
 						buttons[0].buttonText.displayText = `Sisa Clue : ${data[index].clue == 0 ? "Habis" : data[index].clue}`;
-						const messages = client[botNum].buttonText(from, `${grid}\nGame ini masi di tahap beta.\nKesulitan masi dalam proses perbaikan.\nGunakan Nomor 0 untuk mengganti nomor 9.`, "Made by nanda", buttons, { quoted: message });
+						const messages = client[botNum].buttonText(
+							from,
+							`${grid}\nGame ini masi di tahap beta.\nKesulitan masi dalam proses perbaikan.\nGunakan Nomor 0 untuk mengganti nomor 9.`,
+							"Made by nanda",
+							buttons,
+							{ quoted: message },
+						);
 						data[index].messages = messages;
 						return writeJSON(path.join(__dirname, "Databases/Games/Sudoku/sudoku.json"), data);
 					}
@@ -93,20 +113,30 @@ export default {
 				}
 				buttons[0].buttonId = ".sd play";
 				buttons[0].buttonText.displayText = "Play Sudoku!";
-				return client[botNum].buttonText(from, `Belum ada sesi game sudoku. Mulai permainan dengan mengetik ${cmd} play atau pencet tombol dibawah`, "Made by nanda", buttons, { quoted: message });
+				return client[botNum].buttonText(from, `Belum ada sesi game sudoku. Mulai permainan dengan mengetik ${cmd} play atau pencet tombol dibawah`, "Made by nanda", buttons, {
+					quoted: message,
+				});
 			} else if (/ch?ec?k?/.test(args[1])) {
 				const index = data.length == 0 ? -1 : data.findIndex((v) => v.id == from);
 				if (index !== -1) {
 					const grid = stringifyGrid(data[index].puzzle);
 					buttons[0].buttonId = ".sd clue";
 					buttons[0].buttonText.displayText = `Sisa Clue : ${data[index].clue == 0 ? "Habis" : data[index].clue}`;
-					const messages = client[botNum].buttonText(from, `${grid}\nGame ini masi di tahap beta.\nKesulitan masi dalam proses perbaikan.\nGunakan Nomor 0 untuk mengganti nomor 9.`, "Made by nanda", buttons, { quoted: message });
+					const messages = client[botNum].buttonText(
+						from,
+						`${grid}\nGame ini masi di tahap beta.\nKesulitan masi dalam proses perbaikan.\nGunakan Nomor 0 untuk mengganti nomor 9.`,
+						"Made by nanda",
+						buttons,
+						{ quoted: message },
+					);
 					data[index].messages = messages;
 					return writeJSON(path.join(__dirname, "Databases/Games/Sudoku/sudoku.json"), data);
 				}
 				buttons[0].buttonId = ".sd play";
 				buttons[0].buttonText.displayText = "Play Sudoku!";
-				return client[botNum].buttonText(from, `Belum ada sesi game sudoku. Mulai permainan dengan mengetik ${cmd} play atau pencet tombol dibawah`, "Made by nanda", buttons, { quoted: message });
+				return client[botNum].buttonText(from, `Belum ada sesi game sudoku. Mulai permainan dengan mengetik ${cmd} play atau pencet tombol dibawah`, "Made by nanda", buttons, {
+					quoted: message,
+				});
 			} else if (/reset/.test(args[1])) {
 				if (!isOwner) return;
 				const index = data.length == 0 ? -1 : data.findIndex((v) => v.id == from);

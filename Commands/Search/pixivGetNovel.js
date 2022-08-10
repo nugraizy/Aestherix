@@ -1,4 +1,4 @@
-import { removeDuplicatesArray, numberWithCommas } from "../../Helper/Modules/index.js";
+import { numberWithCommas, removeDuplicatesArray } from "../../Helper/Modules/index.js";
 import { getNovelContent } from "../../Utils/Pixiv/index.js";
 
 export default {

@@ -27,14 +27,19 @@ export const yt = async (url, quality, type, bitrate, server = "en60") =>
 				ajax: 1,
 			});
 			if (json.result.includes("Error: </span>This video is copyrighted.")) return resolve({ error: "```Error : Video ini dilarang didownload bajakan```", internal: false });
-			if (json.result.includes("Error: </span>We can not convert your video.")) return resolve({ error: "```Error : Link yang kamu masukkan tidak dapat ditemukan.```", internal: false });
+			if (json.result.includes("Error: </span>We can not convert your video."))
+				return resolve({ error: "```Error : Link yang kamu masukkan tidak dapat ditemukan.```", internal: false });
 			let { document } = new JSDOM(json.result).window;
 			const tables = document.querySelectorAll("table");
 			const table = tables[{ mp4: 0, mp3: 1 }[type] || 0];
 			let list;
 			switch (type) {
 				case "mp4":
-					list = Object.fromEntries([...table.querySelectorAll('td > a[href="#"]')].filter((v) => !/\.3gp/.test(v.innerHTML)).map((v) => [v.innerHTML.match(/.*?(?=\()/)[0].trim(), v.parentElement.nextSibling.nextSibling.innerHTML]));
+					list = Object.fromEntries(
+						[...table.querySelectorAll('td > a[href="#"]')]
+							.filter((v) => !/\.3gp/.test(v.innerHTML))
+							.map((v) => [v.innerHTML.match(/.*?(?=\()/)[0].trim(), v.parentElement.nextSibling.nextSibling.innerHTML]),
+					);
 					break;
 				case "mp3":
 					list = {

@@ -1,6 +1,6 @@
-import { bilibiliSearchTV } from "../../Utils/Bilibili/index.js";
-import { numberWithCommas, removeDuplicatesArray } from "../../Helper/Modules/index.js";
 import { generateMessageID } from "@adiwajshing/baileys";
+import { numberWithCommas, removeDuplicatesArray } from "../../Helper/Modules/index.js";
+import { bilibiliSearchTV } from "../../Utils/Bilibili/index.js";
 
 export default {
 	name: "bstation",
@@ -19,8 +19,8 @@ export default {
 			for (const querie of queries) {
 				const videos = await bilibiliSearchTV(querie.trim());
 				if ("error" in videos) {
-					 await client[botNum].reply({ from, quoted: message }, `${videos.error}\n${videos.cus_error}`);
-					 continue
+					await client[botNum].reply({ from, quoted: message }, `${videos.error}\n${videos.cus_error}`);
+					continue;
 				}
 				let i = 0;
 				const row = [];
@@ -56,7 +56,19 @@ Ratings : ${score}`,
 						title: `Bstation | Views : ${numberWithCommas(view)}`,
 					});
 				}
-				await client[botNum].relayMessage(from, { listMessage: { buttonText: " • Download More Bstation", description: "\t", footerText: "```Looking for some more? Choose between these options.```", listType: 1, sections: row } }, { messageId: generateMessageID() });
+				await client[botNum].relayMessage(
+					from,
+					{
+						listMessage: {
+							buttonText: " • Download More Bstation",
+							description: "\t",
+							footerText: "```Looking for some more? Choose between these options.```",
+							listType: 1,
+							sections: row,
+						},
+					},
+					{ messageId: generateMessageID() },
+				);
 			}
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";

@@ -1,6 +1,6 @@
-import { bilibiliSearchCOM } from "../../Utils/Bilibili/index.js";
-import { numberWithCommas, getFilesizeFromBytes } from "../../Helper/Modules/index.js";
 import { delay } from "@adiwajshing/baileys";
+import { getFilesizeFromBytes, numberWithCommas } from "../../Helper/Modules/index.js";
+import { bilibiliSearchCOM } from "../../Utils/Bilibili/index.js";
 
 export default {
 	name: "bilibili",
@@ -31,7 +31,10 @@ export default {
 						{
 							image: { url: thumbnail },
 							caption: `\`\`\` • Bilibili \`\`\``,
-							templateButtons: [{ urlButton: { displayText: `Download Here ${getFilesizeFromBytes(size)}`, url: download_link } }, { urlButton: { displayText: "Stream Here", url: original_video_link } }],
+							templateButtons: [
+								{ urlButton: { displayText: `Download Here ${getFilesizeFromBytes(size)}`, url: download_link } },
+								{ urlButton: { displayText: "Stream Here", url: original_video_link } },
+							],
 							footer: `Title : ${title}
 Author : ${author}
 Author ID : ${author_id}

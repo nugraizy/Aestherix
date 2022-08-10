@@ -57,7 +57,8 @@ const EMOJIS = {
 };
 
 const URL_API = (type, ...input) => {
-	return { coordinate: `https://api.openweathermap.org/data/2.5/weather?lat=${input[0]}&lon=${input[1]}&appid=6507c04b8f51f3b862e4f84bdfad8a1c&units=metric&lang=en`, city: `https://api.openweathermap.org/data/2.5/weather?q=${input[0]}&appid=6507c04b8f51f3b862e4f84bdfad8a1c&units=metric&lang=en` }[
-		type
-	];
+	return {
+		coordinate: `https://api.openweathermap.org/data/2.5/weather?lat=${input[0]}&lon=${input[1]}&appid=6507c04b8f51f3b862e4f84bdfad8a1c&units=metric&lang=en`,
+		city: `https://api.openweathermap.org/data/2.5/weather?q=${input[0]}&appid=6507c04b8f51f3b862e4f84bdfad8a1c&units=metric&lang=en`,
+	}[type];
 };

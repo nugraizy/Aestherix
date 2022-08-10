@@ -1,7 +1,7 @@
-import path from "path";
 import fs from "fs";
+import path from "path";
 import { __dirname } from "../../connect.js";
-import { isURL, removeDuplicatesArray } from "../../Helper/index.js";
+import { isURL } from "../../Helper/index.js";
 import { sauceNao } from "../../Utils/Image Reverse Search/index.js";
 
 export default {
@@ -18,7 +18,8 @@ export default {
 		let media = query && isURL(query) ? query : null;
 		try {
 			await client[botNum].reply({ from, quoted: message }, "Searching. Please wait...");
-			if (isMediaImage) media = await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`));
+			if (isMediaImage)
+				media = await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`));
 			const result = await sauceNao(media);
 			if ("error" in result) {
 				if (isMediaImage) fs.unlinkSync(media);

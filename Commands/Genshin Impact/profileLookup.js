@@ -1,7 +1,7 @@
 import moment from "moment-timezone";
 import parser from "yargs-parser";
+import { color, ERRLOG } from "../../Helper/Modules/index.js";
 import { genshinProfile, getCharacters } from "../../Utils/Games/index.js";
-import { ERRLOG, color } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "genshinstalk",

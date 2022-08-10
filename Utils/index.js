@@ -1,27 +1,74 @@
-export { yta, ytsr, ytv } from "./YouTube/index.js";
-export { searchHashtag, getHighlights, getPost, getUser, getReels, getReels2, searchUser, getStory, getStory2, getIgtv, getIgtv2, getStory3, getHighlights2 } from "./Instagram/index.js";
-export { tiktokDownloader, tiktokAPI, tiktokProfileBRAINANS, tiktokProfileTIKTOK } from "./TikTok/index.js";
-export { createExif, mime, extension, getScreenshot, tesseract, SetIntervals, CheckIntervals, CheckAllIntervals, DeleteIntervals, shopeeProduct, IPLookup } from "./Misc/index.js";
-export { startTG, makePuzzle, solvePuzzle, revealOneElement, checkWin, stringifyGrid, fillGrid, startAkinator, handleAnswer, getSession, TicTacToe, GetTicTacToeSession, DeleteTicTacToeSession, slot, SambungKata, GetSambungKataSession, genshinProfile, getCharacters } from "./Games/index.js";
-export { fbDl } from "./Facebook/index.js";
-export { getSurahAudio, getAyat, getSurahDetail, getListSurah, getTafsirSurah } from "./EQuran/index.js";
-export { toMp4, toOpus, convertMediaToSticker, convertStickerToMedia, webp2mp4File, mp42mp3, soundRemover, pet, textToSpeech, apng2webpUrl, emojimix, mergeVideoWithAudio, gifToMp4 } from "./Converter/index.js";
-export { getEarthquake, getWeather } from "./News/index.js";
-export { line, telegram } from "./Stickers/index.js";
-export { search, skip, handlers, stop } from "./Anonymous/index.js";
-export { yandex, sauceNao, traceMoe } from "./Image Reverse Search/index.js";
-export { tiny } from "./Shortener/index.js";
-export { brainlySearch } from "./Brainly/index.js";
-export { pinterest } from "./Pinterest/index.js";
+export { handlers, search, skip, stop } from "./Anonymous/index.js";
 export { bilibiliSearchCOM, bilibiliSearchTV, detailSourceFormat } from "./Bilibili/index.js";
-export { wpSearch, wpLatest, wpDownload } from "./Waifuplay/index.js";
-export { twitterUser, twitterDownload } from "./Twitter/index.js";
-export { searchManga, searchArtwork, searchNovel, downloadArtworks, downloadManga, getNovelContent } from "./Pixiv/index.js";
-export { searchDeviantArt, downloadDeviantArt } from "./DeviantArt/index.js";
-export { isNsfw, createImage } from "./Deepai/index.js";
-export { getWaifu } from "./Waifu Pic/index.js";
-export { textpro, ephoto360 } from "./Textmaker/index.js";
-export { spotifier } from "./Spotifier/index.js";
+export { brainlySearch } from "./Brainly/index.js";
 export { cnnindonesia, cnninternational } from "./CNN/index.js";
-export { iflixSearch, trueidSearch } from "./Movies/index.js";
+export {
+	apng2webpUrl,
+	convertMediaToSticker,
+	convertStickerToMedia,
+	emojimix,
+	gifToMp4,
+	mergeVideoWithAudio,
+	mp42mp3,
+	pet,
+	soundRemover,
+	textToSpeech,
+	toMp4,
+	toOpus,
+	webp2mp4File,
+} from "./Converter/index.js";
+export { createImage, isNsfw } from "./Deepai/index.js";
+export { downloadDeviantArt, searchDeviantArt } from "./DeviantArt/index.js";
+export { getAyat, getListSurah, getSurahAudio, getSurahDetail, getTafsirSurah } from "./EQuran/index.js";
+export { fbDl } from "./Facebook/index.js";
+export {
+	checkWin,
+	DeleteTicTacToeSession,
+	fillGrid,
+	genshinProfile,
+	getCharacters,
+	GetSambungKataSession,
+	getSession,
+	GetTicTacToeSession,
+	handleAnswer,
+	makePuzzle,
+	revealOneElement,
+	SambungKata,
+	slot,
+	solvePuzzle,
+	startAkinator,
+	startTG,
+	stringifyGrid,
+	TicTacToe,
+} from "./Games/index.js";
+export { sauceNao, traceMoe, yandex } from "./Image Reverse Search/index.js";
 export { instafier } from "./Instagram Notifier/index.js";
+export {
+	getHighlights,
+	getHighlights2,
+	getIgtv,
+	getIgtv2,
+	getPost,
+	getReels,
+	getReels2,
+	getStory,
+	getStory2,
+	getStory3,
+	getUser,
+	searchHashtag,
+	searchUser,
+} from "./Instagram/index.js";
+export { CheckAllIntervals, CheckIntervals, createExif, DeleteIntervals, extension, getScreenshot, IPLookup, mime, SetIntervals, shopeeProduct, tesseract } from "./Misc/index.js";
+export { iflixSearch, trueidSearch } from "./Movies/index.js";
+export { getEarthquake, getWeather } from "./News/index.js";
+export { pinterest } from "./Pinterest/index.js";
+export { downloadArtworks, downloadManga, getNovelContent, searchArtwork, searchManga, searchNovel } from "./Pixiv/index.js";
+export { tiny } from "./Shortener/index.js";
+export { spotifier } from "./Spotifier/index.js";
+export { line, telegram } from "./Stickers/index.js";
+export { ephoto360, textpro } from "./Textmaker/index.js";
+export { tiktokAPI, tiktokDownloader, tiktokProfileBRAINANS, tiktokProfileTIKTOK } from "./TikTok/index.js";
+export { twitterDownload, twitterUser } from "./Twitter/index.js";
+export { getWaifu } from "./Waifu Pic/index.js";
+export { wpDownload, wpLatest, wpSearch } from "./Waifuplay/index.js";
+export { yta, ytsr, ytv } from "./YouTube/index.js";

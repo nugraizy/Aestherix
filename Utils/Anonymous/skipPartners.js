@@ -6,7 +6,12 @@ export const skip = (key, timer, client, message, isStop) => {
 	let results;
 	if (status) {
 		if (status.partner == null) return { status: "searching", seconds: CheckIntervals(intervals["anonymous"].get(key)).timer };
-		results = anonymous.has(key) ? { partner1: key, partner2: anonymous.get(key).partner } : { partner1: anonymous.get(Array.from(anonymous.keys()).find((k) => anonymous.get(k).partner == key)).partner, partner2: Array.from(anonymous.keys()).find((k) => anonymous.get(k).partner == key) };
+		results = anonymous.has(key)
+			? { partner1: key, partner2: anonymous.get(key).partner }
+			: {
+					partner1: anonymous.get(Array.from(anonymous.keys()).find((k) => anonymous.get(k).partner == key)).partner,
+					partner2: Array.from(anonymous.keys()).find((k) => anonymous.get(k).partner == key),
+			  };
 		if (anonymous.has(key)) {
 			anonymous.delete(key);
 		} else {

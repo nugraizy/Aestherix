@@ -9,7 +9,7 @@ export const textStory = async (texts, color) => {
 	const ctx = canvas.getContext("2d");
 	ctx.fillStyle = ARGBtoRGBA(color);
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
-	ctx.fillStyle = ARGBtoRGBA(4294967295);
+	ctx.fillStyle = ARGBtoRGBA(4_294_967_295);
 	CanvasTextWrapper(canvas, texts, { font: "28px coolvetica", textAlign: "center", verticalAlign: "middle", sizeToFill: true, paddingX: 20, paddingY: 20 });
 	return new Buffer.from(canvas.toDataURL("image/png").replace(/^data:image\/png;base64,/, ""), "base64");
 };

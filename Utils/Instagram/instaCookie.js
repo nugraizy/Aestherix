@@ -1,7 +1,7 @@
 import Axios from "axios";
 import crypto from "crypto";
 import moment from "moment-timezone";
-import { INFOLOG, color } from "../../Helper/Modules/index.js";
+import { color, INFOLOG } from "../../Helper/Modules/index.js";
 
 const MOBILE_UA = "Instagram 100.1.0.29.135 Android";
 const URL_LOGIN_GET = "https://i.instagram.com/api/v1/si/fetch_headers/?challenge_type=signup";

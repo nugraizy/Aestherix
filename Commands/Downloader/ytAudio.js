@@ -1,9 +1,9 @@
-import path from "path";
 import moment from "moment-timezone";
+import path from "path";
 import { __dirname } from "../../connect.js";
-import { yta } from "../../Utils/YouTube/index.js";
+import { color, ERRLOG, INFOLOG, isURL, numberWithCommas, removeDuplicatesArray } from "../../Helper/Modules/index.js";
 import { toOpus } from "../../Utils/Converter/index.js";
-import { INFOLOG, ERRLOG, color, numberWithCommas, removeDuplicatesArray, isURL } from "../../Helper/Modules/index.js";
+import { yta } from "../../Utils/YouTube/index.js";
 
 export default {
 	name: "ytaudio",
@@ -40,7 +40,14 @@ export default {
 					capt += `Duration : ${timestamp ?? "No Data"}\n`;
 					capt += `Description : ${description ?? "No Data"}\n`;
 					await client[botNum].reply({ from, quoted: message }, capt.trim());
-					await client[botNum].sendMessage(from, { audio: await toOpus("opus", { input: path.join(__dirname, `Temporary Files/${filename}`), output: path.join(__dirname, `Temporary Files/${filename}-done`), media: dl_link.replace("https", "http") }), caption: capt.trim() });
+					await client[botNum].sendMessage(from, {
+						audio: await toOpus("opus", {
+							input: path.join(__dirname, `Temporary Files/${filename}`),
+							output: path.join(__dirname, `Temporary Files/${filename}-done`),
+							media: dl_link.replace("https", "http"),
+						}),
+						caption: capt.trim(),
+					});
 				}
 			}
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloaded YouTube Audio`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);

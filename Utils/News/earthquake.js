@@ -4,7 +4,20 @@ export const getEarthquake = async () =>
 	new Promise(async (resolve, reject) => {
 		try {
 			const { gempa } = (await fetchJSON(URL_INDONESIA_WITHOUT_IMAGE)).Infogempa;
-			let { Tanggal: date, Jam: time, DateTime: dateTime, Coordinates: coordinates, Lintang: latitude, Bujur: longitude, Magnitude: magnitude, Kedalaman: depth, Wilayah: region, Potensi: potency, Dirasakan: feel, Shakemap: shakemap } = (await fetchJSON(URL_INDONESIA_WITH_IMAGE)).Infogempa.gempa;
+			let {
+				Tanggal: date,
+				Jam: time,
+				DateTime: dateTime,
+				Coordinates: coordinates,
+				Lintang: latitude,
+				Bujur: longitude,
+				Magnitude: magnitude,
+				Kedalaman: depth,
+				Wilayah: region,
+				Potensi: potency,
+				Dirasakan: feel,
+				Shakemap: shakemap,
+			} = (await fetchJSON(URL_INDONESIA_WITH_IMAGE)).Infogempa.gempa;
 			shakemap = `https://ews.bmkg.go.id/TEWS/data/${shakemap}`;
 			const results = [
 				{
@@ -23,7 +36,18 @@ export const getEarthquake = async () =>
 				},
 			];
 			for (const data of gempa) {
-				let { Tanggal: date, Jam: time, DateTime: dateTime, Coordinates: coordinates, Lintang: latitude, Bujur: longitude, Magnitude: magnitude, Kedalaman: depth, Wilayah: region, Potensi: potency } = data;
+				let {
+					Tanggal: date,
+					Jam: time,
+					DateTime: dateTime,
+					Coordinates: coordinates,
+					Lintang: latitude,
+					Bujur: longitude,
+					Magnitude: magnitude,
+					Kedalaman: depth,
+					Wilayah: region,
+					Potensi: potency,
+				} = data;
 				results.push({
 					date,
 					time,

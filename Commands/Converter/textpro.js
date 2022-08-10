@@ -1,13 +1,13 @@
-import fs from "fs";
-import * as jsSplit from "js-split";
-import yargsParser from "yargs-parser";
 import Axios from "axios";
-import sharp from "sharp";
+import fs from "fs";
 import imageSize from "image-size";
+import * as jsSplit from "js-split";
 import path from "path";
-import { randomize } from "../../Helper/index.js";
-import { textpro, convertMediaToSticker } from "../../Utils/index.js";
+import sharp from "sharp";
+import yargsParser from "yargs-parser";
 import { __dirname } from "../../connect.js";
+import { randomize } from "../../Helper/index.js";
+import { convertMediaToSticker, textpro } from "../../Utils/index.js";
 const dataJSON = JSON.parse(fs.readFileSync("./Databases/Textmaker/textprourl.json"));
 const defaulType = "image";
 
@@ -65,7 +65,12 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 					buttons.push({ buttonId: `${cmd} prev ${index - 1} -model`, buttonText: { displayText: "Previous" }, type: 1 });
 				}
 				buttons = buttons.reverse();
-				return await client[botNum].sendMessage(from, { text: texts, footer: `Void Bot   page : ${Number(index) + 1}/${splitData.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`, buttons, headerType: 1 });
+				return await client[botNum].sendMessage(from, {
+					text: texts,
+					footer: `Void Bot   page : ${Number(index) + 1}/${splitData.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
+					buttons,
+					headerType: 1,
+				});
 			}
 
 			models =

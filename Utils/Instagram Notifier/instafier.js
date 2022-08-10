@@ -1,10 +1,10 @@
 import dotenv from "dotenv";
-dotenv.config();
-import { IgApiClient } from "instagram-private-api";
-import { withFbns, withRealtime, GraphQLSubscriptions, SkywalkerSubscriptions } from "instagram_mqtt";
-import fs from "fs";
-import sharp from "sharp";
 import { fileTypeFromBuffer } from "file-type";
+import fs from "fs";
+import { IgApiClient } from "instagram-private-api";
+import { GraphQLSubscriptions, SkywalkerSubscriptions, withFbns, withRealtime } from "instagram_mqtt";
+import sharp from "sharp";
+dotenv.config();
 const IMAGE_MIMETYPE = JSON.parse(fs.readFileSync("./Databases/Mimetypes/Image.json"));
 
 class Instafier {
@@ -199,7 +199,8 @@ class Instafier {
 		this.Instagram.realtime.on("close", (d) => log("REALTIME Disconnected :", d));
 
 		this.Instagram.fbns.on("push", (message) => {
-			if (message.collapseKey == "direct_v2_delete_item" && this.Container.has(Number(message.sourceUserId))) this.Instagram.fbns.emit("onDeleted", { model: "deleted", ...this.Container.get(Number(message.sourceUserId)).get(message.actionParams.dx) });
+			if (message.collapseKey == "direct_v2_delete_item" && this.Container.has(Number(message.sourceUserId)))
+				this.Instagram.fbns.emit("onDeleted", { model: "deleted", ...this.Container.get(Number(message.sourceUserId)).get(message.actionParams.dx) });
 			//message = await instafier._parseIncomingNotification(message);
 		});
 

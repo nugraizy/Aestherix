@@ -1,17 +1,18 @@
 import { delay } from "@adiwajshing/baileys";
-import path from "path";
 import moment from "moment-timezone";
+import path from "path";
 import parser from "yargs-parser";
-import { tiktokAPI } from "../../Utils/TikTok/index.js";
 import { __dirname } from "../../connect.js";
-import { mime } from "../../Utils/Misc/index.js";
+import { color, ERRLOG, INFOLOG, isOne, isURL, removeDuplicatesArray } from "../../Helper/Modules/index.js";
 import { toOpus } from "../../Utils/Converter/index.js";
-import { isOne, isURL, INFOLOG, ERRLOG, color, removeDuplicatesArray } from "../../Helper/Modules/index.js";
+import { mime } from "../../Utils/Misc/index.js";
+import { tiktokAPI } from "../../Utils/TikTok/index.js";
 
 export default {
 	name: "tiktokmusic",
 	description: "Downloads TikTok music that used in the video.",
-	usage: "!tiktokmusic <url> (you can send multiple link using space in between) [options]\nOptions:\n-wm, --watermark: Download with watermark\n-nowm, --nowatermark: Download without watermark",
+	usage:
+		"!tiktokmusic <url> (you can send multiple link using space in between) [options]\nOptions:\n-wm, --watermark: Download with watermark\n-nowm, --nowatermark: Download without watermark",
 	aliases: ["tiktokmusics", "tiktokmusik", "ttmusic", "ttmusik", "ttm"],
 	category: "Downloader",
 	cooldown: 6,
@@ -43,7 +44,11 @@ export default {
 					await client[botNum].sendMessage(
 						from,
 						{
-							document: await toOpus("opus", { input: path.join(__dirname, `Temporary Files/${filename}`), output: path.join(__dirname, `Temporary Files/${filename}-done`), media: music.music.music.replace("https", "http") }),
+							document: await toOpus("opus", {
+								input: path.join(__dirname, `Temporary Files/${filename}`),
+								output: path.join(__dirname, `Temporary Files/${filename}-done`),
+								media: music.music.music.replace("https", "http"),
+							}),
 							fileName: `${music.music.authorMusic} - ${music.music.musicTitle}.mp3`,
 							mimetype: mime("mp3"),
 						},
@@ -53,7 +58,11 @@ export default {
 					await client[botNum].sendMessage(
 						from,
 						{
-							document: await toOpus("opus", { input: path.join(__dirname, `Temporary Files/${filename}`), output: path.join(__dirname, `Temporary Files/${filename}-done`), media: music.url.music.replace("https", "http") }),
+							document: await toOpus("opus", {
+								input: path.join(__dirname, `Temporary Files/${filename}`),
+								output: path.join(__dirname, `Temporary Files/${filename}-done`),
+								media: music.url.music.replace("https", "http"),
+							}),
 							fileName: `${music.authorMusic} - ${music.musicTitle}.mp3`,
 							mimetype: mime("mp3"),
 						},

@@ -6,7 +6,17 @@ export const line = (query) =>
 	new Promise(async (resolve) => {
 		try {
 			const data = await fetchJSON(LINE_URL_BASE(query));
-			resolve(data.items.map((v) => ({ title: v.title, author: v.authorName, idAuthor: v.authorId, productURL: v.productUrl, id: v.id, desc: v.description, stickers: { static: v.payloadForProduct.staticUrl, animated: v.payloadForProduct.animationUrl, withSound: v.payloadForProduct.soundUrl } })));
+			resolve(
+				data.items.map((v) => ({
+					title: v.title,
+					author: v.authorName,
+					idAuthor: v.authorId,
+					productURL: v.productUrl,
+					id: v.id,
+					desc: v.description,
+					stickers: { static: v.payloadForProduct.staticUrl, animated: v.payloadForProduct.animationUrl, withSound: v.payloadForProduct.soundUrl },
+				})),
+			);
 		} catch (e) {
 			resolve({ error: e.message });
 		}

@@ -11,7 +11,10 @@ export default {
 	status: "enable",
 	async run(message, client) {
 		if (!message.query) return client[botNum].reply({ quoted: message.message, from: message.from }, "Please enter a query");
-		let { audio, video } = parser(message.query.toLowerCase(), { configuration: { "short-option-groups": false }, alias: { audio: ["aud", "mp3", "musik", "music"], video: ["vid", "mp4", "video", "videos"] } });
+		let { audio, video } = parser(message.query.toLowerCase(), {
+			configuration: { "short-option-groups": false },
+			alias: { audio: ["aud", "mp3", "musik", "music"], video: ["vid", "mp4", "video", "videos"] },
+		});
 		if (audio) cmds.commands.get("ytaudio").run(message, client);
 		if (video) cmds.commands.get("ytvideo").run(message, client);
 		if (!audio && !video) cmds.commands.get("ytaudio").run(message, client);

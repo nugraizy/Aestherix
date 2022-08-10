@@ -1,6 +1,6 @@
 import fs from "fs";
 import fetch from "node-fetch";
-import { isURL, fetchJSON, fetchTEXT, cheerioLOAD } from "../../Helper/Modules/index.js";
+import { cheerioLOAD, fetchJSON, fetchTEXT, isURL } from "../../Helper/Modules/index.js";
 
 const isValidImageURL = async (url) => {
 	try {

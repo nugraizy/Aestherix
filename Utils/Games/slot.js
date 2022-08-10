@@ -1,5 +1,5 @@
 import emoji from "node-emoji";
-import { isZero, isEmpty, isSame, isNotEmpty, isNotZero, randomize } from "../../Helper/Modules/index.js";
+import { isEmpty, isNotEmpty, isNotZero, isSame, isZero, randomize } from "../../Helper/Modules/index.js";
 
 const randomFruitEmoji = () => {
 	const emojis = [emoji.emojify(":apple:"), emoji.emojify(":grapes:"), emoji.emojify(":banana:"), emoji.emojify(":pineapple:"), emoji.emojify(":watermelon:")];

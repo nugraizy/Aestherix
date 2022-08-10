@@ -1,4 +1,4 @@
-import { fetchTEXT, cheerioLOAD } from "../../Helper/index.js";
+import { cheerioLOAD, fetchTEXT } from "../../Helper/index.js";
 
 export const getDetailMangatoon = (id) =>
 	new Promise(async (resolve, reject) => {

@@ -21,7 +21,9 @@ export default {
 				text: `\`\`\` • Group Participants Notification\`\`\`\n
 Event Update : ${EVENT_UPDATE[message.messageStubType]}
 
-@${message.participant.split("@")[0]} ${EVENT_UPDATE[message.messageStubType.split("_").reverse()[0]]} ${message.messageStubParameters.map((v) => `@${v.split("@")[0]}`).join(", ")}`,
+@${message.participant.split("@")[0]} ${EVENT_UPDATE[message.messageStubType.split("_").reverse()[0]]} ${message.messageStubParameters
+					.map((v) => `@${v.split("@")[0]}`)
+					.join(", ")}`,
 				mentions: [message.participant, ...message.messageStubParameters],
 			});
 		}

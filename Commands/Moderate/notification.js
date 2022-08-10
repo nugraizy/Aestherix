@@ -1,4 +1,4 @@
-import { writeJSON, readJSON } from "../../Helper/Modules/index.js";
+import { readJSON, writeJSON } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "notification",

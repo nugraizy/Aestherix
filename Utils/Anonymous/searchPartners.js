@@ -1,5 +1,5 @@
 import moment from "moment-timezone";
-import { SetIntervals, CheckIntervals, DeleteIntervals } from "../Misc/index.js";
+import { CheckIntervals, DeleteIntervals, SetIntervals } from "../Misc/index.js";
 
 export const search = async (key, timer, client, message) => {
 	const status = Array.from(anonymous.values()).find((k) => k.partner == null) || undefined;

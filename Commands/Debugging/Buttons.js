@@ -7,7 +7,7 @@ export default {
 	cooldown: 5,
 	limit: 0,
 	status: "enable",
-	async run({ from, message, bodyQuoted, mediaData, query }, client, store) {
+	async run({ from }, client, store) {
 		client[botNum].sendMessage(from, {
 			text: "Hi it's button message",
 			footer: "Hello World",

@@ -1,5 +1,5 @@
-import { getServer, request } from "./genshinUtils.js";
 import { genshinProfile } from "./genshinLookupUser.js";
+import { getServer, request } from "./genshinUtils.js";
 
 export const getCharacters = async (uid) => {
 	const { completeServer, simplifiedServer } = getServer(uid);

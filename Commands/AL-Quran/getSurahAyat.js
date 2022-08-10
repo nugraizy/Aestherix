@@ -18,7 +18,9 @@ export default {
 			const detail = await getSurahDetail(query);
 			await client[botNum].reply(
 				{ from, quoted: message },
-				`Surah ${detail.nomor} (${detail.namaArab}) (${detail.namaLatin})\n\nTotal Ayat : ${detail.totAyat}\nTempat Turun : ${detail.turun}\nArti : ${detail.arti}\n\n${ayat.map((v) => ` • ${v.arab}\n؜ • ${v.latin}\n؜ • ${v.indonesia}`).join("\n\n")}`,
+				`Surah ${detail.nomor} (${detail.namaArab}) (${detail.namaLatin})\n\nTotal Ayat : ${detail.totAyat}\nTempat Turun : ${detail.turun}\nArti : ${detail.arti}\n\n${ayat
+					.map((v) => ` • ${v.arab}\n؜ • ${v.latin}\n؜ • ${v.indonesia}`)
+					.join("\n\n")}`,
 			);
 		} catch (err) {
 			return client[botNum].reply({ from, quoted: message }, "Surah not found");

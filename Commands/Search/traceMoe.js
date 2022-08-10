@@ -1,10 +1,10 @@
-import path from "path";
-import fs from "fs";
 import { generateMessageID } from "@adiwajshing/baileys";
+import fs from "fs";
+import path from "path";
 import { __dirname } from "../../connect.js";
 import { isURL } from "../../Helper/index.js";
-import { traceMoe } from "../../Utils/Image Reverse Search/index.js";
 import { toMp4 } from "../../Utils/Converter/index.js";
+import { traceMoe } from "../../Utils/Image Reverse Search/index.js";
 
 export default {
 	name: "tracemoe",
@@ -75,14 +75,19 @@ ${
 					{
 						video: new Buffer.from(buffer, "base64"),
 						caption: `\`\`\` • What Anime ?\`\`\`\n\n${capt.trim()}`,
-						templateButtons: [{ urlButton: { displayText: "Image Source", url: large } }, { urlButton: { displayText: "Video Source", url: args.video } }, { urlButton: { displayText: "Anilist Source", url: siteUrl } }],
+						templateButtons: [
+							{ urlButton: { displayText: "Image Source", url: large } },
+							{ urlButton: { displayText: "Video Source", url: args.video } },
+							{ urlButton: { displayText: "Anilist Source", url: siteUrl } },
+						],
 						footer: "Powered by trace.moe",
 					},
 					{ quoted: message },
 				);
 			}
 			await client[botNum].reply({ from, quoted: message }, "Searching. Please wait...");
-			if (isMediaImage) media = await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`));
+			if (isMediaImage)
+				media = await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`));
 			const result = await traceMoe(media);
 			if ("error" in result) {
 				if (isMediaImage) fs.unlinkSync(media);
@@ -141,7 +146,11 @@ ${externalLinks
 				{
 					video: new Buffer.from(buffer, "base64"),
 					caption: `\`\`\` • What Anime ?\`\`\`\n\n${capt.trim()}`,
-					templateButtons: [{ urlButton: { displayText: "Image Source", url: large } }, { urlButton: { displayText: "Video Source", url: result[0].video } }, { urlButton: { displayText: "Anilist Source", url: siteUrl } }],
+					templateButtons: [
+						{ urlButton: { displayText: "Image Source", url: large } },
+						{ urlButton: { displayText: "Video Source", url: result[0].video } },
+						{ urlButton: { displayText: "Anilist Source", url: siteUrl } },
+					],
 					footer: "Powered by trace.moe",
 				},
 				{ quoted: message },
@@ -164,7 +173,11 @@ ${externalLinks
 				});
 				i++;
 			}
-			await client[botNum].relayMessage(from, { listMessage: { buttonText: " • Fetch More Moe", description: "\t", footerText: "```Looking for some more? Choose between these options.```", listType: 1, sections: row } }, { messageId: generateMessageID() });
+			await client[botNum].relayMessage(
+				from,
+				{ listMessage: { buttonText: " • Fetch More Moe", description: "\t", footerText: "```Looking for some more? Choose between these options.```", listType: 1, sections: row } },
+				{ messageId: generateMessageID() },
+			);
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name}\n`;

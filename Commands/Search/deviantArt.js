@@ -1,5 +1,5 @@
+import { numberWithCommas, removeDuplicatesArray } from "../../Helper/Modules/index.js";
 import { searchDeviantArt } from "../../Utils/DeviantArt/index.js";
-import { removeDuplicatesArray, numberWithCommas } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "deviantart",

@@ -1,5 +1,5 @@
 import qs from "qs";
-import { fetchJSON, fetchTEXT, cheerioLOAD } from "../../Helper/index.js";
+import { cheerioLOAD, fetchJSON, fetchTEXT } from "../../Helper/index.js";
 
 export const getReels = (url) =>
 	new Promise(async (resolve) => {

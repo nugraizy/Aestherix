@@ -1,7 +1,7 @@
 import path from "path";
-import { telegram } from "../../Utils/Stickers/index.js";
-import { convertMediaToSticker } from "../../Utils/Converter/index.js";
 import { __dirname } from "../../connect.js";
+import { convertMediaToSticker } from "../../Utils/Converter/index.js";
+import { telegram } from "../../Utils/Stickers/index.js";
 
 export default {
 	name: "telegramsticker",

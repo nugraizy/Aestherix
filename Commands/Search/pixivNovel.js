@@ -1,6 +1,6 @@
 import { generateMessageID } from "@adiwajshing/baileys";
-import { removeDuplicatesArray, numberWithCommas } from "../../Helper/Modules/index.js";
-import { searchNovel, getNovelContent } from "../../Utils/Pixiv/index.js";
+import { numberWithCommas, removeDuplicatesArray } from "../../Helper/Modules/index.js";
+import { getNovelContent, searchNovel } from "../../Utils/Pixiv/index.js";
 
 export default {
 	name: "pixivnovel",
@@ -51,7 +51,19 @@ ${content}`,
 						title: `PIXIV | ${title.capitalize()} | by ${userName} | ${pageCount} | ${type.capitalize()}`,
 					});
 				}
-				await client[botNum].relayMessage(from, { listMessage: { buttonText: "``` • Pixiv Novel Search```", description: "Pixiv Novel Search", footerText: "choose one of the novel inside of the list to read.", listType: 1, sections: container } }, { messageId: generateMessageID() });
+				await client[botNum].relayMessage(
+					from,
+					{
+						listMessage: {
+							buttonText: "``` • Pixiv Novel Search```",
+							description: "Pixiv Novel Search",
+							footerText: "choose one of the novel inside of the list to read.",
+							listType: 1,
+							sections: container,
+						},
+					},
+					{ messageId: generateMessageID() },
+				);
 			}
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";

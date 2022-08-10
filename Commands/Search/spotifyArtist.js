@@ -1,6 +1,6 @@
 import { generateMessageID } from "@adiwajshing/baileys";
-import { spotifier } from "../../Utils/Spotifier/index.js";
 import { removeDuplicatesArray } from "../../Helper/index.js";
+import { spotifier } from "../../Utils/Spotifier/index.js";
 
 export default {
 	name: "spotifyartist",
@@ -29,5 +29,7 @@ export default {
 };
 
 function regex(input) {
-	return /(https?:\/\/open.spotify.com\/(track|user|artist|album)\/[a-zA-Z0-9]+(\/playlist\/[a-zA-Z0-9]+|)|spotify:(track|user|artist|album):[a-zA-Z0-9]+(:playlist:[a-zA-Z0-9]+|))/.test(input);
+	return /(https?:\/\/open.spotify.com\/(track|user|artist|album)\/[a-zA-Z0-9]+(\/playlist\/[a-zA-Z0-9]+|)|spotify:(track|user|artist|album):[a-zA-Z0-9]+(:playlist:[a-zA-Z0-9]+|))/.test(
+		input,
+	);
 }

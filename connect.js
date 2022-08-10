@@ -14,23 +14,23 @@
  *   @Nafiz         [ @GitHub ] https://github.com/xbnfz01       [ @Instagram ] https://instagram.com/nfz.01
  */
 
-import { platform } from "process";
-console.clear();
+import baileys, { jidDecode } from "@adiwajshing/baileys";
+import { Boom } from "@hapi/boom";
+import center from "center-align";
 import { spawn } from "child_process";
 import fs from "fs";
-import { pathToFileURL } from "url";
-import baileys, { jidDecode } from "@adiwajshing/baileys";
-import P from "pino";
 import meow from "meow";
-import { Boom } from "@hapi/boom";
-import Spinnies from "spinnies";
-import path from "path";
-import center from "center-align";
 import moment from "moment-timezone";
 import mqtt from "mqtt";
+import path from "path";
+import P from "pino";
+import { platform } from "process";
+import Spinnies from "spinnies";
+import { pathToFileURL } from "url";
 import { getSpinner } from "./Helper/Misc/Spinner/spinners.js";
-import { readJSON, INFOLOG, color, romanize, ERRLOG } from "./Helper/Modules/functions.js";
+import { color, ERRLOG, INFOLOG, readJSON, romanize } from "./Helper/Modules/functions.js";
 import { createExif } from "./Utils/Misc/createExif.js";
+console.clear();
 
 const { default: makeWASocket, DisconnectReason, makeInMemoryStore, useSingleFileAuthState, DEFAULT_CONNECTION_CONFIG } = baileys;
 const moduleURL = new URL(import.meta.url);
@@ -41,7 +41,29 @@ const spinners = new Spinnies({ color: "blue", succeedColor: "green", failColor:
 
 global.cli = parseCli();
 global.OPTIONS = cli.flags;
-const regexOption = ["prefix", "readOnly", "autoRead", "autoCorrect", "restrict", "onlyLogs", "noLogs", "selfMode", "debugMode", "multiCmd", "rainbow", "trace", "help", "watch", "coolDown", "noLoad", "json", "reset", "story", "offline", "noCall"];
+const regexOption = [
+	"prefix",
+	"readOnly",
+	"autoRead",
+	"autoCorrect",
+	"restrict",
+	"onlyLogs",
+	"noLogs",
+	"selfMode",
+	"debugMode",
+	"multiCmd",
+	"rainbow",
+	"trace",
+	"help",
+	"watch",
+	"coolDown",
+	"noLoad",
+	"json",
+	"reset",
+	"story",
+	"offline",
+	"noCall",
+];
 if (platform !== "win32" && !OPTIONS.noLoad) await printRandomAscii();
 if (OPTIONS.reset) {
 	const sessionName = `${cli.input[0] ?? "Session-debug"}`;
@@ -61,7 +83,8 @@ if (OPTIONS.json) {
 
 export const runtime = Date.now();
 
-for (const option of Object.keys(OPTIONS).filter((key) => OPTIONS[key] == true)) if (!regexOption.includes(option)) ERRLOG(` ${color(option, "red")} ${color("is not a valid option", "white")}`);
+for (const option of Object.keys(OPTIONS).filter((key) => OPTIONS[key] == true))
+	if (!regexOption.includes(option)) ERRLOG(` ${color(option, "red")} ${color("is not a valid option", "white")}`);
 
 const addSpinner = (name, options) => {
 	if (!OPTIONS.noLoad) {
@@ -98,7 +121,14 @@ const start = async () => {
 	await loadCommands();
 	await loadEveryCommand();
 	createExif("Made by Nanda", "Void bot");
-	const CONNECTION_CONFIG = { printQRInTerminal: true, version: DEFAULT_CONNECTION_CONFIG.version, logger: P({ level: OPTIONS.trace ? "trace" : "fatal" }), auth: state, markOnlineOnConnect: false, syncFullHistory: true };
+	const CONNECTION_CONFIG = {
+		printQRInTerminal: true,
+		version: DEFAULT_CONNECTION_CONFIG.version,
+		logger: P({ level: OPTIONS.trace ? "trace" : "fatal" }),
+		auth: state,
+		markOnlineOnConnect: false,
+		syncFullHistory: true,
+	};
 	const Client = makeWASocket(CONNECTION_CONFIG);
 	store.bind(Client.ev);
 
@@ -219,10 +249,16 @@ const start = async () => {
 		message = message.toString();
 		const data = JSON.parse(message);
 		if (!data.status) return;
-		const content = `Spotify On ${data.is_playing ? "Play" : "Paused"} :                                                       ${data.artists} - ${data.trackTitle}  ( ${data.progress_ms.toTime()}${` - ${data?.duration_ms.toTime()}` ?? ""} )`;
+		const content = `Spotify On ${data.is_playing ? "Play" : "Paused"} :                                                       ${data.artists} - ${
+			data.trackTitle
+		}  ( ${data.progress_ms.toTime()}${` - ${data?.duration_ms.toTime()}` ?? ""} )`;
 		const myStatus = await client[botNum].fetchStatus(`${botNum.split(":")[0]}@s.whatsapp.net`);
 		if (myStatus.status == content) return;
-		await client[botNum].query({ tag: "iq", attrs: { to: "@s.whatsapp.net", type: "set", xmlns: "status" }, content: [{ tag: "status", attrs: {}, content: Buffer.from(content, "utf-8") }] });
+		await client[botNum].query({
+			tag: "iq",
+			attrs: { to: "@s.whatsapp.net", type: "set", xmlns: "status" },
+			content: [{ tag: "status", attrs: {}, content: Buffer.from(content, "utf-8") }],
+		});
 	});
 };
 start().catch((e) => log(e));

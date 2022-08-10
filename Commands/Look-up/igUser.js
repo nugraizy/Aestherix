@@ -1,7 +1,7 @@
 import moment from "moment-timezone";
 import parser from "yargs-parser";
+import { color, ERRLOG, isOne, isURL, numberWithCommas } from "../../Helper/Modules/index.js";
 import { getUser } from "../../Utils/Instagram/index.js";
-import { isOne, isURL, ERRLOG, color, numberWithCommas } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "instalk",
@@ -29,7 +29,25 @@ export default {
 					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Searching Instagram User", "red")} for ${color(prettyNumber, "#ff71ce")}`);
 					continue;
 				} else {
-					const { id, biography, followers, following, fullName, highlightCount, isBusinessAccount, isRecentUser, accountCategory, linkedFacebookPage, isPrivate, isVerified, profilePic, profilePicHD, username, postsCount, posts } = users;
+					const {
+						id,
+						biography,
+						followers,
+						following,
+						fullName,
+						highlightCount,
+						isBusinessAccount,
+						isRecentUser,
+						accountCategory,
+						linkedFacebookPage,
+						isPrivate,
+						isVerified,
+						profilePic,
+						profilePicHD,
+						username,
+						postsCount,
+						posts,
+					} = users;
 					let capt = `Username : ${username}\n`;
 					capt += `Fullname : ${fullName}\n`;
 					capt += `Followers : ${numberWithCommas(followers)}\n`;
@@ -49,7 +67,10 @@ export default {
 						{
 							image: { url: profilePicHD },
 							caption: `\`\`\` • Instagram User Lookup \`\`\``,
-							templateButtons: [{ urlButton: { displayText: "Profile Picture HD Source", url: profilePicHD } }, { urlButton: { displayText: "Profile Picture Low Source", url: profilePic } }],
+							templateButtons: [
+								{ urlButton: { displayText: "Profile Picture HD Source", url: profilePicHD } },
+								{ urlButton: { displayText: "Profile Picture Low Source", url: profilePic } },
+							],
 							footer: capt.trim(),
 						},
 						{ quoted: message },

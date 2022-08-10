@@ -1,15 +1,15 @@
-import * as util from "util";
-import fs from "fs";
-import { WAProto } from "@adiwajshing/baileys";
 import * as _ from "@adiwajshing/baileys";
+import { WAProto } from "@adiwajshing/baileys";
 import { exec } from "child_process";
+import fs from "fs";
 import prettier from "js-beautify";
-import { format } from "util";
 import syntaxerror from "syntax-error";
+import * as util from "util";
+import { format } from "util";
 import * as a from "../../Helper/index.js";
 import * as b from "../../Utils/index.js";
-import { spotifier } from "../../Utils/Spotifier/index.js";
 import { instafier } from "../../Utils/Instagram Notifier/index.js";
+import { spotifier } from "../../Utils/Spotifier/index.js";
 const func = { ...a, ...b };
 
 export default {
@@ -93,7 +93,23 @@ export default {
 			try {
 				if (/await/.test(body)) types = AsyncFunction;
 				query = `return ${query}`;
-				const func = new types("print", "client", "message", "fs", "from", "extractMediaData", "mediaData", "type", "typeQuoted", "body", "adminGroups", "participants", "pushname", "bodyQuoted", query);
+				const func = new types(
+					"print",
+					"client",
+					"message",
+					"fs",
+					"from",
+					"extractMediaData",
+					"mediaData",
+					"type",
+					"typeQuoted",
+					"body",
+					"adminGroups",
+					"participants",
+					"pushname",
+					"bodyQuoted",
+					query,
+				);
 				output = await func(
 					client,
 					(...args) => {

@@ -1,5 +1,5 @@
-import { tiny } from "../../Utils/Shortener/index.js";
 import { isURL } from "../../Helper/Modules/index.js";
+import { tiny } from "../../Utils/Shortener/index.js";
 
 export default {
 	name: "tiny",

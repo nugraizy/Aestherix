@@ -34,7 +34,10 @@ export default {
 				status = EVENT_UPDATE["DEL_ICON"];
 			} else if (message.action == "description" && message.content !== "") {
 				message.messageStubType = "GROUP_CHANGE_DESCRIPTION";
-				status = message[message.from].groupDescription !== undefined ? `${EVENT_UPDATE["DESCRIPTION"]} from ${message[message.from].groupDescription} to ${message.content}` : `${EVENT_UPDATE["DESCRIPTION"]} to ${message.content}`;
+				status =
+					message[message.from].groupDescription !== undefined
+						? `${EVENT_UPDATE["DESCRIPTION"]} from ${message[message.from].groupDescription} to ${message.content}`
+						: `${EVENT_UPDATE["DESCRIPTION"]} to ${message.content}`;
 			} else if (message.action == "description" && message.content == "") {
 				message.messageStubType = "GROUP_CHANGE_DESCRIPTION";
 				status = `${EVENT_UPDATE["DEL_DESCRIPTION"]} from ${message[message.from].groupDescription}`;

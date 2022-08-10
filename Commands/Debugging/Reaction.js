@@ -1,4 +1,4 @@
-import { generateWAMessageFromContent, generateMessageID } from "@adiwajshing/baileys";
+import { generateMessageID, generateWAMessageFromContent } from "@adiwajshing/baileys";
 import emojiReg from "emoji-regex";
 import { readFileSync } from "fs";
 const DATABASE_PATH = `./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`;

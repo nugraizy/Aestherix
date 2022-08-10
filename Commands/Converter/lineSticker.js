@@ -1,9 +1,9 @@
-import path from "path";
 import { exec } from "child_process";
-import { line } from "../../Utils/Stickers/index.js";
-import { convertMediaToSticker } from "../../Utils/Converter/index.js";
+import path from "path";
 import { __dirname } from "../../connect.js";
 import { unlinkFile } from "../../Helper/Modules/index.js";
+import { convertMediaToSticker } from "../../Utils/Converter/index.js";
+import { line } from "../../Utils/Stickers/index.js";
 
 export default {
 	name: "linesticker",
@@ -28,7 +28,11 @@ export default {
 				});
 				continue;
 			}
-			const sticker = await convertMediaToSticker(stickers.static, prettyNumber, path.join(__dirname, `Temporary Files/${filename}${stickers.static.split("/")[stickers.static.split("/").length - 1].split(";")[0].split(".")[0]}.webp`));
+			const sticker = await convertMediaToSticker(
+				stickers.static,
+				prettyNumber,
+				path.join(__dirname, `Temporary Files/${filename}${stickers.static.split("/")[stickers.static.split("/").length - 1].split(";")[0].split(".")[0]}.webp`),
+			);
 			await client[botNum].sendMessage(from, { sticker }, { quoted: message });
 		}
 		unlinkFile(path.join(__dirname, `Temporary Files/${filename}`));

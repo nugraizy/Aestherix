@@ -10,9 +10,13 @@ export default {
 	cooldown: 5,
 	status: "enable",
 	async run({ query, args, from, message, mediaData, extractMediaData, typeQuoted }, client) {
-		if (typeQuoted !== "locationMessage" && typeQuoted !== "liveLocationMessage" && !query) return await client[botNum].reply({ from, quoted: message }, "Please, input city name\nEx:\n*!weather Bekasi* or reply to location message");
+		if (typeQuoted !== "locationMessage" && typeQuoted !== "liveLocationMessage" && !query)
+			return await client[botNum].reply({ from, quoted: message }, "Please, input city name\nEx:\n*!weather Bekasi* or reply to location message");
 		try {
-			const info = typeQuoted == "locationMessage" || typeQuoted == "liveLocationMessage" ? await getWeather("coordinate", extractMediaData.degreesLatitude, extractMediaData.degreesLongitude) : await getWeather("city", query);
+			const info =
+				typeQuoted == "locationMessage" || typeQuoted == "liveLocationMessage"
+					? await getWeather("coordinate", extractMediaData.degreesLatitude, extractMediaData.degreesLongitude)
+					: await getWeather("city", query);
 			if ("error" in info) return await client[botNum].reply({ from, quoted: message }, info.error);
 			const text = ` ~> ${info.name}\n
 Description : ${info.desc.capitalize()}

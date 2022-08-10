@@ -1,6 +1,6 @@
 import { generateMessageID } from "@adiwajshing/baileys";
+import { numberWithCommas, removeDuplicatesArray } from "../../Helper/index.js";
 import { trueidSearch } from "../../Utils/index.js";
-import { removeDuplicatesArray, numberWithCommas } from "../../Helper/index.js";
 
 export default {
 	name: "trueid",
@@ -55,7 +55,20 @@ export default {
 				},
 				{ quoted: message },
 			);
-			if (rows) await client[botNum].relayMessage(from, { listMessage: { buttonText: " • Get Episode URL", description: "\t", footerText: "```Looking for the streaming URL? Choose between these options.```", listType: 1, sections: rows } }, { messageId: generateMessageID() });
+			if (rows)
+				await client[botNum].relayMessage(
+					from,
+					{
+						listMessage: {
+							buttonText: " • Get Episode URL",
+							description: "\t",
+							footerText: "```Looking for the streaming URL? Choose between these options.```",
+							listType: 1,
+							sections: rows,
+						},
+					},
+					{ messageId: generateMessageID() },
+				);
 			return;
 		} else if (args[1] == "get") {
 			return client[botNum].reply({ from, quoted: message }, `\`\`\` • TrueID Search\`\`\`\n\nURL : ${args[2]}`);
@@ -96,12 +109,29 @@ export default {
 				{
 					image: { url: data[0].thumbnail },
 					caption,
-					templateButtons: [{ urlButton: { displayText: "Image Source", url: data[0].thumbnail } }, { urlButton: { displayText: "Series Source", url: data[0].sourceMovie } }, { quickReplyButton: { displayText: "Next Series", id: `${cmd} next ${data[1].thumbnail} ${JSON.stringify(data)}` } }],
+					templateButtons: [
+						{ urlButton: { displayText: "Image Source", url: data[0].thumbnail } },
+						{ urlButton: { displayText: "Series Source", url: data[0].sourceMovie } },
+						{ quickReplyButton: { displayText: "Next Series", id: `${cmd} next ${data[1].thumbnail} ${JSON.stringify(data)}` } },
+					],
 					footer: `Void Bot     1/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 				},
 				{ quoted: message },
 			);
-			if (rows) await client[botNum].relayMessage(from, { listMessage: { buttonText: " • Get Episode URL", description: "\t", footerText: "```Looking for the streaming URL? Choose between these options.```", listType: 1, sections: rows } }, { messageId: generateMessageID() });
+			if (rows)
+				await client[botNum].relayMessage(
+					from,
+					{
+						listMessage: {
+							buttonText: " • Get Episode URL",
+							description: "\t",
+							footerText: "```Looking for the streaming URL? Choose between these options.```",
+							listType: 1,
+							sections: rows,
+						},
+					},
+					{ messageId: generateMessageID() },
+				);
 		}
 	},
 };

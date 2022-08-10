@@ -1,5 +1,3 @@
-import { delay } from "@adiwajshing/baileys";
-
 export default {
 	name: "searchmessage",
 	description: "Search for a message in the current group",

@@ -1,10 +1,10 @@
-import FormData from "form-data";
 import Axios from "axios";
-import sharp from "sharp";
-import path from "path";
-import { __dirname } from "../../connect.js";
+import FormData from "form-data";
 import { readFileSync } from "fs";
-import { isURL, fetchBUFFER, fetchJSON } from "../../Helper/Modules/index.js";
+import path from "path";
+import sharp from "sharp";
+import { __dirname } from "../../connect.js";
+import { fetchBUFFER, fetchJSON, isURL } from "../../Helper/Modules/index.js";
 
 const isValidImageURL = async (url) => {
 	try {

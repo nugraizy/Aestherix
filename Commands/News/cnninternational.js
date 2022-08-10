@@ -1,5 +1,5 @@
-import { cnninternational } from "../../Utils/index.js";
 import { fetchBUFFER } from "../../Helper/index.js";
+import { cnninternational } from "../../Utils/index.js";
 
 export default {
 	name: "cnninternational",
@@ -25,7 +25,9 @@ export default {
 					templateButtons: [
 						data[index].image !== undefined ? { urlButton: { displayText: "Image Source", url: args[1] == "next" ? data[index].image : data[index].image } } : {},
 						{ urlButton: { displayText: "Article Source", url: args[1] == "next" ? data[index].link : data[index].link } },
-						index + 1 !== data.length ? { quickReplyButton: { displayText: "Next Article", id: `${cmd} next ${data[index + 1].image ?? data[index + 1].link} ${JSON.stringify(data)}` } } : {},
+						index + 1 !== data.length
+							? { quickReplyButton: { displayText: "Next Article", id: `${cmd} next ${data[index + 1].image ?? data[index + 1].link} ${JSON.stringify(data)}` } }
+							: {},
 						index !== 0 ? { quickReplyButton: { displayText: "Previous Article", id: `${cmd} prev ${data[index - 1].image ?? data[index + 1].link} ${JSON.stringify(data)}` } } : {},
 					],
 					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,

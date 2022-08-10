@@ -1,4 +1,4 @@
-import { wpSearch, wpLatest, wpDownload } from "../../Utils/Waifuplay/index.js";
+import { wpDownload, wpLatest, wpSearch } from "../../Utils/Waifuplay/index.js";
 
 export default {
 	name: "waifuplay",

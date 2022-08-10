@@ -1,13 +1,14 @@
 import { delay } from "@adiwajshing/baileys";
-import parser from "yargs-parser";
 import moment from "moment-timezone";
+import parser from "yargs-parser";
+import { color, ERRLOG, INFOLOG, isOne, isURL, numberWithCommas, removeDuplicatesArray } from "../../Helper/Modules/index.js";
 import { tiktokAPI } from "../../Utils/TikTok/index.js";
-import { isOne, isURL, INFOLOG, ERRLOG, color, removeDuplicatesArray, numberWithCommas } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "tiktokvideo",
 	description: "Downloads TikTok video.",
-	usage: "!tiktokvideo <url> (you can send multiple link using space in between) [options]\nOptions:\n-wm, --watermark: Download with watermark\n-nowm, --nowatermark: Download without watermark",
+	usage:
+		"!tiktokvideo <url> (you can send multiple link using space in between) [options]\nOptions:\n-wm, --watermark: Download with watermark\n-nowm, --nowatermark: Download without watermark",
 	aliases: ["tiktokvideos", "ttvideo", "ttvid", "ttv"],
 	category: "Downloader",
 	cooldown: 6,

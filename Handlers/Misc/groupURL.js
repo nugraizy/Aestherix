@@ -1,4 +1,4 @@
-import { writeJSON, readJSON } from "../../Helper/Modules/index.js";
+import { readJSON, writeJSON } from "../../Helper/Modules/index.js";
 
 export default {
 	async handler({ from, isAdmin, isGroup, isBotAdmin, message, mediaData, sender, isFromMe, body }, client, settings) {

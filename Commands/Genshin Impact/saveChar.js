@@ -1,7 +1,7 @@
 import path from "path";
-import { genshinProfile } from "../../Utils/Games/index.js";
 import { __dirname } from "../../connect.js";
 import { readJSON, writeJSON } from "../../Helper/Modules/index.js";
+import { genshinProfile } from "../../Utils/Games/index.js";
 
 export default {
 	name: "savechar",

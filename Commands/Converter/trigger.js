@@ -1,9 +1,9 @@
+import _ from "lodash";
 import moment from "moment-timezone";
 import path from "path";
-import _ from "lodash";
-import { trigger } from "../../Helper/Canvas/index.js";
 import { __dirname } from "../../connect.js";
-import { ERRLOG, INFOLOG, color, readBuffer } from "../../Helper/Modules/index.js";
+import { trigger } from "../../Helper/Canvas/index.js";
+import { color, ERRLOG, INFOLOG, readBuffer } from "../../Helper/Modules/index.js";
 
 const defaultOptions = {
 	output: "sticker",
@@ -48,22 +48,24 @@ export default {
 							.capitalize()}`,
 					);
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Triggering`, "#01cdfe")} ${color(prettyNumber, "#ff71ce")}`);
-				client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`)).then(async (file) => {
-					try {
-						const result = await trigger(file, sender, options);
-						if (options.output == "sticker") client[botNum].sendMessage(from, { sticker: Buffer.from(result, "base64") });
-						else client[botNum].sendMessage(from, { video: Buffer.from(result, "base64"), mimetype: "video/mp4" });
-						INFOLOG(`[${color(time, "cyan")}]`, `${color(`Converted Media`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
-						return;
-					} catch (err) {
-						let str = "Something went wrong :\n\n";
-						str += `Type : ${err.name}\n`;
-						str += `Message : ${err.message}`;
-						await client[botNum].reply({ from, quoted: message }, str);
-						ERRLOG(`[${color(time, "cyan")}]`, `${color(`Failed to Trigger a Picture. Reason : ${err.name}`, "red")} for ${color(sender, "#ff71ce")}`);
-						log(err);
-					}
-				});
+				client[botNum]
+					.downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`))
+					.then(async (file) => {
+						try {
+							const result = await trigger(file, sender, options);
+							if (options.output == "sticker") client[botNum].sendMessage(from, { sticker: Buffer.from(result, "base64") });
+							else client[botNum].sendMessage(from, { video: Buffer.from(result, "base64"), mimetype: "video/mp4" });
+							INFOLOG(`[${color(time, "cyan")}]`, `${color(`Converted Media`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
+							return;
+						} catch (err) {
+							let str = "Something went wrong :\n\n";
+							str += `Type : ${err.name}\n`;
+							str += `Message : ${err.message}`;
+							await client[botNum].reply({ from, quoted: message }, str);
+							ERRLOG(`[${color(time, "cyan")}]`, `${color(`Failed to Trigger a Picture. Reason : ${err.name}`, "red")} for ${color(sender, "#ff71ce")}`);
+							log(err);
+						}
+					});
 			}
 			for (const mentioned of mention) {
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Triggering`, "#01cdfe")} ${color(mentioned, "#ff71ce")}`);

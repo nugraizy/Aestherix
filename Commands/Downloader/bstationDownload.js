@@ -1,8 +1,8 @@
 import path from "path";
 import { __dirname } from "../../connect.js";
+import { getFilesizeFromBytes, removeDuplicatesArray } from "../../Helper/Modules/index.js";
 import { detailSourceFormat } from "../../Utils/Bilibili/index.js";
 import { mergeVideoWithAudio } from "../../Utils/Converter/index.js";
-import { removeDuplicatesArray, getFilesizeFromBytes } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "bstationdl",
@@ -26,7 +26,10 @@ export default {
 					await client[botNum].reply({ from, quoted: message }, `${result.error}\n${result.cus_error}`);
 					continue;
 				}
-				client[botNum].reply({ from, quoted: message }, ` • Converting videos, this might take a while please wait.\n\nResolution : ${result.resolution}\nSize : ${getFilesizeFromBytes(result.size)}`);
+				client[botNum].reply(
+					{ from, quoted: message },
+					` • Converting videos, this might take a while please wait.\n\nResolution : ${result.resolution}\nSize : ${getFilesizeFromBytes(result.size)}`,
+				);
 				const merge = await mergeVideoWithAudio(result.video, result.audio, path.join(__dirname, `Temporary Files/${filename}.mp4`));
 				await client[botNum].sendMessage(from, { video: new Buffer.from(merge, "base64"), caption: `\`\`\` • Bstation Downloader \`\`\`` }, { quoted: message });
 			}

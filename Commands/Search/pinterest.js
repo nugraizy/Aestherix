@@ -1,5 +1,5 @@
-import { pinterest } from "../../Utils/Pinterest/index.js";
 import { removeDuplicatesArray } from "../../Helper/Modules/index.js";
+import { pinterest } from "../../Utils/Pinterest/index.js";
 
 export default {
 	name: "pinterest",

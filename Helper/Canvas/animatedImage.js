@@ -1,13 +1,13 @@
 import Canvas from "canvas";
-import { writeFileSync, unlinkSync, readFileSync } from "fs";
 import Wrap from "canvas-text-wrapper";
 import { exec } from "child_process";
-import path from "path";
+import { readFileSync, unlinkSync, writeFileSync } from "fs";
 import moment from "moment-timezone";
-import { createExif } from "../../Utils/Misc/index.js";
+import path from "path";
 import { __dirname } from "../../connect.js";
+import { createExif } from "../../Utils/Misc/index.js";
 import { scheme } from "../Misc/Palettes/colors.js";
-import { INFOLOG, ERRLOG, color } from "../Modules/functions.js";
+import { color, ERRLOG, INFOLOG } from "../Modules/functions.js";
 const { createCanvas, registerFont } = Canvas;
 const { CanvasTextWrapper } = Wrap;
 

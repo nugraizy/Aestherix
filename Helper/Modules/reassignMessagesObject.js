@@ -1,9 +1,16 @@
-import { toBuffer, downloadContentFromMessage, downloadMediaMessage as downloadMessage, generateWAMessageFromContent, generateWAMessage, getContentType } from "@adiwajshing/baileys";
-import moment from "moment-timezone";
+import {
+	downloadContentFromMessage,
+	downloadMediaMessage as downloadMessage,
+	generateWAMessage,
+	generateWAMessageFromContent,
+	getContentType,
+	toBuffer,
+} from "@adiwajshing/baileys";
 import PhoneNumber from "awesome-phonenumber";
-import { isSame, isNotSame, isEmpty, isNotNull, readJSON, isUndefined, isURL, writeBuffer, delaySync } from "./index.js";
-import { NO_DATA, ZERO, S_WHATSAPP_NET, UPDATE, WebMessageInfoStubType } from "../Misc/WAData/index.js";
+import moment from "moment-timezone";
 import { checkJSON, pushDefaultSettings, updateSettings } from "../Groups/Settings/index.js";
+import { NO_DATA, S_WHATSAPP_NET, UPDATE, ZERO } from "../Misc/WAData/index.js";
+import { delaySync, isEmpty, isNotNull, isNotSame, isSame, isUndefined, isURL, readJSON, writeBuffer } from "./index.js";
 
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 export const reassign = async (m, client, store, search, deleted) => {
@@ -26,7 +33,10 @@ export const reassign = async (m, client, store, search, deleted) => {
 		const sender = isFromMe ? `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net` : isGroup ? m?.key?.participant : m?.key?.remoteJid;
 		const isBlocked = (await client[botNum].fetchBlocklist()).includes(sender);
 		if (isBlocked) return;
-		const prettyNumber = PhoneNumber(`+${sender?.replace("@s.whatsapp.net", "")}`)?.getNumber("international") ?? PhoneNumber(`+${m?.key?.participant?.replace("@s.whatsapp.net", "")}`)?.getNumber("international") ?? "No Data";
+		const prettyNumber =
+			PhoneNumber(`+${sender?.replace("@s.whatsapp.net", "")}`)?.getNumber("international") ??
+			PhoneNumber(`+${m?.key?.participant?.replace("@s.whatsapp.net", "")}`)?.getNumber("international") ??
+			"No Data";
 		const groupMetadata = isGroup ? await client[botNum].groupMetadata(from).catch((e) => {}) : {};
 		const groupName = isGroup ? groupMetadata?.subject : NO_DATA;
 		const groupDescription = isGroup ? groupMetadata?.desc?.toString() : NO_DATA;
@@ -53,7 +63,27 @@ export const reassign = async (m, client, store, search, deleted) => {
 		const isOwner = ownerNumbers.includes(sender);
 		const timeStamp = m?.messageTimestamp || Date.now();
 		const filename = sender + (m?.key?.id || Date.now());
-		if (!m.message) return { ...m, settings: SETTINGS, isFromMe, from, isGroup, ...groupSettings, isBaileys, sender, isBlocked, prettyNumber, groupName, groupId, isGroupOwner, pushname, botNumber, isOwner, timeStamp, filename };
+		if (!m.message)
+			return {
+				...m,
+				settings: SETTINGS,
+				isFromMe,
+				from,
+				isGroup,
+				...groupSettings,
+				isBaileys,
+				sender,
+				isBlocked,
+				prettyNumber,
+				groupName,
+				groupId,
+				isGroupOwner,
+				pushname,
+				botNumber,
+				isOwner,
+				timeStamp,
+				filename,
+			};
 		m.message = isSame(Object.keys(m.message)[0], "ephemeralMessage") ? m.message.ephemeralMessage.message : m.message;
 		let type = getContentType(m.message);
 		type = isSame(type, "messageContextInfo") ? (type = Object.keys(m.message)[1]) : type;
@@ -139,7 +169,12 @@ export const reassign = async (m, client, store, search, deleted) => {
 		const isQuotedLocation = isSame(type, "extendedTextMessage") && content.includes("locationMessage");
 		const isQuotedLiveLocation = isSame(type, "extendedTextMessage") && content.includes("liveLocationMessage");
 		const isQuotedContactsArray = isSame(type, "extendedTextMessage") && content.includes("contactsArrayMessage");
-		let typeQuoted = isSame(type, "extendedTextMessage") && m.message.extendedTextMessage ? Object.keys(m.message.extendedTextMessage.contextInfo ? (m.message.extendedTextMessage.contextInfo.quotedMessage ? m.message.extendedTextMessage.contextInfo.quotedMessage : "") : "")[0] : type;
+		let typeQuoted =
+			isSame(type, "extendedTextMessage") && m.message.extendedTextMessage
+				? Object.keys(
+						m.message.extendedTextMessage.contextInfo ? (m.message.extendedTextMessage.contextInfo.quotedMessage ? m.message.extendedTextMessage.contextInfo.quotedMessage : "") : "",
+				  )[0]
+				: type;
 		const isMediaVid = isSame(type, "videoMessage") || isQuotedVideo;
 		const isMediaImage = isSame(type, "imageMessage") || isQuotedImage;
 		const isSticker = isSame(type, "stickerMessage");
@@ -155,9 +190,25 @@ export const reassign = async (m, client, store, search, deleted) => {
 		const isQuotedViewOnce = isSame(type, "extendedTextMessage") && content.includes("viewOnceMessage");
 		const isQuotedViewOnceImage = isQuotedViewOnce && content.includes("viewOnceMessage") && content.includes("imageMessage");
 		const isQuotedViewOnceVideo = isQuotedViewOnce && content.includes("viewOnceMessage") && content.includes("videoMessage");
-		const typeViewOnce = isQuotedViewOnce && isQuotedViewOnceImage ? "imageMessage" : isQuotedViewOnce && isQuotedViewOnceVideo ? "videoMessage" : isViewOnce && isViewOnceImage ? "imageMessage" : isViewOnce && isViewOnceVideo ? "videoMessage" : "";
-		let mMediaData = isSame(type, "extendedTextMessage") && isNotSame(Object.keys(JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message), "ephemeralMessage") ? JSON.parse(JSON.stringify(m).replace("quotedM", "m"))?.message?.extendedTextMessage?.contextInfo : mText;
-		if (isSame(type, "extendedTextMessage") && isSame(Object.keys(JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message), "ephemeralMessage") && JSON.parse(JSON.stringify(m).replace("quotedM", "m"))?.message?.ephemeralMessage?.message?.extendedTextMessage?.contextInfo.message) {
+		const typeViewOnce =
+			isQuotedViewOnce && isQuotedViewOnceImage
+				? "imageMessage"
+				: isQuotedViewOnce && isQuotedViewOnceVideo
+				? "videoMessage"
+				: isViewOnce && isViewOnceImage
+				? "imageMessage"
+				: isViewOnce && isViewOnceVideo
+				? "videoMessage"
+				: "";
+		let mMediaData =
+			isSame(type, "extendedTextMessage") && isNotSame(Object.keys(JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message), "ephemeralMessage")
+				? JSON.parse(JSON.stringify(m).replace("quotedM", "m"))?.message?.extendedTextMessage?.contextInfo
+				: mText;
+		if (
+			isSame(type, "extendedTextMessage") &&
+			isSame(Object.keys(JSON.parse(JSON.stringify(m).replace("quotedM", "m")).message), "ephemeralMessage") &&
+			JSON.parse(JSON.stringify(m).replace("quotedM", "m"))?.message?.ephemeralMessage?.message?.extendedTextMessage?.contextInfo.message
+		) {
 			typeQuoted = Object.keys(JSON.parse(JSON.stringify(m).replace("quotedM", "m"))?.message?.ephemeralMessage?.message?.extendedTextMessage?.contextInfo?.message);
 			mMediaData = JSON.parse(JSON.stringify(m).replace("quotedM", "m"))?.message?.ephemeralMessage?.message?.extendedTextMessage?.contextInfo;
 		}
@@ -305,7 +356,11 @@ export const reassign = async (m, client, store, search, deleted) => {
 					return await generateWAMessage(ZERO, { audio: isURL(media) ? { url: media } : media }, { ...opts, upload: client[botNum].waUploadToServer });
 				}
 				case "documentMessage": {
-					return await generateWAMessage(ZERO, { document: isURL(media) ? { url: media } : media, fileName: opts.fileName, mimetype: opts.mimetype }, { ...opts, upload: client[botNum].waUploadToServer });
+					return await generateWAMessage(
+						ZERO,
+						{ document: isURL(media) ? { url: media } : media, fileName: opts.fileName, mimetype: opts.mimetype },
+						{ ...opts, upload: client[botNum].waUploadToServer },
+					);
 				}
 				case "stickerMessage": {
 					return await generateWAMessage(ZERO, { sticker: isURL(media) ? { url: media } : media }, { ...opts, upload: client[botNum].waUploadToServer });
@@ -318,7 +373,11 @@ export const reassign = async (m, client, store, search, deleted) => {
 		const buttonDocument = async (dari, contentText, footerText, buttons, media, opts = {}) => {
 			if (buttons.length == 0) return new Error("Buttons is empty");
 			const document = await prepareMedia(media, "documentMessage", opts);
-			const message = generateWAMessageFromContent(ZERO, { buttonsMessage: { buttons, contentText, footerText, headerType: 3, contextInfo: opts.contextInfo, documentMessage: document.message.documentMessage } }, opts);
+			const message = generateWAMessageFromContent(
+				ZERO,
+				{ buttonsMessage: { buttons, contentText, footerText, headerType: 3, contextInfo: opts.contextInfo, documentMessage: document.message.documentMessage } },
+				opts,
+			);
 			client[botNum].relayMessage(dari, message.message, { messageId: message.key.id });
 			return message;
 		};
@@ -326,7 +385,11 @@ export const reassign = async (m, client, store, search, deleted) => {
 		const buttonLocation = async (dari, contentText, footerText, buttons, media, opts = {}) => {
 			if (buttons.length == 0) return new Error("Buttons is empty");
 			const location = await generateWAMessage(ZERO, { location: { degreesLatitude: 0, degreesLongitude: 0, jpegThumbnail: media, name: "provided by nanda" } }, opts);
-			const message = generateWAMessageFromContent(ZERO, { buttonsMessage: { buttons, contentText, footerText, headerType: 6, contextInfo: opts.contextInfo, locationMessage: location.message.locationMessage } }, opts);
+			const message = generateWAMessageFromContent(
+				ZERO,
+				{ buttonsMessage: { buttons, contentText, footerText, headerType: 6, contextInfo: opts.contextInfo, locationMessage: location.message.locationMessage } },
+				opts,
+			);
 			client[botNum].relayMessage(dari, message.message, { messageId: message.key.id });
 			return message;
 		};
@@ -356,15 +419,27 @@ export const reassign = async (m, client, store, search, deleted) => {
 				for (const container of containers) {
 					try {
 						if (!force && adminGroups.includes(container) && update == "REMOVE") {
-							await client[botNum].sendMessage(dari, { text: `You can't ${update} @${container.split("@")[0]} because it's admin group.\nadd --force flag to force update admin`, mentions: [container] }, { quoted: message });
+							await client[botNum].sendMessage(
+								dari,
+								{ text: `You can't ${update} @${container.split("@")[0]} because it's admin group.\nadd --force flag to force update admin`, mentions: [container] },
+								{ quoted: message },
+							);
 							continue;
 						}
 						if (adminGroups.includes(container) && update == "PROMOTE") {
-							await client[botNum].sendMessage(dari, { text: `You can't ${update} @${container.split("@")[0]} because they already an admin group.`, mentions: [container] }, { quoted: message });
+							await client[botNum].sendMessage(
+								dari,
+								{ text: `You can't ${update} @${container.split("@")[0]} because they already an admin group.`, mentions: [container] },
+								{ quoted: message },
+							);
 							continue;
 						}
 						if (!adminGroups.includes(container) && update == "DEMOTE") {
-							await client[botNum].sendMessage(dari, { text: `You can't ${update} @${container.split("@")[0]} because they already a member group.`, mentions: [container] }, { quoted: message });
+							await client[botNum].sendMessage(
+								dari,
+								{ text: `You can't ${update} @${container.split("@")[0]} because they already a member group.`, mentions: [container] },
+								{ quoted: message },
+							);
 							continue;
 						}
 						const response = await client[botNum][UPDATE[update]](dari, [container], update.toLowerCase());

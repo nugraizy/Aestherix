@@ -1,6 +1,6 @@
 import path from "path";
 import { __dirname } from "../../../connect.js";
-import { readJSON, writeJSON, isFileExist, readDir } from "../../index.js";
+import { isFileExist, readDir, readJSON, writeJSON } from "../../index.js";
 
 const PATH = {
 	folder: path.join(__dirname, "Databases/Users"),

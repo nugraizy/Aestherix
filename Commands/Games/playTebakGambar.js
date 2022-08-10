@@ -1,6 +1,6 @@
 import moment from "moment-timezone";
-import { startTG } from "../../Utils/Games/index.js";
 import { color, INFOLOG } from "../../Helper/Modules/functions.js";
+import { startTG } from "../../Utils/Games/index.js";
 
 export default {
 	name: "tebakgambar",

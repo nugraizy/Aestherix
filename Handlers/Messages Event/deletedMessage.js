@@ -1,10 +1,10 @@
-import path from "path";
 import moment from "moment-timezone";
-import { CheckIntervals, DeleteIntervals } from "../../Utils/Misc/index.js";
+import path from "path";
 import { __dirname } from "../../connect.js";
-import { convertMediaToSticker } from "../../Utils/Converter/index.js";
 import { getFilesize, readBuffer, unlinkFile } from "../../Helper/Modules/index.js";
 import { reassign } from "../../Helper/Modules/reassignMessagesObject.js";
+import { convertMediaToSticker } from "../../Utils/Converter/index.js";
+import { CheckIntervals, DeleteIntervals } from "../../Utils/Misc/index.js";
 
 export default {
 	async handler(client, message, fetches) {
@@ -20,7 +20,11 @@ export default {
 			if (isFromMe) return;
 			if (from == "status@broadcast") return;
 			if (type == "protocolMessage" || type == "senderKeyDistributionMessage" || !type) return;
-			if (CheckIntervals(intervals["url"].get(sender)) !== 0 && CheckIntervals(intervals["url"].get(sender).get(from)) !== 0 && CheckIntervals(intervals["url"].get(sender).get(from)).id == message.message.key.id) {
+			if (
+				CheckIntervals(intervals["url"].get(sender)) !== 0 &&
+				CheckIntervals(intervals["url"].get(sender).get(from)) !== 0 &&
+				CheckIntervals(intervals["url"].get(sender).get(from)).id == message.message.key.id
+			) {
 				await client[botNum].reply({ from, quoted: message }, "Good. Do not send URLs next time or i will kick you.");
 				DeleteIntervals(intervals["url"].get(sender).get(from), intervals["url"].get(sender), from);
 				return;
@@ -41,7 +45,10 @@ export default {
 				let typeQuoted = null;
 				const captionReply = `\nMessage Replied to : ${replyParticipants}\n`;
 				const quotedMessage =
-					Object.keys(messages)[0] == type && messages[type].contextInfo && messages[type].contextInfo.quotedMessage && (typeQuoted = Object.keys(messages[type].contextInfo.quotedMessage)[0])
+					Object.keys(messages)[0] == type &&
+					messages[type].contextInfo &&
+					messages[type].contextInfo.quotedMessage &&
+					(typeQuoted = Object.keys(messages[type].contextInfo.quotedMessage)[0])
 						? `${
 								messages[type].contextInfo.quotedMessage.conversation
 									? `${captionReply}Type : ${typeQuoted}\nPesan : ${messages[type].contextInfo.quotedMessage.conversation}`
@@ -54,7 +61,11 @@ export default {
 									: messages[type].contextInfo.quotedMessage.contactMessage
 									? `${captionReply}Type : ${typeQuoted}\nDisplayname : ${messages[type].contextInfo.quotedMessage.contactMessage.displayName}`
 									: messages[type].contextInfo.quotedMessage.contactsArrayMessage
-									? `${captionReply}Type : ${typeQuoted}\nTotal Contact : ${messages[type].contextInfo.quotedMessage.contactsArrayMessage.contacts.length}\nList Name :\n${messages[type].contextInfo.quotedMessage.contactsArrayMessage.contacts.map((arr) => arr.displayName).join("\n")}`
+									? `${captionReply}Type : ${typeQuoted}\nTotal Contact : ${messages[type].contextInfo.quotedMessage.contactsArrayMessage.contacts.length}\nList Name :\n${messages[
+											type
+									  ].contextInfo.quotedMessage.contactsArrayMessage.contacts
+											.map((arr) => arr.displayName)
+											.join("\n")}`
 									: messages[type].contextInfo.quotedMessage.imageMessage
 									? `${captionReply}Type : ${typeQuoted}\nCaption : ${messages[type].contextInfo.quotedMessage.imageMessage.caption}` == ""
 										? "No Caption"
@@ -103,7 +114,10 @@ Size : ${fileSize}${quotedMessage}
 						break;
 					case "imageMessage":
 						{
-							const image = await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`));
+							const image = await client[botNum].downloadAndSaveMediaMessage(
+								extractMediaData,
+								path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`),
+							);
 							const fileSize = getFilesize(image);
 							const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
 Name : ${pushname}			
@@ -118,7 +132,10 @@ Caption : ${body ? body : "Unknown"}${quotedMessage}
 						break;
 					case "videoMessage":
 						{
-							const video = await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`));
+							const video = await client[botNum].downloadAndSaveMediaMessage(
+								extractMediaData,
+								path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`),
+							);
 							const fileSize = getFilesize(video);
 							const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
 Name : ${pushname}			
@@ -133,7 +150,10 @@ Caption : ${body ? body : "Unknown"}${quotedMessage}
 						break;
 					case "audioMessage":
 						{
-							const audio = await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`));
+							const audio = await client[botNum].downloadAndSaveMediaMessage(
+								extractMediaData,
+								path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`),
+							);
 							const fileSize = getFilesize(audio);
 							const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
 Name : ${pushname}			
@@ -155,7 +175,9 @@ Type : ${type}
 Time : ${moment.unix(timeStamp).format("HH:mm:ss DD/MM/YYYY")}
 Displayname : ${extractMediaData.displayName}${quotedMessage}
 `.trim();
-							await client[botNum].sendMessage(from, { contacts: { displayName: extractMediaData.displayName, contacts: [{ vcard: extractMediaData.vcard }] } }, options).then(() => client[botNum].sendMessage(from, { text: stringDeleted }, options));
+							await client[botNum]
+								.sendMessage(from, { contacts: { displayName: extractMediaData.displayName, contacts: [{ vcard: extractMediaData.vcard }] } }, options)
+								.then(() => client[botNum].sendMessage(from, { text: stringDeleted }, options));
 						}
 						break;
 					case "contactsArrayMessage":
@@ -167,7 +189,9 @@ Time : ${moment.unix(timeStamp).format("HH:mm:ss DD/MM/YYYY")}
 Displayname :
 ${extractMediaData.contacts.map((v, i) => `${i + 1}. ${v.displayName}`).join("\n")}${quotedMessage}
 `.trim();
-							await client[botNum].sendMessage(from, { contacts: { displayName: extractMediaData.displayName, contacts: extractMediaData.contacts } }, options).then(() => client[botNum].sendMessage(from, { text: stringDeleted }, options));
+							await client[botNum]
+								.sendMessage(from, { contacts: { displayName: extractMediaData.displayName, contacts: extractMediaData.contacts } }, options)
+								.then(() => client[botNum].sendMessage(from, { text: stringDeleted }, options));
 						}
 						break;
 					case "locationMessage":
@@ -181,7 +205,18 @@ Lat : ${extractMediaData.degreesLatitude}
 Long : ${extractMediaData.degreesLongitude}${quotedMessage}
 `.trim();
 							await client[botNum]
-								.sendMessage(from, { location: { degreesLatitude: extractMediaData.degreesLatitude, degreesLongitude: extractMediaData.degreesLongitude, jpegThumbnail: extractMediaData.jpegThumbnail, name: "Provided by Nanda, Void Bot. Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪" } }, options)
+								.sendMessage(
+									from,
+									{
+										location: {
+											degreesLatitude: extractMediaData.degreesLatitude,
+											degreesLongitude: extractMediaData.degreesLongitude,
+											jpegThumbnail: extractMediaData.jpegThumbnail,
+											name: "Provided by Nanda, Void Bot. Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪",
+										},
+									},
+									options,
+								)
 								.then(() => client[botNum].sendMessage(from, { text: string_deleted }, options));
 						}
 						break;

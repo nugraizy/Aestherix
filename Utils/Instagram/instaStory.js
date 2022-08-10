@@ -1,5 +1,5 @@
 import qs from "qs";
-import { fetchJSON, fetchTEXT, cheerioLOAD } from "../../Helper/index.js";
+import { cheerioLOAD, fetchJSON, fetchTEXT } from "../../Helper/index.js";
 
 export const getStory = (username) =>
 	new Promise(async (resolve) => {
@@ -7,7 +7,10 @@ export const getStory = (username) =>
 			if (!username) return resolve({ status: false, error: "Insert username!" });
 			if (username.startsWith("@")) username = username.replace("@", "");
 			const data = await fetchTEXT(URL_BASE(username), {
-				headers: { "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36", Cookie: "PHPSESSID=4cnkqg281u4mf19m23htlrcm7g; _ga=GA1.2.1623964880.1642090612; _gid=GA1.2.553723423.1642090612; _gat=1" },
+				headers: {
+					"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",
+					Cookie: "PHPSESSID=4cnkqg281u4mf19m23htlrcm7g; _ga=GA1.2.1623964880.1642090612; _gid=GA1.2.553723423.1642090612; _gat=1",
+				},
 			});
 			const $ = cheerioLOAD(data);
 			const token = $("input#token").attr("value");

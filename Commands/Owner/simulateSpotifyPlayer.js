@@ -1,6 +1,6 @@
 import { delay } from "@adiwajshing/baileys";
-import mqtt from "mqtt";
 import async from "async";
+import mqtt from "mqtt";
 import { spotifier } from "../../Utils/Spotifier/index.js";
 
 const clientMqttListen = mqtt.connect(process.env.MQTT_URL);
@@ -61,7 +61,7 @@ async function updateSpotifyTracks() {
 			if (presences?.spotify?.timeout == undefined) next();
 			await delay(4_000);
 			const data = await spotifier.updateNowPlayingStates();
-			if (data !== false) clientMqttListen.publish(process.env.MQTT_TOPIC, JSON.stringify({...data,status:true}));
+			if (data !== false) clientMqttListen.publish(process.env.MQTT_TOPIC, JSON.stringify({ ...data, status: true }));
 		},
 		async (err) => {},
 	);

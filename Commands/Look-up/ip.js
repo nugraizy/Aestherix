@@ -1,7 +1,7 @@
 import moment from "moment-timezone";
 import parser from "yargs-parser";
+import { color, ERRLOG, isOne } from "../../Helper/Modules/index.js";
 import { IPLookup } from "../../Utils/Misc/index.js";
-import { isOne, ERRLOG, color } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "iplookup",
@@ -29,7 +29,30 @@ export default {
 					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Searching IP Address", "red")} for ${color(prettyNumber, "#ff71ce")}`);
 					continue;
 				} else {
-					const { continent, continentCode, country, countryCode, region, regionName, city, district, zip, lat, lon, timezone, offset, currency, isp, org, as, asname, reverse, mobile, proxy, hosting } = data;
+					const {
+						continent,
+						continentCode,
+						country,
+						countryCode,
+						region,
+						regionName,
+						city,
+						district,
+						zip,
+						lat,
+						lon,
+						timezone,
+						offset,
+						currency,
+						isp,
+						org,
+						as,
+						asname,
+						reverse,
+						mobile,
+						proxy,
+						hosting,
+					} = data;
 					let capt = `\`\`\` • IP Address Lookup \`\`\`\n\n`;
 					capt += `Continent : ${continent}\n`;
 					capt += `Continent Code : ${continentCode}\n`;

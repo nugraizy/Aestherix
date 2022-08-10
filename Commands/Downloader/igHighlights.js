@@ -1,8 +1,7 @@
 import moment from "moment-timezone";
-import { delay } from "@adiwajshing/baileys";
 import parser from "yargs-parser";
+import { color, ERRLOG, INFOLOG, isEmpty, isOne, isSame, isURL, numberWithCommas } from "../../Helper/Modules/index.js";
 import { getHighlights2 } from "../../Utils/Instagram/index.js";
-import { isOne, isURL, isEmpty, isSame, numberWithCommas, INFOLOG, ERRLOG, color } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "ighighlights",
@@ -48,14 +47,26 @@ export default {
 						for (const media of highlights.highlights[0].dataHighlight.slice(0, 2)) {
 							capt = "";
 							capt += `Highlights Title : ${highlights.highlights[0].title}\n`;
-							await client[botNum].sendMessage(from, isSame(media.type, "video") ? { video: { url: media.url }, caption: capt.trim() } : { image: { url: media.url }, caption: capt.trim() }, { quoted: message });
+							await client[botNum].sendMessage(
+								from,
+								isSame(media.type, "video") ? { video: { url: media.url }, caption: capt.trim() } : { image: { url: media.url }, caption: capt.trim() },
+								{ quoted: message },
+							);
 						}
 					} else {
 						for (const media of highlights.highlights) {
 							capt = "";
 							capt += `Highlights Title : ${media.title}`;
-							await client[botNum].sendMessage(from, isSame(media.dataHighlight[0].type, "video") ? { video: { url: media.dataHighlight[0].url }, caption: capt } : { image: { url: media.dataHighlight[0].url }, caption: capt });
-							await client[botNum].sendMessage(from, isSame(media.dataHighlight[1].type, "video") ? { video: { url: media.dataHighlight[1].url } } : { image: { url: media.dataHighlight[1].url } });
+							await client[botNum].sendMessage(
+								from,
+								isSame(media.dataHighlight[0].type, "video")
+									? { video: { url: media.dataHighlight[0].url }, caption: capt }
+									: { image: { url: media.dataHighlight[0].url }, caption: capt },
+							);
+							await client[botNum].sendMessage(
+								from,
+								isSame(media.dataHighlight[1].type, "video") ? { video: { url: media.dataHighlight[1].url } } : { image: { url: media.dataHighlight[1].url } },
+							);
 						}
 					}
 					INFOLOG(`[${color(time, "cyan")}]`, `${color("Downloaded Instagram highlights", "cyan")} for ${color(prettyNumber, "#ff71ce")}`);

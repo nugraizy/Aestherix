@@ -1,8 +1,8 @@
 import { delay } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
 import parser from "yargs-parser";
+import { color, ERRLOG, INFOLOG, isOne, isSame, isURL } from "../../Helper/Modules/index.js";
 import { getStory3 } from "../../Utils/Instagram/index.js";
-import { isOne, isURL, isSame, INFOLOG, ERRLOG, color } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "igstory",
@@ -18,7 +18,8 @@ export default {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please specify a username");
 		try {
 			const { _: usernames } = parser(query);
-			if (isOne(usernames.length) && isURL(usernames[0]) && !/\/stories\//.test(usernames[0])) return client[botNum].reply({ from, quoted: message }, "Please specify a valid username or a valid url instagram story");
+			if (isOne(usernames.length) && isURL(usernames[0]) && !/\/stories\//.test(usernames[0]))
+				return client[botNum].reply({ from, quoted: message }, "Please specify a valid username or a valid url instagram story");
 			for (const username of usernames) {
 				if (isURL(username) && !/\/stories\//.test(username)) await client[botNum].reply({ from, quoted: message }, "Please specify a username or a valid url instagram story");
 				else {
@@ -32,7 +33,12 @@ export default {
 					let capt = "``` • Instagram Story```\n\n";
 					capt += `Username : ${story.username}\n`;
 					capt += `Fullname : ${story.fullName}\n`;
-					if (isOne(story.stories.length)) await client[botNum].sendMessage(from, story.stories[0].isVideo ? { video: { url: story.stories[0].url }, caption: capt.trim() } : { image: { url: story.stories[0].url }, caption: capt.trim() }, { quoted: message });
+					if (isOne(story.stories.length))
+						await client[botNum].sendMessage(
+							from,
+							story.stories[0].isVideo ? { video: { url: story.stories[0].url }, caption: capt.trim() } : { image: { url: story.stories[0].url }, caption: capt.trim() },
+							{ quoted: message },
+						);
 					else {
 						capt += `Tot. Media : ${story.stories.length}`;
 						await client[botNum].sendMessage(from, { text: capt.trim() }, { quoted: message });

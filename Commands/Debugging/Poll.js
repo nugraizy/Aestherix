@@ -1,4 +1,4 @@
-import { generateWAMessageFromContent, generateMessageID } from "@adiwajshing/baileys";
+import { generateMessageID, generateWAMessageFromContent } from "@adiwajshing/baileys";
 
 export default {
 	name: "polling",

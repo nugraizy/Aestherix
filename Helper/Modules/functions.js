@@ -1,13 +1,13 @@
-import ms from "parse-ms";
-import request from "request";
+import Axios from "axios";
+import cheerio from "cheerio";
+import { fileTypeFromBuffer } from "file-type";
+import FormData from "form-data";
 import fs from "fs";
 import gradient from "gradient-string";
 import beautifyJSON from "json-stable-stringify";
-import { fileTypeFromBuffer } from "file-type";
-import Axios from "axios";
-import FormData from "form-data";
-import cheerio from "cheerio";
 import fetch from "node-fetch";
+import ms from "parse-ms";
+import request from "request";
 
 export const fetchTEXT = async (_, __) => {
 	return await (await fetch(_, __)).text();
@@ -86,7 +86,18 @@ String.prototype.mocking = function () {
 		.split("")
 		.map((str) => {
 			if (str === str.toUpperCase())
-				container.push(str.replace(/A/gi, replacing[0]).replace(/B/gi, replacing[1]).replace(/E/gi, replacing[2]).replace(/G/gi, replacing[3]).replace(/I/gi, replacing[4]).replace(/O/gi, replacing[5]).replace(/S/gi, replacing[6]).replace(/T/gi, replacing[7]).replace(/Z/gi, replacing[8]));
+				container.push(
+					str
+						.replace(/A/gi, replacing[0])
+						.replace(/B/gi, replacing[1])
+						.replace(/E/gi, replacing[2])
+						.replace(/G/gi, replacing[3])
+						.replace(/I/gi, replacing[4])
+						.replace(/O/gi, replacing[5])
+						.replace(/S/gi, replacing[6])
+						.replace(/T/gi, replacing[7])
+						.replace(/Z/gi, replacing[8]),
+				);
 			else container.push(str);
 		});
 
@@ -192,9 +203,11 @@ export const getTimeSince = (dates) => {
 	const time = Date.now() - dates;
 	const dateString = ms(time);
 	const container = [];
-	`${dateString.days ? container.push(`${dateString.days} Day${dateString.days > 1 ? "s" : ""}`) : ""}${dateString.hours ? container.push(`${dateString.hours} Hour${dateString.hours > 1 ? "s" : ""}`) : ""}${
-		dateString.minutes ? container.push(`${dateString.minutes} Minute${dateString.minutes > 1 ? "s" : ""}`) : ""
-	}${dateString.seconds ? container.push(`${dateString.seconds} Second${dateString.seconds > 1 ? "s" : ""}`) : ""}`;
+	`${dateString.days ? container.push(`${dateString.days} Day${dateString.days > 1 ? "s" : ""}`) : ""}${
+		dateString.hours ? container.push(`${dateString.hours} Hour${dateString.hours > 1 ? "s" : ""}`) : ""
+	}${dateString.minutes ? container.push(`${dateString.minutes} Minute${dateString.minutes > 1 ? "s" : ""}`) : ""}${
+		dateString.seconds ? container.push(`${dateString.seconds} Second${dateString.seconds > 1 ? "s" : ""}`) : ""
+	}`;
 	return container.join(", ");
 };
 
@@ -202,9 +215,11 @@ export const getRuntime = (time) => {
 	const uptime = time;
 	const date = new Date(uptime * 1000);
 	const container = [];
-	`${date.getUTCDate() - 1 > 0 ? container.push(`${date.getUTCDate() - 1} Day${date.getUTCDate() - 1 > 1 ? "s" : ""}`) : ""}${date.getUTCHours() > 0 ? container.push(`${date.getUTCHours()} Hour${date.getUTCHours() > 1 ? "s" : ""}`) : ""}${
-		date.getUTCMinutes() > 0 ? container.push(`${date.getUTCMinutes()} Minute${date.getUTCMinutes() > 1 ? "s" : ""}`) : ""
-	}${date.getUTCSeconds() > 0 ? container.push(`${date.getUTCSeconds()} Second${date.getUTCSeconds() > 1 ? "s" : ""}`) : ""}`;
+	`${date.getUTCDate() - 1 > 0 ? container.push(`${date.getUTCDate() - 1} Day${date.getUTCDate() - 1 > 1 ? "s" : ""}`) : ""}${
+		date.getUTCHours() > 0 ? container.push(`${date.getUTCHours()} Hour${date.getUTCHours() > 1 ? "s" : ""}`) : ""
+	}${date.getUTCMinutes() > 0 ? container.push(`${date.getUTCMinutes()} Minute${date.getUTCMinutes() > 1 ? "s" : ""}`) : ""}${
+		date.getUTCSeconds() > 0 ? container.push(`${date.getUTCSeconds()} Second${date.getUTCSeconds() > 1 ? "s" : ""}`) : ""
+	}`;
 	return container.join(", ");
 };
 
@@ -231,7 +246,58 @@ export const randomNumber = (max) => ~~(Math.random() * max);
 
 const chars = () => {
 	const char = {
-		up: ["̍", "̎", "̄", "̅", "̿", "̑", "̆", "̐", "͒", "͗", "͑", "̇", "̈", "̊", "͂", "̓", "̈́", "͊", "͋", "͌", "̃", "̂", "̌", "͐", "̀", "́", "̋", "̏", "̒", "̓", "̔", "̽", "̉", "ͣ", "ͤ", "ͥ", "ͦ", "ͧ", "ͨ", "ͩ", "ͪ", "ͫ", "ͬ", "ͭ", "ͮ", "ͯ", "̾", "͛", "͆", "̚"],
+		up: [
+			"̍",
+			"̎",
+			"̄",
+			"̅",
+			"̿",
+			"̑",
+			"̆",
+			"̐",
+			"͒",
+			"͗",
+			"͑",
+			"̇",
+			"̈",
+			"̊",
+			"͂",
+			"̓",
+			"̈́",
+			"͊",
+			"͋",
+			"͌",
+			"̃",
+			"̂",
+			"̌",
+			"͐",
+			"̀",
+			"́",
+			"̋",
+			"̏",
+			"̒",
+			"̓",
+			"̔",
+			"̽",
+			"̉",
+			"ͣ",
+			"ͤ",
+			"ͥ",
+			"ͦ",
+			"ͧ",
+			"ͨ",
+			"ͩ",
+			"ͪ",
+			"ͫ",
+			"ͬ",
+			"ͭ",
+			"ͮ",
+			"ͯ",
+			"̾",
+			"͛",
+			"͆",
+			"̚",
+		],
 		middle: ["̕", "̛", "̀", "́", "͘", "̡", "̢", "̧", "̨", "̴", "̵", "̶", "͏", "͜", "͝", "͞", "͟", "͠", "͢", "̸", "̷", "͡", "҉"],
 		down: ["̖", "̗", "̘", "̙", "̜", "̝", "̞", "̟", "̠", "̤", "̥", "̦", "̩", "̪", "̫", "̬", "̭", "̮", "̯", "̰", "̱", "̲", "̳", "̹", "̺", "̻", "̼", "ͅ", "͇", "͈", "͉", "͍", "͎", "͓", "͔", "͕", "͖", "͙", "͚", "̣"],
 	};
@@ -439,7 +505,13 @@ export const readDir = (path) => fs.readdirSync(path);
 
 export const color = (text, color) => {
 	const schemes = ["teen", "passion", "instagram"][Math.floor(Math.random() * 3)];
-	return OPTIONS.rainbow ? gradient["rainbow"](text) : typeof color == "object" ? gradient(...color)(text) : typeof color == "string" ? gradient(color, color)(text) : gradient[schemes](text);
+	return OPTIONS.rainbow
+		? gradient["rainbow"](text)
+		: typeof color == "object"
+		? gradient(...color)(text)
+		: typeof color == "string"
+		? gradient(color, color)(text)
+		: gradient[schemes](text);
 };
 
 export const INFOLOG = (...info) => {
@@ -464,7 +536,28 @@ export const parseCode = (input) => {
 };
 
 const convertToRoman = (num) => {
-	const lookup = { M̄: 1_000_000, D̄: 500_000, C̄: 100_000, L̄: 50_000, X̄: 10_000, V̄: 5000, Ī: 1000, M: 1000, CM: 900, D: 500, CD: 400, C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1 };
+	const lookup = {
+		M̄: 1_000_000,
+		D̄: 500_000,
+		C̄: 100_000,
+		L̄: 50_000,
+		X̄: 10_000,
+		V̄: 5000,
+		Ī: 1000,
+		M: 1000,
+		CM: 900,
+		D: 500,
+		CD: 400,
+		C: 100,
+		XC: 90,
+		L: 50,
+		XL: 40,
+		X: 10,
+		IX: 9,
+		V: 5,
+		IV: 4,
+		I: 1,
+	};
 	let roman = "";
 	let i;
 	for (i in lookup) {

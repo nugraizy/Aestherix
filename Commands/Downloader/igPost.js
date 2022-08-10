@@ -1,8 +1,8 @@
 import { delay } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
 import parser from "yargs-parser";
+import { color, ERRLOG, INFOLOG, isOne, isURL, numberWithCommas, parseCode } from "../../Helper/Modules/index.js";
 import { getPost } from "../../Utils/Instagram/index.js";
-import { isOne, isURL, parseCode, numberWithCommas, INFOLOG, ERRLOG, color } from "../../Helper/Modules/index.js";
 
 export default {
 	name: "igpost",

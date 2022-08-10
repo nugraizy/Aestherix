@@ -1,6 +1,6 @@
 import { generateMessageID } from "@adiwajshing/baileys";
+import { fetchBUFFER, removeDuplicatesArray } from "../../Helper/index.js";
 import { spotifier } from "../../Utils/Spotifier/index.js";
-import { removeDuplicatesArray, fetchBUFFER } from "../../Helper/index.js";
 
 export default {
 	name: "spotifyalbum",
@@ -98,7 +98,19 @@ export default {
 					},
 					{ quoted: message },
 				);
-				await client[botNum].relayMessage(from, { listMessage: { buttonText: " • Fetch More Spotify Tracks from this Album", description: "\t", footerText: "```Looking for some more? Choose between these options.```", listType: 1, sections: rows } }, { messageId: generateMessageID() });
+				await client[botNum].relayMessage(
+					from,
+					{
+						listMessage: {
+							buttonText: " • Fetch More Spotify Tracks from this Album",
+							description: "\t",
+							footerText: "```Looking for some more? Choose between these options.```",
+							listType: 1,
+							sections: rows,
+						},
+					},
+					{ messageId: generateMessageID() },
+				);
 			}
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
@@ -111,5 +123,7 @@ export default {
 };
 
 function regex(input) {
-	return /(https?:\/\/open.spotify.com\/(track|user|artist|album)\/[a-zA-Z0-9]+(\/playlist\/[a-zA-Z0-9]+|)|spotify:(track|user|artist|album):[a-zA-Z0-9]+(:playlist:[a-zA-Z0-9]+|))/.test(input);
+	return /(https?:\/\/open.spotify.com\/(track|user|artist|album)\/[a-zA-Z0-9]+(\/playlist\/[a-zA-Z0-9]+|)|spotify:(track|user|artist|album):[a-zA-Z0-9]+(:playlist:[a-zA-Z0-9]+|))/.test(
+		input,
+	);
 }

@@ -1,2 +1,2 @@
-export { checkUser, addUser, indexUser, updateUser, addLimit, addAllLimit, resetAllLimit, checkLimit, checkJSON, pushDefaultSettings } from "./Settings/index.js";
-export { checkAfk, getAfk, setAfk, deleteAfk } from "./AFK/index.js";
+export { checkAfk, deleteAfk, getAfk, setAfk } from "./AFK/index.js";
+export { addAllLimit, addLimit, addUser, checkJSON, checkLimit, checkUser, indexUser, pushDefaultSettings, resetAllLimit, updateUser } from "./Settings/index.js";

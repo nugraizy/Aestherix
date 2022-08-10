@@ -122,7 +122,9 @@ const requestHeaders = (server, { query, body }) => {
 				DS: getDS(server, { query, body }),
 				Origin: "https://webstatic.mihoyo.com",
 				"x-rpc-app_version": getHoyolabV(server),
-				"User-Agent": `Mozilla/5.0 (Linux; Android 9; Unspecified Device) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/39.0.0.0 Mobile Safari/537.36 miHoYoBBS/${getHoyolabV(server)}`,
+				"User-Agent": `Mozilla/5.0 (Linux; Android 9; Unspecified Device) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/39.0.0.0 Mobile Safari/537.36 miHoYoBBS/${getHoyolabV(
+					server,
+				)}`,
 				"x-rpc-client_type": "5",
 				Referer: "https://webstatic.mihoyo.com/app/community-game-records/index.html?v=6",
 				"Accept-Encoding": "gzip, deflate",

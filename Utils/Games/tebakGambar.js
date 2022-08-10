@@ -1,7 +1,7 @@
-import path from "path";
 import moment from "moment-timezone";
+import path from "path";
 import { __dirname } from "../../connect.js";
-import { readJSON, randomize, color, INFOLOG } from "../../Helper/Modules/functions.js";
+import { color, INFOLOG, randomize, readJSON } from "../../Helper/Modules/functions.js";
 import { CheckIntervals, DeleteIntervals, SetIntervals } from "../Misc/intervals.js";
 
 export const startTG = async (client, id, { message, sender }, remainingTime) => {

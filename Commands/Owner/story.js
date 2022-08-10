@@ -50,14 +50,24 @@ export default {
 		}
 		if (tempContainer.size == 0) return client[botNum].reply({ from, quoted: message }, "No story are found.");
 		for (const value of Array.from(tempContainer.entries())) {
-			caption += ` • ${value[1].stories?.extendedTextMessage?.[0].pushName ?? value[1].stories?.imageMessage?.[0].pushName ?? value[1].stories?.videoMessage?.[0].pushName ?? "No Name"}\n`;
+			caption += ` • ${
+				value[1].stories?.extendedTextMessage?.[0].pushName ?? value[1].stories?.imageMessage?.[0].pushName ?? value[1].stories?.videoMessage?.[0].pushName ?? "No Name"
+			}\n`;
 			caption += `Texts : ${value[1].stories?.extendedTextMessage?.length ?? 0}\n`;
 			caption += `Images : ${value[1].stories?.imageMessage?.length ?? 0}\n`;
 			caption += `Videos : ${value[1].stories?.videoMessage?.length ?? 0}\n\n`;
 		}
 		await client[botNum].relayMessage(
 			from,
-			{ listMessage: { buttonText: " • Fetch WhatsApp Story", description: caption.trim(), footerText: "if you can't click 'read more' : click it first then reply the list, then click on the 'x' mark on your reply.", listType: 1, sections: rows } },
+			{
+				listMessage: {
+					buttonText: " • Fetch WhatsApp Story",
+					description: caption.trim(),
+					footerText: "if you can't click 'read more' : click it first then reply the list, then click on the 'x' mark on your reply.",
+					listType: 1,
+					sections: rows,
+				},
+			},
 			{ messageId: generateMessageID() },
 		);
 	},

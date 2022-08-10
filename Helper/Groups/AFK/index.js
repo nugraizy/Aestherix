@@ -1,1 +1,1 @@
-export { checkAfk, getAfk, setAfk, deleteAfk } from "./afk.js";
+export { checkAfk, deleteAfk, getAfk, setAfk } from "./afk.js";

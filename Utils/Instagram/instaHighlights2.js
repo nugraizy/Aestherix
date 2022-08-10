@@ -26,21 +26,42 @@ const fetchId = async (usernames) => {
 	const data = await fetchJSON(
 		appendParams("https://www.instagram.com/graphql/query/", {
 			query_hash: "c9100bf9110dd6361671f113dd02e7d6",
-			variables: JSON.stringify({ user_id: dataUser.id, include_chaining: false, include_reel: true, include_suggested_users: false, include_logged_out_extras: false, include_highlight_reels: true, include_live_status: false }),
+			variables: JSON.stringify({
+				user_id: dataUser.id,
+				include_chaining: false,
+				include_reel: true,
+				include_suggested_users: false,
+				include_logged_out_extras: false,
+				include_highlight_reels: true,
+				include_live_status: false,
+			}),
 		}),
 		{
 			method: "GET",
 			headers: { "user-agent": UA_IP, cookie: `sessionid=${sessionId};` },
 		},
 	);
-	return { user: dataUser, items: data.data.user.edge_highlight_reels.edges.map((edge) => ({ highlight_id: edge.node.id, cover: edge.node.cover_media.thumbnail_src, title: edge.node.title })) };
+	return {
+		user: dataUser,
+		items: data.data.user.edge_highlight_reels.edges.map((edge) => ({ highlight_id: edge.node.id, cover: edge.node.cover_media.thumbnail_src, title: edge.node.title })),
+	};
 };
 
 const fetchHighlights = async (id) => {
 	const data = await fetchJSON(
 		appendParams("https://www.instagram.com/graphql/query/", {
 			query_hash: "0a85e6ea60a4c99edc58ab2f3d17cfdf",
-			variables: JSON.stringify({ reel_ids: [], tag_names: [], location_ids: [], highlight_reel_ids: [id], precomposed_overlay: false, show_story_viewer_list: true, story_viewer_fetch_count: 50, story_viewer_cursor: "", stories_video_dash_manifest: false }),
+			variables: JSON.stringify({
+				reel_ids: [],
+				tag_names: [],
+				location_ids: [],
+				highlight_reel_ids: [id],
+				precomposed_overlay: false,
+				show_story_viewer_list: true,
+				story_viewer_fetch_count: 50,
+				story_viewer_cursor: "",
+				stories_video_dash_manifest: false,
+			}),
 		}),
 		{
 			method: "GET",

@@ -1,6 +1,6 @@
-import moment from "moment-timezone";
-import { SambungKata, GetSambungKataSession } from "../../Utils/Games/index.js";
 import { generateMessageID } from "@adiwajshing/baileys";
+import moment from "moment-timezone";
+import { GetSambungKataSession, SambungKata } from "../../Utils/Games/index.js";
 
 export default {
 	name: "sambungkata",
@@ -18,7 +18,15 @@ export default {
 			const game = new SambungKata(sender, undefined, from);
 			await client[botNum].relayMessage(
 				from,
-				{ listMessage: { buttonText: "Void Bot Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪", description: "List Message", listType: 1, footerText: "Void Bot", sections: [{ rows: [{ title: "Play", rowId: `.sambung player 2` }], title: "VOID BOT | Word Game" }] } },
+				{
+					listMessage: {
+						buttonText: "Void Bot Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪",
+						description: "List Message",
+						listType: 1,
+						footerText: "Void Bot",
+						sections: [{ rows: [{ title: "Play", rowId: `.sambung player 2` }], title: "VOID BOT | Word Game" }],
+					},
+				},
 				{ messageId: generateMessageID() },
 			);
 		} else if (query == "player 2") {

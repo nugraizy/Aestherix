@@ -1,5 +1,5 @@
-import { shopeeProduct } from "../../Utils/Misc/index.js";
 import { numberWithCommas, removeDuplicatesArray } from "../../Helper/Modules/index.js";
+import { shopeeProduct } from "../../Utils/Misc/index.js";
 
 export default {
 	name: "shopee",
