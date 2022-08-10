@@ -326,7 +326,7 @@ export const reassign = async (m, client, store, search, deleted) => {
 				author: "Powered by hidden finder",
 				type: StickerTypes.FULL,
 				id: "MADEBYVOID",
-				quality: 10,
+				quality: 100,
 			});
 			return await prepare.toMessage();
 		};
