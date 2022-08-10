@@ -17,7 +17,7 @@ export default {
 			const urls = await tiny(query);
 			await client[botNum].reply({ from, quoted: message }, urls);
 		} catch (err) {
-			log(e);
+			log(err);
 			client[botNum].reply({ from, quoted: message }, "Error while shortening your URL");
 		}
 	},

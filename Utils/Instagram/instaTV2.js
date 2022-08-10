@@ -15,6 +15,6 @@ export const getIgtv2 = (url) =>
 			const data = $("#downloadBox > a").attr("href");
 			resolve(data);
 		} catch (e) {
-			reject({ error: e });
+			reject(e);
 		}
 	});

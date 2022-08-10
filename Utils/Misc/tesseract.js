@@ -30,6 +30,6 @@ export const tesseract = async (image, sender, lang = "ind") =>
 			resolve({ result: { text, confidence, paragraphs: paragraphs.map((v) => v.text), languages } });
 		} catch (err) {
 			unlinkFile(image);
-			reject({ error: err });
+			reject(err);
 		}
 	});

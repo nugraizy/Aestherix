@@ -38,7 +38,7 @@ export const tiktokProfileBRAINANS = (username) =>
 			} else videos = [];
 			resolve({ userName, fullName, bio, totalVideos, following, followers, likes, profilePicture, videos });
 		} catch (err) {
-			reject({ error: err });
+			reject(err);
 		}
 	});
 

@@ -1,5 +1,5 @@
 import { zalgo } from "../../Helper/Modules/index.js";
-
+//
 export default {
 	name: "zalgo",
 	description: "Convert Text to Zalgo text",

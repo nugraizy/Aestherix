@@ -63,7 +63,7 @@ export const getEarthquake = async () =>
 			}
 			resolve(results);
 		} catch (err) {
-			reject({ error: err });
+			reject(err);
 		}
 	});
 const URL_WORLD = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
