@@ -11,9 +11,10 @@ import { color, ERRLOG, INFOLOG } from "../Modules/functions.js";
 const { createCanvas, registerFont, loadImage } = Canvas;
 const { CanvasTextWrapper } = Wrap;
 
-export const memeGenerator = (sender, input, topTexts = "Made by Nanda", bottomTexts = "Using Canvas", type = "image", WATERMARK) =>
+export const memeGenerator = (sender, input, topTexts = "", bottomTexts = "", type = "image", WATERMARK) =>
 	new Promise(async (resolve, reject) => {
 		try {
+			if (topTexts == "" && bottomTexts == "") return resolve({ error: "No Texts Provided" });
 			const time = moment().format("HH:mm:ss DD/MM");
 			const { width, height } = sizeOf(input);
 			topTexts = topTexts.substring(0, 40);
@@ -98,6 +99,7 @@ const insertExif = async (paths, sender) =>
 					unlinkSync(`${pathResults}-done.webp`);
 					unlinkSync(`${pathResults}.webp`);
 					unlinkSync(paths);
+					createExif(packname, author);
 					resolve({
 						buffers,
 					});

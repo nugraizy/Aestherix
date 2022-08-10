@@ -69,6 +69,7 @@ const createSequence = async (images, sender) =>
 				for (const paths of images) {
 					unlinkSync(paths);
 				}
+				createExif(packname, author);
 				resolve({
 					buffers,
 				});

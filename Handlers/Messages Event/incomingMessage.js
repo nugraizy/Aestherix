@@ -11,6 +11,7 @@ moment.tz.setDefault("Asia/Jakarta").locale("id");
 export default {
 	async handler(message, client, cmds, store, user) {
 		if (message == undefined) return;
+		if (OPTIONS.debugMode && !message?.messages?.[0]?.key?.fromMe) await client[botNum].sendMessage("120363027862918129@g.us", { text: JSON.stringify(message, undefined, 2) });
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (message.messages[0] && "messageStubParameters" in message.messages[0]) return (await import("./stubMessage.js")).default.handler(client, message.messages[0], store);
 		message = await reassign(JSON.parse(JSON.stringify(message.messages[0])), client, store, false);

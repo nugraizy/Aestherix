@@ -69,6 +69,7 @@ const insertExif = async (paths, sender) =>
 					unlinkSync(`${pathResults}-done.webp`);
 					unlinkSync(`${pathResults}.webp`);
 					unlinkSync(paths);
+					createExif(packname, author);
 					resolve({
 						buffers,
 					});

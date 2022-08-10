@@ -63,6 +63,9 @@ export default {
 							parsed.isStickers ? "sticker" : parsed.isImage ? "image" : DEFAULT_TYPE,
 							WATERMARK,
 						);
+						if (buffer.error) {
+							return await client[botNum].reply({ from, quoted: message }, buffer.error);
+						}
 						if (parsed.isStickers) {
 							await client[botNum].sendMessage(from, { sticker: buffer }, { quoted: message });
 						} else {

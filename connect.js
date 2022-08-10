@@ -120,7 +120,7 @@ const start = async () => {
 	}
 	await loadCommands();
 	await loadEveryCommand();
-	createExif("Made by Nanda", "Void bot");
+	createExif(packname, author);
 	const CONNECTION_CONFIG = {
 		printQRInTerminal: true,
 		version: DEFAULT_CONNECTION_CONFIG.version,

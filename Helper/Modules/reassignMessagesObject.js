@@ -1,4 +1,5 @@
 import {
+	delay,
 	downloadContentFromMessage,
 	downloadMediaMessage as downloadMessage,
 	generateWAMessage,
@@ -7,7 +8,9 @@ import {
 	toBuffer,
 } from "@adiwajshing/baileys";
 import PhoneNumber from "awesome-phonenumber";
+import Axios from "axios";
 import moment from "moment-timezone";
+import { Sticker, StickerTypes } from "wa-sticker-formatter";
 import { checkJSON, pushDefaultSettings, updateSettings } from "../Groups/Settings/index.js";
 import { NO_DATA, S_WHATSAPP_NET, UPDATE, ZERO } from "../Misc/WAData/index.js";
 import { delaySync, isEmpty, isNotNull, isNotSame, isSame, isUndefined, isURL, readJSON, writeBuffer } from "./index.js";
@@ -31,7 +34,7 @@ export const reassign = async (m, client, store, search, deleted) => {
 		let groupSettings;
 		const isBaileys = (m?.key?.id?.startsWith("BAE5") && isSame(m?.key?.id?.length, 16)) || (isFromMe && m?.key?.id?.startsWith("VOID"));
 		const sender = isFromMe ? `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net` : isGroup ? m?.key?.participant : m?.key?.remoteJid;
-		const isBlocked = (await client[botNum].fetchBlocklist()).includes(sender);
+		const isBlocked = (await client[botNum].fetchBlocklist())?.includes(sender);
 		if (isBlocked) return;
 		const prettyNumber =
 			PhoneNumber(`+${sender?.replace("@s.whatsapp.net", "")}`)?.getNumber("international") ??
@@ -315,13 +318,24 @@ export const reassign = async (m, client, store, search, deleted) => {
 		const reply = async ({ from, quoted }, text) => {
 			return await client[botNum].sendMessage(from, { text }, { quoted });
 		};
-		const downloadAndSaveMediaMessage = async (media, path) => {
-			return new Promise(async (resolve) => {
-				const msg = await downloadContentFromMessage(media, typeQuoted.replace(/Message/g, ""));
-				const buffer = await toBuffer(msg);
-				writeBuffer(path, buffer);
-				resolve(path);
+		const prepareSticker = async (media) => {
+			const isMediaURL = isURL(media) ? true : false;
+			media = isMediaURL ? (await Axios.get(media, { responseType: "arraybuffer", headers: { DNT: 1, "Upgrade-Insecure-Request": 1 } })).data : media;
+			const prepare = new Sticker(media, {
+				pack: "Made by void",
+				author: "Powered by hidden finder",
+				type: StickerTypes.FULL,
+				id: "MADEBYVOID",
+				quality: 10,
 			});
+			return await prepare.toMessage();
+		};
+		const downloadAndSaveMediaMessage = async (media, path) => {
+			const msg = await downloadContentFromMessage(media, typeQuoted.replace(/Message/g, ""));
+			const buffer = await toBuffer(msg);
+			writeBuffer(path, buffer);
+			await delay(1000);
+			return path;
 		};
 		const downloadMediaMessage = async (media, typeDownloadable = "buffer") => {
 			return await downloadMessage(media, typeDownloadable);
@@ -485,6 +499,7 @@ export const reassign = async (m, client, store, search, deleted) => {
 
 		client[botNum] = {
 			...client[botNum],
+			prepareSticker,
 			reply,
 			downloadAndSaveMediaMessage,
 			downloadMediaMessage,
