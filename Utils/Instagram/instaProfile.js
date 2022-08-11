@@ -2,7 +2,6 @@ import { cheerioLOAD, fetchJSON, fetchTEXT } from "../../Helper/index.js";
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36";
 const sessionId = process.env.INSTAGRAM_SESI || (await (await import("./instaCookie.js")).getCookie(process.env.INSTAGRAM_USERNAME, process.env.INSTAGRAM_PASSWORD));
 
-// Scrape by Alphanum404.
 export const getProfile = (username) =>
 	new Promise(async (resolve, reject) => {
 		try {
