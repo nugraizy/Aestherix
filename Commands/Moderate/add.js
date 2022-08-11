@@ -18,7 +18,7 @@ export default {
 		if (mention?.includes(botNum) || mediaData?.participant?.includes(botNum)) return client[botNum].reply({ from, quoted: message }, "You can't add me by myself.");
 		if (query) {
 			if (mention.length > 0) return client[botNum].reply({ from, quoted: message }, "Please reply people message or input people's number.");
-			await client[botNum].updateGroup(from, query.split(",").parse(), "ADD", false, false, message);
+			await client[botNum].updateGroup(from, query.split(",").parser(), "ADD", false, false, message);
 		}
 		if (bodyQuoted) {
 			await client[botNum].updateGroup(from, [mediaData.participant], "ADD", false, false, message);
@@ -26,10 +26,10 @@ export default {
 	},
 };
 
-Array.prototype.parse = function () {
+Array.prototype.parser = function () {
 	return (
 		removeDuplicatesArray(this)
 			.filter((v) => PhoneNumber(`+${v.replace(/[A-Za-z-@\s+s\.whatsapp\.net]/g, "")}`).isValid())
-			?.map((v) => `${v}@s.whatsapp.net`.trim()) || []
+			?.map((v) => `${v.replace(/[\s+-]/g, "")}@s.whatsapp.net`.trim()) || []
 	);
 };
