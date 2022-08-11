@@ -4,7 +4,7 @@ export default {
 	name: "waifuplay",
 	description: "Search Anime or Get Latest Updates from Waifuplay.me.",
 	aliases: ["wp"],
-	category: "Search",
+	category: "Anime",
 	cooldown: 3,
 	usage: "!waifuplay <search/src> <title>",
 	limit: 4,

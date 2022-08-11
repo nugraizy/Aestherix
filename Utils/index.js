@@ -60,7 +60,9 @@ export {
 } from "./Instagram/index.js";
 export { CheckAllIntervals, CheckIntervals, createExif, DeleteIntervals, extension, getScreenshot, IPLookup, mime, SetIntervals, shopeeProduct, tesseract } from "./Misc/index.js";
 export { iflixSearch, trueidSearch } from "./Movies/index.js";
+export { MyAnimeList } from "./MyAnimeList/index.js";
 export { getEarthquake, getWeather } from "./News/index.js";
+export { PStoreProduct } from "./P-Store/index.js";
 export { pinterest } from "./Pinterest/index.js";
 export { downloadArtworks, downloadManga, getNovelContent, searchArtwork, searchManga, searchNovel } from "./Pixiv/index.js";
 export { tiny } from "./Shortener/index.js";

@@ -10,7 +10,7 @@ export default {
 	name: "tracemoe",
 	description: "Reverse image anime search",
 	usage: "!tracemoe <reply image/send image>",
-	category: "Search",
+	category: "Anime",
 	aliases: ["moe", "waitmoe", "whatanime"],
 	limit: 2,
 	cooldown: 2,

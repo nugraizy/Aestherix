@@ -6,7 +6,7 @@ export default {
 	name: "waifupic",
 	description: "Search images from waifu pics",
 	usage: "!waifupic <query>",
-	category: "Search",
+	category: "Anime",
 	aliases: ["wpic"],
 	limit: 4,
 	cooldown: 5,

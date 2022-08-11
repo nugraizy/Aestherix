@@ -8,7 +8,7 @@ export default {
 	name: "saucenao",
 	description: "Reverse image anime search",
 	usage: "!saucenao <reply image/send image>",
-	category: "Search",
+	category: "Anime",
 	aliases: ["nao", "waitnao"],
 	limit: 2,
 	cooldown: 2,
