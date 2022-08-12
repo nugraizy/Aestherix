@@ -1,9 +1,8 @@
 import moment from "moment-timezone";
 import path from "path";
 import { __dirname } from "../../connect.js";
-import { getFilesize, readBuffer, unlinkFile } from "../../Helper/Modules/index.js";
+import { getFilesize, getFilesizeFromBytes, readBuffer, unlinkFile } from "../../Helper/Modules/index.js";
 import { reassign } from "../../Helper/Modules/reassignMessagesObject.js";
-import { convertMediaToSticker } from "../../Utils/Converter/index.js";
 import { CheckIntervals, DeleteIntervals } from "../../Utils/Misc/index.js";
 
 export default {
@@ -12,7 +11,7 @@ export default {
 			if (message == undefined) return;
 			message = await reassign(JSON.parse(JSON.stringify(message)), client, false, true);
 			if (message && "error" in message) return;
-			const { from, mention: mentioning, timeStamp, sender, body, pushname, extractMediaData, filename, prettyNumber, isBaileys, isFromMe } = message;
+			const { from, mention: mentioning, timeStamp, sender, body, pushname, extractMediaData, filename, isBaileys, isFromMe, mediaData } = message;
 			const messages = message?.message?.message;
 			if (!messages) return;
 			const type = Object.keys(messages)[0];
@@ -98,18 +97,22 @@ Message : ${body ? body : "Unknown"}${quotedMessage}
 						break;
 					case "stickerMessage":
 						{
-							client[botNum].downloadAndSaveMediaMessage(extractMediaData, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`).then(async (result) => {
-								const fileSize = getFilesize(result);
-								const sticker = await convertMediaToSticker(result, prettyNumber, undefined, extractMediaData.mimetype);
-								const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
+							const result = await client[botNum].downloadMediaMessage(mediaData);
+							const fileSize = getFilesizeFromBytes(result);
+							const sticker = await client[botNum].prepareSticker(
+								result,
+								path.join(__dirname, `Temporary Files/${filename}`),
+								mediaData.message.stickerMessage.isAnimated ? "stickerAnimated" : "imageMessage",
+								{ author: "Nanda", pack: "made by void bot" },
+							);
+							const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
 Name : ${pushname}			
 Type : ${type}
 Time : ${moment.unix(timeStamp).format("HH:mm:ss DD/MM/YYYY")}
 Size : ${fileSize}${quotedMessage}
 `.trim();
 
-								await client[botNum].sendMessage(from, { sticker }, options).then(() => client[botNum].sendMessage(from, { text: stringDeleted }, options));
-							});
+							await client[botNum].sendMessage(from, { sticker }, options).then(() => client[botNum].sendMessage(from, { text: stringDeleted }, options));
 						}
 						break;
 					case "imageMessage":

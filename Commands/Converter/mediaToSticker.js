@@ -23,8 +23,6 @@ export default {
 				`Please send/reply a regular media to convert to sticker. Can't convert ${typeQuoted} to sticker, only : ${typeSticker.join(", ").capitalize()}`,
 			);
 		try {
-			const isPossilble = isMediaVid ? (mediaData.message.videoMessage.seconds > 6 ? false : true) : true;
-			if (!isPossilble) return client[botNum].reply({ from, quoted: message }, "Your Media are beyond the expected length of duration. Please trim it first to < 6 seconds.");
 			if (query && isURL(query)) {
 				const sticker = await client[botNum].prepareSticker(query, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author: "Nanda", pack: "made by void bot" });
 				await client[botNum].sendMessage(from, { sticker }, { quoted: message });

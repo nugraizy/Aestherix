@@ -347,14 +347,23 @@ export const reassign = async (m, client, store, search, deleted) => {
 		const prepareSticker = async (media, filename, type, options) => {
 			const isMediaURL = Buffer.isBuffer(media) ? false : isURL(media) ? true : false;
 			media = isMediaURL ? (await Axios.get(media, { responseType: "arraybuffer", headers: { DNT: 1, "Upgrade-Insecure-Request": 1 } })).data : media;
-			const bufferType = type == "imageMessage" ? "image" : type == "videoMessage" ? "video" : (await fileTypeFromBuffer(media)).mime.includes("video") ? "video" : "image";
+			const bufferType =
+				type == "imageMessage"
+					? "image"
+					: type == "videoMessage"
+					? "video"
+					: type == "stickerAnimated"
+					? "sticker"
+					: (await fileTypeFromBuffer(media)).mime.includes("video")
+					? "video"
+					: "image";
 			if (bufferType == "video") {
 				const [video, webp] = ["video", "webp"].map((ext) => `${filename}.${ext}`);
 				await writeFile(video, media);
 				await new Promise((resolve) => {
 					ffmpeg(video)
 						.videoCodec("libwebp")
-						.outputFPS(14)
+						.outputFPS(30)
 						.videoFilter("scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1")
 						.duration(10)
 						.save(webp)
@@ -362,6 +371,8 @@ export const reassign = async (m, client, store, search, deleted) => {
 				});
 				media = await readFile(webp);
 				[video, webp].forEach((file) => unlink(file));
+			} else if (bufferType == "sticker") {
+				return await applyExif(media, options);
 			} else {
 				media = await sharp(media, { animated: bufferType == "video" })
 					.resize(512, 512, {

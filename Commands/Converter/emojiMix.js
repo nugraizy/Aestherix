@@ -2,7 +2,7 @@ import emojiReg from "emoji-regex";
 import jsSplit from "js-split";
 import path from "path";
 import { __dirname } from "../../connect.js";
-import { convertMediaToSticker, emojimix } from "../../Utils/Converter/index.js";
+import { emojimix } from "../../Utils/Converter/index.js";
 
 export default {
 	name: "emojimixer",
@@ -23,11 +23,7 @@ export default {
 			if (arr.length == 1) continue;
 			const result = await emojimix(arr[0], arr[1]);
 			if (typeof result == "object" && "error" in result) return client[botNum].reply({ from, quoted: message }, result.error);
-			const sticker = await convertMediaToSticker(
-				result,
-				prettyNumber,
-				path.join(__dirname, `Temporary Files/${filename}${result.split("/")[result.split("/").length - 1].split(".")[0]}.webp`),
-			);
+			const sticker = await client[botNum].prepareSticker(result, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author: "Nanda", pack: "made by void bot" });
 			await client[botNum].sendMessage(from, { sticker }, { quoted: message });
 		}
 	},

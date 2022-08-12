@@ -7,7 +7,7 @@ import sharp from "sharp";
 import yargsParser from "yargs-parser";
 import { __dirname } from "../../connect.js";
 import { randomize } from "../../Helper/index.js";
-import { convertMediaToSticker, ephoto360 } from "../../Utils/index.js";
+import { ephoto360 } from "../../Utils/index.js";
 const dataJSON = JSON.parse(fs.readFileSync("./Databases/Textmaker/ephoto360url.json"));
 const defaulType = "image";
 
@@ -98,17 +98,13 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 				});
 				const { width, height } = imageSize(data);
 				const buffer = isStickers
-					? await sharp(data)
-							.extract({ width: width - 40, height: height - 40, top: 0, left: 0 })
-							.toFormat("webp")
-							.toFile(path.join(__dirname, `Temporary Files/${filename}.webp`))
+					? await client[botNum].prepareSticker(data, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author: "Nanda", pack: "made by void bot" })
 					: await sharp(data)
 							.extract({ width: width - 40, height: height - 40, left: 0, top: 0 })
 							.toBuffer();
 				if (isImage) await client[botNum].sendMessage(from, { image: buffer }, { quoted: message });
 				else if (isStickers) {
-					const sticker = await convertMediaToSticker(path.join(__dirname, `Temporary Files/${filename}.webp`), prettyNumber, "image/webp");
-					await client[botNum].sendMessage(from, { sticker }, { quoted: message });
+					await client[botNum].sendMessage(from, { sticker: buffer }, { quoted: message });
 				} else await client[botNum].sendMessage(from, { [defaulType]: buffer }, { quoted: message });
 			}
 		} catch (err) {

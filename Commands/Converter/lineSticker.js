@@ -2,7 +2,6 @@ import { exec } from "child_process";
 import path from "path";
 import { __dirname } from "../../connect.js";
 import { unlinkFile } from "../../Helper/Modules/index.js";
-import { convertMediaToSticker } from "../../Utils/Converter/index.js";
 import { line } from "../../Utils/Stickers/index.js";
 
 export default {
@@ -21,20 +20,11 @@ export default {
 		const capt = `Line Stickers\n\nAuthor : ${result[0].author.capitalize()}\nTot. Stickers : ${result.length}`;
 		await client[botNum].sendMessage(from, { text: capt }, { quoted: message });
 		for (const { stickers } of result) {
-			if (stickers.animated) {
-				exec(`wget -O "${path.join(__dirname, `Temporary Files/${filename}`)}" "${stickers.animated}"`, async (err) => {
-					const sticker = await convertMediaToSticker(path.join(__dirname, `Temporary Files/${filename}`), prettyNumber, path.join(__dirname, `Temporary Files/${filename}.webp`));
-					await client[botNum].sendMessage(from, { sticker }, { quoted: message });
-				});
-				continue;
-			}
-			const sticker = await convertMediaToSticker(
-				stickers.static,
-				prettyNumber,
-				path.join(__dirname, `Temporary Files/${filename}${stickers.static.split("/")[stickers.static.split("/").length - 1].split(";")[0].split(".")[0]}.webp`),
-			);
+			const sticker = await client[botNum].prepareSticker(stickers.animated || stickers.static, path.join(__dirname, `Temporary Files/${filename}`), undefined, {
+				author: "Nanda",
+				pack: "made by void bot",
+			});
 			await client[botNum].sendMessage(from, { sticker }, { quoted: message });
 		}
-		unlinkFile(path.join(__dirname, `Temporary Files/${filename}`));
 	},
 };
