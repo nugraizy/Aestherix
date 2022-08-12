@@ -19,6 +19,8 @@ export default {
 				`Please send/reply a regular media to convert to sticker. Can't convert ${typeQuoted} to sticker, only : ${typeSticker.join(", ").capitalize()}`,
 			);
 		try {
+			const isPossilble = isMediaVid ? (mediaData.message.videoMessage.seconds > 6 ? false : true) : true;
+			if (!isPossilble) return client[botNum].reply({ from, quoted: message }, "Your Media are beyond the expected length of duration. Please trim it first to < 6 seconds.");
 			const sticker = await client[botNum].prepareSticker(await client[botNum].downloadMediaMessage(mediaData));
 			await client[botNum].sendMessage(from, sticker, { quoted: message });
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);

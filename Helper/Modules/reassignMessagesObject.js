@@ -319,7 +319,7 @@ export const reassign = async (m, client, store, search, deleted) => {
 			return await client[botNum].sendMessage(from, { text }, { quoted });
 		};
 		const prepareSticker = async (media) => {
-			const isMediaURL = isURL(media) ? true : false;
+			const isMediaURL = Buffer.isBuffer(media) ? false : isURL(media) ? true : false;
 			media = isMediaURL ? (await Axios.get(media, { responseType: "arraybuffer", headers: { DNT: 1, "Upgrade-Insecure-Request": 1 } })).data : media;
 			const prepare = new Sticker(media, {
 				pack: "Made by void",
