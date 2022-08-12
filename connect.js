@@ -307,10 +307,10 @@ async function loadEveryCommand() {
 }
 
 async function watchFile(module) {
-	const modules = process.platform == "win32" ? module.pathname.slice(1) : module;
-	fs.watchFile(modules, async (event, filename) => {
+	const modules = process.platform == "win32" ? module.pathname.slice(1) : module.pathname;
+	fs.watchFile(module, async (event, filename) => {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (fs.existsSync(modules)) {
+		if (fs.existsSync(module)) {
 			INFOLOG(`[${color(time, "cyan")}]`, color(`${modules.split("/").reverse()[0]} has been changed`, "#9f53ea"));
 			await reloadModule(module, false);
 		} else {
@@ -356,7 +356,6 @@ async function reloadModule(module, isNewFile) {
 }
 
 const nocache = async (module) => {
-	log(module);
 	const tempModules = `${module}?update=${Date.now()}`;
 	return await import(tempModules);
 };
