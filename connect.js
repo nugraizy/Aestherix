@@ -288,8 +288,9 @@ async function loadCommands() {
 	for (const command of commands) {
 		try {
 			const cmd = (await import(pathToFileURL(path.join(__dirname, command)))).default;
+			log(pathToFileURL(path.join(__dirname, command)));
 			if (cmd.status != "disable") {
-				if (OPTIONS.watch) await watchFile(path.join(__dirname, command), cmd.name);
+				if (OPTIONS.watch) await watchFile(pathToFileURL(path.join(__dirname, command)), cmd.name);
 				cmds.commands.set(cmd.name, { ...cmd, pathname: path.join(__dirname, command) });
 				commandsPath.push(path.join(__dirname, command));
 			}
@@ -307,10 +308,11 @@ async function loadEveryCommand() {
 }
 
 async function watchFile(module) {
-	fs.watchFile(module, async (event, filename) => {
+	const modules = process.platform == "win32" ? module.pathname.slice(1) : module;
+	fs.watchFile(modules, async (event, filename) => {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (fs.existsSync(module)) {
-			INFOLOG(`[${color(time, "cyan")}]`, color(`${module.split("/").reverse()[0]} has been changed`, "#9f53ea"));
+		if (fs.existsSync(modules)) {
+			INFOLOG(`[${color(time, "cyan")}]`, color(`${modules.split("/").reverse()[0]} has been changed`, "#9f53ea"));
 			await reloadModule(module, false);
 		} else {
 			await reloadModule(module, true);
@@ -355,6 +357,7 @@ async function reloadModule(module, isNewFile) {
 }
 
 const nocache = async (module) => {
+	log(module);
 	const tempModules = `${module}?update=${Date.now()}`;
 	return await import(tempModules);
 };
@@ -398,34 +401,34 @@ async function printRandomAscii() {
 
 function help() {
 	return `
-	Usage
-	  $ node . <session> <options>
-
-	Options
-	  --prefix, -p         Set your custom prefix
-	  --read_only, -y      Read only
-	  --auto_read, -r      Auto read every incoming message
-	  --restrict, -e       Restrict every moderator commands
-	  --only_logs, -o      Only showing logs but will ignore every message and commands
-	  --no_logs, -n        Not showing any logs in the meantime still respond for any commands
-	  --self_mode, -s      Set self mode that only owner and the bot can use
-	  --debug_mode, -g     Show every metadata of any message
-	  --multi_cmd, -m      Loop every command on your script. Use | to seperate each commands
-	  --rainbow, -b        make your logs rainbow colors
-	  --trace, -t          Show errors
-	  --watch, -w          Watch every file on your script and reload it when it changed
-	  --cool_down, -c      Set cool down for every command
-	  --auto_correct, -a   Enable a
-	  --no_load, -v        Disable module load animation
-	  --json, -j           Use JSON DB to store data of the WhatsApp connection
-	  --reset, -k          Reset your WhatsApp connection session, and restart the script
-	  --story, q           Auto download people story after the bot received the story
-	  --offline, -f        Set your current presence to offline
-	  --no_call, -d        Reject incoming call.
-	  --insta_notifier     Handle incoming Instagram DMs.
-	  --help, -h           Show this message.
-
-	Examples
-	  $ node . --read_only -tr
-`;
+	 Usage
+	   $ node . <session> <options>
+ 
+	 Options
+	   --prefix, -p         Set your custom prefix
+	   --read_only, -y      Read only
+	   --auto_read, -r      Auto read every incoming message
+	   --restrict, -e       Restrict every moderator commands
+	   --only_logs, -o      Only showing logs but will ignore every message and commands
+	   --no_logs, -n        Not showing any logs in the meantime still respond for any commands
+	   --self_mode, -s      Set self mode that only owner and the bot can use
+	   --debug_mode, -g     Show every metadata of any message
+	   --multi_cmd, -m      Loop every command on your script. Use | to seperate each commands
+	   --rainbow, -b        make your logs rainbow colors
+	   --trace, -t          Show errors
+	   --watch, -w          Watch every file on your script and reload it when it changed
+	   --cool_down, -c      Set cool down for every command
+	   --auto_correct, -a   Enable a
+	   --no_load, -v        Disable module load animation
+	   --json, -j           Use JSON DB to store data of the WhatsApp connection
+	   --reset, -k          Reset your WhatsApp connection session, and restart the script
+	   --story, q           Auto download people story after the bot received the story
+	   --offline, -f        Set your current presence to offline
+	   --no_call, -d        Reject incoming call.
+	   --insta_notifier     Handle incoming Instagram DMs.
+	   --help, -h           Show this message.
+ 
+	 Examples
+	   $ node . --read_only -tr
+ `;
 }
