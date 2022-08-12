@@ -288,7 +288,6 @@ async function loadCommands() {
 	for (const command of commands) {
 		try {
 			const cmd = (await import(pathToFileURL(path.join(__dirname, command)))).default;
-			log(pathToFileURL(path.join(__dirname, command)));
 			if (cmd.status != "disable") {
 				if (OPTIONS.watch) await watchFile(pathToFileURL(path.join(__dirname, command)), cmd.name);
 				cmds.commands.set(cmd.name, { ...cmd, pathname: path.join(__dirname, command) });
