@@ -217,4 +217,3 @@ class Instafier {
 }
 
 export const instafier = new Instafier();
-console.log(instafier);
