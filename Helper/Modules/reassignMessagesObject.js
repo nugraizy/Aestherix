@@ -9,11 +9,16 @@ import {
 } from "@adiwajshing/baileys";
 import PhoneNumber from "awesome-phonenumber";
 import Axios from "axios";
+import { fileTypeFromBuffer } from "file-type";
+import ffmpeg from "fluent-ffmpeg";
 import moment from "moment-timezone";
-import { Sticker, StickerTypes } from "wa-sticker-formatter";
+import webpmux from "node-webpmux";
+import sharp from "sharp";
+import { TextEncoder } from "util";
 import { checkJSON, pushDefaultSettings, updateSettings } from "../Groups/Settings/index.js";
 import { NO_DATA, S_WHATSAPP_NET, UPDATE, ZERO } from "../Misc/WAData/index.js";
 import { delaySync, isEmpty, isNotNull, isNotSame, isSame, isUndefined, isURL, readJSON, writeBuffer } from "./index.js";
+const { readFile, unlink, writeFile } = (await import("fs-extra")).default;
 
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 export const reassign = async (m, client, store, search, deleted) => {
@@ -318,23 +323,60 @@ export const reassign = async (m, client, store, search, deleted) => {
 		const reply = async ({ from, quoted }, text) => {
 			return await client[botNum].sendMessage(from, { text }, { quoted });
 		};
-		const prepareSticker = async (media) => {
+		const applyExif = async (buffer, metadata) => {
+			const data = {};
+			data["sticker-pack-id"] = metadata?.id || "";
+			data["sticker-pack-name"] = metadata?.pack || "";
+			data["sticker-pack-publisher"] = metadata?.author || "";
+			const exif = Buffer.concat([
+				Buffer.from([0x49, 0x49, 0x2a, 0x00, 0x08, 0x00, 0x00, 0x00, 0x01, 0x00, 0x41, 0x57, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0x00, 0x00, 0x00]),
+				Buffer.from(JSON.stringify(data), "utf-8"),
+			]);
+			exif.writeUIntLE(new TextEncoder().encode(JSON.stringify(data)).length, 14, 4);
+			buffer =
+				buffer instanceof webpmux.Image
+					? buffer
+					: await (async () => {
+							const img = new webpmux.Image();
+							await img.load(buffer);
+							return img;
+					  })();
+			buffer.exif = exif;
+			return await buffer.save(null);
+		};
+		const prepareSticker = async (media, filename, type, options) => {
 			const isMediaURL = Buffer.isBuffer(media) ? false : isURL(media) ? true : false;
 			media = isMediaURL ? (await Axios.get(media, { responseType: "arraybuffer", headers: { DNT: 1, "Upgrade-Insecure-Request": 1 } })).data : media;
-			const prepare = new Sticker(media, {
-				pack: "Made by void",
-				author: "Powered by hidden finder",
-				type: StickerTypes.FULL,
-				id: "MADEBYVOID",
-				quality: 100,
-			});
-			return await prepare.toMessage();
+			const bufferType = type == "imageMessage" ? "image" : type == "videoMessage" ? "video" : (await fileTypeFromBuffer(media)).mime.includes("video") ? "video" : "image";
+			if (bufferType == "video") {
+				const [video, webp] = ["video", "webp"].map((ext) => `${filename}.${ext}`);
+				await writeFile(video, media);
+				await new Promise((resolve) => {
+					ffmpeg(video)
+						.videoCodec("libwebp")
+						.outputFPS(14)
+						.videoFilter("scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1")
+						.duration(10)
+						.save(webp)
+						.on("end", resolve);
+				});
+				media = await readFile(webp);
+				[video, webp].forEach((file) => unlink(file));
+			} else {
+				media = await sharp(media, { animated: bufferType == "video" })
+					.resize(512, 512, {
+						fit: sharp.fit.contain,
+						background: { r: 0, g: 0, b: 0, alpha: 0 },
+					})
+					.webp()
+					.toBuffer();
+			}
+			return await applyExif(media, options);
 		};
 		const downloadAndSaveMediaMessage = async (media, path) => {
 			const msg = await downloadContentFromMessage(media, typeQuoted.replace(/Message/g, ""));
 			const buffer = await toBuffer(msg);
-			writeBuffer(path, buffer);
-			await delay(1000);
+			await writeFile(path, buffer);
 			return path;
 		};
 		const downloadMediaMessage = async (media, typeDownloadable = "buffer") => {
