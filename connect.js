@@ -63,6 +63,7 @@ const regexOption = [
 	"story",
 	"offline",
 	"noCall",
+	"instaNotifier",
 ];
 if (platform !== "win32" && !OPTIONS.noLoad) await printRandomAscii();
 if (OPTIONS.reset) {
@@ -383,6 +384,7 @@ function parseCli() {
 			story: { type: "boolean", alias: "q" },
 			offline: { type: "boolean", alias: "f" },
 			no_call: { type: "boolean", alias: "d" },
+			insta_notifier: { type: "boolean", alias: "i" },
 		},
 	});
 }
@@ -420,6 +422,7 @@ function help() {
 	  --story, q           Auto download people story after the bot received the story
 	  --offline, -f        Set your current presence to offline
 	  --no_call, -d        Reject incoming call.
+	  --insta_notifier     Handle incoming Instagram DMs.
 	  --help, -h           Show this message.
 
 	Examples

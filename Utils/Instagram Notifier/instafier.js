@@ -12,6 +12,7 @@ class Instafier {
 	#password = process.env.INSTAGRAM_PASSWORD;
 	#authorId = null;
 	constructor() {
+		if (!OPTIONS.instaNotifier) return;
 		if (!(this.#username || this.#password)) {
 			throw new Error("Username and password are required");
 		}
@@ -216,3 +217,4 @@ class Instafier {
 }
 
 export const instafier = new Instafier();
+console.log(instafier);
