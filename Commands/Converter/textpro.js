@@ -94,7 +94,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 				});
 				const { width, height } = imageSize(data);
 				const buffer = isStickers
-					? await client[botNum].prepareSticker(data, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author: "Nanda", pack: "made by void bot" })
+					? await client[botNum].prepareSticker(data, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author, packname })
 					: await sharp(data)
 							.extract({ width: width - 40, height: height - 40, left: 0, top: 0 })
 							.toBuffer();

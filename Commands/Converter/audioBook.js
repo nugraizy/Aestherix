@@ -15,11 +15,15 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	status: "enable",
-	async run({ isMediaImage, from, prettyNumber, message, filename, extractMediaData }, client) {
+	async run({ isMediaImage, from, prettyNumber, message, filename, extractMediaData, typeQuoted }, client) {
 		if (!isMediaImage) return client[botNum].reply({ from, quoted: message }, "Please send/reply an image to recognize text");
 		try {
 			const time = moment().format("HH:mm:ss DD/MM");
-			const file = await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`));
+			const file = await client[botNum].downloadAndSaveMediaMessage(
+				extractMediaData,
+				path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`),
+				typeQuoted,
+			);
 			const { result } = await tesseract(file, prettyNumber);
 			const lang = (await LANGUAGE.detect(result.text)).languages[0].code || "id";
 			const { buffer } = await textToSpeech(result.text.trim(), lang, path.join(__dirname, `Temporary Files/${filename}`));

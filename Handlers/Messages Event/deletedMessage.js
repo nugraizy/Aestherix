@@ -103,7 +103,7 @@ Message : ${body ? body : "Unknown"}${quotedMessage}
 								result,
 								path.join(__dirname, `Temporary Files/${filename}`),
 								mediaData.message.stickerMessage.isAnimated ? "stickerAnimated" : "imageMessage",
-								{ author: "Nanda", pack: "made by void bot" },
+								{ author, packname },
 							);
 							const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
 Name : ${pushname}			
@@ -120,6 +120,7 @@ Size : ${fileSize}${quotedMessage}
 							const image = await client[botNum].downloadAndSaveMediaMessage(
 								extractMediaData,
 								path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`),
+								"imageMessage",
 							);
 							const fileSize = getFilesize(image);
 							const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
@@ -138,6 +139,7 @@ Caption : ${body ? body : "Unknown"}${quotedMessage}
 							const video = await client[botNum].downloadAndSaveMediaMessage(
 								extractMediaData,
 								path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`),
+								"videoMessage",
 							);
 							const fileSize = getFilesize(video);
 							const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
@@ -156,6 +158,7 @@ Caption : ${body ? body : "Unknown"}${quotedMessage}
 							const audio = await client[botNum].downloadAndSaveMediaMessage(
 								extractMediaData,
 								path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`),
+								"audioMessage",
 							);
 							const fileSize = getFilesize(audio);
 							const stringDeleted = `\`\`\`Message Deleted\n\`\`\`

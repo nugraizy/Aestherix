@@ -15,12 +15,16 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	status: "enable",
-	async run({ isQuotedAudio, isQuotedDocument, isMediaVid, from, prettyNumber, message, filename, query, extractMediaData }, client) {
+	async run({ isQuotedAudio, isQuotedDocument, isMediaVid, from, prettyNumber, message, filename, query, extractMediaData, typeQuoted }, client) {
 		if (!isQuotedAudio && !isQuotedDocument && !isMediaVid) return client[botNum].reply({ from, quoted: message }, "Please send/reply an audio/video to remove voice");
 		try {
 			const time = moment().format("HH:mm:ss DD/MM");
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Removing Sound`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
-			const file = await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`));
+			const file = await client[botNum].downloadAndSaveMediaMessage(
+				extractMediaData,
+				path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`),
+				typeQuoted,
+			);
 			if (
 				isQuotedDocument &&
 				!JSON.parse(fs.readFileSync(path.join(__dirname, "Databases/Mimetypes/Audio.json")).includes(extractMediaData.mimetype)) &&

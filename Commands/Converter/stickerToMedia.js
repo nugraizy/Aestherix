@@ -13,12 +13,12 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	status: "enable",
-	async run({ isQuotedSticker, from, message, filename, extractMediaData, sender, prettyNumber }, client) {
+	async run({ isQuotedSticker, from, message, filename, extractMediaData, sender, prettyNumber, typeQuoted }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!isQuotedSticker) return client[botNum].reply({ from, quoted: message }, "Please reply a sticker to decrypt");
 		try {
 			client[botNum]
-				.downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`))
+				.downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`), typeQuoted)
 				.then(async (results) => {
 					try {
 						const { result } = await convertStickerToMedia(results, sender, extractMediaData);

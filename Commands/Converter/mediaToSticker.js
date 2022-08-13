@@ -24,20 +24,20 @@ export default {
 			);
 		try {
 			if (query && isURL(query)) {
-				const sticker = await client[botNum].prepareSticker(query, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author: "Nanda", pack: "made by void bot" });
+				const sticker = await client[botNum].prepareSticker(query, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author, packname });
 				await client[botNum].sendMessage(from, { sticker }, { quoted: message });
 			}
 			if (isMediaImage) {
 				const sticker = await client[botNum].prepareSticker(await client[botNum].downloadMediaMessage(mediaData), path.join(__dirname, `Temporary Files/${filename}`), typeQuoted, {
-					author: "Nanda",
-					pack: "made by void bot",
+					author,
+					packname,
 				});
 				await client[botNum].sendMessage(from, { sticker }, { quoted: message });
 			}
 			if (isMediaVid) {
 				const sticker = await client[botNum].prepareSticker(await client[botNum].downloadMediaMessage(mediaData), path.join(__dirname, `Temporary Files/${filename}`), typeQuoted, {
-					author: "Nanda",
-					pack: "made by void bot",
+					author,
+					packname,
 				});
 				await client[botNum].sendMessage(from, { sticker }, { quoted: message });
 			}

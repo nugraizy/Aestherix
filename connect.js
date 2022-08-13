@@ -29,7 +29,7 @@ import Spinnies from "spinnies";
 import { pathToFileURL } from "url";
 import { getSpinner } from "./Helper/Misc/Spinner/spinners.js";
 import { color, ERRLOG, INFOLOG, readJSON, romanize } from "./Helper/Modules/functions.js";
-import { createExif } from "./Utils/Misc/createExif.js";
+
 console.clear();
 
 const { default: makeWASocket, DisconnectReason, makeInMemoryStore, useSingleFileAuthState, DEFAULT_CONNECTION_CONFIG } = baileys;
@@ -121,7 +121,6 @@ const start = async () => {
 	}
 	await loadCommands();
 	await loadEveryCommand();
-	createExif(packname, author);
 	const CONNECTION_CONFIG = {
 		printQRInTerminal: true,
 		version: DEFAULT_CONNECTION_CONFIG.version,

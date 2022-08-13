@@ -23,7 +23,7 @@ export default {
 			if (arr.length == 1) continue;
 			const result = await emojimix(arr[0], arr[1]);
 			if (typeof result == "object" && "error" in result) return client[botNum].reply({ from, quoted: message }, result.error);
-			const sticker = await client[botNum].prepareSticker(result, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author: "Nanda", pack: "made by void bot" });
+			const sticker = await client[botNum].prepareSticker(result, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author, packname });
 			await client[botNum].sendMessage(from, { sticker }, { quoted: message });
 		}
 	},

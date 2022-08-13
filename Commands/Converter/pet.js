@@ -51,7 +51,7 @@ export default {
 					);
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Petting`, "#01cdfe")} ${color(prettyNumber, "#ff71ce")}`);
 				client[botNum]
-					.downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`))
+					.downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`), typeQuoted)
 					.then(async (file) => {
 						try {
 							const result = await pet(file, sender, options);

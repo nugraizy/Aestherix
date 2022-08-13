@@ -20,7 +20,7 @@ export default {
 	cooldown: 4,
 	limit: 3,
 	status: "enable",
-	async run({ from, message, query, args, cmd, filename, prettyNumber, isMediaImage, extractMediaData }, client) {
+	async run({ from, message, query, args, cmd, filename, isMediaImage, extractMediaData, typeQuoted }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a query");
 		try {
 			let {
@@ -85,7 +85,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 			for (const model of models) {
 				let buffers = null;
 				if (isMediaImage) {
-					await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}`));
+					await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}`), typeQuoted);
 					buffers = path.join(__dirname, `Temporary Files/${filename}`);
 				}
 				const result = await ephoto360(model, parsed.join(" "), buffers);
@@ -98,7 +98,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 				});
 				const { width, height } = imageSize(data);
 				const buffer = isStickers
-					? await client[botNum].prepareSticker(data, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author: "Nanda", pack: "made by void bot" })
+					? await client[botNum].prepareSticker(data, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author, packname })
 					: await sharp(data)
 							.extract({ width: width - 40, height: height - 40, left: 0, top: 0 })
 							.toBuffer();

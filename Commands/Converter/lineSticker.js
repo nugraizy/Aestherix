@@ -20,10 +20,7 @@ export default {
 		const capt = `Line Stickers\n\nAuthor : ${result[0].author.capitalize()}\nTot. Stickers : ${result.length}`;
 		await client[botNum].sendMessage(from, { text: capt }, { quoted: message });
 		for (const { stickers } of result) {
-			const sticker = await client[botNum].prepareSticker(stickers.animated || stickers.static, path.join(__dirname, `Temporary Files/${filename}`), undefined, {
-				author: "Nanda",
-				pack: "made by void bot",
-			});
+			const sticker = await client[botNum].prepareSticker(stickers.animated || stickers.static, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author, packname });
 			await client[botNum].sendMessage(from, { sticker }, { quoted: message });
 		}
 	},

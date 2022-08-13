@@ -18,7 +18,7 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	status: "enable",
-	async run({ query, isMediaImage, isSticker, isQuotedSticker, from, prettyNumber, message, filename, extractMediaData, sender, stickerAble }, client) {
+	async run({ query, isMediaImage, isSticker, isQuotedSticker, from, prettyNumber, message, filename, extractMediaData, sender, stickerAble, typeQuoted }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (!isMediaImage && !(isQuotedSticker || isSticker)) return client[botNum].reply({ from, quoted: message }, "Please send/reply a media to convert to sticker");
 		if (!stickerAble)
@@ -46,7 +46,7 @@ export default {
 			const regexs = new RegExp(`--?(${Object.keys(parsed).join("|")})`, "g");
 			query = query.replace(regexs, "");
 			client[botNum]
-				.downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`))
+				.downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`), typeQuoted)
 				.then(async (results) => {
 					try {
 						let image = results;

@@ -2,8 +2,8 @@ import Canvas from "canvas";
 import GIFEncoder from "gifencoder";
 import moment from "moment-timezone";
 import sharp from "sharp";
-import { color, ERRLOG, isURL, readBuffer, unlinkFile } from "../../Helper/Modules/index.js";
-import { convertMediaToSticker } from "../../Utils/Converter/index.js";
+import { color, ERRLOG, isURL } from "../../Helper/Modules/index.js";
+const { readFile, unlink, writeFile } = (await import("fs-extra")).default;
 const { createCanvas, loadImage } = Canvas;
 const { fit } = sharp;
 const width = 640;
@@ -33,24 +33,23 @@ export const trigger = async (image, sender, opt) =>
 			GIF.finish();
 			const buffer = GIF.out.getData();
 			if (opt.output == "sticker") {
-				await sharp(buffer, { animated: true })
+				const file = await sharp(buffer, { animated: true })
 					.resize(width, height - 54, {
 						fit: fit.contain,
 						background: { r: 0, g: 0, b: 0, alpha: 0 },
 					})
-					.toFile(`${isURL(image) ? `./Temporary Files/${sender}` : image}.webp`);
-				const results = await convertMediaToSticker(`${isURL(image) ? `./Temporary Files/${sender}` : image}.webp`, sender, undefined);
-				unlinkFile(`${isURL(image) ? `./Temporary Files/${sender}` : image}.webp`);
-				unlinkFile(`${isURL(image) ? `./Temporary Files/${sender}` : image}`);
+					.webp({ quality: 100 })
+					.toBuffer();
+				const results = await applyExif(file, { packname, author });
 				resolve(results);
 			} else {
-				writeBuffer(`${filename}gif`, buffer);
+				await writeFile(`${filename}gif`, buffer);
 				const { output } = await gif2mp4(`${filename}.gif`, `${filename}.mp4`, opt);
-				resolve(readBuffer(output));
-				unlinkFile(`${filename}.gif`);
-				unlinkFile(`${filename}.mp4`);
-				unlinkFile(`${isURL(image) ? `./Temporary Files/${sender}` : image}`);
-				unlinkFile(`${isURL(image) ? `./Temporary Files/${sender}` : image}.webp`);
+				resolve(await readFile(output));
+				await unlink(`${filename}.gif`);
+				await unlink(`${filename}.mp4`);
+				await unlink(`${isURL(image) ? `./Temporary Files/${sender}` : image}`);
+				await unlink(`${isURL(image) ? `./Temporary Files/${sender}` : image}.webp`);
 			}
 		} catch (err) {
 			ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Trigger an image", "red")} for ${color(sender, "#ff71ce")}`);

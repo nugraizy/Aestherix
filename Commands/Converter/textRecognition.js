@@ -13,11 +13,15 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	status: "enable",
-	async run({ isMediaImage, from, prettyNumber, message, filename, query, extractMediaData }, client) {
+	async run({ isMediaImage, from, prettyNumber, message, filename, query, extractMediaData, typeQuoted }, client) {
 		if (!isMediaImage) return client[botNum].reply({ from, quoted: message }, "Please send/reply an image to recognize text");
 		try {
 			const time = moment().format("HH:mm:ss DD/MM");
-			const file = await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`));
+			const file = await client[botNum].downloadAndSaveMediaMessage(
+				extractMediaData,
+				path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`),
+				typeQuoted,
+			);
 			const { result } = await tesseract(file, prettyNumber, query);
 			await client[botNum].sendMessage(from, { text: result.text.trim() }, { quoted: message });
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Text is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);

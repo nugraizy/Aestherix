@@ -18,7 +18,7 @@ export default {
 		const capt = `Telegram Stickers\n\nName : ${result.name.capitalize()}\nTitle : ${result.title.capitalize()}\nTot. Stickers : ${result.stickers.length}`;
 		await client[botNum].sendMessage(from, { text: capt }, { quoted: message });
 		for (const stickers of result.stickers) {
-			const sticker = await client[botNum].prepareSticker(stickers, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author: "Nanda", pack: "made by void bot" });
+			const sticker = await client[botNum].prepareSticker(stickers, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author, packname });
 			await client[botNum].sendMessage(from, { sticker }, { quoted: message });
 		}
 	},

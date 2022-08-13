@@ -13,13 +13,17 @@ export default {
 	limit: 2,
 	cooldown: 2,
 	status: "enable",
-	async run({ isMediaImage, query, extractMediaData, filename, from, message }, client) {
+	async run({ isMediaImage, query, extractMediaData, filename, from, message, typeQuoted }, client) {
 		if (!isURL(query) && !isMediaImage) return client[botNum].reply({ from, quoted: message }, "Please send/reply a image to find the similar image");
 		let media = query && isURL(query) ? query : null;
 		try {
 			await client[botNum].reply({ from, quoted: message }, "Searching. Please wait...");
 			if (isMediaImage)
-				media = await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`));
+				media = await client[botNum].downloadAndSaveMediaMessage(
+					extractMediaData,
+					path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`),
+					typeQuoted,
+				);
 			const result = await yandex(media);
 			if ("error" in result) {
 				if (isMediaImage) fs.unlinkSync(media);
