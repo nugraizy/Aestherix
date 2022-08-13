@@ -19,8 +19,8 @@ export default {
 		});
 		const options = { lang: undefined, count: undefined };
 		delete parseOptions._;
-		options.lang = Objec.keys(parseOptions).find((v) => /\w{2,2}/i.test(v))?.[0] || undefined;
-		options.count = Objec.keys(parseOptions).find((v) => /\d{2,2}/i.test(v))?.[0] || undefined;
+		options.lang = Object.keys(parseOptions).find((v) => /\w{2,2}/i.test(v))?.[0] || undefined;
+		options.count = Object.keys(parseOptions).find((v) => /\d{2,2}/i.test(v))?.[0] || undefined;
 		try {
 			const brainly = await brainlySearch(query, options);
 			if ("error" in brainly) return client[botNum].reply({ from, quoted: message }, brainly.error);
