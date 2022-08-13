@@ -40,7 +40,6 @@ export const trigger = async (image, sender, opt) =>
 					})
 					.webp({ quality: 60 })
 					.toBuffer();
-				log(file);
 				const results = await applyExif(file, { packname, author });
 				resolve(results);
 			} else {
