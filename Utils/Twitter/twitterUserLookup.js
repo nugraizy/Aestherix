@@ -5,7 +5,7 @@ export const twitterUser = (input) =>
 		try {
 			const data = await fetchJSON(URL_API(input), {
 				headers: {
-					Authorization: `Bearer ${process.env.BEARER_TOKEN}`,
+					Authorization: `Bearer ${process.env.TWITTER_ACCESS_TOKEN}`,
 				},
 			});
 			if ("errors" in data) {

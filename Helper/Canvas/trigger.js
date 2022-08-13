@@ -38,8 +38,9 @@ export const trigger = async (image, sender, opt) =>
 						fit: fit.contain,
 						background: { r: 0, g: 0, b: 0, alpha: 0 },
 					})
-					.webp({ quality: 100 })
+					.webp({ quality: 60 })
 					.toBuffer();
+				log(file);
 				const results = await applyExif(file, { packname, author });
 				resolve(results);
 			} else {
@@ -58,7 +59,7 @@ export const trigger = async (image, sender, opt) =>
 	});
 
 const prepareCanvas = async (images) => {
-	const TRIGGERED = readBuffer("./Media Files/triggered.png");
+	const TRIGGERED = await readFile("./Media Files/triggered.png");
 	const base = await loadImage(TRIGGERED);
 	const image = await loadImage(images);
 	const canvas = createCanvas(width, height);

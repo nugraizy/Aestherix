@@ -1,4 +1,5 @@
 export { handlers, search, skip, stop } from "./Anonymous/index.js";
+export { arq } from "./ARQ/index.js";
 export { bilibiliSearchCOM, bilibiliSearchTV, detailSourceFormat } from "./Bilibili/index.js";
 export { brainlySearch } from "./Brainly/index.js";
 export { cnnindonesia, cnninternational } from "./CNN/index.js";
@@ -44,6 +45,7 @@ export {
 export { sauceNao, traceMoe, yandex } from "./Image Reverse Search/index.js";
 export { instafier } from "./Instagram Notifier/index.js";
 export {
+	getCookie,
 	getHighlights,
 	getHighlights2,
 	getIgtv,
@@ -73,4 +75,5 @@ export { tiktokAPI, tiktokDownloader, tiktokProfileBRAINANS, tiktokProfileTIKTOK
 export { twitterDownload, twitterUser } from "./Twitter/index.js";
 export { getWaifu } from "./Waifu Pic/index.js";
 export { wpDownload, wpLatest, wpSearch } from "./Waifuplay/index.js";
+export { stockImagesPexel } from "./Wallpapers/index.js";
 export { yta, ytsr, ytv } from "./YouTube/index.js";

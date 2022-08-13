@@ -3,10 +3,10 @@ import dotenv from "dotenv";
 dotenv.config();
 
 class Spotifier {
-	#clientId = process.env.CLIENT_ID;
-	#clientSecret = process.env.CLIENT_SECRET;
-	#accessToken = process.env.ACCESS_TOKEN;
-	#refreshToken = process.env.REFRESH_TOKEN;
+	#clientId = process.env.SPOTIFY_CLIENT_ID;
+	#clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+	#accessToken = process.env.SPOTIFY_ACCESS_TOKEN;
+	#refreshToken = process.env.SPOTIFY_REFRESH_TOKEN;
 	#token = `Basic ${new Buffer.from(`${this.#clientId}:${this.#clientSecret}`).toString("base64")}`;
 	#bearerToken = null;
 	#currentlyPlaying = null;

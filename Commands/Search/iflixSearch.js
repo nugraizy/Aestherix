@@ -11,8 +11,8 @@ export default {
 	cooldown: 2,
 	limit: 3,
 	status: "enable",
-	async run({ query, from, message, args, cmd }, client) {
-		if (args[1] == "next" || args[1] == "prev") {
+	async run({ query, from, message, args, cmd, type }, client) {
+		if ((args[1] == "next" || args[1] == "prev") && type == "templateButtonReplyMessage") {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(" "))));
 			const index = data.findIndex((v) => v.thumbnail == args[2]);
 			let caption = `\`\`\` • Iflix Search\`\`\`\n\n`;

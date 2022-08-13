@@ -1,3 +1,4 @@
+export { getCookie } from "./instaCookie.js";
 export { searchHashtag } from "./instaHashtag.js";
 export { getHighlights } from "./instaHighlights.js";
 export { getHighlights2 } from "./instaHighlights2.js";
