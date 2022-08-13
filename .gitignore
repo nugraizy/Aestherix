@@ -3,7 +3,6 @@ node_modules/
 Session/*.json
 package-lock.json
 Session/*/*.json
-Databases/Groups/*.json
 Databases/Users/*.json
 Media Files/Connection Databases/*.json
 Temporary Files/

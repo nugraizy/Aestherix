@@ -1,0 +1,75 @@
+[
+  {
+    "120363043002737271@g.us": {
+      "antiDelete": "disable",
+      "antiGroupURL": "disable",
+      "antiNSFW": "disable",
+      "antiSpam": "disable",
+      "antiURL": "disable",
+      "antiVirus": "disable",
+      "autoReader": "disable",
+      "banned": [
+        "6281311850715@s.whatsapp.net"
+      ],
+      "games": "disable",
+      "groupDescription": "o y?",
+      "groupName": "asu",
+      "left1": "disable",
+      "left1msg": "Bye bye {groupName}",
+      "left2": "disable",
+      "left2msg": "Bye bye {groupName}",
+      "notification": "enable",
+      "welcome1": "disable",
+      "welcome1msg": "Welcome to {groupName}",
+      "welcome2": "disable",
+      "welcome2msg": "Welcome to {groupName}"
+    }
+  },
+  {
+    "120363027862918129@g.us": {
+      "antiDelete": "disable",
+      "antiGroupURL": "disable",
+      "antiNSFW": "disable",
+      "antiSpam": "disable",
+      "antiURL": "disable",
+      "antiVirus": "disable",
+      "autoReader": "disable",
+      "banned": [],
+      "games": "disable",
+      "groupDescription": "Toby Gay",
+      "groupName": "𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪",
+      "left1": "disable",
+      "left1msg": "Bye bye {groupName}",
+      "left2": "disable",
+      "left2msg": "Bye bye {groupName}",
+      "notification": "disable",
+      "welcome1": "disable",
+      "welcome1msg": "Welcome to {groupName}",
+      "welcome2": "disable",
+      "welcome2msg": "Welcome to {groupName}"
+    }
+  },
+  {
+    "120363024308590416@g.us": {
+      "antiDelete": "disable",
+      "antiGroupURL": "disable",
+      "antiNSFW": "disable",
+      "antiSpam": "disable",
+      "antiURL": "disable",
+      "antiVirus": "disable",
+      "autoReader": "disable",
+      "banned": [],
+      "games": "disable",
+      "groupName": "nuar",
+      "left1": "disable",
+      "left1msg": "Bye bye {groupName}",
+      "left2": "disable",
+      "left2msg": "Bye bye {groupName}",
+      "notification": "disable",
+      "welcome1": "disable",
+      "welcome1msg": "Welcome to {groupName}",
+      "welcome2": "disable",
+      "welcome2msg": "Welcome to {groupName}"
+    }
+  }
+]
