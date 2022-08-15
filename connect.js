@@ -223,6 +223,10 @@ const start = async () => {
 		Handler(client, message, store);
 	});
 
+	Client.ev.on("werewolf.cycle", (update) => {
+		log(update);
+	});
+
 	Client.ws.on("CB:notification,type:w:gp2", (update) => {
 		if (update?.content?.[0].tag !== "description" && update?.content?.[0].tag !== "invite") return;
 		const from = update?.attrs?.from || update?.content?.[0]?.attrs?.author;

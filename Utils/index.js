@@ -41,6 +41,7 @@ export {
 	startTG,
 	stringifyGrid,
 	TicTacToe,
+	Werewolf,
 } from "./Games/index.js";
 export { sauceNao, traceMoe, yandex } from "./Image Reverse Search/index.js";
 export { instafier } from "./Instagram Notifier/index.js";

@@ -20,7 +20,6 @@ export const reassign = async (m, client, store, search, deleted) => {
 		delete m?.message?.senderKeyDistributionMessage;
 		const isFromMe = m?.key?.fromMe;
 		const from = m?.key?.remoteJid || m.from;
-		global.where = from;
 		const isGroup = from.endsWith("@g.us");
 		let groupSettings;
 		const isBaileys = (m?.key?.id?.startsWith("BAE5") && isSame(m?.key?.id?.length, 16)) || (isFromMe && m?.key?.id?.startsWith("VOID"));

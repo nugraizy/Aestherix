@@ -6,3 +6,4 @@ export { slot } from "./slot.js";
 export { checkWin, fillGrid, makePuzzle, revealOneElement, solvePuzzle, stringifyGrid } from "./sudoku.js";
 export { startTG } from "./tebakGambar.js";
 export { default as TicTacToe, DeleteTicTacToeSession, GetTicTacToeSession } from "./ticTacToe.js";
+export { Werewolf } from "./werewolf.js";

@@ -86,6 +86,7 @@ export default {
 		if (!isOwner) return client[botNum].reply({ from, quoted: message.message }, "You are not allowed to use this command");
 		if (!query) return client[botNum].reply({ from, quoted: message.message }, "Please specify code to evaluate");
 		if (isBaileys) return;
+		global.where = from;
 		if (body.startsWith("/> ")) {
 			let types = Function;
 			let output;
