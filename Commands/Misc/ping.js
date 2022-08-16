@@ -10,10 +10,6 @@ export default {
 	limit: 0,
 	status: "enable",
 	async run({ from, message }, client) {
-		client[botNum].reply({ from, quoted: message }, `Pong! ${ping(message.messageTimestamp, Date.now())} seconds`);
+		client[botNum].reply({ from, quoted: message }, `Pong! ${moment.duration(Date.now() - moment(message.messageTimestamp * 1000)).asSeconds()} seconds`);
 	},
-};
-
-const ping = (timestamp, now) => {
-	return moment.duration(now - moment(timestamp * 1000)).asSeconds();
 };

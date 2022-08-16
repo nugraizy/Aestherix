@@ -14,7 +14,7 @@
  *   @Nafiz         [ @GitHub ] https://github.com/xbnfz01       [ @Instagram ] https://instagram.com/nfz.01
  */
 
-import baileys, { jidDecode } from "@adiwajshing/baileys";
+import baileys, { generateMessageID, jidDecode } from "@adiwajshing/baileys";
 import { Boom } from "@hapi/boom";
 import center from "center-align";
 import { spawn } from "child_process";
@@ -124,7 +124,7 @@ const start = async () => {
 	const CONNECTION_CONFIG = {
 		printQRInTerminal: true,
 		version: DEFAULT_CONNECTION_CONFIG.version,
-		logger: P({ level: OPTIONS.trace ? "trace" : "fatal" }),
+		logger: P({ level: OPTIONS.trace ? "trace" : OPTIONS.debug ? "debug" : "fatal" }),
 		auth: state,
 		markOnlineOnConnect: false,
 		syncFullHistory: true,
@@ -223,8 +223,97 @@ const start = async () => {
 		Handler(client, message, store);
 	});
 
-	Client.ev.on("werewolf.cycle", (update) => {
-		log(update);
+	Client.ev.on("werewolf.cycle", async (update) => {
+		if (update.time == "day") {
+			await client[botNum].sendMessage(update.id, { text: update.gameDialogue, mentions: update.peopleKilledMention });
+		} else if (update.time == "evening") {
+			await client[botNum].sendMessage(update.id, {
+				text: update.gameDialogue,
+			});
+			for (const id of update.playersAlive) {
+				await client[botNum].sendMessage(id, {
+					text: "Pilih salah satu dari pemain berikut untuk divoting",
+					footer: "\t",
+					title: "\t",
+					buttonText: "Open List",
+					sections: update.playersData
+						.filter((v) => v.isAlive)
+						.map((v) => ({ rows: [{ title: `VOTE ${v.name}`, rowId: `.ww vote ${v.id} ${update.id}` }], title: `VOID BOT | Werewolf Games` })),
+				});
+			}
+		} else if (update.time == "voting") {
+			await client[botNum].sendMessage(update.id, { text: update.gameDialogue, mentions: [update?.voteData?.voted] });
+			if (update.isWinning) {
+				return await client[botNum].sendMessage(update.id, { text: update.gameDialogue, mentions: update.playersData.map((v) => v.id) });
+			}
+		} else if (update.time == "dawn") {
+			await client[botNum].sendMessage(update.id, { text: update.gameDialogue.replace("{0}", update.gameTime) });
+			for (const { id, role, isAlive } of update.playersData) {
+				if (isAlive) {
+					if (role == "werewolf") {
+						await client[botNum].relayMessage(
+							id,
+							{
+								listMessage: {
+									buttonText: "Open list",
+									description: `Kamu adalah Serigala. Dan saat ini merupakan waktu yang tepat untuk membunuh seseorang.\nPilih salah satu player.`,
+									footerText: "\t",
+									listType: 1,
+									sections: update.playersData
+										.filter((v) => v.isAlive)
+										.map((v) => {
+											return { rows: [{ title: `KILL ${v.name}`, rowId: `.ww kill ${v.id} ${update.id}` }], title: `VOID BOT | Werewolf Games` };
+										}),
+								},
+							},
+							{ messageId: generateMessageID() },
+						);
+					} else if (role == "seer") {
+						await client[botNum].relayMessage(
+							id,
+							{
+								listMessage: {
+									buttonText: "Open list",
+									description: `Kamu adalah Penerawang. Dan saat ini merupakan waktu yang tepat untuk menerawang seseorang.\nPilih salah satu player.`,
+									footerText: "\t",
+									listType: 1,
+									sections: update.playersData
+										.filter((v) => v.isAlive)
+										.map((v, i) => {
+											return { rows: [{ title: `TERAWANG ${update.playersData[i].name}`, rowId: `.ww seer ${update.playersData[i].id} ${update.id}` }], title: `VOID BOT | Werewolf Games` };
+										}),
+								},
+							},
+							{ messageId: generateMessageID() },
+						);
+					} else if (role == "guard") {
+						await client[botNum].relayMessage(
+							id,
+							{
+								listMessage: {
+									buttonText: "Open list",
+									description: `Kamu adalah Penjaga. Dan saat ini merupakan waktu yang tepat untuk memjaga seseorang.\nPilih salah satu player.`,
+									footerText: "\t",
+									listType: 1,
+									sections: update.playersData
+										.filter((v) => v.isAlive)
+										.map((v, i) => {
+											return { rows: [{ title: `JAGA ${update.playersData[i].name}`, rowId: `.ww guard ${update.playersData[i].id} ${update.id}` }], title: `VOID BOT | Werewolf Games` };
+										}),
+								},
+							},
+							{ messageId: generateMessageID() },
+						);
+					} else if (role == "villager") {
+						await client[botNum].sendMessage(id, { text: "Kamu adalah Penduduk. Tunggu sampai pagi. Saat ini hanya pemain malam yang beraksi" });
+					}
+				}
+			}
+		} else if (update.time == "night") {
+			await client[botNum].sendMessage(update.id, { text: "Aktifitas pemain malam dihentikan karena sudah mau pagi." });
+		} else if (update.time == "failAfk") {
+			await client[botNum].sendMessage(update.id, { text: update.message, mentions: update.playersData.map((v) => v.id) });
+		}
 	});
 
 	Client.ws.on("CB:notification,type:w:gp2", (update) => {
