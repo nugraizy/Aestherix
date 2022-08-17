@@ -202,25 +202,25 @@ export const closestNumberFromArray = (number, array = []) => {
 export const getTimeSince = (dates) => {
 	const time = Date.now() - dates;
 	const dateString = ms(time);
-	const container = [];
-	`${dateString.days ? container.push(`${dateString.days} Day${dateString.days > 1 ? "s" : ""}`) : ""}${
-		dateString.hours ? container.push(`${dateString.hours} Hour${dateString.hours > 1 ? "s" : ""}`) : ""
-	}${dateString.minutes ? container.push(`${dateString.minutes} Minute${dateString.minutes > 1 ? "s" : ""}`) : ""}${
-		dateString.seconds ? container.push(`${dateString.seconds} Second${dateString.seconds > 1 ? "s" : ""}`) : ""
-	}`;
-	return container.join(", ");
+	return (
+		(dateString.days ? `${dateString.days} day${dateString.days > 1 ? "s" : ""}` : "") +
+		(dateString.hours ? `${dateString.hours} sour${dateString.hours > 1 ? "s" : ""}` : "") +
+		(dateString.minutes ? `${dateString.minutes} minute${dateString.minutes > 1 ? "s" : ""}` : "") +
+		(dateString.seconds ? `${dateString.seconds} second${dateString.seconds > 1 ? "s" : ""}` : "")
+	);
 };
 
 export const getRuntime = (time) => {
 	const uptime = time;
 	const date = new Date(uptime * 1000);
-	const container = [];
-	`${date.getUTCDate() - 1 > 0 ? container.push(`${date.getUTCDate() - 1} Day${date.getUTCDate() - 1 > 1 ? "s" : ""}`) : ""}${
-		date.getUTCHours() > 0 ? container.push(`${date.getUTCHours()} Hour${date.getUTCHours() > 1 ? "s" : ""}`) : ""
-	}${date.getUTCMinutes() > 0 ? container.push(`${date.getUTCMinutes()} Minute${date.getUTCMinutes() > 1 ? "s" : ""}`) : ""}${
-		date.getUTCSeconds() > 0 ? container.push(`${date.getUTCSeconds()} Second${date.getUTCSeconds() > 1 ? "s" : ""}`) : ""
-	}`;
-	return container.join(", ");
+	return (
+		(date.getUTCFullYear() - 1 > 0 ? `${date.getUTCFullYear() - 1} year${date.getUTCFullYear() - 1 > 1 ? "s" : ""}` : "") +
+		(date.getUTCMonth() - 1 > 0 ? `${date.getUTCMonth() - 1} month${date.getUTCMonth() - 1 > 1 ? "s" : ""}` : "") +
+		(date.getUTCDate() - 1 > 0 ? `${date.getUTCDate() - 1} day${date.getUTCDate() - 1 > 1 ? "s" : ""}` : "") +
+		(date.getUTCHours() > 0 ? `${date.getUTCHours()} hour${date.getUTCHours() > 1 ? "s" : ""}` : "") +
+		(date.getUTCMinutes() > 0 ? `${date.getUTCMinutes()} minute${date.getUTCMinutes() > 1 ? "s" : ""}` : "") +
+		(date.getUTCSeconds() > 0 ? `${date.getUTCSeconds()} second${date.getUTCSeconds() > 1 ? "s" : ""}` : "")
+	);
 };
 
 export const generateHex = (length) =>
@@ -306,9 +306,8 @@ const chars = () => {
 	return char;
 };
 
-export const zalgo = (text = "Mana textnya?", options) => {
+export const zalgo = (text = "Mana textnya?", options = {}) => {
 	text = text.split("");
-	options = options || {};
 	let counts;
 	let result = "";
 	const types = [];
@@ -370,7 +369,7 @@ export const loadFiles = (dir) => {
 	for (const file of list) {
 		const path = `${dir}/${file}`;
 		const stat = fs.statSync(path);
-		if (stat && stat.isDirectory()) {
+		if (stat?.isDirectory()) {
 			files = files.concat(loadFiles(path));
 		} else {
 			files.push(path);

@@ -128,6 +128,9 @@ const start = async () => {
 		auth: state,
 		markOnlineOnConnect: false,
 		syncFullHistory: true,
+		getMessage: async () => {
+			return { conversation: "Please Try Again" };
+		},
 	};
 	const Client = makeWASocket(CONNECTION_CONFIG);
 	store.bind(Client.ev);

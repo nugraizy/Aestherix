@@ -27,20 +27,23 @@ export default {
 			}
 			(await import("./offlineMessage.js")).default.handler(client, message);
 		}
-		if (OPTIONS.autoRead) {
-			if (!OPTIONS.offline) await client[botNum].readMessages([message.message.key]);
-		}
+
+		if (OPTIONS.autoRead && !OPTIONS.offline) client[botNum].readMessages([message.message.key]);
+
 		if (checkAfk(message.sender, message.from)) {
 			const { reasons, since } = getAfk(message.sender, message.from);
 			const time = getTimeSince(since);
-			await client[botNum].sendMessage(
+			client[botNum].sendMessage(
 				message.from,
-				{ text: `@${message.sender.split("@")[0]} is AFK since ${time} ago. Now they are out from AFK. Reason: ${reasons}`, mentions: [message.sender] },
+				{
+					text: `@${message.sender.split("@")[0]} is AFK since ${time} ago. Now they are out from AFK. Reason: ${reasons}`,
+					mentions: [message.sender],
+				},
 				{ quoted: message.message },
 			);
 			deleteAfk(message.sender, message.from);
 		}
-		if (!message.isDisappearingChat && !message.isGroup) await client[botNum].sendMessage(message.from, { disappearingMessagesInChat: 24 * 60 * 60 });
+		if (!message.isDisappearingChat && !message.isGroup) client[botNum].sendMessage(message.from, { disappearingMessagesInChat: 24 * 60 * 60 });
 		if (message.bodyQuoted && checkAfk(message.mediaData.participant, message.from)) {
 			const { reasons, since, name } = getAfk(message.mediaData.participant);
 			const time = getTimeSince(since);
