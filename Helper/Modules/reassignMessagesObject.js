@@ -24,13 +24,18 @@ export const reassign = async (m, client, store, search, deleted) => {
 		let groupSettings;
 		const isBaileys = (m?.key?.id?.startsWith("BAE5") && isSame(m?.key?.id?.length, 16)) || (isFromMe && m?.key?.id?.startsWith("VOID"));
 		const sender = isFromMe ? `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net` : isGroup ? m?.key?.participant : m?.key?.remoteJid;
-		const isBlocked = (await client[botNum].fetchBlocklist())?.includes(sender);
+		if (!cache.metadata?.has(from) && isGroup) {
+			await caching(client, from);
+		}
+		const { blocklist } = cache;
+		const isBlocked = blocklist?.includes(sender);
+		const groupMetadata = isGroup ? cache.metadata.get(from) : {};
+		const isGroupOwner = isGroup ? (isSame(groupMetadata?.owner, sender) ? true : false) : false;
 		if (isBlocked) return;
 		const prettyNumber =
 			PhoneNumber(`+${sender?.replace("@s.whatsapp.net", "")}`)?.getNumber("international") ??
 			PhoneNumber(`+${m?.key?.participant?.replace("@s.whatsapp.net", "")}`)?.getNumber("international") ??
 			"No Data";
-		const groupMetadata = isGroup ? await client[botNum].groupMetadata(from).catch((e) => {}) : {};
 		const groupName = isGroup ? groupMetadata?.subject : NO_DATA;
 		const groupDescription = isGroup ? groupMetadata?.desc?.toString() : NO_DATA;
 		const groupId = isGroup ? groupMetadata?.id : NO_DATA;
@@ -48,7 +53,6 @@ export const reassign = async (m, client, store, search, deleted) => {
 				groupSettings = checkJSON(from);
 			}
 		}
-		const isGroupOwner = isGroup ? (isSame((await client[botNum].groupMetadata(from).catch((e) => {}))?.owner, sender) ? true : false) : false;
 		const content = JSON.stringify(m?.message, null, 2);
 		const pushname = m?.pushName ? m?.pushName.trim() : store?.messages?.[sender]?.toJSON?.()?.reverse?.()?.[0]?.pushName || prettyNumber;
 		const botNumber = `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net`;
@@ -386,4 +390,29 @@ export const reassign = async (m, client, store, search, deleted) => {
 			error: e,
 		};
 	}
+};
+
+const caching = async (clients, id) => {
+	await new Promise(async (resolve) => {
+		const groupMetadata = (await clients[botNum].groupMetadata(id).catch((e) => undefined)) || {};
+		cache.metadata.set(id, groupMetadata);
+		resolve();
+	});
+	if (isFirstConnection) await startLoopie(clients);
+};
+
+const startLoopie = async (clients) => {
+	setInterval(async () => {
+		const data = cache.metadata.values();
+		const dataBlock = await client[botNum].fetchBlocklist();
+		cache.blocklist = dataBlock;
+		for (const d of data) {
+			if (d.id) {
+				const groupMetadata = (await clients[botNum].groupMetadata(d.id).catch((e) => undefined)) || {};
+				if (groupMetadata.id) {
+					cache.metadata.set(groupMetadata.id, groupMetadata);
+				}
+			}
+		}
+	}, 10000);
 };

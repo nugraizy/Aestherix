@@ -17,7 +17,14 @@ export default {
 					encKey: generateMessageID(),
 					name: "Poll",
 					selectableOptionsCount: 2,
-					options: [],
+					options: [
+						{
+							optionName: "Option 1",
+						},
+						{
+							optionName: "Option 2",
+						},
+					],
 				},
 			},
 			{},

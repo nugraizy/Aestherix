@@ -41,10 +41,10 @@ export default {
 			deleteAfk(message.sender, message.from);
 		}
 		if (!message.isDisappearingChat && !message.isGroup) await client[botNum].sendMessage(message.from, { disappearingMessagesInChat: 24 * 60 * 60 });
-		if (message.bodyQuoted && checkAfk(message.mediaData.participant)) {
+		if (message.bodyQuoted && checkAfk(message.mediaData.participant, message.from)) {
 			const { reasons, since, name } = getAfk(message.mediaData.participant);
 			const time = getTimeSince(since);
-			await client[botNum].reply({ from: message.from, quoted: message.message }, `${name} is AFK since ${time} ago. Reason: ${reasons}`);
+			client[botNum].reply({ from: message.from, quoted: message.message }, `${name} is AFK since ${time} ago. Reason: ${reasons}`);
 		}
 		if (message.mention.length > 0) {
 			let caption = `You're Tagging People That Are AFK.\n\n`;
@@ -126,7 +126,7 @@ export default {
 						`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
 					);
 				if (Tempcmds && !message.isOwner) {
-					if (OPTIONS["selfMode"]) return;
+					if (OPTIONS.selfMode) return;
 					if (OPTIONS.restrict && Tempcmds.restrict) {
 						await client[botNum].reply({ from: message.from, quoted: message.message }, "This command is restricted and currently bot are on restricted mode.");
 						continue;
@@ -157,7 +157,7 @@ export default {
 				}
 				if (Tempcmds) {
 					if (OPTIONS.onlyLogs ? (message.cmd.startsWith("==>") || message.cmd.startsWith("//>") || message.cmd.startsWith("$$>") ? true : false) : true) {
-						if (!message.isOwner && OPTIONS["selfMode"]) return;
+						if (!message.isOwner && OPTIONS.selfMode) return;
 						try {
 							if (/-{1,2}((help(s)?|info|des(c|k)rip(t|s)i(on)?)|H)$/i.test(message.args[1]) && Tempcmds.name !== "eval") {
 								const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${Tempcmds.cooldown}s\nAliases : ${Tempcmds.aliases
