@@ -23,7 +23,6 @@ export const fbDl = (url) =>
 				.split(",")
 				.map((v) => v.replace(/"/g, "").trim());
 			let html;
-
 			if (!Array.isArray(decode) || decode.length !== 6) html = (typeof data === "string" ? JSON.parse(data) : data)?.data;
 			else {
 				const decoded = decoding(...decode);
@@ -44,8 +43,8 @@ export const fbDl = (url) =>
 					const el = $(this).find("td");
 					if (/tidak|no/i.test(el.eq(1).text())) {
 						const quality = el.eq(0).text().split("(")?.[0]?.trim();
-						const url = el.eq(2).find("a[href]").attr("href");
-						if (url) result.push({ quality, url });
+						const urls = el.eq(2).find("a[href]").attr("href");
+						if (url) result.push({ quality, url: urls });
 					}
 				});
 				if (!result.length) return resolve({ error: "Cant find downloadable media" });
@@ -59,11 +58,11 @@ export const fbDl = (url) =>
 		} catch (err) {
 			const data = await fetchJSON(URL_BASE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) });
 			if (data.code == 102) return resolve({ error: data.message });
-			let { url, subname } = data.url.filter((x) => x.subname == "HD")?.[0] ?? data.url.filter((x) => x.subname == "SD")?.[0] ?? data.url[0];
+			let { url: urls, subname } = data.url.filter((x) => x.subname == "HD")?.[0] ?? data.url.filter((x) => x.subname == "SD")?.[0] ?? data.url[0];
 			let { duration, title } = data.meta;
 			let { timestamp: datePosted } = data;
 			return resolve({
-				url,
+				url: urls,
 				duration,
 				isVideo: title !== "Photo",
 				resolution: subname,

@@ -22,6 +22,7 @@ import fs from "fs";
 import meow from "meow";
 import moment from "moment-timezone";
 import mqtt from "mqtt";
+import cron from "node-cron";
 import path from "path";
 import P from "pino";
 import { platform } from "process";
@@ -64,12 +65,28 @@ const regexOption = [
 	"offline",
 	"noCall",
 	"instaNotifier",
+	"limitReset",
 ];
 if (platform !== "win32" && !OPTIONS.noLoad) await printRandomAscii();
 if (OPTIONS.reset) {
 	const sessionName = `${cli.input[0] ?? "Session-debug"}`;
 	if (fs.existsSync(`./Session/${sessionName}.json`)) fs.unlinkSync(`./Session/${sessionName}.json`);
 	if (fs.existsSync(`./Media Files/Connection Databases/${sessionName}.json`)) fs.unlinkSync(`./Media Files/Connection Databases/${sessionName}.json`);
+}
+
+if (OPTIONS.limitReset) {
+	cron.schedule(
+		"0 0 * * *",
+		async () => {
+			const time = moment().tz("Asia/Jakarta").format("HH:mm:ss DD/MM");
+			(await import("./Helper/Groups/Settings/limit.js")).resetAllLimit();
+			INFOLOG(`[${color(time, "cyan")}]`, `${color("Sukses Reset User's Limit", "white")}`);
+		},
+		{
+			timezone: "Asia/Jakarta",
+			scheduled: true,
+		},
+	);
 }
 
 const { state, saveState } = useSingleFileAuthState(`./Session/${cli.input[0] ?? "Session-debug"}.json`);
@@ -247,8 +264,20 @@ const start = async () => {
 		} else if (update.time == "voting") {
 			await client[botNum].sendMessage(update.id, { text: update.gameDialogue, mentions: [update?.voteData?.voted] });
 			if (update.isWinning) {
-				return await client[botNum].sendMessage(update.id, { text: update.gameDialogue, mentions: update.playersData.map((v) => v.id) });
+				return await client[botNum].sendMessage(update.id, { text: update.gameDialogue, mentions: update?.peopleMention });
 			}
+			await client[botNum].sendMessage(update.id, {
+				text: `Statistic Pemain :
+
+Pemain : ${update.playersData.filter((v) => v.isAlive).length}/${update.playersData.length}
+
+${update.playersData
+	.map((v) => {
+		return v.isAlive ? `@${v.id.split("@")[0]} : 😄 Hidup` : `@${v.id.split("@")[0]} : 💀 Mati | ${v.role}`;
+	})
+	.join("\n")}`,
+				mentions: update.playersData.map((v) => v.id),
+			});
 		} else if (update.time == "dawn") {
 			await client[botNum].sendMessage(update.id, { text: update.gameDialogue.replace("{0}", update.gameTime) });
 			for (const { id, role, isAlive } of update.playersData) {
@@ -316,6 +345,8 @@ const start = async () => {
 			await client[botNum].sendMessage(update.id, { text: "Aktifitas pemain malam dihentikan karena sudah mau pagi." });
 		} else if (update.time == "failAfk") {
 			await client[botNum].sendMessage(update.id, { text: update.message, mentions: update.playersData.map((v) => v.id) });
+		} else if (update.time == "voted") {
+			await client[botNum].sendMessage(update.id, { text: update.text, mentions: update.mentions });
 		}
 	});
 
@@ -340,6 +371,8 @@ const start = async () => {
 	});
 
 	Client.ev.on("contacts.update", () => {});
+
+	Client.ev.on("groups.update", () => {});
 
 	clientMqttListen.on("message", async (topic, message) => {
 		message = message.toString();
@@ -481,6 +514,7 @@ function parseCli() {
 			offline: { type: "boolean", alias: "f" },
 			no_call: { type: "boolean", alias: "d" },
 			insta_notifier: { type: "boolean", alias: "i" },
+			limit_reset: { type: "boolean", alias: "l" },
 		},
 	});
 }
@@ -518,7 +552,8 @@ function help() {
 	   --story, q           Auto download people story after the bot received the story
 	   --offline, -f        Set your current presence to offline
 	   --no_call, -d        Reject incoming call.
-	   --insta_notifier     Handle incoming Instagram DMs.
+	   --insta_notifier, -i Handle incoming Instagram DMs.
+	   --limit_reset, -l	Enable Auto-reset user's limit.
 	   --help, -h           Show this message.
  
 	 Examples

@@ -25,7 +25,19 @@ export const reassign = async (m, client, store, search, deleted) => {
 		const isBaileys = (m?.key?.id?.startsWith("BAE5") && isSame(m?.key?.id?.length, 16)) || (isFromMe && m?.key?.id?.startsWith("VOID"));
 		const sender = isFromMe ? `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net` : isGroup ? m?.key?.participant : m?.key?.remoteJid;
 		if (!cache.metadata?.has(from) && isGroup) {
-			await caching(client, from);
+			await caching(client, from, store);
+		}
+		if (isFirstConnection) {
+			const { multi, noPref } = SETTINGS.prefix;
+			const botNumber = `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net`;
+			cache = {
+				...cache,
+				multi,
+				noPref,
+				pref: SETTINGS.prefix.pref || ".",
+				botNumber,
+				ownerNumbers: [SETTINGS.owner_number, ...SETTINGS.team_number, botNumber],
+			};
 		}
 		const { blocklist } = cache;
 		const isBlocked = blocklist?.includes(sender);
@@ -54,9 +66,8 @@ export const reassign = async (m, client, store, search, deleted) => {
 			}
 		}
 		const content = JSON.stringify(m?.message, null, 2);
-		const pushname = m?.pushName ? m?.pushName.trim() : store?.messages?.[sender]?.toJSON?.()?.reverse?.()?.[0]?.pushName || prettyNumber;
-		const botNumber = `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net`;
-		const ownerNumbers = [SETTINGS.owner_number, ...SETTINGS.team_number, botNumber];
+		const pushname = m?.pushName ? m?.pushName.trim() : store.contacts?.[sender]?.verifiedName || store.contacts?.[sender]?.notify || prettyNumber;
+		const { botNumber, ownerNumbers } = cache;
 		const isOwner = ownerNumbers.includes(sender);
 		const timeStamp = m?.messageTimestamp || Date.now();
 		const filename = sender + (m?.key?.id || Date.now());
@@ -148,8 +159,7 @@ export const reassign = async (m, client, store, search, deleted) => {
 			: "Unknown body";
 		const args = body?.split(/ +/g);
 		const cmd = body?.toLowerCase()?.split(" ")[0] || "";
-		const { multi, noPref } = SETTINGS.prefix;
-		const pref = SETTINGS.prefix.pref || ".";
+		const { multi, noPref, pref } = cache;
 		let prf;
 		if (multi) prf = /^[°π÷×¶∆£¢€¥®™✓_=+|~!#$%^&.\/\\©^>]/.test(cmd) ? cmd.match(/^[°π÷×¶∆£¢€¥®™✓_=+|~!#$%^&.\/\\©^>]/gi) : "-";
 		else if (noPref) prf = "";
@@ -392,23 +402,23 @@ export const reassign = async (m, client, store, search, deleted) => {
 	}
 };
 
-const caching = async (clients, id) => {
+const caching = async (clients, id, store) => {
 	await new Promise(async (resolve) => {
 		const groupMetadata = (await clients[botNum].groupMetadata(id).catch((e) => undefined)) || {};
 		cache.metadata.set(id, groupMetadata);
 		resolve();
 	});
-	if (isFirstConnection) await startLoopie(clients);
+	if (isFirstConnection) await startLoopie(clients, store);
 };
 
-const startLoopie = async (clients) => {
+const startLoopie = async (clients, store) => {
 	setInterval(async () => {
 		const data = cache.metadata.values();
-		const dataBlock = await client[botNum].fetchBlocklist();
+		const dataBlock = await clients[botNum].fetchBlocklist();
 		cache.blocklist = dataBlock;
 		for (const d of data) {
 			if (d.id) {
-				const groupMetadata = (await clients[botNum].groupMetadata(d.id).catch((e) => undefined)) || {};
+				const groupMetadata = store.fetchGroupMetadata(d.id, clients[botNum]) || {};
 				if (groupMetadata.id) {
 					cache.metadata.set(groupMetadata.id, groupMetadata);
 				}

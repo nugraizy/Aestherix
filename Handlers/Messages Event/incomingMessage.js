@@ -1,6 +1,7 @@
 import { delay } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
 import similarity from "similarity";
+import { log } from "util";
 import { runtime } from "../../connect.js";
 import { addLimit, checkAfk, color, deleteAfk, getAfk, getTimeSince, INFOLOG, reassign } from "../../Helper/index.js";
 let STATS_OFFLINE = true;
@@ -11,7 +12,7 @@ moment.tz.setDefault("Asia/Jakarta").locale("id");
 export default {
 	async handler(message, client, cmds, store, user) {
 		if (message == undefined) return;
-		if (OPTIONS.debugMode && !message?.messages?.[0]?.key?.fromMe) await client[botNum].sendMessage("120363027862918129@g.us", { text: JSON.stringify(message, undefined, 2) });
+		if (OPTIONS.debugMode && !message?.messages?.[0]?.key?.fromMe) log(JSON.stringify(message, undefined, 2));
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (message.messages[0] && "messageStubParameters" in message.messages[0]) return (await import("./stubMessage.js")).default.handler(client, message.messages[0], store);
 		message = await reassign(JSON.parse(JSON.stringify(message.messages[0])), client, store, false);
@@ -176,7 +177,6 @@ export default {
 							await Tempcmds.run(message, client, store);
 							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) user.cooldown.get(message.sender).requests = false;
 							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).has(Tempcmds.name)) user.cooldown.get(message.sender).delete(Tempcmds.name);
-							await delay(200);
 						} catch (err) {
 							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) user.cooldown.get(message.sender).requests = false;
 							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).has(Tempcmds.name)) user.cooldown.get(message.sender).delete(Tempcmds.name);

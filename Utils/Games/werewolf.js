@@ -127,13 +127,14 @@ export class Werewolf {
 		this.playerVoted = [];
 		this.gameStarted = false;
 		this.gameWinner = null;
-		this.gameTime = 20;
+		this.gameTime = 120;
 		this.gameTimeCycle = "night";
 		this.gameDialogue = "";
 		this.gameCycler = null;
 		this.gameTimeStarted = null;
 		this.gameAfk = 0;
 		this.firstNight = true;
+		this.timeSpent = 1;
 		this.client = client;
 		if (status) this.setNewGame();
 
@@ -259,7 +260,7 @@ export class Werewolf {
 			return dialogue[Math.floor(Math.random() * dialogue.length)].replace("{0}", playerSeerName).replace("{1}", playerSeerRole);
 		} else {
 			const dialogue = shuffleArray([...WEREWOLF_SCRIPTING.characterInAction.seer.guessing, ...WEREWOLF_SCRIPTING.characterInAction.seer.notGuessingWerewolf]);
-			return dialogue[0].replace("{0}", `${playerSeerName}`).replace("{1}", playerSeerRole);
+			return dialogue[0].replace("{0}", playerSeerName).replace("{1}", playerSeerRole);
 		}
 	};
 
@@ -356,7 +357,7 @@ export class Werewolf {
 				mentions: [data.playersData[playerKill].id],
 				data: [
 					{ id: data.playersData[playerKill].id, message: WEREWOLF_SCRIPTING.success.killedByWerewolf },
-					{ id: data.playersData[player].id, message: `${WEREWOLF_SCRIPTING.success.killWerewolf}@${data.playersData[playerKill].id.split("@")[0]}` },
+					{ id: data.playersData[player].id, message: `${WEREWOLF_SCRIPTING.success.killWerewolf}${data.playersData[playerKill].name}` },
 				],
 			};
 		}
@@ -387,6 +388,7 @@ export class Werewolf {
 		const isStarted = data.gameStarted;
 		if (!isStarted) return;
 		const timers = data.gameTime;
+		let reduceTime = true;
 		data.gameCycler = setTimeout((timerly = timer) => {
 			const dataGame = this.getDataGame(roomId);
 			if (!dataGame) return;
@@ -395,6 +397,10 @@ export class Werewolf {
 				dataGame.gameTimeCycle = "day";
 			}
 			if (dataGame.gameTimeCycle == "day") {
+				if (dataGame.timeSpent > 1 && reduceTime) {
+					data.gameTime /= 1.5;
+					reduceTime = false;
+				}
 				this.resetPerks(dataGame.roomId);
 				let peopleKilledMention = [];
 				let message = WEREWOLF_SCRIPTING.dayTime.noKill[Math.floor(Math.random() * WEREWOLF_SCRIPTING.dayTime.noKill.length)];
@@ -435,7 +441,7 @@ export class Werewolf {
 							.map((v, i) => `@${v.id.split("@")[0]} ${v.isAlive ? "😄 Hidup" : "💀 Mati"} - ${v.role.capitalize()}\n`)
 							.join("")}\nPihak Jahat:\n${statisticPlayer[0].bad
 							.map((v, i) => `@${v.id.split("@")[0]} ${v.isAlive ? "😄 Hidup" : "💀 Mati"} - ${v.role.capitalize()}\n`)
-							.join("")}\n\nLama permainan : ${convertSecondstoTime(dataGame.gameTimeStarted)}`;
+							.join("")}\n\nLama permainan : ${dataGame.timeLength}`;
 					clearTimeout(dataGame.gameCycler);
 					const data = dataGame;
 					games.werewolf.delete(roomId);
@@ -515,7 +521,7 @@ export class Werewolf {
 								.map((v, i) => `@${v.id.split("@")[0]} ${v.isAlive ? "😄 Hidup" : "💀 Mati"} - ${v.role.capitalize()}\n`)
 								.join("")}\nPihak Jahat:\n${statisticPlayer[0].bad
 								.map((v, i) => `@${v.id.split("@")[0]} ${v.isAlive ? "😄 Hidup" : "💀 Mati"} - ${v.role.capitalize()}\n`)
-								.join("")}\n\nLama permainan : ${convertSecondstoTime(dataGame.gameTimeStarted)}`;
+								.join("")}\n\nLama permainan : ${dataGame.timeLength}`;
 						client[botNum].ev.emit("werewolf.cycle", {
 							error: false,
 							peopleMention: dataGame.playersData.map((v) => v.id),
@@ -545,6 +551,7 @@ export class Werewolf {
 				dataGame.gameDialogue = message;
 				client[botNum].ev.emit("werewolf.cycle", { error: false, ...(dataGame.firstNight ? {} : message), ...client, id: dataGame.roomId, ...dataGame, time: "night" });
 				dataGame.gameTimeCycle = "day";
+				dataGame.timeSpent += 1;
 				this.startGameCycle(roomId);
 			}
 		}, timers * 1000);
@@ -599,5 +606,13 @@ export class Werewolf {
 		const data = games.werewolf.get(roomId);
 		if (data === undefined) return false;
 		return data;
+	}
+
+	get timeLength() {
+		const data = this.getDataGame(this.roomId);
+		const difference = new Date().getTime() - data.gameTimeStarted;
+		const minutes = Math.floor(difference / (1000 * 60)) % 60;
+		const seconds = Math.floor(difference / 1000) % 60;
+		return `${minutes}:${seconds}`;
 	}
 }

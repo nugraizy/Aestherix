@@ -74,10 +74,10 @@ export const addAllLimit = (limit) => {
 	return true;
 };
 
-export const resetAllLimit = (limit) => {
+export const resetAllLimit = () => {
 	const data = readJSON(PATH.files);
 	for (const index in data) {
-		data[index].limit = limit;
+		data[index].limit = LIMIT;
 	}
 	writeJSON(PATH.files, data);
 	return true;

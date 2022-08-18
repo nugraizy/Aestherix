@@ -45,6 +45,13 @@ export default {
 			for (const data of vote.data) {
 				await client[botNum].sendMessage(data.id, { text: data.message });
 			}
+			client[botNum].ev.emit("werewolf.cycle", {
+				time: "voted",
+				id: args[3],
+				text: `@${sender.split("@")[0]} voted for @${args[2].split("@")[0]}`,
+				mentions: [args[2], sender],
+				...client,
+			});
 		} else if (args[1] == "delete") {
 			const werewolf = new Werewolf(sender, from, client);
 			const deletes = werewolf.deleteGame(sender);
