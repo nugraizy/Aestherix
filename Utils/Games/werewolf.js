@@ -309,7 +309,7 @@ export class Werewolf {
 		data.playersData[player].isAction = true;
 		return {
 			error: false,
-			data: [{ id: data.playersData[player].id, message: data.randomSeer(data.playersData[playerSeer].role, data.playersData[playerSeer].playerSeerName) }],
+			data: [{ id: data.playersData[player].id, message: data.randomSeer(data.playersData[playerSeer].role, data.playersData[playerSeer].name) }],
 		};
 	};
 
