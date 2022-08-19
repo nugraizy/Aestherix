@@ -31,6 +31,6 @@ export const getPost = (code) =>
 			}
 			resolve(result);
 		} catch (e) {
-			resolve({ error: url.includes("/p/") ? e.message : "Invalid code" });
+			resolve(e);
 		}
 	});

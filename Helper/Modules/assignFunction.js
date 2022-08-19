@@ -10,32 +10,33 @@ import { isURL } from "./functions.js";
 import { reassign } from "./reassignMessagesObject.js";
 const { readFile, unlink, writeFile } = (await import("fs-extra")).default;
 export const assign = (client) => {
+	const applyExif = async (buffer, metadata) => {
+		const data = {};
+		data["sticker-pack-id"] = metadata?.id || "";
+		data["sticker-pack-name"] = metadata?.packname || "";
+		data["sticker-pack-publisher"] = metadata?.author || "";
+		const exif = Buffer.concat([
+			Buffer.from([0x49, 0x49, 0x2a, 0x00, 0x08, 0x00, 0x00, 0x00, 0x01, 0x00, 0x41, 0x57, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0x00, 0x00, 0x00]),
+			Buffer.from(JSON.stringify(data), "utf-8"),
+		]);
+		exif.writeUIntLE(new TextEncoder().encode(JSON.stringify(data)).length, 14, 4);
+		buffer =
+			buffer instanceof webpmux.Image
+				? buffer
+				: await (async () => {
+						const img = new webpmux.Image();
+						await img.load(buffer);
+						return img;
+				  })();
+		buffer.exif = exif;
+		return await buffer.save(null);
+	};
 	client[botNum] = {
 		...client[botNum],
 		reply: async ({ from, quoted }, text) => {
 			return await client[botNum].sendMessage(from, { text }, { quoted });
 		},
-		applyExif: async (buffer, metadata) => {
-			const data = {};
-			data["sticker-pack-id"] = metadata?.id || "";
-			data["sticker-pack-name"] = metadata?.packname || "";
-			data["sticker-pack-publisher"] = metadata?.author || "";
-			const exif = Buffer.concat([
-				Buffer.from([0x49, 0x49, 0x2a, 0x00, 0x08, 0x00, 0x00, 0x00, 0x01, 0x00, 0x41, 0x57, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0x00, 0x00, 0x00]),
-				Buffer.from(JSON.stringify(data), "utf-8"),
-			]);
-			exif.writeUIntLE(new TextEncoder().encode(JSON.stringify(data)).length, 14, 4);
-			buffer =
-				buffer instanceof webpmux.Image
-					? buffer
-					: await (async () => {
-							const img = new webpmux.Image();
-							await img.load(buffer);
-							return img;
-					  })();
-			buffer.exif = exif;
-			return await buffer.save(null);
-		},
+		applyExif,
 		prepareSticker: async (media, filename, type, options) => {
 			const isMediaURL = Buffer.isBuffer(media) ? false : isURL(media) ? true : false;
 			media = isMediaURL ? (await Axios.get(media, { responseType: "arraybuffer", headers: { DNT: 1, "Upgrade-Insecure-Request": 1 } })).data : media;
