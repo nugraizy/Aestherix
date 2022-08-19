@@ -34,7 +34,7 @@ export default {
 					isImage: ["img", "image", "foto", "images"],
 				},
 			});
-			let models = query.match(/(\d+|model)/g);
+			let models = query.match(/model/g);
 			parsed = models !== null ? parsed.slice(1) : parsed;
 			if (models?.includes("model")) {
 				if (args[1] == "next") args[2] = Number(args[2]);
