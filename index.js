@@ -24,6 +24,7 @@ games.akinator = new Map();
 games.tictactoe = new Map();
 games.word = new Map();
 games.werewolf = new Map();
+games.wordle = new Map();
 user.cooldown = new Map();
 cmds.commands = new Map();
 user.afk = new Map();

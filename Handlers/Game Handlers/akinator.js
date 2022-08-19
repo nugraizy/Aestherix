@@ -30,7 +30,7 @@ export default {
 				);
 			}
 		};
-		if (isGroup && (settings[from].games == "enable" || isAdmin) && !OPTIONS.onlyLogs) play();
+		if (isGroup && (settings[from].games == "enable" || isAdmin) && !OPTIONS.onlyLogs) await play();
 		else if (!isGroup && !OPTIONS.onlyLogs) await play();
 	},
 };

@@ -163,7 +163,7 @@
   },
   {
     "120363024781168861@g.us": {
-      "antiDelete": "disable",
+      "antiDelete": "enable",
       "antiGroupURL": "disable",
       "antiNSFW": "disable",
       "antiSpam": "disable",

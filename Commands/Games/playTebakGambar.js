@@ -6,7 +6,7 @@ export default {
 	name: "tebakgambar",
 	description: "Play Guess the image",
 	usage: "!tebakgambar",
-	aliases: ["tg"],
+	aliases: ["tg", "tebak"],
 	category: "Games",
 	cooldown: 2,
 	limit: 2,

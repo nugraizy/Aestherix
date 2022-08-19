@@ -25,7 +25,7 @@ export const reassign = async (m, client, store, search, deleted) => {
 		const isBaileys = (m?.key?.id?.startsWith("BAE5") && isSame(m?.key?.id?.length, 16)) || (isFromMe && m?.key?.id?.startsWith("VOID"));
 		const sender = isFromMe ? `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net` : isGroup ? m?.key?.participant : m?.key?.remoteJid;
 		if (!cache.metadata?.has(from) && isGroup) {
-			await caching(client, from, store);
+			await caching(client, from);
 		}
 		if (isFirstConnection) {
 			const { multi, noPref } = SETTINGS.prefix;
@@ -222,24 +222,50 @@ export const reassign = async (m, client, store, search, deleted) => {
 		}
 		const mediaData = isSame(type, "extendedTextMessage") ? (isSame(typeQuoted, "thumbnailMessage") ? mText : mMediaData || {}) : mText || {};
 		const typeMessage = [
-			"conversation",
-			"extendedTextMessage",
-			"mentionText",
-			"imageMessage",
-			"stickerMessage",
 			"audioMessage",
-			"videoMessage",
-			"documentMessage",
-			"contactMessage",
-			"contactsArrayMessage",
-			"thumbnailMessage",
-			"viewOnceMessage",
 			"buttonsMessage",
 			"buttonsResponseMessage",
-			"templateMessage",
-			"templateButtonReplyMessage",
-			"messageContextInfo",
+			"cancelPaymentRequestMessage",
+			"collectionMessage",
+			"contactMessage",
+			"contactsArrayMessage",
+			"declinePaymentRequestMessage",
+			"deviceSentMessage",
+			"documentMessage",
+			"extendedTextMessage",
+			"futureProofMessage",
 			"groupInviteMessage",
+			"handshakeMessage",
+			"highlyStructuredMessage",
+			"imageMessage",
+			"interactiveMessage",
+			"interactiveResponseMessage",
+			"invoiceMessage",
+			"keepInChatMessage",
+			"listMessage",
+			"listResponseMessage",
+			"liveLocationMessage",
+			"locationMessage",
+			"nativeFlowMessage",
+			"nativeFlowResponseMessage",
+			"orderMessage",
+			"paymentInviteMessage",
+			"pollCreationMessage",
+			"pollUpdateMessage",
+			"pollVoteMessage",
+			"productMessage",
+			"protocolMessage",
+			"reactionMessage",
+			"requestPaymentMessage",
+			"sendPaymentMessage",
+			"senderKeyDistributionMessage",
+			"shopMessage",
+			"stickerMessage",
+			"stickerSyncRMRMessage",
+			"syncActionMessage",
+			"templateButtonReplyMessage",
+			"templateMessage",
+			"videoMessage",
 		];
 		const bodyQuoted = typeMessage.includes(isSame(type, "extendedTextMessage") && mMediaData ? Object.keys(mMediaData.message ? mMediaData.message : { CLIENT: "m" })[0] : "none")
 			? isSame(typeQuoted, "conversation")
@@ -394,23 +420,23 @@ export const reassign = async (m, client, store, search, deleted) => {
 	}
 };
 
-const caching = async (clients, id, store) => {
+const caching = async (clients, id) => {
 	await new Promise(async (resolve) => {
 		const groupMetadata = (await clients[botNum].groupMetadata(id).catch((e) => undefined)) || {};
 		cache.metadata.set(id, groupMetadata);
 		resolve();
 	});
-	if (isFirstConnection) await startLoopie(clients, store);
+	if (isFirstConnection) await startLoopie(clients);
 };
 
-const startLoopie = async (clients, store) => {
+const startLoopie = async (clients) => {
 	setInterval(async () => {
 		const data = cache.metadata.values();
 		const dataBlock = await clients[botNum].fetchBlocklist();
 		cache.blocklist = dataBlock;
 		for (const d of data) {
 			if (d.id) {
-				const groupMetadata = store.fetchGroupMetadata(d.id, clients[botNum]) || {};
+				const groupMetadata = (await clients[botNum].groupMetadata(d.id)) || {};
 				if (groupMetadata.id) {
 					cache.metadata.set(groupMetadata.id, groupMetadata);
 				}

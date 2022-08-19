@@ -7,3 +7,4 @@ export { checkWin, fillGrid, makePuzzle, revealOneElement, solvePuzzle, stringif
 export { startTG } from "./tebakGambar.js";
 export { default as TicTacToe, DeleteTicTacToeSession, GetTicTacToeSession } from "./ticTacToe.js";
 export { Werewolf } from "./werewolf.js";
+export { Wordle } from "./wordle.js";

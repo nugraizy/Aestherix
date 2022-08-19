@@ -210,6 +210,7 @@ export default {
 		(await import("../Game Handlers/akinator.js")).default.handler(message, client, message);
 		(await import("../Game Handlers/tebakGambar.js")).default.handler(message, client, message);
 		(await import("../Game Handlers/sambungKata.js")).default.handler(message, client, message);
+		(await import("../Game Handlers/wordle.js")).default.handler(message, client, message);
 		(await import("./anonymousMessage.js")).default.handler(message, client);
 		(await import("../Misc/groupURL.js")).default.handler(message, client);
 		(await import("../Misc/antiNSFW.js")).default.handler(message, client, message);

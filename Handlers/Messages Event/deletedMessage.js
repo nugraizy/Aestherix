@@ -20,12 +20,12 @@ export default {
 			if (from == "status@broadcast") return;
 			if (type == "protocolMessage" || type == "senderKeyDistributionMessage" || !type) return;
 			if (
-				CheckIntervals(intervals["url"].get(sender)) !== 0 &&
-				CheckIntervals(intervals["url"].get(sender).get(from)) !== 0 &&
-				CheckIntervals(intervals["url"].get(sender).get(from)).id == message.message.key.id
+				CheckIntervals(intervals.url.get(sender)) !== 0 &&
+				CheckIntervals(intervals.url.get(sender).get(from)) !== 0 &&
+				CheckIntervals(intervals.url.get(sender).get(from)).id == message.message.key.id
 			) {
 				await client[botNum].reply({ from, quoted: message }, "Good. Do not send URLs next time or i will kick you.");
-				DeleteIntervals(intervals["url"].get(sender).get(from), intervals["url"].get(sender), from);
+				DeleteIntervals(intervals.url.get(sender).get(from), intervals.url.get(sender), from);
 				return;
 			}
 			const stats = message[from]?.antiDelete == "enable" ? true : fetches ? true : false;
@@ -37,9 +37,12 @@ export default {
 					},
 				};
 
-				const mentioningReply = messages[type].contextInfo && messages[type].contextInfo.participant ? messages[type].contextInfo.participant.toString() : "";
-				const replyParticipants = messages[type].contextInfo && messages[type].contextInfo.participant ? messages[type].contextInfo.participant.split("@")[0] : "";
-				options.contextInfo.mentionedJid.push(sender, mentioning, mentioningReply);
+				const mentioningReply = messages[type].contextInfo?.participant ? messages[type].contextInfo.participant.toString() : "";
+				const replyParticipants = messages[type].contextInfo?.participant ? messages[type].contextInfo.participant.split("@")[0] : "";
+				options.contextInfo.mentionedJid.push(sender, ...mentioning);
+				if (mentioningReply !== "") {
+					options.contextInfo.mentionedJid.push(mentioningReply);
+				}
 
 				let typeQuoted = null;
 				const captionReply = `\nMessage Replied to : ${replyParticipants}\n`;
@@ -130,7 +133,7 @@ Time : ${moment.unix(timeStamp).format("HH:mm:ss DD/MM/YYYY")}
 Size : ${fileSize}
 Caption : ${body ? body : "Unknown"}${quotedMessage}
 `.trim();
-							await client[botNum].sendMessage(from, { image: readBuffer(image), caption: stringDeleted, mentions: options.contextInfo.mentionedJid }, options);
+							await client[botNum].sendMessage(from, { image: readBuffer(video), caption: stringDeleted, mention: options.contextInfo.mentionedJid }, options);
 							unlinkFile(image);
 						}
 						break;
@@ -149,7 +152,7 @@ Time : ${moment.unix(timeStamp).format("HH:mm:ss DD/MM/YYYY")}
 Size : ${fileSize}
 Caption : ${body ? body : "Unknown"}${quotedMessage}
 `.trim();
-							await client[botNum].sendMessage(from, { video: readBuffer(video), caption: stringDeleted, mentions: options.contextInfo.mentionedJid }, options);
+							await client[botNum].sendMessage(from, { video: readBuffer(video), caption: stringDeleted, mention: options.contextInfo.mentionedJid }, options);
 							unlinkFile(video);
 						}
 						break;
