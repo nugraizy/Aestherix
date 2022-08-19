@@ -48,7 +48,7 @@ Total Media : ${dataImage.pageCount}`,
 							{
 								image: new Buffer.from(images, "base64"),
 								caption: "\t",
-								templateButtons: [{ urlButton: { displayText: "Manga Source", url: `https://www.pixiv.net/en/artworks/${id}` } }],
+								templateButtons: [{ urlButton: { displayText: "Manga Source", url: `https://www.pixiv.net/en/artworks/${dataImage.id}` } }],
 								footer: "\t",
 							},
 							{ quoted: message },

@@ -141,7 +141,7 @@ const start = async () => {
 	const CONNECTION_CONFIG = {
 		printQRInTerminal: true,
 		version: DEFAULT_CONNECTION_CONFIG.version,
-		logger: P({ level: OPTIONS.trace ? "trace" : OPTIONS.debug ? "debug" : "fatal" }),
+		logger: P({ level: OPTIONS.trace ? "trace" : OPTIONS.debugMode ? "debug" : "fatal" }),
 		auth: state,
 		markOnlineOnConnect: false,
 		syncFullHistory: true,
@@ -176,6 +176,7 @@ const start = async () => {
 			global.client = {};
 			global.botNum = Client.user.id;
 			client[Client.user.id] = Client;
+			(await import("./Helper/Modules/assignFunction.js")).assign(client);
 			successSpinner("Connecting", { text: "Connected to WASocket" });
 			INFOLOG(color(center(`Bot Version  ${romanize(readJSON("./package.json").version)}\n\n`, stdout.columns), "#9f53ea"));
 		}

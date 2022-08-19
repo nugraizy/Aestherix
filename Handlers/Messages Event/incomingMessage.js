@@ -1,4 +1,3 @@
-import { delay } from "@adiwajshing/baileys";
 import moment from "moment-timezone";
 import similarity from "similarity";
 import { log } from "util";

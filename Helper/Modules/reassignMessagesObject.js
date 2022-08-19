@@ -38,6 +38,7 @@ export const reassign = async (m, client, store, search, deleted) => {
 				botNumber,
 				ownerNumbers: [SETTINGS.owner_number, ...SETTINGS.team_number, botNumber],
 			};
+			isFirstConnection = false;
 		}
 		const { blocklist } = cache;
 		const isBlocked = blocklist?.includes(sender);
@@ -318,15 +319,6 @@ export const reassign = async (m, client, store, search, deleted) => {
 				: {};
 		const typeSticker = ["imageMessage", "videoMessage", "stickerMessage"];
 		const stickerAble = typeSticker.includes(typeQuoted);
-
-		if (isFirstConnection) {
-			const clients = (await import("./assignFunction.js")).assign(client);
-			client[botNum] = {
-				...client[botNum],
-				...clients,
-			};
-			isFirstConnection = false;
-		}
 
 		return {
 			message: m,

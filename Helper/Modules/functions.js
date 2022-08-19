@@ -18,7 +18,7 @@ export const fetchJSON = async (_, __) => {
 };
 
 export const fetchBUFFER = async (_, __) => {
-	return await (await fetch(_, __)).text();
+	return await (await fetch(_, __)).arrayBuffer();
 };
 
 export const cheerioLOAD = (html) => {

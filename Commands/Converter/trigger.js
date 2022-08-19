@@ -48,7 +48,7 @@ export default {
 							.capitalize()}`,
 					);
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Triggering`, "#01cdfe")} ${color(prettyNumber, "#ff71ce")}`);
-				const buffer = client[botNum].downloadMediaMessage(mediaData);
+				const buffer = await client[botNum].downloadMediaMessage(mediaData);
 				const result = await trigger(buffer, sender, options);
 				if (options.output == "sticker") client[botNum].sendMessage(from, { sticker: Buffer.from(result, "base64") });
 				else client[botNum].sendMessage(from, { video: Buffer.from(result, "base64"), mimetype: "video/mp4" });
