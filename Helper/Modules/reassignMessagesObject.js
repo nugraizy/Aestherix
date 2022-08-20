@@ -45,10 +45,15 @@ export const reassign = async (m, client, store, search, deleted) => {
 		const groupMetadata = isGroup ? cache.metadata.get(from) : {};
 		const isGroupOwner = isGroup ? (isSame(groupMetadata?.owner, sender) ? true : false) : false;
 		if (isBlocked) return;
-		const prettyNumber =
-			PhoneNumber(`+${sender?.replace("@s.whatsapp.net", "")}`)?.getNumber("international") ??
-			PhoneNumber(`+${m?.key?.participant?.replace("@s.whatsapp.net", "")}`)?.getNumber("international") ??
-			"No Data";
+		if (!cache.users.has(sender)) {
+			cache.users.set(sender, {
+				prettyNumber:
+					PhoneNumber(`+${sender?.replace("@s.whatsapp.net", "")}`)?.getNumber("international") ??
+					PhoneNumber(`+${m?.key?.participant?.replace("@s.whatsapp.net", "")}`)?.getNumber("international") ??
+					"No Data",
+			});
+		}
+		const prettyNumber = cache.users.get(sender)?.prettyNumber;
 		const groupName = isGroup ? groupMetadata?.subject : NO_DATA;
 		const groupDescription = isGroup ? groupMetadata?.desc?.toString() : NO_DATA;
 		const groupId = isGroup ? groupMetadata?.id : NO_DATA;
@@ -68,7 +73,7 @@ export const reassign = async (m, client, store, search, deleted) => {
 			}
 		}
 		const content = JSON.stringify(m?.message, null, 2);
-		const pushname = m?.pushName ? m?.pushName.trim() : store.contacts?.[sender]?.verifiedName || store.contacts?.[sender]?.notify || prettyNumber;
+		const pushname = m?.pushName ? m?.pushName.trim() : cache.users.get(sender).name || store.contacts?.[sender]?.verifiedName || store.contacts?.[sender]?.notify || prettyNumber;
 		const { botNumber, ownerNumbers } = cache;
 		const isOwner = ownerNumbers.includes(sender);
 		const timeStamp = m?.messageTimestamp || Date.now();
@@ -103,10 +108,7 @@ export const reassign = async (m, client, store, search, deleted) => {
 			type = Object.keys(m.message?.ephemeralMessage?.message);
 			mText = m.message.ephemeralMessage;
 		}
-		const rawParticipants = groupMetadata?.participants ? groupMetadata?.participants : [];
-		const adminGroups = rawParticipants?.filter((v) => isNotNull(v.admin)).map((v) => v.id);
-		const participantsGroups = rawParticipants?.map((v) => v.id);
-		const ownerGroups = rawParticipants?.find((v) => v.admin == "superadmin")?.id || null;
+		const { rawParticipants, adminGroups, participantsGroups, ownerGroups } = groupMetadata;
 		const isAdmin = adminGroups?.includes(sender);
 		const isBotAdmin = adminGroups?.includes(botNumber);
 		const isDisappearingChat = m.message?.[type]?.contextInfo?.expiration !== 0;
@@ -428,7 +430,14 @@ const compare = (obj1, obj2) => {
 const caching = async (clients, id) => {
 	await new Promise(async (resolve) => {
 		const groupMetadata = (await clients[botNum].groupMetadata(id).catch((e) => undefined)) || {};
-		cache.metadata.set(id, groupMetadata);
+		const partc = groupMetadata.participant;
+		cache.metadata.set(id, {
+			...groupMetadata,
+			rawParticipants: partc || [],
+			adminGroups: partc?.filter((v) => isNotNull(v.admin))?.map((v) => v.id),
+			participantsGroups: partc?.map((v) => v.id),
+			ownerGroups: partc?.find((v) => v.admin == "superadmin")?.id || null,
+		});
 		resolve();
 	});
 	if (isFirstConnection) await startLoopie(clients);
@@ -445,7 +454,14 @@ const startLoopie = async (clients) => {
 			if (d.id) {
 				const groupMetadata = (await clients[botNum].groupMetadata(d.id)) || {};
 				if (groupMetadata.id && !compare(groupMetadata, d)) {
-					cache.metadata.set(groupMetadata.id, groupMetadata);
+					const partc = groupMetadata.participant;
+					cache.metadata.set(groupMetadata.id, {
+						...groupMetadata,
+						rawParticipants: partc || [],
+						adminGroups: partc?.filter((v) => isNotNull(v.admin))?.map((v) => v.id),
+						participantsGroups: partc?.map((v) => v.id),
+						ownerGroups: partc?.find((v) => v.admin == "superadmin")?.id || null,
+					});
 				}
 			}
 		}
