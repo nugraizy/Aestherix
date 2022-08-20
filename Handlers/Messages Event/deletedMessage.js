@@ -133,7 +133,7 @@ Time : ${moment.unix(timeStamp).format("HH:mm:ss DD/MM/YYYY")}
 Size : ${fileSize}
 Caption : ${body ? body : "Unknown"}${quotedMessage}
 `.trim();
-							await client[botNum].sendMessage(from, { image: readBuffer(video), caption: stringDeleted, mention: options.contextInfo.mentionedJid }, options);
+							await client[botNum].sendMessage(from, { image: readBuffer(image), caption: stringDeleted, mention: options.contextInfo.mentionedJid }, options);
 							unlinkFile(image);
 						}
 						break;
