@@ -453,8 +453,12 @@ const startLoopie = async (clients) => {
 		for (const d of data) {
 			if (d.id) {
 				const groupMetadata = (await clients[botNum].groupMetadata(d.id)) || {};
+				const partc = groupMetadata.participants;
+				groupMetadata.rawParticipants = partc || [];
+				groupMetadata.adminGroups = partc?.filter((v) => isNotNull(v.admin))?.map((v) => v.id);
+				groupMetadata.participantsGroups = partc?.map((v) => v.id);
+				groupMetadata.ownerGroups = partc?.find((v) => v.admin == "superadmin")?.id || null;
 				if (groupMetadata.id && !compare(groupMetadata, d)) {
-					const partc = groupMetadata.participants;
 					cache.metadata.set(groupMetadata.id, {
 						...groupMetadata,
 						rawParticipants: partc || [],
