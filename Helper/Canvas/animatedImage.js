@@ -1,6 +1,7 @@
 import Canvas from "canvas";
 import Wrap from "canvas-text-wrapper";
 import { exec } from "child_process";
+import emojiReg from "emoji-regex";
 import { readFileSync, unlinkSync, writeFileSync } from "fs";
 import moment from "moment-timezone";
 import path from "path";
@@ -29,7 +30,12 @@ export const attp = (sender, texts, colored, fonts) =>
 			ctx.shadowOffsetY = 1;
 			ctx.shadowColor = reassignColor;
 			ctx.shadowBlur = 2;
-			CanvasTextWrapper(canvas, texts, { font: `56px ${fonts}`, textAlign: "center", verticalAlign: "middle", sizeToFill: true /* paddingX: 20 */ });
+			CanvasTextWrapper(canvas, texts.trim().replace(new RegExp(emojiReg(), "g"), ""), {
+				font: `56px ${fonts}`,
+				textAlign: "center",
+				verticalAlign: "middle",
+				sizeToFill: true /* paddingX: 20 */,
+			});
 			const buffer = canvas.toDataURL("image/png").replace(/^data:image\/png;base64,/, "");
 			const saved = saveImages(new Buffer.from(buffer, "base64"), i);
 			bufferContainer.push(saved);

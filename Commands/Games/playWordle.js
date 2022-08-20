@@ -13,7 +13,7 @@ export default {
 	status: "enable",
 	async run({ from, message, query, args, sender, prettyNumber }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!query) return client.sendText(from, "Please specify arguments.\n\nUsage: !wordle <play/exit/info>");
+		if (!query) return client[botNum].reply({ from, quoted: message }, "Please specify arguments.\n\nUsage: !wordle <play/exit/info>");
 		if (args[1] == "play") {
 			if (games.wordle.has(sender)) {
 				return await client[botNum].reply({ from, quoted: wordle.messages }, "You are already playing Wordle.");

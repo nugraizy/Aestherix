@@ -169,7 +169,7 @@ export default {
 								client[botNum].reply({ from: message.from, quoted: message.message }, help);
 								continue;
 							}
-							if (Tempcmds.category == "Games" && message.isGroup && !message.isAdmin && message[message.from].games == "disable")
+							if (Tempcmds.category == "Games" && message.isGroup && !message.isAdmin && !message.isOwner && message[message.from].games == "disable")
 								return client[botNum].reply({ from: message.from, quoted: message.message }, "Mode games belum dihidupkan");
 							if (Tempcmds.category == "Moderation" && message.isGroup && !message.isAdmin && !message.isOwner)
 								return client[botNum].reply({ from: message.from, quoted: message.message }, "Kamu bukan admin");
@@ -181,7 +181,7 @@ export default {
 							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).has(Tempcmds.name)) user.cooldown.get(message.sender).delete(Tempcmds.name);
 							let str = "Something went wrong.\nPlease send this error stack to the owner. :\n\n";
 							str += `Type : ${err.name}\n`;
-							str += `Message : ${err.message}`;
+							str += `Message : ${err.message}\n`;
 							str += `Stack Trace : ${err.stack.substr(0, 20)}...`;
 							await client[botNum].sendMessage(message.from, {
 								text: str,
