@@ -10,13 +10,22 @@ export default {
 	async run({ isAdmin, isBotAdmin, isOwner, from, message }, client, store) {
 		if (!isAdmin && !isOwner) return client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
 		if (!isBotAdmin) return client[botNum].reply({ from, quoted: message }, "Bot is not admin, Please promote admin before using moderation commands.");
-		await client[botNum].reply(
-			{ from, quoted: message },
-			`Absolute URL : https://chat.whatsapp.com/${(await client[botNum].updateGroup(from, undefined, "RETRIEVE"))[0]}\nRAW : ${
-				(
-					await client[botNum].updateGroup(from, undefined, "RETRIEVE")
-				)[0]
-			}`,
+		await client[botNum].sendMessage(
+			from,
+			{
+				text: "Succeeded to retrieve the group's invitation URL.",
+				footer: "Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪",
+				templateButtons: [
+					{
+						urlButton: {
+							displayText: "Copy URL",
+							url: `https://www.whatsapp.com/otp/copy/https://chat.whatsapp.com/${(await client[botNum].updateGroup(from, undefined, "RETRIEVE"))[0]}`,
+						},
+					},
+				],
+				headerType: 1,
+			},
+			{ quoted: message },
 		);
 	},
 };

@@ -430,7 +430,7 @@ const compare = (obj1, obj2) => {
 const caching = async (clients, id) => {
 	await new Promise(async (resolve) => {
 		const groupMetadata = (await clients[botNum].groupMetadata(id).catch((e) => undefined)) || {};
-		const partc = groupMetadata.participant;
+		const partc = groupMetadata.participants;
 		cache.metadata.set(id, {
 			...groupMetadata,
 			rawParticipants: partc || [],
@@ -454,7 +454,7 @@ const startLoopie = async (clients) => {
 			if (d.id) {
 				const groupMetadata = (await clients[botNum].groupMetadata(d.id)) || {};
 				if (groupMetadata.id && !compare(groupMetadata, d)) {
-					const partc = groupMetadata.participant;
+					const partc = groupMetadata.participants;
 					cache.metadata.set(groupMetadata.id, {
 						...groupMetadata,
 						rawParticipants: partc || [],

@@ -7,14 +7,26 @@ export default {
 	cooldown: 2,
 	limit: 2,
 	status: "enable",
-	async run({ isAdmin, isBotAdmin, isOwner, from, query, type, body, message }, client, store) {
+	async run({ isAdmin, isBotAdmin, isOwner, from, message }, client, store) {
 		if (!isAdmin && !isOwner) return client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
 		if (!isBotAdmin) return client[botNum].reply({ from, quoted: message }, "Bot is not admin, Please promote admin before using moderation commands.");
 		const code = (await client[botNum].updateGroup(from, undefined, "REVOKE"))[0];
-		const buttons = [{ buttonId: `.retrieve Absolute URL : https://chat.whatsapp.com/${code}\nRAW : ${code}`, buttonText: { displayText: "SHOW URL" }, type: 1 }];
-		if (query && type == "buttonsResponseMessage") {
-			return await client[botNum].reply({ from, quoted: message }, body);
-		}
-		await client[botNum].buttonText(from, "URL is successfully revoked.", "Made by nanda", buttons, { quoted: message });
+		await client[botNum].sendMessage(
+			from,
+			{
+				text: "Succeeded to revoke the group's invitation URL.",
+				footer: "Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪",
+				templateButtons: [
+					{
+						urlButton: {
+							displayText: "Copy New URL",
+							url: `https://www.whatsapp.com/otp/copy/https://chat.whatsapp.com/${code}`,
+						},
+					},
+				],
+				headerType: 1,
+			},
+			{ quoted: message },
+		);
 	},
 };
