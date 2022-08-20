@@ -66,8 +66,25 @@ export default {
 				: client[botNum].sendMessage(from, { text: `${join.message}\n${join.mentions.map((v) => `@${v.split("@")[0]}`).join("\n")}`, mentions: join.mentions }, { quoted: message });
 		} else if (args[1] == "newGame") {
 			const werewolf = new Werewolf(sender, from, client);
-			const newGame = werewolf.setNewGame();
-			return client[botNum].reply({ from, quoted: message }, newGame.message);
+			if (werewolf.getDataGame(from)) {
+				await client[botNum].sendMessage(from, {
+					text: "\t",
+					title: "Sesi sudah ada di group ini. Pilih join untuk bergabung ke permainan",
+					footer: `Made by Void Bot. Powered by Hidden Finder`,
+					buttonText: "Open list",
+					sections: row,
+				});
+				return;
+			}
+			new Werewolf(sender, from, client, pushname, true);
+			const caption = "Permainan Werewolf berhasil dibuat.";
+			await client[botNum].sendMessage(from, {
+				text: "\t",
+				buttonText: "Open list",
+				footer: `Made by Void Bot. Powered by Hidden Finder`,
+				title: `${caption}\nPilih salah satu.`,
+				sections: row,
+			});
 		} else if (args[1] == "exit") {
 			const werewolf = new Werewolf(sender, from, client);
 			const exit = werewolf.exitGame(sender, from);
