@@ -87,95 +87,65 @@ export default {
 				if (player.role == "villager") {
 					await client[botNum].sendMessage(player.id, { text: player.dialogue });
 				} else if (player.role == "werewolf") {
-					await client[botNum].relayMessage(
-						player.id,
-						{
-							listMessage: {
-								buttonText: "Open list",
-								description: `Kamu adalah Serigala. Dan saat ini merupakan waktu yang tepat untuk membunuh seseorang.\nPilih salah satu player.`,
-								footerText: "\t",
-								listType: 1,
-								sections: Array(start.data.playersData.length)
-									.fill(undefined)
-									.map((v, i) => {
-										return { rows: [{ title: `KILL ${start.data.playersData[i].name}`, rowId: `.ww kill ${start.data.playersData[i].id} ${from}` }], title: `VOID BOT | Werewolf Games` };
-									}),
-							},
-						},
-						{ messageId: generateMessageID() },
-					);
+					await client[botNum].sendMessage(player.id, {
+						buttonText: "Open list",
+						footer: `Made by Void Bot. Powered by Hidden Finder`,
+						title: "Kamu adalah Serigala. Dan saat ini merupakan waktu yang tepat untuk membunuh seseorang.\nPilih salah satu player.",
+						text: "\t",
+						sections: Array(start.data.playersData.length)
+							.fill(undefined)
+							.map((v, i) => {
+								return { rows: [{ title: `KILL ${start.data.playersData[i].name}`, rowId: `.ww kill ${start.data.playersData[i].id} ${from}` }], title: `VOID BOT | Werewolf Games` };
+							}),
+					});
 				} else if (player.role == "seer") {
-					await client[botNum].relayMessage(
-						player.id,
-						{
-							listMessage: {
-								buttonText: "Open list",
-								description: `Kamu adalah Penerawang. Dan saat ini merupakan waktu yang tepat untuk menerawang seseorang.\nPilih salah satu player.`,
-								footerText: "\t",
-								listType: 1,
-								sections: Array(start.data.playersData.length)
-									.fill(undefined)
-									.map((v, i) => {
-										return { rows: [{ title: `TERAWANG ${start.data.playersData[i].name}`, rowId: `.ww seer ${start.data.playersData[i].id} ${from}` }], title: `VOID BOT | Werewolf Games` };
-									}),
-							},
-						},
-						{ messageId: generateMessageID() },
-					);
+					await client[botNum].sendMessage(player.id, {
+						buttonText: "Open list",
+						footer: `Made by Void Bot. Powered by Hidden Finder`,
+						title: `Kamu adalah Penerawang. Dan saat ini merupakan waktu yang tepat untuk menerawang seseorang.\nPilih salah satu player.`,
+						text: "\t",
+						sections: Array(start.data.playersData.length)
+							.fill(undefined)
+							.map((v, i) => {
+								return { rows: [{ title: `TERAWANG ${start.data.playersData[i].name}`, rowId: `.ww seer ${start.data.playersData[i].id} ${from}` }], title: `VOID BOT | Werewolf Games` };
+							}),
+					});
 				} else if (player.role == "guard") {
-					await client[botNum].relayMessage(
-						player.id,
-						{
-							listMessage: {
-								buttonText: "Open list",
-								description: `Kamu adalah Penjaga. Dan saat ini merupakan waktu yang tepat untuk memjaga seseorang.\nPilih salah satu player.`,
-								footerText: "\t",
-								listType: 1,
-								sections: Array(start.data.playersData.length)
-									.fill(undefined)
-									.map((v, i) => {
-										return { rows: [{ title: `JAGA ${start.data.playersData[i].name}`, rowId: `.ww guard ${start.data.playersData[i].id} ${from}` }], title: `VOID BOT | Werewolf Games` };
-									}),
-							},
-						},
-						{ messageId: generateMessageID() },
-					);
+					await client[botNum].sendMessage(player.id, {
+						buttonText: "Open list",
+						footer: `Made by Void Bot. Powered by Hidden Finder`,
+						title: `Kamu adalah Penjaga. Dan saat ini merupakan waktu yang tepat untuk memjaga seseorang.\nPilih salah satu player.`,
+						text: "\t",
+						sections: Array(start.data.playersData.length)
+							.fill(undefined)
+							.map((v, i) => {
+								return { rows: [{ title: `JAGA ${start.data.playersData[i].name}`, rowId: `.ww guard ${start.data.playersData[i].id} ${from}` }], title: `VOID BOT | Werewolf Games` };
+							}),
+					});
 				}
 			}
 			start.data.startGameCycle(from, start.data.gameTimeCycle);
 		} else {
 			const werewolfs = new Werewolf(sender, from, client);
 			if (werewolfs.getDataGame(from)) {
-				await client[botNum].relayMessage(
-					from,
-					{
-						listMessage: {
-							buttonText: "Open list",
-							description: "Sesi sudah ada di group ini. Pilih join untuk bergabung ke permainan",
-							footerText: "\t",
-							listType: 1,
-							sections: row,
-						},
-					},
-					{ messageId: generateMessageID() },
-				);
+				await client[botNum].sendMessage(from, {
+					text: "\t",
+					title: "Sesi sudah ada di group ini. Pilih join untuk bergabung ke permainan",
+					footer: `Made by Void Bot. Powered by Hidden Finder`,
+					buttonText: "Open list",
+					sections: row,
+				});
 				return;
 			}
-			const werewolf = new Werewolf(sender, from, client, pushname, true);
+			new Werewolf(sender, from, client, pushname, true);
 			const caption = "Permainan Werewolf berhasil dibuat.";
-			await client[botNum].relayMessage(
-				from,
-				{
-					listMessage: {
-						buttonText: "Open list",
-						description: `${caption}\nPilih salah satu.`,
-						footerText: "\t",
-						listType: 1,
-						sections: row,
-					},
-				},
-				{ messageId: generateMessageID() },
-			);
+			await client[botNum].sendMessage(from, {
+				text: "\t",
+				buttonText: "Open list",
+				footer: `Made by Void Bot. Powered by Hidden Finder`,
+				title: `${caption}\nPilih salah satu.`,
+				sections: row,
+			});
 		}
 	},
 };

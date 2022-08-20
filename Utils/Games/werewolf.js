@@ -12,6 +12,7 @@ const WEREWOLF_SCRIPTING = {
 		exit: "Kamu berhasil keluar dari permainan Werewolf!",
 		delete: "Sukses menghapus sesi permainan Werewolf!",
 		guarded: "Sukses menjaga {0}. Ia akan tidur nyenyak malam ini!",
+		exitAndDelete: "Karena pemain di sesi ini tidak ada, Maka permainan otomatis dibubarkan.",
 	},
 	error: {
 		afk: [
@@ -216,10 +217,16 @@ export class Werewolf {
 			if (player == -1) return { error: true, message: WEREWOLF_SCRIPTING.error.notJoined };
 			if (data.gameStarted) return { error: true, message: WEREWOLF_SCRIPTING.error.gameStarted };
 			data.playersData.splice(player, 1);
+			if (data.playersData.length === 0) {
+				this.deleteGame(playerId);
+				return {
+					error: false,
+					message: WEREWOLF_SCRIPTING.success.exitAndDelete,
+				};
+			}
 			return {
 				error: false,
 				message: WEREWOLF_SCRIPTING.success.exit,
-				mentions: [data.playersData[player].id],
 			};
 		};
 	}
