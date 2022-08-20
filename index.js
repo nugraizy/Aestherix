@@ -11,6 +11,7 @@ global.intervals = {};
 global.anonymous = new Map();
 global.cache = {};
 cache.metadata = new Map();
+cache.settings = new Map();
 global.packname = "Made by Void";
 global.author = "Powered by Hidden Finder";
 intervals.tebakGambar = new Map();

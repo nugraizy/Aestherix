@@ -53,17 +53,18 @@ export const reassign = async (m, client, store, search, deleted) => {
 		const groupDescription = isGroup ? groupMetadata?.desc?.toString() : NO_DATA;
 		const groupId = isGroup ? groupMetadata?.id : NO_DATA;
 		if (isGroup) {
-			if (typeof checkJSON(from) == "boolean") {
+			if (!cache.settings.has(from)) {
 				pushDefaultSettings(from, groupName, groupDescription);
-				groupSettings = checkJSON(from);
+				cache.settings.set(from, checkJSON(from));
+				groupSettings = cache.settings.get(from);
 			} else if ("GROUP_CHANGE_SUBJECT" == m.messageStubType) {
-				groupSettings = checkJSON(from);
+				groupSettings = cache.settings.get(from);
 				updateSettings("groupName", groupName, from);
 			} else if ("GROUP_CHANGE_DESCRIPTION" == m.messageStubType) {
-				groupSettings = checkJSON(from);
+				groupSettings = cache.settings.get(from);
 				updateSettings("groupDescription", groupDescription, from);
 			} else {
-				groupSettings = checkJSON(from);
+				groupSettings = cache.settings.get(from);
 			}
 		}
 		const content = JSON.stringify(m?.message, null, 2);
@@ -420,6 +421,10 @@ export const reassign = async (m, client, store, search, deleted) => {
 	}
 };
 
+const compare = (obj1, obj2) => {
+	return JSON.stringify(obj1) === JSON.stringify(obj2);
+};
+
 const caching = async (clients, id) => {
 	await new Promise(async (resolve) => {
 		const groupMetadata = (await clients[botNum].groupMetadata(id).catch((e) => undefined)) || {};
@@ -433,14 +438,16 @@ const startLoopie = async (clients) => {
 	setInterval(async () => {
 		const data = cache.metadata.values();
 		const dataBlock = await clients[botNum].fetchBlocklist();
-		cache.blocklist = dataBlock;
+		if (!compare(dataBlock, cache.blocklist)) {
+			cache.blocklist = dataBlock;
+		}
 		for (const d of data) {
 			if (d.id) {
 				const groupMetadata = (await clients[botNum].groupMetadata(d.id)) || {};
-				if (groupMetadata.id) {
+				if (groupMetadata.id && !compare(groupMetadata, d)) {
 					cache.metadata.set(groupMetadata.id, groupMetadata);
 				}
 			}
 		}
-	}, 10000);
+	}, 3000);
 };
