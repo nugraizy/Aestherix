@@ -2,9 +2,9 @@ export default {
 	async handler({ from, isAdmin, isGroup, body, message, sender }, client, settings) {
 		const play = async () => {
 			const wordle = games.wordle.get(sender);
-			if (wordle.isPlaying) {
+			if (wordle?.isPlaying()) {
 				const guess = wordle.checkInput(body);
-				if (guess.isWin) {
+				if (guess?.isWin) {
 					return await client[botNum].sendMessage(
 						from,
 						{
