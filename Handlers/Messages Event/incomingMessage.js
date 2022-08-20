@@ -179,10 +179,20 @@ export default {
 						} catch (err) {
 							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) user.cooldown.get(message.sender).requests = false;
 							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).has(Tempcmds.name)) user.cooldown.get(message.sender).delete(Tempcmds.name);
-							let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
+							let str = "Something went wrong.\nPlease send this error stack to the owner. :\n\n";
 							str += `Type : ${err.name}\n`;
 							str += `Message : ${err.message}`;
-							await client[botNum].reply({ from: message.from, quoted: message.message }, str);
+							str += `Stack Trace : ${err.stack.substr(0, 20)}...`;
+							await client[botNum].sendMessage(message.from, {
+								text: str,
+								footer: "Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪",
+								templateButtons: [
+									{ urlButton: { displayText: "Copy Stack Trace", url: `https://www.whatsapp.com/otp/copy/${err.stack}` } },
+									{ urlButton: { displayText: "Contact Owner", url: `https://wa.me/${message.settings.owner_number}?text=hey%20owner` } },
+									{ quickReplyButton: { displayText: "Report", id: `.report ${err.stack}` } },
+								],
+								headerType: 1,
+							});
 							log(err);
 						}
 					}

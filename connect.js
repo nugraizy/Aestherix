@@ -425,12 +425,12 @@ async function watchFile(module) {
 			INFOLOG(`[${color(time, "cyan")}]`, color(`${modules.split("/").reverse()[0]} has been changed`, "#9f53ea"));
 			await reloadModule(module, false);
 		} else {
-			await reloadModule(module, true);
+			await reloadModule(module, true, modules);
 		}
 	});
 }
 
-async function reloadModule(module, isNewFile) {
+async function reloadModule(module, isNewFile, newFilePath) {
 	if (isNewFile) {
 		try {
 			const time = moment().format("HH:mm:ss DD/MM");
@@ -438,17 +438,17 @@ async function reloadModule(module, isNewFile) {
 			const afterCommands = commands.filter((v) => !commandsPath.includes(path.join(__dirname, v)))[0];
 			try {
 				commandsPath.push(path.join(__dirname, afterCommands));
-				commandsPath.splice(commandsPath.indexOf(module), 1);
+				commandsPath.splice(commandsPath.indexOf(newFilePath), 1);
 				const cmd = (await import(path.join(__dirname, afterCommands))).default;
 				cmds.commands.set(cmd.name, cmd);
 				watchFile(path.join(__dirname, afterCommands), cmd.name);
 			} catch (e) {
-				commandsPath.splice(commandsPath.indexOf(module), 1);
-				cmds.commands.delete(Array.from(cmds.commands.values()).find((v) => v.pathname == module).name);
+				commandsPath.splice(commandsPath.indexOf(newFilePath), 1);
+				cmds.commands.delete(Array.from(cmds.commands.values()).find((v) => v.pathname == newFilePath).name);
 				fs.unwatchFile(module);
-				return ERRLOG(`[${color(time, "cyan")}]`, color(`${module.split("/").reverse()[0]} is deleted`, "red"));
+				return ERRLOG(`[${color(time, "cyan")}]`, color(`${newFilePath.split("/").reverse()[0]} is deleted`, "red"));
 			} finally {
-				INFOLOG(`[${color(time, "cyan")}]`, color(`${module.split("/").reverse()[0]} has been renamed to ${afterCommands.split("/").reverse()[0]}`, "#9f53ea"));
+				INFOLOG(`[${color(time, "cyan")}]`, color(`${newFilePath.split("/").reverse()[0]} has been renamed to ${afterCommands.split("/").reverse()[0]}`, "#9f53ea"));
 			}
 		} catch (e) {
 			log(e);

@@ -9,7 +9,7 @@ export default {
 	cooldown: 10,
 	limit: 5,
 	status: "enable",
-	async run({ from, message }, client) {
+	async run({ from }, client) {
 		const capt = `Bot Name : Void
 Total Commands : ${cmds.commands.size}
 Bot Version : ${readJSON("./package.json").version.toUpperCase()}

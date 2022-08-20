@@ -1,4 +1,3 @@
-import { generateMessageID } from "@adiwajshing/baileys";
 import { readFileSync } from "fs";
 const STATUS = "status@broadcast";
 const STATUS_PATH = `./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`;
@@ -57,18 +56,12 @@ export default {
 			caption += `Images : ${value[1].stories?.imageMessage?.length ?? 0}\n`;
 			caption += `Videos : ${value[1].stories?.videoMessage?.length ?? 0}\n\n`;
 		}
-		await client[botNum].relayMessage(
-			from,
-			{
-				listMessage: {
-					buttonText: " • Fetch WhatsApp Story",
-					description: caption.trim(),
-					footerText: "if you can't click 'read more' : click it first then reply the list, then click on the 'x' mark on your reply.",
-					listType: 1,
-					sections: rows,
-				},
-			},
-			{ messageId: generateMessageID() },
-		);
+		await client[botNum].sendMessage(from, {
+			buttonText: "Open List",
+			title: caption.trim(),
+			footer: "if you can't click 'read more' : click it first then reply the list, then click on the 'x' mark on your reply.",
+			text: "\t",
+			sections: rows,
+		});
 	},
 };

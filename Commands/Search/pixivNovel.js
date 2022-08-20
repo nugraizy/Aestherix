@@ -51,19 +51,13 @@ ${content}`,
 						title: `PIXIV | ${title.capitalize()} | by ${userName} | ${pageCount} | ${type.capitalize()}`,
 					});
 				}
-				await client[botNum].relayMessage(
-					from,
-					{
-						listMessage: {
-							buttonText: "``` • Pixiv Novel Search```",
-							description: "Pixiv Novel Search",
-							footerText: "choose one of the novel inside of the list to read.",
-							listType: 1,
-							sections: container,
-						},
-					},
-					{ messageId: generateMessageID() },
-				);
+				await client[botNum].sendMessage(from, {
+					title: "``` • Pixiv Novel Search```",
+					text: "\t",
+					footer: "choose one of the novel inside of the list to read.",
+					buttonText: "Open List",
+					sections: container,
+				});
 			}
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";

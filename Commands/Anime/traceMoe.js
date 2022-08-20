@@ -1,4 +1,3 @@
-import { generateMessageID } from "@adiwajshing/baileys";
 import fs from "fs";
 import path from "path";
 import { __dirname } from "../../connect.js";
@@ -177,11 +176,13 @@ ${externalLinks
 				});
 				i++;
 			}
-			await client[botNum].relayMessage(
-				from,
-				{ listMessage: { buttonText: " • Fetch More Moe", description: "\t", footerText: "```Looking for some more? Choose between these options.```", listType: 1, sections: row } },
-				{ messageId: generateMessageID() },
-			);
+			await client[botNum].sendMessage(from, {
+				title: "``` • Trace Moe```",
+				text: "Trace Moe",
+				footer: "Looking for some more? Choose between these options.",
+				buttonText: "Open List",
+				sections: row,
+			});
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name}\n`;

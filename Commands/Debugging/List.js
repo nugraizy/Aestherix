@@ -1,5 +1,3 @@
-import { generateWAMessageFromContent } from "@adiwajshing/baileys";
-
 export default {
 	name: "list",
 	description: "Send list message.",
@@ -19,19 +17,12 @@ export default {
 			],
 			title: "Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪",
 		});
-		const messages = generateWAMessageFromContent(
-			from,
-			{
-				listMessage: {
-					buttonText: "Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪",
-					description: "List Message",
-					listType: 1,
-					footerText: "Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪",
-					sections: row,
-				},
-			},
-			{},
-		);
-		await client[botNum].relayMessage(from, messages.message, { messageId: messages.key.id });
+		await client[botNum].sendMessage(from, {
+			buttonText: "Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪",
+			title: "List Message",
+			text: "\t",
+			footer: "Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪",
+			sections: row,
+		});
 	},
 };

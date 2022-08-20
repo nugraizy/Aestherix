@@ -59,19 +59,13 @@ Total Media : ${dataImage.pageCount}`,
 					container.push({ rows: [{ title: `${i + 1}. ${title}`, rowId: `${cmd}dl https://www.pixiv.net/en/artworks/${id}` }], title: `\t` });
 					i++;
 				}
-				await client[botNum].relayMessage(
-					from,
-					{
-						listMessage: {
-							buttonText: "``` • Pixiv Artworks Search```",
-							description: "Pixiv Artworks Search",
-							footerText: "choose one of the artworks inside of the list to download.",
-							listType: 1,
-							sections: container,
-						},
-					},
-					{ messageId: generateMessageID() },
-				);
+				await client[botNum].sendMessage(from, {
+					buttonText: "``` • Pixiv Artworks Search```",
+					description: "Pixiv Artworks Search",
+					footerText: "choose one of the artworks inside of the list to download.",
+					listType: 1,
+					sections: container,
+				});
 			}
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";

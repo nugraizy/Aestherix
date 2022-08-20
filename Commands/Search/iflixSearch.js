@@ -1,4 +1,3 @@
-import { generateMessageID } from "@adiwajshing/baileys";
 import { removeDuplicatesArray } from "../../Helper/index.js";
 import { iflixSearch } from "../../Utils/index.js";
 
@@ -48,19 +47,13 @@ export default {
 				},
 				{ quoted: message },
 			);
-			return await client[botNum].relayMessage(
-				from,
-				{
-					listMessage: {
-						buttonText: " • Get Episode URL",
-						description: "\t",
-						footerText: "```Looking for the streaming URL? Choose between these options.```",
-						listType: 1,
-						sections: rows,
-					},
-				},
-				{ messageId: generateMessageID() },
-			);
+			return await client[botNum].sendMessage(from, {
+				buttonText: "Open List",
+				text: "\t",
+				footer: "```Looking for the streaming URL? Choose between these options.```",
+				title: "``` • Iflix```",
+				sections: rows,
+			});
 		} else if (args[1] == "get") {
 			return client[botNum].reply({ from, quoted: message }, `\`\`\` • Iflix Search\`\`\`\n\nURL : ${args[2]}`);
 		}
@@ -101,19 +94,13 @@ export default {
 				},
 				{ quoted: message },
 			);
-			await client[botNum].relayMessage(
-				from,
-				{
-					listMessage: {
-						buttonText: " • Get Episode URL",
-						description: "\t",
-						footerText: "```Looking for the streaming URL? Choose between these options.```",
-						listType: 1,
-						sections: rows,
-					},
-				},
-				{ messageId: generateMessageID() },
-			);
+			await client[botNum].sendMessage(from, {
+				buttonText: "Open List",
+				text: "\t",
+				footer: "```Looking for the streaming URL? Choose between these options.```",
+				title: "``` • Iflix```",
+				sections: rows,
+			});
 		}
 	},
 };

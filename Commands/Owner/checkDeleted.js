@@ -1,6 +1,4 @@
-import { generateMessageID } from "@adiwajshing/baileys";
 import fs from "fs";
-import moment from "moment-timezone";
 import { getTimeSince } from "../../Helper/index.js";
 const DB_PATH = `./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`;
 
@@ -36,18 +34,12 @@ export default {
 			});
 			i++;
 		}
-		await client[botNum].relayMessage(
-			from,
-			{
-				listMessage: {
-					buttonText: " • Fetch Deleted WhatsApp Message",
-					description: "choosse one to fetch the metadata message",
-					footerText: "and bot will send the message",
-					listType: 1,
-					sections: row,
-				},
-			},
-			{ messageId: generateMessageID() },
-		);
+		await client[botNum].sendMessage(from, {
+			buttonText: "Open List",
+			text: "choosse one to fetch the metadata message",
+			footer: "and bot will send the message",
+			text: "\t",
+			sections: row,
+		});
 	},
 };

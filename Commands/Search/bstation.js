@@ -56,19 +56,13 @@ Ratings : ${score}`,
 						title: `Bstation | Views : ${numberWithCommas(view)}`,
 					});
 				}
-				await client[botNum].relayMessage(
-					from,
-					{
-						listMessage: {
-							buttonText: " • Download More Bstation",
-							description: "\t",
-							footerText: "```Looking for some more? Choose between these options.```",
-							listType: 1,
-							sections: row,
-						},
-					},
-					{ messageId: generateMessageID() },
-				);
+				await client[botNum].sendMessage(from, {
+					buttonText: "Open List",
+					text: "\t",
+					footer: "```Looking for some more? Choose between these options.```",
+					title: "``` • Bstation```",
+					sections: row,
+				});
 			}
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";

@@ -79,19 +79,13 @@ export default {
 					},
 					{ quoted: message },
 				);
-				await client[botNum].relayMessage(
-					from,
-					{
-						listMessage: {
-							buttonText: " • Fetch More Spotify by your Keyword",
-							description: "\t",
-							footerText: "```Looking for some more? Choose between these options.```",
-							listType: 1,
-							sections: rows,
-						},
-					},
-					{ messageId: generateMessageID() },
-				);
+				await client[botNum].sendMessage(from, {
+					buttonText: "Open List",
+					text: "\t",
+					footer: "```Looking for some more? Choose between these options.```",
+					title: "``` • Spotify Track```",
+					sections: rows,
+				});
 			}
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";

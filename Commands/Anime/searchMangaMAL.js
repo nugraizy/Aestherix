@@ -1,5 +1,4 @@
-import { generateMessageID } from "@adiwajshing/baileys";
-import { convertSecondstoTime, numberWithCommas } from "../../Helper/index.js";
+import { numberWithCommas } from "../../Helper/index.js";
 import { MyAnimeList } from "../../Utils/MyAnimeList/index.js";
 
 export default {
@@ -69,19 +68,13 @@ export default {
 				},
 				{ quoted: message },
 			);
-			await client[botNum].relayMessage(
-				from,
-				{
-					listMessage: {
-						buttonText: "``` • Myanimelist Search [ Manga ]```",
-						description: "Myanimelist search",
-						footerText: "choose one of the title inside of the list to see the details of the manga.",
-						listType: 1,
-						sections: rows,
-					},
-				},
-				{ messageId: generateMessageID() },
-			);
+			await client[botNum].sendMessage(from, {
+				buttonText: "``` • Myanimelist Search [ Manga ]```",
+				text: "Myanimelist search",
+				footer: "choose one of the title inside of the list to see the details of the manga.",
+				buttonText: "Open List",
+				sections: rows,
+			});
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name}\n`;
