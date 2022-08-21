@@ -1,4 +1,4 @@
-import { delay, generateMessageID } from "@adiwajshing/baileys";
+import { delay } from "../../Helper/index.js";
 import { Werewolf } from "../../Utils/Games/index.js";
 const row = [
 	{ rows: [{ title: "JOIN", rowId: `.ww join` }], title: `VOID BOT | Werewolf Games` },

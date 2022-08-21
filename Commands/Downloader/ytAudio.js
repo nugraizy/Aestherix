@@ -11,7 +11,7 @@ export default {
 	usage: "!ytaudio <url>",
 	aliases: ["yta"],
 	category: "Downloader",
-	cooldown: 6,
+	cooldown: 7,
 	limit: 8,
 	status: "enable",
 	async run({ from, query, prettyNumber, filename, message }, client) {

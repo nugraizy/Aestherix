@@ -1,4 +1,4 @@
-import { delay } from "@adiwajshing/baileys";
+import { delay } from "../../Helper/index.js";
 import moment from "moment-timezone";
 import parser from "yargs-parser";
 import { color, ERRLOG, INFOLOG, isOne, isURL, numberWithCommas, removeDuplicatesArray } from "../../Helper/Modules/index.js";
@@ -11,7 +11,7 @@ export default {
 		"!tiktokvideo <url> (you can send multiple link using space in between) [options]\nOptions:\n-wm, --watermark: Download with watermark\n-nowm, --nowatermark: Download without watermark",
 	aliases: ["tiktokvideos", "ttvideo", "ttvid", "ttv"],
 	category: "Downloader",
-	cooldown: 6,
+	cooldown: 10,
 	limit: 6,
 	status: "enable",
 	async run({ from, query, prettyNumber, message }, client) {

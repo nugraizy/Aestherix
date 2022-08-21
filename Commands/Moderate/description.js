@@ -4,7 +4,7 @@ export default {
 	usage: "!description <texts>",
 	aliases: ["desc"],
 	category: "Moderation",
-	cooldown: 2,
+	cooldown: 4,
 	limit: 2,
 	status: "enable",
 	async run({ isAdmin, isBotAdmin, isOwner, query, bodyQuoted, from, message }, client, store) {

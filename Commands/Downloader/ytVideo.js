@@ -1,4 +1,4 @@
-import { delay } from "@adiwajshing/baileys";
+import { delay } from "../../Helper/index.js";
 import moment from "moment-timezone";
 import { color, ERRLOG, INFOLOG, isURL, numberWithCommas, removeDuplicatesArray } from "../../Helper/Modules/index.js";
 import { ytv } from "../../Utils/YouTube/index.js";
@@ -9,7 +9,7 @@ export default {
 	usage: "!ytvideo <url>",
 	aliases: ["ytv"],
 	category: "Downloader",
-	cooldown: 6,
+	cooldown: 12,
 	limit: 8,
 	status: "enable",
 	async run({ from, query, prettyNumber, message }, client) {

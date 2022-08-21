@@ -7,6 +7,7 @@ export {
 	color,
 	convertSecondstoTime,
 	delaySync,
+	delay,
 	distordFX,
 	download,
 	ERRLOG,

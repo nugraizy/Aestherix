@@ -7,8 +7,8 @@ export default {
 	category: "Search",
 	usage: "!trueid <query>",
 	aliases: ["tid"],
-	cooldown: 2,
-	limit: 3,
+	cooldown: 6,
+	limit: 5,
 	status: "enable",
 	async run({ query, from, message, args, cmd, type }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");

@@ -1,5 +1,4 @@
-import { delay } from "@adiwajshing/baileys";
-import { getFilesizeFromBytes, numberWithCommas } from "../../Helper/Modules/index.js";
+import { getFilesizeFromBytes, numberWithCommas, delay } from "../../Helper/Modules/index.js";
 import { bilibiliSearchCOM } from "../../Utils/Bilibili/index.js";
 
 export default {
@@ -9,7 +8,7 @@ export default {
 	category: "Search",
 	aliases: ["bili", "bli"],
 	limit: 4,
-	cooldown: 5,
+	cooldown: 7,
 	status: "enable",
 	async run({ query, from, message }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");

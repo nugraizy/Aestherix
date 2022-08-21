@@ -7,7 +7,7 @@ export default {
 	usage: "!demote <reply/tag member>",
 	aliases: ["demt", "member", "mem", "dmt"],
 	category: "Moderation",
-	cooldown: 2,
+	cooldown: 10,
 	limit: 2,
 	status: "enable",
 	restrict: true,

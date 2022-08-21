@@ -1,4 +1,4 @@
-import { delay } from "@adiwajshing/baileys";
+import { delay } from "../../Helper/index.js";
 import moment from "moment-timezone";
 import parser from "yargs-parser";
 import { color, ERRLOG, INFOLOG, isOne, isSame, isURL } from "../../Helper/Modules/index.js";
@@ -10,7 +10,7 @@ export default {
 	usage: "!igstory <username>",
 	aliases: ["igstory", "igs"],
 	category: "Downloader",
-	cooldown: 6,
+	cooldown: 10,
 	limit: 9,
 	status: "enable",
 	async run({ from, query, prettyNumber, message }, client) {

@@ -7,8 +7,8 @@ export default {
 	usage: "!shopee <query>",
 	category: "Search",
 	aliases: ["shop"],
-	limit: 4,
-	cooldown: 5,
+	limit: 5,
+	cooldown: 10,
 	status: "enable",
 	async run({ query, from, message }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");

@@ -11,7 +11,7 @@ export default {
 	usage: "!spotifydl <url>",
 	aliases: ["sfydl"],
 	category: "Downloader",
-	cooldown: 6,
+	cooldown: 9,
 	limit: 8,
 	status: "enable",
 	async run({ from, query, prettyNumber, filename, message }, client) {

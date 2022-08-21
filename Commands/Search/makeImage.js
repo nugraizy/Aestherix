@@ -7,7 +7,7 @@ export default {
 	category: "Search",
 	aliases: ["createimage", "makeimg", "createimg"],
 	limit: 2,
-	cooldown: 2,
+	cooldown: 5,
 	status: "enable",
 	async run({ query, from, message }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");

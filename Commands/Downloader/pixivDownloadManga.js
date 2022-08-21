@@ -8,7 +8,7 @@ export default {
 	aliases: ["pixmangadl"],
 	category: "Downloader",
 	limit: 4,
-	cooldown: 5,
+	cooldown: 7,
 	status: "enable",
 	async run({ from, query, message }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");

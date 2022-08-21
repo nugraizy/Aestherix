@@ -8,7 +8,7 @@ export default {
 	category: "Search",
 	aliases: ["dvart", "devart"],
 	limit: 4,
-	cooldown: 5,
+	cooldown: 7,
 	status: "enable",
 	async run({ query, from, message, args, type }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");

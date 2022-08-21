@@ -1,4 +1,4 @@
-import { generateMessageID, generateWAMessageFromContent } from "@adiwajshing/baileys";
+import { generateWAMessageFromContent } from "@adiwajshing/baileys";
 import { readBuffer } from "../../Helper/index.js";
 
 export default {

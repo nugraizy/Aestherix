@@ -6,7 +6,7 @@ export default {
 	usage: "!ighashtag <keyword>",
 	aliases: ["ighash"],
 	category: "Search",
-	cooldown: 2,
+	cooldown: 8,
 	limit: 4,
 	status: "enable",
 	async run({ query, from, message }, client) {

@@ -4,8 +4,8 @@ export default {
 	usage: "!delete <reply chat>",
 	aliases: ["del"],
 	category: "Moderation",
-	cooldown: 2,
-	limit: 2,
+	cooldown: 8,
+	limit: 4,
 	status: "enable",
 	async run({ isOwner, isAdmin, from, mediaData, message, bodyQuoted }, client) {
 		if (!isAdmin && !isOwner) return client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");

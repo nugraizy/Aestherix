@@ -10,8 +10,8 @@ export default {
 	usage: "!yandex <reply image/send image>",
 	category: "Search",
 	aliases: ["ri", "similar", "whatimage", "whatimg", "findimg"],
-	limit: 2,
-	cooldown: 2,
+	limit: 5,
+	cooldown: 8,
 	status: "enable",
 	async run({ isMediaImage, query, extractMediaData, filename, from, message, typeQuoted }, client) {
 		if (!isURL(query) && !isMediaImage) return client[botNum].reply({ from, quoted: message }, "Please send/reply a image to find the similar image");

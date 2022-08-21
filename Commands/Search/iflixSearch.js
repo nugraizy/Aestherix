@@ -7,8 +7,8 @@ export default {
 	category: "Search",
 	usage: "!iflix <query>",
 	aliases: ["iflx"],
-	cooldown: 2,
-	limit: 3,
+	cooldown: 7,
+	limit: 4,
 	status: "enable",
 	async run({ query, from, message, args, cmd, type }, client) {
 		if ((args[1] == "next" || args[1] == "prev") && type == "templateButtonReplyMessage") {

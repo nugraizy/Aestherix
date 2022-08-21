@@ -7,8 +7,8 @@ export default {
 	usage: "!promote <reply/tag member>",
 	aliases: ["prmt", "admin", "adm"],
 	category: "Moderation",
-	cooldown: 2,
-	limit: 2,
+	cooldown: 8,
+	limit: 6,
 	status: "enable",
 	restrict: true,
 	async run({ isAdmin, isBotAdmin, isOwner, query, from, bodyQuoted, mediaData, mention, message }, client, store) {

@@ -4,7 +4,7 @@ export default {
 	usage: "!hidetag <?query>",
 	aliases: ["tag", "h"],
 	category: "Moderation",
-	cooldown: 6,
+	cooldown: 10,
 	limit: 5,
 	restrict: true,
 	status: "enable",

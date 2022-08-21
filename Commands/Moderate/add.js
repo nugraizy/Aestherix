@@ -7,8 +7,8 @@ export default {
 	usage: "!add <reply/tag member>",
 	aliases: ["addmem", "invite"],
 	category: "Moderation",
-	cooldown: 2,
-	limit: 2,
+	cooldown: 10,
+	limit: 4,
 	restrict: true,
 	status: "enable",
 	async run({ isAdmin, isBotAdmin, isOwner, from, query, mention, bodyQuoted, mediaData, message }, client) {

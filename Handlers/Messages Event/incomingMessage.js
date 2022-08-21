@@ -149,8 +149,11 @@ export default {
 						}
 						if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).has(Tempcmds.name)) {
 							const time = user.cooldown.get(message.sender).get(Tempcmds.name);
-							if (Date.now() > time) user.cooldown.get(message.sender).delete(Tempcmds.name);
-							else return client[botNum].reply({ from: message.from, quoted: message.message }, `${Tempcmds.name} is on cooldown for ${((time - Date.now()) / 1000).toFixed(1)} seconds.`);
+							if (Date.now() > time) {
+								user.cooldown.get(message.sender).delete(Tempcmds.name);
+								user.cooldown.get(message.sender).requests = false;
+							} else
+								return client[botNum].reply({ from: message.from, quoted: message.message }, `${Tempcmds.name} is on cooldown for ${((time - Date.now()) / 1000).toFixed(1)} seconds.`);
 						}
 						if (!user.cooldown.has(message.sender)) user.cooldown.set(message.sender, new Map());
 						if (!user.cooldown.get(message.sender).has(Tempcmds.name)) user.cooldown.get(message.sender).set(Tempcmds.name, Date.now() + Tempcmds.cooldown * 1000);
@@ -175,10 +178,8 @@ export default {
 								return client[botNum].reply({ from: message.from, quoted: message.message }, "Kamu bukan admin");
 							await Tempcmds.run(message, client, store);
 							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) user.cooldown.get(message.sender).requests = false;
-							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).has(Tempcmds.name)) user.cooldown.get(message.sender).delete(Tempcmds.name);
 						} catch (err) {
 							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) user.cooldown.get(message.sender).requests = false;
-							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).has(Tempcmds.name)) user.cooldown.get(message.sender).delete(Tempcmds.name);
 							let str = "Something went wrong.\nPlease send this error stack to the owner. :\n\n";
 							str += `Type : ${err.name}\n`;
 							str += `Message : ${err.message}\n`;

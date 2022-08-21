@@ -15,7 +15,7 @@ export default {
 		"!tiktokmusic <url> (you can send multiple link using space in between) [options]\nOptions:\n-wm, --watermark: Download with watermark\n-nowm, --nowatermark: Download without watermark",
 	aliases: ["tiktokmusics", "tiktokmusik", "ttmusic", "ttmusik", "ttm"],
 	category: "Downloader",
-	cooldown: 6,
+	cooldown: 7,
 	limit: 6,
 	status: "enable",
 	async run({ from, query, prettyNumber, message, filename }, client) {

@@ -1,4 +1,4 @@
-import { generateMessageID, generateWAMessageFromContent } from "@adiwajshing/baileys";
+import { generateWAMessageFromContent } from "@adiwajshing/baileys";
 import fs from "fs-extra";
 
 export default {

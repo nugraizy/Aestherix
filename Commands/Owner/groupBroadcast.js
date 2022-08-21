@@ -1,4 +1,4 @@
-import { delay } from "@adiwajshing/baileys";
+import { delay } from "../../Helper/index.js";
 
 export default {
 	name: "groupbc",

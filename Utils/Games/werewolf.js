@@ -136,6 +136,7 @@ export class Werewolf {
 		this.gameAfk = 0;
 		this.firstNight = true;
 		this.timeSpent = 1;
+		this.reduceTime = true;
 		this.client = client;
 		if (status) this.setNewGame();
 
@@ -293,7 +294,7 @@ export class Werewolf {
 		return {
 			error: false,
 			data: [
-				{ id: data.playersData[player].id, message: WEREWOLF_SCRIPTING.success.guarded.replace(data.playersData[playerGuard].name) },
+				{ id: data.playersData[player].id, message: WEREWOLF_SCRIPTING.success.guarded.replace("{0}", data.playersData[playerGuard].name) },
 				{ id: data.playersData[playerGuard].id, message: data.randomGuard() },
 			],
 		};
@@ -395,7 +396,6 @@ export class Werewolf {
 		const isStarted = data.gameStarted;
 		if (!isStarted) return;
 		const timers = data.gameTime;
-		let reduceTime = true;
 		data.gameCycler = setTimeout((timerly = timer) => {
 			const dataGame = this.getDataGame(roomId);
 			if (!dataGame) return;
@@ -404,9 +404,9 @@ export class Werewolf {
 				dataGame.gameTimeCycle = "day";
 			}
 			if (dataGame.gameTimeCycle == "day") {
-				if (dataGame.timeSpent > 1 && reduceTime) {
-					data.gameTime /= 1.5;
-					reduceTime = false;
+				if (dataGame.timeSpent > 1 && dataGame.reduceTime) {
+					dataGame.gameTime = Math.floor(dataGame.gameTime - 30);
+					dataGame.reduceTime = false;
 				}
 				this.resetPerks(dataGame.roomId);
 				let peopleKilledMention = [];
@@ -620,6 +620,6 @@ export class Werewolf {
 		const difference = new Date().getTime() - data.gameTimeStarted;
 		const minutes = Math.floor(difference / (1000 * 60)) % 60;
 		const seconds = Math.floor(difference / 1000) % 60;
-		return `${minutes}:${seconds}`;
+		return String(minutes).length == 1 ? `0${minutes}` : `${minutes}:${String(seconds).length == 1 ? `0${seconds}` : seconds}`;
 	}
 }

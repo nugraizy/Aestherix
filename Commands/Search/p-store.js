@@ -1,4 +1,4 @@
-import { numberWithCommas, removeDuplicatesArray, shuffleArray } from "../../Helper/Modules/index.js";
+import { numberWithCommas, removeDuplicatesArray } from "../../Helper/Modules/index.js";
 import { PStoreProduct } from "../../Utils/P-Store/index.js";
 
 export default {
@@ -8,7 +8,7 @@ export default {
 	category: "Search",
 	aliases: ["pstor"],
 	limit: 4,
-	cooldown: 5,
+	cooldown: 8,
 	status: "enable",
 	async run({ query, from, message }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");

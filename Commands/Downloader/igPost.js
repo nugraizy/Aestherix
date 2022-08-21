@@ -1,4 +1,4 @@
-import { delay } from "@adiwajshing/baileys";
+import { delay } from "../../Helper/index.js";
 import moment from "moment-timezone";
 import parser from "yargs-parser";
 import { color, ERRLOG, INFOLOG, isOne, isURL, numberWithCommas, parseCode } from "../../Helper/Modules/index.js";
@@ -10,7 +10,7 @@ export default {
 	usage: "!igpost <url>",
 	aliases: ["igpost", "igp"],
 	category: "Downloader",
-	cooldown: 6,
+	cooldown: 10,
 	limit: 9,
 	status: "enable",
 	async run({ from, query, prettyNumber, message }, client) {

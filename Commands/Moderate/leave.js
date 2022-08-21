@@ -5,7 +5,7 @@ export default {
 	aliases: ["out", "bye"],
 	category: "Moderation",
 	cooldown: 6,
-	limit: 10,
+	limit: 20,
 	restrict: true,
 	status: "enable",
 	async run({ isAdmin, isOwner, from, isGroup, message }, client) {

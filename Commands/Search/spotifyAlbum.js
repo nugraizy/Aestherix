@@ -1,4 +1,3 @@
-import { generateMessageID } from "@adiwajshing/baileys";
 import { fetchBUFFER, removeDuplicatesArray } from "../../Helper/index.js";
 import { spotifier } from "../../Utils/Spotifier/index.js";
 
@@ -9,7 +8,7 @@ export default {
 	category: "Search",
 	aliases: ["spotifyal"],
 	limit: 5,
-	cooldown: 4,
+	cooldown: 8,
 	status: "enable",
 	async run({ query, from, message }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");

@@ -10,7 +10,7 @@ export default {
 	usage: "!twitterdl <url>",
 	aliases: ["twtdl", "twitdl"],
 	category: "Downloader",
-	cooldown: 6,
+	cooldown: 10,
 	limit: 9,
 	status: "enable",
 	async run({ from, query, prettyNumber, message }, client) {

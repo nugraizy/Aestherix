@@ -1,4 +1,3 @@
-import { generateMessageID } from "@adiwajshing/baileys";
 import { numberWithCommas, removeDuplicatesArray } from "../../Helper/Modules/index.js";
 import { bilibiliSearchTV } from "../../Utils/Bilibili/index.js";
 
@@ -9,7 +8,7 @@ export default {
 	category: "Search",
 	aliases: ["bstat", "blindo"],
 	limit: 4,
-	cooldown: 5,
+	cooldown: 7,
 	status: "enable",
 	async run({ query, from, message, cmd }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");

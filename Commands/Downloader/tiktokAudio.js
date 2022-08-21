@@ -1,4 +1,4 @@
-import { delay } from "@adiwajshing/baileys";
+import { delay } from "../../Helper/index.js";
 import moment from "moment-timezone";
 import path from "path";
 import parser from "yargs-parser";
@@ -14,7 +14,7 @@ export default {
 	usage: "!tiktokaudio <url> (you can send multiple link using space in between)",
 	aliases: ["tiktokaudio", "ttaudio", "ttaud"],
 	category: "Downloader",
-	cooldown: 6,
+	cooldown: 7,
 	limit: 6,
 	status: "enable",
 	async run({ from, query, prettyNumber, filename, message }, client) {

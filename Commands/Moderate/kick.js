@@ -7,8 +7,8 @@ export default {
 	usage: "!kick <reply/tag member>",
 	aliases: ["remove", "rem", "rm"],
 	category: "Moderation",
-	cooldown: 2,
-	limit: 2,
+	cooldown: 12,
+	limit: 6,
 	status: "enable",
 	restrict: true,
 	async run(message, client, store) {

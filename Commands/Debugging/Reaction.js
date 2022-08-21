@@ -23,7 +23,7 @@ export default {
 						quoted: message,
 					},
 				);
-				client[botNum].relayMessage(from, messages.message, { messageId: generateMessageID() });
+				client[botNum].relayMessage(from, messages.message, { messageId: messages.key.id });
 			}
 			return;
 		}
@@ -33,7 +33,6 @@ export default {
 			for (let chat of chats) {
 				chat = chat;
 				chat.participant = chat.fromMe ? `${botNum.split(":")[0]}@s.whatsapp.net` : chat.participant;
-				log(char);
 				await client[botNum].relayMessage(from, { reactionMessage: { key: chat, text: emojis[0] } }, { messageId: generateMessageID() });
 			}
 		}

@@ -11,7 +11,7 @@ export default {
 	category: "Downloader",
 	aliases: ["bstatdl", "bsdl"],
 	limit: 4,
-	cooldown: 5,
+	cooldown: 8,
 	status: "enable",
 	async run({ query, from, message, filename }, client) {
 		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");

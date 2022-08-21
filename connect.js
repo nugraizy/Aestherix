@@ -14,7 +14,7 @@
  *   @Nafiz         [ @GitHub ] https://github.com/xbnfz01       [ @Instagram ] https://instagram.com/nfz.01
  */
 
-import baileys, { generateMessageID, jidDecode } from "@adiwajshing/baileys";
+import baileys, { jidDecode } from "@adiwajshing/baileys";
 import { Boom } from "@hapi/boom";
 import center from "center-align";
 import { spawn } from "child_process";

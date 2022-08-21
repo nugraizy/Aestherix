@@ -1,4 +1,4 @@
-import { delay } from "@adiwajshing/baileys";
+import { delay } from "../../Helper/index.js";
 import moment from "moment-timezone";
 import parser from "yargs-parser";
 import { color, ERRLOG, fetchBUFFER, INFOLOG, isOne, isURL } from "../../Helper/Modules/index.js";
@@ -10,7 +10,7 @@ export default {
 	usage: "!fbpost <url>",
 	aliases: ["fbpost", "fbp", "fb", "fbdl"],
 	category: "Downloader",
-	cooldown: 6,
+	cooldown: 8,
 	limit: 6,
 	status: "enable",
 	async run({ from, query, prettyNumber, message }, client) {

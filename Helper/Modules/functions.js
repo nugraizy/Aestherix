@@ -495,6 +495,8 @@ export const delaySync = (ms) => {
 	while (new Date() - start <= ms) {}
 };
 
+export const delay = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export const makeDir = (path) => {
 	fs.mkdirSync(path, { recursive: true });
 	return true;
@@ -639,4 +641,3 @@ export const convertSecondstoTime = (ms) => {
 		.map((val) => val[1])
 		.join(":");
 };
-
