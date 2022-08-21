@@ -33,7 +33,7 @@ export default {
 			}
 		} else if (args[1] == "guard") {
 			const werewolf = new Werewolf(sender, args[3], client);
-			const guard = werewolf.seerSomeone(sender, args[2], args[3]);
+			const guard = werewolf.guardSomeone(sender, args[2], args[3]);
 			if (guard.error && !("data" in guard)) return client[botNum].reply({ from, quoted: message }, guard.message);
 			for (const data of guard.data) {
 				await client[botNum].sendMessage(data.id, { text: data.message });

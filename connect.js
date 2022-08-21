@@ -248,11 +248,16 @@ const start = async () => {
 		if (update.time == "day") {
 			await client[botNum].sendMessage(update.id, { text: update.gameDialogue, mentions: update.peopleKilledMention });
 		} else if (update.time == "evening") {
-			await client[botNum].sendMessage(update.id, {
+			client[botNum].sendMessage(update.id, {
 				text: update.gameDialogue,
 			});
-			for (const id of update.playersAlive) {
-				await client[botNum].sendMessage(id, {
+			for (const id of update.playersData.filter((v) => !v.isAlive)) {
+				client[botNum].sendMessage(id.id, {
+					text: "Karena kamu sudah mati, maka kamu hanya bisa menonton permainan saja",
+				});
+			}
+			for (const id of update.playersData.filter((v) => v.isAlive)) {
+				client[botNum].sendMessage(id.id, {
 					title: "Pilih salah satu dari pemain berikut untuk divoting",
 					footer: `Made by Void Bot. Powered by Hidden Finder`,
 					text: "\t",
@@ -284,7 +289,7 @@ ${update.playersData
 			for (const { id, role, isAlive } of update.playersData) {
 				if (isAlive) {
 					if (role == "werewolf") {
-						await client[botNum].sendMessage(id, {
+						client[botNum].sendMessage(id, {
 							buttonText: "Open list",
 							footer: `Made by Void Bot. Powered by Hidden Finder`,
 							title: `Kamu adalah Serigala. Dan saat ini merupakan waktu yang tepat untuk membunuh seseorang.\nPilih salah satu player.`,
@@ -296,7 +301,7 @@ ${update.playersData
 								}),
 						});
 					} else if (role == "seer") {
-						await client[botNum].sendMessage(id, {
+						client[botNum].sendMessage(id, {
 							buttonText: "Open list",
 							footer: `Made by Void Bot. Powered by Hidden Finder`,
 							text: "\t",
@@ -308,7 +313,7 @@ ${update.playersData
 								}),
 						});
 					} else if (role == "guard") {
-						await client[botNum].sendMessage(id, {
+						client[botNum].sendMessage(id, {
 							buttonText: "Open list",
 							title: `Kamu adalah Penjaga. Dan saat ini merupakan waktu yang tepat untuk memjaga seseorang.\nPilih salah satu player.`,
 							footer: `Made by Void Bot. Powered by Hidden Finder`,
@@ -320,7 +325,7 @@ ${update.playersData
 								}),
 						});
 					} else if (role == "villager") {
-						await client[botNum].sendMessage(id, { text: "Kamu adalah Penduduk. Tunggu sampai pagi. Saat ini hanya pemain malam yang beraksi" });
+						client[botNum].sendMessage(id, { text: "Kamu adalah Penduduk. Tunggu sampai pagi. Saat ini hanya pemain malam yang beraksi" });
 					}
 				}
 			}
