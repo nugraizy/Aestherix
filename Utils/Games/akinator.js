@@ -24,7 +24,9 @@ const progressBar = (progress) => {
 };
 
 export const startAkinator = async (key) => {
-	if (getSession(key)) return { error: "You already have a game running." };
+	if (getSession(key)) {
+		return { error: "You already have a game running." };
+	}
 	setSession(key);
 	const session = getSession(key);
 	await session.start();
@@ -32,53 +34,79 @@ export const startAkinator = async (key) => {
 };
 
 export const getSession = (key) => {
-	const session = games.akinator.get(key) || null;
-	return session;
+	return games.akinator.get(key) || null;
 };
 
 const setSession = (key) => {
-	const session = games.akinator.set(key, new Aki({ region: "id" }));
-	return session;
+	return games.akinator.set(key, new Aki({ region: "id" }));
 };
 
 const deleteSession = async (key) => {
 	const session = getSession(key);
-	if (!session) return { error: "You don't have a game running." };
+	if (!session) {
+		return { error: "You don't have a game running." };
+	}
 	games.akinator.delete(key);
 	return session;
 };
 
 export const handleAnswer = async (key, answer) => {
 	const session = getSession(key);
-	if (!session) return;
-	if (!answer) return true;
+	if (!session) {
+		return;
+	}
+	if (!answer) {
+		return true;
+	}
 	let progress;
 	let arrow;
 	const tempProgress = session.progress;
-	if (parseInt(answer) > TOTAL_ANSWER) return { status: "waiting" };
+	if (parseInt(answer) > TOTAL_ANSWER) {
+		return { status: "waiting" };
+	}
 	if (isNaN(answer) || answer == 6) {
-		if (/^((t(?:rue)?|i?y(ak?|e)?(?:es|p)?|ok(?:ay)?)|(be?(tul|n(a|e)?r)))$/i.test(answer)) answer = ANSWERS[1];
-		else if (/^((t(i?da?k|dk))|g(a?|k)?|n(o?|ope))$/i.test(answer)) answer = ANSWERS[2];
-		else if (/^(((t(i?da?k|dk))|g(a?|k)?) (t(a?|h?|w)u?)|nt(a?h))/i.test(answer)) answer = ANSWERS[3];
-		else if (/^(((m(u?ng?k(i)?n|a?(y)?b(e|i))?) ((t(i?da?k|dk))|g(a?|k)?|n(o?|ope))))/i.test(answer)) answer = ANSWERS[5];
-		else if (/^((m(u?ng?k(i)?n|a?(y)?b(e|i))?))/i.test(answer)) answer = ANSWERS[4];
-		else if (/^(b(a?c?)k|undo|k(e?mb(a?)li))$/i.test(answer)) answer = ANSWERS[7];
-		else if (/^((e(xit)?|out|b(a?|t(a)?)l))$/i.test(answer) || answer == 6) {
+		if (/^((t(?:rue)?|i?y(ak?|e)?(?:es|p)?|ok(?:ay)?)|(be?(tul|n(a|e)?r)))$/i.test(answer)) {
+			answer = ANSWERS[1];
+		} else if (/^((t(i?da?k|dk))|g(a?|k)?|n(o?|ope))$/i.test(answer)) {
+			answer = ANSWERS[2];
+		} else if (/^(((t(i?da?k|dk))|g(a?|k)?) (t(a?|h?|w)u?)|nt(a?h))/i.test(answer)) {
+			answer = ANSWERS[3];
+		} else if (/^(((m(u?ng?k(i)?n|a?(y)?b(e|i))?) ((t(i?da?k|dk))|g(a?|k)?|n(o?|ope))))/i.test(answer)) {
+			answer = ANSWERS[5];
+		} else if (/^((m(u?ng?k(i)?n|a?(y)?b(e|i))?))/i.test(answer)) {
+			answer = ANSWERS[4];
+		} else if (/^(b(a?c?)k|undo|k(e?mb(a?)li))$/i.test(answer)) {
+			answer = ANSWERS[7];
+		} else if (/^((e(xit)?|out|b(a?|t(a)?)l))$/i.test(answer) || answer == 6) {
 			await session.win();
-			if (session.progress == 0) arrow = "⇵";
-			else if (session.progress > tempProgress) arrow = "↑";
-			else arrow = "↓";
+			if (session.progress == 0) {
+				arrow = "⇵";
+			} else if (session.progress > tempProgress) {
+				arrow = "↑";
+			} else {
+				arrow = "↓";
+			}
 			progress = progressBar(session.progress);
 			await deleteSession(key);
 			return { status: "exitted", arrow, progressBar: progress, ...session };
-		} else return { status: "invalid" };
-	} else answer = ANSWERS[parseInt(answer)];
+		} else {
+			return { status: "invalid" };
+		}
+	} else {
+		answer = ANSWERS[parseInt(answer)];
+	}
 	if (answer == 6) {
-		if (session.currentStep == 0) return { status: "back", arrow: "⇵", isFailed: true, ...session };
+		if (session.currentStep == 0) {
+			return { status: "back", arrow: "⇵", isFailed: true, ...session };
+		}
 		await session.back();
-		if (session.progress == 0) arrow = "⇵";
-		else if (session.progress > tempProgress) arrow = "↑";
-		else arrow = "↓";
+		if (session.progress == 0) {
+			arrow = "⇵";
+		} else if (session.progress > tempProgress) {
+			arrow = "↑";
+		} else {
+			arrow = "↓";
+		}
 		progress = progressBar(session.progress);
 		return { status: "back", arrow, progressBar: progress, isFailed: false, ...session };
 	}
@@ -87,9 +115,13 @@ export const handleAnswer = async (key, answer) => {
 	} catch (e) {
 		return { status: "waiting" };
 	}
-	if (session.progress == 0) arrow = "⇵";
-	else if (session.progress > tempProgress) arrow = "↑";
-	else arrow = "↓";
+	if (session.progress == 0) {
+		arrow = "⇵";
+	} else if (session.progress > tempProgress) {
+		arrow = "↑";
+	} else {
+		arrow = "↓";
+	}
 	progress = progressBar(session.progress);
 	if (session.progress >= 90 || session.currentStep >= 87) {
 		await session.win();

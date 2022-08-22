@@ -19,10 +19,13 @@ ${guess.guessed.map((v, i) => `${i + 1}. ${v.input}\n${v.board}`).join("\n")}`,
 						{ quoted: message },
 					);
 				}
-				return client[botNum].reply({ from, quoted: message }, guess.board);
+				return await client[botNum].reply({ from, quoted: message }, guess.board);
 			}
 		};
-		if (isGroup && (settings[from].games == "enable" || isAdmin) && !OPTIONS.onlyLogs) await play();
-		else if (!isGroup && !OPTIONS.onlyLogs) await play();
+		if (isGroup && (settings[from].games == "enable" || isAdmin) && !OPTIONS.onlyLogs) {
+			await play();
+		} else if (!isGroup && !OPTIONS.onlyLogs) {
+			await play();
+		}
 	},
 };

@@ -14,7 +14,9 @@ export default {
 	status: "enable",
 	async run({ from, query, prettyNumber, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!query) return client[botNum].reply({ from, quoted: message }, "Please specify an UID");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "Please specify an UID");
+		}
 		try {
 			let {
 				_: uids,
@@ -33,13 +35,17 @@ export default {
 			});
 			for (const uid of uids) {
 				const reg = await regex(String(uid));
-				if (!reg.status) return client[botNum].reply({ from, quoted: message }, reg.message);
+				if (!reg.status) {
+					return await client[botNum].reply({ from, quoted: message }, reg.message);
+				}
 				let info;
-				if (statistic) info = await genshinProfile(String(uid));
-				else if (character) info = await getCharacters(String(uid));
-				else info = await genshinProfile(String(uid));
+				if (statistic) {
+					info = await genshinProfile(String(uid));
+				} else if (character) {
+					info = await getCharacters(String(uid));
+				} else info = await genshinProfile(String(uid));
 				if ("error" in info) {
-					client[botNum].reply({ from, quoted: message }, `Error while searching Genshin Impact player\n\n${info.error}`);
+					await client[botNum].reply({ from, quoted: message }, `Error while searching Genshin Impact player\n\n${info.error}`);
 					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Searching Genshin Impact player", "red")} for ${color(prettyNumber, "#ff71ce")}`);
 					continue;
 				} else {
@@ -118,7 +124,11 @@ Magic: ${info.stats.magic_chest_number}`;
 
 const regex = async (input) => {
 	const match = input.match(/^\d{9,10}/g);
-	if (!match) return { status: false, message: "Wasn't a valid UID" };
-	if (!(await genshinProfile(match[0]))) return { status: false, message: "We can't find your char" };
+	if (!match) {
+		return { status: false, message: "Wasn't a valid UID" };
+	}
+	if (!(await genshinProfile(match[0]))) {
+		return { status: false, message: "We can't find your char" };
+	}
 	return { status: true, message: match[0] };
 };

@@ -16,9 +16,13 @@ export default {
 			const data = readJSON("./Databases/Groups/settingsManager.json");
 			const index = data.findIndex((v) => Object.keys(v)[0] == from);
 			const isBanned = data[index][from].banned.includes(sender);
-			if (isAdmin) return await client[botNum].reply({ from, quoted: message }, JSON.stringify(check, undefined, 2));
+			if (isAdmin) {
+				return await client[botNum].reply({ from, quoted: message }, JSON.stringify(check, undefined, 2));
+			}
 			if ((check.ok && (check.result.hentai > 65 || check.result.porn > 65)) || check.reesult.is_nsfw) {
-				if (!isBotAdmin) return await client[botNum].reply({ from, quoted: message }, "Anti-NSFW is enabled, but i'm not admin, so i can't kick you.");
+				if (!isBotAdmin) {
+					return await client[botNum].reply({ from, quoted: message }, "Anti-NSFW is enabled, but i'm not admin, so i can't kick you.");
+				}
 				if (!isBanned) {
 					await client[botNum].reply(
 						{ from, quoted: message },

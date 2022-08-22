@@ -21,7 +21,9 @@ export default {
 	limit: 3,
 	status: "enable",
 	async run({ from, message, query, args, cmd, filename, isMediaImage, extractMediaData, typeQuoted }, client) {
-		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a query");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "Please provide a query");
+		}
 		try {
 			let {
 				_: parsed,
@@ -37,8 +39,11 @@ export default {
 			let models = query.match(/model/g);
 			parsed = models !== null ? parsed.slice(1) : parsed;
 			if (models?.includes("model")) {
-				if (args[1] == "next") args[2] = Number(args[2]);
-				else if (args[1] == "prev") args[2] = Number(args[2]);
+				if (args[1] == "next") {
+					args[2] = Number(args[2]);
+				} else if (args[1] == "prev") {
+					args[2] = Number(args[2]);
+				}
 				const numbers = [];
 				const index = args[2] ?? 0;
 				const splitData = split(
@@ -81,7 +86,9 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 								models?.map((v) => Number(v) - 1),
 							)
 							?.map((v) => v.url);
-			if (models?.length == 0) return client[botNum].reply({ from, quoted: message }, `Model ${models[0]} not found\n Type : !${this.name} -type`);
+			if (models?.length == 0) {
+				return await client[botNum].reply({ from, quoted: message }, `Model ${models[0]} not found\n Type : !${this.name} -type`);
+			}
 			for (const model of models) {
 				let buffers = null;
 				if (isMediaImage) {
@@ -90,7 +97,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 				}
 				const result = await ephoto360(model, parsed.join(" "), buffers);
 				if ("error" in result) {
-					client[botNum].reply({ from, quoted: message }, `something went wrong:\n\n${result.error}`);
+					await client[botNum].reply({ from, quoted: message }, `something went wrong:\n\n${result.error}`);
 					continue;
 				}
 				const { data } = await Axios.get(result.preview, {
@@ -102,10 +109,13 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 					: await sharp(data)
 							.extract({ width: width - 40, height: height - 40, left: 0, top: 0 })
 							.toBuffer();
-				if (isImage) await client[botNum].sendMessage(from, { image: buffer }, { quoted: message });
-				else if (isStickers) {
+				if (isImage) {
+					await client[botNum].sendMessage(from, { image: buffer }, { quoted: message });
+				} else if (isStickers) {
 					await client[botNum].sendMessage(from, { sticker: buffer }, { quoted: message });
-				} else await client[botNum].sendMessage(from, { [defaulType]: buffer }, { quoted: message });
+				} else {
+					await client[botNum].sendMessage(from, { [defaulType]: buffer }, { quoted: message });
+				}
 			}
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";

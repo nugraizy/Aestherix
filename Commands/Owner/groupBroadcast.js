@@ -11,8 +11,12 @@ export default {
 	status: "enable",
 	async run({ isOwner, from, query, message, sender }, client) {
 		try {
-			if (!isOwner) return client[botNum].reply({ from, quoted: message }, "You are not allowed to use this command");
-			if (!query) return client[botNum].reply({ from, quoted: message }, "You must enter text");
+			if (!isOwner) {
+				return await client[botNum].reply({ from, quoted: message }, "You are not allowed to use this command");
+			}
+			if (!query) {
+				return await client[botNum].reply({ from, quoted: message }, "You must enter text");
+			}
 			const getGroups = await client[botNum].groupFetchAllParticipating();
 			const groups = Object.entries(getGroups)
 				.slice(0)

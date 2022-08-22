@@ -33,10 +33,10 @@ export const assign = (client) => {
 	};
 	client[botNum] = {
 		...client[botNum],
+		applyExif,
 		reply: async ({ from, quoted }, text) => {
 			return await client[botNum].sendMessage(from, { text }, { quoted });
 		},
-		applyExif,
 		prepareSticker: async (media, filename, type, options) => {
 			const isMediaURL = Buffer.isBuffer(media) ? false : isURL(media) ? true : false;
 			media = isMediaURL ? (await Axios.get(media, { responseType: "arraybuffer", headers: { DNT: 1, "Upgrade-Insecure-Request": 1 } })).data : media;
@@ -87,7 +87,9 @@ export const assign = (client) => {
 			return await downloadMessage(media, typeDownloadable);
 		},
 		buttonText: async (dari, contentText, footerText, buttons, opts = {}) => {
-			if (buttons.length == 0) return new Error("Buttons is empty");
+			if (buttons.length == 0) {
+				return new Error("Buttons is empty");
+			}
 			const message = generateWAMessageFromContent(
 				ZERO,
 				{
@@ -101,7 +103,7 @@ export const assign = (client) => {
 				},
 				opts,
 			);
-			client[botNum].relayMessage(dari, message.message, { messageId: message.key.id });
+			await client[botNum].relayMessage(dari, message.message, { messageId: message.key.id });
 			return message;
 		},
 		prepareMedia: async (media, type, opts = {}) => {
@@ -131,29 +133,35 @@ export const assign = (client) => {
 			}
 		},
 		buttonDocument: async (dari, contentText, footerText, buttons, media, opts = {}) => {
-			if (buttons.length == 0) return new Error("Buttons is empty");
+			if (buttons.length == 0) {
+				return new Error("Buttons is empty");
+			}
 			const document = await prepareMedia(media, "documentMessage", opts);
 			const message = generateWAMessageFromContent(
 				ZERO,
 				{ buttonsMessage: { buttons, contentText, footerText, headerType: 3, contextInfo: opts.contextInfo, documentMessage: document.message.documentMessage } },
 				opts,
 			);
-			client[botNum].relayMessage(dari, message.message, { messageId: message.key.id });
+			await client[botNum].relayMessage(dari, message.message, { messageId: message.key.id });
 			return message;
 		},
 		buttonLocation: async (dari, contentText, footerText, buttons, media, opts = {}) => {
-			if (buttons.length == 0) return new Error("Buttons is empty");
+			if (buttons.length == 0) {
+				return new Error("Buttons is empty");
+			}
 			const location = await generateWAMessage(ZERO, { location: { degreesLatitude: 0, degreesLongitude: 0, jpegThumbnail: media, name: "provided by nanda" } }, opts);
 			const message = generateWAMessageFromContent(
 				ZERO,
 				{ buttonsMessage: { buttons, contentText, footerText, headerType: 6, contextInfo: opts.contextInfo, locationMessage: location.message.locationMessage } },
 				opts,
 			);
-			client[botNum].relayMessage(dari, message.message, { messageId: message.key.id });
+			await client[botNum].relayMessage(dari, message.message, { messageId: message.key.id });
 			return message;
 		},
 		setStatus: async (status) => {
-			if (!status) return new Error("Status is empty");
+			if (!status) {
+				return new Error("Status is empty");
+			}
 			return await client[botNum].query({
 				tag: "iq",
 				attrs: {
@@ -205,7 +213,7 @@ export const assign = (client) => {
 					} catch (e) {
 						responses.push({ error: e.message, id: container });
 						log(e);
-						client[botNum].reply({ from: dari, quoted: message }, `${container} is not a valid number`);
+						await client[botNum].reply({ from: dari, quoted: message }, `${container} is not a valid number`);
 					}
 				}
 			}
@@ -227,9 +235,11 @@ export const assign = (client) => {
 			const containers = await store.loadMessages(dari);
 			const keys = [];
 			let i = 0;
-			if (containers.length == 0) return keys;
+			if (containers.length == 0) {
+				return keys;
+			}
 			for (const messages of containers) {
-				if (i == 20) break;
+				if (i == 20) {break;}
 				const { message, body, isCmd } = await reassign(JSON.parse(JSON.stringify(messages)), client, store, true);
 				if (body.includes(query) && !isCmd) {
 					keys.push(message);

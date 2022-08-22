@@ -9,20 +9,26 @@ export default {
 	name: "ytaudio",
 	description: "Downloads a YouTube audio",
 	usage: "!ytaudio <url>",
-	aliases: ["yta"],
+	aliases: ["yta", "ytmp3"],
 	category: "Downloader",
 	cooldown: 7,
 	limit: 8,
 	status: "enable",
 	async run({ from, query, prettyNumber, filename, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a URL");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "Please provide a URL");
+		}
 		try {
 			let queries = query.split(",");
 			queries = removeDuplicatesArray(queries);
-			if (queries.length == 1 && isURL(queries) && !regex(queries)) return client[botNum].reply({ from, quoted: message }, "This isn't a valid YouTube URL.");
+			if (queries.length == 1 && isURL(queries) && !regex(queries)) {
+				return await client[botNum].reply({ from, quoted: message }, "This isn't a valid YouTube URL.");
+			}
 			for (const Query of queries) {
-				if (isURL(Query) && !regex(Query)) return client[botNum].reply({ from, quoted: message }, `[ ${Query} ] This isn't a valid YouTube URL.`);
+				if (isURL(Query) && !regex(Query)) {
+					return await client[botNum].reply({ from, quoted: message }, `[ ${Query} ] This isn't a valid YouTube URL.`);
+				}
 				const audio = await yta(Query);
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading YouTube Audio`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 				if ("error" in audio) {
@@ -41,11 +47,13 @@ export default {
 					capt += `Description : ${description ?? "No Data"}\n`;
 					await client[botNum].reply({ from, quoted: message }, capt.trim());
 					await client[botNum].sendMessage(from, {
-						audio: await toOpus("opus", {
+						document: await toOpus("opus", {
 							input: path.join(__dirname, `Temporary Files/${filename}`),
 							output: path.join(__dirname, `Temporary Files/${filename}-done`),
 							media: dl_link.replace("https", "http"),
 						}),
+						fileName: `${title}.opus`,
+						mimetype: "audio/opus",
 						caption: capt.trim(),
 					});
 				}

@@ -83,10 +83,15 @@ const createSequence = async (images, sender) =>
 	});
 
 const createCanvasTemplates = (fonts) => {
-	if (fonts == "chevin") registerFont("./Media Files/Fonts/Chevin Bold.ttf", { family: "chevin" });
-	if (fonts == "texgy") registerFont("./Media Files/Fonts/texgyreadventor-bold.otf", { family: "texgy" });
-	if (fonts == "sanspro") registerFont("./Media Files/Fonts/SourceSansPro-Italic.ttf", { family: "sanspro" });
-	if (fonts == "calm") registerFont("./Media Files/Fonts/KeepCalm-Medium.ttf", { family: "calm" });
+	if (fonts == "chevin") {
+		registerFont("./Media Files/Fonts/Chevin Bold.ttf", { family: "chevin" });
+	} else if (fonts == "texgy") {
+		registerFont("./Media Files/Fonts/texgyreadventor-bold.otf", { family: "texgy" });
+	} else if (fonts == "sanspro") {
+		registerFont("./Media Files/Fonts/SourceSansPro-Italic.ttf", { family: "sanspro" });
+	} else if (fonts == "calm") {
+		registerFont("./Media Files/Fonts/KeepCalm-Medium.ttf", { family: "calm" });
+	}
 	const canvas = createCanvas(360, 360);
 	const ctx = canvas.getContext("2d");
 	return { ctx, canvas };

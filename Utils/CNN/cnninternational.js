@@ -8,7 +8,9 @@ export const cnninternational = (keyword) =>
 			const { result: json } = await fetchJSON(`https://search.api.cnn.com/content?${keyword ? `?q=${keyword}&` : ""}size=10`, {
 				method: "GET",
 			});
-			if (!json) return resolve({ error: "data not found" });
+			if (!json) {
+				return resolve({ error: "data not found" });
+			}
 			resolve(parse(json));
 		} catch (err) {
 			reject(err);

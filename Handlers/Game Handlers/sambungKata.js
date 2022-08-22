@@ -2,10 +2,16 @@ export default {
 	async handler({ from, isGroup, sender, body, message, isAdmin }, client, settings) {
 		const data = games["word"].get(from);
 		const play = async () => {
-			if (!data) return;
+			if (!data) {
+				return;
+			}
 			const sambung = await data.guess(body, sender, from, client);
-			if (!sambung) return;
-			if ("status" in sambung && !sambung.status) return await client[botNum].reply({ from, quoted: message }, sambung.message);
+			if (!sambung) {
+				return;
+			}
+			if ("status" in sambung && !sambung.status) {
+				return await client[botNum].reply({ from, quoted: message }, sambung.message);
+			}
 			await client[botNum].sendMessage(
 				from,
 				{
@@ -22,6 +28,8 @@ Turn : @${sambung.turn.split("@")[0]}`,
 				{ quoted: message },
 			);
 		};
-		if (isGroup && (settings[from].games == "enable" || isAdmin) && !OPTIONS.onlyLogs) await play();
+		if (isGroup && (settings[from].games == "enable" || isAdmin) && !OPTIONS.onlyLogs) {
+			await play();
+		}
 	},
 };

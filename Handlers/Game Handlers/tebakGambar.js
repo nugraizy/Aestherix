@@ -12,10 +12,15 @@ export default {
 					games.tebakGambar.delete(games.tebakGambar.get(from).id);
 					return await client[botNum].sendMessage(from, { text: "Correct!" }, { quoted: message });
 				}
-				if (similarity(body.toLowerCase(), data.data.answer.toLowerCase()) >= minScore) return client[botNum].sendMessage(from, { text: "The answer is close!" }, { quoted: message });
+				if (similarity(body.toLowerCase(), data.data.answer.toLowerCase()) >= minScore) {
+					return await client[botNum].sendMessage(from, { text: "The answer is close!" }, { quoted: message });
+				}
 			}
 		};
-		if (isGroup && (settings[from].games == "enable" || isAdmin) && !OPTIONS.onlyLogs) await play();
-		else if (!isGroup && !OPTIONS.onlyLogs) await play();
+		if (isGroup && (settings[from].games == "enable" || isAdmin) && !OPTIONS.onlyLogs) {
+			await play();
+		} else if (!isGroup && !OPTIONS.onlyLogs) {
+			await play();
+		}
 	},
 };

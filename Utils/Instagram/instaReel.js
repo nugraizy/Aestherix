@@ -40,6 +40,8 @@ const URL_BASE = () => "https://www.instagramsave.com/reels-downloader.php";
 const URL_POST = () => "https://www.instagramsave.com/system/action.php";
 const PARSE_URL = (url) => {
 	const regUrl = url.match(/([-_0-9A-Za-z]{11})/) || undefined;
-	if (regUrl) return `https://www.instagram.com/reel/${regUrl[0]}`;
+	if (regUrl) {
+		return `https://www.instagram.com/reel/${regUrl[0]}`;
+	}
 	return undefined;
 };

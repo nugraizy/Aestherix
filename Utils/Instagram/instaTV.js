@@ -5,7 +5,9 @@ import { cheerioLOAD } from "../../Helper/index.js";
 export const getIgtv = (username) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			if (username.startsWith("@")) username = username.replace("@", "");
+			if (username.startsWith("@")) {
+				username = username.replace("@", "");
+			}
 			let { data } = await Axios.get(`https://www.instagramsave.com/instagram-story-downloader.php?input=${username}`, {
 				headers: {
 					"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",

@@ -8,8 +8,12 @@ const sessionId = process.env.INSTAGRAM_SESI;
 export const getStory3 = (input) =>
 	new Promise(async (resolve, reject) => {
 		const tempURL = input;
-		if (input.startsWith("@")) input = input.replace("@", "");
-		if (regex(input)) input = new URL(input);
+		if (input.startsWith("@")) {
+			input = input.replace("@", "");
+		}
+		if (regex(input)) {
+			input = new URL(input);
+		}
 		try {
 			const idStory = regex(tempURL) ? input.pathname.split("/").filter((v) => v)[2] : input;
 			let username = regex(tempURL) ? input.pathname.split("/").filter((v) => v)[1] : input;
@@ -23,12 +27,18 @@ export const getStory3 = (input) =>
 			const result = { username, fullName, totalStories: data.media_count, stories: [] };
 			for (const item of data.items) {
 				if (regex(tempURL) && item.id.split("_")[0] === idStory) {
-					if (item.media_type == 1) result.stories.push({ isVideo: false, id: item.id.split("_")[0], url: item.image_versions2.candidates[0].url });
-					else if (item.media_type == 2) result.stories.push({ isVideo: true, url: item.video_versions[0].url, duration: item.video_duration });
+					if (item.media_type == 1) {
+						result.stories.push({ isVideo: false, id: item.id.split("_")[0], url: item.image_versions2.candidates[0].url });
+					} else if (item.media_type == 2) {
+						result.stories.push({ isVideo: true, url: item.video_versions[0].url, duration: item.video_duration });
+					}
 					break;
 				} else if (!regex(tempURL)) {
-					if (item.media_type == 1) result.stories.push({ isVideo: false, id: item.id.split("_")[0], url: item.image_versions2.candidates[0].url });
-					else if (item.media_type == 2) result.stories.push({ isVideo: true, url: item.video_versions[0].url, duration: item.video_duration });
+					if (item.media_type == 1) {
+						result.stories.push({ isVideo: false, id: item.id.split("_")[0], url: item.image_versions2.candidates[0].url });
+					} else if (item.media_type == 2) {
+						result.stories.push({ isVideo: true, url: item.video_versions[0].url, duration: item.video_duration });
+					}
 				}
 			}
 			resolve(result);

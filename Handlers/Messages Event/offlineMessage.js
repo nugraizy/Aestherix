@@ -4,8 +4,12 @@ import { isFileExist, readJSON, writeJSON } from "../../Helper/Modules/index.js"
 export default {
 	async handler(client, { isGroup, from, sender, message }) {
 		try {
-			if (isGroup) return;
-			if (!isFileExist("./Databases/Offline DB/users.json")) writeJSON("./Databases/Offline DB/users.json", []);
+			if (isGroup) {
+				return;
+			}
+			if (!isFileExist("./Databases/Offline DB/users.json")) {
+				writeJSON("./Databases/Offline DB/users.json", []);
+			}
 			const data = readJSON("./Databases/Offline DB/users.json");
 			if (data.length == 0) {
 				data.push({
@@ -13,7 +17,7 @@ export default {
 					date: moment().valueOf(),
 				});
 				writeJSON("./Databases/Offline DB/users.json", JSON.parse(JSON.stringify(data, undefined, 2)));
-				client[botNum].reply({ from, quoted: message }, "The owner currently offline, please contact in another time.");
+				await client[botNum].reply({ from, quoted: message }, "The owner currently offline, please contact in another time.");
 				return;
 			}
 			const dataUser = data.find((v) => v.participant == sender);
@@ -22,7 +26,7 @@ export default {
 			const dateNow = moment().valueOf();
 			if (dataUser && dateNow > waitTil30Second) {
 				dataUser.date = moment().valueOf();
-				client[botNum].reply({ from, quoted: message }, "The owner currently offline, please contact in another time.");
+				await client[botNum].reply({ from, quoted: message }, "The owner currently offline, please contact in another time.");
 				writeJSON("./Databases/Offline DB/users.json", JSON.parse(JSON.stringify(data, undefined, 2)));
 			} else if (dataUser && dateNow < waitTil30Second) {
 				return;
@@ -32,7 +36,7 @@ export default {
 					date: moment().valueOf(),
 				});
 				writeJSON("./Databases/Offline DB/users.json", JSON.parse(JSON.stringify(data, undefined, 2)));
-				client[botNum].reply({ from, quoted: message }, "The owner currently offline, please contact in another time.");
+				await client[botNum].reply({ from, quoted: message }, "The owner currently offline, please contact in another time.");
 			}
 		} catch (err) {
 			log(er);

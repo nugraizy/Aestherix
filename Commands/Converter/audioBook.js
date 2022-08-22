@@ -16,7 +16,9 @@ export default {
 	limit: 1,
 	status: "enable",
 	async run({ isMediaImage, from, prettyNumber, message, filename, extractMediaData, typeQuoted }, client) {
-		if (!isMediaImage) return client[botNum].reply({ from, quoted: message }, "Please send/reply an image to recognize text");
+		if (!isMediaImage) {
+			return await client[botNum].reply({ from, quoted: message }, "Please send/reply an image to recognize text");
+		}
 		try {
 			const time = moment().format("HH:mm:ss DD/MM");
 			const file = await client[botNum].downloadAndSaveMediaMessage(

@@ -16,7 +16,7 @@ export default {
 			if (args[1] == "detail" && type == "listResponseMessage") {
 				const detail = await mal.getAnimeDetail(args[2]);
 				if ("error" in detail) {
-					return client[botNum].reply({ from, quoted: message }, detail.message);
+					return await client[botNum].reply({ from, quoted: message }, detail.message);
 				}
 				const caption = parse(detail);
 				const {
@@ -40,7 +40,7 @@ export default {
 			}
 			const result = await mal.searchAnime(query);
 			if ("error" in result) {
-				return client[botNum].reply({ from, quoted: message }, result.message);
+				return await client[botNum].reply({ from, quoted: message }, result.message);
 			}
 			const rows = result
 				.map(({ title, id }, i) => {

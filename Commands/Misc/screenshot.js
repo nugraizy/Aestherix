@@ -11,14 +11,20 @@ export default {
 	limit: 2,
 	status: "enable",
 	async run(message, client) {
-		if (!message.query) return client[botNum].reply({ from: message.from, quoted: message.message }, "Please specify a website URL");
+		if (!message.query) {
+			return await client[botNum].reply({ from: message.from, quoted: message.message }, "Please specify a website URL");
+		}
 		const parseOptions = message.query.includes("--") ? message.query.split("--") : message.query;
 		let type = "desktop";
 		if (Array.isArray(parseOptions)) {
-			if (!isURL(parseOptions[0])) return client[botNum].reply({ from: message.from, quoted: message.message }, "Please specify a valid URL");
+			if (!isURL(parseOptions[0])) {
+				return await client[botNum].reply({ from: message.from, quoted: message.message }, "Please specify a valid URL");
+			}
 			message.query = parseOptions[0];
 			type = parseOptions[1];
-		} else if (!isURL(message.query)) return client[botNum].reply({ from: message.from, quoted: message.message }, "Please specify a valid URL");
+		} else if (!isURL(message.query)) {
+			return await client[botNum].reply({ from: message.from, quoted: message.message }, "Please specify a valid URL");
+		}
 		const { buffer } = await getScreenshot(message.query, type);
 		await client[botNum].sendMessage(message.from, { image: new Buffer.from(buffer, "base64") }, { quoted: message.message });
 	},

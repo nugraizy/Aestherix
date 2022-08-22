@@ -17,7 +17,9 @@ export default {
 				typeQuoted == "locationMessage" || typeQuoted == "liveLocationMessage"
 					? await getWeather("coordinate", extractMediaData.degreesLatitude, extractMediaData.degreesLongitude)
 					: await getWeather("city", query);
-			if ("error" in info) return await client[botNum].reply({ from, quoted: message }, info.error);
+			if ("error" in info) {
+				return await client[botNum].reply({ from, quoted: message }, info.error);
+			}
 			const text = ` ~> ${info.name}\n
 Description : ${info.desc.capitalize()}
 Temperature : ${info.temp}

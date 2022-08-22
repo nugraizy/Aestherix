@@ -67,11 +67,18 @@ const regexOption = [
 	"instaNotifier",
 	"limitReset",
 ];
-if (platform !== "win32" && !OPTIONS.noLoad) await printRandomAscii();
+if (platform !== "win32" && !OPTIONS.noLoad) {
+	await printRandomAscii();
+}
+
 if (OPTIONS.reset) {
 	const sessionName = `${cli.input[0] ?? "Session-debug"}`;
-	if (fs.existsSync(`./Session/${sessionName}.json`)) fs.unlinkSync(`./Session/${sessionName}.json`);
-	if (fs.existsSync(`./Media Files/Connection Databases/${sessionName}.json`)) fs.unlinkSync(`./Media Files/Connection Databases/${sessionName}.json`);
+	if (fs.existsSync(`./Session/${sessionName}.json`)) {
+		fs.unlinkSync(`./Session/${sessionName}.json`);
+	}
+	if (fs.existsSync(`./Media Files/Connection Databases/${sessionName}.json`)) {
+		fs.unlinkSync(`./Media Files/Connection Databases/${sessionName}.json`);
+	}
 }
 
 if (OPTIONS.limitReset) {
@@ -92,7 +99,9 @@ if (OPTIONS.limitReset) {
 const { state, saveState } = useSingleFileAuthState(`./Session/${cli.input[0] ?? "Session-debug"}.json`);
 const store = makeInMemoryStore({ logger: P().child({ level: "fatal", stream: "store" }) });
 if (OPTIONS.json) {
-	if (!fs.existsSync("./Media Files/Connection Databases/")) fs.mkdirSync("./Media Files/Connection Databases/");
+	if (!fs.existsSync("./Media Files/Connection Databases/")) {
+		fs.mkdirSync("./Media Files/Connection Databases/");
+	}
 	store.readFromFile(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`);
 	setInterval(() => {
 		store.writeToFile(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`);
@@ -101,8 +110,11 @@ if (OPTIONS.json) {
 
 export const runtime = Date.now();
 
-for (const option of Object.keys(OPTIONS).filter((key) => OPTIONS[key] == true))
-	if (!regexOption.includes(option)) ERRLOG(` ${color(option, "red")} ${color("is not a valid option", "white")}`);
+for (const option of Object.keys(OPTIONS).filter((key) => OPTIONS[key] == true)) {
+	if (!regexOption.includes(option)) {
+		ERRLOG(` ${color(option, "red")} ${color("is not a valid option", "white")}`);
+	}
+}
 
 const addSpinner = (name, options) => {
 	if (!OPTIONS.noLoad) {
@@ -154,22 +166,31 @@ const start = async () => {
 
 	Client.ev.on("connection.update", async (connections) => {
 		const { lastDisconnect, connection } = connections;
-		if (connection == "connecting") addSpinner("Connecting", { text: "Connecting to WASocket..." });
+		if (connection == "connecting") {
+			addSpinner("Connecting", { text: "Connecting to WASocket..." });
+		}
 		if (connection == "close") {
 			const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
 			if (reason == DisconnectReason.badSession) {
 				log("Bad session, Please delete your previous session and do a rescan...");
 				process.exit(0);
-			} else if (reason == DisconnectReason.connectionLost) log("Connection lost, Quick reconnecting...");
-			else if (reason == DisconnectReason.connectionReplaced) log("Connection replaced, Quick reconnecting...");
-			else if (reason == DisconnectReason.loggedOut) {
+			} else if (reason == DisconnectReason.connectionLost) {
+				log("Connection lost, Quick reconnecting...");
+			} else if (reason == DisconnectReason.connectionReplaced) {
+				log("Connection replaced, Quick reconnecting...");
+			} else if (reason == DisconnectReason.loggedOut) {
 				log("Logged out, Please delete your previous session and do a rescan...");
 				process.exit(0);
 			} else {
-				if (reason == DisconnectReason.restartRequired) log("Restart required, Restarting your WebScoket...");
-				else if (reason == DisconnectReason.timedOut) log("Timed out, Quick reconnecting...");
-				else if (reason == DisconnectReason.connectionClosed) log("Connection closed, Quick reconnecting...");
-				else log("Unknown reason, Quick reconnecting...");
+				if (reason == DisconnectReason.restartRequired) {
+					log("Restart required, Restarting your WebScoket...");
+				} else if (reason == DisconnectReason.timedOut) {
+					log("Timed out, Quick reconnecting...");
+				} else if (reason == DisconnectReason.connectionClosed) {
+					log("Connection closed, Quick reconnecting...");
+				} else {
+					log("Unknown reason, Quick reconnecting...");
+				}
 				await start().catch((e) => log(e));
 			}
 		} else if (connection == "open") {
@@ -192,7 +213,9 @@ const start = async () => {
 	Client.ev.on("creds.update", saveState);
 
 	Client.ev.on("messages.update", async (message) => {
-		if (message?.[0]?.update?.status == 4 || message?.[0]?.update?.status == 3) return;
+		if (message?.[0]?.update?.status == 4 || message?.[0]?.update?.status == 3) {
+			return;
+		}
 		const Handler = (await import("./Handlers/Messages Event/deletedMessage.js")).default.handler;
 		message = store.messages[message[0].key.remoteJid]?.get(message[0].key.id);
 		Handler(client, message, false, store);
@@ -248,15 +271,17 @@ const start = async () => {
 		if (update.time == "day") {
 			await client[botNum].sendMessage(update.id, { text: update.gameDialogue, mentions: update.peopleKilledMention });
 		} else if (update.time == "evening") {
-			client[botNum].sendMessage(update.id, {
+			await client[botNum].sendMessage(update.id, {
 				text: update.gameDialogue,
 			});
 			for (const id of update.playersData.filter((v) => !v.isAlive)) {
+				console.log(id, "Not Alive");
 				client[botNum].sendMessage(id.id, {
 					text: "Karena kamu sudah mati, maka kamu hanya bisa menonton permainan saja",
 				});
 			}
 			for (const id of update.playersData.filter((v) => v.isAlive)) {
+				console.log(id, "Alive");
 				client[botNum].sendMessage(id.id, {
 					title: "Pilih salah satu dari pemain berikut untuk divoting",
 					footer: `Made by Void Bot. Powered by Hidden Finder`,
@@ -339,7 +364,9 @@ ${update.playersData
 	});
 
 	Client.ws.on("CB:notification,type:w:gp2", (update) => {
-		if (update?.content?.[0].tag !== "description" && update?.content?.[0].tag !== "invite") return;
+		if (update?.content?.[0].tag !== "description" && update?.content?.[0].tag !== "invite") {
+			return;
+		}
 		const from = update?.attrs?.from || update?.content?.[0]?.attrs?.author;
 		const name = update?.attrs?.notify;
 		const action = update?.attrs?.content?.[0]?.tag || update?.content?.[0].tag;
@@ -354,8 +381,7 @@ ${update.playersData
 		const action = update?.content?.[0]?.tag;
 		const participant = update?.content?.[0]?.attrs?.author;
 		const content = action == "delete" ? null : await client[botNum].profilePictureUrl(from, "image").catch((e) => null);
-		if (from.endsWith("@g.us")) client[botNum].ev.emit("group.settings.update", { from, name, action, participant, content });
-		else client[botNum].ev.emit("profile.update", { from, name, action, participant, content });
+		client[botNum].ev.emit("group.settings.update", { from, name, action, participant, content });
 	});
 
 	Client.ev.on("contacts.update", () => {});
@@ -365,12 +391,16 @@ ${update.playersData
 	clientMqttListen.on("message", async (topic, message) => {
 		message = message.toString();
 		const data = JSON.parse(message);
-		if (!data.status) return;
-		const content = `Spotify On ${data.is_playing ? "Play" : "Paused"} :                                                       ${data.artists} - ${
-			data.trackTitle
-		}  ( ${data.progress_ms.toTime()}${` - ${data?.duration_ms.toTime()}` ?? ""} )`;
+		if (!data.status) {
+			return;
+		}
+		const content = `Spotify On ${data.is_playing ? "Play" : "Paused"} :                                                       ${data.artists} - ${data.trackTitle}  ( ${
+			data.progress_ms?.toTime() || "00"
+		} - ${data?.duration_ms?.toTime() || "00"} )`;
 		const myStatus = await client[botNum].fetchStatus(`${botNum.split(":")[0]}@s.whatsapp.net`);
-		if (myStatus.status == content) return;
+		if (myStatus.status == content) {
+			return;
+		}
 		await client[botNum].query({
 			tag: "iq",
 			attrs: { to: "@s.whatsapp.net", type: "set", xmlns: "status" },
@@ -400,12 +430,16 @@ async function loadCommands() {
 	const commands = loadFiles("./Commands");
 	successSpinner("files", { text: `Loaded ${commands.length} files` });
 	addSpinner("commands", { text: "Loading Commands..." });
-	if (OPTIONS.watch) addSpinner("watch", { text: "Watching for changes..." });
+	if (OPTIONS.watch) {
+		addSpinner("watch", { text: "Watching for changes..." });
+	}
 	for (const command of commands) {
 		try {
 			const cmd = (await import(pathToFileURL(path.join(__dirname, command)))).default;
 			if (cmd.status != "disable") {
-				if (OPTIONS.watch) await watchFile(pathToFileURL(path.join(__dirname, command)), cmd.name);
+				if (OPTIONS.watch) {
+					await watchFile(pathToFileURL(path.join(__dirname, command)), cmd.name);
+				}
 				cmds.commands.set(cmd.name, { ...cmd, pathname: path.join(__dirname, command) });
 				commandsPath.push(path.join(__dirname, command));
 			}
@@ -415,11 +449,17 @@ async function loadCommands() {
 		}
 	}
 	successSpinner("commands", { text: `Loaded ${cmds.commands.size} commands` });
-	if (OPTIONS.watch) successSpinner("watch", { text: `Watched ${cmds.commands.size} commands` });
+	if (OPTIONS.watch) {
+		successSpinner("watch", { text: `Watched ${cmds.commands.size} commands` });
+	}
 }
 
 async function loadEveryCommand() {
-	for (const command of cmds.commands) for (const aliases of command[1].aliases) cmds.aliases.push(aliases);
+	for (const command of cmds.commands) {
+		for (const aliases of command[1].aliases) {
+			cmds.aliases.push(aliases);
+		}
+	}
 }
 
 async function watchFile(module) {

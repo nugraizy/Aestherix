@@ -12,14 +12,18 @@ export default {
 	limit: 0,
 	status: "enable",
 	async run({ from, message, isOwner }, client, store) {
-		if (!isOwner) return client[botNum].reply({ from, quoted: message }, "You are not allowed to use this command");
+		if (!isOwner) {
+			return await client[botNum].reply({ from, quoted: message }, "You are not allowed to use this command");
+		}
 		const messages = OPTIONS.json ? JSON.parse(readFileSync(STATUS_PATH)).messages[STATUS] : await store.loadMessages(STATUS);
 		const tempContainer = new Map();
 		let caption = `\`\`\` • Fetch WhatsApp Story\`\`\`\n\n`;
 		const rows = [];
 		for (const message of messages) {
 			const type = message.message ? Object.keys(message.message)[0] : undefined;
-			if (!["extendedTextMessage", "imageMessage", "videoMessage"].includes(type)) continue;
+			if (!["extendedTextMessage", "imageMessage", "videoMessage"].includes(type)) {
+				continue;
+			}
 			if (tempContainer.get(message.key.participant)) {
 				if (tempContainer.get(message.key.participant).stories[type] == undefined) {
 					tempContainer.get(message.key.participant).stories = {
@@ -47,7 +51,9 @@ export default {
 				});
 			}
 		}
-		if (tempContainer.size == 0) return client[botNum].reply({ from, quoted: message }, "No story are found.");
+		if (tempContainer.size == 0) {
+			return await client[botNum].reply({ from, quoted: message }, "No story are found.");
+		}
 		for (const value of Array.from(tempContainer.entries())) {
 			caption += ` • ${
 				value[1].stories?.extendedTextMessage?.[0].pushName ?? value[1].stories?.imageMessage?.[0].pushName ?? value[1].stories?.videoMessage?.[0].pushName ?? "No Name"

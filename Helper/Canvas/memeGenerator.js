@@ -14,7 +14,9 @@ const { CanvasTextWrapper } = Wrap;
 export const memeGenerator = (sender, input, topTexts = "", bottomTexts = "", type = "image", WATERMARK) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			if (topTexts == "" && bottomTexts == "") return resolve({ error: "No Texts Provided" });
+			if (topTexts == "" && bottomTexts == "") {
+				return resolve({ error: "No Texts Provided" });
+			}
 			const time = moment().format("HH:mm:ss DD/MM");
 			const { width, height } = sizeOf(input);
 			topTexts = topTexts.substring(0, 40);

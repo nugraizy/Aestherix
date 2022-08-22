@@ -5,7 +5,9 @@ import { isURL } from "../../Helper/Modules/index.js";
 const isValidImageURL = async (url) => {
 	try {
 		const data = await fetch(url.replace("https:", "http:"));
-		if (data.status !== 200) return false;
+		if (data.status !== 200) {
+			return false;
+		}
 		return true;
 	} catch (error) {
 		return false;
@@ -21,15 +23,20 @@ export const sauceNao = async (file) =>
 				form.append("file", createReadStream(file));
 				const response = await new Promise((resolve, reject) => {
 					form.submit(URL_BASE(), (err, res) => {
-						if (err) reject(err);
-						else resolve(res);
+						if (err) {
+							reject(err);
+						} else {
+							resolve(res);
+						}
 					});
 				});
 				response.setEncoding("utf-8");
 				data = "";
 				response.on("data", (v) => (data += v));
 				await new Promise((r) => response.on("end", r));
-			} else if (isURL(file) && !(await isValidImageURL(file))) return resolve({ error: "Invalid image URL" });
+			} else if (isURL(file) && !(await isValidImageURL(file))) {
+				return resolve({ error: "Invalid image URL" });
+			}
 			data = data ?? (await fetchTEXT(URL_BASE_INPUT(file)));
 			const $ = cheerioLOAD(data);
 			const result = $("#middle > div:nth-child(2)");
@@ -39,7 +46,9 @@ export const sauceNao = async (file) =>
 				similarity: Number(result.find("div.resultmatchinfo > div.resultsimilarityinfo").text().replace("%", "")),
 				MAL: result.find("div.resultmatchinfo > div.resultmiscinfo > a:nth-child(4)").attr("href"),
 			};
-			if (!results.MAL) delete results.MAL;
+			if (!results.MAL) {
+				delete results.MAL;
+			}
 			resolve(results);
 		} catch (error) {
 			resolve({ error: error.message });

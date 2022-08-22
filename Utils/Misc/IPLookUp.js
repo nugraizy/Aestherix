@@ -30,7 +30,9 @@ export const IPLookup = (input) =>
 				hosting,
 				message,
 			} = await fetchJSON(URL_API(input));
-			if (status != "success") resolve({ error: message });
+			if (status != "success") {
+				resolve({ error: message });
+			}
 			resolve({
 				continent,
 				continentCode,

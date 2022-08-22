@@ -16,18 +16,24 @@ export default {
 	status: "enable",
 	async run({ from, query, prettyNumber, filename, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a URL");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "Please provide a URL");
+		}
 		try {
 			let queries = query.split(",");
 			queries = removeDuplicatesArray(queries);
-			if (queries.length == 1 && isURL(queries) && !regex(queries)) return client[botNum].reply({ from, quoted: message }, "This isn't a valid Spotify URL.");
+			if (queries.length == 1 && isURL(queries) && !regex(queries)) {
+				return await client[botNum].reply({ from, quoted: message }, "This isn't a valid Spotify URL.");
+			}
 			for (const Query of queries) {
-				if (isURL(Query) && !regex(Query)) return client[botNum].reply({ from, quoted: message }, `[ ${Query} ] This isn't a valid Spotify URL.`);
+				if (isURL(Query) && !regex(Query)) {
+					return await client[botNum].reply({ from, quoted: message }, `[ ${Query} ] This isn't a valid Spotify URL.`);
+				}
 				const searchTerm = await ytsr(Query);
 				const audio = await yta(searchTerm[0].url);
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading Spotify Audio`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 				if ("error" in audio) {
-					client[botNum].reply({ from, quoted: message }, audio.error);
+					await client[botNum].reply({ from, quoted: message }, audio.error);
 					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Spotify Audio", "red")} for ${color(prettyNumber, "#ff71ce")}`);
 				} else {
 					const { title, timestamp, dl_link } = audio;
@@ -36,11 +42,13 @@ export default {
 					capt += `Duration : ${timestamp ?? "No Data"}\n`;
 					await client[botNum].reply({ from, quoted: message }, capt.trim());
 					await client[botNum].sendMessage(from, {
-						audio: await toOpus("opus", {
+						document: await toOpus("opus", {
 							input: path.join(__dirname, `Temporary Files/${filename}`),
 							output: path.join(__dirname, `Temporary Files/${filename}-done`),
 							media: dl_link.replace("https", "http"),
 						}),
+						fileName: `${title}.opus`,
+						mimetype: "audio/opus",
 						caption: capt.trim(),
 					});
 				}

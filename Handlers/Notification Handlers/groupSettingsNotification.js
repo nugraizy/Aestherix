@@ -22,9 +22,11 @@ const EVENT_TYPE = {
 };
 export default {
 	async handler(client, message, store) {
-		if ("action" in message && message.action == "description") message.messageStubType = EVENT_TYPE["DESCRIPTION"];
+		if ("action" in message && message.action == "description") {
+			message.messageStubType = EVENT_TYPE["DESCRIPTION"];
+		}
 		message = await reassign(JSON.parse(JSON.stringify(message)), client, store, false);
-		if (message[message.from].notification == "enable") {
+		if (message[message.from]?.notification == "enable") {
 			let status;
 			if (message.action == "set") {
 				message.messageStubType = "GROUP_CHANGE_ICON";
@@ -53,7 +55,7 @@ export default {
 						? `${message.messageStubParameters[0] == "on" ? "Enabling Mode Restrictions" : "Disabling Mode Restrictions"}`
 						: `${EVENT_UPDATE[mode]} from ${message[message.from].groupName} to ${message.messageStubParameters[0]}`;
 			}
-			client[botNum].sendMessage(message.from, {
+			await client[botNum].sendMessage(message.from, {
 				text: `\`\`\` • Group Settings Notification\`\`\`\n
 Event Update : ${EVENT_UPDATE[message.messageStubType]}
 

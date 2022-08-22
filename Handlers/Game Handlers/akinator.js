@@ -2,11 +2,15 @@ import { getSession, handleAnswer } from "../../Utils/Games/index.js";
 
 export default {
 	async handler({ from, isAdmin, isGroup, body, message }, client, settings) {
-		if (!getSession(from)) return;
+		if (!getSession(from)) {
+			return;
+		}
 		const play = async () => {
 			const handle = await handleAnswer(from, body);
 			const { question, answers, status, progress, progressBar, arrow } = handle;
-			if (status == "waiting") return;
+			if (status == "waiting") {
+				return;
+			}
 			if (status == "playing")
 				await client[botNum].reply(
 					{ from, quoted: message },
@@ -21,16 +25,23 @@ export default {
 					},
 					{ quted: message },
 				);
-			if (status == "exitted") await client[botNum].reply({ from, quoted: message }, "You have exitted the game.");
+			if (status == "exitted") {
+				await client[botNum].reply({ from, quoted: message }, "You have exitted the game.");
+			}
 			if (status == "back") {
-				if (handle.isFailed) return await client[botNum].reply({ from, quoted: message }, "You can't go back.");
+				if (handle.isFailed) {
+					return await client[botNum].reply({ from, quoted: message }, "You can't go back.");
+				}
 				await client[botNum].reply(
 					{ from, quoted: message },
 					`${question}\n\n${answers.map((v, i) => `${i + 1}. ${v}`).join("\n")}\n6. Exit\n7. Back/Undo\n\Progress : ${progress.toFixed(2)}% ${arrow}\n${progressBar}`,
 				);
 			}
 		};
-		if (isGroup && (settings[from].games == "enable" || isAdmin) && !OPTIONS.onlyLogs) await play();
-		else if (!isGroup && !OPTIONS.onlyLogs) await play();
+		if (isGroup && (settings[from].games == "enable" || isAdmin) && !OPTIONS.onlyLogs) {
+			await play();
+		} else if (!isGroup && !OPTIONS.onlyLogs) {
+			await play();
+		}
 	},
 };

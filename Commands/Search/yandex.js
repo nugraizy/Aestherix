@@ -14,7 +14,9 @@ export default {
 	cooldown: 8,
 	status: "enable",
 	async run({ isMediaImage, query, extractMediaData, filename, from, message, typeQuoted }, client) {
-		if (!isURL(query) && !isMediaImage) return client[botNum].reply({ from, quoted: message }, "Please send/reply a image to find the similar image");
+		if (!isURL(query) && !isMediaImage) {
+			return await client[botNum].reply({ from, quoted: message }, "Please send/reply a image to find the similar image");
+		}
 		let media = query && isURL(query) ? query : null;
 		try {
 			await client[botNum].reply({ from, quoted: message }, "Searching. Please wait...");
@@ -26,8 +28,10 @@ export default {
 				);
 			const result = await yandex(media);
 			if ("error" in result) {
-				if (isMediaImage) fs.unlinkSync(media);
-				return client[botNum].reply({ from, quoted: message }, result.error);
+				if (isMediaImage) {
+					fs.unlinkSync(media);
+				}
+				return await client[botNum].reply({ from, quoted: message }, result.error);
 			}
 			let capt = "``` • Reverse Image Search```\n";
 			capt += "Will sending a few similar or the actual images itself. Please wait...\n\n";
@@ -38,13 +42,19 @@ export default {
 			let i = 0;
 			const images = removeDuplicatesArray(result.information.map((item) => item.images));
 			for (const image of images) {
-				if (i == 5) break;
+				if (i == 5) {
+					break;
+				}
 				await client[botNum].sendMessage(from, { image: { url: image } });
 				i++;
 			}
-			if (isMediaImage) fs.unlinkSync(media);
+			if (isMediaImage) {
+				fs.unlinkSync(media);
+			}
 		} catch (err) {
-			if (isMediaImage) fs.unlinkSync(media);
+			if (isMediaImage) {
+				fs.unlinkSync(media);
+			}
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name}\n`;
 			str += `Message : ${err.message}`;

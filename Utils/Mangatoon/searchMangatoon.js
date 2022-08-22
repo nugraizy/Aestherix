@@ -5,7 +5,9 @@ export const searchMangatoon = (query) =>
 		try {
 			const data = await fetchTEXT(BASE_URL(`/en/search?word=${query}`));
 			const $ = cheerioLOAD(data);
-			if ($(".no-result").length !== 0) return resolve({ error: $(".no-result-word").text() });
+			if ($(".no-result").length !== 0) {
+				return resolve({ error: $(".no-result-word").text() });
+			}
 			resolve(
 				$(".recommend-comics > .recommend-item")
 					.map((i, el) => {

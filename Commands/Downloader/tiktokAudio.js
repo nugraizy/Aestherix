@@ -19,11 +19,17 @@ export default {
 	status: "enable",
 	async run({ from, query, prettyNumber, filename, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a URL");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "Please provide a URL");
+		}
 		try {
 			let { _: urls } = parser(query);
-			if (isOne(urls.length) && !isURL(urls[0])) return client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
-			if (isOne(urls.length) && !regex(urls[0])) return client[botNum].reply({ from, quoted: message }, "Please specify a valid TikTok url");
+			if (isOne(urls.length) && !isURL(urls[0])) {
+				return await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
+			}
+			if (isOne(urls.length) && !regex(urls[0])) {
+				return await client[botNum].reply({ from, quoted: message }, "Please specify a valid TikTok url");
+			}
 			for (const url of removeDuplicatesArray(urls.map((v) => v.trim()))) {
 				if (!isURL(url)) {
 					await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
@@ -35,7 +41,7 @@ export default {
 				const audio = await tiktokAPI(url);
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading TikTok Audio`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 				if ("error" in audio || audio.status === "error") {
-					client[botNum].reply({ from, quoted: message }, audio.error || audio.message);
+					await client[botNum].reply({ from, quoted: message }, audio.error || audio.message);
 					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download TikTok Audio", "red")} for ${color(prettyNumber, "#ff71ce")}`);
 					continue;
 				}

@@ -4,7 +4,9 @@ export const trueidSearch = (keyword) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			const { data } = await fetchJSON(BASE_API_URL_SEARCH(keyword));
-			if (data.length == 0) return resolve({ error: "No result found" });
+			if (data.length == 0) {
+				return resolve({ error: "No result found" });
+			}
 			resolve(await parse(data));
 		} catch (err) {
 			reject(err);

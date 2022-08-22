@@ -11,7 +11,9 @@ export default {
 	cooldown: 5,
 	status: "enable",
 	async run({ query, from, message, args, type }, client) {
-		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "You must provide a query.");
+		}
 		if ((args[1] == "next" || args[1] == "prev") && type == "templateButtonReplyMessage") {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(" "))));
 			const index = data.findIndex((v) => v.image == args[2]);

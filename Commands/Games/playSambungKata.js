@@ -10,7 +10,9 @@ export default {
 	limit: 2,
 	status: "enable",
 	async run({ isGroup, message, from, sender, query }, client) {
-		if (!isGroup) return client[botNum].reply({ from, quoted: message }, "This feature only for groups");
+		if (!isGroup) {
+			return await client[botNum].reply({ from, quoted: message }, "This feature only for groups");
+		}
 		const statusGame = GetSambungKataSession(from);
 		if (!statusGame) {
 			new SambungKata(sender, undefined, from);

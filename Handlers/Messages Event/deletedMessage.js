@@ -8,17 +8,31 @@ import { CheckIntervals, DeleteIntervals } from "../../Utils/Misc/index.js";
 export default {
 	async handler(client, message, fetches) {
 		try {
-			if (message == undefined) return;
+			if (message == undefined) {
+				return;
+			}
 			message = await reassign(JSON.parse(JSON.stringify(message)), client, false, true);
-			if (message && "error" in message) return;
+			if (message && "error" in message) {
+				return;
+			}
 			const { from, mention: mentioning, timeStamp, sender, body, pushname, extractMediaData, filename, isBaileys, isFromMe, mediaData } = message;
 			const messages = message?.message?.message;
-			if (!messages) return;
+			if (!messages) {
+				return;
+			}
 			const type = Object.keys(messages)[0];
-			if (isBaileys) return;
-			if (isFromMe) return;
-			if (from == "status@broadcast") return;
-			if (type == "protocolMessage" || type == "senderKeyDistributionMessage" || !type) return;
+			if (isBaileys) {
+				return;
+			}
+			if (isFromMe) {
+				return;
+			}
+			if (from == "status@broadcast") {
+				return;
+			}
+			if (type == "protocolMessage" || type == "senderKeyDistributionMessage" || !type) {
+				return;
+			}
 			if (
 				CheckIntervals(intervals.url.get(sender)) !== 0 &&
 				CheckIntervals(intervals.url.get(sender).get(from)) !== 0 &&
@@ -95,7 +109,7 @@ Type : ${type}
 Time : ${moment.unix(timeStamp).format("HH:mm:ss DD/MM/YYYY")}
 Message : ${body ? body : "Unknown"}${quotedMessage}
 `.trim();
-							client[botNum].sendMessage(from, { text: stringDeleted, mentions: options.contextInfo.mentionedJid }, options);
+							await client[botNum].sendMessage(from, { text: stringDeleted, mentions: options.contextInfo.mentionedJid }, options);
 						}
 						break;
 					case "stickerMessage":

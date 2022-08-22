@@ -17,7 +17,7 @@ export default {
 				lists.map((v, i) => `${i + 1}. ${v.nama_latin}\nTot. Ayat : ${v.jumlah_ayat}\nArti : ${v.arti}\nTurun Di : ${v.tempat_turun}\nAudio : ${v.audio}\n`).join("\n"),
 			);
 		} catch (err) {
-			return client[botNum].reply({ from, quoted: message }, "Something went wrong");
+			return await lient[botNum].reply({ from, quoted: message }, "Something went wrong");
 		}
 	},
 };

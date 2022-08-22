@@ -16,7 +16,9 @@ export const SetIntervals = async (intervaly, key, time, callback, opts = {}) =>
 
 export const CheckIntervals = (intervaly) => {
 	const interval = intervaly;
-	if (interval == undefined) return 0;
+	if (interval == undefined) {
+		return 0;
+	}
 	return {
 		...interval,
 	};
@@ -36,7 +38,9 @@ export const CheckAllIntervals = () => {
 
 export const DeleteIntervals = (intervaly, rawIntervaly, key) => {
 	const interval = intervaly;
-	if (interval == undefined) return 0;
+	if (interval == undefined) {
+		return 0;
+	}
 	clearInterval(interval.intervals);
 	rawIntervaly.delete(key);
 };

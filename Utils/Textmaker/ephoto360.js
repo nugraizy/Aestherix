@@ -23,14 +23,18 @@ export const ephoto360 = async (api, texts, buffer) =>
 			const token = $('input[name="token"]').attr("value");
 			const cookie = headers["set-cookie"][0].split(";")[0];
 			const isNeedImageBuffer = $("li.item-content > span.file-input-wrapper > span.btn.btn-primary.choose_file_button").text().trim() == "Select Photo";
-			if (isNeedImageBuffer && !buffer) return resolve({ error: "This Model Need image buffer" });
+			if (isNeedImageBuffer && !buffer) {
+				return resolve({ error: "This Model Need image buffer" });
+			}
 			let formData = new FormData();
 			const howManyText = $("li.item-content > div.item-inner").find("div.item-input > input.form-control").get().length;
 			const style = $('input[name="radio0[radio]"]')
 				.map((i, el) => $(el).attr("value"))
 				.get()?.[0];
 			texts = howManyText !== 0 ? split(texts, howManyText) : 0;
-			if (texts.length < howManyText) return resolve({ error: "Texts is not enough" });
+			if (texts.length < howManyText) {
+				return resolve({ error: "Texts is not enough" });
+			}
 			if (isNeedImageBuffer) {
 				formData.append("file", buffer);
 				const { data: payloadImages } = await Axios.post("https://e1.yotools.net/upload", formData, {
@@ -60,7 +64,9 @@ export const ephoto360 = async (api, texts, buffer) =>
 					}),
 				);
 			}
-			if (style) formData.append("radio0[radio]", style);
+			if (style) {
+				formData.append("radio0[radio]", style);
+			}
 			formData.append("build_server", "https://e2.yotools.net");
 			formData.append("build_server_id", 2);
 			formData.append("submit", "GO");
@@ -81,7 +87,9 @@ export const ephoto360 = async (api, texts, buffer) =>
 			).data;
 			$ = cheerioLOAD(data);
 			const jsonDataRaw = $('input[name="form_value_input"]').attr("value");
-			if (NO_VAL(jsonDataRaw)) return resolve({ error: "Process Failed. Reason : No Token found at the last step." });
+			if (NO_VAL(jsonDataRaw)) {
+				return resolve({ error: "Process Failed. Reason : No Token found at the last step." });
+			}
 			const jsonData = JSON.parse(jsonDataRaw);
 			formData = null;
 			formData = new FormData();
@@ -89,7 +97,9 @@ export const ephoto360 = async (api, texts, buffer) =>
 				formData.append("file_image_input", "");
 				formData.append("image[]", jsonData.image[0]);
 			}
-			if (style) formData.append("radio0[radio]", style);
+			if (style) {
+				formData.append("radio0[radio]", style);
+			}
 			formData.append("build_server", "https://e1.yotools.net");
 			formData.append("build_server_id", 2);
 			formData.append("id", jsonData.id);
@@ -108,7 +118,9 @@ export const ephoto360 = async (api, texts, buffer) =>
 					},
 				})
 			).data;
-			if (buffer) fs.unlinkSync(tmpBuffer);
+			if (buffer) {
+				fs.unlinkSync(tmpBuffer);
+			}
 			resolve(parseUrlDownload(data));
 		} catch (err) {
 			reject(err);
@@ -136,12 +148,16 @@ const scrapePages = async (page) => {
 			container.push({ url: BASE_URL(url), effectName });
 		}
 	});
-	if (page == 39) return fs.writeFileSync("./Databases/Textmaker/ephoto360url.json", JSON.stringify(container, undefined, 2));
+	if (page == 39) {
+		return fs.writeFileSync("./Databases/Textmaker/ephoto360url.json", JSON.stringify(container, undefined, 2));
+	}
 	await scrapePages(page + 1);
 };
 
 const split = (text, len) => {
-	if (len == 1) return [text];
+	if (len == 1) {
+		return [text];
+	}
 	const arr = text.split(/\s+/);
 	let length = len;
 	len = arr.length;
@@ -161,5 +177,3 @@ const split = (text, len) => {
 	}
 	return out.map((v) => v.join(" "));
 };
-
-//await ephoto360("https://en.ephoto360.com/create-anime-style-computer-photo-frames-694.html", "Noo need", fs.readFileSync("./test.webp"));

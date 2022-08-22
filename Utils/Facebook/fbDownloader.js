@@ -23,8 +23,9 @@ export const fbDl = (url) =>
 				.split(",")
 				.map((v) => v.replace(/"/g, "").trim());
 			let html;
-			if (!Array.isArray(decode) || decode.length !== 6) html = (typeof data === "string" ? JSON.parse(data) : data)?.data;
-			else {
+			if (!Array.isArray(decode) || decode.length !== 6) {
+				html = (typeof data === "string" ? JSON.parse(data) : data)?.data;
+			} else {
 				const decoded = decoding(...decode);
 				html = decoded
 					?.split('("download-section").innerHTML = "')[1]
@@ -36,7 +37,9 @@ export const fbDl = (url) =>
 					.join()
 					?.split("</section><div class=")[0]
 					?.replace(/\\(\\)?/g, "");
-				if (!html) return resolve({ error: "Cant find downloadable media" });
+				if (!html) {
+					return resolve({ error: "Cant find downloadable media" });
+				}
 				const $ = cheerioLOAD(html);
 				let result = [];
 				$("table.table > tbody > tr").each(function () {
@@ -44,10 +47,14 @@ export const fbDl = (url) =>
 					if (/tidak|no/i.test(el.eq(1).text())) {
 						const quality = el.eq(0).text().split("(")?.[0]?.trim();
 						const urls = el.eq(2).find("a[href]").attr("href");
-						if (url) result.push({ quality, url: urls });
+						if (url) {
+							result.push({ quality, url: urls });
+						}
 					}
 				});
-				if (!result.length) return resolve({ error: "Cant find downloadable media" });
+				if (!result.length) {
+					return resolve({ error: "Cant find downloadable media" });
+				}
 				result = result.filter((v) => v.quality == "1080p" || v.quality == "720p" || v.quality == "480p");
 				resolve({
 					isVideo: true,
@@ -57,7 +64,9 @@ export const fbDl = (url) =>
 			}
 		} catch (err) {
 			const data = await fetchJSON(URL_BASE, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) });
-			if (data.code == 102) return resolve({ error: data.message });
+			if (data.code == 102) {
+				return resolve({ error: data.message });
+			}
 			let { url: urls, subname } = data.url.filter((x) => x.subname == "HD")?.[0] ?? data.url.filter((x) => x.subname == "SD")?.[0] ?? data.url[0];
 			let { duration, title } = data.meta;
 			let { timestamp: datePosted } = data;
@@ -84,7 +93,9 @@ const decoding = (...args) => {
 			.split("")
 			.reverse()
 			.reduce((a, b, c) => {
-				if (h.includes(b)) return (a += h.indexOf(b) * e ** c);
+				if (h.includes(b)) {
+					return (a += h.indexOf(b) * e ** c);
+				}
 			}, 0);
 		let k = "";
 		while (j > 0) {

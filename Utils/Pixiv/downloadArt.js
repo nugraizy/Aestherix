@@ -5,7 +5,9 @@ export const downloadArtworks = (input) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			const { body } = await fetchJSON(URL_API_DOWNLOAD_ARTWORKS(input));
-			if (body.length == 0) resolve({ error: "No downloadable media found with this keyword." });
+			if (body.length == 0) {
+				resolve({ error: "No downloadable media found with this keyword." });
+			}
 			const container = {};
 			const { id, title, userId, userName, pageCount } = body;
 			container.id = id;

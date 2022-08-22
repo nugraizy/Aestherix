@@ -15,10 +15,14 @@ export default {
 	status: "enable",
 	async run({ from, query, prettyNumber, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!query) return client[botNum].reply({ from, quoted: message }, "Please specify a url");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "Please specify a url");
+		}
 		try {
 			let { _: urls } = parser(query);
-			if (isOne(urls.length) && !isURL(urls[0])) return client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
+			if (isOne(urls.length) && !isURL(urls[0])) {
+				return await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
+			}
 			for (const url of urls) {
 				if (!isURL(url.trim())) {
 					await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");

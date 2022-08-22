@@ -6,7 +6,9 @@ const sessionId = process.env.INSTAGRAM_SESI || (await (await import("./instaCoo
 
 export const getPost = (code) =>
 	new Promise(async (resolve, reject) => {
-		if (!code) return reject(new Error('Argument "code" must be specified'));
+		if (!code) {
+			return reject(new Error('Argument "code" must be specified'));
+		}
 		try {
 			const FORMATTED_URL = INFO_URL_API(code);
 			const data = await fetchJSON(FORMATTED_URL, {
@@ -21,11 +23,16 @@ export const getPost = (code) =>
 			let result = { username, full_name, is_private, is_verified, like_count, carousel_media_count, taken_at, comment_count, captions, post: [] };
 			if (type == "slide") {
 				let { carousel_media: posts } = data.items[0];
-				for (const post of posts)
-					if (post.media_type == 1) result.post.push({ isVideo: false, url: post.image_versions2.candidates[0].url });
-					else if (post.media_type == 2) result.post.push({ isVideo: true, url: post.video_versions[0].url, duration: post.video_duration });
-			} else if (type == "image") result.post.push({ isVideo: false, url: data.items[0].image_versions2.candidates[0].url });
-			else if (type == "video") {
+				for (const post of posts) {
+					if (post.media_type == 1) {
+						result.post.push({ isVideo: false, url: post.image_versions2.candidates[0].url });
+					} else if (post.media_type == 2) {
+						result.post.push({ isVideo: true, url: post.video_versions[0].url, duration: post.video_duration });
+					}
+				}
+			} else if (type == "image") {
+				result.post.push({ isVideo: false, url: data.items[0].image_versions2.candidates[0].url });
+			} else if (type == "video") {
 				result = { ...result, play_count: data.items[0].play_count };
 				result.post.push({ isVideo: true, url: data.items[0].video_versions[0].url });
 			}

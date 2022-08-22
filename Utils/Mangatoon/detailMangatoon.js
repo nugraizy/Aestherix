@@ -3,9 +3,11 @@ import { cheerioLOAD, fetchTEXT } from "../../Helper/index.js";
 export const getDetailMangatoon = (id) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const data = await fetchTEXT(BASE_URL(775402));
+			const data = await fetchTEXT(BASE_URL(id));
 			const $ = cheerioLOAD(data);
-			if ($(".list-item").length !== 0) return resolve({ error: "Manga not found, Try another URL." });
+			if ($(".list-item").length !== 0) {
+				return resolve({ error: "Manga not found, Try another URL." });
+			}
 			resolve({
 				title: $("span.detail-title.select-text").text(),
 				author: $(".detail-author-name.select-text").text().trim().split("Author Name: ")[1],

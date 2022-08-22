@@ -7,20 +7,20 @@ export default {
 	name: "ytvideo",
 	description: "Downloads a YouTube video",
 	usage: "!ytvideo <url>",
-	aliases: ["ytv"],
+	aliases: ["ytv", "ytmp4"],
 	category: "Downloader",
 	cooldown: 12,
 	limit: 8,
 	status: "enable",
 	async run({ from, query, prettyNumber, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a URL");
+		if (!query) return await client[botNum].reply({ from, quoted: message }, "Please provide a URL");
 		try {
 			let queries = query.split(",");
 			queries = removeDuplicatesArray(queries);
-			if (queries.length == 1 && isURL(queries) && !regex(queries)) return client[botNum].reply({ from, quoted: message }, "This isn't a valid YouTube URL.");
+			if (queries.length == 1 && isURL(queries) && !regex(queries)) return await client[botNum].reply({ from, quoted: message }, "This isn't a valid YouTube URL.");
 			for (const Query of queries) {
-				if (isURL(Query) && !regex(Query)) return client[botNum].reply({ from, quoted: message }, `[ ${Query} ] This isn't a valid YouTube URL.`);
+				if (isURL(Query) && !regex(Query)) return await client[botNum].reply({ from, quoted: message }, `[ ${Query} ] This isn't a valid YouTube URL.`);
 				const video = await ytv(Query);
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading YouTube Video`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 				if ("error" in video) {

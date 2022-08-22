@@ -5,8 +5,12 @@ export const readMangatoon = (id) =>
 		try {
 			const data = await fetchTEXT(id);
 			const $ = cheerioLOAD(data);
-			if ($("div.lock-top-text").text() == "This chapter is not unlocked yet") return resolve({ error: $("div.lock-top-text").text() });
-			if (data == "NOT FOUND") return resolve({ error: "Manga not found" });
+			if ($("div.lock-top-text").text() == "This chapter is not unlocked yet") {
+				return resolve({ error: $("div.lock-top-text").text() });
+			}
+			if (data == "NOT FOUND") {
+				return resolve({ error: "Manga not found" });
+			}
 			resolve(
 				$(".watch-page > .pictures")
 					.find("img.lazyload_img")

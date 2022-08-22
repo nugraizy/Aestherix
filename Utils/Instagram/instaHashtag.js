@@ -7,7 +7,9 @@ const BASE_URL = (code) => `https://www.instagram.com/p/${code}`;
 export const searchHashtag = (query) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			if (query.includes("#")) query = query.replace("#", "");
+			if (query.includes("#")) {
+				query = query.replace("#", "");
+			}
 			const { data } = await fetchJSON(`https://www.instagram.com/explore/tags/${query}/?__a=1&__d=dis`, {
 				headers: {
 					"user-agent": UA,
@@ -16,7 +18,9 @@ export const searchHashtag = (query) =>
 			});
 			resolve(parse(data));
 		} catch (e) {
-			if (e.response?.data && Object.keys(e?.response?.data)?.length == 0) return resolve({ error: "Hashtag not found" });
+			if (e.response?.data && Object.keys(e?.response?.data)?.length == 0) {
+				return resolve({ error: "Hashtag not found" });
+			}
 			reject(e);
 		}
 	});
@@ -47,7 +51,9 @@ const parse = (arr) => {
 						let media;
 						if (mediaType == "slide") {
 							media = medias.carousel_media.map((posts) => {
-								if (posts.media_type == 1) return { isVideo: false, url: posts.image_versions2.candidates[0].url };
+								if (posts.media_type == 1) {
+									return { isVideo: false, url: posts.image_versions2.candidates[0].url };
+								}
 								return { isVideo: true, url: posts.video_versions[0].url, duration: posts.video_duration };
 							});
 						} else if (mediaType == "video") {

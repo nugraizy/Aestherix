@@ -8,10 +8,14 @@ export default {
 	cooldown: 5,
 	status: "enable",
 	async run({ from, query, message, sender, isOwner }, client) {
-		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a url.");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "You must provide a url.");
+		}
 		try {
 			const reg = regex(query);
-			if (!reg) return await client[botNum].reply({ from, quoted: message }, "Invalid url.");
+			if (!reg) {
+				return await client[botNum].reply({ from, quoted: message }, "Invalid url.");
+			}
 			const metadataInvite = await client[botNum].groupGetInviteInfo(reg);
 			const metadataGroup = await client[botNum].groupMetadata(metadataInvite?.id);
 			const participants = metadataInvite.participants?.map((v) => v?.id);

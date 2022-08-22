@@ -20,15 +20,20 @@ export const isUrl = (url) => url.match(new RegExp(/^.*(?:(?:youtu\.be\/|v\/|vi\
 export const yt = async (url, quality, type, bitrate, server = "en60") =>
 	new Promise(async (resolve) => {
 		try {
-			if (!isUrl(url)) return resolve({ error: "Invalid URL" });
+			if (!isUrl(url)) {
+				return resolve({ error: "Invalid URL" });
+			}
 			const json = await post(`https://www.y2mate.com/mates/${server}/analyze/ajax`, {
 				url,
 				q_auto: 0,
 				ajax: 1,
 			});
-			if (json.result.includes("Error: </span>This video is copyrighted.")) return resolve({ error: "```Error : Video ini dilarang didownload bajakan```", internal: false });
-			if (json.result.includes("Error: </span>We can not convert your video."))
+			if (json.result.includes("Error: </span>This video is copyrighted.")) {
+				return resolve({ error: "```Error : Video ini dilarang didownload bajakan```", internal: false });
+			}
+			if (json.result.includes("Error: </span>We can not convert your video.")) {
 				return resolve({ error: "```Error : Link yang kamu masukkan tidak dapat ditemukan.```", internal: false });
+			}
 			let { document } = new JSDOM(json.result).window;
 			const tables = document.querySelectorAll("table");
 			const table = tables[{ mp4: 0, mp3: 1 }[type] || 0];
@@ -129,8 +134,9 @@ export const ytv = (query) =>
 							.catch((e) => resolve({ error: e.error, internal: false }));
 					})
 					.catch((e) => resolve({ error: e.error, internal: false }));
-			} else if (isUrl(query)) resolve({ error: "Link YouTube tidak valid.", internal: false });
-			else {
+			} else if (isUrl(query)) {
+				resolve({ error: "Link YouTube tidak valid.", internal: false });
+			} else {
 				ytsr(query, false)
 					.then((res) => {
 						const url = `https://youtu.be/${res.videoId}`;
@@ -165,8 +171,9 @@ export const yta = (query) =>
 							.catch((e) => resolve({ error: e.error, internal: false }));
 					})
 					.catch((e) => resolve({ error: e.error, internal: false }));
-			} else if (isUrl(query)) resolve({ error: "Link YouTube tidak valid.", internal: false });
-			else {
+			} else if (isUrl(query)) {
+				resolve({ error: "Link YouTube tidak valid.", internal: false });
+			} else {
 				ytsr(query, false)
 					.then((res) => {
 						const url = `https://youtu.be/${res.videoId}`;

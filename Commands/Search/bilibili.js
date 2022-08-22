@@ -11,7 +11,9 @@ export default {
 	cooldown: 7,
 	status: "enable",
 	async run({ query, from, message }, client) {
-		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "You must provide a query.");
+		}
 		try {
 			let queries = query.split(",");
 			queries = removeDuplicatesArray(queries);
@@ -23,7 +25,9 @@ export default {
 				}
 				let i = 0;
 				for (const { title, author, author_id, like, share, duration, favorite, view, thumbnail, description, original_video_link, download_link, size } of videos) {
-					if (i == 3) break;
+					if (i == 3) {
+						break;
+					}
 					await delay(300);
 					await client[botNum].sendMessage(
 						from,

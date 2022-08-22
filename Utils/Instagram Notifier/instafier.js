@@ -12,7 +12,9 @@ class Instafier {
 	#password = process.env.INSTAGRAM_PASSWORD;
 	#authorId = null;
 	constructor() {
-		if (!OPTIONS.instaNotifier) return;
+		if (!OPTIONS.instaNotifier) {
+			return;
+		}
 		if (!(this.#username || this.#password)) {
 			throw new Error("Username and password are required");
 		}
@@ -64,7 +66,9 @@ class Instafier {
 	}
 
 	async saveState() {
-		if (!fs.existsSync("./Session/Instagram Auth/")) fs.mkdirSync("./Session/Instagram Auth/");
+		if (!fs.existsSync("./Session/Instagram Auth/")) {
+			fs.mkdirSync("./Session/Instagram Auth/");
+		}
 		return fs.writeFileSync(`./Session/Instagram Auth/${process.env.INSTAGRAM_USERNAME}.json`, await this.Instagram.exportState(), { encoding: "utf8" });
 	}
 
@@ -72,14 +76,18 @@ class Instafier {
 		if (!fs.existsSync(`./Session/Instagram Auth/${process.env.INSTAGRAM_USERNAME}.json`)) {
 			await this.login();
 			await this.saveState();
-		} else await this.Instagram.importState(fs.readFileSync(`./Session/Instagram Auth/${process.env.INSTAGRAM_USERNAME}.json`, { encoding: "utf8" }));
+		} else {
+			await this.Instagram.importState(fs.readFileSync(`./Session/Instagram Auth/${process.env.INSTAGRAM_USERNAME}.json`, { encoding: "utf8" }));
+		}
 		this.#authorId = (await this.Instagram.account.currentUser()).pk;
 		return { error: false, message: "State read" };
 	}
 
 	async changeBiography(texts) {
 		try {
-			if (!texts) return { error: true, message: "No texts provided" };
+			if (!texts) {
+				return { error: true, message: "No texts provided" };
+			}
 			return { error: false, ...(await this.Instagram.account.setBiography(texts)) };
 		} catch {
 			return { error: true, message: "Failed to change biography" };
@@ -97,7 +105,9 @@ class Instafier {
 	async postStory(buffer) {
 		try {
 			const fileType = fileTypeFromBuffer(buffer);
-			if (!fileType) return { error: true, message: "No file type detected" };
+			if (!fileType) {
+				return { error: true, message: "No file type detected" };
+			}
 			if (IMAGE_MIMETYPE.includes(fileType.mime)) {
 				const image = sharp(buffer).jpeg({ quality: 100 });
 				buffer = await image.toBuffer();

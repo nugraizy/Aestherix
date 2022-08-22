@@ -11,24 +11,34 @@ export default {
 	limit: 0,
 	status: "enable",
 	async run({ isOwner, from, query, message }, client) {
-		if (!isOwner) return client[botNum].reply({ from, quoted: message }, "You are not allowed to use this command");
-		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a state to set");
+		if (!isOwner) {
+			return await client[botNum].reply({ from, quoted: message }, "You are not allowed to use this command");
+		}
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "You must provide a state to set");
+		}
 		switch (query.toLowerCase()) {
 			case "enable":
-				if (instafierState) return client[botNum].reply({ from, quoted: message }, "Instafier is already enabled");
+				if (instafierState) {
+					return await client[botNum].reply({ from, quoted: message }, "Instafier is already enabled");
+				}
 				await (await import("../../Handlers/Instagram Notifier/handlers.js")).handler();
 				instafierState = true;
-				return client[botNum].reply({ from, quoted: message }, "Instafier is now enabled");
+				return await client[botNum].reply({ from, quoted: message }, "Instafier is now enabled");
 			case "disable":
-				if (!instafierState) return client[botNum].reply({ from, quoted: message }, "Instafier is already disabled");
+				if (!instafierState) {
+					return await client[botNum].reply({ from, quoted: message }, "Instafier is already disabled");
+				}
 				const clients = instafier.closeConnection();
-				if (clients.error) return client[botNum].reply({ from, quoted: message }, clients.message);
+				if (clients.error) {
+					return await client[botNum].reply({ from, quoted: message }, clients.message);
+				}
 				instafierState = false;
-				client[botNum].reply({ from, quoted: message }, clients.message);
+				await client[botNum].reply({ from, quoted: message }, clients.message);
 				break;
 			default:
 				if (instafierState) {
-					client[botNum].reply({ from, quoted: message }, "The instafier is enabled.");
+					await client[botNum].reply({ from, quoted: message }, "The instafier is enabled.");
 				}
 		}
 	},

@@ -5,7 +5,9 @@ export const skip = (key, timer, client, message, isStop) => {
 	const status = anonymous.get(key) || Array.from(anonymous.values()).find((k) => k.partner == key) || undefined;
 	let results;
 	if (status) {
-		if (status.partner == null) return { status: "searching", seconds: CheckIntervals(intervals["anonymous"].get(key)).timer };
+		if (status.partner == null) {
+			return { status: "searching", seconds: CheckIntervals(intervals["anonymous"].get(key)).timer };
+		}
 		results = anonymous.has(key)
 			? { partner1: key, partner2: anonymous.get(key).partner }
 			: {
@@ -17,7 +19,9 @@ export const skip = (key, timer, client, message, isStop) => {
 		} else {
 			anonymous.delete(Array.from(anonymous.keys()).find((k) => anonymous.get(k).partner == key));
 		}
-		if (!isStop) search(key, timer, client, message);
+		if (!isStop) {
+			search(key, timer, client, message);
+		}
 		return results;
 	}
 	return false;

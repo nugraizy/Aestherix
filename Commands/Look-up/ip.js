@@ -14,10 +14,14 @@ export default {
 	status: "enable",
 	async run({ from, query, prettyNumber, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!query) return client[botNum].reply({ from, quoted: message }, "Please specify a IP Address");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "Please specify a IP Address");
+		}
 		try {
 			let { _: IPs } = parser(query);
-			if (isOne(IPs.length) && !regex(IPs[0])) return client[botNum].reply({ from, quoted: message }, "Please specify a valid IP Address");
+			if (isOne(IPs.length) && !regex(IPs[0])) {
+				return await client[botNum].reply({ from, quoted: message }, "Please specify a valid IP Address");
+			}
 			for (const IP of IPs) {
 				if (!regex(IP.trim())) {
 					await client[botNum].reply({ from, quoted: message }, "Please specify a valid IP Address");

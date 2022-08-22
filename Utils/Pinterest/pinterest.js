@@ -7,7 +7,9 @@ export const pinterest = (query) =>
 			const container = [];
 			let RAW_RESULTS = RAW_DATA.resource_response.data.results;
 			RAW_RESULTS = RAW_RESULTS.filter((v) => v.images?.orig !== undefined);
-			if (RAW_RESULTS.length == 0) resolve({ error: true, message: "Original Image Not Available." });
+			if (RAW_RESULTS.length == 0) {
+				resolve({ error: true, message: "Original Image Not Available." });
+			}
 			for (const result of RAW_RESULTS) {
 				container.push({
 					authorUsername: result.pinner.username,

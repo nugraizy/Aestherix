@@ -12,10 +12,18 @@ export default {
 	status: "enable",
 	restrict: true,
 	async run({ isAdmin, isBotAdmin, isOwner, query, from, bodyQuoted, mediaData, mention, message }, client, store) {
-		if (!isAdmin && !isOwner) return client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
-		if (!query && mention.length == 0 && !bodyQuoted) return client[botNum].reply({ from, quoted: message }, "Please reply people message or mention people.");
-		if (!isBotAdmin) return client[botNum].reply({ from, quoted: message }, "Bot is not admin, Please promote admin before using moderation commands.");
-		if (mention?.includes(botNum) || mediaData?.participant?.includes(botNum)) return client[botNum].reply({ from, quoted: message }, "You can't promote me by myself.");
+		if (!isAdmin && !isOwner) {
+			return await client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
+		}
+		if (!query && mention.length == 0 && !bodyQuoted) {
+			return await client[botNum].reply({ from, quoted: message }, "Please reply people message or mention people.");
+		}
+		if (!isBotAdmin) {
+			return await client[botNum].reply({ from, quoted: message }, "Bot is not admin, Please promote admin before using moderation commands.");
+		}
+		if (mention?.includes(botNum) || mediaData?.participant?.includes(botNum)) {
+			return await client[botNum].reply({ from, quoted: message }, "You can't promote me by myself.");
+		}
 		if (query || mention.length > 0) {
 			await client[botNum].updateGroup(from, mention.length > 0 ? mention : query.split(",").parse(), "PROMOTE", false, false, message);
 		}

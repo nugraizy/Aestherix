@@ -16,7 +16,9 @@ export default {
 					{
 						const result = await wpSearch(args.slice(2).join(" "));
 						let sections;
-						if ("error" in result) return client[botNum].reply({ from, quoted: message }, result.error);
+						if ("error" in result) {
+							return await client[botNum].reply({ from, quoted: message }, result.error);
+						}
 						await client[botNum].sendMessage(
 							from,
 							{
@@ -77,7 +79,9 @@ Url : ${result.link}`,
 				case args[1] == "latest":
 					{
 						const result = await wpLatest();
-						if ("error" in result) return client[botNum].reply({ from, quoted: message }, result.error);
+						if ("error" in result) {
+							return await client[botNum].reply({ from, quoted: message }, result.error);
+						}
 						for (const { image, title, episode, status, type, link } of result.results) {
 							const buttons = [{ urlButton: { displayText: "Source", url: link } }, { quickReplyButton: { displayText: "Download", id: `.waifuplay download ${link}` } }];
 							await client[botNum].sendMessage(
@@ -99,7 +103,9 @@ Type : ${type}`,
 					break;
 				case args[1] == "download":
 					{
-						if (type !== "listResponseMessage" && type !== "templateButtonReplyMessage") return client[botNum].reply({ from, quoted: message }, "wait, you can't do that.");
+						if (type !== "listResponseMessage" && type !== "templateButtonReplyMessage") {
+							return await client[botNum].reply({ from, quoted: message }, "wait, you can't do that.");
+						}
 						const result = await wpDownload(args[2]);
 						let caption = "``` • Waifuplay Downloader```\n";
 						for (const { quality, url } of result) {
@@ -112,7 +118,7 @@ Type : ${type}`,
 					}
 					break;
 				default:
-					client[botNum].sendMessage(
+					await client[botNum].sendMessage(
 						from,
 						{
 							text: `\`\`\` • Waifuplay Utility\`\`\`

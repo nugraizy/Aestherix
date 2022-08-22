@@ -6,7 +6,7 @@
 	"main_session": "debug",
 	"max_group": 20,
 	"min_members": 20,
-	"limit": 20,
+	"limit": 30,
 	"reset_time": {
 		"minute": "6",
 		"hour": "00"

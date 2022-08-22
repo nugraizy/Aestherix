@@ -20,7 +20,9 @@ export const shopeeProduct = (key, total = 5) =>
 					"user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36",
 				},
 			});
-			if (DATA.data.items.length == 0) return resolve({ error: "No product found" });
+			if (DATA.data.items.length == 0) {
+				return resolve({ error: "No product found" });
+			}
 			DATA.data.items.forEach((element) => {
 				CONTAINER.items.push({
 					productName: element.item_basic.name,

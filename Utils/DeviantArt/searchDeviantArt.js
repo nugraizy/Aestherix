@@ -5,7 +5,9 @@ export const searchDeviantArt = (keyword) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			const data = await fetchJSON(URL_API_SEARCH(keyword));
-			if ("errorCode" in data) return resolve({ error: "No art found with this keyword." });
+			if ("errorCode" in data) {
+				return resolve({ error: "No art found with this keyword." });
+			}
 			resolve(
 				data.deviations.map((v) => {
 					const image = `${v.media.baseUri}${v.media.types[

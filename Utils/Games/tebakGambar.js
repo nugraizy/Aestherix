@@ -23,7 +23,9 @@ export const startTG = async (client, id, { message, sender }, remainingTime) =>
 		.valueOf();
 	INFOLOG(`[${color(time, "cyan")}]`, `${color(`The Answer is : ${answer.trim()}`, "#01cdfe")}`);
 	SetIntervals(intervals["tebakGambar"], id, remainingTime + 2, (clients = client, ids = id, answers = answer, messages = message, remainingTimes = remainings) => {
-		if (intervals["tebakGambar"].get(ids) === undefined) return;
+		if (intervals["tebakGambar"].get(ids) === undefined) {
+			return;
+		}
 		const second = Math.floor(((remainingTimes - new Date().getTime()) % (1000 * 60)) / 1000);
 		intervals["tebakGambar"].get(ids).timer = second;
 		games.tebakGambar.get(ids).timer = second;

@@ -12,7 +12,9 @@ export default {
 	limit: 1,
 	status: "enable",
 	async run({ query, from, filename, message }, client) {
-		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide some text to convert to speech");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "Please provide some text to convert to speech");
+		}
 		const parseOptions = query.includes("--") ? query.split("--") : query;
 		let language = "id";
 		if (Array.isArray(parseOptions)) {
@@ -23,15 +25,16 @@ export default {
 			const { buffer } = await textToSpeech(query, language, path.join(__dirname, `Temporary Files/${filename}`));
 			await client[botNum].sendMessage(from, { audio: buffer }, { quoted: message });
 		} catch (e) {
-			if (e.error === "lang not found")
-				return client[botNum].reply(
+			if (e.error === "lang not found") {
+				return await client[botNum].reply(
 					from,
 					`Language not found. Available languages :\n\n${Object.keys(e.lang)
 						.map((key, i) => `${i + 1}. ${key}   :  ${e.lang[key]}`)
 						.join("\n")}`,
 				);
+			}
 			log(e);
-			client[botNum].reply({ from, quoted: message }, "Error while converting text to speech");
+			await client[botNum].reply({ from, quoted: message }, "Error while converting text to speech");
 		}
 	},
 };

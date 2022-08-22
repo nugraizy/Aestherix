@@ -15,37 +15,45 @@ export default {
 	limit: 0,
 	status: "enable",
 	async run({ isOwner, from, args, message, query }, client, store) {
-		if (!isOwner) return client[botNum].reply({ from, quoted: message }, "You are not allowed to use this command");
-		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a status to simulate");
+		if (!isOwner) {
+			return await client[botNum].reply({ from, quoted: message }, "You are not allowed to use this command");
+		}
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "You must provide a status to simulate");
+		}
 		const started = Date.now();
 		try {
 			switch (args[1]?.toLowerCase()) {
 				case "status":
 				case "stats":
 					{
-						client[botNum].reply({ from, quoted: message }, Object.keys(global.presences).includes("spotify") ? "Enabled" : "Disabled");
+						await client[botNum].reply({ from, quoted: message }, Object.keys(global.presences).includes("spotify") ? "Enabled" : "Disabled");
 					}
 					break;
 				case "disable":
 				case "off":
 					{
-						if (!("spotify" in global.presences)) return client[botNum].reply({ from, quoted: message }, "Already disabled");
+						if (!("spotify" in global.presences)) {
+							return await client[botNum].reply({ from, quoted: message }, "Already disabled");
+						}
 						clearTimeout(global.presences.spotify.timeout);
 						delete global.presences.spotify;
-						client[botNum].reply({ from, quoted: message }, "Simulate Spotify Player Bio Disabled");
+						await client[botNum].reply({ from, quoted: message }, "Simulate Spotify Player Bio Disabled");
 					}
 					break;
 				case "enable":
 				case "on":
 					{
-						if ("spotify" in global.presences) return client[botNum].reply({ from, quoted: message }, "Already enabled");
+						if ("spotify" in global.presences) {
+							return await client[botNum].reply({ from, quoted: message }, "Already enabled");
+						}
 						global.presences.spotify = { started, timeout: setTimeout(() => updateSpotifyTracks(), 0) };
-						client[botNum].reply({ from, quoted: message }, "Simulate Spotify Player Bio Enabled");
+						await client[botNum].reply({ from, quoted: message }, "Simulate Spotify Player Bio Enabled");
 					}
 					break;
 				default:
 					{
-						client[botNum].reply({ from, quoted: message }, "Usage: !spotifyplayer [enable|disable|status]");
+						await client[botNum].reply({ from, quoted: message }, "Usage: !spotifyplayer [enable|disable|status]");
 					}
 					break;
 			}
@@ -58,10 +66,14 @@ export default {
 async function updateSpotifyTracks() {
 	async.forever(
 		async (next) => {
-			if (presences?.spotify?.timeout == undefined) next();
-			await delay(4_000);
+			if (presences?.spotify?.timeout == undefined) {
+				next();
+			}
+			await delay(5_000);
 			const data = await spotifier.updateNowPlayingStates();
-			if (data !== false) clientMqttListen.publish(process.env.MQTT_TOPIC, JSON.stringify({ ...data, status: true }));
+			if (data !== false) {
+				clientMqttListen.publish(process.env.MQTT_TOPIC, JSON.stringify({ ...data, status: true }));
+			}
 		},
 		async (err) => {},
 	);

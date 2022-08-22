@@ -11,14 +11,16 @@ export default {
 	cooldown: 8,
 	status: "enable",
 	async run({ from, query, message, cmd }, client) {
-		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "You must provide a query.");
+		}
 		try {
 			let queries = query.split(",");
 			queries = removeDuplicatesArray(queries);
 			for (const querie of queries) {
 				const data = await searchNovel(querie.trim());
 				if ("error" in data) {
-					client[botNum].reply({ from, quoted: message }, `Failed while searching Pixiv novel\n\n${data.error}\n${querie}`);
+					await client[botNum].reply({ from, quoted: message }, `Failed while searching Pixiv novel\n\n${data.error}\n${querie}`);
 					continue;
 				}
 				const container = [];

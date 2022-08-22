@@ -62,9 +62,15 @@ String.prototype.toReadAble = function () {
 	let hours = Math.floor(sec / 3600);
 	let minutes = Math.floor((sec - hours * 3600) / 60);
 	let seconds = sec - hours * 3600 - minutes * 60;
-	if (hours < 10) hours = `0${hours}`;
-	if (minutes < 10) minutes = `0${minutes}`;
-	if (seconds < 10) seconds = `0${seconds}`;
+	if (hours < 10) {
+		hours = `0${hours}`;
+	}
+	if (minutes < 10) {
+		minutes = `0${minutes}`;
+	}
+	if (seconds < 10) {
+		seconds = `0${seconds}`;
+	}
 	return `${hours}:${minutes}:${seconds}`;
 };
 
@@ -85,7 +91,7 @@ String.prototype.mocking = function () {
 	randomCase(this)
 		.split("")
 		.map((str) => {
-			if (str === str.toUpperCase())
+			if (str === str.toUpperCase()) {
 				container.push(
 					str
 						.replace(/A/gi, replacing[0])
@@ -98,22 +104,30 @@ String.prototype.mocking = function () {
 						.replace(/T/gi, replacing[7])
 						.replace(/Z/gi, replacing[8]),
 				);
-			else container.push(str);
+			} else {
+				container.push(str);
+			}
 		});
 
 	return container.join("");
 };
 
 export const numberWithCommas = (number = 0, region = "id", type = "comma") => {
-	if (type == "comma") return parseInt(number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-	else if (type == "dot") return parseFloat(number).toLocaleString(region);
+	if (type == "comma") {
+		return parseInt(number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+	} else if (type == "dot") {
+		return parseFloat(number).toLocaleString(region);
+	}
 };
 
 export const randomCase = (string = "") => {
 	const container = [];
 	string.split("").map((str) => {
-		if (Math.floor(Math.random() * 2) + 1 == 1) container.push(str.toLowerCase());
-		else container.push(str.toUpperCase());
+		if (Math.floor(Math.random() * 2) + 1 == 1) {
+			container.push(str.toLowerCase());
+		} else {
+			container.push(str.toUpperCase());
+		}
 	});
 	return container.join("");
 };
@@ -131,7 +145,7 @@ export const wordWrapping = (string, options = {}) => {
 	const result =
 		indent +
 		line
-			.map(function (lines) {
+			.map((lines) => {
 				if (lines.slice(-1) === "\n") {
 					lines = lines.slice(0, lines.length - 1);
 				}
@@ -152,8 +166,7 @@ export const calcCrow = (lats1, lon1, lats2, lon2) => {
 	const lat2 = () => (lats2 * Math.PI) / 180;
 	const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
 	const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-	const d = R * c;
-	return d;
+	return R * c;
 };
 
 export const getFilesizeFromBytes = (bytes = 0) => {
@@ -195,7 +208,9 @@ export const getFilesize = (filename) => {
 export const extractFilesize = (bytes = 0) => getFilesizeFromBytes(Buffer.byteLength(bytes));
 
 export const closestNumberFromArray = (number, array = []) => {
-	if (typeof number !== "number") Number(number);
+	if (typeof number !== "number") {
+		Number(number);
+	}
 	return array.reduce((previous, current) => (Math.abs(current - number) < Math.abs(previous - number) ? current : previous));
 };
 
@@ -311,9 +326,15 @@ export const zalgo = (text = "Mana textnya?", options = {}) => {
 	let counts;
 	let result = "";
 	const types = [];
-	if (options.up !== false) types.push("up");
-	if (options.middle !== false) types.push("middle");
-	if (options.down !== false) types.push("down");
+	if (options.up !== false) {
+		types.push("up");
+	}
+	if (options.middle !== false) {
+		types.push("middle");
+	}
+	if (options.down !== false) {
+		types.push("down");
+	}
 	for (let i = 0, l = text.length; i < l; i++) {
 		if (chars().pattern.test(text[i])) {
 			continue;
@@ -601,9 +622,14 @@ export const isFilePath = (file) => /^(?:[a-z]:\\|\/|\.)/i.test(file);
 export const uploadToTelegraph = async (file) => {
 	try {
 		const tempFile = file;
-		if (Buffer.isBuffer(file)) file = file.toString("base64");
-		else if (isFilePath(file)) (file = Buffer.from(fs.readFileSync(file), "base64")) && unlinkFile(tempFile);
-		else if (typeof file === "string") file = Buffer.from(file, "base64");
+		if (Buffer.isBuffer(file)) {
+			file = file.toString("base64");
+		} else if (isFilePath(file)) {
+			file = Buffer.from(fs.readFileSync(file), "base64");
+			unlinkFile(tempFile);
+		} else if (typeof file === "string") {
+			file = Buffer.from(file, "base64");
+		}
 		let { ext } = await fileTypeFromBuffer(file);
 		const form = new FormData();
 		form.append("file", file, `file.${ext}`);
@@ -623,12 +649,16 @@ export const formatViews = (s) => {
 		T: 1_000_000_000,
 	};
 	const matrix = s.split("").findIndex((v) => Object.keys(MULTIPLIER).includes(v));
-	if (matrix == -1) return Number(s);
+	if (matrix == -1) {
+		return Number(s);
+	}
 	return Number(s.replace(reg, "")) * MULTIPLIER[s[matrix]];
 };
 
 export const convertSecondstoTime = (ms) => {
-	if (ms < 0) ms = -ms;
+	if (ms < 0) {
+		ms = -ms;
+	}
 	const time = {
 		day: Math.floor(ms / 86400000),
 		hour: Math.floor(ms / 3600000) % 24,

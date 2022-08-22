@@ -23,7 +23,9 @@ export default {
 					const solved = solvePuzzle(puzzle);
 					const grid = stringifyGrid(puzzle);
 					const gridSolved = stringifyGrid(solved);
-					if (isOwner) client[botNum].reply({ from, quoted: message }, gridSolved);
+					if (isOwner) {
+						client[botNum].reply({ from, quoted: message }, gridSolved);
+					}
 					buttons[0].buttonId = ".sd clue";
 					buttons[0].buttonText.displayText = "Sisa Clue : 5";
 					const messages = client[botNum].buttonText(
@@ -47,8 +49,12 @@ export default {
 				}
 				client[botNum].reply({ from, quoted: message }, "You already have a game in progress.");
 			} else if (/([A-Ia-i])[1-9]/.test(args[1])) {
-				if (args[2].length > 2) return client[botNum].reply({ from, quoted: message }, `Wrong format!\n\nex : ${cmd} A2 7`);
-				if (!args[2]) return client[botNum].reply({ from, quoted: message }, `Pleas provide a row indexs\n\nex : ${cmd} A2 7`);
+				if (args[2].length > 2) {
+					return await client[botNum].reply({ from, quoted: message }, `Wrong format!\n\nex : ${cmd} A2 7`);
+				}
+				if (!args[2]) {
+					return await client[botNum].reply({ from, quoted: message }, `Pleas provide a row indexs\n\nex : ${cmd} A2 7`);
+				}
 				const index = data.length == 0 ? -1 : data.findIndex((v) => v.id == from);
 				if (index !== -1) {
 					const fill = fillGrid(args[1], args[2], data[index].puzzle, data[index].solved);
@@ -70,11 +76,11 @@ export default {
 						data[index].messages = messages;
 						return writeJSON(path.join(__dirname, "Databases/Games/Sudoku/sudoku.json"), data);
 					}
-					return client[botNum].reply({ from, quoted: message }, fill.message);
+					return await client[botNum].reply({ from, quoted: message }, fill.message);
 				}
 				buttons[0].buttonId = ".sudoku play";
 				buttons[0].buttonText.displayText = "Play Sudoku!";
-				return client[botNum].buttonText(from, `No session found. Type ${cmd} play to start new sudoku game. Or press the button below.`, "Made by nanda", buttons, {
+				return await client[botNum].buttonText(from, `No session found. Type ${cmd} play to start new sudoku game. Or press the button below.`, "Made by nanda", buttons, {
 					quoted: message,
 				});
 			} else if (/clue/.test(args[1])) {
@@ -88,7 +94,7 @@ export default {
 						if (isWin.status) {
 							data.splice(index, 1);
 							writeJSON(path.join(__dirname, "Databases/Games/Sudoku/sudoku.json"), data);
-							return client[botNum].reply({ from, quoted: message }, `${isWin.message}\n${stringifyGrid(reveal.board)}\n\nGame Time : ${getTimeSince(data[index].startedAt)}`);
+							return await client[botNum].reply({ from, quoted: message }, `${isWin.message}\n${stringifyGrid(reveal.board)}\n\nGame Time : ${getTimeSince(data[index].startedAt)}`);
 						}
 						data[index].puzzle = reveal.board;
 						const grid = stringifyGrid(reveal.tempBoard);
@@ -98,11 +104,11 @@ export default {
 						data[index].messages = messages;
 						return writeJSON(path.join(__dirname, "Databases/Games/Sudoku/sudoku.json"), data);
 					}
-					return client[botNum].reply({ from, quoted: message }, "Clue has run out!");
+					return await client[botNum].reply({ from, quoted: message }, "Clue has run out!");
 				}
 				buttons[0].buttonId = ".sd play";
 				buttons[0].buttonText.displayText = "Play Sudoku!";
-				return client[botNum].buttonText(from, `No session found. Type ${cmd} play to start new sudoku game. Or press the button below.`, "Made by nanda", buttons, {
+				return await client[botNum].buttonText(from, `No session found. Type ${cmd} play to start new sudoku game. Or press the button below.`, "Made by nanda", buttons, {
 					quoted: message,
 				});
 			} else if (/ch?ec?k?/.test(args[1])) {
@@ -117,11 +123,13 @@ export default {
 				}
 				buttons[0].buttonId = ".sd play";
 				buttons[0].buttonText.displayText = "Play Sudoku!";
-				return client[botNum].buttonText(from, `No session found. Type ${cmd} play to start new sudoku game. Or press the button below.`, "Made by nanda", buttons, {
+				return await client[botNum].buttonText(from, `No session found. Type ${cmd} play to start new sudoku game. Or press the button below.`, "Made by nanda", buttons, {
 					quoted: message,
 				});
 			} else if (/reset/.test(args[1])) {
-				if (!isOwner) return;
+				if (!isOwner) {
+					return;
+				}
 				const index = data.length == 0 ? -1 : data.findIndex((v) => v.id == from);
 				if (args[2] == "all") {
 					data = [];
@@ -133,7 +141,7 @@ export default {
 					client[botNum].reply({ from, quoted: message }, "Game reset!");
 					return writeJSON(path.join(__dirname, "Databases/Games/Sudoku/sudoku.json"), data);
 				}
-				return client[botNum].reply({ from, quoted: message }, "There is no game to reset!");
+				return await client[botNum].reply({ from, quoted: message }, "There is no game to reset!");
 			}
 		} catch (err) {
 			log(err);

@@ -6,7 +6,9 @@ export const iflixSearch = (keyword) =>
 			const {
 				result: { result },
 			} = await fetchJSON(BASE_API_URL(keyword));
-			if (result.length == 0) return resolve({ error: "No result found" });
+			if (result.length == 0) {
+				return resolve({ error: "No result found" });
+			}
 			resolve(parser(result));
 		} catch (err) {
 			reject(err);

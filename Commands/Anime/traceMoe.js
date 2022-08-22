@@ -15,7 +15,9 @@ export default {
 	cooldown: 2,
 	status: "enable",
 	async run({ type: typeMessage, cmd, isMediaImage, query, extractMediaData, filename, from, message, sender, args, typeQuoted }, client) {
-		if (!isURL(query) && !isMediaImage) return client[botNum].reply({ from, quoted: message }, "Please send/reply a image to find the similar image");
+		if (!isURL(query) && !isMediaImage) {
+			return await client[botNum].reply({ from, quoted: message }, "Please send/reply a image to find the similar image");
+		}
 		let media = query && isURL(query) ? query : null;
 		try {
 			if (typeMessage == "listResponseMessage" && args[1] == "get") {
@@ -85,18 +87,23 @@ ${
 				);
 			}
 			await client[botNum].reply({ from, quoted: message }, "Searching. Please wait...");
-			if (isMediaImage)
+			if (isMediaImage) {
 				media = await client[botNum].downloadAndSaveMediaMessage(
 					extractMediaData,
 					path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`),
 					typeQuoted,
 				);
+			}
 			const result = await traceMoe(media);
 			if ("error" in result) {
-				if (isMediaImage) fs.unlinkSync(media);
-				return client[botNum].reply({ from, quoted: message }, result.error);
+				if (isMediaImage) {
+					fs.unlinkSync(media);
+				}
+				return await client[botNum].reply({ from, quoted: message }, result.error);
 			}
-			if (isMediaImage) fs.unlinkSync(media);
+			if (isMediaImage) {
+				fs.unlinkSync(media);
+			}
 			const {
 				title: { native, romaji },
 				type,

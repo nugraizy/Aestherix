@@ -22,7 +22,9 @@ export const getProfile = (username) =>
 				.find(".comments_photo")
 				.each((i, elem) => (media[i].comments = $(elem).text().trim()))
 				.text();
-			if ($(".profile-name-top").text().trim() == "" && $(".follows").text().trim() == "") return resolve({ error: "User not found." });
+			if ($(".profile-name-top").text().trim() == "" && $(".follows").text().trim() == "") {
+				return resolve({ error: "User not found." });
+			}
 			resolve({
 				fullName: $(".profile-name-bottom").text().trim() !== "" ? $(".profile-name-bottom").text().trim() : "Not Available.",
 				userName: $(".profile-name-top").text().trim(),
@@ -41,14 +43,18 @@ export const getProfile = (username) =>
 export const getUser = (username) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			if (username.startsWith("@")) username = username.replace("@", "");
+			if (username.startsWith("@")) {
+				username = username.replace("@", "");
+			}
 			const { graphql } = await fetchJSON(`https://www.instagram.com/${username}/?__a=1&__d=dis`, {
 				headers: {
 					"user-agent": UA,
 					cookie: sessionId,
 				},
 			});
-			if (!graphql) return resolve({ error: `User ${username} not found.` });
+			if (!graphql) {
+				return resolve({ error: `User ${username} not found.` });
+			}
 			const { user } = graphql;
 			resolve({
 				id: user.id,

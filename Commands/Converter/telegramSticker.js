@@ -12,9 +12,13 @@ export default {
 	limit: 4,
 	status: "enable",
 	async run({ query, message, from, filename }, client) {
-		if (!query) return client[botNum].reply({ from, quoted: message }, "Please enter a query");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "Please enter a query");
+		}
 		const result = await telegram(query);
-		if (result.stickers.length > 10) result.stickers = result.stickers.slice(0, 10);
+		if (result.stickers.length > 10) {
+			result.stickers = result.stickers.slice(0, 10);
+		}
 		const capt = `Telegram Stickers\n\nName : ${result.name.capitalize()}\nTitle : ${result.title.capitalize()}\nTot. Stickers : ${result.stickers.length}`;
 		await client[botNum].sendMessage(from, { text: capt }, { quoted: message });
 		for (const stickers of result.stickers) {

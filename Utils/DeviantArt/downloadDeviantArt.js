@@ -5,7 +5,9 @@ export const downloadDeviantArt = (input) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			const data = await fetchJSON(URL_API_DOWNLOAD(input));
-			if ("error" in data) return resolve({ error: `Type : ${data.error}\nMessage : ${data.errorDescription}` });
+			if ("error" in data) {
+				return resolve({ error: `Type : ${data.error}\nMessage : ${data.errorDescription}` });
+			}
 			const { deviation } = data;
 			const image = `${deviation.media.baseUri}${deviation.media.types[
 				check(deviation.media.types.findIndex((w) => w.t == "fullview" && w.c != undefined)) ?? deviation.media.types.findIndex((w) => w.t == "social_preview")

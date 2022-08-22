@@ -12,13 +12,17 @@ export default {
 	cooldown: 5,
 	status: "enable",
 	async run({ query, from, message, args, sender }, client) {
-		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "You must provide a query.");
+		}
 		if (args[1] == "next" || args[1] == "prev") {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(5).join(" "))));
 			const index = data.findIndex((v) => v == args[4]);
 			let buffer;
 			const isGif = data[index].endsWith("gif");
-			if (isGif) buffer = await gifToMp4(data[index], sender);
+			if (isGif) {
+				buffer = await gifToMp4(data[index], sender);
+			}
 			return await client[botNum].sendMessage(
 				from,
 				{
@@ -54,7 +58,9 @@ export default {
 			}
 			let buffer;
 			const isGif = result[0].endsWith("gif");
-			if (isGif) buffer = await gifToMp4(result[0], sender);
+			if (isGif) {
+				buffer = await gifToMp4(result[0], sender);
+			}
 			await client[botNum].sendMessage(
 				from,
 				{

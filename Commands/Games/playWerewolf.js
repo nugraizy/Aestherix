@@ -20,28 +20,36 @@ export default {
 		if (args[1] == "kill") {
 			const werewolf = new Werewolf(sender, args[3], client);
 			const kill = werewolf.killPlayerAsWerewolf(sender, args[2], args[3]);
-			if (kill.error && !("data" in kill)) return client[botNum].reply({ from, quoted: message }, kill.message);
+			if (kill.error && !("data" in kill)) {
+				return await client[botNum].reply({ from, quoted: message }, kill.message);
+			}
 			for (const data of kill.data) {
 				await client[botNum].sendMessage(data.id, { text: data.message });
 			}
 		} else if (args[1] == "seer") {
 			const werewolf = new Werewolf(sender, args[3], client);
 			const seer = werewolf.seerSomeone(sender, args[2], args[3]);
-			if (seer.error && !("data" in seer)) return client[botNum].reply({ from, quoted: message }, seer.message);
+			if (seer.error && !("data" in seer)) {
+				return await client[botNum].reply({ from, quoted: message }, seer.message);
+			}
 			for (const data of seer.data) {
 				await client[botNum].sendMessage(data.id, { text: data.message });
 			}
 		} else if (args[1] == "guard") {
 			const werewolf = new Werewolf(sender, args[3], client);
 			const guard = werewolf.guardSomeone(sender, args[2], args[3]);
-			if (guard.error && !("data" in guard)) return client[botNum].reply({ from, quoted: message }, guard.message);
+			if (guard.error && !("data" in guard)) {
+				return await client[botNum].reply({ from, quoted: message }, guard.message);
+			}
 			for (const data of guard.data) {
 				await client[botNum].sendMessage(data.id, { text: data.message });
 			}
 		} else if (args[1] == "vote") {
 			const werewolf = new Werewolf(sender, args[3], client);
 			const vote = werewolf.voteSomeone(sender, args[2], args[3]);
-			if (vote.error && !("data" in vote)) return client[botNum].reply({ from, quoted: message }, vote.message);
+			if (vote.error && !("data" in vote)) {
+				return await client[botNum].reply({ from, quoted: message }, vote.message);
+			}
 			for (const data of vote.data) {
 				await client[botNum].sendMessage(data.id, { text: data.message });
 			}
@@ -55,7 +63,7 @@ export default {
 		} else if (args[1] == "delete") {
 			const werewolf = new Werewolf(sender, from, client);
 			const deletes = werewolf.deleteGame(sender);
-			return client[botNum].reply({ from, quoted: message }, deletes.message);
+			return await client[botNum].reply({ from, quoted: message }, deletes.message);
 		} else if (args[1] == "join") {
 			sender = args[2] || sender;
 			pushname = args[3] || pushname;
@@ -88,11 +96,13 @@ export default {
 		} else if (args[1] == "exit") {
 			const werewolf = new Werewolf(sender, from, client);
 			const exit = werewolf.exitGame(sender, from);
-			return client[botNum].reply({ from, quoted: message }, exit.message);
+			return await client[botNum].reply({ from, quoted: message }, exit.message);
 		} else if (args[1] == "start") {
 			const werewolf = new Werewolf(sender, from, client);
 			const start = werewolf.startGame(sender, from);
-			if (start.error) return client[botNum].reply({ from, quoted: message }, start.message);
+			if (start.error) {
+				return await client[botNum].reply({ from, quoted: message }, start.message);
+			}
 			await client[botNum].sendMessage(from, { text: start.message });
 			await client[botNum].sendMessage(from, {
 				text: `~ Player Werewolf ~\n\n${start.data.playersData.map((v, i) => `${i + 1}. @${v.id.split("@")[0]} | ${v.name}`).join("\n")}`,
@@ -102,9 +112,9 @@ export default {
 			await client[botNum].sendMessage(from, { text: start.data.gameDialogue.replace("{0}", start.data.gameTime) });
 			for (const player of start.data.playersData) {
 				if (player.role == "villager") {
-					await client[botNum].sendMessage(player.id, { text: player.dialogue });
+					client[botNum].sendMessage(player.id, { text: player.dialogue });
 				} else if (player.role == "werewolf") {
-					await client[botNum].sendMessage(player.id, {
+					client[botNum].sendMessage(player.id, {
 						buttonText: "Open list",
 						footer: `Made by Void Bot. Powered by Hidden Finder`,
 						title: "Kamu adalah Serigala. Dan saat ini merupakan waktu yang tepat untuk membunuh seseorang.\nPilih salah satu player.",
@@ -116,7 +126,7 @@ export default {
 							}),
 					});
 				} else if (player.role == "seer") {
-					await client[botNum].sendMessage(player.id, {
+					client[botNum].sendMessage(player.id, {
 						buttonText: "Open list",
 						footer: `Made by Void Bot. Powered by Hidden Finder`,
 						title: `Kamu adalah Penerawang. Dan saat ini merupakan waktu yang tepat untuk menerawang seseorang.\nPilih salah satu player.`,
@@ -128,7 +138,7 @@ export default {
 							}),
 					});
 				} else if (player.role == "guard") {
-					await client[botNum].sendMessage(player.id, {
+					client[botNum].sendMessage(player.id, {
 						buttonText: "Open list",
 						footer: `Made by Void Bot. Powered by Hidden Finder`,
 						title: `Kamu adalah Penjaga. Dan saat ini merupakan waktu yang tepat untuk memjaga seseorang.\nPilih salah satu player.`,
@@ -144,7 +154,7 @@ export default {
 			start.data.startGameCycle(from, start.data.gameTimeCycle);
 		} else {
 			const werewolfs = new Werewolf(sender, from, client);
-			if (werewolfs.getDataGame(from)) {
+			if (werewolfs.getDataGame(from) && !werewolfs.gameStarted) {
 				await client[botNum].sendMessage(from, {
 					text: "\t",
 					title: "Sesi sudah ada di group ini. Pilih join untuk bergabung ke permainan",
@@ -153,6 +163,8 @@ export default {
 					sections: row,
 				});
 				return;
+			} else if (werewolfs.getDataGame(from) && werewolfs.gameStarted) {
+				return await client[botNum].reply({ from, quoted: message }, "Sesi sudah ada di group ini dan permainan sudah dimulai.");
 			}
 			new Werewolf(sender, from, client, pushname, true);
 			const caption = "Permainan Werewolf berhasil dibuat.";

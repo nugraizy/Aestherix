@@ -14,9 +14,13 @@ export default {
 	limit: 1,
 	status: "enable",
 	async run({ query, message, from, prettyNumber, filename }, client) {
-		if (!query) return client[botNum].reply({ from, quoted: message }, "Please enter a query");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "Please enter a query");
+		}
 		let result = await line(query);
-		if (result.length > 10) result = result.slice(0, 10);
+		if (result.length > 10) {
+			result = result.slice(0, 10);
+		}
 		const capt = `Line Stickers\n\nAuthor : ${result[0].author.capitalize()}\nTot. Stickers : ${result.length}`;
 		await client[botNum].sendMessage(from, { text: capt }, { quoted: message });
 		for (const { stickers } of result) {

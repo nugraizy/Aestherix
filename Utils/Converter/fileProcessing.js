@@ -16,7 +16,9 @@ export const toMp4 = (input, sender) =>
 			const time = moment().unix();
 			exec(`ffmpeg -i "${input}" "./Temporary Files/${sender}${time}.mp4"`, async (err, stdout, stderr) => {
 				if (err) {
-					if (!isURL(input)) unlinkFile(input);
+					if (!isURL(input)) {
+						unlinkFile(input);
+					}
 					log(err);
 					reject(err);
 				}
@@ -38,7 +40,9 @@ export const gifToMp4 = (input, sender) =>
 				`ffmpeg -i "${input}" -movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" "./Temporary Files/${sender}${time}.mp4"`,
 				async (err, stdout, stderr) => {
 					if (err) {
-						if (!isURL(input)) unlinkFile(input);
+						if (!isURL(input)) {
+							unlinkFile(input);
+						}
 						log(err);
 						reject(err);
 					}
@@ -62,7 +66,9 @@ export const toOpus = (ext, opts = {}) =>
 			container = ["-y", "-i", opts.media, "-vn", "-c:a", "libopus", "-b:a", "128k", "-vbr", "on", "-compression_level", "10", `${opts.output}.${ext}`];
 		} else {
 			tmp = `${opts.input}.${ext}`;
-			if (Buffer.isBuffer(opts.media)) writeBuffer(tmp, opts.media);
+			if (Buffer.isBuffer(opts.media)) {
+				writeBuffer(tmp, opts.media);
+			}
 			container = ["-y", "-i", tmp, "-vn", "-c:a", "libopus", "-b:a", "128k", "-vbr", "on", "-compression_level", "10", `${opts.output}.${ext}`];
 		}
 		spawn("ffmpeg", container)
@@ -80,7 +86,9 @@ export const convertMediaToSticker = (filePath, sender, output, mimetype) =>
 		const time = moment().format("HH:mm:ss DD/MM");
 		const pathExif = path.join(__dirname, "Temporary Files/data.exif");
 		let pathSticker = filePath;
-		if (!isFileExist(pathSticker)) pathSticker = path.join(__dirname, `Temporary Files/${pathSticker}`);
+		if (!isFileExist(pathSticker)) {
+			pathSticker = path.join(__dirname, `Temporary Files/${pathSticker}`);
+		}
 		INFOLOG(`[${color(time, "cyan")}]`, `${color(`Converting Media`, "#01cdfe")} for ${color(sender, "#ff71ce")}`);
 		if (filePath.endsWith("webp") && isFileExist(filePath)) {
 			exec(`webpmux -set exif "${pathExif}" "${pathSticker}" -o "${pathSticker}-done.webp"`, (err, stdout, stderr) => {

@@ -14,10 +14,14 @@ export default {
 	status: "enable",
 	async run({ from, query, prettyNumber, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!query) return client[botNum].reply({ from, quoted: message }, "Please specify a url");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "Please specify a url");
+		}
 		try {
 			let { _: usernames } = parser(query);
-			if (isOne(usernames.length) && isURL(usernames[0])) return client[botNum].reply({ from, quoted: message }, "Please specify a valid Twitter usernames");
+			if (isOne(usernames.length) && isURL(usernames[0])) {
+				return await client[botNum].reply({ from, quoted: message }, "Please specify a valid Twitter usernames");
+			}
 			for (const username of usernames) {
 				if (isURL(username.trim())) {
 					await client[botNum].reply({ from, quoted: message }, "Please specify a valid Twitter username");

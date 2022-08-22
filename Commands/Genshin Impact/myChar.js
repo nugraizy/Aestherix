@@ -16,7 +16,7 @@ export default {
 			const data = readJSON(path.join(__dirname, "Databases/Games/Genshin Impact/data.json"));
 			const index = data.findIndex((v) => v.user == sender);
 			if (index == -1) {
-				return client[botNum].reply({ from, quoted: message }, "Your character seems nowhere in the Database.");
+				return await client[botNum].reply({ from, quoted: message }, "Your character seems nowhere in the Database.");
 			}
 			query = `${data[index].uid} -char ${query}`;
 			cmds.commands.get("genshinstalk").run({ sender, query, message, from }, client);

@@ -4,7 +4,9 @@ const sessionId = process.env.INSTAGRAM_SESI;
 export const searchUser = (username) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			if (username.startsWith("@")) username = username.replace("@", "");
+			if (username.startsWith("@")) {
+				username = username.replace("@", "");
+			}
 			const { users: items } = await fetchJSON(`https://www.instagram.com/web/search/topsearch/?query=${username}`, { headers: { Cookie: `sessionid=${sessionId}` } });
 			const result = [];
 			for (const item of items)

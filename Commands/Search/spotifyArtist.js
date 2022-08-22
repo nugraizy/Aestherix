@@ -11,7 +11,9 @@ export default {
 	cooldown: 8,
 	status: "enable",
 	async run({ query, from, message }, client) {
-		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "You must provide a query.");
+		}
 		try {
 			query = removeDuplicatesArray(query.split(","));
 			for (const querie of query) {

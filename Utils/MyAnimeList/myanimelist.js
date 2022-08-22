@@ -70,7 +70,9 @@ export class MyAnimeList {
 		};
 
 		this.getAnimeRanking = async (type = "all") => {
-			if (!TYPE.ANIME.includes(type)) return { error: true, message: `Invalid type\nValid types are :\n${TYPE.ANIME.join(", ")}` };
+			if (!TYPE.ANIME.includes(type)) {
+				return { error: true, message: `Invalid type\nValid types are :\n${TYPE.ANIME.join(", ")}` };
+			}
 			return (
 				await this.request(
 					`/anime/ranking`,
@@ -87,7 +89,9 @@ export class MyAnimeList {
 		};
 
 		this.getMangaRanking = async (type = "all") => {
-			if (!TYPE.MANGA.includes(type)) return { error: true, message: `Invalid type\nValid types are :\n${TYPE.ANIME.join(", ")}` };
+			if (!TYPE.MANGA.includes(type)) {
+				return { error: true, message: `Invalid type\nValid types are :\n${TYPE.ANIME.join(", ")}` };
+			}
 			return (
 				await this.request(
 					`/manga/ranking`,

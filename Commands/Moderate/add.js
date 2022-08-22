@@ -12,12 +12,22 @@ export default {
 	restrict: true,
 	status: "enable",
 	async run({ isAdmin, isBotAdmin, isOwner, from, query, mention, bodyQuoted, mediaData, message }, client) {
-		if (!isAdmin && !isOwner) return client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
-		if (!query && !bodyQuoted) return client[botNum].reply({ from, quoted: message }, "Please reply people message or reply people's ");
-		if (!isBotAdmin) return client[botNum].reply({ from, quoted: message }, "Bot is not admin, Please promote admin before using moderation commands.");
-		if (mention?.includes(botNum) || mediaData?.participant?.includes(botNum)) return client[botNum].reply({ from, quoted: message }, "You can't add me by myself.");
+		if (!isAdmin && !isOwner) {
+			return await client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
+		}
+		if (!query && !bodyQuoted) {
+			return await client[botNum].reply({ from, quoted: message }, "Please reply people message or reply people's ");
+		}
+		if (!isBotAdmin) {
+			return await client[botNum].reply({ from, quoted: message }, "Bot is not admin, Please promote admin before using moderation commands.");
+		}
+		if (mention?.includes(botNum) || mediaData?.participant?.includes(botNum)) {
+			return await client[botNum].reply({ from, quoted: message }, "You can't add me by myself.");
+		}
 		if (query) {
-			if (mention.length > 0) return client[botNum].reply({ from, quoted: message }, "Please reply people message or input people's number.");
+			if (mention.length > 0) {
+				return await client[botNum].reply({ from, quoted: message }, "Please reply people message or input people's number.");
+			}
 			await client[botNum].updateGroup(from, query.split(",").parser(), "ADD", false, false, message);
 		}
 		if (bodyQuoted) {

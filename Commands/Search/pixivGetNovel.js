@@ -11,16 +11,20 @@ export default {
 	cooldown: 8,
 	status: "enable",
 	async run({ from, query, message }, client) {
-		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "You must provide a query.");
+		}
 		try {
 			let queries = query.split(",");
 			queries = removeDuplicatesArray(queries);
 			for (const querie of queries) {
 				const regexs = regex(querie.trim());
-				if (!regexs.status) return client[botNum].reply({ from, quoted: message }, regexs.message);
+				if (!regexs.status) {
+					return await client[botNum].reply({ from, quoted: message }, regexs.message);
+				}
 				const data = await getNovelContent(regexs.message);
 				if ("error" in data) {
-					client[botNum].reply({ from, quoted: message }, `Failed while looking for Pixiv novel content\n\n${data.error}\n${querie}`);
+					await client[botNum].reply({ from, quoted: message }, `Failed while looking for Pixiv novel content\n\n${data.error}\n${querie}`);
 					continue;
 				}
 				const { title, likeCount, userName, viewCount, userId, content } = data;
@@ -57,7 +61,9 @@ const regex = (input) => {
 	const isPixiv = reg.test(input);
 	if (isPixiv) {
 		const match = input.match(/\d{8,10}/g);
-		if (!match) return { status: false, message: "Novel code not found on your URL. Try another URL." };
+		if (!match) {
+			return { status: false, message: "Novel code not found on your URL. Try another URL." };
+		}
 		return { status: true, message: match[0] };
 	}
 	return { status: false, message: "This URL isn't a valid Pixiv URL. Try another URL." };

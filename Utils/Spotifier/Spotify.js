@@ -51,8 +51,12 @@ class Spotifier {
 	}
 
 	updateCredential(clientId, clientSecret) {
-		if (!clientId) return { status: false, message: "Parameter clientId must provided" };
-		if (!clientSecret) return { status: false, message: "Parameter clientSecret must provided" };
+		if (!clientId) {
+			return { status: false, message: "Parameter clientId must provided" };
+		}
+		if (!clientSecret) {
+			return { status: false, message: "Parameter clientSecret must provided" };
+		}
 		this.#clientId = clientId;
 		this.#clientSecret = clientSecret;
 		return { status: true, message: "Credential Updated" };
@@ -87,7 +91,9 @@ class Spotifier {
 
 	async getPlaylists(playlistsID) {
 		try {
-			if (!playlistsID) return { status: false, message: "Parameter playlistsID must provided" };
+			if (!playlistsID) {
+				return { status: false, message: "Parameter playlistsID must provided" };
+			}
 			return { status: true, ...(await this.req(`/playlists/${playlistsID}`, "GET")), ...this };
 		} catch (err) {
 			return { status: false, message: err };
@@ -96,7 +102,9 @@ class Spotifier {
 
 	async getAlbum(albumID) {
 		try {
-			if (!albumID) return { status: false, message: "Parameter albumID must provided" };
+			if (!albumID) {
+				return { status: false, message: "Parameter albumID must provided" };
+			}
 			return { status: true, ...(await this.req(`/albums?ids=${albumID}`, "GET")) };
 		} catch (err) {
 			return { status: false, message: err };
@@ -105,7 +113,9 @@ class Spotifier {
 
 	async getAlbumTracks(albumID) {
 		try {
-			if (!albumID) return { status: false, message: "Parameter albumID must provided" };
+			if (!albumID) {
+				return { status: false, message: "Parameter albumID must provided" };
+			}
 			return { status: true, ...(await this.req(`/albums/${albumID}/tracks`, "GET")) };
 		} catch (err) {
 			return { status: false, message: err };
@@ -114,7 +124,9 @@ class Spotifier {
 
 	async getArtists(artistsID) {
 		try {
-			if (!artistsID) return { status: false, message: "Parameter artistsID must provided" };
+			if (!artistsID) {
+				return { status: false, message: "Parameter artistsID must provided" };
+			}
 			return { status: true, ...(await this.req(`/artists?ids=${artistsID}`, "GET")) };
 		} catch (err) {
 			return { status: false, message: err };
@@ -123,7 +135,9 @@ class Spotifier {
 
 	async getArtistsAlbums(artistsID) {
 		try {
-			if (!artistsID) return { status: false, message: "Parameter artistsID must provided" };
+			if (!artistsID) {
+				return { status: false, message: "Parameter artistsID must provided" };
+			}
 			return { status: true, ...(await this.req(`/artists?ids=${artistsID}/albums`, "GET")) };
 		} catch (err) {
 			return { status: false, message: err };
@@ -132,7 +146,9 @@ class Spotifier {
 
 	async getArtistsTopTracks(artistsID) {
 		try {
-			if (!artistsID) return { status: false, message: "Parameter artistsID must provided" };
+			if (!artistsID) {
+				return { status: false, message: "Parameter artistsID must provided" };
+			}
 			return { status: true, ...(await this.req(`/artists?ids=${artistsID}/top-tracks`, "GET")) };
 		} catch (err) {
 			return { status: false, message: err };
@@ -141,7 +157,9 @@ class Spotifier {
 
 	async getTracks(tracksID) {
 		try {
-			if (!tracksID) return { status: false, message: "Parameter tracksID must provided" };
+			if (!tracksID) {
+				return { status: false, message: "Parameter tracksID must provided" };
+			}
 			return { status: true, ...(await this.req(`/tracks?ids=${tracksID}`, "GET")) };
 		} catch (err) {
 			return { status: false, message: err };
@@ -150,7 +168,9 @@ class Spotifier {
 
 	async getTracksAudioAnalysis(tracksID) {
 		try {
-			if (!tracksID) return { status: false, message: "Parameter tracksID must provided" };
+			if (!tracksID) {
+				return { status: false, message: "Parameter tracksID must provided" };
+			}
 			return { status: true, ...(await this.req(`/audio-analysis/${tracksID}`, "GET")) };
 		} catch (err) {
 			return { status: false, message: err };
@@ -159,7 +179,9 @@ class Spotifier {
 
 	async getTracksAudioFeatures(tracksID) {
 		try {
-			if (!tracksID) return { status: false, message: "Parameter tracksID must provided" };
+			if (!tracksID) {
+				return { status: false, message: "Parameter tracksID must provided" };
+			}
 			return { status: true, ...(await this.req(`/audio-features?ids=${tracksID}`, "GET")) };
 		} catch (err) {
 			return { status: false, message: err };
@@ -178,7 +200,9 @@ class Spotifier {
 		try {
 			query = encodeURI(query);
 			const data = await this.req(`/search?q=track:${query}+artist:${artists}&type=track&include_external=audio`, "GET");
-			if (data.tracks.items.length == 0) return { status: false, message: "Not Found" };
+			if (data.tracks.items.length == 0) {
+				return { status: false, message: "Not Found" };
+			}
 			return { status: true, data: data.tracks };
 		} catch (err) {
 			return { status: false, message: err };
@@ -189,7 +213,9 @@ class Spotifier {
 		try {
 			query = encodeURI(query);
 			const data = await this.req(`/search?q=album:${query}&type=album&include_external=audio`, "GET");
-			if (data.albums.items.length == 0) return { status: false, message: "Not Found" };
+			if (data.albums.items.length == 0) {
+				return { status: false, message: "Not Found" };
+			}
 			return { status: true, data: data.albums };
 		} catch (err) {
 			return { status: false, message: err };
@@ -200,7 +226,9 @@ class Spotifier {
 		try {
 			query = encodeURI(query);
 			const data = await this.req(`/search?q=artist:${query}&type=artist&include_external=audio`, "GET");
-			if (data.artists.items.length == 0) return { status: false, message: "Not Found" };
+			if (data.artists.items.length == 0) {
+				return { status: false, message: "Not Found" };
+			}
 			return { status: true, data: data.artists };
 		} catch (err) {
 			return { status: false, message: err };
@@ -265,7 +293,9 @@ class Spotifier {
 					Authorization: `Bearer ${this.#accessToken}`,
 				},
 			});
-			if (!data) return false;
+			if (!data) {
+				return false;
+			}
 			if (data.currently_playing_type == "ad")
 				return {
 					trackTitle: "Advertisement",
@@ -275,7 +305,9 @@ class Spotifier {
 				};
 			const { name: trackTitle, artists, duration_ms } = data.item;
 			this.#currentlyPlaying = data.item.name;
-			if (!this.#currentlyPlaying) return false;
+			if (!this.#currentlyPlaying) {
+				return false;
+			}
 			const { progress_ms, is_playing } = data;
 			return {
 				trackTitle,

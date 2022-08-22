@@ -15,18 +15,22 @@ export default {
 	status: "enable",
 	async run({ from, query, prettyNumber, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!query) return client[botNum].reply({ from, quoted: message }, "Please specify a username");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "Please specify a username");
+		}
 		try {
 			const { _: usernames } = parser(query);
-			if (isOne(usernames.length) && isURL(usernames[0]) && !/\/stories\//.test(usernames[0]))
-				return client[botNum].reply({ from, quoted: message }, "Please specify a valid username or a valid url instagram story");
+			if (isOne(usernames.length) && isURL(usernames[0]) && !/\/stories\//.test(usernames[0])) {
+				return await client[botNum].reply({ from, quoted: message }, "Please specify a valid username or a valid url instagram story");
+			}
 			for (const username of usernames) {
-				if (isURL(username) && !/\/stories\//.test(username)) await client[botNum].reply({ from, quoted: message }, "Please specify a username or a valid url instagram story");
-				else {
+				if (isURL(username) && !/\/stories\//.test(username)) {
+					await client[botNum].reply({ from, quoted: message }, "Please specify a username or a valid url instagram story");
+				} else {
 					const story = await getStory3(username);
 					INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading Instagram Story`, "cyan")} for ${color(prettyNumber, "#ff71ce")}`);
 					if ("error" in story) {
-						client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram story\n\n${story.error}\n${username}`);
+						await client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram story\n\n${story.error}\n${username}`);
 						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Instagram Story", "cyan")} for ${color(prettyNumber, "#ff71ce")}`);
 						continue;
 					}

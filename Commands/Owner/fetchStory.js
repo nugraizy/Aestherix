@@ -14,7 +14,9 @@ export default {
 	limit: 0,
 	status: "enable",
 	async run({ from, message, isOwner, query }, client, store) {
-		if (!isOwner) return client[botNum].reply({ from, quoted: message }, "You are not allowed to use this command");
+		if (!isOwner) {
+			return await client[botNum].reply({ from, quoted: message }, "You are not allowed to use this command");
+		}
 		try {
 			const messages = OPTIONS.json ? JSON.parse(readFileSync(STATUS_PATH)).messages[STATUS] : await store.loadMessages(STATUS);
 			const tempContainer = new Map();
@@ -22,7 +24,9 @@ export default {
 			let i = 0;
 			for (const message of messages) {
 				const type = message.message ? Object.keys(message.message)[0] : undefined;
-				if (!["extendedTextMessage", "imageMessage", "videoMessage"].includes(type)) continue;
+				if (!["extendedTextMessage", "imageMessage", "videoMessage"].includes(type)) {
+					continue;
+				}
 				if (tempContainer.get(message.key.participant)) {
 					if (tempContainer.get(message.key.participant).stories[type] == undefined) {
 						tempContainer.get(message.key.participant).stories = {
@@ -44,7 +48,9 @@ export default {
 				}
 			}
 			const data = tempContainer.get(query) || Array.from(tempContainer.values()).find((v) => v.index == Number(query) - 1) || null;
-			if (!data) return client[botNum].reply({ from, quoted: message }, "Story not found");
+			if (!data) {
+				return await client[botNum].reply({ from, quoted: message }, "Story not found");
+			}
 			caption += ` • ${data.stories?.extendedTextMessage?.[0].pushName ?? data.stories?.imageMessage?.[0].pushName ?? data.stories?.videoMessage?.[0].pushName}\n`;
 			caption += `Texts : ${data.stories?.extendedTextMessage?.length ?? 0}\n`;
 			caption += `Images : ${data.stories?.imageMessage?.length ?? 0}\n`;

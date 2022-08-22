@@ -15,7 +15,9 @@ export default {
 	status: "enable",
 	async run({ isQuotedSticker, from, message, filename, extractMediaData, sender, prettyNumber, typeQuoted }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!isQuotedSticker) return client[botNum].reply({ from, quoted: message }, "Please reply a sticker to decrypt");
+		if (!isQuotedSticker) {
+			return await client[botNum].reply({ from, quoted: message }, "Please reply a sticker to decrypt");
+		}
 		try {
 			client[botNum]
 				.downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`), typeQuoted)

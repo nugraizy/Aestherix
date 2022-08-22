@@ -3,7 +3,9 @@ import { cheerioLOAD, fetchTEXT } from "../../Helper/index.js";
 export const tiktokProfileBRAINANS = (username) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			if (username.startsWith("@")) username = username.substr(1);
+			if (username.startsWith("@")) {
+				username = username.substr(1);
+			}
 			const data = await fetchTEXT(URL_BASE(username), {
 				headers: {
 					"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
@@ -35,7 +37,9 @@ export const tiktokProfileBRAINANS = (username) =>
 						});
 					}
 				});
-			} else videos = [];
+			} else {
+				videos = [];
+			}
 			resolve({ userName, fullName, bio, totalVideos, following, followers, likes, profilePicture, videos });
 		} catch (err) {
 			reject(err);
@@ -43,6 +47,8 @@ export const tiktokProfileBRAINANS = (username) =>
 	});
 
 const URL_BASE = (input) => {
-	if (input) return `https://www.brainans.com/user/${input}`;
+	if (input) {
+		return `https://www.brainans.com/user/${input}`;
+	}
 	return `https://www.brainans.com/user/`;
 };

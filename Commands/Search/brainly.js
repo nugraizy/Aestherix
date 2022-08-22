@@ -11,7 +11,9 @@ export default {
 	cooldown: 7,
 	status: "enable",
 	async run({ query, from, message }, client) {
-		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "You must provide a query");
+		}
 		const parseOptions = yargsParser(query, {
 			configuration: {
 				"short-option-groups": false,
@@ -23,7 +25,9 @@ export default {
 		options.count = Object.keys(parseOptions).find((v) => /\d{2,2}/i.test(v))?.[0] || undefined;
 		try {
 			const brainly = await brainlySearch(query, options);
-			if ("error" in brainly) return client[botNum].reply({ from, quoted: message }, brainly.error);
+			if ("error" in brainly) {
+				return await client[botNum].reply({ from, quoted: message }, brainly.error);
+			}
 			let capt = "``` • Brainly```\n\n";
 			for (const { pertanyaan, jawaban } of brainly) {
 				capt += `Pertanyaan : ${pertanyaan.replace(/[\n\t\r]/g, "")}\n`;
@@ -36,7 +40,7 @@ export default {
 			await client[botNum].reply({ from, quoted: message }, capt.trim());
 		} catch (err) {
 			log(e);
-			client[botNum].reply({ from, quoted: message }, "Error while searching your question");
+			await client[botNum].reply({ from, quoted: message }, "Error while searching your question");
 		}
 	},
 };

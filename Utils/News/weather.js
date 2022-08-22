@@ -15,20 +15,21 @@ export const getWeather = (type, ...q) =>
 					data = await fetchJSON(URL_API("city", q[0]));
 					break;
 			}
-			if (data.cod !== 200) return resolve({ error: data?.message });
-			else
-				resolve({
-					desc: data.weather[0].description,
-					temp: `${data.main.temp}°C`,
-					feels: `${data.main.feels_like}°C`,
-					press: `${data.main.pressure} hPa`,
-					humi: `${data.main.humidity}%`,
-					visible: `${(data.visibility / 1000).toFixed(1)} km`,
-					wind: `${data.wind.speed} m/s`,
-					name: data.name,
-					id: data.id,
-					emoji: EMOJIS[data.weather[0].icon],
-				});
+			if (data.cod !== 200) {
+				return resolve({ error: data?.message });
+			}
+			resolve({
+				desc: data.weather[0].description,
+				temp: `${data.main.temp}°C`,
+				feels: `${data.main.feels_like}°C`,
+				press: `${data.main.pressure} hPa`,
+				humi: `${data.main.humidity}%`,
+				visible: `${(data.visibility / 1000).toFixed(1)} km`,
+				wind: `${data.wind.speed} m/s`,
+				name: data.name,
+				id: data.id,
+				emoji: EMOJIS[data.weather[0].icon],
+			});
 		} catch (err) {
 			log(err);
 			reject(err);

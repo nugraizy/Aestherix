@@ -14,21 +14,26 @@ export default {
 	status: "enable",
 	async run({ from, query, prettyNumber, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!query) return client[botNum].reply({ from, quoted: message }, "Please specify a username");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "Please specify a username");
+		}
 		try {
 			const { _: usernames } = parser(query);
-			if (isOne(usernames.length) && isURL(usernames[0])) return client[botNum].reply({ from, quoted: message }, "Please specify a valid username");
+			if (isOne(usernames.length) && isURL(usernames[0])) {
+				return await client[botNum].reply({ from, quoted: message }, "Please specify a valid username");
+			}
 			for (const username of usernames) {
-				if (isURL(username)) await client[botNum].reply({ from, quoted: message }, "Please specify a username");
-				else {
+				if (isURL(username)) {
+					await client[botNum].reply({ from, quoted: message }, "Please specify a username");
+				} else {
 					const highlights = await getHighlights2(username);
 					INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading Instagram highlights`, "cyan")} for ${color(prettyNumber, "#ff71ce")}`);
 					if ("error" in highlights) {
-						client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram highlights\n\n${highlights.error}\n${username}`);
+						await client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram highlights\n\n${highlights.error}\n${username}`);
 						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Instagram highlights", "cyan")} for ${color(prettyNumber, "#ff71ce")}`);
 						continue;
 					} else if (isEmpty(highlights.highlights)) {
-						client[botNum].reply({ from, quoted: message }, `No highlights found for ${username}`);
+						await client[botNum].reply({ from, quoted: message }, `No highlights found for ${username}`);
 						ERRLOG(`[${color(time, "cyan")}]`, `${color("No highlights found for", "cyan")} ${color(username, "#ff71ce")}`);
 						continue;
 					}
@@ -42,7 +47,7 @@ export default {
 					capt += `Each Sections of the Higlights will be send 2 media.\n`;
 					capt += `Tot. Sections : ${highlights.highlights.length}\n`;
 					capt += `Tot. Estimated media per Section : ${numberWithCommas(highlights.highlights.length * 2)}\n\n`;
-					client[botNum].reply({ from, quoted: message }, capt.trim());
+					await client[botNum].reply({ from, quoted: message }, capt.trim());
 					if (isOne(highlights.highlights.length)) {
 						for (const media of highlights.highlights[0].dataHighlight.slice(0, 2)) {
 							capt = "";

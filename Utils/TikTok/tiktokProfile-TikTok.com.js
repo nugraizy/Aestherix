@@ -3,7 +3,9 @@ import { cheerioLOAD, fetchJSON, fetchTEXT } from "../../Helper/index.js";
 export const tiktokProfileTIKTOK = (username) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			if (!username.startsWith("@")) username = `@${username.replace(/[^a-zA-Z0-9_.]/gi, "")}`;
+			if (!username.startsWith("@")) {
+				username = `@${username.replace(/[^a-zA-Z0-9_.]/gi, "")}`;
+			}
 			const res = await fetchTEXT(URL_BASE(username), {
 				headers: {
 					"user-agent": UA(),
@@ -12,7 +14,9 @@ export const tiktokProfileTIKTOK = (username) =>
 			});
 			const $ = cheerioLOAD(res);
 			const data = parseUserInfo(JSON.parse($("#SIGI_STATE").html()));
-			if ("error" in data) resolve({ error: data.error });
+			if ("error" in data) {
+				resolve({ error: data.error });
+			}
 			resolve(data);
 		} catch (err) {
 			reject(err);

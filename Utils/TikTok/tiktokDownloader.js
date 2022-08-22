@@ -5,9 +5,13 @@ export const tiktokDownloader = (url) =>
 		try {
 			url = url.includes("vm.tiktok.com") ? url.replace("vm.tiktok.com", "vt.tiktok.com") : url;
 			const data = await fetchJSON(URL_KEY_PARSER(url));
-			if (data.status !== "success") resolve(data);
+			if (data.status !== "success") {
+				resolve(data);
+			}
 			const dataResult = await fetchJSON(URL_DETAIL_PARSER(data.data.key));
-			if (dataResult.status !== "success") resolve(dataResult);
+			if (dataResult.status !== "success") {
+				resolve(dataResult);
+			}
 			resolve({
 				...dataResult.data.author,
 				description: dataResult.data.description,

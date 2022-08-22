@@ -26,8 +26,11 @@ const getHoyolabV = (server) => HOYOLAB_VERSION[server];
 export const request = async (method, path, data, server) => {
 	let query;
 	let body;
-	if (method.toLowerCase() == "get") query = data;
-	else body = data;
+	if (method.toLowerCase() == "get") {
+		query = data;
+	} else {
+		body = data;
+	}
 	const { data: dataRaw } = await Axios({
 		method,
 		url: path.startsWith("http") ? path : `${API_ENDPOINT(server)}${path}`,
@@ -63,7 +66,9 @@ export const getServer = (uid) => {
 	} else if (firstIndex == "9") {
 		server.completeServer = "os_cht";
 		server.simplifiedServer = "os";
-	} else throw { code: -1, message: "Invalid uid" };
+	} else {
+		throw { code: -1, message: "Invalid uid" };
+	}
 	return server;
 };
 

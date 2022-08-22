@@ -15,7 +15,9 @@ export default {
 	status: "enable",
 	async run({ from, query, message, sender, prettyNumber, bodyQuoted }, client) {
 		try {
-			if (!query && !bodyQuoted) query = "Mana text nya?";
+			if (!query && !bodyQuoted) {
+				query = "Mana text nya?";
+			}
 			const time = moment().format("HH:mm:ss DD/MM");
 			let parseOptions = yargsParser(query, { configuration: { "short-option-groups": false } });
 			parseOptions = {
@@ -52,7 +54,7 @@ export default {
 				await client[botNum].sendMessage(from, { sticker: new Buffer.from(buffer, "base64") }, { quoted: message });
 				return INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
 			}
-			return client[botNum].reply({ from, quoted: message }, "Please enter text to convert to sticker");
+			return await client[botNum].reply({ from, quoted: message }, "Please enter text to convert to sticker");
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
 			str += `Type : ${err.name}\n`;

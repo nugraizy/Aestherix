@@ -18,7 +18,9 @@ const WORDS = [];
 export class Wordle {
 	constructor(id) {
 		this.id = id;
-		if (this.isPlaying()) return this.session();
+		if (this.isPlaying()) {
+			return this.session();
+		}
 		this.word = WORDS[Math.floor(Math.random() * WORDS.length)];
 		this.board = this.word.split("").map((v) => (v === " " ? " " : BLOCKS.WHITE));
 		this.message = null;

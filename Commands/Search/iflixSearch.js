@@ -55,7 +55,7 @@ export default {
 				sections: rows,
 			});
 		} else if (args[1] == "get") {
-			return client[botNum].reply({ from, quoted: message }, `\`\`\` • Iflix Search\`\`\`\n\nURL : ${args[2]}`);
+			return await client[botNum].reply({ from, quoted: message }, `\`\`\` • Iflix Search\`\`\`\n\nURL : ${args[2]}`);
 		}
 		query = query.split(",");
 		query = removeDuplicatesArray(query);

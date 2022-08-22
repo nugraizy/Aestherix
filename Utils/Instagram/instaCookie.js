@@ -16,7 +16,9 @@ const LOGIN_HEADERS = {
 export const getCookie = (username, password) =>
 	new Promise(async (resolve) => {
 		try {
-			if (!username || !password) return;
+			if (!username || !password) {
+				return;
+			}
 			const time = moment().format("HH:mm:ss DD/MM");
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Getting Instagram Cookies.`, "#01cdfe")}`);
 			const REQUESTED_HEADERS = await Axios.get(URL_LOGIN_GET);

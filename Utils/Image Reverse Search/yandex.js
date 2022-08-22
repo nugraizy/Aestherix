@@ -5,7 +5,9 @@ import { cheerioLOAD, fetchJSON, fetchTEXT, isURL } from "../../Helper/Modules/i
 const isValidImageURL = async (url) => {
 	try {
 		const data = await fetch(url.replace("https:", "http:"));
-		if (data.status !== 200) return false;
+		if (data.status !== 200) {
+			return false;
+		}
 		return true;
 	} catch (error) {
 		return false;
@@ -31,8 +33,11 @@ const postImage = async (file) => {
 export const yandex = async (file, { limit = 20 } = {}) =>
 	new Promise(async (resolve) => {
 		try {
-			if (!isURL(file)) file = await postImage(file);
-			else if (isURL(file) && !(await isValidImageURL(file))) return resolve({ error: "Invalid image URL" });
+			if (!isURL(file)) {
+				file = await postImage(file);
+			} else if (isURL(file) && !(await isValidImageURL(file))) {
+				return resolve({ error: "Invalid image URL" });
+			}
 			const dataInformation = await fetchTEXT(URL_BASE(file), {
 				headers: {
 					cookie:
@@ -50,13 +55,17 @@ export const yandex = async (file, { limit = 20 } = {}) =>
 			const now = new Date();
 			const container = { status: "OK", responseTime: 0, information: [] };
 			$information("div.CbirSites-Items > div.CbirSites-Item").each(function () {
-				if (container.information.length >= limit && limit !== "infinite") return;
+				if (container.information.length >= limit && limit !== "infinite") {
+					return;
+				}
 				const title = $information(this).find("div.CbirSites-ItemInfo > div.CbirSites-ItemTitle").text();
 				const description = $information(this).find("div.CbirSites-ItemInfo > div.CbirSites-ItemDescription").text() || "NO DESCRIPTION";
 				container.information.push({ images: "", title, description });
 			});
 			$images("div > a.serp-item__link > img.serp-item__thumb.justifier__thumb").each((i, el) => {
-				if (container.information[i] == undefined) return;
+				if (container.information[i] == undefined) {
+					return;
+				}
 				const images = `https:${$images(el).attr("src")}`;
 				container.information[i].images = images;
 			});

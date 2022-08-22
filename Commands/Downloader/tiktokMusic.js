@@ -20,11 +20,17 @@ export default {
 	status: "enable",
 	async run({ from, query, prettyNumber, message, filename }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a URL");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "Please provide a URL");
+		}
 		try {
 			let { _: urls } = parser(query);
-			if (isOne(urls.length) && !isURL(urls[0])) return client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
-			if (isOne(urls.length) && !regex(urls[0])) return client[botNum].reply({ from, quoted: message }, "Please specify a valid TikTok url");
+			if (isOne(urls.length) && !isURL(urls[0])) {
+				return await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
+			}
+			if (isOne(urls.length) && !regex(urls[0])) {
+				return await client[botNum].reply({ from, quoted: message }, "Please specify a valid TikTok url");
+			}
 			for (const url of removeDuplicatesArray(urls.map((v) => v.trim()))) {
 				if (!isURL(url)) {
 					await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");

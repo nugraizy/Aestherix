@@ -9,8 +9,10 @@ export default {
 	cooldown: 5,
 	limit: 0,
 	status: "enable",
-	async run({ from, message, bodyQuoted, mediaData, query }, client, store) {
-		if (!query && !bodyQuoted) return;
+	async run({ from, bodyQuoted, mediaData, query }, client, store) {
+		if (!query && !bodyQuoted) {
+			return;
+		}
 		setInterval(async () => {
 			const messages = generateWAMessageFromContent(
 				from,

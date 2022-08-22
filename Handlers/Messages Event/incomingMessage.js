@@ -10,16 +10,31 @@ moment.tz.setDefault("Asia/Jakarta").locale("id");
 
 export default {
 	async handler(message, client, cmds, store, user) {
-		if (message == undefined) return;
-		if (OPTIONS.debugMode && !message?.messages?.[0]?.key?.fromMe) log(JSON.stringify(message, undefined, 2));
+		if (message == undefined) {
+			return;
+		}
+		if (OPTIONS.debugMode && !message?.messages?.[0]?.key?.fromMe) {
+			log(JSON.stringify(message, undefined, 2));
+		}
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (message.messages[0] && "messageStubParameters" in message.messages[0]) return (await import("./stubMessage.js")).default.handler(client, message.messages[0], store);
+		if (message.messages[0] && "messageStubParameters" in message.messages[0]) {
+			return (await import("./stubMessage.js")).default.handler(client, message.messages[0], store);
+		}
 		message = await reassign(JSON.parse(JSON.stringify(message.messages[0])), client, store, false);
-		if (!message || "error" in message) return;
-		if (!message.message) return;
-		if (message.isBaileys) return;
-		if (message.message.key && message.message.key.remoteJid == "status@broadcast" && OPTIONS.story) return (await import("./storyMessage.js")).default.handler(client, message);
-		if (message.type == "protocolMessage" || message.type == "senderKeyDistributionMessage" || !message.type) return;
+		if (
+			!message ||
+			"error" in message ||
+			!message.message ||
+			message.isBaileys ||
+			message.type == "protocolMessage" ||
+			message.type == "senderKeyDistributionMessage" ||
+			!message.type
+		) {
+			return;
+		}
+		if (message.message.key && message.message.key.remoteJid == "status@broadcast" && OPTIONS.story) {
+			return (await import("./storyMessage.js")).default.handler(client, message);
+		}
 		if (OPTIONS.offline) {
 			if (STATS_OFFLINE) {
 				await cmds.commands.get("simulates").run({ args: [".simulates", "online", "disable"], isOwner: true, from: false, message: message.message }, client, store);
@@ -28,7 +43,9 @@ export default {
 			(await import("./offlineMessage.js")).default.handler(client, message);
 		}
 
-		if (OPTIONS.autoRead && !OPTIONS.offline) client[botNum].readMessages([message.message.key]);
+		if (OPTIONS.autoRead && !OPTIONS.offline) {
+			client[botNum].readMessages([message.message.key]);
+		}
 
 		if (checkAfk(message.sender, message.from)) {
 			const { reasons, since } = getAfk(message.sender, message.from);
@@ -43,7 +60,9 @@ export default {
 			);
 			deleteAfk(message.sender, message.from);
 		}
-		if (!message.isDisappearingChat && !message.isGroup) client[botNum].sendMessage(message.from, { disappearingMessagesInChat: 24 * 60 * 60 });
+		if (!message.isDisappearingChat && !message.isGroup) {
+			client[botNum].sendMessage(message.from, { disappearingMessagesInChat: 24 * 60 * 60 });
+		}
 		if (message.bodyQuoted && checkAfk(message.mediaData.participant, message.from)) {
 			const { reasons, since, name } = getAfk(message.mediaData.participant);
 			const time = getTimeSince(since);
@@ -61,7 +80,7 @@ export default {
 				}
 			}
 			if (container.length > 0) {
-				await client[botNum].reply({ from: message.from, quoted: message.message }, caption.trim());
+				client[botNum].reply({ from: message.from, quoted: message.message }, caption.trim());
 			}
 		}
 		const runtimes = ((Date.now() - runtime) / 1000).toFixed(0);
@@ -69,7 +88,9 @@ export default {
 			let bodies = [];
 			if (OPTIONS.multiCmd) {
 				bodies = EVALY.includes(message.cmd) ? [message.body] : message.body.split("|");
-			} else bodies.push(message.body);
+			} else {
+				bodies.push(message.body);
+			}
 			for (const body of bodies) {
 				message.body = body.trim();
 				message.args = message.body.split(/ +/g);
@@ -79,19 +100,21 @@ export default {
 				if (OPTIONS.autoCorrect) {
 					for (const cmd of Array.from(cmds.commands.keys())) {
 						const correcting = similarity(message.args[0], cmd);
-						if (correcting >= Math.min(0.6))
+						if (correcting >= Math.min(0.6)) {
 							correctedCommand.push({
 								score: correcting,
 								command: cmd,
 							});
+						}
 					}
 					for (const aliases of cmds.aliases) {
 						const correcting = similarity(message.args[0], aliases);
-						if (correcting >= Math.min(0.67))
+						if (correcting >= Math.min(0.67)) {
 							correctedCommand.push({
 								score: correcting,
 								command: aliases,
 							});
+						}
 					}
 				}
 				if (correctedCommand.length != 0) {
@@ -119,7 +142,7 @@ export default {
 						`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
 						`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
 					);
-				} else if (!message.isGroup && !OPTIONS.noLogs)
+				} else if (!message.isGroup && !OPTIONS.noLogs) {
 					INFOLOG(
 						`[${color(time, "cyan")}]`,
 						`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
@@ -128,8 +151,11 @@ export default {
 						`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
 						`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
 					);
+				}
 				if (Tempcmds && !message.isOwner) {
-					if (OPTIONS.selfMode) return;
+					if (OPTIONS.selfMode) {
+						return;
+					}
 					if (OPTIONS.restrict && Tempcmds.restrict) {
 						await client[botNum].reply({ from: message.from, quoted: message.message }, "This command is restricted and currently bot are on restricted mode.");
 						continue;
@@ -142,28 +168,40 @@ export default {
 						);
 						continue;
 					}
-					if (limit == false) return client[botNum].reply({ from: message.from, quoted: message.message }, "You have reached the limit of this command.");
+					if (limit == false) {
+						return await client[botNum].reply({ from: message.from, quoted: message.message }, "You have reached the limit of this command.");
+					}
 					if (OPTIONS.coolDown) {
 						if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) {
-							return client[botNum].reply({ from: message.from, quoted: message.message }, `Please wait until your request is done`);
+							return await client[botNum].reply({ from: message.from, quoted: message.message }, `Please wait until your request is done`);
 						}
 						if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).has(Tempcmds.name)) {
 							const time = user.cooldown.get(message.sender).get(Tempcmds.name);
 							if (Date.now() > time) {
 								user.cooldown.get(message.sender).delete(Tempcmds.name);
 								user.cooldown.get(message.sender).requests = false;
-							} else
-								return client[botNum].reply({ from: message.from, quoted: message.message }, `${Tempcmds.name} is on cooldown for ${((time - Date.now()) / 1000).toFixed(1)} seconds.`);
+							} else {
+								return await client[botNum].reply(
+									{ from: message.from, quoted: message.message },
+									`${Tempcmds.name} is on cooldown for ${((time - Date.now()) / 1000).toFixed(1)} seconds.`,
+								);
+							}
 						}
-						if (!user.cooldown.has(message.sender)) user.cooldown.set(message.sender, new Map());
-						if (!user.cooldown.get(message.sender).has(Tempcmds.name)) user.cooldown.get(message.sender).set(Tempcmds.name, Date.now() + Tempcmds.cooldown * 1000);
+						if (!user.cooldown.has(message.sender)) {
+							user.cooldown.set(message.sender, new Map());
+						}
+						if (!user.cooldown.get(message.sender).has(Tempcmds.name)) {
+							user.cooldown.get(message.sender).set(Tempcmds.name, Date.now() + Tempcmds.cooldown * 1000);
+						}
 						user.cooldown.get(message.sender).get(Tempcmds.name);
 						user.cooldown.get(message.sender).requests = true;
 					}
 				}
 				if (Tempcmds) {
 					if (OPTIONS.onlyLogs ? (message.cmd.startsWith("==>") || message.cmd.startsWith("//>") || message.cmd.startsWith("$$>") ? true : false) : true) {
-						if (!message.isOwner && OPTIONS.selfMode) return;
+						if (!message.isOwner && OPTIONS.selfMode) {
+							return;
+						}
 						try {
 							if (/-{1,2}((help(s)?|info|des(c|k)rip(t|s)i(on)?)|H)$/i.test(message.args[1]) && Tempcmds.name !== "eval") {
 								const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${Tempcmds.cooldown}s\nAliases : ${Tempcmds.aliases
@@ -172,14 +210,20 @@ export default {
 								client[botNum].reply({ from: message.from, quoted: message.message }, help);
 								continue;
 							}
-							if (Tempcmds.category == "Games" && message.isGroup && !message.isAdmin && !message.isOwner && message[message.from].games == "disable")
-								return client[botNum].reply({ from: message.from, quoted: message.message }, "Mode games belum dihidupkan");
-							if (Tempcmds.category == "Moderation" && message.isGroup && !message.isAdmin && !message.isOwner)
-								return client[botNum].reply({ from: message.from, quoted: message.message }, "Kamu bukan admin");
+							if (Tempcmds.category == "Games" && message.isGroup && !message.isAdmin && !message.isOwner && message[message.from].games == "disable") {
+								return await client[botNum].reply({ from: message.from, quoted: message.message }, "Game Mode is Disabled. Type !games enable to enable Game Mode");
+							}
+							if (Tempcmds.category == "Moderation" && message.isGroup && !message.isAdmin && !message.isOwner) {
+								return await client[botNum].reply({ from: message.from, quoted: message.message }, "You are not Admin");
+							}
 							await Tempcmds.run(message, client, store);
-							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) user.cooldown.get(message.sender).requests = false;
+							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) {
+								user.cooldown.get(message.sender).requests = false;
+							}
 						} catch (err) {
-							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) user.cooldown.get(message.sender).requests = false;
+							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) {
+								user.cooldown.get(message.sender).requests = false;
+							}
 							let str = "Something went wrong.\nPlease send this error stack to the owner. :\n\n";
 							str += `Type : ${err.name}\n`;
 							str += `Message : ${err.message}\n`;
@@ -201,7 +245,7 @@ export default {
 			}
 			return;
 		}
-		if (!message.isGroup && !OPTIONS.noLogs)
+		if (!message.isGroup && !OPTIONS.noLogs) {
 			INFOLOG(
 				`[${color(time, "cyan")}]`,
 				`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
@@ -209,7 +253,7 @@ export default {
 				`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
 				`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
 			);
-		else if (message.isGroup && !OPTIONS.noLogs)
+		} else if (message.isGroup && !OPTIONS.noLogs) {
 			INFOLOG(
 				`[${color(time, "cyan")}]`,
 				`${color(message.pushname.trim(), "white")} ${color(message.prettyNumber, "#ff71ce")} :`,
@@ -218,6 +262,7 @@ export default {
 				`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
 				`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
 			);
+		}
 		(await import("../Game Handlers/akinator.js")).default.handler(message, client, message);
 		(await import("../Game Handlers/tebakGambar.js")).default.handler(message, client, message);
 		(await import("../Game Handlers/sambungKata.js")).default.handler(message, client, message);

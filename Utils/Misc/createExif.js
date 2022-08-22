@@ -37,6 +37,8 @@ export const createExif = (packname, author) => {
 	const ff = Buffer.from(length, "hex");
 	const buffer = Buffer.concat([f, ff, fff, ffff]);
 	fs.writeFile(path.join(__dirname, "Temporary Files/data.exif"), buffer, function (err) {
-		if (err) return console.error(err);
+		if (err) {
+			return console.error(err);
+		}
 	});
 };

@@ -11,7 +11,9 @@ export default {
 	status: "enable",
 	async run({ from, message }, client) {
 		const aki = await startAkinator(from);
-		if ("error" in aki) return await client[botNum].reply({ from, quoted: message }, aki.error);
+		if ("error" in aki) {
+			return await client[botNum].reply({ from, quoted: message }, aki.error);
+		}
 		const { question, answers, progress, progressBar, arrow } = aki;
 		await client[botNum].reply(
 			{ from, quoted: message },

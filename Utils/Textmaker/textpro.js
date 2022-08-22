@@ -22,7 +22,9 @@ export const textpro = (api, texts) =>
 					.map((i, el) => $(el).attr("value"))
 					.get(),
 			);
-			if (tokenStyle) form.append("radio0[radio]", tokenStyle);
+			if (tokenStyle) {
+				form.append("radio0[radio]", tokenStyle);
+			}
 			form.append("submit", "Go");
 			form.append("token", token);
 			form.append("build_server", "https://textpro.me");
@@ -37,7 +39,9 @@ export const textpro = (api, texts) =>
 			).data;
 			$ = cheerioLOAD(data);
 			const jsonDataRaw = $("div#form_value.sr-only").text();
-			if (NO_VAL(jsonDataRaw)) return resolve({ error: "Process Failed. Reason : No Token found at the last step." });
+			if (NO_VAL(jsonDataRaw)) {
+				return resolve({ error: "Process Failed. Reason : No Token found at the last step." });
+			}
 			const jsonData = JSON.parse(JSON.parse(JSON.stringify(`${$("div#form_value.sr-only").text().split("}{")[0]}}`)));
 			token = jsonData["token"];
 			form = null;
@@ -48,7 +52,9 @@ export const textpro = (api, texts) =>
 			}
 			form.append("submit", "Go");
 			form.append("token", token);
-			if (tokenStyle) form.append("radio0[radio]", tokenStyle);
+			if (tokenStyle) {
+				form.append("radio0[radio]", tokenStyle);
+			}
 			form.append("build_server", "https://textpro.me");
 			form.append("build_server_id", 1);
 			data = (
@@ -71,7 +77,9 @@ const parseUrlDownload = ({ image_code, session_id, code, image }) => {
 	return { preview: `https://textpro.me${image}`, dl: `https://textpro.me/save-images/${image_code}/${session_id}/${code}` };
 };
 const split = (text, len) => {
-	if (len == 1) return [text];
+	if (len == 1) {
+		return [text];
+	}
 	const arr = text.split(/\s+/);
 	let length = len;
 	len = arr.length;
@@ -94,9 +102,13 @@ const split = (text, len) => {
 
 let BASE = (page) => `https://textpro.me/home-p${page}`;
 const scrapeUrl = async (page) => {
-	if (!fs.existsSync("./Databases/Textmaker/textprourl.json")) fs.writeFileSync("./Databases/Textmaker/textprourl.json", JSON.stringify([]));
+	if (!fs.existsSync("./Databases/Textmaker/textprourl.json")) {
+		fs.writeFileSync("./Databases/Textmaker/textprourl.json", JSON.stringify([]));
+	}
 	const dataJSON = JSON.parse(fs.readFileSync("./Databases/Textmaker/textprourl.json"));
-	if (page == 13) return console.log("scraping is done. saved in './textprourl.json' total page scraped :", page);
+	if (page == 13) {
+		return console.log("scraping is done. saved in './textprourl.json' total page scraped :", page);
+	}
 	console.log("scraping page", page);
 	const { data } = await Axios.get(BASE(page));
 	const $ = cheerioLOAD(data);

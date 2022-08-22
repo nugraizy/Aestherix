@@ -7,21 +7,29 @@ const PATH = {
 	files: path.join(__dirname, "Databases/Users/limit.json"),
 };
 
-const LIMIT = 30;
+const LIMIT = readJSON("./Config/settings.json")?.limit || 100;
 
-if (!readDir(PATH.folder)) makeDir(PATH.folder);
-if (!isFileExist(PATH.files)) writeJSON(PATH.files, []);
+if (!readDir(PATH.folder)) {
+	makeDir(PATH.folder);
+}
+if (!isFileExist(PATH.files)) {
+	writeJSON(PATH.files, []);
+}
 
 export const checkUser = (obj) => {
 	const data = readJSON(PATH.files);
 	const status = data.some((v) => v.id == obj.id);
-	if (!status) return false;
+	if (!status) {
+		return false;
+	}
 	return true;
 };
 
 export const addUser = (obj) => {
 	const data = readJSON(PATH.files);
-	if (!checkUser(obj)) data.push(obj);
+	if (!checkUser(obj)) {
+		data.push(obj);
+	}
 	writeJSON(PATH.files, data);
 	return true;
 };
@@ -29,7 +37,9 @@ export const addUser = (obj) => {
 export const indexUser = (obj) => {
 	const data = readJSON(PATH.files);
 	const index = data.findIndex((v) => v.id == obj.id);
-	if (index == -1) return false;
+	if (index == -1) {
+		return false;
+	}
 	return {
 		index,
 		limit: data[index].limit,
@@ -42,9 +52,13 @@ export const updateUser = (obj) => {
 	if (indexUser(obj) !== false) {
 		for (const index in obj) {
 			if (index == "limit" && obj.type == "MIN") {
-				if (data[indexUser(obj).index][index] - obj[index] < 0) return { status: false, message: "Limit is not enough", limits: data[indexUser(obj).index][index] };
-				else data[indexUser(obj).index][index] -= obj[index];
-			} else if (obj.type !== "MIN") data[indexUser(obj).index][index] = obj[index];
+				if (data[indexUser(obj).index][index] - obj[index] < 0) {
+					return { status: false, message: "Limit is not enough", limits: data[indexUser(obj).index][index] };
+				}
+				data[indexUser(obj).index][index] -= obj[index];
+			} else if (obj.type !== "MIN") {
+				data[indexUser(obj).index][index] = obj[index];
+			}
 		}
 		writeJSON(PATH.files, data);
 		return data[indexUser(obj).index];
@@ -55,7 +69,9 @@ export const updateUser = (obj) => {
 export const addLimit = (obj) => {
 	const data = readJSON(PATH.files);
 	if (indexUser(obj) !== false) {
-		if (data[indexUser(obj).index].limit <= 0) return false;
+		if (data[indexUser(obj).index].limit <= 0) {
+			return false;
+		}
 		return updateUser(obj);
 	}
 	return addUser({

@@ -11,7 +11,9 @@ export const bilibiliSearchCOM = (keyword) =>
 					},
 				})
 			).data;
-			if (data.result == undefined) return resolve({ error: "Videos Not Found", cus_message: "Error when searching Bilibili videos." });
+			if (data.result == undefined) {
+				return resolve({ error: "Videos Not Found", cus_message: "Error when searching Bilibili videos." });
+			}
 			resolve(bilibiliVideoCOM(data.result));
 		} catch (err) {
 			resolve({ error: err.message, cus_message: "Error when searching Bilibili videos." });
@@ -103,7 +105,9 @@ export const bilibiliSearchTV = (keyword) =>
 					},
 				})
 			).data;
-			if (!data.some((v) => v.module == "ugc")) return resolve({ error: "Videos Not Found", cus_message: "Error when searching Bilibili videos." });
+			if (!data.some((v) => v.module == "ugc")) {
+				return resolve({ error: "Videos Not Found", cus_message: "Error when searching Bilibili videos." });
+			}
 			let { items } = data[data.findIndex((v) => v.module == "ugc")];
 			resolve(bilibiliParseMetadataTV(items));
 		} catch (err) {

@@ -11,7 +11,9 @@ export default {
 	cooldown: 8,
 	status: "enable",
 	async run({ from, query, message, cmd }, client) {
-		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "You must provide a query.");
+		}
 		try {
 			let queries = query.split(",");
 			queries = removeDuplicatesArray(queries);
@@ -19,7 +21,7 @@ export default {
 				const data = await searchArtwork(querie.trim());
 				const dataImage = await downloadArtworks(data[0].id);
 				if ("error" in data) {
-					client[botNum].reply({ from, quoted: message }, `Failed while searching Pixiv artworks\n\n${data.error}\n${querie}`);
+					await client[botNum].reply({ from, quoted: message }, `Failed while searching Pixiv artworks\n\n${data.error}\n${querie}`);
 					continue;
 				}
 				const container = [];

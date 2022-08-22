@@ -14,8 +14,11 @@ export default {
 		let capt = `Void Bot\n${center(`V ${readJSON("./package.json").version.toUpperCase()}`, 23)}\n\n`;
 		const Container = [];
 		for (const [key, value] of cmds.commands)
-			if (Object.keys(Container).includes(value.category)) Container[value.category].push(key);
-			else Container[value.category] = [key];
+			if (Object.keys(Container).includes(value.category)) {
+				Container[value.category].push(key);
+			} else {
+				Container[value.category] = [key];
+			}
 		for (const key of Object.keys(Container).sort((a, b) => a.localeCompare(b)))
 			capt += `${key.toLocaleUpperCase()}\n\n${Container[key]
 				.sort((a, b) => a.localeCompare(b))

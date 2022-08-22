@@ -1,6 +1,8 @@
 export const checkAfk = (participant, groupId) => {
 	const key = user.afk.get(participant)?.has(groupId);
-	if (!key) return false;
+	if (!key) {
+		return false;
+	}
 	return true;
 };
 

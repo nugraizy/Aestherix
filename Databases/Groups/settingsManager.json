@@ -68,5 +68,29 @@
       "welcome2": "disable",
       "welcome2msg": "Welcome to {groupName}"
     }
+  },
+  {
+    "6281233649676-1631582034@g.us": {
+      "antiDelete": "disable",
+      "antiGroupURL": "disable",
+      "antiNSFW": "disable",
+      "antiSpam": "disable",
+      "antiURL": "disable",
+      "antiVirus": "disable",
+      "autoReader": "disable",
+      "banned": [],
+      "games": "disable",
+      "groupDescription": "*Welcome To 𝙸𝚕𝚑𝚊𝚖-𝙼𝙳 乂 𝙰𝚕𝚕 𝙾𝚝𝚑𝚎𝚛𝚜 𝙱𝚘𝚝*\n\nRead the terms kid :v\nDenying = kick\n\n*RULES:*\n• Do not spam bot !\n• 18+ Content is probihited\n• Archive / mute group if annoying\n• JB is probihited\n• Disable auto download if annoying :v\n• Do not share group links / virus\n• Dead group ? Tag admin\n\nLINK GROUP:\ns.id/allbot\n\nRest Api?\nbetabotz-api.herokuapp.com\n\nSC BOT?\n1. https://github.com/Restaa/bot-md\n2. https://github.com/KilluaBot 😎\n3. https://github.com/DikaArdnt/Hisoka-Morou\n\n🙏🏻Please be Polite🙏🏻",
+      "groupName": "𝙸𝚕𝚑𝚊𝚖-𝙼𝙳 乂 𝙰𝚕𝚕 𝙾𝚝𝚑𝚎𝚛𝚜 𝙱𝚘𝚝",
+      "left1": "disable",
+      "left1msg": "Bye bye {groupName}",
+      "left2": "disable",
+      "left2msg": "Bye bye {groupName}",
+      "notification": "disable",
+      "welcome1": "disable",
+      "welcome1msg": "Welcome to {groupName}",
+      "welcome2": "disable",
+      "welcome2msg": "Welcome to {groupName}"
+    }
   }
 ]

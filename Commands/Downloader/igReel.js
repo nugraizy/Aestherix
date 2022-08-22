@@ -15,11 +15,17 @@ export default {
 	status: "enable",
 	async run({ from, query, prettyNumber, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!query) return client[botNum].reply({ from, quoted: message }, "Please specify a url");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "Please specify a url");
+		}
 		try {
 			const { _: urls } = parser(query);
-			if (isOne(urls.length) && !isURL(urls[0])) return client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
-			if (isOne(urls.length) && !regex(urls[0])) return client[botNum].reply({ from, quoted: message }, "Please specify a valid Instagram url");
+			if (isOne(urls.length) && !isURL(urls[0])) {
+				return await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
+			}
+			if (isOne(urls.length) && !regex(urls[0])) {
+				return await client[botNum].reply({ from, quoted: message }, "Please specify a valid Instagram url");
+			}
 			for (const url of urls) {
 				if (!isURL(url.trim())) {
 					await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
@@ -33,7 +39,7 @@ export default {
 				if (parse) {
 					const reel = await getPost(url);
 					if ("error" in reel) {
-						client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram reel\n\n${reel.error}\n${url}`);
+						await client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram reel\n\n${reel.error}\n${url}`);
 						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Instagram reel", "red")} for ${color(prettyNumber, "#ff71ce")}`);
 						continue;
 					}

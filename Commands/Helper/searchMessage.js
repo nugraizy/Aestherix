@@ -10,8 +10,9 @@ export default {
 	async run({ from, query, message }, client) {
 		let capt = `Void Bot Search\n\n`;
 		const messages = await client[botNum].searchMessage(from, query);
-		if (messages.length == 0) capt += `No message found.`;
-		else {
+		if (messages.length == 0) {
+			capt += `No message found.`;
+		} else {
 			capt += `Found ${messages.length} messages.\n\n`;
 			await client[botNum].reply({ from, quoted: message }, capt.trim());
 			for (const messageElement of messages) {

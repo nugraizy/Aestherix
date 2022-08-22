@@ -83,16 +83,24 @@ export default {
 			extractMediaData,
 			bodyQuoted,
 		} = message;
-		if (!isOwner) return client[botNum].reply({ from, quoted: message.message }, "You are not allowed to use this command");
-		if (!query) return client[botNum].reply({ from, quoted: message.message }, "Please specify code to evaluate");
-		if (isBaileys) return;
+		if (!isOwner) {
+			return await client[botNum].reply({ from, quoted: message.message }, "You are not allowed to use this command");
+		}
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message.message }, "Please specify code to evaluate");
+		}
+		if (isBaileys) {
+			return;
+		}
 		global.where = from;
 		if (body.startsWith("/> ")) {
 			let types = Function;
 			let output;
 			let syntaxes = "";
 			try {
-				if (/await/.test(body)) types = AsyncFunction;
+				if (/await/.test(body)) {
+					types = AsyncFunction;
+				}
 				query = `return ${query}`;
 				const func = new types(
 					"print",
@@ -113,7 +121,7 @@ export default {
 				);
 				output = await func(
 					client,
-					(...args) => {
+					async (...args) => {
 						return client[botNum].reply({ from, quoted: message.message }, format(...args));
 					},
 					client,
@@ -136,7 +144,9 @@ export default {
 					allowAwaitOutsideFunction: true,
 					sourceType: "module",
 				});
-				if (err) syntaxes = `\`\`\`${err}\`\`\`\n\n`;
+				if (err) {
+					syntaxes = `\`\`\`${err}\`\`\`\n\n`;
+				}
 				output = e;
 			} finally {
 				client[botNum].reply({ from, quoted: message.message }, syntaxes + format(output));
@@ -144,13 +154,15 @@ export default {
 		} else if (body.startsWith("$> ")) {
 			try {
 				exec(body.slice(3), async (err, stdout, stderr) => {
-					if (err) return client[botNum].reply({ from, quoted: message.message }, format(err));
+					if (err) {
+						return await client[botNum].reply({ from, quoted: message.message }, format(err));
+					}
 					await client[botNum].reply({ from, quoted: message.message }, format(stdout.replace(col, "").trim()));
 				});
 			} catch (err) {
 				let str = `Type : ${err.name}\n`;
 				str += `Message : ${err.message}`;
-				return client[botNum].reply({ from, quoted: message.message }, `\`ERROR\` \`\`\`\n\n${str}\`\`\``);
+				return await client[botNum].reply({ from, quoted: message.message }, `\`ERROR\` \`\`\`\n\n${str}\`\`\``);
 			}
 		} else if (body.startsWith("=> ")) {
 			try {
@@ -187,8 +199,10 @@ export default {
 				);
 				let str = `Type : ${e.name}\n`;
 				str += `Message : ${e.message}`;
-				if (err) str += `\`\`\`${err}\`\`\`\n\n`;
-				return client[botNum].reply({ from, quoted: message.message }, `\`ERROR\` \`\`\`\n\n${str}\`\`\``);
+				if (err) {
+					str += `\`\`\`${err}\`\`\`\n\n`;
+				}
+				return await client[botNum].reply({ from, quoted: message.message }, `\`ERROR\` \`\`\`\n\n${str}\`\`\``);
 			}
 		} else if (body.startsWith("!> ")) {
 			let returning;
@@ -202,9 +216,9 @@ export default {
 				const exec = new (async () => {}).constructor("print", "message", "client", "store", "Array", "process", "args", "groupMetadata", "exports", "argument", queries);
 				returning = await exec.call(
 					client,
-					(...args) => {
+					async (...args) => {
 						if (--i < 1) return;
-						return client[botNum].reply({ from, quoted: message.message }, format(...args));
+						return await client[botNum].reply({ from, quoted: message.message }, format(...args));
 					},
 					message,
 					client,
@@ -223,7 +237,9 @@ export default {
 					allowAwaitOutsideFunction: true,
 					sourceType: "module",
 				});
-				if (err) syntaxes = `\`\`\`${err}\`\`\`\n\n`;
+				if (err) {
+					syntaxes = `\`\`\`${err}\`\`\`\n\n`;
+				}
 				returning = e;
 			} finally {
 				client[botNum].reply({ from, quoted: message.message }, syntaxes + format(returning));
@@ -241,10 +257,18 @@ const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 const print = ({ from, quoted }, ...args) => client[botNum].reply({ from: from || where, quoted }, format(...args));
 global.prints = print;
 const temp = async (names, func) => {
-	if (!/^[a-z0-9_]+$/i.test(names)) return new Error("Invalid name.");
-	if (Object.keys(func).includes(names)) return new Error("Function already exists in the script.");
-	if (Object.keys(global).includes(names)) return new Error("Function already exists in the temporary functions.");
-	if (typeof func !== "function") return new Error("Argument is not a function.");
+	if (!/^[a-z0-9_]+$/i.test(names)) {
+		return new Error("Invalid name.");
+	}
+	if (Object.keys(func).includes(names)) {
+		return new Error("Function already exists in the script.");
+	}
+	if (Object.keys(global).includes(names)) {
+		return new Error("Function already exists in the temporary functions.");
+	}
+	if (typeof func !== "function") {
+		return new Error("Argument is not a function.");
+	}
 	func = prettier.js_beautify(func.toString());
 	func = prettier.js_beautify(func.split("\n").insert(1, "try {").insert(-1, "} catch(e) { prints(false, format(e))}").join("\n"));
 	global[names] = func.includes("await") ? await new AsyncFunction(`return ${func}`)() : new Function(`return ${func}`)();
@@ -261,8 +285,12 @@ const clear = (names) => {
 			}
 		}
 	}
-	if (!/^[a-z0-9_]+$/i.test(names)) return new Error("Invalid name.");
-	if (!Object.keys(global).includes(names)) return new Error("Function does not exist.");
+	if (!/^[a-z0-9_]+$/i.test(names)) {
+		return new Error("Invalid name.");
+	}
+	if (!Object.keys(global).includes(names)) {
+		return new Error("Function does not exist.");
+	}
 	const capt = `Function is deleted\n\n${global[names]}`;
 	delete global[names];
 	delete global.functions[names];
@@ -278,14 +306,17 @@ const check = (names) => {
 			}
 		}
 	}
-	if (!/^[a-z0-9_]+$/i.test(names)) return new Error("Invalid name.");
-	if (!Object.keys(global).includes(names)) return new Error("Function does not exist.");
+	if (!/^[a-z0-9_]+$/i.test(names)) {
+		return new Error("Invalid name.");
+	}
+	if (!Object.keys(global).includes(names)) {
+		return new Error("Function does not exist.");
+	}
 	return global[names].toString();
 };
 
 class CustomArray extends Array {
 	constructor(...args) {
-		if (typeof args[0] == "number") return super(Math.min(args[0], 10000));
-		else return super(...args);
+		return typeof args[0] == "number" ? super(Math.min(args[0], 10_000)) : super(...args);
 	}
 }

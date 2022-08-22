@@ -8,7 +8,7 @@ export default {
 	limit: 0,
 	status: "enable",
 	async run({ from }, client, store) {
-		client[botNum].sendMessage(from, {
+		await client[botNum].sendMessage(from, {
 			text: "Hi it's button message",
 			footer: "Hello World",
 			buttons: [

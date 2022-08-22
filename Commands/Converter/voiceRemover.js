@@ -16,7 +16,9 @@ export default {
 	limit: 1,
 	status: "enable",
 	async run({ isQuotedAudio, isQuotedDocument, isMediaVid, from, prettyNumber, message, filename, query, extractMediaData, typeQuoted }, client) {
-		if (!isQuotedAudio && !isQuotedDocument && !isMediaVid) return client[botNum].reply({ from, quoted: message }, "Please send/reply an audio/video to remove voice");
+		if (!isQuotedAudio && !isQuotedDocument && !isMediaVid) {
+			return await client[botNum].reply({ from, quoted: message }, "Please send/reply an audio/video to remove voice");
+		}
 		try {
 			const time = moment().format("HH:mm:ss DD/MM");
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Removing Sound`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
@@ -29,12 +31,13 @@ export default {
 				isQuotedDocument &&
 				!JSON.parse(fs.readFileSync(path.join(__dirname, "Databases/Mimetypes/Audio.json")).includes(extractMediaData.mimetype)) &&
 				!JSON.parse(fs.readFileSync(path.join(__dirname, "Databases/Mimetypes/Video.json")).includes(extractMediaData.mimetype))
-			)
-				return client[botNum].reply({ from, quoted: message }, "This file is not an audio/video");
+			) {
+				return await client[botNum].reply({ from, quoted: message }, "This file is not an audio/video");
+			}
 			const { result } = await soundRemover(file, prettyNumber);
-			if (/--?(voice|suara)/.test(query) && /--?(instrument(s)?)/.test(query))
-				return client[botNum].reply({ from, quoted: message }, `${time}\n${result.vocal}\n${result.instrumental}`);
-			else if (/--?(voice|suara)/.test(query))
+			if (/--?(voice|suara)/.test(query) && /--?(instrument(s)?)/.test(query)) {
+				return await client[botNum].reply({ from, quoted: message }, `${time}\n${result.vocal}\n${result.instrumental}`);
+			} else if (/--?(voice|suara)/.test(query)) {
 				await client[botNum].sendMessage(
 					from,
 					{
@@ -44,18 +47,19 @@ export default {
 					},
 					{ quoted: message },
 				);
-			else if (/--?(instrumen(ts)?)/.test(query))
+			} else if (/--?(instrumen(ts)?)/.test(query)) {
 				await client[botNum].sendMessage(
 					from,
 					{ document: { url: result.vocal }, fileName: extractMediaData?.fileName?.replace(extension(extractMediaData.mimetype), "mp3") ?? "Made by Nanda.mp3", mimetype: "audio/mp3" },
 					{ quoted: message },
 				);
-			else
+			} else {
 				await client[botNum].sendMessage(
 					from,
 					{ document: { url: result.instrumental }, fileName: extractMediaData.fileName ?? "Made by Nanda.mp3", mimetype: "audio/mp3" },
 					{ quoted: message },
 				);
+			}
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sound is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
 		} catch (err) {
 			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";

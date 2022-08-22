@@ -9,7 +9,9 @@ import { fetchBUFFER, fetchJSON, isURL } from "../../Helper/Modules/index.js";
 const isValidImageURL = async (url) => {
 	try {
 		const data = await fetch(url.replace("https:", "http:"));
-		if (data.status !== 200) return false;
+		if (data.status !== 200) {
+			return false;
+		}
 		return true;
 	} catch (error) {
 		return false;
@@ -19,9 +21,11 @@ const isValidImageURL = async (url) => {
 export const traceMoe = async (file) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			if (isURL(file) && isValidImageURL(file)) file = await fetchBUFFER(file);
-			else if (isURL(file) && !(await isValidImageURL(file))) return resolve({ error: "Invalid image URL" });
-			else file = readFileSync(file);
+			if (isURL(file) && isValidImageURL(file)) {
+				file = await fetchBUFFER(file);
+			} else if (isURL(file) && !(await isValidImageURL(file))) {
+				return resolve({ error: "Invalid image URL" });
+			} else file = readFileSync(file);
 			file = await sharp(file).jpeg({ quality: 100 }).toBuffer();
 			const form = new FormData();
 			form.append("image", file, { contentType: "image/jpeg", filename: "blob" });

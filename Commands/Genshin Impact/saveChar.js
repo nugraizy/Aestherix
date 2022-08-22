@@ -13,15 +13,19 @@ export default {
 	limit: 2,
 	status: "enable",
 	async run({ sender, query, message, from }, client) {
-		if (!query) return client[botNum].reply({ from, quoted: message }, "Please specify an UID");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "Please specify an UID");
+		}
 		try {
 			const data = readJSON(path.join(__dirname, "Databases/Games/Genshin Impact/data.json"));
 			const index = data.findIndex((v) => v.user == sender);
 			if (index !== -1) {
-				return client[botNum].reply({ from, quoted: message }, "Your character already in Database.");
+				return await client[botNum].reply({ from, quoted: message }, "Your character already in Database.");
 			}
 			const findUid = await regex(query);
-			if (!findUid.status) return client[botNum].reply({ from, quoted: message }, findUid.message);
+			if (!findUid.status) {
+				return await client[botNum].reply({ from, quoted: message }, findUid.message);
+			}
 			data.push({
 				user: sender,
 				uid: findUid.message,
@@ -40,7 +44,11 @@ export default {
 
 const regex = async (input) => {
 	const match = input.match(/^\d{9,10}/g);
-	if (!match) return { status: false, message: "Wasn't a valid UID" };
-	if (!(await genshinProfile(match[0]))) return { status: false, message: "We can't find your char" };
+	if (!match) {
+		return { status: false, message: "Wasn't a valid UID" };
+	}
+	if (!(await genshinProfile(match[0]))) {
+		return { status: false, message: "We can't find your char" };
+	}
 	return { status: true, message: match[0] };
 };

@@ -5,7 +5,9 @@ const URL_BASE = (input) => `https://tinyurl.com/api-create.php?url=${input}`;
 export const tiny = (url) =>
 	new Promise(async (resolve) => {
 		try {
-			if (!isURL(url)) return resolve({ error: "Invalid URL" });
+			if (!isURL(url)) {
+				return resolve({ error: "Invalid URL" });
+			}
 			const data = await fetchTEXT(URL_BASE(url));
 			resolve(data);
 		} catch (error) {

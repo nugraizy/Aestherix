@@ -14,14 +14,18 @@ export default {
 	status: "enable",
 	async run({ isMediaImage, isMediaVid, from, prettyNumber, message, mediaData, stickerAble, typeQuoted, typeSticker, filename, query }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!isMediaImage && !isMediaVid && !query) return client[botNum].reply({ from, quoted: message }, "Please send/reply a media or send a url to convert to sticker");
-		if (query && !isURL(query) && !isMediaImage && !isMediaVid)
-			return client[botNum].reply({ from, quoted: message }, "If you trying to convert sticker from url, please provide a valid url");
-		if (!stickerAble && !query)
-			return client[botNum].reply(
+		if (!isMediaImage && !isMediaVid && !query) {
+			return await client[botNum].reply({ from, quoted: message }, "Please send/reply a media or send a url to convert to sticker");
+		}
+		if (query && !isURL(query) && !isMediaImage && !isMediaVid) {
+			return await client[botNum].reply({ from, quoted: message }, "If you trying to convert sticker from url, please provide a valid url");
+		}
+		if (!stickerAble && !query) {
+			return await client[botNum].reply(
 				{ from, quoted: message },
 				`Please send/reply a regular media to convert to sticker. Can't convert ${typeQuoted} to sticker, only : ${typeSticker.join(", ").capitalize()}`,
 			);
+		}
 		try {
 			if (query && isURL(query)) {
 				const sticker = await client[botNum].prepareSticker(query, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author, packname });

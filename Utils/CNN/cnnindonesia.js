@@ -15,7 +15,9 @@ export const cnnindonesia = (keyword) =>
 					type: 3,
 				}),
 			});
-			if (!json) return resolve({ error: "data not found" });
+			if (!json) {
+				return resolve({ error: "data not found" });
+			}
 			resolve(parse(json));
 		} catch (err) {
 			reject(err);

@@ -61,13 +61,17 @@ export class SambungKata {
 		games.word.set(group, this);
 	}
 
-	checkValidClue(word, prev_clue) {
-		if (!word.startsWith(prev_clue)) return false;
+	checkValidClue(word, prevClue) {
+		if (!word.startsWith(prevClue)) {
+			return false;
+		}
 		return true;
 	}
 
 	checkIsGuessed(word) {
-		if (this.guessed.includes(word)) return true;
+		if (this.guessed.includes(word)) {
+			return true;
+		}
 		return false;
 	}
 
@@ -94,7 +98,9 @@ export class SambungKata {
 		const remainings = moment(new Date()).add(parseInt(20), "seconds").valueOf();
 		SetIntervals(intervals["word"], this.group, 20, (clients = client, group = this.group, remaining = remainings) => {
 			const data = intervals["word"].get(group);
-			if (data === undefined) return;
+			if (data === undefined) {
+				return;
+			}
 			const second = Math.floor(((remaining - new Date().getTime()) % (1000 * 60)) / 1000);
 			const dataGame = games.word.get(group);
 			data.timer = second;
@@ -152,13 +158,21 @@ export class SambungKata {
 		}
 	}
 
-	async checkWord(word, prev_clue) {
-		if (word.includes(" ")) return RESPONSE.INVALID_ANSWER;
-		if (this.checkIsGuessed(word)) return RESPONSE.ALREADY_GUESSED;
-		if (!this.checkValidClue(word, prev_clue)) return RESPONSE.CLUE_DOESNT_MATCH;
+	async checkWord(word, prevClue) {
+		if (word.includes(" ")) {
+			return RESPONSE.INVALID_ANSWER;
+		}
+		if (this.checkIsGuessed(word)) {
+			return RESPONSE.ALREADY_GUESSED;
+		}
+		if (!this.checkValidClue(word, prevClue)) {
+			return RESPONSE.CLUE_DOESNT_MATCH;
+		}
 		const data = await fetchTEXT(URL_BASE(word));
 		const $ = cheerioLOAD(data);
-		if ($("body > div.container.body-content > h4:nth-child(6)").text() == WORD_NOT_FOUND) return RESPONSE.FAIL_TO_FIND_WORD;
+		if ($("body > div.container.body-content > h4:nth-child(6)").text() == WORD_NOT_FOUND) {
+			return RESPONSE.FAIL_TO_FIND_WORD;
+		}
 		const value = $("body > div.container.body-content > h2:nth-child(5)").text().replace(/[0-9]/g, "");
 		return {
 			status: true,
@@ -168,11 +182,19 @@ export class SambungKata {
 	}
 
 	async guess(word, guesser, group, client) {
-		if (!intervals["word"].get(group) && !games["word"].get(group)) return false;
-		if (!this.player2) return false;
-		if (!this.checkTurn(guesser)) return RESPONSE.WRONG_TURN;
+		if (!intervals["word"].get(group) && !games["word"].get(group)) {
+			return false;
+		}
+		if (!this.player2) {
+			return false;
+		}
+		if (!this.checkTurn(guesser)) {
+			return RESPONSE.WRONG_TURN;
+		}
 		const data = await this.checkWord(word, this.clue);
-		if (!data.status) return data;
+		if (!data.status) {
+			return data;
+		}
 		this.changeTurn();
 		this.words = data.value;
 		this.clue = data.clue;
@@ -180,7 +202,9 @@ export class SambungKata {
 		const remainings = moment(new Date()).add(parseInt(20), "seconds").valueOf();
 		SetIntervals(intervals["word"], this.group, 20, (clients = client, group = this.group, remaining = remainings) => {
 			const data = intervals["word"].get(group);
-			if (data === undefined) return;
+			if (data === undefined) {
+				return;
+			}
 			const second = Math.floor(((remaining - new Date().getTime()) % (1000 * 60)) / 1000);
 			const dataGame = games.word.get(group);
 			data.timer = second;

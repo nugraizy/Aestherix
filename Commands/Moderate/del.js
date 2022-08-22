@@ -8,13 +8,18 @@ export default {
 	limit: 4,
 	status: "enable",
 	async run({ isOwner, isAdmin, from, mediaData, message, bodyQuoted }, client) {
-		if (!isAdmin && !isOwner) return client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
-		if (!bodyQuoted) return client[botNum].reply({ from, quoted: message }, "You must reply to a message to delete it");
+		if (!isAdmin && !isOwner) {
+			return await client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
+		}
+		if (!bodyQuoted) {
+			return await client[botNum].reply({ from, quoted: message }, "You must reply to a message to delete it");
+		}
 		await client[botNum].sendMessage(from, {
 			delete: {
 				id: mediaData.stanzaId,
 				participant: mediaData.participant,
 				remoteJid: from,
+				...(mediaData.participant.includes(botNum) ? { fromMe: true } : {}),
 			},
 		});
 	},

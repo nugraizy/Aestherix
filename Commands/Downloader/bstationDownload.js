@@ -14,19 +14,23 @@ export default {
 	cooldown: 8,
 	status: "enable",
 	async run({ query, from, message, filename }, client) {
-		if (!query) return client[botNum].reply({ from, quoted: message }, "You must provide a query.");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "You must provide a query.");
+		}
 		try {
 			let queries = query.split(",");
 			queries = removeDuplicatesArray(queries);
 			for (const querie of queries) {
 				const regexs = regex(querie.trim());
-				if (!regexs.status) return client[botNum].reply({ from, quoted: message }, regexs.message);
+				if (!regexs.status) {
+					return await client[botNum].reply({ from, quoted: message }, regexs.message);
+				}
 				const result = await detailSourceFormat(regexs.message.trim());
 				if ("error" in result) {
 					await client[botNum].reply({ from, quoted: message }, `${result.error}\n${result.cus_error}`);
 					continue;
 				}
-				client[botNum].reply(
+				await client[botNum].reply(
 					{ from, quoted: message },
 					` • Converting videos, this might take a while please wait.\n\nResolution : ${result.resolution}\nSize : ${getFilesizeFromBytes(result.size)}`,
 				);
@@ -44,7 +48,9 @@ const regex = (input) => {
 	const isBili = reg.test(input) || /\d{5,10}/g.test(input);
 	if (isBili) {
 		const match = input.match(/\d{5,10}/g) || input.match(/\d{5,10}/g);
-		if (!match) return { status: false, message: "Bstation code not found on your URL. Try another URL or Input a Code." };
+		if (!match) {
+			return { status: false, message: "Bstation code not found on your URL. Try another URL or Input a Code." };
+		}
 		return { status: true, message: match[0] };
 	}
 	return { status: false, message: "This URL isn't a valid Bstation Art URL. Try another URL." };

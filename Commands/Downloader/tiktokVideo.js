@@ -16,7 +16,9 @@ export default {
 	status: "enable",
 	async run({ from, query, prettyNumber, message }, client) {
 		const time = moment().format("HH:mm:ss DD/MM");
-		if (!query) return client[botNum].reply({ from, quoted: message }, "Please provide a URL");
+		if (!query) {
+			return await client[botNum].reply({ from, quoted: message }, "Please provide a URL");
+		}
 		try {
 			let { _: urls } = parser(query);
 			let { no_wm: NO_WM, wm: WITH_WM } = parser(query.toLowerCase(), {
@@ -28,10 +30,18 @@ export default {
 					wm: ["with-watermark", "with_watermark", "watermark"],
 				},
 			});
-			if (Array.isArray(NO_WM)) NO_WM = removeDuplicatesArray(NO_WM)[0];
-			if (Array.isArray(WITH_WM)) WITH_WM = removeDuplicatesArray(WITH_WM)[0];
-			if (isOne(urls.length) && !isURL(urls[0])) return client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
-			if (isOne(urls.length) && !regex(urls[0])) return client[botNum].reply({ from, quoted: message }, "Please specify a valid TikTok url");
+			if (Array.isArray(NO_WM)) {
+				NO_WM = removeDuplicatesArray(NO_WM)[0];
+			}
+			if (Array.isArray(WITH_WM)) {
+				WITH_WM = removeDuplicatesArray(WITH_WM)[0];
+			}
+			if (isOne(urls.length) && !isURL(urls[0])) {
+				return await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
+			}
+			if (isOne(urls.length) && !regex(urls[0])) {
+				return await client[botNum].reply({ from, quoted: message }, "Please specify a valid TikTok url");
+			}
 			for (const url of removeDuplicatesArray(urls.map((v) => v.trim()))) {
 				if (!isURL(url)) {
 					await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
@@ -73,9 +83,15 @@ export default {
 					capt += `View : ${numberWithCommas(videos.view)}\n`;
 					capt += `Duration : ${videos.videoDuration}\n`;
 					capt += `Description : ${videos.videoDescription}\n`;
-					if (NO_WM) await client[botNum].sendMessage(from, { video: { url: videos.url.with_no_watermark }, caption: capt.trim() }, { quoted: message });
-					if (WITH_WM) await client[botNum].sendMessage(from, { video: { url: videos.url.with_watermark }, caption: capt.trim() }, { quoted: message });
-					if (!NO_WM && !WITH_WM) await client[botNum].sendMessage(from, { video: { url: videos.url.with_watermark }, caption: capt.trim() }, { quoted: message });
+					if (NO_WM) {
+						await client[botNum].sendMessage(from, { video: { url: videos.url.with_no_watermark }, caption: capt.trim() }, { quoted: message });
+					}
+					if (WITH_WM) {
+						await client[botNum].sendMessage(from, { video: { url: videos.url.with_watermark }, caption: capt.trim() }, { quoted: message });
+					}
+					if (!NO_WM && !WITH_WM) {
+						await client[botNum].sendMessage(from, { video: { url: videos.url.with_watermark }, caption: capt.trim() }, { quoted: message });
+					}
 				}
 				await delay(100);
 				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloaded TikTok Media`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);

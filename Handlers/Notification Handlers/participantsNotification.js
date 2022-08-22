@@ -17,7 +17,7 @@ export default {
 	async handler(client, message, store) {
 		message = await reassign(JSON.parse(JSON.stringify(message)), client, store, false);
 		if (message[message.from].notification == "enable") {
-			client[botNum].sendMessage(message.from, {
+			await client[botNum].sendMessage(message.from, {
 				text: `\`\`\` • Group Participants Notification\`\`\`\n
 Event Update : ${EVENT_UPDATE[message.messageStubType]}
 

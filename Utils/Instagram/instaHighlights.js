@@ -4,8 +4,12 @@ import { cheerioLOAD, fetchJSON, fetchTEXT } from "../../Helper/index.js";
 export const getHighlights = (username) =>
 	new Promise(async (resolve) => {
 		try {
-			if (!username) return resolve({ status: false, error: "Insert username!" });
-			if (username.startsWith("@")) username = username.replace("@", "");
+			if (!username) {
+				return resolve({ status: false, error: "Insert username!" });
+			}
+			if (username.startsWith("@")) {
+				username = username.replace("@", "");
+			}
 			const data = await fetchTEXT(URL_BASE(username), {
 				headers: {
 					"user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36",

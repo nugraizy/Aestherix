@@ -23,7 +23,7 @@ export default {
 						quoted: message,
 					},
 				);
-				client[botNum].relayMessage(from, messages.message, { messageId: messages.key.id });
+				await client[botNum].relayMessage(from, messages.message, { messageId: messages.key.id });
 			}
 			return;
 		}

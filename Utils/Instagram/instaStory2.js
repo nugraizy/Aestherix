@@ -3,11 +3,15 @@ import { cheerioLOAD, fetchTEXT } from "../../Helper/index.js";
 export const getStory2 = (username) =>
 	new Promise(async (resolve, reject) => {
 		let data = null;
-		if (username.startsWith("@")) username = username.replace("@", "");
+		if (username.startsWith("@")) {
+			username = username.replace("@", "");
+		}
 		try {
 			for (let i = 0; i < 5; i++) {
 				data = await fetchTEXT(URL_BASE(username, i));
-				if (!data.includes("nostory")) break;
+				if (!data.includes("nostory")) {
+					break;
+				}
 			}
 			const $ = cheerioLOAD(data);
 			const results = [];

@@ -40,6 +40,6 @@ export default {
 			},
 			{},
 		);
-		client[botNum].relayMessage(from, content.message, { messageId: content.key.id });
+		await client[botNum].relayMessage(from, content.message, { messageId: content.key.id });
 	},
 };

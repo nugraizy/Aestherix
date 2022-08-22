@@ -27,16 +27,22 @@ const RANDOM_TURN_BASED_ON_MODEL = (player1, player2) => {
 
 export const DeleteTicTacToeSession = (session) => {
 	const key = Array.from(games.tictactoe.values()).find((game) => game.PLAYER_1 == session || game.PLAYER_2 == session) || null;
-	if (key !== null && key.PLAYER_1 == session) return games.tictactoe.delete(key.PLAYER_1);
-	else if (key !== null && key.player2 == session) return games.tictactoe.delete(key.PLAYER_2);
-	else return null;
+	if (key !== null && key.PLAYER_1 == session) {
+		return games.tictactoe.delete(key.PLAYER_1);
+	} else if (key !== null && key.player2 == session) {
+		return games.tictactoe.delete(key.PLAYER_2);
+	}
+	return null;
 };
 
 export const GetTicTacToeSession = (session) => {
 	const key = Array.from(games.tictactoe.values()).find((game) => game.PLAYER_1 == session || game.PLAYER_2 == session) || null;
-	if (key !== null && key.PLAYER_1 == session) return key;
-	else if (key !== null && key.PLAYER_2 == session) return key;
-	else return null;
+	if (key !== null && key.PLAYER_1 == session) {
+		return key;
+	} else if (key !== null && key.PLAYER_2 == session) {
+		return key;
+	}
+	return null;
 };
 
 export default class TicTacToe {
@@ -52,24 +58,27 @@ export default class TicTacToe {
 		this.BOARD = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"];
 		this.WINNING_ORDER = [null, null, null];
 		this.PLAY_BOARD = new Array(9).fill("");
-		if (this.checkGameStatus() && newGame) return { error: "Game already exists" };
+		if (this.checkGameStatus() && newGame) {
+			return { error: "Game already exists" };
+		}
 		this.setGame();
 	}
 
 	getKey(dari) {
 		const key = Array.from(games.tictactoe.values()).find((game) => game.PLAYER_1 == dari || game.PLAYER_2 == dari) || null;
-		if (key !== null && key.PLAYER_1 == dari) return key;
-		else if (key !== null && key.PLAYER_1 == dari) return key;
-		else return null;
+		if (key !== null && key.PLAYER_1 == dari) {
+			return key;
+		} else if (key !== null && key.PLAYER_1 == dari) {
+			return key;
+		}
+		return null;
 	}
 
 	checkGameStatus() {
 		return this.getKey(this.PLAYER_1);
 	}
 
-	setGame() {
-		return games.tictactoe.set(this.PLAYER_1, this);
-	}
+	setGame() {}
 
 	displayBoard() {
 		return this.BOARD;
@@ -84,21 +93,31 @@ export default class TicTacToe {
 	}
 
 	playMove(location, player, pcRival) {
-		if (!this.isTurn(player)) return { error: "It's not your turn" };
+		if (!this.isTurn(player)) {
+			return { error: "It's not your turn" };
+		}
 		if (player == "Void Bot") {
 			location = this.minimax(location, 0, true, pcRival).move;
 			this.BOARD[player == "Void Bot" ? location : location - 1] = this.PLAYER_TURN == this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL;
 			this.PLAY_BOARD[player == "Void Bot" ? location : location - 1] = this.PLAYER_TURN == this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL;
-			if (this.isWinner(this.PLAYER_TURN == this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL)) return { status: "WINNER", winner: player, ...this };
-			if (this.isDraw()) return { status: "DRAW", ...this };
+			if (this.isWinner(this.PLAYER_TURN == this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL)) {
+				return { status: "WINNER", winner: player, ...this };
+			}
+			if (this.isDraw()) {
+				return { status: "DRAW", ...this };
+			}
 			this.changeTurn();
 			return this;
 		}
 		if (this.isCorrectMove(location)) {
 			this.BOARD[player == "Void Bot" ? location : location - 1] = this.PLAYER_TURN == this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL;
 			this.PLAY_BOARD[player == "Void Bot" ? location : location - 1] = this.PLAYER_TURN == this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL;
-			if (this.isWinner(this.PLAYER_TURN == this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL)) return { status: "WINNER", winner: player, ...this };
-			if (this.isDraw()) return { status: "DRAW", ...this };
+			if (this.isWinner(this.PLAYER_TURN == this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL)) {
+				return { status: "WINNER", winner: player, ...this };
+			}
+			if (this.isDraw()) {
+				return { status: "DRAW", ...this };
+			}
 			this.changeTurn();
 			return this;
 		} else {
@@ -136,9 +155,15 @@ export default class TicTacToe {
 	}
 
 	minimax(board, depth, isMaximizing, players) {
-		if (this.isWinner(this.PLAYER_1_MODEL)) return { score: 10 - depth };
-		if (this.isWinner(this.PLAYER_2_MODEL)) return { score: depth - 10 };
-		if (board.every((v) => v !== "")) return { score: 0 };
+		if (this.isWinner(this.PLAYER_1_MODEL)) {
+			return { score: 10 - depth };
+		}
+		if (this.isWinner(this.PLAYER_2_MODEL)) {
+			return { score: depth - 10 };
+		}
+		if (board.every((v) => v !== "")) {
+			return { score: 0 };
+		}
 		let bestScore = isMaximizing ? -Infinity : Infinity;
 		let bestMove = null;
 		for (let i = 0; i < board.length; i++) {
