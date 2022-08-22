@@ -9,7 +9,7 @@ export default {
 	description: "Downloads TikTok video.",
 	usage:
 		"!tiktokvideo <url> (you can send multiple link using space in between) [options]\nOptions:\n-wm, --watermark: Download with watermark\n-nowm, --nowatermark: Download without watermark",
-	aliases: ["tiktokvideos", "ttvideo", "ttvid", "ttv"],
+	aliases: ["tiktokvideos", "ttvideo", "ttvid", "ttv", "tiktok"],
 	category: "Downloader",
 	cooldown: 10,
 	limit: 6,
