@@ -1,6 +1,6 @@
 import { JSDOM } from "jsdom";
 import yts from "yt-search";
-import { fetchJSON } from "../../Helper/index.js";
+import { fetchJSON, isURL } from "../../Helper/index.js";
 
 const post = async (url, formdata) => {
 	return await fetchJSON(url, {
@@ -83,115 +83,74 @@ export const yt = async (url, quality, type, bitrate, server = "en60") =>
 	});
 
 export const ytsr = (query, all = true) =>
-	new Promise((resolve) => {
+	new Promise(async (resolve, reject) => {
 		try {
 			if (all) {
-				yts(query)
-					.then((res) => {
-						resolve(res.all);
-					})
-					.catch((e) => resolve({ error: e, internal: false }));
+				const res = await yts(query);
+				resolve(res.all);
 			} else {
-				yts(query)
-					.then((res) => {
-						const data = res.all[0];
-						let {
-							videoId,
-							url,
-							title,
-							description,
-							thumbnail,
-							timestamp,
-							seconds: times,
-							ago: uploaded,
-							views,
-							author: { name: author },
-							author: { url: urlChannel },
-						} = data;
-						resolve({ videoId, url, title, description, thumbnail, timestamp, times, uploaded, views, author, urlChannel });
-					})
-					.catch((e) => resolve({ error: e, internal: false }));
+				const res = await yts(query);
+				const data = res?.all?.[0];
+				let {
+					videoId,
+					url,
+					title,
+					description,
+					thumbnail,
+					timestamp,
+					seconds: times,
+					ago: uploaded,
+					views,
+					author: { name: author },
+					author: { url: urlChannel },
+				} = data;
+				resolve({ videoId, url, title, description, thumbnail, timestamp, times, uploaded, views, author, urlChannel });
 			}
 		} catch (e) {
-			resolve({
-				error: e.stack,
-				internal: true,
-			});
+			reject(e);
 		}
 	});
 
 export const ytv = (query) =>
-	new Promise((resolve) => {
+	new Promise(async (resolve, reject) => {
 		try {
 			if (isUrl(query)) {
-				yt(query, "360p", "mp4", "360")
-					.then((res) => {
-						const container = res;
-						ytsr(res.title, false)
-							.then((res) => {
-								resolve({ ...container, ...res });
-							})
-							.catch((e) => resolve({ error: e.error, internal: false }));
-					})
-					.catch((e) => resolve({ error: e.error, internal: false }));
-			} else if (isUrl(query)) {
+				let res = await yt(query, "360p", "mp4", "360");
+				const container = res;
+				res = await ytsr(res.title, false);
+				resolve({ ...container, ...res });
+			} else if (isURL(query) && !isUrl(query)) {
 				resolve({ error: "Link YouTube tidak valid.", internal: false });
 			} else {
-				ytsr(query, false)
-					.then((res) => {
-						const url = `https://youtu.be/${res.videoId}`;
-						const container = res;
-						yt(url, "360p", "mp4", "360")
-							.then((res) => {
-								resolve({ ...container, ...res });
-							})
-							.catch((e) => resolve({ error: e.error, internal: false }));
-					})
-					.catch((e) => resolve({ error: e.error, internal: false }));
+				let res = await ytsr(query, false);
+				const url = `https://youtu.be/${res.videoId}`;
+				const container = res;
+				res = yt(url, "360p", "mp4", "360");
+				resolve({ ...container, ...res });
 			}
 		} catch (e) {
-			resolve({
-				error: e.stack,
-				internal: true,
-			});
+			reject(e);
 		}
 	});
 
 export const yta = (query) =>
-	new Promise((resolve) => {
+	new Promise(async (resolve) => {
 		try {
 			if (isUrl(query)) {
-				yt(query, "128kbps", "mp3", "128")
-					.then((res) => {
-						const container = res;
-						ytsr(res.title, false)
-							.then((res) => {
-								resolve({ ...container, ...res });
-							})
-							.catch((e) => resolve({ error: e.error, internal: false }));
-					})
-					.catch((e) => resolve({ error: e.error, internal: false }));
-			} else if (isUrl(query)) {
+				let res = await yt(query, "128kbps", "mp3", "128");
+				const container = res;
+				res = await ytsr(res.title, false);
+				resolve({ ...container, ...res });
+			} else if (isURL(query) && !isUrl(query)) {
 				resolve({ error: "Link YouTube tidak valid.", internal: false });
 			} else {
-				ytsr(query, false)
-					.then((res) => {
-						const url = `https://youtu.be/${res.videoId}`;
-						const container = res;
-						yt(url, "128kbps", "mp3", "128")
-							.then((res) => {
-								resolve({ ...container, ...res });
-							})
-							.catch((e) => resolve({ error: e.error, internal: false }));
-					})
-					.catch((e) => {
-						resolve({ error: e.error, internal: false });
-					});
+				const res = await ytsr(query, false);
+				const url = `https://youtu.be/${res.videoId}`;
+				const container = res;
+				res = await yt(url, "128kbps", "mp3", "128");
+				resolve({ ...container, ...res });
 			}
 		} catch (e) {
-			resolve({
-				error: e.stack,
-				internal: true,
-			});
+			reject(e);
 		}
 	});

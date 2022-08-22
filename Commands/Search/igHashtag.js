@@ -36,7 +36,7 @@ export default {
 			text: "\t",
 			buttonText: "Open List",
 			sections: result.posts.map((v, i) => ({
-				rows: [{ title: `${i + 1}. ${v.caption.substring(0, 20)}`, rowId: `.igpost https://instagram.com/${v.code}` }],
+				rows: [{ title: `${i + 1}. ${v.caption.substring(0, 20)}`, rowId: `.igpost https://instagram.com/p/${v.code}` }],
 				title: `@${v.username} | ${v.fullName}`,
 			})),
 		});

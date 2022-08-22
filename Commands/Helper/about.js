@@ -28,10 +28,10 @@ Using less module and try to find every private api from the provider (if they u
 		});
 		await client[botNum].sendMessage(from, {
 			text: `Thanks To :
-Aldi a.k.a Alphanum404 a.k.a ctOS v2.0
+Aldi a.k.a Alphanum404
 Benni a.k.a Bennz
 Hanif a.k.a Mrhrtz
-Nafiz
+Nafiz a.k.a VoIP
 Toby a.k.a Tobz`,
 			footer: "Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪",
 			templateButtons: [{ urlButton: { displayText: "\t", url: "\t" } }],
