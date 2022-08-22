@@ -275,13 +275,11 @@ const start = async () => {
 				text: update.gameDialogue,
 			});
 			for (const id of update.playersData.filter((v) => !v.isAlive)) {
-				console.log(id, "Not Alive");
 				client[botNum].sendMessage(id.id, {
 					text: "Karena kamu sudah mati, maka kamu hanya bisa menonton permainan saja",
 				});
 			}
 			for (const id of update.playersData.filter((v) => v.isAlive)) {
-				console.log(id, "Alive");
 				client[botNum].sendMessage(id.id, {
 					title: "Pilih salah satu dari pemain berikut untuk divoting",
 					footer: `Made by Void Bot. Powered by Hidden Finder`,
@@ -467,7 +465,7 @@ async function watchFile(module) {
 	fs.watchFile(module, async (event, filename) => {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (fs.existsSync(module)) {
-			INFOLOG(`[${color(time, "cyan")}]`, color(`${modules.split("/").reverse()[0]} has been changed`, "#9f53ea"));
+			INFOLOG(`[${color(time, "cyan")}]`, color(`${modules?.split("/")?.reverse()[0]} has been changed`, "#9f53ea"));
 			await reloadModule(module, false);
 		} else {
 			await reloadModule(module, true, modules);

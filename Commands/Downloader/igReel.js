@@ -18,56 +18,48 @@ export default {
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, "Please specify a url");
 		}
-		try {
-			const { _: urls } = parser(query);
-			if (isOne(urls.length) && !isURL(urls[0])) {
-				return await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
+		const { _: urls } = parser(query);
+		if (isOne(urls.length) && !isURL(urls[0])) {
+			return await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
+		}
+		if (isOne(urls.length) && !regex(urls[0])) {
+			return await client[botNum].reply({ from, quoted: message }, "Please specify a valid Instagram url");
+		}
+		for (const url of urls) {
+			if (!isURL(url.trim())) {
+				await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
+				continue;
+			} else if (!regex(url.trim())) {
+				await client[botNum].reply({ from, quoted: message }, "Please specify a valid Instagram url");
+				continue;
 			}
-			if (isOne(urls.length) && !regex(urls[0])) {
-				return await client[botNum].reply({ from, quoted: message }, "Please specify a valid Instagram url");
-			}
-			for (const url of urls) {
-				if (!isURL(url.trim())) {
-					await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
-					continue;
-				} else if (!regex(url.trim())) {
-					await client[botNum].reply({ from, quoted: message }, "Please specify a valid Instagram url");
+			const parse = parseCode(url.trim());
+			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading Instagram reel`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
+			if (parse) {
+				const reel = await getPost(url);
+				if ("error" in reel) {
+					await client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram reel\n\n${reel.error}\n${url}`);
+					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Instagram reel", "red")} for ${color(prettyNumber, "#ff71ce")}`);
 					continue;
 				}
-				const parse = parseCode(url.trim());
-				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading Instagram reel`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
-				if (parse) {
-					const reel = await getPost(url);
-					if ("error" in reel) {
-						await client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram reel\n\n${reel.error}\n${url}`);
-						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Instagram reel", "red")} for ${color(prettyNumber, "#ff71ce")}`);
-						continue;
-					}
-					let capt = "``` • Instagram reel```\n\n";
-					capt += `Username : ${reel.user.username}\n`;
-					capt += `Fullname : ${reel.user.fullName}\n`;
-					if (isOne(reel.medias.length)) {
-						await client[botNum].sendMessage(
-							from,
-							reel.medias[0].type == "video"
-								? { video: { url: reel.medias[0].url }, caption: capt.trim() }
-								: {
-										image: { url: reel.medias[0].url },
-										caption: capt.trim(),
-								  },
-							{ quoted: message },
-						);
-					}
-					INFOLOG(`[${color(time, "cyan")}]`, `${color("Downloaded Instagram reel", "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
-					await delay(100);
+				let capt = "``` • Instagram reel```\n\n";
+				capt += `Username : ${reel.user.username}\n`;
+				capt += `Fullname : ${reel.user.fullName}\n`;
+				if (isOne(reel.medias.length)) {
+					await client[botNum].sendMessage(
+						from,
+						reel.medias[0].type == "video"
+							? { video: { url: reel.medias[0].url }, caption: capt.trim() }
+							: {
+									image: { url: reel.medias[0].url },
+									caption: capt.trim(),
+							  },
+						{ quoted: message },
+					);
 				}
+				INFOLOG(`[${color(time, "cyan")}]`, `${color("Downloaded Instagram reel", "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
+				await delay(100);
 			}
-		} catch (error) {
-			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
-			str += `Type : ${error.name}\n`;
-			str += `Message : ${error.message}`;
-			await client[botNum].reply({ from, quoted: message }, str);
-			log(error);
 		}
 	},
 };

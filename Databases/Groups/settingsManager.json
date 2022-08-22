@@ -92,5 +92,29 @@
       "welcome2": "disable",
       "welcome2msg": "Welcome to {groupName}"
     }
+  },
+  {
+    "6282328199503-1601429044@g.us": {
+      "antiDelete": "disable",
+      "antiGroupURL": "disable",
+      "antiNSFW": "disable",
+      "antiSpam": "disable",
+      "antiURL": "disable",
+      "antiVirus": "disable",
+      "autoReader": "disable",
+      "banned": [],
+      "games": "disable",
+      "groupDescription": "*ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ:*\nɪɴᴅᴏɴᴇꜱɪᴀɴ ᴍᴇᴍᴇ\n\n-ᴊᴀɴɢᴀɴ ʀᴀꜱɪꜱ ɢᴏʙʟᴏᴋ\n-ɴᴏ ᴘᴏʀɴ,ꜱᴇꜱᴀᴛ ʟᴏ ʏᴀᴋ?\n-ɴᴏ ꜱᴘᴀᴍ ɴɢᴇɴ\n-ɴᴏ ᴠɪʀᴛᴇxᴛ,ʜᴘ ᴀᴅᴍɪɴ ᴋᴇɴᴛᴀɴɢ\n-ɴᴏ ʙᴀᴘᴇʀᴀɴ ᴀɴᴊɪɴɢ\n-ᴍᴇɴᴛᴀʟ ʏᴜᴘɪ ᴏᴜᴛ ᴀᴊᴀ ᴛᴏᴅ\n\nꜰʙ:\n https://facebook.com/groups/1530940770418095/\n\nʏᴛ: https://youtube.com/channel/UCKdie58zFrk60W0UtS0PjSw\n\nᴛᴇʟᴇ:  \nhttps://t.me/joinchat/pbZv7G-3Ob81MWJl\n\n*ig*:https://instagram.com/indonesian.meme_?igshid=YmMyMTA2M2Y=",
+      "groupName": "INDONESIAN MEME",
+      "left1": "disable",
+      "left1msg": "Bye bye {groupName}",
+      "left2": "disable",
+      "left2msg": "Bye bye {groupName}",
+      "notification": "disable",
+      "welcome1": "disable",
+      "welcome1msg": "Welcome to {groupName}",
+      "welcome2": "disable",
+      "welcome2msg": "Welcome to {groupName}"
+    }
   }
 ]

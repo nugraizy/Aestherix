@@ -16,47 +16,39 @@ export default {
 		if (!query) {
 			query = "Mana text nya?";
 		}
-		try {
-			const time = moment().format("HH:mm:ss DD/MM");
-			const parseOptions = query.includes("--") ? query.split("--") : query;
-			let colors = [];
-			if (Array.isArray(parseOptions)) {
-				query = parseOptions[0];
-				colors.push(...parseOptions.slice(1));
-				for (const color of colors) {
-					if (color.trim() == "rainbow") {
-						colors = ["3fffff", "3fff3f", "ff3fff", "ff3f3f", "3f3fff"];
-						break;
+		const time = moment().format("HH:mm:ss DD/MM");
+		const parseOptions = query.includes("--") ? query.split("--") : query;
+		let colors = [];
+		if (Array.isArray(parseOptions)) {
+			query = parseOptions[0];
+			colors.push(...parseOptions.slice(1));
+			for (const color of colors) {
+				if (color.trim() == "rainbow") {
+					colors = ["3fffff", "3fff3f", "ff3fff", "ff3f3f", "3f3fff"];
+					break;
+				} else {
+					const check = rgbcolor(color.trim());
+					const index = colors.findIndex((v) => v == color);
+					if (check.isValid()) {
+						colors[index] = check.hex();
 					} else {
-						const check = rgbcolor(color.trim());
-						const index = colors.findIndex((v) => v == color);
-						if (check.isValid()) {
-							colors[index] = check.hex();
-						} else {
-							colors.splice(index, 1);
-						}
+						colors.splice(index, 1);
 					}
 				}
 			}
-			if (bodyQuoted) {
-				ttp(sender, bodyQuoted, colors).then(async (buffer) => {
-					await client[botNum].sendMessage(from, { sticker: new Buffer.from(buffer, "base64") }, { quoted: message });
-					INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
-				});
-			} else if (query) {
-				ttp(sender, query, colors).then(async (buffer) => {
-					await client[botNum].sendMessage(from, { sticker: new Buffer.from(buffer, "base64") }, { quoted: message });
-					INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
-				});
-			} else {
-				await client[botNum].reply({ from, quoted: message }, "Please enter text to convert to sticker");
-			}
-		} catch (err) {
-			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
-			str += `Type : ${err.name}\n`;
-			str += `Message : ${err.message}`;
-			await client[botNum].reply({ from, quoted: message }, str);
-			log(err);
+		}
+		if (bodyQuoted) {
+			ttp(sender, bodyQuoted, colors).then(async (buffer) => {
+				await client[botNum].sendMessage(from, { sticker: new Buffer.from(buffer, "base64") }, { quoted: message });
+				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
+			});
+		} else if (query) {
+			ttp(sender, query, colors).then(async (buffer) => {
+				await client[botNum].sendMessage(from, { sticker: new Buffer.from(buffer, "base64") }, { quoted: message });
+				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
+			});
+		} else {
+			await client[botNum].reply({ from, quoted: message }, "Please enter text to convert to sticker");
 		}
 	},
 };

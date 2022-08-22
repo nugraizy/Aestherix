@@ -16,6 +16,9 @@ export const searchHashtag = (query) =>
 					cookie: sessionId,
 				},
 			});
+			if (!data) {
+				return resolve({ error: "No data found" });
+			}
 			resolve(parse(data));
 		} catch (e) {
 			if (e.response?.data && Object.keys(e?.response?.data)?.length == 0) {

@@ -35,7 +35,7 @@ export default {
 		let queries = query.split(",");
 		queries = removeDuplicatesArray(queries);
 		for (const querie of queries) {
-			let result = await stockImagesPexel(querie.trim());
+			const result = await stockImagesPexel(querie.trim());
 			if ("error" in result || !result) {
 				await client[botNum].reply({ from, quoted: message }, JSON.stringify(result));
 				continue;

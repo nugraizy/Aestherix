@@ -6,7 +6,7 @@ export default {
 	description: "Find song on Spotify",
 	usage: "!spotifytracks <query>",
 	category: "Search",
-	aliases: ["spotifyt"],
+	aliases: ["spotifytra"],
 	limit: 4,
 	cooldown: 8,
 	status: "enable",

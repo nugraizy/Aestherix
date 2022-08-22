@@ -17,12 +17,7 @@ export default {
 		if (!isURL(query)) {
 			return await client[botNum].reply({ from, quoted: message }, "Please specify a valid URL");
 		}
-		try {
-			const urls = await tiny(query);
-			await client[botNum].reply({ from, quoted: message }, urls);
-		} catch (err) {
-			log(err);
-			client[botNum].reply({ from, quoted: message }, "Error while shortening your URL");
-		}
+		const urls = await tiny(query);
+		await client[botNum].reply({ from, quoted: message }, urls);
 	},
 };

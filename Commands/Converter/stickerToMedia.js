@@ -18,41 +18,25 @@ export default {
 		if (!isQuotedSticker) {
 			return await client[botNum].reply({ from, quoted: message }, "Please reply a sticker to decrypt");
 		}
-		try {
-			client[botNum]
-				.downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`), typeQuoted)
-				.then(async (results) => {
-					try {
-						const { result } = await convertStickerToMedia(results, sender, extractMediaData);
-						await client[botNum].sendMessage(
-							from,
-							Buffer.isBuffer(result)
-								? {
-										image: new Buffer.from(result, "base64"),
-								  }
-								: {
-										video: {
-											url: result,
-										},
-								  },
-							{ quoted: message },
-						);
-						INFOLOG(`[${color(time, "cyan")}]`, `${color(`Media is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
-					} catch (err) {
-						let str = "Something went wrong :\n\n";
-						str += `Type : ${err.name}\n`;
-						str += `Message : ${err.message}`;
-						await client[botNum].reply({ from, quoted: message }, str);
-						ERRLOG(`[${color(time, "cyan")}]`, `${color(`Failed to Convert a Sticker to Media. Reason : ${err.name}`, "red")} for ${color(sender, "#ff71ce")}`);
-						log(err);
-					}
-				});
-		} catch (err) {
-			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
-			str += `Type : ${err.name}\n`;
-			str += `Message : ${err.message}`;
-			await client[botNum].reply({ from, quoted: message }, str);
-			log(err);
-		}
+		const results = await client[botNum].downloadAndSaveMediaMessage(
+			extractMediaData,
+			path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`),
+			typeQuoted,
+		);
+		const { result } = await convertStickerToMedia(results, sender, extractMediaData);
+		await client[botNum].sendMessage(
+			from,
+			Buffer.isBuffer(result)
+				? {
+						image: new Buffer.from(result, "base64"),
+				  }
+				: {
+						video: {
+							url: result,
+						},
+				  },
+			{ quoted: message },
+		);
+		INFOLOG(`[${color(time, "cyan")}]`, `${color(`Media is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
 	},
 };

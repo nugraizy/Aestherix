@@ -26,32 +26,24 @@ export default {
 				`Please send/reply a regular media to convert to sticker. Can't convert ${typeQuoted} to sticker, only : ${typeSticker.join(", ").capitalize()}`,
 			);
 		}
-		try {
-			if (query && isURL(query)) {
-				const sticker = await client[botNum].prepareSticker(query, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author, packname });
-				await client[botNum].sendMessage(from, { sticker }, { quoted: message });
-			}
-			if (isMediaImage) {
-				const sticker = await client[botNum].prepareSticker(await client[botNum].downloadMediaMessage(mediaData), path.join(__dirname, `Temporary Files/${filename}`), typeQuoted, {
-					author,
-					packname,
-				});
-				await client[botNum].sendMessage(from, { sticker }, { quoted: message });
-			}
-			if (isMediaVid) {
-				const sticker = await client[botNum].prepareSticker(await client[botNum].downloadMediaMessage(mediaData), path.join(__dirname, `Temporary Files/${filename}`), typeQuoted, {
-					author,
-					packname,
-				});
-				await client[botNum].sendMessage(from, { sticker }, { quoted: message });
-			}
-			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
-		} catch (err) {
-			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
-			str += `Type : ${err.name}\n`;
-			str += `Message : ${err.message}`;
-			await client[botNum].reply({ from, quoted: message }, str);
-			log(err);
+		if (query && isURL(query)) {
+			const sticker = await client[botNum].prepareSticker(query, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author, packname });
+			await client[botNum].sendMessage(from, { sticker }, { quoted: message });
 		}
+		if (isMediaImage) {
+			const sticker = await client[botNum].prepareSticker(await client[botNum].downloadMediaMessage(mediaData), path.join(__dirname, `Temporary Files/${filename}`), typeQuoted, {
+				author,
+				packname,
+			});
+			await client[botNum].sendMessage(from, { sticker }, { quoted: message });
+		}
+		if (isMediaVid) {
+			const sticker = await client[botNum].prepareSticker(await client[botNum].downloadMediaMessage(mediaData), path.join(__dirname, `Temporary Files/${filename}`), typeQuoted, {
+				author,
+				packname,
+			});
+			await client[botNum].sendMessage(from, { sticker }, { quoted: message });
+		}
+		INFOLOG(`[${color(time, "cyan")}]`, `${color(`Sticker is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
 	},
 };

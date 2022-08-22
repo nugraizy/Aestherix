@@ -19,12 +19,8 @@ export default {
 		if (parseInt(query) > 114) {
 			return await client[botNum].reply({ from, quoted: message }, "Surah number must be less than 114");
 		}
-		try {
-			const tafsir = await getTafsirSurah(query);
-			await client[botNum].reply({ from, quoted: message }, tafsir.map((v) => `${v.arab} • \n • ${v.tafsir}`).join("\n\n"));
-		} catch (err) {
-			return await client[botNum].reply({ from, quoted: message }, "Surah not found");
-		}
+		const tafsir = await getTafsirSurah(query);
+		await client[botNum].reply({ from, quoted: message }, tafsir.map((v) => `${v.arab} • \n • ${v.tafsir}`).join("\n\n"));
 	},
 };
 

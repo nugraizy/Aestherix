@@ -17,28 +17,24 @@ export default {
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, "You must provide a query.");
 		}
-		try {
-			let queries = query.split(",");
-			queries = removeDuplicatesArray(queries);
-			for (const querie of queries) {
-				const regexs = regex(querie.trim());
-				if (!regexs.status) {
-					return await client[botNum].reply({ from, quoted: message }, regexs.message);
-				}
-				const result = await detailSourceFormat(regexs.message.trim());
-				if ("error" in result) {
-					await client[botNum].reply({ from, quoted: message }, `${result.error}\n${result.cus_error}`);
-					continue;
-				}
-				await client[botNum].reply(
-					{ from, quoted: message },
-					` • Converting videos, this might take a while please wait.\n\nResolution : ${result.resolution}\nSize : ${getFilesizeFromBytes(result.size)}`,
-				);
-				const merge = await mergeVideoWithAudio(result.video, result.audio, path.join(__dirname, `Temporary Files/${filename}.mp4`));
-				await client[botNum].sendMessage(from, { video: new Buffer.from(merge, "base64"), caption: `\`\`\` • Bstation Downloader \`\`\`` }, { quoted: message });
+		let queries = query.split(",");
+		queries = removeDuplicatesArray(queries);
+		for (const querie of queries) {
+			const regexs = regex(querie.trim());
+			if (!regexs.status) {
+				return await client[botNum].reply({ from, quoted: message }, regexs.message);
 			}
-		} catch (err) {
-			log(err);
+			const result = await detailSourceFormat(regexs.message.trim());
+			if ("error" in result) {
+				await client[botNum].reply({ from, quoted: message }, `${result.error}\n${result.cus_error}`);
+				continue;
+			}
+			await client[botNum].reply(
+				{ from, quoted: message },
+				` • Converting videos, this might take a while please wait.\n\nResolution : ${result.resolution}\nSize : ${getFilesizeFromBytes(result.size)}`,
+			);
+			const merge = await mergeVideoWithAudio(result.video, result.audio, path.join(__dirname, `Temporary Files/${filename}.mp4`));
+			await client[botNum].sendMessage(from, { video: new Buffer.from(merge, "base64"), caption: `\`\`\` • Bstation Downloader \`\`\`` }, { quoted: message });
 		}
 	},
 };

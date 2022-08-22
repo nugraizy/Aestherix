@@ -14,21 +14,20 @@ export default {
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, "You must provide a query.");
 		}
-		try {
-			let queries = query.split(",");
-			queries = removeDuplicatesArray(queries);
-			for (const querie of queries) {
-				const regexs = regex(querie.trim());
-				if (!regexs.status) {
-					return await client[botNum].reply({ from, quoted: message }, regexs.message);
-				}
-				const data = await getNovelContent(regexs.message);
-				if ("error" in data) {
-					await client[botNum].reply({ from, quoted: message }, `Failed while looking for Pixiv novel content\n\n${data.error}\n${querie}`);
-					continue;
-				}
-				const { title, likeCount, userName, viewCount, userId, content } = data;
-				const caption = `Title : ${title.capitalize()}
+		let queries = query.split(",");
+		queries = removeDuplicatesArray(queries);
+		for (const querie of queries) {
+			const regexs = regex(querie.trim());
+			if (!regexs.status) {
+				return await client[botNum].reply({ from, quoted: message }, regexs.message);
+			}
+			const data = await getNovelContent(regexs.message);
+			if ("error" in data) {
+				await client[botNum].reply({ from, quoted: message }, `Failed while looking for Pixiv novel content\n\n${data.error}\n${querie}`);
+				continue;
+			}
+			const { title, likeCount, userName, viewCount, userId, content } = data;
+			const caption = `Title : ${title.capitalize()}
 Author : ${userName}
 ID Artwork : ${regexs.message}
 ID Author : ${userId}
@@ -36,22 +35,15 @@ Tot. Like : ${numberWithCommas(likeCount)}
 Tot. View : ${numberWithCommas(viewCount)}
 
 ${content}`;
-				await client[botNum].sendMessage(
-					from,
-					{
-						text: caption,
-						templateButtons: [{ urlButton: { displayText: "Novel Source", url: `https://www.pixiv.net/novel/show.php?id=${regexs.message}` } }],
-						footer: " • Pixiv Novel Content",
-					},
-					{ quoted: message },
-				);
-			}
-		} catch (err) {
-			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
-			str += `Type : ${err.name}\n`;
-			str += `Message : ${err.message}`;
-			await client[botNum].reply({ from, quoted: message }, str);
-			log(err);
+			await client[botNum].sendMessage(
+				from,
+				{
+					text: caption,
+					templateButtons: [{ urlButton: { displayText: "Novel Source", url: `https://www.pixiv.net/novel/show.php?id=${regexs.message}` } }],
+					footer: " • Pixiv Novel Content",
+				},
+				{ quoted: message },
+			);
 		}
 	},
 };

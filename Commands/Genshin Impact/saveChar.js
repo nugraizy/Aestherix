@@ -16,29 +16,21 @@ export default {
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, "Please specify an UID");
 		}
-		try {
-			const data = readJSON(path.join(__dirname, "Databases/Games/Genshin Impact/data.json"));
-			const index = data.findIndex((v) => v.user == sender);
-			if (index !== -1) {
-				return await client[botNum].reply({ from, quoted: message }, "Your character already in Database.");
-			}
-			const findUid = await regex(query);
-			if (!findUid.status) {
-				return await client[botNum].reply({ from, quoted: message }, findUid.message);
-			}
-			data.push({
-				user: sender,
-				uid: findUid.message,
-			});
-			writeJSON(path.join(__dirname, "Databases/Games/Genshin Impact/data.json"), data);
-			client[botNum].reply({ from, quoted: message }, "Your char is saved");
-		} catch (err) {
-			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
-			str += `Type : ${err.name}\n`;
-			str += `Message : ${err.message}`;
-			await client[botNum].reply({ from, quoted: message }, str);
-			log(err);
+		const data = readJSON(path.join(__dirname, "Databases/Games/Genshin Impact/data.json"));
+		const index = data.findIndex((v) => v.user == sender);
+		if (index !== -1) {
+			return await client[botNum].reply({ from, quoted: message }, "Your character already in Database.");
 		}
+		const findUid = await regex(query);
+		if (!findUid.status) {
+			return await client[botNum].reply({ from, quoted: message }, findUid.message);
+		}
+		data.push({
+			user: sender,
+			uid: findUid.message,
+		});
+		writeJSON(path.join(__dirname, "Databases/Games/Genshin Impact/data.json"), data);
+		client[botNum].reply({ from, quoted: message }, "Your char is saved");
 	},
 };
 

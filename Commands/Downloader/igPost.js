@@ -18,71 +18,63 @@ export default {
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, "Please specify a url");
 		}
-		try {
-			const { _: urls } = parser(query);
-			if (isOne(urls.length) && !isURL(urls[0])) {
-				return await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
+		const { _: urls } = parser(query);
+		if (isOne(urls.length) && !isURL(urls[0])) {
+			return await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
+		}
+		if (isOne(urls.length) && !regex(urls[0])) {
+			return await client[botNum].reply({ from, quoted: message }, "Please specify a valid Instagram url");
+		}
+		for (const url of urls) {
+			if (!isURL(url.trim())) {
+				await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
+				continue;
+			} else if (!regex(url.trim())) {
+				await client[botNum].reply({ from, quoted: message }, "Please specify a valid Instagram url");
+				continue;
 			}
-			if (isOne(urls.length) && !regex(urls[0])) {
-				return await client[botNum].reply({ from, quoted: message }, "Please specify a valid Instagram url");
-			}
-			for (const url of urls) {
-				if (!isURL(url.trim())) {
-					await client[botNum].reply({ from, quoted: message }, "Please specify a valid url");
-					continue;
-				} else if (!regex(url.trim())) {
-					await client[botNum].reply({ from, quoted: message }, "Please specify a valid Instagram url");
+			const parse = parseCode(url.trim());
+			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading Instagram Post`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
+			if (parse) {
+				const post = await getPost(parse);
+				if ("error" in post) {
+					await client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram post\n\n${post.error}\n${url}`);
+					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Instagram Post", "red")} for ${color(prettyNumber, "#ff71ce")}`);
 					continue;
 				}
-				const parse = parseCode(url.trim());
-				INFOLOG(`[${color(time, "cyan")}]`, `${color(`Downloading Instagram Post`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
-				if (parse) {
-					const post = await getPost(parse);
-					if ("error" in post) {
-						await client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram post\n\n${post.error}\n${url}`);
-						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Download Instagram Post", "red")} for ${color(prettyNumber, "#ff71ce")}`);
-						continue;
-					}
-					let capt = "``` • Instagram Post```\n\n";
-					capt += `Username : ${post.username}\n`;
-					capt += `Fullname : ${post.full_name}\n`;
-					capt += `Privacy : ${post.is_private ? "Private" : "Public"}\n`;
-					capt += `Verified : ${post.is_verified ? "Verified" : "Not Verified"}\n`;
-					capt += `Published : ${moment(post.taken_at * 1000).format("HH:mm:ss DD/MM/YYYY")}\n`;
-					capt += `Tot. Comment : ${numberWithCommas(post.comment_count)}\n`;
-					capt += `Tot. Like : ${numberWithCommas(post.like_count)}\n`;
-					if (isOne(post.post.length)) {
-						capt += `Caption : ${post.captions.trim()}\n`;
-						await client[botNum].sendMessage(
-							from,
-							post.post[0].isVideo
-								? { video: { url: post.post[0].url }, caption: capt.trim() }
-								: {
-										image: { url: post.post[0].url },
-										caption: capt.trim(),
-								  },
-							{ quoted: message },
-						);
-					} else {
-						capt += `Tot. Media : ${post.post.length}\n`;
-						capt += `Caption : ${post.captions.trim()}\n`;
-						await client[botNum].sendMessage(from, { text: capt.trim() }, { quoted: message });
-						for (const media of post.post) {
-							await client[botNum].sendMessage(from, media.isVideo ? { video: { url: media.url } } : { image: { url: media.url } });
-							await delay(300);
-						}
-					}
-					INFOLOG(`[${color(time, "cyan")}]`, `${color("Downloaded Instagram Post", "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
+				let capt = "``` • Instagram Post```\n\n";
+				capt += `Username : ${post.username}\n`;
+				capt += `Fullname : ${post.full_name}\n`;
+				capt += `Privacy : ${post.is_private ? "Private" : "Public"}\n`;
+				capt += `Verified : ${post.is_verified ? "Verified" : "Not Verified"}\n`;
+				capt += `Published : ${moment(post.taken_at * 1000).format("HH:mm:ss DD/MM/YYYY")}\n`;
+				capt += `Tot. Comment : ${numberWithCommas(post.comment_count)}\n`;
+				capt += `Tot. Like : ${numberWithCommas(post.like_count)}\n`;
+				if (isOne(post.post.length)) {
+					capt += `Caption : ${post.captions.trim()}\n`;
+					await client[botNum].sendMessage(
+						from,
+						post.post[0].isVideo
+							? { video: { url: post.post[0].url }, caption: capt.trim() }
+							: {
+									image: { url: post.post[0].url },
+									caption: capt.trim(),
+							  },
+						{ quoted: message },
+					);
 				} else {
-					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Parse Instagram Post URL", "red")} for ${color(prettyNumber, "#ff71ce")}`);
+					capt += `Tot. Media : ${post.post.length}\n`;
+					capt += `Caption : ${post.captions.trim()}\n`;
+					await client[botNum].sendMessage(from, { text: capt.trim() }, { quoted: message });
+					for (const media of post.post) {
+						await client[botNum].sendMessage(from, media.isVideo ? { video: { url: media.url } } : { image: { url: media.url } });
+						await delay(300);
+					}
 				}
+				INFOLOG(`[${color(time, "cyan")}]`, `${color("Downloaded Instagram Post", "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
+			} else {
+				ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Parse Instagram Post URL", "red")} for ${color(prettyNumber, "#ff71ce")}`);
 			}
-		} catch (err) {
-			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
-			str += `Type : ${err.name}\n`;
-			str += `Message : ${err.message}`;
-			await client[botNum].reply({ from, quoted: message }, str);
-			log(err);
 		}
 	},
 };

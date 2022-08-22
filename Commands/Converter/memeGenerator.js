@@ -38,59 +38,37 @@ export default {
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, "Please provide a query, use & to split top/bottom text");
 		}
-		try {
-			const parsed = parser(query.toLowerCase(), {
-				configuration: {
-					"short-option-groups": false,
-				},
-				alias: {
-					isStickers: ["stk", "stick", "sticker", "sticks", "stc"],
-					isImage: ["img", "image", "foto", "images"],
-				},
-			});
-			const regexs = new RegExp(`--?(${Object.keys(parsed).join("|")})`, "g");
-			query = query.replace(regexs, "");
-			client[botNum]
-				.downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`), typeQuoted)
-				.then(async (results) => {
-					try {
-						let image = results;
-						if (isQuotedSticker) {
-							const { result } = await convertStickerToMedia(results, sender, extractMediaData);
-							writeFileSync(path.join(__dirname, `Temporary Files/${filename}.png`), new Buffer.from(result, "base64"));
-							image = path.join(__dirname, `Temporary Files/${filename}.png`);
-						}
-						const buffer = await memeGenerator(
-							sender,
-							image,
-							query.split("&")[0],
-							query.split("&")[1],
-							parsed.isStickers ? "sticker" : parsed.isImage ? "image" : DEFAULT_TYPE,
-							WATERMARK,
-						);
-						if (buffer.error) {
-							return await client[botNum].reply({ from, quoted: message }, buffer.error);
-						}
-						if (parsed.isStickers) {
-							await client[botNum].sendMessage(from, { sticker: buffer }, { quoted: message });
-						} else {
-							await client[botNum].sendMessage(from, { image: buffer, caption: "Meme Generator Made by Void Bot using Canvas. Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪" }, { quoted: message });
-						}
-						INFOLOG(`[${color(time, "cyan")}]`, `${color(`${parsed.isStickers ? "Sticker" : "Image"} is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
-					} catch (err) {
-						let str = "Something went wrong :\n\n";
-						str += `Type : ${err.name}\n`;
-						str += `Message : ${err.message}`;
-						await client[botNum].reply({ from, quoted: message }, str);
-						ERRLOG(`[${color(time, "cyan")}]`, `${color(`Failed to Generate a Meme. Reason : ${err.name}`, "red")} for ${color(sender, "#ff71ce")}`);
-					}
-				});
-		} catch (err) {
-			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
-			str += `Type : ${err.name}\n`;
-			str += `Message : ${err.message}`;
-			await client[botNum].reply({ from, quoted: message }, str);
-			log(err);
+		const parsed = parser(query.toLowerCase(), {
+			configuration: {
+				"short-option-groups": false,
+			},
+			alias: {
+				isStickers: ["stk", "stick", "sticker", "sticks", "stc"],
+				isImage: ["img", "image", "foto", "images"],
+			},
+		});
+		const regexs = new RegExp(`--?(${Object.keys(parsed).join("|")})`, "g");
+		query = query.replace(regexs, "");
+		const results = await client[botNum].downloadAndSaveMediaMessage(
+			extractMediaData,
+			path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`),
+			typeQuoted,
+		);
+		let image = results;
+		if (isQuotedSticker) {
+			const { result } = await convertStickerToMedia(results, sender, extractMediaData);
+			writeFileSync(path.join(__dirname, `Temporary Files/${filename}.png`), new Buffer.from(result, "base64"));
+			image = path.join(__dirname, `Temporary Files/${filename}.png`);
 		}
+		const buffer = await memeGenerator(sender, image, query.split("&")[0], query.split("&")[1], parsed.isStickers ? "sticker" : parsed.isImage ? "image" : DEFAULT_TYPE, WATERMARK);
+		if (buffer.error) {
+			return await client[botNum].reply({ from, quoted: message }, buffer.error);
+		}
+		if (parsed.isStickers) {
+			await client[botNum].sendMessage(from, { sticker: buffer }, { quoted: message });
+		} else {
+			await client[botNum].sendMessage(from, { image: buffer, caption: "Meme Generator Made by Void Bot using Canvas. Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪" }, { quoted: message });
+		}
+		INFOLOG(`[${color(time, "cyan")}]`, `${color(`${parsed.isStickers ? "Sticker" : "Image"} is sent`, "#01cdfe")} to ${color(prettyNumber, "#ff71ce")}`);
 	},
 };

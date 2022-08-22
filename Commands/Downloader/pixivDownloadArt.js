@@ -14,61 +14,53 @@ export default {
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, "You must provide a query.");
 		}
-		try {
-			let queries = query.split(",");
-			queries = removeDuplicatesArray(queries);
-			for (const querie of queries) {
-				const regexs = regex(querie.trim());
-				if (!regexs.status) {
-					return await client[botNum].reply({ from, quoted: message }, regexs.message);
-				}
-				const data = await downloadArtworks(regexs.message);
-				if ("error" in data) {
-					await client[botNum].reply({ from, quoted: message }, `Failed while downloading Pixiv artworks\n\n${data.error}\n${querie}`);
-					continue;
-				}
-				let i = 0;
-				const { id, title, userId, userName, pageCount, url: urls } = data;
-				let caption = `Title : ${title.capitalize()}
+		let queries = query.split(",");
+		queries = removeDuplicatesArray(queries);
+		for (const querie of queries) {
+			const regexs = regex(querie.trim());
+			if (!regexs.status) {
+				return await client[botNum].reply({ from, quoted: message }, regexs.message);
+			}
+			const data = await downloadArtworks(regexs.message);
+			if ("error" in data) {
+				await client[botNum].reply({ from, quoted: message }, `Failed while downloading Pixiv artworks\n\n${data.error}\n${querie}`);
+				continue;
+			}
+			let i = 0;
+			const { id, title, userId, userName, pageCount, url: urls } = data;
+			let caption = `Title : ${title.capitalize()}
 Author : ${userName}
 ID Artwork : ${id}
 ID Author : ${userId}
 Total Media : ${pageCount}`;
-				if (urls.original.length == 1) {
-					const images = await fetchBUFFER(urls.original[0], { headers: { referer: `https://www.pixiv.net/ajax/illust/${id}` } });
-					return await client[botNum].sendMessage(
-						from,
-						{
-							image: new Buffer.from(images, "base64"),
-							caption: `\`\`\` • Pixiv Artworks Downloader\`\`\`\n\n`,
-							templateButtons: [{ urlButton: { displayText: "Artwork Source", url: `https://www.pixiv.net/en/artworks/${id}` } }],
-							footer: caption,
-						},
-						{ quoted: message },
-					);
-				}
-				for (const url of urls.original) {
-					caption = i == 0 ? caption : "\t";
-					const buffer = await fetchBUFFER(url, { headers: { referer: `https://www.pixiv.net/ajax/illust/${id}` } });
-					await client[botNum].sendMessage(
-						from,
-						{
-							image: new Buffer.from(buffer, "base64"),
-							caption: `\`\`\` • Pixiv Artworks Downloader\`\`\`\n\n`,
-							templateButtons: [{ urlButton: { displayText: "Artwork Source", url: `https://www.pixiv.net/en/artworks/${id}` } }],
-							footer: caption,
-						},
-						{ quoted: message },
-					);
-					i++;
-				}
+			if (urls.original.length == 1) {
+				const images = await fetchBUFFER(urls.original[0], { headers: { referer: `https://www.pixiv.net/ajax/illust/${id}` } });
+				return await client[botNum].sendMessage(
+					from,
+					{
+						image: new Buffer.from(images, "base64"),
+						caption: `\`\`\` • Pixiv Artworks Downloader\`\`\`\n\n`,
+						templateButtons: [{ urlButton: { displayText: "Artwork Source", url: `https://www.pixiv.net/en/artworks/${id}` } }],
+						footer: caption,
+					},
+					{ quoted: message },
+				);
 			}
-		} catch (err) {
-			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
-			str += `Type : ${err.name}\n`;
-			str += `Message : ${err.message}`;
-			await client[botNum].reply({ from, quoted: message }, str);
-			log(err);
+			for (const url of urls.original) {
+				caption = i == 0 ? caption : "\t";
+				const buffer = await fetchBUFFER(url, { headers: { referer: `https://www.pixiv.net/ajax/illust/${id}` } });
+				await client[botNum].sendMessage(
+					from,
+					{
+						image: new Buffer.from(buffer, "base64"),
+						caption: `\`\`\` • Pixiv Artworks Downloader\`\`\`\n\n`,
+						templateButtons: [{ urlButton: { displayText: "Artwork Source", url: `https://www.pixiv.net/en/artworks/${id}` } }],
+						footer: caption,
+					},
+					{ quoted: message },
+				);
+				i++;
+			}
 		}
 	},
 };

@@ -17,78 +17,70 @@ export default {
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, "Please specify a IP Address");
 		}
-		try {
-			let { _: IPs } = parser(query);
-			if (isOne(IPs.length) && !regex(IPs[0])) {
-				return await client[botNum].reply({ from, quoted: message }, "Please specify a valid IP Address");
+		let { _: IPs } = parser(query);
+		if (isOne(IPs.length) && !regex(IPs[0])) {
+			return await client[botNum].reply({ from, quoted: message }, "Please specify a valid IP Address");
+		}
+		for (const IP of IPs) {
+			if (!regex(IP.trim())) {
+				await client[botNum].reply({ from, quoted: message }, "Please specify a valid IP Address");
+				continue;
 			}
-			for (const IP of IPs) {
-				if (!regex(IP.trim())) {
-					await client[botNum].reply({ from, quoted: message }, "Please specify a valid IP Address");
-					continue;
-				}
-				const data = await IPLookup(IP.trim());
-				if ("error" in data) {
-					client[botNum].reply({ from, quoted: message }, `Error while searching IP Address\n\n${data.error}`);
-					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Searching IP Address", "red")} for ${color(prettyNumber, "#ff71ce")}`);
-					continue;
-				} else {
-					const {
-						continent,
-						continentCode,
-						country,
-						countryCode,
-						region,
-						regionName,
-						city,
-						district,
-						zip,
-						lat,
-						lon,
-						timezone,
-						offset,
-						currency,
-						isp,
-						org,
-						as,
-						asname,
-						reverse,
-						mobile,
-						proxy,
-						hosting,
-					} = data;
-					let capt = `\`\`\` • IP Address Lookup \`\`\`\n\n`;
-					capt += `Continent : ${continent}\n`;
-					capt += `Continent Code : ${continentCode}\n`;
-					capt += `Country : ${country}\n`;
-					capt += `Country Code : ${countryCode}\n`;
-					capt += `Region : ${region}\n`;
-					capt += `Region Name : ${regionName}\n`;
-					capt += `City : ${city}\n`;
-					capt += `District : ${district}\n`;
-					capt += `ZIP Code : ${zip}\n`;
-					capt += `Latitude : ${lat}\n`;
-					capt += `Longitude : ${lon}\n`;
-					capt += `Timezone : ${timezone}\n`;
-					capt += `Offset : ${offset}\n`;
-					capt += `Currency : ${currency}\n`;
-					capt += `ISP : ${isp}\n`;
-					capt += `Organization : ${org}\n`;
-					capt += `AS number & Organization : ${as}\n`;
-					capt += `AS name : ${asname}\n`;
-					capt += `Reverse DNS : ${reverse}\n`;
-					capt += `Mobile Connection : ${mobile ? "Yes" : "No"}\n`;
-					capt += `Proxy : ${proxy ? "Yes" : "No"}\n`;
-					capt += `Hosting : ${hosting ? "Yes" : "No"}`;
-					await client[botNum].sendMessage(from, { text: capt.trim() }, { quoted: message });
-				}
+			const data = await IPLookup(IP.trim());
+			if ("error" in data) {
+				client[botNum].reply({ from, quoted: message }, `Error while searching IP Address\n\n${data.error}`);
+				ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Searching IP Address", "red")} for ${color(prettyNumber, "#ff71ce")}`);
+				continue;
+			} else {
+				const {
+					continent,
+					continentCode,
+					country,
+					countryCode,
+					region,
+					regionName,
+					city,
+					district,
+					zip,
+					lat,
+					lon,
+					timezone,
+					offset,
+					currency,
+					isp,
+					org,
+					as,
+					asname,
+					reverse,
+					mobile,
+					proxy,
+					hosting,
+				} = data;
+				let capt = `\`\`\` • IP Address Lookup \`\`\`\n\n`;
+				capt += `Continent : ${continent}\n`;
+				capt += `Continent Code : ${continentCode}\n`;
+				capt += `Country : ${country}\n`;
+				capt += `Country Code : ${countryCode}\n`;
+				capt += `Region : ${region}\n`;
+				capt += `Region Name : ${regionName}\n`;
+				capt += `City : ${city}\n`;
+				capt += `District : ${district}\n`;
+				capt += `ZIP Code : ${zip}\n`;
+				capt += `Latitude : ${lat}\n`;
+				capt += `Longitude : ${lon}\n`;
+				capt += `Timezone : ${timezone}\n`;
+				capt += `Offset : ${offset}\n`;
+				capt += `Currency : ${currency}\n`;
+				capt += `ISP : ${isp}\n`;
+				capt += `Organization : ${org}\n`;
+				capt += `AS number & Organization : ${as}\n`;
+				capt += `AS name : ${asname}\n`;
+				capt += `Reverse DNS : ${reverse}\n`;
+				capt += `Mobile Connection : ${mobile ? "Yes" : "No"}\n`;
+				capt += `Proxy : ${proxy ? "Yes" : "No"}\n`;
+				capt += `Hosting : ${hosting ? "Yes" : "No"}`;
+				await client[botNum].sendMessage(from, { text: capt.trim() }, { quoted: message });
 			}
-		} catch (err) {
-			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
-			str += `Type : ${err.name}\n`;
-			str += `Message : ${err.message}`;
-			await client[botNum].reply({ from, quoted: message }, str);
-			log(err);
 		}
 	},
 };

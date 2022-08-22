@@ -19,15 +19,11 @@ export default {
 		if (parseInt(query) > 114) {
 			return await client[botNum].reply({ from, quoted: message }, "Surah number must be less than 114");
 		}
-		try {
-			const detail = await getSurahDetail(query);
-			await client[botNum].reply(
-				{ from, quoted: message },
-				`Surah ${detail.nomor} (${detail.namaArab}) (${detail.namaLatin})\n\nTotal Ayat : ${detail.totAyat}\nTempat Turun : ${detail.turun}\nArti : ${detail.arti}\nDeskripsi : ${detail.deskripsi}`,
-			);
-		} catch (err) {
-			return await client[botNum].reply({ from, quoted: message }, "Surah not found");
-		}
+		const detail = await getSurahDetail(query);
+		await client[botNum].reply(
+			{ from, quoted: message },
+			`Surah ${detail.nomor} (${detail.namaArab}) (${detail.namaLatin})\n\nTotal Ayat : ${detail.totAyat}\nTempat Turun : ${detail.turun}\nArti : ${detail.arti}\nDeskripsi : ${detail.deskripsi}`,
+		);
 	},
 };
 

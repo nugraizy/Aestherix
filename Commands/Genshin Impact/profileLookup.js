@@ -17,41 +17,40 @@ export default {
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, "Please specify an UID");
 		}
-		try {
-			let {
-				_: uids,
-				character,
-				statistic,
-				description,
-			} = parser(query, {
-				configuration: {
-					"short-option-groups": false,
-				},
-				alias: {
-					character: ["char"],
-					statistic: ["uid", "stats"],
-					description: ["desc", "descriptions", "desk"],
-				},
-			});
-			for (const uid of uids) {
-				const reg = await regex(String(uid));
-				if (!reg.status) {
-					return await client[botNum].reply({ from, quoted: message }, reg.message);
-				}
-				let info;
+		let {
+			_: uids,
+			character,
+			statistic,
+			description,
+		} = parser(query, {
+			configuration: {
+				"short-option-groups": false,
+			},
+			alias: {
+				character: ["char"],
+				statistic: ["uid", "stats"],
+				description: ["desc", "descriptions", "desk"],
+			},
+		});
+		for (const uid of uids) {
+			const reg = await regex(String(uid));
+			if (!reg.status) {
+				return await client[botNum].reply({ from, quoted: message }, reg.message);
+			}
+			let info;
+			if (statistic) {
+				info = await genshinProfile(String(uid));
+			} else if (character) {
+				info = await getCharacters(String(uid));
+			} else info = await genshinProfile(String(uid));
+			if ("error" in info) {
+				await client[botNum].reply({ from, quoted: message }, `Error while searching Genshin Impact player\n\n${info.error}`);
+				ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Searching Genshin Impact player", "red")} for ${color(prettyNumber, "#ff71ce")}`);
+				continue;
+			} else {
+				let capt;
 				if (statistic) {
-					info = await genshinProfile(String(uid));
-				} else if (character) {
-					info = await getCharacters(String(uid));
-				} else info = await genshinProfile(String(uid));
-				if ("error" in info) {
-					await client[botNum].reply({ from, quoted: message }, `Error while searching Genshin Impact player\n\n${info.error}`);
-					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Searching Genshin Impact player", "red")} for ${color(prettyNumber, "#ff71ce")}`);
-					continue;
-				} else {
-					let capt;
-					if (statistic) {
-						capt = `\`\`\` • Genshin Impact Statistic \`\`\`\n\n
+					capt = `\`\`\` • Genshin Impact Statistic \`\`\`\n\n
 \`\`\` • Proflie \`\`\`\n
 Nickname: ${info.role.nickname}
 Server: ${info.role.region.replace("os_", "")}
@@ -72,22 +71,22 @@ Exquisite: ${info.stats.exquisite_chest_number}
 Luxurios: ${info.stats.luxurious_chest_number}
 Precious: ${info.stats.precious_chest_number}
 Magic: ${info.stats.magic_chest_number}`;
-					} else if (character) {
-						capt = `\`\`\` • Genshin Impact Characters \`\`\`\n\n
+				} else if (character) {
+					capt = `\`\`\` • Genshin Impact Characters \`\`\`\n\n
 • Total: ${info.length}\n\n`;
-						for (const {
-							name,
-							weapon: { name: weaponName, rarity: weaponRarity, level: weaponLevel, affix_level: affixLevel, type_name, desc },
-							rarity,
-							level,
-							actived_constellation_num,
-						} of info) {
-							capt += `• ${name} | ⭐${rarity} | ${level} | C${actived_constellation_num}
+					for (const {
+						name,
+						weapon: { name: weaponName, rarity: weaponRarity, level: weaponLevel, affix_level: affixLevel, type_name, desc },
+						rarity,
+						level,
+						actived_constellation_num,
+					} of info) {
+						capt += `• ${name} | ⭐${rarity} | ${level} | C${actived_constellation_num}
 • ${weaponName} | ${type_name} | ⭐${weaponRarity} | ${weaponLevel} | R${affixLevel}${description ? "\n" : ""}${description ? `• ${desc}\n` : ""}
 ──────────────────────\n\n`;
-						}
-					} else {
-						capt = `\`\`\` • Genshin Impact Statistic \`\`\`\n\n
+					}
+				} else {
+					capt = `\`\`\` • Genshin Impact Statistic \`\`\`\n\n
 \`\`\` • Proflie \`\`\`\n
 Nickname: ${info.role.nickname}
 Server: ${info.role.region.replace("os_", "")}
@@ -108,16 +107,9 @@ Exquisite: ${info.stats.exquisite_chest_number}
 Luxurios: ${info.stats.luxurious_chest_number}
 Precious: ${info.stats.precious_chest_number}
 Magic: ${info.stats.magic_chest_number}`;
-					}
-					await client[botNum].reply({ from, quoted: message }, capt.trim());
 				}
+				await client[botNum].reply({ from, quoted: message }, capt.trim());
 			}
-		} catch (err) {
-			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
-			str += `Type : ${err.name}\n`;
-			str += `Message : ${err.message}`;
-			await client[botNum].reply({ from, quoted: message }, str);
-			log(err);
 		}
 	},
 };

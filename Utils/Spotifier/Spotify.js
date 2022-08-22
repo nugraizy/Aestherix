@@ -7,6 +7,7 @@ class Spotifier {
 	#clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
 	#accessToken = process.env.SPOTIFY_ACCESS_TOKEN;
 	#refreshToken = process.env.SPOTIFY_REFRESH_TOKEN;
+	#credentialToken = process.env.SPOTIFY_ACCESS_CREDENTIAL_TOKEN;
 	#token = `Basic ${new Buffer.from(`${this.#clientId}:${this.#clientSecret}`).toString("base64")}`;
 	#bearerToken = null;
 	#currentlyPlaying = null;
@@ -45,7 +46,6 @@ class Spotifier {
 			});
 			return { status: true, ...data };
 		} catch (err) {
-			log(err.response);
 			return { status: false, message: err.message };
 		}
 	}
@@ -149,7 +149,29 @@ class Spotifier {
 			if (!artistsID) {
 				return { status: false, message: "Parameter artistsID must provided" };
 			}
-			return { status: true, ...(await this.req(`/artists?ids=${artistsID}/top-tracks`, "GET")) };
+			let { data } = await Axios({
+				url: "https://accounts.spotify.com/api/token",
+				headers: {
+					Authorization: `Basic ${new Buffer.from(`${this.#clientId}:${this.#clientSecret}`).toString("base64")}`,
+				},
+				params: {
+					grant_type: "client_credentials",
+				},
+				method: "POST",
+			});
+			data = (
+				await Axios({
+					url: `https://api.spotify.com/v1/artists/${artistsID}/top-tracks`,
+					headers: {
+						Authorization: `Bearer ${this.#credentialToken || data.access_token}`,
+					},
+					method: "GET",
+					params: {
+						country: "US",
+					},
+				})
+			).data;
+			return { status: true, data };
 		} catch (err) {
 			return { status: false, message: err };
 		}

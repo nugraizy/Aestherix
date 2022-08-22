@@ -14,35 +14,31 @@ export default {
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, "You must provide a query.");
 		}
-		try {
-			let queries = query.split(",");
-			queries = removeDuplicatesArray(queries);
-			for (const querie of queries) {
-				const regexs = regex(querie.trim());
-				if (!regexs.status) {
-					return await client[botNum].reply({ from, quoted: message }, regexs.message);
-				}
-				const result = await downloadDeviantArt(regexs.message.trim());
-				if ("error" in result) {
-					await client[botNum].reply({ from, quoted: message }, result.error);
-					continue;
-				}
-				await client[botNum].sendMessage(
-					from,
-					{
-						image: { url: result.image },
-						caption: `\`\`\` • Deviant Art \`\`\``,
-						templateButtons: [{ urlButton: { displayText: "Image Source", url: result.image } }, { urlButton: { displayText: "Deviant Art Source", url: result.source } }],
-						footer: `Title : ${result.author.capitalize()}
+		let queries = query.split(",");
+		queries = removeDuplicatesArray(queries);
+		for (const querie of queries) {
+			const regexs = regex(querie.trim());
+			if (!regexs.status) {
+				return await client[botNum].reply({ from, quoted: message }, regexs.message);
+			}
+			const result = await downloadDeviantArt(regexs.message.trim());
+			if ("error" in result) {
+				await client[botNum].reply({ from, quoted: message }, result.error);
+				continue;
+			}
+			await client[botNum].sendMessage(
+				from,
+				{
+					image: { url: result.image },
+					caption: `\`\`\` • Deviant Art \`\`\``,
+					templateButtons: [{ urlButton: { displayText: "Image Source", url: result.image } }, { urlButton: { displayText: "Deviant Art Source", url: result.source } }],
+					footer: `Title : ${result.author.capitalize()}
 Author : ${result.author}
 Favourites : ${numberWithCommas(result.favourites)}
 Views : ${numberWithCommas(result.views)}`,
-					},
-					{ quoted: message },
-				);
-			}
-		} catch (err) {
-			log(err);
+				},
+				{ quoted: message },
+			);
 		}
 	},
 };

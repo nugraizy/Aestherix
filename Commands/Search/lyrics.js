@@ -37,7 +37,7 @@ Song: ${data[index].song}
 		let queries = query.split(",");
 		queries = removeDuplicatesArray(queries);
 		for (const querie of queries) {
-			let result = await arq.findLyrics(querie.trim());
+			const result = await arq.findLyrics(querie.trim());
 			if ("error" in result || !result.ok) {
 				await client[botNum].reply({ from, quoted: message }, JSON.stringify(result));
 				continue;

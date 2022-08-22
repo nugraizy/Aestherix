@@ -6,7 +6,7 @@ export default {
 	description: "Find album on Spotify",
 	usage: "!spotifyalbum <query>",
 	category: "Search",
-	aliases: ["spotifyal"],
+	aliases: ["spotifyalb"],
 	limit: 5,
 	cooldown: 8,
 	status: "enable",
@@ -14,105 +14,97 @@ export default {
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, "You must provide a query.");
 		}
-		try {
-			query = removeDuplicatesArray(query.split(","));
-			for (const querie of query) {
-				let result;
-				let images;
-				let tracks;
-				let id;
-				const source = (ids) => `https://open.spotify.com${ids}`;
-				if (regex(querie)) {
-					id = querie.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:album\/|\?uri=spotify:album:)((\w|-){22})/)[1];
-					result = await spotifier.getAlbum(id);
-					if (!result.status) {
-						await client[botNum].reply({ from, quoted: message }, result.message);
-						continue;
-					}
+		query = removeDuplicatesArray(query.split(","));
+		for (const querie of query) {
+			let result;
+			let images;
+			let tracks;
+			let id;
+			const source = (ids) => `https://open.spotify.com${ids}`;
+			if (regex(querie)) {
+				id = querie.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:album\/|\?uri=spotify:album:)((\w|-){22})/)[1];
+				result = await spotifier.getAlbum(id);
+				if (!result.status) {
+					await client[botNum].reply({ from, quoted: message }, result.message);
+					continue;
+				}
+			} else {
+				result = await spotifier.searchAlbum(querie);
+				if (!result.status) {
+					await client[botNum].reply({ from, quoted: message }, result.message);
+					continue;
+				}
+				id = result.data.items[0].id;
+				result = await spotifier.getAlbum(id);
+			}
+			tracks = await spotifier.getAlbumTracks(id);
+			images = result.albums[0].images[0].url;
+			let caption = "";
+			let count = 0;
+			const rows = [];
+			for (const { artists, name, duration_ms } of tracks.items) {
+				if (count == 0) {
+					caption += `Title : ${name}\n`;
+					caption += `Artists : ${artists
+						.map((v) => v.name)
+						.map((v, i) => (artists.length !== 1 && i + 1 == artists.length ? `and ${v}` : v))
+						.join(", ")}\n`;
+					caption += `Duration : ${duration_ms.toTime()}\n`;
 				} else {
-					result = await spotifier.searchAlbum(querie);
-					if (!result.status) {
-						await client[botNum].reply({ from, quoted: message }, result.message);
-						continue;
-					}
-					id = result.data.items[0].id;
-					result = await spotifier.getAlbum(id);
-				}
-				tracks = await spotifier.getAlbumTracks(id);
-				images = result.albums[0].images[0].url;
-				let caption = "";
-				let count = 0;
-				const rows = [];
-				for (const { artists, name, duration_ms } of tracks.items) {
-					if (count == 0) {
-						caption += `Title : ${name}\n`;
-						caption += `Artists : ${artists
-							.map((v) => v.name)
-							.map((v, i) => (artists.length !== 1 && i + 1 == artists.length ? `and ${v}` : v))
-							.join(", ")}\n`;
-						caption += `Duration : ${duration_ms.toTime()}\n`;
-					} else {
-						rows.push({
-							rows: [
-								{
-									title: `${count}. ${artists
-										.map((v) => v.name)
-										.map((v, i) => (artists.length !== 1 && i + 1 == artists.length ? `and ${v}` : v))
-										.join(", ")} - ${name}`,
-									rowId: `.spotifydl ${name} - ${artists[0].name}`,
-								},
-							],
-							title: `VOID BOT | Powered by Spotify`,
-						});
-					}
-					count++;
-				}
-				await client[botNum].sendMessage(
-					from,
-					{
-						image: new Buffer.from(await fetchBUFFER(images), "base64"),
-						caption: `\`\`\` • Spotify Album \`\`\``,
-						templateButtons: [
+					rows.push({
+						rows: [
 							{
-								urlButton: {
-									displayText: "Image Source",
-									url: images,
-								},
-							},
-							{
-								urlButton: {
-									displayText: "Open Album On Spotify",
-									url: source(`/album/${id}`),
-								},
-							},
-							{
-								urlButton: {
-									displayText: "Open Song On Spotify",
-									url: source(`/track/${tracks.items[0].id}`),
-								},
-							},
-							{
-								quickReplyButton: { displayText: "Download", id: `.spotifydl ${tracks.items[0].artists[0].name} - ${tracks.items[0].name}` },
+								title: `${count}. ${artists
+									.map((v) => v.name)
+									.map((v, i) => (artists.length !== 1 && i + 1 == artists.length ? `and ${v}` : v))
+									.join(", ")} - ${name}`,
+								rowId: `.spotifydl ${name} - ${artists[0].name}`,
 							},
 						],
-						footer: caption,
-					},
-					{ quoted: message },
-				);
-				await client[botNum].sendMessage(from, {
-					buttonText: "Open List",
-					text: "\t",
-					footer: "```Looking for some more? Choose between these options.```",
-					title: "``` • Spotify Album```",
-					sections: rows,
-				});
+						title: `VOID BOT | Powered by Spotify`,
+					});
+				}
+				count++;
 			}
-		} catch (err) {
-			let str = "Something went wrong. Please send this error stack to the owner. :\n\n";
-			str += `Type : ${err.name}\n`;
-			str += `Message : ${err.message}`;
-			await client[botNum].reply({ from, quoted: message }, str);
-			log(err);
+			await client[botNum].sendMessage(
+				from,
+				{
+					image: new Buffer.from(await fetchBUFFER(images), "base64"),
+					caption: `\`\`\` • Spotify Album \`\`\``,
+					templateButtons: [
+						{
+							urlButton: {
+								displayText: "Image Source",
+								url: images,
+							},
+						},
+						{
+							urlButton: {
+								displayText: "Open Album On Spotify",
+								url: source(`/album/${id}`),
+							},
+						},
+						{
+							urlButton: {
+								displayText: "Open Song On Spotify",
+								url: source(`/track/${tracks.items[0].id}`),
+							},
+						},
+						{
+							quickReplyButton: { displayText: "Download", id: `.spotifydl ${tracks.items[0].artists[0].name} - ${tracks.items[0].name}` },
+						},
+					],
+					footer: caption,
+				},
+				{ quoted: message },
+			);
+			await client[botNum].sendMessage(from, {
+				buttonText: "Open List",
+				text: "\t",
+				footer: "```Looking for some more? Choose between these options.```",
+				title: "``` • Spotify Album```",
+				sections: rows,
+			});
 		}
 	},
 };
