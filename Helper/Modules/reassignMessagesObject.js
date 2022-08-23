@@ -7,14 +7,10 @@ import { isEmpty, isNotNull, isNotSame, isSame, isUndefined, readJSON } from "./
 let isFirstConnection = true;
 
 moment.tz.setDefault("Asia/Jakarta").locale("id");
-export const reassign = async (m, client, store, search, deleted) => {
+export const reassign = async (m, client, store) => {
 	try {
-		const SETTINGS = readJSON("./Config/settings.json");
-		if (m.message?.protocolMessage && m.message.protocolMessage.type == "REVOKE") return m;
-		if (!search && deleted) {
-			if (m.message && m.messageTimestamp) {
-				if (moment(m.messageTimestamp * 1000).unix() < moment(moment().subtract("5", "seconds").valueOf()).unix()) return { error: "OLD MESSAGE" };
-			} else if (moment(JSON.parse(m.messageTimestamp * 1000)).unix() < moment(moment().subtract("5", "seconds").valueOf()).unix()) return { error: "OLD MESSAGE" };
+		if (m.message?.protocolMessage && m.message.protocolMessage.type == "REVOKE") {
+			return m;
 		}
 		delete m?.message?.messageContextInfo;
 		delete m?.message?.senderKeyDistributionMessage;
@@ -28,6 +24,7 @@ export const reassign = async (m, client, store, search, deleted) => {
 			await caching(client, from);
 		}
 		if (isFirstConnection) {
+			const SETTINGS = readJSON("./Config/settings.json");
 			const { multi, noPref } = SETTINGS.prefix;
 			const botNumber = `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net`;
 			cache = {
@@ -38,8 +35,10 @@ export const reassign = async (m, client, store, search, deleted) => {
 				botNumber,
 				ownerNumbers: [SETTINGS.owner_number, ...SETTINGS.team_number, botNumber],
 			};
+			cache.config = SETTINGS;
 			isFirstConnection = false;
 		}
+		const SETTINGS = cache.config;
 		const { blocklist } = cache;
 		const isBlocked = blocklist?.includes(sender);
 		const groupMetadata = isGroup ? cache.metadata.get(from) : {};
@@ -78,7 +77,7 @@ export const reassign = async (m, client, store, search, deleted) => {
 		const isOwner = ownerNumbers.includes(sender);
 		const timeStamp = m?.messageTimestamp || Date.now();
 		const filename = sender + (m?.key?.id || Date.now());
-		if (!m.message)
+		if (!m.message) {
 			return {
 				...m,
 				settings: SETTINGS,
@@ -99,6 +98,7 @@ export const reassign = async (m, client, store, search, deleted) => {
 				timeStamp,
 				filename,
 			};
+		}
 		m.message = isSame(Object.keys(m.message)[0], "ephemeralMessage") ? m.message.ephemeralMessage.message : m.message;
 		let type = getContentType(m.message);
 		type = isSame(type, "messageContextInfo") ? (type = Object.keys(m.message)[1]) : type;
@@ -447,8 +447,12 @@ const startLoopie = async (clients) => {
 	setInterval(async () => {
 		const data = cache.metadata.values();
 		const dataBlock = await clients[botNum].fetchBlocklist();
+		const SETTINGS = readJSON("./Config/settings.json");
 		if (!compare(dataBlock, cache.blocklist)) {
 			cache.blocklist = dataBlock;
+		}
+		if (!compare(SETTINGS, cache.config)) {
+			cache.config = SETTINGS;
 		}
 		for (const d of data) {
 			if (d.id) {

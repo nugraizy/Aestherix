@@ -239,8 +239,10 @@ export const assign = (client) => {
 				return keys;
 			}
 			for (const messages of containers) {
-				if (i == 20) {break;}
-				const { message, body, isCmd } = await reassign(JSON.parse(JSON.stringify(messages)), client, store, true);
+				if (i == 20) {
+					break;
+				}
+				const { message, body, isCmd } = await reassign(JSON.parse(JSON.stringify(messages)), client, store);
 				if (body.includes(query) && !isCmd) {
 					keys.push(message);
 					i++;

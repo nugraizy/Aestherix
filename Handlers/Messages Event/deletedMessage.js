@@ -11,7 +11,7 @@ export default {
 			if (message == undefined) {
 				return;
 			}
-			message = await reassign(JSON.parse(JSON.stringify(message)), client, false, true);
+			message = await reassign(JSON.parse(JSON.stringify(message)), client);
 			if (message && "error" in message) {
 				return;
 			}
@@ -115,7 +115,7 @@ Message : ${body ? body : "Unknown"}${quotedMessage}
 					case "stickerMessage":
 						{
 							const result = await client[botNum].downloadMediaMessage(mediaData);
-							const fileSize = getFilesizeFromBytes(result);
+							const fileSize = getFilesizeFromBytes(Buffer.byteLength(result));
 							const sticker = await client[botNum].prepareSticker(
 								result,
 								path.join(__dirname, `Temporary Files/${filename}`),

@@ -1,5 +1,6 @@
 export { handlers, search, skip, stop } from "./Anonymous/index.js";
 export { arq } from "./ARQ/index.js";
+export { downloadBandcamp, searchBandcamp } from "./Bandcamp/index.js";
 export { bilibiliSearchCOM, bilibiliSearchTV, detailSourceFormat } from "./Bilibili/index.js";
 export { brainlySearch } from "./Brainly/index.js";
 export { cnnindonesia, cnninternational } from "./CNN/index.js";
@@ -22,6 +23,7 @@ export { createImage, isNsfw } from "./Deepai/index.js";
 export { downloadDeviantArt, searchDeviantArt } from "./DeviantArt/index.js";
 export { getAyat, getListSurah, getSurahAudio, getSurahDetail, getTafsirSurah } from "./EQuran/index.js";
 export { fbDl } from "./Facebook/index.js";
+export { FlickerAPI } from "./Flickr/index.js";
 export {
 	checkWin,
 	DeleteTicTacToeSession,

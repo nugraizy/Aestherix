@@ -2,7 +2,7 @@ import moment from "moment-timezone";
 import similarity from "similarity";
 import { log } from "util";
 import { runtime } from "../../connect.js";
-import { addLimit, checkAfk, color, deleteAfk, getAfk, getTimeSince, INFOLOG, reassign } from "../../Helper/index.js";
+import { addLimit, checkAfk, color, delay, deleteAfk, getAfk, getTimeSince, INFOLOG, reassign } from "../../Helper/index.js";
 let STATS_OFFLINE = true;
 const EVALY = ["/>", "$>", "=>", "!>"];
 
@@ -220,6 +220,7 @@ export default {
 							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) {
 								user.cooldown.get(message.sender).requests = false;
 							}
+							await delay(300);
 						} catch (err) {
 							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) {
 								user.cooldown.get(message.sender).requests = false;

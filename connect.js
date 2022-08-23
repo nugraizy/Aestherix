@@ -29,7 +29,8 @@ import { platform } from "process";
 import Spinnies from "spinnies";
 import { pathToFileURL } from "url";
 import { getSpinner } from "./Helper/Misc/Spinner/spinners.js";
-import { color, ERRLOG, INFOLOG, readJSON, romanize } from "./Helper/Modules/functions.js";
+import { color, ERRLOG, INFOLOG, readJSON, romanize, writeJSON } from "./Helper/Modules/functions.js";
+let shouldWait = false;
 
 console.clear();
 
@@ -88,6 +89,11 @@ if (OPTIONS.limitReset) {
 			const time = moment().tz("Asia/Jakarta").format("HH:mm:ss DD/MM");
 			(await import("./Helper/Groups/Settings/limit.js")).resetAllLimit();
 			INFOLOG(`[${color(time, "cyan")}]`, `${color("Sukses Reset User's Limit", "white")}`);
+			const data = readJSON(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`);
+			data.chats = [];
+			data.contacts = {};
+			data.messages = {};
+			writeJSON(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`, JSON.stringify(data, undefined, 2));
 		},
 		{
 			timezone: "Asia/Jakarta",
@@ -97,7 +103,7 @@ if (OPTIONS.limitReset) {
 }
 
 const { state, saveState } = useSingleFileAuthState(`./Session/${cli.input[0] ?? "Session-debug"}.json`);
-const store = makeInMemoryStore({ logger: P().child({ level: "fatal", stream: "store" }) });
+global.store = makeInMemoryStore({ logger: P().child({ level: "fatal", stream: "store" }) });
 if (OPTIONS.json) {
 	if (!fs.existsSync("./Media Files/Connection Databases/")) {
 		fs.mkdirSync("./Media Files/Connection Databases/");
@@ -156,7 +162,7 @@ const start = async () => {
 		logger: P({ level: OPTIONS.trace ? "trace" : OPTIONS.debugMode ? "debug" : "fatal" }),
 		auth: state,
 		markOnlineOnConnect: false,
-		syncFullHistory: true,
+		syncFullHistory: false,
 		getMessage: async () => {
 			return { conversation: "Please Try Again" };
 		},
@@ -164,8 +170,7 @@ const start = async () => {
 	const Client = makeWASocket(CONNECTION_CONFIG);
 	store.bind(Client.ev);
 
-	Client.ev.on("connection.update", async (connections) => {
-		const { lastDisconnect, connection } = connections;
+	Client.ev.on("connection.update", async ({ lastDisconnect, connection, receivedPendingNotifications }) => {
 		if (connection == "connecting") {
 			addSpinner("Connecting", { text: "Connecting to WASocket..." });
 		}
@@ -194,217 +199,227 @@ const start = async () => {
 				await start().catch((e) => log(e));
 			}
 		} else if (connection == "open") {
+			if (receivedPendingNotifications == true) {
+				shouldWait = true;
+			}
+			if (receivedPendingNotifications == false && shouldWait) {
+				shouldWait = false;
+			}
 			global.client = {};
 			global.botNum = Client.user.id;
 			client[Client.user.id] = Client;
 			(await import("./Helper/Modules/assignFunction.js")).assign(client);
 			successSpinner("Connecting", { text: "Connected to WASocket" });
 			INFOLOG(color(center(`Bot Version  ${romanize(readJSON("./package.json").version)}\n\n`, stdout.columns), "#9f53ea"));
+
+			if (!receivedPendingNotifications && !shouldWait) {
+				connectEvent();
+			}
 		}
 	});
 
-	Client.ev.on("messages.upsert", async (message) => {
-		const Handler = (await import("./Handlers/Messages Event/incomingMessage.js")).default.handler;
-		Handler(message, client, cmds, store, user);
-	});
+	const connectEvent = () => {
+		Client.ev.on("messages.upsert", async (message) => {
+			const Handler = (await import("./Handlers/Messages Event/incomingMessage.js")).default.handler;
+			Handler(message, client, cmds, store, user);
+		});
 
-	Client.ev.on("auth-state.update", saveState);
+		Client.ev.on("messages.update", async (message) => {
+			if (message?.[0]?.update?.status == 4 || message?.[0]?.update?.status == 3) {
+				return;
+			}
+			const Handler = (await import("./Handlers/Messages Event/deletedMessage.js")).default.handler;
+			message = store.messages[message[0].key.remoteJid]?.get(message[0].key.id);
+			Handler(client, message, false, store);
+		});
 
-	Client.ev.on("creds.update", saveState);
+		Client.ev.on("presence.update", async (presence) => {
+			const from = presence.id;
+			const participant = Object.keys(presence.presences)[0];
+			const presences = presence.presences[participant].lastKnownPresence;
+			if (presences == "composing") {
+				const Handler = (await import("./Handlers/Message Presence/composing.js")).default.handler;
+				Handler(client, from, participant);
+			}
+		});
 
-	Client.ev.on("messages.update", async (message) => {
-		if (message?.[0]?.update?.status == 4 || message?.[0]?.update?.status == 3) {
-			return;
-		}
-		const Handler = (await import("./Handlers/Messages Event/deletedMessage.js")).default.handler;
-		message = store.messages[message[0].key.remoteJid]?.get(message[0].key.id);
-		Handler(client, message, false, store);
-	});
-
-	Client.ev.on("presence.update", async (presence) => {
-		const from = presence.id;
-		const participant = Object.keys(presence.presences)[0];
-		const presences = presence.presences[participant].lastKnownPresence;
-		if (presences == "composing") {
-			const Handler = (await import("./Handlers/Message Presence/composing.js")).default.handler;
-			Handler(client, from, participant);
-		}
-	});
-
-	Client.ev.on("call", async ([{ isGroup, status, id, from }]) => {
-		if (OPTIONS.noCall && !isGroup && status == "offer") {
-			const { user, server } = jidDecode(botNum);
-			await client[botNum].sendNode({
-				tag: "call",
-				attrs: {
-					from: `${user}@${server}`,
-					to: from,
-					id: client[botNum].generateMessageTag(),
-				},
-				content: [
-					{
-						tag: "reject",
-						attrs: {
-							"call-id": id,
-							"call-creator": from,
-							count: "512202",
-						},
-						content: null,
+		Client.ev.on("call", async ([{ isGroup, status, id, from }]) => {
+			if (OPTIONS.noCall && !isGroup && status == "offer") {
+				const { user, server } = jidDecode(botNum);
+				await client[botNum].sendNode({
+					tag: "call",
+					attrs: {
+						from: `${user}@${server}`,
+						to: from,
+						id: client[botNum].generateMessageTag(),
 					},
-				],
-			});
-			await client[botNum].updateBlockStatus(from, "block");
-		}
-	});
-
-	Client.ev.on("group.participants.update", async (message) => {
-		const Handler = (await import("./Handlers/Notification Handlers/participantsNotification.js")).default.handler;
-		Handler(client, message, store);
-	});
-
-	Client.ev.on("group.settings.update", async (message) => {
-		const Handler = (await import("./Handlers/Notification Handlers/groupSettingsNotification.js")).default.handler;
-		Handler(client, message, store);
-	});
-
-	Client.ev.on("werewolf.cycle", async (update) => {
-		if (update.time == "day") {
-			await client[botNum].sendMessage(update.id, { text: update.gameDialogue, mentions: update.peopleKilledMention });
-		} else if (update.time == "evening") {
-			await client[botNum].sendMessage(update.id, {
-				text: update.gameDialogue,
-			});
-			for (const id of update.playersData.filter((v) => !v.isAlive)) {
-				client[botNum].sendMessage(id.id, {
-					text: "Karena kamu sudah mati, maka kamu hanya bisa menonton permainan saja",
+					content: [
+						{
+							tag: "reject",
+							attrs: {
+								"call-id": id,
+								"call-creator": from,
+								count: "512202",
+							},
+							content: null,
+						},
+					],
 				});
+				await client[botNum].updateBlockStatus(from, "block");
 			}
-			for (const id of update.playersData.filter((v) => v.isAlive)) {
-				client[botNum].sendMessage(id.id, {
-					title: "Pilih salah satu dari pemain berikut untuk divoting",
-					footer: `Made by Void Bot. Powered by Hidden Finder`,
-					text: "\t",
-					buttonText: "Open List",
-					sections: update.playersData
-						.filter((v) => v.isAlive)
-						.map((v) => ({ rows: [{ title: `VOTE ${v.name}`, rowId: `.ww vote ${v.id} ${update.id}` }], title: `VOID BOT | Werewolf Games` })),
+		});
+
+		Client.ev.on("group.participants.update", async (message) => {
+			const Handler = (await import("./Handlers/Notification Handlers/participantsNotification.js")).default.handler;
+			Handler(client, message, store);
+		});
+
+		Client.ev.on("group.settings.update", async (message) => {
+			const Handler = (await import("./Handlers/Notification Handlers/groupSettingsNotification.js")).default.handler;
+			Handler(client, message, store);
+		});
+
+		Client.ev.on("werewolf.cycle", async (update) => {
+			if (update.time == "day") {
+				await client[botNum].sendMessage(update.id, { text: update.gameDialogue, mentions: update.peopleKilledMention });
+			} else if (update.time == "evening") {
+				await client[botNum].sendMessage(update.id, {
+					text: update.gameDialogue,
 				});
-			}
-		} else if (update.time == "voting") {
-			await client[botNum].sendMessage(update.id, { text: update.gameDialogue, mentions: [update?.voteData?.voted] });
-			if (update.isWinning) {
-				return await client[botNum].sendMessage(update.id, { text: update.gameDialogue, mentions: update?.peopleMention });
-			}
-			await client[botNum].sendMessage(update.id, {
-				text: `Statistic Pemain :
-
-Pemain : ${update.playersData.filter((v) => v.isAlive).length}/${update.playersData.length}
-
-${update.playersData
-	.map((v) => {
-		return v.isAlive ? `@${v.id.split("@")[0]} : 😄 Hidup` : `@${v.id.split("@")[0]} : 💀 Mati | ${v.role}`;
-	})
-	.join("\n")}`,
-				mentions: update.playersData.map((v) => v.id),
-			});
-		} else if (update.time == "dawn") {
-			await client[botNum].sendMessage(update.id, { text: update.gameDialogue.replace("{0}", update.gameTime) });
-			for (const { id, role, isAlive } of update.playersData) {
-				if (isAlive) {
-					if (role == "werewolf") {
-						client[botNum].sendMessage(id, {
-							buttonText: "Open list",
-							footer: `Made by Void Bot. Powered by Hidden Finder`,
-							title: `Kamu adalah Serigala. Dan saat ini merupakan waktu yang tepat untuk membunuh seseorang.\nPilih salah satu player.`,
-							text: "\t",
-							sections: update.playersData
-								.filter((v) => v.isAlive)
-								.map((v) => {
-									return { rows: [{ title: `KILL ${v.name}`, rowId: `.ww kill ${v.id} ${update.id}` }], title: `VOID BOT | Werewolf Games` };
-								}),
-						});
-					} else if (role == "seer") {
-						client[botNum].sendMessage(id, {
-							buttonText: "Open list",
-							footer: `Made by Void Bot. Powered by Hidden Finder`,
-							text: "\t",
-							title: `Kamu adalah Penerawang. Dan saat ini merupakan waktu yang tepat untuk menerawang seseorang.\nPilih salah satu player.`,
-							sections: update.playersData
-								.filter((v) => v.isAlive)
-								.map((v, i) => {
-									return { rows: [{ title: `TERAWANG ${update.playersData[i].name}`, rowId: `.ww seer ${update.playersData[i].id} ${update.id}` }], title: `VOID BOT | Werewolf Games` };
-								}),
-						});
-					} else if (role == "guard") {
-						client[botNum].sendMessage(id, {
-							buttonText: "Open list",
-							title: `Kamu adalah Penjaga. Dan saat ini merupakan waktu yang tepat untuk memjaga seseorang.\nPilih salah satu player.`,
-							footer: `Made by Void Bot. Powered by Hidden Finder`,
-							text: "\t",
-							sections: update.playersData
-								.filter((v) => v.isAlive)
-								.map((v, i) => {
-									return { rows: [{ title: `JAGA ${update.playersData[i].name}`, rowId: `.ww guard ${update.playersData[i].id} ${update.id}` }], title: `VOID BOT | Werewolf Games` };
-								}),
-						});
-					} else if (role == "villager") {
-						client[botNum].sendMessage(id, { text: "Kamu adalah Penduduk. Tunggu sampai pagi. Saat ini hanya pemain malam yang beraksi" });
+				for (const id of update.playersData.filter((v) => !v.isAlive)) {
+					client[botNum].sendMessage(id.id, {
+						text: "Karena kamu sudah mati, maka kamu hanya bisa menonton permainan saja",
+					});
+				}
+				for (const id of update.playersData.filter((v) => v.isAlive)) {
+					client[botNum].sendMessage(id.id, {
+						title: "Pilih salah satu dari pemain berikut untuk divoting",
+						footer: `Made by Void Bot. Powered by Hidden Finder`,
+						text: "\t",
+						buttonText: "Open List",
+						sections: update.playersData
+							.filter((v) => v.isAlive)
+							.map((v) => ({ rows: [{ title: `VOTE ${v.name}`, rowId: `.ww vote ${v.id} ${update.id}` }], title: `VOID BOT | Werewolf Games` })),
+					});
+				}
+			} else if (update.time == "voting") {
+				await client[botNum].sendMessage(update.id, { text: update.gameDialogue, mentions: [update?.voteData?.voted] });
+				if (update.isWinning) {
+					return await client[botNum].sendMessage(update.id, { text: update.gameDialogue, mentions: update?.peopleMention });
+				}
+				await client[botNum].sendMessage(update.id, {
+					text: `Statistic Pemain :
+	
+	Pemain : ${update.playersData.filter((v) => v.isAlive).length}/${update.playersData.length}
+	
+	${update.playersData
+		.map((v) => {
+			return v.isAlive ? `@${v.id.split("@")[0]} : 😄 Hidup` : `@${v.id.split("@")[0]} : 💀 Mati | ${v.role}`;
+		})
+		.join("\n")}`,
+					mentions: update.playersData.map((v) => v.id),
+				});
+			} else if (update.time == "dawn") {
+				await client[botNum].sendMessage(update.id, { text: update.gameDialogue.replace("{0}", update.gameTime) });
+				for (const { id, role, isAlive } of update.playersData) {
+					if (isAlive) {
+						if (role == "werewolf") {
+							client[botNum].sendMessage(id, {
+								buttonText: "Open list",
+								footer: `Made by Void Bot. Powered by Hidden Finder`,
+								title: `Kamu adalah Serigala. Dan saat ini merupakan waktu yang tepat untuk membunuh seseorang.\nPilih salah satu player.`,
+								text: "\t",
+								sections: update.playersData
+									.filter((v) => v.isAlive)
+									.map((v) => {
+										return { rows: [{ title: `KILL ${v.name}`, rowId: `.ww kill ${v.id} ${update.id}` }], title: `VOID BOT | Werewolf Games` };
+									}),
+							});
+						} else if (role == "seer") {
+							client[botNum].sendMessage(id, {
+								buttonText: "Open list",
+								footer: `Made by Void Bot. Powered by Hidden Finder`,
+								text: "\t",
+								title: `Kamu adalah Penerawang. Dan saat ini merupakan waktu yang tepat untuk menerawang seseorang.\nPilih salah satu player.`,
+								sections: update.playersData
+									.filter((v) => v.isAlive)
+									.map((v, i) => {
+										return { rows: [{ title: `TERAWANG ${update.playersData[i].name}`, rowId: `.ww seer ${update.playersData[i].id} ${update.id}` }], title: `VOID BOT | Werewolf Games` };
+									}),
+							});
+						} else if (role == "guard") {
+							client[botNum].sendMessage(id, {
+								buttonText: "Open list",
+								title: `Kamu adalah Penjaga. Dan saat ini merupakan waktu yang tepat untuk memjaga seseorang.\nPilih salah satu player.`,
+								footer: `Made by Void Bot. Powered by Hidden Finder`,
+								text: "\t",
+								sections: update.playersData
+									.filter((v) => v.isAlive)
+									.map((v, i) => {
+										return { rows: [{ title: `JAGA ${update.playersData[i].name}`, rowId: `.ww guard ${update.playersData[i].id} ${update.id}` }], title: `VOID BOT | Werewolf Games` };
+									}),
+							});
+						} else if (role == "villager") {
+							client[botNum].sendMessage(id, { text: "Kamu adalah Penduduk. Tunggu sampai pagi. Saat ini hanya pemain malam yang beraksi" });
+						}
 					}
 				}
+			} else if (update.time == "night") {
+				await client[botNum].sendMessage(update.id, { text: "Aktifitas pemain malam dihentikan karena sudah mau pagi." });
+			} else if (update.time == "failAfk") {
+				await client[botNum].sendMessage(update.id, { text: update.message, mentions: update.playersData.map((v) => v.id) });
+			} else if (update.time == "voted") {
+				await client[botNum].sendMessage(update.id, { text: update.text, mentions: update.mentions });
 			}
-		} else if (update.time == "night") {
-			await client[botNum].sendMessage(update.id, { text: "Aktifitas pemain malam dihentikan karena sudah mau pagi." });
-		} else if (update.time == "failAfk") {
-			await client[botNum].sendMessage(update.id, { text: update.message, mentions: update.playersData.map((v) => v.id) });
-		} else if (update.time == "voted") {
-			await client[botNum].sendMessage(update.id, { text: update.text, mentions: update.mentions });
-		}
-	});
+		});
 
-	Client.ws.on("CB:notification,type:w:gp2", (update) => {
-		if (update?.content?.[0].tag !== "description" && update?.content?.[0].tag !== "invite") {
-			return;
-		}
-		const from = update?.attrs?.from || update?.content?.[0]?.attrs?.author;
-		const name = update?.attrs?.notify;
-		const action = update?.attrs?.content?.[0]?.tag || update?.content?.[0].tag;
-		const content = update?.content?.[0]?.content?.[0]?.content?.toString() || update?.content?.[0]?.attrs.code || "";
-		const participant = update?.attrs?.participant;
-		client[botNum].ev.emit("group.settings.update", { from, name, action, participant, content });
-	});
+		Client.ws.on("CB:notification,type:w:gp2", (update) => {
+			if (update?.content?.[0].tag !== "description" && update?.content?.[0].tag !== "invite") {
+				return;
+			}
+			const from = update?.attrs?.from || update?.content?.[0]?.attrs?.author;
+			const name = update?.attrs?.notify;
+			const action = update?.attrs?.content?.[0]?.tag || update?.content?.[0].tag;
+			const content = update?.content?.[0]?.content?.[0]?.content?.toString() || update?.content?.[0]?.attrs.code || "";
+			const participant = update?.attrs?.participant;
+			client[botNum].ev.emit("group.settings.update", { from, name, action, participant, content });
+		});
 
-	Client.ws.on("CB:notification,type:picture", async (update) => {
-		const from = update?.attrs?.from || update?.content?.[0]?.attrs?.author;
-		const name = update?.attrs?.notify;
-		const action = update?.content?.[0]?.tag;
-		const participant = update?.content?.[0]?.attrs?.author;
-		const content = action == "delete" ? null : await client[botNum].profilePictureUrl(from, "image").catch((e) => null);
-		client[botNum].ev.emit("group.settings.update", { from, name, action, participant, content });
-	});
+		Client.ws.on("CB:notification,type:picture", async (update) => {
+			const from = update?.attrs?.from || update?.content?.[0]?.attrs?.author;
+			const name = update?.attrs?.notify;
+			const action = update?.content?.[0]?.tag;
+			const participant = update?.content?.[0]?.attrs?.author;
+			const content = action == "delete" ? null : await client[botNum].profilePictureUrl(from, "image").catch((e) => null);
+			client[botNum].ev.emit("group.settings.update", { from, name, action, participant, content });
+		});
+
+		clientMqttListen.on("message", async (topic, message) => {
+			message = message.toString();
+			const data = JSON.parse(message);
+			if (!data.status) {
+				return;
+			}
+			const content = `Spotify On ${data.is_playing ? "Play" : "Paused"} :                                                       ${data.artists} - ${data.trackTitle}  ( ${
+				data.progress_ms?.toTime() || "00"
+			} - ${data?.duration_ms?.toTime() || "00"} )`;
+			const myStatus = await client[botNum].fetchStatus(`${botNum.split(":")[0]}@s.whatsapp.net`);
+			if (myStatus.status == content) {
+				return;
+			}
+			await client[botNum].query({
+				tag: "iq",
+				attrs: { to: "@s.whatsapp.net", type: "set", xmlns: "status" },
+				content: [{ tag: "status", attrs: {}, content: Buffer.from(content, "utf-8") }],
+			});
+		});
+	};
+
+	Client.ev.on("auth-state.update", saveState);
 
 	Client.ev.on("contacts.update", () => {});
 
 	Client.ev.on("groups.update", () => {});
-
-	clientMqttListen.on("message", async (topic, message) => {
-		message = message.toString();
-		const data = JSON.parse(message);
-		if (!data.status) {
-			return;
-		}
-		const content = `Spotify On ${data.is_playing ? "Play" : "Paused"} :                                                       ${data.artists} - ${data.trackTitle}  ( ${
-			data.progress_ms?.toTime() || "00"
-		} - ${data?.duration_ms?.toTime() || "00"} )`;
-		const myStatus = await client[botNum].fetchStatus(`${botNum.split(":")[0]}@s.whatsapp.net`);
-		if (myStatus.status == content) {
-			return;
-		}
-		await client[botNum].query({
-			tag: "iq",
-			attrs: { to: "@s.whatsapp.net", type: "set", xmlns: "status" },
-			content: [{ tag: "status", attrs: {}, content: Buffer.from(content, "utf-8") }],
-		});
-	});
 };
 start().catch((e) => log(e));
 

@@ -15,6 +15,7 @@ export default {
 			return client[botNum].reply({ from, quoted: message }, "Please specify a query.");
 		}
 		let result = await ytsr(query);
+		result = result.filter((v) => v.type == "video");
 		const { url, title, description, image, timestamp, views, author } = result[0];
 		result = result.slice(1);
 		let capt = "``` • YouTube Search```\n\n";
@@ -41,8 +42,10 @@ export default {
 			row.push(
 				{ rows: [{ title: `MP4 | ${title}`, rowId: `.ytv ${url}` }], title: `${author.name} | 👁️‍🗨️ ${numberWithCommas(views)} | ${timestamp}` },
 				{ rows: [{ title: `MP3 | ${title}`, rowId: `.yta ${url}` }], title: `${author.name} | 👁️‍🗨️ ${numberWithCommas(views)} | ${timestamp}` },
-				{ rows: [{ title: `MP3 & MP4 | ${title}`, rowId: `.yta ${url}|.ytv ${url}` }], title: `${author} | 👁️‍🗨️ ${numberWithCommas(views)} | ${timestamp}` },
 			);
+			if (OPTIONS.multiCmd) {
+				row.push({ rows: [{ title: `MP3 & MP4 | ${title}`, rowId: `.yta ${url}|.ytv ${url}` }], title: `${author.name} | 👁️‍🗨️ ${numberWithCommas(views)} | ${timestamp}` });
+			}
 		}),
 			await client[botNum].sendMessage(from, {
 				buttonText: "Open list",
