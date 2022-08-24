@@ -11,38 +11,22 @@ export default {
 	limit: 6,
 	status: "enable",
 	restrict: true,
-	async run(message, client, store) {
-		if (!message.isAdmin && !message.isOwner)
-			return await client[botNum].reply({ from: message.from, quoted: message.message }, "You are not admin. This commands is only for admins.");
-		if (!message.isBotAdmin)
-			return await client[botNum].reply({ from: message.from, quoted: message.message }, "Bot is not admin, Please promote admin before using moderation commands.");
-		if (message.type == "buttonsResponseMessage") {
-			return await client[botNum].updateGroup(
-				message.from,
-				message.mention.length > 0 ? message.mention : message.query.split(",").parse(),
-				"REMOVE",
-				false,
-				/--?(force|F)/.test(message.query),
-				message.message,
-			);
-		} else if (!message.query && message.mention.length == 0 && !message.bodyQuoted) {
-			return await client[botNum].reply({ from: message.from, quoted: message.message }, "Please reply people message or mention people.");
+	async run({ mediaData, isAdmin, isOwner, isBotAdmin, type, message, from, mention, query, bodyQuoted, adminGroups }, client) {
+		if (!isAdmin && !isOwner) return await client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
+		if (!isBotAdmin) return await client[botNum].reply({ from, quoted: message }, "Bot is not admin, Please promote admin before using moderation commands.");
+		if (type == "buttonsResponseMessage") {
+			return await client[botNum].updateGroup(from, mention.length > 0 ? mention : query.split(",").parse(), "REMOVE", false, /--?(force|F)/.test(query), message);
+		} else if (!query && mention.length == 0 && !bodyQuoted) {
+			return await client[botNum].reply({ from, quoted: message }, "Please reply people message or mention people.");
 		}
-		if (message?.mention.includes(botNum) || message.mediaData?.participant.includes(botNum)) {
-			return await client[botNum].reply({ from: message.from, quoted: message.message }, "You can't kick me by myself.");
+		if (message?.mention?.includes(`${botNum.split(":")[0]}@s.whatsapp.net`) || mediaData?.participant?.includes(`${botNum.split(":")[0]}@s.whatsapp.net`)) {
+			return await client[botNum].reply({ from, quoted: message }, "You can't kick me by myself.");
 		}
-		if (message.query || message.mention.length > 0) {
-			await client[botNum].updateGroup(
-				message.from,
-				message.mention.length > 0 ? message.mention : message.query.split(",").parse(),
-				"REMOVE",
-				false,
-				/--?(force|F)/.test(message.query),
-				message.message,
-			);
+		if (query || mention.length > 0) {
+			await client[botNum].updateGroup(from, mention.length > 0 ? mention : query.split(",").parse(), "REMOVE", false, /--?(force|F)/.test(query), message, adminGroups);
 		}
-		if (message.bodyQuoted) {
-			await client[botNum].updateGroup(message.from, [message.mediaData.participant], "REMOVE", false, /--?(force|F)/.test(message.query), message.message);
+		if (bodyQuoted) {
+			await client[botNum].updateGroup(from, [mediaData.participant], "REMOVE", false, /--?(force|F)/.test(query), message, adminGroups);
 		}
 	},
 };

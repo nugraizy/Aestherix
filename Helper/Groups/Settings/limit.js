@@ -102,3 +102,14 @@ export const resetAllLimit = () => {
 export const checkLimit = (users) => {
 	return indexUser({ id: users });
 };
+
+export const addUserLimit = (user, limit) => {
+	const data = readJSON(PATH.files);
+	for (const index in data) {
+		if (data[index].id == user) {
+			data[index].limit += limit;
+		}
+	}
+	writeJSON(PATH.files, data);
+	return true;
+};

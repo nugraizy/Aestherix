@@ -179,10 +179,6 @@ const start = async () => {
 			if (reason == DisconnectReason.badSession) {
 				log("Bad session, Please delete your previous session and do a rescan...");
 				process.exit(0);
-			} else if (reason == DisconnectReason.connectionLost) {
-				log("Connection lost, Quick reconnecting...");
-			} else if (reason == DisconnectReason.connectionReplaced) {
-				log("Connection replaced, Quick reconnecting...");
 			} else if (reason == DisconnectReason.loggedOut) {
 				log("Logged out, Please delete your previous session and do a rescan...");
 				process.exit(0);
@@ -193,6 +189,10 @@ const start = async () => {
 					log("Timed out, Quick reconnecting...");
 				} else if (reason == DisconnectReason.connectionClosed) {
 					log("Connection closed, Quick reconnecting...");
+				} else if (reason == DisconnectReason.connectionReplaced) {
+					log("Connection replaced, Quick reconnecting...");
+				} else if (reason == DisconnectReason.connectionLost) {
+					log("Connection lost, Quick reconnecting...");
 				} else {
 					log("Unknown reason, Quick reconnecting...");
 				}

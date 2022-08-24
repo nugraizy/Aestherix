@@ -232,6 +232,7 @@ export const reassign = async (m, client, store) => {
 			"collectionMessage",
 			"contactMessage",
 			"contactsArrayMessage",
+			"conversation",
 			"declinePaymentRequestMessage",
 			"deviceSentMessage",
 			"documentMessage",
@@ -249,6 +250,7 @@ export const reassign = async (m, client, store) => {
 			"listResponseMessage",
 			"liveLocationMessage",
 			"locationMessage",
+			"mentionText",
 			"nativeFlowMessage",
 			"nativeFlowResponseMessage",
 			"orderMessage",
@@ -268,6 +270,7 @@ export const reassign = async (m, client, store) => {
 			"syncActionMessage",
 			"templateButtonReplyMessage",
 			"templateMessage",
+			"thumbnailMessage",
 			"videoMessage",
 		];
 		const bodyQuoted = typeMessage.includes(isSame(type, "extendedTextMessage") && mMediaData ? Object.keys(mMediaData.message ? mMediaData.message : { CLIENT: "m" })[0] : "none")

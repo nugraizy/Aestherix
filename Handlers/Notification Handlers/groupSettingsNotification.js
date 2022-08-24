@@ -26,7 +26,7 @@ export default {
 			message.messageStubType = EVENT_TYPE["DESCRIPTION"];
 		}
 		message = await reassign(JSON.parse(JSON.stringify(message)), client, store, false);
-		if (message[message.from]?.notification == "enable") {
+		if (message?.[message.from]?.notification == "enable") {
 			let status;
 			if (message.action == "set") {
 				message.messageStubType = "GROUP_CHANGE_ICON";

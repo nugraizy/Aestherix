@@ -3,7 +3,7 @@ import { arq } from "../../Utils/ARQ/index.js";
 
 export default {
 	name: "subreddit",
-	description: "Search subreddit",
+	description: "Search Subreddit",
 	usage: "!subreddit <query>",
 	category: "Search",
 	aliases: ["subr"],
@@ -22,23 +22,19 @@ export default {
 				await client[botNum].reply({ from, quoted: message }, JSON.stringify(result));
 				continue;
 			}
-			await client[botNum].sendMessage(
-				from,
-				{
-					image: { url: result.result.url },
-					caption: `\`\`\` • Reddit \`\`\``,
-					templateButtons: [
-						{ urlButton: { displayText: "Image Source", url: result.result.url } },
-						{ urlButton: { displayText: "Post Source", url: result.result.postLink } },
-						{ quickReplyButton: { displayText: "Next Post", id: `.subreddit ${querie}` } },
-					],
-					footer: `Author : ${result.result.author}
+			await client[botNum].sendMessage(from, {
+				image: { url: result.result.url },
+				caption: `\`\`\` • Reddit \`\`\``,
+				templateButtons: [
+					{ urlButton: { displayText: "Image Source", url: result.result.url } },
+					{ urlButton: { displayText: "Post Source", url: result.result.postLink } },
+					{ quickReplyButton: { displayText: "Next Post", id: `.subreddit ${querie}` } },
+				],
+				footer: `Author : ${result.result.author}
 Title : ${result.result.title}
                     
 Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
-				},
-				{ quoted: message },
-			);
+			});
 		}
 	},
 };

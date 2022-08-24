@@ -11,7 +11,7 @@ export default {
 	limit: 4,
 	restrict: true,
 	status: "enable",
-	async run({ isAdmin, isBotAdmin, isOwner, from, query, mention, bodyQuoted, mediaData, message }, client) {
+	async run({ isAdmin, isBotAdmin, isOwner, from, query, mention, bodyQuoted, mediaData, message, adminGroups }, client) {
 		if (!isAdmin && !isOwner) {
 			return await client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
 		}
@@ -21,17 +21,17 @@ export default {
 		if (!isBotAdmin) {
 			return await client[botNum].reply({ from, quoted: message }, "Bot is not admin, Please promote admin before using moderation commands.");
 		}
-		if (mention?.includes(botNum) || mediaData?.participant?.includes(botNum)) {
+		if (mention?.includes(`${botNum.split(":")[0]}@s.whatsapp.net`) || mediaData?.participant?.includes(`${botNum.split(":")[0]}@s.whatsapp.net`)) {
 			return await client[botNum].reply({ from, quoted: message }, "You can't add me by myself.");
 		}
 		if (query) {
 			if (mention.length > 0) {
 				return await client[botNum].reply({ from, quoted: message }, "Please reply people message or input people's number.");
 			}
-			await client[botNum].updateGroup(from, query.split(",").parser(), "ADD", false, false, message);
+			await client[botNum].updateGroup(from, query.split(",").parser(), "ADD", false, false, message, adminGroups);
 		}
 		if (bodyQuoted) {
-			await client[botNum].updateGroup(from, [mediaData.participant], "ADD", false, false, message);
+			await client[botNum].updateGroup(from, [mediaData.participant], "ADD", false, false, message, adminGroups);
 		}
 	},
 };

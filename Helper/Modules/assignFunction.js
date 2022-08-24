@@ -6,7 +6,7 @@ import webpmux from "node-webpmux";
 import sharp from "sharp";
 import { TextEncoder } from "util";
 import { S_WHATSAPP_NET, UPDATE, ZERO } from "../Misc/WAData/index.js";
-import { isURL } from "./functions.js";
+import { isURL, delaySync } from "./functions.js";
 import { reassign } from "./reassignMessagesObject.js";
 const { readFile, unlink, writeFile } = (await import("fs-extra")).default;
 export const assign = (client) => {
@@ -178,7 +178,7 @@ export const assign = (client) => {
 				],
 			});
 		},
-		updateGroup: async (dari, containers, update, texts, force, message) => {
+		updateGroup: async (dari, containers, update, texts, force, message, adminGroups) => {
 			const responses = [];
 			if (update.PARSE_EVENTS("ADD", "REMOVE", "DEMOTE", "PROMOTE")) {
 				for (const container of containers) {

@@ -5,17 +5,21 @@ const URL_API = "https://bandcamp.com/api/bcsearch_public_api/1/autocomplete_ela
 export const searchBandcamp = (keyword) =>
 	new Promise(async (resolve, reject) => {
 		try {
+			const { headers } = await Axios({ url: "https://bandcamp.com/", method: "GET" });
+			log(headers);
 			const { data } = await Axios({
 				url: URL_API,
 				method: "POST",
 				data: { search_text: keyword, search_filter: "", full_page: true, fan_id: null },
 				headers: {
-					Cookie: `client_id=4374C1BE95BED7BA597E9FD2304C72D1806F55C88E4C0F3009BBC9EF1475CCAB; unique_24h=223; BACKENDID3=flexocentral-700d-5; session=1	r:["414826803X0f0x1661229933","261569836S0g0x1661229906","414826803X0f0x1661229842"]	t:1661229842`,
+					Cookie: parseCookie(headers["set-cookie"]),
 					"Content-Type": "application/json; charset=UTF-8",
 					"X-Requested-With": "XMLHttpRequest",
 					"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36",
+					Host: "bandcamp.com",
 					Origin: "https://bandcamp.com",
 					Referer: "https://bandcamp.com/",
+					"Content-Type": "application/json; charset=UTF-8",
 				},
 			});
 			if (data?.auto?.results?.length == 0) {
@@ -40,3 +44,5 @@ const parse = (arr) => {
 		thumbnailUrl: `https://f4.bcbits.com/img/a${art_id}_5.jpg`,
 	}));
 };
+
+const parseCookie = (arr) => arr.map((v) => v.split(";")[0]).join("; ");

@@ -46,6 +46,7 @@ export {
 	Werewolf,
 	Wordle,
 } from "./Games/index.js";
+export { Github } from "./Github/index.js";
 export { sauceNao, traceMoe, yandex } from "./Image Reverse Search/index.js";
 export { instafier } from "./Instagram Notifier/index.js";
 export {

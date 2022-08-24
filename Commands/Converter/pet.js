@@ -1,15 +1,8 @@
-import _ from "lodash";
 import moment from "moment-timezone";
 import path from "path";
 import { __dirname } from "../../connect.js";
 import { color, INFOLOG, readBuffer } from "../../Helper/Modules/index.js";
 import { pet } from "../../Utils/Converter/index.js";
-
-const defaultOptions = {
-	output: "sticker",
-	duration: 5,
-	resolution: 512,
-};
 
 export default {
 	name: "petpet",
@@ -25,14 +18,20 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, "Please mention or send/reply an image to pet");
 		}
 		const time = moment().format("HH:mm:ss DD/MM");
-		let options = {};
-		options = /--?images?/.test(query) ? _.defaults({ output: "image" }, defaultOptions) : _.defaults({ output: "sticker" }, defaultOptions);
+		const defaultOptions = {
+			output: "sticker",
+			duration: 5,
+			resolution: 512,
+		};
+		if (/--?images?/.test(query)) {
+			defaultOptions.output = "image";
+		}
 		if (bodyQuoted && !isMediaImage) {
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Petting`, "#01cdfe")} for ${color(prettyNumber, "#ff71ce")}`);
 			const profile = await client[botNum].profilePictureUrl(mediaData.participant, "image").catch(() => readBuffer(path.join(__dirname, "Media Files/blank.png")));
-			options = _.defaults({ filename: path.join(__dirname, `Temporary Files/${filename}`) }, defaultOptions);
-			const result = await pet(profile, sender, options);
-			if (options.output == "sticker") {
+			defaultOptions.filename = path.join(__dirname, `Temporary Files/${filename}`);
+			const result = await pet(profile, sender, defaultOptions);
+			if (defaultOptions.output == "sticker") {
 				await client[botNum].sendMessage(from, { sticker: Buffer.from(result, "base64") });
 			} else {
 				await client[botNum].sendMessage(from, { video: Buffer.from(result, "base64"), mimetype: "video/mp4" });
@@ -59,8 +58,8 @@ export default {
 				path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split("/")[1]}`),
 				typeQuoted,
 			);
-			const result = await pet(file, sender, options);
-			if (options.output == "sticker") {
+			const result = await pet(file, sender, defaultOptions);
+			if (defaultOptions.output == "sticker") {
 				await client[botNum].sendMessage(from, { sticker: Buffer.from(result, "base64") });
 			} else {
 				await client[botNum].sendMessage(from, { video: Buffer.from(result, "base64"), mimetype: "video/mp4" });
@@ -71,9 +70,9 @@ export default {
 		for (const mentioned of mention) {
 			INFOLOG(`[${color(time, "cyan")}]`, `${color(`Petting`, "#01cdfe")} ${color(mentioned, "#ff71ce")}`);
 			const profile = await client[botNum].profilePictureUrl(mentioned, "image").catch(() => readBuffer(path.join(__dirname, "Media Files/blank.png")));
-			options = _.defaults({ filename: path.join(__dirname, `Temporary Files/${filename}`) }, defaultOptions);
-			const result = await pet(profile, sender, options);
-			if (options.output == "sticker") {
+			defaultOptions.filename = path.join(__dirname, `Temporary Files/${filename}`);
+			const result = await pet(profile, sender, defaultOptions);
+			if (defaultOptions.output == "sticker") {
 				await client[botNum].sendMessage(from, { sticker: Buffer.from(result, "base64") });
 			} else {
 				await client[botNum].sendMessage(from, { video: Buffer.from(result, "base64"), mimetype: "video/mp4" });

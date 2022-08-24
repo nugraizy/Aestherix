@@ -1,4 +1,4 @@
-import { readJSON } from "../../Helper/index.js";
+import { readJSON, romanize } from "../../Helper/index.js";
 
 export default {
 	name: "about",
@@ -12,7 +12,7 @@ export default {
 	async run({ from }, client) {
 		const capt = `Bot Name : Void
 Total Commands : ${cmds.commands.size}
-Bot Version : ${readJSON("./package.json").version.toUpperCase()}
+Bot Version : ${romanize(readJSON("./package.json").version).toUpperCase()}
 Bot Creator : Nanda
 Github Uname : nugraizy
 Github Repo : Currently not available (private)
@@ -34,7 +34,7 @@ Hanif a.k.a Mrhrtz
 Nafiz a.k.a VoIP
 Toby a.k.a Tobz`,
 			footer: "Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪",
-			templateButtons: [{ urlButton: { displayText: "\t", url: "\t" } }],
+			templateButtons: [{ urlButton: { displayText: "Contact Owner", url: "https://wa.me/6289607055246?text=hi" } }],
 			headerType: 1,
 		});
 	},
