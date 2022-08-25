@@ -167,7 +167,7 @@ const subtitleVideos = (aid) =>
 		try {
 			throw new Error("not yet made. only the videos that official/verified has subtitle");
 		} catch (err) {
-			console.log(err);
+			log(err);
 		}
 	});
 

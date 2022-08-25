@@ -1,6 +1,6 @@
 import { exec, spawn } from "child_process";
 import FormData from "form-data";
-import fs from "fs";
+import fs from "fs-extra";
 import moment from "moment-timezone";
 import path from "path";
 import petting from "pet-pet-gif";
@@ -255,16 +255,23 @@ export const pet = (input, sender, opts = {}) =>
 	new Promise(async (resolve, reject) => {
 		const time = moment().format("HH:mm:ss DD/MM");
 		try {
-			const petted = await petting(input, opts);
+			let petted;
+			await new Promise(async (res) => {
+				petted = await petting(input, opts);
+				await fs.writeFile(`${opts.filename}.gif`, petted);
+				res();
+			});
 			if (opts.output == "sticker") {
-				await sharp(petted, { animated: true }).toFile(`${isURL(input) ? `./Temporary Files/${sender}` : input}.webp`);
-				const sticker = await convertMediaToSticker(`${isURL(input) ? `./Temporary Files/${sender}` : input}.webp`, sender, undefined);
+				const file = await sharp(await fs.readFile(`${opts.filename}.gif`), { animated: true })
+					.toFormat("webp")
+					.webp()
+					.toBuffer();
+				const sticker = await client[botNum].prepareSticker(file, `${opts.filename}-done.webp`, "stickerAnimated", { author, packname });
+				unlinkFile(`${opts.filename}.gif`);
+				unlinkFile(`${opts.filename}-done.webp`);
 				resolve(sticker);
-				unlinkFile(`${isURL(input) ? `./Temporary Files/${sender}` : input}.webp`);
 				return;
 			}
-			input = opts.filename ? `${opts.filename}` : `${input}.gif`;
-			writeBuffer(`${input}.gif`, petted);
 			const { output } = await gif2mp4(`${input}.gif`, `${input}.mp4`, opts);
 			resolve(readBuffer(output));
 			unlinkFile(input);

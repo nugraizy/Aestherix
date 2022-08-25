@@ -6,7 +6,6 @@ export const searchBandcamp = (keyword) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			const { headers } = await Axios({ url: "https://bandcamp.com/", method: "GET" });
-			log(headers);
 			const { data } = await Axios({
 				url: URL_API,
 				method: "POST",
