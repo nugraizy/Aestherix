@@ -12,8 +12,12 @@ export default {
 	status: "enable",
 	restrict: true,
 	async run({ mediaData, isAdmin, isOwner, isBotAdmin, type, message, from, mention, query, bodyQuoted, adminGroups }, client) {
-		if (!isAdmin && !isOwner) return await client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
-		if (!isBotAdmin) return await client[botNum].reply({ from, quoted: message }, "Bot is not admin, Please promote admin before using moderation commands.");
+		if (!isAdmin && !isOwner) {
+			return await client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
+		}
+		if (!isBotAdmin) {
+			return await client[botNum].reply({ from, quoted: message }, "Bot is not admin, Please promote admin before using moderation commands.");
+		}
 		if (type == "buttonsResponseMessage") {
 			return await client[botNum].updateGroup(from, mention.length > 0 ? mention : query.split(",").parse(), "REMOVE", false, /--?(force|F)/.test(query), message);
 		} else if (!query && mention.length == 0 && !bodyQuoted) {

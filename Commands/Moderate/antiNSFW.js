@@ -10,10 +10,12 @@ export default {
 	limit: 2,
 	status: "enable",
 	async run(message, client) {
-		if (!message.isAdmin && !message.isOwner)
+		if (!message.isAdmin && !message.isOwner) {
 			return await client[botNum].reply({ from: message.from, quoted: message.message }, "You are not admin. This commands is only for admins.");
-		if (!message.isBotAdmin)
+		}
+		if (!message.isBotAdmin) {
 			return await client[botNum].reply({ from: message.from, quoted: message.message }, "Bot is not admin, Please promote admin before using moderation commands.");
+		}
 		if (!message.query) {
 			return await client[botNum].reply({ from: message.from, quoted: message.message }, "Please specify a command\n\nEx: antinsfw <enable/disable>");
 		}

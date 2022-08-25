@@ -2,12 +2,10 @@ import Axios from "axios";
 import cheerio from "cheerio";
 import { fileTypeFromBuffer } from "file-type";
 import FormData from "form-data";
-import fs from "fs";
+import fs from "fs-extra";
 import gradient from "gradient-string";
-import beautifyJSON from "json-stable-stringify";
 import fetch from "node-fetch";
 import ms from "parse-ms";
-import request from "request";
 
 export const fetchTEXT = async (_, __) => {
 	return await (await fetch(_, __)).text();
@@ -25,10 +23,22 @@ export const cheerioLOAD = (html) => {
 	return cheerio.load(html);
 };
 
-export const download = (url, path, callback) => {
-	request.head(url, () => {
-		request(url).pipe(fs.createWriteStream(path)).on("close", callback);
+export const download = async (url, path) => {
+	await new Promise(async (resolve, reject) => {
+		try {
+			const { data } = await Axios({
+				url,
+				method: "GET",
+				responseType: "arraybuffer",
+			});
+			path = path || `./Temporary Files/${Date.now()}.${(await fileTypeFromBuffer(data)).ext}`;
+			await fs.writeFile(path, data);
+			resolve();
+		} catch (err) {
+			reject(err);
+		}
 	});
+	return path;
 };
 
 export const clampFloat = (value) => (value > 1 ? 1 : value < -1 ? -1 : value);
@@ -41,7 +51,7 @@ export const shuffleArray = (array = []) => {
 	let curId = array.length;
 	while (0 !== curId) {
 		const randId = Math.floor(Math.random() * curId);
-		curId -= 1;
+		curId--;
 		const tmp = array[curId];
 		array[curId] = array[randId];
 		array[randId] = tmp;
@@ -383,7 +393,6 @@ export const convertToOrdinal = (number) => {
 	return number + (ordinal[(Metta - 20) % 10] || ordinal[Metta] || ordinal[0]);
 };
 
-// make a function to load every each of the files from local files directory
 export const loadFiles = (dir) => {
 	let files = [];
 	const list = fs.readdirSync(dir);
@@ -399,108 +408,73 @@ export const loadFiles = (dir) => {
 	return files;
 };
 
-// make a function to check if the string contains zilgoo unicode
 export const isZilgoo = (str) => str.match(/\u{1F1E6}/g);
 
-// check if one value is the same to the other
 export const isSame = (value1, value2) => value1 == value2;
 
-// check if the value is undefined
 export const isUndefined = (value) => value == undefined;
 
-// check if the value is not undefined
 export const isNotUndefined = (value) => value != undefined;
 
-// check if the value is not zero
 export const isNotZero = (value) => value != 0;
 
-// check if one value is not the same to the other
 export const isNotSame = (value1, value2) => value1 != value2;
 
-// check if the value is not -1
 export const isNotMinusOne = (value) => value != -1;
 
-// check value is not null
 export const isNotNull = (value) => value != null;
 
-// check if value is null
 export const isNull = (value) => value == null;
 
-// check value is zero
 export const isZero = (value) => value == 0;
 
-// check if value is empty
 export const isEmpty = (value) => value == "";
 
-// check if value is not empty
 export const isNotEmpty = (value) => value != "";
 
-// check if value is minus 1
 export const isMinusOne = (value) => value == -1;
 
-// check if value is one
 export const isOne = (value) => value == 1;
 
-// check if value is not one
 export const isNotOne = (value) => value != 1;
 
-// check if number bigger than other number.
-// if the arguments are string then convert to number.
-// if it's not a string nor number return false.
 export const isBigger = (value1, value2) => (typeof value1 == "string" ? value1.toNumber() > value2.toNumber() : typeof value1 == "number" ? value1 > value2 : false);
 
-// check if number smaller than other number.
-// if the arguments are string then convert to number.
-// if it's not a string nor number return false.
 export const isSmaller = (value1, value2) => (typeof value1 == "string" ? value1.toNumber() < value2.toNumber() : typeof value1 == "number" ? value1 < value2 : false);
 
-// check if number is same or bigger than other number.
-// if the arguments are string then convert to number.
-// if it's not a string nor number return false.
 export const isSameOrBigger = (value1, value2) => (typeof value1 == "string" ? value1.toNumber() >= value2.toNumber() : typeof value1 == "number" ? value1 >= value2 : false);
 
-// check if numbe is same or smaller than other number.
-// if the arguments are string then convert to number.
-// if it's not a string nor number return false.
 export const isSameOrSmaller = (value1, value2) => (typeof value1 == "string" ? value1.toNumber() <= value2.toNumber() : typeof value1 == "number" ? value1 <= value2 : false);
 
-// randomize an array and take only one value.
 export const randomize = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-// read json file using fs
 export const readJSON = (path) => JSON.parse(fs.readFileSync(path));
 
-// read file buffer using fs
 export const readBuffer = (path) => fs.readFileSync(path);
 
-// write json file using fs. check the data using isUndefined function then throw new error saying "you need the data to write!"
 export const writeJSON = (path, data) => {
 	if (isUndefined(data)) {
 		throw new Error("you need the data to write!");
 	}
-	return fs.writeFileSync(path, JSON.stringify(JSON.parse(beautifyJSON(data)), undefined, 2));
+	return fs.writeFileSync(path, JSON.stringify(data, undefined, 2));
 };
 
-// write buffer to file using fs. If the data is undefined then throw new error saying "you need the buffer to write!"
 export const writeBuffer = (path, data) => {
 	if (isUndefined(data)) {
 		throw new Error("you need the buffer to write!");
-	} // and if the data is not a buffer throw new error saying "the data is invalid. please input only buffer!"
-	else if (!Buffer.isBuffer(data)) {
+	} else if (!Buffer.isBuffer(data)) {
 		throw new Error("the data is invalid. please input only buffer!");
 	}
 	fs.writeFileSync(path, data);
 	return true;
 };
 
-// get every function in baileys module
 export const getFunctions = (module) => {
 	Object.keys(module).filter((key) => {
 		typeof module[key] == "function";
 	});
 };
 
-// check if the file exists then unlink it.
 export const unlinkFile = (path) => {
 	if (fs.existsSync(path)) {
 		fs.unlinkSync(path);
@@ -508,7 +482,6 @@ export const unlinkFile = (path) => {
 	}
 };
 
-// check if the file is exists with the name isFileExist
 export const isFileExist = (path) => fs.existsSync(path);
 
 export const delaySync = (ms) => {
