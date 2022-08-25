@@ -163,6 +163,7 @@ const start = async () => {
 		auth: state,
 		markOnlineOnConnect: false,
 		syncFullHistory: false,
+		keepAliveIntervalMs: 60 * 1000,
 		getMessage: async () => {
 			return { conversation: "Please Try Again" };
 		},
