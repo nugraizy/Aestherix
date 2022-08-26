@@ -572,6 +572,7 @@ function parseCli() {
 			no_call: { type: "boolean", alias: "d" },
 			insta_notifier: { type: "boolean", alias: "i" },
 			limit_reset: { type: "boolean", alias: "l" },
+			reset_on_start: { type: "boolean", alias: "x" },
 		},
 	});
 }
