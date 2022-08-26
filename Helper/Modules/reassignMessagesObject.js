@@ -4,7 +4,6 @@ import moment from "moment-timezone";
 import { checkJSON, pushDefaultSettings, updateSettings } from "../Groups/Settings/index.js";
 import { NO_DATA } from "../Misc/WAData/index.js";
 import { isEmpty, isNotNull, isNotSame, isSame, isUndefined, readJSON } from "./index.js";
-let isFirstConnection = true;
 
 moment.tz.setDefault("Asia/Jakarta").locale("id");
 export const reassign = async (m, client, store) => {
@@ -20,9 +19,6 @@ export const reassign = async (m, client, store) => {
 		let groupSettings;
 		const isBaileys = (m?.key?.id?.startsWith("BAE5") && isSame(m?.key?.id?.length, 16)) || (isFromMe && m?.key?.id?.startsWith("VOID"));
 		const sender = isFromMe ? `${client[botNum].user.id.split(":")[0]}@s.whatsapp.net` : isGroup ? m?.key?.participant : m?.key?.remoteJid;
-		if (!cache.metadata?.has(from) && isGroup) {
-			await caching(client, from);
-		}
 		if (isFirstConnection) {
 			const SETTINGS = readJSON("./Config/settings.json");
 			const { multi, noPref } = SETTINGS.prefix;
@@ -36,7 +32,9 @@ export const reassign = async (m, client, store) => {
 				ownerNumbers: [SETTINGS.owner_number, ...SETTINGS.team_number, botNumber],
 			};
 			cache.config = SETTINGS;
-			isFirstConnection = false;
+		}
+		if (!cache.metadata?.has(from) && isGroup) {
+			await caching(client, from);
 		}
 		const SETTINGS = cache.config;
 		const { blocklist } = cache;
@@ -72,7 +70,9 @@ export const reassign = async (m, client, store) => {
 			}
 		}
 		const content = JSON.stringify(m?.message, null, 2);
-		const pushname = m?.pushName ? m?.pushName.trim() : cache.users.get(sender).name || store.contacts?.[sender]?.verifiedName || store.contacts?.[sender]?.notify || prettyNumber;
+		const pushname = m?.pushName
+			? m?.pushName?.trim()
+			: cache?.users?.get(sender)?.name || store?.contacts?.[sender]?.verifiedName || store?.contacts?.[sender]?.notify || prettyNumber;
 		const { botNumber, ownerNumbers } = cache;
 		const isOwner = ownerNumbers.includes(sender);
 		const timeStamp = m?.messageTimestamp || Date.now();
@@ -443,38 +443,61 @@ const caching = async (clients, id) => {
 		});
 		resolve();
 	});
-	if (isFirstConnection) await startLoopie(clients);
+	if (isFirstConnection) {
+		await startMetadataLoop(clients, 3);
+		await startBlocklistLoop(clients, 6);
+	}
+	isFirstConnection = false;
 };
 
-const startLoopie = async (clients) => {
-	setInterval(async () => {
-		const data = cache.metadata.values();
-		const dataBlock = await clients[botNum].fetchBlocklist();
-		const SETTINGS = readJSON("./Config/settings.json");
-		if (!compare(dataBlock, cache.blocklist)) {
-			cache.blocklist = dataBlock;
-		}
-		if (!compare(SETTINGS, cache.config)) {
-			cache.config = SETTINGS;
-		}
-		for (const d of data) {
-			if (d.id) {
-				const groupMetadata = (await clients[botNum].groupMetadata(d.id)) || {};
-				const partc = groupMetadata.participants;
-				groupMetadata.rawParticipants = partc || [];
-				groupMetadata.adminGroups = partc?.filter((v) => isNotNull(v.admin))?.map((v) => v.id);
-				groupMetadata.participantsGroups = partc?.map((v) => v.id);
-				groupMetadata.ownerGroups = partc?.find((v) => v.admin == "superadmin")?.id || null;
-				if (groupMetadata.id && !compare(groupMetadata, d)) {
-					cache.metadata.set(groupMetadata.id, {
-						...groupMetadata,
-						rawParticipants: partc || [],
-						adminGroups: partc?.filter((v) => isNotNull(v.admin))?.map((v) => v.id),
-						participantsGroups: partc?.map((v) => v.id),
-						ownerGroups: partc?.find((v) => v.admin == "superadmin")?.id || null,
-					});
+const startBlocklistLoop = async (clients, ms) => {
+	cache.interval.set(
+		"blocklist",
+		setInterval(async () => {
+			try {
+				const dataBlock = await clients[botNum].fetchBlocklist();
+				if (!compare(dataBlock, cache.blocklist)) {
+					cache.blocklist = dataBlock;
 				}
+			} catch (err) {
+				cache.interval.delete("blocklist");
 			}
-		}
-	}, 3000);
+		}, ms * 1000),
+	);
+};
+
+const startMetadataLoop = async (clients, ms) => {
+	cache.interval.set(
+		"groupMetadata",
+		setInterval(async () => {
+			try {
+				const data = cache.metadata.values();
+				const SETTINGS = readJSON("./Config/settings.json");
+				if (!compare(SETTINGS, cache.config)) {
+					cache.config = SETTINGS;
+				}
+				for (const d of data) {
+					if (d.id) {
+						const groupMetadata = (await clients[botNum].groupMetadata(d.id)) || {};
+						const partc = groupMetadata.participants;
+						groupMetadata.rawParticipants = partc || [];
+						groupMetadata.adminGroups = partc?.filter((v) => isNotNull(v.admin))?.map((v) => v.id);
+						groupMetadata.participantsGroups = partc?.map((v) => v.id);
+						groupMetadata.ownerGroups = partc?.find((v) => v.admin == "superadmin")?.id || null;
+						if (groupMetadata.id && !compare(groupMetadata, d)) {
+							cache.metadata.set(groupMetadata.id, {
+								...groupMetadata,
+								rawParticipants: partc || [],
+								adminGroups: partc?.filter((v) => isNotNull(v.admin))?.map((v) => v.id),
+								participantsGroups: partc?.map((v) => v.id),
+								ownerGroups: partc?.find((v) => v.admin == "superadmin")?.id || null,
+							});
+						}
+					}
+				}
+			} catch (err) {
+				cache.interval.delete("blocklist");
+			}
+		}, ms * 1000),
+	);
 };

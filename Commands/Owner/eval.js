@@ -8,9 +8,10 @@ import * as util from "util";
 import { format } from "util";
 import * as a from "../../Helper/index.js";
 import * as b from "../../Utils/index.js";
+import * as c from "../../connect.js";
 import { instafier } from "../../Utils/Instagram Notifier/index.js";
 import { spotifier } from "../../Utils/Spotifier/index.js";
-const func = { ...a, ...b };
+const func = { ...a, ...b, ...c };
 
 export default {
 	name: "eval",

@@ -205,7 +205,7 @@ export default {
 						try {
 							if (/-{1,2}((help(s)?|info|des(c|k)rip(t|s)i(on)?)|H)$/i.test(message.args[1]) && Tempcmds.name !== "eval") {
 								const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${Tempcmds.cooldown}s\nAliases : ${Tempcmds.aliases
-									.map((v) => `!${v.capitalize()}`)
+									.map((v) => `!${v}`)
 									.join(", ")}.`;
 								client[botNum].reply({ from: message.from, quoted: message.message }, help);
 								continue;

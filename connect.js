@@ -18,7 +18,7 @@ import baileys, { jidDecode } from "@adiwajshing/baileys";
 import { Boom } from "@hapi/boom";
 import center from "center-align";
 import { spawn } from "child_process";
-import fs from "fs";
+import fs from "fs-extra";
 import meow from "meow";
 import moment from "moment-timezone";
 import mqtt from "mqtt";
@@ -67,6 +67,7 @@ const regexOption = [
 	"noCall",
 	"instaNotifier",
 	"limitReset",
+	"resetOnStart",
 ];
 if (platform !== "win32" && !OPTIONS.noLoad) {
 	await printRandomAscii();
@@ -89,11 +90,9 @@ if (OPTIONS.limitReset) {
 			const time = moment().tz("Asia/Jakarta").format("HH:mm:ss DD/MM");
 			(await import("./Helper/Groups/Settings/limit.js")).resetAllLimit();
 			INFOLOG(`[${color(time, "cyan")}]`, `${color("Sukses Reset User's Limit", "white")}`);
-			const data = readJSON(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`);
-			data.chats = [];
-			data.contacts = {};
-			data.messages = {};
-			writeJSON(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`, JSON.stringify(data, undefined, 2));
+			if (OPTIONS.resetOnStart) {
+				await clearDBConnection();
+			}
 		},
 		{
 			timezone: "Asia/Jakarta",
@@ -108,6 +107,7 @@ if (OPTIONS.json) {
 	if (!fs.existsSync("./Media Files/Connection Databases/")) {
 		fs.mkdirSync("./Media Files/Connection Databases/");
 	}
+	await clearDBConnection();
 	store.readFromFile(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`);
 	setInterval(() => {
 		store.writeToFile(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`);
@@ -149,13 +149,18 @@ Number.prototype.toTime = function () {
 	return seconds == 60 ? `${minutes + 1}:00` : `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
 };
 
+let isClosed = false;
+
 const start = async () => {
 	if (OPTIONS.help) {
 		log(cli.help);
 		process.exit(0);
 	}
-	await loadCommands();
-	await loadEveryCommand();
+
+	const load = async () => {
+		await loadCommands();
+		await loadEveryCommand();
+	};
 	const CONNECTION_CONFIG = {
 		printQRInTerminal: true,
 		version: DEFAULT_CONNECTION_CONFIG.version,
@@ -187,6 +192,11 @@ const start = async () => {
 				if (reason == DisconnectReason.restartRequired) {
 					log("Restart required, Restarting your WebScoket...");
 				} else if (reason == DisconnectReason.timedOut) {
+					if (cache.interval.has("blocklist") && cache.interval.has("groupMetadata")) {
+						cache.interval.delete("blocklist");
+						cache.interval.delete("groupMetadata");
+						isFirstConnection = false;
+					}
 					log("Timed out, Quick reconnecting...");
 				} else if (reason == DisconnectReason.connectionClosed) {
 					log("Connection closed, Quick reconnecting...");
@@ -200,6 +210,11 @@ const start = async () => {
 				await start().catch((e) => log(e));
 			}
 		} else if (connection == "open") {
+			if (!isClosed) {
+				await load();
+				isClosed = true;
+			}
+			isFirstConnection = true;
 			if (receivedPendingNotifications == true) {
 				shouldWait = true;
 			}
@@ -212,9 +227,9 @@ const start = async () => {
 			(await import("./Helper/Modules/assignFunction.js")).assign(client);
 			successSpinner("Connecting", { text: "Connected to WASocket" });
 			INFOLOG(color(center(`Bot Version  ${romanize(readJSON("./package.json").version)}\n\n`, stdout.columns), "#9f53ea"));
-
 			if (!receivedPendingNotifications && !shouldWait) {
 				connectEvent();
+				clearDBConnection();
 			}
 		}
 	});
@@ -574,31 +589,43 @@ function help() {
 	   $ node . <session> <options>
  
 	 Options
-	   --prefix, -p         Set your custom prefix
-	   --read_only, -y      Read only
-	   --auto_read, -r      Auto read every incoming message
-	   --restrict, -e       Restrict every moderator commands
-	   --only_logs, -o      Only showing logs but will ignore every message and commands
-	   --no_logs, -n        Not showing any logs in the meantime still respond for any commands
-	   --self_mode, -s      Set self mode that only owner and the bot can use
-	   --debug_mode, -g     Show every metadata of any message
-	   --multi_cmd, -m      Loop every command on your script. Use | to seperate each commands
-	   --rainbow, -b        make your logs rainbow colors
-	   --trace, -t          Show errors
-	   --watch, -w          Watch every file on your script and reload it when it changed
-	   --cool_down, -c      Set cool down for every command
-	   --auto_correct, -a   Enable a
-	   --no_load, -v        Disable module load animation
-	   --json, -j           Use JSON DB to store data of the WhatsApp connection
-	   --reset, -k          Reset your WhatsApp connection session, and restart the script
-	   --story, q           Auto download people story after the bot received the story
-	   --offline, -f        Set your current presence to offline
-	   --no_call, -d        Reject incoming call.
-	   --insta_notifier, -i Handle incoming Instagram DMs.
-	   --limit_reset, -l	Enable Auto-reset user's limit.
-	   --help, -h           Show this message.
+	   --prefix, -p          Set your custom prefix
+	   --read_only, -y       Read only
+	   --auto_read, -r       Auto read every incoming message
+	   --restrict, -e        Restrict every moderator commands
+	   --only_logs, -o       Only showing logs but will ignore every message and commands
+	   --no_logs, -n         Not showing any logs in the meantime still respond for any commands
+	   --self_mode, -s       Set self mode that only owner and the bot can use
+	   --debug_mode, -g      Show every metadata of any message
+	   --multi_cmd, -m       Loop every command on your script. Use | to seperate each commands
+	   --rainbow, -b         make your logs rainbow colors
+	   --trace, -t           Show errors
+	   --watch, -w           Watch every file on your script and reload it when it changed
+	   --cool_down, -c       Set cool down for every command
+	   --auto_correct, -a    Enable auto correct for every incoming command
+	   --no_load, -v         Disable module load animation
+	   --json, -j            Use JSON DB to store data of the WhatsApp connection
+	   --reset, -k           Reset your WhatsApp connection session, and restart the script
+	   --story, q            Auto download people story after the bot received the story
+	   --offline, -f         Set your current presence to offline
+	   --no_call, -d         Reject incoming call.
+	   --insta_notifier, -i  Handle incoming Instagram DMs.
+	   --limit_reset, -l	 Enable Auto-reset user's limit.
+	   --reset_on_start, -x  Auto reset DB-Connections every start of the script
+	   --help, -h            Show this message.
  
 	 Examples
 	   $ node . --read_only -tr
  `;
+}
+
+export async function clearDBConnection() {
+	if (!fs.existsSync(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`)) {
+		await fs.writeFile(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`, JSON.stringify({}));
+	}
+	const data = readJSON(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`);
+	data.chats = [];
+	data.contacts = {};
+	data.messages = {};
+	writeJSON(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`, data);
 }

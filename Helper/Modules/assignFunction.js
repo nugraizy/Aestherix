@@ -6,9 +6,10 @@ import webpmux from "node-webpmux";
 import sharp from "sharp";
 import { TextEncoder } from "util";
 import { S_WHATSAPP_NET, UPDATE, ZERO } from "../Misc/WAData/index.js";
-import { isURL, delaySync } from "./functions.js";
+import { isURL, delaySync, fetchBUFFER } from "./functions.js";
 import { reassign } from "./reassignMessagesObject.js";
 const { readFile, unlink, writeFile } = (await import("fs-extra")).default;
+
 export const assign = (client) => {
 	const applyExif = async (buffer, metadata) => {
 		const data = {};
@@ -208,12 +209,40 @@ export const assign = (client) => {
 							continue;
 						}
 						const response = await client[botNum][UPDATE[update]](dari, [container], update.toLowerCase());
+						if (update.PARSE_EVENTS("ADD")) {
+							if (response?.[0]?.status == "500") {
+								await client[botNum].reply({ from: dari, quoted: message }, `Group is already full`);
+							} else if (response?.[0]?.status == "408") {
+								await client[botNum].reply({ from: dari, quoted: message }, `${container} is just left a while ago`);
+							} else if (response?.[0]?.status == "403") {
+								await client[botNum].reply({ from: dari, quoted: message }, `${container} is privated their number. Trying to invite them via invitational message.`);
+								const messages = generateWAMessageFromContent(
+									dari,
+									{
+										groupInviteMessage: {
+											groupJid: dari,
+											inviteCode: response?.[0].code,
+											inviteExpiration: response?.[0].expiration,
+											groupName: (await client[botNum].groupMetadata(dari)).subject,
+											caption: "Invitation to join my WhatsApp group",
+											jpegThumbnail: new Buffer.from(await fetchBUFFER(await client[botNum].profilePictureUrl(dari, "preview"))).toString("base64"),
+										},
+									},
+									{},
+								);
+								await client[botNum].relayMessage(container, messages.message, { messageId: messages.key.id });
+							} else if (response?.[0]?.status == "401") {
+								await client[botNum].reply({ from: dari, quoted: message }, `${container} blocked bot number`);
+							}
+						}
 						delaySync(120);
 						responses.push(response);
 					} catch (e) {
 						responses.push({ error: e.message, id: container });
-						log(e);
-						await client[botNum].reply({ from: dari, quoted: message }, `${container} is not a valid number`);
+						if (e?.[0]?.status == "400") {
+							await client[botNum].reply({ from: dari, quoted: message }, `${container} is not a valid number`);
+						}
+						return;
 					}
 				}
 			}
