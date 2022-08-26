@@ -134,7 +134,7 @@ export const ytv = (query) =>
 	});
 
 export const yta = (query) =>
-	new Promise(async (resolve) => {
+	new Promise(async (resolve, reject) => {
 		try {
 			if (isUrl(query)) {
 				let res = await yt(query, "128kbps", "mp3", "128");
