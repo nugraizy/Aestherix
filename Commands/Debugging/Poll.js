@@ -4,7 +4,7 @@ export default {
 	name: "polling",
 	description: "Send polling to a message.",
 	category: "Debugging",
-	usage: "!polling <emoji>",
+	usage: "!polling",
 	aliases: ["poll", "pollwith"],
 	cooldown: 5,
 	limit: 0,

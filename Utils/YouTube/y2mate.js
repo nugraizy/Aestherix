@@ -144,7 +144,7 @@ export const yta = (query) =>
 			} else if (isURL(query) && !isUrl(query)) {
 				resolve({ error: "Link YouTube tidak valid.", internal: false });
 			} else {
-				const res = await ytsr(query, false);
+				let res = await ytsr(query, false);
 				const url = `https://youtu.be/${res.videoId}`;
 				const container = res;
 				res = await yt(url, "128kbps", "mp3", "128");

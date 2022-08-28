@@ -91,7 +91,7 @@ const insertExif = async (paths, sender) =>
 					ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);
 					reject(er);
 				}
-				exec(`webpmux -set exif '${pathExif}' '${pathResults}.webp' -o '${pathResults}-done.webp'`, (err, stdout, stderr) => {
+				exec(`webpmux -set exif "${pathExif}" "${pathResults}.webp" -o "${pathResults}-done.webp"`, (err, stdout, stderr) => {
 					if (err) {
 						log(err);
 						ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Media to Sticker", "red")} for ${color(sender, "#ff71ce")}`);

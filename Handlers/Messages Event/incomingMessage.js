@@ -197,52 +197,50 @@ export default {
 						user.cooldown.get(message.sender).requests = true;
 					}
 				}
-				if (Tempcmds) {
-					if (OPTIONS.onlyLogs ? (message.cmd.startsWith("==>") || message.cmd.startsWith("//>") || message.cmd.startsWith("$$>") ? true : false) : true) {
-						if (!message.isOwner && OPTIONS.selfMode) {
-							return;
+				if (Tempcmds && (OPTIONS.onlyLogs ? (message.cmd.startsWith("==>") || message.cmd.startsWith("//>") || message.cmd.startsWith("$$>") ? true : false) : true)) {
+					if (!message.isOwner && OPTIONS.selfMode) {
+						return;
+					}
+					try {
+						if (/-{1,2}((help(s)?|info|des(c|k)rip(t|s)i(on)?)|H)$/i.test(message.args[1]) && Tempcmds.name !== "eval") {
+							const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${Tempcmds.cooldown}s\nAliases : ${Tempcmds.aliases
+								.map((v) => `!${v}`)
+								.join(", ")}.`;
+							client[botNum].reply({ from: message.from, quoted: message.message }, help);
+							continue;
 						}
-						try {
-							if (/-{1,2}((help(s)?|info|des(c|k)rip(t|s)i(on)?)|H)$/i.test(message.args[1]) && Tempcmds.name !== "eval") {
-								const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${Tempcmds.cooldown}s\nAliases : ${Tempcmds.aliases
-									.map((v) => `!${v}`)
-									.join(", ")}.`;
-								client[botNum].reply({ from: message.from, quoted: message.message }, help);
-								continue;
-							}
-							if (Tempcmds.category == "Games" && message.isGroup && !message.isAdmin && !message.isOwner && message[message.from].games == "disable") {
-								return await client[botNum].reply({ from: message.from, quoted: message.message }, "Game Mode is Disabled. Type !games enable to enable Game Mode");
-							}
-							if (Tempcmds.category == "Moderation" && message.isGroup && !message.isAdmin && !message.isOwner) {
-								return await client[botNum].reply({ from: message.from, quoted: message.message }, "You are not Admin");
-							}
-							await Tempcmds.run(message, client, store);
-							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) {
-								user.cooldown.get(message.sender).requests = false;
-							}
-							await delay(300);
-						} catch (err) {
-							if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) {
-								user.cooldown.get(message.sender).requests = false;
-							}
-							let str = "Something went wrong.\nPlease send this error stack to the owner :\n\n";
-							str += `Type : ${err.name}\n`;
-							str += `Message : ${err.message}\n`;
-							str += `Stack Trace : ${err.stack.substr(0, 20)}...`;
-							await client[botNum].sendMessage(message.from, {
-								text: str,
-								footer: "Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪",
-								templateButtons: [
-									{ urlButton: { displayText: "Copy Stack Trace", url: `https://www.whatsapp.com/otp/copy/${err.stack}` } },
-									{
-										urlButton: { displayText: "Report to Owner", url: `https://wa.me/${message.settings.owner_number}?text=hi,%20bot%20mengalami%20error${encodeURI(`\n\n${err.stack}`)}` },
-									},
-									{ quickReplyButton: { displayText: "Report via Bot", id: `.report ${err.stack}` } },
-								],
-								headerType: 1,
-							});
-							log(err);
+						if (Tempcmds.category == "Games" && message.isGroup && !message.isAdmin && !message.isOwner && message[message.from].games == "disable") {
+							return await client[botNum].reply({ from: message.from, quoted: message.message }, "Game Mode is Disabled. Type !games enable to enable Game Mode");
 						}
+						if (Tempcmds.category == "Moderation" && message.isGroup && !message.isAdmin && !message.isOwner) {
+							return await client[botNum].reply({ from: message.from, quoted: message.message }, "You are not Admin");
+						}
+						await Tempcmds.run(message, client, store);
+						if (user.cooldown.get(message.sender)?.requests) {
+							user.cooldown.get(message.sender).requests = false;
+						}
+						await delay(300);
+					} catch (err) {
+						if (user.cooldown.get(message.sender)?.requests) {
+							user.cooldown.get(message.sender).requests = false;
+						}
+						let str = "Something went wrong.\nPlease send this error stack to the owner :\n\n";
+						str += `Type : ${err.name}\n`;
+						str += `Message : ${err.message}\n`;
+						str += `Stack Trace : ${err.stack.substr(0, 20)}...`;
+						await client[botNum].sendMessage(message.from, {
+							text: str,
+							footer: "Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪",
+							templateButtons: [
+								{ urlButton: { displayText: "Copy Stack Trace", url: `https://www.whatsapp.com/otp/copy/${err.stack}` } },
+								{
+									urlButton: { displayText: "Report to Owner", url: `https://wa.me/${message.settings.owner_number}?text=hi,%20bot%20mengalami%20error${encodeURI(`\n\n${err.stack}`)}` },
+								},
+								{ quickReplyButton: { displayText: "Report via Bot", id: `.report ${err.stack}` } },
+							],
+							headerType: 1,
+						});
+						log(err);
 					}
 				}
 			}

@@ -32,7 +32,13 @@ export default {
 					fs.unlinkSync(media);
 				}
 				return await client[botNum].reply({ from, quoted: message }, result.error);
+			} else if (result.information.length == 0) {
+				if (isMediaImage) {
+					fs.unlinkSync(media);
+				}
+				return await client[botNum].reply({ from, quoted: message }, "Similar images not found.");
 			}
+
 			let capt = "``` • Reverse Image Search```\n";
 			capt += "Will sending a few similar or the actual images itself. Please wait...\n\n";
 			for (const item of result.information) {

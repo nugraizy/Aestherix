@@ -168,7 +168,6 @@ const start = async () => {
 		auth: state,
 		markOnlineOnConnect: false,
 		syncFullHistory: false,
-		keepAliveIntervalMs: 10 * 1000,
 		getMessage: async () => {
 			return { conversation: "Please Try Again" };
 		},
@@ -177,60 +176,73 @@ const start = async () => {
 	store.bind(Client.ev);
 
 	Client.ev.on("connection.update", async ({ lastDisconnect, connection, receivedPendingNotifications }) => {
-		if (connection == "connecting") {
-			addSpinner("Connecting", { text: "Connecting to WASocket..." });
-		}
-		if (connection == "close") {
-			const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
-			if (reason == DisconnectReason.badSession) {
-				log("Bad session, Please delete your previous session and do a rescan...");
-				process.exit(0);
-			} else if (reason == DisconnectReason.loggedOut) {
-				log("Logged out, Please delete your previous session and do a rescan...");
-				process.exit(0);
-			} else {
-				if (reason == DisconnectReason.restartRequired) {
-					log("Restart required, Restarting your WebScoket...");
-				} else if (reason == DisconnectReason.timedOut) {
+		try {
+			if (connection == "connecting") {
+				addSpinner("Connecting", { text: "Connecting to WASocket..." });
+			}
+			if (connection == "close") {
+				const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
+				if (reason == DisconnectReason.badSession) {
+					log("Bad session, Please delete your previous session and do a rescan...");
+					process.exit(0);
+				} else if (reason == DisconnectReason.loggedOut) {
+					log("Logged out, Please delete your previous session and do a rescan...");
+					process.exit(0);
+				} else {
+					if (reason == DisconnectReason.restartRequired) {
+						log("Restart required, Restarting your WebScoket...");
+					} else if (reason == DisconnectReason.timedOut) {
+						log("Timed out, Quick reconnecting...");
+					} else if (reason == DisconnectReason.connectionClosed) {
+						log("Connection closed, Quick reconnecting...");
+					} else if (reason == DisconnectReason.connectionReplaced) {
+						log("Connection replaced, Quick reconnecting...");
+					} else if (reason == DisconnectReason.connectionLost) {
+						log("Connection lost, Quick reconnecting...");
+					} else {
+						log("Unknown reason, Quick reconnecting...");
+					}
 					if (cache.interval.has("blocklist") && cache.interval.has("groupMetadata")) {
+						clearInterval(cache.interval.get("blocklist"));
+						clearInterval(cache.interval.get("groupMetadata"));
 						cache.interval.delete("blocklist");
 						cache.interval.delete("groupMetadata");
 						isFirstConnection = false;
 					}
-					log("Timed out, Quick reconnecting...");
-				} else if (reason == DisconnectReason.connectionClosed) {
-					log("Connection closed, Quick reconnecting...");
-				} else if (reason == DisconnectReason.connectionReplaced) {
-					log("Connection replaced, Quick reconnecting...");
-				} else if (reason == DisconnectReason.connectionLost) {
-					log("Connection lost, Quick reconnecting...");
-				} else {
-					log("Unknown reason, Quick reconnecting...");
+					await start().catch((e) => log(e));
 				}
-				await start().catch((e) => log(e));
+			} else if (connection == "open") {
+				if (!isClosed) {
+					await load();
+					isClosed = true;
+				}
+				isFirstConnection = true;
+				if (receivedPendingNotifications == true) {
+					shouldWait = true;
+				}
+				if (receivedPendingNotifications == false && shouldWait) {
+					shouldWait = false;
+				}
+				global.client = {};
+				global.botNum = Client.user.id;
+				client[Client.user.id] = Client;
+				(await import("./Helper/Modules/assignFunction.js")).assign(client);
+				successSpinner("Connecting", { text: "Connected to WASocket" });
+				INFOLOG(color(center(`Bot Version  ${romanize(readJSON("./package.json").version)}\n\n`, stdout.columns), "#9f53ea"));
+				if (!receivedPendingNotifications && !shouldWait) {
+					connectEvent();
+					clearDBConnection();
+				}
 			}
-		} else if (connection == "open") {
-			if (!isClosed) {
-				await load();
-				isClosed = true;
+		} catch (error) {
+			if (cache.interval.has("blocklist") && cache.interval.has("groupMetadata")) {
+				clearInterval(cache.interval.get("blocklist"));
+				clearInterval(cache.interval.get("groupMetadata"));
+				cache.interval.delete("blocklist");
+				cache.interval.delete("groupMetadata");
+				isFirstConnection = false;
 			}
-			isFirstConnection = true;
-			if (receivedPendingNotifications == true) {
-				shouldWait = true;
-			}
-			if (receivedPendingNotifications == false && shouldWait) {
-				shouldWait = false;
-			}
-			global.client = {};
-			global.botNum = Client.user.id;
-			client[Client.user.id] = Client;
-			(await import("./Helper/Modules/assignFunction.js")).assign(client);
-			successSpinner("Connecting", { text: "Connected to WASocket" });
-			INFOLOG(color(center(`Bot Version  ${romanize(readJSON("./package.json").version)}\n\n`, stdout.columns), "#9f53ea"));
-			if (!receivedPendingNotifications && !shouldWait) {
-				connectEvent();
-				clearDBConnection();
-			}
+			await start().catch((e) => log(e));
 		}
 	});
 

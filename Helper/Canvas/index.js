@@ -1,3 +1,4 @@
+export { Attachment } from "./attachments.js";
 export { attp } from "./animatedImage.js";
 export { memeGenerator } from "./memeGenerator.js";
 export { ttp } from "./staticImage.js";
