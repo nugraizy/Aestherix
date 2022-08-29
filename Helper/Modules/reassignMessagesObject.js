@@ -37,11 +37,11 @@ export const reassign = async (m, client, store) => {
 			await caching(client, from);
 		}
 		const SETTINGS = cache.config;
-		const { blocklist } = cache;
+		const { blocklist, bannedlist } = cache;
 		const isBlocked = blocklist?.includes(sender);
+		const isBanned = bannedlist?.includes(sender);
 		const groupMetadata = isGroup ? cache.metadata.get(from) : {};
 		const isGroupOwner = isGroup ? (isSame(groupMetadata?.owner, sender) ? true : false) : false;
-		if (isBlocked) return;
 		if (!cache.users.has(sender)) {
 			cache.users.set(sender, {
 				prettyNumber:
@@ -170,6 +170,25 @@ export const reassign = async (m, client, store) => {
 		else prf = pref;
 		const isCmd = body?.startsWith(prf);
 		const query = args?.slice(1)?.join(" ");
+		if (isBlocked || isBanned) {
+			return {
+				pushname,
+				prettyNumber,
+				from,
+				body,
+				cmd,
+				args,
+				query,
+				isGroup,
+				prefix: prf,
+				message: m,
+				isBaileys,
+				type,
+				isBlocked,
+				isBanned,
+				isCmd,
+			};
+		}
 		const isMedia = isSame(type, "imageMessage") || isSame(type, "videoMessage");
 		const isQuotedImage = isSame(type, "extendedTextMessage") && !content.includes("viewOnceMessage") && content.includes("imageMessage");
 		const isQuotedVideo = isSame(type, "extendedTextMessage") && !content.includes("viewOnceMessage") && content.includes("videoMessage");
@@ -473,6 +492,10 @@ const startMetadataLoop = async (clients, ms) => {
 			try {
 				const data = cache.metadata.values();
 				const SETTINGS = readJSON("./Config/settings.json");
+				const dataBanned = readJSON("./Databases/Users/banned.json");
+				if (!compare(dataBanned, cache.bannedlist)) {
+					cache.bannedlist = dataBanned;
+				}
 				if (!compare(SETTINGS, cache.config)) {
 					cache.config = SETTINGS;
 				}

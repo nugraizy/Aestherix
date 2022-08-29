@@ -32,7 +32,7 @@ export default {
 		) {
 			return;
 		}
-		if (message.message.key && message.message.key.remoteJid == "status@broadcast" && OPTIONS.story) {
+		if (message.message.key && message.message.key.remoteJid == "status@broadcast" && OPTIONS.story & message.isBanned) {
 			return (await import("./storyMessage.js")).default.handler(client, message);
 		}
 		if (OPTIONS.offline) {
@@ -43,7 +43,7 @@ export default {
 			(await import("./offlineMessage.js")).default.handler(client, message);
 		}
 
-		if (OPTIONS.autoRead && !OPTIONS.offline) {
+		if (OPTIONS.autoRead && !OPTIONS.offline && !message.isBlocked && !message.isBanned) {
 			client[botNum].readMessages([message.message.key]);
 		}
 
@@ -68,7 +68,7 @@ export default {
 			const time = getTimeSince(since);
 			client[botNum].reply({ from: message.from, quoted: message.message }, `${name} is AFK since ${time} ago. Reason: ${reasons}`);
 		}
-		if (message.mention.length > 0) {
+		if (message.mention?.length > 0) {
 			let caption = `You're Tagging People That Are AFK.\n\n`;
 			const container = [];
 			for (const mention of message.mention) {
@@ -155,6 +155,10 @@ export default {
 				if (Tempcmds && !message.isOwner) {
 					if (OPTIONS.selfMode) {
 						return;
+					}
+					if (message.isBanned) {
+						await client[botNum].sendMessage(message.from, { react: { text: "🖕🏼", key: message.message.key } });
+						continue;
 					}
 					if (OPTIONS.restrict && Tempcmds.restrict) {
 						await client[botNum].reply({ from: message.from, quoted: message.message }, "This command is restricted and currently bot are on restricted mode.");
@@ -263,6 +267,9 @@ export default {
 				`${color("type", "#ff71ce")} : ${color(message.type, "#b967ff")}`,
 				`${color(runtimes, "#f18f15")}${color(`s`, "#f5e700")}`,
 			);
+		}
+		if (message.isBanned || message.isBlocked) {
+			return;
 		}
 		(await import("../Game Handlers/akinator.js")).default.handler(message, client, message);
 		(await import("../Game Handlers/tebakGambar.js")).default.handler(message, client, message);

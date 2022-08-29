@@ -4,7 +4,7 @@ export default {
 	name: "report",
 	description: "Report bug or error to the owner",
 	usage: "!report",
-	aliases: ["laport"],
+	aliases: ["lapor"],
 	category: "Helper",
 	cooldown: 40,
 	limit: 0,
@@ -41,6 +41,7 @@ The Problem Occured in : ${from}`,
 			templateButtons: [
 				{ urlButton: { displayText: "Contact Person", url: `wa.me/${sender.split("@")[0]}` } },
 				{ quickReplyButton: { displayText: "Accept", id: `.report accept ${from} ${sender} ${JSON.stringify(message)}` } },
+				{ quickReplyButton: { displayText: "Banned", id: `.ban report ${from} ${sender} ${JSON.stringify(message)}` } },
 			],
 			headerType: 1,
 		});

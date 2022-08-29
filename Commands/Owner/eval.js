@@ -168,12 +168,12 @@ export default {
 		} else if (body.startsWith("=> ")) {
 			try {
 				if (body.includes("/s")) {
-					body = body.replace(/\/s/g, "");
+					body = body.replace(/\W\/s\W/, "");
 					const evaled = body.slice(3);
 					print(from, eval(evaled));
 				} else {
 					if (body.includes("/as")) {
-						body = body.replace(/\/as/g, "");
+						body = body.replace(/\W\/as\W/, "");
 					}
 					print(
 						from,

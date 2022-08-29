@@ -1,19 +1,3 @@
-/**
- *   @BANNER  |  @BANNER  |  @BANNER  |  @BANNER  |  @BANNER  |  @BANNER  |  @BANNER  |  @BANNER  |
- *   @BANNER [ INFO ] this is a work done by @NANDA, coded by several people as team.
- *   @BANNER [ INFO ] this project starts at the beginning of 2022 by @NANDA. coded by our team since February 9, 2022.
- *   @BANNER [ INFO ] please do not remove this banner of information.
- */
-
-/**
- *   @AUTHOR  |  @AUTHOR  |  @AUTHOR  |  @AUTHOR  |  @AUTHOR  |  @AUTHOR  |  @AUTHOR  |  @AUTHOR  |
- *   @NANDA         [ @GitHub ] https://github.com/nugraizy      [ @Instagram ] https://instagram.com/ngrdzy_
- *   @MRHRTZ        [ @GitHub ] https://github.com/MRHRTZ        [ @Instagram ] https://instagram.com/hanif_az.sq.62
- *   @Alphanum404   [ @GitHub ] https://github.com/Alphanum404   [ @Instagram ] https://instagram.com/aldiflynns
- *   @TobyG74       [ @GitHub ] https://github.com/TobyG74       [ @Instagram ] https://instagram.com/ini.tobz
- *   @Nafiz         [ @GitHub ] https://github.com/xbnfz01       [ @Instagram ] https://instagram.com/nfz.01
- */
-
 import baileys, { jidDecode } from "@adiwajshing/baileys";
 import { Boom } from "@hapi/boom";
 import center from "center-align";
@@ -337,9 +321,9 @@ const start = async () => {
 				}
 				await client[botNum].sendMessage(update.id, {
 					text: `Statistic Pemain :
-	
+
 	Pemain : ${update.playersData.filter((v) => v.isAlive).length}/${update.playersData.length}
-	
+
 	${update.playersData
 		.map((v) => {
 			return v.isAlive ? `@${v.id.split("@")[0]} : 😄 Hidup` : `@${v.id.split("@")[0]} : 💀 Mati | ${v.role}`;
@@ -600,7 +584,7 @@ function help() {
 	return `
 	 Usage
 	   $ node . <session> <options>
- 
+
 	 Options
 	   --prefix, -p          Set your custom prefix
 	   --read_only, -y       Read only
@@ -626,7 +610,7 @@ function help() {
 	   --limit_reset, -l	 Enable Auto-reset user's limit.
 	   --reset_on_start, -x  Auto reset DB-Connections every start of the script
 	   --help, -h            Show this message.
- 
+
 	 Examples
 	   $ node . --read_only -tr
  `;

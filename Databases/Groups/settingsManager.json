@@ -15,7 +15,7 @@
       "left1msg": "Bye bye {groupName}",
       "left2": "disable",
       "left2msg": "Bye bye {groupName}",
-      "notification": "disable",
+      "notification": "enable",
       "welcome1": "disable",
       "welcome1msg": "Welcome to {groupName}",
       "welcome2": "disable",

@@ -1,0 +1,97 @@
+import PhoneNumber from "awesome-phonenumber";
+import { readJSON, writeJSON } from "../../Helper/index.js";
+
+export default {
+	name: "banned",
+	description: "Banned user",
+	usage: "!banned <tag/reply>",
+	aliases: ["ban"],
+	category: "Owner",
+	cooldown: 0,
+	limit: 0,
+	status: "enable",
+	async run({ from, message, isOwner, args, mediaData, mention, bodyQuoted, query }, client) {
+		if (!query && bodyQuoted) {
+			return await client[botNum].reply({ from, quoted: message }, "Please provide user to ban");
+		}
+
+		if (!isOwner) {
+			return await client[botNum].reply({ from, quoted: message }, "You are not allowed to use this command");
+		}
+
+		const userBanned = readJSON("./Databases/Users/banned.json");
+		const banned = [];
+
+		if (args[1] == "report" && isOwner) {
+			userBanned.push(args[3]);
+			writeJSON("./Databases/Users/banned.json", userBanned);
+			client[botNum].updateBlockStatus(args[3], "block");
+			await client[botNum].reply({ from, quoted: JSON.parse(args.slice(4)) }, "You are banned from using bot.\n\nReason : Abusing Report command.");
+			return;
+		}
+
+		if (mention.length > 0) {
+			for (const mentioned of mention) {
+				if (userBanned.includes(mentioned)) {
+					await client[botNum].sendMessage(from, { text: `@${mentioned.split("@")[0]} Already banned`, mentions: [mentioned] }, { quoted: message });
+					continue;
+				} else {
+					userBanned.push(mentioned);
+					writeJSON("./Databases/Users/banned.json", userBanned);
+					banned.push(mentioned);
+					client[botNum].updateBlockStatus(mentioned, "block");
+				}
+			}
+			if (banned.length > 0) {
+				await client[botNum].sendMessage(from, { text: `Success banning : ${banned.map((v) => `@${v.split("@")[0]}`).join(", ")}`, mentions: [banned] }, { quoted: message });
+			}
+			return;
+		}
+
+		if (query) {
+			const reg = new RegExp("[A-Za-z-@s+s.whatsapp.net]", "g");
+
+			const checkIfValid = (input) => {
+				const isValid = PhoneNumber(`+${input}`).isValid();
+				return isValid;
+			};
+
+			if (query.includes(",")) {
+				query = query.split(",");
+			} else {
+				query = [query];
+			}
+
+			for (let user of query) {
+				if (reg.test(user)) {
+					user = user.replace(reg, "");
+				}
+
+				const validation = checkIfValid(user);
+				const notBanned = userBanned.includes(`${user}@s.whatsapp.net`);
+
+				if (!validation) {
+					await client[botNum].sendMessage(from, { text: `@${user} is not a valid number`, mentions: [`${user}@s.whatsapp.net`] }, { quoted: message });
+				} else if (notBanned) {
+					await client[botNum].sendMessage(from, { text: `@${user} is already banned`, mentions: [`${user}@s.whatsapp.net`] }, { quoted: message });
+				} else {
+					userBanned.push(`${user}@s.whatsapp.net`);
+					writeJSON("./Databases/Users/banned.json", userBanned);
+					await client[botNum].sendMessage(from, { text: `Success banning : @${user}`, mentions: [`${user}@s.whatsapp.net`] }, { quoted: message });
+				}
+			}
+			return;
+		}
+
+		if (bodyQuoted) {
+			if (userBanned.includes(mediaData.participant)) {
+				return await client[botNum].reply({ from, quoted: message }, "Already banned");
+			}
+
+			userBanned.push(mediaData.participant);
+			writeJSON("./Databases/Users/banned.json", userBanned);
+			client[botNum].updateBlockStatus(mentioned, "block");
+			await client[botNum].sendMessage(from, { text: `Success banning : @${mediaData.participant.split("@")[0]}`, mentions: [mediaData.participant] }, { quoted: message });
+		}
+	},
+};

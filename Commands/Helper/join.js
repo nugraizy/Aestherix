@@ -7,7 +7,7 @@ export default {
 	limit: 7,
 	cooldown: 5,
 	status: "enable",
-	async run({ from, query, message, sender, isOwner }, client) {
+	async run({ from, query, message, sender, isOwner, settings }, client) {
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, "You must provide a url.");
 		}
@@ -19,10 +19,13 @@ export default {
 		const metadataGroup = await client[botNum].groupMetadata(metadataInvite?.id);
 		const participants = metadataInvite.participants?.map((v) => v?.id);
 		const isAdmin = metadataInvite.participants?.map((v) => v?.admin)?.includes(sender);
+		const isGroupMaxed = Object.keys(await client[botNum].groupFetchAllParticipating()).length > settings.max_group;
 		if (metadataGroup.id !== "") {
 			await client[botNum].reply({ from, quoted: message }, "I'm already in this group.");
-		} else if (participants?.length < 120 && !isOwner) {
-			await client[botNum].reply({ from, quoted: message }, "This group is not big enough to join. Minimum 120 participants.");
+		} else if (isGroupMaxed && !isOwner) {
+			await client[botNum].reply({ from, quoted: message }, "Bot already maxed the group.");
+		} else if (participants?.length < settings.min_members && !isOwner) {
+			await client[botNum].reply({ from, quoted: message }, `This group is not big enough to join. Minimum ${settings.min_members} participants.`);
 		} else if (!isAdmin && !isOwner) {
 			await client[botNum].reply({ from, quoted: message }, "You must be an admin to invite bot to group.");
 		} else if (metadataInvite) {
