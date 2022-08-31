@@ -1,5 +1,6 @@
 export { Attachment } from "./attachments.js";
 export { attp } from "./animatedImage.js";
+export { GithubGraph } from "./githubContribution.js";
 export { memeGenerator } from "./memeGenerator.js";
 export { ttp } from "./staticImage.js";
 export { textStory } from "./textStory.js";

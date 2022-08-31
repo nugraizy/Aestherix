@@ -6,3 +6,4 @@ Session/*/*.json
 Databases/Users/*.json
 Media Files/Connection Databases/*.json
 Temporary Files/
+test.*

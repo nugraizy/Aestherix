@@ -167,21 +167,20 @@ export default {
 			}
 		} else if (body.startsWith("=> ")) {
 			try {
-				if (body.includes("/s")) {
-					body = body.replace(/\W\/s\W/, "");
-					const evaled = body.slice(3);
-					print(from, eval(evaled));
+				if (/\/s$/.test(query)) {
+					query = query.replace(/\/s$/, "");
+					print(from, eval(query));
 				} else {
-					if (body.includes("/as")) {
-						body = body.replace(/\W\/as\W/, "");
+					if (/\/s$/.test(query)) {
+						query = query.replace(/\/s$/, "");
 					}
 					print(
 						from,
 						await eval(
 							`(async () => {
 						${query}
-					})()
-					.catch(err => print(from, err))`,
+								})()
+							 .catch(err => print(from, err))`,
 						),
 					);
 				}
@@ -189,8 +188,8 @@ export default {
 				const err = syntaxerror(
 					`(async () => {
 					${query}
-				})()
-				.catch(err => print(from, err))`,
+						})()
+						.catch(err => print(from, err))`,
 					"Execution Function",
 					{
 						allowReturnOutsideFunction: true,

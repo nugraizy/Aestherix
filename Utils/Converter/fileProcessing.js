@@ -59,26 +59,29 @@ export const gifToMp4 = (input, sender) =>
 
 export const toOpus = (ext, opts = {}) =>
 	new Promise(async (resolve, reject) => {
+		const time = moment().format("HH:mm:ss DD/MM");
 		let container;
 		let tmp;
 		if (typeof opts.media == "string" && isURL(opts.media)) {
 			tmp = `${opts.input}.${ext}`;
-			container = ["-y", "-i", opts.media, "-vn", "-c:a", "libopus", "-b:a", "128k", "-vbr", "on", "-compression_level", "10", `${opts.output}.${ext}`];
+			container = ["-y", "-i", `"${opts.media}"`, "-vn", "-c:a", "libopus", "-b:a", "128k", "-vbr", "on", "-compression_level", "10", `"${opts.output}.${ext}"`];
 		} else {
 			tmp = `${opts.input}.${ext}`;
 			if (Buffer.isBuffer(opts.media)) {
 				writeBuffer(tmp, opts.media);
 			}
-			container = ["-y", "-i", tmp, "-vn", "-c:a", "libopus", "-b:a", "128k", "-vbr", "on", "-compression_level", "10", `${opts.output}.${ext}`];
+			container = ["-y", "-i", `"${tmp}"`, "-vn", "-c:a", "libopus", "-b:a", "128k", "-vbr", "on", "-compression_level", "10", `"${opts.output}.${ext}"`];
 		}
-		spawn("ffmpeg", container)
-			.on("error", reject)
-			.on("error", () => unlinkFile(tmp))
-			.on("close", () => {
+		exec(`ffmpeg ${container.join(" ")}`, (err, stdout, stderr) => {
+			if (err) {
+				ERRLOG(`[${color(time, "cyan")}]`, `${color("Failed to Convert Audio OPUS Codec", "red")}`);
 				unlinkFile(tmp);
-				resolve(readBuffer(`${opts.output}.${ext}`));
-				unlinkFile(`${opts.output}.${ext}`);
-			});
+				reject(stderr);
+			}
+			resolve(readBuffer(`${opts.output}.${ext}`));
+			unlinkFile(`${opts.output}.${ext}`);
+			unlinkFile(tmp);
+		});
 	});
 
 export const convertMediaToSticker = (filePath, sender, output, mimetype) =>
