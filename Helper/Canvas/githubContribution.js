@@ -3,30 +3,34 @@ import jsSplit from "js-split";
 import { fetchTEXT, cheerioLOAD } from "../Modules/index.js";
 const { createCanvas, registerFont } = Canvas;
 
-const THEME = {
-	// GENERAl :
-	// 0 BACKGROUND, 1 TEXTS, 2 LINES, 3 DATES TEXT
-	// GRAPH :
-	// 0 NONE, 1 LESS, 2 BIT LESS, 3 BIT MORE, 4 MORE
-	DEFAULT: {
-		GENERAL: ["#FFFFFF", "#8B6CFA", "rgba(175,143,251,0.3)", "#245278"],
-		GRAPH: ["#9BB1DA", "#668ADA", "#4771DA", "#1E53D9", "#012D5E"],
-	},
-	DRACULA: {
-		GENERAL: ["#282A36", "#F8F8F2", "#FF79C6", "#50FA7B"],
-		GRAPH: ["#1E1738", "#503E69", "#745A99", "#BD36F9", "#FF79C6"],
-	},
-};
-
 export class GithubGraph {
-	constructor(username, theme) {
-		this._username = username;
-		this._theme = THEME[theme];
-		this._api = new API(this._username, this._theme);
+	constructor() {
+		this._themes = {
+			DEFAULT: {
+				GENERAL: ["#FFFFFF", "#8B6CFA", "rgba(175,143,251,0.3)", "#245278", "rgba(108, 122, 137, 0.3)"],
+				GRAPH: ["#9BB1DA", "#668ADA", "#4771DA", "#1E53D9", "#012D5E"],
+			},
+			DRACULA: {
+				GENERAL: ["#282A36", "#F8F8F2", "#FF79C6", "#50FA7B", "rgba(239, 239, 240, 0.3)"],
+				GRAPH: ["#1E1738", "#503E69", "#745A99", "#BD36F9", "#FF79C6"],
+			},
+		};
+		this._username = null;
+		this._theme = null;
+		this._api = null;
 		this.canvas = null;
 		this.ctx = null;
 
-		this.init = async () => {
+		this.init = async (username, theme) => {
+			if (!username) {
+				throw new Error("Username is required.");
+			}
+
+			this._username = username;
+			this._theme = this._themes[theme || "DEFAULT"];
+
+			this._api = new API(this._username, this._theme);
+
 			if (!this.canvas || !this.ctx) {
 				this.canvas = await this.createCanvas();
 				this.ctx = this.canvas.getContext("2d");
@@ -93,7 +97,7 @@ export class GithubGraph {
 			return this;
 		};
 
-		this.calenders = (month, y, data, opts) => {
+		this.calendars = (month, y, data, opts) => {
 			if (!this.canvas || !this.ctx) {
 				throw new Error("Need initialization. Call .init() first.");
 			}
@@ -103,6 +107,7 @@ export class GithubGraph {
 			this.ctx.font = "32px ibm";
 			this.ctx.fillStyle = this._theme.GENERAL[3];
 			this.ctx.fillText(`${data.year} : ${data.totContributionsInYear} Contribution`, 70, y - 50, this.canvas.width - 130);
+			this.fillLineInBetween(70, y + 400, this.canvas.width - 120, y + 400);
 
 			for (let i = 0; i < month; i++) {
 				let multiple = y + 40;
@@ -117,13 +122,25 @@ export class GithubGraph {
 						}
 					}
 					if (String(j / 7).includes(".")) {
-						multiple += 35;
+						multiple += 40;
 					}
 				}
 				this.ctx.fillStyle = this._theme.GENERAL[3];
 				this.ctx.font = "22px ibm";
 				this.ctx.fillText(months[i], dim[i][Math.round(dim[i].length / 2)] - 30, y, this.canvas.width - 120);
 			}
+		};
+
+		this.fillLineInBetween = (x, y, x1, y1) => {
+			this.ctx.beginPath();
+			this.ctx.moveTo(x, y);
+			this.ctx.lineTo(x1, y1);
+			this.ctx.strokeStyle = this._theme.GENERAL[4];
+			this.ctx.lineWidth = 2;
+			this.ctx.lineCap = "round";
+			this.ctx.stroke();
+			this.ctx.closePath();
+			return this;
 		};
 
 		this.activityColor = (x, y, color, opts) => {
@@ -183,7 +200,7 @@ export class GithubGraph {
 
 			let i = 290;
 			for (const data of arr) {
-				this.calenders(data.month, i, data, opts);
+				this.calendars(data.month, i, data, opts);
 				i += 550;
 			}
 		};
@@ -232,6 +249,10 @@ export class GithubGraph {
 		this.ctx.quadraticCurveTo(x, y, x + radius, y);
 		this.ctx.fill();
 	}
+
+	toBuffer() {
+		return this.canvas.toBuffer();
+	}
 }
 
 class API {
@@ -264,35 +285,52 @@ class API {
 				.text()
 				.trim()
 				.match(/^([0-9,]+)\s/)[1];
-			const firstWeekOfFirstMonth = 7 - data('g[transform="translate(0, 0)"]').find("rect").get().length;
-			const lastWeekOfLastMonth = 7 - data('g[transform="translate(728, 0)"]').find("rect").get().length;
+			const dates = {
+				startYear: data("g > g:nth-child(1)").find("rect").get().length,
+				endYear: data(`g > g:nth-child(${data("g > g").length})`)
+					.find("rect")
+					.get().length,
+			};
+			const firstWeekOfFirstMonth = 8 - dates.startYear;
+			const lastWeekOfLastMonth = 8 - dates.endYear;
 			return {
 				totContributionsInYear,
 				firstWeekOfFirstMonth,
 				lastWeekOfLastMonth,
-				month: Math.round(parseInt(data('g[transform="translate(728, 0)"]').find("rect").attr("data-date").split("-")[1])),
 				year,
-				days: data("g")
-					.find("rect")
-					.get()
-					.map((v, i) => {
-						if (i > firstWeekOfFirstMonth && data("g").find("rect").get().length - lastWeekOfLastMonth > i) {
-							const level = parseInt(data(v).attr("data-level"));
-							const month = Math.round(parseInt(data(v).attr("data-date").split("-")[1]));
-							return {
-								level,
-								month,
-								totalContri: parseInt(data(v).attr("data-count")),
-								color: theme.GRAPH[level],
-							};
-						}
-						return undefined;
-					}),
+				month: Math.round(
+					parseInt(
+						data(`g > g:nth-child(${data("g > g").length})`)
+							.find("rect")
+							.attr("data-date")
+							.split("-")[1],
+					),
+				),
+				days: [...new Array(firstWeekOfFirstMonth).fill(undefined), ...data("g").find("rect").get()].map((v, i) => {
+					if (v && data("g").find("rect").get().length - lastWeekOfLastMonth > i) {
+						const level = parseInt(data(v).attr("data-level"));
+						const month = Math.round(parseInt(data(v).attr("data-date").split("-")[1]));
+						return {
+							level,
+							month,
+							totalContri: parseInt(data(v).attr("data-count")),
+							color: theme.GRAPH[level],
+						};
+					}
+					return undefined;
+				}),
 			};
 		};
 	}
 	async req(param) {
-		const data = await fetchTEXT(`https://github.com${param}`);
-		return cheerioLOAD(data);
+		try {
+			const data = await fetchTEXT(`https://github.com${param}`);
+			if (data.includes("Not Found")) {
+				throw new Error("User not found");
+			}
+			return cheerioLOAD(data);
+		} catch (err) {
+			throw new Error("Something went wrong");
+		}
 	}
 }

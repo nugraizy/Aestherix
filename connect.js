@@ -219,6 +219,7 @@ const start = async () => {
 				}
 			}
 		} catch (error) {
+			console.log(error);
 			if (cache.interval.has("blocklist") && cache.interval.has("groupMetadata")) {
 				clearInterval(cache.interval.get("blocklist"));
 				clearInterval(cache.interval.get("groupMetadata"));
