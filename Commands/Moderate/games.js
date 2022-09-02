@@ -11,7 +11,7 @@ export default {
 	status: "enable",
 	async run(message, client) {
 		if (!message.isAdmin && !message.isOwner) {
-			return await client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
+			return await client[botNum].reply({ from: message.from, quoted: message.message }, "You are not admin. This commands is only for admins.");
 		}
 		if (!message.query) {
 			return await client[botNum].reply({ from: message.from, quoted: message.message }, `Please specify a command\n\nEx: ${message.cmd} <enable/disable>`);

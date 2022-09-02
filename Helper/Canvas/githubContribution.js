@@ -31,9 +31,12 @@ export class GithubGraph {
 
 			this._api = new API(this._username, this._theme);
 
+			if (this.canvas || this.ctx) {
+				throw new Error("GitHub Graph already been initialized.");
+			}
+
 			if (!this.canvas || !this.ctx) {
-				this.canvas = await this.createCanvas();
-				this.ctx = this.canvas.getContext("2d");
+				await this.initCanvas();
 			}
 
 			return this;
@@ -44,8 +47,9 @@ export class GithubGraph {
 				throw new Error("Need initialization. Call .init() first.");
 			}
 
-			if (typeof opts !== "object") {
-				throw new Error(`Expected opts to be Object. Got : ${typeof opts}`);
+			if (typeof opts !== "object" && opts) {
+				const err = `Expected opts to be Object. Got : ${typeof opts}`;
+				throw new Error(err);
 			}
 
 			if (!opts) {
@@ -144,8 +148,9 @@ export class GithubGraph {
 		};
 
 		this.activityColor = (x, y, color, opts) => {
-			if (typeof opts !== "object") {
-				throw new Error(`Expected opts to be Object. Got : ${typeof opts}`);
+			if (typeof opts !== "object" && opts) {
+				const err = `Expected opts to be Object. Got : ${typeof opts}`;
+				throw new Error(err);
 			}
 
 			if (!opts) {
@@ -166,8 +171,9 @@ export class GithubGraph {
 		};
 
 		this.activitySchedule = (opts) => {
-			if (typeof opts !== "object") {
-				throw new Error(`Expected opts to be Object. Got : ${typeof opts}`);
+			if (typeof opts !== "object" && opts) {
+				const err = `Expected opts to be Object. Got : ${typeof opts}`;
+				throw new Error(err);
 			}
 
 			if (!opts) {
@@ -228,10 +234,11 @@ export class GithubGraph {
 		return [width, height];
 	}
 
-	async createCanvas() {
+	async initCanvas() {
 		const dimension = await this.calculateDimension();
 		registerFont("./Media Files/Fonts/IBM.ttf", { family: "ibm" });
-		return createCanvas(dimension[0], dimension[1]);
+		this.canvas = createCanvas(dimension[0], dimension[1]);
+		this.ctx = this.canvas.getContext("2d");
 	}
 
 	round(x, y, w, h, radius) {
@@ -328,6 +335,11 @@ class API {
 			if (data.includes("Not Found")) {
 				throw new Error("User not found");
 			}
+
+			if (data.includes("activity is private")) {
+				throw new Error("User not found");
+			}
+
 			return cheerioLOAD(data);
 		} catch (err) {
 			throw new Error("Something went wrong");

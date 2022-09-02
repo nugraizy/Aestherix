@@ -218,10 +218,10 @@ class Spotifier {
 		}
 	}
 
-	async searchTracks(query, artists) {
+	async searchTracks(query) {
 		try {
 			query = encodeURI(query);
-			const data = await this.req(`/search?q=track:${query}+artist:${artists}&type=track&include_external=audio`, "GET");
+			const data = await this.req(`/search?q=${query}&type=track&include_external=audio`, "GET");
 			if (data.tracks.items.length == 0) {
 				return { status: false, message: "Not Found" };
 			}

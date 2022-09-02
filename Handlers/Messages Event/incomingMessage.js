@@ -164,6 +164,16 @@ export default {
 						await client[botNum].reply({ from: message.from, quoted: message.message }, "This command is restricted and currently bot are on restricted mode.");
 						continue;
 					}
+					if (Tempcmds.category == "Games" && message.isGroup && !message.isAdmin && !message.isOwner && message[message.from].games == "disable") {
+						return await client[botNum].reply({ from: message.from, quoted: message.message }, "Game Mode is Disabled. Type !games enable to enable Game Mode");
+					}
+					if (Tempcmds.category == "Moderation" && message.isGroup && !message.isAdmin && !message.isOwner) {
+						return await client[botNum].reply({ from: message.from, quoted: message.message }, "You are not Admin");
+					}
+					if (Tempcmds.category == "Moderation" && !message.isGroup) {
+						return await client[botNum].reply({ from: message.from, quoted: message.message }, "This commands for group only");
+					}
+
 					const limit = addLimit({ id: message.sender, limit: Tempcmds.limit ?? 0, type: "MIN" });
 					if (typeof limit == "object" && "message" in limit) {
 						client[botNum].reply(
@@ -212,12 +222,6 @@ export default {
 								.join(", ")}.`;
 							client[botNum].reply({ from: message.from, quoted: message.message }, help);
 							continue;
-						}
-						if (Tempcmds.category == "Games" && message.isGroup && !message.isAdmin && !message.isOwner && message[message.from].games == "disable") {
-							return await client[botNum].reply({ from: message.from, quoted: message.message }, "Game Mode is Disabled. Type !games enable to enable Game Mode");
-						}
-						if (Tempcmds.category == "Moderation" && message.isGroup && !message.isAdmin && !message.isOwner) {
-							return await client[botNum].reply({ from: message.from, quoted: message.message }, "You are not Admin");
 						}
 						await Tempcmds.run(message, client, store);
 						if (user.cooldown.get(message.sender)?.requests) {
