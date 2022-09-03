@@ -17,7 +17,7 @@ export default {
 		const git = new GithubGraph();
 		await git.init(query, "DRACULA");
 		git.fillBackground().createLines({ round: true });
-		await git.textHeaders({ round: true });
+		await git.textHeaders();
 		await client[botNum].sendMessage(from, { image: new Buffer.from(git.toBuffer()) });
 	},
 };

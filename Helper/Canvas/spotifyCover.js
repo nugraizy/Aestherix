@@ -86,7 +86,15 @@ export class SpotifyCover {
 
 			const image = await loadImage(this._buffer);
 
+			this.ctx.save();
+			this.ctx.beginPath();
+			this.ctx.shadowBlur = 20;
+			this.ctx.shadowColor = "black";
+			this.ctx.shadowOffsetX = 2;
+			this.ctx.shadowOffsetY = 10;
 			this.ctx.drawImage(image, this.canvas.width / 3 - (image.width * 1.3) / 3 + 38, this.canvas.height / 3.5 - (image.height * 1.3) / 3, image.width * 1.3, image.height * 1.3);
+			this.ctx.closePath();
+			this.ctx.restore();
 			this.w = this.canvas.width / 3 - (image.width * 1.3) / 3 + 38;
 
 			return this;
