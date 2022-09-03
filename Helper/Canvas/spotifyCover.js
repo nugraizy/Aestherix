@@ -127,8 +127,8 @@ export class SpotifyCover {
 
 			this.ctx.font = "22px sans-thin";
 			this.ctx.fillStyle = chroma("white").brighten(2).hex();
-			this.ctx.fillText("0:04", this.w, centerY + 30);
-			this.ctx.fillText(this.toTime(this._timestamp), this.w + 800, centerY + 30);
+			this.ctx.fillText("0:04", this.w + 15, centerY + 30);
+			this.ctx.fillText(this.toTime(this._timestamp), this.w + 800 + 15, centerY + 30);
 
 			this.ctx.lineCap = "round";
 			this.ctx.lineWidth = 5;
