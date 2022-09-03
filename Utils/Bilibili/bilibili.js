@@ -14,7 +14,7 @@ export const bilibiliSearchCOM = (keyword) =>
 			if (data.result == undefined) {
 				return resolve({ error: "Videos Not Found", cus_message: "Error when searching Bilibili videos." });
 			}
-			resolve(bilibiliVideoCOM(data.result));
+			resolve(bilibiliVideoCOM(data.result.filter((v) => v.type == "video")));
 		} catch (err) {
 			resolve({ error: err.message, cus_message: "Error when searching Bilibili videos." });
 		}

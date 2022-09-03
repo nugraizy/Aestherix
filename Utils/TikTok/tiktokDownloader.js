@@ -1,3 +1,4 @@
+import fetch from "node-fetch";
 import { cheerioLOAD, fetchJSON, fetchTEXT } from "../../Helper/index.js";
 
 export const tiktokDownloader = (url) =>

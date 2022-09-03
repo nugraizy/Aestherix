@@ -20,7 +20,7 @@ export default {
 	cooldown: 4,
 	limit: 3,
 	status: "enable",
-	async run({ from, message, query, args, cmd, filename, prettyNumber }, client) {
+	async run({ from, message, query, args, cmd, filename }, client) {
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, "Please provide a query");
 		}

@@ -337,7 +337,7 @@ class API {
 			}
 
 			if (data.includes("activity is private")) {
-				throw new Error("User not found");
+				throw new Error("User privated their activity");
 			}
 
 			return cheerioLOAD(data);

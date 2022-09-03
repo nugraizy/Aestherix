@@ -1,23 +1,13 @@
+import Axios from "axios";
 import Canvas from "canvas";
 import chroma from "chroma-js";
 import * as FT from "file-type";
 import fs from "fs-extra";
 import color from "get-image-colors";
-import fetch from "node-fetch";
+import { shuffleArray } from "../Modules/index.js";
 import { spotifier } from "../../Utils/Spotifier/Spotify.js";
 
 const { createCanvas, registerFont, loadImage } = Canvas;
-const shuffleArray = (array = []) => {
-	let curId = array.length;
-	while (0 !== curId) {
-		const randId = Math.floor(Math.random() * curId);
-		curId--;
-		const tmp = array[curId];
-		array[curId] = array[randId];
-		array[randId] = tmp;
-	}
-	return array;
-};
 
 export class SpotifyCover {
 	constructor() {
@@ -29,7 +19,6 @@ export class SpotifyCover {
 		this._mime = null;
 		this._colorPalettes = null;
 		this.revertBlack = false;
-		this._tracklist = [];
 		this.canvas = null;
 		this.ctx = null;
 		this.w = null;
@@ -82,7 +71,7 @@ export class SpotifyCover {
 				gradient.addColorStop(1, chroma(this._colorPalettes[0]).darken(2).hex());
 			}
 
-			this.revertBlack = chroma(this._colorPalettes[0]).name() == "black";
+			this.revertBlack = chroma(this._colorPalettes[0]).name() == "white";
 
 			this.ctx.fillStyle = opts.gradient ? gradient : opts.color ? (chroma.valid(opts.color) ? opts.color : chroma(this._colorPalettes[0]).darken(0.7)) : this._colorPalettes[0];
 			this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -116,21 +105,30 @@ export class SpotifyCover {
 			this.ctx.font = "62px texgy";
 			this.ctx.fillText(this._title, this.w, this.canvas.height / 2 + 190);
 			this.ctx.fillStyle = chroma("grey").brighten(2).hex();
-			this.ctx.font = "42px antre";
+			this.ctx.font = "32px antre";
 			this.ctx.fillText(this._artist, this.w, this.canvas.height / 2 + 250);
+
+			this.ctx.font = "32px antre";
+			this.ctx.fillStyle = chroma("white").hex();
+			this.ctx.textAlign = "center";
+			this.ctx.fillText("Spotify Cover by Void".split("").join(" "), this.canvas.width / 2, 290);
 
 			return this;
 		};
 
 		this.putPlayback = () => {
+			if (!this.canvas || !this.ctx) {
+				throw new Error("Need initialization. Call .init() first.");
+			}
+
 			const centerX = this.w + 20;
-			const centerY = this.canvas.height / 2 + 460;
+			const centerY = this.canvas.height / 2 + 310;
 			const radius = 10;
 
 			this.ctx.font = "22px sans-thin";
 			this.ctx.fillStyle = chroma("white").brighten(2).hex();
-			this.ctx.fillText("0:04", this.w, this.canvas.height / 2 + 500);
-			this.ctx.fillText(this.toTime(this._timestamp), this.w + 800, this.canvas.height / 2 + 500);
+			this.ctx.fillText("0:04", this.w, centerY + 30);
+			this.ctx.fillText(this.toTime(this._timestamp), this.w + 800, centerY + 30);
 
 			this.ctx.lineCap = "round";
 			this.ctx.lineWidth = 5;
@@ -144,7 +142,7 @@ export class SpotifyCover {
 			this.ctx.beginPath();
 			this.ctx.strokeStyle = chroma("gray").brighten(1).hex();
 			this.ctx.moveTo(centerX, centerY);
-			this.ctx.lineTo(this.w + 820, centerY);
+			this.ctx.lineTo(this.w + 830, centerY);
 			this.ctx.stroke();
 			this.ctx.closePath();
 
@@ -154,6 +152,45 @@ export class SpotifyCover {
 			this.ctx.closePath();
 
 			return this;
+		};
+
+		this.putButtons = async () => {
+			if (!this.canvas || !this.ctx) {
+				throw new Error("Need initialization. Call .init() first.");
+			}
+
+			const contrast = this.revertBlack;
+			let iconType = 1;
+
+			if (contrast) {
+				iconType = 2;
+			}
+
+			const assets = {};
+			const dir = await fs.readdir("./Media Files/Assets/");
+
+			for (const asset of dir) {
+				if (asset.startsWith(iconType)) {
+					assets[asset.split("_").slice(2).join("_").replace(/\..*/, "")] = await loadImage(`./Media Files/Assets/${asset}`);
+				}
+			}
+
+			const w = 512 / 3.1;
+			const h = 512 / 3.1;
+
+			const n = 2.5;
+
+			const x = (w1) => this.canvas.width / (n - 0.5) - (w1 || w) / (n - 0.5);
+			const y = (h1) => this.canvas.height / (n - 0.5) - (h1 || h) / (n - 0.5) + 430;
+
+			this.ctx.drawImage(assets.pause, x(), y(), w, h);
+			this.ctx.drawImage(assets.down_arrow, x(w / (n - 0.3)) - 390, y(h / (n - 0.3)) - 1320, w / (n - 0.3), h / (n - 0.3));
+			this.ctx.drawImage(assets.previous, x(w / (n + 0.5)) - 200, y(h / (n + 0.5)), w / (n + 0.5), h / (n + 0.5));
+			this.ctx.drawImage(assets.next, x(w / (n + 0.5)) + 200, y(h / (n + 0.5)), w / (n + 0.5), h / (n + 0.5));
+			this.ctx.drawImage(assets.heart, x(w / (n + 0.5)) - 390, y(h / (n + 0.5)), w / (n + 0.5), h / (n + 0.5));
+			this.ctx.drawImage(assets.circle_diagonal, x(w / (n + 0.5)) + 390, y(h / (n + 0.5)), w / (n + 0.5), h / (n + 0.5));
+			this.ctx.drawImage(assets.share, x(w / (n + 2.1)) + 390, y(h / (n + 2.1)) + 100, w / (n + 2.1), h / (n + 2.1));
+			this.ctx.drawImage(assets.speaker, x(w / (n + 0.7)) - 360, y(h / (n + 0.7)) + 100, w / (n + 0.7), h / (n + 0.7));
 		};
 	}
 
@@ -178,12 +215,19 @@ export class SpotifyCover {
 
 	async getTrackCover() {
 		const data = await spotifier.searchTracks(this._track);
-		this._buffer = new Buffer.from(await (await fetch(data.data.items[0].album.images[0].url)).arrayBuffer(), "base64");
+		if (!data.status) {
+			const err = data.message;
+			throw new Error(err);
+		}
+		const buffer = (
+			await Axios.get(data.data.items[0].album.images[0].url, {
+				responseType: "arraybuffer",
+			})
+		).data;
+		this._buffer = new Buffer.from(buffer, "base64");
 		this._title = data.data.items[0].name;
 		this._artist = data.data.items[0].artists.map((v) => v.name).join(", ");
 		this._timestamp = data.data.items[0].duration_ms;
-		delete data.data.items[0];
-		this._tracklist = data.data.items;
 	}
 
 	async mime() {

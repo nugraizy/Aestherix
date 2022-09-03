@@ -2,9 +2,9 @@ import { readJSON, romanize } from "../../Helper/index.js";
 
 export default {
 	name: "about",
-	description: "Shows the menu",
-	usage: "!menu",
-	aliases: ["help"],
+	description: "Shows the bot information",
+	usage: "!about",
+	aliases: ["info"],
 	category: "Helper",
 	cooldown: 10,
 	limit: 5,

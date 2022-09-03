@@ -1,4 +1,4 @@
-import { getFilesizeFromBytes, numberWithCommas, delay } from "../../Helper/Modules/index.js";
+import { getFilesizeFromBytes, numberWithCommas, delay, removeDuplicatesArray } from "../../Helper/Modules/index.js";
 import { bilibiliSearchCOM } from "../../Utils/Bilibili/index.js";
 
 export default {
@@ -19,7 +19,7 @@ export default {
 		for (const querie of queries) {
 			const videos = await bilibiliSearchCOM(querie.trim());
 			if ("error" in videos) {
-				await client[botNum].reply({ from, quoted: message }, `${videos.error}\n${videos.cus_error}`);
+				await client[botNum].reply({ from, quoted: message }, `${videos.error}\n${videos.cus_message}`);
 				continue;
 			}
 			let i = 0;

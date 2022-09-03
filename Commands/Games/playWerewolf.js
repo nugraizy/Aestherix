@@ -16,7 +16,7 @@ export default {
 	cooldown: 2,
 	limit: 2,
 	status: "enable",
-	async run({ from, message, args, sender, pushname }, client) {
+	async run({ from, message, args, sender, pushname, isGroup }, client) {
 		if (args[1] == "kill") {
 			const werewolf = new Werewolf(sender, args[3], client);
 			const kill = werewolf.killPlayerAsWerewolf(sender, args[2], args[3]);
@@ -153,6 +153,10 @@ export default {
 			}
 			start.data.startGameCycle(from, start.data.gameTimeCycle);
 		} else {
+			if (!isGroup) {
+				return await client[botNum].reply({ from, quoted: message }, "This commands for group only");
+			}
+
 			const werewolfs = new Werewolf(sender, from, client);
 			if (werewolfs.getDataGame(from) && !werewolfs.gameStarted) {
 				await client[botNum].sendMessage(from, {
