@@ -167,6 +167,7 @@ export default {
 			}
 		} else if (body.startsWith("=> ")) {
 			try {
+				query = query.replace("yeet", "return");
 				if (/\/s$/.test(query)) {
 					query = query.replace(/\/s$/, "");
 					print(from, eval(query));

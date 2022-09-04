@@ -471,8 +471,9 @@ async function loadCommands() {
 				if (OPTIONS.watch) {
 					await watchFile(pathToFileURL(path.join(__dirname, command)), cmd.name);
 				}
-				cmds.commands.set(cmd.name, { ...cmd, pathname: path.join(__dirname, command) });
-				commandsPath.push(path.join(__dirname, command));
+				const modules = process.platform == "win32" ? pathToFileURL(path.join(__dirname, command)).pathname.slice(1) : pathToFileURL(path.join(__dirname, command)).pathname;
+				cmds.commands.set(cmd.name, { ...cmd, pathname: decodeURI(modules) });
+				commandsPath.push(decodeURI(modules));
 			}
 		} catch (e) {
 			log(e);
@@ -494,7 +495,7 @@ async function loadEveryCommand() {
 }
 
 async function watchFile(module) {
-	const modules = process.platform == "win32" ? module.pathname.slice(1) : module.pathname;
+	const modules = process.platform == "win32" ? decodeURI(module.pathname.slice(1)) : decodeURI(module.pathname);
 	fs.watchFile(module, async (event, filename) => {
 		const time = moment().format("HH:mm:ss DD/MM");
 		if (fs.existsSync(module)) {
@@ -510,21 +511,51 @@ async function reloadModule(module, isNewFile, newFilePath) {
 	if (isNewFile) {
 		try {
 			const time = moment().format("HH:mm:ss DD/MM");
-			const commands = loadFiles("./Commands");
-			const afterCommands = commands.filter((v) => !commandsPath.includes(path.join(__dirname, v)))[0];
+			const commands = await new Promise(async (resolve) => {
+				const files = (
+					await Promise.all(
+						loadFiles("./Commands").map(async (v) => {
+							const modules = process.platform == "win32" ? decodeURI(pathToFileURL(v).pathname.slice(1)) : decodeURI(pathToFileURL(v).pathname);
+							const module = (await import(pathToFileURL(modules))).default;
+							return { ...module, pathname: modules };
+						}),
+					)
+				)
+					.filter((v) => v.status == "enable")
+					.map((v) => v.pathname);
+				resolve(files);
+			});
+			let afterCommands;
+			let renamedCommand;
+
+			for (const commandModule of commandsPath) {
+				let status = false;
+				if (fs.existsSync(commandModule)) {
+					status = true;
+				}
+
+				if (!status) {
+					renamedCommand = commands.filter((v) => !commandsPath.includes(v))[0];
+					afterCommands = commandModule;
+					break;
+				}
+			}
+
 			try {
-				commandsPath.push(path.join(__dirname, afterCommands));
-				commandsPath.splice(commandsPath.indexOf(newFilePath), 1);
-				const cmd = (await import(path.join(__dirname, afterCommands))).default;
+				commandsPath.push(renamedCommand);
+				commandsPath.splice(commandsPath.indexOf(afterCommands), 1);
+				const cmd = (await import(pathToFileURL(renamedCommand))).default;
 				cmds.commands.set(cmd.name, cmd);
-				watchFile(path.join(__dirname, afterCommands), cmd.name);
+				watchFile(pathToFileURL(renamedCommand), cmd.name);
+				fs.unwatchFile(module);
 			} catch (e) {
+				console.log(e);
 				commandsPath.splice(commandsPath.indexOf(newFilePath), 1);
 				cmds.commands.delete(Array.from(cmds.commands.values()).find((v) => v.pathname == newFilePath).name);
 				fs.unwatchFile(module);
 				return ERRLOG(`[${color(time, "cyan")}]`, color(`${newFilePath.split("/").reverse()[0]} is deleted`, "red"));
 			} finally {
-				INFOLOG(`[${color(time, "cyan")}]`, color(`${newFilePath.split("/").reverse()[0]} has been renamed to ${afterCommands.split("/").reverse()[0]}`, "#9f53ea"));
+				INFOLOG(`[${color(time, "cyan")}]`, color(`${newFilePath.split("/").reverse()[0]} has been renamed to ${renamedCommand.split("/").reverse()[0]}`, "#9f53ea"));
 			}
 		} catch (e) {
 			log(e);
