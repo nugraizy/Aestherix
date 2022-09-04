@@ -7,7 +7,7 @@ export default {
 	aliases: ["scover"],
 	usage: "!spotifycover <query>",
 	cooldown: 5,
-	limit: 1,
+	limit: 3,
 	status: "enable",
 	async run({ from, message, query }, client) {
 		if (!query) {
@@ -17,7 +17,7 @@ export default {
 		const cover = new SpotifyCover();
 		await cover.init(query);
 		cover.fillBackground({ gradient: true });
-		await cover.putTrackCover();
+		await cover.putTrackCover(); //({ round: 35, shadow: 55 });
 		await cover.putButtons();
 		cover.putText().putPlayback();
 		client[botNum].sendMessage(from, { image: new Buffer.from(cover.toBuffer(), "base64") }, { quoted: message });

@@ -1,10 +1,8 @@
 import Axios from "axios";
 import Canvas from "canvas";
 import chroma from "chroma-js";
-import * as FT from "file-type";
 import fs from "fs-extra";
 import color from "get-image-colors";
-import { shuffleArray } from "../Modules/index.js";
 import { spotifier } from "../../Utils/Spotifier/Spotify.js";
 
 const { createCanvas, registerFont, loadImage } = Canvas;
@@ -16,7 +14,6 @@ export class SpotifyCover {
 		this._artist = null;
 		this._timestamp = null;
 		this._buffer = null;
-		this._mime = null;
 		this._colorPalettes = null;
 		this.revertBlack = false;
 		this.canvas = null;
@@ -31,7 +28,6 @@ export class SpotifyCover {
 			this._track = track;
 
 			await this.getTrackCover();
-			await this.mime();
 			await this.palettes();
 
 			if (!this.canvas || !this.ctx) {
@@ -63,35 +59,83 @@ export class SpotifyCover {
 			}
 
 			let gradient;
+			const random = ~~(Math.random() * 2);
 
 			if (opts.gradient) {
 				gradient = this.ctx.createLinearGradient(0, this.canvas.height - 300, this.canvas.width / 1.4, this.canvas.height);
 
-				gradient.addColorStop(0, chroma(this._colorPalettes[0]).darken(0.7).hex());
-				gradient.addColorStop(1, chroma(this._colorPalettes[0]).darken(2).hex());
+				gradient.addColorStop(0, chroma(this._colorPalettes[random]).darken(0.7).hex());
+				gradient.addColorStop(1, chroma(this._colorPalettes[random]).darken(2).hex());
 			}
 
-			this.revertBlack = chroma(this._colorPalettes[0]).name() == "white";
+			this.revertBlack = chroma(this._colorPalettes[random]).name() == "white";
 
-			this.ctx.fillStyle = opts.gradient ? gradient : opts.color ? (chroma.valid(opts.color) ? opts.color : chroma(this._colorPalettes[0]).darken(0.7)) : this._colorPalettes[0];
+			this.ctx.fillStyle = opts.gradient ? gradient : opts.color ? (chroma.valid(opts.color) ? opts.color : chroma(this._colorPalettes[random]).darken(0.7)) : this._colorPalettes[0];
 			this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
 			return this;
 		};
 
-		this.putTrackCover = async () => {
+		this.putTrackCover = async (opts) => {
 			if (!this.canvas || !this.ctx) {
 				throw new Error("Need initialization. Call .init() first.");
 			}
 
-			const image = await loadImage(this._buffer);
+			if (!opts) {
+				opts = {};
+			}
+
+			if (!opts.shadow) {
+				opts.shadow = false;
+			}
+
+			if (!opts.round) {
+				opts.round = false;
+			}
+
+			let image = await loadImage(this._buffer);
 
 			this.ctx.save();
 			this.ctx.beginPath();
-			this.ctx.shadowBlur = 20;
-			this.ctx.shadowColor = "black";
-			this.ctx.shadowOffsetX = 2;
-			this.ctx.shadowOffsetY = 10;
+			if (opts.shadow) {
+				if (typeof opts.shadow === "boolean") {
+					opts.shadow = 10;
+				}
+
+				if (typeof opts.shadow !== "number") {
+					throw new Error(`Options.shadow expected integer/number. Got : ${typeof opts.shadow}`);
+				}
+
+				if (!Number.isInteger(opts.shadow)) {
+					opts.shadow = Math.round(opts.shadow);
+				}
+
+				this.ctx.shadowBlur = opts.shadow;
+				this.ctx.shadowColor = "black";
+				this.ctx.shadowOffsetX = 6;
+				this.ctx.shadowOffsetY = 6;
+			}
+
+			if (opts.round) {
+				if (typeof opts.round === "boolean") {
+					opts.round = 20;
+				}
+
+				if (typeof opts.round !== "number") {
+					throw new Error(`Options.shadow expected integer/number. Got : ${typeof opts.round}`);
+				}
+
+				if (!Number.isInteger(opts.round)) {
+					opts.round = Math.round(opts.round);
+				}
+
+				const rounded = new Buffer.from(`<svg><rect x="0" y="0" width="${image.width}" height="${image.height}" rx="${opts.round}" ry="${opts.round}"/></svg>`);
+				const roundedCornerResizer = sharp(this._buffer)
+					.composite([{ input: rounded, blend: "dest-in" }])
+					.png();
+				image = await loadImage(await roundedCornerResizer.toBuffer());
+			}
+
 			this.ctx.drawImage(image, this.canvas.width / 3 - (image.width * 1.3) / 3 + 38, this.canvas.height / 3.5 - (image.height * 1.3) / 3, image.width * 1.3, image.height * 1.3);
 			this.ctx.closePath();
 			this.ctx.restore();
@@ -232,22 +276,13 @@ export class SpotifyCover {
 				responseType: "arraybuffer",
 			})
 		).data;
-		this._buffer = new Buffer.from(buffer, "base64");
+		this._buffer = buffer;
 		this._title = data.data.items[0].name;
 		this._artist = data.data.items[0].artists.map((v) => v.name).join(", ");
 		this._timestamp = data.data.items[0].duration_ms;
 	}
 
-	async mime() {
-		try {
-			const { mime } = await FT.fileTypeFromBuffer(this._buffer);
-			this._mime = mime;
-		} catch (err) {
-			throw new Error(err);
-		}
-	}
-
 	async palettes() {
-		this._colorPalettes = shuffleArray((await color(new Buffer.from(this._buffer, "base64"), this._mime)).map((v) => `rgba(${v._rgb._unclipped.join(", ")})`));
+		this._colorPalettes = await color.getPalette(this._buffer);
 	}
 }

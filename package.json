@@ -1,6 +1,6 @@
 {
 	"name": "simplebotpro3",
-	"version": "1.14.12",
+	"version": "1.14.13",
 	"description": "WhatsApp bot using Baileys library with Javascript language.",
 	"exports": "./connect.js",
 	"type": "module",
@@ -37,6 +37,7 @@
 		"child_process": "^1.0.2",
 		"chroma-js": "^2.4.2",
 		"cld": "^2.8.1",
+		"colorthief": "github:nugraizy/color-thief",
 		"dotenv": "^16.0.0",
 		"esm": "^3.2.25",
 		"ffmpeg": "^0.0.4",
@@ -45,7 +46,6 @@
 		"fluent-ffmpeg": "^2.1.2",
 		"form-data": "^4.0.0",
 		"fs-extra": "^10.1.0",
-		"get-image-colors": "^4.0.1",
 		"gifencoder": "^2.0.1",
 		"gradient-string": "^2.0.0",
 		"https": "^1.0.0",
