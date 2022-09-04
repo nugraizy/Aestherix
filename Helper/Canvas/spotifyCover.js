@@ -2,7 +2,8 @@ import Axios from "axios";
 import Canvas from "canvas";
 import chroma from "chroma-js";
 import fs from "fs-extra";
-import color from "get-image-colors";
+import sharp from "sharp";
+import * as color from "colorthief";
 import { spotifier } from "../../Utils/Spotifier/Spotify.js";
 
 const { createCanvas, registerFont, loadImage } = Canvas;
