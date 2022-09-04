@@ -217,6 +217,7 @@ const start = async () => {
 					INFOLOG(color(center(`Bot Version  ${romanize(readJSON("./package.json").version)}\n\n`, stdout.columns), "#9f53ea"));
 					connectEvent();
 					clearDBConnection();
+					connectMqtt();
 				}
 			}
 		} catch (error) {

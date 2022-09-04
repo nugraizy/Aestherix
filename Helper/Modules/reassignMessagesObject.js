@@ -56,7 +56,9 @@ export const reassign = async (m, client, store) => {
 		const groupId = isGroup ? groupMetadata?.id : NO_DATA;
 		if (isGroup) {
 			if (!cache.settings.has(from) || typeof checkJSON(from) == "boolean") {
-				if (typeof checkJSON(from) == "boolean") pushDefaultSettings(from, groupName, groupDescription);
+				if (typeof checkJSON(from) == "boolean") {
+					pushDefaultSettings(from, groupName, groupDescription);
+				}
 				cache.settings.set(from, checkJSON(from));
 				groupSettings = cache.settings.get(from);
 			} else if ("GROUP_CHANGE_SUBJECT" == m.messageStubType) {
@@ -64,7 +66,7 @@ export const reassign = async (m, client, store) => {
 				updateSettings("groupName", m.messageStubParameters[0], from);
 			} else if ("GROUP_CHANGE_DESCRIPTION" == m.messageStubType) {
 				groupSettings = cache.settings.get(from);
-				updateSettings("groupDescription", m.messageStubParameters[0], from);
+				updateSettings("groupDescription", m.content, from);
 			} else {
 				groupSettings = cache.settings.get(from);
 			}
