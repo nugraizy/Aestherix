@@ -8,7 +8,7 @@ export default {
 	aliases: ["sus"],
 	cooldown: 5,
 	limit: 0,
-	status: "disable",
+	status: "enable",
 	async run({ isOwner, from, query }, client) {
 		if (!isOwner) {
 			return;

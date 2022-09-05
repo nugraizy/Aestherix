@@ -38,7 +38,7 @@ export default {
 		}
 		await client[botNum].sendMessage(from, {
 			buttonText: "Open List",
-			text: "choosse one to fetch the metadata message",
+			title: "choosse one to fetch the metadata message",
 			footer: "and bot will send the message",
 			text: "\t",
 			sections: row,

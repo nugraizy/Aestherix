@@ -14,7 +14,7 @@ export const reassign = async (m, client, store) => {
 		delete m?.message?.messageContextInfo;
 		delete m?.message?.senderKeyDistributionMessage;
 		const isFromMe = m?.key?.fromMe;
-		const from = m?.key?.remoteJid || m.from;
+		const from = m?.key?.remoteJid || m?.from;
 		const isGroup = from.endsWith("@g.us");
 		let groupSettings;
 		const isBaileys = (m?.key?.id?.startsWith("BAE5") && isSame(m?.key?.id?.length, 16)) || (isFromMe && m?.key?.id?.startsWith("VOID"));
@@ -244,7 +244,7 @@ export const reassign = async (m, client, store) => {
 			typeQuoted = Object.keys(JSON.parse(JSON.stringify(m).replace("quotedM", "m"))?.message?.ephemeralMessage?.message?.extendedTextMessage?.contextInfo?.message);
 			mMediaData = JSON.parse(JSON.stringify(m).replace("quotedM", "m"))?.message?.ephemeralMessage?.message?.extendedTextMessage?.contextInfo;
 		}
-		const mediaData = isSame(type, "extendedTextMessage") ? (isSame(typeQuoted, "thumbnailMessage") ? mText : mMediaData || {}) : mText || {};
+		const mediaData = isSame(type, "extendedTextMessage") || isSame(type, "mentionText") ? (isSame(typeQuoted, "thumbnailMessage") ? mText : mMediaData || {}) : mText || {};
 		const typeMessage = [
 			"audioMessage",
 			"buttonsMessage",

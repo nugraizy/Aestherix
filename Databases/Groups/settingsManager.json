@@ -255,5 +255,29 @@
       "notification": "disable",
       "banned": []
     }
+  },
+  {
+    "120363045302259953@g.us": {
+      "groupName": "GRUP BUAT MABAR GAME",
+      "groupDescription": "Peraturan\n\nBebas mau main game \nMain game bareng boleh \nKalo temen nya gk punya game Mabar yang lain\nMakin banyak member 7 admin\n\n{\\_/}\n(^  ^)\n(> Semoga betah di grup in🙏🏼",
+      "welcome1": "disable",
+      "welcome1msg": "Welcome to {groupName}",
+      "welcome2": "disable",
+      "welcome2msg": "Welcome to {groupName}",
+      "left1": "disable",
+      "left1msg": "Bye bye {groupName}",
+      "left2": "disable",
+      "left2msg": "Bye bye {groupName}",
+      "antiDelete": "disable",
+      "antiGroupURL": "disable",
+      "antiURL": "disable",
+      "antiSpam": "disable",
+      "antiVirus": "disable",
+      "autoReader": "disable",
+      "antiNSFW": "disable",
+      "games": "disable",
+      "notification": "disable",
+      "banned": []
+    }
   }
 ]

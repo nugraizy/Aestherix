@@ -228,10 +228,10 @@ export const getTimeSince = (dates) => {
 	const time = Date.now() - dates;
 	const dateString = ms(time);
 	return (
-		(dateString.days ? `${dateString.days} day${dateString.days > 1 ? "s" : ""}` : "") +
-		(dateString.hours ? `${dateString.hours} sour${dateString.hours > 1 ? "s" : ""}` : "") +
-		(dateString.minutes ? `${dateString.minutes} minute${dateString.minutes > 1 ? "s" : ""}` : "") +
-		(dateString.seconds ? `${dateString.seconds} second${dateString.seconds > 1 ? "s" : ""}` : "")
+		(dateString.days ? `${dateString.days} day${dateString.days > 1 ? "s" : ""} ` : "") +
+		(dateString.hours ? `${dateString.hours} hour${dateString.hours > 1 ? "s" : ""} ` : "") +
+		(dateString.minutes ? `${dateString.minutes} minute${dateString.minutes > 1 ? "s" : ""} ` : "") +
+		(dateString.seconds ? `${dateString.seconds} second${dateString.seconds > 1 ? "s" : ""} ` : "")
 	);
 };
 
@@ -239,12 +239,12 @@ export const getRuntime = (time) => {
 	const uptime = time;
 	const date = new Date(uptime * 1000);
 	return (
-		(date.getUTCFullYear() - 1 > 0 ? `${date.getUTCFullYear() - 1} year${date.getUTCFullYear() - 1 > 1 ? "s" : ""}` : "") +
-		(date.getUTCMonth() - 1 > 0 ? `${date.getUTCMonth() - 1} month${date.getUTCMonth() - 1 > 1 ? "s" : ""}` : "") +
-		(date.getUTCDate() - 1 > 0 ? `${date.getUTCDate() - 1} day${date.getUTCDate() - 1 > 1 ? "s" : ""}` : "") +
-		(date.getUTCHours() > 0 ? `${date.getUTCHours()} hour${date.getUTCHours() > 1 ? "s" : ""}` : "") +
-		(date.getUTCMinutes() > 0 ? `${date.getUTCMinutes()} minute${date.getUTCMinutes() > 1 ? "s" : ""}` : "") +
-		(date.getUTCSeconds() > 0 ? `${date.getUTCSeconds()} second${date.getUTCSeconds() > 1 ? "s" : ""}` : "")
+		(date.getUTCFullYear() - 1 > 0 ? `${date.getUTCFullYear() - 1} year${date.getUTCFullYear() - 1 > 1 ? "s" : ""} ` : "") +
+		(date.getUTCMonth() - 1 > 0 ? `${date.getUTCMonth() - 1} month${date.getUTCMonth() - 1 > 1 ? "s" : ""} ` : "") +
+		(date.getUTCDate() - 1 > 0 ? `${date.getUTCDate() - 1} day${date.getUTCDate() - 1 > 1 ? "s" : ""} ` : "") +
+		(date.getUTCHours() > 0 ? `${date.getUTCHours()} hour${date.getUTCHours() > 1 ? "s" : ""} ` : "") +
+		(date.getUTCMinutes() > 0 ? `${date.getUTCMinutes()} minute${date.getUTCMinutes() > 1 ? "s" : ""} ` : "") +
+		(date.getUTCSeconds() > 0 ? `${date.getUTCSeconds()} second${date.getUTCSeconds() > 1 ? "s" : ""} ` : "")
 	);
 };
 
