@@ -14,16 +14,20 @@ export default {
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, "Please specify a surah number");
 		}
+
 		if (!regex(query)) {
 			return await client[botNum].reply({ from, quoted: message }, "Please specify a valid surah number");
 		}
+
 		if (parseInt(query) > 114) {
 			return await client[botNum].reply({ from, quoted: message }, "Surah number must be less than 114");
 		}
+
 		const audio = await getSurahAudio(query);
 		const ayat = await getAyat(query);
 		const detail = await getSurahDetail(query);
 		const buttons = [{ buttonId: "", buttonText: { displayText: "" }, type: 1 }];
+
 		if (query == 1) {
 			buttons[0].buttonId = `${cmd} ${parseInt(query) + 1}`;
 			buttons[0].buttonText.displayText = "Next";
@@ -36,6 +40,7 @@ export default {
 			buttons.push({ buttonId: `${cmd} ${parseInt(query) + 1}` });
 			buttons.push({ buttonText: { displayText: "Next" } });
 		}
+
 		await client[botNum].buttonDocument(from, ayat.map((v) => ` • ${v.arab}\n؜ • ${v.latin}\n؜ • ${v.indonesia}`).join("\n\n"), "Made by nanda", buttons, audio.url, {
 			quoted: message,
 			mimetype: mime(audio.url),

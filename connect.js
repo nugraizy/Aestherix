@@ -658,10 +658,13 @@ export async function clearDBConnection() {
 		await fs.writeFile(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`, JSON.stringify({}));
 	}
 	const data = readJSON(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`);
+	const session = readJSON(`./Session/${cli.input[0] ?? "Session-debug"}.json`)
+	session.keys = {}
 	data.chats = [];
 	data.contacts = {};
 	data.messages = {};
 	writeJSON(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`, data);
+	writeJSON(`./Session/${cli.input[0] ?? "Session-debug"}.json`, session);
 }
 
 function reconnectMqttConnection(connection) {

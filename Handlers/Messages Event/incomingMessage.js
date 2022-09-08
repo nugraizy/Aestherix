@@ -164,7 +164,7 @@ export default {
 						await client[botNum].reply({ from: message.from, quoted: message.message }, "This command is restricted and currently bot are on restricted mode.");
 						continue;
 					}
-					if (Tempcmds.category == "Games" && message.isGroup && !message.isAdmin && !message.isOwner && message[message.from].games == "disable") {
+					if (Tempcmds.category == "Games" && message.isGroup && !message.isAdmin && !message.isOwner && message?.[message?.from]?.games == "disable") {
 						return await client[botNum].reply({ from: message.from, quoted: message.message }, "Game Mode is Disabled. Type !games enable to enable Game Mode");
 					}
 					if (Tempcmds.category == "Moderation" && message.isGroup && !message.isAdmin && !message.isOwner) {

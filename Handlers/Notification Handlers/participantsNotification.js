@@ -11,6 +11,7 @@ const EVENT_UPDATE = {
 	REMOVE: "Removing",
 	PROMOTE: "Promoting",
 	DEMOTE: "Demoting",
+	LEAVE: "Left",
 };
 
 export default {
@@ -20,13 +21,14 @@ export default {
 			const text = `\`\`\` • Group Participants Notification\`\`\`\n
 Event Update : ${EVENT_UPDATE[message.messageStubType]}
 
-@${message.participant.split("@")[0]} ${EVENT_UPDATE[message.messageStubType.split("_").reverse()[0]]} ${message.messageStubParameters
-				.map((v) => `@${v.split("@")[0]}`)
-				.join(", ")}`;
+@${message.participant.split("@")[0]} ${EVENT_UPDATE[message.messageStubType.split("_").reverse()[0]]} ${
+				message.messageStubType.split("_").reverse()[0] !== "LEAVE" ? message.messageStubParameters.map((v) => `@${v.split("@")[0]}`).join(", ") : ""
+			}`;
 			if (["GROUP_PARTICIPANT_LEAVE", "GROUP_PARTICIPANT_REMOVE", "GROUP_PARTICIPANT_INVITE", "GROUP_PARTICIPANT_ADD"].includes(message.messageStubType)) {
 				if (message.messageStubParameters.length == 1) {
 					const attach = new Attachment(1024, 500);
 					const profile = await client[botNum].profilePictureUrl(message.messageStubParameters[0], "image").catch(() => "./Media Files/blank.png");
+
 					(await attach.fillBackground().appendImage(profile, { stroke: true, strokeWidth: 9, strokeColor: attach.PALETTES.RED, roundedRadius: 70 })).appendText(
 						["GROUP_PARTICIPANT_LEAVE"].includes(message.messageStubType)
 							? "Leaving the group"
@@ -46,14 +48,17 @@ Event Update : ${EVENT_UPDATE[message.messageStubType]}
 							textColor: attach.PALETTES.RED,
 						},
 					);
+
 					await client[botNum].sendMessage(message.from, {
 						image: new Buffer.from(attach.toBuffer(), "base64"),
 						caption: text,
 						mentions: [message.participant, ...message.messageStubParameters],
 					});
+
 					return;
 				}
 			}
+
 			await client[botNum].sendMessage(message.from, {
 				text,
 				mentions: [message.participant, ...message.messageStubParameters],

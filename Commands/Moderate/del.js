@@ -7,19 +7,25 @@ export default {
 	cooldown: 8,
 	limit: 4,
 	status: "enable",
-	async run({ isOwner, isAdmin, from, mediaData, message, bodyQuoted }, client) {
+	async run({ isOwner, isAdmin, from, mediaData, message, bodyQuoted, isBotAdmin }, client) {
 		if (!isAdmin && !isOwner) {
 			return await client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
 		}
+
 		if (!bodyQuoted) {
-			return await client[botNum].reply({ from, quoted: message }, "You must reply to a message to delete it");
+			return await client[botNum].reply({ from, quoted: message }, "You must reply to a message to delete it.");
 		}
+
+		if (!mediaData.participant.includes(`${botNum.split(":")[0]}@s.whatsapp.net`) && !isBotAdmin) {
+			return await client[botNum].reply({ from, quoted: message }, "You can't ask bot to delete people message when bot is not admin.");
+		}
+
 		await client[botNum].sendMessage(from, {
 			delete: {
 				id: mediaData.stanzaId,
 				participant: mediaData.participant,
 				remoteJid: from,
-				...(mediaData.participant.includes(botNum) ? { fromMe: true } : {}),
+				...(mediaData.participant.includes(`${botNum.split(":")[0]}@s.whatsapp.net`) ? { fromMe: true } : {}),
 			},
 		});
 	},

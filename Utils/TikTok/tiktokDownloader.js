@@ -60,8 +60,10 @@ const parseData = async (arr) => {
 			video: { keyword },
 		},
 	} = arr;
-	if (arr.ItemModule[keyword] == undefined) {
+
+	if (arr.ItemModule?.[keyword] == undefined) {
 		const data = await fetchJSON(URL_API(keyword));
+
 		const {
 			nickname,
 			unique_id: author,
@@ -77,7 +79,7 @@ const parseData = async (arr) => {
 		const musicDuration = data.aweme_detail?.music?.duration ?? "N/A";
 		const authorMusic = data.aweme_detail?.music?.matched_song?.author ?? "N/A";
 		const musicTitle = data.aweme_detail?.music?.matched_song?.title ?? "N/A";
-		data.aweme_detail?.music;
+
 		return {
 			keyword,
 			nickname,
@@ -104,6 +106,7 @@ const parseData = async (arr) => {
 			}),
 		};
 	}
+
 	const {
 		desc: videoDescription,
 		createTime: published,
@@ -117,6 +120,7 @@ const parseData = async (arr) => {
 		music: { title: musicTitle, authorName: authorMusic, playUrl: music, duration: musicDuration },
 	} = arr?.ItemModule?.[keyword];
 	const { signature: biograph, verified } = arr?.UserModule?.users?.[author];
+
 	return {
 		keyword,
 		author,
@@ -153,4 +157,3 @@ const URL_DETAIL_PARSER = (input) => `https://api.ngutek.com/video-details-by-ke
 const URL_BASE_DOWNLOAD = (input) => `https://api.ngutek.com/download?key=${input}&type=video`;
 const URL_BASE_MUSIC = (input) => `https://api.ngutek.com/download?key=${input}&type=music`;
 const URL_API = (input) => `https://api2.musical.ly/aweme/v1/aweme/detail/?aweme_id=${input}`;
-const UA = () => "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36";
