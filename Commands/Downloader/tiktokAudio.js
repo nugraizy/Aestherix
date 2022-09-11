@@ -9,9 +9,7 @@ import { toOpus } from '../../Utils/Converter/index.js';
 import { mime } from '../../Utils/Misc/index.js';
 import { tiktokAPI } from '../../Utils/TikTok/index.js';
 
-const regex = (input) => {
-	return /(?:https:?\/{2})?(?:w{3}|vm|vt|t)?\.?tiktok.com\/([^\s&]+)/gi.test(input);
-};
+const regex = (input) => /(?:https:?\/{2})?(?:w{3}|vm|vt|t)?\.?tiktok.com\/([^\s&]+)/gi.test(input);
 
 export default {
 	name: 'tiktokaudio',

@@ -7,11 +7,10 @@ import { color, ERRLOG, INFOLOG, isURL, removeDuplicatesArray } from '../../Help
 import { toOpus } from '../../Utils/Converter/index.js';
 import { yta2 as yta, ytsr } from '../../Utils/YouTube/index.js';
 
-const regex = (input) => {
-	return /(https?:\/\/open.spotify.com\/(track|user|artist|album)\/[a-zA-Z0-9]+(\/playlist\/[a-zA-Z0-9]+|)|spotify:(track|user|artist|album):[a-zA-Z0-9]+(:playlist:[a-zA-Z0-9]+|))/.test(
+const regex = (input) =>
+	/(https?:\/\/open.spotify.com\/(track|user|artist|album)\/[a-zA-Z0-9]+(\/playlist\/[a-zA-Z0-9]+|)|spotify:(track|user|artist|album):[a-zA-Z0-9]+(:playlist:[a-zA-Z0-9]+|))/.test(
 		input,
 	);
-};
 
 export default {
 	name: 'spotifydl',
@@ -34,7 +33,7 @@ export default {
 		queries = removeDuplicatesArray(queries);
 
 		if (queries.length == 1 && isURL(queries) && !regex(queries)) {
-			return await client[botNum].reply({ from, quoted: message }, 'This isn\'t a valid Spotify URL.');
+			return await client[botNum].reply({ from, quoted: message }, 'This is not a valid Spotify URL.');
 		}
 
 		for (const Query of queries) {

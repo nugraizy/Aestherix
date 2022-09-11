@@ -6,9 +6,7 @@ import parser from 'yargs-parser';
 import { color, ERRLOG, fetchBUFFER, INFOLOG, isOne, isURL } from '../../Helper/Modules/index.js';
 import { fbDl } from '../../Utils/Facebook/index.js';
 
-const regex = (input) => {
-	return /^(https?:\/\/)?((w{3}\.)|(m\.)?)?(facebook|fb)\.(com|watch)\/.*/.test(input);
-};
+const regex = (input) => /^(https?:\/\/)?((w{3}\.)|(m\.)?)?(facebook|fb)\.(com|watch)\/.*/.test(input);
 
 export default {
 	name: 'fbpost',

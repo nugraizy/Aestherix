@@ -5,9 +5,7 @@ import parser from 'yargs-parser';
 import { color, delay, ERRLOG, INFOLOG, isOne, isURL, parseCode } from '../../Helper/Modules/index.js';
 import { getPost } from '../../Utils/Instagram/index.js';
 
-const regex = (input) => {
-	return /(https?:\/\/(?:www\.)?instagram\.com\/(p|reel|tv|s)\/([^/?#&]+)).*/.test(input);
-};
+const regex = (input) => /(https?:\/\/(?:www\.)?instagram\.com\/(p|reel|tv|s)\/([^/?#&]+)).*/.test(input);
 
 export default {
 	name: 'igreel',

@@ -5,9 +5,7 @@ import parser from 'yargs-parser';
 import { color, delay, ERRLOG, INFOLOG, isOne, isURL, numberWithCommas, removeDuplicatesArray } from '../../Helper/Modules/index.js';
 import { tiktokAPI } from '../../Utils/TikTok/index.js';
 
-const regex = (input) => {
-	return /(?:https:?\/{2})?(?:w{3}|vm|vt|t)?\.?tiktok.com\/([^\s&]+)/gi.test(input);
-};
+const regex = (input) => /(?:https:?\/{2})?(?:w{3}|vm|vt|t)?\.?tiktok.com\/([^\s&]+)/gi.test(input);
 
 export default {
 	name: 'tiktokvideo',
@@ -32,7 +30,7 @@ export default {
 				'short-option-groups': false,
 			},
 			alias: {
-				no_wm /* eslint-disable-line*/: ["nowm", "no-wm", "no-watermark", "no_watermark", "nowatermark"],
+				no_wm /* eslint-disable-line*/: ['nowm', 'no-wm', 'no-watermark', 'no_watermark', 'nowatermark'],
 				wm: ['with-watermark', 'with_watermark', 'watermark'],
 			},
 		});

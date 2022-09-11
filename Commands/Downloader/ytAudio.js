@@ -8,9 +8,7 @@ import { color, delay, ERRLOG, fetchBUFFER, INFOLOG, isURL, numberWithCommas, re
 import { toOpus } from '../../Utils/Converter/index.js';
 import { yta2 as yta } from '../../Utils/YouTube/index.js';
 
-const regex = (input) => {
-	return /(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:-nocookie|)\.com\/(?:shorts\/)?(?:watch\?.*(?:|&)v=|embed\/|v\/)|youtu\.be\/)?\/.+/.test(input);
-};
+const regex = (input) => /(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:-nocookie|)\.com\/(?:shorts\/)?(?:watch\?.*(?:|&)v=|embed\/|v\/)|youtu\.be\/)?\/.+/.test(input);
 
 export default {
 	name: 'ytaudio',
@@ -33,7 +31,7 @@ export default {
 		queries = removeDuplicatesArray(queries);
 
 		if (queries.length == 1 && isURL(queries) && !regex(queries)) {
-			return await client[botNum].reply({ from, quoted: message }, 'This isn\'t a valid YouTube URL.');
+			return await client[botNum].reply({ from, quoted: message }, 'This is not a valid YouTube URL.');
 		}
 
 		for (const Query of queries) {
