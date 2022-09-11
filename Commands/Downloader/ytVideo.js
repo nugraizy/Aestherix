@@ -28,7 +28,7 @@ export default {
 		queries = removeDuplicatesArray(queries);
 
 		if (queries.length == 1 && isURL(queries) && !regex(queries)) {
-			return await client[botNum].reply({ from, quoted: message }, "This isn't a valid YouTube URL.");
+			return await client[botNum].reply({ from, quoted: message }, 'This is not a valid YouTube URL.');
 		}
 
 		for (const Query of queries) {
