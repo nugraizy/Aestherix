@@ -1,45 +1,53 @@
-import { getFilesizeFromBytes, numberWithCommas, delay, removeDuplicatesArray } from "../../Helper/Modules/index.js";
-import { bilibiliSearchCOM } from "../../Utils/Bilibili/index.js";
+/* global botNum */
+import { getFilesizeFromBytes, numberWithCommas, delay, removeDuplicatesArray } from '../../Helper/Modules/index.js';
+import { bilibiliSearchCOM } from '../../Utils/Bilibili/index.js';
 
 export default {
-	name: "bilibili",
-	description: "Search videos from Bilibili",
-	usage: "!bilibili <query>",
-	category: "Search",
-	aliases: ["bili", "bli"],
+	name: 'bilibili',
+	description: 'Search videos from Bilibili',
+	usage: '!bilibili <query>',
+	category: 'Search',
+	aliases: ['bili', 'bli'],
 	limit: 4,
 	cooldown: 7,
-	status: "enable",
+	status: 'enable',
 	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client[botNum].reply({ from, quoted: message }, "You must provide a query.");
+			return await client[botNum].reply({ from, quoted: message }, 'You must provide a query.');
 		}
-		let queries = query.split(",");
+
+		let queries = query.split(',');
+
 		queries = removeDuplicatesArray(queries);
+
 		for (const querie of queries) {
 			const videos = await bilibiliSearchCOM(querie.trim());
-			if ("error" in videos) {
-				await client[botNum].reply({ from, quoted: message }, `${videos.error}\n${videos.cus_message}`);
+
+			if ('error' in videos) {
+				await client[botNum].reply({ from, quoted: message }, `${videos.error}\n${videos.cusMessage}`);
 				continue;
 			}
+
 			let i = 0;
-			for (const { title, author, author_id, like, share, duration, favorite, view, thumbnail, description, original_video_link, download_link, size } of videos) {
+
+			for (const { title, author, authorId, like, share, duration, favorite, view, thumbnail, description, originalVideoLink, downloadLink, size } of videos) {
 				if (i == 3) {
 					break;
 				}
+
 				await delay(300);
 				await client[botNum].sendMessage(
 					from,
 					{
 						image: { url: thumbnail },
-						caption: `\`\`\` • Bilibili \`\`\``,
+						caption: '``` • Bilibili ```',
 						templateButtons: [
-							{ urlButton: { displayText: `Download Here ${getFilesizeFromBytes(size)}`, url: download_link } },
-							{ urlButton: { displayText: "Stream Here", url: original_video_link } },
+							{ urlButton: { displayText: `Download Here ${getFilesizeFromBytes(size)}`, url: downloadLink } },
+							{ urlButton: { displayText: 'Stream Here', url: originalVideoLink } },
 						],
 						footer: `Title : ${title}
 Author : ${author}
-Author ID : ${author_id}
+Author ID : ${authorId}
 Like : ${numberWithCommas(like)}
 Share : ${numberWithCommas(share)}
 Favorite : ${numberWithCommas(favorite)}

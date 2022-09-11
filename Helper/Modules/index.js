@@ -73,5 +73,5 @@ export {
 	writeBuffer,
 	writeJSON,
 	zalgo,
-} from "./functions.js";
-export { reassign } from "./reassignMessagesObject.js";
+} from './functions.js';
+export { reassign } from './reassignMessagesObject.js';

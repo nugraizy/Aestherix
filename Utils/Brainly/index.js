@@ -1,1 +1,1 @@
-export { brainlySearch } from "./searchAnswer.js";
+export { brainlySearch } from './searchAnswer.js';

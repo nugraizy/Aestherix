@@ -1,44 +1,51 @@
-import { numberWithCommas, removeDuplicatesArray } from "../../Helper/Modules/index.js";
-import { shopeeProduct } from "../../Utils/Misc/index.js";
+/* global botNum */
+import { numberWithCommas, removeDuplicatesArray } from '../../Helper/Modules/index.js';
+import { shopeeProduct } from '../../Utils/Misc/index.js';
 
 export default {
-	name: "shopee",
-	description: "Search products from shopee",
-	usage: "!shopee <query>",
-	category: "Search",
-	aliases: ["shop"],
+	name: 'shopee',
+	description: 'Search products from shopee',
+	usage: '!shopee <query>',
+	category: 'Search',
+	aliases: ['shop'],
 	limit: 5,
 	cooldown: 10,
-	status: "enable",
+	status: 'enable',
 	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client[botNum].reply({ from, quoted: message }, "You must provide a query.");
+			return await client[botNum].reply({ from, quoted: message }, 'You must provide a query.');
 		}
-		let queries = query.split(",");
+
+		let queries = query.split(',');
+
 		queries = removeDuplicatesArray(queries);
+
 		for (const querie of queries) {
 			const product = await shopeeProduct(querie.trim());
-			if ("error" in product) {
+
+			if ('error' in product) {
 				await client[botNum].reply({ from, quoted: message }, product.error);
 				continue;
 			}
+
 			let { items } = product;
+
 			for (const { productName, stock, sold, brand, prices, pricesDiscount, discountPercent, likes, ratings, location, productURL, imageURL } of items) {
 				await client[botNum].sendMessage(
 					from,
 					{
 						image: { url: imageURL },
-						caption: `\`\`\` • Shopee \`\`\``,
+						caption: '``` • Shopee ```',
 						templateButtons: [
 							{
 								urlButton: {
-									displayText: "Product Source",
+									displayText: 'Product Source',
 									url: productURL,
 								},
 							},
 							{
 								urlButton: {
-									displayText: "Image Source",
+									displayText: 'Image Source',
 									url: imageURL,
 								},
 							},

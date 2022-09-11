@@ -1,59 +1,13 @@
-import fetch from "node-fetch";
-import { cheerioLOAD, fetchJSON, fetchTEXT } from "../../Helper/index.js";
+/* global log */
+import fetch from 'node-fetch';
 
-export const tiktokDownloader = (url) =>
-	new Promise(async (resolve) => {
-		try {
-			url = url.includes("vm.tiktok.com") ? url.replace("vm.tiktok.com", "vt.tiktok.com") : url;
-			const data = await fetchJSON(URL_KEY_PARSER(url));
-			if (data.status !== "success") {
-				resolve(data);
-			}
-			const dataResult = await fetchJSON(URL_DETAIL_PARSER(data.data.key));
-			if (dataResult.status !== "success") {
-				resolve(dataResult);
-			}
-			resolve({
-				...dataResult.data.author,
-				description: dataResult.data.description,
-				with_watermark: URL_BASE_DOWNLOAD(dataResult.data.video.with_watermark),
-				no_watermark: URL_BASE_DOWNLOAD(dataResult.data.video.no_watermark),
-				no_watermark_raw: dataResult.data.video.no_watermark_raw,
-				music: URL_BASE_MUSIC(dataResult.data.music),
-			});
-		} catch (e) {
-			resolve(e);
-		}
-	});
+import { cheerioLOAD, fetchJSON, fetchTEXT } from '../../Helper/index.js';
 
-export const tiktokAPI = (url) =>
-	new Promise(async (resolve) => {
-		try {
-			url = url.includes("vm.tiktok.com") ? url.replace("vm.tiktok.com", "vt.tiktok.com") : url;
-			if (/((vt|vm|vk)\.tiktok\.com)/g.test(url) || !url.includes(/video/)) {
-				const req = await fetch(url);
-				const { origin, pathname } = new URL(req.url);
-				url = origin + pathname;
-			}
-			const res = await fetchTEXT(url);
-			const $ = cheerioLOAD(res);
-			const parsed = await parseData(JSON.parse($("#SIGI_STATE").html()));
-			if (parsed.type == "images") {
-				resolve(parsed);
-			}
-			const with_no_watermark = (await fetchJSON(URL_API(parsed.keyword))).aweme_detail.video.play_addr.url_list[Math.floor(Math.random() * 3)];
-			parsed.published = Number(parsed.published);
-			parsed.url = {
-				...parsed.url,
-				with_no_watermark,
-			};
-			resolve(parsed);
-		} catch (err) {
-			log(err);
-			resolve({ error: err.message });
-		}
-	});
-
+const URL_KEY_PARSER = (input) => `https://api.ngutek.com/video-key?video_url=${input}`;
+const URL_DETAIL_PARSER = (input) => `https://api.ngutek.com/video-details-by-key?key=${input}`;
+const URL_BASE_DOWNLOAD = (input) => `https://api.ngutek.com/download?key=${input}&type=video`;
+const URL_BASE_MUSIC = (input) => `https://api.ngutek.com/download?key=${input}&type=music`;
+const URL_API = (input) => `https://api2.musical.ly/aweme/v1/aweme/detail/?aweme_id=${input}`;
 const parseData = async (arr) => {
 	const {
 		ItemList: {
@@ -75,15 +29,15 @@ const parseData = async (arr) => {
 			desc: videoDescription,
 			image_post_info: { images },
 		} = data.aweme_detail;
-		const music = data.aweme_detail?.music?.play_url?.uri ?? "N/A";
-		const musicDuration = data.aweme_detail?.music?.duration ?? "N/A";
-		const authorMusic = data.aweme_detail?.music?.matched_song?.author ?? "N/A";
-		const musicTitle = data.aweme_detail?.music?.matched_song?.title ?? "N/A";
+		const music = data.aweme_detail?.music?.play_url?.uri ?? 'N/A';
+		const musicDuration = data.aweme_detail?.music?.duration ?? 'N/A';
+		const authorMusic = data.aweme_detail?.music?.matched_song?.author ?? 'N/A';
+		const musicTitle = data.aweme_detail?.music?.matched_song?.title ?? 'N/A';
 
 		return {
 			keyword,
 			nickname,
-			type: "images",
+			type: 'images',
 			author,
 			liked,
 			shared,
@@ -116,7 +70,7 @@ const parseData = async (arr) => {
 		locationCreated,
 		nickname,
 		avatarThumb: profilePicture,
-		video: { downloadAddr: with_watermark, duration: videoDuration, ratio, cover: videoThumbnail },
+		video: { downloadAddr: withWatermark, duration: videoDuration, ratio, cover: videoThumbnail },
 		music: { title: musicTitle, authorName: authorMusic, playUrl: music, duration: musicDuration },
 	} = arr?.ItemModule?.[keyword];
 	const { signature: biograph, verified } = arr?.UserModule?.users?.[author];
@@ -147,13 +101,70 @@ const parseData = async (arr) => {
 			profilePicture,
 			videoThumbnail,
 			music,
-			with_watermark,
+			withWatermark,
 		},
 	};
 };
 
-const URL_KEY_PARSER = (input) => `https://api.ngutek.com/video-key?video_url=${input}`;
-const URL_DETAIL_PARSER = (input) => `https://api.ngutek.com/video-details-by-key?key=${input}`;
-const URL_BASE_DOWNLOAD = (input) => `https://api.ngutek.com/download?key=${input}&type=video`;
-const URL_BASE_MUSIC = (input) => `https://api.ngutek.com/download?key=${input}&type=music`;
-const URL_API = (input) => `https://api2.musical.ly/aweme/v1/aweme/detail/?aweme_id=${input}`;
+export const tiktokDownloader = (url) =>
+	new Promise(async (resolve) => {
+		try {
+			url = url.includes('vm.tiktok.com') ? url.replace('vm.tiktok.com', 'vt.tiktok.com') : url;
+			const data = await fetchJSON(URL_KEY_PARSER(url));
+
+			if (data.status !== 'success') {
+				resolve(data);
+			}
+
+			const dataResult = await fetchJSON(URL_DETAIL_PARSER(data.data.key));
+
+			if (dataResult.status !== 'success') {
+				resolve(dataResult);
+			}
+
+			resolve({
+				...dataResult.data.author,
+				description: dataResult.data.description,
+				withWatermark: URL_BASE_DOWNLOAD(dataResult.data.video.with_watermark),
+				noWatermark: URL_BASE_DOWNLOAD(dataResult.data.video.no_watermark),
+				noWatermarkRaw: dataResult.data.video.no_watermark_raw,
+				music: URL_BASE_MUSIC(dataResult.data.music),
+			});
+		} catch (e) {
+			resolve(e);
+		}
+	});
+
+export const tiktokAPI = (url) =>
+	new Promise(async (resolve) => {
+		try {
+			url = url.includes('vm.tiktok.com') ? url.replace('vm.tiktok.com', 'vt.tiktok.com') : url;
+
+			if (/((vt|vm|vk)\.tiktok\.com)/g.test(url) || !url.includes(/video/)) {
+				const req = await fetch(url);
+				const { origin, pathname } = new URL(req.url);
+
+				url = origin + pathname;
+			}
+
+			const res = await fetchTEXT(url);
+			const $ = cheerioLOAD(res);
+			const parsed = await parseData(JSON.parse($('#SIGI_STATE').html()));
+
+			if (parsed.type == 'images') {
+				resolve(parsed);
+			}
+
+			const withNoWatermark = (await fetchJSON(URL_API(parsed.keyword))).aweme_detail.video.play_addr.url_list[Math.floor(Math.random() * 3)];
+
+			parsed.published = Number(parsed.published);
+			parsed.url = {
+				...parsed.url,
+				withNoWatermark,
+			};
+			resolve(parsed);
+		} catch (err) {
+			log(err);
+			resolve({ error: err.message });
+		}
+	});

@@ -1,16 +1,19 @@
-import Axios from "axios";
-import dotenv from "dotenv";
+/* global process */
+import Axios from 'axios';
+import dotenv from 'dotenv';
+
 dotenv.config();
 
 export class Github {
 	#access = process.env.GITHUB_ACCESS;
 	#personal = process.env.GITHUB_AUTH_TOKEN;
-	#urlBase = "https://api.github.com";
+	#urlBase = 'https://api.github.com';
 	constructor() {
 		this.searchUser = (user) =>
 			new Promise(async (resolve, reject) => {
 				try {
-					const res = await this.req("/search/users", { q: user, per_pag: 100 }, "GET", true);
+					const res = await this.req('/search/users', { q: user, /* eslint-disable-line */ per_page: 100 }, 'GET', true);
+
 					resolve(res);
 				} catch (err) {
 					// TODO: handle rate-limited error.
@@ -21,7 +24,8 @@ export class Github {
 		this.searchRepository = (repo) =>
 			new Promise(async (resolve, reject) => {
 				try {
-					const res = await this.req("/search/repositories", { q: encodeURI(repo), per_pag: 100 }, "GET", true);
+					const res = await this.req('/search/repositories', { q: encodeURI(repo), /* eslint-disable-line */ per_page: 100 }, 'GET', true);
+
 					resolve(res);
 				} catch (err) {
 					// TODO: handle rate-limited error.
@@ -32,7 +36,8 @@ export class Github {
 		this.searchBaileysIssue = (keyword) =>
 			new Promise(async (resolve, reject) => {
 				try {
-					const res = await this.req("/search/issues", { q: `${encodeURI(keyword)}+user:adiwajshing`, per_page: 100 }, "GET", true);
+					const res = await this.req('/search/issues', { q: `${encodeURI(keyword)}+user:adiwajshing`, /* eslint-disable-line */ per_page: 100 }, 'GET', true);
+
 					resolve(res);
 				} catch (err) {
 					// TODO: handle rate-limited error.
@@ -43,7 +48,8 @@ export class Github {
 		this.searchCode = (code) =>
 			new Promise(async (resolve, reject) => {
 				try {
-					const res = await this.req("/search/code", { q: code, per_page: 100 }, "GET");
+					const res = await this.req('/search/code', { q: code, /* eslint-disable-line */ per_page: 100 }, 'GET');
+
 					resolve(res);
 				} catch (err) {
 					// TODO: handle rate-limited error.
@@ -55,6 +61,7 @@ export class Github {
 			new Promise(async (resolve, reject) => {
 				try {
 					const res = await this.extractMetadata(input);
+
 					resolve(res);
 				} catch (err) {
 					// TODO: handle rate-limited error.
@@ -70,9 +77,10 @@ export class Github {
 			method,
 			headers: {
 				Authorization: `Token ${access ? this.#access : this.#personal}`,
-				Accept: "application/vnd.github.text-match+json",
+				Accept: 'application/vnd.github.text-match+json',
 			},
 		});
+
 		return data;
 	}
 
@@ -84,17 +92,19 @@ export class Github {
 						Axios({
 							url: `${this.#urlBase}/users/${v.login}`,
 							Authorization: `Token ${this.#access}`,
-							method: "GET",
+							method: 'GET',
 						}),
 					),
 				)
 			).map(({ data }) => data);
 		}
+
 		const { data } = await Axios({
 			url: `${this.#urlBase}/users/${input}`,
 			Authorization: `Token ${this.#access}`,
-			method: "GET",
+			method: 'GET',
 		});
+
 		return data;
 	}
 }

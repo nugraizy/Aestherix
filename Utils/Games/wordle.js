@@ -1,16 +1,18 @@
-import fs from "fs-extra";
+/* global games */
+import fs from 'fs-extra';
 
-const ALPHABET_ON_KEYBOARD = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
+const ALPHABET_ON_KEYBOARD = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
 const BLOCKS = {
-	WHITE: "⬜",
-	BLACK: "⬛",
-	YELLOW: "🟨",
-	GREEN: "🟩",
+	WHITE: '⬜',
+	BLACK: '⬛',
+	YELLOW: '🟨',
+	GREEN: '🟩',
 };
 
 const WORDS = [];
-(await fs.readJSON("./Databases/Games/Tebak Gambar/db.json")).forEach((element) => {
-	element.answer.split(" ").forEach((word) => {
+
+(await fs.readJSON('./Databases/Games/Tebak Gambar/db.json')).forEach((element) => {
+	element.answer.split(' ').forEach((word) => {
 		WORDS.push(word);
 	});
 });
@@ -18,11 +20,13 @@ const WORDS = [];
 export class Wordle {
 	constructor(id) {
 		this.id = id;
+
 		if (this.isPlaying()) {
 			return this.session();
 		}
+
 		this.word = WORDS[Math.floor(Math.random() * WORDS.length)];
-		this.board = this.word.split("").map((v) => (v === " " ? " " : BLOCKS.WHITE));
+		this.board = this.word.split('').map((v) => (v === ' ' ? ' ' : BLOCKS.WHITE));
 		this.message = null;
 		this.guessed = [];
 
@@ -30,19 +34,24 @@ export class Wordle {
 
 		this.checkInput = (input) => {
 			const data = this.session();
-			input = input.toLowerCase().split("");
+
+			input = input.toLowerCase().split('');
+
 			if (input.length !== data.word.length) {
-				const board = data.board.map((v) => (v == " " ? " " : BLOCKS.BLACK));
-				data.guessed.push({ input: input.join(""), board: board.join("") });
+				const board = data.board.map((v) => (v == ' ' ? ' ' : BLOCKS.BLACK));
+
+				data.guessed.push({ input: input.join(''), board: board.join('') });
 				data.board = board;
 				return {
-					board: board.join(""),
+					board: board.join(''),
 					words: data.words,
 				};
 			}
+
 			for (let i = 0; i < input.length; i++) {
 				const blocks = data.checkClosesAlphabet(input[i], data.word[i]);
-				if (input[i] !== " " && data.word[i] !== " ") {
+
+				if (input[i] !== ' ' && data.word[i] !== ' ') {
 					if (blocks.green) {
 						data.board[i] = BLOCKS.GREEN;
 					} else if (blocks.yellow) {
@@ -51,14 +60,17 @@ export class Wordle {
 						data.board[i] = BLOCKS.BLACK;
 					}
 				} else {
-					data.board[i] = " ";
+					data.board[i] = ' ';
 				}
 			}
-			data.guessed.push({ input: input.join(""), board: data.board.join("") });
+
+			data.guessed.push({ input: input.join(''), board: data.board.join('') });
+
 			if (data.checkWin()) {
 				const boardWon = data.board;
-				const board = boardWon.join("");
+				const board = boardWon.join('');
 				const words = data.word;
+
 				data.exit();
 				return {
 					isWin: true,
@@ -67,8 +79,9 @@ export class Wordle {
 					guessed: data.guessed,
 				};
 			}
+
 			return {
-				board: data.board.join(""),
+				board: data.board.join(''),
 				words: data.words,
 			};
 		};
@@ -79,7 +92,7 @@ export class Wordle {
 	}
 
 	checkWin() {
-		return this.board.every((v) => v == BLOCKS.GREEN || v == " ");
+		return this.board.every((v) => v == BLOCKS.GREEN || v == ' ');
 	}
 
 	checkClosesAlphabet(inp, alp) {
@@ -88,18 +101,21 @@ export class Wordle {
 				return {
 					green: true,
 				};
-			case ALPHABET_ON_KEYBOARD.some((v) => v.includes(inp) && v.includes(alp)):
-				const indexAlp = ALPHABET_ON_KEYBOARD[ALPHABET_ON_KEYBOARD.findIndex((v) => v.includes(alp))].split("").findIndex((v) => v == alp);
-				const indexInp = ALPHABET_ON_KEYBOARD[ALPHABET_ON_KEYBOARD.findIndex((v) => v.includes(inp))].split("").findIndex((v) => v == inp);
+			case ALPHABET_ON_KEYBOARD.some((v) => v.includes(inp) && v.includes(alp)): {
+				const indexAlp = ALPHABET_ON_KEYBOARD[ALPHABET_ON_KEYBOARD.findIndex((v) => v.includes(alp))].split('').findIndex((v) => v == alp);
+				const indexInp = ALPHABET_ON_KEYBOARD[ALPHABET_ON_KEYBOARD.findIndex((v) => v.includes(inp))].split('').findIndex((v) => v == inp);
 				const index = Math.abs(indexAlp - indexInp);
+
 				if (index >= 3) {
 					return {
 						black: true,
 					};
 				}
+
 				return {
 					yellow: true,
 				};
+			}
 			default: {
 				return {
 					black: true,

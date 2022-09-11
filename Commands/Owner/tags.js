@@ -1,30 +1,36 @@
-import fs from "fs";
-import { getTimeSince } from "../../Helper/index.js";
-const DB_PATH = `./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`;
+/* global botNum, cli, OPTIONS */
+import fs from 'fs';
+
+import { getTimeSince } from '../../Helper/index.js';
+
+const DB_PATH = `./Media Files/Connection Databases/${cli.input[0] ?? 'Session-debug'}.json`;
 
 export default {
-	name: "tags",
-	description: "Fetch every tags",
-	usage: "!tags",
-	aliases: ["mytag", "tagged"],
-	category: "Owner",
+	name: 'tags',
+	description: 'Fetch every tags',
+	usage: '!tags',
+	aliases: ['mytag', 'tagged'],
+	category: 'Owner',
 	cooldown: 0,
 	limit: 0,
-	status: "enable",
+	status: 'enable',
 	async run({ isOwner, from, message, args, settings, cmd }, client, store) {
 		if (!isOwner) {
-			return await client[botNum].reply({ from, quoted: message }, "You are not allowed to use this command");
+			return await client[botNum].reply({ from, quoted: message }, 'You are not allowed to use this command');
 		}
+
 		const messages = OPTIONS.json ? JSON.parse(fs.readFileSync(DB_PATH)).messages[from] : await store.loadMessages(from);
-		if (args[1] == "get") {
+
+		if (args[1] == 'get') {
 			let dataMessage = messages.find((v) => v.key.id == args[2]);
-			dataMessage = await (await import("../../Helper/Modules/reassignMessagesObject.js")).reassign(JSON.parse(JSON.stringify(dataMessage)), client, store, false);
-			await client[botNum].reply({ from: dataMessage?.from, quoted: dataMessage.message }, "Here.");
+
+			dataMessage = await (await import('../../Helper/Modules/reassignMessagesObject.js')).reassign(JSON.parse(JSON.stringify(dataMessage)), client, store, false);
+			await client[botNum].reply({ from: dataMessage?.from, quoted: dataMessage.message }, 'Here.');
 			await client[botNum].reply(
 				{ from: dataMessage?.from, quoted: dataMessage.message },
 				`Message Metadata : 
 
-Possibly Hidetag : ${dataMessage.mention.length > 0 && !dataMessage.body.match(/@[0-9]+/g) ? "Yup" : "Nope"}
+Possibly Hidetag : ${dataMessage.mention.length > 0 && !dataMessage.body.match(/@[0-9]+/g) ? 'Yup' : 'Nope'}
 Type Message : ${dataMessage.type}
 Tot. Tags : ${dataMessage.mention.length}`,
 			);
@@ -33,14 +39,17 @@ Tot. Tags : ${dataMessage.mention.length}`,
 		}
 
 		let dataMessages = [];
+
 		for (const message of messages) {
-			dataMessages.push(await (await import("../../Helper/Modules/reassignMessagesObject.js")).reassign(JSON.parse(JSON.stringify(message)), client, store, false));
+			dataMessages.push(await (await import('../../Helper/Modules/reassignMessagesObject.js')).reassign(JSON.parse(JSON.stringify(message)), client, store, false));
 		}
+
 		if (dataMessages.length == 0) {
-			return await client[botNum].reply({ from, quoted: message }, "No messages scraped in this chat");
+			return await client[botNum].reply({ from, quoted: message }, 'No messages scraped in this chat');
 		}
 
 		dataMessages = dataMessages.filter((v) => (v.mediaData?.participant == settings.owner_number || v.mention.includes(settings.owner_number)) && v.sender !== settings.owner_number);
+
 		if (dataMessages.length == 0) {
 			return await client[botNum].reply({ from, quoted: message }, `Your tags is not found. Chats scraped : ${messages.length}`);
 		}
@@ -51,13 +60,13 @@ Tot. Tags : ${dataMessage.mention.length}`,
 				message: v.message,
 				sender: v.sender,
 				type:
-					v.mention.includes(settings.owner_number) && (v.type == "mentionText" || v.type == "extendedTextMessage")
-						? "Tags & Reply"
+					v.mention.includes(settings.owner_number) && (v.type == 'mentionText' || v.type == 'extendedTextMessage')
+						? 'Tags & Reply'
 						: v.mention.includes(settings.owner_number) && v.mediaData.participant !== settings.owner_number
-						? "Tags"
+						? 'Tags'
 						: !v.mention.includes(settings.owner_number) && v.mediaData.participant == settings.owner_number
-						? "Reply"
-						: "",
+						? 'Reply'
+						: '',
 				time: getTimeSince(Number(v.timeStamp) * 1000),
 				pushName: v.pushname,
 				media: v.type,
@@ -79,11 +88,12 @@ Tot. Tags : ${dataMessage.mention.length}`,
 			});
 			i++;
 		}
+
 		await client[botNum].sendMessage(from, {
-			buttonText: "Open List",
-			title: "choosse one to fetch the metadata message",
-			footer: "and bot will send the message",
-			text: "\t",
+			buttonText: 'Open List',
+			title: 'choosse one to fetch the metadata message',
+			footer: 'and bot will send the message',
+			text: '\t',
 			sections: row,
 		});
 	},

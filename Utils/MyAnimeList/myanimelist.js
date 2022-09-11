@@ -1,11 +1,13 @@
-import Axios from "axios";
-import dotenv from "dotenv";
+/* global process */
+import Axios from 'axios';
+import dotenv from 'dotenv';
+
 dotenv.config();
 
 const BASE_URL = (path) => `https://api.myanimelist.net/v2${path}`;
 const TYPE = {
-	MANGA: ["all", "manga", "novels", "oneshots", "doujin", "manhwa", "manhua", "bypopularity", "favorite"],
-	ANIME: ["all", "airing", "upcoming", "tv", "ova", "movie", "special", "bypopularity", "favorite"],
+	MANGA: ['all', 'manga', 'novels', 'oneshots', 'doujin', 'manhwa', 'manhua', 'bypopularity', 'favorite'],
+	ANIME: ['all', 'airing', 'upcoming', 'tv', 'ova', 'movie', 'special', 'bypopularity', 'favorite'],
 };
 
 export class MyAnimeList {
@@ -14,15 +16,15 @@ export class MyAnimeList {
 		this.searchAnime = async (query) => {
 			return (
 				await this.request(
-					"/anime",
+					'/anime',
 					{
 						q: query,
 						limit: 100,
 						fields:
-							"id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity,num_list_users,num_scoring_users,nsfw,created_at,updated_at,media_type,status,genres,my_list_status,num_episodes,start_season,broadcast,source,average_episode_duration,rating,pictures,background,related_anime,related_manga,recommendations,studios,statistics",
+							'id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity,num_list_users,num_scoring_users,nsfw,created_at,updated_at,media_type,status,genres,my_list_status,num_episodes,start_season,broadcast,source,average_episode_duration,rating,pictures,background,related_anime,related_manga,recommendations,studios,statistics',
 					},
 					null,
-					"GET",
+					'GET',
 				)
 			)?.data?.map((v) => {
 				return v.node;
@@ -32,15 +34,15 @@ export class MyAnimeList {
 		this.searchManga = async (query) => {
 			return (
 				await this.request(
-					"/manga",
+					'/manga',
 					{
 						q: query,
 						limit: 100,
 						fields:
-							"id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity,num_list_users,num_scoring_users,nsfw,created_at,updated_at,media_type,status,genres,my_list_status,num_episodes,start_season,broadcast,source,average_episode_duration,rating,pictures,background,related_anime,related_manga,recommendations,studios,statistics",
+							'id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity,num_list_users,num_scoring_users,nsfw,created_at,updated_at,media_type,status,genres,my_list_status,num_episodes,start_season,broadcast,source,average_episode_duration,rating,pictures,background,related_anime,related_manga,recommendations,studios,statistics',
 					},
 					null,
-					"GET",
+					'GET',
 				)
 			)?.data?.map((v) => {
 				return v.node;
@@ -52,9 +54,9 @@ export class MyAnimeList {
 				`/anime/${id}`,
 				{
 					fields:
-						"id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity,num_list_users,num_scoring_users,nsfw,created_at,updated_at,media_type,status,genres,my_list_status,num_episodes,start_season,broadcast,source,average_episode_duration,rating,pictures,background,related_anime,related_manga,recommendations,studios,statistics",
+						'id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity,num_list_users,num_scoring_users,nsfw,created_at,updated_at,media_type,status,genres,my_list_status,num_episodes,start_season,broadcast,source,average_episode_duration,rating,pictures,background,related_anime,related_manga,recommendations,studios,statistics',
 				},
-				"GET",
+				'GET',
 			);
 		};
 
@@ -63,44 +65,46 @@ export class MyAnimeList {
 				`/manga/${id}`,
 				{
 					fields:
-						"id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity,num_list_users,num_scoring_users,nsfw,created_at,updated_at,media_type,status,genres,my_list_status,num_episodes,start_season,broadcast,source,average_episode_duration,rating,pictures,background,related_anime,related_manga,recommendations,studios,statistics",
+						'id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity,num_list_users,num_scoring_users,nsfw,created_at,updated_at,media_type,status,genres,my_list_status,num_episodes,start_season,broadcast,source,average_episode_duration,rating,pictures,background,related_anime,related_manga,recommendations,studios,statistics',
 				},
-				"GET",
+				'GET',
 			);
 		};
 
-		this.getAnimeRanking = async (type = "all") => {
+		this.getAnimeRanking = async (type = 'all') => {
 			if (!TYPE.ANIME.includes(type)) {
-				return { error: true, message: `Invalid type\nValid types are :\n${TYPE.ANIME.join(", ")}` };
+				return { error: true, message: `Invalid type\nValid types are :\n${TYPE.ANIME.join(', ')}` };
 			}
+
 			return (
 				await this.request(
-					`/anime/ranking`,
+					'/anime/ranking',
 					{
-						ranking_type: type,
+						ranking_type: type /* eslint-disable-line */,
 						fields:
-							"id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity,num_list_users,num_scoring_users,nsfw,created_at,updated_at,media_type,status,genres,my_list_status,num_episodes,start_season,broadcast,source,average_episode_duration,rating,pictures,background,related_anime,related_manga,recommendations,studios,statistics",
+							'id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity,num_list_users,num_scoring_users,nsfw,created_at,updated_at,media_type,status,genres,my_list_status,num_episodes,start_season,broadcast,source,average_episode_duration,rating,pictures,background,related_anime,related_manga,recommendations,studios,statistics',
 					},
-					"GET",
+					'GET',
 				)
 			)?.data?.map((v) => {
 				return v.node;
 			});
 		};
 
-		this.getMangaRanking = async (type = "all") => {
+		this.getMangaRanking = async (type = 'all') => {
 			if (!TYPE.MANGA.includes(type)) {
-				return { error: true, message: `Invalid type\nValid types are :\n${TYPE.ANIME.join(", ")}` };
+				return { error: true, message: `Invalid type\nValid types are :\n${TYPE.ANIME.join(', ')}` };
 			}
+
 			return (
 				await this.request(
-					`/manga/ranking`,
+					'/manga/ranking',
 					{
-						ranking_type: type,
+						ranking_type: type /* eslint-disable-line */,
 						fields:
-							"id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity,num_list_users,num_scoring_users,nsfw,created_at,updated_at,media_type,status,genres,my_list_status,num_episodes,start_season,broadcast,source,average_episode_duration,rating,pictures,background,related_anime,related_manga,recommendations,studios,statistics",
+							'id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity,num_list_users,num_scoring_users,nsfw,created_at,updated_at,media_type,status,genres,my_list_status,num_episodes,start_season,broadcast,source,average_episode_duration,rating,pictures,background,related_anime,related_manga,recommendations,studios,statistics',
 					},
-					"GET",
+					'GET',
 				)
 			)?.data?.map((v) => {
 				return v.node;
@@ -108,12 +112,12 @@ export class MyAnimeList {
 		};
 
 		this.userDetails = async () => {
-			return await this.request("/users/@me", {
-				fields: "anime_statistics",
+			return await this.request('/users/@me', {
+				fields: 'anime_statistics',
 			});
 		};
 	}
-	async request(path, params = {}, method = "GET") {
+	async request(path, params = {}, method = 'GET') {
 		try {
 			const url = BASE_URL(path);
 			const response = await Axios({
@@ -124,6 +128,7 @@ export class MyAnimeList {
 					Authorization: this.#access,
 				},
 			});
+
 			return response.data;
 		} catch (err) {
 			return err.response;

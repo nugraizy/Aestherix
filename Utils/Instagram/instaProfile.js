@@ -1,6 +1,8 @@
-import { cheerioLOAD, fetchJSON, fetchTEXT } from "../../Helper/index.js";
-const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36";
-const sessionId = process.env.INSTAGRAM_SESI || (await (await import("./instaCookie.js")).getCookie(process.env.INSTAGRAM_USERNAME, process.env.INSTAGRAM_PASSWORD));
+/* global process, log */
+import { cheerioLOAD, fetchJSON, fetchTEXT } from '../../Helper/index.js';
+
+const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36';
+const sessionId = process.env.INSTAGRAM_SESI || (await (await import('./instaCookie.js')).getCookie(process.env.INSTAGRAM_USERNAME, process.env.INSTAGRAM_PASSWORD));
 
 // Scrape by Alphanum404.
 export const getProfile = (username) =>
@@ -9,30 +11,33 @@ export const getProfile = (username) =>
 			const data = await fetchTEXT(`https://www.picuki.com/profile/${username}`);
 			const $ = cheerioLOAD(data);
 			const media = [];
-			$(".photo")
-				.find("a > img")
-				.each((_, elem) => media.push({ url: $(elem).attr("src") }));
-			$(".photo-info")
-				.find(".photo-description")
+
+			$('.photo')
+				.find('a > img')
+				.each((_, elem) => media.push({ url: $(elem).attr('src') }));
+			$('.photo-info')
+				.find('.photo-description')
 				.each((i, elem) => (media[i].caption = $(elem).text().trim()));
-			$(".post-footer")
-				.find(".likes_photo")
+			$('.post-footer')
+				.find('.likes_photo')
 				.each((i, elem) => (media[i].likes = $(elem).text().trim()));
-			$(".post-footer")
-				.find(".comments_photo")
+			$('.post-footer')
+				.find('.comments_photo')
 				.each((i, elem) => (media[i].comments = $(elem).text().trim()))
 				.text();
-			if ($(".profile-name-top").text().trim() == "" && $(".follows").text().trim() == "") {
-				return resolve({ error: "User not found." });
+
+			if ($('.profile-name-top').text().trim() == '' && $('.follows').text().trim() == '') {
+				return resolve({ error: 'User not found.' });
 			}
+
 			resolve({
-				fullName: $(".profile-name-bottom").text().trim() !== "" ? $(".profile-name-bottom").text().trim() : "Not Available.",
-				userName: $(".profile-name-top").text().trim(),
-				following: $(".follows").text().trim(),
-				followers: $(".followed_by").text().trim(),
-				bio: $(".profile-description").text().trim() !== "" ? $(".profile-description").text().trim() : "Not Available.",
-				post: $(".total_posts").text().trim(),
-				thumb: $(".profile-hd-link.launchLightbox").attr("data-video-poster"),
+				fullName: $('.profile-name-bottom').text().trim() !== '' ? $('.profile-name-bottom').text().trim() : 'Not Available.',
+				userName: $('.profile-name-top').text().trim(),
+				following: $('.follows').text().trim(),
+				followers: $('.followed_by').text().trim(),
+				bio: $('.profile-description').text().trim() !== '' ? $('.profile-description').text().trim() : 'Not Available.',
+				post: $('.total_posts').text().trim(),
+				thumb: $('.profile-hd-link.launchLightbox').attr('data-video-poster'),
 				latestPost: media,
 			});
 		} catch (e) {
@@ -43,25 +48,29 @@ export const getProfile = (username) =>
 export const getUser = (username) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			if (username.startsWith("@")) {
-				username = username.replace("@", "");
+			if (username.startsWith('@')) {
+				username = username.replace('@', '');
 			}
+
 			const { graphql } = await fetchJSON(`https://www.instagram.com/${username}/?__a=1&__d=dis`, {
 				headers: {
-					"user-agent": UA,
+					'user-agent': UA,
 					cookie: sessionId,
 				},
 			});
+
 			if (!graphql) {
 				return resolve({ error: `User ${username} not found.` });
 			}
+
 			const { user } = graphql;
+
 			resolve({
 				id: user.id,
 				biography: user.biography,
 				followers: user.edge_followed_by.count,
 				following: user.edge_follow.count,
-				fullName: user.full_name == "" ? "No Fullname" : user.full_name,
+				fullName: user.full_name == '' ? 'No Fullname' : user.full_name,
 				highlightCount: user.highlight_reel_count,
 				isBusinessAccount: user.is_business_account,
 				isRecentUser: user.is_joined_recently,
@@ -76,6 +85,7 @@ export const getUser = (username) =>
 				posts:
 					user.edge_owner_to_timeline_media.edges.map((edge) => {
 						const hasCaption = edge.node.edge_media_to_caption.edges[0];
+
 						return {
 							id: edge.node.id,
 							shortCode: edge.node.shortcode,
@@ -83,7 +93,7 @@ export const getUser = (username) =>
 							dimensions: edge.node.dimensions,
 							imageUrl: edge.node.display_url,
 							isVideo: edge.node.is_video,
-							caption: hasCaption ? hasCaption.node.text : "",
+							caption: hasCaption ? hasCaption.node.text : '',
 							commentsCount: edge.node.edge_media_to_comment.count,
 							commentsDisabled: edge.node.comments_disabled,
 							timestamp: edge.node.taken_at_timestamp,
@@ -96,7 +106,7 @@ export const getUser = (username) =>
 										dimensions: edge.node.dimensions,
 										imageUrl: edge.node.display_url,
 										isVideo: edge.node.is_video,
-								  }))
+								  })) /* eslint-disable-line */
 								: [],
 						};
 					}) || [],

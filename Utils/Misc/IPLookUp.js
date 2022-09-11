@@ -1,9 +1,12 @@
-import { fetchJSON } from "../../Helper/index.js";
+import { fetchJSON } from '../../Helper/index.js';
+
+const URL_API = (input) =>
+	`http://ip-api.com/json/${input}?fields=status,message,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,query`;
 
 export const IPLookup = (input) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const noData = "No Data";
+			const noData = 'No Data';
 			const {
 				status,
 				continent,
@@ -30,9 +33,11 @@ export const IPLookup = (input) =>
 				hosting,
 				message,
 			} = await fetchJSON(URL_API(input));
-			if (status != "success") {
+
+			if (status != 'success') {
 				resolve({ error: message });
 			}
+
 			resolve({
 				continent,
 				continentCode,
@@ -41,8 +46,8 @@ export const IPLookup = (input) =>
 				region,
 				regionName,
 				city,
-				district: district == "" ? noData : district,
-				zip: zip == "" ? noData : zip,
+				district: district == '' ? noData : district,
+				zip: zip == '' ? noData : zip,
 				lat,
 				lon,
 				timezone,
@@ -52,7 +57,7 @@ export const IPLookup = (input) =>
 				org,
 				as,
 				asname,
-				reverse: reverse == "" ? noData : reverse,
+				reverse: reverse == '' ? noData : reverse,
 				mobile,
 				proxy,
 				hosting,
@@ -61,6 +66,3 @@ export const IPLookup = (input) =>
 			reject(err);
 		}
 	});
-
-const URL_API = (input) =>
-	`http://ip-api.com/json/${input}?fields=status,message,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,query`;

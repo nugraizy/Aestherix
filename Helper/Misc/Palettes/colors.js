@@ -1,3 +1,3 @@
-import { randomize, readJSON } from "../../Modules/functions.js";
+import { randomize, readJSON } from '../../Modules/functions.js';
 
-export const scheme = () => randomize(readJSON("./Helper/Misc/Palettes/palettes.json"));
+export const scheme = () => randomize(readJSON('./Helper/Misc/Palettes/palettes.json'));

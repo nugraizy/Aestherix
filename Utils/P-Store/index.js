@@ -1,1 +1,1 @@
-export { PStoreProduct } from "./searchProduct.js";
+export { PStoreProduct } from './searchProduct.js';

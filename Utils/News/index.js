@@ -1,2 +1,2 @@
-export { getEarthquake } from "./earthquake.js";
-export { getWeather } from "./weather.js";
+export { getEarthquake } from './earthquake.js';
+export { getWeather } from './weather.js';

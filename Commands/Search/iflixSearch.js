@@ -1,20 +1,22 @@
-import { removeDuplicatesArray } from "../../Helper/index.js";
-import { iflixSearch } from "../../Utils/index.js";
+/* global botNum */
+import { removeDuplicatesArray } from '../../Helper/index.js';
+import { iflixSearch } from '../../Utils/index.js';
 
 export default {
-	name: "iflix",
-	description: "Find movie on iflix",
-	category: "Search",
-	usage: "!iflix <query>",
-	aliases: ["iflx"],
+	name: 'iflix',
+	description: 'Find movie on iflix',
+	category: 'Search',
+	usage: '!iflix <query>',
+	aliases: ['iflx'],
 	cooldown: 7,
 	limit: 4,
-	status: "enable",
+	status: 'enable',
 	async run({ query, from, message, args, cmd, type }, client) {
-		if ((args[1] == "next" || args[1] == "prev") && type == "templateButtonReplyMessage") {
-			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(" "))));
+		if ((args[1] == 'next' || args[1] == 'prev') && type == 'templateButtonReplyMessage') {
+			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.thumbnail == args[2]);
-			let caption = `\`\`\` • Iflix Search\`\`\`\n\n`;
+			let caption = '``` • Iflix Search```\n\n';
+
 			caption += `Title : ${data[index].title}\n`;
 			caption += `Actress : ${data[index].actressStr}\n`;
 			caption += `Director : ${data[index].director}\n`;
@@ -30,41 +32,47 @@ export default {
 							rowId: `${cmd} get ${v}`,
 						},
 					],
-					title: `VOID BOT | Powered by Iflix`,
+					title: 'VOID BOT | Powered by Iflix',
 				};
 			});
+
 			await client[botNum].sendMessage(
 				from,
 				{
 					image: { url: data[index].thumbnail },
 					caption,
 					templateButtons: [
-						{ urlButton: { displayText: "Image Source", url: args[1] == "next" ? data[index].image : data[index].thumbnail } },
-						index + 1 !== data.length ? { quickReplyButton: { displayText: "Next Series", id: `${cmd} next ${data[index + 1].thumbnail} ${JSON.stringify(data)}` } } : {},
-						index !== 0 ? { quickReplyButton: { displayText: "Previous Series", id: `${cmd} prev ${data[index - 1].thumbnail} ${JSON.stringify(data)}` } } : {},
+						{ urlButton: { displayText: 'Image Source', url: args[1] == 'next' ? data[index].image : data[index].thumbnail } },
+						index + 1 !== data.length ? { quickReplyButton: { displayText: 'Next Series', id: `${cmd} next ${data[index + 1].thumbnail} ${JSON.stringify(data)}` } } : {},
+						index !== 0 ? { quickReplyButton: { displayText: 'Previous Series', id: `${cmd} prev ${data[index - 1].thumbnail} ${JSON.stringify(data)}` } } : {},
 					],
 					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 				},
 				{ quoted: message },
 			);
 			return await client[botNum].sendMessage(from, {
-				buttonText: "Open List",
-				text: "\t",
-				footer: "```Looking for the streaming URL? Choose between these options.```",
-				title: "``` • Iflix```",
+				buttonText: 'Open List',
+				text: '\t',
+				footer: '```Looking for the streaming URL? Choose between these options.```',
+				title: '``` • Iflix```',
 				sections: rows,
 			});
-		} else if (args[1] == "get") {
+		} else if (args[1] == 'get') {
 			return await client[botNum].reply({ from, quoted: message }, `\`\`\` • Iflix Search\`\`\`\n\nURL : ${args[2]}`);
 		}
-		query = query.split(",");
+
+		query = query.split(',');
 		query = removeDuplicatesArray(query);
+
 		for (const querie of query) {
 			const data = await iflixSearch(querie);
-			if ("error" in data) {
+
+			if ('error' in data) {
 				return await client[botNum].reply({ from, quoted: message }, data.error);
 			}
-			let caption = `\`\`\` • Iflix Search\`\`\`\n\n`;
+
+			let caption = '``` • Iflix Search```\n\n';
+
 			caption += `Title : ${data[0].title}\n`;
 			caption += `Actress : ${data[0].actressStr}\n`;
 			caption += `Director : ${data[0].director}\n`;
@@ -78,27 +86,28 @@ export default {
 							rowId: `${cmd} get ${v}`,
 						},
 					],
-					title: `VOID BOT | Powered by Iflix`,
+					title: 'VOID BOT | Powered by Iflix',
 				};
 			});
+
 			await client[botNum].sendMessage(
 				from,
 				{
 					image: { url: data[0].thumbnail },
 					caption,
 					templateButtons: [
-						{ urlButton: { displayText: "Image Source", url: data[0].thumbnail } },
-						{ quickReplyButton: { displayText: "Next Series", id: `${cmd} next ${data[1].thumbnail} ${JSON.stringify(data)}` } },
+						{ urlButton: { displayText: 'Image Source', url: data[0].thumbnail } },
+						{ quickReplyButton: { displayText: 'Next Series', id: `${cmd} next ${data[1].thumbnail} ${JSON.stringify(data)}` } },
 					],
 					footer: `Void Bot     1/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 				},
 				{ quoted: message },
 			);
 			await client[botNum].sendMessage(from, {
-				buttonText: "Open List",
-				text: "\t",
-				footer: "```Looking for the streaming URL? Choose between these options.```",
-				title: "``` • Iflix```",
+				buttonText: 'Open List',
+				text: '\t',
+				footer: '```Looking for the streaming URL? Choose between these options.```',
+				title: '``` • Iflix```',
 				sections: rows,
 			});
 		}

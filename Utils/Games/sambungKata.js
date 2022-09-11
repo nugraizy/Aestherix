@@ -1,43 +1,46 @@
-import moment from "moment-timezone";
-import { cheerioLOAD, fetchJSON, fetchTEXT, randomize } from "../../Helper/Modules/index.js";
-import { CheckIntervals, DeleteIntervals, SetIntervals } from "../Misc/intervals.js";
+/* global games, intervals, botNum */
+import moment from 'moment-timezone';
+
+import { cheerioLOAD, fetchJSON, fetchTEXT, randomize } from '../../Helper/Modules/index.js';
+import { CheckIntervals, DeleteIntervals, SetIntervals } from '../Misc/intervals.js';
 
 const URL_BASE = (input) => `https://kbbi.kemdikbud.go.id/entri/${input}`;
-const URL_RANDOM_WORD = `https://gist.githubusercontent.com/sipalingkoding/ca07ee6116d5ed5bdddfbe2d1a3a0e56/raw/3b4fb33bc60bbb42089cc75bed93e7477fe4ab5c/list-kata.json`;
-const WORD_NOT_FOUND = " Entri tidak ditemukan.";
+
+const URL_RANDOM_WORD = 'https://gist.githubusercontent.com/sipalingkoding/ca07ee6116d5ed5bdddfbe2d1a3a0e56/raw/3b4fb33bc60bbb42089cc75bed93e7477fe4ab5c/list-kata.json';
+const WORD_NOT_FOUND = ' Entri tidak ditemukan.';
 const RESPONSE = {
 	WRONG_TURN: {
 		status: false,
-		message: "Its not your turn.",
+		message: 'Its not your turn.',
 	},
 	CLUE_DOESNT_MATCH: {
 		status: false,
-		message: "Your word doesnt starts with the clue are given.",
+		message: 'Your word doesnt starts with the clue are given.',
 	},
 	FAIL_TO_FIND_WORD: {
 		status: false,
-		message: "Your word doesn't seem valid on KBBI. Try another word.",
+		message: 'Your word does not seem valid on KBBI. Try another word.',
 	},
 	ALREADY_GUESSED: {
 		status: false,
-		message: "The word already guessed. Try another word.",
+		message: 'The word already guessed. Try another word.',
 	},
 	GAME_ALREADY_STARTED: {
 		status: false,
-		message: "The game already playing. Please connect the word to the given clue.",
+		message: 'The game already playing. Please connect the word to the given clue.',
 	},
 	WAITING_FOR_OPPONENT: {
 		status: false,
-		message: "You on a game waiting for opponent.",
+		message: 'You on a game waiting for opponent.',
 	},
 	INVALID_ANSWER: {
 		status: false,
-		message: "Your word contain special character or space. Use one word only.",
+		message: 'Your word contain special character or space. Use one word only.',
 	},
 };
 const GAME_STATUS = {
-	PLAYING: "playing",
-	WAITING: "waiting",
+	PLAYING: 'playing',
+	WAITING: 'waiting',
 };
 
 const RegexEndWord = (arr) => {
@@ -65,6 +68,7 @@ export class SambungKata {
 		if (!word.startsWith(prevClue)) {
 			return false;
 		}
+
 		return true;
 	}
 
@@ -72,6 +76,7 @@ export class SambungKata {
 		if (this.guessed.includes(word)) {
 			return true;
 		}
+
 		return false;
 	}
 
@@ -89,31 +94,38 @@ export class SambungKata {
 	}
 
 	throwResponse() {
-		return this.checkStatus() == "waiting" ? RESPONSE.WAITING_FOR_OPPONENT : RESPONSE.GAME_ALREADY_STARTED;
+		return this.checkStatus() == 'waiting' ? RESPONSE.WAITING_FOR_OPPONENT : RESPONSE.GAME_ALREADY_STARTED;
 	}
 
 	async start(player2, client) {
 		this.player2 = player2;
 		const data = await this.randomWord();
-		const remainings = moment(new Date()).add(parseInt(20), "seconds").valueOf();
-		SetIntervals(intervals["word"], this.group, 20, (clients = client, group = this.group, remaining = remainings) => {
-			const data = intervals["word"].get(group);
+		const remainings = moment(new Date()).add(parseInt(20), 'seconds').valueOf();
+
+		SetIntervals(intervals['word'], this.group, 20, (clients = client, group = this.group, remaining = remainings) => {
+			const data = intervals['word'].get(group);
+
 			if (data === undefined) {
 				return;
 			}
+
 			const second = Math.floor(((remaining - new Date().getTime()) % (1000 * 60)) / 1000);
 			const dataGame = games.word.get(group);
+
 			data.timer = second;
 			dataGame.timer = second;
 			const { timer } = CheckIntervals(data);
+
 			if (timer == 10) {
-				clients[botNum].sendMessage(group, { text: `Time's almost over! 10 second @${dataGame.turn.split("@")[0]}`, mentions: [dataGame.turn] });
+				clients[botNum].sendMessage(group, { text: `Time's almost over! 10 second @${dataGame.turn.split('@')[0]}`, mentions: [dataGame.turn] });
 			}
+
 			if (timer <= 0) {
-				DeleteIntervals(data, intervals["word"], group);
+				DeleteIntervals(data, intervals['word'], group);
 				const winner = dataGame.changeTurn();
-				clients[botNum].sendMessage(group, { text: `Time's up! The winner is : @${winner.split("@")[0]}`, mentions: [winner] });
-				games["word"].delete(games["word"].get(group));
+
+				clients[botNum].sendMessage(group, { text: `Time's up! The winner is : @${winner.split('@')[0]}`, mentions: [winner] });
+				games['word'].delete(games['word'].get(group));
 			}
 		});
 		return { ...this, ...data };
@@ -122,9 +134,11 @@ export class SambungKata {
 	random(i) {
 		const random = randomize([-2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2]);
 		const randomL = randomize([-2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2]);
-		if (i.includes(".")) {
-			return random == 2 ? i.split(".")[0] : i.split(".")[1];
+
+		if (i.includes('.')) {
+			return random == 2 ? i.split('.')[0] : i.split('.')[1];
 		}
+
 		return random == 2 ? i.slice(0, randomL == 2 ? 3 : 2) : i.slice(randomL == 2 ? -3 : -2);
 	}
 
@@ -132,6 +146,7 @@ export class SambungKata {
 		try {
 			const WORDS = await fetchJSON(URL_RANDOM_WORD);
 			const RANDOM_WORD = randomize(RegexEndWord(WORDS));
+
 			this.words = RANDOM_WORD;
 			this.clue = this.random(RANDOM_WORD);
 			this.guessed.push(RANDOM_WORD);
@@ -141,6 +156,7 @@ export class SambungKata {
 			try {
 				const WORDS = await fetchJSON(URL_RANDOM_WORD);
 				const RANDOM_WORD = randomize(RegexEndWord(WORDS));
+
 				this.words = RANDOM_WORD;
 				this.clue = this.random(RANDOM_WORD);
 				this.guessed.push(RANDOM_WORD);
@@ -149,6 +165,7 @@ export class SambungKata {
 			} catch (err) {
 				const WORDS = await fetchJSON(URL_RANDOM_WORD);
 				const RANDOM_WORD = randomize(RegexEndWord(WORDS));
+
 				this.words = RANDOM_WORD;
 				this.clue = this.random(RANDOM_WORD);
 				this.guessed.push(RANDOM_WORD);
@@ -159,65 +176,83 @@ export class SambungKata {
 	}
 
 	async checkWord(word, prevClue) {
-		if (word.includes(" ")) {
+		if (word.includes(' ')) {
 			return RESPONSE.INVALID_ANSWER;
 		}
+
 		if (this.checkIsGuessed(word)) {
 			return RESPONSE.ALREADY_GUESSED;
 		}
+
 		if (!this.checkValidClue(word, prevClue)) {
 			return RESPONSE.CLUE_DOESNT_MATCH;
 		}
+
 		const data = await fetchTEXT(URL_BASE(word));
 		const $ = cheerioLOAD(data);
-		if ($("body > div.container.body-content > h4:nth-child(6)").text() == WORD_NOT_FOUND) {
+
+		if ($('body > div.container.body-content > h4:nth-child(6)').text() == WORD_NOT_FOUND) {
 			return RESPONSE.FAIL_TO_FIND_WORD;
 		}
-		const value = $("body > div.container.body-content > h2:nth-child(5)").text().replace(/[0-9]/g, "");
+
+		const value = $('body > div.container.body-content > h2:nth-child(5)').text().replace(/[0-9]/g, '');
+
 		return {
 			status: true,
-			value: value.replace(".", ""),
+			value: value.replace('.', ''),
 			clue: this.random(value),
 		};
 	}
 
 	async guess(word, guesser, group, client) {
-		if (!intervals["word"].get(group) && !games["word"].get(group)) {
+		if (!intervals['word'].get(group) && !games['word'].get(group)) {
 			return false;
 		}
+
 		if (!this.player2) {
 			return false;
 		}
+
 		if (!this.checkTurn(guesser)) {
 			return RESPONSE.WRONG_TURN;
 		}
+
 		const data = await this.checkWord(word, this.clue);
+
 		if (!data.status) {
 			return data;
 		}
+
 		this.changeTurn();
 		this.words = data.value;
 		this.clue = data.clue;
-		DeleteIntervals(intervals["word"].get(this.group), intervals["word"], this.group);
-		const remainings = moment(new Date()).add(parseInt(20), "seconds").valueOf();
-		SetIntervals(intervals["word"], this.group, 20, (clients = client, group = this.group, remaining = remainings) => {
-			const data = intervals["word"].get(group);
+		DeleteIntervals(intervals['word'].get(this.group), intervals['word'], this.group);
+		const remainings = moment(new Date()).add(parseInt(20), 'seconds').valueOf();
+
+		SetIntervals(intervals['word'], this.group, 20, (clients = client, group = this.group, remaining = remainings) => {
+			const data = intervals['word'].get(group);
+
 			if (data === undefined) {
 				return;
 			}
+
 			const second = Math.floor(((remaining - new Date().getTime()) % (1000 * 60)) / 1000);
 			const dataGame = games.word.get(group);
+
 			data.timer = second;
 			dataGame.timer = second;
 			const { timer } = CheckIntervals(data);
+
 			if (timer == 10) {
-				clients[botNum].sendMessage(group, { text: `Time's almost over! 10 second @${dataGame.turn.split("@")[0]}`, mentions: [dataGame.turn] });
+				clients[botNum].sendMessage(group, { text: `Time's almost over! 10 second @${dataGame.turn.split('@')[0]}`, mentions: [dataGame.turn] });
 			}
+
 			if (timer <= 0) {
-				DeleteIntervals(data, intervals["word"], group);
+				DeleteIntervals(data, intervals['word'], group);
 				const winner = dataGame.changeTurn();
-				clients[botNum].sendMessage(group, { text: `Time's up! The winner is : @${winner.split("@")[0]}`, mentions: [winner] });
-				games["word"].delete(group);
+
+				clients[botNum].sendMessage(group, { text: `Time's up! The winner is : @${winner.split('@')[0]}`, mentions: [winner] });
+				games['word'].delete(group);
 			}
 		});
 		return this;

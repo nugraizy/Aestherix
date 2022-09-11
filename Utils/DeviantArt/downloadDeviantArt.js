@@ -1,17 +1,23 @@
-import { fetchJSON } from "../../Helper/index.js";
-import { URL_API_DOWNLOAD } from "./api.js";
+/* global log */
+import { fetchJSON } from '../../Helper/index.js';
+import { URL_API_DOWNLOAD } from './api.js';
+
+const check = (i) => (i == -1 ? undefined : i);
 
 export const downloadDeviantArt = (input) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			const data = await fetchJSON(URL_API_DOWNLOAD(input));
-			if ("error" in data) {
+
+			if ('error' in data) {
 				return resolve({ error: `Type : ${data.error}\nMessage : ${data.errorDescription}` });
 			}
+
 			const { deviation } = data;
 			const image = `${deviation.media.baseUri}${deviation.media.types[
-				check(deviation.media.types.findIndex((w) => w.t == "fullview" && w.c != undefined)) ?? deviation.media.types.findIndex((w) => w.t == "social_preview")
-			].c?.replace("<prettyName>", deviation.media.prettyName)}${deviation.media.token?.[0] ? `?token=${deviation.media.token[0]}` : ""}`;
+				check(deviation.media.types.findIndex((w) => w.t == 'fullview' && w.c != undefined)) ?? deviation.media.types.findIndex((w) => w.t == 'social_preview')
+			].c?.replace('<prettyName>', deviation.media.prettyName)}${deviation.media.token?.[0] ? `?token=${deviation.media.token[0]}` : ''}`;
+
 			resolve({
 				id: deviation.deviationId,
 				title: deviation.title,
@@ -26,5 +32,3 @@ export const downloadDeviantArt = (input) =>
 			reject(err);
 		}
 	});
-
-const check = (i) => (i == -1 ? undefined : i);

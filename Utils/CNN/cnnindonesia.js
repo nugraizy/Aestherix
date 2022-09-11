@@ -1,32 +1,10 @@
-import { fetchJSON } from "../../Helper/index.js";
+import { fetchJSON } from '../../Helper/index.js';
 
-export const cnnindonesia = (keyword) =>
-	new Promise(async (resolve, reject) => {
-		try {
-			const { data: json } = await fetchJSON("https://www.cnnindonesia.com/api", {
-				method: "POST",
-				headers: {
-					"Accept-Action": "search",
-				},
-				body: JSON.stringify({
-					query: keyword,
-					limit: 10,
-					typechannel: 5,
-					type: 3,
-				}),
-			});
-			if (!json) {
-				return resolve({ error: "data not found" });
-			}
-			resolve(parse(json));
-		} catch (err) {
-			reject(err);
-		}
-	});
+const URL_VISUAL = (input) => `https://akcdn.detik.net.id/visual/${input}`;
 
 const parse = (arr) => {
 	return arr.map((v) => {
-		v.strisi = v.strisi.replace(/<[^>]*>/g, "");
+		v.strisi = v.strisi.replace(/<[^>]*>/g, '');
 		return {
 			title: v.strjudul,
 			body: v.strisi,
@@ -38,4 +16,28 @@ const parse = (arr) => {
 	});
 };
 
-const URL_VISUAL = (input) => `https://akcdn.detik.net.id/visual/${input}`;
+export const cnnindonesia = (keyword) =>
+	new Promise(async (resolve, reject) => {
+		try {
+			const { data: json } = await fetchJSON('https://www.cnnindonesia.com/api', {
+				method: 'POST',
+				headers: {
+					'Accept-Action': 'search',
+				},
+				body: JSON.stringify({
+					query: keyword,
+					limit: 10,
+					typechannel: 5,
+					type: 3,
+				}),
+			});
+
+			if (!json) {
+				return resolve({ error: 'data not found' });
+			}
+
+			resolve(parse(json));
+		} catch (err) {
+			reject(err);
+		}
+	});

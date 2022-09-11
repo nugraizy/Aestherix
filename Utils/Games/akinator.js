@@ -1,4 +1,5 @@
-import { Aki } from "aki-api";
+/* global games */
+import { Aki } from 'aki-api';
 
 const TOTAL_ANSWER = 7;
 const ANSWERS = {
@@ -12,25 +13,16 @@ const ANSWERS = {
 };
 
 const BARS = {
-	1: "▰",
-	2: "▱",
+	1: '▰',
+	2: '▱',
 };
 
 const progressBar = (progress) => {
 	const bar = BARS[1].repeat(10);
 	const filled = Math.floor(progress / 10);
 	const empty = bar.length - filled;
-	return `${BARS[1].repeat(filled)}${BARS[2].repeat(empty)}`;
-};
 
-export const startAkinator = async (key) => {
-	if (getSession(key)) {
-		return { error: "You already have a game running." };
-	}
-	setSession(key);
-	const session = getSession(key);
-	await session.start();
-	return { progressBar: progressBar(0), arrow: "⇵", ...session };
+	return `${BARS[1].repeat(filled)}${BARS[2].repeat(empty)}`;
 };
 
 export const getSession = (key) => {
@@ -38,32 +30,51 @@ export const getSession = (key) => {
 };
 
 const setSession = (key) => {
-	return games.akinator.set(key, new Aki({ region: "id" }));
+	return games.akinator.set(key, new Aki({ region: 'id' }));
 };
 
 const deleteSession = async (key) => {
 	const session = getSession(key);
+
 	if (!session) {
-		return { error: "You don't have a game running." };
+		return { error: "You don't have a game running." }; /* eslint-disable-line */
 	}
+
 	games.akinator.delete(key);
 	return session;
 };
 
+export const startAkinator = async (key) => {
+	if (getSession(key)) {
+		return { error: 'You already have a game running.' };
+	}
+
+	setSession(key);
+	const session = getSession(key);
+
+	await session.start();
+	return { progressBar: progressBar(0), arrow: '⇵', ...session };
+};
+
 export const handleAnswer = async (key, answer) => {
 	const session = getSession(key);
+
 	if (!session) {
 		return;
 	}
+
 	if (!answer) {
 		return true;
 	}
+
 	let progress;
 	let arrow;
 	const tempProgress = session.progress;
+
 	if (parseInt(answer) > TOTAL_ANSWER) {
-		return { status: "waiting" };
+		return { status: 'waiting' };
 	}
+
 	if (isNaN(answer) || answer == 6) {
 		if (/^((t(?:rue)?|i?y(ak?|e)?(?:es|p)?|ok(?:ay)?)|(be?(tul|n(a|e)?r)))$/i.test(answer)) {
 			answer = ANSWERS[1];
@@ -79,54 +90,65 @@ export const handleAnswer = async (key, answer) => {
 			answer = ANSWERS[7];
 		} else if (/^((e(xit)?|out|b(a?|t(a)?)l))$/i.test(answer) || answer == 6) {
 			await session.win();
+
 			if (session.progress == 0) {
-				arrow = "⇵";
+				arrow = '⇵';
 			} else if (session.progress > tempProgress) {
-				arrow = "↑";
+				arrow = '↑';
 			} else {
-				arrow = "↓";
+				arrow = '↓';
 			}
+
 			progress = progressBar(session.progress);
 			await deleteSession(key);
-			return { status: "exitted", arrow, progressBar: progress, ...session };
+			return { status: 'exitted', arrow, progressBar: progress, ...session };
 		} else {
-			return { status: "invalid" };
+			return { status: 'invalid' };
 		}
 	} else {
 		answer = ANSWERS[parseInt(answer)];
 	}
+
 	if (answer == 6) {
 		if (session.currentStep == 0) {
-			return { status: "back", arrow: "⇵", isFailed: true, ...session };
+			return { status: 'back', arrow: '⇵', isFailed: true, ...session };
 		}
+
 		await session.back();
+
 		if (session.progress == 0) {
-			arrow = "⇵";
+			arrow = '⇵';
 		} else if (session.progress > tempProgress) {
-			arrow = "↑";
+			arrow = '↑';
 		} else {
-			arrow = "↓";
+			arrow = '↓';
 		}
+
 		progress = progressBar(session.progress);
-		return { status: "back", arrow, progressBar: progress, isFailed: false, ...session };
+		return { status: 'back', arrow, progressBar: progress, isFailed: false, ...session };
 	}
+
 	try {
 		await session.step(answer);
 	} catch (e) {
-		return { status: "waiting" };
+		return { status: 'waiting' };
 	}
+
 	if (session.progress == 0) {
-		arrow = "⇵";
+		arrow = '⇵';
 	} else if (session.progress > tempProgress) {
-		arrow = "↑";
+		arrow = '↑';
 	} else {
-		arrow = "↓";
+		arrow = '↓';
 	}
+
 	progress = progressBar(session.progress);
+
 	if (session.progress >= 90 || session.currentStep >= 87) {
 		await session.win();
 		await deleteSession(key);
-		return { status: "win", arrow, progressBar: progress, ...session };
+		return { status: 'win', arrow, progressBar: progress, ...session };
 	}
-	return { status: "playing", arrow, progressBar: progress, ...session };
+
+	return { status: 'playing', arrow, progressBar: progress, ...session };
 };

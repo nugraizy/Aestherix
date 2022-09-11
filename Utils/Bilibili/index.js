@@ -1,1 +1,1 @@
-export { bilibiliSearchCOM, bilibiliSearchTV, detailSourceFormat } from "./bilibili.js";
+export { bilibiliSearchCOM, bilibiliSearchTV, detailSourceFormat } from './bilibili.js';

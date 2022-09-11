@@ -1,4 +1,4 @@
-import { fetchJSON } from "../../Helper/index.js";
+import { fetchJSON } from '../../Helper/index.js';
 
 const LINE_URL_BASE = (input) => `https://store.line.me/api/search/sticker?query=${input}&offset=0&limit=36&type=ALL&includeFacets=true`;
 
@@ -6,6 +6,7 @@ export const line = (query) =>
 	new Promise(async (resolve) => {
 		try {
 			const data = await fetchJSON(LINE_URL_BASE(query));
+
 			resolve(
 				data.items.map((v) => ({
 					title: v.title,

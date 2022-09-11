@@ -10,6 +10,7 @@ const URL_API_SEARCH_NOVEL = (keyword) =>
 	`https://www.pixiv.net/ajax/search/novels/${encodeURIComponent(keyword)}?word=${encodeURIComponent(keyword)}&order=date_d&mode=all&p=1&s_mode=s_tag&gs=0&lang=en`;
 const URL_API_SEARCH_ARTWORKS = (keyword) =>
 	`https://www.pixiv.net/ajax/search/artworks/${encodeURIComponent(keyword)}?word=${encodeURIComponent(keyword)}&order=date_d&mode=all&p=1&s_mode=s_tag&type=all&lang=en`;
+
 export {
 	URL_API_DOWNLOAD_MANGA,
 	URL_API_DOWNLOAD_ARTWORKS,

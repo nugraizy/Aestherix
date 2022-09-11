@@ -1,7 +1,8 @@
-import dotenv from "dotenv";
-import { EventEmitter } from "events";
+import dotenv from 'dotenv';
+import { EventEmitter } from 'events';
 
 dotenv.config();
+/* eslint-disable */
 global.cmds = {};
 global.user = {};
 global.presences = {};

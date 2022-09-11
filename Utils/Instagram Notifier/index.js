@@ -1,1 +1,1 @@
-export { instafier } from "./instafier.js";
+export { instafier } from './instafier.js';

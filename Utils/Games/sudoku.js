@@ -1,3 +1,4 @@
+/* eslint-disable */
 const LEVEL = {
 	easy: 60,
 	medium: 50,
@@ -7,15 +8,18 @@ const LEVEL = {
 
 export const makePuzzle = (level) => {
 	let board;
+
 	if (level == undefined) {
-		level = LEVEL["easy"];
+		level = LEVEL['easy'];
 	} else {
-		level = LEVEL[level] || LEVEL["easy"];
+		level = LEVEL[level] || LEVEL['easy'];
 	}
+
 	board = solvePuzzle(Array(81).fill(null));
 	let puzzle = [];
 	let deduced = Array(81).fill(null);
 	let order = [...Array(81).keys()];
+
 	shuffleArray(order);
 
 	for (let i = 0; i < order.length; i++) {
@@ -35,6 +39,7 @@ export const makePuzzle = (level) => {
 
 	for (let i = puzzle.length - 1; i >= 0; i--) {
 		let e = puzzle[i];
+
 		removeElement(puzzle, i);
 		let rating = checkpuzzle(boardforentries(puzzle), board);
 
@@ -42,7 +47,9 @@ export const makePuzzle = (level) => {
 			puzzle.push(e);
 		}
 	}
+
 	let boards = boardforentries(puzzle);
+
 	boards = makeItEasy(boards, level);
 	return boards;
 };
@@ -108,6 +115,7 @@ function solveboard(original) {
 			board: board,
 		},
 	];
+
 	return solvenext(track);
 }
 
@@ -126,6 +134,7 @@ function solvenext(remembered) {
 		});
 		let workspace = [].concat(tuple1.board);
 		let tuple2 = tuple1.guesses[tuple1.count];
+
 		workspace[tuple2.pos] = tuple2.num;
 		let guesses = deduce(workspace);
 
@@ -176,6 +185,7 @@ function deduce(board) {
 						};
 					});
 					let tuple2 = pickbetter(guess, count, t);
+
 					guess = tuple2.guess;
 					count = tuple2.count;
 				}
@@ -184,6 +194,7 @@ function deduce(board) {
 
 		if (!stuck) {
 			let tuple3 = figurebits(board);
+
 			allowed = tuple3.allowed;
 			needed = tuple3.needed;
 		}
@@ -218,6 +229,7 @@ function deduce(board) {
 							};
 						});
 						let tuple4 = pickbetter(guess, count, t);
+
 						guess = tuple4.guess;
 						count = tuple4.count;
 					}
@@ -244,10 +256,12 @@ function figurebits(board) {
 	for (let axis = 0; axis < 3; axis++) {
 		for (let x = 0; x < 9; x++) {
 			let bits = axismissing(board, x, axis);
+
 			needed.push(bits);
 
 			for (let y = 0; y < 9; y++) {
 				let pos = posfor(x, y, axis);
+
 				allowed[pos] = allowed[pos] & bits;
 			}
 		}
@@ -314,6 +328,7 @@ function allowed(board, pos) {
 
 	for (let axis = 0; axis < 3; axis++) {
 		const x = axisfor(pos, axis);
+
 		bits = bits & axismissing(board, x, axis);
 	}
 
@@ -349,6 +364,7 @@ function boardforentries(entries) {
 
 	for (const item of entries) {
 		let { num, pos } = item;
+
 		board[pos] = num;
 	}
 
@@ -373,6 +389,7 @@ function shuffleArray(original) {
 	for (let i = original.length - 1; i > 0; i--) {
 		const j = randomInt(i);
 		const contents = original[i];
+
 		original[i] = original[j];
 		original[j] = contents;
 	}
@@ -380,6 +397,7 @@ function shuffleArray(original) {
 
 function removeElement(array, from, to) {
 	const rest = array.slice((to || from) + 1 || array.length);
+
 	array.length = from < 0 ? array.length + from : from;
 	return array.push(...rest);
 }
@@ -387,28 +405,35 @@ function removeElement(array, from, to) {
 function makeItEasy(board, level) {
 	const emptyCells = [];
 	const solve = solvePuzzle(board);
+
 	for (let i = 0; i < board.length; i++) {
 		if (board[i] === null) {
 			emptyCells.push(i);
 		}
 	}
+
 	for (let i = 0; i < level; i++) {
 		const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+
 		board[randomIndex] = solve[randomIndex];
 		emptyCells.splice(randomIndex, 1);
 	}
+
 	return board;
 }
 
 export const revealOneElement = (board, solvedBoard) => {
 	const emptyCells = [];
 	const tempBoard = board;
+
 	for (let i = 0; i < board.length; i++) {
-		if (board[i] == "X") {
+		if (board[i] == 'X') {
 			emptyCells.push(i);
 		}
 	}
+
 	const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+
 	board[randomIndex] = solvedBoard[randomIndex];
 	tempBoard[randomIndex] = `(${solvedBoard[randomIndex]})`;
 	return { board, tempBoard };
@@ -417,75 +442,84 @@ export const revealOneElement = (board, solvedBoard) => {
 function allowedMove(post, num, board, solvedBoard) {
 	const postAx = post[0].toLowerCase();
 	let postNum = Number(post[1]);
+
 	num = Number(num);
-	if (postAx === "a") {
+
+	if (postAx === 'a') {
 		postNum -= 1;
-	} else if (postAx === "b") {
+	} else if (postAx === 'b') {
 		postNum = postNum + 9 * 1 - 1;
-	} else if (postAx === "c") {
+	} else if (postAx === 'c') {
 		postNum = postNum + 9 * 2 - 1;
-	} else if (postAx === "d") {
+	} else if (postAx === 'd') {
 		postNum = postNum + 9 * 3 - 1;
-	} else if (postAx === "e") {
+	} else if (postAx === 'e') {
 		postNum = postNum + 9 * 4 - 1;
-	} else if (postAx === "f") {
+	} else if (postAx === 'f') {
 		postNum = postNum + 9 * 5 - 1;
-	} else if (postAx === "g") {
+	} else if (postAx === 'g') {
 		postNum = postNum + 9 * 6 - 1;
-	} else if (postAx === "h") {
+	} else if (postAx === 'h') {
 		postNum = postNum + 9 * 7 - 1;
-	} else if (postAx === "i") {
+	} else if (postAx === 'i') {
 		postNum = postNum + 9 * 8 - 1;
 	}
-	if (board[postNum] !== "X") {
-		return { status: false, statusPlay: "Already Filled", message: "Posisi ini telah diisi." };
+
+	if (board[postNum] !== 'X') {
+		return { status: false, statusPlay: 'Already Filled', message: 'Posisi ini telah diisi.' };
 	} else if (num !== solvedBoard[postNum]) {
-		return { status: false, statusPlay: "Wrong move", message: `Jawaban kamu bukan merupakan solusi di grid ${post}.` };
+		return { status: false, statusPlay: 'Wrong move', message: `Jawaban kamu bukan merupakan solusi di grid ${post}.` };
 	} else {
-		return { status: true, statusPlay: "Playing", post: postNum, message: `Kamu benar. Grid ${post} adalah ${num}` };
+		return { status: true, statusPlay: 'Playing', post: postNum, message: `Kamu benar. Grid ${post} adalah ${num}` };
 	}
 }
 
 export const checkWin = (board) => {
-	if (board.filter((x) => x == "X").length == 0) {
-		return { status: true, message: "Selamat, kamu berhasil menyelesaikan puzzle ini." };
+	if (board.filter((x) => x == 'X').length == 0) {
+		return { status: true, message: 'Selamat, kamu berhasil menyelesaikan puzzle ini.' };
 	}
+
 	return { status: false };
 };
 
 export const stringifyGrid = (grid) => {
-	let capt = "\n   1  2  3      4  5  6      7  8  9\n";
-	let abjad = "ABCDEFGHI".split("").map((v) => v + ".");
+	let capt = '\n   1  2  3      4  5  6      7  8  9\n';
+	let abjad = 'ABCDEFGHI'.split('').map((v) => v + '.');
+
 	for (let i = 0; i < grid.length; i++) {
 		if (grid[i] == null) {
-			grid[i] = "X";
+			grid[i] = 'X';
 		}
+
 		if (i == 0) {
 			capt += `${abjad[0]} ${grid[i]} `;
 		} else if (i % 3 == 0) {
-			capt += `${abjad[i / 9] == "I." ? `${abjad[i / 9]} ` : abjad[i / 9] || ""}  ${grid[i]} `;
+			capt += `${abjad[i / 9] == 'I.' ? `${abjad[i / 9]} ` : abjad[i / 9] || ''}  ${grid[i]} `;
 		} else {
 			capt += `${grid[i]} `;
 		}
+
 		if (i % 3 === 2 && i % 9 != 8) {
-			capt += "  |  ";
+			capt += '  |  ';
 		}
 
 		if (i % 9 === 8) {
-			capt += "\n";
+			capt += '\n';
 		}
 
 		if (i % 27 === 26 && i != 80) {
-			capt += "━━━━━━━━━━━━\n";
+			capt += '━━━━━━━━━━━━\n';
 		}
 	}
+
 	return capt;
 };
 
 export const fillGrid = (post, num, board, solvedBoard) => {
 	let grids = allowedMove(post, num, board, solvedBoard);
 	let tempBoard = board;
-	if (grids.status && grids.statusPlay === "Playing") {
+
+	if (grids.status && grids.statusPlay === 'Playing') {
 		board[grids.post] = Number(num);
 		tempBoard[grids.post] = `(${num})`;
 		return { status: true, statusPlaying: grids.statusPlay, grid: board, gridSolved: solvedBoard, tempBoard };

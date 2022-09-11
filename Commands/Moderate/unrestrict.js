@@ -1,22 +1,27 @@
+/* global botNum */
+
 export default {
-	name: "unrestrict",
-	description: "Unrestrict the group.",
-	usage: "!unlock",
-	aliases: ["unrestrict", "unrestrictgroup", "unrestrictgroupchat"],
-	category: "Moderation",
+	name: 'unrestrict',
+	description: 'Unrestrict the group.',
+	usage: '!unlock',
+	aliases: ['unrestrict', 'unrestrictgroup', 'unrestrictgroupchat'],
+	category: 'Moderation',
 	cooldown: 2,
 	limit: 2,
-	status: "enable",
-	async run({ groupMetadata, isAdmin, isBotAdmin, isOwner, from, message }, client, store) {
+	status: 'enable',
+	async run({ groupMetadata, isAdmin, isBotAdmin, isOwner, from, message }, client) {
 		if (!isAdmin && !isOwner) {
-			return await client[botNum].reply({ from, quoted: message }, "You are not admin. This commands is only for admins.");
+			return await client[botNum].reply({ from, quoted: message }, 'You are not admin. This commands is only for admins.');
 		}
+
 		if (!isBotAdmin) {
-			return await client[botNum].reply({ from, quoted: message }, "Bot is not admin, Please promote admin before using moderation commands.");
+			return await client[botNum].reply({ from, quoted: message }, 'Bot is not admin, Please promote admin before using moderation commands.');
 		}
+
 		if (!groupMetadata.restrict) {
-			return await client[botNum].reply({ from, quoted: message }, "Group is already unrestricted.");
+			return await client[botNum].reply({ from, quoted: message }, 'Group is already unrestricted.');
 		}
-		await client[botNum].updateGroup(from, undefined, "UNLOCKED");
+
+		await client[botNum].updateGroup(from, undefined, 'UNLOCKED');
 	},
 };

@@ -1,29 +1,37 @@
-import fs from "fs";
-import { getTimeSince } from "../../Helper/index.js";
-const DB_PATH = `./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`;
+/* global cli, botNum, OPTIONS */
+import fs from 'fs';
+
+import { getTimeSince } from '../../Helper/index.js';
+
+const DB_PATH = `./Media Files/Connection Databases/${cli.input[0] ?? 'Session-debug'}.json`;
 
 export default {
-	name: "checkdeleted",
-	description: "Fetch every deleted messages in chat",
-	usage: "!checkdeleted",
-	aliases: ["cekdel", "checkdel"],
-	category: "Owner",
+	name: 'checkdeleted',
+	description: 'Fetch every deleted messages in chat',
+	usage: '!checkdeleted',
+	aliases: ['cekdel', 'checkdel'],
+	category: 'Owner',
 	cooldown: 0,
 	limit: 0,
-	status: "enable",
+	status: 'enable',
 	async run({ isOwner, from, message, args, cmd }, client, store) {
 		if (!isOwner) {
-			return await client[botNum].reply({ from, quoted: message }, "You are not allowed to use this command");
+			return await client[botNum].reply({ from, quoted: message }, 'You are not allowed to use this command');
 		}
+
 		const messages = OPTIONS.json ? JSON.parse(fs.readFileSync(DB_PATH)).messages[from] : await store.loadMessages(from);
-		if (args[1] == "get") {
+
+		if (args[1] == 'get') {
 			const dataMessage = messages.find((v) => v.key.id == args[2]);
-			(await import("../../Handlers/Messages Event/deletedMessage.js")).default.handler(client, dataMessage, true, store);
+
+			(await import('../../Handlers/Messages Event/deletedMessage.js')).default.handler(client, dataMessage, true, store);
 			return;
 		}
-		const dataMessages = messages.filter((v) => v.message?.protocolMessage && v.message.protocolMessage.type == "REVOKE");
+
+		const dataMessages = messages.filter((v) => v.message?.protocolMessage && v.message.protocolMessage.type == 'REVOKE');
 		const row = [];
 		let i = 0;
+
 		for (const message of dataMessages) {
 			row.push({
 				rows: [
@@ -32,15 +40,16 @@ export default {
 						rowId: `${cmd} get ${message.message.protocolMessage.key.id}`,
 					},
 				],
-				title: `VOID BOT | ${message?.pushName ?? "No Name"}`,
+				title: `VOID BOT | ${message?.pushName ?? 'No Name'}`,
 			});
 			i++;
 		}
+
 		await client[botNum].sendMessage(from, {
-			buttonText: "Open List",
-			title: "choosse one to fetch the metadata message",
-			footer: "and bot will send the message",
-			text: "\t",
+			buttonText: 'Open List',
+			title: 'choosse one to fetch the metadata message',
+			footer: 'and bot will send the message',
+			text: '\t',
 			sections: row,
 		});
 	},

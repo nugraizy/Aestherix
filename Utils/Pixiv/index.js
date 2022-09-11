@@ -6,10 +6,10 @@ export {
 	URL_API_SEARCH_ARTWORKS,
 	URL_API_SEARCH_MANGA,
 	URL_API_SEARCH_NOVEL,
-} from "./api.js";
-export { getNovelContent } from "./contentNovel.js";
-export { downloadArtworks } from "./downloadArt.js";
-export { downloadManga } from "./downloadManga.js";
-export { searchArtwork } from "./searchArt.js";
-export { searchManga } from "./searchManga.js";
-export { searchNovel } from "./searchNovel.js";
+} from './api.js';
+export { getNovelContent } from './contentNovel.js';
+export { downloadArtworks } from './downloadArt.js';
+export { downloadManga } from './downloadManga.js';
+export { searchArtwork } from './searchArt.js';
+export { searchManga } from './searchManga.js';
+export { searchNovel } from './searchNovel.js';

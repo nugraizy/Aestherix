@@ -1,2 +1,2 @@
-export { wpDownload, wpLatest, wpSearch } from "./waifuplay.js";
+export { wpDownload, wpLatest, wpSearch } from './waifuplay.js';
 

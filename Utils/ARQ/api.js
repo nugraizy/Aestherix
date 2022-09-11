@@ -1,49 +1,51 @@
-import Axios from "axios";
-import dotenv from "dotenv";
-import FormData from "form-data";
-import fs from "fs-extra";
+/* global process */
+import Axios from 'axios';
+import dotenv from 'dotenv';
+import FormData from 'form-data';
+
 dotenv.config();
 
 class ArqAPI {
 	#apiKey = process.env.ARQ_KEY;
-	#url_base = `https://arq.hamker.dev`;
+	#urlBase = 'https://arq.hamker.dev';
 	constructor() {
 		this.isNsfw = async (media) => {
 			const form = new FormData();
-			form.append("file", media);
-			return await this.post("/nsfw_scan", form, form.getHeaders());
+
+			form.append('file', media);
+			return await this.post('/nsfw_scan', form, form.getHeaders());
 		};
 
 		this.searchImage = async (query) => {
-			return await this.request("/image", {
+			return await this.request('/image', {
 				params: {
 					query,
 				},
-				method: "GET",
+				method: 'GET',
 			});
 		};
 
 		this.findLyrics = async (query) => {
-			return await this.request("/lyrics", {
+			return await this.request('/lyrics', {
 				params: {
 					query,
 				},
-				method: "GET",
+				method: 'GET',
 			});
 		};
 
 		this.searchPHub = async (query) => {
-			return await this.request("/ph", {
+			return await this.request('/ph', {
 				params: {
 					query,
-					thumbsize: "large_hd",
+					thumbsize: 'large_hd',
 				},
-				method: "GET",
+				method: 'GET',
 			});
 		};
 
-		this.subreddits = async (query = "memes") => {
-			return await this.request("/reddit", {
+		this.subreddits = async (query = 'memes') => {
+			return await this.request('/reddit', {
 				params: {
 					query,
 				},
@@ -51,7 +53,7 @@ class ArqAPI {
 		};
 
 		this.searchWallpaperARQ = async (query) => {
-			return await this.request("/wall", {
+			return await this.request('/wall', {
 				params: {
 					query,
 				},
@@ -61,13 +63,14 @@ class ArqAPI {
 	async request(path, _) {
 		try {
 			const { data } = await Axios({
-				url: this.#url_base + path,
+				url: this.#urlBase + path,
 				..._,
 				headers: {
-					"content-type": "application/json",
-					"X-API-KEY": this.#apiKey,
+					'content-type': 'application/json',
+					'X-API-KEY': this.#apiKey,
 				},
 			});
+
 			return data;
 		} catch (err) {
 			return err?.response?.data;
@@ -76,12 +79,13 @@ class ArqAPI {
 
 	async post(path, form, _) {
 		try {
-			const { data } = await Axios.post(this.#url_base + path, form, {
+			const { data } = await Axios.post(this.#urlBase + path, form, {
 				headers: {
 					..._,
-					"X-API-KEY": this.#apiKey,
+					'X-API-KEY': this.#apiKey,
 				},
 			});
+
 			return data;
 		} catch (err) {
 			return err?.response?.data;

@@ -1,1 +1,1 @@
-export { emojimix } from "./emojiMix.js";
+export { emojimix } from './emojiMix.js';

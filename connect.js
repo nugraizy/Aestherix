@@ -1,67 +1,74 @@
-import baileys, { jidDecode } from "@adiwajshing/baileys";
-import { Boom } from "@hapi/boom";
-import center from "center-align";
-import { spawn } from "child_process";
-import fs from "fs-extra";
-import meow from "meow";
-import moment from "moment-timezone";
-import mqtt from "mqtt";
-import cron from "node-cron";
-import path from "path";
-import P from "pino";
-import { platform } from "process";
-import Spinnies from "spinnies";
-import { pathToFileURL } from "url";
-import { getSpinner } from "./Helper/Misc/Spinner/spinners.js";
-import { color, ERRLOG, INFOLOG, readJSON, romanize, writeJSON } from "./Helper/Modules/functions.js";
+/* eslint-disable */
+
+import baileys, { jidDecode } from '@adiwajshing/baileys';
+import { Boom } from '@hapi/boom';
+import center from 'center-align';
+import { spawn } from 'child_process';
+import fs from 'fs-extra';
+import meow from 'meow';
+import moment from 'moment-timezone';
+import mqtt from 'mqtt';
+import cron from 'node-cron';
+import path from 'path';
+import P from 'pino';
+import { platform } from 'process';
+import Spinnies from 'spinnies';
+import { pathToFileURL } from 'url';
+
+import { getSpinner } from './Helper/Misc/Spinner/spinners.js';
+import { color, ERRLOG, INFOLOG, readJSON, romanize, writeJSON } from './Helper/Modules/functions.js';
 let shouldWait = false;
 
 console.clear();
 
 const { default: makeWASocket, DisconnectReason, makeInMemoryStore, useSingleFileAuthState, DEFAULT_CONNECTION_CONFIG } = baileys;
 const moduleURL = new URL(import.meta.url);
-export const __dirname = platform == "win32" ? path.dirname(moduleURL.pathname).slice(1) : path.dirname(moduleURL.pathname);
+
+export const __dirname = platform == 'win32' ? path.dirname(moduleURL.pathname).slice(1) : path.dirname(moduleURL.pathname);
 const { stdout } = process;
 
-const spinners = new Spinnies({ color: "blue", succeedColor: "green", failColor: "redBright", spinner: getSpinner("dots") });
+const spinners = new Spinnies({ color: 'blue', succeedColor: 'green', failColor: 'redBright', spinner: getSpinner('dots') });
 
 global.cli = parseCli();
 global.OPTIONS = cli.flags;
 const regexOption = [
-	"prefix",
-	"readOnly",
-	"autoRead",
-	"autoCorrect",
-	"restrict",
-	"onlyLogs",
-	"noLogs",
-	"selfMode",
-	"debugMode",
-	"multiCmd",
-	"rainbow",
-	"trace",
-	"help",
-	"watch",
-	"coolDown",
-	"noLoad",
-	"json",
-	"reset",
-	"story",
-	"offline",
-	"noCall",
-	"instaNotifier",
-	"limitReset",
-	"resetOnStart",
+	'prefix',
+	'readOnly',
+	'autoRead',
+	'autoCorrect',
+	'restrict',
+	'onlyLogs',
+	'noLogs',
+	'selfMode',
+	'debugMode',
+	'multiCmd',
+	'rainbow',
+	'trace',
+	'help',
+	'watch',
+	'coolDown',
+	'noLoad',
+	'json',
+	'reset',
+	'story',
+	'offline',
+	'noCall',
+	'instaNotifier',
+	'limitReset',
+	'resetOnStart',
 ];
-if (platform !== "win32" && !OPTIONS.noLoad) {
+
+if (platform !== 'win32' && !OPTIONS.noLoad) {
 	await printRandomAscii();
 }
 
 if (OPTIONS.reset) {
-	const sessionName = `${cli.input[0] ?? "Session-debug"}`;
+	const sessionName = `${cli.input[0] ?? 'Session-debug'}`;
+
 	if (fs.existsSync(`./Session/${sessionName}.json`)) {
 		fs.unlinkSync(`./Session/${sessionName}.json`);
 	}
+
 	if (fs.existsSync(`./Media Files/Connection Databases/${sessionName}.json`)) {
 		fs.unlinkSync(`./Media Files/Connection Databases/${sessionName}.json`);
 	}
@@ -69,32 +76,37 @@ if (OPTIONS.reset) {
 
 if (OPTIONS.limitReset) {
 	cron.schedule(
-		"0 0 * * *",
+		'0 0 * * *',
 		async () => {
-			const time = moment().tz("Asia/Jakarta").format("HH:mm:ss DD/MM");
-			(await import("./Helper/Groups/Settings/limit.js")).resetAllLimit();
-			INFOLOG(`[${color(time, "cyan")}]`, `${color("Sukses Reset User's Limit", "white")}`);
+			const time = moment().tz('Asia/Jakarta').format('HH:mm:ss DD/MM');
+
+			(await import('./Helper/Groups/Settings/limit.js')).resetAllLimit();
+			INFOLOG(`[${color(time, 'cyan')}]`, `${color("Sukses Reset User's Limit", 'white')}`);
+
 			if (OPTIONS.resetOnStart) {
 				await clearDBConnection();
 			}
 		},
 		{
-			timezone: "Asia/Jakarta",
+			timezone: 'Asia/Jakarta',
 			scheduled: true,
 		},
 	);
 }
 
-const { state, saveState } = useSingleFileAuthState(`./Session/${cli.input[0] ?? "Session-debug"}.json`);
-global.store = makeInMemoryStore({ logger: P().child({ level: "fatal", stream: "store" }) });
+const { state, saveState } = useSingleFileAuthState(`./Session/${cli.input[0] ?? 'Session-debug'}.json`);
+
+global.store = makeInMemoryStore({ logger: P().child({ level: 'fatal', stream: 'store' }) });
+
 if (OPTIONS.json) {
-	if (!fs.existsSync("./Media Files/Connection Databases/")) {
-		fs.mkdirSync("./Media Files/Connection Databases/");
+	if (!fs.existsSync('./Media Files/Connection Databases/')) {
+		fs.mkdirSync('./Media Files/Connection Databases/');
 	}
+
 	await clearDBConnection();
-	store.readFromFile(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`);
+	store.readFromFile(`./Media Files/Connection Databases/${cli.input[0] ?? 'Session-debug'}.json`);
 	setInterval(() => {
-		store.writeToFile(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`);
+		store.writeToFile(`./Media Files/Connection Databases/${cli.input[0] ?? 'Session-debug'}.json`);
 	}, 2 * 1000);
 }
 
@@ -102,7 +114,7 @@ export const runtime = Date.now();
 
 for (const option of Object.keys(OPTIONS).filter((key) => OPTIONS[key] == true)) {
 	if (!regexOption.includes(option)) {
-		ERRLOG(` ${color(option, "red")} ${color("is not a valid option", "white")}`);
+		ERRLOG(` ${color(option, 'red')} ${color('is not a valid option', 'white')}`);
 	}
 }
 
@@ -123,14 +135,16 @@ const failSpinner = (name, options) => {
 };
 
 const clientMqttListen = mqtt.connect(process.env.MQTT_URL);
-clientMqttListen.on("connect", () => {
+
+clientMqttListen.on('connect', () => {
 	clientMqttListen.subscribe(process.env.MQTT_TOPIC, async (err) => {});
 });
 
 Number.prototype.toTime = function () {
 	const minutes = Math.floor(this / 60_000);
 	const seconds = ((this % 60_000) / 1000).toFixed(0);
-	return seconds == 60 ? `${minutes + 1}:00` : `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+
+	return seconds == 60 ? `${minutes + 1}:00` : `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 };
 
 let isClosed = false;
@@ -148,73 +162,82 @@ const start = async () => {
 	const CONNECTION_CONFIG = {
 		printQRInTerminal: true,
 		version: DEFAULT_CONNECTION_CONFIG.version,
-		logger: P({ level: OPTIONS.trace ? "trace" : OPTIONS.debugMode ? "debug" : "fatal" }),
+		logger: P({ level: OPTIONS.trace ? 'trace' : OPTIONS.debugMode ? 'debug' : 'fatal' }),
 		auth: state,
 		markOnlineOnConnect: false,
 		syncFullHistory: false,
 		getMessage: async () => {
-			return { conversation: "Please Try Again" };
+			return { conversation: 'Please Try Again' };
 		},
 	};
 	const Client = makeWASocket(CONNECTION_CONFIG);
+
 	store.bind(Client.ev);
 
-	Client.ev.on("connection.update", async ({ lastDisconnect, connection, receivedPendingNotifications }) => {
+	Client.ev.on('connection.update', async ({ lastDisconnect, connection, receivedPendingNotifications }) => {
 		try {
-			if (connection == "connecting") {
-				addSpinner("Connecting", { text: "Connecting to WASocket..." });
+			if (connection == 'connecting') {
+				addSpinner('Connecting', { text: 'Connecting to WASocket...' });
 			}
-			if (connection == "close") {
+
+			if (connection == 'close') {
 				const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
+
 				if (reason == DisconnectReason.badSession) {
-					log("Bad session, Please delete your previous session and do a rescan...");
+					log('Bad session, Please delete your previous session and do a rescan...');
 					process.exit(0);
 				} else if (reason == DisconnectReason.loggedOut) {
-					log("Logged out, Please delete your previous session and do a rescan...");
+					log('Logged out, Please delete your previous session and do a rescan...');
 					process.exit(0);
 				} else {
 					if (reason == DisconnectReason.restartRequired) {
-						log("Restart required, Restarting your WebScoket...");
+						log('Restart required, Restarting your WebScoket...');
 					} else if (reason == DisconnectReason.timedOut) {
-						log("Timed out, Quick reconnecting...");
+						log('Timed out, Quick reconnecting...');
 					} else if (reason == DisconnectReason.connectionClosed) {
-						log("Connection closed, Quick reconnecting...");
+						log('Connection closed, Quick reconnecting...');
 					} else if (reason == DisconnectReason.connectionReplaced) {
-						log("Connection replaced, Quick reconnecting...");
+						log('Connection replaced, Quick reconnecting...');
 					} else if (reason == DisconnectReason.connectionLost) {
-						log("Connection lost, Quick reconnecting...");
+						log('Connection lost, Quick reconnecting...');
 					} else {
-						log("Unknown reason, Quick reconnecting...");
+						log('Unknown reason, Quick reconnecting...');
 					}
-					if (cache.interval.has("blocklist") && cache.interval.has("groupMetadata")) {
-						clearInterval(cache.interval.get("blocklist"));
-						clearInterval(cache.interval.get("groupMetadata"));
-						cache.interval.delete("blocklist");
-						cache.interval.delete("groupMetadata");
+
+					if (cache.interval.has('blocklist') && cache.interval.has('groupMetadata')) {
+						clearInterval(cache.interval.get('blocklist'));
+						clearInterval(cache.interval.get('groupMetadata'));
+						cache.interval.delete('blocklist');
+						cache.interval.delete('groupMetadata');
 						isFirstConnection = false;
 					}
+
 					reconnectMqttConnection(connectMqtt);
 					await start().catch((e) => log(e));
 				}
-			} else if (connection == "open") {
+			} else if (connection == 'open') {
 				if (!isClosed) {
 					await load();
 					isClosed = true;
 				}
+
 				isFirstConnection = true;
+
 				if (receivedPendingNotifications == true) {
 					shouldWait = true;
 				}
+
 				if (receivedPendingNotifications == false && shouldWait) {
 					shouldWait = false;
 				}
+
 				if (!receivedPendingNotifications && !shouldWait) {
 					global.client = {};
 					global.botNum = Client.user.id;
 					client[Client.user.id] = Client;
-					(await import("./Helper/Modules/assignFunction.js")).assign(client);
-					successSpinner("Connecting", { text: "Connected to WASocket" });
-					INFOLOG(color(center(`Bot Version  ${romanize(readJSON("./package.json").version)}\n\n`, stdout.columns), "#9f53ea"));
+					(await import('./Helper/Modules/assignFunction.js')).assign(client);
+					successSpinner('Connecting', { text: 'Connected to WASocket' });
+					INFOLOG(color(center(`Bot Version  ${romanize(readJSON('./package.json').version)}\n\n`, stdout.columns), '#9f53ea'));
 					connectEvent();
 					clearDBConnection();
 					connectMqtt();
@@ -222,48 +245,56 @@ const start = async () => {
 			}
 		} catch (error) {
 			log(error);
-			if (cache.interval.has("blocklist") && cache.interval.has("groupMetadata")) {
-				clearInterval(cache.interval.get("blocklist"));
-				clearInterval(cache.interval.get("groupMetadata"));
-				cache.interval.delete("blocklist");
-				cache.interval.delete("groupMetadata");
+
+			if (cache.interval.has('blocklist') && cache.interval.has('groupMetadata')) {
+				clearInterval(cache.interval.get('blocklist'));
+				clearInterval(cache.interval.get('groupMetadata'));
+				cache.interval.delete('blocklist');
+				cache.interval.delete('groupMetadata');
 				isFirstConnection = false;
 			}
+
 			reconnectMqttConnection(connectMqtt);
 			await start().catch((e) => log(e));
 		}
 	});
 
 	const connectEvent = () => {
-		Client.ev.on("messages.upsert", async (message) => {
-			const Handler = (await import("./Handlers/Messages Event/incomingMessage.js")).default.handler;
+		Client.ev.on('messages.upsert', async (message) => {
+			const Handler = (await import('./Handlers/Messages Event/incomingMessage.js')).default.handler;
+
 			Handler(message, client, cmds, store, user);
 		});
 
-		Client.ev.on("messages.update", async (message) => {
+		Client.ev.on('messages.update', async (message) => {
 			if (message?.[0]?.update?.status == 4 || message?.[0]?.update?.status == 3) {
 				return;
 			}
-			const Handler = (await import("./Handlers/Messages Event/deletedMessage.js")).default.handler;
+
+			const Handler = (await import('./Handlers/Messages Event/deletedMessage.js')).default.handler;
+
 			message = store.messages[message[0].key.remoteJid]?.get(message[0].key.id);
 			Handler(client, message, false, store);
 		});
 
-		Client.ev.on("presence.update", async (presence) => {
+		Client.ev.on('presence.update', async (presence) => {
 			const from = presence.id;
 			const participant = Object.keys(presence.presences)[0];
 			const presences = presence.presences[participant].lastKnownPresence;
-			if (presences == "composing") {
-				const Handler = (await import("./Handlers/Message Presence/composing.js")).default.handler;
+
+			if (presences == 'composing') {
+				const Handler = (await import('./Handlers/Message Presence/composing.js')).default.handler;
+
 				Handler(client, from, participant);
 			}
 		});
 
-		Client.ev.on("call", async ([{ isGroup, status, id, from }]) => {
-			if (OPTIONS.noCall && !isGroup && status == "offer") {
+		Client.ev.on('call', async ([{ isGroup, status, id, from }]) => {
+			if (OPTIONS.noCall && !isGroup && status == 'offer') {
 				const { user, server } = jidDecode(botNum);
+
 				await client[botNum].sendNode({
-					tag: "call",
+					tag: 'call',
 					attrs: {
 						from: `${user}@${server}`,
 						to: from,
@@ -271,58 +302,64 @@ const start = async () => {
 					},
 					content: [
 						{
-							tag: "reject",
+							tag: 'reject',
 							attrs: {
-								"call-id": id,
-								"call-creator": from,
-								count: "512202",
+								'call-id': id,
+								'call-creator': from,
+								count: '512202',
 							},
 							content: null,
 						},
 					],
 				});
-				await client[botNum].updateBlockStatus(from, "block");
+				await client[botNum].updateBlockStatus(from, 'block');
 			}
 		});
 
-		Client.ev.on("group.participants.update", async (message) => {
-			const Handler = (await import("./Handlers/Notification Handlers/participantsNotification.js")).default.handler;
+		Client.ev.on('group.participants.update', async (message) => {
+			const Handler = (await import('./Handlers/Notification Handlers/participantsNotification.js')).default.handler;
+
 			Handler(client, message, store);
 		});
 
-		Client.ev.on("group.settings.update", async (message) => {
-			const Handler = (await import("./Handlers/Notification Handlers/groupSettingsNotification.js")).default.handler;
+		Client.ev.on('group.settings.update', async (message) => {
+			const Handler = (await import('./Handlers/Notification Handlers/groupSettingsNotification.js')).default.handler;
+
 			Handler(client, message, store);
 		});
 
-		Client.ev.on("werewolf.cycle", async (update) => {
-			if (update.time == "day") {
+		Client.ev.on('werewolf.cycle', async (update) => {
+			if (update.time == 'day') {
 				await client[botNum].sendMessage(update.id, { text: update.gameDialogue, mentions: update.peopleKilledMention });
-			} else if (update.time == "evening") {
+			} else if (update.time == 'evening') {
 				await client[botNum].sendMessage(update.id, {
 					text: update.gameDialogue,
 				});
+
 				for (const id of update.playersData.filter((v) => !v.isAlive)) {
 					client[botNum].sendMessage(id.id, {
-						text: "Karena kamu sudah mati, maka kamu hanya bisa menonton permainan saja",
+						text: 'Karena kamu sudah mati, maka kamu hanya bisa menonton permainan saja',
 					});
 				}
+
 				for (const id of update.playersData.filter((v) => v.isAlive)) {
 					client[botNum].sendMessage(id.id, {
-						title: "Pilih salah satu dari pemain berikut untuk divoting",
-						footer: `Made by Void Bot. Powered by Hidden Finder`,
-						text: "\t",
-						buttonText: "Open List",
+						title: 'Pilih salah satu dari pemain berikut untuk divoting',
+						footer: 'Made by Void Bot. Powered by Hidden Finder',
+						text: '\t',
+						buttonText: 'Open List',
 						sections: update.playersData
 							.filter((v) => v.isAlive)
-							.map((v) => ({ rows: [{ title: `VOTE ${v.name}`, rowId: `.ww vote ${v.id} ${update.id}` }], title: `VOID BOT | Werewolf Games` })),
+							.map((v) => ({ rows: [{ title: `VOTE ${v.name}`, rowId: `.ww vote ${v.id} ${update.id}` }], title: 'VOID BOT | Werewolf Games' })),
 					});
 				}
-			} else if (update.time == "voting") {
+			} else if (update.time == 'voting') {
 				await client[botNum].sendMessage(update.id, { text: update.gameDialogue, mentions: [update?.voteData?.voted] });
+
 				if (update.isWinning) {
 					return await client[botNum].sendMessage(update.id, { text: update.gameDialogue, mentions: update?.peopleMention });
 				}
+
 				await client[botNum].sendMessage(update.id, {
 					text: `Statistic Pemain :
 
@@ -330,159 +367,180 @@ const start = async () => {
 
 	${update.playersData
 		.map((v) => {
-			return v.isAlive ? `@${v.id.split("@")[0]} : 😄 Hidup` : `@${v.id.split("@")[0]} : 💀 Mati | ${v.role}`;
+			return v.isAlive ? `@${v.id.split('@')[0]} : 😄 Hidup` : `@${v.id.split('@')[0]} : 💀 Mati | ${v.role}`;
 		})
-		.join("\n")}`,
+		.join('\n')}`,
 					mentions: update.playersData.map((v) => v.id),
 				});
-			} else if (update.time == "dawn") {
-				await client[botNum].sendMessage(update.id, { text: update.gameDialogue.replace("{0}", update.gameTime) });
+			} else if (update.time == 'dawn') {
+				await client[botNum].sendMessage(update.id, { text: update.gameDialogue.replace('{0}', update.gameTime) });
+
 				for (const { id, role, isAlive } of update.playersData) {
 					if (isAlive) {
-						if (role == "werewolf") {
+						if (role == 'werewolf') {
 							client[botNum].sendMessage(id, {
-								buttonText: "Open list",
-								footer: `Made by Void Bot. Powered by Hidden Finder`,
-								title: `Kamu adalah Serigala. Dan saat ini merupakan waktu yang tepat untuk membunuh seseorang.\nPilih salah satu player.`,
-								text: "\t",
+								buttonText: 'Open list',
+								footer: 'Made by Void Bot. Powered by Hidden Finder',
+								title: 'Kamu adalah Serigala. Dan saat ini merupakan waktu yang tepat untuk membunuh seseorang.\nPilih salah satu player.',
+								text: '\t',
 								sections: update.playersData
 									.filter((v) => v.isAlive)
 									.map((v) => {
-										return { rows: [{ title: `KILL ${v.name}`, rowId: `.ww kill ${v.id} ${update.id}` }], title: `VOID BOT | Werewolf Games` };
+										return { rows: [{ title: `KILL ${v.name}`, rowId: `.ww kill ${v.id} ${update.id}` }], title: 'VOID BOT | Werewolf Games' };
 									}),
 							});
-						} else if (role == "seer") {
+						} else if (role == 'seer') {
 							client[botNum].sendMessage(id, {
-								buttonText: "Open list",
-								footer: `Made by Void Bot. Powered by Hidden Finder`,
-								text: "\t",
-								title: `Kamu adalah Penerawang. Dan saat ini merupakan waktu yang tepat untuk menerawang seseorang.\nPilih salah satu player.`,
+								buttonText: 'Open list',
+								footer: 'Made by Void Bot. Powered by Hidden Finder',
+								text: '\t',
+								title: 'Kamu adalah Penerawang. Dan saat ini merupakan waktu yang tepat untuk menerawang seseorang.\nPilih salah satu player.',
 								sections: update.playersData
 									.filter((v) => v.isAlive)
 									.map((v, i) => {
-										return { rows: [{ title: `TERAWANG ${update.playersData[i].name}`, rowId: `.ww seer ${update.playersData[i].id} ${update.id}` }], title: `VOID BOT | Werewolf Games` };
+										return { rows: [{ title: `TERAWANG ${update.playersData[i].name}`, rowId: `.ww seer ${update.playersData[i].id} ${update.id}` }], title: 'VOID BOT | Werewolf Games' };
 									}),
 							});
-						} else if (role == "guard") {
+						} else if (role == 'guard') {
 							client[botNum].sendMessage(id, {
-								buttonText: "Open list",
-								title: `Kamu adalah Penjaga. Dan saat ini merupakan waktu yang tepat untuk memjaga seseorang.\nPilih salah satu player.`,
-								footer: `Made by Void Bot. Powered by Hidden Finder`,
-								text: "\t",
+								buttonText: 'Open list',
+								title: 'Kamu adalah Penjaga. Dan saat ini merupakan waktu yang tepat untuk memjaga seseorang.\nPilih salah satu player.',
+								footer: 'Made by Void Bot. Powered by Hidden Finder',
+								text: '\t',
 								sections: update.playersData
 									.filter((v) => v.isAlive)
 									.map((v, i) => {
-										return { rows: [{ title: `JAGA ${update.playersData[i].name}`, rowId: `.ww guard ${update.playersData[i].id} ${update.id}` }], title: `VOID BOT | Werewolf Games` };
+										return { rows: [{ title: `JAGA ${update.playersData[i].name}`, rowId: `.ww guard ${update.playersData[i].id} ${update.id}` }], title: 'VOID BOT | Werewolf Games' };
 									}),
 							});
-						} else if (role == "villager") {
-							client[botNum].sendMessage(id, { text: "Kamu adalah Penduduk. Tunggu sampai pagi. Saat ini hanya pemain malam yang beraksi" });
+						} else if (role == 'villager') {
+							client[botNum].sendMessage(id, { text: 'Kamu adalah Penduduk. Tunggu sampai pagi. Saat ini hanya pemain malam yang beraksi' });
 						}
 					}
 				}
-			} else if (update.time == "night") {
-				await client[botNum].sendMessage(update.id, { text: "Aktifitas pemain malam dihentikan karena sudah mau pagi." });
-			} else if (update.time == "failAfk") {
+			} else if (update.time == 'night') {
+				await client[botNum].sendMessage(update.id, { text: 'Aktifitas pemain malam dihentikan karena sudah mau pagi.' });
+			} else if (update.time == 'failAfk') {
 				await client[botNum].sendMessage(update.id, { text: update.message, mentions: update.playersData.map((v) => v.id) });
-			} else if (update.time == "voted") {
+			} else if (update.time == 'voted') {
 				await client[botNum].sendMessage(update.id, { text: update.text, mentions: update.mentions });
 			}
 		});
 
-		Client.ws.on("CB:notification,type:w:gp2", (update) => {
-			if (update?.content?.[0].tag !== "description" && update?.content?.[0].tag !== "invite") {
+		Client.ws.on('CB:notification,type:w:gp2', (update) => {
+			if (update?.content?.[0].tag !== 'description' && update?.content?.[0].tag !== 'invite') {
 				return;
 			}
+
 			const from = update?.attrs?.from || update?.content?.[0]?.attrs?.author;
 			const name = update?.attrs?.notify;
 			const action = update?.attrs?.content?.[0]?.tag || update?.content?.[0].tag;
-			const content = update?.content?.[0]?.content?.[0]?.content?.toString() || update?.content?.[0]?.attrs.code || "";
+			const content = update?.content?.[0]?.content?.[0]?.content?.toString() || update?.content?.[0]?.attrs.code || '';
 			const participant = update?.attrs?.participant;
-			client[botNum].ev.emit("group.settings.update", { from, name, action, participant, content });
+
+			client[botNum].ev.emit('group.settings.update', { from, name, action, participant, content });
 		});
 
-		Client.ws.on("CB:notification,type:picture", async (update) => {
+		Client.ws.on('CB:notification,type:picture', async (update) => {
 			const from = update?.attrs?.from || update?.content?.[0]?.attrs?.author;
 			const name = update?.attrs?.notify;
 			const action = update?.content?.[0]?.tag;
 			const participant = update?.content?.[0]?.attrs?.author;
-			const content = action == "delete" ? null : await client[botNum].profilePictureUrl(from, "image").catch((e) => null);
-			client[botNum].ev.emit("group.settings.update", { from, name, action, participant, content });
+			const content = action == 'delete' ? null : await client[botNum].profilePictureUrl(from, 'image').catch((e) => null);
+
+			client[botNum].ev.emit('group.settings.update', { from, name, action, participant, content });
 		});
 	};
 
 	function connectMqtt() {
-		clientMqttListen.on("message", async (topic, message) => {
+		clientMqttListen.on('message', async (topic, message) => {
 			message = message.toString();
 			const data = JSON.parse(message);
+
 			if (!data.status) {
 				return;
 			}
-			const content = `Spotify On ${data.is_playing ? "Play" : "Paused"} :                                                       ${data.artists || ""} - ${data.trackTitle || ""}  ( ${
-				data.progress_ms?.toTime() || "00"
-			} - ${data?.duration_ms?.toTime() || "00"} )`;
-			const myStatus = await client[botNum].fetchStatus(`${botNum.split(":")[0]}@s.whatsapp.net`);
+
+			const content = `Spotify On ${data.isPlaying ? 'Play' : 'Paused'} :                                                       ${data.artists || ''} - ${data.trackTitle || ''}  ( ${
+				data.progressMs?.toTime() || '00'
+			} - ${data?.durationMs?.toTime() || '00'} )`;
+			const myStatus = await client[botNum].fetchStatus(`${botNum.split(':')[0]}@s.whatsapp.net`);
+
 			if (myStatus.status == content) {
 				return;
 			}
+
 			await client[botNum].query({
-				tag: "iq",
-				attrs: { to: "@s.whatsapp.net", type: "set", xmlns: "status" },
-				content: [{ tag: "status", attrs: {}, content: Buffer.from(content, "utf-8") }],
+				tag: 'iq',
+				attrs: { to: '@s.whatsapp.net', type: 'set', xmlns: 'status' },
+				content: [{ tag: 'status', attrs: {}, content: Buffer.from(content, 'utf-8') }],
 			});
 		});
 	}
 
-	Client.ev.on("auth-state.update", saveState);
+	Client.ev.on('auth-state.update', saveState);
 
-	Client.ev.on("contacts.update", () => {});
+	Client.ev.on('contacts.update', () => {});
 
-	Client.ev.on("groups.update", () => {});
+	Client.ev.on('groups.update', () => {});
 };
+
 start().catch((e) => log(e));
 
 function loadFiles(dir) {
 	let files = [];
 	const list = fs.readdirSync(dir);
+
 	for (const file of list) {
 		const path = `${dir}/${file}`;
 		const stat = fs.statSync(path);
+
 		if (stat?.isDirectory()) {
 			files = files.concat(loadFiles(path));
 		} else {
 			files.push(path);
 		}
 	}
+
 	return files;
 }
 
 async function loadCommands() {
-	addSpinner("files", { text: "Loading Files..." });
-	const commands = loadFiles("./Commands");
-	successSpinner("files", { text: `Loaded ${commands.length} files` });
-	addSpinner("commands", { text: "Loading Commands..." });
+	addSpinner('files', { text: 'Loading Files...' });
+	const commands = loadFiles('./Commands');
+
+	successSpinner('files', { text: `Loaded ${commands.length} files` });
+	addSpinner('commands', { text: 'Loading Commands...' });
+
 	if (OPTIONS.watch) {
-		addSpinner("watch", { text: "Watching for changes..." });
+		addSpinner('watch', { text: 'Watching for changes...' });
 	}
+
 	for (const command of commands) {
 		try {
 			const cmd = (await import(pathToFileURL(path.join(__dirname, command)))).default;
-			if (cmd.status != "disable") {
+
+			if (cmd.status != 'disable') {
 				if (OPTIONS.watch) {
 					await watchFile(pathToFileURL(path.join(__dirname, command)), cmd.name);
 				}
-				const modules = process.platform == "win32" ? pathToFileURL(path.join(__dirname, command)).pathname.slice(1) : pathToFileURL(path.join(__dirname, command)).pathname;
+
+				const modules = process.platform == 'win32' ? pathToFileURL(path.join(__dirname, command)).pathname.slice(1) : pathToFileURL(path.join(__dirname, command)).pathname;
+
 				cmds.commands.set(cmd.name, { ...cmd, pathname: decodeURI(modules) });
 				commandsPath.push(decodeURI(modules));
 			}
 		} catch (e) {
 			log(e);
-			ERRLOG(`${color(command, "red")} ${color("is causing error. Please check the file before running.", "white")}`);
+			ERRLOG(`${color(command, 'red')} ${color('is causing error. Please check the file before running.', 'white')}`);
+			process.exit(0);
 		}
 	}
-	successSpinner("commands", { text: `Loaded ${cmds.commands.size} commands` });
+
+	successSpinner('commands', { text: `Loaded ${cmds.commands.size} commands` });
+
 	if (OPTIONS.watch) {
-		successSpinner("watch", { text: `Watched ${cmds.commands.size} commands` });
+		successSpinner('watch', { text: `Watched ${cmds.commands.size} commands` });
 	}
 }
 
@@ -495,11 +553,13 @@ async function loadEveryCommand() {
 }
 
 async function watchFile(module) {
-	const modules = process.platform == "win32" ? decodeURI(module.pathname.slice(1)) : decodeURI(module.pathname);
+	const modules = process.platform == 'win32' ? decodeURI(module.pathname.slice(1)) : decodeURI(module.pathname);
+
 	fs.watchFile(module, async (event, filename) => {
-		const time = moment().format("HH:mm:ss DD/MM");
+		const time = moment().format('HH:mm:ss DD/MM');
+
 		if (fs.existsSync(module)) {
-			INFOLOG(`[${color(time, "cyan")}]`, color(`${modules?.split("/")?.reverse()[0]} has been changed`, "#9f53ea"));
+			INFOLOG(`[${color(time, 'cyan')}]`, color(`${modules?.split('/')?.reverse()[0]} has been changed`, '#9f53ea'));
 			await reloadModule(module, false);
 		} else {
 			await reloadModule(module, true, modules);
@@ -510,19 +570,21 @@ async function watchFile(module) {
 async function reloadModule(module, isNewFile, newFilePath) {
 	if (isNewFile) {
 		try {
-			const time = moment().format("HH:mm:ss DD/MM");
+			const time = moment().format('HH:mm:ss DD/MM');
 			const commands = await new Promise(async (resolve) => {
 				const files = (
 					await Promise.all(
-						loadFiles("./Commands").map(async (v) => {
-							const modules = process.platform == "win32" ? decodeURI(pathToFileURL(v).pathname.slice(1)) : decodeURI(pathToFileURL(v).pathname);
+						loadFiles('./Commands').map(async (v) => {
+							const modules = process.platform == 'win32' ? decodeURI(pathToFileURL(v).pathname.slice(1)) : decodeURI(pathToFileURL(v).pathname);
 							const module = (await import(pathToFileURL(modules))).default;
+
 							return { ...module, pathname: modules };
 						}),
 					)
 				)
-					.filter((v) => v.status == "enable")
+					.filter((v) => v.status == 'enable')
 					.map((v) => v.pathname);
+
 				resolve(files);
 			});
 			let afterCommands;
@@ -530,6 +592,7 @@ async function reloadModule(module, isNewFile, newFilePath) {
 
 			for (const commandModule of commandsPath) {
 				let status = false;
+
 				if (fs.existsSync(commandModule)) {
 					status = true;
 				}
@@ -545,6 +608,7 @@ async function reloadModule(module, isNewFile, newFilePath) {
 				commandsPath.push(renamedCommand);
 				commandsPath.splice(commandsPath.indexOf(afterCommands), 1);
 				const cmd = (await import(pathToFileURL(renamedCommand))).default;
+
 				cmds.commands.set(cmd.name, cmd);
 				watchFile(pathToFileURL(renamedCommand), cmd.name);
 				fs.unwatchFile(module);
@@ -553,18 +617,20 @@ async function reloadModule(module, isNewFile, newFilePath) {
 				commandsPath.splice(commandsPath.indexOf(newFilePath), 1);
 				cmds.commands.delete(Array.from(cmds.commands.values()).find((v) => v.pathname == newFilePath).name);
 				fs.unwatchFile(module);
-				return ERRLOG(`[${color(time, "cyan")}]`, color(`${newFilePath.split("/").reverse()[0]} is deleted`, "red"));
+				return ERRLOG(`[${color(time, 'cyan')}]`, color(`${newFilePath.split('/').reverse()[0]} is deleted`, 'red'));
 			} finally {
-				INFOLOG(`[${color(time, "cyan")}]`, color(`${newFilePath.split("/").reverse()[0]} has been renamed to ${renamedCommand.split("/").reverse()[0]}`, "#9f53ea"));
+				INFOLOG(`[${color(time, 'cyan')}]`, color(`${newFilePath.split('/').reverse()[0]} has been renamed to ${renamedCommand.split('/').reverse()[0]}`, '#9f53ea'));
 			}
 		} catch (e) {
 			log(e);
 		}
 		return;
 	}
+
 	try {
 		fs.unwatchFile(module);
 		const cmd = (await nocache(module)).default;
+
 		cmds.commands.delete(cmd.name);
 		cmds.commands.set(cmd.name, cmd);
 		watchFile(module);
@@ -575,6 +641,7 @@ async function reloadModule(module, isNewFile, newFilePath) {
 
 const nocache = async (module) => {
 	const tempModules = `${module}?update=${Date.now()}`;
+
 	return await import(tempModules);
 };
 
@@ -582,38 +649,39 @@ function parseCli() {
 	return meow(help(), {
 		importMeta: import.meta,
 		flags: {
-			read_only: { type: "boolean", alias: "y" },
-			auto_read: { type: "boolean", alias: "r" },
-			restrict: { type: "boolean", alias: "e" },
-			only_logs: { type: "boolean", alias: "o" },
-			no_logs: { type: "boolean", alias: "n" },
-			self_mode: { type: "boolean", alias: "s" },
-			debug_mode: { type: "boolean", alias: "g" },
-			multi_cmd: { type: "boolean", alias: "m" },
-			rainbow: { type: "boolean", alias: "b" },
-			trace: { type: "boolean", alias: "t" },
-			help: { type: "boolean", alias: "h" },
-			prefix: { type: "string", alias: "p" },
-			watch: { type: "boolean", alias: "w" },
-			cool_down: { type: "boolean", alias: "c" },
-			auto_correct: { type: "boolean", alias: "a" },
-			no_load: { type: "boolean", alias: "v" },
-			json: { type: "boolean", alias: "j" },
-			reset: { type: "boolean", alias: "k" },
-			story: { type: "boolean", alias: "q" },
-			offline: { type: "boolean", alias: "f" },
-			no_call: { type: "boolean", alias: "d" },
-			insta_notifier: { type: "boolean", alias: "i" },
-			limit_reset: { type: "boolean", alias: "l" },
-			reset_on_start: { type: "boolean", alias: "x" },
+			read_only: { type: 'boolean', alias: 'y' },
+			auto_read: { type: 'boolean', alias: 'r' },
+			restrict: { type: 'boolean', alias: 'e' },
+			only_logs: { type: 'boolean', alias: 'o' },
+			no_logs: { type: 'boolean', alias: 'n' },
+			self_mode: { type: 'boolean', alias: 's' },
+			debug_mode: { type: 'boolean', alias: 'g' },
+			multi_cmd: { type: 'boolean', alias: 'm' },
+			rainbow: { type: 'boolean', alias: 'b' },
+			trace: { type: 'boolean', alias: 't' },
+			help: { type: 'boolean', alias: 'h' },
+			prefix: { type: 'string', alias: 'p' },
+			watch: { type: 'boolean', alias: 'w' },
+			cool_down: { type: 'boolean', alias: 'c' },
+			auto_correct: { type: 'boolean', alias: 'a' },
+			no_load: { type: 'boolean', alias: 'v' },
+			json: { type: 'boolean', alias: 'j' },
+			reset: { type: 'boolean', alias: 'k' },
+			story: { type: 'boolean', alias: 'q' },
+			offline: { type: 'boolean', alias: 'f' },
+			no_call: { type: 'boolean', alias: 'd' },
+			insta_notifier: { type: 'boolean', alias: 'i' },
+			limit_reset: { type: 'boolean', alias: 'l' },
+			reset_on_start: { type: 'boolean', alias: 'x' },
 		},
 	});
 }
 
 async function printRandomAscii() {
-	const randomAscii = fs.readdirSync("./Helper/Ascii/");
-	spawn("bash", [`./Helper/Ascii/${randomAscii[Math.floor(Math.random() * randomAscii.length)]}`], {
-		stdio: "inherit",
+	const randomAscii = fs.readdirSync('./Helper/Ascii/');
+
+	spawn('bash', [`./Helper/Ascii/${randomAscii[Math.floor(Math.random() * randomAscii.length)]}`], {
+		stdio: 'inherit',
 	});
 }
 
@@ -654,24 +722,27 @@ function help() {
 }
 
 export async function clearDBConnection() {
-	if (!fs.existsSync(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`)) {
-		await fs.writeFile(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`, JSON.stringify({}));
+	if (!fs.existsSync(`./Media Files/Connection Databases/${cli.input[0] ?? 'Session-debug'}.json`)) {
+		await fs.writeFile(`./Media Files/Connection Databases/${cli.input[0] ?? 'Session-debug'}.json`, JSON.stringify({}));
 	}
-	const data = readJSON(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`);
-	const session = readJSON(`./Session/${cli.input[0] ?? "Session-debug"}.json`)
-	session.keys = {}
+
+	const data = readJSON(`./Media Files/Connection Databases/${cli.input[0] ?? 'Session-debug'}.json`);
+	const session = readJSON(`./Session/${cli.input[0] ?? 'Session-debug'}.json`);
+
+	session.keys = {};
 	data.chats = [];
 	data.contacts = {};
 	data.messages = {};
-	writeJSON(`./Media Files/Connection Databases/${cli.input[0] ?? "Session-debug"}.json`, data);
-	writeJSON(`./Session/${cli.input[0] ?? "Session-debug"}.json`, session);
+	writeJSON(`./Media Files/Connection Databases/${cli.input[0] ?? 'Session-debug'}.json`, data);
+	writeJSON(`./Session/${cli.input[0] ?? 'Session-debug'}.json`, session);
 }
 
 function reconnectMqttConnection(connection) {
-	if ("spotify" in global.presences) {
+	if ('spotify' in global.presences) {
 		clearTimeout(global.presences.spotify.timeout);
 		delete global.presences.spotify;
 	}
+
 	clientMqttListen.reconnect();
 	connection();
 }

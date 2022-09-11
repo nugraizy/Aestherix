@@ -1,1 +1,1 @@
-export { scheme } from "./colors.js";
+export { scheme } from './colors.js';

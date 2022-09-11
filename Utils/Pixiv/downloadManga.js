@@ -1,5 +1,6 @@
-import { fetchJSON } from "../../Helper/index.js";
-import { URL_API_DOWNLOAD_MANGA, URL_API_DOWNLOAD_MANGA_DETAIL } from "./index.js";
+/* global log */
+import { fetchJSON } from '../../Helper/index.js';
+import { URL_API_DOWNLOAD_MANGA, URL_API_DOWNLOAD_MANGA_DETAIL } from './index.js';
 
 export const downloadManga = (input) =>
 	new Promise(async (resolve, reject) => {
@@ -7,6 +8,7 @@ export const downloadManga = (input) =>
 			const data = await fetchJSON(URL_API_DOWNLOAD_MANGA_DETAIL(input));
 			const { id, title, userId, userName, pageCount } = data.body;
 			const { body } = await fetchJSON(URL_API_DOWNLOAD_MANGA(input));
+
 			resolve({
 				id,
 				title,

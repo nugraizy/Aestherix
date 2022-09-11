@@ -1,7 +1,7 @@
-export { Attachment, attp, GithubGraph, memeGenerator, SpotifyCover, textStory, trigger, ttp } from "./Canvas/index.js";
-export { addAllLimit, addLimit, addUser, checkAfk, checkLimit, checkUser, deleteAfk, getAfk, indexUser, resetAllLimit, setAfk, updateUser, addUserLimit } from "./Groups/index.js";
-export { getSpinner, scheme, UA } from "./Misc/index.js";
-export { NO_DATA, S_WHATSAPP_NET, UPDATE, WebMessageInfoStubType, ZERO } from "./Misc/WAData/index.js";
+export { Attachment, attp, GithubGraph, memeGenerator, SpotifyCover, textStory, trigger, ttp } from './Canvas/index.js';
+export { addAllLimit, addLimit, addUser, checkAfk, checkLimit, checkUser, deleteAfk, getAfk, indexUser, resetAllLimit, setAfk, updateUser, addUserLimit } from './Groups/index.js';
+export { getSpinner, scheme, UA } from './Misc/index.js';
+export { NO_DATA, S_WHATSAPP_NET, UPDATE, WebMessageInfoStubType, ZERO } from './Misc/WAData/index.js';
 export {
 	calcCrow,
 	cheerioLOAD,
@@ -78,4 +78,4 @@ export {
 	writeBuffer,
 	writeJSON,
 	zalgo,
-} from "./Modules/index.js";
+} from './Modules/index.js';

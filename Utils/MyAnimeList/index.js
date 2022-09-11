@@ -1,1 +1,1 @@
-export { MyAnimeList } from "./myanimelist.js";
+export { MyAnimeList } from './myanimelist.js';

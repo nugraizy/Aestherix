@@ -1,3 +1,3 @@
-import { randomize, readJSON } from "../../Modules/functions.js";
+import { randomize, readJSON } from '../../Modules/functions.js';
 
-export const UA = () => randomize(readJSON("./Helper/Misc/User-Agent/ua.json"));
+export const UA = () => randomize(readJSON('./Helper/Misc/User-Agent/ua.json'));
