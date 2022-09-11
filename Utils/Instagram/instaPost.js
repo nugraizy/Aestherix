@@ -19,7 +19,8 @@ export const getPost = (code) =>
 				headers: { 'user-agent': UA, cookie: sessionId },
 			});
 			let { username, full_name: fullName, is_private: isPrivate, is_verified: isVerified } = data.items[0].user;
-			let { like_count: likeCount, takenAt, commentCount, mediaType } = data.items[0];
+			let { like_count: likeCount, taken_at: takenAt, comment_count: commentCount, media_type: mediaType } = data.items[0];
+
 			const captions = data.items[0].caption?.text ?? 'No captions';
 			const type = mediaType == 8 ? 'slide' : mediaType == 2 ? 'video' : 'image';
 

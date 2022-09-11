@@ -274,9 +274,13 @@ export const reassign = async (m, client, store) => {
 		const { multi, noPref, pref } = cache;
 		let prf;
 
-		if (multi) {prf = /^[°π÷×¶∆£¢€¥®™✓_=+|~!#$%^&./\\©^>]/.test(cmd) ? cmd.match(/^[°π÷×¶∆£¢€¥®™✓_=+|~!#$%^&./\\©^>]/gi) : '-';}
-		else if (noPref) {prf = '';}
-		else {prf = pref;}
+		if (multi) {
+			prf = /^[°π÷×¶∆£¢€¥®™✓_=+|~!#$%^&./\\©^>]/.test(cmd) ? cmd.match(/^[°π÷×¶∆£¢€¥®™✓_=+|~!#$%^&./\\©^>]/gi) : '-';
+		} else if (noPref) {
+			prf = '';
+		} else {
+			prf = pref;
+		}
 
 		const isCmd = body?.startsWith(prf);
 		const query = args?.slice(1)?.join(' ');
