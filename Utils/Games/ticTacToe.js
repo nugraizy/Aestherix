@@ -1,4 +1,4 @@
-/* global games */
+import configuration from '../../connect.js';
 import { shuffleArray } from '../../Helper/Modules/index.js';
 
 const COMBOS = [
@@ -28,19 +28,19 @@ const RANDOM_TURN_BASED_ON_MODEL = (player1, player2) => {
 };
 
 export const DeleteTicTacToeSession = (session) => {
-	const key = Array.from(games.tictactoe.values()).find((game) => game.PLAYER_1 == session || game.PLAYER_2 == session) || null;
+	const key = Array.from(configuration.games.tictactoe.values()).find((game) => game.PLAYER_1 == session || game.PLAYER_2 == session) || null;
 
 	if (key !== null && key.PLAYER_1 == session) {
-		return games.tictactoe.delete(key.PLAYER_1);
+		return configuration.games.tictactoe.delete(key.PLAYER_1);
 	} else if (key !== null && key.player2 == session) {
-		return games.tictactoe.delete(key.PLAYER_2);
+		return configuration.games.tictactoe.delete(key.PLAYER_2);
 	}
 
 	return null;
 };
 
 export const GetTicTacToeSession = (session) => {
-	const key = Array.from(games.tictactoe.values()).find((game) => game.PLAYER_1 == session || game.PLAYER_2 == session) || null;
+	const key = Array.from(configuration.games.tictactoe.values()).find((game) => game.PLAYER_1 == session || game.PLAYER_2 == session) || null;
 
 	if (key !== null && key.PLAYER_1 == session) {
 		return key;
@@ -51,7 +51,7 @@ export const GetTicTacToeSession = (session) => {
 	return null;
 };
 
-export default class TicTacToe {
+export class TicTacToe {
 	constructor(player1, player2 = 'Void Bot', newGame) {
 		const container = RANDOM_TURN_BASED_ON_MODEL(player1, player2);
 
@@ -74,7 +74,7 @@ export default class TicTacToe {
 	}
 
 	getKey(dari) {
-		const key = Array.from(games.tictactoe.values()).find((game) => game.PLAYER_1 == dari || game.PLAYER_2 == dari) || null;
+		const key = Array.from(configuration.games.tictactoe.values()).find((game) => game.PLAYER_1 == dari || game.PLAYER_2 == dari) || null;
 
 		if (key !== null && key.PLAYER_1 == dari) {
 			return key;
@@ -98,7 +98,7 @@ export default class TicTacToe {
 	}
 
 	deleteGame() {
-		return games.tictactoe.delete(this.PLAYER_1);
+		return configuration.games.tictactoe.delete(this.PLAYER_1);
 	}
 
 	playMove(location, player, pcRival) {

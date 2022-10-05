@@ -1,2 +1,2 @@
-export { createImage } from './imageDescribing.js';
-export { isNsfw } from './nsfw.js';
+export * from './imageDescribing.js';
+export * from './nsfw.js';

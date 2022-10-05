@@ -1,5 +1,5 @@
-export { getSurahAudio } from './quranAudio.js';
-export { getAyat } from './quranAyat.js';
-export { getSurahDetail } from './quranDetail.js';
-export { getListSurah } from './quranList.js';
-export { getTafsirSurah } from './quranTafsir.js';
+export * from './quranAudio.js';
+export * from './quranAyat.js';
+export * from './quranDetail.js';
+export * from './quranList.js';
+export * from './quranTafsir.js';

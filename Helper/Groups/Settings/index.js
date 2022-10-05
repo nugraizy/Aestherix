@@ -1,2 +1,2 @@
-export { checkJSON, pushDefaultSettings, updateSettings } from './groupDefaultSettings.js';
-export { addAllLimit, addLimit, addUser, checkLimit, checkUser, indexUser, resetAllLimit, updateUser, addUserLimit } from './limit.js';
+export * from './groupDefaultSettings.js';
+export * from './limit.js';

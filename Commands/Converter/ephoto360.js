@@ -1,4 +1,4 @@
-/* global botNum, author, packname */
+/* global botNum */
 import Axios from 'axios';
 import fs from 'fs';
 import * as jsSplit from 'js-split';
@@ -6,7 +6,8 @@ import path from 'path';
 import sharp from 'sharp';
 import yargsParser from 'yargs-parser';
 
-import { __dirname } from '../../connect.js';
+import configuration from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { randomize } from '../../Helper/index.js';
 import { ephoto360 } from '../../Utils/index.js';
 
@@ -154,7 +155,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 			});
 
 			const buffer = isStickers
-				? await client[botNum].prepareSticker(data, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author, packname })
+				? await client[botNum].prepareSticker(data, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author: configuration.author, packname: configuration.packname })
 				: (async () => {
 						const image = sharp(data);
 						const { width, height } = await image.metadata();

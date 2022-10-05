@@ -3,7 +3,7 @@ import moment from 'moment-timezone';
 import path from 'path';
 import sharp from 'sharp';
 
-import { __dirname } from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { color, delay, ERRLOG, fetchBUFFER, INFOLOG, isURL, numberWithCommas, removeDuplicatesArray } from '../../Helper/Modules/index.js';
 import { toOpus } from '../../Utils/Converter/index.js';
 import { yta2 as yta } from '../../Utils/YouTube/index.js';

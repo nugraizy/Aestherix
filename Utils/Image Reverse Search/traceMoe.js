@@ -4,7 +4,7 @@ import { readFileSync } from 'fs';
 import path from 'path';
 import sharp from 'sharp';
 
-import { __dirname } from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { fetchBUFFER, fetchJSON, isURL } from '../../Helper/Modules/index.js';
 
 const URL_BASE_API = 'https://api.trace.moe/search?cutBorders&';

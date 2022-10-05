@@ -1,10 +1,12 @@
-/* global process, OPTIONS, log */
+/* global process, log */
 import dotenv from 'dotenv';
 import { fileTypeFromBuffer } from 'file-type';
 import fs from 'fs';
 import { IgApiClient } from 'instagram-private-api';
 import { GraphQLSubscriptions, SkywalkerSubscriptions, withFbns, withRealtime } from 'instagram_mqtt';
 import sharp from 'sharp';
+
+import configuration from '../../connect.js';
 
 dotenv.config();
 
@@ -15,7 +17,7 @@ class Instafier {
 	#password = process.env.INSTAGRAM_PASSWORD;
 	#authorId = null;
 	constructor() {
-		if (!OPTIONS.instaNotifier) {
+		if (!configuration.OPTIONS.instaNotifier) {
 			return;
 		}
 
@@ -239,7 +241,7 @@ class Instafier {
 
 		this.Instagram.fbns.on('disconnect', (d) => log('FBNS Disconnected :', d));
 
-		await this.connect().then(() => (!OPTIONS.noLoad ? log('Instagram Service Connected') : {}));
+		await this.connect().then(() => (!configuration.OPTIONS.noLoad ? log('Instagram Service Connected') : {}));
 		return this.Instagram;
 	}
 }

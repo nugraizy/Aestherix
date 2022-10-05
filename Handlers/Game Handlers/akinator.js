@@ -1,4 +1,5 @@
-/* global botNum, OPTIONS */
+/* global botNum */
+import configuration from '../../connect.js';
 import { getSession, handleAnswer } from '../../Utils/Games/index.js';
 
 export default {
@@ -50,9 +51,9 @@ export default {
 			}
 		};
 
-		if (isGroup && (settings[from].games == 'enable' || isAdmin) && !OPTIONS.onlyLogs) {
+		if (isGroup && (settings[from].games == 'enable' || isAdmin) && !configuration.OPTIONS.onlyLogs) {
 			await play();
-		} else if (!isGroup && !OPTIONS.onlyLogs) {
+		} else if (!isGroup && !configuration.OPTIONS.onlyLogs) {
 			await play();
 		}
 	},

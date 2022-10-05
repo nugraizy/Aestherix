@@ -1,4 +1,5 @@
-/* global botNum, cmds */
+/* global botNum */
+import configuration from '../../connect.js';
 import { readJSON, romanize } from '../../Helper/index.js';
 
 export default {
@@ -12,7 +13,7 @@ export default {
 	status: 'enable',
 	async run({ from }, client) {
 		const capt = `Bot Name : Void
-Total Commands : ${cmds.commands.size}
+Total Commands : ${configuration.cmds.commands.size}
 Bot Version : ${romanize(readJSON('./package.json').version).toUpperCase()}
 Bot Creator : Nanda
 Github Uname : nugraizy

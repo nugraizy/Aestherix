@@ -139,23 +139,7 @@ export const assign = (client) => {
 				return new Error('Buttons is empty');
 			}
 
-			const message = generateWAMessageFromContent(
-				ZERO,
-				{
-					buttonsMessage: {
-						buttons,
-						contentText,
-						footerText,
-						headerType: 1,
-						contextInfo: opts.contextInfo,
-					},
-				},
-				opts,
-			);
-
-			await client[botNum].relayMessage(dari, message.message, { messageId: message.key.id });
-
-			return message;
+			return await client[botNum].sendMessage(dari, { text: contentText, footer: footerText, buttons, headerType: 1, contextInfo: opts.contextInfo });
 		},
 		prepareMedia,
 		buttonDocument: async (dari, contentText, footerText, buttons, media, opts = {}) => {

@@ -1,6 +1,7 @@
-/* global botNum, Buffer, OPTIONS */
+/* global botNum, Buffer */
 import sharp from 'sharp';
 
+import configuration from '../../connect.js';
 import { ytsr } from '../../Utils/YouTube/index.js';
 import { fetchBUFFER, numberWithCommas } from '../../Helper/index.js';
 
@@ -62,7 +63,7 @@ export default {
 				{ rows: [{ title: `MP3 | ${title}`, rowId: `.yta ${url}` }], title: `${author.name} | 👁️‍🗨️ ${numberWithCommas(views)} | ${timestamp}` },
 			);
 
-			if (OPTIONS.multiCmd) {
+			if (configuration.OPTIONS.multiCmd) {
 				row.push({ rows: [{ title: `MP3 & MP4 | ${title}`, rowId: `.yta ${url}|.ytv ${url}` }], title: `${author.name} | 👁️‍🗨️ ${numberWithCommas(views)} | ${timestamp}` });
 			}
 		});

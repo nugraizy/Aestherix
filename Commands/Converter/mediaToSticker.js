@@ -1,8 +1,9 @@
-/* global botNum, author, packname */
+/* global botNum */
 import moment from 'moment-timezone';
 import path from 'path';
 
-import { __dirname } from '../../connect.js';
+import configuration from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { color, INFOLOG, isURL } from '../../Helper/Modules/index.js';
 
 export default {
@@ -33,15 +34,18 @@ export default {
 		}
 
 		if (query && isURL(query)) {
-			const sticker = await client[botNum].prepareSticker(query, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author, packname });
+			const sticker = await client[botNum].prepareSticker(query, path.join(__dirname, `Temporary Files/${filename}`), undefined, {
+				author: configuration.author,
+				packname: configuration.packname,
+			});
 
 			await client[botNum].sendMessage(from, { sticker }, { quoted: message });
 		}
 
 		if (isMediaImage) {
 			const sticker = await client[botNum].prepareSticker(await client[botNum].downloadMediaMessage(mediaData), path.join(__dirname, `Temporary Files/${filename}`), typeQuoted, {
-				author,
-				packname,
+				author: configuration.author,
+				packname: configuration.packname,
 			});
 
 			await client[botNum].sendMessage(from, { sticker }, { quoted: message });
@@ -49,8 +53,8 @@ export default {
 
 		if (isMediaVid) {
 			const sticker = await client[botNum].prepareSticker(await client[botNum].downloadMediaMessage(mediaData), path.join(__dirname, `Temporary Files/${filename}`), typeQuoted, {
-				author,
-				packname,
+				author: configuration.author,
+				packname: configuration.packname,
 			});
 
 			await client[botNum].sendMessage(from, { sticker }, { quoted: message });

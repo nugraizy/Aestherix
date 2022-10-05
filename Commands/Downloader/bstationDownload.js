@@ -1,7 +1,7 @@
 /* global botNum, Buffer */
 import path from 'path';
 
-import { __dirname } from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { getFilesizeFromBytes, removeDuplicatesArray } from '../../Helper/Modules/index.js';
 import { detailSourceFormat } from '../../Utils/Bilibili/index.js';
 import { mergeVideoWithAudio } from '../../Utils/Converter/index.js';

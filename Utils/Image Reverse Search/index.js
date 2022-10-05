@@ -1,3 +1,3 @@
-export { sauceNao } from './sauceNao.js';
-export { traceMoe } from './traceMoe.js';
-export { yandex } from './yandex.js';
+export * from './sauceNao.js';
+export * from './traceMoe.js';
+export * from './yandex.js';

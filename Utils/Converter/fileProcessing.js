@@ -1,4 +1,4 @@
-/* global log, Buffer, botNum, client, packname, author */
+/* global log, Buffer, botNum, client */
 import { exec } from 'child_process';
 import FormData from 'form-data';
 import fs from 'fs-extra';
@@ -7,7 +7,8 @@ import path from 'path';
 import petting from 'pet-pet-gif';
 import sharp from 'sharp';
 
-import { __dirname } from '../../connect.js';
+import configuration from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { color, ERRLOG, fetchJSON, INFOLOG, isFileExist, isURL, readBuffer, readJSON, unlinkFile, writeBuffer } from '../../Helper/Modules/index.js';
 import { webp2mp4File } from './EZGifs/index.js';
 
@@ -308,7 +309,7 @@ export const pet = (input, sender, opts = {}) =>
 					.toFormat('webp')
 					.webp()
 					.toBuffer();
-				const sticker = await client[botNum].prepareSticker(file, `${opts.filename}-done.webp`, 'stickerAnimated', { author, packname });
+				const sticker = await client[botNum].prepareSticker(file, `${opts.filename}-done.webp`, 'stickerAnimated', { author: configuration.author, packname: configuration.packname });
 
 				unlinkFile(`${opts.filename}.gif`);
 				unlinkFile(`${opts.filename}-done.webp`);

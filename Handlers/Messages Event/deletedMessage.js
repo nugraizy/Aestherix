@@ -1,8 +1,9 @@
-/* global botNum, intervals, Buffer, author, packname, log */
+/* global botNum, Buffer, log */
 import moment from 'moment-timezone';
 import path from 'path';
 
-import { __dirname } from '../../connect.js';
+import configuration from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { getFilesize, getFilesizeFromBytes, readBuffer, unlinkFile } from '../../Helper/Modules/index.js';
 import { reassign } from '../../Helper/Modules/reassignMessagesObject.js';
 import { CheckIntervals, DeleteIntervals } from '../../Utils/Misc/index.js';
@@ -46,12 +47,12 @@ export default {
 			}
 
 			if (
-				CheckIntervals(intervals.url.get(sender)) !== 0 &&
-				CheckIntervals(intervals.url.get(sender).get(from)) !== 0 &&
-				CheckIntervals(intervals.url.get(sender).get(from)).id == message.message.key.id
+				CheckIntervals(configuration.intervals.url.get(sender)) !== 0 &&
+				CheckIntervals(configuration.intervals.url.get(sender).get(from)) !== 0 &&
+				CheckIntervals(configuration.intervals.url.get(sender).get(from)).id == message.message.key.id
 			) {
 				await client[botNum].reply({ from, quoted: message }, 'Good. Do not send URLs next time or i will kick you.');
-				DeleteIntervals(intervals.url.get(sender).get(from), intervals.url.get(sender), from);
+				DeleteIntervals(configuration.intervals.url.get(sender).get(from), configuration.intervals.url.get(sender), from);
 				return;
 			}
 
@@ -139,7 +140,7 @@ Message : ${body ? body : 'Unknown'}${quotedMessage}
 								result,
 								path.join(__dirname, `Temporary Files/${filename}`),
 								mediaData.message.stickerMessage.isAnimated ? 'stickerAnimated' : 'imageMessage',
-								{ author, packname },
+								{ author: configuration.author, packname: configuration.packname },
 							);
 							const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
 Name : ${pushname}			

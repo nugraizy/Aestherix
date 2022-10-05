@@ -1,1 +1,1 @@
-export { arq } from './api.js';
+export * from './api.js';

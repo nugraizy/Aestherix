@@ -1,1 +1,1 @@
-export { spotifier } from './Spotify.js';
+export * from './Spotify.js';

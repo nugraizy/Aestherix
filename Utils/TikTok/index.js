@@ -1,3 +1,3 @@
-export { tiktokAPI, tiktokDownloader } from './tiktokDownloader.js';
-export { tiktokProfileBRAINANS } from './tiktokProfile-Brainans.com.js';
-export { tiktokProfileTIKTOK } from './tiktokProfile-TikTok.com.js';
+export * from './tiktokDownloader.js';
+export * from './tiktokProfile-Brainans.com.js';
+export * from './tiktokProfile-TikTok.com.js';

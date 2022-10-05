@@ -1,4 +1,4 @@
-/* global botNum, banned */
+/* global botNum */
 import PhoneNumber from 'awesome-phonenumber';
 
 import { readJSON, writeJSON } from '../../Helper/index.js';
@@ -39,7 +39,7 @@ export default {
 			}
 
 			if (unbanned.length > 0) {
-				await client[botNum].sendMessage(from, { text: `Success unbanning : ${banned.map((v) => `@${v.split('@')[0]}`).join(', ')}`, mentions: [banned] }, { quoted: message });
+				await client[botNum].sendMessage(from, { text: `Success unbanning : ${unbanned.map((v) => `@${v.split('@')[0]}`).join(', ')}`, mentions: [unbanned] }, { quoted: message });
 			}
 
 			return;
@@ -53,11 +53,7 @@ export default {
 				return isValid;
 			};
 
-			if (query.includes(',')) {
-				query = query.split(',');
-			} else {
-				query = [query];
-			}
+			query = query.includes(',') ? query.split(',') : [query];
 
 			for (let user of query) {
 				if (reg.test(user)) {

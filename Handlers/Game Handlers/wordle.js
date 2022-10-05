@@ -1,9 +1,10 @@
-/* global botNum, games, OPTIONS */
+/* global botNum */
+import configuration from '../../connect.js';
 
 export default {
 	async handler({ from, isAdmin, isGroup, body, message, sender }, client, settings) {
 		const play = async () => {
-			const wordle = games.wordle.get(sender);
+			const wordle = configuration.games.wordle.get(sender);
 
 			if (wordle?.isPlaying()) {
 				const guess = wordle.checkInput(body);
@@ -28,9 +29,9 @@ ${guess.guessed.map((v, i) => `${i + 1}. ${v.input}\n${v.board}`).join('\n')}`,
 			}
 		};
 
-		if (isGroup && (settings[from].games == 'enable' || isAdmin) && !OPTIONS.onlyLogs) {
+		if (isGroup && (settings[from].games == 'enable' || isAdmin) && !configuration.OPTIONS.onlyLogs) {
 			await play();
-		} else if (!isGroup && !OPTIONS.onlyLogs) {
+		} else if (!isGroup && !configuration.OPTIONS.onlyLogs) {
 			await play();
 		}
 	},

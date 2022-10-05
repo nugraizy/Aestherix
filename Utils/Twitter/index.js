@@ -1,2 +1,2 @@
-export { twitterDownload } from './twitterMediaDownloader.js';
-export { twitterUser } from './twitterUserLookup.js';
+export * from './twitterMediaDownloader.js';
+export * from './twitterUserLookup.js';

@@ -1,14 +1,15 @@
-/* global botNum, games, intervals */
+/* global botNum */
 import moment from 'moment-timezone';
 import path from 'path';
 
-import { __dirname } from '../../connect.js';
+import configuration from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { color, INFOLOG, randomize, readJSON } from '../../Helper/Modules/functions.js';
 import { CheckIntervals, DeleteIntervals, SetIntervals } from '../Misc/intervals.js';
 
 const pushMessageData = (id, data, message) => {
-	games.tebakGambar.set(id, data);
-	const Data = games.tebakGambar.get(id);
+	configuration.games.tebakGambar.set(id, data);
+	const Data = configuration.games.tebakGambar.get(id);
 
 	Data.message = message;
 	return true;
@@ -18,10 +19,10 @@ const getData = () => randomize(readJSON(path.join(__dirname, 'Databases/Games/T
 
 export const startTG = async (client, id, { message, sender }, remainingTime) => {
 	const time = moment().format('HH:mm:ss DD/MM');
-	const Data = CheckIntervals(intervals['tebakGambar'].get(id));
+	const Data = CheckIntervals(configuration.intervals['tebakGambar'].get(id));
 
 	if (Data !== 0) {
-		const data = games.tebakGambar.get(id);
+		const data = configuration.games.tebakGambar.get(id);
 
 		return { status: 'playing', messages: data.message, remaining: data.timer };
 	}
@@ -39,25 +40,25 @@ export const startTG = async (client, id, { message, sender }, remainingTime) =>
 		.valueOf();
 
 	INFOLOG(`[${color(time, 'cyan')}]`, `${color(`The Answer is : ${answer.trim()}`, '#01cdfe')}`);
-	SetIntervals(intervals['tebakGambar'], id, remainingTime + 2, (clients = client, ids = id, answers = answer, messages = message, remainingTimes = remainings) => {
-		if (intervals['tebakGambar'].get(ids) === undefined) {
+	SetIntervals(configuration.intervals['tebakGambar'], id, remainingTime + 2, (clients = client, ids = id, answers = answer, messages = message, remainingTimes = remainings) => {
+		if (configuration.intervals['tebakGambar'].get(ids) === undefined) {
 			return;
 		}
 
 		const second = Math.floor(((remainingTimes - new Date().getTime()) % (1000 * 60)) / 1000);
 
-		intervals['tebakGambar'].get(ids).timer = second;
-		games.tebakGambar.get(ids).timer = second;
-		const { timer } = CheckIntervals(intervals['tebakGambar'].get(ids));
+		configuration.intervals['tebakGambar'].get(ids).timer = second;
+		configuration.games.tebakGambar.get(ids).timer = second;
+		const { timer } = CheckIntervals(configuration.intervals['tebakGambar'].get(ids));
 
 		if (timer == 5) {
 			clients[botNum].reply({ from: ids, quoted: messages }, 'Time is almost over! 5 seconds');
 		}
 
 		if (timer <= 0) {
-			DeleteIntervals(intervals['tebakGambar'].get(ids), intervals['tebakGambar'], ids);
+			DeleteIntervals(configuration.intervals['tebakGambar'].get(ids), configuration.intervals['tebakGambar'], ids);
 			clients[botNum].reply({ from: ids, quoted: messages }, `Time's up! The answer is ${answers}`);
-			games.tebakGambar.delete(games.tebakGambar.get(ids).id);
+			configuration.games.tebakGambar.delete(configuration.games.tebakGambar.get(ids).id);
 		}
 	});
 	return {

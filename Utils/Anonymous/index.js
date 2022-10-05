@@ -1,4 +1,4 @@
-export { handlers } from './handlersPartners.js';
-export { search } from './searchPartners.js';
-export { skip } from './skipPartners.js';
-export { stop } from './stopPartners.js';
+export * from './handlersPartners.js';
+export * from './searchPartners.js';
+export * from './skipPartners.js';
+export * from './stopPartners.js';

@@ -1,14 +1,15 @@
-/* global botNum, OPTIONS */
+/* global botNum */
 import { generateWAMessageFromContent } from '@adiwajshing/baileys';
 import moment from 'moment-timezone';
 
-import { runtime } from '../../connect.js';
+import configuration from '../../connect.js';
+import { runtime } from '../../index.js';
 import { textStory } from '../../Helper/Canvas/index.js';
 import { color, INFOLOG } from '../../Helper/Modules/index.js';
 
 export default {
 	async handler(client, message) {
-		if (OPTIONS.autoRead) {
+		if (configuration.OPTIONS.autoRead) {
 			await client[botNum].readMessages([message.message.key]);
 		}
 

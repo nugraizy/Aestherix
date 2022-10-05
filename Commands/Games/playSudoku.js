@@ -1,7 +1,8 @@
-/* global botNum, log, settings */
+/* global botNum, log */
 import path from 'path';
 
-import { __dirname } from '../../connect.js';
+import configuration from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { getTimeSince, readJSON, writeJSON } from '../../Helper/Modules/index.js';
 import { checkWin, fillGrid, makePuzzle, revealOneElement, solvePuzzle, stringifyGrid } from '../../Utils/Games/index.js';
 
@@ -29,13 +30,13 @@ export default {
 					const gridSolved = stringifyGrid(solved);
 
 					if (isOwner) {
-						await client[botNum].reply({ from: settings.owner_number, quoted: message }, gridSolved);
+						await client[botNum].reply({ from: configuration.cache.config.owner_number, quoted: message }, gridSolved);
 					}
 
 					buttons[0].buttonId = '.sd clue';
 					buttons[0].buttonText.displayText = 'Sisa Clue : 5';
 
-					const messages = client[botNum].buttonText(
+					const messages = await client[botNum].buttonText(
 						from,
 						`${grid}\nThis game is still work on progress\nDifficulty is still on try mode.\nReplace number 9 with 0.`,
 						'Made by nanda',
@@ -118,7 +119,8 @@ export default {
 						writeJSON(path.join(__dirname, 'Databases/Games/Sudoku/sudoku.json'), data);
 
 						const reveal = revealOneElement(data[index].puzzle, data[index].solved);
-						const isWin = checkWin(reveal.grid);
+
+						const isWin = checkWin(reveal.board);
 
 						if (isWin.status) {
 							data.splice(index, 1);
@@ -168,9 +170,16 @@ export default {
 				buttons[0].buttonId = '.sd play';
 				buttons[0].buttonText.displayText = 'Play Sudoku!';
 
-				return await client[botNum].buttonText(from, `No session found. Type ${cmd} play to start new sudoku game. Or press the button below.`, 'Made by nanda', buttons, {
-					quoted: message,
-				});
+				return await client[botNum].buttonText(
+					from,
+					`No session found. Type ${cmd} play to start new sudoku game. Or press the button below.`,
+					'Made by nanda',
+					buttons,
+					{
+						quoted: message,
+					},
+					sender,
+				);
 			} else if (/reset/.test(args[1])) {
 				if (!isOwner) {
 					return;

@@ -1,8 +1,10 @@
-/* global botNum, cli, OPTIONS */
+/* global botNum */
 import { readFileSync } from 'fs';
 
+import configuration from '../../connect.js';
+
 const STATUS = 'status@broadcast';
-const STATUS_PATH = `./Media Files/Connection Databases/${cli.input[0] ?? 'Session-debug'}.json`;
+const STATUS_PATH = `./Media Files/Connection Databases/${configuration.cli.input[0] ?? 'Session-debug'}.json`;
 
 export default {
 	name: 'story',
@@ -18,7 +20,7 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'You are not allowed to use this command');
 		}
 
-		const messages = OPTIONS.json ? JSON.parse(readFileSync(STATUS_PATH)).messages[STATUS] : await store.loadMessages(STATUS);
+		const messages = configuration.OPTIONS.json ? JSON.parse(readFileSync(STATUS_PATH)).messages[STATUS] : await store.loadMessages(STATUS);
 		const tempContainer = new Map();
 		let caption = '``` • Fetch WhatsApp Story```\n\n';
 		const rows = [];

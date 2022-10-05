@@ -1,84 +1,34 @@
-export { handlers, search, skip, stop } from './Anonymous/index.js';
-export { arq } from './ARQ/index.js';
-export { downloadBandcamp, searchBandcamp } from './Bandcamp/index.js';
-export { bilibiliSearchCOM, bilibiliSearchTV, detailSourceFormat } from './Bilibili/index.js';
-export { brainlySearch } from './Brainly/index.js';
-export { cnnindonesia, cnninternational } from './CNN/index.js';
-export {
-	apng2webpUrl,
-	convertMediaToSticker,
-	convertStickerToMedia,
-	emojimix,
-	gifToMp4,
-	mergeVideoWithAudio,
-	mp42mp3,
-	pet,
-	soundRemover,
-	textToSpeech,
-	toMp4,
-	toOpus,
-	webp2mp4File,
-} from './Converter/index.js';
-export { createImage, isNsfw } from './Deepai/index.js';
-export { downloadDeviantArt, searchDeviantArt } from './DeviantArt/index.js';
-export { getAyat, getListSurah, getSurahAudio, getSurahDetail, getTafsirSurah } from './EQuran/index.js';
-export { fbDl } from './Facebook/index.js';
-export { FlickerAPI } from './Flickr/index.js';
-export {
-	checkWin,
-	DeleteTicTacToeSession,
-	fillGrid,
-	genshinProfile,
-	getCharacters,
-	GetSambungKataSession,
-	getSession,
-	GetTicTacToeSession,
-	handleAnswer,
-	makePuzzle,
-	revealOneElement,
-	SambungKata,
-	slot,
-	solvePuzzle,
-	startAkinator,
-	startTG,
-	stringifyGrid,
-	TicTacToe,
-	Werewolf,
-	Wordle,
-} from './Games/index.js';
-export { Github } from './Github/index.js';
-export { sauceNao, traceMoe, yandex } from './Image Reverse Search/index.js';
-export { instafier } from './Instagram Notifier/index.js';
-export {
-	getCookie,
-	getHighlights,
-	getHighlights2,
-	getIgtv,
-	getIgtv2,
-	getPost,
-	getReels,
-	getReels2,
-	getStory,
-	getStory2,
-	getStory3,
-	getUser,
-	searchHashtag,
-	searchUser,
-} from './Instagram/index.js';
-export { CheckAllIntervals, CheckIntervals, createExif, DeleteIntervals, extension, getScreenshot, IPLookup, mime, SetIntervals, shopeeProduct, tesseract } from './Misc/index.js';
-export { iflixSearch, trueidSearch } from './Movies/index.js';
-export { MyAnimeList } from './MyAnimeList/index.js';
-export { getEarthquake, getWeather } from './News/index.js';
-export { PStoreProduct } from './P-Store/index.js';
-export { pinterest } from './Pinterest/index.js';
-export { downloadArtworks, downloadManga, getNovelContent, searchArtwork, searchManga, searchNovel } from './Pixiv/index.js';
-export { tiny } from './Shortener/index.js';
-export { spotifier } from './Spotifier/index.js';
-export { line, telegram } from './Stickers/index.js';
-export { ephoto360, textpro } from './Textmaker/index.js';
-export { tiktokAPI, tiktokDownloader, tiktokProfileBRAINANS, tiktokProfileTIKTOK } from './TikTok/index.js';
-export { twitterDownload, twitterUser } from './Twitter/index.js';
-export { getWaifu } from './Waifu Pic/index.js';
-export { wpDownload, wpLatest, wpSearch } from './Waifuplay/index.js';
-export { stockImagesPexel } from './Wallpapers/index.js';
-export { yta, ytsr, ytv, yta2, ytsr2, ytv2 } from './YouTube/index.js';
+export * from './Anonymous/index.js';
+export * from './ARQ/index.js';
+export * from './Bandcamp/index.js';
+export * from './Bilibili/index.js';
+export * from './Brainly/index.js';
+export * from './CNN/index.js';
+export * from './Converter/index.js';
+export * from './Deepai/index.js';
+export * from './DeviantArt/index.js';
+export * from './EQuran/index.js';
+export * from './Facebook/index.js';
+export * from './Flickr/index.js';
+export * from './Games/index.js';
+export * from './Github/index.js';
+export * from './Image Reverse Search/index.js';
+export * from './Instagram Notifier/index.js';
+export * from './Instagram/index.js';
+export * from './Misc/index.js';
+export * from './Movies/index.js';
+export * from './MyAnimeList/index.js';
+export * from './News/index.js';
+export * from './P-Store/index.js';
+export * from './Pinterest/index.js';
+export * from './Pixiv/index.js';
+export * from './Shortener/index.js';
+export * from './Spotifier/index.js';
+export * from './Stickers/index.js';
+export * from './Textmaker/index.js';
+export * from './TikTok/index.js';
+export * from './Twitter/index.js';
+export * from './Waifu Pic/index.js';
+export * from './Waifuplay/index.js';
+export * from './Wallpapers/index.js';
+export * from './YouTube/index.js';

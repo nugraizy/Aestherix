@@ -1,11 +1,12 @@
-/* global cli, botNum, OPTIONS, log */
+/* global botNum, log */
 import { generateWAMessageFromContent } from '@adiwajshing/baileys';
 import { readFileSync } from 'fs';
 
+import configuration from '../../connect.js';
 import { textStory } from '../../Helper/Canvas/index.js';
 
 const STATUS = 'status@broadcast';
-const STATUS_PATH = `./Media Files/Connection Databases/${cli.input[0] ?? 'Session-debug'}.json`;
+const STATUS_PATH = `./Media Files/Connection Databases/${configuration.cli.input[0] ?? 'Session-debug'}.json`;
 
 export default {
 	name: 'fetchstory',
@@ -22,7 +23,7 @@ export default {
 		}
 
 		try {
-			const messages = OPTIONS.json ? JSON.parse(readFileSync(STATUS_PATH)).messages[STATUS] : await store.loadMessages(STATUS);
+			const messages = configuration.OPTIONS.json ? JSON.parse(readFileSync(STATUS_PATH)).messages[STATUS] : await store.loadMessages(STATUS);
 			const tempContainer = new Map();
 			let caption = '``` • Fetch WhatsApp Story```\n\n';
 			let i = 0;

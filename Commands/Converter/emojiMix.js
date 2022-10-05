@@ -1,9 +1,10 @@
-/* global botNum, author, packname */
+/* global botNum */
 import emojiReg from 'emoji-regex';
 import jsSplit from 'js-split';
 import path from 'path';
 
-import { __dirname } from '../../connect.js';
+import configuration from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { emojimix } from '../../Utils/Converter/index.js';
 
 export default {
@@ -45,7 +46,10 @@ export default {
 				continue;
 			}
 
-			const sticker = await client[botNum].prepareSticker(result, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author, packname });
+			const sticker = await client[botNum].prepareSticker(result, path.join(__dirname, `Temporary Files/${filename}`), undefined, {
+				author: configuration.author,
+				packname: configuration.packname,
+			});
 
 			await client[botNum].sendMessage(from, { sticker }, { quoted: message });
 		}

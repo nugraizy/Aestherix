@@ -1,1 +1,1 @@
-export { pinterest } from './pinterest.js';
+export * from './pinterest.js';

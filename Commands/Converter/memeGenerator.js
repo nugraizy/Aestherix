@@ -4,7 +4,7 @@ import path from 'path';
 import parser from 'yargs-parser';
 import { writeFileSync } from 'fs';
 
-import { __dirname } from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { memeGenerator } from '../../Helper/Canvas/index.js';
 import { color, INFOLOG } from '../../Helper/Modules/index.js';
 import { convertStickerToMedia } from '../../Utils/Converter/index.js';
@@ -14,7 +14,7 @@ const DEFAULT_TYPE = 'image';
 
 export default {
 	name: 'memegen',
-	description: 'Meme Generator, Y\'know the drill',
+	description: 'Meme Generator, You know the drill',
 	usage: '!memegen <reply media/send media> <[Top Texts] & [Bottom Texts]> [options]\nOptions:\n-stk / -img',
 	aliases: ['mgen', 'memgen', 'memegen'],
 	category: 'Converter',

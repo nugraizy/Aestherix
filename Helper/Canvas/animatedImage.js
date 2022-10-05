@@ -7,7 +7,7 @@ import { readFileSync, unlinkSync, writeFileSync } from 'fs';
 import moment from 'moment-timezone';
 import path from 'path';
 
-import { __dirname } from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { createExif } from '../../Utils/Misc/index.js';
 import { scheme } from '../Misc/Palettes/colors.js';
 import { color, ERRLOG, INFOLOG } from '../Modules/functions.js';

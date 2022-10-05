@@ -1,1 +1,1 @@
-export { stockImagesPexel } from './pexels.js';
+export * from './pexels.js';

@@ -1,2 +1,2 @@
-export { downloadDeviantArt } from './downloadDeviantArt.js';
-export { searchDeviantArt } from './searchDeviantArt.js';
+export * from './downloadDeviantArt.js';
+export * from './searchDeviantArt.js';

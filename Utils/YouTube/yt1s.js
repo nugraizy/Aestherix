@@ -1,5 +1,5 @@
 import fileSize from 'filesize-parser';
-import yts from 'yt-search';
+import yts from 'ytsr';
 
 import { fetchJSON, isURL } from '../../Helper/index.js';
 
@@ -19,8 +19,9 @@ const yt2 = async (url, type) =>
 				method: 'POST',
 				body: `q=${encodeURIComponent(url)}&vt=home`,
 				headers: {
-					Accept: 'application/json, text/plain, */*',
+					Accept: '*/*',
 					'Content-Type': 'application/x-www-form-urlencoded',
+					'X-Requested-With': 'XMLHttpRequest',
 				},
 			});
 
@@ -43,6 +44,7 @@ const yt2 = async (url, type) =>
 				filesize: fileSize(size, { base: 2 }),
 				dlLink: data.dlink,
 				title: data.title,
+				id: datas.vid,
 			});
 		} catch (e) {
 			resolve({
@@ -52,7 +54,7 @@ const yt2 = async (url, type) =>
 		}
 	});
 
-export const ytsr2 = (query, all = true) =>
+export const ytsr2 = (query, id, all = true) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			if (all) {
@@ -61,22 +63,29 @@ export const ytsr2 = (query, all = true) =>
 				resolve(res.all);
 			} else {
 				const res = await yts(query);
-				const data = res?.all?.[0];
+				let data;
+
+				if (id) {
+					const filtered = res?.items?.find((v) => v.id === id);
+
+					data = filtered ? filtered : res?.items?.[0];
+				} else {
+					data = res?.items?.[0];
+				}
+
 				let {
-					videoId,
+					id: videoId,
 					url,
 					title,
 					description,
-					thumbnail,
-					timestamp,
-					seconds: times,
-					ago: uploaded,
+					bestThumbnail: { url: thumbnail },
+					duration: timestamp,
+					uploadedAt: uploaded,
 					views,
-					author: { name: author },
-					author: { url: urlChannel },
+					author: { name: author, url: urlChannel },
 				} = data;
 
-				resolve({ videoId, url, title, description, thumbnail, timestamp, times, uploaded, views, author, urlChannel });
+				resolve({ videoId, url, title, description, thumbnail, timestamp, uploaded, views, author, urlChannel });
 			}
 		} catch (e) {
 			reject(e);
@@ -90,12 +99,12 @@ export const ytv2 = (query) =>
 				let res = await yt2(query, 'mp4');
 				const container = res;
 
-				res = await ytsr2(res.title, false);
+				res = await ytsr2(res.title, res.id, false);
 				resolve({ ...container, ...res });
 			} else if (isURL(query) && !isUrl(query)) {
 				resolve({ error: 'Link YouTube tidak valid.', internal: false });
 			} else {
-				let res = await ytsr2(query, false);
+				let res = await ytsr2(query, false, false);
 				const url = `https://youtu.be/${res.videoId}`;
 				const container = res;
 
@@ -114,12 +123,12 @@ export const yta2 = (query) =>
 				let res = await yt2(query, 'mp3');
 				const container = res;
 
-				res = await ytsr2(res.title, false);
+				res = await ytsr2(res.title, res.id, false);
 				resolve({ ...container, ...res });
 			} else if (isURL(query) && !isUrl(query)) {
 				resolve({ error: 'Link YouTube tidak valid.', internal: false });
 			} else {
-				let res = await ytsr2(query, false);
+				let res = await ytsr2(query, false, false);
 				const url = `https://youtu.be/${res.videoId}`;
 				const container = res;
 

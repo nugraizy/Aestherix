@@ -1,4 +1,4 @@
-/* global botNum, log, */
+/* global botNum, log */
 import moment from 'moment-timezone';
 
 import { isFileExist, readJSON, writeJSON } from '../../Helper/Modules/index.js';

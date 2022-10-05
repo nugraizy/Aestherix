@@ -1,7 +1,7 @@
 /* global botNum, cmds */
 import path from 'path';
 
-import { __dirname } from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { readJSON } from '../../Helper/Modules/index.js';
 
 export default {

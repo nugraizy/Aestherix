@@ -1,8 +1,8 @@
-export { createExif } from './createExif.js';
-export { CheckAllIntervals, CheckIntervals, DeleteIntervals, SetIntervals } from './intervals.js';
-export { IPLookup } from './IPLookUp.js';
-export { extension, mime } from './mimetype.js';
-export { resi } from './resi.js';
-export { shopeeProduct } from './shopee.js';
-export { tesseract } from './tesseract.js';
-export { getScreenshot } from './webScreenshot.js';
+export * from './createExif.js';
+export * from './intervals.js';
+export * from './IPLookUp.js';
+export * from './mimetype.js';
+export * from './resi.js';
+export * from './shopee.js';
+export * from './tesseract.js';
+export * from './webScreenshot.js';

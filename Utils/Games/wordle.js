@@ -1,5 +1,6 @@
-/* global games */
 import fs from 'fs-extra';
+
+import configuration from '../../connect.js';
 
 const ALPHABET_ON_KEYBOARD = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
 const BLOCKS = {
@@ -87,7 +88,7 @@ export class Wordle {
 		};
 
 		this.exit = () => {
-			games.wordle.delete(this.id);
+			configuration.games.wordle.delete(this.id);
 		};
 	}
 
@@ -125,11 +126,11 @@ export class Wordle {
 	}
 
 	session() {
-		return games.wordle.get(this.id);
+		return configuration.games.wordle.get(this.id);
 	}
 
 	isPlaying() {
-		return games.wordle.has(this.id);
+		return configuration.games.wordle.has(this.id);
 	}
 
 	set messages(m) {
@@ -141,6 +142,6 @@ export class Wordle {
 	}
 
 	play() {
-		games.wordle.set(this.id, this);
+		configuration.games.wordle.set(this.id, this);
 	}
 }

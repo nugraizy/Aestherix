@@ -1,4 +1,4 @@
-/* global Buffer, OPTIONS, log */
+/* global Buffer, log */
 import Axios from 'axios';
 import cheerio from 'cheerio';
 import { fileTypeFromBuffer } from 'file-type';
@@ -7,6 +7,8 @@ import fs from 'fs-extra';
 import gradient from 'gradient-string';
 import fetch from 'node-fetch';
 import ms from 'parse-ms';
+
+import configuration from '../../connect.js';
 
 export const fetchTEXT = async (_, __) => {
 	return await (await fetch(_, __)).text();
@@ -68,8 +70,7 @@ export const randomArray = (array = []) => array[Math.floor(Math.random() * arra
 
 export const removeDuplicatesArray = (array = []) => [...new Set(array)];
 
-export const reverseWord = (string = '') => string.split('').reverse()
-.join('');
+export const reverseWord = (string = '') => string.split('').reverse().join('');
 
 export const reverseArray = (array = []) => array.reverse();
 
@@ -545,7 +546,7 @@ export const readDir = (path) => fs.readdirSync(path);
 export const color = (text, color) => {
 	const schemes = ['teen', 'passion', 'instagram'][Math.floor(Math.random() * 3)];
 
-	return OPTIONS.rainbow
+	return configuration.OPTIONS.rainbow
 		? gradient['rainbow'](text)
 		: typeof color == 'object'
 		? gradient(...color)(text)
@@ -555,7 +556,7 @@ export const color = (text, color) => {
 };
 
 export const INFOLOG = (...info) => {
-	const isLOGS = OPTIONS.noLog || false;
+	const isLOGS = configuration.OPTIONS.noLog || false;
 
 	if (!isLOGS) {
 		log(...info);
@@ -563,7 +564,7 @@ export const INFOLOG = (...info) => {
 };
 
 export const ERRLOG = (...info) => {
-	const isLOGS = OPTIONS.noLog || false;
+	const isLOGS = configuration.OPTIONS.noLog || false;
 
 	if (!isLOGS) {
 		console.error(...info);

@@ -1,1 +1,1 @@
-export { UA } from './ua.js';
+export * from './ua.js';

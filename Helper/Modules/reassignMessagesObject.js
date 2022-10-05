@@ -1,8 +1,10 @@
-/* global botNum, isFirstConnection, cache, log */
+/* global botNum, log */
 
 import { getContentType } from '@adiwajshing/baileys';
 import PhoneNumber from 'awesome-phonenumber';
 import moment from 'moment-timezone';
+
+import configuration from '../../connect.js';
 import { checkJSON, pushDefaultSettings, updateSettings } from '../Groups/Settings/index.js';
 import { NO_DATA } from '../Misc/WAData/index.js';
 import { isEmpty, isNotNull, isNotSame, isSame, isUndefined, readJSON } from './index.js';
@@ -12,37 +14,37 @@ const compare = (obj1, obj2) => {
 };
 
 const startBlocklistLoop = async (clients, ms) => {
-	cache.interval.set(
+	configuration.cache.interval.set(
 		'blocklist',
 		setInterval(async () => {
 			try {
 				const dataBlock = await clients[botNum].fetchBlocklist();
 
-				if (!compare(dataBlock, cache.blocklist)) {
-					cache.blocklist = dataBlock;
+				if (!compare(dataBlock, configuration.cache.blocklist)) {
+					configuration.cache.blocklist = dataBlock;
 				}
 			} catch (err) {
-				cache.interval.delete('blocklist');
+				configuration.cache.interval.delete('blocklist');
 			}
 		}, ms * 1000),
 	);
 };
 
 const startMetadataLoop = async (clients, ms) => {
-	cache.interval.set(
+	configuration.cache.interval.set(
 		'groupMetadata',
 		setInterval(async () => {
 			try {
-				const data = cache.metadata.values();
+				const data = configuration.cache.metadata.values();
 				const SETTINGS = readJSON('./Config/settings.json');
 				const dataBanned = readJSON('./Databases/Users/banned.json');
 
-				if (!compare(dataBanned, cache.bannedlist)) {
-					cache.bannedlist = dataBanned;
+				if (!compare(dataBanned, configuration.cache.bannedlist)) {
+					configuration.cache.bannedlist = dataBanned;
 				}
 
-				if (!compare(SETTINGS, cache.config)) {
-					cache.config = SETTINGS;
+				if (!compare(SETTINGS, configuration.cache.config)) {
+					configuration.cache.config = SETTINGS;
 				}
 
 				for (const d of data) {
@@ -56,7 +58,7 @@ const startMetadataLoop = async (clients, ms) => {
 						groupMetadata.ownerGroups = partc?.find((v) => v.admin == 'superadmin')?.id || null;
 
 						if (groupMetadata.id && !compare(groupMetadata, d)) {
-							cache.metadata.set(groupMetadata.id, {
+							configuration.cache.metadata.set(groupMetadata.id, {
 								...groupMetadata,
 								rawParticipants: partc || [],
 								adminGroups: partc?.filter((v) => isNotNull(v.admin))?.map((v) => v.id),
@@ -67,7 +69,7 @@ const startMetadataLoop = async (clients, ms) => {
 					}
 				}
 			} catch (err) {
-				cache.interval.delete('blocklist');
+				configuration.cache.interval.delete('blocklist');
 			}
 		}, ms * 1000),
 	);
@@ -78,7 +80,7 @@ const caching = async (clients, id) => {
 		const groupMetadata = (await clients[botNum].groupMetadata(id).catch(() => undefined)) || {};
 		const partc = groupMetadata.participants;
 
-		cache.metadata.set(id, {
+		configuration.cache.metadata.set(id, {
 			...groupMetadata,
 			rawParticipants: partc || [],
 			adminGroups: partc?.filter((v) => isNotNull(v.admin))?.map((v) => v.id),
@@ -88,12 +90,12 @@ const caching = async (clients, id) => {
 		resolve();
 	});
 
-	if (isFirstConnection) {
+	if (configuration.isFirstConnection) {
 		await startMetadataLoop(clients, 3);
 		await startBlocklistLoop(clients, 6);
 	}
 
-	isFirstConnection = false;
+	configuration.isFirstConnection = false;
 };
 
 moment.tz.setDefault('Asia/Jakarta').locale('id');
@@ -112,35 +114,35 @@ export const reassign = async (m, client, store) => {
 		const isBaileys = (m?.key?.id?.startsWith('BAE5') && isSame(m?.key?.id?.length, 16)) || (isFromMe && m?.key?.id?.startsWith('VOID'));
 		const sender = isFromMe ? `${client[botNum].user.id.split(':')[0]}@s.whatsapp.net` : isGroup ? m?.key?.participant : m?.key?.remoteJid;
 
-		if (isFirstConnection) {
+		if (configuration.isFirstConnection) {
 			const SETTINGS = readJSON('./Config/settings.json');
 			const { multi, noPref } = SETTINGS.prefix;
 			const botNumber = `${client[botNum].user.id.split(':')[0]}@s.whatsapp.net`;
 
-			cache = {
-				...cache,
+			configuration.cache = {
+				...configuration.cache,
 				multi,
 				noPref,
 				pref: SETTINGS.prefix.pref || '.',
 				botNumber,
 				ownerNumbers: [SETTINGS.owner_number, ...SETTINGS.team_number, botNumber],
 			};
-			cache.config = SETTINGS;
+			configuration.cache.config = SETTINGS;
 		}
 
-		if (!cache.metadata?.has(from) && isGroup) {
+		if (!configuration.cache.metadata?.has(from) && isGroup) {
 			await caching(client, from);
 		}
 
-		const SETTINGS = cache.config;
-		const { blocklist, bannedlist } = cache;
+		const SETTINGS = configuration.cache.config;
+		const { blocklist, bannedlist } = configuration.cache;
 		const isBlocked = blocklist?.includes(sender);
 		const isBanned = bannedlist?.includes(sender);
-		const groupMetadata = isGroup ? cache.metadata.get(from) : {};
+		const groupMetadata = isGroup ? configuration.cache.metadata.get(from) : {};
 		const isGroupOwner = isGroup ? (isSame(groupMetadata?.owner, sender) ? true : false) : false;
 
-		if (!cache.users.has(sender)) {
-			cache.users.set(sender, {
+		if (!configuration.cache.users.has(sender)) {
+			configuration.cache.users.set(sender, {
 				prettyNumber:
 					PhoneNumber(`+${sender?.replace('@s.whatsapp.net', '')}`)?.getNumber('international') ??
 					PhoneNumber(`+${m?.key?.participant?.replace('@s.whatsapp.net', '')}`)?.getNumber('international') ??
@@ -148,35 +150,35 @@ export const reassign = async (m, client, store) => {
 			});
 		}
 
-		const prettyNumber = cache.users.get(sender)?.prettyNumber;
+		const prettyNumber = configuration.cache.users.get(sender)?.prettyNumber;
 		const groupName = isGroup ? groupMetadata?.subject : NO_DATA;
 		const groupDescription = isGroup ? groupMetadata?.desc?.toString() : NO_DATA;
 		const groupId = isGroup ? groupMetadata?.id : NO_DATA;
 
 		if (isGroup) {
-			if (!cache.settings.has(from) || typeof checkJSON(from) == 'boolean') {
+			if (!configuration.cache.settings.has(from) || typeof checkJSON(from) == 'boolean') {
 				if (typeof checkJSON(from) == 'boolean') {
 					pushDefaultSettings(from, groupName, groupDescription);
 				}
 
-				cache.settings.set(from, checkJSON(from));
-				groupSettings = cache.settings.get(from);
+				configuration.cache.settings.set(from, checkJSON(from));
+				groupSettings = configuration.cache.settings.get(from);
 			} else if ('GROUP_CHANGE_SUBJECT' == m.messageStubType) {
-				groupSettings = cache.settings.get(from);
+				groupSettings = configuration.cache.settings.get(from);
 				updateSettings('groupName', m.messageStubParameters[0], from);
 			} else if ('GROUP_CHANGE_DESCRIPTION' == m.messageStubType) {
-				groupSettings = cache.settings.get(from);
+				groupSettings = configuration.cache.settings.get(from);
 				updateSettings('groupDescription', m.content, from);
 			} else {
-				groupSettings = cache.settings.get(from);
+				groupSettings = configuration.cache.settings.get(from);
 			}
 		}
 
 		const content = JSON.stringify(m?.message, null, 2);
 		const pushname = m?.pushName
 			? m?.pushName?.trim()
-			: cache?.users?.get(sender)?.name || store?.contacts?.[sender]?.verifiedName || store?.contacts?.[sender]?.notify || prettyNumber;
-		const { botNumber, ownerNumbers } = cache;
+			: configuration.cache?.users?.get(sender)?.name || store?.contacts?.[sender]?.verifiedName || store?.contacts?.[sender]?.notify || prettyNumber;
+		const { botNumber, ownerNumbers } = configuration.cache;
 		const isOwner = ownerNumbers.includes(sender);
 		const timeStamp = m?.messageTimestamp || Date.now();
 		const filename = sender + (m?.key?.id || Date.now());
@@ -271,7 +273,7 @@ export const reassign = async (m, client, store) => {
 			: 'Unknown body';
 		const args = body?.split(/ +/g);
 		const cmd = body?.toLowerCase()?.split(' ')[0] || '';
-		const { multi, noPref, pref } = cache;
+		const { multi, noPref, pref } = configuration.cache;
 		let prf;
 
 		if (multi) {

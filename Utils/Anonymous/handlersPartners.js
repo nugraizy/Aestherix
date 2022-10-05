@@ -1,16 +1,16 @@
-/* global anonymous */
+import configuration from '../../connect.js';
 
 export const handlers = (key) => {
-	const status = anonymous.get(key) || Array.from(anonymous.values()).find((k) => k.partner == key) || undefined;
+	const status = configuration.anonymous.get(key) || Array.from(configuration.anonymous.values()).find((k) => k.partner == key) || undefined;
 
 	if (status == undefined) {
 		return false;
 	}
 
-	return anonymous.has(key)
-		? { partner1: key, partner2: anonymous.get(key).partner }
+	return configuration.anonymous.has(key)
+		? { partner1: key, partner2: configuration.anonymous.get(key).partner }
 		: {
-				partner1: anonymous.get(Array.from(anonymous.keys()).find((k) => anonymous.get(k).partner == key)).partner,
-				partner2: Array.from(anonymous.keys()).find((k) => anonymous.get(k).partner == key),
+				partner1: configuration.anonymous.get(Array.from(configuration.anonymous.keys()).find((k) => configuration.anonymous.get(k).partner == key)).partner,
+				partner2: Array.from(configuration.anonymous.keys()).find((k) => configuration.anonymous.get(k).partner == key),
 		  }; /* eslint-disable-line */
 };

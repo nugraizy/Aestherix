@@ -1,4 +1,16 @@
 /* eslint-disable */
+const keycaps = {
+	0: '0️⃣',
+	1: '1️⃣',
+	2: '2️⃣',
+	3: '3️⃣',
+	4: '4️⃣',
+	5: '5️⃣',
+	6: '6️⃣',
+	7: '7️⃣',
+	8: '8️⃣',
+	9: '9️⃣',
+};
 const LEVEL = {
 	easy: 60,
 	medium: 50,
@@ -435,7 +447,7 @@ export const revealOneElement = (board, solvedBoard) => {
 	const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
 
 	board[randomIndex] = solvedBoard[randomIndex];
-	tempBoard[randomIndex] = `(${solvedBoard[randomIndex]})`;
+	tempBoard[randomIndex] = keycaps[solvedBoard[randomIndex]];
 	return { board, tempBoard };
 };
 
@@ -521,7 +533,7 @@ export const fillGrid = (post, num, board, solvedBoard) => {
 
 	if (grids.status && grids.statusPlay === 'Playing') {
 		board[grids.post] = Number(num);
-		tempBoard[grids.post] = `(${num})`;
+		tempBoard[grids.post] = keycaps[num];
 		return { status: true, statusPlaying: grids.statusPlay, grid: board, gridSolved: solvedBoard, tempBoard };
 	} else {
 		return {

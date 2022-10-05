@@ -1,9 +1,10 @@
-/* global botNum, OPTIONS,  */
+/* global botNum,  */
 import moment from 'moment-timezone';
 import similarity from 'similarity';
-
 import { log } from 'util';
-import { runtime } from '../../connect.js';
+
+import configuration from '../../connect.js';
+import { runtime } from '../../index.js';
 import { addLimit, checkAfk, color, delay, deleteAfk, getAfk, getTimeSince, INFOLOG, reassign } from '../../Helper/index.js';
 
 let STATS_OFFLINE = true;
@@ -17,7 +18,7 @@ export default {
 			return;
 		}
 
-		if (OPTIONS.debugMode && !message?.messages?.[0]?.key?.fromMe) {
+		if (configuration.OPTIONS.debugMode && !message?.messages?.[0]?.key?.fromMe) {
 			log(JSON.stringify(message, undefined, 2));
 		}
 
@@ -41,11 +42,11 @@ export default {
 			return;
 		}
 
-		if (message.message.key && message.message.key.remoteJid == 'status@broadcast' && OPTIONS.story & message.isBanned) {
+		if (message.message.key && message.message.key.remoteJid == 'status@broadcast' && configuration.OPTIONS.story & message.isBanned) {
 			return (await import('./storyMessage.js')).default.handler(client, message);
 		}
 
-		if (OPTIONS.offline) {
+		if (configuration.OPTIONS.offline) {
 			if (STATS_OFFLINE) {
 				await cmds.commands.get('simulates').run({ args: ['.simulates', 'online', 'disable'], isOwner: true, from: false, message: message.message }, client, store);
 				STATS_OFFLINE = false;
@@ -54,7 +55,7 @@ export default {
 			(await import('./offlineMessage.js')).default.handler(client, message);
 		}
 
-		if (OPTIONS.autoRead && !OPTIONS.offline && !message.isBlocked && !message.isBanned) {
+		if (configuration.OPTIONS.autoRead && !configuration.OPTIONS.offline && !message.isBlocked && !message.isBanned) {
 			client[botNum].readMessages([message.message.key]);
 		}
 
@@ -108,7 +109,7 @@ export default {
 		if (message.isCmd && message.from !== 'status@broadcast') {
 			let bodies = [];
 
-			if (OPTIONS.multiCmd) {
+			if (configuration.OPTIONS.multiCmd) {
 				bodies = EVALY.includes(message.cmd) ? [message.body] : message.body.split('|');
 			} else {
 				bodies.push(message.body);
@@ -121,7 +122,7 @@ export default {
 				message.query = message.args.slice(1).join(' ').trim();
 				const correctedCommand = [];
 
-				if (OPTIONS.autoCorrect) {
+				if (configuration.OPTIONS.autoCorrect) {
 					for (const cmd of Array.from(cmds.commands.keys())) {
 						const correcting = similarity(message.args[0], cmd);
 
@@ -163,7 +164,7 @@ export default {
 					Array.from(cmds.commands.values()).find((v) => v.aliases.includes(message.cmd.trim().toLowerCase())) ||
 					false;
 
-				if (message.isGroup && !OPTIONS.noLogs) {
+				if (message.isGroup && !configuration.OPTIONS.noLogs) {
 					INFOLOG(
 						`[${color(time, 'cyan')}]`,
 						`${color(message.pushname.trim(), 'white')} ${color(message.prettyNumber, '#ff71ce')} :`,
@@ -173,7 +174,7 @@ export default {
 						`${color('type', '#ff71ce')} : ${color(message.type, '#b967ff')}`,
 						`${color(runtimes, '#f18f15')}${color('s', '#f5e700')}`,
 					);
-				} else if (!message.isGroup && !OPTIONS.noLogs) {
+				} else if (!message.isGroup && !configuration.OPTIONS.noLogs) {
 					INFOLOG(
 						`[${color(time, 'cyan')}]`,
 						`${color(message.pushname.trim(), 'white')} ${color(message.prettyNumber, '#ff71ce')} :`,
@@ -185,7 +186,7 @@ export default {
 				}
 
 				if (Tempcmds && !message.isOwner) {
-					if (OPTIONS.selfMode) {
+					if (configuration.OPTIONS.selfMode) {
 						return;
 					}
 
@@ -194,7 +195,7 @@ export default {
 						continue;
 					}
 
-					if (OPTIONS.restrict && Tempcmds.restrict) {
+					if (configuration.OPTIONS.restrict && Tempcmds.restrict) {
 						await client[botNum].reply({ from: message.from, quoted: message.message }, 'This command is restricted and currently bot are on restricted mode.');
 						continue;
 					}
@@ -225,7 +226,7 @@ export default {
 						return await client[botNum].reply({ from: message.from, quoted: message.message }, 'You have reached the limit of this command.');
 					}
 
-					if (OPTIONS.coolDown) {
+					if (configuration.OPTIONS.coolDown) {
 						if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) {
 							return await client[botNum].reply({ from: message.from, quoted: message.message }, 'Please wait until your request is done');
 						}
@@ -257,8 +258,8 @@ export default {
 					}
 				}
 
-				if (Tempcmds && (OPTIONS.onlyLogs ? (message.cmd.startsWith('==>') || message.cmd.startsWith('//>') || message.cmd.startsWith('$$>') ? true : false) : true)) {
-					if (!message.isOwner && OPTIONS.selfMode) {
+				if (Tempcmds && (configuration.OPTIONS.onlyLogs ? (message.cmd.startsWith('==>') || message.cmd.startsWith('//>') || message.cmd.startsWith('$$>') ? true : false) : true)) {
+					if (!message.isOwner && configuration.OPTIONS.selfMode) {
 						return;
 					}
 
@@ -309,7 +310,7 @@ export default {
 			return;
 		}
 
-		if (!message.isGroup && !OPTIONS.noLogs) {
+		if (!message.isGroup && !configuration.OPTIONS.noLogs) {
 			INFOLOG(
 				`[${color(time, 'cyan')}]`,
 				`${color(message.pushname.trim(), 'white')} ${color(message.prettyNumber, '#ff71ce')} :`,
@@ -317,7 +318,7 @@ export default {
 				`${color('type', '#ff71ce')} : ${color(message.type, '#b967ff')}`,
 				`${color(runtimes, '#f18f15')}${color('s', '#f5e700')}`,
 			);
-		} else if (message.isGroup && !OPTIONS.noLogs) {
+		} else if (message.isGroup && !configuration.OPTIONS.noLogs) {
 			INFOLOG(
 				`[${color(time, 'cyan')}]`,
 				`${color(message.pushname.trim(), 'white')} ${color(message.prettyNumber, '#ff71ce')} :`,

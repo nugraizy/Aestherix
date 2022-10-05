@@ -1,5 +1,6 @@
-/* global games */
 import { Aki } from 'aki-api';
+
+import configuration from '../../connect.js';
 
 const TOTAL_ANSWER = 7;
 const ANSWERS = {
@@ -26,11 +27,11 @@ const progressBar = (progress) => {
 };
 
 export const getSession = (key) => {
-	return games.akinator.get(key) || null;
+	return configuration.games.akinator.get(key) || null;
 };
 
 const setSession = (key) => {
-	return games.akinator.set(key, new Aki({ region: 'id' }));
+	return configuration.games.akinator.set(key, new Aki({ region: 'id' }));
 };
 
 const deleteSession = async (key) => {
@@ -40,7 +41,7 @@ const deleteSession = async (key) => {
 		return { error: "You don't have a game running." }; /* eslint-disable-line */
 	}
 
-	games.akinator.delete(key);
+	configuration.games.akinator.delete(key);
 	return session;
 };
 

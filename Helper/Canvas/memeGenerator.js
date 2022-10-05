@@ -7,7 +7,7 @@ import sizeOf from 'image-size';
 import moment from 'moment-timezone';
 import path from 'path';
 
-import { __dirname } from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { createExif } from '../../Utils/Misc/index.js';
 import { color, ERRLOG, INFOLOG } from '../Modules/functions.js';
 
@@ -134,6 +134,6 @@ export const memeGenerator = (sender, input, topTexts = '', bottomTexts = '', ty
 		} catch (err) {
 			unlinkSync(input);
 
-			reject({ name: 'Not Supported.', message: 'Cant\' convert a .png image without fixed dimension. Try other image.' });
+			reject({ name: 'Not Supported.', message: 'Can not convert a .png image without fixed dimension. Try other image.' });
 		}
 	});

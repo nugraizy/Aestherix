@@ -1,6 +1,6 @@
 import path from 'path';
 
-import { __dirname } from '../../../connect.js';
+import { __dirname } from '../../../index.js';
 import { isFileExist, makeDir, readDir, readJSON, writeJSON } from '../../index.js';
 
 const PATH = {

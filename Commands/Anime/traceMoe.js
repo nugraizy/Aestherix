@@ -2,7 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 
-import { __dirname } from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { isURL } from '../../Helper/index.js';
 import { toMp4 } from '../../Utils/Converter/index.js';
 import { traceMoe } from '../../Utils/Image Reverse Search/index.js';

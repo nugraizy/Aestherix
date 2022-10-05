@@ -3,7 +3,7 @@ import LANGUAGE from 'cld';
 import moment from 'moment-timezone';
 import path from 'path';
 
-import { __dirname } from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { color, INFOLOG } from '../../Helper/Modules/index.js';
 import { textToSpeech } from '../../Utils/Converter/index.js';
 import { tesseract } from '../../Utils/Misc/index.js';

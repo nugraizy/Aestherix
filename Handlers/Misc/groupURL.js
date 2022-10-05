@@ -1,11 +1,12 @@
-/* global botNum, OPTIONS */
+/* global botNum */
+import configuration from '../../connect.js';
 import { readJSON, writeJSON } from '../../Helper/Modules/index.js';
 
 const checkURL = (input) => /(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])/g.test(input);
 
 export default {
 	async handler({ from, isAdmin, isGroup, isBotAdmin, message, mediaData, sender, isFromMe, body, isOwner }, client, settings) {
-		if (isGroup && settings?.[from]?.antiURL == 'enable' && !isAdmin && isBotAdmin && !OPTIONS.onlyLogs) {
+		if (isGroup && settings?.[from]?.antiURL == 'enable' && !isAdmin && isBotAdmin && !configuration.OPTIONS.onlyLogs) {
 			const data = readJSON('./Databases/Groups/settingsManager.json');
 			const index = data.findIndex((v) => Object.keys(v)[0] == from);
 			const isBanned = data[index][from].banned.includes(sender);

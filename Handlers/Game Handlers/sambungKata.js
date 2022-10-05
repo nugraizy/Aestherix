@@ -1,8 +1,9 @@
-/* global botNum, games, OPTIONS */
+/* global botNum */
+import configuration from '../../connect.js';
 
 export default {
 	async handler({ from, isGroup, sender, body, message, isAdmin }, client, settings) {
-		const data = games['word'].get(from);
+		const data = configuration.games['word'].get(from);
 		const play = async () => {
 			if (!data) {
 				return;
@@ -35,7 +36,7 @@ Turn : @${sambung.turn.split('@')[0]}`,
 			);
 		};
 
-		if (isGroup && (settings[from].games == 'enable' || isAdmin) && !OPTIONS.onlyLogs) {
+		if (isGroup && (settings[from].games == 'enable' || isAdmin) && !configuration.OPTIONS.onlyLogs) {
 			await play();
 		}
 	},

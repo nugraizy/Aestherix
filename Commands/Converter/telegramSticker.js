@@ -1,7 +1,8 @@
-/* global botNum, author, packname */
+/* global botNum */
 import path from 'path';
 
-import { __dirname } from '../../connect.js';
+import configuration from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { telegram } from '../../Utils/Stickers/index.js';
 
 export default {
@@ -29,7 +30,10 @@ export default {
 		await client[botNum].sendMessage(from, { text: capt }, { quoted: message });
 
 		for (const stickers of result.stickers) {
-			const sticker = await client[botNum].prepareSticker(stickers, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author, packname });
+			const sticker = await client[botNum].prepareSticker(stickers, path.join(__dirname, `Temporary Files/${filename}`), undefined, {
+				author: configuration.author,
+				packname: configuration.packname,
+			});
 
 			await client[botNum].sendMessage(from, { sticker }, { quoted: message });
 		}

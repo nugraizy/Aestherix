@@ -2,7 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 
-import { __dirname } from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { isURL, removeDuplicatesArray } from '../../Helper/index.js';
 import { yandex } from '../../Utils/Image Reverse Search/index.js';
 

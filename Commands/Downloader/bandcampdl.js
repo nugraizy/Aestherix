@@ -1,7 +1,7 @@
 /* global botNum */
 import path from 'path';
 
-import { __dirname } from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { removeDuplicatesArray, isURL } from '../../Helper/Modules/index.js';
 import { downloadBandcamp, toOpus } from '../../Utils/index.js';
 

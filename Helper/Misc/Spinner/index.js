@@ -1,1 +1,1 @@
-export { getSpinner } from './spinners.js';
+export * from './spinners.js';

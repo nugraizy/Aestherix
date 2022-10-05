@@ -1,9 +1,10 @@
-/* global cli, botNum, OPTIONS */
+/* global botNum */
 import fs from 'fs';
 
+import configuration from '../../connect.js';
 import { getTimeSince } from '../../Helper/index.js';
 
-const DB_PATH = `./Media Files/Connection Databases/${cli.input[0] ?? 'Session-debug'}.json`;
+const DB_PATH = `./Media Files/Connection Databases/${configuration.cli.input[0] ?? 'Session-debug'}.json`;
 
 export default {
 	name: 'checkdeleted',
@@ -19,7 +20,7 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'You are not allowed to use this command');
 		}
 
-		const messages = OPTIONS.json ? JSON.parse(fs.readFileSync(DB_PATH)).messages[from] : await store.loadMessages(from);
+		const messages = configuration.OPTIONS.json ? JSON.parse(fs.readFileSync(DB_PATH)).messages[from] : await store.loadMessages(from);
 
 		if (args[1] == 'get') {
 			const dataMessage = messages.find((v) => v.key.id == args[2]);

@@ -1,7 +1,8 @@
-/* global botNum, process, presences, log */
+/* global botNum, process, log */
 import async from 'async';
 import mqtt from 'mqtt';
 
+import configuration from '../../connect.js';
 import { spotifier } from '../../Utils/Spotifier/index.js';
 import { delay } from '../../Helper/Modules/index.js';
 
@@ -10,7 +11,7 @@ const clientMqttListen = mqtt.connect(process.env.MQTT_URL);
 async function updateSpotifyTracks() {
 	async.forever(
 		async (next) => {
-			if (presences?.spotify?.timeout == undefined) {
+			if (configuration.presences?.spotify?.timeout == undefined) {
 				next();
 			}
 
@@ -50,19 +51,19 @@ export default {
 				case 'status':
 				case 'stats':
 					{
-						await client[botNum].reply({ from, quoted: message }, Object.keys(presences).includes('spotify') ? 'Enabled' : 'Disabled');
+						await client[botNum].reply({ from, quoted: message }, Object.keys(configuration.presences).includes('spotify') ? 'Enabled' : 'Disabled');
 					}
 
 					break;
 				case 'disable':
 				case 'off':
 					{
-						if (!('spotify' in presences)) {
+						if (!('spotify' in configuration.presences)) {
 							return await client[botNum].reply({ from, quoted: message }, 'Already disabled');
 						}
 
-						clearTimeout(presences.spotify.timeout);
-						delete presences.spotify;
+						clearTimeout(configuration.presences.spotify.timeout);
+						delete configuration.presences.spotify;
 						await client[botNum].reply({ from, quoted: message }, 'Simulate Spotify Player Bio Disabled');
 					}
 
@@ -70,11 +71,11 @@ export default {
 				case 'enable':
 				case 'on':
 					{
-						if ('spotify' in presences) {
+						if ('spotify' in configuration.presences) {
 							return await client[botNum].reply({ from, quoted: message }, 'Already enabled');
 						}
 
-						presences.spotify = { started, timeout: setTimeout(() => updateSpotifyTracks(), 0) };
+						configuration.presences.spotify = { started, timeout: setTimeout(() => updateSpotifyTracks(), 0) };
 						await client[botNum].reply({ from, quoted: message }, 'Simulate Spotify Player Bio Enabled');
 					}
 

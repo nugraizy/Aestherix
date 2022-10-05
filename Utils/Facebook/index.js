@@ -1,1 +1,1 @@
-export { fbDl } from './fbDownloader.js';
+export * from './fbDownloader.js';

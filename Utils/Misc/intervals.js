@@ -1,5 +1,6 @@
-/* global intervals */
 import moment from 'moment-timezone';
+
+import configuration from '../../connect.js';
 
 export const SetIntervals = async (intervaly, key, time, callback, opts = {}) => {
 	const starts = new Date().getTime();
@@ -31,9 +32,9 @@ export const CheckIntervals = (intervaly) => {
 export const CheckAllIntervals = () => {
 	const result = [];
 
-	for (const type in intervals) {
+	for (const type in configuration.intervals) {
 		result.push({
-			[type]: Array.from(intervals[type].entries()).map(([key, value]) => ({
+			[type]: Array.from(configuration.intervals[type].entries()).map(([key, value]) => ({
 				[key]: value,
 			})),
 		});

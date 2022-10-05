@@ -1,2 +1,2 @@
-export { iflixSearch } from './iflixSearch.js';
-export { trueidSearch } from './trueIDSearch.js';
+export * from './iflixSearch.js';
+export * from './trueIDSearch.js';

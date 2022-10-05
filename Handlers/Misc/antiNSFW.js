@@ -1,9 +1,10 @@
-/* global botNum, OPTIONS */
+/* global botNum */
 import { downloadMediaMessage } from '@adiwajshing/baileys';
 import fs from 'fs-extra';
 import path from 'path';
 
-import { __dirname } from '../../connect.js';
+import configuration from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { delay, readJSON, writeJSON } from '../../Helper/index.js';
 import { arq } from '../../Utils/ARQ/index.js';
 
@@ -11,7 +12,7 @@ const { createReadStream, writeFile } = fs;
 
 export default {
 	async handler({ from, isAdmin, isGroup, isBotAdmin, message, mediaData, isMediaImage, sender, filename, extractMediaData }, client, settings) {
-		if (isBotAdmin && isMediaImage && isGroup && settings?.[from]?.['antiNSFW'] == 'enable' && !OPTIONS.onlyLogs) {
+		if (isBotAdmin && isMediaImage && isGroup && settings?.[from]?.['antiNSFW'] == 'enable' && !configuration.OPTIONS.onlyLogs) {
 			const filePath = path.join(__dirname, `Temporary Files/${filename}.${extractMediaData.mimetype.split('/')[1]}`);
 			const media = await downloadMediaMessage(mediaData, 'buffer');
 

@@ -1,5 +1,6 @@
 import moment from 'moment-timezone';
 import Tesseract from 'tesseract.js';
+
 import { cheerioLOAD, color, fetchTEXT, INFOLOG, unlinkFile } from '../../Helper/Modules/index.js';
 
 export const tesseract = async (image, sender, lang = 'ind') =>
@@ -14,16 +15,13 @@ export const tesseract = async (image, sender, lang = 'ind') =>
 			const $ = cheerioLOAD(await fetchTEXT('https://github.com/tesseract-ocr/tessdoc/blob/main/Data-Files-in-different-versions.md'));
 
 			$('#readme > article > table:nth-child(2) > tbody > tr').each(function () {
-				if ($(this).find('td:nth-child(1)')
-.text() === '') {
+				if ($(this).find('td:nth-child(1)').text() === '') {
 					return;
 				}
 
 				languages.push({
-					code: $(this).find('td:nth-child(1)')
-.text(),
-					name: $(this).find('td:nth-child(2)')
-.text(),
+					code: $(this).find('td:nth-child(1)').text(),
+					name: $(this).find('td:nth-child(2)').text(),
 				});
 			});
 

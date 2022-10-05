@@ -1,2 +1,2 @@
-export { line } from './line.js';
-export { telegram } from './telegram.js';
+export * from './line.js';
+export * from './telegram.js';

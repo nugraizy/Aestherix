@@ -1,7 +1,7 @@
-/* global user */
+import configuration from '../../../connect.js';
 
 export const checkAfk = (participant, groupId) => {
-	const key = user.afk.get(participant)?.has(groupId);
+	const key = configuration.user.afk.get(participant)?.has(groupId);
 
 	if (!key) {
 		return false;
@@ -12,7 +12,7 @@ export const checkAfk = (participant, groupId) => {
 
 export const getAfk = (participant, groupId) => {
 	if (checkAfk(participant, groupId)) {
-		return user.afk.get(participant).get(groupId);
+		return configuration.user.afk.get(participant).get(groupId);
 	}
 
 	return false;
@@ -20,7 +20,7 @@ export const getAfk = (participant, groupId) => {
 
 export const deleteAfk = (participant, groupId) => {
 	if (checkAfk(participant, groupId)) {
-		user.afk.get(participant).delete(groupId);
+		configuration.user.afk.get(participant).delete(groupId);
 		return true;
 	}
 
@@ -29,6 +29,6 @@ export const deleteAfk = (participant, groupId) => {
 
 export const setAfk = (participant, groupId, reason, name) => {
 	if (!getAfk(participant, groupId)) {
-		user.afk.set(participant, new Map().set(groupId, { since: new Date().getTime(), reasons: !reason ? 'No Reason' : reason, name }));
+		configuration.user.afk.set(participant, new Map().set(groupId, { since: new Date().getTime(), reasons: !reason ? 'No Reason' : reason, name }));
 	}
 };

@@ -1,4 +1,5 @@
-/* global games, client, botNum */
+/* global client, botNum */
+import configuration from '../../connect.js';
 import { shuffleArray } from '../../Helper/index.js';
 
 const WEREWOLF_SCRIPTING = {
@@ -303,7 +304,7 @@ export class Werewolf {
 		}
 
 		clearTimeout(this.gameCycler);
-		games.werewolf.delete(this.roomId);
+		configuration.games.werewolf.delete(this.roomId);
 		return { error: false, message: WEREWOLF_SCRIPTING.success.delete };
 	};
 
@@ -311,8 +312,8 @@ export class Werewolf {
 		const data = this.getDataGame(this.roomId);
 
 		if (!data) {
-			games.werewolf.set(this.roomId, this);
-			games.werewolf.get(this.roomId).playersData.push({
+			configuration.games.werewolf.set(this.roomId, this);
+			configuration.games.werewolf.get(this.roomId).playersData.push({
 				id: this.roomMaster,
 				index: 0,
 				name: this.roomMasterName,
@@ -655,7 +656,7 @@ export class Werewolf {
 					clearTimeout(dataGame.gameCycler);
 					const data = dataGame;
 
-					games.werewolf.delete(roomId);
+					configuration.games.werewolf.delete(roomId);
 					client[botNum].ev.emit('werewolf.cycle', { error: true, message, id: dataGame.roomId, ...client, ...data, status: false, time: 'failAfk' });
 					return;
 				}
@@ -758,7 +759,7 @@ export class Werewolf {
 							time: 'voting',
 						});
 						clearTimeout(dataGame.gameCycler);
-						games.werewolf.delete(dataGame.roomId);
+						configuration.games.werewolf.delete(dataGame.roomId);
 					}, 3000);
 					return;
 				}
@@ -849,7 +850,7 @@ export class Werewolf {
 	}
 
 	getDataGame(roomId) {
-		const data = games.werewolf.get(roomId);
+		const data = configuration.games.werewolf.get(roomId);
 
 		if (data === undefined) {
 			return false;

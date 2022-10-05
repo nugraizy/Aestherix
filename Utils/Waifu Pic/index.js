@@ -1,1 +1,1 @@
-export { getWaifu } from './waifu.js';
+export * from './waifu.js';

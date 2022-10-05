@@ -1,6 +1,6 @@
 {
 	"name": "simplebotpro3",
-	"version": "1.15.2",
+	"version": "1.16.0",
 	"description": "WhatsApp bot using Baileys library with Javascript language.",
 	"exports": "./connect.js",
 	"type": "module",
@@ -83,7 +83,8 @@
 		"tesseract.js": "^2.1.5",
 		"util": "^0.12.4",
 		"yargs-parser": "^21.0.1",
-		"yt-search": "^2.10.3"
+		"yt-search": "^2.10.3",
+		"ytsr": "^3.8.0"
 	},
 	"devDependencies": {
 		"@adiwajshing/keyed-db": "^0.2.4",

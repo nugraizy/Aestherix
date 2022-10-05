@@ -3,7 +3,7 @@ import moment from 'moment-timezone';
 import path from 'path';
 import parser from 'yargs-parser';
 
-import { __dirname } from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { color, ERRLOG, INFOLOG, isOne, isURL, removeDuplicatesArray } from '../../Helper/Modules/index.js';
 import { toOpus } from '../../Utils/Converter/index.js';
 import { mime } from '../../Utils/Misc/index.js';

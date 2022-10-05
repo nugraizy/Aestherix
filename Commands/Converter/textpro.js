@@ -1,4 +1,4 @@
-/* global botNum, author, packname */
+/* global botNum */
 import Axios from 'axios';
 import fs from 'fs';
 import imageSize from 'image-size';
@@ -7,7 +7,8 @@ import path from 'path';
 import sharp from 'sharp';
 import yargsParser from 'yargs-parser';
 
-import { __dirname } from '../../connect.js';
+import configuration from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { randomize } from '../../Helper/index.js';
 import { textpro } from '../../Utils/index.js';
 
@@ -149,7 +150,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 			const { width, height } = imageSize(data);
 
 			const buffer = isStickers
-				? await client[botNum].prepareSticker(data, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author, packname })
+				? await client[botNum].prepareSticker(data, path.join(__dirname, `Temporary Files/${filename}`), undefined, { author: configuration.author, packname: configuration.packname })
 				: await sharp(data)
 						.extract({ width: width - 40, height: height - 40, left: 0, top: 0 })
 						.toBuffer();

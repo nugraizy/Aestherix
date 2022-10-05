@@ -3,7 +3,7 @@ import _ from 'lodash';
 import moment from 'moment-timezone';
 import path from 'path';
 
-import { __dirname } from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { trigger } from '../../Helper/Canvas/index.js';
 import { color, INFOLOG, readBuffer } from '../../Helper/Modules/index.js';
 

@@ -1,1 +1,1 @@
-export { FlickerAPI } from './searchImages.js';
+export * from './searchImages.js';

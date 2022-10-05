@@ -1,5 +1,7 @@
-/* global botNum, cmds */
+/* global botNum */
 import parser from 'yargs-parser';
+
+import configuration from '../../connect.js';
 
 export default {
 	name: 'ytplay',
@@ -21,15 +23,15 @@ export default {
 		});
 
 		if (audio) {
-			await cmds.commands.get('ytaudio').run(message, client);
+			await configuration.cmds.commands.get('ytaudio').run(message, client);
 		}
 
 		if (video) {
-			await cmds.commands.get('ytvideo').run(message, client);
+			await configuration.cmds.commands.get('ytvideo').run(message, client);
 		}
 
 		if (!audio && !video) {
-			await cmds.commands.get('ytaudio').run(message, client);
+			await configuration.cmds.commands.get('ytaudio').run(message, client);
 		}
 	},
 };

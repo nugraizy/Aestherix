@@ -1,4 +1,4 @@
-export { apng2webpUrl, webp2mp4File } from './EZGifs/index.js';
-export { convertMediaToSticker, convertStickerToMedia, gifToMp4, gif2mp4, mergeVideoWithAudio, mp42mp3, pet, soundRemover, toMp4, toOpus } from './fileProcessing.js';
-export { textToSpeech } from './Node-gtts/index.js';
-export { emojimix } from './Tenor/emojiMix.js';
+export * from './EZGifs/index.js';
+export * from './fileProcessing.js';
+export * from './Node-gtts/index.js';
+export * from './Tenor/emojiMix.js';

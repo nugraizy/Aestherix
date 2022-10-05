@@ -1,6 +1,7 @@
-/* global games, intervals, botNum */
+/* global botNum */
 import moment from 'moment-timezone';
 
+import configuration from '../../connect.js';
 import { cheerioLOAD, fetchJSON, fetchTEXT, randomize } from '../../Helper/Modules/index.js';
 import { CheckIntervals, DeleteIntervals, SetIntervals } from '../Misc/intervals.js';
 
@@ -48,7 +49,7 @@ const RegexEndWord = (arr) => {
 };
 
 export const GetSambungKataSession = (group) => {
-	return games.word.get(group);
+	return configuration.games.word.get(group);
 };
 
 export class SambungKata {
@@ -61,7 +62,7 @@ export class SambungKata {
 		this.turn = null;
 		this.guessed = [];
 		this.status = GAME_STATUS.WAITING;
-		games.word.set(group, this);
+		configuration.games.word.set(group, this);
 	}
 
 	checkValidClue(word, prevClue) {
@@ -102,15 +103,15 @@ export class SambungKata {
 		const data = await this.randomWord();
 		const remainings = moment(new Date()).add(parseInt(20), 'seconds').valueOf();
 
-		SetIntervals(intervals['word'], this.group, 20, (clients = client, group = this.group, remaining = remainings) => {
-			const data = intervals['word'].get(group);
+		SetIntervals(configuration.intervals['word'], this.group, 20, (clients = client, group = this.group, remaining = remainings) => {
+			const data = configuration.intervals['word'].get(group);
 
 			if (data === undefined) {
 				return;
 			}
 
 			const second = Math.floor(((remaining - new Date().getTime()) % (1000 * 60)) / 1000);
-			const dataGame = games.word.get(group);
+			const dataGame = configuration.games.word.get(group);
 
 			data.timer = second;
 			dataGame.timer = second;
@@ -121,11 +122,11 @@ export class SambungKata {
 			}
 
 			if (timer <= 0) {
-				DeleteIntervals(data, intervals['word'], group);
+				DeleteIntervals(data, configuration.intervals['word'], group);
 				const winner = dataGame.changeTurn();
 
 				clients[botNum].sendMessage(group, { text: `Time's up! The winner is : @${winner.split('@')[0]}`, mentions: [winner] });
-				games['word'].delete(games['word'].get(group));
+				configuration.games['word'].delete(configuration.games['word'].get(group));
 			}
 		});
 		return { ...this, ...data };
@@ -205,7 +206,7 @@ export class SambungKata {
 	}
 
 	async guess(word, guesser, group, client) {
-		if (!intervals['word'].get(group) && !games['word'].get(group)) {
+		if (!configuration.intervals['word'].get(group) && !configuration.games['word'].get(group)) {
 			return false;
 		}
 
@@ -226,18 +227,18 @@ export class SambungKata {
 		this.changeTurn();
 		this.words = data.value;
 		this.clue = data.clue;
-		DeleteIntervals(intervals['word'].get(this.group), intervals['word'], this.group);
+		DeleteIntervals(configuration.intervals['word'].get(this.group), configuration.intervals['word'], this.group);
 		const remainings = moment(new Date()).add(parseInt(20), 'seconds').valueOf();
 
-		SetIntervals(intervals['word'], this.group, 20, (clients = client, group = this.group, remaining = remainings) => {
-			const data = intervals['word'].get(group);
+		SetIntervals(configuration.intervals['word'], this.group, 20, (clients = client, group = this.group, remaining = remainings) => {
+			const data = configuration.intervals['word'].get(group);
 
 			if (data === undefined) {
 				return;
 			}
 
 			const second = Math.floor(((remaining - new Date().getTime()) % (1000 * 60)) / 1000);
-			const dataGame = games.word.get(group);
+			const dataGame = configuration.games.word.get(group);
 
 			data.timer = second;
 			dataGame.timer = second;
@@ -248,11 +249,11 @@ export class SambungKata {
 			}
 
 			if (timer <= 0) {
-				DeleteIntervals(data, intervals['word'], group);
+				DeleteIntervals(data, configuration.intervals['word'], group);
 				const winner = dataGame.changeTurn();
 
 				clients[botNum].sendMessage(group, { text: `Time's up! The winner is : @${winner.split('@')[0]}`, mentions: [winner] });
-				games['word'].delete(group);
+				configuration.games['word'].delete(group);
 			}
 		});
 		return this;

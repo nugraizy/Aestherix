@@ -1,9 +1,11 @@
-/* global botNum, OPTIONS, cli */
+/* global botNum */
 import { generateMessageID, generateWAMessageFromContent } from '@adiwajshing/baileys';
 import emojiReg from 'emoji-regex';
 import { readFileSync } from 'fs';
 
-const DATABASE_PATH = `./Media Files/Connection Databases/${cli.input[0] ?? 'Session-debug'}.json`;
+import configuration from '../../connect.js';
+
+const DATABASE_PATH = `./Media Files/Connection Databases/${configuration.cli.input[0] ?? 'Session-debug'}.json`;
 
 export default {
 	name: 'reaction',
@@ -36,9 +38,9 @@ export default {
 		const emojis = query.match(emojiReg());
 
 		if (emojis) {
-			const chats = OPTIONS.json ? JSON.parse(readFileSync(DATABASE_PATH)).messages[from].map((v) => v.key) : (await store.loadMessages(from)).map((v) => v.key);
+			const chats = configuration.OPTIONS.json ? JSON.parse(readFileSync(DATABASE_PATH)).messages[from].map((v) => v.key) : (await store.loadMessages(from)).map((v) => v.key);
 
-			for (let chat of chats) {
+			for (const chat of chats) {
 				chat.participant = chat.fromMe ? `${botNum.split(':')[0]}@s.whatsapp.net` : chat.participant;
 
 				await client[botNum].relayMessage(from, { reactionMessage: { key: chat, text: emojis[0] } }, { messageId: generateMessageID() });

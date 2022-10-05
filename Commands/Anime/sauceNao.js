@@ -2,7 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 
-import { __dirname } from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { isURL } from '../../Helper/index.js';
 import { sauceNao } from '../../Utils/Image Reverse Search/index.js';
 
@@ -43,7 +43,7 @@ export default {
 		}
 
 		if (result.title == '') {
-			return await client[botNum].reply({ from, quoted: message }, 'Can\'t discover what anime is this. Try moe instead.');
+			return await client[botNum].reply({ from, quoted: message }, 'Can not discover what anime is this. Try moe instead.');
 		}
 
 		const capt = `\`\`\` • What Anime ?\`\`\`

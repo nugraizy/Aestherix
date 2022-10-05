@@ -1,7 +1,8 @@
-/* global botNum, cmds */
+/* global botNum */
+import configuration from '../../connect.js';
 import { readJSON } from '../../Helper/Modules/index.js';
 
-const getRandomCommand = () => Array.from(cmds.commands.keys())[Math.floor(Math.random() * cmds.commands.size)];
+const getRandomCommand = () => Array.from(configuration.cmds.commands.keys())[Math.floor(Math.random() * configuration.cmds.commands.size)];
 
 export default {
 	name: 'menu',
@@ -18,7 +19,7 @@ export default {
 		).version.toUpperCase()}\n\nnote : if you want to try werewolf, the game still on beta, so many bugs (the game made in 2 days). but still playable.\n\n`;
 		const Container = [];
 
-		for (const [key, value] of cmds.commands) {
+		for (const [key, value] of configuration.cmds.commands) {
 			if (Object.keys(Container).includes(value.category)) {
 				Container[value.category].push(key);
 			} else {
@@ -33,7 +34,7 @@ export default {
 				.join('\n')}\n\n\n`;
 		}
 
-		capt = `${capt.trim()}\n\nUse : ${prefix}${getRandomCommand()} -H\n~> to see the detail of the command.\n~> total command : ${cmds.commands.size}`;
+		capt = `${capt.trim()}\n\nUse : ${prefix}${getRandomCommand()} -H\n~> to see the detail of the command.\n~> total command : ${configuration.cmds.commands.size}`;
 
 		await client[botNum].sendMessage(
 			from,

@@ -1,7 +1,7 @@
 /* global botNum */
 import path from 'path';
 
-import { __dirname } from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { readJSON, writeJSON } from '../../Helper/Modules/index.js';
 import { genshinProfile } from '../../Utils/Games/index.js';
 
@@ -9,11 +9,11 @@ const regex = async (input) => {
 	const match = input.match(/^\d{9,10}/g);
 
 	if (!match) {
-		return { status: false, message: 'Wasn\'t a valid UID' };
+		return { status: false, message: 'Not a valid UID' };
 	}
 
 	if (!(await genshinProfile(match[0]))) {
-		return { status: false, message: 'We can\'t find your char' };
+		return { status: false, message: 'We can not find your char' };
 	}
 
 	return { status: true, message: match[0] };

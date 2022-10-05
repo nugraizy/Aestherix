@@ -1,6 +1,7 @@
-/* global botNum, process, presences, log */
+/* global botNum, process, log */
 import moment from 'moment-timezone';
 
+import configuration from '../../connect.js';
 import { getRuntime } from '../../Helper/Modules/index.js';
 
 const WAPresence = {
@@ -23,7 +24,7 @@ const events = async (client, containers, presence) => {
 		}
 
 		for (const container of containers) {
-			if (presences[presence] == undefined) {
+			if (configuration.presences[presence] == undefined) {
 				break;
 			}
 
@@ -73,22 +74,22 @@ export default {
 							case 'status':
 							case 'stats':
 								{
-									await client[botNum].reply({ from, quoted: message }, Object.keys(presences).includes('available') ? 'Available' : 'Unavailable');
+									await client[botNum].reply({ from, quoted: message }, Object.keys(configuration.presences).includes('available') ? 'Available' : 'Unavailable');
 								}
 
 								break;
 							case 'disable':
 							case 'off':
 								{
-									if ('unavailable' in presences) {
+									if ('unavailable' in configuration.presences) {
 										return await client[botNum].reply({ from, quoted: message }, 'Already offline');
 									}
 
-									if ('available' in presences) {
-										delete presences.available;
+									if ('available' in configuration.presences) {
+										delete configuration.presences.available;
 									}
 
-									presences.unavailable = {
+									configuration.presences.unavailable = {
 										status: WAPresence.unavailable,
 										started,
 										interval: setInterval(() => {
@@ -107,16 +108,16 @@ export default {
 							case 'enable':
 							case 'on':
 								{
-									if ('available' in presences) {
+									if ('available' in configuration.presences) {
 										return await client[botNum].reply({ from, quoted: message }, 'Already online');
 									}
 
-									if ('unavailable' in presences) {
+									if ('unavailable' in configuration.presences) {
 										const messages = Object.keys(store.messages);
 
 										pause(client, messages);
-										clearInterval(presences.unavailable.interval);
-										delete presences.unavailable;
+										clearInterval(configuration.presences.unavailable.interval);
+										delete configuration.presences.unavailable;
 									}
 
 									if (from) {
@@ -143,22 +144,22 @@ export default {
 							case 'status':
 							case 'stats':
 								{
-									await client[botNum].reply({ from, quoted: message }, Object.keys(presences).includes('composing') ? 'Composing' : 'Not composing');
+									await client[botNum].reply({ from, quoted: message }, Object.keys(configuration.presences).includes('composing') ? 'Composing' : 'Not composing');
 								}
 
 								break;
 							case 'disable':
 							case 'off':
 								{
-									if (!('composing' in presences)) {
+									if (!('composing' in configuration.presences)) {
 										return await client[botNum].reply({ from, quoted: message }, 'Already not writing');
 									}
 
 									const messages = Object.keys(store.messages);
 
 									pause(client, messages);
-									clearInterval(presences.composing.interval);
-									delete presences.composing;
+									clearInterval(configuration.presences.composing.interval);
+									delete configuration.presences.composing;
 									await client[botNum].reply({ from, quoted: message }, 'Simulate Composing Disabled');
 								}
 
@@ -166,11 +167,11 @@ export default {
 							case 'enable':
 							case 'on':
 								{
-									if ('composing' in presences) {
+									if ('composing' in configuration.presences) {
 										return await client[botNum].reply({ from, quoted: message }, 'Already writing');
 									}
 
-									presences.composing = {
+									configuration.presences.composing = {
 										status: WAPresence.composing,
 										started,
 										interval: setInterval(() => {
@@ -200,22 +201,22 @@ export default {
 							case 'status':
 							case 'stats':
 								{
-									await client[botNum].reply({ from, quoted: message }, Object.keys(presences).includes('recording') ? 'Recording' : 'Not recording');
+									await client[botNum].reply({ from, quoted: message }, Object.keys(configuration.presences).includes('recording') ? 'Recording' : 'Not recording');
 								}
 
 								break;
 							case 'disable':
 							case 'off':
 								{
-									if (!('recording' in presences)) {
+									if (!('recording' in configuration.presences)) {
 										return await client[botNum].reply({ from, quoted: message }, 'Already not recording');
 									}
 
 									const messages = Object.keys(store.messages);
 
 									pause(client, messages);
-									clearInterval(presences.recording.interval);
-									delete presences.recording;
+									clearInterval(configuration.presences.recording.interval);
+									delete configuration.presences.recording;
 									await client[botNum].reply({ from, quoted: message }, 'Simulate Recording Disabled');
 								}
 
@@ -223,11 +224,11 @@ export default {
 							case 'enable':
 							case 'on':
 								{
-									if ('recording' in presences) {
+									if ('recording' in configuration.presences) {
 										return await client[botNum].reply({ from, quoted: message }, 'Already recording');
 									}
 
-									presences.recording = {
+									configuration.presences.recording = {
 										status: WAPresence.recording,
 										started,
 										interval: setInterval(() => {
@@ -255,19 +256,19 @@ export default {
 						case 'status':
 						case 'stats':
 							{
-								await client[botNum].reply({ from, quoted: message }, Object.keys(presences).includes('bio') ? 'Enabled' : 'Disabled');
+								await client[botNum].reply({ from, quoted: message }, Object.keys(configuration.presences).includes('bio') ? 'Enabled' : 'Disabled');
 							}
 
 							break;
 						case 'disable':
 						case 'off':
 							{
-								if (!('bio' in presences)) {
+								if (!('bio' in configuration.presences)) {
 									return await client[botNum].reply({ from, quoted: message }, 'Already disabled');
 								}
 
-								clearInterval(presences.bio.interval);
-								delete presences.bio;
+								clearInterval(configuration.presences.bio.interval);
+								delete configuration.presences.bio;
 								await client[botNum].reply({ from, quoted: message }, 'Simulate Bio Disabled');
 							}
 
@@ -275,11 +276,11 @@ export default {
 						case 'enable':
 						case 'on':
 							{
-								if ('bio' in presences) {
+								if ('bio' in configuration.presences) {
 									return await client[botNum].reply({ from, quoted: message }, 'Already enabled');
 								}
 
-								presences.bio = { status: WAPresence.bio, started, interval: setInterval(() => events(client, [], 'bio'), 10_000) };
+								configuration.presences.bio = { status: WAPresence.bio, started, interval: setInterval(() => events(client, [], 'bio'), 10_000) };
 								await client[botNum].reply({ from, quoted: message }, 'Simulate Bio Enabled');
 							}
 

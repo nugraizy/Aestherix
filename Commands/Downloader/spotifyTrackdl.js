@@ -2,7 +2,7 @@
 import moment from 'moment-timezone';
 import path from 'path';
 
-import { __dirname } from '../../connect.js';
+import { __dirname } from '../../index.js';
 import { color, ERRLOG, INFOLOG, isURL, removeDuplicatesArray } from '../../Helper/Modules/index.js';
 import { toOpus } from '../../Utils/Converter/index.js';
 import { yta2 as yta, ytsr } from '../../Utils/YouTube/index.js';
