@@ -87,7 +87,9 @@ export class TicTacToe {
 		return this.getKey(this.PLAYER_1);
 	}
 
-	setGame() {}
+	setGame() {
+		return games.tictactoe.set(this.PLAYER_1, this);
+	}
 
 	displayBoard() {
 		return this.BOARD;
