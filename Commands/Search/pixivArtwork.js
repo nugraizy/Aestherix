@@ -1,4 +1,4 @@
-/* global botNum, Buffer */
+/* global botNum */
 import { fetchBUFFER, removeDuplicatesArray } from '../../Helper/Modules/index.js';
 import { downloadArtworks, searchArtwork } from '../../Utils/Pixiv/index.js';
 

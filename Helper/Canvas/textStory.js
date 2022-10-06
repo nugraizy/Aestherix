@@ -1,4 +1,3 @@
-/* global Buffer */
 import Canvas from 'canvas';
 import Wrap from 'canvas-text-wrapper';
 

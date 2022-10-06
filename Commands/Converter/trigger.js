@@ -1,4 +1,4 @@
-/* global botNum, Buffer */
+/* global botNum */
 import _ from 'lodash';
 import moment from 'moment-timezone';
 import path from 'path';

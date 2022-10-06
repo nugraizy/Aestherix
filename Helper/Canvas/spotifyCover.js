@@ -1,4 +1,3 @@
-/* global Buffer */
 import Axios from 'axios';
 import Canvas from 'canvas';
 import chroma from 'chroma-js';
@@ -71,10 +70,8 @@ export class SpotifyCover {
 			if (opts.gradient) {
 				gradient = this.ctx.createLinearGradient(0, this.canvas.height - 300, this.canvas.width / 1.4, this.canvas.height);
 
-				gradient.addColorStop(0, chroma(this._colorPalettes[gradientNumber]).darken(0.7)
-.hex());
-				gradient.addColorStop(1, chroma(this._colorPalettes[gradientNumber]).darken(2)
-.hex());
+				gradient.addColorStop(0, chroma(this._colorPalettes[gradientNumber]).darken(0.7).hex());
+				gradient.addColorStop(1, chroma(this._colorPalettes[gradientNumber]).darken(2).hex());
 			}
 
 			this.revertBlack = chroma(this._colorPalettes[gradientNumber]).name() == 'white';
@@ -186,8 +183,7 @@ export class SpotifyCover {
 
 			this.ctx.font = '32px antre';
 
-			this.ctx.fillStyle = chroma('grey').brighten(2)
-.hex();
+			this.ctx.fillStyle = chroma('grey').brighten(2).hex();
 			this.ctx.fillText(this._artist, this.w, this.canvas.height / 2 + 250);
 
 			this.ctx.font = '32px antre';
@@ -212,8 +208,7 @@ export class SpotifyCover {
 
 			this.ctx.font = '22px sans-thin';
 
-			this.ctx.fillStyle = chroma('white').brighten(2)
-.hex();
+			this.ctx.fillStyle = chroma('white').brighten(2).hex();
 			this.ctx.fillText('0:04', this.w + 15, centerY + 30);
 			this.ctx.fillText(this.toTime(this._timestamp), this.w + 800 + 15, centerY + 30);
 
@@ -228,8 +223,7 @@ export class SpotifyCover {
 
 			this.ctx.beginPath();
 
-			this.ctx.strokeStyle = chroma('gray').brighten(1)
-.hex();
+			this.ctx.strokeStyle = chroma('gray').brighten(1).hex();
 
 			this.ctx.moveTo(centerX, centerY);
 			this.ctx.lineTo(this.w + 830, centerY);
@@ -263,9 +257,7 @@ export class SpotifyCover {
 
 			for (const asset of dir) {
 				if (asset.startsWith(iconType)) {
-					assets[asset.split('_').slice(2)
-.join('_')
-.replace(/\..*/, '')] = await loadImage(`./Media Files/Assets/${asset}`);
+					assets[asset.split('_').slice(2).join('_').replace(/\..*/, '')] = await loadImage(`./Media Files/Assets/${asset}`);
 				}
 			}
 

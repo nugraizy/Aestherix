@@ -1,4 +1,3 @@
-/* global process */
 import Flickr from 'flickr-sdk';
 import dotenv from 'dotenv';
 

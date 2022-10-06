@@ -1,4 +1,4 @@
-/* global botNum, Buffer */
+/* global botNum */
 import path from 'path';
 
 import { __dirname } from '../../index.js';

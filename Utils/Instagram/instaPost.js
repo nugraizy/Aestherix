@@ -1,4 +1,3 @@
-/* global process */
 import { fetchJSON } from '../../Helper/index.js';
 
 const INFO_URL_API = (code) => `https://www.instagram.com/p/${code}/?__a=1&__d=dis`;

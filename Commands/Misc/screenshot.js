@@ -1,4 +1,4 @@
-/* global botNum, Buffer */
+/* global botNum */
 import { isURL } from '../../Helper/index.js';
 import { getScreenshot } from '../../Utils/Misc/webScreenshot.js';
 

@@ -63,7 +63,6 @@ export default {
 			}
 
 			const videos = await tiktokAPI(url);
-			// console.log(videos);
 
 			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Downloading TikTok Media', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`);
 
@@ -75,38 +74,38 @@ export default {
 			}
 
 			if (videos.type == 'images') {
-				let capt = '``` ⤙ TikTok Images ⤚```\n\n';
+				let capt = '``` • TikTok Images```\n\n';
 
-				capt += `▷ Author : ${videos.author}\n`;
-				capt += `▷ Username : ${videos.nickname}\n`;
-				capt += `▷ Liked : ${videos.liked}\n`;
-				capt += `▷ Shared : ${videos.shared}\n`;
-				capt += `▷ Comment : ${videos.comment}\n`;
-				capt += `▷ View : ${videos.view}\n`;
-				capt += `▷ Description : ${videos.videoDescription}\n`;
-				capt += `▷ Tot. Image : ${videos.images.length}\n`;
+				capt += `Author : ${videos.author}\n`;
+				capt += `Username : ${videos.nickname}\n`;
+				capt += `Liked : ${numberWithCommas(videos.liked)}\n`;
+				capt += `Shared : ${numberWithCommas(videos.shared)}\n`;
+				capt += `Comment : ${numberWithCommas(videos.comment)}\n`;
+				capt += `View : ${numberWithCommas(videos.view)}\n`;
+				capt += `Description : ${videos.videoDescription}\n`;
+				capt += `Tot. Image : ${videos.images.length}\n`;
 
 				for (const { url, index } of videos.images) {
 					await client[botNum].sendMessage(from, { image: { url }, caption: index == 1 ? capt.trim() : '' }, { quoted: message });
 				}
 			} else {
 				const date = moment(moment(videos.published).unix()).format('HH:mm:ss DD/MM/YYYY');
-				let capt = '``` ⤙ TikTok Video ⤚```\n\n';
+				let capt = '``` • TikTok Video```\n\n';
 
-				capt += `▷ Author : ${videos.author}\n`;
-				capt += `▷ Username : ${videos.nickname}\n`;
-				capt += `▷ Verifies : ${videos.verified ? 'Verified' : 'Not Verified'}\n`;
-				capt += `▷ Followers : ${videos.followers}\n`;
-				capt += `▷ Following : ${videos.following}\n`;
-				capt += `▷ Tot. Video : ${videos.totalVideo}\n`;
-				capt += `▷ Liked : ${videos.liked}\n`;
-				capt += `▷ Shared : ${videos.shared}\n`;
-				capt += `▷ Comment : ${videos.comment}\n`;
-				capt += `▷ Published : ${date}\n`;
-				capt += `▷ View : ${videos.view}\n`;
-				capt += `▷ Duration : ${videos.videoDuration}\n`;
-				capt += `▷ Music : ${videos.musicTitle}\n`;
-				capt += `▷ Description : ${videos.videoDescription}\n`;
+				capt += `Author : ${videos.author}\n`;
+				capt += `Username : ${videos.nickname}\n`;
+				capt += `Verifies : ${videos.verified ? 'Verified' : 'Not Verified'}\n`;
+				capt += `Followers : ${numberWithCommas(videos.followers)}\n`;
+				capt += `Following : ${numberWithCommas(videos.following)}\n`;
+				capt += `Tot. Video : ${numberWithCommas(videos.totalVideo)}\n`;
+				capt += `Liked : ${numberWithCommas(videos.liked)}\n`;
+				capt += `Shared : ${numberWithCommas(videos.shared)}\n`;
+				capt += `Comment : ${numberWithCommas(videos.comment)}\n`;
+				capt += `Published : ${date}\n`;
+				capt += `View : ${numberWithCommas(videos.view)}\n`;
+				capt += `Duration : ${videos.videoDuration}\n`;
+				capt += `Music : ${videos.musicTitle}\n`;
+				capt += `Description : ${videos.videoDescription}\n`;
 
 				if (NO_WM) {
 					await client[botNum].sendMessage(from, { video: { url: videos.url.withNoWatermark }, caption: capt.trim() }, { quoted: message });

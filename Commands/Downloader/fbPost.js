@@ -1,4 +1,4 @@
-/* global botNum, Buffer */
+/* global botNum */
 import { delay } from '../../Helper/index.js';
 import moment from 'moment-timezone';
 import parser from 'yargs-parser';

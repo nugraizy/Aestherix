@@ -3,7 +3,7 @@ import { generateMessageID, generateWAMessageFromContent } from '@adiwajshing/ba
 
 export default {
 	name: 'polling',
-	description: 'Send polling to a message.',
+	description: 'Send polling.',
 	category: 'Debugging',
 	usage: '!polling',
 	aliases: ['poll', 'pollwith'],

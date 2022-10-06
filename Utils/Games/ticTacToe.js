@@ -88,7 +88,7 @@ export class TicTacToe {
 	}
 
 	setGame() {
-		return games.tictactoe.set(this.PLAYER_1, this);
+		return configuration.games.tictactoe.set(this.PLAYER_1, this);
 	}
 
 	displayBoard() {

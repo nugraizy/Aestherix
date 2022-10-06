@@ -1,4 +1,4 @@
-/* global botNum, process, log */
+/* global botNum, log */
 import async from 'async';
 import mqtt from 'mqtt';
 

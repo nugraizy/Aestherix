@@ -1,4 +1,3 @@
-/* global process */
 import { fetchJSON } from '../../Helper/index.js';
 import { getUser } from './index.js';
 

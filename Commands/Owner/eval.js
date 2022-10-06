@@ -1,4 +1,4 @@
-/* global botNum, global, client, process */
+/* global botNum, client */
 
 import * as _ from '@adiwajshing/baileys'; /* eslint-disable-line */
 import { WAProto } from '@adiwajshing/baileys'; /* eslint-disable-line */
@@ -9,11 +9,12 @@ import syntaxerror from 'syntax-error';
 import * as util from 'util'; /* eslint-disable-line */
 import { format } from 'util';
 
+import configuration from '../../connect.js';
 import * as a from '../../Helper/index.js';
 import * as b from '../../Utils/index.js';
 import * as c from '../../connect.js';
 
-const func = { ...a, ...b, ...c }; /* eslint-disable-line */
+const func = { ...a, ...b, ...c, ...configuration }; /* eslint-disable-line */
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 const col = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g; /* eslint-disable-line */
 

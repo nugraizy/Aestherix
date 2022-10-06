@@ -1,4 +1,4 @@
-/* global log, process */
+/* global log */
 import { fetchJSON } from '../../Helper/index.js';
 
 const URL_API = (input) => `https://api.twitter.com/2/users/by?usernames=${input}&user.fields=created_at,description,profile_image_url,verified,url`;

@@ -1,4 +1,4 @@
-/* global Buffer, log */
+/* global log */
 import Axios from 'axios';
 import cheerio from 'cheerio';
 import { fileTypeFromBuffer } from 'file-type';

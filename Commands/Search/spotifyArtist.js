@@ -1,4 +1,4 @@
-/* global botNum, Buffer */
+/* global botNum */
 import { fetchBUFFER, removeDuplicatesArray } from '../../Helper/index.js';
 import { spotifier } from '../../Utils/Spotifier/index.js';
 

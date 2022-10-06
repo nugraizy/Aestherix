@@ -1,4 +1,3 @@
-/* global process, Buffer */
 import Axios from 'axios';
 import dotenv from 'dotenv';
 

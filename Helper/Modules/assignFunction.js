@@ -1,4 +1,4 @@
-/* global botNum, Buffer, store */
+/* global botNum, store */
 import { downloadContentFromMessage, downloadMediaMessage as downloadMessage, generateWAMessage, generateWAMessageFromContent, toBuffer } from '@adiwajshing/baileys';
 import Axios from 'axios';
 import { fileTypeFromBuffer } from 'file-type';

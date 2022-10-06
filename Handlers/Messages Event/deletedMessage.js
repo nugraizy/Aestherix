@@ -1,4 +1,4 @@
-/* global botNum, Buffer, log */
+/* global botNum, log */
 import moment from 'moment-timezone';
 import path from 'path';
 

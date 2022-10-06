@@ -1,4 +1,4 @@
-/* global botNum, Buffer */
+/* global botNum */
 import fs from 'fs';
 import path from 'path';
 

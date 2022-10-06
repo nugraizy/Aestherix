@@ -1,4 +1,4 @@
-/* global process, log */
+/* global log */
 import dotenv from 'dotenv';
 import { fileTypeFromBuffer } from 'file-type';
 import fs from 'fs';

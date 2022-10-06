@@ -1,4 +1,4 @@
-/* global botNum, Buffer */
+/* global botNum */
 import { fetchBUFFER, removeDuplicatesArray } from '../../Helper/Modules/index.js';
 import { downloadManga } from '../../Utils/Pixiv/index.js';
 
@@ -16,7 +16,7 @@ const regex = (input) => {
 		return { status: true, message: match[0] };
 	}
 
-	return { status: false, message: 'This URL isn\'t a valid Pixiv URL. Try another URL.' };
+	return { status: false, message: 'This URL is not a valid Pixiv URL. Try another URL.' };
 };
 
 export default {

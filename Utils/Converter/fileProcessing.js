@@ -1,4 +1,4 @@
-/* global log, Buffer, botNum, client */
+/* global log, botNum, client */
 import { exec } from 'child_process';
 import FormData from 'form-data';
 import fs from 'fs-extra';

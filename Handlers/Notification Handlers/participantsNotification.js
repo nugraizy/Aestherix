@@ -1,4 +1,4 @@
-/* global botNum, Buffer */
+/* global botNum */
 import { reassign, Attachment } from '../../Helper/index.js';
 
 const EVENT_UPDATE = {

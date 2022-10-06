@@ -1,4 +1,3 @@
-/* global Buffer, process */
 import { fetchBUFFER } from '../../Helper/index.js';
 
 export const getScreenshot = async (url, type) =>

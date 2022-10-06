@@ -1,4 +1,3 @@
-/* global process */
 import { fetchJSON } from '../../Helper/index.js';
 
 const sessionId = process.env.INSTAGRAM_SESI;

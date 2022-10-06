@@ -1,4 +1,4 @@
-/* global botNum, Buffer */
+/* global botNum */
 import moment from 'moment-timezone';
 import sharp from 'sharp';
 

@@ -1,4 +1,4 @@
-/* global botNum, process, log */
+/* global botNum, log */
 import moment from 'moment-timezone';
 
 import configuration from '../../connect.js';

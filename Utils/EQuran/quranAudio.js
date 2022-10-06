@@ -1,4 +1,3 @@
-/* global Buffer */
 import { fetchBUFFER, fetchJSON } from '../../Helper/index.js';
 
 const URL_BASE = 'https://equran.id/api';

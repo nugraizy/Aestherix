@@ -89,6 +89,7 @@
 	"devDependencies": {
 		"@adiwajshing/keyed-db": "^0.2.4",
 		"@hapi/boom": "^9.1.4",
+		"@types/node": "18.8.2",
 		"eslint": "^8.23.0",
 		"jimp": "^0.16.1",
 		"pino": "^7.6.5",

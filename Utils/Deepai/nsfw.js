@@ -1,4 +1,3 @@
-/* global process */
 import Axios from 'axios';
 import FormData from 'form-data';
 import fs from 'fs';

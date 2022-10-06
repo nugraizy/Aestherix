@@ -1,4 +1,4 @@
-/* global botNum, Buffer */
+/* global botNum */
 import { SpotifyCover } from '../../Helper/Canvas/index.js';
 
 export default {

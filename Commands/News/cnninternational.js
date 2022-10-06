@@ -1,4 +1,4 @@
-/* global botNum, Buffer */
+/* global botNum */
 import { fetchBUFFER } from '../../Helper/index.js';
 import { cnninternational } from '../../Utils/index.js';
 

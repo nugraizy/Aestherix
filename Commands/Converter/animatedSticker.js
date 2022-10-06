@@ -1,4 +1,4 @@
-/* global botNum, Buffer */
+/* global botNum */
 import moment from 'moment-timezone';
 import rgbcolor from 'rgb-color';
 import yargsParser from 'yargs-parser';

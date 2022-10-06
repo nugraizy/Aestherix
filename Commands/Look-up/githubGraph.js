@@ -1,4 +1,4 @@
-/* global botNum, Buffer */
+/* global botNum */
 import { GithubGraph } from '../../Helper/index.js';
 
 export default {

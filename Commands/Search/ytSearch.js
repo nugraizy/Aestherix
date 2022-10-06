@@ -1,4 +1,4 @@
-/* global botNum, Buffer */
+/* global botNum */
 import sharp from 'sharp';
 
 import configuration from '../../connect.js';
