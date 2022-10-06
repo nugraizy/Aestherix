@@ -3,7 +3,9 @@ import jsSplit from 'js-split';
 
 import { fetchTEXT, cheerioLOAD } from '../Modules/index.js';
 
-const { createCanvas, registerFont } = Canvas;
+const copyright = '© 2022 Hidden Finder, Inc | Made by Nanda using Canvas Module.';
+
+const { createCanvas, registerFont, loadImage } = Canvas;
 
 class API {
 	constructor(username, theme) {
@@ -40,8 +42,7 @@ class API {
 				.trim()
 				.match(/^([0-9,]+)\s/)[1];
 			const dates = {
-				startYear: data('g > g:nth-child(1)').find('rect')
-.get().length,
+				startYear: data('g > g:nth-child(1)').find('rect').get().length,
 				endYear: data(`g > g:nth-child(${data('g > g').length})`)
 					.find('rect')
 					.get().length,
@@ -63,13 +64,10 @@ class API {
 							.split('-')[1],
 					),
 				),
-				days: [...new Array(firstWeekOfFirstMonth).fill(undefined), ...data('g').find('rect')
-.get()].map((v, i) => {
-					if (v && data('g').find('rect')
-.get().length - lastWeekOfLastMonth > i) {
+				days: [...new Array(firstWeekOfFirstMonth).fill(undefined), ...data('g').find('rect').get()].map((v, i) => {
+					if (v && data('g').find('rect').get().length - lastWeekOfLastMonth > i) {
 						const level = parseInt(data(v).attr('data-level'));
-						const month = Math.round(parseInt(data(v).attr('data-date')
-.split('-')[1]));
+						const month = Math.round(parseInt(data(v).attr('data-date').split('-')[1]));
 
 						return {
 							level,
@@ -111,10 +109,12 @@ export class GithubGraph {
 	constructor() {
 		this._themes = {
 			DEFAULT: {
+				isDark: false,
 				GENERAL: ['#FFFFFF', '#8B6CFA', 'rgba(175,143,251,0.3)', '#245278', 'rgba(108, 122, 137, 0.3)'],
 				GRAPH: ['#9BB1DA', '#668ADA', '#4771DA', '#1E53D9', '#012D5E'],
 			},
 			DRACULA: {
+				isDark: true,
 				GENERAL: ['#282A36', '#F8F8F2', '#FF79C6', '#50FA7B', 'rgba(239, 239, 240, 0.3)'],
 				GRAPH: ['#1E1738', '#503E69', '#745A99', '#BD36F9', '#FF79C6'],
 			},
@@ -332,13 +332,33 @@ export class GithubGraph {
 				this.ctx.fillStyle = color;
 
 				if (opts.round) {
-					this.round(this.canvas.width - 440 + multiple, 120, 30, 30, 5);
+					this.round(this.canvas.width - 440 + multiple, 12, 30, 30, 5);
 				} else {
-					this.ctx.fillRect(this.canvas.width - 1300 + multiple, 245, 30, 30);
+					this.ctx.fillRect(this.canvas.width - 440 + multiple, 125, 30, 30);
 				}
 
 				multiple += 34;
 			}
+		};
+
+		this.placeCopyright = (watermark = copyright) => {
+			this.ctx.fillStyle = this._theme.GENERAL[3];
+			this.ctx.font = '32px ibm';
+			this.ctx.fillText(watermark, 145, this.canvas.height - 65, this.canvas.width - 130);
+
+			return this;
+		};
+
+		this.placeIcons = async () => {
+			const color = this._theme.isDark ? '1' : '2';
+
+			const [icons, signature] = await Promise.all([
+				await loadImage(`./Media Files/Assets/${color}_icon_github.png`),
+				await loadImage(`./Media Files/Assets/${color}_icon_github_signature.png`),
+			]);
+
+			this.ctx.drawImage(icons, 70, this.canvas.height - 100, icons.width / 2.9, icons.height / 2.9);
+			this.ctx.drawImage(signature, this.canvas.width - signature.width / 6.8 - 55, this.canvas.height - 100, signature.width / 6.8, signature.height / 6.8);
 		};
 
 		this.dates = async (opts) => {

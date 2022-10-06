@@ -72,7 +72,7 @@ const createCanvasTemplates = (fonts) => {
 		registerFont('./Media Files/Fonts/KeepCalm-Medium.ttf', { family: 'calm' });
 	}
 
-	const canvas = createCanvas(360, 360);
+	const canvas = createCanvas(300, 300);
 	const ctx = canvas.getContext('2d');
 
 	return { ctx, canvas };
@@ -109,6 +109,10 @@ export const attp = (sender, texts, colored, fonts) =>
 		const colors = await loadColorsPalette(colored);
 		const bufferContainer = [];
 
+		const regex = new RegExp(emojiReg(), 'g');
+
+		texts = texts.trim().replace(regex, '');
+
 		for (const colori of colors) {
 			const reassignColor = colori.startsWith('#') ? colori : `#${colori}`;
 
@@ -119,7 +123,7 @@ export const attp = (sender, texts, colored, fonts) =>
 			ctx.shadowColor = reassignColor;
 			ctx.shadowBlur = 2;
 
-			CanvasTextWrapper(canvas, texts.trim().replace(new RegExp(emojiReg(), 'g'), ''), {
+			CanvasTextWrapper(canvas, texts, {
 				font: `56px ${fonts}`,
 				textAlign: 'center',
 				verticalAlign: 'middle',

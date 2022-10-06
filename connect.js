@@ -1,4 +1,3 @@
-/* eslint-disable */
 import dotenv from 'dotenv';
 import { EventEmitter } from 'events';
 

@@ -730,8 +730,6 @@ function help() {
 }
 
 export async function clearDBConnection() {
-	if (configuration.isFirstConnection) {
-	}
 	if (!fs.existsSync(`./Media Files/Connection Databases/${cli.input[0] ?? 'Session-debug'}.json`)) {
 		await fs.writeFile(`./Media Files/Connection Databases/${cli.input[0] ?? 'Session-debug'}.json`, JSON.stringify({}));
 	}
