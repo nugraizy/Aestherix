@@ -14,8 +14,8 @@ export default {
 		'!tiktokvideo <url> (you can send multiple link using space in between) [options]\nOptions:\n-wm, --watermark: Download with watermark\n-nowm, --nowatermark: Download without watermark',
 	aliases: ['tiktokvideos', 'ttvideo', 'ttvid', 'ttv', 'tiktok'],
 	category: 'Downloader',
-	cooldown: 10,
-	limit: 6,
+	limit: 2,
+	cooldown: 8,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
 		const time = moment().format('HH:mm:ss DD/MM');
@@ -63,6 +63,7 @@ export default {
 			}
 
 			const videos = await tiktokAPI(url);
+			// console.log(videos);
 
 			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Downloading TikTok Media', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`);
 
@@ -74,45 +75,49 @@ export default {
 			}
 
 			if (videos.type == 'images') {
-				let capt = '``` • TikTok Images```\n\n';
+				let capt = '``` ⤙ TikTok Images ⤚```\n\n';
 
-				capt += `Author : ${videos.author}\n`;
-				capt += `Username : ${videos.nickname}\n`;
-				capt += `Liked : ${numberWithCommas(videos.liked)}\n`;
-				capt += `Shared : ${numberWithCommas(videos.shared)}\n`;
-				capt += `Comment : ${numberWithCommas(videos.comment)}\n`;
-				capt += `View : ${numberWithCommas(videos.view)}\n`;
-				capt += `Description : ${videos.videoDescription}\n`;
-				capt += `Tot. Image : ${videos.images.length}\n`;
+				capt += `▷ Author : ${videos.author}\n`;
+				capt += `▷ Username : ${videos.nickname}\n`;
+				capt += `▷ Liked : ${videos.liked}\n`;
+				capt += `▷ Shared : ${videos.shared}\n`;
+				capt += `▷ Comment : ${videos.comment}\n`;
+				capt += `▷ View : ${videos.view}\n`;
+				capt += `▷ Description : ${videos.videoDescription}\n`;
+				capt += `▷ Tot. Image : ${videos.images.length}\n`;
 
 				for (const { url, index } of videos.images) {
 					await client[botNum].sendMessage(from, { image: { url }, caption: index == 1 ? capt.trim() : '' }, { quoted: message });
 				}
 			} else {
 				const date = moment(moment(videos.published).unix()).format('HH:mm:ss DD/MM/YYYY');
-				let capt = '``` • TikTok Video```\n\n';
+				let capt = '``` ⤙ TikTok Video ⤚```\n\n';
 
-				capt += `Author : ${videos.author}\n`;
-				capt += `Username : ${videos.nickname}\n`;
-				capt += `Verifies : ${videos.verified ? 'Verified' : 'Not Verified'}\n`;
-				capt += `Liked : ${numberWithCommas(videos.liked)}\n`;
-				capt += `Shared : ${numberWithCommas(videos.shared)}\n`;
-				capt += `Comment : ${numberWithCommas(videos.comment)}\n`;
-				capt += `Published : ${date}\n`;
-				capt += `View : ${numberWithCommas(videos.view)}\n`;
-				capt += `Duration : ${videos.videoDuration}\n`;
-				capt += `Description : ${videos.videoDescription}\n`;
+				capt += `▷ Author : ${videos.author}\n`;
+				capt += `▷ Username : ${videos.nickname}\n`;
+				capt += `▷ Verifies : ${videos.verified ? 'Verified' : 'Not Verified'}\n`;
+				capt += `▷ Followers : ${videos.followers}\n`;
+				capt += `▷ Following : ${videos.following}\n`;
+				capt += `▷ Tot. Video : ${videos.totalVideo}\n`;
+				capt += `▷ Liked : ${videos.liked}\n`;
+				capt += `▷ Shared : ${videos.shared}\n`;
+				capt += `▷ Comment : ${videos.comment}\n`;
+				capt += `▷ Published : ${date}\n`;
+				capt += `▷ View : ${videos.view}\n`;
+				capt += `▷ Duration : ${videos.videoDuration}\n`;
+				capt += `▷ Music : ${videos.musicTitle}\n`;
+				capt += `▷ Description : ${videos.videoDescription}\n`;
 
 				if (NO_WM) {
-					await client[botNum].sendMessage(from, { video: { url: videos.url.with_no_watermark }, caption: capt.trim() }, { quoted: message });
+					await client[botNum].sendMessage(from, { video: { url: videos.url.withNoWatermark }, caption: capt.trim() }, { quoted: message });
 				}
 
 				if (WITH_WM) {
-					await client[botNum].sendMessage(from, { video: { url: videos.url.with_watermark }, caption: capt.trim() }, { quoted: message });
+					await client[botNum].sendMessage(from, { video: { url: videos.url.withWatermark }, caption: capt.trim() }, { quoted: message });
 				}
 
 				if (!NO_WM && !WITH_WM) {
-					await client[botNum].sendMessage(from, { video: { url: videos.url.with_watermark }, caption: capt.trim() }, { quoted: message });
+					await client[botNum].sendMessage(from, { video: { url: videos.url.withNoWatermark }, caption: capt.trim() }, { quoted: message });
 				}
 			}
 
