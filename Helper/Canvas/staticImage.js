@@ -2,7 +2,7 @@ import Canvas from '@napi-rs/canvas';
 import Wrap from 'canvas-text-wrapper';
 import { exec } from 'child_process';
 import emojiReg from 'emoji-regex';
-import { readFileSync, unlinkSync, writeFileSync } from 'fs';
+import fs, { readFileSync, unlinkSync } from 'fs';
 import moment from 'moment-timezone';
 import path from 'path';
 
@@ -20,7 +20,7 @@ const saveImages = async (buffer) => {
 	const paths = `Temporary Files/Static Images-${Date.now()}.webp`;
 	const fileName = path.join(__dirname, paths);
 
-	writeFileSync(fileName, buffer);
+	await fs.promises.writeFile(fileName, buffer);
 	return fileName;
 };
 
@@ -31,7 +31,6 @@ const insertExif = async (paths, sender) =>
 		const pathExif = path.join(__dirname, 'Temporary Files/data.exif');
 		const pathResults = paths;
 
-		createExif('Made by Nanda', 'Void Static Sticker using Canvas and WebP');
 		exec(`webpmux -set exif "${pathExif}" "${pathResults}" -o "${pathResults}-done.webp"`, (err) => {
 			if (err) {
 				ERRLOG(`[${color(time, 'cyan')}]`, `${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`);
@@ -61,7 +60,7 @@ const createCanvasTemplates = (fonts) => {
 		GlobalFonts.registerFromPath(path.join(__dirname, 'Media Files/Fonts/KeepCalm-Medium.ttf'), 'calm');
 	}
 
-	const canvas = createCanvas(720, 720);
+	const canvas = createCanvas(500, 500);
 	const ctx = canvas.getContext('2d');
 
 	return { ctx, canvas };
@@ -90,6 +89,8 @@ const loadColorsPalette = async (color = null) => {
 
 export const ttp = (sender, texts, colors, fonts) =>
 	new Promise(async (resolve, reject) => {
+		createExif('Made by Nanda', 'Void Static Sticker using Canvas and WebP');
+
 		const time = moment().format('HH:mm:ss DD/MM');
 
 		fonts = fonts !== undefined ? fonts.toLowerCase() : 'chevin';
@@ -110,7 +111,9 @@ export const ttp = (sender, texts, colors, fonts) =>
 		CanvasTextWrapper(canvas, texts.trim().replace(new RegExp(emojiReg(), 'g'), ''), {
 			font: `126px ${fonts}`,
 			textAlign: 'center',
-			verticalAlign: 'middle',
+			verticalAlign: 'top',
+			sizeToFill: true,
+			maxFontSizeToFill: 126 * 1.4,
 		});
 
 		const buffer = canvas.toBuffer('image/webp');

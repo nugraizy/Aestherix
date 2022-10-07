@@ -24,8 +24,6 @@ const saveImages = (buffer, sequence) => {
 
 const createSequence = async (images, sender) =>
 	new Promise(async (resolve, reject) => {
-		createExif('Made by Nanda', 'Void Animated Sticker using Canvas and WebP');
-
 		const time = moment().format('HH:mm:ss DD/MM');
 
 		const pathExif = path.join(__dirname, 'Temporary Files/data.exif');
@@ -72,7 +70,7 @@ const createCanvasTemplates = (fonts) => {
 		GlobalFonts.registerFromPath(path.join(__dirname, 'Media Files/Fonts/KeepCalm-Medium.ttf'), 'calm');
 	}
 
-	const canvas = createCanvas(720, 720);
+	const canvas = createCanvas(500, 500);
 	const ctx = canvas.getContext('2d');
 
 	return { ctx, canvas };
@@ -97,6 +95,7 @@ const loadColorsPalette = async (color) => {
 
 export const attp = (sender, texts, colored, fonts) =>
 	new Promise(async (resolve) => {
+		createExif('Made by Nanda', 'Void Animated Sticker using Canvas and WebP');
 		const time = moment().format('HH:mm:ss DD/MM');
 
 		fonts = fonts !== undefined ? fonts.toLowerCase() : 'chevin';
@@ -126,7 +125,9 @@ export const attp = (sender, texts, colored, fonts) =>
 			CanvasTextWrapper(canvas, texts, {
 				font: `126px ${fonts}`,
 				textAlign: 'center',
-				verticalAlign: 'middle',
+				verticalAlign: 'top',
+				sizeToFill: true,
+				maxFontSizeToFill: 126 * 1.4,
 			});
 
 			const buffer = canvas.toBuffer('image/webp');

@@ -207,6 +207,8 @@ export const convertStickerToMedia = (filePath, sender, mediaData) =>
 				if (err) {
 					const { result } = await webp2mp4File(filePath);
 
+					console.log(err);
+
 					INFOLOG(`[${color(time, 'cyan')}]`, `${color('Converted Media', '#01cdfe')} for ${color(sender, '#ff71ce')}`);
 					unlinkFile(filePath);
 					resolve({
