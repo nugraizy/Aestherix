@@ -1,4 +1,4 @@
-import Canvas from 'canvas';
+import Canvas from '@napi-rs/canvas';
 import Wrap from 'canvas-text-wrapper';
 import { exec } from 'child_process';
 import emojiReg from 'emoji-regex';
@@ -11,13 +11,13 @@ import { createExif } from '../../Utils/Misc/index.js';
 import { scheme } from '../Misc/Palettes/colors.js';
 import { color, ERRLOG, INFOLOG } from '../Modules/functions.js';
 
-const { createCanvas, registerFont } = Canvas;
+const { createCanvas, GlobalFonts } = Canvas;
 const { CanvasTextWrapper } = Wrap;
 
 const random = (input) => input[Math.floor(Math.random() * input.length)];
 
-const saveImages = async (buffer, sequence) => {
-	const paths = `Temporary Files/Static Images-${sequence}.png`;
+const saveImages = async (buffer) => {
+	const paths = `Temporary Files/Static Images-${Date.now()}.webp`;
 	const fileName = path.join(__dirname, paths);
 
 	writeFileSync(fileName, buffer);
@@ -29,52 +29,39 @@ const insertExif = async (paths, sender) =>
 		const time = moment().format('HH:mm:ss DD/MM');
 
 		const pathExif = path.join(__dirname, 'Temporary Files/data.exif');
-		const pathResults = path.join(__dirname, `Temporary Files/Static Images-${Date.now()}`);
+		const pathResults = paths;
 
 		createExif('Made by Nanda', 'Void Static Sticker using Canvas and WebP');
+		exec(`webpmux -set exif "${pathExif}" "${pathResults}" -o "${pathResults}-done.webp"`, (err) => {
+			if (err) {
+				ERRLOG(`[${color(time, 'cyan')}]`, `${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`);
 
-		exec(
-			`ffmpeg -i "${paths}" -vcodec libwebp -vf "scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1,fps=fps=30" -lossless 0 -an -vsync 0 -s 512:512 "${pathResults}.webp"`,
-			(er) => {
-				if (er) {
-					ERRLOG(`[${color(time, 'cyan')}]`, `${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`);
+				reject(err);
+			}
 
-					reject(er);
-				}
+			const buffers = readFileSync(`${pathResults}-done.webp`);
 
-				exec(`webpmux -set exif "${pathExif}" "${pathResults}.webp" -o "${pathResults}-done.webp"`, (err) => {
-					if (err) {
-						ERRLOG(`[${color(time, 'cyan')}]`, `${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`);
+			unlinkSync(`${pathResults}-done.webp`);
+			unlinkSync(`${pathResults}`);
 
-						reject(err);
-					}
-
-					const buffers = readFileSync(`${pathResults}-done.webp`);
-
-					unlinkSync(`${pathResults}-done.webp`);
-					unlinkSync(`${pathResults}.webp`);
-					unlinkSync(paths);
-
-					resolve({
-						buffers,
-					});
-				});
-			},
-		);
+			resolve({
+				buffers,
+			});
+		});
 	});
 
 const createCanvasTemplates = (fonts) => {
 	if (fonts == 'chevin') {
-		registerFont('./Media Files/Fonts/Chevin Bold.ttf', { family: 'chevin' });
+		GlobalFonts.registerFromPath(path.join(__dirname, 'Media Files/Fonts/Chevin Bold.ttf'), 'chevin');
 	} else if (fonts == 'texgy') {
-		registerFont('./Media Files/Fonts/texgyreadventor-bold.otf', { family: 'texgy' });
+		GlobalFonts.registerFromPath(path.join(__dirname, 'Media Files/Fonts/texgyreadventor-bold.otf'), 'texgy');
 	} else if (fonts == 'sanspro') {
-		registerFont('./Media Files/Fonts/SourceSansPro-Italic.ttf', { family: 'sanspro' });
+		GlobalFonts.registerFromPath(path.join(__dirname, 'Media Files/Fonts/SourceSansPro-Italic.ttf'), 'sanspro');
 	} else if (fonts == 'calm') {
-		registerFont('./Media Files/Fonts/KeepCalm-Medium.ttf', { family: 'calm' });
+		GlobalFonts.registerFromPath(path.join(__dirname, 'Media Files/Fonts/KeepCalm-Medium.ttf'), 'calm');
 	}
 
-	const canvas = createCanvas(360, 360);
+	const canvas = createCanvas(720, 720);
 	const ctx = canvas.getContext('2d');
 
 	return { ctx, canvas };
@@ -121,13 +108,12 @@ export const ttp = (sender, texts, colors, fonts) =>
 		ctx.shadowBlur = 2;
 
 		CanvasTextWrapper(canvas, texts.trim().replace(new RegExp(emojiReg(), 'g'), ''), {
-			font: `56px ${fonts}`,
+			font: `126px ${fonts}`,
 			textAlign: 'center',
 			verticalAlign: 'middle',
-			sizeToFill: true /* paddingX: 20 */,
 		});
 
-		const buffer = canvas.toDataURL('image/png').replace(/^data:image\/png;base64,/, '');
+		const buffer = canvas.toBuffer('image/webp');
 
 		saveImages(new Buffer.from(buffer, 'base64'), sender)
 			.then((saved) => {

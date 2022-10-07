@@ -1,4 +1,4 @@
-import Canvas from 'canvas';
+import Canvas from '@napi-rs/canvas';
 import Wrap from 'canvas-text-wrapper';
 import { exec } from 'child_process';
 import emojiReg from 'emoji-regex';
@@ -11,7 +11,7 @@ import { createExif } from '../../Utils/Misc/index.js';
 import { scheme } from '../Misc/Palettes/colors.js';
 import { color, ERRLOG, INFOLOG } from '../Modules/functions.js';
 
-const { createCanvas, registerFont } = Canvas;
+const { createCanvas, GlobalFonts } = Canvas;
 const { CanvasTextWrapper } = Wrap;
 
 const saveImages = (buffer, sequence) => {
@@ -63,16 +63,16 @@ const createSequence = async (images, sender) =>
 
 const createCanvasTemplates = (fonts) => {
 	if (fonts == 'chevin') {
-		registerFont('./Media Files/Fonts/Chevin Bold.ttf', { family: 'chevin' });
+		GlobalFonts.registerFromPath(path.join(__dirname, 'Media Files/Fonts/Chevin Bold.ttf'), 'chevin');
 	} else if (fonts == 'texgy') {
-		registerFont('./Media Files/Fonts/texgyreadventor-bold.otf', { family: 'texgy' });
+		GlobalFonts.registerFromPath(path.join(__dirname, 'Media Files/Fonts/texgyreadventor-bold.otf'), 'texgy');
 	} else if (fonts == 'sanspro') {
-		registerFont('./Media Files/Fonts/SourceSansPro-Italic.ttf', { family: 'sanspro' });
+		GlobalFonts.registerFromPath(path.join(__dirname, 'Media Files/Fonts/SourceSansPro-Italic.ttf'), 'sanspro');
 	} else if (fonts == 'calm') {
-		registerFont('./Media Files/Fonts/KeepCalm-Medium.ttf', { family: 'calm' });
+		GlobalFonts.registerFromPath(path.join(__dirname, 'Media Files/Fonts/KeepCalm-Medium.ttf'), 'calm');
 	}
 
-	const canvas = createCanvas(300, 300);
+	const canvas = createCanvas(720, 720);
 	const ctx = canvas.getContext('2d');
 
 	return { ctx, canvas };
@@ -124,13 +124,12 @@ export const attp = (sender, texts, colored, fonts) =>
 			ctx.shadowBlur = 2;
 
 			CanvasTextWrapper(canvas, texts, {
-				font: `56px ${fonts}`,
+				font: `126px ${fonts}`,
 				textAlign: 'center',
 				verticalAlign: 'middle',
-				sizeToFill: true /* paddingX: 20 */,
 			});
 
-			const buffer = canvas.toDataURL('image/png').replace(/^data:image\/png;base64,/, '');
+			const buffer = canvas.toBuffer('image/webp');
 			const saved = saveImages(new Buffer.from(buffer, 'base64'), i);
 
 			bufferContainer.push(saved);

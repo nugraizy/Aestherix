@@ -24,6 +24,7 @@
 	"__comment": "If you happen to occur cld package installation error, install the version 2.8.2 or below.",
 	"dependencies": {
 		"@adiwajshing/baileys": "github:nugraizy/baileys",
+		"@napi-rs/canvas": "^0.1.30",
 		"aki-api": "^6.0.8",
 		"awesome-phonenumber": "^2.68.0",
 		"axios": "^0.25.0",

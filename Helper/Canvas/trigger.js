@@ -1,9 +1,10 @@
-/* global client, botNum, packname, author */
-import Canvas from 'canvas';
+/* global client, botNum */
+import Canvas from '@napi-rs/canvas';
 import GIFEncoder from 'gifencoder';
 import moment from 'moment-timezone';
 import sharp from 'sharp';
 
+import configuration from '../../connect.js';
 import { color, ERRLOG, isURL } from '../../Helper/Modules/index.js';
 import { gif2mp4 } from '../../Utils/Converter/index.js';
 
@@ -72,7 +73,7 @@ export const trigger = async (image, sender, opt) =>
 					.webp({ quality: 60 })
 					.toBuffer();
 
-				const results = await client[botNum].applyExif(file, { packname, author });
+				const results = await client[botNum].applyExif(file, { packname: configuration.packname, author: configuration.author });
 
 				resolve(results);
 			} else {

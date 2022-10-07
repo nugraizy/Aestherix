@@ -1,11 +1,13 @@
-import Canvas from 'canvas';
+import Canvas from '@napi-rs/canvas';
 import jsSplit from 'js-split';
+import path from 'path';
 
+import { __dirname } from '../../index.js';
 import { fetchTEXT, cheerioLOAD } from '../Modules/index.js';
 
 const copyright = '© 2022 Hidden Finder, Inc | Made by Nanda using Canvas Module.';
 
-const { createCanvas, registerFont, loadImage } = Canvas;
+const { createCanvas, GlobalFonts, loadImage } = Canvas;
 
 class API {
 	constructor(username, theme) {
@@ -409,7 +411,7 @@ export class GithubGraph {
 	async initCanvas() {
 		const dimension = await this.calculateDimension();
 
-		registerFont('./Media Files/Fonts/IBM.ttf', { family: 'ibm' });
+		GlobalFonts.registerFromPath(path.join(__dirname, 'Media Files/Fonts/IBM.ttf'), 'ibm');
 
 		this.canvas = createCanvas(dimension[0], dimension[1]);
 		this.ctx = this.canvas.getContext('2d');

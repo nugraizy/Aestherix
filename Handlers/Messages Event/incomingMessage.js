@@ -42,7 +42,7 @@ export default {
 			return;
 		}
 
-		if (message.message.key && message.message.key.remoteJid == 'status@broadcast' && configuration.OPTIONS.story & message.isBanned) {
+		if (message.message.key && message.message.key.remoteJid == 'status@broadcast' && configuration.OPTIONS.story) {
 			return (await import('./storyMessage.js')).default.handler(client, message);
 		}
 

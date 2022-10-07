@@ -1,13 +1,15 @@
 import Axios from 'axios';
-import Canvas from 'canvas';
+import Canvas from '@napi-rs/canvas';
 import chroma from 'chroma-js';
 import fs from 'fs-extra';
 import sharp from 'sharp';
 import * as color from 'colorthief';
+import path from 'path';
 
+import { __dirname } from '../../index.js';
 import { spotifier } from '../../Utils/Spotifier/Spotify.js';
 
-const { createCanvas, registerFont, loadImage } = Canvas;
+const { createCanvas, GlobalFonts, loadImage } = Canvas;
 
 export class SpotifyCover {
 	constructor() {
@@ -288,17 +290,17 @@ export class SpotifyCover {
 	}
 
 	initCanvas() {
-		registerFont('./Media Files/Fonts/Antebas-Regular.otf', { family: 'antre' });
-		registerFont('./Media Files/Fonts/texgyreadventor-bold.otf', { family: 'texgy' });
-		registerFont('./Media Files/Fonts/AtypText-Semibold.ttf', { family: 'atyp' });
-		registerFont('./Media Files/Fonts/SourceSansPro-ExtraLight.ttf', { family: 'sans-thin' });
+		GlobalFonts.registerFromPath(path.join(__dirname, 'Media Files/Fonts/Antebas-Regular.otf'), 'antre');
+		GlobalFonts.registerFromPath(path.join(__dirname, 'Media Files/Fonts/texgyreadventor-bold.otf'), 'texgy');
+		GlobalFonts.registerFromPath(path.join(__dirname, 'Media Files/Fonts/AtypText-Semibold.ttf'), 'atyp');
+		GlobalFonts.registerFromPath(path.join(__dirname, 'Media Files/Fonts/SourceSansPro-ExtraLight.ttf'), 'sans-thin');
 
 		this.canvas = createCanvas(1080, 2340);
 		this.ctx = this.canvas.getContext('2d');
 	}
 
 	toBuffer() {
-		return this.canvas.toBuffer();
+		return this.canvas.toBuffer('image/png');
 	}
 
 	async getTrackCover() {
