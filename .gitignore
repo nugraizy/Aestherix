@@ -1,9 +1,9 @@
 .env
 node_modules/
-Session/*.json
+session/*.json
 package-lock.json
-Session/*/*.json
-Databases/Users/*.json
-Media Files/Connection Databases/*.json
-Temporary Files/
+session/*/*.json
+databases/users/*.json
+media_files/connection_databases/*.json
+temporary_files/
 test.*

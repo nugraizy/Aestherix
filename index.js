@@ -15,8 +15,8 @@ import Spinnies from 'spinnies';
 import { pathToFileURL } from 'url';
 
 import configuration from './connect.js';
-import { getSpinner } from './Helper/Misc/Spinner/spinners.js';
-import { color, ERRLOG, INFOLOG, readJSON, romanize, writeJSON } from './Helper/Modules/functions.js';
+import { getSpinner } from './helper/misc/spinner/spinners.js';
+import { color, ERRLOG, INFOLOG, readJSON, romanize, writeJSON } from './helper/modules/functions.js';
 
 let shouldWait = false;
 
@@ -35,32 +35,10 @@ configuration.OPTIONS = configuration.cli.flags;
 
 const { OPTIONS, cli } = configuration; // backwards compatibility
 
-const regexOption = [
-	'prefix',
-	'readOnly',
-	'autoRead',
-	'autoCorrect',
-	'restrict',
-	'onlyLogs',
-	'noLogs',
-	'selfMode',
-	'debugMode',
-	'multiCmd',
-	'rainbow',
-	'trace',
-	'help',
-	'watch',
-	'coolDown',
-	'noLoad',
-	'json',
-	'reset',
-	'story',
-	'offline',
-	'noCall',
-	'instaNotifier',
-	'limitReset',
-	'resetOnStart',
-];
+const regexOption =
+	'prefix,readOnly,autoRead,autoCorrect,restrict,onlyLogs,noLogs,selfMode,debugMode,multiCmd,rainbow,trace,help,watch,coolDown,noLoad,json,reset,story,offline,noCall,instaNotifier,limitReset,resetOnStart'.split(
+		',',
+	);
 
 if (platform !== 'win32' && !OPTIONS.noLoad) {
 	await printRandomAscii();
@@ -69,12 +47,12 @@ if (platform !== 'win32' && !OPTIONS.noLoad) {
 if (OPTIONS.reset) {
 	const sessionName = `${cli.input[0] ?? 'Session-debug'}`;
 
-	if (fs.existsSync(`./Session/${sessionName}.json`)) {
-		fs.unlinkSync(`./Session/${sessionName}.json`);
+	if (fs.existsSync(`./session/${sessionName}.json`)) {
+		fs.unlinkSync(`./session/${sessionName}.json`);
 	}
 
-	if (fs.existsSync(`./Media Files/Connection Databases/${sessionName}.json`)) {
-		fs.unlinkSync(`./Media Files/Connection Databases/${sessionName}.json`);
+	if (fs.existsSync(`./media_files/connection_databases/${sessionName}.json`)) {
+		fs.unlinkSync(`./media_files/connection_databases/${sessionName}.json`);
 	}
 }
 
@@ -84,7 +62,7 @@ if (OPTIONS.limitReset) {
 		async () => {
 			const time = moment().tz('Asia/Jakarta').format('HH:mm:ss DD/MM');
 
-			(await import('./Helper/Groups/Settings/limit.js')).resetAllLimit();
+			(await import('./helper/groups/settings/limit.js')).resetAllLimit();
 			INFOLOG(`[${color(time, 'cyan')}]`, `${color("Sukses Reset User's Limit", 'white')}`);
 
 			if (OPTIONS.resetOnStart) {
@@ -98,23 +76,23 @@ if (OPTIONS.limitReset) {
 	);
 }
 
-const { state, saveState } = useSingleFileAuthState(`./Session/${cli.input[0] ?? 'Session-debug'}.json`);
+const { state, saveState } = useSingleFileAuthState(`./session/${cli.input[0] ?? 'Session-debug'}.json`);
 
 global.store = makeInMemoryStore({ logger: P().child({ level: 'fatal', stream: 'store' }) });
 
 if (OPTIONS.json) {
-	if (!fs.existsSync('./Media Files/Connection Databases/')) {
-		fs.mkdirSync('./Media Files/Connection Databases/');
+	if (!fs.existsSync('./media_files/connection_databases/')) {
+		fs.mkdirSync('./media_files/connection_databases/');
 	}
 
-	if (fs.existsSync(`./Session/${cli.input[0] ?? 'Session-debug'}.json`)) {
+	if (fs.existsSync(`./session/${cli.input[0] ?? 'Session-debug'}.json`)) {
 		await clearDBConnection();
 	}
 
-	store.readFromFile(`./Media Files/Connection Databases/${cli.input[0] ?? 'Session-debug'}.json`);
+	store.readFromFile(`./media_files/connection_databases/${cli.input[0] ?? 'Session-debug'}.json`);
 
 	setInterval(() => {
-		store.writeToFile(`./Media Files/Connection Databases/${cli.input[0] ?? 'Session-debug'}.json`);
+		store.writeToFile(`./media_files/connection_databases/${cli.input[0] ?? 'Session-debug'}.json`);
 	}, 2 * 1000);
 }
 
@@ -212,11 +190,11 @@ const start = async () => {
 						log('Unknown reason, Quick reconnecting...');
 					}
 
-					if (configuration.cache.interval.has('blocklist') && configuration.cache.interval.has('groupMetadata')) {
+					if (configuration.cache.interval.has('blocklist') && configuration.cache.interval.has('setting')) {
 						clearInterval(configuration.cache.interval.get('blocklist'));
-						clearInterval(configuration.cache.interval.get('groupMetadata'));
+						clearInterval(configuration.cache.interval.get('setting'));
 						configuration.cache.interval.delete('blocklist');
-						configuration.cache.interval.delete('groupMetadata');
+						configuration.cache.interval.delete('setting');
 						configuration.isFirstConnection = false;
 					}
 
@@ -243,7 +221,7 @@ const start = async () => {
 					global.client = {};
 					global.botNum = Client.user.id;
 					client[Client.user.id] = Client;
-					(await import('./Helper/Modules/assignFunction.js')).assign(client);
+					(await import('./helper/modules/assignFunction.js')).assign(client);
 					successSpinner('Connecting', { text: 'Connected to WASocket' });
 					INFOLOG(color(center(`Bot Version  ${romanize(readJSON('./package.json').version)}\n\n`, stdout.columns), '#9f53ea'));
 					connectEvent();
@@ -254,11 +232,11 @@ const start = async () => {
 		} catch (error) {
 			log(error);
 
-			if (configuration.cache.interval.has('blocklist') && configuration.cache.interval.has('groupMetadata')) {
+			if (configuration.cache.interval.has('blocklist') && configuration.cache.interval.has('setting')) {
 				clearInterval(configuration.cache.interval.get('blocklist'));
-				clearInterval(configuration.cache.interval.get('groupMetadata'));
+				clearInterval(configuration.cache.interval.get('setting'));
 				configuration.cache.interval.delete('blocklist');
-				configuration.cache.interval.delete('groupMetadata');
+				configuration.cache.interval.delete('setting');
 				configuration.isFirstConnection = false;
 			}
 
@@ -269,7 +247,7 @@ const start = async () => {
 
 	const connectEvent = () => {
 		Client.ev.on('messages.upsert', async (message) => {
-			const Handler = (await import('./Handlers/Messages Event/incomingMessage.js')).default.handler;
+			const Handler = (await import('./handlers/messages_event/incomingMessage.js')).default.handler;
 
 			Handler(message, client, configuration.cmds, store, configuration.user);
 		});
@@ -279,7 +257,7 @@ const start = async () => {
 				return;
 			}
 
-			const Handler = (await import('./Handlers/Messages Event/deletedMessage.js')).default.handler;
+			const Handler = (await import('./handlers/messages_event/deletedMessage.js')).default.handler;
 
 			message = store.messages[message[0].key.remoteJid]?.get(message[0].key.id);
 			Handler(client, message, false, store);
@@ -291,7 +269,7 @@ const start = async () => {
 			const presences = presence.presences[participant].lastKnownPresence;
 
 			if (presences == 'composing') {
-				const Handler = (await import('./Handlers/Message Presence/composing.js')).default.handler;
+				const Handler = (await import('./handlers/message_presence/composing.js')).default.handler;
 
 				Handler(client, from, participant);
 			}
@@ -325,13 +303,13 @@ const start = async () => {
 		});
 
 		Client.ev.on('group.participants.update', async (message) => {
-			const Handler = (await import('./Handlers/Notification Handlers/participantsNotification.js')).default.handler;
+			const Handler = (await import('./handlers/notification_handlers/participantsNotification.js')).default.handler;
 
 			Handler(client, message, store);
 		});
 
 		Client.ev.on('group.settings.update', async (message) => {
-			const Handler = (await import('./Handlers/Notification Handlers/groupSettingsNotification.js')).default.handler;
+			const Handler = (await import('./handlers/notification_handlers/groupSettingsNotification.js')).default.handler;
 
 			Handler(client, message, store);
 		});
@@ -515,7 +493,7 @@ function loadFiles(dir) {
 
 async function loadCommands() {
 	addSpinner('files', { text: 'Loading Files...' });
-	const commands = loadFiles('./Commands');
+	const commands = loadFiles('./commands');
 
 	successSpinner('files', { text: `Loaded ${commands.length} files` });
 	addSpinner('commands', { text: 'Loading Commands...' });
@@ -582,7 +560,7 @@ async function reloadModule(module, isNewFile, newFilePath) {
 			const commands = await new Promise(async (resolve) => {
 				const files = (
 					await Promise.all(
-						loadFiles('./Commands').map(async (v) => {
+						loadFiles('./commands').map(async (v) => {
 							const modules = process.platform == 'win32' ? decodeURI(pathToFileURL(v).pathname.slice(1)) : decodeURI(pathToFileURL(v).pathname);
 							const module = (await import(pathToFileURL(modules))).default;
 
@@ -686,9 +664,9 @@ function parseCli() {
 }
 
 async function printRandomAscii() {
-	const randomAscii = fs.readdirSync('./Helper/Ascii/');
+	const randomAscii = fs.readdirSync('./helper/ascii/');
 
-	spawn('bash', [`./Helper/Ascii/${randomAscii[Math.floor(Math.random() * randomAscii.length)]}`], {
+	spawn('bash', [`./helper/ascii/${randomAscii[Math.floor(Math.random() * randomAscii.length)]}`], {
 		stdio: 'inherit',
 	});
 }
@@ -730,19 +708,19 @@ function help() {
 }
 
 export async function clearDBConnection() {
-	if (!fs.existsSync(`./Media Files/Connection Databases/${cli.input[0] ?? 'Session-debug'}.json`)) {
-		await fs.writeFile(`./Media Files/Connection Databases/${cli.input[0] ?? 'Session-debug'}.json`, JSON.stringify({}));
+	if (!fs.existsSync(`./media_files/connection_databases/${cli.input[0] ?? 'Session-debug'}.json`)) {
+		await fs.writeFile(`./media_files/connection_databases/${cli.input[0] ?? 'Session-debug'}.json`, JSON.stringify({}));
 	}
 
-	const data = readJSON(`./Media Files/Connection Databases/${cli.input[0] ?? 'Session-debug'}.json`);
-	const session = readJSON(`./Session/${cli.input[0] ?? 'Session-debug'}.json`);
+	const data = readJSON(`./media_files/connection_databases/${cli.input[0] ?? 'Session-debug'}.json`);
+	const session = readJSON(`./session/${cli.input[0] ?? 'Session-debug'}.json`);
 
 	session.keys = {};
 	data.chats = [];
 	data.contacts = {};
 	data.messages = {};
-	writeJSON(`./Media Files/Connection Databases/${cli.input[0] ?? 'Session-debug'}.json`, data);
-	writeJSON(`./Session/${cli.input[0] ?? 'Session-debug'}.json`, session);
+	writeJSON(`./media_files/connection_databases/${cli.input[0] ?? 'Session-debug'}.json`, data);
+	writeJSON(`./session/${cli.input[0] ?? 'Session-debug'}.json`, session);
 }
 
 function reconnectMqttConnection(connection) {
