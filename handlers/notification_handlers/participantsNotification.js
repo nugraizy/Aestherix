@@ -20,7 +20,7 @@ export default {
 	async handler(client, message, store) {
 		message = await reassign(JSON.parse(JSON.stringify(message)), client, store, false);
 
-		if (['GROUP_PARTICIPANT_LEAVE', 'GROUP_PARTICIPANT_REMOVE', 'GROUP_PARTICIPANT_INVITE', 'GROUP_PARTICIPANT_ADD'].includes(message.messageStubType)) {
+		if (Object.keys(EVENT_UPDATE).includes(message.messageStubType)) {
 			if (configuration.cache.metadata.has(message.from)) {
 				const groupMetadata = (await client[botNum].groupMetadata(message.from)) || {};
 				const partc = groupMetadata.participants;
