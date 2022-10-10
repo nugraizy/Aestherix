@@ -46,7 +46,7 @@ export default {
 				continue;
 			}
 
-			const result = await downloadDeviantArt(regexs.message.trim());
+			const result = await downloadDeviantArt(querie);
 
 			if ('error' in result) {
 				await client[botNum].reply({ from, quoted: message }, result.error);

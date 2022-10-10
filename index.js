@@ -104,6 +104,10 @@ for (const option of Object.keys(OPTIONS).filter((key) => OPTIONS[key] == true))
 	}
 }
 
+if (!fs.existsSync('./temporary_files/')) {
+	fs.mkdirSync('./temporary_files/');
+}
+
 const addSpinner = (name, options) => {
 	if (!OPTIONS.noLoad) {
 		spinners.add(name, options);
