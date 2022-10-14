@@ -32,7 +32,7 @@
 		"big-integer": "^1.6.51",
 		"brainly-scraper-v2": "^1.1.2",
 		"canvas": "^2.9.3",
-		"canvas-text-wrapper": "^0.10.2",
+		"canvas-text-wrapper": "github:cyberj/canvas-text-wrapper#master",
 		"center-align": "^1.0.1",
 		"chalk": "^5.0.0",
 		"cheerio": "^1.0.0-rc.10",
