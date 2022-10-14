@@ -437,6 +437,6 @@ export class GithubGraph {
 	}
 
 	toBuffer() {
-		return this.canvas.toBuffer();
+		return this.canvas.toBuffer('image/png');
 	}
 }
