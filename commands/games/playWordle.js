@@ -1,6 +1,7 @@
-/* global botNum, games */
+/* global botNum */
 import moment from 'moment-timezone';
 
+import configuration from '../../connect.js';
 import { Wordle } from '../../utils/games/index.js';
 import { INFOLOG, color } from '../../helper/index.js';
 
@@ -23,8 +24,8 @@ export default {
 		if (args[1] == 'play') {
 			const wordle = new Wordle(sender);
 
-			if (games.wordle.has(sender)) {
-				return await client[botNum].reply({ from, quoted: wordle.messages }, 'You are already playing Wordle.');
+			if (configuration.games.wordle.has(sender) && wordle.message) {
+				return await client[botNum].reply({ from, quoted: wordle.message }, 'You are already playing Wordle.');
 			}
 
 			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Wordle Game Answer : ', '#01cdfe')} ${color(wordle.word, 'white')} to ${color(prettyNumber, '#ff71ce')}`);
@@ -33,7 +34,7 @@ export default {
 
 			wordle.messages = data;
 		} else if (args[1] == 'exit') {
-			if (!games.wordle.has(sender)) {
+			if (!configuration.games.wordle.has(sender)) {
 				return await client[botNum].reply({ from, quoted: message }, 'You are not playing Wordle.');
 			}
 

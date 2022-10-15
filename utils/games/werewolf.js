@@ -865,6 +865,6 @@ export class Werewolf {
 		const minutes = Math.floor(difference / (1000 * 60)) % 60;
 		const seconds = Math.floor(difference / 1000) % 60;
 
-		return String(minutes).length == 1 ? `0${minutes}` : `${minutes}:${String(seconds).length == 1 ? `0${seconds}` : seconds}`;
+		return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 	}
 }

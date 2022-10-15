@@ -19,7 +19,9 @@ ${guess.board}
 ${guess.words}
 
 Statistic : 
-${guess.guessed.map((v, i) => `${i + 1}. ${v.input}\n${v.board}`).join('\n')}`,
+${guess.guessed.map((v, i) => `${i + 1}. ${v.input}\n${v.board}`).join('\n')}
+
+Lama permainan : ${wordle.timeLength}`,
 						},
 						{ quoted: message },
 					);

@@ -30,6 +30,7 @@ export class Wordle {
 		this.board = this.word.split('').map((v) => (v === ' ' ? ' ' : BLOCKS.WHITE));
 		this.message = null;
 		this.guessed = [];
+		this.gameTimeStarted = new Date().getTime();
 
 		this.play();
 
@@ -143,5 +144,13 @@ export class Wordle {
 
 	play() {
 		configuration.games.wordle.set(this.id, this);
+	}
+
+	get timeLength() {
+		const difference = new Date().getTime() - this.gameTimeStarted;
+		const minutes = Math.floor(difference / (1000 * 60)) % 60;
+		const seconds = Math.floor(difference / 1000) % 60;
+
+		return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 	}
 }

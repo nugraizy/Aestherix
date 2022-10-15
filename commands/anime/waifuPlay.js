@@ -7,7 +7,7 @@ export default {
 	aliases: ['wp'],
 	category: 'Anime',
 	cooldown: 3,
-	usage: '!waifuplay <search/src> <title>',
+	usage: '!waifuplay <search/latest> <title>',
 	limit: 4,
 	status: 'enable',
 	async run({ args, from, message, sender, type }, client) {
