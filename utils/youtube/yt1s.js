@@ -40,8 +40,8 @@ const yt2 = async (url, type) =>
 			});
 
 			resolve({
-				filesizeF: size,
-				filesize: fileSize(size, { base: 2 }),
+				filesizeF: size || '0 B',
+				filesize: fileSize(size || '0 B', { base: 2 }),
 				dlLink: data.dlink,
 				title: data.title,
 				id: datas.vid,
