@@ -1,4 +1,4 @@
-import Axios from 'axios';
+import axios from 'axios';
 
 const TYPE = {
 	nsfw: ['waifu', 'neko', 'trap', 'blowjob'],
@@ -52,7 +52,7 @@ export const getWaifu = (input = 'neko', type = 'sfw') =>
 				});
 			}
 
-			const { data } = await Axios.post(`https://api.waifu.pics/many/${type}/${input}`, {
+			const { data } = await axios.post(`https://api.waifu.pics/many/${type}/${input}`, {
 				headers: {
 					'content-type': 'application/json;charset=UTF-8',
 				},

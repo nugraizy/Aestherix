@@ -1,5 +1,5 @@
 /* global botNum */
-import Axios from 'axios';
+import axios from 'axios';
 import fs from 'fs';
 import * as jsSplit from 'js-split';
 import path from 'path';
@@ -150,7 +150,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 				continue;
 			}
 
-			const { data } = await Axios.get(result.preview, {
+			const { data } = await axios.get(result.preview, {
 				responseType: 'arraybuffer',
 			});
 

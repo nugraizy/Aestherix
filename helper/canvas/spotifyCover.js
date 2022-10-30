@@ -1,4 +1,4 @@
-import Axios from 'axios';
+import axios from 'axios';
 import Canvas from '@napi-rs/canvas';
 import chroma from 'chroma-js';
 import fs from 'fs-extra';
@@ -313,7 +313,7 @@ export class SpotifyCover {
 		}
 
 		const buffer = (
-			await Axios.get(data.data.items[0].album.images[0].url, {
+			await axios.get(data.data.items[0].album.images[0].url, {
 				responseType: 'arraybuffer',
 			})
 		).data;

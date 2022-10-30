@@ -1,8 +1,9 @@
 /* global botNum */
+import { S_WHATSAPP_NET } from '../../helper/index.js';
 
 export default {
 	name: 'delete',
-	description: 'Delete people\'s messages',
+	description: 'Delete people messages',
 	usage: '!delete <reply chat>',
 	aliases: ['del'],
 	category: 'Moderation',
@@ -18,8 +19,8 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'You must reply to a message to delete it.');
 		}
 
-		if (!mediaData.participant.includes(`${botNum.split(':')[0]}@s.whatsapp.net`) && !isBotAdmin) {
-			return await client[botNum].reply({ from, quoted: message }, 'You can\'t ask bot to delete people message when bot is not admin.');
+		if (!mediaData.participant.includes(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`) && !isBotAdmin) {
+			return await client[botNum].reply({ from, quoted: message }, 'You can not ask bot to delete people message when bot is not admin.');
 		}
 
 		await client[botNum].sendMessage(from, {
@@ -27,7 +28,7 @@ export default {
 				id: mediaData.stanzaId,
 				participant: mediaData.participant,
 				remoteJid: from,
-				...(mediaData.participant.includes(`${botNum.split(':')[0]}@s.whatsapp.net`) ? { fromMe: true } : {}),
+				...(mediaData.participant.includes(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`) ? { fromMe: true } : {}),
 			},
 		});
 	},

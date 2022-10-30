@@ -1,5 +1,5 @@
 /* global botNum */
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import path from 'path';
 import parser from 'yargs-parser';
 import { writeFileSync } from 'fs';
@@ -22,7 +22,7 @@ export default {
 	limit: 1,
 	status: 'enable',
 	async run({ query, isMediaImage, isSticker, isQuotedSticker, from, prettyNumber, message, filename, extractMediaData, sender, stickerAble, typeQuoted, typeSticker }, client) {
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!isMediaImage && !(isQuotedSticker || isSticker)) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please send/reply a media to convert to sticker');

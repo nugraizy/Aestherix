@@ -1,5 +1,5 @@
 /* global botNum */
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
 import { color, ERRLOG, isOne } from '../../helper/modules/index.js';
@@ -20,7 +20,7 @@ export default {
 	limit: 3,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please specify a IP Address');
@@ -44,7 +44,7 @@ export default {
 			if ('error' in data) {
 				await client[botNum].reply({ from, quoted: message }, `Error while searching IP Address\n\n${data.error}`);
 
-				ERRLOG(`[${color(time, 'cyan')}]`, `${color('Failed to Searching IP Address', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Failed to Searching IP Address', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 
 				continue;
 			} else {

@@ -1,4 +1,4 @@
-import Axios from 'axios';
+import axios from 'axios';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -42,7 +42,7 @@ class Spotifier {
 					await this.refreshToken();
 				}
 
-				const { data } = await Axios({
+				const { data } = await axios({
 					url: this.#BASE_API + path,
 					method,
 					headers: {
@@ -74,7 +74,7 @@ class Spotifier {
 
 		this.refreshToken = async () => {
 			try {
-				const { data } = await Axios(this.tokenize());
+				const { data } = await axios(this.tokenize());
 
 				this.#bearerToken = data.access_token;
 				this.#bearerTokenExpiredAt = Date.now() + data.expires_in;
@@ -97,7 +97,7 @@ class Spotifier {
 			params.append('refresh_token', this.#refreshToken);
 			const {
 				data: { access_token: accessToken, expires_in: expiresIn },
-			} = await Axios({
+			} = await axios({
 				url: 'https://accounts.spotify.com/api/token',
 				method: 'POST',
 				params,
@@ -174,7 +174,7 @@ class Spotifier {
 					return { status: false, message: 'Parameter artistsID must provided' };
 				}
 
-				let { data } = await Axios({
+				let { data } = await axios({
 					url: 'https://accounts.spotify.com/api/token',
 					headers: {
 						Authorization: `Basic ${new Buffer.from(`${this.#clientId}:${this.#clientSecret}`).toString('base64')}`,
@@ -186,7 +186,7 @@ class Spotifier {
 				});
 
 				data = (
-					await Axios({
+					await axios({
 						url: `https://api.spotify.com/v1/artists/${artistsID}/top-tracks`,
 						headers: {
 							Authorization: `Bearer ${this.#credentialToken || data.access_token}`,
@@ -294,7 +294,7 @@ class Spotifier {
 		this.getCurrentlyPlaying = async () => {
 			try {
 				await this.getAccessTokenFromRefreshToken();
-				const { data } = await Axios({
+				const { data } = await axios({
 					url: `${this.#BASE_API}/me/player/currently-playing`,
 					method: 'GET',
 					headers: {
@@ -311,7 +311,7 @@ class Spotifier {
 		this.getDevices = async () => {
 			try {
 				await this.getAccessTokenFromRefreshToken();
-				const { data } = await Axios({
+				const { data } = await axios({
 					url: `${this.#BASE_API}/me/player/devices`,
 					method: 'GET',
 					headers: {
@@ -328,7 +328,7 @@ class Spotifier {
 		this.getPlaybackState = async () => {
 			try {
 				await this.getAccessTokenFromRefreshToken();
-				const { data } = await Axios({
+				const { data } = await axios({
 					url: `${this.#BASE_API}/me/player`,
 					method: 'GET',
 					headers: {
@@ -345,7 +345,7 @@ class Spotifier {
 		this.updateNowPlayingStates = async () => {
 			try {
 				await this.getAccessTokenFromRefreshToken();
-				const { data } = await Axios({
+				const { data } = await axios({
 					url: `${this.#BASE_API}/me/player/currently-playing`,
 					method: 'GET',
 					headers: {
@@ -395,7 +395,7 @@ class Spotifier {
 		this.skipPlayback = async () => {
 			try {
 				await this.getAccessTokenFromRefreshToken();
-				const { data } = await Axios({
+				const { data } = await axios({
 					url: `${this.#BASE_API}/me/player/next`,
 					method: 'POST',
 					headers: {
@@ -415,7 +415,7 @@ class Spotifier {
 		this.pausePlayback = async () => {
 			try {
 				await this.getAccessTokenFromRefreshToken();
-				const { data } = await Axios({
+				const { data } = await axios({
 					url: `${this.#BASE_API}/me/player/pause`,
 					method: 'PUT',
 					headers: {
@@ -435,7 +435,7 @@ class Spotifier {
 		this.resumePlayback = async () => {
 			try {
 				await this.getAccessTokenFromRefreshToken();
-				const { data } = await Axios({
+				const { data } = await axios({
 					url: `${this.#BASE_API}/me/player/play`,
 					method: 'PUT',
 					headers: {
@@ -455,7 +455,7 @@ class Spotifier {
 		this.startNewPlayback = async (trackId) => {
 			try {
 				await this.getAccessTokenFromRefreshToken();
-				const { data } = await Axios({
+				const { data } = await axios({
 					url: `${this.#BASE_API}/me/player/play`,
 					method: 'PUT',
 					headers: {

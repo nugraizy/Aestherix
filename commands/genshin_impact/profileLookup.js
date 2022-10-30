@@ -1,5 +1,5 @@
 /* global botNum */
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
 import { color, ERRLOG } from '../../helper/modules/index.js';
@@ -9,11 +9,11 @@ const regex = async (input) => {
 	const match = input.match(/^\d{9,10}/g);
 
 	if (!match) {
-		return { status: false, message: "Wasn't a valid UID" };
+		return { status: false, message: 'That is not a valid UID' };
 	}
 
 	if (!(await genshinProfile(match[0]))) {
-		return { status: false, message: "We can't find your char" };
+		return { status: false, message: 'We can not find your char' };
 	}
 
 	return { status: true, message: match[0] };
@@ -29,7 +29,7 @@ export default {
 	limit: 4,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please specify an UID');
@@ -71,7 +71,7 @@ export default {
 			if ('error' in info) {
 				await client[botNum].reply({ from, quoted: message }, `Error while searching Genshin Impact player\n\n${info.error}`);
 
-				ERRLOG(`[${color(time, 'cyan')}]`, `${color('Failed to Searching Genshin Impact player', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Failed to Searching Genshin Impact player', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 
 				continue;
 			} else {

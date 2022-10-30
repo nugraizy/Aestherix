@@ -1,5 +1,5 @@
 /* global botNum */
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import path from 'path';
 
 import { __dirname } from '../../index.js';
@@ -16,7 +16,7 @@ export default {
 	limit: 1,
 	status: 'enable',
 	async run({ isQuotedSticker, from, message, filename, extractMediaData, sender, prettyNumber, typeQuoted }, client) {
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!isQuotedSticker) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please reply a sticker to decrypt');

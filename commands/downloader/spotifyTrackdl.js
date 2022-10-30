@@ -1,5 +1,5 @@
 /* global botNum */
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import path from 'path';
 
 import { __dirname } from '../../index.js';
@@ -22,7 +22,7 @@ export default {
 	limit: 8,
 	status: 'enable',
 	async run({ from, query, prettyNumber, filename, message }, client) {
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please provide a URL');
@@ -49,7 +49,7 @@ export default {
 			if ('error' in audio) {
 				await client[botNum].reply({ from, quoted: message }, audio.error);
 
-				ERRLOG(`[${color(time, 'cyan')}]`, `${color('Failed to Download Spotify Audio', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Failed to Download Spotify Audio', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 			} else {
 				const { title, timestamp, dlLink } = audio;
 

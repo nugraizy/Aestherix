@@ -1,6 +1,13 @@
-import Axios from 'axios';
+import axios from 'axios';
 
 import { convertSecondstoTime, formatViews, UA } from '../../helper/index.js';
+
+/**
+ * Error definition.
+ * @typedef {Object} Error
+ * @property {string} Error.error
+ * @property {string} Error.cusMessage
+ */
 
 const URL_BASE_COM = (code) => `https://www.bilibili.com/video/${code}`;
 const URL_SEARCH_COM = (keyword) => `https://api.bilibili.com/x/web-interface/search/type?keyword=${keyword}&page=1&pagesize=3&search_type=video&order=totalrank`;
@@ -58,7 +65,7 @@ const bilibiliVideoCOM = (arr) =>
 
 			for (const { aid } of arr) {
 				CONTAINER.push(
-					Axios.get(URL_VIDEO_DETAILS_COM(aid), {
+					axios.get(URL_VIDEO_DETAILS_COM(aid), {
 						headers: {
 							'user-agent': UA(),
 						},
@@ -72,7 +79,7 @@ const bilibiliVideoCOM = (arr) =>
 						data: { data: detailMetadata },
 					} of result) {
 						const { data: fileMetadata } = (
-							await Axios.get(URL_VIDEO_COM(detailMetadata.aid, detailMetadata.cid), {
+							await axios.get(URL_VIDEO_COM(detailMetadata.aid, detailMetadata.cid), {
 								headers: {
 									'user-agent': UA(),
 								},
@@ -91,11 +98,35 @@ const bilibiliVideoCOM = (arr) =>
 		}
 	});
 
+/**
+ * Parsed result definition.
+ * @typedef {Object[]} ResultsSearchCOM
+ * @property {string} ResultsSearchCOM[].title
+ * @property {string} ResultsSearchCOM[].author
+ * @property {(string|number)} ResultsSearchCOM[].authorId
+ * @property {(string|number)} ResultsSearchCOM[].like
+ * @property {(string|number)} ResultsSearchCOM[].share
+ * @property {(string|number)} ResultsSearchCOM[].duration
+ * @property {(string|number)} ResultsSearchCOM[].favorite
+ * @property {(string|number)} ResultsSearchCOM[].view
+ * @property {string} ResultsSearchCOM[].thumbnail
+ * @property {string} ResultsSearchCOM[].description
+ * @property {string} ResultsSearchCOM[].originalVideoLink
+ * @property {string} ResultsSearchCOM[].downloadLink
+ * @property {(string|number)} ResultsSearchCOM[].size
+ */
+
+/**
+ * Search videos from bilibili.com.
+ * @param {string} keyword search keyword of the videos.
+ * @returns {Promise<ResultsSearchCOM>}
+ * @throws {Promise<Error>}
+ */
 export const bilibiliSearchCOM = (keyword) =>
 	new Promise(async (resolve) => {
 		try {
 			const { data } = (
-				await Axios.get(URL_SEARCH_COM(keyword), {
+				await axios.get(URL_SEARCH_COM(keyword), {
 					headers: {
 						'user-agent': UA(),
 					},
@@ -133,11 +164,30 @@ const bilibiliParseMetadataTV = (arr) =>
 		}
 	});
 
+/**
+ * Parsed result definition.
+ * @typedef {Object[]} ResultsSearchTV
+ * @property {string} ResultsSearchTV[].title
+ * @property {string} ResultsSearchTV[].author
+ * @property {(string|number)} ResultsSearchTV[].aid
+ * @property {string} ResultsSearchTV[].cover
+ * @property {string} ResultsSearchTV[].source
+ * @property {(string|number)} ResultsSearchTV[].duration
+ * @property {(string|number)} ResultsSearchTV[].view
+ * @property {number} ResultsSearchTV[].score
+ */
+
+/**
+ * Search videos from bilibili.tv.
+ * @param {string} keyword search keyword of the videos.
+ * @returns {Promise<ResultsSearResultsSearchTVchCOM>}
+ * @throws {Promise<Error>}
+ */
 export const bilibiliSearchTV = (keyword) =>
 	new Promise(async (resolve) => {
 		try {
 			const { data } = (
-				await Axios.get(URL_SEARCH_TV(keyword), {
+				await axios.get(URL_SEARCH_TV(keyword), {
 					headers: {
 						'user-agent': UA(),
 					},
@@ -156,10 +206,25 @@ export const bilibiliSearchTV = (keyword) =>
 		}
 	});
 
+/**
+ * Parsed result definition.
+ * @typedef {Object} ResultsDetailedSource
+ * @property {string} ResultsDetailedSource.video
+ * @property {(string|number)} ResultsDetailedSource.size
+ * @property {(string|number)} ResultsDetailedSource.resolution
+ * @property {string} ResultsDetailedSource.audio
+ */
+
+/**
+ * Get the detailed video from bilibili by its aid.
+ * @param {string} aid aid of the videos.
+ * @returns {Promise<ResultsDetailedSource>}
+ * @throws {Promise<Error>}
+ */
 export const detailSourceFormat = (aid) =>
 	new Promise(async (resolve) => {
 		try {
-			let { data } = await Axios.get(URL_VIDEO_TV(aid), {
+			let { data } = await axios.get(URL_VIDEO_TV(aid), {
 				headers: {
 					'user-agent': UA(),
 					cookie: 'bstar-web-lang=id; buvid3=8ee5ac76-5a96-4bad-ba97-15797dcb024347191infoc',

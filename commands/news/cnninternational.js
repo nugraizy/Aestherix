@@ -40,6 +40,10 @@ export default {
 			);
 		}
 
+		if (!query) {
+			return client[botNum].reply({ from, quoted: message }, 'Please provide queries');
+		}
+
 		const data = await cnninternational(query);
 
 		if ('error' in data) {

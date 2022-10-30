@@ -1,16 +1,14 @@
 /* global botNum,  */
-import moment from 'moment-timezone';
-import similarity from 'similarity';
+import dayjs from 'dayjs';
+import similarity from 'string-similarity';
 import { log } from 'util';
 
 import configuration from '../../connect.js';
 import { runtime } from '../../index.js';
-import { addLimit, checkAfk, color, delay, deleteAfk, getAfk, getTimeSince, INFOLOG, reassign } from '../../helper/index.js';
+import { addLimit, checkAfk, color, deleteAfk, getAfk, getTimeSince, INFOLOG, reassign } from '../../helper/index.js';
 
 let STATS_OFFLINE = true;
 const EVALY = ['/>', '$>', '=>', '!>'];
-
-moment.tz.setDefault('Asia/Jakarta').locale('id');
 
 export default {
 	async handler(message, client, cmds, store, user) {
@@ -22,7 +20,7 @@ export default {
 			log(JSON.stringify(message, undefined, 2));
 		}
 
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (message.messages[0] && 'messageStubParameters' in message.messages[0]) {
 			return (await import('./stubMessage.js')).default.handler(client, message.messages[0], store);
@@ -59,48 +57,46 @@ export default {
 			client[botNum].readMessages([message.message.key]);
 		}
 
-		if (checkAfk(message.sender, message.from)) {
-			const { reasons, since } = getAfk(message.sender, message.from);
-			const time = getTimeSince(since);
+		if (message.isGroup) {
+			if (checkAfk(message.sender, message.from)) {
+				const { reasons, since } = getAfk(message.sender, message.from);
+				const time = getTimeSince(since);
 
-			client[botNum].sendMessage(
-				message.from,
-				{
-					text: `@${message.sender.split('@')[0]} is AFK since ${time} ago. Now they are out from AFK. Reason: ${reasons}`,
-					mentions: [message.sender],
-				},
-				{ quoted: message.message },
-			);
-			deleteAfk(message.sender, message.from);
-		}
-
-		if (!message.isDisappearingChat && !message.isGroup) {
-			client[botNum].sendMessage(message.from, { disappearingMessagesInChat: 24 * 60 * 60 });
-		}
-
-		if (message.bodyQuoted && checkAfk(message.mediaData.participant, message.from)) {
-			const { reasons, since, name } = getAfk(message.mediaData.participant);
-			const time = getTimeSince(since);
-
-			client[botNum].reply({ from: message.from, quoted: message.message }, `${name} is AFK since ${time} ago. Reason: ${reasons}`);
-		}
-
-		if (message.mention?.length > 0) {
-			let caption = "You're Tagging People That Are AFK.\n\n"; /* eslint-disable-line */
-			const container = [];
-
-			for (const mention of message.mention) {
-				if (checkAfk(mention, message.from)) {
-					const { reasons, since, name } = getAfk(mention, message.from);
-					const time = getTimeSince(since);
-
-					caption += `${name}\nSince : ${time} ago.\nReason : ${reasons}\n\n`;
-					container.push(mention);
-				}
+				client[botNum].sendMessage(
+					message.from,
+					{
+						text: `@${message.sender.split('@')[0]} is AFK since ${time} ago. Now they are out from AFK. Reason: ${reasons}`,
+						mentions: [message.sender],
+					},
+					{ quoted: message.message },
+				);
+				deleteAfk(message.sender, message.from);
 			}
 
-			if (container.length > 0) {
-				client[botNum].reply({ from: message.from, quoted: message.message }, caption.trim());
+			if (message.bodyQuoted && checkAfk(message.mediaData.participant, message.from)) {
+				const { reasons, since, name } = getAfk(message.mediaData.participant);
+				const time = getTimeSince(since);
+
+				client[botNum].reply({ from: message.from, quoted: message.message }, `${name} is AFK since ${time} ago. Reason: ${reasons}`);
+			}
+
+			if (message.mention?.length > 0) {
+				let caption = "You're Tagging People That Are AFK.\n\n"; /* eslint-disable-line */
+				const container = [];
+
+				for (const mention of message.mention) {
+					if (checkAfk(mention, message.from)) {
+						const { reasons, since, name } = getAfk(mention, message.from);
+						const time = getTimeSince(since);
+
+						caption += `${name}\nSince : ${time} ago.\nReason : ${reasons}\n\n`;
+						container.push(mention);
+					}
+				}
+
+				if (container.length > 0) {
+					client[botNum].reply({ from: message.from, quoted: message.message }, caption.trim());
+				}
 			}
 		}
 
@@ -135,9 +131,9 @@ export default {
 					}
 
 					for (const aliases of cmds.aliases) {
-						const correcting = similarity(message.args[0], aliases);
+						const correcting = similarity.compareTwoStrings(message.args[0], aliases);
 
-						if (correcting >= Math.min(0.67)) {
+						if (correcting >= Math.min(0.57)) {
 							correctedCommand.push({
 								score: correcting,
 								command: aliases,
@@ -278,8 +274,6 @@ export default {
 						if (user.cooldown.get(message.sender)?.requests) {
 							user.cooldown.get(message.sender).requests = false;
 						}
-
-						await delay(300);
 					} catch (err) {
 						if (user.cooldown.get(message.sender)?.requests) {
 							user.cooldown.get(message.sender).requests = false;

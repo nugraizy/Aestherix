@@ -1,5 +1,10 @@
 import configuration from '../../connect.js';
 
+/**
+ *
+ * @param {string} key the key/participants that sent message to bot.
+ * @returns {{partner1: string, partner2: string}} key1 and key2.
+ */
 export const handlers = (key) => {
 	const status = configuration.anonymous.get(key) || Array.from(configuration.anonymous.values()).find((k) => k.partner == key) || undefined;
 

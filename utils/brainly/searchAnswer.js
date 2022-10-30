@@ -1,5 +1,9 @@
 import Brainly from 'brainly-scraper-v2';
 
+/**
+ * Available languages definition.
+ * @typedef {('id'|'us'|'es'|'ru'|'ro'|'pt'|'tr'|'ph'|'pl'|'hi'|undefined)} languages
+ */
 const LANG = ['id', 'us', 'es', 'ru', 'ro', 'pt', 'tr', 'ph', 'pl', 'hi'];
 
 const parseAnswers = (arr) =>
@@ -8,9 +12,31 @@ const parseAnswers = (arr) =>
 		jawaban: item.jawaban.map((answer) => answer.text.replace('amp;', '')),
 	}));
 
-export const brainlySearch = (query, { lang = 'id', count = Number(5) }) =>
+/**
+ * Parsed result definition.
+ * @typedef {{pertanyaan: string, jawaban: string[]}[] & {error?: string}} ResultsBrainly
+ */
+
+/**
+ * Search Questions/Homework answers in Brainly/
+ * @param {string} query keyword of the questions to search using Brainly module.
+ * @param {{lang: languages, count: number}} options set options. [lang='id', count=5].
+ * @returns {Promise<ResultsBrainly>}
+ * @throws {Promise<Error>}
+ */
+export const brainlySearch = (query, options) =>
 	new Promise(async (resolve, reject) => {
 		try {
+			if (!options.lang) {
+				options.lang = 'id';
+			}
+
+			if (!options.count) {
+				options.count = 5;
+			}
+
+			const { count, lang } = options;
+
 			if (count > 30) {
 				resolve({ error: 'Max count is 30' });
 			}

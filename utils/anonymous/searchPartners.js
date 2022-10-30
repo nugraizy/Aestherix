@@ -1,9 +1,17 @@
 /* global botNum */
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 
 import configuration from '../../connect.js';
 import { CheckIntervals, DeleteIntervals, SetIntervals } from '../misc/index.js';
 
+/**
+ * Search new Anonymous session.
+ * @param {string} key string of the key/participant.
+ * @param {number} timer timeout for how long the queue.
+ * @param {Client} client socket connection.
+ * @param {import('@adiwajshing/baileys').AnyMessageContent} message metadata of the message.
+ * @returns {(undefined|boolean)|{partner1: string, partner2: string, messages1: AnyMessageContent, messages2: AnyMessageContent}|{status: string, seconds?: number}}
+ */
 export const search = async (key, timer, client, message) => {
 	const status = Array.from(configuration.anonymous.values()).find((k) => k.partner == null) || undefined;
 
@@ -32,8 +40,8 @@ export const search = async (key, timer, client, message) => {
 	}
 
 	configuration.anonymous.set(key, { partner: null, message });
-	const timers = moment(new Date())
-		.add(parseInt(timer + 2), 'seconds')
+	const timers = dayjs(new Date())
+		.add(timer + 2, 's')
 		.valueOf();
 
 	SetIntervals(

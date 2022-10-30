@@ -3,14 +3,14 @@ import FormData from 'form-data';
 
 import { randomize } from '../../helper/index.js';
 
-const URL_API = 'https://api.deepai.org/api/text2img';
+const URL_API = 'https://api.deepai.org/api/stable-diffusion';
 
 /**
- * Convert strings into an image.
+ * Convert strings into an image v2.
  * @param {string} input descriptive strings.
  * @returns {Promise<string>}
  */
-export const createImage = (input) =>
+export const createImageV2 = (input) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			const KEY = randomize(process.env.DEEP_KEY.split('\n'));

@@ -2,6 +2,12 @@ import FormData from 'form-data';
 
 import { cheerioLOAD, fetchTEXT } from '../../../helper/index.js';
 
+/**
+ * Convert PNG to WEBP.
+ * @param {string} url PNG url to convert to WEBP url.
+ * @returns {Promise<{result: string}>}
+ * @throws {Error}
+ */
 export const apng2webpUrl = (url) =>
 	new Promise(async (resolve) => {
 		try {

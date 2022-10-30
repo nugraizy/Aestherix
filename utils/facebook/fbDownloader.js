@@ -1,5 +1,5 @@
-import Axios from 'axios';
-import moment from 'moment-timezone';
+import axios from 'axios';
+import dayjs from 'dayjs';
 
 import { cheerioLOAD, fetchJSON } from '../../helper/index.js';
 
@@ -55,7 +55,7 @@ const decoding = (...args) => {
 export const fbDl = (url) =>
 	new Promise(async (resolve) => {
 		try {
-			const { data } = await Axios(FB_DL, {
+			const { data } = await axios(FB_DL, {
 				method: 'POST',
 				headers: {
 					'content-type': 'application/x-www-form-urlencoded',
@@ -134,8 +134,8 @@ export const fbDl = (url) =>
 				duration,
 				isVideo: title !== 'Photo',
 				resolution: subname,
-				...(duration ? { duration: moment(duration * 1000).format('DD/MM/YYYY HH:mm:ss') } : {}),
-				datePosted: moment(datePosted * 1000).format('DD/MM/YYYY HH:mm:ss'),
+				...(duration ? { duration: dayjs(duration * 1000).format('DD/MM/YYYY HH:mm:ss') } : {}),
+				datePosted: dayjs(datePosted * 1000).format('DD/MM/YYYY HH:mm:ss'),
 				rawDatePosted: datePosted * 1000,
 			});
 		} finally {

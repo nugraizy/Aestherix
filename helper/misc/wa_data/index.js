@@ -1,2 +1,3 @@
 export * from './objectAssign.js';
-export * from './webMessageInfoStubType.js';
+export * from './utils.js';
+export * from './webMessageInfo.js';

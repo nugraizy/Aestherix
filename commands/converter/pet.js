@@ -1,5 +1,5 @@
 /* global botNum */
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import path from 'path';
 
 import { __dirname } from '../../index.js';
@@ -20,7 +20,7 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'Please mention or send/reply an image to pet');
 		}
 
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		const defaultOptions = {
 			output: 'sticker',
@@ -53,7 +53,7 @@ export default {
 		}
 
 		if (isMediaImage) {
-			if (!stickerAble) {
+			if (!stickerAble || typeQuoted == 'videoMessage') {
 				return await client[botNum].reply(
 					{ from, quoted: message },
 					`Please send/reply a regular media to be petted. Can't convert ${typeQuoted}, only : ${typeSticker

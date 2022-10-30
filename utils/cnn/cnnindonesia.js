@@ -16,6 +16,22 @@ const parse = (arr) => {
 	});
 };
 
+/**
+ * Parsed result definition.
+ * @typedef {Object[]} ResultsCNN
+ * @property {string} ResultsCNN[].title
+ * @property {string} ResultsCNN[].body
+ * @property {string} ResultsCNN[].places
+ * @property {(string|number)} ResultsCNN[].published
+ * @property {string} ResultsCNN[].image
+ * @property {string} ResultsCNN[].link
+ */
+
+/**
+ * Find news from CNN Indonesia.
+ * @param {string} keyword search specific news from CNN.
+ * @returns {Promise<ResultsCNN> & Promise<{error?: string}>}
+ */
 export const cnnindonesia = (keyword) =>
 	new Promise(async (resolve, reject) => {
 		try {

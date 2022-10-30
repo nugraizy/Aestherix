@@ -1,4 +1,4 @@
-import Axios from 'axios';
+import axios from 'axios';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -70,7 +70,7 @@ export class Github {
 	}
 
 	async req(path, params, method, access = false) {
-		const { data } = await Axios({
+		const { data } = await axios({
 			url: this.#urlBase + path,
 			params,
 			method,
@@ -88,7 +88,7 @@ export class Github {
 			return (
 				await Promise.all(
 					input.map((v) =>
-						Axios({
+						axios({
 							url: `${this.#urlBase}/users/${v.login}`,
 							Authorization: `Token ${this.#access}`,
 							method: 'GET',
@@ -98,7 +98,7 @@ export class Github {
 			).map(({ data }) => data);
 		}
 
-		const { data } = await Axios({
+		const { data } = await axios({
 			url: `${this.#urlBase}/users/${input}`,
 			Authorization: `Token ${this.#access}`,
 			method: 'GET',

@@ -2,6 +2,15 @@ import configuration from '../../connect.js';
 import { CheckIntervals } from '../misc/index.js';
 import { search } from './index.js';
 
+/**
+ * Skip current Anonymous session id and find another session.
+ * @param {string} key string of the key/participant.
+ * @param {number} timer timeout for how long the queue.
+ * @param {Client} client socket connection.
+ * @param {import('@adiwajshing/baileys').AnyMessageContent} message metadata of the message.
+ * @param {boolean} isStop
+ * @returns {boolean|{partner1: string, partner2: string}|{status: string, seconds: number}}
+ */
 export const skip = (key, timer, client, message, isStop) => {
 	const status = configuration.anonymous.get(key) || Array.from(configuration.anonymous.values()).find((k) => k.partner == key) || undefined;
 	let results;

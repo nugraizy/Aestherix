@@ -1,5 +1,5 @@
 /* global botNum */
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
 import { color, delay, ERRLOG, INFOLOG, isOne, isURL, numberWithCommas, removeDuplicatesArray } from '../../helper/modules/index.js';
@@ -18,7 +18,7 @@ export default {
 	cooldown: 8,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please provide a URL');
@@ -67,7 +67,7 @@ export default {
 			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Downloading TikTok Media', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`);
 
 			if ('error' in videos) {
-				ERRLOG(`[${color(time, 'cyan')}]`, `${color('Error while downloading TikTok Video', '#ff0000')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Error while downloading TikTok Video', '#ff0000')} for ${color(prettyNumber, '#ff71ce')}`);
 				await client[botNum].reply({ from, quoted: message }, `Error while downloading TikTok Video\n\n${url.split(' ')[0]}`);
 
 				continue;
@@ -89,7 +89,7 @@ export default {
 					await client[botNum].sendMessage(from, { image: { url }, caption: index == 1 ? capt.trim() : '' }, { quoted: message });
 				}
 			} else {
-				const date = moment(moment(videos.published).unix()).format('HH:mm:ss DD/MM/YYYY');
+				const date = dayjs(dayjs(videos.published).unix()).format('HH:mm:ss DD/MM/YYYY');
 				let capt = '``` • TikTok Video```\n\n';
 
 				capt += `Author : ${videos.author}\n`;

@@ -5,7 +5,8 @@ import center from 'center-align';
 import { spawn } from 'child_process';
 import fs from 'fs-extra';
 import meow from 'meow';
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
+import localePlugins from 'dayjs/plugin/timezone.js';
 import mqtt from 'mqtt';
 import cron from 'node-cron';
 import path from 'path';
@@ -16,11 +17,15 @@ import { pathToFileURL } from 'url';
 
 import configuration from './connect.js';
 import { getSpinner } from './helper/misc/spinner/spinners.js';
+import { S_WHATSAPP_NET } from './helper/misc/wa_data/index.js';
 import { color, ERRLOG, INFOLOG, readJSON, romanize, writeJSON } from './helper/modules/functions.js';
 
 let shouldWait = false;
 
 console.clear();
+
+dayjs.extend(localePlugins);
+dayjs.tz.setDefault('Asia/Jakarta');
 
 const { default: makeWASocket, DisconnectReason, makeInMemoryStore, useSingleFileAuthState, DEFAULT_CONNECTION_CONFIG } = baileys;
 const moduleURL = new URL(import.meta.url);
@@ -60,7 +65,7 @@ if (OPTIONS.limitReset) {
 	cron.schedule(
 		'0 0 * * *',
 		async () => {
-			const time = moment().tz('Asia/Jakarta').format('HH:mm:ss DD/MM');
+			const time = dayjs().format('HH:mm:ss DD/MM');
 
 			(await import('./helper/groups/settings/limit.js')).resetAllLimit();
 			INFOLOG(`[${color(time, 'cyan')}]`, `${color("Sukses Reset User's Limit", 'white')}`);
@@ -194,14 +199,6 @@ const start = async () => {
 						log('Unknown reason, Quick reconnecting...');
 					}
 
-					if (configuration.cache.interval.has('blocklist') && configuration.cache.interval.has('setting')) {
-						clearInterval(configuration.cache.interval.get('blocklist'));
-						clearInterval(configuration.cache.interval.get('setting'));
-						configuration.cache.interval.delete('blocklist');
-						configuration.cache.interval.delete('setting');
-						configuration.isFirstConnection = false;
-					}
-
 					reconnectMqttConnection(connectMqtt);
 					await start().catch((e) => log(e));
 				}
@@ -228,6 +225,7 @@ const start = async () => {
 					(await import('./helper/modules/assignFunction.js')).assign(client);
 					successSpinner('Connecting', { text: 'Connected to WASocket' });
 					INFOLOG(color(center(`Bot Version  ${romanize(readJSON('./package.json').version)}\n\n`, stdout.columns), '#9f53ea'));
+
 					connectEvent();
 					clearDBConnection();
 					connectMqtt();
@@ -235,15 +233,6 @@ const start = async () => {
 			}
 		} catch (error) {
 			log(error);
-
-			if (configuration.cache.interval.has('blocklist') && configuration.cache.interval.has('setting')) {
-				clearInterval(configuration.cache.interval.get('blocklist'));
-				clearInterval(configuration.cache.interval.get('setting'));
-				configuration.cache.interval.delete('blocklist');
-				configuration.cache.interval.delete('setting');
-				configuration.isFirstConnection = false;
-			}
-
 			reconnectMqttConnection(connectMqtt);
 			await start().catch((e) => log(e));
 		}
@@ -454,7 +443,7 @@ const start = async () => {
 			const content = `Spotify On ${data.isPlaying ? 'Play' : 'Paused'} :                                                       ${data.artists || ''} - ${data.trackTitle || ''}  ( ${
 				data.progressMs?.toTime() || '00'
 			} - ${data?.durationMs?.toTime() || '00'} )`;
-			const myStatus = await client[botNum].fetchStatus(`${botNum.split(':')[0]}@s.whatsapp.net`);
+			const myStatus = await client[botNum].fetchStatus(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`);
 
 			if (myStatus.status == content) {
 				return;
@@ -462,7 +451,7 @@ const start = async () => {
 
 			await client[botNum].query({
 				tag: 'iq',
-				attrs: { to: '@s.whatsapp.net', type: 'set', xmlns: 'status' },
+				attrs: { to: S_WHATSAPP_NET, type: 'set', xmlns: 'status' },
 				content: [{ tag: 'status', attrs: {}, content: Buffer.from(content, 'utf-8') }],
 			});
 		});
@@ -546,7 +535,7 @@ async function watchFile(module) {
 	const modules = process.platform == 'win32' ? decodeURI(module.pathname.slice(1)) : decodeURI(module.pathname);
 
 	fs.watchFile(module, async (event, filename) => {
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (fs.existsSync(module)) {
 			INFOLOG(`[${color(time, 'cyan')}]`, color(`${modules?.split('/')?.reverse()[0]} has been changed`, '#9f53ea'));
@@ -560,7 +549,7 @@ async function watchFile(module) {
 async function reloadModule(module, isNewFile, newFilePath) {
 	if (isNewFile) {
 		try {
-			const time = moment().format('HH:mm:ss DD/MM');
+			const time = dayjs().format('HH:mm:ss DD/MM');
 			const commands = await new Promise(async (resolve) => {
 				const files = (
 					await Promise.all(
@@ -607,7 +596,7 @@ async function reloadModule(module, isNewFile, newFilePath) {
 				configuration.commandsPath.splice(configuration.commandsPath.indexOf(newFilePath), 1);
 				configuration.cmds.commands.delete(Array.from(configuration.cmds.commands.values()).find((v) => v.pathname == newFilePath).name);
 				fs.unwatchFile(module);
-				return ERRLOG(`[${color(time, 'cyan')}]`, color(`${newFilePath.split('/').reverse()[0]} is deleted`, 'red'));
+				return ERRLOG(`[${color(time, 'cyan')}]`, color(`⚠️ ${newFilePath.split('/').reverse()[0]} is deleted`, 'red'));
 			} finally {
 				INFOLOG(`[${color(time, 'cyan')}]`, color(`${newFilePath.split('/').reverse()[0]} has been renamed to ${renamedCommand.split('/').reverse()[0]}`, '#9f53ea'));
 			}

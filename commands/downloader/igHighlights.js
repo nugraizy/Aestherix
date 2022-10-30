@@ -1,5 +1,5 @@
 /* global botNum */
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
 import { color, ERRLOG, INFOLOG, isEmpty, isOne, isSame, isURL, numberWithCommas } from '../../helper/modules/index.js';
@@ -15,7 +15,7 @@ export default {
 	limit: 9,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please specify a username');
@@ -37,12 +37,12 @@ export default {
 
 				if ('error' in highlights) {
 					await client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram highlights\n\n${highlights.error}\n${username}`);
-					ERRLOG(`[${color(time, 'cyan')}]`, `${color('Failed to Download Instagram highlights', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+					ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Failed to Download Instagram highlights', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 					continue;
 				} else if (isEmpty(highlights.highlights)) {
 					await client[botNum].reply({ from, quoted: message }, `No highlights found for ${username}`);
-					ERRLOG(`[${color(time, 'cyan')}]`, `${color('No highlights found for', 'cyan')} ${color(username, '#ff71ce')}`);
+					ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('No highlights found for', 'cyan')} ${color(username, '#ff71ce')}`);
 
 					continue;
 				}

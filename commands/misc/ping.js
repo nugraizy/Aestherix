@@ -1,8 +1,4 @@
 /* global botNum */
-import moment from 'moment-timezone';
-
-const calculate = (t, n) => moment.duration(n - moment(t * 1000)).asSeconds();
-
 export default {
 	name: 'ping',
 	description: 'Ping the bot or Show bot latency',
@@ -13,6 +9,8 @@ export default {
 	limit: 0,
 	status: 'enable',
 	async run({ from, message }, client) {
-		client[botNum].sendMessage(from, { text: `Pong! ${calculate(message.messageTimestamp, Date.now())} seconds` }, { quoted: message });
+		const start = performance.now();
+
+		client[botNum].sendMessage(from, { text: `Pong! ${(performance.now() - start).toFixed(3)} seconds` }, { quoted: message });
 	},
 };

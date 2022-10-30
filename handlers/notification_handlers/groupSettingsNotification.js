@@ -26,22 +26,20 @@ const EVENT_TYPE = {
 export default {
 	async handler(client, message, store) {
 		if ('action' in message && message.action == 'description') {
-			message.messageStubType = EVENT_TYPE['DESCRIPTION'];
+			message.messageStubType = EVENT_TYPE.DESCRIPTION;
 		}
 
 		message = await reassign(JSON.parse(JSON.stringify(message)), client, store, false);
 
-		if (['GROUP_CHANGE_SUBJECT', 'GROUP_CHANGE_DESCRIPTION'].includes(message.messageStubType)) {
-			if (configuration.cache.metadata.has(message.from)) {
-				const groupMetadata = (await client[botNum].groupMetadata(message.from)) || {};
-				const partc = groupMetadata.participants;
+		if (configuration.cache.metadata.has(message.from)) {
+			const cache = configuration.cache.metadata.get(message.from);
 
-				groupMetadata.rawParticipants = partc || [];
-				groupMetadata.adminGroups = partc?.filter((v) => v.admin !== null)?.map((v) => v.id);
-				groupMetadata.participantsGroups = partc?.map((v) => v.id);
-				groupMetadata.ownerGroups = partc?.find((v) => v.admin == 'superadmin')?.id || null;
-
-				configuration.cache.metadata.set(message.from, groupMetadata);
+			if (['GROUP_CHANGE_SUBJECT'].includes(message.messageStubType)) {
+				cache.subject = message.messageStubParameters[0];
+				cache.subjectOwner = message.participant;
+				cache.subjectTime = parseInt(message.messageTimestamp);
+			} else if (['GROUP_CHANGE_DESCRIPTION'].includes(message.messageStubType)) {
+				cache.desc = new Buffer.from(message.content, 'utf-8');
 			}
 		}
 
@@ -50,22 +48,22 @@ export default {
 
 			if (message.action == 'set') {
 				message.messageStubType = 'GROUP_CHANGE_ICON';
-				status = EVENT_UPDATE['ICON'];
+				status = EVENT_UPDATE.ICON;
 			} else if (message.action == 'delete') {
 				message.messageStubType = 'GROUP_CHANGE_ICON';
-				status = EVENT_UPDATE['DEL_ICON'];
+				status = EVENT_UPDATE.DEL_ICON;
 			} else if (message.action == 'description' && message.content !== '') {
 				message.messageStubType = 'GROUP_CHANGE_DESCRIPTION';
 				status =
 					message[message.from].groupDescription !== undefined
-						? `${EVENT_UPDATE['DESCRIPTION']} from ${message[message.from].groupDescription} to ${message.content}`
-						: `${EVENT_UPDATE['DESCRIPTION']} to ${message.content}`;
+						? `${EVENT_UPDATE.DESCRIPTION} from ${message[message.from].groupDescription} to ${message.content}`
+						: `${EVENT_UPDATE.DESCRIPTION} to ${message.content}`;
 			} else if (message.action == 'description' && message.content == '') {
 				message.messageStubType = 'GROUP_CHANGE_DESCRIPTION';
-				status = `${EVENT_UPDATE['DEL_DESCRIPTION']} from ${message[message.from].groupDescription}`;
+				status = `${EVENT_UPDATE.DEL_DESCRIPTION} from ${message[message.from].groupDescription}`;
 			} else if (message.action == 'invite') {
 				message.messageStubType = 'GROUP_INVITE_CHANGED';
-				status = EVENT_UPDATE['REVOKE_INVITE'];
+				status = EVENT_UPDATE.REVOKE_INVITE;
 			} else {
 				const mode = message.messageStubType.split('_').reverse()[0];
 

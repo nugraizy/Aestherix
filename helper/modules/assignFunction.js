@@ -1,6 +1,9 @@
 /* global botNum, store */
 import { downloadContentFromMessage, downloadMediaMessage as downloadMessage, generateWAMessage, generateWAMessageFromContent, toBuffer } from '@adiwajshing/baileys';
-import Axios from 'axios';
+
+const { AnyMessageContent, AnyMediaMessageContent, ButtonReplyInfo, WAMessageKey, MinimalMessage, WAProto } = (await import('@adiwajshing/baileys')).default;
+
+import axios from 'axios';
 import { fileTypeFromBuffer } from 'file-type';
 import ffmpeg from 'fluent-ffmpeg';
 import webpmux from 'node-webpmux';
@@ -13,7 +16,23 @@ import { reassign } from './reassignMessagesObject.js';
 
 const { readFile, unlink, writeFile } = (await import('fs-extra')).default;
 
+/**
+ * Assign functions for easiest use.
+ * @param {object} client SocketClient.
+ * @returns
+ */
 export const assign = (client) => {
+	/**
+	 * @typedef {'imageMessage' | 'videoMessage' | 'audioMessage' | 'documentMessage' |'stickerMessage' | 'locationMessage'} MediaType
+	 */
+
+	/**
+	 * Prepare media message to send to WhatsApp.
+	 * @param {(string|ArrayBufferLike)} media files media path, url, or arrayBuffers.
+	 * @param {MediaType} type media type for messages.
+	 * @param {MessageGenerationOptionsFromContent & {fileName?: string, mimetype?: string}} opts
+	 * @returns {Promise<MinimalMessage & {message: AnyMediaMessageContent}>}
+	 */
 	const prepareMedia = async (media, type, opts = {}) => {
 		switch (type) {
 			case 'imageMessage': {
@@ -40,7 +59,15 @@ export const assign = (client) => {
 			}
 		}
 	};
-
+	/**
+	 * @typedef {{id?: string, packname?: string, author?: string}} ExifMetadata
+	 */
+	/**
+	 * Apply exif to a media files.
+	 * @param {ArrayBufferLike} buffer media buffer to be applied exif metadata.
+	 * @param {ExifMetadata} metadata exif metadata info.
+	 * @returns {Promise<ArrayBufferLike>}
+	 */
 	const applyExif = async (buffer, metadata) => {
 		const data = {};
 
@@ -72,13 +99,31 @@ export const assign = (client) => {
 	client[botNum] = {
 		...client[botNum],
 		applyExif,
+		/**
+		 * Reply people message.
+		 * @param {{from: string, quoted?: AnyMediaMessageContent}} param0
+		 * @param {string} text texts to be sent.
+		 * @returns {MinimalMessage & {message: {extendedTextMessage: WAProto.Message.ExtendedTextMessage}}}
+		 */
 		reply: async ({ from, quoted }, text) => {
 			return await client[botNum].sendMessage(from, { text }, { quoted });
 		},
+		/**
+		 *
+		 * @typedef {'imageMessage' | 'videoMessage' | 'stickerAnimated' | undefined} StickerType
+		 */
+		/**
+		 * Prepare sticker to be sent.
+		 * @param {(ArrayBufferLike|string)} media path or arrayBuffers.
+		 * @param {string} filename temporary filename to be saved.
+		 * @param {StickerType} type media type.
+		 * @param {ExifMetadata} options
+		 * @returns {Promise<ArrayBufferLike>}
+		 */
 		prepareSticker: async (media, filename, type, options) => {
 			const isMediaURL = Buffer.isBuffer(media) ? false : isURL(media) ? true : false;
 
-			media = isMediaURL ? (await Axios.get(media, { responseType: 'arraybuffer', headers: { DNT: 1, 'Upgrade-Insecure-Request': 1 } })).data : media;
+			media = isMediaURL ? (await axios.get(media, { responseType: 'arraybuffer', headers: { DNT: 1, 'Upgrade-Insecure-Request': 1 } })).data : media;
 
 			const bufferType =
 				type == 'imageMessage'
@@ -123,6 +168,13 @@ export const assign = (client) => {
 
 			return await applyExif(media, options);
 		},
+		/**
+		 * Download and save WhatsApp media message to local.
+		 * @param {AnyMediaMessageContent} media media message content.
+		 * @param {string} path filepath to be saved.
+		 * @param {string} typeQuoted
+		 * @returns {Promis<string>}
+		 */
 		downloadAndSaveMediaMessage: async (media, path, typeQuoted) => {
 			const msg = await downloadContentFromMessage(media, typeQuoted.replace(/Message/g, ''));
 			const buffer = await toBuffer(msg);
@@ -131,15 +183,30 @@ export const assign = (client) => {
 
 			return path;
 		},
+		/**
+		 * Download WhatsApp media message to buffer.
+		 * @param {AnyMediaMessageContent} media media message content.
+		 * @param {'stream' | 'buffer'} typeDownloadable
+		 * @returns {Promise<ArrayBufferLike>}
+		 */
 		downloadMediaMessage: async (media, typeDownloadable = 'buffer') => {
 			return await downloadMessage(media, typeDownloadable);
 		},
-		buttonText: async (dari, contentText, footerText, buttons, opts = {}) => {
+		/**
+		 *
+		 * @param {string} to destination the message to be sent.
+		 * @param {string} contentText header of content.
+		 * @param {string} footerText footer of content.
+		 * @param {ButtonReplyInfo[]} buttons
+		 * @param {} opts
+		 * @returns
+		 */
+		buttonText: async (to, contentText, footerText, buttons, opts = {}) => {
 			if (buttons.length == 0) {
 				return new Error('Buttons is empty');
 			}
 
-			return await client[botNum].sendMessage(dari, { text: contentText, footer: footerText, buttons, headerType: 1, contextInfo: opts.contextInfo });
+			return await client[botNum].sendMessage(to, { text: contentText, footer: footerText, buttons, headerType: 1, contextInfo: opts.contextInfo });
 		},
 		prepareMedia,
 		buttonDocument: async (dari, contentText, footerText, buttons, media, opts = {}) => {

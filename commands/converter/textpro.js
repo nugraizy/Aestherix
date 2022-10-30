@@ -1,5 +1,5 @@
 /* global botNum */
-import Axios from 'axios';
+import axios from 'axios';
 import fs from 'fs';
 import imageSize from 'image-size';
 import * as jsSplit from 'js-split';
@@ -143,7 +143,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 				continue;
 			}
 
-			const { data } = await Axios.get(result.dl, {
+			const { data } = await axios.get(result.dl, {
 				responseType: 'arraybuffer',
 			});
 

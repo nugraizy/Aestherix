@@ -20,17 +20,39 @@ export default {
 	async handler(client, message, store) {
 		message = await reassign(JSON.parse(JSON.stringify(message)), client, store, false);
 
-		if (Object.keys(EVENT_UPDATE).includes(message.messageStubType)) {
-			if (configuration.cache.metadata.has(message.from)) {
-				const groupMetadata = (await client[botNum].groupMetadata(message.from)) || {};
-				const partc = groupMetadata.participants;
+		if (Object.keys(EVENT_UPDATE).includes(message.messageStubType) && configuration.cache.metadata.has(message.from)) {
+			const cache = configuration.cache.metadata.get(message.from);
+			const index = (arr, id, obj) => arr.findIndex((v) => (obj ? v.id === id : v === id));
 
-				groupMetadata.rawParticipants = partc || [];
-				groupMetadata.adminGroups = partc?.filter((v) => v.admin !== null)?.map((v) => v.id);
-				groupMetadata.participantsGroups = partc?.map((v) => v.id);
-				groupMetadata.ownerGroups = partc?.find((v) => v.admin == 'superadmin')?.id || null;
+			if ([EVENT_UPDATE.GROUP_PARTICIPANT_ADD, EVENT_UPDATE.GROUP_PARTICIPANT_INVITE].includes(message.messageStubParameters)) {
+				for (const id of message.messageStubParameters) {
+					cache.participants.push({
+						id,
+						admin: null,
+					});
+					cache.rawParticipants.push({ id, admin: null });
+					cache.participantsGroups.push(id);
+				}
+			} else if ([EVENT_UPDATE.GROUP_PARTICIPANT_LEAVE, EVENT_UPDATE.GROUP_PARTICIPANT_REMOVE].includes(message.messageStubType)) {
+				for (const id of message.messageStubParameters) {
+					if (cache.adminGroups.includes(id)) {
+						cache.adminGroups.splice(index(cache.adminGroups, id, false), 1);
+					}
 
-				configuration.cache.metadata.set(message.from, groupMetadata);
+					cache.participants.splice(index(cache.participants, id, true), 1);
+					cache.rawParticipants.splice(index(cache.rawParticipants, id, true), 1);
+					cache.participantsGroups.splice(index(cache.participantsGroups, id, false), 1);
+				}
+			} else if (EVENT_UPDATE.GROUP_PARTICIPANT_DEMOTE.includes(message.messageStubType)) {
+				for (const id of message.messageStubParameters) {
+					cache.participants[index(cache.participants, id, true)].admin = null;
+					cache.rawParticipants[index(cache.rawParticipants, id, true)].admin = null;
+				}
+			} else if (EVENT_UPDATE.GROUP_PARTICIPANT_PROMOTE.includes(message.messageStubType)) {
+				for (const id of message.messageStubParameters) {
+					cache.participants[index(cache.participants, id, true)].admin = 'admin';
+					cache.rawParticipants[index(cache.rawParticipants, id, true)].admin = 'admin';
+				}
 			}
 		}
 

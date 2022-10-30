@@ -39,6 +39,10 @@ export default {
 			);
 		}
 
+		if (!query) {
+			return client[botNum].reply({ from, quoted: message }, 'Please provide queries');
+		}
+
 		const data = await cnnindonesia(query);
 
 		if ('error' in data) {

@@ -1,5 +1,5 @@
 /*  global log */
-import Axios from 'axios';
+import axios from 'axios';
 
 import { cheerioLOAD } from '../../helper/index.js';
 
@@ -9,7 +9,7 @@ export const wpList = (url) =>
 			switch (url) {
 				case url.includes('batch'):
 					{
-						const { data } = await Axios.get(url);
+						const { data } = await axios.get(url);
 						const $ = cheerioLOAD(data);
 						const result = $('div#download > ul > li')
 							.get()
@@ -25,7 +25,7 @@ export const wpList = (url) =>
 
 					break;
 				default: {
-					const { data } = await Axios.get(url);
+					const { data } = await axios.get(url);
 					const $ = cheerioLOAD(data);
 					const result = $('.series-episodelist > li')
 						.get()
@@ -55,7 +55,7 @@ export const wpList = (url) =>
 export const wpSearch = (text) =>
 	new Promise(async (resolve) => {
 		try {
-			const { data } = await Axios.get(`https://waifuplay.my.id/?s=${text}`);
+			const { data } = await axios.get(`https://waifuplay.my.id/?s=${text}`);
 			const $ = cheerioLOAD(data);
 
 			if ($('div.pagenon > h2').text() == 'No Post Found') {
@@ -90,7 +90,7 @@ export const wpSearch = (text) =>
 export const wpDownload = (url) =>
 	new Promise(async (resolve) => {
 		try {
-			const { data } = await Axios.get(url);
+			const { data } = await axios.get(url);
 			const $ = cheerioLOAD(data);
 			const result = $('.dlbox2 > a')
 				.get()
@@ -111,7 +111,7 @@ export const wpDownload = (url) =>
 export const wpLatest = () =>
 	new Promise(async (resolve) => {
 		try {
-			const { data } = await Axios.get('https://waifuplay.my.id/');
+			const { data } = await axios.get('https://waifuplay.my.id/');
 			const $ = cheerioLOAD(data);
 
 			resolve({

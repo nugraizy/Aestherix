@@ -1,5 +1,5 @@
 /* global log */
-import Axios from 'axios';
+import axios from 'axios';
 import cheerio from 'cheerio';
 import { fileTypeFromBuffer } from 'file-type';
 import FormData from 'form-data';
@@ -10,26 +10,47 @@ import ms from 'parse-ms';
 
 import configuration from '../../connect.js';
 
-export const fetchTEXT = async (_, __) => {
-	return await (await fetch(_, __)).text();
-};
+/**
+ * Fetches texts
+ * @param {string} url
+ * @param {RequestInit} options node-fetch options
+ * @returns {Promise<string>}
+ */
+export const fetchTEXT = async (url, options) => await (await fetch(url, options)).text();
 
-export const fetchJSON = async (_, __) => {
-	return await (await fetch(_, __)).json();
-};
+/**
+ * Fetches objects
+ * @param {string} url
+ * @param {RequestInit} options node-fetch options
+ * @returns {Promise<object>}
+ */
+export const fetchJSON = async (url, options) => await (await fetch(url, options)).json();
 
-export const fetchBUFFER = async (_, __) => {
-	return await (await fetch(_, __)).arrayBuffer();
-};
+/**
+ * Fetches buffers
+ * @param {string} url
+ * @param {RequestInit} options node-fetch options
+ * @returns {Promise<ArrayBufferLike>}
+ */
+export const fetchBUFFER = async (url, options) => await (await fetch(url, options)).arrayBuffer();
 
-export const cheerioLOAD = (html) => {
-	return cheerio.load(html);
-};
+/**
+ * Load HTML using cheerio
+ * @param {string} html
+ * @returns {import('cheerio').CheerioAPI}
+ */
+export const cheerioLOAD = (html) => cheerio.load(html);
 
+/**
+ * Douwnload files using axios
+ * @param {string} url direct url download.
+ * @param {string} path local filepath where the file will be save.
+ * @returns {Promise<string>}
+ */
 export const download = async (url, path) => {
 	await new Promise(async (resolve, reject) => {
 		try {
-			const { data } = await Axios({
+			const { data } = await axios({
 				url,
 				method: 'GET',
 				responseType: 'arraybuffer',
@@ -45,8 +66,18 @@ export const download = async (url, path) => {
 	return path;
 };
 
+/**
+ * Clamp Floats utility
+ * @param {number} value
+ * @returns {(value | 1 | -1)}
+ */
 export const clampFloat = (value) => (value > 1 ? 1 : value < -1 ? -1 : value);
 
+/**
+ * Distord FX utility
+ * @param {number} value
+ * @returns {(0 | 1 | -1 )}
+ */
 export const distordFX = (value) => (value > 0 ? 1 : value < 0 ? -1 : 0);
 
 export const clamp = (value, min, max) => Math.min(Math.max(min, value), max);
@@ -106,6 +137,10 @@ String.prototype.toReadAble = function () {
 	}
 
 	return `${hours}:${minutes}:${seconds}`;
+};
+
+String.prototype.seperateCamel = function () {
+	return this.replace(/[A-Z]/g, (_) => ` ${_}`);
 };
 
 String.prototype.capitalize = function () {
@@ -664,7 +699,7 @@ export const uploadToTelegraph = async (file) => {
 		const form = new FormData();
 
 		form.append('file', file, `file.${ext}`);
-		const { data } = await Axios.post('https://telegra.ph/upload', form, { headers: form.getHeaders() });
+		const { data } = await axios.post('https://telegra.ph/upload', form, { headers: form.getHeaders() });
 
 		return `https://telegra.ph${data[0].src}`;
 	} catch (error) {

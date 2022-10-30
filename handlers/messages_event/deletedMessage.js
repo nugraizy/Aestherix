@@ -1,5 +1,5 @@
 /* global botNum, log */
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import path from 'path';
 
 import configuration from '../../connect.js';
@@ -124,7 +124,7 @@ export default {
 							const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
 Name : ${pushname}
 Type : ${type}
-Time : ${moment.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
+Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
 Message : ${body ? body : 'Unknown'}${quotedMessage}
 `.trim();
 
@@ -145,7 +145,7 @@ Message : ${body ? body : 'Unknown'}${quotedMessage}
 							const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
 Name : ${pushname}			
 Type : ${type}
-Time : ${moment.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
+Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
 Size : ${fileSize}${quotedMessage}
 `.trim();
 
@@ -164,7 +164,7 @@ Size : ${fileSize}${quotedMessage}
 							const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
 Name : ${pushname}			
 Type : ${type}
-Time : ${moment.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
+Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
 Size : ${fileSize}
 Caption : ${body ? body : 'Unknown'}${quotedMessage}
 `.trim();
@@ -185,7 +185,7 @@ Caption : ${body ? body : 'Unknown'}${quotedMessage}
 							const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
 Name : ${pushname}			
 Type : ${type}
-Time : ${moment.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
+Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
 Size : ${fileSize}
 Caption : ${body ? body : 'Unknown'}${quotedMessage}
 `.trim();
@@ -206,7 +206,7 @@ Caption : ${body ? body : 'Unknown'}${quotedMessage}
 							const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
 Name : ${pushname}			
 Type : ${type}
-Time : ${moment.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
+Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
 Audio Type : ${extractMediaData.ptt ? 'Voice Note' : 'Audio File'}
 Mimetype : ${extractMediaData.mimetype}
 Size : ${fileSize}${quotedMessage}${quotedMessage}
@@ -222,7 +222,7 @@ Size : ${fileSize}${quotedMessage}${quotedMessage}
 							const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
 Name : ${pushname}			
 Type : ${type}
-Time : ${moment.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
+Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
 Displayname : ${extractMediaData.displayName}${quotedMessage}
 `.trim();
 
@@ -237,7 +237,7 @@ Displayname : ${extractMediaData.displayName}${quotedMessage}
 							const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
 Name : ${pushname}
 Type : ${type}
-Time : ${moment.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
+Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
 Displayname :
 ${extractMediaData.contacts.map((v, i) => `${i + 1}. ${v.displayName}`).join('\n')}${quotedMessage}
 `.trim();
@@ -254,7 +254,7 @@ ${extractMediaData.contacts.map((v, i) => `${i + 1}. ${v.displayName}`).join('\n
 							const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
 Name : ${pushname}			
 Type : ${type}
-Time : ${moment.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
+Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
 Lat : ${extractMediaData.degreesLatitude}
 Long : ${extractMediaData.degreesLongitude}${quotedMessage}
 `.trim();

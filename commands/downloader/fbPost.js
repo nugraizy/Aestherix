@@ -1,6 +1,6 @@
 /* global botNum */
 import { delay } from '../../helper/index.js';
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
 import { color, ERRLOG, fetchBUFFER, INFOLOG, isOne, isURL } from '../../helper/modules/index.js';
@@ -18,7 +18,7 @@ export default {
 	limit: 6,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please provide a URL');
@@ -51,7 +51,7 @@ export default {
 
 			if ('error' in post) {
 				await client[botNum].reply({ from, quoted: message }, `Failed while downloading Facebook post\n\n${post.error}\n${url}`);
-				ERRLOG(`[${color(time, 'cyan')}]`, `${color('Failed to Download Facebook Post', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Failed to Download Facebook Post', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 
 				continue;
 			}

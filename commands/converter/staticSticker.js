@@ -1,5 +1,5 @@
 /* global botNum */
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import rgbcolor from 'rgb-color';
 
 import { ttp } from '../../helper/canvas/index.js';
@@ -19,7 +19,7 @@ export default {
 			query = 'Mana text nya?';
 		}
 
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		let colors = [];
 		const parseOptions = query.includes('--') ? query.split('--') : query;

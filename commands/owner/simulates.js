@@ -1,5 +1,5 @@
 /* global botNum, log */
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 
 import configuration from '../../connect.js';
 import { getRuntime } from '../../helper/modules/index.js';
@@ -15,7 +15,7 @@ const WAPresence = {
 const events = async (client, containers, presence) => {
 	try {
 		if (presence === 'bio') {
-			const time = moment().format('HH:mm:ss DD/MM');
+			const time = dayjs().format('HH:mm:ss DD/MM');
 			const uptime = getRuntime(process.uptime());
 			const bio = `Made by nanda | Void bot info : UPTIME : ${uptime} | TIME : ${time} | Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 

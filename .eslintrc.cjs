@@ -11,6 +11,7 @@ module.exports = {
 	},
 	rules: {
 		'no-unsafe-optional-chaining': 0,
+		'no-unused-vars': 1,
 		'no-use-before-define': 2,
 		'no-async-promise-executor': 0,
 		'no-mixed-spaces-and-tabs': 2,

@@ -1,5 +1,5 @@
 /* global botNum */
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 
 import configuration from '../../connect.js';
 import { cheerioLOAD, fetchJSON, fetchTEXT, randomize } from '../../helper/modules/index.js';
@@ -101,10 +101,10 @@ export class SambungKata {
 	async start(player2, client) {
 		this.player2 = player2;
 		const data = await this.randomWord();
-		const remainings = moment(new Date()).add(parseInt(20), 'seconds').valueOf();
+		const remainings = dayjs(new Date()).add(20, 's').valueOf();
 
-		SetIntervals(configuration.intervals['word'], this.group, 20, (clients = client, group = this.group, remaining = remainings) => {
-			const data = configuration.intervals['word'].get(group);
+		SetIntervals(configuration.intervals.word, this.group, 20, (clients = client, group = this.group, remaining = remainings) => {
+			const data = configuration.intervals.word.get(group);
 
 			if (data === undefined) {
 				return;
@@ -122,11 +122,11 @@ export class SambungKata {
 			}
 
 			if (timer <= 0) {
-				DeleteIntervals(data, configuration.intervals['word'], group);
+				DeleteIntervals(data, configuration.intervals.word, group);
 				const winner = dataGame.changeTurn();
 
 				clients[botNum].sendMessage(group, { text: `Time's up! The winner is : @${winner.split('@')[0]}`, mentions: [winner] });
-				configuration.games['word'].delete(configuration.games['word'].get(group));
+				configuration.games.word.delete(configuration.games.word.get(group));
 			}
 		});
 		return { ...this, ...data };
@@ -206,7 +206,7 @@ export class SambungKata {
 	}
 
 	async guess(word, guesser, group, client) {
-		if (!configuration.intervals['word'].get(group) && !configuration.games['word'].get(group)) {
+		if (!configuration.intervals.word.get(group) && !configuration.games.word.get(group)) {
 			return false;
 		}
 
@@ -227,11 +227,11 @@ export class SambungKata {
 		this.changeTurn();
 		this.words = data.value;
 		this.clue = data.clue;
-		DeleteIntervals(configuration.intervals['word'].get(this.group), configuration.intervals['word'], this.group);
-		const remainings = moment(new Date()).add(parseInt(20), 'seconds').valueOf();
+		DeleteIntervals(configuration.intervals.word.get(this.group), configuration.intervals.word, this.group);
+		const remainings = dayjs(new Date()).add(20, 's').valueOf();
 
-		SetIntervals(configuration.intervals['word'], this.group, 20, (clients = client, group = this.group, remaining = remainings) => {
-			const data = configuration.intervals['word'].get(group);
+		SetIntervals(configuration.intervals.word, this.group, 20, (clients = client, group = this.group, remaining = remainings) => {
+			const data = configuration.intervals.word.get(group);
 
 			if (data === undefined) {
 				return;
@@ -249,11 +249,11 @@ export class SambungKata {
 			}
 
 			if (timer <= 0) {
-				DeleteIntervals(data, configuration.intervals['word'], group);
+				DeleteIntervals(data, configuration.intervals.word, group);
 				const winner = dataGame.changeTurn();
 
 				clients[botNum].sendMessage(group, { text: `Time's up! The winner is : @${winner.split('@')[0]}`, mentions: [winner] });
-				configuration.games['word'].delete(group);
+				configuration.games.word.delete(group);
 			}
 		});
 		return this;

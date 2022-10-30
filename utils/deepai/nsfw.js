@@ -1,4 +1,4 @@
-import Axios from 'axios';
+import axios from 'axios';
 import FormData from 'form-data';
 import fs from 'fs';
 
@@ -13,7 +13,7 @@ export const isNsfw = (input, filename) =>
 			input = fs.createReadStream(filename);
 			const KEY = randomize(process.env.DEEP_KEY.split('\n'));
 			const form = new FormData();
-			const axiosInstance = Axios.create({ headers: { 'client-library': 'deepai-js-client' } });
+			const axiosInstance = axios.create({ headers: { 'client-library': 'deepai-js-client' } });
 
 			axiosInstance.defaults.headers.common['api-key'] = KEY;
 			const reqOptions = {

@@ -1,7 +1,7 @@
 /* global log */
-import Axios from 'axios';
+import axios from 'axios';
 import crypto from 'crypto';
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 
 import { color, INFOLOG } from '../../helper/modules/index.js';
 
@@ -22,13 +22,13 @@ export const getCookie = (username, password) =>
 				return;
 			}
 
-			const time = moment().format('HH:mm:ss DD/MM');
+			const time = dayjs().format('HH:mm:ss DD/MM');
 
 			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Getting Instagram Cookies.', '#01cdfe')}`);
-			const REQUESTED_HEADERS = await Axios.get(URL_LOGIN_GET);
+			const REQUESTED_HEADERS = await axios.get(URL_LOGIN_GET);
 
 			LOGIN_HEADERS.Cookie = REQUESTED_HEADERS.headers['set-cookie'].map((x) => x.match(/(.*?=.*?);/)?.[1])?.join('; ');
-			const LOGGED_IN_HEADERS = await Axios.post(URL_LOGIN_POST, `username=${username}&password=${password}&device_id=${crypto.randomUUID()}&login_attempt_count=0`, {
+			const LOGGED_IN_HEADERS = await axios.post(URL_LOGIN_POST, `username=${username}&password=${password}&device_id=${crypto.randomUUID()}&login_attempt_count=0`, {
 				headers: LOGIN_HEADERS,
 			});
 			const FINAL_COOKIE = LOGGED_IN_HEADERS.headers['set-cookie'].map((x) => x.match(/(.*?=.*?);/)?.[1])?.join('; ');

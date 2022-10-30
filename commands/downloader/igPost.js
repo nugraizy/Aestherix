@@ -1,5 +1,5 @@
 /* global botNum */
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
 import { color, delay, ERRLOG, INFOLOG, isOne, isURL, numberWithCommas, parseCode } from '../../helper/modules/index.js';
@@ -17,7 +17,7 @@ export default {
 	limit: 9,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please specify a url');
@@ -53,7 +53,7 @@ export default {
 
 				if ('error' in post) {
 					await client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram post\n\n${post.error}\n${url}`);
-					ERRLOG(`[${color(time, 'cyan')}]`, `${color('Failed to Download Instagram Post', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
+					ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Failed to Download Instagram Post', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 
 					continue;
 				}
@@ -64,7 +64,7 @@ export default {
 				capt += `Fullname : ${post.fullName}\n`;
 				capt += `Privacy : ${post.isPrivate ? 'Private' : 'Public'}\n`;
 				capt += `Verified : ${post.isVerified ? 'Verified' : 'Not Verified'}\n`;
-				capt += `Published : ${moment(post.takenAt * 1000).format('HH:mm:ss DD/MM/YYYY')}\n`;
+				capt += `Published : ${dayjs(post.takenAt * 1000).format('HH:mm:ss DD/MM/YYYY')}\n`;
 				capt += `Tot. Comment : ${numberWithCommas(post.commentCount)}\n`;
 				capt += `Tot. Like : ${numberWithCommas(post.likeCount)}\n`;
 
@@ -95,7 +95,7 @@ export default {
 
 				INFOLOG(`[${color(time, 'cyan')}]`, `${color('Downloaded Instagram Post', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`);
 			} else {
-				ERRLOG(`[${color(time, 'cyan')}]`, `${color('Failed to Parse Instagram Post URL', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Failed to Parse Instagram Post URL', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 			}
 		}
 	},

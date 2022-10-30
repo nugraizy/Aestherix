@@ -1,6 +1,6 @@
 /* global botNum */
 import fs from 'fs';
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import path from 'path';
 
 import { __dirname } from '../../index.js';
@@ -22,7 +22,7 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'Please send/reply an audio/video to remove voice');
 		}
 
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		INFOLOG(`[${color(time, 'cyan')}]`, `${color('Removing Sound', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`);
 

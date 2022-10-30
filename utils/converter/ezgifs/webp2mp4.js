@@ -3,6 +3,12 @@ import fs from 'fs';
 
 import { cheerioLOAD, fetchTEXT } from '../../../helper/index.js';
 
+/**
+ * Convert WEBP to MP4.
+ * @param {string} path input WEBP path to convert to MP4.
+ * @returns {Promise<{result: string}>}
+ * @throws {Error}
+ */
 export const webp2mp4File = async (path) =>
 	new Promise(async (resolve, reject) => {
 		try {

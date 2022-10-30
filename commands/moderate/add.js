@@ -1,13 +1,13 @@
 /* global botNum */
 import PhoneNumber from 'awesome-phonenumber';
 
-import { removeDuplicatesArray } from '../../helper/modules/index.js';
+import { removeDuplicatesArray, S_WHATSAPP_NET } from '../../helper/index.js';
 
 Array.prototype.parser = function () {
 	return (
 		removeDuplicatesArray(this)
 			.filter((v) => PhoneNumber(`+${v.replace(/[A-Za-z-@\s+s.whatsapp.net]/g, '')}`).isValid())
-			?.map((v) => `${v.replace(/[\s+-]/g, '')}@s.whatsapp.net`.trim()) || []
+			?.map((v) => `${v.replace(/[\s+-]/g, '')}${S_WHATSAPP_NET}`.trim()) || []
 	);
 };
 
@@ -27,20 +27,20 @@ export default {
 		}
 
 		if (!query && !bodyQuoted) {
-			return await client[botNum].reply({ from, quoted: message }, "Please reply people message or reply people's ");
+			return await client[botNum].reply({ from, quoted: message }, 'Please reply people message or reply people');
 		}
 
 		if (!isBotAdmin) {
 			return await client[botNum].reply({ from, quoted: message }, 'Bot is not admin, Please promote admin before using moderation commands.');
 		}
 
-		if (mention?.includes(`${botNum.split(':')[0]}@s.whatsapp.net`) || mediaData?.participant?.includes(`${botNum.split(':')[0]}@s.whatsapp.net`)) {
-			return await client[botNum].reply({ from, quoted: message }, "You can't add me by myself.");
+		if (mention?.includes(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`) || mediaData?.participant?.includes(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`)) {
+			return await client[botNum].reply({ from, quoted: message }, 'You can not add me by myself.');
 		}
 
 		if (query) {
 			if (mention.length > 0) {
-				return await client[botNum].reply({ from, quoted: message }, "Please reply people message or input people's number.");
+				return await client[botNum].reply({ from, quoted: message }, 'Please reply people message or input people number.');
 			}
 
 			await client[botNum].updateGroup(from, query.split(',').parser(), 'ADD', false, false, message, adminGroups);

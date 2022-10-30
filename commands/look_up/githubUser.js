@@ -20,7 +20,7 @@ export default {
 
 		if ((args[1] == 'next' || args[1] == 'prev') && type == 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
-			const index = data.findIndex((v) => v.source == args[2]);
+			const index = data.findIndex((v) => v.html_url == args[2]);
 			const { login, avatar_url: avatarUrl, type: typeGit, name, bio, public_repos: pubRepos, followers, following, created_at: createdAt, updated_at: updatedAt } = data[index];
 
 			return await client[botNum].sendMessage(from, {
@@ -42,7 +42,7 @@ Created : ${createdAt}
 Updated : ${updatedAt}
 Biography : ${bio}
                     
-Void Bot     1/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
+Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 			});
 		}
 
@@ -87,7 +87,7 @@ Void Bot     1/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇ�
 				templateButtons: [
 					{ urlButton: { displayText: 'Image Source', url: avatarUrl } },
 					{ urlButton: { displayText: 'User Source', url: htmlUrl } },
-					users.length !== 1 ? { quickReplyButton: { displayText: 'Next User', id: `.gitstalk next ${htmlUrl} ${JSON.stringify(users).replace(/\|/g, '')}` } } : {},
+					users.length !== 1 ? { quickReplyButton: { displayText: 'Next User', id: `.gitstalk next ${users[1].html_url} ${JSON.stringify(users).replace(/\|/g, '')}` } } : {},
 				],
 				footer: `Fullname : ${name}
 Username : ${login}

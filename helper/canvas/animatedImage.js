@@ -3,7 +3,7 @@ import Wrap from 'canvas-text-wrapper';
 import { exec } from 'child_process';
 import emojiReg from 'emoji-regex';
 import { readFileSync, unlinkSync, writeFileSync } from 'fs';
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import path from 'path';
 
 import { __dirname } from '../../index.js';
@@ -24,21 +24,21 @@ const saveImages = (buffer, sequence) => {
 
 const createSequence = async (images, sender) =>
 	new Promise(async (resolve, reject) => {
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		const pathExif = path.join(__dirname, 'temporary_files/data.exif');
 		const pathResults = path.join(__dirname, `temporary_files/animated_images-${Date.now()}`);
 
 		exec(`img2webp -loop 1 ${images.map((v) => `"${v}"`).join(' ')} -o "${pathResults}.webp"`, (er) => {
 			if (er) {
-				ERRLOG(`[${color(time, 'cyan')}]`, `${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`);
+				ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`);
 
 				reject(er);
 			}
 
 			exec(`webpmux -set exif "${pathExif}" "${pathResults}.webp" -o "${pathResults}-done.webp"`, (err) => {
 				if (err) {
-					ERRLOG(`[${color(time, 'cyan')}]`, `${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`);
+					ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`);
 
 					reject(err);
 				}
@@ -96,7 +96,7 @@ const loadColorsPalette = async (color) => {
 export const attp = (sender, texts, colored, fonts) =>
 	new Promise(async (resolve) => {
 		createExif('Made by Nanda', 'Void Animated Sticker using Canvas and WebP');
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		fonts = fonts !== undefined ? fonts.toLowerCase() : 'chevin';
 		colored = colored.length == 0 ? null : colored;

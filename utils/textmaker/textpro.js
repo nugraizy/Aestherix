@@ -1,4 +1,4 @@
-import Axios from 'axios';
+import axios from 'axios';
 import FormData from 'form-data';
 import fs from 'fs';
 
@@ -44,7 +44,7 @@ export const textpro = (api, texts) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			let form = new FormData();
-			let { data, headers } = await Axios.get(api);
+			let { data, headers } = await axios.get(api);
 			let $ = cheerioLOAD(data);
 			let token = $('input[name="token"]').attr('value');
 			const howManyText = $('li.item-content').get().length;
@@ -72,7 +72,7 @@ export const textpro = (api, texts) =>
 			form.append('build_server', 'https://textpro.me');
 			form.append('build_server_id', 1);
 			data = (
-				await Axios.post(api, form, {
+				await axios.post(api, form, {
 					headers: {
 						Cookie: cookie,
 						...form.getHeaders(),
@@ -107,7 +107,7 @@ export const textpro = (api, texts) =>
 			form.append('build_server', 'https://textpro.me');
 			form.append('build_server_id', 1);
 			data = (
-				await Axios.post(CREATE_URL(), form, {
+				await axios.post(CREATE_URL(), form, {
 					headers: {
 						Cookie: cookie,
 						...form.getHeaders(),
@@ -132,7 +132,7 @@ export const scrapeUrl = async (page) => {
 	}
 
 	console.log('scraping page', page);
-	const { data } = await Axios.get(BASE(page));
+	const { data } = await axios.get(BASE(page));
 	const $ = cheerioLOAD(data);
 	let container = [];
 

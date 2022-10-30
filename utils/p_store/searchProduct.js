@@ -1,4 +1,4 @@
-import Axios from 'axios';
+import axios from 'axios';
 
 import { numberWithCommas } from '../../helper/index.js';
 
@@ -26,7 +26,7 @@ const parse = (arr) => {
 export const PStoreProduct = (keyword) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { data } = await Axios({
+			const { data } = await axios({
 				url: URL_API_BASE,
 				method: 'GET',
 				params: {

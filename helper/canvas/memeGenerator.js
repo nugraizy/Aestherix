@@ -3,7 +3,7 @@ import Wrap from 'canvas-text-wrapper';
 import { exec } from 'child_process';
 import { readFileSync, unlinkSync, writeFileSync } from 'fs';
 import sizeOf from 'image-size';
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import path from 'path';
 
 import { __dirname } from '../../index.js';
@@ -24,7 +24,7 @@ const saveImages = async (buffer, sequence) => {
 
 const insertExif = async (paths, sender) =>
 	new Promise(async (resolve, reject) => {
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		const pathExif = path.join(__dirname, 'temporary_files/data.exif');
 		const pathResults = path.join(__dirname, `temporary_files/meme_generator-${Date.now()}`);
@@ -35,14 +35,14 @@ const insertExif = async (paths, sender) =>
 			`ffmpeg -i "${paths}" -vcodec libwebp -vf "scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1,fps=fps=30" -lossless 0 -an -vsync 0 -s 512:512 "${pathResults}.webp"`,
 			(er) => {
 				if (er) {
-					ERRLOG(`[${color(time, 'cyan')}]`, `${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`);
+					ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`);
 
 					reject(er);
 				}
 
 				exec(`webpmux -set exif "${pathExif}" "${pathResults}.webp" -o "${pathResults}-done.webp"`, (err) => {
 					if (err) {
-						ERRLOG(`[${color(time, 'cyan')}]`, `${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`);
+						ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`);
 
 						reject(err);
 					}
@@ -68,7 +68,7 @@ export const memeGenerator = (sender, input, topTexts = '', bottomTexts = '', ty
 				return resolve({ error: 'No Texts Provided' });
 			}
 
-			const time = moment().format('HH:mm:ss DD/MM');
+			const time = dayjs().format('HH:mm:ss DD/MM');
 
 			const { width, height } = sizeOf(input);
 

@@ -1,5 +1,8 @@
-import Axios from 'axios';
+import axios from 'axios';
 import dotenv from 'dotenv';
+import dayjs from 'dayjs';
+
+import { ERRLOG, color } from '../../helper/index.js';
 
 dotenv.config();
 
@@ -11,9 +14,13 @@ const TYPE = {
 
 export class MyAnimeList {
 	#access = `Bearer ${process.env.MAL_ACCESS}`;
+	#refresh = process.env.MAL_REFRESH;
+	#clientId = process.env.MAL_ID;
+	#clientSecret = process.env.MAL_SECRET;
+	#retries = 0;
 	constructor() {
-		this.searchAnime = async (query) => {
-			return (
+		this.searchAnime = async (query) =>
+			(
 				await this.request(
 					'/anime',
 					{
@@ -25,13 +32,10 @@ export class MyAnimeList {
 					null,
 					'GET',
 				)
-			)?.data?.map((v) => {
-				return v.node;
-			});
-		};
+			)?.data?.map((v) => v.node);
 
-		this.searchManga = async (query) => {
-			return (
+		this.searchManga = async (query) =>
+			(
 				await this.request(
 					'/manga',
 					{
@@ -43,13 +47,10 @@ export class MyAnimeList {
 					null,
 					'GET',
 				)
-			)?.data?.map((v) => {
-				return v.node;
-			});
-		};
+			).data?.map((v) => v.node);
 
-		this.getAnimeDetail = async (id) => {
-			return await this.request(
+		this.getAnimeDetail = async (id) =>
+			await this.request(
 				`/anime/${id}`,
 				{
 					fields:
@@ -57,10 +58,9 @@ export class MyAnimeList {
 				},
 				'GET',
 			);
-		};
 
-		this.getMangaDetail = async (id) => {
-			return await this.request(
+		this.getMangaDetail = async (id) =>
+			await this.request(
 				`/manga/${id}`,
 				{
 					fields:
@@ -68,7 +68,6 @@ export class MyAnimeList {
 				},
 				'GET',
 			);
-		};
 
 		this.getAnimeRanking = async (type = 'all') => {
 			if (!TYPE.ANIME.includes(type)) {
@@ -110,16 +109,15 @@ export class MyAnimeList {
 			});
 		};
 
-		this.userDetails = async () => {
-			return await this.request('/users/@me', {
+		this.userDetails = async () =>
+			await this.request('/users/@me', {
 				fields: 'anime_statistics',
 			});
-		};
 	}
 	async request(path, params = {}, method = 'GET') {
 		try {
 			const url = BASE_URL(path);
-			const response = await Axios({
+			const response = await axios({
 				method,
 				url,
 				params,
@@ -130,7 +128,49 @@ export class MyAnimeList {
 
 			return response.data;
 		} catch (err) {
+			if (err.response.data.error === 'invalid_token') {
+				this.showExpiredError();
+				await this.refreshToken();
+
+				this.#retries++;
+
+				if (this.#retries > 3) {
+					this.#retries = 0;
+					return err.response;
+				}
+
+				return await this.request(path, params, method);
+			}
+
 			return err.response;
 		}
+	}
+
+	async refreshToken() {
+		try {
+			const time = dayjs().format('HH:mm:ss DD/MM');
+
+			const response = await axios('https://myanimelist.net/v1/oauth2/token', {
+				method: 'POST',
+				data: `grant_type=refresh_token&refresh_token=${this.#refresh}&client_id=${this.#clientId}&client_secret=${this.#clientSecret}`,
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+				},
+			});
+
+			this.#access = `Bearer ${response.data.access_token}`;
+
+			ERRLOG(`[${color(time, 'cyan')}]`, `⚠️  ${color('( MyAnimeList ) AccessToken is found. Copy this and paste to .env', 'green')}`, color(response.data.access_token, '#05ffa1'));
+
+			return response.data;
+		} catch (err) {
+			return err.response;
+		}
+	}
+
+	showExpiredError() {
+		const time = dayjs().format('HH:mm:ss DD/MM');
+
+		ERRLOG(`[${color(time, 'cyan')}]`, `⚠️  ${color('( MyAnimeList ) AccessToken expired. Refreshing the access tokens.', 'red')}`);
 	}
 }

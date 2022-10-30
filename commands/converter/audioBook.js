@@ -1,6 +1,6 @@
 /* global botNum */
 import LANGUAGE from 'cld';
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import path from 'path';
 
 import { __dirname } from '../../index.js';
@@ -22,7 +22,7 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'Please send/reply an image to recognize text');
 		}
 
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 		const file = await client[botNum].downloadAndSaveMediaMessage(
 			extractMediaData,
 			path.join(__dirname, `temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),

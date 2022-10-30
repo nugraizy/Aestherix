@@ -1,5 +1,5 @@
 /* global botNum */
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import path from 'path';
 import parser from 'yargs-parser';
 
@@ -22,7 +22,7 @@ export default {
 	limit: 6,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, filename }, client) {
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please provide a URL');
@@ -56,7 +56,7 @@ export default {
 			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Downloading TikTok Music', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`);
 
 			if ('error' in music) {
-				ERRLOG(`[${color(time, 'cyan')}]`, `${color('Error while downloading TikTok Music', '#ff0000')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Error while downloading TikTok Music', '#ff0000')} for ${color(prettyNumber, '#ff71ce')}`);
 				await client[botNum].reply({ from, quoted: message }, `Error while downloading TikTok Music\n\n${url.split(' ')[0]}`);
 
 				continue;

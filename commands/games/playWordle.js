@@ -1,5 +1,5 @@
 /* global botNum */
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 
 import configuration from '../../connect.js';
 import { Wordle } from '../../utils/games/index.js';
@@ -15,7 +15,7 @@ export default {
 	limit: 2,
 	status: 'enable',
 	async run({ from, message, query, args, sender, prettyNumber }, client) {
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please specify arguments.\n\nUsage: !wordle <play/exit/info>');

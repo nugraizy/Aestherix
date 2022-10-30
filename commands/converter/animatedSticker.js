@@ -1,5 +1,5 @@
 /* global botNum */
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import rgbcolor from 'rgb-color';
 import yargsParser from 'yargs-parser';
 
@@ -20,7 +20,7 @@ export default {
 			query = 'Mana text nya?';
 		}
 
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		let parseOptions = yargsParser(query, { configuration: { 'short-option-groups': false } });
 

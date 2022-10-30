@@ -13,8 +13,9 @@ import configuration from '../../connect.js';
 import * as a from '../../helper/index.js';
 import * as b from '../../utils/index.js';
 import * as c from '../../connect.js';
+import * as d from '../../index.js';
 
-const func = { ...a, ...b, ...c, ...configuration }; /* eslint-disable-line */
+const func = { ...a, ...b, ...c, ...d, ...configuration }; /* eslint-disable-line */
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 const col = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g; /* eslint-disable-line */
 

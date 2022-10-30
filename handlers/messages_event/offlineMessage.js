@@ -1,5 +1,5 @@
 /* global botNum, log */
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 
 import { isFileExist, readJSON, writeJSON } from '../../helper/modules/index.js';
 
@@ -19,7 +19,7 @@ export default {
 			if (data.length == 0) {
 				data.push({
 					participant: sender,
-					date: moment().valueOf(),
+					date: dayjs().valueOf(),
 				});
 				writeJSON('./databases/offline_db/users.json', JSON.parse(JSON.stringify(data, undefined, 2)));
 				await client[botNum].reply({ from, quoted: message }, 'The owner currently offline, please contact in another time.');
@@ -28,11 +28,11 @@ export default {
 
 			const dataUser = data.find((v) => v.participant == sender);
 			const dateOff = dataUser ? dataUser.date : 0;
-			const waitTil30Second = dataUser ? moment(dateOff).add(parseInt('30'), 'seconds').valueOf() : 0;
-			const dateNow = moment().valueOf();
+			const waitTil30Second = dataUser ? dayjs(dateOff).add(30, 's').valueOf() : 0;
+			const dateNow = dayjs().valueOf();
 
 			if (dataUser && dateNow > waitTil30Second) {
-				dataUser.date = moment().valueOf();
+				dataUser.date = dayjs().valueOf();
 				await client[botNum].reply({ from, quoted: message }, 'The owner currently offline, please contact in another time.');
 				writeJSON('./databases/offline_db/users.json', JSON.parse(JSON.stringify(data, undefined, 2)));
 			} else if (dataUser && dateNow < waitTil30Second) {
@@ -40,7 +40,7 @@ export default {
 			} else if (!dataUser) {
 				data.push({
 					participant: sender,
-					date: moment().valueOf(),
+					date: dayjs().valueOf(),
 				});
 				writeJSON('./databases/offline_db/users.json', JSON.parse(JSON.stringify(data, undefined, 2)));
 				await client[botNum].reply({ from, quoted: message }, 'The owner currently offline, please contact in another time.');

@@ -56,18 +56,27 @@ const LANGUAGES = {
 	cy: 'Welsh',
 };
 
+/**
+ * Convert texts to speech
+ * @param {string} text
+ * @param {string} language
+ * @param {string} filename output file.
+ * @returns {Promise<{buffer: Buffer}>}
+ * @throws {{name: string, message: string}}
+ */
 export const textToSpeech = (text, language, filename) =>
 	new Promise((resolve, reject) => {
 		let gtts;
 
 		try {
 			gtts = Text2Speech(language);
-		} catch (e) {
+		} catch (/** @type {{name: string, message: string}} */ e) {
 			reject({ name: 'lang not found', message: LANGUAGES });
 			return;
 		}
 		gtts.save(`${filename}.opus`, text, async (err) => {
 			if (err) {
+				/** @type {{name: string, message: string}} */
 				reject({ message: 'error while converting text to speech', name: err });
 				return;
 			}

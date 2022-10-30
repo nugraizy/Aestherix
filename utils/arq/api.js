@@ -1,4 +1,4 @@
-import Axios from 'axios';
+import axios from 'axios';
 import dotenv from 'dotenv';
 import FormData from 'form-data';
 
@@ -61,7 +61,7 @@ class ArqAPI {
 	}
 	async request(path, _) {
 		try {
-			const { data } = await Axios({
+			const { data } = await axios({
 				url: this.#urlBase + path,
 				..._,
 				headers: {
@@ -78,7 +78,7 @@ class ArqAPI {
 
 	async post(path, form, _) {
 		try {
-			const { data } = await Axios.post(this.#urlBase + path, form, {
+			const { data } = await axios.post(this.#urlBase + path, form, {
 				headers: {
 					..._,
 					'X-API-KEY': this.#apiKey,

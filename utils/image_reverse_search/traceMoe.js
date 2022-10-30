@@ -1,4 +1,4 @@
-import Axios from 'axios';
+import axios from 'axios';
 import FormData from 'form-data';
 import { readFileSync } from 'fs';
 import path from 'path';
@@ -41,7 +41,7 @@ export const traceMoe = async (file) =>
 			form.append('image', file, { contentType: 'image/jpeg', filename: 'blob' });
 			const {
 				data: { result },
-			} = await Axios.post(URL_BASE_API, form);
+			} = await axios.post(URL_BASE_API, form);
 
 			result.forEach((v) => {
 				return (v.similarity = Number((v.similarity * 100).toFixed(2)));

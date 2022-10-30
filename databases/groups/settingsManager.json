@@ -443,5 +443,53 @@
       "notification": "disable",
       "banned": []
     }
+  },
+  {
+    "120363045465365245@g.us": {
+      "groupName": "asu",
+      "welcome1": "disable",
+      "welcome1msg": "Welcome to {groupName}",
+      "welcome2": "disable",
+      "welcome2msg": "Welcome to {groupName}",
+      "left1": "disable",
+      "left1msg": "Bye bye {groupName}",
+      "left2": "disable",
+      "left2msg": "Bye bye {groupName}",
+      "antiDelete": "disable",
+      "antiGroupURL": "disable",
+      "antiURL": "disable",
+      "antiSpam": "disable",
+      "antiVirus": "disable",
+      "autoReader": "disable",
+      "antiNSFW": "disable",
+      "games": "disable",
+      "notification": "disable",
+      "banned": [],
+      "groupDescription": "asuo"
+    }
+  },
+  {
+    "6288247269987-1556717426@g.us": {
+      "groupName": "ひろふみ",
+      "groupDescription": "tong hilap dedic kang\nupami anjeun henteu hoyong kaluar ti dieu\n\ncek discord aya mep",
+      "welcome1": "disable",
+      "welcome1msg": "Welcome to {groupName}",
+      "welcome2": "disable",
+      "welcome2msg": "Welcome to {groupName}",
+      "left1": "disable",
+      "left1msg": "Bye bye {groupName}",
+      "left2": "disable",
+      "left2msg": "Bye bye {groupName}",
+      "antiDelete": "disable",
+      "antiGroupURL": "disable",
+      "antiURL": "disable",
+      "antiSpam": "disable",
+      "antiVirus": "disable",
+      "autoReader": "disable",
+      "antiNSFW": "disable",
+      "games": "disable",
+      "notification": "disable",
+      "banned": []
+    }
   }
 ]

@@ -1,7 +1,8 @@
 /* global botNum */
 import PhoneNumber from 'awesome-phonenumber';
 
-import { readJSON, writeJSON } from '../../helper/index.js';
+import configuration from '../../connect.js';
+import { readJSON, writeJSON, S_WHATSAPP_NET } from '../../helper/index.js';
 
 export default {
 	name: 'banned',
@@ -26,6 +27,8 @@ export default {
 
 		if (args[1] == 'report' && isOwner) {
 			userBanned.push(args[3]);
+			configuration.bannedlist.push(args[3]);
+			configuration.blocklist.push(args[3]);
 			writeJSON('./databases/users/banned.json', userBanned);
 
 			client[botNum].updateBlockStatus(args[3], 'block');
@@ -40,10 +43,12 @@ export default {
 					await client[botNum].sendMessage(from, { text: `@${mentioned.split('@')[0]} Already banned`, mentions: [mentioned] }, { quoted: message });
 					continue;
 				} else {
+					configuration.bannedlist.push(mentioned);
+					configuration.blocklist.push(mentioned);
 					userBanned.push(mentioned);
 					writeJSON('./databases/users/banned.json', userBanned);
 					banned.push(mentioned);
-					client[botNum].updateBlockStatus(mentioned, 'block');
+					await client[botNum].updateBlockStatus(mentioned, 'block');
 				}
 			}
 
@@ -75,16 +80,19 @@ export default {
 				}
 
 				const validation = checkIfValid(user);
-				const notBanned = userBanned.includes(`${user}@s.whatsapp.net`);
+				const notBanned = userBanned.includes(`${user}${S_WHATSAPP_NET}`);
 
 				if (!validation) {
-					await client[botNum].sendMessage(from, { text: `@${user} is not a valid number`, mentions: [`${user}@s.whatsapp.net`] }, { quoted: message });
+					await client[botNum].sendMessage(from, { text: `@${user} is not a valid number`, mentions: [`${user}${S_WHATSAPP_NET}`] }, { quoted: message });
 				} else if (notBanned) {
-					await client[botNum].sendMessage(from, { text: `@${user} is already banned`, mentions: [`${user}@s.whatsapp.net`] }, { quoted: message });
+					await client[botNum].sendMessage(from, { text: `@${user} is already banned`, mentions: [`${user}${S_WHATSAPP_NET}`] }, { quoted: message });
 				} else {
-					userBanned.push(`${user}@s.whatsapp.net`);
+					configuration.bannedlist.push(`${user}${S_WHATSAPP_NET}`);
+					configuration.blocklist.push(`${user}${S_WHATSAPP_NET}`);
+					userBanned.push(`${user}${S_WHATSAPP_NET}`);
 					writeJSON('./databases/users/banned.json', userBanned);
-					await client[botNum].sendMessage(from, { text: `Success banning : @${user}`, mentions: [`${user}@s.whatsapp.net`] }, { quoted: message });
+					await client[botNum].updateBlockStatus(`${user}${S_WHATSAPP_NET}`, 'block');
+					await client[botNum].sendMessage(from, { text: `Success banning : @${user}`, mentions: [`${user}${S_WHATSAPP_NET}`] }, { quoted: message });
 				}
 			}
 
@@ -96,9 +104,11 @@ export default {
 				return await client[botNum].reply({ from, quoted: message }, 'Already banned');
 			}
 
+			configuration.bannedlist.push(mediaData.participant);
+			configuration.blocklist.push(mediaData.participant);
 			userBanned.push(mediaData.participant);
 			writeJSON('./databases/users/banned.json', userBanned);
-			client[botNum].updateBlockStatus(mediaData.participant, 'block');
+			await client[botNum].updateBlockStatus(mediaData.participant, 'block');
 			await client[botNum].sendMessage(from, { text: `Success banning : @${mediaData.participant.split('@')[0]}`, mentions: [mediaData.participant] }, { quoted: message });
 		}
 	},

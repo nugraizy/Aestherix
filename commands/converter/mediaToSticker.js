@@ -1,5 +1,5 @@
 /* global botNum */
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import path from 'path';
 
 import configuration from '../../connect.js';
@@ -16,7 +16,7 @@ export default {
 	limit: 1,
 	status: 'enable',
 	async run({ isMediaImage, isMediaVid, from, prettyNumber, message, mediaData, stickerAble, typeQuoted, typeSticker, filename, query }, client) {
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!isMediaImage && !isMediaVid && !query) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please send/reply a media or send a url to convert to sticker');

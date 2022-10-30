@@ -1,4 +1,4 @@
-import Axios from 'axios';
+import axios from 'axios';
 import FormData from 'form-data';
 import fs from 'fs';
 
@@ -50,7 +50,7 @@ export const ephoto360 = async (api, texts, buffer) =>
 				buffer = fs.createReadStream(buffer);
 			}
 
-			let { data, headers } = await Axios.get(api, {
+			let { data, headers } = await axios.get(api, {
 				headers: {
 					'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36',
 				},
@@ -78,7 +78,7 @@ export const ephoto360 = async (api, texts, buffer) =>
 
 			if (isNeedImageBuffer) {
 				formData.append('file', buffer);
-				const { data: payloadImages } = await Axios.post('https://e1.yotools.net/upload', formData, {
+				const { data: payloadImages } = await axios.post('https://e1.yotools.net/upload', formData, {
 					headers: {
 						Cookie: cookie,
 						...formData.getHeaders(),
@@ -125,7 +125,7 @@ export const ephoto360 = async (api, texts, buffer) =>
 			}
 
 			data = (
-				await Axios.post(api, formData, {
+				await axios.post(api, formData, {
 					headers: {
 						Cookie: cookie,
 						...formData.getHeaders(),
@@ -166,7 +166,7 @@ export const ephoto360 = async (api, texts, buffer) =>
 			}
 
 			data = (
-				await Axios.post(CREATE_URL(), formData, {
+				await axios.post(CREATE_URL(), formData, {
 					headers: {
 						Cookie: cookie,
 						...formData.getHeaders(),
@@ -188,7 +188,7 @@ export const ephoto360 = async (api, texts, buffer) =>
 const container = [];
 
 export const scrapePages = async (page) => {
-	const { data } = await Axios.get(`${BASE_URL_PAGE}${page}`, {
+	const { data } = await axios.get(`${BASE_URL_PAGE}${page}`, {
 		headers: {
 			'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36',
 		},

@@ -1,4 +1,4 @@
-import Axios from 'axios';
+import axios from 'axios';
 
 const URL_API = 'https://bandcamp.com/api/bcsearch_public_api/1/autocomplete_elastic';
 
@@ -17,11 +17,28 @@ const parse = (arr) => {
 	}));
 };
 
+/**
+ * Parsed result definition.
+ * @typedef {Object[]} ResultsBandcamp
+ * @property {string} ResultsBandcamp[].bandId
+ * @property {string} ResultsBandcamp[].bandName
+ * @property {string} ResultsBandcamp[].title
+ * @property {(string|null)} ResultsBandcamp[].albumName
+ * @property {(string|null)} ResultsBandcamp[].albumId
+ * @property {string} ResultsBandcamp[].urlBase
+ * @property {string} ResultsBandcamp[].thumbnailUrl
+ */
+/**
+ *
+ * @param {string} keyword search keyword of the band/track.
+ * @returns {Promise<ResultsBandcamp> & Promise<{error?: string}>}
+ * @throws {Promise<Error>}
+ */
 export const searchBandcamp = (keyword) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { headers } = await Axios({ url: 'https://bandcamp.com/', method: 'GET' });
-			const { data } = await Axios({
+			const { headers } = await axios({ url: 'https://bandcamp.com/', method: 'GET' });
+			const { data } = await axios({
 				url: URL_API,
 				method: 'POST',
 				data: { search_text: keyword, search_filter: '', full_page: true, fan_id: null } /* eslint-disable-line */,

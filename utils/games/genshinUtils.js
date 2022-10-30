@@ -1,4 +1,4 @@
-import Axios from 'axios';
+import axios from 'axios';
 import Crypto from 'crypto';
 import url from 'url';
 
@@ -138,7 +138,7 @@ export const request = async (method, path, data, server) => {
 		body = data;
 	}
 
-	const { data: dataRaw } = await Axios({
+	const { data: dataRaw } = await axios({
 		method,
 		url: path.startsWith('http') ? path : `${API_ENDPOINT(server)}${path}`,
 		headers: requestHeaders(server, { query, body }),

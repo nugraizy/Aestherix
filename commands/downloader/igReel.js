@@ -1,5 +1,5 @@
 /* global botNum */
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
 import { color, delay, ERRLOG, INFOLOG, isOne, isURL, parseCode } from '../../helper/modules/index.js';
@@ -17,7 +17,7 @@ export default {
 	limit: 9,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please specify a url');
@@ -53,7 +53,7 @@ export default {
 
 				if ('error' in reel) {
 					await client[botNum].reply({ from, quoted: message }, `Error while downloading Instagram reel\n\n${reel.error}\n${url}`);
-					ERRLOG(`[${color(time, 'cyan')}]`, `${color('Failed to Download Instagram reel', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
+					ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Failed to Download Instagram reel', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 
 					continue;
 				}

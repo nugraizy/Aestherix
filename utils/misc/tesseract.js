@@ -1,4 +1,4 @@
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import Tesseract from 'tesseract.js';
 
 import { cheerioLOAD, color, fetchTEXT, INFOLOG, unlinkFile } from '../../helper/modules/index.js';
@@ -10,7 +10,7 @@ export const tesseract = async (image, sender, lang = 'ind') =>
 				lang = 'ind';
 			}
 
-			const time = moment().format('HH:mm:ss DD/MM');
+			const time = dayjs().format('HH:mm:ss DD/MM');
 			const languages = [];
 			const $ = cheerioLOAD(await fetchTEXT('https://github.com/tesseract-ocr/tessdoc/blob/main/Data-Files-in-different-versions.md'));
 

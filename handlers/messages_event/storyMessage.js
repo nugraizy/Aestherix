@@ -1,11 +1,10 @@
 /* global botNum */
 import { generateWAMessageFromContent } from '@adiwajshing/baileys';
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 
 import configuration from '../../connect.js';
 import { runtime } from '../../index.js';
-import { textStory } from '../../helper/canvas/index.js';
-import { color, INFOLOG } from '../../helper/modules/index.js';
+import { textStory, color, INFOLOG, ZERO } from '../../helper/index.js';
 
 export default {
 	async handler(client, message) {
@@ -13,7 +12,7 @@ export default {
 			await client[botNum].readMessages([message.message.key]);
 		}
 
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 		const runtimes = ((Date.now() - runtime) / 1000).toFixed(0);
 		let caption = '```Auto Fetch WhatsApp Story```\n\n';
 		let messages;
@@ -26,10 +25,10 @@ export default {
 			caption += `Body : ${message.body}`;
 			const buffer = await textStory(message.body, message.message.message.extendedTextMessage.backgroundArgb);
 
-			return await client[botNum].sendMessage('0@s.whatsapp.net', { image: buffer, caption: caption.trim() });
+			return await client[botNum].sendMessage(ZERO, { image: buffer, caption: caption.trim() });
 		} else if (message.type == 'videoMessage' || message.type == 'imageMessage') {
 			caption += `Caption : ${message.body}`;
-			messages = generateWAMessageFromContent('0@s.whatsapp.net', { ...message.message.message }, {});
+			messages = generateWAMessageFromContent(ZERO, { ...message.message.message }, {});
 			messages.message[message.type].caption = caption;
 			messages.message[message.type].contextInfo = {
 				stanzaId: message.message.key.id,
@@ -37,7 +36,7 @@ export default {
 				quotedMessage: message.message.message,
 				remoteJid: message.message.key.remoteJid,
 			};
-			await client[botNum].relayMessage('0@s.whatsapp.net', messages.message, { messageId: messages.key.id });
+			await client[botNum].relayMessage(ZERO, messages.message, { messageId: messages.key.id });
 		}
 
 		INFOLOG(

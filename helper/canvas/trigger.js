@@ -1,7 +1,7 @@
 /* global client, botNum */
 import Canvas from '@napi-rs/canvas';
 import GIFEncoder from 'gifencoder';
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 import sharp from 'sharp';
 
 import configuration from '../../connect.js';
@@ -35,7 +35,7 @@ const prepareCanvas = async (images) => {
 
 export const trigger = async (image, sender, opt) =>
 	new Promise(async (resolve, reject) => {
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		try {
 			let i = 0;
@@ -89,7 +89,7 @@ export const trigger = async (image, sender, opt) =>
 				await unlink(`${isURL(image) ? `./temporary_files/${sender}` : image}.webp`);
 			}
 		} catch (err) {
-			ERRLOG(`[${color(time, 'cyan')}]`, `${color('Failed to Trigger an image', 'red')} for ${color(sender, '#ff71ce')}`);
+			ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Failed to Trigger an image', 'red')} for ${color(sender, '#ff71ce')}`);
 
 			reject(err);
 		}

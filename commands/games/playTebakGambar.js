@@ -1,5 +1,5 @@
 /* global botNum */
-import moment from 'moment-timezone';
+import dayjs from 'dayjs';
 
 import { color, INFOLOG } from '../../helper/modules/functions.js';
 import { startTG } from '../../utils/games/index.js';
@@ -14,7 +14,7 @@ export default {
 	limit: 2,
 	status: 'enable',
 	async run(message, client) {
-		const time = moment().format('HH:mm:ss DD/MM');
+		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		INFOLOG(`[${color(time, 'cyan')}]`, `${color('Starting Guess The Image Games.', '#01cdfe')}  to ${color(message.prettyNumber, '#ff71ce')}`);
 

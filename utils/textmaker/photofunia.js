@@ -1,4 +1,4 @@
-import Axios from 'axios';
+import axios from 'axios';
 import FormData from 'form-data';
 import fs from 'fs-extra';
 
@@ -37,7 +37,7 @@ const split = (text, len) => {
 export const photofunia = (url, file, texts) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const init = await Axios({
+			const init = await axios({
 				url,
 				method: 'GET',
 			});
@@ -60,7 +60,7 @@ export const photofunia = (url, file, texts) =>
 			}
 
 			let form = new FormData();
-			let { data } = await Axios({
+			let { data } = await axios({
 				url: 'https://photofunia.com/images?server=1',
 				method: 'GET',
 				params: { server: 1 },
@@ -69,7 +69,7 @@ export const photofunia = (url, file, texts) =>
 			if (isRequiredImage) {
 				form.append('image', fs.createReadStream(file));
 				data = (
-					await Axios({
+					await axios({
 						url: 'https://photofunia.com/images?server=1',
 						method: 'POST',
 						params: { server: 1 },
@@ -103,7 +103,7 @@ export const photofunia = (url, file, texts) =>
 
 			const tempCookie = data.response.sid;
 
-			data = await Axios({
+			data = await axios({
 				url,
 				method: 'POST',
 				params: { server: 1 },
@@ -122,7 +122,7 @@ export const photofunia = (url, file, texts) =>
 			const { path } = data.request;
 
 			data = (
-				await Axios({
+				await axios({
 					url: URL_RESULT(path),
 					method: 'GET',
 					headers: {
