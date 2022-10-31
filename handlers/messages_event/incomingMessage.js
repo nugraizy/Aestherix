@@ -120,7 +120,7 @@ export default {
 
 				if (configuration.OPTIONS.autoCorrect) {
 					for (const cmd of Array.from(cmds.commands.keys())) {
-						const correcting = similarity(message.args[0], cmd);
+						const correcting = similarity.compareTwoString(message.args[0], cmd);
 
 						if (correcting >= Math.min(0.6)) {
 							correctedCommand.push({
