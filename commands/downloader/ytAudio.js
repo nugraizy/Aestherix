@@ -4,7 +4,7 @@ import path from 'path';
 import sharp from 'sharp';
 
 import { __dirname } from '../../index.js';
-import { color, delay, ERRLOG, fetchBUFFER, INFOLOG, isURL, numberWithCommas, removeDuplicatesArray } from '../../helper/modules/index.js';
+import { color, ERRLOG, fetchBUFFER, INFOLOG, isURL, numberWithCommas, removeDuplicatesArray } from '../../helper/modules/index.js';
 import { toOpus } from '../../utils/converter/index.js';
 import { yta2 as yta } from '../../utils/youtube/index.js';
 
@@ -71,6 +71,12 @@ export default {
 
 				jpegThumbnail = await jpegThumbnail.resize(300, 300).toBuffer();
 
+				const audioBuffer = await toOpus('opus', {
+					input: path.join(__dirname, `temporary_files/${filename}`),
+					output: path.join(__dirname, `temporary_files/${filename}-done`),
+					media: dlLink.replace('https', 'http'),
+				});
+
 				await client[botNum].sendMessage(from, {
 					location: {
 						degreesLatitude: 0,
@@ -85,18 +91,17 @@ export default {
 				await client[botNum].sendMessage(
 					from,
 					{
-						document: await toOpus('opus', {
-							input: path.join(__dirname, `temporary_files/${filename}`),
-							output: path.join(__dirname, `temporary_files/${filename}-done`),
-							media: dlLink.replace('https', 'http'),
-						}),
+						document: audioBuffer,
 						fileName: `${title}.opus`,
 						mimetype: 'audio/opus',
 						caption: capt.trim(),
 					},
 					{ quoted: message },
 				);
-				await delay(300);
+				await client[botNum].sendMessage(from, {
+					audio: audioBuffer,
+					ptt: false,
+				});
 			}
 		}
 

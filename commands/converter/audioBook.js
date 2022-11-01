@@ -1,5 +1,5 @@
 /* global botNum */
-import LANGUAGE from 'cld';
+import cld from 'cld';
 import dayjs from 'dayjs';
 import path from 'path';
 
@@ -29,7 +29,7 @@ export default {
 			typeQuoted,
 		);
 		const { result } = await tesseract(file, prettyNumber);
-		const lang = (await LANGUAGE.detect(result.text)).languages[0].code || 'id';
+		const lang = (await cld.detect(result.text)).languages[0].code;
 		const { buffer } = await textToSpeech(result.text.trim(), lang, path.join(__dirname, `temporary_files/${filename}`));
 
 		await client[botNum].sendMessage(from, { text: result.text.trim() }, { quoted: message });

@@ -7,9 +7,9 @@ import { color, INFOLOG } from '../../helper/modules/index.js';
 import { tesseract } from '../../utils/misc/index.js';
 
 export default {
-	name: 'textrecognition',
+	name: 'scanimagetext',
 	description: 'Recognize text from image',
-	usage: '!textrecognition <Image(reply/send)>',
+	usage: '!scanimagetext <Image(reply/send)>',
 	category: 'Converter',
 	aliases: ['ocr'],
 	cooldown: 5,
@@ -27,9 +27,19 @@ export default {
 			path.join(__dirname, `temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
 			typeQuoted,
 		);
-		const { result } = await tesseract(file, prettyNumber, query);
+		const scanning = await tesseract(file, prettyNumber, query);
 
-		await client[botNum].sendMessage(from, { text: result.text.trim() }, { quoted: message });
+		if ('error' in scanning) {
+			const lang = scanning.languages
+				.map(({ code, name }) => `${code.toUpperCase()} | ${name}`)
+				.join('\n')
+				.trim();
+
+			client[botNum].reply({ from, quoted: message }, `${scanning.error}\n\nAvailable Languages :\n\n${lang}\n\nUse the code only.`);
+			return;
+		}
+
+		await client[botNum].sendMessage(from, { text: scanning.result.text.trim() }, { quoted: message });
 
 		INFOLOG(`[${color(time, 'cyan')}]`, `${color('Text is sent', '#01cdfe')} to ${color(prettyNumber, '#ff71ce')}`);
 	},

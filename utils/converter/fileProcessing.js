@@ -10,9 +10,9 @@ import sharp from 'sharp';
 
 import configuration from '../../connect.js';
 import { __dirname } from '../../index.js';
-import { color, ERRLOG, fetchBUFFER, fetchJSON, INFOLOG, isFileExist, isURL, readBuffer, readJSON, unlinkFile, writeBuffer } from '../../helper/modules/index.js';
+import { color, ERRLOG, fetchJSON, INFOLOG, isFileExist, isURL, readBuffer, readJSON, unlinkFile, writeBuffer } from '../../helper/modules/index.js';
 import { webp2mp4File } from './ezgifs/index.js';
-import { getTokens, saveAndStream } from './_utils.js';
+import { streamFile } from './_utils.js';
 
 const VIDEO_MIMETYPE = readJSON(path.join(__dirname, 'databases/mimetypes/Video.json'));
 
@@ -444,46 +444,110 @@ export const removeBg = (input, sender) =>
 	new Promise(async (resolve, reject) => {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
+		const apiKeys = process.env.REMOVEBG_KEY.split('\n');
+		const apiKey = apiKeys[Math.floor(Math.random() * apiKeys.length)];
+
+		const output = input.replace(input.slice(input.lastIndexOf('.'), input.length), '.png');
+
 		try {
-			if (!configuration.slazzer.csrf || !configuration.slazzer.cookie) {
-				ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('( removeBg ) Token not found. Trying to get one.', 'red')}`);
-				try {
-					const { cookie, csrf } = await getTokens();
+			await sharp(input).toFormat('png').toFile(output);
+			const file = streamFile(output);
 
-					configuration.slazzer.csrf = csrf;
-					configuration.slazzer.cookie = cookie;
-
-					ERRLOG(
-						`[${color(time, 'cyan')}]`,
-						`⚠️ ${color('( removeBg ) Token is found. Copy this and paste to connect.js', '#05ffa1')}`,
-						color(JSON.stringify({ cookie, csrf }, undefined, 2), '#ff71ce'),
-					);
-				} catch (err) {
-					const error = '( removeBg ) Token not found.';
-
-					ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color(error, 'red')}`);
-					reject(new Error(error));
-				}
-			}
-
-			const file = await saveAndStream(input);
 			const form = new FormData();
 
-			form.append('source_image_file', file);
-			form.append('autogenerate_id', 'heal');
+			form.append('size', 'auto');
+			form.append('image_file', file);
 
-			const { data } = await axios.post('https://www.slazzer.com/upload_image', form, {
+			const { data } = await axios.post('https://api.remove.bg/v1.0/removebg', form, {
 				headers: {
-					accept: '*/*',
-					cookie: `session_slazzer=${configuration.slazzer.cookie}`,
-					'x-csrftoken': configuration.slazzer.csrf,
+					...form.getHeaders(),
+					'X-Api-Key': apiKey,
+				},
+				responseType: 'arraybuffer',
+			});
+
+			await fs.unlink(input);
+			await fs.unlink(output);
+			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Removing image background success', '#01cdfe')} for ${color(sender, '#ff71ce')}`);
+			resolve(new Buffer.from(data, 'base64'));
+		} catch (error) {
+			await fs.unlink(output);
+			await fs.unlink(input);
+
+			ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Failed to Remove image background', 'red')} for ${color(sender, '#ff71ce')}\nRemove Background Token Used : ${apiKey}`);
+			reject(error);
+		}
+	});
+
+const _api = (path, version) => `https://api.alcaamado.es/api/${version}/waifu2x${path}`;
+
+/**
+ * Enhance image using Waifu2x enhancer API.
+ * @param {string} input file input path.
+ * @param {string} sender
+ * @returns {Promise<{Buffer}>}
+ * @throws {Error}
+ */
+
+export const waifu2x = (input, sender) =>
+	new Promise(async (resolve, reject) => {
+		const time = dayjs().format('HH:mm:ss DD/MM');
+
+		const output = input.replace(input.slice(input.lastIndexOf('.'), input.length), '.png');
+
+		try {
+			await sharp(input).toFormat('png').toFile(output);
+			const file = streamFile(output);
+
+			const form = new FormData();
+
+			form.append('denoise', 2);
+			form.append('scale', 'true');
+			form.append('file', file);
+
+			const {
+				data: { hash },
+			} = await axios.post(_api('/convert', 'v1'), form, {
+				headers: {
+					'Accept-Language': 'en-US,en;q=0.9',
+					Referer: 'https://waifu2x.pro/',
+					Accept: 'application/json',
+					'Use-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36',
 					...form.getHeaders(),
 				},
 			});
 
-			resolve(fetchBUFFER(`https://slazzer.com${data.preview_size_output_image}`));
-		} catch (errs) {
-			ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Failed to Remove image background', 'red')} for ${color(sender, '#ff71ce')}`);
-			reject(errs);
+			const {
+				data: { finished },
+			} = await axios.get(_api('/check', 'v2'), {
+				params: { hash },
+				headers: {
+					Referer: 'https://waifu2x.pro/',
+					Accept: 'application/json',
+					'Use-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36',
+				},
+			});
+
+			if (finished) {
+				const { data } = await axios.get(_api('/get', 'v2'), {
+					params: {
+						hash,
+						type: 'png',
+					},
+					responseType: 'arraybuffer',
+				});
+
+				INFOLOG(`[${color(time, 'cyan')}]`, `${color('Enhancing image success', '#01cdfe')} for ${color(sender, '#ff71ce')}`);
+				await fs.unlink(input);
+				resolve(new Buffer.from(data, 'base64'));
+				return;
+			}
+
+			await fs.unlink(input);
+			reject(new Error('Cannot resolve your requests. Try again later.'));
+		} catch (err) {
+			ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Failed to Enhance image', 'red')} for ${color(sender, '#ff71ce')}`);
+			await fs.unlink(input);
+			reject(err);
 		}
 	});

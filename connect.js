@@ -13,10 +13,6 @@ const globalConfig = {
 	cli: {},
 	commandsPath: [],
 	isFirstConnection: false,
-	slazzer: {
-		csrf: null,
-		cookie: null,
-	},
 	packname: 'Made by Void',
 	author: 'Powered by Hidden Finder',
 	anonymous: new Map(),

@@ -41,8 +41,8 @@ export default {
 				} else {
 					const index = userBanned.indexOf(mentioned);
 
-					configuration.bannedlist.splice(indexs(configuration.bannedlist, mentioned), 1);
-					configuration.blocklist.splice(indexs(configuration.bannedlist, mentioned), 1);
+					configuration.cache.bannedlist.splice(indexs(configuration.cache.bannedlist, mentioned), 1);
+					configuration.cache.blocklist.splice(indexs(configuration.cache.bannedlist, mentioned), 1);
 					userBanned.splice(index, 1);
 					writeJSON('./databases/users/banned.json', userBanned);
 					unbanned.push(mentioned);
@@ -82,8 +82,8 @@ export default {
 				} else {
 					const index = userBanned.indexOf(`${user}${S_WHATSAPP_NET}`);
 
-					configuration.bannedlist.splice(indexs(configuration.bannedlist, `${user}${S_WHATSAPP_NET}`), 1);
-					configuration.blocklist.splice(indexs(configuration.bannedlist, `${user}${S_WHATSAPP_NET}`), 1);
+					configuration.cache.bannedlist.splice(indexs(configuration.cache.bannedlist, `${user}${S_WHATSAPP_NET}`), 1);
+					configuration.cache.blocklist.splice(indexs(configuration.cache.bannedlist, `${user}${S_WHATSAPP_NET}`), 1);
 					userBanned.splice(index, 1);
 					writeJSON('./databases/users/banned.json', userBanned);
 					await client[botNum].updateBlockStatus(`${user}${S_WHATSAPP_NET}`, 'unblock');
@@ -101,8 +101,8 @@ export default {
 
 			const index = userBanned.indexOf(mediaData.participant);
 
-			configuration.bannedlist.splice(indexs(configuration.bannedlist, mediaData.participant), 1);
-			configuration.blocklist.splice(indexs(configuration.bannedlist, mediaData.participant), 1);
+			configuration.cache.bannedlist.splice(indexs(configuration.cache.bannedlist, mediaData.participant), 1);
+			configuration.cache.blocklist.splice(indexs(configuration.cache.bannedlist, mediaData.participant), 1);
 			userBanned.splice(index, 1);
 			writeJSON('./databases/users/banned.json', userBanned);
 

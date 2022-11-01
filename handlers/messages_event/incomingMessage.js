@@ -119,8 +119,8 @@ export default {
 				const correctedCommand = [];
 
 				if (configuration.OPTIONS.autoCorrect) {
-					for (const cmd of Array.from(cmds.commands.keys())) {
-						const correcting = similarity.compareTwoString(message.args[0], cmd);
+					Array.from(cmds.commands.keys()).forEach((cmd) => {
+						const correcting = similarity.compareTwoStrings(message.args[0], cmd);
 
 						if (correcting >= Math.min(0.6)) {
 							correctedCommand.push({
@@ -128,9 +128,9 @@ export default {
 								command: cmd,
 							});
 						}
-					}
+					});
 
-					for (const aliases of cmds.aliases) {
+					cmds.aliases.forEach((aliases) => {
 						const correcting = similarity.compareTwoStrings(message.args[0], aliases);
 
 						if (correcting >= Math.min(0.57)) {
@@ -139,7 +139,7 @@ export default {
 								command: aliases,
 							});
 						}
-					}
+					});
 				}
 
 				if (correctedCommand.length != 0) {
@@ -154,10 +154,12 @@ export default {
 					message.cmd = message.prefix + HIGH_SCORE.command.toLowerCase().split(' ')[0].trim() || '';
 				}
 
+				const commands = Array.from(cmds.commands.values());
+
 				const Tempcmds =
 					cmds.commands.get(message.cmd.slice(1).trim().toLowerCase()) ||
-					Array.from(cmds.commands.values()).find((v) => v.aliases.includes(message.cmd.slice(1).trim().toLowerCase())) ||
-					Array.from(cmds.commands.values()).find((v) => v.aliases.includes(message.cmd.trim().toLowerCase())) ||
+					commands.find((v) => v.aliases.includes(message.cmd.slice(1).trim().toLowerCase())) ||
+					commands.find((v) => v.aliases.includes(message.cmd.trim().toLowerCase())) ||
 					false;
 
 				if (message.isGroup && !configuration.OPTIONS.noLogs) {
@@ -281,9 +283,9 @@ export default {
 
 						let str = 'Something went wrong.\nPlease send this error stack to the owner :\n\n';
 
-						str += `Type : ${err.name}\n`;
-						str += `Message : ${err.message}\n`;
-						str += `Stack Trace : ${err.stack.substr(0, 20)}...`;
+						str += `Type : ${err.name || 'Unknown'}\n`;
+						str += `Message : ${err.message || 'Unknown'}\n`;
+						str += `Stack Trace : ${`${err.stack?.substr(0, 20)}...` || 'Unknown'}`;
 						await client[botNum].sendMessage(message.from, {
 							text: str,
 							footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
@@ -296,7 +298,7 @@ export default {
 							],
 							headerType: 1,
 						});
-						log(err);
+						console.log(err);
 					}
 				}
 			}

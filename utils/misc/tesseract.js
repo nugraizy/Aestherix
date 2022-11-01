@@ -25,10 +25,10 @@ export const tesseract = async (image, sender, lang = 'ind') =>
 				});
 			});
 
-			if (!languages.some((l) => l.code === lang)) {
+			if (!languages.some((l) => l.code.toLowerCase() === lang.toLowerCase())) {
 				unlinkFile(image);
 				INFOLOG(`[${color(time, 'cyan')}]`, `${color(`Language ${lang} is not supported`, 'red')}`);
-				reject({ error: `Language ${lang} not found`, languages });
+				resolve({ error: `Language ${lang} not found`, languages });
 				return;
 			}
 

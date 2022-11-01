@@ -56,7 +56,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 			result.forEach((v) => {
 				return (v.caption = v.caption == '' ? 'No caption' : v.caption);
 			});
-			const a = await client[botNum].sendMessage(
+			await client[botNum].sendMessage(
 				from,
 				{
 					image: { url: result[0].image },
@@ -74,8 +74,6 @@ Void Bot     1/${result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅ�
 				},
 				{ quoted: message },
 			);
-
-			console.log(a);
 		}
 	},
 };

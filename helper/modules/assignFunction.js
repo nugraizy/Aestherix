@@ -175,14 +175,15 @@ export const assign = (client) => {
 		 * @param {string} typeQuoted
 		 * @returns {Promis<string>}
 		 */
-		downloadAndSaveMediaMessage: async (media, path, typeQuoted) => {
-			const msg = await downloadContentFromMessage(media, typeQuoted.replace(/Message/g, ''));
-			const buffer = await toBuffer(msg);
+		downloadAndSaveMediaMessage: (media, path, typeQuoted) =>
+			new Promise(async (resolve) => {
+				const msg = await downloadContentFromMessage(media, typeQuoted.replace(/Message/g, ''));
+				const buffer = await toBuffer(msg);
 
-			await writeFile(path, buffer);
+				await writeFile(path, buffer);
 
-			return path;
-		},
+				resolve(path);
+			}),
 		/**
 		 * Download WhatsApp media message to buffer.
 		 * @param {AnyMediaMessageContent} media media message content.

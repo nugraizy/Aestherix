@@ -160,10 +160,11 @@ const start = async () => {
 		logger: P({ level: OPTIONS.trace ? 'trace' : OPTIONS.debugMode ? 'debug' : 'fatal' }),
 		auth: state,
 		markOnlineOnConnect: false,
-		syncFullHistory: false,
-		getMessage: async () => {
-			return { conversation: 'Please Try Again' };
-		},
+		shouldSyncHistoryMessage: () => false,
+		getMessage: async () => ({ conversation: 'Success syncing. Please resend the command again.' }),
+		generateHighQualityLinkPreview: true,
+		mediaCache: new Map(),
+		userDevicesCache: false,
 	};
 	const Client = makeWASocket(CONNECTION_CONFIG);
 

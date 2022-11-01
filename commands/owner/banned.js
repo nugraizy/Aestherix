@@ -27,8 +27,8 @@ export default {
 
 		if (args[1] == 'report' && isOwner) {
 			userBanned.push(args[3]);
-			configuration.bannedlist.push(args[3]);
-			configuration.blocklist.push(args[3]);
+			configuration.cache.bannedlist.push(args[3]);
+			configuration.cache.blocklist.push(args[3]);
 			writeJSON('./databases/users/banned.json', userBanned);
 
 			client[botNum].updateBlockStatus(args[3], 'block');
@@ -43,8 +43,8 @@ export default {
 					await client[botNum].sendMessage(from, { text: `@${mentioned.split('@')[0]} Already banned`, mentions: [mentioned] }, { quoted: message });
 					continue;
 				} else {
-					configuration.bannedlist.push(mentioned);
-					configuration.blocklist.push(mentioned);
+					configuration.cache.bannedlist.push(mentioned);
+					configuration.cache.blocklist.push(mentioned);
 					userBanned.push(mentioned);
 					writeJSON('./databases/users/banned.json', userBanned);
 					banned.push(mentioned);
@@ -87,8 +87,8 @@ export default {
 				} else if (notBanned) {
 					await client[botNum].sendMessage(from, { text: `@${user} is already banned`, mentions: [`${user}${S_WHATSAPP_NET}`] }, { quoted: message });
 				} else {
-					configuration.bannedlist.push(`${user}${S_WHATSAPP_NET}`);
-					configuration.blocklist.push(`${user}${S_WHATSAPP_NET}`);
+					configuration.cache.bannedlist.push(`${user}${S_WHATSAPP_NET}`);
+					configuration.cache.blocklist.push(`${user}${S_WHATSAPP_NET}`);
 					userBanned.push(`${user}${S_WHATSAPP_NET}`);
 					writeJSON('./databases/users/banned.json', userBanned);
 					await client[botNum].updateBlockStatus(`${user}${S_WHATSAPP_NET}`, 'block');
@@ -104,8 +104,8 @@ export default {
 				return await client[botNum].reply({ from, quoted: message }, 'Already banned');
 			}
 
-			configuration.bannedlist.push(mediaData.participant);
-			configuration.blocklist.push(mediaData.participant);
+			configuration.cache.bannedlist.push(mediaData.participant);
+			configuration.cache.blocklist.push(mediaData.participant);
 			userBanned.push(mediaData.participant);
 			writeJSON('./databases/users/banned.json', userBanned);
 			await client[botNum].updateBlockStatus(mediaData.participant, 'block');
