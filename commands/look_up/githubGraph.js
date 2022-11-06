@@ -19,11 +19,10 @@ export default {
 
 		await git.init(query, 'DRACULA');
 
-		git.fillBackground().createLines({ round: true }).placeCopyright();
+		await git.fillBackground().createLines({ round: true }).placeCopyright().placeIcons();
 
-		await git.placeIcons();
 		await git.textHeaders();
 
-		await client[botNum].sendMessage(from, { image: new Buffer.from(git.toBuffer()) });
+		await client[botNum].sendMessage(from, { image: new Buffer.from(git.toBuffer()) }, { quoted: message });
 	},
 };

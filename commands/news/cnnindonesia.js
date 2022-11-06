@@ -64,7 +64,7 @@ export default {
 				templateButtons: [
 					{ urlButton: { displayText: 'Image Source', url: data[0].image } },
 					{ urlButton: { displayText: 'Article Source', url: data[0].link } },
-					{ quickReplyButton: { displayText: 'Next Article', id: `${cmd} next ${data[1].image} ${JSON.stringify(data)}` } },
+					data.length !== 1 ? { quickReplyButton: { displayText: 'Next Article', id: `${cmd} next ${data[1].image} ${JSON.stringify(data)}` } } : {},
 				],
 				footer: `Void Bot     1/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 			},

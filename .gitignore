@@ -7,3 +7,4 @@ databases/users/*.json
 media_files/connection_databases/*.json
 temporary_files/
 test.*
+t.js

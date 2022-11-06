@@ -19,7 +19,7 @@ async function updateSpotifyTracks() {
 			const data = await spotifier.updateNowPlayingStates();
 
 			if (data !== false) {
-				clientMqttListen.publish(process.env.MQTT_TOPIC, JSON.stringify({ ...data, status: true }));
+				clientMqttListen.publish(process.env.MQTT_TOPIC, JSON.stringify({ data, status: true }));
 			}
 		},
 		async () => {},

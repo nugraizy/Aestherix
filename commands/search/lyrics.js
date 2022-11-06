@@ -25,8 +25,8 @@ export default {
 				{
 					text: `\`\`\` • Lyrics \`\`\`
                     
-Artist: ${data[index].artist}
-Song: ${data[index].song}
+Artist : ${data[index].artist}
+Song : ${data[index].song}
 \n${data[index].lyrics}`,
 					templateButtons: [
 						index + 1 !== data.length ? { quickReplyButton: { displayText: 'Next Lyrics', id: `.lyrics next ${data[index + 1].index} ${JSON.stringify(data)}` } } : {},
@@ -46,7 +46,7 @@ Song: ${data[index].song}
 			const result = await arq.findLyrics(querie.trim());
 
 			if ('error' in result || !result.ok) {
-				await client[botNum].reply({ from, quoted: message }, JSON.stringify(result));
+				client[botNum].reply({ from, quoted: message }, JSON.stringify(result));
 				continue;
 			}
 
@@ -57,10 +57,12 @@ Song: ${data[index].song}
 				{
 					text: `\`\`\` • Lyrics \`\`\`
                     
-Artist: ${result.result[0].artist}
-Song: ${result.result[0].song}
+Artist : ${result.result[0].artist}
+Song : ${result.result[0].song}
 \n${result.result[0].lyrics}`,
-					templateButtons: [{ quickReplyButton: { displayText: 'Next Lyrics', id: `.lyrics next ${result.result[1].index} ${JSON.stringify(result.result)}` } }],
+					templateButtons: [
+						result.result.length !== 1 ? { quickReplyButton: { displayText: 'Next Lyrics', id: `.lyrics next ${result.result[1].index} ${JSON.stringify(result.result)}` } } : {},
+					],
 					footer: `Void Bot     1/${result.result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 				},
 				{ quoted: message },

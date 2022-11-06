@@ -70,7 +70,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: result.result[0].mainThumb } },
 						{ urlButton: { displayText: 'PHub Source', url: result.result[0].url } },
-						{ quickReplyButton: { displayText: 'Next Post', id: `.phub next ${result.result[0].mainThumb} ${JSON.stringify(result.result)}` } },
+						result.result.length !== 1 ? { quickReplyButton: { displayText: 'Next Post', id: `.phub next ${result.result[1].mainThumb} ${JSON.stringify(result.result)}` } } : {},
 					],
 					footer: `Title : ${result.result[0].title}
 Pornstars : ${result.result[0].pornstars.join(', ')}

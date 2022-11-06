@@ -1,5 +1,5 @@
 /* global botNum */
-import { Attachment } from '../../helper/index.js';
+import { Attachment, fetchBUFFER } from '../../helper/index.js';
 
 export default {
 	name: 'attachment',
@@ -9,27 +9,31 @@ export default {
 	aliases: ['attach'],
 	cooldown: 5,
 	limit: 0,
-	status: 'disable',
+	status: 'enable',
 	async run({ sender, mention, from, groupName }, client) {
 		const attach = new Attachment(1024, 500);
 
-		const profile = await client[botNum].profilePictureUrl(mention[0] || sender, 'image').catch(() => './media_files/blank.png');
+		const { profile, radi } = await client[botNum]
+			.profilePictureUrl(mention[0] || sender, 'image')
+			.then(async (image) => ({ profile: new Buffer.from(await fetchBUFFER(image)), radi: 180 }))
+			.catch(() => ({ profile: './media_files/blank.png', radi: 80 }));
 
-		(await attach.fillBackground().appendImage(profile, { stroke: true, strokeWidth: 9, strokeColor: attach.PALETTES.RED, roundedRadius: 70 })).appendText(
-			'Welcome to',
-			mention?.[0]?.split('@')?.[0] || sender.split('@')[0],
-			groupName,
-			attach.canvas.width / 2,
-			attach.canvas.height / 2,
-			{
+		await attach.init(profile);
+
+		attach.fillBackground();
+
+		await attach.putAssets();
+		await attach.appendImage({ roundedRadius: radi });
+		await attach
+			.appendText('Welcome to', '6289607055246', groupName, attach.canvas.width / 2, attach.canvas.height / 2, {
 				fontSize: 62,
 				color: attach.PALETTES.GREEN,
 				shadow: true,
 				participantColor: attach.PALETTES.GREEN,
 				groupNameColor: attach.PALETTES.PURPLE,
 				textColor: attach.PALETTES.RED,
-			},
-		);
+			})
+			.placeCopyright();
 
 		await client[botNum].sendMessage(from, { image: new Buffer.from(attach.toBuffer(), 'base64') });
 	},

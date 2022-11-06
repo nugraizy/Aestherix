@@ -517,9 +517,7 @@ export const waifu2x = (input, sender) =>
 				},
 			});
 
-			const {
-				data: { finished },
-			} = await axios.get(_api('/check', 'v2'), {
+			const { data } = await axios.get(_api('/check', 'v2'), {
 				params: { hash },
 				headers: {
 					Referer: 'https://waifu2x.pro/',
@@ -528,7 +526,7 @@ export const waifu2x = (input, sender) =>
 				},
 			});
 
-			if (finished) {
+			if (data.finished) {
 				const { data } = await axios.get(_api('/get', 'v2'), {
 					params: {
 						hash,
@@ -544,7 +542,7 @@ export const waifu2x = (input, sender) =>
 			}
 
 			await fs.unlink(input);
-			reject(new Error('Cannot resolve your requests. Try again later.'));
+			resolve({ error: 'Client Rejects the requests. please try again later.' });
 		} catch (err) {
 			ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Failed to Enhance image', 'red')} for ${color(sender, '#ff71ce')}`);
 			await fs.unlink(input);

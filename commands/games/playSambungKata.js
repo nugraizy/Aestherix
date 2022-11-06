@@ -1,5 +1,5 @@
 /* global botNum */
-import { GetSambungKataSession, SambungKata } from '../../utils/games/index.js';
+import { getSambungkataSession, SambungKata } from '../../utils/games/index.js';
 
 export default {
 	name: 'sambungkata',
@@ -15,7 +15,7 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'This feature only for groups');
 		}
 
-		const statusGame = GetSambungKataSession(from);
+		const statusGame = getSambungkataSession(from);
 
 		if (!statusGame) {
 			new SambungKata(sender, undefined, from);

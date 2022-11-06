@@ -2,7 +2,7 @@
 import dayjs from 'dayjs';
 
 import configuration from '../../connect.js';
-import { CheckIntervals, DeleteIntervals, SetIntervals } from '../misc/index.js';
+import { checkIntervals, deleteIntervals, setIntervals } from '../misc/index.js';
 
 /**
  * Search new Anonymous session.
@@ -17,7 +17,7 @@ export const search = async (key, timer, client, message) => {
 
 	if (status) {
 		if (configuration.anonymous.has(key)) {
-			return { status: 'searching', seconds: CheckIntervals(configuration.intervals['anonymous'].get(key)).timer };
+			return { status: 'searching', seconds: checkIntervals(configuration.intervals['anonymous'].get(key)).timer };
 		}
 
 		status.partner = key;
@@ -44,7 +44,7 @@ export const search = async (key, timer, client, message) => {
 		.add(timer + 2, 's')
 		.valueOf();
 
-	SetIntervals(
+	setIntervals(
 		configuration.intervals['anonymous'],
 		key,
 		timer + 2,
@@ -54,19 +54,19 @@ export const search = async (key, timer, client, message) => {
 			}
 
 			const second = Math.floor(((remaining - new Date().getTime()) % (1000 * 60)) / 1000);
-			const { partner1, partner2, partner1Message } = CheckIntervals(configuration.intervals['anonymous'].get(id));
+			const { partner1, partner2, partner1Message } = checkIntervals(configuration.intervals['anonymous'].get(id));
 
 			configuration.intervals['anonymous'].get(id).timer = second;
 
 			if (partner2 !== null) {
-				DeleteIntervals(configuration.intervals['anonymous'].get(id), configuration.intervals['anonymous'], id);
+				deleteIntervals(configuration.intervals['anonymous'].get(id), configuration.intervals['anonymous'], id);
 				return;
 			}
 
 			if (second <= 0) {
 				clients[botNum].reply({ from: partner1, quoted: partner1Message }, 'Your partner is not found! Try again later!');
 				configuration.anonymous.delete(id);
-				DeleteIntervals(configuration.intervals['anonymous'].get(id), configuration.intervals['anonymous'], id);
+				deleteIntervals(configuration.intervals['anonymous'].get(id), configuration.intervals['anonymous'], id);
 				return;
 			}
 		},

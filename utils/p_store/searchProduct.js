@@ -23,7 +23,7 @@ const parse = (arr) => {
 	});
 };
 
-export const PStoreProduct = (keyword) =>
+export const pStoreProduct = (keyword) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			const { data } = await axios({

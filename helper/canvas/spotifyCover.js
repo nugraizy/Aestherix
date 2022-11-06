@@ -279,6 +279,11 @@ export class SpotifyCover {
 			this.ctx.drawImage(assets.circle_diagonal, x(w / (n + 0.5)) + 390, y(h / (n + 0.5)), w / (n + 0.5), h / (n + 0.5));
 			this.ctx.drawImage(assets.share, x(w / (n + 2.1)) + 390, y(h / (n + 2.1)) + 100, w / (n + 2.1), h / (n + 2.1));
 			this.ctx.drawImage(assets.speaker, x(w / (n + 0.7)) - 360, y(h / (n + 0.7)) + 100, w / (n + 0.7), h / (n + 0.7));
+			this.ctx.drawImage(assets.github_signature, 120, this.canvas.height - 300, assets.github_signature.width / 8.5, assets.github_signature.height / 8.5);
+
+			this.ctx.font = '38px texgy';
+			this.ctx.fillStyle = chroma('white').hex();
+			this.ctx.fillText('- nugraizy', 130, this.canvas.height - 220);
 		};
 	}
 

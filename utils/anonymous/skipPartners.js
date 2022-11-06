@@ -1,5 +1,5 @@
 import configuration from '../../connect.js';
-import { CheckIntervals } from '../misc/index.js';
+import { checkIntervals } from '../misc/index.js';
 import { search } from './index.js';
 
 /**
@@ -17,7 +17,7 @@ export const skip = (key, timer, client, message, isStop) => {
 
 	if (status) {
 		if (status.partner == null) {
-			return { status: 'searching', seconds: CheckIntervals(configuration.intervals['anonymous'].get(key)).timer };
+			return { status: 'searching', seconds: checkIntervals(configuration.intervals['anonymous'].get(key)).timer };
 		}
 
 		results = configuration.anonymous.has(key)

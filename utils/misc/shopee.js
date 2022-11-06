@@ -3,6 +3,7 @@ import axios from 'axios';
 
 const COOKIE = '__LOCALE__null=ID; csrftoken=VLT3in1vbv6tm8MLZGg37FG2hLk5hCrE; ';
 const COOKIE_URL = 'https://shopee.co.id/api/v4/pages/is_short_url/?path=search';
+
 const API_URL = (product, total) =>
 	`https://shopee.co.id/api/v4/search/search_items?by=relevancy&keyword=${product}&limit=${total}&newest=0&order=desc&page_type=search&scenario=PAGE_GLOBAL_SEARCH&version=2`;
 const URL_PRODUCT = (productName, productId, shopeeId) => `https://shopee.co.id/${productName}-i.${shopeeId}.${productId}`;

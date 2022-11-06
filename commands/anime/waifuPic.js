@@ -83,7 +83,9 @@ export default {
 					caption: '``` • Waifu Pics ```',
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: result[0] } },
-						{ quickReplyButton: { displayText: 'Next Image', id: `.waifupic next ${querie} ${nsfw ? 'nsfw' : 'sfw'} ${result[1]} ${JSON.stringify(result)}` } },
+						result.length !== 1
+							? { quickReplyButton: { displayText: 'Next Image', id: `.waifupic next ${querie} ${nsfw ? 'nsfw' : 'sfw'} ${result[1]} ${JSON.stringify(result)}` } }
+							: {},
 					],
 					footer: `Provided by waifu.pics\nVoid Bot     1/${result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 				},

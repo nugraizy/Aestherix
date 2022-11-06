@@ -491,5 +491,29 @@
       "notification": "disable",
       "banned": []
     }
+  },
+  {
+    "120363044879066269@g.us": {
+      "groupName": "sider",
+      "groupDescription": "just for fun\nno share +18\nlu di grup ini bisa :\nNgeluarin unek² , nyari pcr , gibah , nyari tmn mabar , curhat \nNo admin yang 9522 paling ganteng",
+      "welcome1": "disable",
+      "welcome1msg": "Welcome to {groupName}",
+      "welcome2": "disable",
+      "welcome2msg": "Welcome to {groupName}",
+      "left1": "disable",
+      "left1msg": "Bye bye {groupName}",
+      "left2": "disable",
+      "left2msg": "Bye bye {groupName}",
+      "antiDelete": "disable",
+      "antiGroupURL": "disable",
+      "antiURL": "disable",
+      "antiSpam": "disable",
+      "antiVirus": "disable",
+      "autoReader": "disable",
+      "antiNSFW": "disable",
+      "games": "disable",
+      "notification": "disable",
+      "banned": []
+    }
   }
 ]

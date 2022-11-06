@@ -69,7 +69,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 					caption: '``` • Flickr ```',
 					templateButtons: [
 						{ urlButton: { displayText: 'Flickr Source', url: result[0].source } },
-						{ quickReplyButton: { displayText: 'Next Image', id: `.flickr next ${result[1].download} ${JSON.stringify(result)}` } },
+						result.length !== 1 ? { quickReplyButton: { displayText: 'Next Image', id: `.flickr next ${result[1].download} ${JSON.stringify(result)}` } } : {},
 					],
 					footer: `Author : ${result[0].userName}
 Author Fullname : ${result[0].fullName}

@@ -27,7 +27,7 @@ const RANDOM_TURN_BASED_ON_MODEL = (player1, player2) => {
 	};
 };
 
-export const DeleteTicTacToeSession = (session) => {
+export const deleteTictactoeSession = (session) => {
 	const key = Array.from(configuration.games.tictactoe.values()).find((game) => game.PLAYER_1 == session || game.PLAYER_2 == session) || null;
 
 	if (key !== null && key.PLAYER_1 == session) {
@@ -39,7 +39,7 @@ export const DeleteTicTacToeSession = (session) => {
 	return null;
 };
 
-export const GetTicTacToeSession = (session) => {
+export const getTictactoeSession = (session) => {
 	const key = Array.from(configuration.games.tictactoe.values()).find((game) => game.PLAYER_1 == session || game.PLAYER_2 == session) || null;
 
 	if (key !== null && key.PLAYER_1 == session) {

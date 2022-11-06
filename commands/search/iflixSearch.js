@@ -97,7 +97,7 @@ export default {
 					caption,
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: data[0].thumbnail } },
-						{ quickReplyButton: { displayText: 'Next Series', id: `${cmd} next ${data[1].thumbnail} ${JSON.stringify(data)}` } },
+						data.length !== 1 ? { quickReplyButton: { displayText: 'Next Series', id: `${cmd} next ${data[1].thumbnail} ${JSON.stringify(data)}` } } : {},
 					],
 					footer: `Void Bot     1/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 				},

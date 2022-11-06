@@ -18,7 +18,7 @@ import { pathToFileURL } from 'url';
 import configuration from './connect.js';
 import { getSpinner } from './helper/misc/spinner/spinners.js';
 import { S_WHATSAPP_NET } from './helper/misc/wa_data/index.js';
-import { color, ERRLOG, INFOLOG, readJSON, romanize, writeJSON } from './helper/modules/functions.js';
+import { color, ERRLOG, INFOLOG, readJSON, romanize, writeJSON, delay } from './helper/modules/functions.js';
 
 let shouldWait = false;
 
@@ -133,6 +133,7 @@ const clientMqttListen = mqtt.connect(process.env.MQTT_URL);
 
 clientMqttListen.on('connect', () => {
 	clientMqttListen.subscribe(process.env.MQTT_TOPIC, async (err) => {});
+	clientMqttListen.subscribe(process.env.FREEGAME_TOPIC, async (err) => {});
 });
 
 Number.prototype.toTime = function () {
@@ -434,27 +435,57 @@ const start = async () => {
 
 	function connectMqtt() {
 		clientMqttListen.on('message', async (topic, message) => {
-			message = message.toString();
-			const data = JSON.parse(message);
+			if (topic === process.env.MQTT_TOPIC) {
+				message = message.toString();
+				const data = JSON.parse(message);
 
-			if (!data.status) {
-				return;
+				if (!data.status) {
+					return;
+				}
+
+				const content = `Spotify On ${data.isPlaying ? 'Play' : 'Paused'} :                                                       ${data.artists || ''} - ${data.trackTitle || ''}  ( ${
+					data.progressMs?.toTime() || '00'
+				} - ${data?.durationMs?.toTime() || '00'} )`;
+				const myStatus = await client[botNum].fetchStatus(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`);
+
+				if (myStatus.status == content) {
+					return;
+				}
+
+				await client[botNum].query({
+					tag: 'iq',
+					attrs: { to: S_WHATSAPP_NET, type: 'set', xmlns: 'status' },
+					content: [{ tag: 'status', attrs: {}, content: Buffer.from(content, 'utf-8') }],
+				});
+			} else if (topic === process.env.FREEGAME_TOPIC) {
+				message = message.toString();
+				const data = JSON.parse(message);
+
+				if (!data.status) {
+					return;
+				}
+
+				if (!data.from.length === 0) {
+					return;
+				}
+
+				const { data: result } = data;
+				for (const destination of data.from) {
+					const caption = `\`\`\` • Freegames Notifier\`\`\`
+
+${result.title}`;
+					await client[botNum].sendMessage(destination, {
+						image: { url: result.preview.images[0].source.url.replace('amp;') },
+						caption,
+						footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
+						templateButtons: [
+							{ urlButton: { displayText: 'Open Platform', url: result.url_overridden_by_dest } },
+							{ urlButton: { displayText: 'Image Source', url: result.preview.images[0].source.url.replace('amp;') } },
+						],
+					});
+					await delay(300);
+				}
 			}
-
-			const content = `Spotify On ${data.isPlaying ? 'Play' : 'Paused'} :                                                       ${data.artists || ''} - ${data.trackTitle || ''}  ( ${
-				data.progressMs?.toTime() || '00'
-			} - ${data?.durationMs?.toTime() || '00'} )`;
-			const myStatus = await client[botNum].fetchStatus(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`);
-
-			if (myStatus.status == content) {
-				return;
-			}
-
-			await client[botNum].query({
-				tag: 'iq',
-				attrs: { to: S_WHATSAPP_NET, type: 'set', xmlns: 'status' },
-				content: [{ tag: 'status', attrs: {}, content: Buffer.from(content, 'utf-8') }],
-			});
 		});
 	}
 
@@ -723,6 +754,10 @@ function reconnectMqttConnection(connection) {
 		delete configuration.presences.spotify;
 	}
 
-	clientMqttListen.reconnect();
+	if ('freegame' in configuration.intervals) {
+		clearInterval(configuration.intervals.freegame);
+		configuration.intervals.freegame = null;
+	}
+
 	connection();
 }

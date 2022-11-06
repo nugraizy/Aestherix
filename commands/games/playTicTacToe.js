@@ -1,6 +1,6 @@
 /* global botNum */
 import { delay } from '../../helper/modules/index.js';
-import { DeleteTicTacToeSession, GetTicTacToeSession, TicTacToe } from '../../utils/games/index.js';
+import { deleteTictactoeSession, getTictactoeSession, TicTacToe } from '../../utils/games/index.js';
 
 const WINNER_SETS = {
 	O: '🚫',
@@ -45,13 +45,13 @@ ${game.BOARD.map((v, i) => {
 Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 
 		if (/(del|dlt|d)/i.test(query)) {
-			const status = GetTicTacToeSession(sender);
+			const status = getTictactoeSession(sender);
 
 			if (!status) {
 				return await client[botNum].reply({ from, quoted: message }, 'You do not have a game');
 			}
 
-			DeleteTicTacToeSession(sender);
+			deleteTictactoeSession(sender);
 
 			await client[botNum].reply({ from, quoted: message }, 'Game deleted');
 		}
@@ -67,7 +67,7 @@ Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 		}
 
 		if (/[1-9]/.test(query)) {
-			const game = GetTicTacToeSession(sender);
+			const game = getTictactoeSession(sender);
 
 			if (!game) {
 				return await client[botNum].reply({ from, quoted: message }, 'You do not have a game');
@@ -82,13 +82,13 @@ Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 			if (move.status == 'WINNER' || move.status == 'DRAW') {
 				await client[botNum].sendMessage(from, { text: capt(move, true), mentions: [game.PLAYER_1, game.PLAYER_2] }, { quoted: message });
 
-				return DeleteTicTacToeSession(sender);
+				return deleteTictactoeSession(sender);
 			}
 
 			await client[botNum].sendMessage(from, { text: capt(move), mentions: [game.PLAYER_1, game.PLAYER_2] }, { quoted: message });
 
 			if (move.PLAYER_TURN == 'Void Bot') {
-				const botGames = GetTicTacToeSession(sender);
+				const botGames = getTictactoeSession(sender);
 
 				await client[botNum].reply({ from, quoted: message }, 'Void Bot TURN');
 				await delay(1000);
@@ -98,7 +98,7 @@ Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 				if (botMove.status == 'WINNER' || botMove.status == 'DRAW') {
 					await client[botNum].sendMessage(from, { text: capt(botMove, true), mentions: [botGames.PLAYER_1, botGames.PLAYER_2] }, { quoted: message });
 
-					return DeleteTicTacToeSession(sender);
+					return deleteTictactoeSession(sender);
 				}
 
 				await client[botNum].sendMessage(from, { text: capt(botMove, false), mentions: [botGames.PLAYER_1, botGames.PLAYER_2] }, { quoted: message });

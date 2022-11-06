@@ -64,7 +64,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: result[0].image } },
 						{ urlButton: { displayText: 'Pinterest Source', url: result[0].pinSource } },
-						{ quickReplyButton: { displayText: 'Next Image', id: `.pinterest next ${result[1].image} ${JSON.stringify(result).replace(/\|/g, '')}` } },
+						result.length !== 1 ? { quickReplyButton: { displayText: 'Next Image', id: `.pinterest next ${result[1].image} ${JSON.stringify(result).replace(/\|/g, '')}` } } : {},
 					],
 					footer: `Author : ${result[0].authorUsername}
 Author Fullname : ${result[0].authorFullname}

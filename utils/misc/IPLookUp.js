@@ -1,9 +1,9 @@
 import { fetchJSON } from '../../helper/index.js';
 
-const URL_API = (input) =>
+const _api = (input) =>
 	`http://ip-api.com/json/${input}?fields=status,message,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,query`;
 
-export const IPLookup = (input) =>
+export const iplookup = (input) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			const noData = 'No Data';
@@ -32,7 +32,7 @@ export const IPLookup = (input) =>
 				proxy,
 				hosting,
 				message,
-			} = await fetchJSON(URL_API(input));
+			} = await fetchJSON(_api(input));
 
 			if (status != 'success') {
 				resolve({ error: message });

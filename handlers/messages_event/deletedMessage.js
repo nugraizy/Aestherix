@@ -6,7 +6,7 @@ import configuration from '../../connect.js';
 import { __dirname } from '../../index.js';
 import { getFilesize, getFilesizeFromBytes, readBuffer, unlinkFile } from '../../helper/modules/index.js';
 import { reassign } from '../../helper/modules/reassignMessagesObject.js';
-import { CheckIntervals, DeleteIntervals } from '../../utils/misc/index.js';
+import { checkIntervals, deleteIntervals } from '../../utils/misc/index.js';
 
 export default {
 	async handler(client, message, fetches) {
@@ -47,12 +47,12 @@ export default {
 			}
 
 			if (
-				CheckIntervals(configuration.intervals.url.get(sender)) !== 0 &&
-				CheckIntervals(configuration.intervals.url.get(sender).get(from)) !== 0 &&
-				CheckIntervals(configuration.intervals.url.get(sender).get(from)).id == message.message.key.id
+				checkIntervals(configuration.intervals.url.get(sender)) !== 0 &&
+				checkIntervals(configuration.intervals.url.get(sender).get(from)) !== 0 &&
+				checkIntervals(configuration.intervals.url.get(sender).get(from)).id == message.message.key.id
 			) {
 				await client[botNum].reply({ from, quoted: message }, 'Good. Do not send URLs next time or i will kick you.');
-				DeleteIntervals(configuration.intervals.url.get(sender).get(from), configuration.intervals.url.get(sender), from);
+				deleteIntervals(configuration.intervals.url.get(sender).get(from), configuration.intervals.url.get(sender), from);
 				return;
 			}
 

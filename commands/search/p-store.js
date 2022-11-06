@@ -1,6 +1,6 @@
 /* global botNum */
 import { numberWithCommas, removeDuplicatesArray } from '../../helper/modules/index.js';
-import { PStoreProduct } from '../../utils/p_store/index.js';
+import { pStoreProduct } from '../../utils/p_store/index.js';
 
 const regex = (str1, str2) => new RegExp(`\\b${str1}\\b`).test(str2.toLowerCase());
 
@@ -23,7 +23,7 @@ export default {
 		queries = removeDuplicatesArray(queries);
 
 		for (const querie of queries) {
-			let product = await PStoreProduct(querie.trim());
+			let product = await pStoreProduct(querie.trim());
 
 			if ('error' in product) {
 				await client[botNum].reply({ from, quoted: message }, product.error);

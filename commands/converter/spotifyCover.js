@@ -21,7 +21,7 @@ export default {
 
 		cover.fillBackground({ gradient: true });
 
-		await cover.putTrackCover(); //({ round: 35, shadow: 55 });
+		await cover.putTrackCover({ round: 90, shadow: 80 });
 		await cover.putButtons();
 
 		cover.putText().putPlayback();

@@ -1,6 +1,12 @@
 import axios from 'axios';
 import FormData from 'form-data';
 
+/**
+ *
+ * @param {string} kurir
+ * @param {string} resi
+ * @returns
+ */
 export const resi = (kurir, resi) =>
 	new Promise(async (resolve, reject) => {
 		try {

@@ -2,7 +2,7 @@
 import similarity from 'string-similarity';
 
 import configuration from '../../connect.js';
-import { DeleteIntervals } from '../../utils/misc/intervals.js';
+import { deleteIntervals } from '../../utils/misc/intervals.js';
 
 export default {
 	async handler({ from, isAdmin, isGroup, body, message }, client, settings) {
@@ -12,12 +12,12 @@ export default {
 				const data = configuration.games.tebakGambar.get(from);
 
 				if (body.toLowerCase() == data.data.answer.toLowerCase()) {
-					DeleteIntervals(configuration.intervals['tebakGambar'].get(from), configuration.intervals['tebakGambar'], from);
+					deleteIntervals(configuration.intervals['tebakGambar'].get(from), configuration.intervals['tebakGambar'], from);
 					configuration.games.tebakGambar.delete(configuration.games.tebakGambar.get(from).id);
 					return await client[botNum].sendMessage(from, { text: 'Correct!' }, { quoted: message });
 				}
 
-				if (similarity.compareTwoString(body.toLowerCase(), data.data.answer.toLowerCase()) >= minScore) {
+				if (similarity.compareTwoStrings(body.toLowerCase(), data.data.answer.toLowerCase()) >= minScore) {
 					return await client[botNum].sendMessage(from, { text: 'The answer is close!' }, { quoted: message });
 				}
 			}

@@ -18,7 +18,9 @@ class API {
 			const date = $('.js-year-link').get();
 
 			if (!date) {
-				throw new Error('Username not found or privated their activity');
+				const err = 'Username not found or privated their activity';
+
+				throw new Error(err);
 			}
 
 			return date.map((el) => {

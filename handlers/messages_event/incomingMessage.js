@@ -268,6 +268,11 @@ export default {
 								.join(', ')}.`;
 
 							client[botNum].reply({ from: message.from, quoted: message.message }, help);
+
+							if (user.cooldown.get(message.sender)?.requests) {
+								user.cooldown.get(message.sender).requests = false;
+							}
+
 							continue;
 						}
 

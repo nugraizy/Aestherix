@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 
 import configuration from '../../connect.js';
 
-export const SetIntervals = async (intervaly, key, time, callback, opts = {}) => {
+export const setIntervals = async (intervaly, key, time, callback, opts = {}) => {
 	const starts = new Date().getTime();
 	const ends = dayjs(starts).add(parseInt(time), 'seconds').valueOf();
 
@@ -17,7 +17,7 @@ export const SetIntervals = async (intervaly, key, time, callback, opts = {}) =>
 	});
 };
 
-export const CheckIntervals = (intervaly) => {
+export const checkIntervals = (intervaly) => {
 	if (intervaly == undefined) {
 		return 0;
 	}
@@ -27,7 +27,7 @@ export const CheckIntervals = (intervaly) => {
 	};
 };
 
-export const CheckAllIntervals = () => {
+export const checkAllIntervals = () => {
 	const result = [];
 
 	for (const type in configuration.intervals) {
@@ -41,7 +41,7 @@ export const CheckAllIntervals = () => {
 	return result;
 };
 
-export const DeleteIntervals = (intervaly, rawIntervaly, key) => {
+export const deleteIntervals = (intervaly, rawIntervaly, key) => {
 	if (intervaly == undefined) {
 		return 0;
 	}

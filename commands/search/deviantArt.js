@@ -61,7 +61,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: result[0].image } },
 						{ urlButton: { displayText: 'Deviant Art Source', url: result[0].source } },
-						{ quickReplyButton: { displayText: 'Next Image', id: `.deviantart next ${result[1].image} ${JSON.stringify(result).replace(/\|/g, '')}` } },
+						result.length !== 1 ? { quickReplyButton: { displayText: 'Next Image', id: `.deviantart next ${result[1].image} ${JSON.stringify(result).replace(/\|/g, '')}` } } : {},
 					],
 					footer: `Title : ${result[0].author.capitalize()}
 Author : ${result[0].author}

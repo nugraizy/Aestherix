@@ -35,8 +35,8 @@ export default {
 				'short-option-groups': false,
 			},
 			alias: {
-				isStickers: ['stk', 'stick', 'sticker', 'sticks', 'stc'],
-				isImage: ['img', 'image', 'foto', 'images'],
+				isStickers: ['stk', 'stick', 'sticker', 'sticks', 'stc', 's'],
+				isImage: ['img', 'image', 'foto', 'images', 'i'],
 			},
 		});
 
