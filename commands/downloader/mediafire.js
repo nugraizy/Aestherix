@@ -18,7 +18,7 @@ export default {
 		}
 
 		if (!regex(query)) {
-			return client[botNum].reply({ from, quoted: message }, 'You must provide a query.');
+			return client[botNum].reply({ from, quoted: message }, 'Please specify a valid Mediafire url.');
 		}
 
 		const result = await mediafire(query);
