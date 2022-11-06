@@ -19,7 +19,7 @@ async function updateGames() {
 
 			games = data;
 
-			clientMqttListen.publish(process.env.FREEGAME_TOPIC, JSON.stringify({ ...data, from: configuration.intervals.from, status: true }));
+			clientMqttListen.publish(process.env.FREEGAME_TOPIC, JSON.stringify({ data, from: configuration.intervals.from, status: true }));
 		} catch (error) {
 			clearInterval(configuration.intervals.freegame);
 			delete configuration.intervals.freegame;
