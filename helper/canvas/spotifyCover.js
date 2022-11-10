@@ -11,6 +11,11 @@ import { spotifier } from '../../utils/spotifier/index.js';
 
 const { createCanvas, GlobalFonts, loadImage } = Canvas;
 
+const assets = {
+	fonts: null,
+	model: null,
+};
+
 export class SpotifyCover {
 	constructor() {
 		this._track = null;
@@ -67,7 +72,7 @@ export class SpotifyCover {
 			}
 
 			let gradient;
-			const gradientNumber = 0;
+			const gradientNumber = Math.floor(Math.random() * 3);
 
 			if (opts.gradient) {
 				gradient = this.ctx.createLinearGradient(0, this.canvas.height - 300, this.canvas.width / 1.4, this.canvas.height);
@@ -254,12 +259,12 @@ export class SpotifyCover {
 				iconType = 2;
 			}
 
-			const assets = {};
-			const dir = await fs.readdir('./media_files/assets/');
+			if (!assets.model) {
+				assets.model = {};
+				const dir = await fs.readdir('./media_files/assets/');
 
-			for (const asset of dir) {
-				if (asset.startsWith(iconType)) {
-					assets[asset.split('_').slice(2).join('_').replace(/\..*/, '')] = await loadImage(`./media_files/assets/${asset}`);
+				for (const asset of dir) {
+					assets.model[`${asset.at(0)}_${asset.split('_').slice(2).join('_').replace(/\..*/, '')}`] = await loadImage(`./media_files/assets/${asset}`);
 				}
 			}
 
@@ -271,19 +276,40 @@ export class SpotifyCover {
 			const x = (w1) => this.canvas.width / (n - 0.5) - (w1 || w) / (n - 0.5);
 			const y = (h1) => this.canvas.height / (n - 0.5) - (h1 || h) / (n - 0.5) + 430;
 
-			this.ctx.drawImage(assets.pause, x(), y(), w, h);
-			this.ctx.drawImage(assets.down_arrow, x(w / (n - 0.3)) - 390, y(h / (n - 0.3)) - 1320, w / (n - 0.3), h / (n - 0.3));
-			this.ctx.drawImage(assets.previous, x(w / (n + 0.5)) - 200, y(h / (n + 0.5)), w / (n + 0.5), h / (n + 0.5));
-			this.ctx.drawImage(assets.next, x(w / (n + 0.5)) + 200, y(h / (n + 0.5)), w / (n + 0.5), h / (n + 0.5));
-			this.ctx.drawImage(assets.heart, x(w / (n + 0.5)) - 390, y(h / (n + 0.5)), w / (n + 0.5), h / (n + 0.5));
-			this.ctx.drawImage(assets.circle_diagonal, x(w / (n + 0.5)) + 390, y(h / (n + 0.5)), w / (n + 0.5), h / (n + 0.5));
-			this.ctx.drawImage(assets.share, x(w / (n + 2.1)) + 390, y(h / (n + 2.1)) + 100, w / (n + 2.1), h / (n + 2.1));
-			this.ctx.drawImage(assets.speaker, x(w / (n + 0.7)) - 360, y(h / (n + 0.7)) + 100, w / (n + 0.7), h / (n + 0.7));
-			this.ctx.drawImage(assets.github_signature, 120, this.canvas.height - 300, assets.github_signature.width / 8.5, assets.github_signature.height / 8.5);
+			this.ctx.drawImage(assets.model[`${iconType}_pause`], x(), y(), w, h);
+			this.ctx.drawImage(assets.model[`${iconType}_down_arrow`], x(w / (n - 0.3)) - 390, y(h / (n - 0.3)) - 1320, w / (n - 0.3), h / (n - 0.3));
+			this.ctx.drawImage(assets.model[`${iconType}_previous`], x(w / (n + 0.5)) - 200, y(h / (n + 0.5)), w / (n + 0.5), h / (n + 0.5));
+			this.ctx.drawImage(assets.model[`${iconType}_next`], x(w / (n + 0.5)) + 200, y(h / (n + 0.5)), w / (n + 0.5), h / (n + 0.5));
+			this.ctx.drawImage(assets.model[`${iconType}_heart`], x(w / (n + 0.5)) - 390, y(h / (n + 0.5)), w / (n + 0.5), h / (n + 0.5));
+			this.ctx.drawImage(assets.model[`${iconType}_circle_diagonal`], x(w / (n + 0.5)) + 390, y(h / (n + 0.5)), w / (n + 0.5), h / (n + 0.5));
+			this.ctx.drawImage(assets.model[`${iconType}_share`], x(w / (n + 2.1)) + 390, y(h / (n + 2.1)) + 100, w / (n + 2.1), h / (n + 2.1));
+			this.ctx.drawImage(assets.model[`${iconType}_speaker`], x(w / (n + 0.7)) - 360, y(h / (n + 0.7)) + 100, w / (n + 0.7), h / (n + 0.7));
 
-			this.ctx.font = '38px texgy';
+			this.ctx.drawImage(
+				assets.model[`${iconType}_github`],
+				120,
+				this.canvas.height - 220,
+				assets.model[`${iconType}_github`].width / 2,
+				assets.model[`${iconType}_github`].height / 2,
+			);
+			this.ctx.font = '32px galyon';
 			this.ctx.fillStyle = chroma('white').hex();
-			this.ctx.fillText('- nugraizy', 130, this.canvas.height - 220);
+			this.ctx.fillText('nugraizy', 220, this.canvas.height - 180);
+
+			const instagram = '_dizyy_';
+
+			this.ctx.drawImage(
+				assets.model[`${iconType}_instagram`],
+				this.canvas.width - 120 - assets.model[`${iconType}_instagram`].width / 8.5,
+				this.canvas.height - 220,
+				assets.model[`${iconType}_instagram`].width / 8.5,
+				assets.model[`${iconType}_instagram`].height / 8.5,
+			);
+			this.ctx.font = '32px galyon';
+			this.ctx.fillStyle = chroma('white').hex();
+			this.ctx.fillText(instagram, this.canvas.width - 160 - this.ctx.measureText(instagram).width - assets.model[`${iconType}_instagram`].height / 8.5, this.canvas.height - 180);
+
+			return this;
 		};
 	}
 
@@ -295,10 +321,13 @@ export class SpotifyCover {
 	}
 
 	initCanvas() {
-		GlobalFonts.registerFromPath(path.join(__dirname, 'media_files/fonts/Antebas-Regular.otf'), 'antre');
-		GlobalFonts.registerFromPath(path.join(__dirname, 'media_files/fonts/texgyreadventor-bold.otf'), 'texgy');
-		GlobalFonts.registerFromPath(path.join(__dirname, 'media_files/fonts/AtypText-Semibold.ttf'), 'atyp');
-		GlobalFonts.registerFromPath(path.join(__dirname, 'media_files/fonts/SourceSansPro-ExtraLight.ttf'), 'sans-thin');
+		if (!assets.fonts) {
+			GlobalFonts.registerFromPath(path.join(__dirname, 'media_files/fonts/Antebas-Regular.otf'), 'antre');
+			GlobalFonts.registerFromPath(path.join(__dirname, 'media_files/fonts/texgyreadventor-bold.otf'), 'texgy');
+			GlobalFonts.registerFromPath(path.join(__dirname, 'media_files/fonts/AtypText-Semibold.ttf'), 'atyp');
+			GlobalFonts.registerFromPath(path.join(__dirname, 'media_files/fonts/SourceSansPro-ExtraLight.ttf'), 'sans-thin');
+			GlobalFonts.registerFromPath(path.join(__dirname, 'media_files/fonts/Galyon-Book.otf'), 'galyon');
+		}
 
 		this.canvas = createCanvas(1080, 2340);
 		this.ctx = this.canvas.getContext('2d');

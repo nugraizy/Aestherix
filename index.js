@@ -12,11 +12,9 @@ import cron from 'node-cron';
 import path from 'path';
 import P from 'pino';
 import { platform } from 'process';
-import Spinnies from 'spinnies';
 import { pathToFileURL } from 'url';
 
 import configuration from './connect.js';
-import { getSpinner } from './helper/misc/spinner/spinners.js';
 import { S_WHATSAPP_NET } from './helper/misc/wa_data/index.js';
 import { color, ERRLOG, INFOLOG, readJSON, romanize, writeJSON, delay } from './helper/modules/functions.js';
 
@@ -32,8 +30,6 @@ const moduleURL = new URL(import.meta.url);
 
 export const __dirname = platform == 'win32' ? path.dirname(moduleURL.pathname).slice(1) : path.dirname(moduleURL.pathname);
 const { stdout } = process;
-
-const spinners = new Spinnies({ color: 'blue', succeedColor: 'green', failColor: 'redBright', spinner: getSpinner('dots') });
 
 configuration.cli = parseCli();
 configuration.OPTIONS = configuration.cli.flags;
@@ -113,22 +109,6 @@ if (!fs.existsSync('./temporary_files/')) {
 	fs.mkdirSync('./temporary_files/');
 }
 
-const addSpinner = (name, options) => {
-	if (!OPTIONS.noLoad) {
-		spinners.add(name, options);
-	}
-};
-const successSpinner = (name, options) => {
-	if (!OPTIONS.noLoad) {
-		spinners.succeed(name, options);
-	}
-};
-const failSpinner = (name, options) => {
-	if (!OPTIONS.noLoad) {
-		spinners.fail(name, options);
-	}
-};
-
 const clientMqttListen = mqtt.connect(process.env.MQTT_URL);
 
 clientMqttListen.on('connect', () => {
@@ -144,6 +124,7 @@ Number.prototype.toTime = function () {
 };
 
 let isClosed = false;
+let tries = 0;
 
 const start = async () => {
 	if (OPTIONS.help) {
@@ -153,8 +134,8 @@ const start = async () => {
 
 	const load = async () => {
 		await loadCommands();
-		await loadEveryCommand();
 	};
+
 	const CONNECTION_CONFIG = {
 		printQRInTerminal: true,
 		version: DEFAULT_CONNECTION_CONFIG.version,
@@ -173,10 +154,6 @@ const start = async () => {
 
 	Client.ev.on('connection.update', async ({ lastDisconnect, connection, receivedPendingNotifications }) => {
 		try {
-			if (connection == 'connecting') {
-				addSpinner('Connecting', { text: 'Connecting to WASocket...' });
-			}
-
 			if (connection == 'close') {
 				const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
 
@@ -225,7 +202,7 @@ const start = async () => {
 					global.botNum = Client.user.id;
 					client[Client.user.id] = Client;
 					(await import('./helper/modules/assignFunction.js')).assign(client);
-					successSpinner('Connecting', { text: 'Connected to WASocket' });
+
 					INFOLOG(color(center(`Bot Version  ${romanize(readJSON('./package.json').version)}\n\n`, stdout.columns), '#9f53ea'));
 
 					connectEvent();
@@ -517,21 +494,13 @@ function loadFiles(dir) {
 }
 
 async function loadCommands() {
-	addSpinner('files', { text: 'Loading Files...' });
 	const commands = loadFiles('./commands');
-
-	successSpinner('files', { text: `Loaded ${commands.length} files` });
-	addSpinner('commands', { text: 'Loading Commands...' });
-
-	if (OPTIONS.watch) {
-		addSpinner('watch', { text: 'Watching for changes...' });
-	}
 
 	for (const command of commands) {
 		try {
 			const cmd = (await import(pathToFileURL(path.join(__dirname, command)))).default;
 
-			if (cmd.status != 'disable') {
+			if (cmd.status !== 'disable') {
 				if (OPTIONS.watch) {
 					await watchFile(pathToFileURL(path.join(__dirname, command)), cmd.name);
 				}
@@ -539,26 +508,13 @@ async function loadCommands() {
 				const modules = process.platform == 'win32' ? pathToFileURL(path.join(__dirname, command)).pathname.slice(1) : pathToFileURL(path.join(__dirname, command)).pathname;
 
 				configuration.cmds.commands.set(cmd.name, { ...cmd, pathname: decodeURI(modules) });
+				configuration.cmds.aliases = [...cmd.aliases, ...configuration.cmds.aliases];
 				configuration.commandsPath.push(decodeURI(modules));
 			}
 		} catch (e) {
 			log(e);
 			ERRLOG(`${color(command, 'red')} ${color('is causing error. Please check the file before running.', 'white')}`);
 			process.exit(0);
-		}
-	}
-
-	successSpinner('commands', { text: `Loaded ${configuration.cmds.commands.size} commands` });
-
-	if (OPTIONS.watch) {
-		successSpinner('watch', { text: `Watched ${configuration.cmds.commands.size} commands` });
-	}
-}
-
-async function loadEveryCommand() {
-	for (const command of configuration.cmds.commands) {
-		for (const aliases of command[1].aliases) {
-			configuration.cmds.aliases.push(aliases);
 		}
 	}
 }
