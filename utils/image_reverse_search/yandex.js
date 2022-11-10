@@ -1,9 +1,8 @@
-import fs from 'fs';
 import fetch from 'node-fetch';
 
-import { cheerioLOAD, fetchJSON, fetchTEXT, isURL } from '../../helper/modules/index.js';
+import { cheerioLOAD, fetchTEXT, isURL, UA, uploadToTelegraph } from '../../helper/index.js';
 
-const URL_BASE = (input) => `https://yandex.com/images/search?rpt=imageview&url=${input}`;
+const _api = (input) => `https://yandex.com/images/search?rpt=imageview&url=${input}`;
 
 const isValidImageURL = async (url) => {
 	try {
@@ -19,59 +18,49 @@ const isValidImageURL = async (url) => {
 	}
 };
 
-const postImage = async (file) => {
-	try {
-		const { url } = await fetchJSON('https://yandex.com/images-apphost/image-download?cbird=111&images_avatars_size=orig&images_avatars_namespace=images-cbir', {
-			method: 'post',
-			body: fs.readFileSync(file),
-			headers: {
-				cookie:
-					'is_gdpr=0; yandexuid=8061117791646679247; i=TOzP/iLfxpPtpYkc5o5+cmu9eR3EDL5vmX4zTFE1ZwOWXlchamsv/NiInft9B0YjJO7E3Um0LeSfEk5s1tFyQ09b0Hc=; is_gdpr_b=CPrlYRCWZigC; mda=0; my=YwA=; ys=wprid.1646826348600464-10355450763662077070-man1-2641-ced-man-l7-balancer-8080-BAL-672; yandex_gid=10574; bltsr=1; MGphYZof=1; _yasc=sobSth10AqC1wS/0p/c/jfAgad0tDPrJpHcdENiwq6g/q+BF0Ruy9tIiJ1dVUA==;',
-			},
-		});
-
-		return url;
-	} catch (error) {
-		return false;
-	}
-};
-
 export const yandex = async (file, { limit = 20 } = {}) =>
-	new Promise(async (resolve) => {
+	new Promise(async (resolve, reject) => {
 		try {
 			if (!isURL(file)) {
-				file = await postImage(file);
+				file = await uploadToTelegraph(file);
 			} else if (isURL(file) && !(await isValidImageURL(file))) {
 				return resolve({ error: 'Invalid image URL' });
 			}
 
-			const dataInformation = await fetchTEXT(URL_BASE(file), {
+			const ua = UA();
+
+			const dataInformation = await fetchTEXT(_api(file), {
 				headers: {
 					cookie:
-						'is_gdpr=0; yandexuid=8061117791646679247; i=TOzP/iLfxpPtpYkc5o5+cmu9eR3EDL5vmX4zTFE1ZwOWXlchamsv/NiInft9B0YjJO7E3Um0LeSfEk5s1tFyQ09b0Hc=; is_gdpr_b=CPrlYRCWZigC; mda=0; my=YwA=; ys=wprid.1646826348600464-10355450763662077070-man1-2641-ced-man-l7-balancer-8080-BAL-672; yandex_gid=10574; bltsr=1; MGphYZof=1; _yasc=sobSth10AqC1wS/0p/c/jfAgad0tDPrJpHcdENiwq6g/q+BF0Ruy9tIiJ1dVUA==;',
+						'mda=0; yandex_gid=112665; yandexuid=7619580781668102965; yuidss=7619580781668102965; is_gdpr=0; is_gdpr_b=CIyaHxDUlAEoAg==; i=aV+BsdmB5XW/GOuXKw3lw1JY3DAJJ1DDk9X5cVdJr962Qgfuphh43+iwo/EYmtz/iI/n+8WgcDRuXoCfU5goK69YCdc=; my=YwA=; bltsr=1; KIykI=1; spravka=dD0xNjY4MTEwMjY2O2k9MjAwMTo0NDhhOjEwNDE6YmU4OTo4MGNkOmQ5MTpiMmIyOjMxMGI7RD05MzUzOEE3NDk0MjYxNjkwQkI2NUREQTAzNDhDNjJENURENEMyNUZGQkFGODJERThFMTNEMEZDM0JBQjQxNkFFQzA1RThFQ0M7dT0xNjY4MTEwMjY2MDM3MjkwOTI5O2g9ZmE3ZDUzNDk1ZjE3MjIwMTc5MmE2NjdhNmY2M2IxZjk=; _yasc=prYDVz9hUr5MvE7MO/qvScS4uny1TIr+t4amnRSdf1FHU155d9t41rXlEyZ4PpufIonvBMn9DKVZcYA=; yp=1670694965.ygu.1#1668707775.szm.1:1366x768:767x641',
+					'user-agent': ua,
 				},
 			});
-			const dataImages = await fetchTEXT(`${URL_BASE(file)}&cbir_page=similar`, {
+			const dataImages = await fetchTEXT(`${_api(file)}&cbir_page=similar`, {
 				headers: {
 					cookie:
-						'is_gdpr=0; yandexuid=8061117791646679247; i=TOzP/iLfxpPtpYkc5o5+cmu9eR3EDL5vmX4zTFE1ZwOWXlchamsv/NiInft9B0YjJO7E3Um0LeSfEk5s1tFyQ09b0Hc=; is_gdpr_b=CPrlYRCWZigC; mda=0; my=YwA=; ys=wprid.1646826348600464-10355450763662077070-man1-2641-ced-man-l7-balancer-8080-BAL-672; yandex_gid=10574; bltsr=1; MGphYZof=1; _yasc=sobSth10AqC1wS/0p/c/jfAgad0tDPrJpHcdENiwq6g/q+BF0Ruy9tIiJ1dVUA==;',
+						'mda=0; yandex_gid=112665; yandexuid=7619580781668102965; yuidss=7619580781668102965; is_gdpr=0; is_gdpr_b=CIyaHxDUlAEoAg==; i=aV+BsdmB5XW/GOuXKw3lw1JY3DAJJ1DDk9X5cVdJr962Qgfuphh43+iwo/EYmtz/iI/n+8WgcDRuXoCfU5goK69YCdc=; my=YwA=; bltsr=1; KIykI=1; spravka=dD0xNjY4MTEwMjY2O2k9MjAwMTo0NDhhOjEwNDE6YmU4OTo4MGNkOmQ5MTpiMmIyOjMxMGI7RD05MzUzOEE3NDk0MjYxNjkwQkI2NUREQTAzNDhDNjJENURENEMyNUZGQkFGODJERThFMTNEMEZDM0JBQjQxNkFFQzA1RThFQ0M7dT0xNjY4MTEwMjY2MDM3MjkwOTI5O2g9ZmE3ZDUzNDk1ZjE3MjIwMTc5MmE2NjdhNmY2M2IxZjk=; _yasc=prYDVz9hUr5MvE7MO/qvScS4uny1TIr+t4amnRSdf1FHU155d9t41rXlEyZ4PpufIonvBMn9DKVZcYA=; yp=1670694965.ygu.1#1668707775.szm.1:1366x768:767x641',
+					'user-agent': ua,
 				},
 			});
+
 			const $images = cheerioLOAD(dataImages);
 			const $information = cheerioLOAD(dataInformation);
 			const now = new Date();
 			const container = { status: 'OK', responseTime: 0, information: [] };
 
-			$information('div.CbirSites-Items > div.CbirSites-Item').each(function () {
-				if (container.information.length >= limit && limit !== 'infinite') {
-					return;
-				}
+			$information('li.CbirSites-Item')
+				.get()
+				.forEach((el) => {
+					if (container.information.length >= limit && limit !== 'infinite') {
+						return;
+					}
 
-				const title = $information(this).find('div.CbirSites-ItemInfo > div.CbirSites-ItemTitle').text();
-				const description = $information(this).find('div.CbirSites-ItemInfo > div.CbirSites-ItemDescription').text() || 'NO DESCRIPTION';
+					const title = $information(el).find('div.CbirSites-ItemInfo > div.CbirSites-ItemTitle').text();
+					const description = $information(el).find('div.CbirSites-ItemInfo > div.CbirSites-ItemDescription').text() || 'n/a';
 
-				container.information.push({ images: '', title, description });
-			});
+					container.information.push({ images: '', title, description });
+				});
 			$images('div > a.serp-item__link > img.serp-item__thumb.justifier__thumb').each((i, el) => {
 				if (container.information[i] == undefined) {
 					return;
@@ -84,6 +73,6 @@ export const yandex = async (file, { limit = 20 } = {}) =>
 			container.responseTime = (new Date() - now) / 1000;
 			resolve(container);
 		} catch (error) {
-			resolve({ error: error.message });
+			reject(error);
 		}
 	});

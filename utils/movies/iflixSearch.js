@@ -14,8 +14,8 @@ const parser = (arr) => {
 		return {
 			title: v.title,
 			actressStr: v.leading_actorX.join(', '),
-			director: v.director == '' ? 'N/A' : v.director,
-			status: v.holly_online_time ?? 'N/A',
+			director: v.director == '' ? 'n/a' : v.director,
+			status: v.holly_online_time ?? 'n/a',
 			totEpisode: v.episode_all ?? 1,
 			thumbnail: v.new_pic_hz_country_calc,
 			actressArr: v.leading_actorX,

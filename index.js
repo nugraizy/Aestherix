@@ -476,19 +476,24 @@ ${result.title}`;
 start().catch((e) => log(e));
 
 function loadFiles(dir) {
-	let files = [];
-	const list = fs.readdirSync(dir);
+	const files = [];
 
-	for (const file of list) {
-		const path = `${dir}/${file}`;
-		const stat = fs.statSync(path);
+	function walkDir(curDir) {
+		const list = fs.readdirSync(curDir);
 
-		if (stat?.isDirectory()) {
-			files = files.concat(loadFiles(path));
-		} else {
-			files.push(path);
+		for (const file of list) {
+			const path = `${curDir}/${file}`;
+			const stat = fs.statSync(path);
+
+			if (stat?.isDirectory()) {
+				walkDir(path);
+			} else {
+				files.push(path);
+			}
 		}
 	}
+
+	walkDir(dir);
 
 	return files;
 }
@@ -496,16 +501,27 @@ function loadFiles(dir) {
 async function loadCommands() {
 	const commands = loadFiles('./commands');
 
-	for (const command of commands) {
+	const container = [];
+
+	(
+		await Promise.all(
+			commands.map((v) => {
+				container.push({ pathname: v });
+
+				return import(pathToFileURL(path.join(__dirname, v)));
+			}),
+		)
+	).forEach((v, i) => (container[i].imports = v));
+
+	for (const obj of container) {
 		try {
-			const cmd = (await import(pathToFileURL(path.join(__dirname, command)))).default;
+			const cmd = obj.imports.default;
 
 			if (cmd.status !== 'disable') {
 				if (OPTIONS.watch) {
-					await watchFile(pathToFileURL(path.join(__dirname, command)), cmd.name);
+					await watchFile(pathToFileURL(path.join(__dirname, obj.pathname)), cmd.name);
 				}
-
-				const modules = process.platform == 'win32' ? pathToFileURL(path.join(__dirname, command)).pathname.slice(1) : pathToFileURL(path.join(__dirname, command)).pathname;
+				const modules = process.platform == 'win32' ? pathToFileURL(path.join(__dirname, obj.pathname)).pathname.slice(1) : pathToFileURL(path.join(__dirname, obj.pathname)).pathname;
 
 				configuration.cmds.commands.set(cmd.name, { ...cmd, pathname: decodeURI(modules) });
 				configuration.cmds.aliases = [...cmd.aliases, ...configuration.cmds.aliases];
@@ -513,7 +529,7 @@ async function loadCommands() {
 			}
 		} catch (e) {
 			log(e);
-			ERRLOG(`${color(command, 'red')} ${color('is causing error. Please check the file before running.', 'white')}`);
+			ERRLOG(`${color(obj.pathname, 'red')} ${color('is causing error. Please check the file before running.', 'white')}`);
 			process.exit(0);
 		}
 	}

@@ -11,10 +11,10 @@ const parseEpisode = async (url) => {
 	return {
 		category: data.article_category,
 		views: data.count_views,
-		published: data?.publish_date ?? 'N/A',
-		actressStr: data.actor?.join(', ') ?? 'N/A',
+		published: data?.publish_date ?? 'n/a',
+		actressStr: data.actor?.join(', ') ?? 'n/a',
 		actressArr: data?.actor ?? [],
-		director: data.director?.join(', ') ?? 'N/A',
+		director: data.director?.join(', ') ?? 'n/a',
 		genre: data.genres.join(', '),
 		totEpisode: Number(data.ep_total) || 1,
 		episodes:

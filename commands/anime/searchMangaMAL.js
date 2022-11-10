@@ -3,24 +3,24 @@ import { numberWithCommas } from '../../helper/index.js';
 import { MyAnimeList } from '../../utils/my_anime_list/index.js';
 
 const parse = (obj) => {
-	return `Full Title : ${obj?.title || 'N/A'}
-EN : ${obj?.alternative_titles?.en || 'N/A'}
-JP : ${obj?.alternative_titles?.ja || 'N/A'}
-ID : ${obj?.id || 'N/A'}
+	return `Full Title : ${obj?.title || 'n/a'}
+EN : ${obj?.alternative_titles?.en || 'n/a'}
+JP : ${obj?.alternative_titles?.ja || 'n/a'}
+ID : ${obj?.id || 'n/a'}
 
-Rank : ${obj?.rank || 'N/A'}
-Score : ${obj?.score || 'N/A'}
-Popularity : ${obj?.popularity || 'N/A'}
+Rank : ${obj?.rank || 'n/a'}
+Score : ${obj?.score || 'n/a'}
+Popularity : ${obj?.popularity || 'n/a'}
 Tot. Listed Users : ${numberWithCommas(obj?.num_list_users || 0)}
 Tot. Scoring Users : ${numberWithCommas(obj?.num_scoring_users || 0)}
 NSFW? : ${obj?.nsfw == 'white' ? 'No' : 'Yes'}
-Anime Type : ${obj?.media_type?.capitalize() || 'N/A'}
-Status : ${obj?.status?.replace('_', ' ')?.capitalize() || 'N/A'}
+Anime Type : ${obj?.media_type?.capitalize() || 'n/a'}
+Status : ${obj?.status?.replace('_', ' ')?.capitalize() || 'n/a'}
 Source : ${obj?.source?.replace('_', '')?.capitalize()}
-Rating : ${obj?.rating?.replace('_', ' ')?.capitalize() || 'N/A'}
-Genres : ${obj?.genres?.map(({ name }) => name)?.join(', ') || 'N/A'}
+Rating : ${obj?.rating?.replace('_', ' ')?.capitalize() || 'n/a'}
+Genres : ${obj?.genres?.map(({ name }) => name)?.join(', ') || 'n/a'}
 	
-Synopsis : ${obj?.synopsis || 'N/A'}`;
+Synopsis : ${obj?.synopsis || 'n/a'}`;
 };
 
 export default {

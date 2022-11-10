@@ -36,13 +36,13 @@ export default {
 			const result = await yandex(media);
 
 			if ('error' in result) {
-				if (isMediaImage) {
+				if (isMediaImage && fs.existsSync(media)) {
 					fs.unlinkSync(media);
 				}
 
 				return await client[botNum].reply({ from, quoted: message }, result.error);
 			} else if (result.information.length == 0) {
-				if (isMediaImage) {
+				if (isMediaImage && fs.existsSync(media)) {
 					fs.unlinkSync(media);
 				}
 
@@ -58,23 +58,20 @@ export default {
 			}
 
 			await client[botNum].sendMessage(from, { image: { url: result.information[0].images }, caption: capt.trim() }, { quoted: message });
-			let i = 0;
-			const images = removeDuplicatesArray(result.information.map((item) => item.images));
+
+			const images = removeDuplicatesArray(result.information.map((item) => item.images))
+				.slice(1)
+				.slice(0, 5);
 
 			for (const image of images) {
-				if (i == 5) {
-					break;
-				}
-
 				await client[botNum].sendMessage(from, { image: { url: image } });
-				i++;
 			}
 
-			if (isMediaImage) {
+			if (isMediaImage && fs.existsSync(media)) {
 				fs.unlinkSync(media);
 			}
 		} catch (err) {
-			if (isMediaImage) {
+			if (isMediaImage && fs.existsSync(media)) {
 				fs.unlinkSync(media);
 			}
 

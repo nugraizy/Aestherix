@@ -15,7 +15,7 @@ const findh2 = ($, str) => $(`div > h2:contains(${str})`);
 /**
  * Scrape details layarkaca21.
  * @param {string} url
- * @typedef {{country: string, quality: string, director: string, ratings: string, thumbnail: string, released: string, translateBy: string | 'N/A', genreArr: string[], castArr: string[], genreStr: (seperator: string) => string, castStr: (seperator: string) => string}} Details
+ * @typedef {{country: string, quality: string, director: string, ratings: string, thumbnail: string, released: string, translateBy: string | 'n/a', genreArr: string[], castArr: string[], genreStr: (seperator: string) => string, castStr: (seperator: string) => string}} Details
  * @returns {Promise<Details>}
  * @throws {Error}
  */

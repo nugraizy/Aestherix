@@ -35,8 +35,8 @@ export default {
 				footer: `Band Name : ${bandName}
 Band ID : ${bandId}
 Title : ${title}
-Album : ${albumName || 'N/A'}
-Album ID : ${albumId || 'N/A'}`,
+Album : ${albumName || 'n/a'}
+Album ID : ${albumId || 'n/a'}`,
 				templateButtons: [
 					{ urlButton: { displayText: 'Image Source', url: thumbnailUrl } },
 					{ urlButton: { displayText: 'Stream Here', url: urlBase } },

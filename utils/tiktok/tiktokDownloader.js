@@ -95,10 +95,10 @@ const parseData = async (arr) => {
 			desc: videoDescription,
 			image_post_info: { images },
 		} = actualData;
-		const music = actualData?.music?.play_url?.uri ?? 'N/A';
-		const musicDuration = actualData?.music?.duration ?? 'N/A';
-		const authorMusic = actualData?.music?.author ?? 'N/A';
-		const musicTitle = actualData?.music?.title ?? 'N/A';
+		const music = actualData?.music?.play_url?.uri ?? 'n/a';
+		const musicDuration = actualData?.music?.duration ?? 'n/a';
+		const authorMusic = actualData?.music?.author ?? 'n/a';
+		const musicTitle = actualData?.music?.title ?? 'n/a';
 
 		return {
 			keyword,
