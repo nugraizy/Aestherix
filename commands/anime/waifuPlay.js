@@ -12,7 +12,7 @@ export default {
 	status: 'enable',
 	async run({ args, from, message, sender, type }, client) {
 		switch (true) {
-			case /(search|src)/.test(args[1].trim()):
+			case /(search|src)/.test(args?.[1]?.trim()):
 				{
 					let sections;
 					const result = await wpSearch(args.slice(2).join(' '));
@@ -25,7 +25,7 @@ export default {
 						from,
 						{
 							image: { url: result.image || 'https://i.stack.imgur.com/6M513.png' },
-							caption: `\`\`\` • Waifuplay Search\`\`\`\n\n
+							caption: `${'Waifuplay Search'.formatHeaders()}\n\n
 Title : ${result.title}
 Score : ${result.score}
 Studio : ${result.studio}
@@ -60,7 +60,7 @@ Url : ${result.link}`,
 					} else if (result.listEpisode.type == 'batch') {
 						sections = [
 							{
-								title: '``` • Waifuplay Downloader```',
+								title: 'Waifuplay Downloader'.formatHeaders(),
 								rows: result.listEpisode.result.map(({ quality, url }) => {
 									return {
 										title: quality,
@@ -98,7 +98,7 @@ Url : ${result.link}`,
 							from,
 							{
 								image: { url: image || 'https://i.stack.imgur.com/6M513.png' },
-								caption: `\`\`\` • Waifuplay Latest\`\`\`
+								caption: `${'Waifuplay Latest'.formatHeaders()}
 Title : ${title}
 Episode : ${episode}
 Status : ${status}
@@ -119,7 +119,9 @@ Type : ${type}`,
 					}
 
 					const result = await wpDownload(args[2]);
-					let caption = '``` • Waifuplay Downloader```\n';
+					let caption = 'Waifuplay Downloader'.formatHeaders();
+
+					caption += '\n';
 
 					for (const { quality, url } of result) {
 						caption += `
@@ -136,7 +138,7 @@ Type : ${type}`,
 				await client[botNum].sendMessage(
 					from,
 					{
-						text: `\`\`\` • Waifuplay Utility\`\`\`
+						text: `${'Waifuplay Utility'.formatHeaders()}
 
 !waifuplay <search/src> <title>
 Ex : .waifuplay search yofukashi no uta

@@ -49,9 +49,9 @@ export default {
 				return await client[botNum].reply({ from, quoted: message }, 'Similar images not found.');
 			}
 
-			let capt = '``` • Reverse Image Search```\n';
+			let capt = 'Reverse Image Search'.formatHeaders();
 
-			capt += 'Will sending a few similar or the actual images itself. Please wait...\n\n';
+			capt += '\nWill sending a few similar or the actual images itself. Please wait...\n\n';
 
 			for (const item of result.information) {
 				capt += `Title: ${item.title}\nDescription: ${item.description}\n\n`;

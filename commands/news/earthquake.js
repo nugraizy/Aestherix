@@ -13,10 +13,10 @@ export default {
 	async run(message, client) {
 		const data = await getEarthquake();
 
-		let caption = '``` • Latest Earthquake```\n\n';
+		let caption = 'Latest Earthquake'.formatHeaders();
 
 		for (const res of data) {
-			caption += `Tanggal : ${res.date}\n`;
+			caption += `\n\nTanggal : ${res.date}\n`;
 			caption += `Jam : ${res.time}\n`;
 			caption += `Koordinat : ${res.coordinates}\n`;
 			caption += `Lintang : ${res.latitude}\n`;

@@ -15,9 +15,9 @@ export default {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.image == args[2]);
 
-			let caption = '``` • CNN Indonesia```\n\n';
+			let caption = 'CNN Indonesia'.formatHeaders();
 
-			caption += `Title : ${data[index].title}\n`;
+			caption += `\n\nTitle : ${data[index].title}\n`;
 			caption += `Place : ${data[index].places}\n`;
 			caption += `Published : ${data[index].published}\n`;
 			caption += `Content : ${data[index].body}\n`;
@@ -49,9 +49,9 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, data.error);
 		}
 
-		let caption = '``` • CNN Indonesia```\n\n';
+		let caption = 'CNN Indonesia'.formatHeaders();
 
-		caption += `Title : ${data[0].title}\n`;
+		caption += `\n\nTitle : ${data[0].title}\n`;
 		caption += `Place : ${data[0].places}\n`;
 		caption += `Published : ${data[0].published}\n`;
 		caption += `Content : ${data[0].body}\n`;

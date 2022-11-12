@@ -76,7 +76,7 @@ export default {
 			}
 
 			await client[botNum].sendMessage(message.from, {
-				text: `\`\`\` • Group Settings Notification\`\`\`\n
+				text: `${'Group Settings Notification'.formatHeaders()}\n
 Event Update : ${EVENT_UPDATE[message.messageStubType]}
 
 @${message.participant.split('@')[0]} ${status}`,

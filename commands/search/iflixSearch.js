@@ -15,9 +15,9 @@ export default {
 		if ((args[1] == 'next' || args[1] == 'prev') && type == 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.thumbnail == args[2]);
-			let caption = '``` • Iflix Search```\n\n';
+			let caption = 'Iflix Search'.formatHeaders();
 
-			caption += `Title : ${data[index].title}\n`;
+			caption += `\n\nTitle : ${data[index].title}\n`;
 			caption += `Actress : ${data[index].actressStr}\n`;
 			caption += `Director : ${data[index].director}\n`;
 			caption += `Status : ${data[index].status}\n`;
@@ -54,11 +54,11 @@ export default {
 				buttonText: 'Open List',
 				text: '\t',
 				footer: '```Looking for the streaming URL? Choose between these options.```',
-				title: '``` • Iflix```',
+				title: 'Iflix'.formatHeaders(),
 				sections: rows,
 			});
 		} else if (args[1] == 'get') {
-			return await client[botNum].reply({ from, quoted: message }, `\`\`\` • Iflix Search\`\`\`\n\nURL : ${args[2]}`);
+			return await client[botNum].reply({ from, quoted: message }, `${'Iflix Search'.formatHeaders()}\n\nURL : ${args[2]}`);
 		}
 
 		query = query.split(',');
@@ -71,9 +71,9 @@ export default {
 				return await client[botNum].reply({ from, quoted: message }, data.error);
 			}
 
-			let caption = '``` • Iflix Search```\n\n';
+			let caption = 'Iflix Search'.formatHeaders();
 
-			caption += `Title : ${data[0].title}\n`;
+			caption += `\n\nTitle : ${data[0].title}\n`;
 			caption += `Actress : ${data[0].actressStr}\n`;
 			caption += `Director : ${data[0].director}\n`;
 			caption += `Status : ${data[0].status}\n`;
@@ -107,7 +107,7 @@ export default {
 				buttonText: 'Open List',
 				text: '\t',
 				footer: '```Looking for the streaming URL? Choose between these options.```',
-				title: '``` • Iflix```',
+				title: 'Iflix'.formatHeaders(),
 				sections: rows,
 			});
 		}

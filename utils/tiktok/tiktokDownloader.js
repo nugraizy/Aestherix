@@ -1,13 +1,13 @@
-/* global log */
 import fetch from 'node-fetch';
 
 import { cheerioLOAD, fetchJSON, fetchTEXT } from '../../helper/index.js';
 
-const URL_KEY_PARSER = (input) => `https://api.ngutek.com/video-key?video_url=${input}`;
-const URL_DETAIL_PARSER = (input) => `https://api.ngutek.com/video-details-by-key?key=${input}`;
-const URL_BASE_DOWNLOAD = (input) => `https://api.ngutek.com/download?key=${input}&type=video`;
-const URL_BASE_MUSIC = (input) => `https://api.ngutek.com/download?key=${input}&type=music`;
-const URL_API = 'https://api2.musical.ly/aweme/v1/feed/?';
+const _api = 'https://api2.musical.ly/aweme/v1/feed/?';
+const _apiNgutek = (input) => `https://api.ngutek.com/${input}`;
+const _apiKeyParser = (input) => _apiNgutek(`video-key?video_url=${input}`);
+const _apiDetailParser = (input) => _apiNgutek(`video-details-by-key?key=${input}`);
+const _apiBaseDownload = (input) => _apiNgutek(`download?key=${input}&type=video`);
+const _apiBaseMusic = (input) => _apiNgutek(`download?key=${input}&type=music`);
 
 const randomChar = (char, range) => {
 	let chars = '';
@@ -74,7 +74,7 @@ const parseData = async (arr) => {
 
 	if (arr.ItemModule?.[keyword] == undefined) {
 		const datas = await (
-			await fetch(URL_API + new URLSearchParams(buildHead(keyword).params), {
+			await fetch(_api + new URLSearchParams(buildHead(keyword).params), {
 				headers: buildHead().headers,
 			})
 		).json();
@@ -118,12 +118,10 @@ const parseData = async (arr) => {
 				music,
 			},
 			profilePicture: profilePicture[0],
-			images: images.map((v, i) => {
-				return {
-					url: v.display_image.url_list[1],
-					index: i + 1,
-				};
-			}),
+			images: images.map((v, i) => ({
+				url: v.display_image.url_list[1],
+				index: i + 1,
+			})),
 		};
 	}
 
@@ -176,13 +174,13 @@ export const tiktokDownloader = (url) =>
 	new Promise(async (resolve) => {
 		try {
 			url = url.includes('vm.tiktok.com') ? url.replace('vm.tiktok.com', 'vt.tiktok.com') : url;
-			const data = await fetchJSON(URL_KEY_PARSER(url));
+			const data = await fetchJSON(_apiKeyParser(url));
 
 			if (data.status !== 'success') {
 				resolve(data);
 			}
 
-			const dataResult = await fetchJSON(URL_DETAIL_PARSER(data.data.key));
+			const dataResult = await fetchJSON(_apiDetailParser(data.data.key));
 
 			if (dataResult.status !== 'success') {
 				resolve(dataResult);
@@ -191,18 +189,30 @@ export const tiktokDownloader = (url) =>
 			resolve({
 				...dataResult.data.author,
 				description: dataResult.data.description,
-				withWatermark: URL_BASE_DOWNLOAD(dataResult.data.video.with_watermark),
-				noWatermark: URL_BASE_DOWNLOAD(dataResult.data.video.no_watermark),
+				withWatermark: _apiBaseDownload(dataResult.data.video.with_watermark),
+				noWatermark: _apiBaseDownload(dataResult.data.video.no_watermark),
 				noWatermarkRaw: dataResult.data.video.no_watermark_raw,
-				music: URL_BASE_MUSIC(dataResult.data.music),
+				music: _apiBaseMusic(dataResult.data.music),
 			});
 		} catch (e) {
 			resolve(e);
 		}
 	});
 
+/**
+ * @typedef {{author: string, nickname: string, liked: number, shared: number, comment: number, view: number, videoDescription: string, biograph: string}} ParsedContainer
+ * @typedef {{music?: {authorMusic: string, musicTitle: string, musicDuration: number, music: string}}} MusicContainer
+ * @typedef {{url?: {profilePicture: string, videoThumbnail: string, music: string, withNoWatermark: string}, verified?: boolean, heart?: number, totalVideo?: number, locationCreated?: string, musicTitle?: string, authorMusic?: string, videoDuration?: number, musicDuration?: number, ratio?:string}} VideosContainer
+ * @typedef {{type?: 'images', images?: {url: string, index: number}[]} & MusicContainer} ImagesContainer
+ */
+/**
+ * Download TikTok using Official API.
+ * @param {string} url
+ * @returns {Promise<ParsedContainer & ImagesContainer & VideosContainer>}
+ * @throws {Error}
+ */
 export const tiktokAPI = (url) =>
-	new Promise(async (resolve) => {
+	new Promise(async (resolve, reject) => {
 		try {
 			url = url.includes('vm.tiktok.com') ? url.replace('vm.tiktok.com', 'vt.tiktok.com') : url;
 			let keyword;
@@ -232,7 +242,7 @@ export const tiktokAPI = (url) =>
 			}
 
 			const withNoWatermark = (
-				await fetchJSON(URL_API + new URLSearchParams(buildHead(parsed.keyword).params), {
+				await fetchJSON(_api + new URLSearchParams(buildHead(parsed.keyword).params), {
 					headers: buildHead().headers,
 				})
 			).aweme_list.find((v) => v.aweme_id === parsed.keyword).video.play_addr.url_list[Math.floor(Math.random() * 3)];
@@ -244,7 +254,6 @@ export const tiktokAPI = (url) =>
 			};
 			resolve(parsed);
 		} catch (err) {
-			log(err);
-			resolve({ error: err.message });
+			reject(err);
 		}
 	});

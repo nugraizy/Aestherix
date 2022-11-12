@@ -19,7 +19,7 @@ export default {
 
 		const result = await createImage(query);
 
-		const caption = '``` • A.I Image Generator```\n\nPowered by deepai.org';
+		const caption = `${'A.I Image Generator'.formatHeaders()}\n\nPowered by deepai.org`;
 
 		await client[botNum].sendMessage(from, { image: { url: result }, caption }, { quoted: message });
 	},

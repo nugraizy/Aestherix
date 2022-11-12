@@ -182,6 +182,10 @@ String.prototype.mocking = function () {
 	return container.join('');
 };
 
+String.prototype.formatHeaders = function () {
+	return `\`\`\` • ${this || 'This is Headers'}\`\`\``;
+};
+
 export const numberWithCommas = (number = 0, region = 'id', type = 'comma') => {
 	if (type == 'comma') {
 		return parseInt(number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','));

@@ -37,7 +37,7 @@ export default {
 				from,
 				{
 					image: new Buffer.from(images, 'base64'),
-					caption: '``` • Pixiv Manga Search ```',
+					caption: 'Pixiv Manga Search'.formatHeaders(),
 					templateButtons: [{ urlButton: { displayText: 'Manga Source', url: `https://www.pixiv.net/en/artworks/${dataImage.id}` } }],
 					footer: `Title : ${dataImage.title.capitalize()}
 Author : ${dataImage.userName}
@@ -71,7 +71,7 @@ Total Media : ${dataImage.pageCount}`,
 			}
 
 			await client[botNum].sendMessage(from, {
-				title: '``` • Pixiv Manga Search```',
+				title: 'Pixiv Manga Search'.formatHeaders(),
 				text: '\t',
 				footer: 'choose one of the manga inside of the list to download.',
 				buttonText: 'Open List',

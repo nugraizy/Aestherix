@@ -61,13 +61,13 @@ export default {
 				post.isVideo
 					? {
 							video: new Buffer.from(await fetchBUFFER(post.url)),
-							caption: `\`\`\` • Facebook Video Downloader\`\`\`\n\n${post.datePosted ? `Post Uploaded : ${post.datePosted}\n` : ''}Res : ${post.resolution}${
+							caption: `${'Facebook Video Downloader'.formatHeaders()}\n\n${post.datePosted ? `Post Uploaded : ${post.datePosted}\n` : ''}Res : ${post.resolution}${
 								post.duration ? `\nDuration : ${post.duration}` : ''
 							}`,
 					  } /* eslint-disable-line */
 					: {
 							image: new Buffer.from(await fetchBUFFER(post.url)),
-							caption: `\`\`\` • Facebook Image Downloader\`\`\`\n\n${post.datePosted ? `Post Uploaded : ${post.datePosted}\n` : ''}Res : ${post.resolution}`,
+							caption: `${'Facebook Image Downloader'.formatHeaders()}\n\n${post.datePosted ? `Post Uploaded : ${post.datePosted}\n` : ''}Res : ${post.resolution}`,
 					  } /* eslint-disable-line */,
 			);
 			await delay(300);

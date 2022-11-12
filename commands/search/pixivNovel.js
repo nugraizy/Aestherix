@@ -61,7 +61,7 @@ ${content}`,
 			}
 
 			await client[botNum].sendMessage(from, {
-				title: '``` • Pixiv Novel Search```',
+				title: 'Pixiv Novel Search'.formatHeaders(),
 				text: '\t',
 				footer: 'choose one of the novel inside of the list to read.',
 				buttonText: 'Open List',

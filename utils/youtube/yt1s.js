@@ -8,8 +8,19 @@ const URL_CONVERT = 'https://yt1s.com/api/ajaxConvert/convert';
 
 const isUrl = (url) => url.match(new RegExp(/^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/)|(?:(?:watch)?\?v(?:i)?=|&v(?:i)?=))([^#&?]*).*/, 'g'));
 
+/**
+ * @typedef {{videoId: string, url: string, title: string, description: string | null, thumbnail: string, timestamp: string, uploaded: string, views: number, author: string, urlChannel: string}} YTSearchResults
+ * @typedef {{filesizeF: string, filesize: number, dlLink: string, title: string, id: string}} YTScrapeResults
+ */
+/**
+ * Scrape YouTube available downloader.
+ * @param {string} url
+ * @param {'mp3' | 'mp4'} type
+ * @returns {Promise<YTScrapeResults>}
+ * @throws {Error}
+ */
 const yt2 = async (url, type) =>
-	new Promise(async (resolve) => {
+	new Promise(async (resolve, reject) => {
 		try {
 			if (!isUrl(url)) {
 				return resolve({ error: 'Invalid URL' });
@@ -47,51 +58,59 @@ const yt2 = async (url, type) =>
 				id: datas.vid,
 			});
 		} catch (e) {
-			resolve({
-				error: e.stack,
-				internal: true,
-			});
+			reject(e);
 		}
 	});
 
-export const ytsr2 = (query, id, all = true) =>
+/**
+ *
+ * @param {string} query
+ * @param {string | undefined} id
+ * @returns {Promise<YTSearchResults>}
+ * @throws {Error}
+ */
+export const ytsr2 = (query, id) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			if (all) {
-				const res = await yts(query);
+			const res = await yts(query);
+			let data;
 
-				resolve(res.all);
+			if (id) {
+				const filtered = res?.items?.find((v) => v.id === id);
+
+				data = filtered ? filtered : res?.items?.[0];
 			} else {
-				const res = await yts(query);
-				let data;
-
-				if (id) {
-					const filtered = res?.items?.find((v) => v.id === id);
-
-					data = filtered ? filtered : res?.items?.[0];
-				} else {
-					data = res?.items?.[0];
-				}
-
-				let {
-					id: videoId,
-					url,
-					title,
-					description,
-					bestThumbnail: { url: thumbnail },
-					duration: timestamp,
-					uploadedAt: uploaded,
-					views,
-					author: { name: author, url: urlChannel },
-				} = data;
-
-				resolve({ videoId, url, title, description, thumbnail, timestamp, uploaded, views, author, urlChannel });
+				data = res?.items?.[0];
 			}
+
+			if (!data) {
+				reject(new Error('Result of the query is not found.'));
+			}
+
+			let {
+				id: videoId,
+				url,
+				title,
+				description,
+				bestThumbnail: { url: thumbnail },
+				duration: timestamp,
+				uploadedAt: uploaded,
+				views,
+				author: { name: author, url: urlChannel },
+			} = data;
+
+			resolve({ videoId, url, title, description, thumbnail, timestamp, uploaded, views, author, urlChannel });
 		} catch (e) {
 			reject(e);
 		}
 	});
 
+/**
+ * Download YouTube video, Using either url or query.
+ * @param {string} query
+ * @returns {Promise<YTSearchResults & YTScrapeResults & {error?: string, internal?: false}}
+ * @throws {Error}
+ */
 export const ytv2 = (query) =>
 	new Promise(async (resolve, reject) => {
 		try {
@@ -99,12 +118,12 @@ export const ytv2 = (query) =>
 				let res = await yt2(query, 'mp4');
 				const container = res;
 
-				res = await ytsr2(res.title, res.id, false);
+				res = await ytsr2(res.title, res.id);
 				resolve({ ...container, ...res });
 			} else if (isURL(query) && !isUrl(query)) {
 				resolve({ error: 'Link YouTube tidak valid.', internal: false });
 			} else {
-				let res = await ytsr2(query, false, false);
+				let res = await ytsr2(query, false);
 				const url = `https://youtu.be/${res.videoId}`;
 				const container = res;
 
@@ -116,6 +135,12 @@ export const ytv2 = (query) =>
 		}
 	});
 
+/**
+ * Download YouTube audio, Using either url or query.
+ * @param {string} query
+ * @returns {Promise<YTSearchResults & YTScrapeResults & {error?: string, internal?: false}}
+ * @throws {Error}
+ */
 export const yta2 = (query) =>
 	new Promise(async (resolve, reject) => {
 		try {
@@ -123,12 +148,13 @@ export const yta2 = (query) =>
 				let res = await yt2(query, 'mp3');
 				const container = res;
 
-				res = await ytsr2(res.title, res.id, false);
+				res = await ytsr2(res.title, res.id);
 				resolve({ ...container, ...res });
 			} else if (isURL(query) && !isUrl(query)) {
 				resolve({ error: 'Link YouTube tidak valid.', internal: false });
 			} else {
-				let res = await ytsr2(query, false, false);
+				let res = await ytsr2(query, false);
+
 				const url = `https://youtu.be/${res.videoId}`;
 				const container = res;
 

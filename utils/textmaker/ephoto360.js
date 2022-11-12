@@ -4,14 +4,19 @@ import fs from 'fs';
 
 import { cheerioLOAD } from '../../helper/index.js';
 
-const BASE_URL_PAGE = 'https://en.ephoto360.com/home-p';
-const BASE_URL = (input) => `https://en.ephoto360.com${input}`;
-const CREATE_URL = () => 'https://en.ephoto360.com/effect/create-image';
-const NO_VAL = (v) => v == '' || v == undefined || v == null || v == false;
+const _apiBase = 'https://en.ephoto360.com';
+const _apiBaseUrl = (input) => _apiBase + input;
+const isNoVal = (v) => v == '' || v == undefined || v == null || v == false;
 
-const parseUrlDownload = ({ image_code: imageCode, session_id: sessionId, image }) => {
-	return { preview: `https://e1.yotools.net${image}`, dl: `https://e1.yotools.net/save-images/${imageCode}/${sessionId}` };
-};
+/**
+ * @param {{image_code: string, session_id: string, image: string}} param0
+ * @typedef {{preview: string, dl: string}} ImageContainer
+ * @returns {ImageContainer}
+ */
+const parseUrlDownload = ({ image_code: imageCode, session_id: sessionId, image }) => ({
+	preview: `https://e1.yotools.net${image}`,
+	dl: `https://e1.yotools.net/save-images/${imageCode}/${sessionId}`,
+});
 
 const split = (text, len) => {
 	if (len == 1) {
@@ -41,13 +46,21 @@ const split = (text, len) => {
 	return out.map((v) => v.join(' '));
 };
 
-export const ephoto360 = async (api, texts, buffer) =>
+/**
+ * Scrape ephoto360.
+ * @param {string} api
+ * @param {string} texts
+ * @param {string} path
+ * @returns {Promise<ImageContainer & {error?: string}>}
+ * @throws {Error}
+ */
+export const ephoto360 = async (api, texts, path) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const tmpBuffer = buffer;
+			const tmpBuffer = path;
 
-			if (buffer) {
-				buffer = fs.createReadStream(buffer);
+			if (path) {
+				path = fs.createReadStream(path);
 			}
 
 			let { data, headers } = await axios.get(api, {
@@ -60,7 +73,7 @@ export const ephoto360 = async (api, texts, buffer) =>
 			const cookie = headers['set-cookie'][0].split(';')[0];
 			const isNeedImageBuffer = $('li.item-content > span.file-input-wrapper > span.btn.btn-primary.choose_file_button').text().trim() == 'Select Photo';
 
-			if (isNeedImageBuffer && !buffer) {
+			if (isNeedImageBuffer && !path) {
 				return resolve({ error: 'This Model Need image buffer' });
 			}
 
@@ -77,7 +90,7 @@ export const ephoto360 = async (api, texts, buffer) =>
 			}
 
 			if (isNeedImageBuffer) {
-				formData.append('file', buffer);
+				formData.append('file', path);
 				const { data: payloadImages } = await axios.post('https://e1.yotools.net/upload', formData, {
 					headers: {
 						Cookie: cookie,
@@ -136,7 +149,7 @@ export const ephoto360 = async (api, texts, buffer) =>
 			$ = cheerioLOAD(data);
 			const jsonDataRaw = $('input[name="form_value_input"]').attr('value');
 
-			if (NO_VAL(jsonDataRaw)) {
+			if (isNoVal(jsonDataRaw)) {
 				return resolve({ error: 'Process Failed. Reason : No Token found at the last step.' });
 			}
 
@@ -166,7 +179,7 @@ export const ephoto360 = async (api, texts, buffer) =>
 			}
 
 			data = (
-				await axios.post(CREATE_URL(), formData, {
+				await axios.post(_apiBaseUrl('/effect/create-image'), formData, {
 					headers: {
 						Cookie: cookie,
 						...formData.getHeaders(),
@@ -175,7 +188,7 @@ export const ephoto360 = async (api, texts, buffer) =>
 				})
 			).data;
 
-			if (buffer) {
+			if (path) {
 				fs.unlinkSync(tmpBuffer);
 			}
 
@@ -188,7 +201,7 @@ export const ephoto360 = async (api, texts, buffer) =>
 const container = [];
 
 export const scrapePages = async (page) => {
-	const { data } = await axios.get(`${BASE_URL_PAGE}${page}`, {
+	const { data } = await axios.get(`${_apiBase}/home-p${page}`, {
 		headers: {
 			'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36',
 		},
@@ -202,7 +215,7 @@ export const scrapePages = async (page) => {
 		if (url.endsWith('.html')) {
 			const effectName = $el.find('a > div.title-effect-home').text();
 
-			container.push({ url: BASE_URL(url), effectName });
+			container.push({ url: _apiBaseUrl(url), effectName });
 		}
 	});
 

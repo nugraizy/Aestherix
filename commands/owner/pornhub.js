@@ -28,7 +28,7 @@ export default {
 				from,
 				{
 					image: { url: data[index].mainThumb },
-					caption: '``` • Pornhub ```',
+					caption: 'Pornhub'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: args[1] == 'next' ? data[index].mainThumb : data[index].mainThumb } },
 						{ urlButton: { displayText: 'PHub Source', url: args[1] == 'next' ? data[index].url : data[index].url } },
@@ -66,7 +66,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 				from,
 				{
 					image: { url: result.result[0].mainThumb },
-					caption: '``` • Pornhub ```',
+					caption: 'Pornhub'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: result.result[0].mainThumb } },
 						{ urlButton: { displayText: 'PHub Source', url: result.result[0].url } },

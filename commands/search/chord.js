@@ -23,7 +23,7 @@ export default {
 
 		client[botNum].reply(
 			{ from, quoted: message },
-			`\`\`\` • Chords\`\`\`
+			`${'Chords'.formatHeaders()}
 
 Title : ${result.title}
 

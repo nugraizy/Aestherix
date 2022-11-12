@@ -58,7 +58,7 @@ export default {
 				from,
 				{
 					image: { url: result.image },
-					caption: '``` • Deviant Art ```',
+					caption: 'Deviant Art'.formatHeaders(),
 					templateButtons: [{ urlButton: { displayText: 'Image Source', url: result.image } }, { urlButton: { displayText: 'Deviant Art Source', url: result.source } }],
 					footer: `Title : ${result.author.capitalize()}
 Author : ${result.author}

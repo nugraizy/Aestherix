@@ -24,7 +24,7 @@ export default {
 				from,
 				{
 					image: { url: data[index].download },
-					caption: '``` • Flickr ```',
+					caption: 'Flickr'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Flickr Source', url: args[1] == 'next' ? data[index].source : data[index].source } },
 						index + 1 !== data.length ? { quickReplyButton: { displayText: 'Next Image', id: `.flickr next ${data[index + 1].download} ${JSON.stringify(data)}` } } : {},
@@ -66,7 +66,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 				from,
 				{
 					image: { url: result[0].download },
-					caption: '``` • Flickr ```',
+					caption: 'Flickr'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Flickr Source', url: result[0].source } },
 						result.length !== 1 ? { quickReplyButton: { displayText: 'Next Image', id: `.flickr next ${result[1].download} ${JSON.stringify(result)}` } } : {},

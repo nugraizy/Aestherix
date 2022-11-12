@@ -58,7 +58,7 @@ export default {
 				from,
 				{
 					image: { url: large },
-					caption: `\`\`\` • Myanimelist Search [ Anime ]\`\`\`\n\n${caption.trim()}`,
+					caption: `${'Myanimelist Search [ Anime ]'.formatHeaders()}\n\n${caption.trim()}`,
 					footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
 					templateButtons: [
 						{ urlButton: { displayText: 'Myanimelist Source', url: `https://www.myanimelist.net/anime/${id}` } },
@@ -94,7 +94,7 @@ export default {
 			from,
 			{
 				image: { url: large },
-				caption: `\`\`\` • Myanimelist Search [ Anime ]\`\`\`\n\n${caption.trim()}`,
+				caption: `${'Myanimelist Search [ Anime ]'.formatHeaders()}\n\n${caption.trim()}`,
 				footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
 				templateButtons: [
 					{ urlButton: { displayText: 'Myanimelist Source', url: `https://www.myanimelist.net/anime/${id}` } },
@@ -106,7 +106,7 @@ export default {
 		);
 
 		await client[botNum].sendMessage(from, {
-			title: '``` • Myanimelist Search [ Anime ]```',
+			title: 'Myanimelist Search [ Anime ]'.formatHeaders(),
 			text: 'Myanimelist Search',
 			footer: 'choose one of the title inside of the list to see the details of the anime.',
 			buttonText: 'Open List',

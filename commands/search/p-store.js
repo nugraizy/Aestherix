@@ -39,7 +39,7 @@ export default {
 					from,
 					{
 						image: { url: thumbnail },
-						caption: '``` • P-Store ```',
+						caption: 'P-Store'.formatHeaders(),
 						templateButtons: [
 							{
 								urlButton: {

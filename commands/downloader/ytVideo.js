@@ -55,9 +55,9 @@ export default {
 					continue;
 				}
 
-				let capt = '``` • YouTube Video```\n\n';
+				let capt = 'YouTube Video'.formatHeaders();
 
-				capt += `Title : ${title}\n`;
+				capt += `\n\nTitle : ${title}\n`;
 				capt += `Uploaded : ${uploaded}\n`;
 				capt += `Views : ${numberWithCommas(views)}\n`;
 				capt += `Author : ${author}\n`;

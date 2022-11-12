@@ -58,9 +58,9 @@ export default {
 					continue;
 				}
 
-				let capt = '``` • Instagram reel```\n\n';
+				let capt = 'Instagram reel'.formatHeaders();
 
-				capt += `Username : ${reel.user.username}\n`;
+				capt += `\n\nUsername : ${reel.user.username}\n`;
 				capt += `Fullname : ${reel.user.fullName}\n`;
 
 				if (isOne(reel.medias.length)) {

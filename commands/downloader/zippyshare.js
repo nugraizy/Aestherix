@@ -29,7 +29,7 @@ export default {
 
 		client[botNum].reply(
 			{ from, quoted: message },
-			`\`\`\` • Zippyshare Downloader\`\`\`
+			`${'Zippyshare Downloader'.formatHeaders()}
 		
 Filename: ${result.filename}
 Filesize: ${result.filesize}

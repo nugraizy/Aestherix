@@ -17,18 +17,22 @@ export default {
 		let capt = `𓆩 Void Bot ⁣𓆪\nV ${readJSON(
 			'./package.json',
 		).version.toUpperCase()}\n\nnote : if you want to try werewolf, the game still on beta, so many bugs (the game made in 2 days). but still playable.\n\n`;
-		const Container = [];
+		const container = [];
 
 		for (const [key, value] of configuration.cmds.commands) {
-			if (Object.keys(Container).includes(value.category)) {
-				Container[value.category].push(key);
+			if (value.name === '') {
+				continue;
+			}
+
+			if (Object.keys(container).includes(value.category)) {
+				container[value.category].push(key);
 			} else {
-				Container[value.category] = [key];
+				container[value.category] = [key];
 			}
 		}
 
-		for (const key of Object.keys(Container).sort((a, b) => a.localeCompare(b))) {
-			capt += `${key.toUpperCase()}\n\n${Container[key]
+		for (const key of Object.keys(container).sort((a, b) => a.localeCompare(b))) {
+			capt += `${key.toUpperCase()}\n\n${container[key]
 				.sort((a, b) => a.localeCompare(b))
 				.map((v) => ` ⋊ ${v}`)
 				.join('\n')}\n\n\n`;

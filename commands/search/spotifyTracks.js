@@ -68,7 +68,7 @@ export default {
 					from,
 					{
 						image: new Buffer.from(await fetchBUFFER(result?.data?.items?.[0]?.album?.images?.[0]?.url ?? result.tracks[0].album.images[0].url), 'base64'),
-						caption: '``` • Spotify Tracks ```',
+						caption: 'Spotify Tracks'.formatHeaders(),
 						templateButtons: [
 							{
 								urlButton: {
@@ -97,7 +97,7 @@ export default {
 					buttonText: 'Open List',
 					text: '\t',
 					footer: '```Looking for some more? Choose between these options.```',
-					title: '``` • Spotify Track```',
+					title: 'Spotify Track'.formatHeaders(),
 					sections: rows,
 				});
 			}

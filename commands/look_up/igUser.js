@@ -82,7 +82,7 @@ export default {
 					from,
 					{
 						image: { url: profilePicHD },
-						caption: '``` • Instagram User Lookup ```',
+						caption: 'Instagram User Lookup'.formatHeaders(),
 						templateButtons: [
 							{ urlButton: { displayText: 'Profile Picture HD Source', url: profilePicHD } },
 							{ urlButton: { displayText: 'Profile Picture Low Source', url: profilePic } },

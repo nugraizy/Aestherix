@@ -74,9 +74,9 @@ export default {
 			}
 
 			if (videos.type == 'images') {
-				let capt = '``` • TikTok Images```\n\n';
+				let capt = 'TikTok Images'.formatHeaders();
 
-				capt += `Author : ${videos.author}\n`;
+				capt += `\n\nAuthor : ${videos.author}\n`;
 				capt += `Username : ${videos.nickname}\n`;
 				capt += `Liked : ${numberWithCommas(videos.liked)}\n`;
 				capt += `Shared : ${numberWithCommas(videos.shared)}\n`;
@@ -90,9 +90,9 @@ export default {
 				}
 			} else {
 				const date = dayjs(dayjs(videos.published).unix()).format('HH:mm:ss DD/MM/YYYY');
-				let capt = '``` • TikTok Video```\n\n';
+				let capt = 'TikTok Video'.formatHeaders();
 
-				capt += `Author : ${videos.author}\n`;
+				capt += `\n\nAuthor : ${videos.author}\n`;
 				capt += `Username : ${videos.nickname}\n`;
 				capt += `Verifies : ${videos.verified ? 'Verified' : 'Not Verified'}\n`;
 				capt += `Followers : ${numberWithCommas(videos.followers)}\n`;

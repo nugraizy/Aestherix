@@ -1,4 +1,3 @@
-/* global log */
 import { fetchJSON, fetchTEXT } from '../../helper/index.js';
 
 const regex = (input) => {
@@ -14,10 +13,20 @@ const regex = (input) => {
 	};
 };
 
-const URL_API_DOWNLOAD = (input) => `https://tweetpik.com/api/tweets/${input}`;
+const _api = (input) => `https://tweetpik.com/api/tweets/${input}`;
+/**
+ * @typedef {{author: string, username: string, verified: true | false, caption: string, published: string, liked: number, retweet: number, replies: number}} InfoRaw
+ * @typedef {{url: string, type: 'image' | 'video'}} MediaRaw
+ */
 
+/**
+ * Download Twitter media.
+ * @param {string} input
+ * @returns {Promise<InfoRaw & {medias: MediaRaw[]} & {error?: string}>}
+ * @throws {Error}
+ */
 export const twitterDownload = (input) =>
-	new Promise(async (resolve) => {
+	new Promise(async (resolve, reject) => {
 		if (!regex(input)) {
 			return resolve({ error: 'This is not a valid Twitter URL.' });
 		}
@@ -26,7 +35,7 @@ export const twitterDownload = (input) =>
 
 		try {
 			let container = {};
-			const data = await fetchTEXT(URL_API_DOWNLOAD(id), { headers: { cookie: '_fbp=fb.1.1657783842199.544637810' } });
+			const data = await fetchTEXT(_api(id), { headers: { cookie: '_fbp=fb.1.1657783842199.544637810' } });
 
 			if (data == '') {
 				return resolve({ error: 'Something went wrong with the URL.' });
@@ -45,7 +54,7 @@ export const twitterDownload = (input) =>
 					continue;
 				}
 
-				const data = await fetchJSON(URL_API_DOWNLOAD(`${id}/video`), { headers: { cookie: '_fbp=fb.1.1657783842199.544637810' } });
+				const data = await fetchJSON(_api(`${id}/video`), { headers: { cookie: '_fbp=fb.1.1657783842199.544637810' } });
 
 				container.medias.push({
 					url: data.variants.slice(-1)[0].url,
@@ -55,7 +64,6 @@ export const twitterDownload = (input) =>
 
 			resolve(container);
 		} catch (err) {
-			log(err);
-			resolve({ error: err.message });
+			reject(err);
 		}
 	});

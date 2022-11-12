@@ -40,7 +40,7 @@ export default {
 					from,
 					{
 						image: { url: thumbnail },
-						caption: '``` • Bilibili ```',
+						caption: 'Bilibili'.formatHeaders(),
 						templateButtons: [
 							{ urlButton: { displayText: `Download Here ${getFilesizeFromBytes(size)}`, url: downloadLink } },
 							{ urlButton: { displayText: 'Stream Here', url: originalVideoLink } },

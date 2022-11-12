@@ -60,7 +60,7 @@ export default {
 					from,
 					{
 						image: { url: profileHD },
-						caption: '``` • TikTok User Lookup ```',
+						caption: 'TikTok User Lookup'.formatHeaders(),
 						templateButtons: [
 							{ urlButton: { displayText: 'Profile Picture HD Source', url: profileHD } },
 							{ urlButton: { displayText: 'Profile Picture SD Source', url: profileSD } },

@@ -50,7 +50,7 @@ export default {
 					}),
 					fileName: `${result.title}.opus`,
 					mimetype: 'audio/opus',
-					caption: `\`\`\` • Bandcamp \`\`\`
+					caption: `${'Bandcamp'.formatHeaders()}
 Title : ${result.title}`,
 				},
 				{ quoted: message },

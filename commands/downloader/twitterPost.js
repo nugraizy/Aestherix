@@ -44,7 +44,7 @@ export default {
 				continue;
 			}
 
-			let capt = '``` • Twitter Post```\n\n';
+			let capt = 'Twitter Post'.formatHeaders();
 
 			capt += `Username : ${post.username}\n`;
 			capt += `Fullname : ${post.author}\n`;

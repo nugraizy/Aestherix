@@ -24,7 +24,7 @@ export default {
 				from,
 				{
 					image: { url: data[index] },
-					caption: '``` • Google-it Images ```',
+					caption: 'Google-it Images'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: data[index] } },
 						index + 1 !== data.length ? { quickReplyButton: { displayText: 'Next Image', id: `.googleimage next ${data[index + 1]} ${JSON.stringify(data)}` } } : {},
@@ -52,7 +52,7 @@ export default {
 				from,
 				{
 					image: { url: result[0] },
-					caption: '``` • Google-it Images ```',
+					caption: 'Google-it Images'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: result[0] } },
 						result.length !== 1 ? { quickReplyButton: { displayText: 'Next Image', id: `.googleimage next ${result[1]} ${JSON.stringify(result).replace(/\|/g, '')}` } } : {},

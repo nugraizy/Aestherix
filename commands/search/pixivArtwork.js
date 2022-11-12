@@ -37,7 +37,7 @@ export default {
 				from,
 				{
 					image: new Buffer.from(images, 'base64'),
-					caption: '``` • Pixiv Artwork Search ```',
+					caption: 'Pixiv Artwork Search'.formatHeaders(),
 					templateButtons: [{ urlButton: { displayText: 'Artwork Source', url: `https://www.pixiv.net/en/artworks/${dataImage.id}` } }],
 					footer: `Title : ${dataImage.title.capitalize()}
 Author : ${dataImage.userName}
@@ -71,7 +71,7 @@ Total Media : ${dataImage.pageCount}`,
 			}
 
 			await client[botNum].sendMessage(from, {
-				buttonText: '``` • Pixiv Artworks Search```',
+				buttonText: 'Pixiv Artworks Search'.formatHeaders(),
 				description: 'Pixiv Artworks Search',
 				footerText: 'choose one of the artworks inside of the list to download.',
 				listType: 1,

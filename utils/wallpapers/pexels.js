@@ -1,15 +1,18 @@
 import axios from 'axios';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const TOKEN = process.env.PEXEL_TOKEN;
-const URL_API = 'https://api.pexels.com/v1/search';
+const _api = 'https://api.pexels.com/v1/search';
 
+/**
+ * Find Stock Images from Pexels.com
+ * @param {string} query
+ * @returns {Promise<string[]>}
+ * @throws {Error}
+ */
 export const stockImagesPexel = (query) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { data } = await axios.get(URL_API, {
+			const { data } = await axios.get(_api, {
 				params: {
 					query,
 					size: 'large',

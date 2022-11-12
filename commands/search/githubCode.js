@@ -24,7 +24,7 @@ export default {
 			return await client[botNum].sendMessage(
 				from,
 				{
-					text: `\`\`\` • Github Code \`\`\`
+					text: `${'Github Code'.formatHeaders()}
 Username : ${data[index].owner.ownerUsername}
 Repository : ${data[index].repository.name}
 Filename : ${data[index].fileName}
@@ -63,7 +63,7 @@ ${data[index].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).
 		await client[botNum].sendMessage(
 			from,
 			{
-				text: `\`\`\` • Github Code \`\`\`
+				text: `${'Github Code'.formatHeaders()}
 Username : ${result[0].owner.ownerUsername}
 Repository : ${result[0].repository.name}
 Filename : ${result[0].fileName}

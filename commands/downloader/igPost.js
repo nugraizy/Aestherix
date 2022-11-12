@@ -58,9 +58,9 @@ export default {
 					continue;
 				}
 
-				let capt = '``` • Instagram Post```\n\n';
+				let capt = 'Instagram Post'.formatHeaders();
 
-				capt += `Username : ${post.username}\n`;
+				capt += `\n\nUsername : ${post.username}\n`;
 				capt += `Fullname : ${post.fullName}\n`;
 				capt += `Privacy : ${post.isPrivate ? 'Private' : 'Public'}\n`;
 				capt += `Verified : ${post.isVerified ? 'Verified' : 'Not Verified'}\n`;

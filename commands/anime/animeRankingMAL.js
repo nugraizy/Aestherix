@@ -59,7 +59,7 @@ export default {
 				from,
 				{
 					image: { url: large },
-					caption: `\`\`\` • Myanimelist Ranking [ Anime ]\`\`\`\n\n${caption.trim()}`,
+					caption: `${'Myanimelist Ranking [ Anime ]'.formatHeaders()}\n\n${caption.trim()}`,
 					footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
 					templateButtons: [
 						{ urlButton: { displayText: 'Myanimelist Source', url: `https://www.myanimelist.net/anime/${id}` } },
@@ -94,7 +94,7 @@ export default {
 			from,
 			{
 				image: { url: large },
-				caption: `\`\`\` • Myanimelist Ranking [ Anime ]\`\`\`\n\n${caption.trim()}`,
+				caption: `${'Myanimelist Ranking [ Anime ]'.formatHeaders()}\n\n${caption.trim()}`,
 				footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
 				templateButtons: [
 					{ urlButton: { displayText: 'Myanimelist Source', url: `https://www.myanimelist.net/anime/${id}` } },
@@ -106,7 +106,7 @@ export default {
 		);
 
 		await client[botNum].sendMessage(from, {
-			title: '``` • Myanimelist Ranking [ Anime ]```',
+			title: 'Myanimelist Ranking [ Anime ]'.formatHeaders(),
 			text: 'Myanimelist Ranking',
 			footer: 'choose one of the title inside of the list to see the details of the anime.',
 			buttonText: 'Open List',

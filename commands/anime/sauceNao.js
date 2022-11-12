@@ -46,7 +46,7 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'Can not discover what anime is this. Try moe instead.');
 		}
 
-		const capt = `\`\`\` • What Anime ?\`\`\`
+		const capt = `${'What Anime ?'.formatHeaders()}
 Title : ${result.title}
 Description : ${result.description}
 Similarity : ${result.similarity}%

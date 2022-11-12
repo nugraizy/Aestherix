@@ -20,9 +20,9 @@ export default {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.thumbnail == args[2]);
 
-			let caption = '``` • TrueID Search```\n\n';
+			let caption = 'TrueID Search'.formatHeaders();
 
-			caption += `Title : ${data[index].title}\n`;
+			caption += `\n\nTitle : ${data[index].title}\n`;
 			caption += `Actress : ${data[index].detailed.actressStr}\n`;
 			caption += `Director : ${data[index].detailed.director}\n`;
 			caption += `Release : ${data[index].releaseDate}\n`;
@@ -67,14 +67,14 @@ export default {
 					buttonText: 'Open List',
 					text: '\t',
 					footer: '```Looking for the streaming URL? Choose between these options.```',
-					title: '``` • True ID```',
+					title: 'True ID'.formatHeaders(),
 					sections: rows,
 				});
 			}
 
 			return;
 		} else if (args[1] == 'get') {
-			return await client[botNum].reply({ from, quoted: message }, `\`\`\` • TrueID Search\`\`\`\n\nURL : ${args[2]}`);
+			return await client[botNum].reply({ from, quoted: message }, `${'TrueID Search'.formatHeaders()}\n\nURL : ${args[2]}`);
 		}
 
 		query = query.split(',');
@@ -87,9 +87,9 @@ export default {
 				return await client[botNum].reply({ from, quoted: message }, data.error);
 			}
 
-			let caption = '``` • TrueID Search```\n\n';
+			let caption = 'TrueID Search'.formatHeaders();
 
-			caption += `Title : ${data[0].title}\n`;
+			caption += `\n\nTitle : ${data[0].title}\n`;
 			caption += `Actress : ${data[0].detailed.actressStr}\n`;
 			caption += `Director : ${data[0].detailed.director}\n`;
 			caption += `Release : ${data[0].releaseDate}\n`;
@@ -133,7 +133,7 @@ export default {
 					buttonText: 'Open List',
 					text: '\t',
 					footer: '```Looking for the streaming URL? Choose between these options.```',
-					title: '``` • True ID```',
+					title: 'True ID'.formatHeaders(),
 					sections: rows,
 				});
 			}

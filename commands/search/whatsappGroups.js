@@ -23,7 +23,7 @@ export default {
 
 		client[botNum].reply(
 			{ from, quoted: message },
-			`\`\`\` • WhatsApp Public Groups \`\`\`
+			`${'WhatsApp Public Groups'.formatHeaders()}
 
 ${result
 	.map((v) => `Title : ${v.title}\nURL : ${v.url}`)

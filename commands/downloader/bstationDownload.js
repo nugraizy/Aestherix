@@ -63,7 +63,7 @@ export default {
 
 			const merge = await mergeVideoWithAudio(result.video, result.audio, path.join(__dirname, `temporary_files/${filename}.mp4`), sender);
 
-			await client[botNum].sendMessage(from, { video: new Buffer.from(merge, 'base64'), caption: '``` • Bstation Downloader ```' }, { quoted: message });
+			await client[botNum].sendMessage(from, { video: new Buffer.from(merge, 'base64'), caption: 'Bstation Downloader'.formatHeaders() }, { quoted: message });
 		}
 	},
 };

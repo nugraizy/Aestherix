@@ -23,7 +23,7 @@ export default {
 				from,
 				{
 					image: { url: data[index].thumbnail },
-					caption: '``` • Layarkaca21 ```',
+					caption: 'Layarkaca21'.formatHeaders(),
 					footer: `${data[index].title}
 Quality : ${data[index].quality}
 Country : ${data[index].country}
@@ -54,7 +54,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 			from,
 			{
 				image: { url: result[0].thumbnail },
-				caption: '``` • Layarkaca21 ```',
+				caption: 'Layarkaca21'.formatHeaders(),
 				footer: `${result[0].title}
 Quality : ${result[0].quality}
 Country : ${result[0].country}

@@ -22,7 +22,9 @@ export default {
 
 		const messages = configuration.OPTIONS.json ? JSON.parse(readFileSync(STATUS_PATH)).messages[STATUS] : await store.loadMessages(STATUS);
 		const tempContainer = new Map();
-		let caption = '``` • Fetch WhatsApp Story```\n\n';
+		let caption = 'Fetch WhatsApp Story'.formatHeaders();
+
+		caption += '\n\n';
 		const rows = [];
 
 		for (const message of messages) {

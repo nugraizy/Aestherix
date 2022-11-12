@@ -83,7 +83,7 @@ ${
 				from,
 				{
 					video: new Buffer.from(buffer, 'base64'),
-					caption: `\`\`\` • What Anime ?\`\`\`\n\n${capt.trim()}`,
+					caption: `${'What Anime ?'.formatHeaders()}\n\n${capt.trim()}`,
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: large } },
 						{ urlButton: { displayText: 'Video Source', url: args.video } },
@@ -172,7 +172,7 @@ ${externalLinks
 			from,
 			{
 				video: new Buffer.from(buffer, 'base64'),
-				caption: `\`\`\` • What Anime ?\`\`\`\n\n${capt.trim()}`,
+				caption: `${'What Anime ?'.formatHeaders()}\n\n${capt.trim()}`,
 				templateButtons: [
 					{ urlButton: { displayText: 'Image Source', url: large } },
 					{ urlButton: { displayText: 'Video Source', url: result[0].video } },
@@ -205,7 +205,7 @@ ${externalLinks
 		}
 
 		await client[botNum].sendMessage(from, {
-			title: '``` • Trace Moe```',
+			title: 'Trace Moe'.formatHeaders(),
 			text: 'Trace Moe',
 			footer: 'Looking for some more? Choose between these options.',
 			buttonText: 'Open List',

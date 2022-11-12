@@ -1,10 +1,15 @@
 /* global log */
-import { cheerioLOAD, fetchJSON, fetchTEXT } from '../../helper/index.js';
+import { cheerioLOAD, fetchJSON, fetchTEXT, UA } from '../../helper/index.js';
 
-const URL_BASE = (input) => `https://www.tiktok.com/${input}`;
-const URL_ID_API = (input) => `https://m.tiktok.com/share/item/list?id=${input}&type=1&count=10000&minCursor=0&maxCursor=0`;
-const URL_VIDEO_PAGE = (...input) => `https://www.tiktok.com/@${input[0]}/video/${input[1]}`;
-const UA = () => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36';
+const _api = (input) => `https://www.tiktok.com/${input}`;
+const _apiBaseId = (input) => `https://m.tiktok.com/share/item/list?id=${input}&type=1&count=10000&minCursor=0&maxCursor=0`;
+const _apiBaseVideo = (...input) => _api(`@${input[0]}/video/${input[1]}`);
+
+/**
+ * @typedef {{keyword: string, username: string, fullName: string, biography: string, isVerified: boolean, profileHD: string, profileSD: string}} ParsedContainer
+ * @typedef {{videoId: {id: string, url: string}[]}} VideosContainer
+ * @typedef {ParsedContainer & VideosContainer & {profileLOW: string, followers: number, following: number, heart: number, totalVideo: number}} ResultContainer
+ */
 const parseUserInfo = async (arr) => {
 	try {
 		const {
@@ -18,11 +23,14 @@ const parseUserInfo = async (arr) => {
 			uniqueId: username,
 		} = arr.UserModule.users[arr.UserPage.uniqueId];
 		const { followerCount: followers, followingCount: following, heart, videoCount: totalVideo } = arr.UserModule.stats[arr.UserPage.uniqueId];
-		let data = await fetchJSON(URL_ID_API(keyword));
+		let data = await fetchJSON(_apiBaseId(keyword));
 
-		data = data.body.itemListData.map((v) => {
-			return { id: v.itemInfos.id, url: URL_VIDEO_PAGE(arr.UserPage.uniqueId, v.itemInfos.id) };
-		});
+		data =
+			data?.body?.itemListData?.map((v) => ({
+				id: v.itemInfos.id,
+				url: _apiBaseVideo(arr.UserPage.uniqueId, v.itemInfos.id),
+			})) || [];
+
 		return {
 			keyword,
 			username,
@@ -44,6 +52,12 @@ const parseUserInfo = async (arr) => {
 	}
 };
 
+/**
+ * Look-up TikTok user's from Official TikTok API.
+ * @param {string} username
+ * @returns {Promise<ResultContainer & {error?: string}>}
+ * @throws {Error}
+ */
 export const tiktokProfileTIKTOK = (username) =>
 	new Promise(async (resolve, reject) => {
 		try {
@@ -51,7 +65,7 @@ export const tiktokProfileTIKTOK = (username) =>
 				username = `@${username.replace(/[^a-zA-Z0-9_.]/gi, '')}`;
 			}
 
-			const res = await fetchTEXT(URL_BASE(username), {
+			const res = await fetchTEXT(_api(username), {
 				headers: {
 					'user-agent': UA(),
 					cookie:

@@ -33,7 +33,7 @@ export default {
 				from,
 				{
 					...(isGif ? { video: buffer, gifPlayback: true } : { image: { url: data[index] } }),
-					caption: '``` • Waifu Pics ```',
+					caption: 'Waifu Pics'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: args[1] == 'next' ? data[index] : data[index] } },
 						index + 1 !== data.length
@@ -80,7 +80,7 @@ export default {
 				{
 					...(isGif ? { video: buffer } : { image: { url: result[0] } }),
 					image: { url: result[0] },
-					caption: '``` • Waifu Pics ```',
+					caption: 'Waifu Pics'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: result[0] } },
 						result.length !== 1

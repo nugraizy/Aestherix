@@ -37,7 +37,7 @@ export default {
 						from,
 						{
 							image: { url: cover },
-							caption: '``` • Bilibili ```',
+							caption: 'Bilibili'.formatHeaders(),
 							templateButtons: [
 								{ index: 1, urlButton: { displayText: 'Source Bstation', url: source } },
 								{ index: 2, urlButton: { displayText: 'Source Image', url: cover } },
@@ -70,7 +70,7 @@ Ratings : ${score}`,
 				buttonText: 'Open List',
 				text: '\t',
 				footer: '```Looking for some more? Choose between these options.```',
-				title: '``` • Bstation```',
+				title: 'Bstation'.formatHeaders(),
 				sections: row,
 			});
 		}

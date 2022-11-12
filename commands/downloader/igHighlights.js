@@ -47,9 +47,9 @@ export default {
 					continue;
 				}
 
-				let capt = '``` • Instagram Highlights```\n\n';
+				let capt = 'Instagram Highlights'.formatHeaders();
 
-				capt += `Username  : ${highlights.user.username}\n`;
+				capt += `\n\nUsername  : ${highlights.user.username}\n`;
 				capt += `Fullname  : ${highlights.user.fullName}\n`;
 				capt += `Follower  : ${numberWithCommas(highlights.user.followers)}\n`;
 				capt += `Following : ${numberWithCommas(highlights.user.following)}\n`;

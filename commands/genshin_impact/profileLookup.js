@@ -78,12 +78,13 @@ export default {
 				let capt;
 
 				if (statistic) {
-					capt = `\`\`\` • Genshin Impact Statistic \`\`\`\n\n
-\`\`\` • Proflie \`\`\`\n
+					capt = `${'Genshin Impact Statistic'.formatHeaders()}\n\n
+
+${'Proflie'.formatHeaders()}\n
 Nickname: ${info.role.nickname}
 Server: ${info.role.region.replace('os_', '')}
 Level: ${info.role.level}\n\n
-\`\`\` • Stats \`\`\`\n
+${'Stats'.formatHeaders()}\n
 Achievement: ${info.stats.achievement_number}
 Way Point: ${info.stats.way_point_number}
 Avatar: ${info.stats.avatar_number}
@@ -93,14 +94,14 @@ Domain: ${info.stats.domain_number}
 Anemoculus: ${info.stats.anemoculus_number}
 Geoculus: ${info.stats.geoculus_number}
 Electroculus: ${info.stats.electroculus_number}\n\n
-\`\`\` • Chest \`\`\`\n
+${'Chest'.formatHeaders()}\n
 Common: ${info.stats.common_chest_number}
 Exquisite: ${info.stats.exquisite_chest_number}
 Luxurios: ${info.stats.luxurious_chest_number}
 Precious: ${info.stats.precious_chest_number}
 Magic: ${info.stats.magic_chest_number}`;
 				} else if (character) {
-					capt = `\`\`\` • Genshin Impact Characters \`\`\`\n\n
+					capt = `${'Genshin Impact Characters'.formatHeaders()}\n\n
 • Total: ${info.length}\n\n`;
 
 					for (const {
@@ -115,12 +116,12 @@ Magic: ${info.stats.magic_chest_number}`;
 ──────────────────────\n\n`;
 					}
 				} else {
-					capt = `\`\`\` • Genshin Impact Statistic \`\`\`\n\n
-\`\`\` • Proflie \`\`\`\n
+					capt = `${'Genshin Impact Statistic'.formatHeaders()}\n\n
+${'Proflie'.formatHeaders()}\n
 Nickname: ${info.role.nickname}
 Server: ${info.role.region.replace('os_', '')}
 Level: ${info.role.level}\n\n
-\`\`\` • Stats \`\`\`\n
+${'Stats'.formatHeaders()}\n
 Achievement: ${info.stats.achievement_number}
 Way Point: ${info.stats.way_point_number}
 Avatar: ${info.stats.avatar_number}
@@ -130,7 +131,7 @@ Domain: ${info.stats.domain_number}
 Anemoculus: ${info.stats.anemoculus_number}
 Geoculus: ${info.stats.geoculus_number}
 Electroculus: ${info.stats.electroculus_number}\n\n
-\`\`\` • Chest \`\`\`\n
+${'Chest'.formatHeaders()}\n
 Common: ${info.stats.common_chest_number}
 Exquisite: ${info.stats.exquisite_chest_number}
 Luxurios: ${info.stats.luxurious_chest_number}

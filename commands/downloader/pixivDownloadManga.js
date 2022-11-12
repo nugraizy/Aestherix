@@ -67,7 +67,7 @@ Total Media : ${pageCount}`;
 					from,
 					{
 						image: new Buffer.from(images, 'base64'),
-						caption: '``` • Pixiv Manga Downloader```',
+						caption: 'Pixiv Manga Downloader'.formatHeaders(),
 						templateButtons: [{ urlButton: { displayText: 'Manga Source', url: `https://www.pixiv.net/en/artworks/${id}` } }],
 						footer: caption,
 					},
@@ -84,7 +84,7 @@ Total Media : ${pageCount}`;
 					from,
 					{
 						image: new Buffer.from(buffer, 'base64'),
-						caption: '``` • Pixiv Manga Downloader```',
+						caption: 'Pixiv Manga Downloader'.formatHeaders(),
 						templateButtons: [{ urlButton: { displayText: 'Manga Source', url: `https://www.pixiv.net/en/artworks/${id}` } }],
 						footer: caption,
 					},

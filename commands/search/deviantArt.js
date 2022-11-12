@@ -24,7 +24,7 @@ export default {
 				from,
 				{
 					image: { url: data[index].image },
-					caption: '``` • Deviant Art ```',
+					caption: 'Deviant Art'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: args[1] == 'next' ? data[index].image : data[index].image } },
 						{ urlButton: { displayText: 'Deviant Art Source', url: args[1] == 'next' ? data[index].source : data[index].source } },
@@ -57,7 +57,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 				from,
 				{
 					image: { url: result[0].image },
-					caption: '``` • Deviant Art ```',
+					caption: 'Deviant Art'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: result[0].image } },
 						{ urlButton: { displayText: 'Deviant Art Source', url: result[0].source } },

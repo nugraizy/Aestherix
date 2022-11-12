@@ -23,7 +23,7 @@ export default {
 			return await client[botNum].sendMessage(
 				from,
 				{
-					text: `\`\`\` • Lyrics \`\`\`
+					text: `${'Lyrics'.formatHeaders()}
                     
 Artist : ${data[index].artist}
 Song : ${data[index].song}
@@ -55,7 +55,7 @@ Song : ${data[index].song}
 			await client[botNum].sendMessage(
 				from,
 				{
-					text: `\`\`\` • Lyrics \`\`\`
+					text: `${'Lyrics'.formatHeaders()}
                     
 Artist : ${result.result[0].artist}
 Song : ${result.result[0].song}

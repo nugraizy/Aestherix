@@ -57,7 +57,7 @@ export default {
 		}
 
 		if (message?.[message.from]?.notification == 'enable') {
-			const text = `\`\`\` • Group Participants Notification\`\`\`\n
+			const text = `${'Group Participants Notification'.formatHeaders()}\n
 Event Update : ${EVENT_UPDATE[message.messageStubType]}
 
 @${message.participant.split('@')[0]} ${EVENT_UPDATE[message.messageStubType.split('_').reverse()[0]]} ${

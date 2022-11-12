@@ -67,7 +67,7 @@ Total Media : ${pageCount}`;
 					from,
 					{
 						image: new Buffer.from(images, 'base64'),
-						caption: '``` • Pixiv Artworks Downloader```\n\n',
+						caption: 'Pixiv Artworks Downloader'.formatHeaders(),
 						templateButtons: [{ urlButton: { displayText: 'Artwork Source', url: `https://www.pixiv.net/en/artworks/${id}` } }],
 						footer: caption,
 					},
@@ -84,7 +84,7 @@ Total Media : ${pageCount}`;
 					from,
 					{
 						image: new Buffer.from(buffer, 'base64'),
-						caption: '``` • Pixiv Artworks Downloader```\n\n',
+						caption: 'Pixiv Artworks Downloader'.formatHeaders(),
 						templateButtons: [{ urlButton: { displayText: 'Artwork Source', url: `https://www.pixiv.net/en/artworks/${id}` } }],
 						footer: caption,
 					},

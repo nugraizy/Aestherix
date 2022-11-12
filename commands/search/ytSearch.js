@@ -25,9 +25,9 @@ export default {
 		const { url, title, description, image, timestamp, views, author } = result[0];
 
 		result = result.slice(1);
-		let capt = '``` • YouTube Search```\n\n';
+		let capt = 'YouTube Search'.formatHeaders();
 
-		capt += `Title : ${title}\n`;
+		capt += `\n\nTitle : ${title}\n`;
 		capt += `Views : ${numberWithCommas(views)}\n`;
 		capt += `Author : ${author.name}\n`;
 		capt += `Author Channel : ${author.url}\n`;

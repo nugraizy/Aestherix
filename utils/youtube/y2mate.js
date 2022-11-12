@@ -20,7 +20,7 @@ const post = async (url, formdata) => {
 const isUrl = (url) => url.match(new RegExp(/^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/)|(?:(?:watch)?\?v(?:i)?=|&v(?:i)?=))([^#&?]*).*/, 'g'));
 
 const yt = async (url, quality, type, bitrate, server = 'en60') =>
-	new Promise(async (resolve) => {
+	new Promise(async (resolve, reject) => {
 		try {
 			if (!isUrl(url)) {
 				return resolve({ error: 'Invalid URL' });
@@ -85,10 +85,7 @@ const yt = async (url, quality, type, bitrate, server = 'en60') =>
 				filesize: KB,
 			});
 		} catch (e) {
-			resolve({
-				error: e.stack,
-				internal: true,
-			});
+			reject(e);
 		}
 	});
 

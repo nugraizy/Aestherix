@@ -53,9 +53,9 @@ export default {
 			} else {
 				const { title, timestamp, dlLink } = audio;
 
-				let capt = '``` • Spotify Audio```\n\n';
+				let capt = 'Spotify Audio'.formatHeaders();
 
-				capt += `Title : ${title}\n`;
+				capt += `\n\nTitle : ${title}\n`;
 				capt += `Duration : ${timestamp ?? 'No Data'}\n`;
 
 				await client[botNum].reply({ from, quoted: message }, capt.trim());

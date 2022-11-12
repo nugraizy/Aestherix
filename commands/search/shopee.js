@@ -35,7 +35,7 @@ export default {
 					from,
 					{
 						image: { url: imageURL },
-						caption: '``` • Shopee ```',
+						caption: 'Shopee'.formatHeaders(),
 						templateButtons: [
 							{
 								urlButton: {

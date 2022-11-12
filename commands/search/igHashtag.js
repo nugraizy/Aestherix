@@ -27,7 +27,7 @@ export default {
 		await client[botNum].sendMessage(
 			from,
 			{
-				caption: '``` • Instagram Hashtag Search```',
+				caption: 'Instagram Hashtag Search'.formatHeaders(),
 				image: { url: result.thumbnail },
 				templateButtons: [{ urlButton: { displayText: 'Image Source', url: result.thumbnail } }],
 				footer: caption,

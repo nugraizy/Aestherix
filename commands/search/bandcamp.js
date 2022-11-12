@@ -31,7 +31,7 @@ export default {
 
 			await client[botNum].sendMessage(from, {
 				image: { url: thumbnailUrl },
-				caption: '``` • Bandcamp ```',
+				caption: 'Bandcamp'.formatHeaders(),
 				footer: `Band Name : ${bandName}
 Band ID : ${bandId}
 Title : ${title}
@@ -47,7 +47,7 @@ Album ID : ${albumId || 'n/a'}`,
 				buttonText: 'Open List',
 				text: '\t',
 				footer: '```Looking for some more? Choose between these options.```',
-				title: '``` • Bandcamp Tracks```',
+				title: 'Bandcamp Tracks'.formatHeaders(),
 				sections: result.slice(1).map((v) => ({ rows: [{ title: `MP3 | ${v.title}`, rowId: `.bandcampdl ${v.urlBase}` }], title: `${v.bandName} - ${v.title}` })),
 			});
 		}

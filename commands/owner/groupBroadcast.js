@@ -41,12 +41,12 @@ export default {
 				.slice(0)
 				.map((entry) => entry[1]);
 			const chats = check4Duplicate(groups.map((v) => v.id));
-			let text = '``` • Group Broadcast ```';
+			let text = 'Group Broadcast'.formatHeaders();
 
 			text += `\n\n${query.trim()}\n\n`;
 			text += `\`\`\`Broadcast by @${sender.split('@')[0]}\`\`\``;
 
-			for (let id of chats) {
+			for (const id of chats) {
 				await delay(300);
 				await client[botNum].sendMessage(id, { text, mentions: [sender] });
 			}

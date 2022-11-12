@@ -1,4 +1,3 @@
-import dotenv from 'dotenv';
 import { EventEmitter } from 'events';
 
 const globalConfig = {
@@ -17,8 +16,6 @@ const globalConfig = {
 	author: 'Powered by Hidden Finder',
 	anonymous: new Map(),
 };
-
-dotenv.config();
 
 global.log = console.log;
 

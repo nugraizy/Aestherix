@@ -24,7 +24,7 @@ export default {
 				from,
 				{
 					text: data[index].title,
-					caption: '``` • Google-it Articles ```',
+					caption: 'Google-it Articles'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Article Source', url: data[index].url } },
 						index + 1 !== data.length ? { quickReplyButton: { displayText: 'Next Article', id: `.googlearticle next ${data[index + 1].url} ${JSON.stringify(data)}` } } : {},
@@ -54,7 +54,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 				from,
 				{
 					text: result[0].title,
-					caption: '``` • Google-it Articles ```',
+					caption: 'Google-it Articles'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Article Source', url: result[0].url } },
 						result.length !== 1 ? { quickReplyButton: { displayText: 'Next Article', id: `.googlearticle next ${result[1].url} ${JSON.stringify(result).replace(/\|/g, '')}` } } : {},

@@ -16,9 +16,9 @@ export default {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.image == args[2] || v.link == args[2]);
 
-			let caption = '``` • CNN International```\n\n';
+			let caption = 'CNN International'.formatHeaders();
 
-			caption += `Title : ${data[index].title}\n`;
+			caption += `\n\nTitle : ${data[index].title}\n`;
 			caption += `Published : ${data[index].published}\n`;
 			caption += `Content : ${data[index].body}\n`;
 
@@ -50,9 +50,9 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, data.error);
 		}
 
-		let caption = '``` • CNN International```\n\n';
+		let caption = 'CNN International'.formatHeaders();
 
-		caption += `Title : ${data[0].title}\n`;
+		caption += `\n\nTitle : ${data[0].title}\n`;
 		caption += `Published : ${data[0].published}\n`;
 		caption += `Content : ${data[0].body}\n`;
 

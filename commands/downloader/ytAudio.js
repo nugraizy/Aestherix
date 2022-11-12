@@ -56,9 +56,9 @@ export default {
 					continue;
 				}
 
-				let capt = '``` • YouTube Audio```\n\n';
+				let capt = 'YouTube Audio'.formatHeaders();
 
-				capt += `Title : ${title}\n`;
+				capt += `\n\nTitle : ${title}\n`;
 				capt += `Uploaded : ${uploaded}\n`;
 				capt += `Views : ${numberWithCommas(views)}\n`;
 				capt += `Author : ${author}\n`;

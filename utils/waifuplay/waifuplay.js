@@ -1,10 +1,11 @@
-/*  global log */
 import axios from 'axios';
 
 import { cheerioLOAD } from '../../helper/index.js';
 
+const _api = (path = '') => `https://waifuplay.my.id${path}`;
+
 export const wpList = (url) =>
-	new Promise(async (resolve) => {
+	new Promise(async (resolve, reject) => {
 		try {
 			switch (url) {
 				case url.includes('batch'):
@@ -13,12 +14,10 @@ export const wpList = (url) =>
 						const $ = cheerioLOAD(data);
 						const result = $('div#download > ul > li')
 							.get()
-							.map((res) => {
-								return {
-									quality: $(res).find('b').text(),
-									url: $(res).find('a').attr('href'),
-								};
-							});
+							.map((element) => ({
+								quality: $(element).find('b').text(),
+								url: $(element).find('a').attr('href'),
+							}));
 
 						resolve({ type: 'batch', result });
 					}
@@ -29,33 +28,30 @@ export const wpList = (url) =>
 					const $ = cheerioLOAD(data);
 					const result = $('.series-episodelist > li')
 						.get()
-						.map((res) => {
-							return {
-								episode: Number(
-									$(res)
-										.find('a > span')
-										.map((i, el) => $(el).text())
-										.get(0)
-										.replace('Episode ', ''),
-								),
-								url: $(res).find('a').attr('href'),
-							};
-						})
+						.map((element) => ({
+							episode: Number(
+								$(element)
+									.find('a > span')
+									.map((i, _) => $(_).text())
+									.get(0)
+									.replace('Episode ', ''),
+							),
+							url: $(element).find('a').attr('href'),
+						}))
 						.sort((a, b) => a.episode - b.episode);
 
 					resolve({ type: 'episode', result });
 				}
 			}
 		} catch (err) {
-			log(err);
-			resolve({ error: err.message });
+			reject(err);
 		}
 	});
 
 export const wpSearch = (text) =>
-	new Promise(async (resolve) => {
+	new Promise(async (resolve, reject) => {
 		try {
-			const { data } = await axios.get(`https://waifuplay.my.id/?s=${text}`);
+			const { data } = await axios.get(_api(`/${text}`));
 			const $ = cheerioLOAD(data);
 
 			if ($('div.pagenon > h2').text() == 'No Post Found') {
@@ -66,7 +62,7 @@ export const wpSearch = (text) =>
 
 			const listEpisode = await wpList($('.flexbox2-item').find('a').attr('href'));
 
-			resolve({
+			const result = {
 				title: $('.flexbox2-item').find('a').attr('title'),
 				image: $('.flexbox2-item').find('img').attr('src').replace('?resize=225,310', '').replace('waifuplay.me', 'waifuplay.my.id'),
 				score: $('.flexbox2-item').find('.score').text(),
@@ -80,58 +76,57 @@ export const wpSearch = (text) =>
 				link: $('.flexbox2-item').find('a').attr('href').replace('waifuplay.me', 'waifuplay.my.id'),
 				sysnopsis: $('.flexbox2-item').find('.synops').text(),
 				listEpisode,
-			});
+			};
+
+			resolve(result);
 		} catch (err) {
-			log(err);
-			resolve({ error: err.message });
+			reject(err);
 		}
 	});
 
 export const wpDownload = (url) =>
-	new Promise(async (resolve) => {
+	new Promise(async (resolve, reject) => {
 		try {
 			const { data } = await axios.get(url);
 			const $ = cheerioLOAD(data);
 			const result = $('.dlbox2 > a')
 				.get()
-				.map((res) => {
+				.map((element) => {
 					return {
-						quality: $(res).text() || '',
-						url: $(res).attr('href') || '',
+						quality: $(element).text() || '',
+						url: $(element).attr('href') || '',
 					};
 				});
 
 			resolve(result);
 		} catch (err) {
-			log(err);
-			resolve({ error: err.message });
+			reject(err);
 		}
 	});
 
 export const wpLatest = () =>
-	new Promise(async (resolve) => {
+	new Promise(async (resolve, reject) => {
 		try {
-			const { data } = await axios.get('https://waifuplay.my.id/');
+			const { data } = await axios.get(_api('/'));
 			const $ = cheerioLOAD(data);
 
-			resolve({
-				results: $('.flexbox')
+			const container = {
+				result: $('.flexbox')
 					.map((_, element) => $(element).find('.flexbox-item'))
 					.get(1)
 					.get()
-					.map((res) => {
-						return {
-							title: $(res).find('.flexbox-title').text(),
-							episode: $(res).find('.flexbox-episode').text().replace('Episode', ''),
-							image: $(res).find('img').attr('src').replace('?resize=225,310', '').replace('waifuplay.me', 'waifuplay.my.id'),
-							status: $(res).find('.flexbox-status').text(),
-							type: $(res).find('.flexbox-type').text(),
-							link: $(res).find('a').attr('href').replace('waifuplay.me', 'waifuplay.my.id'),
-						};
-					}),
-			});
+					.map((element) => ({
+						title: $(element).find('.flexbox-title').text(),
+						episode: $(element).find('.flexbox-episode').text().replace('Episode', ''),
+						image: $(element).find('img').attr('src').replace('?resize=225,310', '').replace('waifuplay.me', 'waifuplay.my.id'),
+						status: $(element).find('.flexbox-status').text(),
+						type: $(element).find('.flexbox-type').text(),
+						link: $(element).find('a').attr('href').replace('waifuplay.me', 'waifuplay.my.id'),
+					})),
+			};
+
+			resolve(container);
 		} catch (err) {
-			log(err);
-			resolve({ error: err.message });
+			reject(err);
 		}
 	});

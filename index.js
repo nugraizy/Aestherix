@@ -2,17 +2,21 @@
 import baileys, { jidDecode } from '@adiwajshing/baileys';
 import { Boom } from '@hapi/boom';
 import center from 'center-align';
+import dotenv from 'dotenv';
 import { spawn } from 'child_process';
 import fs from 'fs-extra';
 import meow from 'meow';
 import dayjs from 'dayjs';
 import localePlugins from 'dayjs/plugin/timezone.js';
+import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 import mqtt from 'mqtt';
 import cron from 'node-cron';
 import path from 'path';
 import P from 'pino';
 import { platform } from 'process';
 import { pathToFileURL } from 'url';
+
+dotenv.config();
 
 import configuration from './connect.js';
 import { S_WHATSAPP_NET } from './helper/misc/wa_data/index.js';
@@ -23,6 +27,7 @@ let shouldWait = false;
 console.clear();
 
 dayjs.extend(localePlugins);
+dayjs.extend(customParseFormat);
 dayjs.tz.setDefault('Asia/Jakarta');
 
 const { default: makeWASocket, DisconnectReason, makeInMemoryStore, useSingleFileAuthState, DEFAULT_CONNECTION_CONFIG } = baileys;
@@ -448,7 +453,7 @@ const start = async () => {
 
 				const { data: result } = data;
 				for (const destination of data.from) {
-					const caption = `\`\`\` • Freegames Notifier\`\`\`
+					const caption = `${'Freegames Notifier'.formatHeaders()}
 
 ${result.title}`;
 					await client[botNum].sendMessage(destination, {

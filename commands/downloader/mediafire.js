@@ -29,7 +29,7 @@ export default {
 
 		client[botNum].reply(
 			{ from, quoted: message },
-			`\`\`\` • Mediafire Downloader\`\`\`
+			`${'Mediafire Downloader'.formatHeaders()}
 		
 Filename: ${result.filename}
 Filesize: ${result.filesize}

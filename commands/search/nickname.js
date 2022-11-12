@@ -23,7 +23,7 @@ export default {
 
 		client[botNum].reply(
 			{ from, quoted: message },
-			`\`\`\` • Nickfinder\`\`\`
+			`${'Nickfinder'.formatHeaders()}
 
 ${result.join('\n').trim()}`,
 		);

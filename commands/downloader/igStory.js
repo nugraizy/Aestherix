@@ -42,9 +42,9 @@ export default {
 					continue;
 				}
 
-				let capt = '``` • Instagram Story```\n\n';
+				let capt = 'Instagram Story'.formatHeaders();
 
-				capt += `Username : ${story.username}\n`;
+				capt += `\n\nUsername : ${story.username}\n`;
 				capt += `Fullname : ${story.fullName}\n`;
 
 				if (isOne(story.stories.length)) {

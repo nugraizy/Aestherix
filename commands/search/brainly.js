@@ -33,7 +33,9 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, brainly.error);
 		}
 
-		let capt = '``` • Brainly```\n\n';
+		let capt = 'Brainly'.formatHeaders();
+
+		capt += '\n\n';
 
 		for (const { pertanyaan, jawaban } of brainly) {
 			capt += `Pertanyaan : ${pertanyaan.replace(/[\n\t\r]/g, '')}\n`;

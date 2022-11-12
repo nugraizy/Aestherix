@@ -73,9 +73,9 @@ export default {
 					hosting,
 				} = data;
 
-				let capt = '``` • IP Address Lookup ```\n\n';
+				let capt = 'IP Address Lookup'.formatHeaders();
 
-				capt += `Continent : ${continent}\n`;
+				capt += `\n\nContinent : ${continent}\n`;
 				capt += `Continent Code : ${continentCode}\n`;
 				capt += `Country : ${country}\n`;
 				capt += `Country Code : ${countryCode}\n`;

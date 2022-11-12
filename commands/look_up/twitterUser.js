@@ -45,7 +45,7 @@ export default {
 			} else {
 				const { biograph, username, name, joined, verified, imageProfile, personalUrl } = user;
 
-				let capt = '``` • Twitter User Lookup```\n\n';
+				let capt = 'Twitter User Lookup'.formatHeaders();
 
 				capt += `Username : ${username}\n`;
 				capt += `Fullname : ${name}\n`;

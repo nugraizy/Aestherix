@@ -24,7 +24,7 @@ export default {
 				from,
 				{
 					image: { url: data[index] },
-					caption: '``` • Stock Images ```',
+					caption: 'Stock Images'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: args[1] == 'next' ? data[index] : data[index] } },
 						index + 1 !== data.length ? { quickReplyButton: { displayText: 'Next Image', id: `.stockimages next ${data[index + 1]} ${JSON.stringify(data)}` } } : {},
@@ -43,6 +43,8 @@ export default {
 		for (const querie of queries) {
 			const result = await stockImagesPexel(querie.trim());
 
+			console.log(result);
+
 			if ('error' in result || !result) {
 				await client[botNum].reply({ from, quoted: message }, JSON.stringify(result));
 				continue;
@@ -52,7 +54,7 @@ export default {
 				from,
 				{
 					image: { url: result[0] },
-					caption: '``` • Stock Images ```',
+					caption: 'Stock Images'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: result[0] } },
 						result.length !== 1 ? { quickReplyButton: { displayText: 'Next Image', id: `.stockimages next ${result[1]} ${JSON.stringify(result)}` } } : {},

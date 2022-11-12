@@ -24,7 +24,7 @@ export default {
 				from,
 				{
 					image: { url: data[index].image },
-					caption: '``` • Pinterest ```',
+					caption: 'Pinterest'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: args[1] == 'next' ? data[index].image : data[index].image } },
 						{ urlButton: { displayText: 'Pinterest Source', url: args[1] == 'next' ? data[index].pinSource : data[index].pinSource } },
@@ -60,7 +60,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 				from,
 				{
 					image: { url: result[0].image },
-					caption: '``` • Pinterest ```',
+					caption: 'Pinterest'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: result[0].image } },
 						{ urlButton: { displayText: 'Pinterest Source', url: result[0].pinSource } },

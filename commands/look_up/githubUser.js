@@ -25,7 +25,7 @@ export default {
 
 			return await client[botNum].sendMessage(from, {
 				image: { url: avatarUrl },
-				caption: '``` • Github User Lookup ```',
+				caption: 'Github User Lookup'.formatHeaders(),
 				templateButtons: [
 					{ urlButton: { displayText: 'Image Source', url: args[1] == 'next' ? data[index].avatar_url : data[index].avatar_url } },
 					{ urlButton: { displayText: 'User Source', url: args[1] == 'next' ? data[index].html_url : data[index].html_url } },
@@ -83,7 +83,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 
 			await client[botNum].sendMessage(from, {
 				image: { url: avatarUrl },
-				caption: '``` • Github User Lookup ```',
+				caption: 'Github User Lookup'.formatHeaders(),
 				templateButtons: [
 					{ urlButton: { displayText: 'Image Source', url: avatarUrl } },
 					{ urlButton: { displayText: 'User Source', url: htmlUrl } },

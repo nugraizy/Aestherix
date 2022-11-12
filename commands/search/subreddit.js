@@ -30,7 +30,7 @@ export default {
 
 			await client[botNum].sendMessage(from, {
 				image: { url: result.result.url },
-				caption: '``` • Reddit ```',
+				caption: 'Reddit'.formatHeaders(),
 				templateButtons: [
 					{ urlButton: { displayText: 'Image Source', url: result.result.url } },
 					{ urlButton: { displayText: 'Post Source', url: result.result.postLink } },
