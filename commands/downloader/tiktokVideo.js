@@ -89,7 +89,7 @@ export default {
 					await client[botNum].sendMessage(from, { image: { url }, caption: index == 1 ? capt.trim() : '' }, { quoted: message });
 				}
 			} else {
-				const date = dayjs(dayjs(videos.published).unix()).format('HH:mm:ss DD/MM/YYYY');
+				const date = dayjs(videos.published * 1000).format('HH:mm:ss DD/MM/YYYY');
 				let capt = 'TikTok Video'.formatHeaders();
 
 				capt += `\n\nAuthor : ${videos.author}\n`;

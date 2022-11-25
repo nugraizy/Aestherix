@@ -1,12 +1,12 @@
 import { fetchJSON } from '../../helper/index.js';
 import { getAyat } from './index.js';
 
-const URL_BASE = 'https://equran.id/api';
+const _api = (input) => `https://equran.id/api/tafsir/${input}`;
 
 export const getTafsirSurah = (nomor) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const data = await fetchJSON(`${URL_BASE}/tafsir/${nomor}`);
+			const data = await fetchJSON(_api(nomor));
 			const ayat = await getAyat(nomor);
 
 			resolve(

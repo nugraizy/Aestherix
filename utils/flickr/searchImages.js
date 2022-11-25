@@ -3,14 +3,14 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const KEY = process.env.FLICKR_KEY;
+const _key = process.env.FLICKR_KEY;
 
 export class FlickerAPI extends Flickr {
-	#API;
+	#_api;
 	constructor() {
-		const API = super(KEY);
+		const API = super(_key);
 
-		this.#API = API;
+		this.#_api = API;
 
 		this.searchImages = async (keyword) =>
 			new Promise(async (resolve, reject) => {
@@ -47,7 +47,7 @@ export class FlickerAPI extends Flickr {
 			});
 	}
 	async req(type, method, options) {
-		let { text } = await this.#API[type][method](options);
+		let { text } = await this.#_api[type][method](options);
 
 		return JSON.parse(text);
 	}

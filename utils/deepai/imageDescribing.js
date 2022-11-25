@@ -3,7 +3,7 @@ import FormData from 'form-data';
 
 import { randomize } from '../../helper/index.js';
 
-const URL_API = 'https://api.deepai.org/api/text2img';
+const _api = 'https://api.deepai.org/api/text2img';
 
 /**
  * Convert strings into an image.
@@ -26,7 +26,7 @@ export const createImage = (input) =>
 			reqOptions.headers = form.getHeaders();
 			const {
 				data: { output_url: outputUrl },
-			} = await axiosInstance.post(URL_API, form, reqOptions);
+			} = await axiosInstance.post(_api, form, reqOptions);
 
 			resolve(outputUrl);
 		} catch (err) {

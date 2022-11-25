@@ -1,7 +1,8 @@
 /* global log */
 import { cheerioLOAD, fetchJSON, fetchTEXT } from '../../helper/index.js';
 
-const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36';
+const _api = (input) => `https://www.instagram.com/${input}/?__a=1&__d=dis`;
+const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36';
 const sessionId = process.env.INSTAGRAM_SESI || (await (await import('./instaCookie.js')).getCookie(process.env.INSTAGRAM_USERNAME, process.env.INSTAGRAM_PASSWORD));
 
 // Scrape by Alphanum404.
@@ -52,9 +53,9 @@ export const getUser = (username) =>
 				username = username.replace('@', '');
 			}
 
-			const { graphql } = await fetchJSON(`https://www.instagram.com/${username}/?__a=1&__d=dis`, {
+			const { graphql } = await fetchJSON(_api(username), {
 				headers: {
-					'user-agent': UA,
+					'user-agent': userAgent,
 					cookie: sessionId,
 				},
 			});

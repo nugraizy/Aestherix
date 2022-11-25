@@ -14,9 +14,7 @@ export default {
 	limit: 5,
 	status: 'enable',
 	async run({ from, prefix, message }, client) {
-		let capt = `𓆩 Void Bot ⁣𓆪\nV ${readJSON(
-			'./package.json',
-		).version.toUpperCase()}\n\nnote : if you want to try werewolf, the game still on beta, so many bugs (the game made in 2 days). but still playable.\n\n`;
+		let capt = `𓆩 Void Bot ⁣𓆪\nV ${readJSON('./package.json').version.toUpperCase()}\n\n`;
 		const container = [];
 
 		for (const [key, value] of configuration.cmds.commands) {

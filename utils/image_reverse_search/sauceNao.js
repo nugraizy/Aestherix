@@ -3,8 +3,8 @@ import FormData from 'form-data';
 import { createReadStream } from 'fs';
 import { cheerioLOAD, fetchTEXT, isURL } from '../../helper/modules/index.js';
 
-const URL_BASE = 'https://saucenao.com/search.php';
-const URL_BASE_INPUT = (input) => `https://saucenao.com/search.php?url=${input}`;
+const _api = (input) => `https://saucenao.com/search.php${input ? input : ''}`;
+const _apiRequest = (input) => _api(`?url=${input}`);
 
 const isValidImageURL = async (url) => {
 	try {
@@ -30,7 +30,7 @@ export const sauceNao = async (file) =>
 
 				form.append('file', createReadStream(file));
 				const response = await new Promise((resolve, reject) => {
-					form.submit(URL_BASE, (err, res) => {
+					form.submit(_api(), (err, res) => {
 						if (err) {
 							reject(err);
 						} else {
@@ -47,7 +47,7 @@ export const sauceNao = async (file) =>
 				return resolve({ error: 'Invalid image URL' });
 			}
 
-			data = data ?? (await fetchTEXT(URL_BASE_INPUT(file)));
+			data = data ?? (await fetchTEXT(_apiRequest(file)));
 			const $ = cheerioLOAD(data);
 			const result = $('#middle > div:nth-child(2)');
 			const results = {

@@ -1,6 +1,6 @@
 import { fetchJSON } from '../../helper/index.js';
 
-const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36';
+const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36';
 const sessionId = process.env.INSTAGRAM_SESI || (await (await import('./instaCookie.js')).getCookie(process.env.INSTAGRAM_USERNAME, process.env.INSTAGRAM_PASSWORD));
 
 const BASE_URL = (code) => `https://www.instagram.com/p/${code}`;
@@ -72,7 +72,7 @@ export const searchHashtag = (query) =>
 
 			const { data } = await fetchJSON(`https://www.instagram.com/explore/tags/${query}/?__a=1&__d=dis`, {
 				headers: {
-					'user-agent': UA,
+					'user-agent': userAgent,
 					cookie: sessionId,
 				},
 			});

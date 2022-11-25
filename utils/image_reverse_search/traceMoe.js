@@ -7,8 +7,8 @@ import sharp from 'sharp';
 import { __dirname } from '../../index.js';
 import { fetchBUFFER, fetchJSON, isURL } from '../../helper/modules/index.js';
 
-const URL_BASE_API = 'https://api.trace.moe/search?cutBorders&';
-const URL_BASE_ANILIST = 'https://trace.moe/anilist/';
+const _api = 'https://api.trace.moe/search?cutBorders&';
+const _apiPost = 'https://trace.moe/anilist/';
 
 const isValidImageURL = async (url) => {
 	try {
@@ -41,7 +41,7 @@ export const traceMoe = async (file) =>
 			form.append('image', file, { contentType: 'image/jpeg', filename: 'blob' });
 			const {
 				data: { result },
-			} = await axios.post(URL_BASE_API, form);
+			} = await axios.post(_api, form);
 
 			result.forEach((v) => {
 				return (v.similarity = Number((v.similarity * 100).toFixed(2)));
@@ -50,7 +50,7 @@ export const traceMoe = async (file) =>
 				data: {
 					Page: { media },
 				},
-			} = await fetchJSON(URL_BASE_ANILIST, {
+			} = await fetchJSON(_apiPost, {
 				method: 'POST',
 				body: JSON.stringify({
 					query: readFileSync(path.join(__dirname, 'utils/image_reverse_search/query.graphql')).toString(),
@@ -63,9 +63,10 @@ export const traceMoe = async (file) =>
 					cookie: 'laravel_session=b7cAHsg8W1BucvpMg3I8VxYHEyUEpk8wxL1mI08I',
 				},
 			});
-			const container = result.map((v) => {
-				return { ...v, media: media.find((w) => w.id == v.anilist) ?? 'No Detail' };
-			});
+			const container = result.map((v) => ({
+				...v,
+				media: media.find((w) => w.id === v.anilist) ?? 'No Detail',
+			}));
 
 			resolve(container.filter((v) => v.media !== 'No Detail'));
 		} catch (error) {

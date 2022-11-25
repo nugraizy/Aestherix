@@ -1,7 +1,8 @@
 import { fetchJSON } from '../../helper/index.js';
 import { getUser } from './index.js';
 
-const UA_IP = 'Instagram 123.0.0.21.114 (iPhone; CPU iPhone OS 11_4 like Mac OS X; en_US; en-US; scale=2.00; 750x1334) AppleWebKit/605.1.15';
+const _apiGraphql = 'https://www.instagram.com/graphql/query/';
+const userAgent = 'Instagram 123.0.0.21.114 (iPhone; CPU iPhone OS 11_4 like Mac OS X; en_US; en-US; scale=2.00; 750x1334) AppleWebKit/605.1.15';
 const sessionId = process.env.INSTAGRAM_SESI;
 
 const appendParams = (url, params) => {
@@ -30,7 +31,7 @@ const fetchId = async (usernames) => {
 		}),
 		{
 			method: 'GET',
-			headers: { 'user-agent': UA_IP, cookie: `sessionid=${sessionId};` },
+			headers: { 'user-agent': userAgent, cookie: `sessionid=${sessionId};` },
 		},
 	);
 
@@ -42,7 +43,7 @@ const fetchId = async (usernames) => {
 
 const fetchHighlights = async (id) => {
 	const data = await fetchJSON(
-		appendParams('https://www.instagram.com/graphql/query/', {
+		appendParams(_apiGraphql, {
 			/* eslint-disable */
 			query_hash: '0a85e6ea60a4c99edc58ab2f3d17cfdf',
 			variables: JSON.stringify({
@@ -60,7 +61,7 @@ const fetchHighlights = async (id) => {
 		}),
 		{
 			method: 'GET',
-			headers: { 'user-agent': UA_IP, cookie: `sessionid=${sessionId};` },
+			headers: { 'user-agent': userAgent, cookie: `sessionid=${sessionId};` },
 		},
 	);
 

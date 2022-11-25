@@ -219,8 +219,14 @@ export const tiktokAPI = (url) =>
 			let keyword;
 
 			if (/((vt|vm|vk)\.tiktok\.com)/g.test(url) || !url.includes('video')) {
-				const req = await fetch(url);
-				const { origin, pathname } = new URL(req.url);
+				const req = await axios.get(url);
+
+				if (!req.request?.res?.responseUrl) {
+					resolve({ error: 'download failed. either the access is denied, or other error.' });
+					return;
+				}
+
+				const { origin, pathname } = new URL(req.request.res.responseUrl);
 
 				keyword = pathname.split('/').slice(-1)[0];
 

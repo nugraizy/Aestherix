@@ -1,12 +1,12 @@
 import { fetchJSON } from '../../helper/index.js';
 
-const URL_BASE = 'https://equran.id/api';
+const _api = (input) => `https://equran.id/api/surat/${input}`;
 const regex = new RegExp('(</?i>|</?br>)', 'g');
 
 export const getSurahDetail = (nomor) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const data = await fetchJSON(`${URL_BASE}/surat/${nomor}`);
+			const data = await fetchJSON(_api(nomor));
 
 			resolve({
 				namaArab: data.nama,

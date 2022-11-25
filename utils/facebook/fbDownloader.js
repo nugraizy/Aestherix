@@ -3,11 +3,11 @@ import dayjs from 'dayjs';
 
 import { cheerioLOAD, fetchJSON } from '../../helper/index.js';
 
-const URL_BASE = 'https://api.onlinevideoconverter.pro/api/convert';
-const FB_DL = 'https://snapsave.app/action.php';
+const _api = 'https://api.onlinevideoconverter.pro/api/convert';
+const _apiAction = 'https://snapsave.app/action.php';
 
 const decoding = (...args) => {
-	function a(d, e, f) {
+	const a = (d, e, f) => {
 		const g = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/'.split('');
 		const h = g.slice(0, e);
 		const i = g.slice(0, f);
@@ -26,9 +26,9 @@ const decoding = (...args) => {
 			j = (j - (j % f)) / f;
 		}
 		return k || '0';
-	}
+	};
 
-	function b(h, u, n, t, e, r) {
+	const b = (h, u, n, t, e, r) => {
 		r = '';
 
 		for (let i = 0, len = h.length; i < len; i++) {
@@ -47,7 +47,7 @@ const decoding = (...args) => {
 		}
 
 		return decodeURIComponent(encodeURIComponent(r));
-	}
+	};
 
 	return b(...args);
 };
@@ -55,7 +55,7 @@ const decoding = (...args) => {
 export const fbDl = (url) =>
 	new Promise(async (resolve) => {
 		try {
-			const { data } = await axios(FB_DL, {
+			const { data } = await axios(_apiAction, {
 				method: 'POST',
 				headers: {
 					'content-type': 'application/x-www-form-urlencoded',
@@ -119,7 +119,7 @@ export const fbDl = (url) =>
 				});
 			}
 		} catch (err) {
-			const data = await fetchJSON(URL_BASE, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) });
+			const data = await fetchJSON(_api, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) });
 
 			if (data.code == 102) {
 				return resolve({ error: data.message });

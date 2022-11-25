@@ -1,8 +1,8 @@
 import { fetchJSON } from '../../helper/index.js';
 
-const INFO_URL_API = (code) => `https://www.instagram.com/p/${code}/?__a=1&__d=dis`;
+const _api = (code) => `https://www.instagram.com/p/${code}/?__a=1&__d=dis`;
 
-const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36';
+const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36';
 const sessionId = process.env.INSTAGRAM_SESI || (await (await import('./instaCookie.js')).getCookie(process.env.INSTAGRAM_USERNAME, process.env.INSTAGRAM_PASSWORD));
 
 export const getPost = (code) =>
@@ -12,10 +12,10 @@ export const getPost = (code) =>
 		}
 
 		try {
-			const FORMATTED_URL = INFO_URL_API(code);
+			const FORMATTED_URL = _api(code);
 			const data = await fetchJSON(FORMATTED_URL, {
 				method: 'GET',
-				headers: { 'user-agent': UA, cookie: sessionId },
+				headers: { 'user-agent': userAgent, cookie: sessionId },
 			});
 			let { username, full_name: fullName, is_private: isPrivate, is_verified: isVerified } = data.items[0].user;
 			let { like_count: likeCount, taken_at: takenAt, comment_count: commentCount, media_type: mediaType } = data.items[0];

@@ -5,12 +5,12 @@ import { fetchTEXT } from '../../helper/index.js';
 import { parse } from './utils.js';
 
 const check = (i) => (i == -1 ? undefined : i);
-const URL_SEARCH = (input) => `https://www.deviantart.com/search?q=${input}`;
+const _api = (input) => `https://www.deviantart.com/search?q=${input}`;
 
 export const searchDeviantArt = (keyword) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const data = await fetchTEXT(URL_SEARCH(keyword));
+			const data = await fetchTEXT(_api(keyword));
 			const $ = cheerio.load(data);
 
 			let json = $('body > script').get(0).firstChild.data;

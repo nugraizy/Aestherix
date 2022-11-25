@@ -2,8 +2,8 @@ import { fetchJSON } from '../../helper/index.js';
 
 const URL_VISUAL = (input) => `https://akcdn.detik.net.id/visual/${input}`;
 
-const parse = (arr) => {
-	return arr.map((v) => {
+const parse = (arr) =>
+	arr.map((v) => {
 		v.strisi = v.strisi.replace(/<[^>]*>/g, '');
 		return {
 			title: v.strjudul,
@@ -14,7 +14,6 @@ const parse = (arr) => {
 			link: v.url,
 		};
 	});
-};
 
 /**
  * Parsed result definition.

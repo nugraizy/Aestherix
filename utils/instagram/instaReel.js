@@ -3,8 +3,8 @@ import qs from 'qs';
 
 import { cheerioLOAD, fetchJSON, fetchTEXT } from '../../helper/index.js';
 
-const URL_BASE = () => 'https://www.instagramsave.com/reels-downloader.php';
-const URL_POST = () => 'https://www.instagramsave.com/system/action.php';
+const _apiBase = 'https://www.instagramsave.com/reels-downloader.php';
+const _apiPost = 'https://www.instagramsave.com/system/action.php';
 const PARSE_URL = (url) => {
 	const regUrl = url.match(/([-_0-9A-Za-z]{11})/) || undefined;
 
@@ -19,7 +19,7 @@ export const getReels = (url) =>
 	new Promise(async (resolve) => {
 		try {
 			url = PARSE_URL(url);
-			const data = await fetchTEXT(URL_BASE(), {
+			const data = await fetchTEXT(_apiBase, {
 				method: 'get',
 				headers: {
 					'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36',
@@ -28,7 +28,7 @@ export const getReels = (url) =>
 			});
 			const $ = cheerioLOAD(data);
 			const token = $('input#token').attr('value');
-			const dataResult = await fetchJSON(URL_POST(), {
+			const dataResult = await fetchJSON(_apiPost, {
 				method: 'POST',
 				headers: {
 					'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36',
