@@ -1,6 +1,6 @@
 /* global botNum */
 import { isURL } from '../../helper/index.js';
-import { getScreenshot } from '../../utils/misc/webScreenshot.js';
+import { getScreenshotAPI } from '../../utils/misc/webScreenshot.js';
 
 export default {
 	name: 'screenshots',
@@ -30,7 +30,7 @@ export default {
 			return await client[botNum].reply({ from: message.from, quoted: message.message }, 'Please specify a valid URL');
 		}
 
-		const { buffer } = await getScreenshot(message.query, type);
+		const { buffer } = await getScreenshotAPI(message.query, type);
 
 		await client[botNum].sendMessage(message.from, { image: new Buffer.from(buffer, 'base64') }, { quoted: message.message });
 	},
