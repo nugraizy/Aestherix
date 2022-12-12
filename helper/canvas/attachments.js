@@ -276,5 +276,7 @@ export class Attachment {
 		return image;
 	}
 
-	async palettes(str) {}
+	async palettes(str) {
+	return await color.getPalette(str);
+	}
 }
