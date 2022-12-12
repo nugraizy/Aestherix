@@ -13,7 +13,7 @@ export default {
 	description: 'Enhance image using image processing A.I. called waifu2x.',
 	usage: '!waifu2x <reply/send (image/sticker)>',
 	aliases: ['w2x', 'enhance', 'upscale', 'remmini'],
-	category: 'Category',
+	category: 'Converter',
 	cooldown: 6,
 	limit: 4,
 	status: 'enable',

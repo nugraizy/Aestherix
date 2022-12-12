@@ -11,8 +11,12 @@ export default {
 	cooldown: 5,
 	limit: 0,
 	status: 'disable',
-	async run({ from, bodyQuoted, mediaData, query }, client) {
+	async run({ from, bodyQuoted, mediaData, query, isOwner }, client) {
 		if (!query && !bodyQuoted) {
+			return;
+		}
+
+		if (!isOwner) {
 			return;
 		}
 

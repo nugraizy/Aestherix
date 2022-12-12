@@ -35,6 +35,6 @@ export default {
 			})
 			.placeCopyright();
 
-		await client[botNum].sendMessage(from, { image: new Buffer.from(attach.toBuffer(), 'base64') });
+		await client[botNum].sendMessage(from, { image: attach.toBuffer() });
 	},
 };

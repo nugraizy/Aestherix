@@ -150,6 +150,7 @@ const start = async () => {
 		shouldSyncHistoryMessage: () => false,
 		getMessage: async () => ({ conversation: 'Success syncing. Please resend the command again.' }),
 		generateHighQualityLinkPreview: true,
+		linkPreviewImageThumbnailWidth: 2,
 		mediaCache: new Map(),
 		userDevicesCache: false,
 	};

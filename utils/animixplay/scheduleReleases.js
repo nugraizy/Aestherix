@@ -59,11 +59,15 @@ const sortDates = (arr) => {
 	const dates = {};
 	const todaySchedule = arr.filter((v) => v.indexDate === datesNow);
 
-	dates[todaySchedule[0].date] = todaySchedule.sort((a, b) => dayjs(a.time, 'HH:mm').hour() - dayjs(b.time, 'HH:mm').hour());
+	dates[todaySchedule[0].date] = todaySchedule.sort((lhs, rhs) =>
+		dayjs(lhs.time, 'HH:mm').hour() > dayjs(rhs.time, 'HH:mm').hour() ? 1 : dayjs(lhs.time, 'HH:mm').hour() < dayjs(rhs.time, 'HH:mm').hour() ? -1 : 0,
+	);
 
 	for (const date of maps[datesNow]) {
 		const day = dayjs().day(date).format('dddd');
-		dates[day] = arr.filter((v) => v.indexDate === date).sort((a, b) => dayjs(a.time, 'HH:mm').hour() - dayjs(b.time, 'HH:mm').hour());
+		dates[day] = arr
+			.filter((v) => v.indexDate === date)
+			.sort((lhs, rhs) => (dayjs(lhs.time, 'HH:mm').hour() > dayjs(rhs.time, 'HH:mm').hour() ? 1 : dayjs(lhs.time, 'HH:mm').hour() < dayjs(rhs.time, 'HH:mm').hour() ? -1 : 0));
 	}
 
 	return dates;
@@ -78,7 +82,7 @@ export const animixReleases = () =>
 		try {
 			const { data } = await axios.get('https://animixplay.to/assets/s/schedule.json');
 
-			const container = sortDates(convertToDates(data.map((v) => ({ title: v.name, id: v.malid, release: parseInt(v.time * 1000) }))));
+			const container = sortDates(convertToDates(data.map((v) => ({ title: v.name, id: v.malid, release: parseInt(v.time * 1000 + 2 * 60 * 60 * 1000) }))));
 
 			for (const obj in container) {
 				for (const val of container[obj]) {

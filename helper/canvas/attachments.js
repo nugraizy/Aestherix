@@ -1,5 +1,6 @@
 import Canvas from 'canvas';
 import sharp from 'sharp';
+import jimp from 'jimp';
 import Wrap from 'canvas-text-wrapper';
 import * as color from 'colorthief';
 
@@ -173,15 +174,10 @@ export class Attachment {
 			let cw = 60;
 			let ch = 60;
 
-			const cross1Raw = await sharp('./media_files/assets/cross-mark.png')
-				.rotate(Math.floor(Math.random() * 180), { background: { alpha: 0, b: 0, g: 0, r: 0 } })
-				.png({ force: true })
-				.toBuffer();
+			const raw = await jimp.read('./media_files/assets/cross-mark.png');
 
-			const cross2Raw = await sharp('./media_files/assets/cross-mark.png')
-				.rotate(Math.floor(Math.random() * 180), { background: { alpha: 0, b: 0, g: 0, r: 0 } })
-				.png({ force: true })
-				.toBuffer();
+			const cross1Raw = await raw.rotate(Math.floor(Math.random() * 180)).getBufferAsync(jimp.MIME_PNG);
+			const cross2Raw = await raw.rotate(Math.floor(Math.random() * 180)).getBufferAsync(jimp.MIME_PNG);
 
 			const [signature, logo, [cross1, cross2]] = [
 				await loadImage('./media_files/assets/1_icon_github_signature.png'),
@@ -261,9 +257,7 @@ export class Attachment {
 			return this;
 		};
 
-		this.toBuffer = () => {
-			return this.canvas.toBuffer();
-		};
+		this.toBuffer = () => this.canvas.toBuffer();
 	}
 
 	registerFonts() {
@@ -282,7 +276,5 @@ export class Attachment {
 		return image;
 	}
 
-	async palettes(str) {
-		return await color.getPalette(str);
-	}
+	async palettes(str) {}
 }

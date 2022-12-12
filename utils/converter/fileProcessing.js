@@ -339,7 +339,7 @@ export const soundRemover = (input, sender) =>
 			});
 			const { vocal_path: vocal, instrumental_path: instrumental } = await fetchJSON('https://aivocalremover.com/api/v2/ProcessFile', {
 				method: 'post',
-				body: `file_name=${data.file_name}&action=watermark_video&key=X9QXlU9PaCqGWpnP1Q4IzgXoKinMsKvMuMn3RYXnKHFqju8VfScRmLnIGQsJBnbZFdcKyzeCDOcnJ3StBmtT9nDEXJn`,
+				body: `file_name=${data.file_name}&action=watermark_video&key=X9QXlU9PaCqGWpnP1Q4IzgXoKinMsKvMuMn3RYXnKHFqju8VfScRmLnIGQsJBnbZFdcKyzeCDOcnJ3StBmtT9nDEXJn&web=web`,
 				headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' },
 			});
 
