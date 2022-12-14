@@ -28,8 +28,9 @@ export const _3hentai = (code) =>
 				language: getElement('Languages'),
 				categories: getElement('Categories'),
 				images: $('div.single-thumb-col')
-					.map((i, el) => $(el).find('img').attr('data-src').replace('.t', '.'))
-					.get(),
+					.map((i, el) => $(el).find('img').attr('data-src'))
+					.get()
+					.map((v) => v.replace('t.', '.')),
 			};
 
 			details.totalPages = details.images.length;

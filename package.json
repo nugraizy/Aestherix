@@ -55,6 +55,7 @@
 		"gradient-string": "^2.0.0",
 		"https": "^1.0.0",
 		"image-size": "^1.0.2",
+		"image-to-pdf": "^2.0.0",
 		"instagram_mqtt": "^1.2.2",
 		"instagram-private-api": "^1.45.3",
 		"js-beautify": "^1.14.0",

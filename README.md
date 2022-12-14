@@ -1,126 +1,132 @@
-<div align="center">
-<img src="https://i.ibb.co/BBCqryH/Screenshot-from-2022-02-11-13-36-53.png" alt="s" width="500" />
+<div align='center'>
+<img src='https://i.ibb.co/BBCqryH/Screenshot-from-2022-02-11-13-36-53.png' alt='s' width='500' />
 
 # SimplebotPRO3
 
 ### Next-gen bot using Baileys-md, and latest version of simplebotPRO
 
-` (remove showing bash function if script won't start)`
-
 ---
 
 </div>
 
-# `this.isZero() is not a function` error fix
+# Table of Contents <a name='table'></a>
+
+- [Installations](#installations)
+  - [Linux](#linux)
+  - [Windows](#windows)
+- [Run](#run-the-project)
+  - [Run With Flags](#available-flags)
+- [Known Error Fixed](#common-occured-error)
+  - [this.isZero() not a function](#zero)
+  - [crash when added to a group](#crash)
+- [Additional Context](#additional-context)
+
+---
+
+# Installations
+
+## Linux
+
+#### FFMPEG
+
+```bash
+sudo apt install ffmpeg
+```
+
+#### LIBWEBP
+
+##### make sure to install `gcc`, and `make`
+
+```bash
+sudo apt-get install libjpeg-dev libpng-dev libtiff-dev libgif-dev
+wget https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.2.4.tar.gz
+tar xvzf libwebp-1.2.4.tar.gz
+cd libwebp-1.2.4
+./configure
+make
+sudo make install
+```
+
+<div align='center'>
+<a href='#table'>go back</a>
+</div>
+
+## Windows
+
+### FFMPEG
+
+1. Download manual using this [link](https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip)
+2. Extract it
+3. Open the folder, go to bin, copy the path
+4. Set/add the Environment path with the copied path
+
+### LIBWEBP
+
+1. Download manual using this [link](https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.2.3-windows-x64.zip)
+2. Extract it
+3. Open the folder, go to bin, copy the path
+4. Set/add the Environment path with the copied path
+
+<div align='center'>
+<a href='#table'>go back</a>
+</div>
+
+# Run the project
+
+`node . your_session_name --flag` you can find the available flags [here](#available-flags)
+
+<div align='center'>
+<a href='#table'>go back</a>
+</div>
+
+## Available Flags
+
+| Flags             | Descriptions                                                                                        | Alias |
+| ----------------- | --------------------------------------------------------------------------------------------------- | ----- |
+| --prf your_prefix | Set your custom prefix. Don't use it if you want multi-prefixes                                     | -p    |
+| --read_only       | Bot will ignore every incoming command and only read the chat with no logs                          | -y    |
+| --auto_read       | Bot will enable auto-read chat                                                                      | -r    |
+| --restrict        | Bot will ignore restricted command. Such Add, Promote, Demote                                       | -e    |
+| --only_logs       | Only shows logs for incoming message and command. But will ignore message and command               | -o    |
+| --no_logs         | This will disable the logs. But not ignore the incoming messages and command                        | -n    |
+| --self_mode       | This mode will only listening to your own message and command                                       | -s    |
+| --debug_mode      | Every incoming message will be extracted the metadata and showed to the logs                        | -g    |
+| --multi_cmd       | You can use multiple command. Use \| to separate each command                                       | -m    |
+| --auto_correct    | Automatically correcting every incoming command                                                     | -a    |
+| --rainbow         | Make your console colorful                                                                          | -b    |
+| --watch           | Watch files for changes and will auto remove previous cache. `WARNING : THIS CAN SLOWS YOUR SCRIPT` | -w    |
+| --cool_down       | Enable cooldown for each commands                                                                   | -c    |
+| --no_load         | Disable load animation                                                                              | -v    |
+| --json            | Store WhatsApp data into JSON File                                                                  | -j    |
+| --reset           | Reset WhatsApp session and start a new one                                                          | -k    |
+| --story           | Fetch every incoming Story from your contacts                                                       | -q    |
+| --offline         | Set your current client devices to offline                                                          | -f    |
+| --no_call         | Do not disturb. Every incoming call will be rejected and the caller will be blocked                 | -d    |
+| --help            | Will show this message in the console                                                               | -h    |
+
+---
+
+<div align='center'>
+<a href='#table'>go back</a>
+</div>
+
+# Common Occured Error
+
+### <a name="zero"></a> this.isZero() not a function
 
 Go to `node_modules\long\src\long.js:474`
 
 Add this code to line 474 (don't change the original 474 code. just add the code below) :
 
 ```js
-if (typeof this.isZero != "function") return "1";
+if (typeof this.isZero != 'function') return '1';
 ```
 
-# `crash when added to a group` error fix
+### <a name="crash"></a> crash when added to a group
 
 Please install the latest Baileys-md commit
 
-# Installation
-
-`npm install`
-
-# run
-
-`node .`
-
-## run with options :
-
-node . <session_name> <--options>
-`options :`
-
-### --prf YOUR_PREFIX / -p YOUR_PREFIX
-
-> "Set your custom prefix. Don't use it if you want multi-prefixes."
-
-### --read_only / -y
-
-> "Bot will ignore every incoming command and only read the chat with no logs."
-
-### --auto_read / -r
-
-> "Bot will enable auto-read chat."
-
-### --restrict / -e
-
-> "Bot will ignore restricted command. Such Add, Promote, Demote."
-
-### --only_logs / -o
-
-> "Only shows logs for incoming message and command. But will ignore message and command."
-
-### --no_logs / -n
-
-> "This will disable the logs. But not ignore the incoming messages and command."
-
-### --self_mode / -s
-
-> "This mode will only listening to your own message and command."
-
-### --debug_mode / -g
-
-> "Every incoming message will be extracted the metadata and showed to the logs."
-
-### --multi_cmd / -m
-
-> "You can use multiple command. Use | to separate each command."
-
-### --help / -h
-
-> "Will show this message in the console."
-
-### --auto_correct / -a
-
-> "Automatically correcting every incoming command."
-
-## --rainbow / -b
-
-> "Make your console colorful."
-
-### --watch / -w
-
-> "Watch files for changes and will auto remove previous cache. WARNING : THIS CAN SLOWS YOUR SCRIPT."
-
-## --cool_down / -c
-
-> "Enable cooldown for each commands."
-
-## --no_load / -v
-
-> "Disable load animation."
-
-## --json / -j
-
-> "Store WhatsApp data into JSON File."
-
-## --reset / -k
-
-> "Reset WhatsApp session and start a new one."
-
-## --story / -q
-
-> "Fetch every incoming Story from your contacts."
-
-## --offline / -f
-
-> "Set your current client devices to offline"
-
-## --no_call / -d
-
-> "Do not disturb. Every incoming call will be rejected and the caller will be blocked."
-
----
-
-# additional context
+# Additional Context
 
 ### Changing ID message :
 
@@ -128,108 +134,6 @@ Go to `node_modules\@adiwajshing\baileys\lib\Utils\generic.js:165`
 
 Change the `BAE5` to anything. (do not includes special characters!)
 
----
-
-### Disable `saving auth state` log spam
-
-Go to `node_modules\@adiwajshing\baileys-md\lib\Utils\auth-utils.js:99`
-
-Comment the
-
-```js
-//log('saving auth state');
-```
-
----
-
-### no_crop ability for changing profile pictures
-
-Go to `\node_modules\@adiwajshing\baileys\lib\Socket\chats.js:86`
-
-```js
-const updateProfilePicture = async (jid, content, options = {}) => {
-	const { img } = await Utils_1.generateProfilePicture(content, options);
-	await query({
-		tag: "iq",
-		attrs: {
-			to: WABinary_1.jidNormalizedUser(jid),
-			type: "set",
-			xmlns: "w:profile:picture",
-		},
-		content: [
-			{
-				tag: "picture",
-				attrs: { type: "image" },
-				content: img,
-			},
-		],
-	});
-};
-```
-
-Go to `\node_modules\@adiwajshing\baileys\lib\Utils\messages-media.js:35`
-
-```js
-const getImageProcessingLibrary = async () => {
-	const [jimp] = await Promise.all([
-		(async () => {
-			const jimp = await Promise.resolve()
-				.then(() => __importStar(require("jimp")))
-				.catch(() => {});
-			return jimp;
-		})(),
-	]);
-	if (jimp) {
-		return { jimp };
-	}
-	throw new boom_1.Boom("No image processing library available");
-};
-```
-
-Go to `\node_modules\@adiwajshing\baileys\lib\Utils\messages-media.js:110`
-
-```js
-const generateProfilePicture = async (mediaUpload, options) => {
-	let bufferOrFilePath;
-	if (Buffer.isBuffer(mediaUpload)) {
-		bufferOrFilePath = mediaUpload;
-	} else if ("url" in mediaUpload) {
-		bufferOrFilePath = mediaUpload.url.toString();
-	} else {
-		bufferOrFilePath = await exports.toBuffer(mediaUpload.stream);
-	}
-	const lib = await getImageProcessingLibrary();
-	let img;
-	const { read, MIME_JPEG, RESIZE_BILINEAR } = lib.jimp;
-	const jimp = await read(bufferOrFilePath);
-	let w = 640;
-	let h = 640;
-	if (options.no_crop) {
-		if (jimp.getWidth() == jimp.getHeight()) (w = 300), (h = 700);
-		else if (jimp.getWidth() > jimp.getHeight()) (w = 300), (h = jimp.getHeight() / (jimp.getWidth() / 300));
-		else if (jimp.getWidth() < jimp.getHeight()) (h = 700), (w = jimp.getWidth() / (jimp.getHeight() / 700));
-		const re_size = jimp.resize(w, h);
-		img = jimp.getBufferAsync(MIME_JPEG);
-	} else if (options.no_stretch) {
-		const min = Math.min(jimp.getWidth(), jimp.getHeight());
-		const cropped = jimp.crop(0, 0, min, min);
-		img = await cropped.quality(50).resize(640, 640, RESIZE_BILINEAR).getBufferAsync(MIME_JPEG);
-	} else {
-		const stretch = jimp.resize(w, h);
-		img = jimp.quality(50).getBufferAsync(MIME_JPEG);
-	}
-	return {
-		img: await img,
-	};
-};
-```
-
----
-
-### fix anti-delete handler if you aren't using json options :
-
-Go to `\node_modules\@adiwajshing\baileys\lib\Store\make-in-memory-store.js:141`
-
-```js
-ev.on("messages.update", (updates) => {});
-```
+<div align='center'>
+<a href='#table'>go back</a>
+</div>

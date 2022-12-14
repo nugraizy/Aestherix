@@ -129,7 +129,6 @@ Number.prototype.toTime = function () {
 };
 
 let isClosed = false;
-let tries = 0;
 
 const start = async () => {
 	if (OPTIONS.help) {
@@ -429,7 +428,7 @@ const start = async () => {
 				const content = `Spotify On ${data.isPlaying ? 'Play' : 'Paused'} :                                                       ${data.artists || ''} - ${data.trackTitle || ''}  ( ${
 					data.progressMs?.toTime() || '00'
 				} - ${data?.durationMs?.toTime() || '00'} )`;
-				const myStatus = await client[botNum].fetchStatus(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`);
+				const myStatus = await client?.[botNum]?.fetchStatus(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`);
 
 				if (myStatus.status == content) {
 					return;
@@ -457,7 +456,7 @@ const start = async () => {
 					const caption = `${'Freegames Notifier'.formatHeaders()}
 
 ${result.title}`;
-					await client[botNum].sendMessage(destination, {
+					await client?.[botNum]?.sendMessage(destination, {
 						image: { url: result.preview.images[0].source.url.replace('amp;') },
 						caption,
 						footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
