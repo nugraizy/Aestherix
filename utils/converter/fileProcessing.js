@@ -7,10 +7,11 @@ import dayjs from 'dayjs';
 import path from 'path';
 import petting from 'pet-pet-gif';
 import sharp from 'sharp';
+import imgToPdf, { sizes } from 'image-to-pdf';
 
 import configuration from '../../connect.js';
 import { __dirname } from '../../index.js';
-import { color, ERRLOG, fetchJSON, INFOLOG, isFileExist, isURL, readBuffer, readJSON, unlinkFile, writeBuffer } from '../../helper/modules/index.js';
+import { color, delay, ERRLOG, fetchJSON, INFOLOG, isFileExist, isURL, readBuffer, readJSON, unlinkFile, writeBuffer } from '../../helper/modules/index.js';
 import { webp2mp4File } from './ezgifs/index.js';
 import { streamFile } from './_utils.js';
 
@@ -547,5 +548,39 @@ export const waifu2x = (input, sender) =>
 			ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Failed to Enhance image', 'red')} for ${color(sender, '#ff71ce')}`);
 			await fs.unlink(input);
 			reject(err);
+		}
+	});
+
+export const img2pdf = (image, sender) =>
+	new Promise(async (resolve, reject) => {
+		try {
+			if (!Array.isArray(image)) {
+				image = [image];
+			}
+
+			const filename = `./temporary_files/${sender}.pdf`;
+
+			const buffers = (
+				await Promise.all(
+					image.map((v) => {
+						if (isURL(v)) {
+							return axios.get(v, { responseType: 'arraybuffer' });
+						}
+
+						return { data: fs.readFile(v) };
+					}),
+				)
+			).map((v) => v.data);
+
+			await imgToPdf(buffers, sizes.A4).pipe(fs.createWriteStream(filename));
+
+			await delay(1000);
+
+			const buffer = await fs.readFile(filename);
+
+			await fs.unlink(filename);
+			resolve(buffer);
+		} catch (error) {
+			reject(error);
 		}
 	});

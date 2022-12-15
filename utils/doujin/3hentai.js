@@ -3,6 +3,16 @@ import cheerio from 'cheerio';
 
 const _api = (input) => `https://3hentai.net/d/${input}`;
 
+/**
+ * @typedef {{title: string, uploadDate: string, tags: string[], artists: string[], language: string[], categories: string[], images: string[], totalPages: number}} _3HentaiResult
+ */
+
+/**
+ * Search comic from 3hentai.
+ * @param {string} code
+ * @returns {Promise<_3HentaiResult>}
+ * @throws {Error}
+ */
 export const _3hentai = (code) =>
 	new Promise(async (resolve, reject) => {
 		try {
@@ -13,6 +23,10 @@ export const _3hentai = (code) =>
 			});
 
 			const $ = cheerio.load(data);
+
+			if ($('#main-content > div.large-container.bg-container.container > h1').text() === '404 - Oh no') {
+				resolve({ error: `Code (${code}) you are looking for is not found.` });
+			}
 
 			const getElement = (input) =>
 				$(`.tag-container.field-name:contains(${input}:)`)
@@ -28,9 +42,8 @@ export const _3hentai = (code) =>
 				language: getElement('Languages'),
 				categories: getElement('Categories'),
 				images: $('div.single-thumb-col')
-					.map((i, el) => $(el).find('img').attr('data-src'))
-					.get()
-					.map((v) => v.replace('t.', '.')),
+					.map((i, el) => $(el).find('img').attr('data-src').replace('t.', '.'))
+					.get(),
 			};
 
 			details.totalPages = details.images.length;

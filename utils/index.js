@@ -18,6 +18,8 @@ export * from './google-it/index.js';
 export * from './image_reverse_search/index.js';
 export * from './instagram_notifier/index.js';
 export * from './instagram/index.js';
+export * from './komikcast/index.js';
+export * from './mangatoon/index.js';
 export * from './misc/index.js';
 export * from './movies/index.js';
 export * from './my_anime_list/index.js';

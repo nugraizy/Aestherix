@@ -219,23 +219,33 @@ export const tiktokAPI = (url) =>
 			let keyword;
 
 			if (/((vt|vm|vk)\.tiktok\.com)/g.test(url) || !url.includes('video')) {
-				const req = await axios.get(url);
+				const req = (
+					await fetch(url, {
+						headers: {
+							'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36',
+						},
+					})
+				)?.url;
 
-				if (!req.request?.res?.responseUrl) {
+				if (!req) {
 					resolve({ error: 'download failed. either the access is denied, or other error.' });
 					return;
 				}
 
-				const { origin, pathname } = new URL(req.request.res.responseUrl);
+				const { origin, pathname } = new URL(req);
 
 				keyword = pathname.split('/').slice(-1)[0];
 
 				url = origin + pathname;
 			}
 
-			const { data: res } = await axios.get(url, {
-				validateStatus: () => true,
-			});
+			const res = await (
+				await fetch(url, {
+					headers: {
+						'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36',
+					},
+				})
+			).text();
 
 			const $ = cheerioLOAD(res);
 			const parsed = await parseData(JSON.parse($('#SIGI_STATE').html()), keyword);

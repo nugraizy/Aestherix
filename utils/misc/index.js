@@ -1,3 +1,4 @@
+export * from './animeName.js';
 export * from './chord.js';
 export * from './createExif.js';
 export * from './freegames.js';

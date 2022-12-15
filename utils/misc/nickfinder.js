@@ -13,7 +13,9 @@ const _api = (query) => `https://nickfinder.com/${query}`;
 export const nickname = (query) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { data } = await axios.get(_api(query)).catch((v) => v.response);
+			const { data } = await axios.get(_api(query), {
+				validateStatus: () => true,
+			});
 
 			const $ = cheerioLOAD(data);
 
