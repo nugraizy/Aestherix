@@ -3,7 +3,13 @@ import emoji from 'node-emoji';
 import { randomize } from '../../helper/modules/index.js';
 
 const randomFruitEmoji = () => {
-	const emojis = [emoji.emojify(':apple:'), emoji.emojify(':grapes:'), emoji.emojify(':banana:'), emoji.emojify(':pineapple:'), emoji.emojify(':watermelon:')];
+	const emojis = [
+		emoji.emojify(':apple:'),
+		emoji.emojify(':grapes:'),
+		emoji.emojify(':banana:'),
+		emoji.emojify(':pineapple:'),
+		emoji.emojify(':watermelon:'),
+	];
 
 	return Array(9)
 		.fill()
@@ -24,7 +30,9 @@ export const slot = (bet) => {
 	const secondColumnSame = top[1] === middle[1] && top[1] === bottom[1] ? ' ▲' : '';
 	const thirdColumnSame = top[2] === middle[2] && top[2] === bottom[2] ? ' ▲' : '';
 	const arrowCapt = [];
-	const grid = [top.join(' ') + topSame, middle.join(' ') + middleSame, bottom.join(' ') + bottomSame].filter((v) => v !== '').join('\n');
+	const grid = [top.join(' ') + topSame, middle.join(' ') + middleSame, bottom.join(' ') + bottomSame]
+		.filter((v) => v !== '')
+		.join('\n');
 
 	prices = [topSame, middleSame, bottomSame];
 

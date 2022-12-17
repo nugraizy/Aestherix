@@ -2,7 +2,7 @@ import axios from 'axios';
 
 import { cheerioLOAD } from '../../helper/index.js';
 
-const _api = (path = '') => `https://waifuplay.my.id${path}`;
+const _apiBase = (path = '') => `https://waifuplay.my.id${path}`;
 
 export const wpList = (url) =>
 	new Promise(async (resolve, reject) => {
@@ -51,12 +51,13 @@ export const wpList = (url) =>
 export const wpSearch = (text) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { data } = await axios.get(_api(`/${text}`));
+			const { data } = await axios.get(_apiBase(`/${text}`));
 			const $ = cheerioLOAD(data);
 
 			if ($('div.pagenon > h2').text() == 'No Post Found') {
 				return resolve({
-					error: 'Anime not found. Try another keyword. If you sure if this keyword belongs to a few Anime title and you see this error keep happening, please report to owner ASAP.',
+					error:
+						'Anime not found. Try another keyword. If you sure if this keyword belongs to a few Anime title and you see this error keep happening, please report to owner ASAP.',
 				});
 			}
 
@@ -64,7 +65,11 @@ export const wpSearch = (text) =>
 
 			const result = {
 				title: $('.flexbox2-item').find('a').attr('title'),
-				image: $('.flexbox2-item').find('img').attr('src').replace('?resize=225,310', '').replace('waifuplay.me', 'waifuplay.my.id'),
+				image: $('.flexbox2-item')
+					.find('img')
+					.attr('src')
+					.replace('?resize=225,310', '')
+					.replace('waifuplay.me', 'waifuplay.my.id'),
 				score: $('.flexbox2-item').find('.score').text(),
 				studio: $('.flexbox2-item')
 					.find('.flexbox2-title > span')
@@ -107,7 +112,7 @@ export const wpDownload = (url) =>
 export const wpLatest = () =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { data } = await axios.get(_api('/'));
+			const { data } = await axios.get(_apiBase('/'));
 			const $ = cheerioLOAD(data);
 
 			const container = {
@@ -118,7 +123,11 @@ export const wpLatest = () =>
 					.map((element) => ({
 						title: $(element).find('.flexbox-title').text(),
 						episode: $(element).find('.flexbox-episode').text().replace('Episode', ''),
-						image: $(element).find('img').attr('src').replace('?resize=225,310', '').replace('waifuplay.me', 'waifuplay.my.id'),
+						image: $(element)
+							.find('img')
+							.attr('src')
+							.replace('?resize=225,310', '')
+							.replace('waifuplay.me', 'waifuplay.my.id'),
 						status: $(element).find('.flexbox-status').text(),
 						type: $(element).find('.flexbox-type').text(),
 						link: $(element).find('a').attr('href').replace('waifuplay.me', 'waifuplay.my.id'),

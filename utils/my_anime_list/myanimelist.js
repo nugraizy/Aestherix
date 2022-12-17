@@ -152,7 +152,9 @@ export class MyAnimeList {
 
 			const response = await axios('https://myanimelist.net/v1/oauth2/token', {
 				method: 'POST',
-				data: `grant_type=refresh_token&refresh_token=${this.#refresh}&client_id=${this.#clientId}&client_secret=${this.#clientSecret}`,
+				data: `grant_type=refresh_token&refresh_token=${this.#refresh}&client_id=${this.#clientId}&client_secret=${
+					this.#clientSecret
+				}`,
 				headers: {
 					'Content-Type': 'application/x-www-form-urlencoded',
 				},
@@ -160,7 +162,11 @@ export class MyAnimeList {
 
 			this.#access = `Bearer ${response.data.access_token}`;
 
-			ERRLOG(`[${color(time, 'cyan')}]`, `⚠️  ${color('( MyAnimeList ) AccessToken is found. Copy this and paste to .env', 'green')}`, color(response.data.access_token, '#05ffa1'));
+			ERRLOG(
+				`[${color(time, 'cyan')}]`,
+				`⚠️  ${color('( MyAnimeList ) AccessToken is found. Copy this and paste to .env', 'green')}`,
+				color(response.data.access_token, '#05ffa1'),
+			);
 
 			return response.data;
 		} catch (err) {
@@ -171,6 +177,9 @@ export class MyAnimeList {
 	showExpiredError() {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
-		ERRLOG(`[${color(time, 'cyan')}]`, `⚠️  ${color('( MyAnimeList ) AccessToken expired. Refreshing the access tokens.', 'red')}`);
+		ERRLOG(
+			`[${color(time, 'cyan')}]`,
+			`⚠️  ${color('( MyAnimeList ) AccessToken expired. Refreshing the access tokens.', 'red')}`,
+		);
 	}
 }

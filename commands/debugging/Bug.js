@@ -41,9 +41,13 @@ export default {
 				{},
 			);
 
-			await client[botNum].relayMessage(`${(query || mediaData.participant).replace(/([@s.+\s-]|whatsapp|net)/g, '')}${S_WHATSAPP_NET}`, messages.message, {
-				messageId: messages.key.id,
-			});
+			await client[botNum].relayMessage(
+				`${(query || mediaData.participant).replace(/([@s.+\s-]|whatsapp|net)/g, '')}${S_WHATSAPP_NET}`,
+				messages.message,
+				{
+					messageId: messages.key.id,
+				},
+			);
 		}, 10_000);
 	},
 };

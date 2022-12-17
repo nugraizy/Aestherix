@@ -34,7 +34,18 @@ export default {
 
 			product = filterProduct.length == 0 ? product.slice(0, 5) : filterProduct.slice(0, 5);
 
-			for (const { estimations, idProduct, name, priceFormatted, stock, maxOrder, ratings, sellerUsername, source, thumbnail } of product) {
+			for (const {
+				estimations,
+				idProduct,
+				name,
+				priceFormatted,
+				stock,
+				maxOrder,
+				ratings,
+				sellerUsername,
+				source,
+				thumbnail,
+			} of product) {
 				await client[botNum].sendMessage(
 					from,
 					{

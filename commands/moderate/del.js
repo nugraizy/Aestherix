@@ -20,7 +20,10 @@ export default {
 		}
 
 		if (!mediaData.participant.includes(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`) && !isBotAdmin) {
-			return await client[botNum].reply({ from, quoted: message }, 'You can not ask bot to delete people message when bot is not admin.');
+			return await client[botNum].reply(
+				{ from, quoted: message },
+				'You can not ask bot to delete people message when bot is not admin.',
+			);
 		}
 
 		await client[botNum].sendMessage(from, {

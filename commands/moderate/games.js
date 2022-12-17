@@ -12,11 +12,17 @@ export default {
 	status: 'enable',
 	async run(message, client) {
 		if (!message.isAdmin && !message.isOwner) {
-			return await client[botNum].reply({ from: message.from, quoted: message.message }, 'You are not admin. This commands is only for admins.');
+			return await client[botNum].reply(
+				{ from: message.from, quoted: message.message },
+				'You are not admin. This commands is only for admins.',
+			);
 		}
 
 		if (!message.query) {
-			return await client[botNum].reply({ from: message.from, quoted: message.message }, `Please specify a command\n\nEx: ${message.cmd} <enable/disable>`);
+			return await client[botNum].reply(
+				{ from: message.from, quoted: message.message },
+				`Please specify a command\n\nEx: ${message.cmd} <enable/disable>`,
+			);
 		}
 
 		const data = readJSON('./databases/groups/settingsManager.json');
@@ -26,7 +32,10 @@ export default {
 			case 'enable':
 			case 'on':
 				if (isEnable) {
-					return await client[botNum].reply({ from: message.from, quoted: message.message }, 'You already have this command enabled');
+					return await client[botNum].reply(
+						{ from: message.from, quoted: message.message },
+						'You already have this command enabled',
+					);
 				}
 
 				message[message.from].games = 'enable';
@@ -38,7 +47,10 @@ export default {
 			case 'disable':
 			case 'off':
 				if (!isEnable) {
-					return await client[botNum].reply({ from: message.from, quoted: message.message }, 'You already have this command disabled');
+					return await client[botNum].reply(
+						{ from: message.from, quoted: message.message },
+						'You already have this command disabled',
+					);
 				}
 
 				message[message.from].games = 'disable';
@@ -48,7 +60,10 @@ export default {
 				await client[botNum].reply({ from: message.from, quoted: message.message }, 'You have successfully disabled games');
 				break;
 			default:
-				await client[botNum].reply({ from: message.from, quoted: message.message }, `Please specify a command\n\nEx: ${message.cmd} <enable/disable>`);
+				await client[botNum].reply(
+					{ from: message.from, quoted: message.message },
+					`Please specify a command\n\nEx: ${message.cmd} <enable/disable>`,
+				);
 		}
 	},
 };

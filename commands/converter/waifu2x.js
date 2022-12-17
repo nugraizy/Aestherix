@@ -17,11 +17,17 @@ export default {
 	cooldown: 6,
 	limit: 4,
 	status: 'enable',
-	run: async ({ from, isMediaImage, isQuotedSticker, prettyNumber, extractMediaData, filename, message, query, typeQuoted }, client) => {
+	run: async (
+		{ from, isMediaImage, isQuotedSticker, prettyNumber, extractMediaData, filename, message, query, typeQuoted },
+		client,
+	) => {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!isMediaImage && !isQuotedSticker) {
-			return client[botNum].reply({ from, quoted: message }, 'Please reply/send image with caption the command. This command also accept sticker (reply one with command).');
+			return client[botNum].reply(
+				{ from, quoted: message },
+				'Please reply/send image with caption the command. This command also accept sticker (reply one with command).',
+			);
 		}
 
 		if (isQuotedSticker && extractMediaData.isAnimated) {
@@ -49,10 +55,15 @@ export default {
 		const enhance = await waifu2x(media, prettyNumber);
 
 		if (parsed.isStickers) {
-			const prepareSticker = await client[botNum].prepareSticker(enhance, path.join(__dirname, `temporary_files/${filename}`), undefined, {
-				author: configuration.author,
-				packname: configuration.packname,
-			});
+			const prepareSticker = await client[botNum].prepareSticker(
+				enhance,
+				path.join(__dirname, `temporary_files/${filename}`),
+				undefined,
+				{
+					author: configuration.author,
+					packname: configuration.packname,
+				},
+			);
 
 			client[botNum].sendMessage(from, { sticker: prepareSticker }, { quoted: message });
 		} else {

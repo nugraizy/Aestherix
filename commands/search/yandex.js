@@ -57,7 +57,11 @@ export default {
 				capt += `Title: ${item.title}\nDescription: ${item.description}\n\n`;
 			}
 
-			await client[botNum].sendMessage(from, { image: { url: result.information[0].images }, caption: capt.trim() }, { quoted: message });
+			await client[botNum].sendMessage(
+				from,
+				{ image: { url: result.information[0].images }, caption: capt.trim() },
+				{ quoted: message },
+			);
 
 			const images = removeDuplicatesArray(result.information.map((item) => item.images))
 				.slice(1)

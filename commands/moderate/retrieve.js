@@ -2,7 +2,7 @@
 
 export default {
 	name: 'retrieve',
-	description: 'Retrieve the group\'s invitation URL.',
+	description: "Retrieve the group's invitation URL." /* eslint-disable-line */,
 	usage: '!retrieve',
 	aliases: ['invite', 'inv', 'link'],
 	category: 'Moderation',
@@ -15,19 +15,26 @@ export default {
 		}
 
 		if (!isBotAdmin) {
-			return await client[botNum].reply({ from, quoted: message }, 'Bot is not admin, Please promote admin before using moderation commands.');
+			return await client[botNum].reply(
+				{ from, quoted: message },
+				'Bot is not admin, Please promote admin before using moderation commands.',
+			);
 		}
 
 		await client[botNum].sendMessage(
 			from,
 			{
-				text: 'Succeeded to retrieve the group\'s invitation URL.',
+				text: "Succeeded to retrieve the group's invitation URL." /* eslint-disable-line */,
 				footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
 				templateButtons: [
 					{
 						urlButton: {
 							displayText: 'Copy URL',
-							url: `https://www.whatsapp.com/otp/copy/https://chat.whatsapp.com/${(await client[botNum].updateGroup(from, undefined, 'RETRIEVE'))[0]}`,
+							url: `https://www.whatsapp.com/otp/copy/https://chat.whatsapp.com/${
+								(
+									await client[botNum].updateGroup(from, undefined, 'RETRIEVE')
+								)[0]
+							}`,
 						},
 					},
 				],

@@ -10,12 +10,14 @@ import { convertSecondstoTime, formatViews, UA } from '../../helper/index.js';
  */
 
 const URL_BASE_COM = (code) => `https://www.bilibili.com/video/${code}`;
-const URL_SEARCH_COM = (keyword) => `https://api.bilibili.com/x/web-interface/search/type?keyword=${keyword}&page=1&pagesize=3&search_type=video&order=totalrank`;
+const URL_SEARCH_COM = (keyword) =>
+	`https://api.bilibili.com/x/web-interface/search/type?keyword=${keyword}&page=1&pagesize=3&search_type=video&order=totalrank`;
 const URL_VIDEO_DETAILS_COM = (aid) => `https://api.bilibili.com/x/web-interface/view?aid=${aid}&bvid=`;
 const URL_VIDEO_COM = (aid, cid) => `https://api.bilibili.com/x/player/playurl?cid=${cid}&avid=${aid}&type=flv`;
 
 const URL_BASE_TV = (code) => `https://www.bilibili.tv/id/video/${code}`;
-const URL_SEARCH_TV = (keyword) => `https://api.bilibili.tv/intl/gateway/web/v2/search?keyword=${keyword}&platform=web&s_locale=id_ID`;
+const URL_SEARCH_TV = (keyword) =>
+	`https://api.bilibili.tv/intl/gateway/web/v2/search?keyword=${keyword}&platform=web&s_locale=id_ID`;
 const URL_VIDEO_TV = (aid) =>
 	`https://api.bilibili.tv/intl/gateway/web/playurl?s_locale=id_ID&platform=web&aid=${aid}&qn=112&type=0&device=wap&tf=0&spm_id=bstar-web.ugc-video-detail.0.0&from_spm_id=bstar-web.search-result.0.0`;
 // const URL_SUBTITLE_TV = (aid) => `https://api.bilibili.tv/intl/gateway/web/v2/subtitle?s_locale=id_ID&platform=web&aid=${aid}&spm_id=bstar-web.ugc-video-detail.0.0&from_spm_id=bstar-web.search-result.0.0`;

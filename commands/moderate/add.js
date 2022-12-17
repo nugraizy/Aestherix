@@ -31,10 +31,16 @@ export default {
 		}
 
 		if (!isBotAdmin) {
-			return await client[botNum].reply({ from, quoted: message }, 'Bot is not admin, Please promote admin before using moderation commands.');
+			return await client[botNum].reply(
+				{ from, quoted: message },
+				'Bot is not admin, Please promote admin before using moderation commands.',
+			);
 		}
 
-		if (mention?.includes(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`) || mediaData?.participant?.includes(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`)) {
+		if (
+			mention?.includes(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`) ||
+			mediaData?.participant?.includes(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`)
+		) {
 			return await client[botNum].reply({ from, quoted: message }, 'You can not add me by myself.');
 		}
 

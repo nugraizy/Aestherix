@@ -27,10 +27,14 @@ export default {
 		}
 
 		if (query.length < 20 && type !== 'templateButtonReplyMessage') {
-			return await client[botNum].reply({ from, quoted: message }, 'Please describe the problem in detail. Min. 20 characters');
+			return await client[botNum].reply(
+				{ from, quoted: message },
+				'Please describe the problem in detail. Min. 20 characters',
+			);
 		}
 
-		const capt = 'Thanks for reporting!\n\nThis error will be reviewed and fixed as soon as possible.\n\nIf you have any questions, please contact the owner.';
+		const capt =
+			'Thanks for reporting!\n\nThis error will be reviewed and fixed as soon as possible.\n\nIf you have any questions, please contact the owner.';
 
 		await client[botNum].sendMessage(from, {
 			text: capt.trim(),

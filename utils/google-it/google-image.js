@@ -32,7 +32,8 @@ export const googleImage = (query, limit = 10) =>
 
 			const { data } = await axios.get(_api(query), {
 				headers: {
-					'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36',
+					'User-Agent':
+						'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36',
 				},
 			});
 
@@ -54,7 +55,9 @@ export const googleImage = (query, limit = 10) =>
 			container = container.map(filter).flat().slice(0, limit);
 
 			if (container.length === 0) {
-				resolve({ error: `The image you are looking for (${query.capitalize()}) cannot be found.\nPlease try again with another keyword.` });
+				resolve({
+					error: `The image you are looking for (${query.capitalize()}) cannot be found.\nPlease try again with another keyword.`,
+				});
 			}
 
 			resolve(container);

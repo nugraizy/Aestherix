@@ -1,6 +1,6 @@
 /* global botNum */
 import { isURL } from '../../helper/index.js';
-import { getScreenshotAPI } from '../../utils/misc/webScreenshot.js';
+import { getScreenshotAPI } from '../../utils/index.js';
 
 export default {
 	name: 'screenshots',

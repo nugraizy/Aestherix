@@ -35,7 +35,10 @@ export default {
 				.join('\n')
 				.trim();
 
-			client[botNum].reply({ from, quoted: message }, `${scanning.error}\n\nAvailable Languages :\n\n${lang}\n\nUse the code only.`);
+			client[botNum].reply(
+				{ from, quoted: message },
+				`${scanning.error}\n\nAvailable Languages :\n\n${lang}\n\nUse the code only.`,
+			);
 			return;
 		}
 

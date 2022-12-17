@@ -31,15 +31,29 @@ export default {
 		}
 
 		if (!isBotAdmin) {
-			return await client[botNum].reply({ from, quoted: message }, 'Bot is not admin, Please promote admin before using moderation commands.');
+			return await client[botNum].reply(
+				{ from, quoted: message },
+				'Bot is not admin, Please promote admin before using moderation commands.',
+			);
 		}
 
-		if (mention?.includes(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`) || mediaData?.participant?.includes(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`)) {
+		if (
+			mention?.includes(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`) ||
+			mediaData?.participant?.includes(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`)
+		) {
 			return await client[botNum].reply({ from, quoted: message }, 'You can not demote me by myself.');
 		}
 
 		if (query || mention.length > 0) {
-			await client[botNum].updateGroup(from, mention.length > 0 ? mention : query.split(',').parse(), 'DEMOTE', false, false, message, adminGroups);
+			await client[botNum].updateGroup(
+				from,
+				mention.length > 0 ? mention : query.split(',').parse(),
+				'DEMOTE',
+				false,
+				false,
+				message,
+				adminGroups,
+			);
 		}
 
 		if (bodyQuoted) {

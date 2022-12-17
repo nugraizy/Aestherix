@@ -12,7 +12,10 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, extractMediaData, typeQuoted }, client) {
 		if (typeQuoted !== 'locationMessage' && typeQuoted !== 'liveLocationMessage' && !query) {
-			return await client[botNum].reply({ from, quoted: message }, 'Please, input city name\nEx:\n*!weather Bekasi* or reply to location message');
+			return await client[botNum].reply(
+				{ from, quoted: message },
+				'Please, input city name\nEx:\n*!weather Bekasi* or reply to location message',
+			);
 		}
 
 		const info =
@@ -38,7 +41,9 @@ Powered by openweathermap.org`;
 			from,
 			{
 				text: `${info.emoji} Weather Report ${info.emoji}`.formatHeaders(),
-				templateButtons: [{ urlButton: { displayText: 'More Info', url: `More info https://openweathermap.org/city/${info.id}` } }],
+				templateButtons: [
+					{ urlButton: { displayText: 'More Info', url: `More info https://openweathermap.org/city/${info.id}` } },
+				],
 				footer: text.trim(),
 			},
 			{ quoted: message },

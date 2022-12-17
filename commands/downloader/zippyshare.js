@@ -38,7 +38,10 @@ Uploaded: ${result.uploaded}`,
 		);
 		client[botNum].sendMessage(
 			from,
-			{ [result.filetype]: { url: result.dlLink }, ...(result.filetype === 'document' ? { fileName: result.filename, mimetype: result.mimetype } : {}) },
+			{
+				[result.filetype]: { url: result.dlLink },
+				...(result.filetype === 'document' ? { fileName: result.filename, mimetype: result.mimetype } : {}),
+			},
 			{ quoted: message },
 		);
 	},

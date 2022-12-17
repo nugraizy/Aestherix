@@ -1,0 +1,151 @@
+import Canvas from '@napi-rs/canvas';
+import Wrap from 'canvas-text-wrapper';
+import { exec } from 'child_process';
+import emojiReg from 'emoji-regex';
+import { readFileSync, unlinkSync, writeFileSync } from 'fs';
+import dayjs from 'dayjs';
+import path from 'path';
+
+import { __dirname } from '../../index.js';
+import { createExif } from '../../utils/misc/index.js';
+import { scheme } from '../misc/palettes/colors.js';
+import { color, ERRLOG, INFOLOG } from '../modules/functions.js';
+
+const { createCanvas, GlobalFonts } = Canvas;
+const { CanvasTextWrapper } = Wrap;
+
+const saveImages = (buffer, sequence) => {
+	const fileName = path.join(__dirname, `temporary_files/animated_images-${sequence}.webp`);
+
+	writeFileSync(fileName, buffer);
+
+	return fileName;
+};
+
+const createSequence = async (images, sender) =>
+	new Promise(async (resolve, reject) => {
+		const time = dayjs().format('HH:mm:ss DD/MM');
+
+		const pathExif = path.join(__dirname, 'temporary_files/data.exif');
+		const pathResults = path.join(__dirname, `temporary_files/animated_images-${Date.now()}`);
+
+		exec(`img2webp -loop 1 ${images.map((v) => `"${v}"`).join(' ')} -o "${pathResults}.webp"`, (er) => {
+			if (er) {
+				ERRLOG(
+					`[${color(time, 'cyan')}]`,
+					`⚠️ ${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`,
+				);
+
+				reject(er);
+			}
+
+			exec(`webpmux -set exif "${pathExif}" "${pathResults}.webp" -o "${pathResults}-done.webp"`, (err) => {
+				if (err) {
+					ERRLOG(
+						`[${color(time, 'cyan')}]`,
+						`⚠️ ${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`,
+					);
+
+					reject(err);
+				}
+
+				const buffers = readFileSync(`${pathResults}-done.webp`);
+
+				unlinkSync(`${pathResults}-done.webp`);
+				unlinkSync(`${pathResults}.webp`);
+
+				for (const paths of images) {
+					unlinkSync(paths);
+				}
+
+				resolve({
+					buffers,
+				});
+			});
+		});
+	});
+
+const createCanvasTemplates = (fonts) => {
+	if (fonts == 'chevin') {
+		GlobalFonts.registerFromPath(path.join(__dirname, 'media_files/fonts/Chevin Bold.ttf'), 'chevin');
+	} else if (fonts == 'texgy') {
+		GlobalFonts.registerFromPath(path.join(__dirname, 'media_files/fonts/texgyreadventor-bold.otf'), 'texgy');
+	} else if (fonts == 'sanspro') {
+		GlobalFonts.registerFromPath(path.join(__dirname, 'media_files/fonts/SourceSansPro-Italic.ttf'), 'sanspro');
+	} else if (fonts == 'calm') {
+		GlobalFonts.registerFromPath(path.join(__dirname, 'media_files/fonts/KeepCalm-Medium.ttf'), 'calm');
+	}
+
+	const canvas = createCanvas(500, 500);
+	const ctx = canvas.getContext('2d');
+
+	return { ctx, canvas };
+};
+
+const loadColorsPalette = async (color) => {
+	const defaultColors = [
+		['047af6', '7401df', '202532', '32fa00', 'ff00d5'],
+		['4db1c3', '046084', '35b07e', 'f0a7aa', 'e74758'],
+		['ffffff', 'f7a9ef', 'f881ec', 'f751e6', 'c400b0'],
+		['ffaf39', 'ee7e1b', 'ef421b', 'cf214b', 'bf1679'],
+		['86ff5d', '34e361', '14d285', '0ebb9b', '0c9ea9'],
+		['e0f4ff', 'cbecff', 'afe2ff', 'afd5ff', 'afc8ff'],
+		['d2dbde', '8debff', '84b7ff', 'b8b8b8', '08e1ff'],
+		['ffef2b', '2f4af4', 'ee1c62', '33ee87', '6cfcff'],
+		['6500ff', 'ffe04e', '8b00ff', 'bd93ed', '7400ff'],
+		scheme().map((v) => v.replace('#', '')), // for more randomize
+	];
+
+	return [].concat(...Array(1).fill(color ?? defaultColors[Math.floor(Math.random() * defaultColors.length)]));
+};
+
+export const attp = (sender, texts, colored, fonts) =>
+	new Promise(async (resolve) => {
+		createExif('Made by Nanda', 'Void Animated Sticker using Canvas and WebP');
+		const time = dayjs().format('HH:mm:ss DD/MM');
+
+		fonts = fonts !== undefined ? fonts.toLowerCase() : 'chevin';
+		colored = colored.length == 0 ? null : colored;
+
+		INFOLOG(`[${color(time, 'cyan')}]`, `${color('Making Animated Image', '#01cdfe')} for ${color(sender, '#ff71ce')}`);
+
+		let i = 0;
+		let { ctx, canvas } = createCanvasTemplates(fonts);
+		const colors = await loadColorsPalette(colored);
+		const bufferContainer = [];
+
+		const regex = new RegExp(emojiReg(), 'g');
+
+		texts = texts.trim().replace(regex, '');
+
+		for (const colori of colors) {
+			const reassignColor = colori.startsWith('#') ? colori : `#${colori}`;
+
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			ctx.fillStyle = reassignColor;
+			ctx.shadowOffsetX = 1;
+			ctx.shadowOffsetY = 1;
+			ctx.shadowColor = reassignColor;
+			ctx.shadowBlur = 2;
+
+			CanvasTextWrapper(canvas, texts, {
+				font: `126px ${fonts}`,
+				textAlign: 'center',
+				verticalAlign: 'top',
+				sizeToFill: true,
+				maxFontSizeToFill: 126 * 1.4,
+			});
+
+			const buffer = canvas.toBuffer('image/webp');
+			const saved = saveImages(new Buffer.from(buffer, 'base64'), i);
+
+			bufferContainer.push(saved);
+			i++;
+		}
+
+		createSequence(bufferContainer, sender).then(({ buffers }) => {
+			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Animated Image is Done', '#01cdfe')} for ${color(sender, '#ff71ce')}`);
+
+			resolve(buffers);
+		});
+	});

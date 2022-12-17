@@ -1,7 +1,8 @@
 /* global botNum */
 import { mediafire } from '../../utils/index.js';
 
-const regex = (url) => /^(https?:\/\/)?(www\.)?mediafire\.com\/(file|view|download)\/[a-zA-Z0-9]+(\/[a-zA-Z0-9_\-.~%]+)?(\/file)?.*$/.test(url);
+const regex = (url) =>
+	/^(https?:\/\/)?(www\.)?mediafire\.com\/(file|view|download)\/[a-zA-Z0-9]+(\/[a-zA-Z0-9_\-.~%]+)?(\/file)?.*$/.test(url);
 
 export default {
 	name: 'mediafire',
@@ -38,7 +39,10 @@ Uploaded: ${result.uploaded}`,
 		);
 		client[botNum].sendMessage(
 			from,
-			{ [result.filetype]: { url: result.dlLink }, ...(result.filetype === 'document' ? { fileName: result.filename, mimetype: result.mimetype } : {}) },
+			{
+				[result.filetype]: { url: result.dlLink },
+				...(result.filetype === 'document' ? { fileName: result.filename, mimetype: result.mimetype } : {}),
+			},
 			{ quoted: message },
 		);
 	},

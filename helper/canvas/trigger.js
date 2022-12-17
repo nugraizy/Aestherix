@@ -50,12 +50,24 @@ export const trigger = async (image, sender, opt) =>
 
 			while (i < 9) {
 				ctx.clearRect(0, 0, width, height);
-				ctx.drawImage(images, Math.floor(Math.random() * BR) - BR, Math.floor(Math.random() * BR) - BR, width + BR, height - 54 + BR);
+				ctx.drawImage(
+					images,
+					Math.floor(Math.random() * BR) - BR,
+					Math.floor(Math.random() * BR) - BR,
+					width + BR,
+					height - 54 + BR,
+				);
 
 				ctx.fillStyle = '#FF000033';
 
 				ctx.fillRect(0, 0, width, height);
-				ctx.drawImage(base, Math.floor(Math.random() * LR) - LR, height - 54 + Math.floor(Math.random() * LR) - LR, width + LR, 54 + LR);
+				ctx.drawImage(
+					base,
+					Math.floor(Math.random() * LR) - LR,
+					height - 54 + Math.floor(Math.random() * LR) - LR,
+					width + LR,
+					54 + LR,
+				);
 				GIF.addFrame(ctx);
 				i++;
 			}
@@ -73,7 +85,10 @@ export const trigger = async (image, sender, opt) =>
 					.webp({ quality: 60 })
 					.toBuffer();
 
-				const results = await client[botNum].applyExif(file, { packname: configuration.packname, author: configuration.author });
+				const results = await client[botNum].applyExif(file, {
+					packname: configuration.packname,
+					author: configuration.author,
+				});
 
 				resolve(results);
 			} else {

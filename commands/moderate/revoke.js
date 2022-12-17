@@ -2,7 +2,7 @@
 
 export default {
 	name: 'revoke',
-	description: 'Revoke group\'s invitation URL.',
+	description: "Revoke group's invitation URL." /* eslint-disable-line */,
 	usage: '!revoke',
 	aliases: ['rvk', 'tarik'],
 	category: 'Moderation',
@@ -15,7 +15,10 @@ export default {
 		}
 
 		if (!isBotAdmin) {
-			return await client[botNum].reply({ from, quoted: message }, 'Bot is not admin, Please promote admin before using moderation commands.');
+			return await client[botNum].reply(
+				{ from, quoted: message },
+				'Bot is not admin, Please promote admin before using moderation commands.',
+			);
 		}
 
 		const code = (await client[botNum].updateGroup(from, undefined, 'REVOKE'))[0];
@@ -23,7 +26,7 @@ export default {
 		await client[botNum].sendMessage(
 			from,
 			{
-				text: 'Succeeded to revoke the group\'s invitation URL.',
+				text: "Succeeded to revoke the group's invitation URL." /* eslint-disable-line */,
 				footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
 				templateButtons: [
 					{

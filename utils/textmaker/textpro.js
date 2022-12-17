@@ -4,13 +4,14 @@ import fs from 'fs';
 
 import { cheerioLOAD, delay, randomize } from '../../helper/index.js';
 
-const BASE = (page) => `https://textpro.me/home-p${page}`;
-const CREATE_URL = () => 'https://textpro.me/effect/create-image';
+const _apiBase = (page) => `https://textpro.me/home-p${page}`;
+const createUrl = () => 'https://textpro.me/effect/create-image';
 const NO_VAL = (v) => v == '' || v == undefined || v == null || v == false;
 
-const parseUrlDownload = ({ image_code: imageCode, session_id: sessionId, code, image }) => {
-	return { preview: `https://textpro.me${image}`, dl: `https://textpro.me/save-images/${imageCode}/${sessionId}/${code}` };
-};
+const parseUrlDownload = ({ image_code: imageCode, session_id: sessionId, code, image }) => ({
+	preview: `https://textpro.me${image}`,
+	dl: `https://textpro.me/save-images/${imageCode}/${sessionId}/${code}`,
+});
 
 const split = (text, len) => {
 	if (len == 1) {
@@ -107,7 +108,7 @@ export const textpro = (api, texts) =>
 			form.append('build_server', 'https://textpro.me');
 			form.append('build_server_id', 1);
 			data = (
-				await axios.post(CREATE_URL(), form, {
+				await axios.post(createUrl(), form, {
 					headers: {
 						Cookie: cookie,
 						...form.getHeaders(),
@@ -132,7 +133,7 @@ export const scrapeUrl = async (page) => {
 	}
 
 	console.log('scraping page', page);
-	const { data } = await axios.get(BASE(page));
+	const { data } = await axios.get(_apiBase(page));
 	const $ = cheerioLOAD(data);
 	let container = [];
 
@@ -156,7 +157,11 @@ export const scrapeUrl = async (page) => {
 			container.push({ effectName: name, url });
 			fs.writeFileSync('./databases/textmaker/textprourl.json', JSON.stringify(dataJSON, undefined, 2));
 		});
-	console.log('page ', page, 'scraped. result :\n' + container.map((v) => `effect name : ${v.effectName} url : ${v.url}`).join('\n'));
+	console.log(
+		'page ',
+		page,
+		'scraped. result :\n' + container.map((v) => `effect name : ${v.effectName} url : ${v.url}`).join('\n'),
+	);
 	container = [];
 
 	if (page != 13) {

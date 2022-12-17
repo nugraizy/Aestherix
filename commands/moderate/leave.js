@@ -19,7 +19,7 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'You must be an admin to use this command.');
 		}
 
-		const data = await client[botNum].reply({ from, quoted: message }, 'I\'ll leave.');
+		const data = await client[botNum].reply({ from, quoted: message }, 'I will leave.');
 
 		await client[botNum].groupLeave(from);
 		await client[botNum].chatModify({ delete: true, lastMessages: [data] }, from);

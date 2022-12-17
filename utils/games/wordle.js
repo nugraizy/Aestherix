@@ -104,8 +104,12 @@ export class Wordle {
 					green: true,
 				};
 			case ALPHABET_ON_KEYBOARD.some((v) => v.includes(inp) && v.includes(alp)): {
-				const indexAlp = ALPHABET_ON_KEYBOARD[ALPHABET_ON_KEYBOARD.findIndex((v) => v.includes(alp))].split('').findIndex((v) => v == alp);
-				const indexInp = ALPHABET_ON_KEYBOARD[ALPHABET_ON_KEYBOARD.findIndex((v) => v.includes(inp))].split('').findIndex((v) => v == inp);
+				const indexAlp = ALPHABET_ON_KEYBOARD[ALPHABET_ON_KEYBOARD.findIndex((v) => v.includes(alp))]
+					.split('')
+					.findIndex((v) => v == alp);
+				const indexInp = ALPHABET_ON_KEYBOARD[ALPHABET_ON_KEYBOARD.findIndex((v) => v.includes(inp))]
+					.split('')
+					.findIndex((v) => v == inp);
 				const index = Math.abs(indexAlp - indexInp);
 
 				if (index >= 3) {

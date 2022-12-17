@@ -44,7 +44,10 @@ export default {
 			if ('error' in data) {
 				await client[botNum].reply({ from, quoted: message }, `Error while searching IP Address\n\n${data.error}`);
 
-				ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Failed to Searching IP Address', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(
+					`[${color(time, 'cyan')}]`,
+					`⚠️ ${color('Failed to Searching IP Address', 'red')} for ${color(prettyNumber, '#ff71ce')}`,
+				);
 
 				continue;
 			} else {

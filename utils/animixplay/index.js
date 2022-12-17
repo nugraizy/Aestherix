@@ -1,1 +1,1 @@
-export * from './scheduleReleases.js';
+export * from './schedule-releases.js';

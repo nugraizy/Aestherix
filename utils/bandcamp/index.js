@@ -1,2 +1,2 @@
-export { searchBandcamp } from './searchBandcamp.js';
-export { downloadBandcamp } from './downloadBandcamp.js';
+export * from './search-bandcamp.js';
+export * from './download-bandcamp.js';

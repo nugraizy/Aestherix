@@ -27,9 +27,28 @@ export default {
 					caption: 'Pinterest'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: args[1] == 'next' ? data[index].image : data[index].image } },
-						{ urlButton: { displayText: 'Pinterest Source', url: args[1] == 'next' ? data[index].pinSource : data[index].pinSource } },
-						index + 1 !== data.length ? { quickReplyButton: { displayText: 'Next Image', id: `.pinterest next ${data[index + 1].image} ${JSON.stringify(data)}` } } : {},
-						index !== 0 ? { quickReplyButton: { displayText: 'Previous Image', id: `.pinterest prev ${data[index - 1].image} ${JSON.stringify(data)}` } } : {},
+						{
+							urlButton: {
+								displayText: 'Pinterest Source',
+								url: args[1] == 'next' ? data[index].pinSource : data[index].pinSource,
+							},
+						},
+						index + 1 !== data.length
+							? {
+									quickReplyButton: {
+										displayText: 'Next Image',
+										id: `.pinterest next ${data[index + 1].image} ${JSON.stringify(data)}`,
+									},
+							  } /* eslint-disable-line */
+							: {},
+						index !== 0
+							? {
+									quickReplyButton: {
+										displayText: 'Previous Image',
+										id: `.pinterest prev ${data[index - 1].image} ${JSON.stringify(data)}`,
+									},
+							  } /* eslint-disable-line */
+							: {},
 					],
 					footer: `Author : ${data[index].authorUsername}
 Author Fullname : ${data[index].authorFullname}
@@ -64,7 +83,14 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: result[0].image } },
 						{ urlButton: { displayText: 'Pinterest Source', url: result[0].pinSource } },
-						result.length !== 1 ? { quickReplyButton: { displayText: 'Next Image', id: `.pinterest next ${result[1].image} ${JSON.stringify(result).replace(/\|/g, '')}` } } : {},
+						result.length !== 1
+							? {
+									quickReplyButton: {
+										displayText: 'Next Image',
+										id: `.pinterest next ${result[1].image} ${JSON.stringify(result).replace(/\|/g, '')}`,
+									},
+							  } /* eslint-disable-line */
+							: {},
 					],
 					footer: `Author : ${result[0].authorUsername}
 Author Fullname : ${result[0].authorFullname}

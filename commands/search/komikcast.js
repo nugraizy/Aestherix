@@ -18,7 +18,8 @@ export default {
 		const komik = new KomikCast();
 
 		if (args[2] === 'detail' && type === 'listResponseMessage') {
-			const { altTitle, onGoing, comicType, releaseDate, serialize, views, thumbnail, authorStr, artistsStr, chapters } = await komik.getDetails(args[1]);
+			const { altTitle, onGoing, comicType, releaseDate, serialize, views, thumbnail, authorStr, artistsStr, chapters } =
+				await komik.getDetails(args[1]);
 			const caption = `${'Komikcast'.formatHeaders()}
 			
 Title : ${altTitle}
@@ -35,7 +36,9 @@ Tot. Chapters : ${chapters.length}`;
 
 			const row = [];
 
-			chapters.forEach((v, i) => row.push({ rows: [{ title: `Chapter ${i + 1}`, rowId: `.komikcast ${v} extract ${altTitle}` }], title: '\t' }));
+			chapters.forEach((v, i) =>
+				row.push({ rows: [{ title: `Chapter ${i + 1}`, rowId: `.komikcast ${v} extract ${altTitle}` }], title: '\t' }),
+			);
 
 			await client[botNum].sendMessage(from, {
 				buttonText: 'Open list',
@@ -50,7 +53,11 @@ Tot. Chapters : ${chapters.length}`;
 
 			const buffer = await komik.toPdf(pages, sender);
 
-			await client[botNum].sendMessage(from, { document: Buffer.from(buffer, 'base64'), mimetype: mime('pdf'), fileName: args.slice(3).join('') });
+			await client[botNum].sendMessage(from, {
+				document: Buffer.from(buffer, 'base64'),
+				mimetype: mime('pdf'),
+				fileName: args.slice(3).join(''),
+			});
 
 			return;
 		}
@@ -63,7 +70,9 @@ Tot. Chapters : ${chapters.length}`;
 
 		const row = [];
 
-		result.forEach(({ name, source }) => row.push({ rows: [{ title: `${name}`, rowId: `.komikcast ${source} detail` }], title: '\t' }));
+		result.forEach(({ name, source }) =>
+			row.push({ rows: [{ title: `${name}`, rowId: `.komikcast ${source} detail` }], title: '\t' }),
+		);
 
 		await client[botNum].sendMessage(from, {
 			buttonText: 'Open list',

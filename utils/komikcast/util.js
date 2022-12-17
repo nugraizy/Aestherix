@@ -1,7 +1,7 @@
 import axios from 'axios';
 import cheerio from 'cheerio';
 
-import { img2pdf } from '../converter/fileProcessing.js';
+import { img2pdf } from '../converter/file-processing.js';
 
 export class KomikCast {
 	#base = (input) => `https://komikcast.net${input}`;

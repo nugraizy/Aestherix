@@ -1,3 +1,3 @@
-export * from './objectAssign.js';
+export * from './object-assign.js';
 export * from './utils.js';
-export * from './webMessageInfo.js';
+export * from './web-message-info.js';

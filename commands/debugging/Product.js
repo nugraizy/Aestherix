@@ -12,7 +12,11 @@ export default {
 	limit: 0,
 	status: 'enable',
 	async run({ from, sender }, client) {
-		const messages = await generateWAMessage(from, { image: await fs.readFile('./media_files/blank.png') }, { upload: client[botNum].waUploadToServer });
+		const messages = await generateWAMessage(
+			from,
+			{ image: await fs.readFile('./media_files/blank.png') },
+			{ upload: client[botNum].waUploadToServer },
+		);
 
 		const content = generateWAMessageFromContent(
 			from,

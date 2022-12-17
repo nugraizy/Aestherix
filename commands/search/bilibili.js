@@ -30,7 +30,21 @@ export default {
 
 			let i = 0;
 
-			for (const { title, author, authorId, like, share, duration, favorite, view, thumbnail, description, originalVideoLink, downloadLink, size } of videos) {
+			for (const {
+				title,
+				author,
+				authorId,
+				like,
+				share,
+				duration,
+				favorite,
+				view,
+				thumbnail,
+				description,
+				originalVideoLink,
+				downloadLink,
+				size,
+			} of videos) {
 				if (i == 3) {
 					break;
 				}

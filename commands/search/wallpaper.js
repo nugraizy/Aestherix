@@ -27,8 +27,22 @@ export default {
 					caption: 'Wallpaper'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: args[1] == 'next' ? data[index] : data[index] } },
-						index + 1 !== data.length ? { quickReplyButton: { displayText: 'Next Image', id: `.wallpaper next ${data[index + 1]} ${JSON.stringify(data)}` } } : {},
-						index !== 0 ? { quickReplyButton: { displayText: 'Previous Image', id: `.wallpaper prev ${data[index - 1]} ${JSON.stringify(data)}` } } : {},
+						index + 1 !== data.length
+							? {
+									quickReplyButton: {
+										displayText: 'Next Image',
+										id: `.wallpaper next ${data[index + 1]} ${JSON.stringify(data)}`,
+									},
+							  } /* eslint-disable-line */
+							: {},
+						index !== 0
+							? {
+									quickReplyButton: {
+										displayText: 'Previous Image',
+										id: `.wallpaper prev ${data[index - 1]} ${JSON.stringify(data)}`,
+									},
+							  } /* eslint-disable-line */
+							: {},
 					],
 					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 				},
@@ -56,7 +70,14 @@ export default {
 					caption: 'Wallpaper'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: result[0] } },
-						result.length !== 1 ? { quickReplyButton: { displayText: 'Next Image', id: `.wallpaper next ${result[1]} ${JSON.stringify(result)}` } } : {},
+						result.length !== 1
+							? {
+									quickReplyButton: {
+										displayText: 'Next Image',
+										id: `.wallpaper next ${result[1]} ${JSON.stringify(result)}`,
+									},
+							  } /* eslint-disable-line */
+							: {},
 					],
 					footer: `Void Bot     1/${result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 				},

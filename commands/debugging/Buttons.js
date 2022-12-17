@@ -11,7 +11,7 @@ export default {
 	status: 'enable',
 	async run({ from }, client) {
 		await client[botNum].sendMessage(from, {
-			text: 'Hi it\'s button message',
+			text: 'Hi this is a button message',
 			footer: 'Hello World',
 			buttons: [
 				{ buttonId: 'id1', buttonText: { displayText: 'Button 1' }, type: 1 },

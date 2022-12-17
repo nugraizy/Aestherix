@@ -59,7 +59,14 @@ export default {
 ${
 	existedNumber?.length === 0
 		? 'No Data'
-		: existedNumber.map((v, i) => `${i + 1}. @${v.jid.split('@')[0]}\nBiograph : ${v.info}${v.info ? `\nSet On : ${dayjs(v.setAt).format('HH:mm:ss DD/MM/YYYY')}` : ''}`).join('\n\n')
+		: existedNumber
+				.map(
+					(v, i) =>
+						`${i + 1}. @${v.jid.split('@')[0]}\nBiograph : ${v.info}${
+							v.info ? `\nSet On : ${dayjs(v.setAt).format('HH:mm:ss DD/MM/YYYY')}` : ''
+						}`,
+				)
+				.join('\n\n')
 }`;
 		text += `\n\n${'Unregistered'.formatHeaders()}
 

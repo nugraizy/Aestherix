@@ -23,7 +23,10 @@ export default {
 				return client[botNum].sendMessage(stopping.partner2, { text: 'Your partner stoped the chat!' });
 			}
 
-			await client[botNum].reply({ from, quoted: message }, `You already searching for a partner!\nPlease wait for ${stopping.seconds}s`);
+			await client[botNum].reply(
+				{ from, quoted: message },
+				`You already searching for a partner!\nPlease wait for ${stopping.seconds}s`,
+			);
 		} catch (err) {
 			log(err);
 		}

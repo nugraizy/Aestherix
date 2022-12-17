@@ -20,7 +20,24 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	status: 'enable',
-	async run({ bodyQuoted, mention, isMediaImage, from, mediaData, filename, prettyNumber, sender, query, message, stickerAble, typeQuoted, typeSticker }, client) {
+	async run(
+		{
+			bodyQuoted,
+			mention,
+			isMediaImage,
+			from,
+			mediaData,
+			filename,
+			prettyNumber,
+			sender,
+			query,
+			message,
+			stickerAble,
+			typeQuoted,
+			typeSticker,
+		},
+		client,
+	) {
 		if (mention.length == 0 && !isMediaImage) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please mention or send/reply an image to pet');
 		}
@@ -29,12 +46,16 @@ export default {
 
 		let options = {};
 
-		options = /--?images?/.test(query) ? _.defaults({ output: 'image' }, defaultOptions) : _.defaults({ output: 'sticker' }, defaultOptions);
+		options = /--?images?/.test(query)
+			? _.defaults({ output: 'image' }, defaultOptions)
+			: _.defaults({ output: 'sticker' }, defaultOptions);
 
 		if (bodyQuoted && !isMediaImage) {
 			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Triggering', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`);
 
-			const profile = await client[botNum].profilePictureUrl(mediaData.participant, 'image').catch(() => readBuffer(path.join(__dirname, 'media_files/blank.png')));
+			const profile = await client[botNum]
+				.profilePictureUrl(mediaData.participant, 'image')
+				.catch(() => readBuffer(path.join(__dirname, 'media_files/blank.png')));
 
 			options = _.defaults({ filename: path.join(__dirname, `temporary_files/${filename}`) }, defaultOptions);
 
@@ -82,7 +103,9 @@ export default {
 		for (const mentioned of mention) {
 			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Triggering', '#01cdfe')} ${color(mentioned, '#ff71ce')}`);
 
-			const profile = await client[botNum].profilePictureUrl(mentioned, 'image').catch(() => readBuffer(path.join(__dirname, 'media_files/blank.png')));
+			const profile = await client[botNum]
+				.profilePictureUrl(mentioned, 'image')
+				.catch(() => readBuffer(path.join(__dirname, 'media_files/blank.png')));
 
 			options = _.defaults({ filename: path.join(__dirname, `temporary_files/${filename}`) }, defaultOptions);
 

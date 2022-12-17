@@ -1,2 +1,2 @@
 export * from './functions.js';
-export * from './reassignMessagesObject.js';
+export * from './reassign-messages-object.js';

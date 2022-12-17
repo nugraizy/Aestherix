@@ -1,1 +1,1 @@
-export * from './emojiMix.js';
+export * from './emoji-mix.js';

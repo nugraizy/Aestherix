@@ -4,7 +4,7 @@ import fs from 'fs-extra';
 
 import { cheerioLOAD } from '../../helper/index.js';
 
-const URL_RESULT = (input) => `https://photofunia.com${input}`;
+const _apiBase = (input) => `https://photofunia.com${input}`;
 
 const split = (text, len) => {
 	if (len == 1) {
@@ -123,7 +123,7 @@ export const photofunia = (url, file, texts) =>
 
 			data = (
 				await axios({
-					url: URL_RESULT(path),
+					url: _apiBase(path),
 					method: 'GET',
 					headers: {
 						Cookie: `PHPSESSID=${tempCookie}; accept_cookie=true`,

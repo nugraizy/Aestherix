@@ -20,7 +20,9 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'You are not allowed to use this command');
 		}
 
-		const messages = configuration.OPTIONS.json ? JSON.parse(readFileSync(STATUS_PATH)).messages[STATUS] : await store.loadMessages(STATUS);
+		const messages = configuration.OPTIONS.json
+			? JSON.parse(readFileSync(STATUS_PATH)).messages[STATUS]
+			: await store.loadMessages(STATUS);
 		const tempContainer = new Map();
 		let caption = 'Fetch WhatsApp Story'.formatHeaders();
 
@@ -69,7 +71,10 @@ export default {
 
 		for (const value of Array.from(tempContainer.entries())) {
 			caption += ` • ${
-				value[1].stories?.extendedTextMessage?.[0].pushName ?? value[1].stories?.imageMessage?.[0].pushName ?? value[1].stories?.videoMessage?.[0].pushName ?? 'No Name'
+				value[1].stories?.extendedTextMessage?.[0].pushName ??
+				value[1].stories?.imageMessage?.[0].pushName ??
+				value[1].stories?.videoMessage?.[0].pushName ??
+				'No Name'
 			}\n`;
 			caption += `Texts : ${value[1].stories?.extendedTextMessage?.length ?? 0}\n`;
 			caption += `Images : ${value[1].stories?.imageMessage?.length ?? 0}\n`;
@@ -79,7 +84,8 @@ export default {
 		await client[botNum].sendMessage(from, {
 			buttonText: 'Open List',
 			title: caption.trim(),
-			footer: 'if you cannot click "read more" : click it first then reply the list, then click on the "x" mark on your reply.',
+			footer:
+				'if you cannot click "read more" : click it first then reply the list, then click on the "x" mark on your reply.',
 			text: '\t',
 			sections: rows,
 		});

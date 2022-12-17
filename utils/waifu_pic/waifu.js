@@ -30,8 +30,14 @@ export const getWaifu = (input = 'neko', type = 'sfw') =>
 
 			if (!_type[type].includes(input)) {
 				return resolve({
-					error: `No data with the input : ${input}\nCurrent option are ${type}\nList of ${type} : ${_type[type].join(', ')}.\n${
-						_type.nsfw.find((v) => v == input) ? '\nThis input are on nsfw section.' : _type.sfw.find((v) => v == input) ? '\nThis input are on sfw section.' : ''
+					error: `No data with the input : ${input}\nCurrent option are ${type}\nList of ${type} : ${_type[type].join(
+						', ',
+					)}.\n${
+						_type.nsfw.find((v) => v == input)
+							? '\nThis input are on nsfw section.'
+							: _type.sfw.find((v) => v == input)
+							? '\nThis input are on sfw section.'
+							: ''
 					}`.trim(),
 				});
 			}

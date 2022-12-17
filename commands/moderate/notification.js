@@ -12,15 +12,24 @@ export default {
 	status: 'enable',
 	async run(message, client) {
 		if (!message.isAdmin && !message.isOwner) {
-			return await client[botNum].reply({ from: message.from, quoted: message.message }, 'You are not admin. This commands is only for admins.');
+			return await client[botNum].reply(
+				{ from: message.from, quoted: message.message },
+				'You are not admin. This commands is only for admins.',
+			);
 		}
 
 		if (!message.isBotAdmin) {
-			return await client[botNum].reply({ from: message.from, quoted: message.message }, 'Bot is not admin, Please promote admin before using moderation commands.');
+			return await client[botNum].reply(
+				{ from: message.from, quoted: message.message },
+				'Bot is not admin, Please promote admin before using moderation commands.',
+			);
 		}
 
 		if (!message.query) {
-			return await client[botNum].reply({ from: message.from, quoted: message.message }, 'Please specify a command\n\nEx: notification <enable/disable>');
+			return await client[botNum].reply(
+				{ from: message.from, quoted: message.message },
+				'Please specify a command\n\nEx: notification <enable/disable>',
+			);
 		}
 
 		const data = readJSON('./databases/groups/settingsManager.json');
@@ -30,29 +39,44 @@ export default {
 			case 'enable':
 			case 'on':
 				if (isEnable) {
-					return await client[botNum].reply({ from: message.from, quoted: message.message }, 'You already have this command enabled');
+					return await client[botNum].reply(
+						{ from: message.from, quoted: message.message },
+						'You already have this command enabled',
+					);
 				}
 
 				message[message.from].notification = 'enable';
 				data[data.findIndex((v) => Object.keys(v)[0] == message.from)][message.from].notification = 'enable';
 				writeJSON('./databases/groups/settingsManager.json', data);
 
-				await client[botNum].reply({ from: message.from, quoted: message.message }, 'You have successfully enabled group notification');
+				await client[botNum].reply(
+					{ from: message.from, quoted: message.message },
+					'You have successfully enabled group notification',
+				);
 				break;
 			case 'disable':
 			case 'off':
 				if (!isEnable) {
-					return await client[botNum].reply({ from: message.from, quoted: message.message }, 'You already have this command disabled');
+					return await client[botNum].reply(
+						{ from: message.from, quoted: message.message },
+						'You already have this command disabled',
+					);
 				}
 
 				message[message.from].notification = 'disable';
 				data[data.findIndex((v) => Object.keys(v)[0] == message.from)][message.from].notification = 'disable';
 				writeJSON('./databases/groups/settingsManager.json', data);
 
-				await client[botNum].reply({ from: message.from, quoted: message.message }, 'You have successfully disabled group notification');
+				await client[botNum].reply(
+					{ from: message.from, quoted: message.message },
+					'You have successfully disabled group notification',
+				);
 				break;
 			default:
-				await client[botNum].reply({ from: message.from, quoted: message.message }, 'Please specify a command\n\nEx: notification <enable/disable>');
+				await client[botNum].reply(
+					{ from: message.from, quoted: message.message },
+					'Please specify a command\n\nEx: notification <enable/disable>',
+				);
 		}
 	},
 };

@@ -14,7 +14,8 @@ export const googleArticle = (query) =>
 		try {
 			const { data } = await axios.get(_api(query), {
 				headers: {
-					'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36',
+					'User-Agent':
+						'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36',
 				},
 			});
 
@@ -24,7 +25,10 @@ export const googleArticle = (query) =>
 
 			container = container
 				.map((v) => {
-					const detail = { description: $(v).find('div.snippet-content > p.snippet-description').text().trim().split('-'), date: null };
+					const detail = {
+						description: $(v).find('div.snippet-content > p.snippet-description').text().trim().split('-'),
+						date: null,
+					};
 
 					if (detail.description.length > 1) {
 						detail.date = detail.description[0];

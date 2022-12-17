@@ -74,7 +74,10 @@ export default {
 							case 'status':
 							case 'stats':
 								{
-									await client[botNum].reply({ from, quoted: message }, Object.keys(configuration.presences).includes('available') ? 'Available' : 'Unavailable');
+									await client[botNum].reply(
+										{ from, quoted: message },
+										Object.keys(configuration.presences).includes('available') ? 'Available' : 'Unavailable',
+									);
 								}
 
 								break;
@@ -144,7 +147,10 @@ export default {
 							case 'status':
 							case 'stats':
 								{
-									await client[botNum].reply({ from, quoted: message }, Object.keys(configuration.presences).includes('composing') ? 'Composing' : 'Not composing');
+									await client[botNum].reply(
+										{ from, quoted: message },
+										Object.keys(configuration.presences).includes('composing') ? 'Composing' : 'Not composing',
+									);
 								}
 
 								break;
@@ -201,7 +207,10 @@ export default {
 							case 'status':
 							case 'stats':
 								{
-									await client[botNum].reply({ from, quoted: message }, Object.keys(configuration.presences).includes('recording') ? 'Recording' : 'Not recording');
+									await client[botNum].reply(
+										{ from, quoted: message },
+										Object.keys(configuration.presences).includes('recording') ? 'Recording' : 'Not recording',
+									);
 								}
 
 								break;
@@ -256,7 +265,10 @@ export default {
 						case 'status':
 						case 'stats':
 							{
-								await client[botNum].reply({ from, quoted: message }, Object.keys(configuration.presences).includes('bio') ? 'Enabled' : 'Disabled');
+								await client[botNum].reply(
+									{ from, quoted: message },
+									Object.keys(configuration.presences).includes('bio') ? 'Enabled' : 'Disabled',
+								);
 							}
 
 							break;
@@ -280,7 +292,11 @@ export default {
 									return await client[botNum].reply({ from, quoted: message }, 'Already enabled');
 								}
 
-								configuration.presences.bio = { status: WAPresence.bio, started, interval: setInterval(() => events(client, [], 'bio'), 10_000) };
+								configuration.presences.bio = {
+									status: WAPresence.bio,
+									started,
+									interval: setInterval(() => events(client, [], 'bio'), 10_000),
+								};
 								await client[botNum].reply({ from, quoted: message }, 'Simulate Bio Enabled');
 							}
 

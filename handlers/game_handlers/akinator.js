@@ -19,7 +19,9 @@ export default {
 			if (status == 'playing') {
 				await client[botNum].reply(
 					{ from, quoted: message },
-					`${question}\n\n${answers.map((v, i) => `${i + 1}. ${v}`).join('\n')}\n6. Exit\n7. Back/Undo\n\nProgress : ${progress.toFixed(2)}% ${arrow}\n${progressBar}`,
+					`${question}\n\n${answers
+						.map((v, i) => `${i + 1}. ${v}`)
+						.join('\n')}\n6. Exit\n7. Back/Undo\n\nProgress : ${progress.toFixed(2)}% ${arrow}\n${progressBar}`,
 				);
 			}
 
@@ -28,7 +30,9 @@ export default {
 					from,
 					{
 						image: { url: answers[answers.length - 1].absolute_picture_path },
-						caption: `Name : ${answers[answers.length - 1].name}\nDescription : ${answers[answers.length - 1].description}\nProgress : ${progress}\n${progressBar}`,
+						caption: `Name : ${answers[answers.length - 1].name}\nDescription : ${
+							answers[answers.length - 1].description
+						}\nProgress : ${progress}\n${progressBar}`,
 					},
 					{ quted: message },
 				);
@@ -46,7 +50,9 @@ export default {
 
 				await client[botNum].reply(
 					{ from, quoted: message },
-					`${question}\n\n${answers.map((v, i) => `${i + 1}. ${v}`).join('\n')}\n6. Exit\n7. Back/Undo\n\nProgress : ${progress.toFixed(2)}% ${arrow}\n${progressBar}`,
+					`${question}\n\n${answers
+						.map((v, i) => `${i + 1}. ${v}`)
+						.join('\n')}\n6. Exit\n7. Back/Undo\n\nProgress : ${progress.toFixed(2)}% ${arrow}\n${progressBar}`,
 				);
 			}
 		};

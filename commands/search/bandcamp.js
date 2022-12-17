@@ -48,7 +48,12 @@ Album ID : ${albumId || 'n/a'}`,
 				text: '\t',
 				footer: '```Looking for some more? Choose between these options.```',
 				title: 'Bandcamp Tracks'.formatHeaders(),
-				sections: result.slice(1).map((v) => ({ rows: [{ title: `MP3 | ${v.title}`, rowId: `.bandcampdl ${v.urlBase}` }], title: `${v.bandName} - ${v.title}` })),
+				sections: result
+					.slice(1)
+					.map((v) => ({
+						rows: [{ title: `MP3 | ${v.title}`, rowId: `.bandcampdl ${v.urlBase}` }],
+						title: `${v.bandName} - ${v.title}`,
+					})),
 			});
 		}
 	},

@@ -15,7 +15,10 @@ export default {
 		}
 
 		if (!isBotAdmin) {
-			return await client[botNum].reply({ from, quoted: message }, 'Bot is not admin, Please promote admin before using moderation commands.');
+			return await client[botNum].reply(
+				{ from, quoted: message },
+				'Bot is not admin, Please promote admin before using moderation commands.',
+			);
 		}
 
 		if (groupMetadata.announce) {

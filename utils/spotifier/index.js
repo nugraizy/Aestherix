@@ -1,1 +1,1 @@
-export * from './Spotify.js';
+export * from './spotify.js';

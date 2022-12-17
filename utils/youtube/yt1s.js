@@ -3,10 +3,13 @@ import yts from 'ytsr';
 
 import { fetchJSON, isURL } from '../../helper/index.js';
 
-const URL_INFO = 'https://yt1s.com/api/ajaxSearch/index';
-const URL_CONVERT = 'https://yt1s.com/api/ajaxConvert/convert';
+const _apiIndex = 'https://yt1s.com/api/ajaxSearch/index';
+const _apiConvert = 'https://yt1s.com/api/ajaxConvert/convert';
 
-const isUrl = (url) => url.match(new RegExp(/^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/)|(?:(?:watch)?\?v(?:i)?=|&v(?:i)?=))([^#&?]*).*/, 'g'));
+const isUrl = (url) =>
+	url.match(
+		new RegExp(/^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/)|(?:(?:watch)?\?v(?:i)?=|&v(?:i)?=))([^#&?]*).*/, 'g'),
+	);
 
 /**
  * @typedef {{videoId: string, url: string, title: string, description: string | null, thumbnail: string, timestamp: string, uploaded: string, views: number, author: string, urlChannel: string}} YTSearchResults
@@ -26,7 +29,7 @@ const yt2 = async (url, type) =>
 				return resolve({ error: 'Invalid URL' });
 			}
 
-			const datas = await fetchJSON(URL_INFO, {
+			const datas = await fetchJSON(_apiIndex, {
 				method: 'POST',
 				body: `q=${encodeURIComponent(url)}&vt=home`,
 				headers: {
@@ -37,11 +40,15 @@ const yt2 = async (url, type) =>
 			});
 
 			const { k, size } =
-				Object.values(datas.links[type]).filter((v) => (type == 'mp4' ? v.q == '480p' || v.q == '360p' : v.q == '128kbps' || v.q == `${128 / 2}kbps`)).length === 0
+				Object.values(datas.links[type]).filter((v) =>
+					type == 'mp4' ? v.q == '480p' || v.q == '360p' : v.q == '128kbps' || v.q == `${128 / 2}kbps`,
+				).length === 0
 					? Object.values(datas.links[type])[Object.keys(datas.links[type]).length - 1]
-					: Object.values(datas.links[type]).filter((v) => (type == 'mp4' ? v.q == '480p' || v.q == '360p' : v.q == '128kbps' || v.q == `${128 / 2}kbps`))[0];
+					: Object.values(datas.links[type]).filter((v) =>
+							type == 'mp4' ? v.q == '480p' || v.q == '360p' : v.q == '128kbps' || v.q == `${128 / 2}kbps`,
+					  )[0]; /* eslint-disable-line */
 
-			const data = await fetchJSON(URL_CONVERT, {
+			const data = await fetchJSON(_apiConvert, {
 				method: 'POST',
 				body: `vid=${datas.vid}&k=${encodeURIComponent(k)}`,
 				headers: {

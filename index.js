@@ -30,7 +30,13 @@ dayjs.extend(localePlugins);
 dayjs.extend(customParseFormat);
 dayjs.tz.setDefault('Asia/Jakarta');
 
-const { default: makeWASocket, DisconnectReason, makeInMemoryStore, useSingleFileAuthState, DEFAULT_CONNECTION_CONFIG } = baileys;
+const {
+	default: makeWASocket,
+	DisconnectReason,
+	makeInMemoryStore,
+	useSingleFileAuthState,
+	DEFAULT_CONNECTION_CONFIG,
+} = baileys;
 const moduleURL = new URL(import.meta.url);
 
 export const __dirname = platform == 'win32' ? path.dirname(moduleURL.pathname).slice(1) : path.dirname(moduleURL.pathname);
@@ -206,9 +212,11 @@ const start = async () => {
 					global.client = {};
 					global.botNum = Client.user.id;
 					client[Client.user.id] = Client;
-					(await import('./helper/modules/assignFunction.js')).assign(client);
+					(await import('./helper/modules/assign-function.js')).assign(client);
 
-					INFOLOG(color(center(`Bot Version  ${romanize(readJSON('./package.json').version)}\n\n`, stdout.columns), '#9f53ea'));
+					INFOLOG(
+						color(center(`Bot Version  ${romanize(readJSON('./package.json').version)}\n\n`, stdout.columns), '#9f53ea'),
+					);
 
 					connectEvent();
 					clearDBConnection();
@@ -224,7 +232,7 @@ const start = async () => {
 
 	const connectEvent = () => {
 		Client.ev.on('messages.upsert', async (message) => {
-			const Handler = (await import('./handlers/messages_event/incomingMessage.js')).default.handler;
+			const Handler = (await import('./handlers/messages_event/incoming-message.js')).default.handler;
 
 			Handler(message, client, configuration.cmds, store, configuration.user);
 		});
@@ -234,7 +242,7 @@ const start = async () => {
 				return;
 			}
 
-			const Handler = (await import('./handlers/messages_event/deletedMessage.js')).default.handler;
+			const Handler = (await import('./handlers/messages_event/deleted-message.js')).default.handler;
 
 			message = store.messages[message[0].key.remoteJid]?.get(message[0].key.id);
 			Handler(client, message, false, store);
@@ -280,13 +288,13 @@ const start = async () => {
 		});
 
 		Client.ev.on('group.participants.update', async (message) => {
-			const Handler = (await import('./handlers/notification_handlers/participantsNotification.js')).default.handler;
+			const Handler = (await import('./handlers/notification_handlers/participants-notification.js')).default.handler;
 
 			Handler(client, message, store);
 		});
 
 		Client.ev.on('group.settings.update', async (message) => {
-			const Handler = (await import('./handlers/notification_handlers/groupSettingsNotification.js')).default.handler;
+			const Handler = (await import('./handlers/notification_handlers/group-settings-notification.js')).default.handler;
 
 			Handler(client, message, store);
 		});
@@ -313,7 +321,10 @@ const start = async () => {
 						buttonText: 'Open List',
 						sections: update.playersData
 							.filter((v) => v.isAlive)
-							.map((v) => ({ rows: [{ title: `VOTE ${v.name}`, rowId: `.ww vote ${v.id} ${update.id}` }], title: 'VOID BOT | Werewolf Games' })),
+							.map((v) => ({
+								rows: [{ title: `VOTE ${v.name}`, rowId: `.ww vote ${v.id} ${update.id}` }],
+								title: 'VOID BOT | Werewolf Games',
+							})),
 					});
 				}
 			} else if (update.time == 'voting') {
@@ -344,12 +355,16 @@ const start = async () => {
 							client[botNum].sendMessage(id, {
 								buttonText: 'Open list',
 								footer: 'Made by Void Bot. Powered by Hidden Finder',
-								title: 'Kamu adalah Serigala. Dan saat ini merupakan waktu yang tepat untuk membunuh seseorang.\nPilih salah satu player.',
+								title:
+									'Kamu adalah Serigala. Dan saat ini merupakan waktu yang tepat untuk membunuh seseorang.\nPilih salah satu player.',
 								text: '\t',
 								sections: update.playersData
 									.filter((v) => v.isAlive)
 									.map((v) => {
-										return { rows: [{ title: `KILL ${v.name}`, rowId: `.ww kill ${v.id} ${update.id}` }], title: 'VOID BOT | Werewolf Games' };
+										return {
+											rows: [{ title: `KILL ${v.name}`, rowId: `.ww kill ${v.id} ${update.id}` }],
+											title: 'VOID BOT | Werewolf Games',
+										};
 									}),
 							});
 						} else if (role == 'seer') {
@@ -357,27 +372,47 @@ const start = async () => {
 								buttonText: 'Open list',
 								footer: 'Made by Void Bot. Powered by Hidden Finder',
 								text: '\t',
-								title: 'Kamu adalah Penerawang. Dan saat ini merupakan waktu yang tepat untuk menerawang seseorang.\nPilih salah satu player.',
+								title:
+									'Kamu adalah Penerawang. Dan saat ini merupakan waktu yang tepat untuk menerawang seseorang.\nPilih salah satu player.',
 								sections: update.playersData
 									.filter((v) => v.isAlive)
 									.map((v, i) => {
-										return { rows: [{ title: `TERAWANG ${update.playersData[i].name}`, rowId: `.ww seer ${update.playersData[i].id} ${update.id}` }], title: 'VOID BOT | Werewolf Games' };
+										return {
+											rows: [
+												{
+													title: `TERAWANG ${update.playersData[i].name}`,
+													rowId: `.ww seer ${update.playersData[i].id} ${update.id}`,
+												},
+											],
+											title: 'VOID BOT | Werewolf Games',
+										};
 									}),
 							});
 						} else if (role == 'guard') {
 							client[botNum].sendMessage(id, {
 								buttonText: 'Open list',
-								title: 'Kamu adalah Penjaga. Dan saat ini merupakan waktu yang tepat untuk memjaga seseorang.\nPilih salah satu player.',
+								title:
+									'Kamu adalah Penjaga. Dan saat ini merupakan waktu yang tepat untuk memjaga seseorang.\nPilih salah satu player.',
 								footer: 'Made by Void Bot. Powered by Hidden Finder',
 								text: '\t',
 								sections: update.playersData
 									.filter((v) => v.isAlive)
 									.map((v, i) => {
-										return { rows: [{ title: `JAGA ${update.playersData[i].name}`, rowId: `.ww guard ${update.playersData[i].id} ${update.id}` }], title: 'VOID BOT | Werewolf Games' };
+										return {
+											rows: [
+												{
+													title: `JAGA ${update.playersData[i].name}`,
+													rowId: `.ww guard ${update.playersData[i].id} ${update.id}`,
+												},
+											],
+											title: 'VOID BOT | Werewolf Games',
+										};
 									}),
 							});
 						} else if (role == 'villager') {
-							client[botNum].sendMessage(id, { text: 'Kamu adalah Penduduk. Tunggu sampai pagi. Saat ini hanya pemain malam yang beraksi' });
+							client[botNum].sendMessage(id, {
+								text: 'Kamu adalah Penduduk. Tunggu sampai pagi. Saat ini hanya pemain malam yang beraksi',
+							});
 						}
 					}
 				}
@@ -425,7 +460,9 @@ const start = async () => {
 					return;
 				}
 
-				const content = `Spotify On ${data.isPlaying ? 'Play' : 'Paused'} :                                                       ${data.artists || ''} - ${data.trackTitle || ''}  ( ${
+				const content = `Spotify On ${
+					data.isPlaying ? 'Play' : 'Paused'
+				} :                                                       ${data.artists || ''} - ${data.trackTitle || ''}  ( ${
 					data.progressMs?.toTime() || '00'
 				} - ${data?.durationMs?.toTime() || '00'} )`;
 				const myStatus = await client?.[botNum]?.fetchStatus(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`);
@@ -526,7 +563,10 @@ async function loadCommands() {
 				if (OPTIONS.watch) {
 					await watchFile(pathToFileURL(path.join(__dirname, obj.pathname)), cmd.name);
 				}
-				const modules = process.platform == 'win32' ? pathToFileURL(path.join(__dirname, obj.pathname)).pathname.slice(1) : pathToFileURL(path.join(__dirname, obj.pathname)).pathname;
+				const modules =
+					process.platform == 'win32'
+						? pathToFileURL(path.join(__dirname, obj.pathname)).pathname.slice(1)
+						: pathToFileURL(path.join(__dirname, obj.pathname)).pathname;
 
 				configuration.cmds.commands.set(cmd.name, { ...cmd, pathname: decodeURI(modules) });
 				configuration.cmds.aliases = [...cmd.aliases, ...configuration.cmds.aliases];
@@ -563,7 +603,10 @@ async function reloadModule(module, isNewFile, newFilePath) {
 				const files = (
 					await Promise.all(
 						loadFiles('./commands').map(async (v) => {
-							const modules = process.platform == 'win32' ? decodeURI(pathToFileURL(v).pathname.slice(1)) : decodeURI(pathToFileURL(v).pathname);
+							const modules =
+								process.platform == 'win32'
+									? decodeURI(pathToFileURL(v).pathname.slice(1))
+									: decodeURI(pathToFileURL(v).pathname);
 							const module = (await import(pathToFileURL(modules))).default;
 
 							return { ...module, pathname: modules };
@@ -603,11 +646,19 @@ async function reloadModule(module, isNewFile, newFilePath) {
 			} catch (e) {
 				log(e);
 				configuration.commandsPath.splice(configuration.commandsPath.indexOf(newFilePath), 1);
-				configuration.cmds.commands.delete(Array.from(configuration.cmds.commands.values()).find((v) => v.pathname == newFilePath).name);
+				configuration.cmds.commands.delete(
+					Array.from(configuration.cmds.commands.values()).find((v) => v.pathname == newFilePath).name,
+				);
 				fs.unwatchFile(module);
 				return ERRLOG(`[${color(time, 'cyan')}]`, color(`⚠️ ${newFilePath.split('/').reverse()[0]} is deleted`, 'red'));
 			} finally {
-				INFOLOG(`[${color(time, 'cyan')}]`, color(`${newFilePath.split('/').reverse()[0]} has been renamed to ${renamedCommand.split('/').reverse()[0]}`, '#9f53ea'));
+				INFOLOG(
+					`[${color(time, 'cyan')}]`,
+					color(
+						`${newFilePath.split('/').reverse()[0]} has been renamed to ${renamedCommand.split('/').reverse()[0]}`,
+						'#9f53ea',
+					),
+				);
 			}
 		} catch (e) {
 			log(e);

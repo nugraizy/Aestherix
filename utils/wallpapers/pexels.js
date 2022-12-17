@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const TOKEN = process.env.PEXEL_TOKEN;
-const _api = 'https://api.pexels.com/v1/search';
+const _apiBase = 'https://api.pexels.com/v1/search';
 
 /**
  * Find Stock Images from Pexels.com
@@ -12,7 +12,7 @@ const _api = 'https://api.pexels.com/v1/search';
 export const stockImagesPexel = (query) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { data } = await axios.get(_api, {
+			const { data } = await axios.get(_apiBase, {
 				params: {
 					query,
 					size: 'large',

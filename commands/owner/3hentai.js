@@ -39,6 +39,10 @@ Categories : ${categories.join(', ')}
 Tot. Pages : ${totalPages}`;
 
 		await client[botNum].reply({ from, quoted: message }, caption);
-		await client[botNum].sendMessage(from, { document: Buffer.from(buffer, 'base64'), mimetype: mime('pdf'), fileName: title });
+		await client[botNum].sendMessage(from, {
+			document: Buffer.from(buffer, 'base64'),
+			mimetype: mime('pdf'),
+			fileName: title,
+		});
 	},
 };

@@ -44,18 +44,26 @@ export default {
 		const isGroupMaxed = Object.keys(await client[botNum].groupFetchAllParticipating()).length > settings.max_group;
 
 		if (metadataGroup.id !== '') {
-			await client[botNum].reply({ from, quoted: message }, 'I\'m already in this group.');
+			await client[botNum].reply({ from, quoted: message }, 'I am already in this group.');
 		} else if (isGroupMaxed && !isOwner) {
 			await client[botNum].reply({ from, quoted: message }, 'Bot already maxed the group.');
 		} else if (participants?.length < settings.min_members && !isOwner) {
-			await client[botNum].reply({ from, quoted: message }, `This group is not big enough to join. Minimum ${settings.min_members} participants.`);
+			await client[botNum].reply(
+				{ from, quoted: message },
+				`This group is not big enough to join. Minimum ${settings.min_members} participants.`,
+			);
 		} else if (!isAdmin && !isOwner) {
 			await client[botNum].reply({ from, quoted: message }, 'You must be an admin to invite bot to group.');
 		} else if (metadataInvite) {
 			await client[botNum].groupAcceptInvite(reg);
-			await client[botNum].reply({ from, quoted: message }, 'I\'m joining this group.');
-			await client[botNum].sendMessage(metadataInvite.id, { text: `@${sender.split('@')[0]} has invited me to the group. Tysm.`, mentions: [sender] });
-			await client[botNum].buttonText(metadataInvite.id, 'Click to open menu', 'Powered by Hidden Finder', [{ buttonId: '.menu', buttonText: { displayText: 'Menu' }, type: 1 }]);
+			await client[botNum].reply({ from, quoted: message }, 'I am joining this group.');
+			await client[botNum].sendMessage(metadataInvite.id, {
+				text: `@${sender.split('@')[0]} has invited me to the group. Tysm.`,
+				mentions: [sender],
+			});
+			await client[botNum].buttonText(metadataInvite.id, 'Click to open menu', 'Powered by Hidden Finder', [
+				{ buttonId: '.menu', buttonText: { displayText: 'Menu' }, type: 1 },
+			]);
 		} else {
 			await client[botNum].reply({ from, quoted: message }, 'Invalid url.');
 		}

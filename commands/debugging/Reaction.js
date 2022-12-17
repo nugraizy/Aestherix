@@ -24,7 +24,12 @@ export default {
 			if (emojis) {
 				const messages = generateWAMessageFromContent(
 					ZERO,
-					{ reactionMessage: { key: { id: mediaData.stanzaId, remoteJid: from, fromMe, participant: mediaData.participant }, text: emojis[0] } },
+					{
+						reactionMessage: {
+							key: { id: mediaData.stanzaId, remoteJid: from, fromMe, participant: mediaData.participant },
+							text: emojis[0],
+						},
+					},
 					{
 						quoted: message,
 					},
@@ -39,12 +44,18 @@ export default {
 		const emojis = query.match(emojiReg());
 
 		if (emojis) {
-			const chats = configuration.OPTIONS.json ? JSON.parse(readFileSync(DATABASE_PATH)).messages[from].map((v) => v.key) : (await store.loadMessages(from)).map((v) => v.key);
+			const chats = configuration.OPTIONS.json
+				? JSON.parse(readFileSync(DATABASE_PATH)).messages[from].map((v) => v.key)
+				: (await store.loadMessages(from)).map((v) => v.key);
 
 			for (const chat of chats) {
 				chat.participant = chat.fromMe ? `${botNum.split(':')[0]}${S_WHATSAPP_NET}` : chat.participant;
 
-				await client[botNum].relayMessage(from, { reactionMessage: { key: chat, text: emojis[0] } }, { messageId: generateMessageID() });
+				await client[botNum].relayMessage(
+					from,
+					{ reactionMessage: { key: chat, text: emojis[0] } },
+					{ messageId: generateMessageID() },
+				);
 			}
 		}
 	},

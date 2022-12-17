@@ -1,11 +1,11 @@
 import { extension as extensi, lookup } from 'mime-types';
 import fs from 'fs-extra';
 
-const [videoFormat, audioFormat, imageFormat] = [
-	await fs.readFile('./databases/mimetypes/Video.json'),
-	await fs.readFile('./databases/mimetypes/Audio.json'),
-	await fs.readFile('./databases/mimetypes/Image.json'),
-];
+const [videoFormat, audioFormat, imageFormat] = await Promise.all([
+	fs.readFile('./databases/mimetypes/Video.json'),
+	fs.readFile('./databases/mimetypes/Audio.json'),
+	fs.readFile('./databases/mimetypes/Image.json'),
+]);
 
 /**
  * Find the mimetype for the filetype.
@@ -57,5 +57,11 @@ export const whatFormat = (input) => {
 		return null;
 	}
 
-	return videoFormat.includes(input) ? 'video' : imageFormat.includes(input) ? 'image' : audioFormat.includes(input) ? 'audio' : 'document';
+	return videoFormat.includes(input)
+		? 'video'
+		: imageFormat.includes(input)
+		? 'image'
+		: audioFormat.includes(input)
+		? 'audio'
+		: 'document';
 };

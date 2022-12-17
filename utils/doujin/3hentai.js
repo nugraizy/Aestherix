@@ -18,7 +18,8 @@ export const _3hentai = (code) =>
 		try {
 			const { data } = await axios.get(_api(code), {
 				headers: {
-					'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36',
+					'user-agent':
+						'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36',
 				},
 			});
 

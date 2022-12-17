@@ -20,12 +20,16 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'You are not allowed to use this command');
 		}
 
-		const messages = configuration.OPTIONS.json ? JSON.parse(fs.readFileSync(DB_PATH)).messages[from] : await store.loadMessages(from);
+		const messages = configuration.OPTIONS.json
+			? JSON.parse(fs.readFileSync(DB_PATH)).messages[from]
+			: await store.loadMessages(from);
 
 		if (args[1] == 'get') {
 			let dataMessage = messages.find((v) => v.key.id == args[2]);
 
-			dataMessage = await (await import('../../helper/modules/reassignMessagesObject.js')).reassign(JSON.parse(JSON.stringify(dataMessage)), client, store, false);
+			dataMessage = await (
+				await import('../../helper/modules/reassign-messages-object.js')
+			).reassign(JSON.parse(JSON.stringify(dataMessage)), client, store, false);
 			await client[botNum].reply({ from: dataMessage?.from, quoted: dataMessage.message }, 'Here.');
 			await client[botNum].reply(
 				{ from: dataMessage?.from, quoted: dataMessage.message },
@@ -42,17 +46,28 @@ Tot. Tags : ${dataMessage.mention.length}`,
 		let dataMessages = [];
 
 		for (const message of messages) {
-			dataMessages.push(await (await import('../../helper/modules/reassignMessagesObject.js')).reassign(JSON.parse(JSON.stringify(message)), client, store, false));
+			dataMessages.push(
+				await (
+					await import('../../helper/modules/reassign-messages-object.js')
+				).reassign(JSON.parse(JSON.stringify(message)), client, store, false),
+			);
 		}
 
 		if (dataMessages.length == 0) {
 			return await client[botNum].reply({ from, quoted: message }, 'No messages scraped in this chat');
 		}
 
-		dataMessages = dataMessages.filter((v) => (v.mediaData?.participant == settings.owner_number || v.mention.includes(settings.owner_number)) && v.sender !== settings.owner_number);
+		dataMessages = dataMessages.filter(
+			(v) =>
+				(v.mediaData?.participant == settings.owner_number || v.mention.includes(settings.owner_number)) &&
+				v.sender !== settings.owner_number,
+		);
 
 		if (dataMessages.length == 0) {
-			return await client[botNum].reply({ from, quoted: message }, `Your tags is not found. Chats scraped : ${messages.length}`);
+			return await client[botNum].reply(
+				{ from, quoted: message },
+				`Your tags is not found. Chats scraped : ${messages.length}`,
+			);
 		}
 
 		dataMessages = dataMessages.map((v) => {

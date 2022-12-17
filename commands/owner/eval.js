@@ -1,4 +1,4 @@
-/* global botNum, client */
+/* global botNum, client, where */
 
 import * as _ from '@adiwajshing/baileys'; /* eslint-disable-line */
 import { WAProto } from '@adiwajshing/baileys'; /* eslint-disable-line */
@@ -25,7 +25,8 @@ class CustomArray extends Array {
 	}
 }
 
-/* eslint-disable-line */ const print = ({ from, quoted }, ...args) => client[botNum].reply({ from: from || where, quoted }, format(...args));
+/* eslint-disable-line */ const print = ({ from, quoted }, ...args) =>
+	client[botNum].reply({ from: from || where, quoted }, format(...args));
 
 export default {
 	name: 'eval',
@@ -248,7 +249,19 @@ export default {
 				const exportsly = {
 					exports: {},
 				};
-				const exec = new (async () => {}).constructor('print', 'message', 'client', 'store', 'Array', 'process', 'args', 'groupMetadata', 'exports', 'argument', queries);
+				const exec = new (async () => {}).constructor(
+					'print',
+					'message',
+					'client',
+					'store',
+					'Array',
+					'process',
+					'args',
+					'groupMetadata',
+					'exports',
+					'argument',
+					queries,
+				);
 
 				returning = await exec.call(
 					client,
@@ -313,7 +326,9 @@ global.prints = print;
 	}
 
 	func = prettier.js_beautify(func.toString());
-	func = prettier.js_beautify(func.split('\n').insert(1, 'try {').insert(-1, '} catch(e) { prints(false, format(e))}').join('\n'));
+	func = prettier.js_beautify(
+		func.split('\n').insert(1, 'try {').insert(-1, '} catch(e) { prints(false, format(e))}').join('\n'),
+	);
 	global[names] = func.includes('await') ? await new AsyncFunction(`return ${func}`)() : new Function(`return ${func}`)();
 	global.functions = { ...global.functions, [names]: global[names] };
 	return func;

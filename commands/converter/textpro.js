@@ -131,7 +131,10 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 						?.map((v) => v.url);
 
 		if (models?.length == 0) {
-			return await client[botNum].reply({ from, quoted: message }, `Model ${models[0]} not found\n Type : !${this.name} -type`);
+			return await client[botNum].reply(
+				{ from, quoted: message },
+				`Model ${models[0]} not found\n Type : !${this.name} -type`,
+			);
 		}
 
 		for (const model of models) {
@@ -150,7 +153,10 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 			const { width, height } = imageSize(data);
 
 			const buffer = isStickers
-				? await client[botNum].prepareSticker(data, path.join(__dirname, `temporary_files/${filename}`), undefined, { author: configuration.author, packname: configuration.packname })
+				? await client[botNum].prepareSticker(data, path.join(__dirname, `temporary_files/${filename}`), undefined, {
+						author: configuration.author,
+						packname: configuration.packname,
+				  }) /* eslint-disable-line */
 				: await sharp(data)
 						.extract({ width: width - 40, height: height - 40, left: 0, top: 0 })
 						.toBuffer();

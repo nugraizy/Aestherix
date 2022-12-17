@@ -17,6 +17,10 @@ export default {
 
 		setAfk(sender, from, query, pushname);
 
-		await client[botNum].sendMessage(from, { text: `@${sender.split('@')[0]} is now AFK.`, mentions: [sender] }, { quoted: message });
+		await client[botNum].sendMessage(
+			from,
+			{ text: `@${sender.split('@')[0]} is now AFK.`, mentions: [sender] },
+			{ quoted: message },
+		);
 	},
 };

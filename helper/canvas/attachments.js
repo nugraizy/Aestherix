@@ -31,7 +31,14 @@ export class Attachment {
 				throw new Error(err);
 			}
 
-			const defaultOpts = { textColor: 'white', groupName: 'white', participantColor: 'white', fontSize: 82, fontName: 'nina-bold', shadow: false };
+			const defaultOpts = {
+				textColor: 'white',
+				groupName: 'white',
+				participantColor: 'white',
+				fontSize: 82,
+				fontName: 'nina-bold',
+				shadow: false,
+			};
 
 			Object.assign(defaultOpts, opts);
 
@@ -120,9 +127,19 @@ export class Attachment {
 			};
 
 			if (filename == './media_files/blank.png') {
-				changeDimen(this.canvas.width / 2 - this._image.width / 2 + 5, this.canvas.height / 2 - this._image.height / 2 - 80, this._image.width / 1.04, this._image.height / 1.04);
+				changeDimen(
+					this.canvas.width / 2 - this._image.width / 2 + 5,
+					this.canvas.height / 2 - this._image.height / 2 - 80,
+					this._image.width / 1.04,
+					this._image.height / 1.04,
+				);
 			} else {
-				changeDimen(this.canvas.width / 2 - this._image.width / 3 + 110, this.canvas.height / 2 - this._image.height / 3 + 15, this._image.width / 2.99, this._image.height / 2.99);
+				changeDimen(
+					this.canvas.width / 2 - this._image.width / 3 + 110,
+					this.canvas.height / 2 - this._image.height / 3 + 15,
+					this._image.width / 2.99,
+					this._image.height / 2.99,
+				);
 			}
 
 			if (roundedRadius) {
@@ -193,7 +210,13 @@ export class Attachment {
 			this.ctx.shadowColor = 'white';
 
 			this.ctx.drawImage(logo, 15, this.canvas.height - 38, 20, 20);
-			this.ctx.drawImage(signature, this.canvas.width - 70, this.canvas.height - 38, signature.width / 19, signature.height / 19);
+			this.ctx.drawImage(
+				signature,
+				this.canvas.width - 70,
+				this.canvas.height - 38,
+				signature.width / 19,
+				signature.height / 19,
+			);
 			this.ctx.restore();
 
 			this.ctx.beginPath();
@@ -267,7 +290,9 @@ export class Attachment {
 	}
 
 	async roundImage(image, file, roundedRadius) {
-		const rounded = new Buffer.from(`<svg><rect x="0" y="0" width="${image.width}" height="${image.height}" rx="${roundedRadius}" ry="${roundedRadius}"/></svg>`);
+		const rounded = new Buffer.from(
+			`<svg><rect x="0" y="0" width="${image.width}" height="${image.height}" rx="${roundedRadius}" ry="${roundedRadius}"/></svg>`,
+		);
 		const roundedCornerResizer = sharp(file)
 			.composite([{ input: rounded, blend: 'dest-in' }])
 			.png();

@@ -43,7 +43,8 @@ const split = (arrs, len) => {
 export default {
 	name: 'ephoto360',
 	description: 'Image maker using texts',
-	usage: '!ephoto360 <query> <model/number[REQUIRED]> [options]\nOptions:\n-stk / -img\nAvailable Model Type : !ephoto360 -model',
+	usage:
+		'!ephoto360 <query> <model/number[REQUIRED]> [options]\nOptions:\n-stk / -img\nAvailable Model Type : !ephoto360 -model',
 	aliases: ['ephoto', 'epht'],
 	category: 'Converter',
 	cooldown: 4,
@@ -130,14 +131,21 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 						?.map((v) => v.url);
 
 		if (models?.length == 0) {
-			return await client[botNum].reply({ from, quoted: message }, `Model ${models[0]} not found\n Type : !${this.name} -type`);
+			return await client[botNum].reply(
+				{ from, quoted: message },
+				`Model ${models[0]} not found\n Type : !${this.name} -type`,
+			);
 		}
 
 		for (const model of models) {
 			let buffers = null;
 
 			if (isMediaImage) {
-				await client[botNum].downloadAndSaveMediaMessage(extractMediaData, path.join(__dirname, `temporary_files/${filename}`), typeQuoted);
+				await client[botNum].downloadAndSaveMediaMessage(
+					extractMediaData,
+					path.join(__dirname, `temporary_files/${filename}`),
+					typeQuoted,
+				);
 
 				buffers = path.join(__dirname, `temporary_files/${filename}`);
 			}
@@ -155,7 +163,10 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 			});
 
 			const buffer = isStickers
-				? await client[botNum].prepareSticker(data, path.join(__dirname, `temporary_files/${filename}`), undefined, { author: configuration.author, packname: configuration.packname })
+				? await client[botNum].prepareSticker(data, path.join(__dirname, `temporary_files/${filename}`), undefined, {
+						author: configuration.author,
+						packname: configuration.packname,
+				  }) /* eslint-disable-line */
 				: (async () => {
 						const image = sharp(data);
 						const { width, height } = await image.metadata();

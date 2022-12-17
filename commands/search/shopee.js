@@ -30,7 +30,20 @@ export default {
 
 			let { items } = product;
 
-			for (const { productName, stock, sold, brand, prices, pricesDiscount, discountPercent, likes, ratings, location, productURL, imageURL } of items) {
+			for (const {
+				productName,
+				stock,
+				sold,
+				brand,
+				prices,
+				pricesDiscount,
+				discountPercent,
+				likes,
+				ratings,
+				location,
+				productURL,
+				imageURL,
+			} of items) {
 				await client[botNum].sendMessage(
 					from,
 					{
@@ -54,7 +67,11 @@ export default {
 Stock : ${numberWithCommas(stock)}
 Sold : ${numberWithCommas(sold)}
 Brand : ${brand}
-Price : ${prices == 0 ? numberWithCommas(pricesDiscount) : `${numberWithCommas(prices)}\nPrices After Discount : ${numberWithCommas(pricesDiscount)}`}
+Price : ${
+							prices == 0
+								? numberWithCommas(pricesDiscount)
+								: `${numberWithCommas(prices)}\nPrices After Discount : ${numberWithCommas(pricesDiscount)}`
+						}
 Percent Discount : ${discountPercent}
 Likes : ${likes}
 Ratings : ${ratings.toFixed(2)}

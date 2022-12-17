@@ -1,1 +1,1 @@
-export * from './tinyURL.js';
+export * from './tiny-url.js';

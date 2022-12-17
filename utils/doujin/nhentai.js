@@ -26,7 +26,9 @@ export const nhentai = async (code) =>
 				totPages: json.num_pages,
 				totFavorites: json.num_favorites,
 				tags: json.tags.map((v) => v.name),
-				images: json.images.pages.map((v, i) => `https://i.nhentai.net/galleries/${json.media_id}/${i + 1}.${_imageType(v.t)}`),
+				images: json.images.pages.map(
+					(v, i) => `https://i.nhentai.net/galleries/${json.media_id}/${i + 1}.${_imageType(v.t)}`,
+				),
 			};
 
 			resolve(details);

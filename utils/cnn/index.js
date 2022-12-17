@@ -1,2 +1,2 @@
-export * from './cnnindonesia.js';
-export * from './cnninternational.js';
+export * from './cnn-indonesia.js';
+export * from './cnn-international.js';

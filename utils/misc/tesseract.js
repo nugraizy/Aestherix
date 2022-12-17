@@ -12,7 +12,9 @@ export const tesseract = async (image, sender, lang = 'ind') =>
 
 			const time = dayjs().format('HH:mm:ss DD/MM');
 			const languages = [];
-			const $ = cheerioLOAD(await fetchTEXT('https://github.com/tesseract-ocr/tessdoc/blob/main/Data-Files-in-different-versions.md'));
+			const $ = cheerioLOAD(
+				await fetchTEXT('https://github.com/tesseract-ocr/tessdoc/blob/main/Data-Files-in-different-versions.md'),
+			);
 
 			$('#readme > article > table:nth-child(2) > tbody > tr').each(function () {
 				if ($(this).find('td:nth-child(1)').text() === '') {

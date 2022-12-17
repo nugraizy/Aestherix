@@ -29,6 +29,9 @@ export const deleteAfk = (participant, groupId) => {
 
 export const setAfk = (participant, groupId, reason, name) => {
 	if (!getAfk(participant, groupId)) {
-		configuration.user.afk.set(participant, new Map().set(groupId, { since: new Date().getTime(), reasons: !reason ? 'No Reason' : reason, name }));
+		configuration.user.afk.set(
+			participant,
+			new Map().set(groupId, { since: new Date().getTime(), reasons: !reason ? 'No Reason' : reason, name }),
+		);
 	}
 };

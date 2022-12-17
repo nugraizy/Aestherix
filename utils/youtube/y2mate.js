@@ -17,7 +17,10 @@ const post = async (url, formdata) => {
 	});
 };
 
-const isUrl = (url) => url.match(new RegExp(/^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/)|(?:(?:watch)?\?v(?:i)?=|&v(?:i)?=))([^#&?]*).*/, 'g'));
+const isUrl = (url) =>
+	url.match(
+		new RegExp(/^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/)|(?:(?:watch)?\?v(?:i)?=|&v(?:i)?=))([^#&?]*).*/, 'g'),
+	);
 
 const yt = async (url, quality, type, bitrate, server = 'en60') =>
 	new Promise(async (resolve, reject) => {

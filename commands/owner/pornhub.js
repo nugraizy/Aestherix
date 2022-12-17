@@ -30,10 +30,29 @@ export default {
 					image: { url: data[index].mainThumb },
 					caption: 'Pornhub'.formatHeaders(),
 					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: args[1] == 'next' ? data[index].mainThumb : data[index].mainThumb } },
+						{
+							urlButton: {
+								displayText: 'Image Source',
+								url: args[1] == 'next' ? data[index].mainThumb : data[index].mainThumb,
+							},
+						},
 						{ urlButton: { displayText: 'PHub Source', url: args[1] == 'next' ? data[index].url : data[index].url } },
-						index + 1 !== data.length ? { quickReplyButton: { displayText: 'Next Post', id: `.phub next ${data[index + 1].mainThumb} ${JSON.stringify(data)}` } } : {},
-						index !== 0 ? { quickReplyButton: { displayText: 'Previous Post', id: `.phub prev ${data[index - 1].mainThumb} ${JSON.stringify(data)}` } } : {},
+						index + 1 !== data.length
+							? {
+									quickReplyButton: {
+										displayText: 'Next Post',
+										id: `.phub next ${data[index + 1].mainThumb} ${JSON.stringify(data)}`,
+									},
+							  } /* eslint-disable-line */
+							: {},
+						index !== 0
+							? {
+									quickReplyButton: {
+										displayText: 'Previous Post',
+										id: `.phub prev ${data[index - 1].mainThumb} ${JSON.stringify(data)}`,
+									},
+							  } /* eslint-disable-line */
+							: {},
 					],
 					footer: `Title : ${data[index].title}
 Pornstars : ${data[index].pornstars.join(', ')}
@@ -70,7 +89,14 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: result.result[0].mainThumb } },
 						{ urlButton: { displayText: 'PHub Source', url: result.result[0].url } },
-						result.result.length !== 1 ? { quickReplyButton: { displayText: 'Next Post', id: `.phub next ${result.result[1].mainThumb} ${JSON.stringify(result.result)}` } } : {},
+						result.result.length !== 1
+							? {
+									quickReplyButton: {
+										displayText: 'Next Post',
+										id: `.phub next ${result.result[1].mainThumb} ${JSON.stringify(result.result)}`,
+									},
+							  } /* eslint-disable-line */
+							: {},
 					],
 					footer: `Title : ${result.result[0].title}
 Pornstars : ${result.result[0].pornstars.join(', ')}

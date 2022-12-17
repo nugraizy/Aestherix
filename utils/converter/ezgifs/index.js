@@ -1,2 +1,2 @@
-export * from './apng2webpUrl.js';
-export * from './webp2mp4.js';
+export * from './apng-to-webp-url.js';
+export * from './webp-to-mp4.js';

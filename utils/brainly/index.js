@@ -1,1 +1,1 @@
-export * from './searchAnswer.js';
+export * from './search-answer.js';

@@ -79,7 +79,8 @@ export const layarkaca21 = (keyword) =>
 					const title = data.attr('title');
 					const source = data.attr('href');
 
-					const { country, quality, director, ratings, thumbnail, released, genreArr, castArr, genreStr, castStr } = await getDetailsMovies(source);
+					const { country, quality, director, ratings, thumbnail, released, genreArr, castArr, genreStr, castStr } =
+						await getDetailsMovies(source);
 
 					return {
 						title,

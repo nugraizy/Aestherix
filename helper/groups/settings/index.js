@@ -1,2 +1,2 @@
-export * from './groupDefaultSettings.js';
+export * from './group-default-settings.js';
 export * from './limit.js';

@@ -15,7 +15,25 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	status: 'enable',
-	async run({ bodyQuoted, mention, isMediaImage, from, extractMediaData, mediaData, filename, prettyNumber, sender, query, message, stickerAble, typeQuoted, typeSticker }, client) {
+	async run(
+		{
+			bodyQuoted,
+			mention,
+			isMediaImage,
+			from,
+			extractMediaData,
+			mediaData,
+			filename,
+			prettyNumber,
+			sender,
+			query,
+			message,
+			stickerAble,
+			typeQuoted,
+			typeSticker,
+		},
+		client,
+	) {
 		if (mention.length == 0 && !isMediaImage) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please mention or send/reply an image to pet');
 		}
@@ -35,7 +53,9 @@ export default {
 		if (bodyQuoted && !isMediaImage) {
 			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Petting', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`);
 
-			const profile = await client[botNum].profilePictureUrl(mediaData.participant, 'image').catch(() => readBuffer(path.join(__dirname, 'media_files/blank.png')));
+			const profile = await client[botNum]
+				.profilePictureUrl(mediaData.participant, 'image')
+				.catch(() => readBuffer(path.join(__dirname, 'media_files/blank.png')));
 
 			defaultOptions.filename = path.join(__dirname, `temporary_files/${filename}`);
 
@@ -89,7 +109,9 @@ export default {
 		for (const mentioned of mention) {
 			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Petting', '#01cdfe')} ${color(mentioned, '#ff71ce')}`);
 
-			const profile = await client[botNum].profilePictureUrl(mentioned, 'image').catch(() => readBuffer(path.join(__dirname, 'media_files/blank.png')));
+			const profile = await client[botNum]
+				.profilePictureUrl(mentioned, 'image')
+				.catch(() => readBuffer(path.join(__dirname, 'media_files/blank.png')));
 
 			defaultOptions.filename = path.join(__dirname, `temporary_files/${filename}`);
 

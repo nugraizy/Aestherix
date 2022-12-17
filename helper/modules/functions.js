@@ -229,7 +229,8 @@ export const calcCrow = (lats1, lon1, lats2, lon2) => {
 	const dLon = () => lon2 - (lon1 * Math.PI) / 180;
 	const lat1 = () => (lats1 * Math.PI) / 18_080;
 	const lat2 = () => (lats2 * Math.PI) / 180;
-	const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+	const a =
+		Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
 	const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
 	return R * c;
@@ -387,7 +388,48 @@ const chars = () => {
 			'̚',
 		],
 		middle: ['̕', '̛', '̀', '́', '͘', '̡', '̢', '̧', '̨', '̴', '̵', '̶', '͏', '͜', '͝', '͞', '͟', '͠', '͢', '̸', '̷', '͡', '҉'],
-		down: ['̖', '̗', '̘', '̙', '̜', '̝', '̞', '̟', '̠', '̤', '̥', '̦', '̩', '̪', '̫', '̬', '̭', '̮', '̯', '̰', '̱', '̲', '̳', '̹', '̺', '̻', '̼', 'ͅ', '͇', '͈', '͉', '͍', '͎', '͓', '͔', '͕', '͖', '͙', '͚', '̣'],
+		down: [
+			'̖',
+			'̗',
+			'̘',
+			'̙',
+			'̜',
+			'̝',
+			'̞',
+			'̟',
+			'̠',
+			'̤',
+			'̥',
+			'̦',
+			'̩',
+			'̪',
+			'̫',
+			'̬',
+			'̭',
+			'̮',
+			'̯',
+			'̰',
+			'̱',
+			'̲',
+			'̳',
+			'̹',
+			'̺',
+			'̻',
+			'̼',
+			'ͅ',
+			'͇',
+			'͈',
+			'͉',
+			'͍',
+			'͎',
+			'͓',
+			'͔',
+			'͕',
+			'͖',
+			'͙',
+			'͚',
+			'̣',
+		],
 	};
 
 	char.all = [].concat(char.up, char.middle, char.down);
@@ -517,13 +559,17 @@ export const isOne = (value) => value == 1;
 
 export const isNotOne = (value) => value != 1;
 
-export const isBigger = (value1, value2) => (typeof value1 == 'string' ? value1.toNumber() > value2.toNumber() : typeof value1 == 'number' ? value1 > value2 : false);
+export const isBigger = (value1, value2) =>
+	typeof value1 == 'string' ? value1.toNumber() > value2.toNumber() : typeof value1 == 'number' ? value1 > value2 : false;
 
-export const isSmaller = (value1, value2) => (typeof value1 == 'string' ? value1.toNumber() < value2.toNumber() : typeof value1 == 'number' ? value1 < value2 : false);
+export const isSmaller = (value1, value2) =>
+	typeof value1 == 'string' ? value1.toNumber() < value2.toNumber() : typeof value1 == 'number' ? value1 < value2 : false;
 
-export const isSameOrBigger = (value1, value2) => (typeof value1 == 'string' ? value1.toNumber() >= value2.toNumber() : typeof value1 == 'number' ? value1 >= value2 : false);
+export const isSameOrBigger = (value1, value2) =>
+	typeof value1 == 'string' ? value1.toNumber() >= value2.toNumber() : typeof value1 == 'number' ? value1 >= value2 : false;
 
-export const isSameOrSmaller = (value1, value2) => (typeof value1 == 'string' ? value1.toNumber() <= value2.toNumber() : typeof value1 == 'number' ? value1 <= value2 : false);
+export const isSameOrSmaller = (value1, value2) =>
+	typeof value1 == 'string' ? value1.toNumber() <= value2.toNumber() : typeof value1 == 'number' ? value1 <= value2 : false;
 
 export const randomize = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -610,7 +656,8 @@ export const ERRLOG = (...info) => {
 	}
 };
 
-export const isURL = (input) => /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/gi.test(input);
+export const isURL = (input) =>
+	/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/gi.test(input);
 
 export const parseCode = (input) => {
 	const parse = input.match(/([-_0-9a-zA-Z]{11})/);

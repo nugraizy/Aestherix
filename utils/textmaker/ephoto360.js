@@ -65,13 +65,16 @@ export const ephoto360 = async (api, texts, path) =>
 
 			let { data, headers } = await axios.get(api, {
 				headers: {
-					'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36',
+					'user-agent':
+						'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36',
 				},
 			});
 			let $ = cheerioLOAD(data);
 			const token = $('input[name="token"]').attr('value');
 			const cookie = headers['set-cookie'][0].split(';')[0];
-			const isNeedImageBuffer = $('li.item-content > span.file-input-wrapper > span.btn.btn-primary.choose_file_button').text().trim() == 'Select Photo';
+			const isNeedImageBuffer =
+				$('li.item-content > span.file-input-wrapper > span.btn.btn-primary.choose_file_button').text().trim() ==
+				'Select Photo';
 
 			if (isNeedImageBuffer && !path) {
 				return resolve({ error: 'This Model Need image buffer' });
@@ -95,7 +98,8 @@ export const ephoto360 = async (api, texts, path) =>
 					headers: {
 						Cookie: cookie,
 						...formData.getHeaders(),
-						'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36',
+						'user-agent':
+							'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36',
 					},
 				});
 
@@ -142,7 +146,8 @@ export const ephoto360 = async (api, texts, path) =>
 					headers: {
 						Cookie: cookie,
 						...formData.getHeaders(),
-						'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36',
+						'user-agent':
+							'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36',
 					},
 				})
 			).data;
@@ -183,7 +188,8 @@ export const ephoto360 = async (api, texts, path) =>
 					headers: {
 						Cookie: cookie,
 						...formData.getHeaders(),
-						'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36',
+						'user-agent':
+							'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36',
 					},
 				})
 			).data;
@@ -203,7 +209,8 @@ const container = [];
 export const scrapePages = async (page) => {
 	const { data } = await axios.get(`${_apiBase}/home-p${page}`, {
 		headers: {
-			'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36',
+			'user-agent':
+				'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36',
 		},
 	});
 	const $ = cheerioLOAD(data);

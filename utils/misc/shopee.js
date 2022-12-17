@@ -19,7 +19,8 @@ export const shopeeProduct = (key, total = 5) =>
 			const DATA = await axios.get(API_URL(key, total), {
 				headers: {
 					cookie: COOKIE + DATA_RAW.headers['set-cookie'].map((v) => v.split(';')[0]).join('; '),
-					'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36',
+					'user-agent':
+						'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36',
 				},
 			});
 
@@ -39,7 +40,11 @@ export const shopeeProduct = (key, total = 5) =>
 					likes: element.item_basic.liked_count,
 					ratings: element.item_basic.item_rating.rating_star,
 					location: element.item_basic.shop_location,
-					productURL: URL_PRODUCT(element.item_basic.name.replace(/[/[\] ]/g, '-'), element.item_basic.itemid, element.item_basic.shopid),
+					productURL: URL_PRODUCT(
+						element.item_basic.name.replace(/[/[\] ]/g, '-'),
+						element.item_basic.itemid,
+						element.item_basic.shopid,
+					),
 					imageURL: URL_IMAGE(element.item_basic.image),
 				});
 			});

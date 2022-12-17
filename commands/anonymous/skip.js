@@ -21,7 +21,10 @@ export default {
 			client[botNum].reply(skipping.partner1, 'You have skipped your partner!');
 			client[botNum].sendMessage(skipping.partner2, { text: 'Your partner skipped the chat!' });
 		} else {
-			await client[botNum].reply({ from, quoted: message }, `You already searching for a partner!\nPlease wait for ${skipping.seconds}s`);
+			await client[botNum].reply(
+				{ from, quoted: message },
+				`You already searching for a partner!\nPlease wait for ${skipping.seconds}s`,
+			);
 		}
 	},
 };

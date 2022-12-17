@@ -53,7 +53,10 @@ class Instafier {
 						GraphQLSubscriptions.getDirectTypingSubscription(this.Instagram.state.cookieUserId),
 						GraphQLSubscriptions.getAsyncAdSubscription(this.Instagram.state.cookieUserId),
 					],
-					skywalkerSubs: [SkywalkerSubscriptions.directSub(this.Instagram.state.cookieUserId), SkywalkerSubscriptions.liveSub(this.Instagram.state.cookieUserId)],
+					skywalkerSubs: [
+						SkywalkerSubscriptions.directSub(this.Instagram.state.cookieUserId),
+						SkywalkerSubscriptions.liveSub(this.Instagram.state.cookieUserId),
+					],
 					irisData: await this.Instagram.feed.directInbox().request(),
 				})),
 			};
@@ -77,7 +80,11 @@ class Instafier {
 			fs.mkdirSync('./session/instagram_auth/');
 		}
 
-		return fs.writeFileSync(`./session/instagram_auth/${process.env.INSTAGRAM_USERNAME}.json`, await this.Instagram.exportState(), { encoding: 'utf8' });
+		return fs.writeFileSync(
+			`./session/instagram_auth/${process.env.INSTAGRAM_USERNAME}.json`,
+			await this.Instagram.exportState(),
+			{ encoding: 'utf8' },
+		);
 	}
 
 	async readState() {
@@ -85,7 +92,9 @@ class Instafier {
 			await this.login();
 			await this.saveState();
 		} else {
-			await this.Instagram.importState(fs.readFileSync(`./session/instagram_auth/${process.env.INSTAGRAM_USERNAME}.json`, { encoding: 'utf8' }));
+			await this.Instagram.importState(
+				fs.readFileSync(`./session/instagram_auth/${process.env.INSTAGRAM_USERNAME}.json`, { encoding: 'utf8' }),
+			);
 		}
 
 		this.#authorId = (await this.Instagram.account.currentUser()).pk;
@@ -143,7 +152,8 @@ class Instafier {
 		data.userId = message.user_id;
 		data.isOwner = data.userId == this.#authorId;
 		data.timestamp = message.timestamp;
-		data.type = message.item_type == 'link' ? 'texts' : message.item_type == 'animated_media' ? 'animated_media' : message.item_type;
+		data.type =
+			message.item_type == 'link' ? 'texts' : message.item_type == 'animated_media' ? 'animated_media' : message.item_type;
 
 		if ('text' in message) {
 			data.content = message.text;
@@ -230,7 +240,10 @@ class Instafier {
 
 		this.Instagram.fbns.on('push', (message) => {
 			if (message.collapseKey == 'direct_v2_delete_item' && this.Container.has(Number(message.sourceUserId))) {
-				this.Instagram.fbns.emit('onDeleted', { model: 'deleted', ...this.Container.get(Number(message.sourceUserId)).get(message.actionParams.dx) });
+				this.Instagram.fbns.emit('onDeleted', {
+					model: 'deleted',
+					...this.Container.get(Number(message.sourceUserId)).get(message.actionParams.dx),
+				});
 			}
 			//message = await instafier._parseIncomingNotification(message);
 		});

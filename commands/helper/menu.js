@@ -2,7 +2,8 @@
 import configuration from '../../connect.js';
 import { readJSON } from '../../helper/modules/index.js';
 
-const getRandomCommand = () => Array.from(configuration.cmds.commands.keys())[Math.floor(Math.random() * configuration.cmds.commands.size)];
+const getRandomCommand = () =>
+	Array.from(configuration.cmds.commands.keys())[Math.floor(Math.random() * configuration.cmds.commands.size)];
 
 export default {
 	name: 'menu',
@@ -36,11 +37,18 @@ export default {
 				.join('\n')}\n\n\n`;
 		}
 
-		capt = `${capt.trim()}\n\nUse : ${prefix}${getRandomCommand()} -H\n~> to see the detail of the command.\n~> total command : ${configuration.cmds.commands.size}`;
+		capt = `${capt.trim()}\n\nUse : ${prefix}${getRandomCommand()} -H\n~> to see the detail of the command.\n~> total command : ${
+			configuration.cmds.commands.size
+		}`;
 
 		await client[botNum].sendMessage(
 			from,
-			{ text: capt.trim(), footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪', buttons: [{ buttonId: '.about', buttonText: { displayText: 'About Us.' }, type: 1 }], headerType: 1 },
+			{
+				text: capt.trim(),
+				footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
+				buttons: [{ buttonId: '.about', buttonText: { displayText: 'About Us.' }, type: 1 }],
+				headerType: 1,
+			},
 			{ quoted: message },
 		);
 	},
