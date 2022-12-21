@@ -15,6 +15,7 @@ import {
 	color,
 	delay,
 	ERRLOG,
+	fetchBUFFER,
 	fetchJSON,
 	INFOLOG,
 	isFileExist,
@@ -25,7 +26,7 @@ import {
 	writeBuffer,
 } from '../../helper/modules/index.js';
 import { webp2mp4File } from './ezgifs/index.js';
-import { streamFile } from './_utils.js';
+import { cropImage, imageToBuffer, signV1, streamFile } from './_utils.js';
 
 const VIDEO_MIMETYPE = readJSON(path.join(__dirname, 'databases/mimetypes/Video.json'));
 
@@ -580,10 +581,21 @@ export const waifu2x = (input, sender) =>
 	new Promise(async (resolve, reject) => {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
-		const output = input.replace(input.slice(input.lastIndexOf('.'), input.length), '.png');
+		let output;
+
+		if (Buffer.isBuffer) {
+			output = path.join(__dirname, `temporary_files/${sender}.png`);
+			await sharp(input).toFormat('png').toFile(output);
+		} else if (isFileExist(input)) {
+			await sharp(input).toFormat('png').toFile(output);
+		} else if (isURL(input)) {
+			input = await fetchBUFFER(input);
+			await sharp(input).toFormat('png').toFile(output);
+		} else {
+			output = input.replace(input.slice(input.lastIndexOf('.'), input.length), '.png');
+		}
 
 		try {
-			await sharp(input).toFormat('png').toFile(output);
 			const file = streamFile(output);
 
 			const form = new FormData();
@@ -605,6 +617,8 @@ export const waifu2x = (input, sender) =>
 				},
 			});
 
+			await delay(2000);
+
 			const { data } = await axios.get(_api('/check', 'v2'), {
 				params: { hash },
 				headers: {
@@ -625,16 +639,27 @@ export const waifu2x = (input, sender) =>
 				});
 
 				INFOLOG(`[${color(time, 'cyan')}]`, `${color('Enhancing image success', '#01cdfe')} for ${color(sender, '#ff71ce')}`);
-				await fs.unlink(input);
+
+				if (await fs.pathExists(input)) {
+					await fs.unlink(input);
+				}
+
 				resolve(new Buffer.from(data, 'base64'));
 				return;
 			}
 
-			await fs.unlink(input);
+			if (await fs.pathExists(input)) {
+				await fs.unlink(input);
+			}
+
 			resolve({ error: 'Client Rejects the requests. please try again later.' });
 		} catch (err) {
 			ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Failed to Enhance image', 'red')} for ${color(sender, '#ff71ce')}`);
-			await fs.unlink(input);
+
+			if (await fs.pathExists(input)) {
+				await fs.unlink(input);
+			}
+
 			reject(err);
 		}
 	});
@@ -672,3 +697,137 @@ export const img2pdf = (image, sender) =>
 			reject(error);
 		}
 	});
+
+import socksProxyAgent from 'socks-proxy-agent';
+import httpsProxyAgent from 'https-proxy-agent';
+import asyncRetry from 'async-retry';
+import { v4 } from 'uuid';
+
+const DEFAULT_URL = 'https://ai.tu.qq.com/trpc.shadow_cv.ai_processor_cgi.AIProcessorCgi/Process';
+const defaultOpts = {
+	retries: 10,
+	factor: 1,
+};
+
+/**
+ * Convert an existing image to anime-like using QQ A.I
+ * @param {Buffer|string} image
+ * @param {string} sender
+ * @param {{proxy?: {url: string, chinese: boolean, image: boolean}, enhance?: boolean | undefined, forever?: boolean | undefined, unref: boolean | undefined, maxRetryTime?: number | undefined, retries?: number | undefined, factor?: number | undefined, minTimeout?: number | undefined, maxTimeout?: number | undefined, randomize?: boolean | undefined, crop: 'COMPARED' | 'SINGLE'}} options
+ * @returns {Promise<Buffer>}
+ * @throws {Error}
+ */
+export const imageToAnime = async (image, sender, options = defaultOpts) => {
+	options = Object.assign(defaultOpts, options);
+
+	const useProxy = !!options.proxy?.url;
+	const QQ_MODE = useProxy && options.proxy?.chinese ? 'CHINA' : 'WORLD';
+	let httpsAgent;
+
+	if (useProxy) {
+		httpsAgent = /^socks/.test(options.proxy?.url)
+			? new socksProxyAgent.SocksProxyAgent(options.proxy?.url)
+			: new httpsProxyAgent.HttpsProxyAgent(options.proxy?.url);
+		httpsAgent.timeout = 30_000;
+	}
+
+	const imageRequest = await imageToBuffer(image, options.proxy?.image ? httpsAgent : undefined, options);
+
+	const obj = {
+		busiId: QQ_MODE === 'WORLD' ? 'different_dimension_me_img_entry' : 'ai_painting_anime_entry',
+		images: [imageRequest.toString('base64')],
+		extra: JSON.stringify({
+			face_rects: [] /* eslint-disable-line */,
+			version: 2,
+			language: 'en',
+			platform: 'web',
+			/* eslint-disable-line */ data_report: {
+				parent_trace_id: v4() /* eslint-disable-line */,
+				root_channel: '' /* eslint-disable-line */,
+				level: 0,
+			},
+		}),
+	};
+
+	let data = {
+		img_urls: [imageRequest.toString('base64')] /* eslint-disable-line */,
+	};
+
+	try {
+		data = await asyncRetry(
+			async (bail) => {
+				const response = await axios.request({
+					method: 'POST',
+					url: DEFAULT_URL,
+					data: obj,
+					headers: {
+						'Content-Type': 'application/json',
+						Origin: 'https://h5.tu.qq.com',
+						Referer: 'https://h5.tu.qq.com/',
+						'User-Agent':
+							'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36',
+						'x-sign-value': signV1(obj),
+						'x-sign-version': 'v1',
+					},
+					timeout: 30_000,
+					...(useProxy ? { httpsAgent } : {}),
+				});
+
+				const data = response?.data;
+
+				if (!data) {
+					throw new Error('Failed to resolve data. Try again later.');
+				}
+
+				if (data.msg === 'VOLUMN_LIMIT') {
+					throw new Error('Rated limited by the API.');
+				}
+
+				if (data.msg === 'IMG_ILLEGAL') {
+					bail(new Error('Your image contains pornographic, gore, and abusive material.'));
+					return;
+				}
+
+				if (data.code === 1001) {
+					bail(new Error('The image input did not match any criteria. Face need to be visible on the image.'));
+					return;
+				}
+
+				if (data.code === -2100) {
+					bail(new Error('Failed to resolve data. Try again later.'));
+					return;
+				}
+
+				if (data.code === 2119 || data.code === -2111) {
+					bail(new Error('Seems the API does not like us. Report this error so we will fix it ASAP.'));
+					return;
+				}
+
+				if (!data.extra) {
+					throw new Error('Failed to resolve data. Try again later.');
+				}
+
+				return JSON.parse(data.extra);
+			},
+			{
+				...options,
+			},
+		);
+	} catch (error) {
+		throw new Error('Failed to resolve data. Try again later.');
+	}
+	const result = data.img_urls[1] || data.img_urls[0];
+
+	return options.enhance
+		? waifu2x(
+				await cropImage(
+					await imageToBuffer(result, options.proxy?.image ? httpsAgent : undefined, options),
+					options.crop === 'SINGLE' ? 'SINGLE' : options.crop === 'COMPARED' ? 'COMPARED' : undefined,
+				),
+				sender,
+		  ) /* eslint-disable-line */
+		: await cropImage(
+				await imageToBuffer(result, options.proxy?.image ? httpsAgent : undefined, options),
+				options.crop === 'SINGLE' ? 'SINGLE' : options.crop === 'COMPARED' ? 'COMPARED' : undefined,
+		  ); /* eslint-disable-line */
+};

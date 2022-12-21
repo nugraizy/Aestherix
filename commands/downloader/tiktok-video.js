@@ -71,14 +71,14 @@ export default {
 				continue;
 			}
 
-			const videos = await tiktokAPI(url);
+			const container = await tiktokAPI(url);
 
 			INFOLOG(
 				`[${color(time, 'cyan')}]`,
 				`${color('Downloading TikTok Media', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`,
 			);
 
-			if ('error' in videos) {
+			if ('error' in container) {
 				ERRLOG(
 					`[${color(time, 'cyan')}]`,
 					`⚠️ ${color('Error while downloading TikTok Video', '#ff0000')} for ${color(prettyNumber, '#ff71ce')}`,
@@ -88,68 +88,68 @@ export default {
 				continue;
 			}
 
-			if (videos.type == 'images') {
-				let capt = 'TikTok Images'.formatHeaders();
+			const date = dayjs(container.published * 1000).format('HH:mm:ss DD/MM/YYYY');
+			let capt = 'TikTok Video'.formatHeaders();
 
-				capt += `\n\nAuthor : ${videos.author}\n`;
-				capt += `Username : ${videos.nickname}\n`;
-				capt += `Liked : ${numberWithCommas(videos.liked)}\n`;
-				capt += `Shared : ${numberWithCommas(videos.shared)}\n`;
-				capt += `Comment : ${numberWithCommas(videos.comment)}\n`;
-				capt += `View : ${numberWithCommas(videos.view)}\n`;
-				capt += `Description : ${videos.videoDescription}\n`;
-				capt += `Tot. Image : ${videos.images.length}\n`;
+			capt += `\n\nAuthor : ${container.author}\n`;
+			capt += `Username : ${container.nickname}\n`;
+			capt += `Verifies : ${container.verified ? 'Verified' : 'Not Verified'}\n`;
+			capt += `Followers : ${numberWithCommas(container.followers)}\n`;
+			capt += `Following : ${numberWithCommas(container.following)}\n`;
+			capt += `Tot. Video : ${numberWithCommas(container.totalVideo)}\n`;
+			capt += `Liked : ${numberWithCommas(container.liked)}\n`;
+			capt += `Shared : ${numberWithCommas(container.shared)}\n`;
+			capt += `Comment : ${numberWithCommas(container.comment)}\n`;
+			capt += `Published : ${date}\n`;
+			capt += `View : ${numberWithCommas(container.view)}\n`;
 
-				for (const { url, index } of videos.images) {
-					await client[botNum].sendMessage(
-						from,
-						{ image: { url }, caption: index == 1 ? capt.trim() : '' },
-						{ quoted: message },
-					);
-				}
-			} else {
-				const date = dayjs(videos.published * 1000).format('HH:mm:ss DD/MM/YYYY');
-				let capt = 'TikTok Video'.formatHeaders();
-
-				capt += `\n\nAuthor : ${videos.author}\n`;
-				capt += `Username : ${videos.nickname}\n`;
-				capt += `Verifies : ${videos.verified ? 'Verified' : 'Not Verified'}\n`;
-				capt += `Followers : ${numberWithCommas(videos.followers)}\n`;
-				capt += `Following : ${numberWithCommas(videos.following)}\n`;
-				capt += `Tot. Video : ${numberWithCommas(videos.totalVideo)}\n`;
-				capt += `Liked : ${numberWithCommas(videos.liked)}\n`;
-				capt += `Shared : ${numberWithCommas(videos.shared)}\n`;
-				capt += `Comment : ${numberWithCommas(videos.comment)}\n`;
-				capt += `Published : ${date}\n`;
-				capt += `View : ${numberWithCommas(videos.view)}\n`;
-				capt += `Duration : ${videos.videoDuration}\n`;
-				capt += `Music : ${videos.musicTitle}\n`;
-				capt += `Description : ${videos.videoDescription}\n`;
-
-				if (NO_WM) {
-					await client[botNum].sendMessage(
-						from,
-						{ video: { url: videos.url.withNoWatermark }, caption: capt.trim() },
-						{ quoted: message },
-					);
-				}
-
-				if (WITH_WM) {
-					await client[botNum].sendMessage(
-						from,
-						{ video: { url: videos.url.withWatermark }, caption: capt.trim() },
-						{ quoted: message },
-					);
-				}
-
-				if (!NO_WM && !WITH_WM) {
-					await client[botNum].sendMessage(
-						from,
-						{ video: { url: videos.url.withNoWatermark }, caption: capt.trim() },
-						{ quoted: message },
-					);
-				}
+			if (container.type !== 'images') {
+				capt += `Duration : ${container.videoDuration}\n`;
 			}
+
+			capt += `Music : ${container.musicTitle}\n`;
+			capt += `Description : ${container.videoDescription}\n`;
+
+			if (container.type === 'images') {
+				capt += `Tot. Image : ${container.url.images.length}\n`;
+
+				const images = container.url.images;
+
+				for (const { url, index } of images) {
+					client[botNum].sendMessage(
+						from,
+						{
+							image: {
+								url,
+							},
+							caption: index === 1 ? capt.trim() : '',
+						},
+						{ quoted: message },
+					);
+					await delay(100);
+				}
+
+				await delay(100);
+				INFOLOG(
+					`[${color(time, 'cyan')}]`,
+					`${color('Downloaded TikTok Media', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`,
+				);
+
+				return;
+			}
+
+			await client[botNum].sendMessage(
+				from,
+				{
+					video: {
+						url: container.url[
+							!NO_WM && !WITH_WM ? 'withNoWatermark' : WITH_WM ? 'withWatermark' : NO_WM ? 'withNoWatermark' : 'withWatermark'
+						],
+					},
+					caption: capt.trim(),
+				},
+				{ quoted: message },
+			);
 
 			await delay(100);
 			INFOLOG(

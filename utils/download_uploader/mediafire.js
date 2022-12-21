@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { contentType } from 'mime-types';
 
 import { mime, whatFormat } from '../misc/index.js';
 import { cheerioLOAD } from '../../helper/index.js';
@@ -30,7 +29,7 @@ export const mediafire = (url) =>
 			const dlLink = $('a.input.popsok').attr('href');
 			const filetypes = /[a-zA-Z]+/g.exec($('.filetype').find('span').get(1).children[0].data);
 			const mimetype = mime(filetypes?.[0]?.toLowerCase());
-			const format = whatFormat(contentType(filetypes?.[0]?.toLowerCase()));
+			const format = whatFormat(mime(filetypes?.[0]?.toLowerCase()));
 
 			if (!dlLink) {
 				resolve({ error: 'Cannot find downloadable link. Please check if the url is valid.' });

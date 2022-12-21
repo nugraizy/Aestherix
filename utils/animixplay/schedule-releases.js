@@ -60,9 +60,9 @@ const sortDates = (arr) => {
 	const todaySchedule = arr.filter((v) => v.indexDate === datesNow);
 
 	dates[todaySchedule[0].date] = todaySchedule.sort((a, b) =>
-		dayjs(a.time, 'HH:mm').hour() > dayjs(b.time, 'HH:mm').hour()
+		dayjs(a.time, 'HH:mm').unix() > dayjs(b.time, 'HH:mm').unix()
 			? 1
-			: dayjs(a.time, 'HH:mm').hour() < dayjs(b.time, 'HH:mm').hour()
+			: dayjs(a.time, 'HH:mm').unix() < dayjs(b.time, 'HH:mm').unix()
 			? -1
 			: 0,
 	);
@@ -72,9 +72,9 @@ const sortDates = (arr) => {
 		dates[day] = arr
 			.filter((v) => v.indexDate === date)
 			.sort((a, b) =>
-				dayjs(a.time, 'HH:mm').hour() > dayjs(b.time, 'HH:mm').hour()
+				dayjs(a.time, 'HH:mm').unix() > dayjs(b.time, 'HH:mm').unix()
 					? 1
-					: dayjs(a.time, 'HH:mm').hour() < dayjs(b.time, 'HH:mm').hour()
+					: dayjs(a.time, 'HH:mm').unix() < dayjs(b.time, 'HH:mm').unix()
 					? -1
 					: 0,
 			);

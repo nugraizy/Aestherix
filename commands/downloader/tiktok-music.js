@@ -68,35 +68,19 @@ export default {
 				continue;
 			}
 
-			if (music.type == 'images') {
-				await client[botNum].sendMessage(
-					from,
-					{
-						document: await toOpus('opus', {
-							input: path.join(__dirname, `temporary_files/${filename}`),
-							output: path.join(__dirname, `temporary_files/${filename}-done`),
-							media: music.music.music.replace('https', 'http'),
-						}),
-						fileName: `${music.music.authorMusic} - ${music.music.musicTitle}.mp3`,
-						mimetype: mime('mp3'),
-					},
-					{ quoted: message },
-				);
-			} else {
-				await client[botNum].sendMessage(
-					from,
-					{
-						document: await toOpus('opus', {
-							input: path.join(__dirname, `temporary_files/${filename}`),
-							output: path.join(__dirname, `temporary_files/${filename}-done`),
-							media: music.url.music.replace('https', 'http'),
-						}),
-						fileName: `${music.authorMusic} - ${music.musicTitle}.mp3`,
-						mimetype: mime('mp3'),
-					},
-					{ quoted: message },
-				);
-			}
+			await client[botNum].sendMessage(
+				from,
+				{
+					document: await toOpus('opus', {
+						input: path.join(__dirname, `temporary_files/${filename}`),
+						output: path.join(__dirname, `temporary_files/${filename}-done`),
+						media: music.url.music.replace('https', 'http'),
+					}),
+					fileName: `${music.authorMusic} - ${music.musicTitle}.mp3`,
+					mimetype: mime('mp3'),
+				},
+				{ quoted: message },
+			);
 
 			await delay(300);
 			INFOLOG(
