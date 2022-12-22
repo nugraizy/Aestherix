@@ -1,5 +1,7 @@
 import Text2Speech from 'node-gtts';
 import axios from 'axios';
+import fetch from 'node-fetch';
+import AsyncRetry from 'async-retry';
 
 import { toOpus } from '../index.js';
 
@@ -104,22 +106,48 @@ export const gttsAI = (text, voice) =>
 				resolve(caches.get(text + voice));
 			}
 
-			const { data } = await axios.post('https://api.uberduck.ai/speak', {
-				body: JSON.stringify({ speech: text, voice }),
-				headers: {
-					authorization: `Basic ${Buffer.from(`${process.env.UBERDUCK_KEY}:${process.env.UBERDUCK_SECRET}`).toString(
-						'base64',
-					)}`,
-				},
-			});
+			const basicAuth = `Basic ${
+				process.env.UBERDUCK_BASIC.split('\n')[Math.floor(Math.random() * process.env.UBERDUCK_BASIC.split('\n').length)]
+			}`;
 
-			const { data: result } = await axios.get(`https://api.uberduck.ai/speak-status?uuid=${data.uuid}`, {
-				headers: {
-					authorization: `Basic ${Buffer.from(`${process.env.UBERDUCK_KEY}:${process.env.UBERDUCK_SECRET}`).toString(
-						'base64',
-					)}`,
-				},
-			});
+			const container = await (
+				await fetch('https://api.uberduck.ai/speak', {
+					method: 'POST',
+					body: JSON.stringify({ speech: text, voice }),
+					headers: {
+						accept: 'application/json',
+						authorization: basicAuth,
+						'content-type': 'application/json',
+					},
+				})
+			).json();
+
+			let result = {};
+
+			try {
+				result = await AsyncRetry(
+					async () => {
+						const { data } = await axios.get(`https://api.uberduck.ai/speak-status?uuid=${container.uuid}`, {
+							headers: {
+								accept: 'application/json',
+								authorization: basicAuth,
+							},
+						});
+
+						if (!data.path) {
+							throw Error();
+						}
+
+						return data;
+					},
+					{
+						retries: 10,
+						factor: 1,
+					},
+				);
+			} catch (error) {
+				resolve({ error: 'Could not process the request. Try again later.' });
+			}
 
 			if (!result.failed_at && !result.finished_at) {
 				resolve({ error: 'Could not process the request. Try again later.' });

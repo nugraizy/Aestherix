@@ -82,7 +82,6 @@ export default {
 						configuration.intervals.from.push(from);
 
 						if (!configuration.intervals.freegame) {
-							console.log('masuk');
 							await updateGames();
 						}
 

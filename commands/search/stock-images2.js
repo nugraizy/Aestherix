@@ -57,8 +57,6 @@ export default {
 		for (const querie of queries) {
 			const result = await stockImagesPexel(querie.trim());
 
-			console.log(result);
-
 			if ('error' in result || !result) {
 				await client[botNum].reply({ from, quoted: message }, JSON.stringify(result));
 				continue;
