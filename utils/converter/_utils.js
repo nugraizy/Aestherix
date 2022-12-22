@@ -111,8 +111,8 @@ export const cropImage = async (imgData, type = 'SINGLE') => {
 		if (type === 'SINGLE') {
 			cropLeft = widthH ? 507 : 27;
 			cropTop = widthH ? 23 : 544;
-			cropWidth = width - cropLeft - (widthH ? 22 : 30);
-			cropHeight = height - cropTop - (widthH ? 202 : 213);
+			cropWidth = width - cropLeft - (widthH ? 20 : 25);
+			cropHeight = height - cropTop - (widthH ? 203 : 212);
 		}
 
 		return await sharp.extract({ left: cropLeft, top: cropTop, width: cropWidth, height: cropHeight }).png().toBuffer();
@@ -139,8 +139,8 @@ export const cropImage = async (imgData, type = 'SINGLE') => {
 		if (type === 'SINGLE') {
 			cropLeft = widthH ? 507 : 27;
 			cropTop = widthH ? 23 : 544;
-			cropWidth = width - cropLeft - (widthH ? 22 : 30);
-			cropHeight = height - cropTop - (widthH ? 202 : 213);
+			cropWidth = width - cropLeft - (widthH ? 20 : 25);
+			cropHeight = height - cropTop - (widthH ? 203 : 212);
 		}
 
 		return await jimp.crop(cropLeft, cropTop, cropWidth, cropHeight).getBufferAsync(lib.jimp.MIME_PNG);
