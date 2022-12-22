@@ -109,8 +109,8 @@ export const cropImage = async (imgData, type = 'SINGLE') => {
 		}
 
 		if (type === 'SINGLE') {
-			cropLeft = widthH ? 507 : 27;
-			cropTop = widthH ? 23 : 544;
+			cropLeft = widthH ? 512 : 27;
+			cropTop = widthH ? 28 : 544;
 			cropWidth = width - cropLeft - (widthH ? 22 : 30);
 			cropHeight = height - cropTop - (widthH ? 202 : 213);
 		}
