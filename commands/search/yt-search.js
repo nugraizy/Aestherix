@@ -21,7 +21,7 @@ export default {
 
 		let result = await ytsr(query);
 
-		result = result.filter((v) => v.type == 'video');
+		result = result.filter((v) => v.type === 'video');
 		const { url, title, description, image, timestamp, views, author } = result[0];
 
 		result = result.slice(1);

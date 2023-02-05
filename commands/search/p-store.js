@@ -32,7 +32,7 @@ export default {
 
 			const filterProduct = product.filter((v) => regex(querie.trim(), v.name));
 
-			product = filterProduct.length == 0 ? product.slice(0, 5) : filterProduct.slice(0, 5);
+			product = filterProduct.length === 0 ? product.slice(0, 5) : filterProduct.slice(0, 5);
 
 			for (const {
 				estimations,

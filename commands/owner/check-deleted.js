@@ -24,14 +24,14 @@ export default {
 			? JSON.parse(fs.readFileSync(DB_PATH)).messages[from]
 			: await store.loadMessages(from);
 
-		if (args[1] == 'get') {
-			const dataMessage = messages.find((v) => v.key.id == args[2]);
+		if (args[1] === 'get') {
+			const dataMessage = messages.find((v) => v.key.id === args[2]);
 
 			(await import('../../handlers/messages_event/deleted-message.js')).default.handler(client, dataMessage, true, store);
 			return;
 		}
 
-		const dataMessages = messages.filter((v) => v.message?.protocolMessage && v.message.protocolMessage.type == 'REVOKE');
+		const dataMessages = messages.filter((v) => v.message?.protocolMessage && v.message.protocolMessage.type === 'REVOKE');
 		const row = [];
 		let i = 0;
 

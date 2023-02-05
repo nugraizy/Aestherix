@@ -25,7 +25,7 @@ export default {
 		const userBanned = readJSON('./databases/users/banned.json');
 		const banned = [];
 
-		if (args[1] == 'report' && isOwner) {
+		if (args[1] === 'report' && isOwner) {
 			userBanned.push(args[3]);
 			configuration.cache.bannedlist.push(args[3]);
 			configuration.cache.blocklist.push(args[3]);

@@ -32,10 +32,10 @@ export default {
 
 		const buttons = [{ buttonId: '', buttonText: { displayText: '' }, type: 1 }];
 
-		if (query == 1) {
+		if (query === 1) {
 			buttons[0].buttonId = `${cmd} ${parseInt(query) + 1}`;
 			buttons[0].buttonText.displayText = 'Next';
-		} else if (query == 114) {
+		} else if (query === 114) {
 			buttons[0].buttonId = `${cmd} ${parseInt(query) - 1}`;
 			buttons[0].buttonText.displayText = 'Previous';
 		} else {

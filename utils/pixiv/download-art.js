@@ -7,7 +7,7 @@ export const downloadArtworks = (input) =>
 		try {
 			const { body } = await fetchJSON(URL_API_DOWNLOAD_ARTWORKS(input));
 
-			if (body.length == 0) {
+			if (body.length === 0) {
 				resolve({ error: 'No downloadable media found with this keyword.' });
 			}
 

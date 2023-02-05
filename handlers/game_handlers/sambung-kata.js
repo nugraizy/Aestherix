@@ -36,7 +36,7 @@ Turn : @${sambung.turn.split('@')[0]}`,
 			);
 		};
 
-		if (isGroup && (settings[from].games == 'enable' || isAdmin) && !configuration.OPTIONS.onlyLogs) {
+		if (isGroup && (settings[from].games === 'enable' || isAdmin) && !configuration.OPTIONS.onlyLogs) {
 			await play();
 		}
 	},

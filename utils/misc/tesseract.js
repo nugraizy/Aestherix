@@ -6,7 +6,7 @@ import { cheerioLOAD, color, fetchTEXT, INFOLOG, unlinkFile } from '../../helper
 export const tesseract = async (image, sender, lang = 'ind') =>
 	new Promise(async (resolve, reject) => {
 		try {
-			if (lang == '') {
+			if (lang === '') {
 				lang = 'ind';
 			}
 

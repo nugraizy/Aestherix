@@ -34,13 +34,13 @@ export default {
 		const emojis = jsSplit(regex, 2);
 
 		for (const arr of emojis) {
-			if (arr.length == 1) {
+			if (arr.length === 1) {
 				continue;
 			}
 
 			const result = await emojimix(arr[0], arr[1]);
 
-			if (typeof result == 'object' && 'error' in result) {
+			if (typeof result === 'object' && 'error' in result) {
 				await client[botNum].reply({ from, quoted: message }, result.error);
 
 				continue;

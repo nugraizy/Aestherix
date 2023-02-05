@@ -26,7 +26,7 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'You are not admin. This commands is only for admins.');
 		}
 
-		if (!query && mention.length == 0 && !bodyQuoted) {
+		if (!query && mention.length === 0 && !bodyQuoted) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please reply people message or mention people.');
 		}
 

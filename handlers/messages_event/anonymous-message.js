@@ -13,7 +13,7 @@ export default {
 			return;
 		}
 
-		if ((type == 'conversation' || type == 'extendedTextMessage') && status.partner2) {
+		if ((type === 'conversation' || type === 'extendedTextMessage') && status.partner2) {
 			return await client[botNum].sendMessage(status.partner2, { text: body });
 		}
 	},

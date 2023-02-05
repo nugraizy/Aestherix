@@ -14,7 +14,7 @@ import {
 	removeDuplicatesArray,
 } from '../../helper/modules/index.js';
 import { toOpus } from '../../utils/converter/index.js';
-import { yta2 as yta } from '../../utils/youtube/index.js';
+import { youtubeMainDownload as yta } from '../../utils/youtube/index.js';
 
 const regex = (input) =>
 	/(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:-nocookie|)\.com\/(?:shorts\/)?(?:watch\?.*(?:|&)v=|embed\/|v\/)|youtu\.be\/)?\/.+/.test(
@@ -30,8 +30,46 @@ export default {
 	cooldown: 7,
 	limit: 8,
 	status: 'enable',
-	async run({ from, query, prettyNumber, filename, message }, client) {
+	async run({ from, query, prettyNumber, filename, message, type, args }, client) {
 		const time = dayjs().format('HH:mm:ss DD/MM');
+
+		if (type === 'listResponseMessage' && args[1] === 'download') {
+			const audioBuffer = await toOpus('opus', {
+				input: path.join(__dirname, `temporary_files/${filename}`),
+				output: path.join(__dirname, `temporary_files/${filename}-done`),
+				media: args[2].replace('https', 'http'),
+			});
+
+			await client[botNum].sendMessage(
+				from,
+				{
+					document: audioBuffer,
+					fileName: `${args.slice(3).join(' ')}.opus`,
+					mimetype: 'audio/opus',
+					caption: '',
+				},
+				{ quoted: message },
+			);
+			await client[botNum].sendMessage(from, {
+				audio: audioBuffer,
+				ptt: false,
+			});
+			return;
+		} else if (type === 'listResponseMessage' && args[1] === 'get') {
+			const video = await ytv(args[2], 'mp4');
+			const { title, mp4 } = video;
+			await client[botNum].sendMessage(from, {
+				title: 'YouTube MP4'.formatHeaders(),
+				footer: 'Made by Void Bot. Powered by Hidden Finder',
+				text: '\t',
+				buttonText: 'Open List',
+				sections: mp4.map((v, i) => ({
+					rows: [{ title: `${i + 1}. ${v.quality} ${v.filesizeF}`, rowId: `.ytmp4 download ${v.dlUrl} ${title}` }],
+					title: `\t`,
+				})),
+			});
+			return;
+		}
 
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please provide a URL');
@@ -41,7 +79,7 @@ export default {
 
 		queries = removeDuplicatesArray(queries);
 
-		if (queries.length == 1 && isURL(queries) && !regex(queries)) {
+		if (queries.length === 1 && isURL(queries) && !regex(queries)) {
 			return await client[botNum].reply({ from, quoted: message }, 'This is not a valid YouTube URL.');
 		}
 
@@ -50,7 +88,7 @@ export default {
 				return await client[botNum].reply({ from, quoted: message }, `[ ${Query} ] This isn't a valid YouTube URL.`);
 			}
 
-			const audio = await yta(Query);
+			const audio = await yta(Query, 'mp3');
 
 			INFOLOG(
 				`[${color(time, 'cyan')}]`,
@@ -64,19 +102,7 @@ export default {
 					`⚠️ ${color('Failed to Download YouTube Audio', 'red')} for ${color(prettyNumber, '#ff71ce')}`,
 				);
 			} else {
-				const {
-					title,
-					description,
-					timestamp,
-					uploaded,
-					views,
-					author,
-					urlChannel,
-					dlLink,
-					filesize,
-					filesizeF,
-					thumbnail: image,
-				} = audio;
+				const { title, description, timestamp, uploaded, views, author, urlChannel, mp3, thumbnail: image, url } = audio;
 
 				if (!dlLink) {
 					client[botNum].reply({ from, quoted: message }, `Error while downloading YouTube Video\n\n${Query}`);
@@ -95,19 +121,12 @@ export default {
 				capt += `Views : ${numberWithCommas(views)}\n`;
 				capt += `Author : ${author}\n`;
 				capt += `Channel : ${urlChannel}\n`;
-				capt += `File Size : ${filesize} (${filesizeF})\n`;
 				capt += `Duration : ${timestamp ?? 'No Data'}\n`;
 				capt += `Description : ${description ?? 'No Data'}\n`;
 
 				let jpegThumbnail = sharp(new Buffer.from(await fetchBUFFER(image), 'base64'));
 
 				jpegThumbnail = await jpegThumbnail.resize(300, 300).toBuffer();
-
-				const audioBuffer = await toOpus('opus', {
-					input: path.join(__dirname, `temporary_files/${filename}`),
-					output: path.join(__dirname, `temporary_files/${filename}-done`),
-					media: dlLink.replace('https', 'http'),
-				});
 
 				await client[botNum].sendMessage(from, {
 					location: {
@@ -117,22 +136,26 @@ export default {
 					},
 					caption: capt,
 					footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
-					templateButtons: [],
+					templateButtons: [
+						{
+							quickReplyButton: {
+								displayText: 'Video',
+								id: `.ytmp4 get ${url}`,
+							},
+						},
+					],
 					headerType: 1,
 				});
-				await client[botNum].sendMessage(
-					from,
-					{
-						document: audioBuffer,
-						fileName: `${title}.opus`,
-						mimetype: 'audio/opus',
-						caption: capt.trim(),
-					},
-					{ quoted: message },
-				);
+
 				await client[botNum].sendMessage(from, {
-					audio: audioBuffer,
-					ptt: false,
+					title: 'YouTube MP3'.formatHeaders(),
+					footer: 'Made by Void Bot. Powered by Hidden Finder',
+					text: '\t',
+					buttonText: 'Open List',
+					sections: mp3.map((v, i) => ({
+						rows: [{ title: `${i + 1}. 📼 ${v.quality} 💾 ${v.filesizeF}`, rowId: `.ytmp3 download ${v.dlUrl}` }],
+						title: `\t`,
+					})),
 				});
 			}
 		}

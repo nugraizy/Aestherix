@@ -46,7 +46,7 @@ const bilibiliParseMetadataCOM = (arr) =>
 						favorite,
 						view,
 						thumbnail,
-						description: description == '' ? 'No Description' : description,
+						description: description === '' ? 'No Description' : description,
 						originalVideoLink: URL_BASE_COM(bvid),
 						downloadLink,
 						size,
@@ -135,11 +135,11 @@ export const bilibiliSearchCOM = (keyword) =>
 				})
 			).data;
 
-			if (data.result == undefined) {
+			if (data.result === undefined) {
 				return resolve({ error: 'Videos Not Found', cusMessage: 'Error when searching Bilibili videos.' });
 			}
 
-			resolve(bilibiliVideoCOM(data.result.filter((v) => v.type == 'video')));
+			resolve(bilibiliVideoCOM(data.result.filter((v) => v.type === 'video')));
 		} catch (err) {
 			resolve({ error: err.message, cusMessage: 'Error when searching Bilibili videos.' });
 		}
@@ -196,11 +196,11 @@ export const bilibiliSearchTV = (keyword) =>
 				})
 			).data;
 
-			if (!data.some((v) => v.module == 'ugc')) {
+			if (!data.some((v) => v.module === 'ugc')) {
 				return resolve({ error: 'Videos Not Found', cusMessage: 'Error when searching Bilibili videos.' });
 			}
 
-			let { items } = data[data.findIndex((v) => v.module == 'ugc')];
+			let { items } = data[data.findIndex((v) => v.module === 'ugc')];
 
 			resolve(bilibiliParseMetadataTV(items));
 		} catch (err) {
@@ -235,7 +235,7 @@ export const detailSourceFormat = (aid) =>
 			});
 			const vid = data.data.playurl.video
 				.filter((v) => v.video_resource.url !== '' && v.video_resource.quality < 64)
-				.find((v) => v.video_resource.quality == 32 || v.video_resource.quality == 16 || v.video_resource.quality == 6);
+				.find((v) => v.video_resource.quality === 32 || v.video_resource.quality === 16 || v.video_resource.quality === 6);
 			const audio = data.data.playurl.audio_resource.filter((v) => v.url !== '')[0].url;
 
 			data = {

@@ -25,7 +25,7 @@ const EVENT_TYPE = {
 
 export default {
 	async handler(client, message, store) {
-		if ('action' in message && message.action == 'description') {
+		if ('action' in message && message.action === 'description') {
 			message.messageStubType = EVENT_TYPE.DESCRIPTION;
 		}
 
@@ -39,39 +39,40 @@ export default {
 				cache.subjectOwner = message.participant;
 				cache.subjectTime = parseInt(message.messageTimestamp);
 			} else if (['GROUP_CHANGE_DESCRIPTION'].includes(message.messageStubType)) {
-				cache.desc = new Buffer.from(message.content, 'utf-8');
+				cache.desc = Buffer.from(message.content).toString();
 			}
 		}
 
-		if (message?.[message.from]?.notification == 'enable') {
+		if (message?.[message.from]?.notification === 'enable') {
 			let status;
 
-			if (message.action == 'set') {
+			if (message.action === 'set') {
 				message.messageStubType = 'GROUP_CHANGE_ICON';
 				status = EVENT_UPDATE.ICON;
-			} else if (message.action == 'delete') {
+			} else if (message.action === 'delete') {
 				message.messageStubType = 'GROUP_CHANGE_ICON';
 				status = EVENT_UPDATE.DEL_ICON;
-			} else if (message.action == 'description' && message.content !== '') {
+			} else if (message.action === 'description' && message.content !== '') {
 				message.messageStubType = 'GROUP_CHANGE_DESCRIPTION';
 				status =
 					message[message.from].groupDescription !== undefined
 						? `${EVENT_UPDATE.DESCRIPTION} from ${message[message.from].groupDescription} to ${message.content}`
 						: `${EVENT_UPDATE.DESCRIPTION} to ${message.content}`;
-			} else if (message.action == 'description' && message.content == '') {
+			} else if (message.action === 'description' && message.content === '') {
 				message.messageStubType = 'GROUP_CHANGE_DESCRIPTION';
+				console.log(message[message.from]);
 				status = `${EVENT_UPDATE.DEL_DESCRIPTION} from ${message[message.from].groupDescription}`;
-			} else if (message.action == 'invite') {
+			} else if (message.action === 'invite') {
 				message.messageStubType = 'GROUP_INVITE_CHANGED';
 				status = EVENT_UPDATE.REVOKE_INVITE;
 			} else {
 				const mode = message.messageStubType.split('_').reverse()[0];
 
 				status =
-					mode == 'ANNOUNCE'
-						? `${message.messageStubParameters[0] == 'on' ? 'Enabling Announcement Mode' : 'Disabling Announcement Mode'}`
-						: mode == 'RESTRICT'
-						? `${message.messageStubParameters[0] == 'on' ? 'Enabling Mode Restrictions' : 'Disabling Mode Restrictions'}`
+					mode === 'ANNOUNCE'
+						? `${message.messageStubParameters[0] === 'on' ? 'Enabling Announcement Mode' : 'Disabling Announcement Mode'}`
+						: mode === 'RESTRICT'
+						? `${message.messageStubParameters[0] === 'on' ? 'Enabling Mode Restrictions' : 'Disabling Mode Restrictions'}`
 						: `${EVENT_UPDATE[mode]} from ${message[message.from].groupName} to ${message.messageStubParameters[0]}`;
 			}
 

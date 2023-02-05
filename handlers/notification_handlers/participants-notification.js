@@ -59,7 +59,7 @@ export default {
 			}
 		}
 
-		if (message?.[message.from]?.notification == 'enable') {
+		if (message?.[message.from]?.notification === 'enable') {
 			const text = `${'Group Participants Notification'.formatHeaders()}\n
 Event Update : ${EVENT_UPDATE[message.messageStubType]}
 

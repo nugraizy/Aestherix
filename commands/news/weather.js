@@ -19,7 +19,7 @@ export default {
 		}
 
 		const info =
-			typeQuoted == 'locationMessage' || typeQuoted == 'liveLocationMessage'
+			typeQuoted === 'locationMessage' || typeQuoted === 'liveLocationMessage'
 				? await getWeather('coordinate', extractMediaData.degreesLatitude, extractMediaData.degreesLongitude)
 				: await getWeather('city', query);
 

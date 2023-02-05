@@ -27,7 +27,7 @@ export default {
 
 		const data = readJSON('./databases/groups/settingsManager.json');
 
-		const isEnable = message?.[message?.from]?.antiDelete == 'enable';
+		const isEnable = message?.[message?.from]?.antiDelete === 'enable';
 
 		switch (message.query.toLowerCase()) {
 			case 'enable':
@@ -40,7 +40,7 @@ export default {
 				}
 
 				message[message.from].antiDelete = 'enable';
-				data[data.findIndex((v) => Object.keys(v)[0] == message.from)][message.from].antiDelete = 'enable';
+				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].antiDelete = 'enable';
 				writeJSON('./databases/groups/settingsManager.json', data);
 
 				await client[botNum].reply(
@@ -58,7 +58,7 @@ export default {
 				}
 
 				message[message.from].antiDelete = 'disable';
-				data[data.findIndex((v) => Object.keys(v)[0] == message.from)][message.from].antiDelete = 'disable';
+				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].antiDelete = 'disable';
 				writeJSON('./databases/groups/settingsManager.json', data);
 
 				await client[botNum].reply(

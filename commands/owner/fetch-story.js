@@ -40,7 +40,7 @@ export default {
 				}
 
 				if (tempContainer.get(message.key.participant)) {
-					if (tempContainer.get(message.key.participant).stories[type] == undefined) {
+					if (tempContainer.get(message.key.participant).stories[type] === undefined) {
 						tempContainer.get(message.key.participant).stories = {
 							...tempContainer.get(message.key.participant).stories,
 							[type]: [message],
@@ -62,7 +62,7 @@ export default {
 			}
 
 			const data =
-				tempContainer.get(query) || Array.from(tempContainer.values()).find((v) => v.index == Number(query) - 1) || null;
+				tempContainer.get(query) || Array.from(tempContainer.values()).find((v) => v.index === Number(query) - 1) || null;
 
 			if (!data) {
 				return await client[botNum].reply({ from, quoted: message }, 'Story not found');
@@ -83,7 +83,7 @@ export default {
 					const body =
 						message.message?.['extendedTextMessage']?.text ?? message.message?.[type]?.caption ?? 'Caption or texts N/A';
 
-					if (type == 'extendedTextMessage') {
+					if (type === 'extendedTextMessage') {
 						const buffer = await textStory(body, message.message.extendedTextMessage.backgroundArgb);
 
 						await client[botNum].sendMessage(from, { image: buffer, caption: body }, { quoted: message });

@@ -24,7 +24,7 @@ const events = async (client, containers, presence) => {
 		}
 
 		for (const container of containers) {
-			if (configuration.presences[presence] == undefined) {
+			if (configuration.presences[presence] === undefined) {
 				break;
 			}
 
@@ -59,7 +59,7 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'You are not allowed to use this command');
 		}
 
-		if (args.length == 1) {
+		if (args.length === 1) {
 			return await client[botNum].reply({ from, quoted: message }, 'You must provide a status to simulate');
 		}
 

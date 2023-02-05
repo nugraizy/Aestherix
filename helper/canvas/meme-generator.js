@@ -70,7 +70,7 @@ const insertExif = async (paths, sender) =>
 export const memeGenerator = (sender, input, topTexts = '', bottomTexts = '', type = 'image', WATERMARK) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			if (topTexts == '' && bottomTexts == '') {
+			if (topTexts === '' && bottomTexts === '') {
 				return resolve({ error: 'No Texts Provided' });
 			}
 
@@ -132,7 +132,7 @@ export const memeGenerator = (sender, input, topTexts = '', bottomTexts = '', ty
 				strokeText: true,
 			});
 
-			if (type == 'sticker') {
+			if (type === 'sticker') {
 				saveImages(new Buffer.from(canvas.toDataURL('image/png').replace(/^data:image\/png;base64,/, ''), 'base64'), sender)
 					.then((saved) => {
 						insertExif(saved, sender)

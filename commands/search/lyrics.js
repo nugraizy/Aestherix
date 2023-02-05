@@ -16,9 +16,9 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'You must provide a query.');
 		}
 
-		if ((args[1] == 'next' || args[1] == 'prev') && type == 'templateButtonReplyMessage') {
+		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
-			const index = data.findIndex((v) => v.index == args[2]);
+			const index = data.findIndex((v) => v.index === args[2]);
 
 			return await client[botNum].sendMessage(
 				from,

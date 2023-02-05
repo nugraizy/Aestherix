@@ -20,7 +20,7 @@ export default {
 			isBotAdmin &&
 			isMediaImage &&
 			isGroup &&
-			settings?.[from]?.['antiNSFW'] == 'enable' &&
+			settings?.[from]?.['antiNSFW'] === 'enable' &&
 			!configuration.OPTIONS.onlyLogs
 		) {
 			const filePath = path.join(__dirname, `temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`);
@@ -29,7 +29,7 @@ export default {
 			await writeFile(filePath, media);
 			const check = await arq.isNsfw(createReadStream(filePath));
 			const data = readJSON('./databases/groups/settingsManager.json');
-			const index = data.findIndex((v) => Object.keys(v)[0] == from);
+			const index = data.findIndex((v) => Object.keys(v)[0] === from);
 			const isBanned = data[index][from].banned.includes(sender);
 
 			if (isAdmin) {

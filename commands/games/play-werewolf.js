@@ -19,7 +19,7 @@ export default {
 	limit: 2,
 	status: 'enable',
 	async run({ from, message, args, sender, pushname, isGroup }, client) {
-		if (args[1] == 'kill') {
+		if (args[1] === 'kill') {
 			const werewolf = new Werewolf(sender, args[3], client);
 			const kill = werewolf.killPlayerAsWerewolf(sender, args[2], args[3]);
 
@@ -30,7 +30,7 @@ export default {
 			for (const data of kill.data) {
 				await client[botNum].sendMessage(data.id, { text: data.message });
 			}
-		} else if (args[1] == 'seer') {
+		} else if (args[1] === 'seer') {
 			const werewolf = new Werewolf(sender, args[3], client);
 			const seer = werewolf.seerSomeone(sender, args[2], args[3]);
 
@@ -41,7 +41,7 @@ export default {
 			for (const data of seer.data) {
 				await client[botNum].sendMessage(data.id, { text: data.message });
 			}
-		} else if (args[1] == 'guard') {
+		} else if (args[1] === 'guard') {
 			const werewolf = new Werewolf(sender, args[3], client);
 			const guard = werewolf.guardSomeone(sender, args[2], args[3]);
 
@@ -52,7 +52,7 @@ export default {
 			for (const data of guard.data) {
 				await client[botNum].sendMessage(data.id, { text: data.message });
 			}
-		} else if (args[1] == 'vote') {
+		} else if (args[1] === 'vote') {
 			const werewolf = new Werewolf(sender, args[3], client);
 			const vote = werewolf.voteSomeone(sender, args[2], args[3]);
 
@@ -71,12 +71,12 @@ export default {
 				mentions: [args[2], sender],
 				...client,
 			});
-		} else if (args[1] == 'delete') {
+		} else if (args[1] === 'delete') {
 			const werewolf = new Werewolf(sender, from, client);
 			const deletes = werewolf.deleteGame(sender);
 
 			return await client[botNum].reply({ from, quoted: message }, deletes.message);
-		} else if (args[1] == 'join') {
+		} else if (args[1] === 'join') {
 			sender = args[2] || sender;
 			pushname = args[3] || pushname;
 
@@ -93,7 +93,7 @@ export default {
 						},
 						{ quoted: message },
 				  ); /* eslint-disable-line */
-		} else if (args[1] == 'newGame') {
+		} else if (args[1] === 'newGame') {
 			const werewolf = new Werewolf(sender, from, client);
 
 			if (werewolf.getDataGame(from)) {
@@ -119,12 +119,12 @@ export default {
 				title: `${caption}\nPilih salah satu.`,
 				sections: row,
 			});
-		} else if (args[1] == 'exit') {
+		} else if (args[1] === 'exit') {
 			const werewolf = new Werewolf(sender, from, client);
 			const exit = werewolf.exitGame(sender, from);
 
 			return await client[botNum].reply({ from, quoted: message }, exit.message);
-		} else if (args[1] == 'start') {
+		} else if (args[1] === 'start') {
 			const werewolf = new Werewolf(sender, from, client);
 			const start = werewolf.startGame(sender, from);
 
@@ -145,9 +145,9 @@ export default {
 			await client[botNum].sendMessage(from, { text: start.data.gameDialogue.replace('{0}', start.data.gameTime) });
 
 			for (const player of start.data.playersData) {
-				if (player.role == 'villager') {
+				if (player.role === 'villager') {
 					client[botNum].sendMessage(player.id, { text: player.dialogue });
-				} else if (player.role == 'werewolf') {
+				} else if (player.role === 'werewolf') {
 					client[botNum].sendMessage(player.id, {
 						buttonText: 'Open list',
 						footer: 'Made by Void Bot. Powered by Hidden Finder',
@@ -168,7 +168,7 @@ export default {
 								};
 							}),
 					});
-				} else if (player.role == 'seer') {
+				} else if (player.role === 'seer') {
 					client[botNum].sendMessage(player.id, {
 						buttonText: 'Open list',
 						footer: 'Made by Void Bot. Powered by Hidden Finder',
@@ -189,7 +189,7 @@ export default {
 								};
 							}),
 					});
-				} else if (player.role == 'guard') {
+				} else if (player.role === 'guard') {
 					client[botNum].sendMessage(player.id, {
 						buttonText: 'Open list',
 						footer: 'Made by Void Bot. Powered by Hidden Finder',

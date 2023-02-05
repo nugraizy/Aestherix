@@ -30,22 +30,22 @@ export const getServer = (uid) => {
 	};
 	const firstIndex = uid[0];
 
-	if (firstIndex == '1' || firstIndex == '2') {
+	if (firstIndex === '1' || firstIndex === '2') {
 		server.completeServer = 'cn_gf01';
 		server.simplifiedServer = 'cn';
-	} else if (firstIndex == '5') {
+	} else if (firstIndex === '5') {
 		server.completeServer = 'cn_qd01';
 		server.simplifiedServer = 'cn';
-	} else if (firstIndex == '6') {
+	} else if (firstIndex === '6') {
 		server.completeServer = 'os_usa';
 		server.simplifiedServer = 'os';
-	} else if (firstIndex == '7') {
+	} else if (firstIndex === '7') {
 		server.completeServer = 'os_euro';
 		server.simplifiedServer = 'os';
-	} else if (firstIndex == '8') {
+	} else if (firstIndex === '8') {
 		server.completeServer = 'os_asia';
 		server.simplifiedServer = 'os';
-	} else if (firstIndex == '9') {
+	} else if (firstIndex === '9') {
 		server.completeServer = 'os_cht';
 		server.simplifiedServer = 'os';
 	} else {
@@ -97,11 +97,11 @@ const getCNDSKey = ({ query, body }) => {
 };
 
 const getDS = (server, { query, body }) => {
-	return server == 'os' ? getOSDSKey() : getCNDSKey({ query, body });
+	return server === 'os' ? getOSDSKey() : getCNDSKey({ query, body });
 };
 
 const requestHeaders = (server, { query, body }) => {
-	return server == 'os'
+	return server === 'os'
 		? {
 				DS: getDS(server, { query, body }),
 				Origin: 'https://webstatic-sea.hoyolab.com',
@@ -137,7 +137,7 @@ export const request = async (method, path, data, server) => {
 	let query;
 	let body;
 
-	if (method.toLowerCase() == 'get') {
+	if (method.toLowerCase() === 'get') {
 		query = data;
 	} else {
 		body = data;
@@ -149,7 +149,7 @@ export const request = async (method, path, data, server) => {
 		headers: requestHeaders(server, { query, body }),
 		data: body,
 		params: query,
-		...(server == 'os' ? { withCredentials: true } : {}),
+		...(server === 'os' ? { withCredentials: true } : {}),
 	});
 
 	return dataRaw;

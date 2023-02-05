@@ -7,7 +7,7 @@ export const searchManga = (keyword) =>
 		try {
 			const { body } = await fetchJSON(URL_API_SEARCH_MANGA(keyword));
 
-			if (body.manga.data.length == 0) {
+			if (body.manga.data.length === 0) {
 				resolve({ error: 'No manga found with this keyword.' });
 			}
 

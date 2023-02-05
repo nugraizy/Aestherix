@@ -33,7 +33,7 @@ export default {
 		}
 
 		const data = readJSON('./databases/groups/settingsManager.json');
-		const isEnable = message?.[message?.from]?.notification == 'enable';
+		const isEnable = message?.[message?.from]?.notification === 'enable';
 
 		switch (message.query.toLowerCase()) {
 			case 'enable':
@@ -46,7 +46,7 @@ export default {
 				}
 
 				message[message.from].notification = 'enable';
-				data[data.findIndex((v) => Object.keys(v)[0] == message.from)][message.from].notification = 'enable';
+				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].notification = 'enable';
 				writeJSON('./databases/groups/settingsManager.json', data);
 
 				await client[botNum].reply(
@@ -64,7 +64,7 @@ export default {
 				}
 
 				message[message.from].notification = 'disable';
-				data[data.findIndex((v) => Object.keys(v)[0] == message.from)][message.from].notification = 'disable';
+				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].notification = 'disable';
 				writeJSON('./databases/groups/settingsManager.json', data);
 
 				await client[botNum].reply(

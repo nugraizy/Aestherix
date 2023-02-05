@@ -50,7 +50,7 @@ export default {
 				{ from, quoted: message },
 				`Please send/reply a regular media to be meme'd. Can't convert ${typeQuoted}, only : ${typeSticker
 					.slice(
-						typeSticker.findIndex((v) => v == 'videoMessage'),
+						typeSticker.findIndex((v) => v === 'videoMessage'),
 						1,
 					)
 					.join(', ')

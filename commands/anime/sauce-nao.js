@@ -42,7 +42,7 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, result.error);
 		}
 
-		if (result.title == '') {
+		if (result.title === '') {
 			return await client[botNum].reply({ from, quoted: message }, 'Can not discover what anime is this. Try moe instead.');
 		}
 

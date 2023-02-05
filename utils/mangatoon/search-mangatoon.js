@@ -14,15 +14,13 @@ export const searchMangatoon = (query) =>
 
 			resolve(
 				$('.recommend-comics > .recommend-item')
-					.map((i, el) => {
-						return {
-							title: $(el).find('.recommend-comics-title > span').text(),
-							source: BASE_URL($(el).find('a').attr('href')),
-							imagePoster: `${$(el).find('.comics-image > img').attr('src').split('.jpg')[0]}.jpg`,
-							genreStr: $(el).find('.comics-type > span').text().trim().split('/').join(', '),
-							genreArr: $(el).find('.comics-type > span').text().trim().split('/'),
-						};
-					})
+					.map((i, el) => ({
+						title: $(el).find('.recommend-comics-title > span').text(),
+						source: BASE_URL($(el).find('a').attr('href')),
+						imagePoster: `${$(el).find('.comics-image > img').attr('src').split('.jpg')[0]}.jpg`,
+						genreStr: $(el).find('.comics-type > span').text().trim().split('/').join(', '),
+						genreArr: $(el).find('.comics-type > span').text().trim().split('/'),
+					}))
 					.get(),
 			);
 		} catch (err) {

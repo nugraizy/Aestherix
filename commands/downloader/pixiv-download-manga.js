@@ -63,7 +63,7 @@ ID Artwork : ${id}
 ID Author : ${userId}
 Total Media : ${pageCount}`;
 
-			if (urls.original.length == 1) {
+			if (urls.original.length === 1) {
 				const images = await fetchBUFFER(urls.original[0], { headers: { referer: `https://www.pixiv.net/ajax/manga/${id}` } });
 
 				return await client[botNum].sendMessage(
@@ -79,7 +79,7 @@ Total Media : ${pageCount}`;
 			}
 
 			for (const url of urls.original) {
-				caption = i == 0 ? caption : '\t';
+				caption = i === 0 ? caption : '\t';
 
 				const buffer = await fetchBUFFER(url, { headers: { referer: `https://www.pixiv.net/ajax/manga/${id}` } });
 

@@ -12,9 +12,9 @@ export default {
 	limit: 3,
 	status: 'enable',
 	async run({ query, from, message, args, cmd }, client) {
-		if (args[1] == 'next' || args[1] == 'prev') {
+		if (args[1] === 'next' || args[1] === 'prev') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
-			const index = data.findIndex((v) => v.image == args[2] || v.link == args[2]);
+			const index = data.findIndex((v) => v.image === args[2] || v.link === args[2]);
 
 			let caption = 'CNN International'.formatHeaders();
 
@@ -25,14 +25,30 @@ export default {
 			return await client[botNum].sendMessage(
 				from,
 				{
-					...(data[index].image !== undefined ? { image: new Buffer.from(await fetchBUFFER(data[index].image), 'base64'), caption } : { text: caption }),
+					...(data[index].image !== undefined
+						? { image: new Buffer.from(await fetchBUFFER(data[index].image), 'base64'), caption }
+						: { text: caption }),
 					templateButtons: [
-						data[index].image !== undefined ? { urlButton: { displayText: 'Image Source', url: args[1] == 'next' ? data[index].image : data[index].image } } : {},
-						{ urlButton: { displayText: 'Article Source', url: args[1] == 'next' ? data[index].link : data[index].link } },
-						index + 1 !== data.length
-							? { quickReplyButton: { displayText: 'Next Article', id: `${cmd} next ${data[index + 1].image ?? data[index + 1].link} ${JSON.stringify(data)}` } }
+						data[index].image !== undefined
+							? { urlButton: { displayText: 'Image Source', url: args[1] === 'next' ? data[index].image : data[index].image } }
 							: {},
-						index !== 0 ? { quickReplyButton: { displayText: 'Previous Article', id: `${cmd} prev ${data[index - 1].image ?? data[index + 1].link} ${JSON.stringify(data)}` } } : {},
+						{ urlButton: { displayText: 'Article Source', url: args[1] === 'next' ? data[index].link : data[index].link } },
+						index + 1 !== data.length
+							? {
+									quickReplyButton: {
+										displayText: 'Next Article',
+										id: `${cmd} next ${data[index + 1].image ?? data[index + 1].link} ${JSON.stringify(data)}`,
+									},
+							  }
+							: {},
+						index !== 0
+							? {
+									quickReplyButton: {
+										displayText: 'Previous Article',
+										id: `${cmd} prev ${data[index - 1].image ?? data[index + 1].link} ${JSON.stringify(data)}`,
+									},
+							  }
+							: {},
 					],
 					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 				},
@@ -59,11 +75,20 @@ export default {
 		await client[botNum].sendMessage(
 			from,
 			{
-				...(data[0].image !== undefined ? { image: new Buffer.from(await fetchBUFFER(data[0].image), 'base64'), caption } : { text: caption }),
+				...(data[0].image !== undefined
+					? { image: new Buffer.from(await fetchBUFFER(data[0].image), 'base64'), caption }
+					: { text: caption }),
 				templateButtons: [
 					data[0].image !== undefined ? { urlButton: { displayText: 'Image Source', url: data[0].image } } : {},
 					{ urlButton: { displayText: 'Article Source', url: data[0].link } },
-					data.length !== 1 ? { quickReplyButton: { displayText: 'Next Article', id: `${cmd} next ${data[1].image ?? data[1].link} ${JSON.stringify(data)}` } } : {},
+					data.length !== 1
+						? {
+								quickReplyButton: {
+									displayText: 'Next Article',
+									id: `${cmd} next ${data[1].image ?? data[1].link} ${JSON.stringify(data)}`,
+								},
+						  }
+						: {},
 				],
 				footer: `Void Bot     1/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 			},

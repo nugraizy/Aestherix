@@ -40,7 +40,7 @@ export class Wordle {
 			input = input.toLowerCase().split('');
 
 			if (input.length !== data.word.length) {
-				const board = data.board.map((v) => (v == ' ' ? ' ' : BLOCKS.BLACK));
+				const board = data.board.map((v) => (v === ' ' ? ' ' : BLOCKS.BLACK));
 
 				data.guessed.push({ input: input.join(''), board: board.join('') });
 				data.board = board;
@@ -94,22 +94,22 @@ export class Wordle {
 	}
 
 	checkWin() {
-		return this.board.every((v) => v == BLOCKS.GREEN || v == ' ');
+		return this.board.every((v) => v === BLOCKS.GREEN || v === ' ');
 	}
 
 	checkClosesAlphabet(inp, alp) {
 		switch (true) {
-			case inp == alp:
+			case inp === alp:
 				return {
 					green: true,
 				};
 			case ALPHABET_ON_KEYBOARD.some((v) => v.includes(inp) && v.includes(alp)): {
 				const indexAlp = ALPHABET_ON_KEYBOARD[ALPHABET_ON_KEYBOARD.findIndex((v) => v.includes(alp))]
 					.split('')
-					.findIndex((v) => v == alp);
+					.findIndex((v) => v === alp);
 				const indexInp = ALPHABET_ON_KEYBOARD[ALPHABET_ON_KEYBOARD.findIndex((v) => v.includes(inp))]
 					.split('')
-					.findIndex((v) => v == inp);
+					.findIndex((v) => v === inp);
 				const index = Math.abs(indexAlp - indexInp);
 
 				if (index >= 3) {

@@ -18,11 +18,11 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'You must provide a query.');
 		}
 
-		if (args[1] == 'next' || args[1] == 'prev') {
+		if (args[1] === 'next' || args[1] === 'prev') {
 			let buffer;
 
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(5).join(' '))));
-			const index = data.findIndex((v) => v == args[4]);
+			const index = data.findIndex((v) => v === args[4]);
 			const isGif = data[index].endsWith('gif');
 
 			if (isGif) {
@@ -35,7 +35,7 @@ export default {
 					...(isGif ? { video: buffer, gifPlayback: true } : { image: { url: data[index] } }),
 					caption: 'Waifu Pics'.formatHeaders(),
 					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: args[1] == 'next' ? data[index] : data[index] } },
+						{ urlButton: { displayText: 'Image Source', url: args[1] === 'next' ? data[index] : data[index] } },
 						index + 1 !== data.length
 							? {
 									quickReplyButton: {

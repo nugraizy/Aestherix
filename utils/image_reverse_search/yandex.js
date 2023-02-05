@@ -62,7 +62,7 @@ export const yandex = async (file, { limit = 20 } = {}) =>
 					container.information.push({ images: '', title, description });
 				});
 			$images('div > a.serp-item__link > img.serp-item__thumb.justifier__thumb').each((i, el) => {
-				if (container.information[i] == undefined) {
+				if (container.information[i] === undefined) {
 					return;
 				}
 

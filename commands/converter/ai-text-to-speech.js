@@ -21,7 +21,7 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'Please provide some text to convert to speech');
 		}
 
-		if (type == 'listResponseMessage') {
+		if (type === 'listResponseMessage') {
 			const result = await gttsAI(args.slice(2).join(' '), args[1]);
 
 			if ('error' in result) {

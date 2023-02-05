@@ -45,7 +45,7 @@ export default {
 				downloadLink,
 				size,
 			} of videos) {
-				if (i == 3) {
+				if (i === 3) {
 					break;
 				}
 

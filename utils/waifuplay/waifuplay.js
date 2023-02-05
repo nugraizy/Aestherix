@@ -54,7 +54,7 @@ export const wpSearch = (text) =>
 			const { data } = await axios.get(_apiBase(`/${text}`));
 			const $ = cheerioLOAD(data);
 
-			if ($('div.pagenon > h2').text() == 'No Post Found') {
+			if ($('div.pagenon > h2').text() === 'No Post Found') {
 				return resolve({
 					error:
 						'Anime not found. Try another keyword. If you sure if this keyword belongs to a few Anime title and you see this error keep happening, please report to owner ASAP.',

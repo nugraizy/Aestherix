@@ -26,7 +26,7 @@ export default {
 
 		let media = query && isURL(query) ? query : null;
 
-		if (typeMessage == 'listResponseMessage' && args[1] == 'get') {
+		if (typeMessage === 'listResponseMessage' && args[1] === 'get') {
 			await client[botNum].reply({ from, quoted: message }, 'Searching. Please wait...');
 
 			args = JSON.parse(JSON.parse(JSON.stringify(args.slice(2).join(' '))));
@@ -190,7 +190,7 @@ ${externalLinks
 		const row = [];
 
 		for (const data of result) {
-			if (i == 0) {
+			if (i === 0) {
 				i++;
 				continue;
 			}

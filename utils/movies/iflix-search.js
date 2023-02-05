@@ -14,7 +14,7 @@ const parser = (arr) => {
 		return {
 			title: v.title,
 			actressStr: v.leading_actorX.join(', '),
-			director: v.director == '' ? 'n/a' : v.director,
+			director: v.director === '' ? 'n/a' : v.director,
 			status: v.holly_online_time ?? 'n/a',
 			totEpisode: v.episode_all ?? 1,
 			thumbnail: v.new_pic_hz_country_calc,
@@ -31,7 +31,7 @@ export const iflixSearch = (keyword) =>
 				result: { result },
 			} = await fetchJSON(BASE_API_URL(keyword));
 
-			if (result.length == 0) {
+			if (result.length === 0) {
 				return resolve({ error: 'No result found' });
 			}
 

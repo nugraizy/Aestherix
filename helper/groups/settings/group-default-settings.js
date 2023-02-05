@@ -2,7 +2,7 @@ import { readJSON, writeJSON } from '../../index.js';
 
 export const checkJSON = (dari) => {
 	const data = readJSON('./databases/groups/settingsManager.json');
-	const index = data.findIndex((v) => Object.keys(v)[0] == dari);
+	const index = data.findIndex((v) => Object.keys(v)[0] === dari);
 
 	if (index != -1) {
 		return data[index];
@@ -13,9 +13,9 @@ export const checkJSON = (dari) => {
 
 export const pushDefaultSettings = (dari, groupName, groupDescription) => {
 	const data = readJSON('./databases/groups/settingsManager.json');
-	const index = data.findIndex((v) => Object.keys(v)[0] == dari);
+	const index = data.findIndex((v) => Object.keys(v)[0] === dari);
 
-	if (index == -1) {
+	if (index === -1) {
 		data.push({
 			[dari]: {
 				groupName,
@@ -49,9 +49,9 @@ export const pushDefaultSettings = (dari, groupName, groupDescription) => {
 
 export const updateSettings = (setting, value, dari) => {
 	const data = readJSON('./databases/groups/settingsManager.json');
-	const index = data.findIndex((v) => Object.keys(v)[0] == dari);
+	const index = data.findIndex((v) => Object.keys(v)[0] === dari);
 
-	if (index == -1) {
+	if (index === -1) {
 		return false;
 	}
 

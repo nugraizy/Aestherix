@@ -36,7 +36,7 @@ export default {
 			);
 		}
 
-		if (type == 'buttonsResponseMessage') {
+		if (type === 'buttonsResponseMessage') {
 			return await client[botNum].updateGroup(
 				from,
 				mention.length > 0 ? mention : query.split(',').parse(),
@@ -45,7 +45,7 @@ export default {
 				/--?(force|F)/.test(query),
 				message,
 			);
-		} else if (!query && mention.length == 0 && !bodyQuoted) {
+		} else if (!query && mention.length === 0 && !bodyQuoted) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please reply people message or mention people.');
 		}
 

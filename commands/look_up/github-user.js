@@ -18,9 +18,9 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'Please specify a url');
 		}
 
-		if ((args[1] == 'next' || args[1] == 'prev') && type == 'templateButtonReplyMessage') {
+		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
-			const index = data.findIndex((v) => v.html_url == args[2]);
+			const index = data.findIndex((v) => v.html_url === args[2]);
 			const {
 				login,
 				avatar_url: avatarUrl,
@@ -41,10 +41,10 @@ export default {
 					{
 						urlButton: {
 							displayText: 'Image Source',
-							url: args[1] == 'next' ? data[index].avatar_url : data[index].avatar_url,
+							url: args[1] === 'next' ? data[index].avatar_url : data[index].avatar_url,
 						},
 					},
-					{ urlButton: { displayText: 'User Source', url: args[1] == 'next' ? data[index].html_url : data[index].html_url } },
+					{ urlButton: { displayText: 'User Source', url: args[1] === 'next' ? data[index].html_url : data[index].html_url } },
 					index + 1 !== data.length
 						? {
 								quickReplyButton: {
@@ -91,7 +91,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 			const git = new Github();
 			let users = await git.searchUser(user);
 
-			if (users.total_count == 0) {
+			if (users.total_count === 0) {
 				await client[botNum].reply({ from, quoted: message }, 'User not found.');
 				continue;
 			}

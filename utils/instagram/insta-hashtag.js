@@ -28,19 +28,19 @@ const parse = (arr) => {
 						},
 						media: medias,
 					}) => {
-						mediaType = mediaType == 8 ? 'slide' : mediaType == 2 ? 'video' : 'image';
+						mediaType = mediaType === 8 ? 'slide' : mediaType === 2 ? 'video' : 'image';
 
 						let media;
 
-						if (mediaType == 'slide') {
+						if (mediaType === 'slide') {
 							media = medias.carousel_media.map((posts) => {
-								if (posts.media_type == 1) {
+								if (posts.media_type === 1) {
 									return { isVideo: false, url: posts.image_versions2.candidates[0].url };
 								}
 
 								return { isVideo: true, url: posts.video_versions[0].url, duration: posts.video_duration };
 							});
-						} else if (mediaType == 'video') {
+						} else if (mediaType === 'video') {
 							media = [{ isVideo: true, url: medias.video_versions[0].url, duration: medias.video_duration }];
 						} else {
 							media = [{ isVideo: false, url: medias.image_versions2.candidates[0].url }];
@@ -86,7 +86,7 @@ export const searchHashtag = (query) =>
 
 			resolve(parse(data));
 		} catch (e) {
-			if (e.response?.data && Object.keys(e?.response?.data)?.length == 0) {
+			if (e.response?.data && Object.keys(e?.response?.data)?.length === 0) {
 				return resolve({ error: 'Hashtag not found' });
 			}
 

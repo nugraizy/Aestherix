@@ -1,7 +1,7 @@
 /* global botNum */
 import { Github } from '../../utils/github/index.js';
 
-const BASE_URL = (input) => `https://github.com/${input}`;
+const _baseUrl = (input) => `https://github.com/${input}`;
 
 export default {
 	name: 'githubcode',
@@ -17,9 +17,9 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'You must provide a query.');
 		}
 
-		if ((args[1] == 'next' || args[1] == 'prev') && type == 'templateButtonReplyMessage') {
+		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
-			const index = data.findIndex((v) => v.source == args[2]);
+			const index = data.findIndex((v) => v.source === args[2]);
 
 			return await client[botNum].sendMessage(
 				from,
@@ -35,16 +35,16 @@ ${data[index].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).
 						{
 							urlButton: {
 								displayText: 'User Avatar Source',
-								url: args[1] == 'next' ? data[index].owner.ownerPicture : data[index].owner.ownerPicture,
+								url: args[1] === 'next' ? data[index].owner.ownerPicture : data[index].owner.ownerPicture,
 							},
 						},
 						{
 							urlButton: {
 								displayText: 'Repository Source',
-								url: args[1] == 'next' ? data[index].repository.url : data[index].repository.url,
+								url: args[1] === 'next' ? data[index].repository.url : data[index].repository.url,
 							},
 						},
-						{ urlButton: { displayText: 'Code Source', url: args[1] == 'next' ? data[index].source : data[index].source } },
+						{ urlButton: { displayText: 'Code Source', url: args[1] === 'next' ? data[index].source : data[index].source } },
 						index + 1 !== data.length
 							? {
 									quickReplyButton: {
@@ -71,13 +71,13 @@ ${data[index].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).
 		const git = new Github();
 		let result = await git.searchCode(query.trim());
 
-		if (result.total_count == 0) {
+		if (result.total_count === 0) {
 			return await client[botNum].reply({ from, quoted: message }, 'Code not found.');
 		}
 
 		result = result.items.map((v) => ({
 			source: v.html_url,
-			repository: { name: v.repository.name, url: BASE_URL(v.repository.full_name) },
+			repository: { name: v.repository.name, url: _baseUrl(v.repository.full_name) },
 			owner: { ownerUsername: v.repository.owner.login, ownerPicture: v.repository.owner.avatar_url },
 			fileName: v.name,
 			filePath: v.path,

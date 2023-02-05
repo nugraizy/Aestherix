@@ -35,17 +35,17 @@ export const getStory3 = (input) =>
 
 			for (const item of data.items) {
 				if (regex(tempURL) && item.id.split('_')[0] === idStory) {
-					if (item.media_type == 1) {
+					if (item.media_type === 1) {
 						result.stories.push({ isVideo: false, id: item.id.split('_')[0], url: item.image_versions2.candidates[0].url });
-					} else if (item.media_type == 2) {
+					} else if (item.media_type === 2) {
 						result.stories.push({ isVideo: true, url: item.video_versions[0].url, duration: item.video_duration });
 					}
 
 					break;
 				} else if (!regex(tempURL)) {
-					if (item.media_type == 1) {
+					if (item.media_type === 1) {
 						result.stories.push({ isVideo: false, id: item.id.split('_')[0], url: item.image_versions2.candidates[0].url });
-					} else if (item.media_type == 2) {
+					} else if (item.media_type === 2) {
 						result.stories.push({ isVideo: true, url: item.video_versions[0].url, duration: item.video_duration });
 					}
 				}

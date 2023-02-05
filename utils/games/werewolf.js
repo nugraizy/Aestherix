@@ -270,7 +270,7 @@ export class Werewolf {
 			const data = this.getDataGame(roomId);
 			const player = data.playersData.findIndex((v) => v.id === playerId);
 
-			if (player == -1) {
+			if (player === -1) {
 				return { error: true, message: WEREWOLF_SCRIPTING.error.notJoined };
 			}
 
@@ -338,7 +338,7 @@ export class Werewolf {
 	};
 
 	randomSeer = (playerSeerRole, playerSeerName) => {
-		if (playerSeerRole == 'werewolf') {
+		if (playerSeerRole === 'werewolf') {
 			const dialogue = WEREWOLF_SCRIPTING.characterInAction.seer.guessing;
 
 			return dialogue[Math.floor(Math.random() * dialogue.length)]
@@ -369,13 +369,13 @@ export class Werewolf {
 
 		const player = data.playersData.findIndex((v) => v.id === playerId);
 
-		if (player == -1) {
+		if (player === -1) {
 			return;
 		}
 
-		const playerGuard = data.playersData.findIndex((v) => v.id === playerIdGuard || v.index == playerIdGuard - 1);
+		const playerGuard = data.playersData.findIndex((v) => v.id === playerIdGuard || v.index === playerIdGuard - 1);
 
-		if (playerGuard == -1) {
+		if (playerGuard === -1) {
 			return;
 		}
 
@@ -388,7 +388,7 @@ export class Werewolf {
 			};
 		}
 
-		if (data.gameTimeCycle == 'day') {
+		if (data.gameTimeCycle === 'day') {
 			return {
 				error: true,
 				message: WEREWOLF_SCRIPTING.error.wrongTime.replace('{0}', 'Malam Hari').replace('{1}', 'Pagi Hari'),
@@ -403,7 +403,7 @@ export class Werewolf {
 			return { error: true, message: WEREWOLF_SCRIPTING.error.alreadyAction };
 		}
 
-		if (data.playersData[playerGuard].id == playerId) {
+		if (data.playersData[playerGuard].id === playerId) {
 			return { error: true, message: WEREWOLF_SCRIPTING.error.cantActionSelf.replace('{0}', 'Menjaga') };
 		}
 
@@ -433,13 +433,13 @@ export class Werewolf {
 
 		const player = data.playersData.findIndex((v) => v.id === playerId);
 
-		if (player == -1) {
+		if (player === -1) {
 			return;
 		}
 
-		const playerSeer = data.playersData.findIndex((v) => v.id === playerIdSeer || v.index == playerIdSeer - 1);
+		const playerSeer = data.playersData.findIndex((v) => v.id === playerIdSeer || v.index === playerIdSeer - 1);
 
-		if (playerSeer == -1) {
+		if (playerSeer === -1) {
 			return;
 		}
 
@@ -452,7 +452,7 @@ export class Werewolf {
 			};
 		}
 
-		if (data.gameTimeCycle == 'day') {
+		if (data.gameTimeCycle === 'day') {
 			return {
 				error: true,
 				message: WEREWOLF_SCRIPTING.error.wrongTime.replace('{0}', 'Malam Hari').replace('{1}', 'Pagi Hari'),
@@ -467,7 +467,7 @@ export class Werewolf {
 			return { error: true, message: WEREWOLF_SCRIPTING.error.alreadyAction };
 		}
 
-		if (data.playersData[playerSeer].id == playerId) {
+		if (data.playersData[playerSeer].id === playerId) {
 			return { error: true, message: WEREWOLF_SCRIPTING.error.cantActionSelf.replace('{0}', 'Menerawang') };
 		}
 
@@ -496,13 +496,13 @@ export class Werewolf {
 
 		const player = data.playersData.findIndex((v) => v.id === playerId);
 
-		if (player == -1) {
+		if (player === -1) {
 			return;
 		}
 
-		const playerKill = data.playersData.findIndex((v) => v.id === playerIdKill || v.index == playerIdKill - 1);
+		const playerKill = data.playersData.findIndex((v) => v.id === playerIdKill || v.index === playerIdKill - 1);
 
-		if (playerKill == -1) {
+		if (playerKill === -1) {
 			return;
 		}
 
@@ -515,7 +515,7 @@ export class Werewolf {
 			};
 		}
 
-		if (data.gameTimeCycle == 'day') {
+		if (data.gameTimeCycle === 'day') {
 			return {
 				error: true,
 				message: WEREWOLF_SCRIPTING.error.wrongTime.replace('{0}', 'Malam Hari').replace('{1}', 'Pagi Hari'),
@@ -526,7 +526,7 @@ export class Werewolf {
 			return { error: true, message: WEREWOLF_SCRIPTING.error.dead };
 		}
 
-		if (data.playersData[playerKill].id == playerId) {
+		if (data.playersData[playerKill].id === playerId) {
 			return { error: true, message: WEREWOLF_SCRIPTING.error.cantActionSelf.replace('{0}', 'Membunuh') };
 		}
 
@@ -567,7 +567,7 @@ export class Werewolf {
 			data.playersData[playerKill].isAlive = false;
 			data.playersKilled.push(data.playersData[playerKill]);
 			data.playersAlive.splice(
-				data.playersAlive.findIndex((v) => v.id == data.playersData[playerKill].id),
+				data.playersAlive.findIndex((v) => v.id === data.playersData[playerKill].id),
 				1,
 			);
 			return {
@@ -593,13 +593,13 @@ export class Werewolf {
 
 		const player = data.playersData.findIndex((v) => v.id === playerId);
 
-		if (player == -1) {
+		if (player === -1) {
 			return;
 		}
 
 		const playerVoted = data.playersData.findIndex((v) => v.id === playerIdVoted);
 
-		if (playerVoted == -1) {
+		if (playerVoted === -1) {
 			return;
 		}
 
@@ -657,7 +657,7 @@ export class Werewolf {
 				dataGame.gameTimeCycle = 'day';
 			}
 
-			if (dataGame.gameTimeCycle == 'day') {
+			if (dataGame.gameTimeCycle === 'day') {
 				this.resetPerks(dataGame.roomId);
 				let peopleKilledMention = [];
 				let message = WEREWOLF_SCRIPTING.dayTime.noKill[Math.floor(Math.random() * WEREWOLF_SCRIPTING.dayTime.noKill.length)];
@@ -672,10 +672,10 @@ export class Werewolf {
 					].replace('{0}', peopleKilled);
 					dataGame.playersKilled.forEach((v) => {
 						dataGame.playersData.forEach((w) => {
-							if (w.id == v.id) {
+							if (w.id === v.id) {
 								w.isAlive = false;
 								dataGame.playersAlive.splice(
-									dataGame.playersAlive.findIndex((x) => x.id == v.id),
+									dataGame.playersAlive.findIndex((x) => x.id === v.id),
 									1,
 								);
 								dataGame.playersDead.push(v);
@@ -698,17 +698,17 @@ export class Werewolf {
 				dataGame.gameTimeCycle = 'evening';
 				dataGame.gameTime = 20;
 				this.startGameCycle(roomId, timer);
-			} else if (dataGame.gameTimeCycle == 'evening') {
+			} else if (dataGame.gameTimeCycle === 'evening') {
 				if (!dataGame) {
 					return;
 				}
 
 				let message;
 
-				if (dataGame.gameAfk == 3) {
+				if (dataGame.gameAfk === 3) {
 					const statisticPlayer = dataGame.playersData.map(() => ({
 						good: dataGame.playersData.filter((w) => w.role !== 'werewolf'),
-						bad: dataGame.playersData.filter((w) => w.role == 'werewolf'),
+						bad: dataGame.playersData.filter((w) => w.role === 'werewolf'),
 					}));
 
 					message =
@@ -748,7 +748,7 @@ export class Werewolf {
 				});
 				dataGame.gameTimeCycle = 'voting';
 				this.startGameCycle(roomId, timer);
-			} else if (dataGame.gameTimeCycle == 'voting') {
+			} else if (dataGame.gameTimeCycle === 'voting') {
 				if (!dataGame) {
 					return;
 				}
@@ -763,7 +763,7 @@ export class Werewolf {
 					const peopleVoted = dataGame.shortVoters(roomId);
 
 					ids = Object.entries(peopleVoted);
-					const isDraw = ids.length > 1 && ids[0][1].length == ids[1][1].length;
+					const isDraw = ids.length > 1 && ids[0][1].length === ids[1][1].length;
 
 					if (isDraw) {
 						message =
@@ -801,10 +801,10 @@ export class Werewolf {
 				}
 
 				const isWinning =
-					dataGame.playersData.filter((v) => v.isAlive && v.role == 'werewolf').length ==
+					dataGame.playersData.filter((v) => v.isAlive && v.role === 'werewolf').length ==
 					dataGame.playersData.filter((v) => v.isAlive && v.role !== 'werewolf').length
 						? 'werewolf'
-						: dataGame.playersData.filter((v) => v.isAlive && v.role == 'werewolf').length == 0
+						: dataGame.playersData.filter((v) => v.isAlive && v.role === 'werewolf').length === 0
 						? 'villager'
 						: 'none';
 
@@ -823,7 +823,7 @@ export class Werewolf {
 					setTimeout(() => {
 						const statisticPlayer = dataGame.playersData.map(() => ({
 							good: dataGame.playersData.filter((w) => w.role !== 'werewolf'),
-							bad: dataGame.playersData.filter((w) => w.role == 'werewolf'),
+							bad: dataGame.playersData.filter((w) => w.role === 'werewolf'),
 						}));
 
 						dataGame.gameDialogue =
@@ -853,7 +853,7 @@ export class Werewolf {
 				dataGame.gameTimeCycle = 'dawn';
 				dataGame.gameTime = 30;
 				this.startGameCycle(roomId, timer);
-			} else if (dataGame.gameTimeCycle == 'dawn') {
+			} else if (dataGame.gameTimeCycle === 'dawn') {
 				dataGame.gameTime = 40;
 				const message = WEREWOLF_SCRIPTING.nightTime[Math.floor(Math.random() * WEREWOLF_SCRIPTING.nightTime.length)].replace(
 					'{0}',
@@ -871,7 +871,7 @@ export class Werewolf {
 				});
 				dataGame.gameTimeCycle = 'night';
 				this.startGameCycle(roomId);
-			} else if (dataGame.gameTimeCycle == 'night') {
+			} else if (dataGame.gameTimeCycle === 'night') {
 				const message = WEREWOLF_SCRIPTING.nightTime[Math.floor(Math.random() * WEREWOLF_SCRIPTING.nightTime.length)].replace(
 					'{0}',
 					dataGame.gameTime,

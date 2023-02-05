@@ -21,7 +21,7 @@ const LEVEL = {
 export const makePuzzle = (level) => {
 	let board;
 
-	if (level == undefined) {
+	if (level === undefined) {
 		level = LEVEL['easy'];
 	} else {
 		level = LEVEL[level] || LEVEL['easy'];
@@ -439,7 +439,7 @@ export const revealOneElement = (board, solvedBoard) => {
 	const tempBoard = board;
 
 	for (let i = 0; i < board.length; i++) {
-		if (board[i] == 'X') {
+		if (board[i] === 'X') {
 			emptyCells.push(i);
 		}
 	}
@@ -487,7 +487,7 @@ function allowedMove(post, num, board, solvedBoard) {
 }
 
 export const checkWin = (board) => {
-	if (board.filter((x) => x == 'X').length == 0) {
+	if (board.filter((x) => x === 'X').length === 0) {
 		return { status: true, message: 'Selamat, kamu berhasil menyelesaikan puzzle ini.' };
 	}
 
@@ -499,14 +499,14 @@ export const stringifyGrid = (grid) => {
 	let abjad = 'ABCDEFGHI'.split('').map((v) => v + '.');
 
 	for (let i = 0; i < grid.length; i++) {
-		if (grid[i] == null) {
+		if (grid[i] === null) {
 			grid[i] = 'X';
 		}
 
-		if (i == 0) {
+		if (i === 0) {
 			capt += `${abjad[0]} ${grid[i]} `;
-		} else if (i % 3 == 0) {
-			capt += `${abjad[i / 9] == 'I.' ? `${abjad[i / 9]} ` : abjad[i / 9] || ''}  ${grid[i]} `;
+		} else if (i % 3 === 0) {
+			capt += `${abjad[i / 9] === 'I.' ? `${abjad[i / 9]} ` : abjad[i / 9] || ''}  ${grid[i]} `;
 		} else {
 			capt += `${grid[i]} `;
 		}

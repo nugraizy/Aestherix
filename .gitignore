@@ -5,5 +5,5 @@ session/*/*.json
 databases/users/*.json
 media_files/connection_databases/*.json
 temporary_files/
-t-*.js
-t-*.png
+t-*.*
+test.json

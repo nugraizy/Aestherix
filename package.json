@@ -25,7 +25,7 @@
 	"___comment": "If you happen to occur colorthief error (while using spotifycover command), try reinstall colorthief.",
 	"dependencies": {
 		"@adiwajshing/baileys": "github:nugraizy/baileys",
-		"@napi-rs/canvas": "^0.1.30",
+		"@napi-rs/canvas": "^0.1.34",
 		"@vitalets/google-translate-api": "^9.0.0",
 		"aki-api": "^6.0.8",
 		"async-retry": "^1.3.3",

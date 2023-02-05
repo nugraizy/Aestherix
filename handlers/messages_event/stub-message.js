@@ -12,7 +12,7 @@ export default {
 			case WebMessageInfoStubType.GROUP_PARTICIPANT_ADD:
 			case WebMessageInfoStubType.GROUP_PARTICIPANT_PROMOTE:
 			case WebMessageInfoStubType.GROUP_PARTICIPANT_DEMOTE: {
-				if (WebMessageInfoStubType.GROUP_PARTICIPANT_ADD == message.messageStubType) {
+				if (WebMessageInfoStubType.GROUP_PARTICIPANT_ADD === message.messageStubType) {
 					message = await reassign(JSON.parse(JSON.stringify(message)), client, store, false);
 					await checkBan(client, message, message);
 				}

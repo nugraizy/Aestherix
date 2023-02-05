@@ -12,7 +12,7 @@ Score : ${obj?.score || 'n/a'}
 Popularity : ${obj?.popularity || 'n/a'}
 Tot. Listed Users : ${numberWithCommas(obj?.num_list_users || 0)}
 Tot. Scoring Users : ${numberWithCommas(obj?.num_scoring_users || 0)}
-NSFW? : ${obj?.nsfw == 'white' ? 'No' : 'Yes'}
+NSFW? : ${obj?.nsfw === 'white' ? 'No' : 'Yes'}
 Anime Type : ${obj?.media_type?.capitalize() || 'n/a'}
 Status : ${obj?.status?.replace('_', ' ')?.capitalize() || 'n/a'}
 Tot. Episodes : ${numberWithCommas(obj?.num_episodes || 0)}
@@ -39,7 +39,7 @@ export default {
 	async run({ query, from, message, args, type, cmd }, client) {
 		const mal = new MyAnimeList();
 
-		if (args[1] == 'detail' && type == 'listResponseMessage') {
+		if (args[1] === 'detail' && type === 'listResponseMessage') {
 			const detail = await mal.getAnimeDetail(args[2]);
 
 			if ('error' in detail) {

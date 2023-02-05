@@ -3,7 +3,7 @@ import axios from 'axios';
 
 import { parse } from './utils.js';
 
-const check = (i) => (i == -1 ? undefined : i);
+const check = (i) => (i === -1 ? undefined : i);
 const _api = (input) => `https://www.deviantart.com/search?q=${input}`;
 
 export const searchDeviantArt = (keyword) =>
@@ -26,8 +26,8 @@ export const searchDeviantArt = (keyword) =>
 					.map((v) => v[1])
 					.map((v) => {
 						const image = `${v.media.baseUri}${v.media.types[
-							check(v.media.types.findIndex((w) => w.t == 'fullview' && w.c != undefined)) ??
-								v.media.types.findIndex((w) => w.t == 'social_preview')
+							check(v.media.types.findIndex((w) => w.t === 'fullview' && w.c != undefined)) ??
+								v.media.types.findIndex((w) => w.t === 'social_preview')
 						].c?.replace('<prettyName>', v.media.prettyName)}${v.media.token?.[0] ? `?token=${v.media.token[0]}` : ''}`;
 
 						const { pathname } = new URL(v.url);

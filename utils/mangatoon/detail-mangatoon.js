@@ -28,20 +28,21 @@ export const getDetailMangatoon = (id) =>
 					.match(/\((.*?)\)/)[1],
 				totalViews: $('span.view-count').text(),
 				totalLikes: $('span.like-count').text(),
-				descriptions: $('.detail-description-short > p').text().split('MangaToon got ')[0].trim(),
-				genreStr: $('.detail-tags-info.select-text')
-					.text()
-					.split('/')
-					.map((v) => v.trim())
-					.join(', '),
-				genreArr: $('.detail-tags-info.select-text')
+				description: $('.detail-description-short > p').text().split('MangaToon got ')[0].trim(),
+				genre: $('.detail-tags-info.select-text')
 					.text()
 					.split('/')
 					.map((v) => v.trim()),
 				episodes: $(
 					'.episode-content.episode-content-asc > .selected-episodes.selected-tag > .episodes-wrap-new > a.episode-item-new',
 				)
-					.map((i, el) => READS_URL($(el).attr('href')))
+					.map((i, el) => ({
+						episode: $(el).find('.item-top > .episode-title-new').text().trim(),
+						time: $(el).find('span.open-date').text().trim(),
+						likes: $(el).find('.episode-like-view > span'),
+						views: $(el).find('.episode-like-view > span'),
+						url: READS_URL($(el).attr('href')),
+					}))
 					.get(),
 			});
 		} catch (err) {

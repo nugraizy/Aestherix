@@ -76,7 +76,7 @@ export const handleAnswer = async (key, answer) => {
 		return { status: 'waiting' };
 	}
 
-	if (isNaN(answer) || answer == 6) {
+	if (isNaN(answer) || answer === 6) {
 		if (/^((t(?:rue)?|i?y(ak?|e)?(?:es|p)?|ok(?:ay)?)|(be?(tul|n(a|e)?r)))$/i.test(answer)) {
 			answer = ANSWERS[1];
 		} else if (/^((t(i?da?k|dk))|g(a?|k)?|n(o?|ope))$/i.test(answer)) {
@@ -89,10 +89,10 @@ export const handleAnswer = async (key, answer) => {
 			answer = ANSWERS[4];
 		} else if (/^(b(a?c?)k|undo|k(e?mb(a?)li))$/i.test(answer)) {
 			answer = ANSWERS[7];
-		} else if (/^((e(xit)?|out|b(a?|t(a)?)l))$/i.test(answer) || answer == 6) {
+		} else if (/^((e(xit)?|out|b(a?|t(a)?)l))$/i.test(answer) || answer === 6) {
 			await session.win();
 
-			if (session.progress == 0) {
+			if (session.progress === 0) {
 				arrow = '⇵';
 			} else if (session.progress > tempProgress) {
 				arrow = '↑';
@@ -110,14 +110,14 @@ export const handleAnswer = async (key, answer) => {
 		answer = ANSWERS[parseInt(answer)];
 	}
 
-	if (answer == 6) {
-		if (session.currentStep == 0) {
+	if (answer === 6) {
+		if (session.currentStep === 0) {
 			return { status: 'back', arrow: '⇵', isFailed: true, ...session };
 		}
 
 		await session.back();
 
-		if (session.progress == 0) {
+		if (session.progress === 0) {
 			arrow = '⇵';
 		} else if (session.progress > tempProgress) {
 			arrow = '↑';
@@ -135,7 +135,7 @@ export const handleAnswer = async (key, answer) => {
 		return { status: 'waiting' };
 	}
 
-	if (session.progress == 0) {
+	if (session.progress === 0) {
 		arrow = '⇵';
 	} else if (session.progress > tempProgress) {
 		arrow = '↑';

@@ -109,7 +109,7 @@ export const randomCase = (string = '') => {
 	const container = [];
 
 	string.split('').map((str) => {
-		if (Math.floor(Math.random() * 2) + 1 == 1) {
+		if (Math.floor(Math.random() * 2) + 1 === 1) {
 			container.push(str.toLowerCase());
 		} else {
 			container.push(str.toUpperCase());
@@ -151,7 +151,7 @@ String.prototype.capitalize = function () {
 };
 
 String.prototype.PARSE_EVENTS = function (...args) {
-	return args.some((v) => v == this);
+	return args.some((v) => v === this);
 };
 
 String.prototype.mocking = function () {
@@ -239,7 +239,7 @@ export const getFilesizeFromBytes = (bytes = 0) => {
 		bytes = `${(bytes / 1024).toFixed(2)} KB`;
 	} else if (bytes > 1) {
 		bytes += ' bytes';
-	} else if (bytes == 1) {
+	} else if (bytes === 1) {
 		return `${bytes} byte`;
 	} else {
 		return '0 bytes';
@@ -260,7 +260,7 @@ export const getFilesize = (filename) => {
 		bytes = `${(bytes / 1024).toFixed(2)} KB`;
 	} else if (bytes > 1) {
 		bytes += ' bytes';
-	} else if (bytes == 1) {
+	} else if (bytes === 1) {
 		return `${bytes} byte`;
 	} else {
 		return '0 bytes';
@@ -525,9 +525,9 @@ export const loadFiles = (dir) => {
 
 export const isZilgoo = (str) => str.match(/\u{1F1E6}/g);
 
-export const isSame = (value1, value2) => value1 == value2;
+export const isSame = (value1, value2) => value1 === value2;
 
-export const isUndefined = (value) => value == undefined;
+export const isUndefined = (value) => value === undefined;
 
 export const isNotUndefined = (value) => value != undefined;
 
@@ -539,31 +539,31 @@ export const isNotMinusOne = (value) => value != -1;
 
 export const isNotNull = (value) => value != null;
 
-export const isNull = (value) => value == null;
+export const isNull = (value) => value === null;
 
-export const isZero = (value) => value == 0;
+export const isZero = (value) => value === 0;
 
-export const isEmpty = (value) => value == '';
+export const isEmpty = (value) => value === '';
 
 export const isNotEmpty = (value) => value != '';
 
-export const isMinusOne = (value) => value == -1;
+export const isMinusOne = (value) => value === -1;
 
-export const isOne = (value) => value == 1;
+export const isOne = (value) => value === 1;
 
 export const isNotOne = (value) => value != 1;
 
 export const isBigger = (value1, value2) =>
-	typeof value1 == 'string' ? value1.toNumber() > value2.toNumber() : typeof value1 == 'number' ? value1 > value2 : false;
+	typeof value1 === 'string' ? value1.toNumber() > value2.toNumber() : typeof value1 === 'number' ? value1 > value2 : false;
 
 export const isSmaller = (value1, value2) =>
-	typeof value1 == 'string' ? value1.toNumber() < value2.toNumber() : typeof value1 == 'number' ? value1 < value2 : false;
+	typeof value1 === 'string' ? value1.toNumber() < value2.toNumber() : typeof value1 === 'number' ? value1 < value2 : false;
 
 export const isSameOrBigger = (value1, value2) =>
-	typeof value1 == 'string' ? value1.toNumber() >= value2.toNumber() : typeof value1 == 'number' ? value1 >= value2 : false;
+	typeof value1 === 'string' ? value1.toNumber() >= value2.toNumber() : typeof value1 === 'number' ? value1 >= value2 : false;
 
 export const isSameOrSmaller = (value1, value2) =>
-	typeof value1 == 'string' ? value1.toNumber() <= value2.toNumber() : typeof value1 == 'number' ? value1 <= value2 : false;
+	typeof value1 === 'string' ? value1.toNumber() <= value2.toNumber() : typeof value1 === 'number' ? value1 <= value2 : false;
 
 export const randomize = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -592,7 +592,7 @@ export const writeBuffer = (path, data) => {
 
 export const getFunctions = (module) => {
 	Object.keys(module).filter((key) => {
-		typeof module[key] == 'function';
+		typeof module[key] === 'function';
 	});
 };
 
@@ -627,9 +627,9 @@ export const color = (text, color) => {
 
 	return configuration.OPTIONS.rainbow
 		? gradient['rainbow'](text)
-		: typeof color == 'object'
+		: typeof color === 'object'
 		? gradient(...color)(text)
-		: typeof color == 'string'
+		: typeof color === 'string'
 		? gradient(color, color)(text)
 		: gradient[schemes](text);
 };
@@ -656,7 +656,7 @@ export const isURL = (input) =>
 export const parseCode = (input) => {
 	const parse = input.match(/([-_0-9a-zA-Z]{11})/);
 
-	return parse == null ? false : parse[0];
+	return parse === null ? false : parse[0];
 };
 
 const convertToRoman = (num) => {
@@ -762,7 +762,7 @@ export const formatViews = (s) => {
 	};
 	const matrix = s.split('').findIndex((v) => Object.keys(MULTIPLIER).includes(v));
 
-	if (matrix == -1) {
+	if (matrix === -1) {
 		return Number(s);
 	}
 

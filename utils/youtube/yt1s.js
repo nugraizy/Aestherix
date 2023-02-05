@@ -11,72 +11,66 @@ const isUrl = (url) =>
 		new RegExp(/^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/)|(?:(?:watch)?\?v(?:i)?=|&v(?:i)?=))([^#&?]*).*/, 'g'),
 	);
 
-/**
- * @typedef {{videoId: string, url: string, title: string, description: string | null, thumbnail: string, timestamp: string, uploaded: string, views: number, author: string, urlChannel: string}} YTSearchResults
- * @typedef {{filesizeF: string, filesize: number, dlLink: string, title: string, id: string}} YTScrapeResults
- */
-/**
- * Scrape YouTube available downloader.
- * @param {string} url
- * @param {'mp3' | 'mp4'} type
- * @returns {Promise<YTScrapeResults>}
- * @throws {Error}
- */
-const yt2 = async (url, type) =>
+const convertStreams = (vid, el) =>
+	new Promise(async (resolve) => {
+		const data = await fetchJSON(_apiConvert, {
+			method: 'POST',
+			body: `vid=${vid}&k=${encodeURIComponent(el.k)}`,
+			headers: {
+				Accept: 'application/json, text/plain, */*',
+				'Content-Type': 'application/x-www-form-urlencoded',
+			},
+		});
+
+		resolve({
+			filesizeF: el.size,
+			filesize: fileSize(el.size, { base: 2 }),
+			quality: el.q,
+			dlUrl: data.dlink,
+		});
+	});
+
+export const downloaderYouTubeMain = (url, type) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			if (!isUrl(url)) {
-				return resolve({ error: 'Invalid URL' });
-			}
-
-			const datas = await fetchJSON(_apiIndex, {
+			const data = await fetchJSON(_apiIndex, {
 				method: 'POST',
 				body: `q=${encodeURIComponent(url)}&vt=home`,
 				headers: {
 					Accept: '*/*',
 					'Content-Type': 'application/x-www-form-urlencoded',
 					'X-Requested-With': 'XMLHttpRequest',
+					'User-Agent':
+						'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36',
 				},
 			});
+			const rawData = (filter) =>
+				Object.entries(data.links)
+					.filter(filter)
+					.map((v) => data.links[v[0]])
+					.reduce((r, c) => Object.assign(r, c), [])
+					.filter((v) => v.size !== '');
 
-			const { k, size } =
-				Object.values(datas.links[type]).filter((v) =>
-					type == 'mp4' ? v.q == '480p' || v.q == '360p' : v.q == '128kbps' || v.q == `${128 / 2}kbps`,
-				).length === 0
-					? Object.values(datas.links[type])[Object.keys(datas.links[type]).length - 1]
-					: Object.values(datas.links[type]).filter((v) =>
-							type == 'mp4' ? v.q == '480p' || v.q == '360p' : v.q == '128kbps' || v.q == `${128 / 2}kbps`,
-					  )[0]; /* eslint-disable-line */
-
-			const data = await fetchJSON(_apiConvert, {
-				method: 'POST',
-				body: `vid=${datas.vid}&k=${encodeURIComponent(k)}`,
-				headers: {
-					Accept: 'application/json, text/plain, */*',
-					'Content-Type': 'application/x-www-form-urlencoded',
-				},
-			});
-
-			resolve({
-				filesizeF: size || '0 B',
-				filesize: fileSize(size || '0 B', { base: 2 }),
-				dlLink: data.dlink,
+			const response = {
 				title: data.title,
-				id: datas.vid,
-			});
+				id: data.vid,
+			};
+			if (type === 'mp4') {
+				response.mp4 = await Promise.all(
+					rawData((v) => !['mp3', 'm4a'].includes(v[0])).map((v) => convertStreams(data.vid, v)),
+				);
+			} else if (type === 'mp3') {
+				response.mp3 = await Promise.all(
+					rawData((v) => ['mp3', 'm4a'].includes(v[0])).map((v) => convertStreams(data.vid, v)),
+				);
+			}
+			resolve(response);
 		} catch (e) {
 			reject(e);
 		}
 	});
 
-/**
- *
- * @param {string} query
- * @param {string | undefined} id
- * @returns {Promise<YTSearchResults>}
- * @throws {Error}
- */
-export const ytsr2 = (query, id) =>
+export const searchYoutube = (query, id) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			const res = await yts(query);
@@ -112,61 +106,21 @@ export const ytsr2 = (query, id) =>
 		}
 	});
 
-/**
- * Download YouTube video, Using either url or query.
- * @param {string} query
- * @returns {Promise<YTSearchResults & YTScrapeResults & {error?: string, internal?: false}}
- * @throws {Error}
- */
-export const ytv2 = (query) =>
+export const youtubeMainDownload = (query, type) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			if (isUrl(query)) {
-				let res = await yt2(query, 'mp4');
-				const container = res;
-
-				res = await ytsr2(res.title, res.id);
-				resolve({ ...container, ...res });
+				const result = await downloaderYouTubeMain(query, type);
+				const response = await searchYoutube(result.title, result.id);
+				resolve({ title: result.title, ...response, ...(type === 'mp3' ? { mp3: result.mp3 } : { mp4: result.mp4 }) });
 			} else if (isURL(query) && !isUrl(query)) {
-				resolve({ error: 'Link YouTube tidak valid.', internal: false });
+				resolve({ error: true });
 			} else {
-				let res = await ytsr2(query, false);
-				const url = `https://youtu.be/${res.videoId}`;
-				const container = res;
+				const result = await searchYoutube(query, false);
+				const url = `https://youtu.be/${result.videoId}`;
 
-				res = await yt2(url, 'mp4');
-				resolve({ ...container, ...res });
-			}
-		} catch (e) {
-			reject(e);
-		}
-	});
-
-/**
- * Download YouTube audio, Using either url or query.
- * @param {string} query
- * @returns {Promise<YTSearchResults & YTScrapeResults & {error?: string, internal?: false}}
- * @throws {Error}
- */
-export const yta2 = (query) =>
-	new Promise(async (resolve, reject) => {
-		try {
-			if (isUrl(query)) {
-				let res = await yt2(query, 'mp3');
-				const container = res;
-
-				res = await ytsr2(res.title, res.id);
-				resolve({ ...container, ...res });
-			} else if (isURL(query) && !isUrl(query)) {
-				resolve({ error: 'Link YouTube tidak valid.', internal: false });
-			} else {
-				let res = await ytsr2(query, false);
-
-				const url = `https://youtu.be/${res.videoId}`;
-				const container = res;
-
-				res = await yt2(url, 'mp3');
-				resolve({ ...container, ...res });
+				const response = await downloaderYouTubeMain(url, type);
+				resolve({ title: response.title, ...result, ...(type === 'mp3' ? { mp3: response.mp3 } : { mp4: response.mp4 }) });
 			}
 		} catch (e) {
 			reject(e);

@@ -41,7 +41,7 @@ export const brainlySearch = (query, options) =>
 				resolve({ error: 'Max count is 30' });
 			}
 
-			if (count == 0) {
+			if (count === 0) {
 				resolve({ error: 'Count cannot be 0' });
 			}
 

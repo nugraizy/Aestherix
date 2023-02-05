@@ -75,7 +75,7 @@ export default {
 				if (isOne(reel.medias.length)) {
 					await client[botNum].sendMessage(
 						from,
-						reel.medias[0].type == 'video'
+						reel.medias[0].type === 'video'
 							? { video: { url: reel.medias[0].url }, caption: capt.trim() }
 							: {
 									image: { url: reel.medias[0].url },

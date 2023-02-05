@@ -5,7 +5,7 @@ const URL_API = 'https://bandcamp.com/api/bcsearch_public_api/1/autocomplete_ela
 const parseCookie = (arr) => arr.map((v) => v.split(';')[0]).join('; ');
 
 const parse = (arr) => {
-	arr = arr.filter((v) => v.type == 't');
+	arr = arr.filter((v) => v.type === 't');
 	return arr.map(
 		({
 			art_id: artId,
@@ -65,7 +65,7 @@ export const searchBandcamp = (keyword) =>
 				},
 			});
 
-			if (data?.auto?.results?.length == 0) {
+			if (data?.auto?.results?.length === 0) {
 				return resolve({ error: 'Not Found' });
 			}
 

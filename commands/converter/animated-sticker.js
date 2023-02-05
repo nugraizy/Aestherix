@@ -36,12 +36,12 @@ export default {
 
 		if (parseOptions.color) {
 			for (const color of parseOptions.color) {
-				if (color.trim() == 'rainbow') {
+				if (color.trim() === 'rainbow') {
 					parseOptions.color = ['3fffff', '3fff3f', 'ff3fff', 'ff3f3f', '3f3fff'];
 					break;
 				} else {
 					const check = rgbcolor(color.trim());
-					const index = parseOptions.color.findIndex((v) => v == color);
+					const index = parseOptions.color.findIndex((v) => v === color);
 
 					if (check.isValid()) {
 						parseOptions.color[index] = check.hex();

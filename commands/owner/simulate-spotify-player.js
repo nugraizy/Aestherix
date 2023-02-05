@@ -11,7 +11,7 @@ const clientMqttListen = mqtt.connect(process.env.MQTT_URL);
 async function updateSpotifyTracks() {
 	async.forever(
 		async (next) => {
-			if (configuration.presences?.spotify?.timeout == undefined) {
+			if (configuration.presences?.spotify?.timeout === undefined) {
 				next();
 			}
 

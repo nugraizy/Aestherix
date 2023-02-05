@@ -11,9 +11,9 @@ export default {
 	limit: 1,
 	status: 'enable',
 	async run({ query, from, message, args, cmd }, client) {
-		if (args[1] == 'next' || args[1] == 'prev') {
+		if (args[1] === 'next' || args[1] === 'prev') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
-			const index = data.findIndex((v) => v.image == args[2]);
+			const index = data.findIndex((v) => v.image === args[2]);
 
 			let caption = 'CNN Indonesia'.formatHeaders();
 
@@ -28,8 +28,8 @@ export default {
 					image: { url: data[index].image },
 					caption,
 					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: args[1] == 'next' ? data[index].image : data[index].image } },
-						{ urlButton: { displayText: 'Article Source', url: args[1] == 'next' ? data[index].link : data[index].link } },
+						{ urlButton: { displayText: 'Image Source', url: args[1] === 'next' ? data[index].image : data[index].image } },
+						{ urlButton: { displayText: 'Article Source', url: args[1] === 'next' ? data[index].link : data[index].link } },
 						index + 1 !== data.length
 							? {
 									quickReplyButton: {

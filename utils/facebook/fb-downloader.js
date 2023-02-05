@@ -18,7 +18,7 @@ export const fbDl = (url) =>
 			}
 
 			let { url: urls, subname } =
-				data.url.filter((x) => x.subname == 'HD')?.[0] ?? data.url.filter((x) => x.subname == 'SD')?.[0] ?? data.url[0];
+				data.url.filter((x) => x.subname === 'HD')?.[0] ?? data.url.filter((x) => x.subname === 'SD')?.[0] ?? data.url[0];
 			let { duration, title } = data.meta;
 			let { timestamp: datePosted } = data;
 

@@ -12,9 +12,9 @@ export default {
 	limit: 4,
 	status: 'enable',
 	async run({ query, from, message, args, cmd, type }, client) {
-		if ((args[1] == 'next' || args[1] == 'prev') && type == 'templateButtonReplyMessage') {
+		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
-			const index = data.findIndex((v) => v.thumbnail == args[2]);
+			const index = data.findIndex((v) => v.thumbnail === args[2]);
 			let caption = 'Iflix Search'.formatHeaders();
 
 			caption += `\n\nTitle : ${data[index].title}\n`;
@@ -42,7 +42,9 @@ export default {
 					image: { url: data[index].thumbnail },
 					caption,
 					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: args[1] == 'next' ? data[index].image : data[index].thumbnail } },
+						{
+							urlButton: { displayText: 'Image Source', url: args[1] === 'next' ? data[index].image : data[index].thumbnail },
+						},
 						index + 1 !== data.length
 							? {
 									quickReplyButton: {
@@ -71,7 +73,7 @@ export default {
 				title: 'Iflix'.formatHeaders(),
 				sections: rows,
 			});
-		} else if (args[1] == 'get') {
+		} else if (args[1] === 'get') {
 			return await client[botNum].reply({ from, quoted: message }, `${'Iflix Search'.formatHeaders()}\n\nURL : ${args[2]}`);
 		}
 

@@ -15,7 +15,7 @@ export default {
 	run: async ({ from, message, type, cmd, args }, client) => {
 		const text = 'Animixplay Releases'.formatHeaders();
 
-		if (type == 'listResponseMessage') {
+		if (type === 'listResponseMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(1).join(' '))));
 
 			client[botNum].reply(
@@ -51,13 +51,11 @@ export default {
 						description: `Releases : ${result[day][0].time}`,
 						rowId: `${cmd} ${JSON.stringify(result[day][0].streams).replace(/\|/g, '')}`,
 					},
-					...result[day]
-						.slice(1)
-						.map((v) => ({
-							title: `${v.title}`,
-							description: `Releases : ${v.time}`,
-							rowId: `${cmd} ${JSON.stringify(v.streams).replace(/\|/g, '')}`,
-						})),
+					...result[day].slice(1).map((v) => ({
+						title: `${v.title}`,
+						description: `Releases : ${v.time}`,
+						rowId: `${cmd} ${JSON.stringify(v.streams).replace(/\|/g, '')}`,
+					})),
 				],
 				title: `${translatedText[indexDay]} ${index === 0 ? '(today)' : ''}`,
 			});

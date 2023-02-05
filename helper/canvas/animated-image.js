@@ -66,13 +66,13 @@ const createSequence = async (images, sender) =>
 	});
 
 const createCanvasTemplates = (fonts) => {
-	if (fonts == 'chevin') {
+	if (fonts === 'chevin') {
 		GlobalFonts.registerFromPath(path.join(__dirname, 'media_files/fonts/Chevin Bold.ttf'), 'chevin');
-	} else if (fonts == 'texgy') {
+	} else if (fonts === 'texgy') {
 		GlobalFonts.registerFromPath(path.join(__dirname, 'media_files/fonts/texgyreadventor-bold.otf'), 'texgy');
-	} else if (fonts == 'sanspro') {
+	} else if (fonts === 'sanspro') {
 		GlobalFonts.registerFromPath(path.join(__dirname, 'media_files/fonts/SourceSansPro-Italic.ttf'), 'sanspro');
-	} else if (fonts == 'calm') {
+	} else if (fonts === 'calm') {
 		GlobalFonts.registerFromPath(path.join(__dirname, 'media_files/fonts/KeepCalm-Medium.ttf'), 'calm');
 	}
 
@@ -105,7 +105,7 @@ export const attp = (sender, texts, colored, fonts) =>
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		fonts = fonts !== undefined ? fonts.toLowerCase() : 'chevin';
-		colored = colored.length == 0 ? null : colored;
+		colored = colored.length === 0 ? null : colored;
 
 		INFOLOG(`[${color(time, 'cyan')}]`, `${color('Making Animated Image', '#01cdfe')} for ${color(sender, '#ff71ce')}`);
 
@@ -129,11 +129,10 @@ export const attp = (sender, texts, colored, fonts) =>
 			ctx.shadowBlur = 2;
 
 			CanvasTextWrapper(canvas, texts, {
-				font: `126px ${fonts}`,
+				font: `82px ${fonts}`,
 				textAlign: 'center',
-				verticalAlign: 'top',
+				verticalAlign: 'middle',
 				sizeToFill: true,
-				maxFontSizeToFill: 126 * 1.4,
 			});
 
 			const buffer = canvas.toBuffer('image/webp');

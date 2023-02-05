@@ -24,23 +24,23 @@ export const getPost = (code) =>
 			let { like_count: likeCount, taken_at: takenAt, comment_count: commentCount, media_type: mediaType } = data.items[0];
 
 			const captions = data.items[0].caption?.text ?? 'No captions';
-			const type = mediaType == 8 ? 'slide' : mediaType == 2 ? 'video' : 'image';
+			const type = mediaType === 8 ? 'slide' : mediaType === 2 ? 'video' : 'image';
 
 			let result = { username, fullName, isPrivate, isVerified, likeCount, takenAt, commentCount, captions, post: [] };
 
-			if (type == 'slide') {
+			if (type === 'slide') {
 				let { carousel_media: posts } = data.items[0];
 
 				for (const post of posts) {
-					if (post.media_type == 1) {
+					if (post.media_type === 1) {
 						result.post.push({ isVideo: false, url: post.image_versions2.candidates[0].url });
-					} else if (post.media_type == 2) {
+					} else if (post.media_type === 2) {
 						result.post.push({ isVideo: true, url: post.video_versions[0].url, duration: post.video_duration });
 					}
 				}
-			} else if (type == 'image') {
+			} else if (type === 'image') {
 				result.post.push({ isVideo: false, url: data.items[0].image_versions2.candidates[0].url });
-			} else if (type == 'video') {
+			} else if (type === 'video') {
 				result = { ...result, playCount: data.items[0].play_count };
 				result.post.push({ isVideo: true, url: data.items[0].video_versions[0].url });
 			}

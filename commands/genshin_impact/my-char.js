@@ -15,9 +15,9 @@ export default {
 	status: 'enable',
 	async run({ sender, query, message, from }, client) {
 		const data = readJSON(path.join(__dirname, 'databases/games/genshin_impact/data.json'));
-		const index = data.findIndex((v) => v.user == sender);
+		const index = data.findIndex((v) => v.user === sender);
 
-		if (index == -1) {
+		if (index === -1) {
 			return await client[botNum].reply({ from, quoted: message }, 'Your character seems nowhere in the Database.');
 		}
 

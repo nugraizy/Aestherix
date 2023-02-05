@@ -16,9 +16,9 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'You must provide a query.');
 		}
 
-		if ((args[1] == 'next' || args[1] == 'prev') && type == 'templateButtonReplyMessage') {
+		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
-			const index = data.findIndex((v) => v.thumbnail == args[2]);
+			const index = data.findIndex((v) => v.thumbnail === args[2]);
 
 			let caption = 'TrueID Search'.formatHeaders();
 
@@ -55,7 +55,7 @@ export default {
 						{
 							urlButton: {
 								displayText: 'Image Source',
-								url: args[1] == 'next' ? data[index].thumbnail : data[index].thumbnail,
+								url: args[1] === 'next' ? data[index].thumbnail : data[index].thumbnail,
 							},
 						},
 						{ urlButton: { displayText: 'Series Source', url: data[index].sourceMovie } },
@@ -92,7 +92,7 @@ export default {
 			}
 
 			return;
-		} else if (args[1] == 'get') {
+		} else if (args[1] === 'get') {
 			return await client[botNum].reply({ from, quoted: message }, `${'TrueID Search'.formatHeaders()}\n\nURL : ${args[2]}`);
 		}
 

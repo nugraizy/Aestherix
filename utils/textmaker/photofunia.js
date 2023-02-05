@@ -7,7 +7,7 @@ import { cheerioLOAD } from '../../helper/index.js';
 const _apiBase = (input) => `https://photofunia.com${input}`;
 
 const split = (text, len) => {
-	if (len == 1) {
+	if (len === 1) {
 		return [text];
 	}
 
@@ -93,7 +93,7 @@ export const photofunia = (url, file, texts) =>
 			let i = 0;
 
 			while (i < howManyTexts) {
-				form.append(`text${i == 0 ? '' : i}`, texts[i] ?? texts[i - 1]);
+				form.append(`text${i === 0 ? '' : i}`, texts[i] ?? texts[i - 1]);
 				i++;
 			}
 

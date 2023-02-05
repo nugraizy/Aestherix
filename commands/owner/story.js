@@ -37,7 +37,7 @@ export default {
 			}
 
 			if (tempContainer.get(message.key.participant)) {
-				if (tempContainer.get(message.key.participant).stories[type] == undefined) {
+				if (tempContainer.get(message.key.participant).stories[type] === undefined) {
 					tempContainer.get(message.key.participant).stories = {
 						...tempContainer.get(message.key.participant).stories,
 						[type]: [message],
@@ -65,7 +65,7 @@ export default {
 			}
 		}
 
-		if (tempContainer.size == 0) {
+		if (tempContainer.size === 0) {
 			return await client[botNum].reply({ from, quoted: message }, 'No story are found.');
 		}
 

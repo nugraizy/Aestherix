@@ -26,7 +26,7 @@ export default {
 		}
 
 		const data = readJSON('./databases/groups/settingsManager.json');
-		const isEnable = message?.[message?.from]?.games == 'enable';
+		const isEnable = message?.[message?.from]?.games === 'enable';
 
 		switch (message.query.toLowerCase()) {
 			case 'enable':
@@ -39,7 +39,7 @@ export default {
 				}
 
 				message[message.from].games = 'enable';
-				data[data.findIndex((v) => Object.keys(v)[0] == message.from)][message.from].games = 'enable';
+				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].games = 'enable';
 				writeJSON('./databases/groups/settingsManager.json', data);
 
 				await client[botNum].reply({ from: message.from, quoted: message.message }, 'You have successfully enabled games');
@@ -54,7 +54,7 @@ export default {
 				}
 
 				message[message.from].games = 'disable';
-				data[data.findIndex((v) => Object.keys(v)[0] == message.from)][message.from].games = 'disable';
+				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].games = 'disable';
 				writeJSON('./databases/groups/settingsManager.json', data);
 
 				await client[botNum].reply({ from: message.from, quoted: message.message }, 'You have successfully disabled games');

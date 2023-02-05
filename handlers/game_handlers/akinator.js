@@ -12,11 +12,11 @@ export default {
 			const handle = await handleAnswer(from, body);
 			const { question, answers, status, progress, progressBar, arrow } = handle;
 
-			if (status == 'waiting') {
+			if (status === 'waiting') {
 				return;
 			}
 
-			if (status == 'playing') {
+			if (status === 'playing') {
 				await client[botNum].reply(
 					{ from, quoted: message },
 					`${question}\n\n${answers
@@ -25,7 +25,7 @@ export default {
 				);
 			}
 
-			if (status == 'win') {
+			if (status === 'win') {
 				await client[botNum].sendMessage(
 					from,
 					{
@@ -38,11 +38,11 @@ export default {
 				);
 			}
 
-			if (status == 'exitted') {
+			if (status === 'exitted') {
 				await client[botNum].reply({ from, quoted: message }, 'You have exitted the game.');
 			}
 
-			if (status == 'back') {
+			if (status === 'back') {
 				if (handle.isFailed) {
 					/* eslint-disable-next-line */
 					return await client[botNum].reply({ from, quoted: message }, "You can't go back.");
@@ -57,7 +57,7 @@ export default {
 			}
 		};
 
-		if (isGroup && (settings[from].games == 'enable' || isAdmin) && !configuration.OPTIONS.onlyLogs) {
+		if (isGroup && (settings[from].games === 'enable' || isAdmin) && !configuration.OPTIONS.onlyLogs) {
 			await play();
 		} else if (!isGroup && !configuration.OPTIONS.onlyLogs) {
 			await play();

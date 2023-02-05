@@ -20,7 +20,7 @@ if (!isFileExist(PATH.files)) {
 
 export const checkUser = (obj) => {
 	const data = readJSON(PATH.files);
-	const status = data.some((v) => v.id == obj.id);
+	const status = data.some((v) => v.id === obj.id);
 
 	if (!status) {
 		return false;
@@ -42,9 +42,9 @@ export const addUser = (obj) => {
 
 export const indexUser = (obj) => {
 	const data = readJSON(PATH.files);
-	const index = data.findIndex((v) => v.id == obj.id);
+	const index = data.findIndex((v) => v.id === obj.id);
 
-	if (index == -1) {
+	if (index === -1) {
 		return false;
 	}
 
@@ -60,7 +60,7 @@ export const updateUser = (obj) => {
 
 	if (indexUser(obj) !== false) {
 		for (const index in obj) {
-			if (index == 'limit' && obj.type == 'MIN') {
+			if (index === 'limit' && obj.type === 'MIN') {
 				if (data[indexUser(obj).index][index] - obj[index] < 0) {
 					return { status: false, message: 'Limit is not enough', limits: data[indexUser(obj).index][index] };
 				}
@@ -126,7 +126,7 @@ export const addUserLimit = (user, limit) => {
 	const data = readJSON(PATH.files);
 
 	for (const index in data) {
-		if (data[index].id == user) {
+		if (data[index].id === user) {
 			data[index].limit += limit;
 		}
 	}

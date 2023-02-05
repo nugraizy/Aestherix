@@ -31,7 +31,7 @@ Lama permainan : ${wordle.timeLength}`,
 			}
 		};
 
-		if (isGroup && (settings[from].games == 'enable' || isAdmin) && !configuration.OPTIONS.onlyLogs) {
+		if (isGroup && (settings[from].games === 'enable' || isAdmin) && !configuration.OPTIONS.onlyLogs) {
 			await play();
 		} else if (!isGroup && !configuration.OPTIONS.onlyLogs) {
 			await play();

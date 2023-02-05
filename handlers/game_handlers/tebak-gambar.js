@@ -11,7 +11,7 @@ export default {
 				const minScore = 0.65;
 				const data = configuration.games.tebakGambar.get(from);
 
-				if (body.toLowerCase() == data.data.answer.toLowerCase()) {
+				if (body.toLowerCase() === data.data.answer.toLowerCase()) {
 					deleteIntervals(configuration.intervals['tebakGambar'].get(from), configuration.intervals['tebakGambar'], from);
 					configuration.games.tebakGambar.delete(configuration.games.tebakGambar.get(from).id);
 					return await client[botNum].sendMessage(from, { text: 'Correct!' }, { quoted: message });
@@ -23,7 +23,7 @@ export default {
 			}
 		};
 
-		if (isGroup && (settings[from].games == 'enable' || isAdmin) && !configuration.OPTIONS.onlyLogs) {
+		if (isGroup && (settings[from].games === 'enable' || isAdmin) && !configuration.OPTIONS.onlyLogs) {
 			await play();
 		} else if (!isGroup && !configuration.OPTIONS.onlyLogs) {
 			await play();

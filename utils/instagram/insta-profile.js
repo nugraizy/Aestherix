@@ -30,7 +30,7 @@ export const getProfile = (username) =>
 				.each((i, elem) => (media[i].comments = $(elem).text().trim()))
 				.text();
 
-			if ($('.profile-name-top').text().trim() == '' && $('.follows').text().trim() == '') {
+			if ($('.profile-name-top').text().trim() === '' && $('.follows').text().trim() === '') {
 				return resolve({ error: 'User not found.' });
 			}
 
@@ -74,7 +74,7 @@ export const getUser = (username) =>
 				biography: user.biography,
 				followers: user.edge_followed_by.count,
 				following: user.edge_follow.count,
-				fullName: user.full_name == '' ? 'No Fullname' : user.full_name,
+				fullName: user.full_name === '' ? 'No Fullname' : user.full_name,
 				highlightCount: user.highlight_reel_count,
 				isBusinessAccount: user.is_business_account,
 				isRecentUser: user.is_joined_recently,

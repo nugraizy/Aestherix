@@ -6,7 +6,7 @@ import { cheerioLOAD, delay, randomize } from '../../helper/index.js';
 
 const _apiBase = (page) => `https://textpro.me/home-p${page}`;
 const createUrl = () => 'https://textpro.me/effect/create-image';
-const NO_VAL = (v) => v == '' || v == undefined || v == null || v == false;
+const NO_VAL = (v) => v === '' || v === undefined || v === null || v === false;
 
 const parseUrlDownload = ({ image_code: imageCode, session_id: sessionId, code, image }) => ({
 	preview: `https://textpro.me${image}`,
@@ -14,7 +14,7 @@ const parseUrlDownload = ({ image_code: imageCode, session_id: sessionId, code, 
 });
 
 const split = (text, len) => {
-	if (len == 1) {
+	if (len === 1) {
 		return [text];
 	}
 
@@ -128,7 +128,7 @@ export const scrapeUrl = async (page) => {
 
 	const dataJSON = JSON.parse(fs.readFileSync('./databases/textmaker/textprourl.json'));
 
-	if (page == 13) {
+	if (page === 13) {
 		return console.log("scraping is done. saved in './textprourl.json' total page scraped :", page); /* eslint-disable-line */
 	}
 

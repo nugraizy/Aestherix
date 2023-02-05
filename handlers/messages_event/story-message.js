@@ -21,12 +21,12 @@ export default {
 		caption += `Number : ${message.prettyNumber}\n`;
 		caption += `Type : ${message.type}\n`;
 
-		if (message.type == 'extendedTextMessage') {
+		if (message.type === 'extendedTextMessage') {
 			caption += `Body : ${message.body}`;
 			const buffer = await textStory(message.body, message.message.message.extendedTextMessage.backgroundArgb);
 
 			return await client[botNum].sendMessage(ZERO, { image: buffer, caption: caption.trim() });
-		} else if (message.type == 'videoMessage' || message.type == 'imageMessage') {
+		} else if (message.type === 'videoMessage' || message.type === 'imageMessage') {
 			caption += `Caption : ${message.body}`;
 			messages = generateWAMessageFromContent(ZERO, { ...message.message.message }, {});
 			messages.message[message.type].caption = caption;
@@ -43,7 +43,7 @@ export default {
 			`[${color(time, 'cyan')}]`,
 			`${color(message.pushname.trim(), 'white')} ${color(message.prettyNumber, '#ff71ce')} :`,
 			`${color(
-				message.body == 'Unknown body' ? 'Bug Story' : message.body?.trim()?.replace('\n', '')?.substr(0, 20),
+				message.body === 'Unknown body' ? 'Bug Story' : message.body?.trim()?.replace('\n', '')?.substr(0, 20),
 				'#05ffa1',
 			)}`,
 			`${color(message.from, '#b967ff')}`,

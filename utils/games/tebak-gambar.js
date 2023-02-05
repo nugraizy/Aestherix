@@ -58,7 +58,7 @@ export const startTG = async (client, id, { message, sender }, remainingTime) =>
 			configuration.games.tebakGambar.get(ids).timer = second;
 			const { timer } = checkIntervals(configuration.intervals.tebakGambar.get(ids));
 
-			if (timer == 5) {
+			if (timer === 5) {
 				clients[botNum].reply({ from: ids, quoted: messages }, 'Time is almost over! 5 seconds');
 			}
 

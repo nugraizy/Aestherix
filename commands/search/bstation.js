@@ -32,7 +32,7 @@ export default {
 			const row = [];
 
 			for (const { title, aid, cover, source, author, view, duration, score } of videos) {
-				if (i == 0) {
+				if (i === 0) {
 					await client[botNum].sendMessage(
 						from,
 						{

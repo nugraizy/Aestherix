@@ -12,7 +12,7 @@ const EVALY = ['/>', '$>', '=>', '!>'];
 
 export default {
 	async handler(message, client, cmds, store, user) {
-		if (message == undefined) {
+		if (message === undefined) {
 			return;
 		}
 
@@ -33,14 +33,14 @@ export default {
 			'error' in message ||
 			!message.message ||
 			message.isBaileys ||
-			message.type == 'protocolMessage' ||
-			message.type == 'senderKeyDistributionMessage' ||
+			message.type === 'protocolMessage' ||
+			message.type === 'senderKeyDistributionMessage' ||
 			!message.type
 		) {
 			return;
 		}
 
-		if (message.message.key && message.message.key.remoteJid == 'status@broadcast' && configuration.OPTIONS.story) {
+		if (message.message.key && message.message.key.remoteJid === 'status@broadcast' && configuration.OPTIONS.story) {
 			return (await import('./story-message.js')).default.handler(client, message);
 		}
 
@@ -157,7 +157,7 @@ export default {
 							Math.max.apply(
 								null,
 								correctedCommand.map((x) => x.score),
-							) == x.score,
+							) === x.score,
 					);
 
 					message.cmd = message.prefix + HIGH_SCORE.command.toLowerCase().split(' ')[0].trim() || '';
@@ -211,11 +211,11 @@ export default {
 					}
 
 					if (
-						Tempcmds.category == 'Games' &&
+						Tempcmds.category === 'Games' &&
 						message.isGroup &&
 						!message.isAdmin &&
 						!message.isOwner &&
-						message?.[message?.from]?.games == 'disable'
+						message?.[message?.from]?.games === 'disable'
 					) {
 						return await client[botNum].reply(
 							{ from: message.from, quoted: message.message },
@@ -223,17 +223,17 @@ export default {
 						);
 					}
 
-					if (Tempcmds.category == 'Moderation' && message.isGroup && !message.isAdmin && !message.isOwner) {
+					if (Tempcmds.category === 'Moderation' && message.isGroup && !message.isAdmin && !message.isOwner) {
 						return await client[botNum].reply({ from: message.from, quoted: message.message }, 'You are not Admin');
 					}
 
-					if (Tempcmds.category == 'Moderation' && !message.isGroup) {
+					if (Tempcmds.category === 'Moderation' && !message.isGroup) {
 						return await client[botNum].reply({ from: message.from, quoted: message.message }, 'This commands for group only');
 					}
 
 					const limit = addLimit({ id: message.sender, limit: Tempcmds.limit ?? 0, type: 'MIN' });
 
-					if (typeof limit == 'object' && 'message' in limit) {
+					if (typeof limit === 'object' && 'message' in limit) {
 						client[botNum].reply(
 							{ from: message.from, quoted: message.message },
 							`${limit.message}\nYour limit is ${limit.limits}\nBut this command (${Tempcmds.name}) need ${Tempcmds.limit}`,
@@ -241,7 +241,7 @@ export default {
 						continue;
 					}
 
-					if (limit == false) {
+					if (limit === false) {
 						return await client[botNum].reply(
 							{ from: message.from, quoted: message.message },
 							'You have reached the limit of this command.',

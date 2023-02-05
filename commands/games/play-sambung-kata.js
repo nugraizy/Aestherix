@@ -27,14 +27,14 @@ export default {
 				footer: 'Void Bot Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
 				sections: [{ rows: [{ title: 'Play', rowId: '.sambung player 2' }], title: 'VOID BOT | Word Game' }],
 			});
-		} else if (query == 'player 2') {
-			if (statusGame.checkStatus() == 'waiting' && (statusGame.player1 == sender || statusGame.player2 == sender)) {
+		} else if (query === 'player 2') {
+			if (statusGame.checkStatus() === 'waiting' && (statusGame.player1 === sender || statusGame.player2 === sender)) {
 				await client[botNum].reply({ from, quoted: message }, statusGame.throwResponse().message);
 				return;
-			} else if (statusGame.checkStatus() == 'playing' && (statusGame.player1 == sender || statusGame.player2 == sender)) {
+			} else if (statusGame.checkStatus() === 'playing' && (statusGame.player1 === sender || statusGame.player2 === sender)) {
 				await client[botNum].reply({ from, quoted: message }, statusGame.throwResponse().message);
 				return;
-			} else if (statusGame.player1 !== sender && statusGame.player2 == undefined && statusGame.checkStatus() == 'waiting') {
+			} else if (statusGame.player1 !== sender && statusGame.player2 === undefined && statusGame.checkStatus() === 'waiting') {
 				const data = await statusGame.start(sender, client);
 
 				await client[botNum].sendMessage(from, {

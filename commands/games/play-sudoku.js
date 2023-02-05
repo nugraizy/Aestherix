@@ -21,9 +21,9 @@ export default {
 			const buttons = [{ buttonId: '', buttonText: { displayText: '' }, type: 1 }];
 
 			if (/(play|main)/.test(args[1])) {
-				const index = data.length == 0 ? -1 : data.findIndex((v) => v.id == from);
+				const index = data.length === 0 ? -1 : data.findIndex((v) => v.id === from);
 
-				if (index == -1) {
+				if (index === -1) {
 					const puzzle = makePuzzle('easy');
 					const solved = solvePuzzle(puzzle);
 					const grid = stringifyGrid(puzzle);
@@ -68,12 +68,12 @@ export default {
 					return await client[botNum].reply({ from, quoted: message }, `Pleas provide a row indexs\n\nex : ${cmd} A2 7`);
 				}
 
-				const index = data.length == 0 ? -1 : data.findIndex((v) => v.id == from);
+				const index = data.length === 0 ? -1 : data.findIndex((v) => v.id === from);
 
 				if (index !== -1) {
 					const fill = fillGrid(args[1], args[2], data[index].puzzle, data[index].solved);
 
-					if (fill.statusPlaying == 'Playing') {
+					if (fill.statusPlaying === 'Playing') {
 						const isWin = checkWin(fill.grid);
 
 						if (isWin.status) {
@@ -95,7 +95,7 @@ export default {
 						const grid = stringifyGrid(fill.tempBoard);
 
 						buttons[0].buttonId = '.sd clue';
-						buttons[0].buttonText.displayText = `Sisa Clue : ${data[index].clue == 0 ? 'Habis' : data[index].clue}`;
+						buttons[0].buttonText.displayText = `Sisa Clue : ${data[index].clue === 0 ? 'Habis' : data[index].clue}`;
 
 						const messages = client[botNum].buttonText(from, `${grid}`, 'Made by nanda', buttons, { quoted: message });
 
@@ -120,7 +120,7 @@ export default {
 					},
 				);
 			} else if (/clue/.test(args[1])) {
-				const index = data.length == 0 ? -1 : data.findIndex((v) => v.id == from);
+				const index = data.length === 0 ? -1 : data.findIndex((v) => v.id === from);
 
 				if (index !== -1) {
 					if (data[index].clue !== 0) {
@@ -146,7 +146,7 @@ export default {
 						const grid = stringifyGrid(reveal.tempBoard);
 
 						buttons[0].buttonId = '.sd clue';
-						buttons[0].buttonText.displayText = `Sisa Clue : ${data[index].clue == 0 ? 'Habis' : data[index].clue}`;
+						buttons[0].buttonText.displayText = `Sisa Clue : ${data[index].clue === 0 ? 'Habis' : data[index].clue}`;
 
 						const messages = client[botNum].buttonText(from, `${grid}`, 'Made by nanda', buttons, { quoted: message });
 
@@ -171,13 +171,13 @@ export default {
 					},
 				);
 			} else if (/ch?ec?k?/.test(args[1])) {
-				const index = data.length == 0 ? -1 : data.findIndex((v) => v.id == from);
+				const index = data.length === 0 ? -1 : data.findIndex((v) => v.id === from);
 
 				if (index !== -1) {
 					const grid = stringifyGrid(data[index].puzzle);
 
 					buttons[0].buttonId = '.sd clue';
-					buttons[0].buttonText.displayText = `Sisa Clue : ${data[index].clue == 0 ? 'Habis' : data[index].clue}`;
+					buttons[0].buttonText.displayText = `Sisa Clue : ${data[index].clue === 0 ? 'Habis' : data[index].clue}`;
 
 					const messages = client[botNum].buttonText(from, `${grid}`, 'Made by nanda', buttons, { quoted: message });
 
@@ -203,9 +203,9 @@ export default {
 					return;
 				}
 
-				const index = data.length == 0 ? -1 : data.findIndex((v) => v.id == from);
+				const index = data.length === 0 ? -1 : data.findIndex((v) => v.id === from);
 
-				if (args[2] == 'all') {
+				if (args[2] === 'all') {
 					data = [];
 					writeJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'), data);
 

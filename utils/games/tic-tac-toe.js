@@ -17,7 +17,7 @@ const MODEL = {
 };
 
 const RANDOM_TURN_BASED_ON_MODEL = (player1, player2) => {
-	const players = player2 == 'Void Bot' ? [player1, player2] : shuffleArray([player1, player2]);
+	const players = player2 === 'Void Bot' ? [player1, player2] : shuffleArray([player1, player2]);
 
 	return {
 		player1: players[0],
@@ -29,12 +29,13 @@ const RANDOM_TURN_BASED_ON_MODEL = (player1, player2) => {
 
 export const deleteTictactoeSession = (session) => {
 	const key =
-		Array.from(configuration.games.tictactoe.values()).find((game) => game.PLAYER_1 == session || game.PLAYER_2 == session) ||
-		null;
+		Array.from(configuration.games.tictactoe.values()).find(
+			(game) => game.PLAYER_1 === session || game.PLAYER_2 === session,
+		) || null;
 
-	if (key !== null && key.PLAYER_1 == session) {
+	if (key !== null && key.PLAYER_1 === session) {
 		return configuration.games.tictactoe.delete(key.PLAYER_1);
-	} else if (key !== null && key.player2 == session) {
+	} else if (key !== null && key.player2 === session) {
 		return configuration.games.tictactoe.delete(key.PLAYER_2);
 	}
 
@@ -43,12 +44,13 @@ export const deleteTictactoeSession = (session) => {
 
 export const getTictactoeSession = (session) => {
 	const key =
-		Array.from(configuration.games.tictactoe.values()).find((game) => game.PLAYER_1 == session || game.PLAYER_2 == session) ||
-		null;
+		Array.from(configuration.games.tictactoe.values()).find(
+			(game) => game.PLAYER_1 === session || game.PLAYER_2 === session,
+		) || null;
 
-	if (key !== null && key.PLAYER_1 == session) {
+	if (key !== null && key.PLAYER_1 === session) {
 		return key;
-	} else if (key !== null && key.PLAYER_2 == session) {
+	} else if (key !== null && key.PLAYER_2 === session) {
 		return key;
 	}
 
@@ -79,10 +81,10 @@ export class TicTacToe {
 
 	getKey(dari) {
 		const key =
-			Array.from(configuration.games.tictactoe.values()).find((game) => game.PLAYER_1 == dari || game.PLAYER_2 == dari) ||
+			Array.from(configuration.games.tictactoe.values()).find((game) => game.PLAYER_1 === dari || game.PLAYER_2 === dari) ||
 			null;
 
-		if (key !== null && key.PLAYER_1 == dari) {
+		if (key !== null && key.PLAYER_1 === dari) {
 			return key;
 		}
 
@@ -114,14 +116,14 @@ export class TicTacToe {
 			return { error: 'It is not your turn' };
 		}
 
-		if (player == 'Void Bot') {
+		if (player === 'Void Bot') {
 			location = this.minimax(location, 0, true, pcRival).move;
-			this.BOARD[player == 'Void Bot' ? location : location - 1] =
-				this.PLAYER_TURN == this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL;
-			this.PLAY_BOARD[player == 'Void Bot' ? location : location - 1] =
-				this.PLAYER_TURN == this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL;
+			this.BOARD[player === 'Void Bot' ? location : location - 1] =
+				this.PLAYER_TURN === this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL;
+			this.PLAY_BOARD[player === 'Void Bot' ? location : location - 1] =
+				this.PLAYER_TURN === this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL;
 
-			if (this.isWinner(this.PLAYER_TURN == this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL)) {
+			if (this.isWinner(this.PLAYER_TURN === this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL)) {
 				return { status: 'WINNER', winner: player, ...this };
 			}
 
@@ -134,12 +136,12 @@ export class TicTacToe {
 		}
 
 		if (this.isCorrectMove(location)) {
-			this.BOARD[player == 'Void Bot' ? location : location - 1] =
-				this.PLAYER_TURN == this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL;
-			this.PLAY_BOARD[player == 'Void Bot' ? location : location - 1] =
-				this.PLAYER_TURN == this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL;
+			this.BOARD[player === 'Void Bot' ? location : location - 1] =
+				this.PLAYER_TURN === this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL;
+			this.PLAY_BOARD[player === 'Void Bot' ? location : location - 1] =
+				this.PLAYER_TURN === this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL;
 
-			if (this.isWinner(this.PLAYER_TURN == this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL)) {
+			if (this.isWinner(this.PLAYER_TURN === this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL)) {
 				return { status: 'WINNER', winner: player, ...this };
 			}
 
@@ -174,11 +176,11 @@ export class TicTacToe {
 	}
 
 	isTurn(player) {
-		return this.PLAYER_TURN == player;
+		return this.PLAYER_TURN === player;
 	}
 
 	isDraw() {
-		return this.PLAY_BOARD.every((row) => row == '❌' || row == '⭕');
+		return this.PLAY_BOARD.every((row) => row === '❌' || row === '⭕');
 	}
 
 	changeTurn() {

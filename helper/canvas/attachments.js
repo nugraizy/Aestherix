@@ -126,7 +126,7 @@ export class Attachment {
 				y = y0;
 			};
 
-			if (filename == './media_files/blank.png') {
+			if (filename === './media_files/blank.png') {
 				changeDimen(
 					this.canvas.width / 2 - this._image.width / 2 + 5,
 					this.canvas.height / 2 - this._image.height / 2 - 80,

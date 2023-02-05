@@ -40,7 +40,7 @@ export const twitterDownload = (input) =>
 			let container = {};
 			const data = await fetchTEXT(_api(id), { headers: { cookie: '_fbp=fb.1.1657783842199.544637810' } });
 
-			if (data == '') {
+			if (data === '') {
 				return resolve({ error: 'Something went wrong with the URL.' });
 			}
 
@@ -69,7 +69,7 @@ export const twitterDownload = (input) =>
 			};
 
 			for (const media of medias) {
-				if (media.type == 'photo') {
+				if (media.type === 'photo') {
 					container.medias.push({
 						url: media.url,
 						type: 'image',

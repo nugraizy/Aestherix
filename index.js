@@ -39,7 +39,7 @@ const {
 } = baileys;
 const moduleURL = new URL(import.meta.url);
 
-export const __dirname = platform == 'win32' ? path.dirname(moduleURL.pathname).slice(1) : path.dirname(moduleURL.pathname);
+export const __dirname = platform === 'win32' ? path.dirname(moduleURL.pathname).slice(1) : path.dirname(moduleURL.pathname);
 const { stdout } = process;
 
 configuration.cli = parseCli();
@@ -110,7 +110,7 @@ if (OPTIONS.json) {
 
 export const runtime = Date.now();
 
-for (const option of Object.keys(OPTIONS).filter((key) => OPTIONS[key] == true)) {
+for (const option of Object.keys(OPTIONS).filter((key) => OPTIONS[key])) {
 	if (!regexOption.includes(option)) {
 		ERRLOG(` ${color(option, 'red')} ${color('is not a valid option', 'white')}`);
 	}
@@ -131,7 +131,7 @@ Number.prototype.toTime = function () {
 	const minutes = Math.floor(this / 60_000);
 	const seconds = ((this % 60_000) / 1000).toFixed(0);
 
-	return seconds == 60 ? `${minutes + 1}:00` : `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+	return seconds === 60 ? `${minutes + 1}:00` : `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 };
 
 let isClosed = false;
@@ -165,25 +165,25 @@ const start = async () => {
 
 	Client.ev.on('connection.update', async ({ lastDisconnect, connection, receivedPendingNotifications }) => {
 		try {
-			if (connection == 'close') {
+			if (connection === 'close') {
 				const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
 
-				if (reason == DisconnectReason.badSession) {
+				if (reason === DisconnectReason.badSession) {
 					log('Bad session, Please delete your previous session and do a rescan...');
 					process.exit(0);
-				} else if (reason == DisconnectReason.loggedOut) {
+				} else if (reason === DisconnectReason.loggedOut) {
 					log('Logged out, Please delete your previous session and do a rescan...');
 					process.exit(0);
 				} else {
-					if (reason == DisconnectReason.restartRequired) {
+					if (reason === DisconnectReason.restartRequired) {
 						log('Restart required, Restarting your WebScoket...');
-					} else if (reason == DisconnectReason.timedOut) {
+					} else if (reason === DisconnectReason.timedOut) {
 						log('Timed out, Quick reconnecting...');
-					} else if (reason == DisconnectReason.connectionClosed) {
+					} else if (reason === DisconnectReason.connectionClosed) {
 						log('Connection closed, Quick reconnecting...');
-					} else if (reason == DisconnectReason.connectionReplaced) {
+					} else if (reason === DisconnectReason.connectionReplaced) {
 						log('Connection replaced, Quick reconnecting...');
-					} else if (reason == DisconnectReason.connectionLost) {
+					} else if (reason === DisconnectReason.connectionLost) {
 						log('Connection lost, Quick reconnecting...');
 					} else {
 						log('Unknown reason, Quick reconnecting...');
@@ -192,7 +192,7 @@ const start = async () => {
 					reconnectMqttConnection(connectMqtt);
 					await start().catch((e) => log(e));
 				}
-			} else if (connection == 'open') {
+			} else if (connection === 'open') {
 				if (!isClosed) {
 					await load();
 					isClosed = true;
@@ -200,11 +200,11 @@ const start = async () => {
 
 				configuration.isFirstConnection = true;
 
-				if (receivedPendingNotifications == true) {
+				if (receivedPendingNotifications === true) {
 					shouldWait = true;
 				}
 
-				if (receivedPendingNotifications == false && shouldWait) {
+				if (receivedPendingNotifications === false && shouldWait) {
 					shouldWait = false;
 				}
 
@@ -238,7 +238,7 @@ const start = async () => {
 		});
 
 		Client.ev.on('messages.update', async (message) => {
-			if (message?.[0]?.update?.status == 4 || message?.[0]?.update?.status == 3) {
+			if (message?.[0]?.update?.status === 4 || message?.[0]?.update?.status === 3) {
 				return;
 			}
 
@@ -253,7 +253,7 @@ const start = async () => {
 			const participant = Object.keys(presence.presences)[0];
 			const presences = presence.presences[participant].lastKnownPresence;
 
-			if (presences == 'composing') {
+			if (presences === 'composing') {
 				const Handler = (await import('./handlers/message_presence/composing.js')).default.handler;
 
 				Handler(client, from, participant);
@@ -261,7 +261,7 @@ const start = async () => {
 		});
 
 		Client.ev.on('call', async ([{ isGroup, status, id, from }]) => {
-			if (OPTIONS.noCall && !isGroup && status == 'offer') {
+			if (OPTIONS.noCall && !isGroup && status === 'offer') {
 				const { user, server } = jidDecode(botNum);
 
 				await client[botNum].sendNode({
@@ -300,9 +300,9 @@ const start = async () => {
 		});
 
 		Client.ev.on('werewolf.cycle', async (update) => {
-			if (update.time == 'day') {
+			if (update.time === 'day') {
 				await client[botNum].sendMessage(update.id, { text: update.gameDialogue, mentions: update.peopleKilledMention });
-			} else if (update.time == 'evening') {
+			} else if (update.time === 'evening') {
 				await client[botNum].sendMessage(update.id, {
 					text: update.gameDialogue,
 				});
@@ -327,7 +327,7 @@ const start = async () => {
 							})),
 					});
 				}
-			} else if (update.time == 'voting') {
+			} else if (update.time === 'voting') {
 				await client[botNum].sendMessage(update.id, { text: update.gameDialogue, mentions: [update?.voteData?.voted] });
 
 				if (update.isWinning) {
@@ -346,12 +346,12 @@ const start = async () => {
 		.join('\n')}`,
 					mentions: update.playersData.map((v) => v.id),
 				});
-			} else if (update.time == 'dawn') {
+			} else if (update.time === 'dawn') {
 				await client[botNum].sendMessage(update.id, { text: update.gameDialogue.replace('{0}', update.gameTime) });
 
 				for (const { id, role, isAlive } of update.playersData) {
 					if (isAlive) {
-						if (role == 'werewolf') {
+						if (role === 'werewolf') {
 							client[botNum].sendMessage(id, {
 								buttonText: 'Open list',
 								footer: 'Made by Void Bot. Powered by Hidden Finder',
@@ -367,7 +367,7 @@ const start = async () => {
 										};
 									}),
 							});
-						} else if (role == 'seer') {
+						} else if (role === 'seer') {
 							client[botNum].sendMessage(id, {
 								buttonText: 'Open list',
 								footer: 'Made by Void Bot. Powered by Hidden Finder',
@@ -388,7 +388,7 @@ const start = async () => {
 										};
 									}),
 							});
-						} else if (role == 'guard') {
+						} else if (role === 'guard') {
 							client[botNum].sendMessage(id, {
 								buttonText: 'Open list',
 								title:
@@ -409,18 +409,18 @@ const start = async () => {
 										};
 									}),
 							});
-						} else if (role == 'villager') {
+						} else if (role === 'villager') {
 							client[botNum].sendMessage(id, {
 								text: 'Kamu adalah Penduduk. Tunggu sampai pagi. Saat ini hanya pemain malam yang beraksi',
 							});
 						}
 					}
 				}
-			} else if (update.time == 'night') {
+			} else if (update.time === 'night') {
 				await client[botNum].sendMessage(update.id, { text: 'Aktifitas pemain malam dihentikan karena sudah mau pagi.' });
-			} else if (update.time == 'failAfk') {
+			} else if (update.time === 'failAfk') {
 				await client[botNum].sendMessage(update.id, { text: update.message, mentions: update.playersData.map((v) => v.id) });
-			} else if (update.time == 'voted') {
+			} else if (update.time === 'voted') {
 				await client[botNum].sendMessage(update.id, { text: update.text, mentions: update.mentions });
 			}
 		});
@@ -444,7 +444,7 @@ const start = async () => {
 			const name = update?.attrs?.notify;
 			const action = update?.content?.[0]?.tag;
 			const participant = update?.content?.[0]?.attrs?.author;
-			const content = action == 'delete' ? null : await client[botNum].profilePictureUrl(from, 'image').catch((e) => null);
+			const content = action === 'delete' ? null : await client[botNum].profilePictureUrl(from, 'image').catch((e) => null);
 
 			client[botNum].ev.emit('group.settings.update', { from, name, action, participant, content });
 		});
@@ -467,7 +467,7 @@ const start = async () => {
 				} - ${data?.durationMs?.toTime() || '00'} )`;
 				const myStatus = await client?.[botNum]?.fetchStatus(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`);
 
-				if (myStatus.status == content) {
+				if (myStatus.status === content) {
 					return;
 				}
 
@@ -564,7 +564,7 @@ async function loadCommands() {
 					await watchFile(pathToFileURL(path.join(__dirname, obj.pathname)), cmd.name);
 				}
 				const modules =
-					process.platform == 'win32'
+					process.platform === 'win32'
 						? pathToFileURL(path.join(__dirname, obj.pathname)).pathname.slice(1)
 						: pathToFileURL(path.join(__dirname, obj.pathname)).pathname;
 
@@ -581,7 +581,7 @@ async function loadCommands() {
 }
 
 async function watchFile(module) {
-	const modules = process.platform == 'win32' ? decodeURI(module.pathname.slice(1)) : decodeURI(module.pathname);
+	const modules = process.platform === 'win32' ? decodeURI(module.pathname.slice(1)) : decodeURI(module.pathname);
 
 	fs.watchFile(module, async (event, filename) => {
 		const time = dayjs().format('HH:mm:ss DD/MM');
@@ -604,7 +604,7 @@ async function reloadModule(module, isNewFile, newFilePath) {
 					await Promise.all(
 						loadFiles('./commands').map(async (v) => {
 							const modules =
-								process.platform == 'win32'
+								process.platform === 'win32'
 									? decodeURI(pathToFileURL(v).pathname.slice(1))
 									: decodeURI(pathToFileURL(v).pathname);
 							const module = (await import(pathToFileURL(modules))).default;
@@ -613,7 +613,7 @@ async function reloadModule(module, isNewFile, newFilePath) {
 						}),
 					)
 				)
-					.filter((v) => v.status == 'enable')
+					.filter((v) => v.status === 'enable')
 					.map((v) => v.pathname);
 
 				resolve(files);
@@ -647,7 +647,7 @@ async function reloadModule(module, isNewFile, newFilePath) {
 				log(e);
 				configuration.commandsPath.splice(configuration.commandsPath.indexOf(newFilePath), 1);
 				configuration.cmds.commands.delete(
-					Array.from(configuration.cmds.commands.values()).find((v) => v.pathname == newFilePath).name,
+					Array.from(configuration.cmds.commands.values()).find((v) => v.pathname === newFilePath).name,
 				);
 				fs.unwatchFile(module);
 				return ERRLOG(`[${color(time, 'cyan')}]`, color(`⚠️ ${newFilePath.split('/').reverse()[0]} is deleted`, 'red'));

@@ -34,7 +34,7 @@ export default {
 		},
 		client,
 	) {
-		if (mention.length == 0 && !isMediaImage) {
+		if (mention.length === 0 && !isMediaImage) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please mention or send/reply an image to pet');
 		}
 
@@ -61,7 +61,7 @@ export default {
 
 			const result = await pet(profile, sender, defaultOptions);
 
-			if (defaultOptions.output == 'sticker') {
+			if (defaultOptions.output === 'sticker') {
 				await client[botNum].sendMessage(from, { sticker: Buffer.from(result, 'base64') });
 			} else {
 				await client[botNum].sendMessage(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' });
@@ -73,12 +73,12 @@ export default {
 		}
 
 		if (isMediaImage) {
-			if (!stickerAble || typeQuoted == 'videoMessage') {
+			if (!stickerAble || typeQuoted === 'videoMessage') {
 				return await client[botNum].reply(
 					{ from, quoted: message },
 					`Please send/reply a regular media to be petted. Can't convert ${typeQuoted}, only : ${typeSticker
 						.slice(
-							typeSticker.findIndex((v) => v == 'videoMessage'),
+							typeSticker.findIndex((v) => v === 'videoMessage'),
 							1,
 						)
 						.join(', ')
@@ -95,7 +95,7 @@ export default {
 			);
 			const result = await pet(file, sender, defaultOptions);
 
-			if (defaultOptions.output == 'sticker') {
+			if (defaultOptions.output === 'sticker') {
 				await client[botNum].sendMessage(from, { sticker: Buffer.from(result, 'base64') });
 			} else {
 				await client[botNum].sendMessage(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' });
@@ -117,7 +117,7 @@ export default {
 
 			const result = await pet(profile, sender, defaultOptions);
 
-			if (defaultOptions.output == 'sticker') {
+			if (defaultOptions.output === 'sticker') {
 				await client[botNum].sendMessage(from, { sticker: Buffer.from(result, 'base64') });
 			} else {
 				await client[botNum].sendMessage(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' });

@@ -24,8 +24,8 @@ export default {
 			? JSON.parse(fs.readFileSync(DB_PATH)).messages[from]
 			: await store.loadMessages(from);
 
-		if (args[1] == 'get') {
-			let dataMessage = messages.find((v) => v.key.id == args[2]);
+		if (args[1] === 'get') {
+			let dataMessage = messages.find((v) => v.key.id === args[2]);
 
 			dataMessage = await (
 				await import('../../helper/modules/reassign-messages-object.js')
@@ -53,17 +53,17 @@ Tot. Tags : ${dataMessage.mention.length}`,
 			);
 		}
 
-		if (dataMessages.length == 0) {
+		if (dataMessages.length === 0) {
 			return await client[botNum].reply({ from, quoted: message }, 'No messages scraped in this chat');
 		}
 
 		dataMessages = dataMessages.filter(
 			(v) =>
-				(v.mediaData?.participant == settings.owner_number || v.mention.includes(settings.owner_number)) &&
+				(v.mediaData?.participant === settings.owner_number || v.mention.includes(settings.owner_number)) &&
 				v.sender !== settings.owner_number,
 		);
 
-		if (dataMessages.length == 0) {
+		if (dataMessages.length === 0) {
 			return await client[botNum].reply(
 				{ from, quoted: message },
 				`Your tags is not found. Chats scraped : ${messages.length}`,
@@ -76,11 +76,11 @@ Tot. Tags : ${dataMessage.mention.length}`,
 				message: v.message,
 				sender: v.sender,
 				type:
-					v.mention.includes(settings.owner_number) && (v.type == 'mentionText' || v.type == 'extendedTextMessage')
+					v.mention.includes(settings.owner_number) && (v.type === 'mentionText' || v.type === 'extendedTextMessage')
 						? 'Tags & Reply'
 						: v.mention.includes(settings.owner_number) && v.mediaData.participant !== settings.owner_number
 						? 'Tags'
-						: !v.mention.includes(settings.owner_number) && v.mediaData.participant == settings.owner_number
+						: !v.mention.includes(settings.owner_number) && v.mediaData.participant === settings.owner_number
 						? 'Reply'
 						: '',
 				time: getTimeSince(Number(v.timeStamp) * 1000),

@@ -16,9 +16,9 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'You must provide a query.');
 		}
 
-		if ((args[1] == 'next' || args[1] == 'prev') && type == 'templateButtonReplyMessage') {
+		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
-			const index = data.findIndex((v) => v.image == args[2]);
+			const index = data.findIndex((v) => v.image === args[2]);
 
 			return await client[botNum].sendMessage(
 				from,
@@ -26,11 +26,11 @@ export default {
 					image: { url: data[index].image },
 					caption: 'Pinterest'.formatHeaders(),
 					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: args[1] == 'next' ? data[index].image : data[index].image } },
+						{ urlButton: { displayText: 'Image Source', url: args[1] === 'next' ? data[index].image : data[index].image } },
 						{
 							urlButton: {
 								displayText: 'Pinterest Source',
-								url: args[1] == 'next' ? data[index].pinSource : data[index].pinSource,
+								url: args[1] === 'next' ? data[index].pinSource : data[index].pinSource,
 							},
 						},
 						index + 1 !== data.length
@@ -73,7 +73,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 			}
 
 			result.forEach((v) => {
-				return (v.caption = v.caption == '' ? 'No caption' : v.caption);
+				return (v.caption = v.caption === '' ? 'No caption' : v.caption);
 			});
 			await client[botNum].sendMessage(
 				from,

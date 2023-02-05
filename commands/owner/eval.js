@@ -21,7 +21,7 @@ const col = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-n
 
 class CustomArray extends Array {
 	constructor(...args) {
-		return typeof args[0] == 'number' ? super(Math.min(args[0], 10_000)) : super(...args); /* eslint-disable-line */
+		return typeof args[0] === 'number' ? super(Math.min(args[0], 10_000)) : super(...args); /* eslint-disable-line */
 	}
 }
 
@@ -335,9 +335,9 @@ global.prints = print;
 };
 
 /* eslint-disable-line */ const clear = (names) => {
-	if (typeof names == 'function') {
+	if (typeof names === 'function') {
 		for (const key in global.functions) {
-			if (global.functions[key] == names) {
+			if (global.functions[key] === names) {
 				names = key;
 				break;
 			}
@@ -360,9 +360,9 @@ global.prints = print;
 };
 
 /* eslint-disable-line */ const check = (names) => {
-	if (typeof names == 'function') {
+	if (typeof names === 'function') {
 		for (const key in global.functions) {
-			if (global.functions[key] == names) {
+			if (global.functions[key] === names) {
 				names = key;
 				break;
 			}

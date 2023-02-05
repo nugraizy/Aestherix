@@ -65,7 +65,7 @@ export default {
 
 				await client[botNum].sendMessage(
 					from,
-					post.medias[0].type == 'video'
+					post.medias[0].type === 'video'
 						? { video: { url: post.medias[0].url }, caption: capt.trim() }
 						: {
 								image: { url: post.medias[0].url },
@@ -82,7 +82,7 @@ export default {
 				for (const media of post.medias) {
 					await client[botNum].sendMessage(
 						from,
-						media.type == 'video' ? { video: { url: media.url } } : { image: { url: media.url } },
+						media.type === 'video' ? { video: { url: media.url } } : { image: { url: media.url } },
 					);
 					await delay(100);
 				}

@@ -13,7 +13,7 @@ export const pinterest = (query) =>
 
 			RAW_RESULTS = RAW_RESULTS.filter((v) => v.images?.orig !== undefined);
 
-			if (RAW_RESULTS.length == 0) {
+			if (RAW_RESULTS.length === 0) {
 				resolve({ error: true, message: 'Original Image Not Available.' });
 			}
 

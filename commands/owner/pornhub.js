@@ -20,9 +20,9 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'You must provide a query.');
 		}
 
-		if ((args[1] == 'next' || args[1] == 'prev') && type == 'templateButtonReplyMessage') {
+		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
-			const index = data.findIndex((v) => v.mainThumb == args[2]);
+			const index = data.findIndex((v) => v.mainThumb === args[2]);
 
 			return await client[botNum].sendMessage(
 				from,
@@ -33,10 +33,10 @@ export default {
 						{
 							urlButton: {
 								displayText: 'Image Source',
-								url: args[1] == 'next' ? data[index].mainThumb : data[index].mainThumb,
+								url: args[1] === 'next' ? data[index].mainThumb : data[index].mainThumb,
 							},
 						},
-						{ urlButton: { displayText: 'PHub Source', url: args[1] == 'next' ? data[index].url : data[index].url } },
+						{ urlButton: { displayText: 'PHub Source', url: args[1] === 'next' ? data[index].url : data[index].url } },
 						index + 1 !== data.length
 							? {
 									quickReplyButton: {

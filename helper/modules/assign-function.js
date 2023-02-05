@@ -155,17 +155,17 @@ export const assign = (client) => {
 				: media;
 
 			const bufferType =
-				type == 'imageMessage'
+				type === 'imageMessage'
 					? 'image'
-					: type == 'videoMessage'
+					: type === 'videoMessage'
 					? 'video'
-					: type == 'stickerAnimated'
+					: type === 'stickerAnimated'
 					? 'sticker'
 					: (await fileTypeFromBuffer(media)).mime.includes('video')
 					? 'video'
 					: 'image';
 
-			if (bufferType == 'video') {
+			if (bufferType === 'video') {
 				const [video, webp] = ['video', 'webp'].map((ext) => `${filename}.${ext}`);
 
 				await writeFile(video, media);
@@ -185,10 +185,10 @@ export const assign = (client) => {
 				media = await readFile(webp);
 
 				[video, webp].forEach((file) => unlink(file));
-			} else if (bufferType == 'sticker') {
+			} else if (bufferType === 'sticker') {
 				return await applyExif(media, options);
 			} else {
-				media = await sharp(media, { animated: bufferType == 'video' })
+				media = await sharp(media, { animated: bufferType === 'video' })
 					.resize(512, 512, {
 						fit: sharp.fit.contain,
 						background: { r: 0, g: 0, b: 0, alpha: 0 },
@@ -234,7 +234,7 @@ export const assign = (client) => {
 		 * @returns
 		 */
 		buttonText: async (to, contentText, footerText, buttons, opts = {}) => {
-			if (buttons.length == 0) {
+			if (buttons.length === 0) {
 				return new Error('Buttons is empty');
 			}
 
@@ -248,7 +248,7 @@ export const assign = (client) => {
 		},
 		prepareMedia,
 		buttonDocument: async (dari, contentText, footerText, buttons, media, opts = {}) => {
-			if (buttons.length == 0) {
+			if (buttons.length === 0) {
 				return new Error('Buttons is empty');
 			}
 
@@ -274,7 +274,7 @@ export const assign = (client) => {
 			return message;
 		},
 		buttonLocation: async (dari, contentText, footerText, buttons, media, opts = {}) => {
-			if (buttons.length == 0) {
+			if (buttons.length === 0) {
 				return new Error('Buttons is empty');
 			}
 
@@ -330,7 +330,7 @@ export const assign = (client) => {
 			if (update.PARSE_EVENTS('ADD', 'REMOVE', 'DEMOTE', 'PROMOTE')) {
 				for (const container of containers) {
 					try {
-						if (!force && adminGroups.includes(container) && update == 'REMOVE') {
+						if (!force && adminGroups.includes(container) && update === 'REMOVE') {
 							await client[botNum].sendMessage(
 								dari,
 								{
@@ -345,7 +345,7 @@ export const assign = (client) => {
 							continue;
 						}
 
-						if (adminGroups.includes(container) && update == 'PROMOTE') {
+						if (adminGroups.includes(container) && update === 'PROMOTE') {
 							await client[botNum].sendMessage(
 								dari,
 								{
@@ -358,7 +358,7 @@ export const assign = (client) => {
 							continue;
 						}
 
-						if (!adminGroups.includes(container) && update == 'DEMOTE') {
+						if (!adminGroups.includes(container) && update === 'DEMOTE') {
 							await client[botNum].sendMessage(
 								dari,
 								{
@@ -374,11 +374,11 @@ export const assign = (client) => {
 						const response = await client[botNum][UPDATE[update]](dari, [container], update.toLowerCase());
 
 						if (update.PARSE_EVENTS('ADD')) {
-							if (response?.[0]?.status == '500') {
+							if (response?.[0]?.status === '500') {
 								await client[botNum].reply({ from: dari, quoted: message }, 'Group is already full');
-							} else if (response?.[0]?.status == '408') {
+							} else if (response?.[0]?.status === '408') {
 								await client[botNum].reply({ from: dari, quoted: message }, `${container} is just left a while ago`);
-							} else if (response?.[0]?.status == '403') {
+							} else if (response?.[0]?.status === '403') {
 								await client[botNum].reply(
 									{ from: dari, quoted: message },
 									`${container} is privated their number. Trying to invite them via invitational message.`,
@@ -402,7 +402,7 @@ export const assign = (client) => {
 								);
 
 								await client[botNum].relayMessage(container, messages.message, { messageId: messages.key.id });
-							} else if (response?.[0]?.status == '401') {
+							} else if (response?.[0]?.status === '401') {
 								await client[botNum].reply({ from: dari, quoted: message }, `${container} blocked bot number`);
 							}
 						}
@@ -412,7 +412,7 @@ export const assign = (client) => {
 					} catch (e) {
 						responses.push({ error: e.message, id: container });
 
-						if (e?.[0]?.status == '400') {
+						if (e?.[0]?.status === '400') {
 							await client[botNum].reply({ from: dari, quoted: message }, `${container} is not a valid number`);
 						}
 
@@ -446,12 +446,12 @@ export const assign = (client) => {
 			const containers = await store.loadMessages(dari);
 			const keys = [];
 
-			if (containers.length == 0) {
+			if (containers.length === 0) {
 				return keys;
 			}
 
 			for (const messages of containers) {
-				if (i == 20) {
+				if (i === 20) {
 					break;
 				}
 

@@ -11,7 +11,7 @@ import { checkIntervals, deleteIntervals } from '../../utils/misc/index.js';
 export default {
 	async handler(client, message, fetches) {
 		try {
-			if (message == undefined) {
+			if (message === undefined) {
 				return;
 			}
 
@@ -50,25 +50,25 @@ export default {
 				return;
 			}
 
-			if (from == 'status@broadcast') {
+			if (from === 'status@broadcast') {
 				return;
 			}
 
-			if (type == 'protocolMessage' || type == 'senderKeyDistributionMessage' || !type) {
+			if (type === 'protocolMessage' || type === 'senderKeyDistributionMessage' || !type) {
 				return;
 			}
 
 			if (
 				checkIntervals(configuration.intervals.url.get(sender)) !== 0 &&
 				checkIntervals(configuration.intervals.url.get(sender).get(from)) !== 0 &&
-				checkIntervals(configuration.intervals.url.get(sender).get(from)).id == message.message.key.id
+				checkIntervals(configuration.intervals.url.get(sender).get(from)).id === message.message.key.id
 			) {
 				await client[botNum].reply({ from, quoted: message }, 'Good. Do not send URLs next time or i will kick you.');
 				deleteIntervals(configuration.intervals.url.get(sender).get(from), configuration.intervals.url.get(sender), from);
 				return;
 			}
 
-			const stats = message[from]?.antiDelete == 'enable' ? true : fetches ? true : false;
+			const stats = message[from]?.antiDelete === 'enable' ? true : fetches ? true : false;
 
 			if (stats) {
 				const options = {
@@ -94,7 +94,7 @@ export default {
 				let typeQuoted = null;
 				const captionReply = `\nMessage Replied to : ${replyParticipants}\n`;
 				const quotedMessage =
-					Object.keys(messages)[0] == type &&
+					Object.keys(messages)[0] === type &&
 					messages[type].contextInfo &&
 					messages[type].contextInfo.quotedMessage &&
 					(typeQuoted = Object.keys(messages[type].contextInfo.quotedMessage)[0])

@@ -14,11 +14,11 @@ export default {
 		const stopping = stop(from, 0, client);
 
 		try {
-			if (typeof stopping == 'boolean' && !stopping) {
+			if (typeof stopping === 'boolean' && !stopping) {
 				return await client[botNum].reply({ from, quoted: message }, 'You are not in a search!');
 			}
 
-			if (typeof stopping == 'object' && stopping.partner2) {
+			if (typeof stopping === 'object' && stopping.partner2) {
 				client[botNum].reply({ quoted: message, from: stopping.partner1 }, 'You have stopped the chat!');
 				return client[botNum].sendMessage(stopping.partner2, { text: 'Your partner stoped the chat!' });
 			}

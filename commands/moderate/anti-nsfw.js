@@ -33,7 +33,7 @@ export default {
 		}
 
 		const data = readJSON('./databases/groups/settingsManager.json');
-		const isEnable = message?.[message?.from]?.antiNSFW == 'enable';
+		const isEnable = message?.[message?.from]?.antiNSFW === 'enable';
 
 		switch (message.query.toLowerCase()) {
 			case 'enable':
@@ -46,7 +46,7 @@ export default {
 				}
 
 				message[message.from].antiNSFW = 'enable';
-				data[data.findIndex((v) => Object.keys(v)[0] == message.from)][message.from].antiNSFW = 'enable';
+				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].antiNSFW = 'enable';
 				writeJSON('./databases/groups/settingsManager.json', data);
 
 				await client[botNum].reply({ from: message.from, quoted: message.message }, 'You have successfully enabled anti-nsfw');
@@ -61,7 +61,7 @@ export default {
 				}
 
 				message[message.from].antiNSFW = 'disable';
-				data[data.findIndex((v) => Object.keys(v)[0] == message.from)][message.from].antiNSFW = 'disable';
+				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].antiNSFW = 'disable';
 				writeJSON('./databases/groups/settingsManager.json', data);
 
 				await client[botNum].reply(

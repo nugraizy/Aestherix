@@ -81,7 +81,7 @@ export class SpotifyCover {
 				gradient.addColorStop(1, chroma(this._colorPalettes[gradientNumber]).darken(2).hex());
 			}
 
-			this.revertBlack = chroma(this._colorPalettes[gradientNumber]).name() == 'white';
+			this.revertBlack = chroma(this._colorPalettes[gradientNumber]).name() === 'white';
 
 			this.ctx.fillStyle = opts.gradient
 				? gradient
@@ -373,7 +373,7 @@ export class SpotifyCover {
 		const minutes = Math.floor(ms / 60_000);
 		const seconds = ((ms % 60_000) / 1000).toFixed(0);
 
-		return seconds == 60 ? `${minutes + 1}:00` : `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+		return seconds === 60 ? `${minutes + 1}:00` : `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 	}
 
 	initCanvas() {

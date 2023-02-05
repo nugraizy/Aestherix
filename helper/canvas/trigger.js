@@ -76,7 +76,7 @@ export const trigger = async (image, sender, opt) =>
 
 			const buffer = GIF.out.getData();
 
-			if (opt.output == 'sticker') {
+			if (opt.output === 'sticker') {
 				const file = await sharp(buffer, { animated: true })
 					.resize(width, height - 54, {
 						fit: fit.contain,

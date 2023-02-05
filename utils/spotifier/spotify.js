@@ -34,7 +34,7 @@ class Spotifier {
 
 		this.req = async (path, method, opts) => {
 			try {
-				if (this.#bearerToken == null) {
+				if (this.#bearerToken === null) {
 					await this.refreshToken();
 				}
 
@@ -251,7 +251,7 @@ class Spotifier {
 				query = encodeURI(query);
 				const data = await this.req(`/search?q=${query}&type=track&include_external=audio`, 'GET');
 
-				if (data.tracks.items.length == 0) {
+				if (data.tracks.items.length === 0) {
 					return { status: false, message: 'Not Found' };
 				}
 
@@ -266,7 +266,7 @@ class Spotifier {
 				query = encodeURI(query);
 				const data = await this.req(`/search?q=album:${query}&type=album&include_external=audio`, 'GET');
 
-				if (data.albums.items.length == 0) {
+				if (data.albums.items.length === 0) {
 					return { status: false, message: 'Not Found' };
 				}
 
@@ -281,7 +281,7 @@ class Spotifier {
 				query = encodeURI(query);
 				const data = await this.req(`/search?q=artist:${query}&type=artist&include_external=audio`, 'GET');
 
-				if (data.artists.items.length == 0) {
+				if (data.artists.items.length === 0) {
 					return { status: false, message: 'Not Found' };
 				}
 
@@ -357,7 +357,7 @@ class Spotifier {
 					return false;
 				}
 
-				if (data.currently_playing_type == 'ad') {
+				if (data.currently_playing_type === 'ad') {
 					return {
 						trackTitle: 'Advertisement',
 						artists: 'Spotify',
@@ -381,7 +381,7 @@ class Spotifier {
 					artists: artists
 						.slice(0, 3)
 						.map((v) => v.name)
-						.map((v, i) => (artists.length !== 1 && i + 1 == artists.length ? `and ${v}` : v))
+						.map((v, i) => (artists.length !== 1 && i + 1 === artists.length ? `and ${v}` : v))
 						.join(', '),
 					durationMs,
 					progressMs,

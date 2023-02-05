@@ -16,9 +16,9 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'You must provide a query.');
 		}
 
-		if ((args[1] == 'next' || args[1] == 'prev') && type == 'templateButtonReplyMessage') {
+		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
-			const index = data.findIndex((v) => v.download == args[2]);
+			const index = data.findIndex((v) => v.download === args[2]);
 
 			return await client[botNum].sendMessage(
 				from,
@@ -26,9 +26,23 @@ export default {
 					image: { url: data[index].download },
 					caption: 'Flickr'.formatHeaders(),
 					templateButtons: [
-						{ urlButton: { displayText: 'Flickr Source', url: args[1] == 'next' ? data[index].source : data[index].source } },
-						index + 1 !== data.length ? { quickReplyButton: { displayText: 'Next Image', id: `.flickr next ${data[index + 1].download} ${JSON.stringify(data)}` } } : {},
-						index !== 0 ? { quickReplyButton: { displayText: 'Previous Image', id: `.flickr prev ${data[index - 1].download} ${JSON.stringify(data)}` } } : {},
+						{ urlButton: { displayText: 'Flickr Source', url: args[1] === 'next' ? data[index].source : data[index].source } },
+						index + 1 !== data.length
+							? {
+									quickReplyButton: {
+										displayText: 'Next Image',
+										id: `.flickr next ${data[index + 1].download} ${JSON.stringify(data)}`,
+									},
+							  }
+							: {},
+						index !== 0
+							? {
+									quickReplyButton: {
+										displayText: 'Previous Image',
+										id: `.flickr prev ${data[index - 1].download} ${JSON.stringify(data)}`,
+									},
+							  }
+							: {},
 					],
 					footer: `Author : ${data[index].userName}
 Author Fullname : ${data[index].fullName}
@@ -69,7 +83,14 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 					caption: 'Flickr'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Flickr Source', url: result[0].source } },
-						result.length !== 1 ? { quickReplyButton: { displayText: 'Next Image', id: `.flickr next ${result[1].download} ${JSON.stringify(result)}` } } : {},
+						result.length !== 1
+							? {
+									quickReplyButton: {
+										displayText: 'Next Image',
+										id: `.flickr next ${result[1].download} ${JSON.stringify(result)}`,
+									},
+							  }
+							: {},
 					],
 					footer: `Author : ${result[0].userName}
 Author Fullname : ${result[0].fullName}

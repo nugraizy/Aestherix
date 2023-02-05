@@ -83,11 +83,11 @@ export class SambungKata {
 	}
 
 	checkTurn(player) {
-		return this.turn == player;
+		return this.turn === player;
 	}
 
 	changeTurn() {
-		this.turn = this.turn == this.player1 ? this.player2 : this.player1;
+		this.turn = this.turn === this.player1 ? this.player2 : this.player1;
 		return this.turn;
 	}
 
@@ -96,7 +96,7 @@ export class SambungKata {
 	}
 
 	throwResponse() {
-		return this.checkStatus() == 'waiting' ? RESPONSE.WAITING_FOR_OPPONENT : RESPONSE.GAME_ALREADY_STARTED;
+		return this.checkStatus() === 'waiting' ? RESPONSE.WAITING_FOR_OPPONENT : RESPONSE.GAME_ALREADY_STARTED;
 	}
 
 	async start(player2, client) {
@@ -122,7 +122,7 @@ export class SambungKata {
 				dataGame.timer = second;
 				const { timer } = checkIntervals(data);
 
-				if (timer == 10) {
+				if (timer === 10) {
 					clients[botNum].sendMessage(group, {
 						text: `Time's almost over! 10 second @${dataGame.turn.split('@')[0]}`,
 						mentions: [dataGame.turn],
@@ -149,10 +149,10 @@ export class SambungKata {
 		const randomL = randomize([-2, 2, -2, 2, -2, 2, -2, 2, -2, 2, -2, 2]);
 
 		if (i.includes('.')) {
-			return random == 2 ? i.split('.')[0] : i.split('.')[1];
+			return random === 2 ? i.split('.')[0] : i.split('.')[1];
 		}
 
-		return random == 2 ? i.slice(0, randomL == 2 ? 3 : 2) : i.slice(randomL == 2 ? -3 : -2);
+		return random === 2 ? i.slice(0, randomL === 2 ? 3 : 2) : i.slice(randomL === 2 ? -3 : -2);
 	}
 
 	async randomWord() {
@@ -204,7 +204,7 @@ export class SambungKata {
 		const data = await fetchTEXT(URL_BASE(word));
 		const $ = cheerioLOAD(data);
 
-		if ($('body > div.container.body-content > h4:nth-child(6)').text() == WORD_NOT_FOUND) {
+		if ($('body > div.container.body-content > h4:nth-child(6)').text() === WORD_NOT_FOUND) {
 			return RESPONSE.FAIL_TO_FIND_WORD;
 		}
 
@@ -260,7 +260,7 @@ export class SambungKata {
 				dataGame.timer = second;
 				const { timer } = checkIntervals(data);
 
-				if (timer == 10) {
+				if (timer === 10) {
 					clients[botNum].sendMessage(group, {
 						text: `Time's almost over! 10 second @${dataGame.turn.split('@')[0]}`,
 						mentions: [dataGame.turn],

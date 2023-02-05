@@ -11,9 +11,9 @@ export default {
 		client,
 		settings,
 	) {
-		if (isGroup && settings?.[from]?.antiURL == 'enable' && !isAdmin && isBotAdmin && !configuration.OPTIONS.onlyLogs) {
+		if (isGroup && settings?.[from]?.antiURL === 'enable' && !isAdmin && isBotAdmin && !configuration.OPTIONS.onlyLogs) {
 			const data = readJSON('./databases/groups/settingsManager.json');
-			const index = data.findIndex((v) => Object.keys(v)[0] == from);
+			const index = data.findIndex((v) => Object.keys(v)[0] === from);
 			const isBanned = data[index][from].banned.includes(sender);
 
 			if (!checkURL(body)) {

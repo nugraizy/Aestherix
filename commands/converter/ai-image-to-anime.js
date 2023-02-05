@@ -30,6 +30,7 @@ export default {
 			crop: 'SINGLE',
 			enhance: true,
 			proxy: { url: 'socks5://20.239.168.212:443', chinese: true, image: true },
+			onRetry: (e) => console.log(e),
 		});
 
 		await client[botNum].sendMessage(from, { image: Buffer.from(buffer, 'base64') }, { quoted: message });

@@ -12,7 +12,7 @@ import {
 	numberWithCommas,
 	removeDuplicatesArray,
 } from '../../helper/modules/index.js';
-import { ytv2 as ytv } from '../../utils/youtube/index.js';
+import { youtubeMainDownload as ytv } from '../../utils/youtube/index.js';
 
 const regex = (input) =>
 	/(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:-nocookie|)\.com\/(?:shorts\/)?(?:watch\?.*(?:|&)v=|embed\/|v\/)|youtu\.be\/)?\/.+/.test(
@@ -28,8 +28,27 @@ export default {
 	cooldown: 12,
 	limit: 8,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message }, client) {
+	async run({ from, query, prettyNumber, message, type, args }, client) {
 		const time = dayjs().format('HH:mm:ss DD/MM');
+
+		if (type === 'listResponseMessage' && args[1] === 'download') {
+			await client[botNum].sendMessage(from, { video: { url: args[2].replace('https', 'http') } }, { quoted: message });
+			return;
+		} else if (type === 'listResponseMessage' && args[1] === 'get') {
+			const video = await ytv(args[2], 'mp4');
+			const { mp4 } = video;
+			await client[botNum].sendMessage(from, {
+				title: 'YouTube MP4'.formatHeaders(),
+				footer: 'Made by Void Bot. Powered by Hidden Finder',
+				text: '\t',
+				buttonText: 'Open List',
+				sections: mp4.map((v, i) => ({
+					rows: [{ title: `${i + 1}. ${v.quality} ${v.filesizeF}`, rowId: `.ytmp4 download ${v.dlUrl}` }],
+					title: `\t`,
+				})),
+			});
+			return;
+		}
 
 		if (!query) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please provide a URL');
@@ -39,7 +58,7 @@ export default {
 
 		queries = removeDuplicatesArray(queries);
 
-		if (queries.length == 1 && isURL(queries) && !regex(queries)) {
+		if (queries.length === 1 && isURL(queries) && !regex(queries)) {
 			return await client[botNum].reply({ from, quoted: message }, 'This is not a valid YouTube URL.');
 		}
 
@@ -48,7 +67,7 @@ export default {
 				return await client[botNum].reply({ from, quoted: message }, `[ ${Query} ] This isn't a valid YouTube URL.`);
 			}
 
-			const video = await ytv(Query);
+			const video = await ytv(Query, 'mp4');
 
 			INFOLOG(
 				`[${color(time, 'cyan')}]`,
@@ -72,13 +91,14 @@ export default {
 					views,
 					author,
 					urlChannel,
-					dlLink,
+					mp4,
 					filesize,
 					filesizeF,
 					thumbnail: image,
+					url,
 				} = video;
 
-				if (!dlLink) {
+				if (!mp4) {
 					await client[botNum].reply({ from, quoted: message }, `Error while downloading YouTube Video\n\n${Query}`);
 					ERRLOG(
 						`[${color(time, 'cyan')}]`,
@@ -95,7 +115,6 @@ export default {
 				capt += `Views : ${numberWithCommas(views)}\n`;
 				capt += `Author : ${author}\n`;
 				capt += `Channel : ${urlChannel}\n`;
-				capt += `File Size : ${filesize} (${filesizeF})\n`;
 				capt += `Duration : ${timestamp ?? 'No Data'}\n`;
 				capt += `Description : ${description ?? 'No Data'}\n`;
 
@@ -111,10 +130,27 @@ export default {
 					},
 					caption: capt,
 					footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
-					templateButtons: [],
+					templateButtons: [
+						{
+							quickReplyButton: {
+								displayText: 'Audio',
+								id: `.ytmp3 get ${url}`,
+							},
+						},
+					],
 					headerType: 1,
 				});
-				await client[botNum].sendMessage(from, { video: { url: dlLink.replace('https', 'http') }, caption: capt.trim() });
+
+				await client[botNum].sendMessage(from, {
+					title: 'YouTube MP4'.formatHeaders(),
+					footer: 'Made by Void Bot. Powered by Hidden Finder',
+					text: '\t',
+					buttonText: 'Open List',
+					sections: mp4.map((v, i) => ({
+						rows: [{ title: `${i + 1}. 📼 ${v.quality} 💾 ${v.filesizeF}`, rowId: `.ytmp4 download ${v.dlUrl}` }],
+						title: `\t`,
+					})),
+				});
 				await delay(300);
 			}
 		}

@@ -37,7 +37,7 @@ Url : ${result.link}`,
 						{ quoted: message },
 					);
 
-					if (result.listEpisode.type == 'episode') {
+					if (result.listEpisode.type === 'episode') {
 						sections = [
 							{
 								title: result.title,
@@ -57,7 +57,7 @@ Url : ${result.link}`,
 							mentions: [sender],
 							sections,
 						});
-					} else if (result.listEpisode.type == 'batch') {
+					} else if (result.listEpisode.type === 'batch') {
 						sections = [
 							{
 								title: 'Waifuplay Downloader'.formatHeaders(),
@@ -83,7 +83,7 @@ Url : ${result.link}`,
 				}
 
 				break;
-			case args[1] == 'latest':
+			case args[1] === 'latest':
 				{
 					const result = await wpLatest();
 
@@ -115,7 +115,7 @@ Type : ${type}`,
 				}
 
 				break;
-			case args[1] == 'download':
+			case args[1] === 'download':
 				{
 					if (type !== 'listResponseMessage' && type !== 'templateButtonReplyMessage') {
 						return await client[botNum].reply({ from, quoted: message }, 'wait, you cannot do that.');

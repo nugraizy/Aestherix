@@ -41,7 +41,7 @@ export default {
 				}
 
 				return await client[botNum].reply({ from, quoted: message }, result.error);
-			} else if (result.information.length == 0) {
+			} else if (result.information.length === 0) {
 				if (isMediaImage && fs.existsSync(media)) {
 					fs.unlinkSync(media);
 				}

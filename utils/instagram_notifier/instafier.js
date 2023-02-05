@@ -150,20 +150,20 @@ class Instafier {
 		data.path = message.path;
 		data.itemId = message.item_id;
 		data.userId = message.user_id;
-		data.isOwner = data.userId == this.#authorId;
+		data.isOwner = data.userId === this.#authorId;
 		data.timestamp = message.timestamp;
 		data.type =
-			message.item_type == 'link' ? 'texts' : message.item_type == 'animated_media' ? 'animated_media' : message.item_type;
+			message.item_type === 'link' ? 'texts' : message.item_type === 'animated_media' ? 'animated_media' : message.item_type;
 
 		if ('text' in message) {
 			data.content = message.text;
 		}
 
-		if (message.item_type == 'link') {
+		if (message.item_type === 'link') {
 			data.content = message.link.text;
 		}
 
-		if (data.type == 'media' && 'video_versions' in message.media) {
+		if (data.type === 'media' && 'video_versions' in message.media) {
 			data.content = message.media.video_versions[0].url;
 			data.videoMetaData = {
 				id: message.media.id,
@@ -173,7 +173,7 @@ class Instafier {
 			};
 		}
 
-		if (data.type == 'media' && 'image_versions2' in message.media) {
+		if (data.type === 'media' && 'image_versions2' in message.media) {
 			data.content = message.media.image_versions2.candidates[0].url;
 			data.imageMetaData = {
 				id: message.media.id,
@@ -182,7 +182,7 @@ class Instafier {
 			};
 		}
 
-		if (data.type == 'voice_media') {
+		if (data.type === 'voice_media') {
 			data.content = message.voice_media.media.audio.audio_src;
 			data.voiceMetaData = {
 				id: message.voice_media.media.id,
@@ -190,7 +190,7 @@ class Instafier {
 			};
 		}
 
-		if (data.type == 'animated_media') {
+		if (data.type === 'animated_media') {
 			data.content = message.animated_media.images.fixed_height.webp;
 			data.animatedMetaData = {
 				id: message.animated_media.id,
@@ -220,7 +220,7 @@ class Instafier {
 	async ev() {
 		await this.readState();
 		this.Instagram.realtime.on('message', async (data) => {
-			if (data.message.op == 'add') {
+			if (data.message.op === 'add') {
 				data = await this._parseIncomingMessage(data.message);
 				this.Instagram.realtime.emit('onMessage', { model: 'received', ...data });
 			}
@@ -239,7 +239,7 @@ class Instafier {
 		this.Instagram.realtime.on('close', (d) => log('REALTIME Disconnected :', d));
 
 		this.Instagram.fbns.on('push', (message) => {
-			if (message.collapseKey == 'direct_v2_delete_item' && this.Container.has(Number(message.sourceUserId))) {
+			if (message.collapseKey === 'direct_v2_delete_item' && this.Container.has(Number(message.sourceUserId))) {
 				this.Instagram.fbns.emit('onDeleted', {
 					model: 'deleted',
 					...this.Container.get(Number(message.sourceUserId)).get(message.actionParams.dx),

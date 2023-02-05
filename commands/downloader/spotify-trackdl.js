@@ -5,7 +5,7 @@ import path from 'path';
 import { __dirname } from '../../index.js';
 import { color, ERRLOG, INFOLOG, isURL, removeDuplicatesArray } from '../../helper/modules/index.js';
 import { toOpus } from '../../utils/converter/index.js';
-import { yta2 as yta, ytsr } from '../../utils/youtube/index.js';
+import { youtubeMainDownload as yta, searchYoutube } from '../../utils/youtube/index.js';
 
 const regex = (input) =>
 	/(https?:\/\/open.spotify.com\/(track|user|artist|album)\/[a-zA-Z0-9]+(\/playlist\/[a-zA-Z0-9]+|)|spotify:(track|user|artist|album):[a-zA-Z0-9]+(:playlist:[a-zA-Z0-9]+|))/.test(
@@ -32,7 +32,7 @@ export default {
 
 		queries = removeDuplicatesArray(queries);
 
-		if (queries.length == 1 && isURL(queries) && !regex(queries)) {
+		if (queries.length === 1 && isURL(queries) && !regex(queries)) {
 			return await client[botNum].reply({ from, quoted: message }, 'This is not a valid Spotify URL.');
 		}
 
@@ -41,7 +41,7 @@ export default {
 				return await client[botNum].reply({ from, quoted: message }, `[ ${Query} ] This isn't a valid Spotify URL.`);
 			}
 
-			const searchTerm = await ytsr(Query);
+			const searchTerm = await searchYoutube(Query);
 			const audio = await yta(searchTerm[0].url);
 
 			INFOLOG(

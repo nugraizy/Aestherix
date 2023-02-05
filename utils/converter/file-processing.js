@@ -8,6 +8,10 @@ import path from 'path';
 import petting from 'pet-pet-gif';
 import sharp from 'sharp';
 import imgToPdf, { sizes } from 'image-to-pdf';
+import socksProxyAgent from 'socks-proxy-agent';
+import httpsProxyAgent from 'https-proxy-agent';
+import asyncRetry from 'async-retry';
+import { v4 } from 'uuid';
 
 import configuration from '../../connect.js';
 import { __dirname } from '../../index.js';
@@ -112,7 +116,7 @@ export const toOpus = (ext, opts = {}) =>
 		let container;
 		let tmp;
 
-		if (typeof opts.media == 'string' && isURL(opts.media)) {
+		if (typeof opts.media === 'string' && isURL(opts.media)) {
 			tmp = `${opts.input}.${ext}`;
 			container = [
 				'-y',
@@ -447,7 +451,7 @@ export const pet = (input, sender, opts = {}) =>
 				res();
 			});
 
-			if (opts.output == 'sticker') {
+			if (opts.output === 'sticker') {
 				const file = await sharp(await fs.readFile(`${opts.filename}.gif`), { animated: true })
 					.toFormat('webp')
 					.webp()
@@ -617,42 +621,48 @@ export const waifu2x = (input, sender) =>
 				},
 			});
 
-			await delay(2000);
+			try {
+				await asyncRetry(
+					async () => {
+						const {
+							data: { finished },
+						} = await axios.get(_api('/get', 'v2'), {
+							params: {
+								hash,
+								type: 'png',
+							},
+							responseType: 'arraybuffer',
+						});
 
-			const { data } = await axios.get(_api('/check', 'v2'), {
-				params: { hash },
-				headers: {
-					Referer: 'https://waifu2x.pro/',
-					Accept: 'application/json',
-					'Use-Agent':
-						'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36',
+						if (finished) {
+							return;
+						}
+					},
+					{ retries: 10, factor: 1 },
+				);
+			} catch (err) {
+				console.log(err);
+			}
+
+			const { data } = await axios.get(_api('/get', 'v2'), {
+				params: {
+					hash,
+					type: 'png',
 				},
+				responseType: 'arraybuffer',
 			});
 
-			if (data.finished) {
-				const { data } = await axios.get(_api('/get', 'v2'), {
-					params: {
-						hash,
-						type: 'png',
-					},
-					responseType: 'arraybuffer',
-				});
+			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Enhancing image success', '#01cdfe')} for ${color(sender, '#ff71ce')}`);
 
-				INFOLOG(`[${color(time, 'cyan')}]`, `${color('Enhancing image success', '#01cdfe')} for ${color(sender, '#ff71ce')}`);
-
-				if (await fs.pathExists(input)) {
-					await fs.unlink(input);
-				}
-
-				resolve(new Buffer.from(data, 'base64'));
-				return;
+			if (await fs.pathExists(input)) {
+				await fs.unlink(input);
 			}
 
 			if (await fs.pathExists(input)) {
 				await fs.unlink(input);
 			}
 
-			resolve({ error: 'Client Rejects the requests. please try again later.' });
+			resolve(new Buffer.from(data, 'base64'));
 		} catch (err) {
 			ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('Failed to Enhance image', 'red')} for ${color(sender, '#ff71ce')}`);
 
@@ -698,11 +708,6 @@ export const img2pdf = (image, sender) =>
 		}
 	});
 
-import socksProxyAgent from 'socks-proxy-agent';
-import httpsProxyAgent from 'https-proxy-agent';
-import asyncRetry from 'async-retry';
-import { v4 } from 'uuid';
-
 const DEFAULT_URL = 'https://ai.tu.qq.com/trpc.shadow_cv.ai_processor_cgi.AIProcessorCgi/Process';
 const defaultOpts = {
 	retries: 10,
@@ -713,7 +718,7 @@ const defaultOpts = {
  * Convert an existing image to anime-like using QQ A.I
  * @param {Buffer|string} image
  * @param {string} sender
- * @param {{proxy?: {url: string, chinese: boolean, image: boolean}, enhance?: boolean | undefined, forever?: boolean | undefined, unref: boolean | undefined, maxRetryTime?: number | undefined, retries?: number | undefined, factor?: number | undefined, minTimeout?: number | undefined, maxTimeout?: number | undefined, randomize?: boolean | undefined, crop: 'COMPARED' | 'SINGLE'}} options
+ * @param {{proxy?: {url: string, chinese: boolean, image: boolean}, enhance?: boolean | undefined, forever?: boolean | undefined, unref: boolean | undefined, maxRetryTime?: number | undefined, retries?: number | undefined, factor?: number | undefined, minTimeout?: number | undefined, maxTimeout?: number | undefined, randomize?: boolean | undefined, crop: 'COMPARED' | 'SINGLE', onRetry: (e) => any | undefined}} options
  * @returns {Promise<Buffer>}
  * @throws {Error}
  */

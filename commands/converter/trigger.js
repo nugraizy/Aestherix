@@ -38,7 +38,7 @@ export default {
 		},
 		client,
 	) {
-		if (mention.length == 0 && !isMediaImage) {
+		if (mention.length === 0 && !isMediaImage) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please mention or send/reply an image to pet');
 		}
 
@@ -61,7 +61,7 @@ export default {
 
 			const result = await trigger(profile, sender, options);
 
-			if (options.output == 'sticker') {
+			if (options.output === 'sticker') {
 				await client[botNum].sendMessage(from, { sticker: Buffer.from(result, 'base64') });
 			} else {
 				await client[botNum].sendMessage(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' });
@@ -78,7 +78,7 @@ export default {
 					{ from, quoted: message },
 					`Please send/reply a regular media to be triggered. Can't convert ${typeQuoted}, only : ${typeSticker
 						.slice(
-							typeSticker.findIndex((v) => v == 'videoMessage'),
+							typeSticker.findIndex((v) => v === 'videoMessage'),
 							1,
 						)
 						.join(', ')
@@ -91,7 +91,7 @@ export default {
 			const buffer = await client[botNum].downloadMediaMessage(mediaData);
 			const result = await trigger(buffer, sender, options);
 
-			if (options.output == 'sticker') {
+			if (options.output === 'sticker') {
 				await client[botNum].sendMessage(from, { sticker: Buffer.from(result, 'base64') });
 			} else {
 				await client[botNum].sendMessage(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' });
@@ -111,7 +111,7 @@ export default {
 
 			const result = await trigger(profile, sender, options);
 
-			if (options.output == 'sticker') {
+			if (options.output === 'sticker') {
 				await client[botNum].sendMessage(from, { sticker: Buffer.from(result, 'base64') });
 			} else {
 				await client[botNum].sendMessage(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' });

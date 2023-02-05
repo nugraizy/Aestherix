@@ -15,7 +15,7 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'Please provide a message to report');
 		}
 
-		if (args[1] == 'accept' && isOwner) {
+		if (args[1] === 'accept' && isOwner) {
 			await client[botNum].reply(
 				{ from: args[2], quoted: JSON.parse(args.slice(4)) },
 				'Your problem has been accepted by the Owner. Please wait for the fix. And for the bonuses you will be given 20 Limit.',

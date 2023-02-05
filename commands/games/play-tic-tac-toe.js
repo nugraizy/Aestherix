@@ -20,28 +20,34 @@ export default {
 		const capt = (game, status) => `TicTacToe Games by Void Bot.
 	${
 		status
-			? game.status == 'WINNER'
-				? `${game.winner == 'Void Bot' ? 'Void Bot' : `@${game.winner.split('@')[0]}`} wins!`
-				: game.status == 'DRAW'
+			? game.status === 'WINNER'
+				? `${game.winner === 'Void Bot' ? 'Void Bot' : `@${game.winner.split('@')[0]}`} wins!`
+				: game.status === 'DRAW'
 				? 'Game is Draw!'
-				: `${game.PLAYER_TURN == game.PLAYER_1 ? game.PLAYER_1_MODEL : game.PLAYER_2_MODEL} ${
-						game.PLAYER_TURN == 'Void Bot' ? 'Void Bot' : `@${game.PLAYER_TURN.split('@')[0]}`
+				: `${game.PLAYER_TURN === game.PLAYER_1 ? game.PLAYER_1_MODEL : game.PLAYER_2_MODEL} ${
+						game.PLAYER_TURN === 'Void Bot' ? 'Void Bot' : `@${game.PLAYER_TURN.split('@')[0]}`
 				  }'s turn\n\n` /* eslint-disable-line */
 			: ''
 	}
 	${game.PLAYER_1_MODEL} @${game.PLAYER_1.split('@')[0]} vs ${game.PLAYER_2_MODEL} ${
-			game.PLAYER_2 == 'Void Bot' ? 'Void Bot' : `@${game.PLAYER_2.split('@')[0]}`
+			game.PLAYER_2 === 'Void Bot' ? 'Void Bot' : `@${game.PLAYER_2.split('@')[0]}`
 		}
 	
 ${game.BOARD.map((v, i) => {
 	const ICON = WINNER_SETS[game.TURN];
 
 	if (status && game.status !== 'DRAW') {
-		v = i == game.WINNING_ORDER[0] || i == game.WINNING_ORDER[1] || i == game.WINNING_ORDER[2] ? v.replace(v, ICON) : v;
+		v = i === game.WINNING_ORDER[0] || i === game.WINNING_ORDER[1] || i === game.WINNING_ORDER[2] ? v.replace(v, ICON) : v;
 	}
 
 	v =
-		i == 2 || i == 5 || i == 8 ? (i == 8 ? v : `${v}\n          ---------\n          `) : i == 0 ? `          ${v}|` : `${v}|`;
+		i === 2 || i === 5 || i === 8
+			? i === 8
+				? v
+				: `${v}\n          ---------\n          `
+			: i === 0
+			? `          ${v}|`
+			: `${v}|`;
 	return v;
 }).join('')}
 
@@ -86,7 +92,7 @@ Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 				return await client[botNum].reply({ from, quoted: message }, move.error);
 			}
 
-			if (move.status == 'WINNER' || move.status == 'DRAW') {
+			if (move.status === 'WINNER' || move.status === 'DRAW') {
 				await client[botNum].sendMessage(
 					from,
 					{ text: capt(move, true), mentions: [game.PLAYER_1, game.PLAYER_2] },
@@ -102,7 +108,7 @@ Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 				{ quoted: message },
 			);
 
-			if (move.PLAYER_TURN == 'Void Bot') {
+			if (move.PLAYER_TURN === 'Void Bot') {
 				const botGames = getTictactoeSession(sender);
 
 				await client[botNum].reply({ from, quoted: message }, 'Void Bot TURN');
@@ -110,7 +116,7 @@ Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 
 				const botMove = botGames.playMove(botGames.displayPlayBoard(), 'Void Bot', sender);
 
-				if (botMove.status == 'WINNER' || botMove.status == 'DRAW') {
+				if (botMove.status === 'WINNER' || botMove.status === 'DRAW') {
 					await client[botNum].sendMessage(
 						from,
 						{ text: capt(botMove, true), mentions: [botGames.PLAYER_1, botGames.PLAYER_2] },

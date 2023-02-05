@@ -6,7 +6,7 @@ import { cheerioLOAD } from '../../helper/index.js';
 
 const _apiBase = 'https://en.ephoto360.com';
 const _apiBaseUrl = (input) => _apiBase + input;
-const isNoVal = (v) => v == '' || v == undefined || v == null || v == false;
+const isNoVal = (v) => v === '' || v === undefined || v === null || v === false;
 
 /**
  * @param {{image_code: string, session_id: string, image: string}} param0
@@ -19,7 +19,7 @@ const parseUrlDownload = ({ image_code: imageCode, session_id: sessionId, image 
 });
 
 const split = (text, len) => {
-	if (len == 1) {
+	if (len === 1) {
 		return [text];
 	}
 
@@ -226,7 +226,7 @@ export const scrapePages = async (page) => {
 		}
 	});
 
-	if (page == 39) {
+	if (page === 39) {
 		return fs.writeFileSync('./databases/textmaker/ephoto360url.json', JSON.stringify(container, undefined, 2));
 	}
 

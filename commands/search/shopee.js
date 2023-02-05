@@ -68,7 +68,7 @@ Stock : ${numberWithCommas(stock)}
 Sold : ${numberWithCommas(sold)}
 Brand : ${brand}
 Price : ${
-							prices == 0
+							prices === 0
 								? numberWithCommas(pricesDiscount)
 								: `${numberWithCommas(prices)}\nPrices After Discount : ${numberWithCommas(pricesDiscount)}`
 						}

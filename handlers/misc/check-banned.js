@@ -4,7 +4,7 @@ import { readJSON } from '../../helper/index.js';
 export const checkBan = async (client, { from, isBotAdmin, isGroup, messageStubParameters }) => {
 	if (isGroup) {
 		const data = readJSON('./databases/groups/settingsManager.json');
-		const index = data.findIndex((v) => Object.keys(v)[0] == from);
+		const index = data.findIndex((v) => Object.keys(v)[0] === from);
 
 		for (const participant of messageStubParameters) {
 			const isBanned = data[index][from].banned.includes(participant);

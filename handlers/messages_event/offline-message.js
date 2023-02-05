@@ -16,7 +16,7 @@ export default {
 
 			const data = readJSON('./databases/offline_db/users.json');
 
-			if (data.length == 0) {
+			if (data.length === 0) {
 				data.push({
 					participant: sender,
 					date: dayjs().valueOf(),
@@ -26,7 +26,7 @@ export default {
 				return;
 			}
 
-			const dataUser = data.find((v) => v.participant == sender);
+			const dataUser = data.find((v) => v.participant === sender);
 			const dateOff = dataUser ? dataUser.date : 0;
 			const waitTil30Second = dataUser ? dayjs(dateOff).add(30, 's').valueOf() : 0;
 			const dateNow = dayjs().valueOf();

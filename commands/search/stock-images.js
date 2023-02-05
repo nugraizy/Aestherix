@@ -16,9 +16,9 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'You must provide a query.');
 		}
 
-		if (args[1] == 'next' || args[1] == 'prev') {
+		if (args[1] === 'next' || args[1] === 'prev') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
-			const index = data.findIndex((v) => v == args[2]);
+			const index = data.findIndex((v) => v === args[2]);
 
 			return await client[botNum].sendMessage(
 				from,
@@ -26,7 +26,7 @@ export default {
 					image: { url: data[index] },
 					caption: 'Stock Images'.formatHeaders(),
 					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: args[1] == 'next' ? data[index] : data[index] } },
+						{ urlButton: { displayText: 'Image Source', url: args[1] === 'next' ? data[index] : data[index] } },
 						index + 1 !== data.length
 							? {
 									quickReplyButton: {

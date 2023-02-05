@@ -33,9 +33,9 @@ export const getWaifu = (input = 'neko', type = 'sfw') =>
 					error: `No data with the input : ${input}\nCurrent option are ${type}\nList of ${type} : ${_type[type].join(
 						', ',
 					)}.\n${
-						_type.nsfw.find((v) => v == input)
+						_type.nsfw.find((v) => v === input)
 							? '\nThis input are on nsfw section.'
-							: _type.sfw.find((v) => v == input)
+							: _type.sfw.find((v) => v === input)
 							? '\nThis input are on sfw section.'
 							: ''
 					}`.trim(),

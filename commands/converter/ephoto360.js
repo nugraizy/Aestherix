@@ -72,9 +72,9 @@ export default {
 		parsed = models !== null ? parsed.slice(1) : parsed;
 
 		if (models?.includes('model')) {
-			if (args[1] == 'next') {
+			if (args[1] === 'next') {
 				args[2] = Number(args[2]);
-			} else if (args[1] == 'prev') {
+			} else if (args[1] === 'prev') {
 				args[2] = Number(args[2]);
 			}
 
@@ -121,7 +121,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 		}
 
 		models =
-			models == null
+			models === null
 				? [randomize(dataJSON).url]
 				: jsSplit
 						.select(
@@ -130,7 +130,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 						)
 						?.map((v) => v.url);
 
-		if (models?.length == 0) {
+		if (models?.length === 0) {
 			return await client[botNum].reply(
 				{ from, quoted: message },
 				`Model ${models[0]} not found\n Type : !${this.name} -type`,

@@ -24,7 +24,7 @@ export default {
 			);
 		}
 
-		if (args[1] == 'play') {
+		if (args[1] === 'play') {
 			const wordle = new Wordle(sender);
 
 			if (configuration.games.wordle.has(sender) && wordle.message) {
@@ -42,7 +42,7 @@ export default {
 			);
 
 			wordle.messages = data;
-		} else if (args[1] == 'exit') {
+		} else if (args[1] === 'exit') {
 			if (!configuration.games.wordle.has(sender)) {
 				return await client[botNum].reply({ from, quoted: message }, 'You are not playing Wordle.');
 			}
@@ -52,7 +52,7 @@ export default {
 			wordle.exit();
 
 			await client[botNum].reply({ from, quoted: message }, 'You have exited Wordle.');
-		} else if (args[1] == 'info') {
+		} else if (args[1] === 'info') {
 			await client[botNum].reply(
 				{ from, quoted: message },
 				'This is a Wordle Game. You have given a clue how much the word length. And you have to guess the word, Every guessed word will checked and determined by how closed the input to the word is.\n\nGreen [🟩] : Correct Alphabet\nYellow [🟨] : Close\nBlack [⬛] : Not Close/Invalid\nWhite [⬜] : First Board Play.\n\nUsage: !wordle <play/exit/info>',

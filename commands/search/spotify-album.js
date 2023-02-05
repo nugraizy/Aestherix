@@ -57,11 +57,11 @@ export default {
 			const rows = [];
 
 			for (const { artists, name, duration_ms: durationMs } of tracks.items) {
-				if (count == 0) {
+				if (count === 0) {
 					caption += `Title : ${name}\n`;
 					caption += `Artists : ${artists
 						.map((v) => v.name)
-						.map((v, i) => (artists.length !== 1 && i + 1 == artists.length ? `and ${v}` : v))
+						.map((v, i) => (artists.length !== 1 && i + 1 === artists.length ? `and ${v}` : v))
 						.join(', ')}\n`;
 					caption += `Duration : ${durationMs.toTime()}\n`;
 				} else {
@@ -70,7 +70,7 @@ export default {
 							{
 								title: `${count}. ${artists
 									.map((v) => v.name)
-									.map((v, i) => (artists.length !== 1 && i + 1 == artists.length ? `and ${v}` : v))
+									.map((v, i) => (artists.length !== 1 && i + 1 === artists.length ? `and ${v}` : v))
 									.join(', ')} - ${name}`,
 								rowId: `.spotifydl ${name} - ${artists[0].name}`,
 							},
