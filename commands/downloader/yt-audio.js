@@ -104,7 +104,7 @@ export default {
 			} else {
 				const { title, description, timestamp, uploaded, views, author, urlChannel, mp3, thumbnail: image, url } = audio;
 
-				if (!dlLink) {
+				if (!mp3) {
 					client[botNum].reply({ from, quoted: message }, `Error while downloading YouTube Video\n\n${Query}`);
 					ERRLOG(
 						`[${color(time, 'cyan')}]`,
