@@ -16,6 +16,8 @@ const assets = {
 	model: null,
 };
 
+const instagram = 'dizy.wav';
+
 export class SpotifyCover {
 	constructor() {
 		this._track = null;
@@ -347,8 +349,6 @@ export class SpotifyCover {
 			this.ctx.font = '32px galyon';
 			this.ctx.fillStyle = chroma('white').hex();
 			this.ctx.fillText('nugraizy', 220, this.canvas.height - 180);
-
-			const instagram = '_dizyy_';
 
 			this.ctx.drawImage(
 				assets.model[`${iconType}_instagram`],

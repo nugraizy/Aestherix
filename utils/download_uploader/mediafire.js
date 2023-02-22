@@ -24,10 +24,10 @@ export const mediafire = (url) =>
 			const detail = $('ul.details');
 
 			const filename = $('.filename').text();
-			const filesize = detail.find('li > span').get(0).children[0].data;
-			const uploaded = detail.find('li > span').get(1).children[0].data;
+			const filesize = detail.find('li:first-child > span').text();
+			const uploaded = detail.find('li:first-child > span').text();
 			const dlLink = $('a.input.popsok').attr('href');
-			const filetypes = /[a-zA-Z]+/g.exec($('.filetype').find('span').get(1).children[0].data);
+			const filetypes = /[a-zA-Z]+/g.exec($('.filetype > span:last-child').text());
 			const mimetype = mime(filetypes?.[0]?.toLowerCase());
 			const format = whatFormat(mime(filetypes?.[0]?.toLowerCase()));
 

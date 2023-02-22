@@ -89,7 +89,7 @@ export default {
 			}
 
 			const date = dayjs(container.published * 1000).format('HH:mm:ss DD/MM/YYYY');
-			let capt = 'TikTok Video'.formatHeaders();
+			let capt = `TikTok ${container.type === 'images' ? 'Slide' : 'Video'}`.formatHeaders();
 
 			capt += `\n\nAuthor : ${container.author}\n`;
 			capt += `Username : ${container.nickname}\n`;
@@ -115,17 +115,32 @@ export default {
 
 				const images = container.url.images;
 
+				let data;
 				for (const { url, index } of images) {
+					if (index === 1) {
+						data = await client[botNum].sendMessage(
+							from,
+							{
+								image: {
+									url,
+								},
+								caption: capt.trim(),
+							},
+							{ quoted: message },
+						);
+						continue;
+					}
+
 					client[botNum].sendMessage(
 						from,
 						{
 							image: {
 								url,
 							},
-							caption: index === 1 ? capt.trim() : '',
 						},
-						{ quoted: message },
+						{ quoted: data },
 					);
+
 					await delay(100);
 				}
 
@@ -135,7 +150,7 @@ export default {
 					`${color('Downloaded TikTok Media', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`,
 				);
 
-				return;
+				continue;
 			}
 
 			await client[botNum].sendMessage(

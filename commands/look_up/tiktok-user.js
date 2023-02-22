@@ -5,6 +5,18 @@ import parser from 'yargs-parser';
 import { color, ERRLOG, isOne, isURL, numberWithCommas } from '../../helper/modules/index.js';
 import { tiktokProfileTIKTOK } from '../../utils/tiktok/index.js';
 
+const split = (arrs, len) => {
+	let idx = 0;
+	const result = [];
+
+	while (idx < arrs.length) {
+		if (idx % len === 0) result.push([]);
+		result[result.length - 1].push(arrs[idx++]);
+	}
+
+	return result;
+};
+
 export default {
 	name: 'tikstalk',
 	description: 'Lookup TikTok user',
@@ -14,11 +26,45 @@ export default {
 	cooldown: 6,
 	limit: 6,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message }, client) {
+	async run({ from, query, prettyNumber, message, type, args }, client) {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
+		if (type === 'templateButtonReplyMessage' && args[1] === '-crawl') {
+			let data = JSON.parse(args.slice(2).join(' '));
+			let len = '';
+			let int = 0;
+
+			data = split(data, 5).map((v, i) => {
+				len = i === 0 ? `1 - ${v.length}` : `${int + 1} - ${int + v.length}`;
+				int += v.length;
+				return {
+					int: len,
+					videos: v,
+				};
+			});
+
+			const row = [];
+
+			data.forEach((v) =>
+				row.push({
+					rows: [{ title: `${v.int}`, rowId: `.ttv ${v.videos.map((v) => v.url.sourceUrl).join(' ')}` }],
+					title: '\t',
+				}),
+			);
+
+			await client[botNum].sendMessage(from, {
+				buttonText: 'Open list',
+				title: 'See List Videos',
+				footer: 'Made by Void Bot. Powered by Hidden Finder',
+				text: '\t',
+				sections: row,
+			});
+
+			return;
+		}
+
 		if (!query) {
-			return await client[botNum].reply({ from, quoted: message }, 'Please specify a url');
+			return await client[botNum].reply({ from, quoted: message }, 'Please specify a query');
 		}
 
 		let { _: usernames } = parser(query);
@@ -59,6 +105,7 @@ export default {
 					following,
 					heart,
 					totalVideo,
+					posts,
 				} = users;
 
 				let capt = `Username : ${username}\n`;
@@ -81,6 +128,9 @@ export default {
 							{ urlButton: { displayText: 'Profile Picture HD Source', url: profileHD } },
 							{ urlButton: { displayText: 'Profile Picture SD Source', url: profileSD } },
 							{ urlButton: { displayText: 'Profile Picture Low Source', url: profileLOW } },
+							posts.length !== 0
+								? { quickReplyButton: { displayText: 'Crawl Videos', id: `.tikstalk -crawl ${JSON.stringify(posts)}` } }
+								: {},
 						],
 						footer: capt.trim(),
 					},
