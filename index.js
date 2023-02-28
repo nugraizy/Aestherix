@@ -88,6 +88,10 @@ if (OPTIONS.limitReset) {
 	);
 }
 
+if (OPTIONS.resetOnStart) {
+	await clearDBConnection();
+}
+
 const { state, saveState } = useSingleFileAuthState(`./session/${cli.input[0] ?? 'Session-debug'}.json`);
 
 global.store = makeInMemoryStore({ logger: P().child({ level: 'fatal', stream: 'store' }) });

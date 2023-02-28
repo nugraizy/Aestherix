@@ -10,13 +10,15 @@ import { whatFormat } from '../misc/index.js';
  * @returns {{path: string, id: number, filepath: string}}
  */
 const _parse = (str) => {
-	str = str.match(/((?:"[^"]*"|^[^"]*$)|((?:"[^"]*"|^[^"]*$)|\(([^)]+)\)+))/g);
+	const number = str.split(`    document.getElementById('dlbutton').omg = `)[1].split('\n')[0].replace(/;/g, '').split('%');
 
-	return {
-		path: str[1].replace(/"/g, ''),
-		id: eval(str[2]),
-		filepath: str[3].replace(/"/g, ''),
-	};
+	const numberMultiplication = parseInt(Number(number[0]) % Number(number[1])) * Number(number[0] % 3) + 18;
+
+	return str
+		.split(`    document.getElementById('dlbutton').href    = `)[1]
+		.split('\n')[0]
+		.replace(/"/g, '')
+		.replace('+(b+18)+', numberMultiplication);
 };
 
 /**
@@ -33,7 +35,7 @@ export const zippyshare = (url) =>
 
 			const $ = cheerioLOAD(data);
 
-			const dlLinkRaw = $('#dlbutton').next().html();
+			const dlLinkRaw = $('#dlbutton').next().next().next().html() || $('#player').next().next().next().html();
 
 			const dlLink = _parse(dlLinkRaw);
 
@@ -46,7 +48,7 @@ export const zippyshare = (url) =>
 				mimetype: contentType(filename),
 				filesize: $('font:contains(Size:)').next().text(),
 				uploaded: $('font:contains(Uploaded:)').next().text(),
-				dlLink: origin + dlLink.path + dlLink.id + dlLink.filepath,
+				dlLink: origin + dlLink,
 			};
 
 			if (!details.dlLink) {

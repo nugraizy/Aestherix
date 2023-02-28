@@ -708,7 +708,7 @@ export const img2pdf = (image, sender) =>
 		}
 	});
 
-const DEFAULT_URL = 'https://ai.tu.qq.com/trpc.shadow_cv.ai_processor_cgi.AIProcessorCgi/Process';
+const DEFAULT_URL = 'https://ai.tu.qq.com/overseas/trpc.shadow_cv.ai_processor_cgi.AIProcessorCgi/Process';
 const defaultOpts = {
 	retries: 10,
 	factor: 1,

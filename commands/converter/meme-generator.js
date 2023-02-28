@@ -1,15 +1,11 @@
 /* global botNum */
 import dayjs from 'dayjs';
-import path from 'path';
 import parser from 'yargs-parser';
-import { writeFileSync } from 'fs';
 
 import { __dirname } from '../../index.js';
 import { memeGenerator } from '../../helper/canvas/index.js';
 import { color, INFOLOG } from '../../helper/modules/index.js';
-import { convertStickerToMedia } from '../../utils/converter/index.js';
 
-const WATERMARK = 'made by void bot';
 const DEFAULT_TYPE = 'image';
 
 export default {
@@ -30,7 +26,7 @@ export default {
 			from,
 			prettyNumber,
 			message,
-			filename,
+			mediaData,
 			extractMediaData,
 			sender,
 			stickerAble,
@@ -76,29 +72,20 @@ export default {
 
 		query = query.replace(regexs, '');
 
-		const results = await client[botNum].downloadAndSaveMediaMessage(
-			extractMediaData,
-			path.join(__dirname, `temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
-			typeQuoted,
-		);
-
-		let image = results;
-
-		if (isQuotedSticker) {
-			const { result } = await convertStickerToMedia(results, sender, extractMediaData);
-
-			writeFileSync(path.join(__dirname, `temporary_files/${filename}.png`), new Buffer.from(result, 'base64'));
-
-			image = path.join(__dirname, `temporary_files/${filename}.png`);
+		if (isQuotedSticker && extractMediaData.isAnimated) {
+			return client[botNum].reply({ from, quoted: message }, 'Cannot use animated sticker.');
 		}
 
+		const image = await client[botNum].downloadMediaMessage(mediaData);
+
 		const buffer = await memeGenerator(
+			client[botNum],
 			sender,
 			image,
 			query.split('&')[0],
 			query.split('&')[1],
 			parsed.isStickers ? 'sticker' : parsed.isImage ? 'image' : DEFAULT_TYPE,
-			WATERMARK,
+			1000,
 		);
 
 		if (buffer.error) {

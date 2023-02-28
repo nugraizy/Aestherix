@@ -2,6 +2,7 @@ export * from './attachments.js';
 export * from './animated-image.js';
 export * from './github-contribution.js';
 export * from './meme-generator.js';
+export * from './prettify-screenshot.js';
 export * from './spotify-cover.js';
 export * from './static-image.js';
 export * from './text-story.js';

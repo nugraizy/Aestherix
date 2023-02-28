@@ -29,7 +29,7 @@ export default {
 		let buffer = await imageToAnime(bufferMessage, sender, {
 			crop: 'SINGLE',
 			enhance: true,
-			proxy: { url: 'socks5://20.239.168.212:443', chinese: true, image: true },
+			proxy: { url: 'socks5://proxyhk:caliph123@8.218.63.81:1080', chinese: false, image: true },
 			onRetry: (e) => console.log(e),
 		});
 

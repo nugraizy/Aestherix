@@ -25,7 +25,7 @@ export const mediafire = (url) =>
 
 			const filename = $('.filename').text();
 			const filesize = detail.find('li:first-child > span').text();
-			const uploaded = detail.find('li:first-child > span').text();
+			const uploaded = detail.find('li:last-child > span').text();
 			const dlLink = $('a.input.popsok').attr('href');
 			const filetypes = /[a-zA-Z]+/g.exec($('.filetype > span:last-child').text());
 			const mimetype = mime(filetypes?.[0]?.toLowerCase());
