@@ -34,7 +34,7 @@ export default {
 		if (type === 'listResponseMessage' && args[1] === 'download') {
 			await client[botNum].sendMessage(from, { video: { url: args[2].replace('https', 'http') } }, { quoted: message });
 			return;
-		} else if (type === 'listResponseMessage' && args[1] === 'get') {
+		} else if (type === 'templateButtonReplyMessage' && args[1] === 'get') {
 			const video = await ytv(args[2], 'mp4');
 			const { mp4 } = video;
 			await client[botNum].sendMessage(from, {
@@ -83,20 +83,7 @@ export default {
 
 				continue;
 			} else {
-				const {
-					title,
-					description,
-					timestamp,
-					uploaded,
-					views,
-					author,
-					urlChannel,
-					mp4,
-					filesize,
-					filesizeF,
-					thumbnail: image,
-					url,
-				} = video;
+				const { title, description, timestamp, uploaded, views, author, urlChannel, mp4, thumbnail: image, url } = video;
 
 				if (!mp4) {
 					await client[botNum].reply({ from, quoted: message }, `Error while downloading YouTube Video\n\n${Query}`);

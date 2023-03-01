@@ -55,8 +55,8 @@ export default {
 				ptt: false,
 			});
 			return;
-		} else if (type === 'listResponseMessage' && args[1] === 'get') {
-			const video = await ytv(args[2], 'mp4');
+		} else if (type === 'templateButtonReplyMessage' && args[1] === 'get') {
+			const video = await yta(args[2], 'mp4');
 			const { title, mp4 } = video;
 			await client[botNum].sendMessage(from, {
 				title: 'YouTube MP4'.formatHeaders(),

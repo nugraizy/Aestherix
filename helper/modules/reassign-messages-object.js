@@ -21,7 +21,7 @@ const typeSticker = ['imageMessage', 'videoMessage', 'stickerMessage'];
 
 const caching = async (clients, id) => {
 	await new Promise(async (resolve) => {
-		const groupMetadata = (await clients[botNum].groupMetadata(id).catch(() => undefined)) || {};
+		const groupMetadata = await clients[botNum].groupMetadata(id).catch(() => ({}));
 		const partc = groupMetadata.participants;
 
 		configuration.cache.metadata.set(id, {
