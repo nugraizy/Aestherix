@@ -1,7 +1,7 @@
 /* global botNum */
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
-import { color, delay, ERRLOG, INFOLOG, isOne, isURL, numberWithCommas } from '../../helper/modules/index.js';
+import { color, delay, ERRLOG, INFOLOG, isURL, numberWithCommas } from '../../helper/modules/index.js';
 import { twitterDownload } from '../../utils/twitter/index.js';
 
 export default {
@@ -22,7 +22,7 @@ export default {
 
 		let { _: urls } = parser(query);
 
-		if (isOne(urls.length) && !isURL(urls[0])) {
+		if (urls.length === 1 && !isURL(urls[0])) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please specify a valid url');
 		}
 
@@ -60,7 +60,7 @@ export default {
 			capt += `Tot. Like : ${numberWithCommas(post.liked)}\n`;
 			capt += `Tot. Retweet : ${numberWithCommas(post.retweet)}\n`;
 
-			if (isOne(post.medias.length)) {
+			if (post.medias.length === 1) {
 				capt += `Caption : ${post.caption.trim()}\n`;
 
 				await client[botNum].sendMessage(

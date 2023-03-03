@@ -2,7 +2,7 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
-import { color, delay, ERRLOG, INFOLOG, isOne, isURL } from '../../helper/modules/index.js';
+import { color, delay, ERRLOG, INFOLOG, isURL } from '../../helper/modules/index.js';
 import { getStory3 } from '../../utils/instagram/index.js';
 
 export default {
@@ -23,7 +23,7 @@ export default {
 
 		const { _: usernames } = parser(query);
 
-		if (isOne(usernames.length) && isURL(usernames[0]) && !/\/stories\//.test(usernames[0])) {
+		if (usernames.length === 1 && isURL(usernames[0]) && !/\/stories\//.test(usernames[0])) {
 			return await client[botNum].reply(
 				{ from, quoted: message },
 				'Please specify a valid username or a valid url instagram story',
@@ -59,7 +59,7 @@ export default {
 				capt += `\n\nUsername : ${story.username}\n`;
 				capt += `Fullname : ${story.fullName}\n`;
 
-				if (isOne(story.stories.length)) {
+				if (story.stories.length === 1) {
 					await client[botNum].sendMessage(
 						from,
 						story.stories[0].isVideo

@@ -3,7 +3,7 @@ import { delay } from '../../helper/index.js';
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
-import { color, ERRLOG, fetchBUFFER, INFOLOG, isOne, isURL } from '../../helper/modules/index.js';
+import { color, ERRLOG, fetchBUFFER, INFOLOG, isURL } from '../../helper/modules/index.js';
 import { fbDl } from '../../utils/facebook/index.js';
 
 const regex = (input) => /^(https?:\/\/)?((w{3}\.)|(m\.)?)?(facebook|fb)\.(com|watch)\/.*/.test(input);
@@ -26,11 +26,11 @@ export default {
 
 		const { _: urls } = parser(query);
 
-		if (isOne(urls.length) && !isURL(urls[0])) {
+		if (urls.length === 1 && !isURL(urls[0])) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please specify a valid url');
 		}
 
-		if (isOne(urls.length) && !regex(urls[0])) {
+		if (urls.length === 1 && !regex(urls[0])) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please specify a valid Facebook url');
 		}
 

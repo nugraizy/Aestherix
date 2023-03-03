@@ -62,7 +62,6 @@
 		"instagram_mqtt": "^1.2.2",
 		"instagram-private-api": "^1.45.3",
 		"js-beautify": "^1.14.0",
-		"js-split": "github:nugraizy/js-split",
 		"jsdom": "^19.0.0",
 		"link-preview-js": "^2.1.19",
 		"lodash": "^4.17.21",

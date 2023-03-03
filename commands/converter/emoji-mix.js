@@ -1,7 +1,7 @@
 /* global botNum */
 import emojiReg from 'emoji-regex';
-import jsSplit from 'js-split';
 import path from 'path';
+import _ from 'lodash';
 
 import configuration from '../../connect.js';
 import { __dirname } from '../../index.js';
@@ -31,7 +31,7 @@ export default {
 			return await client[botNum].reply({ from, quoted: message }, 'Please enter 2 valid emoji');
 		}
 
-		const emojis = jsSplit(regex, 2);
+		const emojis = _.chunk(regex, 2);
 
 		for (const arr of emojis) {
 			if (arr.length === 1) {

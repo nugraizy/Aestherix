@@ -40,8 +40,6 @@ const drawText = (ctx, x, y, texts, fontSize, isBottom = false) => {
 	});
 	lines = isBottom ? [line, ...lines] : [...lines, line];
 
-	console.log(lines);
-
 	if (lines.length > maxLines) {
 		drawText(ctx, x, y, texts, fontSize - 5, isBottom);
 	} else {

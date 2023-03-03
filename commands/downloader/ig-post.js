@@ -2,7 +2,7 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
-import { color, delay, ERRLOG, INFOLOG, isOne, isURL, numberWithCommas, parseCode } from '../../helper/modules/index.js';
+import { color, delay, ERRLOG, INFOLOG, isURL, numberWithCommas, parseCode } from '../../helper/modules/index.js';
 import { getPost } from '../../utils/instagram/index.js';
 
 const regex = (input) => /(https?:\/\/(?:www\.)?instagram\.com\/(p|reel|tv|s)\/([^/?#&]+)).*/.test(input);
@@ -25,11 +25,11 @@ export default {
 
 		const { _: urls } = parser(query);
 
-		if (isOne(urls.length) && !isURL(urls[0])) {
+		if (urls.length === 1 && !isURL(urls[0])) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please specify a valid url');
 		}
 
-		if (isOne(urls.length) && !regex(urls[0])) {
+		if (urls.length === 1 && !regex(urls[0])) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please specify a valid Instagram url');
 		}
 
@@ -77,7 +77,7 @@ export default {
 				capt += `Tot. Comment : ${numberWithCommas(post.commentCount)}\n`;
 				capt += `Tot. Like : ${numberWithCommas(post.likeCount)}\n`;
 
-				if (isOne(post.post.length)) {
+				if (post.post.length === 1) {
 					capt += `Caption : ${post.captions.trim()}\n`;
 
 					await client[botNum].sendMessage(

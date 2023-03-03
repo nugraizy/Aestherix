@@ -140,6 +140,15 @@ Number.prototype.toTime = function () {
 
 let isClosed = false;
 
+const handler = new Map();
+const handlerPath = {
+	incoming: './handlers/messages_event/incoming-message.js',
+	deleted: './handlers/messages_event/deleted-message.js',
+	composing: './handlers/message_presence/composing.js',
+	participant: './handlers/notification_handlers/group-participants-notification.js',
+	groupSettings: './handlers/notification_handlers/group-settings-notification.js',
+};
+
 const start = async () => {
 	if (OPTIONS.help) {
 		log(cli.help);
@@ -236,9 +245,10 @@ const start = async () => {
 
 	const connectEvent = () => {
 		Client.ev.on('messages.upsert', async (message) => {
-			const Handler = (await import('./handlers/messages_event/incoming-message.js')).default.handler;
-
-			Handler(message, client, configuration.cmds, store, configuration.user);
+			if (!handler.has('incoming')) {
+				handler.set('incoming', (await import(handlerPath.incoming)).default);
+			}
+			handler.get('incoming')(message, client, configuration.cmds, store, configuration.user);
 		});
 
 		Client.ev.on('messages.update', async (message) => {
@@ -246,10 +256,11 @@ const start = async () => {
 				return;
 			}
 
-			const Handler = (await import('./handlers/messages_event/deleted-message.js')).default.handler;
-
 			message = store.messages[message[0].key.remoteJid]?.get(message[0].key.id);
-			Handler(client, message, false, store);
+			if (!handler.has('deleted')) {
+				handler.set('deleted', (await import(handlerPath.deleted)).default);
+			}
+			handler.get('deleted')(client, message, false, store);
 		});
 
 		Client.ev.on('presence.update', async (presence) => {
@@ -258,9 +269,10 @@ const start = async () => {
 			const presences = presence.presences[participant].lastKnownPresence;
 
 			if (presences === 'composing') {
-				const Handler = (await import('./handlers/message_presence/composing.js')).default.handler;
-
-				Handler(client, from, participant);
+				if (!handler.has('coposing')) {
+					handler.set('composing', (await import(handlerPath.composing)).default);
+				}
+				handler.get('composing')(client, from, participant);
 			}
 		});
 
@@ -292,15 +304,17 @@ const start = async () => {
 		});
 
 		Client.ev.on('group.participants.update', async (message) => {
-			const Handler = (await import('./handlers/notification_handlers/participants-notification.js')).default.handler;
-
-			Handler(client, message, store);
+			if (!handler.has('participant')) {
+				handler.set('participant', (await import(handlerPath.participant)).default);
+			}
+			handler.get('participant')(client, message, store);
 		});
 
 		Client.ev.on('group.settings.update', async (message) => {
-			const Handler = (await import('./handlers/notification_handlers/group-settings-notification.js')).default.handler;
-
-			Handler(client, message, store);
+			if (!handler.has('groupSettings')) {
+				handler.set('groupSettings', (await import(handlerPath.groupSettings)).default);
+			}
+			handler.get('groupSettings')(client, message, store);
 		});
 
 		Client.ev.on('werewolf.cycle', async (update) => {
@@ -498,12 +512,12 @@ const start = async () => {
 
 ${result.title}`;
 					await client?.[botNum]?.sendMessage(destination, {
-						image: { url: result.preview.images[0].source.url.replace('amp;') },
+						image: { url: result.preview.images[0].source.url.replace('amp;', '') },
 						caption,
 						footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
 						templateButtons: [
 							{ urlButton: { displayText: 'Open Platform', url: result.url_overridden_by_dest } },
-							{ urlButton: { displayText: 'Image Source', url: result.preview.images[0].source.url.replace('amp;') } },
+							{ urlButton: { displayText: 'Image Source', url: result.preview.images[0].source.url.replace('amp;', '') } },
 						],
 					});
 					await delay(300);

@@ -2,16 +2,7 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
-import {
-	color,
-	delay,
-	ERRLOG,
-	INFOLOG,
-	isOne,
-	isURL,
-	numberWithCommas,
-	removeDuplicatesArray,
-} from '../../helper/modules/index.js';
+import { color, delay, ERRLOG, INFOLOG, isURL, numberWithCommas, removeDuplicatesArray } from '../../helper/modules/index.js';
 import { tiktokAPI } from '../../utils/tiktok/index.js';
 
 const regex = (input) => /(?:https:?\/{2})?(?:w{3}|vm|vt|t)?\.?tiktok.com\/([^\s&]+)/gi.test(input);
@@ -52,11 +43,11 @@ export default {
 			WITH_WM = removeDuplicatesArray(WITH_WM)[0];
 		}
 
-		if (isOne(urls.length) && !isURL(urls[0])) {
+		if (urls.length === 1 && !isURL(urls[0])) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please specify a valid url');
 		}
 
-		if (isOne(urls.length) && !regex(urls[0])) {
+		if (urls.length === 1 && !regex(urls[0])) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please specify a valid TikTok url');
 		}
 
@@ -125,6 +116,10 @@ export default {
 									url,
 								},
 								caption: capt.trim(),
+								templateButtons: [
+									{ urlButton: { displayText: 'User Profile Link', url: `https://www.tiktok.com/@${container.author}` } },
+								],
+								footer: '\t',
 							},
 							{ quoted: message },
 						);
@@ -161,6 +156,10 @@ export default {
 							!NO_WM && !WITH_WM ? 'withNoWatermark' : WITH_WM ? 'withWatermark' : NO_WM ? 'withNoWatermark' : 'withWatermark'
 						],
 					},
+					templateButtons: [
+						{ urlButton: { displayText: 'User Profile Link', url: `https://www.tiktok.com/@${container.author}` } },
+					],
+					footer: '\t',
 					caption: capt.trim(),
 				},
 				{ quoted: message },

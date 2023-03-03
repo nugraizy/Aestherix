@@ -1,6 +1,6 @@
 import Canvas from '@napi-rs/canvas';
-import jsSplit from 'js-split';
 import path from 'path';
+import _ from 'lodash';
 
 import { __dirname } from '../../index.js';
 import { fetchTEXT, cheerioLOAD } from '../modules/index.js';
@@ -398,7 +398,7 @@ export class GithubGraph {
 			arr.push(i);
 		}
 
-		return jsSplit(arr, calculated);
+		return _.chunk(arr, calculated);
 	}
 
 	async calculateDimension() {

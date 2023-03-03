@@ -1,10 +1,10 @@
 /* global botNum */
 import axios from 'axios';
 import fs from 'fs';
-import * as jsSplit from 'js-split';
 import path from 'path';
 import sharp from 'sharp';
 import yargsParser from 'yargs-parser';
+import _ from 'lodash';
 
 import configuration from '../../connect.js';
 import { __dirname } from '../../index.js';
@@ -13,32 +13,6 @@ import { ephoto360 } from '../../utils/index.js';
 
 const dataJSON = JSON.parse(fs.readFileSync('./databases/textmaker/ephoto360url.json'));
 const defaulType = 'image';
-
-const split = (arrs, len) => {
-	const arr = arrs;
-	const out = [];
-
-	let length = len;
-	let i = 0;
-	let size;
-
-	len = arr.length;
-
-	if (len % length === 0) {
-		size = Math.floor(len / length);
-
-		while (i < len) {
-			out.push(arr.slice(i, (i += size)));
-		}
-	} else {
-		while (i < len) {
-			size = Math.ceil((len - i) / length--);
-			out.push(arr.slice(i, (i += size)));
-		}
-	}
-
-	return out;
-};
 
 export default {
 	name: 'ephoto360',
@@ -81,7 +55,7 @@ export default {
 			const numbers = [];
 			const index = args[2] ?? 0;
 
-			const splitData = split(
+			const splitData = _.chunk(
 				dataJSON.map((v, i) => {
 					numbers.push(i + 1);
 					return `${i + 1}.    ${v.effectName}`;
@@ -120,15 +94,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 			});
 		}
 
-		models =
-			models === null
-				? [randomize(dataJSON).url]
-				: jsSplit
-						.select(
-							dataJSON,
-							models?.map((v) => Number(v) - 1),
-						)
-						?.map((v) => v.url);
+		models = !_.isNumber(parsed[0]) ? [randomize(dataJSON).url] : [_.get(dataJSON, parsed[0] - 1)?.url].filter(Boolean);
 
 		if (models?.length === 0) {
 			return await client[botNum].reply(
@@ -150,7 +116,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 				buffers = path.join(__dirname, `temporary_files/${filename}`);
 			}
 
-			const result = await ephoto360(model, parsed.join(' '), buffers);
+			const result = await ephoto360(model, parsed.slice(1).join(' '), buffers);
 
 			if ('error' in result) {
 				await client[botNum].reply({ from, quoted: message }, `something went wrong:\n\n${result.error}`);

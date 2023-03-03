@@ -1,21 +1,10 @@
 /* global botNum */
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
+import _ from 'lodash';
 
-import { color, ERRLOG, isOne, isURL, numberWithCommas } from '../../helper/modules/index.js';
+import { color, ERRLOG, isURL, numberWithCommas } from '../../helper/modules/index.js';
 import { tiktokProfileTIKTOK } from '../../utils/tiktok/index.js';
-
-const split = (arrs, len) => {
-	let idx = 0;
-	const result = [];
-
-	while (idx < arrs.length) {
-		if (idx % len === 0) result.push([]);
-		result[result.length - 1].push(arrs[idx++]);
-	}
-
-	return result;
-};
 
 export default {
 	name: 'tikstalk',
@@ -34,7 +23,7 @@ export default {
 			let len = '';
 			let int = 0;
 
-			data = split(data, 5).map((v, i) => {
+			data = _.chunk(data, 5).map((v, i) => {
 				len = i === 0 ? `1 - ${v.length}` : `${int + 1} - ${int + v.length}`;
 				int += v.length;
 				return {
@@ -69,7 +58,7 @@ export default {
 
 		let { _: usernames } = parser(query);
 
-		if (isOne(usernames.length) && isURL(usernames[0])) {
+		if (usernames.length === 1 && isURL(usernames[0])) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please specify a valid TikTok usernames');
 		}
 

@@ -1,7 +1,7 @@
 /* global botNum */
 import parser from 'yargs-parser';
 
-import { numberWithCommas, isURL, isOne } from '../../helper/modules/index.js';
+import { numberWithCommas, isURL } from '../../helper/modules/index.js';
 import { Github } from '../../utils/github/index.js';
 
 export default {
@@ -78,7 +78,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 
 		let { _: usernames } = parser(query);
 
-		if (isOne(usernames.length) && isURL(usernames[0])) {
+		if (usernames.length == 1 && isURL(usernames[0])) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please specify a valid Github usernames');
 		}
 

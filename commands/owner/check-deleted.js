@@ -6,6 +6,11 @@ import { getTimeSince } from '../../helper/index.js';
 
 const DB_PATH = `./media_files/connection_databases/${configuration.cli.input[0] ?? 'Session-debug'}.json`;
 
+const path = {
+	deleted: '../../handlers/messages_event/deleted-message.js',
+};
+const handler = new Map();
+
 export default {
 	name: 'checkdeleted',
 	description: 'Fetch every deleted messages in chat',
@@ -27,7 +32,10 @@ export default {
 		if (args[1] === 'get') {
 			const dataMessage = messages.find((v) => v.key.id === args[2]);
 
-			(await import('../../handlers/messages_event/deleted-message.js')).default.handler(client, dataMessage, true, store);
+			if (!handler.has('deleted')) {
+				handler.set('deleted', (await import(path.deleted)).default);
+			}
+			handler.get('deleted')(client, dataMessage, true, store);
 			return;
 		}
 

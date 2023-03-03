@@ -1,12 +1,13 @@
 /* global log */
 import axios from 'axios';
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';
 import { fileTypeFromBuffer } from 'file-type';
 import FormData from 'form-data';
 import fs from 'fs-extra';
 import gradient from 'gradient-string';
 import fetch from 'node-fetch';
 import ms from 'parse-ms';
+import _ from 'lodash';
 
 import configuration from '../../connect.js';
 
@@ -82,41 +83,22 @@ export const distordFX = (value) => (value > 0 ? 1 : value < 0 ? -1 : 0);
 
 export const clamp = (value, min, max) => Math.min(Math.max(min, value), max);
 
-export const shuffleArray = (array = []) => {
-	let curId = array.length;
+export const shuffleArray = (array = []) => _.shuffle(array);
 
-	while (0 !== curId) {
-		const randId = Math.floor(Math.random() * curId);
+export const randomize = (array = []) => _.sample(array);
 
-		curId--;
-		const tmp = array[curId];
-
-		array[curId] = array[randId];
-		array[randId] = tmp;
-	}
-	return array;
-};
-
-export const randomArray = (array = []) => array[Math.floor(Math.random() * array.length)];
-
-export const removeDuplicatesArray = (array = []) => [...new Set(array)];
+export const removeDuplicatesArray = (array = []) => _.sortedUniq(array);
 
 export const reverseWord = (string = '') => string.split('').reverse().join('');
 
 export const reverseArray = (array = []) => array.reverse();
 
-export const randomCase = (string = '') => {
-	const container = [];
+export const randomCase = (string = '') =>
+	string.replace(/[A-Za-z]/gi, (str) => {
+		const random = _.random(0, 2);
 
-	string.split('').map((str) => {
-		if (Math.floor(Math.random() * 2) + 1 === 1) {
-			container.push(str.toLowerCase());
-		} else {
-			container.push(str.toUpperCase());
-		}
+		return random === 1 ? str.toUpperCase() : str.toLowerCase();
 	});
-	return container.join('');
-};
 
 String.prototype.toReadAble = function () {
 	const sec = parseInt(this, 10);
@@ -307,7 +289,7 @@ export const getRuntime = (time) => {
 
 export const generateHex = (length) =>
 	[...Array(length)]
-		.map(() => Math.floor(Math.random() * 16).toString(16))
+		.map(() => _.random(0, 16).toString(16))
 		.join('')
 		.toUpperCase();
 
@@ -325,7 +307,7 @@ export const speedText = (speed) => {
 	return `${bits.toFixed(places[unit])} ${units[unit]}bps`;
 };
 
-export const randomNumber = (max) => ~~(Math.random() * max);
+export const randomNumber = (max) => _.random(0, max);
 
 const chars = () => {
 	const char = {
@@ -525,54 +507,12 @@ export const loadFiles = (dir) => {
 
 export const isZilgoo = (str) => str.match(/\u{1F1E6}/g);
 
-export const isSame = (value1, value2) => value1 === value2;
-
-export const isUndefined = (value) => value === undefined;
-
-export const isNotUndefined = (value) => value != undefined;
-
-export const isNotZero = (value) => value != 0;
-
-export const isNotSame = (value1, value2) => value1 != value2;
-
-export const isNotMinusOne = (value) => value != -1;
-
-export const isNotNull = (value) => value != null;
-
-export const isNull = (value) => value === null;
-
-export const isZero = (value) => value === 0;
-
-export const isEmpty = (value) => value === '';
-
-export const isNotEmpty = (value) => value != '';
-
-export const isMinusOne = (value) => value === -1;
-
-export const isOne = (value) => value === 1;
-
-export const isNotOne = (value) => value != 1;
-
-export const isBigger = (value1, value2) =>
-	typeof value1 === 'string' ? value1.toNumber() > value2.toNumber() : typeof value1 === 'number' ? value1 > value2 : false;
-
-export const isSmaller = (value1, value2) =>
-	typeof value1 === 'string' ? value1.toNumber() < value2.toNumber() : typeof value1 === 'number' ? value1 < value2 : false;
-
-export const isSameOrBigger = (value1, value2) =>
-	typeof value1 === 'string' ? value1.toNumber() >= value2.toNumber() : typeof value1 === 'number' ? value1 >= value2 : false;
-
-export const isSameOrSmaller = (value1, value2) =>
-	typeof value1 === 'string' ? value1.toNumber() <= value2.toNumber() : typeof value1 === 'number' ? value1 <= value2 : false;
-
-export const randomize = (arr) => arr[Math.floor(Math.random() * arr.length)];
-
 export const readJSON = (path) => JSON.parse(fs.readFileSync(path));
 
 export const readBuffer = (path) => fs.readFileSync(path);
 
 export const writeJSON = (path, data) => {
-	if (isUndefined(data)) {
+	if (!data) {
 		throw new Error('you need the data to write!');
 	}
 
@@ -580,7 +520,7 @@ export const writeJSON = (path, data) => {
 };
 
 export const writeBuffer = (path, data) => {
-	if (isUndefined(data)) {
+	if (!data) {
 		throw new Error('you need the buffer to write!');
 	} else if (!Buffer.isBuffer(data)) {
 		throw new Error('the data is invalid. please input only buffer!');
@@ -623,7 +563,7 @@ export const makeDir = (path) => {
 export const readDir = (path) => fs.readdirSync(path);
 
 export const color = (text, color) => {
-	const schemes = ['teen', 'passion', 'instagram'][Math.floor(Math.random() * 3)];
+	const schemes = ['teen', 'passion', 'instagram'][_.random(0, 3)];
 
 	return configuration.OPTIONS.rainbow
 		? gradient['rainbow'](text)

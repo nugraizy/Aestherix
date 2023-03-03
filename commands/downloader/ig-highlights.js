@@ -2,7 +2,7 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
-import { color, ERRLOG, INFOLOG, isEmpty, isOne, isSame, isURL, numberWithCommas } from '../../helper/modules/index.js';
+import { color, ERRLOG, INFOLOG, isURL, numberWithCommas } from '../../helper/modules/index.js';
 import { getHighlights2 } from '../../utils/instagram/index.js';
 
 export default {
@@ -23,7 +23,7 @@ export default {
 
 		const { _: usernames } = parser(query);
 
-		if (isOne(usernames.length) && isURL(usernames[0])) {
+		if (usernames.length === 1 && isURL(usernames[0])) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please specify a valid username');
 		}
 
@@ -49,7 +49,7 @@ export default {
 					);
 
 					continue;
-				} else if (isEmpty(highlights.highlights)) {
+				} else if (highlights.highlights === '') {
 					await client[botNum].reply({ from, quoted: message }, `No highlights found for ${username}`);
 					ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('No highlights found for', 'cyan')} ${color(username, '#ff71ce')}`);
 
@@ -62,7 +62,7 @@ export default {
 				capt += `Fullname  : ${highlights.user.fullName}\n`;
 				capt += `Follower  : ${numberWithCommas(highlights.user.followers)}\n`;
 				capt += `Following : ${numberWithCommas(highlights.user.following)}\n`;
-				capt += isEmpty(highlights.user.biography) ? '' : `Biography : ${highlights.user.biography}\n`;
+				capt += highlights.user.biography === '' ? '' : `Biography : ${highlights.user.biography}\n`;
 				capt += `Tot. Highlights : ${numberWithCommas(highlights.highlights.length)}\n\n`;
 				capt += 'Each Sections of the Higlights will be send 2 media.\n';
 				capt += `Tot. Sections : ${highlights.highlights.length}\n`;
@@ -70,14 +70,14 @@ export default {
 
 				await client[botNum].reply({ from, quoted: message }, capt.trim());
 
-				if (isOne(highlights.highlights.length)) {
+				if (highlights.highlights.length === 1) {
 					for (const media of highlights.highlights[0].dataHighlight.slice(0, 2)) {
 						capt = '';
 						capt += `Highlights Title : ${highlights.highlights[0].title}\n`;
 
 						await client[botNum].sendMessage(
 							from,
-							isSame(media.type, 'video')
+							media.type === 'video'
 								? { video: { url: media.url }, caption: capt.trim() }
 								: { image: { url: media.url }, caption: capt.trim() },
 							{ quoted: message },
@@ -90,13 +90,13 @@ export default {
 
 						await client[botNum].sendMessage(
 							from,
-							isSame(media.dataHighlight[0].type, 'video')
+							media.dataHighlight[0].type === 'video'
 								? { video: { url: media.dataHighlight[0].url }, caption: capt }
 								: { image: { url: media.dataHighlight[0].url }, caption: capt },
 						);
 						await client[botNum].sendMessage(
 							from,
-							isSame(media.dataHighlight[1].type, 'video')
+							media.dataHighlight[1].type === 'video'
 								? { video: { url: media.dataHighlight[1].url } }
 								: { image: { url: media.dataHighlight[1].url } },
 						);

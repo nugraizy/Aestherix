@@ -2,7 +2,7 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
-import { color, ERRLOG, isOne, isURL } from '../../helper/modules/index.js';
+import { color, ERRLOG, isURL } from '../../helper/modules/index.js';
 import { twitterUser } from '../../utils/twitter/index.js';
 
 export default {
@@ -23,7 +23,7 @@ export default {
 
 		let { _: usernames } = parser(query);
 
-		if (isOne(usernames.length) && isURL(usernames[0])) {
+		if (usernames.length === 1 && isURL(usernames[0])) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please specify a valid Twitter usernames');
 		}
 

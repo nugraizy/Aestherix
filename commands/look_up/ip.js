@@ -2,7 +2,7 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
-import { color, ERRLOG, isOne } from '../../helper/modules/index.js';
+import { color, ERRLOG } from '../../helper/modules/index.js';
 import { iplookup } from '../../utils/misc/index.js';
 
 const regex = (input) =>
@@ -28,7 +28,7 @@ export default {
 
 		let { _: IPs } = parser(query);
 
-		if (isOne(IPs.length) && !regex(IPs[0])) {
+		if (IPs.length === 1 && !regex(IPs[0])) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please specify a valid IP Address');
 		}
 

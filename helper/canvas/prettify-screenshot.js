@@ -59,17 +59,13 @@ export const prettifyScreenshot = async (file) => {
 
 	const imageMetadata = await image.metadata();
 
-	const opts = {
-		round: 40,
-		widthCanvas: imageMetadata.width * 2,
-		heightCanvas: imageMetadata.height + 1113,
-		width: (multiple) => imageMetadata.width * multiple,
-		height: (multiple) => imageMetadata.height * multiple,
-	};
+	const widthTops = imageMetadata.height / 12;
 
-	if (opts.heightCanvas < 500 || opts.widthCanvas < 500) {
-		return { error: 'Image too small. Please use better resolution. Width >= 500 & Height >= 500' };
-	}
+	const opts = {
+		round: 10,
+		widthCanvas: imageMetadata.width * 1.1,
+		heightCanvas: imageMetadata.height * 1.2 + widthTops,
+	};
 
 	let rounded = new Buffer.from(
 		`<svg><path d="${roundedRectData(imageMetadata.width, imageMetadata.height, 0, 0, opts.round, opts.round)}"/></svg>`,
@@ -78,10 +74,10 @@ export const prettifyScreenshot = async (file) => {
 	const stats = await color.getPalette(buffer);
 
 	let tops = new Buffer.from(
-		`<svg><path d="${roundedRectData(imageMetadata.width * 1.6, 150, opts.round, opts.round, 0, 0)}" fill="${
+		`<svg><path d="${roundedRectData(imageMetadata.width, widthTops, opts.round, opts.round, 0, 0)}" fill="${
 			stats ? `rgb(${stats[0][0]}, ${stats[0][1]}, ${stats[0][2]})` : '#ffff'
 		}"
-        /></svg>`,
+		/></svg>`,
 	);
 
 	const canvas = createCanvas(opts.widthCanvas, opts.heightCanvas);
@@ -94,23 +90,13 @@ export const prettifyScreenshot = async (file) => {
 			.png()
 			.toBuffer();
 
-		ctx.drawImage(
-			await loadImage(topsPadding),
-			canvas.width / 2 - opts.width(1.6) / 2,
-			canvas.height / 2 - opts.height(1.6) / 2 - 150,
-			imageMetadata.width * 1.6,
-			150,
-		);
+		const tempCanvas = createCanvas(imageMetadata.width, imageMetadata.height + widthTops);
+		const tempCtx = tempCanvas.getContext('2d');
 
-		ctx.drawImage(
-			await loadImage(roundedCornerResizer),
-			canvas.width / 2 - opts.width(1.6) / 2,
-			canvas.height / 2 - opts.height(1.6) / 2,
-			opts.width(1.6),
-			opts.height(1.6),
-		);
+		tempCtx.drawImage(await loadImage(topsPadding), 0, 0, tempCanvas.width, widthTops);
+		tempCtx.drawImage(await loadImage(roundedCornerResizer), 0, widthTops, tempCanvas.width, tempCanvas.height - widthTops);
 
-		let combine = canvas.toBuffer('image/png');
+		let combine = tempCanvas.toBuffer('image/png');
 
 		const background = chroma(stats[0][0], stats[0][1], stats[0][2]).darken(0.6);
 
@@ -129,28 +115,24 @@ export const prettifyScreenshot = async (file) => {
 
 		let measured = ctx.measureText(watermark).width;
 
-		ctx.fillText(
-			watermark,
-			canvas.width / 2 - measured / 2,
-			opts.height(imageMetadata.width === imageMetadata.height ? 1.6 : 1.9) + 340,
-		);
+		combine = await loadImage(combine);
+
+		const scale = 0.8;
+		const x = (canvas.width - combine.width * scale) / 2;
+		const y = (canvas.height - combine.height * scale) / 2;
+
+		ctx.fillText(watermark, canvas.width / 2 - measured / 2, canvas.height - (canvas.height - combine.height) / 2.4);
 
 		measured = ctx.measureText(time).width;
 
-		ctx.fillText(time, canvas.width / 2 - measured / 2, 170);
+		ctx.fillText(time, canvas.width / 2 - measured / 2, y / 1.8);
 
 		ctx.shadowBlur = 70;
 		ctx.shadowColor = 'black';
 		ctx.shadowOffsetX = 0;
 		ctx.shadowOffsetY = 20;
 
-		ctx.drawImage(
-			await loadImage(combine),
-			canvas.width / 2 - (imageMetadata.width * 2.2) / 2,
-			canvas.height / 2 - (imageMetadata.height * 2.2) / 2,
-			imageMetadata.width * 2.2,
-			imageMetadata.height + 1113,
-		);
+		ctx.drawImage(combine, x, y, combine.width * scale, combine.height * scale);
 
 		combine = null;
 		buffer = null;

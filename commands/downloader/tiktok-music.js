@@ -4,7 +4,7 @@ import path from 'path';
 import parser from 'yargs-parser';
 
 import { __dirname } from '../../index.js';
-import { color, delay, ERRLOG, INFOLOG, isOne, isURL, removeDuplicatesArray } from '../../helper/modules/index.js';
+import { color, delay, ERRLOG, INFOLOG, isURL, removeDuplicatesArray } from '../../helper/modules/index.js';
 import { toOpus } from '../../utils/converter/index.js';
 import { mime } from '../../utils/misc/index.js';
 import { tiktokAPI } from '../../utils/tiktok/index.js';
@@ -30,11 +30,11 @@ export default {
 
 		let { _: urls } = parser(query);
 
-		if (isOne(urls.length) && !isURL(urls[0])) {
+		if (urls.length === 1 && !isURL(urls[0])) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please specify a valid url');
 		}
 
-		if (isOne(urls.length) && !regex(urls[0])) {
+		if (urls.length === 1 && !regex(urls[0])) {
 			return await client[botNum].reply({ from, quoted: message }, 'Please specify a valid TikTok url');
 		}
 
@@ -78,6 +78,10 @@ export default {
 					}),
 					fileName: `${music.authorMusic} - ${music.musicTitle}.mp3`,
 					mimetype: mime('mp3'),
+					templateButtons: [
+						{ urlButton: { displayText: 'User Profile Link', url: `https://www.tiktok.com/@${music.author}` } },
+					],
+					footer: '\t',
 				},
 				{ quoted: message },
 			);

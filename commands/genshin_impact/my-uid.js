@@ -3,6 +3,7 @@ import path from 'path';
 
 import { __dirname } from '../../index.js';
 import { readJSON } from '../../helper/modules/index.js';
+import configuration from '../../connect.js';
 
 export default {
 	name: 'mystats',
@@ -23,6 +24,6 @@ export default {
 
 		query = `${data[index].uid} -uid`;
 
-		await cmds.commands.get('genshinstalk').run({ sender, query, message, from }, client);
+		await configuration.cmds.commands.get('genshinstalk').run({ sender, query, message, from }, client);
 	},
 };
