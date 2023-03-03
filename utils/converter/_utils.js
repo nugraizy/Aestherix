@@ -13,16 +13,12 @@ const UA = 'Mozilla/5.0 (X11; Linux x86_64; rv:108.0) AppleWebKit/537.36 (KHTML,
  * @param {string} file input file path.
  * @returns {Promise<ReadableStream>}
  */
-export const streamFile = (file) => {
-	const read = fs.createReadStream(file);
-
-	return read;
-};
+export const streamFile = (file) => fs.createReadStream(file);
 
 export const signV1 = (obj) => {
 	const str = JSON.stringify(obj);
 
-	return md5('https://h5.tu.qq.com' + (str.length + (encodeURIComponent(str).match(/%[89ABab]/g)?.length || 0)) + 'HQ31X02e' );
+	return md5(`https://h5.tu.qq.com${str.length + (encodeURIComponent(str).match(/%[89ABab]/g)?.length || 0)}HQ31X02e`);
 };
 
 export const imageToBuffer = async (image, httpsAgent, opts) => {
