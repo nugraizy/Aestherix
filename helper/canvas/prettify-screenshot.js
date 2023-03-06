@@ -145,7 +145,7 @@ export const prettifyScreenshot = async (file) => {
 
 		const background = chroma(stats[0][0], stats[0][1], stats[0][2]).darken(0.6);
 
-		ctx.fillStyle = 'rgb(188,53,80)'; //`rgb(${background._rgb._unclipped[0]}, ${background._rgb._unclipped[1]}, ${background._rgb._unclipped[2]})`;
+		ctx.fillStyle = `rgb(${background._rgb._unclipped[0]}, ${background._rgb._unclipped[1]}, ${background._rgb._unclipped[2]})`;
 		ctx.fillRect(0, 0, opts.widthCanvas, opts.heightCanvas);
 
 		const time = dayjs().format('ddd DD.MMM.YYYY HH:mmA');
