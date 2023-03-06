@@ -2,7 +2,6 @@
 node_modules/
 session/*.json
 session/*/*.json
-databases/users/*.json
 media_files/connection_databases/*.json
 temporary_files/
 t-*.*
