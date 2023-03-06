@@ -53,7 +53,7 @@ export default {
 		}
 
 		if (bodyQuoted) {
-			const { buffer } = await attp(sender, bodyQuoted, parseOptions.color);
+			const { buffer } = await attp(prettyNumber, bodyQuoted, parseOptions.color);
 
 			await client[botNum].sendMessage(from, { sticker: new Buffer.from(buffer, 'base64') }, { quoted: message });
 			return INFOLOG(
@@ -63,7 +63,7 @@ export default {
 		}
 
 		if (query) {
-			const { buffer } = await attp(sender, query, parseOptions.color);
+			const { buffer } = await attp(prettyNumber, query, parseOptions.color);
 
 			await client[botNum].sendMessage(from, { sticker: new Buffer.from(buffer, 'base64') }, { quoted: message });
 			return INFOLOG(

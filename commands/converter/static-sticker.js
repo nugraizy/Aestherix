@@ -47,13 +47,13 @@ export default {
 		}
 
 		if (bodyQuoted) {
-			ttp(sender, bodyQuoted, colors).then(async (buffer) => {
+			ttp(prettyNumber, bodyQuoted, colors).then(async (buffer) => {
 				await client[botNum].sendMessage(from, { sticker: new Buffer.from(buffer, 'base64') }, { quoted: message });
 
 				INFOLOG(`[${color(time, 'cyan')}]`, `${color('Sticker is sent', '#01cdfe')} to ${color(prettyNumber, '#ff71ce')}`);
 			});
 		} else if (query) {
-			ttp(sender, query, colors).then(async (buffer) => {
+			ttp(prettyNumber, query, colors).then(async (buffer) => {
 				await client[botNum].sendMessage(from, { sticker: new Buffer.from(buffer, 'base64') }, { quoted: message });
 
 				INFOLOG(`[${color(time, 'cyan')}]`, `${color('Sticker is sent', '#01cdfe')} to ${color(prettyNumber, '#ff71ce')}`);

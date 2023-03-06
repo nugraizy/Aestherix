@@ -1,6 +1,5 @@
 import Canvas from 'canvas';
 import sharp from 'sharp';
-import jimp from 'jimp';
 import Wrap from 'canvas-text-wrapper';
 import * as color from 'colorthief';
 
@@ -187,14 +186,14 @@ export class Attachment {
 				throw new Error(err);
 			}
 
-			let r = 1.4;
-			let cw = 60;
-			let ch = 60;
+			const r = 1.4;
+			const cw = 60;
+			const ch = 60;
 
-			const raw = await jimp.read('./media_files/assets/cross-mark.png');
+			const raw = sharp('./media_files/assets/cross-mark.png');
 
-			const cross1Raw = await raw.rotate(Math.floor(Math.random() * 180)).getBufferAsync(jimp.MIME_PNG);
-			const cross2Raw = await raw.rotate(Math.floor(Math.random() * 180)).getBufferAsync(jimp.MIME_PNG);
+			const cross1Raw = await raw.rotate(~~(Math.random() * 180), { background: { r: 0, g: 0, b: 0, alpha: 0 } }).toBuffer();
+			const cross2Raw = await raw.rotate(~~(Math.random() * 180), { background: { r: 0, g: 0, b: 0, alpha: 0 } }).toBuffer();
 
 			const [signature, logo, [cross1, cross2]] = [
 				await loadImage('./media_files/assets/1_icon_github_signature.png'),

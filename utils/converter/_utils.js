@@ -60,7 +60,10 @@ export const imageToBuffer = async (image, httpsAgent, opts) => {
 };
 
 const getImageProcessingLibrary = async () => {
-	const [_jimp, sharp] = await Promise.all([await import('jimp').catch(() => {}), await import('sharp').catch(() => {})]);
+	const [_jimp, sharp] = await Promise.all([
+		await import('jimp').catch(() => undefined),
+		await import('sharp').catch(() => undefined),
+	]);
 
 	if (sharp) {
 		return { sharp };

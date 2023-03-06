@@ -49,26 +49,38 @@ export default {
 				return await client[botNum].reply({ from, quoted: message }, 'Similar images not found.');
 			}
 
-			let capt = 'Reverse Image Search'.formatHeaders();
-
-			capt += '\nWill sending a few similar or the actual images itself. Please wait...\n\n';
+			let i = 1;
+			let capt = '';
 
 			for (const item of result.information) {
-				capt += `Title: ${item.title}\nDescription: ${item.description}\n\n`;
-			}
+				if (i === 1) {
+					capt += 'Reverse Image Search'.formatHeaders();
+					capt += '\nWill sending a few similar or the actual images itself. Please wait...\n\n';
+				}
 
-			await client[botNum].sendMessage(
-				from,
-				{ image: { url: result.information[0].images }, caption: capt.trim() },
-				{ quoted: message },
-			);
+				if (i === 6) {
+					break;
+				}
 
-			const images = removeDuplicatesArray(result.information.map((item) => item.images))
-				.slice(1)
-				.slice(0, 5);
+				capt += `Title : ${item.title}\n`;
+				capt += `Description : ${item.description}\n`;
+				capt += `Domain : ${item.domain}`;
 
-			for (const image of images) {
-				await client[botNum].sendMessage(from, { image: { url: image } });
+				await client[botNum].sendMessage(
+					from,
+					{
+						image: { url: item.images.preview[0].url },
+						caption: capt.trim(),
+						templateButtons: [
+							{ urlButton: { displayText: 'Image Source', url: item.images.original } },
+							{ urlButton: { displayText: 'Content Source', url: item.source } },
+						],
+					},
+					{ quoted: message },
+				);
+				capt = '';
+
+				i++;
 			}
 
 			if (isMediaImage && fs.existsSync(media)) {

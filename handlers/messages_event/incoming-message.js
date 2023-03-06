@@ -343,17 +343,19 @@ export default incomingHandler = async (message, client, cmds, store, user) => {
 						user.cooldown.get(message.sender).requests = false;
 					}
 
-					let str = 'Something went wrong.\nPlease send this error stack to the owner :\n\n';
+					let str = 'Something went wrong.\n';
+					str += !message.isOwner ? 'Please send this error stack to the owner :\n\n' : '\n';
 
 					str += `Type : ${err.name || 'Unknown'}\n`;
 					str += `Message : ${err.message || 'Unknown'}\n`;
-					str += `Stack Trace : ${`${err.stack?.substr(0, 20)}...` || 'Unknown'}`;
+					str += `Stack Trace : ${(message.isOwner ? err?.stack : err?.stack?.substring(0, 20)) || 'Unknown'}`;
+
 					await client[botNum].sendMessage(message.from, {
 						text: str,
 						footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
 						templateButtons: [
 							{ urlButton: { displayText: 'Copy Stack Trace', url: `https://www.whatsapp.com/otp/copy/${err.stack}` } },
-							{
+							(message.isOwner && {}) || {
 								urlButton: {
 									displayText: 'Report to Owner',
 									url: `https://wa.me/${message.settings.owner_number}?text=hi,%20bot%20mengalami%20error${encodeURI(
@@ -361,11 +363,11 @@ export default incomingHandler = async (message, client, cmds, store, user) => {
 									)}`,
 								},
 							},
-							{ quickReplyButton: { displayText: 'Report via Bot', id: `.report ${err.stack}` } },
+							(message.isOwner && {}) || { quickReplyButton: { displayText: 'Report via Bot', id: `.report ${err.stack}` } },
 						],
 						headerType: 1,
 					});
-					console.log(err);
+					console.error(err);
 				}
 			}
 		}

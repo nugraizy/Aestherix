@@ -151,7 +151,13 @@ export const assign = (client) => {
 			const isMediaURL = Buffer.isBuffer(media) ? false : isURL(media) ? true : false;
 
 			media = isMediaURL
-				? (await axios.get(media, { responseType: 'arraybuffer', headers: { DNT: 1, 'Upgrade-Insecure-Request': 1 } })).data
+				? (
+						await axios.get(media, {
+							responseType: 'arraybuffer',
+							headers: { DNT: 1, 'Upgrade-Insecure-Request': 1 },
+							validateStatus: () => true,
+						})
+				  ).data
 				: media;
 
 			const bufferType =

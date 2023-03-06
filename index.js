@@ -15,6 +15,7 @@ import path from 'path';
 import P from 'pino';
 import { platform } from 'process';
 import { pathToFileURL } from 'url';
+import benchmark from 'nanobench';
 
 dotenv.config();
 
@@ -538,7 +539,7 @@ start().catch((e) => log(e));
 function loadFiles(dir) {
 	const files = [];
 
-	function walkDir(curDir) {
+	const walkDir = (curDir) => {
 		const list = fs.readdirSync(curDir);
 
 		for (const file of list) {
@@ -551,7 +552,7 @@ function loadFiles(dir) {
 				files.push(path);
 			}
 		}
-	}
+	};
 
 	walkDir(dir);
 

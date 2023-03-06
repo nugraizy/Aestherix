@@ -35,25 +35,21 @@ export const telegram = (query) =>
 	new Promise(async (resolve) => {
 		try {
 			if (
-				query.match(
-					new RegExp(
-						/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/,
-						'gi',
-					),
-				)
+				new RegExp(
+					/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/,
+					'gi',
+				).test(query)
 			) {
-				const data = await fetchJSON(_apiBase(`getStickerSet?name=${query.split('t.me/addstickers/')[1]}`)).json();
+				const data = await fetchJSON(_apiBase(`getStickerSet?name=${query.split('t.me/addstickers/')[1]}`));
+
+				const files = await Promise.all(data.result.stickers.map((v) => fetchJSON(_apiBase(`getFile?file_id=${v.file_id}`))));
 
 				resolve({
 					status: true,
-					containername: data.result.name,
+					name: data.result.name,
 					title: data.result.title,
 					isAnimated: data.result.is_animated,
-					stickers: await Promise.all(
-						data.result.stickers.map(async (v) =>
-							_apiDatabase((await fetchJSON(_apiBase(`getFile?file_id=${v.thumb.file_id}`))).result.file_path),
-						),
-					),
+					stickers: files.map((v) => _apiDatabase(v.result.file_path)),
 				});
 				return;
 			}
@@ -67,16 +63,14 @@ export const telegram = (query) =>
 				),
 			);
 
+			const files = await Promise.all(data.result.stickers.map((v) => fetchJSON(_apiBase(`getFile?file_id=${v.file_id}`))));
+
 			resolve({
 				status: true,
 				name: data.result.name,
 				title: data.result.title,
 				isAnimated: data.result.is_animated,
-				stickers: await Promise.all(
-					data.result.stickers.map(async (v) =>
-						_apiDatabase((await fetchJSON(_apiBase(`getFile?file_id=${v.thumb.file_id}`))).result.file_path),
-					),
-				),
+				stickers: files.map((v) => _apiDatabase(v.result.file_path)),
 			});
 		} catch (e) {
 			resolve({ error: e.message });

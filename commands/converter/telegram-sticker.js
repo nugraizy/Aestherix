@@ -3,7 +3,7 @@ import path from 'path';
 
 import configuration from '../../connect.js';
 import { __dirname } from '../../index.js';
-import { telegram } from '../../utils/stickers/index.js';
+import { telegram } from '../../utils/index.js';
 
 export default {
 	name: 'telegramsticker',
@@ -21,7 +21,7 @@ export default {
 
 		const result = await telegram(query);
 
-		if (result.stickers.length > 10) {
+		if (result?.stickers?.length > 10) {
 			result.stickers = result.stickers.slice(0, 10);
 		}
 

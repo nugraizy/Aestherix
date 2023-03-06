@@ -15,7 +15,7 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	status: 'enable',
-	async run({ isQuotedSticker, from, message, filename, extractMediaData, sender, prettyNumber, typeQuoted }, client) {
+	async run({ isQuotedSticker, from, message, filename, extractMediaData, prettyNumber, typeQuoted }, client) {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!isQuotedSticker) {
@@ -27,7 +27,7 @@ export default {
 			path.join(__dirname, `temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
 			typeQuoted,
 		);
-		const { result } = await convertStickerToMedia(results, sender, extractMediaData);
+		const { result } = await convertStickerToMedia(results, prettyNumber, extractMediaData);
 
 		await client[botNum].sendMessage(
 			from,
