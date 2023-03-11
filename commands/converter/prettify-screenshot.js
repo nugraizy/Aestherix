@@ -1,7 +1,7 @@
 /* global botNum */
 import dayjs from 'dayjs';
 
-import { prettifyScreenshot } from '../../helper/index.js';
+import { Prettify } from '../../helper/index.js';
 import { color, INFOLOG, ERRLOG } from '../../helper/modules/index.js';
 
 export default {
@@ -13,7 +13,7 @@ export default {
 	cooldown: 5,
 	limit: 4,
 	status: 'enable',
-	run: async ({ from, isMediaImage, prettyNumber, mediaData, message, sender }, client) => {
+	run: async ({ from, isMediaImage, prettyNumber, mediaData, message }, client) => {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!isMediaImage) {
@@ -24,13 +24,14 @@ export default {
 
 		let buffer = await client[botNum].downloadMediaMessage(mediaData);
 
-		buffer = await prettifyScreenshot(buffer);
+		buffer = await new Prettify().Screenshot(buffer);
+		buffer = buffer.toBuffer();
 
 		if ('error' in buffer) {
 			client[botNum].reply({ from, quoted: message }, buffer.error);
 			ERRLOG(
 				`[${color(time, 'cyan')}]`,
-				`⚠️ ${color('Failed to Convert Media to Sticker', 'red')} for ${color(prettyNumber, '#ff71ce')}`,
+				`⚠️ ${color('Failed to Prettify an Image', 'red')} for ${color(prettyNumber, '#ff71ce')}`,
 			);
 			return;
 		}

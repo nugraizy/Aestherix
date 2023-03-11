@@ -15,7 +15,6 @@ import path from 'path';
 import P from 'pino';
 import { platform } from 'process';
 import { pathToFileURL } from 'url';
-import benchmark from 'nanobench';
 
 dotenv.config();
 
