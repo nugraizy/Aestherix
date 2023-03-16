@@ -47,10 +47,7 @@ configuration.OPTIONS = configuration.cli.flags;
 
 const { OPTIONS, cli } = configuration; // backwards compatibility
 
-const regexOption =
-	'prefix,readOnly,autoRead,autoCorrect,restrict,onlyLogs,noLogs,selfMode,debugMode,multiCmd,rainbow,trace,help,watch,coolDown,noLoad,json,reset,story,offline,noCall,instaNotifier,limitReset,resetOnStart'.split(
-		',',
-	);
+const regexOption = Object.keys(OPTIONS);
 
 if (platform !== 'win32' && !OPTIONS.noLoad) {
 	await printRandomAscii();
