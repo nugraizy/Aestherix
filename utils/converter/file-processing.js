@@ -572,6 +572,7 @@ export const removeBg = (input, sender) =>
 	});
 
 const _api = (path, version) => `https://api.alcaamado.es/api/${version}/waifu2x${path}`;
+const _apiV2 = 'https://api.deepai.org/api/torch-srgan';
 
 /**
  * Enhance image using Waifu2x enhancer API.
@@ -671,6 +672,36 @@ export const waifu2x = (input, sender) =>
 			}
 
 			reject(err);
+		}
+	});
+
+export const waifu2xV2 = (input, filename) =>
+	new Promise(async (resolve, reject) => {
+		try {
+			input = fs.writeFileSync(filename, input);
+			input = fs.createReadStream(filename);
+
+			const form = new FormData();
+			const axiosInstance = axios.create({ headers: { 'client-library': 'deepai-js-client' } });
+
+			axiosInstance.defaults.headers.common['api-key'] = '71eaa526-b468-429e-a01d-22a581fa74fe';
+			const reqOptions = {
+				withCredentials: true,
+			};
+
+			form.append('image', input);
+			reqOptions.headers = form.getHeaders();
+			const { data } = await axiosInstance.post(_apiV2, form, reqOptions);
+
+			if (!data.output_url) {
+				reject(new Error('Cannot get the output result.'));
+			}
+
+			await fs.unlink(filename);
+
+			resolve(await fetchBUFFER(data.output_url));
+		} catch (err) {
+			console.log(err);
 		}
 	});
 
@@ -824,7 +855,7 @@ export const imageToAnime = async (image, sender, options = defaultOpts) => {
 	const result = data.img_urls[1] || data.img_urls[0];
 
 	return options.enhance
-		? waifu2x(
+		? waifu2xV2(
 				await cropImage(
 					await imageToBuffer(result, options.proxy?.image ? httpsAgent : undefined, options),
 					options.crop === 'SINGLE' ? 'SINGLE' : options.crop === 'COMPARED' ? 'COMPARED' : undefined,

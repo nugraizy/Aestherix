@@ -6,13 +6,13 @@ import parser from 'yargs-parser';
 import configuration from '../../connect.js';
 import { __dirname } from '../../index.js';
 import { color, INFOLOG } from '../../helper/modules/index.js';
-import { waifu2x } from '../../utils/index.js';
+import { waifu2xV2 } from '../../utils/index.js';
 
 export default {
-	name: 'waifu2x',
+	name: 'waifu2xv2',
 	description: 'Enhance image using image processing A.I. called waifu2x.',
-	usage: '!waifu2x <reply/send (image/sticker)>',
-	aliases: ['w2x', 'enhance', 'upscale', 'remmini'],
+	usage: '!waifu2xv2 <reply/send (image/sticker)>',
+	aliases: ['w2xv2', 'enhancev2', 'upscalev2', 'remminiv2'],
 	category: 'Converter',
 	cooldown: 6,
 	limit: 4,
@@ -48,7 +48,7 @@ export default {
 
 		const media = await client[botNum].downloadMediaMessage(mediaData);
 
-		const enhance = await waifu2x(
+		const enhance = await waifu2xV2(
 			media,
 			path.join(__dirname, `temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
 		);
@@ -66,7 +66,7 @@ export default {
 
 			client[botNum].sendMessage(from, { sticker: prepareSticker }, { quoted: message });
 		} else {
-			client[botNum].sendMessage(from, { image: enhance }, { quoted: message });
+			client[botNum].sendMessage(from, { image: Buffer.from(enhance, 'base64') }, { quoted: message });
 		}
 	},
 };

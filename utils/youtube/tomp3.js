@@ -3,8 +3,8 @@ import yts from 'ytsr';
 
 import { fetchJSON, isURL } from '../../helper/index.js';
 
-const _apiIndex = 'https://yt1s.com/api/ajaxSearch/index';
-const _apiConvert = 'https://yt1s.com/api/ajaxConvert/convert';
+const _apiIndex = 'https://tomp3.cc/api/ajax/search';
+const _apiConvert = 'https://tomp3.cc/api/ajax/convert';
 
 const isUrl = (url) =>
 	url.match(
@@ -19,6 +19,9 @@ const convertStreams = (vid, el) =>
 			headers: {
 				Accept: 'application/json, text/plain, */*',
 				'Content-Type': 'application/x-www-form-urlencoded',
+				'user-agent':
+					'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 YaBrowser/23.1.5.750 (beta) Yowser/2.5 Safari/537.36',
+				'x-requested-with': 'XMLHttpRequest',
 			},
 		});
 
@@ -35,7 +38,7 @@ export const downloaderYouTubeMain = (url, type) =>
 		try {
 			const data = await fetchJSON(_apiIndex, {
 				method: 'POST',
-				body: `q=${encodeURIComponent(url)}&vt=home`,
+				body: `query=${encodeURIComponent(url)}&vt=downloader`,
 				headers: {
 					Accept: '*/*',
 					'Content-Type': 'application/x-www-form-urlencoded',
@@ -47,22 +50,17 @@ export const downloaderYouTubeMain = (url, type) =>
 			const rawData = (filter) =>
 				Object.entries(data.links)
 					.filter(filter)
-					.map((v) => data.links[v[0]])
-					.reduce((r, c) => Object.assign(r, c), [])
-					.filter((v) => v.size !== '');
+					.map((v) => data.links[v[0]][Object.keys(data.links[v[0]])]);
 
 			const response = {
 				title: data.title,
 				id: data.vid,
 			};
+
 			if (type === 'mp4') {
-				response.mp4 = await Promise.all(
-					rawData((v) => !['mp3', 'm4a'].includes(v[0])).map((v) => convertStreams(data.vid, v)),
-				);
+				response.mp4 = await Promise.all(rawData((v) => !['mp3'].includes(v[0])).map((v) => convertStreams(data.vid, v)));
 			} else if (type === 'mp3') {
-				response.mp3 = await Promise.all(
-					rawData((v) => ['mp3', 'm4a'].includes(v[0])).map((v) => convertStreams(data.vid, v)),
-				);
+				response.mp3 = await Promise.all(rawData((v) => ['mp3'].includes(v[0])).map((v) => convertStreams(data.vid, v)));
 			}
 			resolve(response);
 		} catch (e) {

@@ -2,8 +2,7 @@
 import { numberWithCommas } from '../../helper/index.js';
 import { MyAnimeList } from '../../utils/my_anime_list/index.js';
 
-const parse = (obj) => {
-	return `Full Title : ${obj?.title || 'n/a'}
+const parse = (obj) => `Full Title : ${obj?.title || 'n/a'}
 EN : ${obj?.alternative_titles?.en || 'n/a'}
 JP : ${obj?.alternative_titles?.ja || 'n/a'}
 ID : ${obj?.id || 'n/a'}
@@ -21,7 +20,6 @@ Rating : ${obj?.rating?.replace('_', ' ')?.capitalize() || 'n/a'}
 Genres : ${obj?.genres?.map(({ name }) => name)?.join(', ') || 'n/a'}
 	
 Synopsis : ${obj?.synopsis || 'n/a'}`;
-};
 
 export default {
 	name: 'malmangaranking',

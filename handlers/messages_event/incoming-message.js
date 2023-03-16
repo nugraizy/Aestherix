@@ -254,21 +254,23 @@ export default incomingHandler = async (message, client, cmds, store, user) => {
 					return await client[botNum].reply({ from: message.from, quoted: message.message }, 'This commands for group only');
 				}
 
-				const limit = addLimit({ id: message.sender, limit: Tempcmds.limit ?? 0, type: 'MIN' });
+				if (!configuration.OPTIONS.noLimit) {
+					const limit = addLimit({ id: message.sender, limit: Tempcmds.limit ?? 0, type: 'MIN' });
 
-				if (typeof limit === 'object' && 'message' in limit) {
-					client[botNum].reply(
-						{ from: message.from, quoted: message.message },
-						`${limit.message}\nYour limit is ${limit.limits}\nBut this command (${Tempcmds.name}) need ${Tempcmds.limit}`,
-					);
-					continue;
-				}
+					if (typeof limit === 'object' && 'message' in limit) {
+						client[botNum].reply(
+							{ from: message.from, quoted: message.message },
+							`${limit.message}\nYour limit is ${limit.limits}\nBut this command (${Tempcmds.name}) need ${Tempcmds.limit}`,
+						);
+						continue;
+					}
 
-				if (limit === false) {
-					return await client[botNum].reply(
-						{ from: message.from, quoted: message.message },
-						'You have reached the limit of this command.',
-					);
+					if (!limit) {
+						return await client[botNum].reply(
+							{ from: message.from, quoted: message.message },
+							'You have reached the limit of this command.',
+						);
+					}
 				}
 
 				if (configuration.OPTIONS.coolDown) {

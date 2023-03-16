@@ -14,8 +14,8 @@ const ANSWERS = {
 };
 
 const BARS = {
-	1: '▰',
-	2: '▱',
+	1: '▓',
+	2: '░',
 };
 
 const progressBar = (progress) => {

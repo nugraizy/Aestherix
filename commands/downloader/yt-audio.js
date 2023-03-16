@@ -153,7 +153,7 @@ export default {
 					text: '\t',
 					buttonText: 'Open List',
 					sections: mp3.map((v, i) => ({
-						rows: [{ title: `${i + 1}. 📼 ${v.quality} 💾 ${v.filesizeF}`, rowId: `.ytmp3 download ${v.dlUrl}` }],
+						rows: [{ title: `${i + 1}. 📼 ${v.quality} 💾 ${v.filesizeF}`, rowId: `.ytmp3 download ${v.dlUrl} ${title}` }],
 						title: `\t`,
 					})),
 				});

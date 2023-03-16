@@ -274,16 +274,22 @@ export const getTimeSince = (dates) => {
 };
 
 export const getRuntime = (time) => {
-	const uptime = time;
-	const date = new Date(uptime * 1000);
+	const date = new Date(time * 1000);
+	const dates = {
+		year: date.getUTCFullYear(),
+		month: date.getUTCMonth(),
+		day: date.getUTCDate(),
+		hour: date.getUTCHours(),
+		minute: date.getUTCMinutes(),
+		second: date.getUTCSeconds(),
+	};
 
 	return (
-		(date.getUTCFullYear() - 1 > 0 ? `${date.getUTCFullYear() - 1} year${date.getUTCFullYear() - 1 > 1 ? 's' : ''} ` : '') +
-		(date.getUTCMonth() - 1 > 0 ? `${date.getUTCMonth() - 1} month${date.getUTCMonth() - 1 > 1 ? 's' : ''} ` : '') +
-		(date.getUTCDate() - 1 > 0 ? `${date.getUTCDate() - 1} day${date.getUTCDate() - 1 > 1 ? 's' : ''} ` : '') +
-		(date.getUTCHours() > 0 ? `${date.getUTCHours()} hour${date.getUTCHours() > 1 ? 's' : ''} ` : '') +
-		(date.getUTCMinutes() > 0 ? `${date.getUTCMinutes()} minute${date.getUTCMinutes() > 1 ? 's' : ''} ` : '') +
-		(date.getUTCSeconds() > 0 ? `${date.getUTCSeconds()} second${date.getUTCSeconds() > 1 ? 's' : ''} ` : '')
+		(dates.month - 1 > 0 ? `${dates.month - 1} month${dates.month - 1 > 1 ? 's' : ''} ` : '') +
+		(dates.day - 1 > 0 ? `${dates.day - 1} day${dates.day - 1 > 1 ? 's' : ''} ` : '') +
+		(dates.hour > 0 ? `${dates.hour} hour${dates.hour > 1 ? 's' : ''} ` : '') +
+		(dates.minute > 0 ? `${dates.minute} minute${dates.minute > 1 ? 's' : ''} ` : '') +
+		(dates.second > 0 ? `${dates.second} second${dates.second > 1 ? 's' : ''} ` : '')
 	);
 };
 

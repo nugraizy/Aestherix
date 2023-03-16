@@ -5,6 +5,24 @@ import { readJSON } from '../../helper/modules/index.js';
 const getRandomCommand = () =>
 	Array.from(configuration.cmds.commands.keys())[Math.floor(Math.random() * configuration.cmds.commands.size)];
 
+const format = {
+	'AL-Quran': 'Ａｌ-Ｑｕｒａｎ',
+	Anime: 'Ａｎｉｍｅ',
+	Anonymous: 'Ａｎｏｎｙｍｏｕｓ',
+	Converter: 'Ｃｏｎｖｅｒｔｅｒ',
+	Debugging: 'Ｄｅｂｕｇｇｉｎｇ',
+	Downloader: 'Ｄｏｗｎｌｏａｄｅｒ',
+	Games: 'Ｇａｍｅｓ',
+	'Genshin Impact': 'Ｇｅｎｓｈｉｎ Ｉｍｐａｃｔ',
+	Helper: 'Ｈｅｌｐｅｒ',
+	'Look-up': 'Ｌｏｏｋ-ｕｐ',
+	Misc: 'Ｍｉｓｃ',
+	Moderation: 'Ｍｏｄｅｒａｔｉｏｎ',
+	News: 'Ｎｅｗｓ',
+	Owner: 'Ｏｗｎｅｒ',
+	Search: 'Ｓｅａｒｃｈ',
+};
+
 export default {
 	name: 'menu',
 	description: 'Shows the menu',
@@ -31,9 +49,9 @@ export default {
 		}
 
 		for (const key of Object.keys(container).sort((a, b) => a.localeCompare(b))) {
-			capt += `${key.toUpperCase()}\n\n${container[key]
+			capt += `⪨ *${format[key]}* ⪩\n\n${container[key]
 				.sort((a, b) => a.localeCompare(b))
-				.map((v) => ` ⋊ ${v}`)
+				.map((v) => ` ⪩ ${prefix}${v}`)
 				.join('\n')}\n\n\n`;
 		}
 

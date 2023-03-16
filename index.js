@@ -155,9 +155,7 @@ const start = async () => {
 		process.exit(0);
 	}
 
-	const load = async () => {
-		await loadCommands();
-	};
+	const load = async () => await loadCommands();
 
 	const CONNECTION_CONFIG = {
 		printQRInTerminal: true,
@@ -730,6 +728,7 @@ function parseCli() {
 			insta_notifier: { type: 'boolean', alias: 'i' },
 			limit_reset: { type: 'boolean', alias: 'l' },
 			reset_on_start: { type: 'boolean', alias: 'x' },
+			no_limit: { type: 'boolean', alias: 'u' },
 		},
 	});
 }
@@ -771,6 +770,7 @@ function help() {
 	   --insta_notifier, -i  Handle incoming Instagram DMs.
 	   --limit_reset, -l	 Enable Auto-reset user's limit.
 	   --reset_on_start, -x  Auto reset DB-Connections every start of the script.
+	   --no_limit, -u        Set commands limit to None.
 	   --help, -h            Show this message.
 
 	 Examples
