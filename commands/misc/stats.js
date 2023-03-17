@@ -10,29 +10,14 @@ const getCpus = (func) => {
 		return cpu;
 	});
 
-	const cpu = cpus.reduce(
-		(last, cpu, _, { length }) => {
-			last.total += cpu.total;
-			last.speed += cpu.speed / length;
-			last.times.user += cpu.times.user;
-			last.times.nice += cpu.times.nice;
-			last.times.sys += cpu.times.sys;
-			last.times.idle += cpu.times.idle;
-			last.times.irq += cpu.times.irq;
-			return last;
-		},
-		{
-			speed: 0,
-			total: 0,
-			times: {
-				user: 0,
-				nice: 0,
-				sys: 0,
-				idle: 0,
-				irq: 0,
-			},
-		},
-	);
+	return cpus
+		.map(
+			(cpu, i) =>
+				`${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Object.keys(cpu.times)
+					.map((type) => `- ${type.padEnd(6)}: ${((100 * cpu.times[type]) / cpu.total).toFixed(2)}%`)
+					.join('\n')}`,
+		)
+		.join('\n\n');
 };
 
 export default {
