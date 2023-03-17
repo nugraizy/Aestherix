@@ -26,8 +26,8 @@ const convertStreams = (vid, el) =>
 		});
 
 		resolve({
-			filesizeF: el.size,
-			filesize: fileSize(el.size, { base: 2 }),
+			filesizeF: (el.size !== 'MB' && el.size) || '0MB',
+			filesize: (el.size !== 'MB' && fileSize(el.size, { base: 2 })) || '0MB',
 			quality: el.q,
 			dlUrl: data.dlink,
 		});
@@ -48,7 +48,9 @@ export const downloaderYouTubeMain = (url, type) =>
 				},
 			});
 
-			const rawData = Object.values(Object.entries(data.links).filter((v) => [type].includes(v[0]))[0][1]);
+			const rawData = Object.values(Object.entries(data.links).filter((v) => [type].includes(v[0]))[0][1]).filter(
+				(v) => ![''].includes(v.size),
+			);
 
 			const response = {
 				title: data.title,
