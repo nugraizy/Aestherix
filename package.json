@@ -1,6 +1,6 @@
 {
 	"name": "simplebotpro3",
-	"version": "1.25.13",
+	"version": "1.25.14",
 	"description": "WhatsApp bot using Baileys library with Javascript language.",
 	"exports": "./index.js",
 	"type": "module",
