@@ -633,5 +633,29 @@
       "notification": "disable",
       "banned": []
     }
+  },
+  {
+    "120363049220101468@g.us": {
+      "groupName": "Mecha Cave Explore [OFF]",
+      "groupDescription": "*_MECHA RP_*\n*EDISI CAVE*\n\n*ABOUT SERVER*\n➸ *Realms = https://realms.gg/bRo4oKnqrfE*\n➸ *𝚅𝙴𝚁𝚂𝙸 =⌦ 1.19.63 ⌫* \n\n❉ *𝚁𝚄𝙻𝙴𝚂* ❉\n➸ *NOHACK & TOLLBOX*\n➸ *NO PROMOSI*\n➸ *NO MALING*\n\n*FEATURE*\n1. Mecha Service\n2. Mecha Fast TP\n3. Mecha Shop\n4. Mecha Score Tier\nDll..\n\n🏅Owner : Errs404 & MRHRTZ\nDISCORD : https://discord.gg/jM7t5R63XS\nMINEKREP PE: https://mcpedl.org/minecraft-pe-1-19-63-apk\nGROUP:\nhttps://chat.whatsapp.com/HutdreuzCLpHISS147PEp1",
+      "welcome1": "disable",
+      "welcome1msg": "Welcome to {groupName}",
+      "welcome2": "disable",
+      "welcome2msg": "Welcome to {groupName}",
+      "left1": "disable",
+      "left1msg": "Bye bye {groupName}",
+      "left2": "disable",
+      "left2msg": "Bye bye {groupName}",
+      "antiDelete": "disable",
+      "antiGroupURL": "disable",
+      "antiURL": "disable",
+      "antiSpam": "disable",
+      "antiVirus": "disable",
+      "autoReader": "disable",
+      "antiNSFW": "disable",
+      "games": "disable",
+      "notification": "disable",
+      "banned": []
+    }
   }
 ]

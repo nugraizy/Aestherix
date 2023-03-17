@@ -47,10 +47,8 @@ export const downloaderYouTubeMain = (url, type) =>
 						'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36',
 				},
 			});
-			const rawData = (filter) =>
-				Object.entries(data.links)
-					.filter(filter)
-					.map((v) => data.links[v[0]][Object.keys(data.links[v[0]])]);
+
+			const rawData = Object.values(Object.entries(data.links).filter((v) => [type].includes(v[0]))[0][1]);
 
 			const response = {
 				title: data.title,
@@ -58,9 +56,9 @@ export const downloaderYouTubeMain = (url, type) =>
 			};
 
 			if (type === 'mp4') {
-				response.mp4 = await Promise.all(rawData((v) => !['mp3'].includes(v[0])).map((v) => convertStreams(data.vid, v)));
+				response.mp4 = await Promise.all(rawData.map((v) => convertStreams(data.vid, v)));
 			} else if (type === 'mp3') {
-				response.mp3 = await Promise.all(rawData((v) => ['mp3'].includes(v[0])).map((v) => convertStreams(data.vid, v)));
+				response.mp3 = await Promise.all(rawData.map((v) => convertStreams(data.vid, v)));
 			}
 			resolve(response);
 		} catch (e) {
