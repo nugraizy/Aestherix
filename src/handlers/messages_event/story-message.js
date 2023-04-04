@@ -1,7 +1,7 @@
 import { generateWAMessageFromContent } from '@adiwajshing/baileys';
 import dayjs from 'dayjs';
 
-import configuration from '../../connect.js';
+import configuration from '../../helper/config/connect.js';
 import { runtime } from '../../index.js';
 import { textStory, ZERO } from '../../helper/index.js';
 import { color, INFOLOG } from '../../utils/modules/index.js';

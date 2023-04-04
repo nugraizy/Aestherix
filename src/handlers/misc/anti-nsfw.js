@@ -2,9 +2,8 @@ import { downloadMediaMessage } from '@adiwajshing/baileys';
 import fs from 'fs-extra';
 import path from 'path';
 
-import configuration from '../../connect.js';
-import { delay } from '../../helper/index.js';
-import { arq } from '../../utils/arq/index.js';
+import configuration from '../../helper/config/connect.js';
+import { arq, delay } from '../../utils/index.js';
 
 const { createReadStream } = fs;
 

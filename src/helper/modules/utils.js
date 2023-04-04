@@ -128,7 +128,7 @@ export const assign = (client) => {
 			delete options.ephemeralExpiration;
 		}
 
-		client[botNum].sendMessage(to, message, options);
+		return client[botNum].sendMessage(to, message, options);
 	};
 
 	client[botNum] = {

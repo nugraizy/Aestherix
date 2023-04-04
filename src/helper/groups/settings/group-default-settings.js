@@ -4,7 +4,7 @@ export const checkJSON = async (dari) => {
 	const data = await fs.readJSON('./databases/groups/settingsManager.json');
 	const index = data.findIndex((v) => Object.keys(v)[0] === dari);
 
-	if (index != -1) {
+	if (index !== -1) {
 		return data[index];
 	}
 
@@ -37,8 +37,8 @@ export const pushDefaultSettings = async (dari, groupName, groupDescription) => 
 				antiNSFW: 'disable',
 				games: 'disable',
 				notification: 'disable',
-				banned: [],
-			},
+				banned: []
+			}
 		});
 		await fs.writeJSON('./databases/groups/settingsManager.json', data);
 		return data[index];

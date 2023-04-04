@@ -121,19 +121,19 @@ export const reassign = async (m, client, store) => {
 		const groupId = isGroup ? groupMetadata?.id : NO_DATA;
 
 		if (isGroup) {
-			if (!isSettings || typeof checkJSON(from) === 'boolean') {
-				if (typeof checkJSON(from) === 'boolean') {
-					pushDefaultSettings(from, groupName, groupDescription);
+			if (!isSettings || typeof (await checkJSON(from)) === 'boolean') {
+				if (typeof (await checkJSON(from)) === 'boolean') {
+					await pushDefaultSettings(from, groupName, groupDescription);
 				}
 
-				configuration.cache.settings.set(from, checkJSON(from));
+				configuration.cache.settings.set(from, await checkJSON(from));
 				groupSettings = configuration.cache.settings.get(from);
 			} else if ('GROUP_CHANGE_SUBJECT' === m.messageStubType) {
 				groupSettings = configuration.cache.settings.get(from);
-				updateSettings('groupName', m.messageStubParameters[0], from);
+				await updateSettings('groupName', m.messageStubParameters[0], from);
 			} else if ('GROUP_CHANGE_DESCRIPTION' === m.messageStubType) {
 				groupSettings = configuration.cache.settings.get(from);
-				updateSettings('groupDescription', m.content, from);
+				await updateSettings('groupDescription', m.content, from);
 			} else {
 				groupSettings = configuration.cache.settings.get(from);
 			}

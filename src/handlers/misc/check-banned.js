@@ -6,7 +6,6 @@ export const checkBan = async (client, { from, isBotAdmin, isGroup, messageStubP
 		const index = data.findIndex((v) => Object.keys(v)[0] === from);
 
 		for (const participant of messageStubParameters) {
-			console.log(data[index]);
 			const isBanned = data[index][from].banned.includes(participant);
 
 			if (isBanned && isBotAdmin) {

@@ -1,5 +1,6 @@
-import configuration from '../../connect.js';
-import { reassign, Attachment, fetchBUFFER } from '../../helper/index.js';
+import configuration from '../../helper/config/connect.js';
+import { reassign, Attachment } from '../../helper/index.js';
+import { fetchBUFFER } from '../../utils/modules/index.js';
 
 const EVENT_UPDATE = {
 	GROUP_PARTICIPANT_LEAVE: 'Member Leave',

@@ -1,7 +1,6 @@
 .env*
 node_modules/
-session/*.json
-session/*/*.json
+src/helper/connection/session/**/*.json
 src/media/connection_databases/*.json
 temporary_files/
 test/

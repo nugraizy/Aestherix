@@ -1,4 +1,4 @@
-import configuration from '../../connect.js';
+import configuration from '../../helper/config/connect.js';
 import { reassign } from '../../helper/index.js';
 
 const EVENT_UPDATE = {

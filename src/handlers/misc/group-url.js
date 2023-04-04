@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 
-import configuration from '../../connect.js';
+import configuration from '../../helper/config/connect.js';
 
 const checkURL = (input) =>
 	/(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])/g.test(input);
