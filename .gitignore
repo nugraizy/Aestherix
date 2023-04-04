@@ -2,7 +2,6 @@
 node_modules/
 session/*.json
 session/*/*.json
-media_files/connection_databases/*.json
+src/media/connection_databases/*.json
 temporary_files/
-t-*.*
-test.json
+test/

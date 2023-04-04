@@ -9,15 +9,23 @@ module.exports = {
 		ecmaVersion: 'latest',
 		sourceType: 'module',
 	},
+	globals:{
+		"botNum": true,
+		"client": true,
+		"where": true,
+		"log": true,
+		"store": true
+	},
 	rules: {
 		'no-unsafe-optional-chaining': 0,
-		'no-unused-vars': 1,
-		'no-use-before-define': 2,
+		'no-unused-vars': 2,
+		'no-use-before-define': 1,
 		'no-async-promise-executor': 0,
 		'no-mixed-spaces-and-tabs': 2,
 		'no-dupe-keys': 1,
 		'no-global-assign': 0,
 		camelcase: 2,
+		'no-empty': 2,
 		curly: 2,
 		'no-whitespace-before-property': 2,
 		quotes: [2, 'single'],
@@ -39,5 +47,5 @@ module.exports = {
 			{ blankLine: 'any', prev: ['import'], next: ['import'] },
 		],
 	},
-	ignorePatterns: ['.eslintrc.cjs'],
+	ignorePatterns: ['.eslintrc.cjs', 't-*.js'],
 };

@@ -657,5 +657,52 @@
       "notification": "disable",
       "banned": []
     }
+  },
+  {
+    "120363043561420064@g.us": {
+      "groupName": "тємραт яαкιт вσт ωнαтѕαρρ",
+      "groupDescription": "*=> Main Eval Disini Aja!*\n*=> Kalau Mw Collab Ajak Bwang Rojak!*\n*=> FRM Developers Sudah Punah😭*\n*=> Antek Antek Rojak Bertebaran 📌*\n*=> Terkena Mugenskyoumi si DIDIN🙄*\n*=> Area API Si Caliph https://api.caliph.biz.id , di pake coeng!, biar Ezz 🗿*\n*=> Open Kelas Pembelajaran! Real Langsung Diajarin Dengan Penuh Pengertian , Penjelasan , Dan Contoh! Diajarin Sampe Bisa, Minat? Langsung Chat Bang Rozack ➡ wa.me/6281361057300*\n\n*🙏🏻 Dilarang Keras Berbicara Rasis, Toxic, Sombong, Ngejudge & Media Pornografi, Ingat Kita Semuanya Bakal Balik Ke Tanah! dan SC lu gak bakal bisa lu bawa ke tanah!*\n\n*🙏🏻 Bebas Promosi Bisnis Lu, Panel Lu, Jualan Lu, Asal Jangan Ripper! Ketahuan ? Auto Kena Serang Akun Lu, Dan Buat Kalian Yang Kena Rippers Itu Di Luar Tanggung Jawab Admin, Disini Juga Bebas Share Link YouTube Saling Support, Bebas Nge-JB, Bebas Share Broadcast Pedia/Dll. Yang Ga Boleh Cuma Share Link Group! [ Anti Link Grup: AKTIF! ]*\n\n____________________________\n\n• ```Harap Jaga Decode Jangan Sampe Bocor Dan Kesebar!\n\n• Jangan Pernah Lupa Pasang Credits Arifi Razzaq & DLL, Di Saat Kalian Udah Jadi Youtuber, Ingat Guru Kalian! Biar Berkah Hidupmu```\n\n____________________________\n\n*Noted:* Self Bot? Gunakan Eval Disini!, Enjoy Your Day With WhatsApp Bots!\n*Link Group:* https://chat.whatsapp.com/KFyRaA0px9qGocjY5n0sap",
+      "welcome1": "disable",
+      "welcome1msg": "Welcome to {groupName}",
+      "welcome2": "disable",
+      "welcome2msg": "Welcome to {groupName}",
+      "left1": "disable",
+      "left1msg": "Bye bye {groupName}",
+      "left2": "disable",
+      "left2msg": "Bye bye {groupName}",
+      "antiDelete": "disable",
+      "antiGroupURL": "disable",
+      "antiURL": "disable",
+      "antiSpam": "disable",
+      "antiVirus": "disable",
+      "autoReader": "disable",
+      "antiNSFW": "disable",
+      "games": "disable",
+      "notification": "disable",
+      "banned": []
+    }
+  },
+  {
+    "120363086918573926@g.us": {
+      "groupName": "hm",
+      "welcome1": "disable",
+      "welcome1msg": "Welcome to {groupName}",
+      "welcome2": "disable",
+      "welcome2msg": "Welcome to {groupName}",
+      "left1": "disable",
+      "left1msg": "Bye bye {groupName}",
+      "left2": "disable",
+      "left2msg": "Bye bye {groupName}",
+      "antiDelete": "disable",
+      "antiGroupURL": "disable",
+      "antiURL": "disable",
+      "antiSpam": "disable",
+      "antiVirus": "disable",
+      "autoReader": "disable",
+      "antiNSFW": "disable",
+      "games": "disable",
+      "notification": "disable",
+      "banned": []
+    }
   }
 ]

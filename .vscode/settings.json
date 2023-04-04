@@ -1,0 +1,10 @@
+{
+    "eslint.validate": [
+        "javascript"
+    ],
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "prettier.configPath": ".prettierrc.json",
+    "eslint.debug": true,
+    "workbench.editor.enablePreview": false
+}
