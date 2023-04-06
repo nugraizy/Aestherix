@@ -1,10 +1,9 @@
 import { Boom } from '@hapi/boom';
-import center from 'center-align';
 import fs from 'fs-extra';
 import baileys, { jidDecode } from '@adiwajshing/baileys';
+import boxen from 'boxen';
 
 const { DisconnectReason } = baileys;
-const { stdout } = process;
 
 import configuration from '../../config/connect.js';
 import { INFOLOG, color, romanize } from '../../../utils/modules/index.js';
@@ -82,7 +81,10 @@ export const handleConnectionUpdate = async (
 
 				INFOLOG(
 					color(
-						center(`Bot Version  ${romanize((await fs.readJSON('./package.json')).version)}\n\n`, stdout.columns),
+						boxen(`Made By Nanda\n Bot Version  ${romanize((await fs.readJSON('./package.json')).version)} `, {
+							textAlignment: 'center',
+							float: 'center'
+						}),
 						'#9f53ea'
 					)
 				);

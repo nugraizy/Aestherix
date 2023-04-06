@@ -219,42 +219,40 @@ export const calcCrow = (lats1, lon1, lats2, lon2) => {
 };
 
 export const getFilesizeFromBytes = (bytes = 0) => {
-	if (bytes >= 1_073_741_824) {
-		bytes = `${(bytes / 1_073_741_824).toFixed(2)} GB`;
-	} else if (bytes >= 1_048_576) {
-		bytes = `${(bytes / 1_048_576).toFixed(2)} MB`;
-	} else if (bytes >= 1024) {
-		bytes = `${(bytes / 1024).toFixed(2)} KB`;
-	} else if (bytes > 1) {
-		bytes += ' bytes';
-	} else if (bytes === 1) {
-		return `${bytes} byte`;
-	} else {
-		return '0 bytes';
-	}
+	const size = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+	const factor = Math.floor((String(bytes).length - 1) / 3);
 
-	return bytes;
+	bytes = bytes / Math.pow(1024, factor);
+	bytes = Math.floor(bytes * Math.pow(10, 2)) / Math.pow(10, 2);
+
+	return String(bytes) + size[factor];
+};
+
+export const parseHumanReadableToBytes = (s) => {
+	s = String(s);
+
+	const units = ['bytes', 'kb', 'mb', 'gb', 'tb'];
+	const POWER_BASE = 1024;
+	const data = {};
+
+	data.numericPart = s.replace(/[^\d.]+/gim, '');
+	data.unitPart = s
+		.replace(/[^a-z]+/gim, '')
+		.trim()
+		.toLowerCase();
+	data.index = -1 !== units.indexOf(data.unitPart) ? units.indexOf(data.unitPart) : 0;
+	data.unit = units[data.index];
+	data.factor = Math.pow(POWER_BASE, data.index);
+	data.valueBytes = Math.trunc(Number(data.numericPart) * data.factor);
+
+	return data.valueBytes;
 };
 
 export const getFilesize = (filename) => {
 	const stats = fs.statSync(filename);
 	let bytes = stats.size;
 
-	if (bytes >= 1_073_741_824) {
-		bytes = `${(bytes / 1_073_741_824).toFixed(2)} GB`;
-	} else if (bytes >= 1_048_576) {
-		bytes = `${(bytes / 1_048_576).toFixed(2)} MB`;
-	} else if (bytes >= 1024) {
-		bytes = `${(bytes / 1024).toFixed(2)} KB`;
-	} else if (bytes > 1) {
-		bytes += ' bytes';
-	} else if (bytes === 1) {
-		return `${bytes} byte`;
-	} else {
-		return '0 bytes';
-	}
-
-	return bytes;
+	return getFilesizeFromBytes(bytes);
 };
 
 export const extractFilesize = (bytes = 0) => getFilesizeFromBytes(Buffer.byteLength(bytes));

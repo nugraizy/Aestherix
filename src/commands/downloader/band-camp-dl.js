@@ -55,11 +55,3 @@ Title : ${result.title}`
 		}
 	}
 };
-
-// TypeError: Cannot read properties of undefined (reading '120363118603597768@g.us')
-//     at checkBan (file:///home/void/github/simplebotPRO3/handlers/misc/check-banned.js:10:32)
-//     at async stubMessageHandler (file:///home/void/github/simplebotPRO3/handlers/messages_event/stub-message.js:18:5)
-
-// TypeError: Cannot read properties of undefined (reading '120363118603597768@g.us')
-//     at checkBan (file:///home/void/github/simplebotPRO3/handlers/misc/check-banned.js:10:32)
-//     at async stubMessageHandler (file:///home/void/github/simplebotPRO3/handlers/messages_event/stub-message.js:18:5)

@@ -8,45 +8,13 @@ import dayjs from 'dayjs';
 import color from 'colorthief';
 import chroma from 'chroma-js';
 
+import { colors, roundedRectData } from './utils.js';
+
 const { createCanvas, loadImage, GlobalFonts } = Canvas;
+const regex = /\t/g;
 
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/JetBrainsMono-Light.ttf'), 'JetBrainsMono');
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/zh-cn.ttf'), 'ZHCN');
-
-const roundedRectData = (w, h, tlr, trr, brr, blr) =>
-	`M 0 ${tlr} A ${tlr} ${tlr}  0 0 1 ${tlr}  0 L ${w - trr} 0 A ${trr} ${trr} 0 0 1 ${w} ${trr} L ${w} ${
-		h - brr
-	} A ${brr} ${brr} 0 0 1 ${w - brr} ${h} L ${blr} ${h} A ${blr} ${blr} 0 0 1 0 ${h - blr} Z`;
-
-const colors = {
-	dracula: {
-		_default: '#f8f8f2',
-		'': '#bd93f9',
-		'function-variable function': '#50fa7b',
-		comment: '#6272a4',
-		constant: '#bd93f9',
-		'string-property property': '#f1fa8c',
-		string: '#f1fa8c',
-		variable: '#ff79c6',
-		'template-punctuation string': '#f1fa8c',
-		'interpolation-punctuation punctuation': '#ff79c6',
-		interpolation: '#f8f8f2',
-		parameter: '#50fa7b',
-		function: '#50fa7b',
-		punctuation: {
-			opacity: 0.7,
-			color: '#f8f8f2'
-		},
-		'regex-flags': '#ff79c6',
-		'regex-delimiter': '#ff5555',
-		'regex-source language-regex': '#50fa7b',
-		'class-name': '#8be9fd',
-		number: '#ff79c6',
-		boolean: 'white',
-		operator: '#ff79c6',
-		keyword: '#ff79c6'
-	}
-};
 
 export class Prettify {
 	#buffer = null;
@@ -292,8 +260,10 @@ export class Prettify {
 			singleQuote: true,
 			trailingComma: 'all',
 			parser: 'babel',
-			useTabs: false
+			useTabs: true,
+			tabWidth: 3
 		});
+
 		const palette = colors[opts.palette];
 		const el = this.#highlightCode(formatCode);
 		const parsed = parse(el).childNodes[0].childNodes[1].childNodes;
@@ -316,7 +286,7 @@ export class Prettify {
 		const { canvas, ctx } = this.#createCanvas(width, height);
 
 		ctx.font = '30px JetBrainsMono';
-		ctx.fillStyle = '#282a36';
+		ctx.fillStyle = palette.background;
 
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 		ctx.save();
@@ -360,6 +330,7 @@ export class Prettify {
 		let width = 0;
 
 		code.split('\n').forEach((text) => {
+			text = text.replace(regex, '    ');
 			const lenWidth = ctx.measureText(text).width;
 
 			if (lenWidth >= width) {

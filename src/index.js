@@ -5,7 +5,6 @@ import dayjs from 'dayjs';
 import localePlugins from 'dayjs/plugin/timezone.js';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 import mqtt from 'mqtt';
-// import { platform } from 'process';
 
 dotenv.config();
 
@@ -16,7 +15,6 @@ import { color, ERRLOG } from './utils/modules/index.js';
 import { runLimitScheduler } from './helper/groups/settings/limit.js';
 import { clearDBConnection, resetSession } from './helper/connection/socket/reset-session.js';
 import { parseCli } from './helper/connection/utils/check-flag.js';
-// import { printRandomAscii } from './helper/ascii/random-ascii.js';
 import { connectSocket } from './helper/connection/socket/socket.js';
 import {
 	handleConnectionUpdate,
@@ -45,10 +43,6 @@ configuration.OPTIONS = configuration.cli.flags;
 const { OPTIONS, cli } = configuration;
 
 const regexOption = Object.keys(OPTIONS);
-
-// if (platform !== 'win32' && !OPTIONS.noLoad) {
-// 	await printRandomAscii();
-// }
 
 if (OPTIONS.reset) {
 	await resetSession(cli);

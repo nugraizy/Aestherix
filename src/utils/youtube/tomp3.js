@@ -1,7 +1,6 @@
-import fileSize from 'filesize-parser';
 import yts from 'ytsr';
 
-import { fetchJSON, isURL } from '../modules/index.js';
+import { fetchJSON, isURL, parseHumanReadableToBytes } from '../modules/index.js';
 
 const _apiIndex = 'https://tomp3.cc/api/ajax/search';
 const _apiConvert = 'https://tomp3.cc/api/ajax/convert';
@@ -27,7 +26,7 @@ const convertStreams = (vid, el) =>
 
 		resolve({
 			filesizeF: (el.size !== 'MB' && el.size) || '0MB',
-			filesize: (el.size !== 'MB' && fileSize(el.size, { base: 2 })) || '0MB',
+			filesize: (el.size !== 'MB' && parseHumanReadableToBytes(el.size)) || '0MB',
 			quality: el.q,
 			dlUrl: data.dlink
 		});

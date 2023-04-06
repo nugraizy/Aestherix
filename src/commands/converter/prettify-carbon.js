@@ -21,7 +21,7 @@ export default {
 
 		INFOLOG(`[${color(time, 'cyan')}]`, `${color('Carboning a Codes', '#01cdfe')} ${color(prettyNumber, '#ff71ce')}`);
 
-		const carbon = await new Prettify().Carbon(query, { theme: 'dracula', shadow: 3 });
+		const carbon = await new Prettify().Carbon(query, { theme: 'dracula' });
 
 		let buffer = carbon.toBuffer();
 
