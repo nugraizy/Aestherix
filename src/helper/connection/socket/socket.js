@@ -1,41 +1,34 @@
 import fs from 'fs-extra';
-import baileys from '@adiwajshing/baileys';
+import baileys, { makeCacheableSignalKeyStore } from '@adiwajshing/baileys';
 import P from 'pino';
 
 import { clearDBConnection } from './reset-session.js';
+import { patchInteractiveMessage } from '../utils/patch-message.js';
 
 const { default: makeWASocket, makeInMemoryStore, DEFAULT_CONNECTION_CONFIG } = baileys;
+const logger = (OPTIONS) => P({ level: OPTIONS.trace ? 'trace' : OPTIONS.debugMode ? 'debug' : 'fatal' });
+
+Map.prototype.flushAll = function () {
+	this.clear();
+};
 
 export const connectSocket = async ({ cli, OPTIONS, state }) => {
 	const CONNECTION_CONFIG = {
 		printQRInTerminal: true,
 		version: DEFAULT_CONNECTION_CONFIG.version,
-		logger: P({ level: OPTIONS.trace ? 'trace' : OPTIONS.debugMode ? 'debug' : 'fatal' }),
-		auth: state,
+		logger: logger(OPTIONS),
+		auth: {
+			creds: state.creds,
+			keys: makeCacheableSignalKeyStore(state.keys, logger(OPTIONS))
+		},
 		markOnlineOnConnect: false,
 		shouldSyncHistoryMessage: () => false,
 		getMessage: async () => ({ conversation: 'Success syncing. Please resend the command again.' }),
 		generateHighQualityLinkPreview: true,
 		linkPreviewImageThumbnailWidth: 2,
 		mediaCache: new Map(),
-		userDevicesCache: false,
-		patchMessageBeforeSending: (message) => {
-			if (message.buttonsMessage || message.templateMessage || message.listMessage) {
-				message = {
-					viewOnceMessage: {
-						message: {
-							messageContextInfo: {
-								deviceListMetadataVersion: 2,
-								deviceListMetadata: {}
-							},
-							...message
-						}
-					}
-				};
-			}
-
-			return message;
-		}
+		userDevicesCache: new Map(),
+		patchMessageBeforeSending: patchInteractiveMessage
 	};
 
 	const store = makeInMemoryStore({ logger: P().child({ level: 'fatal', stream: 'store' }) });
