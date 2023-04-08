@@ -11,7 +11,7 @@ export const githubWebhook = () => {
 
 	app.use(express.json());
 
-	const secret = process.env.GITHUB_SECRET;
+	const secret = process.env.GITHUB_SECRET_WEBHOOK;
 
 	app.get('/hc', (req, res) => {
 		res.status(200).send('good condition');
