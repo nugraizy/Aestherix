@@ -113,3 +113,5 @@ export const start = async () => {
 	Client.ev.on('contacts.update', () => {});
 	Client.ev.on('groups.update', () => {});
 };
+
+start().catch(console.log);
