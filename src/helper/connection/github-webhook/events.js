@@ -1,4 +1,4 @@
-const parseFilesCommited = (files) => {
+const parseFilesCommitted = (files) => {
 	let caption = '';
 
 	if (files.added.length > 0) {
@@ -22,18 +22,11 @@ export const handleGithubWebhook = async (commitInfo) => {
 ${commitInfo.message}
 
 Author-by : @${commitInfo.author.name}
-Comitted At : ${commitInfo.timestamp}
+Committed At : ${commitInfo.timestamp}
 
-${parseFilesCommited(commitInfo.files)}`;
+${parseFilesCommitted(commitInfo.files)}`;
 
-	await client[botNum].send('120363027862918129@g.us', {
-		text: caption,
-		buttons: [
-			{
-				buttonId: '$> git pull origin main',
-				buttonText: { displayText: 'Pull' },
-				type: 1
-			}
-		]
+	await client[botNum].sendMessage('120363027862918129@g.us', {
+		text: caption
 	});
 };
