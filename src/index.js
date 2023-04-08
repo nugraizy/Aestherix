@@ -1,3 +1,4 @@
+// THIS IS A TEST
 import baileys from '@adiwajshing/baileys';
 import dotenv from 'dotenv';
 import fs from 'fs-extra';
