@@ -17,17 +17,19 @@ import { clearDBConnection, resetSession } from './helper/connection/socket/rese
 import { parseCli } from './helper/connection/utils/check-flag.js';
 import { connectSocket } from './helper/connection/socket/socket.js';
 import {
+	emitGroupSettings,
 	handleConnectionUpdate,
 	handleUpsertUpdate,
 	handleMessagesUpdate,
 	handlePresenceUpdate,
 	handleCallUpdate,
 	handleParticipantsUpdate,
-	emitGroupSettings,
 	handleGroupSettingsUpdate,
 	handlePollUpdate,
 	handleWerewolfCycle
 } from './helper/connection/event-handler/universal.js';
+import { handleGithubWebhook } from './helper/connection/github-webhook/events.js';
+import { githubWebhook } from './helper/connection/github-webhook/server.js';
 
 const { useSingleFileAuthState } = baileys;
 
@@ -91,6 +93,7 @@ export const start = async () => {
 	);
 
 	Client.ev.on('connected', () => {
+		githubWebhook();
 		Client.ev.on('messages.upsert', async (message) => await handleUpsertUpdate(store, message));
 		Client.ev.on('messages.update', async (message) => await handleMessagesUpdate(store, message));
 		Client.ev.on('presence.update', async (presence) => await handlePresenceUpdate(presence));
@@ -99,19 +102,14 @@ export const start = async () => {
 			async ([{ isGroup, status, id, from }]) => await handleCallUpdate(isGroup, status, id, from, OPTIONS)
 		);
 		Client.ev.on('group.participants.update', async (message) => await handleParticipantsUpdate(store, message));
-
+		Client.ev.on('commit', async (commitInfo) => await handleGithubWebhook(commitInfo));
 		Client.ev.on('group.settings.update', async (message) => await handleGroupSettingsUpdate(store, message));
 		Client.ev.on('werewolf.cycle', async (update) => await handleWerewolfCycle(update));
 		Client.ev.on('poll.update', async (msg) => handlePollUpdate(store, msg));
 		Client.ws.on('CB:notification,type:w:gp2', (update) => emitGroupSettings.settings(update));
 		Client.ws.on('CB:notification,type:picture', async (update) => await emitGroupSettings.picture(update));
 	});
-
 	Client.ev.on('auth-state.update', saveState);
-
 	Client.ev.on('contacts.update', () => {});
-
 	Client.ev.on('groups.update', () => {});
 };
-
-start().catch((e) => console.log(e));

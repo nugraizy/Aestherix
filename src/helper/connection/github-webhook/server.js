@@ -1,0 +1,77 @@
+import express from 'express';
+import crypto from 'crypto';
+import dotenv from 'dotenv';
+
+import { parseCommit } from './utils.js';
+
+dotenv.config();
+
+export const githubWebhook = () => {
+	const app = express();
+
+	app.use(express.json());
+
+	const secret = process.env.GITHUB_SECRET;
+
+	app.get('/hc', (req, res) => {
+		res.status(200).send('good condition');
+	});
+
+	app.post('/webhook', (req, res) => {
+		const signature = req.headers['x-hub-signature'];
+		const payload = JSON.stringify(req.body);
+
+		const hmac = crypto.createHmac('sha1', secret);
+		const digest = Buffer.from('sha1=' + hmac.update(payload).digest('hex'), 'utf8');
+		const checksum = Buffer.from(signature, 'utf8');
+
+		if (checksum.length !== digest.length || !crypto.timingSafeEqual(digest, checksum)) {
+			return res.status(401).send('Unauthorized');
+		}
+
+		const event = req.headers['x-github-event'];
+		const commitEvent = 'push';
+
+		if (event === commitEvent) {
+			const commits = req.body.commits;
+
+			commits.forEach((commit) => {
+				const commitInfo = parseCommit(commit);
+
+				if (commitInfo && commitInfo.event === 'push') {
+					const { commits } = commitInfo.payload;
+
+					const lastCommit = commits[commits.length - 1];
+					const {
+						message,
+						timestamp,
+						url,
+						author: { name: authorName, email: authorEmail },
+						added,
+						modified,
+						removed
+					} = lastCommit;
+
+					const commitData = {
+						message,
+						timestamp,
+						url,
+						authorName,
+						authorEmail,
+						added,
+						modified,
+						removed
+					};
+
+					client[botNum].ev.emit('commit', commitData);
+				}
+
+				res.status(200).send('OK');
+			});
+		}
+	});
+
+	app.listen(8080, () => {
+		console.log('Webhook server started on port 8080');
+	});
+};
