@@ -38,33 +38,7 @@ export const githubWebhook = () => {
 			commits.forEach((commit) => {
 				const commitInfo = parseCommit(commit);
 
-				if (commitInfo && commitInfo.event === 'push') {
-					const { commits } = commitInfo.payload;
-
-					const lastCommit = commits[commits.length - 1];
-					const {
-						message,
-						timestamp,
-						url,
-						author: { name: authorName, email: authorEmail },
-						added,
-						modified,
-						removed
-					} = lastCommit;
-
-					const commitData = {
-						message,
-						timestamp,
-						url,
-						authorName,
-						authorEmail,
-						added,
-						modified,
-						removed
-					};
-
-					client[botNum].ev.emit('commit', commitData);
-				}
+				client[botNum].ev.emit('commit', commitInfo);
 
 				res.status(200).send('OK');
 			});

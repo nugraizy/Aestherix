@@ -2,7 +2,7 @@ export const parseCommit = (commit) => {
 	const commitInfo = {
 		message: commit.message,
 		author: {
-			name: commit.author.name
+			name: commit.committer.name
 		},
 		timestamp: commit.timestamp,
 		url: commit.url,
