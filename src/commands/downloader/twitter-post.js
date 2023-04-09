@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
-import { color, delay, ERRLOG, INFOLOG, isURL, numberWithCommas } from '../../utils/modules/index.js';
+import { color, delay, ERRLOG, INFOLOG, isURL, formatNumber } from '../../utils/modules/index.js';
 import { twitterDownload } from '../../utils/twitter/index.js';
 
 export default {
@@ -54,16 +54,17 @@ export default {
 
 			let capt = 'Twitter Post'.formatHeaders();
 
-			capt += `Username : ${post.username}\n`;
+			capt += `\n\nUsername : ${post.username}\n`;
 			capt += `Fullname : ${post.author}\n`;
 			capt += `Verified : ${post.verified ? 'Verified' : 'Not Verified'}\n`;
-			capt += `Published : ${post.published}\n`;
-			capt += `Tot. Comment : ${numberWithCommas(post.replies)}\n`;
-			capt += `Tot. Like : ${numberWithCommas(post.liked)}\n`;
-			capt += `Tot. Retweet : ${numberWithCommas(post.retweet)}\n`;
 
 			if (post.medias.length === 1) {
-				capt += `Caption : ${post.caption.trim()}\n`;
+				capt += ` 💭 : ${post.caption.trim()}\n\n`;
+
+				capt += `*${dayjs(post.published).format('HH.mm A · MMM, YYYY')} · ${formatNumber(post.impression)} 👀*\n`;
+				capt += `${formatNumber(post.retweet)} 🔄 · ${formatNumber(post.replies)} 💬 · ${formatNumber(
+					post.liked
+				)} ❤️ · ${formatNumber(post.quoted)} 📌\n`;
 
 				await client[botNum].send(
 					from,
@@ -76,8 +77,12 @@ export default {
 					{ groupMetadata, quoted: message }
 				);
 			} else {
-				capt += `Tot. Media : ${post.medias.length}\n`;
-				capt += `Caption : ${post.caption.trim()}\n`;
+				capt += ` 💭 : ${post.caption.trim()}\n`;
+				capt += `Tot. Media : ${post.medias.length}\n\n`;
+				capt += `*${dayjs(post.published).format('HH.mm A · MMM, YYYY')} · ${formatNumber(post.impression)} 👀*\n`;
+				capt += `${formatNumber(post.retweet)} 🔄 · ${formatNumber(post.replies)} 💬 · ${formatNumber(
+					post.liked
+				)} ❤️ · ${formatNumber(post.quoted)} 📌\n`;
 
 				await client[botNum].send(from, { text: capt.trim() }, { groupMetadata, quoted: message });
 

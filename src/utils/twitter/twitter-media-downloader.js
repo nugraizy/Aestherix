@@ -1,6 +1,10 @@
-import { fetchJSON, fetchTEXT } from '../modules/index.js';
+import axios from 'axios';
 
-const _api = (input) => `https://tweetpik.com/api/tweets/${input}`;
+import { fetchJSON } from '../modules/index.js';
+
+const _api = (input) =>
+	`https://api.twitter.com/2/tweets/${input}?expansions=attachments.media_keys,author_id,entities.mentions.username&media.fields=duration_ms,height,preview_image_url,public_metrics,type,url,width,alt_text&tweet.fields=public_metrics,attachments,source,created_at&user.fields=username`;
+const _apiVideos = (input) => `https://api.twitterpicker.com/tweet/mediav2?id=${input}`;
 
 const regex = (input) => {
 	const regex = /twitter\.com\/.*\/status(?:es)?\/([^/?]+)/.test(input)
@@ -18,7 +22,7 @@ const regex = (input) => {
 };
 
 /**
- * @typedef {{author: string, username: string, verified: true | false, caption: string, published: string, liked: number, retweet: number, replies: number}} InfoRaw
+ * @typedef {{author: string, username: string, caption: string, published: string, liked: number, retweet: number, replies: number, quoted: number, impression: number}} InfoRaw
  * @typedef {{url: string, type: 'image' | 'video'}} MediaRaw
  */
 
@@ -38,49 +42,62 @@ export const twitterDownload = (input) =>
 
 		try {
 			let container = {};
-			const data = await fetchTEXT(_api(id), { headers: { cookie: '_fbp=fb.1.1657783842199.544637810' } });
+			const data = await fetchJSON(_api(id), {
+				headers: {
+					Authorization: `Bearer ${process.env.TWITTER_ACCESS_TOKEN}`
+				}
+			});
 
-			if (data === '') {
+			if ('errors' in data) {
 				return resolve({ error: 'Something went wrong with the URL.' });
 			}
 
 			const {
-				name,
-				username,
-				verified,
 				text,
 				created_at: createdAt,
-				like_count: likeCount,
-				retweet_count: retweetCount,
-				reply_count: replyCount,
-				media: medias
-			} = JSON.parse(data);
+				public_metrics: {
+					like_count: likeCount,
+					retweet_count: retweetCount,
+					reply_count: replyCount,
+					quote_count: quoteCount,
+					impression_count: impressionCount
+				}
+			} = data.data;
+			const {
+				media: medias,
+				users: [{ name, username }]
+			} = data.includes;
 
 			container = {
-				author: name,
 				username,
-				verified,
+				author: name,
 				caption: text,
 				published: createdAt,
 				liked: likeCount,
 				retweet: retweetCount,
 				replies: replyCount,
+				quoted: quoteCount,
+				impression: impressionCount,
 				medias: []
 			};
 
-			for (const media of medias) {
-				if (media.type === 'photo') {
+			for (const { type, url, width, height } of medias) {
+				if (type === 'photo') {
 					container.medias.push({
-						url: media.url,
+						url: url,
 						type: 'image'
 					});
 					continue;
 				}
 
-				const data = await fetchJSON(_api(`${id}/video`), { headers: { cookie: '_fbp=fb.1.1657783842199.544637810' } });
+				const {
+					data: {
+						media: { videos }
+					}
+				} = await axios.get(_apiVideos(id));
 
 				container.medias.push({
-					url: data.variants.slice(-1)[0].url,
+					url: videos.find((v) => v.url.includes(`${width}x${height}`)).url,
 					type: 'video'
 				});
 			}

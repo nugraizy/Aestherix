@@ -685,6 +685,23 @@ export const formatViews = (s) => {
 	return Number(s.replace(reg, '')) * MULTIPLIER[s[matrix]];
 };
 
+export const formatNumber = (number) => {
+	if (typeof number !== 'number') {
+		throw new Error('Input must be a number');
+	}
+
+	if (number < 1000) {
+		return String(number);
+	}
+
+	const units = ['K', 'M', 'B', 'T'];
+
+	const unit = Math.floor((number.toFixed(0).length - 1) / 3) * 3;
+	const value = (number / 10 ** unit).toFixed(1);
+
+	return `${value}${units[unit / 3 - 1]}`;
+};
+
 export const convertSecondstoTime = (ms) => {
 	if (ms < 0) {
 		ms = -ms;
