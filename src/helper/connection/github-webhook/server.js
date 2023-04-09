@@ -6,7 +6,11 @@ import { parseCommit } from './utils.js';
 
 dotenv.config();
 
-export const githubWebhook = () => {
+export const githubWebhook = (isReconnect) => {
+	if (isReconnect) {
+		return;
+	}
+
 	const app = express();
 
 	app.use(express.json());

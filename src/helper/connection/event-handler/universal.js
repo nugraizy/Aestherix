@@ -52,7 +52,7 @@ export const handleConnectionUpdate = async (
 				}
 
 				reconnectMqttConnection(connectMqtt, clientMqttListen);
-				await (await import('../../../index.js')).start();
+				await (await import('../../../index.js')).start(true);
 			}
 		} else if (connection === 'open') {
 			if (!isClosed) {

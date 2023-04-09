@@ -79,7 +79,7 @@ clientMqttListen.on('connect', () => {
 
 const { state, saveState } = useSingleFileAuthState(`./src/helper/connection/session/${cli.input[0] ?? 'Session-debug'}.json`);
 
-export const start = async () => {
+export const start = async (isReconnect) => {
 	if (OPTIONS.help) {
 		console.log(cli.help);
 		process.exit(0);
@@ -93,7 +93,7 @@ export const start = async () => {
 	);
 
 	Client.ev.on('connected', () => {
-		githubWebhook();
+		githubWebhook(isReconnect);
 		Client.ev.on('messages.upsert', async (message) => await handleUpsertUpdate(store, message));
 		Client.ev.on('messages.update', async (message) => await handleMessagesUpdate(store, message));
 		Client.ev.on('presence.update', async (presence) => await handlePresenceUpdate(presence));
