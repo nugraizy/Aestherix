@@ -42,7 +42,7 @@ export const githubWebhook = (isReconnect) => {
 			commits.forEach(async (commit) => {
 				const commitInfo = parseCommit(commit);
 
-				const { additions, deletions, filesChanged } = await getFilesChanged(commitInfo);
+				const { additions, deletions, filesChanged } = await getFilesChanged(commitInfo.sha);
 
 				client[botNum].ev.emit('commit', { ...commitInfo, additions, deletions, filesChanged });
 
