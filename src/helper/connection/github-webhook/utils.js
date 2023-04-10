@@ -5,7 +5,9 @@ import { fetchJSON } from '../../../utils/modules/index.js';
 dotenv.config();
 
 const _api = (commitSha) => `https://api.github.com/repos/nugraizy/simplebotPRO3/commits/${commitSha}`;
-const _config = { Accept: 'application/vnd.github.v3+json', Authorization: `Bearer ${process.env.GITHUB_AUTH_TOKEN}` };
+const _config = {
+	headers: { Accept: 'application/vnd.github.v3+json', Authorization: `Bearer ${process.env.GITHUB_AUTH_TOKEN}` }
+};
 
 export const parseCommit = (commit) => {
 	const commitInfo = {
@@ -15,7 +17,7 @@ export const parseCommit = (commit) => {
 		},
 		timestamp: commit.timestamp,
 		url: commit.url,
-		sha: commit.sha,
+		sha: commit.id,
 		files: {
 			added: commit.added,
 			modified: commit.modified,
