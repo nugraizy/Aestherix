@@ -4,3 +4,4 @@ src/helper/connection/session/**/*.json
 src/media/connection_databases/*.json
 temporary_files/
 test/
+src/commands/debugging/Call.js

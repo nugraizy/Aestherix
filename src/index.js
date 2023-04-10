@@ -8,8 +8,6 @@ import mqtt from 'mqtt';
 
 dotenv.config();
 
-console.log(__dirname);
-
 import configuration from './helper/config/connect.js';
 import { color, ERRLOG } from './utils/modules/index.js';
 import { runLimitScheduler } from './helper/groups/settings/limit.js';
@@ -94,7 +92,7 @@ export const start = async (isReconnect) => {
 
 	Client.ev.on('connected', () => {
 		githubWebhook(isReconnect);
-		Client.ev.on('messages.upsert', async (message) => await handleUpsertUpdate(store, message));
+		Client.ev.on('messages.upsert', async (message) => await handleUpsertUpdate(store, message, state));
 		Client.ev.on('messages.update', async (message) => await handleMessagesUpdate(store, message));
 		Client.ev.on('presence.update', async (presence) => await handlePresenceUpdate(presence));
 		Client.ev.on(

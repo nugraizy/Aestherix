@@ -2,7 +2,7 @@ import express from 'express';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 
-import { parseCommit } from './utils.js';
+import { getFilesChanged, parseCommit } from './utils.js';
 
 dotenv.config();
 
@@ -39,10 +39,12 @@ export const githubWebhook = (isReconnect) => {
 		if (event === commitEvent) {
 			const commits = req.body.commits;
 
-			commits.forEach((commit) => {
+			commits.forEach(async (commit) => {
 				const commitInfo = parseCommit(commit);
 
-				client[botNum].ev.emit('commit', commitInfo);
+				const { additions, deletions, filesChanged } = await getFilesChanged(commitInfo);
+
+				client[botNum].ev.emit('commit', { ...commitInfo, additions, deletions, filesChanged });
 
 				res.status(200).send('OK');
 			});

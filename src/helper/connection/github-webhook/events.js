@@ -24,7 +24,11 @@ ${commitInfo.message}
 Author-by : @${commitInfo.author.name}
 Committed At : ${commitInfo.timestamp}
 
-${parseFilesCommitted(commitInfo.files)}`;
+${parseFilesCommitted(commitInfo.files)}
+
+*Showing ${commitInfo.filesChanged} changed files with ${commitInfo.additions} additions and ${
+		commitInfo.deletions
+	} deletions.*`;
 
 	await client[botNum].sendMessage('120363027862918129@g.us', {
 		text: caption

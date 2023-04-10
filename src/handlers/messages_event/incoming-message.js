@@ -25,7 +25,7 @@ const path = {
 	antiNsfw: '../misc/anti-nsfw.js'
 };
 
-const handlers = async (message, client, cmds, store, user) => {
+const handlers = async (message, client, cmds, store, user, state) => {
 	if (message === undefined) {
 		return;
 	}
@@ -351,7 +351,7 @@ const handlers = async (message, client, cmds, store, user) => {
 						continue;
 					}
 
-					await Tempcmds.run(message, client, store);
+					await Tempcmds.run({ ...message, state }, client, store);
 
 					if (user.cooldown.get(message.sender)?.requests) {
 						user.cooldown.get(message.sender).requests = false;

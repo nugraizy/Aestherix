@@ -101,12 +101,12 @@ export const handleConnectionUpdate = async (
 	}
 };
 
-export const handleUpsertUpdate = async (store, message) => {
+export const handleUpsertUpdate = async (store, message, state) => {
 	if (!handler.has('incoming')) {
 		handler.set('incoming', (await import(handlerPath.incoming)).default);
 	}
 
-	handler.get('incoming')(message, client, configuration.cmds, store, configuration.user);
+	handler.get('incoming')(message, client, configuration.cmds, store, configuration.user, state);
 };
 
 export const handleMessagesUpdate = async (store, message) => {
