@@ -36,7 +36,11 @@ const handlers = async (message, client, cmds, store, user, state) => {
 
 	const time = dayjs().format('HH:mm:ss DD/MM');
 
-	if (message.messages[0] && 'messageStubParameters' in message.messages[0]) {
+	if (
+		message.messages[0] &&
+		'messageStubParameters' in message.messages[0] &&
+		message.messages[0]?.messageStubParameters?.length > 0
+	) {
 		if (!handler.has('stubType')) {
 			handler.set('stubType', (await import(path.stubType)).default);
 		}

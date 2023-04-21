@@ -124,7 +124,10 @@ export const assign = (client) => {
 			...options,
 			...(options?.groupMetadata ? { cachedGroupMetadata: () => options?.groupMetadata } : {}),
 			ephemeralExpiration:
-				options?.groupMetadata?.ephemeralDuration || configuration.cache.users.get(to).ephemeralDuration || null
+				options?.groupMetadata?.ephemeralDuration ||
+				configuration.cache.metadata?.get(to)?.ephemeralDuration ||
+				configuration.cache.users?.get(to)?.ephemeralDuration ||
+				null
 		};
 
 		if ('buttons' in message || 'sections' in message) {
@@ -183,7 +186,8 @@ export const assign = (client) => {
 				{
 					quoted,
 					cachedGroupMetadata: () => groupMetadata,
-					ephemeralExpiration: groupMetadata?.ephemeralDuration || 7 * 24 * 60 * 60
+					ephemeralExpiration:
+						groupMetadata?.ephemeralDuration || configuration.cache.users?.get(from)?.ephemeralDuration || null
 				}
 			),
 		/**

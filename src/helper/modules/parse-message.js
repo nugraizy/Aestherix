@@ -59,14 +59,12 @@ function crawlProperty(obj, propName) {
  */
 export const reassign = async (m, client, store) => {
 	try {
-		if (m.message?.protocolMessage?.type === 'REVOKE') {
+		if (m.message?.protocolMessage?.type === 3) {
 			return m;
 		}
 
 		delete m?.message?.messageContextInfo;
 		delete m?.message?.senderKeyDistributionMessage;
-
-		console.log(JSON.stringify(m, null, 2));
 
 		const isFromMe = m?.key?.fromMe;
 		const from = m?.key?.remoteJid || m?.from;
@@ -132,7 +130,7 @@ export const reassign = async (m, client, store) => {
 			});
 		}
 
-		if (m.message?.protocolMessage?.type === 'EPHEMERAL_SETTING') {
+		if (m.message?.protocolMessage?.type === 0) {
 			const keyStats = isMetadata && isGroup ? 'metadata' : isUsers && !isGroup ? 'users' : '';
 
 			if (keyStats) {
