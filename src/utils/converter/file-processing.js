@@ -151,7 +151,6 @@ export const toOpus = (ext, opts = {}) =>
 
 			resolve(await fs.readFile(`${opts.output}.${ext}`));
 			await fs.unlink(`${opts.output}.${ext}`);
-			await fs.unlink(tmp);
 		});
 	});
 

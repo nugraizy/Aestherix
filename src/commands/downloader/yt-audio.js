@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import path from 'path';
 import sharp from 'sharp';
 
 import {
@@ -11,7 +10,6 @@ import {
 	numberWithCommas,
 	removeDuplicatesArray
 } from '../../utils/modules/index.js';
-import { toOpus } from '../../utils/converter/index.js';
 import { youtubeMainDownload as yta } from '../../utils/youtube/index.js';
 
 const regex = (input) =>
@@ -28,33 +26,19 @@ export default {
 	cooldown: 7,
 	limit: 8,
 	status: 'enable',
-	async run({ from, query, prettyNumber, filename, message, type, args, groupMetadata }, client) {
+	async run({ from, query, prettyNumber, message, type, args, groupMetadata, isGroup }, client) {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (type === 'listResponseMessage' && args[1] === 'download') {
-			const audioBuffer = await toOpus('opus', {
-				input: path.join(__dirname, `src/media/temporary_files/${filename}`),
-				output: path.join(__dirname, `src/media/temporary_files/${filename}-done`),
-				media: args[2].replace('https', 'http')
-			});
-
 			await client[botNum].send(
 				from,
 				{
-					document: audioBuffer,
+					document: { url: args[2] },
 					fileName: `${args.slice(3).join(' ')}.opus`,
 					mimetype: 'audio/opus',
 					caption: ''
 				},
 				{ groupMetadata, quoted: message }
-			);
-			await client[botNum].send(
-				from,
-				{
-					audio: audioBuffer,
-					ptt: false
-				},
-				{ groupMetadata }
 			);
 			return;
 		} else if (type === 'templateButtonReplyMessage' && args[1] === 'get') {
@@ -154,6 +138,20 @@ export default {
 					},
 					{ groupMetadata }
 				);
+
+				if (isGroup) {
+					await client[botNum].send(
+						from,
+						{
+							document: { url: mp3[0].dlUrl },
+							fileName: `${title}.mp3`,
+							mimetype: 'audio/mp3',
+							caption: ''
+						},
+						{ groupMetadata, quoted: message }
+					);
+					continue;
+				}
 
 				await client[botNum].send(
 					from,

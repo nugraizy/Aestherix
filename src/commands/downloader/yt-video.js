@@ -27,7 +27,7 @@ export default {
 	cooldown: 12,
 	limit: 8,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, type, args, groupMetadata }, client) {
+	async run({ from, query, prettyNumber, message, type, args, groupMetadata, isGroup }, client) {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (type === 'listResponseMessage' && args[1] === 'download') {
@@ -125,20 +125,19 @@ export default {
 					},
 					caption: capt,
 					footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
-					templateButtons: [
+					buttons: [
 						{
-							quickReplyButton: {
-								displayText: 'Audio',
-								id: `.ytmp3 get ${url}`
-							},
-							urlButton: {
-								displayText: 'Stream Here',
-								url
-							}
+							buttonId: `.ytmp3 get ${url}`,
+							buttonText: { displayText: 'Audio' },
+							type: 1
 						}
-					],
-					headerType: 1
+					]
 				});
+
+				if (isGroup) {
+					await client[botNum].send(from, { video: { url: mp4[0].dlUrl } }, { groupMetadata, quoted: message });
+					continue;
+				}
 
 				await client[botNum].send(from, {
 					title: 'YouTube MP4'.formatHeaders(),

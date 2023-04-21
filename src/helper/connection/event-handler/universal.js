@@ -306,7 +306,11 @@ ${update.playersData
 	}
 };
 export const handlePollUpdate = async (store, msg) => {
-	const originalPoll = await store.loadMessage(msg.from, msg.message.pollUpdateMessage.pollCreationMessageKey.id);
+	const originalPoll = await store.loadMessage(msg.from, msg.message.pollUpdateMessage?.pollCreationMessageKey?.id);
+
+	if (!originalPoll) {
+		return;
+	}
 
 	const hash = await msg.func.decrypt(
 		originalPoll.message.messageContextInfo.messageSecret,
@@ -320,6 +324,7 @@ export const handlePollUpdate = async (store, msg) => {
 	console.log(await msg.func.compare(['help', 'yo'], hash));
 	return;
 };
+
 
 export const emitGroupSettings = {
 	settings: (update) => {

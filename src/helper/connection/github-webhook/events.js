@@ -2,18 +2,18 @@ const parseFilesCommitted = (files) => {
 	let caption = '';
 
 	if (files.added.length > 0) {
-		caption += `+ ${files.added.join(', ')}\n`;
+		caption += files.added.map((v) => `+ ${v}\n`);
 	}
 
 	if (files.removed.length > 0) {
-		caption += `- ${files.removed.join(', ')}\n`;
+		caption += files.removed.map((v) => `- ${v}\n`);
 	}
 
 	if (files.modified.length > 0) {
-		caption += `± ${files.modified.join(', ')}\n`;
+		caption += files.modified.map((v) => `± ${v}\n`);
 	}
 
-	return caption;
+	return caption.trim();
 };
 
 export const handleGithubWebhook = async (commitInfo) => {

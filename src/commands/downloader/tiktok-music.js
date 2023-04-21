@@ -1,9 +1,7 @@
 import dayjs from 'dayjs';
-import path from 'path';
 import parser from 'yargs-parser';
 
 import { color, delay, ERRLOG, INFOLOG, isURL, removeDuplicatesArray } from '../../utils/modules/index.js';
-import { toOpus } from '../../utils/converter/index.js';
 import { mime } from '../../utils/misc/index.js';
 import { tiktokAPI } from '../../utils/tiktok/index.js';
 
@@ -19,7 +17,7 @@ export default {
 	cooldown: 7,
 	limit: 6,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, filename, groupMetadata }, client) {
+	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!query) {
@@ -72,11 +70,7 @@ export default {
 			await client[botNum].send(
 				from,
 				{
-					document: await toOpus('opus', {
-						input: path.join(__dirname, `src/media/temporary_files/${filename}`),
-						output: path.join(__dirname, `src/media/temporary_files/${filename}-done`),
-						media: music.url.music.replace('https', 'http')
-					}),
+					document: { url: music.url.music },
 					fileName: `${music.authorMusic} - ${music.musicTitle}.mp3`,
 					mimetype: mime('mp3')
 				},

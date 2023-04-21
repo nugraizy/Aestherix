@@ -1,4 +1,4 @@
-import {
+import baileys, {
 	downloadContentFromMessage,
 	downloadMediaMessage as downloadMessage,
 	generateWAMessage,
@@ -12,10 +12,12 @@ import webpmux from 'node-webpmux';
 import sharp from 'sharp';
 import { TextEncoder } from 'util';
 
+import configuration from '../config/connect.js';
 import { S_WHATSAPP_NET, UPDATE, ZERO } from '../misc/wa_data/index.js';
 import { isURL, delaySync, fetchBUFFER } from '../../utils/modules/index.js';
 import { reassign } from './parse-message.js';
 
+const { proto } = baileys;
 const { readFile, unlink, writeFile } = (await import('fs-extra')).default;
 
 /**
@@ -121,10 +123,43 @@ export const assign = (client) => {
 		options = {
 			...options,
 			...(options?.groupMetadata ? { cachedGroupMetadata: () => options?.groupMetadata } : {}),
-			ephemeralExpiration: options?.groupMetadata?.ephemeralDuration || 7 * 24 * 60 * 60
+			ephemeralExpiration:
+				options?.groupMetadata?.ephemeralDuration || configuration.cache.users.get(to).ephemeralDuration || null
 		};
 
 		if ('buttons' in message || 'sections' in message) {
+			delete options.ephemeralExpiration;
+		}
+
+		filter: if ('templateButtons' in message) {
+			const filteredButtons = message.templateButtons.filter((v) => v.quickReplyButton);
+
+			if (filteredButtons.length === 0) {
+				delete message.templateButtons;
+				delete message.footer;
+
+				break filter;
+			}
+
+			message.buttons = filteredButtons.map((v) => ({
+				buttonId: v.quickReplyButton.id,
+				buttonText: { displayText: v.quickReplyButton.displayText },
+				type: 1
+			}));
+
+			if ('text' in message) {
+				message.headerType = proto.Message.ButtonsMessage.HeaderType.TEXT;
+			} else if ('image' in message) {
+				message.headerType = proto.Message.ButtonsMessage.HeaderType.IMAGE;
+			} else if ('video' in message) {
+				message.headerType = proto.Message.ButtonsMessage.HeaderType.VIDEO;
+			} else if ('document' in message) {
+				message.headerType = proto.Message.ButtonsMessage.HeaderType.DOCUMENT;
+			} else if ('location' in message) {
+				message.headerType = proto.Message.ButtonsMessage.HeaderType.LOCATION;
+			}
+
+			delete message.templateButtons;
 			delete options.ephemeralExpiration;
 		}
 

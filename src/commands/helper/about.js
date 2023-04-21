@@ -12,7 +12,7 @@ export default {
 	cooldown: 10,
 	limit: 5,
 	status: 'enable',
-	async run({ from, groupMetadata }, client) {
+	async run({ from, groupMetadata, message }, client) {
 		const capt = `Bot Name : Void
 Total Commands : ${configuration.cmds.commands.size}
 Bot Version : ${romanize((await fs.readJSON('./package.json')).version).toUpperCase()}
@@ -24,30 +24,17 @@ Our Motto :
 
 Using less module and try to find every private api from the provider (if they using one).`;
 
-		await client[botNum].send(
-			from,
-			{
-				text: capt.trim(),
-				footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
-				templateButtons: [],
-				headerType: 1
-			},
-			{ groupMetadata }
-		);
-		await client[botNum].send(
-			from,
-			{
-				text: `Thanks To :
+		await client[botNum].reply({ from, quoted: message, groupMetadata }, capt.trim());
+		await client[botNum].reply(
+			{ from, quoted: message, groupMetadata },
+			`Thanks To :
 Aldi a.k.a Alphanum404
 Benni a.k.a Bennz
 Hanif a.k.a Mrhrtz
 Nafiz a.k.a VoIP
-Toby a.k.a Tobz`,
-				footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
-				templateButtons: [{ urlButton: { displayText: 'Contact Owner', url: 'https://wa.me/6289607055246?text=hi' } }],
-				headerType: 1
-			},
-			{ groupMetadata }
+Toby a.k.a Tobz
+
+Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
 		);
 	}
 };

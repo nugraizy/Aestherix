@@ -33,7 +33,7 @@ export const checkUser = async (obj) => {
 export const addUser = async (obj) => {
 	const data = await fs.readJSON(PATH.files);
 
-	if (!checkUser(obj)) {
+	if (!(await checkUser(obj))) {
 		data.push(obj);
 	}
 
@@ -58,22 +58,23 @@ export const indexUser = async (obj) => {
 
 export const updateUser = async (obj) => {
 	const data = await fs.readJSON(PATH.files);
+	const indexs = await indexUser(obj);
 
-	if (indexUser(obj)) {
+	if (indexs) {
 		for (const index in obj) {
 			if (index === 'limit' && obj.type === 'MIN') {
-				if (data[indexUser(obj).index][index] - obj[index] < 0) {
-					return { status: false, message: 'Limit is not enough', limits: data[indexUser(obj).index][index] };
+				if (data[indexs.index][index] - obj[index] < 0) {
+					return { status: false, message: 'Limit is not enough', limits: data[indexs.index][index] };
 				}
 
-				data[indexUser(obj).index][index] -= obj[index];
+				data[indexs.index][index] -= obj[index];
 			} else if (obj.type !== 'MIN') {
-				data[indexUser(obj).index][index] = obj[index];
+				data[indexs.index][index] = obj[index];
 			}
 		}
 
 		await fs.writeJSON(PATH.files, data);
-		return data[indexUser(obj).index];
+		return data[indexs.index];
 	}
 
 	return false;
@@ -81,16 +82,17 @@ export const updateUser = async (obj) => {
 
 export const addLimit = async (obj) => {
 	const data = await fs.readJSON(PATH.files);
+	const indexs = await indexUser(obj);
 
-	if (indexUser(obj)) {
-		if (data[indexUser(obj).index].limit <= 0) {
+	if (indexs) {
+		if (data[indexs.index].limit <= 0) {
 			return false;
 		}
 
-		return updateUser(obj);
+		return await updateUser(obj);
 	}
 
-	return addUser({
+	return await addUser({
 		id: obj.id,
 		limit: LIMIT,
 		role: 'FREE'
@@ -119,7 +121,7 @@ export const resetAllLimit = async () => {
 	return true;
 };
 
-export const checkLimit = (users) => indexUser({ id: users });
+export const checkLimit = async (users) => await indexUser({ id: users });
 
 export const addUserLimit = async (user, limit) => {
 	const data = await fs.readJSON(PATH.files);

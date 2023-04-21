@@ -23,38 +23,58 @@ groupParticipantsNotificationHandler = async (client, message, store) => {
 	message = await reassign(JSON.parse(JSON.stringify(message)), client, store, false);
 
 	if (Object.keys(EVENT_UPDATE).includes(message.messageStubType) && configuration.cache.metadata.has(message.from)) {
-		const cache = configuration.cache.metadata.get(message.from);
+		const cache = configuration.cache.metadata?.get(message.from);
 		const index = (arr, id, obj) => arr.findIndex((v) => (obj ? v.id === id : v === id));
 
 		if (['GROUP_PARTICIPANT_ADD', 'GROUP_PARTICIPANT_INVITE'].includes(message.messageStubType)) {
 			for (const id of message.messageStubParameters) {
-				cache.participants.push({
+				cache.participants?.push({
 					id,
 					admin: null
 				});
-				cache.rawParticipants.push({ id, admin: null });
-				cache.participantsGroups.push(id);
+				cache.rawParticipants?.push({ id, admin: null });
+				cache.participantsGroups?.push(id);
 			}
 		} else if (['GROUP_PARTICIPANT_LEAVE', 'GROUP_PARTICIPANT_REMOVE'].includes(message.messageStubType)) {
 			for (const id of message.messageStubParameters) {
-				if (cache.adminGroups.includes(id)) {
+				if (cache.adminGroups?.includes(id)) {
 					cache.adminGroups.splice(index(cache.adminGroups, id, false), 1);
 				}
 
-				cache.participants.splice(index(cache.participants, id, true), 1);
-				cache.rawParticipants.splice(index(cache.rawParticipants, id, true), 1);
-				cache.participantsGroups.splice(index(cache.participantsGroups, id, false), 1);
+				cache.participants?.splice(index(cache.participants, id, true), 1);
+				cache.rawParticipants?.splice(index(cache.rawParticipants, id, true), 1);
+				cache.participantsGroups?.splice(index(cache.participantsGroups, id, false), 1);
 			}
 		} else if (['GROUP_PARTICIPANT_DEMOTE'].includes(message.messageStubType)) {
 			for (const id of message.messageStubParameters) {
-				cache.participants[index(cache.participants, id, true)].admin = null;
-				cache.rawParticipants[index(cache.rawParticipants, id, true)].admin = null;
+				let indexs = index(cache.participants, id, true);
+
+				if (cache.participants && cache.participants[indexs]?.admin) {
+					cache.participants[indexs].admin = null;
+				}
+
+				indexs = index(cache.rawParticipants, id, true);
+
+				if (cache.rawParticipants && cache.rawParticipants[indexs]?.admin) {
+					cache.rawParticipants[indexs].admin = null;
+				}
+
 				cache.adminGroups.slice(index(cache.adminGroups, id, false), 1);
 			}
 		} else if (['GROUP_PARTICIPANT_PROMOTE'].includes(message.messageStubType)) {
 			for (const id of message.messageStubParameters) {
-				cache.participants[index(cache.participants, id, true)].admin = 'admin';
-				cache.rawParticipants[index(cache.rawParticipants, id, true)].admin = 'admin';
+				let indexs = index(cache.participants, id, true);
+
+				if (cache.participants && cache.participants[indexs]?.admin) {
+					cache.participants[indexs].admin = 'admin';
+				}
+
+				indexs = index(cache.rawParticipants, id, true);
+
+				if (cache.rawParticipants && cache.rawParticipants[indexs]?.admin) {
+					cache.rawParticipants[indexs].admin = 'admin';
+				}
+
 				cache.adminGroups.push(id);
 			}
 		}

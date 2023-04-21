@@ -15,7 +15,10 @@ export default {
 			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
 		}
 
-		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
+		if (
+			(args[1] === 'next' || args[1] === 'prev') &&
+			(type === 'templateButtonReplyMessage' || type === 'buttonsResponseMessage')
+		) {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.image === args[2]);
 

@@ -28,30 +28,37 @@ export default {
 			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a url.');
 		}
 
+		const groups = await client[botNum].groupFetchAllParticipating();
+
+		const isGroupMaxed = Object.keys(groups).length > settings.max_group;
 		const reg = regex(query);
+
+		if (isGroupMaxed && !isOwner) {
+			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Bot already maxed the group.');
+		}
 
 		if (!reg) {
 			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Invalid url.');
 		}
 
-		const metadataInvite = await client[botNum].groupGetInviteInfo(reg);
-		const metadataGroup = await client[botNum].groupMetadata(metadataInvite?.id);
+		const metadataInvite = await client[botNum].groupGetInviteInfo(reg).catch(() => null);
 
-		const participants = metadataInvite.participants?.map((v) => v?.id);
-		const isAdmin = metadataInvite.participants?.map((v) => v?.admin)?.includes(sender);
-
-		const isGroupMaxed = Object.keys(await client[botNum].groupFetchAllParticipating()).length > settings.max_group;
-
-		if (metadataGroup.id !== '') {
+		if (Object.keys(groups).includes(metadataInvite.id)) {
 			await client[botNum].reply({ groupMetadata, from, quoted: message }, 'I am already in this group.');
-		} else if (isGroupMaxed && !isOwner) {
-			await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Bot already maxed the group.');
-		} else if (participants?.length < settings.min_members && !isOwner) {
+		} else if (!isOwner && metadataInvite.size >= 1024) {
+			await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Bot cannot join. Reason : Group is full.');
+		} else if (!isOwner && metadataInvite.size < settings.min_members) {
 			await client[botNum].reply(
 				{ groupMetadata, from, quoted: message },
 				`This group is not big enough to join. Minimum ${settings.min_members} participants.`
 			);
-		} else if (!isAdmin && !isOwner) {
+		} else if (
+			!isOwner &&
+			!metadataInvite.participants
+				?.filter((v) => v.admin)
+				.map((v) => v.id)
+				?.includes(sender)
+		) {
 			await client[botNum].reply({ from, quoted: message }, 'You must be an admin to invite bot to group.');
 		} else if (metadataInvite) {
 			await client[botNum].groupAcceptInvite(reg);
@@ -60,15 +67,16 @@ export default {
 				text: `@${sender.split('@')[0]} has invited me to the group. Tysm.`,
 				mentions: [sender]
 			});
-			await client[botNum].buttonText(
-				metadataInvite.id,
-				'Click to open menu',
-				'Powered by Hidden Finder',
-				[{ buttonId: '.menu', buttonText: { displayText: 'Menu' }, type: 1 }],
+			await client[botNum].send(
+				from,
+				{
+					text: 'Click to open menu',
+					footer: 'Powered by Hidden Finder',
+					buttons: [{ buttonId: '.menu', buttonText: { displayText: 'Menu' }, type: 1 }],
+					headerType: 1
+				},
 				{ groupMetadata }
 			);
-		} else {
-			await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Invalid url.');
 		}
 	}
 };

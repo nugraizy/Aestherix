@@ -36,6 +36,20 @@ const caching = async (clients, id) => {
 	configuration.isFirstConnection = false;
 };
 
+function crawlProperty(obj, propName) {
+	for (let key in obj) {
+		if (key === propName) {
+			return obj[key];
+		} else if (typeof obj[key] === 'object') {
+			const foundProp = crawlProperty(obj[key], propName);
+
+			if (foundProp !== undefined) {
+				return foundProp;
+			}
+		}
+	}
+}
+
 /**
  *
  * @param {*} m
@@ -45,12 +59,14 @@ const caching = async (clients, id) => {
  */
 export const reassign = async (m, client, store) => {
 	try {
-		if (m.message?.protocolMessage && m.message.protocolMessage.type === 'REVOKE') {
+		if (m.message?.protocolMessage?.type === 'REVOKE') {
 			return m;
 		}
 
 		delete m?.message?.messageContextInfo;
 		delete m?.message?.senderKeyDistributionMessage;
+
+		console.log(JSON.stringify(m, null, 2));
 
 		const isFromMe = m?.key?.fromMe;
 		const from = m?.key?.remoteJid || m?.from;
@@ -111,8 +127,20 @@ export const reassign = async (m, client, store) => {
 				prettyNumber:
 					PhoneNumber(`+${sender?.replace(S_WHATSAPP_NET, '')}`)?.getNumber('international') ??
 					PhoneNumber(`+${m?.key?.participant?.replace(S_WHATSAPP_NET, '')}`)?.getNumber('international') ??
-					'No Data'
+					'No Data',
+				ephemeralDuration: crawlProperty(m.message, 'expiration')
 			});
+		}
+
+		if (m.message?.protocolMessage?.type === 'EPHEMERAL_SETTING') {
+			const keyStats = isMetadata && isGroup ? 'metadata' : isUsers && !isGroup ? 'users' : '';
+
+			if (keyStats) {
+				const val = configuration.cache[keyStats].get(from);
+
+				val.ephemeralDuration = m.message.protocolMessage.ephemeralExpiration || null;
+				configuration.cache[keyStats].set(from, val);
+			}
 		}
 
 		const { prettyNumber, name } = configuration.cache.users.get(sender);

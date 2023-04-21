@@ -8,6 +8,7 @@
 	"scripts": {
 		"pm2": "pm2 start ./index.js && pm2 logs",
 		"pm2kill": "pm2 kill",
+		"dev": "nodemon",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"keywords": [
@@ -46,6 +47,7 @@
 		"colorthief": "github:nugraizy/color-thief",
 		"dayjs": "^1.11.6",
 		"dotenv": "^16.0.0",
+		"emojibase-regex": "^6.0.1",
 		"esm": "^3.2.25",
 		"express": "^4.18.2",
 		"ffmpeg": "^0.0.4",
@@ -118,6 +120,7 @@
 		"eslint-plugin-n": "^15.7.0",
 		"eslint-plugin-promise": "^6.1.1",
 		"jimp": "^0.16.1",
+		"nodemon": "^2.0.22",
 		"pino": "^7.6.5",
 		"pm2": "^5.1.2",
 		"qrcode-terminal": "^0.12.0"
