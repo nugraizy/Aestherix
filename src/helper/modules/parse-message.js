@@ -59,7 +59,7 @@ function crawlProperty(obj, propName) {
  */
 export const reassign = async (m, client, store) => {
 	try {
-		if (m.message?.protocolMessage?.type === 3) {
+		if (m.message?.protocolMessage?.type === 0) {
 			return m;
 		}
 
@@ -130,7 +130,7 @@ export const reassign = async (m, client, store) => {
 			});
 		}
 
-		if (m.message?.protocolMessage?.type === 0) {
+		if (m.message?.protocolMessage?.type === 3) {
 			const keyStats = isMetadata && isGroup ? 'metadata' : isUsers && !isGroup ? 'users' : '';
 
 			if (keyStats) {
