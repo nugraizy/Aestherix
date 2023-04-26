@@ -10,7 +10,7 @@ export default {
 	async run({ from, message, groupMetadata }, client) {
 		const start = performance.now();
 
-		client[botNum].send(
+		await client[botNum].send(
 			from,
 			{ text: `Pong! ${(performance.now() - start).toFixed(3)} seconds` },
 			{

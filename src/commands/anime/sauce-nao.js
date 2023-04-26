@@ -14,7 +14,10 @@ export default {
 	status: 'enable',
 	async run({ isMediaImage, query, extractMediaData, filename, from, message, typeQuoted, groupMetadata }, client) {
 		if (!isURL(query) && !isMediaImage) {
-			return await client[botNum].reply({ from, quoted: message }, 'Please send/reply a image to find the similar image');
+			return await client[botNum].reply(
+				{ groupMetadata, from, quoted: message },
+				'Please send/reply a image to find the similar image'
+			);
 		}
 
 		let media = query && isURL(query) ? query : null;

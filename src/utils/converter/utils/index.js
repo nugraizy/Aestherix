@@ -4,7 +4,7 @@ import md5 from 'md5';
 import asyncRetry from 'async-retry';
 
 const urlRegex = new RegExp(
-	/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/gi,
+	/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/gi
 );
 const UA = 'Mozilla/5.0 (X11; Linux x86_64; rv:108.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36';
 
@@ -18,7 +18,7 @@ export const streamFile = (file) => fs.createReadStream(file);
 export const signV1 = (obj) => {
 	const str = JSON.stringify(obj);
 
-	return md5(`https://h5.tu.qq.com${str.length + (encodeURIComponent(str).match(/%[89ABab]/g)?.length || 0)}HQ31X02e`);
+	return md5(`https://qgc.qq.com${str.length + (encodeURIComponent(str).match(/%[89ABab]/g)?.length || 0)}HQ31X02e`);
 };
 
 export const imageToBuffer = async (image, httpsAgent, opts) => {
@@ -31,17 +31,17 @@ export const imageToBuffer = async (image, httpsAgent, opts) => {
 							method: 'GET',
 							url: image,
 							headers: {
-								'User-Agent': UA,
+								'User-Agent': UA
 							},
 							responseType: 'arraybuffer',
-							...(httpsAgent ? { httpsAgent } : {}),
+							...(httpsAgent ? { httpsAgent } : {})
 						});
 
 						return response.data;
 					},
 					{
-						...opts,
-					},
+						...opts
+					}
 				);
 			} catch (e) {
 				throw new Error(`Unable to download media: ${e.toString()}`);
@@ -62,7 +62,7 @@ export const imageToBuffer = async (image, httpsAgent, opts) => {
 const getImageProcessingLibrary = async () => {
 	const [_jimp, sharp] = await Promise.all([
 		await import('jimp').catch(() => undefined),
-		await import('sharp').catch(() => undefined),
+		await import('sharp').catch(() => undefined)
 	]);
 
 	if (sharp) {

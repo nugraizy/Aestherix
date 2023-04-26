@@ -1,4 +1,4 @@
-export * from './animixplay/index.js';
+export * from './anime/index.js';
 export * from './anonymous/index.js';
 export * from './arq/index.js';
 export * from './bandcamp/index.js';

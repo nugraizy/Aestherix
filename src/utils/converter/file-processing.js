@@ -685,7 +685,7 @@ export const waifu2xV2 = (input, filename) =>
 			const form = new FormData();
 			const axiosInstance = axios.create({ headers: { 'client-library': 'deepai-js-client' } });
 
-			axiosInstance.defaults.headers.common['api-key'] = '71eaa526-b468-429e-a01d-22a581fa74fe';
+			axiosInstance.defaults.headers.common['api-key'] = process.env.DEEP_KEY;
 			const reqOptions = {
 				withCredentials: true
 			};
@@ -713,7 +713,7 @@ export const img2pdf = (image, sender) =>
 				image = [image];
 			}
 
-			const filename = `./temporary_files/${sender}.pdf`;
+			const filename = `./src/media/temporary_files/${sender}.pdf`;
 
 			const buffers = (
 				await Promise.all(
@@ -799,8 +799,8 @@ export const imageToAnime = async (image, sender, options = defaultOpts) => {
 					data: obj,
 					headers: {
 						'Content-Type': 'application/json',
-						Origin: 'https://h5.tu.qq.com',
-						Referer: 'https://h5.tu.qq.com/',
+						Origin: 'https://qgc.qq.com',
+						Referer: 'https://qgc.qq.com/',
 						'User-Agent':
 							'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36',
 						'x-sign-value': signV1(obj),
@@ -861,7 +861,7 @@ export const imageToAnime = async (image, sender, options = defaultOpts) => {
 					await imageToBuffer(result, options.proxy?.image ? httpsAgent : undefined, options),
 					options.crop === 'SINGLE' ? 'SINGLE' : options.crop === 'COMPARED' ? 'COMPARED' : undefined
 				),
-				sender
+				`./src/media/temporary_files/${sender}`
 		  ) /* eslint-disable-line */
 		: await cropImage(
 				await imageToBuffer(result, options.proxy?.image ? httpsAgent : undefined, options),

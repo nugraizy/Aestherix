@@ -1,11 +1,7 @@
-/* eslint-disable */
 import axios from 'axios';
 import dayjs from 'dayjs';
 import FormData from 'form-data';
-
-import { UA } from '../../helper/index.js';
-
-const ua = UA;
+import fs from 'fs-extra';
 
 /**
  * @typedef {'Sunday' | 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday'} Days
@@ -15,6 +11,7 @@ const ua = UA;
  * @typedef {Record<Days, StreamsContainer>} Results
  */
 
+const query = await fs.readFile('./src/utils/anime/query.graphql', 'utf-8');
 const maps = {
 	0: [1, 2, 3, 4, 5, 6],
 	1: [2, 3, 4, 5, 6, 0],
@@ -22,7 +19,7 @@ const maps = {
 	3: [4, 5, 6, 0, 1, 2],
 	4: [5, 6, 0, 1, 2, 3],
 	5: [6, 0, 1, 2, 3, 4],
-	6: [0, 1, 2, 3, 4, 5],
+	6: [0, 1, 2, 3, 4, 5]
 };
 
 /**
@@ -37,6 +34,7 @@ const convertToDates = (arr) => {
 	const container = [];
 
 	const temp = arr.sort((a, b) => a.release - b.release);
+
 	for (const obj of temp) {
 		const date = dayjs(obj.release).format('dddd');
 		const time = dayjs(obj.release).format('HH:mm');
@@ -47,6 +45,11 @@ const convertToDates = (arr) => {
 
 	return container;
 };
+
+const _api = (path) => ({
+	AL: 'https://allanime.to/anime/' + path,
+	GOGO: 'https://gogoanime.cl/' + path
+});
 
 /**
  * Sort the days of the week into full circle.
@@ -64,11 +67,12 @@ const sortDates = (arr) => {
 			? 1
 			: dayjs(a.time, 'HH:mm').unix() < dayjs(b.time, 'HH:mm').unix()
 			? -1
-			: 0,
+			: 0
 	);
 
 	for (const date of maps[datesNow]) {
 		const day = dayjs().day(date).format('dddd');
+
 		dates[day] = arr
 			.filter((v) => v.indexDate === date)
 			.sort((a, b) =>
@@ -76,7 +80,7 @@ const sortDates = (arr) => {
 					? 1
 					: dayjs(a.time, 'HH:mm').unix() < dayjs(b.time, 'HH:mm').unix()
 					? -1
-					: 0,
+					: 0
 			);
 	}
 
@@ -84,46 +88,101 @@ const sortDates = (arr) => {
 };
 
 /**
- * Get release schedule from animixplay.to.
+ * Get release schedule from anilist.co.
  * @returns {Promise<Results>}
  */
-export const animixReleases = () =>
+export const animeReleases = () =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { data } = await axios.get('https://animixplay.to/assets/s/schedule.json');
+			let data = [];
+			let page = 1;
+
+			for (;;) {
+				const {
+					data: { data: response }
+				} = await axios.post(
+					'https://graphql.anilist.co/',
+					{
+						query,
+						variables: {
+							season: 'SPRING',
+							year: 2023,
+							format: 'TV',
+							page
+						}
+					},
+					{
+						headers: {
+							'Content-Type': 'application/json',
+							Referer: 'https://anichart.net/',
+							'User-Agent':
+								'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 YaBrowser/23.1.5.750 (beta) Yowser/2.5 Safari/537.36'
+						}
+					}
+				);
+
+				data = data.concat(response.Page.media);
+
+				page += 1;
+
+				if (!response.Page.pageInfo.hasNextPage) {
+					break;
+				}
+			}
 
 			const container = sortDates(
 				convertToDates(
-					data.map((v) => ({ title: v.name, id: v.malid, release: parseInt(v.time * 1000 + 2 * 60 * 60 * 1000) })),
-				),
+					data
+						.filter((v) => v.airingSchedule.nodes.length > 0)
+						.map((v) => ({
+							titleRomaji: v.title.romaji,
+							titleNative: v.title.native,
+							id: v.idMal,
+							release: parseInt(v.airingSchedule.nodes[0].airingAt * 1000),
+							totalEp: v.airingSchedule.nodes[0].episode - 1
+						}))
+				)
 			);
 
 			for (const obj in container) {
 				for (const val of container[obj]) {
 					const form = new FormData();
+
 					form.append('recomended', val.id);
 
 					const {
-						data: { data },
+						data: { data }
 					} = await axios.post('https://animixplay.to/api/search', form, {
 						headers: {
 							...form.getHeaders(),
-							'user-agent': ua(),
-						},
+							'user-agent':
+								'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 YaBrowser/23.1.5.750 (beta) Yowser/2.5 Safari/537.36'
+						}
 					});
 
-					val.streams = data.map((v) => ({
-						server: v.type,
-						items: v.items.map((w) => ({
-							url: `https://animixplay.to${w.url}`,
-							title: w.title,
-							totalEpisode: w.ep,
-							totViews: w.views,
-							thumbnail: w.img,
-						})),
-					}));
+					val.streams = data
+						.filter((v) => v.type !== 'RUSH')
+						.map((v) => ({
+							server: v.type,
+							items: v.items
+								.filter((w) => !w.url.includes('dub'))
+								.map((w) => ({
+									url: `${_api(w.url.split('/')[w.url.split('/').length - 1])[v.type]}${
+										v.type === 'GOGO' ? `-episode-${val.totalEp}` : ''
+									}`,
+									title: `${val.titleRomaji} ${val.titleNative}`,
+									totalEpisode: val.totalEp,
+									totViews: w.views,
+									thumbnail: w.img
+								}))
+						}));
 				}
 			}
+
+			for (const obj in container) {
+				container[obj] = container[obj].filter((v) => v.streams.length > 0);
+			}
+
 			resolve(container);
 		} catch (error) {
 			reject(error);

@@ -5,3 +5,5 @@ src/media/connection_databases/*.json
 temporary_files/
 test/
 src/commands/debugging/Call.js
+src/commands/debugging/Story.js
+src/commands/debugging/Logout.js
