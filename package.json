@@ -104,7 +104,7 @@
 		"tesseract.js": "^2.1.5",
 		"util": "^0.12.4",
 		"uuid": "^9.0.0",
-		"word-wrap": "^1.2.3",
+		"word-wrap": "^1.2.4",
 		"wordwrap": "^1.0.0",
 		"yargs-parser": "^21.0.1",
 		"yt-search": "^2.10.3",
