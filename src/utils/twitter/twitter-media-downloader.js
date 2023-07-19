@@ -1,10 +1,9 @@
-import axios from 'axios';
-
 import { fetchJSON } from '../modules/index.js';
 
-const _api = (input) =>
-	`https://api.twitter.com/2/tweets/${input}?expansions=attachments.media_keys,author_id,entities.mentions.username&media.fields=duration_ms,height,preview_image_url,public_metrics,type,url,width,alt_text&tweet.fields=public_metrics,attachments,source,created_at&user.fields=username`;
-const _apiVideos = (input) => `https://api.twitterpicker.com/tweet/mediav2?id=${input}`;
+// const _apiV2 = (input) =>
+// 	`https://api.twitter.com/2/tweets/${input}?expansions=attachments.media_keys,author_id,entities.mentions.username&media.fields=duration_ms,height,preview_image_url,public_metrics,type,url,width,alt_text,variants&tweet.fields=public_metrics,attachments,source,created_at&user.fields=username`;
+
+const _apiV1 = (input) => `https://api.twitterpicker.com/tweet/datav3?id=${input}`;
 
 const regex = (input) => {
 	const regex = /twitter\.com\/.*\/status(?:es)?\/([^/?]+)/.test(input)
@@ -21,9 +20,71 @@ const regex = (input) => {
 	};
 };
 
+const _parseDestructuring = (data) => {
+	const {
+		user,
+		text: caption,
+		created_at: createdAt,
+		favorite_count: likeCount,
+		entities: { hashtags },
+		conversation_count: replyCount,
+		mediaDetails,
+		photos,
+		video
+	} = data;
+	const {
+		name,
+		screen_name: username,
+		verified: isVerified,
+		is_blue_verified: isBlueVerified,
+		profile_image_url_https: profilePicture
+	} = user;
+
+	const container = {
+		username,
+		author: name,
+		caption,
+		published: createdAt,
+		liked: likeCount,
+		replies: replyCount,
+		isVerified,
+		isBlueVerified,
+		profilePicture,
+		hashtags
+	};
+
+	if (photos?.length > 0) {
+		container.medias = photos.map((v) => ({
+			url: v.url,
+			type: 'image',
+			ratio: {
+				width: v.width,
+				height: v.height
+			}
+		}));
+		return container;
+	}
+
+	container.viewCount = video.view_count;
+	container.thumbnail = video.poster;
+
+	return {
+		...container,
+		medias: mediaDetails.map((v) => ({
+			url: v.video_info.variants.filter((w) => w?.content_type === 'video/mp4')?.sort((a, b) => b?.bit_rate - a?.bit_rate)[0],
+			type: 'video',
+			duration: v.duration_millis,
+			ratio: {
+				width: v.original_info.width,
+				height: v.original_info.height
+			}
+		}))
+	};
+};
+
 /**
- * @typedef {{author: string, username: string, caption: string, published: string, liked: number, retweet: number, replies: number, quoted: number, impression: number}} InfoRaw
- * @typedef {{url: string, type: 'image' | 'video'}} MediaRaw
+ * @typedef {{author: string, username: string, caption: string, published: string, liked: number, replies: number, hashtags: string[] }} InfoRaw
+ * @typedef {{url: string, type: 'image' | 'video', ratio: { width: number, height: number }, duration?: number}} MediaRaw
  */
 
 /**
@@ -41,68 +102,14 @@ export const twitterDownload = (input) =>
 		const { id } = regex(input);
 
 		try {
-			let container = {};
-			const data = await fetchJSON(_api(id), {
+			const data = await fetchJSON(_apiV1(id), {
 				headers: {
-					Authorization: `Bearer ${process.env.TWITTER_ACCESS_TOKEN}`
+					'User-Agent':
+						'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 YaBrowser/23.1.5.750 (beta) Yowser/2.5 Safari/537.36'
 				}
 			});
 
-			if ('errors' in data) {
-				return resolve({ error: 'Something went wrong with the URL.' });
-			}
-
-			const {
-				text,
-				created_at: createdAt,
-				public_metrics: {
-					like_count: likeCount,
-					retweet_count: retweetCount,
-					reply_count: replyCount,
-					quote_count: quoteCount,
-					impression_count: impressionCount
-				}
-			} = data.data;
-			const {
-				media: medias,
-				users: [{ name, username }]
-			} = data.includes;
-
-			container = {
-				username,
-				author: name,
-				caption: text,
-				published: createdAt,
-				liked: likeCount,
-				retweet: retweetCount,
-				replies: replyCount,
-				quoted: quoteCount,
-				impression: impressionCount,
-				medias: []
-			};
-
-			for (const { type, url, width, height } of medias) {
-				if (type === 'photo') {
-					container.medias.push({
-						url: url,
-						type: 'image'
-					});
-					continue;
-				}
-
-				const {
-					data: {
-						media: { videos }
-					}
-				} = await axios.get(_apiVideos(id));
-
-				container.medias.push({
-					url: videos.find((v) => v.url.includes(`${width}x${height}`)).url,
-					type: 'video'
-				});
-			}
-
-			resolve(container);
+			resolve(_parseDestructuring(data));
 		} catch (err) {
 			reject(err);
 		}

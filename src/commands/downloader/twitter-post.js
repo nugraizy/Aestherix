@@ -56,15 +56,16 @@ export default {
 
 			capt += `\n\nUsername : ${post.username}\n`;
 			capt += `Fullname : ${post.author}\n`;
-			capt += `Verified : ${post.verified ? 'Verified' : 'Not Verified'}\n`;
+			capt += `Verified : ${post.isVerified ? 'Verified' : 'Not Verified'}\n`;
+			capt += `Blue Verified : ${post.isBlueVerified ? 'Verified' : 'Not Verified'}\n`;
 
 			if (post.medias.length === 1) {
 				capt += ` 💭 : ${post.caption.trim()}\n\n`;
 
-				capt += `*${dayjs(post.published).format('HH.mm A · MMM, YYYY')} · ${formatNumber(post.impression)} 👀*\n`;
-				capt += `${formatNumber(post.retweet)} 🔄 · ${formatNumber(post.replies)} 💬 · ${formatNumber(
-					post.liked
-				)} ❤️ · ${formatNumber(post.quoted)} 📌\n`;
+				capt += `*${dayjs(post.published).format('HH.mm A · MMM, YYYY')}${
+					post.medias[0].type === 'video' ? ` · ${formatNumber(post.viewCount)} 👀` : ''
+				}*\n`;
+				capt += `${formatNumber(post.replies)} 💬 · ${formatNumber(post.liked)} ❤️\n`;
 
 				await client[botNum].send(
 					from,
@@ -79,14 +80,15 @@ export default {
 			} else {
 				capt += ` 💭 : ${post.caption.trim()}\n`;
 				capt += `Tot. Media : ${post.medias.length}\n\n`;
-				capt += `*${dayjs(post.published).format('HH.mm A · MMM, YYYY')} · ${formatNumber(post.impression)} 👀*\n`;
-				capt += `${formatNumber(post.retweet)} 🔄 · ${formatNumber(post.replies)} 💬 · ${formatNumber(
-					post.liked
-				)} ❤️ · ${formatNumber(post.quoted)} 📌\n`;
+				capt += `*${dayjs(post.published).format('HH.mm A · MMM, YYYY')}${
+					post.medias[0].type === 'video' ? ` · ${formatNumber(post.viewCount)} 👀` : ''
+				}*\n`;
+				capt += `${formatNumber(post.replies)} 💬 · ${formatNumber(post.liked)} ❤️\n`;
 
 				await client[botNum].send(from, { text: capt.trim() }, { groupMetadata, quoted: message });
 
 				for (const media of post.medias) {
+					console.log(media);
 					await client[botNum].send(
 						from,
 						media.type === 'video' ? { video: { url: media.url } } : { image: { url: media.url } },

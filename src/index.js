@@ -13,6 +13,7 @@ import { color, ERRLOG } from './utils/modules/index.js';
 import { runLimitScheduler } from './helper/groups/settings/limit.js';
 import { clearDBConnection, resetSession } from './helper/connection/socket/reset-session.js';
 import { parseCli } from './helper/connection/utils/check-flag.js';
+import { saveContacts } from './helper/connection/utils/cache.js';
 import { connectSocket } from './helper/connection/socket/socket.js';
 import {
 	emitGroupSettings,
@@ -108,6 +109,7 @@ export const start = async (isReconnect) => {
 		Client.ws.on('CB:notification,type:picture', async (update) => await emitGroupSettings.picture(update));
 	});
 	Client.ev.on('auth-state.update', saveState);
+	Client.ev.on('contacts.upsert', (contacts) => saveContacts(store, contacts));
 	Client.ev.on('contacts.update', () => {});
 	Client.ev.on('groups.update', () => {});
 };

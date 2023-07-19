@@ -1,6 +1,96 @@
-import { generateWAMessageFromContent, delay } from '@adiwajshing/baileys';
+import axios from 'axios';
+import { generateWAMessageFromContent } from '@adiwajshing/baileys';
 
 import { getWaifu } from '../../utils/index.js';
+
+const loading = async (frame, from, message, client, groupMetadata) => {
+	let caption = `${frame || ''} loading image. please wait.`;
+	const messages = generateWAMessageFromContent(
+		from,
+		{
+			editedMessage: {
+				message: {
+					protocolMessage: {
+						key: {
+							remoteJid: message.key.remoteJid,
+							fromMe: true,
+							id: message.key.id
+						},
+						type: 'MESSAGE_EDIT',
+						editedMessage: {
+							conversation: caption
+						}
+					}
+				}
+			}
+		},
+		{}
+	);
+
+	await client[botNum].relayMessage(from, messages.message, {
+		messageId: messages.key.id,
+		cachedGroupMetadata: () => groupMetadata
+	});
+};
+
+const frames = [
+	'⢀⠀',
+	'⡀⠀',
+	'⠄⠀',
+	'⢂⠀',
+	'⡂⠀',
+	'⠅⠀',
+	'⢃⠀',
+	'⡃⠀',
+	'⠍⠀',
+	'⢋⠀',
+	'⡋⠀',
+	'⠍⠁',
+	'⢋⠁',
+	'⡋⠁',
+	'⠍⠉',
+	'⠋⠉',
+	'⠋⠉',
+	'⠉⠙',
+	'⠉⠙',
+	'⠉⠩',
+	'⠈⢙',
+	'⠈⡙',
+	'⢈⠩',
+	'⡀⢙',
+	'⠄⡙',
+	'⢂⠩',
+	'⡂⢘',
+	'⠅⡘',
+	'⢃⠨',
+	'⡃⢐',
+	'⠍⡐',
+	'⢋⠠',
+	'⡋⢀',
+	'⠍⡁',
+	'⢋⠁',
+	'⡋⠁',
+	'⠍⠉',
+	'⠋⠉',
+	'⠋⠉',
+	'⠉⠙',
+	'⠉⠙',
+	'⠉⠩',
+	'⠈⢙',
+	'⠈⡙',
+	'⠈⠩',
+	'⠀⢙',
+	'⠀⡙',
+	'⠀⠩',
+	'⠀⢘',
+	'⠀⡘',
+	'⠀⠨',
+	'⠀⢐',
+	'⠀⡐',
+	'⠀⠠',
+	'⠀⢀',
+	'⠀⡀'
+];
 
 export default {
 	name: 'loading',
@@ -13,100 +103,24 @@ export default {
 	status: 'enable',
 	async run({ from, groupMetadata }, client) {
 		let caption = '';
-		const frames = [
-			'⢀⠀',
-			'⡀⠀',
-			'⠄⠀',
-			'⢂⠀',
-			'⡂⠀',
-			'⠅⠀',
-			'⢃⠀',
-			'⡃⠀',
-			'⠍⠀',
-			'⢋⠀',
-			'⡋⠀',
-			'⠍⠁',
-			'⢋⠁',
-			'⡋⠁',
-			'⠍⠉',
-			'⠋⠉',
-			'⠋⠉',
-			'⠉⠙',
-			'⠉⠙',
-			'⠉⠩',
-			'⠈⢙',
-			'⠈⡙',
-			'⢈⠩',
-			'⡀⢙',
-			'⠄⡙',
-			'⢂⠩',
-			'⡂⢘',
-			'⠅⡘',
-			'⢃⠨',
-			'⡃⢐',
-			'⠍⡐',
-			'⢋⠠',
-			'⡋⢀',
-			'⠍⡁',
-			'⢋⠁',
-			'⡋⠁',
-			'⠍⠉',
-			'⠋⠉',
-			'⠋⠉',
-			'⠉⠙',
-			'⠉⠙',
-			'⠉⠩',
-			'⠈⢙',
-			'⠈⡙',
-			'⠈⠩',
-			'⠀⢙',
-			'⠀⡙',
-			'⠀⠩',
-			'⠀⢘',
-			'⠀⡘',
-			'⠀⠨',
-			'⠀⢐',
-			'⠀⡐',
-			'⠀⠠',
-			'⠀⢀',
-			'⠀⡀'
-		];
+
 		const message = await client[botNum].send(from, { text: `${frames[0]} loading image. please wait.` }, { groupMetadata });
 
 		const waifu = (await getWaifu('waifu', 'sfw'))[0];
 
-		for (const frame of frames) {
-			caption = `${frame} loading image. please wait.`;
-			const messages = generateWAMessageFromContent(
-				from,
-				{
-					editedMessage: {
-						message: {
-							protocolMessage: {
-								key: {
-									remoteJid: message.key.remoteJid,
-									fromMe: true,
-									id: message.key.id
-								},
-								type: 'MESSAGE_EDIT',
-								editedMessage: {
-									conversation: caption
-								},
-								timestampMs: '1680418593103'
-							}
-						}
-					}
-				},
-				{}
-			);
+		let progress = 0;
+		const { data: buffer } = await axios.get(waifu, {
+			responseType: 'arraybuffer',
+			onDownloadProgress: async () => {
+				await loading(frames[progress], from, message, client, groupMetadata);
 
-			client[botNum].relayMessage(from, messages.message, {
-				messageId: messages.key.id,
-				cachedGroupMetadata: () => groupMetadata
-			});
-
-			await delay(80);
-		}
+				if (progress === frames.length - 1) {
+					progress = 0;
+				} else {
+					progress++;
+				}
+			}
+		});
 
 		caption = 'loading complete. here is your image!';
 		const messages = generateWAMessageFromContent(
@@ -123,8 +137,7 @@ export default {
 							type: 'MESSAGE_EDIT',
 							editedMessage: {
 								conversation: caption
-							},
-							timestampMs: '1680418593103'
+							}
 						}
 					}
 				}
@@ -136,6 +149,6 @@ export default {
 			messageId: messages.key.id,
 			cachedGroupMetadata: () => groupMetadata
 		});
-		await client[botNum].send(from, { image: { url: waifu } }, { groupMetadata });
+		await client[botNum].send(from, { image: new Buffer.from(buffer, 'base64') }, { groupMetadata });
 	}
 };

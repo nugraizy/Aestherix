@@ -108,3 +108,18 @@ export const reloadModule = async (module, isNewFile, newFilePath) => {
 		console.log(e);
 	}
 };
+
+export const saveContacts = (store, contactsList) => {
+	const { contacts } = store;
+
+	const contactsValue = Object.keys(contacts);
+
+	for (const { id, name } of contactsList) {
+		if (contactsValue.includes(id)) {
+			contacts[id].name = name;
+			continue;
+		}
+
+		contacts[id] = { name, id };
+	}
+};

