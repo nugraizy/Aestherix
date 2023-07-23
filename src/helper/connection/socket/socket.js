@@ -8,10 +8,6 @@ import { patchInteractiveMessage } from '../utils/patch-message.js';
 const { default: makeWASocket, makeInMemoryStore, DEFAULT_CONNECTION_CONFIG } = baileys;
 const logger = (OPTIONS) => P({ level: OPTIONS.trace ? 'trace' : OPTIONS.debugMode ? 'debug' : 'fatal' });
 
-Map.prototype.flushAll = function () {
-	this.clear();
-};
-
 export const connectSocket = async ({ cli, OPTIONS, state }) => {
 	const CONNECTION_CONFIG = {
 		printQRInTerminal: true,

@@ -1,15 +1,4 @@
-import PhoneNumber from 'awesome-phonenumber';
-
-import { removeDuplicatesArray } from '../../utils/index.js';
 import { S_WHATSAPP_NET } from '../../helper/index.js';
-
-Array.prototype.parser = function () {
-	return (
-		removeDuplicatesArray(this)
-			.filter((v) => PhoneNumber(`+${v.replace(/[A-Za-z-@\s+s.whatsapp.net]/g, '')}`).isValid())
-			?.map((v) => `${v.replace(/[\s+-]/g, '')}${S_WHATSAPP_NET}`.trim()) || []
-	);
-};
 
 export default {
 	name: 'add',
@@ -61,7 +50,7 @@ export default {
 				);
 			}
 
-			await client[botNum].updateGroup(from, query.split(',').parser(), 'ADD', false, false, message, adminGroups);
+			await client[botNum].updateGroup(from, query.split(',').parse(), 'ADD', false, false, message, adminGroups);
 		}
 
 		if (bodyQuoted) {

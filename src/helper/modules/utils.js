@@ -132,6 +132,9 @@ export const assign = (client) => {
 
 		if ('buttons' in message || 'sections' in message) {
 			delete options.ephemeralExpiration;
+			delete message.buttons;
+			delete message.footer;
+			delete message.headerType;
 		}
 
 		filter: if ('templateButtons' in message) {

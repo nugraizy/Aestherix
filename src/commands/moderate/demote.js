@@ -1,15 +1,4 @@
-import PhoneNumber from 'awesome-phonenumber';
-
-import { removeDuplicatesArray } from '../../utils/index.js';
 import { S_WHATSAPP_NET } from '../../helper/index.js';
-
-Array.prototype.parse = function () {
-	return (
-		removeDuplicatesArray(this)
-			.filter((v) => PhoneNumber(`+${v.replace(/[A-Za-z-@\s+s.whatsapp.net]/g, '')}`).isValid())
-			?.map((v) => `${v}${S_WHATSAPP_NET}`.trim()) || []
-	);
-};
 
 export default {
 	name: 'demote',

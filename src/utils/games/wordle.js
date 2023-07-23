@@ -10,13 +10,14 @@ const BLOCKS = {
 	GREEN: '🟩'
 };
 
-const WORDS = [];
-
-(await fs.readJSON('./databases/games/tebak_gambar/db.json')).forEach((element) => {
-	element.answer.split(' ').forEach((word) => {
-		WORDS.push(word);
-	});
-});
+const WORDS = (await fs.readJSON('./databases/games/tebak_gambar/db.json'))
+	.map((v) =>
+		v.answer
+			.toLowerCase()
+			.split(' ')
+			.find((v) => v.length === 5)
+	)
+	.filter(Boolean);
 
 export class Wordle {
 	constructor(id) {

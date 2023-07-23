@@ -54,7 +54,7 @@ export default {
 		} else if (args[1] === 'info') {
 			await client[botNum].reply(
 				{ groupMetadata, from, quoted: message },
-				'This is a Wordle Game. You have given a clue how much the word length. And you have to guess the word, Every guessed word will checked and determined by how closed the input to the word is.\n\nGreen [🟩] : Correct Alphabet\nYellow [🟨] : Close\nBlack [⬛] : Not Close/Invalid\nWhite [⬜] : First Board Play.\n\nUsage: !wordle <play/exit/info>'
+				'This is a Wordle Game. You have given a word with only 5 letter. And you have to guess the word, Every guessed word will checked and measured by how closed the input to the word is.\n\nGreen [🟩] : Correct Alphabet\nYellow [🟨] : Close\nBlack [⬛] : Not Close/Invalid\nWhite [⬜] : First Board Play.\n\nUsage: !wordle <play/exit/info>'
 			);
 		}
 	}

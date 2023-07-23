@@ -309,11 +309,6 @@ export default {
 	}
 };
 
-Array.prototype.insert = function (index) {
-	this.splice(...[index, 0].concat(Array.prototype.slice.call(arguments, 1)));
-	return this;
-};
-
 global.prints = print;
 /* eslint-disable-line */ const temp = async (names, func) => {
 	if (!/^[a-z0-9_]+$/i.test(names)) {
