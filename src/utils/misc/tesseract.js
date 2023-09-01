@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import Tesseract from 'tesseract.js';
 import fs from 'fs-extra';
 
-import { cheerioLOAD, color, fetchTEXT, INFOLOG } from '../modules/index.js';
+import { cheerioLOAD, color, fetchJSON, INFOLOG } from '../modules/index.js';
 
 export const tesseract = async (image, sender, lang = 'ind') =>
 	new Promise(async (resolve, reject) => {
@@ -13,17 +13,26 @@ export const tesseract = async (image, sender, lang = 'ind') =>
 
 			const time = dayjs().format('HH:mm:ss DD/MM');
 			const languages = [];
-			const $ = cheerioLOAD(
-				await fetchTEXT('https://github.com/tesseract-ocr/tessdoc/blob/main/Data-Files-in-different-versions.md')
-			);
+			let data;
 
-			$('#readme > article > table:nth-child(2) > tbody > tr').each(function () {
-				if ($(this).find('td:nth-child(1)').text() === '') {
+			if (!(await fs.exists('./src/media/temporary_files/tesseract_lang.json'))) {
+				data = await fetchJSON('https://github.com/tesseract-ocr/tessdoc/blob/main/Data-Files-in-different-versions.md');
+				await fs.writeFile('./src/media/temporary_files/tesseract_lang.json', JSON.stringify(data));
+			} else {
+				data = await fs.readJSON('./src/media/temporary_files/tesseract_lang.json');
+			}
+
+			const $ = cheerioLOAD(data.payload.blob.richText);
+
+			$('article > table > tbody > tr').each(function () {
+				const code = $(this).find('td:nth-child(1)').text();
+
+				if (code === '') {
 					return;
 				}
 
 				languages.push({
-					code: $(this).find('td:nth-child(1)').text(),
+					code,
 					name: $(this).find('td:nth-child(2)').text()
 				});
 			});
