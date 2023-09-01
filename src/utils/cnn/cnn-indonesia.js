@@ -1,19 +1,5 @@
 import { fetchJSON } from '../modules/index.js';
-
-const URL_VISUAL = (input) => `https://akcdn.detik.net.id/visual/${input}`;
-
-const parse = (arr) =>
-	arr.map((v) => {
-		v.strisi = v.strisi.replace(/<[^>]*>/g, '');
-		return {
-			title: v.strjudul,
-			body: v.strisi,
-			places: v.strnmkota,
-			published: v.dtnewsdate,
-			image: URL_VISUAL(`${v.image[0].strnmfile + v.image[0].extension}?w=1080`),
-			link: v.url
-		};
-	});
+import { parseIndonesia } from './utils.js';
 
 /**
  * Parsed result definition.
@@ -51,7 +37,7 @@ export const cnnindonesia = (keyword) =>
 				return resolve({ error: 'data not found' });
 			}
 
-			resolve(parse(json));
+			resolve(parseIndonesia(json));
 		} catch (err) {
 			reject(err);
 		}

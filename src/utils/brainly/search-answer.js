@@ -1,16 +1,6 @@
 import Brainly from 'brainly-scraper-v2';
 
-/**
- * Available languages definition.
- * @typedef {('id'|'us'|'es'|'ru'|'ro'|'pt'|'tr'|'ph'|'pl'|'hi'|undefined)} languages
- */
-const LANG = ['id', 'us', 'es', 'ru', 'ro', 'pt', 'tr', 'ph', 'pl', 'hi'];
-
-const parseAnswers = (arr) =>
-	arr.map((item) => ({
-		pertanyaan: item.pertanyaan,
-		jawaban: item.jawaban.map((answer) => answer.text.replace('amp;', '')),
-	}));
+import { LANG, parseAnswers } from './utils.js';
 
 /**
  * Parsed result definition.
@@ -48,8 +38,8 @@ export const brainlySearch = (query, options) =>
 			if (!LANG.includes(lang)) {
 				resolve({
 					error: `Language not supported\n\nChoose either of one of this : ${LANG.join(
-						', ',
-					)} or leave it blank. (Indonesia will be used)`,
+						', '
+					)} or leave it blank. (Indonesia will be used)`
 				});
 			}
 

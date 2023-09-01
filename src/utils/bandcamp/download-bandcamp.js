@@ -1,8 +1,7 @@
 import axios from 'axios';
 
 import { cheerioLOAD } from '../modules/index.js';
-
-const parse = (obj) => ({ title: obj?.trackinfo?.[0]?.title || null, mp3: obj?.trackinfo?.[0]?.file?.['mp3-128'] || null });
+import { parseDownload } from './utils.js';
 
 /**
  * Parsed result definition.
@@ -27,7 +26,7 @@ export const downloadBandcamp = (url) =>
 				)
 			);
 
-			const jsonParsed = parse(jsonRaw);
+			const jsonParsed = parseDownload(jsonRaw);
 
 			if (!jsonParsed.mp3) {
 				return resolve({ error: 'No data found' });

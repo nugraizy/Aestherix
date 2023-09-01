@@ -4,7 +4,7 @@ import fs from 'fs';
 
 import { randomize } from '../modules/index.js';
 
-const URL_API = 'https://api.deepai.org/api/nsfw-detector';
+const _api = 'https://api.deepai.org/api/nsfw-detector';
 
 export const isNsfw = (input, filename) =>
 	new Promise(async (resolve) => {
@@ -24,7 +24,7 @@ export const isNsfw = (input, filename) =>
 			reqOptions.headers = form.getHeaders();
 			const {
 				data: { output }
-			} = await axiosInstance.post(URL_API, form, reqOptions);
+			} = await axiosInstance.post(_api, form, reqOptions);
 			const outputPercentageNSFW = output?.detections?.some((v) => Number(v.confidence) > 0.6) || output.nsfw_score >= 0.4;
 
 			if (outputPercentageNSFW) {

@@ -1,21 +1,20 @@
-import { removeDuplicatesArray } from '../../utils/modules/index.js';
-import { stockImagesPexel } from '../../utils/wallpapers/index.js';
+import { yandexImage, removeDuplicatesArray } from '../../utils/index.js';
 
 export default {
-	name: 'stockimages2',
-	description: 'Search stock images',
-	usage: '!stockimages2 <query>',
+	name: 'yandeximage',
+	description: 'Find images from Yandex.',
+	usage: '!yandeximage <query>',
+	aliases: ['yim', 'yis', 'yandimage'],
 	category: 'Search',
-	aliases: ['stockimg2'],
-	limit: 4,
 	cooldown: 5,
+	limit: 4,
 	status: 'enable',
-	async run({ query, from, message, args, groupMetadata }, client) {
+	run: async ({ query, message, from, type, args, groupMetadata }, client) => {
 		if (!query) {
 			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
 		}
 
-		if (args[1] === 'next' || args[1] === 'prev') {
+		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v === args[2]);
 
@@ -23,14 +22,14 @@ export default {
 				from,
 				{
 					image: { url: data[index] },
-					caption: 'Stock Images'.formatHeaders(),
+					caption: 'Yandex Images'.formatHeaders(),
 					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: args[1] === 'next' ? data[index] : data[index] } },
+						{ urlButton: { displayText: 'Image Source', url: data[index].url.image } },
 						index + 1 !== data.length
 							? {
 									quickReplyButton: {
 										displayText: 'Next Image',
-										id: `.stockimages next ${data[index + 1]} ${JSON.stringify(data)}`
+										id: `.yandeximage next ${data[index + 1].url.image} ${JSON.stringify(data)}`
 									}
 							  } /* eslint-disable-line */
 							: {},
@@ -38,7 +37,7 @@ export default {
 							? {
 									quickReplyButton: {
 										displayText: 'Previous Image',
-										id: `.stockimages prev ${data[index - 1]} ${JSON.stringify(data)}`
+										id: `.yandeximage prev ${data[index - 1].url.image} ${JSON.stringify(data)}`
 									}
 							  } /* eslint-disable-line */
 							: {}
@@ -54,10 +53,10 @@ export default {
 		queries = removeDuplicatesArray(queries);
 
 		for (const querie of queries) {
-			const result = await stockImagesPexel(querie.trim());
+			const result = await yandexImage(querie);
 
-			if ('error' in result || !result) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, JSON.stringify(result));
+			if ('error' in result) {
+				client[botNum].reply({ groupMetadata, from, quoted: from }, result.error);
 				continue;
 			}
 
@@ -66,20 +65,22 @@ export default {
 			await client[botNum].send(
 				from,
 				{
-					image: { url: result[index] },
-					caption: 'Stock Images'.formatHeaders(),
+					image: { url: result[index].url.image },
+					caption: 'Yandex Images'.formatHeaders(),
 					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: result[0] } },
+						{ urlButton: { displayText: 'Image Source', url: result[0].url.image } },
 						result.length !== 1
 							? {
 									quickReplyButton: {
 										displayText: 'Next Image',
-										id: `.stockimages next ${result[1]} ${JSON.stringify(result)}`
+										id: `.yandeximage next ${result[1].url.image} ${JSON.stringify(result).replace(/\|/g, '')}`
 									}
 							  } /* eslint-disable-line */
 							: {}
 					],
-					footer: '\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪'
+					footer: `Title : ${result[index].title}
+Article : ${result[index].url.article}
+\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
 				},
 				{ groupMetadata, quoted: message }
 			);

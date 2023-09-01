@@ -1,17 +1,7 @@
-import dayjs from 'dayjs';
-
 import { fetchJSON } from '../modules/index.js';
+import { parseInternational } from './utils.js';
 
 const _api = (input) => `https://search.api.cnn.com/content?${input ? `?q=${input}&` : ''}size=10`;
-
-const parse = (arr) =>
-	arr.map((v) => ({
-		title: v.headline,
-		body: v.body,
-		published: dayjs(v.firstPublishDate).format('HH:mm:ss DD/MM/YYYY'),
-		image: v.thumbnail || 'No thumbnail',
-		link: v.url
-	}));
 
 /**
  * Parsed result definition.
@@ -39,7 +29,7 @@ export const cnninternational = (keyword) =>
 				return resolve({ error: 'data not found' });
 			}
 
-			resolve(parse(json));
+			resolve(parseInternational(json));
 		} catch (err) {
 			reject(err);
 		}

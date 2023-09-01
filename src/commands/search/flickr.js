@@ -75,10 +75,12 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 
 			result = result.filter((v) => v.title.toLowerCase().includes(querie.toLowerCase()));
 
+			const index = ~~(Math.random() * result.length);
+
 			await client[botNum].send(
 				from,
 				{
-					image: { url: result[0].download },
+					image: { url: result[index].download },
 					caption: 'Flickr'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Flickr Source', url: result[0].source } },
@@ -91,14 +93,14 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 							  } /* eslint-disable-line */
 							: {}
 					],
-					footer: `Author : ${result[0].userName}
-Author Fullname : ${result[0].fullName}
-Views : ${numberWithCommas(result[0].views)}
-Title : ${result[0].title}
-Description : ${result[0].description}
-Tags : ${result[0].tags || 'n/a'}
-Published : ${result[0].posted}
-Void Bot     1/${result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+					footer: `Author : ${result[index].userName}
+Author Fullname : ${result[index].fullName}
+Views : ${numberWithCommas(result[index].views)}
+Title : ${result[index].title}
+Description : ${result[index].description}
+Tags : ${result[index].tags || 'n/a'}
+Published : ${result[index].posted}
+\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
 				},
 				{ groupMetadata, quoted: message }
 			);

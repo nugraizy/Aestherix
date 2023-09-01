@@ -1,36 +1,36 @@
-import dayjs from 'dayjs';
-
 import { fetchJSON } from '../modules/index.js';
+import { parse } from './utils.js';
 
-const _api = 'https://api.onlinevideoconverter.pro/api/convert';
+const _api = 'https://www.y2mate.com/mates/en/analyzeV2/ajax';
 
 export const fbDl = (url) =>
 	new Promise(async (resolve, reject) => {
 		try {
+			const obj = {
+				// eslint-disable-next-line
+				k_query: url,
+				// eslint-disable-next-line
+				k_page: 'Facebook',
+				hl: 'en',
+				// eslint-disable-next-line
+				q_auto: 0
+			};
+
 			const data = await fetchJSON(_api, {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ url })
+				headers: {
+					Referer: 'https://www.y2mate.com/en/facebook-downloader',
+					'User-Agent':
+						'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36'
+				},
+				body: new URLSearchParams(obj)
 			});
 
-			if (data.code === 102) {
-				return resolve({ error: data.message });
+			if (data.mess !== '') {
+				resolve({ error: data.mess });
 			}
 
-			let { url: urls, subname } =
-				data.url.filter((x) => x.subname === 'HD')?.[0] ?? data.url.filter((x) => x.subname === 'SD')?.[0] ?? data.url[0];
-			let { duration, title } = data.meta;
-			let { timestamp: datePosted } = data;
-
-			resolve({
-				url: urls,
-				duration,
-				isVideo: title !== 'Photo',
-				resolution: subname,
-				...(duration ? { duration } : {}),
-				datePosted: dayjs(datePosted * 1000).format('DD/MM/YYYY HH:mm:ss'),
-				rawDatePosted: datePosted * 1000
-			});
+			resolve(parse(data));
 		} catch (err) {
 			reject(err);
 		}

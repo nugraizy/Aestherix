@@ -8,7 +8,7 @@ export default {
 	category: 'Search',
 	cooldown: 5,
 	limit: 4,
-	status: 'enable',
+	status: 'disable',
 	run: async ({ query, message, from, type, args, groupMetadata }, client) => {
 		if (!query) {
 			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');

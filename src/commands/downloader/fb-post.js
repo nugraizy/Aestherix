@@ -63,21 +63,14 @@ export default {
 				continue;
 			}
 
+			const urlFilter = post.url.find((v) => v.resolution === '1080p' || v.resolution === '720p' || v.resolution === '480p');
+
 			await client[botNum].send(
 				from,
-				post.isVideo
-					? {
-							video: new Buffer.from(await fetchBUFFER(post.url)),
-							caption: `${'Facebook Video Downloader'.formatHeaders()}\n\n${
-								post.datePosted ? `Post Uploaded : ${post.datePosted}\n` : ''
-							}Res : ${post.resolution}${post.duration ? `\nDuration : ${post.duration}` : ''}`
-					  } /* eslint-disable-line */
-					: {
-							image: new Buffer.from(await fetchBUFFER(post.url)),
-							caption: `${'Facebook Image Downloader'.formatHeaders()}\n\n${
-								post.datePosted ? `Post Uploaded : ${post.datePosted}\n` : ''
-							}Res : ${post.resolution}`
-					  } /* eslint-disable-line */,
+				{
+					video: new Buffer.from(await fetchBUFFER(urlFilter.url)),
+					caption: `${'Facebook Video Downloader'.formatHeaders()}\n\nRes : ${urlFilter.resolution}`
+				},
 				{ grouppMetadata }
 			);
 			await delay(300);

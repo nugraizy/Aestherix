@@ -77,10 +77,13 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 			result.forEach((v) => {
 				return (v.caption = v.caption === '' ? 'No caption' : v.caption);
 			});
+
+			const index = ~~(Math.random() * result.length);
+
 			await client[botNum].send(
 				from,
 				{
-					image: { url: result[0].image },
+					image: { url: result[index].image },
 					caption: 'Pinterest'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: result[0].image } },
@@ -94,11 +97,11 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 							  } /* eslint-disable-line */
 							: {}
 					],
-					footer: `Author : ${result[0].authorUsername}
-Author Fullname : ${result[0].authorFullname}
-Follower : ${result[0].follower}
-Caption : ${result[0].caption}
-Void Bot     1/${result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+					footer: `Author : ${result[index].authorUsername}
+Author Fullname : ${result[index].authorFullname}
+Follower : ${result[index].follower}
+Caption : ${result[index].caption}
+\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
 				},
 				{ groupMetadata, quoted: message }
 			);

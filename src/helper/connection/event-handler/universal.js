@@ -325,7 +325,6 @@ export const handlePollUpdate = async (store, msg) => {
 	return;
 };
 
-
 export const emitGroupSettings = {
 	settings: (update) => {
 		if (update?.content?.[0].tag !== 'description' && update?.content?.[0].tag !== 'invite') {

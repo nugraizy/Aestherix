@@ -61,11 +61,13 @@ export default {
 				continue;
 			}
 
+			const index = ~~(Math.random() * result.length);
+
 			result = result.result.map((v) => v.url);
 			await client[botNum].send(
 				from,
 				{
-					image: { url: result[0] },
+					image: { url: result[index] },
 					caption: 'Stock Images'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: result[0] } },
@@ -78,7 +80,7 @@ export default {
 							  } /* eslint-disable-line */
 							: {}
 					],
-					footer: `Void Bot     1/${result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+					footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪'
 				},
 				{ groupMetadata, quoted: message }
 			);

@@ -17,7 +17,7 @@ import { S_WHATSAPP_NET, UPDATE, ZERO } from '../misc/wa_data/index.js';
 import { isURL, delaySync, fetchBUFFER } from '../../utils/modules/index.js';
 import { reassign } from './parse-message.js';
 
-const { proto } = baileys;
+const { proto } = baileys; // eslint-disable-line
 const { readFile, unlink, writeFile } = (await import('fs-extra')).default;
 
 /**
@@ -130,44 +130,51 @@ export const assign = (client) => {
 				null
 		};
 
-		if ('buttons' in message || 'sections' in message) {
+		if ('buttons' in message || 'sections' in message || 'templateButtons' in message) {
 			delete options.ephemeralExpiration;
 			delete message.buttons;
 			delete message.footer;
 			delete message.headerType;
-		}
-
-		filter: if ('templateButtons' in message) {
-			const filteredButtons = message.templateButtons.filter((v) => v.quickReplyButton);
-
-			if (filteredButtons.length === 0) {
-				delete message.templateButtons;
-				delete message.footer;
-
-				break filter;
-			}
-
-			message.buttons = filteredButtons.map((v) => ({
-				buttonId: v.quickReplyButton.id,
-				buttonText: { displayText: v.quickReplyButton.displayText },
-				type: 1
-			}));
-
-			if ('text' in message) {
-				message.headerType = proto.Message.ButtonsMessage.HeaderType.TEXT;
-			} else if ('image' in message) {
-				message.headerType = proto.Message.ButtonsMessage.HeaderType.IMAGE;
-			} else if ('video' in message) {
-				message.headerType = proto.Message.ButtonsMessage.HeaderType.VIDEO;
-			} else if ('document' in message) {
-				message.headerType = proto.Message.ButtonsMessage.HeaderType.DOCUMENT;
-			} else if ('location' in message) {
-				message.headerType = proto.Message.ButtonsMessage.HeaderType.LOCATION;
-			}
-
 			delete message.templateButtons;
-			delete options.ephemeralExpiration;
 		}
+
+		if (('image' in message && 'footer' in message) || ('video' in message && 'footer' in message)) {
+			if (message.caption) {
+				message.caption = `${message?.caption}\n\n${message.footer}`?.trim();
+			}
+		}
+
+		// filter: if ('templateButtons' in message) {
+		// 	const filteredButtons = message.templateButtons.filter((v) => v.quickReplyButton);
+
+		// 	if (filteredButtons.length === 0) {
+		// 		delete message.templateButtons;
+		// 		delete message.footer;
+
+		// 		break filter;
+		// 	}
+
+		// 	message.buttons = filteredButtons.map((v) => ({
+		// 		buttonId: v.quickReplyButton.id,
+		// 		buttonText: { displayText: v.quickReplyButton.displayText },
+		// 		type: 1
+		// 	}));
+
+		// 	if ('text' in message) {
+		// 		message.headerType = proto.Message.ButtonsMessage.HeaderType.TEXT;
+		// 	} else if ('image' in message) {
+		// 		message.headerType = proto.Message.ButtonsMessage.HeaderType.IMAGE;
+		// 	} else if ('video' in message) {
+		// 		message.headerType = proto.Message.ButtonsMessage.HeaderType.VIDEO;
+		// 	} else if ('document' in message) {
+		// 		message.headerType = proto.Message.ButtonsMessage.HeaderType.DOCUMENT;
+		// 	} else if ('location' in message) {
+		// 		message.headerType = proto.Message.ButtonsMessage.HeaderType.LOCATION;
+		// 	}
+
+		// 	delete message.templateButtons;
+		// 	delete options.ephemeralExpiration;
+		// }
 
 		return client[botNum].sendMessage(to, message, options);
 	};

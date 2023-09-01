@@ -71,10 +71,12 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 				continue;
 			}
 
+			const index = ~~(Math.random() * result.length);
+
 			await client[botNum].send(
 				from,
 				{
-					image: { url: result[0].image },
+					image: { url: result[index].image },
 					caption: 'Deviant Art'.formatHeaders(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: result[0].image } },
@@ -88,11 +90,11 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 							  } /* eslint-disable-line */
 							: {}
 					],
-					footer: `Title : ${result[0].author.capitalize()}
-Author : ${result[0].author}
-Favourites : ${numberWithCommas(result[0].favourites)}
-Views : ${numberWithCommas(result[0].views)}
-Void Bot     1/${result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+					footer: `Title : ${result[index].author.capitalize()}
+Author : ${result[index].author}
+Favourites : ${numberWithCommas(result[index].favourites)}
+Views : ${numberWithCommas(result[index].views)}
+\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
 				},
 				{ groupMetadata, quoted: message }
 			);

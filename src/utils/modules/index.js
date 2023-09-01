@@ -645,3 +645,13 @@ export const convertSecondstoTime = (ms) => {
 		.map((val) => val[1])
 		.join(':');
 };
+
+export const randomChar = (char, range) => {
+	let chars = '';
+
+	for (let i = 0; i < range; i++) {
+		chars += char[Math.floor(Math.random() * char.length)];
+	}
+
+	return chars;
+};
