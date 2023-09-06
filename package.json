@@ -109,6 +109,7 @@
 		"word-wrap": "^1.2.4",
 		"wordwrap": "^1.0.0",
 		"yargs-parser": "^21.0.1",
+		"youtubei.js": "^6.3.0",
 		"yt-search": "^2.10.3",
 		"ytsr": "^3.8.0"
 	},
