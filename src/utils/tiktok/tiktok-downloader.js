@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 import { load } from 'cheerio';
-import { buildHead, parseData } from './util.js';
 
+import { buildHead, parseData } from './util.js';
 import { fetchJSON, fetchTEXT } from '../modules/index.js';
 
 const _api = 'https://api16-va.tiktokv.com/aweme/v1/feed/?';

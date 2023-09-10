@@ -74,6 +74,7 @@ const _parseDestructuring = (data) => {
 			url: v.video_info.variants.filter((w) => w?.content_type === 'video/mp4')?.sort((a, b) => b?.bit_rate - a?.bit_rate)[0],
 			type: 'video',
 			duration: v.duration_millis,
+			bitrates: v.bitrate,
 			ratio: {
 				width: v.original_info.width,
 				height: v.original_info.height
