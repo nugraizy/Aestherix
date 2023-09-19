@@ -22,7 +22,7 @@ export default {
 	description: 'Check bot status.',
 	usage: '!stats',
 	aliases: ['status'],
-	category: 'misc',
+	category: 'Misc',
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',

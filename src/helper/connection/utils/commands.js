@@ -37,13 +37,14 @@ export const loadCommands = async (OPTIONS) => {
 		module.default.path = normalize;
 
 		configuration.cmds.commands.set(module.default.name, module.default);
+		configuration.cmds.aliases.push(...module.default.aliases);
 
 		folder.push(path.dirname(command));
-
-		// if (process.argv.includes('--watch')) watch(command);
 	}
 
 	if (OPTIONS.watch) {
 		new Set(folder).forEach(watch);
 	}
+
+	configuration.cmds.aliases.filter(Boolean);
 };
