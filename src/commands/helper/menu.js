@@ -34,19 +34,17 @@ export default {
 	status: 'enable',
 	async run({ from, prefix, groupMetadata }, client) {
 		let capt = `𓆩 Void Bot ⁣𓆪\nV ${(await fs.readJSON('./package.json')).version.toUpperCase()}\n\n`;
-		const container = [];
+		const container = {};
 
-		for (const [key, value] of configuration.cmds.commands) {
-			if (value.name === '') {
-				continue;
+		configuration.cmds.commands.forEach((value, key) => {
+			if (value.name !== '') {
+				if (Object.keys(container).includes(value.category)) {
+					container[value.category].push(key);
+				} else {
+					container[value.category] = [key];
+				}
 			}
-
-			if (Object.keys(container).includes(value.category)) {
-				container[value.category].push(key);
-			} else {
-				container[value.category] = [key];
-			}
-		}
+		});
 
 		for (const key of Object.keys(container).sort((a, b) => a.localeCompare(b))) {
 			capt += `⪨ *${format[key]}* ⪩\n\n${container[key]

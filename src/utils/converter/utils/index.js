@@ -18,7 +18,7 @@ export const streamFile = (file) => fs.createReadStream(file);
 export const signV1 = (obj) => {
 	const str = JSON.stringify(obj);
 
-	return md5(`https://qgc.qq.com${str.length + (encodeURIComponent(str).match(/%[89ABab]/g)?.length || 0)}HQ31X02e`);
+	return md5('https://h5.tu.qq.com' + (str.length + (encodeURIComponent(str).match(/%[89ABab]/g)?.length || 0)) + 'HQ31X02e');
 };
 
 export const imageToBuffer = async (image, httpsAgent, opts) => {

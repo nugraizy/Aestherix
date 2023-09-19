@@ -14,7 +14,8 @@ const pushMessageData = (id, data, message) => {
 	return true;
 };
 
-const getData = async () => randomize(await fs.readJSON(path.join(__dirname, 'databases/games/tebak_gambar/db.json')));
+const images = await fs.readJSON(path.join(__dirname, 'databases/games/tebak_gambar/db.json'));
+const getData = () => randomize(images);
 
 export const startTG = async (client, id, { message, sender, groupMetadata }, remainingTime) => {
 	const time = dayjs().format('HH:mm:ss DD/MM');
@@ -26,7 +27,7 @@ export const startTG = async (client, id, { message, sender, groupMetadata }, re
 		return { status: 'playing', messages: data.message, remaining: data.timer };
 	}
 
-	const { image, answer } = await getData();
+	const { image, answer } = getData();
 	const obj = { id, startsBy: sender, message: null, timer: null, data: { image, answer: answer.trim() } };
 	const caption = `Guess The Image!\n\nYou have ${remainingTime} seconds to guess the image.\nClue : ${answer.replace(
 		/[aiueoAIUEO]/g,

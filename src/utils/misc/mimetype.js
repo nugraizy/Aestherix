@@ -1,10 +1,10 @@
 import { extension as extensi, lookup } from 'mime-types';
 import fs from 'fs-extra';
 
-const [videoFormat, audioFormat, imageFormat] = await Promise.all([
-	fs.readFile('./databases/mimetypes/Video.json'),
-	fs.readFile('./databases/mimetypes/Audio.json'),
-	fs.readFile('./databases/mimetypes/Image.json'),
+export const [videoFormat, audioFormat, imageFormat] = await Promise.all([
+	fs.readJSON('./databases/mimetypes/Video.json'),
+	fs.readJSON('./databases/mimetypes/Audio.json'),
+	fs.readJSON('./databases/mimetypes/Image.json')
 ]);
 
 /**

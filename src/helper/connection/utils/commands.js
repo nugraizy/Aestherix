@@ -1,47 +1,49 @@
-import { pathToFileURL } from 'url';
 import path from 'path';
+import dayjs from 'dayjs';
 
 import configuration from '../../config/connect.js';
 import { color, ERRLOG, loadFiles } from '../../../utils/modules/index.js';
-import { watchFile } from './cache.js';
+import { ICON, normalizeImportPath, watch } from './cache.js';
 
-export const loadCommands = async (OPTIONS, __dirname) => {
+export const loadCommands = async (OPTIONS) => {
 	const commands = loadFiles('./src/commands');
+	const folder = [];
 
-	const container = [];
+	const time = dayjs().format('HH:mm:ss DD/MM');
 
-	(
-		await Promise.all(
-			commands.map((v) => {
-				container.push({ pathname: v });
-
-				return import(pathToFileURL(path.join(__dirname, v)));
-			})
-		)
-	).forEach((v, i) => (container[i].imports = v));
-
-	for (const obj of container) {
-		try {
-			const cmd = obj.imports.default;
-
-			if (cmd.status !== 'disable') {
-				if (OPTIONS.watch) {
-					await watchFile(pathToFileURL(path.join(__dirname, obj.pathname)), cmd.name);
-				}
-
-				const modules =
-					process.platform === 'win32'
-						? pathToFileURL(path.join(__dirname, obj.pathname)).pathname.slice(1)
-						: pathToFileURL(path.join(__dirname, obj.pathname)).pathname;
-
-				configuration.cmds.commands.set(cmd.name, { ...cmd, pathname: decodeURI(modules) });
-				configuration.cmds.aliases = [...cmd.aliases, ...configuration.cmds.aliases];
-				configuration.commandsPath.push(decodeURI(modules));
-			}
-		} catch (e) {
-			console.log(e);
-			ERRLOG(`${color(obj.pathname, 'red')} ${color('is causing error. Please check the file before running.', 'white')}`);
-			process.exit(0);
+	for (const command of commands) {
+		if (command.includes('template')) {
+			continue;
 		}
+
+		const file = normalizeImportPath(command);
+		const module = await import(file);
+		const normalize = path.normalize(command);
+
+		if (!module?.default) {
+			ERRLOG(
+				`[${color(time, 'cyan')}]`,
+				color(`${ICON.ADD} ${normalize.split('/').slice(-2).join('/')}`, '#9f53ea'),
+				color('File Error! Waiting for changes...', 'red')
+			);
+			configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
+				absolutePath: file,
+				path: normalize
+			});
+			continue;
+		}
+
+		module.default.absolutePath = file;
+		module.default.path = normalize;
+
+		configuration.cmds.commands.set(module.default.name, module.default);
+
+		folder.push(path.dirname(command));
+
+		// if (process.argv.includes('--watch')) watch(command);
+	}
+
+	if (OPTIONS.watch) {
+		new Set(folder).forEach(watch);
 	}
 };

@@ -68,7 +68,7 @@ const createCanvasTemplates = (fonts) => {
 	return { ctx, canvas };
 };
 
-const loadColorsPalette = async (color = null) => {
+const loadColorsPalette = (color = null) => {
 	const defaultColors = [
 		['047af6', '7401df', '202532', '32fa00', 'ff00d5'],
 		['4db1c3', '046084', '35b07e', 'f0a7aa', 'e74758'],
@@ -101,7 +101,7 @@ export const ttp = (sender, texts, colors, fonts) =>
 		INFOLOG(`[${color(time, 'cyan')}]`, `${color('Making Static Image', '#01cdfe')} for ${color(sender, '#ff71ce')}`);
 
 		let { ctx, canvas } = createCanvasTemplates(fonts);
-		const colori = await loadColorsPalette(colors);
+		const colori = loadColorsPalette(colors);
 		const reassignColor = colori.startsWith('#') ? colori : `#${colori}`;
 
 		ctx.fillStyle = reassignColor;

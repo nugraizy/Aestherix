@@ -81,7 +81,7 @@ const createCanvasTemplates = (fonts) => {
 	return { ctx, canvas };
 };
 
-const loadColorsPalette = async (color) => {
+const loadColorsPalette = (color) => {
 	const defaultColors = [
 		['047af6', '7401df', '202532', '32fa00', 'ff00d5'],
 		['4db1c3', '046084', '35b07e', 'f0a7aa', 'e74758'],
@@ -110,7 +110,7 @@ export const attp = (sender, texts, colored, fonts) =>
 
 		let i = 0;
 		let { ctx, canvas } = createCanvasTemplates(fonts);
-		const colors = await loadColorsPalette(colored);
+		const colors = loadColorsPalette(colored);
 		const bufferContainer = [];
 
 		const regex = new RegExp(emojiReg(), 'g');

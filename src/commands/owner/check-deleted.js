@@ -2,13 +2,14 @@ import fs from 'fs';
 
 import configuration from '../../helper/config/connect.js';
 import { getTimeSince } from '../../utils/modules/index.js';
+import { Cache } from '../../helper/modules/cache.js';
 
 const DB_PATH = `./src/media/connection_databases/${configuration.cli.input[0] ?? 'Session-debug'}.json`;
 
 const path = {
 	deleted: '../../handlers/messages_event/deleted-message.js'
 };
-const handler = new Map();
+const handler = new Cache();
 
 export default {
 	name: 'checkdeleted',

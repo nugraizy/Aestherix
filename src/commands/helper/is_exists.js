@@ -1,6 +1,8 @@
 import dayjs from 'dayjs';
 
-const cache = new Map();
+import { Cache } from '../../helper/modules/cache.js';
+
+const cache = new Cache();
 
 export default {
 	name: 'nowhatsapp',

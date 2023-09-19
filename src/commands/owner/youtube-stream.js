@@ -1,8 +1,9 @@
 import { YTNodes } from 'youtubei.js';
 
 import { youtubeLiveComments } from '../../utils/index.js';
+import { Cache } from '../../helper/modules/cache.js';
 
-const lives = new Map();
+const lives = new Cache();
 
 export default {
 	name: 'youtubelive',

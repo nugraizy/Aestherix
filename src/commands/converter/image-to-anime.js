@@ -38,6 +38,7 @@ export default {
 		buffer = await imageToAnime(bufferMessage, sender, {
 			crop: 'SINGLE',
 			enhance: true,
+			proxy: 'socks5://arugaz:arugaz1717%40%23@8.210.154.33:1080',
 			onRetry: (e) => ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color(e.message, 'red')} for ${color(prettyNumber, '#ff71ce')}`)
 		});
 

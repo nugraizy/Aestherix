@@ -2,14 +2,26 @@ import { reassign } from '../../helper/index.js';
 import { WebMessageInfoStubType } from '../../helper/misc/wa_data/index.js';
 import { checkBan } from '../misc/check-banned.js';
 
+const EVENTS = {
+	GROUPS_PARTICIPANT: [
+		WebMessageInfoStubType.GROUP_PARTICIPANT_LEAVE,
+		WebMessageInfoStubType.GROUP_PARTICIPANT_INVITE,
+		WebMessageInfoStubType.GROUP_PARTICIPANT_REMOVE,
+		WebMessageInfoStubType.GROUP_PARTICIPANT_ADD,
+		WebMessageInfoStubType.GROUP_PARTICIPANT_PROMOTE,
+		WebMessageInfoStubType.GROUP_PARTICIPANT_DEMOTE
+	],
+	GROUPS_SETTINGS: [
+		WebMessageInfoStubType.GROUP_CHANGE_SUBJECT,
+		WebMessageInfoStubType.GROUP_CHANGE_RESTRICT,
+		WebMessageInfoStubType.GROUP_CHANGE_ANNOUNCE
+	],
+	MISC: [WebMessageInfoStubType.OVERSIZED]
+};
+
 const handler = async (client, message, store) => {
-	switch (message.messageStubType) {
-		case WebMessageInfoStubType.GROUP_PARTICIPANT_LEAVE:
-		case WebMessageInfoStubType.GROUP_PARTICIPANT_INVITE:
-		case WebMessageInfoStubType.GROUP_PARTICIPANT_REMOVE:
-		case WebMessageInfoStubType.GROUP_PARTICIPANT_ADD:
-		case WebMessageInfoStubType.GROUP_PARTICIPANT_PROMOTE:
-		case WebMessageInfoStubType.GROUP_PARTICIPANT_DEMOTE: {
+	switch (true) {
+		case EVENTS.GROUPS_PARTICIPANT.some((v) => v === message.messageStubType): {
 			if (WebMessageInfoStubType.GROUP_PARTICIPANT_ADD === message.messageStubType) {
 				message = await reassign(JSON.parse(JSON.stringify(message)), client, store, false);
 				await checkBan(client, message);
@@ -18,13 +30,11 @@ const handler = async (client, message, store) => {
 			client[botNum].ev.emit('group.participants.update', message, client);
 			break;
 		}
-		case WebMessageInfoStubType.GROUP_CHANGE_SUBJECT:
-		case WebMessageInfoStubType.GROUP_CHANGE_RESTRICT:
-		case WebMessageInfoStubType.GROUP_CHANGE_ANNOUNCE: {
+		case EVENTS.GROUPS_SETTINGS.some((v) => v === message.messageStubType): {
 			client[botNum].ev.emit('group.settings.update', message, client);
 			break;
 		}
-		case WebMessageInfoStubType.OVERSIZED: {
+		case EVENTS.MISC.some((v) => v === message.messageStubType): {
 			client[botNum].ev.emit('message.oversized', message, client);
 			break;
 		}

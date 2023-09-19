@@ -1,5 +1,55 @@
+/* eslint-disable */
+
 import { generateWAMessageFromContent } from '@adiwajshing/baileys';
 import fs from 'fs-extra';
+
+import { randomChar } from '../../utils/index.js';
+
+const container = () => ({
+	order: {
+		shipping: {
+			value: 150000,
+			offset: 1
+		},
+		status: 'pending',
+		items: [
+			{
+				amount: {
+					offset: 1,
+					value: 5000000
+				},
+				name: 'Test',
+				quantity: 1,
+				retailer_id: 'custom-item-1694865264'
+			}
+		],
+		discount: {
+			value: 50000,
+			offset: 1
+		},
+		subtotal: {
+			value: 5000000,
+			offset: 1
+		},
+		tax: {
+			value: 12375,
+			offset: 1
+		}
+	},
+	total_amount: {
+		offset: 1,
+		value: 5112375
+	},
+	reference_id: '4MVS' + randomChar('abcdefghijklmnopqrstuvwxyz0123456789', 11 - 4).toUpperCase(),
+	currency: 'IDR',
+	external_payment_configurations: [
+		{
+			type: 'payment_instruction',
+			payment_instruction: 'Haloo'
+		}
+	],
+	type: 'physical-goods'
+});
 
 export default {
 	name: 'interactive',
@@ -17,23 +67,11 @@ export default {
 			from,
 			{
 				interactiveMessage: {
-					header: {
-						title: 'Nanda title',
-						subtitle: 'Nanda subtitle',
-						hasMediaAttachment: true,
-						imageMessage: image.message.imageMessage
-					},
-					body: {
-						text: 'Nanda text'
-					},
-					footer: {
-						text: 'Nanda footer'
-					},
 					nativeFlowMessage: {
 						buttons: [
 							{
-								name: 'Nanda button name',
-								buttonParamsJson: 'Nanda button params json'
+								name: 'review_and_pay',
+								buttonParamsJson: JSON.stringify(container())
 							}
 						]
 					}
@@ -42,6 +80,7 @@ export default {
 			{}
 		);
 
+		console.log(JSON.stringify(messages, null, 2));
 		await client[botNum].relayMessage(from, messages.message, { messageId: messages.key.id });
 	}
 };

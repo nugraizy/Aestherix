@@ -1,112 +1,26 @@
-import { pathToFileURL } from 'url';
-import fs from 'fs-extra';
+import path from 'path';
 import dayjs from 'dayjs';
+import chokidar from 'chokidar';
 
 import configuration from '../../config/connect.js';
 import { color, ERRLOG, INFOLOG, loadFiles } from '../../../utils/modules/index.js';
 
-export const nocache = async (module) => {
-	const tempModules = `${module}?update=${Date.now()}`;
+const nocache = (module, newFile = false) => {
+	let param = '?v=' + Date.now();
+	const newPath = module + (newFile ? param : '');
 
-	return await import(tempModules);
+	return { import: import(newPath), param };
 };
 
-export const watchFile = (module) => {
-	const modules = process.platform === 'win32' ? decodeURI(module.pathname.slice(1)) : decodeURI(module.pathname);
-
-	fs.watchFile(module, async () => {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
-		if (fs.existsSync(module)) {
-			INFOLOG(`[${color(time, 'cyan')}]`, color(`${modules?.split('/')?.reverse()[0]} has been changed`, '#9f53ea'));
-			await reloadModule(module, false);
-		} else {
-			await reloadModule(module, true, modules);
-		}
-	});
+export const ICON = {
+	ADD: '🆕',
+	DELETED: '🗑️ ',
+	CHANGED: '✏️ ',
+	RENAMED: '🔂'
 };
 
-export const reloadModule = async (module, isNewFile, newFilePath) => {
-	if (isNewFile) {
-		try {
-			const time = dayjs().format('HH:mm:ss DD/MM');
-			const commands = await new Promise(async (resolve) => {
-				const files = (
-					await Promise.all(
-						loadFiles('./src/commands').map(async (v) => {
-							const modules =
-								process.platform === 'win32'
-									? decodeURI(pathToFileURL(v).pathname.slice(1))
-									: decodeURI(pathToFileURL(v).pathname);
-							const module = (await import(pathToFileURL(modules))).default;
-
-							return { ...module, pathname: modules };
-						})
-					)
-				)
-					.filter((v) => v.status === 'enable')
-					.map((v) => v.pathname);
-
-				resolve(files);
-			});
-			let afterCommands;
-			let renamedCommand;
-
-			for (const commandModule of configuration.commandsPath) {
-				let status = false;
-
-				if (fs.existsSync(commandModule)) {
-					status = true;
-				}
-
-				if (!status) {
-					renamedCommand = commands.filter((v) => !configuration.commandsPath.includes(v))[0];
-					afterCommands = commandModule;
-					break;
-				}
-			}
-
-			try {
-				configuration.commandsPath.push(renamedCommand);
-				configuration.commandsPath.splice(configuration.commandsPath.indexOf(afterCommands), 1);
-				const cmd = (await import(pathToFileURL(renamedCommand))).default;
-
-				configuration.cmds.commands.set(cmd.name, cmd);
-				watchFile(pathToFileURL(renamedCommand), cmd.name);
-				fs.unwatchFile(module);
-			} catch (e) {
-				console.log(e);
-				configuration.commandsPath.splice(configuration.commandsPath.indexOf(newFilePath), 1);
-				configuration.cmds.commands.delete(
-					Array.from(configuration.cmds.commands.values()).find((v) => v.pathname === newFilePath).name
-				);
-				fs.unwatchFile(module);
-				return ERRLOG(`[${color(time, 'cyan')}]`, color(`⚠️ ${newFilePath.split('/').reverse()[0]} is deleted`, 'red'));
-			} finally {
-				INFOLOG(
-					`[${color(time, 'cyan')}]`,
-					color(
-						`${newFilePath.split('/').reverse()[0]} has been renamed to ${renamedCommand.split('/').reverse()[0]}`,
-						'#9f53ea'
-					)
-				);
-			}
-		} catch (e) {
-			console.log(e);
-		}
-		return;
-	}
-
-	try {
-		fs.unwatchFile(module);
-		const cmd = (await nocache(module)).default;
-
-		configuration.cmds.commands.delete(cmd.name);
-		configuration.cmds.commands.set(cmd.name, cmd);
-		watchFile(module);
-	} catch (e) {
-		console.log(e);
-	}
+export const normalizeImportPath = (file) => {
+	return path.resolve(path.join(file));
 };
 
 export const saveContacts = (store, contactsList) => {
@@ -122,4 +36,157 @@ export const saveContacts = (store, contactsList) => {
 
 		contacts[id] = { name, id };
 	}
+};
+
+const add = async (filename, stats, icon = ICON.ADD) => {
+	const time = dayjs().format('HH:mm:ss DD/MM');
+
+	const cmds = configuration.cmds.commands.entries();
+	const index = cmds.findIndex((v) => v[1].path === filename);
+	const files = loadFiles('./src/commands').filter((v) => !v.includes('template'));
+
+	if (index === -1 && files.length !== cmds.length) {
+		const file = normalizeImportPath(filename);
+
+		const module = await import(file);
+
+		INFOLOG(
+			`[${color(time, 'cyan')}]`,
+			color(`${icon} ${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
+			color('New File Added!', 'yellow')
+		);
+
+		INFOLOG(`[${color(time, 'cyan')}]`, color('checking if its valid plugins...', '#ffb86c'));
+
+		if (module?.default) {
+			configuration.cmds.commands.set(module.default.name, {
+				...module.default,
+				absolutePath: file,
+				path: filename
+			});
+			INFOLOG(
+				`[${color(time, 'cyan')}]`,
+				color(`${icon} ${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
+				color('Plugins are valid! Waiting for changes...', '#50fa7b')
+			);
+		} else {
+			ERRLOG(
+				`[${color(time, 'cyan')}]`,
+				color(`${icon} ${filename.split('/').slice(-2).join('/')}`, '#9f53ea'),
+				color('File Error! Waiting for changes...', 'red')
+			);
+			configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
+				absolutePath: file,
+				path: filename
+			});
+		}
+	}
+};
+
+const change = async (filename, stats, icon = ICON.CHANGED) => {
+	const time = dayjs().format('HH:mm:ss DD/MM');
+
+	INFOLOG(
+		`[${color(time, 'cyan')}]`,
+		color(`${icon} ${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
+		color('File has been changed!', 'yellow')
+	);
+
+	const _command = nocache(normalizeImportPath(filename), true);
+
+	const cmds = configuration.cmds.commands.entries();
+
+	const index = cmds.findIndex((v) => {
+		return v[1].path === filename;
+	});
+
+	const command = (await _command.import)?.default;
+
+	if (!command) {
+		ERRLOG(
+			`[${color(time, 'cyan')}]`,
+			color(`⚠️ ${filename.split('/').slice(-2).join('/')}`, '#9f53ea'),
+			color('File Error! Waiting for changes...', 'red')
+		);
+		return;
+	}
+
+	const _commandObj = cmds[index][1];
+
+	INFOLOG(
+		`[${color(time, 'cyan')}]`,
+		color(`${icon} ${(_commandObj.path + _command.param)?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
+		color('File Reloaded!', 'yellow')
+	);
+
+	const _absolutePath = _commandObj.absolutePath;
+	const _path = _commandObj.path;
+	let _commandName = cmds[index][0];
+
+	if (_commandName !== command.name) {
+		configuration.cmds.commands.delete(_commandName);
+		_commandName = command.name;
+	}
+
+	configuration.cmds.commands.set(_commandName, {
+		...command,
+		absolutePath: _absolutePath,
+		path: _path
+	});
+};
+
+const unlink = (filename, icon = ICON.DELETED) => {
+	const time = dayjs().format('HH:mm:ss DD/MM');
+
+	const cmds = configuration.cmds.commands.entries();
+	const indexPath = cmds.findIndex((v) => v[1].path === filename);
+
+	if (indexPath === -1) {
+		return;
+	}
+
+	const commands = loadFiles('./src/commands').filter((v) => !v.includes('template'));
+
+	const _filesContainer = cmds.map((v) => v[1].path);
+
+	const index = commands.map((c) => path.normalize(c));
+
+	const renamedFile = index.find((v) => !_filesContainer.includes(v));
+
+	if (renamedFile ? true : false) {
+		const file = cmds[indexPath];
+
+		configuration.cmds.commands.delete(cmds[0]);
+
+		delete file[1].path;
+		delete file[1].absolutePath;
+
+		configuration.cmds.commands.set(
+			file[0],
+			Object.assign(file[1], { path: renamedFile, absolutePath: normalizeImportPath(renamedFile) })
+		);
+
+		INFOLOG(
+			`[${color(time, 'cyan')}]`,
+			color(`${ICON.RENAMED} ${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
+			color('File Renamed!', 'yellow'),
+			color('to', 'cyan'),
+			color(renamedFile.split('/')?.slice(-2).join('/'), '#9f53ea'),
+			color('Waiting for changes...', 'yellow')
+		);
+
+		return;
+	}
+
+	commands.cmds.commands.delete(cmds[indexPath][0]);
+
+	INFOLOG(
+		`[${color(time, 'cyan')}]`,
+		color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
+		color('File Deleted!', 'red')
+	);
+};
+
+export const watch = (folder) => {
+	chokidar.watch(folder).on('add', add).on('change', change).on('unlink', unlink);
 };

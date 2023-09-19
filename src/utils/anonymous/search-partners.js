@@ -12,7 +12,7 @@ import { checkIntervals, deleteIntervals, setIntervals } from '../misc/index.js'
  * @returns {(undefined|boolean)|{partner1: string, partner2: string, messages1: AnyMessageContent, messages2: AnyMessageContent}|{status: string, seconds?: number}}
  */
 export const search = (key, timer, client, message) => {
-	const status = Array.from(configuration.anonymous.values()).find((k) => k.partner === null) || undefined;
+	const status = Array.from(configuration.anonymous.values().values).find((k) => k.partner === null) || undefined;
 
 	if (status) {
 		if (configuration.anonymous.has(key)) {
@@ -40,7 +40,7 @@ export const search = (key, timer, client, message) => {
 
 	if (configuration.anonymous.has(key)) {
 		return { status: 'chatting' };
-	} else if (Array.from(configuration.anonymous.values()).find((k) => k.partner === key)) {
+	} else if (Array.from(configuration.anonymous.values().values).find((k) => k.partner === key)) {
 		return { status: 'chatting' };
 	}
 

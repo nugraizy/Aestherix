@@ -1,6 +1,6 @@
 import axios from 'axios';
 import FormData from 'form-data';
-import fs from 'fs';
+import fs from 'fs-extra';
 
 import { cheerioLOAD, delay, randomize } from '../modules/index.js';
 

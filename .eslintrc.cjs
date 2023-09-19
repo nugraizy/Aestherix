@@ -14,7 +14,8 @@ module.exports = {
 		"client": true,
 		"where": true,
 		"log": true,
-		"store": true
+		"store": true,
+		"Bun": true
 	},
 	rules: {
 		'no-unsafe-optional-chaining': 0,

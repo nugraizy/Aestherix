@@ -1,10 +1,9 @@
-import fs from 'fs';
 import dayjs from 'dayjs';
 import path from 'path';
 
 import { color, INFOLOG } from '../../utils/modules/index.js';
 import { soundRemover } from '../../utils/converter/index.js';
-import { extension } from '../../utils/misc/index.js';
+import { extension, audioFormat, videoFormat } from '../../utils/misc/mimetype.js';
 
 export default {
 	name: 'soundremover',
@@ -50,10 +49,8 @@ export default {
 
 		if (
 			isQuotedDocument &&
-			!JSON.parse(
-				fs.readFileSync(path.join(__dirname, 'databases/mimetypes/Audio.json')).includes(extractMediaData.mimetype)
-			) &&
-			!JSON.parse(fs.readFileSync(path.join(__dirname, 'databases/mimetypes/Video.json')).includes(extractMediaData.mimetype))
+			!audioFormat.includes(extractMediaData.mimetype) &&
+			!videoFormat.includes(extractMediaData.mimetype)
 		) {
 			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'This file is not an audio/video');
 		}

@@ -6,10 +6,10 @@ import { GraphQLSubscriptions, SkywalkerSubscriptions, withFbns, withRealtime } 
 import sharp from 'sharp';
 
 import configuration from '../../helper/config/connect.js';
+import { Cache } from '../../helper/modules/cache.js';
+import { imageFormat as IMAGE_MIMETYPE } from '../misc/mimetype.js';
 
 dotenv.config();
-
-const IMAGE_MIMETYPE = JSON.parse(fs.readFileSync('./databases/mimetypes/Image.json'));
 
 class Instafier {
 	#username = process.env.INSTAGRAM_USERNAME;
@@ -24,7 +24,7 @@ class Instafier {
 			throw new Error('Username and password are required');
 		}
 
-		this.Container = new Map();
+		this.Container = new Cache();
 		this.Instagram = withFbns(withRealtime(new IgApiClient()));
 		this.Instagram.state.generateDevice(process.env.INSTAGRAM_USERNAME);
 	}
@@ -207,7 +207,7 @@ class Instafier {
 		data.user = await this.Instagram.user.info(data.userId);
 
 		if (!this.Container.has(data.userId)) {
-			this.Container.set(data.userId, new Map());
+			this.Container.set(data.userId, new Cache());
 			this.Container.get(data.userId).set(data.itemId, data);
 		} else if (this.Container.get(data.userId).has(data.itemId)) {
 			return;

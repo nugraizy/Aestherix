@@ -14,7 +14,7 @@ import { search } from './index.js';
 export const skip = (key, timer, client, message, isStop) => {
 	const status =
 		configuration.anonymous.get(key) ||
-		Array.from(configuration.anonymous.values()).find((k) => k.partner === key) ||
+		Array.from(configuration.anonymous.values().values).find((k) => k.partner === key) ||
 		undefined;
 	let results;
 

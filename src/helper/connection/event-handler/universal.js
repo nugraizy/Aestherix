@@ -10,10 +10,11 @@ import { INFOLOG, color, romanize } from '../../../utils/modules/index.js';
 import { connectMqtt, reconnectMqttConnection } from '../utils/mqtt.js';
 import { loadCommands } from '../utils/commands.js';
 import { clearDBConnection } from '../socket/reset-session.js';
+import { Cache } from '../../modules/cache.js';
 
 let isClosed = false;
 let shouldWait = false;
-const handler = new Map();
+const handler = new Cache();
 const handlerPath = {
 	incoming: '../../../handlers/messages_event/incoming-message.js',
 	deleted: '../../../handlers/messages_event/deleted-message.js',
@@ -56,7 +57,7 @@ export const handleConnectionUpdate = async (
 			}
 		} else if (connection === 'open') {
 			if (!isClosed) {
-				await loadCommands(OPTIONS, __dirname);
+				await loadCommands(OPTIONS);
 				isClosed = true;
 			}
 

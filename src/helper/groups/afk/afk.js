@@ -1,4 +1,5 @@
 import configuration from '../../config/connect.js';
+import { Cache } from '../../modules/cache.js';
 
 export const checkAfk = (participant, groupId) => {
 	const key = configuration.user.afk.get(participant)?.has(groupId);
@@ -31,7 +32,7 @@ export const setAfk = (participant, groupId, reason, name) => {
 	if (!getAfk(participant, groupId)) {
 		configuration.user.afk.set(
 			participant,
-			new Map().set(groupId, { since: new Date().getTime(), reasons: !reason ? 'No Reason' : reason, name })
+			new Cache().set(groupId, { since: new Date().getTime(), reasons: !reason ? 'No Reason' : reason, name })
 		);
 	}
 };

@@ -4,6 +4,7 @@ import P from 'pino';
 
 import { clearDBConnection } from './reset-session.js';
 import { patchInteractiveMessage } from '../utils/patch-message.js';
+import { Cache } from '../../modules/cache.js';
 
 const { default: makeWASocket, makeInMemoryStore, DEFAULT_CONNECTION_CONFIG } = baileys;
 const logger = (OPTIONS) => P({ level: OPTIONS.trace ? 'trace' : OPTIONS.debugMode ? 'debug' : 'fatal' });
@@ -22,8 +23,8 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 		getMessage: async () => ({ conversation: 'Success syncing. Please resend the command again.' }),
 		generateHighQualityLinkPreview: true,
 		linkPreviewImageThumbnailWidth: 2,
-		mediaCache: new Map(),
-		userDevicesCache: new Map(),
+		mediaCache: new Cache(),
+		userDevicesCache: new Cache(),
 		patchMessageBeforeSending: patchInteractiveMessage
 	};
 

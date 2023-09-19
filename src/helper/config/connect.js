@@ -1,5 +1,7 @@
 import { EventEmitter } from 'events';
 
+import { Cache } from '../modules/cache.js';
+
 const globalConfig = {
 	cmds: {},
 	user: {},
@@ -15,33 +17,33 @@ const globalConfig = {
 	isConnected: false,
 	packname: 'Made by Void',
 	author: 'Powered by Hidden Finder',
-	anonymous: new Map(),
+	anonymous: new Cache()
 };
 
 global.log = console.log;
 
-globalConfig.cache.metadata = new Map();
-globalConfig.cache.settings = new Map();
-globalConfig.cache.users = new Map();
-globalConfig.cache.interval = new Map();
+globalConfig.cache.metadata = new Cache();
+globalConfig.cache.settings = new Cache();
+globalConfig.cache.users = new Cache();
+globalConfig.cache.interval = new Cache();
 
-globalConfig.intervals.tebakGambar = new Map();
-globalConfig.intervals.sudoku = new Map();
-globalConfig.intervals.url = new Map();
-globalConfig.intervals.anonymous = new Map();
-globalConfig.intervals.word = new Map();
+globalConfig.intervals.tebakGambar = new Cache();
+globalConfig.intervals.sudoku = new Cache();
+globalConfig.intervals.url = new Cache();
+globalConfig.intervals.anonymous = new Cache();
+globalConfig.intervals.word = new Cache();
 globalConfig.intervals.from = [];
 globalConfig.intervals.freegame = null;
-globalConfig.games.tebakGambar = new Map();
-globalConfig.games.sudoku = new Map();
-globalConfig.games.akinator = new Map();
-globalConfig.games.tictactoe = new Map();
-globalConfig.games.word = new Map();
-globalConfig.games.werewolf = new Map();
-globalConfig.games.wordle = new Map();
-globalConfig.user.cooldown = new Map();
-globalConfig.cmds.commands = new Map();
-globalConfig.user.afk = new Map();
+globalConfig.games.tebakGambar = new Cache();
+globalConfig.games.sudoku = new Cache();
+globalConfig.games.akinator = new Cache();
+globalConfig.games.tictactoe = new Cache();
+globalConfig.games.word = new Cache();
+globalConfig.games.werewolf = new Cache();
+globalConfig.games.wordle = new Cache();
+globalConfig.user.cooldown = new Cache();
+globalConfig.cmds.commands = new Cache();
+globalConfig.user.afk = new Cache();
 globalConfig.commandsPath = [];
 globalConfig.cmds.aliases = [];
 

@@ -3,6 +3,7 @@ import { readFileSync } from 'fs';
 
 import configuration from '../../helper/config/connect.js';
 import { textStory } from '../../helper/canvas/index.js';
+import { Cache } from '../../helper/modules/cache.js';
 
 const STATUS = 'status@broadcast';
 const STATUS_PATH = `./src/media/connection_databases/${configuration.cli.input[0] ?? 'Session-debug'}.json`;
@@ -25,7 +26,7 @@ export default {
 			const messages = configuration.OPTIONS.json
 				? JSON.parse(readFileSync(STATUS_PATH)).messages[STATUS]
 				: await store.loadMessages(STATUS);
-			const tempContainer = new Map();
+			const tempContainer = new Cache();
 			let caption = 'Fetch WhatsApp Story'.formatHeaders();
 			let i = 0;
 
@@ -61,7 +62,9 @@ export default {
 			}
 
 			const data =
-				tempContainer.get(query) || Array.from(tempContainer.values()).find((v) => v.index === Number(query) - 1) || null;
+				tempContainer.get(query) ||
+				Array.from(tempContainer.values().values).find((v) => v.index === Number(query) - 1) ||
+				null;
 
 			if (!data) {
 				return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Story not found');

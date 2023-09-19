@@ -8,7 +8,7 @@ import configuration from '../../helper/config/connect.js';
 export const handlers = (key) => {
 	const status =
 		configuration.anonymous.get(key) ||
-		Array.from(configuration.anonymous.values()).find((k) => k.partner === key) ||
+		Array.from(configuration.anonymous.values().values).find((k) => k.partner === key) ||
 		undefined;
 
 	if (status === undefined) {

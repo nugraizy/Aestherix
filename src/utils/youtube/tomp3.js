@@ -1,4 +1,4 @@
-import yts from 'ytsr';
+import yts from 'yt-search';
 
 import { fetchJSON, isURL, parseHumanReadableToBytes } from '../modules/index.js';
 
@@ -71,34 +71,29 @@ export const downloaderYouTubeMain = (url, type) =>
 export const searchYoutube = (query, id) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const res = await yts(query);
-			let data;
+			const res = id
+				? await yts({
+						videoId: id
+				  }) // eslint-disable-line
+				: (await yts(query)).videos?.[0];
 
-			if (id) {
-				const filtered = res?.items?.find((v) => v.id === id);
-
-				data = filtered ? filtered : res?.items?.[0];
-			} else {
-				data = res?.items?.[0];
-			}
-
-			if (!data) {
+			if (!res) {
 				reject(new Error('Result of the query is not found.'));
 			}
 
 			let {
-				id: videoId,
+				videoId,
 				url,
 				title,
 				description,
-				bestThumbnail: { url: thumbnail },
-				duration: timestamp,
-				uploadedAt: uploaded,
+				image: thumbnail,
+				duration: { timestamp, seconds },
+				ago: uploaded,
 				views,
 				author: { name: author, url: urlChannel }
-			} = data;
+			} = res;
 
-			resolve({ videoId, url, title, description, thumbnail, timestamp, uploaded, views, author, urlChannel });
+			resolve({ videoId, url, title, description, thumbnail, timestamp, seconds, uploaded, views, author, urlChannel });
 		} catch (e) {
 			reject(e);
 		}

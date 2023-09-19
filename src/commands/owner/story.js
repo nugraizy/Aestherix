@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs';
 
 import configuration from '../../helper/config/connect.js';
+import { Cache } from '../../helper/modules/cache.js';
 
 const STATUS = 'status@broadcast';
 const STATUS_PATH = `./src/media/connection_databases/${configuration.cli.input[0] ?? 'Session-debug'}.json`;
@@ -22,7 +23,7 @@ export default {
 		const messages = configuration.OPTIONS.json
 			? JSON.parse(readFileSync(STATUS_PATH)).messages[STATUS]
 			: await store.loadMessages(STATUS);
-		const tempContainer = new Map();
+		const tempContainer = new Cache();
 		let caption = 'Fetch WhatsApp Story'.formatHeaders();
 
 		caption += '\n\n';

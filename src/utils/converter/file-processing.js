@@ -10,14 +10,12 @@ import imgToPdf, { sizes } from 'image-to-pdf';
 import socksProxyAgent from 'socks-proxy-agent';
 import httpsProxyAgent from 'https-proxy-agent';
 import asyncRetry from 'async-retry';
-import { v4 } from 'uuid';
 
 import configuration from '../../helper/config/connect.js';
 import { color, delay, ERRLOG, fetchBUFFER, fetchJSON, INFOLOG, isURL } from '../modules/index.js';
 import { webp2mp4File } from './ezgifs/index.js';
 import { cropImage, imageToBuffer, signV1, streamFile } from './utils/index.js';
-
-const VIDEO_MIMETYPE = await fs.readJSON('./databases/mimetypes/Video.json');
+import { videoFormat as VIDEO_MIMETYPE } from '../misc/mimetype.js';
 
 /**
  * Convert to MP4.
@@ -740,7 +738,7 @@ export const img2pdf = (image, sender) =>
 		}
 	});
 
-const DEFAULT_URL = 'https://ai.tu.qq.com/overseas/trpc.shadow_cv.ai_processor_cgi.AIProcessorCgi/Process';
+const DEFAULT_URL = 'https://ai.tu.qq.com/trpc.shadow_cv.ai_processor_cgi.AIProcessorCgi/Process';
 const defaultOpts = {
 	retries: 10,
 	factor: 1
@@ -750,44 +748,39 @@ const defaultOpts = {
  * Convert an existing image to anime-like using QQ A.I
  * @param {Buffer|string} image
  * @param {string} sender
- * @param {{proxy?: {url: string, chinese: boolean, image: boolean}, enhance?: boolean | undefined, forever?: boolean | undefined, unref: boolean | undefined, maxRetryTime?: number | undefined, retries?: number | undefined, factor?: number | undefined, minTimeout?: number | undefined, maxTimeout?: number | undefined, randomize?: boolean | undefined, crop: 'COMPARED' | 'SINGLE', onRetry: (e) => any | undefined}} options
+ * @param {{proxy?: string | undefined, enhance?: boolean | undefined, forever?: boolean | undefined, unref: boolean | undefined, maxRetryTime?: number | undefined, retries?: number | undefined, factor?: number | undefined, minTimeout?: number | undefined, maxTimeout?: number | undefined, randomize?: boolean | undefined, crop: 'COMPARED' | 'SINGLE', onRetry: (e) => any | undefined}} options
  * @returns {Promise<Buffer>}
  * @throws {Error}
  */
 export const imageToAnime = async (image, sender, options = defaultOpts) => {
 	options = Object.assign(defaultOpts, options);
 
-	const useProxy = !!options.proxy?.url;
-	const QQ_MODE = useProxy && options.proxy?.chinese ? 'CHINA' : 'WORLD';
+	const useProxy = !!options.proxy;
 	let httpsAgent;
 
 	if (useProxy) {
-		httpsAgent = /^socks/.test(options.proxy?.url)
-			? new socksProxyAgent.SocksProxyAgent(options.proxy?.url)
-			: new httpsProxyAgent.HttpsProxyAgent(options.proxy?.url);
+		httpsAgent = /^socks/.test(options.proxy)
+			? new socksProxyAgent.SocksProxyAgent(options.proxy)
+			: new httpsProxyAgent.HttpsProxyAgent(options.proxy);
 		httpsAgent.timeout = 30_000;
 	}
 
-	const imageRequest = await imageToBuffer(image, options.proxy?.image ? httpsAgent : undefined, options);
+	const imageRequest = await imageToBuffer(image, options.proxy ? httpsAgent : undefined, options);
+
+	const imgString = imageRequest.toString('base64');
 
 	const obj = {
-		busiId: QQ_MODE === 'WORLD' ? 'different_dimension_me_img_entry' : 'ai_painting_anime_entry',
-		images: [imageRequest.toString('base64')],
+		busiId: 'ai_painting_anime_img_entry',
+		images: [imgString],
 		extra: JSON.stringify({
 			face_rects: [] /* eslint-disable-line */,
 			version: 2,
-			language: 'en',
-			platform: 'web',
-			/* eslint-disable-line */ data_report: {
-				parent_trace_id: v4() /* eslint-disable-line */,
-				root_channel: '' /* eslint-disable-line */,
-				level: 0
-			}
+			platform: 'web'
 		})
 	};
 
 	let data = {
-		img_urls: [imageRequest.toString('base64')] /* eslint-disable-line */
+		img_urls: [imgString] /* eslint-disable-line */
 	};
 
 	try {
@@ -799,8 +792,8 @@ export const imageToAnime = async (image, sender, options = defaultOpts) => {
 					data: obj,
 					headers: {
 						'Content-Type': 'application/json',
-						Origin: 'https://qgc.qq.com',
-						Referer: 'https://qgc.qq.com/',
+						Origin: 'https://h5.tu.qq.com',
+						Referer: 'https://h5.tu.qq.com/',
 						'User-Agent':
 							'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36',
 						'x-sign-value': signV1(obj),
@@ -851,7 +844,7 @@ export const imageToAnime = async (image, sender, options = defaultOpts) => {
 			}
 		);
 	} catch (error) {
-		throw new Error('Failed to resolve data. Try again later.');
+		throw new Error(typeof error === 'string' ? error : error.message);
 	}
 	const result = data.img_urls[1] || data.img_urls[0];
 

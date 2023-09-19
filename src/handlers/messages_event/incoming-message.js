@@ -5,13 +5,14 @@ import configuration from '../../helper/config/connect.js';
 import { runtime } from '../../index.js';
 import { addLimit, checkAfk, deleteAfk, getAfk, reassign } from '../../helper/index.js';
 import { color, getTimeSince, INFOLOG } from '../../utils/modules/index.js';
+import { Cache } from '../../helper/modules/cache.js';
 
 const log = console.log;
 
 let STATS_OFFLINE = true;
 const EVALY = ['/>', '$>', '=>', '!>'];
 
-const handler = new Map();
+const handler = new Cache();
 const path = {
 	stubType: './stub-message.js',
 	story: './story-message.js',
@@ -196,7 +197,7 @@ const handlers = async (message, client, cmds, store, user, state) => {
 				message.cmd = message.prefix + HIGH_SCORE.command.toLowerCase().split(' ')[0].trim() || '';
 			}
 
-			const commands = Array.from(cmds.commands.values());
+			const commands = Array.from(cmds.commands.values().values);
 
 			const Tempcmds =
 				cmds.commands.get(message.cmd.slice(1).trim().toLowerCase()) ||
@@ -316,7 +317,7 @@ const handlers = async (message, client, cmds, store, user, state) => {
 					}
 
 					if (!user.cooldown.has(message.sender)) {
-						user.cooldown.set(message.sender, new Map());
+						user.cooldown.set(message.sender, new Cache());
 					}
 
 					if (!user.cooldown.get(message.sender).has(Tempcmds.name)) {
