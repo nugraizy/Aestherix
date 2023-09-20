@@ -17,29 +17,37 @@ export const loadCommands = async (OPTIONS) => {
 		}
 
 		const file = normalizeImportPath(command);
-		const module = await import(file);
 		const normalize = path.normalize(command);
 
-		if (!module?.default) {
-			ERRLOG(
-				`[${color(time, 'cyan')}]`,
-				color(`${ICON.ADD} ${normalize.split('/').slice(-2).join('/')}`, '#9f53ea'),
-				color('File Error! Waiting for changes...', 'red')
-			);
+		try {
+			const module = await import(file);
+
+			if (!module?.default) {
+				ERRLOG(
+					`[${color(time, 'cyan')}]`,
+					color(`${ICON.ADD} ${normalize.split('/').slice(-2).join('/')}`, '#9f53ea'),
+					color('File Error! Waiting for changes...', 'red')
+				);
+				configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
+					absolutePath: file,
+					path: normalize
+				});
+				continue;
+			}
+
+			module.default.absolutePath = file;
+			module.default.path = normalize;
+
+			configuration.cmds.commands.set(module.default.name, module.default);
+			configuration.cmds.aliases.push(...module.default.aliases);
+
+			folder.push(path.dirname(command));
+		} catch {
 			configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
 				absolutePath: file,
 				path: normalize
 			});
-			continue;
 		}
-
-		module.default.absolutePath = file;
-		module.default.path = normalize;
-
-		configuration.cmds.commands.set(module.default.name, module.default);
-		configuration.cmds.aliases.push(...module.default.aliases);
-
-		folder.push(path.dirname(command));
 	}
 
 	if (OPTIONS.watch) {

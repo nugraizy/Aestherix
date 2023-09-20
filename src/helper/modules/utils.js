@@ -465,8 +465,8 @@ export const assign = (client) => {
 									{
 										groupInviteMessage: {
 											groupJid: dari,
-											inviteCode: response?.[0].code,
-											inviteExpiration: response?.[0].expiration,
+											inviteCode: response?.[0]?.code,
+											inviteExpiration: response?.[0]?.expiration,
 											groupName: (await client[botNum].groupMetadata(dari)).subject,
 											caption: 'Invitation to join my WhatsApp group',
 											jpegThumbnail: new Buffer.from(
