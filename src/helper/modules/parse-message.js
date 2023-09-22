@@ -63,7 +63,6 @@ export const reassign = async (m, client, store) => {
 			return m;
 		}
 
-		delete m?.message?.messageContextInfo;
 		delete m?.message?.senderKeyDistributionMessage;
 
 		const isFromMe = m?.key?.fromMe;
@@ -83,7 +82,7 @@ export const reassign = async (m, client, store) => {
 		const isSettings = configuration.cache.settings.has(from);
 
 		if (m.message?.pollUpdateMessage) {
-			client[botNum].ev.emit('poll.update', { ...m.message, from, sender, func: PollUpdateDecrypt });
+			client[botNum].ev.emit('poll.update', { ...m.message, msg: m, from, sender, func: PollUpdateDecrypt });
 		}
 
 		if (configuration.isFirstConnection) {

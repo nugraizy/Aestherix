@@ -1,6 +1,6 @@
 import { Boom } from '@hapi/boom';
 import fs from 'fs-extra';
-import baileys, { jidDecode } from '@adiwajshing/baileys';
+import baileys, { jidNormalizedUser, getKeyAuthor, jidDecode, getAggregateVotesInPollMessage } from '@adiwajshing/baileys';
 import boxen from 'boxen';
 
 const { DisconnectReason } = baileys;
@@ -107,7 +107,7 @@ export const handleUpsertUpdate = async (store, message, state) => {
 		handler.set('incoming', (await import(handlerPath.incoming)).default);
 	}
 
-	handler.get('incoming')(message, client, configuration.cmds, store, configuration.user, state);
+	await handler.get('incoming')(message, client, configuration.cmds, store, configuration.user, state);
 };
 
 export const handleMessagesUpdate = async (store, message) => {
@@ -306,23 +306,39 @@ ${update.playersData
 		await client[botNum].send(update.id, { text: update.text, mentions: update.mentions });
 	}
 };
+
+const getMessage = (key, store) => store.loadMessage(key.remoteJid, key.id);
+
 export const handlePollUpdate = async (store, msg) => {
-	const originalPoll = await store.loadMessage(msg.from, msg.message.pollUpdateMessage?.pollCreationMessageKey?.id);
+	const pollKey = msg?.pollUpdateMessage?.pollCreationMessageKey;
+	const originalPoll = await getMessage(pollKey, store);
 
 	if (!originalPoll) {
 		return;
 	}
 
-	const hash = await msg.func.decrypt(
-		originalPoll.message.messageContextInfo.messageSecret,
-		msg.message.pollUpdateMessage.vote.encPayload,
-		msg.message.pollUpdateMessage.vote.encIv,
-		msg.message.pollUpdateMessage.pollCreationMessageKey.remoteJid,
-		msg.message.pollUpdateMessage.pollCreationMessageKey.id,
-		msg.sender
+	const meIdNormalized = jidNormalizedUser(botNum);
+	const pollCreatorJid = getKeyAuthor(pollKey, meIdNormalized);
+	const voterJid = getKeyAuthor(msg.msg.key, meIdNormalized);
+	const pollEncKey = originalPoll.message.messageContextInfo?.messageSecret;
+
+	const voteMsg = msg.func.decrypt(
+		msg.pollUpdateMessage.vote.encPayload,
+		msg.pollUpdateMessage.vote.encIv,
+		pollEncKey,
+		pollCreatorJid,
+		pollKey.id,
+		voterJid
 	);
 
-	console.log(await msg.func.compare(['help', 'yo'], hash));
+	getAggregateVotesInPollMessage(
+		{
+			pollUpdates: [{ vote: voteMsg, pollUpdateMessageKey: msg.msg.key, senderTimestampMs: msg.msg.messageTimestamp }],
+			message: originalPoll.message
+		},
+		botNum
+	);
+
 	return;
 };
 

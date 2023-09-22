@@ -5,7 +5,6 @@ import fs from 'fs-extra';
 import configuration from '../../helper/config/connect.js';
 import { getFilesize, getFilesizeFromBytes } from '../../utils/modules/index.js';
 import { reassign } from '../../helper/modules/parse-message.js';
-import { checkIntervals, deleteIntervals } from '../../utils/misc/index.js';
 
 const handler = async (client, message, fetches) => {
 	try {
@@ -54,19 +53,6 @@ const handler = async (client, message, fetches) => {
 		}
 
 		if (type === 'protocolMessage' || type === 'senderKeyDistributionMessage' || !type) {
-			return;
-		}
-
-		if (
-			checkIntervals(configuration.intervals.url.get(sender)) !== 0 &&
-			checkIntervals(configuration.intervals.url.get(sender).get(from)) !== 0 &&
-			checkIntervals(configuration.intervals.url.get(sender).get(from)).id === message.message.key.id
-		) {
-			await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'Good. Do not send URLs next time or i will kick you.'
-			);
-			deleteIntervals(configuration.intervals.url.get(sender).get(from), configuration.intervals.url.get(sender), from);
 			return;
 		}
 

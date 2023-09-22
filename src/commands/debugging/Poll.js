@@ -1,4 +1,5 @@
 import { generateMessageID, generateWAMessageFromContent } from '@adiwajshing/baileys';
+import { randomBytes } from 'crypto';
 
 export default {
 	name: 'polling',
@@ -16,7 +17,7 @@ export default {
 				pollCreationMessage: {
 					encKey: generateMessageID(),
 					name: 'Poll',
-					selectableOptionsCount: 2,
+					selectableOptionsCount: 1,
 					options: [
 						{
 							optionName: 'Option 1'
@@ -25,11 +26,18 @@ export default {
 							optionName: 'Option 2'
 						}
 					]
+				},
+				messageContextInfo: {
+					messageSecret: randomBytes(32)
 				}
 			},
 			{}
 		);
 
 		await client[botNum].relayMessage(from, messages.message, { messageId: messages.key.id });
+
+		process.nextTick(() => {
+			client[botNum].processingMutex.mutex(() => client[botNum].upsertMessage(messages, 'append'));
+		});
 	}
 };

@@ -31,7 +31,6 @@ global.log = console.log;
  * @property {Object} intervals - Interval settings.
  * @property {Cache} intervals.tebakGambar - Tebak Gambar interval cache.
  * @property {Cache} intervals.sudoku - Sudoku interval cache.
- * @property {Cache} intervals.url - URL interval cache.
  * @property {Cache} intervals.anonymous - Anonymous interval cache.
  * @property {Cache} intervals.word - Word interval cache.
  * @property {any[]} intervals.from - Description of intervals.from.
@@ -76,7 +75,6 @@ const globalConfig = {
 	intervals: {
 		tebakGambar: new Cache(),
 		sudoku: new Cache(),
-		url: new Cache(),
 		anonymous: new Cache(),
 		word: new Cache(),
 		from: [],
