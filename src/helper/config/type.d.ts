@@ -42,3 +42,7 @@ interface GlobalConfig {
 	author: string;
 	anonymous: Cache;
 }
+
+declare global {
+	var log: (typeof console)['log'];
+}

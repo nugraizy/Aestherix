@@ -33,8 +33,7 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 		linkPreviewImageThumbnailWidth: 2,
 		mediaCache: new Cache(),
 		userDevicesCache: new Cache(),
-		patchMessageBeforeSending: patchInteractiveMessage,
-		makeSignalRepository: (state) => state
+		patchMessageBeforeSending: patchInteractiveMessage
 	};
 
 	/**

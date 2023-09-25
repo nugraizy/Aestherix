@@ -12,7 +12,7 @@ export const loadCommands = async (OPTIONS) => {
 	const time = dayjs().format('HH:mm:ss DD/MM');
 
 	for (const command of commands) {
-		if (command.includes('template')) {
+		if (command.includes('template') || command.includes('d.ts')) {
 			continue;
 		}
 

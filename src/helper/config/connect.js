@@ -48,6 +48,8 @@ const globalConfig = {
 	anonymous: new Cache()
 };
 
+global.log = console.log;
+
 EventEmitter.prototype.setMaxListeners(0);
 
 export default globalConfig;
