@@ -4,6 +4,9 @@ import parser from 'yargs-parser';
 import { color, ERRLOG, isURL, numberWithCommas } from '../../utils/modules/index.js';
 import { getUser } from '../../utils/instagram/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'instalk',
 	description: 'Lookup Instagram user',

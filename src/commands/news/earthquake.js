@@ -1,5 +1,8 @@
 import { getEarthquake } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'gempa',
 	description: 'Showing latest earthquake in Indonesia',

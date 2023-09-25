@@ -1,3 +1,6 @@
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'ping',
 	description: 'Ping the bot or Show bot latency',

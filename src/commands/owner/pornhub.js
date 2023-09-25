@@ -1,6 +1,9 @@
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { arq } from '../../utils/arq/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'pornhub',
 	description: 'Search pornhub',

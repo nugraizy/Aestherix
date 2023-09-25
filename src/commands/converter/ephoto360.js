@@ -12,6 +12,9 @@ import { ephoto360 } from '../../utils/textmaker/ephoto360.js';
 const dataJSON = JSON.parse(fs.readFileSync('./databases/textmaker/ephoto360url.json'));
 const defaulType = 'image';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'ephoto360',
 	description: 'Image maker using texts',

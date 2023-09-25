@@ -19,28 +19,53 @@ const EVENTS = {
 	MISC: [WebMessageInfoStubType.OVERSIZED]
 };
 
-const handler = async (client, message, store) => {
-	switch (true) {
-		case EVENTS.GROUPS_PARTICIPANT.some((v) => v === message.messageStubType): {
-			if (WebMessageInfoStubType.GROUP_PARTICIPANT_ADD === message.messageStubType) {
-				message = await reassign(JSON.parse(JSON.stringify(message)), client, store, false);
-				await checkBan(client, message);
-			}
-
-			client[botNum].ev.emit('group.participants.update', message, client);
-			break;
-		}
-		case EVENTS.GROUPS_SETTINGS.some((v) => v === message.messageStubType): {
-			client[botNum].ev.emit('group.settings.update', message, client);
-			break;
-		}
-		case EVENTS.MISC.some((v) => v === message.messageStubType): {
-			client[botNum].ev.emit('message.oversized', message, client);
-			break;
-		}
+/**
+ * @param {typeof client} client
+ * @param {import('@adiwajshing/baileys').proto.IWebMessageInfo} message
+ * @param {import('../../helper/connection/type.js').Store} store
+ */
+const handleGroupParticipantEvent = async (client, message, store) => {
+	if (WebMessageInfoStubType.GROUP_PARTICIPANT_ADD === message.messageStubType) {
+		message = await reassign(JSON.parse(JSON.stringify(message)), client, store, false);
+		await checkBan(client, message);
 	}
+
+	client[botNum].ev.emit('group.participants.update', message, client);
 };
 
-const stubMessageHandler = handler;
+/**
+ * @param {typeof client} client
+ * @param {import('@adiwajshing/baileys').proto.IWebMessageInfo} message
+ */
+const handleGroupSettingsEvent = (client, message) => {
+	client[botNum].ev.emit('group.settings.update', message, client);
+};
+
+/**
+ * @param {typeof client} client
+ * @param {import('@adiwajshing/baileys').proto.IWebMessageInfo} message
+ */
+const handleMiscEvent = (client, message) => {
+	client[botNum].ev.emit('message.oversized', message, client);
+};
+
+/**
+ * @param {typeof client} client
+ * @param {import('@adiwajshing/baileys').proto.IWebMessageInfo} message
+ * @param {import('../../helper/connection/type.js').Store} store
+ */
+const stubMessageHandler = async (client, message, store) => {
+	switch (true) {
+		case EVENTS.GROUPS_PARTICIPANT.includes(message.messageStubType):
+			await handleGroupParticipantEvent(client, message, store);
+			break;
+		case EVENTS.GROUPS_SETTINGS.includes(message.messageStubType):
+			handleGroupSettingsEvent(client, message);
+			break;
+		case EVENTS.MISC.includes(message.messageStubType):
+			handleMiscEvent(client, message);
+			break;
+	}
+};
 
 export default stubMessageHandler;

@@ -1,3 +1,6 @@
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'setname',
 	description: "Set the bot's name" /* eslint-disable-line */,

@@ -1,5 +1,8 @@
 import { skip } from '../../utils/anonymous/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'skip',
 	description: 'Skip a partner',

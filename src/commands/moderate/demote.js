@@ -1,5 +1,8 @@
 import { S_WHATSAPP_NET } from '../../helper/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'demote',
 	description: 'Demote admin to member.',

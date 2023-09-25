@@ -3,6 +3,9 @@ import parser from 'yargs-parser';
 import { color, delay, ERRLOG, INFOLOG, isURL, formatNumber } from '../../utils/modules/index.js';
 import { twitterDownload } from '../../utils/twitter/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'twitterdl',
 	description: 'Download Twitter post',

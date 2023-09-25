@@ -1,5 +1,8 @@
 import { stop } from '../../utils/anonymous/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'stop',
 	description: 'Stop a partner',

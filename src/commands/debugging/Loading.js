@@ -92,6 +92,9 @@ const frames = [
 	'⠀⡀'
 ];
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'loading',
 	description: 'Loading.',

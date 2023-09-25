@@ -5,6 +5,9 @@ import yargsParser from 'yargs-parser';
 import { attp } from '../../helper/canvas/index.js';
 import { color, INFOLOG } from '../../utils/modules/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'animatedsticker',
 	description: 'Generate animated gif sticker',

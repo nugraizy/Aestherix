@@ -5,6 +5,9 @@ import _ from 'lodash';
 import { color, ERRLOG, isURL, numberWithCommas } from '../../utils/modules/index.js';
 import { tiktokProfileTIKTOK } from '../../utils/tiktok/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'tikstalk',
 	description: 'Lookup TikTok user',

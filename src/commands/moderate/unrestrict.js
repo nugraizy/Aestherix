@@ -1,3 +1,6 @@
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'unrestrict',
 	description: 'Unrestrict the group.',

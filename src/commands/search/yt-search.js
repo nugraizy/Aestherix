@@ -4,6 +4,9 @@ import configuration from '../../helper/config/connect.js';
 import { ytsr } from '../../utils/youtube/index.js';
 import { fetchBUFFER, numberWithCommas } from '../../utils/modules/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'ytsearch',
 	description: 'Search YouTube',

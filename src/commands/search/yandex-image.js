@@ -1,5 +1,8 @@
 import { yandexImage, removeDuplicatesArray } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'yandeximage',
 	description: 'Find images from Yandex.',

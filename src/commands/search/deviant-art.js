@@ -1,6 +1,9 @@
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { searchDeviantArt } from '../../utils/deviant_art/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'deviantart',
 	description: 'Search images from Deviant Art',

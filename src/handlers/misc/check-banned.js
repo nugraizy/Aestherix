@@ -7,24 +7,24 @@ export const checkBan = async (client, { from, isBotAdmin, isGroup, messageStubP
 
 		for (const participant of messageStubParameters) {
 			const isBanned = data[index][from].banned.includes(participant);
+			const bannedUserName = participant.split('@')[0];
 
 			if (isBanned && isBotAdmin) {
-				await client[botNum].send(
-					from,
-					{
-						text: `You were adding someone who is banned from this group (@${
-							participant.split('@')[0]
-						}). Are you sure you want to add him?`,
-						footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
-						buttons: [
-							{ buttonId: `.kick ${participant.split('@')[0]}`, buttonText: { displayText: 'Kick.' }, type: 1 },
-							{ buttonId: 'ID', buttonText: { displayText: 'Don not kick.' }, type: 1 }
-						],
-						headerType: 1,
-						mentions: [participant]
-					},
-					{ groupMetadata }
-				);
+				const kickMessage = `You were adding someone who is banned from this group (@${bannedUserName}). Are you sure you want to add them?`;
+				const buttons = [
+					{ buttonId: `.kick ${bannedUserName}`, buttonText: { displayText: 'Kick.' }, type: 1 },
+					{ buttonId: 'ID', buttonText: { displayText: 'Dont kick.' }, type: 1 }
+				];
+
+				const messageOptions = {
+					text: kickMessage,
+					footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
+					buttons,
+					headerType: 1,
+					mentions: [participant]
+				};
+
+				await client[botNum].send(from, messageOptions, { groupMetadata });
 			}
 		}
 	}

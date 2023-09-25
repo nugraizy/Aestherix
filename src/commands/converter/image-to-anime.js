@@ -3,6 +3,9 @@ import dayjs from 'dayjs';
 import { imageToAnime } from '../../utils/converter/file-processing.js';
 import { color, INFOLOG, ERRLOG } from '../../utils/modules/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'toanime',
 	description: 'Change your selfie picture to Anime-like using QQ A.I',

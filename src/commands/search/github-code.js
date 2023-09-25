@@ -2,6 +2,9 @@ import { Github } from '../../utils/github/index.js';
 
 const _baseUrl = (input) => `https://github.com/${input}`;
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'githubcode',
 	description: 'Search code from Github',

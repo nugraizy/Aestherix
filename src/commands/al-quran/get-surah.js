@@ -1,5 +1,8 @@
 import { getListSurah } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'getsurah',
 	description: 'Get List of Surah from The Quran',

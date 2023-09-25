@@ -7,6 +7,9 @@ import { tiktokAPI } from '../../utils/tiktok/index.js';
 
 const regex = (input) => /(?:https:?\/{2})?(?:w{3}|vm|vt|t)?\.?tiktok.com\/([^\s&]+)/gi.test(input);
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'tiktokvideo',
 	description: 'Downloads TikTok video.',

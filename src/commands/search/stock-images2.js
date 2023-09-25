@@ -1,6 +1,9 @@
 import { removeDuplicatesArray } from '../../utils/modules/index.js';
 import { stockImagesPexel } from '../../utils/wallpapers/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'stockimages2',
 	description: 'Search stock images',

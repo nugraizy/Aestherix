@@ -3,6 +3,9 @@ import dayjs from 'dayjs';
 import { color, INFOLOG } from '../../utils/modules/index.js';
 import { startTG } from '../../utils/games/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'tebakgambar',
 	description: 'Play Guess the image',

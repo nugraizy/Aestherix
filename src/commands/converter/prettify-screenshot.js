@@ -3,6 +3,9 @@ import dayjs from 'dayjs';
 import { Prettify } from '../../helper/index.js';
 import { color, INFOLOG, ERRLOG } from '../../utils/modules/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'prettify',
 	description: 'Prettify image.',

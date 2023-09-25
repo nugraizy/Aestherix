@@ -1,5 +1,8 @@
 import { getScreenshotAPI, isURL } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'screenshots',
 	description: 'Get a screenshot of a website',

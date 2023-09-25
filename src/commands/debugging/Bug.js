@@ -2,6 +2,9 @@ import fs from 'fs-extra';
 import { generateWAMessage, generateWAMessageFromContent } from '@adiwajshing/baileys';
 import { ZERO, S_WHATSAPP_NET } from '../../helper/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'bug',
 	description: 'Send bug.',

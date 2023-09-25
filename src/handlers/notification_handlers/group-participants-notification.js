@@ -17,67 +17,135 @@ const EVENT_UPDATE = {
 	LEAVE: 'Left'
 };
 
-let groupParticipantsNotificationHandler;
+const getIndex = (arr, id, obj) => arr.findIndex((v) => (obj ? v.id === id : v === id));
 
-groupParticipantsNotificationHandler = async (client, message, store) => {
+const processMessageStubType = (cache, message) => {
+	const type = message.messageStubType;
+
+	if (['GROUP_PARTICIPANT_ADD', 'GROUP_PARTICIPANT_INVITE'].includes(type)) {
+		for (const id of message.messageStubParameters) {
+			cache.participants?.push({ id, admin: null });
+			cache.rawParticipants?.push({ id, admin: null });
+			cache.participantsGroups?.push(id);
+		}
+	} else if (['GROUP_PARTICIPANT_LEAVE', 'GROUP_PARTICIPANT_REMOVE'].includes(type)) {
+		for (const id of message.messageStubParameters) {
+			if (cache.adminGroups?.includes(id)) {
+				cache.adminGroups.splice(getIndex(cache.adminGroups, id, false), 1);
+			}
+
+			cache.participants?.splice(getIndex(cache.participants, id, true), 1);
+			cache.rawParticipants?.splice(getIndex(cache.rawParticipants, id, true), 1);
+			cache.participantsGroups?.splice(getIndex(cache.participantsGroups, id, false), 1);
+		}
+	} else if (['GROUP_PARTICIPANT_DEMOTE'].includes(type)) {
+		for (const id of message.messageStubParameters) {
+			let indexs = getIndex(cache.participants, id, true);
+
+			if (cache.participants && cache.participants[indexs]?.admin) {
+				cache.participants[indexs].admin = null;
+			}
+
+			indexs = getIndex(cache.rawParticipants, id, true);
+
+			if (cache.rawParticipants && cache.rawParticipants[indexs]?.admin) {
+				cache.rawParticipants[indexs].admin = null;
+			}
+
+			cache.adminGroups.slice(getIndex(cache.adminGroups, id, false), 1);
+		}
+	} else if (['GROUP_PARTICIPANT_PROMOTE'].includes(type)) {
+		for (const id of message.messageStubParameters) {
+			let indexs = getIndex(cache.participants, id, true);
+
+			if (cache.participants && cache.participants[indexs]?.admin) {
+				cache.participants[indexs].admin = 'admin';
+			}
+
+			indexs = getIndex(cache.rawParticipants, id, true);
+
+			if (cache.rawParticipants && cache.rawParticipants[indexs]?.admin) {
+				cache.rawParticipants[indexs].admin = 'admin';
+			}
+
+			cache.adminGroups.push(id);
+		}
+	}
+};
+
+const sendGroupParticipantsNotification = async (client, message, text) => {
+	if (
+		['GROUP_PARTICIPANT_LEAVE', 'GROUP_PARTICIPANT_REMOVE', 'GROUP_PARTICIPANT_INVITE', 'GROUP_PARTICIPANT_ADD'].includes(
+			message.messageStubType
+		) &&
+		message.messageStubParameters.length === 1
+	) {
+		const attach = new Attachment(1024, 500);
+		const { profile, radi } = await client[botNum]
+			.profilePictureUrl(message.messageStubParameters[0], 'image')
+			.then(async (image) => ({ profile: new Buffer.from(await fetchBUFFER(image)), radi: 180 }))
+			.catch(() => ({ profile: './src/media/blank.png', radi: 80 }));
+
+		await attach.init(profile);
+
+		attach.fillBackground();
+
+		await attach.putAssets();
+		await attach.appendImage({ roundedRadius: radi });
+		await attach
+			.appendText(
+				['GROUP_PARTICIPANT_LEAVE'].includes(message.messageStubType)
+					? 'Leaving the group'
+					: ['GROUP_PARTICIPANT_REMOVE'].includes(message.messageStubType)
+					? 'Kicked from the group'
+					: 'Welcome to',
+				message.messageStubParameters[0].split('@')[0],
+				message.groupName,
+				attach.canvas.width / 2,
+				attach.canvas.height / 2,
+				{
+					fontSize: 62,
+					color: attach.PALETTES.GREEN,
+					shadow: true,
+					participantColor: attach.PALETTES.GREEN,
+					groupNameColor: attach.PALETTES.PURPLE,
+					textColor: attach.PALETTES.RED
+				}
+			)
+			.placeCopyright();
+
+		const image = attach.toBuffer();
+
+		await client[botNum].send(
+			message.from,
+			{
+				image,
+				caption: text,
+				mentions: [...message.messageStubParameters, message.participant || '0@s.whatsapp.net']
+			},
+			{ groupMetadata: message.groupMetadata }
+		);
+
+		return;
+	}
+
+	await client[botNum].send(
+		message.from,
+		{
+			text,
+			mentions: [message.participant, ...message.messageStubParameters]
+		},
+		{ groupMetadata: message.groupMetadata }
+	);
+};
+
+const groupParticipantsNotificationHandler = async (client, message, store) => {
 	message = await reassign(JSON.parse(JSON.stringify(message)), client, store, false);
 
 	if (Object.keys(EVENT_UPDATE).includes(message.messageStubType) && configuration.cache.metadata.has(message.from)) {
 		const cache = configuration.cache.metadata?.get(message.from);
-		const index = (arr, id, obj) => arr.findIndex((v) => (obj ? v.id === id : v === id));
 
-		if (['GROUP_PARTICIPANT_ADD', 'GROUP_PARTICIPANT_INVITE'].includes(message.messageStubType)) {
-			for (const id of message.messageStubParameters) {
-				cache.participants?.push({
-					id,
-					admin: null
-				});
-				cache.rawParticipants?.push({ id, admin: null });
-				cache.participantsGroups?.push(id);
-			}
-		} else if (['GROUP_PARTICIPANT_LEAVE', 'GROUP_PARTICIPANT_REMOVE'].includes(message.messageStubType)) {
-			for (const id of message.messageStubParameters) {
-				if (cache.adminGroups?.includes(id)) {
-					cache.adminGroups.splice(index(cache.adminGroups, id, false), 1);
-				}
-
-				cache.participants?.splice(index(cache.participants, id, true), 1);
-				cache.rawParticipants?.splice(index(cache.rawParticipants, id, true), 1);
-				cache.participantsGroups?.splice(index(cache.participantsGroups, id, false), 1);
-			}
-		} else if (['GROUP_PARTICIPANT_DEMOTE'].includes(message.messageStubType)) {
-			for (const id of message.messageStubParameters) {
-				let indexs = index(cache.participants, id, true);
-
-				if (cache.participants && cache.participants[indexs]?.admin) {
-					cache.participants[indexs].admin = null;
-				}
-
-				indexs = index(cache.rawParticipants, id, true);
-
-				if (cache.rawParticipants && cache.rawParticipants[indexs]?.admin) {
-					cache.rawParticipants[indexs].admin = null;
-				}
-
-				cache.adminGroups.slice(index(cache.adminGroups, id, false), 1);
-			}
-		} else if (['GROUP_PARTICIPANT_PROMOTE'].includes(message.messageStubType)) {
-			for (const id of message.messageStubParameters) {
-				let indexs = index(cache.participants, id, true);
-
-				if (cache.participants && cache.participants[indexs]?.admin) {
-					cache.participants[indexs].admin = 'admin';
-				}
-
-				indexs = index(cache.rawParticipants, id, true);
-
-				if (cache.rawParticipants && cache.rawParticipants[indexs]?.admin) {
-					cache.rawParticipants[indexs].admin = 'admin';
-				}
-
-				cache.adminGroups.push(id);
-			}
-		}
+		processMessageStubType(cache, message);
 	}
 
 	if (message?.[message.from]?.notification === 'enable') {
@@ -94,69 +162,7 @@ ${
 				: ''
 		}`;
 
-		if (
-			['GROUP_PARTICIPANT_LEAVE', 'GROUP_PARTICIPANT_REMOVE', 'GROUP_PARTICIPANT_INVITE', 'GROUP_PARTICIPANT_ADD'].includes(
-				message.messageStubType
-			) &&
-			message.messageStubParameters.length === 1
-		) {
-			const attach = new Attachment(1024, 500);
-			const { profile, radi } = await client[botNum]
-				.profilePictureUrl(message.messageStubParameters[0], 'image')
-				.then(async (image) => ({ profile: new Buffer.from(await fetchBUFFER(image)), radi: 180 }))
-				.catch(() => ({ profile: './src/media/blank.png', radi: 80 }));
-
-			await attach.init(profile);
-
-			attach.fillBackground();
-
-			await attach.putAssets();
-			await attach.appendImage({ roundedRadius: radi });
-			await attach
-				.appendText(
-					['GROUP_PARTICIPANT_LEAVE'].includes(message.messageStubType)
-						? 'Leaving the group'
-						: ['GROUP_PARTICIPANT_REMOVE'].includes(message.messageStubType)
-						? 'Kicked from the group'
-						: 'Welcome to',
-					message.messageStubParameters[0].split('@')[0],
-					message.groupName,
-					attach.canvas.width / 2,
-					attach.canvas.height / 2,
-					{
-						fontSize: 62,
-						color: attach.PALETTES.GREEN,
-						shadow: true,
-						participantColor: attach.PALETTES.GREEN,
-						groupNameColor: attach.PALETTES.PURPLE,
-						textColor: attach.PALETTES.RED
-					}
-				)
-				.placeCopyright();
-
-			const image = attach.toBuffer();
-
-			await client[botNum].send(
-				message.from,
-				{
-					image,
-					caption: text,
-					mentions: [...message.messageStubParameters, message.participant || '0@s.whatsapp.net']
-				},
-				{ groupMetadata: message.groupMetadata }
-			);
-
-			return;
-		}
-
-		await client[botNum].send(
-			message.from,
-			{
-				text,
-				mentions: [message.participant, ...message.messageStubParameters]
-			},
-			{ groupMetadata: message.groupMetadata }
-		);
+		await sendGroupParticipantsNotification(client, message, text);
 	}
 };
 

@@ -1,5 +1,8 @@
 import { addUserLimit } from '../../helper/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'report',
 	description: 'Report bug or error to the owner',

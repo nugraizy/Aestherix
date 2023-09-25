@@ -18,6 +18,9 @@ const regex = (input) =>
 		input
 	);
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'ytvideo',
 	description: 'Downloads a YouTube video',

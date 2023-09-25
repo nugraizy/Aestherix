@@ -2,6 +2,9 @@ import { getSurahDetail } from '../../utils/index.js';
 
 const regex = (input) => /[1-9][0-9]*/.test(input);
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'surahdetails',
 	description: 'Get surah details',

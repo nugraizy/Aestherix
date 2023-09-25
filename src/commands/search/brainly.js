@@ -2,6 +2,9 @@ import yargsParser from 'yargs-parser';
 
 import { brainlySearch } from '../../utils/brainly/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'brainly',
 	description: 'Search answers from brainly',

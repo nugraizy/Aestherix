@@ -1,5 +1,8 @@
 import { googleArticle, removeDuplicatesArray } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'googlearticle',
 	description: 'Find articles from Google.',

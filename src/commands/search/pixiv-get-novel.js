@@ -18,6 +18,9 @@ const regex = (input) => {
 	return { status: false, message: 'This URL is not a valid Pixiv URL. Try another URL.' };
 };
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'pixivnovelget',
 	description: 'Get novel content from Pixiv',

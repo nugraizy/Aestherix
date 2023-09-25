@@ -1,3 +1,6 @@
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'retrieve',
 	description: "Retrieve the group's invitation URL." /* eslint-disable-line */,

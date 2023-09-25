@@ -1,5 +1,8 @@
 import yargsParser from 'yargs-parser';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'changeprofile',
 	description: 'Set the icon group or bot.',

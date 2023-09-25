@@ -1,5 +1,8 @@
 import { extractZalgo } from '../../utils/modules/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'extractzalgo',
 	description: 'Extract Zalgo text to Text',

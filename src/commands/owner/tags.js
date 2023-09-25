@@ -5,6 +5,9 @@ import { getTimeSince } from '../../utils/modules/index.js';
 
 const DB_PATH = `./src/media/connection_databases/${configuration.cli.input[0] ?? 'Session-debug'}.json`;
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'tags',
 	description: 'Fetch every tags',

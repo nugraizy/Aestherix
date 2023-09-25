@@ -1,5 +1,8 @@
 import { setAfk } from '../../helper/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'afk',
 	description: 'Going away from keyboard.',

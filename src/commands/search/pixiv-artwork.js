@@ -1,6 +1,9 @@
 import { fetchBUFFER, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { downloadArtworks, searchArtwork } from '../../utils/pixiv/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'pixivartwork',
 	description: 'Find artworks from Pixiv',

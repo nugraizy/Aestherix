@@ -5,6 +5,9 @@ import { color, INFOLOG } from '../../utils/modules/index.js';
 import { soundRemover } from '../../utils/converter/index.js';
 import { extension, audioFormat, videoFormat } from '../../utils/misc/mimetype.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'soundremover',
 	description: 'Remove specific sound from audio/video',

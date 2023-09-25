@@ -16,6 +16,9 @@ const check4Duplicate = (chats) => {
 	return newChatIds;
 };
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'groupbc',
 	description: 'Send Broadcast to all groups.',

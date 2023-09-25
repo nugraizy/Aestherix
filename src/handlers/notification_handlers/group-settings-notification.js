@@ -22,13 +22,19 @@ const EVENT_TYPE = {
 	DESCRIPTION: 'GROUP_CHANGE_DESCRIPTION'
 };
 
-const handler = async (client, message, store) => {
+/**
+ * @param {import('@adiwajshing/baileys').proto.IWebMessageInfo} message
+ */
+const handleDescriptionAction = (message) => {
 	if ('action' in message && message.action === 'description') {
 		message.messageStubType = EVENT_TYPE.DESCRIPTION;
 	}
+};
 
-	message = await reassign(JSON.parse(JSON.stringify(message)), client, store, false);
-
+/**
+ * @param {import('@adiwajshing/baileys').proto.IWebMessageInfo & import('../../helper/index.js').ReassignResult} message
+ */
+const updateCacheForSubjectAndDescription = (message) => {
 	if (configuration.cache.metadata.has(message.from)) {
 		const cache = configuration.cache.metadata.get(message.from);
 
@@ -40,6 +46,39 @@ const handler = async (client, message, store) => {
 			cache.desc = Buffer.from(message.content).toString();
 		}
 	}
+};
+
+/**
+ *
+ * @param {typeof client} client
+ * @param {import('@adiwajshing/baileys').proto.IWebMessageInfo & import('../../helper/index.js').ReassignResult} message
+ * @param {string} status
+ */
+const sendGroupSettingsNotification = async (client, message, status) => {
+	await client[botNum].send(
+		message.from,
+		{
+			text: `${'Group Settings Notification'.formatHeaders()}\n
+Event Update : ${EVENT_UPDATE[message.messageStubType]}
+
+@${message.participant.split('@')[0]} ${status}`,
+			mentions: [message.participant]
+		},
+		{ groupMetadata: message.groupMetadata }
+	);
+};
+
+/**
+ *
+ * @param {typeof client} client
+ * @param {import('@adiwajshing/baileys').proto.IWebMessageInfo & import('../../helper/index.js').ReassignResult} message
+ * @param {import('../../helper/connection/type.js').Store} store
+ */
+const groupSettingsNotificationHandler = async (client, message, store) => {
+	handleDescriptionAction(message);
+	message = await reassign(JSON.parse(JSON.stringify(message)), client, store, false);
+
+	updateCacheForSubjectAndDescription(message);
 
 	if (message?.[message.from]?.notification === 'enable') {
 		let status;
@@ -73,20 +112,8 @@ const handler = async (client, message, store) => {
 					: `${EVENT_UPDATE[mode]} from ${message[message.from].groupName} to ${message.messageStubParameters[0]}`;
 		}
 
-		await client[botNum].send(
-			message.from,
-			{
-				text: `${'Group Settings Notification'.formatHeaders()}\n
-Event Update : ${EVENT_UPDATE[message.messageStubType]}
-
-@${message.participant.split('@')[0]} ${status}`,
-				mentions: [message.participant]
-			},
-			{ groupMetadata: message.groupMetadata }
-		);
+		await sendGroupSettingsNotification(client, message, status);
 	}
 };
-
-const groupSettingsNotificationHandler = handler;
 
 export default groupSettingsNotificationHandler;

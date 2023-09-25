@@ -8,6 +8,9 @@ const row = [
 	{ rows: [{ title: 'DELETE GAME', rowId: '.ww delete' }], title: 'VOID BOT | Werewolf Games' }
 ];
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'werewolf',
 	description: 'Play Werewolf',

@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import similarity from 'string-similarity';
+import { findBestMatch } from 'string-similarity';
 
 import configuration from '../../helper/config/connect.js';
 import { runtime } from '../../index.js';
@@ -26,7 +26,310 @@ const path = {
 	antiNsfw: '../misc/anti-nsfw.js'
 };
 
-const handlers = async (message, client, cmds, store, user, state) => {
+const logMessage = (message, time) => {
+	const senderInfo = `${color(message.pushname.trim(), 'white')} ${color(message.prettyNumber, '#ff71ce')}`;
+	const messageBody = `${color(message.query?.trim()?.replace('\n', '')?.substr(0, 20), '#05ffa1')}`;
+	const typeInfo = `${color('type', '#ff71ce')} : ${color(message.type, '#b967ff')}`;
+	const runtimeInfo = `${color(((Date.now() - runtime) / 1000).toFixed(0), '#f18f15')}${color('s', '#f5e700')}`;
+
+	const fullBody = message.isCmd
+		? `${color(message.prefix, 'white')}${color(message.cmd.slice(1).trim(), '#01cdfe')} ${messageBody}`.trim()
+		: color(message.body, 'white');
+
+	INFOLOG(`[${color(time, 'cyan')}]`, `${senderInfo} :`, fullBody, typeInfo, runtimeInfo);
+};
+
+const handleStubMessage = async (client, message, store) => {
+	if (!handler.has('stubType')) {
+		handler.set('stubType', (await import(path.stubType)).default);
+	}
+
+	return handler.get('stubType')(client, message.messages[0], store);
+};
+
+const handleStoryMessage = async (client, message) => {
+	if (!handler.has('story')) {
+		handler.set('story', (await import(path.story)).default);
+	}
+
+	return handler.get('story')(client, message);
+};
+
+const handleOfflineMessage = async (client, message, cmds) => {
+	if (STATS_OFFLINE) {
+		await cmds.commands.get('simulates').run(
+			{
+				args: ['.simulates', 'online', 'disable'],
+				isOwner: true,
+				from: false,
+				message: message.message
+			},
+			client,
+			store
+		);
+		STATS_OFFLINE = false;
+	}
+
+	if (!handler.has('offline')) {
+		handler.set('offline', (await import(path.offline)).default);
+	}
+
+	return handler.get('offline')(client, message);
+};
+
+const handleMentionedAfkUsers = (message, client, botNum) => {
+	let caption = 'You are Tagging People That Are AFK.\n\n';
+	const container = [];
+
+	for (const mention of message.mention) {
+		if (checkAfk(mention, message.from)) {
+			const { reasons, since, name } = getAfk(mention, message.from);
+			const time = getTimeSince(since);
+
+			caption += `${name}\nSince : ${time} ago.\nReason : ${reasons}\n\n`;
+			container.push(mention);
+		}
+	}
+
+	if (container.length > 0) {
+		client[botNum].reply(
+			{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
+			caption.trim()
+		);
+	}
+};
+
+/**
+ *
+ * @param {import('../../helper/index.js').ReassignResult} message
+ * @param {typeof client} client
+ * @param {import('../../helper/connection/type.js').Store} store
+ * @param {import('../../helper/config/type.js').GlobalConfig['cmds']} cmds
+ * @param {import('../../helper/config/type.js').GlobalConfig['user']} user
+ * @param {typeof globalThis['botNum']} botNum
+ * @param {string} runtime
+ * @param {import('../../helper/connection/type.js').SingleAuthState['state']} state
+ * @returns
+ */
+const handleCommandExecution = async (message, client, store, cmds, user, botNum, runtime, state) => {
+	let bodies = [];
+
+	if (configuration.OPTIONS.multiCmd) {
+		bodies = EVALY.includes(message.cmd) ? [message.body] : message.body.split('|');
+	} else {
+		bodies.push(message.body);
+	}
+
+	for (const body of bodies) {
+		message.body = body.trim();
+		message.args = message.body.split(/ +/g);
+		message.cmd = message.body.toLowerCase().split(' ')[0].trim() || '';
+		message.query = message.args.slice(1).join(' ').trim();
+		let correctedCommand = null;
+		let correctedAliases = null;
+
+		if (configuration.OPTIONS.autoCorrect) {
+			const prf = message.prefix;
+			const cmdMatch = findBestMatch(message.args[0], cmds.commands.keys());
+			const aliasMatch = findBestMatch(message.args[0], cmds.aliases);
+
+			if (cmdMatch.ratings >= 0.6) {
+				correctedCommand = prf + cmdMatch.target;
+			} else if (aliasMatch.ratings >= 0.57) {
+				correctedAliases = prf + aliasMatch.target;
+			}
+
+			message.cmd = correctedCommand || correctedAliases || '';
+		}
+
+		const commands = Array.from(cmds.commands.values().values);
+
+		const Tempcmds =
+			cmds.commands.get(message.cmd.slice(1).trim().toLowerCase()) ||
+			commands.find(
+				(v) =>
+					v.aliases.includes(message.cmd.slice(1).trim().toLowerCase()) || v.aliases.includes(message.cmd.trim().toLowerCase())
+			) ||
+			false;
+
+		if (message.isGroup && !configuration.OPTIONS.noLogs) {
+			logMessage(message, runtime);
+		} else if (!message.isGroup && !configuration.OPTIONS.noLogs) {
+			logMessage(message, runtime);
+		}
+
+		if (Tempcmds && !message.isOwner) {
+			if (configuration.OPTIONS.selfMode) {
+				return;
+			}
+
+			if (message.isBanned) {
+				await client[botNum].send(
+					message.from,
+					{ react: { text: '🖕🏼', key: message.message.key } },
+					{ groupMetadata: message.groupMetadata }
+				);
+				continue;
+			}
+
+			if (configuration.OPTIONS.restrict && Tempcmds.restrict) {
+				await client[botNum].reply(
+					{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
+					'This command is restricted and currently bot are on restricted mode.'
+				);
+				continue;
+			}
+
+			if (
+				Tempcmds.category === 'Games' &&
+				message.isGroup &&
+				!message.isAdmin &&
+				!message.isOwner &&
+				message?.[message?.from]?.games === 'disable'
+			) {
+				return await client[botNum].reply(
+					{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
+					'Game Mode is Disabled. Type !games enable to enable Game Mode'
+				);
+			}
+
+			if (Tempcmds.category === 'Moderation' && message.isGroup && !message.isAdmin && !message.isOwner) {
+				return await client[botNum].reply(
+					{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
+					'You are not admin. This commands is only for admins.'
+				);
+			}
+
+			if (Tempcmds.category === 'Moderation' && !message.isGroup) {
+				return await client[botNum].reply(
+					{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
+					'This commands for group only'
+				);
+			}
+
+			if (!configuration.OPTIONS.noLimit) {
+				const limit = addLimit({ id: message.sender, limit: Tempcmds.limit ?? 0, type: 'MIN' });
+
+				if (typeof limit === 'object' && 'message' in limit) {
+					client[botNum].reply(
+						{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
+						`${limit.message}\nYour limit is ${limit.limits}\nBut this command (${Tempcmds.name}) need ${Tempcmds.limit}`
+					);
+					continue;
+				}
+
+				if (!limit) {
+					return await client[botNum].reply(
+						{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
+						'You have reached the limit of this command.'
+					);
+				}
+			}
+
+			const cooldownEnabled = configuration.OPTIONS.coolDown;
+
+			if (cooldownEnabled) {
+				const cooldownUser = user.cooldown.get(message.sender) || new Cache();
+				const isCooldown = cooldownUser.requests;
+
+				if (isCooldown) {
+					return await client[botNum].reply(
+						{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
+						'Please wait until your request is done'
+					);
+				}
+
+				const commandName = Tempcmds.name;
+				const cooldownTime = cooldownUser.get(commandName);
+
+				if (cooldownTime && Date.now() < cooldownTime) {
+					return await client[botNum].reply(
+						{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
+						`${commandName} is on cooldown for ${((cooldownTime - Date.now()) / 1000).toFixed(1)} seconds.`
+					);
+				}
+
+				cooldownUser.set(commandName, Date.now() + Tempcmds.cooldown * 1000);
+				cooldownUser.requests = true;
+				user.cooldown.set(message.sender, cooldownUser);
+			}
+		}
+
+		if (
+			Tempcmds &&
+			(configuration.OPTIONS.onlyLogs
+				? message.cmd.startsWith('==>') || message.cmd.startsWith('//>') || message.cmd.startsWith('$$>')
+					? true
+					: false
+				: true)
+		) {
+			if (!message.isOwner && configuration.OPTIONS.selfMode) {
+				return;
+			}
+
+			const cooldownUser = user.cooldown.get(message.sender);
+
+			try {
+				if (/-{1,2}((help(s)?|info|des(c|k)rip(t|s)i(on)?)|H)$/i.test(message.args[1]) && Tempcmds.name !== 'eval') {
+					const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${
+						Tempcmds.cooldown
+					}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v}`).join(', ')}.`;
+
+					client[botNum].reply({ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message }, help);
+
+					if (cooldownUser?.requests) {
+						cooldownUser.requests = false;
+					}
+
+					continue;
+				}
+
+				await Tempcmds.run({ ...message, state }, client, store);
+
+				if (cooldownUser?.requests) {
+					cooldownUser.requests = false;
+				}
+			} catch (err) {
+				if (cooldownUser?.requests) {
+					cooldownUser.requests = false;
+				}
+
+				let str = 'Something went wrong.\n';
+
+				str += !message.isOwner ? 'Please send this error stack to the owner :\n\n' : '\n';
+
+				str += `Type : ${err.name || 'Unknown'}\n`;
+				str += `Message : ${err.message || 'Unknown'}\n`;
+				str += `Stack Trace : ${(message.isOwner ? err?.stack : err?.stack?.substring(0, 20)) || 'Unknown'}`;
+
+				await client[botNum].send(
+					message.from,
+					{
+						text: str,
+						footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
+						templateButtons: [
+							{ urlButton: { displayText: 'Copy Stack Trace', url: `https://www.whatsapp.com/otp/copy/${err.stack}` } },
+							(message.isOwner && {}) || {
+								urlButton: {
+									displayText: 'Report to Owner',
+									url: `https://wa.me/${message.settings.owner_number}?text=hi,%20bot%20mengalami%20error${encodeURI(
+										`\n\n${err.stack}`
+									)}`
+								}
+							},
+							(message.isOwner && {}) || { quickReplyButton: { displayText: 'Report via Bot', id: `.report ${err.stack}` } }
+						],
+						headerType: 1
+					},
+					{ groupMetadata: message.groupMetadata }
+				);
+				console.error(err);
+			}
+		}
+	}
+};
+
+const handleIncomingMessage = async (message, client, cmds, store, user, state) => {
 	if (message === undefined) {
 		return;
 	}
@@ -42,11 +345,7 @@ const handlers = async (message, client, cmds, store, user, state) => {
 		'messageStubParameters' in message.messages[0] &&
 		message.messages[0]?.messageStubParameters?.length > 0
 	) {
-		if (!handler.has('stubType')) {
-			handler.set('stubType', (await import(path.stubType)).default);
-		}
-
-		return handler.get('stubType')(client, message.messages[0], store);
+		return handleStubMessage(client, message, store);
 	}
 
 	message = await reassign(message.messages[0], client, store, false);
@@ -64,30 +363,11 @@ const handlers = async (message, client, cmds, store, user, state) => {
 	}
 
 	if (message.message.key && message.message.key.remoteJid === 'status@broadcast' && configuration.OPTIONS.story) {
-		if (!handler.has('story')) {
-			handler.set('story', (await import(path.story)).default);
-		}
-
-		return handler.get('story')(client, message);
+		return handleStoryMessage(client, message);
 	}
 
 	if (configuration.OPTIONS.offline) {
-		if (STATS_OFFLINE) {
-			await cmds.commands
-				.get('simulates')
-				.run(
-					{ args: ['.simulates', 'online', 'disable'], isOwner: true, from: false, message: message.message },
-					client,
-					store
-				);
-			STATS_OFFLINE = false;
-		}
-
-		if (!handler.has('offline')) {
-			handler.set('offline', (await import(path.offline)).default);
-		}
-
-		return handler.get('offline')(client, message);
+		return handleOfflineMessage(client, message, cmds);
 	}
 
 	if (configuration.OPTIONS.autoRead && !configuration.OPTIONS.offline && !message.isBlocked && !message.isBanned) {
@@ -121,334 +401,13 @@ const handlers = async (message, client, cmds, store, user, state) => {
 		}
 
 		if (message.mention?.length > 0) {
-			let caption = "You're Tagging People That Are AFK.\n\n"; /* eslint-disable-line */
-			const container = [];
-
-			for (const mention of message.mention) {
-				if (checkAfk(mention, message.from)) {
-					const { reasons, since, name } = getAfk(mention, message.from);
-					const time = getTimeSince(since);
-
-					caption += `${name}\nSince : ${time} ago.\nReason : ${reasons}\n\n`;
-					container.push(mention);
-				}
-			}
-
-			if (container.length > 0) {
-				client[botNum].reply(
-					{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
-					caption.trim()
-				);
-			}
+			handleMentionedAfkUsers(message, client, botNum);
 		}
 	}
 
-	const runtimes = ((Date.now() - runtime) / 1000).toFixed(0);
-
-	if (message.isCmd && message.from !== 'status@broadcast') {
-		let bodies = [];
-
-		if (configuration.OPTIONS.multiCmd) {
-			bodies = EVALY.includes(message.cmd) ? [message.body] : message.body.split('|');
-		} else {
-			bodies.push(message.body);
-		}
-
-		for (const body of bodies) {
-			message.body = body.trim();
-			message.args = message.body.split(/ +/g);
-			message.cmd = message.body.toLowerCase().split(' ')[0].trim() || '';
-			message.query = message.args.slice(1).join(' ').trim();
-			const correctedCommand = [];
-
-			if (configuration.OPTIONS.autoCorrect) {
-				Array.from(cmds.commands.keys()).forEach((cmd) => {
-					const correcting = similarity.compareTwoStrings(message.args[0], cmd);
-
-					if (correcting >= Math.min(0.6)) {
-						correctedCommand.push({
-							score: correcting,
-							command: cmd
-						});
-					}
-				});
-
-				cmds.aliases.forEach((aliases) => {
-					const correcting = similarity.compareTwoStrings(message.args[0], aliases);
-
-					if (correcting >= Math.min(0.57)) {
-						correctedCommand.push({
-							score: correcting,
-							command: aliases
-						});
-					}
-				});
-			}
-
-			if (correctedCommand.length != 0) {
-				const HIGH_SCORE = correctedCommand.find(
-					(x) =>
-						Math.max.apply(
-							null,
-							correctedCommand.map((x) => x.score)
-						) === x.score
-				);
-
-				message.cmd = message.prefix + HIGH_SCORE.command.toLowerCase().split(' ')[0].trim() || '';
-			}
-
-			const commands = Array.from(cmds.commands.values().values);
-
-			const Tempcmds =
-				cmds.commands.get(message.cmd.slice(1).trim().toLowerCase()) ||
-				commands.find((v) => v.aliases.includes(message.cmd.slice(1).trim().toLowerCase())) ||
-				commands.find((v) => v.aliases.includes(message.cmd.trim().toLowerCase())) ||
-				false;
-
-			if (message.isGroup && !configuration.OPTIONS.noLogs) {
-				INFOLOG(
-					`[${color(time, 'cyan')}]`,
-					`${color(message.pushname.trim(), 'white')} ${color(message.prettyNumber, '#ff71ce')} :`,
-					`${color(message.prefix, 'white')}${color(Tempcmds.name || message.cmd.slice(1).trim(), '#01cdfe')}`,
-					`${color(message.query.substr(0, 20), '#05ffa1')}`,
-					`${color(message.from, '#b967ff')}`,
-					`${color('type', '#ff71ce')} : ${color(message.type, '#b967ff')}`,
-					`${color(runtimes, '#f18f15')}${color('s', '#f5e700')}`
-				);
-			} else if (!message.isGroup && !configuration.OPTIONS.noLogs) {
-				INFOLOG(
-					`[${color(time, 'cyan')}]`,
-					`${color(message.pushname.trim(), 'white')} ${color(message.prettyNumber, '#ff71ce')} :`,
-					`${color(message.prefix, 'white')}${color(Tempcmds.name || message.cmd.slice(1).trim(), '#01cdfe')}`,
-					`${color(message.query.trim().substr(0, 20), '#05ffa1')}`,
-					`${color('type', '#ff71ce')} : ${color(message.type, '#b967ff')}`,
-					`${color(runtimes, '#f18f15')}${color('s', '#f5e700')}`
-				);
-			}
-
-			if (Tempcmds && !message.isOwner) {
-				if (configuration.OPTIONS.selfMode) {
-					return;
-				}
-
-				if (message.isBanned) {
-					await client[botNum].send(
-						message.from,
-						{ react: { text: '🖕🏼', key: message.message.key } },
-						{ groupMetadata: message.groupMetadata }
-					);
-					continue;
-				}
-
-				if (configuration.OPTIONS.restrict && Tempcmds.restrict) {
-					await client[botNum].reply(
-						{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
-						'This command is restricted and currently bot are on restricted mode.'
-					);
-					continue;
-				}
-
-				if (
-					Tempcmds.category === 'Games' &&
-					message.isGroup &&
-					!message.isAdmin &&
-					!message.isOwner &&
-					message?.[message?.from]?.games === 'disable'
-				) {
-					return await client[botNum].reply(
-						{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
-						'Game Mode is Disabled. Type !games enable to enable Game Mode'
-					);
-				}
-
-				if (Tempcmds.category === 'Moderation' && message.isGroup && !message.isAdmin && !message.isOwner) {
-					return await client[botNum].reply(
-						{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
-						'You are not Admin'
-					);
-				}
-
-				if (Tempcmds.category === 'Moderation' && !message.isGroup) {
-					return await client[botNum].reply(
-						{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
-						'This commands for group only'
-					);
-				}
-
-				if (!configuration.OPTIONS.noLimit) {
-					const limit = addLimit({ id: message.sender, limit: Tempcmds.limit ?? 0, type: 'MIN' });
-
-					if (typeof limit === 'object' && 'message' in limit) {
-						client[botNum].reply(
-							{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
-							`${limit.message}\nYour limit is ${limit.limits}\nBut this command (${Tempcmds.name}) need ${Tempcmds.limit}`
-						);
-						continue;
-					}
-
-					if (!limit) {
-						return await client[botNum].reply(
-							{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
-							'You have reached the limit of this command.'
-						);
-					}
-				}
-
-				if (configuration.OPTIONS.coolDown) {
-					if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).requests) {
-						return await client[botNum].reply(
-							{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
-							'Please wait until your request is done'
-						);
-					}
-
-					if (user.cooldown.has(message.sender) && user.cooldown.get(message.sender).has(Tempcmds.name)) {
-						const time = user.cooldown.get(message.sender).get(Tempcmds.name);
-
-						if (Date.now() > time) {
-							user.cooldown.get(message.sender).delete(Tempcmds.name);
-							user.cooldown.get(message.sender).requests = false;
-						} else {
-							return await client[botNum].reply(
-								{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
-								`${Tempcmds.name} is on cooldown for ${((time - Date.now()) / 1000).toFixed(1)} seconds.`
-							);
-						}
-					}
-
-					if (!user.cooldown.has(message.sender)) {
-						user.cooldown.set(message.sender, new Cache());
-					}
-
-					if (!user.cooldown.get(message.sender).has(Tempcmds.name)) {
-						user.cooldown.get(message.sender).set(Tempcmds.name, Date.now() + Tempcmds.cooldown * 1000);
-					}
-
-					user.cooldown.get(message.sender).get(Tempcmds.name);
-					user.cooldown.get(message.sender).requests = true;
-				}
-			}
-
-			if (
-				Tempcmds &&
-				(configuration.OPTIONS.onlyLogs
-					? message.cmd.startsWith('==>') || message.cmd.startsWith('//>') || message.cmd.startsWith('$$>')
-						? true
-						: false
-					: true)
-			) {
-				if (!message.isOwner && configuration.OPTIONS.selfMode) {
-					return;
-				}
-
-				try {
-					if (/-{1,2}((help(s)?|info|des(c|k)rip(t|s)i(on)?)|H)$/i.test(message.args[1]) && Tempcmds.name !== 'eval') {
-						const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${
-							Tempcmds.cooldown
-						}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v}`).join(', ')}.`;
-
-						client[botNum].reply({ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message }, help);
-
-						if (user.cooldown.get(message.sender)?.requests) {
-							user.cooldown.get(message.sender).requests = false;
-						}
-
-						continue;
-					}
-
-					await Tempcmds.run({ ...message, state }, client, store);
-
-					if (user.cooldown.get(message.sender)?.requests) {
-						user.cooldown.get(message.sender).requests = false;
-					}
-				} catch (err) {
-					if (user.cooldown.get(message.sender)?.requests) {
-						user.cooldown.get(message.sender).requests = false;
-					}
-
-					let str = 'Something went wrong.\n';
-
-					str += !message.isOwner ? 'Please send this error stack to the owner :\n\n' : '\n';
-
-					str += `Type : ${err.name || 'Unknown'}\n`;
-					str += `Message : ${err.message || 'Unknown'}\n`;
-					str += `Stack Trace : ${(message.isOwner ? err?.stack : err?.stack?.substring(0, 20)) || 'Unknown'}`;
-
-					await client[botNum].send(
-						message.from,
-						{
-							text: str,
-							footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
-							templateButtons: [
-								{ urlButton: { displayText: 'Copy Stack Trace', url: `https://www.whatsapp.com/otp/copy/${err.stack}` } },
-								(message.isOwner && {}) || {
-									urlButton: {
-										displayText: 'Report to Owner',
-										url: `https://wa.me/${message.settings.owner_number}?text=hi,%20bot%20mengalami%20error${encodeURI(
-											`\n\n${err.stack}`
-										)}`
-									}
-								},
-								(message.isOwner && {}) || { quickReplyButton: { displayText: 'Report via Bot', id: `.report ${err.stack}` } }
-							],
-							headerType: 1
-						},
-						{ groupMetadata: message.groupMetadata }
-					);
-					console.error(err);
-				}
-			}
-		}
-
-		return;
-	}
-
-	if (!message.isGroup && !configuration.OPTIONS.noLogs) {
-		INFOLOG(
-			`[${color(time, 'cyan')}]`,
-			`${color(message.pushname.trim(), 'white')} ${color(message.prettyNumber, '#ff71ce')} :`,
-			`${color(message.body?.trim()?.replace('\n', '')?.substr(0, 20), '#05ffa1')}`,
-			`${color('type', '#ff71ce')} : ${color(message.type, '#b967ff')}`,
-			`${color(runtimes, '#f18f15')}${color('s', '#f5e700')}`
-		);
-	} else if (message.isGroup && !configuration.OPTIONS.noLogs) {
-		INFOLOG(
-			`[${color(time, 'cyan')}]`,
-			`${color(message.pushname.trim(), 'white')} ${color(message.prettyNumber, '#ff71ce')} :`,
-			`${color(message.body?.trim()?.replace('\n', '')?.substr(0, 20), '#05ffa1')}`,
-			`${color(message.from, '#b967ff')}`,
-			`${color('type', '#ff71ce')} : ${color(message.type, '#b967ff')}`,
-			`${color(runtimes, '#f18f15')}${color('s', '#f5e700')}`
-		);
-	}
-
-	if (message.isBanned || message.isBlocked) {
-		return;
-	}
-
-	if (!handler.has('akinator')) {
-		handler.set('akinator', (await import(path.akinator)).default);
-	} else if (!handler.has('tebakGambar')) {
-		handler.set('tebakGambar', (await import(path.tebakGambar)).default);
-	} else if (!handler.has('sambungKata')) {
-		handler.set('sambungKata', (await import(path.sambungKata)).default);
-	} else if (!handler.has('wordle')) {
-		handler.set('wordle', (await import(path.wordle)).default);
-	} else if (!handler.has('anonymous')) {
-		handler.set('anonymous', (await import(path.anonymous)).default);
-	} else if (!handler.has('groupUrl')) {
-		handler.set('groupUrl', (await import(path.groupUrl)).default);
-	} else if (!handler.has('antiNsfw')) {
-		handler.set('antiNsfw', (await import(path.antiNsfw)).default);
-	}
-
-	await Promise.all(
-		Array.from(handler.keys())
-			.filter((v) => !['stubType', 'story', 'offline'].includes(v))
-			.map((v) => handler.get(v)(message, client, message))
-	);
+	handleCommandExecution(message, client, store, cmds, user, botNum, time, state);
 };
 
-const incomingHandler = handlers;
+const incomingHandler = handleIncomingMessage;
 
 export default incomingHandler;

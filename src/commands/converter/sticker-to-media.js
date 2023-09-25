@@ -4,6 +4,9 @@ import path from 'path';
 import { color, INFOLOG } from '../../utils/modules/index.js';
 import { convertStickerToMedia } from '../../utils/converter/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'decrypt',
 	description: 'Decrypt a sticker to media',

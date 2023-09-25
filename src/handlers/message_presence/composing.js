@@ -1,27 +1,25 @@
 import { checkAfk, deleteAfk, getAfk } from '../../helper/index.js';
 import { getTimeSince } from '../../utils/modules/index.js';
 
-const handler = async (client, from, participant) => {
-	if (checkAfk(participant, from)) {
-		const container = getAfk(participant, from);
-		const { reasons, since } = container;
+const composingHandler = async (client, from, participant) => {
+	const afkContainer = getAfk(participant, from);
 
-		if (since === new Date().getTime()) {
-			return;
-		}
-
-		const time = getTimeSince(since);
-
-		await client[botNum].send(from, {
-			text: `@${
-				participant.split('@')[0]
-			} detected writing. AFK since ${time} ago. Now they are out from AFK. Reason : ${reasons}`,
-			mentions: [participant]
-		});
-		deleteAfk(participant, from);
+	if (!checkAfk(participant, from) || afkContainer.since === new Date().getTime()) {
+		return;
 	}
-};
 
-const composingHandler = handler;
+	const timeSinceAfk = getTimeSince(afkContainer.since);
+
+	const message = `@${
+		participant.split('@')[0]
+	} detected writing. AFK since ${timeSinceAfk} ago. Now they are out from AFK. Reason : ${afkContainer.reasons}`;
+
+	await client[botNum].send(from, {
+		text: message,
+		mentions: [participant]
+	});
+
+	deleteAfk(participant, from);
+};
 
 export default composingHandler;

@@ -1,6 +1,9 @@
 import { removeDuplicatesArray } from '../../utils/modules/index.js';
 import { arq } from '../../utils/arq/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'wallpaper',
 	description: 'Search wallpaper',

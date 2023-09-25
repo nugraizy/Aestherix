@@ -1,5 +1,8 @@
 import { youtubeChannel } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'youtubestalk',
 	description: 'Lookup YouTube Channel',

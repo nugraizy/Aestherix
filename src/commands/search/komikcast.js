@@ -1,5 +1,8 @@
 import { KomikCast, mime } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'komikcast',
 	description: 'Search Comic from Komikcast.net',

@@ -1,3 +1,6 @@
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'hidetag',
 	description: 'Hide tag',

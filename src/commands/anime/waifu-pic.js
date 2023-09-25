@@ -2,6 +2,9 @@ import parser from 'yargs-parser';
 
 import { removeDuplicatesArray, getWaifu, gifToMp4 } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'waifupic',
 	description: 'Search images from waifu pics',

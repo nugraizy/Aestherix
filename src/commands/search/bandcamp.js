@@ -1,6 +1,9 @@
 import { removeDuplicatesArray } from '../../utils/modules/index.js';
 import { searchBandcamp } from '../../utils/bandcamp/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'bandcamp',
 	description: 'Search Musics from Bandcamp',

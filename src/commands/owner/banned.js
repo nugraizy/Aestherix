@@ -4,6 +4,9 @@ import fs from 'fs-extra';
 import configuration from '../../helper/config/connect.js';
 import { S_WHATSAPP_NET } from '../../helper/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'banned',
 	description: 'Banned user',

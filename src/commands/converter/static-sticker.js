@@ -4,6 +4,9 @@ import rgbcolor from 'rgb-color';
 import { ttp } from '../../helper/canvas/index.js';
 import { color, INFOLOG } from '../../utils/modules/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'staticsticker',
 	description: 'Generate static sticker',

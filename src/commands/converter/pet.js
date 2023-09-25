@@ -5,6 +5,9 @@ import fs from 'fs-extra';
 import { color, INFOLOG } from '../../utils/modules/index.js';
 import { pet } from '../../utils/converter/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'petpet',
 	description: 'Pet someone profile picture or send/reply an image to pet',

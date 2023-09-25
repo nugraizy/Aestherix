@@ -1,3 +1,6 @@
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'setbio',
 	description: "Set the bot's bio" /* eslint-disable-line */,

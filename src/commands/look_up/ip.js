@@ -9,6 +9,9 @@ const regex = (input) =>
 		input
 	);
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'iplookup',
 	description: 'Lookup IP Address',

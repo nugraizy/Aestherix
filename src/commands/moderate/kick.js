@@ -1,6 +1,8 @@
 import { S_WHATSAPP_NET } from '../../helper/index.js';
 
-
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'kick',
 	description: 'Kick member from group.',

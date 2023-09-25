@@ -2,6 +2,9 @@ import path from 'path';
 
 import { removeDuplicatesArray, isURL, toOpus, downloadBandcamp } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'bandcampdl',
 	description: 'Download Musics from Bandcamp',

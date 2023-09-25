@@ -3,6 +3,9 @@ import { mediafire } from '../../utils/index.js';
 const regex = (url) =>
 	/^(https?:\/\/)?(www\.)?mediafire\.com\/(file|view|download)\/[a-zA-Z0-9]+(\/[a-zA-Z0-9_\-.~%]+)?(\/file)?.*$/.test(url);
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'mediafire',
 	description: 'Download files from Mediafire',

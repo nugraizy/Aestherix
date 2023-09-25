@@ -1,6 +1,9 @@
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { getNovelContent, searchNovel } from '../../utils/pixiv/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'pixivnovel',
 	description: 'Find novel from Pixiv',

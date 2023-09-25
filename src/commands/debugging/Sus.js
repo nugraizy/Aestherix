@@ -1,5 +1,8 @@
 import { delay } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'sus',
 	description: 'sus',

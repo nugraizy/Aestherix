@@ -1,5 +1,8 @@
 import { cnninternational, fetchBUFFER } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'cnninternational',
 	description: 'Showing latest news in International from CNN',

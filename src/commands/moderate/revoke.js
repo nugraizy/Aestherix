@@ -1,3 +1,6 @@
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'revoke',
 	description: "Revoke group's invitation URL." /* eslint-disable-line */,

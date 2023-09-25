@@ -1,5 +1,8 @@
 import { iflixSearch, removeDuplicatesArray } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'iflix',
 	description: 'Find movie on iflix',

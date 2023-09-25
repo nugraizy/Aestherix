@@ -1,9 +1,13 @@
 import { Boom } from '@hapi/boom';
 import fs from 'fs-extra';
-import baileys, { jidNormalizedUser, getKeyAuthor, jidDecode, getAggregateVotesInPollMessage } from '@adiwajshing/baileys';
+import {
+	jidNormalizedUser,
+	getKeyAuthor,
+	jidDecode,
+	getAggregateVotesInPollMessage,
+	DisconnectReason
+} from '@adiwajshing/baileys';
 import boxen from 'boxen';
-
-const { DisconnectReason } = baileys;
 
 import configuration from '../../config/connect.js';
 import { INFOLOG, color, romanize } from '../../../utils/modules/index.js';
@@ -23,6 +27,11 @@ const handlerPath = {
 	groupSettings: '../../../handlers/notification_handlers/group-settings-notification.js'
 };
 
+/**
+ *
+ * @param {import('../type.js').Client} Client
+ * @param {{lastDisconnect: import('../type.js').Disconnect['lastDisconnect'], connection: import('../type.js').ConnectionState, receivedPendingNotifications: boolean, clientMqttListen: import('mqtt').Client, OPTIONS: {[_: string]: boolean}, cli: import('../socket/socket.js').Cli}} param1
+ */
 export const handleConnectionUpdate = async (
 	Client,
 	{ lastDisconnect, connection, receivedPendingNotifications, clientMqttListen, OPTIONS, cli }
@@ -31,6 +40,9 @@ export const handleConnectionUpdate = async (
 		if (connection === 'close') {
 			const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
 
+			/**
+			 * @type {DisconnectReason} DisconnectReason
+			 */
 			if (reason === DisconnectReason.badSession) {
 				console.log('Bad session, Please delete your previous session and do a rescan...');
 				process.exit(0);
@@ -72,12 +84,22 @@ export const handleConnectionUpdate = async (
 			}
 
 			if (!receivedPendingNotifications && !shouldWait) {
+				/**
+				 * @type {import('../type.js').AdvancedClient}
+				 */
 				const client = {};
+
+				/**
+				 * @typedef {string} BotNum
+				 * @type {BotNum}
+				 */
 				const botNum = Client.user.id;
 
-				global.client = client;
+				global.client;
 				global.botNum = botNum;
+
 				client[Client.user.id] = Client;
+
 				(await import('../../modules/utils.js')).assign(client);
 
 				INFOLOG(
@@ -102,6 +124,11 @@ export const handleConnectionUpdate = async (
 	}
 };
 
+/**
+ * @param {import('../type.js').Store} store
+ * @param {import('@adiwajshing/baileys').proto.IWebMessageInfo[]} message
+ * @param {import('../type.js').SingleAuthState['state']} state
+ */
 export const handleUpsertUpdate = async (store, message, state) => {
 	if (!handler.has('incoming')) {
 		handler.set('incoming', (await import(handlerPath.incoming)).default);
@@ -110,6 +137,10 @@ export const handleUpsertUpdate = async (store, message, state) => {
 	await handler.get('incoming')(message, client, configuration.cmds, store, configuration.user, state);
 };
 
+/**
+ * @param {import('../type.js').Store} store
+ * @param {import('@adiwajshing/baileys').WAMessageUpdate[]} message
+ */
 export const handleMessagesUpdate = async (store, message) => {
 	if (message?.[0]?.update?.status === 4 || message?.[0]?.update?.status === 3) {
 		return;
@@ -124,6 +155,9 @@ export const handleMessagesUpdate = async (store, message) => {
 	handler.get('deleted')(client, message, false, store);
 };
 
+/**
+ * @param {{ id: string, presences: { [participant: string]: import('@adiwajshing/baileys').PresenceData } }} presence
+ */
 export const handlePresenceUpdate = async (presence) => {
 	const from = presence.id;
 	const participant = Object.keys(presence.presences)[0];
@@ -138,6 +172,13 @@ export const handlePresenceUpdate = async (presence) => {
 	}
 };
 
+/**
+ * @param {(string | undefined)} isGroup
+ * @param {import('@adiwajshing/baileys').WACallUpdateType} status
+ * @param {string} id
+ * @param {string} from
+ * @param {{[_: string]: boolean}} OPTIONS
+ */
 export const handleCallUpdate = async (isGroup, status, id, from, OPTIONS) => {
 	if (OPTIONS.noCall && !isGroup && status === 'offer') {
 		const { user, server } = jidDecode(botNum);
@@ -165,6 +206,10 @@ export const handleCallUpdate = async (isGroup, status, id, from, OPTIONS) => {
 	}
 };
 
+/**
+ * @param {import('../type.js').Store} store
+ * @param {import('@adiwajshing/baileys').proto.IWebMessageInfo[]} message
+ */
 export const handleParticipantsUpdate = async (store, message) => {
 	if (!handler.has('participant')) {
 		handler.set('participant', (await import(handlerPath.participant)).default);

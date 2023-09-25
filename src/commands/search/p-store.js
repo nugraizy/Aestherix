@@ -3,6 +3,9 @@ import { pStoreProduct } from '../../utils/p_store/index.js';
 
 const regex = (str1, str2) => new RegExp(`\\b${str1}\\b`).test(str2.toLowerCase());
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'pstore',
 	description: 'Search products from p-store',

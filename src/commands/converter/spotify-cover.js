@@ -1,5 +1,8 @@
 import { SpotifyCover } from '../../helper/canvas/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'spotifycover',
 	description: 'Make Spotif Cover',

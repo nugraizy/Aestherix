@@ -1,5 +1,8 @@
 import { searchHashtag } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'ighashtag',
 	description: 'Search for hashtag on Instagram',

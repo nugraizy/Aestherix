@@ -1,6 +1,9 @@
 import { generateWAMessageFromContent } from '@adiwajshing/baileys';
 import fs from 'fs-extra';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'productlist',
 	description: 'Send list product message.',

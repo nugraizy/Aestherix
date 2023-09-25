@@ -1,3 +1,6 @@
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'searchmessage',
 	description: 'Search for a message in the current group',

@@ -6,6 +6,9 @@ import { getPost } from '../../utils/instagram/index.js';
 
 const regex = (input) => /(https?:\/\/(?:www\.)?instagram\.com\/(p|reel|tv|s)\/([^/?#&]+)).*/.test(input);
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'igreel',
 	description: 'Downloads the reel of the user',

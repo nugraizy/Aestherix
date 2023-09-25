@@ -3,6 +3,9 @@ import { Configuration, OpenAIApi } from 'openai';
 const updateApikey = () =>
 	process.env.OPENAI_KEY.split('\n')[Math.floor(Math.random() * process.env.OPENAI_KEY.split('\n').length)];
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'aicompletions',
 	description: 'Ask A.I to complete your sentence or give A.I any task within texts.',

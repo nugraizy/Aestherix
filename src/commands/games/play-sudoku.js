@@ -5,6 +5,9 @@ import configuration from '../../helper/config/connect.js';
 import { getTimeSince } from '../../utils/modules/index.js';
 import { checkWin, fillGrid, makePuzzle, revealOneElement, solvePuzzle, stringifyGrid } from '../../utils/games/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'sudoku',
 	description: 'Play Sudoku',

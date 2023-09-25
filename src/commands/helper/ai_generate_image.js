@@ -3,6 +3,9 @@ import { Configuration, OpenAIApi } from 'openai';
 const updateApikey = () =>
 	process.env.OPENAI_KEY.split('\n')[Math.floor(Math.random() * process.env.OPENAI_KEY.split('\n').length)];
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'aiimage',
 	description: 'Ask A.I to make an image based on your text.',

@@ -51,6 +51,9 @@ const container = () => ({
 	type: 'physical-goods'
 });
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'interactive',
 	description: 'Send interactive.',

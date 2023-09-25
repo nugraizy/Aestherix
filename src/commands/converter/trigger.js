@@ -10,6 +10,9 @@ const defaultOptions = {
 	output: 'sticker'
 };
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'trigger',
 	description: 'Trigger someone profile picture or send/reply an image to trigger',

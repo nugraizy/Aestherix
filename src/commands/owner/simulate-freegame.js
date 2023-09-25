@@ -29,6 +29,9 @@ async function updateGames() {
 	}, 3 * 60 * 1000);
 }
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'freegame',
 	description: 'Fetch freegames from games platform.',

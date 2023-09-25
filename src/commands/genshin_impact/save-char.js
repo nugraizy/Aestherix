@@ -17,6 +17,9 @@ const regex = async (input) => {
 	return { status: true, message: match[0] };
 };
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'savechar',
 	description: 'Save your Genshin Impact character',

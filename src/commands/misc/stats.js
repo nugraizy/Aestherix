@@ -17,6 +17,9 @@ const getCpus = (func) =>
 		)
 		.join('\n\n');
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'stats',
 	description: 'Check bot status.',

@@ -1,6 +1,9 @@
 import { fetchBUFFER } from '../../utils/index.js';
 import { Attachment } from '../../helper/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'attachment',
 	description: 'Debugging Welcome/bye message',

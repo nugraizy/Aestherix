@@ -4,6 +4,9 @@ import path from 'path';
 import { color, INFOLOG } from '../../utils/modules/index.js';
 import { tesseract } from '../../utils/misc/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'scanimagetext',
 	description: 'Recognize text from image',

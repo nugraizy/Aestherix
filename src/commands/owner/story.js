@@ -6,6 +6,9 @@ import { Cache } from '../../helper/modules/cache.js';
 const STATUS = 'status@broadcast';
 const STATUS_PATH = `./src/media/connection_databases/${configuration.cli.input[0] ?? 'Session-debug'}.json`;
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'story',
 	description: 'Fetch story from host WhatsApp.',

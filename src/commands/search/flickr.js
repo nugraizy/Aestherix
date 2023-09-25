@@ -1,6 +1,9 @@
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { FlickerAPI } from '../../utils/flickr/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'flickr',
 	description: 'Search images from Flickr',

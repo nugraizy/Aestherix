@@ -25,6 +25,9 @@ const updateSpotifyTracks = () => {
 	);
 };
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'spotifyplayer',
 	description: 'Simulates an spotify player on bio',

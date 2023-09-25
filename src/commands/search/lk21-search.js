@@ -1,5 +1,8 @@
 import { layarkaca21 } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'layarkaca21',
 	description: 'Search movies through Layarkaca21 websites.',

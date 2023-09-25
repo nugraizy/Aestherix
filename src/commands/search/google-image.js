@@ -1,5 +1,8 @@
 import { googleImage, removeDuplicatesArray } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'googleimage',
 	description: 'Find images from Google.',

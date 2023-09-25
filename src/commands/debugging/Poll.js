@@ -1,6 +1,9 @@
 import { generateMessageID, generateWAMessageFromContent } from '@adiwajshing/baileys';
 import { randomBytes } from 'crypto';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'polling',
 	description: 'Send polling.',

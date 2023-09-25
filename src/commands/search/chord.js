@@ -1,5 +1,8 @@
 import { chords } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'chords',
 	description: 'Find music chords.',

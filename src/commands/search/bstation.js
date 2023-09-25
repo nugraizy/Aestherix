@@ -1,6 +1,9 @@
 import { removeDuplicatesArray } from '../../utils/modules/index.js';
 import { bilibiliSearchTv } from '../../utils/bilibili/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'bstation',
 	description: 'Search videos from Bilibili/Bstation ID Server',

@@ -1,6 +1,9 @@
 import { removeDuplicatesArray } from '../../utils/modules/index.js';
 import { pinterest } from '../../utils/pinterest/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'pinterest',
 	description: 'Search images from pinterest',

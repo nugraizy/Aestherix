@@ -2,6 +2,9 @@ import parser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'ytplay',
 	description: 'Instantly Download a YouTube video/audio.',

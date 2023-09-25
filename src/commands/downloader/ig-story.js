@@ -4,6 +4,9 @@ import parser from 'yargs-parser';
 import { color, delay, ERRLOG, INFOLOG, isURL } from '../../utils/modules/index.js';
 import { getStory3 } from '../../utils/instagram/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'igstory',
 	description: 'Downloads the story of the user',

@@ -19,6 +19,9 @@ Genres : ${obj?.genres?.map(({ name }) => name)?.join(', ') || 'n/a'}
 	
 Synopsis : ${obj?.synopsis || 'n/a'}`;
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'malmangaranking',
 	description: 'Looks for Top Ranked Manga on MyAnimeList.',

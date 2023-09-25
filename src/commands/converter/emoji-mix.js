@@ -5,6 +5,9 @@ import _ from 'lodash';
 import configuration from '../../helper/config/connect.js';
 import { emojimix } from '../../utils/converter/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'emojimixer',
 	description: 'Mix emoji.',

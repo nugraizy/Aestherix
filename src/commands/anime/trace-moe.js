@@ -3,6 +3,9 @@ import path from 'path';
 
 import { isURL, traceMoe, toMp4 } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'tracemoe',
 	description: 'Reverse image anime search',

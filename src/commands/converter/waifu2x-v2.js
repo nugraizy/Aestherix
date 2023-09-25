@@ -5,6 +5,9 @@ import parser from 'yargs-parser';
 import configuration from '../../helper/config/connect.js';
 import { color, INFOLOG, waifu2xV2 } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'waifu2xv2',
 	description: 'Enhance image using image processing A.I. called waifu2x.',

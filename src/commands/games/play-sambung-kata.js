@@ -1,5 +1,8 @@
 import { getSambungkataSession, SambungKata } from '../../utils/games/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'sambungkata',
 	description: 'Word Play Game',

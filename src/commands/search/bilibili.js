@@ -3,6 +3,9 @@ import path from 'path';
 import { numberWithCommas, removeDuplicatesArray, getFilesizeFromBytes } from '../../utils/modules/index.js';
 import { bilibiliSearchEn, bilibiliDetailEn, mergeVideoWithAudio } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'bilibili',
 	description: 'Search videos from Bilibili',

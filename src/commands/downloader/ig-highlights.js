@@ -4,6 +4,9 @@ import parser from 'yargs-parser';
 import { color, ERRLOG, INFOLOG, isURL, numberWithCommas } from '../../utils/modules/index.js';
 import { getHighlights2 } from '../../utils/instagram/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'ighighlights',
 	description: 'Downloads the highlights of the user',

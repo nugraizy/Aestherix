@@ -1,5 +1,8 @@
 import fs from 'fs-extra';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'games',
 	aliases: ['game'],
@@ -10,13 +13,6 @@ export default {
 	limit: 2,
 	status: 'enable',
 	async run(message, client) {
-		if (!message.isAdmin && !message.isOwner) {
-			return await client[botNum].reply(
-				{ from: message.from, quoted: message.message },
-				'You are not admin. This commands is only for admins.'
-			);
-		}
-
 		if (!message.query) {
 			return await client[botNum].reply(
 				{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },

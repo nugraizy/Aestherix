@@ -44,6 +44,9 @@ const pause = async (client, containers) => {
 	}
 };
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'simulates',
 	description: 'Simulates an event update',

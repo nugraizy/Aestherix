@@ -10,6 +10,9 @@ const regex = (input) =>
 		input
 	);
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'spotifydl',
 	description: 'Downloads a Spotify audio',

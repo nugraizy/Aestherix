@@ -6,6 +6,9 @@ const WINNER_SETS = {
 	X: '❎'
 };
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'playtictactoe',
 	description: 'Play Tic Tac Toe',

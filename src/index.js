@@ -76,8 +76,14 @@ clientMqttListen.on('connect', () => {
 	clientMqttListen.subscribe(process.env.FREEGAME_TOPIC);
 });
 
+/**
+ * @type {import('./helper/connection/type.js').SingleAuthState}
+ */
 const { state, saveState } = useSingleFileAuthState(`./src/helper/connection/session/${cli.input[0] ?? 'Session-debug'}.json`);
 
+/**
+ * @param {boolean} isReconnect
+ */
 export const start = async (isReconnect) => {
 	if (OPTIONS.help) {
 		console.log(cli.help);

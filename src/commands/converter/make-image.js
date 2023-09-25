@@ -1,5 +1,8 @@
 import { createImage } from '../../utils/deepai/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'makeimage',
 	description: 'Create an image based on your description',

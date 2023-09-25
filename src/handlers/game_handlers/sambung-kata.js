@@ -1,33 +1,31 @@
 import configuration from '../../helper/config/connect.js';
 
-const handler = async ({ from, isGroup, sender, body, message, isAdmin, groupMetadata }, client, settings) => {
-	const data = configuration.games['word'].get(from);
-	const play = async () => {
-		if (!data) {
+const sambungKataHandler = async ({ from, isGroup, sender, body, message, isAdmin, groupMetadata }, client, settings) => {
+	const gameData = configuration.games['word'].get(from);
+
+	const playGame = async () => {
+		if (!gameData) {
 			return;
 		}
 
-		const sambung = await data.guess(body, sender, from, client);
+		const result = await gameData.guess(body, sender, from, client);
 
-		if (!sambung) {
+		if (!result || ('status' in result && !result.status)) {
+			if (result && result.message) {
+				await client[botNum].reply({ groupMetadata, from, quoted: message }, result.message);
+			}
+
 			return;
-		}
-
-		if ('status' in sambung && !sambung.status) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, sambung.message);
 		}
 
 		await client[botNum].send(
 			from,
 			{
-				text: `This is Word Play Game.
-
-Guess the word for given clue :
-Word : ${sambung.words}
-Clue : ${sambung.clue}
-Turn : @${sambung.turn.split('@')[0]}`,
+				text: `This is Word Play Game.\n\nGuess the word for the given clue:\nWord: ${result.words}\nClue: ${
+					result.clue
+				}\nTurn: @${result.turn.split('@')[0]}`,
 				contextInfo: {
-					mentionedJid: [sambung.turn]
+					mentionedJid: [result.turn]
 				}
 			},
 			{ groupMetadata, quoted: message }
@@ -35,10 +33,8 @@ Turn : @${sambung.turn.split('@')[0]}`,
 	};
 
 	if (isGroup && (settings[from]?.games === 'enable' || isAdmin) && !configuration.OPTIONS.onlyLogs) {
-		await play();
+		await playGame();
 	}
 };
-
-const sambungKataHandler = handler;
 
 export default sambungKataHandler;

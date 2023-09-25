@@ -6,6 +6,9 @@ import { color, INFOLOG } from '../../utils/modules/index.js';
 import { textToSpeech } from '../../utils/converter/index.js';
 import { tesseract } from '../../utils/misc/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'audiobook',
 	description: 'Take a picture and turn it into an audio book.',

@@ -6,6 +6,9 @@ import { color, INFOLOG } from '../../utils/modules/index.js';
 
 const DEFAULT_TYPE = 'image';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'memegen',
 	description: 'Meme Generator, You know the drill',

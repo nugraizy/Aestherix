@@ -13,6 +13,9 @@ import { textpro } from '../../utils/textmaker/textpro.js';
 const dataJSON = JSON.parse(fs.readFileSync('./databases/textmaker/textprourl.json'));
 const defaulType = 'image';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'textpro',
 	description: 'Image maker using texts',

@@ -4,6 +4,9 @@ import parser from 'yargs-parser';
 import { color, ERRLOG, isURL } from '../../utils/modules/index.js';
 import { twitterUser } from '../../utils/twitter/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'twitstalk',
 	description: 'Lookup Twitter user',

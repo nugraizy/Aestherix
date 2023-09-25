@@ -1,5 +1,8 @@
 import { zalgo } from '../../utils/modules/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'zalgo',
 	description: 'Convert Text to Zalgo text',

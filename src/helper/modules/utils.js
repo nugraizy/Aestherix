@@ -1,4 +1,4 @@
-import baileys, {
+import {
 	downloadContentFromMessage,
 	downloadMediaMessage as downloadMessage,
 	generateWAMessage,
@@ -14,28 +14,46 @@ import { TextEncoder } from 'util';
 
 import configuration from '../config/connect.js';
 import { S_WHATSAPP_NET, UPDATE, ZERO } from '../misc/wa_data/index.js';
-import { isURL, delaySync, fetchBUFFER } from '../../utils/modules/index.js';
+import { isURL, fetchBUFFER } from '../../utils/modules/index.js';
 import { reassign } from './parse-message.js';
 
-const { proto } = baileys; // eslint-disable-line
 const { readFile, unlink, writeFile } = (await import('fs-extra')).default;
 
 /**
+ * @typedef {'imageMessage' | 'videoMessage' | 'audioMessage' | 'documentMessage' |'stickerMessage' | 'locationMessage'} MediaType
+ * @typedef {import('@adiwajshing/baileys').proto.WebMessageInfo} MessageGenerated
+ * @typedef {import('@adiwajshing/baileys').proto.IWebMessageInfo} MessageGeneratedII
+ * @typedef {import('@adiwajshing/baileys').ButtonReplyInfo} ButtonReplyInfo
+ * @typedef {'imageMessage' | 'videoMessage' | 'stickerAnimated' | undefined} StickerType
+ * @typedef {{id?: string, packname?: string, author?: string}} ExifMetadata
+ * @typedef {(media: (string|Buffer), type: MediaType, opts?: import('@adiwajshing/baileys').MessageGenerationOptions) => Promise<MessageGenerated>} PrepareMedia
+ * @typedef {(buffer: (string|Buffer), metadata: ExifMetadata) => Promise<Buffer>} AppliedExif
+ * @typedef {(to: string, message: import('@adiwajshing/baileys').AnyMessageContent, options: import('@adiwajshing/baileys').MiscMessageGenerationOptions & import('@adiwajshing/baileys').GroupMetadata) => Promise<MessageGenerated>} SendMessage
+ * @typedef {(_: { from: string, quoted?: import('@adiwajshing/baileys').MessageGenerationOptionsFromContent['quoted'], groupMetadata?: import('@adiwajshing/baileys').GroupMetadata }, text: string) => Promise<MessageGenerated>} ReplyMessage
+ * @typedef {(media: Buffer | string, filename: string, type: StickerType, options: ExifMetadata) => Promise<Buffer>} PrepareSticker
+ * @typedef {(media: import('@adiwajshing/baileys').DownloadableMessage, path: string, typeQuoted: keyof import('@adiwajshing/baileys').proto.IMessage) => Promise<string>} DownloadAndSave
+ * @typedef {(media: MessageGeneratedII, typeDownloadable: 'stream' | 'buffer') => Promise<Buffer | import("stream").Transform>} DownloadMedia
+ * @typedef {(to: string, contentText: string, footerText: string, buttons: ButtonReplyInfo[], opts?: import('@adiwajshing/baileys').MiscMessageGenerationOptions) => Promise<MessageGenerated>} SendButtonText
+ * @typedef {(to: string, contentText: string, footerText: string, buttons: ButtonReplyInfo[], media: string | Buffer, opts?: import('@adiwajshing/baileys').MiscMessageGenerationOptions) => Promise<MessageGenerated>} SendButtonDocument
+ * @typedef {(to: string, contentText: string, footerText: string, buttons: ButtonReplyInfo[], media: string | Buffer, opts?: import('@adiwajshing/baileys').MiscMessageGenerationOptions) => Promise<MessageGenerated>} SendButtonLocation
+ * @typedef {(status: string) => Promise<import('@adiwajshing/baileys').BinaryNode>} SetInfo
+ * @typedef {(to: string, containers: string[], update: keyof UPDATE, texts: string, force: boolean, message: import('@adiwajshing/baileys').MiscMessageGenerationOptions['quoted'],  adminGroups: string[]) => Promise<unknown>} UpdateGroup
+ * @typedef {(to: string, query: string) => Promise<unknown>} SearchMessage
+ */
+
+/**
+ * @typedef {{prepareMedia: PrepareMedia, applyExif: AppliedExif, send: SendMessage, reply: ReplyMessage, prepareSticker: PrepareSticker, downloadAndSaveMediaMessage: DownloadAndSave, downloadMediaMessage: DownloadMedia, buttonText: SendButtonText, buttonDocument: SendButtonDocument, buttonLocation: SendButtonLocation, setStatus: SetInfo, updateGroup: UpdateGroup, searchMessage: SearchMessage}} AdvancedClient
+ */
+
+/**
  * Assign functions for easiest use.
- * @param {object} client SocketClient.
- * @returns
+ * @param {import('../connection/event-handler/universal.js').ClientSocket} client SocketClient.
+ * @returns {AdvancedClient}
  */
 export const assign = (client) => {
 	/**
-	 * @typedef {'imageMessage' | 'videoMessage' | 'audioMessage' | 'documentMessage' |'stickerMessage' | 'locationMessage'} MediaType
-	 */
-
-	/**
-	 * Prepare media message to send to WhatsApp.
-	 * @param {(string|ArrayBufferLike)} media files media path, url, or arrayBuffers.
-	 * @param {MediaType} type media type for messages.
-	 * @param {MessageGenerationOptionsFromContent & {fileName?: string, mimetype?: string}} opts
-	 * @returns {Promise<MinimalMessage & {message: AnyMediaMessageContent}>}
+	 * Prepare Message Before Snding
+	 * @type {PrepareMedia}
 	 */
 	const prepareMedia = async (media, type, opts = {}) => {
 		switch (type) {
@@ -79,14 +97,10 @@ export const assign = (client) => {
 			}
 		}
 	};
-	/**
-	 * @typedef {{id?: string, packname?: string, author?: string}} ExifMetadata
-	 */
+
 	/**
 	 * Apply exif to a media files.
-	 * @param {ArrayBufferLike} buffer media buffer to be applied exif metadata.
-	 * @param {ExifMetadata} metadata exif metadata info.
-	 * @returns {Promise<ArrayBufferLike>}
+	 * @type {AppliedExif}
 	 */
 	const applyExif = async (buffer, metadata) => {
 		const data = {};
@@ -119,6 +133,10 @@ export const assign = (client) => {
 		return await buffer.save(null);
 	};
 
+	/**
+	 * Send any message.
+	 * @type {SendMessage}
+	 */
 	const send = async (to, message, options) => {
 		options = {
 			...options,
@@ -131,7 +149,6 @@ export const assign = (client) => {
 		};
 
 		if ('buttons' in message || 'sections' in message || 'templateButtons' in message) {
-			delete options.ephemeralExpiration;
 			delete message.buttons;
 			delete message.footer;
 			delete message.headerType;
@@ -183,11 +200,10 @@ export const assign = (client) => {
 		...client[botNum],
 		send,
 		applyExif,
+
 		/**
-		 * Reply people message.
-		 * @param {{from: string, quoted?: AnyMediaMessageContent}} param0
-		 * @param {string} text texts to be sent.
-		 * @returns {MinimalMessage & {message: {extendedTextMessage: WAProto.Message.ExtendedTextMessage}}}
+		 * Send and reply any user message.
+		 * @type {ReplyMessage}
 		 */
 		reply: async ({ from, quoted, groupMetadata }, text) =>
 			await send(
@@ -200,17 +216,10 @@ export const assign = (client) => {
 						groupMetadata?.ephemeralDuration || configuration.cache.users?.get(from)?.ephemeralDuration || null
 				}
 			),
+
 		/**
-		 *
-		 * @typedef {'imageMessage' | 'videoMessage' | 'stickerAnimated' | undefined} StickerType
-		 */
-		/**
-		 * Prepare sticker to be sent.
-		 * @param {(ArrayBufferLike|string)} media path or arrayBuffers.
-		 * @param {string} filename temporary filename to be saved.
-		 * @param {StickerType} type media type.
-		 * @param {ExifMetadata} options
-		 * @returns {Promise<ArrayBufferLike>}
+		 * Prepare media before sending it as readable WhatsApp sticker.
+		 * @type {PrepareSticker}
 		 */
 		prepareSticker: async (media, filename, type, options) => {
 			const isMediaURL = Buffer.isBuffer(media) ? false : isURL(media) ? true : false;
@@ -271,12 +280,10 @@ export const assign = (client) => {
 
 			return await applyExif(media, options);
 		},
+
 		/**
-		 * Download and save WhatsApp media message to local.
-		 * @param {AnyMediaMessageContent} media media message content.
-		 * @param {string} path filepath to be saved.
-		 * @param {string} typeQuoted
-		 * @returns {Promis<string>}
+		 * Download WhatsApp media and save it to local drive.
+		 * @type {DownloadAndSave}
 		 */
 		downloadAndSaveMediaMessage: (media, path, typeQuoted) =>
 			new Promise(async (resolve) => {
@@ -287,30 +294,25 @@ export const assign = (client) => {
 
 				resolve(path);
 			}),
+
 		/**
-		 * Download WhatsApp media message to buffer.
-		 * @param {AnyMediaMessageContent} media media message content.
-		 * @param {'stream' | 'buffer'} typeDownloadable
-		 * @returns {Promise<ArrayBufferLike>}
+		 * Download WhatsApp media and returns it as buffer | stream.
+		 * @type {DownloadMedia}
 		 */
 		downloadMediaMessage: async (media, typeDownloadable = 'buffer') => {
 			return await downloadMessage(media, typeDownloadable);
 		},
+
 		/**
-		 *
-		 * @param {string} to destination the message to be sent.
-		 * @param {string} contentText header of content.
-		 * @param {string} footerText footer of content.
-		 * @param {ButtonReplyInfo[]} buttons
-		 * @param {} opts
-		 * @returns
+		 * Send button text.
+		 * @type {SendButtonText}
 		 */
 		buttonText: async (to, contentText, footerText, buttons, opts = {}) => {
 			if (buttons.length === 0) {
 				return new Error('Buttons is empty');
 			}
 
-			return await client[botNum].send(
+			return await send(
 				to,
 				{
 					text: contentText,
@@ -322,8 +324,14 @@ export const assign = (client) => {
 				opts
 			);
 		},
+
 		prepareMedia,
-		buttonDocument: async (dari, contentText, footerText, buttons, media, opts = {}) => {
+
+		/**
+		 * Send button document.
+		 * @type {SendButtonDocument}
+		 */
+		buttonDocument: async (to, contentText, footerText, buttons, media, opts = {}) => {
 			if (buttons.length === 0) {
 				return new Error('Buttons is empty');
 			}
@@ -345,10 +353,15 @@ export const assign = (client) => {
 				opts
 			);
 
-			await client[botNum].relayMessage(dari, message.message, { messageId: message.key.id });
+			await client[botNum].relayMessage(to, message.message, { messageId: message.key.id });
 
 			return message;
 		},
+
+		/**
+		 * Send button location.
+		 * @type {SendButtonLocation}
+		 */
 		buttonLocation: async (dari, contentText, footerText, buttons, media, opts = {}) => {
 			if (buttons.length === 0) {
 				return new Error('Buttons is empty');
@@ -379,6 +392,11 @@ export const assign = (client) => {
 
 			return message;
 		},
+
+		/**
+		 * Set profile info of the bot.
+		 * @type {SetInfo}
+		 */
 		setStatus: async (status) => {
 			if (!status) {
 				return new Error('Status is empty');
@@ -400,15 +418,20 @@ export const assign = (client) => {
 				]
 			});
 		},
-		updateGroup: async (dari, containers, update, texts, force, message, adminGroups) => {
+
+		/**
+		 * Update group's participants or settings.
+		 * @type {UpdateGroup}
+		 */
+		updateGroup: async (to, containers, update, texts, force, message, adminGroups) => {
 			const responses = [];
 
 			if (update.PARSE_EVENTS('ADD', 'REMOVE', 'DEMOTE', 'PROMOTE')) {
 				for (const container of containers) {
 					try {
 						if (!force && adminGroups.includes(container) && update === 'REMOVE') {
-							await client[botNum].send(
-								dari,
+							await send(
+								to,
 								{
 									text: `You can't ${update} @${
 										container.split('@')[0]
@@ -422,8 +445,8 @@ export const assign = (client) => {
 						}
 
 						if (adminGroups.includes(container) && update === 'PROMOTE') {
-							await client[botNum].send(
-								dari,
+							await send(
+								to,
 								{
 									text: `You can't ${update} @${container.split('@')[0]} because they already an admin group.`,
 									mentions: [container]
@@ -435,8 +458,8 @@ export const assign = (client) => {
 						}
 
 						if (!adminGroups.includes(container) && update === 'DEMOTE') {
-							await client[botNum].send(
-								dari,
+							await send(
+								to,
 								{
 									text: `You can't ${update} @${container.split('@')[0]} because they already a member group.`,
 									mentions: [container]
@@ -447,30 +470,31 @@ export const assign = (client) => {
 							continue;
 						}
 
-						const response = await client[botNum][UPDATE[update]](dari, [container], update.toLowerCase());
+						const response = await client[botNum][UPDATE[update]](to, [container], update.toLowerCase());
 
 						if (update.PARSE_EVENTS('ADD')) {
 							if (response?.[0]?.status === '500') {
-								await client[botNum].reply({ from: dari, quoted: message }, 'Group is already full');
+								await send(to, { text: 'Group is already full' }, { quoted: message });
 							} else if (response?.[0]?.status === '408') {
-								await client[botNum].reply({ from: dari, quoted: message }, `${container} is just left a while ago`);
+								await send(to, { text: `${container} is just left a while ago` }, { quoted: message });
 							} else if (response?.[0]?.status === '403') {
-								await client[botNum].reply(
-									{ from: dari, quoted: message },
-									`${container} is privated their number. Trying to invite them via invitational message.`
+								await send(
+									to,
+									{ text: `${container} is privated their number. Trying to invite them via invitational message.` },
+									{ quoted: message }
 								);
 
 								const messages = generateWAMessageFromContent(
-									dari,
+									to,
 									{
 										groupInviteMessage: {
-											groupJid: dari,
+											groupJid: to,
 											inviteCode: response?.[0]?.code,
 											inviteExpiration: response?.[0]?.expiration,
-											groupName: (await client[botNum].groupMetadata(dari)).subject,
+											groupName: (await client[botNum].groupMetadata(to)).subject,
 											caption: 'Invitation to join my WhatsApp group',
 											jpegThumbnail: new Buffer.from(
-												await fetchBUFFER(await client[botNum].profilePictureUrl(dari, 'preview'))
+												await fetchBUFFER(await client[botNum].profilePictureUrl(to, 'preview'))
 											).toString('base64')
 										}
 									},
@@ -479,17 +503,16 @@ export const assign = (client) => {
 
 								await client[botNum].relayMessage(container, messages.message, { messageId: messages.key.id });
 							} else if (response?.[0]?.status === '401') {
-								await client[botNum].reply({ from: dari, quoted: message }, `${container} blocked bot number`);
+								await send(to, { text: `${container} blocked bot number` }, { quoted: message });
 							}
 						}
 
-						delaySync(120);
 						responses.push(response);
 					} catch (e) {
 						responses.push({ error: e.message, id: container });
 
 						if (e?.[0]?.status === '400') {
-							await client[botNum].reply({ from: dari, quoted: message }, `${container} is not a valid number`);
+							await send(to, { text: `${container} is not a valid number` }, { quoted: message });
 						}
 
 						return;
@@ -498,28 +521,33 @@ export const assign = (client) => {
 			}
 
 			if (update.PARSE_EVENTS('SUBJECT', 'DESCRIPTION')) {
-				const response = await client[botNum][UPDATE[update]](dari, texts);
+				const response = await client[botNum][UPDATE[update]](to, texts);
 
 				responses.push(response);
 			}
 
 			if (update.PARSE_EVENTS('ANNOUNCEMENT', 'NOT_ANNOUNCEMENT', 'UNLOCKED', 'LOCKED')) {
-				const response = await client[botNum][UPDATE[update]](dari, update.toLowerCase());
+				const response = await client[botNum][UPDATE[update]](to, update.toLowerCase());
 
 				responses.push(response);
 			}
 
 			if (update.PARSE_EVENTS('RETRIEVE', 'REVOKE')) {
-				const response = await client[botNum][UPDATE[update]](dari);
+				const response = await client[botNum][UPDATE[update]](to);
 
 				responses.push(response);
 			}
 
 			return responses;
 		},
-		searchMessage: async (dari, query) => {
+
+		/**
+		 * Search a message from the destination.
+		 * @type {SearchMessage}
+		 */
+		searchMessage: async (to, query) => {
 			let i = 0;
-			const containers = await store.loadMessages(dari);
+			const containers = await store.loadMessages(to);
 			const keys = [];
 
 			if (containers.length === 0) {

@@ -7,6 +7,9 @@ import configuration from '../../helper/config/connect.js';
 
 const DATABASE_PATH = `./src/media/connection_databases/${configuration.cli.input[0] ?? 'Session-debug'}.json`;
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'reaction',
 	description: 'Send reaction to a message.',

@@ -6,6 +6,9 @@ const regex = (input) =>
 		input
 	);
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'spotifytracks',
 	description: 'Find song on Spotify',

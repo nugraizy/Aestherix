@@ -5,6 +5,9 @@ import { gttsAI, toOpus } from '../../utils/converter/index.js';
 
 const voices = await fs.readJSON(path.join(__dirname, 'databases/model/voices.json'));
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'aitts',
 	description: 'Convert text to speech with real people voice over it',

@@ -2,6 +2,9 @@ import { S_WHATSAPP_NET } from '../../index.js';
 import { delay } from '../../../utils/modules/index.js';
 import configuration from '../../config/connect.js';
 
+/**
+ * @param {import('mqtt').Client} clientMqttListen
+ */
 export const connectMqtt = (clientMqttListen) => {
 	clientMqttListen.on('message', async (topic, message) => {
 		if (topic === process.env.MQTT_TOPIC) {
@@ -62,6 +65,11 @@ ${result.title}`;
 	});
 };
 
+/**
+ *
+ * @param {typeof connectMqtt} connection
+ * @param {import('mqtt').Client} clientMqttListen
+ */
 export const reconnectMqttConnection = (connection, clientMqttListen) => {
 	if ('spotify' in configuration.presences) {
 		clearTimeout(configuration.presences.spotify.timeout);

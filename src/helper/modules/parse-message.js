@@ -16,8 +16,30 @@ import {
 	PollUpdateDecrypt
 } from '../misc/wa_data/index.js';
 
+/**
+ * @constant
+ * @type {Array.<'imageMessage' | 'videoMessage' | 'stickerMessage'>}
+ */
 const typeSticker = ['imageMessage', 'videoMessage', 'stickerMessage'];
 
+/**
+ * @typedef {import('@adiwajshing/baileys').GroupParticipant[]} GroupMetadataParticipants
+ * @typedef {import('@adiwajshing/baileys').GroupMetadata} GroupMetadata
+ */
+
+/**
+ * @typedef {object} GroupMetadataParsed
+ * @property {GroupMetadataParticipants} rawParticipants
+ * @property {string[]} adminGroups
+ * @property {string[]} participantsGroups
+ * @property {string} ownerGroups
+ */
+
+/**
+ *
+ * @param {typeof client} clients
+ * @param {string} id
+ */
 const caching = async (clients, id) => {
 	await new Promise(async (resolve) => {
 		const groupMetadata = await clients[botNum].groupMetadata(id).catch(() => ({}));
@@ -36,6 +58,12 @@ const caching = async (clients, id) => {
 	configuration.isFirstConnection = false;
 };
 
+/**
+ *
+ * @param {Object} obj
+ * @param {string} propName
+ * @returns
+ */
 function crawlProperty(obj, propName) {
 	for (let key in obj) {
 		if (key === propName) {
@@ -51,11 +79,85 @@ function crawlProperty(obj, propName) {
 }
 
 /**
+ * @typedef {import('@adiwajshing/baileys').proto.WebMessageInfo} Message
+ */
+/**
+ * @typedef {object} ReassignResult
+ * @property {Message} message - The reassigned message object.
+ * @property {boolean} isFromMe - Indicates if the message is from the current user.
+ * @property {string} from - The sender's JID.
+ * @property {boolean} isGroup - Indicates if the message is from a group.
+ * @property {boolean} isBaileys - Indicates if the message is a Baileys protocol message.
+ * @property {boolean} isDisappearingChat - Indicates if the message is from a disappearing chat.
+ * @property {string} sender - The sender's JID.
+ * @property {string} prettyNumber - The sender's pretty formatted phone number.
+ * @property {number} timeStamp - The timestamp of the message.
+ * @property {string} filename - The filename associated with the message.
+ * @property {GroupMetadataParsed & GroupMetadata} groupMetadata - Group metadata information.
+ * @property {...object} groupSettings - Additional group settings.
+ * @property {string} groupName - The name of the group.
+ * @property {string} groupId - The ID of the group.
+ * @property {boolean} isGroupOwner - Indicates if the sender is the group owner.
+ * @property {string} pushname - The pushname of the sender.
+ * @property {string} botNumber - The phone number of the bot.
+ * @property {string[]} ownerNumbers - Array of owner phone numbers.
+ * @property {boolean} isOwner - Indicates if the sender is an owner.
+ * @property {any} settings - Additional settings data.
+ * @property {string} type - The type of message.
+ * @property {string} typeQuoted - The type of the quoted message, if any.
+ * @property {typeof typeSticker} typeSticker - The type of sticker message.
+ * @property {boolean} stickerAble - Indicates if stickers can be sent.
+ * @property {boolean | undefined} isAdmin - Indicates if the sender is an admin.
+ * @property {object[] | undefined} rawParticipants - Array of raw participants data.
+ * @property {string[] | undefined} adminGroups - Array of admin group IDs.
+ * @property {string[] | undefined} participantsGroups - Array of group IDs with participants.
+ * @property {string | undefined} ownerGroups - The group ID where the sender is the owner.
+ * @property {boolean | undefined} isBotAdmin - Indicates if the bot is an admin in the group.
+ * @property {string} body - The message body.
+ * @property {string[] | undefined} args - Array of command arguments.
+ * @property {string} cmd - The command.
+ * @property {boolean} isCmd - Indicates if the message is a command.
+ * @property {string} prefix - The command prefix.
+ * @property {string | undefined} query - The command query.
+ * @property {boolean} isMedia - Indicates if the message is media (e.g., image, video).
+ * @property {boolean} isQuotedImage - Indicates if the message quotes an image.
+ * @property {boolean} isQuotedVideo - Indicates if the message quotes a video.
+ * @property {boolean} isQuotedAudio - Indicates if the message quotes audio.
+ * @property {boolean} isQuotedContact - Indicates if the message quotes a contact.
+ * @property {boolean} isQuotedContactsArray - Indicates if the message quotes a contacts array.
+ * @property {boolean} isQuotedDocument - Indicates if the message quotes a document.
+ * @property {boolean} isQuotedLiveLocation - Indicates if the message quotes live location.
+ * @property {boolean} isQuotedLocation - Indicates if the message quotes location.
+ * @property {boolean} isQuotedSticker - Indicates if the message quotes a sticker.
+ * @property {boolean} isMediaVid - Indicates if the message is a video or quotes a video.
+ * @property {boolean} isMediaImage - Indicates if the message is an image or quotes an image.
+ * @property {boolean} isSticker - Indicates if the message is a sticker.
+ * @property {boolean} isAudio - Indicates if the message is audio.
+ * @property {boolean} isContact - Indicates if the message is a contact.
+ * @property {boolean} isContactsArray - Indicates if the message is a contacts array.
+ * @property {boolean} isDocument - Indicates if the message is a document.
+ * @property {boolean} isLocation - Indicates if the message is a location.
+ * @property {boolean} isLiveLocation - Indicates if the message is live location.
+ * @property {boolean} isViewOnce - Indicates if the message is a view-once message.
+ * @property {boolean} isViewOnceImage - Indicates if the message is a view-once image.
+ * @property {boolean} isViewOnceVideo - Indicates if the message is a view-once video.
+ * @property {boolean} isQuotedViewOnce - Indicates if the message quotes a view-once message.
+ * @property {boolean} isQuotedViewOnceImage - Indicates if the message quotes a view-once image.
+ * @property {boolean} isQuotedViewOnceVideo - Indicates if the message quotes a view-once video.
+ * @property {string} typeViewOnce - The type of the view-once message.
+ * @property {string[]} mention - Array of mentioned JIDs.
+ * @property {import('@adiwajshing/baileys').WAMessageContent} mediaData - Media data associated with the message.
+ * @property {import('@adiwajshing/baileys').WAGenericMediaMessage} extractMediaData - Extracted media data.
+ * @property {string} bodyQuoted - The quoted message body.
+ */
+
+/**
+ * Reassigns and normalizes message data for easier handling and access.
  *
- * @param {*} m
- * @param {*} client
- * @param {*} store
- * @returns {Promise<{message: any, isFromMe: boolean, from: string, isGroup: boolean, isBaileys: boolean, isDisappearingChat: boolean, sender: string, prettyNumber: string, timeStamp: number, filename: string, groupMetadata: string, ...groupSettings: any, groupName: string, groupId: string, isGroupOwner: boolean, pushname: string, botNumber: string, ownerNumbers: string[], isOwner: boolean, settings: any, type: string, typeQuoted: string, typeSticker: string, stickerAble: boolean, isAdmin: boolean | undefined, rawParticipants: object[] | undefined, adminGroups: string[] | undefined, participantsGroups: string[] | undefined, ownerGroups: string | undefined, isBotAdmin: boolean | undefined, body: string, args: string[] | undefined, cmd: string, isCmd: boolean, prefix: string, query: string | undefined, isMedia: boolean, isQuotedImage: boolean, isQuotedVideo: boolean, isQuotedAudio: boolean, isQuotedContact: boolean, isQuotedContactsArray: boolean, isQuotedDocument: boolean, isQuotedLiveLocation: boolean, isQuotedLocation: boolean, isQuotedSticker: boolean, isMediaVid: boolean, isMediaImage: boolean, isSticker: boolean, isAudio: boolean, isContact: boolean, isContactsArray: boolean, isDocument: boolean, isLocation: boolean, isLiveLocation: boolean, isViewOnce: boolean, isViewOnceImage: boolean, isViewOnceVideo: boolean, isQuotedViewOnce: boolean, isQuotedViewOnceImage: boolean, isQuotedViewOnceVideo: boolean, typeViewOnce: string, mention: string[], mediaData: any, extractMediaData: any, bodyQuoted: string}>}
+ * @param {import('@adiwajshing/baileys').proto.IWebMessageInfo} m - The original message object.
+ * @param {typeof client} client - The client object.
+ * @param {import('../connection/type.js').Store} store - The store object.
+ * @returns {Promise<ReassignResult>} - The reassigned message data or an error object.
  */
 export const reassign = async (m, client, store) => {
 	try {
@@ -105,6 +207,7 @@ export const reassign = async (m, client, store) => {
 				botNumber,
 				ownerNumbers: [SETTINGS.owner_number, ...SETTINGS.team_number, botNumber]
 			};
+
 			configuration.cache.config = SETTINGS;
 		}
 

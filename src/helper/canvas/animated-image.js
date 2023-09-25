@@ -17,24 +17,21 @@ const saveImages = (buffer, sequence) => {
 	const fileName = path.join(__dirname, `src/media/temporary_files/animated_images-${sequence}.webp`);
 
 	writeFileSync(fileName, buffer);
-
 	return fileName;
 };
 
-const createSequence = async (images, sender) =>
-	new Promise(async (resolve, reject) => {
-		const time = dayjs().format('HH:mm:ss DD/MM');
+const createSequence = async (images, sender) => {
+	const time = dayjs().format('HH:mm:ss DD/MM');
+	const pathExif = path.join(__dirname, 'src/media/temporary_files/data.exif');
+	const pathResults = path.join(__dirname, `src/media/temporary_files/animated_images-${Date.now()}`);
 
-		const pathExif = path.join(__dirname, 'src/media/temporary_files/data.exif');
-		const pathResults = path.join(__dirname, `src/media/temporary_files/animated_images-${Date.now()}`);
-
+	return new Promise(async (resolve, reject) => {
 		exec(`img2webp -loop 1 ${images.map((v) => `"${v}"`).join(' ')} -o "${pathResults}.webp"`, (er) => {
 			if (er) {
 				ERRLOG(
 					`[${color(time, 'cyan')}]`,
 					`⚠️ ${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`
 				);
-
 				reject(er);
 			}
 
@@ -44,7 +41,6 @@ const createSequence = async (images, sender) =>
 						`[${color(time, 'cyan')}]`,
 						`⚠️ ${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`
 					);
-
 					reject(err);
 				}
 
@@ -63,6 +59,7 @@ const createSequence = async (images, sender) =>
 			});
 		});
 	});
+};
 
 const createCanvasTemplates = (fonts) => {
 	if (fonts === 'chevin') {

@@ -3,6 +3,9 @@ import path from 'path';
 import configuration from '../../helper/config/connect.js';
 import { telegram } from '../../utils/stickers/telegram.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'telegramsticker',
 	description: 'Find Telegram stickers.',

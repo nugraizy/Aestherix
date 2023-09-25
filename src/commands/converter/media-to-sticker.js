@@ -4,6 +4,9 @@ import path from 'path';
 import configuration from '../../helper/config/connect.js';
 import { color, INFOLOG, isURL } from '../../utils/modules/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'sticker',
 	description: 'Convert media to sticker',

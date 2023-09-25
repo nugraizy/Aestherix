@@ -1,6 +1,9 @@
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { shopeeProduct } from '../../utils/misc/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'shopee',
 	description: 'Search products from shopee',

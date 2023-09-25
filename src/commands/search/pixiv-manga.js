@@ -1,6 +1,9 @@
 import { fetchBUFFER, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { downloadManga, searchManga } from '../../utils/pixiv/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'pixivmanga',
 	description: 'Find manga from Pixiv',

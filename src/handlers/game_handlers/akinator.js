@@ -1,14 +1,14 @@
 import configuration from '../../helper/config/connect.js';
 import { getSession, handleAnswer } from '../../utils/games/index.js';
 
-let akinatorHandler;
+const akinatorHandler = async ({ from, isAdmin, isGroup, body, message, groupMetadata }, client, settings) => {
+	const session = getSession(from);
 
-akinatorHandler = async ({ from, isAdmin, isGroup, body, message, groupMetadata }, client, settings) => {
-	if (!getSession(from)) {
+	if (!session) {
 		return;
 	}
 
-	const play = async () => {
+	const playAkinator = async () => {
 		const handle = await handleAnswer(from, body);
 		const { question, answers, status, progress, progressBar, arrow } = handle;
 
@@ -16,51 +16,36 @@ akinatorHandler = async ({ from, isAdmin, isGroup, body, message, groupMetadata 
 			return;
 		}
 
-		if (status === 'playing') {
-			await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				`${question}\n\n${answers
-					.map((v, i) => `${i + 1}. ${v}`)
-					.join('\n')}\n6. Exit\n7. Back/Undo\n\nProgress : ${progress.toFixed(2)}% ${arrow}\n${progressBar}`
-			);
-		}
+		const akinatorMessage = `${question}\n\n${answers
+			.map((v, i) => `${i + 1}. ${v}`)
+			.join('\n')}\n6. Exit\n7. Back/Undo\n\nProgress : ${progress.toFixed(2)}% ${arrow}\n${progressBar}`;
 
-		if (status === 'win') {
+		if (status === 'playing') {
+			await client[botNum].reply({ groupMetadata, from, quoted: message }, akinatorMessage);
+		} else if (status === 'win') {
+			const { absolute_picture_path: absolutePath, name, description } = answers[answers.length - 1];
+
 			await client[botNum].send(
 				from,
 				{
-					image: { url: answers[answers.length - 1].absolute_picture_path },
-					caption: `Name : ${answers[answers.length - 1].name}\nDescription : ${
-						answers[answers.length - 1].description
-					}\nProgress : ${progress}\n${progressBar}`
+					image: { url: absolutePath },
+					caption: `Name : ${name}\nDescription : ${description}\nProgress : ${progress}\n${progressBar}`
 				},
-				{ groupMetadata, quted: message }
+				{ groupMetadata, quoted: message }
 			);
-		}
-
-		if (status === 'exitted') {
-			await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You have exitted the game.');
-		}
-
-		if (status === 'back') {
+		} else if (status === 'exitted') {
+			await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You have exited the game.');
+		} else if (status === 'back') {
 			if (handle.isFailed) {
-				/* eslint-disable-next-line */
-				return await client[botNum].reply({ groupMetadata, from, quoted: message }, "You can't go back.");
+				await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You cannot go back.');
+			} else {
+				await client[botNum].reply({ groupMetadata, from, quoted: message }, akinatorMessage);
 			}
-
-			await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				`${question}\n\n${answers
-					.map((v, i) => `${i + 1}. ${v}`)
-					.join('\n')}\n6. Exit\n7. Back/Undo\n\nProgress : ${progress.toFixed(2)}% ${arrow}\n${progressBar}`
-			);
 		}
 	};
 
-	if (isGroup && (settings[from]?.games === 'enable' || isAdmin) && !configuration.OPTIONS.onlyLogs) {
-		await play();
-	} else if (!isGroup && !configuration.OPTIONS.onlyLogs) {
-		await play();
+	if ((!isGroup || isAdmin || settings[from]?.games === 'enable') && !configuration.OPTIONS.onlyLogs) {
+		await playAkinator();
 	}
 };
 

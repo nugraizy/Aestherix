@@ -6,9 +6,9 @@ import configuration from '../../helper/config/connect.js';
 import { getFilesize, getFilesizeFromBytes } from '../../utils/modules/index.js';
 import { reassign } from '../../helper/modules/parse-message.js';
 
-const handler = async (client, message, fetches) => {
+const deletedHandler = async (client, message, fetches) => {
 	try {
-		if (message === undefined) {
+		if (!message) {
 			return;
 		}
 
@@ -32,27 +32,16 @@ const handler = async (client, message, fetches) => {
 			mediaData,
 			groupMetadata
 		} = message;
+
 		const messages = message?.message?.message;
 
-		if (!messages) {
+		if (!messages || isBaileys || isFromMe || from === 'status@broadcast') {
 			return;
 		}
 
 		const type = Object.keys(messages)[0];
 
-		if (isBaileys) {
-			return;
-		}
-
-		if (isFromMe) {
-			return;
-		}
-
-		if (from === 'status@broadcast') {
-			return;
-		}
-
-		if (type === 'protocolMessage' || type === 'senderKeyDistributionMessage' || !type) {
+		if (!type || type === 'protocolMessage' || type === 'senderKeyDistributionMessage') {
 			return;
 		}
 
@@ -67,75 +56,24 @@ const handler = async (client, message, fetches) => {
 				}
 			};
 
-			const mentioningReply = messages[type].contextInfo?.participant ? messages[type].contextInfo.participant.toString() : '';
-			const replyParticipants = messages[type].contextInfo?.participant
-				? messages[type].contextInfo.participant.split('@')[0]
-				: '';
-
 			options.contextInfo.mentionedJid.push(sender, ...mentioning);
 
-			if (mentioningReply !== '') {
-				options.contextInfo.mentionedJid.push(mentioningReply);
-			}
+			let quotedMessage = '';
 
-			let typeQuoted = null;
-			const captionReply = `\nMessage Replied to : ${replyParticipants}\n`;
-			const quotedMessage =
-				Object.keys(messages)[0] === type &&
-				messages[type].contextInfo &&
-				messages[type].contextInfo.quotedMessage &&
-				(typeQuoted = Object.keys(messages[type].contextInfo.quotedMessage)[0])
-					? `${
-							messages[type].contextInfo.quotedMessage.conversation
-								? `${captionReply}Type : ${typeQuoted}\nPesan : ${messages[type].contextInfo.quotedMessage.conversation}`
-								: messages[type].contextInfo.quotedMessage.extendedTextMessage
-								? `${captionReply}Type : ${typeQuoted}\n\nPesan : ${messages[type].contextInfo.quotedMessage.extendedTextMessage.text}`
-								: messages[type].contextInfo.quotedMessage.documentMessage
-								? `${captionReply}Type : ${typeQuoted}\nFilename : ${messages[type].contextInfo.quotedMessage.documentMessage.fileName}\nMimetype : ${messages[type].contextInfo.quotedMessage.documentMessage.mimetype}`
-								: messages[type].contextInfo.quotedMessage.locationMessage
-								? `${captionReply}Type : ${typeQuoted}\nLat : ${messages[type].contextInfo.quotedMessage.locationMessage.degreesLatitude}\nLong : ${messages[type].contextInfo.quotedMessage.locationMessage.degreesLongitude}`
-								: messages[type].contextInfo.quotedMessage.contactMessage
-								? `${captionReply}Type : ${typeQuoted}\nDisplayname : ${messages[type].contextInfo.quotedMessage.contactMessage.displayName}`
-								: messages[type].contextInfo.quotedMessage.contactsArrayMessage
-								? `${captionReply}Type : ${typeQuoted}\nTotal Contact : ${
-										messages[type].contextInfo.quotedMessage.contactsArrayMessage.contacts.length
-								  }\nList Name :\n${messages /* eslint-disable-line */[
-										type
-								  ].contextInfo.quotedMessage.contactsArrayMessage.contacts /* eslint-disable-line */
-										.map((arr) => arr.displayName)
-										.join('\n')}`
-								: messages[type].contextInfo.quotedMessage.imageMessage
-								? `${captionReply}Type : ${typeQuoted}\nCaption : ${messages[type].contextInfo.quotedMessage.imageMessage.caption}` ==
-								  '' /* eslint-disable-line */
-									? 'No Caption'
-									: messages[type].contextInfo.quotedMessage.imageMessage.caption
-								: messages[type].contextInfo.quotedMessage.videoMessage
-								? `${captionReply}Type : ${typeQuoted}\nCaption : ${messages[type].contextInfo.quotedMessage.imageMessage.caption}` ==
-								  '' /* eslint-disable-line */
-									? 'No Caption'
-									: messages[type].contextInfo.quotedMessage.videoMessage.caption
-								: messages[type].contextInfo.quotedMessage.audioMessage
-								? `${captionReply}Type : ${typeQuoted}\n${messages[type].contextInfo.quotedMessage.audioMessage.ptt}` /* eslint-disable-line */
-									? `\nType Audio : Voice Note\nMimetype : ${messages[type].contextInfo.quotedMessage.audioMessage.mimetype}`
-									: `\nType Audio : Audio File\nMimetype : ${messages[type].contextInfo.quotedMessage.audioMessage.mimetype}`
-								: messages[type].contextInfo.quotedMessage.stickerMessage
-								? `${captionReply}Type : ${typeQuoted}`
-								: ''
-					  }` /* eslint-disable-line */
-					: '';
+			if (messages[type].contextInfo.quotedMessage) {
+				const quotedType = Object.keys(messages[type].contextInfo.quotedMessage)[0];
+				const quotedContent = messages[type].contextInfo.quotedMessage[quotedType];
+
+				quotedMessage = buildQuotedMessage(quotedType, quotedContent);
+			}
 
 			switch (type) {
 				case 'extendedTextMessage':
 				case 'conversation':
 					{
-						const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
-Name : ${pushname}
-Type : ${type}
-Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
-Message : ${body ? body : 'Unknown'}${quotedMessage}
-`.trim();
+						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, body || 'Unknown', quotedMessage);
 
-						await client[botNum].send(from, { text: stringDeleted, mentions: options.contextInfo.mentionedJid }, options);
+						await sendMessageWithMentions(client, from, stringDeleted, options);
 					}
 
 					break;
@@ -143,163 +81,125 @@ Message : ${body ? body : 'Unknown'}${quotedMessage}
 					{
 						const result = await client[botNum].downloadMediaMessage(mediaData);
 						const fileSize = getFilesizeFromBytes(Buffer.byteLength(result));
-						const sticker = await client[botNum].prepareSticker(
+						const sticker = await prepareAndSendSticker(
+							client[botNum],
 							result,
-							path.join(__dirname, `src/media/temporary_files/${filename}`),
-							mediaData.message.stickerMessage.isAnimated ? 'stickerAnimated' : 'imageMessage',
-							{ author: configuration.author, packname: configuration.packname }
+							filename,
+							mediaData.message.stickerMessage.isAnimated
 						);
-						const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
-Name : ${pushname}			
-Type : ${type}
-Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
-Size : ${fileSize}${quotedMessage}
-`.trim();
+						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, `\nSize : ${fileSize}`, quotedMessage);
 
-						await client[botNum]
-							.send(from, { sticker }, options)
-							.then(() => client[botNum].send(from, { text: stringDeleted }, options));
+						await client[botNum].send(from, { sticker }, options);
+						await sendMessageWithMentions(client, from, stringDeleted, options);
 					}
 
 					break;
 				case 'imageMessage':
 					{
-						const image = await client[botNum].downloadAndSaveMediaMessage(
-							extractMediaData,
-							path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
-							'imageMessage'
-						);
+						const image = await downloadAndSaveMediaMessage(client[botNum], extractMediaData, filename, 'imageMessage');
 						const fileSize = getFilesize(image);
-						const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
-Name : ${pushname}			
-Type : ${type}
-Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
-Size : ${fileSize}
-Caption : ${body ? body : 'Unknown'}${quotedMessage}
-`.trim();
+						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, `\nSize : ${fileSize}`, quotedMessage);
 
-						await client[botNum].send(
-							from,
-							{ image: await fs.readFile(image), caption: stringDeleted, mention: options.contextInfo.mentionedJid },
-							options
-						);
+						await sendImageMessageWithCaption(client[botNum], from, image, stringDeleted, options);
 						await fs.unlink(image);
 					}
 
 					break;
 				case 'videoMessage':
 					{
-						const video = await client[botNum].downloadAndSaveMediaMessage(
-							extractMediaData,
-							path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
-							'videoMessage'
-						);
+						const video = await downloadAndSaveMediaMessage(client[botNum], extractMediaData, filename, 'videoMessage');
 						const fileSize = getFilesize(video);
-						const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
-Name : ${pushname}			
-Type : ${type}
-Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
-Size : ${fileSize}
-Caption : ${body ? body : 'Unknown'}${quotedMessage}
-`.trim();
+						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, `\nSize : ${fileSize}`, quotedMessage);
 
-						await client[botNum].send(
-							from,
-							{ video: await fs.readFile(video), caption: stringDeleted, mention: options.contextInfo.mentionedJid },
-							options
-						);
+						await sendVideoMessageWithCaption(client[botNum], from, video, stringDeleted, options);
 						await fs.unlink(video);
 					}
 
 					break;
 				case 'audioMessage':
 					{
-						const audio = await client[botNum].downloadAndSaveMediaMessage(
-							extractMediaData,
-							path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
-							'audioMessage'
-						);
+						const audio = await downloadAndSaveMediaMessage(client[botNum], extractMediaData, filename, 'audioMessage');
 						const fileSize = getFilesize(audio);
-						const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
-Name : ${pushname}			
-Type : ${type}
-Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
-Audio Type : ${extractMediaData.ptt ? 'Voice Note' : 'Audio File'}
-Mimetype : ${extractMediaData.mimetype}
-Size : ${fileSize}${quotedMessage}${quotedMessage}
-`.trim();
+						const audioType = extractMediaData.ptt ? 'Voice Note' : 'Audio File';
+						const mimeType = extractMediaData.mimetype;
+						const stringDeleted = buildAudioDeletedTextMessage(
+							pushname,
+							type,
+							timeStamp,
+							audioType,
+							mimeType,
+							`Size : ${fileSize}`,
+							quotedMessage
+						);
 
-						await client[botNum]
-							.send(from, { audio: await fs.readFile(audio) }, options)
-							.then(() => client[botNum].send(from, { text: stringDeleted }, options));
+						await sendAudioMessageWithCaption(client[botNum], from, audio, stringDeleted, options);
 						await fs.unlink(audio);
 					}
 
 					break;
 				case 'contactMessage':
 					{
-						const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
-Name : ${pushname}			
-Type : ${type}
-Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
-Displayname : ${extractMediaData.displayName}${quotedMessage}
-`.trim();
+						const stringDeleted = buildContactDeletedTextMessage(
+							pushname,
+							type,
+							timeStamp,
+							extractMediaData.displayName,
+							quotedMessage
+						);
 
-						await client[botNum]
-							.send(
-								from,
-								{ contacts: { displayName: extractMediaData.displayName, contacts: [{ vcard: extractMediaData.vcard }] } },
-								options
-							)
-							.then(() => client[botNum].send(from, { text: stringDeleted }, options));
+						await sendContactMessage(
+							client[botNum],
+							from,
+							extractMediaData.displayName,
+							extractMediaData.vcard,
+							stringDeleted,
+							options
+						);
 					}
 
 					break;
 				case 'contactsArrayMessage':
 					{
-						const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
-Name : ${pushname}
-Type : ${type}
-Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
-Displayname :
-${extractMediaData.contacts.map((v, i) => `${i + 1}. ${v.displayName}`).join('\n')}${quotedMessage}
-`.trim();
+						const stringDeleted = buildContactsArrayDeletedTextMessage(
+							pushname,
+							type,
+							timeStamp,
+							extractMediaData.contacts,
+							quotedMessage
+						);
 
-						await client[botNum]
-							.send(
-								from,
-								{ contacts: { displayName: extractMediaData.displayName, contacts: extractMediaData.contacts } },
-								options
-							)
-							.then(() => client[botNum].send(from, { text: stringDeleted }, options));
+						await sendContactsArrayMessage(
+							client[botNum],
+							from,
+							extractMediaData.displayName,
+							extractMediaData.contacts,
+							stringDeleted,
+							options
+						);
 					}
 
 					break;
 				case 'locationMessage':
 				case 'liveLocationMessage':
 					{
-						const stringDeleted = `\`\`\`Message Deleted\n\`\`\`
-Name : ${pushname}			
-Type : ${type}
-Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
-Lat : ${extractMediaData.degreesLatitude}
-Long : ${extractMediaData.degreesLongitude}${quotedMessage}
-`.trim();
+						const stringDeleted = buildLocationDeletedTextMessage(
+							pushname,
+							type,
+							timeStamp,
+							extractMediaData.degreesLatitude,
+							extractMediaData.degreesLongitude,
+							quotedMessage
+						);
 
-						await client[botNum]
-							.send(
-								from,
-								{
-									location: {
-										degreesLatitude: extractMediaData.degreesLatitude,
-										degreesLongitude: extractMediaData.degreesLongitude,
-										jpegThumbnail: extractMediaData.jpegThumbnail,
-										name: 'Provided by Nanda, Void Bot. Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪'
-									}
-								},
-								options
-							)
-							.then(() => client[botNum].send(from, { text: stringDeleted }, options));
+						await sendLocationMessage(
+							client[botNum],
+							from,
+							extractMediaData.degreesLatitude,
+							extractMediaData.degreesLongitude,
+							extractMediaData.jpegThumbnail,
+							stringDeleted,
+							options
+						);
 					}
 
 					break;
@@ -310,6 +210,155 @@ Long : ${extractMediaData.degreesLongitude}${quotedMessage}
 	}
 };
 
-const deletedHandler = handler;
+const buildQuotedMessage = (type, content) => {
+	switch (type) {
+		case 'conversation':
+			return `Message Replied to : ${content.conversation || 'Unknown'}`;
+		case 'extendedTextMessage':
+			return `Message Replied to : ${content.text || 'Unknown'}`;
+		case 'documentMessage':
+			return `Filename : ${content.fileName || 'Unknown'}\nMimetype : ${content.mimetype || 'Unknown'}`;
+		case 'locationMessage':
+			return `Lat : ${content.degreesLatitude || 'Unknown'}\nLong : ${content.degreesLongitude || 'Unknown'}`;
+		case 'contactMessage':
+			return `Displayname : ${content.displayName || 'Unknown'}`;
+		case 'contactsArrayMessage':
+			const contacts = content.contacts || []; // eslint-disable-line
+			const contactNames = contacts.map((contact) => contact.displayName || 'Unknown').join('\n'); // eslint-disable-line
+
+			return `Total Contact : ${contacts.length || 0}\nList Name :\n${contactNames}`;
+		case 'imageMessage':
+		case 'videoMessage':
+			return `Caption : ${content.caption || 'No Caption'}`;
+		case 'audioMessage':
+			return content.ptt ? 'Type Audio : Voice Note' : 'Type Audio : Audio File';
+		case 'stickerMessage':
+			return '';
+		default:
+			return '';
+	}
+};
+
+const buildDeletedTextMessage = (pushname, type, timeStamp, body, quotedMessage) => {
+	return `\`\`\`Message Deleted\n\`\`\`
+Name : ${pushname}
+Type : ${type}
+Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
+Message : ${body}${quotedMessage}
+`.trim();
+};
+
+const buildAudioDeletedTextMessage = (pushname, type, timeStamp, audioType, mimeType, fileSize, quotedMessage) => {
+	return `\`\`\`Message Deleted\n\`\`\`
+Name : ${pushname}
+Type : ${type}
+Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
+Audio Type : ${audioType}
+Mimetype : ${mimeType}
+Size : ${fileSize}${quotedMessage}
+`.trim();
+};
+
+const buildContactDeletedTextMessage = (pushname, type, timeStamp, displayName, quotedMessage) => {
+	return `\`\`\`Message Deleted\n\`\`\`
+Name : ${pushname}
+Type : ${type}
+Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
+Displayname : ${displayName}${quotedMessage}
+`.trim();
+};
+
+const buildContactsArrayDeletedTextMessage = (pushname, type, timeStamp, contacts, quotedMessage) => {
+	const contactNames = contacts.map((contact, index) => `${index + 1}. ${contact.displayName || 'Unknown'}`).join('\n');
+
+	return `\`\`\`Message Deleted\n\`\`\`
+Name : ${pushname}
+Type : ${type}
+Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
+Displayname :
+${contactNames}${quotedMessage}
+`.trim();
+};
+
+const buildLocationDeletedTextMessage = (pushname, type, timeStamp, lat, long, quotedMessage) => {
+	return `\`\`\`Message Deleted\n\`\`\`
+Name : ${pushname}
+Type : ${type}
+Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
+Lat : ${lat}
+Long : ${long}${quotedMessage}
+`.trim();
+};
+
+const sendMessageWithMentions = async (client, from, message, options) => {
+	await client.send(from, { text: message, mentions: options.contextInfo.mentionedJid }, options);
+};
+
+const prepareAndSendSticker = async (client, data, filename, isAnimated) => {
+	const result = await client.downloadMediaMessage(data);
+	const sticker = await client.prepareSticker(
+		result,
+		path.join(__dirname, `src/media/temporary_files/${filename}`),
+		isAnimated ? 'stickerAnimated' : 'imageMessage',
+		{ author: configuration.author, packname: configuration.packname }
+	);
+
+	return sticker;
+};
+
+const downloadAndSaveMediaMessage = async (client, data, filename, messageType) => {
+	const savedPath = path.join(__dirname, `src/media/temporary_files/${filename}.${data.mimetype.split('/')[1]}`);
+
+	await client.downloadAndSaveMediaMessage(data, savedPath, messageType);
+
+	return savedPath;
+};
+
+const sendImageMessageWithCaption = async (client, from, image, caption, options) => {
+	await client.send(
+		from,
+		{ image: await fs.readFile(image), caption: caption, mention: options.contextInfo.mentionedJid },
+		options
+	);
+};
+
+const sendVideoMessageWithCaption = async (client, from, video, caption, options) => {
+	await client.send(
+		from,
+		{ video: await fs.readFile(video), caption: caption, mention: options.contextInfo.mentionedJid },
+		options
+	);
+};
+
+const sendAudioMessageWithCaption = async (client, from, audio, caption, options) => {
+	await client.send(from, { audio: await fs.readFile(audio) }, options);
+	await client.send(from, { text: caption }, options);
+};
+
+const sendContactMessage = async (client, from, displayName, vcard, caption, options) => {
+	await client.send(from, { contacts: { displayName: displayName, contacts: [{ vcard: vcard }] } }, options);
+	await client.send(from, { text: caption }, options);
+};
+
+const sendContactsArrayMessage = async (client, from, displayName, contacts, caption, options) => {
+	await client.send(from, { contacts: { displayName: displayName, contacts: contacts } }, options);
+	await client.send(from, { text: caption }, options);
+};
+
+const sendLocationMessage = async (client, from, lat, long, jpegThumbnail, caption, options) => {
+	await client.send(
+		from,
+		{
+			location: {
+				degreesLatitude: lat,
+				degreesLongitude: long,
+				jpegThumbnail: jpegThumbnail,
+				name: 'Provided by Nanda, Void Bot. Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪'
+			}
+		},
+		options
+	);
+	await client.send(from, { text: caption }, options);
+};
 
 export default deletedHandler;

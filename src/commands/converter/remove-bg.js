@@ -6,6 +6,9 @@ import configuration from '../../helper/config/connect.js';
 import { color, INFOLOG } from '../../utils/modules/index.js';
 import { removeBg } from '../../utils/converter/file-processing.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'removebg',
 	description: 'Remove background from image.',

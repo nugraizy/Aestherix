@@ -3,6 +3,9 @@ import fs from 'fs-extra';
 import configuration from '../../helper/config/connect.js';
 import { romanize } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'about',
 	description: 'Shows the bot information',

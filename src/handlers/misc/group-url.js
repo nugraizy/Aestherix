@@ -5,7 +5,7 @@ import configuration from '../../helper/config/connect.js';
 const checkURL = (input) =>
 	/(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])/g.test(input);
 
-const handler = async (
+const antiGroupLinkHandler = async (
 	{ from, isAdmin, isGroup, isBotAdmin, message, mediaData, sender, isFromMe, body, isOwner, groupMetadata },
 	client,
 	settings
@@ -26,7 +26,7 @@ const handler = async (
 		if (!isBotAdmin) {
 			return await client[botNum].reply(
 				{ groupMetadata, from, quoted: message },
-				'Anti-URL is enabled, but i am not admin, so i cannot kick you.'
+				'Anti-URL is enabled, but I am not an admin, so I cannot kick you.'
 			);
 		}
 
@@ -51,13 +51,11 @@ const handler = async (
 		} else {
 			await client[botNum].reply(
 				{ groupMetadata, from, quoted: message },
-				'You have been banned from this group for URL. And you will be kicked in any second.'
+				'You have been banned from this group for posting URLs. You will be kicked shortly.'
 			);
 			await client[botNum].groupParticipantsUpdate(from, [sender], 'remove');
 		}
 	}
 };
-
-const antiGroupLinkHandler = handler;
 
 export default antiGroupLinkHandler;

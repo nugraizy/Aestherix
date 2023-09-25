@@ -27,6 +27,7 @@
   "___comment": "If you happen to occur colorthief error (while using spotifycover command), try reinstall colorthief.",
   "dependencies": {
     "@adiwajshing/baileys": "github:nugraizy/baileys",
+    "@hidden-finder/didyoumean": "^1.1.0",
     "@napi-rs/canvas": "^0.1.40",
     "@vitalets/google-translate-api": "^9.0.0",
     "aki-api": "^6.0.8",
@@ -118,6 +119,7 @@
     "@hapi/boom": "^9.1.4",
     "@types/node": "18.8.2",
     "@types/sharp": "^0.32.0",
+    "bun-types": "latest",
     "eslint": "^8.37.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.27.5",
@@ -127,8 +129,7 @@
     "nodemon": "^2.0.22",
     "pino": "^7.6.5",
     "pm2": "^5.1.2",
-    "qrcode-terminal": "^0.12.0",
-    "bun-types": "latest"
+    "qrcode-terminal": "^0.12.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

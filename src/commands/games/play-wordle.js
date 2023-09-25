@@ -4,6 +4,9 @@ import configuration from '../../helper/config/connect.js';
 import { Wordle } from '../../utils/games/index.js';
 import { INFOLOG, color } from '../../utils/modules/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'wordle',
 	description: 'Play Wordle',

@@ -12,6 +12,9 @@ import { S_WHATSAPP_NET } from '../../helper/index.js';
  */
 const indexs = (arr, id) => arr.findIndex((v) => v === id);
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'unbanned',
 	description: 'Unbanned user',

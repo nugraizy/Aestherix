@@ -2,6 +2,9 @@ import { getAyat, getSurahAudio, getSurahDetail, extension, mime } from '../../u
 
 const regex = (input) => /[1-9][0-9]*/.test(input);
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'surahaudio',
 	description: 'Get surah audio',

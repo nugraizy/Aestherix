@@ -1,5 +1,8 @@
 import { slot as slots } from '../../utils/games/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'slotmachine',
 	description: 'Play Slot Machine',

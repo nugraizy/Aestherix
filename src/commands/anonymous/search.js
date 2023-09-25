@@ -1,6 +1,9 @@
 import { delay } from '../../utils/modules/index.js';
 import { search } from '../../utils/anonymous/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'search',
 	description: 'Search for a partner',

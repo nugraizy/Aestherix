@@ -1,5 +1,8 @@
 import { startAkinator } from '../../utils/games/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'akinator',
 	description: 'Play Akinator',

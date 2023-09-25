@@ -1,5 +1,8 @@
 import { cnnindonesia } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'cnnindonesia',
 	description: 'Showing latest news in Indonesia from CNN',

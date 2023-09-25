@@ -1,5 +1,8 @@
 import fs from 'fs-extra';
 
+/**
+ * @param {import('meow').Result} cli
+ */
 export const resetSession = async (cli) => {
 	const sessionName = `${cli.input[0] ?? 'Session-debug'}`;
 
@@ -12,6 +15,9 @@ export const resetSession = async (cli) => {
 	}
 };
 
+/**
+ * @param {import('meow').Result} cli
+ */
 export const clearDBConnection = async (cli) => {
 	if (!(await fs.exists(`./src/media/connection_databases/${cli.input[0] ?? 'Session-debug'}.json`))) {
 		await fs.writeFile(`./src/media/connection_databases/${cli.input[0] ?? 'Session-debug'}.json`, JSON.stringify({}));

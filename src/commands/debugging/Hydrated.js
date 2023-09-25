@@ -11,6 +11,9 @@ const randomString = (chars, length) => {
 	return strings;
 };
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'hydrated',
 	description: 'Send hydrated image.',

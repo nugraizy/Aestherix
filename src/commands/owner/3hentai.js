@@ -1,5 +1,8 @@
 import { _3hentai, img2pdf, mime } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: '3hentai',
 	description: 'Search Doujin from 3hentai.net',

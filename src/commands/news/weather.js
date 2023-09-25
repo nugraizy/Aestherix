@@ -1,5 +1,8 @@
 import { getWeather } from '../../utils/news/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'weather',
 	description: 'Get Weather on Your City',

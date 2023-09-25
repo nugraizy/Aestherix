@@ -1,5 +1,8 @@
 import { wpDownload, wpLatest, wpSearch } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'waifuplay',
 	description: 'Search Anime or Get Latest Updates from Waifuplay.me.',

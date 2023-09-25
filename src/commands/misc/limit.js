@@ -1,5 +1,8 @@
 import { checkLimit } from '../../helper/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'limit',
 	description: 'Check your daily limit.',

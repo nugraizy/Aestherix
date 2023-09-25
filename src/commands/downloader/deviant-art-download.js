@@ -18,6 +18,9 @@ const regex = (input) => {
 	return { status: false, message: 'This URL is not a valid Deviant Art URL. Try another URL.' };
 };
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'deviantartdl',
 	description: 'Download images from Deviant Art',

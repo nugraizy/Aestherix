@@ -35,9 +35,9 @@ const MEDIA_TYPE = {
 
 /**
  * Extract main body of the WhatsApp message.
- * @param {{message: any}} m
- * @param {string} type
- * @returns {string}
+ * @param {import('@adiwajshing/baileys').proto.WebMessageInfo} m
+ * @param {keyof import('@adiwajshing/baileys').proto.IMessage} type
+ * @returns {string | 'Unknown Body'}
  */
 export const extractBody = (m, type) => {
 	if (type === 'conversation') {
@@ -76,8 +76,8 @@ export const extractBody = (m, type) => {
 
 /**
  * Extract quoted body of WhatsApp message.
- * @param {{message: any}} m
- * @param {string} type
+ * @param {import('@adiwajshing/baileys').proto.WebMessageInfo} m
+ * @param {keyof import('@adiwajshing/baileys').proto.IMessage} type
  * @returns {string}
  */
 export const extractQuotedBody = (m, type) => {
@@ -107,12 +107,12 @@ export const extractQuotedBody = (m, type) => {
 
 /**
  * Find type quoted of the WhatsApp message.
- * @param {{message: any}} m
- * @param {string} type
- * @returns {string}
+ * @param {import('@adiwajshing/baileys').proto.WebMessageInfo} m
+ * @param {keyof import('@adiwajshing/baileys').proto.IMessage} type
+ * @returns {keyof import('@adiwajshing/baileys').proto.IMessage}
  */
-export const extractTypeQuoted = (m, type) =>
-	m.message?.extendedTextMessage
+export const extractTypeQuoted = (m, type) => {
+	return m.message?.extendedTextMessage
 		? Object.keys(
 				m.message.extendedTextMessage.contextInfo
 					? m.message.extendedTextMessage.contextInfo.quotedMessage
@@ -121,11 +121,12 @@ export const extractTypeQuoted = (m, type) =>
 					: ''
 		  )[0] /* eslint-disable-line*/
 		: type;
+};
 
 /**
  * Extract mentions metadata from WhatsApp message.
- * @param {{message: any}} m
- * @param {string} type
+ * @param {import('@adiwajshing/baileys').proto.WebMessageInfo} m
+ * @param {(keyof import('@adiwajshing/baileys').proto.IMessage | 'mentionText')} type
  * @returns {string[]}
  */
 export const extractMentionedJid = (m, type) => {
@@ -140,9 +141,10 @@ export const extractMentionedJid = (m, type) => {
 
 /**
  * Extract metadata WhatsApp message.
- * @param {{message: any}} m
- * @param {string} type
- * @returns {string[]}
+ * @param {import('@adiwajshing/baileys').proto.WebMessageInfo} m
+ * @param {keyof import('@adiwajshing/baileys').proto.IMessage} typeM
+ * @param {keyof import('@adiwajshing/baileys').proto.IMessage} typeQ
+ * @returns {string[] | null}
  */
 export const extractMetadata = (m, typeM, typeQ) => {
 	return (
@@ -150,10 +152,14 @@ export const extractMetadata = (m, typeM, typeQ) => {
 		m.message?.[typeM] ||
 		m.message?.[typeQ]?.message?.[Object.keys(m.message[typeQ].message)[0]] ||
 		m.message?.[typeQ] ||
-		{}
+		null
 	);
 };
 
+/**
+ * @param {string} str
+ * @returns
+ */
 const toBinary = (str) => Buffer.from(str);
 
 /**

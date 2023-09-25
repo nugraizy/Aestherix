@@ -1,5 +1,8 @@
 import { nickname } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'nickname',
 	description: 'Find nickname.',

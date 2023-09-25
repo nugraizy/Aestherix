@@ -1,3 +1,6 @@
+/**
+ * @type {import('./types.js').Plugins}
+ */
 export default {
 	name: '',
 	description: '',
@@ -7,5 +10,5 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	run: async (_, client) => {},
+	run: async (_, client) => {}
 };

@@ -3,6 +3,9 @@ import parser from 'yargs-parser';
 import { numberWithCommas, isURL } from '../../utils/modules/index.js';
 import { Github } from '../../utils/github/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'gitstalk',
 	description: 'Lookup Github user',

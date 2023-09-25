@@ -2,6 +2,9 @@ import { animeName, animeNameOptions as _options } from '../../utils/index.js';
 
 const animeNameOptions = Object.keys(_options);
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'animename',
 	description: 'Find your Nickname in Anime Style.',

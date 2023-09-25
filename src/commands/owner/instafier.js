@@ -2,6 +2,9 @@ import { instafier } from '../../utils/index.js';
 
 let instafierState = false;
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'instafier',
 	description: 'Change current state of the Instafier listener.',

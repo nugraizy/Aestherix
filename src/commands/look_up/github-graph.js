@@ -1,5 +1,8 @@
 import { GithubGraph } from '../../helper/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'githubgraph',
 	description: 'Lookup for User Contribution Graph',

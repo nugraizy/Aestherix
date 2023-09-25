@@ -2,6 +2,9 @@ import path from 'path';
 
 import { textToSpeech } from '../../utils/converter/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'text2speech',
 	description: 'Convert text to speech',

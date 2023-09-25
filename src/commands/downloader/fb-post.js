@@ -6,6 +6,9 @@ import { fbDl } from '../../utils/facebook/index.js';
 
 const regex = (input) => /^(https?:\/\/)?((w{3}\.)|(m\.)?)?(facebook|fb)\.(com|watch)\/.*/.test(input);
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'fbpost',
 	description: 'Downloads a Facebook post',

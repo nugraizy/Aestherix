@@ -26,6 +26,9 @@ class CustomArray extends Array {
 /* eslint-disable-line */ const print = ({ from, quoted }, ...args) =>
 	client[botNum].reply({ from: from || where, quoted }, format(...args));
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'eval',
 	description: 'Evaluates code.',

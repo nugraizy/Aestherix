@@ -4,6 +4,9 @@ import { Cache } from '../../helper/modules/cache.js';
 
 const cache = new Cache();
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'nowhatsapp',
 	description: 'Check if the number is exist or not.',

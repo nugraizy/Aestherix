@@ -1,6 +1,9 @@
 import { isURL } from '../../utils/modules/index.js';
 import { tiny } from '../../utils/shortener/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'tiny',
 	description: 'URL shortener using tinyurl',

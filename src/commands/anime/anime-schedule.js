@@ -2,6 +2,9 @@ import { translate } from '@vitalets/google-translate-api';
 
 import { animeReleases } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'animeschedule',
 	description: 'Check Anime schedule.',

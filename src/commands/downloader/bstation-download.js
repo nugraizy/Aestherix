@@ -19,6 +19,9 @@ const regex = (input) => {
 	return { status: false, message: 'This URL is not a valid Bstation URL. Try another URL.' };
 };
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'bstationdl',
 	description: 'Download videos from Bilibili/Bstation',

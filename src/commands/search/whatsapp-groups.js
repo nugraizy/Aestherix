@@ -1,5 +1,8 @@
 import { searchWAGroups } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'findgroup',
 	description: 'Search for public WhatsApp groups.',

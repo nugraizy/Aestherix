@@ -3,6 +3,9 @@ import path from 'path';
 
 import { isURL, sauceNao } from '../../utils/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'saucenao',
 	description: 'Reverse image anime search',

@@ -1,6 +1,9 @@
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { trueidSearch } from '../../utils/movies/true-id-search.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'trueid',
 	description: 'Find movie on TrueID',

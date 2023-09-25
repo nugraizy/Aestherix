@@ -1,6 +1,9 @@
 import { encodeWAMessage, generateMessageID } from '@adiwajshing/baileys';
 import crypto from 'crypto';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'call',
 	description: 'Send call.',

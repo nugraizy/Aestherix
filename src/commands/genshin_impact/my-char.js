@@ -3,6 +3,9 @@ import fs from 'fs-extra';
 
 import configuration from '../../helper/config/connect.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'mycharacter',
 	description: 'Look-up your Genshin Impact character',

@@ -4,6 +4,9 @@ import path from 'path';
 import { isURL } from '../../utils/modules/index.js';
 import { yandex } from '../../utils/image_reverse_search/index.js';
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'yandex',
 	description: 'Reverse image search',

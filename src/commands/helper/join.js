@@ -14,6 +14,9 @@ const regex = (input) => {
 	return false;
 };
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'join',
 	description: 'Ask bot to join your group',

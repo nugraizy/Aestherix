@@ -11,6 +11,9 @@ const path = {
 };
 const handler = new Cache();
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'checkdeleted',
 	description: 'Fetch every deleted messages in chat',

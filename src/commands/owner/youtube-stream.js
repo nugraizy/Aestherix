@@ -5,6 +5,9 @@ import { Cache } from '../../helper/modules/cache.js';
 
 const lives = new Cache();
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'youtubelive',
 	description: 'Listen to a YouTube live stream.',

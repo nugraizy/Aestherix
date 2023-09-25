@@ -23,6 +23,9 @@ const format = {
 	Search: 'Ｓｅａｒｃｈ'
 };
 
+/**
+ * @type {import('../types.js').Plugins}
+ */
 export default {
 	name: 'menu',
 	description: 'Shows the menu',
