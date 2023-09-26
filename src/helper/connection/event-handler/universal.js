@@ -85,17 +85,12 @@ export const handleConnectionUpdate = async (
 
 			if (!receivedPendingNotifications && !shouldWait) {
 				/**
-				 * @type {import('../type.js').AdvancedClient}
-				 */
-				const client = {};
-
-				/**
 				 * @typedef {string} BotNum
 				 * @type {BotNum}
 				 */
 				const botNum = Client.user.id;
 
-				global.client;
+				global.client = {};
 				global.botNum = botNum;
 
 				client[Client.user.id] = Client;

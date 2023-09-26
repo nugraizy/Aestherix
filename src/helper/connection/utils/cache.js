@@ -3,9 +3,12 @@ import dayjs from 'dayjs';
 import chokidar from 'chokidar';
 import fs from 'fs-extra';
 import syntaxError from 'syntax-error';
+import os from 'os';
 
 import configuration from '../../config/connect.js';
 import { color, ERRLOG, INFOLOG, loadFiles } from '../../../utils/modules/index.js';
+
+const hostPlatform = os.platform();
 
 const nocache = (module, newFile = false) => {
 	let param = '?v=' + Date.now();
@@ -23,7 +26,10 @@ export const ICON = {
 };
 
 export const normalizeImportPath = (file) => {
-	return path.resolve(path.join(file));
+	const absolutePath =
+		hostPlatform === 'win32' ? 'file:' + path.win32.resolve(path.win32.join(file)) : path.resolve(path.join(file));
+
+	return absolutePath;
 };
 
 export const saveContacts = (store, contactsList) => {
