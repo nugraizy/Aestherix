@@ -71,7 +71,7 @@ export default {
 				capt += `Tot. Sections : ${highlights.highlights.length}\n`;
 				capt += `Tot. Estimated media per Section : ${numberWithCommas(highlights.highlights.length * 2)}\n\n`;
 
-				await client[botNum].reply(capt.trim());
+				await client[botNum].reply(capt.trim(), { from, quoted: message, groupMetadata });
 
 				if (highlights.highlights.length === 1) {
 					for (const media of highlights.highlights[0].dataHighlight.slice(0, 2)) {

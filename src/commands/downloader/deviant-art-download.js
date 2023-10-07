@@ -43,7 +43,7 @@ export default {
 			const regexs = regex(querie.trim());
 
 			if (!regexs.status) {
-				await client[botNum].reply(regexs.message);
+				await client[botNum].reply(regexs.message, { from, quoted: message, groupMetadata });
 
 				continue;
 			}
@@ -51,7 +51,7 @@ export default {
 			const result = await downloadDeviantArt(querie);
 
 			if ('error' in result) {
-				await client[botNum].reply(result.error);
+				await client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
 
 				continue;
 			}

@@ -292,7 +292,11 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 						Tempcmds.cooldown
 					}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v}`).join(', ')}.`;
 
-					client[botNum].reply(help);
+					client[botNum].reply(help, {
+						groupMetadata: message.groupMetadata,
+						from: message.from,
+						quoted: message.message
+					});
 
 					if (cooldownUser?.requests) {
 						cooldownUser.requests = false;

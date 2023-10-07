@@ -24,6 +24,6 @@ export default {
 			capt += `\nYou Lose ${slot.lose}! Try again?\nSlot Machine by Void Bot. Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 		}
 
-		await client[botNum].reply(capt);
+		await client[botNum].reply(capt, { from, quoted: message, groupMetadata });
 	}
 };

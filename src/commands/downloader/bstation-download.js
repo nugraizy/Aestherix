@@ -44,7 +44,7 @@ export default {
 			const regexs = regex(querie.trim());
 
 			if (!regexs.status) {
-				return await client[botNum].reply(regexs.message);
+				return await client[botNum].reply(regexs.message, { from, quoted: message, groupMetadata });
 			}
 
 			const result = await bilibiliDetailTv({ aid: regexs.message.trim() });

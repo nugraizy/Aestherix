@@ -19,7 +19,7 @@ const handleWordle = async ({ from, isAdmin, isGroup, body, message, sender, gro
 
 			await client[botNum].send(from, response, { groupMetadata, quoted: message });
 		} else {
-			await client[botNum].reply(guess.board);
+			await client[botNum].reply(guess.board, { from, quoted: message, groupMetadata });
 		}
 	};
 
