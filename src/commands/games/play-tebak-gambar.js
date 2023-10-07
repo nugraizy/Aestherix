@@ -4,7 +4,7 @@ import { color, INFOLOG } from '../../utils/modules/index.js';
 import { startTG } from '../../utils/games/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'tebakgambar',
@@ -26,10 +26,11 @@ export default {
 		const game = await startTG(client, message.from, message, 20);
 
 		if (game.status === 'playing') {
-			return await client[botNum].reply(
-				{ groupMetadata: message.groupMetadata, from: message.from, quoted: game.data },
-				`Your game is already playing!\n${game.remaining}s left`
-			);
+			return await client[botNum].reply(`Your game is already playing!\n${game.remaining}s left`, {
+				groupMetadata: message.groupMetadata,
+				from: message.from,
+				quoted: game.data
+			});
 		}
 	}
 };

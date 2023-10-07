@@ -6,7 +6,7 @@ import { getTimeSince } from '../../utils/modules/index.js';
 const DB_PATH = `./src/media/connection_databases/${configuration.cli.input[0] ?? 'Session-debug'}.json`;
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'tags',
@@ -19,7 +19,7 @@ export default {
 	status: 'enable',
 	async run({ isOwner, from, message, args, settings, cmd, groupMetadata }, client, store) {
 		if (!isOwner) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You are not allowed to use this command');
+			return await client[botNum].reply('You are not allowed to use this command', { from, quoted: message, groupMetadata });
 		}
 
 		const messages = configuration.OPTIONS.json
@@ -32,14 +32,18 @@ export default {
 			dataMessage = await (
 				await import('../../helper/modules/reassign-messages-object.js')
 			).reassign(JSON.parse(JSON.stringify(dataMessage)), client, store, false);
-			await client[botNum].reply({ from: dataMessage?.from, quoted: dataMessage.message }, 'Here.');
+			await client[botNum].reply('Here.', {
+				from: dataMessage.from,
+				quoted: dataMessage.message,
+				groupMetadata: dataMessage.groupMetadata
+			});
 			await client[botNum].reply(
-				{ from: dataMessage?.from, quoted: dataMessage.message },
 				`Message Metadata : 
 
 Possibly Hidetag : ${dataMessage.mention.length > 0 && !dataMessage.body.match(/@[0-9]+/g) ? 'Yup' : 'Nope'}
 Type Message : ${dataMessage.type}
-Tot. Tags : ${dataMessage.mention.length}`
+Tot. Tags : ${dataMessage.mention.length}`,
+				{ from: dataMessage?.from, quoted: dataMessage.message }
 			);
 
 			return;
@@ -56,7 +60,7 @@ Tot. Tags : ${dataMessage.mention.length}`
 		}
 
 		if (dataMessages.length === 0) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'No messages scraped in this chat');
+			return await client[botNum].reply('No messages scraped in this chat', { from, quoted: message, groupMetadata });
 		}
 
 		dataMessages = dataMessages.filter(
@@ -66,10 +70,11 @@ Tot. Tags : ${dataMessage.mention.length}`
 		);
 
 		if (dataMessages.length === 0) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				`Your tags is not found. Chats scraped : ${messages.length}`
-			);
+			return await client[botNum].reply(`Your tags is not found. Chats scraped : ${messages.length}`, {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		dataMessages = dataMessages.map((v) => ({

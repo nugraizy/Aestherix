@@ -8,7 +8,7 @@ import { tiktokAPI } from '../../utils/tiktok/index.js';
 const regex = (input) => /(?:https:?\/{2})?(?:w{3}|vm|vt|t)?\.?tiktok.com\/([^\s&]+)/gi.test(input);
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'tiktokmusic',
@@ -24,28 +24,28 @@ export default {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please provide a URL');
+			return await client[botNum].reply('Please provide a URL', { from, quoted: message, groupMetadata });
 		}
 
 		let { _: urls } = parser(query);
 
 		if (urls.length === 1 && !isURL(urls[0])) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a valid url');
+			return await client[botNum].reply('Please specify a valid url', { from, quoted: message, groupMetadata });
 		}
 
 		if (urls.length === 1 && !regex(urls[0])) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a valid TikTok url');
+			return await client[botNum].reply('Please specify a valid TikTok url', { from, quoted: message, groupMetadata });
 		}
 
 		urls = removeDuplicatesArray(urls.map((v) => v.trim()));
 
 		for (const url of urls) {
 			if (!isURL(url)) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a valid url');
+				await client[botNum].reply('Please specify a valid url', { from, quoted: message, groupMetadata });
 
 				continue;
 			} else if (!regex(url)) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a valid TikTok url');
+				await client[botNum].reply('Please specify a valid TikTok url', { from, quoted: message, groupMetadata });
 
 				continue;
 			}
@@ -62,10 +62,11 @@ export default {
 					`[${color(time, 'cyan')}]`,
 					`⚠️ ${color('Error while downloading TikTok Music', '#ff0000')} for ${color(prettyNumber, '#ff71ce')}`
 				);
-				await client[botNum].reply(
-					{ groupMetadata, from, quoted: message },
-					`Error while downloading TikTok Music\n\n${url.split(' ')[0]}`
-				);
+				await client[botNum].reply(`Error while downloading TikTok Music\n\n${url.split(' ')[0]}`, {
+					from,
+					quoted: message,
+					groupMetadata
+				});
 
 				continue;
 			}

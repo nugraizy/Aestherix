@@ -1,7 +1,7 @@
 import { getListSurah } from '../../utils/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'getsurah',
@@ -16,7 +16,6 @@ export default {
 		const lists = await getListSurah();
 
 		await client[botNum].reply(
-			{ groupMetadata, from, quoted: message },
 			lists
 				.map(
 					(v, i) =>
@@ -24,7 +23,8 @@ export default {
 							v.tempat_turun
 						}\nAudio : ${v.audio}\n`
 				)
-				.join('\n')
+				.join('\n'),
+			{ from, quoted: message, groupMetadata }
 		);
 	}
 };

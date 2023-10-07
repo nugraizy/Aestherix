@@ -1,5 +1,5 @@
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'revoke',
@@ -12,20 +12,22 @@ export default {
 	status: 'enable',
 	async run({ isAdmin, isBotAdmin, isOwner, from, message, groupMetadata, sender }, client) {
 		if (!isAdmin && !isOwner) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'You are not admin. This commands is only for admins.'
-			);
+			return await client[botNum].reply('You are not admin. This commands is only for admins.', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		if (!isBotAdmin) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'Bot is not admin, Please promote admin before using moderation commands.'
-			);
+			return await client[botNum].reply('Bot is not admin, Please promote admin before using moderation commands.', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
-		const code = (await client[botNum].updateGroup(from, undefined, 'REVOKE'))[0];
+		const code = (await client[botNum].updateGroup(from, 'REVOKE'))[0];
 
 		await client[botNum].send(
 			from,

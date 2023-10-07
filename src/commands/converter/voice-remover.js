@@ -6,7 +6,7 @@ import { soundRemover } from '../../utils/converter/index.js';
 import { extension, audioFormat, videoFormat } from '../../utils/misc/mimetype.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'soundremover',
@@ -34,10 +34,11 @@ export default {
 		client
 	) {
 		if (!isQuotedAudio && !isQuotedDocument && !isMediaVid) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'Please send/reply an audio/video to remove voice'
-			);
+			return await client[botNum].reply('Please send/reply an audio/video to remove voice', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		const time = dayjs().format('HH:mm:ss DD/MM');
@@ -55,13 +56,17 @@ export default {
 			!audioFormat.includes(extractMediaData.mimetype) &&
 			!videoFormat.includes(extractMediaData.mimetype)
 		) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'This file is not an audio/video');
+			return await client[botNum].reply('This file is not an audio/video', { from, quoted: message, groupMetadata });
 		}
 
 		const { result } = await soundRemover(file, prettyNumber);
 
 		if (/--?(voice|suara)/.test(query) && /--?(instrument(s)?)/.test(query)) {
-			return await client[botNum].reply({ from, quoted: message }, `${time}\n${result.vocal}\n${result.instrumental}`);
+			return await client[botNum].reply(`${time}\n${result.vocal}\n${result.instrumental}`, {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		} else if (/--?(voice|suara)/.test(query)) {
 			await client[botNum].send(
 				from,

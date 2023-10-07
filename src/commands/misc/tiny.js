@@ -2,7 +2,7 @@ import { isURL } from '../../utils/modules/index.js';
 import { tiny } from '../../utils/shortener/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'tiny',
@@ -15,15 +15,15 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a URL');
+			return await client[botNum].reply('You must provide a URL', { from, quoted: message, groupMetadata });
 		}
 
 		if (!isURL(query)) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a valid URL');
+			return await client[botNum].reply('Please specify a valid URL', { from, quoted: message, groupMetadata });
 		}
 
 		const urls = await tiny(query);
 
-		await client[botNum].reply({ groupMetadata, from, quoted: message }, urls);
+		await client[botNum].reply(urls, { from, quoted: message, groupMetadata });
 	}
 };

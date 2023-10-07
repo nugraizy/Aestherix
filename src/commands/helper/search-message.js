@@ -1,5 +1,7 @@
+import { delay } from '@adiwajshing/baileys';
+
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'searchmessage',
@@ -19,15 +21,16 @@ export default {
 		} else {
 			capt += `Found ${messages.length} messages.\n\n`;
 
-			await client[botNum].reply({ groupMetadata, from, quoted: message }, capt.trim());
+			await client[botNum].reply(capt.trim(), { from, quoted: message, groupMetadata });
 
 			for (const messageElement of messages) {
-				await client[botNum].reply({ groupMetadata, from, quoted: messageElement }, 'Found it.');
+				await client[botNum].reply('Found it.', { from, quoted: messageElement, groupMetadata });
+				await delay(200);
 			}
 
 			return;
 		}
 
-		await client[botNum].reply({ groupMetadata, from, quoted: message }, capt.trim());
+		await client[botNum].reply(capt.trim(), { from, quoted: message, groupMetadata });
 	}
 };

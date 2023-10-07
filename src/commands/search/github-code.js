@@ -3,7 +3,7 @@ import { Github } from '../../utils/github/index.js';
 const _baseUrl = (input) => `https://github.com/${input}`;
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'githubcode',
@@ -16,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, type, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
+			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -74,7 +74,7 @@ ${data[index].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).
 		let result = await git.searchCode(query.trim());
 
 		if (result.total_count === 0) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Code not found.');
+			return await client[botNum].reply('Code not found.', { from, quoted: message, groupMetadata });
 		}
 
 		result = result.items.map((v) => ({

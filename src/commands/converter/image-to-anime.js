@@ -4,7 +4,7 @@ import { imageToAnime } from '../../utils/converter/file-processing.js';
 import { color, INFOLOG, ERRLOG } from '../../utils/modules/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'toanime',
@@ -31,10 +31,11 @@ export default {
 		}
 
 		if (!isMediaImage && args[1] !== '-variant') {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'Please send/reply an image to convert to anime'
-			);
+			return await client[botNum].reply('Please send/reply an image to convert to anime', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		bufferMessage = await client[botNum].downloadMediaMessage(mediaData);

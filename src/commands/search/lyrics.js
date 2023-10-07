@@ -2,7 +2,7 @@ import { removeDuplicatesArray } from '../../utils/modules/index.js';
 import { arq } from '../../utils/arq/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'findlyrics',
@@ -15,7 +15,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, type, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ from, quoted: message }, 'You must provide a query.');
+			return await client[botNum].reply('You must provide a query.');
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -62,7 +62,7 @@ Song : ${data[index].song}
 			const result = await arq.findLyrics(querie.trim());
 
 			if ('error' in result || !result.ok) {
-				client[botNum].reply({ groupMetadata, from, quoted: message }, JSON.stringify(result));
+				client[botNum].reply(JSON.stringify(result));
 				continue;
 			}
 

@@ -1,7 +1,7 @@
 import { wpDownload, wpLatest, wpSearch } from '../../utils/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'waifuplay',
@@ -20,7 +20,7 @@ export default {
 					const result = await wpSearch(args.slice(2).join(' '));
 
 					if ('error' in result) {
-						return await client[botNum].reply({ from, quoted: message }, result.error);
+						return await client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
 					}
 
 					await client[botNum].send(
@@ -94,7 +94,7 @@ Url : ${result.link}`
 					const result = await wpLatest();
 
 					if ('error' in result) {
-						return await client[botNum].reply({ groupMetadata, from, quoted: message }, result.error);
+						return await client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
 					}
 
 					for (const { image, title, episode, status, type, link } of result.results) {
@@ -124,7 +124,7 @@ Type : ${type}`,
 			case args[1] === 'download':
 				{
 					if (type !== 'listResponseMessage' && type !== 'templateButtonReplyMessage') {
-						return await client[botNum].reply({ from, quoted: message }, 'wait, you cannot do that.');
+						return await client[botNum].reply('wait, you cannot do that.', { from, quoted: message, groupMetadata });
 					}
 
 					const result = await wpDownload(args[2]);
@@ -139,7 +139,7 @@ Type : ${type}`,
 `;
 					}
 
-					await client[botNum].reply({ groupMetadata, from, quoted: message }, caption);
+					await client[botNum].reply(caption, { from, quoted: message, groupMetadata });
 				}
 
 				break;

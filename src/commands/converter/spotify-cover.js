@@ -1,7 +1,7 @@
 import { SpotifyCover } from '../../helper/canvas/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'spotifycover',
@@ -14,7 +14,7 @@ export default {
 	status: 'enable',
 	async run({ from, message, query, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please provide a query');
+			return await client[botNum].reply('Please provide a query', { from, quoted: message, groupMetadata });
 		}
 
 		const cover = new SpotifyCover();

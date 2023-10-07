@@ -6,7 +6,7 @@ import configuration from '../../helper/config/connect.js';
 import { color, INFOLOG, waifu2xV2 } from '../../utils/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'waifu2xv2',
@@ -36,16 +36,16 @@ export default {
 
 		if (!isMediaImage && !isQuotedSticker) {
 			return client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
 				'Please reply/send image with caption the command. This command also accept sticker (reply one with command).'
 			);
 		}
 
 		if (isQuotedSticker && extractMediaData.isAnimated) {
-			return client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'The sticker are animated. Please reply static stickers only.'
-			);
+			return client[botNum].reply('The sticker are animated. Please reply static stickers only.', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		INFOLOG(`[${color(time, 'cyan')}]`, `${color('Enhancing image', '#01cdfe')} ${color(prettyNumber, '#ff71ce')}`);

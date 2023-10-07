@@ -2,7 +2,7 @@ import { delay } from '../../utils/modules/index.js';
 import { search } from '../../utils/anonymous/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'search',
@@ -17,24 +17,24 @@ export default {
 		const searching = search(from, 20, client, message);
 
 		if (typeof searching === 'boolean' && searching) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Searching for a partner...');
+			return await client[botNum].reply('Searching for a partner...', { from, quoted: message, groupMetadata });
 		}
 
 		if (typeof searching === 'boolean' && !searching) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You are already searching for a partner!');
+			return await client[botNum].reply('You are already searching for a partner!', { from, quoted: message, groupMetadata });
 		}
 
 		if (typeof searching === 'object' && searching.partner2) {
-			await client[botNum].reply({ groupMetadata, quoted: message, from: searching.partner2 }, 'Searching for a partner...');
+			await client[botNum].reply('Searching for a partner...', { from: searching.partner2, quoted: message, groupMetadata });
 
 			await delay(1_500);
 
-			client[botNum].reply({ groupMetadata, quoted: searching.messages1, from: searching.partner1 }, 'Your partner is found!');
-			client[botNum].reply({ groupMetadata, quoted: searching.messages2, from: searching.partner2 }, 'Your partner is found!');
+			client[botNum].reply('Your partner is found!', { from: searching.partner1, quoted: searching.messages1, groupMetadata });
+			client[botNum].reply('Your partner is found!', { from: searching.partner2, quoted: searching.messages2, groupMetadata });
 		} else if (searching.status === 'chatting') {
-			await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You are already chatting with someone!');
+			await client[botNum].reply('You are already chatting with someone!', { from, quoted: message, groupMetadata });
 		} else {
-			await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You are already searching for a partner!');
+			await client[botNum].reply('You are already searching for a partner!', { from, quoted: message, groupMetadata });
 		}
 	}
 };

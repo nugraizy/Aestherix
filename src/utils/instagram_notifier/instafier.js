@@ -1,4 +1,3 @@
-import dotenv from 'dotenv';
 import { fileTypeFromBuffer } from 'file-type';
 import fs from 'fs';
 import { IgApiClient } from 'instagram-private-api';
@@ -8,8 +7,6 @@ import sharp from 'sharp';
 import configuration from '../../helper/config/connect.js';
 import { Cache } from '../../helper/modules/cache.js';
 import { imageFormat as IMAGE_MIMETYPE } from '../misc/mimetype.js';
-
-dotenv.config();
 
 class Instafier {
 	#username = process.env.INSTAGRAM_USERNAME;

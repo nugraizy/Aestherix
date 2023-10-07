@@ -7,7 +7,7 @@ import { color, INFOLOG } from '../../utils/modules/index.js';
 const DEFAULT_TYPE = 'image';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'memegen',
@@ -40,30 +40,32 @@ export default {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!isMediaImage && !(isQuotedSticker || isSticker)) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'Please send/reply a media to convert to sticker'
-			);
+			return await client[botNum].reply('Please send/reply a media to convert to sticker', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		if (!stickerAble) {
 			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
 				`Please send/reply a regular media to be meme'd. Can't convert ${typeQuoted}, only : ${typeSticker
 					.slice(
 						typeSticker.findIndex((v) => v === 'videoMessage'),
 						1
 					)
 					.join(', ')
-					.capitalize()}`
+					.capitalize()}`,
+				{ from, quoted: message, groupMetadata }
 			);
 		}
 
 		if (!query) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'Please provide a query, use & to split top/bottom text'
-			);
+			return await client[botNum].reply('Please provide a query, use & to split top/bottom text', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		const parsed = parser(query.toLowerCase(), {
@@ -81,7 +83,7 @@ export default {
 		query = query.replace(regexs, '');
 
 		if (isQuotedSticker && extractMediaData.isAnimated) {
-			return client[botNum].reply({ groupMetadata, from, quoted: message }, 'Cannot use animated sticker.');
+			return client[botNum].reply('Cannot use animated sticker.', { from, quoted: message, groupMetadata });
 		}
 
 		const image = await client[botNum].downloadMediaMessage(mediaData);
@@ -97,7 +99,7 @@ export default {
 		);
 
 		if (buffer.error) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, buffer.error);
+			return await client[botNum].reply(buffer.error, { from, quoted: message, groupMetadata });
 		}
 
 		if (parsed.isStickers) {

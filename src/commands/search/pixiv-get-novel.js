@@ -19,7 +19,7 @@ const regex = (input) => {
 };
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'pixivnovelget',
@@ -32,7 +32,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
+			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -43,16 +43,17 @@ export default {
 			const regexs = regex(querie.trim());
 
 			if (!regexs.status) {
-				return await client[botNum].reply({ groupMetadata, from, quoted: message }, regexs.message);
+				return await client[botNum].reply(regexs.message, { from, quoted: message, groupMetadata });
 			}
 
 			const data = await getNovelContent(regexs.message);
 
 			if ('error' in data) {
-				await client[botNum].reply(
-					{ groupMetadata, from, quoted: message },
-					`Failed while looking for Pixiv novel content\n\n${data.error}\n${querie}`
-				);
+				await client[botNum].reply(`Failed while looking for Pixiv novel content\n\n${data.error}\n${querie}`, {
+					from,
+					quoted: message,
+					groupMetadata
+				});
 				continue;
 			}
 

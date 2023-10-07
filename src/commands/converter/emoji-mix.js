@@ -6,7 +6,7 @@ import configuration from '../../helper/config/connect.js';
 import { emojimix } from '../../utils/converter/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'emojimixer',
@@ -19,17 +19,17 @@ export default {
 	status: 'enable',
 	async run({ query, from, filename, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please enter a query');
+			return await client[botNum].reply('Please enter a query', { from, quoted: message, groupMetadata });
 		}
 
 		const regex = query.match(emojiReg());
 
 		if (!regex) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please enter a valid emoji');
+			return await client[botNum].reply('Please enter a valid emoji', { from, quoted: message, groupMetadata });
 		}
 
 		if (regex.length < 2) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please enter 2 valid emoji');
+			return await client[botNum].reply('Please enter 2 valid emoji', { from, quoted: message, groupMetadata });
 		}
 
 		const emojis = _.chunk(regex, 2);
@@ -42,7 +42,7 @@ export default {
 			const result = await emojimix(arr[0], arr[1]);
 
 			if (typeof result === 'object' && 'error' in result) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, result.error);
+				await client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
 
 				continue;
 			}

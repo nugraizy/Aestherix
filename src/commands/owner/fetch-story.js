@@ -9,7 +9,7 @@ const STATUS = 'status@broadcast';
 const STATUS_PATH = `./src/media/connection_databases/${configuration.cli.input[0] ?? 'Session-debug'}.json`;
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'fetchstory',
@@ -22,7 +22,7 @@ export default {
 	status: 'enable',
 	async run({ from, message, isOwner, query, groupMetadata }, client, store) {
 		if (!isOwner) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You are not allowed to use this command');
+			return await client[botNum].reply('You are not allowed to use this command', { from, quoted: message, groupMetadata });
 		}
 
 		try {
@@ -70,7 +70,7 @@ export default {
 				null;
 
 			if (!data) {
-				return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Story not found');
+				return await client[botNum].reply('Story not found', { from, quoted: message, groupMetadata });
 			}
 
 			caption += ` • ${
@@ -81,7 +81,7 @@ export default {
 			caption += `Texts : ${data.stories?.extendedTextMessage?.length ?? 0}\n`;
 			caption += `Images : ${data.stories?.imageMessage?.length ?? 0}\n`;
 			caption += `Videos : ${data.stories?.videoMessage?.length ?? 0}\n\n`;
-			await client[botNum].reply({ groupMetadata, from, quoted: message }, caption.trim());
+			await client[botNum].reply(caption.trim(), { from, quoted: message, groupMetadata });
 
 			for (const type of Object.keys(data.stories)) {
 				for (const message of data.stories[type]) {
@@ -105,6 +105,10 @@ export default {
 						await client[botNum].relayMessage(from, messages.message, {
 							cachedGroupMetadata: () => groupMetadata,
 							messageId: messages.key.id
+						});
+
+						process.nextTick(() => {
+							client[botNum];
 						});
 					}
 				}

@@ -3,7 +3,7 @@ import yargsParser from 'yargs-parser';
 import { brainlySearch } from '../../utils/brainly/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'brainly',
@@ -16,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query');
+			return await client[botNum].reply('You must provide a query', { from, quoted: message, groupMetadata });
 		}
 
 		const parseOptions = yargsParser(query, {
@@ -32,7 +32,7 @@ export default {
 		const brainly = await brainlySearch(query, options);
 
 		if ('error' in brainly) {
-			return await client[botNum].reply({ from, quoted: message }, brainly.error);
+			return await client[botNum].reply(brainly.error, { from, quoted: message, groupMetadata });
 		}
 
 		let capt = 'Brainly'.formatHeaders();
@@ -48,6 +48,6 @@ export default {
 		}
 
 		capt += '\nBrainly by Void Bot. Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪';
-		await client[botNum].reply({ groupMetadata, from, quoted: message }, capt.trim());
+		await client[botNum].reply(capt.trim(), { from, quoted: message, groupMetadata });
 	}
 };

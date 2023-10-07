@@ -1,7 +1,4 @@
 import axios from 'axios';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 export class Github {
 	#access = process.env.GITHUB_ACCESS;
@@ -27,7 +24,7 @@ export class Github {
 						'/search/repositories',
 						{ q: encodeURI(repo), /* eslint-disable-line */ per_page: 100 },
 						'GET',
-						true,
+						true
 					);
 
 					resolve(res);
@@ -44,7 +41,7 @@ export class Github {
 						'/search/issues',
 						{ q: `${encodeURI(keyword)}+user:adiwajshing`, /* eslint-disable-line */ per_page: 100 },
 						'GET',
-						true,
+						true
 					);
 
 					resolve(res);
@@ -86,8 +83,8 @@ export class Github {
 			method,
 			headers: {
 				Authorization: `Token ${access ? this.#access : this.#personal}`,
-				Accept: 'application/vnd.github.text-match+json',
-			},
+				Accept: 'application/vnd.github.text-match+json'
+			}
 		});
 
 		return data;
@@ -101,9 +98,9 @@ export class Github {
 						axios({
 							url: `${this.#urlBase}/users/${v.login}`,
 							Authorization: `Token ${this.#access}`,
-							method: 'GET',
-						}),
-					),
+							method: 'GET'
+						})
+					)
 				)
 			).map(({ data }) => data);
 		}
@@ -111,7 +108,7 @@ export class Github {
 		const { data } = await axios({
 			url: `${this.#urlBase}/users/${input}`,
 			Authorization: `Token ${this.#access}`,
-			method: 'GET',
+			method: 'GET'
 		});
 
 		return data;

@@ -1,7 +1,7 @@
 import { layarkaca21 } from '../../utils/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'layarkaca21',
@@ -14,7 +14,7 @@ export default {
 	status: 'enable',
 	run: async ({ query, message, from, args, type, groupMetadata }, client) => {
 		if (!query) {
-			return client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
+			return client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -63,7 +63,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 		const result = await layarkaca21(query);
 
 		if ('error' in result) {
-			client[botNum].reply({ from, quoted: message }, result.error);
+			client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
 		}
 
 		await client[botNum].send(

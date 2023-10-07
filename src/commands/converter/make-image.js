@@ -1,7 +1,7 @@
 import { createImage } from '../../utils/deepai/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'makeimage',
@@ -14,10 +14,10 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
+			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
-		await client[botNum].reply({ from, quoted: message }, 'Creating. Please wait...');
+		await client[botNum].reply('Creating. Please wait...', { from, quoted: message, groupMetadata });
 
 		const result = await createImage(query);
 

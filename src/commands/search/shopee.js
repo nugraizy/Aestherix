@@ -2,7 +2,7 @@ import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/ind
 import { shopeeProduct } from '../../utils/misc/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'shopee',
@@ -15,7 +15,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
+			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -26,7 +26,7 @@ export default {
 			const product = await shopeeProduct(querie.trim());
 
 			if ('error' in product) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, product.error);
+				await client[botNum].reply(product.error, { from, quoted: message, groupMetadata });
 				continue;
 			}
 

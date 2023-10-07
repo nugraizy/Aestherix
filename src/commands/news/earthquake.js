@@ -1,7 +1,7 @@
 import { getEarthquake } from '../../utils/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'gempa',

@@ -5,7 +5,7 @@ import configuration from '../../helper/config/connect.js';
 import { S_WHATSAPP_NET } from '../../helper/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'banned',
@@ -18,11 +18,11 @@ export default {
 	status: 'enable',
 	async run({ from, message, isOwner, args, mediaData, mention, bodyQuoted, query, groupMetadata }, client) {
 		if (!query && bodyQuoted) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please provide user to ban');
+			return await client[botNum].reply('Please provide user to ban', { from, quoted: message, groupMetadata });
 		}
 
 		if (!isOwner) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You are not allowed to use this command');
+			return await client[botNum].reply('You are not allowed to use this command', { from, quoted: message, groupMetadata });
 		}
 
 		const userBanned = await fs.readJSON('./databases/users/banned.json');
@@ -35,10 +35,11 @@ export default {
 			await fs.writeJSON('./databases/users/banned.json', userBanned);
 
 			client[botNum].updateBlockStatus(args[3], 'block');
-			await client[botNum].reply(
-				{ from, quoted: JSON.parse(args.slice(4)) },
-				'You are banned from using bot.\n\nReason : Abusing Report command.'
-			);
+			await client[botNum].reply('You are banned from using bot.\n\nReason : Abusing Report command.', {
+				from,
+				quoted: JSON.parse(args.slice(4)),
+				groupMetadata
+			});
 
 			return;
 		}
@@ -127,7 +128,7 @@ export default {
 
 		if (bodyQuoted) {
 			if (userBanned.includes(mediaData.participant)) {
-				return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Already banned');
+				return await client[botNum].reply('Already banned', { from, quoted: message, groupMetadata });
 			}
 
 			configuration.cache.bannedlist.push(mediaData.participant);

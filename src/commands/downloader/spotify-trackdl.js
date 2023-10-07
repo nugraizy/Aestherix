@@ -11,7 +11,7 @@ const regex = (input) =>
 	);
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'spotifydl',
@@ -26,7 +26,7 @@ export default {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please provide a URL');
+			return await client[botNum].reply('Please provide a URL', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -34,15 +34,16 @@ export default {
 		queries = removeDuplicatesArray(queries);
 
 		if (queries.length === 1 && isURL(queries) && !regex(queries)) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'This is not a valid Spotify URL.');
+			return await client[botNum].reply('This is not a valid Spotify URL.', { from, quoted: message, groupMetadata });
 		}
 
 		for (const Query of queries) {
 			if (isURL(Query) && !regex(Query)) {
-				return await client[botNum].reply(
-					{ groupMetadata, from, quoted: message },
-					`[ ${Query} ] This isn't a valid Spotify URL.`
-				);
+				return await client[botNum].reply(`[ ${Query} ] This isn't a valid Spotify URL.`, {
+					from,
+					quoted: message,
+					groupMetadata
+				});
 			}
 
 			const searchTerm = await searchYoutube(Query);
@@ -54,7 +55,7 @@ export default {
 			);
 
 			if ('error' in audio) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, audio.error);
+				await client[botNum].reply(audio.error, { from, quoted: message, groupMetadata });
 
 				ERRLOG(
 					`[${color(time, 'cyan')}]`,
@@ -68,7 +69,7 @@ export default {
 				capt += `\n\nTitle : ${title}\n`;
 				capt += `Duration : ${timestamp ?? 'No Data'}\n`;
 
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, capt.trim());
+				await client[botNum].reply(capt.trim(), { from, quoted: message, groupMetadata });
 				await client[botNum].send(from, {
 					document: await toOpus('opus', {
 						input: path.join(__dirname, `src/media/temporary_files/${filename}`),

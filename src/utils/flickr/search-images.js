@@ -1,7 +1,4 @@
 import Flickr from 'flickr-sdk';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const _key = process.env.FLICKR_KEY;
 
@@ -39,7 +36,7 @@ export class FlickerAPI extends Flickr {
 						tags: photo.tags.tag.map((v) => v.raw).join(', '),
 						posted: photo.dates.taken,
 						source: photo.urls.url[0]._content,
-						download: this.urlDownload(photo.id, photo.server, photo.originalsecret, photo.originalformat),
+						download: this.urlDownload(photo.id, photo.server, photo.originalsecret, photo.originalformat)
 					});
 				} catch (err) {
 					reject(err);

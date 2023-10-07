@@ -21,7 +21,7 @@ const akinatorHandler = async ({ from, isAdmin, isGroup, body, message, groupMet
 			.join('\n')}\n6. Exit\n7. Back/Undo\n\nProgress : ${progress.toFixed(2)}% ${arrow}\n${progressBar}`;
 
 		if (status === 'playing') {
-			await client[botNum].reply({ groupMetadata, from, quoted: message }, akinatorMessage);
+			await client[botNum].reply(akinatorMessage, { from, quoted: message, groupMetadata });
 		} else if (status === 'win') {
 			const { absolute_picture_path: absolutePath, name, description } = answers[answers.length - 1];
 
@@ -34,12 +34,12 @@ const akinatorHandler = async ({ from, isAdmin, isGroup, body, message, groupMet
 				{ groupMetadata, quoted: message }
 			);
 		} else if (status === 'exitted') {
-			await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You have exited the game.');
+			await client[botNum].reply('You have exited the game.', { from, quoted: message, groupMetadata });
 		} else if (status === 'back') {
 			if (handle.isFailed) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You cannot go back.');
+				await client[botNum].reply('You cannot go back.', { from, quoted: message, groupMetadata });
 			} else {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, akinatorMessage);
+				await client[botNum].reply(akinatorMessage, { from, quoted: message, groupMetadata });
 			}
 		}
 	};

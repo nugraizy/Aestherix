@@ -4,7 +4,7 @@ const regex = (url) =>
 	/^(https?:\/\/)?(www\.)?mediafire\.com\/(file|view|download)\/[a-zA-Z0-9]+(\/[a-zA-Z0-9_\-.~%]+)?(\/file)?.*$/.test(url);
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'mediafire',
@@ -15,29 +15,29 @@ export default {
 	cooldown: 5,
 	limit: 7,
 	status: 'enable',
-	run: async ({ from, message, query, grouppMetadata }, client) => {
+	run: async ({ from, message, query, groupMetadata }, client) => {
 		if (!query) {
-			return client[botNum].reply({ grouppMetadata, from, quoted: message }, 'You must provide a query.');
+			return client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if (!regex(query)) {
-			return client[botNum].reply({ grouppMetadata, from, quoted: message }, 'Please specify a valid Mediafire url.');
+			return client[botNum].reply('Please specify a valid Mediafire url.', { from, quoted: message, groupMetadata });
 		}
 
 		const result = await mediafire(query);
 
 		if ('error' in result) {
-			return client[botNum].reply({ grouppMetadata, from, quoted: message }, result.error);
+			return client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
 		}
 
 		client[botNum].reply(
-			{ from, quoted: message },
 			`${'Mediafire Downloader'.formatHeaders()}
 		
 Filename: ${result.filename}
 Filesize: ${result.filesize}
 Filetype: ${result.filetype}
-Uploaded: ${result.uploaded}`
+Uploaded: ${result.uploaded}`,
+			{ from, quoted: message, groupMetadata }
 		);
 		client[botNum].send(
 			from,
@@ -45,7 +45,7 @@ Uploaded: ${result.uploaded}`
 				[result.filetype]: { url: result.dlLink },
 				...(result.filetype === 'document' ? { fileName: result.filename, mimetype: result.mimetype } : {})
 			},
-			{ grouppMetadata, quoted: message }
+			{ groupMetadata, quoted: message }
 		);
 	}
 };

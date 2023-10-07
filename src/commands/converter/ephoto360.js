@@ -13,7 +13,7 @@ const dataJSON = JSON.parse(fs.readFileSync('./databases/textmaker/ephoto360url.
 const defaulType = 'image';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'ephoto360',
@@ -27,7 +27,7 @@ export default {
 	status: 'enable',
 	async run({ from, message, query, args, cmd, filename, isMediaImage, extractMediaData, typeQuoted, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please provide a query');
+			return await client[botNum].reply('Please provide a query', { from, quoted: message, groupMetadata });
 		}
 
 		let {
@@ -102,10 +102,11 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 		models = !_.isNumber(parsed[0]) ? [randomize(dataJSON).url] : [_.get(dataJSON, parsed[0] - 1)?.url].filter(Boolean);
 
 		if (models?.length === 0) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				`Model ${models[0]} not found\n Type : !${this.name} -type`
-			);
+			return await client[botNum].reply(`Model ${models[0]} not found\n Type : !${this.name} -type`, {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		for (const model of models) {
@@ -124,7 +125,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 			const result = await ephoto360(model, parsed.slice(1).join(' '), buffers);
 
 			if ('error' in result) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, `something went wrong:\n\n${result.error}`);
+				await client[botNum].reply(`something went wrong:\n\n${result.error}`, { from, quoted: message, groupMetadata });
 
 				continue;
 			}

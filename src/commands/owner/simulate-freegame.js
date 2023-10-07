@@ -30,7 +30,7 @@ async function updateGames() {
 }
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'freegame',
@@ -43,11 +43,11 @@ export default {
 	status: 'enable',
 	async run({ isOwner, from, args, message, query, groupMetadata }, client) {
 		if (!isOwner) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You are not allowed to use this command');
+			return await client[botNum].reply('You are not allowed to use this command', { from, quoted: message, groupMetadata });
 		}
 
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a status to simulate');
+			return await client[botNum].reply('You must provide a status to simulate', { from, quoted: message, groupMetadata });
 		}
 
 		try {
@@ -55,10 +55,11 @@ export default {
 				case 'status':
 				case 'stats':
 					{
-						await client[botNum].reply(
-							{ groupMetadata, from, quoted: message },
-							configuration.intervals.from.includes(from) ? 'Enabled' : 'Disabled'
-						);
+						await client[botNum].reply(configuration.intervals.from.includes(from) ? 'Enabled' : 'Disabled', {
+							from,
+							quoted: message,
+							groupMetadata
+						});
 					}
 
 					break;
@@ -66,11 +67,11 @@ export default {
 				case 'off':
 					{
 						if (!configuration.intervals.from.includes(from)) {
-							return await client[botNum].reply({ from, quoted: message }, 'Already disabled');
+							return await client[botNum].reply('Already disabled', { from, quoted: message, groupMetadata });
 						}
 
 						configuration.intervals.from.splice(configuration.intervals.from.indexOf(from), 1);
-						await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Simulate Freegame Disabled');
+						await client[botNum].reply('Simulate Freegame Disabled', { from, quoted: message, groupMetadata });
 					}
 
 					break;
@@ -78,7 +79,7 @@ export default {
 				case 'on':
 					{
 						if (configuration.intervals.from.includes(from)) {
-							return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Already enabled');
+							return await client[botNum].reply('Already enabled', { from, quoted: message, groupMetadata });
 						}
 
 						configuration.intervals.from.push(from);
@@ -87,16 +88,17 @@ export default {
 							await updateGames();
 						}
 
-						await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Simulate Freegame Enabled');
+						await client[botNum].reply('Simulate Freegame Enabled', { from, quoted: message, groupMetadata });
 					}
 
 					break;
 				default:
 					{
-						await client[botNum].reply(
-							{ groupMetadata, from, quoted: message },
-							'Usage: !spotifyplayer [enable|disable|status]'
-						);
+						await client[botNum].reply('Usage: !freegame [enable|disable|status]', {
+							from,
+							quoted: message,
+							groupMetadata
+						});
 					}
 
 					break;

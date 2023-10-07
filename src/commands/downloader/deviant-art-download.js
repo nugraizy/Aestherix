@@ -19,7 +19,7 @@ const regex = (input) => {
 };
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'deviantartdl',
@@ -30,9 +30,9 @@ export default {
 	limit: 4,
 	cooldown: 8,
 	status: 'enable',
-	async run({ query, from, message, grouppMetadata }, client) {
+	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ grouppMetadata, from, quoted: message }, 'You must provide a query.');
+			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -43,7 +43,7 @@ export default {
 			const regexs = regex(querie.trim());
 
 			if (!regexs.status) {
-				await client[botNum].reply({ grouppMetadata, from, quoted: message }, regexs.message);
+				await client[botNum].reply(regexs.message);
 
 				continue;
 			}
@@ -51,7 +51,7 @@ export default {
 			const result = await downloadDeviantArt(querie);
 
 			if ('error' in result) {
-				await client[botNum].reply({ grouppMetadata, from, quoted: message }, result.error);
+				await client[botNum].reply(result.error);
 
 				continue;
 			}
@@ -70,7 +70,7 @@ Author : ${result.author}
 Favourites : ${numberWithCommas(result.favourites)}
 Views : ${numberWithCommas(result.views)}`
 				},
-				{ grouppMetadata, quoted: message }
+				{ groupMetadata, quoted: message }
 			);
 		}
 	}

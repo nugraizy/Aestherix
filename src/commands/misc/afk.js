@@ -1,7 +1,7 @@
 import { setAfk } from '../../helper/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'afk',
@@ -14,10 +14,11 @@ export default {
 	status: 'enable',
 	async run({ message, from, query, isGroup, sender, pushname, groupMetadata }, client) {
 		if (!isGroup) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'This command is only available in group chat.'
-			);
+			return await client[botNum].reply('This command is only available in group chat.', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		setAfk(sender, from, query, pushname);

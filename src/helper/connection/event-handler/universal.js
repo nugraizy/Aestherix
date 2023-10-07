@@ -29,8 +29,11 @@ const handlerPath = {
 
 /**
  *
- * @param {import('../type.js').Client} Client
- * @param {{lastDisconnect: import('../type.js').Disconnect['lastDisconnect'], connection: import('../type.js').ConnectionState, receivedPendingNotifications: boolean, clientMqttListen: import('mqtt').Client, OPTIONS: {[_: string]: boolean}, cli: import('../socket/socket.js').Cli}} param1
+ * @typedef {import('../../../types/Socket/index.js').ClientSocket} Client
+ * @typedef {import('../../../types/Socket/index.js').ConnectionStates['lastDisconnect']} LastDisconnect
+ * @typedef {import('../../../types/Socket/index.js').WAConnectionStates} Connection
+ * @param {Client} Client
+ * @param {{lastDisconnect: LastDisconnect, connection: Connection, receivedPendingNotifications: boolean, clientMqttListen: import('mqtt').Client, OPTIONS: {[_: string]: boolean}, cli: import('../socket/socket.js').Cli}} param1
  */
 export const handleConnectionUpdate = async (
 	Client,
@@ -40,9 +43,6 @@ export const handleConnectionUpdate = async (
 		if (connection === 'close') {
 			const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
 
-			/**
-			 * @type {DisconnectReason} DisconnectReason
-			 */
 			if (reason === DisconnectReason.badSession) {
 				console.log('Bad session, Please delete your previous session and do a rescan...');
 				process.exit(0);
@@ -93,7 +93,7 @@ export const handleConnectionUpdate = async (
 				global.client = {};
 				global.botNum = botNum;
 
-				client[Client.user.id] = Client;
+				client[botNum] = Client;
 
 				(await import('../../modules/utils.js')).assign(client);
 

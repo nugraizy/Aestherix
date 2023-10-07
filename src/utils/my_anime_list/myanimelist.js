@@ -1,10 +1,7 @@
 import axios from 'axios';
-import dotenv from 'dotenv';
 import dayjs from 'dayjs';
 
 import { ERRLOG, color } from '../modules/index.js';
-
-dotenv.config();
 
 const BASE_URL = (path) => `https://api.myanimelist.net/v2${path}`;
 const TYPE = {

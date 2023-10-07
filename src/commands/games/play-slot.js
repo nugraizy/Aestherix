@@ -1,7 +1,7 @@
 import { slot as slots } from '../../utils/games/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'slotmachine',
@@ -24,6 +24,6 @@ export default {
 			capt += `\nYou Lose ${slot.lose}! Try again?\nSlot Machine by Void Bot. Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 		}
 
-		await client[botNum].reply({ groupMetadata, from, quoted: message }, capt);
+		await client[botNum].reply(capt);
 	}
 };

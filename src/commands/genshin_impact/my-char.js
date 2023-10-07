@@ -4,7 +4,7 @@ import fs from 'fs-extra';
 import configuration from '../../helper/config/connect.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'mycharacter',
@@ -20,10 +20,11 @@ export default {
 		const index = data.findIndex((v) => v.user === sender);
 
 		if (index === -1) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'Your character seems nowhere in the Database.'
-			);
+			return await client[botNum].reply('Your character seems nowhere in the Database.', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		query = `${data[index].uid} -char ${query}`;

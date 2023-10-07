@@ -13,7 +13,7 @@ import { S_WHATSAPP_NET } from '../../helper/index.js';
 const indexs = (arr, id) => arr.findIndex((v) => v === id);
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'unbanned',
@@ -26,11 +26,11 @@ export default {
 	status: 'enable',
 	async run({ from, message, isOwner, mediaData, mention, bodyQuoted, query, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please provide user to unban');
+			return await client[botNum].reply('Please provide user to unban', { from, quoted: message, groupMetadata });
 		}
 
 		if (!isOwner) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You are not allowed to use this command');
+			return await client[botNum].reply('You are not allowed to use this command', { from, quoted: message, groupMetadata });
 		}
 
 		const userBanned = await fs.readJSON('./databases/users/banned.json');
@@ -118,7 +118,7 @@ export default {
 
 		if (bodyQuoted) {
 			if (!userBanned.includes(mediaData.participant)) {
-				return await client[botNum].reply({ from, quoted: message }, 'not banned');
+				return await client[botNum].reply('not banned', { from, quoted: message, groupMetadata });
 			}
 
 			const index = userBanned.indexOf(mediaData.participant);

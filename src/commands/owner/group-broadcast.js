@@ -17,7 +17,7 @@ const check4Duplicate = (chats) => {
 };
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'groupbc',
@@ -31,11 +31,11 @@ export default {
 	async run({ isOwner, from, query, message, sender, groupMetadata }, client) {
 		try {
 			if (!isOwner) {
-				return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You are not allowed to use this command');
+				return await client[botNum].reply('You are not allowed to use this command', { from, quoted: message, groupMetadata });
 			}
 
 			if (!query) {
-				return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must enter text');
+				return await client[botNum].reply('You must enter text', { from, quoted: message, groupMetadata });
 			}
 
 			const getGroups = await client[botNum].groupFetchAllParticipating();
@@ -54,7 +54,7 @@ export default {
 			}
 		} catch (err) {
 			log(err);
-			await client[botNum].reply({ groupMetadata, from, quoted: message }, err.stack);
+			await client[botNum].reply(err.stack, { from, quoted: message, groupMetadata });
 		}
 	}
 };

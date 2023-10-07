@@ -1,7 +1,7 @@
 import { extractZalgo } from '../../utils/modules/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'extractzalgo',
@@ -14,9 +14,9 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You need to provide text');
+			return await client[botNum].reply('You need to provide text', { from, quoted: message, groupMetadata });
 		}
 
-		await client[botNum].reply({ groupMetadata, from, quoted: message }, extractZalgo(query));
+		await client[botNum].reply(extractZalgo(query), { from, quoted: message, groupMetadata });
 	}
 };

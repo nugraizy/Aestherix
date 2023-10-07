@@ -3,7 +3,7 @@ import parser from 'yargs-parser';
 import { removeDuplicatesArray, getWaifu, gifToMp4 } from '../../utils/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'waifupic',
@@ -16,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, sender, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ from, quoted: message }, 'You must provide a query.');
+			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if (args[1] === 'next' || args[1] === 'prev') {
@@ -81,7 +81,7 @@ export default {
 			const result = await getWaifu(querie.trim(), nsfw ? 'nsfw' : 'sfw');
 
 			if ('error' in result) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, result.error);
+				await client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
 
 				continue;
 			}

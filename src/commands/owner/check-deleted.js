@@ -12,7 +12,7 @@ const path = {
 const handler = new Cache();
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'checkdeleted',
@@ -25,7 +25,7 @@ export default {
 	status: 'enable',
 	async run({ isOwner, from, message, args, cmd, groupMetadata }, client, store) {
 		if (!isOwner) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You are not allowed to use this command');
+			return await client[botNum].reply('You are not allowed to use this command', { from, quoted: message, groupMetadata });
 		}
 
 		const messages = configuration.OPTIONS.json

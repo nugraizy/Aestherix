@@ -45,7 +45,7 @@ const pause = async (client, containers) => {
 };
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'simulates',
@@ -58,11 +58,11 @@ export default {
 	status: 'enable',
 	async run({ isOwner, from, args, message, groupMetadata }, client, store) {
 		if (!isOwner) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You are not allowed to use this command');
+			return await client[botNum].reply('You are not allowed to use this command', { from, quoted: message, groupMetadata });
 		}
 
 		if (args.length === 1) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a status to simulate');
+			return await client[botNum].reply('You must provide a status to simulate', { from, quoted: message, groupMetadata });
 		}
 
 		const started = Date.now();
@@ -77,8 +77,8 @@ export default {
 							case 'stats':
 								{
 									await client[botNum].reply(
-										{ groupMetadata, from, quoted: message },
-										Object.keys(configuration.presences).includes('available') ? 'Available' : 'Unavailable'
+										Object.keys(configuration.presences).includes('available') ? 'Available' : 'Unavailable',
+										{ from, quoted: message, groupMetadata }
 									);
 								}
 
@@ -87,7 +87,7 @@ export default {
 							case 'off':
 								{
 									if ('unavailable' in configuration.presences) {
-										return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Already offline');
+										return await client[botNum].reply('Already offline', { from, quoted: message, groupMetadata });
 									}
 
 									if ('available' in configuration.presences) {
@@ -105,10 +105,11 @@ export default {
 									};
 
 									if (from) {
-										await client[botNum].reply(
-											{ groupMetadata, from, quoted: message },
-											'Simulate Available Presence Disabled'
-										);
+										await client[botNum].reply('Simulate Available Presence Disabled', {
+											from,
+											quoted: message,
+											groupMetadata
+										});
 									}
 								}
 
@@ -117,7 +118,7 @@ export default {
 							case 'on':
 								{
 									if ('available' in configuration.presences) {
-										return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Already online');
+										return await client[botNum].reply('Already online', { from, quoted: message, groupMetadata });
 									}
 
 									if ('unavailable' in configuration.presences) {
@@ -129,20 +130,22 @@ export default {
 									}
 
 									if (from) {
-										await client[botNum].reply(
-											{ groupMetadata, from, quoted: message },
-											'Simulate Available Presence Enabled'
-										);
+										await client[botNum].reply('Simulate Available Presence Enabled', {
+											from,
+											quoted: message,
+											groupMetadata
+										});
 									}
 								}
 
 								break;
 							default:
 								{
-									await client[botNum].reply(
-										{ groupMetadata, from, quoted: message },
-										'Usage: !presence online [enable|disable|status]'
-									);
+									await client[botNum].reply('Usage: !presence online [enable|disable|status]', {
+										from,
+										quoted: message,
+										groupMetadata
+									});
 								}
 
 								break;
@@ -159,8 +162,8 @@ export default {
 							case 'stats':
 								{
 									await client[botNum].reply(
-										{ groupMetadata, from, quoted: message },
-										Object.keys(configuration.presences).includes('composing') ? 'Composing' : 'Not composing'
+										Object.keys(configuration.presences).includes('composing') ? 'Composing' : 'Not composing',
+										{ from, quoted: message, groupMetadata }
 									);
 								}
 
@@ -169,7 +172,7 @@ export default {
 							case 'off':
 								{
 									if (!('composing' in configuration.presences)) {
-										return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Already not writing');
+										return await client[botNum].reply('Already not writing', { from, quoted: message, groupMetadata });
 									}
 
 									const messages = Object.keys(store.messages);
@@ -177,7 +180,7 @@ export default {
 									pause(client, messages);
 									clearInterval(configuration.presences.composing.interval);
 									delete configuration.presences.composing;
-									await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Simulate Composing Disabled');
+									await client[botNum].reply('Simulate Composing Disabled', { from, quoted: message, groupMetadata });
 								}
 
 								break;
@@ -185,7 +188,7 @@ export default {
 							case 'on':
 								{
 									if ('composing' in configuration.presences) {
-										return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Already writing');
+										return await client[botNum].reply('Already writing', { from, quoted: message, groupMetadata });
 									}
 
 									configuration.presences.composing = {
@@ -197,16 +200,17 @@ export default {
 											events(client, messages, 'composing');
 										}, 8_000)
 									};
-									await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Simulate Composing Enabled');
+									await client[botNum].reply('Simulate Composing Enabled', { from, quoted: message, groupMetadata });
 								}
 
 								break;
 							default:
 								{
-									await client[botNum].reply(
-										{ groupMetadata, from, quoted: message },
-										'Usage: !presence composing [enable|disable|status]'
-									);
+									await client[botNum].reply('Usage: !presence composing [enable|disable|status]', {
+										from,
+										quoted: message,
+										groupMetadata
+									});
 								}
 
 								break;
@@ -222,8 +226,8 @@ export default {
 							case 'stats':
 								{
 									await client[botNum].reply(
-										{ groupMetadata, from, quoted: message },
-										Object.keys(configuration.presences).includes('recording') ? 'Recording' : 'Not recording'
+										Object.keys(configuration.presences).includes('recording') ? 'Recording' : 'Not recording',
+										{ from, quoted: message, groupMetadata }
 									);
 								}
 
@@ -232,7 +236,7 @@ export default {
 							case 'off':
 								{
 									if (!('recording' in configuration.presences)) {
-										return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Already not recording');
+										return await client[botNum].reply('Already not recording', { from, quoted: message, groupMetadata });
 									}
 
 									const messages = Object.keys(store.messages);
@@ -240,7 +244,7 @@ export default {
 									pause(client, messages);
 									clearInterval(configuration.presences.recording.interval);
 									delete configuration.presences.recording;
-									await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Simulate Recording Disabled');
+									await client[botNum].reply('Simulate Recording Disabled', { from, quoted: message, groupMetadata });
 								}
 
 								break;
@@ -248,7 +252,7 @@ export default {
 							case 'on':
 								{
 									if ('recording' in configuration.presences) {
-										return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Already recording');
+										return await client[botNum].reply('Already recording', { from, quoted: message, groupMetadata });
 									}
 
 									configuration.presences.recording = {
@@ -260,16 +264,17 @@ export default {
 											events(client, messages, 'recording');
 										}, 10_000)
 									};
-									await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Simulate Recording Enabled');
+									await client[botNum].reply('Simulate Recording Enabled', { from, quoted: message, groupMetadata });
 								}
 
 								break;
 							default:
 								{
-									await client[botNum].reply(
-										{ groupMetadata, from, quoted: message },
-										'Usage: !presence recording [enable|disable|status]'
-									);
+									await client[botNum].reply('Usage: !presence recording [enable|disable|status]', {
+										from,
+										quoted: message,
+										groupMetadata
+									});
 								}
 
 								break;
@@ -282,10 +287,11 @@ export default {
 						case 'status':
 						case 'stats':
 							{
-								await client[botNum].reply(
-									{ groupMetadata, from, quoted: message },
-									Object.keys(configuration.presences).includes('bio') ? 'Enabled' : 'Disabled'
-								);
+								await client[botNum].reply(Object.keys(configuration.presences).includes('bio') ? 'Enabled' : 'Disabled', {
+									from,
+									quoted: message,
+									groupMetadata
+								});
 							}
 
 							break;
@@ -293,12 +299,12 @@ export default {
 						case 'off':
 							{
 								if (!('bio' in configuration.presences)) {
-									return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Already disabled');
+									return await client[botNum].reply('Already disabled', { from, quoted: message, groupMetadata });
 								}
 
 								clearInterval(configuration.presences.bio.interval);
 								delete configuration.presences.bio;
-								await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Simulate Bio Disabled');
+								await client[botNum].reply('Simulate Bio Disabled', { from, quoted: message, groupMetadata });
 							}
 
 							break;
@@ -306,7 +312,7 @@ export default {
 						case 'on':
 							{
 								if ('bio' in configuration.presences) {
-									return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Already enabled');
+									return await client[botNum].reply('Already enabled', { from, quoted: message, groupMetadata });
 								}
 
 								configuration.presences.bio = {
@@ -314,16 +320,17 @@ export default {
 									started,
 									interval: setInterval(() => events(client, [], 'bio'), 10_000)
 								};
-								await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Simulate Bio Enabled');
+								await client[botNum].reply('Simulate Bio Enabled', { from, quoted: message, groupMetadata });
 							}
 
 							break;
 						default:
 							{
-								await client[botNum].reply(
-									{ groupMetadata, from, quoted: message },
-									'Usage: !presence bio [enable|disable|status]'
-								);
+								await client[botNum].reply('Usage: !presence bio [enable|disable|status]', {
+									from,
+									quoted: message,
+									groupMetadata
+								});
 							}
 
 							break;
@@ -332,7 +339,7 @@ export default {
 				}
 				default:
 					{
-						await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Invalid command');
+						await client[botNum].reply('Invalid command', { from, quoted: message, groupMetadata });
 					}
 
 					break;

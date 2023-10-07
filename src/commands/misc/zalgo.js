@@ -1,7 +1,7 @@
 import { zalgo } from '../../utils/modules/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'zalgo',
@@ -14,9 +14,9 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, bodyQuoted, groupMetadata }, client) {
 		if (!query && !bodyQuoted) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You need to provide text');
+			return await client[botNum].reply('You need to provide text', { from, quoted: message, groupMetadata });
 		}
 
-		await client[botNum].reply({ groupMetadata, from, quoted: message }, zalgo(query || bodyQuoted, { size: 'maxi' }));
+		await client[botNum].reply(zalgo(query || bodyQuoted, { size: 'maxi' }), { from, quoted: message, groupMetadata });
 	}
 };

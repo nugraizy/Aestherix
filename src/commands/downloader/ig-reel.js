@@ -7,7 +7,7 @@ import { getPost } from '../../utils/instagram/index.js';
 const regex = (input) => /(https?:\/\/(?:www\.)?instagram\.com\/(p|reel|tv|s)\/([^/?#&]+)).*/.test(input);
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'igreel',
@@ -18,30 +18,30 @@ export default {
 	cooldown: 10,
 	limit: 9,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, grouppMetadata }, client) {
+	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!query) {
-			return await client[botNum].reply({ grouppMetadata, from, quoted: message }, 'Please specify a url');
+			return await client[botNum].reply('Please specify a url', { from, quoted: message, groupMetadata });
 		}
 
 		const { _: urls } = parser(query);
 
 		if (urls.length === 1 && !isURL(urls[0])) {
-			return await client[botNum].reply({ grouppMetadata, from, quoted: message }, 'Please specify a valid url');
+			return await client[botNum].reply('Please specify a valid url', { from, quoted: message, groupMetadata });
 		}
 
 		if (urls.length === 1 && !regex(urls[0])) {
-			return await client[botNum].reply({ grouppMetadata, from, quoted: message }, 'Please specify a valid Instagram url');
+			return await client[botNum].reply('Please specify a valid Instagram url', { from, quoted: message, groupMetadata });
 		}
 
 		for (const url of urls) {
 			if (!isURL(url.trim())) {
-				await client[botNum].reply({ grouppMetadata, from, quoted: message }, 'Please specify a valid url');
+				await client[botNum].reply('Please specify a valid url', { from, quoted: message, groupMetadata });
 
 				continue;
 			} else if (!regex(url.trim())) {
-				await client[botNum].reply({ grouppMetadata, from, quoted: message }, 'Please specify a valid Instagram url');
+				await client[botNum].reply('Please specify a valid Instagram url', { from, quoted: message, groupMetadata });
 
 				continue;
 			}
@@ -57,10 +57,11 @@ export default {
 				const reel = await getPost(url);
 
 				if ('error' in reel) {
-					await client[botNum].reply(
-						{ grouppMetadata, from, quoted: message },
-						`Error while downloading Instagram reel\n\n${reel.error}\n${url}`
-					);
+					await client[botNum].reply(`Error while downloading Instagram reel\n\n${reel.error}\n${url}`, {
+						from,
+						quoted: message,
+						groupMetadata
+					});
 					ERRLOG(
 						`[${color(time, 'cyan')}]`,
 						`⚠️ ${color('Failed to Download Instagram reel', 'red')} for ${color(prettyNumber, '#ff71ce')}`
@@ -83,7 +84,7 @@ export default {
 									image: { url: reel.medias[0].url },
 									caption: capt.trim()
 							  } /* eslint-disable-line */,
-						{ grouppMetadata, quoted: message }
+						{ groupMetadata, quoted: message }
 					);
 				}
 

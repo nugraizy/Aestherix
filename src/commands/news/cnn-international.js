@@ -1,7 +1,7 @@
 import { cnninternational, fetchBUFFER } from '../../utils/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'cnninternational',
@@ -58,13 +58,13 @@ export default {
 		}
 
 		if (!query) {
-			return client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please provide queries');
+			return client[botNum].reply('Please provide queries', { from, quoted: message, groupMetadata });
 		}
 
 		const data = await cnninternational(query);
 
 		if ('error' in data) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, data.error);
+			return await client[botNum].reply(data.error, { from, quoted: message, groupMetadata });
 		}
 
 		let caption = 'CNN International'.formatHeaders();

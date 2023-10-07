@@ -1,7 +1,7 @@
 import { addUserLimit } from '../../helper/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'report',
@@ -14,13 +14,13 @@ export default {
 	status: 'enable',
 	async run({ from, message, query, sender, pushname, prettyNumber, settings, type, isOwner, args, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please provide a message to report');
+			return await client[botNum].reply('Please provide a message to report', { from, quoted: message, groupMetadata });
 		}
 
 		if (args[1] === 'accept' && isOwner) {
 			await client[botNum].reply(
-				{ from: args[2], quoted: JSON.parse(args.slice(4)) },
-				'Your problem has been accepted by the Owner. Please wait for the fix. And for the bonuses you will be given 20 Limit.'
+				'Your problem has been accepted by the Owner. Please wait for the fix. And for the bonuses you will be given 20 Limit.',
+				{ from: args[2], quoted: JSON.parse(args.slice(4)), groupMetadata }
 			);
 
 			addUserLimit(args[3], 20);
@@ -29,10 +29,11 @@ export default {
 		}
 
 		if (query.length < 20 && type !== 'templateButtonReplyMessage') {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'Please describe the problem in detail. Min. 20 characters'
-			);
+			return await client[botNum].reply('Please describe the problem in detail. Min. 20 characters', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		const capt =

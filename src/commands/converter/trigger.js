@@ -11,7 +11,7 @@ const defaultOptions = {
 };
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'trigger',
@@ -42,10 +42,11 @@ export default {
 		client
 	) {
 		if (mention.length === 0 && !isMediaImage) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'Please mention or send/reply an image to pet'
-			);
+			return await client[botNum].reply('Please mention or send/reply an image to pet', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		const time = dayjs().format('HH:mm:ss DD/MM');
@@ -81,14 +82,14 @@ export default {
 		if (isMediaImage) {
 			if (!stickerAble) {
 				return await client[botNum].reply(
-					{ from, quoted: message },
 					`Please send/reply a regular media to be triggered. Can't convert ${typeQuoted}, only : ${typeSticker
 						.slice(
 							typeSticker.findIndex((v) => v === 'videoMessage'),
 							1
 						)
 						.join(', ')
-						.capitalize()}`
+						.capitalize()}`,
+					{ from, quoted: message, groupMetadata }
 				);
 			}
 

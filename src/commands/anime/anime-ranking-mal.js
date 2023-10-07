@@ -26,7 +26,7 @@ Genres : ${obj?.genres?.map(({ name }) => name)?.join(', ') || 'n/a'}
 Synopsis : ${obj?.synopsis || 'n/a'}`;
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'malanimeranking',
@@ -44,7 +44,7 @@ export default {
 			const detail = await mal.getAnimeDetail(args[2]);
 
 			if ('error' in detail) {
-				return await client[botNum].reply({ groupMetadata, from, quoted: message }, detail.message);
+				return await client[botNum].reply(detail.message, { from, quoted: message, groupMetadata });
 			}
 
 			const caption = parse(detail);
@@ -73,7 +73,7 @@ export default {
 		const result = await mal.getAnimeRanking(query || undefined);
 
 		if ('error' in result) {
-			return await client[botNum].reply({ from, quoted: message }, result.message);
+			return await client[botNum].reply(result.message, { from, quoted: message, groupMetadata });
 		}
 
 		const rows = result

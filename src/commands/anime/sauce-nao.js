@@ -4,7 +4,7 @@ import path from 'path';
 import { isURL, sauceNao } from '../../utils/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'saucenao',
@@ -17,15 +17,16 @@ export default {
 	status: 'enable',
 	async run({ isMediaImage, query, extractMediaData, filename, from, message, typeQuoted, groupMetadata }, client) {
 		if (!isURL(query) && !isMediaImage) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'Please send/reply a image to find the similar image'
-			);
+			return await client[botNum].reply('Please send/reply a image to find the similar image', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		let media = query && isURL(query) ? query : null;
 
-		await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Searching. Please wait...');
+		await client[botNum].reply('Searching. Please wait...', { from, quoted: message, groupMetadata });
 
 		if (isMediaImage) {
 			media = await client[botNum].downloadAndSaveMediaMessage(
@@ -42,14 +43,15 @@ export default {
 				fs.unlinkSync(media);
 			}
 
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, result.error);
+			return await client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
 		}
 
 		if (result.title === '') {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'Can not discover what anime is this. Try moe instead.'
-			);
+			return await client[botNum].reply('Can not discover what anime is this. Try moe instead.', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		const capt = `${'What Anime ?'.formatHeaders()}
@@ -58,7 +60,7 @@ Description : ${result.description}
 Similarity : ${result.similarity}%
 Powered by sauce.nao`;
 
-		await client[botNum].reply({ groupMetadata, from, quoted: message }, capt.trim());
+		await client[botNum].reply(capt.trim(), { from, quoted: message, groupMetadata });
 
 		if (isMediaImage) {
 			fs.unlinkSync(media);

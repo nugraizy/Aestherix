@@ -7,7 +7,7 @@ import { color, INFOLOG } from '../../utils/modules/index.js';
 import { removeBg } from '../../utils/converter/file-processing.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'removebg',
@@ -37,16 +37,17 @@ export default {
 
 		if (!isMediaImage && !isQuotedSticker) {
 			return client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'Please reply/send image with caption the command. This command also accept sticker (reply one with command).'
+				'Please reply/send image with caption the command. This command also accept sticker (reply one with command).',
+				{ from, quoted: message, groupMetadata }
 			);
 		}
 
 		if (isQuotedSticker && extractMediaData.isAnimated) {
-			return client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'The sticker are animated. Please reply static stickers only.'
-			);
+			return client[botNum].reply('The sticker are animated. Please reply static stickers only.', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		INFOLOG(`[${color(time, 'cyan')}]`, `${color('Removing Background image', '#01cdfe')} ${color(prettyNumber, '#ff71ce')}`);

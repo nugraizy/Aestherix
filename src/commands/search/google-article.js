@@ -1,7 +1,7 @@
 import { googleArticle, removeDuplicatesArray } from '../../utils/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'googlearticle',
@@ -14,7 +14,7 @@ export default {
 	status: 'enable',
 	run: async ({ query, message, from, type, args, groupMetadata }, client) => {
 		if (!query) {
-			return await client[botNum].reply({ from, quoted: message }, 'You must provide a query.');
+			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -61,7 +61,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 			const result = await googleArticle(querie, 10);
 
 			if ('error' in result) {
-				client[botNum].reply({ groupMetadata, from, quoted: from }, result.error);
+				client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
 				continue;
 			}
 

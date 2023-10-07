@@ -23,11 +23,11 @@ class CustomArray extends Array {
 	}
 }
 
-/* eslint-disable-line */ const print = ({ from, quoted }, ...args) =>
-	client[botNum].reply({ from: from || where, quoted }, format(...args));
+/* eslint-disable-line */ const print = ({ from, quoted, groupMetadata }, ...args) =>
+	client[botNum].reply(format(...args), { from, quoted, groupMetadata });
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'eval',
@@ -104,14 +104,15 @@ export default {
 		} = message;
 
 		if (!isOwner) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message.message },
-				'You are not allowed to use this command'
-			);
+			return await client[botNum].reply('You are not allowed to use this command', {
+				from,
+				quoted: message.message,
+				groupMetadata
+			});
 		}
 
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message.message }, 'Please specify code to evaluate');
+			return await client[botNum].reply('Please specify code to evaluate', { from, quoted: message.message, groupMetadata });
 		}
 
 		if (isBaileys) {
@@ -152,7 +153,7 @@ export default {
 				output = await func(
 					client,
 					async (...args) => {
-						return client[botNum].reply({ groupMetadata, from, quoted: message.message }, format(...args));
+						return client[botNum].reply(format(...args), { from, quoted: message.message, groupMetadata });
 					},
 					client,
 					message,
@@ -181,25 +182,26 @@ export default {
 
 				output = e;
 			} finally {
-				client[botNum].reply({ groupMetadata, from, quoted: message.message }, syntaxes + format(output));
+				client[botNum].reply(syntaxes + format(output), { from, quoted: message.message, groupMetadata });
 			}
 		} else if (body.startsWith('$> ')) {
 			try {
 				exec(body.slice(3), async (err, stdout) => {
 					if (err) {
-						return await client[botNum].reply({ groupMetadata, from, quoted: message.message }, format(err));
+						return await client[botNum].reply(format(err), { from, quoted: message.message, groupMetadata });
 					}
 
-					await client[botNum].reply({ groupMetadata, from, quoted: message.message }, format(stdout.replace(col, '').trim()));
+					await client[botNum].reply(format(stdout.replace(col, '').trim()), { from, quoted: message.message, groupMetadata });
 				});
 			} catch (err) {
 				let str = `Type : ${err.name}\n`;
 
 				str += `Message : ${err.message}`;
-				return await client[botNum].reply(
-					{ groupMetadata, from, quoted: message.message },
-					`\`ERROR\` \`\`\`\n\n${str}\`\`\``
-				);
+				return await client[botNum].reply(`\`ERROR\` \`\`\`\n\n${str}\`\`\``, {
+					from,
+					quoted: message.message,
+					groupMetadata
+				});
 			}
 		} else if (body.startsWith('=> ')) {
 			try {
@@ -207,19 +209,34 @@ export default {
 
 				if (/\/s$/.test(query)) {
 					query = query.replace(/\/s$/, '');
-					print(from, eval(query));
+					print(
+						{
+							from,
+							quoted: message.message,
+							groupMetadata
+						},
+						eval(query)
+					);
 				} else {
 					if (/\/s$/.test(query)) {
 						query = query.replace(/\/s$/, '');
 					}
 
 					print(
-						from,
+						{
+							from,
+							quoted: message.message,
+							groupMetadata
+						},
 						await eval(
 							`(async () => {
 						${query}
 								})()
-							 .catch(err => print(from, err))`
+							 .catch(err => print({
+								from,
+								quoted: message.message,
+								groupMetadata
+							}, err))`
 						)
 					);
 				}
@@ -228,7 +245,11 @@ export default {
 					`(async () => {
 					${query}
 						})()
-						.catch(err => print(from, err))`,
+						.catch(err => print({
+							from,
+							quoted: message.message,
+							groupMetadata
+						}, err))`,
 					'Execution Function',
 					{
 						allowReturnOutsideFunction: true,
@@ -244,10 +265,11 @@ export default {
 					str += `\`\`\`${err}\`\`\`\n\n`;
 				}
 
-				return await client[botNum].reply(
-					{ groupMetadata, from, quoted: message.message },
-					`\`ERROR\` \`\`\`\n\n${str}\`\`\``
-				);
+				return await client[botNum].reply(`\`ERROR\` \`\`\`\n\n${str}\`\`\``, {
+					from,
+					quoted: message.message,
+					groupMetadata
+				});
 			}
 		} else if (body.startsWith('!> ')) {
 			let returning;
@@ -280,7 +302,7 @@ export default {
 							return;
 						}
 
-						return await client[botNum].reply({ groupMetadata, from, quoted: message.message }, format(...args));
+						return await client[botNum].reply(format(...args), { from, quoted: message.message, groupMetadata });
 					},
 					message,
 					client,
@@ -306,7 +328,7 @@ export default {
 
 				returning = e;
 			} finally {
-				client[botNum].reply({ groupMetadata, from, quoted: message.message }, syntaxes + format(returning));
+				client[botNum].reply(syntaxes + format(returning), { from, quoted: message.message, groupMetadata });
 			}
 		}
 	}

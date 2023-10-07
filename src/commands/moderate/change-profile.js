@@ -1,7 +1,7 @@
 import yargsParser from 'yargs-parser';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'changeprofile',
@@ -14,18 +14,19 @@ export default {
 	status: 'enable',
 	async run({ isOwner, isAdmin, isMediaImage, isMediaVid, from, message, groupMetadata, mediaData, query }, client) {
 		if (!isAdmin && !isOwner) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'You are not admin. This commands is only for admins.'
-			);
+			return await client[botNum].reply('You are not admin. This commands is only for admins.', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		if (!isMediaImage) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please send/reply a media[image]');
+			return await client[botNum].reply('Please send/reply a media[image]', { from, quoted: message, groupMetadata });
 		}
 
 		if (isMediaVid) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please send/reply a media[image]');
+			return await client[botNum].reply('Please send/reply a media[image]', { from, quoted: message, groupMetadata });
 		}
 
 		const media = await client[botNum].downloadMediaMessage(mediaData);

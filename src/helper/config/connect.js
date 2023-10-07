@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 import { Cache } from '../modules/cache.js';
 
 /**
- * @type {import('./type.js').GlobalConfig}
+ * @type {import('../../types/Socket/config.js').GlobalConfig}
  */
 const globalConfig = {
 	cmds: {

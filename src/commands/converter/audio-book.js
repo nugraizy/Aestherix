@@ -7,7 +7,7 @@ import { textToSpeech } from '../../utils/converter/index.js';
 import { tesseract } from '../../utils/misc/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'audiobook',
@@ -20,10 +20,11 @@ export default {
 	status: 'enable',
 	async run({ isMediaImage, from, prettyNumber, message, filename, extractMediaData, typeQuoted, groupMetadata }, client) {
 		if (!isMediaImage) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'Please send/reply an image to recognize text'
-			);
+			return await client[botNum].reply('Please send/reply an image to recognize text', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		const time = dayjs().format('HH:mm:ss DD/MM');

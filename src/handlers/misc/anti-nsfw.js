@@ -38,21 +38,22 @@ const processNsfwImage = async ({
 	await unlink(filePath);
 
 	if (isAdmin) {
-		return await client.reply({ groupMetadata, from, quoted: message }, JSON.stringify(check, undefined, 2));
+		return await client.reply(JSON.stringify(check, undefined, 2), { from, quoted: message, groupMetadata });
 	}
 
 	if ((check.ok && (check.result.hentai > 65 || check.result.porn > 65)) || check.reesult.is_nsfw) {
 		if (!isBotAdmin) {
-			return await client.reply(
-				{ groupMetadata, from, quoted: message },
-				'Anti-NSFW is enabled, but I am not an admin, so I cannot kick you.'
-			);
+			return await client.reply('Anti-NSFW is enabled, but I am not an admin, so I cannot kick you.', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		if (!isBanned) {
 			await client.reply(
-				{ groupMetadata, from, quoted: message },
-				'Any kind of NSFW Images is Prohibited. This is a warning, you will be kicked if you continue to do this one more time.'
+				'Any kind of NSFW Images is Prohibited. This is a warning, you will be kicked if you continue to do this one more time.',
+				{ from, quoted: message, groupMetadata }
 			);
 			await client.send(
 				from,
@@ -68,10 +69,11 @@ const processNsfwImage = async ({
 			data[index][from].banned.push(sender);
 			await fs.writeJSON('./databases/groups/settingsManager.json', data);
 		} else {
-			await client.reply(
-				{ groupMetadata, from, quoted: message },
-				'You have been banned from this group for NSFW Images. And you will be kicked in any second.'
-			);
+			await client.reply('You have been banned from this group for NSFW Images. And you will be kicked in any second.', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 			await delay(350);
 			await client.groupParticipantsUpdate(from, [sender], 'remove');
 		}

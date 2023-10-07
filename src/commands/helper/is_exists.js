@@ -5,7 +5,7 @@ import { Cache } from '../../helper/modules/cache.js';
 const cache = new Cache();
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'nowhatsapp',
@@ -18,23 +18,23 @@ export default {
 	status: 'enable',
 	run: async ({ query, from, message, groupMetadata }, client) => {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a number.');
+			return await client[botNum].reply('You must provide a number.', { from, quoted: message, groupMetadata });
 		}
 
 		if (!/^[0-9xX]*$/.test(query)) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide only number.');
+			return await client[botNum].reply('You must provide only number.', { from, quoted: message, groupMetadata });
 		}
 
 		const regex = /[xX]/g;
 
 		if (!regex.test(query)) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must include "x" in your query.');
+			return await client[botNum].reply('You must include "x" in your query.', { from, quoted: message, groupMetadata });
 		}
 
 		const total = 10 ** query.match(regex).length;
 
 		if (total > 100) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Too much "x" in your query.');
+			return await client[botNum].reply('Too much "x" in your query.', { from, quoted: message, groupMetadata });
 		}
 
 		const container = cache.get(query) || [];

@@ -20,40 +20,13 @@ import { reassign } from './parse-message.js';
 const { readFile, unlink, writeFile } = (await import('fs-extra')).default;
 
 /**
- * @typedef {'imageMessage' | 'videoMessage' | 'audioMessage' | 'documentMessage' |'stickerMessage' | 'locationMessage'} MediaType
- * @typedef {import('@adiwajshing/baileys').proto.WebMessageInfo} MessageGenerated
- * @typedef {import('@adiwajshing/baileys').proto.IWebMessageInfo} MessageGeneratedII
- * @typedef {import('@adiwajshing/baileys').ButtonReplyInfo} ButtonReplyInfo
- * @typedef {'imageMessage' | 'videoMessage' | 'stickerAnimated' | undefined} StickerType
- * @typedef {{id?: string, packname?: string, author?: string}} ExifMetadata
- * @typedef {(media: (string|Buffer), type: MediaType, opts?: import('@adiwajshing/baileys').MessageGenerationOptions) => Promise<MessageGenerated>} PrepareMedia
- * @typedef {(buffer: (string|Buffer), metadata: ExifMetadata) => Promise<Buffer>} AppliedExif
- * @typedef {(to: string, message: import('@adiwajshing/baileys').AnyMessageContent, options: import('@adiwajshing/baileys').MiscMessageGenerationOptions & import('@adiwajshing/baileys').GroupMetadata) => Promise<MessageGenerated>} SendMessage
- * @typedef {(_: { from: string, quoted?: import('@adiwajshing/baileys').MessageGenerationOptionsFromContent['quoted'], groupMetadata?: import('@adiwajshing/baileys').GroupMetadata }, text: string) => Promise<MessageGenerated>} ReplyMessage
- * @typedef {(media: Buffer | string, filename: string, type: StickerType, options: ExifMetadata) => Promise<Buffer>} PrepareSticker
- * @typedef {(media: import('@adiwajshing/baileys').DownloadableMessage, path: string, typeQuoted: keyof import('@adiwajshing/baileys').proto.IMessage) => Promise<string>} DownloadAndSave
- * @typedef {(media: MessageGeneratedII, typeDownloadable: 'stream' | 'buffer') => Promise<Buffer | import("stream").Transform>} DownloadMedia
- * @typedef {(to: string, contentText: string, footerText: string, buttons: ButtonReplyInfo[], opts?: import('@adiwajshing/baileys').MiscMessageGenerationOptions) => Promise<MessageGenerated>} SendButtonText
- * @typedef {(to: string, contentText: string, footerText: string, buttons: ButtonReplyInfo[], media: string | Buffer, opts?: import('@adiwajshing/baileys').MiscMessageGenerationOptions) => Promise<MessageGenerated>} SendButtonDocument
- * @typedef {(to: string, contentText: string, footerText: string, buttons: ButtonReplyInfo[], media: string | Buffer, opts?: import('@adiwajshing/baileys').MiscMessageGenerationOptions) => Promise<MessageGenerated>} SendButtonLocation
- * @typedef {(status: string) => Promise<import('@adiwajshing/baileys').BinaryNode>} SetInfo
- * @typedef {(to: string, containers: string[], update: keyof UPDATE, texts: string, force: boolean, message: import('@adiwajshing/baileys').MiscMessageGenerationOptions['quoted'],  adminGroups: string[]) => Promise<unknown>} UpdateGroup
- * @typedef {(to: string, query: string) => Promise<unknown>} SearchMessage
- */
-
-/**
- * @typedef {{prepareMedia: PrepareMedia, applyExif: AppliedExif, send: SendMessage, reply: ReplyMessage, prepareSticker: PrepareSticker, downloadAndSaveMediaMessage: DownloadAndSave, downloadMediaMessage: DownloadMedia, buttonText: SendButtonText, buttonDocument: SendButtonDocument, buttonLocation: SendButtonLocation, setStatus: SetInfo, updateGroup: UpdateGroup, searchMessage: SearchMessage}} AdvancedClient
- */
-
-/**
- * Assign functions for easiest use.
- * @param {import('../connection/event-handler/universal.js').ClientSocket} client SocketClient.
- * @returns {AdvancedClient}
+ * Assign functions for easier use.
+ * @type {import('../../types/Utils/index.js').AssignSocketClient}
  */
 export const assign = (client) => {
 	/**
-	 * Prepare Message Before Snding
-	 * @type {PrepareMedia}
+	 * Prepare Message Before Sending
+	 * @type {import('../../types/Utils/index.js').PrepareMedia}
 	 */
 	const prepareMedia = async (media, type, opts = {}) => {
 		switch (type) {
@@ -100,7 +73,7 @@ export const assign = (client) => {
 
 	/**
 	 * Apply exif to a media files.
-	 * @type {AppliedExif}
+	 * @type {import('../../types/Utils/index.js').AppliedExif}
 	 */
 	const applyExif = async (buffer, metadata) => {
 		const data = {};
@@ -135,7 +108,7 @@ export const assign = (client) => {
 
 	/**
 	 * Send any message.
-	 * @type {SendMessage}
+	 * @type {import('../../types/Utils/index.js').SendMessage}
 	 */
 	const send = async (to, message, options) => {
 		options = {
@@ -203,9 +176,9 @@ export const assign = (client) => {
 
 		/**
 		 * Send and reply any user message.
-		 * @type {ReplyMessage}
+		 * @type {import('../../types/Utils/index.js').ReplyMessage}
 		 */
-		reply: async ({ from, quoted, groupMetadata }, text) =>
+		reply: async (text, { from, groupMetadata, quoted }) =>
 			await send(
 				from,
 				{ text },
@@ -219,9 +192,9 @@ export const assign = (client) => {
 
 		/**
 		 * Prepare media before sending it as readable WhatsApp sticker.
-		 * @type {PrepareSticker}
+		 * @type {import('../../types/Utils/index.js').PrepareSticker}
 		 */
-		prepareSticker: async (media, filename, type, options) => {
+		prepareSticker: async (media, filename, type, exif) => {
 			const isMediaURL = Buffer.isBuffer(media) ? false : isURL(media) ? true : false;
 
 			media = isMediaURL
@@ -267,7 +240,7 @@ export const assign = (client) => {
 
 				[video, webp].forEach((file) => unlink(file));
 			} else if (bufferType === 'sticker') {
-				return await applyExif(media, options);
+				return await applyExif(media, exif);
 			} else {
 				media = await sharp(media, { animated: bufferType === 'video' })
 					.resize(512, 512, {
@@ -278,16 +251,16 @@ export const assign = (client) => {
 					.toBuffer();
 			}
 
-			return await applyExif(media, options);
+			return await applyExif(media, exif);
 		},
 
 		/**
 		 * Download WhatsApp media and save it to local drive.
-		 * @type {DownloadAndSave}
+		 * @type {import('../../types/Utils/index.js').DownloadAndSave}
 		 */
-		downloadAndSaveMediaMessage: (media, path, typeQuoted) =>
+		downloadAndSaveMediaMessage: (media, path, type) =>
 			new Promise(async (resolve) => {
-				const msg = await downloadContentFromMessage(media, typeQuoted.replace(/Message/g, ''));
+				const msg = await downloadContentFromMessage(media, type.replace(/Message/g, ''));
 				const buffer = await toBuffer(msg);
 
 				await writeFile(path, buffer);
@@ -297,7 +270,7 @@ export const assign = (client) => {
 
 		/**
 		 * Download WhatsApp media and returns it as buffer | stream.
-		 * @type {DownloadMedia}
+		 * @type {import('../../types/Utils/index.js').DownloadMedia}
 		 */
 		downloadMediaMessage: async (media, typeDownloadable = 'buffer') => {
 			return await downloadMessage(media, typeDownloadable);
@@ -305,9 +278,9 @@ export const assign = (client) => {
 
 		/**
 		 * Send button text.
-		 * @type {SendButtonText}
+		 * @type {import('../../types/Utils/index.js').SendButtonText}
 		 */
-		buttonText: async (to, contentText, footerText, buttons, opts = {}) => {
+		buttonText: async (to, contentText, footerText, buttons, options = {}) => {
 			if (buttons.length === 0) {
 				return new Error('Buttons is empty');
 			}
@@ -319,9 +292,9 @@ export const assign = (client) => {
 					footer: footerText,
 					buttons,
 					headerType: 1,
-					contextInfo: opts.contextInfo
+					contextInfo: options.contextInfo
 				},
-				opts
+				options
 			);
 		},
 
@@ -329,14 +302,14 @@ export const assign = (client) => {
 
 		/**
 		 * Send button document.
-		 * @type {SendButtonDocument}
+		 * @type {import('../../types/Utils/index.js').SendButtonDocument}
 		 */
-		buttonDocument: async (to, contentText, footerText, buttons, media, opts = {}) => {
+		buttonDocument: async (to, contentText, footerText, buttons, media, options = {}) => {
 			if (buttons.length === 0) {
 				return new Error('Buttons is empty');
 			}
 
-			const document = await prepareMedia(media, 'documentMessage', opts);
+			const document = await prepareMedia(media, 'documentMessage', options);
 
 			const message = generateWAMessageFromContent(
 				ZERO,
@@ -346,23 +319,27 @@ export const assign = (client) => {
 						contentText,
 						footerText,
 						headerType: 3,
-						contextInfo: opts.contextInfo,
+						contextInfo: options.contextInfo,
 						documentMessage: document.message.documentMessage
 					}
 				},
-				opts
+				options
 			);
 
 			await client[botNum].relayMessage(to, message.message, { messageId: message.key.id });
+
+			process.nextTick(async () => {
+				await client[botNum].upsertMessage(message, 'append');
+			});
 
 			return message;
 		},
 
 		/**
 		 * Send button location.
-		 * @type {SendButtonLocation}
+		 * @type {import('../../types/Utils/index.js').SendButtonLocation}
 		 */
-		buttonLocation: async (dari, contentText, footerText, buttons, media, opts = {}) => {
+		buttonLocation: async (dari, contentText, footerText, buttons, media, options = {}) => {
 			if (buttons.length === 0) {
 				return new Error('Buttons is empty');
 			}
@@ -370,7 +347,7 @@ export const assign = (client) => {
 			const location = await generateWAMessage(
 				ZERO,
 				{ location: { degreesLatitude: 0, degreesLongitude: 0, jpegThumbnail: media, name: 'provided by nanda' } },
-				opts
+				options
 			);
 
 			const message = generateWAMessageFromContent(
@@ -381,21 +358,25 @@ export const assign = (client) => {
 						contentText,
 						footerText,
 						headerType: 6,
-						contextInfo: opts.contextInfo,
+						contextInfo: options.contextInfo,
 						locationMessage: location.message.locationMessage
 					}
 				},
-				opts
+				options
 			);
 
 			await client[botNum].relayMessage(dari, message.message, { messageId: message.key.id });
+
+			process.nextTick(async () => {
+				await client[botNum].upsertMessage(message, 'append');
+			});
 
 			return message;
 		},
 
 		/**
 		 * Set profile info of the bot.
-		 * @type {SetInfo}
+		 * @type {import('../../types/Utils/index.js').SetInfo}
 		 */
 		setStatus: async (status) => {
 			if (!status) {
@@ -421,67 +402,79 @@ export const assign = (client) => {
 
 		/**
 		 * Update group's participants or settings.
-		 * @type {UpdateGroup}
+		 * @type {import('../../types/Utils/index.js').UpdateGroup}
 		 */
-		updateGroup: async (to, containers, update, texts, force, message, adminGroups) => {
+		updateGroup: async (
+			to,
+			update,
+			participants,
+			adminGroups,
+			{ force, message, texts } = { force: false, message: null, texts: '' }
+		) => {
 			const responses = [];
 
+			const quoted = message
+				? {
+						quoted: message
+				  } // eslint-disable-line
+				: {};
+
 			if (update.PARSE_EVENTS('ADD', 'REMOVE', 'DEMOTE', 'PROMOTE')) {
-				for (const container of containers) {
+				for (const participant of participants) {
 					try {
-						if (!force && adminGroups.includes(container) && update === 'REMOVE') {
+						if (!force && adminGroups.includes(participant) && update === 'REMOVE') {
 							await send(
 								to,
 								{
 									text: `You can't ${update} @${
-										container.split('@')[0]
+										participant.split('@')[0]
 									} because it's admin group.\nadd --force flag to force update admin`,
-									mentions: [container]
+									mentions: [participant]
 								},
-								{ quoted: message }
+								quoted
 							);
 
 							continue;
 						}
 
-						if (adminGroups.includes(container) && update === 'PROMOTE') {
+						if (adminGroups.includes(participant) && update === 'PROMOTE') {
 							await send(
 								to,
 								{
-									text: `You can't ${update} @${container.split('@')[0]} because they already an admin group.`,
-									mentions: [container]
+									text: `You can't ${update} @${participant.split('@')[0]} because they already an admin group.`,
+									mentions: [participant]
 								},
-								{ quoted: message }
+								quoted
 							);
 
 							continue;
 						}
 
-						if (!adminGroups.includes(container) && update === 'DEMOTE') {
+						if (!adminGroups.includes(participant) && update === 'DEMOTE') {
 							await send(
 								to,
 								{
-									text: `You can't ${update} @${container.split('@')[0]} because they already a member group.`,
-									mentions: [container]
+									text: `You can't ${update} @${participant.split('@')[0]} because they already a member group.`,
+									mentions: [participant]
 								},
-								{ quoted: message }
+								quoted
 							);
 
 							continue;
 						}
 
-						const response = await client[botNum][UPDATE[update]](to, [container], update.toLowerCase());
+						const response = await client[botNum][UPDATE[update]](to, [participant], update.toLowerCase());
 
 						if (update.PARSE_EVENTS('ADD')) {
 							if (response?.[0]?.status === '500') {
-								await send(to, { text: 'Group is already full' }, { quoted: message });
+								await send(to, { text: 'Group is already full' }, quoted);
 							} else if (response?.[0]?.status === '408') {
-								await send(to, { text: `${container} is just left a while ago` }, { quoted: message });
+								await send(to, { text: `${participant} is just left a while ago` }, quoted);
 							} else if (response?.[0]?.status === '403') {
 								await send(
 									to,
-									{ text: `${container} is privated their number. Trying to invite them via invitational message.` },
-									{ quoted: message }
+									{ text: `${participant} is privated their number. Trying to invite them via invitational message.` },
+									quoted
 								);
 
 								const messages = generateWAMessageFromContent(
@@ -501,18 +494,22 @@ export const assign = (client) => {
 									{}
 								);
 
-								await client[botNum].relayMessage(container, messages.message, { messageId: messages.key.id });
+								await client[botNum].relayMessage(participant, messages.message, { messageId: messages.key.id });
+
+								process.nextTick(async () => {
+									await client[botNum].upsertMessage(message, 'append');
+								});
 							} else if (response?.[0]?.status === '401') {
-								await send(to, { text: `${container} blocked bot number` }, { quoted: message });
+								await send(to, { text: `${participant} blocked bot number` }, quoted);
 							}
 						}
 
 						responses.push(response);
 					} catch (e) {
-						responses.push({ error: e.message, id: container });
+						responses.push({ error: e.message, id: participant });
 
 						if (e?.[0]?.status === '400') {
-							await send(to, { text: `${container} is not a valid number` }, { quoted: message });
+							await send(to, { text: `${participant} is not a valid number` }, quoted);
 						}
 
 						return;
@@ -543,7 +540,7 @@ export const assign = (client) => {
 
 		/**
 		 * Search a message from the destination.
-		 * @type {SearchMessage}
+		 * @type {import('../../types/Utils/index.js').SearchMessage}
 		 */
 		searchMessage: async (to, query) => {
 			let i = 0;
@@ -570,4 +567,6 @@ export const assign = (client) => {
 			return keys;
 		}
 	};
+
+	return client;
 };

@@ -18,7 +18,7 @@ const regex = (input) =>
 	);
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'ytaudio',
@@ -62,7 +62,7 @@ export default {
 		}
 
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please provide a URL');
+			return await client[botNum].reply('Please provide a URL', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -70,15 +70,16 @@ export default {
 		queries = removeDuplicatesArray(queries);
 
 		if (queries.length === 1 && isURL(queries) && !regex(queries)) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'This is not a valid YouTube URL.');
+			return await client[botNum].reply('This is not a valid YouTube URL.', { from, quoted: message, groupMetadata });
 		}
 
 		for (const Query of queries) {
 			if (isURL(Query) && !regex(Query)) {
-				return await client[botNum].reply(
-					{ groupMetadata, from, quoted: message },
-					`[ ${Query} ] This isn't a valid YouTube URL.`
-				);
+				return await client[botNum].reply(`[ ${Query} ] This isn't a valid YouTube URL.`, {
+					from,
+					quoted: message,
+					groupMetadata
+				});
 			}
 
 			const audio = await yta(Query, 'mp3');
@@ -89,7 +90,7 @@ export default {
 			);
 
 			if ('error' in audio) {
-				client[botNum].reply({ groupMetadata, from, quoted: message }, audio.error);
+				client[botNum].reply(audio.error, { from, quoted: message, groupMetadata });
 				ERRLOG(
 					`[${color(time, 'cyan')}]`,
 					`⚠️ ${color('Failed to Download YouTube Audio', 'red')} for ${color(prettyNumber, '#ff71ce')}`
@@ -98,7 +99,7 @@ export default {
 				const { title, description, timestamp, uploaded, views, author, urlChannel, mp3, thumbnail: image, url } = audio;
 
 				if (!mp3) {
-					client[botNum].reply({ groupMetadata, from, quoted: message }, `Error while downloading YouTube Video\n\n${Query}`);
+					client[botNum].reply(`Error while downloading YouTube Video\n\n${Query}`, { from, quoted: message, groupMetadata });
 					ERRLOG(
 						`[${color(time, 'cyan')}]`,
 						`⚠️ ${color('Failed to Download YouTube Video', 'red')} for ${color(prettyNumber, '#ff71ce')}`

@@ -4,7 +4,7 @@ import configuration from '../../helper/config/connect.js';
 import { telegram } from '../../utils/stickers/telegram.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'telegramsticker',
@@ -17,7 +17,7 @@ export default {
 	status: 'enable',
 	async run({ query, message, from, filename, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please enter a query');
+			return await client[botNum].reply('Please enter a query', { from, quoted: message, groupMetadata });
 		}
 
 		const result = await telegram(query);

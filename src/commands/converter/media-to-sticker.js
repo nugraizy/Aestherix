@@ -5,7 +5,7 @@ import configuration from '../../helper/config/connect.js';
 import { color, INFOLOG, isURL } from '../../utils/modules/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'sticker',
@@ -50,25 +50,27 @@ export default {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!isMediaImage && !isMediaVid && !query) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'Please send/reply a media or send a url to convert to sticker'
-			);
+			return await client[botNum].reply('Please send/reply a media or send a url to convert to sticker', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		if (query && !isURL(query) && !isMediaImage && !isMediaVid) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'If you trying to convert sticker from url, please provide a valid url'
-			);
+			return await client[botNum].reply('If you trying to convert sticker from url, please provide a valid url', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		if (!stickerAble && !query) {
 			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
 				`Please send/reply a regular media to convert to sticker. Can't convert ${typeQuoted} to sticker, only : ${typeSticker
 					.join(', ')
-					.capitalize()}`
+					.capitalize()}`,
+				{ from, quoted: message, groupMetadata }
 			);
 		}
 

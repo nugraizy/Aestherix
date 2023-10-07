@@ -2,7 +2,7 @@ import { removeDuplicatesArray } from '../../utils/modules/index.js';
 import { arq } from '../../utils/arq/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'subreddit',
@@ -15,7 +15,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
+			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -26,7 +26,7 @@ export default {
 			const result = await arq.subreddits(querie.trim());
 
 			if ('error' in result || !result.ok) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, JSON.stringify(result));
+				await client[botNum].reply(JSON.stringify(result), { from, quoted: message, groupMetadata });
 				continue;
 			}
 

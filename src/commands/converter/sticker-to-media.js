@@ -5,7 +5,7 @@ import { color, INFOLOG } from '../../utils/modules/index.js';
 import { convertStickerToMedia } from '../../utils/converter/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'decrypt',
@@ -20,7 +20,7 @@ export default {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!isQuotedSticker) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please reply a sticker to decrypt');
+			return await client[botNum].reply('Please reply a sticker to decrypt', { from, quoted: message, groupMetadata });
 		}
 
 		const results = await client[botNum].downloadAndSaveMediaMessage(

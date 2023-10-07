@@ -2,7 +2,7 @@ import { fetchBUFFER } from '../../utils/index.js';
 import { Attachment } from '../../helper/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'attachment',

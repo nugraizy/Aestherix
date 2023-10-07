@@ -1,5 +1,5 @@
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'setname',
@@ -12,17 +12,17 @@ export default {
 	status: 'enable',
 	async run({ isOwner, from, query, message, groupMetadata }, client) {
 		if (!isOwner) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You are not allowed to use this command');
+			return await client[botNum].reply('You are not allowed to use this command', { from, quoted: message, groupMetadata });
 		}
 
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a name to set');
+			return await client[botNum].reply('You must provide a name to set', { from, quoted: message, groupMetadata });
 		}
 
 		if (typeof client[botNum].updateProfileName !== 'function') {
 			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				"Your current Baileys didn't support changing profile name, please update to latest commit of the Baileys." /* eslint-disable-line */
+				"Your current Baileys didn't support changing profile name, please update to latest commit of the Baileys." /* eslint-disable-line */,
+				{ from, quoted: message, groupMetadata }
 			);
 		}
 

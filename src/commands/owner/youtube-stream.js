@@ -6,7 +6,7 @@ import { Cache } from '../../helper/modules/cache.js';
 const lives = new Cache();
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'youtubelive',
@@ -19,58 +19,58 @@ export default {
 	status: 'enable',
 	run: async ({ isOwner, from, message, query, groupMetadata, args }, client) => {
 		if (!isOwner) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You are not allowed to use this command.');
+			return await client[botNum].reply('You are not allowed to use this command.', { from, quoted: message, groupMetadata });
 		}
 
 		if (!query) {
-			return client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
+			return client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if (args[1] === 'stop') {
 			const live = lives.get(from);
 
 			if (!live) {
-				return client[botNum].reply({ groupMetadata, from, quoted: message }, 'No live stream is running.');
+				return client[botNum].reply('No live stream is running.', { from, quoted: message, groupMetadata });
 			}
 
 			live.stop();
 
-			return client[botNum].reply({ groupMetadata, from, quoted: message }, 'Live stream has been stopped.');
+			return client[botNum].reply('Live stream has been stopped.', { from, quoted: message, groupMetadata });
 		} else if (args[1] === 'start') {
 			const live = lives.get(from);
 
 			if (!live) {
-				return client[botNum].reply({ groupMetadata, from, quoted: message }, 'No live stream is running.');
+				return client[botNum].reply('No live stream is running.', { from, quoted: message, groupMetadata });
 			}
 
 			live.start();
 
-			return client[botNum].reply({ groupMetadata, from, quoted: message }, 'Live stream has been started.');
+			return client[botNum].reply('Live stream has been started.', { from, quoted: message, groupMetadata });
 		}
 
 		const live = await youtubeLiveComments(query);
 
 		if ('error' in live) {
-			return client[botNum].reply({ groupMetadata, from, quoted: message }, live.error);
+			return client[botNum].reply(live.error, { from, quoted: message, groupMetadata });
 		}
 
 		lives.set(from, live);
 
 		live.on('start', async (initialData) => {
 			try {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Success join the live stream.');
+				await client[botNum].reply('Success join the live stream.', { from, quoted: message, groupMetadata });
 
 				const pinnedAction = initialData.actions.firstOfType(YTNodes.AddBannerToLiveChatCommand);
 
 				if (pinnedAction) {
 					if (pinnedAction.banner?.contents?.is(YTNodes.LiveChatTextMessage)) {
 						client[botNum].reply(
-							{ groupMetadata, from, quoted: message },
 							`${'Live Stream Info'.formatHeaders()}
     
 Info : Pinned Message
 From : ${pinnedAction.banner.contents.author?.name.toString()}
-Content : ${pinnedAction?.banner.contents.message.toString()}`
+Content : ${pinnedAction?.banner.contents.message.toString()}`,
+							{ from, quoted: message, groupMetadata }
 						);
 					}
 				}
@@ -80,7 +80,7 @@ Content : ${pinnedAction?.banner.contents.message.toString()}`
 		});
 
 		live.on('error', async () => {
-			await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Something went wrong with the socket.');
+			await client[botNum].reply('Something went wrong with the socket.', { from, quoted: message, groupMetadata });
 
 			try {
 				live.stop();
@@ -93,7 +93,7 @@ Content : ${pinnedAction?.banner.contents.message.toString()}`
 
 		live.on('end', async () => {
 			try {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, 'The live stream has ended.');
+				await client[botNum].reply('The live stream has ended.', { from, quoted: message, groupMetadata });
 
 				live.stop();
 				lives.delete(from);

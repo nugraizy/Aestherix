@@ -4,7 +4,7 @@ import path from 'path';
 import { isURL, traceMoe, toMp4 } from '../../utils/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'tracemoe',
@@ -33,16 +33,17 @@ export default {
 		client
 	) {
 		if (!isURL(query) && !isMediaImage) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'Please send/reply a image to find the similar image'
-			);
+			return await client[botNum].reply('Please send/reply a image to find the similar image', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		let media = query && isURL(query) ? query : null;
 
 		if (typeMessage === 'listResponseMessage' && args[1] === 'get') {
-			await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Searching. Please wait...');
+			await client[botNum].reply('Searching. Please wait...', { from, quoted: message, groupMetadata });
 
 			args = JSON.parse(JSON.parse(JSON.stringify(args.slice(2).join(' '))));
 
@@ -113,7 +114,7 @@ ${
 			);
 		}
 
-		await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Searching. Please wait...');
+		await client[botNum].reply('Searching. Please wait...', { from, quoted: message, groupMetadata });
 
 		if (isMediaImage) {
 			media = await client[botNum].downloadAndSaveMediaMessage(
@@ -130,7 +131,7 @@ ${
 				fs.unlinkSync(media);
 			}
 
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, result.error);
+			return await client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
 		}
 
 		if (isMediaImage) {

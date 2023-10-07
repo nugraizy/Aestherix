@@ -3,7 +3,7 @@ import path from 'path';
 import { removeDuplicatesArray, isURL, toOpus, downloadBandcamp } from '../../utils/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'bandcampdl',
@@ -16,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, filename, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
+			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -27,7 +27,7 @@ export default {
 			const regexs = isURL(querie.trim());
 
 			if (!regexs) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please Use a Valid URL.');
+				await client[botNum].reply('Please Use a Valid URL.', { from, quoted: message, groupMetadata });
 
 				continue;
 			}
@@ -35,7 +35,7 @@ export default {
 			const result = await downloadBandcamp(querie);
 
 			if ('error' in result) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, result.error);
+				await client[botNum].reply(result.error);
 
 				continue;
 			}

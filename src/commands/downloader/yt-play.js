@@ -3,7 +3,7 @@ import parser from 'yargs-parser';
 import configuration from '../../helper/config/connect.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'ytplay',
@@ -16,10 +16,11 @@ export default {
 	status: 'enable',
 	async run(message, client) {
 		if (!message.query) {
-			return await client[botNum].reply(
-				{ groupMetadata: message.groupMetadata, quoted: message.message, from: message.from },
-				'Please enter a query'
-			);
+			return await client[botNum].reply('Please enter a query', {
+				groupMetadata: message.groupMetadata,
+				quoted: message.message,
+				from: message.from
+			});
 		}
 
 		let { audio, video } = parser(message.query.toLowerCase(), {

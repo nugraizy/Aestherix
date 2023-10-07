@@ -5,7 +5,7 @@ import { color, ERRLOG, isURL, numberWithCommas } from '../../utils/modules/inde
 import { getUser } from '../../utils/instagram/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'instalk',
@@ -20,21 +20,22 @@ export default {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a url');
+			return await client[botNum].reply('Please specify a url', { from, quoted: message, groupMetadata });
 		}
 
 		let { _: usernames } = parser(query);
 
 		if (usernames.length === 1 && isURL(usernames[0])) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'Please specify a valid Instagram usernames'
-			);
+			return await client[botNum].reply('Please specify a valid Instagram usernames', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		for (const user of usernames) {
 			if (isURL(user.trim())) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a valid Instagram username');
+				await client[botNum].reply('Please specify a valid Instagram username', { from, quoted: message, groupMetadata });
 
 				continue;
 			}
@@ -42,10 +43,11 @@ export default {
 			const users = await getUser(user);
 
 			if ('error' in users) {
-				await client[botNum].reply(
-					{ groupMetadata, from, quoted: message },
-					`Error while searching Instagram user\n\n${users.error}`
-				);
+				await client[botNum].reply(`Error while searching Instagram user\n\n${users.error}`, {
+					from,
+					quoted: message,
+					groupMetadata
+				});
 
 				ERRLOG(
 					`[${color(time, 'cyan')}]`,

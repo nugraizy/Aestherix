@@ -4,7 +4,7 @@ import { color, delay, ERRLOG, INFOLOG, isURL, formatNumber } from '../../utils/
 import { twitterDownload } from '../../utils/twitter/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'twitterdl',
@@ -19,18 +19,18 @@ export default {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a url');
+			return await client[botNum].reply('Please specify a url', { from, quoted: message, groupMetadata });
 		}
 
 		let { _: urls } = parser(query);
 
 		if (urls.length === 1 && !isURL(urls[0])) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a valid url');
+			return await client[botNum].reply('Please specify a valid url', { from, quoted: message, groupMetadata });
 		}
 
 		for (const url of urls) {
 			if (!isURL(url.trim())) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a valid url');
+				await client[botNum].reply('Please specify a valid url', { from, quoted: message, groupMetadata });
 
 				continue;
 			}
@@ -43,10 +43,11 @@ export default {
 			const post = await twitterDownload(url);
 
 			if ('error' in post) {
-				await client[botNum].reply(
-					{ groupMetadata, from, quoted: message },
-					`Error while downloading Twitter post\n\n${post.error}\n${url}`
-				);
+				await client[botNum].reply(`Error while downloading Twitter post\n\n${post.error}\n${url}`, {
+					from,
+					quoted: message,
+					groupMetadata
+				});
 				ERRLOG(
 					`[${color(time, 'cyan')}]`,
 					`⚠️ ${color('Failed to Download Twitter Post', 'red')} for ${color(prettyNumber, '#ff71ce')}`
@@ -91,7 +92,6 @@ export default {
 				await client[botNum].send(from, { text: capt.trim() }, { groupMetadata, quoted: message });
 
 				for (const media of post.medias) {
-					console.log(media);
 					await client[botNum].send(
 						from,
 						media.type === 'video' ? { video: { url: media.url } } : { image: { url: media.url } },

@@ -26,7 +26,7 @@ const helpFlag = () => `
 	   --offline, -f         Set your current presence to offline.
 	   --no_call, -d         Reject incoming call.
 	   --insta_notifier, -i  Handle incoming Instagram DMs.
-	   --limit_reset, -l	 Enable Auto-reset user's limit.
+	   --limit_reset, -l     Enable Auto-reset user's limit.
 	   --reset_on_start, -x  Auto reset DB-Connections every start of the script.
 	   --no_limit, -u        Set commands limit to None.
 	   --help, -h            Show this message.
@@ -40,30 +40,31 @@ export const parseCli = () =>
 		importMeta: import.meta,
 		flags: {
 			/* eslint-disable */
-			read_only: { type: 'boolean', alias: 'y' },
-			auto_read: { type: 'boolean', alias: 'r' },
-			restrict: { type: 'boolean', alias: 'e' },
-			only_logs: { type: 'boolean', alias: 'o' },
-			no_logs: { type: 'boolean', alias: 'n' },
-			self_mode: { type: 'boolean', alias: 's' },
-			debug_mode: { type: 'boolean', alias: 'g' },
-			multi_cmd: { type: 'boolean', alias: 'm' },
-			rainbow: { type: 'boolean', alias: 'b' },
-			trace: { type: 'boolean', alias: 't' },
-			help: { type: 'boolean', alias: 'h' },
-			prefix: { type: 'string', alias: 'p' },
-			watch: { type: 'boolean', alias: 'w' },
-			cool_down: { type: 'boolean', alias: 'c' },
-			auto_correct: { type: 'boolean', alias: 'a' },
-			no_load: { type: 'boolean', alias: 'v' },
-			json: { type: 'boolean', alias: 'j' },
-			reset: { type: 'boolean', alias: 'k' },
-			story: { type: 'boolean', alias: 'q' },
-			offline: { type: 'boolean', alias: 'f' },
-			no_call: { type: 'boolean', alias: 'd' },
-			insta_notifier: { type: 'boolean', alias: 'i' },
-			limit_reset: { type: 'boolean', alias: 'l' },
-			reset_on_start: { type: 'boolean', alias: 'x' },
-			no_limit: { type: 'boolean', alias: 'u' }
+			read_only: { type: 'boolean', shortFlag: 'y' },
+			auto_read: { type: 'boolean', shortFlag: 'r' },
+			restrict: { type: 'boolean', shortFlag: 'e' },
+			only_logs: { type: 'boolean', shortFlag: 'o' },
+			no_logs: { type: 'boolean', shortFlag: 'n' },
+			self_mode: { type: 'boolean', shortFlag: 's' },
+			debug_mode: { type: 'boolean', shortFlag: 'g' },
+			multi_cmd: { type: 'boolean', shortFlag: 'm' },
+			rainbow: { type: 'boolean', shortFlag: 'b' },
+			trace: { type: 'boolean', shortFlag: 't' },
+			help: { type: 'boolean', shortFlag: 'h' },
+			prefix: { type: 'string', shortFlag: 'p' },
+			watch: { type: 'boolean', shortFlag: 'w' },
+			cool_down: { type: 'boolean', shortFlag: 'c' },
+			auto_correct: { type: 'boolean', shortFlag: 'a' },
+			no_load: { type: 'boolean', shortFlag: 'v' },
+			json: { type: 'boolean', shortFlag: 'j' },
+			reset: { type: 'boolean', shortFlag: 'k' },
+			story: { type: 'boolean', shortFlag: 'q' },
+			offline: { type: 'boolean', shortFlag: 'f' },
+			no_call: { type: 'boolean', shortFlag: 'd' },
+			insta_notifier: { type: 'boolean', shortFlag: 'i' },
+			limit_reset: { type: 'boolean', shortFlag: 'l' },
+			reset_on_start: { type: 'boolean', shortFlag: 'x' },
+			no_limit: { type: 'boolean', shortFlag: 'u' },
+			pair_mode: { type: 'boolean', shortFlag: 'z' }
 		}
 	});

@@ -14,10 +14,11 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, extractMediaData, typeQuoted, groupMetadata }, client) {
 		if (typeQuoted !== 'locationMessage' && typeQuoted !== 'liveLocationMessage' && !query) {
-			return await client[botNum].reply(
-				{ from, quoted: message },
-				'Please, input city name\nEx:\n*!weather Bekasi* or reply to location message'
-			);
+			return await client[botNum].reply('Please, input city name\nEx:\n*!weather Bekasi* or reply to location message', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		const info =
@@ -26,7 +27,11 @@ export default {
 				: await getWeather('city', query);
 
 		if ('error' in info) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, info.error);
+			return await client[botNum].reply(info.error, {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		const text = ` ~> ${info.name}\n

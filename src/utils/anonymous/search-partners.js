@@ -69,7 +69,7 @@ export const search = (key, timer, client, message) => {
 			}
 
 			if (second <= 0) {
-				clients[botNum].reply({ from: partner1, quoted: partner1Message }, 'Your partner is not found! Try again later!');
+				clients[botNum].reply('Your partner is not found! Try again later!', { from: partner1, quoted: partner1Message });
 				configuration.anonymous.delete(id);
 				deleteIntervals(configuration.intervals['anonymous'].get(id), configuration.intervals['anonymous'], id);
 				return;

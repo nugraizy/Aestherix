@@ -9,7 +9,7 @@ const row = [
 ];
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'werewolf',
@@ -26,7 +26,7 @@ export default {
 			const kill = werewolf.killPlayerAsWerewolf(sender, args[2], args[3]);
 
 			if (kill.error && !('data' in kill)) {
-				return await client[botNum].reply({ groupMetadata, from, quoted: message }, kill.message);
+				return await client[botNum].reply(kill.message, { from, quoted: message, groupMetadata });
 			}
 
 			for (const data of kill.data) {
@@ -37,7 +37,7 @@ export default {
 			const seer = werewolf.seerSomeone(sender, args[2], args[3]);
 
 			if (seer.error && !('data' in seer)) {
-				return await client[botNum].reply({ groupMetadata, from, quoted: message }, seer.message);
+				return await client[botNum].reply(seer.message, { from, quoted: message, groupMetadata });
 			}
 
 			for (const data of seer.data) {
@@ -48,7 +48,7 @@ export default {
 			const guard = werewolf.guardSomeone(sender, args[2], args[3]);
 
 			if (guard.error && !('data' in guard)) {
-				return await client[botNum].reply({ groupMetadata, from, quoted: message }, guard.message);
+				return await client[botNum].reply(guard.message, { from, quoted: message, groupMetadata });
 			}
 
 			for (const data of guard.data) {
@@ -59,7 +59,7 @@ export default {
 			const vote = werewolf.voteSomeone(sender, args[2], args[3]);
 
 			if (vote.error && !('data' in vote)) {
-				return await client[botNum].reply({ groupMetadata, from, quoted: message }, vote.message);
+				return await client[botNum].reply(vote.message, { from, quoted: message, groupMetadata });
 			}
 
 			for (const data of vote.data) {
@@ -77,7 +77,7 @@ export default {
 			const werewolf = new Werewolf(sender, from, client);
 			const deletes = werewolf.deleteGame(sender);
 
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, deletes.message);
+			return await client[botNum].reply(deletes.message, { from, quoted: message, groupMetadata });
 		} else if (args[1] === 'join') {
 			sender = args[2] || sender;
 			pushname = args[3] || pushname;
@@ -86,7 +86,7 @@ export default {
 			const join = werewolf.werewolfJoin(sender, from, pushname);
 
 			return join.error
-				? client[botNum].reply({ groupMetadata, from, quoted: message }, join.message)
+				? client[botNum].reply(join.message, { from, quoted: message, groupMetadata })
 				: client[botNum].send(
 						from,
 						{
@@ -133,13 +133,13 @@ export default {
 			const werewolf = new Werewolf(sender, from, client);
 			const exit = werewolf.exitGame(sender, from);
 
-			return await client[botNum].reply({ from, quoted: message }, exit.message);
+			return await client[botNum].reply(exit.message, { from, quoted: message, groupMetadata });
 		} else if (args[1] === 'start') {
 			const werewolf = new Werewolf(sender, from, client);
 			const start = werewolf.startGame(sender, from);
 
 			if (start.error) {
-				return await client[botNum].reply({ groupMetadata, from, quoted: message }, start.message);
+				return await client[botNum].reply(start.message, { from, quoted: message, groupMetadata });
 			}
 
 			await client[botNum].send(from, { text: start.message }, { groupMetadata });
@@ -234,7 +234,7 @@ export default {
 			start.data.startGameCycle(from, start.data.gameTimeCycle);
 		} else {
 			if (!isGroup) {
-				return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'This commands for group only');
+				return await client[botNum].reply('This commands for group only', { from, quoted: message, groupMetadata });
 			}
 
 			const werewolfs = new Werewolf(sender, from, client);
@@ -254,10 +254,11 @@ export default {
 
 				return;
 			} else if (werewolfs.getDataGame(from) && werewolfs.gameStarted) {
-				return await client[botNum].reply(
-					{ groupMetadata, from, quoted: message },
-					'Sesi sudah ada di group ini dan permainan sudah dimulai.'
-				);
+				return await client[botNum].reply('Sesi sudah ada di group ini dan permainan sudah dimulai.', {
+					from,
+					quoted: message,
+					groupMetadata
+				});
 			}
 
 			new Werewolf(sender, from, client, pushname, true);

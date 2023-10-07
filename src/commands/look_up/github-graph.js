@@ -1,7 +1,7 @@
 import { GithubGraph } from '../../helper/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'githubgraph',
@@ -14,7 +14,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a GitHub User');
+			return await client[botNum].reply('Please specify a GitHub User', { from, quoted: message, groupMetadata });
 		}
 
 		const git = new GithubGraph();

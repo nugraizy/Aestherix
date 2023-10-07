@@ -2,7 +2,7 @@ import { encodeWAMessage, generateMessageID } from '@adiwajshing/baileys';
 import crypto from 'crypto';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'call',

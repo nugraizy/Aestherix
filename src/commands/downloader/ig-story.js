@@ -5,7 +5,7 @@ import { color, delay, ERRLOG, INFOLOG, isURL } from '../../utils/modules/index.
 import { getStory3 } from '../../utils/instagram/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'igstory',
@@ -16,28 +16,30 @@ export default {
 	cooldown: 10,
 	limit: 9,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, grouppMetadata }, client) {
+	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!query) {
-			return await client[botNum].reply({ grouppMetadata, from, quoted: message }, 'Please specify a username');
+			return await client[botNum].reply('Please specify a username', { from, quoted: message, groupMetadata });
 		}
 
 		const { _: usernames } = parser(query);
 
 		if (usernames.length === 1 && isURL(usernames[0]) && !/\/stories\//.test(usernames[0])) {
-			return await client[botNum].reply(
-				{ grouppMetadata, from, quoted: message },
-				'Please specify a valid username or a valid url instagram story'
-			);
+			return await client[botNum].reply('Please specify a valid username or a valid url instagram story', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		for (const username of usernames) {
 			if (isURL(username) && !/\/stories\//.test(username)) {
-				await client[botNum].reply(
-					{ grouppMetadata, from, quoted: message },
-					'Please specify a username or a valid url instagram story'
-				);
+				await client[botNum].reply('Please specify a username or a valid url instagram story', {
+					from,
+					quoted: message,
+					groupMetadata
+				});
 			} else {
 				const story = await getStory3(username);
 
@@ -47,10 +49,11 @@ export default {
 				);
 
 				if ('error' in story) {
-					await client[botNum].reply(
-						{ grouppMetadata, from, quoted: message },
-						`Error while downloading Instagram story\n\n${story.error}\n${username}`
-					);
+					await client[botNum].reply(`Error while downloading Instagram story\n\n${story.error}\n${username}`, {
+						from,
+						quoted: message,
+						groupMetadata
+					});
 					ERRLOG(
 						`[${color(time, 'cyan')}]`,
 						`⚠️ ${color('Failed to Download Instagram Story', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`
@@ -70,7 +73,7 @@ export default {
 						story.stories[0].isVideo
 							? { video: { url: story.stories[0].url }, caption: capt.trim() }
 							: { image: { url: story.stories[0].url }, caption: capt.trim() },
-						{ grouppMetadata, quoted: message }
+						{ groupMetadata, quoted: message }
 					);
 				} else {
 					capt += `Tot. Media : ${story.stories.length}`;
@@ -79,7 +82,7 @@ export default {
 
 					for (const medias of story.stories) {
 						await client[botNum].send(from, medias.isVideo ? { video: { url: medias.url } } : { image: { url: medias.url } }, {
-							grouppMetadata
+							groupMetadata
 						});
 						await delay(300);
 					}

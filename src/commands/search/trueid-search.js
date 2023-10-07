@@ -2,7 +2,7 @@ import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/ind
 import { trueidSearch } from '../../utils/movies/true-id-search.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'trueid',
@@ -15,7 +15,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, cmd, type, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
+			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -99,10 +99,11 @@ export default {
 
 			return;
 		} else if (args[1] === 'get') {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				`${'TrueID Search'.formatHeaders()}\n\nURL : ${args[2]}`
-			);
+			return await client[botNum].reply(`${'TrueID Search'.formatHeaders()}\n\nURL : ${args[2]}`, {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		query = query.split(',');
@@ -112,7 +113,7 @@ export default {
 			const data = await trueidSearch(querie);
 
 			if ('error' in data) {
-				return await client[botNum].reply({ groupMetadata, from, quoted: message }, data.error);
+				return await client[botNum].reply(data.error, { from, quoted: message, groupMetadata });
 			}
 
 			let caption = 'TrueID Search'.formatHeaders();

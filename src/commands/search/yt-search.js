@@ -5,7 +5,7 @@ import { ytsr } from '../../utils/youtube/index.js';
 import { fetchBUFFER, numberWithCommas } from '../../utils/modules/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'ytsearch',
@@ -18,7 +18,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, groupMetadata }, client) {
 		if (!query) {
-			return client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a query.');
+			return client[botNum].reply('Please specify a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let result = await ytsr(query);

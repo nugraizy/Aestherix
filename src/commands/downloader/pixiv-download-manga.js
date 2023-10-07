@@ -19,7 +19,7 @@ const regex = (input) => {
 };
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'pixivmangadl',
@@ -30,9 +30,9 @@ export default {
 	limit: 4,
 	cooldown: 7,
 	status: 'enable',
-	async run({ from, query, message, grouppMetadata }, client) {
+	async run({ from, query, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ grouppMetadata, from, quoted: message }, 'You must provide a query.');
+			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -43,16 +43,17 @@ export default {
 			const regexs = regex(querie.trim());
 
 			if (!regexs.status) {
-				return await client[botNum].reply({ grouppMetadata, from, quoted: message }, regexs.message);
+				return await client[botNum].reply(regexs.message, { from, quoted: message, groupMetadata });
 			}
 
 			const data = await downloadManga(regexs.message);
 
 			if ('error' in data) {
-				await client[botNum].reply(
-					{ from, quoted: message },
-					`Failed while downloading Pixiv manga\n\n${data.error}\n${querie}`
-				);
+				await client[botNum].reply(`Failed while downloading Pixiv manga\n\n${data.error}\n${querie}`, {
+					from,
+					quoted: message,
+					groupMetadata
+				});
 
 				continue;
 			}
@@ -76,7 +77,7 @@ Total Media : ${pageCount}`;
 						image: new Buffer.from(images, 'base64'),
 						caption: caption + `\nSource https://www.pixiv.net/en/artworks/${id}`
 					},
-					{ grouppMetadata, quoted: message }
+					{ groupMetadata, quoted: message }
 				);
 			}
 
@@ -91,7 +92,7 @@ Total Media : ${pageCount}`;
 						image: new Buffer.from(buffer, 'base64'),
 						caption: caption
 					},
-					{ grouppMetadata, quoted: message }
+					{ groupMetadata, quoted: message }
 				);
 				i++;
 			}

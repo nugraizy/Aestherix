@@ -4,7 +4,7 @@ import { numberWithCommas, isURL } from '../../utils/modules/index.js';
 import { Github } from '../../utils/github/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'gitstalk',
@@ -17,7 +17,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, args, type, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a url');
+			return await client[botNum].reply('Please specify a url', { from, quoted: message, groupMetadata });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -87,12 +87,12 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 		let { _: usernames } = parser(query);
 
 		if (usernames.length == 1 && isURL(usernames[0])) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a valid Github usernames');
+			return await client[botNum].reply('Please specify a valid Github usernames', { from, quoted: message, groupMetadata });
 		}
 
 		for (const user of usernames) {
 			if (isURL(user.trim())) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a valid Github username');
+				await client[botNum].reply('Please specify a valid Github username', { from, quoted: message, groupMetadata });
 				continue;
 			}
 
@@ -100,7 +100,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 			let users = await git.searchUser(user);
 
 			if (users.total_count === 0) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, 'User not found.');
+				await client[botNum].reply('User not found.', { from, quoted: message, groupMetadata });
 				continue;
 			}
 

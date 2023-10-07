@@ -2,7 +2,7 @@ import { generateWAMessage, generateWAMessageFromContent } from '@adiwajshing/ba
 import fs from 'fs-extra';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'product',

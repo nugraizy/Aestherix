@@ -6,7 +6,7 @@ import { color, ERRLOG, isURL, numberWithCommas } from '../../utils/modules/inde
 import { tiktokProfileTIKTOK } from '../../utils/tiktok/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'tikstalk',
@@ -59,18 +59,18 @@ export default {
 		}
 
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a query');
+			return await client[botNum].reply('Please specify a query', { from, quoted: message, groupMetadata });
 		}
 
 		let { _: usernames } = parser(query);
 
 		if (usernames.length === 1 && isURL(usernames[0])) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a valid TikTok usernames');
+			return await client[botNum].reply('Please specify a valid TikTok usernames', { from, quoted: message, groupMetadata });
 		}
 
 		for (const user of usernames) {
 			if (isURL(user.trim())) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a valid TikTok username');
+				await client[botNum].reply('Please specify a valid TikTok username', { from, quoted: message, groupMetadata });
 
 				continue;
 			}
@@ -78,7 +78,7 @@ export default {
 			const users = await tiktokProfileTIKTOK(user);
 
 			if ('error' in users) {
-				client[botNum].reply({ groupMetadata, from, quoted: message }, `Error while searching TikTok user\n\n${users.error}`);
+				client[botNum].reply(`Error while searching TikTok user\n\n${users.error}`, { from, quoted: message, groupMetadata });
 
 				ERRLOG(
 					`[${color(time, 'cyan')}]`,

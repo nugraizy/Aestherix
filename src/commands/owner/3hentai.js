@@ -1,7 +1,7 @@
 import { _3hentai, img2pdf, mime } from '../../utils/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: '3hentai',
@@ -14,17 +14,17 @@ export default {
 	status: 'enable',
 	run: async ({ isOwner, from, message, query, sender, groupMetadata }, client) => {
 		if (!isOwner) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You are not allowed to use this command.');
+			return await client[botNum].reply('You are not allowed to use this command.', { from, quoted: message, groupMetadata });
 		}
 
 		if (!query) {
-			return client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
+			return client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		const result = await _3hentai(query);
 
 		if ('error' in result) {
-			return client[botNum].reply({ groupMetadata, from, quoted: message }, result.error);
+			return client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
 		}
 
 		const { artists, categories, images, language, tags, title, totalPages, uploadDate } = result;
@@ -40,7 +40,7 @@ Language : ${language.join(', ')}
 Categories : ${categories.join(', ')}
 Tot. Pages : ${totalPages}`;
 
-		await client[botNum].reply({ from, quoted: message }, caption);
+		await client[botNum].reply(caption, { from, quoted: message, groupMetadata });
 		await client[botNum].send(from, {
 			document: Buffer.from(buffer, 'base64'),
 			mimetype: mime('pdf'),

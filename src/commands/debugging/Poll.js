@@ -2,7 +2,7 @@ import { generateMessageID, generateWAMessageFromContent } from '@adiwajshing/ba
 import { randomBytes } from 'crypto';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'polling',

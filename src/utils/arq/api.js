@@ -1,8 +1,5 @@
 import axios from 'axios';
-import dotenv from 'dotenv';
 import FormData from 'form-data';
-
-dotenv.config();
 
 class ArqAPI {
 	#apiKey = process.env.ARQ_KEY;
@@ -18,18 +15,18 @@ class ArqAPI {
 		this.searchImage = async (query) => {
 			return await this.request('/image', {
 				params: {
-					query,
+					query
 				},
-				method: 'GET',
+				method: 'GET'
 			});
 		};
 
 		this.findLyrics = async (query) => {
 			return await this.request('/lyrics', {
 				params: {
-					query,
+					query
 				},
-				method: 'GET',
+				method: 'GET'
 			});
 		};
 
@@ -37,25 +34,25 @@ class ArqAPI {
 			return await this.request('/ph', {
 				params: {
 					query,
-					thumbsize: 'large_hd',
+					thumbsize: 'large_hd'
 				},
-				method: 'GET',
+				method: 'GET'
 			});
 		};
 
 		this.subreddits = async (query = 'memes') => {
 			return await this.request('/reddit', {
 				params: {
-					query,
-				},
+					query
+				}
 			});
 		};
 
 		this.searchWallpaperARQ = async (query) => {
 			return await this.request('/wall', {
 				params: {
-					query,
-				},
+					query
+				}
 			});
 		};
 	}
@@ -66,8 +63,8 @@ class ArqAPI {
 				..._,
 				headers: {
 					'content-type': 'application/json',
-					'X-API-KEY': this.#apiKey,
-				},
+					'X-API-KEY': this.#apiKey
+				}
 			});
 
 			return data;
@@ -81,8 +78,8 @@ class ArqAPI {
 			const { data } = await axios.post(this.#urlBase + path, form, {
 				headers: {
 					..._,
-					'X-API-KEY': this.#apiKey,
-				},
+					'X-API-KEY': this.#apiKey
+				}
 			});
 
 			return data;

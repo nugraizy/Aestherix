@@ -3,7 +3,7 @@ import path from 'path';
 import { textToSpeech } from '../../utils/converter/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'text2speech',
@@ -16,10 +16,11 @@ export default {
 	status: 'enable',
 	async run({ query, from, filename, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'Please provide some text to convert to speech'
-			);
+			return await client[botNum].reply('Please provide some text to convert to speech', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		let language = 'id';
@@ -37,14 +38,14 @@ export default {
 		} catch (e) {
 			if (e.error === 'lang not found') {
 				return await client[botNum].reply(
-					{ groupMetadata, from, quoted: message },
 					`Language not found. Available languages :\n\n${Object.keys(e.lang)
 						.map((key, i) => `${i + 1}. ${key}   :  ${e.lang[key]}`)
-						.join('\n')}`
+						.join('\n')}`,
+					{ from, quoted: message, groupMetadata }
 				);
 			}
 
-			await client[botNum].reply({ from, quoted: message }, 'Error while converting text to speech');
+			await client[botNum].reply('Error while converting text to speech', { from, quoted: message, groupMetadata });
 
 			log(e);
 		}

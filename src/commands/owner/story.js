@@ -7,7 +7,7 @@ const STATUS = 'status@broadcast';
 const STATUS_PATH = `./src/media/connection_databases/${configuration.cli.input[0] ?? 'Session-debug'}.json`;
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'story',
@@ -20,7 +20,7 @@ export default {
 	status: 'enable',
 	async run({ from, message, isOwner, groupMetadata }, client, store) {
 		if (!isOwner) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You are not allowed to use this command');
+			return await client[botNum].reply('You are not allowed to use this command', { from, quoted: message, groupMetadata });
 		}
 
 		const messages = configuration.OPTIONS.json
@@ -69,7 +69,7 @@ export default {
 		}
 
 		if (tempContainer.size === 0) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'No story are found.');
+			return await client[botNum].reply('No story are found.', { from, quoted: message, groupMetadata });
 		}
 
 		for (const value of Array.from(tempContainer.entries())) {

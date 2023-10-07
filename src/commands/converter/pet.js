@@ -6,7 +6,7 @@ import { color, INFOLOG } from '../../utils/modules/index.js';
 import { pet } from '../../utils/converter/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'petpet',
@@ -38,10 +38,11 @@ export default {
 		client
 	) {
 		if (mention.length === 0 && !isMediaImage) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'Please mention or send/reply an image to pet'
-			);
+			return await client[botNum].reply('Please mention or send/reply an image to pet', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		const time = dayjs().format('HH:mm:ss DD/MM');
@@ -81,14 +82,14 @@ export default {
 		if (isMediaImage) {
 			if (!stickerAble || typeQuoted === 'videoMessage') {
 				return await client[botNum].reply(
-					{ groupMetadata, from, quoted: message },
 					`Please send/reply a regular media to be petted. Can't convert ${typeQuoted}, only : ${typeSticker
 						.slice(
 							typeSticker.findIndex((v) => v === 'videoMessage'),
 							1
 						)
 						.join(', ')
-						.capitalize()}`
+						.capitalize()}`,
+					{ from, quoted: message, groupMetadata }
 				);
 			}
 

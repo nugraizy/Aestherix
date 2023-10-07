@@ -7,7 +7,7 @@ const WINNER_SETS = {
 };
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'playtictactoe',
@@ -59,19 +59,19 @@ Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 			const status = getTictactoeSession(sender);
 
 			if (!status) {
-				return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You do not have a game');
+				return await client[botNum].reply('You do not have a game', { from, quoted: message, groupMetadata });
 			}
 
 			deleteTictactoeSession(sender);
 
-			await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Game deleted');
+			await client[botNum].reply('Game deleted', { from, quoted: message, groupMetadata });
 		}
 
 		if (!query) {
 			const game = new TicTacToe(sender, undefined, true);
 
 			if ('error' in game) {
-				return await client[botNum].reply({ groupMetadata, from, quoted: message }, game.error);
+				return await client[botNum].reply(game.error, { from, quoted: message, groupMetadata });
 			}
 
 			await client[botNum].send(
@@ -85,13 +85,13 @@ Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 			const game = getTictactoeSession(sender);
 
 			if (!game) {
-				return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You do not have a game');
+				return await client[botNum].reply('You do not have a game', { from, quoted: message, groupMetadata });
 			}
 
 			const move = game.playMove(query, sender);
 
 			if ('error' in move) {
-				return await client[botNum].reply({ groupMetadata, from, quoted: message }, move.error);
+				return await client[botNum].reply(move.error, { from, quoted: message, groupMetadata });
 			}
 
 			if (move.status === 'WINNER' || move.status === 'DRAW') {
@@ -113,7 +113,7 @@ Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 			if (move.PLAYER_TURN === 'Void Bot') {
 				const botGames = getTictactoeSession(sender);
 
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Void Bot TURN');
+				await client[botNum].reply('Void Bot TURN', { from, quoted: message, groupMetadata });
 				await delay(1000);
 
 				const botMove = botGames.playMove(botGames.displayPlayBoard(), 'Void Bot', sender);

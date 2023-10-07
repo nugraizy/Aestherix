@@ -19,7 +19,7 @@ const regex = (input) =>
 	);
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'ytvideo',
@@ -62,7 +62,7 @@ export default {
 		}
 
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please provide a URL');
+			return await client[botNum].reply('Please provide a URL', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -70,12 +70,16 @@ export default {
 		queries = removeDuplicatesArray(queries);
 
 		if (queries.length === 1 && isURL(queries) && !regex(queries)) {
-			return await client[botNum].reply({ from, quoted: message }, 'This is not a valid YouTube URL.');
+			return await client[botNum].reply('This is not a valid YouTube URL.', { from, quoted: message, groupMetadata });
 		}
 
 		for (const Query of queries) {
 			if (isURL(Query) && !regex(Query)) {
-				return await client[botNum].reply({ from, quoted: message }, `[ ${Query} ] This isn't a valid YouTube URL.`);
+				return await client[botNum].reply(`[ ${Query} ] This isn't a valid YouTube URL.`, {
+					from,
+					quoted: message,
+					groupMetadata
+				});
 			}
 
 			const video = await ytv(Query, 'mp4');
@@ -86,7 +90,11 @@ export default {
 			);
 
 			if ('error' in video) {
-				client[botNum].reply({ from, quoted: message }, `Error while downloading YouTube Video\n\b${video.error}\n${Query}`);
+				client[botNum].reply(`Error while downloading YouTube Video\n\b${video.error}\n${Query}`, {
+					from,
+					quoted: message,
+					groupMetadata
+				});
 				ERRLOG(
 					`[${color(time, 'cyan')}]`,
 					`⚠️ ${color('Failed to Download YouTube Video', 'red')} for ${color(prettyNumber, '#ff71ce')}`
@@ -97,7 +105,11 @@ export default {
 				const { title, description, timestamp, uploaded, views, author, urlChannel, mp4, thumbnail: image, url } = video;
 
 				if (!mp4) {
-					await client[botNum].reply({ from, quoted: message }, `Error while downloading YouTube Video\n\n${Query}`);
+					await client[botNum].reply(`Error while downloading YouTube Video\n\n${Query}`, {
+						from,
+						quoted: message,
+						groupMetadata
+					});
 					ERRLOG(
 						`[${color(time, 'cyan')}]`,
 						`⚠️ ${color('Failed to Download YouTube Video', 'red')} for ${color(prettyNumber, '#ff71ce')}`

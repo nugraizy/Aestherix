@@ -18,7 +18,7 @@ const getCpus = (func) =>
 		.join('\n\n');
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'stats',
@@ -70,6 +70,6 @@ export default {
 		caption += '⪨ ＣＰＵｓ Ｉｎｆｏ ⪩\n\n';
 		caption += `${getCpus(cpus)}`;
 
-		client[botNum].reply({ groupMetadata, from, quoted: message }, caption);
+		client[botNum].reply(caption);
 	}
 };

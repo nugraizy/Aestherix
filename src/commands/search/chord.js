@@ -1,7 +1,7 @@
 import { chords } from '../../utils/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'chords',
@@ -14,22 +14,22 @@ export default {
 	status: 'enable',
 	run: async ({ query, message, from, groupMetadata }, client) => {
 		if (!query) {
-			return client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
+			return client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		const result = await chords(query);
 
 		if ('error' in result) {
-			client[botNum].reply({ groupMetadata, from, quoted: message }, result.error);
+			client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
 		}
 
 		client[botNum].reply(
-			{ from, quoted: message },
 			`${'Chords'.formatHeaders()}
 
 Title : ${result.title}
 
-${result.chord.trim()}`
+${result.chord.trim()}`,
+			{ from, quoted: message, groupMetadata }
 		);
 	}
 };

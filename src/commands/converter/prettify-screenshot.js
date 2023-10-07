@@ -4,7 +4,7 @@ import { Prettify } from '../../helper/index.js';
 import { color, INFOLOG, ERRLOG } from '../../utils/modules/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'prettify',
@@ -19,21 +19,23 @@ export default {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!isMediaImage) {
-			return client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'Please reply/send image with caption the command.'
-			);
+			return client[botNum].reply('Please reply/send image with caption the command.', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		INFOLOG(`[${color(time, 'cyan')}]`, `${color('Prettifying an Image', '#01cdfe')} ${color(prettyNumber, '#ff71ce')}`);
 
 		let buffer = await client[botNum].downloadMediaMessage(mediaData);
 
-		buffer = await new Prettify().Screenshot(buffer);
-		buffer = buffer.toBuffer();
+		const screenshot = await new Prettify().Screenshot(buffer);
 
-		if ('error' in buffer) {
-			client[botNum].reply({ groupMetadata, from, quoted: message }, buffer.error);
+		buffer = screenshot.toBuffer();
+
+		if ('error' in screenshot) {
+			client[botNum].reply(screenshot.error, { from, quoted: message, groupMetadata });
 			ERRLOG(
 				`[${color(time, 'cyan')}]`,
 				`⚠️ ${color('Failed to Prettify an Image', 'red')} for ${color(prettyNumber, '#ff71ce')}`

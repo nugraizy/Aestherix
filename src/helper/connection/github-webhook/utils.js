@@ -1,8 +1,4 @@
-import dotenv from 'dotenv';
-
 import { fetchJSON } from '../../../utils/modules/index.js';
-
-dotenv.config();
 
 const _api = (commitSha) => `https://api.github.com/repos/nugraizy/simplebotPRO3/commits/${commitSha}`;
 const _config = {

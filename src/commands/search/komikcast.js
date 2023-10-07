@@ -1,7 +1,7 @@
 import { KomikCast, mime } from '../../utils/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'komikcast',
@@ -14,7 +14,7 @@ export default {
 	status: 'enable',
 	run: async ({ query, from, message, type, args, sender, groupMetadata }, client) => {
 		if (!query) {
-			return client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
+			return client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		const komik = new KomikCast();
@@ -75,7 +75,7 @@ Tot. Chapters : ${chapters.length}`;
 		const result = await komik.search(query);
 
 		if ('error' in result) {
-			return client[botNum].reply({ groupMetadata, from, quoted: message }, result.error);
+			return client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
 		}
 
 		const row = [];

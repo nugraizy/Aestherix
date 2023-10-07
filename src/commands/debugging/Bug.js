@@ -3,7 +3,7 @@ import { generateWAMessage, generateWAMessageFromContent } from '@adiwajshing/ba
 import { ZERO, S_WHATSAPP_NET } from '../../helper/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'bug',

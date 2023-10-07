@@ -5,7 +5,7 @@ import { ttp } from '../../helper/canvas/index.js';
 import { color, INFOLOG } from '../../utils/modules/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'staticsticker',
@@ -61,7 +61,7 @@ export default {
 				INFOLOG(`[${color(time, 'cyan')}]`, `${color('Sticker is sent', '#01cdfe')} to ${color(prettyNumber, '#ff71ce')}`);
 			});
 		} else {
-			await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please enter text to convert to sticker');
+			await client[botNum].reply('Please enter text to convert to sticker', { from, quoted: message, groupMetadata });
 		}
 	}
 };

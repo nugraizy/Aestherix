@@ -1,7 +1,7 @@
 import { youtubeChannel } from '../../utils/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'youtubestalk',
@@ -14,16 +14,17 @@ export default {
 	status: 'enable',
 	run: async ({ from, query, message, groupMetadata }, client) => {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a query');
+			return await client[botNum].reply('Please specify a query', { from, quoted: message, groupMetadata });
 		}
 
 		const channel = await youtubeChannel(query);
 
 		if ('error' in channel) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				`Error while searching YouTube Channel\n\n${channel.error}`
-			);
+			return await client[botNum].reply(`Error while searching YouTube Channel\n\n${channel.error}`, {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		const { author, avatar } = channel;

@@ -2,7 +2,7 @@ import { fetchBUFFER, removeDuplicatesArray } from '../../utils/modules/index.js
 import { downloadArtworks, searchArtwork } from '../../utils/pixiv/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'pixivartwork',
@@ -15,7 +15,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, cmd, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
+			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -27,10 +27,11 @@ export default {
 			const dataImage = await downloadArtworks(data[0].id);
 
 			if ('error' in data) {
-				await client[botNum].reply(
-					{ groupMetadata, from, quoted: message },
-					`Failed while searching Pixiv artworks\n\n${data.error}\n${querie}`
-				);
+				await client[botNum].reply(`Failed while searching Pixiv artworks\n\n${data.error}\n${querie}`, {
+					from,
+					quoted: message,
+					groupMetadata
+				});
 				continue;
 			}
 

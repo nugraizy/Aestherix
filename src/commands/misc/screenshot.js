@@ -1,7 +1,7 @@
 import { getScreenshotAPI, isURL } from '../../utils/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'screenshots',
@@ -14,10 +14,11 @@ export default {
 	status: 'enable',
 	async run(message, client) {
 		if (!message.query) {
-			return await client[botNum].reply(
-				{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
-				'Please specify a website URL'
-			);
+			return await client[botNum].reply('Please specify a website URL', {
+				groupMetadata: message.groupMetadata,
+				from: message.from,
+				quoted: message.message
+			});
 		}
 
 		let type = 'desktop';
@@ -25,16 +26,21 @@ export default {
 
 		if (Array.isArray(parseOptions)) {
 			if (!isURL(parseOptions[0])) {
-				return await client[botNum].reply({ from: message.from, quoted: message.message }, 'Please specify a valid URL');
+				return await client[botNum].reply('Please specify a valid URL', {
+					groupMetadata: message.groupMetadata,
+					from: message.from,
+					quoted: message.message
+				});
 			}
 
 			message.query = parseOptions[0];
 			type = parseOptions[1];
 		} else if (!isURL(message.query)) {
-			return await client[botNum].reply(
-				{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
-				'Please specify a valid URL'
-			);
+			return await client[botNum].reply('Please specify a valid URL', {
+				groupMetadata: message.groupMetadata,
+				from: message.from,
+				quoted: message.message
+			});
 		}
 
 		const { buffer } = await getScreenshotAPI(message.query, type);

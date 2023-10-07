@@ -19,7 +19,7 @@ const regex = async (input) => {
 };
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'genshinstalk',
@@ -34,7 +34,7 @@ export default {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify an UID');
+			return await client[botNum].reply('Please specify an UID', { from, quoted: message, groupMetadata });
 		}
 
 		let {
@@ -57,7 +57,7 @@ export default {
 			const reg = await regex(String(uid));
 
 			if (!reg.status) {
-				return await client[botNum].reply({ groupMetadata, from, quoted: message }, reg.message);
+				return await client[botNum].reply(reg.message, { from, quoted: message, groupMetadata });
 			}
 
 			let info;
@@ -71,10 +71,11 @@ export default {
 			}
 
 			if ('error' in info) {
-				await client[botNum].reply(
-					{ groupMetadata, from, quoted: message },
-					`Error while searching Genshin Impact player\n\n${info.error}`
-				);
+				await client[botNum].reply(`Error while searching Genshin Impact player\n\n${info.error}`, {
+					from,
+					quoted: message,
+					groupMetadata
+				});
 
 				ERRLOG(
 					`[${color(time, 'cyan')}]`,
@@ -156,7 +157,7 @@ Precious: ${info.stats.precious_chest_number}
 Magic: ${info.stats.magic_chest_number}`;
 				}
 
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, capt.trim());
+				await client[botNum].reply(capt.trim(), { from, quoted: message, groupMetadata });
 			}
 		}
 	}

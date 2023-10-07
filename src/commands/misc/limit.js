@@ -1,7 +1,7 @@
 import { checkLimit } from '../../helper/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'limit',
@@ -14,8 +14,8 @@ export default {
 	status: 'enable',
 	async run({ from, sender, message, groupMetadata }, client) {
 		await client[botNum].reply(
-			{ groupMetadata, from, quoted: message },
-			checkLimit(sender) ? `Your limit : ${checkLimit(sender).limit}\nType user : ${checkLimit(sender).type}` : '404'
+			checkLimit(sender) ? `Your limit : ${checkLimit(sender).limit}\nType user : ${checkLimit(sender).type}` : '404',
+			{ from, quoted: message, groupMetadata }
 		);
 	}
 };

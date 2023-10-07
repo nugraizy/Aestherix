@@ -1,5 +1,5 @@
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'setbio',
@@ -12,11 +12,11 @@ export default {
 	status: 'enable',
 	async run({ isOwner, from, query, message, groupMetadata }, client) {
 		if (!isOwner) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You are not allowed to use this command');
+			return await client[botNum].reply('You are not allowed to use this command', { from, quoted: message, groupMetadata });
 		}
 
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a bio to set');
+			return await client[botNum].reply('You must provide a bio to set', { from, quoted: message, groupMetadata });
 		}
 
 		await client[botNum].setStatus(query);

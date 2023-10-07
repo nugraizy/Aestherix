@@ -2,7 +2,7 @@ import { removeDuplicatesArray } from '../../utils/modules/index.js';
 import { searchBandcamp } from '../../utils/bandcamp/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'bandcamp',
@@ -15,7 +15,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
+			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		query = query.split(',');
@@ -25,7 +25,7 @@ export default {
 			const result = await searchBandcamp(queries);
 
 			if ('error' in result) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, result.error);
+				await client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
 				continue;
 			}
 

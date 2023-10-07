@@ -1,5 +1,8 @@
 import { handlers } from '../../utils/anonymous/index.js';
 
+/**
+ * @type {import('../../types/Commands/index.js').CommandProps['run']}
+ */
 const handler = async ({ from, type, body, isGroup }, client) => {
 	if (!isGroup) {
 		const status = handlers(from);

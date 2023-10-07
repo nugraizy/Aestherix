@@ -29,7 +29,9 @@
     "@adiwajshing/baileys": "github:nugraizy/baileys",
     "@hidden-finder/didyoumean": "^1.1.0",
     "@napi-rs/canvas": "^0.1.40",
+    "@nugraizy/baileys": "github:nugraizy/baileys",
     "@vitalets/google-translate-api": "^9.0.0",
+    "@whiskeysockets/baileys": "github:WhiskeySockets/baileys",
     "aki-api": "^6.0.8",
     "async-retry": "^1.3.3",
     "awesome-phonenumber": "^2.68.0",
@@ -70,10 +72,10 @@
     "instagram-private-api": "^1.45.3",
     "js-beautify": "^1.14.0",
     "jsdom": "^19.0.0",
-    "link-preview-js": "^2.1.19",
+    "link-preview-js": "^3.0.5",
     "lodash": "^4.17.21",
     "md5": "^2.3.0",
-    "meow": "^10.1.2",
+    "meow": "^12.1.1",
     "mime-types": "^2.1.34",
     "mqtt": "^4.3.7",
     "ms": "^2.1.3",
@@ -129,7 +131,8 @@
     "nodemon": "^2.0.22",
     "pino": "^7.6.5",
     "pm2": "^5.1.2",
-    "qrcode-terminal": "^0.12.0"
+    "qrcode-terminal": "^0.12.0",
+    "typescript": "^5.3.0-dev.20231007"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

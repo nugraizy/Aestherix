@@ -4,7 +4,7 @@ const updateApikey = () =>
 	process.env.OPENAI_KEY.split('\n')[Math.floor(Math.random() * process.env.OPENAI_KEY.split('\n').length)];
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'aicompletions',
@@ -17,7 +17,7 @@ export default {
 	status: 'enable',
 	run: async ({ query, from, message, groupMetadata }, client) => {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
+			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		const configuration = new Configuration({ apiKey: updateApikey() });
@@ -29,6 +29,6 @@ export default {
 			max_tokens: 200 /* eslint-disable-line */
 		});
 
-		client[botNum].reply({ groupMetadata, from, quoted: message }, completion.data.choices[0].text.trim());
+		client[botNum].reply(completion.data.choices[0].text.trim(), { from, quoted: message, groupMetadata });
 	}
 };

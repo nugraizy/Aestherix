@@ -3,7 +3,7 @@ import { animeName, animeNameOptions as _options } from '../../utils/index.js';
 const animeNameOptions = Object.keys(_options);
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'animename',
@@ -16,7 +16,7 @@ export default {
 	status: 'enable',
 	run: async ({ query, from, message, groupMetadata }, client) => {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You need to provide query.');
+			return await client[botNum].reply('You need to provide query.', { from, quoted: message, groupMetadata });
 		}
 
 		const options = !/[1-6]/.test(query) ? 0 : query.match(/[1-6]$/)?.[0] - 1 === undefined ? 0 : query.match(/[1-6]$/)[0] - 1;
@@ -24,10 +24,10 @@ export default {
 		const result = await animeName(query.replace(/[0-9]/g, ''), animeNameOptions[options]);
 
 		client[botNum].reply(
-			{ groupMetadata, from, quoted: message },
 			`${'Anime Name'.formatHeaders()}
 
-${result.map((v, i) => `${i + 1}. ${v.name}${v.meaning ? `\n${v.meaning}` : ''}`).join('\n\n')}`
+${result.map((v, i) => `${i + 1}. ${v.name}${v.meaning ? `\n${v.meaning}` : ''}`).join('\n\n')}`,
+			{ from, quoted: message, groupMetadata }
 		);
 	}
 };

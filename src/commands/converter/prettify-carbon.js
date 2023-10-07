@@ -4,7 +4,7 @@ import { Prettify } from '../../helper/index.js';
 import { color, INFOLOG, ERRLOG } from '../../utils/modules/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'carbon',
@@ -19,7 +19,7 @@ export default {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!query) {
-			return client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please provide a Codes.');
+			return client[botNum].reply('Please provide a Codes.', { from, quoted: message, groupMetadata });
 		}
 
 		INFOLOG(`[${color(time, 'cyan')}]`, `${color('Carboning a Codes', '#01cdfe')} ${color(prettyNumber, '#ff71ce')}`);
@@ -29,7 +29,7 @@ export default {
 		let buffer = carbon.toBuffer();
 
 		if ('error' in buffer) {
-			client[botNum].reply({ from, quoted: message }, buffer.error);
+			client[botNum].reply(buffer.error, { from, quoted: message, groupMetadata });
 			ERRLOG(
 				`[${color(time, 'cyan')}]`,
 				`⚠️ ${color('Failed to Carboning a Codes', 'red')} for ${color(prettyNumber, '#ff71ce')}`

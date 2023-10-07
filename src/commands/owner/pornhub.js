@@ -2,7 +2,7 @@ import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/ind
 import { arq } from '../../utils/arq/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'pornhub',
@@ -15,11 +15,15 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, type, isOwner, groupMetadata }, client) {
 		if (!isOwner) {
-			return await client[botNum].reply({ from, quoted: message }, 'You must be the owner to use this command.');
+			return await client[botNum].reply('You must be the owner to use this command.', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		if (!query) {
-			return await client[botNum].reply({ from, quoted: message }, 'You must provide a query.');
+			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -79,7 +83,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 			const result = await arq.searchPHub(querie.trim());
 
 			if ('error' in result || !result.ok) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, JSON.stringify(result));
+				await client[botNum].reply(JSON.stringify(result), { from, quoted: message, groupMetadata });
 				continue;
 			}
 

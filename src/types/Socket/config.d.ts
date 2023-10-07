@@ -1,6 +1,6 @@
-import { Cache } from '../modules/cache.js';
+import { Cache } from '../../helper/modules/cache.js';
 
-interface GlobalConfig {
+export interface GlobalConfig {
 	cmds: {
 		commands: Cache;
 		aliases: string[];
@@ -41,8 +41,4 @@ interface GlobalConfig {
 	packname: string;
 	author: string;
 	anonymous: Cache;
-}
-
-declare global {
-	var log: (typeof console)['log'];
 }

@@ -1,25 +1,37 @@
 import fs from 'fs-extra';
 import baileys, { makeCacheableSignalKeyStore } from '@adiwajshing/baileys';
 import P from 'pino';
+import readline from 'readline';
+import dayjs from 'dayjs';
 
 import { clearDBConnection } from './reset-session.js';
 import { patchInteractiveMessage } from '../utils/patch-message.js';
 import { Cache } from '../../modules/cache.js';
+import { INFOLOG, color } from '../../../utils/modules/index.js';
 
 const { default: makeWASocket, makeInMemoryStore, DEFAULT_CONNECTION_CONFIG } = baileys;
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 const logger = (OPTIONS) => P({ level: OPTIONS.trace ? 'trace' : OPTIONS.debugMode ? 'debug' : 'fatal' });
+const question = (text) => new Promise((resolve) => rl.question(text, resolve));
+
+let phoneNumber;
 
 /**
  * @typedef {import('meow').Result} Cli
- * @param {{cli: Cli, OPTIONS: {[_: string]: boolean}, state: import('./../type.js').SingleAuthState['state']}} params
- * @returns {Promise<{Client: import('./../type.js').Client, store: import('./../type.js').Store}>}
+ * @typedef {import('../../../types/Socket/index.js').ClientSocket} ClientSocket
+ * @typedef {import('../../../types/Socket/index.js').Store} Store
+ * @typedef {import('./../../../types/Socket/index.js').SingleAuthState['state']} State
+ * @param {{cli: Cli, OPTIONS: {[_: string]: boolean}, state: State}} params
+ * @returns {Promise<{Client: ClientSocket, store: Store}>}
  */
 export const connectSocket = async ({ cli, OPTIONS, state }) => {
 	/**
 	 * @type {import('@adiwajshing/baileys').UserFacingSocketConfig}
 	 */
 	const CONNECTION_CONFIG = {
-		printQRInTerminal: true,
+		printQRInTerminal: !OPTIONS.pairMode,
+		mobile: false,
+		browser: ['Chrome (Linux)', '', ''],
 		version: DEFAULT_CONNECTION_CONFIG.version,
 		logger: logger(OPTIONS),
 		auth: {
@@ -33,11 +45,12 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 		linkPreviewImageThumbnailWidth: 2,
 		mediaCache: new Cache(),
 		userDevicesCache: new Cache(),
-		patchMessageBeforeSending: patchInteractiveMessage
+		patchMessageBeforeSending: patchInteractiveMessage,
+		customId: 'HFINDER'
 	};
 
 	/**
-	 * @type {import('./../type.js').Store}
+	 * @type {Store}
 	 */
 	const store = makeInMemoryStore({ logger: P().child({ level: 'fatal', stream: 'store' }) });
 
@@ -53,6 +66,31 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 	const Client = makeWASocket(CONNECTION_CONFIG);
 
 	store.bind(Client.ev);
+
+	if (OPTIONS.pairMode && !Client.authState.creds.registered) {
+		let time = dayjs().format('HH:mm:ss DD/MM');
+
+		check: if (!phoneNumber) {
+			const { host_number: hostNumber } = await fs.readJSON('./src/helper/config/settings.json');
+
+			if (!hostNumber) {
+				phoneNumber = await question(`[${color(time, 'cyan')}] ${color('Insert your phone number : ', '#ff71ce')}`);
+
+				break check;
+			}
+
+			phoneNumber = hostNumber;
+		}
+
+		phoneNumber = phoneNumber.trim();
+
+		const code = await Client.requestPairingCode(phoneNumber);
+
+		time = dayjs().format('HH:mm:ss DD/MM');
+		INFOLOG(`[${color(time, 'cyan')}]`, color('Pairing code :', '#ff71ce'), color(code, 'white'));
+		time = dayjs().format('HH:mm:ss DD/MM');
+		INFOLOG(`[${color(time, 'cyan')}]`, color('Waiting for code input', '#ff71ce'), color('. . .', 'white'));
+	}
 
 	return { Client, store };
 };

@@ -5,7 +5,7 @@ import { color, INFOLOG } from '../../utils/modules/index.js';
 import { tesseract } from '../../utils/misc/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'scanimagetext',
@@ -21,7 +21,11 @@ export default {
 		client
 	) {
 		if (!isMediaImage) {
-			return await client[botNum].reply({ from, quoted: message }, 'Please send/reply an image to recognize text');
+			return await client[botNum].reply('Please send/reply an image to recognize text', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		const time = dayjs().format('HH:mm:ss DD/MM');
@@ -39,10 +43,11 @@ export default {
 				.join('\n')
 				.trim();
 
-			client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				`${scanning.error}\n\nAvailable Languages :\n\n${lang}\n\nUse the code only.`
-			);
+			client[botNum].reply(`${scanning.error}\n\nAvailable Languages :\n\n${lang}\n\nUse the code only.`, {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 			return;
 		}
 

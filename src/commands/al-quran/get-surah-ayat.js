@@ -3,7 +3,7 @@ import { getAyat, getSurahDetail } from '../../utils/index.js';
 const regex = (input) => /[1-9][0-9]*/.test(input);
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'surahayat',
@@ -16,25 +16,25 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a surah number');
+			return await client[botNum].reply('Please specify a surah number', { from, quoted: message, groupMetadata });
 		}
 
 		if (!regex(query)) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a valid surah number');
+			return await client[botNum].reply('Please specify a valid surah number', { from, quoted: message, groupMetadata });
 		}
 
 		if (parseInt(query) > 114) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Surah number must be less than 114');
+			return await client[botNum].reply('Surah number must be less than 114', { from, quoted: message, groupMetadata });
 		}
 
 		const ayat = await getAyat(query);
 		const detail = await getSurahDetail(query);
 
 		await client[botNum].reply(
-			{ groupMetadata, from, quoted: message },
 			`Surah ${detail.nomor} (${detail.namaArab}) (${detail.namaLatin})\n\nTotal Ayat : ${detail.totAyat}\nTempat Turun : ${
 				detail.turun
-			}\nArti : ${detail.arti}\n\n${ayat.map((v) => ` • ${v.arab}\n؜ • ${v.latin}\n؜ • ${v.indonesia}`).join('\n\n')}`
+			}\nArti : ${detail.arti}\n\n${ayat.map((v) => ` • ${v.arab}\n؜ • ${v.latin}\n؜ • ${v.indonesia}`).join('\n\n')}`,
+			{ from, quoted: message, groupMetadata }
 		);
 	}
 };

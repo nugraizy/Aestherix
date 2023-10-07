@@ -1,12 +1,9 @@
 import baileys from '@adiwajshing/baileys';
-import dotenv from 'dotenv';
 import fs from 'fs-extra';
 import dayjs from 'dayjs';
 import localePlugins from 'dayjs/plugin/timezone.js';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 import mqtt from 'mqtt';
-
-dotenv.config();
 
 import configuration from './helper/config/connect.js';
 import { color, ERRLOG } from './utils/modules/index.js';

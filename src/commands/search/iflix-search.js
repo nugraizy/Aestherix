@@ -1,7 +1,7 @@
 import { iflixSearch, removeDuplicatesArray } from '../../utils/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'iflix',
@@ -79,10 +79,11 @@ export default {
 				{ groupMetadata }
 			);
 		} else if (args[1] === 'get') {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				`${'Iflix Search'.formatHeaders()}\n\nURL : ${args[2]}`
-			);
+			return await client[botNum].reply(`${'Iflix Search'.formatHeaders()}\n\nURL : ${args[2]}`, {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		query = query.split(',');
@@ -92,7 +93,7 @@ export default {
 			const data = await iflixSearch(querie);
 
 			if ('error' in data) {
-				return await client[botNum].reply({ groupMetadata, from, quoted: message }, data.error);
+				return await client[botNum].reply(data.error, { from, quoted: message, groupMetadata });
 			}
 
 			let caption = 'Iflix Search'.formatHeaders();

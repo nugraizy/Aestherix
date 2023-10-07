@@ -1,7 +1,7 @@
 import { searchWAGroups } from '../../utils/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'findgroup',
@@ -12,25 +12,25 @@ export default {
 	cooldown: 4,
 	limit: 3,
 	status: 'enable',
-	run: async ({ query, message, from }, client) => {
+	run: async ({ query, message, from, groupMetadata }, client) => {
 		if (!query) {
-			return client[botNum].reply({ from, quoted: message }, 'You must provide a query.');
+			return client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		const result = await searchWAGroups(query);
 
 		if ('error' in result) {
-			client[botNum].reply({ from, quoted: message }, result.error);
+			client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
 		}
 
 		client[botNum].reply(
-			{ from, quoted: message },
 			`${'WhatsApp Public Groups'.formatHeaders()}
 
 ${result
 	.map((v) => `Title : ${v.title}\nURL : ${v.url}`)
 	.join('\n\n')
-	.trim()}`
+	.trim()}`,
+			{ from, quoted: message, groupMetadata }
 		);
 	}
 };

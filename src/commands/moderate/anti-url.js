@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'antiurl',
@@ -14,17 +14,19 @@ export default {
 	status: 'enable',
 	async run(message, client) {
 		if (!message.isBotAdmin) {
-			return await client[botNum].reply(
-				{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
-				'Bot is not admin, Please promote admin before using moderation commands.'
-			);
+			return await client[botNum].reply('Bot is not admin, Please promote admin before using moderation commands.', {
+				groupMetadata: message.groupMetadata,
+				from: message.from,
+				quoted: message.message
+			});
 		}
 
 		if (!message.query) {
-			return await client[botNum].reply(
-				{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
-				'Please specify a command\n\nEx: antiurl <enable/disable>'
-			);
+			return await client[botNum].reply('Please specify a command\n\nEx: antiurl <enable/disable>', {
+				groupMetadata: message.groupMetadata,
+				from: message.from,
+				quoted: message.message
+			});
 		}
 
 		const data = await fs.readJSON('./databases/groups/settingsManager.json');
@@ -34,44 +36,49 @@ export default {
 			case 'enable':
 			case 'on':
 				if (isEnable) {
-					return await client[botNum].reply(
-						{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
-						'You already have this command enabled'
-					);
+					return await client[botNum].reply('You already have this command enabled', {
+						groupMetadata: message.groupMetadata,
+						from: message.from,
+						quoted: message.message
+					});
 				}
 
 				message[message.from].antiURL = 'enable';
 				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].antiURL = 'enable';
 				await fs.writeJSON('./databases/groups/settingsManager.json', data);
 
-				await client[botNum].reply(
-					{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
-					'You have successfully enabled anti-url'
-				);
+				await client[botNum].reply('You have successfully enabled anti-url', {
+					groupMetadata: message.groupMetadata,
+					from: message.from,
+					quoted: message.message
+				});
 				break;
 			case 'disable':
 			case 'off':
 				if (!isEnable) {
-					return await client[botNum].reply(
-						{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
-						'You already have this command disabled'
-					);
+					return await client[botNum].reply('You already have this command disabled', {
+						groupMetadata: message.groupMetadata,
+						from: message.from,
+						quoted: message.message
+					});
 				}
 
 				message[message.from].antiURL = 'disable';
 				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].antiURL = 'disable';
 				await fs.writeJSON('./databases/groups/settingsManager.json', data);
 
-				await client[botNum].reply(
-					{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
-					'You have successfully disabled anti-url'
-				);
+				await client[botNum].reply('You have successfully disabled anti-url', {
+					groupMetadata: message.groupMetadata,
+					from: message.from,
+					quoted: message.message
+				});
 				break;
 			default:
-				await client[botNum].reply(
-					{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message },
-					'Please specify a command\n\nEx: antiurl <enable/disable>'
-				);
+				await client[botNum].reply('Please specify a command\n\nEx: antiurl <enable/disable>', {
+					groupMetadata: message.groupMetadata,
+					from: message.from,
+					quoted: message.message
+				});
 		}
 	}
 };

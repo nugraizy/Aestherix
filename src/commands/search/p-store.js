@@ -4,7 +4,7 @@ import { pStoreProduct } from '../../utils/p_store/index.js';
 const regex = (str1, str2) => new RegExp(`\\b${str1}\\b`).test(str2.toLowerCase());
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'pstore',
@@ -17,7 +17,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
+			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -28,7 +28,7 @@ export default {
 			let product = await pStoreProduct(querie.trim());
 
 			if ('error' in product) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, product.error);
+				await client[botNum].reply(product.error, { from, quoted: message, groupMetadata });
 				continue;
 			}
 

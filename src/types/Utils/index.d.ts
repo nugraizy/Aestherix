@@ -1,0 +1,363 @@
+import type { Transform } from 'stream';
+
+import type { GroupMetadata } from '../Groups';
+import type {
+	BinaryNode,
+	DownloadableMessage,
+	GenerationOptions,
+	MessageGenerated,
+	MessageSendContent,
+	MessageSendOptions,
+	MessageTypes,
+	PrepareableMediaType,
+	PrepareMessageOptions,
+	WAMessage
+} from '../Messages';
+import type { Client, AdvancedClient } from '../Socket';
+import { proto } from '@adiwajshing/baileys';
+
+export type ExifMetadata = Partial<{
+	/**
+	 * the id of the pack
+	 */
+	id: string;
+
+	/**
+	 * the name of the pack
+	 */
+	packname: string;
+
+	/**
+	 * the author of the pack
+	 */
+	author: string;
+}>;
+
+interface ReplyContainer {
+	/**
+	 * destination of the message
+	 */
+	from: string;
+
+	/**
+	 * quoting the message
+	 */
+	quoted?: WAMessage;
+
+	/**
+	 * groupMetadata for caching
+	 */
+	groupMetadata?: GroupMetadata;
+}
+
+/**
+ * Prepare message media before sending
+ * @example
+ * ```js
+ * await client[session].prepareMedia(buffer, 'imageMessage', {})
+ * ```
+ */
+export type PrepareMedia = (
+	/**
+	 * the media you want to prepare
+	 */
+	media: string | Buffer,
+
+	/**
+	 * type of the media
+	 */
+	type: PrepareableMediaType,
+
+	/**
+	 * options
+	 */
+	options?: PrepareMessageOptions
+) => Promise<MessageGenerated>;
+
+/**
+ * Applying exif to stickers
+ * * @example ```js
+ * await client[session].applyExif(buffer, { id: 'hello-world', packname: 'my-sticker' author: 'your-name' })
+ * ```
+ */
+export type AppliedExif = (
+	/**
+	 * the buffer you want to apply the exif
+	 */
+	buffer: string | Buffer,
+
+	/**
+	 * the metadata of the exif
+	 */
+	metadata: ExifMetadata
+) => Promise<Buffer>;
+
+/**
+ * Send message
+ */
+export type SendMessage = (
+	/**
+	 * destination of sending the message
+	 */
+	to: string,
+
+	/**
+	 * the message object
+	 */
+	message: MessageSendContent,
+
+	/**
+	 * the options of send message
+	 */
+	options: MessageSendOptions
+) => Promise<MessageGenerated>;
+
+/**
+ * Reply message
+ */
+export type ReplyMessage = (
+	/**
+	 * the text message
+	 */
+	text: string,
+
+	_: ReplyContainer
+) => Promise<MessageGenerated>;
+
+/**
+ * Convert media into readable WhatsApp stickers
+ */
+export type PrepareSticker = (
+	/**
+	 * media of the message
+	 */
+	media: Buffer | string,
+
+	/**
+	 * filename of the media
+	 */
+	filename: string,
+
+	/**
+	 * type of the sticker
+	 */
+	type: StickerType,
+
+	/**
+	 * the exif metadata
+	 */
+	exif: ExifMetadata
+) => Promise<Buffer>;
+
+/**
+ * Download WhatsApp media and save it to local
+ */
+export type DownloadAndSave = (
+	/**
+	 * the media of the message
+	 */
+	media: DownloadableMessage,
+
+	/**
+	 * path to save the message
+	 */
+	path: string,
+
+	/**
+	 * the types of the message
+	 */
+	type: MessageTypes
+) => Promise<string>;
+
+/**
+ * Download WhatsApp media and returns buffer or stream
+ */
+export type DownloadMedia = {
+	(media: MessageGenerated, typeDownloadable: 'stream'): Promise<Transform>;
+	(media: MessageGenerated, typeDownloadable: 'buffer'): Promise<Buffer>;
+};
+
+/**
+ * Send regular button text
+ */
+export type SendButtonText = (
+	/**
+	 * destination of the message
+	 */
+	to: string,
+
+	/**
+	 * text in content
+	 */
+	contentText: string,
+
+	/**
+	 * text in footer
+	 */
+	footerText: string,
+
+	/**
+	 * buttons to send
+	 */
+	buttons: ButtonReplyInfo[],
+
+	/**
+	 * the options of send message
+	 */
+	options?: GenerationOptions
+) => Promise<MessageGenerated>;
+
+/**
+ * Send button with a document attached
+ */
+export type SendButtonDocument = (
+	/**
+	 * destination of the message
+	 */
+	to: string,
+
+	/**
+	 * text in content
+	 */
+	contentText: string,
+
+	/**
+	 * text in footer
+	 */
+	footerText: string,
+
+	/**
+	 * buttons to send
+	 */
+	buttons: ButtonReplyInfo[],
+
+	/**
+	 * media to send
+	 */
+	media: string | Buffer,
+
+	/**
+	 * the options of send message
+	 */
+	options?: GenerationOptions
+) => Promise<MessageGenerated>;
+
+/**
+ * Send button with a location attached
+ */
+export type SendButtonLocation = (
+	/**
+	 * destination of the message
+	 */
+	to: string,
+
+	/**
+	 * text in content
+	 */
+	contentText: string,
+
+	/**
+	 * text in footer
+	 */
+	footerText: string,
+
+	/**
+	 * buttons to send
+	 */
+	buttons: ButtonReplyInfo[],
+
+	/**
+	 * media as thumbnail
+	 */
+	media?: string | Buffer,
+
+	/**
+	 * the options of send message
+	 */
+	options?: GenerationOptions
+) => Promise<MessageGenerated>;
+
+/**
+ * Set info bot
+ */
+export type SetInfo = (
+	/**
+	 * the string you want to set as info
+	 */
+	status: string
+) => Promise<BinaryNode>;
+
+/**
+ * Update group settings & participants
+ */
+export type UpdateGroup = (
+	/**
+	 * destination of update
+	 */
+	to: string,
+
+	/**
+	 * type of the update
+	 */
+	update: import('../../helper/misc/wa_data/constants').UpdateType,
+
+	/**
+	 * participants of sending the update
+	 */
+	participants: string[],
+
+	/**
+	 * admins of the group
+	 */
+	adminGroups: string[],
+
+	_: {
+		/**
+		 * text if there is a response
+		 */
+		texts: string;
+
+		/**
+		 * force update if the admins in participants are included
+		 */
+		force: boolean;
+
+		/**
+		 * quoted of the original command
+		 */
+		message: GenerationOptions['quoted'] | null;
+	}
+) => Promise<unknown>;
+
+/**
+ * Search messages in a chat
+ */
+export type SearchMessage = (
+	/**
+	 * destination of update
+	 */
+	to: string,
+
+	/**
+	 * the keyword of the message
+	 */
+	query: string
+) => Promise<proto.IWebMessageInfo[]>;
+
+export type AssignSocketClient = (client: Client) => AdvancedClient;
+
+export type AssignedClient = {
+	prepareMedia: PrepareMedia;
+	applyExif: AppliedExif;
+	send: SendMessage;
+	reply: ReplyMessage;
+	prepareSticker: PrepareSticker;
+	downloadAndSaveMediaMessage: DownloadAndSave;
+	downloadMediaMessage: DownloadMedia;
+	buttonText: SendButtonText;
+	buttonDocument: SendButtonDocument;
+	buttonLocation: SendButtonLocation;
+	setStatus: SetInfo;
+	updateGroup: UpdateGroup;
+	searchMessage: SearchMessage;
+};

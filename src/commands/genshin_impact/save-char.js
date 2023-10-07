@@ -18,7 +18,7 @@ const regex = async (input) => {
 };
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'savechar',
@@ -31,20 +31,20 @@ export default {
 	status: 'enable',
 	async run({ sender, query, message, from, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify an UID');
+			return await client[botNum].reply('Please specify an UID', { from, quoted: message, groupMetadata });
 		}
 
 		const data = await fs.readJSON(path.join(__dirname, 'databases/games/genshin_impact/data.json'));
 		const index = data.findIndex((v) => v.user === sender);
 
 		if (index !== -1) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Your character already in Database.');
+			return await client[botNum].reply('Your character already in Database.', { from, quoted: message, groupMetadata });
 		}
 
 		const findUid = await regex(query);
 
 		if (!findUid.status) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, findUid.message);
+			return await client[botNum].reply(findUid.message, { from, quoted: message, groupMetadata });
 		}
 
 		data.push({
@@ -53,6 +53,6 @@ export default {
 		});
 		await fs.writeJSON(path.join(__dirname, 'databases/games/genshin_impact/data.json'), data);
 
-		await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Your char is saved');
+		await client[botNum].reply('Your char is saved', { from, quoted: message, groupMetadata });
 	}
 };

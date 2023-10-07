@@ -1,7 +1,4 @@
 import axios from 'axios';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 class Spotifier {
 	#clientId = process.env.SPOTIFY_CLIENT_ID;
@@ -26,9 +23,9 @@ class Spotifier {
 				url: this.#_apiAuth,
 				method: 'POST',
 				headers: {
-					Authorization: this.#token,
+					Authorization: this.#token
 				},
-				data: 'grant_type=client_credentials',
+				data: 'grant_type=client_credentials'
 			};
 		};
 
@@ -47,9 +44,9 @@ class Spotifier {
 					method,
 					headers: {
 						...(opts !== undefined && 'headers' in opts ? opts.headers : {}),
-						Authorization: `Bearer ${this.#bearerToken}`,
+						Authorization: `Bearer ${this.#bearerToken}`
 					},
-					...(opts !== undefined && 'data' in opts ? { data: opts } : {}),
+					...(opts !== undefined && 'data' in opts ? { data: opts } : {})
 				});
 
 				return { status: true, ...data };
@@ -96,11 +93,11 @@ class Spotifier {
 			params.append('grant_type', 'refresh_token');
 			params.append('refresh_token', this.#refreshToken);
 			const {
-				data: { access_token: accessToken, expires_in: expiresIn },
+				data: { access_token: accessToken, expires_in: expiresIn }
 			} = await axios({
 				url: 'https://accounts.spotify.com/api/token',
 				method: 'POST',
-				params,
+				params
 			});
 
 			this.#accessToken = accessToken;
@@ -177,24 +174,24 @@ class Spotifier {
 				let { data } = await axios({
 					url: 'https://accounts.spotify.com/api/token',
 					headers: {
-						Authorization: `Basic ${new Buffer.from(`${this.#clientId}:${this.#clientSecret}`).toString('base64')}`,
+						Authorization: `Basic ${new Buffer.from(`${this.#clientId}:${this.#clientSecret}`).toString('base64')}`
 					},
 					params: {
-						grant_type: 'client_credentials' /* eslint-disable-line */,
+						grant_type: 'client_credentials' /* eslint-disable-line */
 					},
-					method: 'POST',
+					method: 'POST'
 				});
 
 				data = (
 					await axios({
 						url: `https://api.spotify.com/v1/artists/${artistsID}/top-tracks`,
 						headers: {
-							Authorization: `Bearer ${this.#credentialToken || data.access_token}`,
+							Authorization: `Bearer ${this.#credentialToken || data.access_token}`
 						},
 						method: 'GET',
 						params: {
-							country: 'US',
-						},
+							country: 'US'
+						}
 					})
 				).data;
 				return { status: true, data };
@@ -298,8 +295,8 @@ class Spotifier {
 					url: `${this.#_api}/me/player/currently-playing`,
 					method: 'GET',
 					headers: {
-						Authorization: `Bearer ${this.#accessToken}`,
-					},
+						Authorization: `Bearer ${this.#accessToken}`
+					}
 				});
 
 				return data !== '' ? data : null;
@@ -315,8 +312,8 @@ class Spotifier {
 					url: `${this.#_api}/me/player/devices`,
 					method: 'GET',
 					headers: {
-						Authorization: `Bearer ${this.#accessToken}`,
-					},
+						Authorization: `Bearer ${this.#accessToken}`
+					}
 				});
 
 				return data;
@@ -332,8 +329,8 @@ class Spotifier {
 					url: `${this.#_api}/me/player`,
 					method: 'GET',
 					headers: {
-						Authorization: `Bearer ${this.#accessToken}`,
-					},
+						Authorization: `Bearer ${this.#accessToken}`
+					}
 				});
 
 				return data;
@@ -349,8 +346,8 @@ class Spotifier {
 					url: `${this.#_api}/me/player/currently-playing`,
 					method: 'GET',
 					headers: {
-						Authorization: `Bearer ${this.#accessToken}`,
-					},
+						Authorization: `Bearer ${this.#accessToken}`
+					}
 				});
 
 				if (!data) {
@@ -362,7 +359,7 @@ class Spotifier {
 						trackTitle: 'Advertisement',
 						artists: 'Spotify',
 						progressMs: data.progress_ms,
-						isPlaying: true,
+						isPlaying: true
 					};
 				}
 
@@ -385,7 +382,7 @@ class Spotifier {
 						.join(', '),
 					durationMs,
 					progressMs,
-					isPlaying,
+					isPlaying
 				};
 			} catch (err) {
 				return { status: false, message: err.response?.data?.error?.message };
@@ -399,11 +396,11 @@ class Spotifier {
 					url: `${this.#_api}/me/player/next`,
 					method: 'POST',
 					headers: {
-						Authorization: `Bearer ${this.#accessToken}`,
+						Authorization: `Bearer ${this.#accessToken}`
 					},
 					params: {
-						device_id: 'd9fe42af9e32ef6748395b0cf0479cc8642a5640' /* eslint-disable-line */,
-					},
+						device_id: 'd9fe42af9e32ef6748395b0cf0479cc8642a5640' /* eslint-disable-line */
+					}
 				});
 
 				return data;
@@ -419,11 +416,11 @@ class Spotifier {
 					url: `${this.#_api}/me/player/pause`,
 					method: 'PUT',
 					headers: {
-						Authorization: `Bearer ${this.#accessToken}`,
+						Authorization: `Bearer ${this.#accessToken}`
 					},
 					params: {
-						device_id: 'd9fe42af9e32ef6748395b0cf0479cc8642a5640' /* eslint-disable-line */,
-					},
+						device_id: 'd9fe42af9e32ef6748395b0cf0479cc8642a5640' /* eslint-disable-line */
+					}
 				});
 
 				return data;
@@ -439,11 +436,11 @@ class Spotifier {
 					url: `${this.#_api}/me/player/play`,
 					method: 'PUT',
 					headers: {
-						Authorization: `Bearer ${this.#accessToken}`,
+						Authorization: `Bearer ${this.#accessToken}`
 					},
 					params: {
-						device_id: 'd9fe42af9e32ef6748395b0cf0479cc8642a5640' /* eslint-disable-line */,
-					},
+						device_id: 'd9fe42af9e32ef6748395b0cf0479cc8642a5640' /* eslint-disable-line */
+					}
 				});
 
 				return data;
@@ -459,13 +456,13 @@ class Spotifier {
 					url: `${this.#_api}/me/player/play`,
 					method: 'PUT',
 					headers: {
-						Authorization: `Bearer ${this.#accessToken}`,
+						Authorization: `Bearer ${this.#accessToken}`
 					},
 					params: {
 						device_id: 'd9fe42af9e32ef6748395b0cf0479cc8642a5640' /* eslint-disable-line */,
 						context_uri: `spotify:track:${trackId}` /* eslint-disable-line */,
-						position_ms: 0 /* eslint-disable-line */,
-					},
+						position_ms: 0 /* eslint-disable-line */
+					}
 				});
 
 				return data;

@@ -6,7 +6,7 @@ import { gttsAI, toOpus } from '../../utils/converter/index.js';
 const voices = await fs.readJSON(path.join(__dirname, 'databases/model/voices.json'));
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'aitts',
@@ -19,17 +19,18 @@ export default {
 	status: 'enable',
 	run: async ({ query, from, type, message, cmd, args, filename, groupMetadata }, client) => {
 		if (!query) {
-			return await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
-				'Please provide some text to convert to speech'
-			);
+			return await client[botNum].reply('Please provide some text to convert to speech', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
 		if (type === 'listResponseMessage') {
 			const result = await gttsAI(args.slice(2).join(' '), args[1]);
 
 			if ('error' in result) {
-				return await client[botNum].reply({ groupMetadata, from, quoted: message }, result.error);
+				return await client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
 			}
 
 			const audioBuffer = await toOpus('opus', {

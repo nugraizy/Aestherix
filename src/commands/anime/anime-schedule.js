@@ -3,7 +3,7 @@ import { translate } from '@vitalets/google-translate-api';
 import { animeReleases } from '../../utils/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'animeschedule',
@@ -16,11 +16,7 @@ export default {
 	status: 'enable',
 	run: async ({ from, message, type, cmd, args, isGroup, groupMetadata }, client) => {
 		if (isGroup) {
-			return client[botNum].reply(
-				{ from, quoted: message, groupMetadata },
-				'This command only works in private chat.',
-				message
-			);
+			return client[botNum].reply('This command only works in private chat.', { from, quoted: message, groupMetadata });
 		}
 
 		const text = 'Anime Releases'.formatHeaders();
@@ -29,7 +25,6 @@ export default {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(1).join(' '))));
 
 			client[botNum].reply(
-				{ from, quoted: message },
 				`${text}\n\nStream Here\n\n${data
 					.map(
 						(v) =>
@@ -37,7 +32,8 @@ export default {
 								.map((w, i) => ` ╠  📂${w.title}\n ${i === v.items.length - 1 ? '╚' : '╠'}  📂 ${w.url}`)
 								.join('\n')}`
 					)
-					.join('\n\n')}`.trim()
+					.join('\n\n')}`.trim(),
+				{ from, quoted: message, groupMetadata }
 			);
 
 			return;

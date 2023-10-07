@@ -2,7 +2,7 @@ import { removeDuplicatesArray } from '../../utils/modules/index.js';
 import { pinterest } from '../../utils/pinterest/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'pinterest',
@@ -15,7 +15,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, type, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
+			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if (
@@ -73,7 +73,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 			const result = await pinterest(querie.trim());
 
 			if ('error' in result) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, result.message);
+				await client[botNum].reply(result.message, { from, quoted: message, groupMetadata });
 				continue;
 			}
 

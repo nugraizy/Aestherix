@@ -7,7 +7,7 @@ const regex = (input) =>
 	);
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'spotifyartist',
@@ -20,7 +20,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
+			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		query = removeDuplicatesArray(query.split(','));
@@ -37,14 +37,14 @@ export default {
 				result = await spotifier.getArtists(id);
 
 				if (!result.status) {
-					await client[botNum].reply({ groupMetadata, from, quoted: message }, result.message);
+					await client[botNum].reply(result.message, { from, quoted: message, groupMetadata });
 					continue;
 				}
 			} else {
 				result = await spotifier.searchArtist(querie);
 
 				if (!result.status) {
-					await client[botNum].reply({ groupMetadata, from, quoted: message }, result.message);
+					await client[botNum].reply(result.message, { from, quoted: message, groupMetadata });
 					continue;
 				}
 

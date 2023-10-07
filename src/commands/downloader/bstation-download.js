@@ -20,7 +20,7 @@ const regex = (input) => {
 };
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'bstationdl',
@@ -31,9 +31,9 @@ export default {
 	limit: 4,
 	cooldown: 8,
 	status: 'enable',
-	async run({ query, from, message, filename, sender, grouppMetadata }, client) {
+	async run({ query, from, message, filename, sender, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ grouppMetadata, from, quoted: message }, 'You must provide a query.');
+			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -44,16 +44,16 @@ export default {
 			const regexs = regex(querie.trim());
 
 			if (!regexs.status) {
-				return await client[botNum].reply({ grouppMetadata, from, quoted: message }, regexs.message);
+				return await client[botNum].reply(regexs.message);
 			}
 
 			const result = await bilibiliDetailTv({ aid: regexs.message.trim() });
 
 			await client[botNum].reply(
-				{ from, quoted: message },
 				` • Converting videos, this might take a while please wait.\n\nResolution : ${
 					result.resolution
-				}\nSize : ${getFilesizeFromBytes(result.size)}`
+				}\nSize : ${getFilesizeFromBytes(result.size)}`,
+				{ from, quoted: message }
 			);
 
 			const merge = await mergeVideoWithAudio(
@@ -66,7 +66,7 @@ export default {
 			await client[botNum].send(
 				from,
 				{ video: new Buffer.from(merge, 'base64'), caption: 'Bstation Downloader'.formatHeaders() },
-				{ grouppMetadata, quoted: message }
+				{ groupMetadata, quoted: message }
 			);
 		}
 	}

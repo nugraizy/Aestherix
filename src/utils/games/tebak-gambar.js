@@ -47,7 +47,14 @@ export const startTG = async (client, id, { message, sender, groupMetadata }, re
 		configuration.intervals.tebakGambar,
 		id,
 		remainingTime + 2,
-		(clients = client, ids = id, answers = answer, messages = message, remainingTimes = remainings) => {
+		(
+			clients = client,
+			ids = id,
+			answers = answer,
+			messages = message,
+			remainingTimes = remainings,
+			groupMetadatas = groupMetadata
+		) => {
 			if (configuration.intervals.tebakGambar.get(ids) === undefined) {
 				return;
 			}
@@ -59,12 +66,20 @@ export const startTG = async (client, id, { message, sender, groupMetadata }, re
 			const { timer } = checkIntervals(configuration.intervals.tebakGambar.get(ids));
 
 			if (timer === 5) {
-				clients[botNum].reply({ from: ids, quoted: messages }, 'Time is almost over! 5 seconds');
+				clients[botNum].reply('Time is almost over! 5 seconds', {
+					from: ids,
+					quoted: messages,
+					groupMetadata: groupMetadatas
+				});
 			}
 
 			if (timer <= 0) {
 				deleteIntervals(configuration.intervals.tebakGambar.get(ids), configuration.intervals.tebakGambar, ids);
-				clients[botNum].reply({ from: ids, quoted: messages }, `Time's up! The answer is ${answers}`);
+				clients[botNum].reply(`Time's up! The answer is ${answers}`, {
+					from: ids,
+					quoted: messages,
+					groupMetadata: groupMetadatas
+				});
 				configuration.games.tebakGambar.delete(configuration.games.tebakGambar.get(ids).id);
 			}
 		}

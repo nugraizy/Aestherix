@@ -1,7 +1,7 @@
 import { searchHashtag } from '../../utils/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'ighashtag',
@@ -14,13 +14,13 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
+			return client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		const result = await searchHashtag(query);
 
 		if (result.error) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, result.error);
+			return await client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
 		}
 
 		let caption = '';

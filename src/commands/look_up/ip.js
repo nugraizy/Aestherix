@@ -10,7 +10,7 @@ const regex = (input) =>
 	);
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'iplookup',
@@ -25,18 +25,18 @@ export default {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a IP Address');
+			return await client[botNum].reply('Please specify a IP Address', { from, quoted: message, groupMetadata });
 		}
 
 		let { _: IPs } = parser(query);
 
 		if (IPs.length === 1 && !regex(IPs[0])) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a valid IP Address');
+			return await client[botNum].reply('Please specify a valid IP Address', { from, quoted: message, groupMetadata });
 		}
 
 		for (const IP of IPs) {
 			if (!regex(IP.trim())) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a valid IP Address');
+				await client[botNum].reply('Please specify a valid IP Address', { from, quoted: message, groupMetadata });
 
 				continue;
 			}
@@ -44,10 +44,11 @@ export default {
 			const data = await iplookup(IP.trim());
 
 			if ('error' in data) {
-				await client[botNum].reply(
-					{ groupMetadata, from, quoted: message },
-					`Error while searching IP Address\n\n${data.error}`
-				);
+				await client[botNum].reply(`Error while searching IP Address\n\n${data.error}`, {
+					from,
+					quoted: message,
+					groupMetadata
+				});
 
 				ERRLOG(
 					`[${color(time, 'cyan')}]`,

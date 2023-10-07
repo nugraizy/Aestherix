@@ -1,7 +1,7 @@
 import { startAkinator } from '../../utils/games/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'akinator',
@@ -16,16 +16,16 @@ export default {
 		const aki = await startAkinator(from);
 
 		if ('error' in aki) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, aki.error);
+			return await client[botNum].reply(aki.error, { from, quoted: message, groupMetadata });
 		}
 
 		const { question, answers, progress, progressBar, arrow } = aki;
 
 		await client[botNum].reply(
-			{ groupMetadata, from, quoted: message },
 			`${question}\n\n${answers
 				.map((v, i) => `${i + 1}. ${v}`)
-				.join('\n')}\n6. Exit\n7. Back/Undo\n\nProgress : ${progress.toFixed(2)}% ${arrow}\n${progressBar}`
+				.join('\n')}\n6. Exit\n7. Back/Undo\n\nProgress : ${progress.toFixed(2)}% ${arrow}\n${progressBar}`,
+			{ from, quoted: message, groupMetadata }
 		);
 	}
 };

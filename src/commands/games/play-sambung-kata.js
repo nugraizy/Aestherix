@@ -1,7 +1,7 @@
 import { getSambungkataSession, SambungKata } from '../../utils/games/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'sambungkata',
@@ -14,7 +14,7 @@ export default {
 	status: 'enable',
 	async run({ isGroup, message, from, sender, query, groupMetadata }, client) {
 		if (!isGroup) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'This feature only for groups');
+			return await client[botNum].reply('This feature only for groups', { from, quoted: message, groupMetadata });
 		}
 
 		const statusGame = getSambungkataSession(from);
@@ -35,10 +35,10 @@ export default {
 			);
 		} else if (query === 'player 2') {
 			if (statusGame.checkStatus() === 'waiting' && (statusGame.player1 === sender || statusGame.player2 === sender)) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, statusGame.throwResponse().message);
+				await client[botNum].reply(statusGame.throwResponse().message, { from, quoted: message, groupMetadata });
 				return;
 			} else if (statusGame.checkStatus() === 'playing' && (statusGame.player1 === sender || statusGame.player2 === sender)) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, statusGame.throwResponse().message);
+				await client[botNum].reply(statusGame.throwResponse().message, { from, quoted: message, groupMetadata });
 				return;
 			} else if (statusGame.player1 !== sender && statusGame.player2 === undefined && statusGame.checkStatus() === 'waiting') {
 				const data = await statusGame.start(sender, client);

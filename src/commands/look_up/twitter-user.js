@@ -5,7 +5,7 @@ import { color, ERRLOG, isURL } from '../../utils/modules/index.js';
 import { twitterUser } from '../../utils/twitter/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'twitstalk',
@@ -20,18 +20,18 @@ export default {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a url');
+			return await client[botNum].reply('Please specify a url', { from, quoted: message, groupMetadata });
 		}
 
 		let { _: usernames } = parser(query);
 
 		if (usernames.length === 1 && isURL(usernames[0])) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a valid Twitter usernames');
+			return await client[botNum].reply('Please specify a valid Twitter usernames', { from, quoted: message, groupMetadata });
 		}
 
 		for (const username of usernames) {
 			if (isURL(username.trim())) {
-				await client[botNum].reply({ groupMetadata, from, quoted: message }, 'Please specify a valid Twitter username');
+				await client[botNum].reply('Please specify a valid Twitter username', { from, quoted: message, groupMetadata });
 
 				continue;
 			}
@@ -39,10 +39,11 @@ export default {
 			const user = await twitterUser(username);
 
 			if ('error' in user) {
-				await client[botNum].reply(
-					{ from, quoted: message },
-					`Error while searching Twitter user\n\n${user.error}\n${username}`
-				);
+				await client[botNum].reply(`Error while searching Twitter user\n\n${user.error}\n${username}`, {
+					from,
+					quoted: message,
+					groupMetadata
+				});
 
 				ERRLOG(
 					`[${color(time, 'cyan')}]`,

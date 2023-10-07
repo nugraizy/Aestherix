@@ -4,7 +4,7 @@ import { numberWithCommas, removeDuplicatesArray, getFilesizeFromBytes } from '.
 import { bilibiliSearchEn, bilibiliDetailEn, mergeVideoWithAudio } from '../../utils/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'bilibili',
@@ -17,17 +17,17 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, cmd, sender, filename, args, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply({ groupMetadata, from, quoted: message }, 'You must provide a query.');
+			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if (args[1] === '-dl') {
 			const result = JSON.parse(args.slice(2).join(''));
 
 			await client[botNum].reply(
-				{ groupMetadata, from, quoted: message },
 				` • Converting videos, this might take a while please wait.\n\nResolution : ${
 					result.resolution
-				}\nSize : ${getFilesizeFromBytes(result.size)}`
+				}\nSize : ${getFilesizeFromBytes(result.size)}`,
+				{ from, quoted: message, groupMetadata }
 			);
 
 			const merge = await mergeVideoWithAudio(
