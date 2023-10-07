@@ -70,6 +70,6 @@ export default {
 		caption += '⪨ ＣＰＵｓ Ｉｎｆｏ ⪩\n\n';
 		caption += `${getCpus(cpus)}`;
 
-		client[botNum].reply(caption);
+		client[botNum].reply(caption, { from, quoted: message, groupMetadata });
 	}
 };
