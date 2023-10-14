@@ -40,7 +40,7 @@ const globalConfig = {
 		metadata: new Cache(),
 		settings: new Cache(),
 		users: new Cache(),
-		interval: new Cache()
+		interval: new Cache(),
 		ownerNumbers: [users.owner_number, ...users.team_number]
 	},
 	OPTIONS: {},
