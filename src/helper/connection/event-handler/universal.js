@@ -8,6 +8,7 @@ import {
 	DisconnectReason
 } from '@adiwajshing/baileys';
 import boxen from 'boxen';
+import dayjs from 'dayjs';
 
 import configuration from '../../config/connect.js';
 import { INFOLOG, color, romanize } from '../../../utils/modules/index.js';
@@ -27,6 +28,8 @@ const handlerPath = {
 	groupSettings: '../../../handlers/notification_handlers/group-settings-notification.js'
 };
 
+let shouldPrintBanner = true;
+
 /**
  *
  * @typedef {import('../../../types/Socket/index.js').ClientSocket} Client
@@ -39,29 +42,59 @@ export const handleConnectionUpdate = async (
 	Client,
 	{ lastDisconnect, connection, receivedPendingNotifications, clientMqttListen, OPTIONS, cli }
 ) => {
+	const getTime = () => dayjs().format('HH:mm:ss DD/MM');
+
 	try {
 		if (connection === 'close') {
 			const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
 
 			if (reason === DisconnectReason.badSession) {
-				console.log('Bad session, Please delete your previous session and do a rescan...');
+				INFOLOG(
+					`[${color(getTime(), 'cyan')}]`,
+					color('Bad session', '#ff71ce'),
+					color('Please delete your previous session and do a rescan...', 'white')
+				);
 				process.exit(0);
 			} else if (reason === DisconnectReason.loggedOut) {
-				console.log('Logged out, Please delete your previous session and do a rescan...');
+				INFOLOG(
+					`[${color(getTime(), 'cyan')}]`,
+					color('Logged out', '#ff71ce'),
+					color('Please delete your previous session and do a rescan...', 'white')
+				);
 				process.exit(0);
 			} else {
 				if (reason === DisconnectReason.restartRequired) {
-					console.log('Restart required, Restarting your WebScoket...');
+					INFOLOG(
+						`[${color(getTime(), 'cyan')}]`,
+						color('Restart required', '#ff71ce'),
+						color('Restarting your WebScoket...', 'white')
+					);
 				} else if (reason === DisconnectReason.timedOut) {
-					console.log('Timed out, Quick reconnecting...');
+					INFOLOG(`[${color(getTime(), 'cyan')}]`, color('Timed out', '#ff71ce'), color('Quick reconnecting...', 'white'));
 				} else if (reason === DisconnectReason.connectionClosed) {
-					console.log('Connection closed, Quick reconnecting...');
+					INFOLOG(
+						`[${color(getTime(), 'cyan')}]`,
+						color('Connection closed', '#ff71ce'),
+						color('Quick reconnecting...', 'white')
+					);
 				} else if (reason === DisconnectReason.connectionReplaced) {
-					console.log('Connection replaced, Quick reconnecting...');
+					INFOLOG(
+						`[${color(getTime(), 'cyan')}]`,
+						color('Connection replaced', '#ff71ce'),
+						color('Quick reconnecting...', 'white')
+					);
 				} else if (reason === DisconnectReason.connectionLost) {
-					console.log('Connection lost, Quick reconnecting...');
+					INFOLOG(
+						`[${color(getTime(), 'cyan')}]`,
+						color('Connection lost', '#ff71ce'),
+						color('Quick reconnecting...', 'white')
+					);
 				} else {
-					console.log('Unknown reason, Quick reconnecting...');
+					INFOLOG(
+						`[${color(getTime(), 'cyan')}]`,
+						color('Unknown reason', '#ff71ce'),
+						color('Quick reconnecting...', 'white')
+					);
 				}
 
 				reconnectMqttConnection(connectMqtt, clientMqttListen);
@@ -97,15 +130,18 @@ export const handleConnectionUpdate = async (
 
 				(await import('../../modules/utils.js')).assign(client);
 
-				INFOLOG(
-					color(
-						boxen(`Made By Nanda\n Bot Version  ${romanize((await fs.readJSON('./package.json')).version)} `, {
-							textAlignment: 'center',
-							float: 'center'
-						}),
-						'#9f53ea'
-					)
-				);
+				if (shouldPrintBanner) {
+					INFOLOG(
+						color(
+							boxen(`Made By Nanda\n Bot Version  ${romanize((await fs.readJSON('./package.json')).version)} `, {
+								textAlignment: 'center',
+								float: 'center'
+							}),
+							'#9f53ea'
+						)
+					);
+					shouldPrintBanner = false;
+				}
 
 				Client.ev.emit('connected');
 				clearDBConnection(cli);

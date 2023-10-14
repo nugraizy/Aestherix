@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import baileys, { makeCacheableSignalKeyStore } from '@adiwajshing/baileys';
+import baileys, { delay, makeCacheableSignalKeyStore } from '@adiwajshing/baileys';
 import P from 'pino';
 import readline from 'readline';
 import dayjs from 'dayjs';
@@ -77,6 +77,8 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 				phoneNumber = await question(`[${color(time, 'cyan')}] ${color('Insert your phone number : ', '#ff71ce')}`);
 
 				break check;
+			} else {
+				await delay(1000);
 			}
 
 			phoneNumber = hostNumber;

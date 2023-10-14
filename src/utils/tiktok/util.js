@@ -15,10 +15,10 @@ export const buildHead = (args) => {
 		params: {
 			...args,
 			version_name: '1.1.9',
-			version_code: '119',
+			version_code: '2018111632',
 			build_number: '1.1.9',
-			manifest_version_code: '119',
-			update_version_code: '119',
+			manifest_version_code: '2018111632',
+			update_version_code: '2018111632',
 			openudid: randomChar('0123456789abcdef', 16),
 			uuid: randomChar('1234567890', 16),
 			_rticket: Date.now() * 1000,

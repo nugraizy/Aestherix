@@ -83,7 +83,6 @@ export default {
 			{}
 		);
 
-		console.log(JSON.stringify(messages, null, 2));
 		await client[botNum].relayMessage(from, messages.message, { messageId: messages.key.id });
 	}
 };

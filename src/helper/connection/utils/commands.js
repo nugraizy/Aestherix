@@ -42,7 +42,28 @@ export const loadCommands = async (OPTIONS) => {
 			configuration.cmds.aliases.push(...module.default.aliases);
 
 			folder.push(path.dirname(command));
-		} catch {
+		} catch (e) {
+			ERRLOG(`[${color(time, 'cyan')}]`, color(e.message, 'white'));
+			ERRLOG(
+				e.stack
+					.split(e.name + ': ')[1]
+					.replace(e.message + '\n', '')
+					.split('    at ')
+					.map((stackEntry) => {
+						const regex = /\((.*?)\)/;
+						const match = regex.exec(stackEntry);
+
+						if (match) {
+							const [fullMatch, text] = match;
+							const formattedStackEntry = `${color(stackEntry.replace(fullMatch, ''), 'white')}(${color(text, '#ff71ce')})`;
+
+							return formattedStackEntry.replace('\n', '') + '\n';
+						} else {
+							return stackEntry.trim();
+						}
+					})
+					.join(`  ${color('> ', 'red') + color('at', '#ff71ce')} `)
+			);
 			configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
 				absolutePath: file,
 				path: normalize

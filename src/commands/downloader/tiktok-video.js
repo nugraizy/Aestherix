@@ -77,11 +77,14 @@ export default {
 					`[${color(time, 'cyan')}]`,
 					`⚠️ ${color('Error while downloading TikTok Video', '#ff0000')} for ${color(prettyNumber, '#ff71ce')}`
 				);
-				await client[botNum].reply(`Error while downloading TikTok Video\n\n${url.split(' ')[0]}`, {
-					from,
-					quoted: message,
-					groupMetadata
-				});
+				await client[botNum].reply(
+					`Error while downloading TikTok Video\n\n${url.split(' ')[0]}\nMSG: ${container.error || ''}`,
+					{
+						from,
+						quoted: message,
+						groupMetadata
+					}
+				);
 
 				continue;
 			}

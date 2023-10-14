@@ -4,7 +4,7 @@ import { load } from 'cheerio';
 import { buildHead, parseData } from './util.js';
 import { fetchJSON, fetchTEXT } from '../modules/index.js';
 
-const _api = 'https://api16-va.tiktokv.com/aweme/v1/feed/?';
+const _api = 'https://api.tiktokv.com/aweme/v1/feed/?';
 const _websiteProfile = 'https://www.tiktok.com/@';
 
 /**
@@ -53,6 +53,11 @@ export const tiktokAPI = (url) =>
 			);
 
 			json = json.aweme_list.find((v) => v.aweme_id === keyword);
+
+			if (!json) {
+				resolve({ error: 'Download failed. either the access is denied, or other error.' });
+				return;
+			}
 
 			json = await parseData(json, json.image_post_info && json.image_post_info?.images.length > 0 ? 'images' : undefined);
 

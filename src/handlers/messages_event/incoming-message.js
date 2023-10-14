@@ -3,8 +3,8 @@ import { findBestMatch } from 'string-similarity';
 
 import configuration from '../../helper/config/connect.js';
 import { runtime } from '../../index.js';
-import { addLimit, checkAfk, deleteAfk, getAfk, reassign } from '../../helper/index.js';
-import { color, getTimeSince, INFOLOG } from '../../utils/modules/index.js';
+import { Limit, checkAfk, deleteAfk, getAfk, reassign } from '../../helper/index.js';
+import { color, getTimeSince, INFOLOG, ERRLOG } from '../../utils/modules/index.js';
 import { Cache } from '../../helper/modules/cache.js';
 
 const log = console.log;
@@ -27,14 +27,14 @@ const path = {
 };
 
 const logMessage = (message, time) => {
-	const senderInfo = `${color(message.pushname.trim(), 'white')} ${color(message.prettyNumber, '#ff71ce')}`;
-	const messageBody = `${color(message.query?.trim()?.replace('\n', '')?.substr(0, 20), '#05ffa1')}`;
+	const senderInfo = `${color(message.pushname, 'white')} ${color(message.prettyNumber, '#ff71ce')}`;
+	const messageBody = `${color(message.query?.replace(/\\\n/g, ' - '), '#05ffa1')}`;
 	const typeInfo = `${color('type', '#ff71ce')} : ${color(message.type, '#b967ff')}`;
 	const runtimeInfo = `${color(((Date.now() - runtime) / 1000).toFixed(0), '#f18f15')}${color('s', '#f5e700')}`;
 
 	const fullBody = message.isCmd
-		? `${color(message.prefix, 'white')}${color(message.cmd.slice(1).trim(), '#01cdfe')} ${messageBody}`.trim()
-		: color(message.body, 'white');
+		? `${color(message.prefix, 'white')}${color(message.cmd.slice(1), '#01cdfe')} ${messageBody.substring(0, 20)}`.trim()
+		: color(message.body?.substring(0, 20), 'white');
 
 	INFOLOG(`[${color(time, 'cyan')}]`, `${senderInfo} :`, fullBody, typeInfo, runtimeInfo);
 };
@@ -153,13 +153,14 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 			message.cmd = correctedCommand || correctedAliases || '';
 		}
 
-		const commands = Array.from(cmds.commands.values().values);
+		const commands = cmds.commands.values().values;
 
 		const Tempcmds =
 			cmds.commands.get(message.cmd.slice(1).trim().toLowerCase()) ||
 			commands.find(
 				(v) =>
-					v.aliases.includes(message.cmd.slice(1).trim().toLowerCase()) || v.aliases.includes(message.cmd.trim().toLowerCase())
+					v.aliases?.includes(message.cmd.slice(1).trim().toLowerCase()) ||
+					v.aliases?.includes(message.cmd.trim().toLowerCase())
 			) ||
 			false;
 
@@ -223,22 +224,25 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 			}
 
 			if (!configuration.OPTIONS.noLimit) {
-				const limit = addLimit({ id: message.sender, limit: Tempcmds.limit ?? 0, type: 'MIN' });
+				const isExist = Limit.checkExist(message.sender);
 
-				if (typeof limit === 'object' && 'message' in limit) {
-					client[botNum].reply(
-						`${limit.message}\nYour limit is ${limit.limits}\nBut this command (${Tempcmds.name}) need ${Tempcmds.limit}`,
-						{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message }
-					);
-					continue;
+				if (!isExist) {
+					const { role } = Limit.checkRole(message.sender);
+
+					if (!(role === 'OWNER' || role === 'PREMIUM')) {
+						Limit.upsert(message.sender, 0, 'USER');
+					}
 				}
 
-				if (!limit) {
-					return await client[botNum].reply('You have reached the limit of this command.', {
+				const limit = Limit.reduceLimit(message.sender, Tempcmds.limit);
+
+				if (limit.error) {
+					client[botNum].reply(limit.message.replace('%s', `But this command (${Tempcmds.name}) need ${Tempcmds.limit}`), {
 						groupMetadata: message.groupMetadata,
 						from: message.from,
 						quoted: message.message
 					});
+					continue;
 				}
 			}
 
@@ -344,7 +348,30 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 					},
 					{ groupMetadata: message.groupMetadata }
 				);
-				console.error(err);
+
+				const time = dayjs().format('HH:mm:ss DD/MM');
+
+				ERRLOG(`[${color(time, 'cyan')}]`, color(err.message, 'white'));
+				ERRLOG(
+					err.stack
+						.split(err.name + ': ')[1]
+						.replace(err.message + '\n', '')
+						.split('    at ')
+						.map((stackEntry) => {
+							const regex = /\((.*?)\)/;
+							const match = regex.exec(stackEntry);
+
+							if (match) {
+								const [fullMatch, text] = match;
+								const formattedStackEntry = `${color(stackEntry.replace(fullMatch, ''), 'white')}(${color(text, '#ff71ce')})`;
+
+								return formattedStackEntry.replace('\n', '') + '\n';
+							} else {
+								return stackEntry.trim();
+							}
+						})
+						.join(`  ${color('> ', 'red') + color('at', '#ff71ce')} `)
+				);
 			}
 		}
 	}

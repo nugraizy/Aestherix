@@ -3,7 +3,7 @@ import { load } from 'cheerio';
 
 import { buildHead, parseCrawlerResponse } from './util.js';
 
-const _api = 'https://api-h2.tiktokv.com/aweme/v1/aweme/post/?';
+const _api = 'https://api.tiktokv.com/aweme/v1/aweme/post/?';
 
 export const tiktokPostCrawler = (username) =>
 	new Promise(async (resolve, reject) => {

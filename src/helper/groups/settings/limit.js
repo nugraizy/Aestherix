@@ -3,13 +3,16 @@ import dayjs from 'dayjs';
 import fs from 'fs-extra';
 
 import { INFOLOG, color } from '../../../utils/modules/index.js';
+import { Cache } from '../../modules/cache.js';
+import configuration from '../../config/connect.js';
 
 const PATH = {
 	folder: './databases/users',
-	files: './databases/users/limit.json'
+	files: './databases/users/limit.json',
+	settings: './src/helper/config/settings.json'
 };
 
-const LIMIT = (await fs.readJSON('./src/helper/config/settings.json'))?.limit || 100;
+const cache = new Cache();
 
 if (!(await fs.readdir(PATH.folder))) {
 	await fs.mkdir(PATH.folder);
@@ -19,122 +22,161 @@ if (!(await fs.exists(PATH.files))) {
 	await fs.writeJSON(PATH.files, []);
 }
 
-export const checkUser = async (obj) => {
-	const data = await fs.readJSON(PATH.files);
-	const status = data.some((v) => v.id === obj.id);
+const users = await fs.readJSON(PATH.files);
+const LIMIT = (await fs.readJSON(PATH.settings))?.limit || 100;
 
-	if (!status) {
-		return false;
-	}
+configuration.cache.limit = LIMIT;
 
-	return true;
-};
-
-export const addUser = async (obj) => {
-	const data = await fs.readJSON(PATH.files);
-
-	if (!(await checkUser(obj))) {
-		data.push(obj);
-	}
-
-	await fs.writeJSON(PATH.files, data);
-	return true;
-};
-
-export const indexUser = async (obj) => {
-	const data = await fs.readJSON(PATH.files);
-	const index = data.findIndex((v) => v.id === obj.id);
-
-	if (index === -1) {
-		return false;
-	}
-
-	return {
-		index,
-		limit: data[index].limit,
-		type: data[index].role
-	};
-};
-
-export const updateUser = async (obj) => {
-	const data = await fs.readJSON(PATH.files);
-	const indexs = await indexUser(obj);
-
-	if (indexs) {
-		for (const index in obj) {
-			if (index === 'limit' && obj.type === 'MIN') {
-				if (data[indexs.index][index] - obj[index] < 0) {
-					return { status: false, message: 'Limit is not enough', limits: data[indexs.index][index] };
-				}
-
-				data[indexs.index][index] -= obj[index];
-			} else if (obj.type !== 'MIN') {
-				data[indexs.index][index] = obj[index];
-			}
-		}
-
-		await fs.writeJSON(PATH.files, data);
-		return data[indexs.index];
-	}
-
-	return false;
-};
-
-export const addLimit = async (obj) => {
-	const data = await fs.readJSON(PATH.files);
-	const indexs = await indexUser(obj);
-
-	if (indexs) {
-		if (data[indexs.index].limit <= 0) {
-			return false;
-		}
-
-		return await updateUser(obj);
-	}
-
-	return await addUser({
-		id: obj.id,
-		limit: LIMIT,
-		role: 'FREE'
+users.forEach((element) => {
+	cache.set(element.id, {
+		limit: element.limit,
+		role: element.role
 	});
-};
+});
 
-export const addAllLimit = async (limit) => {
-	const data = await fs.readJSON(PATH.files);
-
-	for (const index in data) {
-		data[index].limit += limit;
+export class Limit {
+	static checkExist(sender) {
+		return !!cache.get(sender);
 	}
 
-	await fs.writeJSON(PATH.files, data);
-	return true;
-};
-
-export const resetAllLimit = async () => {
-	const data = await fs.readJSON(PATH.files);
-
-	for (const index in data) {
-		data[index].limit = LIMIT;
+	static upsert(sender, limit, role) {
+		cache.set(sender, {
+			limit: limit,
+			role: role
+		});
 	}
 
-	await fs.writeJSON(PATH.files, data);
-	return true;
-};
+	static updateRole(sender, role) {
+		const user = cache.get(sender);
 
-export const checkLimit = async (users) => await indexUser({ id: users });
+		user.role = role;
+		this.upsert(sender, user.limit, user.role);
+	}
 
-export const addUserLimit = async (user, limit) => {
-	const data = await fs.readJSON(PATH.files);
+	static checkRole(sender) {
+		if (configuration.cache?.ownerNumbers?.includes(sender)) {
+			return { role: 'OWNER' };
+		}
 
-	for (const index in data) {
-		if (data[index].id === user) {
-			data[index].limit += limit;
+		const user = cache.get(sender);
+
+		return { role: user.role };
+	}
+
+	static addLimit(sender, limit) {
+		const { role } = this.checkRole(sender);
+
+		if (role === 'OWNER' || role === 'PREMIUM') {
+			return;
+		}
+
+		const user = cache.get(sender);
+
+		user.limit = user.limit + limit;
+		this.upsert(sender, user.limit, user.role);
+	}
+
+	static reduceLimit(sender, limit) {
+		const { role } = this.checkRole(sender);
+
+		if (role === 'OWNER' || role === 'PREMIUM') {
+			return { error: false };
+		}
+
+		const user = cache.get(sender);
+
+		if (user.limit === 0) {
+			return {
+				error: true,
+				message: 'You have reached the limit of this command.'
+			};
+		}
+
+		const tempLimit = user.limit - limit;
+
+		if (tempLimit < 0) {
+			return {
+				error: true,
+				message: `Limit is not enough.\nYour limit is ${user.limit}.\n%s`
+			};
+		}
+
+		this.upsert(sender, tempLimit, user.role);
+
+		return {
+			error: false
+		};
+	}
+
+	/**
+	 *
+	 * @param {string} sender
+	 * @returns {number | string}
+	 */
+	static checkLimit(sender) {
+		const user = cache.get(sender);
+		const { role } = this.checkRole(sender);
+
+		if (role === 'OWNER' || role === 'PREMIUM') {
+			return '∞';
+		}
+
+		if (!user) {
+			return 30;
+		} else {
+			return user.limit;
 		}
 	}
 
-	await fs.writeJSON(PATH.files, data);
-	return true;
-};
+	static async resetAllLimit() {
+		const users = await fs.readJSON('./databases/users/limit.json');
+
+		users.forEach((element, i) => {
+			const exist = this.checkExist(element.id);
+
+			if (!exist) {
+				this.upsert(element.id, element.limit, element.role);
+			} else {
+				const { role } = this.checkRole(element.id);
+
+				if (!(role === 'OWNER' || role === 'PREMIUM')) {
+					users[i].limit = LIMIT;
+					this.upsert(element.id, LIMIT, element.role);
+					return;
+				}
+			}
+		});
+
+		await fs.writeJSON('./databases/users/limit.json', users, {
+			spaces: 2
+		});
+	}
+
+	static async updateLimitFromCache() {
+		const [usersFile, usersCache] = [await fs.readJSON('./databases/users/limit.json'), cache.entries()];
+
+		usersCache.forEach((element) => {
+			const index = usersFile.findIndex((user) => user.id === element[0]);
+
+			if (index !== -1) {
+				usersFile[index].limit = element[1].limit;
+				usersFile[index].role = element[1].role;
+
+				return;
+			}
+
+			usersFile.push({
+				id: element[0],
+				limit: element[1].limit,
+				role: element[1].role
+			});
+		});
+
+		await fs.writeJSON('./databases/users/limit.json', usersFile, {
+			spaces: 2
+		});
+	}
+}
 
 export const runLimitScheduler = (OPTIONS, clearDBConnection, cli) => {
 	cron.schedule(
@@ -142,7 +184,9 @@ export const runLimitScheduler = (OPTIONS, clearDBConnection, cli) => {
 		async () => {
 			const time = dayjs().format('HH:mm:ss DD/MM');
 
-			await resetAllLimit();
+			await Limit.resetAllLimit();
+			await Limit.updateLimitFromCache();
+
 			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Sukses Reset User`s Limit', 'white')}`);
 
 			if (OPTIONS.resetOnStart) {

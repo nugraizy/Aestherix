@@ -1,4 +1,4 @@
-import { addUserLimit } from '../../helper/index.js';
+import { Limit } from '../../helper/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -23,7 +23,7 @@ export default {
 				{ from: args[2], quoted: JSON.parse(args.slice(4)), groupMetadata }
 			);
 
-			addUserLimit(args[3], 20);
+			Limit.addLimit(args[3], 20);
 
 			return;
 		}
