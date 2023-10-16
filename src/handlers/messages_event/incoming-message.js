@@ -28,12 +28,12 @@ const path = {
 
 const logMessage = (message, time) => {
 	const senderInfo = `${color(message.pushname, 'white')} ${color(message.prettyNumber, '#ff71ce')}`;
-	const messageBody = color(message.query?.replace(/[\t\n]/g, ' '), '#05ffa1');
+	const messageBody = color(message.query?.replace(/[\t\n]/g, ' ')?.substring(0, 20), '#05ffa1');
 	const typeInfo = `${color('type', '#ff71ce')} : ${color(message.type, '#b967ff')}`;
 	const runtimeInfo = `${color(((Date.now() - runtime) / 1000).toFixed(0), '#f18f15')}${color('s', '#f5e700')}`;
 
 	const fullBody = message.isCmd
-		? `${color(message.prefix, 'white')}${color(message.cmd.slice(1), '#01cdfe')} ${messageBody.substring(0, 50)}`.trim()
+		? `${color(message.prefix, 'white')}${color(message.cmd.slice(1), '#01cdfe')} ${messageBody}`
 		: color(message.body?.substring(0, 20).replace(/[\t\n]/g, ' '), 'white');
 
 	INFOLOG(`[${color(time, 'cyan')}]`, `${senderInfo} :`, fullBody, typeInfo, runtimeInfo);
