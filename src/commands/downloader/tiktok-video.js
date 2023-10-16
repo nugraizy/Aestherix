@@ -171,7 +171,7 @@ export default {
 					video: new Buffer.from(
 						(
 							await axios.get(
-								container.url[
+								container.urls[
 									!NO_WM && !WITH_WM
 										? 'withNoWatermark'
 										: WITH_WM

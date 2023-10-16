@@ -70,7 +70,7 @@ export default {
 			await client[botNum].send(
 				from,
 				{
-					document: { url: audio.url.withNoWatermark },
+					document: { url: audio.urls.withNoWatermark },
 					fileName: `${audio.musicTitle}.mp3`,
 					mimetype: mime('mp3')
 				},

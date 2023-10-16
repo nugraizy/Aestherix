@@ -74,7 +74,7 @@ export default {
 			await client[botNum].send(
 				from,
 				{
-					document: { url: music.url.music },
+					document: { url: music.urls.music },
 					fileName: `${music.authorMusic} - ${music.musicTitle}.mp3`,
 					mimetype: mime('mp3')
 				},

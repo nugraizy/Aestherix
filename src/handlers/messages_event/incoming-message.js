@@ -36,8 +36,6 @@ const logMessage = (message, time) => {
 		? `${color(message.prefix, 'white')}${color(message.cmd.slice(1), '#01cdfe')} ${messageBody.substring(0, 50)}`.trim()
 		: color(message.body?.substring(0, 20).replace(/[\t\n]/g, ' '), 'white');
 
-	console.log(message.isCmd && (message.prefix + message.cmd.slice(1), messageBody.substring(0, 50)).trim());
-
 	INFOLOG(`[${color(time, 'cyan')}]`, `${senderInfo} :`, fullBody, typeInfo, runtimeInfo);
 };
 
