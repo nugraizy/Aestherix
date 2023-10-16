@@ -3,7 +3,7 @@ import parser from 'yargs-parser';
 import axios from 'axios';
 
 import { color, delay, ERRLOG, INFOLOG, isURL, numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
-import { tiktokAPI } from '../../utils/tiktok/index.js';
+import { tiktok } from '../../utils/tiktok/index.js';
 
 const regex = (input) => /(?:https:?\/{2})?(?:w{3}|vm|vt|t)?\.?tiktok.com\/([^\s&]+)/gi.test(input);
 
@@ -65,7 +65,7 @@ export default {
 				continue;
 			}
 
-			const container = await tiktokAPI(url);
+			const container = await tiktok.downloadMedia(url);
 
 			INFOLOG(
 				`[${color(time, 'cyan')}]`,

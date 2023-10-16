@@ -3,7 +3,7 @@ import parser from 'yargs-parser';
 
 import { color, ERRLOG, INFOLOG, isURL, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { mime } from '../../utils/misc/index.js';
-import { tiktokAPI } from '../../utils/tiktok/index.js';
+import { tiktok } from '../../utils/tiktok/index.js';
 
 const regex = (input) => /(?:https:?\/{2})?(?:w{3}|vm|vt|t)?\.?tiktok.com\/([^\s&]+)/gi.test(input);
 
@@ -49,15 +49,15 @@ export default {
 				continue;
 			}
 
-			const audio = await tiktokAPI(url);
+			const audio = await tiktok.downloadMedia(url);
 
 			INFOLOG(
 				`[${color(time, 'cyan')}]`,
 				`${color('Downloading TikTok Audio', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`
 			);
 
-			if ('error' in audio || audio.status === 'error') {
-				await client[botNum].reply(audio.error || audio.message, { from, quoted: message, groupMetadata });
+			if ('error' in audio) {
+				await client[botNum].reply(audio.error, { from, quoted: message, groupMetadata });
 
 				ERRLOG(
 					`[${color(time, 'cyan')}]`,

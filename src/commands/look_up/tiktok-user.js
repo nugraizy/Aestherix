@@ -3,7 +3,7 @@ import parser from 'yargs-parser';
 import _ from 'lodash';
 
 import { color, ERRLOG, isURL, numberWithCommas } from '../../utils/modules/index.js';
-import { tiktokProfileTIKTOK } from '../../utils/tiktok/index.js';
+import { tiktok } from '../../utils/tiktok/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -75,7 +75,7 @@ export default {
 				continue;
 			}
 
-			const users = await tiktokProfileTIKTOK(user);
+			const users = await tiktok.profileDetail(user);
 
 			if ('error' in users) {
 				client[botNum].reply(`Error while searching TikTok user\n\n${users.error}`, { from, quoted: message, groupMetadata });
@@ -118,7 +118,7 @@ export default {
 					from,
 					{
 						image: { url: profileHD },
-						caption: 'TikTok User Lookup'.formatHeaders(),
+						caption: 'TikTok User Lookup'.formatHeaders() + `\n\n${capt.trim()}`.trimEnd(),
 						templateButtons: [
 							{ urlButton: { displayText: 'Profile Picture HD Source', url: profileHD } },
 							{ urlButton: { displayText: 'Profile Picture SD Source', url: profileSD } },
