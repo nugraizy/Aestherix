@@ -1,5 +1,3 @@
-import dayjs from 'dayjs';
-
 import configuration from '../../helper/config/connect.js';
 import { Wordle } from '../../utils/games/index.js';
 import { INFOLOG, color } from '../../utils/modules/index.js';
@@ -17,8 +15,6 @@ export default {
 	limit: 2,
 	status: 'enable',
 	async run({ from, message, query, args, sender, prettyNumber, groupMetadata }, client) {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		if (!query) {
 			return await client[botNum].reply('Please specify arguments.\n\nUsage: !wordle <play/exit/info>', {
 				from,
@@ -34,10 +30,7 @@ export default {
 				return await client[botNum].reply('You are already playing Wordle.', { from, quoted: message, groupMetadata });
 			}
 
-			INFOLOG(
-				`[${color(time, 'cyan')}]`,
-				`${color('Wordle Game Answer : ', '#01cdfe')} ${color(wordle.word, 'white')} to ${color(prettyNumber, '#ff71ce')}`
-			);
+			INFOLOG(`${color('Wordle Game Answer : ', 'cyan')} ${color(wordle.word, 'white')} to ${color(prettyNumber, '#ff71ce')}`);
 
 			const data = await client[botNum].reply(`${wordle.board.join('')}\nTot. words : ${wordle.word.length}`, {
 				from,

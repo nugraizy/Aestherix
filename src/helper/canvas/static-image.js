@@ -3,7 +3,6 @@ import Wrap from 'canvas-text-wrapper';
 import { exec } from 'child_process';
 import emojiReg from 'emoji-regex';
 import fs, { readFileSync, unlinkSync } from 'fs';
-import dayjs from 'dayjs';
 import path from 'path';
 
 import { createExif } from '../../utils/misc/index.js';
@@ -25,17 +24,12 @@ const saveImages = async (buffer) => {
 
 const insertExif = async (paths, sender) =>
 	new Promise(async (resolve, reject) => {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		const pathExif = path.join(__dirname, 'src/media/temporary_files/data.exif');
 		const pathResults = paths;
 
 		exec(`webpmux -set exif "${pathExif}" "${pathResults}" -o "${pathResults}-done.webp"`, (err) => {
 			if (err) {
-				ERRLOG(
-					`[${color(time, 'cyan')}]`,
-					`⚠️ ${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`
-				);
+				ERRLOG(`⚠️ ${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`);
 
 				reject(err);
 			}
@@ -93,12 +87,10 @@ export const ttp = (sender, texts, colors, fonts) =>
 	new Promise(async (resolve, reject) => {
 		createExif('Made by Nanda', 'Void Static Sticker using Canvas and WebP');
 
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		fonts = fonts !== undefined ? fonts.toLowerCase() : 'chevin';
 		colors = colors.length === 0 ? null : colors;
 
-		INFOLOG(`[${color(time, 'cyan')}]`, `${color('Making Static Image', '#01cdfe')} for ${color(sender, '#ff71ce')}`);
+		INFOLOG(`${color('Making Static Image', 'cyan')} for ${color(sender, '#ff71ce')}`);
 
 		let { ctx, canvas } = createCanvasTemplates(fonts);
 		const colori = loadColorsPalette(colors);
@@ -123,7 +115,7 @@ export const ttp = (sender, texts, colors, fonts) =>
 			.then((saved) => {
 				insertExif(saved, sender)
 					.then(({ buffers }) => {
-						INFOLOG(`[${color(time, 'cyan')}]`, `${color('Static Image is Done', '#01cdfe')} for ${color(sender, '#ff71ce')}`);
+						INFOLOG(`${color('Static Image is Done', 'cyan')} for ${color(sender, '#ff71ce')}`);
 
 						resolve(buffers);
 					})

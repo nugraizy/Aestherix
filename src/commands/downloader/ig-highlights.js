@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
 import { color, ERRLOG, INFOLOG, isURL, numberWithCommas } from '../../utils/modules/index.js';
@@ -17,8 +16,6 @@ export default {
 	limit: 9,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		if (!query) {
 			return await client[botNum].reply('Please specify a username', { from, quoted: message, groupMetadata });
 		}
@@ -35,10 +32,7 @@ export default {
 			} else {
 				const highlights = await getHighlights2(username);
 
-				INFOLOG(
-					`[${color(time, 'cyan')}]`,
-					`${color('Downloading Instagram highlights', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`
-				);
+				INFOLOG(`${color('Downloading Instagram highlights', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 				if ('error' in highlights) {
 					await client[botNum].reply(`Error while downloading Instagram highlights\n\n${highlights.error}\n${username}`, {
@@ -46,15 +40,12 @@ export default {
 						quoted: message,
 						groupMetadata
 					});
-					ERRLOG(
-						`[${color(time, 'cyan')}]`,
-						`⚠️ ${color('Failed to Download Instagram highlights', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`
-					);
+					ERRLOG(`⚠️ ${color('Failed to Download Instagram highlights', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 					continue;
 				} else if (highlights.highlights === '') {
 					await client[botNum].reply(`No highlights found for ${username}`, { from, quoted: message, groupMetadata });
-					ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color('No highlights found for', 'cyan')} ${color(username, '#ff71ce')}`);
+					ERRLOG(`⚠️ ${color('No highlights found for', 'cyan')} ${color(username, '#ff71ce')}`);
 
 					continue;
 				}
@@ -108,10 +99,7 @@ export default {
 					}
 				}
 
-				INFOLOG(
-					`[${color(time, 'cyan')}]`,
-					`${color('Downloaded Instagram highlights', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`
-				);
+				INFOLOG(`${color('Downloaded Instagram highlights', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 			}
 		}
 	}

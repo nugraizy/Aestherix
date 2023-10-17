@@ -16,8 +16,6 @@ export default {
 	limit: 9,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		if (!query) {
 			return await client[botNum].reply('Please specify a url', { from, quoted: message, groupMetadata });
 		}
@@ -35,10 +33,7 @@ export default {
 				continue;
 			}
 
-			INFOLOG(
-				`[${color(time, 'cyan')}]`,
-				`${color('Downloading Twitter Post', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`
-			);
+			INFOLOG(`${color('Downloading Twitter Post', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 			const post = await twitterDownload(url);
 
@@ -48,10 +43,7 @@ export default {
 					quoted: message,
 					groupMetadata
 				});
-				ERRLOG(
-					`[${color(time, 'cyan')}]`,
-					`⚠️ ${color('Failed to Download Twitter Post', 'red')} for ${color(prettyNumber, '#ff71ce')}`
-				);
+				ERRLOG(`⚠️ ${color('Failed to Download Twitter Post', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 
 				continue;
 			}
@@ -101,10 +93,7 @@ export default {
 				}
 			}
 
-			INFOLOG(
-				`[${color(time, 'cyan')}]`,
-				`${color('Downloaded Twitter Post', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`
-			);
+			INFOLOG(`${color('Downloaded Twitter Post', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 		}
 	}
 };

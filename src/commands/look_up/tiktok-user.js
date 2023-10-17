@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 import _ from 'lodash';
 
@@ -18,8 +17,6 @@ export default {
 	limit: 6,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, type, args, groupMetadata }, client) {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		if (type === 'templateButtonReplyMessage' && args[1] === '-crawl') {
 			let data = JSON.parse(args.slice(2).join(' '));
 			let len = '';
@@ -80,10 +77,7 @@ export default {
 			if ('error' in users) {
 				client[botNum].reply(`Error while searching TikTok user\n\n${users.error}`, { from, quoted: message, groupMetadata });
 
-				ERRLOG(
-					`[${color(time, 'cyan')}]`,
-					`⚠️ ${color('Failed to Searching TikTok User', 'red')} for ${color(prettyNumber, '#ff71ce')}`
-				);
+				ERRLOG(`⚠️ ${color('Failed to Searching TikTok User', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 
 				continue;
 			} else {

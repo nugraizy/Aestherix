@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import path from 'path';
 
 import { color, INFOLOG } from '../../utils/modules/index.js';
@@ -17,8 +16,6 @@ export default {
 	limit: 1,
 	status: 'enable',
 	async run({ isQuotedSticker, from, message, filename, extractMediaData, prettyNumber, typeQuoted, groupMetadata }, client) {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		if (!isQuotedSticker) {
 			return await client[botNum].reply('Please reply a sticker to decrypt', { from, quoted: message, groupMetadata });
 		}
@@ -44,6 +41,6 @@ export default {
 			{ groupMetadata, quoted: message }
 		);
 
-		INFOLOG(`[${color(time, 'cyan')}]`, `${color('Media is sent', '#01cdfe')} to ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Media is sent', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
 	}
 };

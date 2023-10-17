@@ -1,6 +1,5 @@
 import axios from 'axios';
 import crypto from 'crypto';
-import dayjs from 'dayjs';
 
 import { color, INFOLOG } from '../modules/index.js';
 
@@ -21,9 +20,7 @@ export const getCookie = (username, password) =>
 				return;
 			}
 
-			const time = dayjs().format('HH:mm:ss DD/MM');
-
-			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Getting Instagram Cookies.', '#01cdfe')}`);
+			INFOLOG(`${color('Getting Instagram Cookies.', 'cyan')}`);
 			const requestedHeaders = await axios.get(_apiLoginResponse);
 
 			_loginHeaders.Cookie = requestedHeaders.headers['set-cookie'].map((x) => x.match(/(.*?=.*?);/)?.[1])?.join('; ');

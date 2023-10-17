@@ -19,8 +19,6 @@ export default {
 	limit: 9,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		if (!query) {
 			return await client[botNum].reply('Please specify a url', { from, quoted: message, groupMetadata });
 		}
@@ -48,10 +46,7 @@ export default {
 
 			const parse = parseCode(url.trim());
 
-			INFOLOG(
-				`[${color(time, 'cyan')}]`,
-				`${color('Downloading Instagram Post', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`
-			);
+			INFOLOG(`${color('Downloading Instagram Post', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 			if (parse) {
 				const post = await getPost(parse);
@@ -62,10 +57,7 @@ export default {
 						quoted: message,
 						groupMetadata
 					});
-					ERRLOG(
-						`[${color(time, 'cyan')}]`,
-						`⚠️ ${color('Failed to Download Instagram Post', 'red')} for ${color(prettyNumber, '#ff71ce')}`
-					);
+					ERRLOG(`⚠️ ${color('Failed to Download Instagram Post', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 
 					continue;
 				}
@@ -107,15 +99,9 @@ export default {
 					}
 				}
 
-				INFOLOG(
-					`[${color(time, 'cyan')}]`,
-					`${color('Downloaded Instagram Post', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`
-				);
+				INFOLOG(`${color('Downloaded Instagram Post', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 			} else {
-				ERRLOG(
-					`[${color(time, 'cyan')}]`,
-					`⚠️ ${color('Failed to Parse Instagram Post URL', 'red')} for ${color(prettyNumber, '#ff71ce')}`
-				);
+				ERRLOG(`⚠️ ${color('Failed to Parse Instagram Post URL', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 			}
 		}
 	}

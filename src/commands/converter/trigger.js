@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import dayjs from 'dayjs';
 import path from 'path';
 import fs from 'fs-extra';
 
@@ -49,8 +48,6 @@ export default {
 			});
 		}
 
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		let options = {};
 
 		options = /--?images?/.test(query)
@@ -58,7 +55,7 @@ export default {
 			: _.defaults({ output: 'sticker' }, defaultOptions);
 
 		if (bodyQuoted && !isMediaImage) {
-			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Triggering', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`);
+			INFOLOG(`${color('Triggering', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 			const profile = await client[botNum]
 				.profilePictureUrl(mediaData.participant, 'image')
@@ -74,7 +71,7 @@ export default {
 				await client[botNum].send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, { groupMetadata });
 			}
 
-			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Converted Media', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`);
+			INFOLOG(`${color('Converted Media', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 			return;
 		}
@@ -93,7 +90,7 @@ export default {
 				);
 			}
 
-			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Triggering', '#01cdfe')} ${color(prettyNumber, '#ff71ce')}`);
+			INFOLOG(`${color('Triggering', 'cyan')} ${color(prettyNumber, '#ff71ce')}`);
 
 			const buffer = await client[botNum].downloadMediaMessage(mediaData);
 			const result = await trigger(buffer, sender, options);
@@ -104,11 +101,11 @@ export default {
 				await client[botNum].send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, { groupMetadata });
 			}
 
-			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Converted Media', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`);
+			INFOLOG(`${color('Converted Media', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 		}
 
 		for (const mentioned of mention) {
-			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Triggering', '#01cdfe')} ${color(mentioned, '#ff71ce')}`);
+			INFOLOG(`${color('Triggering', 'cyan')} ${color(mentioned, '#ff71ce')}`);
 
 			const profile = await client[botNum]
 				.profilePictureUrl(mentioned, 'image')
@@ -124,7 +121,7 @@ export default {
 				await client[botNum].send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, { groupMetadata });
 			}
 
-			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Triggered', '#01cdfe')} ${color(mentioned, '#ff71ce')}`);
+			INFOLOG(`${color('Triggered', 'cyan')} ${color(mentioned, '#ff71ce')}`);
 		}
 	}
 };

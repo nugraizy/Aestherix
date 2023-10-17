@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import rgbcolor from 'rgb-color';
 
 import { ttp } from '../../helper/canvas/index.js';
@@ -20,8 +19,6 @@ export default {
 		if (!query) {
 			query = 'Mana text nya?';
 		}
-
-		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		let colors = [];
 		const parseOptions = query.includes('--') ? query.split('--') : query;
@@ -52,13 +49,13 @@ export default {
 			ttp(prettyNumber, bodyQuoted, colors).then(async (buffer) => {
 				await client[botNum].send(from, { sticker: new Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
 
-				INFOLOG(`[${color(time, 'cyan')}]`, `${color('Sticker is sent', '#01cdfe')} to ${color(prettyNumber, '#ff71ce')}`);
+				INFOLOG(`${color('Sticker is sent', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
 			});
 		} else if (query) {
 			ttp(prettyNumber, query, colors).then(async (buffer) => {
 				await client[botNum].send(from, { sticker: new Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
 
-				INFOLOG(`[${color(time, 'cyan')}]`, `${color('Sticker is sent', '#01cdfe')} to ${color(prettyNumber, '#ff71ce')}`);
+				INFOLOG(`${color('Sticker is sent', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
 			});
 		} else {
 			await client[botNum].reply('Please enter text to convert to sticker', { from, quoted: message, groupMetadata });

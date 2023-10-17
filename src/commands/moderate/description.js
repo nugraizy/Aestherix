@@ -10,15 +10,7 @@ export default {
 	cooldown: 4,
 	limit: 2,
 	status: 'enable',
-	async run({ isAdmin, isBotAdmin, isOwner, query, bodyQuoted, from, message, groupMetadata }, client) {
-		if (!isAdmin && !isOwner) {
-			return await client[botNum].reply('You are not admin. This commands is only for admins.', {
-				from,
-				quoted: message,
-				groupMetadata
-			});
-		}
-
+	async run({ isBotAdmin, query, bodyQuoted, from, message, groupMetadata }, client) {
 		if (!query) {
 			return await client[botNum].reply('Please input the description.', { from, quoted: message, groupMetadata });
 		}

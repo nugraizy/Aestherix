@@ -10,15 +10,7 @@ export default {
 	cooldown: 2,
 	limit: 2,
 	status: 'enable',
-	async run({ groupMetadata, isAdmin, isBotAdmin, isOwner, from, message }, client) {
-		if (!isAdmin && !isOwner) {
-			return await client[botNum].reply('You are not admin. This commands is only for admins.', {
-				from,
-				quoted: message,
-				groupMetadata
-			});
-		}
-
+	async run({ groupMetadata, isBotAdmin, from, message }, client) {
 		if (!isBotAdmin) {
 			return await client[botNum].reply('Bot is not admin, Please promote admin before using moderation commands.', {
 				from,

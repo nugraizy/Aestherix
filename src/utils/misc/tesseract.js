@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import Tesseract from 'tesseract.js';
 import fs from 'fs-extra';
 
@@ -13,7 +12,6 @@ export const tesseract = async (image, sender, lang = 'ind') =>
 				lang = 'ind';
 			}
 
-			const time = dayjs().format('HH:mm:ss DD/MM');
 			const languages = [];
 
 			if (!(await fs.exists('./src/media/temporary_files/tesseract_lang.json'))) {
@@ -40,12 +38,12 @@ export const tesseract = async (image, sender, lang = 'ind') =>
 
 			if (!languages.some((l) => l.code.toLowerCase() === lang.toLowerCase())) {
 				await fs.unlink(image);
-				INFOLOG(`[${color(time, 'cyan')}]`, `${color(`Language ${lang} is not supported`, 'red')}`);
+				INFOLOG(`${color(`Language ${lang} is not supported`, 'red')}`);
 				resolve({ error: `Language ${lang} not found`, languages });
 				return;
 			}
 
-			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Recognizing the image..', '#01cdfe')} to ${color(sender, '#ff71ce')}`);
+			INFOLOG(`${color('Recognizing the image..', 'cyan')} to ${color(sender, '#ff71ce')}`);
 			let {
 				data: { text, confidence, paragraphs }
 			} = await Tesseract.recognize(image, lang);

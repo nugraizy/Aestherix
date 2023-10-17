@@ -1,5 +1,4 @@
 import path from 'path';
-import dayjs from 'dayjs';
 
 import configuration from '../../config/connect.js';
 import { color, ERRLOG, loadFiles } from '../../../utils/modules/index.js';
@@ -8,8 +7,6 @@ import { ICON, normalizeImportPath, watch } from './cache.js';
 export const loadCommands = async (OPTIONS) => {
 	const commands = loadFiles('./src/commands');
 	const folder = [];
-
-	const time = dayjs().format('HH:mm:ss DD/MM');
 
 	for (const command of commands) {
 		if (command.includes('template') || command.includes('d.ts')) {
@@ -24,7 +21,6 @@ export const loadCommands = async (OPTIONS) => {
 
 			if (!module?.default) {
 				ERRLOG(
-					`[${color(time, 'cyan')}]`,
 					color(`${ICON.ADD} ${normalize.split('/').slice(-2).join('/')}`, '#9f53ea'),
 					color('File Error! Waiting for changes...', 'red')
 				);
@@ -43,7 +39,7 @@ export const loadCommands = async (OPTIONS) => {
 
 			folder.push(path.dirname(command));
 		} catch (e) {
-			ERRLOG(`[${color(time, 'cyan')}]`, color(e.message, 'white'));
+			ERRLOG(color(e.message, 'white'));
 			ERRLOG(
 				e.stack
 					.split(e.name + ': ')[1]

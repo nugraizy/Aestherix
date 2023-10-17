@@ -1,5 +1,3 @@
-import dayjs from 'dayjs';
-
 import { Prettify } from '../../helper/index.js';
 import { color, INFOLOG, ERRLOG } from '../../utils/modules/index.js';
 
@@ -16,13 +14,11 @@ export default {
 	limit: 4,
 	status: 'enable',
 	run: async ({ from, prettyNumber, message, query, groupMetadata }, client) => {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		if (!query) {
 			return client[botNum].reply('Please provide a Codes.', { from, quoted: message, groupMetadata });
 		}
 
-		INFOLOG(`[${color(time, 'cyan')}]`, `${color('Carboning a Codes', '#01cdfe')} ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Carboning a Codes', 'cyan')} ${color(prettyNumber, '#ff71ce')}`);
 
 		const carbon = await new Prettify().Carbon(query, { theme: 'dracula' });
 
@@ -30,16 +26,13 @@ export default {
 
 		if ('error' in buffer) {
 			client[botNum].reply(buffer.error, { from, quoted: message, groupMetadata });
-			ERRLOG(
-				`[${color(time, 'cyan')}]`,
-				`⚠️ ${color('Failed to Carboning a Codes', 'red')} for ${color(prettyNumber, '#ff71ce')}`
-			);
+			ERRLOG(`⚠️ ${color('Failed to Carboning a Codes', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 			return;
 		}
 
 		await client[botNum].send(from, { image: Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
 		buffer = null;
 
-		INFOLOG(`[${color(time, 'cyan')}]`, `${color('Carboning a Codes Success', '#01cdfe')} ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Carboning a Codes Success', 'cyan')} ${color(prettyNumber, '#ff71ce')}`);
 	}
 };

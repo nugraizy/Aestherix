@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
 import { memeGenerator } from '../../helper/canvas/index.js';
@@ -37,8 +36,6 @@ export default {
 		},
 		client
 	) {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		if (!isMediaImage && !(isQuotedSticker || isSticker)) {
 			return await client[botNum].reply('Please send/reply a media to convert to sticker', {
 				from,
@@ -112,9 +109,6 @@ export default {
 			);
 		}
 
-		INFOLOG(
-			`[${color(time, 'cyan')}]`,
-			`${color(`${parsed.isStickers ? 'Sticker' : 'Image'} is sent`, '#01cdfe')} to ${color(prettyNumber, '#ff71ce')}`
-		);
+		INFOLOG(`${color(`${parsed.isStickers ? 'Sticker' : 'Image'} is sent`, 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
 	}
 };

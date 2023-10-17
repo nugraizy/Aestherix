@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import path from 'path';
 
 import { color, INFOLOG } from '../../utils/modules/index.js';
@@ -41,9 +40,7 @@ export default {
 			});
 		}
 
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
-		INFOLOG(`[${color(time, 'cyan')}]`, `${color('Removing Sound', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Removing Sound', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 		const file = await client[botNum].downloadAndSaveMediaMessage(
 			extractMediaData,
@@ -62,7 +59,7 @@ export default {
 		const { result } = await soundRemover(file, prettyNumber);
 
 		if (/--?(voice|suara)/.test(query) && /--?(instrument(s)?)/.test(query)) {
-			return await client[botNum].reply(`${time}\n${result.vocal}\n${result.instrumental}`, {
+			return await client[botNum].reply(`${result.vocal}\n${result.instrumental}`, {
 				from,
 				quoted: message,
 				groupMetadata
@@ -99,6 +96,6 @@ export default {
 			);
 		}
 
-		INFOLOG(`[${color(time, 'cyan')}]`, `${color('Sound is sent', '#01cdfe')} to ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Sound is sent', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
 	}
 };

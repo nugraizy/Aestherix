@@ -1,5 +1,4 @@
 import path from 'path';
-import dayjs from 'dayjs';
 import chokidar from 'chokidar';
 import fs from 'fs-extra';
 import syntaxError from 'syntax-error';
@@ -47,7 +46,7 @@ export const saveContacts = (store, contactsList) => {
 	}
 };
 
-export const validatePlugins = async (filename, time) => {
+export const validatePlugins = async (filename) => {
 	const normalizedPath = normalizeImportPath(filename);
 	const str = await fs.readFile(normalizedPath);
 	const syntax = syntaxError(str, normalizedPath, {
@@ -65,7 +64,6 @@ export const validatePlugins = async (filename, time) => {
 		const [typeError, messageError] = strings[3].split(':');
 
 		ERRLOG(
-			`[${color(time, 'cyan')}]`,
 			color(`${ICON.ERROR}${filename.split('/').slice(-2).join('/')}`, '#9f53ea'),
 			color('File Error! Waiting for changes...', 'red')
 		);
@@ -83,8 +81,6 @@ export const validatePlugins = async (filename, time) => {
 };
 
 const add = async (filename, stats, icon = ICON.ADD) => {
-	const time = dayjs().format('HH:mm:ss DD/MM');
-
 	const cmds = configuration.cmds.commands.entries();
 	const index = cmds.findIndex((v) => v[1].path === filename);
 	const files = loadFiles('./src/commands').filter((v) => !v.includes('template'));
@@ -96,14 +92,10 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 
 		try {
 			module = await import(file);
-			INFOLOG(
-				`[${color(time, 'cyan')}]`,
-				color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
-				color('New File Added!', 'yellow')
-			);
-			INFOLOG(`[${color(time, 'cyan')}]`, color('checking if its valid plugins...', '#ffb86c'));
+			INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('New File Added!', 'yellow'));
+			INFOLOG(color('checking if its valid plugins...', '#ffb86c'));
 		} catch (error) {
-			return await validatePlugins(filename, time);
+			return await validatePlugins(filename);
 		}
 
 		if (module?.default) {
@@ -113,13 +105,11 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 				path: filename
 			});
 			INFOLOG(
-				`[${color(time, 'cyan')}]`,
 				color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
 				color('Plugins are valid! Waiting for changes...', '#50fa7b')
 			);
 		} else {
 			ERRLOG(
-				`[${color(time, 'cyan')}]`,
 				color(`${icon}${filename.split('/').slice(-2).join('/')}`, '#9f53ea'),
 				color('File Error! Waiting for changes...', 'red')
 			);
@@ -131,25 +121,15 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 	} else {
 		try {
 			await import(file);
-			INFOLOG(
-				`[${color(time, 'cyan')}]`,
-				color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
-				color('New File Added!', 'yellow')
-			);
+			INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('New File Added!', 'yellow'));
 		} catch (error) {
-			await validatePlugins(filename, time);
+			await validatePlugins(filename);
 		}
 	}
 };
 
 const change = async (filename, stats, icon = ICON.CHANGED) => {
-	const time = dayjs().format('HH:mm:ss DD/MM');
-
-	INFOLOG(
-		`[${color(time, 'cyan')}]`,
-		color(`${icon} ${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
-		color('File has been changed!', 'yellow')
-	);
+	INFOLOG(color(`${icon} ${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('File has been changed!', 'yellow'));
 
 	const _command = nocache(normalizeImportPath(filename), true);
 
@@ -164,13 +144,12 @@ const change = async (filename, stats, icon = ICON.CHANGED) => {
 	try {
 		command = (await _command.import)?.default;
 	} catch {
-		return await validatePlugins(filename, time);
+		return await validatePlugins(filename);
 	}
 
 	const _commandObj = cmds[index][1];
 
 	INFOLOG(
-		`[${color(time, 'cyan')}]`,
 		color(`${icon} ${(_commandObj.path + _command.param)?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
 		color('File Reloaded!', 'yellow')
 	);
@@ -192,8 +171,6 @@ const change = async (filename, stats, icon = ICON.CHANGED) => {
 };
 
 const unlink = (filename, icon = ICON.DELETED) => {
-	const time = dayjs().format('HH:mm:ss DD/MM');
-
 	const cmds = configuration.cmds.commands.entries();
 	const indexPath = cmds.findIndex((v) => v[1].path === filename);
 
@@ -223,7 +200,6 @@ const unlink = (filename, icon = ICON.DELETED) => {
 		);
 
 		INFOLOG(
-			`[${color(time, 'cyan')}]`,
 			color(`${ICON.RENAMED}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
 			color('File Renamed!', 'yellow'),
 			color('to', 'cyan'),
@@ -236,11 +212,7 @@ const unlink = (filename, icon = ICON.DELETED) => {
 
 	configuration.cmds.commands.delete(cmds[indexPath][0]);
 
-	INFOLOG(
-		`[${color(time, 'cyan')}]`,
-		color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
-		color('File Deleted!', 'red')
-	);
+	INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('File Deleted!', 'red'));
 };
 
 export const watch = (folder) => {

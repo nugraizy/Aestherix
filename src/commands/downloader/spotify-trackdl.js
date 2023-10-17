@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import path from 'path';
 
 import { color, ERRLOG, INFOLOG, isURL, removeDuplicatesArray } from '../../utils/modules/index.js';
@@ -23,8 +22,6 @@ export default {
 	limit: 8,
 	status: 'enable',
 	async run({ from, query, prettyNumber, filename, message, groupMetadata }, client) {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		if (!query) {
 			return await client[botNum].reply('Please provide a URL', { from, quoted: message, groupMetadata });
 		}
@@ -49,18 +46,12 @@ export default {
 			const searchTerm = await searchYoutube(Query);
 			const audio = await yta(searchTerm[0].url);
 
-			INFOLOG(
-				`[${color(time, 'cyan')}]`,
-				`${color('Downloading Spotify Audio', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`
-			);
+			INFOLOG(`${color('Downloading Spotify Audio', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 			if ('error' in audio) {
 				await client[botNum].reply(audio.error, { from, quoted: message, groupMetadata });
 
-				ERRLOG(
-					`[${color(time, 'cyan')}]`,
-					`⚠️ ${color('Failed to Download Spotify Audio', 'red')} for ${color(prettyNumber, '#ff71ce')}`
-				);
+				ERRLOG(`⚠️ ${color('Failed to Download Spotify Audio', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 			} else {
 				const { title, timestamp, dlLink } = audio;
 
@@ -83,9 +74,6 @@ export default {
 			}
 		}
 
-		INFOLOG(
-			`[${color(time, 'cyan')}]`,
-			`${color('Downloaded Spotify Audio', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`
-		);
+		INFOLOG(`${color('Downloaded Spotify Audio', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 	}
 };

@@ -1,5 +1,4 @@
 import axios from 'axios';
-import dayjs from 'dayjs';
 
 import { ERRLOG, color } from '../modules/index.js';
 
@@ -145,8 +144,6 @@ export class MyAnimeList {
 
 	async refreshToken() {
 		try {
-			const time = dayjs().format('HH:mm:ss DD/MM');
-
 			const response = await axios('https://myanimelist.net/v1/oauth2/token', {
 				method: 'POST',
 				data: `grant_type=refresh_token&refresh_token=${this.#refresh}&client_id=${this.#clientId}&client_secret=${
@@ -160,7 +157,6 @@ export class MyAnimeList {
 			this.#access = `Bearer ${response.data.access_token}`;
 
 			ERRLOG(
-				`[${color(time, 'cyan')}]`,
 				`⚠️  ${color('( MyAnimeList ) AccessToken is found. Copy this and paste to .env', 'green')}`,
 				color(response.data.access_token, '#05ffa1')
 			);
@@ -172,11 +168,6 @@ export class MyAnimeList {
 	}
 
 	showExpiredError() {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
-		ERRLOG(
-			`[${color(time, 'cyan')}]`,
-			`⚠️  ${color('( MyAnimeList ) AccessToken expired. Refreshing the access tokens.', 'red')}`
-		);
+		ERRLOG(`⚠️  ${color('( MyAnimeList ) AccessToken expired. Refreshing the access tokens.', 'red')}`);
 	}
 }

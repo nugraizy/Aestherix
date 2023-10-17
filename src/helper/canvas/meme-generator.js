@@ -1,5 +1,4 @@
 import Canvas from '@napi-rs/canvas';
-import dayjs from 'dayjs';
 import path from 'path';
 
 import configuration from '../config/connect.js';
@@ -57,8 +56,6 @@ export const memeGenerator = (client, sender, input, topTexts = '', bottomTexts 
 			return resolve({ error: 'No Texts Provided' });
 		}
 
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		const images = await loadImage(input);
 
 		const { canvas, height } = (() => {
@@ -93,7 +90,7 @@ export const memeGenerator = (client, sender, input, topTexts = '', bottomTexts 
 				packname: configuration.packname
 			});
 
-			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Meme Generator is Done', '#01cdfe')} for ${color(sender, '#ff71ce')}`);
+			INFOLOG(`${color('Meme Generator is Done', 'cyan')} for ${color(sender, '#ff71ce')}`);
 			resolve(buffer);
 		} else {
 			resolve(canvas.toBuffer('image/png'));

@@ -11,18 +11,16 @@ const regex = (input) => /(?:https:?\/{2})?(?:w{3}|vm|vt|t)?\.?tiktok.com\/([^\s
  * @type {import('../types.js').Plugins}
  */
 export default {
-	name: 'tiktokvideo',
-	description: 'Downloads TikTok video.',
+	name: 'tiktokpost',
+	description: 'Downloads TikTok posts.',
 	usage:
-		'!tiktokvideo <url> (you can send multiple link using space in between) [options]\nOptions:\n-wm, --watermark: Download with watermark\n-nowm, --nowatermark: Download without watermark',
-	aliases: ['tiktokvideos', 'ttvideo', 'ttvid', 'ttv', 'tiktok'],
+		'!tiktokpost <url(s)> (you can send multiple link using space in between) [options]\nOptions:\n-wm, --watermark: Download with watermark\n-nowm, --nowatermark: Download without watermark',
+	aliases: ['tiktokposts', 'ttimage', 'ttphoto', 'ttimages', 'ttphotos', 'ttvideo', 'ttvideos', 'ttvid', 'ttv', 'tiktok'],
 	category: 'Downloader',
 	limit: 2,
 	cooldown: 8,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		if (!query) {
 			return await client[botNum].reply('Please provide a URL', { from, quoted: message, groupMetadata });
 		}
@@ -67,16 +65,10 @@ export default {
 
 			const container = await tiktok.downloadMedia(url);
 
-			INFOLOG(
-				`[${color(time, 'cyan')}]`,
-				`${color('Downloading TikTok Media', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`
-			);
+			INFOLOG(`${color('Downloading TikTok Media', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 			if ('error' in container) {
-				ERRLOG(
-					`[${color(time, 'cyan')}]`,
-					`⚠️ ${color('Error while downloading TikTok Video', '#ff0000')} for ${color(prettyNumber, '#ff71ce')}`
-				);
+				ERRLOG(`⚠️ ${color('Error while downloading TikTok Video', '#ff0000')} for ${color(prettyNumber, '#ff71ce')}`);
 				await client[botNum].reply(
 					`Error while downloading TikTok Video\n\n${url.split(' ')[0]}\nMSG: ${container.error || ''}`,
 					{
@@ -112,9 +104,9 @@ export default {
 			capt += `Description : ${container.videoDescription}\n`;
 
 			if (container.type === 'images') {
-				capt += `Tot. Image : ${container.url.images.length}\n`;
+				capt += `Tot. Image : ${container.urls.images.length}\n`;
 
-				const images = container.url.images;
+				const images = container.urls.images;
 
 				let data;
 
@@ -157,10 +149,7 @@ export default {
 				}
 
 				await delay(100);
-				INFOLOG(
-					`[${color(time, 'cyan')}]`,
-					`${color('Downloaded TikTok Media', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`
-				);
+				INFOLOG(`${color('Downloaded TikTok Media', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 				continue;
 			}
@@ -193,10 +182,7 @@ export default {
 			);
 
 			await delay(100);
-			INFOLOG(
-				`[${color(time, 'cyan')}]`,
-				`${color('Downloaded TikTok Media', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`
-			);
+			INFOLOG(`${color('Downloaded TikTok Media', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 		}
 	}
 };

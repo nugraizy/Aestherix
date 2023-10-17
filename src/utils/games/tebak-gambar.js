@@ -18,7 +18,6 @@ const images = await fs.readJSON(path.join(__dirname, 'databases/games/tebak_gam
 const getData = () => randomize(images);
 
 export const startTG = async (client, id, { message, sender, groupMetadata }, remainingTime) => {
-	const time = dayjs().format('HH:mm:ss DD/MM');
 	const Data = checkIntervals(configuration.intervals.tebakGambar.get(id));
 
 	if (Data !== 0) {
@@ -42,7 +41,7 @@ export const startTG = async (client, id, { message, sender, groupMetadata }, re
 		.add(remainingTime + 2, 's')
 		.valueOf();
 
-	INFOLOG(`[${color(time, 'cyan')}]`, `${color(`The Answer is : ${answer.trim()}`, '#01cdfe')}`);
+	INFOLOG(`${color(`The Answer is : ${answer.trim()}`, 'cyan')}`);
 	setIntervals(
 		configuration.intervals.tebakGambar,
 		id,

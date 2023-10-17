@@ -1,5 +1,4 @@
 import { generateWAMessageFromContent } from '@adiwajshing/baileys';
-import dayjs from 'dayjs';
 
 import configuration from '../../helper/config/connect.js';
 import { runtime } from '../../index.js';
@@ -11,7 +10,6 @@ const handler = async (client, message) => {
 		await client[botNum].readMessages([message.message.key]);
 	}
 
-	const time = dayjs().format('HH:mm:ss DD/MM');
 	const runtimes = ((Date.now() - runtime) / 1000).toFixed(0);
 	let caption = '```Auto Fetch WhatsApp Story```\n\n';
 	let messages;
@@ -39,7 +37,6 @@ const handler = async (client, message) => {
 	}
 
 	INFOLOG(
-		`[${color(time, 'cyan')}]`,
 		`${color(message.pushname.trim(), 'white')} ${color(message.prettyNumber, '#ff71ce')} :`,
 		`${color(
 			message.body === 'Unknown body' ? 'Bug Story' : message.body?.trim()?.replace('\n', '')?.substr(0, 20),

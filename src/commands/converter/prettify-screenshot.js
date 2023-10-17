@@ -1,5 +1,3 @@
-import dayjs from 'dayjs';
-
 import { Prettify } from '../../helper/index.js';
 import { color, INFOLOG, ERRLOG } from '../../utils/modules/index.js';
 
@@ -16,8 +14,6 @@ export default {
 	limit: 4,
 	status: 'enable',
 	run: async ({ from, isMediaImage, prettyNumber, mediaData, message, groupMetadata }, client) => {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		if (!isMediaImage) {
 			return client[botNum].reply('Please reply/send image with caption the command.', {
 				from,
@@ -26,7 +22,7 @@ export default {
 			});
 		}
 
-		INFOLOG(`[${color(time, 'cyan')}]`, `${color('Prettifying an Image', '#01cdfe')} ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Prettifying an Image', 'cyan')} ${color(prettyNumber, '#ff71ce')}`);
 
 		let buffer = await client[botNum].downloadMediaMessage(mediaData);
 
@@ -36,19 +32,13 @@ export default {
 
 		if ('error' in screenshot) {
 			client[botNum].reply(screenshot.error, { from, quoted: message, groupMetadata });
-			ERRLOG(
-				`[${color(time, 'cyan')}]`,
-				`⚠️ ${color('Failed to Prettify an Image', 'red')} for ${color(prettyNumber, '#ff71ce')}`
-			);
+			ERRLOG(`⚠️ ${color('Failed to Prettify an Image', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 			return;
 		}
 
 		await client[botNum].send(from, { image: Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
 		buffer = null;
 
-		INFOLOG(
-			`[${color(time, 'cyan')}]`,
-			`${color('Prettifying an Image Success', '#01cdfe')} ${color(prettyNumber, '#ff71ce')}`
-		);
+		INFOLOG(`${color('Prettifying an Image Success', 'cyan')} ${color(prettyNumber, '#ff71ce')}`);
 	}
 };

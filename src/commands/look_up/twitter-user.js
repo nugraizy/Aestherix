@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
 import { color, ERRLOG, isURL } from '../../utils/modules/index.js';
@@ -17,8 +16,6 @@ export default {
 	limit: 6,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		if (!query) {
 			return await client[botNum].reply('Please specify a url', { from, quoted: message, groupMetadata });
 		}
@@ -45,10 +42,7 @@ export default {
 					groupMetadata
 				});
 
-				ERRLOG(
-					`[${color(time, 'cyan')}]`,
-					`⚠️ ${color('Failed to Searching Twitter User', 'red')} for ${color(prettyNumber, '#ff71ce')}`
-				);
+				ERRLOG(`⚠️ ${color('Failed to Searching Twitter User', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 
 				continue;
 			} else {

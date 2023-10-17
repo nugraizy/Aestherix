@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
 import { color, ERRLOG } from '../../utils/modules/index.js';
@@ -31,8 +30,6 @@ export default {
 	limit: 4,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		if (!query) {
 			return await client[botNum].reply('Please specify an UID', { from, quoted: message, groupMetadata });
 		}
@@ -77,10 +74,7 @@ export default {
 					groupMetadata
 				});
 
-				ERRLOG(
-					`[${color(time, 'cyan')}]`,
-					`⚠️ ${color('Failed to Searching Genshin Impact player', 'red')} for ${color(prettyNumber, '#ff71ce')}`
-				);
+				ERRLOG(`⚠️ ${color('Failed to Searching Genshin Impact player', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 
 				continue;
 			} else {

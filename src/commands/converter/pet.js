@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import path from 'path';
 import fs from 'fs-extra';
 
@@ -45,8 +44,6 @@ export default {
 			});
 		}
 
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		const defaultOptions = {
 			output: 'sticker',
 			duration: 5,
@@ -58,7 +55,7 @@ export default {
 		}
 
 		if (bodyQuoted && !isMediaImage) {
-			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Petting', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`);
+			INFOLOG(`${color('Petting', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 			const profile = await client[botNum]
 				.profilePictureUrl(mediaData.participant, 'image')
@@ -74,7 +71,7 @@ export default {
 				await client[botNum].send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, { groupMetadata });
 			}
 
-			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Converted Media', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`);
+			INFOLOG(`${color('Converted Media', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 			return;
 		}
@@ -93,7 +90,7 @@ export default {
 				);
 			}
 
-			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Petting', '#01cdfe')} ${color(prettyNumber, '#ff71ce')}`);
+			INFOLOG(`${color('Petting', 'cyan')} ${color(prettyNumber, '#ff71ce')}`);
 
 			const file = await client[botNum].downloadAndSaveMediaMessage(
 				extractMediaData,
@@ -108,13 +105,13 @@ export default {
 				await client[botNum].send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, { groupMetadata });
 			}
 
-			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Converted Media', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`);
+			INFOLOG(`${color('Converted Media', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 			return;
 		}
 
 		for (const mentioned of mention) {
-			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Petting', '#01cdfe')} ${color(mentioned, '#ff71ce')}`);
+			INFOLOG(`${color('Petting', 'cyan')} ${color(mentioned, '#ff71ce')}`);
 
 			const profile = await client[botNum]
 				.profilePictureUrl(mentioned, 'image')
@@ -130,7 +127,7 @@ export default {
 				await client[botNum].send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, { groupMetadata });
 			}
 
-			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Petted', '#01cdfe')} ${color(mentioned, '#ff71ce')}`);
+			INFOLOG(`${color('Petted', 'cyan')} ${color(mentioned, '#ff71ce')}`);
 		}
 	}
 };

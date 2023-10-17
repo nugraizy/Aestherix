@@ -1,5 +1,5 @@
-import dayjs from 'dayjs';
 import { findBestMatch } from 'string-similarity';
+import chalk from 'chalk';
 
 import configuration from '../../helper/config/connect.js';
 import { runtime } from '../../index.js';
@@ -7,55 +7,66 @@ import { Limit, checkAfk, deleteAfk, getAfk, reassign } from '../../helper/index
 import { color, getTimeSince, INFOLOG, ERRLOG } from '../../utils/modules/index.js';
 import { Cache } from '../../helper/modules/cache.js';
 
+const handler = new Cache();
+
 const log = console.log;
 
 let STATS_OFFLINE = true;
 const EVALY = ['/>', '$>', '=>', '!>'];
-
-const handler = new Cache();
-const path = {
-	stubType: './stub-message.js',
-	story: './story-message.js',
-	offline: './offline-message.js',
-	akinator: '../game_handlers/akinator.js',
-	tebakGambar: '../game_handlers/tebak-gambar.js',
-	sambungKata: '../game_handlers/sambung-kata.js',
-	wordle: '../game_handlers/wordle.js',
-	anonymous: './anonymous-message.js',
-	groupUrl: '../misc/group-url.js',
-	antiNsfw: '../misc/anti-nsfw.js'
+const regEval = new RegExp(EVALY.join('|'), 'gi');
+const SEPERATOR = chalk.italic(color('❯❯', '#BD93F9'));
+const HANDLER_PATH = {
+	STUBTYPE: './stub-message.js',
+	STORY: './story-message.js',
+	OFFLINE: './offline-message.js',
+	AKINATOR: '../game_handlers/akinator.js',
+	TEBAKGAMBAR: '../game_handlers/tebak-gambar.js',
+	SAMBUNGKATA: '../game_handlers/sambung-kata.js',
+	WORDLE: '../game_handlers/wordle.js',
+	ANONYMOUS: './anonymous-message.js',
+	GROUPURL: '../misc/group-url.js',
+	ANTINSFW: '../misc/anti-nsfw.js'
 };
 
-const logMessage = (message, time) => {
-	const senderInfo = `${color(message.pushname, 'white')} ${color(message.prettyNumber, '#ff71ce')}`;
+const logMessage = (message) => {
+	const senderInfo = `${color(message.pushname, 'white')} ${SEPERATOR} ${color(message.prettyNumber, '#ff71ce')}`;
 	const messageBody = color(message.query?.replace(/[\t\n]/g, ' ')?.substring(0, 20), '#05ffa1');
-	const typeInfo = `${color('type', '#ff71ce')} : ${color(message.type, '#b967ff')}`;
-	const runtimeInfo = `${color(((Date.now() - runtime) / 1000).toFixed(0), '#f18f15')}${color('s', '#f5e700')}`;
+	const typeInfo = `${SEPERATOR} ${color('type', '#ff71ce')} ${color(message.type, '#05ffa1')}`;
+	const runtimeInfo = `${SEPERATOR} ${color(((Date.now() - runtime) / 1000).toFixed(0), '#F1FA8C')}${color('s', '#f5e700')}`;
+
+	const isEval = regEval.test(message.cmd);
 
 	const fullBody = message.isCmd
-		? `${color(message.prefix, 'white')}${color(message.cmd.slice(1), '#01cdfe')} ${messageBody}`
+		? `${color(isEval ? message.cmd : message.prefix, isEval ? 'cyan' : 'white')}${color(
+				!isEval && message.cmd.slice(1),
+				'cyan'
+		  )} ${messageBody}` // eslint-disable-line
 		: color(message.body?.substring(0, 20).replace(/[\t\n]/g, ' '), 'white');
 
-	INFOLOG(`[${color(time, 'cyan')}]`, `${senderInfo} :`, fullBody, typeInfo, runtimeInfo);
+	INFOLOG(`${senderInfo} ${SEPERATOR}`, fullBody, typeInfo, runtimeInfo);
 };
 
 const handleStubMessage = async (client, message, store) => {
-	if (!handler.has('stubType')) {
-		handler.set('stubType', (await import(path.stubType)).default);
+	if (!handler.has('STUBTYPE')) {
+		handler.set('STUBTYPE', (await import(HANDLER_PATH['STUBTYPE'])).default);
 	}
 
-	return handler.get('stubType')(client, message.messages[0], store);
+	await handler.get('STUBTYPE')(client, message.messages[0], store);
 };
 
 const handleStoryMessage = async (client, message) => {
-	if (!handler.has('story')) {
-		handler.set('story', (await import(path.story)).default);
+	if (!handler.has('STORY')) {
+		handler.set('STORY', (await import(HANDLER_PATH['STORY'])).default);
 	}
 
-	return handler.get('story')(client, message);
+	await handler.get('STORY')(client, message);
 };
 
 const handleOfflineMessage = async (client, message, cmds) => {
+	if (!handler.has('OFFLINE')) {
+		handler.set('OFFLINE', (await import(HANDLER_PATH['OFFLINE'])).default);
+	}
+
 	if (STATS_OFFLINE) {
 		await cmds.commands.get('simulates').run(
 			{
@@ -70,11 +81,7 @@ const handleOfflineMessage = async (client, message, cmds) => {
 		STATS_OFFLINE = false;
 	}
 
-	if (!handler.has('offline')) {
-		handler.set('offline', (await import(path.offline)).default);
-	}
-
-	return handler.get('offline')(client, message);
+	return await handler.get('OFFLINE')(client, message);
 };
 
 const handleMentionedAfkUsers = (message, client, botNum) => {
@@ -155,6 +162,9 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 
 		const commands = cmds.commands.values().values;
 
+		/**
+		 * @type {import('../../types/Commands/index.js').CommandProps}
+		 */
 		const Tempcmds =
 			cmds.commands.get(message.cmd.slice(1).trim().toLowerCase()) ||
 			commands.find(
@@ -164,15 +174,13 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 			) ||
 			false;
 
-		if (message.isGroup && !configuration.OPTIONS.noLogs) {
-			logMessage(message, runtime);
-		} else if (!message.isGroup && !configuration.OPTIONS.noLogs) {
+		if (!configuration.OPTIONS.noLogs) {
 			logMessage(message, runtime);
 		}
 
 		if (Tempcmds && !message.isOwner) {
 			if (configuration.OPTIONS.selfMode) {
-				return;
+				continue;
 			}
 
 			if (message.isBanned) {
@@ -181,6 +189,15 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 					{ react: { text: '🖕🏼', key: message.message.key } },
 					{ groupMetadata: message.groupMetadata }
 				);
+				continue;
+			}
+
+			if (Tempcmds.category === 'Owner' && !message.isOwner) {
+				await client[botNum].reply('This commands is only for owner.', {
+					groupMetadata: message.groupMetadata,
+					from: message.from,
+					quoted: message.message
+				});
 				continue;
 			}
 
@@ -200,27 +217,30 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 				!message.isOwner &&
 				message?.[message?.from]?.games === 'disable'
 			) {
-				return await client[botNum].reply('Game Mode is Disabled. Type !games enable to enable Game Mode', {
+				await client[botNum].reply('Game Mode is Disabled. Type !games enable to enable Game Mode', {
 					groupMetadata: message.groupMetadata,
 					from: message.from,
 					quoted: message.message
 				});
+				continue;
 			}
 
 			if (Tempcmds.category === 'Moderation' && message.isGroup && !message.isAdmin && !message.isOwner) {
-				return await client[botNum].reply('You are not admin. This commands is only for admins.', {
+				await client[botNum].reply('You are not admin. This commands is only for admins.', {
 					groupMetadata: message.groupMetadata,
 					from: message.from,
 					quoted: message.message
 				});
+				continue;
 			}
 
 			if (Tempcmds.category === 'Moderation' && !message.isGroup) {
-				return await client[botNum].reply('This commands for group only', {
+				await client[botNum].reply('This commands for group only', {
 					groupMetadata: message.groupMetadata,
 					from: message.from,
 					quoted: message.message
 				});
+				continue;
 			}
 
 			if (!configuration.OPTIONS.noLimit) {
@@ -253,21 +273,23 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 				const isCooldown = cooldownUser.requests;
 
 				if (isCooldown) {
-					return await client[botNum].reply('Please wait until your request is done', {
+					await client[botNum].reply('Please wait until your request is done', {
 						groupMetadata: message.groupMetadata,
 						from: message.from,
 						quoted: message.message
 					});
+					continue;
 				}
 
 				const commandName = Tempcmds.name;
 				const cooldownTime = cooldownUser.get(commandName);
 
 				if (cooldownTime && Date.now() < cooldownTime) {
-					return await client[botNum].reply(
+					await client[botNum].reply(
 						`${commandName} is on cooldown for ${((cooldownTime - Date.now()) / 1000).toFixed(1)} seconds.`,
 						{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message }
 					);
+					continue;
 				}
 
 				cooldownUser.set(commandName, Date.now() + Tempcmds.cooldown * 1000);
@@ -285,7 +307,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 				: true)
 		) {
 			if (!message.isOwner && configuration.OPTIONS.selfMode) {
-				return;
+				continue;
 			}
 
 			const cooldownUser = user.cooldown.get(message.sender);
@@ -349,9 +371,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 					{ groupMetadata: message.groupMetadata }
 				);
 
-				const time = dayjs().format('HH:mm:ss DD/MM');
-
-				ERRLOG(`[${color(time, 'cyan')}]`, color(err.message, 'white'));
+				ERRLOG(color(err.message, 'white'));
 				ERRLOG(
 					err.stack
 						.split(err.name + ': ')[1]
@@ -377,6 +397,62 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 	}
 };
 
+const handleAfk = (client, message) => {
+	if (checkAfk(message.sender, message.from)) {
+		const { reasons, since } = getAfk(message.sender, message.from);
+		const time = getTimeSince(since);
+
+		client[botNum].send(
+			message.from,
+			{
+				text: `@${message.sender.split('@')[0]} is AFK since ${time} ago. Now they are out from AFK. Reason: ${reasons}`,
+				mentions: [message.sender]
+			},
+			{ groupMetadata: message.groupMetadata, quoted: message.message }
+		);
+		deleteAfk(message.sender, message.from);
+	}
+
+	if (message.bodyQuoted && checkAfk(message.mediaData.participant, message.from)) {
+		const { reasons, since, name } = getAfk(message.mediaData.participant);
+		const time = getTimeSince(since);
+
+		client[botNum].reply(`${name} is AFK since ${time} ago. Reason: ${reasons}`, {
+			groupMetadata: message.groupMetadata,
+			from: message.from,
+			quoted: message.message
+		});
+	}
+
+	if (message.mention?.length > 0) {
+		handleMentionedAfkUsers(message, client, botNum);
+	}
+};
+
+const handleGames = async (message, client) => {
+	if (!handler.has('AKINATOR')) {
+		handler.set('AKINATOR', (await import(HANDLER_PATH.AKINATOR)).default);
+	} else if (!handler.has('TEBAKGAMBAR')) {
+		handler.set('TEBAKGAMBAR', (await import(HANDLER_PATH.TEBAKGAMBAR)).default);
+	} else if (!handler.has('SAMBUNGKATA')) {
+		handler.set('SAMBUNGKATA', (await import(HANDLER_PATH.SAMBUNGKATA)).default);
+	} else if (!handler.has('WORDLE')) {
+		handler.set('WORDLE', (await import(HANDLER_PATH.WORDLE)).default);
+	} else if (!handler.has('ANONYMOUS')) {
+		handler.set('ANONYMOUS', (await import(HANDLER_PATH.ANONYMOUS)).default);
+	} else if (!handler.has('GROUPURL')) {
+		handler.set('GROUPURL', (await import(HANDLER_PATH.GROUPURL)).default);
+	} else if (!handler.has('ANTINSFW')) {
+		handler.set('ANTINSFW', (await import(HANDLER_PATH.ANTINSFW)).default);
+	}
+
+	await Promise.all(
+		Array.from(handler.keys())
+			.filter((v) => !['STUBTYPE', 'STORY', 'OFFLINE'].includes(v))
+			.map((v) => handler.get(v)(message, client, message))
+	);
+};
+
 const handleIncomingMessage = async (message, client, cmds, store, user, state) => {
 	if (message === undefined) {
 		return;
@@ -385,8 +461,6 @@ const handleIncomingMessage = async (message, client, cmds, store, user, state) 
 	if (configuration.OPTIONS.debugMode && !message?.messages?.[0]?.key?.fromMe) {
 		log(JSON.stringify(message, undefined, 2));
 	}
-
-	const time = dayjs().format('HH:mm:ss DD/MM');
 
 	if (
 		message.messages[0] &&
@@ -423,38 +497,12 @@ const handleIncomingMessage = async (message, client, cmds, store, user, state) 
 	}
 
 	if (message.isGroup) {
-		if (checkAfk(message.sender, message.from)) {
-			const { reasons, since } = getAfk(message.sender, message.from);
-			const time = getTimeSince(since);
-
-			client[botNum].send(
-				message.from,
-				{
-					text: `@${message.sender.split('@')[0]} is AFK since ${time} ago. Now they are out from AFK. Reason: ${reasons}`,
-					mentions: [message.sender]
-				},
-				{ groupMetadata: message.groupMetadata, quoted: message.message }
-			);
-			deleteAfk(message.sender, message.from);
-		}
-
-		if (message.bodyQuoted && checkAfk(message.mediaData.participant, message.from)) {
-			const { reasons, since, name } = getAfk(message.mediaData.participant);
-			const time = getTimeSince(since);
-
-			client[botNum].reply(`${name} is AFK since ${time} ago. Reason: ${reasons}`, {
-				groupMetadata: message.groupMetadata,
-				from: message.from,
-				quoted: message.message
-			});
-		}
-
-		if (message.mention?.length > 0) {
-			handleMentionedAfkUsers(message, client, botNum);
-		}
+		handleAfk(client, message);
 	}
 
-	handleCommandExecution(message, client, store, cmds, user, botNum, time, state);
+	await handleCommandExecution(message, client, store, cmds, user, botNum, state);
+
+	await handleGames(message, client);
 };
 
 const incomingHandler = handleIncomingMessage;

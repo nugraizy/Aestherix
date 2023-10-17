@@ -12,15 +12,7 @@ export default {
 	cooldown: 0,
 	limit: 2,
 	status: 'enable',
-	async run({ isOwner, isAdmin, isMediaImage, isMediaVid, from, message, groupMetadata, mediaData, query }, client) {
-		if (!isAdmin && !isOwner) {
-			return await client[botNum].reply('You are not admin. This commands is only for admins.', {
-				from,
-				quoted: message,
-				groupMetadata
-			});
-		}
-
+	async run({ isOwner, isMediaImage, isMediaVid, from, message, groupMetadata, mediaData, query }, client) {
 		if (!isMediaImage) {
 			return await client[botNum].reply('Please send/reply a media[image]', { from, quoted: message, groupMetadata });
 		}
@@ -66,6 +58,14 @@ export default {
 
 			return;
 		})();
+
+		if (options.self && !isOwner) {
+			return await client[botNum].reply('You are not owner. This commands is only for owner.', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
+		}
 
 		await client[botNum].updateProfilePicture(
 			options.self ? botNum : from,

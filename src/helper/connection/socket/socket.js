@@ -2,7 +2,6 @@ import fs from 'fs-extra';
 import baileys, { delay, makeCacheableSignalKeyStore } from '@adiwajshing/baileys';
 import P from 'pino';
 import readline from 'readline';
-import dayjs from 'dayjs';
 
 import { clearDBConnection } from './reset-session.js';
 import { patchInteractiveMessage } from '../utils/patch-message.js';
@@ -68,13 +67,11 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 	store.bind(Client.ev);
 
 	if (OPTIONS.pairMode && !Client.authState.creds.registered) {
-		let time = dayjs().format('HH:mm:ss DD/MM');
-
 		check: if (!phoneNumber) {
 			const { host_number: hostNumber } = await fs.readJSON('./src/helper/config/settings.json');
 
 			if (!hostNumber) {
-				phoneNumber = await question(`[${color(time, 'cyan')}] ${color('Insert your phone number : ', '#ff71ce')}`);
+				phoneNumber = await question(`${color('Insert your phone number : ', '#ff71ce')}`);
 
 				break check;
 			} else {
@@ -88,10 +85,8 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 
 		const code = await Client.requestPairingCode(phoneNumber);
 
-		time = dayjs().format('HH:mm:ss DD/MM');
-		INFOLOG(`[${color(time, 'cyan')}]`, color('Pairing code :', '#ff71ce'), color(code, 'white'));
-		time = dayjs().format('HH:mm:ss DD/MM');
-		INFOLOG(`[${color(time, 'cyan')}]`, color('Waiting for code input', '#ff71ce'), color('. . .', 'white'));
+		INFOLOG(color('Pairing code :', '#ff71ce'), color(code, 'white'));
+		INFOLOG(color('Waiting for code input', 'white'), color('. . .', 'cyan'));
 	}
 
 	return { Client, store };

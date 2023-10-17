@@ -1,6 +1,5 @@
 import express from 'express';
 import crypto from 'crypto';
-import dayjs from 'dayjs';
 
 import { getFilesChanged, parseCommit } from './utils.js';
 import { INFOLOG, color } from '../../../utils/modules/index.js';
@@ -51,13 +50,6 @@ export const githubWebhook = (isReconnect) => {
 	});
 
 	app.listen(8080, () => {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
-		INFOLOG(
-			`[${color(time, 'cyan')}]`,
-			color('GitHub Webhook', 'white'),
-			color('started on port', '#ff71ce'),
-			color('8080', 'white')
-		);
+		INFOLOG(color('GitHub Webhook', 'white'), color('started on port', '#ff71ce'), color('8080', 'white'));
 	});
 };

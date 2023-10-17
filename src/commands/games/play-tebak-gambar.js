@@ -1,5 +1,3 @@
-import dayjs from 'dayjs';
-
 import { color, INFOLOG } from '../../utils/modules/index.js';
 import { startTG } from '../../utils/games/index.js';
 
@@ -16,12 +14,7 @@ export default {
 	limit: 2,
 	status: 'enable',
 	async run(message, client) {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
-		INFOLOG(
-			`[${color(time, 'cyan')}]`,
-			`${color('Starting Guess The Image Games.', '#01cdfe')}  to ${color(message.prettyNumber, '#ff71ce')}`
-		);
+		INFOLOG(`${color('Starting Guess The Image Games.', 'cyan')}  to ${color(message.prettyNumber, '#ff71ce')}`);
 
 		const game = await startTG(client, message.from, message, 20);
 

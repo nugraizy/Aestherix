@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import sharp from 'sharp';
 
 import {
@@ -30,8 +29,6 @@ export default {
 	limit: 8,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, type, args, groupMetadata, isGroup }, client) {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		if (type === 'listResponseMessage' && args[1] === 'download') {
 			await client[botNum].send(
 				from,
@@ -84,26 +81,17 @@ export default {
 
 			const audio = await yta(Query, 'mp3');
 
-			INFOLOG(
-				`[${color(time, 'cyan')}]`,
-				`${color('Downloading YouTube Audio', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`
-			);
+			INFOLOG(`${color('Downloading YouTube Audio', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 			if ('error' in audio) {
 				client[botNum].reply(audio.error, { from, quoted: message, groupMetadata });
-				ERRLOG(
-					`[${color(time, 'cyan')}]`,
-					`⚠️ ${color('Failed to Download YouTube Audio', 'red')} for ${color(prettyNumber, '#ff71ce')}`
-				);
+				ERRLOG(`⚠️ ${color('Failed to Download YouTube Audio', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 			} else {
 				const { title, description, timestamp, uploaded, views, author, urlChannel, mp3, thumbnail: image, url } = audio;
 
 				if (!mp3) {
 					client[botNum].reply(`Error while downloading YouTube Video\n\n${Query}`, { from, quoted: message, groupMetadata });
-					ERRLOG(
-						`[${color(time, 'cyan')}]`,
-						`⚠️ ${color('Failed to Download YouTube Video', 'red')} for ${color(prettyNumber, '#ff71ce')}`
-					);
+					ERRLOG(`⚠️ ${color('Failed to Download YouTube Video', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 
 					continue;
 				}
@@ -174,9 +162,6 @@ export default {
 			}
 		}
 
-		INFOLOG(
-			`[${color(time, 'cyan')}]`,
-			`${color('Downloaded YouTube Audio', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`
-		);
+		INFOLOG(`${color('Downloaded YouTube Audio', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 	}
 };

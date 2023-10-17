@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import rgbcolor from 'rgb-color';
 import yargsParser from 'yargs-parser';
 
@@ -21,8 +20,6 @@ export default {
 		if (!query && !bodyQuoted) {
 			query = 'Mana text nya?';
 		}
-
-		const time = dayjs().format('HH:mm:ss DD/MM');
 
 		let parseOptions = yargsParser(query, { configuration: { 'short-option-groups': false } });
 
@@ -58,20 +55,16 @@ export default {
 			const { buffer } = await attp(prettyNumber, bodyQuoted, parseOptions.color);
 
 			await client[botNum].send(from, { sticker: new Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
-			return INFOLOG(
-				`[${color(time, 'cyan')}]`,
-				`${color('Sticker is sent', '#01cdfe')} to ${color(prettyNumber, '#ff71ce')}`
-			);
+			INFOLOG(`${color('Sticker is sent', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
+			return;
 		}
 
 		if (query) {
 			const { buffer } = await attp(prettyNumber, query, parseOptions.color);
 
 			await client[botNum].send(from, { sticker: new Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
-			return INFOLOG(
-				`[${color(time, 'cyan')}]`,
-				`${color('Sticker is sent', '#01cdfe')} to ${color(prettyNumber, '#ff71ce')}`
-			);
+			INFOLOG(`${color('Sticker is sent', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
+			return;
 		}
 
 		return await client[botNum].reply('Please enter text to convert to sticker', { from, quoted: message, groupMetadata });

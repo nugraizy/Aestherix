@@ -1,5 +1,4 @@
 import cron from 'node-cron';
-import dayjs from 'dayjs';
 import fs from 'fs-extra';
 
 import { INFOLOG, color } from '../../../utils/modules/index.js';
@@ -182,12 +181,10 @@ export const runLimitScheduler = (OPTIONS, clearDBConnection, cli) => {
 	cron.schedule(
 		'0 0 * * *',
 		async () => {
-			const time = dayjs().format('HH:mm:ss DD/MM');
-
 			await Limit.resetAllLimit();
 			await Limit.updateLimitFromCache();
 
-			INFOLOG(`[${color(time, 'cyan')}]`, `${color('Sukses Reset User`s Limit', 'white')}`);
+			INFOLOG(`${color('Sukses Reset User`s Limit', 'white')}`);
 
 			if (OPTIONS.resetOnStart) {
 				await clearDBConnection(cli);

@@ -8,25 +8,28 @@ import {
 	DisconnectReason
 } from '@adiwajshing/baileys';
 import boxen from 'boxen';
-import dayjs from 'dayjs';
 
 import configuration from '../../config/connect.js';
-import { INFOLOG, color, romanize } from '../../../utils/modules/index.js';
+import { INFOLOG, color } from '../../../utils/modules/index.js';
 import { connectMqtt, reconnectMqttConnection } from '../utils/mqtt.js';
 import { loadCommands } from '../utils/commands.js';
 import { clearDBConnection } from '../socket/reset-session.js';
 import { Cache } from '../../modules/cache.js';
+import chalk from 'chalk';
 
 let isClosed = false;
 let shouldWait = false;
 const handler = new Cache();
-const handlerPath = {
-	incoming: '../../../handlers/messages_event/incoming-message.js',
-	deleted: '../../../handlers/messages_event/deleted-message.js',
-	composing: '../../../handlers/message_presence/composing.js',
-	participant: '../../../handlers/notification_handlers/group-participants-notification.js',
-	groupSettings: '../../../handlers/notification_handlers/group-settings-notification.js'
+const { version } = await fs.readJSON('./package.json');
+const HANDLER_PATH = {
+	INCOMING: '../../../handlers/messages_event/incoming-message.js',
+	DELETED: '../../../handlers/messages_event/deleted-message.js',
+	COMPOSING: '../../../handlers/message_presence/composing.js',
+	PARTICIPANT: '../../../handlers/notification_handlers/group-participants-notification.js',
+	GROUPSETTINGS: '../../../handlers/notification_handlers/group-settings-notification.js'
 };
+const SEPERATOR = color(' ✦ ', 'white');
+const SPLITTER = ['᠁✦', '✦', '✦', '✦᠁'].map((v) => color(` ${v} `, '#ff71ce'));
 
 let shouldPrintBanner = true;
 
@@ -42,59 +45,29 @@ export const handleConnectionUpdate = async (
 	Client,
 	{ lastDisconnect, connection, receivedPendingNotifications, clientMqttListen, OPTIONS, cli }
 ) => {
-	const getTime = () => dayjs().format('HH:mm:ss DD/MM');
-
 	try {
 		if (connection === 'close') {
 			const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
 
 			if (reason === DisconnectReason.badSession) {
-				INFOLOG(
-					`[${color(getTime(), 'cyan')}]`,
-					color('Bad session', '#ff71ce'),
-					color('Please delete your previous session and do a rescan...', 'white')
-				);
+				INFOLOG(color('Bad session', 'white'), color('Please delete your previous session and do a rescan...', '#ff71ce'));
 				process.exit(0);
 			} else if (reason === DisconnectReason.loggedOut) {
-				INFOLOG(
-					`[${color(getTime(), 'cyan')}]`,
-					color('Logged out', '#ff71ce'),
-					color('Please delete your previous session and do a rescan...', 'white')
-				);
+				INFOLOG(color('Logged out', 'white'), color('Please delete your previous session and do a rescan...', '#ff71ce'));
 				process.exit(0);
 			} else {
 				if (reason === DisconnectReason.restartRequired) {
-					INFOLOG(
-						`[${color(getTime(), 'cyan')}]`,
-						color('Restart required', '#ff71ce'),
-						color('Restarting your WebScoket...', 'white')
-					);
+					INFOLOG(color('Restart required', 'white'), color('Restarting your WebScoket...', '#ff71ce'));
 				} else if (reason === DisconnectReason.timedOut) {
-					INFOLOG(`[${color(getTime(), 'cyan')}]`, color('Timed out', '#ff71ce'), color('Quick reconnecting...', 'white'));
+					INFOLOG(color('Timed out', 'white'), color('Quick reconnecting...', '#ff71ce'));
 				} else if (reason === DisconnectReason.connectionClosed) {
-					INFOLOG(
-						`[${color(getTime(), 'cyan')}]`,
-						color('Connection closed', '#ff71ce'),
-						color('Quick reconnecting...', 'white')
-					);
+					INFOLOG(color('Connection closed', 'white'), color('Quick reconnecting...', '#ff71ce'));
 				} else if (reason === DisconnectReason.connectionReplaced) {
-					INFOLOG(
-						`[${color(getTime(), 'cyan')}]`,
-						color('Connection replaced', '#ff71ce'),
-						color('Quick reconnecting...', 'white')
-					);
+					INFOLOG(color('Connection replaced', 'white'), color('Quick reconnecting...', '#ff71ce'));
 				} else if (reason === DisconnectReason.connectionLost) {
-					INFOLOG(
-						`[${color(getTime(), 'cyan')}]`,
-						color('Connection lost', '#ff71ce'),
-						color('Quick reconnecting...', 'white')
-					);
+					INFOLOG(color('Connection lost', 'white'), color('Quick reconnecting...', '#ff71ce'));
 				} else {
-					INFOLOG(
-						`[${color(getTime(), 'cyan')}]`,
-						color('Unknown reason', '#ff71ce'),
-						color('Quick reconnecting...', 'white')
-					);
+					INFOLOG(color('Unknown reason', 'white'), color('Quick reconnecting...', '#ff71ce'));
 				}
 
 				reconnectMqttConnection(connectMqtt, clientMqttListen);
@@ -131,15 +104,31 @@ export const handleConnectionUpdate = async (
 				(await import('../../modules/utils.js')).assign(client);
 
 				if (shouldPrintBanner) {
-					INFOLOG(
-						color(
-							boxen(`Made By Nanda\n Bot Version  ${romanize((await fs.readJSON('./package.json')).version)} `, {
+					console.log(
+						boxen(
+							chalk.bold('Bot Version') +
+								`\n${version
+									.split(/(\d)/g)
+									.map((v) => (v === '.' ? '' : v))
+									.map((v) => {
+										if (v === '') {
+											return SPLITTER.shift();
+										} else {
+											return v;
+										}
+									})
+									.join('')}`,
+							{
+								title: `${SEPERATOR}Made By Nanda${SEPERATOR}`,
 								textAlignment: 'center',
-								float: 'center'
-							}),
-							'#9f53ea'
+								float: 'center',
+								borderColor: '#ff71ce',
+								margin: 1,
+								borderStyle: 'round'
+							}
 						)
 					);
+					INFOLOG(color('Socket connected', 'white'), color('Successfully', '#ff71ce') + color('.', 'white'));
 					shouldPrintBanner = false;
 				}
 
@@ -161,11 +150,11 @@ export const handleConnectionUpdate = async (
  * @param {import('../type.js').SingleAuthState['state']} state
  */
 export const handleUpsertUpdate = async (store, message, state) => {
-	if (!handler.has('incoming')) {
-		handler.set('incoming', (await import(handlerPath.incoming)).default);
+	if (!handler.has('INCOMING')) {
+		handler.set('INCOMING', (await import(HANDLER_PATH.INCOMING)).default);
 	}
 
-	await handler.get('incoming')(message, client, configuration.cmds, store, configuration.user, state);
+	await handler.get('INCOMING')(message, client, configuration.cmds, store, configuration.user, state);
 };
 
 /**
@@ -179,11 +168,11 @@ export const handleMessagesUpdate = async (store, message) => {
 
 	message = store.messages[message[0].key.remoteJid]?.get(message[0].key.id);
 
-	if (!handler.has('deleted')) {
-		handler.set('deleted', (await import(handlerPath.deleted)).default);
+	if (!handler.has('DELETED')) {
+		handler.set('DELETED', (await import(HANDLER_PATH.DELETED)).default);
 	}
 
-	handler.get('deleted')(client, message, false, store);
+	await handler.get('DELETED')(client, message, false, store);
 };
 
 /**
@@ -195,11 +184,11 @@ export const handlePresenceUpdate = async (presence) => {
 	const presences = presence.presences[participant].lastKnownPresence;
 
 	if (presences === 'composing') {
-		if (!handler.has('coposing')) {
-			handler.set('composing', (await import(handlerPath.composing)).default);
+		if (!handler.has('COMPOSING')) {
+			handler.set('COMPOSING', (await import(HANDLER_PATH.COMPOSING)).default);
 		}
 
-		handler.get('composing')(client, from, participant);
+		await handler.get('COMPOSING')(client, from, participant);
 	}
 };
 
@@ -242,19 +231,19 @@ export const handleCallUpdate = async (isGroup, status, id, from, OPTIONS) => {
  * @param {import('@adiwajshing/baileys').proto.IWebMessageInfo[]} message
  */
 export const handleParticipantsUpdate = async (store, message) => {
-	if (!handler.has('participant')) {
-		handler.set('participant', (await import(handlerPath.participant)).default);
+	if (!handler.has('PARTICIPANT')) {
+		handler.set('PARTICIPANT', (await import(HANDLER_PATH.PARTICIPANT)).default);
 	}
 
-	handler.get('participant')(client, message, store);
+	await handler.get('PARTICIPANT')(client, message, store);
 };
 
 export const handleGroupSettingsUpdate = async (store, message) => {
-	if (!handler.has('groupSettings')) {
-		handler.set('groupSettings', (await import(handlerPath.groupSettings)).default);
+	if (!handler.has('GROUPSETTINGS')) {
+		handler.set('GROUPSETTINGS', (await import(HANDLER_PATH.GROUPSETTINGS)).default);
 	}
 
-	handler.get('groupSettings')(client, message, store);
+	await handler.get('GROUPSETTINGS')(client, message, store);
 };
 
 export const handleWerewolfCycle = async (update) => {

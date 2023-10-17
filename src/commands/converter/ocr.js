@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import path from 'path';
 
 import { color, INFOLOG } from '../../utils/modules/index.js';
@@ -28,8 +27,6 @@ export default {
 			});
 		}
 
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		const file = await client[botNum].downloadAndSaveMediaMessage(
 			extractMediaData,
 			path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
@@ -53,6 +50,6 @@ export default {
 
 		await client[botNum].send(from, { text: scanning.result.text.trim() }, { groupMetadata, quoted: message });
 
-		INFOLOG(`[${color(time, 'cyan')}]`, `${color('Text is sent', '#01cdfe')} to ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Text is sent', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
 	}
 };

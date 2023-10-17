@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
 import { color, ERRLOG, INFOLOG, isURL, removeDuplicatesArray } from '../../utils/modules/index.js';
@@ -20,8 +19,6 @@ export default {
 	limit: 6,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		if (!query) {
 			return await client[botNum].reply('Please provide a URL', { from, quoted: message, groupMetadata });
 		}
@@ -51,18 +48,12 @@ export default {
 
 			const audio = await tiktok.downloadMedia(url);
 
-			INFOLOG(
-				`[${color(time, 'cyan')}]`,
-				`${color('Downloading TikTok Audio', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`
-			);
+			INFOLOG(`${color('Downloading TikTok Audio', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 			if ('error' in audio) {
 				await client[botNum].reply(audio.error, { from, quoted: message, groupMetadata });
 
-				ERRLOG(
-					`[${color(time, 'cyan')}]`,
-					`⚠️ ${color('Failed to Download TikTok Audio', 'red')} for ${color(prettyNumber, '#ff71ce')}`
-				);
+				ERRLOG(`⚠️ ${color('Failed to Download TikTok Audio', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 
 				continue;
 			}
@@ -78,9 +69,6 @@ export default {
 			);
 		}
 
-		INFOLOG(
-			`[${color(time, 'cyan')}]`,
-			`${color('Downloaded TikTok Audio', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`
-		);
+		INFOLOG(`${color('Downloaded TikTok Audio', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 	}
 };

@@ -13,18 +13,7 @@ export default {
 	limit: 2,
 	status: 'enable',
 	restrict: true,
-	async run(
-		{ isAdmin, isBotAdmin, isOwner, mention, from, mediaData, query, bodyQuoted, message, adminGroups, groupMetadata },
-		client
-	) {
-		if (!isAdmin && !isOwner) {
-			return await client[botNum].reply('You are not admin. This commands is only for admins.', {
-				from,
-				quoted: message,
-				groupMetadata
-			});
-		}
-
+	async run({ isBotAdmin, mention, from, mediaData, query, bodyQuoted, message, adminGroups, groupMetadata }, client) {
 		if (!query && mention.length === 0 && !bodyQuoted) {
 			return await client[botNum].reply('Please reply people message or mention people.', {
 				from,

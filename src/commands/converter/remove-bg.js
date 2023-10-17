@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import path from 'path';
 import parser from 'yargs-parser';
 
@@ -33,8 +32,6 @@ export default {
 		},
 		client
 	) => {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		if (!isMediaImage && !isQuotedSticker) {
 			return client[botNum].reply(
 				'Please reply/send image with caption the command. This command also accept sticker (reply one with command).',
@@ -50,7 +47,7 @@ export default {
 			});
 		}
 
-		INFOLOG(`[${color(time, 'cyan')}]`, `${color('Removing Background image', '#01cdfe')} ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Removing Background image', 'cyan')} ${color(prettyNumber, '#ff71ce')}`);
 
 		const parsed = parser(query.toLowerCase(), {
 			configuration: {

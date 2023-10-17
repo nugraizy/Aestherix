@@ -1,5 +1,3 @@
-import dayjs from 'dayjs';
-
 import { imageToAnime } from '../../utils/converter/file-processing.js';
 import { color, INFOLOG, ERRLOG } from '../../utils/modules/index.js';
 
@@ -16,12 +14,7 @@ export default {
 	limit: 9,
 	status: 'enable',
 	run: async ({ isMediaImage, from, prettyNumber, message, mediaData, sender, args, groupMetadata }, client) => {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
-		INFOLOG(
-			`[${color(time, 'cyan')}]`,
-			`${color('Converting image to Anime-like', '#01cdfe')} to ${color(prettyNumber, '#ff71ce')}`
-		);
+		INFOLOG(`${color('Converting image to Anime-like', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
 
 		let bufferMessage;
 		let buffer;
@@ -43,7 +36,7 @@ export default {
 			crop: 'SINGLE',
 			enhance: true,
 			proxy: 'socks5://arugaz:arugaz1717%40%23@8.210.154.33:1080',
-			onRetry: (e) => ERRLOG(`[${color(time, 'cyan')}]`, `⚠️ ${color(e.message, 'red')} for ${color(prettyNumber, '#ff71ce')}`)
+			onRetry: (e) => ERRLOG(`⚠️ ${color(e.message, 'red')} for ${color(prettyNumber, '#ff71ce')}`)
 		});
 
 		buffer = Buffer.from(buffer, 'base64');
@@ -70,9 +63,6 @@ export default {
 		bufferMessage = null;
 		buffer = null;
 
-		INFOLOG(
-			`[${color(time, 'cyan')}]`,
-			`${color('Anime-like image is sent', '#01cdfe')} to ${color(prettyNumber, '#ff71ce')}`
-		);
+		INFOLOG(`${color('Anime-like image is sent', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
 	}
 };

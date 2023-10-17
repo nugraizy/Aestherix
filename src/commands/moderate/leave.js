@@ -11,15 +11,7 @@ export default {
 	limit: 20,
 	restrict: true,
 	status: 'enable',
-	async run({ isAdmin, isOwner, from, isGroup, message, groupMetadata }, client) {
-		if (!isGroup) {
-			return await client[botNum].reply('This command only works in group.', { from, quoted: message, groupMetadata });
-		}
-
-		if (!isAdmin && !isOwner) {
-			return await client[botNum].reply('You must be an admin to use this command.', { from, quoted: message, groupMetadata });
-		}
-
+	async run({ from, message, groupMetadata }, client) {
 		const data = await client[botNum].reply('I will leave.', { from, quoted: message, groupMetadata });
 
 		await client[botNum].groupLeave(from);

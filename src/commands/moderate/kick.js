@@ -13,18 +13,7 @@ export default {
 	limit: 6,
 	status: 'enable',
 	restrict: true,
-	async run(
-		{ mediaData, isAdmin, isOwner, isBotAdmin, type, message, from, mention, query, bodyQuoted, adminGroups, groupMetadata },
-		client
-	) {
-		if (!isAdmin && !isOwner) {
-			return await client[botNum].reply('You are not admin. This commands is only for admins.', {
-				from,
-				quoted: message,
-				groupMetadata
-			});
-		}
-
+	async run({ mediaData, isBotAdmin, type, message, from, mention, query, bodyQuoted, adminGroups, groupMetadata }, client) {
 		if (!isBotAdmin) {
 			return await client[botNum].reply('Bot is not admin, Please promote admin before using moderation commands.', {
 				from,

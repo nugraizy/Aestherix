@@ -1,6 +1,23 @@
 import type { ReassignResult } from '../Reconstruct';
 import type { AdvancedClient, SingleAuthState, Store } from '../Socket';
 
+type Category =
+	| 'Al-Quran'
+	| 'Anime'
+	| 'Anonymous'
+	| 'Converter'
+	| 'Debugging'
+	| 'Downloader'
+	| 'Games'
+	| 'Genshin Impact'
+	| 'Helper'
+	| 'Look-up'
+	| 'Misc'
+	| 'Moderate'
+	| 'News'
+	| 'Owner'
+	| 'Search';
+
 export type CommandProps = {
 	/**
 	 *  Your plugins name
@@ -15,7 +32,7 @@ export type CommandProps = {
 	/**
 	 *  Your plugins category
 	 */
-	category: string;
+	category: Category;
 
 	/**
 	 *  Your plugins usage exmple

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import * as cheerio from 'cheerio';
+import { load } from 'cheerio';
 import { fileTypeFromBuffer } from 'file-type';
 import FormData from 'form-data';
 import fs from 'fs-extra';
@@ -7,6 +7,8 @@ import gradient from 'gradient-string';
 import fetch from 'node-fetch';
 import ms from 'parse-ms';
 import _ from 'lodash';
+import dayjs from 'dayjs';
+import chalk from 'chalk';
 
 import configuration from '../../helper/config/connect.js';
 
@@ -39,7 +41,7 @@ export const fetchBUFFER = async (url, options) => await (await fetch(url, optio
  * @param {string} html
  * @returns {import('cheerio').CheerioAPI}
  */
-export const cheerioLOAD = (html) => cheerio.load(html);
+export const cheerioLOAD = (html) => load(html);
 
 /**
  * Douwnload files using axios
@@ -475,11 +477,31 @@ export const color = (text, color) => {
 		: gradient[schemes](text);
 };
 
+const TIME_FORMAT = 'HH:mm:ss DD/MM';
+const ICON = color('✦', '#ff71ce');
+const SEPERATOR_1 = color(':', 'cyan');
+const SEPERATOR_2 = color('/', 'cyan');
+const SEPERATOR_3 = chalk.italic(color('❯❯', '#FF5555'));
+const bracketsify = (text) => color('【', '#F8F8F2') + text + color('】', '#F8F8F2');
+const boldify = (string) => chalk.bold(string);
+
+const coloring = (text) => {
+	const [time, date] = text.split(' ');
+
+	const [hour, minute, second] = time.split(':');
+	const [day, month] = date.split('/');
+	const [HH, mm, ss, DD, MM] = [hour, minute, second, day, month].map((x) => color(x, '#6272A4'));
+
+	return `${HH}${SEPERATOR_1}${mm}${SEPERATOR_1}${ss} ${DD}${SEPERATOR_2}${MM}`;
+};
+
 export const INFOLOG = (...info) => {
 	const isLOGS = configuration.OPTIONS.noLog || false;
 
 	if (!isLOGS) {
-		log(...info);
+		const time = dayjs().format(TIME_FORMAT);
+
+		log(ICON + boldify(bracketsify(coloring(time))) + boldify(SEPERATOR_3), ...info);
 	}
 };
 
@@ -487,7 +509,9 @@ export const ERRLOG = (...info) => {
 	const isLOGS = configuration.OPTIONS.noLog || false;
 
 	if (!isLOGS) {
-		console.error(...info);
+		const time = dayjs().format('HH:mm:ss DD/MM');
+
+		log(color(ICON, '#FF5555'), `[${color(time, 'cyan')}]`, ...info);
 	}
 };
 

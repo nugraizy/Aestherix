@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
 import { color, delay, ERRLOG, INFOLOG, isURL, parseCode } from '../../utils/modules/index.js';
@@ -19,8 +18,6 @@ export default {
 	limit: 9,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		if (!query) {
 			return await client[botNum].reply('Please specify a url', { from, quoted: message, groupMetadata });
 		}
@@ -48,10 +45,7 @@ export default {
 
 			const parse = parseCode(url.trim());
 
-			INFOLOG(
-				`[${color(time, 'cyan')}]`,
-				`${color('Downloading Instagram reel', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`
-			);
+			INFOLOG(`${color('Downloading Instagram reel', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 			if (parse) {
 				const reel = await getPost(url);
@@ -62,10 +56,7 @@ export default {
 						quoted: message,
 						groupMetadata
 					});
-					ERRLOG(
-						`[${color(time, 'cyan')}]`,
-						`⚠️ ${color('Failed to Download Instagram reel', 'red')} for ${color(prettyNumber, '#ff71ce')}`
-					);
+					ERRLOG(`⚠️ ${color('Failed to Download Instagram reel', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 
 					continue;
 				}
@@ -88,10 +79,7 @@ export default {
 					);
 				}
 
-				INFOLOG(
-					`[${color(time, 'cyan')}]`,
-					`${color('Downloaded Instagram reel', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`
-				);
+				INFOLOG(`${color('Downloaded Instagram reel', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 				await delay(100);
 			}
 		}

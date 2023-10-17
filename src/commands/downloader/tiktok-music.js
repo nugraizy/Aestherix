@@ -1,7 +1,6 @@
-import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
-import { color, delay, ERRLOG, INFOLOG, isURL, removeDuplicatesArray } from '../../utils/modules/index.js';
+import { color, ERRLOG, INFOLOG, isURL, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { mime } from '../../utils/misc/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
 
@@ -21,8 +20,6 @@ export default {
 	limit: 6,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		if (!query) {
 			return await client[botNum].reply('Please provide a URL', { from, quoted: message, groupMetadata });
 		}
@@ -52,16 +49,10 @@ export default {
 
 			const music = await tiktok.downloadMedia(url);
 
-			INFOLOG(
-				`[${color(time, 'cyan')}]`,
-				`${color('Downloading TikTok Music', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`
-			);
+			INFOLOG(`${color('Downloading TikTok Music', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 			if ('error' in music) {
-				ERRLOG(
-					`[${color(time, 'cyan')}]`,
-					`⚠️ ${color('Error while downloading TikTok Music', '#ff0000')} for ${color(prettyNumber, '#ff71ce')}`
-				);
+				ERRLOG(`⚠️ ${color('Error while downloading TikTok Music', '#ff0000')} for ${color(prettyNumber, '#ff71ce')}`);
 				await client[botNum].reply(`${music.error}\n\n${url.split(' ')[0]}`, {
 					from,
 					quoted: message,
@@ -81,11 +72,7 @@ export default {
 				{ groupMetadata, quoted: message }
 			);
 
-			await delay(300);
-			INFOLOG(
-				`[${color(time, 'cyan')}]`,
-				`${color('Downloaded TikTok Music', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`
-			);
+			INFOLOG(`${color('Downloaded TikTok Music', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 		}
 	}
 };

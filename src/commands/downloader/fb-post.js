@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
 import { color, ERRLOG, fetchBUFFER, INFOLOG, isURL, delay } from '../../utils/modules/index.js';
@@ -19,8 +18,6 @@ export default {
 	limit: 6,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		if (!query) {
 			return await client[botNum].reply('Please provide a URL', { from, quoted: message, groupMetadata });
 		}
@@ -48,10 +45,7 @@ export default {
 
 			const post = await fbDl(url.trim());
 
-			INFOLOG(
-				`[${color(time, 'cyan')}]`,
-				`${color('Downloading Facebook Post', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`
-			);
+			INFOLOG(`${color('Downloading Facebook Post', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 			if ('error' in post) {
 				await client[botNum].reply(`Failed while downloading Facebook post\n\n${post.error}\n${url}`, {
@@ -59,10 +53,7 @@ export default {
 					quoted: message,
 					groupMetadata
 				});
-				ERRLOG(
-					`[${color(time, 'cyan')}]`,
-					`⚠️ ${color('Failed to Download Facebook Post', 'red')} for ${color(prettyNumber, '#ff71ce')}`
-				);
+				ERRLOG(`⚠️ ${color('Failed to Download Facebook Post', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 
 				continue;
 			}
@@ -80,9 +71,6 @@ export default {
 			await delay(300);
 		}
 
-		INFOLOG(
-			`[${color(time, 'cyan')}]`,
-			`${color('Downloaded Facebook Post', '#01cdfe')} for ${color(prettyNumber, '#ff71ce')}`
-		);
+		INFOLOG(`${color('Downloaded Facebook Post', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 	}
 };

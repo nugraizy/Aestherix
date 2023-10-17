@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import path from 'path';
 
 import configuration from '../../helper/config/connect.js';
@@ -47,8 +46,6 @@ export default {
 		},
 		client
 	) {
-		const time = dayjs().format('HH:mm:ss DD/MM');
-
 		if (!isMediaImage && !isMediaVid && !query) {
 			return await client[botNum].reply('Please send/reply a media or send a url to convert to sticker', {
 				from,
@@ -116,6 +113,6 @@ export default {
 			await client[botNum].send(from, { sticker }, { groupMetadata, quoted: message });
 		}
 
-		INFOLOG(`[${color(time, 'cyan')}]`, `${color('Sticker is sent', '#01cdfe')} to ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Sticker is sent', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
 	}
 };
