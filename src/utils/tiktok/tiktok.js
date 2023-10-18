@@ -476,7 +476,8 @@ class RequestModule extends ResponseParser {
 
 		const data = await this._awemeRequest('aweme/v1/discover/search/?', {
 			method: 'POST',
-			body
+			body,
+			config: this._getRequestConfig()
 		});
 
 		if (data === '') {
