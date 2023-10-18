@@ -401,14 +401,22 @@ class RequestModule extends ResponseParser {
 	 * @private
 	 */
 	async _awemeRequest(path, { method, body, config = {} }) {
-		if (method === 'GET') {
-			const { data } = await this._request().get(path + body, config);
+		try {
+			if (method === 'GET') {
+				const { data } = await this._request().get(path + body, config);
 
-			return data;
-		} else {
-			const { data } = await this._request().post(path + body, null, config);
+				return data;
+			} else {
+				const { data } = await this._request().post(path + body, null, config);
 
-			return data;
+				return data;
+			}
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				return { error: error.message };
+			} else {
+				throw error;
+			}
 		}
 	}
 
@@ -492,7 +500,12 @@ class RequestModule extends ResponseParser {
 	 */
 	async _fetchVideoDataAttempt(videoId) {
 		const body = this._buildApiUrl({
-			aweme_id: videoId // eslint-disable-line
+			aweme_id: videoId, // eslint-disable-line
+			version_name: '1.1.9', // eslint-disable-line
+			version_code: '2018111632', // eslint-disable-line
+			build_number: '1.1.9', // eslint-disable-line
+			manifest_version_code: '2018111632', // eslint-disable-line
+			update_version_code: '2018111632' // eslint-disable-line
 		});
 
 		const data = await this._awemeRequest('aweme/v1/feed/?', {
