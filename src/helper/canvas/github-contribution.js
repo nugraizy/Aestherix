@@ -67,14 +67,14 @@ export class GitHubGraph {
 		 * @type {import('../../types/Canvas').GithubGraph<Omit<GitHubGraph, 'init' | 'createGitHubGraph'>>}
 		 */
 		this.createGitHubGraph = () => {
-			this._createGitHubGraph();
+			return this._createGitHubGraph();
 		};
 
 		/**
 		 * @type {import('../../types/Canvas').InitGithubGraph<Omit<GitHubGraph, 'init'>>}
 		 */
 		this.init = (username, { theme, round } = { theme: 'DEFAULT', round: false }) => {
-			this._init(username, { theme, round });
+			return this._init(username, { theme, round });
 		};
 
 		/**
