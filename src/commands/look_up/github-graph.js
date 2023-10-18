@@ -1,4 +1,4 @@
-import { GithubGraph } from '../../helper/index.js';
+import { GitHubGraph } from '../../helper/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -17,14 +17,14 @@ export default {
 			return await client[botNum].reply('Please specify a GitHub User', { from, quoted: message, groupMetadata });
 		}
 
-		const git = new GithubGraph();
+		const git = new GitHubGraph();
 
-		await git.init(query, 'DRACULA');
+		const init = await git.init('nugraizy', { round: true, theme: 'DRACULA' });
 
-		await git.fillBackground().createLines({ round: true }).placeCopyright().placeIcons();
+		const create = await init.createGitHubGraph();
 
-		await git.textHeaders();
+		const buffer = create.toBuffer();
 
-		await client[botNum].send(from, { image: new Buffer.from(git.toBuffer()) }, { groupMetadata, quoted: message });
+		await client[botNum].send(from, { image: new Buffer.from(buffer) }, { groupMetadata, quoted: message });
 	}
 };
