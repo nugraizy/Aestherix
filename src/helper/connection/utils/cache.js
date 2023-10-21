@@ -65,7 +65,7 @@ export const validatePlugins = async (filename) => {
 
 		ERRLOG(
 			color(`${ICON.ERROR}${filename.split('/').slice(-2).join('/')}`, '#9f53ea'),
-			color('File Error! Waiting for changes...', 'red')
+			color('File Error! Waiting for changes...', '#FF5555')
 		);
 
 		ERRLOG(
@@ -111,7 +111,7 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 		} else {
 			ERRLOG(
 				color(`${icon}${filename.split('/').slice(-2).join('/')}`, '#9f53ea'),
-				color('File Error! Waiting for changes...', 'red')
+				color('File Error! Waiting for changes...', '#FF5555')
 			);
 			configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
 				absolutePath: file,
@@ -212,7 +212,7 @@ const unlink = (filename, icon = ICON.DELETED) => {
 
 	configuration.cmds.commands.delete(cmds[indexPath][0]);
 
-	INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('File Deleted!', 'red'));
+	INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('File Deleted!', '#FF5555'));
 };
 
 export const watch = (folder) => {

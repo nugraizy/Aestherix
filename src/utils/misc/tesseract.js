@@ -38,7 +38,7 @@ export const tesseract = async (image, sender, lang = 'ind') =>
 
 			if (!languages.some((l) => l.code.toLowerCase() === lang.toLowerCase())) {
 				await fs.unlink(image);
-				INFOLOG(`${color(`Language ${lang} is not supported`, 'red')}`);
+				INFOLOG(`${color(`Language ${lang} is not supported`, '#FF5555')}`);
 				resolve({ error: `Language ${lang} not found`, languages });
 				return;
 			}

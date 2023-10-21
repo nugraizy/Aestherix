@@ -53,7 +53,7 @@ export default {
 					quoted: message,
 					groupMetadata
 				});
-				ERRLOG(`⚠️ ${color('Failed to Download Facebook Post', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(`⚠️ ${color('Failed to Download Facebook Post', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
 
 				continue;
 			}

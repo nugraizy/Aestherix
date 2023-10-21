@@ -6,16 +6,10 @@ import {
 	ERRLOG,
 	fetchBUFFER,
 	INFOLOG,
-	isURL,
 	numberWithCommas,
 	removeDuplicatesArray
 } from '../../utils/modules/index.js';
 import { youtubeMainDownload as ytv } from '../../utils/youtube/index.js';
-
-const regex = (input) =>
-	/(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:-nocookie|)\.com\/(?:shorts\/)?(?:watch\?.*(?:|&)v=|embed\/|v\/)|youtu\.be\/)?\/.+/.test(
-		input
-	);
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -29,7 +23,7 @@ export default {
 	cooldown: 12,
 	limit: 8,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, type, args, groupMetadata, isGroup }, client) {
+	async run({ from, query, prettyNumber, message, type, args, groupMetadata }, client) {
 		if (type === 'listResponseMessage' && args[1] === 'download') {
 			await client[botNum].send(
 				from,
@@ -66,19 +60,7 @@ export default {
 
 		queries = removeDuplicatesArray(queries);
 
-		if (queries.length === 1 && isURL(queries) && !regex(queries)) {
-			return await client[botNum].reply('This is not a valid YouTube URL.', { from, quoted: message, groupMetadata });
-		}
-
 		for (const Query of queries) {
-			if (isURL(Query) && !regex(Query)) {
-				return await client[botNum].reply(`[ ${Query} ] This isn't a valid YouTube URL.`, {
-					from,
-					quoted: message,
-					groupMetadata
-				});
-			}
-
 			const video = await ytv(Query, 'mp4');
 
 			INFOLOG(`${color('Downloading YouTube Video', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
@@ -89,19 +71,19 @@ export default {
 					quoted: message,
 					groupMetadata
 				});
-				ERRLOG(`⚠️ ${color('Failed to Download YouTube Video', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(`⚠️ ${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
 
 				continue;
 			} else {
-				const { title, description, timestamp, uploaded, views, author, urlChannel, mp4, thumbnail: image, url } = video;
+				const { title, description, timestamp, uploaded, views, author, urlChannel, link, thumbnail: image, url } = video;
 
-				if (!mp4) {
+				if (!link) {
 					await client[botNum].reply(`Error while downloading YouTube Video\n\n${Query}`, {
 						from,
 						quoted: message,
 						groupMetadata
 					});
-					ERRLOG(`⚠️ ${color('Failed to Download YouTube Video', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
+					ERRLOG(`⚠️ ${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
 
 					continue;
 				}
@@ -137,21 +119,7 @@ export default {
 					]
 				});
 
-				if (isGroup) {
-					await client[botNum].send(from, { video: { url: mp4[0].dlUrl } }, { groupMetadata, quoted: message });
-					continue;
-				}
-
-				await client[botNum].send(from, {
-					title: 'YouTube MP4'.formatHeaders(),
-					footer: 'Made by Void Bot. Powered by Hidden Finder',
-					text: '\t',
-					buttonText: 'Open List',
-					sections: mp4.map((v, i) => ({
-						rows: [{ title: `${i + 1}. 📼 ${v.quality} 💾 ${v.filesizeF}`, rowId: `.ytmp4 download ${v.dlUrl}` }],
-						title: '\t'
-					}))
-				});
+				await client[botNum].send(from, { video: { url: link } }, { groupMetadata, quoted: message });
 				await delay(300);
 			}
 		}

@@ -1,9 +1,7 @@
 import parser from 'yargs-parser';
 
-import { color, delay, ERRLOG, INFOLOG, isURL, parseCode } from '../../utils/modules/index.js';
-import { getPost } from '../../utils/instagram/index.js';
-
-const regex = (input) => /(https?:\/\/(?:www\.)?instagram\.com\/(p|reel|tv|s)\/([^/?#&]+)).*/.test(input);
+import { color, delay, ERRLOG, INFOLOG } from '../../utils/modules/index.js';
+import { instagram } from '../../utils/instagram/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -24,64 +22,48 @@ export default {
 
 		const { _: urls } = parser(query);
 
-		if (urls.length === 1 && !isURL(urls[0])) {
-			return await client[botNum].reply('Please specify a valid url', { from, quoted: message, groupMetadata });
-		}
+		const reels = await instagram.download.post(urls);
 
-		if (urls.length === 1 && !regex(urls[0])) {
-			return await client[botNum].reply('Please specify a valid Instagram url', { from, quoted: message, groupMetadata });
-		}
+		INFOLOG(`${color('Downloading Instagram reel', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
-		for (const url of urls) {
-			if (!isURL(url.trim())) {
-				await client[botNum].reply('Please specify a valid url', { from, quoted: message, groupMetadata });
-
-				continue;
-			} else if (!regex(url.trim())) {
-				await client[botNum].reply('Please specify a valid Instagram url', { from, quoted: message, groupMetadata });
-
+		for (const data in reels) {
+			if ('error' in reels[data]) {
+				await client[botNum].reply(`Error while downloading Instagram reel\n\n${reels[data].error}\n${data}`, {
+					from,
+					quoted: message,
+					groupMetadata
+				});
+				ERRLOG(`⚠️ ${color('Failed to Download Instagram reel', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
 				continue;
 			}
 
-			const parse = parseCode(url.trim());
+			let capt = 'Instagram reel'.formatHeaders();
 
-			INFOLOG(`${color('Downloading Instagram reel', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+			capt += `\n\nUsername : ${reels[data].username}\n`;
+			capt += `Fullname : ${reels[data].fullName}\n`;
+			capt += `Privacy : ${reels[data].isPrivate ? 'Private' : 'Public'}\n`;
+			capt += `Verified : ${reels[data].isVerified ? 'Verified' : 'Not Verified'}\n`;
+			capt += `Published : ${reels[data].takenAt}\n`;
+			capt += `Tot. Comment : ${reels[data].commentCount}\n`;
+			capt += `Tot. Like : ${reels[data].likeCount}\n`;
 
-			if (parse) {
-				const reel = await getPost(url);
+			if (reels[data].post.length === 1) {
+				capt += `Caption : ${reels[data].captions.trim()}\n`;
 
-				if ('error' in reel) {
-					await client[botNum].reply(`Error while downloading Instagram reel\n\n${reel.error}\n${url}`, {
-						from,
-						quoted: message,
-						groupMetadata
-					});
-					ERRLOG(`⚠️ ${color('Failed to Download Instagram reel', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
-
-					continue;
-				}
-
-				let capt = 'Instagram reel'.formatHeaders();
-
-				capt += `\n\nUsername : ${reel.user.username}\n`;
-				capt += `Fullname : ${reel.user.fullName}\n`;
-
-				if (reel.medias.length === 1) {
-					await client[botNum].send(
-						from,
-						reel.medias[0].type === 'video'
-							? { video: { url: reel.medias[0].url }, caption: capt.trim() }
-							: {
-									image: { url: reel.medias[0].url },
-									caption: capt.trim()
-							  } /* eslint-disable-line */,
-						{ groupMetadata, quoted: message }
-					);
-				}
-
-				INFOLOG(`${color('Downloaded Instagram reel', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
-				await delay(100);
+				await client[botNum].send(
+					from,
+					reels[data].post[0].isVideo
+						? { video: { url: reels[data].post[0].url }, caption: capt.trim() }
+						: {
+								image: { url: reels[data].post[0].url },
+								caption: capt.trim()
+						  } /* eslint-disable-line */,
+					{ groupMetadata, quoted: message }
+				);
 			}
+
+			INFOLOG(`${color('Downloaded Instagram reel', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+			await delay(100);
 		}
 	}
 };

@@ -511,7 +511,7 @@ export const ERRLOG = (...info) => {
 	if (!isLOGS) {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
-		log(color(ICON, '#FF5555'), `[${color(time, 'cyan')}]`, ...info);
+		log(color('✦', '#FF5555') + boldify(bracketsify(coloring(time))) + boldify(SEPERATOR_3), ...info);
 	}
 };
 

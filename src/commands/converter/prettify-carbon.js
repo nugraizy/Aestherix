@@ -26,7 +26,7 @@ export default {
 
 		if ('error' in buffer) {
 			client[botNum].reply(buffer.error, { from, quoted: message, groupMetadata });
-			ERRLOG(`⚠️ ${color('Failed to Carboning a Codes', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
+			ERRLOG(`⚠️ ${color('Failed to Carboning a Codes', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
 			return;
 		}
 

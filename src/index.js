@@ -58,7 +58,7 @@ export const runtime = Date.now();
 
 for (const option of Object.keys(OPTIONS).filter((key) => OPTIONS[key])) {
 	if (!regexOption.includes(option)) {
-		ERRLOG(`${color(option, 'red')} ${color('is not a valid option', 'white')}`);
+		ERRLOG(`${color(option, '#FF5555')} ${color('is not a valid option', 'white')}`);
 	}
 }
 

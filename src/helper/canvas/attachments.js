@@ -1,11 +1,16 @@
-import Canvas from 'canvas';
+import Canvas from '@napi-rs/canvas';
 import sharp from 'sharp';
 import Wrap from 'canvas-text-wrapper';
 import * as color from 'colorthief';
 import fs from 'fs-extra';
+import path from 'path';
 
-const { createCanvas, registerFont, loadImage } = Canvas;
+const { createCanvas, GlobalFonts, loadImage } = Canvas;
 const { CanvasTextWrapper } = Wrap;
+
+GlobalFonts.registerFromPath(path.join(__dirname, '/src/media/fonts/Nina-Bold.otf'), 'nina-bold');
+GlobalFonts.registerFromPath(path.join(__dirname, '/src/media/fonts/Abril-Text-Bold.otf'), 'abril-text-bold');
+GlobalFonts.registerFromPath(path.join(__dirname, '/src/media/fonts/IBM.ttf'), 'ibm');
 
 const COPYRIGHT_TEXT = '© 2022 nugraizy, HF Inc.';
 
@@ -27,8 +32,6 @@ export class Attachment {
 	}
 
 	async init(image) {
-		this.registerFonts();
-
 		this.canvas = createCanvas(this.x, this.y);
 		this.ctx = this.canvas.getContext('2d');
 
@@ -42,12 +45,6 @@ export class Attachment {
 		};
 
 		return this;
-	}
-
-	registerFonts() {
-		registerFont('./src/media/fonts/Nina-Bold.otf', { family: 'nina-bold' });
-		registerFont('./src/media/fonts/Abril-Text-Bold.otf', { family: 'abril-text-bold' });
-		registerFont('./src/media/fonts/IBM.ttf', { family: 'ibm' });
 	}
 
 	async roundImage(image, roundedRadius) {

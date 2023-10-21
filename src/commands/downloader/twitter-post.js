@@ -43,7 +43,7 @@ export default {
 					quoted: message,
 					groupMetadata
 				});
-				ERRLOG(`⚠️ ${color('Failed to Download Twitter Post', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(`⚠️ ${color('Failed to Download Twitter Post', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
 
 				continue;
 			}

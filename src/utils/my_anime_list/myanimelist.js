@@ -168,6 +168,6 @@ export class MyAnimeList {
 	}
 
 	showExpiredError() {
-		ERRLOG(`⚠️  ${color('( MyAnimeList ) AccessToken expired. Refreshing the access tokens.', 'red')}`);
+		ERRLOG(`⚠️  ${color('( MyAnimeList ) AccessToken expired. Refreshing the access tokens.', '#FF5555')}`);
 	}
 }

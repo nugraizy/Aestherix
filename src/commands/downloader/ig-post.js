@@ -1,10 +1,8 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
-import { color, delay, ERRLOG, INFOLOG, isURL, numberWithCommas, parseCode } from '../../utils/modules/index.js';
-import { getPost } from '../../utils/instagram/index.js';
-
-const regex = (input) => /(https?:\/\/(?:www\.)?instagram\.com\/(p|reel|tv|s)\/([^/?#&]+)).*/.test(input);
+import { color, delay, ERRLOG, INFOLOG, numberWithCommas } from '../../utils/modules/index.js';
+import { instagram } from '../../utils/instagram/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -25,84 +23,59 @@ export default {
 
 		const { _: urls } = parser(query);
 
-		if (urls.length === 1 && !isURL(urls[0])) {
-			return await client[botNum].reply('Please specify a valid url', { from, quoted: message, groupMetadata });
-		}
+		const posts = await instagram.download.post(urls);
 
-		if (urls.length === 1 && !regex(urls[0])) {
-			return await client[botNum].reply('Please specify a valid Instagram url', { from, quoted: message, groupMetadata });
-		}
+		INFOLOG(`${color('Downloading Instagram Post', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
-		for (const url of urls) {
-			if (!isURL(url.trim())) {
-				await client[botNum].reply('Please specify a valid url', { from, quoted: message, groupMetadata });
-
-				continue;
-			} else if (!regex(url.trim())) {
-				await client[botNum].reply('Please specify a valid Instagram url', { from, quoted: message, groupMetadata });
-
+		for (const data in posts) {
+			if ('error' in posts[data]) {
+				await client[botNum].reply(`Error while downloading Instagram post\n\n${posts[data].error}\n${data}`, {
+					from,
+					quoted: message,
+					groupMetadata
+				});
+				ERRLOG(`⚠️ ${color('Failed to Download Instagram Post', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
 				continue;
 			}
 
-			const parse = parseCode(url.trim());
+			let capt = 'Instagram Post'.formatHeaders();
 
-			INFOLOG(`${color('Downloading Instagram Post', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+			capt += `\n\nUsername : ${posts[data].username}\n`;
+			capt += `Fullname : ${posts[data].fullName}\n`;
+			capt += `Privacy : ${posts[data].isPrivate ? 'Private' : 'Public'}\n`;
+			capt += `Verified : ${posts[data].isVerified ? 'Verified' : 'Not Verified'}\n`;
+			capt += `Published : ${dayjs(posts[data].takenAt * 1000).format('HH:mm:ss DD/MM/YYYY')}\n`;
+			capt += `Tot. Comment : ${numberWithCommas(posts[data].commentCount)}\n`;
+			capt += `Tot. Like : ${numberWithCommas(posts[data].likeCount)}\n`;
 
-			if (parse) {
-				const post = await getPost(parse);
+			if (posts[data].post.length === 1) {
+				capt += `Caption : ${posts[data].captions.trim()}\n`;
 
-				if ('error' in post) {
-					await client[botNum].reply(`Error while downloading Instagram post\n\n${post.error}\n${url}`, {
-						from,
-						quoted: message,
+				await client[botNum].send(
+					from,
+					posts[data].post[0].isVideo
+						? { video: { url: posts[data].post[0].url }, caption: capt.trim() }
+						: {
+								image: { url: posts[data].post[0].url },
+								caption: capt.trim()
+						  } /* eslint-disable-line */,
+					{ groupMetadata, quoted: message }
+				);
+			} else {
+				capt += `Tot. Media : ${posts[data].post.length}\n`;
+				capt += `Caption : ${posts[data].captions.trim()}\n`;
+
+				await client[botNum].send(from, { text: capt.trim() }, { quoted: message });
+
+				for (const media of posts[data].post) {
+					await client[botNum].send(from, media.isVideo ? { video: { url: media.url } } : { image: { url: media.url } }, {
 						groupMetadata
 					});
-					ERRLOG(`⚠️ ${color('Failed to Download Instagram Post', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
-
-					continue;
+					await delay(300);
 				}
-
-				let capt = 'Instagram Post'.formatHeaders();
-
-				capt += `\n\nUsername : ${post.username}\n`;
-				capt += `Fullname : ${post.fullName}\n`;
-				capt += `Privacy : ${post.isPrivate ? 'Private' : 'Public'}\n`;
-				capt += `Verified : ${post.isVerified ? 'Verified' : 'Not Verified'}\n`;
-				capt += `Published : ${dayjs(post.takenAt * 1000).format('HH:mm:ss DD/MM/YYYY')}\n`;
-				capt += `Tot. Comment : ${numberWithCommas(post.commentCount)}\n`;
-				capt += `Tot. Like : ${numberWithCommas(post.likeCount)}\n`;
-
-				if (post.post.length === 1) {
-					capt += `Caption : ${post.captions.trim()}\n`;
-
-					await client[botNum].send(
-						from,
-						post.post[0].isVideo
-							? { video: { url: post.post[0].url }, caption: capt.trim() }
-							: {
-									image: { url: post.post[0].url },
-									caption: capt.trim()
-							  } /* eslint-disable-line */,
-						{ groupMetadata, quoted: message }
-					);
-				} else {
-					capt += `Tot. Media : ${post.post.length}\n`;
-					capt += `Caption : ${post.captions.trim()}\n`;
-
-					await client[botNum].send(from, { text: capt.trim() }, { quoted: message });
-
-					for (const media of post.post) {
-						await client[botNum].send(from, media.isVideo ? { video: { url: media.url } } : { image: { url: media.url } }, {
-							groupMetadata
-						});
-						await delay(300);
-					}
-				}
-
-				INFOLOG(`${color('Downloaded Instagram Post', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
-			} else {
-				ERRLOG(`⚠️ ${color('Failed to Parse Instagram Post URL', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
 			}
+
+			INFOLOG(`${color('Downloaded Instagram Post', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 		}
 	}
 };

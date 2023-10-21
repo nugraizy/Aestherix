@@ -74,7 +74,7 @@ export default {
 					groupMetadata
 				});
 
-				ERRLOG(`⚠️ ${color('Failed to Searching Genshin Impact player', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(`⚠️ ${color('Failed to Searching Genshin Impact player', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
 
 				continue;
 			} else {

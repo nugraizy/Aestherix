@@ -42,7 +42,7 @@ export default {
 					groupMetadata
 				});
 
-				ERRLOG(`⚠️ ${color('Failed to Searching Twitter User', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(`⚠️ ${color('Failed to Searching Twitter User', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
 
 				continue;
 			} else {

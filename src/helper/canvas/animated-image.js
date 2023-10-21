@@ -12,6 +12,11 @@ import { color, ERRLOG, INFOLOG } from '../../utils/modules/index.js';
 const { createCanvas, GlobalFonts } = Canvas;
 const { CanvasTextWrapper } = Wrap;
 
+GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Chevin Bold.ttf'), 'chevin');
+GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/texgyreadventor-bold.otf'), 'texgy');
+GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/SourceSansPro-Italic.ttf'), 'sanspro');
+GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/KeepCalm-Medium.ttf'), 'calm');
+
 const saveImages = (buffer, sequence) => {
 	const fileName = path.join(__dirname, `src/media/temporary_files/animated_images-${sequence}.webp`);
 
@@ -26,13 +31,13 @@ const createSequence = async (images, sender) => {
 	return new Promise(async (resolve, reject) => {
 		exec(`img2webp -loop 1 ${images.map((v) => `"${v}"`).join(' ')} -o "${pathResults}.webp"`, (er) => {
 			if (er) {
-				ERRLOG(`⚠️ ${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`);
+				ERRLOG(`⚠️ ${color('Failed to Convert Media to Sticker', '#FF5555')} for ${color(sender, '#ff71ce')}`);
 				reject(er);
 			}
 
 			exec(`webpmux -set exif "${pathExif}" "${pathResults}.webp" -o "${pathResults}-done.webp"`, (err) => {
 				if (err) {
-					ERRLOG(`⚠️ ${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`);
+					ERRLOG(`⚠️ ${color('Failed to Convert Media to Sticker', '#FF5555')} for ${color(sender, '#ff71ce')}`);
 					reject(err);
 				}
 
@@ -53,17 +58,7 @@ const createSequence = async (images, sender) => {
 	});
 };
 
-const createCanvasTemplates = (fonts) => {
-	if (fonts === 'chevin') {
-		GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Chevin Bold.ttf'), 'chevin');
-	} else if (fonts === 'texgy') {
-		GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/texgyreadventor-bold.otf'), 'texgy');
-	} else if (fonts === 'sanspro') {
-		GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/SourceSansPro-Italic.ttf'), 'sanspro');
-	} else if (fonts === 'calm') {
-		GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/KeepCalm-Medium.ttf'), 'calm');
-	}
-
+const createCanvasTemplates = () => {
 	const canvas = createCanvas(500, 500);
 	const ctx = canvas.getContext('2d');
 
@@ -97,7 +92,7 @@ export const attp = (sender, texts, colored, fonts) =>
 		INFOLOG(`${color('Making Animated Image', 'cyan')} for ${color(sender, '#ff71ce')}`);
 
 		let i = 0;
-		let { ctx, canvas } = createCanvasTemplates(fonts);
+		let { ctx, canvas } = createCanvasTemplates();
 		const colors = loadColorsPalette(colored);
 		const bufferContainer = [];
 

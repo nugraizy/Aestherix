@@ -5,6 +5,8 @@ import path from 'path';
 const { createCanvas, GlobalFonts } = Canvas;
 const { CanvasTextWrapper } = Wrap;
 
+GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/coolvetica rg.otf'), 'coolvetica');
+
 const ARGBtoRGBA = (num) => {
 	num >>>= 0;
 
@@ -17,8 +19,6 @@ const ARGBtoRGBA = (num) => {
 };
 
 export const textStory = async (texts, color) => {
-	GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/coolvetica rg.otf'), 'coolvetica');
-
 	const canvas = createCanvas(540, 1170);
 	const ctx = canvas.getContext('2d');
 

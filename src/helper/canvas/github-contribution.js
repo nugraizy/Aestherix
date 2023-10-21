@@ -7,6 +7,8 @@ const copyright = '© 2022 Hidden Finder, Inc | Made by Nanda using Canvas Modul
 
 const { createCanvas, GlobalFonts, loadImage } = Canvas;
 
+GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/IBM.ttf'), 'ibm');
+
 /* eslint-disable-next-line */
 const [icons_1, signature_1, icons_2, signature_2] = await Promise.all([
 	await loadImage('./src/media/assets/1_icon_github.png'),
@@ -130,8 +132,6 @@ export class GitHubGraph {
 	 * @private
 	 */
 	async _initCanvas() {
-		GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/IBM.ttf'), 'ibm');
-
 		const dimension = await this._calculateDimension();
 
 		this.#_canvas = createCanvas(dimension[0], dimension[1]);

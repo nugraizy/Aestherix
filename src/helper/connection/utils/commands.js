@@ -22,7 +22,7 @@ export const loadCommands = async (OPTIONS) => {
 			if (!module?.default) {
 				ERRLOG(
 					color(`${ICON.ADD} ${normalize.split('/').slice(-2).join('/')}`, '#9f53ea'),
-					color('File Error! Waiting for changes...', 'red')
+					color('File Error! Waiting for changes...', '#FF5555')
 				);
 				configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
 					absolutePath: file,
@@ -58,7 +58,7 @@ export const loadCommands = async (OPTIONS) => {
 							return stackEntry.trim();
 						}
 					})
-					.join(`  ${color('> ', 'red') + color('at', '#ff71ce')} `)
+					.join(`${color('> ', '#FF5555') + color('at', '#ff71ce')} `)
 			);
 			configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
 				absolutePath: file,

@@ -28,7 +28,7 @@ export default {
 	cooldown: 7,
 	limit: 8,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, type, args, groupMetadata, isGroup }, client) {
+	async run({ from, query, prettyNumber, message, type, args, groupMetadata }, client) {
 		if (type === 'listResponseMessage' && args[1] === 'download') {
 			await client[botNum].send(
 				from,
@@ -85,13 +85,13 @@ export default {
 
 			if ('error' in audio) {
 				client[botNum].reply(audio.error, { from, quoted: message, groupMetadata });
-				ERRLOG(`⚠️ ${color('Failed to Download YouTube Audio', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(`⚠️ ${color('Failed to Download YouTube Audio', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
 			} else {
-				const { title, description, timestamp, uploaded, views, author, urlChannel, mp3, thumbnail: image, url } = audio;
+				const { title, description, timestamp, uploaded, views, author, urlChannel, thumbnail: image, url, link } = audio;
 
-				if (!mp3) {
+				if (!link) {
 					client[botNum].reply(`Error while downloading YouTube Video\n\n${Query}`, { from, quoted: message, groupMetadata });
-					ERRLOG(`⚠️ ${color('Failed to Download YouTube Video', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
+					ERRLOG(`⚠️ ${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
 
 					continue;
 				}
@@ -131,33 +131,23 @@ export default {
 					{ groupMetadata }
 				);
 
-				if (isGroup) {
-					await client[botNum].send(
-						from,
-						{
-							document: { url: mp3[0].dlUrl },
-							fileName: `${title}.mp3`,
-							mimetype: 'audio/mp3',
-							caption: ''
-						},
-						{ groupMetadata, quoted: message }
-					);
-					continue;
-				}
+				await client[botNum].send(
+					from,
+					{
+						document: { url: link },
+						fileName: `${title}.mp3`,
+						mimetype: 'audio/mp3',
+						caption: ''
+					},
+					{ groupMetadata, quoted: message }
+				);
 
 				await client[botNum].send(
 					from,
 					{
-						title: 'YouTube MP3'.formatHeaders(),
-						footer: 'Made by Void Bot. Powered by Hidden Finder',
-						text: '\t',
-						buttonText: 'Open List',
-						sections: mp3.map((v, i) => ({
-							rows: [{ title: `${i + 1}. 📼 ${v.quality} 💾 ${v.filesizeF}`, rowId: `.ytmp3 download ${v.dlUrl} ${title}` }],
-							title: '\t'
-						}))
+						audio: { url: link }
 					},
-					{ groupMetadata }
+					{ groupMetadata, quoted: message }
 				);
 			}
 		}

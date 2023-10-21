@@ -10,8 +10,13 @@ import { spotifier } from '../../utils/spotifier/index.js';
 
 const { createCanvas, GlobalFonts, loadImage } = Canvas;
 
+GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Antebas-Regular.otf'), 'antre');
+GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/texgyreadventor-bold.otf'), 'texgy');
+GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/AtypText-Semibold.ttf'), 'atyp');
+GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/SourceSansPro-ExtraLight.ttf'), 'sans-thin');
+GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Galyon-Book.otf'), 'galyon');
+
 const assets = {
-	fonts: null,
 	model: null
 };
 
@@ -376,14 +381,6 @@ export class SpotifyCover {
 	}
 
 	initCanvas() {
-		if (!assets.fonts) {
-			GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Antebas-Regular.otf'), 'antre');
-			GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/texgyreadventor-bold.otf'), 'texgy');
-			GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/AtypText-Semibold.ttf'), 'atyp');
-			GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/SourceSansPro-ExtraLight.ttf'), 'sans-thin');
-			GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Galyon-Book.otf'), 'galyon');
-		}
-
 		this.canvas = createCanvas(1080, 2340);
 		this.ctx = this.canvas.getContext('2d');
 	}

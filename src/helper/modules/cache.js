@@ -281,4 +281,3 @@ export class Cache {
 		return { key, value: this.cache[this.keys()[index]] };
 	}
 }
-//feat: using LRU Cache for optimization

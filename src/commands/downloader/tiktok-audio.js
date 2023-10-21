@@ -53,7 +53,7 @@ export default {
 			if ('error' in audio) {
 				await client[botNum].reply(audio.error, { from, quoted: message, groupMetadata });
 
-				ERRLOG(`⚠️ ${color('Failed to Download TikTok Audio', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(`⚠️ ${color('Failed to Download TikTok Audio', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
 
 				continue;
 			}

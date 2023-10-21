@@ -1,4 +1,4 @@
-import { searchHashtag } from '../../utils/index.js';
+import { instagram } from '../../utils/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -17,39 +17,34 @@ export default {
 			return client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
-		const result = await searchHashtag(query);
+		const result = await instagram.search.hashtag(query);
 
-		if (result.error) {
-			return await client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
+		for (const tag in result) {
+			if (result[tag].error) {
+				await client[botNum].reply(result[tag].error, { from, quoted: message, groupMetadata });
+				continue;
+			}
+
+			let capt = 'Instagram Hashtag Search'.formatHeaders();
+
+			for (const post of result[tag].posts) {
+				capt += `\n\nUsername : ${post.username}\n`;
+				capt += `Caption : ${post.caption}\n`;
+				capt += `Likes : ${post.likeCount}\n`;
+				capt += `Comments : ${post.commentCount}\n`;
+				capt += `Link : ${post.link}\n`;
+				capt += `Link : ${post.source}\n\n`;
+			}
+
+			await client[botNum].send(
+				from,
+				{
+					caption: 'Instagram Hashtag Search'.formatHeaders() + `\n\n${capt.trim()}`,
+					image: { url: result[tag].thumbnail },
+					footer: `Tot. Post : ${result[tag].totalPostFormatted}`
+				},
+				{ groupMetadata, quoted: message }
+			);
 		}
-
-		let caption = '';
-
-		caption += `Tot. Post : ${result.totalPostFormatted}\n`;
-		await client[botNum].send(
-			from,
-			{
-				caption: 'Instagram Hashtag Search'.formatHeaders(),
-				image: { url: result.thumbnail },
-				templateButtons: [{ urlButton: { displayText: 'Image Source', url: result.thumbnail } }],
-				footer: caption
-			},
-			{ groupMetadata, quoted: message }
-		);
-
-		await client[botNum].send(
-			from,
-			{
-				title: 'Instagram Hashtag',
-				footer: 'Made by Void Bot. Powered by Hidden Finder',
-				text: '\t',
-				buttonText: 'Open List',
-				sections: result.posts.map((v, i) => ({
-					rows: [{ title: `${i + 1}. ${v.caption.substring(0, 20)}`, rowId: `.igpost https://instagram.com/p/${v.code}` }],
-					title: `@${v.username} | ${v.fullName}`
-				}))
-			},
-			{ groupMetadata }
-		);
 	}
 };

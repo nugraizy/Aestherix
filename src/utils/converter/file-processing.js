@@ -141,7 +141,7 @@ export const toOpus = (ext, opts = {}) =>
 
 		exec(`ffmpeg ${container.join(' ')}`, async (err) => {
 			if (err) {
-				ERRLOG(`⚠️ ${color('Failed to Convert Audio OPUS Codec', 'red')}`);
+				ERRLOG(`⚠️ ${color('Failed to Convert Audio OPUS Codec', '#FF5555')}`);
 				await fs.unlink(tmp);
 				reject(err);
 			}
@@ -174,7 +174,7 @@ export const convertMediaToSticker = (filePath, sender, output, mimetype) =>
 		if (filePath.endsWith('webp') && (await fs.exists(filePath))) {
 			exec(`webpmux -set exif "${pathExif}" "${pathSticker}" -o "${pathSticker}-done.webp"`, async (err, stdout, stderr) => {
 				if (err) {
-					ERRLOG(`⚠️ ${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`);
+					ERRLOG(`⚠️ ${color('Failed to Convert Media to Sticker', '#FF5555')} for ${color(sender, '#ff71ce')}`);
 					await fs.unlink(pathSticker);
 					reject(stderr);
 				}
@@ -191,14 +191,14 @@ export const convertMediaToSticker = (filePath, sender, output, mimetype) =>
 				`ffmpeg -i "${pathSticker}" -vcodec libwebp -vf "scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1,fps=fps=30" -lossless 0 -an -vsync 0 -s 512:512 "${pathSticker}.webp"`,
 				async (err) => {
 					if (err) {
-						ERRLOG(`⚠️ ${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`);
+						ERRLOG(`⚠️ ${color('Failed to Convert Media to Sticker', '#FF5555')} for ${color(sender, '#ff71ce')}`);
 						await fs.unlink(pathSticker);
 						reject(err);
 					}
 
 					exec(`webpmux -set exif "${pathExif}" "${pathSticker}.webp" -o "${pathSticker}-done.webp"`, async (err) => {
 						if (err) {
-							ERRLOG(`⚠️ ${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`);
+							ERRLOG(`⚠️ ${color('Failed to Convert Media to Sticker', '#FF5555')} for ${color(sender, '#ff71ce')}`);
 							await fs.unlink(`${pathSticker}-done.webp`);
 							await fs.unlink(pathSticker);
 							await fs.unlink(`${pathSticker}.webp`);
@@ -225,7 +225,7 @@ export const convertMediaToSticker = (filePath, sender, output, mimetype) =>
 				} "${mimetype && VIDEO_MIMETYPE.includes(mimetype) ? `${pathSticker}.webp` : pathSticker}"`,
 				async (er) => {
 					if (er) {
-						ERRLOG(`⚠️ ${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`);
+						ERRLOG(`⚠️ ${color('Failed to Convert Media to Sticker', '#FF5555')} for ${color(sender, '#ff71ce')}`);
 						await fs.unlink(pathSticker);
 						reject(er);
 					}
@@ -236,7 +236,7 @@ export const convertMediaToSticker = (filePath, sender, output, mimetype) =>
 						}" -o "${pathSticker}-done.webp"`,
 						async (err) => {
 							if (err) {
-								ERRLOG(`⚠️ ${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, '#ff71ce')}`);
+								ERRLOG(`⚠️ ${color('Failed to Convert Media to Sticker', '#FF5555')} for ${color(sender, '#ff71ce')}`);
 								await fs.unlink(pathSticker);
 								reject(err);
 							}
@@ -311,7 +311,7 @@ export const mp42mp3 = (input, output, sender) =>
 	new Promise(async (resolve, reject) => {
 		exec(`ffmpeg -i "${input}" "${output.slice(-3) != 'mp3' ? `${output}.mp3` : output}"`, (err) => {
 			if (err) {
-				ERRLOG(`⚠️ ${color('Failed to Convert Video to Audio', 'red')} for ${color(sender, '#ff71ce')}`);
+				ERRLOG(`⚠️ ${color('Failed to Convert Video to Audio', '#FF5555')} for ${color(sender, '#ff71ce')}`);
 				reject(err);
 				return;
 			}
@@ -337,7 +337,7 @@ export const gif2mp4 = (input, output, opts = {}) =>
 			}.000 "${output}"`,
 			(err) => {
 				if (err) {
-					ERRLOG(`⚠️ ${color('Failed to Convert Gif to Video', 'red')}`);
+					ERRLOG(`⚠️ ${color('Failed to Convert Gif to Video', '#FF5555')}`);
 					reject(err);
 					return;
 				}
@@ -380,7 +380,7 @@ export const soundRemover = (input, sender) =>
 			resolve({ result: { vocal, instrumental } });
 		} catch (err) {
 			log(err);
-			ERRLOG(`⚠️ ${color('Failed to Remove Sound', 'red')} for ${color(sender, '#ff71ce')}`);
+			ERRLOG(`⚠️ ${color('Failed to Remove Sound', '#FF5555')} for ${color(sender, '#ff71ce')}`);
 			reject(err);
 		}
 	});
@@ -427,7 +427,7 @@ export const pet = (input, sender, opts = {}) =>
 			await fs.unlink(`${input}.gif`);
 			await fs.unlink(output);
 		} catch (err) {
-			ERRLOG(`⚠️ ${color('Failed to Pet Image', 'red')} for ${color(sender, '#ff71ce')}`);
+			ERRLOG(`⚠️ ${color('Failed to Pet Image', '#FF5555')} for ${color(sender, '#ff71ce')}`);
 			reject(err);
 		}
 	});
@@ -458,7 +458,7 @@ export const mergeVideoWithAudio = (video, audio, output, sender, referer) =>
 				() => {
 					exec(command, async (err) => {
 						if (err) {
-							ERRLOG(`⚠️ ${color('Failed to Merge Audio to Video', 'red')}`);
+							ERRLOG(`⚠️ ${color('Failed to Merge Audio to Video', '#FF5555')}`);
 							reject(err);
 							return;
 						}
@@ -475,7 +475,7 @@ export const mergeVideoWithAudio = (video, audio, output, sender, referer) =>
 				}
 			);
 		} catch (err) {
-			ERRLOG(`⚠️ ${color('Failed to Merge Audio to Video', 'red')} for ${color(sender, '#ff71ce')}`);
+			ERRLOG(`⚠️ ${color('Failed to Merge Audio to Video', '#FF5555')} for ${color(sender, '#ff71ce')}`);
 			reject(err);
 		}
 	});
@@ -521,7 +521,7 @@ export const removeBg = (input, sender) =>
 			await fs.unlink(input);
 
 			ERRLOG(
-				`⚠️ ${color('Failed to Remove image background', 'red')} for ${color(
+				`⚠️ ${color('Failed to Remove image background', '#FF5555')} for ${color(
 					sender,
 					'#ff71ce'
 				)}\nRemove Background Token Used : ${apiKey}`
@@ -622,7 +622,7 @@ export const waifu2x = (input, sender) =>
 
 			resolve(new Buffer.from(data, 'base64'));
 		} catch (err) {
-			ERRLOG(`⚠️ ${color('Failed to Enhance image', 'red')} for ${color(sender, '#ff71ce')}`);
+			ERRLOG(`⚠️ ${color('Failed to Enhance image', '#FF5555')} for ${color(sender, '#ff71ce')}`);
 
 			if (await fs.pathExists(input)) {
 				await fs.unlink(input);

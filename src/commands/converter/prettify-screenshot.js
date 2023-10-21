@@ -32,7 +32,7 @@ export default {
 
 		if ('error' in screenshot) {
 			client[botNum].reply(screenshot.error, { from, quoted: message, groupMetadata });
-			ERRLOG(`⚠️ ${color('Failed to Prettify an Image', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
+			ERRLOG(`⚠️ ${color('Failed to Prettify an Image', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
 			return;
 		}
 

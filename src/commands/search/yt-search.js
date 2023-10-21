@@ -1,7 +1,7 @@
 import sharp from 'sharp';
 
 import configuration from '../../helper/config/connect.js';
-import { ytsr } from '../../utils/youtube/index.js';
+import { searchYoutube } from '../../utils/youtube/index.js';
 import { fetchBUFFER, numberWithCommas } from '../../utils/modules/index.js';
 
 /**
@@ -21,7 +21,7 @@ export default {
 			return client[botNum].reply('Please specify a query.', { from, quoted: message, groupMetadata });
 		}
 
-		let result = await ytsr(query);
+		let result = await searchYoutube(query);
 
 		result = result.filter((v) => v.type === 'video');
 		const { url, title, description, image, timestamp, views, author } = result[0];

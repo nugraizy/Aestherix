@@ -100,7 +100,7 @@ export const trigger = async (image, sender, opt) =>
 				await unlink(`${isURL(image) ? `./temporary_files/${sender}` : image}.webp`);
 			}
 		} catch (err) {
-			ERRLOG(`⚠️ ${color('Failed to Trigger an image', 'red')} for ${color(sender, '#ff71ce')}`);
+			ERRLOG(`⚠️ ${color('Failed to Trigger an image', '#FF5555')} for ${color(sender, '#ff71ce')}`);
 
 			reject(err);
 		}

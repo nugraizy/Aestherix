@@ -390,7 +390,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 								return stackEntry.trim();
 							}
 						})
-						.join(`  ${color('> ', 'red') + color('at', '#ff71ce')} `)
+						.join(`${color('> ', '#FF5555') + color('at', '#ff71ce')}`)
 				);
 			}
 		}

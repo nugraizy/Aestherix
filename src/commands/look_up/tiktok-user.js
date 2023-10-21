@@ -77,7 +77,7 @@ export default {
 			if ('error' in users) {
 				client[botNum].reply(`Error while searching TikTok user\n\n${users.error}`, { from, quoted: message, groupMetadata });
 
-				ERRLOG(`⚠️ ${color('Failed to Searching TikTok User', 'red')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(`⚠️ ${color('Failed to Searching TikTok User', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
 
 				continue;
 			} else {
