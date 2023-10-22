@@ -18,7 +18,10 @@ class Spotifier {
 			throw new Error('Please add CLIENT_ID and CLIENT_SECRET to your .env files');
 		}
 
-		this.tokenize = () => {
+		/**
+		 * @private
+		 */
+		this._tokenize = () => {
 			return {
 				url: this.#_apiAuth,
 				method: 'POST',
@@ -29,14 +32,17 @@ class Spotifier {
 			};
 		};
 
-		this.req = async (path, method, opts) => {
+		/**
+		 * @private
+		 */
+		this._req = async (path, method, opts) => {
 			try {
 				if (this.#bearerToken === null) {
-					await this.refreshToken();
+					await this._refreshToken();
 				}
 
 				if (this.#bearerTokenExpiredAt < Date.now()) {
-					await this.refreshToken();
+					await this._refreshToken();
 				}
 
 				const { data } = await axios({
@@ -55,7 +61,10 @@ class Spotifier {
 			}
 		};
 
-		this.updateCredential = (clientId, clientSecret) => {
+		/**
+		 * @private
+		 */
+		this._updateCredential = (clientId, clientSecret) => {
 			if (!clientId) {
 				return { status: false, message: 'Parameter clientId must provided' };
 			}
@@ -69,9 +78,12 @@ class Spotifier {
 			return { status: true, message: 'Credential Updated' };
 		};
 
-		this.refreshToken = async () => {
+		/**
+		 * @private
+		 */
+		this._refreshToken = async () => {
 			try {
-				const { data } = await axios(this.tokenize());
+				const { data } = await axios(this._tokenize());
 
 				this.#bearerToken = data.access_token;
 				this.#bearerTokenExpiredAt = Date.now() + data.expires_in;
@@ -81,7 +93,10 @@ class Spotifier {
 			}
 		};
 
-		this.getAccessTokenFromRefreshToken = async () => {
+		/**
+		 * @private
+		 */
+		this._getAccessTokenFromRefreshToken = async () => {
 			if (this.#accessTokenExpiredAt && Date.now() < this.#accessTokenExpiredAt) {
 				return;
 			}
@@ -111,7 +126,7 @@ class Spotifier {
 					return { status: false, message: 'Parameter playlistsID must provided' };
 				}
 
-				return { status: true, ...(await this.req(`/playlists/${playlistsID}`, 'GET')), ...this };
+				return { status: true, ...(await this._req(`/playlists/${playlistsID}`, 'GET')), ...this };
 			} catch (err) {
 				return { status: false, message: err };
 			}
@@ -123,7 +138,7 @@ class Spotifier {
 					return { status: false, message: 'Parameter albumID must provided' };
 				}
 
-				return { status: true, ...(await this.req(`/albums?ids=${albumID}`, 'GET')) };
+				return { status: true, ...(await this._req(`/albums?ids=${albumID}`, 'GET')) };
 			} catch (err) {
 				return { status: false, message: err };
 			}
@@ -135,7 +150,7 @@ class Spotifier {
 					return { status: false, message: 'Parameter albumID must provided' };
 				}
 
-				return { status: true, ...(await this.req(`/albums/${albumID}/tracks`, 'GET')) };
+				return { status: true, ...(await this._req(`/albums/${albumID}/tracks`, 'GET')) };
 			} catch (err) {
 				return { status: false, message: err };
 			}
@@ -147,7 +162,7 @@ class Spotifier {
 					return { status: false, message: 'Parameter artistsID must provided' };
 				}
 
-				return { status: true, ...(await this.req(`/artists?ids=${artistsID}`, 'GET')) };
+				return { status: true, ...(await this._req(`/artists?ids=${artistsID}`, 'GET')) };
 			} catch (err) {
 				return { status: false, message: err };
 			}
@@ -159,7 +174,7 @@ class Spotifier {
 					return { status: false, message: 'Parameter artistsID must provided' };
 				}
 
-				return { status: true, ...(await this.req(`/artists?ids=${artistsID}/albums`, 'GET')) };
+				return { status: true, ...(await this._req(`/artists?ids=${artistsID}/albums`, 'GET')) };
 			} catch (err) {
 				return { status: false, message: err };
 			}
@@ -205,7 +220,7 @@ class Spotifier {
 					return { status: false, message: 'Parameter tracksID must provided' };
 				}
 
-				return { status: true, ...(await this.req(`/tracks?ids=${tracksID}`, 'GET')) };
+				return { status: true, ...(await this._req(`/tracks?ids=${tracksID}`, 'GET')) };
 			} catch (err) {
 				return { status: false, message: err };
 			}
@@ -217,7 +232,7 @@ class Spotifier {
 					return { status: false, message: 'Parameter tracksID must provided' };
 				}
 
-				return { status: true, ...(await this.req(`/audio-analysis/${tracksID}`, 'GET')) };
+				return { status: true, ...(await this._req(`/audio-analysis/${tracksID}`, 'GET')) };
 			} catch (err) {
 				return { status: false, message: err };
 			}
@@ -229,7 +244,7 @@ class Spotifier {
 					return { status: false, message: 'Parameter tracksID must provided' };
 				}
 
-				return { status: true, ...(await this.req(`/audio-features?ids=${tracksID}`, 'GET')) };
+				return { status: true, ...(await this._req(`/audio-features?ids=${tracksID}`, 'GET')) };
 			} catch (err) {
 				return { status: false, message: err };
 			}
@@ -237,7 +252,7 @@ class Spotifier {
 
 		this.getNewReleases = async () => {
 			try {
-				return { status: true, ...(await this.req('/browse/new-releases', 'GET')) };
+				return { status: true, ...(await this._req('/browse/new-releases', 'GET')) };
 			} catch (err) {
 				return { status: false, message: err };
 			}
@@ -246,7 +261,7 @@ class Spotifier {
 		this.searchTracks = async (query) => {
 			try {
 				query = encodeURI(query);
-				const data = await this.req(`/search?q=${query}&type=track&include_external=audio`, 'GET');
+				const data = await this._req(`/search?q=${query}&type=track&include_external=audio`, 'GET');
 
 				if (data.tracks.items.length === 0) {
 					return { status: false, message: 'Not Found' };
@@ -261,7 +276,7 @@ class Spotifier {
 		this.searchAlbum = async (query) => {
 			try {
 				query = encodeURI(query);
-				const data = await this.req(`/search?q=album:${query}&type=album&include_external=audio`, 'GET');
+				const data = await this._req(`/search?q=album:${query}&type=album&include_external=audio`, 'GET');
 
 				if (data.albums.items.length === 0) {
 					return { status: false, message: 'Not Found' };
@@ -276,7 +291,7 @@ class Spotifier {
 		this.searchArtist = async (query) => {
 			try {
 				query = encodeURI(query);
-				const data = await this.req(`/search?q=artist:${query}&type=artist&include_external=audio`, 'GET');
+				const data = await this._req(`/search?q=artist:${query}&type=artist&include_external=audio`, 'GET');
 
 				if (data.artists.items.length === 0) {
 					return { status: false, message: 'Not Found' };
@@ -290,7 +305,7 @@ class Spotifier {
 
 		this.getCurrentlyPlaying = async () => {
 			try {
-				await this.getAccessTokenFromRefreshToken();
+				await this._getAccessTokenFromRefreshToken();
 				const { data } = await axios({
 					url: `${this.#_api}/me/player/currently-playing`,
 					method: 'GET',
@@ -307,7 +322,7 @@ class Spotifier {
 
 		this.getDevices = async () => {
 			try {
-				await this.getAccessTokenFromRefreshToken();
+				await this._getAccessTokenFromRefreshToken();
 				const { data } = await axios({
 					url: `${this.#_api}/me/player/devices`,
 					method: 'GET',
@@ -324,7 +339,7 @@ class Spotifier {
 
 		this.getPlaybackState = async () => {
 			try {
-				await this.getAccessTokenFromRefreshToken();
+				await this._getAccessTokenFromRefreshToken();
 				const { data } = await axios({
 					url: `${this.#_api}/me/player`,
 					method: 'GET',
@@ -341,7 +356,7 @@ class Spotifier {
 
 		this.updateNowPlayingStates = async () => {
 			try {
-				await this.getAccessTokenFromRefreshToken();
+				await this._getAccessTokenFromRefreshToken();
 				const { data } = await axios({
 					url: `${this.#_api}/me/player/currently-playing`,
 					method: 'GET',
@@ -391,7 +406,7 @@ class Spotifier {
 
 		this.skipPlayback = async () => {
 			try {
-				await this.getAccessTokenFromRefreshToken();
+				await this._getAccessTokenFromRefreshToken();
 				const { data } = await axios({
 					url: `${this.#_api}/me/player/next`,
 					method: 'POST',
@@ -411,7 +426,7 @@ class Spotifier {
 
 		this.pausePlayback = async () => {
 			try {
-				await this.getAccessTokenFromRefreshToken();
+				await this._getAccessTokenFromRefreshToken();
 				const { data } = await axios({
 					url: `${this.#_api}/me/player/pause`,
 					method: 'PUT',
@@ -431,7 +446,7 @@ class Spotifier {
 
 		this.resumePlayback = async () => {
 			try {
-				await this.getAccessTokenFromRefreshToken();
+				await this._getAccessTokenFromRefreshToken();
 				const { data } = await axios({
 					url: `${this.#_api}/me/player/play`,
 					method: 'PUT',
@@ -451,7 +466,7 @@ class Spotifier {
 
 		this.startNewPlayback = async (trackId) => {
 			try {
-				await this.getAccessTokenFromRefreshToken();
+				await this._getAccessTokenFromRefreshToken();
 				const { data } = await axios({
 					url: `${this.#_api}/me/player/play`,
 					method: 'PUT',

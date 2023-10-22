@@ -79,8 +79,8 @@ export default {
 					);
 				}
 			}
-
-			INFOLOG(`${color('Downloaded Instagram highlights', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 		}
+
+		INFOLOG(`${color('Downloaded Instagram highlights', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 	}
 };

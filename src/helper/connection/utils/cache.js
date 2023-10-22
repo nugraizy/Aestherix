@@ -92,7 +92,7 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 
 		try {
 			module = await import(file);
-			INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('New File Added!', 'yellow'));
+			INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('New File Added!'));
 			INFOLOG(color('checking if its valid plugins...', '#ffb86c'));
 		} catch (error) {
 			return await validatePlugins(filename);
@@ -121,7 +121,7 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 	} else {
 		try {
 			await import(file);
-			INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('New File Added!', 'yellow'));
+			INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('New File Added!', '#ff71ce'));
 		} catch (error) {
 			await validatePlugins(filename);
 		}
@@ -129,7 +129,10 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 };
 
 const change = async (filename, stats, icon = ICON.CHANGED) => {
-	INFOLOG(color(`${icon} ${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('File has been changed!', 'yellow'));
+	INFOLOG(
+		color(`${icon} ${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
+		color('File has been changed!', '#ff71ce')
+	);
 
 	const _command = nocache(normalizeImportPath(filename), true);
 
@@ -150,8 +153,8 @@ const change = async (filename, stats, icon = ICON.CHANGED) => {
 	const _commandObj = cmds[index][1];
 
 	INFOLOG(
-		color(`${icon} ${(_commandObj.path + _command.param)?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
-		color('File Reloaded!', 'yellow')
+		color(`${icon} ${_commandObj.path?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
+		color('File Reloaded!', '#05ffa1')
 	);
 
 	const _absolutePath = _commandObj.absolutePath;
@@ -201,10 +204,10 @@ const unlink = (filename, icon = ICON.DELETED) => {
 
 		INFOLOG(
 			color(`${ICON.RENAMED}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
-			color('File Renamed!', 'yellow'),
+			color('File Renamed!', '#ff71ce'),
 			color('to', 'cyan'),
 			color(renamedFile.split('/')?.slice(-2).join('/'), '#9f53ea'),
-			color('Waiting for changes...', 'yellow')
+			color('Waiting for changes...', '#ff71ce')
 		);
 
 		return;

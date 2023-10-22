@@ -137,7 +137,7 @@ interface PostElement {
 	url: string;
 }
 
-interface StoryUsers {
+interface StoryUsers extends Omit<DetailUsers, 'posts'> {
 	username: string;
 	fullName: string;
 	totalStories: number;

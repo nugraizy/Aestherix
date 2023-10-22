@@ -44,20 +44,20 @@ export default {
 			capt += `Follower : ${numberWithCommas(users[data].followers)}\n`;
 			capt += `Following : ${numberWithCommas(users[data].following)}\n`;
 			capt += users[data].biography === '' ? '' : `Biography : ${users[data].biography}\n`;
-			capt += `Tot. Highlight : ${numberWithCommas(users[data].highlightCount)}\n`;
-			capt += `Tot. Post : ${numberWithCommas(users[data].postsCount)}\n`;
 			capt += `Verified : ${users[data].isVerified ? 'Verified' : 'Not Verified'}\n`;
 			capt += `Private : ${users[data].isPrivate ? 'Private' : 'Public'}\n`;
 			capt += `Business : ${users[data].isBusinessAccount ? 'Yes' : 'No'}\n`;
 			capt += `New User : ${users[data].isRecentUser ? 'Yes' : 'No'}\n`;
 			capt += `Category : ${users[data].accountCategory ? users[data].accountCategory : 'No'}\n`;
 			capt += `Facebook Linked : ${users[data].linkedFacebookPage ? 'Yes' : 'No'}\n`;
+			capt += `Tot. Highlight : ${numberWithCommas(users[data].highlightCount)}\n`;
+			capt += `Tot. Post : ${numberWithCommas(users[data].postsCount)}\n\n`;
 
 			await client[botNum].send(
 				from,
 				{
 					image: { url: users[data].profilePicHD },
-					caption: 'Instagram User Lookup'.formatHeaders() + `\n\n${capt.trim()}`
+					caption: capt.trim()
 				},
 				{ groupMetadata, quoted: message }
 			);

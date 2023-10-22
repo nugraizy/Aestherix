@@ -1,4 +1,5 @@
 import parser from 'yargs-parser';
+import dayjs from 'dayjs';
 
 import { color, delay, ERRLOG, INFOLOG } from '../../utils/modules/index.js';
 import { instagram } from '../../utils/instagram/index.js';
@@ -43,7 +44,7 @@ export default {
 			capt += `Fullname : ${reels[data].fullName}\n`;
 			capt += `Privacy : ${reels[data].isPrivate ? 'Private' : 'Public'}\n`;
 			capt += `Verified : ${reels[data].isVerified ? 'Verified' : 'Not Verified'}\n`;
-			capt += `Published : ${reels[data].takenAt}\n`;
+			capt += `Published : ${dayjs(reels[data].takenAt * 1000).format('HH:mm:ss DD/MM/YYYY')}\n`;
 			capt += `Tot. Comment : ${reels[data].commentCount}\n`;
 			capt += `Tot. Like : ${reels[data].likeCount}\n`;
 
@@ -62,8 +63,9 @@ export default {
 				);
 			}
 
-			INFOLOG(`${color('Downloaded Instagram reel', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 			await delay(100);
 		}
+
+		INFOLOG(`${color('Downloaded Instagram reel', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 	}
 };

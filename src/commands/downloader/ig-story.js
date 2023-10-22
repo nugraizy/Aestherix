@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { color, delay, ERRLOG, INFOLOG } from '../../utils/modules/index.js';
+import { color, delay, ERRLOG, INFOLOG, numberWithCommas } from '../../utils/modules/index.js';
 import { instagram } from '../../utils/instagram/index.js';
 
 /**
@@ -39,11 +39,19 @@ export default {
 
 			let capt = 'Instagram Story'.formatHeaders();
 
-			capt += `\n\nUsername : ${stories[data].user.username}\n`;
-			capt += `Fullname : ${stories[data].user.fullName}\n`;
-			capt += `Follower : ${stories[data].user.followers}\n`;
-			capt += `Following : ${stories[data].user.following}\n`;
-			capt += stories[data].user.biography === '' ? '' : `Biography : ${stories[data].user.biography}\n`;
+			capt += `\n\nUsername : ${stories[data].username}\n`;
+			capt += `Fullname : ${stories[data].fullName}\n`;
+			capt += `Follower : ${numberWithCommas(stories[data].followers)}\n`;
+			capt += `Following : ${numberWithCommas(stories[data].following)}\n`;
+			capt += stories[data].biography === '' ? '' : `Biography : ${stories[data].biography}\n`;
+			capt += `Verified : ${stories[data].isVerified ? 'Verified' : 'Not Verified'}\n`;
+			capt += `Private : ${stories[data].isPrivate ? 'Private' : 'Public'}\n`;
+			capt += `Business : ${stories[data].isBusinessAccount ? 'Yes' : 'No'}\n`;
+			capt += `New User : ${stories[data].isRecentUser ? 'Yes' : 'No'}\n`;
+			capt += `Category : ${stories[data].accountCategory ? stories[data].accountCategory : 'No'}\n`;
+			capt += `Facebook Linked : ${stories[data].linkedFacebookPage ? 'Yes' : 'No'}\n`;
+			capt += `Tot. Highlight : ${numberWithCommas(stories[data].highlightCount)}\n`;
+			capt += `Tot. Post : ${numberWithCommas(stories[data].postsCount)}\n`;
 			capt += `Tot. Story : ${stories[data].stories.length}\n\n`;
 
 			await client[botNum].reply(capt.trim(), { from, quoted: message, groupMetadata });
@@ -52,11 +60,12 @@ export default {
 
 			for (const media of stories[data].stories) {
 				await client[botNum].send(from, media.isVideo ? { video: { url: media.url } } : { image: { url: media.url } }, {
-					groupMetadata,
-					quoted: message
+					groupMetadata
 				});
 				await delay(300);
 			}
 		}
+
+		INFOLOG(`${color('Downloaded Instagram Story', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 	}
 };

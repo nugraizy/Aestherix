@@ -147,9 +147,8 @@ class ResponseParser {
 	 * @private
 	 */
 	_parseStory({ user, data, isInputURL, STORY_ID }) {
-		const result = { username: user.username, fullName: user.fullName, totalStories: data.media_count, stories: [] };
-
-		console.log(result);
+		delete user.posts;
+		const result = { ...user, totalStories: data.media_count, stories: [] };
 
 		if (!result.totalStories && !user.isPrivate) {
 			return {
@@ -984,21 +983,29 @@ class InstagramApi extends InstagramMethods {
 	 * @returns {InstagramApi}
 	 */
 	static init() {
+		let err;
+
 		if (!fs.existsSync('./.instagram.env')) {
-			throw new Error(
-				'`instagram.env` file not found. Use the constructor to login and create file. ex: `new InstagramApi(username, password).login()`'
+			err = new Error(
+				'`.instagram.env` file not found. Use the constructor to login and create file. ex: `new InstagramApi(username, password).login()`'
 			);
+			console.log(err);
+			process.exit(0);
 		}
 
 		const loginInfo = parse(fs.readFileSync('./.instagram.env', 'utf-8'));
 		let { USERNAME, PASSWORD, UUID, DEVICE_ID, COOKIE } = loginInfo;
 
 		if (!USERNAME) {
-			throw new Error('`USERNAME` not found in `instagram.env`');
+			err = new Error('`USERNAME` not found in `.instagram.env`');
+			console.log(err);
+			process.exit(0);
 		}
 
 		if (!PASSWORD) {
-			throw new Error('`PASSWORD` not found in `instagram.env`');
+			err = new Error('`PASSWORD` not found in `.instagram.env`');
+			console.log(err);
+			process.exit(0);
 		}
 
 		if (!COOKIE) {
@@ -1025,3 +1032,5 @@ class InstagramApi extends InstagramMethods {
 }
 
 export const instagram = InstagramApi.init();
+
+//We are currently on School Projects. And our teacher says that us as a group will workin in different project. Mine are different than other, My idea are every student can access my API through Remini API Services.

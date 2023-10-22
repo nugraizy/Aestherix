@@ -8,6 +8,11 @@ import path from 'path';
 const { createCanvas, GlobalFonts, loadImage } = Canvas;
 const { CanvasTextWrapper } = Wrap;
 
+const [signature, logo] = await Promise.all([
+	loadImage('./src/media/assets/1_icon_github_signature.png'),
+	loadImage('./src/media/assets/1_icon_github.png')
+]);
+
 GlobalFonts.registerFromPath(path.join(__dirname, '/src/media/fonts/Nina-Bold.otf'), 'nina-bold');
 GlobalFonts.registerFromPath(path.join(__dirname, '/src/media/fonts/Abril-Text-Bold.otf'), 'abril-text-bold');
 GlobalFonts.registerFromPath(path.join(__dirname, '/src/media/fonts/IBM.ttf'), 'ibm');
@@ -247,11 +252,7 @@ export class Attachment {
 		const cross1Raw = await raw.rotate(~~(Math.random() * 180), { background: { r: 0, g: 0, b: 0, alpha: 0 } }).toBuffer();
 		const cross2Raw = await raw.rotate(~~(Math.random() * 180), { background: { r: 0, g: 0, b: 0, alpha: 0 } }).toBuffer();
 
-		const [signature, logo, [cross1, cross2]] = await Promise.all([
-			loadImage('./src/media/assets/1_icon_github_signature.png'),
-			loadImage('./src/media/assets/1_icon_github.png'),
-			[loadImage(cross1Raw), loadImage(cross2Raw)]
-		]);
+		const [cross1, cross2] = await Promise.all([loadImage(cross1Raw), loadImage(cross2Raw)]);
 
 		this.ctx.shadowOffsetX = 0;
 		this.ctx.shadowOffsetY = 0;
@@ -317,6 +318,6 @@ export class Attachment {
 
 	toBuffer() {
 		this.checkInitialization();
-		return this.canvas.toBuffer();
+		return this.canvas.toBuffer('image/png');
 	}
 }

@@ -58,7 +58,7 @@ export const loadCommands = async (OPTIONS) => {
 							return stackEntry.trim();
 						}
 					})
-					.join(`${color('> ', '#FF5555') + color('at', '#ff71ce')} `)
+					.join(`${color('> ', '#FF5555') + color('at ', '#ff71ce')} `)
 			);
 			configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
 				absolutePath: file,

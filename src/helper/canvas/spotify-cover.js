@@ -1,10 +1,10 @@
-import axios from 'axios';
 import Canvas from '@napi-rs/canvas';
 import chroma from 'chroma-js';
 import fs from 'fs-extra';
 import sharp from 'sharp';
 import * as color from 'colorthief';
 import path from 'path';
+import { fetch } from 'undici';
 
 import { spotifier } from '../../utils/spotifier/index.js';
 
@@ -398,11 +398,8 @@ export class SpotifyCover {
 			throw new Error(err);
 		}
 
-		const buffer = (
-			await axios.get(data.data.items[0].album.images[0].url, {
-				responseType: 'arraybuffer'
-			})
-		).data;
+		const req = await fetch(data.data.items[0].album.images[0].url);
+		const buffer = Buffer.from(await req.arrayBuffer());
 
 		this._buffer = buffer;
 		this._title = data.data.items[0].name;

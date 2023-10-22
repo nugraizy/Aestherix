@@ -479,18 +479,18 @@ export const color = (text, color) => {
 
 const TIME_FORMAT = 'HH:mm:ss DD/MM';
 const ICON = color('✦', '#ff71ce');
-const SEPERATOR_1 = color(':', 'cyan');
-const SEPERATOR_2 = color('/', 'cyan');
+const SEPERATOR_1 = color(':', '#6272A4');
+const SEPERATOR_2 = color('/', '#6272A4');
 const SEPERATOR_3 = chalk.italic(color('❯❯', '#FF5555'));
 const bracketsify = (text) => color('【', '#F8F8F2') + text + color('】', '#F8F8F2');
 const boldify = (string) => chalk.bold(string);
 
-const coloring = (text) => {
+const coloring = (text, err) => {
 	const [time, date] = text.split(' ');
 
 	const [hour, minute, second] = time.split(':');
 	const [day, month] = date.split('/');
-	const [HH, mm, ss, DD, MM] = [hour, minute, second, day, month].map((x) => color(x, '#6272A4'));
+	const [HH, mm, ss, DD, MM] = [hour, minute, second, day, month].map((x) => color(x, err ? '#FF5555' : '#ff71ce'));
 
 	return `${HH}${SEPERATOR_1}${mm}${SEPERATOR_1}${ss} ${DD}${SEPERATOR_2}${MM}`;
 };
@@ -511,12 +511,17 @@ export const ERRLOG = (...info) => {
 	if (!isLOGS) {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
-		log(color('✦', '#FF5555') + boldify(bracketsify(coloring(time))) + boldify(SEPERATOR_3), ...info);
+		log(color('✦', '#FF5555') + boldify(bracketsify(coloring(time, true))) + boldify(SEPERATOR_3), ...info);
 	}
 };
 
 export const isURL = (input) =>
 	/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/gi.test(input);
+
+export const isYoutubeURL = (input) =>
+	/(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:-nocookie|)\.com\/(?:shorts\/)?(?:watch\?.*(?:|&)v=|embed\/|v\/)|youtu\.be\/)?\/.+/.test(
+		input
+	);
 
 export const parseCode = (input) => {
 	const parse = input.match(/([-_0-9a-zA-Z]{11})/);

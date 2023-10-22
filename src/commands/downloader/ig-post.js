@@ -74,8 +74,8 @@ export default {
 					await delay(300);
 				}
 			}
-
-			INFOLOG(`${color('Downloaded Instagram Post', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 		}
+
+		INFOLOG(`${color('Downloaded Instagram Post', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 	}
 };

@@ -68,17 +68,23 @@ const yt = (url, type) =>
 		}
 	});
 
-export const searchYoutube = (query, id) =>
+export const searchYoutube = (query, id, all) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			const res = id
 				? await yts({
 						videoId: id
 				  }) // eslint-disable-line
+				: all
+				? await yts({ search: query })
 				: (await yts(query)).videos?.[0];
 
 			if (!res) {
 				reject(new Error('Result of the query is not found.'));
+			}
+
+			if (all) {
+				return resolve(res.all);
 			}
 
 			let {

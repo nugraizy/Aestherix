@@ -1,8 +1,19 @@
-import sharp from 'sharp';
-
 import configuration from '../../helper/config/connect.js';
 import { searchYoutube } from '../../utils/youtube/index.js';
-import { fetchBUFFER, numberWithCommas } from '../../utils/modules/index.js';
+import { numberWithCommas } from '../../utils/modules/index.js';
+
+const boxen = (text) => {
+	const texts = text.split('\n');
+	let box = `╭───╌┄ ${texts[0]} ┄┄╌────\n`;
+
+	box += texts
+		.slice(1)
+		.map((v) => `│ ${v}`)
+		.join('\n');
+	box += '\n╰────┄┄';
+
+	return box;
+};
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -21,42 +32,43 @@ export default {
 			return client[botNum].reply('Please specify a query.', { from, quoted: message, groupMetadata });
 		}
 
-		let result = await searchYoutube(query);
+		let result = await searchYoutube(query, null, true);
 
 		result = result.filter((v) => v.type === 'video');
-		const { url, title, description, image, timestamp, views, author } = result[0];
 
-		result = result.slice(1);
-		let capt = 'YouTube Search'.formatHeaders();
+		let capt = '';
 
-		capt += `\n\nTitle : ${title}\n`;
-		capt += `Views : ${numberWithCommas(views)}\n`;
-		capt += `Author : ${author.name}\n`;
-		capt += `Author Channel : ${author.url}\n`;
-		capt += `Duration : ${timestamp ?? 'No Data'}\n`;
-		capt += `Description : ${description ?? 'No Data'}`;
+		let i = 0;
 
-		let jpegThumbnail = sharp(new Buffer.from(await fetchBUFFER(image), 'base64'));
+		for (const { videoId, title, timestamp, views, author } of result) {
+			const caption = boxen(`NO. ${i + 1}
+✦ Video ID : ${videoId}
+📕 Title : ${title}
+👀 Views : ${numberWithCommas(views)}
+📡 Author Channel : ${author.name}
+⏳ Duration : ${timestamp ?? 'No Data'}`);
 
-		jpegThumbnail = await jpegThumbnail.resize(300, 300).toBuffer();
+			capt += `${caption}\n\n`;
+
+			i++;
+		}
 
 		await client[botNum].send(
 			from,
 			{
-				location: {
-					degreesLatitude: 0,
-					degreesLongitude: 0,
-					jpegThumbnail
+				image: {
+					url: result[0].image
 				},
-				caption: capt,
-				footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
-				templateButtons: [
-					{ urlButton: { displayText: 'Stream Here', url } },
-					{ quickReplyButton: { displayText: 'Download MP3', id: `.yta ${url}` } },
-					{ quickReplyButton: { displayText: 'Download MP4', id: `.ytv ${url}` } },
-					{ quickReplyButton: { displayText: 'Download MP3 & MP4', id: `.yta ${url}|.ytv ${url}` } }
-				],
-				headerType: 1
+				caption: capt.trim()
+				// caption: capt,
+				// footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
+				// templateButtons: [
+				// 	{ urlButton: { displayText: 'Stream Here', url } },
+				// 	{ quickReplyButton: { displayText: 'Download MP3', id: `.yta ${url}` } },
+				// 	{ quickReplyButton: { displayText: 'Download MP4', id: `.ytv ${url}` } },
+				// 	{ quickReplyButton: { displayText: 'Download MP3 & MP4', id: `.yta ${url}|.ytv ${url}` } }
+				// ],
+				// headerType: 1
 			},
 			{ groupMetadata }
 		);
