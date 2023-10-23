@@ -9,7 +9,7 @@ import configuration from './helper/config/connect.js';
 import { color, ERRLOG } from './utils/modules/index.js';
 import { runLimitScheduler } from './helper/groups/settings/limit.js';
 import { clearDBConnection, resetSession } from './helper/connection/socket/reset-session.js';
-import { parseCli } from './helper/connection/utils/check-flag.js';
+import { cli as clis } from './helper/connection/utils/check-flag.js';
 import { saveContacts } from './helper/connection/utils/cache.js';
 import { connectSocket } from './helper/connection/socket/socket.js';
 import {
@@ -35,7 +35,7 @@ dayjs.extend(localePlugins);
 dayjs.extend(customParseFormat);
 dayjs.tz.setDefault('Asia/Jakarta');
 
-configuration.cli = parseCli();
+configuration.cli = clis;
 configuration.OPTIONS = configuration.cli.flags;
 
 const { OPTIONS, cli } = configuration;

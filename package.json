@@ -9,6 +9,7 @@
     "pm2": "pm2 start ./index.js && pm2 logs",
     "pm2kill": "pm2 kill",
     "dev": "nodemon",
+    "start": "node . nanda10 -w -c -a -z -u -e",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

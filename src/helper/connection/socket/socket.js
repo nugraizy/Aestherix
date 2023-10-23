@@ -9,9 +9,9 @@ import { Cache } from '../../modules/cache.js';
 import { INFOLOG, color } from '../../../utils/modules/index.js';
 
 const { default: makeWASocket, makeInMemoryStore, DEFAULT_CONNECTION_CONFIG } = baileys;
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+const rl = () => readline.createInterface({ input: process.stdin, output: process.stdout });
 const logger = (OPTIONS) => P({ level: OPTIONS.trace ? 'trace' : OPTIONS.debugMode ? 'debug' : 'fatal' });
-const question = (text) => new Promise((resolve) => rl.question(text, resolve));
+const question = (text) => new Promise((resolve) => rl().question(text, resolve));
 
 let phoneNumber;
 

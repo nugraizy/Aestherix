@@ -1,5 +1,4 @@
 import { findBestMatch } from 'string-similarity';
-import chalk from 'chalk';
 
 import configuration from '../../helper/config/connect.js';
 import { runtime } from '../../index.js';
@@ -14,7 +13,7 @@ const log = console.log;
 let STATS_OFFLINE = true;
 const EVALY = ['/>', '$>', '=>', '!>'];
 const regEval = new RegExp(EVALY.join('|'), 'gi');
-const SEPERATOR = chalk.italic(color('❯❯', '#BD93F9'));
+const SEPERATOR = color('❯❯', '#BD93F9');
 const HANDLER_PATH = {
 	STUBTYPE: './stub-message.js',
 	STORY: './story-message.js',
@@ -146,15 +145,22 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 		let correctedCommand = null;
 		let correctedAliases = null;
 
-		if (configuration.OPTIONS.autoCorrect) {
+		check: if (message.isCmd && configuration.OPTIONS.autoCorrect) {
 			const prf = message.prefix;
-			const cmdMatch = findBestMatch(message.args[0], cmds.commands.keys());
-			const aliasMatch = findBestMatch(message.args[0], cmds.aliases);
+			const cmdMatch = findBestMatch(message.cmd.slice(1).trim().toLowerCase(), cmds.commands.keys());
 
-			if (cmdMatch.ratings >= 0.6) {
-				correctedCommand = prf + cmdMatch.target;
-			} else if (aliasMatch.ratings >= 0.57) {
-				correctedAliases = prf + aliasMatch.target;
+			if (cmdMatch.bestMatch.rating >= 0.6) {
+				correctedCommand = prf + cmdMatch.bestMatch.target;
+				message.cmd = correctedCommand || correctedAliases || '';
+				break check;
+			}
+
+			const aliasMatch = findBestMatch(message.cmd.slice(1).trim().toLowerCase(), cmds.aliases);
+
+			if (aliasMatch.bestMatch.rating >= 0.57) {
+				correctedAliases = prf + aliasMatch.bestMatch.target;
+				message.cmd = correctedCommand || correctedAliases || '';
+				break check;
 			}
 
 			message.cmd = correctedCommand || correctedAliases || '';

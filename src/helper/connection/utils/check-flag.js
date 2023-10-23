@@ -1,42 +1,55 @@
 import meow from 'meow';
+import chalk from 'chalk';
 
-const helpFlag = () => `
-	 Usage
-	   $ node . <session> <options>
+import { color } from '../../../utils/modules/index.js';
 
-	 Options
-	   --prefix, -p          Set your custom prefix.
-	   --read_only, -y       Read only.
-	   --auto_read, -r       Auto read every incoming message.
-	   --restrict, -e        Restrict every moderator commands.
-	   --only_logs, -o       Only showing logs but will ignore every message and commands.
-	   --no_logs, -n         Not showing any logs in the meantime still respond for any commands.
-	   --self_mode, -s       Set self mode that only owner and the bot can use.
-	   --debug_mode, -g      Show every metadata of any message.
-	   --multi_cmd, -m       Loop every command on your script. Use | to seperate each commands.
-	   --rainbow, -b         make your logs rainbow colors.
-	   --trace, -t           Show errors.
-	   --watch, -w           Watch every file on your script and reload it when it changed.
-	   --cool_down, -c       Set cool down for every command.
-	   --auto_correct, -a    Enable auto correct for every incoming command.
-	   --no_load, -v         Disable module load animation.
-	   --json, -j            Use JSON DB to store data of the WhatsApp connection.
-	   --reset, -k           Reset your WhatsApp connection session, and restart the script.
-	   --story, q            Auto download people story after the bot received the story.
-	   --offline, -f         Set your current presence to offline.
-	   --no_call, -d         Reject incoming call.
-	   --insta_notifier, -i  Handle incoming Instagram DMs.
-	   --limit_reset, -l     Enable Auto-reset user's limit.
-	   --reset_on_start, -x  Auto reset DB-Connections every start of the script.
-	   --no_limit, -u        Set commands limit to None.
-	   --help, -h            Show this message.
+const helpFlag = `
+	 ${color('Usage', 'orange')}
+	   $ node ${color('.', 'cyan')} <?session> [options]
 
-	 Examples
-	   $ node . --read_only -t
+	 ${color('Options', 'orange')}
+	   --prefix, -p          ${color('Set your custom prefix.', '#05ffa1')}
+	   --read_only, -y       ${color('Read only.', '#05ffa1')}
+	   --auto_read, -r       ${color('Auto read every incoming message.', '#05ffa1')}
+	   --restrict, -e        ${color('Restrict every moderator commands.', '#05ffa1')}
+	   --only_logs, -o       ${color('Only showing logs but will ignore every message and commands.', '#05ffa1')}
+	   --no_logs, -n         ${color('Not showing any logs in the meantime still respond for any commands.', '#05ffa1')}
+	   --self_mode, -s       ${color('Set self mode that only owner and the bot can use.', '#05ffa1')}
+	   --debug_mode, -g      ${color('Show every metadata of any message.', '#05ffa1')}
+	   --multi_cmd, -m       ${color('Loop every command on your script. Use | to seperate each commands.', '#05ffa1')}
+	   --rainbow, -b         ${color('make your logs rainbow colors.', '#05ffa1')}
+	   --trace, -t           ${color('Show errors.', '#05ffa1')}
+	   --watch, -w           ${color('Watch every file on your script and reload it when it changed.', '#05ffa1')}
+	   --cool_down, -c       ${color('Set cool down for every command.', '#05ffa1')}
+	   --auto_correct, -a    ${color('Enable auto correct for every incoming command.', '#05ffa1')}
+	   ${color('--no_load, -v         ', 'gray')}[${color('Deprecated!', '#FF5555')}] ${color(
+	'Disable module load animation.',
+	'gray'
+)}
+	   ${color('--json, -j            ', 'gray')}[${color('Deprecated!', '#FF5555')}] ${color(
+	'Use JSON DB to store data of the WhatsApp connection.',
+	'gray'
+)}
+	   --reset, -k           ${color('Reset your WhatsApp connection session, and restart the script.', '#05ffa1')}
+	   --story, q            ${color('Auto download people story after the bot received the story.', '#05ffa1')}
+	   --offline, -f         ${color('Set your current presence to offline.', '#05ffa1')}
+	   --no_call, -d         ${color('Reject incoming call.', '#05ffa1')}
+	   --insta_notifier, -i  ${color('Handle incoming Instagram DMs.', '#05ffa1')}
+	   --limit_reset, -l     ${color('Enable Auto-reset user limit.', '#05ffa1')}
+	   --reset_on_start, -x  ${color('Auto reset DB-Connections every start of the script.', '#05ffa1')}
+	   --no_limit, -u        ${color('Set commands limit to None.', '#05ffa1')}
+	   --pair_mode, -z       ${color('Enable pair mode.', '#05ffa1')} ${color(
+	'This needs to input your host number to get the code.',
+	'gray'
+)}
+	   --help, -h            ${color('Show this message.', '#05ffa1')}
+
+	 ${color('Examples', 'orange')}
+	   ${chalk.italic('$ node . --read_only -t')}
  `;
 
 export const parseCli = () =>
-	meow(helpFlag(), {
+	meow(helpFlag, {
 		importMeta: import.meta,
 		flags: {
 			/* eslint-disable */
@@ -68,3 +81,12 @@ export const parseCli = () =>
 			pair_mode: { type: 'boolean', shortFlag: 'z' }
 		}
 	});
+
+const cli = parseCli();
+
+if (cli.flags.help) {
+	console.log(cli.help);
+	process.exit(0);
+}
+
+export { cli };

@@ -1,4 +1,5 @@
 import './src/helper/prototypes/prototypes.js';
+
 import path from 'path';
 import { platform } from 'process';
 import dotenv from 'dotenv';
@@ -10,4 +11,5 @@ global.__dirname = __dirname;
 
 dotenv.config();
 
+await import('./src/helper/connection/utils/check-flag.js');
 await import('./src/index.js');
