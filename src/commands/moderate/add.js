@@ -46,7 +46,7 @@ export default {
 				});
 			}
 
-			await client[botNum].updateGroup(from, 'ADD', query.split(',').parse(), adminGroups, { message });
+			await client[botNum].updateGroup(from, 'ADD', query.split(',').parseNumber(), adminGroups, { message });
 		}
 
 		if (bodyQuoted) {

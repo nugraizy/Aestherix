@@ -26,7 +26,7 @@ export default {
 			return await client[botNum].updateGroup(
 				from,
 				'REMOVE',
-				mention.length > 0 ? mention : query.split(',').parse(),
+				mention.length > 0 ? mention : query.split(',').parseNumber(),
 				adminGroups,
 				{
 					force: /--?(force|F)/.test(query),
@@ -49,10 +49,16 @@ export default {
 		}
 
 		if (query || mention.length > 0) {
-			await client[botNum].updateGroup(from, 'REMOVE', mention.length > 0 ? mention : query.split(',').parse(), adminGroups, {
-				force: /--?(force|F)/.test(query),
-				message
-			});
+			await client[botNum].updateGroup(
+				from,
+				'REMOVE',
+				mention.length > 0 ? mention : query.split(',').parseNumber(),
+				adminGroups,
+				{
+					force: /--?(force|F)/.test(query),
+					message
+				}
+			);
 		}
 
 		if (bodyQuoted) {

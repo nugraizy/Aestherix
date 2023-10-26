@@ -38,9 +38,15 @@ export default {
 		}
 
 		if (query || mention.length > 0) {
-			await client[botNum].updateGroup(from, 'PROMOTE', mention.length > 0 ? mention : query.split(',').parse(), adminGroups, {
-				message
-			});
+			await client[botNum].updateGroup(
+				from,
+				'PROMOTE',
+				mention.length > 0 ? mention : query.split(',').parseNumber(),
+				adminGroups,
+				{
+					message
+				}
+			);
 		}
 
 		if (bodyQuoted) {

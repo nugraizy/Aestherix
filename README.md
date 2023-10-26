@@ -19,63 +19,24 @@
   - [this.isZero() not a function](#zero)
   - [crash when added to a group](#crash)
 - [Additional Context](#additional-context)
+- [Instagram method](#instagram-methods)
 
 ---
 
 # Installations
 
-## Linux
-
-#### FFMPEG
-
-```bash
-sudo apt install ffmpeg
-```
-
-#### LIBWEBP
-
-##### make sure to install `gcc`, and `make`
-
-```bash
-sudo apt-get install libjpeg-dev libpng-dev libtiff-dev libgif-dev
-wget https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.2.4.tar.gz
-tar xvzf libwebp-1.2.4.tar.gz
-cd libwebp-1.2.4
-./configure
-make
-sudo make install
-```
-
-<div align='center'>
-<a href='#table'>go back</a>
-</div>
-
-## Windows
-
-### FFMPEG
-
-1. Download manual using this [link](https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip)
-2. Extract it
-3. Open the folder, go to bin, copy the path
-4. Set/add the Environment path with the copied path
-
-### LIBWEBP
-
-1. Download manual using this [link](https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.2.3-windows-x64.zip)
-2. Extract it
-3. Open the folder, go to bin, copy the path
-4. Set/add the Environment path with the copied path
-
-<div align='center'>
-<a href='#table'>go back</a>
-</div>
+See: [INSTALL.md](./INSTALL.md)
 
 # Run the project
 
-`node . your_session_name --flag` you can find the available flags [here](#available-flags)
+```sh
+node . your_session_name --flag
+```
+
+you can find the available flags [here](#available-flags)
 
 <div align='center'>
-<a href='#table'>go back</a>
+<a href='#table'>⬆️</a>
 </div>
 
 ## Available Flags
@@ -111,7 +72,7 @@ sudo make install
 ---
 
 <div align='center'>
-<a href='#table'>go back</a>
+<a href='#table'>⬆️</a>
 </div>
 
 # Common Occured Error
@@ -123,7 +84,9 @@ Go to `node_modules\long\src\long.js:474`
 Add this code to line 474 (don't change the original 474 code. just add the code below) :
 
 ```js
-if (typeof this.isZero != 'function') return '1';
+if (typeof this.isZero !== 'function') {
+	return '1';
+}
 ```
 
 ### <a name="crash"></a> crash when added to a group
@@ -134,10 +97,42 @@ Please install the latest Baileys-md commit
 
 ### Changing ID message :
 
-Go to `node_modules\@adiwajshing\baileys\lib\Utils\generic.js:165`
+Go to
 
-Change the `BAE5` to anything. (do not includes special characters!)
+```sh
+node_modules\@adiwajshing\baileys\lib\Utils\generic.js:172
+```
+
+> **IMPORTANT** 
+> Change the `BAE5` to anything. (`DO NOT` includes special characters!)
+
+#### Or you can include `customId` to the socket config.
+
+```javascript
+const CONNECTION_CONFIG = {
+	...YOUR_CONFIG,
+	customId: 'HFINDER'
+};
+```
 
 <div align='center'>
-<a href='#table'>go back</a>
+<a href='#table'>⬆️</a>
+</div>
+
+# Instagram Methods
+#### before started you must do a login method
+```javascript
+const login = async () => {
+  const instagram = new InstagramApi('username', 'password');
+
+  const login = await instagram.account.login();
+
+  login.account.writeLoginInfo();
+}
+
+ await login()
+ ```
+
+<div align='center'>
+<a href='#table'>⬆️</a>
 </div>

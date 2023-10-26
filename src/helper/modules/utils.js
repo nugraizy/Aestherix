@@ -419,7 +419,7 @@ export const assign = (client) => {
 				  } // eslint-disable-line
 				: {};
 
-			if (update.PARSE_EVENTS('ADD', 'REMOVE', 'DEMOTE', 'PROMOTE')) {
+			if (update.isExist('ADD', 'REMOVE', 'DEMOTE', 'PROMOTE')) {
 				for (const participant of participants) {
 					try {
 						if (!force && adminGroups.includes(participant) && update === 'REMOVE') {
@@ -465,7 +465,7 @@ export const assign = (client) => {
 
 						const response = await client[botNum][UPDATE[update]](to, [participant], update.toLowerCase());
 
-						if (update.PARSE_EVENTS('ADD')) {
+						if (update.isExist('ADD')) {
 							if (response?.[0]?.status === '500') {
 								await send(to, { text: 'Group is already full' }, quoted);
 							} else if (response?.[0]?.status === '408') {
@@ -517,19 +517,19 @@ export const assign = (client) => {
 				}
 			}
 
-			if (update.PARSE_EVENTS('SUBJECT', 'DESCRIPTION')) {
+			if (update.isExist('SUBJECT', 'DESCRIPTION')) {
 				const response = await client[botNum][UPDATE[update]](to, texts);
 
 				responses.push(response);
 			}
 
-			if (update.PARSE_EVENTS('ANNOUNCEMENT', 'NOT_ANNOUNCEMENT', 'UNLOCKED', 'LOCKED')) {
+			if (update.isExist('ANNOUNCEMENT', 'NOT_ANNOUNCEMENT', 'UNLOCKED', 'LOCKED')) {
 				const response = await client[botNum][UPDATE[update]](to, update.toLowerCase());
 
 				responses.push(response);
 			}
 
-			if (update.PARSE_EVENTS('RETRIEVE', 'REVOKE')) {
+			if (update.isExist('RETRIEVE', 'REVOKE')) {
 				const response = await client[botNum][UPDATE[update]](to);
 
 				responses.push(response);

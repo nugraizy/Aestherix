@@ -688,6 +688,9 @@ class InstagramMethods extends ResponseParser {
 	}
 }
 
+/**
+ * @type {import('instagram').InstagramAPI}
+ */
 class InstagramApi extends InstagramMethods {
 	/**
 	 * @private
@@ -746,9 +749,6 @@ class InstagramApi extends InstagramMethods {
 		this.#_deviceId = deviceId;
 
 		this.account = {
-			/**
-			 * @returns {Promise<Omit<InstagramApi, 'login'>>}
-			 */
 			login: () =>
 				new Promise(async (resolve, reject) => {
 					try {
@@ -757,7 +757,7 @@ class InstagramApi extends InstagramMethods {
 							deviceId: this.#_deviceId
 						});
 
-						delete this.login;
+						delete this.account.login;
 
 						resolve(this);
 					} catch (error) {
@@ -765,29 +765,18 @@ class InstagramApi extends InstagramMethods {
 					}
 				}),
 
-			/**
-			 * @returns {string}
-			 */
 			parseCookie: () => this._parseCookie(),
 
-			/**
-			 * @returns {void}
-			 */
 			writeLoginInfo: () => {
 				const loginInfo = `USERNAME="${this.#_username}"\nPASSWORD="${
 					this.#_password
-				}"\nCOOKIE="${this.parseCookie()}"\nUUID="${this.#_uuid}"\nDEVICE_ID="${this.#_deviceId}"`;
+				}"\nCOOKIE="${this.account.parseCookie()}"\nUUID="${this.#_uuid}"\nDEVICE_ID="${this.#_deviceId}"`;
 
 				fs.writeFileSync('./.instagram.env', loginInfo);
 			}
 		};
 
 		this.download = {
-			/**
-			 * Download Posts from Instagram.
-			 * @param  {...string} urls
-			 * @returns {Promise<import('../../types/Utils/instagram').InstagramPosts>}
-			 */
 			post: (...urls) =>
 				new Promise(async (resolve, reject) => {
 					try {
@@ -817,11 +806,6 @@ class InstagramApi extends InstagramMethods {
 		};
 
 		this.search = {
-			/**
-			 * Get User Details from Instagram.
-			 * @param  {...string} urls
-			 * @returns {Promise<import('../../types/Utils/instagram').InstagramUser>}
-			 */
 			user: (...usernames) =>
 				new Promise(async (resolve, reject) => {
 					try {
@@ -849,11 +833,6 @@ class InstagramApi extends InstagramMethods {
 					}
 				}),
 
-			/**
-			 *
-			 * @param  {...string} usernames
-			 * @returns {Promise<import('../../types/Utils/instagram').InstagramUsers>}
-			 */
 			users: (...usernames) =>
 				new Promise(async (resolve, reject) => {
 					try {
@@ -881,11 +860,6 @@ class InstagramApi extends InstagramMethods {
 					}
 				}),
 
-			/**
-			 * Get Highlights Users from Instagram.
-			 * @param  {...string} urls
-			 * @returns {Promise<import('../../types/Utils/instagram').InstagramHighlights>}
-			 */
 			highlight: (...usernames) =>
 				new Promise(async (resolve, reject) => {
 					try {
@@ -913,11 +887,6 @@ class InstagramApi extends InstagramMethods {
 					}
 				}),
 
-			/**
-			 * Get Stories Users from Instagram.
-			 * @param  {...string} urls
-			 * @returns {Promise<import('../../types/Utils/instagram').InstagramStory>}
-			 */
 			story: (...usernames) =>
 				new Promise(async (resolve, reject) => {
 					try {
@@ -945,11 +914,6 @@ class InstagramApi extends InstagramMethods {
 					}
 				}),
 
-			/**
-			 *
-			 * @param  {...any} hashtags
-			 * @returns {Promise<import('../../types/Utils/instagram').InstagramHashtags>}
-			 */
 			hashtag: (...hashtags) =>
 				new Promise(async (resolve, reject) => {
 					try {
@@ -979,9 +943,6 @@ class InstagramApi extends InstagramMethods {
 		};
 	}
 
-	/**
-	 * @returns {InstagramApi}
-	 */
 	static init() {
 		let err;
 
@@ -1032,5 +993,3 @@ class InstagramApi extends InstagramMethods {
 }
 
 export const instagram = InstagramApi.init();
-
-//We are currently on School Projects. And our teacher says that us as a group will workin in different project. Mine are different than other, My idea are every student can access my API through Remini API Services.
