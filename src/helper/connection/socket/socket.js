@@ -30,7 +30,7 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 	const CONNECTION_CONFIG = {
 		printQRInTerminal: !OPTIONS.pairMode,
 		mobile: false,
-		browser: ['Chrome (Linux)', '', ''],
+		browser: ['Safari (macOS)', 'browser', '1.0.0'],
 		version: DEFAULT_CONNECTION_CONFIG.version,
 		logger: logger(OPTIONS),
 		auth: {

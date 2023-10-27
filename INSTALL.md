@@ -37,6 +37,9 @@ chmod +x install.sh
 
 ## Windows
 
+> **IMPORTANT** 
+> make sure to install [visual studio community](https://c2rsetup.officeapps.live.com/c2r/downloadVS.aspx?sku=community&channel=Release&version=VS2022&source=VSLandingPage&cid=2030) with `Desktop development with C++` workload selected
+
 ### FFMPEG
 
 1. Download manual using this [link](https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip)

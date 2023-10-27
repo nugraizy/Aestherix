@@ -126,9 +126,12 @@ export const assign = (client) => {
 			delete message.footer;
 			delete message.headerType;
 			delete message.templateButtons;
+			delete message.title;
+			delete message.buttonText;
+			delete message.sections;
 		}
 
-		if (('image' in message && 'footer' in message) || ('video' in message && 'footer' in message)) {
+		if (('image' in message || 'video' in message) && 'footer' in message) {
 			if (message.caption) {
 				message.caption = `${message?.caption}\n\n${message.footer}`?.trim();
 			}

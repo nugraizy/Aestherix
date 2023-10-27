@@ -37,7 +37,7 @@ const logMessage = (message) => {
 
 	const fullBody = message.isCmd
 		? `${color(isEval ? message.cmd : message.prefix, isEval ? 'cyan' : 'white')}${color(
-				!isEval && message.cmd.slice(1),
+				!isEval && message.cmd,
 				'cyan'
 		  )} ${messageBody}` // eslint-disable-line
 		: color(message.body?.substring(0, 20).replace(/[\t\n]/g, ' '), 'white');
@@ -139,31 +139,43 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 				: '-';
 		}
 
+		let isEval = regEval.test(message.cmd);
+
 		message.isCmd = message.body.startsWith(prefix);
-		message.cmd = message.isCmd ? message.cmd : '';
+		message.cmd = message.isCmd ? message.cmd : isEval ? message.prefix + '>' : '';
 		message.query = message.args.slice(1).join(' ').trim();
 		let correctedCommand = null;
 		let correctedAliases = null;
 
 		check: if (message.isCmd && configuration.OPTIONS.autoCorrect) {
 			const prf = message.prefix;
-			const cmdMatch = findBestMatch(message.cmd.slice(1).trim().toLowerCase(), cmds.commands.keys());
+
+			if (isEval) {
+				break check;
+			}
+
+			const tempCmd = isEval ? message.cmd.slice(1).trim().toLowerCase() : message.cmd.slice(1).trim().toLowerCase();
+			const cmdMatch = findBestMatch(tempCmd, cmds.commands.keys());
 
 			if (cmdMatch.bestMatch.rating >= 0.6) {
 				correctedCommand = prf + cmdMatch.bestMatch.target;
 				message.cmd = correctedCommand || correctedAliases || '';
+			} else {
+				const aliasMatch = findBestMatch(tempCmd, cmds.aliases);
+
+				if (aliasMatch.bestMatch.rating >= 0.57) {
+					correctedAliases = prf + aliasMatch.bestMatch.target;
+					message.cmd = correctedCommand || correctedAliases || '';
+				}
+			}
+
+			message.cmd = message.cmd.slice(1).toLowerCase();
+		} else if (message.isCmd && !configuration.OPTIONS.autoCorrect) {
+			if (isEval) {
 				break check;
 			}
 
-			const aliasMatch = findBestMatch(message.cmd.slice(1).trim().toLowerCase(), cmds.aliases);
-
-			if (aliasMatch.bestMatch.rating >= 0.57) {
-				correctedAliases = prf + aliasMatch.bestMatch.target;
-				message.cmd = correctedCommand || correctedAliases || '';
-				break check;
-			}
-
-			message.cmd = correctedCommand || correctedAliases || '';
+			message.cmd = message.cmd.slice(1).toLowerCase();
 		}
 
 		const commands = cmds.commands.values().values;
@@ -171,14 +183,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 		/**
 		 * @type {import('../../types/Commands/index.js').CommandProps}
 		 */
-		const Tempcmds =
-			cmds.commands.get(message.cmd.slice(1).trim().toLowerCase()) ||
-			commands.find(
-				(v) =>
-					v.aliases?.includes(message.cmd.slice(1).trim().toLowerCase()) ||
-					v.aliases?.includes(message.cmd.trim().toLowerCase())
-			) ||
-			false;
+		const Tempcmds = cmds.commands.get(message.cmd) || commands.find((v) => v.aliases?.includes(message.cmd)) || false;
 
 		if (!configuration.OPTIONS.noLogs) {
 			logMessage(message, runtime);

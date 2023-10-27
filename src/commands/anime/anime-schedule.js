@@ -14,34 +14,15 @@ export default {
 	cooldown: 4,
 	limit: 5,
 	status: 'enable',
-	run: async ({ from, message, type, cmd, args, isGroup, groupMetadata }, client) => {
+	run: async ({ from, message, isGroup, groupMetadata }, client) => {
 		if (isGroup) {
 			return client[botNum].reply('This command only works in private chat.', { from, quoted: message, groupMetadata });
 		}
 
 		const text = 'Anime Releases'.formatHeaders();
 
-		if (type === 'listResponseMessage') {
-			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(1).join(' '))));
-
-			client[botNum].reply(
-				`${text}\n\nStream Here\n\n${data
-					.map(
-						(v) =>
-							`📁 ${v.server}\n${v.items
-								.map((w, i) => ` ╠  📂${w.title}\n ${i === v.items.length - 1 ? '╚' : '╠'}  📂 ${w.url}`)
-								.join('\n')}`
-					)
-					.join('\n\n')}`.trim(),
-				{ from, quoted: message, groupMetadata }
-			);
-
-			return;
-		}
-
 		const result = await animeReleases();
 
-		const container = [];
 		let index = 0;
 		let indexDay = 0;
 
@@ -49,33 +30,42 @@ export default {
 
 		translatedText = translatedText.split(' ');
 
+		let capt = '';
+
 		for (const day in result) {
-			container.push({
-				rows: [
-					{
-						title: `${result[day][0].titleRomaji} ${result[day][0].titleNative}`,
-						description: `Releases : ${result[day][0].time}`,
-						rowId: `${cmd} ${JSON.stringify(result[day][0].streams).replace(/\|/g, '')}`
-					},
-					...result[day].slice(1).map((v) => ({
-						title: `${v.titleRomaji} ${v.titleNative}`,
-						description: `Releases : ${v.time}`,
-						rowId: `${cmd} ${JSON.stringify(v.streams).replace(/\|/g, '')}`
-					}))
-				],
-				title: `${translatedText[indexDay]} ${index === 0 ? '(today)' : ''}`
-			});
+			index === 0 ? (capt += `${text}\n\n`) : (capt += '\n\n');
+			capt += `╭─ 📅 *${translatedText[indexDay]}${index === 0 ? ' (today 🌐)' : ''}*\n\n`;
+
+			for (let i = 0, anime = result[day]; i < result[day].length; i++) {
+				const time = Object.keys(anime[i])[0];
+
+				capt += ` ⏰ *${time}* ──\n`;
+
+				for (const v of anime[i][time]) {
+					capt += ` 📜 Title : ${v.title.formatHeaders()}\n`;
+					capt += ` 🔢 Episode : ${v.episode}\n`;
+					capt += ` 🔗 URL : ${v.link}\n\n`;
+				}
+			}
+
+			const INFO = result[day][0];
+
+			await client[botNum].send(
+				from,
+				{
+					image: { url: INFO[Object.keys(INFO)][0].thumbnail },
+					caption: capt.trim()
+				},
+				{
+					quoted: message,
+					groupMetadata
+				}
+			);
+
+			capt = '';
 
 			index++;
 			indexDay++;
 		}
-
-		await client[botNum].send(from, {
-			title: text,
-			text: '\n',
-			footer: 'choose one of the title inside of the list to see the available streaming services.',
-			buttonText: 'Open List',
-			sections: container
-		});
 	}
 };

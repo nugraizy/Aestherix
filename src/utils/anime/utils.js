@@ -1,15 +1,5 @@
-import fs from 'fs-extra';
 import dayjs from 'dayjs';
 
-/**
- * @typedef {'Sunday' | 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday' | 'Saturday'} Days
- * @typedef {{url: string, title: string, totalEpisode: number, totalViews: number, thumbnail: string}[]} ItemsContainer
- * @typedef {ResultParsed[] & {streams: {server: string, items: ItemsContainer}}[]} StreamsContainer
- * @typedef {Record<Days, ResultParsed[]>} ResultParsedSorted
- * @typedef {Record<Days, StreamsContainer>} Results
- */
-
-export const query = await fs.readFile('./src/utils/anime/query.graphql', 'utf-8');
 const maps = {
 	0: [1, 2, 3, 4, 5, 6],
 	1: [2, 3, 4, 5, 6, 0],
@@ -19,63 +9,62 @@ const maps = {
 	5: [6, 0, 1, 2, 3, 4],
 	6: [0, 1, 2, 3, 4, 5]
 };
+const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 /**
- * Convert the release timestamp to readable days of the weeks.
- * @typedef {{title: string, id: string, release: number}} ResultRaw
- * @typedef {{title: string, id: string, release: number, date: string, time: string, indexDate: number}} ResultParsed
- * @param {ResultRaw[]} arr
- * @returns {ResultParsed}
- * @throws {Error}
+ * @param {import('cheerio').Cheerio} $
+ * @param {import('cheerio').Cheerio} data
+ * @returns
  */
-export const convertToDates = (arr) => {
+export const parseSchedule = ($, data) => {
 	const container = [];
 
-	const temp = arr.sort((a, b) => a.release - b.release);
+	data
+		.find('div.timetable-timeslot')
+		.get()
+		.forEach((v) => {
+			const time = $(v).find('div.timetable-timeslot__time > span.time').text().trim();
 
-	for (const obj of temp) {
-		const date = dayjs(obj.release).format('dddd');
-		const time = dayjs(obj.release).format('HH:mm');
-		const indexDate = dayjs(obj.release).day();
+			const anime = $(v)
+				.find('div.timetable-anime-block')
+				.get()
+				.map((w) => {
+					const info = $(w).find('a.title');
+					const episode = $(w).find('div.footer').text().trim();
+					const thumbnail = $(w).find('div.poster > img').attr('srcset').split(', ')[1].replace(' 2x', '');
+					const title = info.attr('title').trim();
+					const link = 'https://www.livechart.me' + info.attr('href');
 
-		container.push({ ...obj, date, time, indexDate });
-	}
+					return {
+						title,
+						episode,
+						link,
+						thumbnail
+					};
+				});
+
+			if (time !== '') {
+				container.push({ [time]: anime });
+			}
+		});
 
 	return container;
 };
 
-/**
- * Sort the days of the week into full circle.
- * @param {ResultParsed} arr
- * @returns {ResultParsedSorted}
- */
-export const sortDates = (arr) => {
-	const datesNow = dayjs().day();
+export const createDaysContainer = (day) => {
+	const TODAY = dayjs(day, { format: 'ddd MMM DD YYYY' }).format('dddd');
 
-	const dates = {};
-	const todaySchedule = arr.filter((v) => v.indexDate === datesNow);
+	const DAYS_ASCENDING = maps[DAYS.indexOf(TODAY)];
 
-	dates[todaySchedule[0].date] = todaySchedule.sort((a, b) =>
-		dayjs(a.time, 'HH:mm').unix() > dayjs(b.time, 'HH:mm').unix()
-			? 1
-			: dayjs(a.time, 'HH:mm').unix() < dayjs(b.time, 'HH:mm').unix()
-			? -1
-			: 0
-	);
+	const DAYS_SORTED = {};
 
-	for (const date of maps[datesNow]) {
-		const day = dayjs().day(date).format('dddd');
+	DAYS_ASCENDING.forEach((day, i) => {
+		if (i === 0) {
+			DAYS_SORTED[TODAY] = [];
+		}
 
-		dates[day] = arr
-			.filter((v) => v.indexDate === date)
-			.sort((a, b) =>
-				dayjs(a.time, 'HH:mm').unix() > dayjs(b.time, 'HH:mm').unix()
-					? 1
-					: dayjs(a.time, 'HH:mm').unix() < dayjs(b.time, 'HH:mm').unix()
-					? -1
-					: 0
-			);
-	}
+		DAYS_SORTED[DAYS[day]] = [];
+	});
 
-	return dates;
+	return DAYS_SORTED;
 };
