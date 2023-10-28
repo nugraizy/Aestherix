@@ -81,8 +81,12 @@ const handleOfflineMessage = async (client, message, cmds) => {
 };
 
 const handleMentionedAfkUsers = (message, client, botNum) => {
-	let caption = 'You are Tagging People That Are AFK.\n\n';
+	let caption = 'You are Tagging People That Are AFK.'.formatHeaders() + '\n\n';
 	const container = [];
+
+	if (message.message.key.fromMe) {
+		return;
+	}
 
 	for (const mention of message.mention) {
 		if (checkAfk(mention, message.from)) {
