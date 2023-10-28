@@ -92,6 +92,12 @@ export type AppliedExif = (
 	metadata: ExifMetadata
 ) => Promise<Buffer>;
 
+type ContextInfo = MessageSendOptions['contextInfo'] & {
+	contextInfo: proto.ContextInfo;
+};
+
+type Options = MessageSendOptions & ContextInfo;
+
 /**
  * Send message
  */
@@ -109,7 +115,7 @@ export type SendMessage = (
 	/**
 	 * the options of send message
 	 */
-	options: MessageSendOptions
+	options: Options
 ) => Promise<MessageGenerated>;
 
 /**

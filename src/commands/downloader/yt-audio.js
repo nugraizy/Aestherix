@@ -14,6 +14,13 @@ import {
 } from '../../utils/modules/index.js';
 import { youtubeMainDownload as yta } from '../../utils/youtube/index.js';
 
+/**
+ *
+ * @param {string} url
+ * @param {import('../../types/Socket/index.js').AdvancedClient} client
+ * @param {{from: string, message: import('../../types/Reconstruct/index.js').ReassignResult['message'], groupMetadata: import('../../types/Reconstruct/index.js').ReassignResult['groupMetadata'], prettyNumber: string}} param2
+ * @returns
+ */
 const processAudio = async (url, client, { from, message, groupMetadata, prettyNumber }) => {
 	const audio = await yta(url, 'mp3');
 
@@ -46,15 +53,14 @@ const processAudio = async (url, client, { from, message, groupMetadata, prettyN
 
 		jpegThumbnail = await jpegThumbnail.resize(300, 300).toBuffer();
 
-		const msg = await client[botNum].send(
+		await client[botNum].send(
 			from,
 			{
-				location: {
-					degreesLatitude: 0,
-					degreesLongitude: 0,
-					jpegThumbnail,
-					address: 'YouTube Audio'
-				}
+				document: { url: link },
+				fileName: `${title}.mp3`,
+				mimetype: 'audio/mp3',
+				caption: capt
+
 				// caption: capt,
 				// footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
 				// buttons: [
@@ -66,18 +72,24 @@ const processAudio = async (url, client, { from, message, groupMetadata, prettyN
 				// 	}
 				// ]
 			},
-			{ groupMetadata }
-		);
-
-		await client[botNum].send(
-			from,
 			{
-				document: { url: link },
-				fileName: `${title}.mp3`,
-				mimetype: 'audio/mp3',
-				caption: capt
-			},
-			{ groupMetadata, quoted: msg }
+				groupMetadata,
+				quoted: message,
+				contextInfo: {
+					/**
+					 * @type {import('@adiwajshing/baileys').proto.ContextInfo.ExternalAdReplyInfo}
+					 */
+					externalAdReply: {
+						title: 'YouTube MP3'.formatHeaders(),
+						mediaType: 1,
+						mediaUrl: 'https://github.com/nugraizy',
+						thumbnail: jpegThumbnail,
+						containsAutoReply: false,
+						showAdAttribution: true,
+						renderLargerThumbnail: true
+					}
+				}
+			}
 		);
 	}
 };
@@ -95,7 +107,7 @@ export default {
 	limit: 8,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, type, args, groupMetadata, mediaData, bodyQuoted, typeQuoted }, client) {
-		if (typeQuoted === 'imageMessage' && mediaData.participant.includes(jidDecode(botNum).user)) {
+		if (typeQuoted === 'conversation' && mediaData.participant.includes(jidDecode(botNum).user)) {
 			const reg = /✦ Video ID :\s*([^\n]+)/g;
 
 			const videoIds = [];
@@ -106,7 +118,7 @@ export default {
 			}
 
 			if (videoIds.length === 0) {
-				return;
+				return await client[botNum].reply('No id(s) found', { from, quoted: message, groupMetadata });
 			}
 
 			const numberiedQuery = Number(query);
@@ -152,7 +164,7 @@ export default {
 			const { title, mp4 } = video;
 
 			await client[botNum].send(from, {
-				title: 'YouTube MP4'.formatHeaders(),
+				title: 'YouTube MP3'.formatHeaders(),
 				footer: 'Made by Void Bot. Powered by Hidden Finder',
 				text: '\t',
 				buttonText: 'Open List',

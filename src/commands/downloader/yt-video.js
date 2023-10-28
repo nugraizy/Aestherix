@@ -46,30 +46,42 @@ const processVideo = async (url, client, { from, message, groupMetadata, prettyN
 
 		jpegThumbnail = await jpegThumbnail.resize(300, 300).toBuffer();
 
-		const msg = await client[botNum].send(
+		await client[botNum].send(
 			from,
 			{
-				location: {
-					degreesLatitude: 0,
-					degreesLongitude: 0,
-					jpegThumbnail,
-					address: 'YouTube Video'
-				}
+				video: { url: link },
+				caption: capt.trim()
+
 				// caption: capt,
 				// footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
 				// buttons: [
 				// 	{
-				// 		buttonId: `.ytmp3 get ${url}`,
+				// 		buttonId: `.ytmp4 get ${url}`,
 				// 		buttonText: { displayText: '
-				// Audio' },
+				// Video' },
 				// 		type: 1
 				// 	}
 				// ]
 			},
-			{ groupMetadata, quoted: message }
+			{
+				groupMetadata,
+				quoted: message,
+				contextInfo: {
+					/**
+					 * @type {import('@adiwajshing/baileys').proto.ContextInfo.ExternalAdReplyInfo}
+					 */
+					externalAdReply: {
+						title: 'YouTube MP3'.formatHeaders(),
+						mediaType: 1,
+						mediaUrl: 'https://github.com/nugraizy',
+						thumbnail: jpegThumbnail,
+						containsAutoReply: false,
+						showAdAttribution: true,
+						renderLargerThumbnail: true
+					}
+				}
+			}
 		);
-
-		await client[botNum].send(from, { video: { url: link }, caption: capt.trim() }, { groupMetadata, quoted: msg });
 	}
 };
 
@@ -86,7 +98,7 @@ export default {
 	limit: 8,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, type, args, groupMetadata, mediaData, typeQuoted, bodyQuoted }, client) {
-		if (typeQuoted === 'imageMessage' && mediaData.participant.includes(jidDecode(botNum).user)) {
+		if (typeQuoted === 'conversation' && mediaData.participant.includes(jidDecode(botNum).user)) {
 			const reg = /✦ Video ID :\s*([^\n]+)/g;
 
 			const videoIds = [];
@@ -97,7 +109,7 @@ export default {
 			}
 
 			if (videoIds.length === 0) {
-				return;
+				return await client[botNum].reply('No id(s) found', { from, quoted: message, groupMetadata });
 			}
 
 			const numberiedQuery = Number(query);

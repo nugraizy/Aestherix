@@ -1,5 +1,7 @@
-import configuration from '../../helper/config/connect.js';
-import { searchYoutube } from '../../utils/youtube/index.js';
+// import configuration from '../../helper/config/connect.js';
+import sharp from 'sharp';
+
+import { fetchBUFFER, searchYoutube } from '../../utils/index.js';
 import { numberWithCommas } from '../../utils/modules/index.js';
 
 const boxen = (text) => {
@@ -53,58 +55,78 @@ export default {
 			i++;
 		}
 
+		let jpegThumbnail = sharp(new Buffer.from(await fetchBUFFER(result[0].image), 'base64'));
+
+		jpegThumbnail = await jpegThumbnail.resize(300, 300).toBuffer();
+
 		await client[botNum].send(
 			from,
 			{
-				image: {
-					url: result[0].image
-				},
-				caption: capt.trim()
+				text: capt.trim()
+
 				// caption: capt,
 				// footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
-				// templateButtons: [
-				// 	{ urlButton: { displayText: 'Stream Here', url } },
-				// 	{ quickReplyButton: { displayText: 'Download MP3', id: `.yta ${url}` } },
-				// 	{ quickReplyButton: { displayText: 'Download MP4', id: `.ytv ${url}` } },
-				// 	{ quickReplyButton: { displayText: 'Download MP3 & MP4', id: `.yta ${url}|.ytv ${url}` } }
-				// ],
-				// headerType: 1
+				// buttons: [
+				// 	{
+				// 		buttonId: `.ytmp4 get ${url}`,
+				// 		buttonText: { displayText: '
+				// Video' },
+				// 		type: 1
+				// 	}
+				// ]
 			},
-			{ groupMetadata }
-		);
-
-		const row = [];
-
-		result.forEach(({ url, title, timestamp, views, author }) => {
-			row.push(
-				{
-					rows: [{ title: `MP4 | ${title}`, rowId: `.ytv ${url}` }],
-					title: `${author.name} | 👁️‍🗨️ ${numberWithCommas(views)} | ${timestamp}`
-				},
-				{
-					rows: [{ title: `MP3 | ${title}`, rowId: `.yta ${url}` }],
-					title: `${author.name} | 👁️‍🗨️ ${numberWithCommas(views)} | ${timestamp}`
-				}
-			);
-
-			if (configuration.OPTIONS.multiCmd) {
-				row.push({
-					rows: [{ title: `MP3 & MP4 | ${title}`, rowId: `.yta ${url}|.ytv ${url}` }],
-					title: `${author.name} | 👁️‍🗨️ ${numberWithCommas(views)} | ${timestamp}`
-				});
-			}
-		});
-
-		await client[botNum].send(
-			from,
 			{
-				buttonText: 'Open list',
-				title: 'See other result',
-				footer: 'Made by Void Bot. Powered by Hidden Finder',
-				text: '\t',
-				sections: row
-			},
-			{ groupMetadata }
+				groupMetadata,
+				quoted: message,
+				contextInfo: {
+					/**
+					 * @type {import('@adiwajshing/baileys').proto.ContextInfo.ExternalAdReplyInfo}
+					 */
+					externalAdReply: {
+						title: 'YouTube Search',
+						mediaType: 1,
+						mediaUrl: 'https://github.com/nugraizy',
+						thumbnail: jpegThumbnail,
+						containsAutoReply: false,
+						showAdAttribution: true,
+						renderLargerThumbnail: true
+					}
+				}
+			}
 		);
+
+		// const row = [];
+
+		// result.forEach(({ url, title, timestamp, views, author }) => {
+		// 	row.push(
+		// 		{
+		// 			rows: [{ title: `MP4 | ${title}`, rowId: `.ytv ${url}` }],
+		// 			title: `${author.name} | 👁️‍🗨️ ${numberWithCommas(views)} | ${timestamp}`
+		// 		},
+		// 		{
+		// 			rows: [{ title: `MP3 | ${title}`, rowId: `.yta ${url}` }],
+		// 			title: `${author.name} | 👁️‍🗨️ ${numberWithCommas(views)} | ${timestamp}`
+		// 		}
+		// 	);
+
+		// 	if (configuration.OPTIONS.multiCmd) {
+		// 		row.push({
+		// 			rows: [{ title: `MP3 & MP4 | ${title}`, rowId: `.yta ${url}|.ytv ${url}` }],
+		// 			title: `${author.name} | 👁️‍🗨️ ${numberWithCommas(views)} | ${timestamp}`
+		// 		});
+		// 	}
+		// });
+
+		// await client[botNum].send(
+		// 	from,
+		// 	{
+		// 		buttonText: 'Open list',
+		// 		title: 'See other result',
+		// 		footer: 'Made by Void Bot. Powered by Hidden Finder',
+		// 		text: '\t',
+		// 		sections: row
+		// 	},
+		// 	{ groupMetadata }
+		// );
 	}
 };

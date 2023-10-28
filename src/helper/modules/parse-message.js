@@ -67,7 +67,7 @@ function crawlProperty(obj, propName) {
 /**
  * Reassigns and normalizes message data for easier handling and access.
  *
- * @type {Reconstructuring}
+ * @type {import('../../types/Reconstruct/index.js').Reconstructuring}
  */
 export const reassign = async (m, client, store) => {
 	try {
@@ -308,6 +308,8 @@ export const reassign = async (m, client, store) => {
 					? m
 					: mMediaData || {}
 				: m || {};
+
+		mediaData.extract = async () => await store.loadMessage(from, mediaData.stanzaId);
 
 		const bodyQuoted = typeMessage.includes(
 			type === 'extendedTextMessage' && mMediaData
