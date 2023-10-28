@@ -150,10 +150,10 @@ export default {
 					query
 				);
 
-				output = await func(
+				output = await func.call(
 					client,
 					async (...args) => {
-						return client[botNum].reply(format(...args), { from, quoted: message.message, groupMetadata });
+						return await client[botNum].reply(format(...args), { from, quoted: message.message, groupMetadata });
 					},
 					client,
 					message,

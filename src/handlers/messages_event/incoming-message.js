@@ -12,7 +12,6 @@ const log = console.log;
 
 let STATS_OFFLINE = true;
 const EVALY = ['/>', '$>', '=>', '!>'];
-const regEval = new RegExp(EVALY.join('|'), 'gi');
 const SEPERATOR = color('❯❯', '#BD93F9');
 const HANDLER_PATH = {
 	STUBTYPE: './stub-message.js',
@@ -33,11 +32,9 @@ const logMessage = (message) => {
 	const typeInfo = `${SEPERATOR} ${color('type', '#ff71ce')} ${color(message.type, '#05ffa1')}`;
 	const runtimeInfo = `${SEPERATOR} ${color(((Date.now() - runtime) / 1000).toFixed(0), '#F1FA8C')}${color('s', '#f5e700')}`;
 
-	const isEval = regEval.test(message.cmd);
-
 	const fullBody = message.isCmd
-		? `${color(isEval ? message.cmd : message.prefix, isEval ? 'cyan' : 'white')}${color(
-				!isEval && message.cmd,
+		? `${color(message.isEval ? message.cmd : message.prefix, message.isEval ? 'cyan' : 'white')}${color(
+				!message.isEval && message.cmd,
 				'cyan'
 		  )} ${messageBody}` // eslint-disable-line
 		: color(message.body?.substring(0, 20).replace(/[\t\n]/g, ' '), 'white');
@@ -135,14 +132,14 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 
 		if (configuration.cache.prefixMode === 'multi_prefix') {
 			prefix = configuration.cache.prefixReg.test(message.cmd)
-				? message.cmd.match(new RegExp(configuration.cache.prefixReg, 'gi'))
+				? message.cmd.match(new RegExp(configuration.cache.prefixReg, 'gi'))[0]
 				: '-';
 		}
 
-		let isEval = regEval.test(message.cmd);
+		message.isEval = EVALY.includes(message.args[0]);
 
 		message.isCmd = message.body.startsWith(prefix);
-		message.cmd = message.isCmd ? message.cmd : isEval ? message.prefix + '>' : '';
+		message.cmd = message.isEval ? message.args[0] : message.isCmd ? message.cmd : '';
 		message.query = message.args.slice(1).join(' ').trim();
 		let correctedCommand = null;
 		let correctedAliases = null;
@@ -150,11 +147,11 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 		check: if (message.isCmd && configuration.OPTIONS.autoCorrect) {
 			const prf = message.prefix;
 
-			if (isEval) {
+			if (message.isEval) {
 				break check;
 			}
 
-			const tempCmd = isEval ? message.cmd.slice(1).trim().toLowerCase() : message.cmd.slice(1).trim().toLowerCase();
+			const tempCmd = message.isEval ? message.cmd.slice(1).trim().toLowerCase() : message.cmd.slice(1).trim().toLowerCase();
 			const cmdMatch = findBestMatch(tempCmd, cmds.commands.keys());
 
 			if (cmdMatch.bestMatch.rating >= 0.6) {
@@ -171,7 +168,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 
 			message.cmd = message.cmd.slice(1).toLowerCase();
 		} else if (message.isCmd && !configuration.OPTIONS.autoCorrect) {
-			if (isEval) {
+			if (message.isEval) {
 				break check;
 			}
 
