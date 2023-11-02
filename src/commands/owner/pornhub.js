@@ -13,15 +13,7 @@ export default {
 	limit: 4,
 	cooldown: 5,
 	status: 'enable',
-	async run({ query, from, message, args, type, isOwner, groupMetadata }, client) {
-		if (!isOwner) {
-			return await client[botNum].reply('You must be the owner to use this command.', {
-				from,
-				quoted: message,
-				groupMetadata
-			});
-		}
-
+	async run({ query, from, message, args, type, groupMetadata }, client) {
 		if (!query) {
 			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}

@@ -90,6 +90,12 @@ declare global {
 		 * @returns string
 		 */
 		replaceAll: (find: string, replace: string) => string;
+
+		/**
+		 * Parse number
+		 * @returns string[]
+		 */
+		parseNumber: () => string[];
 	}
 
 	interface Number {
@@ -107,12 +113,6 @@ declare global {
 	}
 
 	interface Array<T> {
-		/**
-		 * Parse number
-		 * @returns string[]
-		 */
-		parseNumber: () => string[];
-
 		/**
 		 * Insert item to array
 		 * @returns string[]

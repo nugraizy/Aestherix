@@ -28,12 +28,8 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	async run({ isOwner, from, query, message, sender, groupMetadata }, client) {
+	async run({ from, query, message, sender, groupMetadata }, client) {
 		try {
-			if (!isOwner) {
-				return await client[botNum].reply('You are not allowed to use this command', { from, quoted: message, groupMetadata });
-			}
-
 			if (!query) {
 				return await client[botNum].reply('You must enter text', { from, quoted: message, groupMetadata });
 			}

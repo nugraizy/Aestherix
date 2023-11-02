@@ -17,11 +17,7 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	async run({ isOwner, from, message, args, settings, cmd, groupMetadata }, client, store) {
-		if (!isOwner) {
-			return await client[botNum].reply('You are not allowed to use this command', { from, quoted: message, groupMetadata });
-		}
-
+	async run({ from, message, args, settings, cmd, groupMetadata }, client, store) {
 		const messages = configuration.OPTIONS.json
 			? JSON.parse(fs.readFileSync(DB_PATH)).messages[from]
 			: await store.loadMessages(from);

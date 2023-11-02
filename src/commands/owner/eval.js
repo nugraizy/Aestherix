@@ -354,9 +354,11 @@ global.prints = print;
 
 	func = prettier.js_beautify(func.toString());
 	func = prettier.js_beautify(
-		func.split('\n').insert(1, 'try {').insert(-1, '} catch(e) { prints(false, format(e))}').join('\n')
+		func.split('\n').insert(1, 'try {').insert(-1, '} catch(e) { print(false, format(e))}').join('\n')
 	);
-	global[names] = func.includes('await') ? await new AsyncFunction(`return ${func}`)() : new Function(`return ${func}`)();
+	global[names] = func.includes('await')
+		? await new AsyncFunction('print', `return ${func}`)()
+		: new Function('print', `return ${func}`)();
 	global.functions = { ...global.functions, [names]: global[names] };
 	return func;
 };

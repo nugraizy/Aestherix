@@ -384,26 +384,28 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 				);
 
 				ERRLOG(color(err.message, 'white'));
-				ERRLOG(
+				const parseErr = (
 					err.stack
-						.split(err.name + ': ')[1]
-						.replace(err.message + '\n', '')
-						.split('    at ')
-						.map((stackEntry) => {
-							const regex = /\((.*?)\)/;
-							const match = regex.exec(stackEntry);
+						?.split(err.name + ': ')[1]
+						?.replace(err.message + '\n', '')
+						?.split('    at ') || []
+				)
+					.map((stackEntry) => {
+						const regex = /\((.*?)\)/;
+						const match = regex.exec(stackEntry);
 
-							if (match) {
-								const [fullMatch, text] = match;
-								const formattedStackEntry = `${color(stackEntry.replace(fullMatch, ''), 'white')}(${color(text, '#ff71ce')})`;
+						if (match) {
+							const [fullMatch, text] = match;
+							const formattedStackEntry = `${color(stackEntry.replace(fullMatch, ''), 'white')}(${color(text, '#ff71ce')})`;
 
-								return formattedStackEntry.replace('\n', '') + '\n';
-							} else {
-								return stackEntry.trim();
-							}
-						})
-						.join(`${color('❯ ', '#FF5555') + color('at ', '#ff71ce')}`)
-				);
+							return formattedStackEntry.replace('\n', '') + '\n';
+						} else {
+							return stackEntry.trim();
+						}
+					})
+					.join(`${color('❯ ', '#FF5555') + color('at ', '#ff71ce')}`);
+
+				parseErr && ERRLOG(parseErr);
 			}
 		}
 	}

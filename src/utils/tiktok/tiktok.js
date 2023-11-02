@@ -339,7 +339,7 @@ class RequestModule extends ResponseParser {
 			headers: {
 				'User-Agent':
 					'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 YaBrowser/23.1.5.750 (beta) Yowser/2.5 Safari/537.36',
-				Cookie: COOKIE.TIKTOK_COOKIE
+				Cookie: COOKIE.TIKTOK_COOKIE.replace(/\n/g, '')
 			}
 		};
 	}

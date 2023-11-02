@@ -9,9 +9,9 @@ import { Cache } from '../../modules/cache.js';
 import { INFOLOG, color } from '../../../utils/modules/index.js';
 
 const { default: makeWASocket, makeInMemoryStore, DEFAULT_CONNECTION_CONFIG } = baileys;
-const rl = () => readline.createInterface({ input: process.stdin, output: process.stdout });
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 const logger = (OPTIONS) => P({ level: OPTIONS.trace ? 'trace' : OPTIONS.debugMode ? 'debug' : 'fatal' });
-const question = (text) => new Promise((resolve) => rl().question(text, resolve));
+const question = (text) => new Promise((resolve) => rl.question(text, resolve));
 
 let phoneNumber;
 
@@ -30,7 +30,7 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 	const CONNECTION_CONFIG = {
 		printQRInTerminal: !OPTIONS.pairMode,
 		mobile: false,
-		browser: ['Safari (macOS)', 'browser', '1.0.0'],
+		browser: ['Safari (macOS)', '', ''],
 		version: DEFAULT_CONNECTION_CONFIG.version,
 		logger: logger(OPTIONS),
 		auth: {
@@ -88,6 +88,8 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 		INFOLOG(color('Pairing code :', '#ff71ce'), color(code, 'white'));
 		INFOLOG(color('Waiting for code input', 'white'), color('. . .', 'cyan'));
 	}
+
+	rl.close();
 
 	return { Client, store };
 };

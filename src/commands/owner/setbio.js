@@ -10,11 +10,7 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	async run({ isOwner, from, query, message, groupMetadata }, client) {
-		if (!isOwner) {
-			return await client[botNum].reply('You are not allowed to use this command', { from, quoted: message, groupMetadata });
-		}
-
+	async run({ from, query, message, groupMetadata }, client) {
 		if (!query) {
 			return await client[botNum].reply('You must provide a bio to set', { from, quoted: message, groupMetadata });
 		}

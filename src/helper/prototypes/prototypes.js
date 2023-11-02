@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import PhoneNumber from 'awesome-phonenumber';
+import { findPhoneNumbersInText } from 'libphonenumber-js';
 
 import { S_WHATSAPP_NET } from '../misc/wa_data/constants.js';
 
@@ -97,18 +97,14 @@ Object.setPrototypeOf(String.prototype, {
 	},
 	replaceAll: function (find, replace) {
 		return this.replace(new RegExp(find, 'g'), replace);
+	},
+	parseNumber: function () {
+		return _.sortedUniq(findPhoneNumbersInText(this).map((v) => v.number.number.replace('+', '') + S_WHATSAPP_NET));
 	}
 });
 
 Object.setPrototypeOf(Array.prototype, {
 	...Array.prototype,
-	parseNumber: function () {
-		return (
-			_.sortedUniq(this)
-				.filter((v) => PhoneNumber(`+${v.replace(/[A-Za-z-@\s+s.whatsapp.net]/g, '')}`).isValid())
-				?.map((v) => `${v.replace(/[\s+-]/g, '')}${S_WHATSAPP_NET}`.trim()) || []
-		);
-	},
 	insert: function (index) {
 		this.splice(...[index, 0].concat(Array.prototype.slice.call(arguments, 1)));
 		return this;

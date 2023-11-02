@@ -1,4 +1,4 @@
-import PhoneNumber from 'awesome-phonenumber';
+import { findPhoneNumbersInText } from 'libphonenumber-js';
 import fs from 'fs-extra';
 
 import configuration from '../../helper/config/connect.js';
@@ -24,13 +24,9 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	async run({ from, message, isOwner, mediaData, mention, bodyQuoted, query, groupMetadata }, client) {
+	async run({ from, message, mediaData, mention, bodyQuoted, query, groupMetadata }, client) {
 		if (!query) {
 			return await client[botNum].reply('Please provide user to unban', { from, quoted: message, groupMetadata });
-		}
-
-		if (!isOwner) {
-			return await client[botNum].reply('You are not allowed to use this command', { from, quoted: message, groupMetadata });
 		}
 
 		const userBanned = await fs.readJSON('./databases/users/banned.json');
@@ -69,48 +65,38 @@ export default {
 		}
 
 		if (query) {
-			const reg = new RegExp('[A-Za-z-@s+s.whatsapp.net]', 'g');
-			const checkIfValid = (input) => {
-				const isValid = PhoneNumber(`+${input}`).isValid();
+			const numbers = findPhoneNumbersInText(query);
 
-				return isValid;
-			};
+			for (let user of numbers) {
+				let {
+					number: { number }
+				} = user;
 
-			query = query.includes(',') ? query.split(',') : [query];
+				number = number.replace(/\+/g, '');
 
-			for (let user of query) {
-				if (reg.test(user)) {
-					user = user.replace(reg, '');
-				}
+				const isBanned = userBanned.includes(`${number}${S_WHATSAPP_NET}`);
 
-				const validation = checkIfValid(user);
-				const notBanned = userBanned.includes(`${user}${S_WHATSAPP_NET}`);
-
-				if (!validation) {
-					await client[botNum].send(from, {
-						text: `@${user} is not a valid number`,
-						mentions: [`${user}${S_WHATSAPP_NET}`]
-					});
-				} else if (!notBanned) {
+				if (!isBanned) {
 					await client[botNum].send(
 						from,
-						{ text: `@${user} is not banned`, mentions: [`${user}${S_WHATSAPP_NET}`] },
+						{ text: `@${number} is not banned`, mentions: [`${number}${S_WHATSAPP_NET}`] },
 						{ groupMetadata }
 					);
-				} else {
-					const index = userBanned.indexOf(`${user}${S_WHATSAPP_NET}`);
-
-					configuration.cache.bannedlist.splice(indexs(configuration.cache.bannedlist, `${user}${S_WHATSAPP_NET}`), 1);
-					configuration.cache.blocklist.splice(indexs(configuration.cache.bannedlist, `${user}${S_WHATSAPP_NET}`), 1);
-					userBanned.splice(index, 1);
-					await fs.writeJSON('./databases/users/banned.json', userBanned);
-					await client[botNum].updateBlockStatus(`${user}${S_WHATSAPP_NET}`, 'unblock');
-					await client[botNum].send(
-						from,
-						{ text: `Success unbanning : @${user}`, mentions: [`${user}${S_WHATSAPP_NET}`] },
-						{ groupMetadata, quoted: message }
-					);
+					continue;
 				}
+
+				const index = userBanned.indexOf(`${number}${S_WHATSAPP_NET}`);
+
+				configuration.cache.bannedlist.splice(indexs(configuration.cache.bannedlist, `${number}${S_WHATSAPP_NET}`), 1);
+				configuration.cache.blocklist.splice(indexs(configuration.cache.bannedlist, `${number}${S_WHATSAPP_NET}`), 1);
+				userBanned.splice(index, 1);
+				await fs.writeJSON('./databases/users/banned.json', userBanned);
+				await client[botNum].updateBlockStatus(`${number}${S_WHATSAPP_NET}`, 'unblock');
+				await client[botNum].send(
+					from,
+					{ text: `Success unbanning : @${number}`, mentions: [`${number}${S_WHATSAPP_NET}`] },
+					{ groupMetadata, quoted: message }
+				);
 			}
 
 			return;

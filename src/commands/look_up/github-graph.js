@@ -19,7 +19,7 @@ export default {
 
 		const git = new GitHubGraph();
 
-		const init = await git.init('nugraizy', { round: true, theme: 'DRACULA' });
+		const init = await git.init(query, { round: true, theme: 'DRACULA' });
 
 		const create = await init.createGitHubGraph();
 

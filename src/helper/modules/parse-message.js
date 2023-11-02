@@ -1,5 +1,5 @@
 import { getContentType, normalizeMessageContent } from '@adiwajshing/baileys';
-import PhoneNumber from 'awesome-phonenumber';
+import PhoneNumber from 'libphonenumber-js';
 import fs from 'fs-extra';
 
 import configuration from '../config/connect.js';
@@ -139,10 +139,7 @@ export const reassign = async (m, client, store) => {
 
 		if (!isUsers) {
 			configuration.cache.users.set(sender, {
-				prettyNumber:
-					PhoneNumber(`+${sender?.replace(S_WHATSAPP_NET, '')}`)?.getNumber('international') ??
-					PhoneNumber(`+${m?.key?.participant?.replace(S_WHATSAPP_NET, '')}`)?.getNumber('international') ??
-					'No Data',
+				prettyNumber: PhoneNumber(`+${sender?.replace(S_WHATSAPP_NET, '')}`)?.formatInternational() ?? 'No Data',
 				ephemeralDuration: crawlProperty(m.message, 'expiration')
 			});
 		}

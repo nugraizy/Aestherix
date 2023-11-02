@@ -56,11 +56,7 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	async run({ isOwner, from, args, message, groupMetadata }, client, store) {
-		if (!isOwner) {
-			return await client[botNum].reply('You are not allowed to use this command', { from, quoted: message, groupMetadata });
-		}
-
+	async run({ from, args, message, groupMetadata }, client, store) {
 		if (args.length === 1) {
 			return await client[botNum].reply('You must provide a status to simulate', { from, quoted: message, groupMetadata });
 		}
