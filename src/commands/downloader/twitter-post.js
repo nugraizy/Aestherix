@@ -3,6 +3,26 @@ import parser from 'yargs-parser';
 import { color, delay, ERRLOG, INFOLOG, isURL, formatNumber } from '../../utils/modules/index.js';
 import { twitterDownload } from '../../utils/twitter/index.js';
 
+const createPostCaption = (post) => {
+	let capt = 'Twitter Post'.formatHeaders();
+
+	capt += `\n\nUsername : ${post.username}\n`;
+	capt += `Fullname : ${post.author}\n`;
+	capt += `Verified : ${post.isVerified ? 'Verified' : 'Not Verified'}\n`;
+	capt += `Blue Verified : ${post.isBlueVerified ? 'Verified' : 'Not Verified'}\n`;
+
+	capt += ` 💭 : ${post.caption.trim()}\n`;
+
+	const postInfo = `*${dayjs(post.published).format('HH.mm A · MMM, YYYY')}${
+		post.medias[0].type === 'video' ? ` · ${formatNumber(post.viewCount)} 👀` : ''
+	}*\n`;
+
+	capt += postInfo;
+	capt += `${formatNumber(post.replies)} 💬 · ${formatNumber(post.liked)} ❤️\n`;
+
+	return capt.trim();
+};
+
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
  */
@@ -48,49 +68,29 @@ export default {
 				continue;
 			}
 
-			let capt = 'Twitter Post'.formatHeaders();
+			const caption = createPostCaption(post);
 
-			capt += `\n\nUsername : ${post.username}\n`;
-			capt += `Fullname : ${post.author}\n`;
-			capt += `Verified : ${post.isVerified ? 'Verified' : 'Not Verified'}\n`;
-			capt += `Blue Verified : ${post.isBlueVerified ? 'Verified' : 'Not Verified'}\n`;
-
-			if (post.medias.length === 1) {
-				capt += ` 💭 : ${post.caption.trim()}\n\n`;
-
-				capt += `*${dayjs(post.published).format('HH.mm A · MMM, YYYY')}${
-					post.medias[0].type === 'video' ? ` · ${formatNumber(post.viewCount)} 👀` : ''
-				}*\n`;
-				capt += `${formatNumber(post.replies)} 💬 · ${formatNumber(post.liked)} ❤️\n`;
-
-				await client[botNum].send(
-					from,
-					post.medias[0].type === 'video'
-						? { video: { url: post.medias[0].url }, caption: capt.trim() }
-						: {
-								image: { url: post.medias[0].url },
-								caption: capt.trim()
-						  } /* eslint-disable-line */,
-					{ groupMetadata, quoted: message }
-				);
-			} else {
-				capt += ` 💭 : ${post.caption.trim()}\n`;
-				capt += `Tot. Media : ${post.medias.length}\n\n`;
-				capt += `*${dayjs(post.published).format('HH.mm A · MMM, YYYY')}${
-					post.medias[0].type === 'video' ? ` · ${formatNumber(post.viewCount)} 👀` : ''
-				}*\n`;
-				capt += `${formatNumber(post.replies)} 💬 · ${formatNumber(post.liked)} ❤️\n`;
-
-				await client[botNum].send(from, { text: capt.trim() }, { groupMetadata, quoted: message });
+			if (post.medias.length > 1) {
+				await client[botNum].send(from, { text: caption }, { groupMetadata, quoted: message });
 
 				for (const media of post.medias) {
 					await client[botNum].send(
 						from,
 						media.type === 'video' ? { video: { url: media.url } } : { image: { url: media.url } },
-						{ groupMetadata }
+						{
+							groupMetadata
+						}
 					);
 					await delay(100);
 				}
+			} else {
+				await client[botNum].send(
+					from,
+					post.medias[0].type === 'video'
+						? { video: { url: post.medias[0].url }, caption }
+						: { image: { url: post.medias[0].url }, caption },
+					{ groupMetadata, quoted: message }
+				);
 			}
 
 			INFOLOG(`${color('Downloaded Twitter Post', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);

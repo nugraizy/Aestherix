@@ -1,4 +1,5 @@
-*.env
+.env
+.instagram.env
 node_modules/
 src/helper/connection/session/**/*.json
 src/media/connection_databases/*.json
