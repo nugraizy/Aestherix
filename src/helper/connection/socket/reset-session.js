@@ -4,10 +4,6 @@ import fs from 'fs-extra';
  * @param {import('meow').Result} cli
  */
 export const resetSession = async (cli) => {
-	if (!cli.flags.resetOnStart) {
-		return;
-	}
-
 	const sessionName = `${cli.input[0] ?? 'Session-debug'}`;
 
 	if (await fs.exists(`./src/helper/connection/session/${sessionName}.json`)) {

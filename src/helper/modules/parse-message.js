@@ -82,7 +82,7 @@ export const reassign = async (m, client, store) => {
 		const isGroup = from.endsWith('@g.us');
 		let groupSettings;
 		const isBaileys =
-			(m?.key?.id?.startsWith('BAE5') && m?.key?.id?.length === 16) || (isFromMe && m?.key?.id?.startsWith('VOID'));
+			(m?.key?.id?.startsWith('BAE5') && m?.key?.id?.length === 16) || (isFromMe && m?.key?.id?.startsWith('HFINDER'));
 		const sender = isFromMe
 			? `${client[botNum].user.id.split(':')[0]}${S_WHATSAPP_NET}`
 			: isGroup

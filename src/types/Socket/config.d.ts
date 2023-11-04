@@ -8,6 +8,7 @@ export interface GlobalConfig {
 	user: {
 		cooldown: Cache;
 		afk: Cache;
+		charAI: Cache;
 	};
 	presences: Record<string, any>;
 	functions: Record<string, any>;

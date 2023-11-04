@@ -15,7 +15,8 @@ const globalConfig = {
 	},
 	user: {
 		afk: new Cache(),
-		cooldown: new Cache()
+		cooldown: new Cache(),
+		charAI: new Cache()
 	},
 	presences: {},
 	functions: {},

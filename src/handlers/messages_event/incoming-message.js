@@ -10,6 +10,8 @@ const handler = new Cache();
 
 const log = console.log;
 
+let isInit = false;
+
 let STATS_OFFLINE = true;
 const EVALY = ['/>', '$>', '=>', '!>'];
 const SEPERATOR = color('❯❯', '#BD93F9');
@@ -23,7 +25,8 @@ const HANDLER_PATH = {
 	WORDLE: '../game_handlers/wordle.js',
 	ANONYMOUS: './anonymous-message.js',
 	GROUPURL: '../misc/group-url.js',
-	ANTINSFW: '../misc/anti-nsfw.js'
+	ANTINSFW: '../misc/anti-nsfw.js',
+	AI: './character-ai.js'
 };
 
 const logMessage = (message) => {
@@ -43,26 +46,14 @@ const logMessage = (message) => {
 };
 
 const handleStubMessage = async (client, message, store) => {
-	if (!handler.has('STUBTYPE')) {
-		handler.set('STUBTYPE', (await import(HANDLER_PATH['STUBTYPE'])).default);
-	}
-
 	await handler.get('STUBTYPE')(client, message.messages[0], store);
 };
 
 const handleStoryMessage = async (client, message) => {
-	if (!handler.has('STORY')) {
-		handler.set('STORY', (await import(HANDLER_PATH['STORY'])).default);
-	}
-
 	await handler.get('STORY')(client, message);
 };
 
 const handleOfflineMessage = async (client, message, cmds) => {
-	if (!handler.has('OFFLINE')) {
-		handler.set('OFFLINE', (await import(HANDLER_PATH['OFFLINE'])).default);
-	}
-
 	if (STATS_OFFLINE) {
 		await cmds.commands.get('simulates').run(
 			{
@@ -105,6 +96,10 @@ const handleMentionedAfkUsers = (message, client, botNum) => {
 			quoted: message.message
 		});
 	}
+};
+
+const handleAIMessage = async (message, client) => {
+	await handler.get('AI')(message, client);
 };
 
 /**
@@ -188,6 +183,11 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 
 		if (!configuration.OPTIONS.noLogs) {
 			logMessage(message, runtime);
+		}
+
+		if (!Tempcmds && !message.isGroup) {
+			await handleAIMessage(message, client);
+			return;
 		}
 
 		if (Tempcmds && !message.isOwner) {
@@ -444,32 +444,35 @@ const handleAfk = (client, message) => {
 };
 
 const handleGames = async (message, client) => {
-	if (!handler.has('AKINATOR')) {
-		handler.set('AKINATOR', (await import(HANDLER_PATH.AKINATOR)).default);
-	} else if (!handler.has('TEBAKGAMBAR')) {
-		handler.set('TEBAKGAMBAR', (await import(HANDLER_PATH.TEBAKGAMBAR)).default);
-	} else if (!handler.has('SAMBUNGKATA')) {
-		handler.set('SAMBUNGKATA', (await import(HANDLER_PATH.SAMBUNGKATA)).default);
-	} else if (!handler.has('WORDLE')) {
-		handler.set('WORDLE', (await import(HANDLER_PATH.WORDLE)).default);
-	} else if (!handler.has('ANONYMOUS')) {
-		handler.set('ANONYMOUS', (await import(HANDLER_PATH.ANONYMOUS)).default);
-	} else if (!handler.has('GROUPURL')) {
-		handler.set('GROUPURL', (await import(HANDLER_PATH.GROUPURL)).default);
-	} else if (!handler.has('ANTINSFW')) {
-		handler.set('ANTINSFW', (await import(HANDLER_PATH.ANTINSFW)).default);
-	}
-
 	await Promise.all(
 		Array.from(handler.keys())
-			.filter((v) => !['STUBTYPE', 'STORY', 'OFFLINE'].includes(v))
+			.filter((v) => !['STUBTYPE', 'STORY', 'OFFLINE', 'AI'].includes(v))
 			.map((v) => handler.get(v)(message, client, message))
 	);
+};
+
+const initHandler = async () => {
+	handler.set('AKINATOR', (await import(HANDLER_PATH.AKINATOR)).default);
+	handler.set('TEBAKGAMBAR', (await import(HANDLER_PATH.TEBAKGAMBAR)).default);
+	handler.set('SAMBUNGKATA', (await import(HANDLER_PATH.SAMBUNGKATA)).default);
+	handler.set('WORDLE', (await import(HANDLER_PATH.WORDLE)).default);
+	handler.set('ANONYMOUS', (await import(HANDLER_PATH.ANONYMOUS)).default);
+	handler.set('GROUPURL', (await import(HANDLER_PATH.GROUPURL)).default);
+	handler.set('ANTINSFW', (await import(HANDLER_PATH.ANTINSFW)).default);
+	handler.set('AI', (await import(HANDLER_PATH.AI)).default);
+	handler.set('STUBTYPE', (await import(HANDLER_PATH.STUBTYPE)).default);
+	handler.set('STORY', (await import(HANDLER_PATH.STORY)).default);
+	handler.set('OFFLINE', (await import(HANDLER_PATH.OFFLINE)).default);
 };
 
 const handleIncomingMessage = async (message, client, cmds, store, user, state) => {
 	if (message === undefined) {
 		return;
+	}
+
+	if (!isInit) {
+		await initHandler();
+		isInit = true;
 	}
 
 	if (configuration.OPTIONS.debugMode && !message?.messages?.[0]?.key?.fromMe) {

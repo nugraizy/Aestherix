@@ -4,6 +4,7 @@ export * from './arq/index.js';
 export * from './bandcamp/index.js';
 export * from './bilibili/index.js';
 export * from './brainly/index.js';
+export * from './char-ai/index.js';
 export * from './cnn/index.js';
 export * from './converter/index.js';
 export * from './deepai/index.js';
