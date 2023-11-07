@@ -1,13 +1,13 @@
 import meow from 'meow';
 import chalk from 'chalk';
 
-import { color } from '../../../utils/modules/index.js';
+import { INFOLOG, color } from '../../../utils/modules/index.js';
 
 const helpFlag = `
-	 ${color('Usage', 'orange')}
+	 ${color('Usage', 'yellow')}
 	   $ node ${color('.', 'cyan')} <?session> [options]
 
-	 ${color('Options', 'orange')}
+	 ${color('Options', 'yellow')}
 	   --prefix, -p          ${color('Set your custom prefix.', '#05ffa1')}
 	   --read_only, -y       ${color('Read only.', '#05ffa1')}
 	   --auto_read, -r       ${color('Auto read every incoming message.', '#05ffa1')}
@@ -34,17 +34,17 @@ const helpFlag = `
 	   --story, q            ${color('Auto download people story after the bot received the story.', '#05ffa1')}
 	   --offline, -f         ${color('Set your current presence to offline.', '#05ffa1')}
 	   --no_call, -d         ${color('Reject incoming call.', '#05ffa1')}
-	   --insta_notifier, -i  ${color('Handle incoming Instagram DMs.', '#05ffa1')}
+	   --ai, -i              ${color('Handle incoming Messages, with AI.', '#05ffa1')}
 	   --limit_reset, -l     ${color('Enable Auto-reset user limit.', '#05ffa1')}
 	   --reset_on_start, -x  ${color('Auto reset DB-Connections every start of the script.', '#05ffa1')}
 	   --no_limit, -u        ${color('Set commands limit to None.', '#05ffa1')}
 	   --pair_mode, -z       ${color('Enable pair mode.', '#05ffa1')} ${color(
 	'This needs to input your host number to get the code.',
-	'gray'
+	'#ef476f'
 )}
 	   --help, -h            ${color('Show this message.', '#05ffa1')}
 
-	 ${color('Examples', 'orange')}
+	 ${color('Examples', 'yellow')}
 	   ${chalk.italic('$ node . --read_only -t')}
  `;
 
@@ -74,7 +74,7 @@ export const parseCli = () =>
 			story: { type: 'boolean', shortFlag: 'q' },
 			offline: { type: 'boolean', shortFlag: 'f' },
 			no_call: { type: 'boolean', shortFlag: 'd' },
-			insta_notifier: { type: 'boolean', shortFlag: 'i' },
+			ai: { type: 'boolean', shortFlag: 'i' },
 			limit_reset: { type: 'boolean', shortFlag: 'l' },
 			reset_on_start: { type: 'boolean', shortFlag: 'x' },
 			no_limit: { type: 'boolean', shortFlag: 'u' },
@@ -87,6 +87,26 @@ const cli = parseCli();
 if (cli.flags.help) {
 	console.log(cli.help);
 	process.exit(0);
+}
+
+if (cli.flags.noLoad) {
+	INFOLOG(
+		color('[WARN]', 'yellow'),
+		'-v',
+		'This flag is ' + color('deprecated', '#FF5555') + '. The module load animation will be disabled by default.'
+	);
+	cli.flags.noLoad = false;
+	cli.unnormalizedFlags.v = false;
+}
+
+if (cli.flags.json) {
+	INFOLOG(
+		color('[WARN]', 'yellow'),
+		'-j',
+		'This flag is ' + color('deprecated', '#FF5555') + '. The JSON DB will be disabled by default.'
+	);
+	cli.flags.json = false;
+	cli.unnormalizedFlags.j = false;
 }
 
 export { cli };

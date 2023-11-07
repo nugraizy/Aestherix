@@ -4,7 +4,7 @@ import { fileTypeFromBuffer } from 'file-type';
 import FormData from 'form-data';
 import fs from 'fs-extra';
 import gradient from 'gradient-string';
-import fetch from 'node-fetch';
+import { fetch } from 'undici';
 import ms from 'parse-ms';
 import _ from 'lodash';
 import dayjs from 'dayjs';
@@ -32,9 +32,17 @@ export const fetchJSON = async (url, options) => await (await fetch(url, options
  * Fetches buffers
  * @param {string} url
  * @param {RequestInit} options node-fetch options
- * @returns {Promise<ArrayBufferLike>}
+ * @returns {Promise<ArrayBuffer>}
  */
 export const fetchBUFFER = async (url, options) => await (await fetch(url, options)).arrayBuffer();
+
+/**
+ * Fetches responses headers
+ * @param {string} url
+ * @param {RequestInit} options node-fetch options
+ * @returns {Promise<import('undici').Response['headers']>}
+ */
+export const fetchHEADERS = async (url, options) => (await fetch(url, options)).headers;
 
 /**
  * Load HTML using cheerio

@@ -2,10 +2,10 @@ import fs from 'fs-extra';
 
 import configuration from '../../helper/config/connect.js';
 
-const getRandomCommand = () =>
-	Array.from(configuration.cmds.commands.keys())[Math.floor(Math.random() * configuration.cmds.commands.size)];
+const getRandomCommand = (cmd) => cmd[Math.floor(Math.random() * cmd.length)].name;
 
 const format = {
+	AI: 'ＡＩ',
 	'AL-Quran': 'Ａｌ-Ｑｕｒａｎ',
 	Anime: 'Ａｎｉｍｅ',
 	Anonymous: 'Ａｎｏｎｙｍｏｕｓ',
@@ -22,6 +22,7 @@ const format = {
 	Owner: 'Ｏｗｎｅｒ',
 	Search: 'Ｓｅａｒｃｈ'
 };
+const { version } = await fs.readJSON('./package.json');
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -36,29 +37,33 @@ export default {
 	limit: 5,
 	status: 'enable',
 	async run({ from, prefix, groupMetadata }, client) {
-		let capt = `𓆩 Void Bot ⁣𓆪\nV ${(await fs.readJSON('./package.json')).version.toUpperCase()}\n\n`;
-		const container = {};
+		let capt = `𓆩 𝓗𝓲𝓭𝓭𝓮𝓷 𝓕𝓲𝓷𝓭𝓮𝓻 ${version} 𓆪\n\n`;
 
-		configuration.cmds.commands.forEach((value, key) => {
-			if (value.name !== '') {
-				if (Object.keys(container).includes(value.category)) {
-					container[value.category].push(key);
-				} else {
-					container[value.category] = [key];
-				}
-			}
-		});
+		if (Object.keys(configuration.cmds.menu).length === 0) {
+			const container = configuration.cmds.commands
+				.filter((value) => value.name !== '', 'filter')
+				.reduce((acc, value) => {
+					acc[value.category] = (acc[value.category] || []).concat(value);
+					return acc;
+				}, {});
 
-		for (const key of Object.keys(container).sort((a, b) => a.localeCompare(b))) {
-			capt += `⪨ *${format[key]}* ⪩\n\n${container[key]
-				.sort((a, b) => a.localeCompare(b))
-				.map((v) => ` ⪩ ${prefix}${v}`)
-				.join('\n')}\n\n\n`;
+			configuration.cmds.menu = container;
 		}
 
-		capt = `${capt.trim()}\n\nUse : ${prefix}${getRandomCommand()} -H\n~> to see the detail of the command.\n~> total command : ${
-			configuration.cmds.commands.size
-		}`;
+		for (const category in configuration.cmds.menu) {
+			const sortedCommands = configuration.cmds.menu[category]
+				.sort((a, b) => a.name.localeCompare(b.name))
+				.map((v) => `╭ ${v.description}\n├ ${prefix}${v.name}\n├ ${v.usage}\n╰ ⏳ ${v.cooldown}s | 🆔 ${v.aliases.join(', ')}`)
+				.join('\n');
+
+			capt += `${format[category].formatHeaders()}\n\n${sortedCommands}\n\n\n`;
+		}
+
+		capt = `${capt.trim()}\n\nUse : ${prefix}${getRandomCommand(
+			Object.values(configuration.cmds.menu).flat()
+		)} -H\n~> to see the detail of the command.\n~> total command : ${configuration.cmds.commands.size}`;
+
+		configuration.cmds.menuStr = capt;
 
 		await client[botNum].send(
 			from,

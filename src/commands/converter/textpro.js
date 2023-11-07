@@ -1,10 +1,10 @@
-import axios from 'axios';
 import fs from 'fs';
 import imageSize from 'image-size';
 import path from 'path';
 import sharp from 'sharp';
 import yargsParser from 'yargs-parser';
 import _ from 'lodash';
+import { fetch } from 'undici';
 
 import configuration from '../../helper/config/connect.js';
 import { randomize } from '../../utils/modules/index.js';
@@ -117,9 +117,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 				continue;
 			}
 
-			const { data } = await axios.get(result.dl, {
-				responseType: 'arraybuffer'
-			});
+			const data = Buffer.from(await (await fetch(result.dl)).arrayBuffer(), 'base64');
 
 			const { width, height } = imageSize(data);
 

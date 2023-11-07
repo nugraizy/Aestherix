@@ -5,12 +5,12 @@ import {
 	generateWAMessageFromContent,
 	toBuffer
 } from '@adiwajshing/baileys';
-import axios from 'axios';
 import { fileTypeFromBuffer } from 'file-type';
 import ffmpeg from 'fluent-ffmpeg';
 import webpmux from 'node-webpmux';
 import sharp from 'sharp';
 import { TextEncoder } from 'util';
+import { fetch } from 'undici';
 
 import configuration from '../config/connect.js';
 import { S_WHATSAPP_NET, UPDATE, ZERO } from '../misc/wa_data/index.js';
@@ -137,6 +137,29 @@ export const assign = (client) => {
 			}
 		}
 
+		if ((message?.video || message?.image || message?.document || message?.audio)?.url) {
+			const buffer = Buffer.from(
+				await fetchBUFFER((message.video || message.image || message.document || message.audio)?.url),
+				'base64'
+			);
+
+			if (message.video) {
+				message.video = buffer;
+			}
+
+			if (message.image) {
+				message.image = buffer;
+			}
+
+			if (message.document) {
+				message.document = buffer;
+			}
+
+			if (message.audio) {
+				message.audio = buffer;
+			}
+		}
+
 		// filter: if ('templateButtons' in message) {
 		// 	const filteredButtons = message.templateButtons.filter((v) => v.quickReplyButton);
 
@@ -200,15 +223,7 @@ export const assign = (client) => {
 		prepareSticker: async (media, filename, type, exif) => {
 			const isMediaURL = Buffer.isBuffer(media) ? false : isURL(media) ? true : false;
 
-			media = isMediaURL
-				? (
-						await axios.get(media, {
-							responseType: 'arraybuffer',
-							headers: { DNT: 1, 'Upgrade-Insecure-Request': 1 },
-							validateStatus: () => true
-						})
-				  ).data /* eslint-disable-line */
-				: media;
+			media = isMediaURL ? Buffer.from(await (await fetch(media)).arrayBuffer(), 'base64') /* eslint-disable-line */ : media;
 
 			const bufferType =
 				type === 'imageMessage'

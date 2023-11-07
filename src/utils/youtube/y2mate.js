@@ -1,8 +1,7 @@
 /* eslint-disable camelcase */
-import axios from 'axios';
 import yts from 'yt-search';
 
-import { isURL } from '../modules/index.js';
+import { isURL, fetchJSON } from '../modules/index.js';
 import { Cache } from '../../helper/modules/cache.js';
 
 const ajaxUrl = 'https://www.y2mate.com/mates/en865/analyzeV2/ajax';
@@ -16,7 +15,9 @@ const isUrl = (url) =>
 const cache = new Cache();
 
 const req = async (url, formdata) => {
-	return await axios.post(url, new URLSearchParams(Object.entries(formdata)), {
+	return await fetchJSON(url, {
+		body: new URLSearchParams(formdata),
+		method: 'POST',
 		headers: {
 			'user-agent':
 				'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 YaBrowser/23.1.5.750 (beta) Yowser/2.5 Safari/537.36',
@@ -27,7 +28,7 @@ const req = async (url, formdata) => {
 };
 
 const convert = async (vid, k) => {
-	const { data } = await req(convertUrl, {
+	const data = await req(convertUrl, {
 		vid,
 		k
 	});
@@ -38,7 +39,7 @@ const convert = async (vid, k) => {
 const yt = (url, type) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { data } = await req(ajaxUrl, {
+			const data = await req(ajaxUrl, {
 				k_query: url,
 				k_page: 'home',
 				hl: 'en',

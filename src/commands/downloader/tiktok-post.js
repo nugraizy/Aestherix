@@ -1,6 +1,5 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
-import axios from 'axios';
 
 import { color, delay, ERRLOG, INFOLOG, isURL, numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
@@ -115,14 +114,7 @@ export default {
 						data = await client[botNum].send(
 							from,
 							{
-								image: new Buffer.from(
-									(
-										await axios.get(url, {
-											responseType: 'arraybuffer'
-										})
-									).data,
-									'base64'
-								),
+								image: { url },
 								caption: capt.trim()
 							},
 							{ groupMetadata, quoted: message }
@@ -133,14 +125,7 @@ export default {
 					client[botNum].send(
 						from,
 						{
-							image: new Buffer.from(
-								(
-									await axios.get(url, {
-										responseType: 'arraybuffer'
-									})
-								).data,
-								'base64'
-							)
+							image: { url }
 						},
 						{ groupMetadata, quoted: data }
 					);
@@ -157,25 +142,9 @@ export default {
 			await client[botNum].send(
 				from,
 				{
-					video: new Buffer.from(
-						(
-							await axios.get(
-								container.urls[
-									!NO_WM && !WITH_WM
-										? 'withNoWatermark'
-										: WITH_WM
-										? 'withWatermark'
-										: NO_WM
-										? 'withNoWatermark'
-										: 'withWatermark'
-								],
-								{
-									responseType: 'arraybuffer'
-								}
-							)
-						).data,
-						'base64'
-					),
+					video: {
+						url: container.urls[!NO_WM && !WITH_WM ? 'withNoWatermark' : WITH_WM ? 'withWatermark' : 'withNoWatermark']
+					},
 					caption: capt.trim()
 				},
 				{ groupMetadata, quoted: message }

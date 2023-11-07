@@ -5,6 +5,8 @@ import { runtime } from '../../index.js';
 import { Limit, checkAfk, deleteAfk, getAfk, reassign } from '../../helper/index.js';
 import { color, getTimeSince, INFOLOG, ERRLOG } from '../../utils/modules/index.js';
 import { Cache } from '../../helper/modules/cache.js';
+import { ChatGPTDialogue } from '../../utils/index.js';
+import dayjs from 'dayjs';
 
 const handler = new Cache();
 
@@ -185,7 +187,19 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 			logMessage(message, runtime);
 		}
 
-		if (!Tempcmds && !message.isGroup) {
+		if (!Tempcmds && !message.isGroup && configuration.OPTIONS.ai) {
+			const isSession = configuration.user.charAI.has(message.sender);
+
+			if (!isSession) {
+				configuration.user.charAI.set(
+					message.sender,
+					new ChatGPTDialogue({
+						name: message.pushname,
+						time: dayjs().format('ddd DD/MM/YYYY HH:mm')
+					})
+				);
+			}
+
 			await handleAIMessage(message, client);
 			return;
 		}

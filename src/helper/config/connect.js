@@ -11,7 +11,9 @@ const users = await fs.readJSON('./src/helper/config/settings.json');
 const globalConfig = {
 	cmds: {
 		commands: new Cache(),
-		aliases: []
+		aliases: [],
+		menu: {},
+		menuStr: ''
 	},
 	user: {
 		afk: new Cache(),

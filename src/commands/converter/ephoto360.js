@@ -1,9 +1,9 @@
-import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
 import yargsParser from 'yargs-parser';
 import _ from 'lodash';
+import { fetch } from 'undici';
 
 import configuration from '../../helper/config/connect.js';
 import { randomize } from '../../utils/modules/index.js';
@@ -130,9 +130,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 				continue;
 			}
 
-			const { data } = await axios.get(result.preview, {
-				responseType: 'arraybuffer'
-			});
+			const data = Buffer.from(await (await fetch(result.preview)).arrayBuffer(), 'base64');
 
 			const buffer = isStickers
 				? await client[botNum].prepareSticker(data, path.join(__dirname, `src/media/temporary_files/${filename}`), undefined, {

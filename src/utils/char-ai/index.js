@@ -1,15 +1,10 @@
-import axios from 'axios';
-
-import { generateDeviceID, generateGPTToken, printDay, ROLES } from './util.js';
+import { generateDeviceID, generateGPTToken, ROLES } from './util.js';
+import { fetchJSON } from '../modules/index.js';
 
 const url = 'https://chatgpt.vulcanlabs.co/api/v3';
 
 export class ChatGPTDialogue {
-	#request = axios.create({
-		baseURL: url
-	});
-
-	constructor() {
+	constructor(data) {
 		/**
 		 * @private
 		 */
@@ -21,7 +16,7 @@ export class ChatGPTDialogue {
 		this._messages = [
 			{
 				role: 'assistant',
-				content: ROLES.join(', ')
+				content: ROLES(data).join(', ')
 			}
 		];
 
@@ -45,16 +40,14 @@ export class ChatGPTDialogue {
 	 * @returns
 	 */
 	_request(path, method = 'GET', data = null) {
-		return this.#request({
-			url: path,
+		return fetchJSON(url + path, {
 			method,
 			headers: {
 				Authorization: `Bearer ${generateGPTToken()}`,
 				'Content-Type': 'application/json; charset=utf-8',
 				'User-Agent': 'Chat GPT Android 3.0.2 373 Android SDK: 30 (11)'
 			},
-			data,
-			validateStatus: () => true
+			body: JSON.stringify(data)
 		});
 	}
 
@@ -69,11 +62,11 @@ export class ChatGPTDialogue {
 				if (text) {
 					this._postData.messages.push({
 						role: 'user',
-						content: printDay() + '\n' + text
+						content: text
 					});
 				}
 
-				const { data } = await this._request('/chat', 'POST', this._postData);
+				const data = await this._request('/chat', 'POST', this._postData);
 
 				if (data.error) {
 					if (data.error.code === 'context_length_exceeded') {

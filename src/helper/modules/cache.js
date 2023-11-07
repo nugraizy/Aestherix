@@ -138,7 +138,7 @@ export class Cache {
 		} else if (action === 'find') {
 			for (const key in this.cache) {
 				if (func(key, this.cache[key])) {
-					return { key, value: this.cache[key] };
+					return this.cache[key];
 				}
 			}
 
@@ -148,7 +148,7 @@ export class Cache {
 
 			for (const key in this.cache) {
 				if (func(key, this.cache[key])) {
-					container.push({ key, value: this.cache[key] });
+					container.push(this.cache[key]);
 				}
 			}
 
