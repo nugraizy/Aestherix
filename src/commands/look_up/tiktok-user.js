@@ -1,7 +1,7 @@
 import parser from 'yargs-parser';
 import _ from 'lodash';
 
-import { color, ERRLOG, isURL, numberWithCommas } from '../../utils/modules/index.js';
+import { color, ERRLOG, numberWithCommas } from '../../utils/modules/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
 
 /**
@@ -61,71 +61,53 @@ export default {
 
 		let { _: usernames } = parser(query);
 
-		if (usernames.length === 1 && isURL(usernames[0])) {
-			return await client[botNum].reply('Please specify a valid TikTok usernames', { from, quoted: message, groupMetadata });
-		}
+		const users = await tiktok.search.lookup(usernames);
 
-		for (const user of usernames) {
-			if (isURL(user.trim())) {
-				await client[botNum].reply('Please specify a valid TikTok username', { from, quoted: message, groupMetadata });
-
-				continue;
-			}
-
-			const users = await tiktok.profileDetail(user);
-
-			if ('error' in users) {
-				client[botNum].reply(`Error while searching TikTok user\n\n${users.error}`, { from, quoted: message, groupMetadata });
-
-				ERRLOG(`⚠️ ${color('Failed to Searching TikTok User', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
-
-				continue;
-			} else {
-				const {
-					keyword,
-					username,
-					fullName,
-					biography,
-					isVerified,
-					profileHD,
-					profileSD,
-					profileLOW,
-					followers,
-					following,
-					heart,
-					totalVideo,
-					posts
-				} = users;
-
-				let capt = `Username : ${username}\n`;
-
-				capt += `Fullname : ${fullName}\n`;
-				capt += `Followers : ${numberWithCommas(followers)}\n`;
-				capt += `Following : ${numberWithCommas(following)}\n`;
-				capt += `Tot. Like : ${numberWithCommas(heart)}\n`;
-				capt += `Tot. Post : ${numberWithCommas(totalVideo)}\n`;
-				capt += `Verified? : ${isVerified ? 'Yes' : 'No'}\n`;
-				capt += `ID Profile : ${keyword}\n`;
-				capt += `Biography : ${biography}\n`;
-
-				await client[botNum].send(
+		for (const data in users) {
+			if ('error' in users[data]) {
+				client[botNum].reply(`Error while searching TikTok user\n\n${users[data].error}`, {
 					from,
-					{
-						image: { url: profileHD },
-						caption: 'TikTok User Lookup'.formatHeaders() + `\n\n${capt.trim()}`.trimEnd(),
-						templateButtons: [
-							{ urlButton: { displayText: 'Profile Picture HD Source', url: profileHD } },
-							{ urlButton: { displayText: 'Profile Picture SD Source', url: profileSD } },
-							{ urlButton: { displayText: 'Profile Picture Low Source', url: profileLOW } },
-							posts.length !== 0
-								? { quickReplyButton: { displayText: 'Crawl Videos', id: `.tikstalk -crawl ${JSON.stringify(posts)}` } }
-								: {}
-						],
-						footer: capt.trim()
-					},
-					{ groupMetadata, quoted: message }
-				);
+					quoted: message,
+					groupMetadata
+				});
+
+				ERRLOG(`⚠️ ${color('Failed to Search TikTok User', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
+				continue;
 			}
+
+			const {
+				keyword,
+				username,
+				fullName,
+				biography,
+				isVerified,
+				profileHD,
+				profileSD,
+				followers,
+				following,
+				heart,
+				totalVideo
+			} = users[data];
+
+			let capt = `Username : ${username}\n`;
+
+			capt += `Fullname : ${fullName}\n`;
+			capt += `Followers : ${numberWithCommas(followers)}\n`;
+			capt += `Following : ${numberWithCommas(following)}\n`;
+			capt += `Tot. Like : ${numberWithCommas(heart)}\n`;
+			capt += `Tot. Post : ${numberWithCommas(totalVideo)}\n`;
+			capt += `Verified? : ${isVerified ? 'Yes' : 'No'}\n`;
+			capt += `ID Profile : ${keyword}\n`;
+			capt += `Biography : ${biography}\n`;
+
+			await client[botNum].send(
+				from,
+				{
+					image: { url: profileHD || profileSD },
+					caption: 'TikTok User Lookup'.formatHeaders() + `\n\n${capt.trim()}`.trimEnd()
+				},
+				{ groupMetadata, quoted: message }
+			);
 		}
 	}
 };

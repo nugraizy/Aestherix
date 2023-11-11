@@ -1,10 +1,8 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
-import { color, delay, ERRLOG, INFOLOG, isURL, numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
+import { color, delay, ERRLOG, INFOLOG, numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
-
-const regex = (input) => /(?:https:?\/{2})?(?:w{3}|vm|vt|t)?\.?tiktok.com\/([^\s&]+)/gi.test(input);
 
 /**
  * @type {import('../types.js').Plugins}
@@ -43,75 +41,54 @@ export default {
 			WITH_WM = removeDuplicatesArray(WITH_WM)[0];
 		}
 
-		if (urls.length === 1 && !isURL(urls[0])) {
-			return await client[botNum].reply('Please specify a valid url', { from, quoted: message, groupMetadata });
-		}
+		const posts = await tiktok.download.post(urls);
 
-		if (urls.length === 1 && !regex(urls[0])) {
-			return await client[botNum].reply('Please specify a valid TikTok url', { from, quoted: message, groupMetadata });
-		}
+		for (const data in posts) {
+			if ('error' in posts[data]) {
+				await client[botNum].reply(`Error while downloading TikTok post\n\n${posts[data].error}\n${data}`, {
+					from,
+					quoted: message,
+					groupMetadata
+				});
 
-		for (const url of removeDuplicatesArray(urls.map((v) => v.trim()))) {
-			if (!isURL(url)) {
-				await client[botNum].reply('Please specify a valid url', { from, quoted: message, groupMetadata });
-
-				continue;
-			} else if (!regex(url)) {
-				await client[botNum].reply('Please specify a valid TikTok url', { from, quoted: message, groupMetadata });
-
+				ERRLOG(`⚠️ ${color('Failed to Download TikTok Post', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
 				continue;
 			}
-
-			const container = await tiktok.downloadMedia(url);
 
 			INFOLOG(`${color('Downloading TikTok Media', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
-			if ('error' in container) {
-				ERRLOG(`⚠️ ${color('Error while downloading TikTok Video', '#ff0000')} for ${color(prettyNumber, '#ff71ce')}`);
-				await client[botNum].reply(
-					`Error while downloading TikTok Video\n\n${url.split(' ')[0]}\nMSG: ${container.error || ''}`,
-					{
-						from,
-						quoted: message,
-						groupMetadata
-					}
-				);
+			const date = dayjs(posts[data].published * 1000).format('HH:mm:ss DD/MM/YYYY');
+			let capt = `TikTok ${posts[data].type === 'images' ? 'Slide' : 'Video'}`.formatHeaders();
 
-				continue;
-			}
-
-			const date = dayjs(container.published * 1000).format('HH:mm:ss DD/MM/YYYY');
-			let capt = `TikTok ${container.type === 'images' ? 'Slide' : 'Video'}`.formatHeaders();
-
-			capt += `\n\nAuthor : ${container.author}\n`;
-			capt += `Username : ${container.nickname}\n`;
-			capt += `Verifies : ${container.verified ? 'Verified' : 'Not Verified'}\n`;
-			capt += `Followers : ${numberWithCommas(container.followers)}\n`;
-			capt += `Following : ${numberWithCommas(container.following)}\n`;
-			capt += `Tot. Video : ${numberWithCommas(container.totalVideo)}\n`;
-			capt += `Liked : ${numberWithCommas(container.liked)}\n`;
-			capt += `Shared : ${numberWithCommas(container.shared)}\n`;
-			capt += `Comment : ${numberWithCommas(container.comment)}\n`;
+			capt += `\n\nAuthor : ${posts[data].author}\n`;
+			capt += `Username : ${posts[data].nickname}\n`;
+			capt += `Verifies : ${posts[data].verified ? 'Verified' : 'Not Verified'}\n`;
+			capt += `Followers : ${numberWithCommas(posts[data].followers)}\n`;
+			capt += `Following : ${numberWithCommas(posts[data].following)}\n`;
+			capt += `Tot. Video : ${numberWithCommas(posts[data].totalVideo)}\n`;
+			capt += `Liked : ${numberWithCommas(posts[data].liked)}\n`;
+			capt += `Shared : ${numberWithCommas(posts[data].shared)}\n`;
+			capt += `Comment : ${numberWithCommas(posts[data].comment)}\n`;
 			capt += `Published : ${date}\n`;
-			capt += `View : ${numberWithCommas(container.view)}\n`;
+			capt += `View : ${numberWithCommas(posts[data].view)}\n`;
 
-			if (container.type !== 'images') {
-				capt += `Duration : ${container.videoDuration}\n`;
+			if (posts[data].type !== 'images') {
+				capt += `Duration : ${posts[data].videoDuration}\n`;
 			}
 
-			capt += `Music : ${container.musicTitle}\n`;
-			capt += `Description : ${container.videoDescription}\n`;
+			capt += `Music : ${posts[data].musicTitle}\n`;
+			capt += `Description : ${posts[data].videoDescription}\n`;
 
-			if (container.type === 'images') {
-				capt += `Tot. Image : ${container.urls.images.length}\n`;
+			if (posts[data].type === 'images') {
+				capt += `Tot. Image : ${posts[data].urls.images.length}\n`;
 
-				const images = container.urls.images;
+				const images = posts[data].urls.images;
 
-				let data;
+				let dataMessage;
 
 				for (const { url, index } of images) {
 					if (index === 1) {
-						data = await client[botNum].send(
+						dataMessage = await client[botNum].send(
 							from,
 							{
 								image: { url },
@@ -127,7 +104,7 @@ export default {
 						{
 							image: { url }
 						},
-						{ groupMetadata, quoted: data }
+						{ groupMetadata, quoted: dataMessage }
 					);
 
 					await delay(100);
@@ -143,7 +120,7 @@ export default {
 				from,
 				{
 					video: {
-						url: container.urls[!NO_WM && !WITH_WM ? 'withNoWatermark' : WITH_WM ? 'withWatermark' : 'withNoWatermark']
+						url: posts[data].urls[!NO_WM && !WITH_WM ? 'withNoWatermark' : WITH_WM ? 'withWatermark' : 'withNoWatermark']
 					},
 					caption: capt.trim()
 				},

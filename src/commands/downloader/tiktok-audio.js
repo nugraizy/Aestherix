@@ -1,10 +1,8 @@
 import parser from 'yargs-parser';
 
-import { color, ERRLOG, INFOLOG, isURL, removeDuplicatesArray } from '../../utils/modules/index.js';
+import { color, ERRLOG, INFOLOG } from '../../utils/modules/index.js';
 import { mime } from '../../utils/misc/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
-
-const regex = (input) => /(?:https:?\/{2})?(?:w{3}|vm|vt|t)?\.?tiktok.com\/([^\s&]+)/gi.test(input);
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -25,44 +23,27 @@ export default {
 
 		let { _: urls } = parser(query);
 
-		if (urls.length === 1 && !isURL(urls[0])) {
-			return await client[botNum].reply('Please specify a valid url', { from, quoted: message, groupMetadata });
-		}
+		const audios = await tiktok.download.post(urls);
 
-		if (urls.length === 1 && !regex(urls[0])) {
-			return await client[botNum].reply('Please specify a valid TikTok url', { from, quoted: message, groupMetadata });
-		}
-
-		urls = removeDuplicatesArray(urls.map((v) => v.trim()));
-
-		for (const url of urls) {
-			if (!isURL(url)) {
-				await client[botNum].reply('Please specify a valid url', { from, quoted: message, groupMetadata });
-
-				continue;
-			} else if (!regex(url)) {
-				await client[botNum].reply('Please specify a valid TikTok url', { from, quoted: message, groupMetadata });
-
-				continue;
-			}
-
-			const audio = await tiktok.downloadMedia(url);
-
-			INFOLOG(`${color('Downloading TikTok Audio', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
-
-			if ('error' in audio) {
-				await client[botNum].reply(audio.error, { from, quoted: message, groupMetadata });
+		for (const data in audios) {
+			if ('error' in audios[data]) {
+				await client[botNum].reply(`Error while downloading TikTok audio\n\n${audios[data].error}\n${data}`, {
+					from,
+					quoted: message,
+					groupMetadata
+				});
 
 				ERRLOG(`⚠️ ${color('Failed to Download TikTok Audio', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
-
 				continue;
 			}
+
+			INFOLOG(`${color('Downloading TikTok Audio', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 			await client[botNum].send(
 				from,
 				{
-					document: { url: audio.urls.withNoWatermark },
-					fileName: `${audio.musicTitle}.mp3`,
+					document: { url: audios[data].url.images ? audios[data].urls.music : audios[data].urls.withNoWatermark },
+					fileName: `${audios[data].musicTitle}.mp3`,
 					mimetype: mime('mp3')
 				},
 				{ groupMetadata, quotes: message }

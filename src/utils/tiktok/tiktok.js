@@ -1,11 +1,24 @@
 import axios from 'axios';
 import { load } from 'cheerio';
+import asyncRetry from 'async-retry';
+import { fetch } from 'undici';
 
-import { randomChar } from '../modules/index.js';
+import { randomChar, isURL } from '../modules/index.js';
 import { COOKIE } from './cookie.js';
-import { _api, _apiBaseVideo } from './util.js';
+import { _api } from './util.js';
 
 const API_BASE_URL = _api;
+const regex = (input) => /(?:https:?\/{2})?(?:w{3}|vm|vt|t)?\.?tiktok.com\/([^\s&]+)/gi.test(input);
+
+const checkValid = (url) => {
+	if (!isURL(url)) {
+		return { error: true, message: 'Please specify a valid url' };
+	} else if (!regex(url)) {
+		return { error: true, message: 'Please specify a valid TikTok url' };
+	}
+
+	return { error: false, message: '' };
+};
 
 class ResponseParser {
 	/**
@@ -15,7 +28,7 @@ class ResponseParser {
 		const container = {};
 
 		const { avatarLarger, signature, verified, bioLink, privateAccount } =
-			dataUsers.UserModule.users[dataUsers.UserPage.uniqueId];
+			dataUsers.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.user;
 
 		if (privateAccount) {
 			return { error: 'User is private' };
@@ -101,8 +114,8 @@ class ResponseParser {
 				video: {
 					urls: {
 						cover: {
-							static: video.cover.url_list[0],
-							animated: video.animated_cover.url_list[0]
+							static: video.cover?.url_list?.[0],
+							animated: video.animated_cover?.url_list?.[0]
 						},
 						video: {
 							withWatermark: { size: video.download_addr.data_size, url: video.download_addr.url_list[0] },
@@ -263,42 +276,42 @@ class ResponseParser {
 			avatarThumb: profileLOW,
 			nickname: fullName,
 			uniqueId: username
-		} = arr.UserModule.users[arr.UserPage.uniqueId];
+		} = arr.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.user;
 
 		const {
 			followerCount: followers,
 			followingCount: following,
 			heart,
 			videoCount: totalVideo
-		} = arr.UserModule.stats[arr.UserPage.uniqueId];
+		} = arr.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.stats;
 
-		const data =
-			Object.keys(arr?.ItemModule || []).length === 0
-				? []
-				: Object.values(arr.ItemModule).map((v) => ({
-						id: v.id,
-						uploaded: Number(v.createTime),
-						liked: v.stats.diggCount,
-						shared: v.stats.shareCount,
-						comment: v.stats.commentCount,
-						view: v.stats.playCount,
-						duration: v.video.duration,
-						ratio: v.video.ratio,
-						width: v.video.width,
-						height: v.video.height,
-						url: {
-							sourceUrl: _apiBaseVideo(arr.UserPage.uniqueId, v.id),
-							music: {
-								title: v.music.title,
-								author: v.music.authorName,
-								duration: v.music.duration,
-								album: v.music.album || 'single',
-								url: v.music.playUrl,
-								[v.music?.coverHd ? 'coverHd' : v.music?.coverLarge ? 'coverLarge' : 'coverMedium']:
-									v.music.coverHd || v.music.coverLarge || v.music.coverMedium
-							}
-						}
-				  })); /* eslint-disable-line */
+		// const data =
+		// 	Object.keys(arr?.ItemModule || []).length === 0
+		// 		? []
+		// 		: Object.values(arr.ItemModule).map((v) => ({
+		// 				id: v.id,
+		// 				uploaded: Number(v.createTime),
+		// 				liked: v.stats.diggCount,
+		// 				shared: v.stats.shareCount,
+		// 				comment: v.stats.commentCount,
+		// 				view: v.stats.playCount,
+		// 				duration: v.video.duration,
+		// 				ratio: v.video.ratio,
+		// 				width: v.video.width,
+		// 				height: v.video.height,
+		// 				url: {
+		// 					sourceUrl: _apiBaseVideo(arr.UserPage.uniqueId, v.id),
+		// 					music: {
+		// 						title: v.music.title,
+		// 						author: v.music.authorName,
+		// 						duration: v.music.duration,
+		// 						album: v.music.album || 'single',
+		// 						url: v.music.playUrl,
+		// 						[v.music?.coverHd ? 'coverHd' : v.music?.coverLarge ? 'coverLarge' : 'coverMedium']:
+		// 							v.music.coverHd || v.music.coverLarge || v.music.coverMedium
+		// 					}
+		// 				}
+		// 		  })); /* eslint-disable-line */
 
 		return {
 			keyword,
@@ -312,8 +325,8 @@ class ResponseParser {
 			followers,
 			following,
 			heart,
-			totalVideo,
-			posts: data
+			totalVideo
+			// posts: data
 		};
 	}
 }
@@ -435,7 +448,7 @@ class RequestModule extends ResponseParser {
 
 		data = data.data;
 
-		const rawData = load(data)('script[id=SIGI_STATE]').html();
+		const rawData = load(data)('script[id=__UNIVERSAL_DATA_FOR_REHYDRATION__]').html();
 
 		return JSON.parse(rawData);
 	}
@@ -443,27 +456,70 @@ class RequestModule extends ResponseParser {
 	/**
 	 * @private
 	 */
-	async _fetchUserPostsAttempt(userDetails, username) {
+	async _fetchUserPostsAttempt(userDetails) {
 		const body = this._buildApiUrl({
 			/* eslint-disable */
-			version_name: '26.1.3',
-			version_code: '2613',
-			build_number: '26.1.3',
-			manifest_version_code: '2613',
-			update_version_code: '2613',
-			user_id: userDetails.UserModule.users[username.replace('@', '')].id,
+			version_name: '20.9.3',
+			version_code: '293',
+			build_number: '20.9.3',
+			manifest_version_code: '293',
+			update_version_code: '293',
+
+			user_id: userDetails.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.user.id,
+			count: 30,
 			max_cursor: 0,
+			min_cursor: 0,
+			retry_type: 'no_retry',
+			device_id: Array.from({ length: 19 }, () => Math.floor(Math.random() * 10).toString()).join('')
 			/* eslint-enable */
-			count: 100
 		});
 
-		const data = await this._awemeRequest('aweme/v1/aweme/post/?', {
-			method: 'GET',
-			body
-		});
+		let data;
+		const config = this._getRequestConfig();
 
-		if ('status_msg' in data) {
-			return { error: 'User does not have any post' };
+		config.headers['User-Agent'] =
+			'com.ss.android.ugc.trill/100303 (Linux; U; Android 10; en_US; Pixel 4; Build/QQ3A.200805.001; Cronet/58.0.2991.0)';
+		try {
+			await asyncRetry(
+				async (bail) => {
+					const bodyFetch = await fetch('https://api.tiktokv.com/aweme/v1/aweme/post/?' + body, {
+						method: 'GET',
+						...config
+					});
+
+					if (bodyFetch.headers.get('content-length') === '0') {
+						throw new Error('No data found');
+					}
+
+					const dataFinale = await bodyFetch.json();
+
+					console.log(dataFinale);
+
+					if (dataFinale.status_msg) {
+						data = {
+							error: 'User does not have any post'
+						};
+
+						bail(new Error('No data found'));
+					}
+
+					console.log(dataFinale);
+
+					if (dataFinale !== '') {
+						data = dataFinale;
+						return;
+					}
+
+					throw new Error('No data found');
+				},
+				{
+					forever: true,
+					minTimeout: 0,
+					maxTimeout: 0
+				}
+			);
+		} catch (e) {
+			console.log(e);
 		}
 
 		return data;
@@ -583,10 +639,10 @@ class RequestModule extends ResponseParser {
 		delete dataClone.url;
 
 		Object.assign(dataClone, {
-			following: userData.UserModule.stats[dataPosts.author].followingCount,
-			followers: userData.UserModule.stats[dataPosts.author].followerCount,
-			heart: userData.UserModule.stats[dataPosts.author].heart,
-			totalVideo: userData.UserModule.stats[dataPosts.author].videoCount,
+			following: userData.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.stats.followingCount,
+			followers: userData.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.stats.followerCount,
+			heart: userData.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.stats.heart,
+			totalVideo: userData.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.stats.videoCount,
 			urls: dataPosts.url
 		});
 
@@ -647,7 +703,7 @@ class TiktokUtils extends RequestModule {
 					resolve(userData);
 				}
 
-				const data = await this._fetchUserPostsAttempt(userData, username);
+				const data = await this._fetchUserPostsAttempt(userData);
 
 				if (data.error) {
 					resolve(data);
@@ -713,49 +769,110 @@ class Tiktok extends TiktokUtils {
 	constructor() {
 		super();
 
-		this.search = async (username) =>
-			new Promise(async (resolve, reject) => {
-				try {
-					const userData = await this._fetchSearchUserData(username);
+		this.search = {
+			users: async (...usernames) =>
+				new Promise(async (resolve, reject) => {
+					try {
+						usernames = usernames.flat();
 
-					resolve(userData);
-				} catch (error) {
-					reject(error);
-				}
-			});
+						let result = {};
 
-		this.crawlPost = async (username) =>
-			new Promise(async (resolve, reject) => {
-				try {
-					const postData = await this._fetchUserPosts(username);
+						for (const username of usernames) {
+							if (result[username]) {
+								continue;
+							}
 
-					resolve(postData);
-				} catch (error) {
-					reject(error);
-				}
-			});
+							const response = await this._fetchSearchUserData(username);
 
-		this.downloadMedia = async (url) =>
-			new Promise(async (resolve, reject) => {
-				try {
-					const videoData = await this._fetchVideoData(url);
+							result[username] = response;
+						}
 
-					resolve(videoData);
-				} catch (error) {
-					reject(error);
-				}
-			});
+						resolve(result);
+					} catch (error) {
+						reject(error);
+					}
+				}),
+			lookup: async (...usernames) =>
+				new Promise(async (resolve, reject) => {
+					try {
+						usernames = usernames.flat();
 
-		this.profileDetail = async (username) =>
-			new Promise(async (resolve, reject) => {
-				try {
-					const userData = await this._fetchUserDetail(username);
+						let result = {};
 
-					resolve(userData);
-				} catch (error) {
-					reject(error);
-				}
-			});
+						for (const username of usernames) {
+							if (result[username]) {
+								continue;
+							}
+
+							const response = await this._fetchUserDetail(username);
+
+							result[username] = response;
+						}
+
+						resolve(result);
+					} catch (error) {
+						reject(error);
+					}
+				})
+		};
+
+		this.users = {
+			posts: async (...usernames) =>
+				new Promise(async (resolve, reject) => {
+					try {
+						usernames = usernames.flat();
+
+						let result = {};
+
+						for (const username of usernames) {
+							if (result[username]) {
+								continue;
+							}
+
+							const response = await this._fetchUserPosts(username);
+
+							result[username] = response;
+						}
+
+						resolve(result);
+					} catch (error) {
+						reject(error);
+					}
+				})
+		};
+
+		this.download = {
+			post: async (...urls) =>
+				new Promise(async (resolve, reject) => {
+					try {
+						urls = urls.flat();
+
+						let result = {};
+
+						for (const url of urls) {
+							const isValidURL = checkValid(url);
+
+							if (isValidURL.error) {
+								result[url] = { error: isValidURL.message };
+
+								continue;
+							}
+
+							if (result[url]) {
+								continue;
+							}
+
+							const response = await this._fetchVideoData(url);
+
+							result[url] = response;
+						}
+
+						resolve(result);
+					} catch (error) {
+						reject(error);
+					}
+				})
+		};
 	}
 }
 

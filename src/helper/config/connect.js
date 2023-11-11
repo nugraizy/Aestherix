@@ -52,7 +52,8 @@ const globalConfig = {
 	isConnected: false,
 	packname: 'Made by Void',
 	author: 'Powered by Hidden Finder',
-	anonymous: new Cache()
+	anonymous: new Cache(),
+	input: new Cache()
 };
 
 global.log = console.log;

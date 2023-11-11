@@ -531,6 +531,27 @@ const handleIncomingMessage = async (message, client, cmds, store, user, state) 
 		handleAfk(client, message);
 	}
 
+	const isInputState = configuration.input.get(message.sender);
+
+	if (isInputState) {
+		if (isInputState.expectedType.some((v) => ['conversation', 'extendedTextMessage'].includes(v))) {
+			isInputState.message = message.body;
+			isInputState.quoted = message.message;
+			return;
+		}
+
+		if (isInputState.expectedType.includes(message.type)) {
+			isInputState.message = message.message;
+			isInputState.quoted = message.message;
+			return;
+		}
+
+		isInputState.invalid = true;
+		isInputState.quoted = message.message;
+
+		return;
+	}
+
 	await handleCommandExecution(message, client, store, cmds, user, botNum, state);
 
 	await handleGames(message, client);

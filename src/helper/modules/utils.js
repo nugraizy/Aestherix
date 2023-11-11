@@ -245,7 +245,8 @@ export const assign = (client) => {
 					ffmpeg(video)
 						.videoCodec('libwebp')
 						.outputOptions('-fs 800k')
-						.outputFPS(30)
+						.outputFPS(15)
+						.videoBitrate('500k')
 						.videoFilter(
 							'scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1'
 						)

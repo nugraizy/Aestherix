@@ -80,6 +80,23 @@ export interface ReassignResult {
 	mediaData: MediaDataContext;
 	extractMediaData: WAGenericMediaMessage;
 	bodyQuoted: string;
+	waitForInput?: (
+		client: AdvancedClient,
+		data: {
+			expectedType: string[];
+			from: string;
+			sender: string;
+			message?: string;
+			timeInSecond?: number;
+		}
+	) => Promise<
+		Partial<{
+			message: string | MessageGenerated;
+			quoted: MessageGenerated;
+			timeout: boolean;
+			invalid: boolean;
+		}>
+	>;
 }
 
 export type Reconstructuring = (m: MessageGenerated, client: AdvancedClient, store: Store) => Promise<ReassignResult>;

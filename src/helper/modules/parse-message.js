@@ -44,6 +44,40 @@ const caching = async (clients, id) => {
 	configuration.isFirstConnection = false;
 };
 
+const waitForInput = (client, data) =>
+	new Promise(async (resolve) => {
+		if (data.message) {
+			await client[botNum].send(data.from, {
+				text: data.message
+			});
+		}
+
+		let times = Date.now();
+
+		configuration.input.set(data.sender, {
+			timeout: setInterval(() => {
+				const sender = data.sender;
+				const { timeout, message, quoted, invalid } = configuration.input.get(sender);
+
+				if (message !== '') {
+					clearInterval(timeout);
+					configuration.input.delete(sender);
+					resolve({ message, quoted, invalid });
+				}
+
+				if (Date.now() - times > (data.timeInSecond || 10) * 1000) {
+					clearInterval(timeout);
+					configuration.input.delete(sender);
+					resolve({ timeout: true });
+				}
+			}, 1000),
+			expectedType: data.expectedType,
+			message: '',
+			quoted: null,
+			invalid: false
+		});
+	});
+
 /**
  *
  * @param {Object} obj
@@ -388,7 +422,8 @@ export const reassign = async (m, client, store) => {
 			mention,
 			mediaData,
 			extractMediaData,
-			bodyQuoted
+			bodyQuoted,
+			waitForInput
 		};
 	} catch (e) {
 		log(e);

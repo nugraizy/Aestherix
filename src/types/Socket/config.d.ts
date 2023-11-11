@@ -42,4 +42,5 @@ export interface GlobalConfig {
 	packname: string;
 	author: string;
 	anonymous: Cache;
+	input: Cache;
 }
