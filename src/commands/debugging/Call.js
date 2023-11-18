@@ -56,6 +56,7 @@ export default {
 				}
 			]
 		);
+		console.log(state);
 		const nodes = {
 			tag: 'call',
 			attrs: {

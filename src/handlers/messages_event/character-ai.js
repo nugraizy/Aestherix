@@ -1,4 +1,5 @@
 import { delay } from '@adiwajshing/baileys';
+
 import configuration from '../../helper/config/connect.js';
 
 /**
@@ -6,7 +7,7 @@ import configuration from '../../helper/config/connect.js';
  */
 const handler = async ({ from, type, body, message, groupMetadata }, client) => {
 	/**
-	 * @type {import('../../utils/char-ai/index.js').ChatGPTDialogue}
+	 * @type {import('../../utils/ai/char-ai.js').ChatGPTDialogue}
 	 */
 	const ai = configuration.user.charAI.get(from);
 

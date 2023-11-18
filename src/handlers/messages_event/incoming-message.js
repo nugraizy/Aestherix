@@ -479,7 +479,7 @@ const initHandler = async () => {
 	handler.set('OFFLINE', (await import(HANDLER_PATH.OFFLINE)).default);
 };
 
-const handleIncomingMessage = async (message, client, cmds, store, user, state) => {
+const handleIncomingMessage = async (message, client, cmds, store, user, state, runtime) => {
 	if (message === undefined) {
 		return;
 	}
@@ -552,7 +552,7 @@ const handleIncomingMessage = async (message, client, cmds, store, user, state) 
 		return;
 	}
 
-	await handleCommandExecution(message, client, store, cmds, user, botNum, state);
+	await handleCommandExecution(message, client, store, cmds, user, botNum, runtime, state);
 
 	await handleGames(message, client);
 };

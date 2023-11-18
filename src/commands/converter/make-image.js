@@ -1,4 +1,4 @@
-import { createImage } from '../../utils/deepai/index.js';
+import { createImage } from '../../utils/ai/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}

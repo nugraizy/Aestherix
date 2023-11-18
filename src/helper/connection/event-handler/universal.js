@@ -148,13 +148,14 @@ export const handleConnectionUpdate = async (
  * @param {import('../type.js').Store} store
  * @param {import('@adiwajshing/baileys').proto.IWebMessageInfo[]} message
  * @param {import('../type.js').SingleAuthState['state']} state
+ * @param {number} runtime
  */
-export const handleUpsertUpdate = async (store, message, state) => {
+export const handleUpsertUpdate = async (store, message, state, runtime) => {
 	if (!handler.has('INCOMING')) {
 		handler.set('INCOMING', (await import(HANDLER_PATH.INCOMING)).default);
 	}
 
-	await handler.get('INCOMING')(message, client, configuration.cmds, store, configuration.user, state);
+	await handler.get('INCOMING')(message, client, configuration.cmds, store, configuration.user, state, runtime);
 };
 
 /**

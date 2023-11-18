@@ -493,8 +493,6 @@ class RequestModule extends ResponseParser {
 
 					const dataFinale = await bodyFetch.json();
 
-					console.log(dataFinale);
-
 					if (dataFinale.status_msg) {
 						data = {
 							error: 'User does not have any post'

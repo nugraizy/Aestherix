@@ -1,96 +1,28 @@
-import axios from 'axios';
 import { generateWAMessageFromContent } from '@adiwajshing/baileys';
+import numeral from 'numeral';
 
-import { getWaifu } from '../../utils/index.js';
+import { getWaifu, Fetch, isURL, audioFormat, imageFormat, videoFormat } from '../../utils/index.js';
 
-const loading = async (frame, from, message, client, groupMetadata) => {
-	let caption = `${frame || ''} loading image. please wait.`;
-	const messages = generateWAMessageFromContent(
-		from,
-		{
-			editedMessage: {
-				message: {
-					protocolMessage: {
-						key: {
-							remoteJid: message.key.remoteJid,
-							fromMe: true,
-							id: message.key.id
-						},
-						type: 'MESSAGE_EDIT',
-						editedMessage: {
-							conversation: caption
-						}
-					}
-				}
-			}
-		},
-		{}
-	);
+const frames = ['▓', '▒'];
 
-	await client[botNum].relayMessage(from, messages.message, {
-		messageId: messages.key.id,
-		cachedGroupMetadata: () => groupMetadata
-	});
+const totalBars = 10; // Set the total number of bars
+
+const createLoadingBar = (progress) => {
+	const percentage = Math.floor(progress.percentage);
+	const barCount = Math.floor((percentage / 100) * totalBars);
+	const emptyCount = totalBars - barCount;
+
+	const bar = frames[0].repeat(barCount);
+	const empty = frames[1].repeat(emptyCount);
+
+	const barText = `${bar}${empty}`;
+
+	const text = `[${barText}] ${numeral(percentage).format('0.00')}%\nETA ${numeral(progress.eta).format('00:00:00')} ${numeral(
+		progress.speed
+	).format('0.00b')}/s`;
+
+	return text;
 };
-
-const frames = [
-	'⢀⠀',
-	'⡀⠀',
-	'⠄⠀',
-	'⢂⠀',
-	'⡂⠀',
-	'⠅⠀',
-	'⢃⠀',
-	'⡃⠀',
-	'⠍⠀',
-	'⢋⠀',
-	'⡋⠀',
-	'⠍⠁',
-	'⢋⠁',
-	'⡋⠁',
-	'⠍⠉',
-	'⠋⠉',
-	'⠋⠉',
-	'⠉⠙',
-	'⠉⠙',
-	'⠉⠩',
-	'⠈⢙',
-	'⠈⡙',
-	'⢈⠩',
-	'⡀⢙',
-	'⠄⡙',
-	'⢂⠩',
-	'⡂⢘',
-	'⠅⡘',
-	'⢃⠨',
-	'⡃⢐',
-	'⠍⡐',
-	'⢋⠠',
-	'⡋⢀',
-	'⠍⡁',
-	'⢋⠁',
-	'⡋⠁',
-	'⠍⠉',
-	'⠋⠉',
-	'⠋⠉',
-	'⠉⠙',
-	'⠉⠙',
-	'⠉⠩',
-	'⠈⢙',
-	'⠈⡙',
-	'⠈⠩',
-	'⠀⢙',
-	'⠀⡙',
-	'⠀⠩',
-	'⠀⢘',
-	'⠀⡘',
-	'⠀⠨',
-	'⠀⢐',
-	'⠀⡐',
-	'⠀⠠',
-	'⠀⢀',
-	'⠀⡀'
-];
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -104,54 +36,102 @@ export default {
 	cooldown: 5,
 	limit: 0,
 	status: 'enable',
-	async run({ from, groupMetadata }, client) {
+	async run({ from, groupMetadata, query }, client) {
+		if (!isURL(query) && query) {
+			return await client[botNum].send(from, { text: 'Please provide a valid URL.' }, { groupMetadata });
+		}
+
 		let caption = '';
 
-		const message = await client[botNum].send(from, { text: `${frames[0]} loading image. please wait.` }, { groupMetadata });
+		const message = await client[botNum].send(from, { text: 'loading media. please wait.' }, { groupMetadata });
 
-		const waifu = (await getWaifu('waifu', 'sfw'))[0];
+		if (!query) {
+			query = (await getWaifu('waifu', 'sfw'))[0];
+		}
 
-		let progress = 0;
-		const { data: buffer } = await axios.get(waifu, {
-			responseType: 'arraybuffer',
-			onDownloadProgress: async () => {
-				await loading(frames[progress], from, message, client, groupMetadata);
+		const { origin } = new URL(query);
 
-				if (progress === frames.length - 1) {
-					progress = 0;
-				} else {
-					progress++;
-				}
+		const clientFetch = new Fetch(origin, {
+			delay: 700
+		});
+
+		const req = await clientFetch.request(query.replace(origin, ''), {
+			method: 'GET'
+		});
+
+		req.on('finish', async (isFinish100Percent) => {
+			if (isFinish100Percent) {
+				caption = 'loading complete. here is your media!\n' + createLoadingBar({ percentage: 100 });
+				const messages = generateWAMessageFromContent(
+					from,
+					{
+						editedMessage: {
+							message: {
+								protocolMessage: {
+									key: {
+										remoteJid: message.key.remoteJid,
+										fromMe: true,
+										id: message.key.id
+									},
+									type: 'MESSAGE_EDIT',
+									editedMessage: {
+										conversation: caption
+									}
+								}
+							}
+						}
+					},
+					{}
+				);
+
+				await client[botNum].relayMessage(from, messages.message, {
+					messageId: messages.key.id,
+					cachedGroupMetadata: () => groupMetadata
+				});
+				await client[botNum].send(
+					from,
+					{
+						[videoFormat.includes(req.headers['content-type'])
+							? 'video'
+							: imageFormat.includes(req.headers['content-type'])
+							? 'image'
+							: audioFormat.includes(req.headers['content-type'])
+							? 'audio'
+							: 'document']: new Buffer.from(req.toBuffer(), 'base64')
+					},
+					{ groupMetadata }
+				);
 			}
 		});
 
-		caption = 'loading complete. here is your image!';
-		const messages = generateWAMessageFromContent(
-			from,
-			{
-				editedMessage: {
-					message: {
-						protocolMessage: {
-							key: {
-								remoteJid: message.key.remoteJid,
-								fromMe: true,
-								id: message.key.id
-							},
-							type: 'MESSAGE_EDIT',
-							editedMessage: {
-								conversation: caption
+		req.on('progress', async (progress) => {
+			let caption = 'loading media. please wait.\n' + createLoadingBar(progress);
+			const messages = generateWAMessageFromContent(
+				from,
+				{
+					editedMessage: {
+						message: {
+							protocolMessage: {
+								key: {
+									remoteJid: message.key.remoteJid,
+									fromMe: true,
+									id: message.key.id
+								},
+								type: 'MESSAGE_EDIT',
+								editedMessage: {
+									conversation: caption
+								}
 							}
 						}
 					}
-				}
-			},
-			{}
-		);
+				},
+				{}
+			);
 
-		await client[botNum].relayMessage(from, messages.message, {
-			messageId: messages.key.id,
-			cachedGroupMetadata: () => groupMetadata
+			await client[botNum].relayMessage(from, messages.message, {
+				messageId: messages.key.id,
+				cachedGroupMetadata: () => groupMetadata
+			});
 		});
-		await client[botNum].send(from, { image: new Buffer.from(buffer, 'base64') }, { groupMetadata });
 	}
 };

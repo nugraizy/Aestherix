@@ -97,7 +97,7 @@ export const start = async (isReconnect) => {
 
 		Client.ev.on('connected', () => {
 			githubWebhook(isReconnect);
-			Client.ev.on('messages.upsert', async (message) => await handleUpsertUpdate(store, message, state));
+			Client.ev.on('messages.upsert', async (message) => await handleUpsertUpdate(store, message, state, runtime));
 			Client.ev.on('messages.update', async (message) => await handleMessagesUpdate(store, message));
 			Client.ev.on('presence.update', async (presence) => await handlePresenceUpdate(presence));
 			Client.ev.on(
