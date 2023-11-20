@@ -1,4 +1,4 @@
-import Canvas from '@napi-rs/canvas';
+import Canvas, { clearAllCache } from '@napi-rs/canvas';
 import chroma from 'chroma-js';
 import fs from 'fs-extra';
 import sharp from 'sharp';
@@ -15,24 +15,44 @@ GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/texgyreadvent
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/AtypText-Semibold.ttf'), 'atyp');
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/SourceSansPro-ExtraLight.ttf'), 'sans-thin');
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Galyon-Book.otf'), 'galyon');
+GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Lemon-Milk-Pro-Regular.ttf'), 'lemon');
 
 const assets = {
 	model: null
 };
 
-const instagram = 'dizy.wav';
+const instagramUsername = 'dizy.webp';
+const githubUsername = 'nugraizy';
+const watermark = 'Spotify Card by Void';
 
 export class SpotifyCover {
 	constructor() {
 		this._track = null;
+
 		this._title = null;
+
 		this._artist = null;
+
 		this._timestamp = null;
+
 		this._buffer = null;
+
 		this._colorPalettes = null;
+
+		this._loadedCover = null;
+
 		this.revertBlack = false;
+
+		/**
+		 * @type {Canvas.Canvas}
+		 */
 		this.canvas = null;
+
+		/**
+		 * @type {Canvas.SKRSContext2D}
+		 */
 		this.ctx = null;
+
 		this.w = null;
 
 		this.init = async (track) => {
@@ -52,7 +72,7 @@ export class SpotifyCover {
 			return this;
 		};
 
-		this.fillBackground = (opts) => {
+		this.fillBackground = async (opts) => {
 			if (!this.canvas || !this.ctx) {
 				const err = 'Need initialization. Call .init() first.';
 
@@ -77,27 +97,50 @@ export class SpotifyCover {
 				opts.color = this._colorPalettes[0];
 			}
 
-			let gradient;
-			const gradientNumber = Math.floor(Math.random() * 3);
-
 			if (opts.gradient) {
+				let gradient;
+				const gradientNumber = Math.floor(Math.random() * 3);
+
 				gradient = this.ctx.createLinearGradient(0, this.canvas.height - 300, this.canvas.width / 1.4, this.canvas.height);
 
 				gradient.addColorStop(0, chroma(this._colorPalettes[gradientNumber]).darken(0.7).hex());
 				gradient.addColorStop(1, chroma(this._colorPalettes[gradientNumber]).darken(2).hex());
+
+				this.revertBlack = chroma(this._colorPalettes[gradientNumber]).name() === 'white';
+
+				this.ctx.fillStyle = opts.gradient
+					? gradient
+					: opts.color
+					? chroma.valid(opts.color)
+						? opts.color
+						: chroma(this._colorPalettes[gradientNumber]).darken(0.7)
+					: this._colorPalettes[0];
+
+				this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+				return this;
 			}
 
-			this.revertBlack = chroma(this._colorPalettes[gradientNumber]).name() === 'white';
+			if (!this._loadedCover) {
+				this._loadedCover = await loadImage(this._buffer);
+			}
 
-			this.ctx.fillStyle = opts.gradient
-				? gradient
-				: opts.color
-				? chroma.valid(opts.color)
-					? opts.color
-					: chroma(this._colorPalettes[gradientNumber]).darken(0.7)
-				: this._colorPalettes[0];
+			const cover = this._loadedCover;
 
-			this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+			const scale = Math.max(this.canvas.width / cover.width, this.canvas.height / cover.height);
+
+			const scaledWidth = cover.width * scale;
+			const scaledHeight = cover.height * scale;
+
+			const offsetX = (this.canvas.width - scaledWidth) / 2;
+			const offsetY = 0;
+
+			this.ctx.save();
+			this.ctx.filter = 'blur(40px) brightness(0.8)';
+
+			this.ctx.drawImage(cover, offsetX, offsetY, scaledWidth, scaledHeight);
+
+			this.ctx.restore();
 
 			return this;
 		};
@@ -121,7 +164,9 @@ export class SpotifyCover {
 				opts.round = false;
 			}
 
-			let image = await loadImage(this._buffer);
+			if (!this._loadedCover) {
+				this._loadedCover = await loadImage(this._buffer);
+			}
 
 			this.ctx.save();
 			this.ctx.beginPath();
@@ -147,6 +192,8 @@ export class SpotifyCover {
 				this.ctx.shadowOffsetY = 6;
 			}
 
+			let image = this._loadedCover;
+
 			if (opts.round) {
 				if (typeof opts.round === 'boolean') {
 					opts.round = 20;
@@ -162,23 +209,28 @@ export class SpotifyCover {
 					opts.round = Math.round(opts.round);
 				}
 
-				const rounded = new Buffer.from(
-					`<svg><rect x="0" y="0" width="${image.width}" height="${image.height}" rx="${opts.round}" ry="${opts.round}"/></svg>`
+				const process = new Buffer.from(
+					`<svg><rect x="0" y="0" width="${this._loadedCover.width}" height="${this._loadedCover.height}" rx="${opts.round}" ry="${opts.round}"/></svg>`
 				);
-				const roundedCornerResizer = sharp(this._buffer)
-					.composite([{ input: rounded, blend: 'dest-in' }])
+				const sharpInstance = sharp(this._buffer)
+					.composite([{ input: process, blend: 'dest-in' }])
 					.png();
 
-				image = await loadImage(await roundedCornerResizer.toBuffer());
+				const buffer = await sharpInstance.toBuffer();
+
+				image = await loadImage(buffer);
 			}
 
-			this.ctx.drawImage(
-				image,
-				this.canvas.width / 3 - (image.width * 1.3) / 3 + 38,
-				this.canvas.height / 3.5 - (image.height * 1.3) / 3,
-				image.width * 1.3,
-				image.height * 1.3
-			);
+			const scaleFactor = 1.3;
+
+			const scaledWidth = image.width * scaleFactor;
+			const scaledHeight = image.height * scaleFactor;
+
+			const centerX = this.canvas.width / 3;
+			const centerY = this.canvas.height / 3.5;
+
+			this.ctx.drawImage(image, centerX - scaledWidth / 3 + 38, centerY - scaledHeight / 3, scaledWidth, scaledHeight);
+
 			this.ctx.closePath();
 			this.ctx.restore();
 			this.w = this.canvas.width / 3 - (image.width * 1.3) / 3 + 38;
@@ -207,11 +259,11 @@ export class SpotifyCover {
 			this.ctx.fillStyle = chroma('grey').brighten(2).hex();
 			this.ctx.fillText(this._artist, this.w, this.canvas.height / 2 + 250);
 
-			this.ctx.font = '32px antre';
+			this.ctx.font = '32px lemon';
 			this.ctx.textAlign = 'center';
 
 			this.ctx.fillStyle = chroma('white').hex();
-			this.ctx.fillText('Spotify Cover by Void'.split('').join(' '), this.canvas.width / 2, 290);
+			this.ctx.fillText(watermark.split('').join(' '), this.canvas.width / 2, 290);
 
 			return this;
 		};
@@ -230,6 +282,16 @@ export class SpotifyCover {
 			this.ctx.font = '22px sans-thin';
 
 			this.ctx.fillStyle = chroma('white').brighten(2).hex();
+
+			const gradientNumber = unique(1, this._colorPalettes.length);
+			const gradient = this.ctx.createLinearGradient(centerX - 19, centerY, this.w + 830, centerY);
+
+			const $chromed1 = chroma(this._colorPalettes[gradientNumber() - 1]);
+			const $chromed2 = chroma(this._colorPalettes[gradientNumber() - 1]);
+
+			gradient.addColorStop(0, $chromed1.hex());
+			gradient.addColorStop(1, $chromed2.hex());
+
 			this.ctx.fillText('0:04', this.w + 15, centerY + 30);
 			this.ctx.fillText(this.toTime(this._timestamp), this.w + 800 + 15, centerY + 30);
 
@@ -244,7 +306,7 @@ export class SpotifyCover {
 
 			this.ctx.beginPath();
 
-			this.ctx.strokeStyle = chroma('gray').brighten(1).hex();
+			this.ctx.strokeStyle = gradient; // chroma('gray').brighten(1).hex();
 
 			this.ctx.moveTo(centerX, centerY);
 			this.ctx.lineTo(this.w + 830, centerY);
@@ -293,13 +355,14 @@ export class SpotifyCover {
 			const y = (h1) => this.canvas.height / (n - 0.5) - (h1 || h) / (n - 0.5) + 430;
 
 			this.ctx.drawImage(assets.model[`${iconType}_pause`], x(), y(), w, h);
-			this.ctx.drawImage(
-				assets.model[`${iconType}_down_arrow`],
-				x(w / (n - 0.3)) - 390,
-				y(h / (n - 0.3)) - 1320,
-				w / (n - 0.3),
-				h / (n - 0.3)
-			);
+
+			// this.ctx.drawImage(
+			// 	assets.model[`${iconType}_down_arrow`],
+			// 	x(w / (n - 0.3)) - 390,
+			// 	y(h / (n - 0.3)) - 1320,
+			// 	w / (n - 0.3),
+			// 	h / (n - 0.3)
+			// );
 			this.ctx.drawImage(
 				assets.model[`${iconType}_previous`],
 				x(w / (n + 0.5)) - 200,
@@ -337,7 +400,7 @@ export class SpotifyCover {
 			);
 			this.ctx.drawImage(
 				assets.model[`${iconType}_speaker`],
-				x(w / (n + 0.7)) - 360,
+				x(w / (n + 0.7)) - 390,
 				y(h / (n + 0.7)) + 100,
 				w / (n + 0.7),
 				h / (n + 0.7)
@@ -352,7 +415,7 @@ export class SpotifyCover {
 			);
 			this.ctx.font = '32px galyon';
 			this.ctx.fillStyle = chroma('white').hex();
-			this.ctx.fillText('nugraizy', 220, this.canvas.height - 180);
+			this.ctx.fillText(githubUsername, 220, this.canvas.height - 180);
 
 			this.ctx.drawImage(
 				assets.model[`${iconType}_instagram`],
@@ -364,8 +427,11 @@ export class SpotifyCover {
 			this.ctx.font = '32px galyon';
 			this.ctx.fillStyle = chroma('white').hex();
 			this.ctx.fillText(
-				instagram,
-				this.canvas.width - 160 - this.ctx.measureText(instagram).width - assets.model[`${iconType}_instagram`].height / 8.5,
+				instagramUsername,
+				this.canvas.width -
+					160 -
+					this.ctx.measureText(instagramUsername).width -
+					assets.model[`${iconType}_instagram`].height / 8.5,
 				this.canvas.height - 180
 			);
 
@@ -386,6 +452,7 @@ export class SpotifyCover {
 	}
 
 	toBuffer() {
+		clearAllCache();
 		return this.canvas.toBuffer('image/png');
 	}
 
@@ -411,3 +478,15 @@ export class SpotifyCover {
 		this._colorPalettes = await color.getPalette(this._buffer);
 	}
 }
+
+const unique = (minimum, maximum) => {
+	let previousValue;
+
+	return function random() {
+		const number = Math.floor(Math.random() * (maximum - minimum + 1) + minimum);
+
+		previousValue = number === previousValue && minimum !== maximum ? random() : number;
+
+		return previousValue;
+	};
+};

@@ -21,9 +21,9 @@ export default {
 
 		await cover.init(query);
 
-		cover.fillBackground({ gradient: true });
+		cover.fillBackground();
 
-		await cover.putTrackCover({ round: 90, shadow: 80 });
+		await cover.putTrackCover({ shadow: 80, round: 30 });
 		await cover.putButtons();
 
 		cover.putText().putPlayback();

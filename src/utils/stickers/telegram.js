@@ -7,7 +7,12 @@ const _apiCombot = (input) => `https://combot.org/telegram/stickers?q=${encodeUR
 const telegramFind = (query) =>
 	new Promise(async (resolve) => {
 		try {
-			const data = await fetchTEXT(_apiCombot(query));
+			const data = await fetchTEXT(_apiCombot(query), {
+				headers: {
+					'User-Agent':
+						'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.210 Mobile Safari/537.36'
+				}
+			});
 			const results = [];
 			const $ = cheerioLOAD(data);
 			const bound = $('body > div > main > div.page > div > div.stickers-catalogue > div.tab-content > div > div');
