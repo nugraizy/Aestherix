@@ -26,438 +26,565 @@ const githubUsername = 'nugraizy';
 const watermark = 'Spotify Card by Void';
 
 export class SpotifyCover {
-	constructor() {
-		this._track = null;
+	/**
+	 * @private
+	 */
+	#_opts;
 
-		this._title = null;
+	/**
+	 * @private
+	 */
+	#_track;
 
-		this._artist = null;
+	/**
+	 * @private
+	 */
+	#_title;
 
-		this._timestamp = null;
+	/**
+	 * @private
+	 */
+	#_artist;
 
-		this._buffer = null;
+	/**
+	 * @private
+	 */
+	#_timestamp;
 
-		this._colorPalettes = null;
+	/**
+	 * @private
+	 */
+	#_buffer;
 
-		this._loadedCover = null;
+	/**
+	 * @private
+	 */
+	#_colorPalettes;
 
-		this.revertBlack = false;
+	/**
+	 * @private
+	 */
+	#_loadedCover;
+
+	/**
+	 * @private
+	 */
+	#_revertBlack;
+
+	/**
+	 * @private
+	 */
+	#_w;
+
+	/**
+	 * @private
+	 */
+	#_isRendered;
+
+	/**
+	 * @private
+	 */
+	#_canvas;
+
+	/**
+	 * @private
+	 */
+	#_ctx;
+
+	/**
+	 * @private
+	 */
+	#_toBuffer;
+
+	/**
+	 *
+	 * @param {string} track
+	 * @param {{background?: { blur?: number | boolean, color?: string, gradient?: boolean }, cover?: { shadow?: number | boolean, round?: number | boolean }}} param1
+	 */
+	constructor(track, { background, cover }) {
+		if (!track) {
+			const err = 'Track name is required.';
+
+			throw new Error(err);
+		}
+
+		this.#_opts = {
+			background: {
+				blur: background?.blur || false,
+				color: background?.color || false,
+				gradient: background?.gradient || false
+			},
+			cover: {
+				shadow: cover?.shadow || false,
+				round: cover?.round || false
+			}
+		};
+
+		/**
+		 * @private
+		 */
+		this.#_track = track;
+
+		/**
+		 * @private
+		 */
+		this.#_title = null;
+
+		/**
+		 * @private
+		 */
+		this.#_artist = null;
+
+		/**
+		 * @private
+		 */
+		this.#_timestamp = null;
+
+		/**
+		 * @private
+		 */
+		this.#_buffer = null;
+
+		/**
+		 * @private
+		 */
+		this.#_colorPalettes = null;
+
+		/**
+		 * @private
+		 */
+		this.#_loadedCover = null;
+
+		/**
+		 * @private
+		 */
+		this.#_revertBlack = false;
+
+		/**
+		 * @private
+		 */
+		this.#_w = null;
+
+		/**
+		 * @private
+		 */
+		this.#_isRendered = false;
 
 		/**
 		 * @type {Canvas.Canvas}
+		 * @private
 		 */
-		this.canvas = null;
+		this.#_canvas = createCanvas(1080, 2340);
 
 		/**
 		 * @type {Canvas.SKRSContext2D}
+		 * @private
 		 */
-		this.ctx = null;
+		this.#_ctx = this.#_canvas.getContext('2d');
 
-		this.w = null;
+		/**
+		 * Render Spotify Cover
+		 * @returns {Promise<{message?: string, toBuffer: () => Buffer}>}
+		 */
+		this.render = async () => {
+			if (this.#_isRendered) {
+				const err = 'SpotifyCover is already rendered.';
 
-		this.init = async (track) => {
-			if (this.canvas || this.ctx) {
-				throw new Error('Spotify Cover already been initialized.');
+				return { message: err, toBuffer: this.#_toBuffer };
 			}
-
-			this._track = track;
 
 			await this.getTrackCover();
 			await this.palettes();
+			await this.fillBackground(this.#_opts.background);
+			await this.putTrackCover(this.#_opts.cover);
+			await this.putButtons();
+			this.putText();
+			this.putPlayback();
 
-			if (!this.canvas || !this.ctx) {
-				this.initCanvas();
-			}
-
-			return this;
+			return { toBuffer: this.#_toBuffer };
 		};
 
-		this.fillBackground = async (opts) => {
-			if (!this.canvas || !this.ctx) {
-				const err = 'Need initialization. Call .init() first.';
+		this.#_toBuffer = () => {
+			clearAllCache();
+			return this.#_canvas.toBuffer('image/png');
+		};
+	}
 
-				throw new Error(err);
+	/**
+	 * @private
+	 */
+	async fillBackground(opts) {
+		if (typeof opts !== 'object' && opts) {
+			const err = `Expected opts to be Object. Got : ${typeof opts}`;
+
+			throw new Error(err);
+		}
+
+		if (!opts) {
+			opts = {};
+		}
+
+		if (!opts.gradient) {
+			opts.gradient = false;
+		}
+
+		if (!opts.color) {
+			opts.color = this.#_colorPalettes[0];
+		}
+
+		if (!opts.blur) {
+			opts.blur = false;
+		}
+
+		if (opts.gradient) {
+			let gradient;
+			const gradientNumber = Math.floor(Math.random() * 3);
+
+			gradient = this.#_ctx.createLinearGradient(
+				0,
+				this.#_canvas.height - 300,
+				this.#_canvas.width / 1.4,
+				this.#_canvas.height
+			);
+
+			gradient.addColorStop(0, chroma(this.#_colorPalettes[gradientNumber]).darken(0.7).hex());
+			gradient.addColorStop(1, chroma(this.#_colorPalettes[gradientNumber]).darken(2).hex());
+
+			this.#_revertBlack = chroma(this.#_colorPalettes[gradientNumber]).name() === 'white';
+
+			this.#_ctx.fillStyle = gradient;
+
+			this.#_ctx.fillRect(0, 0, this.#_canvas.width, this.#_canvas.height);
+		} else if (opts.blur) {
+			if (!this.#_loadedCover) {
+				this.#_loadedCover = await loadImage(this.#_buffer);
 			}
 
-			if (typeof opts !== 'object' && opts) {
-				const err = `Expected opts to be Object. Got : ${typeof opts}`;
+			opts.blur = typeof opts.blur === 'boolean' ? 50 : opts.blur;
 
-				throw new Error(err);
-			}
+			const cover = this.#_loadedCover;
 
-			if (!opts) {
-				opts = {};
-			}
-
-			if (!opts.gradient) {
-				opts.gradient = false;
-			}
-
-			if (!opts.color) {
-				opts.color = this._colorPalettes[0];
-			}
-
-			if (opts.gradient) {
-				let gradient;
-				const gradientNumber = Math.floor(Math.random() * 3);
-
-				gradient = this.ctx.createLinearGradient(0, this.canvas.height - 300, this.canvas.width / 1.4, this.canvas.height);
-
-				gradient.addColorStop(0, chroma(this._colorPalettes[gradientNumber]).darken(0.7).hex());
-				gradient.addColorStop(1, chroma(this._colorPalettes[gradientNumber]).darken(2).hex());
-
-				this.revertBlack = chroma(this._colorPalettes[gradientNumber]).name() === 'white';
-
-				this.ctx.fillStyle = opts.gradient
-					? gradient
-					: opts.color
-					? chroma.valid(opts.color)
-						? opts.color
-						: chroma(this._colorPalettes[gradientNumber]).darken(0.7)
-					: this._colorPalettes[0];
-
-				this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-				return this;
-			}
-
-			if (!this._loadedCover) {
-				this._loadedCover = await loadImage(this._buffer);
-			}
-
-			const cover = this._loadedCover;
-
-			const scale = Math.max(this.canvas.width / cover.width, this.canvas.height / cover.height);
+			const scale = Math.max(this.#_canvas.width / cover.width, this.#_canvas.height / cover.height);
 
 			const scaledWidth = cover.width * scale;
 			const scaledHeight = cover.height * scale;
 
-			const offsetX = (this.canvas.width - scaledWidth) / 2;
-			const offsetY = 0;
+			const offsetX = (this.#_canvas.width - scaledWidth) / 2;
+			const offsetY = -60;
 
-			this.ctx.save();
-			this.ctx.filter = 'blur(40px) brightness(0.8)';
+			this.#_ctx.save();
+			this.#_ctx.filter = `blur(${opts.blur}px) brightness(0.8)`;
 
-			this.ctx.drawImage(cover, offsetX, offsetY, scaledWidth, scaledHeight);
+			this.#_ctx.drawImage(cover, offsetX, offsetY, scaledWidth, scaledHeight + 110);
 
-			this.ctx.restore();
+			this.#_ctx.restore();
+		} else if (opts.color) {
+			this.#_ctx.fillStyle = chroma.valid(opts.color) ? opts.color : chroma(this.#_colorPalettes[0]).darken(0.7);
 
-			return this;
-		};
+			this.#_ctx.fillRect(0, 0, this.#_canvas.width, this.#_canvas.height);
+		}
 
-		this.putTrackCover = async (opts) => {
-			if (!this.canvas || !this.ctx) {
-				const err = 'Need initialization. Call .init() first.';
-
-				throw new Error(err);
-			}
-
-			if (!opts) {
-				opts = {};
-			}
-
-			if (!opts.shadow) {
-				opts.shadow = false;
-			}
-
-			if (!opts.round) {
-				opts.round = false;
-			}
-
-			if (!this._loadedCover) {
-				this._loadedCover = await loadImage(this._buffer);
-			}
-
-			this.ctx.save();
-			this.ctx.beginPath();
-
-			if (opts.shadow) {
-				if (typeof opts.shadow === 'boolean') {
-					opts.shadow = 10;
-				}
-
-				if (typeof opts.shadow !== 'number') {
-					const err = `Options.shadow expected integer/number. Got : ${typeof opts.shadow}`;
-
-					throw new Error(err);
-				}
-
-				if (!Number.isInteger(opts.shadow)) {
-					opts.shadow = Math.round(opts.shadow);
-				}
-
-				this.ctx.shadowBlur = opts.shadow;
-				this.ctx.shadowColor = 'black';
-				this.ctx.shadowOffsetX = 6;
-				this.ctx.shadowOffsetY = 6;
-			}
-
-			let image = this._loadedCover;
-
-			if (opts.round) {
-				if (typeof opts.round === 'boolean') {
-					opts.round = 20;
-				}
-
-				if (typeof opts.round !== 'number') {
-					const err = `Options.round expected integer/number. Got : ${typeof opts.round}`;
-
-					throw new Error(err);
-				}
-
-				if (!Number.isInteger(opts.round)) {
-					opts.round = Math.round(opts.round);
-				}
-
-				const process = new Buffer.from(
-					`<svg><rect x="0" y="0" width="${this._loadedCover.width}" height="${this._loadedCover.height}" rx="${opts.round}" ry="${opts.round}"/></svg>`
-				);
-				const sharpInstance = sharp(this._buffer)
-					.composite([{ input: process, blend: 'dest-in' }])
-					.png();
-
-				const buffer = await sharpInstance.toBuffer();
-
-				image = await loadImage(buffer);
-			}
-
-			const scaleFactor = 1.3;
-
-			const scaledWidth = image.width * scaleFactor;
-			const scaledHeight = image.height * scaleFactor;
-
-			const centerX = this.canvas.width / 3;
-			const centerY = this.canvas.height / 3.5;
-
-			this.ctx.drawImage(image, centerX - scaledWidth / 3 + 38, centerY - scaledHeight / 3, scaledWidth, scaledHeight);
-
-			this.ctx.closePath();
-			this.ctx.restore();
-			this.w = this.canvas.width / 3 - (image.width * 1.3) / 3 + 38;
-
-			return this;
-		};
-
-		this.putText = () => {
-			if (!this.canvas || !this.ctx) {
-				const err = 'Need initialization. Call .init() first.';
-
-				throw new Error(err);
-			}
-
-			if (this._title.length > 21) {
-				this._title = `${this._title.slice(0, 21)} . .`;
-			}
-
-			this.ctx.font = '62px texgy';
-
-			this.ctx.fillStyle = chroma('white').hex();
-			this.ctx.fillText(this._title, this.w, this.canvas.height / 2 + 190);
-
-			this.ctx.font = '32px antre';
-
-			this.ctx.fillStyle = chroma('grey').brighten(2).hex();
-			this.ctx.fillText(this._artist, this.w, this.canvas.height / 2 + 250);
-
-			this.ctx.font = '32px lemon';
-			this.ctx.textAlign = 'center';
-
-			this.ctx.fillStyle = chroma('white').hex();
-			this.ctx.fillText(watermark.split('').join(' '), this.canvas.width / 2, 290);
-
-			return this;
-		};
-
-		this.putPlayback = () => {
-			if (!this.canvas || !this.ctx) {
-				const err = 'Need initialization. Call .init() first.';
-
-				throw new Error(err);
-			}
-
-			const centerX = this.w + 20;
-			const centerY = this.canvas.height / 2 + 310;
-			const radius = 10;
-
-			this.ctx.font = '22px sans-thin';
-
-			this.ctx.fillStyle = chroma('white').brighten(2).hex();
-
-			const gradientNumber = unique(1, this._colorPalettes.length);
-			const gradient = this.ctx.createLinearGradient(centerX - 19, centerY, this.w + 830, centerY);
-
-			const $chromed1 = chroma(this._colorPalettes[gradientNumber() - 1]);
-			const $chromed2 = chroma(this._colorPalettes[gradientNumber() - 1]);
-
-			gradient.addColorStop(0, $chromed1.hex());
-			gradient.addColorStop(1, $chromed2.hex());
-
-			this.ctx.fillText('0:04', this.w + 15, centerY + 30);
-			this.ctx.fillText(this.toTime(this._timestamp), this.w + 800 + 15, centerY + 30);
-
-			this.ctx.lineCap = 'round';
-			this.ctx.lineWidth = 5;
-
-			this.ctx.beginPath();
-			this.ctx.moveTo(centerX - 19, centerY);
-			this.ctx.lineTo(centerX - 15, centerY);
-			this.ctx.stroke();
-			this.ctx.closePath();
-
-			this.ctx.beginPath();
-
-			this.ctx.strokeStyle = gradient; // chroma('gray').brighten(1).hex();
-
-			this.ctx.moveTo(centerX, centerY);
-			this.ctx.lineTo(this.w + 830, centerY);
-			this.ctx.stroke();
-			this.ctx.closePath();
-
-			this.ctx.beginPath();
-			this.ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
-			this.ctx.fill();
-			this.ctx.closePath();
-
-			return this;
-		};
-
-		this.putButtons = async () => {
-			if (!this.canvas || !this.ctx) {
-				const err = 'Need initialization. Call .init() first.';
-
-				throw new Error(err);
-			}
-
-			let iconType = 1;
-			const contrast = this.revertBlack;
-
-			if (contrast) {
-				iconType = 2;
-			}
-
-			if (!assets.model) {
-				assets.model = {};
-				const dir = await fs.readdir('./src/media/assets/');
-
-				for (const asset of dir) {
-					assets.model[`${asset.at(0)}_${asset.split('_').slice(2).join('_').replace(/\..*/, '')}`] = await loadImage(
-						`./src/media/assets/${asset}`
-					);
-				}
-			}
-
-			const w = 512 / 3.1;
-			const h = 512 / 3.1;
-
-			const n = 2.5;
-
-			const x = (w1) => this.canvas.width / (n - 0.5) - (w1 || w) / (n - 0.5);
-			const y = (h1) => this.canvas.height / (n - 0.5) - (h1 || h) / (n - 0.5) + 430;
-
-			this.ctx.drawImage(assets.model[`${iconType}_pause`], x(), y(), w, h);
-
-			// this.ctx.drawImage(
-			// 	assets.model[`${iconType}_down_arrow`],
-			// 	x(w / (n - 0.3)) - 390,
-			// 	y(h / (n - 0.3)) - 1320,
-			// 	w / (n - 0.3),
-			// 	h / (n - 0.3)
-			// );
-			this.ctx.drawImage(
-				assets.model[`${iconType}_previous`],
-				x(w / (n + 0.5)) - 200,
-				y(h / (n + 0.5)),
-				w / (n + 0.5),
-				h / (n + 0.5)
-			);
-			this.ctx.drawImage(
-				assets.model[`${iconType}_next`],
-				x(w / (n + 0.5)) + 200,
-				y(h / (n + 0.5)),
-				w / (n + 0.5),
-				h / (n + 0.5)
-			);
-			this.ctx.drawImage(
-				assets.model[`${iconType}_heart`],
-				x(w / (n + 0.5)) - 390,
-				y(h / (n + 0.5)),
-				w / (n + 0.5),
-				h / (n + 0.5)
-			);
-			this.ctx.drawImage(
-				assets.model[`${iconType}_circle_diagonal`],
-				x(w / (n + 0.5)) + 390,
-				y(h / (n + 0.5)),
-				w / (n + 0.5),
-				h / (n + 0.5)
-			);
-			this.ctx.drawImage(
-				assets.model[`${iconType}_share`],
-				x(w / (n + 2.1)) + 390,
-				y(h / (n + 2.1)) + 100,
-				w / (n + 2.1),
-				h / (n + 2.1)
-			);
-			this.ctx.drawImage(
-				assets.model[`${iconType}_speaker`],
-				x(w / (n + 0.7)) - 390,
-				y(h / (n + 0.7)) + 100,
-				w / (n + 0.7),
-				h / (n + 0.7)
-			);
-
-			this.ctx.drawImage(
-				assets.model[`${iconType}_github`],
-				120,
-				this.canvas.height - 220,
-				assets.model[`${iconType}_github`].width / 2,
-				assets.model[`${iconType}_github`].height / 2
-			);
-			this.ctx.font = '32px galyon';
-			this.ctx.fillStyle = chroma('white').hex();
-			this.ctx.fillText(githubUsername, 220, this.canvas.height - 180);
-
-			this.ctx.drawImage(
-				assets.model[`${iconType}_instagram`],
-				this.canvas.width - 120 - assets.model[`${iconType}_instagram`].width / 8.5,
-				this.canvas.height - 220,
-				assets.model[`${iconType}_instagram`].width / 8.5,
-				assets.model[`${iconType}_instagram`].height / 8.5
-			);
-			this.ctx.font = '32px galyon';
-			this.ctx.fillStyle = chroma('white').hex();
-			this.ctx.fillText(
-				instagramUsername,
-				this.canvas.width -
-					160 -
-					this.ctx.measureText(instagramUsername).width -
-					assets.model[`${iconType}_instagram`].height / 8.5,
-				this.canvas.height - 180
-			);
-
-			return this;
-		};
+		return this;
 	}
 
+	/**
+	 * @private
+	 */
+	async putTrackCover(opts) {
+		if (!opts) {
+			opts = {};
+		}
+
+		if (!opts.shadow) {
+			opts.shadow = false;
+		}
+
+		if (!opts.round) {
+			opts.round = false;
+		}
+
+		if (!this.#_loadedCover) {
+			this.#_loadedCover = await loadImage(this.#_buffer);
+		}
+
+		this.#_ctx.save();
+		this.#_ctx.beginPath();
+
+		if (opts.shadow) {
+			if (typeof opts.shadow === 'boolean') {
+				opts.shadow = 10;
+			}
+
+			if (typeof opts.shadow !== 'number') {
+				const err = `Options.shadow expected integer/number. Got : ${typeof opts.shadow}`;
+
+				throw new Error(err);
+			}
+
+			if (!Number.isInteger(opts.shadow)) {
+				opts.shadow = Math.round(opts.shadow);
+			}
+
+			this.#_ctx.shadowBlur = opts.shadow;
+			this.#_ctx.shadowColor = '#333333';
+			this.#_ctx.shadowOffsetX = 6;
+			this.#_ctx.shadowOffsetY = 6;
+		}
+
+		let image = this.#_loadedCover;
+
+		if (opts.round) {
+			if (typeof opts.round === 'boolean') {
+				opts.round = 20;
+			}
+
+			if (typeof opts.round !== 'number') {
+				const err = `Options.round expected integer/number. Got : ${typeof opts.round}`;
+
+				throw new Error(err);
+			}
+
+			if (!Number.isInteger(opts.round)) {
+				opts.round = Math.round(opts.round);
+			}
+
+			const process = new Buffer.from(
+				`<svg><rect x="0" y="0" width="${this.#_loadedCover.width}" height="${this.#_loadedCover.height}" rx="${
+					opts.round
+				}" ry="${opts.round}"/></svg>`
+			);
+			const sharpInstance = sharp(this.#_buffer)
+				.composite([{ input: process, blend: 'dest-in' }])
+				.png();
+
+			const buffer = await sharpInstance.toBuffer();
+
+			image = await loadImage(buffer);
+		}
+
+		const scaleFactor = 1.3;
+
+		const scaledWidth = image.width * scaleFactor;
+		const scaledHeight = image.height * scaleFactor;
+
+		const centerX = this.#_canvas.width / 3;
+		const centerY = this.#_canvas.height / 3.5;
+
+		this.#_ctx.drawImage(image, centerX - scaledWidth / 3 + 38, centerY - scaledHeight / 3, scaledWidth, scaledHeight);
+
+		this.#_ctx.closePath();
+		this.#_ctx.restore();
+		this.#_w = this.#_canvas.width / 3 - (image.width * 1.3) / 3 + 38;
+
+		return this;
+	}
+
+	/**
+	 * @private
+	 */
+	putText() {
+		if (this.#_title.length > 21) {
+			this.#_title = `${this.#_title.slice(0, 21)} . .`;
+		}
+
+		this.#_ctx.font = '62px texgy';
+
+		this.#_ctx.fillStyle = chroma('white').hex();
+		this.#_ctx.fillText(this.#_title, this.#_w, this.#_canvas.height / 2 + 190);
+
+		this.#_ctx.font = '32px antre';
+
+		this.#_ctx.fillStyle = chroma('grey').brighten(2).hex();
+		this.#_ctx.fillText(this.#_artist, this.#_w, this.#_canvas.height / 2 + 250);
+
+		this.#_ctx.font = '32px lemon';
+		this.#_ctx.textAlign = 'center';
+
+		this.#_ctx.fillStyle = chroma('white').hex();
+		this.#_ctx.fillText(watermark.split('').join(' '), this.#_canvas.width / 2, 290);
+
+		return this;
+	}
+
+	/**
+	 * @private
+	 */
+	putPlayback() {
+		const centerX = this.#_w + 20;
+		const centerY = this.#_canvas.height / 2 + 310;
+		const radius = 10;
+
+		this.#_ctx.font = '22px sans-thin';
+
+		this.#_ctx.fillStyle = chroma('white').brighten(2).hex();
+
+		const gradientNumber = this.unique(1, this.#_colorPalettes.length);
+		const gradient = this.#_ctx.createLinearGradient(centerX - 19, centerY, this.#_w + 830, centerY);
+
+		const $chromed1 = chroma(this.#_colorPalettes[gradientNumber() - 1]);
+		const $chromed2 = chroma(this.#_colorPalettes[gradientNumber() - 1]);
+
+		gradient.addColorStop(0, $chromed1.hex());
+		gradient.addColorStop(1, $chromed2.hex());
+
+		this.#_ctx.fillText('0:04', this.#_w + 15, centerY + 30);
+		this.#_ctx.fillText(this.toTime(this.#_timestamp), this.#_w + 800 + 15, centerY + 30);
+
+		this.#_ctx.lineCap = 'round';
+		this.#_ctx.lineWidth = 5;
+
+		this.#_ctx.beginPath();
+		this.#_ctx.moveTo(centerX - 19, centerY);
+		this.#_ctx.lineTo(centerX - 15, centerY);
+		this.#_ctx.stroke();
+		this.#_ctx.closePath();
+
+		this.#_ctx.beginPath();
+
+		this.#_ctx.strokeStyle = gradient;
+
+		this.#_ctx.moveTo(centerX, centerY);
+		this.#_ctx.lineTo(this.#_w + 830, centerY);
+		this.#_ctx.stroke();
+		this.#_ctx.closePath();
+
+		this.#_ctx.beginPath();
+		this.#_ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+		this.#_ctx.fill();
+		this.#_ctx.closePath();
+
+		return this;
+	}
+
+	/**
+	 * @private
+	 */
+	async putButtons() {
+		let iconType = 1;
+		const contrast = this.#_revertBlack;
+
+		if (contrast) {
+			iconType = 2;
+		}
+
+		if (!assets.model) {
+			assets.model = {};
+			const dir = await fs.readdir('./src/media/assets/');
+
+			for (const asset of dir) {
+				assets.model[`${asset.at(0)}_${asset.split('_').slice(2).join('_').replace(/\..*/, '')}`] = await loadImage(
+					`./src/media/assets/${asset}`
+				);
+			}
+		}
+
+		const w = 512 / 3.1;
+		const h = 512 / 3.1;
+
+		const n = 2.5;
+
+		const x = (w1) => this.#_canvas.width / (n - 0.5) - (w1 || w) / (n - 0.5);
+		const y = (h1) => this.#_canvas.height / (n - 0.5) - (h1 || h) / (n - 0.5) + 430;
+
+		this.#_ctx.drawImage(assets.model[`${iconType}_pause`], x(), y(), w, h);
+
+		// this.#_ctx.drawImage(
+		// 	assets.model[`${iconType}_down_arrow`],
+		// 	x(w / (n - 0.3)) - 390,
+		// 	y(h / (n - 0.3)) - 1320,
+		// 	w / (n - 0.3),
+		// 	h / (n - 0.3)
+		// );
+		this.#_ctx.drawImage(
+			assets.model[`${iconType}_previous`],
+			x(w / (n + 0.5)) - 200,
+			y(h / (n + 0.5)),
+			w / (n + 0.5),
+			h / (n + 0.5)
+		);
+		this.#_ctx.drawImage(
+			assets.model[`${iconType}_next`],
+			x(w / (n + 0.5)) + 200,
+			y(h / (n + 0.5)),
+			w / (n + 0.5),
+			h / (n + 0.5)
+		);
+		this.#_ctx.drawImage(
+			assets.model[`${iconType}_heart`],
+			x(w / (n + 0.5)) - 390,
+			y(h / (n + 0.5)),
+			w / (n + 0.5),
+			h / (n + 0.5)
+		);
+		this.#_ctx.drawImage(
+			assets.model[`${iconType}_circle_diagonal`],
+			x(w / (n + 0.5)) + 390,
+			y(h / (n + 0.5)),
+			w / (n + 0.5),
+			h / (n + 0.5)
+		);
+		this.#_ctx.drawImage(
+			assets.model[`${iconType}_share`],
+			x(w / (n + 2.1)) + 390,
+			y(h / (n + 2.1)) + 100,
+			w / (n + 2.1),
+			h / (n + 2.1)
+		);
+		this.#_ctx.drawImage(
+			assets.model[`${iconType}_speaker`],
+			x(w / (n + 0.7)) - 390,
+			y(h / (n + 0.7)) + 100,
+			w / (n + 0.7),
+			h / (n + 0.7)
+		);
+
+		this.#_ctx.drawImage(
+			assets.model[`${iconType}_github`],
+			120,
+			this.#_canvas.height - 220,
+			assets.model[`${iconType}_github`].width / 2,
+			assets.model[`${iconType}_github`].height / 2
+		);
+		this.#_ctx.font = '32px galyon';
+		this.#_ctx.fillStyle = chroma('white').hex();
+		this.#_ctx.fillText(githubUsername, 220, this.#_canvas.height - 180);
+
+		this.#_ctx.drawImage(
+			assets.model[`${iconType}_instagram`],
+			this.#_canvas.width - 120 - assets.model[`${iconType}_instagram`].width / 8.5,
+			this.#_canvas.height - 220,
+			assets.model[`${iconType}_instagram`].width / 8.5,
+			assets.model[`${iconType}_instagram`].height / 8.5
+		);
+		this.#_ctx.font = '32px galyon';
+		this.#_ctx.fillStyle = chroma('white').hex();
+		this.#_ctx.fillText(
+			instagramUsername,
+			this.#_canvas.width -
+				160 -
+				this.#_ctx.measureText(instagramUsername).width -
+				assets.model[`${iconType}_instagram`].height / 8.5,
+			this.#_canvas.height - 180
+		);
+
+		return this;
+	}
+
+	/**
+	 * @private
+	 */
 	toTime(ms) {
 		const minutes = Math.floor(ms / 60_000);
-		const seconds = ((ms % 60_000) / 1000).toFixed(0);
+		const seconds = Math.floor((ms % 60_000) / 1000);
 
-		return seconds === 60 ? `${minutes + 1}:00` : `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+		return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 	}
 
-	initCanvas() {
-		this.canvas = createCanvas(1080, 2340);
-		this.ctx = this.canvas.getContext('2d');
-	}
-
-	toBuffer() {
-		clearAllCache();
-		return this.canvas.toBuffer('image/png');
-	}
-
+	/**
+	 * @private
+	 */
 	async getTrackCover() {
-		const data = await spotifier.searchTracks(this._track);
+		const data = await spotifier.searchTracks(this.#_track);
 
 		if (!data.status) {
 			const err = data.message;
@@ -468,25 +595,31 @@ export class SpotifyCover {
 		const req = await fetch(data.data.items[0].album.images[0].url);
 		const buffer = Buffer.from(await req.arrayBuffer());
 
-		this._buffer = buffer;
-		this._title = data.data.items[0].name;
-		this._artist = data.data.items[0].artists.map((v) => v.name).join(', ');
-		this._timestamp = data.data.items[0].duration_ms;
+		this.#_buffer = buffer;
+		this.#_title = data.data.items[0].name;
+		this.#_artist = data.data.items[0].artists.map((v) => v.name).join(', ');
+		this.#_timestamp = data.data.items[0].duration_ms;
 	}
 
+	/**
+	 * @private
+	 */
 	async palettes() {
-		this._colorPalettes = await color.getPalette(this._buffer);
+		this.#_colorPalettes = await color.getPalette(this.#_buffer);
+	}
+
+	/**
+	 * @private
+	 */
+	unique(minimum, maximum) {
+		let previousValue;
+
+		return function random() {
+			const number = Math.floor(Math.random() * (maximum - minimum + 1) + minimum);
+
+			previousValue = number === previousValue && minimum !== maximum ? random() : number;
+
+			return previousValue;
+		};
 	}
 }
-
-const unique = (minimum, maximum) => {
-	let previousValue;
-
-	return function random() {
-		const number = Math.floor(Math.random() * (maximum - minimum + 1) + minimum);
-
-		previousValue = number === previousValue && minimum !== maximum ? random() : number;
-
-		return previousValue;
-	};
-};

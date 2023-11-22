@@ -17,17 +17,18 @@ export default {
 			return await client[botNum].reply('Please provide a query', { from, quoted: message, groupMetadata });
 		}
 
-		const cover = new SpotifyCover();
+		const cover = new SpotifyCover(query, {
+			background: {
+				blur: 60
+			},
+			cover: {
+				shadow: 40,
+				round: 90
+			}
+		});
 
-		await cover.init(query);
+		const { toBuffer } = await cover.render();
 
-		cover.fillBackground();
-
-		await cover.putTrackCover({ shadow: 80, round: 30 });
-		await cover.putButtons();
-
-		cover.putText().putPlayback();
-
-		client[botNum].send(from, { image: new Buffer.from(cover.toBuffer(), 'base64') }, { groupMetadata, quoted: message });
+		client[botNum].send(from, { image: new Buffer.from(toBuffer(), 'base64') }, { groupMetadata, quoted: message });
 	}
 };

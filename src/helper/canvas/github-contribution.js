@@ -1,7 +1,7 @@
 import Canvas from '@napi-rs/canvas';
 import path from 'path';
 import _ from 'lodash';
-import { fetchTEXT, cheerioLOAD } from '../../utils/modules/index.js';
+import { Client } from 'undici';
 
 const copyright = '© 2022 Hidden Finder, Inc | Made by Nanda using Canvas Module.';
 
@@ -16,6 +16,49 @@ const [icons_1, signature_1, icons_2, signature_2] = await Promise.all([
 	await loadImage('./src/media/assets/2_icon_github.png'),
 	await loadImage('./src/media/assets/2_icon_github_signature.png')
 ]);
+
+const graphQl = (username, { type, from, to }) => {
+	if (type === 'YEARLY') {
+		return `query {
+					user(login: "${username}") {
+						createdAt
+					}
+				}`;
+	} else if (type === 'CONTRIBUTIONS') {
+		return `query { 
+					user(login: "${username}") {
+	  					contributionsCollection(from: "${from}", to: "${to}") {
+							contributionCalendar {
+		  						totalContributions
+		  						weeks {
+									contributionDays {
+			  							weekday
+			  							date 
+			  							contributionCount 
+			  							color
+              							contributionLevel
+									}
+		  						}
+		  						months {
+									name
+			  						year
+			  						firstDay
+									totalWeeks
+		  						}
+							}
+	  					}
+					}
+  				}`;
+	}
+};
+
+const getLastDateOfMonth = (year, month) => {
+	const nextMonthFirstDay = new Date(year, month, 1);
+
+	const lastDate = new Date(nextMonthFirstDay - 1);
+
+	return lastDate.getDate();
+};
 
 export class GitHubGraph {
 	/**
@@ -93,12 +136,10 @@ export class GitHubGraph {
 	async _createGitHubGraph() {
 		await this._fillBackground()._createLines({ round: this.#_optsRound })._placeCopyright()._placeIcons()._textHeaders();
 
-		const dates = await this.#_api.fetchDates();
+		const dates = await this.#_api.getTotalContribution();
 		let yPos = 290;
 
-		for (const { dates: date, year } of dates) {
-			const data = await this.#_api.getTotalContribution(date, year);
-
+		for (const data of dates) {
 			this._drawCalendar(data.month, yPos, data);
 			yPos += 550;
 		}
@@ -145,10 +186,10 @@ export class GitHubGraph {
 		let height = 290;
 		const width = 1080 * 2;
 
-		const totalYears = await this.#_api.fetchTotalYears();
+		const totalYears = await this.#_api.fetchDates();
 
-		for (let i = 0; i < totalYears; i++) {
-			if (totalYears > 1) {
+		for (let i = 0; i < totalYears.dates.length; i++) {
+			if (totalYears.dates.length > 1) {
 				height += 550;
 			}
 		}
@@ -165,32 +206,34 @@ export class GitHubGraph {
 
 		this.#_ctx.font = '32px ibm';
 		this.#_ctx.fillStyle = this.#_theme.GENERAL[3];
+		this.#_ctx.fillText(String(data.totContributionsInYear), 70, yPos - 50, this.#_canvas.width - 130);
 
+		this.#_ctx.fillStyle = this.#_theme.GENERAL[1];
 		this.#_ctx.fillText(
-			`${data.year} : ${data.totContributionsInYear} Contribution`,
-			70,
+			` Contribution in ${data.year}`,
+			70 + this.#_ctx.measureText(String(data.totContributionsInYear)).width,
 			yPos - 50,
 			this.#_canvas.width - 130
 		);
 		this._fillLineInBetween(70, yPos + 400, this.#_canvas.width - 120, yPos + 400);
 
 		for (let i = 0; i < months; i++) {
+			let h = 25;
 			let multiple = yPos + 40;
-			let h = 50;
 
 			for (let j = 0; j < data.days.length; j++) {
-				if (data.days[j]) {
-					this._activityColor(h, multiple, data.days[j].color);
+				if (String(j / 7).includes('.')) {
+					multiple += 40;
+				}
 
-					if (!String(j / 7).includes('.')) {
+				if (data.days[j]) {
+					if (!String(j / 7).includes('.') && j !== 0) {
 						h += 40;
 						multiple = yPos + 40;
 						continue;
 					}
-				}
 
-				if (String(j / 7).includes('.')) {
-					multiple += 40;
+					this._activityColor(h, multiple, data.days[j].color);
 				}
 			}
 
@@ -316,8 +359,6 @@ export class GitHubGraph {
 
 		this._activitySchedule();
 
-		await this._dates();
-
 		return this;
 	}
 
@@ -331,67 +372,12 @@ export class GitHubGraph {
 			this.#_ctx.fillStyle = color;
 
 			if (this.#_optsRound) {
-				this._round(this.#_canvas.width - 440 + multiple, 12, 30, 30, 5);
+				this._round(this.#_canvas.width - 440 + multiple, 125, 30, 30, 5);
 			} else {
 				this.#_ctx.fillRect(this.#_canvas.width - 440 + multiple, 125, 30, 30);
 			}
 
 			multiple += 34;
-		}
-	}
-
-	/**
-	 * @private
-	 */
-	async _dates() {
-		let i = 290;
-		const dates = await this.#_api.fetchDates();
-
-		for (const { dates: date, year } of dates) {
-			const data = await this.#_api.getTotalContribution(date, year);
-
-			this._calendars(data.month, i, data);
-			i += 550;
-		}
-	}
-
-	/**
-	 * @private
-	 */
-	_calendars(month, y, data) {
-		const dim = this._calculateDates();
-		const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-		this.#_ctx.font = '32px ibm';
-		this.#_ctx.fillStyle = this.#_theme.GENERAL[3];
-
-		this.#_ctx.fillText(`${data.year} : ${data.totContributionsInYear} Contribution`, 70, y - 50, this.#_canvas.width - 130);
-		this._fillLineInBetween(70, y + 400, this.#_canvas.width - 120, y + 400);
-
-		for (let i = 0; i < month; i++) {
-			let multiple = y + 40;
-			let h = 50;
-
-			for (let j = 0; j < data.days.length; j++) {
-				if (data.days[j]) {
-					this._activityColor(h, multiple, data.days[j].color);
-
-					if (!String(j / 7).includes('.')) {
-						h += 40;
-						multiple = y + 40;
-						continue;
-					}
-				}
-
-				if (String(j / 7).includes('.')) {
-					multiple += 40;
-				}
-			}
-
-			this.#_ctx.fillStyle = this.#_theme.GENERAL[3];
-			this.#_ctx.font = '22px ibm';
-
-			this.#_ctx.fillText(months[i], dim[i][Math.round(dim[i].length / 2)] - 30, y, this.#_canvas.width - 120);
 		}
 	}
 
@@ -429,119 +415,138 @@ export class GitHubGraph {
 class API {
 	constructor(username, theme) {
 		this.username = username;
+		this.theme = theme.GRAPH;
+		this.dates = null;
+		this.client = new Client('https://api.github.com');
 
 		this.fetchDates = async () => {
-			const $ = await this.request(`/${this.username}`);
-			const date = $('.js-year-link').get();
-
-			if (!date) {
-				const err = 'Username not found or has private activity';
-
-				throw new Error(err);
+			if (this.dates) {
+				return this.dates;
 			}
 
-			return date.map((el) => {
-				el = $(el);
-				const dates = el.attr('href');
-
-				return {
-					dates,
-					year: parseInt(el.text())
-				};
+			const { body: $body1 } = await this.client.request({
+				method: 'POST',
+				path: '/graphql',
+				headers: {
+					'Content-Type': 'application/json',
+					'User-Agent': 'nugraizy',
+					Authorization: `Bearer ${process.env.GITHUB_AUTH_TOKEN}`
+				},
+				body: JSON.stringify({
+					query: graphQl(username, { type: 'YEARLY' })
+				})
 			});
-		};
 
-		this.fetchTotalYears = async () => {
-			return (await this.fetchDates()).length;
-		};
+			const json = await $body1.json();
 
-		this.getTotalContribution = async (path, year) => {
-			const data = await this.request(path);
-
-			const contributionsInYearTotal = data('.js-yearly-contributions > div.position-relative > h2.f4').text().trim();
-			const parseTotal = contributionsInYearTotal.match(/^([0-9,]+)\s/)[1];
+			const started = new Date(json.data.user.createdAt).getFullYear();
 
 			const dates = {
-				startYear: 0,
-				endYear: 0
-			};
+				started,
+				dates: new Array(new Date().getFullYear() - started + 1).fill(0).map((_, i) => {
+					const date = new Date(Date.UTC(started + i));
 
-			for (let i = 0; i < 7; i++) {
-				const datesCalender = data(`table.ContributionCalendar-grid.js-calendar-graph-table > tbody > tr:nth-child(${i + 1})`);
+					date.setMonth(0);
+					date.setDate(1);
 
-				const index = datesCalender.find('td:not([class])').index();
-
-				if (index !== -1) {
-					if (index === 0) {
-						dates.startYear += 1;
-					} else {
-						dates.endYear += 1;
-					}
-				}
-			}
-
-			const firstWeekOfFirstMonth = dates.startYear;
-			const lastWeekOfLastMonth = dates.endYear;
-
-			return {
-				totContributionsInYear: parseTotal,
-				firstWeekOfFirstMonth,
-				lastWeekOfLastMonth,
-				year,
-				month: Math.round(
-					parseInt(
-						data(
-							`tbody > tr:nth-child(1) > td.ContributionCalendar-day:nth-child(${
-								data('tbody > tr:nth-child(1) > td.ContributionCalendar-day').get().length
-							})`
-						)
-							.attr('data-date')
-							.split('-')[1]
-					)
-				),
-				days: [
-					...new Array(firstWeekOfFirstMonth).fill(undefined),
-					...data('tbody > tr > td.ContributionCalendar-day').get()
-				].map((v, i) => {
-					if (v && data('tbody > tr > td.ContributionCalendar-day').get().length - lastWeekOfLastMonth > i) {
-						const level = parseInt(data(v).attr('data-level'));
-						const month = Math.round(parseInt(data(v).attr('data-date').split('-')[1]));
-						const contri = data(v).text();
-						const totalContri = contri.startsWith('No contributions') ? 0 : parseInt(contri.match(/([0-9]+)/)[1]);
-
-						return {
-							level,
-							month,
-							totalContri,
-							color: theme.GRAPH[level]
-						};
-					}
-
-					return undefined;
+					return {
+						dates: date.toISOString(),
+						year: date.getFullYear()
+					};
 				})
 			};
+
+			this.dates = dates;
+
+			return dates;
 		};
-	}
 
-	async request(param) {
-		try {
-			const data = await fetchTEXT(`https://github.com${param}`);
+		this.parseDays = (data, theme) => {
+			const firstWeekOfFirstMonth = data.weeks[0].contributionDays.length;
+			const lastWeekOfLastMonth = data.weeks[data.weeks.length - 1].contributionDays.length;
 
-			if (data.includes('Not Found')) {
-				const err = 'User not found';
+			const container = {
+				year: null,
+				month: data.months.length,
+				totContributionsInYear: data.totalContributions,
+				firstWeekOfFirstMonth,
+				lastWeekOfLastMonth,
+				days: [...Array(7 - firstWeekOfFirstMonth).fill(undefined)]
+			};
 
-				throw new Error(err);
+			data.weeks.forEach((item) => {
+				const { contributionDays } = item;
+
+				contributionDays.forEach((item2) => {
+					const [year, month, day] = item2.date.split('-');
+					const level =
+						item2.contributionLevel === 'NONE'
+							? 0
+							: item2.contributionLevel === 'FIRST_QUARTILE'
+							? 1
+							: item2.contributionLevel === 'SECOND_QUARTILE'
+							? 2
+							: item2.contributionLevel === 'THIRD_QUARTILE'
+							? 3
+							: item2.contributionLevel === 'FOURTH_QUARTILE'
+							? 4
+							: 5;
+
+					container.year = year;
+
+					container.days.push({
+						day,
+						month,
+						color: theme[level],
+						level,
+						totalContri: item2.contributionCount
+					});
+				});
+			});
+
+			container.days.push(...Array(7 - lastWeekOfLastMonth).fill(undefined));
+
+			return container;
+		};
+
+		this.getTotalContribution = async () => {
+			const container = [];
+
+			const $data1 = await this.fetchDates();
+
+			for (let i = 0; i < $data1.dates.length; i++) {
+				const date = new Date($data1.dates[i].dates);
+
+				date.setMonth(0);
+				date.setDate(1);
+
+				const to = new Date(Date.UTC(date.getFullYear(), 11));
+
+				to.setDate(getLastDateOfMonth(date.getFullYear(), 12));
+
+				const { body: $body2 } = await this.client.request({
+					method: 'POST',
+					path: '/graphql',
+					headers: {
+						'Content-Type': 'application/json',
+						'User-Agent': 'nugraizy',
+						Authorization: `Bearer ${process.env.GITHUB_AUTH_TOKEN}`
+					},
+					body: JSON.stringify({
+						query: graphQl(username, {
+							type: 'CONTRIBUTIONS',
+							from: date.toISOString(),
+							to: to.toISOString()
+						})
+					})
+				});
+
+				const { data: $data2 } = await $body2.json();
+
+				container.push(this.parseDays($data2.user?.contributionsCollection?.contributionCalendar, this.theme));
 			}
 
-			if (data.includes('activity is private')) {
-				const err = 'User has private activity';
-
-				throw new Error(err);
-			}
-
-			return cheerioLOAD(data);
-		} catch (err) {
-			throw new Error(err);
-		}
+			return container;
+		};
 	}
 }
