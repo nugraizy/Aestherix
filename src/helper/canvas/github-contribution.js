@@ -222,18 +222,15 @@ export class GitHubGraph {
 			let multiple = yPos + 40;
 
 			for (let j = 0; j < data.days.length; j++) {
-				if (String(j / 7).includes('.')) {
-					multiple += 40;
+				if (data.days[j]) {
+					this._activityColor(h, multiple, data.days[j].color);
 				}
 
-				if (data.days[j]) {
-					if (!String(j / 7).includes('.') && j !== 0) {
-						h += 40;
-						multiple = yPos + 40;
-						continue;
-					}
+				multiple += 40;
 
-					this._activityColor(h, multiple, data.days[j].color);
+				if ((j + 1) % 7 === 0) {
+					multiple = yPos + 40;
+					h += 40;
 				}
 			}
 

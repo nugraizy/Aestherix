@@ -501,8 +501,6 @@ class RequestModule extends ResponseParser {
 						bail(new Error('No data found'));
 					}
 
-					console.log(dataFinale);
-
 					if (dataFinale !== '') {
 						data = dataFinale;
 						return;
