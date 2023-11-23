@@ -501,7 +501,7 @@ const handleIncomingMessage = async (message, client, cmds, store, user, state, 
 		return handleStubMessage(client, message, store);
 	}
 
-	message = await reassign(message.messages[0], client, store, false);
+	message = await reassign(message.messages[0], client, store);
 
 	if (
 		!message ||

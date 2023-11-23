@@ -3,6 +3,8 @@ import chalk from 'chalk';
 
 import { INFOLOG, color } from '../../../utils/modules/index.js';
 
+export const startingConnection = Date.now();
+
 const helpFlag = `
 	 ${color('Usage', 'yellow')}
 	   $ node ${color('.', 'cyan')} <?session> [options]

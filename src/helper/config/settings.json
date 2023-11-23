@@ -1,33 +1,36 @@
 {
-	"owner_number": "6289607055246@s.whatsapp.net",
-	"host_number": "6289522534401",
-	"team_number": ["6289522534401@s.whatsapp.net"],
-	"state": "public",
-	"maintenance": false,
-	"main_session": "debug",
-	"max_group": 20,
-	"min_members": 20,
-	"limit": 30,
-	"reset_time": {
-		"minute": "6",
-		"hour": "00"
-	},
-	"tebak_gambar": {
-		"expired_time": 20
-	},
-	"prefix": {
-		"multi": true,
-		"nopref": false,
-		"pref": "z"
-	},
-	"debugger": false,
-	"session": [
-		{
-			"jid": "62896070552462@s.whatsapp.net",
-			"status": "Main_Bot",
-			"session_name": "debug",
-			"uptime": 1644383248000
-		}
-	],
-	"delay": 2
+  "owner_number": "6289607055246@s.whatsapp.net",
+  "host_number": "6289522534401",
+  "team_number": [
+    "6289522534401@s.whatsapp.net"
+  ],
+  "state": "public",
+  "maintenance": false,
+  "main_session": "debug",
+  "max_group": 20,
+  "min_members": 20,
+  "limit": 30,
+  "reset_time": {
+    "minute": "6",
+    "hour": "00"
+  },
+  "tebak_gambar": {
+    "expired_time": 20
+  },
+  "prefix": {
+    "multi": true,
+    "nopref": false,
+    "pref": "z"
+  },
+  "debugger": false,
+  "session": [
+    {
+      "jid": "62896070552462@s.whatsapp.net",
+      "status": "Main_Bot",
+      "session_name": "debug",
+      "uptime": 1644383248000
+    }
+  ],
+  "delay": 2,
+  "best_time": 11092
 }

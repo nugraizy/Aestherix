@@ -1,14 +1,14 @@
-import { SpotifyCover } from '../../helper/canvas/index.js';
+import { SpotifyCard } from '../../helper/canvas/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
-	name: 'spotifycover',
-	description: 'Make Spotif Cover',
+	name: 'spotifycard',
+	description: 'Make Spotif Card',
 	category: 'Converter',
-	aliases: ['scover'],
-	usage: '!spotifycover <query>',
+	aliases: ['scard'],
+	usage: '!spotifycard <query>',
 	cooldown: 5,
 	limit: 3,
 	status: 'enable',
@@ -17,7 +17,7 @@ export default {
 			return await client[botNum].reply('Please provide a query', { from, quoted: message, groupMetadata });
 		}
 
-		const cover = new SpotifyCover(query, {
+		const cover = new SpotifyCard(query, {
 			background: {
 				blur: 60
 			},

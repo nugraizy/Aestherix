@@ -8,6 +8,7 @@ import {
 	DisconnectReason
 } from '@adiwajshing/baileys';
 import boxen from 'boxen';
+import chalk from 'chalk';
 
 import configuration from '../../config/connect.js';
 import { INFOLOG, color } from '../../../utils/modules/index.js';
@@ -15,7 +16,7 @@ import { connectMqtt, reconnectMqttConnection } from '../utils/mqtt.js';
 import { loadCommands } from '../utils/commands.js';
 import { clearDBConnection } from '../socket/reset-session.js';
 import { Cache } from '../../modules/cache.js';
-import chalk from 'chalk';
+import { startingConnection } from '../../../helper/connection/utils/check-flag.js';
 
 let isClosed = false;
 let shouldWait = false;
@@ -131,6 +132,39 @@ export const handleConnectionUpdate = async (
 					INFOLOG(color('Socket connected', 'white'), color('Successfully', '#ff71ce') + color('.', 'white'));
 					shouldPrintBanner = false;
 				}
+
+				const timeToConnect = Date.now() - startingConnection;
+
+				const data = await fs.readJSON('./src/helper/config/settings.json');
+				let capt = '';
+
+				if (timeToConnect < data.best_time) {
+					INFOLOG(
+						color('Connection time', 'white'),
+						color(`${timeToConnect / 1000}s`, '#ff71ce'),
+						color('is the best time', 'white'),
+						color(`(${data.best_time / 1000}s)`, '#ff71ce')
+					);
+
+					data.best_time = timeToConnect; // eslint-disable-line
+
+					await fs.writeJSON('./src/helper/config/settings.json', data, { spaces: 2 });
+
+					capt += `New Best!\nConnection time ${timeToConnect / 1000}s is the best time (${data.best_time / 1000}s)`;
+				} else {
+					INFOLOG(
+						color('Connection time', 'white'),
+						color(`${timeToConnect / 1000}s`, '#ff71ce'),
+						color('is not the best time', 'white'),
+						color(`(${data.best_time / 1000}s)`, '#ff71ce')
+					);
+
+					capt += `Connection time ${timeToConnect / 1000}s is not the best time (${data.best_time / 1000}s)`;
+				}
+
+				client[botNum].send(configuration.cache.ownerNumbers[0], {
+					text: 'Bot is connected to socket.\n' + capt
+				});
 
 				Client.ev.emit('connected');
 				clearDBConnection(cli);

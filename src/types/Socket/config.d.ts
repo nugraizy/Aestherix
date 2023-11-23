@@ -34,6 +34,7 @@ export interface GlobalConfig {
 		settings: Cache;
 		users: Cache;
 		interval: Cache;
+		ownerNumbers: string[];
 	};
 	OPTIONS: Record<string, any>;
 	cli: Record<string, any>;

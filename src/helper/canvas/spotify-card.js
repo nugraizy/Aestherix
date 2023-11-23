@@ -25,7 +25,7 @@ const instagramUsername = 'dizy.webp';
 const githubUsername = 'nugraizy';
 const watermark = 'Spotify Card by Void';
 
-export class SpotifyCover {
+export class SpotifyCard {
 	/**
 	 * @private
 	 */
@@ -97,7 +97,7 @@ export class SpotifyCover {
 	#_toBuffer;
 
 	/**
-	 *
+	 * Creates an instance of SpotifyCard.
 	 * @param {string} track
 	 * @param {{background?: { blur?: number | boolean, color?: string, gradient?: boolean }, cover?: { shadow?: number | boolean, round?: number | boolean }}} param1
 	 */
@@ -183,7 +183,7 @@ export class SpotifyCover {
 		this.#_ctx = this.#_canvas.getContext('2d');
 
 		/**
-		 * Render Spotify Cover
+		 * Render Spotify Card
 		 * @returns {Promise<{message?: string, toBuffer: () => Buffer}>}
 		 */
 		this.render = async () => {
@@ -198,6 +198,7 @@ export class SpotifyCover {
 			await this.fillBackground(this.#_opts.background);
 			await this.putTrackCover(this.#_opts.cover);
 			await this.putButtons();
+			await this.putStatusBar();
 			this.putText();
 			this.putPlayback();
 
@@ -389,7 +390,7 @@ export class SpotifyCover {
 
 		this.#_ctx.font = '62px texgy';
 
-		this.#_ctx.fillStyle = chroma('white').hex();
+		this.#_ctx.fillStyle = 'white';
 		this.#_ctx.fillText(this.#_title, this.#_w, this.#_canvas.height / 2 + 190);
 
 		this.#_ctx.font = '32px antre';
@@ -397,11 +398,14 @@ export class SpotifyCover {
 		this.#_ctx.fillStyle = chroma('grey').brighten(2).hex();
 		this.#_ctx.fillText(this.#_artist, this.#_w, this.#_canvas.height / 2 + 250);
 
-		this.#_ctx.font = '32px lemon';
+		this.#_ctx.font = 'bold 32px lemon';
 		this.#_ctx.textAlign = 'center';
 
-		this.#_ctx.fillStyle = chroma('white').hex();
+		this.#_ctx.save();
+		this.#_ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+		this.#_ctx.fill;
 		this.#_ctx.fillText(watermark.split('').join(' '), this.#_canvas.width / 2, 290);
+		this.#_ctx.restore();
 
 		return this;
 	}
@@ -414,43 +418,55 @@ export class SpotifyCover {
 		const centerY = this.#_canvas.height / 2 + 310;
 		const radius = 10;
 
-		this.#_ctx.font = '22px sans-thin';
+		this.#_ctx.font = '30px sans-thin';
 
 		this.#_ctx.fillStyle = chroma('white').brighten(2).hex();
 
-		const gradientNumber = this.unique(1, this.#_colorPalettes.length);
-		const gradient = this.#_ctx.createLinearGradient(centerX - 19, centerY, this.#_w + 830, centerY);
-
-		const $chromed1 = chroma(this.#_colorPalettes[gradientNumber() - 1]);
-		const $chromed2 = chroma(this.#_colorPalettes[gradientNumber() - 1]);
-
-		gradient.addColorStop(0, $chromed1.hex());
-		gradient.addColorStop(1, $chromed2.hex());
-
-		this.#_ctx.fillText('0:04', this.#_w + 15, centerY + 30);
-		this.#_ctx.fillText(this.toTime(this.#_timestamp), this.#_w + 800 + 15, centerY + 30);
+		this.#_ctx.fillText('0:04', this.#_w + 15, centerY + 50);
+		this.#_ctx.fillText(this.toTime(this.#_timestamp), this.#_w + 800 + 15, centerY + 50);
 
 		this.#_ctx.lineCap = 'round';
-		this.#_ctx.lineWidth = 5;
+		this.#_ctx.lineWidth = 7;
 
 		this.#_ctx.beginPath();
-		this.#_ctx.moveTo(centerX - 19, centerY);
+		this.#_ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+		this.#_ctx.moveTo(centerX - 25, centerY);
 		this.#_ctx.lineTo(centerX - 15, centerY);
 		this.#_ctx.stroke();
-		this.#_ctx.closePath();
-
-		this.#_ctx.beginPath();
-
-		this.#_ctx.strokeStyle = gradient;
-
 		this.#_ctx.moveTo(centerX, centerY);
 		this.#_ctx.lineTo(this.#_w + 830, centerY);
 		this.#_ctx.stroke();
-		this.#_ctx.closePath();
-
-		this.#_ctx.beginPath();
+		this.#_ctx.fillStyle = 'white';
 		this.#_ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
 		this.#_ctx.fill();
+		this.#_ctx.closePath();
+
+		return this;
+	}
+
+	async putStatusBar() {
+		let iconType = 1;
+		const contrast = this.#_revertBlack;
+
+		if (contrast) {
+			iconType = 2;
+		}
+
+		this.#_ctx.drawImage(
+			assets.model[`${iconType}_bar_ios_17`],
+			this.#_canvas.width / 2 - assets.model[`${iconType}_bar_ios_17`].width / 2,
+			30,
+			assets.model[`${iconType}_bar_ios_17`].width,
+			assets.model[`${iconType}_bar_ios_17`].height
+		);
+
+		this.#_ctx.beginPath();
+		this.#_ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+		this.#_ctx.lineCap = 'round';
+		this.#_ctx.lineWidth = 8;
+		this.#_ctx.moveTo(assets.model[`${iconType}_bar_ios_17`].height + 20, assets.model[`${iconType}_bar_ios_17`].height + 50);
+		this.#_ctx.lineTo(assets.model[`${iconType}_bar_ios_17`].height + 90, assets.model[`${iconType}_bar_ios_17`].height + 50);
+		this.#_ctx.stroke();
 		this.#_ctx.closePath();
 
 		return this;
@@ -545,8 +561,15 @@ export class SpotifyCover {
 			assets.model[`${iconType}_github`].width / 2,
 			assets.model[`${iconType}_github`].height / 2
 		);
+		this.#_ctx.drawImage(
+			assets.model['1_spotify_likes'],
+			x(w / (n + 0.5)) + 390,
+			y(h / (n + 0.5)) - 220,
+			w / (n + 0.5),
+			h / (n + 0.5)
+		);
 		this.#_ctx.font = '32px galyon';
-		this.#_ctx.fillStyle = chroma('white').hex();
+		this.#_ctx.fillStyle = 'white';
 		this.#_ctx.fillText(githubUsername, 220, this.#_canvas.height - 180);
 
 		this.#_ctx.drawImage(
@@ -557,7 +580,7 @@ export class SpotifyCover {
 			assets.model[`${iconType}_instagram`].height / 8.5
 		);
 		this.#_ctx.font = '32px galyon';
-		this.#_ctx.fillStyle = chroma('white').hex();
+		this.#_ctx.fillStyle = 'white';
 		this.#_ctx.fillText(
 			instagramUsername,
 			this.#_canvas.width -
@@ -606,20 +629,5 @@ export class SpotifyCover {
 	 */
 	async palettes() {
 		this.#_colorPalettes = await color.getPalette(this.#_buffer);
-	}
-
-	/**
-	 * @private
-	 */
-	unique(minimum, maximum) {
-		let previousValue;
-
-		return function random() {
-			const number = Math.floor(Math.random() * (maximum - minimum + 1) + minimum);
-
-			previousValue = number === previousValue && minimum !== maximum ? random() : number;
-
-			return previousValue;
-		};
 	}
 }

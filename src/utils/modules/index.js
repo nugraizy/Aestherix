@@ -766,3 +766,15 @@ export class Fetch {
 		return Buffer.concat(this._data);
 	}
 }
+
+export const unique = (minimum, maximum) => {
+	let previousValue;
+
+	return function random() {
+		const number = Math.floor(Math.random() * (maximum - minimum + 1) + minimum);
+
+		previousValue = number === previousValue && minimum !== maximum ? random() : number;
+
+		return previousValue;
+	};
+};
