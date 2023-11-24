@@ -473,7 +473,8 @@ export class SpotifyCard {
 		const clock = new Date().toLocaleTimeString('en-US', {
 			hour: 'numeric',
 			minute: 'numeric',
-			hour12: false
+			hour12: false,
+			timeZone: 'Asia/Jakarta'
 		});
 
 		this.#_ctx.font = assets.model[`${iconType}_bar_ios_17`].height + 'px roboto-medium';
