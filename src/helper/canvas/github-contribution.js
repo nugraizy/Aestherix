@@ -11,10 +11,10 @@ GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/IBM.ttf'), 'i
 
 /* eslint-disable-next-line */
 const [icons_1, signature_1, icons_2, signature_2] = await Promise.all([
-	await loadImage('./src/media/assets/1_icon_github.png'),
-	await loadImage('./src/media/assets/1_icon_github_signature.png'),
-	await loadImage('./src/media/assets/2_icon_github.png'),
-	await loadImage('./src/media/assets/2_icon_github_signature.png')
+	loadImage('./src/media/assets/1_icon_github.png'),
+	loadImage('./src/media/assets/1_icon_github_signature.png'),
+	loadImage('./src/media/assets/2_icon_github.png'),
+	loadImage('./src/media/assets/2_icon_github_signature.png')
 ]);
 
 const graphQl = (username, { type, from, to }) => {

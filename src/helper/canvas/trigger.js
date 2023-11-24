@@ -15,17 +15,16 @@ const height = 640 + 54;
 const BR = 30 * 2.8;
 const LR = 20 * 2.8;
 
-const prepareCanvas = async (images) => {
-	const TRIGGERED = await readFile('./src/media/triggered.png');
+const TRIGGERED = await readFile('./src/media/triggered.png');
+const base = await loadImage(TRIGGERED);
 
-	const base = await loadImage(TRIGGERED);
+const prepareCanvas = async (images) => {
 	const image = await loadImage(images);
 
 	const canvas = createCanvas(width, height);
 	const ctx = canvas.getContext('2d');
 
 	return {
-		base,
 		image,
 		ctx
 	};
@@ -42,7 +41,7 @@ export const trigger = async (image, sender, opt) =>
 			GIF.setRepeat(0);
 			GIF.setDelay(15);
 
-			const { base, image: images, ctx } = await prepareCanvas(image);
+			const { image: images, ctx } = await prepareCanvas(image);
 
 			while (i < 9) {
 				ctx.clearRect(0, 0, width, height);
@@ -92,12 +91,14 @@ export const trigger = async (image, sender, opt) =>
 
 				const { output } = await gif2mp4(`${opt.filename}.gif`, `${opt.filename}.mp4`, opt);
 
-				resolve(await readFile(output));
+				const finalOutput = await readFile(output);
 
 				await unlink(`${opt.filename}.gif`);
 				await unlink(`${opt.filename}.mp4`);
 				await unlink(`${isURL(image) ? `./temporary_files/${sender}` : image}`);
 				await unlink(`${isURL(image) ? `./temporary_files/${sender}` : image}.webp`);
+
+				resolve(finalOutput);
 			}
 		} catch (err) {
 			ERRLOG(`⚠️ ${color('Failed to Trigger an image', '#FF5555')} for ${color(sender, '#ff71ce')}`);

@@ -276,7 +276,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 					const { role } = Limit.checkRole(message.sender);
 
 					if (!(role === 'OWNER' || role === 'PREMIUM')) {
-						Limit.upsert(message.sender, 0, 'USER');
+						Limit.upsert(message.sender, 0, role);
 					}
 				}
 

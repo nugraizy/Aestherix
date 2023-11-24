@@ -59,6 +59,22 @@ export class Limit {
 
 		const user = cache.get(sender);
 
+		if (!user) {
+			users.push({
+				id: sender,
+				limit: LIMIT,
+				role: 'USER'
+			});
+
+			this.upsert(sender, LIMIT, 'USER');
+
+			fs.writeJSONSync(PATH.files, users, {
+				spaces: 2
+			});
+
+			return { role: 'USER' };
+		}
+
 		return { role: user.role };
 	}
 

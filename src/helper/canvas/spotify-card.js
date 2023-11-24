@@ -16,6 +16,7 @@ GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/AtypText-Semi
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/SourceSansPro-ExtraLight.ttf'), 'sans-thin');
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Galyon-Book.otf'), 'galyon');
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Lemon-Milk-Pro-Regular.ttf'), 'lemon');
+GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Roboto-Medium.ttf'), 'roboto-medium');
 
 const assets = {
 	model: null
@@ -464,10 +465,25 @@ export class SpotifyCard {
 		this.#_ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
 		this.#_ctx.lineCap = 'round';
 		this.#_ctx.lineWidth = 8;
-		this.#_ctx.moveTo(assets.model[`${iconType}_bar_ios_17`].height + 20, assets.model[`${iconType}_bar_ios_17`].height + 50);
-		this.#_ctx.lineTo(assets.model[`${iconType}_bar_ios_17`].height + 90, assets.model[`${iconType}_bar_ios_17`].height + 50);
+		this.#_ctx.moveTo(assets.model[`${iconType}_bar_ios_17`].height + 35, assets.model[`${iconType}_bar_ios_17`].height + 50);
+		this.#_ctx.lineTo(assets.model[`${iconType}_bar_ios_17`].height + 110, assets.model[`${iconType}_bar_ios_17`].height + 50);
 		this.#_ctx.stroke();
 		this.#_ctx.closePath();
+
+		const clock = new Date().toLocaleTimeString('en-US', {
+			hour: 'numeric',
+			minute: 'numeric',
+			hour12: false
+		});
+
+		this.#_ctx.font = assets.model[`${iconType}_bar_ios_17`].height + 'px roboto-medium';
+		this.#_ctx.fillStyle = iconType === 1 ? 'white' : '#333333';
+
+		this.#_ctx.fillText(
+			clock,
+			this.#_canvas.width / 2 - assets.model[`${iconType}_bar_ios_17`].width / 2 + 10,
+			assets.model[`${iconType}_bar_ios_17`].height + 28
+		);
 
 		return this;
 	}
