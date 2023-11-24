@@ -200,6 +200,7 @@ export class SpotifyCard {
 			await this.putTrackCover(this.#_opts.cover);
 			await this.putButtons();
 			await this.putStatusBar();
+			await this.putNavigator();
 			this.putText();
 			this.putPlayback();
 
@@ -445,6 +446,19 @@ export class SpotifyCard {
 		return this;
 	}
 
+	async putNavigator() {
+		this.#_ctx.beginPath();
+		this.#_ctx.strokeStyle = //'rgba(255, 255, 255, 0.3)';
+			this.#_ctx.lineCap = 'round';
+		this.#_ctx.lineWidth = 12;
+		this.#_ctx.moveTo(320, this.#_canvas.height - 30);
+		this.#_ctx.lineTo(this.#_canvas.width - 320, this.#_canvas.height - 30);
+		this.#_ctx.stroke();
+		this.#_ctx.closePath();
+
+		return this;
+	}
+
 	async putStatusBar() {
 		let iconType = 1;
 		const contrast = this.#_revertBlack;
@@ -465,8 +479,14 @@ export class SpotifyCard {
 		this.#_ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
 		this.#_ctx.lineCap = 'round';
 		this.#_ctx.lineWidth = 8;
-		this.#_ctx.moveTo(assets.model[`${iconType}_bar_ios_17`].height + 35, assets.model[`${iconType}_bar_ios_17`].height + 50);
-		this.#_ctx.lineTo(assets.model[`${iconType}_bar_ios_17`].height + 110, assets.model[`${iconType}_bar_ios_17`].height + 50);
+		this.#_ctx.moveTo(
+			this.#_canvas.width - assets.model[`${iconType}_bar_ios_17`].height - 190,
+			assets.model[`${iconType}_bar_ios_17`].height + 60
+		);
+		this.#_ctx.lineTo(
+			this.#_canvas.width - assets.model[`${iconType}_bar_ios_17`].height - 50,
+			assets.model[`${iconType}_bar_ios_17`].height + 60
+		);
 		this.#_ctx.stroke();
 		this.#_ctx.closePath();
 
