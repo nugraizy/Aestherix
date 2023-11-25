@@ -432,6 +432,3 @@ export const reassign = async (m, client, store) => {
 		};
 	}
 };
-/**
- *
- */
