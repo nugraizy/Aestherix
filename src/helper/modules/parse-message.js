@@ -340,7 +340,7 @@ export const reassign = async (m, client, store) => {
 					: mMediaData || {}
 				: m || {};
 
-		mediaData.extract = async () => await store.loadMessage(from, mediaData.stanzaId);
+		mediaData.extract = () => store.loadMessage(from, mediaData.stanzaId);
 
 		const bodyQuoted = typeMessage.includes(
 			type === 'extendedTextMessage' && mMediaData
@@ -432,3 +432,6 @@ export const reassign = async (m, client, store) => {
 		};
 	}
 };
+/**
+ *
+ */
