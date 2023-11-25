@@ -2,11 +2,12 @@ import fs from 'fs-extra';
 import baileys, { delay, makeCacheableSignalKeyStore } from '@adiwajshing/baileys';
 import P from 'pino';
 import readline from 'readline';
+import yn from 'yn';
 
 import { clearDBConnection } from './reset-session.js';
 import { patchInteractiveMessage } from '../utils/patch-message.js';
 import { Cache } from '../../modules/cache.js';
-import { INFOLOG, color } from '../../../utils/modules/index.js';
+import { INFOLOG, color, splitString } from '../../../utils/modules/index.js';
 
 const { default: makeWASocket, makeInMemoryStore, DEFAULT_CONNECTION_CONFIG } = baileys;
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -35,7 +36,7 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 		logger: logger(OPTIONS),
 		auth: {
 			creds: state.creds,
-			keys: makeCacheableSignalKeyStore(state.keys, logger(OPTIONS), new Cache())
+			keys: makeCacheableSignalKeyStore(state.keys, logger(OPTIONS))
 		},
 		markOnlineOnConnect: false,
 		shouldSyncHistoryMessage: () => false,
@@ -45,7 +46,8 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 		mediaCache: new Cache(),
 		userDevicesCache: new Cache(),
 		patchMessageBeforeSending: patchInteractiveMessage,
-		customId: 'HFINDER'
+		customId: 'HFINDER',
+		defaultQueryTimeoutMs: undefined
 	};
 
 	/**
@@ -75,17 +77,51 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 
 				break check;
 			} else {
-				await delay(1000);
-			}
+				const askWantNumber = async () => {
+					const isWantNumber = await question(
+						`${color('Do you want to use a new number?', '#ff71ce')} ${color('[y/n] : ', 'white')}`
+					);
 
-			phoneNumber = hostNumber;
+					const answer = yn(isWantNumber);
+
+					if (answer === undefined) {
+						console.log(color('Please answer with y/n', 'red'));
+
+						await delay(1000);
+
+						return await askWantNumber();
+					}
+
+					if (answer) {
+						phoneNumber = await question(`${color('Insert your phone number : ', '#ff71ce')}`);
+
+						return;
+					}
+
+					phoneNumber = hostNumber;
+				};
+
+				await askWantNumber();
+
+				await delay(1000);
+
+				break check;
+			}
 		}
 
 		phoneNumber = phoneNumber.trim();
 
 		const code = await Client.requestPairingCode(phoneNumber);
 
-		INFOLOG(color('Pairing code :', '#ff71ce'), color(code, 'white'));
+		INFOLOG(
+			color('Pairing code :', '#ff71ce'),
+			color(
+				splitString(code, {
+					length: 4
+				}),
+				'white'
+			)
+		);
 		INFOLOG(color('Waiting for code input', 'white'), color('. . .', 'cyan'));
 	}
 

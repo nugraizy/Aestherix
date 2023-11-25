@@ -269,6 +269,32 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 				continue;
 			}
 
+			let userRole = Limit.checkRole(message.sender);
+
+			if (Tempcmds.premium && !(userRole.role === 'PREMIUM' || userRole.role === 'OWNER')) {
+				if (/-{1,2}((help(s)?|info|des(c|k)rip(t|s)i(on)?)|H)$/i.test(message.args[1]) && Tempcmds.name !== 'eval') {
+					const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${
+						Tempcmds.cooldown
+					}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v}`).join(', ')}.\nThis Features Only for Premium users.`;
+
+					client[botNum].reply(help, {
+						groupMetadata: message.groupMetadata,
+						from: message.from,
+						quoted: message.message
+					});
+
+					continue;
+				}
+
+				await client[botNum].reply('This commands is only for premium user.', {
+					groupMetadata: message.groupMetadata,
+					from: message.from,
+					quoted: message.message
+				});
+
+				continue;
+			}
+
 			if (!configuration.OPTIONS.noLimit) {
 				const isExist = Limit.checkExist(message.sender);
 

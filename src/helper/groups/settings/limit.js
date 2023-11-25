@@ -2,7 +2,6 @@ import cron from 'node-cron';
 import fs from 'fs-extra';
 
 import { INFOLOG, color } from '../../../utils/modules/index.js';
-import { Cache } from '../../modules/cache.js';
 import configuration from '../../config/connect.js';
 
 const PATH = {
@@ -10,8 +9,6 @@ const PATH = {
 	files: './databases/users/limit.json',
 	settings: './src/helper/config/settings.json'
 };
-
-const cache = new Cache();
 
 if (!(await fs.readdir(PATH.folder))) {
 	await fs.mkdir(PATH.folder);
@@ -27,7 +24,7 @@ const LIMIT = (await fs.readJSON(PATH.settings))?.limit || 100;
 configuration.cache.limit = LIMIT;
 
 users.forEach((element) => {
-	cache.set(element.id, {
+	configuration.user.limit.set(element.id, {
 		limit: element.limit,
 		role: element.role
 	});
@@ -35,18 +32,18 @@ users.forEach((element) => {
 
 export class Limit {
 	static checkExist(sender) {
-		return !!cache.get(sender);
+		return !!configuration.user.limit.get(sender);
 	}
 
 	static upsert(sender, limit, role) {
-		cache.set(sender, {
+		configuration.user.limit.set(sender, {
 			limit: limit,
 			role: role
 		});
 	}
 
 	static updateRole(sender, role) {
-		const user = cache.get(sender);
+		const user = configuration.user.limit.get(sender);
 
 		user.role = role;
 		this.upsert(sender, user.limit, user.role);
@@ -57,22 +54,22 @@ export class Limit {
 			return { role: 'OWNER' };
 		}
 
-		const user = cache.get(sender);
+		const user = configuration.user.limit.get(sender);
 
 		if (!user) {
 			users.push({
 				id: sender,
 				limit: LIMIT,
-				role: 'USER'
+				role: 'FREE'
 			});
 
-			this.upsert(sender, LIMIT, 'USER');
+			this.upsert(sender, LIMIT, 'FREE');
 
 			fs.writeJSONSync(PATH.files, users, {
 				spaces: 2
 			});
 
-			return { role: 'USER' };
+			return { role: 'FREE' };
 		}
 
 		return { role: user.role };
@@ -85,7 +82,7 @@ export class Limit {
 			return;
 		}
 
-		const user = cache.get(sender);
+		const user = configuration.user.limit.get(sender);
 
 		user.limit = user.limit + limit;
 		this.upsert(sender, user.limit, user.role);
@@ -98,7 +95,7 @@ export class Limit {
 			return { error: false };
 		}
 
-		const user = cache.get(sender);
+		const user = configuration.user.limit.get(sender);
 
 		if (user.limit === 0) {
 			return {
@@ -129,7 +126,7 @@ export class Limit {
 	 * @returns {number | string}
 	 */
 	static checkLimit(sender) {
-		const user = cache.get(sender);
+		const user = configuration.user.limit.get(sender);
 		const { role } = this.checkRole(sender);
 
 		if (role === 'OWNER' || role === 'PREMIUM') {
@@ -138,9 +135,9 @@ export class Limit {
 
 		if (!user) {
 			return 30;
-		} else {
-			return user.limit;
 		}
+
+		return user.limit;
 	}
 
 	static async resetAllLimit() {
@@ -168,7 +165,7 @@ export class Limit {
 	}
 
 	static async updateLimitFromCache() {
-		const [usersFile, usersCache] = [await fs.readJSON('./databases/users/limit.json'), cache.entries()];
+		const [usersFile, usersCache] = [await fs.readJSON('./databases/users/limit.json'), configuration.user.limit.entries()];
 
 		usersCache.forEach((element) => {
 			const index = usersFile.findIndex((user) => user.id === element[0]);

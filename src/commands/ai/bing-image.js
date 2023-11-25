@@ -13,6 +13,7 @@ export default {
 	cooldown: 3,
 	limit: 5,
 	status: 'enable',
+	premium: true,
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
 			return client[botNum].reply('Please specify a query.', { from, quoted: message, groupMetadata });

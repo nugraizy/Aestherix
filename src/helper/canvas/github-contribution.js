@@ -118,7 +118,7 @@ export class GitHubGraph {
 		/**
 		 * @type {import('../../types/Canvas').InitGithubGraph<Omit<GitHubGraph, 'init'>>}
 		 */
-		this.init = (username, { theme, round } = { theme: 'DEFAULT', round: false }) => {
+		this.init = (username, { theme = 'DEFAULT', round = false } = {}) => {
 			return this._init(username, { theme, round });
 		};
 

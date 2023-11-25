@@ -20,7 +20,7 @@ export type ContextInfo = proto.IContextInfo;
 
 export type MediaDataContext = Omit<ContextInfo, 'quotedMessage'> & {
 	message: ContextInfo['quotedMessage'];
-};
+} & { extract: () => proto.IWebMessageInfo | undefined };
 
 export type ConnectionStates = ConnectionState;
 export type WAConnectionStates = WAConnectionState;

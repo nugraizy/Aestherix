@@ -655,7 +655,7 @@ class InstagramMethods extends ResponseParser {
 	/**
 	 * @private
 	 */
-	async _requestApi(method, path, { body, config } = { body: null, config: null }) {
+	async _requestApi(method, path, { body = null, config = null } = {}) {
 		try {
 			if (method === 'GET') {
 				return await this._request().get(path, config);
@@ -715,7 +715,7 @@ class InstagramApi extends InstagramMethods {
 	#_uuid;
 
 	#_deviceId;
-	constructor(username, password, { uuid, deviceId, cookie } = { uuid: v4(), deviceId: generateDeviceID(), cookie: null }) {
+	constructor(username, password, { uuid = v4(), deviceId = generateDeviceID(), cookie = null } = {}) {
 		super();
 
 		/**

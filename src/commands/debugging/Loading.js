@@ -5,7 +5,7 @@ import { getWaifu, Fetch, isURL, audioFormat, imageFormat, videoFormat } from '.
 
 const frames = ['▓', '▒'];
 
-const totalBars = 10; // Set the total number of bars
+const totalBars = 15; // Set the total number of bars
 
 const createLoadingBar = (progress) => {
 	const percentage = Math.floor(progress.percentage);
@@ -17,9 +17,9 @@ const createLoadingBar = (progress) => {
 
 	const barText = `${bar}${empty}`;
 
-	const text = `[${barText}] ${numeral(percentage).format('0.00')}%\nETA ${numeral(progress.eta).format('00:00:00')} ${numeral(
-		progress.speed
-	).format('0.00b')}/s`;
+	const text = `╭[${barText}] ${numeral(percentage).format('0.00')}%\n╰ ETA ${numeral(progress.eta).format(
+		'00:00:00'
+	)} ${numeral(progress.speed).format('0.00b')}/s`;
 
 	return text;
 };
@@ -52,7 +52,7 @@ export default {
 		const { origin } = new URL(query);
 
 		const clientFetch = new Fetch(origin, {
-			delay: 700
+			delay: 100
 		});
 
 		const req = await clientFetch.request(query.replace(origin, ''), {
@@ -61,7 +61,7 @@ export default {
 
 		req.on('finish', async (isFinish100Percent) => {
 			if (isFinish100Percent) {
-				caption = 'loading complete. here is your media!\n' + createLoadingBar({ percentage: 100 });
+				caption = 'Loading Complete. Here is your media!\n' + createLoadingBar({ percentage: 100 });
 				const messages = generateWAMessageFromContent(
 					from,
 					{
@@ -88,16 +88,25 @@ export default {
 					messageId: messages.key.id,
 					cachedGroupMetadata: () => groupMetadata
 				});
+
+				const buffer = req.toBuffer();
+				const mediaType = videoFormat.includes(req.headers['content-type'])
+					? 'video'
+					: imageFormat.includes(req.headers['content-type'])
+					? 'image'
+					: audioFormat.includes(req.headers['content-type'])
+					? 'audio'
+					: 'document';
+
+				const timeOnProcess = Date.now();
+
 				await client[botNum].send(
 					from,
 					{
-						[videoFormat.includes(req.headers['content-type'])
-							? 'video'
-							: imageFormat.includes(req.headers['content-type'])
-							? 'image'
-							: audioFormat.includes(req.headers['content-type'])
-							? 'audio'
-							: 'document']: new Buffer.from(req.toBuffer(), 'base64')
+						[mediaType]: new Buffer.from(buffer, 'base64'),
+						caption: '*Buffer Type*',
+						benchmark: true,
+						timeOnProcess
 					},
 					{ groupMetadata }
 				);
@@ -105,7 +114,7 @@ export default {
 		});
 
 		req.on('progress', async (progress) => {
-			let caption = 'loading media. please wait.\n' + createLoadingBar(progress);
+			let caption = 'Loading media. Please wait.\n' + createLoadingBar(progress);
 			const messages = generateWAMessageFromContent(
 				from,
 				{

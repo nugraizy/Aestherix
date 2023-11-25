@@ -102,6 +102,7 @@
     "word-wrap": "^1.2.4",
     "wordwrap": "^1.0.0",
     "yargs-parser": "^21.0.1",
+    "yn": "^5.0.0",
     "youtubei.js": "^6.3.0",
     "yt-search": "github:nugraizy/yt-search"
   },
@@ -116,6 +117,7 @@
     "eslint-plugin-n": "^15.7.0",
     "eslint-plugin-promise": "^6.1.1",
     "jimp": "^0.16.1",
+    "node-cache": "^5.1.2",
     "numeral": "^2.0.6",
     "pino": "^7.6.5",
     "progress-stream": "^2.0.0",

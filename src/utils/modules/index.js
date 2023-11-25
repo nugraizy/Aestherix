@@ -726,7 +726,7 @@ export class Fetch {
 
 		this._progress = str;
 
-		this.headers = headers
+		this.headers = headers;
 
 		return this;
 	}
@@ -778,3 +778,6 @@ export const unique = (minimum, maximum) => {
 		return previousValue;
 	};
 };
+
+export const splitString = (code, { length = 3, join = '-' } = {}) =>
+	Array.from({ length: Math.ceil(code.length / length) }, (_, i) => code.substr(i * length, length)).join(join);

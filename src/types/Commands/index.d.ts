@@ -65,6 +65,11 @@ export type CommandProps = {
 	restrict?: boolean;
 
 	/**
+	 * Your plugins type user
+	 */
+	premium?: boolean;
+
+	/**
 	 *  Your plugins callbacks
 	 */
 	run: (ctx: ReassignResult & { state: SingleAuthState['state'] }, client: AdvancedClient, store: Store) => Promise<unknown>;

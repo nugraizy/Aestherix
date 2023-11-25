@@ -16,7 +16,7 @@ GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/AtypText-Semi
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/SourceSansPro-ExtraLight.ttf'), 'sans-thin');
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Galyon-Book.otf'), 'galyon');
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Lemon-Milk-Pro-Regular.ttf'), 'lemon');
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Roboto-Medium.ttf'), 'roboto-medium');
+GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/SFUIDisplay-Medium.otf'), 'sf-pro');
 
 const assets = {
 	model: null
@@ -448,11 +448,11 @@ export class SpotifyCard {
 
 	async putNavigator() {
 		this.#_ctx.beginPath();
-		this.#_ctx.strokeStyle = //'rgba(255, 255, 255, 0.3)';
-			this.#_ctx.lineCap = 'round';
-		this.#_ctx.lineWidth = 12;
-		this.#_ctx.moveTo(320, this.#_canvas.height - 30);
-		this.#_ctx.lineTo(this.#_canvas.width - 320, this.#_canvas.height - 30);
+		this.#_ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+		this.#_ctx.lineCap = 'round';
+		this.#_ctx.lineWidth = 14;
+		this.#_ctx.moveTo(325, this.#_canvas.height - 30);
+		this.#_ctx.lineTo(this.#_canvas.width - 325, this.#_canvas.height - 30);
 		this.#_ctx.stroke();
 		this.#_ctx.closePath();
 
@@ -497,7 +497,7 @@ export class SpotifyCard {
 			timeZone: 'Asia/Jakarta'
 		});
 
-		this.#_ctx.font = assets.model[`${iconType}_bar_ios_17`].height + 'px roboto-medium';
+		this.#_ctx.font = assets.model[`${iconType}_bar_ios_17`].height + 'px sf-pro';
 		this.#_ctx.fillStyle = iconType === 1 ? 'white' : '#333333';
 
 		this.#_ctx.fillText(

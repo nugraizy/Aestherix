@@ -423,13 +423,7 @@ export const assign = (client) => {
 		 * Update group's participants or settings.
 		 * @type {import('../../types/Utils/index.js').UpdateGroup}
 		 */
-		updateGroup: async (
-			to,
-			update,
-			participants,
-			adminGroups,
-			{ force, message, texts } = { force: false, message: null, texts: '' }
-		) => {
+		updateGroup: async (to, update, participants, adminGroups, { force = false, message = null, texts = '' } = {}) => {
 			const responses = [];
 
 			const quoted = message

@@ -92,7 +92,7 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 
 		try {
 			module = await import(file);
-			INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('New File Added!'));
+			INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('New File Added!', '#ff71ce'));
 			INFOLOG(color('checking if its valid plugins...', '#ffb86c'));
 		} catch (error) {
 			return await validatePlugins(filename);
