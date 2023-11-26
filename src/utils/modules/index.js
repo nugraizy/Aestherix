@@ -703,6 +703,7 @@ export class Fetch {
 		this._progress = null;
 		this._delay = delay;
 		this._delayLayer = Date.now();
+		this._abortController = new AbortController();
 	}
 
 	async request(path, { method, config = {} }) {
@@ -764,6 +765,12 @@ export class Fetch {
 
 	toBuffer() {
 		return Buffer.concat(this._data);
+	}
+
+	cancel(message = '') {
+		this._progress.emit('cancel', { cancelByUser: true });
+		this._progress.removeAllListeners();
+		return this._abortController.abort(message);
 	}
 }
 
