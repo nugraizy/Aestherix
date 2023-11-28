@@ -510,7 +510,19 @@ export const INFOLOG = (...info) => {
 	if (!isLOGS) {
 		const time = dayjs().format(TIME_FORMAT);
 
-		log(ICON + boldify(bracketsify(coloring(time))) + SEPERATOR_3, ...info);
+		const isIgnorePrint = info.findIndex((v) => v?.ignore);
+
+		if (isIgnorePrint !== -1) {
+			info.splice(isIgnorePrint, 1);
+
+			const str = ICON + boldify(bracketsify(coloring(time))) + SEPERATOR_3 + ' ' + info.join(' ');
+
+			return str;
+		}
+
+		const str = ICON + boldify(bracketsify(coloring(time))) + SEPERATOR_3 + ' ' + info.join(' ');
+
+		log(str);
 	}
 };
 

@@ -29,7 +29,8 @@ const { version } = await fs.readJSON('./package.json');
  */
 export default {
 	name: 'menu',
-	description: 'Shows the menu',
+	minifiedDescription: 'Bot Menu',
+	description: 'Shows the menu.',
 	usage: '!menu',
 	aliases: ['help'],
 	category: 'Helper',
@@ -52,8 +53,23 @@ export default {
 
 		for (const category in configuration.cmds.menu) {
 			const sortedCommands = configuration.cmds.menu[category]
-				.sort((a, b) => a.name.localeCompare(b.name))
-				.map((v) => `╭ ${v.description}\n├ ${prefix}${v.name}\n├ ${v.usage}\n╰ ⏳ ${v.cooldown}s | 🆔 ${v.aliases.join(', ')}`)
+				.sort(
+					/**
+					 * @param {import('../../types/Commands/index.js').CommandProps} a
+					 * @param {import('../../types/Commands/index.js').CommandProps} b
+					 * @returns {import('../../types/Commands/index.js').CommandProps[]}
+					 */
+					(a, b) => a.name.localeCompare(b.name)
+				)
+				.map(
+					/**
+					 * @param {import('../../types/Commands/index.js').CommandProps} v
+					 */
+					(v) =>
+						`╭ ${v.minifiedDescription}\n├ _${prefix}${v.name}_\n├ ${v.usage}\n╰ ⏳ ${v.cooldown}s | ${
+							v.premium ? 'Premium' : 'Free'
+						} | 🆔 ${v.aliases.join(', ')}`
+				)
 				.join('\n');
 
 			capt += `${format[category].formatHeaders()}\n\n${sortedCommands}\n\n\n`;
@@ -65,7 +81,7 @@ export default {
 
 		configuration.cmds.menuStr = capt;
 
-		await client[botNum].send(
+		await client.instance.send(
 			from,
 			{
 				text: capt.trim(),

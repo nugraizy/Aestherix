@@ -8,7 +8,8 @@ import { twitterUser } from '../../utils/twitter/index.js';
  */
 export default {
 	name: 'twitstalk',
-	description: 'Lookup Twitter user',
+	minifiedDescription: 'Look-up Twitter User',
+	description: 'Look-up Twitter user.',
 	usage: '!twitstalk <username>',
 	aliases: ['twtlu', 'twtlookup', 'twtuser'],
 	category: 'Look-up',
@@ -17,18 +18,18 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please specify a url', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a url', { from, quoted: message, groupMetadata });
 		}
 
 		let { _: usernames } = parser(query);
 
 		if (usernames.length === 1 && isURL(usernames[0])) {
-			return await client[botNum].reply('Please specify a valid Twitter usernames', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a valid Twitter usernames', { from, quoted: message, groupMetadata });
 		}
 
 		for (const username of usernames) {
 			if (isURL(username.trim())) {
-				await client[botNum].reply('Please specify a valid Twitter username', { from, quoted: message, groupMetadata });
+				await client.instance.reply('Please specify a valid Twitter username', { from, quoted: message, groupMetadata });
 
 				continue;
 			}
@@ -36,7 +37,7 @@ export default {
 			const user = await twitterUser(username);
 
 			if ('error' in user) {
-				await client[botNum].reply(`Error while searching Twitter user\n\n${user.error}\n${username}`, {
+				await client.instance.reply(`Error while searching Twitter user\n\n${user.error}\n${username}`, {
 					from,
 					quoted: message,
 					groupMetadata
@@ -45,24 +46,24 @@ export default {
 				ERRLOG(`⚠️ ${color('Failed to Searching Twitter User', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
 
 				continue;
-			} else {
-				const { biograph, username, name, joined, verified, imageProfile, personalUrl } = user;
-
-				let capt = 'Twitter User Lookup'.formatHeaders();
-
-				capt += `Username : ${username}\n`;
-				capt += `Fullname : ${name}\n`;
-				capt += `Verified? : ${verified ? 'Yes' : 'No'}\n`;
-				capt += `Joined : ${joined}\n`;
-				capt += `Personal URL : ${personalUrl}\n`;
-				capt += `Biograph : ${biograph}`;
-
-				await client[botNum].send(
-					from,
-					{ image: { url: imageProfile }, caption: capt.trim() },
-					{ groupMetadata, quoted: message }
-				);
 			}
+
+			const { biograph, username: userName, name, joined, verified, imageProfile, personalUrl } = user;
+
+			let capt = 'Twitter User Lookup'.formatHeaders();
+
+			capt += `Username : ${userName}\n`;
+			capt += `Fullname : ${name}\n`;
+			capt += `Verified? : ${verified ? 'Yes' : 'No'}\n`;
+			capt += `Joined : ${joined}\n`;
+			capt += `Personal URL : ${personalUrl}\n`;
+			capt += `Biograph : ${biograph}`;
+
+			await client.instance.send(
+				from,
+				{ image: { url: imageProfile }, caption: capt.trim() },
+				{ groupMetadata, quoted: message }
+			);
 		}
 	}
 };

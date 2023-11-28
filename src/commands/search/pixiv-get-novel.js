@@ -23,7 +23,8 @@ const regex = (input) => {
  */
 export default {
 	name: 'pixivnovelget',
-	description: 'Get novel content from Pixiv',
+	minifiedDescription: 'Get Novel',
+	description: 'Get novel content from Pixiv.',
 	usage: '!pixivnovelget <url>',
 	aliases: ['pixnovelget'],
 	category: 'Search',
@@ -32,7 +33,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -43,13 +44,13 @@ export default {
 			const regexs = regex(querie.trim());
 
 			if (!regexs.status) {
-				return await client[botNum].reply(regexs.message, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(regexs.message, { from, quoted: message, groupMetadata });
 			}
 
 			const data = await getNovelContent(regexs.message);
 
 			if ('error' in data) {
-				await client[botNum].reply(`Failed while looking for Pixiv novel content\n\n${data.error}\n${querie}`, {
+				await client.instance.reply(`Failed while looking for Pixiv novel content\n\n${data.error}\n${querie}`, {
 					from,
 					quoted: message,
 					groupMetadata
@@ -67,7 +68,7 @@ Tot. View : ${numberWithCommas(viewCount)}
 
 ${content}`;
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					text: caption,

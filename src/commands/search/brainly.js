@@ -7,7 +7,8 @@ import { brainlySearch } from '../../utils/brainly/index.js';
  */
 export default {
 	name: 'brainly',
-	description: 'Search answers from brainly',
+	minifiedDescription: 'Search Brainly',
+	description: 'Search answers from brainly.',
 	usage: '!brainly <query> -<?lang> (id, us, es, ru, ro, pt, tr, ph, pl, hi) -<?count> (1-30)',
 	category: 'Search',
 	aliases: ['brainli', 'brainly-search', 'tugas'],
@@ -16,7 +17,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query', { from, quoted: message, groupMetadata });
 		}
 
 		const parseOptions = yargsParser(query, {
@@ -32,7 +33,7 @@ export default {
 		const brainly = await brainlySearch(query, options);
 
 		if ('error' in brainly) {
-			return await client[botNum].reply(brainly.error, { from, quoted: message, groupMetadata });
+			return await client.instance.reply(brainly.error, { from, quoted: message, groupMetadata });
 		}
 
 		let capt = 'Brainly'.formatHeaders();
@@ -48,6 +49,6 @@ export default {
 		}
 
 		capt += '\nBrainly by Void Bot. Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪';
-		await client[botNum].reply(capt.trim(), { from, quoted: message, groupMetadata });
+		await client.instance.reply(capt.trim(), { from, quoted: message, groupMetadata });
 	}
 };

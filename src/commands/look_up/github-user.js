@@ -8,7 +8,8 @@ import { Github } from '../../utils/github/index.js';
  */
 export default {
 	name: 'gitstalk',
-	description: 'Lookup Github user',
+	minifiedDescription: 'Look-up Github User',
+	description: 'Look-up Github user.',
 	usage: '!gitstalk <username>',
 	aliases: ['ghstalk', 'ghuser'],
 	category: 'Look-up',
@@ -17,7 +18,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, args, type, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please specify a url', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a url', { from, quoted: message, groupMetadata });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -36,7 +37,7 @@ export default {
 				updated_at: updatedAt
 			} = data[index];
 
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{
 					image: { url: avatarUrl },
@@ -87,12 +88,12 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 		let { _: usernames } = parser(query);
 
 		if (usernames.length == 1 && isURL(usernames[0])) {
-			return await client[botNum].reply('Please specify a valid Github usernames', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a valid Github usernames', { from, quoted: message, groupMetadata });
 		}
 
 		for (const user of usernames) {
 			if (isURL(user.trim())) {
-				await client[botNum].reply('Please specify a valid Github username', { from, quoted: message, groupMetadata });
+				await client.instance.reply('Please specify a valid Github username', { from, quoted: message, groupMetadata });
 				continue;
 			}
 
@@ -100,43 +101,25 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 			let users = await git.searchUser(user);
 
 			if (users.total_count === 0) {
-				await client[botNum].reply('User not found.', { from, quoted: message, groupMetadata });
+				await client.instance.reply('User not found.', { from, quoted: message, groupMetadata });
 				continue;
 			}
 
 			users = await git.detailUser(users.items);
-			const {
-				login,
-				html_url: htmlUrl,
-				avatar_url: avatarUrl,
-				type: typeGit,
-				name,
-				bio,
-				public_repos: pubRepos,
-				followers,
-				following,
-				created_at: createdAt,
-				updated_at: updatedAt
-			} = users[0];
-
-			await client[botNum].send(
-				from,
-				{
-					image: { url: avatarUrl },
-					caption: 'Github User Lookup'.formatHeaders(),
-					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: avatarUrl } },
-						{ urlButton: { displayText: 'User Source', url: htmlUrl } },
-						users.length !== 1
-							? {
-									quickReplyButton: {
-										displayText: 'Next User',
-										id: `.gitstalk next ${users[1].html_url} ${JSON.stringify(users).replace(/\|/g, '')}`
-									}
-							  } /* eslint-disable-line */
-							: {}
-					],
-					footer: `Fullname : ${name}
+			const caption = users
+				.map(
+					({
+						login,
+						type: typeGit,
+						name,
+						bio,
+						public_repos: pubRepos,
+						followers,
+						following,
+						created_at: createdAt,
+						updated_at: updatedAt
+					}) => {
+						return `Fullname : ${name}
 Username : ${login}
 Type : ${typeGit}
 Tot. Public Repo : ${numberWithCommas(pubRepos)}
@@ -144,9 +127,52 @@ Tot. Followers : ${numberWithCommas(followers)}
 Tot. Following : ${numberWithCommas(following)}
 Created : ${createdAt}
 Updated : ${updatedAt}
-Biography : ${bio}
-                    
-Void Bot     1/${users.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+Biography : ${bio}`;
+					}
+				)
+				.join('\n\n');
+			// const {
+			// 	login,
+			// 	html_url: htmlUrl,
+			// 	avatar_url: avatarUrl,
+			// 	type: typeGit,
+			// 	name,
+			// 	bio,
+			// 	public_repos: pubRepos,
+			// 	followers,
+			// 	following,
+			// 	created_at: createdAt,
+			// 	updated_at: updatedAt
+			// } = users[0];
+
+			await client.instance.send(
+				from,
+				{
+					image: { url: users[0].avatar_url },
+					caption: 'Github User Lookup'.formatHeaders() + `\n\n${caption.trim()}`
+					// templateButtons: [
+					// 	{ urlButton: { displayText: 'Image Source', url: avatarUrl } },
+					// 	{ urlButton: { displayText: 'User Source', url: htmlUrl } },
+					// 	users.length !== 1
+					// 		? {
+					// 				quickReplyButton: {
+					// 					displayText: 'Next User',
+					// 					id: `.gitstalk next ${users[1].html_url} ${JSON.stringify(users).replace(/\|/g, '')}`
+					// 				}
+					// 		  } /* eslint-disable-line */
+					// 		: {}
+					// ]
+					// 					footer: `Fullname : ${name}
+					// Username : ${login}
+					// Type : ${typeGit}
+					// Tot. Public Repo : ${numberWithCommas(pubRepos)}
+					// Tot. Followers : ${numberWithCommas(followers)}
+					// Tot. Following : ${numberWithCommas(following)}
+					// Created : ${createdAt}
+					// Updated : ${updatedAt}
+					// Biography : ${bio}
+
+					// Void Bot     1/${users.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
 				},
 				{ groupMetadata }
 			);

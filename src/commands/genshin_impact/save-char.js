@@ -22,7 +22,8 @@ const regex = async (input) => {
  */
 export default {
 	name: 'savechar',
-	description: 'Save your Genshin Impact character',
+	minifiedDescription: 'Save Genshin Impact Character',
+	description: 'Save your Genshin Impact character.',
 	usage: '!savechar <uids>',
 	aliases: ['saveuid'],
 	category: 'Genshin Impact',
@@ -31,20 +32,20 @@ export default {
 	status: 'enable',
 	async run({ sender, query, message, from, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please specify an UID', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify an UID', { from, quoted: message, groupMetadata });
 		}
 
 		const data = await fs.readJSON(path.join(__dirname, 'databases/games/genshin_impact/data.json'));
 		const index = data.findIndex((v) => v.user === sender);
 
 		if (index !== -1) {
-			return await client[botNum].reply('Your character already in Database.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Your character already in Database.', { from, quoted: message, groupMetadata });
 		}
 
 		const findUid = await regex(query);
 
 		if (!findUid.status) {
-			return await client[botNum].reply(findUid.message, { from, quoted: message, groupMetadata });
+			return await client.instance.reply(findUid.message, { from, quoted: message, groupMetadata });
 		}
 
 		data.push({
@@ -53,6 +54,6 @@ export default {
 		});
 		await fs.writeJSON(path.join(__dirname, 'databases/games/genshin_impact/data.json'), data);
 
-		await client[botNum].reply('Your char is saved', { from, quoted: message, groupMetadata });
+		await client.instance.reply('Your char is saved', { from, quoted: message, groupMetadata });
 	}
 };

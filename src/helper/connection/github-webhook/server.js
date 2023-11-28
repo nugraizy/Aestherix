@@ -42,7 +42,7 @@ export const githubWebhook = (isReconnect) => {
 
 				const { additions, deletions, filesChanged } = await getFilesChanged(commitInfo.sha);
 
-				client[botNum].ev.emit('commit', { ...commitInfo, additions, deletions, filesChanged });
+				client.instance.ev.emit('commit', { ...commitInfo, additions, deletions, filesChanged });
 
 				res.status(200).send('OK');
 			});

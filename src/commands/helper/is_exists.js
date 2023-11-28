@@ -9,6 +9,7 @@ const cache = new Cache();
  */
 export default {
 	name: 'nowhatsapp',
+	minifiedDescription: 'Check WhatsApp Number',
 	description: 'Check if the number is exist or not.',
 	usage: '!nowhatsapp 628952253440x',
 	aliases: ['nowa'],
@@ -18,23 +19,23 @@ export default {
 	status: 'enable',
 	run: async ({ query, from, message, groupMetadata }, client) => {
 		if (!query) {
-			return await client[botNum].reply('You must provide a number.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a number.', { from, quoted: message, groupMetadata });
 		}
 
 		if (!/^[0-9xX]*$/.test(query)) {
-			return await client[botNum].reply('You must provide only number.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide only number.', { from, quoted: message, groupMetadata });
 		}
 
 		const regex = /[xX]/g;
 
 		if (!regex.test(query)) {
-			return await client[botNum].reply('You must include "x" in your query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must include "x" in your query.', { from, quoted: message, groupMetadata });
 		}
 
 		const total = 10 ** query.match(regex).length;
 
 		if (total > 100) {
-			return await client[botNum].reply('Too much "x" in your query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Too much "x" in your query.', { from, quoted: message, groupMetadata });
 		}
 
 		const container = cache.get(query) || [];
@@ -42,10 +43,10 @@ export default {
 		if (container.length === 0) {
 			for (let i = 0; i < total; i++) {
 				const number = `${query.replace(regex, '') + i}@s.whatsapp.net`;
-				const status = await client[botNum].onWhatsApp(number);
+				const status = await client.instance.onWhatsApp(number);
 
 				if (status[0]?.exists) {
-					const biograph = await client[botNum].fetchStatus(number).catch(() => ({ status: 'No Status' }));
+					const biograph = await client.instance.fetchStatus(number).catch(() => ({ status: 'No Status' }));
 
 					container.push({ jid: number, isExists: true, info: biograph.status, setAt: biograph?.setAt });
 					continue;
@@ -79,7 +80,7 @@ ${container
 	.map((v) => v.jid.split('@')[0])
 	.join('\n')}`;
 
-		client[botNum].send(from, { text, mentions: existedNumber.map((v) => v.jid) }, { groupMetadata });
+		await client.instance.send(from, { text, mentions: existedNumber.map((v) => v.jid) }, { groupMetadata });
 
 		cache.set(query, container);
 	}

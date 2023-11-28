@@ -22,7 +22,8 @@ const regex = async (input) => {
  */
 export default {
 	name: 'genshinstalk',
-	description: 'Lookup Genshin Impact player',
+	minifiedDescription: 'Look-up Genshin Impact Player',
+	description: 'Look-up Genshin Impact player.',
 	usage: '!genshinstalk <uids>',
 	aliases: ['genshinuser', 'giuser', 'gistalk'],
 	category: 'Genshin Impact',
@@ -31,7 +32,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please specify an UID', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify an UID', { from, quoted: message, groupMetadata });
 		}
 
 		let {
@@ -54,7 +55,7 @@ export default {
 			const reg = await regex(String(uid));
 
 			if (!reg.status) {
-				return await client[botNum].reply(reg.message, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(reg.message, { from, quoted: message, groupMetadata });
 			}
 
 			let info;
@@ -68,7 +69,7 @@ export default {
 			}
 
 			if ('error' in info) {
-				await client[botNum].reply(`Error while searching Genshin Impact player\n\n${info.error}`, {
+				await client.instance.reply(`Error while searching Genshin Impact player\n\n${info.error}`, {
 					from,
 					quoted: message,
 					groupMetadata
@@ -81,7 +82,7 @@ export default {
 				let capt;
 
 				if (statistic) {
-					capt = `${'Genshin Impact Statistic'.formatHeaders()}\n\n
+					capt = `${'Genshin Impact Statistic'.formatHeaders()}
 
 ${'Proflie'.formatHeaders()}\n
 Nickname: ${info.role.nickname}
@@ -104,7 +105,8 @@ Luxurios: ${info.stats.luxurious_chest_number}
 Precious: ${info.stats.precious_chest_number}
 Magic: ${info.stats.magic_chest_number}`;
 				} else if (character) {
-					capt = `${'Genshin Impact Characters'.formatHeaders()}\n\n
+					capt = `${'Genshin Impact Characters'.formatHeaders()}
+
 • Total: ${info.length}\n\n`;
 
 					for (const {
@@ -128,7 +130,8 @@ Magic: ${info.stats.magic_chest_number}`;
 ──────────────────────\n\n`;
 					}
 				} else {
-					capt = `${'Genshin Impact Statistic'.formatHeaders()}\n\n
+					capt = `${'Genshin Impact Statistic'.formatHeaders()}
+
 ${'Proflie'.formatHeaders()}\n
 Nickname: ${info.role.nickname}
 Server: ${info.role.region.replace('os_', '')}
@@ -151,7 +154,7 @@ Precious: ${info.stats.precious_chest_number}
 Magic: ${info.stats.magic_chest_number}`;
 				}
 
-				await client[botNum].reply(capt.trim(), { from, quoted: message, groupMetadata });
+				await client.instance.reply(capt.trim(), { from, quoted: message, groupMetadata });
 			}
 		}
 	}

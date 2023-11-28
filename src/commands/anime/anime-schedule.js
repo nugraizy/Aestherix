@@ -7,6 +7,7 @@ import { animeReleases } from '../../utils/index.js';
  */
 export default {
 	name: 'animeschedule',
+	minifiedDescription: 'Anime Schedule',
 	description: 'Check Anime schedule.',
 	usage: '!animeschedule',
 	aliases: ['animerelease', 'animrelease'],
@@ -16,7 +17,7 @@ export default {
 	status: 'enable',
 	run: async ({ from, message, isGroup, groupMetadata }, client) => {
 		if (isGroup) {
-			return client[botNum].reply('This command only works in private chat.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('This command only works in private chat.', { from, quoted: message, groupMetadata });
 		}
 
 		const text = 'Anime Releases'.formatHeaders();
@@ -50,7 +51,7 @@ export default {
 
 			const INFO = result[day][0];
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					image: { url: INFO[Object.keys(INFO)][0].thumbnail },

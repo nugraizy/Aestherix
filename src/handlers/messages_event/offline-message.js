@@ -24,7 +24,7 @@ const offlineHandler = async (client, { isGroup, from, sender, message }) => {
 			dataUser ? (dataUser.date = dateNow) : data.push({ participant: sender, date: dateNow });
 
 			await fs.writeJSON(OFFLINE_DB_PATH, data, { spaces: 2 });
-			await client[botNum].reply('The owner is currently offline, please contact another time.', { from, quoted: message });
+			await client.instance.reply('The owner is currently offline, please contact another time.', { from, quoted: message });
 		}
 	} catch (err) {
 		log(err);

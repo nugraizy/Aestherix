@@ -3,6 +3,7 @@
  */
 export default {
 	name: 'description',
+	minifiedDescription: 'Change Description',
 	description: 'Change the description of the group.',
 	usage: '!description <texts>',
 	aliases: ['desc'],
@@ -12,11 +13,11 @@ export default {
 	status: 'enable',
 	async run({ isBotAdmin, query, bodyQuoted, from, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please input the description.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please input the description.', { from, quoted: message, groupMetadata });
 		}
 
 		if (!isBotAdmin) {
-			return await client[botNum].reply('Bot is not admin, Please promote admin before using moderation commands.', {
+			return await client.instance.reply('Bot is not admin, Please promote admin before using moderation commands.', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -24,11 +25,11 @@ export default {
 		}
 
 		if (query) {
-			return await client[botNum].updateGroup(from, 'DESCRIPTION', [], [], { texts: query });
+			return await client.instance.updateGroup(from, 'DESCRIPTION', [], [], { texts: query });
 		}
 
 		if (bodyQuoted) {
-			return await client[botNum].updateGroup(from, 'DESCRIPTION', [], [], { texts: bodyQuoted });
+			return await client.instance.updateGroup(from, 'DESCRIPTION', [], [], { texts: bodyQuoted });
 		}
 	}
 };

@@ -5,7 +5,8 @@ import { layarkaca21 } from '../../utils/index.js';
  */
 export default {
 	name: 'layarkaca21',
-	description: 'Search movies through Layarkaca21 websites.',
+	minifiedDescription: 'Search Layarkaca21',
+	description: 'Search movies from Layarkaca21 websites.',
 	usage: '!layarkaca21 <query>',
 	aliases: ['lk21', 'd21'],
 	category: 'Search',
@@ -14,14 +15,14 @@ export default {
 	status: 'enable',
 	run: async ({ query, message, from, args, type, groupMetadata }, client) => {
 		if (!query) {
-			return client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.source === args[2]);
 
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{
 					image: { url: data[index].thumbnail },
@@ -63,10 +64,10 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 		const result = await layarkaca21(query);
 
 		if ('error' in result) {
-			client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
+			client.instance.reply(result.error, { from, quoted: message, groupMetadata });
 		}
 
-		await client[botNum].send(
+		await client.instance.send(
 			from,
 			{
 				image: { url: result[0].thumbnail },

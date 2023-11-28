@@ -6,6 +6,7 @@ import { color, INFOLOG, ERRLOG } from '../../utils/modules/index.js';
  */
 export default {
 	name: 'carbon',
+	minifiedDescription: 'Carbonify Code',
 	description: 'Prettify code.',
 	usage: '!carbon <reply/send image>',
 	aliases: ['carbon'],
@@ -15,7 +16,7 @@ export default {
 	status: 'enable',
 	run: async ({ from, prettyNumber, message, query, groupMetadata }, client) => {
 		if (!query) {
-			return client[botNum].reply('Please provide a Codes.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('Please provide a Codes.', { from, quoted: message, groupMetadata });
 		}
 
 		INFOLOG(`${color('Carboning a Codes', 'cyan')} ${color(prettyNumber, '#ff71ce')}`);
@@ -25,12 +26,12 @@ export default {
 		let buffer = carbon.toBuffer();
 
 		if ('error' in buffer) {
-			client[botNum].reply(buffer.error, { from, quoted: message, groupMetadata });
+			client.instance.reply(buffer.error, { from, quoted: message, groupMetadata });
 			ERRLOG(`⚠️ ${color('Failed to Carboning a Codes', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
 			return;
 		}
 
-		await client[botNum].send(from, { image: Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
+		await client.instance.send(from, { image: Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
 		buffer = null;
 
 		INFOLOG(`${color('Carboning a Codes Success', 'cyan')} ${color(prettyNumber, '#ff71ce')}`);

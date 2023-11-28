@@ -12,7 +12,7 @@ export default {
 	aliases: ['plst'],
 	cooldown: 5,
 	limit: 0,
-	status: 'enable',
+	status: 'disable',
 	async run({ from, query, sender }, client) {
 		const row = Array(Number(query || 1)).fill({
 			rows: [
@@ -58,6 +58,6 @@ export default {
 			{}
 		);
 
-		await client[botNum].relayMessage(from, messages.message, { messageId: messages.key.id });
+		await client.instance.relayMessage(from, messages.message, { messageId: messages.key.id });
 	}
 };

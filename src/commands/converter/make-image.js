@@ -5,6 +5,7 @@ import { createImage } from '../../utils/ai/index.js';
  */
 export default {
 	name: 'makeimage',
+	minifiedDescription: 'Create Image',
 	description: 'Create an image based on your description',
 	usage: '!makeimage <scenario>',
 	category: 'Converter',
@@ -14,15 +15,15 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
-		await client[botNum].reply('Creating. Please wait...', { from, quoted: message, groupMetadata });
+		await client.instance.reply('Creating. Please wait...', { from, quoted: message, groupMetadata });
 
 		const result = await createImage(query);
 
 		const caption = `${'A.I Image Generator'.formatHeaders()}\n\nPowered by deepai.org`;
 
-		await client[botNum].send(from, { image: { url: result }, caption }, { groupMetadata, quoted: message });
+		await client.instance.send(from, { image: { url: result }, caption }, { groupMetadata, quoted: message });
 	}
 };

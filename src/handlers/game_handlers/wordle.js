@@ -17,9 +17,9 @@ const handleWordle = async ({ from, isAdmin, isGroup, body, message, sender, gro
 					.join('\n')}\n\nLama permainan: ${wordle.timeLength}`
 			};
 
-			await client[botNum].send(from, response, { groupMetadata, quoted: message });
+			await client.instance.send(from, response, { groupMetadata, quoted: message });
 		} else {
-			await client[botNum].reply(guess.board, { from, quoted: message, groupMetadata });
+			await client.instance.reply(guess.board, { from, quoted: message, groupMetadata });
 		}
 	};
 

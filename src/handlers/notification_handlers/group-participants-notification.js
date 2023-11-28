@@ -81,7 +81,7 @@ const sendGroupParticipantsNotification = async (client, message, text) => {
 		message.messageStubParameters.length === 1
 	) {
 		const attach = new Attachment(1024, 500);
-		const { profile, radi } = await client[botNum]
+		const { profile, radi } = await client.instance
 			.profilePictureUrl(message.messageStubParameters[0], 'image')
 			.then(async (image) => ({ profile: new Buffer.from(await fetchBUFFER(image)), radi: 180 }))
 			.catch(() => ({ profile: './src/media/blank.png', radi: 80 }));
@@ -116,7 +116,7 @@ const sendGroupParticipantsNotification = async (client, message, text) => {
 
 		const image = attach.toBuffer();
 
-		await client[botNum].send(
+		await client.instance.send(
 			message.from,
 			{
 				image,
@@ -129,7 +129,7 @@ const sendGroupParticipantsNotification = async (client, message, text) => {
 		return;
 	}
 
-	await client[botNum].send(
+	await client.instance.send(
 		message.from,
 		{
 			text,

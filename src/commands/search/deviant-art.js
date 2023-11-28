@@ -6,6 +6,7 @@ import { searchDeviantArt } from '../../utils/deviant_art/index.js';
  */
 export default {
 	name: 'deviantart',
+	minifiedDescription: 'Search Deviant Art',
 	description: 'Search images from Deviant Art',
 	usage: '!deviantart <query>',
 	category: 'Search',
@@ -15,14 +16,14 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, type, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.image === args[2]);
 
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{
 					image: { url: data[index].image },
@@ -70,13 +71,13 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 			const result = await searchDeviantArt(querie.trim());
 
 			if ('error' in result) {
-				await client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
+				await client.instance.reply(result.error, { from, quoted: message, groupMetadata });
 				continue;
 			}
 
 			const index = ~~(Math.random() * result.length);
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					image: { url: result[index].image },

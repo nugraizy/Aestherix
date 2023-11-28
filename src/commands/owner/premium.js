@@ -8,7 +8,7 @@ const configureUser = async (client, { mode, user, USERS, PREMS_CONTAINER, from,
 	const index = USERS.findIndex((v) => v.id === user);
 
 	if (index === -1) {
-		await client[botNum].send(
+		await client.instance.send(
 			from,
 			{ text: `User @${user.replace(/[^\d]/g, '')} not found`, mentions: [user] },
 			{ from, quoted: message, groupMetadata }
@@ -17,7 +17,7 @@ const configureUser = async (client, { mode, user, USERS, PREMS_CONTAINER, from,
 
 	if (mode === 'add') {
 		if (USERS[index].role === 'PREMIUM') {
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{ text: `User @${user.replace(/[^\d]/g, '')} is already premium`, mentions: [user] },
 				{ from, quoted: message, groupMetadata }
@@ -32,7 +32,7 @@ const configureUser = async (client, { mode, user, USERS, PREMS_CONTAINER, from,
 
 	if (mode === 'remove') {
 		if (USERS[index].role === 'FREE') {
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{ text: `User @${user.replace(/[^\d]/g, '')} is already user`, mentions: [user] },
 				{ from, quoted: message, groupMetadata }
@@ -56,7 +56,7 @@ const configureUser = async (client, { mode, user, USERS, PREMS_CONTAINER, from,
 			capt += `Success removing premium : ${PREMS_CONTAINER.removing.map((v) => `@${v.split('@')[0]}`).join(', ')}`;
 		}
 
-		await client[botNum].send(
+		await client.instance.send(
 			from,
 			{ text: capt.trim(), mentions: [].concat(PREMS_CONTAINER.adding, PREMS_CONTAINER.removing) },
 			{ groupMetadata, quoted: message }
@@ -69,7 +69,8 @@ const configureUser = async (client, { mode, user, USERS, PREMS_CONTAINER, from,
  */
 export default {
 	name: 'premium',
-	description: 'Configure users status',
+	minifiedDescription: 'Configure Users',
+	description: 'Configure users status.',
 	usage: '!premium (add/remove) <tag/reply>',
 	aliases: ['prem'],
 	category: 'Owner',
@@ -78,7 +79,7 @@ export default {
 	status: 'enable',
 	async run({ from, message, args, mediaData, mention, bodyQuoted, query, groupMetadata }, client) {
 		if (!query && bodyQuoted) {
-			return await client[botNum].reply('Please provide user to ban', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please provide user to ban', { from, quoted: message, groupMetadata });
 		}
 
 		/**
@@ -93,7 +94,7 @@ export default {
 		const configure = args[1];
 
 		if (!configure) {
-			return await client[botNum].reply('Please provide params.\n!prem add/remove [tag/reply]', {
+			return await client.instance.reply('Please provide params.\n!prem add/remove [tag/reply]', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -101,7 +102,7 @@ export default {
 		}
 
 		if (!['add', 'remove'].includes(configure)) {
-			return await client[botNum].reply('Please provide params.\n!prem add/remove [tag/reply]', {
+			return await client.instance.reply('Please provide params.\n!prem add/remove [tag/reply]', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -153,17 +154,17 @@ export default {
 				const mentioned = mediaData.participant;
 
 				if (mentioned === configuration.botNumber) {
-					return await client[botNum].reply('Cannot add bot as premium', { from, quoted: message, groupMetadata });
+					return await client.instance.reply('Cannot add bot as premium', { from, quoted: message, groupMetadata });
 				}
 
 				const index = USERS.findIndex((v) => v.id === mentioned);
 
 				if (index === -1) {
-					return await client[botNum].reply('User not found', { from, quoted: message, groupMetadata });
+					return await client.instance.reply('User not found', { from, quoted: message, groupMetadata });
 				}
 
 				if (USERS[index].role === 'PREMIUM') {
-					return await client[botNum].reply('User already premium', { from, quoted: message, groupMetadata });
+					return await client.instance.reply('User already premium', { from, quoted: message, groupMetadata });
 				}
 
 				USERS[index].role = 'PREMIUM';
@@ -175,17 +176,17 @@ export default {
 				const mentioned = mediaData.participant;
 
 				if (mentioned === configuration.botNumber) {
-					return await client[botNum].reply('Cannot remove bot as premium', { from, quoted: message, groupMetadata });
+					return await client.instance.reply('Cannot remove bot as premium', { from, quoted: message, groupMetadata });
 				}
 
 				const index = USERS.findIndex((v) => v.id === mentioned);
 
 				if (index === -1) {
-					return await client[botNum].reply('User not found', { from, quoted: message, groupMetadata });
+					return await client.instance.reply('User not found', { from, quoted: message, groupMetadata });
 				}
 
 				if (USERS[index].role === 'FREE') {
-					return await client[botNum].reply('User already user', { from, quoted: message, groupMetadata });
+					return await client.instance.reply('User already user', { from, quoted: message, groupMetadata });
 				}
 
 				USERS[index].role = 'FREE';
@@ -204,7 +205,7 @@ export default {
 					capt += `Success removing premium : ${PREMS_CONTAINER.removing.map((v) => `@${v.split('@')[0]}`).join(', ')}`;
 				}
 
-				await client[botNum].send(
+				await client.instance.send(
 					from,
 					{ text: capt.trim(), mentions: [].concat(PREMS_CONTAINER.adding, PREMS_CONTAINER.removing) },
 					{ groupMetadata, quoted: message }

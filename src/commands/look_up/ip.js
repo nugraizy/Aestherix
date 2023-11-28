@@ -13,7 +13,8 @@ const regex = (input) =>
  */
 export default {
 	name: 'iplookup',
-	description: 'Lookup IP Address',
+	minifiedDescription: 'Look-up IP Address',
+	description: 'Look-up IP Address.',
 	usage: '!iplookup <IPv4/IPv6>',
 	aliases: ['iplook', 'ipfind'],
 	category: 'Look-up',
@@ -22,18 +23,18 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please specify a IP Address', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a IP Address', { from, quoted: message, groupMetadata });
 		}
 
 		let { _: IPs } = parser(query);
 
 		if (IPs.length === 1 && !regex(IPs[0])) {
-			return await client[botNum].reply('Please specify a valid IP Address', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a valid IP Address', { from, quoted: message, groupMetadata });
 		}
 
 		for (const IP of IPs) {
 			if (!regex(IP.trim())) {
-				await client[botNum].reply('Please specify a valid IP Address', { from, quoted: message, groupMetadata });
+				await client.instance.reply('Please specify a valid IP Address', { from, quoted: message, groupMetadata });
 
 				continue;
 			}
@@ -41,7 +42,7 @@ export default {
 			const data = await iplookup(IP.trim());
 
 			if ('error' in data) {
-				await client[botNum].reply(`Error while searching IP Address\n\n${data.error}`, {
+				await client.instance.reply(`Error while searching IP Address\n\n${data.error}`, {
 					from,
 					quoted: message,
 					groupMetadata
@@ -101,7 +102,7 @@ export default {
 				capt += `Proxy : ${proxy ? 'Yes' : 'No'}\n`;
 				capt += `Hosting : ${hosting ? 'Yes' : 'No'}`;
 
-				await client[botNum].send(from, { text: capt.trim() }, { groupMetadata, quoted: message });
+				await client.instance.send(from, { text: capt.trim() }, { groupMetadata, quoted: message });
 			}
 		}
 	}

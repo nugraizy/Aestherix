@@ -5,7 +5,8 @@ import { cnninternational, fetchBUFFER } from '../../utils/index.js';
  */
 export default {
 	name: 'cnninternational',
-	description: 'Showing latest news in International from CNN',
+	minifiedDescription: 'CNN-International News',
+	description: 'Showing latest news in International from CNN.',
 	category: 'News',
 	usage: '!cnninternational <keywords/blank(to fetch newest)>',
 	aliases: ['cnnint'],
@@ -23,7 +24,7 @@ export default {
 			caption += `Published : ${data[index].published}\n`;
 			caption += `Content : ${data[index].body}\n`;
 
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{
 					...(data[index].image !== undefined
@@ -58,13 +59,13 @@ export default {
 		}
 
 		if (!query) {
-			return client[botNum].reply('Please provide queries', { from, quoted: message, groupMetadata });
+			return client.instance.reply('Please provide queries', { from, quoted: message, groupMetadata });
 		}
 
 		const data = await cnninternational(query);
 
 		if ('error' in data) {
-			return await client[botNum].reply(data.error, { from, quoted: message, groupMetadata });
+			return await client.instance.reply(data.error, { from, quoted: message, groupMetadata });
 		}
 
 		let caption = 'CNN International'.formatHeaders();
@@ -73,7 +74,11 @@ export default {
 		caption += `Published : ${data[0].published}\n`;
 		caption += `Content : ${data[0].body}\n`;
 
-		await client[botNum].send(
+		caption += `\n${data
+			.map(({ title, body, published }) => `Title : ${title}\nPublished : ${published}\nContent : ${body}`)
+			.join('\n\n')}`.trimEnd();
+
+		await client.instance.send(
 			from,
 			{
 				...(data[0].image !== undefined

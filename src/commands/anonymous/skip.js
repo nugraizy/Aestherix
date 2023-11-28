@@ -5,6 +5,7 @@ import { skip } from '../../utils/anonymous/index.js';
  */
 export default {
 	name: 'skip',
+	minifiedDescription: 'Anonymous Skip',
 	description: 'Skip a partner',
 	category: 'Anonymous',
 	usage: '!skip',
@@ -16,14 +17,14 @@ export default {
 		const skipping = skip(from, 20, client, message);
 
 		if (typeof skipping === 'boolean' && !skipping) {
-			return await client[botNum].reply('You are not in a search!', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You are not in a search!', { from, quoted: message, groupMetadata });
 		}
 
 		if (typeof skipping === 'object' && skipping.partner2) {
-			client[botNum].reply('You have skipped your partner!', { from: skipping.partner1, quoted: message, groupMetadata });
-			client[botNum].send(skipping.partner2, { text: 'Your partner skipped the chat!' }, { groupMetadata });
+			client.instance.reply('You have skipped your partner!', { from: skipping.partner1, quoted: message, groupMetadata });
+			client.instance.send(skipping.partner2, { text: 'Your partner skipped the chat!' }, { groupMetadata });
 		} else {
-			await client[botNum].reply(`You already searching for a partner!\nPlease wait for ${skipping.seconds}s`, {
+			await client.instance.reply(`You already searching for a partner!\nPlease wait for ${skipping.seconds}s`, {
 				from,
 				quoted: message,
 				groupMetadata

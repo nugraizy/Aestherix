@@ -9,7 +9,8 @@ import { tiktok } from '../../utils/tiktok/index.js';
  */
 export default {
 	name: 'tikstalk',
-	description: 'Lookup TikTok user',
+	minifiedDescription: 'Look-up TikTok User',
+	description: 'Look-up TikTok user.',
 	usage: '!tikstalk <username>',
 	aliases: ['ttstalk', 'ttuser'],
 	category: 'Look-up',
@@ -40,7 +41,7 @@ export default {
 				})
 			);
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					buttonText: 'Open list',
@@ -56,7 +57,7 @@ export default {
 		}
 
 		if (!query) {
-			return await client[botNum].reply('Please specify a query', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a query', { from, quoted: message, groupMetadata });
 		}
 
 		let { _: usernames } = parser(query);
@@ -65,7 +66,7 @@ export default {
 
 		for (const data in users) {
 			if ('error' in users[data]) {
-				client[botNum].reply(`Error while searching TikTok user\n\n${users[data].error}`, {
+				client.instance.reply(`Error while searching TikTok user\n\n${users[data].error}`, {
 					from,
 					quoted: message,
 					groupMetadata
@@ -100,7 +101,7 @@ export default {
 			capt += `ID Profile : ${keyword}\n`;
 			capt += `Biography : ${biography}\n`;
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					image: { url: profileHD || profileSD },

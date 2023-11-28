@@ -6,7 +6,8 @@ import { color, INFOLOG, ERRLOG } from '../../utils/modules/index.js';
  */
 export default {
 	name: 'toanime',
-	description: 'Change your selfie picture to Anime-like using QQ A.I',
+	minifiedDescription: 'Animefy Picture',
+	description: 'Change your selfie picture to Anime-like using QQ A.I.',
 	usage: '!toanime <reply media/send media>',
 	aliases: ['toanim', 'ai2d', 'faceplay'],
 	category: 'Converter',
@@ -24,14 +25,14 @@ export default {
 		}
 
 		if (!isMediaImage && args[1] !== '-variant') {
-			return await client[botNum].reply('Please send/reply an image to convert to anime', {
+			return await client.instance.reply('Please send/reply an image to convert to anime', {
 				from,
 				quoted: message,
 				groupMetadata
 			});
 		}
 
-		bufferMessage = await client[botNum].downloadMediaMessage(mediaData);
+		bufferMessage = await client.instance.downloadMediaMessage(mediaData);
 		buffer = await imageToAnime(bufferMessage, sender, {
 			crop: 'SINGLE',
 			enhance: true,
@@ -41,7 +42,7 @@ export default {
 
 		buffer = Buffer.from(buffer, 'base64');
 
-		await client[botNum].send(
+		await client.instance.send(
 			from,
 			{
 				image: buffer,

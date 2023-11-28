@@ -6,7 +6,8 @@ import { startTG } from '../../utils/games/index.js';
  */
 export default {
 	name: 'tebakgambar',
-	description: 'Play Guess the image',
+	minifiedDescription: 'Play Guess',
+	description: 'Play Guess the image.',
 	usage: '!tebakgambar',
 	aliases: ['tg', 'tebak'],
 	category: 'Games',
@@ -19,7 +20,7 @@ export default {
 		const game = await startTG(client, message.from, message, 20);
 
 		if (game.status === 'playing') {
-			return await client[botNum].reply(`Your game is already playing!\n${game.remaining}s left`, {
+			return await client.instance.reply(`Your game is already playing!\n${game.remaining}s left`, {
 				groupMetadata: message.groupMetadata,
 				from: message.from,
 				quoted: game.data

@@ -5,8 +5,9 @@ import fs from 'fs-extra';
  */
 export default {
 	name: 'antiurl',
+	minifiedDescription: 'Anti URL',
 	aliases: ['antilink', 'antitautan'],
-	description: 'Enable or disable anti-url',
+	description: 'Enable or disable anti-url.',
 	category: 'Moderation',
 	usage: '!antiurl <enable/disable>',
 	cooldown: 2,
@@ -14,7 +15,7 @@ export default {
 	status: 'enable',
 	async run(message, client) {
 		if (!message.isBotAdmin) {
-			return await client[botNum].reply('Bot is not admin, Please promote admin before using moderation commands.', {
+			return await client.instance.reply('Bot is not admin, Please promote admin before using moderation commands.', {
 				groupMetadata: message.groupMetadata,
 				from: message.from,
 				quoted: message.message
@@ -22,7 +23,7 @@ export default {
 		}
 
 		if (!message.query) {
-			return await client[botNum].reply('Please specify a command\n\nEx: antiurl <enable/disable>', {
+			return await client.instance.reply('Please specify a command\n\nEx: antiurl <enable/disable>', {
 				groupMetadata: message.groupMetadata,
 				from: message.from,
 				quoted: message.message
@@ -36,7 +37,7 @@ export default {
 			case 'enable':
 			case 'on':
 				if (isEnable) {
-					return await client[botNum].reply('You already have this command enabled', {
+					return await client.instance.reply('You already have this command enabled', {
 						groupMetadata: message.groupMetadata,
 						from: message.from,
 						quoted: message.message
@@ -47,7 +48,7 @@ export default {
 				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].antiURL = 'enable';
 				await fs.writeJSON('./databases/groups/settingsManager.json', data);
 
-				await client[botNum].reply('You have successfully enabled anti-url', {
+				await client.instance.reply('You have successfully enabled anti-url', {
 					groupMetadata: message.groupMetadata,
 					from: message.from,
 					quoted: message.message
@@ -56,7 +57,7 @@ export default {
 			case 'disable':
 			case 'off':
 				if (!isEnable) {
-					return await client[botNum].reply('You already have this command disabled', {
+					return await client.instance.reply('You already have this command disabled', {
 						groupMetadata: message.groupMetadata,
 						from: message.from,
 						quoted: message.message
@@ -67,14 +68,14 @@ export default {
 				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].antiURL = 'disable';
 				await fs.writeJSON('./databases/groups/settingsManager.json', data);
 
-				await client[botNum].reply('You have successfully disabled anti-url', {
+				await client.instance.reply('You have successfully disabled anti-url', {
 					groupMetadata: message.groupMetadata,
 					from: message.from,
 					quoted: message.message
 				});
 				break;
 			default:
-				await client[botNum].reply('Please specify a command\n\nEx: antiurl <enable/disable>', {
+				await client.instance.reply('Please specify a command\n\nEx: antiurl <enable/disable>', {
 					groupMetadata: message.groupMetadata,
 					from: message.from,
 					quoted: message.message

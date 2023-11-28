@@ -21,6 +21,7 @@ const check4Duplicate = (chats) => {
  */
 export default {
 	name: 'groupbc',
+	minifiedDescription: 'Group Broadcast',
 	description: 'Send Broadcast to all groups.',
 	usage: '!groupbc <text>',
 	aliases: ['gcbc'],
@@ -31,10 +32,10 @@ export default {
 	async run({ from, query, message, sender, groupMetadata }, client) {
 		try {
 			if (!query) {
-				return await client[botNum].reply('You must enter text', { from, quoted: message, groupMetadata });
+				return await client.instance.reply('You must enter text', { from, quoted: message, groupMetadata });
 			}
 
-			const getGroups = await client[botNum].groupFetchAllParticipating();
+			const getGroups = await client.instance.groupFetchAllParticipating();
 			const groups = Object.entries(getGroups)
 				.slice(0)
 				.map((entry) => entry[1]);
@@ -46,11 +47,11 @@ export default {
 
 			for (const id of chats) {
 				await delay(300);
-				await client[botNum].send(id, { text, mentions: [sender] });
+				await client.instance.send(id, { text, mentions: [sender] });
 			}
 		} catch (err) {
 			log(err);
-			await client[botNum].reply(err.stack, { from, quoted: message, groupMetadata });
+			await client.instance.reply(err.stack, { from, quoted: message, groupMetadata });
 		}
 	}
 };

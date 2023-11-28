@@ -20,13 +20,13 @@ export const connectMqtt = (clientMqttListen) => {
 			} :                                                       ${data.artists || ''} - ${data.trackTitle || ''}  ( ${
 				data.progressMs?.toTime() || '00'
 			} - ${data?.durationMs?.toTime() || '00'} )`;
-			const myStatus = await client?.[botNum]?.fetchStatus(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`);
+			const myStatus = await client?.instance?.fetchStatus(`${instance.split(':')[0]}${S_WHATSAPP_NET}`);
 
 			if (myStatus.status === content) {
 				return;
 			}
 
-			await client[botNum].query({
+			await client.instance.query({
 				tag: 'iq',
 				attrs: { to: S_WHATSAPP_NET, type: 'set', xmlns: 'status' },
 				content: [{ tag: 'status', attrs: {}, content: Buffer.from(content, 'utf-8') }]
@@ -50,7 +50,7 @@ export const connectMqtt = (clientMqttListen) => {
 
 ${result.title}`;
 
-				await client?.[botNum]?.send(destination, {
+				await client?.instance?.send(destination, {
 					image: { url: result.preview.images[0].source.url.replace('amp;', '') },
 					caption,
 					footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',

@@ -9,6 +9,7 @@ import { extension, audioFormat, videoFormat } from '../../utils/misc/mimetype.j
  */
 export default {
 	name: 'soundremover',
+	minifiedDescription: 'Remove Voice',
 	description: 'Remove specific sound from audio/video',
 	category: 'Converter',
 	usage: '!soundremover <Audio/Video(reply/send)>',
@@ -33,7 +34,7 @@ export default {
 		client
 	) {
 		if (!isQuotedAudio && !isQuotedDocument && !isMediaVid) {
-			return await client[botNum].reply('Please send/reply an audio/video to remove voice', {
+			return await client.instance.reply('Please send/reply an audio/video to remove voice', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -42,7 +43,7 @@ export default {
 
 		INFOLOG(`${color('Removing Sound', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
-		const file = await client[botNum].downloadAndSaveMediaMessage(
+		const file = await client.instance.downloadAndSaveMediaMessage(
 			extractMediaData,
 			path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
 			typeQuoted
@@ -53,19 +54,19 @@ export default {
 			!audioFormat.includes(extractMediaData.mimetype) &&
 			!videoFormat.includes(extractMediaData.mimetype)
 		) {
-			return await client[botNum].reply('This file is not an audio/video', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('This file is not an audio/video', { from, quoted: message, groupMetadata });
 		}
 
 		const { result } = await soundRemover(file, prettyNumber);
 
 		if (/--?(voice|suara)/.test(query) && /--?(instrument(s)?)/.test(query)) {
-			return await client[botNum].reply(`${result.vocal}\n${result.instrumental}`, {
+			return await client.instance.reply(`${result.vocal}\n${result.instrumental}`, {
 				from,
 				quoted: message,
 				groupMetadata
 			});
 		} else if (/--?(voice|suara)/.test(query)) {
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					document: { url: result.instrumental },
@@ -75,7 +76,7 @@ export default {
 				{ groupMetadata, quoted: message }
 			);
 		} else if (/--?(instrumen(ts)?)/.test(query)) {
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					document: { url: result.vocal },
@@ -85,7 +86,7 @@ export default {
 				{ groupMetadata, quoted: message }
 			);
 		} else {
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					document: { url: result.instrumental },

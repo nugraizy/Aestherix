@@ -9,6 +9,7 @@ import { color, INFOLOG, waifu2x } from '../../utils/index.js';
  */
 export default {
 	name: 'waifu2x',
+	minifiedDescription: 'Waifu2x V1',
 	description: 'Enhance image using image processing A.I. called waifu2x.',
 	usage: '!waifu2x <reply/send (image/sticker)>',
 	aliases: ['w2x', 'enhance', 'upscale', 'remmini'],
@@ -32,13 +33,13 @@ export default {
 		client
 	) => {
 		if (!isMediaImage && !isQuotedSticker) {
-			return client[botNum].reply(
+			return client.instance.reply(
 				'Please reply/send image with caption the command. This command also accept sticker (reply one with command).'
 			);
 		}
 
 		if (isQuotedSticker && extractMediaData.isAnimated) {
-			return client[botNum].reply('The sticker are animated. Please reply static stickers only.', {
+			return client.instance.reply('The sticker are animated. Please reply static stickers only.', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -57,7 +58,7 @@ export default {
 			}
 		});
 
-		const media = await client[botNum].downloadMediaMessage(mediaData);
+		const media = await client.instance.downloadMediaMessage(mediaData);
 
 		const enhance = await waifu2x(
 			media,
@@ -65,7 +66,7 @@ export default {
 		);
 
 		if (parsed.isStickers) {
-			const prepareSticker = await client[botNum].prepareSticker(
+			const prepareSticker = await client.instance.prepareSticker(
 				enhance,
 				path.join(__dirname, `src/media/temporary_files/${filename}`),
 				undefined,
@@ -75,9 +76,9 @@ export default {
 				}
 			);
 
-			client[botNum].send(from, { sticker: prepareSticker }, { groupMetadata, quoted: message });
+			client.instance.send(from, { sticker: prepareSticker }, { groupMetadata, quoted: message });
 		} else {
-			client[botNum].send(from, { image: enhance }, { groupMetadata, quoted: message });
+			client.instance.send(from, { image: enhance }, { groupMetadata, quoted: message });
 		}
 	}
 };

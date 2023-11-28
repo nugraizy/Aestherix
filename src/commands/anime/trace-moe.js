@@ -8,6 +8,7 @@ import { isURL, traceMoe, toMp4 } from '../../utils/index.js';
  */
 export default {
 	name: 'tracemoe',
+	minifiedDescription: 'Tracemoe Image Search',
 	description: 'Reverse image anime search',
 	usage: '!tracemoe <reply image/send image>',
 	category: 'Anime',
@@ -18,7 +19,7 @@ export default {
 	async run(
 		{
 			type: typeMessage,
-			cmd,
+			/*cmd,*/
 			isMediaImage,
 			query,
 			extractMediaData,
@@ -33,7 +34,7 @@ export default {
 		client
 	) {
 		if (!isURL(query) && !isMediaImage) {
-			return await client[botNum].reply('Please send/reply a image to find the similar image', {
+			return await client.instance.reply('Please send/reply a image to find the similar image', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -43,7 +44,7 @@ export default {
 		let media = query && isURL(query) ? query : null;
 
 		if (typeMessage === 'listResponseMessage' && args[1] === 'get') {
-			await client[botNum].reply('Searching. Please wait...', { from, quoted: message, groupMetadata });
+			await client.instance.reply('Searching. Please wait...', { from, quoted: message, groupMetadata });
 
 			args = JSON.parse(JSON.parse(JSON.stringify(args.slice(2).join(' '))));
 
@@ -98,7 +99,7 @@ ${
 
 			const buffer = await toMp4(args.video, sender);
 
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{
 					video: new Buffer.from(buffer, 'base64'),
@@ -114,10 +115,10 @@ ${
 			);
 		}
 
-		await client[botNum].reply('Searching. Please wait...', { from, quoted: message, groupMetadata });
+		await client.instance.reply('Searching. Please wait...', { from, quoted: message, groupMetadata });
 
 		if (isMediaImage) {
-			media = await client[botNum].downloadAndSaveMediaMessage(
+			media = await client.instance.downloadAndSaveMediaMessage(
 				extractMediaData,
 				path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
 				typeQuoted
@@ -131,7 +132,7 @@ ${
 				fs.unlinkSync(media);
 			}
 
-			return await client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
+			return await client.instance.reply(result.error, { from, quoted: message, groupMetadata });
 		}
 
 		if (isMediaImage) {
@@ -187,7 +188,7 @@ ${externalLinks
 
 		const buffer = await toMp4(result[0].video, sender);
 
-		await client[botNum].send(
+		await client.instance.send(
 			from,
 			{
 				video: new Buffer.from(buffer, 'base64'),
@@ -202,37 +203,37 @@ ${externalLinks
 			{ groupMetadata, quoted: message }
 		);
 
-		let i = 0;
-		const row = [];
+		// let i = 0;
+		// const row = [];
 
-		for (const data of result) {
-			if (i === 0) {
-				i++;
-				continue;
-			}
+		// for (const data of result) {
+		// 	if (i === 0) {
+		// 		i++;
+		// 		continue;
+		// 	}
 
-			row.push({
-				rows: [
-					{
-						title: `${i}. ${data.media.title.native} (${data.media.title.romaji})`,
-						rowId: `${cmd} get ${JSON.stringify(data)}`
-					}
-				],
-				title: `Similarity | ${data.similarity}%`
-			});
-			i++;
-		}
+		// 	row.push({
+		// 		rows: [
+		// 			{
+		// 				title: `${i}. ${data.media.title.native} (${data.media.title.romaji})`,
+		// 				rowId: `${cmd} get ${JSON.stringify(data)}`
+		// 			}
+		// 		],
+		// 		title: `Similarity | ${data.similarity}%`
+		// 	});
+		// 	i++;
+		// }
 
-		await client[botNum].send(
-			from,
-			{
-				title: 'Trace Moe'.formatHeaders(),
-				text: 'Trace Moe',
-				footer: 'Looking for some more? Choose between these options.',
-				buttonText: 'Open List',
-				sections: row
-			},
-			{ groupMetadata }
-		);
+		// await client.instance.send(
+		// 	from,
+		// 	{
+		// 		title: 'Trace Moe'.formatHeaders(),
+		// 		text: 'Trace Moe',
+		// 		footer: 'Looking for some more? Choose between these options.',
+		// 		buttonText: 'Open List',
+		// 		sections: row
+		// 	},
+		// 	{ groupMetadata }
+		// );
 	}
 };

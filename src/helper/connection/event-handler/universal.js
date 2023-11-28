@@ -92,15 +92,15 @@ export const handleConnectionUpdate = async (
 
 			if (!receivedPendingNotifications && !shouldWait) {
 				/**
-				 * @typedef {string} BotNum
-				 * @type {BotNum}
+				 * @typedef {string} instance
+				 * @type {instance}
 				 */
-				const botNum = Client.user.id;
+				const instance = Client.user.id;
 
 				global.client = {};
-				global.botNum = botNum;
+				global.instance = instance;
 
-				client[botNum] = Client;
+				client.instance = Client;
 
 				(await import('../../modules/utils.js')).assign(client);
 
@@ -162,7 +162,7 @@ export const handleConnectionUpdate = async (
 					capt += `Connection time ${timeToConnect / 1000}s is not the best time (${data.best_time / 1000}s)`;
 				}
 
-				client[botNum].send(configuration.cache.ownerNumbers[0], {
+				client.instance.send(configuration.cache.ownerNumbers[0], {
 					text: 'Bot is connected to socket.\n' + capt
 				});
 
@@ -236,14 +236,14 @@ export const handlePresenceUpdate = async (presence) => {
  */
 export const handleCallUpdate = async (isGroup, status, id, from, OPTIONS) => {
 	if (OPTIONS.noCall && !isGroup && status === 'offer') {
-		const { user, server } = jidDecode(botNum);
+		const { user, server } = jidDecode(instance);
 
-		await client[botNum].sendNode({
+		await client.instance.sendNode({
 			tag: 'call',
 			attrs: {
 				from: `${user}@${server}`,
 				to: from,
-				id: client[botNum].generateMessageTag()
+				id: client.instance.generateMessageTag()
 			},
 			content: [
 				{
@@ -257,7 +257,7 @@ export const handleCallUpdate = async (isGroup, status, id, from, OPTIONS) => {
 				}
 			]
 		});
-		await client[botNum].updateBlockStatus(from, 'block');
+		await client.instance.updateBlockStatus(from, 'block');
 	}
 };
 
@@ -283,20 +283,20 @@ export const handleGroupSettingsUpdate = async (store, message) => {
 
 export const handleWerewolfCycle = async (update) => {
 	if (update.time === 'day') {
-		await client[botNum].send(update.id, { text: update.gameDialogue, mentions: update.peopleKilledMention });
+		await client.instance.send(update.id, { text: update.gameDialogue, mentions: update.peopleKilledMention });
 	} else if (update.time === 'evening') {
-		await client[botNum].send(update.id, {
+		await client.instance.send(update.id, {
 			text: update.gameDialogue
 		});
 
 		for (const id of update.playersData.filter((v) => !v.isAlive)) {
-			client[botNum].send(id.id, {
+			client.instance.send(id.id, {
 				text: 'Karena kamu sudah mati, maka kamu hanya bisa menonton permainan saja'
 			});
 		}
 
 		for (const id of update.playersData.filter((v) => v.isAlive)) {
-			client[botNum].send(id.id, {
+			client.instance.send(id.id, {
 				title: 'Pilih salah satu dari pemain berikut untuk divoting',
 				footer: 'Made by Void Bot. Powered by Hidden Finder',
 				text: '\t',
@@ -310,13 +310,13 @@ export const handleWerewolfCycle = async (update) => {
 			});
 		}
 	} else if (update.time === 'voting') {
-		await client[botNum].send(update.id, { text: update.gameDialogue, mentions: [update?.voteData?.voted] });
+		await client.instance.send(update.id, { text: update.gameDialogue, mentions: [update?.voteData?.voted] });
 
 		if (update.isWinning) {
-			return await client[botNum].send(update.id, { text: update.gameDialogue, mentions: update?.peopleMention });
+			return await client.instance.send(update.id, { text: update.gameDialogue, mentions: update?.peopleMention });
 		}
 
-		await client[botNum].send(update.id, {
+		await client.instance.send(update.id, {
 			text: `Statistic Pemain :
 
 Pemain : ${update.playersData.filter((v) => v.isAlive).length}/${update.playersData.length}
@@ -329,12 +329,12 @@ ${update.playersData
 			mentions: update.playersData.map((v) => v.id)
 		});
 	} else if (update.time === 'dawn') {
-		await client[botNum].send(update.id, { text: update.gameDialogue.replace('{0}', update.gameTime) });
+		await client.instance.send(update.id, { text: update.gameDialogue.replace('{0}', update.gameTime) });
 
 		for (const { id, role, isAlive } of update.playersData) {
 			if (isAlive) {
 				if (role === 'werewolf') {
-					client[botNum].send(id, {
+					client.instance.send(id, {
 						buttonText: 'Open list',
 						footer: 'Made by Void Bot. Powered by Hidden Finder',
 						title:
@@ -350,7 +350,7 @@ ${update.playersData
 							})
 					});
 				} else if (role === 'seer') {
-					client[botNum].send(id, {
+					client.instance.send(id, {
 						buttonText: 'Open list',
 						footer: 'Made by Void Bot. Powered by Hidden Finder',
 						text: '\t',
@@ -371,7 +371,7 @@ ${update.playersData
 							})
 					});
 				} else if (role === 'guard') {
-					client[botNum].send(id, {
+					client.instance.send(id, {
 						buttonText: 'Open list',
 						title:
 							'Kamu adalah Penjaga. Dan saat ini merupakan waktu yang tepat untuk memjaga seseorang.\nPilih salah satu player.',
@@ -392,18 +392,18 @@ ${update.playersData
 							})
 					});
 				} else if (role === 'villager') {
-					client[botNum].send(id, {
+					client.instance.send(id, {
 						text: 'Kamu adalah Penduduk. Tunggu sampai pagi. Saat ini hanya pemain malam yang beraksi'
 					});
 				}
 			}
 		}
 	} else if (update.time === 'night') {
-		await client[botNum].send(update.id, { text: 'Aktifitas pemain malam dihentikan karena sudah mau pagi.' });
+		await client.instance.send(update.id, { text: 'Aktifitas pemain malam dihentikan karena sudah mau pagi.' });
 	} else if (update.time === 'failAfk') {
-		await client[botNum].send(update.id, { text: update.message, mentions: update.playersData.map((v) => v.id) });
+		await client.instance.send(update.id, { text: update.message, mentions: update.playersData.map((v) => v.id) });
 	} else if (update.time === 'voted') {
-		await client[botNum].send(update.id, { text: update.text, mentions: update.mentions });
+		await client.instance.send(update.id, { text: update.text, mentions: update.mentions });
 	}
 };
 
@@ -417,7 +417,7 @@ export const handlePollUpdate = async (store, msg) => {
 		return;
 	}
 
-	const meIdNormalized = jidNormalizedUser(botNum);
+	const meIdNormalized = jidNormalizedUser(instance);
 	const pollCreatorJid = getKeyAuthor(pollKey, meIdNormalized);
 	const voterJid = getKeyAuthor(msg.msg.key, meIdNormalized);
 	const pollEncKey = originalPoll.message.messageContextInfo?.messageSecret;
@@ -436,7 +436,7 @@ export const handlePollUpdate = async (store, msg) => {
 			pollUpdates: [{ vote: voteMsg, pollUpdateMessageKey: msg.msg.key, senderTimestampMs: msg.msg.messageTimestamp }],
 			message: originalPoll.message
 		},
-		botNum
+		instance
 	);
 
 	return;
@@ -454,15 +454,15 @@ export const emitGroupSettings = {
 		const content = update?.content?.[0]?.content?.[0]?.content?.toString() || update?.content?.[0]?.attrs.code || '';
 		const participant = update?.attrs?.participant;
 
-		client[botNum].ev.emit('group.settings.update', { from, name, action, participant, content });
+		client.instance.ev.emit('group.settings.update', { from, name, action, participant, content });
 	},
 	picture: async (update) => {
 		const from = update?.attrs?.from || update?.content?.[0]?.attrs?.author;
 		const name = update?.attrs?.notify;
 		const action = update?.content?.[0]?.tag;
 		const participant = update?.content?.[0]?.attrs?.author;
-		const content = action === 'delete' ? null : await client[botNum].profilePictureUrl(from, 'image').catch(() => null);
+		const content = action === 'delete' ? null : await client.instance.profilePictureUrl(from, 'image').catch(() => null);
 
-		client[botNum].ev.emit('group.settings.update', { from, name, action, participant, content });
+		client.instance.ev.emit('group.settings.update', { from, name, action, participant, content });
 	}
 };

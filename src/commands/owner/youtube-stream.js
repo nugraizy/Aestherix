@@ -10,6 +10,7 @@ const lives = new Cache();
  */
 export default {
 	name: 'youtubelive',
+	minifiedDescription: 'Live Stream Events',
 	description: 'Listen to a YouTube live stream.',
 	usage: '!youtubelive <youtube_id>',
 	aliases: ['ytlive'],
@@ -19,50 +20,50 @@ export default {
 	status: 'enable',
 	run: async ({ from, message, query, groupMetadata, args }, client) => {
 		if (!query) {
-			return client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if (args[1] === 'stop') {
 			const live = lives.get(from);
 
 			if (!live) {
-				return client[botNum].reply('No live stream is running.', { from, quoted: message, groupMetadata });
+				return client.instance.reply('No live stream is running.', { from, quoted: message, groupMetadata });
 			}
 
 			live.stop();
 
-			return client[botNum].reply('Live stream has been stopped.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('Live stream has been stopped.', { from, quoted: message, groupMetadata });
 		} else if (args[1] === 'start') {
 			const live = lives.get(from);
 
 			if (!live) {
-				return client[botNum].reply('No live stream is running.', { from, quoted: message, groupMetadata });
+				return client.instance.reply('No live stream is running.', { from, quoted: message, groupMetadata });
 			}
 
 			live.start();
 
-			return client[botNum].reply('Live stream has been started.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('Live stream has been started.', { from, quoted: message, groupMetadata });
 		}
 
 		const live = await youtubeLiveComments(query);
 
 		if ('error' in live) {
-			return client[botNum].reply(live.error, { from, quoted: message, groupMetadata });
+			return client.instance.reply(live.error, { from, quoted: message, groupMetadata });
 		}
 
 		lives.set(from, live);
 
 		live.on('start', async (initialData) => {
 			try {
-				await client[botNum].reply('Success join the live stream.', { from, quoted: message, groupMetadata });
+				await client.instance.reply('Success join the live stream.', { from, quoted: message, groupMetadata });
 
 				const pinnedAction = initialData.actions.firstOfType(YTNodes.AddBannerToLiveChatCommand);
 
 				if (pinnedAction) {
 					if (pinnedAction.banner?.contents?.is(YTNodes.LiveChatTextMessage)) {
-						client[botNum].reply(
+						await client.instance.reply(
 							`${'Live Stream Info'.formatHeaders()}
-    
+
 Info : Pinned Message
 From : ${pinnedAction.banner.contents.author?.name.toString()}
 Content : ${pinnedAction?.banner.contents.message.toString()}`,
@@ -76,7 +77,7 @@ Content : ${pinnedAction?.banner.contents.message.toString()}`,
 		});
 
 		live.on('error', async () => {
-			await client[botNum].reply('Something went wrong with the socket.', { from, quoted: message, groupMetadata });
+			await client.instance.reply('Something went wrong with the socket.', { from, quoted: message, groupMetadata });
 
 			try {
 				live.stop();
@@ -89,7 +90,7 @@ Content : ${pinnedAction?.banner.contents.message.toString()}`,
 
 		live.on('end', async () => {
 			try {
-				await client[botNum].reply('The live stream has ended.', { from, quoted: message, groupMetadata });
+				await client.instance.reply('The live stream has ended.', { from, quoted: message, groupMetadata });
 
 				live.stop();
 				lives.delete(from);
@@ -118,7 +119,7 @@ Content : ${pinnedAction?.banner.contents.message.toString()}`,
 								return;
 							}
 
-							await client[botNum].send(
+							await client.instance.send(
 								from,
 								{
 									text: `${'Live Stream Message Info'.formatHeaders()}
@@ -134,7 +135,7 @@ MSG ~> ${item.as(YTNodes.LiveChatTextMessage).message.toString()}`.trim()
 							);
 							break;
 						case 'LiveChatPaidMessage':
-							await client[botNum].send(
+							await client.instance.send(
 								from,
 								{
 									text: `${'Live Stream Donation Info'.formatHeaders()}
@@ -149,7 +150,7 @@ MSG ~> ${item.as(YTNodes.LiveChatPaidMessage).message.toString()}`.trim()
 							);
 							break;
 						case 'LiveChatPaidSticker':
-							await client[botNum].send(
+							await client.instance.send(
 								from,
 
 								{
@@ -169,7 +170,7 @@ MSG ~> ${item.as(YTNodes.LiveChatPaidMessage).message.toString()}`.trim()
 				}
 
 				if (action.is(YTNodes.AddBannerToLiveChatCommand)) {
-					await client[botNum].send(
+					await client.instance.send(
 						from,
 						{
 							text: `${'Live Stream Info'.formatHeaders()}
@@ -187,7 +188,7 @@ Content : ${action.banner?.contents}`
 
 		live.on('metadata-update', async (metadata) => {
 			try {
-				await client[botNum].send(
+				await client.instance.send(
 					from,
 					{
 						text: `${'Live Stream Metadata'.formatHeaders()}

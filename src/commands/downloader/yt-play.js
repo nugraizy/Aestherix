@@ -7,6 +7,7 @@ import configuration from '../../helper/config/connect.js';
  */
 export default {
 	name: 'ytplay',
+	minifiedDescription: 'Download YouTube Video/Audio',
 	description: 'Instantly Download a YouTube video/audio.',
 	usage: '!ytplay <query> [options]\nOptions:\n-mp3, Download as Audio\n-mp4, Download as Video',
 	aliases: ['ytp', 'yt', 'play'],
@@ -16,7 +17,7 @@ export default {
 	status: 'enable',
 	async run(message, client) {
 		if (!message.query) {
-			return await client[botNum].reply('Please enter a query', {
+			return await client.instance.reply('Please enter a query', {
 				groupMetadata: message.groupMetadata,
 				quoted: message.message,
 				from: message.from

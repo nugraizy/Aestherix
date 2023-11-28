@@ -10,6 +10,7 @@ import { tesseract } from '../../utils/misc/index.js';
  */
 export default {
 	name: 'audiobook',
+	minifiedDescription: 'Audio book',
 	description: 'Take a picture and turn it into an audio book.',
 	usage: '!audiobook <reply media/send media>',
 	aliases: ['audbook'],
@@ -19,14 +20,14 @@ export default {
 	status: 'enable',
 	async run({ isMediaImage, from, prettyNumber, message, filename, extractMediaData, typeQuoted, groupMetadata }, client) {
 		if (!isMediaImage) {
-			return await client[botNum].reply('Please send/reply an image to recognize text', {
+			return await client.instance.reply('Please send/reply an image to recognize text', {
 				from,
 				quoted: message,
 				groupMetadata
 			});
 		}
 
-		const file = await client[botNum].downloadAndSaveMediaMessage(
+		const file = await client.instance.downloadAndSaveMediaMessage(
 			extractMediaData,
 			path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
 			typeQuoted
@@ -39,8 +40,8 @@ export default {
 			path.join(__dirname, `src/media/temporary_files/${filename}`)
 		);
 
-		await client[botNum].send(from, { text: result.text.trim() }, { groupMetadata, quoted: message });
-		await client[botNum].send(from, { audio: buffer }, { groupMetadata, quoted: message });
+		await client.instance.send(from, { text: result.text.trim() }, { groupMetadata, quoted: message });
+		await client.instance.send(from, { audio: buffer }, { groupMetadata, quoted: message });
 		INFOLOG(`${color('Text is sent', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
 	}
 };

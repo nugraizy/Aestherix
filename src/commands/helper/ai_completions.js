@@ -8,6 +8,7 @@ const updateApikey = () =>
  */
 export default {
 	name: 'aicompletions',
+	minifiedDescription: 'AI Completions',
 	description: 'Ask A.I to complete your sentence or give A.I any task within texts.',
 	usage: '!aicompletions <query>',
 	aliases: ['complete'],
@@ -17,7 +18,7 @@ export default {
 	status: 'enable',
 	run: async ({ query, from, message, groupMetadata }, client) => {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		const configuration = new Configuration({ apiKey: updateApikey() });
@@ -29,6 +30,6 @@ export default {
 			max_tokens: 200 /* eslint-disable-line */
 		});
 
-		client[botNum].reply(completion.data.choices[0].text.trim(), { from, quoted: message, groupMetadata });
+		client.instance.reply(completion.data.choices[0].text.trim(), { from, quoted: message, groupMetadata });
 	}
 };

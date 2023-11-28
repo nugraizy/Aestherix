@@ -3,6 +3,7 @@ import chokidar from 'chokidar';
 import fs from 'fs-extra';
 import syntaxError from 'syntax-error';
 import os from 'os';
+import chalk from 'chalk';
 
 import configuration from '../../config/connect.js';
 import { color, ERRLOG, INFOLOG, loadFiles } from '../../../utils/modules/index.js';
@@ -48,7 +49,11 @@ export const saveContacts = (store, contactsList) => {
 
 export const validatePlugins = async (filename) => {
 	const normalizedPath = normalizeImportPath(filename);
-	const str = await fs.readFile(normalizedPath);
+	const str = (
+		await fs.readFile(normalizedPath, {
+			encoding: 'utf-8'
+		})
+	).replace(/\t/g, '    ');
 	const syntax = syntaxError(str, normalizedPath, {
 		allowReturnOutsideFunction: true,
 		allowAwaitOutsideFunction: true,
@@ -56,26 +61,37 @@ export const validatePlugins = async (filename) => {
 	});
 
 	if (syntax) {
-		let strings = String(syntax);
+		const [, path, error, arrow, typeError] = String(syntax).split('\n');
 
-		strings = strings.split('\n').filter((v) => v !== '');
-		strings = strings.map((v) => v.replace(/\t/g, ' '));
+		const codesArr = str.split('\n');
+		const indexCode = codesArr.findIndex((v) => v.includes(error));
 
-		const [typeError, messageError] = strings[3].split(':');
+		const [firstCode, secondCode] = [codesArr[indexCode - 1], codesArr[indexCode + 1]];
+		const [firstLine, currentLine, secondLine] = [syntax.line - 1, syntax.line, syntax.line + 1];
+		const [firstLineLength, currentLineLength, secondLineLength] = [
+			String(firstLine).length,
+			String(currentLine).length,
+			String(secondLine).length
+		];
+
+		const longestLine = Math.max(firstLineLength, currentLineLength, secondLineLength);
+
+		const linePaddingFirst = ' '.repeat(longestLine - String(firstLine).length + 2);
+		const linePaddingCurrent = ' '.repeat(longestLine - String(currentLine).length + 2);
+		const linePaddingSecond = ' '.repeat(longestLine - String(secondLine).length + 2);
+
+		console.log(chalk.gray(path), '\n');
+
+		console.log(chalk.gray(`  ${linePaddingFirst}${firstLine}:`), chalk.hex('#fff')(firstCode));
+		console.log('  ' + chalk.bold.hex('#fff').bgRed(`${linePaddingCurrent}${currentLine}: ${error}`));
+		console.log(chalk.gray(`  ${linePaddingSecond}${' '.repeat(longestLine)}:`), chalk.bold.hex('#fff')(arrow));
+		console.log(chalk.gray(`  ${linePaddingSecond}${secondLine}:`), chalk.hex('#fff')(secondCode), '\n');
+
+		console.log(chalk.gray(typeError));
 
 		ERRLOG(
 			color(`${ICON.ERROR}${filename.split('/').slice(-2).join('/')}`, '#9f53ea'),
 			color('File Error! Waiting for changes...', '#FF5555')
-		);
-
-		ERRLOG(
-			color(strings[0], '#fff'),
-			'\n',
-			color(strings[1], '#C0C0C0'),
-			'\n',
-			color(strings[2], '#ff5555'),
-			'\n',
-			color(typeError, '#ff5555') + ':' + color(messageError, '#fff')
 		);
 	}
 };

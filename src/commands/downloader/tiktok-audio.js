@@ -9,6 +9,7 @@ import { tiktok } from '../../utils/tiktok/index.js';
  */
 export default {
 	name: 'tiktokaudio',
+	minifiedDescription: 'Download TikTok Audio',
 	description: 'Downloads TikTok audio.',
 	usage: '!tiktokaudio <url> (you can send multiple link using space in between)',
 	aliases: ['tiktokaudio', 'ttaudio', 'ttaud'],
@@ -18,7 +19,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please provide a URL', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please provide a URL', { from, quoted: message, groupMetadata });
 		}
 
 		let { _: urls } = parser(query);
@@ -27,7 +28,7 @@ export default {
 
 		for (const data in audios) {
 			if ('error' in audios[data]) {
-				await client[botNum].reply(`Error while downloading TikTok audio\n\n${audios[data].error}\n${data}`, {
+				await client.instance.reply(`Error while downloading TikTok audio\n\n${audios[data].error}\n${data}`, {
 					from,
 					quoted: message,
 					groupMetadata
@@ -39,7 +40,7 @@ export default {
 
 			INFOLOG(`${color('Downloading TikTok Audio', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					document: { url: audios[data].url.images ? audios[data].urls.music : audios[data].urls.withNoWatermark },

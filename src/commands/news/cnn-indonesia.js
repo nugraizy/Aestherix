@@ -5,7 +5,8 @@ import { cnnindonesia } from '../../utils/index.js';
  */
 export default {
 	name: 'cnnindonesia',
-	description: 'Showing latest news in Indonesia from CNN',
+	minifiedDescription: 'CNN-Indonesia News',
+	description: 'Showing latest news in Indonesia from CNN.',
 	category: 'News',
 	usage: '!cnnindonesia <keyword/blank(to fetch newest)>',
 	aliases: ['cnnid'],
@@ -24,7 +25,7 @@ export default {
 			caption += `Published : ${data[index].published}\n`;
 			caption += `Content : ${data[index].body}\n`;
 
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{
 					image: { url: data[index].image },
@@ -56,13 +57,13 @@ export default {
 		}
 
 		if (!query) {
-			return client[botNum].reply('Please provide queries', { from, quoted: message, groupMetadata });
+			return client.instance.reply('Please provide queries', { from, quoted: message, groupMetadata });
 		}
 
 		const data = await cnnindonesia(query);
 
 		if ('error' in data) {
-			return await client[botNum].reply(data.error, { from, quoted: message, groupMetadata });
+			return await client.instance.reply(data.error, { from, quoted: message, groupMetadata });
 		}
 
 		let caption = 'CNN Indonesia'.formatHeaders();
@@ -72,7 +73,14 @@ export default {
 		caption += `Published : ${data[0].published}\n`;
 		caption += `Content : ${data[0].body}\n`;
 
-		await client[botNum].send(
+		caption += `\n${data
+			.map(
+				({ title, places, body, published }) =>
+					`Title : ${title}\nPlace : ${places}\nPublished : ${published}\nContent : ${body}`
+			)
+			.join('\n\n')}`.trimEnd();
+
+		await client.instance.send(
 			from,
 			{
 				image: { url: data[0].image },

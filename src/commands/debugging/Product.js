@@ -17,7 +17,7 @@ export default {
 		const messages = await generateWAMessage(
 			from,
 			{ image: await fs.readFile('./src/media/blank.png') },
-			{ upload: client[botNum].waUploadToServer }
+			{ upload: client.instance.waUploadToServer }
 		);
 
 		const content = generateWAMessageFromContent(
@@ -49,6 +49,6 @@ export default {
 			{}
 		);
 
-		await client[botNum].relayMessage(from, content.message, { messageId: content.key.id });
+		await client.instance.relayMessage(from, content.message, { messageId: content.key.id });
 	}
 };

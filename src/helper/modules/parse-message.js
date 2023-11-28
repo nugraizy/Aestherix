@@ -28,7 +28,7 @@ const typeSticker = ['imageMessage', 'videoMessage', 'stickerMessage'];
  */
 const caching = async (clients, id) => {
 	await new Promise(async (resolve) => {
-		const groupMetadata = await clients[botNum].groupMetadata(id).catch(() => ({}));
+		const groupMetadata = await clients.instance.groupMetadata(id).catch(() => ({}));
 		const partc = groupMetadata.participants;
 
 		configuration.cache.metadata.set(id, {
@@ -47,7 +47,7 @@ const caching = async (clients, id) => {
 const waitForInput = (client, data) =>
 	new Promise(async (resolve) => {
 		if (data.message) {
-			await client[botNum].send(data.from, {
+			await client.instance.send(data.from, {
 				text: data.message
 			});
 		}
@@ -100,7 +100,6 @@ function crawlProperty(obj, propName) {
 
 /**
  * Reassigns and normalizes message data for easier handling and access.
- *
  * @type {import('../../types/Reconstruct/index.js').Reconstructuring}
  */
 export const reassign = async (m, client, store) => {
@@ -118,7 +117,7 @@ export const reassign = async (m, client, store) => {
 		const isBaileys =
 			(m?.key?.id?.startsWith('BAE5') && m?.key?.id?.length === 16) || (isFromMe && m?.key?.id?.startsWith('HFINDER'));
 		const sender = isFromMe
-			? `${client[botNum].user.id.split(':')[0]}${S_WHATSAPP_NET}`
+			? `${client.instance.user.id.split(':')[0]}${S_WHATSAPP_NET}`
 			: isGroup
 			? m?.key?.participant
 			: m?.key?.remoteJid;
@@ -128,7 +127,7 @@ export const reassign = async (m, client, store) => {
 		const isSettings = configuration.cache.settings.has(from);
 
 		if (m.message?.pollUpdateMessage) {
-			client[botNum].ev.emit('poll.update', { ...m.message, msg: m, from, sender, func: PollUpdateDecrypt });
+			client.instance.ev.emit('poll.update', { ...m.message, msg: m, from, sender, func: PollUpdateDecrypt });
 		}
 
 		if (configuration.isFirstConnection) {
@@ -136,9 +135,9 @@ export const reassign = async (m, client, store) => {
 			const dataBanned = await fs.readJSON('./databases/users/banned.json');
 
 			const { multi, noPref } = SETTINGS.prefix;
-			const botNumber = `${client[botNum].user.id.split(':')[0]}${S_WHATSAPP_NET}`;
+			const botNumber = `${client.instance.user.id.split(':')[0]}${S_WHATSAPP_NET}`;
 
-			const dataBlock = await client[botNum].fetchBlocklist();
+			const dataBlock = await client.instance.fetchBlocklist();
 
 			configuration.cache.bannedlist = dataBanned;
 			configuration.cache.blocklist = dataBlock;

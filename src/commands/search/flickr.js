@@ -6,7 +6,8 @@ import { FlickerAPI } from '../../utils/flickr/index.js';
  */
 export default {
 	name: 'flickr',
-	description: 'Search images from Flickr',
+	minifiedDescription: 'Search Flickr',
+	description: 'Search images from Flickr.',
 	usage: '!flickr <query>',
 	category: 'Search',
 	aliases: ['flick'],
@@ -15,14 +16,14 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, type, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.download === args[2]);
 
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{
 					image: { url: data[index].download },
@@ -68,7 +69,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 			let result = await flickr.searchImages(querie.trim());
 
 			if ('error' in result) {
-				await client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
+				await client.instance.reply(result.error, { from, quoted: message, groupMetadata });
 				continue;
 			}
 
@@ -80,30 +81,32 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 
 			const index = ~~(Math.random() * result.length);
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					image: { url: result[index].download },
-					caption: 'Flickr'.formatHeaders(),
-					templateButtons: [
-						{ urlButton: { displayText: 'Flickr Source', url: result[0].source } },
-						result.length !== 1
-							? {
-									quickReplyButton: {
-										displayText: 'Next Image',
-										id: `.flickr next ${result[1].download} ${JSON.stringify(result)}`
-									}
-							  } /* eslint-disable-line */
-							: {}
-					],
-					footer: `Author : ${result[index].userName}
+					caption:
+						'Flickr'.formatHeaders() +
+						`\n\nAuthor : ${result[index].userName}
 Author Fullname : ${result[index].fullName}
 Views : ${numberWithCommas(result[index].views)}
 Title : ${result[index].title}
 Description : ${result[index].description}
 Tags : ${result[index].tags || 'n/a'}
-Published : ${result[index].posted}
-\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+Published : ${result[index].posted}`
+					// 					templateButtons: [
+					// 						{ urlButton: { displayText: 'Flickr Source', url: result[0].source } },
+					// 						result.length !== 1
+					// 							? {
+					// 									quickReplyButton: {
+					// 										displayText: 'Next Image',
+					// 										id: `.flickr next ${result[1].download} ${JSON.stringify(result)}`
+					// 									}
+					// 							  } /* eslint-disable-line */
+					// 							: {}
+					// 					],
+					// 					footer: `
+					// \nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
 				},
 				{ groupMetadata, quoted: message }
 			);

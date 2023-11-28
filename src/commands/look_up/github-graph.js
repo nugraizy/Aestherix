@@ -5,7 +5,8 @@ import { GitHubGraph } from '../../helper/index.js';
  */
 export default {
 	name: 'githubgraph',
-	description: 'Lookup for User Contribution Graph',
+	minifiedDescription: 'Github Contribution Graph',
+	description: 'Lookup for User Contribution Graph.',
 	usage: '!githubgraph <query>',
 	aliases: ['ghgraph', 'gitgraph'],
 	category: 'Look-up',
@@ -14,7 +15,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please specify a GitHub User', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a GitHub User', { from, quoted: message, groupMetadata });
 		}
 
 		const git = new GitHubGraph();
@@ -25,6 +26,6 @@ export default {
 
 		const buffer = create.toBuffer();
 
-		await client[botNum].send(from, { image: new Buffer.from(buffer) }, { groupMetadata, quoted: message });
+		await client.instance.send(from, { image: new Buffer.from(buffer) }, { groupMetadata, quoted: message });
 	}
 };

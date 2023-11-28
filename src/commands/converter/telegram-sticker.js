@@ -8,6 +8,7 @@ import { telegram } from '../../utils/stickers/telegram.js';
  */
 export default {
 	name: 'telegramsticker',
+	minifiedDescription: 'Telegram Sticker',
 	description: 'Find Telegram stickers.',
 	usage: '!telegramsticker <query>',
 	aliases: ['ts', 'telestick', 'telegramstickers'],
@@ -17,7 +18,7 @@ export default {
 	status: 'enable',
 	async run({ query, message, from, filename, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please enter a query', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please enter a query', { from, quoted: message, groupMetadata });
 		}
 
 		const result = await telegram(query);
@@ -30,10 +31,10 @@ export default {
 			result.stickers.length
 		}`;
 
-		await client[botNum].send(from, { text: capt }, { groupMetadata, quoted: message });
+		await client.instance.send(from, { text: capt }, { groupMetadata, quoted: message });
 
 		for (const stickers of result.stickers) {
-			const sticker = await client[botNum].prepareSticker(
+			const sticker = await client.instance.prepareSticker(
 				stickers,
 				path.join(__dirname, `src/media/temporary_files/${filename}`),
 				undefined,
@@ -43,7 +44,7 @@ export default {
 				}
 			);
 
-			await client[botNum].send(from, { sticker }, { groupMetadata, quoted: message });
+			await client.instance.send(from, { sticker }, { groupMetadata, quoted: message });
 		}
 	}
 };

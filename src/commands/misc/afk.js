@@ -5,6 +5,7 @@ import { setAfk } from '../../helper/index.js';
  */
 export default {
 	name: 'afk',
+	minifiedDescription: 'AFK Mode',
 	description: 'Going away from keyboard.',
 	category: 'Misc',
 	usage: '!afk <reason|no reason>',
@@ -14,7 +15,7 @@ export default {
 	status: 'enable',
 	async run({ message, from, query, isGroup, sender, pushname, groupMetadata }, client) {
 		if (!isGroup) {
-			return await client[botNum].reply('This command is only available in group chat.', {
+			return await client.instance.reply('This command is only available in group chat.', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -23,7 +24,7 @@ export default {
 
 		setAfk(sender, from, query, pushname);
 
-		await client[botNum].send(
+		await client.instance.send(
 			from,
 			{ text: `@${sender.split('@')[0]} is now AFK.`, mentions: [sender] },
 			{ groupMetadata, quoted: message }

@@ -6,7 +6,8 @@ import { downloadManga, searchManga } from '../../utils/pixiv/index.js';
  */
 export default {
 	name: 'pixivmanga',
-	description: 'Find manga from Pixiv',
+	minifiedDescription: 'Search Pixiv Manga',
+	description: 'Search manga from Pixiv.',
 	usage: '!pixivmanga <query>',
 	aliases: ['pixmanga'],
 	category: 'Search',
@@ -15,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, cmd, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -27,7 +28,7 @@ export default {
 			const dataImage = await downloadManga(data[0].id);
 
 			if ('error' in data) {
-				await client[botNum].reply(`Failed while searching Pixiv manga\n\n${data.error}\n${querie}`, {
+				await client.instance.reply(`Failed while searching Pixiv manga\n\n${data.error}\n${querie}`, {
 					from,
 					quoted: message,
 					groupMetadata
@@ -41,7 +42,7 @@ export default {
 				headers: { referer: `https://www.pixiv.net/ajax/manga/${dataImage.id}` }
 			});
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					image: new Buffer.from(images, 'base64'),
@@ -64,7 +65,7 @@ Total Media : ${dataImage.pageCount}`
 						headers: { referer: `https://www.pixiv.net/ajax/manga/${dataImage.id}` }
 					});
 
-					await client[botNum].send(
+					await client.instance.send(
 						from,
 						{
 							image: new Buffer.from(images, 'base64'),
@@ -87,7 +88,7 @@ Total Media : ${dataImage.pageCount}`
 				i++;
 			}
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					title: 'Pixiv Manga Search'.formatHeaders(),

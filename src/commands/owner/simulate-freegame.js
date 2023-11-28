@@ -34,6 +34,7 @@ async function updateGames() {
  */
 export default {
 	name: 'freegame',
+	minifiedDescription: 'Simulate Freegame',
 	description: 'Fetch freegames from games platform.',
 	usage: '!freegame <enable|disable>',
 	aliases: ['f2p'],
@@ -43,7 +44,7 @@ export default {
 	status: 'enable',
 	async run({ from, args, message, query, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a status to simulate', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a status to simulate', { from, quoted: message, groupMetadata });
 		}
 
 		try {
@@ -51,7 +52,7 @@ export default {
 				case 'status':
 				case 'stats':
 					{
-						await client[botNum].reply(configuration.intervals.from.includes(from) ? 'Enabled' : 'Disabled', {
+						await client.instance.reply(configuration.intervals.from.includes(from) ? 'Enabled' : 'Disabled', {
 							from,
 							quoted: message,
 							groupMetadata
@@ -63,11 +64,11 @@ export default {
 				case 'off':
 					{
 						if (!configuration.intervals.from.includes(from)) {
-							return await client[botNum].reply('Already disabled', { from, quoted: message, groupMetadata });
+							return await client.instance.reply('Already disabled', { from, quoted: message, groupMetadata });
 						}
 
 						configuration.intervals.from.splice(configuration.intervals.from.indexOf(from), 1);
-						await client[botNum].reply('Simulate Freegame Disabled', { from, quoted: message, groupMetadata });
+						await client.instance.reply('Simulate Freegame Disabled', { from, quoted: message, groupMetadata });
 					}
 
 					break;
@@ -75,7 +76,7 @@ export default {
 				case 'on':
 					{
 						if (configuration.intervals.from.includes(from)) {
-							return await client[botNum].reply('Already enabled', { from, quoted: message, groupMetadata });
+							return await client.instance.reply('Already enabled', { from, quoted: message, groupMetadata });
 						}
 
 						configuration.intervals.from.push(from);
@@ -84,13 +85,13 @@ export default {
 							await updateGames();
 						}
 
-						await client[botNum].reply('Simulate Freegame Enabled', { from, quoted: message, groupMetadata });
+						await client.instance.reply('Simulate Freegame Enabled', { from, quoted: message, groupMetadata });
 					}
 
 					break;
 				default:
 					{
-						await client[botNum].reply('Usage: !freegame [enable|disable|status]', {
+						await client.instance.reply('Usage: !freegame [enable|disable|status]', {
 							from,
 							quoted: message,
 							groupMetadata

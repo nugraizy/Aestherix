@@ -33,6 +33,7 @@ const downloader = new Cache();
  */
 export default {
 	name: 'loading',
+	minifiedDescription: 'Load a File',
 	description: 'Loading.',
 	category: 'Debugging',
 	usage: '!loading',
@@ -42,7 +43,7 @@ export default {
 	status: 'enable',
 	async run({ from, groupMetadata, query, waitForInput, sender }, client) {
 		if (!isURL(query) && query) {
-			return await client[botNum].send(from, { text: 'Please provide a valid URL.' }, { groupMetadata });
+			return await client.instance.send(from, { text: 'Please provide a valid URL.' }, { groupMetadata });
 		}
 
 		if (downloader.has(sender)) {
@@ -59,13 +60,13 @@ export default {
 			);
 
 			if (wait.timeout) {
-				return await client[botNum].send(from, { text: 'Timeout.' }, { groupMetadata, quoted: wait.quoted });
+				return await client.instance.send(from, { text: 'Timeout.' }, { groupMetadata, quoted: wait.quoted });
 			}
 
 			const isCancel = yn(wait.message);
 
 			if (isCancel === undefined) {
-				return await client[botNum].send(from, { text: 'Invalid input.' }, { groupMetadata, quoted: wait.quoted });
+				return await client.instance.send(from, { text: 'Invalid input.' }, { groupMetadata, quoted: wait.quoted });
 			}
 
 			const downloadSession = downloader.get(sender);
@@ -76,13 +77,13 @@ export default {
 				}
 
 				downloader.delete(sender);
-				return await client[botNum].send(
+				return await client.instance.send(
 					from,
 					{ text: 'Previous download canceled.' },
 					{ groupMetadata, quoted: wait.quoted }
 				);
 			} else {
-				return await client[botNum].send(
+				return await client.instance.send(
 					from,
 					{ text: 'Previous download will continue.' },
 					{ groupMetadata, quoted: wait.quoted }
@@ -100,7 +101,7 @@ export default {
 
 		for (const url of query) {
 			if (!isURL(url)) {
-				return await client[botNum].send(from, { text: 'Please provide a valid URL.' }, { groupMetadata });
+				return await client.instance.send(from, { text: 'Please provide a valid URL.' }, { groupMetadata });
 			}
 
 			const { origin } = new URL(url);
@@ -126,7 +127,7 @@ export default {
 			'Loading media. Please wait.\n' +
 			[...Array(downloads.length)].map((v, i) => createLoadingBar({ percentage: 0, index: i })).join('\n');
 
-		const message = await client[botNum].send(from, {
+		const message = await client.instance.send(from, {
 			text: captionLoading
 		});
 
@@ -169,7 +170,7 @@ export default {
 						{}
 					);
 
-					await client[botNum].relayMessage(from, messages.message, {
+					await client.instance.relayMessage(from, messages.message, {
 						messageId: messages.key.id,
 						cachedGroupMetadata: () => groupMetadata
 					});
@@ -183,7 +184,7 @@ export default {
 						? 'audio'
 						: 'document';
 
-					await client[botNum].send(
+					await client.instance.send(
 						from,
 						{
 							[mediaType]: new Buffer.from(buffer, 'base64'),
@@ -221,7 +222,7 @@ export default {
 					{}
 				);
 
-				await client[botNum].relayMessage(from, messages.message, {
+				await client.instance.relayMessage(from, messages.message, {
 					messageId: messages.key.id,
 					cachedGroupMetadata: () => groupMetadata
 				});
@@ -252,7 +253,7 @@ export default {
 						{}
 					);
 
-					await client[botNum].relayMessage(from, messages.message, {
+					await client.instance.relayMessage(from, messages.message, {
 						messageId: messages.key.id,
 						cachedGroupMetadata: () => groupMetadata
 					});

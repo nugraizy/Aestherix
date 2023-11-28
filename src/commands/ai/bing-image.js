@@ -6,6 +6,7 @@ import { createImageBing } from '../../utils/index.js';
  */
 export default {
 	name: 'bingimage',
+	minifiedDescription: 'Create Image',
 	description: 'Create Image from text using Bing AI.',
 	category: 'AI',
 	usage: '!bingimage <query>',
@@ -16,13 +17,13 @@ export default {
 	premium: true,
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return client[botNum].reply('Please specify a query.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('Please specify a query.', { from, quoted: message, groupMetadata });
 		}
 
 		const images = await createImageBing(query);
 
 		for (const image of images) {
-			await client[botNum].send(from, { image: { url: image } }, { quoted: message, groupMetadata });
+			await client.instance.send(from, { image: { url: image } }, { quoted: message, groupMetadata });
 			await delay(300);
 		}
 	}

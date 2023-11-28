@@ -28,7 +28,7 @@ export type WAConnectionStates = WAConnectionState;
 declare global {
 	var client: AdvancedClient;
 	var store: Store;
-	var botNum: string;
+	var instance: string;
 	var log: (typeof console)['log'];
 	interface String {
 		/**

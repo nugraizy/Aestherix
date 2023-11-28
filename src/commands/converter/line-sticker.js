@@ -8,6 +8,7 @@ import { line } from '../../utils/stickers/index.js';
  */
 export default {
 	name: 'linesticker',
+	minifiedDescription: 'Line Sticker',
 	description: 'Find Line stickers.',
 	usage: '!linesticker <query>',
 	aliases: ['ls', 'linestick', 'linestickers'],
@@ -17,7 +18,7 @@ export default {
 	status: 'enable',
 	async run({ query, message, from, filename, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please enter a query', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please enter a query', { from, quoted: message, groupMetadata });
 		}
 
 		let result = await line(query);
@@ -28,10 +29,10 @@ export default {
 
 		const capt = `Line Stickers\n\nAuthor : ${result[0].author.capitalize()}\nTot. Stickers : ${result.length}`;
 
-		await client[botNum].send(from, { text: capt }, { groupMetadata, quoted: message });
+		await client.instance.send(from, { text: capt }, { groupMetadata, quoted: message });
 
 		for (const { stickers } of result) {
-			const sticker = await client[botNum].prepareSticker(
+			const sticker = await client.instance.prepareSticker(
 				stickers.animated || stickers.static,
 				path.join(__dirname, `src/media/temporary_files/${filename}`),
 				undefined,
@@ -41,7 +42,7 @@ export default {
 				}
 			);
 
-			await client[botNum].send(from, { sticker }, { groupMetadata, quoted: message });
+			await client.instance.send(from, { sticker }, { groupMetadata, quoted: message });
 		}
 	}
 };

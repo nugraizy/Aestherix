@@ -3,6 +3,7 @@
  */
 export default {
 	name: 'waitmessage',
+	minifiedDescription: 'Wait Messages',
 	description: 'Wait for users input then proceed.',
 	usage: '!waitmessage',
 	aliases: ['waitmsg'],
@@ -20,9 +21,9 @@ export default {
 		});
 
 		if (wait.timeout) {
-			return client[botNum].reply('Timeout! I will just call you ' + pushname, { from, quoted: message, groupMetadata });
+			return client.instance.reply('Timeout! I will just call you ' + pushname, { from, quoted: message, groupMetadata });
 		}
 
-		client[botNum].reply('hi there ' + wait.message, { from, quoted: wait.quoted, groupMetadata });
+		client.instance.reply('hi there ' + wait.message, { from, quoted: wait.quoted, groupMetadata });
 	}
 };

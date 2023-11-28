@@ -6,7 +6,8 @@ import { trueidSearch } from '../../utils/movies/true-id-search.js';
  */
 export default {
 	name: 'trueid',
-	description: 'Find movie on TrueID',
+	minifiedDescription: 'Search TrueID',
+	description: 'Search movie on TrueID.',
 	category: 'Search',
 	usage: '!trueid <query>',
 	aliases: ['tid'],
@@ -15,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, cmd, type, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -48,7 +49,7 @@ export default {
 					  }) /* eslint-disable-line */
 					: false;
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					image: { url: data[index].thumbnail },
@@ -84,7 +85,7 @@ export default {
 			);
 
 			if (rows) {
-				await client[botNum].send(
+				await client.instance.send(
 					from,
 					{
 						buttonText: 'Open List',
@@ -99,7 +100,7 @@ export default {
 
 			return;
 		} else if (args[1] === 'get') {
-			return await client[botNum].reply(`${'TrueID Search'.formatHeaders()}\n\nURL : ${args[2]}`, {
+			return await client.instance.reply(`${'TrueID Search'.formatHeaders()}\n\nURL : ${args[2]}`, {
 				from,
 				quoted: message,
 				groupMetadata
@@ -113,7 +114,7 @@ export default {
 			const data = await trueidSearch(querie);
 
 			if ('error' in data) {
-				return await client[botNum].reply(data.error, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(data.error, { from, quoted: message, groupMetadata });
 			}
 
 			let caption = 'TrueID Search'.formatHeaders();
@@ -142,7 +143,7 @@ export default {
 					  }) /* eslint-disable-line */
 					: false;
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					image: { url: data[0].thumbnail },
@@ -165,7 +166,7 @@ export default {
 			);
 
 			if (rows) {
-				await client[botNum].send(
+				await client.instance.send(
 					from,
 					{
 						buttonText: 'Open List',

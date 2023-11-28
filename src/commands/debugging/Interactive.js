@@ -62,9 +62,9 @@ export default {
 	aliases: ['inter'],
 	cooldown: 5,
 	limit: 0,
-	status: 'enable',
+	status: 'disable',
 	async run({ from }, client) {
-		const image = await client[botNum].prepareMedia(await fs.readFile('./src/media/blank.png'), 'imageMessage');
+		const image = await client.instance.prepareMedia(await fs.readFile('./src/media/blank.png'), 'imageMessage');
 
 		const messages = generateWAMessageFromContent(
 			from,
@@ -83,6 +83,6 @@ export default {
 			{}
 		);
 
-		await client[botNum].relayMessage(from, messages.message, { messageId: messages.key.id });
+		await client.instance.relayMessage(from, messages.message, { messageId: messages.key.id });
 	}
 };

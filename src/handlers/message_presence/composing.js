@@ -14,7 +14,7 @@ const composingHandler = async (client, from, participant) => {
 		participant.split('@')[0]
 	} detected writing. AFK since ${timeSinceAfk} ago. Now they are out from AFK. Reason : ${afkContainer.reasons}`;
 
-	await client[botNum].send(from, {
+	await client.instance.send(from, {
 		text: message,
 		mentions: [participant]
 	});

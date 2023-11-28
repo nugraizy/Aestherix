@@ -10,6 +10,7 @@ const regex = (input) => /^(https?:\/\/)?((w{3}\.)|(m\.)?)?(facebook|fb)\.(com|w
  */
 export default {
 	name: 'fbpost',
+	minifiedDescription: 'Download Facebook Post',
 	description: 'Downloads a Facebook post',
 	usage: '!fbpost <url>',
 	aliases: ['fbpost', 'fbp', 'fb', 'fbdl'],
@@ -19,26 +20,26 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please provide a URL', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please provide a URL', { from, quoted: message, groupMetadata });
 		}
 
 		const { _: urls } = parser(query);
 
 		if (urls.length === 1 && !isURL(urls[0])) {
-			return await client[botNum].reply('Please specify a valid url', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a valid url', { from, quoted: message, groupMetadata });
 		}
 
 		if (urls.length === 1 && !regex(urls[0])) {
-			return await client[botNum].reply('Please specify a valid Facebook url', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a valid Facebook url', { from, quoted: message, groupMetadata });
 		}
 
 		for (const url of urls) {
 			if (!isURL(url.trim())) {
-				await client[botNum].reply('Please specify a valid url', { from, quoted: message, groupMetadata });
+				await client.instance.reply('Please specify a valid url', { from, quoted: message, groupMetadata });
 
 				continue;
 			} else if (!regex(url.trim())) {
-				await client[botNum].reply('Please specify a valid Facebook url', { from, quoted: message, groupMetadata });
+				await client.instance.reply('Please specify a valid Facebook url', { from, quoted: message, groupMetadata });
 
 				continue;
 			}
@@ -48,7 +49,7 @@ export default {
 			INFOLOG(`${color('Downloading Facebook Post', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 			if ('error' in post) {
-				await client[botNum].reply(`Failed while downloading Facebook post\n\n${post.error}\n${url}`, {
+				await client.instance.reply(`Failed while downloading Facebook post\n\n${post.error}\n${url}`, {
 					from,
 					quoted: message,
 					groupMetadata
@@ -60,11 +61,11 @@ export default {
 
 			const urlFilter = post.url.find((v) => v.resolution === '1080p' || v.resolution === '720p' || v.resolution === '480p');
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					video: new Buffer.from(await fetchBUFFER(urlFilter.url)),
-					caption: `${'Facebook Video Downloader'.formatHeaders()}\n\nRes : ${urlFilter.resolution}`
+					caption: `${'Facebook Video Downloader'.formatHeaders()}\n\nResolution : ${urlFilter.resolution}`
 				},
 				{ groupMetadata }
 			);

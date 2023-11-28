@@ -9,6 +9,7 @@ import { tiktok } from '../../utils/tiktok/index.js';
  */
 export default {
 	name: 'tiktokpost',
+	minifiedDescription: 'Download TikTok Post',
 	description: 'Downloads TikTok posts.',
 	usage:
 		'!tiktokpost <url(s)> (you can send multiple link using space in between) [options]\nOptions:\n-wm, --watermark: Download with watermark\n-nowm, --nowatermark: Download without watermark',
@@ -19,7 +20,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please provide a URL', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please provide a URL', { from, quoted: message, groupMetadata });
 		}
 
 		let { _: urls } = parser(query);
@@ -45,7 +46,7 @@ export default {
 
 		for (const data in posts) {
 			if ('error' in posts[data]) {
-				await client[botNum].reply(`Error while downloading TikTok post\n\n${posts[data].error}\n${data}`, {
+				await client.instance.reply(`Error while downloading TikTok post\n\n${posts[data].error}\n${data}`, {
 					from,
 					quoted: message,
 					groupMetadata
@@ -88,7 +89,7 @@ export default {
 
 				for (const { url, index } of images) {
 					if (index === 1) {
-						dataMessage = await client[botNum].send(
+						dataMessage = await client.instance.send(
 							from,
 							{
 								image: { url },
@@ -99,7 +100,7 @@ export default {
 						continue;
 					}
 
-					client[botNum].send(
+					client.instance.send(
 						from,
 						{
 							image: { url }
@@ -116,7 +117,7 @@ export default {
 				continue;
 			}
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					video: {

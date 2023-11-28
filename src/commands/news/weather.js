@@ -5,7 +5,8 @@ import { getWeather } from '../../utils/news/index.js';
  */
 export default {
 	name: 'weather',
-	description: 'Get Weather on Your City',
+	minifiedDescription: 'Get Weather',
+	description: 'Get Weather on Your City.',
 	usage: '!weather <query>',
 	category: 'News',
 	aliases: ['cuaca'],
@@ -14,7 +15,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, extractMediaData, typeQuoted, groupMetadata }, client) {
 		if (typeQuoted !== 'locationMessage' && typeQuoted !== 'liveLocationMessage' && !query) {
-			return await client[botNum].reply('Please, input city name\nEx:\n*!weather Bekasi* or reply to location message', {
+			return await client.instance.reply('Please, input city name\nEx:\n*!weather Bekasi* or reply to location message', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -27,7 +28,7 @@ export default {
 				: await getWeather('city', query);
 
 		if ('error' in info) {
-			return await client[botNum].reply(info.error, {
+			return await client.instance.reply(info.error, {
 				from,
 				quoted: message,
 				groupMetadata
@@ -44,14 +45,14 @@ Visibility : ${info.visible}
 Wind Speed : ${info.wind}\n
 Powered by openweathermap.org`;
 
-		await client[botNum].send(
+		await client.instance.send(
 			from,
 			{
-				text: `${info.emoji} Weather Report ${info.emoji}`.formatHeaders(),
-				templateButtons: [
-					{ urlButton: { displayText: 'More Info', url: `More info https://openweathermap.org/city/${info.id}` } }
-				],
-				footer: text.trim()
+				text: `${info.emoji} Weather Report ${info.emoji}`.formatHeaders() + `\n\n${text.trim()}`
+				// templateButtons: [
+				// 	{ urlButton: { displayText: 'More Info', url: `More info https://openweathermap.org/city/${info.id}` } }
+				// ],
+				// footer: text.trim()
 			},
 			{ groupMetadata, quoted: message }
 		);

@@ -8,6 +8,7 @@ import { instagram } from '../../utils/instagram/index.js';
  */
 export default {
 	name: 'ighighlights',
+	minifiedDescription: 'Download Instagram Highlights',
 	description: 'Downloads the highlights of the user',
 	usage: '!ighighlights <username>',
 	aliases: ['igh', 'ighl'],
@@ -17,7 +18,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please specify a username', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a username', { from, quoted: message, groupMetadata });
 		}
 
 		const { _: input } = parser(query);
@@ -28,7 +29,7 @@ export default {
 
 		for (const data in highlights) {
 			if ('error' in highlights[data]) {
-				await client[botNum].reply(`Error while downloading Instagram highlights\n\n${highlights.error}\n${data}`, {
+				await client.instance.reply(`Error while downloading Instagram highlights\n\n${highlights.error}\n${data}`, {
 					from,
 					quoted: message,
 					groupMetadata
@@ -49,13 +50,13 @@ export default {
 			capt += `Tot. Sections : ${highlights[data].highlights.length}\n`;
 			capt += `Tot. Estimated media per Section : ${numberWithCommas(highlights[data].highlights.length * 2)}\n\n`;
 
-			await client[botNum].reply(capt.trim(), { from, quoted: message, groupMetadata });
+			await client.instance.reply(capt.trim(), { from, quoted: message, groupMetadata });
 
 			capt = '';
 
 			if (highlights[data].highlights.length === 1) {
 				for (const media of highlights[data].highlights[0].dataHighlight.slice(0, 2)) {
-					await client[botNum].send(
+					await client.instance.send(
 						from,
 						media.type === 'video' ? { video: { url: media.url } } : { image: { url: media.url } },
 						{ groupMetadata, quoted: message }
@@ -63,14 +64,14 @@ export default {
 				}
 			} else {
 				for (const media of highlights[data].highlights) {
-					await client[botNum].send(
+					await client.instance.send(
 						from,
 						media.dataHighlight[0].type === 'video'
 							? { video: { url: media.dataHighlight[0].url } }
 							: { image: { url: media.dataHighlight[0].url } },
 						{ groupMetadata }
 					);
-					await client[botNum].send(
+					await client.instance.send(
 						from,
 						media.dataHighlight[1].type === 'video'
 							? { video: { url: media.dataHighlight[1].url } }

@@ -24,7 +24,7 @@ export const checkBan = async (client, { from, isBotAdmin, isGroup, messageStubP
 					mentions: [participant]
 				};
 
-				await client[botNum].send(from, messageOptions, { groupMetadata });
+				await client.instance.send(from, messageOptions, { groupMetadata });
 			}
 		}
 	}

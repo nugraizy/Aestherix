@@ -8,6 +8,7 @@ import { color, INFOLOG } from '../../utils/modules/index.js';
  */
 export default {
 	name: 'staticsticker',
+	minifiedDescription: 'Static Text',
 	description: 'Generate static sticker',
 	category: 'Converter',
 	usage: '!staticsticker <text> [--color] [--fonts]',
@@ -47,18 +48,18 @@ export default {
 
 		if (bodyQuoted) {
 			ttp(prettyNumber, bodyQuoted, colors).then(async (buffer) => {
-				await client[botNum].send(from, { sticker: new Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
+				await client.instance.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
 
 				INFOLOG(`${color('Sticker is sent', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
 			});
 		} else if (query) {
 			ttp(prettyNumber, query, colors).then(async (buffer) => {
-				await client[botNum].send(from, { sticker: new Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
+				await client.instance.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
 
 				INFOLOG(`${color('Sticker is sent', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
 			});
 		} else {
-			await client[botNum].reply('Please enter text to convert to sticker', { from, quoted: message, groupMetadata });
+			await client.instance.reply('Please enter text to convert to sticker', { from, quoted: message, groupMetadata });
 		}
 	}
 };

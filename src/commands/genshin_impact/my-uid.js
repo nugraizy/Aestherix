@@ -8,6 +8,7 @@ import configuration from '../../helper/config/connect.js';
  */
 export default {
 	name: 'mystats',
+	minifiedDescription: 'Look-up Genshin Impact Stats',
 	description: 'Look-up your Genshin Impact statistic',
 	usage: '!mystats',
 	aliases: ['myuid'],
@@ -20,7 +21,7 @@ export default {
 		const index = data.findIndex((v) => v.user === sender);
 
 		if (index === -1) {
-			return await client[botNum].reply('Your character seems nowhere in the Database.', {
+			return await client.instance.reply('Your character seems nowhere in the Database.', {
 				from,
 				quoted: message,
 				groupMetadata

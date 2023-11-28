@@ -6,7 +6,8 @@ import { shopeeProduct } from '../../utils/misc/index.js';
  */
 export default {
 	name: 'shopee',
-	description: 'Search products from shopee',
+	minifiedDescription: 'Search Shopee',
+	description: 'Search products from Shopee.',
 	usage: '!shopee <query>',
 	category: 'Search',
 	aliases: ['shop'],
@@ -15,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -26,7 +27,7 @@ export default {
 			const product = await shopeeProduct(querie.trim());
 
 			if ('error' in product) {
-				await client[botNum].reply(product.error, { from, quoted: message, groupMetadata });
+				await client.instance.reply(product.error, { from, quoted: message, groupMetadata });
 				continue;
 			}
 
@@ -46,7 +47,7 @@ export default {
 				productURL,
 				imageURL
 			} of items) {
-				await client[botNum].send(
+				await client.instance.send(
 					from,
 					{
 						image: { url: imageURL },

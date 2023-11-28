@@ -6,6 +6,7 @@ import { Attachment } from '../../helper/index.js';
  */
 export default {
 	name: 'attachment',
+	minifiedDescription: 'Welcome/Bye Image',
 	description: 'Debugging Welcome/bye message',
 	category: 'Debugging',
 	usage: '!attachment',
@@ -16,7 +17,7 @@ export default {
 	async run({ sender, mention, from, groupName, groupMetadata }, client) {
 		const attach = new Attachment(1024, 500);
 
-		const { profile, radi } = await client[botNum]
+		const { profile, radi } = await client.instance
 			.profilePictureUrl(mention[0] || sender, 'image')
 			.then(async (image) => ({ profile: new Buffer.from(await fetchBUFFER(image)), radi: 180 }))
 			.catch(() => ({ profile: './src/media/blank.png', radi: 80 }));
@@ -38,6 +39,6 @@ export default {
 			})
 			.placeCopyright();
 
-		await client[botNum].send(from, { image: attach.toBuffer() }, { groupMetadata });
+		await client.instance.send(from, { image: attach.toBuffer() }, { groupMetadata });
 	}
 };

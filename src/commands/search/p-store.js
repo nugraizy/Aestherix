@@ -14,10 +14,10 @@ export default {
 	aliases: ['pstor'],
 	limit: 4,
 	cooldown: 8,
-	status: 'enable',
+	status: 'disable',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -28,7 +28,7 @@ export default {
 			let product = await pStoreProduct(querie.trim());
 
 			if ('error' in product) {
-				await client[botNum].reply(product.error, { from, quoted: message, groupMetadata });
+				await client.instance.reply(product.error, { from, quoted: message, groupMetadata });
 				continue;
 			}
 
@@ -48,7 +48,7 @@ export default {
 				source,
 				thumbnail
 			} of product) {
-				await client[botNum].send(
+				await client.instance.send(
 					from,
 					{
 						image: { url: thumbnail },

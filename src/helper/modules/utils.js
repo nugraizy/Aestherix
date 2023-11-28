@@ -34,39 +34,39 @@ export const assign = (client) => {
 				return await generateWAMessage(
 					ZERO,
 					{ image: isURL(media) ? { url: media } : media },
-					{ ...opts, upload: client[botNum].waUploadToServer }
+					{ ...opts, upload: client.instance.waUploadToServer }
 				);
 			}
 			case 'videoMessage': {
 				return await generateWAMessage(
 					ZERO,
 					{ video: isURL(media) ? { url: media } : media },
-					{ ...opts, upload: client[botNum].waUploadToServer }
+					{ ...opts, upload: client.instance.waUploadToServer }
 				);
 			}
 			case 'audioMessage': {
 				return await generateWAMessage(
 					ZERO,
 					{ audio: isURL(media) ? { url: media } : media },
-					{ ...opts, upload: client[botNum].waUploadToServer }
+					{ ...opts, upload: client.instance.waUploadToServer }
 				);
 			}
 			case 'documentMessage': {
 				return await generateWAMessage(
 					ZERO,
 					{ document: isURL(media) ? { url: media } : media, fileName: opts.fileName, mimetype: opts.mimetype },
-					{ ...opts, upload: client[botNum].waUploadToServer }
+					{ ...opts, upload: client.instance.waUploadToServer }
 				);
 			}
 			case 'stickerMessage': {
 				return await generateWAMessage(
 					ZERO,
 					{ sticker: isURL(media) ? { url: media } : media },
-					{ ...opts, upload: client[botNum].waUploadToServer }
+					{ ...opts, upload: client.instance.waUploadToServer }
 				);
 			}
 			case 'locationMessage': {
-				return await generateWAMessage(ZERO, { ...media }, { ...opts, upload: client[botNum].waUploadToServer });
+				return await generateWAMessage(ZERO, { ...media }, { ...opts, upload: client.instance.waUploadToServer });
 			}
 		}
 	};
@@ -192,11 +192,11 @@ export const assign = (client) => {
 		// 	delete options.ephemeralExpiration;
 		// }
 
-		return client[botNum].sendMessage(to, message, options);
+		return client.instance.sendMessage(to, message, options);
 	};
 
-	client[botNum] = {
-		...client[botNum],
+	client.instance = {
+		...client.instance,
 		send,
 		applyExif,
 
@@ -345,10 +345,10 @@ export const assign = (client) => {
 				options
 			);
 
-			await client[botNum].relayMessage(to, message.message, { messageId: message.key.id });
+			await client.instance.relayMessage(to, message.message, { messageId: message.key.id });
 
 			process.nextTick(async () => {
-				await client[botNum].upsertMessage(message, 'append');
+				await client.instance.upsertMessage(message, 'append');
 			});
 
 			return message;
@@ -384,10 +384,10 @@ export const assign = (client) => {
 				options
 			);
 
-			await client[botNum].relayMessage(dari, message.message, { messageId: message.key.id });
+			await client.instance.relayMessage(dari, message.message, { messageId: message.key.id });
 
 			process.nextTick(async () => {
-				await client[botNum].upsertMessage(message, 'append');
+				await client.instance.upsertMessage(message, 'append');
 			});
 
 			return message;
@@ -402,7 +402,7 @@ export const assign = (client) => {
 				return new Error('Status is empty');
 			}
 
-			return await client[botNum].query({
+			return await client.instance.query({
 				tag: 'iq',
 				attrs: {
 					to: S_WHATSAPP_NET,
@@ -476,7 +476,7 @@ export const assign = (client) => {
 							continue;
 						}
 
-						const response = await client[botNum][UPDATE[update]](to, [participant], update.toLowerCase());
+						const response = await client.instance[UPDATE[update]](to, [participant], update.toLowerCase());
 
 						if (update.isExist('ADD')) {
 							if (response?.[0]?.status === '500') {
@@ -497,20 +497,20 @@ export const assign = (client) => {
 											groupJid: to,
 											inviteCode: response?.[0]?.code,
 											inviteExpiration: response?.[0]?.expiration,
-											groupName: (await client[botNum].groupMetadata(to)).subject,
+											groupName: (await client.instance.groupMetadata(to)).subject,
 											caption: 'Invitation to join my WhatsApp group',
 											jpegThumbnail: new Buffer.from(
-												await fetchBUFFER(await client[botNum].profilePictureUrl(to, 'preview'))
+												await fetchBUFFER(await client.instance.profilePictureUrl(to, 'preview'))
 											).toString('base64')
 										}
 									},
 									{}
 								);
 
-								await client[botNum].relayMessage(participant, messages.message, { messageId: messages.key.id });
+								await client.instance.relayMessage(participant, messages.message, { messageId: messages.key.id });
 
 								process.nextTick(async () => {
-									await client[botNum].upsertMessage(message, 'append');
+									await client.instance.upsertMessage(message, 'append');
 								});
 							} else if (response?.[0]?.status === '401') {
 								await send(to, { text: `${participant} blocked bot number` }, quoted);
@@ -531,19 +531,19 @@ export const assign = (client) => {
 			}
 
 			if (update.isExist('SUBJECT', 'DESCRIPTION')) {
-				const response = await client[botNum][UPDATE[update]](to, texts);
+				const response = await client.instance[UPDATE[update]](to, texts);
 
 				responses.push(response);
 			}
 
 			if (update.isExist('ANNOUNCEMENT', 'NOT_ANNOUNCEMENT', 'UNLOCKED', 'LOCKED')) {
-				const response = await client[botNum][UPDATE[update]](to, update.toLowerCase());
+				const response = await client.instance[UPDATE[update]](to, update.toLowerCase());
 
 				responses.push(response);
 			}
 
 			if (update.isExist('RETRIEVE', 'REVOKE')) {
-				const response = await client[botNum][UPDATE[update]](to);
+				const response = await client.instance[UPDATE[update]](to);
 
 				responses.push(response);
 			}

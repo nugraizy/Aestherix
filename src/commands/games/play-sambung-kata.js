@@ -5,7 +5,8 @@ import { getSambungkataSession, SambungKata } from '../../utils/games/index.js';
  */
 export default {
 	name: 'sambungkata',
-	description: 'Word Play Game',
+	minifiedDescription: 'Play Word Play',
+	description: 'Word Play Game.',
 	usage: '!sambungkata',
 	aliases: ['sambung'],
 	category: 'Games',
@@ -14,7 +15,7 @@ export default {
 	status: 'enable',
 	async run({ isGroup, message, from, sender, query, groupMetadata }, client) {
 		if (!isGroup) {
-			return await client[botNum].reply('This feature only for groups', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('This feature only for groups', { from, quoted: message, groupMetadata });
 		}
 
 		const statusGame = getSambungkataSession(from);
@@ -22,7 +23,7 @@ export default {
 		if (!statusGame) {
 			new SambungKata(sender, undefined, from);
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					buttonText: 'Open List',
@@ -35,15 +36,15 @@ export default {
 			);
 		} else if (query === 'player 2') {
 			if (statusGame.checkStatus() === 'waiting' && (statusGame.player1 === sender || statusGame.player2 === sender)) {
-				await client[botNum].reply(statusGame.throwResponse().message, { from, quoted: message, groupMetadata });
+				await client.instance.reply(statusGame.throwResponse().message, { from, quoted: message, groupMetadata });
 				return;
 			} else if (statusGame.checkStatus() === 'playing' && (statusGame.player1 === sender || statusGame.player2 === sender)) {
-				await client[botNum].reply(statusGame.throwResponse().message, { from, quoted: message, groupMetadata });
+				await client.instance.reply(statusGame.throwResponse().message, { from, quoted: message, groupMetadata });
 				return;
 			} else if (statusGame.player1 !== sender && statusGame.player2 === undefined && statusGame.checkStatus() === 'waiting') {
 				const data = await statusGame.start(sender, client);
 
-				await client[botNum].send(
+				await client.instance.send(
 					from,
 					{
 						text: `This is Word Play Game.

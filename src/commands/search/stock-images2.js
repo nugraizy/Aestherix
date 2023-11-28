@@ -6,7 +6,8 @@ import { stockImagesPexel } from '../../utils/wallpapers/index.js';
  */
 export default {
 	name: 'stockimages2',
-	description: 'Search stock images',
+	minifiedDescription: 'Stock Images V2',
+	description: 'Search stock images.',
 	usage: '!stockimages2 <query>',
 	category: 'Search',
 	aliases: ['stockimg2'],
@@ -15,14 +16,14 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if (args[1] === 'next' || args[1] === 'prev') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v === args[2]);
 
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{
 					image: { url: data[index] },
@@ -60,13 +61,13 @@ export default {
 			const result = await stockImagesPexel(querie.trim());
 
 			if ('error' in result || !result) {
-				await client[botNum].reply(JSON.stringify(result), { from, quoted: message, groupMetadata });
+				await client.instance.reply(JSON.stringify(result), { from, quoted: message, groupMetadata });
 				continue;
 			}
 
 			const index = ~~(Math.random() * result.length);
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					image: { url: result[index] },

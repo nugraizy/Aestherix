@@ -23,6 +23,7 @@ const regex = (input) => {
  */
 export default {
 	name: 'pixivmangadl',
+	minifiedDescription: 'Download Pixiv Manga',
 	description: 'Download manga from Pixiv',
 	usage: '!pixivmangadl <url>',
 	aliases: ['pixmangadl'],
@@ -32,7 +33,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -43,13 +44,13 @@ export default {
 			const regexs = regex(querie.trim());
 
 			if (!regexs.status) {
-				return await client[botNum].reply(regexs.message, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(regexs.message, { from, quoted: message, groupMetadata });
 			}
 
 			const data = await downloadManga(regexs.message);
 
 			if ('error' in data) {
-				await client[botNum].reply(`Failed while downloading Pixiv manga\n\n${data.error}\n${querie}`, {
+				await client.instance.reply(`Failed while downloading Pixiv manga\n\n${data.error}\n${querie}`, {
 					from,
 					quoted: message,
 					groupMetadata
@@ -71,7 +72,7 @@ Total Media : ${pageCount}`;
 			if (urls.original.length === 1) {
 				const images = await fetchBUFFER(urls.original[0], { headers: { referer: `https://www.pixiv.net/ajax/manga/${id}` } });
 
-				return await client[botNum].send(
+				return await client.instance.send(
 					from,
 					{
 						image: new Buffer.from(images, 'base64'),
@@ -86,7 +87,7 @@ Total Media : ${pageCount}`;
 
 				const buffer = await fetchBUFFER(url, { headers: { referer: `https://www.pixiv.net/ajax/manga/${id}` } });
 
-				await client[botNum].send(
+				await client.instance.send(
 					from,
 					{
 						image: new Buffer.from(buffer, 'base64'),

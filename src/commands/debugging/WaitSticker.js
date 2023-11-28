@@ -6,6 +6,7 @@ import { reassign } from '../../helper/index.js';
  */
 export default {
 	name: 'waitsticker',
+	minifiedDescription: 'Wait Sticker',
 	description: 'Wait for users input then proceed.',
 	usage: '!waitsticker',
 	aliases: ['stickwait'],
@@ -24,11 +25,11 @@ export default {
 		});
 
 		if (wait.timeout) {
-			return client[botNum].reply('Timeout!', { from, quoted: message, groupMetadata });
+			return client.instance.reply('Timeout!', { from, quoted: message, groupMetadata });
 		}
 
 		if (wait.invalid) {
-			return client[botNum].reply('Invalid media!', { from, quoted: message, groupMetadata });
+			return client.instance.reply('Invalid media!', { from, quoted: message, groupMetadata });
 		}
 
 		const messageToConvert = await reassign(wait.message, client, store);

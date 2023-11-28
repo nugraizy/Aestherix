@@ -5,6 +5,7 @@ import yargsParser from 'yargs-parser';
  */
 export default {
 	name: 'changeprofile',
+	minifiedDescription: 'Profile Picture',
 	description: 'Set the icon group or bot.',
 	usage: '!changeprofile <reply media/send media>',
 	aliases: ['setpp', 'seticon'],
@@ -14,14 +15,14 @@ export default {
 	status: 'enable',
 	async run({ isOwner, isMediaImage, isMediaVid, from, message, groupMetadata, mediaData, query }, client) {
 		if (!isMediaImage) {
-			return await client[botNum].reply('Please send/reply a media[image]', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please send/reply a media[image]', { from, quoted: message, groupMetadata });
 		}
 
 		if (isMediaVid) {
-			return await client[botNum].reply('Please send/reply a media[image]', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please send/reply a media[image]', { from, quoted: message, groupMetadata });
 		}
 
-		const media = await client[botNum].downloadMediaMessage(mediaData);
+		const media = await client.instance.downloadMediaMessage(mediaData);
 
 		const options = yargsParser(query, {
 			configuration: {
@@ -60,15 +61,15 @@ export default {
 		})();
 
 		if (options.self && !isOwner) {
-			return await client[botNum].reply('You are not owner. This commands is only for owner.', {
+			return await client.instance.reply('You are not owner. This commands is only for owner.', {
 				from,
 				quoted: message,
 				groupMetadata
 			});
 		}
 
-		await client[botNum].updateProfilePicture(
-			options.self ? botNum : from,
+		await client.instance.updateProfilePicture(
+			options.self ? instance : from,
 			media,
 			options.noCrop ? 'noCrop' : options.noStretch ? 'noStretch' : undefined
 		);

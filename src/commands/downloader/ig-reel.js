@@ -9,6 +9,7 @@ import { instagram } from '../../utils/instagram/index.js';
  */
 export default {
 	name: 'igreel',
+	minifiedDescription: 'Download Instagram Reel',
 	description: 'Downloads the reel of the user',
 	usage: '!igreel <url>',
 	aliases: ['igreel', 'igr'],
@@ -18,7 +19,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please specify a url', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a url', { from, quoted: message, groupMetadata });
 		}
 
 		const { _: urls } = parser(query);
@@ -29,7 +30,7 @@ export default {
 
 		for (const data in reels) {
 			if ('error' in reels[data]) {
-				await client[botNum].reply(`Error while downloading Instagram reel\n\n${reels[data].error}\n${data}`, {
+				await client.instance.reply(`Error while downloading Instagram reel\n\n${reels[data].error}\n${data}`, {
 					from,
 					quoted: message,
 					groupMetadata
@@ -51,7 +52,7 @@ export default {
 			if (reels[data].post.length === 1) {
 				capt += `Caption : ${reels[data].captions.trim()}\n`;
 
-				await client[botNum].send(
+				await client.instance.send(
 					from,
 					reels[data].post[0].isVideo
 						? { video: { url: reels[data].post[0].url }, caption: capt.trim() }

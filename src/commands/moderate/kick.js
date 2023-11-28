@@ -5,6 +5,7 @@ import { S_WHATSAPP_NET } from '../../helper/index.js';
  */
 export default {
 	name: 'kick',
+	minifiedDescription: 'Kick User',
 	description: 'Kick member from group.',
 	usage: '!kick <reply/tag member>',
 	aliases: ['remove', 'rem', 'rm'],
@@ -15,7 +16,7 @@ export default {
 	restrict: true,
 	async run({ mediaData, isBotAdmin, type, message, from, mention, query, bodyQuoted, adminGroups, groupMetadata }, client) {
 		if (!isBotAdmin) {
-			return await client[botNum].reply('Bot is not admin, Please promote admin before using moderation commands.', {
+			return await client.instance.reply('Bot is not admin, Please promote admin before using moderation commands.', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -23,7 +24,7 @@ export default {
 		}
 
 		if (type === 'buttonsResponseMessage') {
-			return await client[botNum].updateGroup(
+			return await client.instance.updateGroup(
 				from,
 				'REMOVE',
 				mention.length > 0 ? mention : query.parseNumber(),
@@ -34,7 +35,7 @@ export default {
 				}
 			);
 		} else if (!query && mention.length === 0 && !bodyQuoted) {
-			return await client[botNum].reply('Please reply people message or mention people.', {
+			return await client.instance.reply('Please reply people message or mention people.', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -42,21 +43,21 @@ export default {
 		}
 
 		if (
-			message?.mention?.includes(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`) ||
-			mediaData?.participant?.includes(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`)
+			message?.mention?.includes(`${instance.split(':')[0]}${S_WHATSAPP_NET}`) ||
+			mediaData?.participant?.includes(`${instance.split(':')[0]}${S_WHATSAPP_NET}`)
 		) {
-			return await client[botNum].reply('You can not kick me by myself.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You can not kick me by myself.', { from, quoted: message, groupMetadata });
 		}
 
 		if (query || mention.length > 0) {
-			await client[botNum].updateGroup(from, 'REMOVE', mention.length > 0 ? mention : query.parseNumber(), adminGroups, {
+			await client.instance.updateGroup(from, 'REMOVE', mention.length > 0 ? mention : query.parseNumber(), adminGroups, {
 				force: /--?(force|F)/.test(query),
 				message
 			});
 		}
 
 		if (bodyQuoted) {
-			await client[botNum].updateGroup(from, 'REMOVE', [mediaData.participant], adminGroups, {
+			await client.instance.updateGroup(from, 'REMOVE', [mediaData.participant], adminGroups, {
 				force: /--?(force|F)/.test(query),
 				message
 			});

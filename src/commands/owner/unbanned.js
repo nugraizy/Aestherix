@@ -17,7 +17,8 @@ const indexs = (arr, id) => arr.findIndex((v) => v === id);
  */
 export default {
 	name: 'unbanned',
-	description: 'Unbanned user',
+	minifiedDescription: 'Unban User',
+	description: 'Unbanned user.',
 	usage: '!unbanned <tag/reply>',
 	aliases: ['unban'],
 	category: 'Owner',
@@ -26,7 +27,7 @@ export default {
 	status: 'enable',
 	async run({ from, message, mediaData, mention, bodyQuoted, query, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please provide user to unban', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please provide user to unban', { from, quoted: message, groupMetadata });
 		}
 
 		const userBanned = await fs.readJSON('./databases/users/banned.json');
@@ -35,7 +36,7 @@ export default {
 		if (mention.length > 0) {
 			for (const mentioned of mention) {
 				if (!userBanned.includes(mentioned)) {
-					await client[botNum].send(
+					await client.instance.send(
 						from,
 						{ text: `@${mentioned.split('@')[0]} is not banned`, mentions: [mentioned] },
 						{ groupMetadata, quoted: message }
@@ -49,12 +50,12 @@ export default {
 					userBanned.splice(index, 1);
 					await fs.writeJSON('./databases/users/banned.json', userBanned);
 					unbanned.push(mentioned);
-					await client[botNum].updateBlockStatus(mentioned, 'unblock');
+					await client.instance.updateBlockStatus(mentioned, 'unblock');
 				}
 			}
 
 			if (unbanned.length > 0) {
-				await client[botNum].send(
+				await client.instance.send(
 					from,
 					{ text: `Success unbanning : ${unbanned.map((v) => `@${v.split('@')[0]}`).join(', ')}`, mentions: [unbanned] },
 					{ groupMetadata, quoted: message }
@@ -77,7 +78,7 @@ export default {
 				const isBanned = userBanned.includes(`${number}${S_WHATSAPP_NET}`);
 
 				if (!isBanned) {
-					await client[botNum].send(
+					await client.instance.send(
 						from,
 						{ text: `@${number} is not banned`, mentions: [`${number}${S_WHATSAPP_NET}`] },
 						{ groupMetadata }
@@ -91,8 +92,8 @@ export default {
 				configuration.cache.blocklist.splice(indexs(configuration.cache.bannedlist, `${number}${S_WHATSAPP_NET}`), 1);
 				userBanned.splice(index, 1);
 				await fs.writeJSON('./databases/users/banned.json', userBanned);
-				await client[botNum].updateBlockStatus(`${number}${S_WHATSAPP_NET}`, 'unblock');
-				await client[botNum].send(
+				await client.instance.updateBlockStatus(`${number}${S_WHATSAPP_NET}`, 'unblock');
+				await client.instance.send(
 					from,
 					{ text: `Success unbanning : @${number}`, mentions: [`${number}${S_WHATSAPP_NET}`] },
 					{ groupMetadata, quoted: message }
@@ -104,7 +105,7 @@ export default {
 
 		if (bodyQuoted) {
 			if (!userBanned.includes(mediaData.participant)) {
-				return await client[botNum].reply('not banned', { from, quoted: message, groupMetadata });
+				return await client.instance.reply('not banned', { from, quoted: message, groupMetadata });
 			}
 
 			const index = userBanned.indexOf(mediaData.participant);
@@ -114,8 +115,8 @@ export default {
 			userBanned.splice(index, 1);
 			await fs.writeJSON('./databases/users/banned.json', userBanned);
 
-			await client[botNum].updateBlockStatus(mediaData.participant, 'unblock');
-			await client[botNum].send(
+			await client.instance.updateBlockStatus(mediaData.participant, 'unblock');
+			await client.instance.send(
 				from,
 				{ text: `Success unbanning : @${mediaData.participant.split('@')[0]}`, mentions: [mediaData.participant] },
 				{ quoted: message }

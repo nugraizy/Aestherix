@@ -18,7 +18,7 @@ const events = async (client, containers, presence) => {
 			const uptime = getRuntime(process.uptime());
 			const bio = `Made by nanda | Void bot info : UPTIME : ${uptime} | TIME : ${time} | Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 
-			await client[botNum].setStatus(bio);
+			await client.instance.setStatus(bio);
 			return;
 		}
 
@@ -27,7 +27,7 @@ const events = async (client, containers, presence) => {
 				break;
 			}
 
-			await client[botNum].sendPresenceUpdate(WAPresence[presence], container);
+			await client.instance.sendPresenceUpdate(WAPresence[presence], container);
 		}
 	} catch (e) {
 		log(e);
@@ -37,7 +37,7 @@ const events = async (client, containers, presence) => {
 const pause = async (client, containers) => {
 	try {
 		for (const container of containers) {
-			await client[botNum].sendPresenceUpdate(WAPresence.paused, container);
+			await client.instance.sendPresenceUpdate(WAPresence.paused, container);
 		}
 	} catch (e) {
 		log(e);
@@ -49,7 +49,8 @@ const pause = async (client, containers) => {
  */
 export default {
 	name: 'simulates',
-	description: 'Simulates an event update',
+	minifiedDescription: 'Simulates Event',
+	description: 'Simulates an event update.',
 	usage: '!simulates <events>',
 	aliases: ['simulate'],
 	category: 'Owner',
@@ -58,7 +59,7 @@ export default {
 	status: 'enable',
 	async run({ from, args, message, groupMetadata }, client, store) {
 		if (args.length === 1) {
-			return await client[botNum].reply('You must provide a status to simulate', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a status to simulate', { from, quoted: message, groupMetadata });
 		}
 
 		const started = Date.now();
@@ -72,7 +73,7 @@ export default {
 							case 'status':
 							case 'stats':
 								{
-									await client[botNum].reply(
+									await client.instance.reply(
 										Object.keys(configuration.presences).includes('available') ? 'Available' : 'Unavailable',
 										{ from, quoted: message, groupMetadata }
 									);
@@ -83,7 +84,7 @@ export default {
 							case 'off':
 								{
 									if ('unavailable' in configuration.presences) {
-										return await client[botNum].reply('Already offline', { from, quoted: message, groupMetadata });
+										return await client.instance.reply('Already offline', { from, quoted: message, groupMetadata });
 									}
 
 									if ('available' in configuration.presences) {
@@ -101,7 +102,7 @@ export default {
 									};
 
 									if (from) {
-										await client[botNum].reply('Simulate Available Presence Disabled', {
+										await client.instance.reply('Simulate Available Presence Disabled', {
 											from,
 											quoted: message,
 											groupMetadata
@@ -114,7 +115,7 @@ export default {
 							case 'on':
 								{
 									if ('available' in configuration.presences) {
-										return await client[botNum].reply('Already online', { from, quoted: message, groupMetadata });
+										return await client.instance.reply('Already online', { from, quoted: message, groupMetadata });
 									}
 
 									if ('unavailable' in configuration.presences) {
@@ -126,7 +127,7 @@ export default {
 									}
 
 									if (from) {
-										await client[botNum].reply('Simulate Available Presence Enabled', {
+										await client.instance.reply('Simulate Available Presence Enabled', {
 											from,
 											quoted: message,
 											groupMetadata
@@ -137,7 +138,7 @@ export default {
 								break;
 							default:
 								{
-									await client[botNum].reply('Usage: !presence online [enable|disable|status]', {
+									await client.instance.reply('Usage: !presence online [enable|disable|status]', {
 										from,
 										quoted: message,
 										groupMetadata
@@ -157,7 +158,7 @@ export default {
 							case 'status':
 							case 'stats':
 								{
-									await client[botNum].reply(
+									await client.instance.reply(
 										Object.keys(configuration.presences).includes('composing') ? 'Composing' : 'Not composing',
 										{ from, quoted: message, groupMetadata }
 									);
@@ -168,7 +169,7 @@ export default {
 							case 'off':
 								{
 									if (!('composing' in configuration.presences)) {
-										return await client[botNum].reply('Already not writing', { from, quoted: message, groupMetadata });
+										return await client.instance.reply('Already not writing', { from, quoted: message, groupMetadata });
 									}
 
 									const messages = Object.keys(store.messages);
@@ -176,7 +177,7 @@ export default {
 									pause(client, messages);
 									clearInterval(configuration.presences.composing.interval);
 									delete configuration.presences.composing;
-									await client[botNum].reply('Simulate Composing Disabled', { from, quoted: message, groupMetadata });
+									await client.instance.reply('Simulate Composing Disabled', { from, quoted: message, groupMetadata });
 								}
 
 								break;
@@ -184,7 +185,7 @@ export default {
 							case 'on':
 								{
 									if ('composing' in configuration.presences) {
-										return await client[botNum].reply('Already writing', { from, quoted: message, groupMetadata });
+										return await client.instance.reply('Already writing', { from, quoted: message, groupMetadata });
 									}
 
 									configuration.presences.composing = {
@@ -196,13 +197,13 @@ export default {
 											events(client, messages, 'composing');
 										}, 8_000)
 									};
-									await client[botNum].reply('Simulate Composing Enabled', { from, quoted: message, groupMetadata });
+									await client.instance.reply('Simulate Composing Enabled', { from, quoted: message, groupMetadata });
 								}
 
 								break;
 							default:
 								{
-									await client[botNum].reply('Usage: !presence composing [enable|disable|status]', {
+									await client.instance.reply('Usage: !presence composing [enable|disable|status]', {
 										from,
 										quoted: message,
 										groupMetadata
@@ -221,7 +222,7 @@ export default {
 							case 'status':
 							case 'stats':
 								{
-									await client[botNum].reply(
+									await client.instance.reply(
 										Object.keys(configuration.presences).includes('recording') ? 'Recording' : 'Not recording',
 										{ from, quoted: message, groupMetadata }
 									);
@@ -232,7 +233,7 @@ export default {
 							case 'off':
 								{
 									if (!('recording' in configuration.presences)) {
-										return await client[botNum].reply('Already not recording', { from, quoted: message, groupMetadata });
+										return await client.instance.reply('Already not recording', { from, quoted: message, groupMetadata });
 									}
 
 									const messages = Object.keys(store.messages);
@@ -240,7 +241,7 @@ export default {
 									pause(client, messages);
 									clearInterval(configuration.presences.recording.interval);
 									delete configuration.presences.recording;
-									await client[botNum].reply('Simulate Recording Disabled', { from, quoted: message, groupMetadata });
+									await client.instance.reply('Simulate Recording Disabled', { from, quoted: message, groupMetadata });
 								}
 
 								break;
@@ -248,7 +249,7 @@ export default {
 							case 'on':
 								{
 									if ('recording' in configuration.presences) {
-										return await client[botNum].reply('Already recording', { from, quoted: message, groupMetadata });
+										return await client.instance.reply('Already recording', { from, quoted: message, groupMetadata });
 									}
 
 									configuration.presences.recording = {
@@ -260,13 +261,13 @@ export default {
 											events(client, messages, 'recording');
 										}, 10_000)
 									};
-									await client[botNum].reply('Simulate Recording Enabled', { from, quoted: message, groupMetadata });
+									await client.instance.reply('Simulate Recording Enabled', { from, quoted: message, groupMetadata });
 								}
 
 								break;
 							default:
 								{
-									await client[botNum].reply('Usage: !presence recording [enable|disable|status]', {
+									await client.instance.reply('Usage: !presence recording [enable|disable|status]', {
 										from,
 										quoted: message,
 										groupMetadata
@@ -283,7 +284,7 @@ export default {
 						case 'status':
 						case 'stats':
 							{
-								await client[botNum].reply(Object.keys(configuration.presences).includes('bio') ? 'Enabled' : 'Disabled', {
+								await client.instance.reply(Object.keys(configuration.presences).includes('bio') ? 'Enabled' : 'Disabled', {
 									from,
 									quoted: message,
 									groupMetadata
@@ -295,12 +296,12 @@ export default {
 						case 'off':
 							{
 								if (!('bio' in configuration.presences)) {
-									return await client[botNum].reply('Already disabled', { from, quoted: message, groupMetadata });
+									return await client.instance.reply('Already disabled', { from, quoted: message, groupMetadata });
 								}
 
 								clearInterval(configuration.presences.bio.interval);
 								delete configuration.presences.bio;
-								await client[botNum].reply('Simulate Bio Disabled', { from, quoted: message, groupMetadata });
+								await client.instance.reply('Simulate Bio Disabled', { from, quoted: message, groupMetadata });
 							}
 
 							break;
@@ -308,7 +309,7 @@ export default {
 						case 'on':
 							{
 								if ('bio' in configuration.presences) {
-									return await client[botNum].reply('Already enabled', { from, quoted: message, groupMetadata });
+									return await client.instance.reply('Already enabled', { from, quoted: message, groupMetadata });
 								}
 
 								configuration.presences.bio = {
@@ -316,13 +317,13 @@ export default {
 									started,
 									interval: setInterval(() => events(client, [], 'bio'), 10_000)
 								};
-								await client[botNum].reply('Simulate Bio Enabled', { from, quoted: message, groupMetadata });
+								await client.instance.reply('Simulate Bio Enabled', { from, quoted: message, groupMetadata });
 							}
 
 							break;
 						default:
 							{
-								await client[botNum].reply('Usage: !presence bio [enable|disable|status]', {
+								await client.instance.reply('Usage: !presence bio [enable|disable|status]', {
 									from,
 									quoted: message,
 									groupMetadata
@@ -335,7 +336,7 @@ export default {
 				}
 				default:
 					{
-						await client[botNum].reply('Invalid command', { from, quoted: message, groupMetadata });
+						await client.instance.reply('Invalid command', { from, quoted: message, groupMetadata });
 					}
 
 					break;

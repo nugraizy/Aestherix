@@ -55,7 +55,7 @@ const updateCacheForSubjectAndDescription = (message) => {
  * @param {string} status
  */
 const sendGroupSettingsNotification = async (client, message, status) => {
-	await client[botNum].send(
+	await client.instance.send(
 		message.from,
 		{
 			text: `${'Group Settings Notification'.formatHeaders()}\n

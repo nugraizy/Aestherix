@@ -685,7 +685,7 @@ export class Werewolf {
 
 				dataGame.playersKilled = [];
 				dataGame.gameDialogue = message;
-				client[botNum].ev.emit('werewolf.cycle', {
+				client.instance.ev.emit('werewolf.cycle', {
 					error: false,
 					peopleKilledMention,
 					message,
@@ -721,7 +721,7 @@ export class Werewolf {
 					const data = dataGame;
 
 					configuration.games.werewolf.delete(roomId);
-					client[botNum].ev.emit('werewolf.cycle', {
+					client.instance.ev.emit('werewolf.cycle', {
 						error: true,
 						message,
 						id: dataGame.roomId,
@@ -736,7 +736,7 @@ export class Werewolf {
 				message = WEREWOLF_SCRIPTING.dayTime.voting[Math.floor(Math.random() * WEREWOLF_SCRIPTING.dayTime.voting.length)];
 				dataGame.gameDialogue = message;
 				dataGame.gameTime = 30;
-				client[botNum].ev.emit('werewolf.cycle', {
+				client.instance.ev.emit('werewolf.cycle', {
 					error: false,
 					message,
 					id: dataGame.roomId,
@@ -808,7 +808,7 @@ export class Werewolf {
 						: 'none';
 
 				dataGame.gameDialogue = message;
-				client[botNum].ev.emit('werewolf.cycle', {
+				client.instance.ev.emit('werewolf.cycle', {
 					error: false,
 					voteData,
 					message,
@@ -832,7 +832,7 @@ export class Werewolf {
 								.join('')}\nPihak Jahat:\n${statisticPlayer[0].bad
 								.map((v) => `@${v.id.split('@')[0]} ${v.isAlive ? '😄 Hidup' : '💀 Mati'} - ${v.role.capitalize()}\n`)
 								.join('')}\n\nLama permainan : ${dataGame.timeLength}`;
-						client[botNum].ev.emit('werewolf.cycle', {
+						client.instance.ev.emit('werewolf.cycle', {
 							error: false,
 							peopleMention: dataGame.playersData.map((v) => v.id),
 							message,
@@ -860,7 +860,7 @@ export class Werewolf {
 				);
 
 				dataGame.gameDialogue = message;
-				client[botNum].ev.emit('werewolf.cycle', {
+				client.instance.ev.emit('werewolf.cycle', {
 					error: false,
 					...(dataGame.firstNight ? {} : message),
 					...client,
@@ -877,7 +877,7 @@ export class Werewolf {
 				);
 
 				dataGame.gameDialogue = message;
-				client[botNum].ev.emit('werewolf.cycle', {
+				client.instance.ev.emit('werewolf.cycle', {
 					error: false,
 					...(dataGame.firstNight ? {} : message),
 					...client,

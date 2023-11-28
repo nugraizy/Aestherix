@@ -9,9 +9,9 @@ export default {
 	aliases: ['butt'],
 	cooldown: 5,
 	limit: 0,
-	status: 'enable',
+	status: 'disable',
 	async run({ from }, client) {
-		await client[botNum].send(from, {
+		await client.instance.send(from, {
 			text: 'Hi this is a button message',
 			footer: 'Hello World',
 			buttons: [

@@ -3,6 +3,7 @@
  */
 export default {
 	name: 'unlock',
+	minifiedDescription: 'Unlock Group',
 	description: 'Unlock the group.',
 	usage: '!unlock',
 	aliases: ['unlocked', 'unlockgroup', 'unlockgroupchat'],
@@ -12,7 +13,7 @@ export default {
 	status: 'enable',
 	async run({ groupMetadata, isBotAdmin, from, message }, client) {
 		if (!isBotAdmin) {
-			return await client[botNum].reply('Bot is not admin, Please promote admin before using moderation commands.', {
+			return await client.instance.reply('Bot is not admin, Please promote admin before using moderation commands.', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -20,9 +21,9 @@ export default {
 		}
 
 		if (!groupMetadata.announce) {
-			return await client[botNum].reply('Group is already unlocked.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Group is already unlocked.', { from, quoted: message, groupMetadata });
 		}
 
-		await client[botNum].updateGroup(from, undefined, 'NOT_ANNOUNCEMENT');
+		await client.instance.updateGroup(from, undefined, 'NOT_ANNOUNCEMENT');
 	}
 };

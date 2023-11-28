@@ -3,6 +3,7 @@
  */
 export default {
 	name: 'title',
+	minifiedDescription: 'Group Title',
 	description: 'Change the title of the group.',
 	usage: '!title <texts>',
 	aliases: ['subject', 'topic', 'name'],
@@ -12,7 +13,7 @@ export default {
 	status: 'enable',
 	async run({ isBotAdmin, from, query, bodyQuoted, message, groupMetadata }, client) {
 		if (!isBotAdmin) {
-			return await client[botNum].reply('Bot is not admin, Please promote admin before using moderation commands.', {
+			return await client.instance.reply('Bot is not admin, Please promote admin before using moderation commands.', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -20,13 +21,13 @@ export default {
 		}
 
 		if (!query) {
-			return await client[botNum].reply('Please input the title.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please input the title.', { from, quoted: message, groupMetadata });
 		}
 
 		if (query) {
-			return await client[botNum].updateGroup(from, undefined, 'SUBJECT', query);
+			return await client.instance.updateGroup(from, undefined, 'SUBJECT', query);
 		} else if (bodyQuoted) {
-			return await client[botNum].updateGroup(from, undefined, 'SUBJECT', bodyQuoted);
+			return await client.instance.updateGroup(from, undefined, 'SUBJECT', bodyQuoted);
 		}
 	}
 };

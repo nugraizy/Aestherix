@@ -79,13 +79,13 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 			} else {
 				const askWantNumber = async () => {
 					const isWantNumber = await question(
-						`${color('Do you want to use a new number?', '#ff71ce')} ${color('[y/n] : ', 'white')}`
+						`${INFOLOG(color('Do you want to use a new number?', '#ff71ce'), color('[y/n] : ', 'white'), { ignore: true })}`
 					);
 
 					const answer = yn(isWantNumber);
 
 					if (answer === undefined) {
-						console.log(color('Please answer with y/n', 'red'));
+						INFOLOG(color('Please answer with y/n', 'red'), { ignore: true });
 
 						await delay(1000);
 
@@ -93,7 +93,9 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 					}
 
 					if (answer) {
-						phoneNumber = await question(`${color('Insert your phone number : ', '#ff71ce')}`);
+						phoneNumber = await question(
+							`${INFOLOG(color('Insert your phone number', '#ff71ce'), color(': ', 'white'), { ignore: true })}`
+						);
 
 						return;
 					}

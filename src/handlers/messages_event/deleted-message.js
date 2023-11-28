@@ -79,46 +79,46 @@ const deletedHandler = async (client, message, fetches) => {
 					break;
 				case 'stickerMessage':
 					{
-						const result = await client[botNum].downloadMediaMessage(mediaData);
+						const result = await client.instance.downloadMediaMessage(mediaData);
 						const fileSize = getFilesizeFromBytes(Buffer.byteLength(result));
 						const sticker = await prepareAndSendSticker(
-							client[botNum],
+							client.instance,
 							result,
 							filename,
 							mediaData.message.stickerMessage.isAnimated
 						);
 						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, `\nSize : ${fileSize}`, quotedMessage);
 
-						await client[botNum].send(from, { sticker }, options);
+						await client.instance.send(from, { sticker }, options);
 						await sendMessageWithMentions(client, from, stringDeleted, options);
 					}
 
 					break;
 				case 'imageMessage':
 					{
-						const image = await downloadAndSaveMediaMessage(client[botNum], extractMediaData, filename, 'imageMessage');
+						const image = await downloadAndSaveMediaMessage(client.instance, extractMediaData, filename, 'imageMessage');
 						const fileSize = getFilesize(image);
 						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, `\nSize : ${fileSize}`, quotedMessage);
 
-						await sendImageMessageWithCaption(client[botNum], from, image, stringDeleted, options);
+						await sendImageMessageWithCaption(client.instance, from, image, stringDeleted, options);
 						await fs.unlink(image);
 					}
 
 					break;
 				case 'videoMessage':
 					{
-						const video = await downloadAndSaveMediaMessage(client[botNum], extractMediaData, filename, 'videoMessage');
+						const video = await downloadAndSaveMediaMessage(client.instance, extractMediaData, filename, 'videoMessage');
 						const fileSize = getFilesize(video);
 						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, `\nSize : ${fileSize}`, quotedMessage);
 
-						await sendVideoMessageWithCaption(client[botNum], from, video, stringDeleted, options);
+						await sendVideoMessageWithCaption(client.instance, from, video, stringDeleted, options);
 						await fs.unlink(video);
 					}
 
 					break;
 				case 'audioMessage':
 					{
-						const audio = await downloadAndSaveMediaMessage(client[botNum], extractMediaData, filename, 'audioMessage');
+						const audio = await downloadAndSaveMediaMessage(client.instance, extractMediaData, filename, 'audioMessage');
 						const fileSize = getFilesize(audio);
 						const audioType = extractMediaData.ptt ? 'Voice Note' : 'Audio File';
 						const mimeType = extractMediaData.mimetype;
@@ -132,7 +132,7 @@ const deletedHandler = async (client, message, fetches) => {
 							quotedMessage
 						);
 
-						await sendAudioMessageWithCaption(client[botNum], from, audio, stringDeleted, options);
+						await sendAudioMessageWithCaption(client.instance, from, audio, stringDeleted, options);
 						await fs.unlink(audio);
 					}
 
@@ -148,7 +148,7 @@ const deletedHandler = async (client, message, fetches) => {
 						);
 
 						await sendContactMessage(
-							client[botNum],
+							client.instance,
 							from,
 							extractMediaData.displayName,
 							extractMediaData.vcard,
@@ -169,7 +169,7 @@ const deletedHandler = async (client, message, fetches) => {
 						);
 
 						await sendContactsArrayMessage(
-							client[botNum],
+							client.instance,
 							from,
 							extractMediaData.displayName,
 							extractMediaData.contacts,
@@ -192,7 +192,7 @@ const deletedHandler = async (client, message, fetches) => {
 						);
 
 						await sendLocationMessage(
-							client[botNum],
+							client.instance,
 							from,
 							extractMediaData.degreesLatitude,
 							extractMediaData.degreesLongitude,

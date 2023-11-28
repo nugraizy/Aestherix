@@ -5,7 +5,8 @@ import { instagram } from '../../utils/index.js';
  */
 export default {
 	name: 'ighashtag',
-	description: 'Search for hashtag on Instagram',
+	minifiedDescription: 'Search Instagram Hashtag',
+	description: 'Search for hashtag on Instagram.',
 	usage: '!ighashtag <keyword>',
 	aliases: ['ighash'],
 	category: 'Search',
@@ -14,14 +15,14 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		const result = await instagram.search.hashtag(query);
 
 		for (const tag in result) {
 			if (result[tag].error) {
-				await client[botNum].reply(result[tag].error, { from, quoted: message, groupMetadata });
+				await client.instance.reply(result[tag].error, { from, quoted: message, groupMetadata });
 				continue;
 			}
 
@@ -36,7 +37,7 @@ export default {
 				capt += `Link : ${post.source}\n\n`;
 			}
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					caption: 'Instagram Hashtag Search'.formatHeaders() + `\n\n${capt.trim()}`,

@@ -19,7 +19,8 @@ const regex = (input) => {
  */
 export default {
 	name: 'join',
-	description: 'Ask bot to join your group',
+	minifiedDescription: 'Invite Bot',
+	description: 'Ask bot to join your group.',
 	usage: '!join <url>',
 	aliases: ['j'],
 	category: 'Helper',
@@ -28,30 +29,30 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, sender, isOwner, settings, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a url.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a url.', { from, quoted: message, groupMetadata });
 		}
 
-		const groups = await client[botNum].groupFetchAllParticipating();
+		const groups = await client.instance.groupFetchAllParticipating();
 
 		const isGroupMaxed = Object.keys(groups).length > settings.max_group;
 		const reg = regex(query);
 
 		if (isGroupMaxed && !isOwner) {
-			return await client[botNum].reply('Bot already maxed the group.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Bot already maxed the group.', { from, quoted: message, groupMetadata });
 		}
 
 		if (!reg) {
-			return await client[botNum].reply('Invalid url.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Invalid url.', { from, quoted: message, groupMetadata });
 		}
 
-		const metadataInvite = await client[botNum].groupGetInviteInfo(reg).catch(() => null);
+		const metadataInvite = await client.instance.groupGetInviteInfo(reg).catch(() => null);
 
 		if (Object.keys(groups).includes(metadataInvite.id)) {
-			await client[botNum].reply('I am already in this group.', { from, quoted: message, groupMetadata });
+			await client.instance.reply('I am already in this group.', { from, quoted: message, groupMetadata });
 		} else if (!isOwner && metadataInvite.size >= 1024) {
-			await client[botNum].reply('Bot cannot join. Reason : Group is full.', { from, quoted: message, groupMetadata });
+			await client.instance.reply('Bot cannot join. Reason : Group is full.', { from, quoted: message, groupMetadata });
 		} else if (!isOwner && metadataInvite.size < settings.min_members) {
-			await client[botNum].reply(`This group is not big enough to join. Minimum ${settings.min_members} participants.`, {
+			await client.instance.reply(`This group is not big enough to join. Minimum ${settings.min_members} participants.`, {
 				from,
 				quoted: message,
 				groupMetadata
@@ -63,15 +64,15 @@ export default {
 				.map((v) => v.id)
 				?.includes(sender)
 		) {
-			await client[botNum].reply('You must be an admin to invite bot to group.', { from, quoted: message, groupMetadata });
+			await client.instance.reply('You must be an admin to invite bot to group.', { from, quoted: message, groupMetadata });
 		} else if (metadataInvite) {
-			await client[botNum].groupAcceptInvite(reg);
-			await client[botNum].reply('I am joining this group.', { from, quoted: message, groupMetadata });
-			await client[botNum].send(metadataInvite.id, {
+			await client.instance.groupAcceptInvite(reg);
+			await client.instance.reply('I am joining this group.', { from, quoted: message, groupMetadata });
+			await client.instance.send(metadataInvite.id, {
 				text: `@${sender.split('@')[0]} has invited me to the group. Tysm.`,
 				mentions: [sender]
 			});
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					text: 'Click to open menu',

@@ -5,7 +5,8 @@ import { youtubeChannel } from '../../utils/index.js';
  */
 export default {
 	name: 'youtubestalk',
-	description: 'Lookup YouTube Channel',
+	minifiedDescription: 'Look-up YouTube Channel',
+	description: 'Look-up YouTube Channel.',
 	usage: '!youtubestalk <channel_id|@channel_username|channel_url>',
 	aliases: ['ytstalk', 'ytinfo', 'ytchannel'],
 	category: 'Look-up',
@@ -14,13 +15,13 @@ export default {
 	status: 'enable',
 	run: async ({ from, query, message, groupMetadata }, client) => {
 		if (!query) {
-			return await client[botNum].reply('Please specify a query', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a query', { from, quoted: message, groupMetadata });
 		}
 
 		const channel = await youtubeChannel(query);
 
 		if ('error' in channel) {
-			return await client[botNum].reply(`Error while searching YouTube Channel\n\n${channel.error}`, {
+			return await client.instance.reply(`Error while searching YouTube Channel\n\n${channel.error}`, {
 				from,
 				quoted: message,
 				groupMetadata
@@ -29,7 +30,7 @@ export default {
 
 		const { author, avatar } = channel;
 
-		client[botNum].send(from, {
+		client.instance.send(from, {
 			image: {
 				url: avatar.url
 			},

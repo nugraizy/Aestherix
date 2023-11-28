@@ -23,6 +23,7 @@ const regex = (input) => {
  */
 export default {
 	name: 'pixivartworkdl',
+	minifiedDescription: 'Download Pixiv Artwork',
 	description: 'Download artworks from Pixiv',
 	usage: '!pixivartworkdl <url>',
 	aliases: ['pixartdl', 'pixivartdl'],
@@ -32,7 +33,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -43,13 +44,13 @@ export default {
 			const regexs = regex(querie.trim());
 
 			if (!regexs.status) {
-				return await client[botNum].reply(regexs.message, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(regexs.message, { from, quoted: message, groupMetadata });
 			}
 
 			const data = await downloadArtworks(regexs.message);
 
 			if ('error' in data) {
-				await client[botNum].reply(`Failed while downloading Pixiv artworks\n\n${data.error}\n${querie}`, {
+				await client.instance.reply(`Failed while downloading Pixiv artworks\n\n${data.error}\n${querie}`, {
 					from,
 					quoted: message,
 					groupMetadata
@@ -60,7 +61,9 @@ export default {
 
 			let i = 0;
 			const { id, title, userId, userName, pageCount, url: urls } = data;
-			let caption = `${'Pixiv Artworks Downloader'.formatHeaders()}\n\nTitle : ${title.capitalize()}
+			let caption = `${'Pixiv Artworks Downloader'.formatHeaders()}
+			
+Title : ${title.capitalize()}
 Author : ${userName}
 ID Artwork : ${id}
 ID Author : ${userId}
@@ -71,7 +74,7 @@ Total Media : ${pageCount}`;
 					headers: { referer: `https://www.pixiv.net/ajax/illust/${id}` }
 				});
 
-				return await client[botNum].send(
+				return await client.instance.send(
 					from,
 					{
 						image: new Buffer.from(images, 'base64'),
@@ -86,7 +89,7 @@ Total Media : ${pageCount}`;
 
 				const buffer = await fetchBUFFER(url, { headers: { referer: `https://www.pixiv.net/ajax/illust/${id}` } });
 
-				await client[botNum].send(
+				await client.instance.send(
 					from,
 					{
 						image: new Buffer.from(buffer, 'base64'),

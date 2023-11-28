@@ -5,7 +5,8 @@ import { googleImage, removeDuplicatesArray } from '../../utils/index.js';
  */
 export default {
 	name: 'googleimage',
-	description: 'Find images from Google.',
+	minifiedDescription: 'Search Google Images',
+	description: 'Search images from Google.',
 	usage: '!googleimage <query>',
 	aliases: ['gim', 'gis', 'image'],
 	category: 'Search',
@@ -14,14 +15,14 @@ export default {
 	status: 'disable',
 	run: async ({ query, message, from, type, args, groupMetadata }, client) => {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v === args[2]);
 
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{
 					image: { url: data[index] },
@@ -59,11 +60,11 @@ export default {
 			const result = await googleImage(querie, 10);
 
 			if ('error' in result) {
-				client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
+				client.instance.reply(result.error, { from, quoted: message, groupMetadata });
 				continue;
 			}
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					image: { url: result[0] },

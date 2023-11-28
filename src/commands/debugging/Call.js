@@ -38,7 +38,7 @@ export default {
 					}
 				});
 
-				const { ciphertext } = await client[botNum].signalRepository.encryptMessage({ jid: number, data: buffer });
+				const { ciphertext } = await client.instance.signalRepository.encryptMessage({ jid: number, data: buffer });
 				const content = [
 					{ tag: 'audio', attrs: { rate: '16000', enc: 'opus' }, content: undefined },
 					{ tag: 'audio', attrs: { rate: '8000', enc: 'opus' }, content: undefined }
@@ -92,7 +92,7 @@ export default {
 					]
 				};
 
-				client[botNum].sendNode(nodes);
+				client.instance.sendNode(nodes);
 			}
 		}
 	}

@@ -8,7 +8,7 @@ const handler = async ({ from, type, body, isGroup }, client) => {
 		const status = handlers(from);
 
 		if (typeof status !== 'boolean' && (type === 'conversation' || type === 'extendedTextMessage') && status.partner2) {
-			await client[botNum].send(status.partner2, { text: body });
+			await client.instance.send(status.partner2, { text: body });
 		}
 	}
 };

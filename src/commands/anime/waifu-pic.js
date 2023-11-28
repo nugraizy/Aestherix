@@ -7,6 +7,7 @@ import { removeDuplicatesArray, getWaifu, gifToMp4 } from '../../utils/index.js'
  */
 export default {
 	name: 'waifupic',
+	minifiedDescription: 'Random Waifupics',
 	description: 'Search images from waifu pics',
 	usage: '!waifupic <query>',
 	category: 'Anime',
@@ -16,7 +17,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, sender, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if (args[1] === 'next' || args[1] === 'prev') {
@@ -30,7 +31,7 @@ export default {
 				buffer = await gifToMp4(data[index], sender);
 			}
 
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{
 					...(isGif ? { video: buffer, gifPlayback: true } : { image: { url: data[index] } }),
@@ -81,7 +82,7 @@ export default {
 			const result = await getWaifu(querie.trim(), nsfw ? 'nsfw' : 'sfw');
 
 			if ('error' in result) {
-				await client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
+				await client.instance.reply(result.error, { from, quoted: message, groupMetadata });
 
 				continue;
 			}
@@ -93,7 +94,7 @@ export default {
 				buffer = await gifToMp4(result[0], sender);
 			}
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					...(isGif ? { video: buffer } : { image: { url: result[0] } }),

@@ -30,7 +30,7 @@ ${parseFilesCommitted(commitInfo.files)}
 		commitInfo.deletions
 	} deletions.*`;
 
-	await client[botNum].sendMessage('120363027862918129@g.us', {
+	await client.instance.sendMessage('120363027862918129@g.us', {
 		text: caption
 	});
 };

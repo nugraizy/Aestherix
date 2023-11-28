@@ -12,7 +12,7 @@ export default {
 	aliases: ['poll', 'pollwith'],
 	cooldown: 5,
 	limit: 0,
-	status: 'enable',
+	status: 'disable',
 	async run({ from }, client) {
 		const messages = generateWAMessageFromContent(
 			from,
@@ -37,10 +37,10 @@ export default {
 			{}
 		);
 
-		await client[botNum].relayMessage(from, messages.message, { messageId: messages.key.id });
+		await client.instance.relayMessage(from, messages.message, { messageId: messages.key.id });
 
 		process.nextTick(() => {
-			client[botNum].processingMutex.mutex(() => client[botNum].upsertMessage(messages, 'append'));
+			client.instance.processingMutex.mutex(() => client.instance.upsertMessage(messages, 'append'));
 		});
 	}
 };

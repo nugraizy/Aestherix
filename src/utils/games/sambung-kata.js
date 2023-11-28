@@ -122,7 +122,7 @@ export class SambungKata {
 				const { timer } = checkIntervals(data);
 
 				if (timer === 10) {
-					clients[botNum].send(group, {
+					clients.instance.send(group, {
 						text: `Time's almost over! 10 second @${dataGame.turn.split('@')[0]}`,
 						mentions: [dataGame.turn]
 					});
@@ -132,7 +132,7 @@ export class SambungKata {
 					deleteIntervals(data, configuration.intervals.word, group);
 					const winner = dataGame.changeTurn();
 
-					clients[botNum].send(group, {
+					clients.instance.send(group, {
 						text: `Time's up! The winner is : @${winner.split('@')[0]}`,
 						mentions: [winner]
 					});
@@ -260,7 +260,7 @@ export class SambungKata {
 				const { timer } = checkIntervals(data);
 
 				if (timer === 10) {
-					clients[botNum].send(group, {
+					clients.instance.send(group, {
 						text: `Time's almost over! 10 second @${dataGame.turn.split('@')[0]}`,
 						mentions: [dataGame.turn]
 					});
@@ -270,7 +270,7 @@ export class SambungKata {
 					deleteIntervals(data, configuration.intervals.word, group);
 					const winner = dataGame.changeTurn();
 
-					clients[botNum].send(group, {
+					clients.instance.send(group, {
 						text: `Time's up! The winner is : @${winner.split('@')[0]}`,
 						mentions: [winner]
 					});

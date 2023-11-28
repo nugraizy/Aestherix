@@ -6,7 +6,8 @@ import { arq } from '../../utils/arq/index.js';
  */
 export default {
 	name: 'findlyrics',
-	description: 'Search song lyrics',
+	minifiedDescription: 'Search Lyrics',
+	description: 'Search song lyrics.',
 	usage: '!findlyrics <query>',
 	category: 'Search',
 	aliases: ['lyrics', 'lyric'],
@@ -15,14 +16,14 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, type, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.index === args[2]);
 
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{
 					text: `${'Lyrics'.formatHeaders()}
@@ -62,13 +63,13 @@ Song : ${data[index].song}
 			const result = await arq.findLyrics(querie.trim());
 
 			if ('error' in result || !result.ok) {
-				client[botNum].reply(JSON.stringify(result));
+				client.instance.reply(JSON.stringify(result));
 				continue;
 			}
 
 			result.result.forEach((v) => v.lyrics.replace('Paroles de la chanson par', ''));
 			result.result = result.result.map((v, i) => ({ index: i, ...v }));
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					text: `${'Lyrics'.formatHeaders()}

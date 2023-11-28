@@ -11,7 +11,8 @@ const regex = (input) =>
  */
 export default {
 	name: 'spotifytracks',
-	description: 'Find song on Spotify',
+	minifiedDescription: 'Search Spotify Tracks',
+	description: 'Search song on Spotify.',
 	usage: '!spotifytracks <query>',
 	category: 'Search',
 	aliases: ['spotifytra'],
@@ -20,7 +21,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		query = removeDuplicatesArray(query.split(','));
@@ -33,7 +34,7 @@ export default {
 				: await spotifier.searchTracks(querie);
 
 			if (!result.status) {
-				await client[botNum].reply(result.message, { from, quoted: message, groupMetadata });
+				await client.instance.reply(result.message, { from, quoted: message, groupMetadata });
 				continue;
 			}
 
@@ -67,7 +68,7 @@ export default {
 				count++;
 			}
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					image: new Buffer.from(
@@ -101,7 +102,7 @@ export default {
 				},
 				{ groupMetadata, quoted: message }
 			);
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					buttonText: 'Open List',

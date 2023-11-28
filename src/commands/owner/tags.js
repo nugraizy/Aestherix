@@ -10,6 +10,7 @@ const DB_PATH = `./src/media/connection_databases/${configuration.cli.input[0] ?
  */
 export default {
 	name: 'tags',
+	minifiedDescription: 'Fetch Tags',
 	description: 'Fetch every tags',
 	usage: '!tags',
 	aliases: ['mytag', 'tagged'],
@@ -20,20 +21,22 @@ export default {
 	async run({ from, message, args, settings, cmd, groupMetadata }, client, store) {
 		const messages = configuration.OPTIONS.json
 			? JSON.parse(fs.readFileSync(DB_PATH)).messages[from]
-			: await store.loadMessages(from);
+			: store.loadMessages(from);
 
 		if (args[1] === 'get') {
-			let dataMessage = messages.find((v) => v.key.id === args[2]);
+			/**
+			 * @type {import('../../types/Reconstruct/index.js').ReassignResult}
+			 */
+			const dataMessage = await (
+				await import('../../helper/modules/parse-message.js')
+			).reassign(JSON.parse(JSON.stringify(messages.find((v) => v.key.id === args[2]))), client, store, false);
 
-			dataMessage = await (
-				await import('../../helper/modules/reassign-messages-object.js')
-			).reassign(JSON.parse(JSON.stringify(dataMessage)), client, store, false);
-			await client[botNum].reply('Here.', {
+			await client.instance.reply('Here.', {
 				from: dataMessage.from,
 				quoted: dataMessage.message,
 				groupMetadata: dataMessage.groupMetadata
 			});
-			await client[botNum].reply(
+			await client.instance.reply(
 				`Message Metadata : 
 
 Possibly Hidetag : ${dataMessage.mention.length > 0 && !dataMessage.body.match(/@[0-9]+/g) ? 'Yup' : 'Nope'}
@@ -45,18 +48,21 @@ Tot. Tags : ${dataMessage.mention.length}`,
 			return;
 		}
 
+		/**
+		 * @type {import('../../types/Reconstruct/index.js').ReassignResult[]}
+		 */
 		let dataMessages = [];
 
 		for (const message of messages) {
 			dataMessages.push(
 				await (
-					await import('../../helper/modules/reassign-messages-object.js')
+					await import('../../helper/modules/parse-message.js')
 				).reassign(JSON.parse(JSON.stringify(message)), client, store, false)
 			);
 		}
 
 		if (dataMessages.length === 0) {
-			return await client[botNum].reply('No messages scraped in this chat', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('No messages scraped in this chat', { from, quoted: message, groupMetadata });
 		}
 
 		dataMessages = dataMessages.filter(
@@ -66,7 +72,7 @@ Tot. Tags : ${dataMessage.mention.length}`,
 		);
 
 		if (dataMessages.length === 0) {
-			return await client[botNum].reply(`Your tags is not found. Chats scraped : ${messages.length}`, {
+			return await client.instance.reply(`Your tags is not found. Chats scraped : ${messages.length}`, {
 				from,
 				quoted: message,
 				groupMetadata
@@ -106,7 +112,7 @@ Tot. Tags : ${dataMessage.mention.length}`,
 			i++;
 		}
 
-		await client[botNum].send(
+		await client.instance.send(
 			from,
 			{
 				buttonText: 'Open List',

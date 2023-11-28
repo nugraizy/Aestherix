@@ -7,7 +7,7 @@ import { color, INFOLOG } from '../../utils/modules/index.js';
 
 const handler = async (client, message) => {
 	if (configuration.OPTIONS.autoRead) {
-		await client[botNum].readMessages([message.message.key]);
+		await client.instance.readMessages([message.message.key]);
 	}
 
 	const runtimes = ((Date.now() - runtime) / 1000).toFixed(0);
@@ -22,7 +22,7 @@ const handler = async (client, message) => {
 		caption += `Body : ${message.body}`;
 		const buffer = await textStory(message.body, message.message.message.extendedTextMessage.backgroundArgb);
 
-		return await client[botNum].send(ZERO, { image: buffer, caption: caption.trim() });
+		return await client.instance.send(ZERO, { image: buffer, caption: caption.trim() });
 	} else if (message.type === 'videoMessage' || message.type === 'imageMessage') {
 		caption += `Caption : ${message.body}`;
 		messages = generateWAMessageFromContent(ZERO, { ...message.message.message }, {});
@@ -33,7 +33,7 @@ const handler = async (client, message) => {
 			quotedMessage: message.message.message,
 			remoteJid: message.message.key.remoteJid
 		};
-		await client[botNum].relayMessage(ZERO, messages.message, { messageId: messages.key.id });
+		await client.instance.relayMessage(ZERO, messages.message, { messageId: messages.key.id });
 	}
 
 	INFOLOG(

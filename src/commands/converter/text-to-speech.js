@@ -7,6 +7,7 @@ import { textToSpeech } from '../../utils/converter/index.js';
  */
 export default {
 	name: 'text2speech',
+	minifiedDescription: 'TTS V1',
 	description: 'Convert text to speech',
 	category: 'Converter',
 	usage: '!text2speech <text> [--language]',
@@ -16,7 +17,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, filename, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please provide some text to convert to speech', {
+			return await client.instance.reply('Please provide some text to convert to speech', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -34,10 +35,10 @@ export default {
 		try {
 			const { buffer } = await textToSpeech(query, language, path.join(__dirname, `src/media/temporary_files/${filename}`));
 
-			await client[botNum].send(from, { audio: buffer }, { groupMetadata, quoted: message });
+			await client.instance.send(from, { audio: buffer }, { groupMetadata, quoted: message });
 		} catch (e) {
 			if (e.error === 'lang not found') {
-				return await client[botNum].reply(
+				return await client.instance.reply(
 					`Language not found. Available languages :\n\n${Object.keys(e.lang)
 						.map((key, i) => `${i + 1}. ${key}   :  ${e.lang[key]}`)
 						.join('\n')}`,
@@ -45,7 +46,7 @@ export default {
 				);
 			}
 
-			await client[botNum].reply('Error while converting text to speech', { from, quoted: message, groupMetadata });
+			await client.instance.reply('Error while converting text to speech', { from, quoted: message, groupMetadata });
 
 			log(e);
 		}

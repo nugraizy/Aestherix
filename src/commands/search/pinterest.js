@@ -6,7 +6,8 @@ import { pinterest } from '../../utils/pinterest/index.js';
  */
 export default {
 	name: 'pinterest',
-	description: 'Search images from pinterest',
+	minifiedDescription: 'Search Pinterest',
+	description: 'Search images from Pinterest.',
 	usage: '!pinterest <query>',
 	category: 'Search',
 	aliases: ['pin'],
@@ -15,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, type, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if (
@@ -25,7 +26,7 @@ export default {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.image === args[2]);
 
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{
 					image: { url: data[index].image },
@@ -73,7 +74,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 			const result = await pinterest(querie.trim());
 
 			if ('error' in result) {
-				await client[botNum].reply(result.message, { from, quoted: message, groupMetadata });
+				await client.instance.reply(result.message, { from, quoted: message, groupMetadata });
 				continue;
 			}
 
@@ -83,7 +84,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 
 			const index = ~~(Math.random() * result.length);
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					image: { url: result[index].image },

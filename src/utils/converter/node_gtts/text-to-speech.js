@@ -44,11 +44,11 @@ export const textToSpeech = (text, language, filename) =>
  * @returns {Promise<{url: string} & {error?: string}>}
  * @throws {Error}
  */
-export const gttsAI = (text, voice) =>
+export const gttsAI = (text, uuid) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			if (caches.uberduck.has(text + voice)) {
-				resolve(caches.get(text + voice));
+			if (caches.uberduck.has(text + uuid)) {
+				resolve(caches.get(text + uuid));
 			}
 
 			const basicAuth = `Basic ${
@@ -58,7 +58,7 @@ export const gttsAI = (text, voice) =>
 			const container = await (
 				await fetch(_apiUberduck, {
 					method: 'POST',
-					body: JSON.stringify({ speech: text, voice }),
+					body: JSON.stringify({ speech: text, voicemodel_uuid: uuid }), // eslint-disable-line
 					headers: {
 						accept: 'application/json',
 						authorization: basicAuth,
@@ -98,7 +98,7 @@ export const gttsAI = (text, voice) =>
 				resolve({ error: 'Could not process the request. Try again later.' });
 			}
 
-			caches.uberduck.set(text + voice, { url: result.path });
+			caches.uberduck.set(text + uuid, { url: result.path });
 
 			resolve({ url: result.path });
 		} catch (error) {

@@ -18,6 +18,7 @@ const defaulType = 'image';
  */
 export default {
 	name: 'textpro',
+	minifiedDescription: 'Textpro Text Maker',
 	description: 'Image maker using texts',
 	usage: '!textpro <query> <model/number[REQUIRED]> [options]\nOptions:\n-stk / -img\nAvailable Model Type : !textpro -model',
 	aliases: ['imgmake', 'maker', 'tpro'],
@@ -27,7 +28,7 @@ export default {
 	status: 'enable',
 	async run({ from, message, query, args, cmd, filename, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please provide a query', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please provide a query', { from, quoted: message, groupMetadata });
 		}
 
 		let {
@@ -86,7 +87,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 
 			buttons = buttons.reverse();
 
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{
 					text: texts,
@@ -101,7 +102,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 		models = !_.isNumber(parsed[0]) ? [randomize(dataJSON).url] : [_.get(dataJSON, parsed[0] - 1)?.url].filter(Boolean);
 
 		if (models?.length === 0) {
-			return await client[botNum].reply(`Model ${models[0]} not found\n Type : !${this.name} -type`, {
+			return await client.instance.reply(`Model ${models[0]} not found\n Type : !${this.name} -type`, {
 				from,
 				quoted: message,
 				groupMetadata
@@ -112,7 +113,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 			const result = await textpro(model, parsed.slice(1).join(' '));
 
 			if ('error' in result) {
-				await client[botNum].reply(`something went wrong:\n\n${result.error}`, { from, quoted: message, groupMetadata });
+				await client.instance.reply(`something went wrong:\n\n${result.error}`, { from, quoted: message, groupMetadata });
 
 				continue;
 			}
@@ -122,20 +123,25 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 			const { width, height } = imageSize(data);
 
 			const buffer = isStickers
-				? await client[botNum].prepareSticker(data, path.join(__dirname, `src/media/temporary_files/${filename}`), undefined, {
-						author: configuration.author,
-						packname: configuration.packname
-				  }) /* eslint-disable-line */
+				? await client.instance.prepareSticker(
+						data,
+						path.join(__dirname, `src/media/temporary_files/${filename}`),
+						undefined,
+						{
+							author: configuration.author,
+							packname: configuration.packname
+						}
+				  ) /* eslint-disable-line */
 				: await sharp(data)
 						.extract({ width: width - 40, height: height - 40, left: 0, top: 0 })
 						.toBuffer();
 
 			if (isImage) {
-				await client[botNum].send(from, { image: buffer }, { groupMetadata, quoted: message });
+				await client.instance.send(from, { image: buffer }, { groupMetadata, quoted: message });
 			} else if (isStickers) {
-				await client[botNum].send(from, { sticker: buffer }, { groupMetadata, quoted: message });
+				await client.instance.send(from, { sticker: buffer }, { groupMetadata, quoted: message });
 			} else {
-				await client[botNum].send(from, { [defaulType]: buffer }, { groupMetadata, quoted: message });
+				await client.instance.send(from, { [defaulType]: buffer }, { groupMetadata, quoted: message });
 			}
 		}
 	}

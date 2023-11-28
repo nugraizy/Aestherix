@@ -5,7 +5,8 @@ import { googleArticle, removeDuplicatesArray } from '../../utils/index.js';
  */
 export default {
 	name: 'googlearticle',
-	description: 'Find articles from Google.',
+	minifiedDescription: 'Search Google Articles',
+	description: 'Search articles from Google.',
 	usage: '!googlearticle <query>',
 	aliases: ['gar', 'goarticle', 'articles'],
 	category: 'Search',
@@ -14,14 +15,14 @@ export default {
 	status: 'enable',
 	run: async ({ query, message, from, type, args, groupMetadata }, client) => {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.url === args[2]);
 
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{
 					text: data[index].title,
@@ -61,11 +62,11 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 			const result = await googleArticle(querie, 10);
 
 			if ('error' in result) {
-				client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
+				client.instance.reply(result.error, { from, quoted: message, groupMetadata });
 				continue;
 			}
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					text: result[0].title,

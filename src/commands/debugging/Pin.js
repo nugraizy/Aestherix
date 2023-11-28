@@ -11,7 +11,7 @@ export default {
 	category: 'Debugging',
 	cooldown: 0,
 	limit: 0,
-	status: 'enable',
+	status: 'disable',
 	run: async ({ from, mediaData, groupMetadata }, client) => {
 		const messageToPin = mediaData.extract();
 
@@ -30,7 +30,7 @@ export default {
 		messages.message.pinInChatMessage.type = 'PIN_FOR_ALL';
 		messages.message.pinInChatMessage.senderTimestampMs = Number(messages.message.pinInChatMessage.senderTimestampMs);
 
-		await client[botNum].relayMessage(from, messages.message, {
+		await client.instance.relayMessage(from, messages.message, {
 			messageId: messages.key.id,
 			cachedGroupMetadata: () => groupMetadata
 		});

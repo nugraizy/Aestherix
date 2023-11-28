@@ -7,7 +7,8 @@ const _baseUrl = (input) => `https://github.com/${input}`;
  */
 export default {
 	name: 'githubcode',
-	description: 'Search code from Github',
+	minifiedDescription: 'Search Github Code',
+	description: 'Search code from Github.',
 	usage: '!githubcode <query>',
 	category: 'Search',
 	aliases: ['ghcode'],
@@ -16,14 +17,14 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, type, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.source === args[2]);
 
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{
 					text: `${'Github Code'.formatHeaders()}
@@ -74,7 +75,7 @@ ${data[index].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).
 		let result = await git.searchCode(query.trim());
 
 		if (result.total_count === 0) {
-			return await client[botNum].reply('Code not found.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Code not found.', { from, quoted: message, groupMetadata });
 		}
 
 		result = result.items.map((v) => ({
@@ -86,7 +87,7 @@ ${data[index].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).
 			textMatches: v.text_matches.map((w) => ({ fragment: w.fragment, texts: w.matches.map((x) => x.text).join(', ') }))
 		}));
 
-		await client[botNum].send(
+		await client.instance.send(
 			from,
 			{
 				text: `${'Github Code'.formatHeaders()}

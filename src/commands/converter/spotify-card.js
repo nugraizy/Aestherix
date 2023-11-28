@@ -5,6 +5,7 @@ import { SpotifyCard } from '../../helper/canvas/index.js';
  */
 export default {
 	name: 'spotifycard',
+	minifiedDescription: 'Spotify Card',
 	description: 'Make Spotif Card',
 	category: 'Converter',
 	aliases: ['scard'],
@@ -14,7 +15,7 @@ export default {
 	status: 'enable',
 	async run({ from, message, query, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please provide a query', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please provide a query', { from, quoted: message, groupMetadata });
 		}
 
 		const cover = new SpotifyCard(query, {
@@ -29,6 +30,6 @@ export default {
 
 		const { toBuffer } = await cover.render();
 
-		client[botNum].send(from, { image: new Buffer.from(toBuffer(), 'base64') }, { groupMetadata, quoted: message });
+		client.instance.send(from, { image: new Buffer.from(toBuffer(), 'base64') }, { groupMetadata, quoted: message });
 	}
 };

@@ -30,7 +30,7 @@ const handleGroupParticipantEvent = async (client, message, store) => {
 		await checkBan(client, message);
 	}
 
-	client[botNum].ev.emit('group.participants.update', message, client);
+	client.instance.ev.emit('group.participants.update', message, client);
 };
 
 /**
@@ -38,7 +38,7 @@ const handleGroupParticipantEvent = async (client, message, store) => {
  * @param {import('@adiwajshing/baileys').proto.IWebMessageInfo} message
  */
 const handleGroupSettingsEvent = (client, message) => {
-	client[botNum].ev.emit('group.settings.update', message, client);
+	client.instance.ev.emit('group.settings.update', message, client);
 };
 
 /**
@@ -46,7 +46,7 @@ const handleGroupSettingsEvent = (client, message) => {
  * @param {import('@adiwajshing/baileys').proto.IWebMessageInfo} message
  */
 const handleMiscEvent = (client, message) => {
-	client[botNum].ev.emit('message.oversized', message, client);
+	client.instance.ev.emit('message.oversized', message, client);
 };
 
 /**

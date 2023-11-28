@@ -10,7 +10,7 @@ module.exports = {
 		sourceType: 'module',
 	},
 	globals:{
-		"botNum": true,
+		"instance": true,
 		"client": true,
 		"where": true,
 		"log": true,

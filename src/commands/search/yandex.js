@@ -9,7 +9,8 @@ import { yandex } from '../../utils/image_reverse_search/index.js';
  */
 export default {
 	name: 'yandex',
-	description: 'Reverse image search',
+	minifiedDescription: 'Reverse Image Yandex',
+	description: 'Reverse image search from Yandex.',
 	usage: '!yandex <reply image/send image>',
 	category: 'Search',
 	aliases: ['ri', 'similar', 'whatimage', 'whatimg', 'findimg'],
@@ -18,7 +19,7 @@ export default {
 	status: 'enable',
 	async run({ isMediaImage, query, extractMediaData, filename, from, message, typeQuoted, groupMetadata }, client) {
 		if (!isURL(query) && !isMediaImage) {
-			return await client[botNum].reply('Please send/reply a image to find the similar image', {
+			return await client.instance.reply('Please send/reply a image to find the similar image', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -28,10 +29,10 @@ export default {
 		let media = query && isURL(query) ? query : null;
 
 		try {
-			await client[botNum].reply('Searching. Please wait...', { from, quoted: message, groupMetadata });
+			await client.instance.reply('Searching. Please wait...', { from, quoted: message, groupMetadata });
 
 			if (isMediaImage) {
-				media = await client[botNum].downloadAndSaveMediaMessage(
+				media = await client.instance.downloadAndSaveMediaMessage(
 					extractMediaData,
 					path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
 					typeQuoted
@@ -45,13 +46,13 @@ export default {
 					fs.unlinkSync(media);
 				}
 
-				return await client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(result.error, { from, quoted: message, groupMetadata });
 			} else if (result.information.length === 0) {
 				if (isMediaImage && fs.existsSync(media)) {
 					fs.unlinkSync(media);
 				}
 
-				return await client[botNum].reply('Similar images not found.', { from, quoted: message, groupMetadata });
+				return await client.instance.reply('Similar images not found.', { from, quoted: message, groupMetadata });
 			}
 
 			let i = 1;
@@ -71,7 +72,7 @@ export default {
 				capt += `Description : ${item.description}\n`;
 				capt += `Domain : ${item.domain}`;
 
-				await client[botNum].send(
+				await client.instance.send(
 					from,
 					{
 						image: { url: item.images.preview[0].url },
@@ -100,7 +101,7 @@ export default {
 
 			str += `Type : ${err.name}\n`;
 			str += `Message : ${err.message}`;
-			await client[botNum].reply(str, { from, quoted: message, groupMetadata });
+			await client.instance.reply(str, { from, quoted: message, groupMetadata });
 			log(err);
 		}
 	}

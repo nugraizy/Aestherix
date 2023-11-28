@@ -5,7 +5,8 @@ import { _3hentai, img2pdf, mime } from '../../utils/index.js';
  */
 export default {
 	name: '3hentai',
-	description: 'Search Doujin from 3hentai.net',
+	minifiedDescription: 'Search Doujin',
+	description: 'Search Doujin from 3hentai.net.',
 	usage: '!3hentai <query>',
 	aliases: ['3hent'],
 	category: 'Owner',
@@ -14,13 +15,13 @@ export default {
 	status: 'enable',
 	run: async ({ from, message, query, sender, groupMetadata }, client) => {
 		if (!query) {
-			return client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		const result = await _3hentai(query);
 
 		if ('error' in result) {
-			return client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
+			return client.instance.reply(result.error, { from, quoted: message, groupMetadata });
 		}
 
 		const { artists, categories, images, language, tags, title, totalPages, uploadDate } = result;
@@ -36,8 +37,8 @@ Language : ${language.join(', ')}
 Categories : ${categories.join(', ')}
 Tot. Pages : ${totalPages}`;
 
-		await client[botNum].reply(caption, { from, quoted: message, groupMetadata });
-		await client[botNum].send(from, {
+		await client.instance.reply(caption, { from, quoted: message, groupMetadata });
+		await client.instance.send(from, {
 			document: Buffer.from(buffer, 'base64'),
 			mimetype: mime('pdf'),
 			fileName: title

@@ -9,7 +9,7 @@ export default {
 	aliases: ['lst'],
 	cooldown: 5,
 	limit: 0,
-	status: 'enable',
+	status: 'disable',
 	async run({ from, query }, client) {
 		const row = Array(Number(query || 1)).fill({
 			rows: [
@@ -21,7 +21,7 @@ export default {
 			title: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪'
 		});
 
-		await client[botNum].send(from, {
+		await client.instance.send(from, {
 			buttonText: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
 			title: 'List Message',
 			text: '\t',

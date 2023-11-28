@@ -3,7 +3,8 @@
  */
 export default {
 	name: 'hidetag',
-	description: 'Hide tag',
+	minifiedDescription: 'Hide tag',
+	description: 'Hide tag everyone in the group.',
 	usage: '!hidetag <?query>',
 	aliases: ['tag', 'h'],
 	category: 'Moderation',
@@ -13,13 +14,17 @@ export default {
 	status: 'enable',
 	async run({ isAdmin, isOwner, from, query, bodyQuoted, participantsGroups, isGroup, message, groupMetadata }, client) {
 		if (!isGroup) {
-			return await client[botNum].reply('This command only works in group.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('This command only works in group.', { from, quoted: message, groupMetadata });
 		}
 
 		if (!isAdmin && !isOwner) {
-			return await client[botNum].reply('You must be an admin to use this command.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must be an admin to use this command.', {
+				from,
+				quoted: message,
+				groupMetadata
+			});
 		}
 
-		await client[botNum].send(from, { text: query || bodyQuoted || ':)', mentions: participantsGroups }, { groupMetadata });
+		await client.instance.send(from, { text: query || bodyQuoted || ':)', mentions: participantsGroups }, { groupMetadata });
 	}
 };

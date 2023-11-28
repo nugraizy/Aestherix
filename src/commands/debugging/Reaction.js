@@ -18,7 +18,7 @@ export default {
 	aliases: ['react', 'reactwith'],
 	cooldown: 5,
 	limit: 0,
-	status: 'enable',
+	status: 'disable',
 	async run({ from, message, bodyQuoted, mediaData, query, fromMe }, client, store) {
 		if (bodyQuoted) {
 			const emojis = query.match(emojiReg());
@@ -37,7 +37,7 @@ export default {
 					}
 				);
 
-				await client[botNum].relayMessage(from, messages.message, { messageId: messages.key.id });
+				await client.instance.relayMessage(from, messages.message, { messageId: messages.key.id });
 			}
 
 			return;
@@ -51,9 +51,9 @@ export default {
 				: (await store.loadMessages(from)).map((v) => v.key);
 
 			for (const chat of chats) {
-				chat.participant = chat.fromMe ? `${botNum.split(':')[0]}${S_WHATSAPP_NET}` : chat.participant;
+				chat.participant = chat.fromMe ? `${instance.split(':')[0]}${S_WHATSAPP_NET}` : chat.participant;
 
-				await client[botNum].relayMessage(
+				await client.instance.relayMessage(
 					from,
 					{ reactionMessage: { key: chat, text: emojis[0] } },
 					{ messageId: generateMessageID() }

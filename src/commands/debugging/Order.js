@@ -12,7 +12,7 @@ export default {
 	aliases: ['order'],
 	cooldown: 5,
 	limit: 0,
-	status: 'enable',
+	status: 'disable',
 	async run({ from, sender }, client) {
 		const messages = generateWAMessageFromContent(
 			from,
@@ -33,6 +33,6 @@ export default {
 			{}
 		);
 
-		await client[botNum].relayMessage(from, messages.message, { messageId: messages.key.id });
+		await client.instance.relayMessage(from, messages.message, { messageId: messages.key.id });
 	}
 };

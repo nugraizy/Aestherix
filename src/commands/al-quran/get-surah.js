@@ -5,6 +5,7 @@ import { getListSurah } from '../../utils/index.js';
  */
 export default {
 	name: 'getsurah',
+	minifiedDescription: 'Surah List',
 	description: 'Get List of Surah from The Quran',
 	category: 'AL-Quran',
 	usage: '!getsurah',
@@ -15,7 +16,7 @@ export default {
 	async run({ from, message, groupMetadata }, client) {
 		const lists = await getListSurah();
 
-		await client[botNum].reply(
+		await client.instance.reply(
 			lists
 				.map(
 					(v, i) =>

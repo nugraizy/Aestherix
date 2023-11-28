@@ -12,13 +12,13 @@ const sambungKataHandler = async ({ from, isGroup, sender, body, message, isAdmi
 
 		if (!result || ('status' in result && !result.status)) {
 			if (result && result.message) {
-				await client[botNum].reply(result.message, { from, quoted: message, groupMetadata });
+				await client.instance.reply(result.message, { from, quoted: message, groupMetadata });
 			}
 
 			return;
 		}
 
-		await client[botNum].send(
+		await client.instance.send(
 			from,
 			{
 				text: `This is Word Play Game.\n\nGuess the word for the given clue:\nWord: ${result.words}\nClue: ${

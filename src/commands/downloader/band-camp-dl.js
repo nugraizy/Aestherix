@@ -7,6 +7,7 @@ import { removeDuplicatesArray, isURL, toOpus, downloadBandcamp } from '../../ut
  */
 export default {
 	name: 'bandcampdl',
+	minifiedDescription: 'Download Bandcamp',
 	description: 'Download Musics from Bandcamp',
 	usage: '!bandcampdl <url>',
 	category: 'Downloader',
@@ -16,7 +17,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, filename, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -27,7 +28,7 @@ export default {
 			const regexs = isURL(querie.trim());
 
 			if (!regexs) {
-				await client[botNum].reply('Please Use a Valid URL.', { from, quoted: message, groupMetadata });
+				await client.instance.reply('Please Use a Valid URL.', { from, quoted: message, groupMetadata });
 
 				continue;
 			}
@@ -35,12 +36,12 @@ export default {
 			const result = await downloadBandcamp(querie);
 
 			if ('error' in result) {
-				await client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
+				await client.instance.reply(result.error, { from, quoted: message, groupMetadata });
 
 				continue;
 			}
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					document: await toOpus('opus', {
@@ -51,6 +52,7 @@ export default {
 					fileName: `${result.title}.opus`,
 					mimetype: 'audio/opus',
 					caption: `${'Bandcamp'.formatHeaders()}
+
 Title : ${result.title}`
 				},
 				{ groupMetadata, quoted: message }

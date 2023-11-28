@@ -25,6 +25,11 @@ export type CommandProps = {
 	name: string;
 
 	/**
+	 *  Your minified description
+	 */
+	minifiedDescription: string;
+
+	/**
 	 *  Your plugins description
 	 */
 	description: number;

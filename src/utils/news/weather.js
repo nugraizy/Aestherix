@@ -23,8 +23,8 @@ const EMOJIS = {
 
 const URL_API = (type, ...input) => {
 	return {
-		coordinate: `https://api.openweathermap.org/data/2.5/weather?lat=${input[0]}&lon=${input[1]}&appid=6507c04b8f51f3b862e4f84bdfad8a1c&units=metric&lang=en`,
-		city: `https://api.openweathermap.org/data/2.5/weather?q=${input[0]}&appid=6507c04b8f51f3b862e4f84bdfad8a1c&units=metric&lang=en`
+		coordinate: `https://api.openweathermap.org/data/2.5/weather?lat=${input[0]}&lon=${input[1]}&appid=${process.env.WEATHER_KEY}&units=metric&lang=en`,
+		city: `https://api.openweathermap.org/data/2.5/weather?q=${input[0]}&appid=${process.env.WEATHER_KEY}&units=metric&lang=en`
 	}[type];
 };
 
@@ -33,15 +33,20 @@ export const getWeather = (type, ...q) =>
 		try {
 			let data;
 
+			const headers = {
+				'User-Agent':
+					'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36'
+			};
+
 			switch (type) {
 				case 'coordinate':
-					data = await fetchJSON(URL_API(type, q[0], q[1]));
+					data = await fetchJSON(URL_API(type, q[0], q[1]), { headers });
 					break;
 				case 'city':
-					data = await fetchJSON(URL_API(type, q[0]));
+					data = await fetchJSON(URL_API(type, q[0]), { headers });
 					break;
 				default:
-					data = await fetchJSON(URL_API('city', q[0]));
+					data = await fetchJSON(URL_API('city', q[0]), { headers });
 					break;
 			}
 

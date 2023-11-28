@@ -8,6 +8,7 @@ import { romanize } from '../../utils/index.js';
  */
 export default {
 	name: 'about',
+	minifiedDescription: 'Bot Information',
 	description: 'Shows the bot information',
 	usage: '!about',
 	aliases: ['info'],
@@ -27,8 +28,8 @@ Our Motto :
 
 Using less module and try to find every private api from the provider (if they using one).`;
 
-		await client[botNum].reply(capt.trim(), { from, quoted: message, groupMetadata });
-		await client[botNum].reply(
+		await client.instance.reply(capt.trim(), { from, quoted: message, groupMetadata });
+		await client.instance.reply(
 			`Thanks To :
 Aldi a.k.a Alphanum404
 Benni a.k.a Bennz

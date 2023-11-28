@@ -16,9 +16,9 @@ const handleTebakGambar = async ({ from, isAdmin, isGroup, body, message, groupM
 			if (input === answerLowerCase) {
 				deleteIntervals(configuration.intervals.tebakGambar.get(from), configuration.intervals.tebakGambar, from);
 				configuration.games.tebakGambar.delete(id);
-				await client[botNum].send(from, { text: 'Correct!' }, { groupMetadata, quoted: message });
+				await client.instance.send(from, { text: 'Correct!' }, { groupMetadata, quoted: message });
 			} else if (similarity.compareTwoStrings(input, answerLowerCase) >= minScore) {
-				await client[botNum].send(from, { text: 'The answer is close!' }, { groupMetadata, quoted: message });
+				await client.instance.send(from, { text: 'The answer is close!' }, { groupMetadata, quoted: message });
 			}
 		}
 	};

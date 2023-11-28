@@ -30,6 +30,7 @@ Synopsis : ${obj?.synopsis || 'n/a'}`;
  */
 export default {
 	name: 'malanime',
+	minifiedDescription: 'MAL Search Anime',
 	description: 'Search an anime on MyAnimeList',
 	usage: '!malanime <query>',
 	category: 'Anime',
@@ -37,14 +38,14 @@ export default {
 	limit: 2,
 	cooldown: 2,
 	status: 'enable',
-	async run({ query, from, message, args, type, cmd, groupMetadata }, client) {
+	async run({ query, from, message, args, type, /*cmd,*/ groupMetadata }, client) {
 		const mal = new MyAnimeList();
 
 		if (args[1] === 'detail' && type === 'listResponseMessage') {
 			const detail = await mal.getAnimeDetail(args[2]);
 
 			if ('error' in detail) {
-				return await client[botNum].reply(detail.message, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(detail.message, { from, quoted: message, groupMetadata });
 			}
 
 			const caption = parse(detail);
@@ -53,7 +54,7 @@ export default {
 				main_picture: { large, medium }
 			} = detail;
 
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{
 					image: { url: large },
@@ -72,16 +73,16 @@ export default {
 		const result = await mal.searchAnime(query);
 
 		if ('error' in result) {
-			return await client[botNum].reply(result.message, { from, quoted: message, groupMetadata });
+			return await client.instance.reply(result.message, { from, quoted: message, groupMetadata });
 		}
 
-		const rows = result
-			.map(({ title, id }, i) => {
-				if (i !== 0) {
-					return { rows: [{ title: `[ ${i + 1} ] ${title}`, rowId: `${cmd} detail ${id}` }], title: '\t' };
-				}
-			})
-			.filter(Boolean);
+		// const rows = result
+		// 	.map(({ title, id }, i) => {
+		// 		if (i !== 0) {
+		// 			return { rows: [{ title: `[ ${i + 1} ] ${title}`, rowId: `${cmd} detail ${id}` }], title: '\t' };
+		// 		}
+		// 	})
+		// 	.filter(Boolean);
 
 		const caption = parse(result[0]);
 		const {
@@ -89,7 +90,7 @@ export default {
 			main_picture: { large, medium }
 		} = result[0];
 
-		await client[botNum].send(
+		await client.instance.send(
 			from,
 			{
 				image: { url: large },
@@ -104,16 +105,16 @@ export default {
 			{ groupMetadata, quoted: message }
 		);
 
-		await client[botNum].send(
-			from,
-			{
-				title: 'Myanimelist Search [ Anime ]'.formatHeaders(),
-				text: 'Myanimelist Search',
-				footer: 'choose one of the title inside of the list to see the details of the anime.',
-				buttonText: 'Open List',
-				sections: rows
-			},
-			{ groupMetadata }
-		);
+		// await client.instance.send(
+		// 	from,
+		// 	{
+		// 		title: 'Myanimelist Search [ Anime ]'.formatHeaders(),
+		// 		text: 'Myanimelist Search',
+		// 		footer: 'choose one of the title inside of the list to see the details of the anime.',
+		// 		buttonText: 'Open List',
+		// 		sections: rows
+		// 	},
+		// 	{ groupMetadata }
+		// );
 	}
 };

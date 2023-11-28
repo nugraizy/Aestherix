@@ -5,7 +5,8 @@ import { slot as slots } from '../../utils/games/index.js';
  */
 export default {
 	name: 'slotmachine',
-	description: 'Play Slot Machine',
+	minifiedDescription: 'Play Slot',
+	description: 'Play Slot Machine.',
 	usage: '!slot <bet>',
 	category: 'Games',
 	aliases: ['slot'],
@@ -24,6 +25,6 @@ export default {
 			capt += `\nYou Lose ${slot.lose}! Try again?\nSlot Machine by Void Bot. Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 		}
 
-		await client[botNum].reply(capt, { from, quoted: message, groupMetadata });
+		await client.instance.reply(capt, { from, quoted: message, groupMetadata });
 	}
 };

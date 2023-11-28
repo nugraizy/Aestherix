@@ -3,7 +3,8 @@
  */
 export default {
 	name: 'ping',
-	description: 'Ping the bot or Show bot latency',
+	minifiedDescription: 'Ping Latency',
+	description: 'Ping the bot or Show bot latency.',
 	usage: '!ping',
 	aliases: ['pong'],
 	category: 'Misc',
@@ -13,7 +14,7 @@ export default {
 	async run({ from, message, groupMetadata }, client) {
 		const start = performance.now();
 
-		await client[botNum].send(
+		await client.instance.send(
 			from,
 			{ text: `Pong! ${(performance.now() - start).toFixed(3)} seconds` },
 			{

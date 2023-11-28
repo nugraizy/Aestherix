@@ -5,7 +5,8 @@ import { getEarthquake } from '../../utils/index.js';
  */
 export default {
 	name: 'gempa',
-	description: 'Showing latest earthquake in Indonesia',
+	minifiedDescription: 'Latest Earthquake',
+	description: 'Showing latest earthquake in Indonesia.',
 	category: 'News',
 	usage: '!gempa',
 	aliases: ['earthquake'],
@@ -35,7 +36,7 @@ export default {
 			}
 		}
 
-		await client[botNum].send(
+		await client.instance.send(
 			message.from,
 			{ image: { url: data[0].shakemap }, caption },
 			{ groupMetadata: message.groupMetadata, quoted: message.message }

@@ -5,7 +5,8 @@ import { iflixSearch, removeDuplicatesArray } from '../../utils/index.js';
  */
 export default {
 	name: 'iflix',
-	description: 'Find movie on iflix',
+	minifiedDescription: 'Search Iflix',
+	description: 'Search movie on iflix.',
 	category: 'Search',
 	usage: '!iflix <query>',
 	aliases: ['iflx'],
@@ -37,7 +38,7 @@ export default {
 				};
 			});
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					image: { url: data[index].thumbnail },
@@ -67,7 +68,7 @@ export default {
 				},
 				{ groupMetadata, quoted: message }
 			);
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{
 					buttonText: 'Open List',
@@ -79,7 +80,7 @@ export default {
 				{ groupMetadata }
 			);
 		} else if (args[1] === 'get') {
-			return await client[botNum].reply(`${'Iflix Search'.formatHeaders()}\n\nURL : ${args[2]}`, {
+			return await client.instance.reply(`${'Iflix Search'.formatHeaders()}\n\nURL : ${args[2]}`, {
 				from,
 				quoted: message,
 				groupMetadata
@@ -93,7 +94,7 @@ export default {
 			const data = await iflixSearch(querie);
 
 			if ('error' in data) {
-				return await client[botNum].reply(data.error, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(data.error, { from, quoted: message, groupMetadata });
 			}
 
 			let caption = 'Iflix Search'.formatHeaders();
@@ -115,7 +116,7 @@ export default {
 				};
 			});
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					image: { url: data[0].thumbnail },
@@ -135,7 +136,7 @@ export default {
 				},
 				{ groupMetadata, quoted: message }
 			);
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					buttonText: 'Open List',

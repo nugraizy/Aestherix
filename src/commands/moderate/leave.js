@@ -3,6 +3,7 @@
  */
 export default {
 	name: 'leave',
+	minifiedDescription: 'Leave Group',
 	description: 'Leave the group',
 	usage: '!leave',
 	aliases: ['out', 'bye'],
@@ -12,9 +13,9 @@ export default {
 	restrict: true,
 	status: 'enable',
 	async run({ from, message, groupMetadata }, client) {
-		const data = await client[botNum].reply('I will leave.', { from, quoted: message, groupMetadata });
+		const data = await client.instance.reply('I will leave.', { from, quoted: message, groupMetadata });
 
-		await client[botNum].groupLeave(from);
-		await client[botNum].chatModify({ delete: true, lastMessages: [data] }, from);
+		await client.instance.groupLeave(from);
+		await client.instance.chatModify({ delete: true, lastMessages: [data] }, from);
 	}
 };

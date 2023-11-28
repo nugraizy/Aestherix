@@ -28,6 +28,7 @@ const createPostCaption = (post) => {
  */
 export default {
 	name: 'twitterdl',
+	minifiedDescription: 'Download Twitter post',
 	description: 'Download Twitter post',
 	usage: '!twitterdl <url>',
 	aliases: ['twtdl', 'twitdl'],
@@ -37,18 +38,18 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please specify a url', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a url', { from, quoted: message, groupMetadata });
 		}
 
 		let { _: urls } = parser(query);
 
 		if (urls.length === 1 && !isURL(urls[0])) {
-			return await client[botNum].reply('Please specify a valid url', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a valid url', { from, quoted: message, groupMetadata });
 		}
 
 		for (const url of urls) {
 			if (!isURL(url.trim())) {
-				await client[botNum].reply('Please specify a valid url', { from, quoted: message, groupMetadata });
+				await client.instance.reply('Please specify a valid url', { from, quoted: message, groupMetadata });
 
 				continue;
 			}
@@ -58,7 +59,7 @@ export default {
 			const post = await twitterDownload(url);
 
 			if ('error' in post) {
-				await client[botNum].reply(`Error while downloading Twitter post\n\n${post.error}\n${url}`, {
+				await client.instance.reply(`Error while downloading Twitter post\n\n${post.error}\n${url}`, {
 					from,
 					quoted: message,
 					groupMetadata
@@ -71,10 +72,10 @@ export default {
 			const caption = createPostCaption(post);
 
 			if (post.medias.length > 1) {
-				await client[botNum].send(from, { text: caption }, { groupMetadata, quoted: message });
+				await client.instance.send(from, { text: caption }, { groupMetadata, quoted: message });
 
 				for (const media of post.medias) {
-					await client[botNum].send(
+					await client.instance.send(
 						from,
 						media.type === 'video' ? { video: { url: media.url } } : { image: { url: media.url } },
 						{
@@ -84,7 +85,7 @@ export default {
 					await delay(100);
 				}
 			} else {
-				await client[botNum].send(
+				await client.instance.send(
 					from,
 					post.medias[0].type === 'video'
 						? { video: { url: post.medias[0].url }, caption }

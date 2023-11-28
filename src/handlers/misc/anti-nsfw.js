@@ -99,7 +99,7 @@ const antiNSFWHandler = async (
 			extractMediaData,
 			groupMetadata,
 			filePath,
-			client: client[botNum]
+			client: client.instance
 		});
 	}
 };

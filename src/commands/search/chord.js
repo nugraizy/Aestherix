@@ -5,7 +5,8 @@ import { chords } from '../../utils/index.js';
  */
 export default {
 	name: 'chords',
-	description: 'Find music chords.',
+	minifiedDescription: 'Search Chords',
+	description: 'Search music chords.',
 	usage: '!chords <query>',
 	aliases: ['chord'],
 	category: 'Search',
@@ -14,16 +15,16 @@ export default {
 	status: 'enable',
 	run: async ({ query, message, from, groupMetadata }, client) => {
 		if (!query) {
-			return client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		const result = await chords(query);
 
 		if ('error' in result) {
-			client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
+			client.instance.reply(result.error, { from, quoted: message, groupMetadata });
 		}
 
-		client[botNum].reply(
+		client.instance.reply(
 			`${'Chords'.formatHeaders()}
 
 Title : ${result.title}

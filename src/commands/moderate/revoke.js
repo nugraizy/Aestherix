@@ -3,6 +3,7 @@
  */
 export default {
 	name: 'revoke',
+	minifiedDescription: 'Revoke Group URL',
 	description: "Revoke group's invitation URL." /* eslint-disable-line */,
 	usage: '!revoke',
 	aliases: ['rvk', 'tarik'],
@@ -12,16 +13,16 @@ export default {
 	status: 'enable',
 	async run({ isBotAdmin, from, message, groupMetadata, sender }, client) {
 		if (!isBotAdmin) {
-			return await client[botNum].reply('Bot is not admin, Please promote admin before using moderation commands.', {
+			return await client.instance.reply('Bot is not admin, Please promote admin before using moderation commands.', {
 				from,
 				quoted: message,
 				groupMetadata
 			});
 		}
 
-		const code = (await client[botNum].updateGroup(from, 'REVOKE'))[0];
+		const code = (await client.instance.updateGroup(from, 'REVOKE'))[0];
 
-		await client[botNum].send(
+		await client.instance.send(
 			from,
 			{
 				text: "Succeeded to revoke the group's invitation URL." /* eslint-disable-line */,
@@ -39,7 +40,7 @@ export default {
 			{ groupMetadata, quoted: message }
 		);
 
-		await client[botNum].send(
+		await client.instance.send(
 			sender,
 			{ text: `Here's the new URL:\nhttps://chat.whatsapp.com/${code}` },
 			{ groupMetadata, quoted: message }

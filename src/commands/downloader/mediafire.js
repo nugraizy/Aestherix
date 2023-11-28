@@ -8,6 +8,7 @@ const regex = (url) =>
  */
 export default {
 	name: 'mediafire',
+	minifiedDescription: 'Download Mediafire',
 	description: 'Download files from Mediafire',
 	usage: '!mediafire <url>',
 	aliases: ['mf', 'mfire', 'mediaf'],
@@ -17,20 +18,20 @@ export default {
 	status: 'enable',
 	run: async ({ from, message, query, groupMetadata }, client) => {
 		if (!query) {
-			return client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if (!regex(query)) {
-			return client[botNum].reply('Please specify a valid Mediafire url.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('Please specify a valid Mediafire url.', { from, quoted: message, groupMetadata });
 		}
 
 		const result = await mediafire(query);
 
 		if ('error' in result) {
-			return client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
+			return client.instance.reply(result.error, { from, quoted: message, groupMetadata });
 		}
 
-		client[botNum].reply(
+		client.instance.reply(
 			`${'Mediafire Downloader'.formatHeaders()}
 		
 Filename: ${result.filename}
@@ -39,7 +40,7 @@ Filetype: ${result.filetype}
 Uploaded: ${result.uploaded}`,
 			{ from, quoted: message, groupMetadata }
 		);
-		client[botNum].send(
+		client.instance.send(
 			from,
 			{
 				[result.filetype]: { url: result.dlLink },

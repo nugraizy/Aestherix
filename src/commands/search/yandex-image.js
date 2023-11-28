@@ -5,7 +5,8 @@ import { yandexImage, removeDuplicatesArray } from '../../utils/index.js';
  */
 export default {
 	name: 'yandeximage',
-	description: 'Find images from Yandex.',
+	minifiedDescription: 'Yandex Images',
+	description: 'Search images from Yandex.',
 	usage: '!yandeximage <query>',
 	aliases: ['yim', 'yis', 'yandimage'],
 	category: 'Search',
@@ -14,14 +15,14 @@ export default {
 	status: 'enable',
 	run: async ({ query, message, from, type, args, groupMetadata }, client) => {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v === args[2]);
 
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{
 					image: { url: data[index] },
@@ -59,17 +60,21 @@ export default {
 			const result = await yandexImage(querie);
 
 			if ('error' in result) {
-				client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
+				client.instance.reply(result.error, { from, quoted: message, groupMetadata });
 				continue;
 			}
 
 			const index = ~~(Math.random() * result.length);
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					image: { url: result[index].url.image },
-					caption: 'Yandex Images'.formatHeaders(),
+					caption:
+						'Yandex Images'.formatHeaders() +
+						`\n\nTitle : ${result[index].title}
+Article : ${result[index].url.article}
+\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: result[0].url.image } },
 						result.length !== 1
@@ -81,9 +86,7 @@ export default {
 							  } /* eslint-disable-line */
 							: {}
 					],
-					footer: `Title : ${result[index].title}
-Article : ${result[index].url.article}
-\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+					footer: ''
 				},
 				{ groupMetadata, quoted: message }
 			);

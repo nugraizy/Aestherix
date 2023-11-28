@@ -5,7 +5,8 @@ import { KomikCast, mime } from '../../utils/index.js';
  */
 export default {
 	name: 'komikcast',
-	description: 'Search Comic from Komikcast.net',
+	minifiedDescription: 'Search Komikcast',
+	description: 'Search comics from Komikcast.net.',
 	usage: '!komikcast <query>',
 	aliases: ['komik', 'comic', 'manga'],
 	category: 'Search',
@@ -14,7 +15,7 @@ export default {
 	status: 'enable',
 	run: async ({ query, from, message, type, args, sender, groupMetadata }, client) => {
 		if (!query) {
-			return client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		const komik = new KomikCast();
@@ -34,7 +35,7 @@ Serialization : ${serialize}
 Views : ${views}
 Tot. Chapters : ${chapters.length}`;
 
-			await client[botNum].send(from, { image: { url: thumbnail }, caption }, { groupMetadata, quoted: message });
+			await client.instance.send(from, { image: { url: thumbnail }, caption }, { groupMetadata, quoted: message });
 
 			const row = [];
 
@@ -42,7 +43,7 @@ Tot. Chapters : ${chapters.length}`;
 				row.push({ rows: [{ title: `Chapter ${i + 1}`, rowId: `.komikcast ${v} extract ${altTitle}` }], title: '\t' })
 			);
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					buttonText: 'Open list',
@@ -59,7 +60,7 @@ Tot. Chapters : ${chapters.length}`;
 
 			const buffer = await komik.toPdf(pages, sender);
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					document: Buffer.from(buffer, 'base64'),
@@ -75,7 +76,7 @@ Tot. Chapters : ${chapters.length}`;
 		const result = await komik.search(query);
 
 		if ('error' in result) {
-			return client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
+			return client.instance.reply(result.error, { from, quoted: message, groupMetadata });
 		}
 
 		const row = [];
@@ -84,7 +85,7 @@ Tot. Chapters : ${chapters.length}`;
 			row.push({ rows: [{ title: `${name}`, rowId: `.komikcast ${source} detail` }], title: '\t' })
 		);
 
-		await client[botNum].send(
+		await client.instance.send(
 			from,
 			{
 				buttonText: 'Open list',

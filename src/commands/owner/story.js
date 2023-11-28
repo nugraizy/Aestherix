@@ -21,7 +21,7 @@ export default {
 	async run({ from, message, groupMetadata }, client, store) {
 		const messages = configuration.OPTIONS.json
 			? JSON.parse(readFileSync(STATUS_PATH)).messages[STATUS]
-			: await store.loadMessages(STATUS);
+			: store.loadMessages(STATUS);
 		const tempContainer = new Cache();
 		let caption = 'Fetch WhatsApp Story'.formatHeaders();
 
@@ -65,7 +65,7 @@ export default {
 		}
 
 		if (tempContainer.size === 0) {
-			return await client[botNum].reply('No story are found.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('No story are found.', { from, quoted: message, groupMetadata });
 		}
 
 		for (const value of Array.from(tempContainer.entries())) {
@@ -80,7 +80,7 @@ export default {
 			caption += `Videos : ${value[1].stories?.videoMessage?.length ?? 0}\n\n`;
 		}
 
-		await client[botNum].send(
+		await client.instance.send(
 			from,
 			{
 				buttonText: 'Open List',

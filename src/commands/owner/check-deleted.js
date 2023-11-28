@@ -16,7 +16,8 @@ const handler = new Cache();
  */
 export default {
 	name: 'checkdeleted',
-	description: 'Fetch every deleted messages in chat',
+	minifiedDescription: 'Check Deleted Messages',
+	description: 'Fetch every deleted messages in chat.',
 	usage: '!checkdeleted',
 	aliases: ['cekdel', 'checkdel'],
 	category: 'Owner',
@@ -56,7 +57,7 @@ export default {
 			i++;
 		}
 
-		await client[botNum].send(
+		await client.instance.send(
 			from,
 			{
 				buttonText: 'Open List',

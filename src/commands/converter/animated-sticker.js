@@ -9,6 +9,7 @@ import { color, INFOLOG } from '../../utils/modules/index.js';
  */
 export default {
 	name: 'animatedsticker',
+	minifiedDescription: 'Animated Text',
 	description: 'Generate animated gif sticker',
 	category: 'Converter',
 	usage: '!gittp <text> [--color]',
@@ -54,7 +55,7 @@ export default {
 		if (bodyQuoted) {
 			const { buffer } = await attp(prettyNumber, bodyQuoted, parseOptions.color);
 
-			await client[botNum].send(from, { sticker: new Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
+			await client.instance.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
 			INFOLOG(`${color('Sticker is sent', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
 			return;
 		}
@@ -62,11 +63,11 @@ export default {
 		if (query) {
 			const { buffer } = await attp(prettyNumber, query, parseOptions.color);
 
-			await client[botNum].send(from, { sticker: new Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
+			await client.instance.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
 			INFOLOG(`${color('Sticker is sent', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
 			return;
 		}
 
-		return await client[botNum].reply('Please enter text to convert to sticker', { from, quoted: message, groupMetadata });
+		return await client.instance.reply('Please enter text to convert to sticker', { from, quoted: message, groupMetadata });
 	}
 };

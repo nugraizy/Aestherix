@@ -9,6 +9,7 @@ import { instagram } from '../../utils/instagram/index.js';
  */
 export default {
 	name: 'igpost',
+	minifiedDescription: 'Download Instagram Post',
 	description: 'Downloads the post of the user',
 	usage: '!igpost <url>',
 	aliases: ['igpost', 'igp'],
@@ -18,7 +19,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please specify a url', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a url', { from, quoted: message, groupMetadata });
 		}
 
 		const { _: urls } = parser(query);
@@ -29,7 +30,7 @@ export default {
 
 		for (const data in posts) {
 			if ('error' in posts[data]) {
-				await client[botNum].reply(`Error while downloading Instagram post\n\n${posts[data].error}\n${data}`, {
+				await client.instance.reply(`Error while downloading Instagram post\n\n${posts[data].error}\n${data}`, {
 					from,
 					quoted: message,
 					groupMetadata
@@ -51,7 +52,7 @@ export default {
 			if (posts[data].post.length === 1) {
 				capt += `Caption : ${posts[data].captions.trim()}\n`;
 
-				await client[botNum].send(
+				await client.instance.send(
 					from,
 					posts[data].post[0].isVideo
 						? { video: { url: posts[data].post[0].url }, caption: capt.trim() }
@@ -65,10 +66,10 @@ export default {
 				capt += `Tot. Media : ${posts[data].post.length}\n`;
 				capt += `Caption : ${posts[data].captions.trim()}\n`;
 
-				await client[botNum].send(from, { text: capt.trim() }, { quoted: message });
+				await client.instance.send(from, { text: capt.trim() }, { quoted: message });
 
 				for (const media of posts[data].post) {
-					await client[botNum].send(from, media.isVideo ? { video: { url: media.url } } : { image: { url: media.url } }, {
+					await client.instance.send(from, media.isVideo ? { video: { url: media.url } } : { image: { url: media.url } }, {
 						groupMetadata
 					});
 					await delay(300);

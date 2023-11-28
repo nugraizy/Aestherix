@@ -6,7 +6,8 @@ import { downloadArtworks, searchArtwork } from '../../utils/pixiv/index.js';
  */
 export default {
 	name: 'pixivartwork',
-	description: 'Find artworks from Pixiv',
+	minifiedDescription: 'Search Pixiv Art',
+	description: 'Search artworks from Pixiv.',
 	usage: '!pixivartwork <query>',
 	aliases: ['pixart', 'pixivart'],
 	category: 'Search',
@@ -15,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, cmd, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -27,7 +28,7 @@ export default {
 			const dataImage = await downloadArtworks(data[0].id);
 
 			if ('error' in data) {
-				await client[botNum].reply(`Failed while searching Pixiv artworks\n\n${data.error}\n${querie}`, {
+				await client.instance.reply(`Failed while searching Pixiv artworks\n\n${data.error}\n${querie}`, {
 					from,
 					quoted: message,
 					groupMetadata
@@ -41,7 +42,7 @@ export default {
 				headers: { referer: `https://www.pixiv.net/ajax/illust/${dataImage.id}` }
 			});
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					image: new Buffer.from(images, 'base64'),
@@ -64,7 +65,7 @@ Total Media : ${dataImage.pageCount}`
 						headers: { referer: `https://www.pixiv.net/ajax/illust/${dataImage.id}` }
 					});
 
-					await client[botNum].send(
+					await client.instance.send(
 						from,
 						{
 							image: new Buffer.from(images, 'base64'),
@@ -89,7 +90,7 @@ Total Media : ${dataImage.pageCount}`
 				i++;
 			}
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					buttonText: 'Pixiv Artworks Search'.formatHeaders(),

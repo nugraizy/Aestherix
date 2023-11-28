@@ -23,6 +23,7 @@ const regex = (input) => {
  */
 export default {
 	name: 'deviantartdl',
+	minifiedDescription: 'Download Deviant Art',
 	description: 'Download images from Deviant Art',
 	usage: '!deviantartdl <url>',
 	category: 'Downloader',
@@ -32,7 +33,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -43,7 +44,7 @@ export default {
 			const regexs = regex(querie.trim());
 
 			if (!regexs.status) {
-				await client[botNum].reply(regexs.message, { from, quoted: message, groupMetadata });
+				await client.instance.reply(regexs.message, { from, quoted: message, groupMetadata });
 
 				continue;
 			}
@@ -51,24 +52,26 @@ export default {
 			const result = await downloadDeviantArt(querie);
 
 			if ('error' in result) {
-				await client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
+				await client.instance.reply(result.error, { from, quoted: message, groupMetadata });
 
 				continue;
 			}
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					image: { url: result.image },
-					caption: 'Deviant Art'.formatHeaders(),
+					caption:
+						'Deviant Art'.formatHeaders() +
+						`\n\nTitle : ${result.author.capitalize()}
+Author : ${result.author}
+Favourites : ${numberWithCommas(result.favourites)}
+Views : ${numberWithCommas(result.views)}`,
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: result.image } },
 						{ urlButton: { displayText: 'Deviant Art Source', url: result.source } }
 					],
-					footer: `Title : ${result.author.capitalize()}
-Author : ${result.author}
-Favourites : ${numberWithCommas(result.favourites)}
-Views : ${numberWithCommas(result.views)}`
+					footer: ''
 				},
 				{ groupMetadata, quoted: message }
 			);

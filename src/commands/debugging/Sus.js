@@ -11,7 +11,7 @@ export default {
 	aliases: ['sus'],
 	cooldown: 5,
 	limit: 0,
-	status: 'enable',
+	status: 'disable',
 	async run({ isOwner, from, query }, client, store) {
 		if (!isOwner) {
 			return;
@@ -20,7 +20,7 @@ export default {
 		const stores = store.messages[from].array.map((v) => v.key.id);
 
 		for (const stored of stores) {
-			await client[botNum].relayMessage(from, { conversation: query || 'yeet' }, { messageId: stored });
+			await client.instance.relayMessage(from, { conversation: query || 'yeet' }, { messageId: stored });
 			await delay(300);
 		}
 	}

@@ -33,7 +33,7 @@ export const startTG = async (client, id, { message, sender, groupMetadata }, re
 		'_'
 	)}\n`;
 
-	await client[botNum].send(id, { image: { url: image }, caption }, { groupMetadata, quoted: message }).then((data) => {
+	await client.instance.send(id, { image: { url: image }, caption }, { groupMetadata, quoted: message }).then((data) => {
 		obj.message = data;
 		pushMessageData(id, obj, data);
 	});
@@ -65,7 +65,7 @@ export const startTG = async (client, id, { message, sender, groupMetadata }, re
 			const { timer } = checkIntervals(configuration.intervals.tebakGambar.get(ids));
 
 			if (timer === 5) {
-				clients[botNum].reply('Time is almost over! 5 seconds', {
+				clients.instance.reply('Time is almost over! 5 seconds', {
 					from: ids,
 					quoted: messages,
 					groupMetadata: groupMetadatas
@@ -74,7 +74,7 @@ export const startTG = async (client, id, { message, sender, groupMetadata }, re
 
 			if (timer <= 0) {
 				deleteIntervals(configuration.intervals.tebakGambar.get(ids), configuration.intervals.tebakGambar, ids);
-				clients[botNum].reply(`Time's up! The answer is ${answers}`, {
+				clients.instance.reply(`Time's up! The answer is ${answers}`, {
 					from: ids,
 					quoted: messages,
 					groupMetadata: groupMetadatas

@@ -5,6 +5,7 @@ import { S_WHATSAPP_NET } from '../../helper/index.js';
  */
 export default {
 	name: 'promote',
+	minifiedDescription: 'Promote User',
 	description: 'Promote member to admin.',
 	usage: '!promote <reply/tag member>',
 	aliases: ['prmt', 'admin', 'adm'],
@@ -15,7 +16,7 @@ export default {
 	restrict: true,
 	async run({ isBotAdmin, query, from, bodyQuoted, mediaData, mention, message, adminGroups, groupMetadata }, client) {
 		if (!query && mention.length === 0 && !bodyQuoted) {
-			return await client[botNum].reply('Please reply people message or mention people.', {
+			return await client.instance.reply('Please reply people message or mention people.', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -23,7 +24,7 @@ export default {
 		}
 
 		if (!isBotAdmin) {
-			return await client[botNum].reply('Bot is not admin, Please promote admin before using moderation commands.', {
+			return await client.instance.reply('Bot is not admin, Please promote admin before using moderation commands.', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -31,20 +32,20 @@ export default {
 		}
 
 		if (
-			mention?.includes(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`) ||
-			mediaData?.participant?.includes(`${botNum.split(':')[0]}${S_WHATSAPP_NET}`)
+			mention?.includes(`${instance.split(':')[0]}${S_WHATSAPP_NET}`) ||
+			mediaData?.participant?.includes(`${instance.split(':')[0]}${S_WHATSAPP_NET}`)
 		) {
-			return await client[botNum].reply('You can not promote me by myself.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You can not promote me by myself.', { from, quoted: message, groupMetadata });
 		}
 
 		if (query || mention.length > 0) {
-			await client[botNum].updateGroup(from, 'PROMOTE', mention.length > 0 ? mention : query.parseNumber(), adminGroups, {
+			await client.instance.updateGroup(from, 'PROMOTE', mention.length > 0 ? mention : query.parseNumber(), adminGroups, {
 				message
 			});
 		}
 
 		if (bodyQuoted) {
-			await client[botNum].updateGroup(from, 'PROMOTE', [mediaData.participant], adminGroups, { message });
+			await client.instance.updateGroup(from, 'PROMOTE', [mediaData.participant], adminGroups, { message });
 		}
 	}
 };

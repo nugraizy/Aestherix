@@ -36,6 +36,5 @@ export * from './textmaker/index.js';
 export * from './tiktok/index.js';
 export * from './twitter/index.js';
 export * from './waifu_pic/index.js';
-export * from './waifuplay/index.js';
 export * from './wallpapers/index.js';
 export * from './youtube/index.js';

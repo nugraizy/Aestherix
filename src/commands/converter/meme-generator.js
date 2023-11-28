@@ -10,7 +10,8 @@ const DEFAULT_TYPE = 'image';
  */
 export default {
 	name: 'memegen',
-	description: 'Meme Generator, You know the drill',
+	minifiedDescription: 'Generate Meme',
+	description: 'Meme Generator, You know the drill.',
 	usage: '!memegen <reply media/send media> <[Top Texts] & [Bottom Texts]> [options]\nOptions:\n-stk / -img',
 	aliases: ['mgen', 'memgen', 'memegen'],
 	category: 'Converter',
@@ -37,7 +38,7 @@ export default {
 		client
 	) {
 		if (!isMediaImage && !(isQuotedSticker || isSticker)) {
-			return await client[botNum].reply('Please send/reply a media to convert to sticker', {
+			return await client.instance.reply('Please send/reply a media to convert to sticker', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -45,7 +46,7 @@ export default {
 		}
 
 		if (!stickerAble) {
-			return await client[botNum].reply(
+			return await client.instance.reply(
 				`Please send/reply a regular media to be meme'd. Can't convert ${typeQuoted}, only : ${typeSticker
 					.slice(
 						typeSticker.findIndex((v) => v === 'videoMessage'),
@@ -58,7 +59,7 @@ export default {
 		}
 
 		if (!query) {
-			return await client[botNum].reply('Please provide a query, use & to split top/bottom text', {
+			return await client.instance.reply('Please provide a query, use & to split top/bottom text', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -80,13 +81,13 @@ export default {
 		query = query.replace(regexs, '');
 
 		if (isQuotedSticker && extractMediaData.isAnimated) {
-			return client[botNum].reply('Cannot use animated sticker.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('Cannot use animated sticker.', { from, quoted: message, groupMetadata });
 		}
 
-		const image = await client[botNum].downloadMediaMessage(mediaData);
+		const image = await client.instance.downloadMediaMessage(mediaData);
 
 		const buffer = await memeGenerator(
-			client[botNum],
+			client.instance,
 			sender,
 			image,
 			query.split('&')[0],
@@ -96,13 +97,13 @@ export default {
 		);
 
 		if (buffer.error) {
-			return await client[botNum].reply(buffer.error, { from, quoted: message, groupMetadata });
+			return await client.instance.reply(buffer.error, { from, quoted: message, groupMetadata });
 		}
 
 		if (parsed.isStickers) {
-			await client[botNum].send(from, { sticker: buffer }, { quoted: message });
+			await client.instance.send(from, { sticker: buffer }, { quoted: message });
 		} else {
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{ image: buffer, caption: 'Meme Generator Made by Void Bot using Canvas. Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪' },
 				{ groupMetadata, quoted: message }

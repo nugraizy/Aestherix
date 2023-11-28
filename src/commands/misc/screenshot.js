@@ -5,7 +5,8 @@ import { getScreenshotAPI, isURL } from '../../utils/index.js';
  */
 export default {
 	name: 'screenshots',
-	description: 'Get a screenshot of a website',
+	minifiedDescription: 'Screenshot Website',
+	description: 'Get a screenshot of a website.',
 	category: 'Misc',
 	usage: '!screenshot <url> --<?type> (phone, tablet, desktop) default is desktop.',
 	aliases: ['screenshot', 'ss'],
@@ -14,7 +15,7 @@ export default {
 	status: 'enable',
 	async run(message, client) {
 		if (!message.query) {
-			return await client[botNum].reply('Please specify a website URL', {
+			return await client.instance.reply('Please specify a website URL', {
 				groupMetadata: message.groupMetadata,
 				from: message.from,
 				quoted: message.message
@@ -26,7 +27,7 @@ export default {
 
 		if (Array.isArray(parseOptions)) {
 			if (!isURL(parseOptions[0])) {
-				return await client[botNum].reply('Please specify a valid URL', {
+				return await client.instance.reply('Please specify a valid URL', {
 					groupMetadata: message.groupMetadata,
 					from: message.from,
 					quoted: message.message
@@ -36,7 +37,7 @@ export default {
 			message.query = parseOptions[0];
 			type = parseOptions[1];
 		} else if (!isURL(message.query)) {
-			return await client[botNum].reply('Please specify a valid URL', {
+			return await client.instance.reply('Please specify a valid URL', {
 				groupMetadata: message.groupMetadata,
 				from: message.from,
 				quoted: message.message
@@ -45,7 +46,7 @@ export default {
 
 		const { buffer } = await getScreenshotAPI(message.query, type);
 
-		await client[botNum].send(
+		await client.instance.send(
 			message.from,
 			{ image: new Buffer.from(buffer, 'base64') },
 			{ groupMetadata: message.groupMetadata, quoted: message.message }

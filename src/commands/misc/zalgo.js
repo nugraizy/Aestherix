@@ -5,6 +5,7 @@ import { zalgo } from '../../utils/modules/index.js';
  */
 export default {
 	name: 'zalgo',
+	minifiedDescription: 'Zalgofie Text',
 	description: 'Convert Text to Zalgo text',
 	usage: '!zalgo <query>',
 	category: 'Misc',
@@ -14,9 +15,9 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, bodyQuoted, groupMetadata }, client) {
 		if (!query && !bodyQuoted) {
-			return await client[botNum].reply('You need to provide text', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You need to provide text', { from, quoted: message, groupMetadata });
 		}
 
-		await client[botNum].reply(zalgo(query || bodyQuoted, { size: 'maxi' }), { from, quoted: message, groupMetadata });
+		await client.instance.reply(zalgo(query || bodyQuoted, { size: 'maxi' }), { from, quoted: message, groupMetadata });
 	}
 };

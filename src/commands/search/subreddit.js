@@ -6,7 +6,8 @@ import { arq } from '../../utils/arq/index.js';
  */
 export default {
 	name: 'subreddit',
-	description: 'Search Subreddit',
+	minifiedDescription: 'Search Subreddit',
+	description: 'Search Subreddit.',
 	usage: '!subreddit <query>',
 	category: 'Search',
 	aliases: ['subr'],
@@ -15,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -26,11 +27,11 @@ export default {
 			const result = await arq.subreddits(querie.trim());
 
 			if ('error' in result || !result.ok) {
-				await client[botNum].reply(JSON.stringify(result), { from, quoted: message, groupMetadata });
+				await client.instance.reply(JSON.stringify(result), { from, quoted: message, groupMetadata });
 				continue;
 			}
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					image: { url: result.result.url },

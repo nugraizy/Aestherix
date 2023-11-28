@@ -5,6 +5,7 @@ import { extractZalgo } from '../../utils/modules/index.js';
  */
 export default {
 	name: 'extractzalgo',
+	minifiedDescription: 'Unzalgofie Text',
 	description: 'Extract Zalgo text to Text',
 	usage: '!extractzalgo <query>',
 	category: 'Misc',
@@ -14,9 +15,9 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You need to provide text', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You need to provide text', { from, quoted: message, groupMetadata });
 		}
 
-		await client[botNum].reply(extractZalgo(query), { from, quoted: message, groupMetadata });
+		await client.instance.reply(extractZalgo(query), { from, quoted: message, groupMetadata });
 	}
 };

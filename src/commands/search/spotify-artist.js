@@ -11,7 +11,8 @@ const regex = (input) =>
  */
 export default {
 	name: 'spotifyartist',
-	description: 'Find artist on Spotify',
+	minifiedDescription: 'Search Spotify Artists',
+	description: 'Search artist on Spotify.',
 	usage: '!spotifyartist <query>',
 	category: 'Search',
 	aliases: ['spotifyart'],
@@ -20,7 +21,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		query = removeDuplicatesArray(query.split(','));
@@ -37,14 +38,14 @@ export default {
 				result = await spotifier.getArtists(id);
 
 				if (!result.status) {
-					await client[botNum].reply(result.message, { from, quoted: message, groupMetadata });
+					await client.instance.reply(result.message, { from, quoted: message, groupMetadata });
 					continue;
 				}
 			} else {
 				result = await spotifier.searchArtist(querie);
 
 				if (!result.status) {
-					await client[botNum].reply(result.message, { from, quoted: message, groupMetadata });
+					await client.instance.reply(result.message, { from, quoted: message, groupMetadata });
 					continue;
 				}
 
@@ -84,7 +85,7 @@ export default {
 				count++;
 			}
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					image: new Buffer.from(await fetchBUFFER(images), 'base64'),
@@ -119,7 +120,7 @@ export default {
 				},
 				{ groupMetadata, quoted: message }
 			);
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					buttonText: 'Open List',

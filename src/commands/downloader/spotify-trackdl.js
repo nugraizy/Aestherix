@@ -14,6 +14,7 @@ const regex = (input) =>
  */
 export default {
 	name: 'spotifydl',
+	minifiedDescription: 'Download Spotify Audio',
 	description: 'Downloads a Spotify audio',
 	usage: '!spotifydl <url>',
 	aliases: ['sfydl'],
@@ -23,7 +24,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, filename, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please provide a URL', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please provide a URL', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -31,12 +32,12 @@ export default {
 		queries = removeDuplicatesArray(queries);
 
 		if (queries.length === 1 && isURL(queries) && !regex(queries)) {
-			return await client[botNum].reply('This is not a valid Spotify URL.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('This is not a valid Spotify URL.', { from, quoted: message, groupMetadata });
 		}
 
 		for (const Query of queries) {
 			if (isURL(Query) && !regex(Query)) {
-				return await client[botNum].reply(`[ ${Query} ] This isn't a valid Spotify URL.`, {
+				return await client.instance.reply(`[ ${Query} ] This isn't a valid Spotify URL.`, {
 					from,
 					quoted: message,
 					groupMetadata
@@ -49,7 +50,7 @@ export default {
 			INFOLOG(`${color('Downloading Spotify Audio', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
 			if ('error' in audio) {
-				await client[botNum].reply(audio.error, { from, quoted: message, groupMetadata });
+				await client.instance.reply(audio.error, { from, quoted: message, groupMetadata });
 
 				ERRLOG(`⚠️ ${color('Failed to Download Spotify Audio', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
 			} else {
@@ -60,8 +61,8 @@ export default {
 				capt += `\n\nTitle : ${title}\n`;
 				capt += `Duration : ${timestamp ?? 'No Data'}\n`;
 
-				await client[botNum].reply(capt.trim(), { from, quoted: message, groupMetadata });
-				await client[botNum].send(from, {
+				await client.instance.reply(capt.trim(), { from, quoted: message, groupMetadata });
+				await client.instance.send(from, {
 					document: await toOpus('opus', {
 						input: path.join(__dirname, `src/media/temporary_files/${filename}`),
 						output: path.join(__dirname, `src/media/temporary_files/${filename}-done`),

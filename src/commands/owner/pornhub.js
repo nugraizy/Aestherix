@@ -6,7 +6,8 @@ import { arq } from '../../utils/arq/index.js';
  */
 export default {
 	name: 'pornhub',
-	description: 'Search pornhub',
+	minifiedDescription: 'Search PornHub',
+	description: 'Search pornhub.',
 	usage: '!pornhub <query>',
 	category: 'Owner',
 	aliases: ['ph', 'phub'],
@@ -15,14 +16,14 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, type, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.mainThumb === args[2]);
 
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{
 					image: { url: data[index].mainThumb },
@@ -75,37 +76,43 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 			const result = await arq.searchPHub(querie.trim());
 
 			if ('error' in result || !result.ok) {
-				await client[botNum].reply(JSON.stringify(result), { from, quoted: message, groupMetadata });
+				await client.instance.reply(JSON.stringify(result), { from, quoted: message, groupMetadata });
 				continue;
 			}
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					image: { url: result.result[0].mainThumb },
-					caption: 'Pornhub'.formatHeaders(),
-					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: result.result[0].mainThumb } },
-						{ urlButton: { displayText: 'PHub Source', url: result.result[0].url } },
-						result.result.length !== 1
-							? {
-									quickReplyButton: {
-										displayText: 'Next Post',
-										id: `.phub next ${result.result[1].mainThumb} ${JSON.stringify(result.result)}`
-									}
-							  } /* eslint-disable-line */
-							: {}
-					],
-					footer: `Title : ${result.result[0].title}
-Pornstars : ${result.result[0].pornstars.join(', ')}
-Duration : ${result.result[0].duration}
-Views : ${numberWithCommas(result.result[0].views)}
-Ratings : ${result.result[0].rating.toFixed(2)}
-Uploaded : ${result.result[0].uploaded}
-Type : ${result.result[0].type}
-Category : ${result.result[0].categories.join(', ')}
-Tags : ${result.result[0].tags.join(', ')}
-Void Bot     1/${result.result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+					caption:
+						'Pornhub'.formatHeaders() +
+						`\n\n${result.result
+							.map(({ title, pornstars, duration, views, rating, uploaded, type, categories, tags }) => {
+								return `Title : ${title}
+Pornstars : ${pornstars.join(', ')}
+Duration : ${duration}
+Views : ${numberWithCommas(views)}
+Ratings : ${rating.toFixed(2)}
+Uploaded : ${uploaded}
+Type : ${type}
+Category : ${categories.join(', ')}
+Tags : ${tags.join(', ')}`;
+							})
+							.join('\n\n')}`.trimEnd()
+					// 					templateButtons: [
+					// 						{ urlButton: { displayText: 'Image Source', url: result.result[0].mainThumb } },
+					// 						{ urlButton: { displayText: 'PHub Source', url: result.result[0].url } },
+					// 						result.result.length !== 1
+					// 							? {
+					// 									quickReplyButton: {
+					// 										displayText: 'Next Post',
+					// 										id: `.phub next ${result.result[1].mainThumb} ${JSON.stringify(result.result)}`
+					// 									}
+					// 							  } /* eslint-disable-line */
+					// 							: {}
+					// 					],
+					// 					footer: `
+					// Void Bot     1/${result.result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
 				},
 				{ groupMetadata, quoted: message }
 			);

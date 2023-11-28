@@ -73,7 +73,7 @@ const handleOfflineMessage = async (client, message, cmds) => {
 	return await handler.get('OFFLINE')(client, message);
 };
 
-const handleMentionedAfkUsers = (message, client, botNum) => {
+const handleMentionedAfkUsers = (message, client, instance) => {
 	let caption = 'You are Tagging People That Are AFK.'.formatHeaders() + '\n\n';
 	const container = [];
 
@@ -92,7 +92,7 @@ const handleMentionedAfkUsers = (message, client, botNum) => {
 	}
 
 	if (container.length > 0) {
-		client[botNum].reply(caption.trim(), {
+		client.instance.reply(caption.trim(), {
 			groupMetadata: message.groupMetadata,
 			from: message.from,
 			quoted: message.message
@@ -111,12 +111,12 @@ const handleAIMessage = async (message, client) => {
  * @param {import('../../types/Socket').Store} store
  * @param {import('../../types/Socket/config.js').GlobalConfig['cmds']} cmds
  * @param {import('../../types/Socket/config.js').GlobalConfig['user']} user
- * @param {typeof globalThis['botNum']} botNum
+ * @param {typeof globalThis['instance']} instance
  * @param {string} runtime
  * @param {import('../../types/Socket').SingleAuthState['state']} state
  * @returns
  */
-const handleCommandExecution = async (message, client, store, cmds, user, botNum, runtime, state) => {
+const handleCommandExecution = async (message, client, store, cmds, user, instance, runtime, state) => {
 	let bodies = [];
 
 	if (configuration.OPTIONS.multiCmd) {
@@ -210,7 +210,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 			}
 
 			if (message.isBanned) {
-				await client[botNum].send(
+				await client.instance.send(
 					message.from,
 					{ react: { text: '🖕🏼', key: message.message.key } },
 					{ groupMetadata: message.groupMetadata }
@@ -219,7 +219,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 			}
 
 			if (Tempcmds.category === 'Owner' && !message.isOwner) {
-				await client[botNum].reply('This commands is only for owner.', {
+				await client.instance.reply('This commands is only for owner.', {
 					groupMetadata: message.groupMetadata,
 					from: message.from,
 					quoted: message.message
@@ -228,7 +228,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 			}
 
 			if (configuration.OPTIONS.restrict && Tempcmds.restrict) {
-				await client[botNum].reply('This command is restricted and currently bot are on restricted mode.', {
+				await client.instance.reply('This command is restricted and currently bot are on restricted mode.', {
 					groupMetadata: message.groupMetadata,
 					from: message.from,
 					quoted: message.message
@@ -243,7 +243,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 				!message.isOwner &&
 				message?.[message?.from]?.games === 'disable'
 			) {
-				await client[botNum].reply('Game Mode is Disabled. Type !games enable to enable Game Mode', {
+				await client.instance.reply('Game Mode is Disabled. Type !games enable to enable Game Mode', {
 					groupMetadata: message.groupMetadata,
 					from: message.from,
 					quoted: message.message
@@ -252,7 +252,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 			}
 
 			if (Tempcmds.category === 'Moderation' && message.isGroup && !message.isAdmin && !message.isOwner) {
-				await client[botNum].reply('You are not admin. This commands is only for admins.', {
+				await client.instance.reply('You are not admin. This commands is only for admins.', {
 					groupMetadata: message.groupMetadata,
 					from: message.from,
 					quoted: message.message
@@ -261,7 +261,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 			}
 
 			if (Tempcmds.category === 'Moderation' && !message.isGroup) {
-				await client[botNum].reply('This commands for group only', {
+				await client.instance.reply('This commands for group only', {
 					groupMetadata: message.groupMetadata,
 					from: message.from,
 					quoted: message.message
@@ -277,7 +277,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 						Tempcmds.cooldown
 					}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v}`).join(', ')}.\nThis Features Only for Premium users.`;
 
-					client[botNum].reply(help, {
+					client.instance.reply(help, {
 						groupMetadata: message.groupMetadata,
 						from: message.from,
 						quoted: message.message
@@ -286,7 +286,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 					continue;
 				}
 
-				await client[botNum].reply('This commands is only for premium user.', {
+				await client.instance.reply('This commands is only for premium user.', {
 					groupMetadata: message.groupMetadata,
 					from: message.from,
 					quoted: message.message
@@ -309,7 +309,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 				const limit = Limit.reduceLimit(message.sender, Tempcmds.limit);
 
 				if (limit.error) {
-					client[botNum].reply(limit.message.replace('%s', `But this command (${Tempcmds.name}) need ${Tempcmds.limit}`), {
+					client.instance.reply(limit.message.replace('%s', `But this command (${Tempcmds.name}) need ${Tempcmds.limit}`), {
 						groupMetadata: message.groupMetadata,
 						from: message.from,
 						quoted: message.message
@@ -325,7 +325,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 				const isCooldown = cooldownUser.requests;
 
 				if (isCooldown) {
-					await client[botNum].reply('Please wait until your request is done', {
+					await client.instance.reply('Please wait until your request is done', {
 						groupMetadata: message.groupMetadata,
 						from: message.from,
 						quoted: message.message
@@ -337,7 +337,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 				const cooldownTime = cooldownUser.get(commandName);
 
 				if (cooldownTime && Date.now() < cooldownTime) {
-					await client[botNum].reply(
+					await client.instance.reply(
 						`${commandName} is on cooldown for ${((cooldownTime - Date.now()) / 1000).toFixed(1)} seconds.`,
 						{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message }
 					);
@@ -370,7 +370,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 						Tempcmds.cooldown
 					}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v}`).join(', ')}.`;
 
-					client[botNum].reply(help, {
+					client.instance.reply(help, {
 						groupMetadata: message.groupMetadata,
 						from: message.from,
 						quoted: message.message
@@ -401,7 +401,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, botNum
 				str += `Message : ${err.message || 'Unknown'}\n`;
 				str += `Stack Trace : ${(message.isOwner ? err?.stack : err?.stack?.substring(0, 20)) || 'Unknown'}`;
 
-				await client[botNum].send(
+				await client.instance.send(
 					message.from,
 					{
 						text: str,
@@ -456,7 +456,7 @@ const handleAfk = (client, message) => {
 		const { reasons, since } = getAfk(message.sender, message.from);
 		const time = getTimeSince(since);
 
-		client[botNum].send(
+		client.instance.send(
 			message.from,
 			{
 				text: `@${message.sender.split('@')[0]} is AFK since ${time} ago. Now they are out from AFK. Reason: ${reasons}`,
@@ -471,7 +471,7 @@ const handleAfk = (client, message) => {
 		const { reasons, since, name } = getAfk(message.mediaData.participant);
 		const time = getTimeSince(since);
 
-		client[botNum].reply(`${name} is AFK since ${time} ago. Reason: ${reasons}`, {
+		client.instance.reply(`${name} is AFK since ${time} ago. Reason: ${reasons}`, {
 			groupMetadata: message.groupMetadata,
 			from: message.from,
 			quoted: message.message
@@ -479,7 +479,7 @@ const handleAfk = (client, message) => {
 	}
 
 	if (message.mention?.length > 0) {
-		handleMentionedAfkUsers(message, client, botNum);
+		handleMentionedAfkUsers(message, client, instance);
 	}
 };
 
@@ -550,7 +550,7 @@ const handleIncomingMessage = async (message, client, cmds, store, user, state, 
 	}
 
 	if (configuration.OPTIONS.autoRead && !configuration.OPTIONS.offline && !message.isBlocked && !message.isBanned) {
-		client[botNum].readMessages([message.message.key]);
+		client.instance.readMessages([message.message.key]);
 	}
 
 	if (message.isGroup) {
@@ -578,7 +578,7 @@ const handleIncomingMessage = async (message, client, cmds, store, user, state, 
 		return;
 	}
 
-	await handleCommandExecution(message, client, store, cmds, user, botNum, runtime, state);
+	await handleCommandExecution(message, client, store, cmds, user, instance, runtime, state);
 
 	await handleGames(message, client);
 };

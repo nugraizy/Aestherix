@@ -6,6 +6,7 @@ import configuration from '../../helper/config/connect.js';
  */
 export default {
 	name: 'limit',
+	minifiedDescription: 'Limit User',
 	description: 'Check your daily limit.',
 	category: 'Misc',
 	usage: '!limit',
@@ -25,7 +26,7 @@ export default {
 
 		const limit = Limit.checkLimit(sender);
 
-		await client[botNum].reply(`Your limit : ${limit || 0}\nType user : ${role}`, {
+		await client.instance.reply(`Your limit : ${limit || 0}\nType user : ${role}`, {
 			from,
 			quoted: message,
 			groupMetadata

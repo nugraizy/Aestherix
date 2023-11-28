@@ -10,6 +10,7 @@ import { removeBg } from '../../utils/converter/file-processing.js';
  */
 export default {
 	name: 'removebg',
+	minifiedDescription: 'Remove Background',
 	description: 'Remove background from image.',
 	usage: '!removebg <reply/send (image/sticker)>',
 	aliases: ['rmbg', 'rbg', 'nobg'],
@@ -33,14 +34,14 @@ export default {
 		client
 	) => {
 		if (!isMediaImage && !isQuotedSticker) {
-			return client[botNum].reply(
+			return client.instance.reply(
 				'Please reply/send image with caption the command. This command also accept sticker (reply one with command).',
 				{ from, quoted: message, groupMetadata }
 			);
 		}
 
 		if (isQuotedSticker && extractMediaData.isAnimated) {
-			return client[botNum].reply('The sticker are animated. Please reply static stickers only.', {
+			return client.instance.reply('The sticker are animated. Please reply static stickers only.', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -59,7 +60,7 @@ export default {
 			}
 		});
 
-		const media = await client[botNum].downloadAndSaveMediaMessage(
+		const media = await client.instance.downloadAndSaveMediaMessage(
 			extractMediaData,
 			path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
 			typeQuoted
@@ -68,7 +69,7 @@ export default {
 		const resultRemoveBg = await removeBg(media, prettyNumber);
 
 		if (parsed.isStickers) {
-			const prepareSticker = await client[botNum].prepareSticker(
+			const prepareSticker = await client.instance.prepareSticker(
 				resultRemoveBg,
 				path.join(__dirname, `src/media/temporary_files/${filename}`),
 				undefined,
@@ -78,9 +79,9 @@ export default {
 				}
 			);
 
-			client[botNum].send(from, { sticker: prepareSticker }, { groupMetadata, quoted: message });
+			client.instance.send(from, { sticker: prepareSticker }, { groupMetadata, quoted: message });
 		} else {
-			client[botNum].send(from, { image: resultRemoveBg }, { groupMetadata, quoted: message });
+			client.instance.send(from, { image: resultRemoveBg }, { groupMetadata, quoted: message });
 		}
 	}
 };

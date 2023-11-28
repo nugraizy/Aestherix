@@ -13,6 +13,7 @@ const STATUS_PATH = `./src/media/connection_databases/${configuration.cli.input[
  */
 export default {
 	name: 'fetchstory',
+	minifiedDescription: 'Fetch Story',
 	description: 'Fetch story from host WhatsApp.',
 	category: 'Owner',
 	usage: '!fetchstory',
@@ -24,7 +25,7 @@ export default {
 		try {
 			const messages = configuration.OPTIONS.json
 				? JSON.parse(readFileSync(STATUS_PATH)).messages[STATUS]
-				: await store.loadMessages(STATUS);
+				: store.loadMessages(STATUS);
 			const tempContainer = new Cache();
 			let caption = 'Fetch WhatsApp Story'.formatHeaders();
 			let i = 0;
@@ -66,7 +67,7 @@ export default {
 				null;
 
 			if (!data) {
-				return await client[botNum].reply('Story not found', { from, quoted: message, groupMetadata });
+				return await client.instance.reply('Story not found', { from, quoted: message, groupMetadata });
 			}
 
 			caption += ` • ${
@@ -77,7 +78,7 @@ export default {
 			caption += `Texts : ${data.stories?.extendedTextMessage?.length ?? 0}\n`;
 			caption += `Images : ${data.stories?.imageMessage?.length ?? 0}\n`;
 			caption += `Videos : ${data.stories?.videoMessage?.length ?? 0}\n\n`;
-			await client[botNum].reply(caption.trim(), { from, quoted: message, groupMetadata });
+			await client.instance.reply(caption.trim(), { from, quoted: message, groupMetadata });
 
 			for (const type of Object.keys(data.stories)) {
 				for (const message of data.stories[type]) {
@@ -87,7 +88,7 @@ export default {
 					if (type === 'extendedTextMessage') {
 						const buffer = await textStory(body, message.message.extendedTextMessage.backgroundArgb);
 
-						await client[botNum].send(from, { image: buffer, caption: body }, { groupMetadata, quoted: message });
+						await client.instance.send(from, { image: buffer, caption: body }, { groupMetadata, quoted: message });
 					} else {
 						const messages = generateWAMessageFromContent(from, { ...message.message }, {});
 
@@ -98,13 +99,13 @@ export default {
 							quotedMessage: message.message,
 							remoteJid: message.key.remoteJid
 						};
-						await client[botNum].relayMessage(from, messages.message, {
+						await client.instance.relayMessage(from, messages.message, {
 							cachedGroupMetadata: () => groupMetadata,
 							messageId: messages.key.id
 						});
 
 						process.nextTick(() => {
-							client[botNum];
+							client.instance;
 						});
 					}
 				}

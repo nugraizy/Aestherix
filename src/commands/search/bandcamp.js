@@ -6,7 +6,8 @@ import { searchBandcamp } from '../../utils/bandcamp/index.js';
  */
 export default {
 	name: 'bandcamp',
-	description: 'Search Musics from Bandcamp',
+	minifiedDescription: 'Search Bandcamp',
+	description: 'Search Musics from Bandcamp.',
 	category: 'Search',
 	usage: '!bandcamp <query>',
 	aliases: ['bcamp', 'bandc'],
@@ -15,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		query = query.split(',');
@@ -25,31 +26,41 @@ export default {
 			const result = await searchBandcamp(queries);
 
 			if ('error' in result) {
-				await client[botNum].reply(result.error, { from, quoted: message, groupMetadata });
+				await client.instance.reply(result.error, { from, quoted: message, groupMetadata });
 				continue;
 			}
 
-			const { bandId, bandName, title, albumName, albumId, urlBase, thumbnailUrl } = result[0];
+			// const { bandId, bandName, title, albumName, albumId, urlBase, thumbnailUrl } = result[0];
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
-					image: { url: thumbnailUrl },
-					caption: 'Bandcamp'.formatHeaders(),
-					footer: `Band Name : ${bandName}
+					image: { url: result[0].thumbnailUrl },
+					caption:
+						'Bandcamp'.formatHeaders() +
+						`\n\n${result
+							.map(({ bandName, bandId, title, albumName, albumId }) => {
+								return `Band Name : ${bandName}
 Band ID : ${bandId}
 Title : ${title}
 Album : ${albumName || 'n/a'}
-Album ID : ${albumId || 'n/a'}`,
-					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: thumbnailUrl } },
-						{ urlButton: { displayText: 'Stream Here', url: urlBase } },
-						{ quickReplyButton: { displayText: 'Download', id: `.bandcampdl ${urlBase}` } }
-					]
+Album ID : ${albumId || 'n/a'}`;
+							})
+							.join('\n\n')}`.trimEnd()
+					// 					footer: `Band Name : ${bandName}
+					// Band ID : ${bandId}
+					// Title : ${title}
+					// Album : ${albumName || 'n/a'}
+					// Album ID : ${albumId || 'n/a'}`,
+					// templateButtons: [
+					// 	{ urlButton: { displayText: 'Image Source', url: thumbnailUrl } },
+					// 	{ urlButton: { displayText: 'Stream Here', url: urlBase } },
+					// 	{ quickReplyButton: { displayText: 'Download', id: `.bandcampdl ${urlBase}` } }
+					// ]
 				},
 				{ groupMetadata }
 			);
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					buttonText: 'Open List',

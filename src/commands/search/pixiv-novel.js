@@ -6,7 +6,8 @@ import { getNovelContent, searchNovel } from '../../utils/pixiv/index.js';
  */
 export default {
 	name: 'pixivnovel',
-	description: 'Find novel from Pixiv',
+	minifiedDescription: 'Search Novel',
+	description: 'Search novel from Pixiv.',
 	usage: '!pixivnovel <query>',
 	aliases: ['pixnovel'],
 	category: 'Search',
@@ -15,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, cmd, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let queries = query.split(',');
@@ -26,7 +27,7 @@ export default {
 			const data = await searchNovel(querie.trim());
 
 			if ('error' in data) {
-				await client[botNum].reply(`Failed while searching Pixiv novel\n\n${data.error}\n${querie}`, {
+				await client.instance.reply(`Failed while searching Pixiv novel\n\n${data.error}\n${querie}`, {
 					from,
 					quoted: message,
 					groupMetadata
@@ -37,7 +38,7 @@ export default {
 			const container = [];
 			const { userName, id, userId, likeCount, viewCount, content } = await getNovelContent(data[0].id);
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					text: `Title : ${data[0].title.capitalize()}
@@ -68,7 +69,7 @@ ${content}`,
 				});
 			}
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					title: 'Pixiv Novel Search'.formatHeaders(),

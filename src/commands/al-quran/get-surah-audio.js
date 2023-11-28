@@ -7,6 +7,7 @@ const regex = (input) => /[1-9][0-9]*/.test(input);
  */
 export default {
 	name: 'surahaudio',
+	minifiedDescription: 'Surah Audio',
 	description: 'Get surah audio',
 	category: 'AL-Quran',
 	usage: '!surahaudio <surah number>',
@@ -16,15 +17,15 @@ export default {
 	status: 'enable',
 	async run({ query, from, cmd, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please specify a surah number', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a surah number', { from, quoted: message, groupMetadata });
 		}
 
 		if (!regex(query)) {
-			return await client[botNum].reply('Please specify a valid surah number', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a valid surah number', { from, quoted: message, groupMetadata });
 		}
 
 		if (parseInt(query) > 114) {
-			return await client[botNum].reply('Surah number must be less than 114', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Surah number must be less than 114', { from, quoted: message, groupMetadata });
 		}
 
 		const audio = await getSurahAudio(query);
@@ -46,7 +47,7 @@ export default {
 			buttons.push({ buttonText: { displayText: 'Next' } });
 		}
 
-		await client[botNum].buttonDocument(
+		await client.instance.buttonDocument(
 			from,
 			ayat.map((v) => ` • ${v.arab}\n؜ • ${v.latin}\n؜ • ${v.indonesia}`).join('\n\n'),
 			'Made by nanda',

@@ -6,7 +6,8 @@ import { tiny } from '../../utils/shortener/index.js';
  */
 export default {
 	name: 'tiny',
-	description: 'URL shortener using tinyurl',
+	minifiedDescription: 'Shorten URL',
+	description: 'URL shortener using tinyurl.',
 	usage: '!tiny <query>',
 	category: 'Misc',
 	aliases: ['tinyurl', 'urlshort', 'short', 'shorten'],
@@ -15,15 +16,15 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('You must provide a URL', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a URL', { from, quoted: message, groupMetadata });
 		}
 
 		if (!isURL(query)) {
-			return await client[botNum].reply('Please specify a valid URL', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a valid URL', { from, quoted: message, groupMetadata });
 		}
 
 		const urls = await tiny(query);
 
-		await client[botNum].reply(urls, { from, quoted: message, groupMetadata });
+		await client.instance.reply(urls, { from, quoted: message, groupMetadata });
 	}
 };

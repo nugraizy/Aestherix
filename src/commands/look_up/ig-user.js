@@ -8,7 +8,8 @@ import { instagram } from '../../utils/instagram/index.js';
  */
 export default {
 	name: 'instalk',
-	description: 'Lookup Instagram user',
+	minifiedDescription: 'Look-up Instagram User',
+	description: 'Look-up Instagram user.',
 	usage: '!instalk <username>',
 	aliases: ['instauser', 'iguser', 'igstalk'],
 	category: 'Look-up',
@@ -17,7 +18,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please specify a url', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a url', { from, quoted: message, groupMetadata });
 		}
 
 		let { _: usernames } = parser(query);
@@ -28,7 +29,7 @@ export default {
 
 		for (const data in users) {
 			if ('error' in users[data]) {
-				await client[botNum].reply(`Error while searching Instagram user\n\n${users[data].error}\n${data}`, {
+				await client.instance.reply(`Error while searching Instagram user\n\n${users[data].error}\n${data}`, {
 					from,
 					quoted: message,
 					groupMetadata
@@ -53,7 +54,7 @@ export default {
 			capt += `Tot. Highlight : ${numberWithCommas(users[data].highlightCount)}\n`;
 			capt += `Tot. Post : ${numberWithCommas(users[data].postsCount)}\n\n`;
 
-			await client[botNum].send(
+			await client.instance.send(
 				from,
 				{
 					image: { url: users[data].profilePicHD },

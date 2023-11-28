@@ -8,7 +8,8 @@ import { tesseract } from '../../utils/misc/index.js';
  */
 export default {
 	name: 'scanimagetext',
-	description: 'Recognize text from image',
+	minifiedDescription: 'Image to text',
+	description: 'Recognize text from image.',
 	usage: '!scanimagetext <Image(reply/send)>',
 	category: 'Converter',
 	aliases: ['ocr'],
@@ -20,14 +21,14 @@ export default {
 		client
 	) {
 		if (!isMediaImage) {
-			return await client[botNum].reply('Please send/reply an image to recognize text', {
+			return await client.instance.reply('Please send/reply an image to recognize text', {
 				from,
 				quoted: message,
 				groupMetadata
 			});
 		}
 
-		const file = await client[botNum].downloadAndSaveMediaMessage(
+		const file = await client.instance.downloadAndSaveMediaMessage(
 			extractMediaData,
 			path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
 			typeQuoted
@@ -40,7 +41,7 @@ export default {
 				.join('\n')
 				.trim();
 
-			client[botNum].reply(`${scanning.error}\n\nAvailable Languages :\n\n${lang}\n\nUse the code only.`, {
+			client.instance.reply(`${scanning.error}\n\nAvailable Languages :\n\n${lang}\n\nUse the code only.`, {
 				from,
 				quoted: message,
 				groupMetadata
@@ -48,7 +49,7 @@ export default {
 			return;
 		}
 
-		await client[botNum].send(from, { text: scanning.result.text.trim() }, { groupMetadata, quoted: message });
+		await client.instance.send(from, { text: scanning.result.text.trim() }, { groupMetadata, quoted: message });
 
 		INFOLOG(`${color('Text is sent', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
 	}

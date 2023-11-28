@@ -17,6 +17,7 @@ const defaulType = 'image';
  */
 export default {
 	name: 'ephoto360',
+	minifiedDescription: 'Ephoto360 Text Maker',
 	description: 'Image maker using texts',
 	usage:
 		'!ephoto360 <query> <model/number[REQUIRED]> [options]\nOptions:\n-stk / -img\nAvailable Model Type : !ephoto360 -model',
@@ -27,7 +28,7 @@ export default {
 	status: 'enable',
 	async run({ from, message, query, args, cmd, filename, isMediaImage, extractMediaData, typeQuoted, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please provide a query', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please provide a query', { from, quoted: message, groupMetadata });
 		}
 
 		let {
@@ -87,7 +88,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 
 			buttons = buttons.reverse();
 
-			return await client[botNum].send(
+			return await client.instance.send(
 				from,
 				{
 					text: texts,
@@ -102,7 +103,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 		models = !_.isNumber(parsed[0]) ? [randomize(dataJSON).url] : [_.get(dataJSON, parsed[0] - 1)?.url].filter(Boolean);
 
 		if (models?.length === 0) {
-			return await client[botNum].reply(`Model ${models[0]} not found\n Type : !${this.name} -type`, {
+			return await client.instance.reply(`Model ${models[0]} not found\n Type : !${this.name} -type`, {
 				from,
 				quoted: message,
 				groupMetadata
@@ -113,7 +114,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 			let buffers = null;
 
 			if (isMediaImage) {
-				await client[botNum].downloadAndSaveMediaMessage(
+				await client.instance.downloadAndSaveMediaMessage(
 					extractMediaData,
 					path.join(__dirname, `src/media/temporary_files/${filename}`),
 					typeQuoted
@@ -125,7 +126,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 			const result = await ephoto360(model, parsed.slice(1).join(' '), buffers);
 
 			if ('error' in result) {
-				await client[botNum].reply(`something went wrong:\n\n${result.error}`, { from, quoted: message, groupMetadata });
+				await client.instance.reply(`something went wrong:\n\n${result.error}`, { from, quoted: message, groupMetadata });
 
 				continue;
 			}
@@ -133,10 +134,15 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 			const data = Buffer.from(await (await fetch(result.preview)).arrayBuffer(), 'base64');
 
 			const buffer = isStickers
-				? await client[botNum].prepareSticker(data, path.join(__dirname, `src/media/temporary_files/${filename}`), undefined, {
-						author: configuration.author,
-						packname: configuration.packname
-				  }) /* eslint-disable-line */
+				? await client.instance.prepareSticker(
+						data,
+						path.join(__dirname, `src/media/temporary_files/${filename}`),
+						undefined,
+						{
+							author: configuration.author,
+							packname: configuration.packname
+						}
+				  ) /* eslint-disable-line */
 				: (async () => {
 						const image = sharp(data);
 						const { width, height } = await image.metadata();
@@ -145,11 +151,11 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 				  })(); /*eslint-disable-line*/
 
 			if (isImage) {
-				await client[botNum].send(from, { image: buffer }, { groupMetadata, quoted: message });
+				await client.instance.send(from, { image: buffer }, { groupMetadata, quoted: message });
 			} else if (isStickers) {
-				await client[botNum].send(from, { sticker: buffer }, { groupMetadata, quoted: message });
+				await client.instance.send(from, { sticker: buffer }, { groupMetadata, quoted: message });
 			} else {
-				await client[botNum].send(from, { [defaulType]: buffer }, { groupMetadata, quoted: message });
+				await client.instance.send(from, { [defaulType]: buffer }, { groupMetadata, quoted: message });
 			}
 		}
 	}

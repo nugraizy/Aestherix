@@ -8,6 +8,7 @@ const updateApikey = () =>
  */
 export default {
 	name: 'aiimage',
+	minifiedDescription: 'Generate Image',
 	description: 'Ask A.I to make an image based on your text.',
 	usage: '!aiimage <query>',
 	aliases: ['aimg'],
@@ -17,7 +18,7 @@ export default {
 	status: 'enable',
 	run: async ({ query, from, message, groupMetadata }, client) => {
 		if (!query) {
-			return await client[botNum].reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
 		const configuration = new Configuration({ apiKey: updateApikey() });
@@ -28,6 +29,6 @@ export default {
 			size: '512x512'
 		});
 
-		client[botNum].send(from, { image: { url: image.data.data[0].url } }, { groupMetadata, quoted: message });
+		client.instance.send(from, { image: { url: image.data.data[0].url } }, { groupMetadata, quoted: message });
 	}
 };

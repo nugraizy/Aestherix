@@ -10,7 +10,8 @@ import { checkWin, fillGrid, makePuzzle, revealOneElement, solvePuzzle, stringif
  */
 export default {
 	name: 'sudoku',
-	description: 'Play Sudoku',
+	minifiedDescription: 'Play Sudoku',
+	description: 'Play Sudoku.',
 	usage: '!sudoku',
 	aliases: ['sd'],
 	category: 'Games',
@@ -32,7 +33,7 @@ export default {
 					const gridSolved = stringifyGrid(solved);
 
 					if (isOwner) {
-						await client[botNum].reply(gridSolved, {
+						await client.instance.reply(gridSolved, {
 							from: configuration.cache.config.owner_number,
 							quoted: message,
 							groupMetadata
@@ -42,7 +43,7 @@ export default {
 					buttons[0].buttonId = '.sd clue';
 					buttons[0].buttonText.displayText = 'Sisa Clue : 5';
 
-					const messages = await client[botNum].buttonText(
+					const messages = await client.instance.buttonText(
 						from,
 						`${grid}\nThis game is still work on progress\nDifficulty is still on try mode.\nReplace number 9 with 0.`,
 						'Made by nanda',
@@ -64,14 +65,14 @@ export default {
 					return await fs.writeJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'), data);
 				}
 
-				await client[botNum].reply('You already have a game in progress.', { from, quoted: message, groupMetadata });
+				await client.instance.reply('You already have a game in progress.', { from, quoted: message, groupMetadata });
 			} else if (/([A-Ia-i])[1-9]/.test(args[1])) {
 				if (args[2].length > 2) {
-					return await client[botNum].reply(`Wrong format!\n\nex : ${cmd} A2 7`, { from, quoted: message, groupMetadata });
+					return await client.instance.reply(`Wrong format!\n\nex : ${cmd} A2 7`, { from, quoted: message, groupMetadata });
 				}
 
 				if (!args[2]) {
-					return await client[botNum].reply(`Pleas provide a row indexs\n\nex : ${cmd} A2 7`, {
+					return await client.instance.reply(`Pleas provide a row indexs\n\nex : ${cmd} A2 7`, {
 						from,
 						quoted: message,
 						groupMetadata
@@ -87,7 +88,7 @@ export default {
 						const isWin = checkWin(fill.grid);
 
 						if (isWin.status) {
-							await client[botNum].reply(
+							await client.instance.reply(
 								`${isWin.message}\n${stringifyGrid(fill.grid)}\n\nGame Time : ${getTimeSince(data[index].startedAt)}`,
 								{ from, quoted: message, groupMetadata }
 							);
@@ -107,20 +108,20 @@ export default {
 						buttons[0].buttonId = '.sd clue';
 						buttons[0].buttonText.displayText = `Sisa Clue : ${data[index].clue === 0 ? 'Habis' : data[index].clue}`;
 
-						const messages = client[botNum].buttonText(from, `${grid}`, 'Made by nanda', buttons, { groupMetadata });
+						const messages = client.instance.buttonText(from, `${grid}`, 'Made by nanda', buttons, { groupMetadata });
 
 						data[index].messages = messages;
 
 						return await fs.writeJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'), data);
 					}
 
-					return await client[botNum].reply(fill.message, { from, quoted: message, groupMetadata });
+					return await client.instance.reply(fill.message, { from, quoted: message, groupMetadata });
 				}
 
 				buttons[0].buttonId = '.sudoku play';
 				buttons[0].buttonText.displayText = 'Play Sudoku!';
 
-				return await client[botNum].buttonText(
+				return await client.instance.buttonText(
 					from,
 					`No session found. Type ${cmd} play to start new sudoku game. Or press the button below.`,
 					'Made by nanda',
@@ -145,7 +146,7 @@ export default {
 							data.splice(index, 1);
 							await fs.writeJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'), data);
 
-							return await client[botNum].reply(
+							return await client.instance.reply(
 								`${isWin.message}\n${stringifyGrid(reveal.board)}\n\nGame Time : ${getTimeSince(data[index].startedAt)}`,
 								{ from, quoted: message, groupMetadata }
 							);
@@ -158,20 +159,20 @@ export default {
 						buttons[0].buttonId = '.sd clue';
 						buttons[0].buttonText.displayText = `Sisa Clue : ${data[index].clue === 0 ? 'Habis' : data[index].clue}`;
 
-						const messages = client[botNum].buttonText(from, `${grid}`, 'Made by nanda', buttons, { groupMetadata });
+						const messages = client.instance.buttonText(from, `${grid}`, 'Made by nanda', buttons, { groupMetadata });
 
 						data[index].messages = messages;
 
 						return await fs.writeJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'), data);
 					}
 
-					return await client[botNum].reply('Clue has run out!', { from, quoted: message, groupMetadata });
+					return await client.instance.reply('Clue has run out!', { from, quoted: message, groupMetadata });
 				}
 
 				buttons[0].buttonId = '.sd play';
 				buttons[0].buttonText.displayText = 'Play Sudoku!';
 
-				return await client[botNum].buttonText(
+				return await client.instance.buttonText(
 					from,
 					`No session found. Type ${cmd} play to start new sudoku game. Or press the button below.`,
 					'Made by nanda',
@@ -189,7 +190,7 @@ export default {
 					buttons[0].buttonId = '.sd clue';
 					buttons[0].buttonText.displayText = `Sisa Clue : ${data[index].clue === 0 ? 'Habis' : data[index].clue}`;
 
-					const messages = client[botNum].buttonText(from, `${grid}`, 'Made by nanda', buttons, { groupMetadata });
+					const messages = client.instance.buttonText(from, `${grid}`, 'Made by nanda', buttons, { groupMetadata });
 
 					data[index].messages = messages;
 					return await fs.writeJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'), data);
@@ -198,7 +199,7 @@ export default {
 				buttons[0].buttonId = '.sd play';
 				buttons[0].buttonText.displayText = 'Play Sudoku!';
 
-				return await client[botNum].buttonText(
+				return await client.instance.buttonText(
 					from,
 					`No session found. Type ${cmd} play to start new sudoku game. Or press the button below.`,
 					'Made by nanda',
@@ -218,17 +219,17 @@ export default {
 					data = [];
 					await fs.writeJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'), data);
 
-					return await client[botNum].reply('All games reset!', { from, quoted: message, groupMetadata });
+					return await client.instance.reply('All games reset!', { from, quoted: message, groupMetadata });
 				}
 
 				if (index !== -1) {
 					data.splice(index, 1);
 					await fs.writeJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'), data);
 
-					return await client[botNum].reply('Game reset!', { from, quoted: message, groupMetadata });
+					return await client.instance.reply('Game reset!', { from, quoted: message, groupMetadata });
 				}
 
-				return await client[botNum].reply('There is no game to reset!', { from, quoted: message, groupMetadata });
+				return await client.instance.reply('There is no game to reset!', { from, quoted: message, groupMetadata });
 			}
 		} catch (err) {
 			console.log(err);

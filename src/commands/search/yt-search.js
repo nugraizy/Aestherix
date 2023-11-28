@@ -1,7 +1,4 @@
-// import configuration from '../../helper/config/connect.js';
-import sharp from 'sharp';
-
-import { fetchBUFFER, searchYoutube } from '../../utils/index.js';
+import { searchYoutube } from '../../utils/index.js';
 import { numberWithCommas } from '../../utils/modules/index.js';
 
 const boxen = (text) => {
@@ -22,6 +19,7 @@ const boxen = (text) => {
  */
 export default {
 	name: 'ytsearch',
+	minifiedDescription: 'Search YouTube',
 	description: 'Search YouTube',
 	usage: '!ytsearch',
 	aliases: ['yts', 'ytsr'],
@@ -31,15 +29,14 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, groupMetadata }, client) {
 		if (!query) {
-			return client[botNum].reply('Please specify a query.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('Please specify a query.', { from, quoted: message, groupMetadata });
 		}
 
 		let result = await searchYoutube(query, null, true);
 
 		result = result.filter((v) => v.type === 'video');
 
-		let capt = '';
-
+		let capt = 'YouTube Search'.formatHeaders() + '\n\n';
 		let i = 0;
 
 		for (const { videoId, title, timestamp, views, author } of result) {
@@ -55,11 +52,11 @@ export default {
 			i++;
 		}
 
-		let jpegThumbnail = sharp(new Buffer.from(await fetchBUFFER(result[0].image), 'base64'));
+		// let jpegThumbnail = sharp(new Buffer.from(await fetchBUFFER(result[0].image), 'base64'));
 
-		jpegThumbnail = await jpegThumbnail.resize(300, 300).toBuffer();
+		// jpegThumbnail = await jpegThumbnail.resize(300, 300).toBuffer();
 
-		await client[botNum].send(
+		await client.instance.send(
 			from,
 			{
 				text: capt.trim()
@@ -77,21 +74,7 @@ export default {
 			},
 			{
 				groupMetadata,
-				quoted: message,
-				contextInfo: {
-					/**
-					 * @type {import('@adiwajshing/baileys').proto.ContextInfo.ExternalAdReplyInfo}
-					 */
-					externalAdReply: {
-						title: 'YouTube Search',
-						mediaType: 1,
-						mediaUrl: 'https://github.com/nugraizy',
-						thumbnail: jpegThumbnail,
-						containsAutoReply: false,
-						showAdAttribution: true,
-						renderLargerThumbnail: true
-					}
-				}
+				quoted: message
 			}
 		);
 
@@ -117,7 +100,7 @@ export default {
 		// 	}
 		// });
 
-		// await client[botNum].send(
+		// await client.instance.send(
 		// 	from,
 		// 	{
 		// 		buttonText: 'Open list',

@@ -8,7 +8,8 @@ import { color, INFOLOG, isURL } from '../../utils/modules/index.js';
  */
 export default {
 	name: 'sticker',
-	description: 'Convert media to sticker',
+	minifiedDescription: 'Media to Sticker',
+	description: 'Convert media to sticker.',
 	usage: '!sticker <reply media/send media>',
 	aliases: [
 		'stickers',
@@ -47,7 +48,7 @@ export default {
 		client
 	) {
 		if (!isMediaImage && !isMediaVid && !query) {
-			return await client[botNum].reply('Please send/reply a media or send a url to convert to sticker', {
+			return await client.instance.reply('Please send/reply a media or send a url to convert to sticker', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -55,7 +56,7 @@ export default {
 		}
 
 		if (query && !isURL(query) && !isMediaImage && !isMediaVid) {
-			return await client[botNum].reply('If you trying to convert sticker from url, please provide a valid url', {
+			return await client.instance.reply('If you trying to convert sticker from url, please provide a valid url', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -63,7 +64,7 @@ export default {
 		}
 
 		if (!stickerAble && !query) {
-			return await client[botNum].reply(
+			return await client.instance.reply(
 				`Please send/reply a regular media to convert to sticker. Can't convert ${typeQuoted} to sticker, only : ${typeSticker
 					.join(', ')
 					.capitalize()}`,
@@ -72,7 +73,7 @@ export default {
 		}
 
 		if (query && isURL(query)) {
-			const sticker = await client[botNum].prepareSticker(
+			const sticker = await client.instance.prepareSticker(
 				query,
 				path.join(__dirname, `src/media/temporary_files/${filename}`),
 				undefined,
@@ -82,12 +83,12 @@ export default {
 				}
 			);
 
-			await client[botNum].send(from, { sticker }, { groupMetadata, quoted: message });
+			await client.instance.send(from, { sticker }, { groupMetadata, quoted: message });
 		}
 
 		if (isMediaImage) {
-			const sticker = await client[botNum].prepareSticker(
-				await client[botNum].downloadMediaMessage(mediaData),
+			const sticker = await client.instance.prepareSticker(
+				await client.instance.downloadMediaMessage(mediaData),
 				path.join(__dirname, `src/media/temporary_files/${filename}`),
 				typeQuoted,
 				{
@@ -96,12 +97,12 @@ export default {
 				}
 			);
 
-			await client[botNum].send(from, { sticker }, { groupMetadata, quoted: message });
+			await client.instance.send(from, { sticker }, { groupMetadata, quoted: message });
 		}
 
 		if (isMediaVid) {
-			const sticker = await client[botNum].prepareSticker(
-				await client[botNum].downloadMediaMessage(mediaData),
+			const sticker = await client.instance.prepareSticker(
+				await client.instance.downloadMediaMessage(mediaData),
 				path.join(__dirname, `src/media/temporary_files/${filename}`),
 				typeQuoted,
 				{
@@ -110,7 +111,7 @@ export default {
 				}
 			);
 
-			await client[botNum].send(from, { sticker }, { groupMetadata, quoted: message });
+			await client.instance.send(from, { sticker }, { groupMetadata, quoted: message });
 		}
 
 		INFOLOG(`${color('Sticker is sent', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);

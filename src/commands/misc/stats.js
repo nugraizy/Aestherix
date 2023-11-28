@@ -22,6 +22,7 @@ const getCpus = (func) =>
  */
 export default {
 	name: 'stats',
+	minifiedDescription: 'Bot Status',
 	description: 'Check bot status.',
 	usage: '!stats',
 	aliases: ['status'],
@@ -70,6 +71,6 @@ export default {
 		caption += '⪨ ＣＰＵｓ Ｉｎｆｏ ⪩\n\n';
 		caption += `${getCpus(cpus)}`;
 
-		client[botNum].reply(caption, { from, quoted: message, groupMetadata });
+		client.instance.reply(caption, { from, quoted: message, groupMetadata });
 	}
 };

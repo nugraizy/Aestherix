@@ -8,6 +8,7 @@ import { instagram } from '../../utils/instagram/index.js';
  */
 export default {
 	name: 'igstory',
+	minifiedDescription: 'Download Instagram Story',
 	description: 'Downloads the story of the user',
 	usage: '!igstory <username>',
 	aliases: ['igstory', 'igs'],
@@ -17,7 +18,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
 		if (!query) {
-			return await client[botNum].reply('Please specify a username', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a username', { from, quoted: message, groupMetadata });
 		}
 
 		const { _: input } = parser(query);
@@ -28,7 +29,7 @@ export default {
 
 		for (const data in stories) {
 			if ('error' in stories[data]) {
-				await client[botNum].reply(`Error while downloading Instagram story\n\n${stories[data].error}\n${data}`, {
+				await client.instance.reply(`Error while downloading Instagram story\n\n${stories[data].error}\n${data}`, {
 					from,
 					quoted: message,
 					groupMetadata
@@ -54,12 +55,12 @@ export default {
 			capt += `Tot. Post : ${numberWithCommas(stories[data].postsCount)}\n`;
 			capt += `Tot. Story : ${stories[data].stories.length}\n\n`;
 
-			await client[botNum].reply(capt.trim(), { from, quoted: message, groupMetadata });
+			await client.instance.reply(capt.trim(), { from, quoted: message, groupMetadata });
 
 			capt = '';
 
 			for (const media of stories[data].stories) {
-				await client[botNum].send(from, media.isVideo ? { video: { url: media.url } } : { image: { url: media.url } }, {
+				await client.instance.send(from, media.isVideo ? { video: { url: media.url } } : { image: { url: media.url } }, {
 					groupMetadata
 				});
 				await delay(300);

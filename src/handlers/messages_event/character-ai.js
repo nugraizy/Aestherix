@@ -15,14 +15,14 @@ const handler = async ({ from, type, body, message, groupMetadata }, client) => 
 		let response = await ai.sendMessage(body);
 
 		if (response.error) {
-			await client[botNum].reply(response.message, { from, quoted: message, groupMetadata });
+			await client.instance.reply(response.message, { from, quoted: message, groupMetadata });
 
 			response = await ai.sendMessage(body);
 
 			await delay(1000);
 		}
 
-		await client[botNum].reply(response.message, { from, quoted: message, groupMetadata });
+		await client.instance.reply(response.message, { from, quoted: message, groupMetadata });
 	}
 };
 
