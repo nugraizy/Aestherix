@@ -8,6 +8,11 @@ import chalk from 'chalk';
 import configuration from '../../config/connect.js';
 import { color, ERRLOG, INFOLOG, loadFiles } from '../../../utils/modules/index.js';
 
+/**
+ * @type {{name: string, id: string}[]}
+ */
+const conctactsDatabases = fs.readJSONSync('./databases/users/contacts.json');
+
 const hostPlatform = os.platform();
 
 const nocache = (module, newFile = false) => {
@@ -32,22 +37,69 @@ export const normalizeImportPath = (file) => {
 	return absolutePath;
 };
 
-export const saveContacts = (store, contactsList) => {
-	const { contacts } = store;
+/**
+ * @param {import('../../../types/Socket/index.js').Store} store
+ * @param {{name: string, id: string}[]} contactsList
+ */
+export const initContact = (store, contactsList) => {
+	if (contactsList.length === 0) {
+		if (conctactsDatabases.length === 0) {
+			ERRLOG(color('Contacts not found!', '#FF5555', 'Please reset your session and do a rescan to collects contacts!'));
+			process.exit(0);
+		}
 
-	const contactsValue = Object.keys(contacts);
+		for (const { id, name } of conctactsDatabases) {
+			store.localContacts[id] = { name, id };
+		}
+	}
 
-	for (const { id, name } of contactsList) {
+	if (conctactsDatabases.length === 0) {
+		fs.writeJSONSync('./databases/users/contacts.json', contactsList);
+	}
+
+	const freshContactsDatabases = fs.readJSONSync('./databases/users/contacts.json');
+
+	if (Object.keys(store.localContacts).length === 0) {
+		for (const { id, name } of contactsList) {
+			const index = freshContactsDatabases.findIndex((v) => v.id === id);
+
+			if (index !== -1) {
+				freshContactsDatabases[index].name = name;
+			}
+
+			store.localContacts[id] = { name, id };
+		}
+	}
+
+	fs.writeJSONSync('./databases/users/contacts.json', freshContactsDatabases);
+};
+
+export const updateContact = (store, contactsList) => {
+	const freshContactsDatabases = fs.readJSONSync('./databases/users/contacts.json');
+
+	const { localContacts } = store;
+
+	const contactsValue = Object.keys(localContacts);
+
+	for (const { id, notify, verifiedName, name } of contactsList) {
 		if (contactsValue.includes(id)) {
-			contacts[id].name = name;
+			localContacts[id].name = name || notify || verifiedName;
+
+			if (conctactsDatabases.length !== 0) {
+				freshContactsDatabases[freshContactsDatabases.findIndex((v) => v.id === id)].name = name || notify || verifiedName;
+			}
+
 			continue;
 		}
 
-		contacts[id] = { name, id };
+		localContacts[id] = { name: name || notify || verifiedName || 'Unknown', id };
+		freshContactsDatabases.push({ name: name || notify || verifiedName || 'Unknown', id });
 	}
+
+	fs.writeJSONSync('./databases/users/contacts.json', freshContactsDatabases);
 };
 
-export const validatePlugins = async (filename) => {
+export const validatePlugins = async (filename, isWatch) => {
 	const normalizedPath = normalizeImportPath(filename);
 	const str = (
 		await fs.readFile(normalizedPath, {
@@ -91,7 +143,9 @@ export const validatePlugins = async (filename) => {
 
 		ERRLOG(
 			color(`${ICON.ERROR}${filename.split('/').slice(-2).join('/')}`, '#9f53ea'),
-			color('File Error! Waiting for changes...', '#FF5555')
+			isWatch
+				? color('File Error! Waiting for changes...', '#FF5555')
+				: color('File Error! Fix the error and restart the bot to use this commands.', '#FF5555')
 		);
 	}
 };
@@ -111,7 +165,7 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 			INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('New File Added!', '#ff71ce'));
 			INFOLOG(color('checking if its valid plugins...', '#ffb86c'));
 		} catch (error) {
-			return await validatePlugins(filename);
+			return await validatePlugins(filename, true);
 		}
 
 		if (module?.default) {
@@ -139,7 +193,7 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 			await import(file);
 			INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('New File Added!', '#ff71ce'));
 		} catch (error) {
-			await validatePlugins(filename);
+			await validatePlugins(filename, true);
 		}
 	}
 };
@@ -163,7 +217,7 @@ const change = async (filename, stats, icon = ICON.CHANGED) => {
 	try {
 		command = (await _command.import)?.default;
 	} catch {
-		return await validatePlugins(filename);
+		return await validatePlugins(filename, true);
 	}
 
 	const _commandObj = cmds[index][1];
@@ -234,6 +288,12 @@ const unlink = (filename, icon = ICON.DELETED) => {
 	INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('File Deleted!', '#FF5555'));
 };
 
-export const watch = (folder) => {
-	chokidar.watch(folder).on('add', add).on('change', change).on('unlink', unlink);
-};
+export const watch = (folder) =>
+	new Promise((resolve) => {
+		chokidar
+			.watch(folder)
+			.on('add', add)
+			.on('change', change)
+			.on('unlink', unlink)
+			.on('ready', () => resolve());
+	});

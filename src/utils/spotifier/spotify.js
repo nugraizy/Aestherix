@@ -1,4 +1,6 @@
 import axios from 'axios';
+import FormData from 'form-data';
+import { load } from 'cheerio';
 
 class Spotifier {
 	#clientId = process.env.SPOTIFY_CLIENT_ID;
@@ -220,7 +222,19 @@ class Spotifier {
 					return { status: false, message: 'Parameter tracksID must provided' };
 				}
 
-				return { status: true, ...(await this._req(`/tracks?ids=${tracksID}`, 'GET')) };
+				const { tracks } = await this._req(`/tracks?ids=${tracksID}`, 'GET');
+
+				if (!tracks.length) {
+					return { status: false, message: 'Not Found' };
+				}
+
+				tracks[0].download = async () => {
+					const results = await this.download(tracks[0].external_urls.spotify);
+
+					return { results, absoluteUrl: tracks[0].external_urls.spotify };
+				};
+
+				return { status: true, tracks };
 			} catch (err) {
 				return { status: false, message: err };
 			}
@@ -266,6 +280,12 @@ class Spotifier {
 				if (data.tracks.items.length === 0) {
 					return { status: false, message: 'Not Found' };
 				}
+
+				data.tracks.items.forEach((_, i) => {
+					data.tracks.items[i].download = async () => {
+						return this.download(data.tracks.items[i].external_urls.spotify);
+					};
+				});
 
 				return { status: true, data: data.tracks };
 			} catch (err) {
@@ -481,6 +501,63 @@ class Spotifier {
 				});
 
 				return data;
+			} catch (err) {
+				return { status: false, message: err };
+			}
+		};
+
+		this.download = async (...urls) => {
+			try {
+				const container = {};
+
+				for (const url of urls) {
+					const $response1 = await axios.get('https://spotifymate.com/', {
+						headers: {
+							'User-Agent':
+								'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36'
+						}
+					});
+
+					const $text1 = $response1.data;
+
+					const token = $text1.match(/type="hidden" value="(.*)"/)[1];
+					const tokenName = $text1.match(/input name="(.*)" type="hidden"/)[1];
+
+					const form = new FormData();
+
+					form.append('url', url);
+					form.append(tokenName, token);
+
+					const $response2 = await axios({
+						url: 'https://spotifymate.com/action',
+						method: 'POST',
+						headers: {
+							...form.getHeaders(),
+							'User-Agent':
+								'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 YaBrowser/23.1.5.750 (beta) Yowser/2.5 Safari/537.36',
+							Origin: 'https://spotifymate.com',
+							Referer: 'https://spotifymate.com/',
+							Accept: '*/*',
+							Cookie: $response1.headers['set-cookie'].map((v) => v.split(';')[0]).join('; ')
+						},
+						data: form.getBuffer()
+					});
+
+					const $text2 = $response2.data;
+
+					const $ = load($text2);
+
+					const urlDownload = $('a.abutton.is-success.is-fullwidth').attr('href');
+
+					if (!urlDownload) {
+						container[url] = { error: true, message: 'Failed to download', url: null };
+						continue;
+					}
+
+					container[url] = { error: false, message: 'Success', url: urlDownload };
+				}
+
+				return container;
 			} catch (err) {
 				return { status: false, message: err };
 			}

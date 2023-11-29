@@ -10,10 +10,10 @@ import type {
 import type { AssignedClient } from '../Utils';
 
 export type ClientSocket = WASocket;
-export type Client = { [key: string]: ClientSocket };
-export type AdvancedClient = { [key: string]: ClientSocket & AssignedClient };
+export type Client = { instance: ClientSocket };
+export type AdvancedClient = { instance: ClientSocket & AssignedClient };
 
-export type Store = WAMemoryStore;
+export type Store = WAMemoryStore & { localContacts: { [_: string]: { name: string; id: string } } };
 export type SingleAuthState = { state: AuthenticationState; saveState: () => void };
 
 export type ContextInfo = proto.IContextInfo;

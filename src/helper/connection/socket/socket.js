@@ -31,7 +31,7 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 	const CONNECTION_CONFIG = {
 		printQRInTerminal: !OPTIONS.pairMode,
 		mobile: false,
-		browser: ['Safari (macOS)', '', ''],
+		browser: ['Chrome (Linux)', '', ''],
 		version: DEFAULT_CONNECTION_CONFIG.version,
 		logger: logger(OPTIONS),
 		auth: {
@@ -39,7 +39,7 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 			keys: makeCacheableSignalKeyStore(state.keys, logger(OPTIONS))
 		},
 		markOnlineOnConnect: false,
-		shouldSyncHistoryMessage: () => false,
+		shouldSyncHistoryMessage: () => true,
 		getMessage: async () => ({ conversation: 'Success syncing. Please resend the command again.' }),
 		generateHighQualityLinkPreview: true,
 		linkPreviewImageThumbnailWidth: 2,
@@ -47,7 +47,7 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 		userDevicesCache: new Cache(),
 		patchMessageBeforeSending: patchInteractiveMessage,
 		customId: 'HFINDER',
-		defaultQueryTimeoutMs: undefined
+		defaultQueryTimeoutMs: 0
 	};
 
 	/**

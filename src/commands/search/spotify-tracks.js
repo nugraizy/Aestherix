@@ -6,6 +6,21 @@ const regex = (input) =>
 		input
 	);
 
+const extractId = (url) => {
+	return url.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/)?.[1] || null;
+};
+
+const getSpotifyType = (url) => {
+	const reg = /^(https:\/\/open\.spotify\.com\/(track|album|playlist|artist)\/[a-zA-Z0-9]+)(\?.+)?$/gi;
+	const match = reg.exec(url);
+
+	if (!match) {
+		return 'track';
+	}
+
+	return match[2];
+};
+
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
  */
@@ -28,9 +43,7 @@ export default {
 
 		for (const querie of query) {
 			const result = regex(querie)
-				? await spotifier.getTracks(
-						querie.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/)[1]
-				  ) /* eslint-disable-line */
+				? await spotifier.getTracks(extractId(querie)) /* eslint-disable-line */
 				: await spotifier.searchTracks(querie);
 
 			if (!result.status) {
@@ -39,33 +52,20 @@ export default {
 			}
 
 			let caption = '';
-			let count = 0;
-			const rows = [];
 
-			for (const { artists, name, duration_ms: durationMs } of result?.data?.items ?? result.tracks) {
-				if (count === 0) {
-					caption += `Title : ${name}\n`;
-					caption += `Artists : ${artists
-						.map((v) => v.name)
-						.map((v, i) => (artists.length !== 1 && i + 1 === artists.length ? `and ${v}` : v))
-						.join(', ')}\n`;
-					caption += `Duration : ${durationMs.toTime()}\n`;
-				} else {
-					rows.push({
-						rows: [
-							{
-								title: `${count}. ${artists
-									.map((v) => v.name)
-									.map((v, i) => (artists.length !== 1 && i + 1 === artists.length ? `and ${v}` : v))
-									.join(', ')} - ${name}`,
-								rowId: `.spotifydl ${name} - ${artists[0].name}`
-							}
-						],
-						title: 'VOID BOT | Powered by Spotify'
-					});
-				}
-
-				count++;
+			for (const {
+				artists,
+				name,
+				duration_ms: durationMs,
+				external_urls: { spotify }
+			} of result?.data?.items ?? result.tracks) {
+				caption += `✦ Media ID : ${extractId(spotify)}\n🖼️ Type : ${getSpotifyType(
+					spotify
+				)}\n📕 Title : ${name}\n📡 Artists : ${artists
+					.map((v) => v.name)
+					.map((v, i) => (artists.length !== 1 && i + 1 === artists.length ? `and ${v}` : v))
+					.join(', ')}\n`;
+				caption += `Duration : ${durationMs.toTime()}\n\n`;
 			}
 
 			await client.instance.send(
@@ -75,7 +75,7 @@ export default {
 						await fetchBUFFER(result?.data?.items?.[0]?.album?.images?.[0]?.url ?? result.tracks[0].album.images[0].url),
 						'base64'
 					),
-					caption: 'Spotify Tracks'.formatHeaders(),
+					caption: 'Spotify Tracks'.formatHeaders() + `\n\n${caption}`.trimEnd(),
 					templateButtons: [
 						{
 							urlButton: {
@@ -102,17 +102,17 @@ export default {
 				},
 				{ groupMetadata, quoted: message }
 			);
-			await client.instance.send(
-				from,
-				{
-					buttonText: 'Open List',
-					text: '\t',
-					footer: '```Looking for some more? Choose between these options.```',
-					title: 'Spotify Track'.formatHeaders(),
-					sections: rows
-				},
-				{ groupMetadata }
-			);
+			// 	await client.instance.send(
+			// 		from,
+			// 		{
+			// 			buttonText: 'Open List',
+			// 			text: '\t',
+			// 			footer: '```Looking for some more? Choose between these options.```',
+			// 			title: 'Spotify Track'.formatHeaders(),
+			// 			sections: rows
+			// 		},
+			// 		{ groupMetadata }
+			// 	);
 		}
 	}
 };
