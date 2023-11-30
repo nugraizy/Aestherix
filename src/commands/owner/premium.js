@@ -1,4 +1,3 @@
-import { findPhoneNumbersInText } from 'libphonenumber-js';
 import fs from 'fs-extra';
 
 import configuration from '../../helper/config/connect.js';
@@ -45,14 +44,14 @@ const configureUser = async (client, { mode, user, USERS, PREMS_CONTAINER, from,
 		Limit.updateRole(user, 'FREE');
 	}
 
-	if (PREMS_CONTAINER.adding.length > 0 || PREMS_CONTAINER.removing.length > 0) {
+	if (PREMS_CONTAINER.adding.length || PREMS_CONTAINER.removing.length) {
 		let capt = '';
 
-		if (PREMS_CONTAINER.adding.length > 0) {
+		if (PREMS_CONTAINER.adding.length) {
 			capt += `Success adding premium : ${PREMS_CONTAINER.adding.map((v) => `@${v.split('@')[0]}`).join(', ')}\n`;
 		}
 
-		if (PREMS_CONTAINER.removing.length > 0) {
+		if (PREMS_CONTAINER.removing.length) {
 			capt += `Success removing premium : ${PREMS_CONTAINER.removing.map((v) => `@${v.split('@')[0]}`).join(', ')}`;
 		}
 
@@ -109,7 +108,7 @@ export default {
 			});
 		}
 
-		if (mention.length > 0) {
+		if (mention.length) {
 			for (const mentioned of mention) {
 				await configureUser(client, {
 					mode: configure,
@@ -126,7 +125,7 @@ export default {
 		}
 
 		if (query) {
-			const numbers = findPhoneNumbersInText(query);
+			const numbers = query.parseNumber();
 
 			for (let user of numbers) {
 				let {
@@ -194,14 +193,14 @@ export default {
 				PREMS_CONTAINER.removing.push(mentioned);
 			}
 
-			if (PREMS_CONTAINER.adding.length > 0 || PREMS_CONTAINER.removing.length > 0) {
+			if (PREMS_CONTAINER.adding.length || PREMS_CONTAINER.removing.length) {
 				let capt = '';
 
-				if (PREMS_CONTAINER.adding.length > 0) {
+				if (PREMS_CONTAINER.adding.length) {
 					capt += `Success adding premium : ${PREMS_CONTAINER.adding.map((v) => `@${v.split('@')[0]}`).join(', ')}\n`;
 				}
 
-				if (PREMS_CONTAINER.removing.length > 0) {
+				if (PREMS_CONTAINER.removing.length) {
 					capt += `Success removing premium : ${PREMS_CONTAINER.removing.map((v) => `@${v.split('@')[0]}`).join(', ')}`;
 				}
 

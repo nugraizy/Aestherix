@@ -13,7 +13,7 @@ export class FlickerAPI extends Flickr {
 			new Promise(async (resolve, reject) => {
 				let { photos } = await this.req('photos', 'search', { text: keyword });
 
-				if (photos.photo.length === 0) {
+				if (!photos.photo.length) {
 					reject(new Error('Image Not Found'));
 				}
 

@@ -45,7 +45,7 @@ export const googleArticle = (query) =>
 				})
 				.filter((v) => v.description);
 
-			if (container.length === 0) {
+			if (!container.length) {
 				resolve({ error: 'Article not found.' });
 			}
 

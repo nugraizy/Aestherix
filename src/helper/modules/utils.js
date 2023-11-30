@@ -3,7 +3,8 @@ import {
 	downloadMediaMessage as downloadMessage,
 	generateWAMessage,
 	generateWAMessageFromContent,
-	toBuffer
+	toBuffer,
+	jidDecode
 } from '@adiwajshing/baileys';
 import { fileTypeFromBuffer } from 'file-type';
 import ffmpeg from 'fluent-ffmpeg';
@@ -300,7 +301,7 @@ export const assign = (client) => {
 		 * @type {import('../../types/Utils/index.js').SendButtonText}
 		 */
 		buttonText: async (to, contentText, footerText, buttons, options = {}) => {
-			if (buttons.length === 0) {
+			if (!buttons.length) {
 				return new Error('Buttons is empty');
 			}
 
@@ -324,7 +325,7 @@ export const assign = (client) => {
 		 * @type {import('../../types/Utils/index.js').SendButtonDocument}
 		 */
 		buttonDocument: async (to, contentText, footerText, buttons, media, options = {}) => {
-			if (buttons.length === 0) {
+			if (!buttons.length) {
 				return new Error('Buttons is empty');
 			}
 
@@ -359,7 +360,7 @@ export const assign = (client) => {
 		 * @type {import('../../types/Utils/index.js').SendButtonLocation}
 		 */
 		buttonLocation: async (dari, contentText, footerText, buttons, media, options = {}) => {
-			if (buttons.length === 0) {
+			if (!buttons.length) {
 				return new Error('Buttons is empty');
 			}
 
@@ -557,10 +558,10 @@ export const assign = (client) => {
 		 */
 		searchMessage: async (to, query) => {
 			let i = 0;
-			const containers = await store.loadMessages(to);
+			const containers = store.loadMessages(to);
 			const keys = [];
 
-			if (containers.length === 0) {
+			if (!containers.length) {
 				return keys;
 			}
 
@@ -578,6 +579,16 @@ export const assign = (client) => {
 			}
 
 			return keys;
+		},
+
+		/**
+		 * Parse JID.
+		 * @type {import('../../types/Utils/index.js').DecodeJid}
+		 */
+		decodeJid: (jid) => {
+			const { user, server } = jidDecode(jid);
+
+			return user + '@' + server;
 		}
 	};
 

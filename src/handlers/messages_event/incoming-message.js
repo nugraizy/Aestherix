@@ -73,7 +73,7 @@ const handleOfflineMessage = async (client, message, cmds) => {
 	return await handler.get('OFFLINE')(client, message);
 };
 
-const handleMentionedAfkUsers = (message, client, instance) => {
+const handleMentionedAfkUsers = (message, client) => {
 	let caption = 'You are Tagging People That Are AFK.'.formatHeaders() + '\n\n';
 	const container = [];
 
@@ -91,7 +91,7 @@ const handleMentionedAfkUsers = (message, client, instance) => {
 		}
 	}
 
-	if (container.length > 0) {
+	if (container.length) {
 		client.instance.reply(caption.trim(), {
 			groupMetadata: message.groupMetadata,
 			from: message.from,
@@ -478,7 +478,7 @@ const handleAfk = (client, message) => {
 		});
 	}
 
-	if (message.mention?.length > 0) {
+	if (message.mention?.length) {
 		handleMentionedAfkUsers(message, client, instance);
 	}
 };
@@ -522,7 +522,7 @@ const handleIncomingMessage = async (message, client, cmds, store, user, state, 
 	if (
 		message.messages[0] &&
 		'messageStubParameters' in message.messages[0] &&
-		message.messages[0]?.messageStubParameters?.length > 0
+		message.messages[0]?.messageStubParameters?.length
 	) {
 		return handleStubMessage(client, message, store);
 	}

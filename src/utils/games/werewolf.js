@@ -227,7 +227,7 @@ export class Werewolf {
 			const data = this.getDataGame(roomId);
 			const player = data.playersData.filter((v) => v.id === playerId);
 
-			if (player.length === 0) {
+			if (!player.length) {
 				return;
 			}
 
@@ -242,7 +242,7 @@ export class Werewolf {
 			const data = this.getDataGame(roomId);
 			const player = data.playersData.filter((v) => v.id === playerId);
 
-			if (player.length === 0) {
+			if (!player.length) {
 				return;
 			}
 
@@ -279,7 +279,7 @@ export class Werewolf {
 
 			data.playersData.splice(player, 1);
 
-			if (data.playersData.length === 0) {
+			if (!data.playersData.length) {
 				this.deleteGame(playerId);
 				return {
 					error: false,
@@ -660,7 +660,7 @@ export class Werewolf {
 				this.resetPerks(dataGame.roomId);
 				let peopleKilledMention = [];
 				let message = WEREWOLF_SCRIPTING.dayTime.noKill[Math.floor(Math.random() * WEREWOLF_SCRIPTING.dayTime.noKill.length)];
-				const isSomeoneKilled = dataGame.playersKilled.length > 0;
+				const isSomeoneKilled = dataGame.playersKilled.length;
 
 				if (isSomeoneKilled) {
 					const peopleKilled = dataGame.playersKilled.map((v) => `@${v.id.split('@')[0]}`).join(', ');
@@ -754,7 +754,7 @@ export class Werewolf {
 
 				let message;
 				const voters = dataGame.playersData.filter((v) => v.isVoted);
-				const isVoting = voters.length > 0;
+				const isVoting = voters.length;
 				let ids = [];
 				let voteData = {};
 
@@ -799,13 +799,10 @@ export class Werewolf {
 					dataGame.gameAfk++;
 				}
 
-				const isWinning =
-					dataGame.playersData.filter((v) => v.isAlive && v.role === 'werewolf').length ==
-					dataGame.playersData.filter((v) => v.isAlive && v.role !== 'werewolf').length
-						? 'werewolf'
-						: dataGame.playersData.filter((v) => v.isAlive && v.role === 'werewolf').length === 0
-						? 'villager'
-						: 'none';
+				const werewolfs = dataGame.playersData.filter((v) => v.isAlive && v.role === 'werewolf').length;
+				const humans = dataGame.playersData.filter((v) => v.isAlive && v.role !== 'werewolf').length;
+
+				const isWinning = werewolfs === humans ? 'werewolf' : !werewolfs ? 'villager' : 'none';
 
 				dataGame.gameDialogue = message;
 				client.instance.ev.emit('werewolf.cycle', {

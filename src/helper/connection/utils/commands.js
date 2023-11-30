@@ -22,8 +22,10 @@ export const loadCommands = async (OPTIONS) => {
 
 				if (!module?.default) {
 					ERRLOG(
-						color(`${ICON.ADD} ${normalize.split('/').slice(-2).join('/')}`, '#9f53ea'),
-						color('File Error! Waiting for changes...', '#FF5555')
+						color(`${ICON.ERROR}${normalize.split('/').slice(-2).join('/')}`, '#9f53ea'),
+						OPTIONS.watch
+							? color('File Error! Waiting for changes...', '#FF5555')
+							: color('File Error! Fix the error and restart the bot to use this commands.', '#FF5555')
 					);
 					configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
 						absolutePath: file,

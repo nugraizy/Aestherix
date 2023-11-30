@@ -13,7 +13,7 @@ export const imagesToWebp = (images) =>
 			if (images instanceof 'string') {
 				form.append('files[]', fs.createReadStream(images));
 			} else if (typeof images === 'object') {
-				if (!images.length || images.length === 0) {
+				if (!images.length) {
 					reject(new Error('Images type must be type of `string` or `array of strings`'));
 				}
 

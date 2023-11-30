@@ -9,13 +9,13 @@ const keycaps = {
 	6: '6️⃣',
 	7: '7️⃣',
 	8: '8️⃣',
-	9: '9️⃣',
+	9: '9️⃣'
 };
 const LEVEL = {
 	easy: 60,
 	medium: 50,
 	hard: 30,
-	insane: 15,
+	insane: 15
 };
 
 export const makePuzzle = (level) => {
@@ -40,7 +40,7 @@ export const makePuzzle = (level) => {
 		if (deduced[pos] === null) {
 			puzzle.push({
 				pos: pos,
-				num: board[pos],
+				num: board[pos]
 			});
 			deduced[pos] = board[pos];
 			deduce(deduced);
@@ -116,7 +116,7 @@ function solveboard(original) {
 	if (guesses === null) {
 		return {
 			state: [],
-			answer: board,
+			answer: board
 		};
 	}
 
@@ -124,8 +124,8 @@ function solveboard(original) {
 		{
 			guesses: guesses,
 			count: 0,
-			board: board,
-		},
+			board: board
+		}
 	];
 
 	return solvenext(track);
@@ -142,7 +142,7 @@ function solvenext(remembered) {
 		remembered.push({
 			guesses: tuple1.guesses,
 			count: tuple1.count + 1,
-			board: tuple1.board,
+			board: tuple1.board
 		});
 		let workspace = [].concat(tuple1.board);
 		let tuple2 = tuple1.guesses[tuple1.count];
@@ -153,20 +153,20 @@ function solvenext(remembered) {
 		if (guesses === null) {
 			return {
 				state: remembered,
-				answer: workspace,
+				answer: workspace
 			};
 		}
 
 		remembered.push({
 			guesses: guesses,
 			count: 0,
-			board: workspace,
+			board: workspace
 		});
 	}
 
 	return {
 		state: [],
-		answer: null,
+		answer: null
 	};
 }
 
@@ -193,7 +193,7 @@ function deduce(board) {
 					let t = numbers.map(function (val, key) {
 						return {
 							pos: pos,
-							num: val,
+							num: val
 						};
 					});
 					let tuple2 = pickbetter(guess, count, t);
@@ -237,7 +237,7 @@ function deduce(board) {
 						let t = spots.map(function (val, key) {
 							return {
 								pos: val,
-								num: n,
+								num: n
 							};
 						});
 						let tuple4 = pickbetter(guess, count, t);
@@ -281,7 +281,7 @@ function figurebits(board) {
 
 	return {
 		allowed: allowed,
-		needed: needed,
+		needed: needed
 	};
 }
 
@@ -351,23 +351,23 @@ function pickbetter(b, c, t) {
 	if (b === null || t.length < b.length) {
 		return {
 			guess: t,
-			count: 1,
+			count: 1
 		};
 	} else if (t.length > b.length) {
 		return {
 			guess: b,
-			count: c,
+			count: c
 		};
 	} else if (randomInt(c) === 0) {
 		return {
 			guess: t,
-			count: c + 1,
+			count: c + 1
 		};
 	}
 
 	return {
 		guess: b,
-		count: c + 1,
+		count: c + 1
 	};
 }
 
@@ -538,7 +538,7 @@ export const fillGrid = (post, num, board, solvedBoard) => {
 	} else {
 		return {
 			statusPlaying: grids.statusPlay,
-			message: grids.message,
+			message: grids.message
 		};
 	}
 };

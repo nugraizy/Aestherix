@@ -1,5 +1,3 @@
-import { S_WHATSAPP_NET } from '../../helper/index.js';
-
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
  */
@@ -22,7 +20,9 @@ export default {
 			});
 		}
 
-		if (!mediaData.participant.includes(`${instance.split(':')[0]}${S_WHATSAPP_NET}`) && !isBotAdmin) {
+		const myJid = client.instance.decodeJid(instance);
+
+		if (!mediaData.participant.includes(myJid) && !isBotAdmin) {
 			return await client.instance.reply('You can not ask bot to delete people message when bot is not admin.', {
 				from,
 				quoted: message,
@@ -37,7 +37,7 @@ export default {
 					id: mediaData.stanzaId,
 					participant: mediaData.participant,
 					remoteJid: from,
-					...(mediaData.participant.includes(`${instance.split(':')[0]}${S_WHATSAPP_NET}`) ? { fromMe: true } : {})
+					...(mediaData.participant.includes(myJid) ? { fromMe: true } : {})
 				}
 			},
 			{ groupMetadata }

@@ -40,7 +40,7 @@ export default {
 	async run({ from, prefix, groupMetadata }, client) {
 		let capt = `𓆩 𝓗𝓲𝓭𝓭𝓮𝓷 𝓕𝓲𝓷𝓭𝓮𝓻 ${version} 𓆪\n\n`;
 
-		if (Object.keys(configuration.cmds.menu).length === 0) {
+		if (!Object.keys(configuration.cmds.menu).length) {
 			const container = configuration.cmds.commands
 				.filter((value) => value.name !== '', 'filter')
 				.reduce((acc, value) => {
@@ -66,7 +66,7 @@ export default {
 					 * @param {import('../../types/Commands/index.js').CommandProps} v
 					 */
 					(v) =>
-						`╭ ${v.minifiedDescription}\n├ _${prefix}${v.name}_\n├ ${v.usage}\n╰ ⏳ ${v.cooldown}s | ${
+						`╭ ${v.minifiedDescription || v.description}\n├ _${prefix}${v.name}_\n├ ${v.usage}\n╰ ⏳ ${v.cooldown}s | ${
 							v.premium ? 'Premium' : 'Free'
 						} | 🆔 ${v.aliases.join(', ')}`
 				)

@@ -1,7 +1,7 @@
 import { generateMessageID, generateWAMessageFromContent } from '@adiwajshing/baileys';
 import emojiReg from 'emoji-regex';
 import { readFileSync } from 'fs';
-import { ZERO, S_WHATSAPP_NET } from '../../helper/index.js';
+import { ZERO } from '../../helper/index.js';
 
 import configuration from '../../helper/config/connect.js';
 
@@ -48,10 +48,10 @@ export default {
 		if (emojis) {
 			const chats = configuration.OPTIONS.json
 				? JSON.parse(readFileSync(DATABASE_PATH)).messages[from].map((v) => v.key)
-				: (await store.loadMessages(from)).map((v) => v.key);
+				: store.loadMessages(from).map((v) => v.key);
 
 			for (const chat of chats) {
-				chat.participant = chat.fromMe ? `${instance.split(':')[0]}${S_WHATSAPP_NET}` : chat.participant;
+				chat.participant = chat.fromMe ? client.instance.decodeJid(instance) : chat.participant;
 
 				await client.instance.relayMessage(
 					from,

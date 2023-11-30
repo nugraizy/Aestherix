@@ -39,7 +39,7 @@ export default {
 			await client.instance.reply(
 				`Message Metadata : 
 
-Possibly Hidetag : ${dataMessage.mention.length > 0 && !dataMessage.body.match(/@[0-9]+/g) ? 'Yup' : 'Nope'}
+Possibly Hidetag : ${dataMessage.mention.length && !dataMessage.body.match(/@[0-9]+/g) ? 'Yup' : 'Nope'}
 Type Message : ${dataMessage.type}
 Tot. Tags : ${dataMessage.mention.length}`,
 				{ from: dataMessage?.from, quoted: dataMessage.message }
@@ -61,7 +61,7 @@ Tot. Tags : ${dataMessage.mention.length}`,
 			);
 		}
 
-		if (dataMessages.length === 0) {
+		if (!dataMessages.length) {
 			return await client.instance.reply('No messages scraped in this chat', { from, quoted: message, groupMetadata });
 		}
 
@@ -71,7 +71,7 @@ Tot. Tags : ${dataMessage.mention.length}`,
 				v.sender !== settings.owner_number
 		);
 
-		if (dataMessages.length === 0) {
+		if (!dataMessages.length) {
 			return await client.instance.reply(`Your tags is not found. Chats scraped : ${messages.length}`, {
 				from,
 				quoted: message,

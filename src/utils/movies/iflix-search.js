@@ -31,7 +31,7 @@ export const iflixSearch = (keyword) =>
 				result: { result }
 			} = await fetchJSON(BASE_API_URL(keyword));
 
-			if (result.length === 0) {
+			if (!result.length) {
 				return resolve({ error: 'No result found' });
 			}
 

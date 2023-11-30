@@ -41,7 +41,7 @@ export const searchBandcamp = (keyword) =>
 				}
 			});
 
-			if (data?.auto?.results?.length === 0) {
+			if (!data?.auto?.results?.length) {
 				return resolve({ error: 'Not Found' });
 			}
 

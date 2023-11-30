@@ -56,7 +56,7 @@ const _parseDestructuring = (data) => {
 		hashtags
 	};
 
-	if (photos?.length > 0) {
+	if (photos?.length) {
 		container.medias = photos.map((v) => ({
 			url: v.url,
 			type: 'image',

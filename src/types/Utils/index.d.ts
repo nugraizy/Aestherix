@@ -350,6 +350,16 @@ export type SearchMessage = (
 	query: string
 ) => Promise<proto.IWebMessageInfo[]>;
 
+/**
+ * Decode jid
+ */
+export type DecodeJid = (
+	/**
+	 * the jid you want to decode
+	 */
+	jid: string
+) => /** The parsed jid */ string;
+
 export type AssignSocketClient = (client: Client) => AdvancedClient;
 
 export type AssignedClient = {
@@ -366,4 +376,5 @@ export type AssignedClient = {
 	setStatus: SetInfo;
 	updateGroup: UpdateGroup;
 	searchMessage: SearchMessage;
+	decodeJid: DecodeJid;
 };

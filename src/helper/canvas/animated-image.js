@@ -87,7 +87,7 @@ export const attp = (sender, texts, colored, fonts) =>
 		createExif('Made by Nanda', 'Void Animated Sticker using Canvas and WebP');
 
 		fonts = fonts !== undefined ? fonts.toLowerCase() : 'chevin';
-		colored = colored.length === 0 ? null : colored;
+		colored = colored.length ? colored : null;
 
 		INFOLOG(`${color('Making Animated Image', 'cyan')} for ${color(sender, '#ff71ce')}`);
 

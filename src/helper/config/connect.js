@@ -38,7 +38,8 @@ const globalConfig = {
 		anonymous: new Cache(),
 		word: new Cache(),
 		from: [],
-		freegame: null
+		freegame: null,
+		spotifyPlaybacks: new Cache()
 	},
 	cache: {
 		metadata: new Cache(),

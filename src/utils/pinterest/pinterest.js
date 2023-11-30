@@ -5,31 +5,26 @@ const _api = (input) =>
 const _apiBase = (input) => `https://id.pinterest.com/pin/${input}`;
 
 export const pinterest = (query) =>
-	new Promise(async (resolve) => {
+	new Promise(async (resolve, reject) => {
 		try {
-			const RAW_DATA = await fetchJSON(_api(query));
-			const container = [];
-			let RAW_RESULTS = RAW_DATA.resource_response.data.results;
+			const response = await fetchJSON(_api(query));
+			const results = response.resource_response.data.results.filter((v) => v.images?.orig !== undefined);
 
-			RAW_RESULTS = RAW_RESULTS.filter((v) => v.images?.orig !== undefined);
-
-			if (RAW_RESULTS.length === 0) {
+			if (!results.length) {
 				resolve({ error: true, message: 'Original Image Not Available.' });
 			}
 
-			for (const result of RAW_RESULTS) {
-				container.push({
+			resolve(
+				results.map((result) => ({
 					authorUsername: result.pinner.username,
 					authorFullname: result.pinner.full_name,
 					follower: result.pinner.follower_count,
 					caption: result.grid_title,
 					image: result.images.orig.url,
 					pinSource: _apiBase(result.id)
-				});
-			}
-
-			resolve(container);
+				}))
+			);
 		} catch (err) {
-			resolve({ error: err });
+			reject(err);
 		}
 	});

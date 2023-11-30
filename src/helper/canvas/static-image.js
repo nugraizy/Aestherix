@@ -78,18 +78,18 @@ const loadColorsPalette = (color = null) => {
 	return random([].concat(...Array(3).fill(defaultColors[Math.floor(Math.random() * defaultColors.length)])));
 };
 
-export const ttp = (sender, texts, colors, fonts) =>
+export const ttp = (sender, texts, colored, fonts) =>
 	new Promise(async (resolve, reject) => {
 		createExif('Made by Nanda', 'Void Static Sticker using Canvas and WebP');
 
 		fonts = fonts !== undefined ? fonts.toLowerCase() : 'chevin';
-		colors = colors.length === 0 ? null : colors;
+		colored = colored.length ? colored : null;
 
 		INFOLOG(`${color('Making Static Image', 'cyan')} for ${color(sender, '#ff71ce')}`);
 
 		let { ctx, canvas } = createCanvasTemplates();
-		const colori = loadColorsPalette(colors);
-		const reassignColor = colori.startsWith('#') ? colori : `#${colori}`;
+		const colors = loadColorsPalette(colored);
+		const reassignColor = colors.startsWith('#') ? colors : `#${colors}`;
 
 		ctx.fillStyle = reassignColor;
 		ctx.shadowOffsetX = 1;

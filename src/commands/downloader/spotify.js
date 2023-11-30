@@ -27,8 +27,6 @@ const isSpotifyURL = (url) => {
 const processVideo = async (url, type, client, { from, message, groupMetadata, prettyNumber }) => {
 	const { tracks, status, message: respMessage } = await spotifier.getTracks(extractId(url));
 
-	console.log(tracks);
-
 	if (!status) {
 		return await client.instance.reply(respMessage, { from, quoted: message, groupMetadata });
 	}
@@ -45,7 +43,7 @@ const processVideo = async (url, type, client, { from, message, groupMetadata, p
 		return;
 	}
 
-	const { url: downloadUrl } = video.results[video.absoluteUrl];
+	const { url: downloadUrl } = video;
 
 	await client.instance.send(
 		from,
@@ -100,14 +98,14 @@ export default {
 				videoIds.push([match[1], type.exec(bodyQuoted)[1]]);
 			}
 
-			if (videoIds.length === 0) {
+			if (!videoIds.length) {
 				return await client.instance.reply('No id(s) found', { from, quoted: message, groupMetadata });
 			}
 
 			const numberiedQuery = Number(query);
 			const index = numberiedQuery - 1;
 
-			if (numberiedQuery === 0) {
+			if (!numberiedQuery) {
 				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
 					from,
 					quoted: message,
@@ -125,6 +123,14 @@ export default {
 
 			const videoId = videoIds[index][0];
 			const typeMedia = videoIds[index][1];
+
+			if (!videoId) {
+				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
+					from,
+					quoted: message,
+					groupMetadata
+				});
+			}
 
 			await client.instance.reply(`Downloading Spotify ${typeMedia} :\n${videoId}\nPlease wait`, {
 				from,

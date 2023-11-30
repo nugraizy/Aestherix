@@ -627,7 +627,7 @@ class RequestModule extends ResponseParser {
 
 		dataPosts = this._parseMediaResponse(
 			dataPosts,
-			dataPosts.image_post_info && dataPosts.image_post_info?.images.length > 0 ? 'images' : undefined
+			dataPosts.image_post_info && dataPosts.image_post_info?.images.length ? 'images' : undefined
 		);
 
 		const dataClone = { ...dataPosts };

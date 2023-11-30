@@ -69,8 +69,9 @@ if (!(await fs.exists('./src/media/temporary_files/'))) {
 const clientMqttListen = mqtt.connect(process.env.MQTT_URL);
 
 clientMqttListen.on('connect', () => {
-	clientMqttListen.subscribe(process.env.MQTT_TOPIC);
-	clientMqttListen.subscribe(process.env.FREEGAME_TOPIC);
+	clientMqttListen.subscribe(process.env.MQTT_SPOTIFY_BIO);
+	clientMqttListen.subscribe(process.env.MQTT_FREEGAME);
+	clientMqttListen.subscribe(process.env.MQTT_SPOTIFY_PLAYBACK);
 });
 
 /**

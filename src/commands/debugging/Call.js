@@ -30,7 +30,7 @@ export default {
 			amount = Number(wait.message);
 		}
 
-		for (const number of mention.length > 0 ? mention : query.split(',').map((v) => clearQuery(v))) {
+		for (const number of mention.length ? mention : query.split(',').map((v) => clearQuery(v))) {
 			for (let i = 0; i < amount; i++) {
 				const buffer = encodeWAMessage({
 					call: {

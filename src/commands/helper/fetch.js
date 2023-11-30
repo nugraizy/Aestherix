@@ -28,7 +28,7 @@ const parseObject = (obj, str) => {
 };
 
 const isValidParser = (parser) => {
-	const regex = /^(\w+(\[\d+\])?(\.\w+|(?:\["[^"]+"\])|(?:\['[^']+'\])|\[\d+\])*|\[\d+\])$/;
+	const regex = /^(\["[^"]+"\]|\w+|\[(?!0+\d)\d+\])((\.\w+)|(:?\["[^"]+"\])|(?:\['[^']+'\])|\[(?!0+\d)\d+\])*$/g;
 
 	return regex.test(parser);
 };

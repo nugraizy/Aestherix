@@ -31,7 +31,7 @@ export const yandexImage = async (query) =>
 					};
 				});
 
-			if (container.length === 0) {
+			if (!container.length) {
 				resolve({
 					error: `The image you are looking for (${query.capitalize()}) cannot be found.\nPlease try again with another keyword.`
 				});

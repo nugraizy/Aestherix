@@ -1,15 +1,15 @@
 const parseFilesCommitted = (files) => {
 	let caption = '';
 
-	if (files.added.length > 0) {
+	if (files.added.length) {
 		caption += files.added.map((v) => `+ ${v}\n`).join('');
 	}
 
-	if (files.removed.length > 0) {
+	if (files.removed.length) {
 		caption += files.removed.map((v) => `- ${v}\n`).join('');
 	}
 
-	if (files.modified.length > 0) {
+	if (files.modified.length) {
 		caption += files.modified.map((v) => `± ${v}\n`).join('');
 	}
 

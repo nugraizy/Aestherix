@@ -27,7 +27,8 @@ export const ICON = {
 	DELETED: '🗑️  ',
 	CHANGED: '✏️ ',
 	ERROR: '⚠️  ',
-	RENAMED: '🔂 '
+	RENAMED: '🔂 ',
+	REFRESH: '🔄 '
 };
 
 export const normalizeImportPath = (file) => {
@@ -42,19 +43,19 @@ export const normalizeImportPath = (file) => {
  * @param {{name: string, id: string}[]} contactsList
  */
 export const initContact = (store, contactsList) => {
-	if (contactsList.length === 0) {
+	if (!contactsList.length) {
 		for (const { id, name } of conctactsDatabases) {
 			store.localContacts[id] = { name, id };
 		}
 	}
 
-	if (conctactsDatabases.length === 0) {
+	if (!conctactsDatabases.length) {
 		fs.writeJSONSync('./databases/users/contacts.json', contactsList);
 	}
 
 	const freshContactsDatabases = fs.readJSONSync('./databases/users/contacts.json');
 
-	if (Object.keys(store.localContacts).length === 0) {
+	if (!Object.keys(store.localContacts).length) {
 		for (const { id, name } of contactsList) {
 			const index = freshContactsDatabases.findIndex((v) => v.id === id);
 
@@ -127,14 +128,14 @@ export const validatePlugins = async (filename, isWatch) => {
 		const linePaddingCurrent = ' '.repeat(longestLine - String(currentLine).length + 2);
 		const linePaddingSecond = ' '.repeat(longestLine - String(secondLine).length + 2);
 
-		console.log(chalk.gray(path), '\n');
+		console.log(`  ${linePaddingFirst}`, chalk.bgHex('#fff').gray(path), '\n');
 
-		console.log(chalk.gray(`  ${linePaddingFirst}${firstLine}:`), chalk.hex('#fff')(firstCode));
+		firstLine > 0 ? console.log(chalk.gray(`  ${linePaddingFirst}${firstLine}:`), chalk.hex('#fff')(firstCode || '')) : '';
 		console.log('  ' + chalk.bold.hex('#fff').bgRed(`${linePaddingCurrent}${currentLine}: ${error}`));
-		console.log(chalk.gray(`  ${linePaddingSecond}${' '.repeat(longestLine)}:`), chalk.bold.hex('#fff')(arrow));
-		console.log(chalk.gray(`  ${linePaddingSecond}${secondLine}:`), chalk.hex('#fff')(secondCode), '\n');
+		console.log(chalk.gray(`  ${linePaddingSecond}${' '.repeat(longestLine)}:`) + chalk.bold.hex('#fff')(arrow + '^^'));
+		console.log(chalk.gray(`  ${linePaddingSecond}${secondLine}:`), chalk.hex('#fff')(secondCode || ''), '\n');
 
-		console.log(chalk.gray(typeError));
+		console.log(`  ${linePaddingSecond}`, chalk.bgHex('#fff').black(typeError));
 
 		ERRLOG(
 			color(`${ICON.ERROR}${filename.split('/').slice(-2).join('/')}`, '#9f53ea'),
@@ -175,8 +176,8 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 			);
 		} else {
 			ERRLOG(
-				color(`${icon}${filename.split('/').slice(-2).join('/')}`, '#9f53ea'),
-				color('File Error! Waiting for changes...', '#FF5555')
+				color(`${ICON.ERROR}${filename.split('/').slice(-2).join('/')}`, '#9f53ea'),
+				color('File Error! Waiting for changes...', '#FF5555') // not this
 			);
 			configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
 				absolutePath: file,
@@ -188,6 +189,7 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 			await import(file);
 			INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('New File Added!', '#ff71ce'));
 		} catch (error) {
+			console.log(error);
 			await validatePlugins(filename, true);
 		}
 	}
@@ -211,6 +213,13 @@ const change = async (filename, stats, icon = ICON.CHANGED) => {
 
 	try {
 		command = (await _command.import)?.default;
+
+		if (!command) {
+			return ERRLOG(
+				color(`${ICON.ERROR}${cmds[index][1].path?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
+				color('File is not containing the correct Command Properties! Refer to Example to make new commands!', '#05ffa1')
+			);
+		}
 	} catch {
 		return await validatePlugins(filename, true);
 	}
@@ -218,7 +227,7 @@ const change = async (filename, stats, icon = ICON.CHANGED) => {
 	const _commandObj = cmds[index][1];
 
 	INFOLOG(
-		color(`${icon} ${_commandObj.path?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
+		color(`${ICON.REFRESH}${_commandObj.path?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
 		color('File Reloaded!', '#05ffa1')
 	);
 

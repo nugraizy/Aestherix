@@ -1,5 +1,3 @@
-import { findPhoneNumbersInText } from 'libphonenumber-js';
-
 import fs from 'fs-extra';
 
 import configuration from '../../helper/config/connect.js';
@@ -42,7 +40,7 @@ export default {
 			return;
 		}
 
-		if (mention.length > 0) {
+		if (mention.length) {
 			for (const mentioned of mention) {
 				if (userBanned.includes(mentioned)) {
 					await client.instance.send(
@@ -61,7 +59,7 @@ export default {
 				await client.instance.updateBlockStatus(mentioned, 'block');
 			}
 
-			if (banned.length > 0) {
+			if (banned.length) {
 				await client.instance.send(
 					from,
 					{ text: `Success banning : ${banned.map((v) => `@${v.split('@')[0]}`).join(', ')}`, mentions: [banned] },
@@ -73,7 +71,7 @@ export default {
 		}
 
 		if (query) {
-			const numbers = findPhoneNumbersInText(query);
+			const numbers = query.parseNumber();
 
 			for (let user of numbers) {
 				let {

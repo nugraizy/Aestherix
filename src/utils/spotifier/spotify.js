@@ -229,9 +229,7 @@ class Spotifier {
 				}
 
 				tracks[0].download = async () => {
-					const results = await this.download(tracks[0].external_urls.spotify);
-
-					return { results, absoluteUrl: tracks[0].external_urls.spotify };
+					return await this.download(tracks[0].external_urls.spotify);
 				};
 
 				return { status: true, tracks };
@@ -277,7 +275,7 @@ class Spotifier {
 				query = encodeURI(query);
 				const data = await this._req(`/search?q=${query}&type=track&include_external=audio`, 'GET');
 
-				if (data.tracks.items.length === 0) {
+				if (!data.tracks.items.length) {
 					return { status: false, message: 'Not Found' };
 				}
 
@@ -298,7 +296,7 @@ class Spotifier {
 				query = encodeURI(query);
 				const data = await this._req(`/search?q=album:${query}&type=album&include_external=audio`, 'GET');
 
-				if (data.albums.items.length === 0) {
+				if (!data.albums.items.length) {
 					return { status: false, message: 'Not Found' };
 				}
 
@@ -313,7 +311,7 @@ class Spotifier {
 				query = encodeURI(query);
 				const data = await this._req(`/search?q=artist:${query}&type=artist&include_external=audio`, 'GET');
 
-				if (data.artists.items.length === 0) {
+				if (!data.artists.items.length) {
 					return { status: false, message: 'Not Found' };
 				}
 
@@ -506,58 +504,51 @@ class Spotifier {
 			}
 		};
 
-		this.download = async (...urls) => {
+		this.download = async (url) => {
 			try {
-				const container = {};
-
-				for (const url of urls) {
-					const $response1 = await axios.get('https://spotifymate.com/', {
-						headers: {
-							'User-Agent':
-								'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36'
-						}
-					});
-
-					const $text1 = $response1.data;
-
-					const token = $text1.match(/type="hidden" value="(.*)"/)[1];
-					const tokenName = $text1.match(/input name="(.*)" type="hidden"/)[1];
-
-					const form = new FormData();
-
-					form.append('url', url);
-					form.append(tokenName, token);
-
-					const $response2 = await axios({
-						url: 'https://spotifymate.com/action',
-						method: 'POST',
-						headers: {
-							...form.getHeaders(),
-							'User-Agent':
-								'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 YaBrowser/23.1.5.750 (beta) Yowser/2.5 Safari/537.36',
-							Origin: 'https://spotifymate.com',
-							Referer: 'https://spotifymate.com/',
-							Accept: '*/*',
-							Cookie: $response1.headers['set-cookie'].map((v) => v.split(';')[0]).join('; ')
-						},
-						data: form.getBuffer()
-					});
-
-					const $text2 = $response2.data;
-
-					const $ = load($text2);
-
-					const urlDownload = $('a.abutton.is-success.is-fullwidth').attr('href');
-
-					if (!urlDownload) {
-						container[url] = { error: true, message: 'Failed to download', url: null };
-						continue;
+				const $response1 = await axios.get('https://spotifymate.com/', {
+					headers: {
+						'User-Agent':
+							'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36'
 					}
+				});
 
-					container[url] = { error: false, message: 'Success', url: urlDownload };
+				const $text1 = $response1.data;
+
+				const token = $text1.match(/type="hidden" value="(.*)"/)[1];
+				const tokenName = $text1.match(/input name="(.*)" type="hidden"/)[1];
+
+				const form = new FormData();
+
+				form.append('url', url);
+				form.append(tokenName, token);
+
+				const $response2 = await axios({
+					url: 'https://spotifymate.com/action',
+					method: 'POST',
+					headers: {
+						...form.getHeaders(),
+						'User-Agent':
+							'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 YaBrowser/23.1.5.750 (beta) Yowser/2.5 Safari/537.36',
+						Origin: 'https://spotifymate.com',
+						Referer: 'https://spotifymate.com/',
+						Accept: '*/*',
+						Cookie: $response1.headers['set-cookie'].map((v) => v.split(';')[0]).join('; ')
+					},
+					data: form.getBuffer()
+				});
+
+				const $text2 = $response2.data;
+
+				const $ = load($text2);
+
+				const urlDownload = $('a.abutton.is-success.is-fullwidth').attr('href');
+
+				if (!urlDownload) {
+					return { error: true, message: 'Failed to download', url: null };
 				}
 
-				return container;
+				return { error: false, message: 'Success', url: urlDownload };
 			} catch (err) {
 				return { status: false, message: err };
 			}

@@ -71,14 +71,14 @@ export default {
 				videoIds.push(match[1]);
 			}
 
-			if (videoIds.length === 0) {
+			if (!videoIds.length) {
 				return await client.instance.reply('No id(s) found', { from, quoted: message, groupMetadata });
 			}
 
 			const numberiedQuery = Number(query);
 			const index = numberiedQuery - 1;
 
-			if (numberiedQuery === 0) {
+			if (!numberiedQuery) {
 				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
 					from,
 					quoted: message,
@@ -95,6 +95,14 @@ export default {
 			}
 
 			const videoId = videoIds[index];
+
+			if (!videoId) {
+				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
+					from,
+					quoted: message,
+					groupMetadata
+				});
+			}
 
 			await client.instance.reply(`Downloading Bstation audio :\n${videoId}\nPlease wait`, {
 				from,

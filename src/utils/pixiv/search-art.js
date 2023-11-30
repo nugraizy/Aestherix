@@ -6,7 +6,7 @@ export const searchArtwork = (keyword) =>
 		try {
 			const { body } = await fetchJSON(URL_API_SEARCH_ARTWORKS(keyword));
 
-			if (body.illustManga.data.length === 0) {
+			if (!body.illustManga.data.length) {
 				resolve({ error: 'No art found with this keyword.' });
 			}
 
@@ -20,7 +20,6 @@ export const searchArtwork = (keyword) =>
 
 			resolve(container);
 		} catch (err) {
-			log(err);
 			reject(err);
 		}
 	});

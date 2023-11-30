@@ -19,7 +19,7 @@ async function updateGames() {
 			games = data;
 
 			clientMqttListen.publish(
-				process.env.FREEGAME_TOPIC,
+				process.env.MQTT_FREEGAME,
 				JSON.stringify({ data, from: configuration.intervals.from, status: true })
 			);
 		} catch (error) {

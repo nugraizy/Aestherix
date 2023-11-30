@@ -41,7 +41,7 @@ export default {
 		},
 		client
 	) {
-		if (mention.length === 0 && !isMediaImage) {
+		if (!mention.length && !isMediaImage) {
 			return await client.instance.reply('Please mention or send/reply an image to pet', {
 				from,
 				quoted: message,

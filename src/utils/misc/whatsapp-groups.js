@@ -39,7 +39,7 @@ export const searchWAGroups = (keyword) =>
 					return { title, url };
 				});
 
-			if (container.length === 0) {
+			if (!container.length) {
 				resolve({ error: 'Cannot find publics group' });
 			}
 

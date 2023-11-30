@@ -6,7 +6,7 @@ export const searchNovel = (keyword) =>
 		try {
 			const { body } = await fetchJSON(URL_API_SEARCH_NOVEL(keyword));
 
-			if (body.novel.data.length === 0) {
+			if (!body.novel.data.length) {
 				resolve({ error: 'No novel found with this keyword.' });
 			}
 
@@ -20,7 +20,6 @@ export const searchNovel = (keyword) =>
 
 			resolve(container);
 		} catch (err) {
-			log(err);
 			reject(err);
 		}
 	});

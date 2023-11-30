@@ -49,7 +49,7 @@ export const trueidSearch = (keyword) =>
 		try {
 			const { data } = await fetchJSON(BASE_API_URL_SEARCH(keyword));
 
-			if (data.length === 0) {
+			if (!data.length) {
 				return resolve({ error: 'No result found' });
 			}
 

@@ -116,11 +116,8 @@ export const reassign = async (m, client, store) => {
 		let groupSettings;
 		const isBaileys =
 			(m?.key?.id?.startsWith('BAE5') && m?.key?.id?.length === 16) || (isFromMe && m?.key?.id?.startsWith('HFINDER'));
-		const sender = isFromMe
-			? `${client.instance.user.id.split(':')[0]}${S_WHATSAPP_NET}`
-			: isGroup
-			? m?.key?.participant
-			: m?.key?.remoteJid;
+		const myJid = client.instance.decodeJid(instance);
+		const sender = isFromMe ? myJid : isGroup ? m?.key?.participant : m?.key?.remoteJid;
 
 		const isMetadata = configuration.cache.metadata?.has(from);
 		const isUsers = configuration.cache.users.has(sender);
@@ -135,7 +132,7 @@ export const reassign = async (m, client, store) => {
 			const dataBanned = await fs.readJSON('./databases/users/banned.json');
 
 			const { multi, noPref } = SETTINGS.prefix;
-			const botNumber = `${client.instance.user.id.split(':')[0]}${S_WHATSAPP_NET}`;
+			const botNumber = myJid;
 
 			const dataBlock = await client.instance.fetchBlocklist();
 
@@ -249,7 +246,7 @@ export const reassign = async (m, client, store) => {
 		let type = getContentType(m.message);
 
 		type =
-			type === 'extendedTextMessage' && m.message?.extendedTextMessage?.contextInfo?.mentionedJid?.length > 0
+			type === 'extendedTextMessage' && m.message?.extendedTextMessage?.contextInfo?.mentionedJid?.length
 				? (type = 'mentionText')
 				: type;
 

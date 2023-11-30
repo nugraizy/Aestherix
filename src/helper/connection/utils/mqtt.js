@@ -2,12 +2,26 @@ import { S_WHATSAPP_NET } from '../../index.js';
 import { delay } from '../../../utils/modules/index.js';
 import configuration from '../../config/connect.js';
 
+function generatePlaybackStatus({ trackTitle, artists, durationMs, progressMs, isPlaying }) {
+	const progressBarLength = 10;
+	const progressPercent = (progressMs / durationMs) * 100;
+	const progressBarCount = Math.floor((progressPercent / 100) * progressBarLength);
+
+	const progressBar = '-'.repeat(progressBarCount) + 'ˋˏ✄' + '┈'.repeat(progressBarLength - progressBarCount);
+
+	return `${`Spotify On ${isPlaying ? 'Playing' : 'Paused'}`.formatHeaders()}
+${artists}
+*${trackTitle}*
+${progressMs.toTime() || '00'} ${progressBar} ${durationMs.toTime() || '00'}
+${' '.repeat(18)}↻ ◁ || ▷ ↺`;
+}
+
 /**
  * @param {import('mqtt').Client} clientMqttListen
  */
 export const connectMqtt = (clientMqttListen) => {
 	clientMqttListen.on('message', async (topic, message) => {
-		if (topic === process.env.MQTT_TOPIC) {
+		if (topic === process.env.MQTT_SPOTIFY_BIO) {
 			message = message.toString();
 			const data = JSON.parse(message);
 
@@ -20,7 +34,8 @@ export const connectMqtt = (clientMqttListen) => {
 			} :                                                       ${data.artists || ''} - ${data.trackTitle || ''}  ( ${
 				data.progressMs?.toTime() || '00'
 			} - ${data?.durationMs?.toTime() || '00'} )`;
-			const myStatus = await client?.instance?.fetchStatus(`${instance.split(':')[0]}${S_WHATSAPP_NET}`);
+			const myJid = client?.instance?.decodeJid(instance);
+			const myStatus = await client?.instance?.fetchStatus(myJid);
 
 			if (myStatus.status === content) {
 				return;
@@ -31,7 +46,7 @@ export const connectMqtt = (clientMqttListen) => {
 				attrs: { to: S_WHATSAPP_NET, type: 'set', xmlns: 'status' },
 				content: [{ tag: 'status', attrs: {}, content: Buffer.from(content, 'utf-8') }]
 			});
-		} else if (topic === process.env.FREEGAME_TOPIC) {
+		} else if (topic === process.env.MQTT_FREEGAME) {
 			message = message.toString();
 			const data = JSON.parse(message);
 
@@ -39,7 +54,7 @@ export const connectMqtt = (clientMqttListen) => {
 				return;
 			}
 
-			if (!data.from.length === 0) {
+			if (!data.from.length) {
 				return;
 			}
 
@@ -60,6 +75,39 @@ ${result.title}`;
 					]
 				});
 				await delay(300);
+			}
+		} else if (topic === process.env.MQTT_SPOTIFY_PLAYBACK) {
+			message = message.toString();
+			const data = JSON.parse(message);
+
+			/**
+			 * @type {import('../../types/Socket/index.js').AdvancedClient}
+			 */
+			const client = configuration.intervals.spotifyPlaybacks.get('client');
+
+			const ids = configuration.intervals.spotifyPlaybacks.get('ids');
+
+			if (!data?.durationMs || !data?.progressMs) {
+				return;
+			}
+
+			const caption = generatePlaybackStatus(data);
+
+			for (const id of Object.keys(ids)) {
+				if (!ids[id].enabled) {
+					continue;
+				}
+
+				client.instance.send(
+					id,
+					{
+						edit: ids[id].message.key,
+						text: caption
+					},
+					{
+						groupMetadata: configuration.cache.metadata.get(id)
+					}
+				);
 			}
 		}
 	});

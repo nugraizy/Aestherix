@@ -21,10 +21,9 @@ export default {
 	async run({ args, sender, from, message, isOwner, cmd, groupMetadata }, client) {
 		try {
 			let data = await fs.readJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'));
-			const buttons = [{ buttonId: '', buttonText: { displayText: '' }, type: 1 }];
 
 			if (/(play|main)/.test(args[1])) {
-				const index = data.length === 0 ? -1 : data.findIndex((v) => v.id === from);
+				const index = !data.length ? -1 : data.findIndex((v) => v.id === from);
 
 				if (index === -1) {
 					const puzzle = makePuzzle('easy');
@@ -40,15 +39,12 @@ export default {
 						});
 					}
 
-					buttons[0].buttonId = '.sd clue';
-					buttons[0].buttonText.displayText = 'Sisa Clue : 5';
-
-					const messages = await client.instance.buttonText(
+					const messages = await client.instance.send(
 						from,
-						`${grid}\nThis game is still work on progress\nDifficulty is still on try mode.\nReplace number 9 with 0.`,
-						'Made by nanda',
-						buttons,
-						{ groupMetadata }
+						{
+							text: `${grid}\nThis game is still work on progress\nDifficulty is still on try mode.\nReplace number 9 with 0.`
+						},
+						{ quoted: message, groupMetadata }
 					);
 
 					data.push({
@@ -79,7 +75,7 @@ export default {
 					});
 				}
 
-				const index = data.length === 0 ? -1 : data.findIndex((v) => v.id === from);
+				const index = !data.length ? -1 : data.findIndex((v) => v.id === from);
 
 				if (index !== -1) {
 					const fill = fillGrid(args[1], args[2], data[index].puzzle, data[index].solved);
@@ -88,9 +84,17 @@ export default {
 						const isWin = checkWin(fill.grid);
 
 						if (isWin.status) {
-							await client.instance.reply(
-								`${isWin.message}\n${stringifyGrid(fill.grid)}\n\nGame Time : ${getTimeSince(data[index].startedAt)}`,
-								{ from, quoted: message, groupMetadata }
+							const messages = data[index].messages;
+
+							await client.instance.send(
+								from,
+								{
+									edit: messages.key,
+									text: `${isWin.message}\n${stringifyGrid(fill.grid)}\n\nGame Time : ${getTimeSince(
+										data[index].startedAt
+									)}\nThis game is still work on progress\nDifficulty is still on try mode.`
+								},
+								{ quoted: message, groupMetadata }
 							);
 
 							data.splice(index, 1);
@@ -105,10 +109,14 @@ export default {
 
 						const grid = stringifyGrid(fill.tempBoard);
 
-						buttons[0].buttonId = '.sd clue';
-						buttons[0].buttonText.displayText = `Sisa Clue : ${data[index].clue === 0 ? 'Habis' : data[index].clue}`;
-
-						const messages = client.instance.buttonText(from, `${grid}`, 'Made by nanda', buttons, { groupMetadata });
+						const messages = await client.instance.send(
+							from,
+							{
+								edit: data[index].messages.key,
+								text: grid + '\nThis game is still work on progress\nDifficulty is still on try mode.'
+							},
+							{ quoted: message, groupMetadata }
+						);
 
 						data[index].messages = messages;
 
@@ -118,20 +126,16 @@ export default {
 					return await client.instance.reply(fill.message, { from, quoted: message, groupMetadata });
 				}
 
-				buttons[0].buttonId = '.sudoku play';
-				buttons[0].buttonText.displayText = 'Play Sudoku!';
-
-				return await client.instance.buttonText(
+				return await client.instance.send(
 					from,
-					`No session found. Type ${cmd} play to start new sudoku game. Or press the button below.`,
-					'Made by nanda',
-					buttons,
+					{ text: `No session found. Type ${cmd} play to start new sudoku game.` },
 					{
+						quoted: message,
 						groupMetadata
 					}
 				);
 			} else if (/clue/.test(args[1])) {
-				const index = data.length === 0 ? -1 : data.findIndex((v) => v.id === from);
+				const index = !data.length ? -1 : data.findIndex((v) => v.id === from);
 
 				if (index !== -1) {
 					if (data[index].clue !== 0) {
@@ -143,11 +147,18 @@ export default {
 						const isWin = checkWin(reveal.board);
 
 						if (isWin.status) {
+							const message = Object.assign({}, data[index].messages);
+
 							data.splice(index, 1);
 							await fs.writeJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'), data);
 
-							return await client.instance.reply(
-								`${isWin.message}\n${stringifyGrid(reveal.board)}\n\nGame Time : ${getTimeSince(data[index].startedAt)}`,
+							return await client.instance.send(
+								{
+									edit: message.key,
+									text: `${isWin.message}\n${stringifyGrid(reveal.board)}\n\nGame Time : ${getTimeSince(
+										data[index].startedAt
+									)}\nThis game is still work on progress\nDifficulty is still on try mode.`
+								},
 								{ from, quoted: message, groupMetadata }
 							);
 						}
@@ -156,10 +167,14 @@ export default {
 
 						const grid = stringifyGrid(reveal.tempBoard);
 
-						buttons[0].buttonId = '.sd clue';
-						buttons[0].buttonText.displayText = `Sisa Clue : ${data[index].clue === 0 ? 'Habis' : data[index].clue}`;
-
-						const messages = client.instance.buttonText(from, `${grid}`, 'Made by nanda', buttons, { groupMetadata });
+						const messages = await client.instance.send(
+							from,
+							{
+								edit: data[index].messages.key,
+								text: grid + '\nThis game is still work on progress\nDifficulty is still on try mode.'
+							},
+							{ groupMetadata }
+						);
 
 						data[index].messages = messages;
 
@@ -169,42 +184,35 @@ export default {
 					return await client.instance.reply('Clue has run out!', { from, quoted: message, groupMetadata });
 				}
 
-				buttons[0].buttonId = '.sd play';
-				buttons[0].buttonText.displayText = 'Play Sudoku!';
-
-				return await client.instance.buttonText(
+				return await client.instance.send(
 					from,
-					`No session found. Type ${cmd} play to start new sudoku game. Or press the button below.`,
-					'Made by nanda',
-					buttons,
+					{ text: `No session found. Type ${cmd} play to start new sudoku game.` },
 					{
+						quoted: message,
 						groupMetadata
 					}
 				);
 			} else if (/ch?ec?k?/.test(args[1])) {
-				const index = data.length === 0 ? -1 : data.findIndex((v) => v.id === from);
+				const index = !data.length ? -1 : data.findIndex((v) => v.id === from);
 
 				if (index !== -1) {
 					const grid = stringifyGrid(data[index].puzzle);
 
-					buttons[0].buttonId = '.sd clue';
-					buttons[0].buttonText.displayText = `Sisa Clue : ${data[index].clue === 0 ? 'Habis' : data[index].clue}`;
-
-					const messages = client.instance.buttonText(from, `${grid}`, 'Made by nanda', buttons, { groupMetadata });
+					const messages = await client.instance.send(
+						from,
+						{ text: grid + '\nThis game is still work on progress\nDifficulty is still on try mode.' },
+						{ quoted: message, groupMetadata }
+					);
 
 					data[index].messages = messages;
 					return await fs.writeJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'), data);
 				}
 
-				buttons[0].buttonId = '.sd play';
-				buttons[0].buttonText.displayText = 'Play Sudoku!';
-
-				return await client.instance.buttonText(
+				return await client.instance.send(
 					from,
-					`No session found. Type ${cmd} play to start new sudoku game. Or press the button below.`,
-					'Made by nanda',
-					buttons,
+					{ text: `No session found. Type ${cmd} play to start new sudoku game.` },
 					{
+						quoted: message,
 						groupMetadata
 					}
 				);
@@ -213,7 +221,7 @@ export default {
 					return;
 				}
 
-				const index = data.length === 0 ? -1 : data.findIndex((v) => v.id === from);
+				const index = !data.length ? -1 : data.findIndex((v) => v.id === from);
 
 				if (args[2] === 'all') {
 					data = [];

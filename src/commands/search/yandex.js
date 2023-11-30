@@ -47,7 +47,7 @@ export default {
 				}
 
 				return await client.instance.reply(result.error, { from, quoted: message, groupMetadata });
-			} else if (result.information.length === 0) {
+			} else if (!result.information.length) {
 				if (isMediaImage && fs.existsSync(media)) {
 					fs.unlinkSync(media);
 				}

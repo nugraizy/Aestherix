@@ -17,7 +17,7 @@ export default {
 		let capt = 'Void Bot Search\n\n';
 		const messages = await client.instance.searchMessage(from, query);
 
-		if (messages.length === 0) {
+		if (!messages.length) {
 			capt += 'No message found.';
 		} else {
 			capt += `Found ${messages.length} messages.\n\n`;

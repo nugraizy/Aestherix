@@ -24,17 +24,11 @@ export default {
 		}
 
 		if (type === 'buttonsResponseMessage') {
-			return await client.instance.updateGroup(
-				from,
-				'REMOVE',
-				mention.length > 0 ? mention : query.parseNumber(),
-				adminGroups,
-				{
-					force: /--?(force|F)/.test(query),
-					message
-				}
-			);
-		} else if (!query && mention.length === 0 && !bodyQuoted) {
+			return await client.instance.updateGroup(from, 'REMOVE', mention.length ? mention : query.parseNumber(), adminGroups, {
+				force: /--?(force|F)/.test(query),
+				message
+			});
+		} else if (!query && !mention.length && !bodyQuoted) {
 			return await client.instance.reply('Please reply people message or mention people.', {
 				from,
 				quoted: message,
@@ -42,15 +36,14 @@ export default {
 			});
 		}
 
-		if (
-			message?.mention?.includes(`${instance.split(':')[0]}${S_WHATSAPP_NET}`) ||
-			mediaData?.participant?.includes(`${instance.split(':')[0]}${S_WHATSAPP_NET}`)
-		) {
+		const myJid = client.instance.decodeJid(instance);
+
+		if (message?.mention?.includes(myJid) || mediaData?.participant?.includes(myJid)) {
 			return await client.instance.reply('You can not kick me by myself.', { from, quoted: message, groupMetadata });
 		}
 
-		if (query || mention.length > 0) {
-			await client.instance.updateGroup(from, 'REMOVE', mention.length > 0 ? mention : query.parseNumber(), adminGroups, {
+		if (query || mention.length) {
+			await client.instance.updateGroup(from, 'REMOVE', mention.length ? mention : query.parseNumber(), adminGroups, {
 				force: /--?(force|F)/.test(query),
 				message
 			});

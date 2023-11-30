@@ -11,24 +11,24 @@ const URL_IMAGE = (id) => `https://cf.shopee.co.id/file/${id}`;
 export const shopeeProduct = (key, total = 5) =>
 	new Promise(async (resolve) => {
 		try {
-			const CONTAINER = {
+			const container = {
 				items: []
 			};
-			const DATA_RAW = await axios.get(COOKIE_URL);
-			const DATA = await axios.get(API_URL(key, total), {
+			const { headers } = await axios.get(COOKIE_URL);
+			const { data } = await axios.get(API_URL(key, total), {
 				headers: {
-					cookie: COOKIE + DATA_RAW.headers['set-cookie'].map((v) => v.split(';')[0]).join('; '),
+					cookie: COOKIE + headers['set-cookie'].map((v) => v.split(';')[0]).join('; '),
 					'user-agent':
 						'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36'
 				}
 			});
 
-			if (DATA.data.items.length === 0) {
+			if (!data.items.length) {
 				return resolve({ error: 'No product found' });
 			}
 
-			DATA.data.items.forEach((element) => {
-				CONTAINER.items.push({
+			data.items.forEach((element) => {
+				container.items.push({
 					productName: element.item_basic.name,
 					stock: element.item_basic.stock,
 					sold: element.item_basic.sold,
@@ -47,7 +47,7 @@ export const shopeeProduct = (key, total = 5) =>
 					imageURL: URL_IMAGE(element.item_basic.image)
 				});
 			});
-			resolve(CONTAINER);
+			resolve(container);
 		} catch (err) {
 			log(err);
 			resolve({ error: err });

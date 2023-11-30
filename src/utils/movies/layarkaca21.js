@@ -101,7 +101,7 @@ export const layarkaca21 = (keyword) =>
 					};
 				});
 
-			if (container.length === 0) {
+			if (!container.length) {
 				resolve({ error: 'Cannot the movie you are looking for. Try another keyword.' });
 			}
 

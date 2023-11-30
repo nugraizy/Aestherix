@@ -14,7 +14,7 @@ export const emojimix = (emoji1, emoji2) =>
 		try {
 			const data = await fetchJSON(URL_BASE(emoji1, emoji2));
 
-			if (data.results.length === 0) {
+			if (!data.results.length) {
 				return resolve({ error: 'No results found.' });
 			}
 

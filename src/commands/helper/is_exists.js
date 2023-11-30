@@ -40,7 +40,7 @@ export default {
 
 		const container = cache.get(query) || [];
 
-		if (container.length === 0) {
+		if (!container.length) {
 			for (let i = 0; i < total; i++) {
 				const number = `${query.replace(regex, '') + i}@s.whatsapp.net`;
 				const status = await client.instance.onWhatsApp(number);
@@ -62,9 +62,8 @@ export default {
 		text += `${'Registered'.formatHeaders()}
 
 ${
-	existedNumber?.length === 0
-		? 'No Data'
-		: existedNumber
+	existedNumber?.length
+		? existedNumber
 				.map(
 					(v, i) =>
 						`${i + 1}. @${v.jid.split('@')[0]}\nBiograph : ${v.info}${
@@ -72,6 +71,7 @@ ${
 						}`
 				)
 				.join('\n\n')
+		: 'No Data'
 }`;
 		text += `\n\n${'Unregistered'.formatHeaders()}
 

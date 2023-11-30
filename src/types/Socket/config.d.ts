@@ -29,6 +29,7 @@ export interface GlobalConfig {
 		word: Cache;
 		from: any[];
 		freegame: any;
+		spotifyPlaybacks: Cache;
 	};
 	cache: {
 		metadata: Cache;
