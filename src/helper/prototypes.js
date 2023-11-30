@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { findPhoneNumbersInText } from 'libphonenumber-js';
 
-import { S_WHATSAPP_NET } from '../misc/wa_data/constants.js';
+import { S_WHATSAPP_NET } from './misc/wa_data/constants.js';
 
 Object.setPrototypeOf(String.prototype, {
 	...String.prototype,

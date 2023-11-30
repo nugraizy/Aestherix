@@ -1,4 +1,4 @@
-import './src/helper/prototypes/prototypes.js';
+import './src/helper/prototypes.js';
 
 import path from 'path';
 import { platform } from 'process';
