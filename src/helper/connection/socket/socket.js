@@ -1,20 +1,31 @@
 import fs from 'fs-extra';
 import baileys, { delay, makeCacheableSignalKeyStore } from '@adiwajshing/baileys';
 import P from 'pino';
-import readline from 'readline';
 import yn from 'yn';
+import PhoneNumber from 'libphonenumber-js';
+import inquirer from 'inquirer';
 
 import { clearDBConnection } from './reset-session.js';
 import { patchInteractiveMessage } from '../utils/patch-message.js';
 import { Cache } from '../../modules/cache.js';
-import { INFOLOG, color, splitString } from '../../../utils/modules/index.js';
+import { ERRLOG, INFOLOG, color, splitString } from '../../../utils/modules/index.js';
 
+const SETTINGS = await fs.readJSON('./src/helper/config/settings.json');
 const { default: makeWASocket, makeInMemoryStore, DEFAULT_CONNECTION_CONFIG } = baileys;
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 const logger = (OPTIONS) => P({ level: OPTIONS.trace ? 'trace' : OPTIONS.debugMode ? 'debug' : 'fatal' });
-const question = (text) => new Promise((resolve) => rl.question(text, resolve));
+const question = (text) =>
+	new Promise(async (resolve) => {
+		const ask = await inquirer.prompt([
+			{
+				type: 'input',
+				name: 'text',
+				message: text,
+				prefix: ''
+			}
+		]);
 
-let phoneNumber;
+		resolve(ask.text);
+	});
 
 /**
  * @typedef {import('meow').Result} Cli
@@ -68,45 +79,111 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 
 	store.bind(Client.ev);
 
+	await handleNewInstance({ OPTIONS, Client });
+
+	return { Client, store };
+};
+
+const storeToJson = async (cli, store, OPTIONS) => {
+	if (!(await fs.exists('./src/media/connection_databases/'))) {
+		await fs.mkdir('./src/media/connection_databases/');
+	}
+
+	if ((await fs.exists(`./src/helper/connection/session/${cli.input[0] ?? 'Session-debug'}.json`)) && OPTIONS.resetOnStart) {
+		await clearDBConnection(cli);
+	}
+
+	store.readFromFile(`./src/media/connection_databases/${cli.input[0] ?? 'Session-debug'}.json`);
+
+	setInterval(() => {
+		store.writeToFile(`./src/media/connection_databases/${cli.input[0] ?? 'Session-debug'}.json`);
+	}, 3 * 1000);
+};
+
+const selectHostNumber = async ({ hostNumber, backupsHostNumbers }) => {
+	const { hosts } = await inquirer.prompt([
+		{
+			type: 'list',
+			name: 'hosts',
+			message: 'Select host number',
+			choices: [
+				...[hostNumber, ...backupsHostNumbers].map((v) => PhoneNumber('+' + v.replace(/[^0-9]/g, '')).formatInternational()),
+				new inquirer.Separator(),
+				'New number'
+			],
+			prefix: ''
+		}
+	]);
+
+	if (hosts === 'New number') {
+		return await inputPhoneNumber();
+	}
+
+	return hosts.replace(/[^0-9]/g, '');
+};
+
+const inputPhoneNumber = async () => {
+	await delay(1000);
+	const phoneNumber = await question(
+		INFOLOG(color('Insert your phone number', '#ff71ce'), color(':', '#ffff'), { ignore: true })
+	);
+
+	const formattedPhoneNumber = '+' + phoneNumber.trim().replace(/[^0-9]/g, '');
+	const numberFormat = PhoneNumber(formattedPhoneNumber);
+
+	if (!numberFormat.isValid()) {
+		ERRLOG(color('Invalid phone number', 'red'));
+		return await inputPhoneNumber();
+	}
+
+	return formattedPhoneNumber.replace(/[^0-9]/g, '');
+};
+
+const askInputNumber = async ({ hostNumber, backupsHostNumbers }) => {
+	if (backupsHostNumbers.length) {
+		return await selectHostNumber({ hostNumber, backupsHostNumbers });
+	}
+
+	return await inputPhoneNumber();
+};
+
+const askWantNumber = async ({ hostNumber, backupsHostNumbers }) => {
+	const isWantNumber = await question(
+		INFOLOG(
+			color('Do you want to use a new number?', '#ff71ce'),
+			color('(', 'gray') + color('default', '#fff'),
+			color(`${PhoneNumber('+' + hostNumber.replace(/[^0-9]/g, '')).formatInternational()})`, 'gray'),
+			color('[y/n]: ', 'white'),
+			{ ignore: true }
+		)
+	);
+
+	const answer = yn(isWantNumber);
+
+	if (answer === undefined) {
+		ERRLOG(color('Please answer with', 'red'), color('[y/n]', 'white'));
+		await delay(1000);
+		return await askWantNumber({ hostNumber, backupsHostNumbers });
+	}
+
+	return answer ? await askInputNumber({ hostNumber, backupsHostNumbers }) : hostNumber;
+};
+
+const handleNewInstance = async ({ OPTIONS, Client }) => {
 	if (OPTIONS.pairMode && !Client.authState.creds.registered) {
+		let phoneNumber = '';
+
 		check: if (!phoneNumber) {
-			const { host_number: hostNumber } = await fs.readJSON('./src/helper/config/settings.json');
+			const { main_host_number: hostNumber = null, backups_host_numbers: backupsHostNumbers = [] } = SETTINGS;
 
 			if (!hostNumber) {
-				phoneNumber = await question(`${color('Insert your phone number : ', '#ff71ce')}`);
-
+				phoneNumber = await askInputNumber({ hostNumber, backupsHostNumbers });
+				SETTINGS.main_host_number = phoneNumber.replace(/[^0-9]/g, ''); // eslint-disable-line
+				fs.writeJSON('./src/helper/config/settings.json', SETTINGS);
 				break check;
 			} else {
-				const askWantNumber = async () => {
-					const isWantNumber = await question(
-						`${INFOLOG(color('Do you want to use a new number?', '#ff71ce'), color('[y/n] : ', 'white'), { ignore: true })}`
-					);
-
-					const answer = yn(isWantNumber);
-
-					if (answer === undefined) {
-						INFOLOG(color('Please answer with y/n', 'red'), { ignore: true });
-
-						await delay(1000);
-
-						return await askWantNumber();
-					}
-
-					if (answer) {
-						phoneNumber = await question(
-							`${INFOLOG(color('Insert your phone number', '#ff71ce'), color(': ', 'white'), { ignore: true })}`
-						);
-
-						return;
-					}
-
-					phoneNumber = hostNumber;
-				};
-
-				await askWantNumber();
-
+				phoneNumber = await askWantNumber({ hostNumber, backupsHostNumbers });
 				await delay(1000);
-
 				break check;
 			}
 		}
@@ -126,24 +203,4 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 		);
 		INFOLOG(color('Waiting for code input', 'white'), color('. . .', 'cyan'));
 	}
-
-	rl.close();
-
-	return { Client, store };
-};
-
-const storeToJson = async (cli, store, OPTIONS) => {
-	if (!(await fs.exists('./src/media/connection_databases/'))) {
-		await fs.mkdir('./src/media/connection_databases/');
-	}
-
-	if ((await fs.exists(`./src/helper/connection/session/${cli.input[0] ?? 'Session-debug'}.json`)) && OPTIONS.resetOnStart) {
-		await clearDBConnection(cli);
-	}
-
-	store.readFromFile(`./src/media/connection_databases/${cli.input[0] ?? 'Session-debug'}.json`);
-
-	setInterval(() => {
-		store.writeToFile(`./src/media/connection_databases/${cli.input[0] ?? 'Session-debug'}.json`);
-	}, 3 * 1000);
 };

@@ -92,8 +92,6 @@ export const start = async (isReconnect) => {
 
 		store.localContacts = {};
 
-		initContact(store, []);
-
 		Client.ev.on(
 			'connection.update',
 			async (connection) => await handleConnectionUpdate(Client, { ...connection, clientMqttListen, store, OPTIONS, cli })

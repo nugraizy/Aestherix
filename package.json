@@ -62,6 +62,7 @@
     "https-proxy-agent": "^7.0.2",
     "image-size": "^1.0.2",
     "image-to-pdf": "^2.0.0",
+    "inquirer": "^9.2.12",
     "instagram_mqtt": "^1.2.2",
     "instagram-private-api": "^1.45.3",
     "is-online": "^10.0.0",

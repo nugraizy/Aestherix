@@ -43,11 +43,6 @@ export const normalizeImportPath = (file) => {
  */
 export const initContact = (store, contactsList) => {
 	if (contactsList.length === 0) {
-		if (conctactsDatabases.length === 0) {
-			ERRLOG(color('Contacts not found!', '#FF5555', 'Please reset your session and do a rescan to collects contacts!'));
-			process.exit(0);
-		}
-
 		for (const { id, name } of conctactsDatabases) {
 			store.localContacts[id] = { name, id };
 		}
