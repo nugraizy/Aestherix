@@ -128,14 +128,14 @@ export const validatePlugins = async (filename, isWatch) => {
 		const linePaddingCurrent = ' '.repeat(longestLine - String(currentLine).length + 2);
 		const linePaddingSecond = ' '.repeat(longestLine - String(secondLine).length + 2);
 
-		console.log(`  ${linePaddingFirst}`, chalk.bgHex('#fff').gray(path), '\n');
+		console.log(`  ${linePaddingFirst}`, chalk.gray('⇢', path), '\n');
 
 		firstLine > 0 ? console.log(chalk.gray(`  ${linePaddingFirst}${firstLine}:`), chalk.hex('#fff')(firstCode || '')) : '';
 		console.log('  ' + chalk.bold.hex('#fff').bgRed(`${linePaddingCurrent}${currentLine}: ${error}`));
 		console.log(chalk.gray(`  ${linePaddingSecond}${' '.repeat(longestLine)}:`) + chalk.bold.hex('#fff')(arrow + '^^'));
 		console.log(chalk.gray(`  ${linePaddingSecond}${secondLine}:`), chalk.hex('#fff')(secondCode || ''), '\n');
 
-		console.log(`  ${linePaddingSecond}`, chalk.bgHex('#fff').black(typeError));
+		console.log(`  ${linePaddingSecond}`, chalk.gray('⇢', typeError));
 
 		ERRLOG(
 			color(`${ICON.ERROR}${filename.split('/').slice(-2).join('/')}`, '#9f53ea'),

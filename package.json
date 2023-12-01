@@ -105,7 +105,8 @@
     "yargs-parser": "^21.0.1",
     "yn": "^5.0.0",
     "youtubei.js": "^6.3.0",
-    "yt-search": "github:nugraizy/yt-search"
+    "yt-search": "github:nugraizy/yt-search",
+    "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
     "@adiwajshing/keyed-db": "^0.2.4",

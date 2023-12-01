@@ -18,7 +18,7 @@ const updateSpotifyTracks = () => {
 		async () => {
 			const data = await spotifier.updateNowPlayingStates();
 
-			if (data && data.isPlaying) {
+			if (data !== false) {
 				clientMqttListen.publish(process.env.MQTT_SPOTIFY_PLAYBACK, JSON.stringify({ ...data, status: true }));
 			}
 		},
@@ -69,7 +69,7 @@ export default {
 
 		if (enable) {
 			if (ids?.[from]?.enabled) {
-				return await client.reply('Already enabled', { from, quoted: message, groupMetadata });
+				return await client.instance.reply('Already enabled', { from, quoted: message, groupMetadata });
 			}
 
 			const messageReplies = await client.instance.send(
@@ -87,7 +87,7 @@ export default {
 
 		if (disable) {
 			if (!ids?.[from]?.enabled) {
-				return await client.reply('Already disabled', { from, quoted: message, groupMetadata });
+				return await client.instance.reply('Already disabled', { from, quoted: message, groupMetadata });
 			}
 
 			/**
