@@ -1,9 +1,5 @@
-import mqtt from 'mqtt';
-
 import configuration from '../../helper/config/connect.js';
 import { getNewGames } from '../../utils/index.js';
-
-const clientMqttListen = mqtt.connect(process.env.MQTT_URL);
 
 let games = {};
 
@@ -16,9 +12,11 @@ async function updateGames() {
 				return;
 			}
 
+			const clientMqttListen = configuration.mqtt;
+
 			games = data;
 
-			clientMqttListen.publish(
+			clientMqttListen?.publish(
 				process.env.MQTT_FREEGAME,
 				JSON.stringify({ data, from: configuration.intervals.from, status: true })
 			);

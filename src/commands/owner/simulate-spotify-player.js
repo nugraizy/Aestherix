@@ -1,11 +1,8 @@
 import async from 'async';
-import mqtt from 'mqtt';
 
 import configuration from '../../helper/config/connect.js';
 import { spotifier } from '../../utils/spotifier/index.js';
 import { delay } from '../../utils/modules/index.js';
-
-const clientMqttListen = mqtt.connect(process.env.MQTT_URL);
 
 const updateSpotifyTracks = () => {
 	async.forever(
@@ -14,11 +11,13 @@ const updateSpotifyTracks = () => {
 				next();
 			}
 
+			const clientMqttListen = configuration.mqtt;
+
 			await delay(5_000);
 			const data = await spotifier.updateNowPlayingStates();
 
 			if (data !== false) {
-				clientMqttListen.publish(process.env.MQTT_SPOTIFY_BIO, JSON.stringify({ ...data, status: true }));
+				clientMqttListen?.publish(process.env.MQTT_SPOTIFY_BIO, JSON.stringify({ ...data, status: true }));
 			}
 		},
 		async () => {}

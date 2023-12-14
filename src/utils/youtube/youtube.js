@@ -97,20 +97,16 @@ export default class YouTube {
 		this.#detailed = async (query, isQueryUrl) => {
 			try {
 				const id = isQueryUrl ? extractVideoId(query) : query;
+				const cachedDetails = CACHE_MANAGER.get(id);
 
-				if (CACHE_MANAGER.has(id)) {
+				if (cachedDetails) {
 					return {
-						...CACHE_MANAGER.get(id).videoDetails,
-						download: async (format) => {
-							const { file } = await this.#rawDownloadAPI(query, format);
-
-							return (await this.#client.get(file)).arrayBuffer();
-						}
+						...cachedDetails.videoDetails,
+						download: async (format) => (await this.#rawDownloadAPI(query, format)).arrayBuffer()
 					};
 				}
 
 				const info = isQueryUrl ? await ytdl.getInfo(query) : await this.#fetchDetailedInfo(query);
-
 				const { videoDetails } = info;
 
 				CACHE_MANAGER.set(videoDetails.videoId, {
@@ -146,7 +142,6 @@ export default class YouTube {
 
 			const data = await this.#client.search(form.toString());
 			const body = await data.body.json();
-
 			const [{ v }] = constant[this.version].search.parser(body);
 
 			return ytdl.getInfo(`https://www.youtube.com/watch?v=${v}`);
@@ -181,7 +176,7 @@ export default class YouTube {
 
 				CACHE_MANAGER.set(`search:${query}`, promises);
 
-				return;
+				return promises;
 			} catch (error) {
 				throw new Error('Error processing search: ' + error.message);
 			}
@@ -219,9 +214,10 @@ export default class YouTube {
 				}
 
 				const id = isQueryUrl ? extractVideoId(query) : query;
+				const cachedDownload = CACHE_MANAGER.get(`download:${id}:${format}`);
 
-				if (CACHE_MANAGER.has(`download:${id}:${format}`)) {
-					const { video, vid } = CACHE_MANAGER.get(`download:${id}:${format}`);
+				if (cachedDownload) {
+					const { video, vid } = cachedDownload;
 
 					const form = this.#createConvertForm(vid, video.k);
 					const convert = await this.#client.convert(form.toString());

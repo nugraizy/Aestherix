@@ -12,7 +12,7 @@ import chalk from 'chalk';
 
 import configuration from '../../config/connect.js';
 import { INFOLOG, color } from '../../../utils/modules/index.js';
-import { connectMqtt, reconnectMqttConnection } from '../utils/mqtt.js';
+import { connectMqtt } from '../utils/mqtt.js';
 import { loadCommands } from '../utils/commands.js';
 import { clearDBConnection } from '../socket/reset-session.js';
 import { Cache } from '../../modules/cache.js';
@@ -71,7 +71,7 @@ export const handleConnectionUpdate = async (
 					INFOLOG(color('Unknown reason', 'white'), color('Quick reconnecting...', '#ff71ce'));
 				}
 
-				reconnectMqttConnection(connectMqtt, clientMqttListen);
+				connectMqtt(clientMqttListen, true);
 				await (await import('../../../index.js')).start(true);
 			}
 		} else if (connection === 'open') {
@@ -174,7 +174,7 @@ export const handleConnectionUpdate = async (
 		}
 	} catch (error) {
 		console.log(error);
-		reconnectMqttConnection(connectMqtt, clientMqttListen);
+		connectMqtt(clientMqttListen, true);
 		await (await import('../../../index.js')).start();
 	}
 };

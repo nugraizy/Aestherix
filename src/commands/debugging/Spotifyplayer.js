@@ -1,11 +1,8 @@
 import async from 'async';
-import mqtt from 'mqtt';
 import parser from 'yargs-parser';
 
 import configuration from '../../helper/index.js';
 import { spotifier } from '../../utils/spotifier/index.js';
-
-const clientMqttListen = mqtt.connect(process.env.MQTT_URL);
 
 let isInitForever = false;
 
@@ -16,10 +13,12 @@ const updateSpotifyTracks = () => {
 
 	async.forever(
 		async () => {
+			const clientMqttListen = configuration.mqtt;
+
 			const data = await spotifier.updateNowPlayingStates();
 
 			if (data !== false) {
-				clientMqttListen.publish(process.env.MQTT_SPOTIFY_PLAYBACK, JSON.stringify({ ...data, status: true }));
+				clientMqttListen?.publish(process.env.MQTT_SPOTIFY_PLAYBACK, JSON.stringify({ ...data, status: true }));
 			}
 		},
 		async () => {}

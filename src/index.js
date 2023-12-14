@@ -72,6 +72,8 @@ clientMqttListen.on('connect', () => {
 	clientMqttListen.subscribe(process.env.MQTT_SPOTIFY_BIO);
 	clientMqttListen.subscribe(process.env.MQTT_FREEGAME);
 	clientMqttListen.subscribe(process.env.MQTT_SPOTIFY_PLAYBACK);
+
+	configuration.mqtt = clientMqttListen;
 });
 
 /**

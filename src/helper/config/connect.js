@@ -55,7 +55,8 @@ const globalConfig = {
 	packname: 'Made by Void',
 	author: 'Powered by Hidden Finder',
 	anonymous: new Cache(),
-	input: new Cache()
+	input: new Cache(),
+	mqtt: null
 };
 
 global.log = console.log;

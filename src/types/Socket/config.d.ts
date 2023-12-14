@@ -46,4 +46,5 @@ export interface GlobalConfig {
 	author: string;
 	anonymous: Cache;
 	input: Cache;
+	mqtt: import('mqtt').Client | null;
 }

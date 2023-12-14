@@ -13,7 +13,7 @@ const { createCanvas, GlobalFonts, loadImage } = Canvas;
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Antebas-Regular.otf'), 'antre');
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/texgyreadventor-bold.otf'), 'texgy');
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/AtypText-Semibold.ttf'), 'atyp');
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/SourceSansPro-ExtraLight.ttf'), 'sans-thin');
+GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/SourceSansPro-Regular.ttf'), 'sans-regular');
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Galyon-Book.otf'), 'galyon');
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Lemon-Milk-Pro-Regular.ttf'), 'lemon');
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/SFUIDisplay-Medium.otf'), 'sf-pro');
@@ -100,7 +100,7 @@ export class SpotifyCard {
 	/**
 	 * Creates an instance of SpotifyCard.
 	 * @param {string} track
-	 * @param {{background?: { blur?: number | boolean, color?: string, gradient?: boolean }, cover?: { shadow?: number | boolean, round?: number | boolean }}} param1
+	 * @param {{background?: { blur?: number | boolean, color?: string, gradient?: string }, cover?: { shadow?: number | boolean, round?: number | boolean }}} param1
 	 */
 	constructor(track, { background, cover }) {
 		if (!track) {
@@ -387,18 +387,18 @@ export class SpotifyCard {
 	 */
 	putText() {
 		if (this.#_title.length > 21) {
-			this.#_title = `${this.#_title.slice(0, 21)} . .`;
+			this.#_title = `${this.#_title.slice(0, 25)} . .`;
 		}
 
-		this.#_ctx.font = '62px texgy';
+		this.#_ctx.font = '62px antre';
 
 		this.#_ctx.fillStyle = 'white';
-		this.#_ctx.fillText(this.#_title, this.#_w, this.#_canvas.height / 2 + 190);
+		this.#_ctx.fillText(this.#_title, this.#_w - 10, this.#_canvas.height / 2 + 190);
 
-		this.#_ctx.font = '32px antre';
+		this.#_ctx.font = '32px texgy';
 
 		this.#_ctx.fillStyle = chroma('grey').brighten(2).hex();
-		this.#_ctx.fillText(this.#_artist, this.#_w, this.#_canvas.height / 2 + 250);
+		this.#_ctx.fillText(this.#_artist, this.#_w - 10, this.#_canvas.height / 2 + 250);
 
 		this.#_ctx.font = 'bold 32px lemon';
 		this.#_ctx.textAlign = 'center';
@@ -420,7 +420,7 @@ export class SpotifyCard {
 		const centerY = this.#_canvas.height / 2 + 310;
 		const radius = 10;
 
-		this.#_ctx.font = '30px sans-thin';
+		this.#_ctx.font = '30px sans-regular';
 
 		this.#_ctx.fillStyle = chroma('white').brighten(2).hex();
 
@@ -428,7 +428,7 @@ export class SpotifyCard {
 		this.#_ctx.fillText(this.toTime(this.#_timestamp), this.#_w + 800 + 15, centerY + 50);
 
 		this.#_ctx.lineCap = 'round';
-		this.#_ctx.lineWidth = 7;
+		this.#_ctx.lineWidth = 10;
 
 		this.#_ctx.beginPath();
 		this.#_ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
@@ -439,7 +439,7 @@ export class SpotifyCard {
 		this.#_ctx.lineTo(this.#_w + 830, centerY);
 		this.#_ctx.stroke();
 		this.#_ctx.fillStyle = 'white';
-		this.#_ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+		this.#_ctx.arc(centerX + 4.5, centerY, radius, 0, 2 * Math.PI, false);
 		this.#_ctx.fill();
 		this.#_ctx.closePath();
 
@@ -450,9 +450,9 @@ export class SpotifyCard {
 		this.#_ctx.beginPath();
 		this.#_ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
 		this.#_ctx.lineCap = 'round';
-		this.#_ctx.lineWidth = 14;
-		this.#_ctx.moveTo(325, this.#_canvas.height - 30);
-		this.#_ctx.lineTo(this.#_canvas.width - 325, this.#_canvas.height - 30);
+		this.#_ctx.lineWidth = 12;
+		this.#_ctx.moveTo(320, this.#_canvas.height - 30);
+		this.#_ctx.lineTo(this.#_canvas.width - 320, this.#_canvas.height - 30);
 		this.#_ctx.stroke();
 		this.#_ctx.closePath();
 
@@ -493,11 +493,10 @@ export class SpotifyCard {
 		const clock = new Date().toLocaleTimeString('en-US', {
 			hour: 'numeric',
 			minute: 'numeric',
-			hour12: false,
-			timeZone: 'Asia/Jakarta'
+			hour12: false
 		});
 
-		this.#_ctx.font = assets.model[`${iconType}_bar_ios_17`].height + 'px sf-pro';
+		this.#_ctx.font = assets.model[`${iconType}_bar_ios_17`].height + 'px roboto-medium';
 		this.#_ctx.fillStyle = iconType === 1 ? 'white' : '#333333';
 
 		this.#_ctx.fillText(
@@ -539,7 +538,7 @@ export class SpotifyCard {
 		const x = (w1) => this.#_canvas.width / (n - 0.5) - (w1 || w) / (n - 0.5);
 		const y = (h1) => this.#_canvas.height / (n - 0.5) - (h1 || h) / (n - 0.5) + 430;
 
-		this.#_ctx.drawImage(assets.model[`${iconType}_pause`], x(), y(), w, h);
+		this.#_ctx.drawImage(assets.model[`${iconType}_pause`], x(), y() + 40, w, h);
 
 		// this.#_ctx.drawImage(
 		// 	assets.model[`${iconType}_down_arrow`],
@@ -551,14 +550,14 @@ export class SpotifyCard {
 		this.#_ctx.drawImage(
 			assets.model[`${iconType}_previous`],
 			x(w / (n + 0.5)) - 200,
-			y(h / (n + 0.5)),
+			y(h / (n + 0.5)) + 40,
 			w / (n + 0.5),
 			h / (n + 0.5)
 		);
 		this.#_ctx.drawImage(
 			assets.model[`${iconType}_next`],
 			x(w / (n + 0.5)) + 200,
-			y(h / (n + 0.5)),
+			y(h / (n + 0.5)) + 40,
 			w / (n + 0.5),
 			h / (n + 0.5)
 		);

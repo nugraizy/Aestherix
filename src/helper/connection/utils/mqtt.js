@@ -17,10 +17,25 @@ ${' '.repeat(18)}↻ ◁ || ▷ ↺`;
 }
 
 /**
- * @param {import('mqtt').Client} clientMqttListen
+ * @param {import('mqtt').Client} mqttInstance
  */
-export const connectMqtt = (clientMqttListen) => {
-	clientMqttListen.on('message', async (topic, message) => {
+export const connectMqtt = (mqttInstance, reconnecting) => {
+	if (reconnecting) {
+		if ('spotify' in configuration.presences) {
+			clearTimeout(configuration.presences.spotify.timeout);
+			delete configuration.presences.spotify;
+		}
+
+		if ('freegame' in configuration.intervals) {
+			clearInterval(configuration.intervals.freegame);
+			configuration.intervals.freegame = null;
+		}
+
+		mqttInstance.reconnect();
+		return;
+	}
+
+	mqttInstance.on('message', async (topic, message) => {
 		if (topic === process.env.MQTT_SPOTIFY_BIO) {
 			message = message.toString();
 			const data = JSON.parse(message);
@@ -111,23 +126,4 @@ ${result.title}`;
 			}
 		}
 	});
-};
-
-/**
- *
- * @param {typeof connectMqtt} connection
- * @param {import('mqtt').Client} clientMqttListen
- */
-export const reconnectMqttConnection = (connection, clientMqttListen) => {
-	if ('spotify' in configuration.presences) {
-		clearTimeout(configuration.presences.spotify.timeout);
-		delete configuration.presences.spotify;
-	}
-
-	if ('freegame' in configuration.intervals) {
-		clearInterval(configuration.intervals.freegame);
-		configuration.intervals.freegame = null;
-	}
-
-	connection(clientMqttListen);
 };
