@@ -17,6 +17,7 @@ GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/SourceSansPro
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Galyon-Book.otf'), 'galyon');
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Lemon-Milk-Pro-Regular.ttf'), 'lemon');
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/SFUIDisplay-Medium.otf'), 'sf-pro');
+GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Roboto-Medium.ttf'), 'roboto-medium');
 
 const assets = {
 	model: null
@@ -390,12 +391,12 @@ export class SpotifyCard {
 			this.#_title = `${this.#_title.slice(0, 25)} . .`;
 		}
 
-		this.#_ctx.font = '62px antre';
+		this.#_ctx.font = '62px texgy';
 
 		this.#_ctx.fillStyle = 'white';
 		this.#_ctx.fillText(this.#_title, this.#_w - 10, this.#_canvas.height / 2 + 190);
 
-		this.#_ctx.font = '32px texgy';
+		this.#_ctx.font = '32px antre';
 
 		this.#_ctx.fillStyle = chroma('grey').brighten(2).hex();
 		this.#_ctx.fillText(this.#_artist, this.#_w - 10, this.#_canvas.height / 2 + 250);
@@ -435,11 +436,13 @@ export class SpotifyCard {
 		this.#_ctx.moveTo(centerX - 25, centerY);
 		this.#_ctx.lineTo(centerX - 15, centerY);
 		this.#_ctx.stroke();
-		this.#_ctx.moveTo(centerX, centerY);
+
+		this.#_ctx.moveTo(centerX + radius, centerY);
 		this.#_ctx.lineTo(this.#_w + 830, centerY);
 		this.#_ctx.stroke();
+
 		this.#_ctx.fillStyle = 'white';
-		this.#_ctx.arc(centerX + 4.5, centerY, radius, 0, 2 * Math.PI, false);
+		this.#_ctx.arc(centerX + 6, centerY, radius, 0, 2 * Math.PI, false);
 		this.#_ctx.fill();
 		this.#_ctx.closePath();
 
