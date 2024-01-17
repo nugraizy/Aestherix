@@ -1,4 +1,4 @@
-import { searchYoutube } from '../../utils/index.js';
+import { youtube } from '../../utils/index.js';
 import { numberWithCommas } from '../../utils/modules/index.js';
 
 const boxen = (text) => {
@@ -32,7 +32,7 @@ export default {
 			return client.instance.reply('Please specify a query.', { from, quoted: message, groupMetadata });
 		}
 
-		let result = await searchYoutube(query, null, true);
+		let result = await youtube.core.search(query);
 
 		result = result.filter((v) => v.type === 'video');
 

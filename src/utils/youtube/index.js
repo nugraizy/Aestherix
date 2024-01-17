@@ -4,4 +4,7 @@ export * from './y2mate.js';
 export * from './channel.js';
 export * from './live-stream.js';
 
-export default YouTube;
+const youtube = new YouTube('v2');
+
+export { youtube };
+export default youtube;

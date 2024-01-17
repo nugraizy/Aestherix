@@ -28,7 +28,7 @@ export const mediafire = (url) =>
 			const dlLink = $('a.input.popsok').attr('href');
 			const filetypes = /[a-zA-Z]+/g.exec($('.filetype > span:last-child').text());
 			const mimetype = mime(filetypes?.[0]?.toLowerCase());
-			const format = whatFormat(mime(filetypes?.[0]?.toLowerCase()));
+			const format = whatFormat(mimetype);
 
 			if (!dlLink) {
 				resolve({ error: 'Cannot find downloadable link. Please check if the url is valid.' });

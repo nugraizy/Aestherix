@@ -3,6 +3,7 @@ import { Client } from 'undici';
 
 import { CACHE_MANAGER, constant, extractVideoId, filterQualities } from './utils.js';
 import { isYoutubeURL, isURL } from '../modules/index.js';
+import { searchYoutube } from './y2mate.js';
 
 class Requests {
 	#headers = {
@@ -151,7 +152,7 @@ export default class YouTube {
 		 * @param {string} query
 		 * @returns {Promise<Detailed[]>}
 		 */
-		this.#search = async (query) => {
+		this.#search = async (query, noDetail) => {
 			try {
 				const isQueryUrl = isURL(query) && isYoutubeURL(query);
 
@@ -171,6 +172,11 @@ export default class YouTube {
 				const body = await data1.body.json();
 
 				const data2 = constant[this.version].search.parser(body);
+
+				if (noDetail) {
+					CACHE_MANAGER.set(`search:${query}`, data2);
+					return data2;
+				}
 
 				const promises = await Promise.all(data2.map(({ v }) => this.#detailed(`https://www.youtube.com/watch?v=${v}`, true)));
 
@@ -202,7 +208,7 @@ export default class YouTube {
 		 *
 		 * @param {string} query
 		 * @param {'mp3' | 'mp4'} format
-		 * @returns {Promise<{ title: string, resolution: string, size: string, file: string, toBuffer: Detailed['download'] }>}
+		 * @returns {Promise<{ title: string, resolution: string, size: string, file: string, download: Detailed['download'] }>}
 		 * @throws {Error}
 		 */
 		this.#rawDownloadAPI = async (query, format = 'mp3') => {
@@ -248,7 +254,9 @@ export default class YouTube {
 				const video = filterQualities(items, format);
 
 				if (!video) {
-					throw new Error('No video found');
+					return {
+						error: 'No Media found'
+					};
 				}
 
 				const form3 = this.#createConvertForm(vid, video.k);
@@ -257,7 +265,13 @@ export default class YouTube {
 
 				CACHE_MANAGER.set(`download:${vid}:${format}`, { video, vid });
 
-				return { title, resolution: video.quality, size: video.size, file, download: () => this.#client.get(file) };
+				return {
+					title,
+					resolution: video.quality,
+					size: video.size,
+					file,
+					download: async () => await (await this.#client.get(file)).arrayBuffer()
+				};
 			} catch (error) {
 				console.log(error);
 				throw new Error('Error processing download: ' + error.message);
@@ -273,6 +287,13 @@ export default class YouTube {
 		};
 
 		this.core = {
+			search: (query, noDetail) => {
+				if (noDetail) {
+					return this.#search(query, true);
+				}
+
+				return searchYoutube(query, null, true);
+			},
 			video: {
 				download: (query) => this.#rawDownloadAPI(query, 'mp4'),
 				search: this.#search

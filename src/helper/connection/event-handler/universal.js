@@ -18,6 +18,9 @@ import { clearDBConnection } from '../socket/reset-session.js';
 import { Cache } from '../../modules/cache.js';
 import { startingConnection } from '../../../helper/connection/utils/check-flag.js';
 
+let started = startingConnection;
+const newStart = () => (started = Date.now());
+
 let isClosed = false;
 let shouldWait = false;
 const handler = new Cache();
@@ -61,14 +64,19 @@ export const handleConnectionUpdate = async (
 					INFOLOG(color('Restart required', 'white'), color('Restarting your WebScoket...', '#ff71ce'));
 				} else if (reason === DisconnectReason.timedOut) {
 					INFOLOG(color('Timed out', 'white'), color('Quick reconnecting...', '#ff71ce'));
+					newStart();
 				} else if (reason === DisconnectReason.connectionClosed) {
 					INFOLOG(color('Connection closed', 'white'), color('Quick reconnecting...', '#ff71ce'));
+					newStart();
 				} else if (reason === DisconnectReason.connectionReplaced) {
 					INFOLOG(color('Connection replaced', 'white'), color('Quick reconnecting...', '#ff71ce'));
+					newStart();
 				} else if (reason === DisconnectReason.connectionLost) {
 					INFOLOG(color('Connection lost', 'white'), color('Quick reconnecting...', '#ff71ce'));
+					newStart();
 				} else {
 					INFOLOG(color('Unknown reason', 'white'), color('Quick reconnecting...', '#ff71ce'));
+					newStart();
 				}
 
 				connectMqtt(clientMqttListen, true);
@@ -134,7 +142,7 @@ export const handleConnectionUpdate = async (
 					shouldPrintBanner = false;
 				}
 
-				const timeToConnect = Date.now() - startingConnection;
+				const timeToConnect = Date.now() - started;
 
 				const data = await fs.readJSON('./src/helper/config/settings.json');
 				let capt = '';

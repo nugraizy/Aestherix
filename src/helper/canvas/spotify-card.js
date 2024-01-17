@@ -23,7 +23,7 @@ const assets = {
 	model: null
 };
 
-const instagramUsername = 'dizy.webp';
+const instagramUsername = 'dizy.env';
 const githubUsername = 'nugraizy';
 const watermark = 'Spotify Card by Void';
 
@@ -387,13 +387,18 @@ export class SpotifyCard {
 	 * @private
 	 */
 	putText() {
-		if (this.#_title.length > 21) {
-			this.#_title = `${this.#_title.slice(0, 25)} . .`;
+		if (this.#_title.length > 22) {
+			this.#_title = `${this.#_title.slice(0, 22)}`;
 		}
 
 		this.#_ctx.font = '62px texgy';
 
-		this.#_ctx.fillStyle = 'white';
+		const fadeOut = this.#_ctx.createLinearGradient(0, 0, this.#_w + 1500, 0);
+
+		fadeOut.addColorStop(0, 'rgba(255, 255, 255, 1)');
+		fadeOut.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+		this.#_ctx.fillStyle = fadeOut;
 		this.#_ctx.fillText(this.#_title, this.#_w - 10, this.#_canvas.height / 2 + 190);
 
 		this.#_ctx.font = '32px antre';
@@ -603,7 +608,7 @@ export class SpotifyCard {
 		this.#_ctx.drawImage(
 			assets.model['1_spotify_likes'],
 			x(w / (n + 0.5)) + 390,
-			y(h / (n + 0.5)) - 220,
+			y(h / (n + 0.5)) - 180,
 			w / (n + 0.5),
 			h / (n + 0.5)
 		);

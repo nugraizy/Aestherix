@@ -1,17 +1,16 @@
-import { mediafire } from '../../utils/index.js';
+import { kraken } from '../../utils/index.js';
 
-const regex = (url) =>
-	/^(https?:\/\/)?(www\.)?mediafire\.com\/(file|view|download)\/[a-zA-Z0-9]+(\/[a-zA-Z0-9_\-.~%]+)?(\/file)?.*$/.test(url);
+const regex = (url) => /^(https?:\/\/)?(www\.)?krakenfiles\.com\/(view)\/[a-zA-Z0-9]+(\/[a-zA-Z0-9_\-.~%]+)?\.html$/.test(url);
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
-	name: 'mediafire',
-	minifiedDescription: 'Download Mediafire',
-	description: 'Download files from Mediafire',
-	usage: '!mediafire <url>',
-	aliases: ['mf', 'mfire', 'mediaf'],
+	name: 'kraken',
+	minifiedDescription: 'Download Kraken',
+	description: 'Download files from Kraken',
+	usage: '!kraken <url>',
+	aliases: ['kkn'],
 	category: 'Downloader',
 	cooldown: 5,
 	limit: 7,
@@ -22,17 +21,17 @@ export default {
 		}
 
 		if (!regex(query)) {
-			return client.instance.reply('Please specify a valid Mediafire url.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('Please specify a valid Kraken url.', { from, quoted: message, groupMetadata });
 		}
 
-		const result = await mediafire(query);
+		const result = await kraken(query);
 
 		if ('error' in result) {
 			return client.instance.reply(result.error, { from, quoted: message, groupMetadata });
 		}
 
 		await client.instance.reply(
-			`${'Mediafire Downloader'.formatHeaders()}
+			`${'Kraken Downloader'.formatHeaders()}
 		
 Filename: ${result.filename}
 Filesize: ${result.filesize}
