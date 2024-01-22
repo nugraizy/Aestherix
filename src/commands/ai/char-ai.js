@@ -14,7 +14,7 @@ export default {
 	cooldown: 3,
 	limit: 5,
 	status: 'enable',
-	async run({ args, query, from, cmd, message, groupMetadata, prefix }, client) {
+	async run({ args, query, from, cmd, message, groupMetadata, prefix, pushname }, client) {
 		if (!query) {
 			return await client.instance.reply(
 				`Please specify a command.\n\nUsage : \n${prefix + cmd} start\n${prefix + cmd} stop`,
@@ -31,7 +31,13 @@ export default {
 				return await client.instance.reply('You already chatting with AI', { from, quoted: message, groupMetadata });
 			}
 
-			configuration.user.charAI.set(from, new ChatGPTDialogue());
+			configuration.user.charAI.set(
+				from,
+				new ChatGPTDialogue({
+					name: pushname,
+					time: new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })
+				})
+			);
 
 			return await client.instance.reply('AI chat has been started', { from, quoted: message, groupMetadata });
 		}

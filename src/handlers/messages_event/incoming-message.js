@@ -188,18 +188,6 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 		}
 
 		if (!Tempcmds && !message.isGroup && configuration.OPTIONS.ai) {
-			const isSession = configuration.user.charAI.has(message.sender);
-
-			if (!isSession) {
-				configuration.user.charAI.set(
-					message.sender,
-					new ChatGPTDialogue({
-						name: message.pushname,
-						time: dayjs().format('ddd DD/MM/YYYY HH:mm')
-					})
-				);
-			}
-
 			await handleAIMessage(message, client);
 			return;
 		}

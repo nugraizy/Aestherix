@@ -99,6 +99,11 @@ export class SpotifyCard {
 	#_toBuffer;
 
 	/**
+	 * @private
+	 */
+	#revampYCoords;
+
+	/**
 	 * Creates an instance of SpotifyCard.
 	 * @param {string} track
 	 * @param {{background?: { blur?: number | boolean, color?: string, gradient?: string }, cover?: { shadow?: number | boolean, round?: number | boolean }}} param1
@@ -183,6 +188,14 @@ export class SpotifyCard {
 		 * @private
 		 */
 		this.#_ctx = this.#_canvas.getContext('2d');
+
+		/**
+		 * Revamp the Y Coordinates of assets
+		 * @param {number} coords
+		 * @returns number
+		 * @private
+		 */
+		this.#revampYCoords = (coords) => coords + 100;
 
 		/**
 		 * Render Spotify Card
@@ -387,11 +400,13 @@ export class SpotifyCard {
 	 * @private
 	 */
 	putText() {
-		if (this.#_title.length > 22) {
-			this.#_title = `${this.#_title.slice(0, 22)}`;
+		if (this.#_title.length > 20) {
+			this.#_title = `${this.#_title.slice(0, 20)}`;
 		}
 
-		this.#_ctx.font = '62px texgy';
+		const x = this.#_w - 10;
+
+		this.#_ctx.font = '60px texgy';
 
 		const fadeOut = this.#_ctx.createLinearGradient(0, 0, this.#_w + 1500, 0);
 
@@ -399,12 +414,12 @@ export class SpotifyCard {
 		fadeOut.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
 		this.#_ctx.fillStyle = fadeOut;
-		this.#_ctx.fillText(this.#_title, this.#_w - 10, this.#_canvas.height / 2 + 190);
+		this.#_ctx.fillText(this.#_title, x, this.#revampYCoords(this.#_canvas.height / 2 + 200));
 
 		this.#_ctx.font = '32px antre';
 
 		this.#_ctx.fillStyle = chroma('grey').brighten(2).hex();
-		this.#_ctx.fillText(this.#_artist, this.#_w - 10, this.#_canvas.height / 2 + 250);
+		this.#_ctx.fillText(this.#_artist, x, this.#revampYCoords(this.#_canvas.height / 2 + 250));
 
 		this.#_ctx.font = 'bold 32px lemon';
 		this.#_ctx.textAlign = 'center';
@@ -423,7 +438,7 @@ export class SpotifyCard {
 	 */
 	putPlayback() {
 		const centerX = this.#_w + 20;
-		const centerY = this.#_canvas.height / 2 + 310;
+		const centerY = this.#revampYCoords(this.#_canvas.height / 2 + 310);
 		const radius = 10;
 
 		this.#_ctx.font = '30px sans-regular';
@@ -544,17 +559,17 @@ export class SpotifyCard {
 		const n = 2.5;
 
 		const x = (w1) => this.#_canvas.width / (n - 0.5) - (w1 || w) / (n - 0.5);
-		const y = (h1) => this.#_canvas.height / (n - 0.5) - (h1 || h) / (n - 0.5) + 430;
+		const y = (h1) => this.#revampYCoords(this.#_canvas.height / (n - 0.5) - (h1 || h) / (n - 0.5) + 430);
 
 		this.#_ctx.drawImage(assets.model[`${iconType}_pause`], x(), y() + 40, w, h);
 
-		// this.#_ctx.drawImage(
-		// 	assets.model[`${iconType}_down_arrow`],
-		// 	x(w / (n - 0.3)) - 390,
-		// 	y(h / (n - 0.3)) - 1320,
-		// 	w / (n - 0.3),
-		// 	h / (n - 0.3)
-		// );
+		this.#_ctx.drawImage(
+			assets.model[`${iconType}_down_arrow`],
+			x(w / (n - 0.3)) - 390,
+			y(h / (n - 0.3)) - 1320 - this.#revampYCoords(0),
+			w / (n - 0.3),
+			h / (n - 0.3)
+		);
 		this.#_ctx.drawImage(
 			assets.model[`${iconType}_previous`],
 			x(w / (n + 0.5)) - 200,
@@ -570,11 +585,11 @@ export class SpotifyCard {
 			h / (n + 0.5)
 		);
 		this.#_ctx.drawImage(
-			assets.model[`${iconType}_heart`],
+			assets.model[`${iconType}_shuffle`],
 			x(w / (n + 0.5)) - 390,
 			y(h / (n + 0.5)),
 			w / (n + 0.5),
-			h / (n + 0.5)
+			h / (n + 0.2)
 		);
 		this.#_ctx.drawImage(
 			assets.model[`${iconType}_circle_diagonal`],
@@ -586,14 +601,14 @@ export class SpotifyCard {
 		this.#_ctx.drawImage(
 			assets.model[`${iconType}_share`],
 			x(w / (n + 2.1)) + 390,
-			y(h / (n + 2.1)) + 100,
+			y(h / (n + 2.1)) + 150,
 			w / (n + 2.1),
 			h / (n + 2.1)
 		);
 		this.#_ctx.drawImage(
 			assets.model[`${iconType}_speaker`],
 			x(w / (n + 0.7)) - 390,
-			y(h / (n + 0.7)) + 100,
+			y(h / (n + 0.7)) + 150,
 			w / (n + 0.7),
 			h / (n + 0.7)
 		);
@@ -606,9 +621,9 @@ export class SpotifyCard {
 			assets.model[`${iconType}_github`].height / 2
 		);
 		this.#_ctx.drawImage(
-			assets.model['1_spotify_likes'],
-			x(w / (n + 0.5)) + 390,
-			y(h / (n + 0.5)) - 180,
+			assets.model[`${iconType}_add`],
+			x(w / (n + 0.7)) + 390,
+			y(h / (n + 0.7)) - 220,
 			w / (n + 0.5),
 			h / (n + 0.5)
 		);

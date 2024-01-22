@@ -2,11 +2,15 @@
 
 # SimplebotPRO3
 
+  <p>
+    <img src="src/media/terminal.png">
+  </p>
+
 ### Next-gen bot using Baileys-md, and latest version of simplebotPRO
 
 ---
-
 </div>
+
 
 # Table of Contents <a name='table'></a>
 
