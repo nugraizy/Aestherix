@@ -28,7 +28,7 @@
 
 ### How is the name written and pronounced?
 
-Aestherix. Pronounced [`/ɛsˈθɛrɪks/`](src/media/pronounciation.m4a?raw=true): AY (pl**ay**, st**ay**) STE (**ste**p, **ste**ady) RIKS (t**ricks**, b**ricks**)
+Aestherix. Pronounced [`/ɛsˈθɛrɪks/`](src/media/pronounciation.m4a?raw=true): ES (l**ess**, str**ess**) THER (e**ther**) RIKS (t**ricks**, b**ricks**)
 
 ---
 
