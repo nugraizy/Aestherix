@@ -3,32 +3,31 @@
   Aestherix</br>
 </h2>
 <p align="center">
-  <img src="src/media/terminal.png" width="315"/>
+  <img src="src/media/terminal.png"/>
 </p>
 <h3 align='center'>
   Next Generation Whatsapp bot built on top of Javascript using <a href="https://github.com/whiskeysockets/baileys">Baileys</a>, and latest version of <a href="https://github.com/nugraizy/aestherix">Aestherix</a>
 </h3>
 
 # Table of Contents <a name='table'></a>
-- [FAQ](#faq)
+- [FAQ](./FAQ.md#faq)
 - [Installations](#installations)
-  - [Linux](./INSTALL.md#linux)
-  - [Windows](./INSTALL.md#windows)
+  - [linux](./INSTALL.md#linux)
+  - [windows](./INSTALL.md#windows)
 - [Run](#run-the-project)
-  - [Run With Flags](#available-flags)
-- [Known Error Fixed](#common-occured-error)
-  - [this.isZero() not a function](#zero)
-  - [crash when added to a group](#crash)
-- [Additional Context](#additional-context)
-- [Instagram method](#instagram-methods)
+  - [run with flags](#available-flags)
 
 ---
 
-# FAQ
-
 ### How is the name written and pronounced?
 
-Aestherix. Pronounced [`/ɛsˈθɛrɪks/`](src/media/pronounciation.m4a?raw=true): ES (l**ess**, str**ess**) THER (e**ther**) RIKS (t**ricks**, b**ricks**)
+***Aestherix***. Pronounced [`/ɛsˈθɛrɪks/`](src/media/pronounciation.m4a?raw=true): ES (l**ess**, str**ess**) THEH (e**ther**) RIKS (t**ricks**, b**ricks**).
+
+### Philosophy behind Aestherix:
+
+- **Aesthetics**: Derived from **"Aesthetics"**, representing the appreciation of beauty and form.
+- **Ether**: Evoking a sense of the ethereal and intangible.
+- ***-ix***: A suffix often associated with innovation, technology, and complexity.
 
 ---
 
@@ -79,68 +78,6 @@ you can find the available flags [here](#available-flags)
 | --help | Will show this message in the console. | -h |
 
 ---
-
-<div align='center'>
-<a href='#table'>⬆️</a>
-</div>
-
-# Common Occured Error
-
-### <a name="zero"></a> this.isZero() not a function
-
-Go to `node_modules\long\src\long.js:474`
-
-Add this code to line 474 (don't change the original 474 code. just add the code below) :
-
-```js
-if (typeof this.isZero !== 'function') {
-	return '1';
-}
-```
-
-### <a name="crash"></a> crash when added to a group
-
-Please install the latest Baileys-md commit
-
-# Additional Context
-
-### Changing ID message :
-
-Go to
-
-```sh
-node_modules\@adiwajshing\baileys\lib\Utils\generic.js:172
-```
-
-> **IMPORTANT** 
-> Change the `BAE5` to anything. (`DO NOT` includes special characters!)
-
-#### Or you can include `customId` to the socket config.
-
-```javascript
-const CONNECTION_CONFIG = {
-	...YOUR_CONFIG,
-	customId: 'HFINDER'
-};
-```
-
-<div align='center'>
-<a href='#table'>⬆️</a>
-</div>
-
-# Instagram Methods
-#### before started you must do a login method
-```javascript
-const login = async () => {
-  const instagram = new InstagramApi('username', 'password');
-
-  const login = await instagram.account.login();
-
-  login.account.writeLoginInfo();
-}
-
- await login()
- ```
 
 <div align='center'>
 <a href='#table'>⬆️</a>
