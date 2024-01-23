@@ -1,6 +1,6 @@
 import { fetchJSON } from '../../../utils/modules/index.js';
 
-const _api = (commitSha) => `https://api.github.com/repos/nugraizy/simplebotPRO3/commits/${commitSha}`;
+const _api = (commitSha) => `https://api.github.com/repos/nugraizy/Aestherix/commits/${commitSha}`;
 const _config = {
 	headers: { Accept: 'application/vnd.github.v3+json', Authorization: `Bearer ${process.env.GITHUB_AUTH_TOKEN}` }
 };

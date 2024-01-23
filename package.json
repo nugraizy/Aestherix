@@ -1,5 +1,5 @@
 {
-  "name": "simplebotpro3",
+  "name": "aestherix",
   "version": "3.0.0",
   "description": "WhatsApp bot using Baileys library with Javascript language.",
   "exports": "./index.js",

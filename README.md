@@ -1,22 +1,19 @@
-<div align='center'>
-
-# SimplebotPRO3
-
-  <p>
-    <img src="src/media/terminal.png">
-  </p>
-
-### Next-gen bot using Baileys-md, and latest version of simplebotPRO
-
----
-</div>
-
+<h2 align="center">
+  <img src="src/media/logo.png" width="100" alt="logo"/></br>
+  Aestherix</br>
+</h2>
+<p align="center">
+  <img src="src/media/terminal.png" width="315"/>
+</p>
+<h3 align='center'>
+  Next Generation Whatsapp bot built on top of Javascript using <a href="https://github.com/whiskeysockets/baileys">Baileys</a>, and latest version of <a href="https://github.com/nugraizy/aestherix">Aestherix</a>
+</h3>
 
 # Table of Contents <a name='table'></a>
-
+- [FAQ](#faq)
 - [Installations](#installations)
-  - [Linux](#linux)
-  - [Windows](#windows)
+  - [Linux](./INSTALL.md#linux)
+  - [Windows](./INSTALL.md#windows)
 - [Run](#run-the-project)
   - [Run With Flags](#available-flags)
 - [Known Error Fixed](#common-occured-error)
@@ -24,6 +21,14 @@
   - [crash when added to a group](#crash)
 - [Additional Context](#additional-context)
 - [Instagram method](#instagram-methods)
+
+---
+
+# FAQ
+
+### How is the name written and pronounced?
+
+Aestherix. Pronounced [`/ɛsˈθɛrɪks/`](src/media/pronounciation.m4a?raw=true): AY (pl**ay**, st**ay**) STE (**ste**p, **ste**ady) RIKS (t**ricks**, b**ricks**)
 
 ---
 

@@ -32,7 +32,7 @@ export default {
 						currencyCode: 'IDR',
 						priceAmount1000: 1_000_000,
 						retailerId: 'Made by Hidden Finder',
-						url: 'https://github.com/nugraizy/simplebotPRO3',
+						url: 'https://github.com/nugraizy/Aestherix',
 						productImageCount: 1,
 						salePriceAmount1000: 1_000_000
 					},
