@@ -122,7 +122,7 @@ export const assign = (client) => {
 				null
 		};
 
-		if ('buttons' in message || 'sections' in message || 'templateButtons' in message) {
+		if ('buttons' in message || 'templateButtons' in message) {
 			delete message.buttons;
 			delete message.footer;
 			delete message.headerType;

@@ -1,10 +1,7 @@
 import axios from 'axios';
 import asyncRetry from 'async-retry';
-import Bluebird from 'bluebird';
 
 import { _api, bilibiliParseMetadataTv } from './utils.js';
-
-const { Promise } = Bluebird;
 
 const headers = {
 	'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36'

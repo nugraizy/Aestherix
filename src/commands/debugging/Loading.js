@@ -188,7 +188,7 @@ export default {
 						from,
 						{
 							[mediaType]: new Buffer.from(buffer, 'base64'),
-							caption: '*Buffer Type*',
+							caption: '*Buffer Type* : ' + mediaType,
 							benchmark: true,
 							timeOnProcess
 						},

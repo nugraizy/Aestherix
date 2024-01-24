@@ -5,7 +5,6 @@
   - [this.isZero() not a function](#zero)
   - [crash when added to a group](#crash)
 - [Additional Context](#additional-context)
-- [Additional Context](#additional-context)
 - [Instagram method](#instagram-methods)
 
 ---
