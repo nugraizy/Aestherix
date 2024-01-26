@@ -513,7 +513,8 @@ export class SpotifyCard {
 		this.#_ctx.stroke();
 		this.#_ctx.closePath();
 
-		const clock = new Date().toLocaleTimeString('en-US', {
+		const clock = new Date(Date.now()).toLocaleTimeString('en-US', {
+			timeZone: 'Asia/Jakarta',
 			hour: 'numeric',
 			minute: 'numeric',
 			hour12: false

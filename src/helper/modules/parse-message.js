@@ -35,7 +35,7 @@ const caching = async (clients, id) => {
 			...groupMetadata,
 			rawParticipants: partc || [],
 			adminGroups: partc?.filter((v) => v.admin !== null)?.map((v) => v.id),
-			participantsGroups: partc?.map((v) => v.id),
+			participantsGroup: partc?.map((v) => v.id),
 			ownerGroups: partc?.find((v) => v.admin === 'superadmin')?.id || null
 		});
 		resolve();
@@ -250,7 +250,7 @@ export const reassign = async (m, client, store) => {
 				? (type = 'mentionText')
 				: type;
 
-		const { rawParticipants, adminGroups, participantsGroups, ownerGroups } = groupMetadata;
+		const { rawParticipants, adminGroups, participantsGroup, ownerGroups } = groupMetadata;
 		const isAdmin = adminGroups?.includes(sender);
 		const isBotAdmin = adminGroups?.includes(botNumber);
 		const isDisappearingChat = m.message?.[type]?.contextInfo?.expiration !== 0;
@@ -336,7 +336,13 @@ export const reassign = async (m, client, store) => {
 					: mMediaData || {}
 				: m || {};
 
-		mediaData.extract = () => store.loadMessage(from, mediaData.stanzaId);
+		mediaData.extract = () => {
+			const messages = store.loadMessage(from, mediaData.stanzaId);
+
+			messages.parse = async () => reassign(messages, client, store);
+
+			return messages;
+		};
 
 		const bodyQuoted = typeMessage.includes(
 			type === 'extendedTextMessage' && mMediaData
@@ -380,7 +386,7 @@ export const reassign = async (m, client, store) => {
 			isAdmin,
 			rawParticipants,
 			adminGroups,
-			participantsGroups,
+			participantsGroup,
 			ownerGroups,
 			isBotAdmin,
 			body,

@@ -74,8 +74,9 @@ Object.setPrototypeOf(String.prototype, {
 
 		return container.join('');
 	},
-	formatHeaders: function () {
-		return `╭ \`\`\`• ${this || 'This is Headers'}\`\`\` ╮`;
+	formatHeaders: function (simplify) {
+		const headers = this || 'This is Headers';
+		return simplify ? `\`\`\`${headers}\`\`\`` : `╭ \`\`\` ✦ ${headers}\`\`\` ╮`;
 	},
 	replaceLast: function (find, replace) {
 		const index = this.lastIndexOf(find);

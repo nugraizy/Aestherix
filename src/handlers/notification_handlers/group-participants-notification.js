@@ -26,7 +26,7 @@ const processMessageStubType = (cache, message) => {
 		for (const id of message.messageStubParameters) {
 			cache.participants?.push({ id, admin: null });
 			cache.rawParticipants?.push({ id, admin: null });
-			cache.participantsGroups?.push(id);
+			cache.participantsGroup?.push(id);
 		}
 	} else if (['GROUP_PARTICIPANT_LEAVE', 'GROUP_PARTICIPANT_REMOVE'].includes(type)) {
 		for (const id of message.messageStubParameters) {
@@ -36,7 +36,7 @@ const processMessageStubType = (cache, message) => {
 
 			cache.participants?.splice(getIndex(cache.participants, id, true), 1);
 			cache.rawParticipants?.splice(getIndex(cache.rawParticipants, id, true), 1);
-			cache.participantsGroups?.splice(getIndex(cache.participantsGroups, id, false), 1);
+			cache.participantsGroup?.splice(getIndex(cache.participantsGroup, id, false), 1);
 		}
 	} else if (['GROUP_PARTICIPANT_DEMOTE'].includes(type)) {
 		for (const id of message.messageStubParameters) {

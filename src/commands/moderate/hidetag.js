@@ -12,7 +12,7 @@ export default {
 	limit: 5,
 	restrict: true,
 	status: 'enable',
-	async run({ isAdmin, isOwner, from, query, bodyQuoted, participantsGroups, isGroup, message, groupMetadata }, client) {
+	async run({ isAdmin, isOwner, from, query, bodyQuoted, participantsGroup, isGroup, message, groupMetadata }, client) {
 		if (!isGroup) {
 			return await client.instance.reply('This command only works in group.', { from, quoted: message, groupMetadata });
 		}
@@ -25,6 +25,6 @@ export default {
 			});
 		}
 
-		await client.instance.send(from, { text: query || bodyQuoted || ':)', mentions: participantsGroups }, { groupMetadata });
+		await client.instance.send(from, { text: query || bodyQuoted || ':)', mentions: participantsGroup }, { groupMetadata });
 	}
 };

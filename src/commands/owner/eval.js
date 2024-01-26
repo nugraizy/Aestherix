@@ -64,7 +64,7 @@ export default {
 			isAdmin,
 			rawParticipants,
 			adminGroups,
-			participantsGroups,
+			participantsGroup,
 			ownerGroups,
 			isBotAdmin,
 			body,
@@ -166,7 +166,7 @@ export default {
 					typeQuoted,
 					body,
 					adminGroups,
-					participantsGroups,
+					participantsGroup,
 					pushname,
 					bodyQuoted
 				);

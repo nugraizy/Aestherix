@@ -26,7 +26,7 @@ export const getCookie = async () => {
 	await browser.close();
 
 	cookie = cookie.map((v) => `${v.name}=${v.value}`).join('; ');
-	await fs.writeFile('./src/helper/config/nh_cookies.txt', cookie, { encoding: 'utf-8' });
+	fs.writeFileSync('./src/helper/config/nh_cookies.txt', cookie);
 
 	return cookie;
 };

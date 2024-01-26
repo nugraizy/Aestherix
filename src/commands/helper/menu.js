@@ -2,8 +2,10 @@ import fs from 'fs-extra';
 
 import configuration from '../../helper/config/connect.js';
 
+const { version } = await fs.readJSON('./package.json');
 const getRandomCommand = (cmd) => cmd[Math.floor(Math.random() * cmd.length)].name;
 
+const isNeedDescription = false;
 const format = {
 	AI: 'ＡＩ',
 	'AL-Quran': 'Ａｌ-Ｑｕｒａｎ',
@@ -22,7 +24,6 @@ const format = {
 	Owner: 'Ｏｗｎｅｒ',
 	Search: 'Ｓｅａｒｃｈ'
 };
-const { version } = await fs.readJSON('./package.json');
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -37,8 +38,8 @@ export default {
 	cooldown: 10,
 	limit: 5,
 	status: 'enable',
-	async run({ from, prefix, groupMetadata }, client) {
-		let capt = `𓆩 𝓗𝓲𝓭𝓭𝓮𝓷 𝓕𝓲𝓷𝓭𝓮𝓻 ${version} 𓆪\n\n`;
+	async run({ from, prefix, groupMetadata, message, query }, client) {
+		let capt = `${`Aestherix ー ${version}`.formatHeaders(true)}\n\n`;
 
 		if (!Object.keys(configuration.cmds.menu).length) {
 			const container = configuration.cmds.commands
@@ -51,45 +52,55 @@ export default {
 			configuration.cmds.menu = container;
 		}
 
+		let isFound = false;
+
 		for (const category in configuration.cmds.menu) {
+			if (query && !category.toLowerCase().includes(query.toLowerCase())) {
+				continue;
+			}
+
 			const sortedCommands = configuration.cmds.menu[category]
-				.sort(
-					/**
-					 * @param {import('../../types/Commands/index.js').CommandProps} a
-					 * @param {import('../../types/Commands/index.js').CommandProps} b
-					 * @returns {import('../../types/Commands/index.js').CommandProps[]}
-					 */
-					(a, b) => a.name.localeCompare(b.name)
-				)
-				.map(
-					/**
-					 * @param {import('../../types/Commands/index.js').CommandProps} v
-					 */
-					(v) =>
-						`╭ ${v.minifiedDescription || v.description}\n├ _${prefix}${v.name}_\n├ ${v.usage}\n╰ ⏳ ${v.cooldown}s | ${
-							v.premium ? 'Premium' : 'Free'
-						} | 🆔 ${v.aliases.join(', ')}`
-				)
+				.sort((a, b) => a.name.localeCompare(b.name))
+				.map((v, i, arr) => {
+					const commonPart = isNeedDescription
+						? `╭ ${v.minifiedDescription || v.description}\n├ _${prefix}${v.name}_\n├ ${v.usage}\n╰ ⏳ ${v.cooldown}s | ${
+								v.premium ? 'Premium' : 'Free'
+						  } | 🆔 ${v.aliases.join(', ')}`
+						: `${i === arr.length - 1 ? '╰' : '├'} ${i + 1}.) _${v.usage}_`;
+
+					return commonPart;
+				})
 				.join('\n');
 
-			capt += `${format[category].formatHeaders()}\n\n${sortedCommands}\n\n\n`;
+			capt += `${format[category].formatHeaders()}\n${sortedCommands}\n\n\n`;
+
+			if (query) {
+				isFound = true;
+				break;
+			}
+		}
+
+		if (!isFound) {
+			capt += `Could not find any category with the name "${query}"\n\n`;
 		}
 
 		capt = `${capt.trim()}\n\nUse : ${prefix}${getRandomCommand(
 			Object.values(configuration.cmds.menu).flat()
-		)} -H\n~> to see the detail of the command.\n~> total command : ${configuration.cmds.commands.size}`;
+		)} -H\nー> To see the detail of the command.\nー> Total Commands : ${
+			configuration.cmds.commands.size
+		}\n\nＰｏｗｅｒｅｄ ｂｙ\n    𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`;
 
 		configuration.cmds.menuStr = capt;
 
 		await client.instance.send(
 			from,
 			{
-				text: capt.trim(),
-				footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
-				buttons: [{ buttonId: '.about', buttonText: { displayText: 'About Us.' }, type: 1 }],
-				headerType: 1
+				text: capt.trim()
+				// footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
+				// buttons: [{ buttonId: '.about', buttonText: { displayText: 'About Us.' }, type: 1 }],
+				// headerType: 1
 			},
-			{ groupMetadata }
+			{ groupMetadata, quoted: message }
 		);
 	}
 };

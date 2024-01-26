@@ -41,7 +41,7 @@ export interface ReassignResult {
 	isAdmin?: boolean;
 	rawParticipants?: object[] | undefined;
 	adminGroups?: string[] | undefined;
-	participantsGroups?: string[] | undefined;
+	participantsGroup?: string[] | undefined;
 	ownerGroups?: string | undefined;
 	isBotAdmin?: boolean | undefined;
 	body: string;

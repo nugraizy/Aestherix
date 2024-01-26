@@ -8,6 +8,7 @@ import type {
 } from '@adiwajshing/baileys';
 
 import type { AssignedClient } from '../Utils';
+import type { ReassignResult } from '../Reconstruct';
 
 export type ClientSocket = WASocket;
 export type Client = { instance: ClientSocket };
@@ -18,9 +19,11 @@ export type SingleAuthState = { state: AuthenticationState; saveState: () => voi
 
 export type ContextInfo = proto.IContextInfo;
 
+type Parse = () => Promise<ReassignResult>;
+
 export type MediaDataContext = Omit<ContextInfo, 'quotedMessage'> & {
 	message: ContextInfo['quotedMessage'];
-} & { extract: () => proto.IWebMessageInfo | undefined };
+} & { extract: () => (proto.IWebMessageInfo & { parse: Parse }) | undefined };
 
 export type ConnectionStates = ConnectionState;
 export type WAConnectionStates = WAConnectionState;
