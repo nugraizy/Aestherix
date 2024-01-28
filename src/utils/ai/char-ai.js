@@ -1,5 +1,6 @@
 import axios from 'axios';
 import querystring from 'node:querystring';
+import { fetch } from 'undici';
 
 import { generateDeviceID, generateGPTToken, ROLES } from './util.js';
 import { fetchJSON } from '../modules/index.js';
@@ -78,28 +79,74 @@ export class ChatGPTDialogue {
 			try {
 				const re = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/gi;
 
-				check: {
-					if (Buffer.isBuffer(content)) {
-						const scanImage = await this.processImage(content);
+				const processImage = async (buffer, needPush) => {
+					const scanImage = await this.processImage(buffer);
+					needPush &&
 						this._postData.messages.push({
 							role: 'system',
 							content: `Beritahu user bahwa kamu telah mendeteksi gambar yang user berikan dan gambar itu adalah "${scanImage}" (Jelaskan dalam singkat mengenai foto tersebut menggunakan bahasa indonesia.)`
 						});
 
+					return scanImage;
+				};
+
+				check: {
+					if (Buffer.isBuffer(content)) {
+						await processImage(content, true);
+
 						break check;
 					}
 
-					const isUrl = content.match(re);
+					const urls = content.match(re);
 
-					if (typeof content === 'string' && isUrl) {
-						const contentType = await fetch(isUrl[0]).then((res) => res.headers.get('content-type'));
+					if (typeof content === 'string' && urls) {
+						const container = {
+							success: [],
+							failed: []
+						};
+						for (const image of urls) {
+							const response = await fetch(image).then((res) =>
+								res.headers.get('content-type')?.startsWith('image') ? res : null
+							);
 
-						if (!contentType?.startsWith('image')) {
-							this._postData.messages.push({
-								role: 'assistant',
-								content: 'Tidak bisa membuka link selain link yang berisi gambar'
-							});
+							if (response) {
+								content = Buffer.from(await response.arrayBuffer(image));
+
+								const caption = await processImage(content);
+
+								container.success.push(caption);
+							} else {
+								container.failed.push(image);
+							}
 						}
+
+						let caption = `Beritahu user bahwa kamu telah mendeteksi gambar-gambar yang user berikan.`;
+						let index = 0;
+
+						if (container.success.length) {
+							caption += `\n${container.success
+								.map((v) => {
+									index++;
+									return `gambar nomor ${index} ialah ${v} (jelaskan dengan bahasa indonesia)`;
+								})
+								.join('\n')}\n\n`;
+						}
+
+						if (container.failed.length) {
+							caption += `\n${container.failed
+								.map((v) => {
+									index++;
+									return `gambar nomor ${index} adalah invalid`;
+								})
+								.join('\n')}`;
+						}
+
+						this._postData.messages.push({
+							role: 'system',
+							content: caption.trim()
+						});
+
+						break check;
 					}
 
 					if (content) {
