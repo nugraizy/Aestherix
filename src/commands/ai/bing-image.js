@@ -22,6 +22,10 @@ export default {
 
 		const images = await createImageBing(query);
 
+		if (!images?.length) {
+			return client.instance.reply('No images found.', { from, quoted: message, groupMetadata });
+		}
+
 		for (const image of images) {
 			await client.instance.send(from, { image: { url: image } }, { quoted: message, groupMetadata });
 			await delay(300);
