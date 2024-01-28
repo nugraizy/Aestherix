@@ -15,6 +15,10 @@ export default {
 	limit: 5,
 	status: 'enable',
 	async run({ args, query, from, cmd, message, groupMetadata, prefix, pushname }, client) {
+		if (!configuration.OPTIONS.ai) {
+			return await client.instance.reply('ChatGPT AI is disabled', { from, quoted: message, groupMetadata });
+		}
+
 		if (!query) {
 			return await client.instance.reply(
 				`Please specify a command.\n\nUsage : \n${prefix + cmd} start\n${prefix + cmd} stop`,

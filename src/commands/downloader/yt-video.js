@@ -185,7 +185,7 @@ export default {
 			await delay(300);
 		}
 
-		await client.relayMessage(
+		await client.instance.relayMessage(
 			from,
 			{
 				protocolMessage: {
