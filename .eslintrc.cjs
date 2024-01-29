@@ -18,8 +18,9 @@ module.exports = {
 		"Bun": true
 	},
 	rules: {
+		'no-undef': 'error',
 		'no-unsafe-optional-chaining': 0,
-		'no-unused-vars': 2,
+		'no-unused-vars': 1,
 		'no-use-before-define': 1,
 		'no-async-promise-executor': 0,
 		'no-mixed-spaces-and-tabs': 2,

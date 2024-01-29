@@ -5,8 +5,6 @@ import { runtime } from '../../index.js';
 import { Limit, checkAfk, deleteAfk, getAfk, reassign } from '../../helper/index.js';
 import { color, getTimeSince, INFOLOG, ERRLOG } from '../../utils/modules/index.js';
 import { Cache } from '../../helper/modules/cache.js';
-import { ChatGPTDialogue } from '../../utils/index.js';
-import dayjs from 'dayjs';
 
 const handler = new Cache();
 
@@ -16,7 +14,7 @@ let isInit = false;
 
 let STATS_OFFLINE = true;
 const EVALY = ['/>', '$>', '=>', '!>'];
-const SEPERATOR = color('❯❯', '#BD93F9');
+const SEPERATOR = color('᚛', '#BD93F9');
 const HANDLER_PATH = {
 	STUBTYPE: './stub-message.js',
 	STORY: './story-message.js',

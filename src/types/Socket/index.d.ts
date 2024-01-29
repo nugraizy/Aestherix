@@ -72,9 +72,10 @@ declare global {
 
 		/**
 		 * Format headers.
+		 * @param simplify either with backtick or not
 		 * @returns string
 		 */
-		formatHeaders: () => string;
+		formatHeaders: (simplify: boolean) => string;
 
 		/**
 		 * Replace last string.

@@ -490,7 +490,7 @@ const TIME_FORMAT = 'HH:mm:ss DD/MM';
 const ICON = color('✦', '#ff71ce');
 const SEPERATOR_1 = color(':', '#6272A4');
 const SEPERATOR_2 = color('/', '#6272A4');
-const SEPERATOR_3 = color('❯❯', '#FF5555');
+const SEPERATOR_3 = color('ᚚ', '#FF5555');
 const bracketsify = (text) => color('【', '#F8F8F2') + text + color('】', '#F8F8F2');
 const boldify = (string) => chalk.bold(string);
 

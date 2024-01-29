@@ -76,6 +76,7 @@ Object.setPrototypeOf(String.prototype, {
 	},
 	formatHeaders: function (simplify) {
 		const headers = this || 'This is Headers';
+
 		return simplify ? `\`\`\`${headers}\`\`\`` : `╭ \`\`\` ✦ ${headers}\`\`\` ╮`;
 	},
 	replaceLast: function (find, replace) {
