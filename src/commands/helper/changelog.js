@@ -1,18 +1,18 @@
 import parser from 'yargs-parser';
 
-import { getChangelogs } from '../../utils/github/index.js';
+import { getChangelogs, stringifyChangelogs } from '../../utils/github/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
-	name: 'changelog',
+	name: 'changelogs',
 	description: 'Get the latest changelogs directly from GitHub',
 	usage: '!changelog -q <number> / --quantity <number>',
-	aliases: ['cl'],
+	aliases: ['cl', 'changelog'],
 	category: 'Helper',
-	cooldown: 0,
-	limit: 0,
+	cooldown: 5,
+	limit: 3,
 	status: 'enable',
 	run: async ({ query, from, groupMetadata, message }, client) => {
 		const { quantity } = parser(query, {
@@ -34,6 +34,6 @@ export default {
 
 		const changelog = await getChangelogs(quantity);
 
-		await client.instance.reply(changelog, { from, quoted: message, groupMetadata });
+		await client.instance.reply(stringifyChangelogs(changelog), { from, quoted: message, groupMetadata });
 	}
 };

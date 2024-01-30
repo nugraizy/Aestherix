@@ -24,22 +24,22 @@ export default {
 		}
 
 		let { _: urls } = parser(query);
-		let { no_wm: NO_WM, wm: WITH_WM } = parser(query.toLowerCase(), {
+		let { withNoWatermark, withWatermark } = parser(query.toLowerCase(), {
 			configuration: {
 				'short-option-groups': false
 			},
 			alias: {
-				no_wm /* eslint-disable-line*/: ['nowm', 'no-wm', 'no-watermark', 'no_watermark', 'nowatermark'],
-				wm: ['with-watermark', 'with_watermark', 'watermark']
+				withNoWatermark /* eslint-disable-line*/: ['nowm', 'no-wm', 'no-watermark', 'no_watermark', 'nowatermark'],
+				withWatermark: ['with-watermark', 'with_watermark', 'watermark']
 			}
 		});
 
-		if (Array.isArray(NO_WM)) {
-			NO_WM = removeDuplicatesArray(NO_WM)[0];
+		if (Array.isArray(withNoWatermark)) {
+			withNoWatermark = removeDuplicatesArray(withNoWatermark)[0];
 		}
 
-		if (Array.isArray(WITH_WM)) {
-			WITH_WM = removeDuplicatesArray(WITH_WM)[0];
+		if (Array.isArray(withWatermark)) {
+			withWatermark = removeDuplicatesArray(withWatermark)[0];
 		}
 
 		const posts = await tiktok.download.post(urls);
@@ -121,7 +121,9 @@ export default {
 				from,
 				{
 					video: {
-						url: posts[data].urls[!NO_WM && !WITH_WM ? 'withNoWatermark' : WITH_WM ? 'withWatermark' : 'withNoWatermark']
+						url: posts[data].urls[
+							!withNoWatermark && !withWatermark ? 'withNoWatermark' : withWatermark ? 'withWatermark' : 'withNoWatermark'
+						]
 					},
 					caption: capt.trim()
 				},

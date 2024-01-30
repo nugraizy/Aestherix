@@ -40,13 +40,15 @@ export default {
 			for (let i = 0, anime = result[day]; i < result[day].length; i++) {
 				const time = Object.keys(anime[i])[0];
 
-				capt += ` ⏰ *${time}* ──\n`;
+				capt += `╭─ ⏰ *${time}* ──\n`;
 
 				for (const v of anime[i][time]) {
-					capt += ` 📜 Title : ${v.title.formatHeaders()}\n`;
-					capt += ` 🔢 Episode : ${v.episode}\n`;
-					capt += ` 🔗 URL : ${v.link}\n\n`;
+					capt += `│ 📜 Title : ${v.title.formatHeaders(true)}\n`;
+					capt += `│ 🔢 Episode : ${v.episode}\n`;
+					capt += `│ 🔗 URL : ${v.link}\n`;
 				}
+
+				capt += '╰───────\n';
 			}
 
 			const INFO = result[day][0];

@@ -4,8 +4,10 @@ const { version } = await fs.readJSON('./package.json');
 
 export const stringifyChangelogs = (data) => {
 	let caption = `⚙️ ${'Aestherix'.formatHeaders(true)} *Changelog* v${version} ⚙️
-from: ${data[data.length - 1].author.formattedDate}
-to: ${data[0].author.formattedDate}
+
+Total Commits **
+From: ${data[data.length - 1].author.formattedDate}
+To: ${data[0].author.formattedDate}
 
 ${'一'.repeat(10)}`;
 

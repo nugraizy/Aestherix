@@ -589,7 +589,11 @@ class RequestModule extends ResponseParser {
 		let videoId;
 
 		if (/((vt|vm|vk)\.tiktok\.com)/g.test(url) || !url.includes('video')) {
-			const req = (await axios.head(url))?.request.res.responseUrl;
+			const req = (
+				await axios.head(url, {
+					validateStatus: () => true
+				})
+			)?.request.res.responseUrl;
 
 			if (!req) {
 				return { error: 'download failed. either the access is denied, or other error.' };
