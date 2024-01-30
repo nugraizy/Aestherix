@@ -44,7 +44,7 @@ export default {
 				continue;
 			}
 
-			const post = await fbDl(url.trim());
+			const post = await fbDl(url);
 
 			INFOLOG(`${color('Downloading Facebook Post', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
 
@@ -59,13 +59,10 @@ export default {
 				continue;
 			}
 
-			const urlFilter = post.url.find((v) => v.resolution === '1080p' || v.resolution === '720p' || v.resolution === '480p');
-
 			await client.instance.send(
 				from,
 				{
-					video: new Buffer.from(await fetchBUFFER(urlFilter.url)),
-					caption: `${'Facebook Video Downloader'.formatHeaders()}\n\nResolution : ${urlFilter.resolution}`
+					video: new Buffer.from(await fetchBUFFER(post.result)),
 				},
 				{ groupMetadata }
 			);
