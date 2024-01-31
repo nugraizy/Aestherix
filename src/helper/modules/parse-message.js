@@ -289,14 +289,16 @@ export const reassign = async (m, client, store) => {
 			};
 		}
 
-		const isMedia = ['videoMessage', 'imageMessage'].includes(type);
+		const isMedia = ['videoMessage', 'imageMessage', 'documentMessage'].includes(type);
 		const isQuotedImage =
 			type === 'extendedTextMessage' && !content.includes('viewOnceMessage') && content.includes('imageMessage');
 		const isQuotedVideo =
 			type === 'extendedTextMessage' && !content.includes('viewOnceMessage') && content.includes('videoMessage');
 		const isQuotedSticker = type === 'extendedTextMessage' && content.includes('stickerMessage');
 		const isQuotedAudio = type === 'extendedTextMessage' && content.includes('audioMessage');
-		const isQuotedDocument = type === 'extendedTextMessage' && content.includes('documentMessage');
+		const isQuotedDocument =
+			type === 'extendedTextMessage' &&
+			(content.includes('documentMessage') || content.includes('documentWithCaptionMessage'));
 		const isQuotedContact = type === 'extendedTextMessage' && content.includes('contactMessage');
 		const isQuotedLocation = type === 'extendedTextMessage' && content.includes('locationMessage');
 		const isQuotedLiveLocation = type === 'extendedTextMessage' && content.includes('liveLocationMessage');
@@ -306,11 +308,12 @@ export const reassign = async (m, client, store) => {
 
 		const isMediaVid = type === 'videoMessage' || isQuotedVideo;
 		const isMediaImage = type === 'imageMessage' || isQuotedImage;
+		const isMediaDocument = type === 'documentMessage' || type === 'documentWithCaptionMessage' || isQuotedDocument;
 		const isSticker = type === 'stickerMessage';
 		const isAudio = type === 'audioMessage';
 		const isContact = type === 'contactMessage';
 		const isContactsArray = type === 'contactsArrayMessage';
-		const isDocument = type === 'documentMessage';
+		const isDocument = type === 'documentMessage' || type === 'documentWithCaptionMessage';
 		const isViewOnce = type === 'viewOnceMessage';
 		const isLocation = type === 'locationMessage';
 		const isLiveLocation = type === 'liveLocationMessage';
@@ -407,6 +410,7 @@ export const reassign = async (m, client, store) => {
 			isQuotedSticker,
 			isMediaVid,
 			isMediaImage,
+			isMediaDocument,
 			isSticker,
 			isAudio,
 			isContact,

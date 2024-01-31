@@ -62,6 +62,7 @@ export interface ReassignResult {
 	isQuotedSticker: boolean;
 	isMediaVid: boolean;
 	isMediaImage: boolean;
+	isMediaDocument: boolean;
 	isSticker: boolean;
 	isAudio: boolean;
 	isContact: boolean;

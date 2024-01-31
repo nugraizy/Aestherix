@@ -19,7 +19,7 @@ const MEDIA_TYPE = {
 		'templateMessage',
 		'pollUpdateMessage'
 	],
-	_c: ['imageMessage', 'videoMessage'],
+	_c: ['imageMessage', 'videoMessage', 'documentWithCaptionMessage'],
 	_d: [
 		'stickerMessage',
 		'audioMessage',
@@ -55,7 +55,7 @@ export const extractBody = (m, type) => {
 	} else if (type === 'buttonsResponseMessage') {
 		return m.message.buttonsResponseMessage.selectedButtonId;
 	} else if (MEDIA_TYPE._c.includes(type)) {
-		return m.message[type].caption || 'No Caption';
+		return m.message[type].caption || m.message[type]?.message?.documentMessage?.caption || 'No Caption';
 	} else if (
 		type === 'viewOnceMessage' &&
 		(m.message.viewOnceMessage.message.imageMessage || m.message.viewOnceMessage.message.videoMessage)

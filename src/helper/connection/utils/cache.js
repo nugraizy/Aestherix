@@ -82,7 +82,9 @@ export const updateContact = (store, contactsList) => {
 			localContacts[id].name = name || notify || verifiedName;
 
 			if (conctactsDatabases.length !== 0) {
-				freshContactsDatabases[freshContactsDatabases.findIndex((v) => v.id === id)].name = name || notify || verifiedName;
+				if (freshContactsDatabases?.[freshContactsDatabases.findIndex((v) => v.id === id)]?.name) {
+					freshContactsDatabases[freshContactsDatabases.findIndex((v) => v.id === id)].name = name || notify || verifiedName;
+				}
 			}
 
 			continue;
