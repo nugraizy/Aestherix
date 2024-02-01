@@ -4,12 +4,14 @@ import P from 'pino';
 import yn from 'yn';
 import PhoneNumber from 'libphonenumber-js';
 import inquirer from 'inquirer';
+import NodeCache from 'node-cache';
 
 import { clearDBConnection } from './reset-session.js';
 import { patchInteractiveMessage } from '../utils/patch-message.js';
 import { Cache } from '../../modules/cache.js';
 import { ERRLOG, INFOLOG, color, splitString } from '../../../utils/modules/index.js';
 
+const msgRetryCounterCache = new NodeCache();
 const SETTINGS = await fs.readJSON('./src/helper/config/settings.json');
 const { default: makeWASocket, makeInMemoryStore, DEFAULT_CONNECTION_CONFIG } = baileys;
 const logger = (OPTIONS) => P({ level: OPTIONS.trace ? 'trace' : OPTIONS.debugMode ? 'debug' : 'fatal' });
@@ -37,13 +39,21 @@ const question = (text) =>
  */
 export const connectSocket = async ({ cli, OPTIONS, state }) => {
 	/**
+	 * @type {Store}
+	 */
+	const store = makeInMemoryStore({ logger: P().child({ level: 'fatal', stream: 'store' }) });
+
+	global.store = store;
+
+	/**
 	 * @type {import('@adiwajshing/baileys').UserFacingSocketConfig}
 	 */
 	const CONNECTION_CONFIG = {
+		msgRetryCounterCache,
 		printQRInTerminal: !OPTIONS.pairMode,
 		mobile: false,
 		browser: ['Chrome (Linux)', '', ''],
-		version: [2, 2404, 5],
+		version: [2, 2405, 1],
 		logger: logger(OPTIONS),
 		auth: {
 			creds: state.creds,
@@ -51,7 +61,18 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 		},
 		markOnlineOnConnect: false,
 		shouldSyncHistoryMessage: () => true,
-		getMessage: async () => ({ conversation: 'Success syncing. Please resend the command again.' }),
+		getMessage: (key) => {
+			if (store) {
+				const { id, remoteJid } = key;
+				const message = store.loadMessage(remoteJid, id);
+
+				if (message) {
+					return message.message;
+				}
+			}
+
+			return { conversation: 'Success syncing. Please resend the command again.' };
+		},
 		generateHighQualityLinkPreview: true,
 		linkPreviewImageThumbnailWidth: 2,
 		mediaCache: new Cache(),
@@ -60,13 +81,6 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 		customId: 'HFINDER',
 		defaultQueryTimeoutMs: 0
 	};
-
-	/**
-	 * @type {Store}
-	 */
-	const store = makeInMemoryStore({ logger: P().child({ level: 'fatal', stream: 'store' }) });
-
-	global.store = store;
 
 	if (OPTIONS.json) {
 		await storeToJson(cli, store, OPTIONS); /* eslint-disable-line */

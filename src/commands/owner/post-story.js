@@ -34,7 +34,7 @@ export default {
 		client
 	) {
 		if (!query && !bodyQuoted && !isMediaVid && !isMediaImage && !isMediaDocument && !isQuotedSticker) {
-			return client.reply('Please provide a message or media', {
+			return client.instance.reply('Please provide a message or media', {
 				from,
 				quoted: message,
 				groupMetadata
@@ -75,7 +75,8 @@ export default {
 				{
 					backgroundColor: '#FFFF',
 					font: 3,
-					statusJidList: jids.concat(`${user}@${server}`)
+					statusJidList: jids.concat(`${user}@${server}`),
+					broadcast: true
 				}
 			);
 		}
@@ -83,12 +84,13 @@ export default {
 		return await client.instance.sendMessage(
 			'status@broadcast',
 			{
-				text: query || 'Sent from Aestherix'
+				text: query
 			},
 			{
 				backgroundColor: '#FFFF',
 				font: 3,
-				statusJidList: jids.concat(`${user}@${server}`)
+				statusJidList: jids.concat(`${user}@${server}`),
+				broadcast: true
 			}
 		);
 	}
