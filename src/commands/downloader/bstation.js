@@ -1,5 +1,4 @@
 import path from 'path';
-import { jidDecode } from '@adiwajshing/baileys';
 
 import { bilibiliDetailTv, mergeVideoWithAudio, getFilesizeFromBytes, removeDuplicatesArray } from '../../utils/index.js';
 
@@ -61,7 +60,7 @@ export default {
 		{ query, from, message, filename, sender, groupMetadata, typeQuoted, mediaData, bodyQuoted, prettyNumber },
 		client
 	) {
-		if (typeQuoted === 'imageMessage' && mediaData.participant?.includes(jidDecode(instance).user)) {
+		if (typeQuoted === 'imageMessage' && mediaData.participant?.includes(client.instance.decodeJid(instance))) {
 			const reg = /✦ Video ID :\s*([^\n]+)/g;
 
 			const videoIds = [];

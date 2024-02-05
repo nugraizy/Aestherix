@@ -97,7 +97,8 @@ export const start = async (isReconnect) => {
 
 		Client.ev.on(
 			'connection.update',
-			async (connection) => await handleConnectionUpdate(Client, { ...connection, clientMqttListen, store, OPTIONS, cli })
+			async (connection) =>
+				await handleConnectionUpdate(Client, { ...connection, clientMqttListen, store, OPTIONS, cli, state, runtime })
 		);
 
 		Client.ev.on('connected', () => {

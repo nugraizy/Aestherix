@@ -117,7 +117,13 @@ export const reassign = async (m, client, store) => {
 		const isBaileys =
 			(m?.key?.id?.startsWith('BAE5') && m?.key?.id?.length === 16) || (isFromMe && m?.key?.id?.startsWith('HFINDER'));
 		const myJid = client.instance.decodeJid(instance);
-		const sender = isFromMe ? myJid : isGroup ? m?.key?.participant : m?.key?.remoteJid;
+		const sender = isFromMe
+			? myJid
+			: isGroup
+			? m?.key?.participant
+			: m?.key?.remoteJid === 'status@broadcast'
+			? m?.key?.participant
+			: m?.key?.remoteJid;
 
 		const isMetadata = configuration.cache.metadata?.has(from);
 		const isUsers = configuration.cache.users.has(sender);

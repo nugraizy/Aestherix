@@ -1,4 +1,4 @@
-import { generateMessageID, jidDecode } from '@adiwajshing/baileys';
+import { generateMessageID } from '@adiwajshing/baileys';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -41,7 +41,7 @@ export default {
 			});
 		}
 
-		const { user, server } = jidDecode(instance);
+		const ownJid = client.instance.decodeJid(instance);
 		const jids = await getStoryParticipants(client);
 
 		if (isMediaVid || isMediaImage || isMediaDocument || isQuotedSticker) {
@@ -75,7 +75,7 @@ export default {
 				{
 					backgroundColor: '#FFFF',
 					font: 3,
-					statusJidList: jids.concat(`${user}@${server}`),
+					statusJidList: jids.concat(ownJid),
 					broadcast: true
 				}
 			);
@@ -89,7 +89,7 @@ export default {
 			{
 				backgroundColor: '#FFFF',
 				font: 3,
-				statusJidList: jids.concat(`${user}@${server}`),
+				statusJidList: jids.concat(ownJid),
 				broadcast: true
 			}
 		);

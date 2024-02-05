@@ -1,5 +1,3 @@
-import { jidDecode } from '@adiwajshing/baileys';
-
 import { color, delay, ERRLOG, INFOLOG, isURL, removeDuplicatesArray, isYoutubeURL } from '../../utils/modules/index.js';
 import youtube from '../../utils/youtube/index.js';
 
@@ -56,7 +54,7 @@ export default {
 	limit: 8,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, /*type, args,*/ groupMetadata, mediaData, typeQuoted, bodyQuoted }, client) {
-		if (typeQuoted === 'conversation' && mediaData.participant?.includes(jidDecode(instance).user)) {
+		if (typeQuoted === 'conversation' && mediaData.participant?.includes(client.instance.decodeJid(instance))) {
 			const reg = /✦ Video ID :\s*([^\n]+)/g;
 
 			const videoIds = [];

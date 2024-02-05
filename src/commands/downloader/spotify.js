@@ -1,5 +1,3 @@
-import { jidDecode } from '@adiwajshing/baileys';
-
 import { color, delay, ERRLOG, INFOLOG, isURL, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { spotifier } from '../../utils/index.js';
 
@@ -87,7 +85,7 @@ export default {
 	limit: 5,
 	status: 'enable',
 	run: async ({ query, bodyQuoted, typeQuoted, message, groupMetadata, from, mediaData, prettyNumber }, client) => {
-		if (typeQuoted === 'imageMessage' && mediaData.participant?.includes(jidDecode(instance).user)) {
+		if (typeQuoted === 'imageMessage' && mediaData.participant?.includes(client.instance.decodeJid(instance))) {
 			const reg = /✦ Media ID :\s*([^\n]+)/g;
 			const type = /🖼️ Type :\s*([^\n]+)/g;
 

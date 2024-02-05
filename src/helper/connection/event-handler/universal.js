@@ -1,14 +1,9 @@
 import { Boom } from '@hapi/boom';
 import fs from 'fs-extra';
-import {
-	jidNormalizedUser,
-	getKeyAuthor,
-	jidDecode,
-	getAggregateVotesInPollMessage,
-	DisconnectReason
-} from '@adiwajshing/baileys';
+import { jidNormalizedUser, getKeyAuthor, getAggregateVotesInPollMessage, DisconnectReason } from '@adiwajshing/baileys';
 import boxen from 'boxen';
 import chalk from 'chalk';
+import readline from 'readline';
 
 import configuration from '../../config/connect.js';
 import { INFOLOG, color } from '../../../utils/modules/index.js';
@@ -18,6 +13,7 @@ import { clearDBConnection } from '../socket/reset-session.js';
 import { Cache } from '../../modules/cache.js';
 import { startingConnection } from '../../../helper/connection/utils/check-flag.js';
 
+let rl = null;
 let started = startingConnection;
 const newStart = () => (started = Date.now());
 
@@ -43,11 +39,11 @@ let shouldPrintBanner = true;
  * @typedef {import('../../../types/Socket/index.js').ConnectionStates['lastDisconnect']} LastDisconnect
  * @typedef {import('../../../types/Socket/index.js').WAConnectionStates} Connection
  * @param {Client} Client
- * @param {{lastDisconnect: LastDisconnect, connection: Connection, receivedPendingNotifications: boolean, clientMqttListen: import('mqtt').Client, OPTIONS: {[_: string]: boolean}, cli: import('../socket/socket.js').Cli}} param1
+ * @param {{lastDisconnect: LastDisconnect, connection: Connection, receivedPendingNotifications: boolean, clientMqttListen: import('mqtt').Client, OPTIONS: {[_: string]: boolean}, cli: import('../socket/socket.js').Cli, state: import('./../../../types/Socket/index.js').SingleAuthState['state'], runtime: number}} param1
  */
 export const handleConnectionUpdate = async (
 	Client,
-	{ lastDisconnect, connection, receivedPendingNotifications, clientMqttListen, OPTIONS, cli }
+	{ lastDisconnect, connection, receivedPendingNotifications, clientMqttListen, OPTIONS, cli, state, runtime }
 ) => {
 	try {
 		if (connection === 'close') {
@@ -178,6 +174,29 @@ export const handleConnectionUpdate = async (
 				Client.ev.emit('connected');
 				clearDBConnection(cli);
 				connectMqtt(clientMqttListen);
+
+				if (configuration.OPTIONS.test && !rl) {
+					rl = readline.createInterface({
+						input: process.stdin,
+						output: process.stdout
+					});
+
+					rl.on('line', async (line) => {
+						if (line === 'exit') {
+							process.exit(0);
+						}
+
+						handleUpsertUpdate(
+							store,
+							{
+								test: true,
+								message: line
+							},
+							state,
+							runtime
+						);
+					});
+				}
 			}
 		}
 	} catch (error) {
@@ -245,12 +264,12 @@ export const handlePresenceUpdate = async (presence) => {
  */
 export const handleCallUpdate = async (isGroup, status, id, from, OPTIONS) => {
 	if (OPTIONS.noCall && !isGroup && status === 'offer') {
-		const { user, server } = jidDecode(instance);
+		const meJid = client.instance.decodeJid(instance);
 
 		await client.instance.sendNode({
 			tag: 'call',
 			attrs: {
-				from: `${user}@${server}`,
+				from: meJid,
 				to: from,
 				id: client.instance.generateMessageTag()
 			},

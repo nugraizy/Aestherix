@@ -5,6 +5,8 @@ import { INFOLOG, color } from '../../../utils/modules/index.js';
 
 export const startingConnection = Date.now();
 
+const deprecated = (flag, warning) => `${color(flag, 'gray')}[${color('Deprecated!', '#FF5555')}] ${color(warning, 'gray')}`;
+
 const helpFlag = `
 	 ${color('Usage', 'yellow')}
 	   $ node ${color('.', 'cyan')} <?session> [options]
@@ -24,16 +26,10 @@ const helpFlag = `
 	   --watch, -w           ${color('Watch every file on your script and reload it when it changed.', '#05ffa1')}
 	   --cool_down, -c       ${color('Set cool down for every command.', '#05ffa1')}
 	   --auto_correct, -a    ${color('Enable auto correct for every incoming command.', '#05ffa1')}
-	   ${color('--no_load, -v         ', 'gray')}[${color('Deprecated!', '#FF5555')}] ${color(
-	'Disable module load animation.',
-	'gray'
-)}
-	   ${color('--json, -j            ', 'gray')}[${color('Deprecated!', '#FF5555')}] ${color(
-	'Use JSON DB to store data of the WhatsApp connection.',
-	'gray'
-)}
+	   ${deprecated('--no_load, -v         ', 'Disable module load animation.')}
+	   ${deprecated('--json, -j            ', 'Use JSON DB to store data of the WhatsApp connection.')}
 	   --reset, -k           ${color('Reset your WhatsApp connection session, and restart the script.', '#05ffa1')}
-	   --story, q            ${color('Auto download people story after the bot received the story.', '#05ffa1')}
+	   --story, -q           ${color('Auto download people story after the bot received the story.', '#05ffa1')}
 	   --offline, -f         ${color('Set your current presence to offline.', '#05ffa1')}
 	   --no_call, -d         ${color('Reject incoming call.', '#05ffa1')}
 	   --ai, -i              ${color('Handle incoming Messages, with AI.', '#05ffa1')}
@@ -44,6 +40,7 @@ const helpFlag = `
 	'This needs to input your host number to get the code.',
 	'#ef476f'
 )}
+	   --test                ${color('Test your connection.', '#05ffa1')}
 	   --help, -h            ${color('Show this message.', '#05ffa1')}
 
 	 ${color('Examples', 'yellow')}
@@ -80,7 +77,8 @@ export const parseCli = () =>
 			limit_reset: { type: 'boolean', shortFlag: 'l' },
 			reset_on_start: { type: 'boolean', shortFlag: 'x' },
 			no_limit: { type: 'boolean', shortFlag: 'u' },
-			pair_mode: { type: 'boolean', shortFlag: 'z' }
+			pair_mode: { type: 'boolean', shortFlag: 'z' },
+			test: { type: 'boolean' }
 		}
 	});
 

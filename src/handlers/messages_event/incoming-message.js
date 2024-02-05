@@ -1,9 +1,10 @@
 import { findBestMatch } from 'string-similarity';
+import { generateWAMessage } from '@adiwajshing/baileys';
 
 import configuration from '../../helper/config/connect.js';
 import { runtime } from '../../index.js';
 import { Limit, checkAfk, deleteAfk, getAfk, reassign } from '../../helper/index.js';
-import { color, getTimeSince, INFOLOG, ERRLOG } from '../../utils/modules/index.js';
+import { color, getTimeSince, INFOLOG, ERRLOG, randomChar } from '../../utils/modules/index.js';
 import { Cache } from '../../helper/modules/cache.js';
 
 const handler = new Cache();
@@ -494,6 +495,23 @@ const initHandler = async () => {
 const handleIncomingMessage = async (message, client, cmds, store, user, state, runtime) => {
 	if (message === undefined) {
 		return;
+	}
+
+	if (configuration.OPTIONS.test && message?.test) {
+		message = {
+			messages: [
+				await generateWAMessage(
+					client.instance.decodeJid(instance),
+					{
+						text: message.message
+					},
+					{
+						upload: client.instance.waUploadToServer,
+						messageId: randomChar('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 16)
+					}
+				)
+			]
+		};
 	}
 
 	if (!isInit) {

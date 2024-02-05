@@ -27,7 +27,7 @@ export default {
 	async run({ from, args, cmd, groupMetadata }, client, store) {
 		const messages = configuration.OPTIONS.json
 			? JSON.parse(fs.readFileSync(DB_PATH)).messages[from]
-			: await store.loadMessages(from);
+			: store.loadMessages(from);
 
 		if (args[1] === 'get') {
 			const dataMessage = messages.find((v) => v.key.id === args[2]);

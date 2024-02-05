@@ -2,10 +2,20 @@ import { generateWAMessageFromContent } from '@adiwajshing/baileys';
 
 import configuration from '../../helper/config/connect.js';
 import { runtime } from '../../index.js';
-import { textStory, ZERO } from '../../helper/index.js';
+import { textStory } from '../../helper/index.js';
 import { color, INFOLOG } from '../../utils/modules/index.js';
 
+let meJid = null;
+
+/**
+ * @param {import('../../types/Socket/index.js').AdvancedClient} client
+ * @param {import('../../types/Reconstruct/index.js').ReassignResult} message
+ */
 const handler = async (client, message) => {
+	if (!meJid) {
+		meJid = client.instance.decodeJid(instance);
+	}
+
 	if (configuration.OPTIONS.autoRead) {
 		await client.instance.readMessages([message.message.key]);
 	}
@@ -22,10 +32,10 @@ const handler = async (client, message) => {
 		caption += `Body : ${message.body}`;
 		const buffer = await textStory(message.body, message.message.message.extendedTextMessage.backgroundArgb);
 
-		return await client.instance.send(ZERO, { image: buffer, caption: caption.trim() });
+		return await client.instance.send(meJid, { image: buffer, caption: caption.trim() });
 	} else if (message.type === 'videoMessage' || message.type === 'imageMessage') {
 		caption += `Caption : ${message.body}`;
-		messages = generateWAMessageFromContent(ZERO, { ...message.message.message }, {});
+		messages = generateWAMessageFromContent(meJid, { ...JSON.parse(JSON.stringify(message.message.message)) }, {});
 		messages.message[message.type].caption = caption;
 		messages.message[message.type].contextInfo = {
 			stanzaId: message.message.key.id,
@@ -33,13 +43,13 @@ const handler = async (client, message) => {
 			quotedMessage: message.message.message,
 			remoteJid: message.message.key.remoteJid
 		};
-		await client.instance.relayMessage(ZERO, messages.message, { messageId: messages.key.id });
+		await client.instance.relayMessage(meJid, messages.message, { messageId: messages.key.id });
 	}
 
 	INFOLOG(
 		`${color(message.pushname.trim(), 'white')} ${color(message.prettyNumber, '#ff71ce')} :`,
 		`${color(
-			message.body === 'Unknown body' ? 'Bug Story' : message.body?.trim()?.replace('\n', '')?.substr(0, 20),
+			message.body === 'Unknown body' ? 'Bug Story' : message.body?.trim()?.replace('\n', '')?.substring(0, 20),
 			'#05ffa1'
 		)}`,
 		`${color(message.from, '#b967ff')}`,

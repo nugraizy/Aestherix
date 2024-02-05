@@ -100,4 +100,4 @@ export interface ReassignResult {
 	>;
 }
 
-export type Reconstructuring = (m: MessageGenerated, client: AdvancedClient, store: Store) => Promise<ReassignResult>;
+export type Reconstructuring = (m: MessageGenerated, client: AdvancedClient, store?: Store) => Promise<ReassignResult>;

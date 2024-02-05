@@ -6,7 +6,13 @@ import configuration from '../../helper/config/connect.js';
 import { getFilesize, getFilesizeFromBytes } from '../../utils/modules/index.js';
 import { reassign } from '../../helper/modules/parse-message.js';
 
-const deletedHandler = async (client, message, fetches) => {
+/**
+ * @param {import('../../types/Socket/index.js').AdvancedClient} client
+ * @param {import('../../types/Messages/index.js').WAMessage} message
+ * @param {boolean} fetches
+ * @param {import('../../types/Socket/index.js').Store} store
+ */
+const deletedHandler = async (client, message, fetches, store) => {
 	try {
 		if (!message) {
 			return;
