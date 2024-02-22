@@ -7,6 +7,7 @@ import path from 'path';
 import { fetch } from 'undici';
 
 import { spotifier } from '../../utils/spotifier/index.js';
+import { createMeshGradient } from '../../utils/converter/file-processing.js';
 
 const { createCanvas, GlobalFonts, loadImage } = Canvas;
 
@@ -106,7 +107,7 @@ export class SpotifyCard {
 	/**
 	 * Creates an instance of SpotifyCard.
 	 * @param {string} track
-	 * @param {{background?: { blur?: number | boolean, color?: string, gradient?: string }, cover?: { shadow?: number | boolean, round?: number | boolean }}} param1
+	 * @param {{background?: { blur?: number | boolean, color?: string, gradient?: string, mesh?: boolean }, cover?: { shadow?: number | boolean, round?: number | boolean }}} param1
 	 */
 	constructor(track, { background, cover }) {
 		if (!track) {
@@ -119,7 +120,8 @@ export class SpotifyCard {
 			background: {
 				blur: background?.blur || false,
 				color: background?.color || false,
-				gradient: background?.gradient || false
+				gradient: background?.gradient || false,
+				mesh: background?.mesh || false
 			},
 			cover: {
 				shadow: cover?.shadow || false,
@@ -253,9 +255,19 @@ export class SpotifyCard {
 			opts.blur = false;
 		}
 
-		if (opts.gradient) {
+		gradient: if (opts.gradient) {
 			let gradient;
 			const gradientNumber = Math.floor(Math.random() * 3);
+
+			if (opts.mesh) {
+				const meshGradient = await createMeshGradient(chroma(this.#_colorPalettes[0]).darken(0.7).hex());
+
+				const image = await loadImage(meshGradient);
+
+				this.#_ctx.drawImage(image, 0, 0, this.#_canvas.width, this.#_canvas.height);
+
+				break gradient;
+			}
 
 			gradient = this.#_ctx.createLinearGradient(
 				0,

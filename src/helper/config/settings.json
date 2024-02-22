@@ -1,27 +1,32 @@
 {
-	"main_host_number": "6289522534401",
-	"backups_host_numbers": ["6289607055246", "16367421471"],
-	"owner_number": "6289607055246@s.whatsapp.net",
-	"team_number": ["6289522534401@s.whatsapp.net"],
-	"state": "public",
-	"maintenance": false,
-	"main_session": "debug",
-	"max_group": 20,
-	"min_members": 20,
-	"limit": 30,
-	"reset_time": {
-		"minute": "6",
-		"hour": "00"
-	},
-	"tebak_gambar": {
-		"expired_time": 20
-	},
-	"prefix": {
-		"multi": true,
-		"nopref": false,
-		"pref": "z"
-	},
-	"debugger": false,
-	"delay": 2,
-	"best_time": 8029
+  "main_host_number": "6289522534401",
+  "backups_host_numbers": [
+    "6289607055246",
+    "16367421471"
+  ],
+  "owner_number": "6289607055246@s.whatsapp.net",
+  "team_number": [
+    "6289522534401@s.whatsapp.net"
+  ],
+  "state": "public",
+  "maintenance": false,
+  "main_session": "debug",
+  "max_group": 20,
+  "min_members": 20,
+  "limit": 30,
+  "reset_time": {
+    "minute": "6",
+    "hour": "00"
+  },
+  "tebak_gambar": {
+    "expired_time": 20
+  },
+  "prefix": {
+    "multi": true,
+    "nopref": false,
+    "pref": "z"
+  },
+  "debugger": false,
+  "delay": 2,
+  "best_time": 2949
 }

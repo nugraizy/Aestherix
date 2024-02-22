@@ -146,3 +146,88 @@ export const cropImage = async (imgData, type = 'SINGLE') => {
 
 	throw new Error('No image processing library available, please install jimp or sharp as a dependency');
 };
+
+/**
+ * @param {any} func
+ * @param  {...any} argsArray
+ * @returns
+ */
+export const stringifyFunction = (func, ...argsArray) => {
+	const functionString = func.toString().replace(/cov_(.+?)\+\+[,;]?/g, '');
+	const args = [];
+
+	for (const argument of argsArray) {
+		switch (typeof argument) {
+			case 'string':
+				args.push('`' + argument + '`');
+				break;
+			case 'object':
+				args.push(JSON.stringify(argument));
+				break;
+			default:
+				args.push(argument);
+		}
+	}
+
+	return `(${functionString})(${args.join(',')})`;
+};
+
+/**
+ *
+ * @param {string} svg
+ * @param {{width: number, height: number, type: 'png' | 'jpg' | 'webp', quality: number}} options
+ * @returns {Promise<string>}
+ */
+export const renderSvg = async (svg, options = { width: 1080, height: 2400, type: 'png', quality: 1 }) => {
+	return new Promise((resolve, reject) => {
+		const canvas = document.createElement('canvas');
+		const ctx = canvas.getContext('2d');
+		const img = new Image();
+
+		if (!ctx) {
+			return reject(new Error('Canvas not supported'));
+		}
+
+		if (options.width) {
+			img.width = options.width;
+		}
+
+		if (options.height) {
+			img.height = options.height;
+		}
+
+		const onLoad = () => {
+			let imageWidth = img.naturalWidth;
+			let imageHeight = img.naturalHeight;
+
+			if (options.width || options.height) {
+				const computedStyle = window.getComputedStyle(img);
+
+				imageWidth = parseInt(computedStyle.getPropertyValue('width'), 10);
+				imageHeight = parseInt(computedStyle.getPropertyValue('height'), 10);
+			}
+
+			canvas.width = imageWidth;
+			canvas.height = imageHeight;
+
+			ctx.drawImage(img, 0, 0, imageWidth, imageHeight);
+
+			const dataURI = canvas.toDataURL('image/' + options.type, options.quality);
+			const base64 = dataURI.substring(`data:image/${options.type};base64,`.length);
+
+			document.body.removeChild(img);
+			resolve(base64);
+		};
+
+		const onError = () => {
+			document.body.removeChild(img);
+			reject(new Error('Malformed SVG'));
+		};
+
+		img.addEventListener('load', onLoad);
+		img.addEventListener('error', onError);
+
+		document.body.appendChild(img);
+		img.src = 'data:image/svg+xml;charset=utf8,' + svg;
+	});
+};

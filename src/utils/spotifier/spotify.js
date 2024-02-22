@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { fetch } from 'undici';
 import FormData from 'form-data';
 import { load } from 'cheerio';
 
@@ -30,7 +31,7 @@ class Spotifier {
 				headers: {
 					Authorization: this.#token
 				},
-				data: 'grant_type=client_credentials'
+				body: new URLSearchParams({ grant_type: 'client_credentials' }) // eslint-disable-line
 			};
 		};
 
@@ -47,15 +48,16 @@ class Spotifier {
 					await this._refreshToken();
 				}
 
-				const { data } = await axios({
-					url: this.#_api + path,
-					method,
-					headers: {
-						...(opts !== undefined && 'headers' in opts ? opts.headers : {}),
-						Authorization: `Bearer ${this.#bearerToken}`
-					},
-					...(opts !== undefined && 'data' in opts ? { data: opts } : {})
-				});
+				const data = await (
+					await fetch(this.#_api + path, {
+						method,
+						headers: {
+							...(opts !== undefined && 'headers' in opts ? opts.headers : {}),
+							Authorization: `Bearer ${this.#bearerToken}`
+						},
+						...(opts !== undefined && 'data' in opts ? { body: opts } : {})
+					})
+				).json();
 
 				return { status: true, ...data };
 			} catch (err) {
@@ -85,7 +87,9 @@ class Spotifier {
 		 */
 		this._refreshToken = async () => {
 			try {
-				const { data } = await axios(this._tokenize());
+				const { url, body, headers, method } = this._tokenize();
+
+				const data = await (await fetch(url, { body, headers, method })).json();
 
 				this.#bearerToken = data.access_token;
 				this.#bearerTokenExpiredAt = Date.now() + data.expires_in;
@@ -109,13 +113,12 @@ class Spotifier {
 			params.append('client_secret', this.#clientSecret);
 			params.append('grant_type', 'refresh_token');
 			params.append('refresh_token', this.#refreshToken);
-			const {
-				data: { access_token: accessToken, expires_in: expiresIn }
-			} = await axios({
-				url: 'https://accounts.spotify.com/api/token',
-				method: 'POST',
-				params
-			});
+			const { access_token: accessToken, expires_in: expiresIn } = await (
+				await fetch('https://accounts.spotify.com/api/token', {
+					method: 'POST',
+					body: params
+				})
+			).json();
 
 			this.#accessToken = accessToken;
 			this.#accessTokenExpiredAt = Date.now() + expiresIn;
@@ -188,28 +191,24 @@ class Spotifier {
 					return { status: false, message: 'Parameter artistsID must provided' };
 				}
 
-				let { data } = await axios({
-					url: 'https://accounts.spotify.com/api/token',
-					headers: {
-						Authorization: `Basic ${new Buffer.from(`${this.#clientId}:${this.#clientSecret}`).toString('base64')}`
-					},
-					params: {
-						grant_type: 'client_credentials' /* eslint-disable-line */
-					},
-					method: 'POST'
-				});
+				let data = await (
+					await fetch('https://accounts.spotify.com/api/token?grant_type=client_credentials', {
+						headers: {
+							Authorization: `Basic ${new Buffer.from(`${this.#clientId}:${this.#clientSecret}`).toString('base64')}`
+						},
+						method: 'POST'
+					})
+				).json();
 
 				data = (
-					await axios({
-						url: `https://api.spotify.com/v1/artists/${artistsID}/top-tracks`,
-						headers: {
-							Authorization: `Bearer ${this.#credentialToken || data.access_token}`
-						},
-						method: 'GET',
-						params: {
-							country: 'US'
-						}
-					})
+					await (
+						await fetch(`https://api.spotify.com/v1/artists/${artistsID}/top-tracks?country=US`, {
+							headers: {
+								Authorization: `Bearer ${this.#credentialToken || data.access_token}`
+							},
+							method: 'GET'
+						})
+					).json()
 				).data;
 				return { status: true, data };
 			} catch (err) {
@@ -324,13 +323,14 @@ class Spotifier {
 		this.getCurrentlyPlaying = async () => {
 			try {
 				await this._getAccessTokenFromRefreshToken();
-				const { data } = await axios({
-					url: `${this.#_api}/me/player/currently-playing`,
-					method: 'GET',
-					headers: {
-						Authorization: `Bearer ${this.#accessToken}`
-					}
-				});
+				const data = await (
+					await fetch(`${this.#_api}/me/player/currently-playing`, {
+						method: 'GET',
+						headers: {
+							Authorization: `Bearer ${this.#accessToken}`
+						}
+					})
+				).json();
 
 				return data !== '' ? data : null;
 			} catch (err) {
@@ -341,13 +341,14 @@ class Spotifier {
 		this.getDevices = async () => {
 			try {
 				await this._getAccessTokenFromRefreshToken();
-				const { data } = await axios({
-					url: `${this.#_api}/me/player/devices`,
-					method: 'GET',
-					headers: {
-						Authorization: `Bearer ${this.#accessToken}`
-					}
-				});
+				const data = await (
+					await fetch(`${this.#_api}/me/player/devices`, {
+						method: 'GET',
+						headers: {
+							Authorization: `Bearer ${this.#accessToken}`
+						}
+					})
+				).json();
 
 				return data;
 			} catch (err) {
@@ -358,13 +359,14 @@ class Spotifier {
 		this.getPlaybackState = async () => {
 			try {
 				await this._getAccessTokenFromRefreshToken();
-				const { data } = await axios({
-					url: `${this.#_api}/me/player`,
-					method: 'GET',
-					headers: {
-						Authorization: `Bearer ${this.#accessToken}`
-					}
-				});
+				const data = await (
+					await fetch(`${this.#_api}/me/player`, {
+						method: 'GET',
+						headers: {
+							Authorization: `Bearer ${this.#accessToken}`
+						}
+					})
+				).json();
 
 				return data;
 			} catch (err) {
@@ -375,13 +377,14 @@ class Spotifier {
 		this.updateNowPlayingStates = async () => {
 			try {
 				await this._getAccessTokenFromRefreshToken();
-				const { data } = await axios({
-					url: `${this.#_api}/me/player/currently-playing`,
-					method: 'GET',
-					headers: {
-						Authorization: `Bearer ${this.#accessToken}`
-					}
-				});
+				const data = await (
+					await fetch(`${this.#_api}/me/player/currently-playing`, {
+						method: 'GET',
+						headers: {
+							Authorization: `Bearer ${this.#accessToken}`
+						}
+					})
+				).json();
 
 				if (!data) {
 					return false;
@@ -425,16 +428,14 @@ class Spotifier {
 		this.skipPlayback = async () => {
 			try {
 				await this._getAccessTokenFromRefreshToken();
-				const { data } = await axios({
-					url: `${this.#_api}/me/player/next`,
-					method: 'POST',
-					headers: {
-						Authorization: `Bearer ${this.#accessToken}`
-					},
-					params: {
-						device_id: 'd9fe42af9e32ef6748395b0cf0479cc8642a5640' /* eslint-disable-line */
-					}
-				});
+				const data = await (
+					await fetch(`${this.#_api}/me/player/next?device_id=d9fe42af9e32ef6748395b0cf0479cc8642a5640`, {
+						method: 'POST',
+						headers: {
+							Authorization: `Bearer ${this.#accessToken}`
+						}
+					})
+				).json();
 
 				return data;
 			} catch (err) {
@@ -445,16 +446,14 @@ class Spotifier {
 		this.pausePlayback = async () => {
 			try {
 				await this._getAccessTokenFromRefreshToken();
-				const { data } = await axios({
-					url: `${this.#_api}/me/player/pause`,
-					method: 'PUT',
-					headers: {
-						Authorization: `Bearer ${this.#accessToken}`
-					},
-					params: {
-						device_id: 'd9fe42af9e32ef6748395b0cf0479cc8642a5640' /* eslint-disable-line */
-					}
-				});
+				const data = await (
+					await fetch(`${this.#_api}/me/player/pause?device_id=d9fe42af9e32ef6748395b0cf0479cc8642a5640`, {
+						method: 'PUT',
+						headers: {
+							Authorization: `Bearer ${this.#accessToken}`
+						}
+					})
+				).json();
 
 				return data;
 			} catch (err) {
@@ -465,16 +464,14 @@ class Spotifier {
 		this.resumePlayback = async () => {
 			try {
 				await this._getAccessTokenFromRefreshToken();
-				const { data } = await axios({
-					url: `${this.#_api}/me/player/play`,
-					method: 'PUT',
-					headers: {
-						Authorization: `Bearer ${this.#accessToken}`
-					},
-					params: {
-						device_id: 'd9fe42af9e32ef6748395b0cf0479cc8642a5640' /* eslint-disable-line */
-					}
-				});
+				const data = await (
+					await fetch(`${this.#_api}/me/player/play?device_id=d9fe42af9e32ef6748395b0cf0479cc8642a5640`, {
+						method: 'PUT',
+						headers: {
+							Authorization: `Bearer ${this.#accessToken}`
+						}
+					})
+				).json();
 
 				return data;
 			} catch (err) {
@@ -485,18 +482,19 @@ class Spotifier {
 		this.startNewPlayback = async (trackId) => {
 			try {
 				await this._getAccessTokenFromRefreshToken();
-				const { data } = await axios({
-					url: `${this.#_api}/me/player/play`,
-					method: 'PUT',
-					headers: {
-						Authorization: `Bearer ${this.#accessToken}`
-					},
-					params: {
-						device_id: 'd9fe42af9e32ef6748395b0cf0479cc8642a5640' /* eslint-disable-line */,
-						context_uri: `spotify:track:${trackId}` /* eslint-disable-line */,
-						position_ms: 0 /* eslint-disable-line */
-					}
-				});
+				const data = await (
+					await fetch(
+						`${
+							this.#_api
+						}/me/player/play?device_id=d9fe42af9e32ef6748395b0cf0479cc8642a5640&context_uri=spotify:track:${trackId}&position_ms=0`,
+						{
+							method: 'PUT',
+							headers: {
+								Authorization: `Bearer ${this.#accessToken}`
+							}
+						}
+					)
+				).json();
 
 				return data;
 			} catch (err) {

@@ -10,11 +10,15 @@ import imgToPdf, { sizes } from 'image-to-pdf';
 import socksProxyAgent from 'socks-proxy-agent';
 import httpsProxyAgent from 'https-proxy-agent';
 import asyncRetry from 'async-retry';
+import { generateMeshGradient } from 'meshgrad';
+import { createSVGWindow } from 'svgdom';
+import { SVG, registerWindow } from '@svgdotjs/svg.js';
+import puppeteer from 'puppeteer';
 
 import configuration from '../../helper/config/connect.js';
 import { color, delay, ERRLOG, fetchBUFFER, fetchJSON, INFOLOG, isURL } from '../modules/index.js';
 import { webp2mp4File } from './ezgifs/index.js';
-import { cropImage, imageToBuffer, signV1, streamFile } from './utils/index.js';
+import { cropImage, imageToBuffer, signV1, streamFile, renderSvg, stringifyFunction } from './utils/index.js';
 import { videoFormat as VIDEO_MIMETYPE } from '../misc/mimetype.js';
 
 /**
@@ -819,3 +823,49 @@ export const imageToAnime = async (image, sender, options = defaultOpts) => {
 				options.crop === 'SINGLE' ? 'SINGLE' : options.crop === 'COMPARED' ? 'COMPARED' : undefined
 		  ); /* eslint-disable-line */
 };
+
+export const createMeshGradient = async (baseColor) =>
+	new Promise(async (resolve, reject) => {
+		try {
+			const browser = await puppeteer.launch({
+				headless: 'new',
+				args: ['--no-sandbox', '--disable-setuid-sandbox']
+			});
+
+			const page = await browser.newPage();
+
+			const ELEMENTS = 3;
+			const vp = { width: 1080, height: 2400 };
+
+			const style = generateMeshGradient(ELEMENTS, baseColor);
+
+			const window = createSVGWindow();
+			const document = window.document;
+
+			registerWindow(window, document);
+
+			/**
+			 * @type {import('@svgdotjs/svg.js').Dom}
+			 */
+			const canvas = SVG(document.documentElement);
+
+			canvas.attr('width', vp.width);
+			canvas.attr('height', vp.height);
+			canvas.attr('style', style);
+
+			const svgString = canvas.svg();
+
+			await page.setOfflineMode(true);
+
+			/**
+			 * @type {string}
+			 */
+			const base64 = await page.evaluate(stringifyFunction(renderSvg, svgString, { ...vp, type: 'png', quality: 1 }));
+
+			await browser.close();
+
+			resolve(Buffer.from(base64, 'base64'));
+		} catch (error) {
+			reject(error);
+		}
+	});
