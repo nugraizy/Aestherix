@@ -5,6 +5,7 @@ import yn from 'yn';
 import PhoneNumber from 'libphonenumber-js';
 import inquirer from 'inquirer';
 import NodeCache from 'node-cache';
+import clip from 'clipboardy';
 
 import { clearDBConnection } from './reset-session.js';
 import { patchInteractiveMessage } from '../utils/patch-message.js';
@@ -215,6 +216,10 @@ const handleNewInstance = async ({ OPTIONS, Client }) => {
 				'white'
 			)
 		);
+		await delay(200);
+		clip.writeSync(code);
+		INFOLOG(color('Pairing code has been copied to clipboard!', 'white'));
+		await delay(200);
 		INFOLOG(color('Waiting for code input', 'white'), color('. . .', 'cyan'));
 	}
 };

@@ -827,6 +827,10 @@ export const imageToAnime = async (image, sender, options = defaultOpts) => {
 export const createMeshGradient = async (baseColor) =>
 	new Promise(async (resolve, reject) => {
 		try {
+			if (baseColor) {
+				baseColor = baseColor.toUpperCase();
+			}
+
 			const browser = await puppeteer.launch({
 				headless: 'new',
 				args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -834,10 +838,10 @@ export const createMeshGradient = async (baseColor) =>
 
 			const page = await browser.newPage();
 
-			const ELEMENTS = 3;
+			const ELEMENTS = 6;
 			const vp = { width: 1080, height: 2400 };
 
-			const style = generateMeshGradient(ELEMENTS, baseColor);
+			const style = generateMeshGradient(ELEMENTS, baseColor, ~~(Math.random() * 10_000));
 
 			const window = createSVGWindow();
 			const document = window.document;

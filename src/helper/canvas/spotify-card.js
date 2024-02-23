@@ -5,6 +5,7 @@ import sharp from 'sharp';
 import * as color from 'colorthief';
 import path from 'path';
 import { fetch } from 'undici';
+import crypto from 'crypto';
 
 import { spotifier } from '../../utils/spotifier/index.js';
 import { createMeshGradient } from '../../utils/converter/file-processing.js';
@@ -257,10 +258,12 @@ export class SpotifyCard {
 
 		gradient: if (opts.gradient) {
 			let gradient;
-			const gradientNumber = Math.floor(Math.random() * 3);
+			const gradientNumber = this.generateRandomNumber(1, 3);
 
 			if (opts.mesh) {
-				const meshGradient = await createMeshGradient(chroma(this.#_colorPalettes[0]).darken(0.7).hex());
+				const meshGradient = await createMeshGradient(
+					chroma(this.#_colorPalettes[gradientNumber]).darken(0.7).hex().toUpperCase()
+				);
 
 				const image = await loadImage(meshGradient);
 
@@ -315,7 +318,6 @@ export class SpotifyCard {
 
 		return this;
 	}
-
 	/**
 	 * @private
 	 */
@@ -412,8 +414,12 @@ export class SpotifyCard {
 	 * @private
 	 */
 	putText() {
-		if (this.#_title.length > 20) {
-			this.#_title = `${this.#_title.slice(0, 20)}`;
+		if (this.#_title.length > 21) {
+			this.#_title = `${this.#_title.slice(0, 21)}`;
+		}
+
+		if (this.#_artist.length > 50) {
+			this.#_artist = `${this.#_artist.slice(0, 50)}`;
 		}
 
 		const x = this.#_w - 10;
@@ -430,8 +436,12 @@ export class SpotifyCard {
 
 		this.#_ctx.font = '32px antre';
 
-		this.#_ctx.fillStyle = chroma('grey').brighten(2).hex();
-		this.#_ctx.fillText(this.#_artist, x, this.#revampYCoords(this.#_canvas.height / 2 + 250));
+		const baseColor = chroma('grey').brighten(2).rgba();
+
+		fadeOut.addColorStop(0, `rgba(${baseColor.join(', ')})`);
+		fadeOut.addColorStop(1, `rgba(${baseColor.length === 4 ? baseColor.slice(0, 3).join(', ') : baseColor.join(', ')}, 0)`);
+
+		this.#_ctx.fillStyle = this.#_ctx.fillText(this.#_artist, x, this.#revampYCoords(this.#_canvas.height / 2 + 250));
 
 		this.#_ctx.font = 'bold 32px lemon';
 		this.#_ctx.textAlign = 'center';
@@ -701,5 +711,13 @@ export class SpotifyCard {
 	 */
 	async palettes() {
 		this.#_colorPalettes = await color.getPalette(this.#_buffer);
+	}
+
+	generateRandomNumber(min, max) {
+		const range = max - min + 1;
+		const randomBuffer = crypto.randomBytes(4);
+		const randomNumber = randomBuffer.readUInt32LE(0);
+
+		return min + Math.floor((randomNumber / (Math.pow(2, 32) - 1)) * range);
 	}
 }
