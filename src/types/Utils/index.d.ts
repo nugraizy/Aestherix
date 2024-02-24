@@ -360,6 +360,25 @@ export type DecodeJid = (
 	jid: string
 ) => /** The parsed jid */ string;
 
+/**
+ * Clear type message and return the real type of media
+ */
+export type ClearType = (
+	/**
+	 * type message
+	 */
+	type: 'imageMessage' | 'videoMessage' | 'stickerMessage' | 'documentMessage' | 'documentWithCaptionMessage',
+	/**
+	 * mime of the type
+	 */
+	mime: 'image' | 'video' | ''
+) => /** The parsed jid */ 'image' | 'video';
+
+/**
+ * Get story participants
+ */
+export type GetStoryParticipants = (client: AdvancedClient) => Promise<string[]>;
+
 export type AssignSocketClient = (client: Client) => AdvancedClient;
 
 export type AssignedClient = {
@@ -377,4 +396,6 @@ export type AssignedClient = {
 	updateGroup: UpdateGroup;
 	searchMessage: SearchMessage;
 	decodeJid: DecodeJid;
+	clearType: ClearType;
+	getStoryParticipants: GetStoryParticipants;
 };

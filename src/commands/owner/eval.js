@@ -85,6 +85,9 @@ export default {
 			isQuotedSticker,
 			isMediaVid,
 			isMediaImage,
+			isMediaDocument,
+			isLocation,
+			isLiveLocation,
 			isSticker,
 			isAudio,
 			isContact,
@@ -97,10 +100,16 @@ export default {
 			isQuotedViewOnceImage,
 			isQuotedViewOnceVideo,
 			typeViewOnce,
+			typeSticker,
+			stickerAble,
+			waitForInput,
+			groupSettings,
+			isDisappearingChat,
 			mention,
 			mediaData,
 			extractMediaData,
-			bodyQuoted
+			bodyQuoted,
+			state
 			/* eslint-enable */
 		} = message;
 
@@ -210,8 +219,6 @@ export default {
 			}
 		} else if (body.startsWith('=> ')) {
 			try {
-				query = query.replace('yeet', 'return');
-
 				if (/\/s$/.test(query)) {
 					query = query.replace(/\/s$/, '');
 					print(
@@ -220,13 +227,9 @@ export default {
 							quoted: message.message,
 							groupMetadata
 						},
-						eval(query)
+						eval(prettier.js_beautify(query))
 					);
 				} else {
-					if (/\/s$/.test(query)) {
-						query = query.replace(/\/s$/, '');
-					}
-
 					print(
 						{
 							from,
@@ -234,14 +237,14 @@ export default {
 							groupMetadata
 						},
 						await eval(
-							`(async () => {
+							prettier.js_beautify(`(async () => {
 						${query}
 								})()
 							 .catch(err => print({
 								from,
 								quoted: message.message,
 								groupMetadata
-							}, err))`
+							}, err))`)
 						)
 					);
 				}

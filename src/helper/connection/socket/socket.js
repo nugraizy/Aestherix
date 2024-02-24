@@ -54,7 +54,7 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 		printQRInTerminal: !OPTIONS.pairMode,
 		mobile: false,
 		browser: ['Chrome (Linux)', '', ''],
-		version: [2, 2405, 1],
+		version: [2, 2408, 1],
 		logger: logger(OPTIONS),
 		auth: {
 			creds: state.creds,

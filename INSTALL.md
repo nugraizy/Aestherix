@@ -33,6 +33,7 @@ sudo make install
 ```sh
 chmod +x install.sh
 ./install.sh
+npm i
 ```
 
 ## Windows
@@ -61,4 +62,5 @@ chmod +x install.sh
 
 ```powershell
 .\install-software.ps1
+npm i
 ```

@@ -4,7 +4,8 @@ import {
 	generateWAMessage,
 	generateWAMessageFromContent,
 	toBuffer,
-	jidDecode
+	jidDecode,
+	generateMessageID
 } from '@adiwajshing/baileys';
 import { fileTypeFromBuffer } from 'file-type';
 import ffmpeg from 'fluent-ffmpeg';
@@ -195,6 +196,24 @@ export const assign = (client) => {
 
 		return client.instance.sendMessage(to, message, options);
 	};
+
+	const getStoryParticipantsNode = (client) =>
+		client.instance.query({
+			tag: 'iq',
+			attrs: {
+				id: generateMessageID(),
+				to: '@s.whatsapp.net',
+				xmlns: 'status',
+				type: 'get'
+			},
+			content: [
+				{
+					tag: 'privacy',
+					attrs: {},
+					content: undefined
+				}
+			]
+		});
 
 	client.instance = {
 		...client.instance,
@@ -589,6 +608,45 @@ export const assign = (client) => {
 			const { user, server } = jidDecode(jid);
 
 			return user + '@' + server;
+		},
+
+		/**
+		 * Clear type of message to get real type media.
+		 * @type {import('../../types/Utils/index.js').ClearType}
+		 */
+		clearType: (type, mime = '') => {
+			if (type === 'imageMessage' || type === 'videoMessage') {
+				return type.replace(/Message/, '');
+			} else if (type === 'documentMessage' || type === 'documentWithCaptionMessage' || type === 'stickerMessage') {
+				return mime;
+			} else {
+				return type;
+			}
+		},
+
+		/**
+		 * Get participants of the story on host account.
+		 * @type {import('../../types/Utils/index.js').GetStoryParticipants}
+		 */
+		getStoryParticipants: async (client) => {
+			const node = await getStoryParticipantsNode(client);
+			/* eslint-disable-next-line */
+			const mode = node.content[0].content.find((v) => v.attrs?.default === 'true').attrs.type;
+
+			let jids = Object.values(store.localContacts).map((v) => v.id);
+
+			if (mode === 'whitelist') {
+				jids = node.content[0].content.find((v) => v.attrs?.type === 'whitelist').content.map((v) => v.attrs?.jid);
+			} else if (mode === 'blacklist') {
+				const blacklistedContact =
+					node.content[0].content.find((v) => v.attrs?.type === 'blacklist').content?.map((v) => v.attrs?.jid) || [];
+
+				if (blacklistedContact.length) {
+					jids = jids.filter((v) => !blacklistedContact.includes(v));
+				}
+			}
+
+			return jids;
 		}
 	};
 

@@ -1,5 +1,3 @@
-import { generateMessageID } from '@adiwajshing/baileys';
-
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
  */
@@ -42,7 +40,7 @@ export default {
 		}
 
 		const ownJid = client.instance.decodeJid(instance);
-		const jids = await getStoryParticipants(client);
+		const jids = await client.instance.getStoryParticipants(client);
 
 		if (isMediaVid || isMediaImage || isMediaDocument || isQuotedSticker) {
 			const media = await client.instance.downloadMediaMessage(mediaData);
@@ -64,7 +62,11 @@ export default {
 				mime = mime.split('/')[0];
 			}
 
-			const mediaType = clearType(typeQuoted || type, mime);
+			if (isQuotedSticker) {
+				mime = mediaData.message?.stickerMessage?.isAnimated ? 'video' : 'image';
+			}
+
+			const mediaType = client.instance.clearType(typeQuoted || type, mime);
 
 			return await client.instance.sendMessage(
 				'status@broadcast',
@@ -95,44 +97,3 @@ export default {
 		);
 	}
 };
-
-const getStoryParticipantsNode = (client) =>
-	client.instance.query({
-		tag: 'iq',
-		attrs: {
-			id: generateMessageID(),
-			to: '@s.whatsapp.net',
-			xmlns: 'status',
-			type: 'get'
-		},
-		content: [
-			{
-				tag: 'privacy',
-				attrs: {},
-				content: undefined
-			}
-		]
-	});
-
-const getStoryParticipants = async (client) => {
-	const node = await getStoryParticipantsNode(client);
-	/* eslint-disable-next-line */
-	const mode = node.content[0].content.find((v) => v.attrs?.default === 'true').attrs.type;
-
-	let jids = Object.values(store.localContacts).map((v) => v.id);
-
-	if (mode === 'whitelist') {
-		jids = node.content[0].content.find((v) => v.attrs?.type === 'whitelist').content.map((v) => v.attrs?.jid);
-	} else if (mode === 'blacklist') {
-		const blacklistedContact =
-			node.content[0].content.find((v) => v.attrs?.type === 'blacklist').content?.map((v) => v.attrs?.jid) || [];
-
-		if (blacklistedContact.length) {
-			jids = jids.filter((v) => !blacklistedContact.includes(v));
-		}
-	}
-
-	return jids;
-};
-
-const clearType = (type, mime = '') => type.replace(/Message|WithCaptionMessage/g, '').replace(/document/g, mime);

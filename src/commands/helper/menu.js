@@ -39,7 +39,7 @@ export default {
 	limit: 5,
 	status: 'enable',
 	async run({ from, prefix, groupMetadata, message, query }, client) {
-		let capt = `${`Aestherix ー ${version}`.formatHeaders(true)}\n\n`;
+		let capt = `\`Aestherix ー ${version}\`\n\n`;
 
 		if (!Object.keys(configuration.cmds.menu).length) {
 			const container = configuration.cmds.commands
@@ -61,18 +61,28 @@ export default {
 
 			const sortedCommands = configuration.cmds.menu[category]
 				.sort((a, b) => a.name.localeCompare(b.name))
-				.map((v, i, arr) => {
+				.map((v, i, arr /* eslint-disable-line */) => {
 					const commonPart = isNeedDescription
 						? `╭ ${v.minifiedDescription || v.description}\n├ _${prefix}${v.name}_\n├ ${v.usage}\n╰ ⏳ ${v.cooldown}s | ${
 								v.premium ? 'Premium' : 'Free'
-						  } | 🆔 ${v.aliases.join(', ')}`
-						: `${i === arr.length - 1 ? '╰' : '├'} ${i + 1}.) _${v.usage}_`;
+						  } | 🆔 ${v.aliases.join(', ')}` // eslint-disable-line
+						: (() => {
+								const [cmd, ...rest] = v.usage.split(' ');
+
+								let capt = `> ${i + 1}.) ${cmd}`;
+
+								if (rest.length) {
+									capt += ` _\`${rest.join(' ')}\`_`;
+								}
+
+								return capt;
+						  })(); // eslint-disable-line
 
 					return commonPart;
 				})
 				.join('\n');
 
-			capt += `${format[category].formatHeaders()}\n${sortedCommands}\n\n\n`;
+			capt += `> _✦ ${format[category]}_ ー\n${sortedCommands}\n\n\n`;
 
 			if (query) {
 				isFound = true;
@@ -80,15 +90,15 @@ export default {
 			}
 		}
 
-		if (!isFound) {
-			capt += `Could not find any category with the name "${query}"\n\n`;
+		if (!isFound && query) {
+			capt += `Could not find any category with the name "\`${query}\`"\n\n`;
 		}
 
 		capt = `${capt.trim()}\n\nUse : ${prefix}${getRandomCommand(
 			Object.values(configuration.cmds.menu).flat()
-		)} -H\nー> To see the detail of the command.\nー> Total Commands : ${
+		)} \`-H\`\nー> \`To see the detail of the command.\`\nー> Total Commands : \`${
 			configuration.cmds.commands.size
-		}\n\nＰｏｗｅｒｅｄ ｂｙ\n    𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`;
+		}\`\n\nＰｏｗｅｒｅｄ ｂｙ\n> 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`;
 
 		configuration.cmds.menuStr = capt;
 
@@ -100,7 +110,18 @@ export default {
 				// buttons: [{ buttonId: '.about', buttonText: { displayText: 'About Us.' }, type: 1 }],
 				// headerType: 1
 			},
-			{ groupMetadata, quoted: message }
+			{
+				groupMetadata,
+				quoted: message,
+				contextInfo: {
+					isForwarded: true,
+					forwardedNewsletterMessageInfo: {
+						newsletterJid: 'aestherix@newsletter',
+						newsletterName: 'Ｐｏｗｅｒｅｄ ｂｙ 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ',
+						serverMessageId: 103
+					}
+				}
+			}
 		);
 	}
 };
