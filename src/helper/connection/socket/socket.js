@@ -217,8 +217,14 @@ const handleNewInstance = async ({ OPTIONS, Client }) => {
 			)
 		);
 		await delay(200);
-		clip.writeSync(code);
-		INFOLOG(color('Pairing code has been copied to clipboard!', 'white'));
+		await clip
+			.write(code)
+			.then(() => {
+				INFOLOG(color('Pairing code has been copied to clipboard!', 'white'));
+			})
+			.catch(() => {
+				ERRLOG(color('SSH detected.', 'red'), color('Could not copy the code.', 'gray'));
+			});
 		await delay(200);
 		INFOLOG(color('Waiting for code input', 'white'), color('. . .', 'cyan'));
 	}
