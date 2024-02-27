@@ -20,9 +20,7 @@ export default {
 
 		const cover = new SpotifyCard(query, {
 			background: {
-				blur: 60,
-				gradient: true,
-				mesh: true
+				blur: 60
 			},
 			cover: {
 				shadow: 40,

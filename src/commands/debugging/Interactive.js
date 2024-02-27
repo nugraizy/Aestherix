@@ -62,7 +62,7 @@ export default {
 	aliases: ['inter'],
 	cooldown: 5,
 	limit: 0,
-	status: 'disable',
+	status: 'enable',
 	async run({ from }, client) {
 		const image = await client.instance.prepareMedia(await fs.readFile('./src/media/blank.png'), 'imageMessage');
 
@@ -70,13 +70,18 @@ export default {
 			from,
 			{
 				interactiveMessage: {
+					body: {
+						text: 'Interactive Message'
+					},
+					footer: {
+						text: 'Interactive Footer'
+					},
+					header: {
+						title: 'Interactive Header',
+						hasMediaAttachment: false
+					},
 					nativeFlowMessage: {
-						buttons: [
-							{
-								name: 'review_and_pay',
-								buttonParamsJson: JSON.stringify(container())
-							}
-						]
+						buttons: []
 					}
 				}
 			},
