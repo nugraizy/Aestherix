@@ -32,7 +32,6 @@ const _parseDestructuring = (data) => {
 		entities: { hashtags },
 		conversation_count: replyCount,
 		mediaDetails,
-		photos,
 		video
 	} = data;
 	const {
@@ -56,38 +55,36 @@ const _parseDestructuring = (data) => {
 		hashtags
 	};
 
-	if (photos?.length) {
-		container.medias = photos.map((v) => ({
-			url: v.url,
-			type: 'image',
-			ratio: {
-				width: v.width,
-				height: v.height
-			}
-		}));
-		return container;
-	}
+	container.viewCount = video?.viewCount;
+	container.thumbnail = video?.poster;
 
-	container.viewCount = video.viewCount;
-	container.thumbnail = video.poster;
+	container.medias = mediaDetails.map((v) => {
+		const detail = {
+			type: v.type
+		};
 
-	let info;
+		let info;
 
-	return {
-		...container,
-		medias: mediaDetails.map((v) => ({
-			url: (info = v.video_info.variants
+		if (v.type === 'video') {
+			info = v.video_info.variants
 				.filter((w) => w?.content_type === 'video/mp4')
-				?.sort((a, b) => (b?.bit_rate > a?.bit_rate ? 1 : -1)))[0].url,
-			type: 'video',
-			duration: v.video_info.duration_millis / 1000,
-			bitrates: info[0].bitrate,
-			ratio: {
-				width: v.original_info.width,
-				height: v.original_info.height
-			}
-		}))
-	};
+				?.sort((a, b) => (b?.bit_rate > a?.bit_rate ? 1 : -1));
+			detail.url = info[0].url;
+			detail.duration = v.video_info.duration_millis / 1000;
+			detail.bitrates = info[0].bitrate;
+		} else {
+			detail.url = v.media_url_https;
+		}
+
+		detail.ratio = {
+			width: v.original_info.width,
+			height: v.original_info.height
+		};
+
+		return detail;
+	});
+
+	return container;
 };
 
 /**

@@ -30,7 +30,9 @@ export default {
 			amount = Number(wait.message);
 		}
 
-		for (const number of mention.length ? mention : query.split(',').map((v) => client.instance.decodeJid(clearQuery(v)))) {
+		for (const number of mention.length
+			? mention
+			: query.split(',').map((v) => client.instance.decodeJid(clearQuery(v)) + '@s.whatsapp.net')) {
 			for (let i = 0; i < amount; i++) {
 				const buffer = encodeWAMessage({
 					call: {

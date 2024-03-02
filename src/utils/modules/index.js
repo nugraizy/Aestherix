@@ -798,5 +798,11 @@ export const unique = (minimum, maximum) => {
 	};
 };
 
-export const splitString = (code, { length = 3, join = '-' } = {}) =>
-	Array.from({ length: Math.ceil(code.length / length) }, (_, i) => code.substr(i * length, length)).join(join);
+/**
+ *
+ * @param {string} string
+ * @param {{ length: number | 3, join: string | '-'}} param1
+ * @returns
+ */
+export const splitString = (string, { length = 3, join = '-' } = {}) =>
+	Array.from({ length: Math.ceil(string.length / length) }, (_, i) => string.substring(i * length, length)).join(join);
