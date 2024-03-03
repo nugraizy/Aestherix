@@ -122,6 +122,12 @@ declare global {
 		 * @returns string[]
 		 */
 		insert: (index: number, ...items: T[]) => T[];
+
+		/**
+		 * Sort Array into unique values
+		 * @returns unknown[]
+		 */
+		sortUnique: (key: string) => unknown[];
 	}
 }
 

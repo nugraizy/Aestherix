@@ -13,6 +13,7 @@ import webpmux from 'node-webpmux';
 import sharp from 'sharp';
 import { TextEncoder } from 'util';
 import { fetch } from 'undici';
+import fs from 'fs-extra';
 
 import configuration from '../config/connect.js';
 import { S_WHATSAPP_NET, UPDATE, ZERO } from '../misc/wa_data/index.js';
@@ -633,7 +634,10 @@ export const assign = (client) => {
 			/* eslint-disable-next-line */
 			const mode = node.content[0].content.find((v) => v.attrs?.default === 'true').attrs.type;
 
-			let jids = Object.values(store.localContacts).map((v) => v.id);
+			let jids = fs
+				.readJSONSync('./databases/users/contacts.json')
+				.sortUnique('id')
+				.map((v) => v.id);
 
 			if (mode === 'whitelist') {
 				jids = node.content[0].content.find((v) => v.attrs?.type === 'whitelist').content.map((v) => v.attrs?.jid);

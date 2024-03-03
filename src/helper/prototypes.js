@@ -110,6 +110,9 @@ Object.setPrototypeOf(Array.prototype, {
 	insert: function (index) {
 		this.splice(...[index, 0].concat(Array.prototype.slice.call(arguments, 1)));
 		return this;
+	},
+	sortUnique: (key) => {
+		return [...new Map(this.map((item) => [key ? item[key] : item, item])).values()];
 	}
 });
 

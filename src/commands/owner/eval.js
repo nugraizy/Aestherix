@@ -2,6 +2,7 @@ import * as _ from '@adiwajshing/baileys'; /* eslint-disable-line */
 import { WAProto } from '@adiwajshing/baileys'; /* eslint-disable-line */
 import { exec } from 'child_process';
 import fs from 'fs';
+import fsX from 'fs-extra'; /* eslint-disable-line */
 import prettier from 'js-beautify';
 import syntaxerror from 'syntax-error';
 import * as util from 'util'; /* eslint-disable-line */
