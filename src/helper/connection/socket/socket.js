@@ -10,7 +10,7 @@ import clip from 'clipboardy';
 import { clearDBConnection } from './reset-session.js';
 import { patchInteractiveMessage } from '../utils/patch-message.js';
 import { Cache } from '../../modules/cache.js';
-import { ERRLOG, INFOLOG, color, splitString } from '../../../utils/modules/index.js';
+import { ERRLOG, INFOLOG, color } from '../../../utils/modules/index.js';
 
 const msgRetryCounterCache = new NodeCache();
 const SETTINGS = await fs.readJSON('./src/helper/config/settings.json');
@@ -210,7 +210,7 @@ const handleNewInstance = async ({ OPTIONS, Client }) => {
 		INFOLOG(
 			color('Pairing code :', '#ff71ce'),
 			color(
-				splitString(code, {
+				code.splitString({
 					length: 4
 				}),
 				'white'

@@ -100,6 +100,12 @@ declare global {
 		 * @returns string[]
 		 */
 		parseNumber: () => string[];
+
+		/**
+		 * Split string based on starting point and join it with another string
+		 * @returns string
+		 */
+		splitString: ({ length: number, join: string }: { length: 3; join: '-' }) => string;
 	}
 
 	interface Number {

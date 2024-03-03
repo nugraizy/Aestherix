@@ -102,6 +102,11 @@ Object.setPrototypeOf(String.prototype, {
 	},
 	parseNumber: function () {
 		return _.sortedUniq(findPhoneNumbersInText(this).map((v) => v.number.number.replace('+', '') + S_WHATSAPP_NET));
+	},
+	splitString: function ({ length = 3, join = '-' } = {}) {
+		return Array.from({ length: Math.ceil(this.length / length) }, (_, i) =>
+			this.substring(i * length, i * length + length)
+		).join(join);
 	}
 });
 
@@ -111,7 +116,7 @@ Object.setPrototypeOf(Array.prototype, {
 		this.splice(...[index, 0].concat(Array.prototype.slice.call(arguments, 1)));
 		return this;
 	},
-	sortUnique: (key) => {
+	sortUnique: function (key) {
 		return [...new Map(this.map((item) => [key ? item[key] : item, item])).values()];
 	}
 });
