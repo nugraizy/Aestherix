@@ -51,34 +51,36 @@ export default {
 					from,
 					{
 						image: { url: imageURL },
-						caption: 'Shopee'.formatHeaders(),
-						templateButtons: [
-							{
-								urlButton: {
-									displayText: 'Product Source',
-									url: productURL
-								}
-							},
-							{
-								urlButton: {
-									displayText: 'Image Source',
-									url: imageURL
-								}
-							}
-						],
-						footer: `Name : ${productName}
+						caption:
+							'Shopee'.formatHeaders() +
+							`\n\nName : ${productName}
 Stock : ${numberWithCommas(stock)}
 Sold : ${numberWithCommas(sold)}
 Brand : ${brand}
 Price : ${
-							prices === 0
-								? numberWithCommas(pricesDiscount)
-								: `${numberWithCommas(prices)}\nPrices After Discount : ${numberWithCommas(pricesDiscount)}`
-						}
+								prices === 0
+									? numberWithCommas(pricesDiscount)
+									: `${numberWithCommas(prices)}\nPrices After Discount : ${numberWithCommas(pricesDiscount)}`
+							}
 Percent Discount : ${discountPercent}
 Likes : ${likes}
 Ratings : ${ratings.toFixed(2)}
-Location : ${location}`
+Location : ${location}`.formatForm()
+						// templateButtons: [
+						// 	{
+						// 		urlButton: {
+						// 			displayText: 'Product Source',
+						// 			url: productURL
+						// 		}
+						// 	},
+						// 	{
+						// 		urlButton: {
+						// 			displayText: 'Image Source',
+						// 			url: imageURL
+						// 		}
+						// 	}
+						// ],
+						// footer:
 					},
 					{ groupMetadata, quoted: message }
 				);

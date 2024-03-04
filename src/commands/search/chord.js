@@ -29,7 +29,7 @@ export default {
 
 Title : ${result.title}
 
-${result.chord.trim()}`,
+${result.chord.trim()}`.formatForm(),
 			{ from, quoted: message, groupMetadata }
 		);
 	}

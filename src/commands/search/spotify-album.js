@@ -89,34 +89,34 @@ export default {
 				from,
 				{
 					image: new Buffer.from(await fetchBUFFER(images), 'base64'),
-					caption: 'Spotify Album'.formatHeaders(),
-					templateButtons: [
-						{
-							urlButton: {
-								displayText: 'Image Source',
-								url: images
-							}
-						},
-						{
-							urlButton: {
-								displayText: 'Open Album On Spotify',
-								url: source(`/album/${id}`)
-							}
-						},
-						{
-							urlButton: {
-								displayText: 'Open Song On Spotify',
-								url: source(`/track/${tracks.items[0].id}`)
-							}
-						},
-						{
-							quickReplyButton: {
-								displayText: 'Download',
-								id: `.spotifydl ${tracks.items[0].artists[0].name} - ${tracks.items[0].name}`
-							}
-						}
-					],
-					footer: caption
+					caption: 'Spotify Album'.formatHeaders() + `\n\n${caption.formatForm()}`
+					// templateButtons: [
+					// 	{
+					// 		urlButton: {
+					// 			displayText: 'Image Source',
+					// 			url: images
+					// 		}
+					// 	},
+					// 	{
+					// 		urlButton: {
+					// 			displayText: 'Open Album On Spotify',
+					// 			url: source(`/album/${id}`)
+					// 		}
+					// 	},
+					// 	{
+					// 		urlButton: {
+					// 			displayText: 'Open Song On Spotify',
+					// 			url: source(`/track/${tracks.items[0].id}`)
+					// 		}
+					// 	},
+					// 	{
+					// 		quickReplyButton: {
+					// 			displayText: 'Download',
+					// 			id: `.spotifydl ${tracks.items[0].artists[0].name} - ${tracks.items[0].name}`
+					// 		}
+					// 	}
+					// ],
+					// footer:
 				},
 				{ groupMetadata, quoted: message }
 			);

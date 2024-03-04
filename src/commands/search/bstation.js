@@ -61,7 +61,7 @@ export default {
 					image: {
 						url: videos[0].cover
 					},
-					caption: capt.trim()
+					caption: capt.trim().formatForm()
 				},
 				{
 					groupMetadata,

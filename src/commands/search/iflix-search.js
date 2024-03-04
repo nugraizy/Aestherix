@@ -120,7 +120,7 @@ export default {
 				from,
 				{
 					image: { url: data[0].thumbnail },
-					caption,
+					caption: caption.formatForm(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: data[0].thumbnail } },
 						data.length !== 1

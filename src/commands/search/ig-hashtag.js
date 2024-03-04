@@ -34,13 +34,13 @@ export default {
 				capt += `Likes : ${post.likeCount}\n`;
 				capt += `Comments : ${post.commentCount}\n`;
 				capt += `Link : ${post.link}\n`;
-				capt += `Link : ${post.source}\n\n`;
+				capt += `Source : ${post.source}\n\n`;
 			}
 
 			await client.instance.send(
 				from,
 				{
-					caption: 'Instagram Hashtag Search'.formatHeaders() + `\n\n${capt.trim()}`,
+					caption: 'Instagram Hashtag Search'.formatHeaders() + `\n\n${capt.trim().formatForm()}`,
 					image: { url: result[tag].thumbnail },
 					footer: `Tot. Post : ${result[tag].totalPostFormatted}`
 				},

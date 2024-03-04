@@ -1,6 +1,7 @@
 import { numberWithCommas, MyAnimeList } from '../../utils/index.js';
 
-const parse = (obj) => `Full Title : ${obj?.title || 'n/a'}
+const parse = (obj) =>
+	`Full Title : ${obj?.title || 'n/a'}
 EN : ${obj?.alternative_titles?.en || 'n/a'}
 JP : ${obj?.alternative_titles?.ja || 'n/a'}
 ID : ${obj?.id || 'n/a'}
@@ -17,7 +18,7 @@ Source : ${obj?.source?.replace('_', '')?.capitalize()}
 Rating : ${obj?.rating?.replace('_', ' ')?.capitalize() || 'n/a'}
 Genres : ${obj?.genres?.map(({ name }) => name)?.join(', ') || 'n/a'}
 	
-Synopsis : ${obj?.synopsis || 'n/a'}`;
+Synopsis : ${obj?.synopsis || 'n/a'}`.formatForm();
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}

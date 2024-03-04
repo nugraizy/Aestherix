@@ -41,35 +41,9 @@ export default {
 				from,
 				{
 					image: { url: avatarUrl },
-					caption: 'Github User Lookup'.formatHeaders(),
-					templateButtons: [
-						{
-							urlButton: {
-								displayText: 'Image Source',
-								url: args[1] === 'next' ? data[index].avatar_url : data[index].avatar_url
-							}
-						},
-						{
-							urlButton: { displayText: 'User Source', url: args[1] === 'next' ? data[index].html_url : data[index].html_url }
-						},
-						index + 1 !== data.length
-							? {
-									quickReplyButton: {
-										displayText: 'Next User',
-										id: `.gitstalk next ${data[index + 1].html_url} ${JSON.stringify(data)}`
-									}
-							  } /* eslint-disable-line */
-							: {},
-						index !== 0
-							? {
-									quickReplyButton: {
-										displayText: 'Previous User',
-										id: `.gitstalk prev ${data[index - 1].html_url} ${JSON.stringify(data)}`
-									}
-							  } /* eslint-disable-line */
-							: {}
-					],
-					footer: `Fullname : ${name}
+					caption: `${'Github User Lookup'.formatHeaders()}
+
+Fullname : ${name}
 Username : ${login}
 Type : ${typeGit}
 Tot. Public Repo : ${numberWithCommas(pubRepos)}
@@ -79,7 +53,34 @@ Created : ${createdAt}
 Updated : ${updatedAt}
 Biography : ${bio}
                     
-Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+Powered by 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`.formatForm()
+					// templateButtons: [
+					// 	{
+					// 		urlButton: {
+					// 			displayText: 'Image Source',
+					// 			url: args[1] === 'next' ? data[index].avatar_url : data[index].avatar_url
+					// 		}
+					// 	},
+					// 	{
+					// 		urlButton: { displayText: 'User Source', url: args[1] === 'next' ? data[index].html_url : data[index].html_url }
+					// 	},
+					// 	index + 1 !== data.length
+					// 		? {
+					// 				quickReplyButton: {
+					// 					displayText: 'Next User',
+					// 					id: `.gitstalk next ${data[index + 1].html_url} ${JSON.stringify(data)}`
+					// 				}
+					// 		  } /* eslint-disable-line */
+					// 		: {},
+					// 	index !== 0
+					// 		? {
+					// 				quickReplyButton: {
+					// 					displayText: 'Previous User',
+					// 					id: `.gitstalk prev ${data[index - 1].html_url} ${JSON.stringify(data)}`
+					// 				}
+					// 		  } /* eslint-disable-line */
+					// 		: {}
+					// ],
 				},
 				{ groupMetadata }
 			);

@@ -35,16 +35,16 @@ export default {
 				from,
 				{
 					image: { url: result.result.url },
-					caption: 'Reddit'.formatHeaders(),
-					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: result.result.url } },
-						{ urlButton: { displayText: 'Post Source', url: result.result.postLink } },
-						{ quickReplyButton: { displayText: 'Next Post', id: `.subreddit ${querie}` } }
-					],
-					footer: `Author : ${result.result.author}
-Title : ${result.result.title}
-                    
-Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+					caption:
+						'Reddit'.formatHeaders() +
+						`\n\nAuthor : ${result.result.author}
+Title : ${result.result.title}`.formatForm()
+					// templateButtons: [
+					// 	{ urlButton: { displayText: 'Image Source', url: result.result.url } },
+					// 	{ urlButton: { displayText: 'Post Source', url: result.result.postLink } },
+					// 	{ quickReplyButton: { displayText: 'Next Post', id: `.subreddit ${querie}` } }
+					// ],
+					// footer:
 				},
 				{ groupMetadata }
 			);

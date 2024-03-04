@@ -73,20 +73,19 @@ export default {
 					caption:
 						'Yandex Images'.formatHeaders() +
 						`\n\nTitle : ${result[index].title}
-Article : ${result[index].url.article}
-\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
-					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: result[0].url.image } },
-						result.length !== 1
-							? {
-									quickReplyButton: {
-										displayText: 'Next Image',
-										id: `.yandeximage next ${result[1].url.image} ${JSON.stringify(result).replace(/\|/g, '')}`
-									}
-							  } /* eslint-disable-line */
-							: {}
-					],
-					footer: ''
+Article : ${result[index].url.article}`.formatForm()
+					// templateButtons: [
+					// 	{ urlButton: { displayText: 'Image Source', url: result[0].url.image } },
+					// 	result.length !== 1
+					// 		? {
+					// 				quickReplyButton: {
+					// 					displayText: 'Next Image',
+					// 					id: `.yandeximage next ${result[1].url.image} ${JSON.stringify(result).replace(/\|/g, '')}`
+					// 				}
+					// 		  } /* eslint-disable-line */
+					// 		: {}
+					// ],
+					// footer: ''
 				},
 				{ groupMetadata, quoted: message }
 			);

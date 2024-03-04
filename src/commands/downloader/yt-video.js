@@ -31,7 +31,7 @@ const processVideo = async (url, client, { from, message, groupMetadata, prettyN
 		from,
 		{
 			video: Buffer.from(await download(), 'base64'),
-			caption: capt.trim()
+			caption: capt.trim().formatForm()
 		},
 		{
 			groupMetadata,
@@ -55,7 +55,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, /*type, args,*/ groupMetadata, mediaData, typeQuoted, bodyQuoted }, client) {
 		if (typeQuoted === 'conversation' && mediaData.participant?.includes(client.instance.decodeJid(instance))) {
-			const reg = /✦ Video ID :\s*([^\n]+)/g;
+			const reg = /✦ Video ID :\s*`([^\n]+)`/g;
 
 			const videoIds = [];
 			let match;
@@ -97,7 +97,7 @@ export default {
 				});
 			}
 
-			const { key } = await client.instance.reply(`Downloading YouTube audio :\n${videoId}\nPlease wait`, {
+			const { key } = await client.instance.reply(`Downloading YouTube audio :\n${videoId}\nPlease wait`.formatForm(), {
 				from,
 				quoted: message,
 				groupMetadata
@@ -164,11 +164,14 @@ export default {
 			return await client.instance.reply('This is not a valid YouTube URL.', { from, quoted: message, groupMetadata });
 		}
 
-		const { key } = await client.instance.reply(`Downloading YouTube video(s) :\n${queries.join('\n')}\nPlease wait`, {
-			from,
-			quoted: message,
-			groupMetadata
-		});
+		const { key } = await client.instance.reply(
+			`Downloading YouTube video(s) :\n${queries.join('\n')}\nPlease wait`.formatForm(),
+			{
+				from,
+				quoted: message,
+				groupMetadata
+			}
+		);
 
 		for (const Query of queries) {
 			if (isURL(Query) && !isYoutubeURL(Query)) {
@@ -190,7 +193,7 @@ export default {
 					key,
 					type: 14,
 					editedMessage: {
-						conversation: `Downloaded YouTube video(s) :\n${queries.join('\n')}`
+						conversation: `Downloaded YouTube video(s) :\n${queries.join('\n')}`.formatForm()
 					}
 				}
 			},

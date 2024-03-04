@@ -52,29 +52,32 @@ export default {
 					from,
 					{
 						image: { url: thumbnail },
-						caption: 'P-Store'.formatHeaders(),
-						templateButtons: [
-							{
-								urlButton: {
-									displayText: 'Product Source',
-									url: source
-								}
-							},
-							{
-								urlButton: {
-									displayText: 'Image Source',
-									url: thumbnail
-								}
-							}
-						],
-						footer: `Name : ${name}
+						caption:
+							'P-Store'.formatHeaders() +
+							`\n\nName : ${name}
 Seller Name : ${sellerUsername}
 ID Product : ${idProduct}
 Estimations : ${estimations}
 Stock : ${numberWithCommas(stock || 0)}
 Max Order : ${numberWithCommas(maxOrder)}
 Price : ${priceFormatted}
-Ratings : ${ratings.toFixed(2)}`
+Ratings : ${ratings.toFixed(2)}
+Source : ${source}`.formatForm()
+						// templateButtons: [
+						// 	{
+						// 		urlButton: {
+						// 			displayText: 'Product Source',
+						// 			url: source
+						// 		}
+						// 	},
+						// 	{
+						// 		urlButton: {
+						// 			displayText: 'Image Source',
+						// 			url: thumbnail
+						// 		}
+						// 	}
+						// ],
+						// footer:
 					},
 					{ groupMetadata, quoted: message }
 				);

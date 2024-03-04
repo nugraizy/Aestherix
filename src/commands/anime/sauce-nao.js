@@ -60,7 +60,8 @@ export default {
 Title : ${result.title}
 Description : ${result.description}
 Similarity : ${result.similarity}%
-Powered by sauce.nao`;
+
+Powered by sauce.nao`.formatForm();
 
 		await client.instance.reply(capt.trim(), { from, quoted: message, groupMetadata });
 

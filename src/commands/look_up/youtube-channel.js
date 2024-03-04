@@ -43,7 +43,7 @@ Videos : ${author.vidsCount}
 Verified : ${author.isVerified ? 'Yes' : 'No'}
 Artist Verified : ${author.isVerifiedArtist ? 'Yes' : 'No'}
 Channel URL : ${author.channelUrlId}
-Channel URL Username : ${author.channelUrlUsername}`
+Channel URL Username : ${author.channelUrlUsername}`.formatForm()
 		});
 	}
 };

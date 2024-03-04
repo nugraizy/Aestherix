@@ -58,7 +58,7 @@ export default {
 				from,
 				{
 					image: { url: users[data].profilePicHD },
-					caption: capt.trim()
+					caption: capt.trim().formatForm()
 				},
 				{ groupMetadata, quoted: message }
 			);

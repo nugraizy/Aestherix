@@ -48,7 +48,7 @@ ID Author : ${userId}
 Tot. Like : ${numberWithCommas(likeCount)}
 Tot. View : ${numberWithCommas(viewCount)}
 						
-${content}`,
+${content}`.formatForm(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Novel Source', url: `https://www.pixiv.net/novel/show.php?id=${data[0].id}` } }
 					],

@@ -25,7 +25,7 @@ const processVideo = async (url, client, { from, message, groupMetadata, sender,
 	await client.instance.reply(
 		` • Converting videos, this might take a while please wait.\n\nResolution : ${
 			video.resolution
-		}\nSize : ${getFilesizeFromBytes(video.size)}`,
+		}\nSize : ${getFilesizeFromBytes(video.size)}`.formatForm(),
 		{ from, quoted: message }
 	);
 

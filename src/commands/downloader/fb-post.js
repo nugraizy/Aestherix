@@ -65,7 +65,7 @@ export default {
 				from,
 				{
 					video: new Buffer.from(await fetchBUFFER(urlFilter.url)),
-					caption: `${'Facebook Video Downloader'.formatHeaders()}\n\nResolution : ${urlFilter.resolution}`
+					caption: `${'Facebook Video Downloader'.formatHeaders()}\n\nResolution : ${urlFilter.resolution}`.formatForm()
 				},
 				{ groupMetadata }
 			);

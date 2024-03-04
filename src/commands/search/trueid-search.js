@@ -53,7 +53,7 @@ export default {
 				from,
 				{
 					image: { url: data[index].thumbnail },
-					caption,
+					caption: caption.formatForm(),
 					templateButtons: [
 						{
 							urlButton: {

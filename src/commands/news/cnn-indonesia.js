@@ -84,7 +84,7 @@ export default {
 			from,
 			{
 				image: { url: data[0].image },
-				caption,
+				caption: caption.formatForm(),
 				templateButtons: [
 					{ urlButton: { displayText: 'Image Source', url: data[0].image } },
 					{ urlButton: { displayText: 'Article Source', url: data[0].link } },

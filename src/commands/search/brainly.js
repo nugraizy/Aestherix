@@ -49,6 +49,6 @@ export default {
 		}
 
 		capt += '\nBrainly by Void Bot. Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪';
-		await client.instance.reply(capt.trim(), { from, quoted: message, groupMetadata });
+		await client.instance.reply(capt.trim().formatForm(), { from, quoted: message, groupMetadata });
 	}
 };

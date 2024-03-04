@@ -103,7 +103,7 @@ ${
 				from,
 				{
 					video: new Buffer.from(buffer, 'base64'),
-					caption: `${'What Anime ?'.formatHeaders()}\n\n${capt.trim()}`,
+					caption: `${'What Anime ?'.formatHeaders()}\n\n${capt.trim().formatForm()}`,
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: large } },
 						{ urlButton: { displayText: 'Video Source', url: args.video } },

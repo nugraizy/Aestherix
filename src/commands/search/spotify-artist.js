@@ -89,34 +89,34 @@ export default {
 				from,
 				{
 					image: new Buffer.from(await fetchBUFFER(images), 'base64'),
-					caption: 'Spotify Artist'.formatHeaders(),
-					templateButtons: [
-						{
-							urlButton: {
-								displayText: 'Image Source',
-								url: images
-							}
-						},
-						{
-							urlButton: {
-								displayText: 'Open Artist On Spotify',
-								url: source(`/artist/${id}`)
-							}
-						},
-						{
-							urlButton: {
-								displayText: 'Open Song On Spotify',
-								url: source(`/track/${tracks.data.tracks[0].id}`)
-							}
-						},
-						{
-							quickReplyButton: {
-								displayText: 'Download',
-								id: `.spotifydl ${tracks.data.tracks[0].artists[0].name} - ${tracks.data.tracks[0].name}`
-							}
-						}
-					],
-					footer: caption
+					caption: 'Spotify Artist'.formatHeaders() + `\n\n${caption.formatForm()}`
+					// templateButtons: [
+					// 	{
+					// 		urlButton: {
+					// 			displayText: 'Image Source',
+					// 			url: images
+					// 		}
+					// 	},
+					// 	{
+					// 		urlButton: {
+					// 			displayText: 'Open Artist On Spotify',
+					// 			url: source(`/artist/${id}`)
+					// 		}
+					// 	},
+					// 	{
+					// 		urlButton: {
+					// 			displayText: 'Open Song On Spotify',
+					// 			url: source(`/track/${tracks.data.tracks[0].id}`)
+					// 		}
+					// 	},
+					// 	{
+					// 		quickReplyButton: {
+					// 			displayText: 'Download',
+					// 			id: `.spotifydl ${tracks.data.tracks[0].artists[0].name} - ${tracks.data.tracks[0].name}`
+					// 		}
+					// 	}
+					// ],
+					// footer:
 				},
 				{ groupMetadata, quoted: message }
 			);

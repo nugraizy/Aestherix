@@ -130,7 +130,7 @@ export default {
 				});
 			}
 
-			await client.instance.reply(`Downloading Spotify ${typeMedia} :\n${videoId}\nPlease wait`, {
+			await client.instance.reply(`Downloading Spotify ${typeMedia} :\n${videoId}\nPlease wait`.formatForm(), {
 				from,
 				quoted: message,
 				groupMetadata

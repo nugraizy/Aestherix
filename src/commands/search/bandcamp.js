@@ -46,7 +46,9 @@ Title : ${title}
 Album : ${albumName || 'n/a'}
 Album ID : ${albumId || 'n/a'}`;
 							})
-							.join('\n\n')}`.trimEnd()
+							.join('\n\n')}`
+							.trimEnd()
+							.formatForm()
 					// 					footer: `Band Name : ${bandName}
 					// Band ID : ${bandId}
 					// Title : ${title}

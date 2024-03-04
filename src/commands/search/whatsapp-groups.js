@@ -30,7 +30,7 @@ export default {
 ${result
 	.map((v) => `Title : ${v.title}\nURL : ${v.url}`)
 	.join('\n\n')
-	.trim()}`,
+	.trim()}`.formatForm(),
 			{ from, quoted: message, groupMetadata }
 		);
 	}

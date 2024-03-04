@@ -76,7 +76,7 @@ export default {
 					from,
 					{
 						image: { url: item.images.preview[0].url },
-						caption: capt.trim(),
+						caption: capt.trim().formatForm(),
 						templateButtons: [
 							{ urlButton: { displayText: 'Image Source', url: item.images.original } },
 							{ urlButton: { displayText: 'Content Source', url: item.source } }

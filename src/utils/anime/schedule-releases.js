@@ -4,23 +4,25 @@ import dayjs from 'dayjs';
 
 import { createDaysContainer, parseSchedule } from './utils.js';
 
+const YEAR = dayjs().format('YYYY');
+
 export const animeReleases = () =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { data } = await axios.get('https://www.livechart.me/timetable');
+			const { data } = await axios.get('https://www.livechart.me/schedule?layout=timetable');
 			const $ = load(data);
 
-			const TODAY_INFO = $('div.timetable > div.timetable-day.today');
-			const RAW_DAY = TODAY_INFO.find('div.timetable-day__heading').text().trim() + ' 2023';
+			const TODAY_INFO = $('div.lc-timetable > div.lc-timetable-day.lc-today');
+			const RAW_DAY = TODAY_INFO.find('div.lc-timetable-day__heading').text().trim() + ` ${YEAR}`;
 			const TODAY_DAY = dayjs(RAW_DAY, { format: 'ddd MMM DD YYYY' }).format('dddd');
 			const SCHEDULES = createDaysContainer(RAW_DAY);
 
 			SCHEDULES[TODAY_DAY] = parseSchedule($, TODAY_INFO);
 
-			$('div.timetable > div.timetable-day.future')
+			$('div.lc-timetable > div.lc-timetable-day.lc-future')
 				.get()
 				.forEach((v) => {
-					const day = dayjs($(v).find('div.timetable-day__heading').text().trim() + ' 2023', {
+					const day = dayjs($(v).find('div.lc-timetable-day__heading').text().trim() + ` ${YEAR}`, {
 						format: 'ddd MMM DD YYYY'
 					}).format('dddd');
 					const child = parseSchedule($, $(v));
@@ -28,16 +30,16 @@ export const animeReleases = () =>
 					SCHEDULES[day] = child;
 				});
 
-			$('div.timetable > div.timetable-day.past')
-				.get()
-				.forEach((v) => {
-					const day = dayjs($(v).find('div.timetable-day__heading').text().trim() + ' 2023', {
-						format: 'ddd MMM DD YYYY'
-					}).format('dddd');
-					const child = parseSchedule($, $(v));
+			// $('div.lc-timetable > div.lc-timetable-day.past')
+			// 	.get()
+			// 	.forEach((v) => {
+			// 		const day = dayjs($(v).find('div.lc-timetable-day__heading').text().trim() + ' 2023', {
+			// 			format: 'ddd MMM DD YYYY'
+			// 		}).format('dddd');
+			// 		const child = parseSchedule($, $(v));
 
-					SCHEDULES[day] = child;
-				});
+			// 		SCHEDULES[day] = child;
+			// 	});
 
 			resolve(SCHEDULES);
 		} catch (error) {

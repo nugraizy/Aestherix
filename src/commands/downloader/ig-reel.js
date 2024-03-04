@@ -55,10 +55,10 @@ export default {
 				await client.instance.send(
 					from,
 					reels[data].post[0].isVideo
-						? { video: { url: reels[data].post[0].url }, caption: capt.trim() }
+						? { video: { url: reels[data].post[0].url }, caption: capt.trim().formatForm() }
 						: {
 								image: { url: reels[data].post[0].url },
-								caption: capt.trim()
+								caption: capt.trim().formatForm()
 						  } /* eslint-disable-line */,
 					{ groupMetadata, quoted: message }
 				);

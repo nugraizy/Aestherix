@@ -38,7 +38,7 @@ const processAudio = async (url, client, { from, message, groupMetadata, prettyN
 				document: Buffer.from(await download(), 'base64'),
 				fileName: `${title}.mp3`,
 				mimetype: 'audio/mp3',
-				caption: capt
+				caption: capt.formatForm()
 			},
 			{
 				groupMetadata,
@@ -63,7 +63,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, /*type, args,*/ groupMetadata, mediaData, bodyQuoted, typeQuoted }, client) {
 		if (typeQuoted === 'conversation' && mediaData.participant?.includes(client.instance.decodeJid(instance))) {
-			const reg = /✦ Video ID :\s*([^\n]+)/g;
+			const reg = /✦ Video ID :\s*`([^\n]+)`/g;
 
 			const videoIds = [];
 			let match;
@@ -105,7 +105,7 @@ export default {
 				});
 			}
 
-			const { key } = await client.instance.reply(`Downloading YouTube audio :\n${videoId}\nPlease wait`, {
+			const { key } = await client.instance.reply(`Downloading YouTube audio :\n${videoId}\nPlease wait`.formatForm(), {
 				from,
 				quoted: message,
 				groupMetadata

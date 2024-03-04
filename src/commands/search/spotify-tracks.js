@@ -75,30 +75,30 @@ export default {
 						await fetchBUFFER(result?.data?.items?.[0]?.album?.images?.[0]?.url ?? result.tracks[0].album.images[0].url),
 						'base64'
 					),
-					caption: 'Spotify Tracks'.formatHeaders() + `\n\n${caption}`.trimEnd(),
-					templateButtons: [
-						{
-							urlButton: {
-								displayText: 'Image Source',
-								url: result?.data?.items?.[0]?.album?.images?.[0]?.url ?? result.tracks[0].album.images[0].url
-							}
-						},
-						{
-							urlButton: {
-								displayText: 'Open On Spotify',
-								url: result?.data?.items?.[0]?.external_urls?.spotify ?? result.tracks[0].external_urls.spotify
-							}
-						},
-						{
-							quickReplyButton: {
-								displayText: 'Download',
-								id: `.spotifydl ${result?.data?.items?.[0]?.name ?? result.tracks[0].name} - ${
-									result?.data?.items?.[0]?.artists?.[0]?.name ?? result.tracks[0].external_urls.spotify
-								}`
-							}
-						}
-					],
-					footer: caption
+					caption: 'Spotify Tracks'.formatHeaders() + `\n\n${caption.formatForm()}`
+					// templateButtons: [
+					// 	{
+					// 		urlButton: {
+					// 			displayText: 'Image Source',
+					// 			url: result?.data?.items?.[0]?.album?.images?.[0]?.url ?? result.tracks[0].album.images[0].url
+					// 		}
+					// 	},
+					// 	{
+					// 		urlButton: {
+					// 			displayText: 'Open On Spotify',
+					// 			url: result?.data?.items?.[0]?.external_urls?.spotify ?? result.tracks[0].external_urls.spotify
+					// 		}
+					// 	},
+					// 	{
+					// 		quickReplyButton: {
+					// 			displayText: 'Download',
+					// 			id: `.spotifydl ${result?.data?.items?.[0]?.name ?? result.tracks[0].name} - ${
+					// 				result?.data?.items?.[0]?.artists?.[0]?.name ?? result.tracks[0].external_urls.spotify
+					// 			}`
+					// 		}
+					// 	}
+					// ],
+					// footer: caption
 				},
 				{ groupMetadata, quoted: message }
 			);

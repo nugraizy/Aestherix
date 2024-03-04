@@ -27,7 +27,7 @@ export default {
 			result = result.slice(0, 10);
 		}
 
-		const capt = `Line Stickers\n\nAuthor : ${result[0].author.capitalize()}\nTot. Stickers : ${result.length}`;
+		const capt = `Line Stickers\n\nAuthor : ${result[0].author.capitalize()}\nTot. Stickers : ${result.length}`.formatForm();
 
 		await client.instance.send(from, { text: capt }, { groupMetadata, quoted: message });
 

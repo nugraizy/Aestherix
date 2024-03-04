@@ -71,7 +71,7 @@ ${content}`;
 			await client.instance.send(
 				from,
 				{
-					text: caption,
+					text: caption.formatForm(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Novel Source', url: `https://www.pixiv.net/novel/show.php?id=${regexs.message}` } }
 					],

@@ -78,6 +78,19 @@ declare global {
 		formatHeaders: (simplify: boolean) => string;
 
 		/**
+		 * Format forms.
+		 * @returns string
+		 */
+		formatForm: () => string;
+
+		/**
+		 * Format strings.
+		 * @param formatter
+		 * @returns
+		 */
+		format: (formatter: '`' | '*') => string;
+
+		/**
 		 * Replace last string.
 		 * @returns string
 		 */

@@ -154,7 +154,7 @@ Precious: ${info.stats.precious_chest_number}
 Magic: ${info.stats.magic_chest_number}`;
 				}
 
-				await client.instance.reply(capt.trim(), { from, quoted: message, groupMetadata });
+				await client.instance.reply(capt.trim().formatForm(), { from, quoted: message, groupMetadata });
 			}
 		}
 	}

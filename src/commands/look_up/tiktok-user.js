@@ -105,7 +105,7 @@ export default {
 				from,
 				{
 					image: { url: profileHD || profileSD },
-					caption: 'TikTok User Lookup'.formatHeaders() + `\n\n${capt.trim()}`.trimEnd()
+					caption: 'TikTok User Lookup'.formatHeaders() + `\n\n${capt.trim().formatForm()}`.trimEnd()
 				},
 				{ groupMetadata, quoted: message }
 			);

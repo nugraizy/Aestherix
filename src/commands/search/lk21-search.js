@@ -26,8 +26,9 @@ export default {
 				from,
 				{
 					image: { url: data[index].thumbnail },
-					caption: 'Layarkaca21'.formatHeaders(),
-					footer: `${data[index].title}
+					caption:
+						'Layarkaca21'.formatHeaders() +
+						`\n\n${data[index].title}
 Quality : ${data[index].quality}
 Country : ${data[index].country}
 Cast : ${data[index].castArr.join(', ')}
@@ -36,8 +37,8 @@ Genre : ${data[index].genreArr.join(', ')}
 IMDb : ${data[index].ratings}
 Release Date : ${data[index].released}
 Translate By : ${data[index].translateBy}
-
-Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
+					
+Powered by 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`.formatForm(),
 					templateButtons: [
 						index + 1 !== data.length
 							? {

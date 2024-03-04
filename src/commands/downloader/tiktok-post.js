@@ -93,7 +93,7 @@ export default {
 							from,
 							{
 								image: { url },
-								caption: capt.trim()
+								caption: capt.trim().formatForm()
 							},
 							{ groupMetadata, quoted: message }
 						);

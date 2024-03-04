@@ -34,6 +34,12 @@ const setSession = (key) => {
 	return configuration.games.akinator.set(key, new Aki({ region: 'id' }));
 };
 
+export const setMessages = (key, message) => {
+	const session = getSession(key);
+
+	return configuration.games.akinator.set(key, Object.assign(session, message));
+};
+
 const deleteSession = async (key) => {
 	const session = getSession(key);
 
@@ -132,6 +138,7 @@ export const handleAnswer = async (key, answer) => {
 	try {
 		await session.step(answer);
 	} catch (e) {
+		console.log(e);
 		return { status: 'waiting' };
 	}
 

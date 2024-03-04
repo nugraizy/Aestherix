@@ -46,15 +46,17 @@ export default {
 				from,
 				{
 					image: new Buffer.from(images, 'base64'),
-					caption: 'Pixiv Manga Search'.formatHeaders(),
-					templateButtons: [
-						{ urlButton: { displayText: 'Manga Source', url: `https://www.pixiv.net/en/artworks/${dataImage.id}` } }
-					],
-					footer: `Title : ${dataImage.title.capitalize()}
+					caption:
+						'Pixiv Manga Search'.formatHeaders() +
+						`\n\nTitle : ${dataImage.title.capitalize()}
 Author : ${dataImage.userName}
 ID Artwork : ${dataImage.id}
 ID Author : ${dataImage.userId}
-Total Media : ${dataImage.pageCount}`
+Total Media : ${dataImage.pageCount}`.formatForm()
+					// templateButtons: [
+					// 	{ urlButton: { displayText: 'Manga Source', url: `https://www.pixiv.net/en/artworks/${dataImage.id}` } }
+					// ],
+					// footer:
 				},
 				{ groupMetadata, quoted: message }
 			);

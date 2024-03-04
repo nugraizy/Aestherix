@@ -1,6 +1,14 @@
-import { translate } from '@vitalets/google-translate-api';
-
 import { animeReleases } from '../../utils/index.js';
+
+const DAYS = {
+	Sunday: 'Minggu',
+	Monday: 'Senin',
+	Tuesday: 'Selasa',
+	Wednesday: 'Rabu',
+	Thursday: 'Kamis',
+	Friday: 'Jumat',
+	Saturday: 'Sabtu'
+};
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -27,25 +35,31 @@ export default {
 		let index = 0;
 		let indexDay = 0;
 
-		let { text: translatedText } = await translate(Object.keys(result).join(','), { to: 'id' });
-
-		translatedText = translatedText.split(' ');
+		const translatedText = Object.keys(result).map((v) => v.replace(v, DAYS[v]));
 
 		let capt = '';
 
 		for (const day in result) {
 			index === 0 ? (capt += `${text}\n\n`) : (capt += '\n\n');
-			capt += `╭─ 📅 *${translatedText[indexDay]}${index === 0 ? ' (today 🌐)' : ''}*\n\n`;
+			capt += `> 📅 ${translatedText[indexDay]}${index === 0 ? ' (today 🌐)' : ''}\n\n`;
 
 			for (let i = 0, anime = result[day]; i < result[day].length; i++) {
 				const time = Object.keys(anime[i])[0];
 
-				capt += `╭─ ⏰ *${time}* ──\n`;
+				capt += `╭─ ⏰ ${time.format('*')} ──\n`;
 
-				for (const v of anime[i][time]) {
-					capt += `│ 📜 Title : ${v.title.formatHeaders(true)}\n`;
-					capt += `│ 🔢 Episode : ${v.episode}\n`;
-					capt += `│ 🔗 URL : ${v.link}\n`;
+				for (const data of anime[i][time]) {
+					let tempCapt = '';
+
+					tempCapt += `Title : ${data.title}\n`;
+					tempCapt += 'note' in data ? `📌 Note : ${data.note}\n` : `Episode : ${data.episode}\n`;
+					tempCapt += `URL : ${data.link}\n`;
+
+					if ('source' in data) {
+						tempCapt += `Source : ${data.source}\n`;
+					}
+
+					capt += tempCapt.formatForm();
 				}
 
 				capt += '╰───────\n';

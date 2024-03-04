@@ -1,4 +1,4 @@
-import { startAkinator } from '../../utils/games/index.js';
+import { startAkinator, setMessages } from '../../utils/games/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -22,11 +22,13 @@ export default {
 
 		const { question, answers, progress, progressBar, arrow } = aki;
 
-		await client.instance.reply(
-			`${question}\n\n${answers
+		const messages = await client.instance.reply(
+			`[?] \`${question}\`\n\n${answers
 				.map((v, i) => `${i + 1}. ${v}`)
-				.join('\n')}\n6. Exit\n7. Back/Undo\n\nProgress : ${progress.toFixed(2)}% ${arrow}\n${progressBar}`,
+				.join('\n')}\n6. Exit\n7. Back/Undo\n\n> Progress : ${progress.toFixed(2)}% ${arrow}\n${progressBar}`,
 			{ from, quoted: message, groupMetadata }
 		);
+
+		setMessages(from, { originalMessage: messages });
 	}
 };

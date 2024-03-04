@@ -78,7 +78,7 @@ Total Media : ${pageCount}`;
 					from,
 					{
 						image: new Buffer.from(images, 'base64'),
-						caption: caption + `\nSource https://www.pixiv.net/en/artworks/${id}`
+						caption: caption + `\nSource : https://www.pixiv.net/en/artworks/${id}`.formatForm()
 					},
 					{ groupMetadata, quoted: message }
 				);

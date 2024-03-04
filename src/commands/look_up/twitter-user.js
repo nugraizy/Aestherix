@@ -61,7 +61,7 @@ export default {
 
 			await client.instance.send(
 				from,
-				{ image: { url: imageProfile }, caption: capt.trim() },
+				{ image: { url: imageProfile }, caption: capt.trim().formatForm() },
 				{ groupMetadata, quoted: message }
 			);
 		}

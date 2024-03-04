@@ -102,7 +102,7 @@ export default {
 				capt += `Proxy : ${proxy ? 'Yes' : 'No'}\n`;
 				capt += `Hosting : ${hosting ? 'Yes' : 'No'}`;
 
-				await client.instance.send(from, { text: capt.trim() }, { groupMetadata, quoted: message });
+				await client.instance.send(from, { text: capt.trim().formatForm() }, { groupMetadata, quoted: message });
 			}
 		}
 	}

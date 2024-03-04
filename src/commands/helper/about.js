@@ -28,7 +28,7 @@ Our Motto :
 
 Using less module and try to find every private api from the provider (if they using one).`;
 
-		await client.instance.reply(capt.trim(), { from, quoted: message, groupMetadata });
+		await client.instance.reply(capt.trim().formatForm(), { from, quoted: message, groupMetadata });
 		await client.instance.reply(
 			`Thanks To :
 Aldi a.k.a Alphanum404
@@ -37,7 +37,7 @@ Hanif a.k.a Mrhrtz
 Nafiz a.k.a VoIP
 Toby a.k.a Tobz
 
-Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
+Powered by 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`,
 			{ from, quoted: message, groupMetadata }
 		);
 	}

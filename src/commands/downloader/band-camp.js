@@ -53,7 +53,7 @@ export default {
 					mimetype: 'audio/opus',
 					caption: `${'Bandcamp'.formatHeaders()}
 
-Title : ${result.title}`
+Title : ${result.title}`.formatForm()
 				},
 				{ groupMetadata, quoted: message }
 			);

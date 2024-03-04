@@ -88,24 +88,25 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 				from,
 				{
 					image: { url: result[index].image },
-					caption: 'Pinterest'.formatHeaders(),
-					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: result[0].image } },
-						{ urlButton: { displayText: 'Pinterest Source', url: result[0].pinSource } },
-						result.length !== 1
-							? {
-									quickReplyButton: {
-										displayText: 'Next Image',
-										id: `.pinterest next ${result[1].image} ${JSON.stringify(result).replace(/\|/g, '')}`
-									}
-							  } /* eslint-disable-line */
-							: {}
-					],
-					footer: `Author : ${result[index].authorUsername}
+					caption:
+						'Pinterest'.formatHeaders() +
+						`\n\nAuthor : ${result[index].authorUsername}
 Author Fullname : ${result[index].authorFullname}
 Follower : ${result[index].follower}
-Caption : ${result[index].caption}
-\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+Caption : ${result[index].caption}`.formatForm()
+					// templateButtons: [
+					// 	{ urlButton: { displayText: 'Image Source', url: result[0].image } },
+					// 	{ urlButton: { displayText: 'Pinterest Source', url: result[0].pinSource } },
+					// 	result.length !== 1
+					// 		? {
+					// 				quickReplyButton: {
+					// 					displayText: 'Next Image',
+					// 					id: `.pinterest next ${result[1].image} ${JSON.stringify(result).replace(/\|/g, '')}`
+					// 				}
+					// 		  } /* eslint-disable-line */
+					// 		: {}
+					// ],
+					// footer:
 				},
 				{ groupMetadata, quoted: message }
 			);

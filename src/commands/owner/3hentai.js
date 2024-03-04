@@ -37,7 +37,7 @@ Language : ${language.join(', ')}
 Categories : ${categories.join(', ')}
 Tot. Pages : ${totalPages}`;
 
-		await client.instance.reply(caption, { from, quoted: message, groupMetadata });
+		await client.instance.reply(caption.formatForm(), { from, quoted: message, groupMetadata });
 		await client.instance.send(from, {
 			document: Buffer.from(buffer, 'base64'),
 			mimetype: mime('pdf'),

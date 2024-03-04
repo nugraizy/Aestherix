@@ -79,6 +79,20 @@ Object.setPrototypeOf(String.prototype, {
 
 		return simplify ? `\`\`\`${headers}\`\`\`` : `╭ \`\`\` ✦ ${headers}\`\`\` ╮`;
 	},
+	formatForm: function () {
+		return this.replace(/(.+?)\s+:\s+(.+)/g, '$1 : `$2`');
+	},
+	format: function (formatter) {
+		if (formatter === '*') {
+			return `*${this}*`;
+		}
+
+		if (formatter === '`') {
+			return `\`${this}\``;
+		}
+
+		return `${formatter}${this}${formatter}`;
+	},
 	replaceLast: function (find, replace) {
 		const index = this.lastIndexOf(find);
 

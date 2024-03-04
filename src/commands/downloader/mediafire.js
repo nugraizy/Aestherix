@@ -37,7 +37,7 @@ export default {
 Filename: ${result.filename}
 Filesize: ${result.filesize}
 Filetype: ${result.filetype}
-Uploaded: ${result.uploaded}`,
+Uploaded: ${result.uploaded}`.formatForm(),
 			{ from, quoted: message, groupMetadata }
 		);
 

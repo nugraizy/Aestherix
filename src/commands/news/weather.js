@@ -48,7 +48,7 @@ Powered by openweathermap.org`;
 		await client.instance.send(
 			from,
 			{
-				text: `${info.emoji} Weather Report ${info.emoji}`.formatHeaders() + `\n\n${text.trim()}`
+				text: `${info.emoji} Weather Report ${info.emoji}`.formatHeaders() + `\n\n${text.trim().formatForm()}`
 				// templateButtons: [
 				// 	{ urlButton: { displayText: 'More Info', url: `More info https://openweathermap.org/city/${info.id}` } }
 				// ],

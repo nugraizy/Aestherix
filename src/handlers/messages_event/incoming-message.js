@@ -191,6 +191,10 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 			return;
 		}
 
+		if (!Tempcmds) {
+			await handleGames(message, client);
+		}
+
 		if (Tempcmds && !message.isOwner) {
 			if (configuration.OPTIONS.selfMode) {
 				continue;
@@ -583,8 +587,6 @@ const handleIncomingMessage = async (message, client, cmds, store, user, state, 
 	}
 
 	await handleCommandExecution(message, client, store, cmds, user, instance, runtime, state);
-
-	await handleGames(message, client);
 };
 
 const incomingHandler = handleIncomingMessage;

@@ -50,7 +50,7 @@ export default {
 			capt += `Tot. Sections : ${highlights[data].highlights.length}\n`;
 			capt += `Tot. Estimated media per Section : ${numberWithCommas(highlights[data].highlights.length * 2)}\n\n`;
 
-			await client.instance.reply(capt.trim(), { from, quoted: message, groupMetadata });
+			await client.instance.reply(capt.trim().formatForm(), { from, quoted: message, groupMetadata });
 
 			capt = '';
 

@@ -30,7 +30,7 @@ export default {
                     
 Artist : ${data[index].artist}
 Song : ${data[index].song}
-\n${data[index].lyrics}`,
+\n${data[index].lyrics}`.formatForm(),
 					templateButtons: [
 						index + 1 !== data.length
 							? {

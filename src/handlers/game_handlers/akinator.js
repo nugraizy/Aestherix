@@ -16,31 +16,55 @@ const akinatorHandler = async ({ from, isAdmin, isGroup, body, message, groupMet
 			return;
 		}
 
-		const akinatorMessage = `${question}\n\n${answers
-			.map((v, i) => `${i + 1}. ${v}`)
-			.join('\n')}\n6. Exit\n7. Back/Undo\n\nProgress : ${progress.toFixed(2)}% ${arrow}\n${progressBar}`;
+		const akinatorMessage = `[?] \`${question}\`\n\n${answers
+			.map((v, i) => `${i + 1}. _${v}_`)
+			.join('\n')}\n6. Exit\n7. Back/Undo\n\nProgress : \`${progress.toFixed(2)}% ${arrow}\`\n> ${progressBar}`;
+
+		const {
+			originalMessage: { key }
+		} = session;
 
 		if (status === 'playing') {
-			await client.instance.reply(akinatorMessage, { from, quoted: message, groupMetadata });
-		} else if (status === 'win') {
+			return await client.instance.send(
+				from,
+				{ edit: key, text: akinatorMessage },
+				{
+					groupMetadata
+				}
+			);
+		}
+
+		if (status === 'win') {
 			const { absolute_picture_path: absolutePath, name, description } = answers[answers.length - 1];
 
 			await client.instance.send(
 				from,
+				{ edit: key, text: `Akinator Game is Over.\n\nProgress : \`${progress}\`\n> ${progressBar}` },
+				{
+					groupMetadata
+				}
+			);
+
+			return await client.instance.send(
+				from,
 				{
 					image: { url: absolutePath },
-					caption: `Name : ${name}\nDescription : ${description}\nProgress : ${progress}\n${progressBar}`
+					caption: `Name : \`${name}\`\nDescription : \`${description}\`\n\nProgress : \`${progress}\`\n> ${progressBar}`
 				},
 				{ groupMetadata, quoted: message }
 			);
-		} else if (status === 'exitted') {
-			await client.instance.reply('You have exited the game.', { from, quoted: message, groupMetadata });
-		} else if (status === 'back') {
+		}
+
+		if (status === 'exitted') {
+			return await client.instance.reply('You have exited the game.', { from, quoted: message, groupMetadata });
+		}
+
+		if (status === 'back') {
 			if (handle.isFailed) {
-				await client.instance.reply('You cannot go back.', { from, quoted: message, groupMetadata });
-			} else {
-				await client.instance.reply(akinatorMessage, { from, quoted: message, groupMetadata });
+				return await client.instance.reply('You cannot go back.', { from, quoted: message, groupMetadata });
 			}
+
+			await client.instance.reply(akinatorMessage, { from, quoted: message, groupMetadata });
 		}
 	};
 

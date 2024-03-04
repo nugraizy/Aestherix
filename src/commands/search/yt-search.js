@@ -40,12 +40,14 @@ export default {
 		let i = 0;
 
 		for (const { videoId, title, timestamp, views, author } of result) {
-			const caption = boxen(`NO. ${i + 1}
+			const caption = boxen(
+				`NO. ${i + 1}
 ✦ Video ID : ${videoId}
 📕 Title : ${title}
 👀 Views : ${numberWithCommas(views)}
 📡 Author Channel : ${author.name}
-⏳ Duration : ${timestamp ?? 'No Data'}`);
+⏳ Duration : ${timestamp ?? 'No Data'}`.formatForm()
+			);
 
 			capt += `${caption}\n\n`;
 

@@ -27,34 +27,36 @@ export default {
 				from,
 				{
 					image: { url: data[index].download },
-					caption: 'Flickr'.formatHeaders(),
-					templateButtons: [
-						{ urlButton: { displayText: 'Flickr Source', url: args[1] === 'next' ? data[index].source : data[index].source } },
-						index + 1 !== data.length
-							? {
-									quickReplyButton: {
-										displayText: 'Next Image',
-										id: `.flickr next ${data[index + 1].download} ${JSON.stringify(data)}`
-									}
-							  } /* eslint-disable-line */
-							: {},
-						index !== 0
-							? {
-									quickReplyButton: {
-										displayText: 'Previous Image',
-										id: `.flickr prev ${data[index - 1].download} ${JSON.stringify(data)}`
-									}
-							  } /* eslint-disable-line */
-							: {}
-					],
-					footer: `Author : ${data[index].userName}
+					caption:
+						'Flickr'.formatHeaders() +
+						`\n\nAuthor : ${data[index].userName}
 Author Fullname : ${data[index].fullName}
 Views : ${numberWithCommas(data[index].views)}
 Title : ${data[index].title}
 Description : ${data[index].description}
 Tags : ${data[index].tags || 'n/a'}
 Published : ${data[index].posted}
-Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+
+Powered by 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`.formatForm()
+					// templateButtons: [
+					// 	{ urlButton: { displayText: 'Flickr Source', url: args[1] === 'next' ? data[index].source : data[index].source } },
+					// 	index + 1 !== data.length
+					// 		? {
+					// 				quickReplyButton: {
+					// 					displayText: 'Next Image',
+					// 					id: `.flickr next ${data[index + 1].download} ${JSON.stringify(data)}`
+					// 				}
+					// 		  } /* eslint-disable-line */
+					// 		: {},
+					// 	index !== 0
+					// 		? {
+					// 				quickReplyButton: {
+					// 					displayText: 'Previous Image',
+					// 					id: `.flickr prev ${data[index - 1].download} ${JSON.stringify(data)}`
+					// 				}
+					// 		  } /* eslint-disable-line */
+					// 		: {}
+					// ],
 				},
 				{ groupMetadata, quoted: message }
 			);

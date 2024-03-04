@@ -82,8 +82,8 @@ export default {
 			from,
 			{
 				...(data[0].image !== undefined
-					? { image: new Buffer.from(await fetchBUFFER(data[0].image), 'base64'), caption }
-					: { text: caption }),
+					? { image: new Buffer.from(await fetchBUFFER(data[0].image), 'base64'), caption: caption.formatForm() }
+					: { text: caption.formatForm() }),
 				templateButtons: [
 					data[0].image !== undefined ? { urlButton: { displayText: 'Image Source', url: data[0].image } } : {},
 					{ urlButton: { displayText: 'Article Source', url: data[0].link } },

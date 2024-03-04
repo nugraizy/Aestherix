@@ -35,7 +35,11 @@ Serialization : ${serialize}
 Views : ${views}
 Tot. Chapters : ${chapters.length}`;
 
-			await client.instance.send(from, { image: { url: thumbnail }, caption }, { groupMetadata, quoted: message });
+			await client.instance.send(
+				from,
+				{ image: { url: thumbnail }, caption: caption.formatForm() },
+				{ groupMetadata, quoted: message }
+			);
 
 			const row = [];
 

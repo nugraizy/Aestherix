@@ -55,7 +55,7 @@ export default {
 				await client.instance.send(
 					from,
 					posts[data].post[0].isVideo
-						? { video: { url: posts[data].post[0].url }, caption: capt.trim() }
+						? { video: { url: posts[data].post[0].url }, caption: capt.trim().formatForm() }
 						: {
 								image: { url: posts[data].post[0].url },
 								caption: capt.trim()
@@ -66,7 +66,7 @@ export default {
 				capt += `Tot. Media : ${posts[data].post.length}\n`;
 				capt += `Caption : ${posts[data].captions.trim()}\n`;
 
-				await client.instance.send(from, { text: capt.trim() }, { quoted: message });
+				await client.instance.send(from, { text: capt.trim().formatForm() }, { quoted: message });
 
 				for (const media of posts[data].post) {
 					await client.instance.send(from, media.isVideo ? { video: { url: media.url } } : { image: { url: media.url } }, {

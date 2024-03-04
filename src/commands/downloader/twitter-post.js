@@ -20,7 +20,7 @@ const createPostCaption = (post) => {
 	capt += postInfo;
 	capt += `${formatNumber(post.replies)} 💬 · ${formatNumber(post.liked)} ❤️\n`;
 
-	return capt.trim();
+	return capt.trim().formatForm();
 };
 
 /**

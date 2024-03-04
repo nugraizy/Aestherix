@@ -55,7 +55,7 @@ export default {
 			capt += `Tot. Post : ${numberWithCommas(stories[data].postsCount)}\n`;
 			capt += `Tot. Story : ${stories[data].stories.length}\n\n`;
 
-			await client.instance.reply(capt.trim(), { from, quoted: message, groupMetadata });
+			await client.instance.reply(capt.trim().formatForm(), { from, quoted: message, groupMetadata });
 
 			capt = '';
 

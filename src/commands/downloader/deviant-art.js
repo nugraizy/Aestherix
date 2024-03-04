@@ -66,7 +66,7 @@ export default {
 						`\n\nTitle : ${result.author.capitalize()}
 Author : ${result.author}
 Favourites : ${numberWithCommas(result.favourites)}
-Views : ${numberWithCommas(result.views)}`,
+Views : ${numberWithCommas(result.views)}`.formatForm(),
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: result.image } },
 						{ urlButton: { displayText: 'Deviant Art Source', url: result.source } }
