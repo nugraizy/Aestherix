@@ -1,8 +1,8 @@
 import './src/helper/prototypes.js';
+import 'dotenv/config.js';
 
 import path from 'path';
 import { platform } from 'process';
-import dotenv from 'dotenv';
 
 import isInternetAvailable from './src/helper/connection/net.js';
 
@@ -10,8 +10,6 @@ const moduleURL = new URL(import.meta.url);
 
 export const __dirname = platform === 'win32' ? path.dirname(moduleURL.pathname).slice(1) : path.dirname(moduleURL.pathname);
 global.__dirname = __dirname;
-
-dotenv.config();
 
 await import('./src/helper/connection/utils/check-flag.js');
 

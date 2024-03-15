@@ -18,40 +18,6 @@ export default {
 			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
-		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
-			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
-			const index = data.findIndex((v) => v === args[2]);
-
-			return await client.instance.send(
-				from,
-				{
-					image: { url: data[index] },
-					caption: 'Google-it Images'.formatHeaders(),
-					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: data[index] } },
-						index + 1 !== data.length
-							? {
-									quickReplyButton: {
-										displayText: 'Next Image',
-										id: `.googleimage next ${data[index + 1]} ${JSON.stringify(data)}`
-									}
-							  } /* eslint-disable-line */
-							: {},
-						index !== 0
-							? {
-									quickReplyButton: {
-										displayText: 'Previous Image',
-										id: `.googleimage prev ${data[index - 1]} ${JSON.stringify(data)}`
-									}
-							  } /* eslint-disable-line */
-							: {}
-					],
-					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
-				},
-				{ groupMetadata, quoted: message }
-			);
-		}
-
 		let queries = query.split(',');
 
 		queries = removeDuplicatesArray(queries);

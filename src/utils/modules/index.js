@@ -797,3 +797,37 @@ export const unique = (minimum, maximum) => {
 		return previousValue;
 	};
 };
+
+export const veryUnique = (minimum, maximum) => {
+	let usedValues = [];
+
+	return function random() {
+		if (usedValues.length === maximum - minimum + 1) {
+			return null;
+		}
+
+		let number;
+
+		do {
+			number = Math.floor(Math.random() * (maximum - minimum + 1)) + minimum;
+		} while (usedValues.includes(number));
+
+		usedValues.push(number);
+		return number;
+	};
+};
+
+export const increment = (minimum, maximum) => {
+	let currentValue = minimum;
+
+	return function () {
+		if (currentValue <= maximum) {
+			const result = currentValue;
+
+			currentValue++;
+			return result;
+		} else {
+			return null;
+		}
+	};
+};

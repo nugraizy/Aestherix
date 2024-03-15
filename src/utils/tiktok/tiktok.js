@@ -565,7 +565,11 @@ class RequestModule extends ResponseParser {
 			body
 		});
 
-		return this._mergeMediaResponse(data, videoId);
+		if (data === '') {
+			throw new Error('No data found');
+		}
+
+		return data;
 	}
 
 	/**
@@ -617,7 +621,7 @@ class RequestModule extends ResponseParser {
 	 * @private
 	 */
 	async _mergeMediaResponse(dataPosts, videoId) {
-		dataPosts = dataPosts.aweme_list.find((v) => v.aweme_id === videoId);
+		dataPosts = dataPosts?.aweme_list?.find((v) => v.aweme_id === videoId);
 
 		if (!dataPosts) {
 			return { error: 'Download failed. either the access is denied, or other error.' };
@@ -728,13 +732,30 @@ class TiktokUtils extends RequestModule {
 					resolve(videoId);
 				}
 
-				const data = await this._fetchVideoDataAttempt(videoId);
+				let container = [];
 
-				if (data.error) {
-					resolve(data);
-				}
+				const timeout = setTimeout(() => {
+					resolve({ error: 'Post not found. Please try again later.' });
+				}, 20_000);
 
-				resolve(data);
+				const trySearch = async () => {
+					container = [];
+
+					for (let i = 0; i < 300; i++) {
+						container.push(this._fetchVideoDataAttempt(videoId));
+					}
+
+					try {
+						const result = await Promise.any(container);
+
+						clearTimeout(timeout);
+						resolve(this._mergeMediaResponse(result, videoId));
+					} catch (error) {
+						return await trySearch();
+					}
+				};
+
+				return await trySearch();
 			} catch (error) {
 				reject(error);
 			}

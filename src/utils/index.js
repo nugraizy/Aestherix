@@ -24,7 +24,7 @@ export * from './mangatoon/index.js';
 export * from './misc/index.js';
 export * from './modules/index.js';
 export * from './movies/index.js';
-export * from './my_anime_list/index.js';
+export * from './jikan/index.js';
 export * from './news/index.js';
 export * from './p_store/index.js';
 export * from './pinterest/index.js';

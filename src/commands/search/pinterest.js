@@ -1,4 +1,6 @@
-import { removeDuplicatesArray } from '../../utils/modules/index.js';
+import yn from 'yn';
+
+import { isURL, removeDuplicatesArray, increment } from '../../utils/modules/index.js';
 import { pinterest } from '../../utils/pinterest/index.js';
 
 /**
@@ -14,55 +16,28 @@ export default {
 	limit: 4,
 	cooldown: 5,
 	status: 'enable',
-	async run({ query, from, message, args, type, groupMetadata }, client) {
+	async run({ query, from, message, args, type, groupMetadata, sender, waitForInput }, client) {
 		if (!query) {
 			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
-		if (
-			(args[1] === 'next' || args[1] === 'prev') &&
-			(type === 'templateButtonReplyMessage' || type === 'buttonsResponseMessage')
-		) {
-			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
-			const index = data.findIndex((v) => v.image === args[2]);
+		if (isURL(query)) {
+			const image = await pinterest.download(query);
 
 			return await client.instance.send(
 				from,
 				{
-					image: { url: data[index].image },
-					caption: 'Pinterest'.formatHeaders(),
-					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: args[1] === 'next' ? data[index].image : data[index].image } },
-						{
-							urlButton: {
-								displayText: 'Pinterest Source',
-								url: args[1] === 'next' ? data[index].pinSource : data[index].pinSource
-							}
-						},
-						index + 1 !== data.length
-							? {
-									quickReplyButton: {
-										displayText: 'Next Image',
-										id: `.pinterest next ${data[index + 1].image} ${JSON.stringify(data)}`
-									}
-							  } /* eslint-disable-line */
-							: {},
-						index !== 0
-							? {
-									quickReplyButton: {
-										displayText: 'Previous Image',
-										id: `.pinterest prev ${data[index - 1].image} ${JSON.stringify(data)}`
-									}
-							  } /* eslint-disable-line */
-							: {}
-					],
-					footer: `Author : ${data[index].authorUsername}
-Author Fullname : ${data[index].authorFullname}
-Follower : ${data[index].follower}
-Caption : ${data[index].caption}
-Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+					image: {
+						url: image.image
+					},
+					caption:
+						'Pinterest'.formatHeaders() +
+						`\n\nAuthor : ${image.authorUsername}
+Author Fullname : ${image.authorFullname}
+Follower : ${image.follower}
+Caption : ${image.caption}`.formatForm()
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message, groupMetadata }
 			);
 		}
 
@@ -71,45 +46,65 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 		queries = removeDuplicatesArray(queries);
 
 		for (const querie of queries) {
-			const result = await pinterest(querie.trim());
+			let result = await pinterest.search(querie.trim());
 
 			if ('error' in result) {
 				await client.instance.reply(result.message, { from, quoted: message, groupMetadata });
 				continue;
 			}
 
-			result.forEach((v) => {
-				return (v.caption = v.caption === '' ? 'No caption' : v.caption);
-			});
+			const incrementedIndex = increment(0, result.length - 1);
 
-			const index = ~~(Math.random() * result.length);
+			const send = async () => {
+				const index = incrementedIndex();
 
-			await client.instance.send(
-				from,
-				{
-					image: { url: result[index].image },
-					caption:
-						'Pinterest'.formatHeaders() +
-						`\n\nAuthor : ${result[index].authorUsername}
+				if (index === null) {
+					return;
+				}
+
+				await client.instance.send(
+					from,
+					{
+						image: { url: result[index].image },
+						caption:
+							'Pinterest'.formatHeaders() +
+							`\n\nAuthor : ${result[index].authorUsername}
 Author Fullname : ${result[index].authorFullname}
 Follower : ${result[index].follower}
-Caption : ${result[index].caption}`.formatForm()
-					// templateButtons: [
-					// 	{ urlButton: { displayText: 'Image Source', url: result[0].image } },
-					// 	{ urlButton: { displayText: 'Pinterest Source', url: result[0].pinSource } },
-					// 	result.length !== 1
-					// 		? {
-					// 				quickReplyButton: {
-					// 					displayText: 'Next Image',
-					// 					id: `.pinterest next ${result[1].image} ${JSON.stringify(result).replace(/\|/g, '')}`
-					// 				}
-					// 		  } /* eslint-disable-line */
-					// 		: {}
-					// ],
-					// footer:
-				},
-				{ groupMetadata, quoted: message }
-			);
+Caption : ${result[index].caption}
+\nImage ${index + 1} of ${result.length}`.formatForm()
+					},
+					{ groupMetadata, quoted: message }
+				);
+
+				if (index + 1 >= result.length) {
+					return;
+				}
+
+				const wait = await waitForInput(client, {
+					message: 'Do you want to get more image? [y/n]',
+					expectedType: ['conversation', 'extendedTextMessage'],
+					from,
+					sender,
+					timeInSecond: 10
+				});
+
+				if (wait.timeout) {
+					return;
+				}
+
+				const isYes = yn(wait.message);
+
+				if (isYes === undefined) {
+					return;
+				}
+
+				if (isYes) {
+					await send();
+				}
+			};
+
+			await send();
 		}
 	}
 };
