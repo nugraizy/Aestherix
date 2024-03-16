@@ -1,6 +1,6 @@
 {
   "name": "aestherix",
-  "version": "4.6.0",
+  "version": "4.6.1",
   "description": "WhatsApp bot using Baileys library with Javascript language.",
   "exports": "./index.js",
   "main": "./index.js",
@@ -27,7 +27,10 @@
   "__comment": "If you happen to occur cld package installation error, install the version 2.8.2 or below.",
   "___comment": "If you happen to occur colorthief error (while using spotifycover command), try reinstall colorthief.",
   "nodemonConfig": {
-    "ignore": ["test/**", "*.json"],
+    "ignore": [
+      "test/**",
+      "*.json"
+    ],
     "delay": 500
   },
   "dependencies": {
