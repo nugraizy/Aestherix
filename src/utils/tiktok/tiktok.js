@@ -285,34 +285,6 @@ class ResponseParser {
 			videoCount: totalVideo
 		} = arr.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.stats;
 
-		// const data =
-		// 	Object.keys(arr?.ItemModule || []).length === 0
-		// 		? []
-		// 		: Object.values(arr.ItemModule).map((v) => ({
-		// 				id: v.id,
-		// 				uploaded: Number(v.createTime),
-		// 				liked: v.stats.diggCount,
-		// 				shared: v.stats.shareCount,
-		// 				comment: v.stats.commentCount,
-		// 				view: v.stats.playCount,
-		// 				duration: v.video.duration,
-		// 				ratio: v.video.ratio,
-		// 				width: v.video.width,
-		// 				height: v.video.height,
-		// 				url: {
-		// 					sourceUrl: _apiBaseVideo(arr.UserPage.uniqueId, v.id),
-		// 					music: {
-		// 						title: v.music.title,
-		// 						author: v.music.authorName,
-		// 						duration: v.music.duration,
-		// 						album: v.music.album || 'single',
-		// 						url: v.music.playUrl,
-		// 						[v.music?.coverHd ? 'coverHd' : v.music?.coverLarge ? 'coverLarge' : 'coverMedium']:
-		// 							v.music.coverHd || v.music.coverLarge || v.music.coverMedium
-		// 					}
-		// 				}
-		// 		  })); /* eslint-disable-line */
-
 		return {
 			keyword,
 			username,
@@ -326,22 +298,63 @@ class ResponseParser {
 			following,
 			heart,
 			totalVideo
-			// posts: data
 		};
+	}
+
+	/**
+	 * @private
+	 */
+	_parseUsersInfo(dataUsers) {
+		const { user_list: userList } = dataUsers;
+
+		return userList.map(({ user_info: userInfo }) => {
+			const {
+				uid: keyword,
+				nickname: fullName,
+				unique_id: username,
+				signature: biography,
+				enterprise_verify_reason: isVerified,
+				follower_count: followers,
+				following_count: following,
+				total_favorited: heart,
+				aweme_count: totalVideo,
+				avatar_larger: {
+					url_list: [, profileHD]
+				},
+				avatar_medium: {
+					url_list: [, profileSD]
+				},
+				avatar_thumb: {
+					url_list: [, profileLOW]
+				}
+			} = userInfo;
+
+			return {
+				keyword,
+				fullName,
+				username,
+				biography,
+				isVerified: !!isVerified,
+				followers,
+				following,
+				heart,
+				totalVideo,
+				profileHD,
+				profileSD,
+				profileLOW
+			};
+		});
 	}
 }
 
 class RequestModule extends ResponseParser {
 	constructor() {
 		super();
-	}
-	/**
-	 * @private
-	 */
-	_request() {
-		return axios.create({
-			baseURL: API_BASE_URL
-		});
+		this.device_id = Array.from({ length: 19 }, () => Math.floor(Math.random() * 10).toString()).join(''); // eslint-disable-line
+		this.openudid = randomChar('0123456789abcdef', 16);
+		this.uuid = randomChar('1234567890', 16);
+
+		this.cookie = COOKIE.TIKTOK_COOKIE.replace(/\n/g, '');
 	}
 
 	/**
@@ -352,7 +365,7 @@ class RequestModule extends ResponseParser {
 			headers: {
 				'User-Agent':
 					'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 YaBrowser/23.1.5.750 (beta) Yowser/2.5 Safari/537.36',
-				Cookie: COOKIE.TIKTOK_COOKIE.replace(/\n/g, '')
+				Cookie: this.cookie
 			}
 		};
 	}
@@ -377,8 +390,8 @@ class RequestModule extends ResponseParser {
 			build_number: '10.3.3',
 			manifest_version_code: '100303',
 			update_version_code: '100303',
-			openudid: randomChar('0123456789abcdef', 16),
-			uuid: randomChar('1234567890', 16),
+			openudid: this.openudid,
+			uuid: this.uuid,
 			_rticket: Date.now() * 1000,
 			ts: Date.now(),
 			device_brand: 'Google',
@@ -414,22 +427,16 @@ class RequestModule extends ResponseParser {
 	 * @private
 	 */
 	async _awemeRequest(path, { method, body, config = {} }) {
-		try {
-			if (method === 'GET') {
-				const { data } = await this._request().get(path + body, config);
+		if (method === 'GET') {
+			const data = await fetch(API_BASE_URL + path + body, config);
+			const json = await data.json().catch(() => '');
 
-				return data;
-			} else {
-				const { data } = await this._request().post(path + body, null, config);
+			return json;
+		} else {
+			const data = await fetch(API_BASE_URL + path + body, { ...config, method: 'POST' });
+			const json = await data.json().catch(() => '');
 
-				return data;
-			}
-		} catch (error) {
-			if (axios.isAxiosError(error)) {
-				return { error: error.message };
-			} else {
-				throw error;
-			}
+			return json;
 		}
 	}
 
@@ -457,119 +464,195 @@ class RequestModule extends ResponseParser {
 	 * @private
 	 */
 	async _fetchUserPostsAttempt(userDetails) {
-		const body = this._buildApiUrl({
-			/* eslint-disable */
-			version_name: '20.9.3',
-			version_code: '293',
-			build_number: '20.9.3',
-			manifest_version_code: '293',
-			update_version_code: '293',
+		return new Promise(async (resolve, reject) => {
+			try {
+				const body = this._buildApiUrl({
+					/* eslint-disable */
+					version_name: '20.9.3',
+					version_code: '293',
+					build_number: '20.9.3',
+					manifest_version_code: '293',
+					update_version_code: '293',
 
-			user_id: userDetails.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.user.id,
-			count: 30,
-			max_cursor: 0,
-			min_cursor: 0,
-			retry_type: 'no_retry',
-			device_id: Array.from({ length: 19 }, () => Math.floor(Math.random() * 10).toString()).join('')
-			/* eslint-enable */
-		});
+					user_id: userDetails.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.user.id,
+					count: 30,
+					max_cursor: 0,
+					min_cursor: 0,
+					retry_type: 'no_retry',
+					device_id: this.device_id
+					/* eslint-enable */
+				});
 
-		let data;
-		const config = this._getRequestConfig();
+				const config = this._getRequestConfig();
 
-		config.headers['User-Agent'] =
-			'com.ss.android.ugc.trill/100303 (Linux; U; Android 10; en_US; Pixel 4; Build/QQ3A.200805.001; Cronet/58.0.2991.0)';
-		try {
-			await asyncRetry(
-				async (bail) => {
-					const bodyFetch = await fetch('https://api.tiktokv.com/aweme/v1/aweme/post/?' + body, {
-						method: 'GET',
-						...config
-					});
+				config.headers['User-Agent'] =
+					'com.ss.android.ugc.trill/100303 (Linux; U; Android 10; en_US; Pixel 4; Build/QQ3A.200805.001; Cronet/58.0.2991.0)';
 
-					if (bodyFetch.headers.get('content-length') === '0') {
-						throw new Error('No data found');
-					}
+				const data = await asyncRetry(
+					async (bail) => {
+						const request = async () => {
+							const bodyFetch = await fetch('https://api.tiktokv.com/aweme/v1/aweme/post/?' + body, {
+								method: 'GET',
+								...config
+							});
 
-					const dataFinale = await bodyFetch.json();
+							if (bodyFetch.headers.get('content-length') === '0') {
+								throw new Error('No data found');
+							}
 
-					if (dataFinale.status_msg) {
-						data = {
-							error: 'User does not have any post'
+							return bodyFetch;
 						};
 
-						bail(new Error('No data found'));
-					}
+						const container = [];
 
-					if (dataFinale !== '') {
-						data = dataFinale;
-						return;
-					}
+						for (let i = 0; i < 200; i++) {
+							container.push(request());
+						}
 
-					throw new Error('No data found');
-				},
-				{
-					forever: true,
-					minTimeout: 0,
-					maxTimeout: 0
+						const resultPromises = await Promise.any(container);
+
+						const dataFinale = await resultPromises.json();
+
+						if (dataFinale.status_msg) {
+							bail(new Error('User does not have any post'));
+						}
+
+						if (dataFinale !== '') {
+							return dataFinale;
+						}
+					},
+					{
+						maxRetryTime: 20_000,
+						minTimeout: 0
+					}
+				);
+
+				if (data instanceof Error) {
+					resolve({
+						error: data.message
+					});
 				}
-			);
-		} catch (e) {
-			console.log(e);
-		}
 
-		return data;
+				resolve(data);
+			} catch (error) {
+				reject(error);
+			}
+		});
 	}
 
 	/**
 	 * @private
 	 */
-	async _fetchSearchUserDataAttempt(username) {
-		const body = this._buildApiUrl({
-			keyword: username,
-			cursor: '0',
-			count: '30',
-			type: '1',
-			hot_search: '0' /* eslint-disable-line*/,
-			source: 'discover'
+	_fetchSearchUserDataAttempt(username) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const body = this._buildApiUrl({
+					keyword: username,
+					cursor: '0',
+					count: '30',
+					type: '1',
+					hot_search: '0' /* eslint-disable-line*/,
+					source: 'discover'
+				});
+
+				const data = await asyncRetry(
+					async () => {
+						const request = async () => {
+							const data = await this._awemeRequest('aweme/v1/discover/search/?', {
+								method: 'POST',
+								body,
+								config: this._getRequestConfig()
+							});
+
+							if (data === '') {
+								throw new Error('No data');
+							}
+
+							return data;
+						};
+
+						const container = [];
+
+						for (let i = 0; i < 200; i++) {
+							container.push(request());
+						}
+
+						const resultPromises = await Promise.any(container);
+
+						return resultPromises;
+					},
+					{
+						maxRetryTime: 20_000,
+						minTimeout: 0
+					}
+				);
+
+				if (!data) {
+					resolve({ error: 'User not found. Please try again later.' });
+				}
+
+				resolve(this._parseUsersInfo(data));
+			} catch (error) {
+				reject(error);
+			}
 		});
-
-		const data = await this._awemeRequest('aweme/v1/discover/search/?', {
-			method: 'POST',
-			body,
-			config: this._getRequestConfig()
-		});
-
-		if (data === '') {
-			throw new Error('No data found');
-		}
-
-		return data;
 	}
 
 	/**
 	 * @private
 	 */
 	async _fetchVideoDataAttempt(videoId) {
-		const body = this._buildApiUrl({
-			aweme_id: videoId, // eslint-disable-line
-			version_name: '1.1.9', // eslint-disable-line
-			version_code: '2018111632', // eslint-disable-line
-			build_number: '1.1.9', // eslint-disable-line
-			manifest_version_code: '2018111632', // eslint-disable-line
-			update_version_code: '2018111632' // eslint-disable-line
+		return new Promise(async (resolve, reject) => {
+			try {
+				const body = this._buildApiUrl({
+					aweme_id: videoId, // eslint-disable-line
+					version_name: '1.1.9', // eslint-disable-line
+					version_code: '2018111632', // eslint-disable-line
+					build_number: '1.1.9', // eslint-disable-line
+					manifest_version_code: '2018111632', // eslint-disable-line
+					update_version_code: '2018111632' // eslint-disable-line
+				});
+
+				const data = await asyncRetry(
+					async () => {
+						const request = async () => {
+							const data = await this._awemeRequest('aweme/v1/feed/?', {
+								method: 'GET',
+								body
+							});
+
+							if (data === '') {
+								throw new Error('No data');
+							}
+
+							return data;
+						};
+
+						const container = [];
+
+						for (let i = 0; i < 200; i++) {
+							container.push(request());
+						}
+
+						const resultPromises = await Promise.any(container);
+
+						return this._mergeMediaResponse(resultPromises, videoId);
+					},
+					{
+						maxRetryTime: 20_000,
+						minTimeout: 0
+					}
+				);
+
+				if (!data) {
+					resolve({ error: 'Post not found. Please try again later.' });
+				}
+
+				resolve(data);
+			} catch (error) {
+				reject(error);
+			}
 		});
-
-		const data = await this._awemeRequest('aweme/v1/feed/?', {
-			method: 'GET',
-			body
-		});
-
-		if (data === '') {
-			throw new Error('No data found');
-		}
-
-		return data;
 	}
 
 	/**
@@ -662,32 +745,32 @@ class TiktokUtils extends RequestModule {
 	/**
 	 * @private
 	 */
+	async _fetchVideoData(url) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const videoId = await this._getVideoId(url);
+
+				if (videoId.error) {
+					resolve(videoId);
+				}
+
+				resolve(await this._fetchVideoDataAttempt(videoId));
+			} catch (error) {
+				reject(error);
+			}
+		});
+	}
+
+	/**
+	 * @private
+	 */
 	async _fetchSearchUserData(username) {
-		return new Promise(async (resolve) => {
-			let container = [];
-
-			const timeout = setTimeout(() => {
-				resolve({ error: 'User not found. Please try again later.' });
-			}, 10000);
-
-			const trySearch = async () => {
-				container = [];
-
-				for (let i = 0; i < 200; i++) {
-					container.push(this._fetchSearchUserDataAttempt(username));
-				}
-
-				try {
-					const result = await Promise.any(container);
-
-					clearTimeout(timeout);
-					resolve(result);
-				} catch (error) {
-					return await trySearch();
-				}
-			};
-
-			return trySearch();
+		return new Promise(async (resolve, reject) => {
+			try {
+				resolve(await this._fetchSearchUserDataAttempt(username));
+			} catch (error) {
+				reject(error);
+			}
 		});
 	}
 
@@ -714,48 +797,6 @@ class TiktokUtils extends RequestModule {
 				}
 
 				resolve(this._parseCrawlerResponse(data, userData));
-			} catch (error) {
-				reject(error);
-			}
-		});
-	}
-
-	/**
-	 * @private
-	 */
-	async _fetchVideoData(url) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				const videoId = await this._getVideoId(url);
-
-				if (videoId.error) {
-					resolve(videoId);
-				}
-
-				let container = [];
-
-				const timeout = setTimeout(() => {
-					resolve({ error: 'Post not found. Please try again later.' });
-				}, 20_000);
-
-				const trySearch = async () => {
-					container = [];
-
-					for (let i = 0; i < 300; i++) {
-						container.push(this._fetchVideoDataAttempt(videoId));
-					}
-
-					try {
-						const result = await Promise.any(container);
-
-						clearTimeout(timeout);
-						resolve(this._mergeMediaResponse(result, videoId));
-					} catch (error) {
-						return await trySearch();
-					}
-				};
-
-				return await trySearch();
 			} catch (error) {
 				reject(error);
 			}
