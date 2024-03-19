@@ -350,9 +350,6 @@ class ResponseParser {
 class RequestModule extends ResponseParser {
 	constructor() {
 		super();
-		this.device_id = Array.from({ length: 19 }, () => Math.floor(Math.random() * 10).toString()).join(''); // eslint-disable-line
-		this.openudid = randomChar('0123456789abcdef', 16);
-		this.uuid = randomChar('1234567890', 16);
 
 		this.cookie = COOKIE.TIKTOK_COOKIE.replace(/\n/g, '');
 	}
@@ -390,16 +387,16 @@ class RequestModule extends ResponseParser {
 			build_number: '10.3.3',
 			manifest_version_code: '100303',
 			update_version_code: '100303',
-			openudid: this.openudid,
-			uuid: this.uuid,
+			openudid: randomChar('0123456789abcdef', 16),
+			uuid: randomChar('1234567890', 16),
 			_rticket: Date.now() * 1000,
 			ts: Date.now(),
 			device_brand: 'Google',
-			device_type: 'Pixel 4',
+			device_type: 'Pixel 7',
 			device_platform: 'android',
-			resolution: '1080*1920',
+			resolution: '1080*2400',
 			dpi: 420,
-			os_version: '10',
+			os_version: '13',
 			os_api: '29',
 			carrier_region: 'US',
 			sys_region: 'US',
@@ -468,25 +465,26 @@ class RequestModule extends ResponseParser {
 			try {
 				const body = this._buildApiUrl({
 					/* eslint-disable */
-					version_name: '20.9.3',
-					version_code: '293',
-					build_number: '20.9.3',
-					manifest_version_code: '293',
-					update_version_code: '293',
+					version_name: '26.1.3',
+					version_code: '260103',
+					build_number: '26.1.3',
+					manifest_version_code: '260103',
+					update_version_code: '260103',
 
 					user_id: userDetails.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.user.id,
 					count: 30,
 					max_cursor: 0,
 					min_cursor: 0,
 					retry_type: 'no_retry',
-					device_id: this.device_id
+					device_id: Array.from({ length: 19 }, () => Math.floor(Math.random() * 10).toString()).join('')
 					/* eslint-enable */
 				});
 
 				const config = this._getRequestConfig();
 
 				config.headers['User-Agent'] =
-					'com.ss.android.ugc.trill/100303 (Linux; U; Android 10; en_US; Pixel 4; Build/QQ3A.200805.001; Cronet/58.0.2991.0)';
+					'com.ss.android.ugc.trill/260103 (Linux; U; Android 13; en_US; Pixel 7; Build/TD1A.220804.031; Cronet/58.0.2991.0)';
+				config.headers['Accept'] = 'application/json';
 
 				const data = await asyncRetry(
 					async (bail) => {
@@ -496,11 +494,21 @@ class RequestModule extends ResponseParser {
 								...config
 							});
 
-							if (bodyFetch.headers.get('content-length') === '0') {
-								throw new Error('No data found');
+							if (!bodyFetch.ok || bodyFetch.status !== 200) {
+								throw new Error(bodyFetch.statusText);
 							}
 
-							return bodyFetch;
+							try {
+								const json = await bodyFetch.json();
+
+								if (!json) {
+									throw new Error('No data found');
+								}
+
+								return json;
+							} catch {
+								throw new Error('Something went wrong while processing json');
+							}
 						};
 
 						const container = [];
@@ -511,15 +519,11 @@ class RequestModule extends ResponseParser {
 
 						const resultPromises = await Promise.any(container);
 
-						const dataFinale = await resultPromises.json();
-
-						if (dataFinale.status_msg) {
+						if (resultPromises.status_msg) {
 							bail(new Error('User does not have any post'));
 						}
 
-						if (dataFinale !== '') {
-							return dataFinale;
-						}
+						return resultPromises;
 					},
 					{
 						maxRetryTime: 20_000,
@@ -606,11 +610,11 @@ class RequestModule extends ResponseParser {
 			try {
 				const body = this._buildApiUrl({
 					aweme_id: videoId, // eslint-disable-line
-					version_name: '1.1.9', // eslint-disable-line
-					version_code: '2018111632', // eslint-disable-line
-					build_number: '1.1.9', // eslint-disable-line
-					manifest_version_code: '2018111632', // eslint-disable-line
-					update_version_code: '2018111632' // eslint-disable-line
+					version_name: '26.1.3', // eslint-disable-line
+					version_code: '260103', // eslint-disable-line
+					build_number: '26.1.3', // eslint-disable-line
+					manifest_version_code: '260103', // eslint-disable-line
+					update_version_code: '260103' // eslint-disable-line
 				});
 
 				const data = await asyncRetry(
