@@ -2,6 +2,7 @@ import axios from 'axios';
 import { load } from 'cheerio';
 import asyncRetry from 'async-retry';
 import { fetch } from 'undici';
+import crypto from 'crypto';
 
 import { randomChar, isURL } from '../modules/index.js';
 import { COOKIE } from './cookie.js';
@@ -357,6 +358,17 @@ class RequestModule extends ResponseParser {
 	/**
 	 * @private
 	 */
+	_msToken() {
+		const timestamp = Date.now().toString();
+		const sha1 = crypto.createHash('sha1').update(timestamp).digest('hex');
+		const md5 = crypto.createHash('md5').update(sha1).digest('hex');
+
+		return md5;
+	}
+
+	/**
+	 * @private
+	 */
 	_getRequestConfig() {
 		return {
 			headers: {
@@ -471,12 +483,12 @@ class RequestModule extends ResponseParser {
 					manifest_version_code: '260103',
 					update_version_code: '260103',
 
-					user_id: userDetails.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.user.id,
+					sec_user_id: userDetails.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.user.secUid,
 					count: 30,
 					max_cursor: 0,
 					min_cursor: 0,
-					retry_type: 'no_retry',
-					device_id: Array.from({ length: 19 }, () => Math.floor(Math.random() * 10).toString()).join('')
+					device_id: Array.from({ length: 19 }, () => Math.floor(Math.random() * 10).toString()).join(''),
+					mas: this._msToken()
 					/* eslint-enable */
 				});
 
@@ -485,6 +497,7 @@ class RequestModule extends ResponseParser {
 				config.headers['User-Agent'] =
 					'com.ss.android.ugc.trill/260103 (Linux; U; Android 13; en_US; Pixel 7; Build/TD1A.220804.031; Cronet/58.0.2991.0)';
 				config.headers['Accept'] = 'application/json';
+				config.headers['Host'] = 'api.tiktokv.com';
 
 				const data = await asyncRetry(
 					async (bail) => {
@@ -526,8 +539,9 @@ class RequestModule extends ResponseParser {
 						return resultPromises;
 					},
 					{
-						maxRetryTime: 20_000,
-						minTimeout: 0
+						maxRetryTime: 60 * 1000,
+						minTimeout: 0,
+						retries: 20
 					}
 				);
 
@@ -550,14 +564,21 @@ class RequestModule extends ResponseParser {
 	_fetchSearchUserDataAttempt(username) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				/* eslint-disable */
 				const body = this._buildApiUrl({
 					keyword: username,
 					cursor: '0',
 					count: '30',
 					type: '1',
-					hot_search: '0' /* eslint-disable-line*/,
-					source: 'discover'
+					hot_search: '0',
+					source: 'discover',
+					mas: this._msToken()
+					/* eslint-enable */
 				});
+
+				const config = this._getRequestConfig();
+
+				config.headers['Host'] = 'api22-normal-c-useast2a.tiktokv.com';
 
 				const data = await asyncRetry(
 					async () => {
@@ -565,7 +586,7 @@ class RequestModule extends ResponseParser {
 							const data = await this._awemeRequest('aweme/v1/discover/search/?', {
 								method: 'POST',
 								body,
-								config: this._getRequestConfig()
+								config
 							});
 
 							if (data === '') {
@@ -586,8 +607,9 @@ class RequestModule extends ResponseParser {
 						return resultPromises;
 					},
 					{
-						maxRetryTime: 20_000,
-						minTimeout: 0
+						maxRetryTime: 60 * 1000,
+						minTimeout: 0,
+						retries: 20
 					}
 				);
 
@@ -609,12 +631,15 @@ class RequestModule extends ResponseParser {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const body = this._buildApiUrl({
-					aweme_id: videoId, // eslint-disable-line
-					version_name: '26.1.3', // eslint-disable-line
-					version_code: '260103', // eslint-disable-line
-					build_number: '26.1.3', // eslint-disable-line
-					manifest_version_code: '260103', // eslint-disable-line
-					update_version_code: '260103' // eslint-disable-line
+					/* eslint-disable */
+					aweme_id: videoId,
+					version_name: '26.1.3',
+					version_code: '260103',
+					build_number: '26.1.3',
+					manifest_version_code: '260103',
+					update_version_code: '260103',
+					mas: this._msToken()
+					/* eslint-enable */
 				});
 
 				const data = await asyncRetry(
@@ -622,7 +647,12 @@ class RequestModule extends ResponseParser {
 						const request = async () => {
 							const data = await this._awemeRequest('aweme/v1/feed/?', {
 								method: 'GET',
-								body
+								body,
+								config: {
+									headers: {
+										host: 'api22-normal-c-useast2a.tiktokv.com'
+									}
+								}
 							});
 
 							if (data === '') {
@@ -643,8 +673,9 @@ class RequestModule extends ResponseParser {
 						return this._mergeMediaResponse(resultPromises, videoId);
 					},
 					{
-						maxRetryTime: 20_000,
-						minTimeout: 0
+						maxRetryTime: 60 * 1000,
+						minTimeout: 0,
+						retries: 20
 					}
 				);
 
