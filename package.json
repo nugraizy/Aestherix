@@ -1,6 +1,6 @@
 {
   "name": "aestherix",
-  "version": "4.6.2",
+  "version": "4.6.3",
   "description": "WhatsApp bot using Baileys library with Javascript language.",
   "exports": "./index.js",
   "main": "./index.js",
