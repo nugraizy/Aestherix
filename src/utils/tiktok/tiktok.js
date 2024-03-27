@@ -352,6 +352,36 @@ class RequestModule extends ResponseParser {
 	constructor() {
 		super();
 
+		this.commonParameters = {
+			/* eslint-disable */
+			WebIdLastTime: Date.now(),
+			aid: '1988',
+			app_language: 'en',
+			app_name: 'tiktok_web',
+			browser_language: 'en-US',
+			browser_name: 'Mozilla',
+			browser_online: true,
+			browser_platform: 'Win32',
+			browser_version:
+				'5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0',
+			channel: 'tiktok_web',
+			cookie_enabled: true,
+			device_id: '7340508178566366722',
+			device_platform: 'web_pc',
+			focus_state: false,
+			history_len: 5,
+			is_fullscreen: false,
+			is_page_visible: true,
+			os: 'windows',
+			priority_region: 'ID',
+			referer: '',
+			region: 'ID',
+			screen_height: 768,
+			screen_width: 1366,
+			tz_name: 'Asia/Jakarta',
+			webcast_language: 'en'
+			/* eslint-enable */
+		};
 		this.cookie = COOKIE.TIKTOK_COOKIE.replace(/\n/g, '');
 	}
 
@@ -394,38 +424,13 @@ class RequestModule extends ResponseParser {
 	_buildRequestParams(params) {
 		const defaultParams = {
 			/* eslint-disable */
-			version_name: '10.3.3',
-			version_code: '100303',
-			build_number: '10.3.3',
-			manifest_version_code: '100303',
-			update_version_code: '100303',
-			openudid: randomChar('0123456789abcdef', 16),
-			uuid: randomChar('1234567890', 16),
-			_rticket: Date.now() * 1000,
-			ts: Date.now(),
-			device_brand: 'Google',
-			device_type: 'Pixel 7',
-			device_platform: 'android',
-			resolution: '1080*2400',
-			dpi: 420,
-			os_version: '13',
-			os_api: '29',
-			carrier_region: 'US',
-			sys_region: 'US',
-			region: 'US',
-			app_name: 'trill',
-			app_language: 'en',
-			language: 'en',
-			timezone_name: 'America/New_York',
-			timezone_offset: '-14400',
-			channel: 'googleplay',
-			ac: 'wifi',
-			mcc_mnc: '310260',
-			is_my_cn: 0,
-			aid: 1180,
-			ssmix: 'a',
-			as: 'a1qwert123',
-			cp: 'cbfhckdckkde1'
+			version_name: '30.9.4',
+			version_code: '300904',
+			build_number: '30.9.4',
+			manifest_version_code: '300904',
+			update_version_code: '300904',
+			iid: '7318518857994389254'
+
 			/* eslint-enable */
 		};
 
@@ -452,21 +457,29 @@ class RequestModule extends ResponseParser {
 	/**
 	 * @private
 	 */
-	async _getSigiUser(username) {
-		let data = await axios.get(`https://www.tiktok.com/${username}`, {
-			...this._getRequestConfig(),
-			validateStatus: () => true
+	async _getUserDetail(username) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				username = '@' + username.replace('@', '');
+
+				let data = await axios.get(`https://www.tiktok.com/${username}`, {
+					...this._getRequestConfig(),
+					validateStatus: () => true
+				});
+
+				if (data.status === 404) {
+					return { error: 'User not found' };
+				}
+
+				data = data.data;
+
+				const rawData = load(data)('script[id=__UNIVERSAL_DATA_FOR_REHYDRATION__]').html();
+
+				resolve(JSON.parse(rawData));
+			} catch (error) {
+				reject(error);
+			}
 		});
-
-		if (data.status === 404) {
-			return { error: 'User not found' };
-		}
-
-		data = data.data;
-
-		const rawData = load(data)('script[id=__UNIVERSAL_DATA_FOR_REHYDRATION__]').html();
-
-		return JSON.parse(rawData);
 	}
 
 	/**
@@ -566,6 +579,38 @@ class RequestModule extends ResponseParser {
 			try {
 				/* eslint-disable */
 				const body = this._buildApiUrl({
+					version_name: '10.3.3',
+					version_code: '100303',
+					build_number: '10.3.3',
+					manifest_version_code: '100303',
+					update_version_code: '100303',
+					openudid: randomChar('0123456789abcdef', 16),
+					uuid: randomChar('1234567890', 16),
+					_rticket: Date.now() * 1000,
+					ts: Date.now(),
+					device_brand: 'Google',
+					device_type: 'Pixel 7',
+					device_platform: 'android',
+					resolution: '1080*2400',
+					dpi: 420,
+					os_version: '13',
+					os_api: '29',
+					carrier_region: 'US',
+					sys_region: 'US',
+					region: 'US',
+					app_name: 'trill',
+					app_language: 'en',
+					language: 'en',
+					timezone_name: 'America/New_York',
+					timezone_offset: '-14400',
+					channel: 'googleplay',
+					ac: 'wifi',
+					mcc_mnc: '310260',
+					is_my_cn: 0,
+					aid: 1180,
+					ssmix: 'a',
+					as: 'a1qwert123',
+					cp: 'cbfhckdckkde1',
 					keyword: username,
 					cursor: '0',
 					count: '30',
@@ -578,13 +623,11 @@ class RequestModule extends ResponseParser {
 
 				const config = this._getRequestConfig();
 
-				config.headers['Host'] = 'api22-normal-c-useast2a.tiktokv.com';
-
 				const data = await asyncRetry(
 					async () => {
 						const request = async () => {
 							const data = await this._awemeRequest('aweme/v1/discover/search/?', {
-								method: 'POST',
+								method: 'GET',
 								body,
 								config
 							});
@@ -633,51 +676,34 @@ class RequestModule extends ResponseParser {
 				const body = this._buildApiUrl({
 					/* eslint-disable */
 					aweme_id: videoId,
-					version_name: '26.1.3',
-					version_code: '260103',
-					build_number: '26.1.3',
-					manifest_version_code: '260103',
-					update_version_code: '260103',
-					mas: this._msToken()
+					device_id: Array.from({ length: 19 }, () => Math.floor(Math.random() * 10).toString()).join('')
 					/* eslint-enable */
 				});
 
-				const data = await asyncRetry(
-					async () => {
-						const request = async () => {
-							const data = await this._awemeRequest('aweme/v1/feed/?', {
-								method: 'GET',
-								body,
-								config: {
-									headers: {
-										host: 'api22-normal-c-useast2a.tiktokv.com'
-									}
-								}
-							});
+				const config = this._getRequestConfig();
 
-							if (data === '') {
-								throw new Error('No data');
-							}
+				config.headers['User-Agent'] =
+					'com.ss.android.ugc.trill/260103 (Linux; U; Android 13; en_US; Pixel 7; Build/TD1A.220804.031; Cronet/58.0.2991.0)';
+				config.headers['Accept'] = 'application/json';
+				config.headers.Cookie = '';
 
-							return data;
-						};
+				const request = async () => {
+					const data = await this._awemeRequest('aweme/v1/feed/?', {
+						method: 'GET',
+						body,
+						config
+					});
 
-						const container = [];
-
-						for (let i = 0; i < 200; i++) {
-							container.push(request());
-						}
-
-						const resultPromises = await Promise.any(container);
-
-						return this._mergeMediaResponse(resultPromises, videoId);
-					},
-					{
-						maxRetryTime: 60 * 1000,
-						minTimeout: 0,
-						retries: 20
+					if (data === '') {
+						throw new Error('No data');
 					}
-				);
+
+					return data;
+				};
+
+				const resultPromises = await request();
+
+				const data = this._mergeMediaResponse(resultPromises, videoId);
 
 				if (!data) {
 					resolve({ error: 'Post not found. Please try again later.' });
@@ -694,7 +720,7 @@ class RequestModule extends ResponseParser {
 	 * @private
 	 */
 	async _fetchUserDetailAttempt(username) {
-		const data = await this._getSigiUser(username);
+		const data = await this._getUserDetail(username);
 
 		if (data.error) {
 			return data;
@@ -745,7 +771,7 @@ class RequestModule extends ResponseParser {
 			return { error: 'Download failed. either the access is denied, or other error.' };
 		}
 
-		const userData = await this._getSigiUser(`@${dataPosts.author.unique_id}`);
+		const userData = await this._getUserDetail(dataPosts.author.unique_id);
 
 		if (userData.error) {
 			return userData;
@@ -815,11 +841,7 @@ class TiktokUtils extends RequestModule {
 	async _fetchUserPosts(username) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				if (!username.startsWith('@')) {
-					username = `@${username.replace(/[^a-zA-Z0-9_.]/gi, '')}`;
-				}
-
-				const userData = await this._getSigiUser(username);
+				const userData = await this._getUserDetail(username);
 
 				if (userData.error) {
 					resolve(userData);
