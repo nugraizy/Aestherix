@@ -216,6 +216,386 @@ export const assign = (client) => {
 			]
 		});
 
+	class InteractiveButtons {
+		button = {
+			copy(data) {
+				return {
+					name: 'cta_copy',
+					buttonParamsJson: JSON.stringify({
+						display_text: data.display /* eslint-disable-line */,
+						copy_code: data.code /* eslint-disable-line */
+					})
+				};
+			},
+
+			reply(data) {
+				return {
+					name: 'quick_reply',
+					buttonParamsJson: JSON.stringify({
+						display_text: data.display /* eslint-disable-line */,
+						id: data.id
+					})
+				};
+			},
+
+			url(data) {
+				return {
+					name: 'cta_url',
+					buttonParamsJson: JSON.stringify({
+						display_text: data.display /* eslint-disable-line */,
+						url: data.url,
+						merchant_url: data.url /* eslint-disable-line */
+					})
+				};
+			},
+
+			list(data) {
+				return {
+					name: 'single_select',
+					buttonParamsJson: JSON.stringify({
+						title: data.display,
+						sections: data.sections
+					})
+				};
+			},
+
+			call(data) {
+				return {
+					name: 'cta_call',
+					buttonParamsJson: JSON.stringify({
+						display_text: data.display /* eslint-disable-line */,
+						id: data.id
+					})
+				};
+			},
+
+			reminder(data) {
+				return {
+					name: 'cta_reminder',
+					buttonParamsJson: JSON.stringify({
+						display_text: data.display /* eslint-disable-line */,
+						id: data.id
+					})
+				};
+			},
+
+			cancel(data) {
+				return {
+					name: 'cta_cancel_reminder',
+					buttonParamsJson: JSON.stringify({
+						display_text: data.display /* eslint-disable-line */,
+						id: data.id
+					})
+				};
+			},
+
+			address(data) {
+				return {
+					name: 'address_message',
+					buttonParamsJson: JSON.stringify({
+						display_text: data.display /* eslint-disable-line */,
+						id: data.id
+					})
+				};
+			},
+
+			location() {
+				return {
+					name: 'send_location',
+					buttonParamsJson: ''
+				};
+			}
+		};
+	}
+
+	class Carousel extends InteractiveButtons {
+		constructor(client) {
+			super();
+
+			/**
+			 * @private
+			 */
+			this.client = client;
+
+			/**
+			 * @private
+			 */
+			this._media = null;
+
+			/**
+			 * @private
+			 */
+			this._cards = [];
+
+			/**
+			 * @private
+			 */
+			this._buildParams = {
+				message: {
+					messageContextInfo: {
+						deviceListMetadata: {},
+						deviceListMetadataVersion: 2
+					},
+					interactiveMessage: {
+						body: {
+							text: ''
+						},
+						footer: {
+							text: ''
+						},
+						header: {
+							title: ''
+						},
+
+						carouselMessage: {
+							cards: []
+						}
+					}
+				}
+			};
+		}
+
+		async render() {
+			this._cards = await Promise.all(this._cards);
+			this._media = !this._media ? { hasMediaAttachment: false } : await this.prepareMessage(this._media);
+
+			this._buildParams.message.interactiveMessage.carouselMessage.cards = this._cards;
+			this._buildParams.message.interactiveMessage.header = {
+				...this._buildParams.message.interactiveMessage.header,
+				...this._media
+			};
+
+			return generateWAMessageFromContent(
+				'0@s.whatsapp.net',
+				{
+					viewOnceMessage: this._buildParams
+				},
+				{}
+			);
+		}
+
+		mainBody(text) {
+			this._buildParams.message.interactiveMessage.body.text = text;
+
+			return this;
+		}
+
+		mainFooter(text) {
+			this._buildParams.message.interactiveMessage.footer.text = text;
+
+			return this;
+		}
+
+		mainHeader(text, media) {
+			this._buildParams.message.interactiveMessage.header.text = text;
+			this._media = media;
+
+			return this;
+		}
+
+		async prepareMessage(media) {
+			if (Buffer.isBuffer(media)) {
+				const mime = (await fileTypeFromBuffer(media))?.mime;
+				const messageType = mime?.includes('video') ? 'videoMessage' : 'imageMessage';
+
+				return {
+					[messageType]: (await this.client.instance.prepareMedia(media, messageType)).message[messageType],
+					hasMediaAttachment: true
+				};
+			} else if (typeof media === 'string') {
+				if (isURL(media)) {
+					const response = await fetch(media);
+					const buffer = Buffer.from(await response.arrayBuffer(), 'base64');
+					const mime = (await fileTypeFromBuffer(buffer)).mime;
+					const messageType = mime.includes('image') ? 'imageMessage' : 'videoMessage';
+
+					return {
+						[messageType]: (await this.client.instance.prepareMedia(buffer, messageType)).message[messageType],
+						hasMediaAttachment: true
+					};
+				} else {
+					const messageType = 'imageMessage';
+
+					return {
+						[messageType]: (await this.client.instance.prepareMedia(Buffer.alloc(10), messageType)).message[messageType],
+						hasMediaAttachment: true
+					};
+				}
+			} else {
+				const messageType = 'imageMessage';
+
+				return {
+					[messageType]: (await this.client.instance.prepareMedia(Buffer.alloc(10), messageType)).message[messageType],
+					hasMediaAttachment: true
+				};
+			}
+		}
+
+		cards(cards) {
+			cards = cards.map(async ({ body, footer, title, header, buttons }) => {
+				const attachment = await this.prepareMessage(header || Buffer.alloc(10));
+
+				return {
+					body: {
+						text: body || ''
+					},
+					footer: {
+						text: footer || ''
+					},
+					header: {
+						title: title || '',
+						...attachment
+					},
+					nativeFlowMessage: {
+						buttons,
+						messageParamsJson: ''
+					}
+				};
+			});
+
+			this._cards = cards;
+
+			return this;
+		}
+	}
+
+	class Native extends InteractiveButtons {
+		constructor(client) {
+			super();
+
+			/**
+			 * @private
+			 */
+			this.client = client;
+
+			/**
+			 * @private
+			 */
+			this._media = null;
+
+			/**
+			 * @private
+			 */
+			this._buttons = [];
+
+			/**
+			 * @private
+			 */
+			this._buildParams = {
+				message: {
+					messageContextInfo: {
+						deviceListMetadata: {},
+						deviceListMetadataVersion: 2
+					},
+					interactiveMessage: {
+						body: {
+							text: ''
+						},
+						footer: {
+							text: ''
+						},
+						header: {
+							title: ''
+						},
+						nativeFlowMessage: {
+							buttons: [],
+							messageParamsJson: ''
+						}
+					}
+				}
+			};
+		}
+
+		mainBody(text) {
+			this._buildParams.message.interactiveMessage.body.text = text;
+
+			return this;
+		}
+
+		mainFooter(text) {
+			this._buildParams.message.interactiveMessage.footer.text = text;
+
+			return this;
+		}
+
+		mainHeader(text, media) {
+			this._buildParams.message.interactiveMessage.header.text = text;
+			this._media = media;
+
+			return this;
+		}
+
+		async render() {
+			this._media = !this._media ? { hasMediaAttachment: false } : await this.prepareMessage(this._media);
+
+			this._buildParams.message.interactiveMessage.header = {
+				...this._buildParams.message.interactiveMessage.header,
+				...this._media
+			};
+			this._buildParams.message.interactiveMessage.nativeFlowMessage.buttons = this._buttons;
+
+			return generateWAMessageFromContent(
+				'0@s.whatsapp.net',
+				{
+					viewOnceMessage: this._buildParams
+				},
+				{}
+			);
+		}
+
+		buttons(...buttons) {
+			this._buttons = buttons;
+
+			return this;
+		}
+
+		async prepareMessage(media) {
+			if (Buffer.isBuffer(media)) {
+				const mime = (await fileTypeFromBuffer(media))?.mime;
+				const messageType = mime?.includes('video') ? 'videoMessage' : 'imageMessage';
+
+				return {
+					[messageType]: (await this.client.instance.prepareMedia(media, messageType)).message[messageType],
+					hasMediaAttachment: true
+				};
+			} else if (typeof media === 'string') {
+				if (isURL(media)) {
+					const response = await fetch(media);
+					const buffer = Buffer.from(await response.arrayBuffer(), 'base64');
+					const mime = (await fileTypeFromBuffer(buffer)).mime;
+					const messageType = mime.includes('image') ? 'imageMessage' : 'videoMessage';
+
+					return {
+						[messageType]: (await this.client.instance.prepareMedia(buffer, messageType)).message[messageType],
+						hasMediaAttachment: true
+					};
+				} else {
+					const messageType = 'imageMessage';
+
+					return {
+						[messageType]: (await this.client.instance.prepareMedia(Buffer.alloc(10), messageType)).message[messageType],
+						hasMediaAttachment: true
+					};
+				}
+			} else {
+				const messageType = 'imageMessage';
+
+				return {
+					[messageType]: (await this.client.instance.prepareMedia(Buffer.alloc(10), messageType)).message[messageType],
+					hasMediaAttachment: true
+				};
+			}
+		}
+	}
+
+	/**
+	 * @type {import('../../types/Commands/Interactive.js').TemplateBuilder}
+	 */
+	class TemplateBuilder {
+		static Carousel = Carousel;
+		static Native = Native;
+	}
+
 	client.instance = {
 		...client.instance,
 		send,
@@ -651,7 +1031,8 @@ export const assign = (client) => {
 			}
 
 			return jids;
-		}
+		},
+		TemplateBuilder
 	};
 
 	return client;

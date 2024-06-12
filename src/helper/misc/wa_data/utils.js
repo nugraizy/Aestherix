@@ -69,6 +69,8 @@ export const extractBody = (m, type) => {
 		return m.message[type].text;
 	} else if (type === 'pollCreationMessage') {
 		return m.message[type].name;
+	} else if (type === 'interactiveResponseMessage') {
+		return JSON.parse(m.message[type].nativeFlowResponseMessage.paramsJson)?.id;
 	}
 
 	return 'Unknown Body';

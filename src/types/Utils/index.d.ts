@@ -14,7 +14,8 @@ import type {
 	WAMessage
 } from '../Messages';
 import type { Client, AdvancedClient } from '../Socket';
-import { proto } from '@adiwajshing/baileys';
+import { TemplateBuilder } from '../Commands/Interactive';
+import { proto, WALocationMessage } from '@adiwajshing/baileys';
 
 export type ExifMetadata = Partial<{
 	/**
@@ -61,7 +62,7 @@ export type PrepareMedia = (
 	/**
 	 * the media you want to prepare
 	 */
-	media: string | Buffer,
+	media: string | Buffer | { location: WALocationMessage },
 
 	/**
 	 * type of the media
@@ -397,5 +398,6 @@ export type AssignedClient = {
 	searchMessage: SearchMessage;
 	decodeJid: DecodeJid;
 	clearType: ClearType;
+	TemplateBuilder: TemplateBuilder;
 	getStoryParticipants: GetStoryParticipants;
 };
