@@ -8,7 +8,10 @@ const _regex = new RegExp(
 const _id = /\/?pin\/?([\d]+)/;
 
 /**
- * @typedef {{authorUsername: string, authorFullname: string, follower: number, caption: string, image: string, pinSource: string}} PinterestResponse
+ * @typedef {Partial<{error: boolean, message: string, keyword: string}>} PinterestErrorResponse
+ * @typedef {Partial<{authorUsername: string, authorFullname: string, follower: number, caption: string, type: 'image' | 'video' | 'gif', url: string, pinSource: string}>} PinterestResponse
+ * @typedef {PinterestErrorResponse & {results?: PinterestResponse[]}} PinterestSearchResponse
+ * @typedef {PinterestErrorResponse & PinterestResponse} PinterestDownloadResponse
  */
 
 class Pinterest {
@@ -16,14 +19,14 @@ class Pinterest {
 		/**
 		 * Search Images
 		 * @param {string} query
-		 * @returns {Promise<PinterestResponse[]>}
+		 * @returns {Promise<PinterestSearchResponse>}
 		 */
 		this.search = (query) => this.#_search(query);
 
 		/**
 		 * Directly Download Image
 		 * @param {string} url
-		 * @returns {Promise<PinterestResponse>}
+		 * @returns {Promise<PinterestDownloadResponse>}
 		 */
 		this.download = (url) => this.#_download(url);
 	}
@@ -54,27 +57,40 @@ class Pinterest {
 				let data = resourceResponse.data.results;
 
 				if (!data.length) {
-					resolve({ error: true, message: 'Could not find Images with the keyword. Try other keyword.' });
+					resolve({ error: true, message: 'Could not find media with the keyword. Try other keyword.', keyword: query });
 				}
 
-				if (data.length) {
-					data = data.filter((v) => v.images?.orig !== undefined);
-				}
+				resolve({
+					keyword: query,
+					results: data
+						.map((result) => {
+							const videos = Object.entries(result.videos?.video_list || []);
+							const isVideos = videos?.length > 0;
 
-				if (!data.length) {
-					resolve({ error: true, message: 'Original Image Not Available.' });
-				}
+							let mediaUrl = null;
 
-				resolve(
-					data.map((result) => ({
-						authorUsername: result.pinner.username,
-						authorFullname: result.pinner.full_name,
-						follower: result.pinner.follower_count,
-						caption: result.grid_title || 'No caption',
-						image: result.images.orig.url,
-						pinSource: _apiBase(result.id)
-					}))
-				);
+							if (isVideos) {
+								mediaUrl = videos.find(([key]) => result.videos.video_list[key].url.endsWith('.mp4'))?.[1]?.url;
+
+								if (!mediaUrl) {
+									return null;
+								}
+							}
+
+							!mediaUrl && (mediaUrl = result.images.orig.url);
+
+							return {
+								authorUsername: result.pinner.username,
+								authorFullname: result.pinner.full_name,
+								follower: result.pinner.follower_count,
+								caption: result.grid_title || 'No caption',
+								type: isVideos ? 'video' : mediaUrl.endsWith('.gif') ? 'gif' : 'image',
+								url: mediaUrl,
+								pinSource: _apiBase(result.id)
+							};
+						})
+						.filter(Boolean)
+				});
 			} catch (error) {
 				reject(error);
 			}
@@ -93,7 +109,7 @@ class Pinterest {
 				}
 
 				if (!pinId) {
-					resolve({ error: true, message: 'Could not find the id on the URL.' });
+					resolve({ error: true, message: 'Could not find the id on the URL.', keyword: url });
 				}
 
 				const context = {
@@ -119,17 +135,29 @@ class Pinterest {
 				const { resource_response: resourceResponse } = await response.json();
 
 				if (resourceResponse.status !== 'success') {
-					resolve({ error: true, message: 'Could not process pinterest image.' });
+					resolve({ error: true, message: 'Could not process pinterest media.', keyword: url });
 				}
 
 				const { data } = resourceResponse;
+
+				const videos = Object.entries(data.videos?.video_list || []);
+				const isVideos = videos?.length > 0;
+
+				let mediaUrl = null;
+
+				if (isVideos) {
+					mediaUrl = videos.find(([key]) => data.videos.video_list[key].url.endsWith('.mp4'))[1].url;
+				}
+
+				!mediaUrl && (mediaUrl = data.images.orig.url);
 
 				resolve({
 					authorUsername: data.pinner.username,
 					authorFullname: data.pinner.full_name,
 					follower: data.pinner.follower_count,
 					caption: data.grid_title || 'No caption',
-					image: data.images.orig.url,
+					type: isVideos ? 'video' : mediaUrl.endsWith('.gif') ? 'gif' : 'image',
+					url: mediaUrl,
 					pinSource: _apiBase(data.id)
 				});
 			} catch (error) {
