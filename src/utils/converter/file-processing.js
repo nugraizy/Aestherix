@@ -313,7 +313,7 @@ export const convertStickerToMedia = (filePath, sender, mediaData) =>
  */
 export const mp42mp3 = (input, output, sender) =>
 	new Promise(async (resolve, reject) => {
-		exec(`ffmpeg -i "${input}" "${output.slice(-3) != 'mp3' ? `${output}.mp3` : output}"`, (err) => {
+		exec(`ffmpeg -i "${input}" "${output.slice(-3) !== 'mp3' ? `${output}.mp3` : output}"`, (err) => {
 			if (err) {
 				ERRLOG(`⚠️ ${color('Failed to Convert Video to Audio', '#FF5555')} for ${color(sender, '#ff71ce')}`);
 				reject(err);
@@ -321,7 +321,7 @@ export const mp42mp3 = (input, output, sender) =>
 			}
 
 			INFOLOG(`${color('Converted Media', 'cyan')} for ${color(sender, '#ff71ce')}`);
-			resolve({ output: output.slice(-3) != 'mp3' ? `${output}.mp3` : output });
+			resolve({ output: output.slice(-3) !== 'mp3' ? `${output}.mp3` : output });
 		});
 	});
 

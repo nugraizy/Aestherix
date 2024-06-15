@@ -1,5 +1,8 @@
 import type { AdvancedClient as Client } from '../Socket';
+import type { MessageGenerated } from '../Messages';
+import type { FileTypeResult } from 'file-type';
 
+type MediaType = 'videoMessage' | 'imageMessage';
 type Media = string | Buffer | undefined | null;
 type Rows = { header: string; title: string; description: string; id: string };
 type Sections = { title: string; highlight_label: string; rows: Rows[] };
@@ -18,7 +21,7 @@ type Buttons = {
 	buttonParamsJson: string;
 };
 
-class InteractiveButtons {
+declare class InteractiveButtons {
 	button: {
 		copy: ({ display: string, code: string }) => { name: 'cta_copy'; buttonParamsJson: string };
 		reply: ({ display: string, id: string }) => { name: 'quick_reply'; buttonParamsJson: string };
@@ -32,7 +35,7 @@ class InteractiveButtons {
 	};
 }
 
-class Carousel extends InteractiveButtons {
+declare class Carousel extends InteractiveButtons {
 	client: Client;
 
 	constructor(client: Client);
@@ -47,10 +50,14 @@ class Carousel extends InteractiveButtons {
 
 	mainHeader(text: string, media: Media): Carousel;
 
+	getMessageType(media: Buffer): { mime: FileTypeResult['mime']; messageType: MediaType };
+
+	prepareGif(media: Buffer, messageType: MediaType): MessageGenerated;
+
 	cards(cards: Cards): Carousel;
 }
 
-class Native extends InteractiveButtons {
+declare class Native extends InteractiveButtons {
 	client: Client;
 
 	constructor(client: Client);
@@ -65,12 +72,14 @@ class Native extends InteractiveButtons {
 
 	mainHeader(text: string, media: Media): Native;
 
+	getMessageType(media: Buffer): { mime: FileTypeResult['mime']; messageType: MediaType };
+
+	prepareGif(media: Buffer, messageType: MediaType): MessageGenerated;
+
 	buttons(...buttons: Buttons[]): Native;
 }
 
-interface TemplateBuilders {
-	Native: typeof Native;
+export declare class TemplateBuilder {
 	Carousel: typeof Carousel;
+	Native: typeof Native;
 }
-
-export type TemplateBuilder = TemplateBuilders;

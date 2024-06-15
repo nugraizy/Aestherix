@@ -36,49 +36,89 @@ export default {
 
 		result = result.filter((v) => v.type === 'video');
 
-		let capt = 'YouTube Search'.formatHeaders() + '\n\n';
-		let i = 0;
+		let capt = 'YouTube Search'.formatHeaders();
 
-		for (const { videoId, title, timestamp, views, author } of result) {
-			const caption = boxen(
-				`NO. ${i + 1}
-✦ Video ID : ${videoId}
-📕 Title : ${title}
-👀 Views : ${numberWithCommas(views)}
-📡 Author Channel : ${author.name}
-⏳ Duration : ${timestamp ?? 'No Data'}`.formatForm()
+		const builder = new client.instance.TemplateBuilder.Carousel(client);
+
+		builder
+			.mainBody(capt)
+			.mainFooter('Powered by Aestherix')
+			.mainHeader('Header')
+			.cards(
+				result.map(({ title, timestamp, views, author, image, thumbnail, url }) => ({
+					body: `📡 Author Channel : ${author.name}\n👀 Views : ${numberWithCommas(views)}\n⏳ Duration : ${(
+						timestamp ?? 'No Data'
+					).formatForm()}`,
+					footer: title,
+					title: '',
+					header: image || thumbnail,
+					buttons: [
+						builder.button.url({
+							display: 'Watch Video',
+							url
+						}),
+						builder.button.url({
+							display: 'Original Thumbnail',
+							url: image || thumbnail
+						}),
+						builder.button.reply({
+							display: 'Download Video',
+							id: `.ytmp4 ${url}`
+						}),
+						builder.button.reply({
+							display: 'Download Audio',
+							id: `.ytmp3 ${url}`
+						})
+					]
+				}))
 			);
 
-			capt += `${caption}\n\n`;
+		const messageBuilt = await builder.render();
 
-			i++;
-		}
+		await client.instance.relayMessage(from, messageBuilt.message, { messageId: messageBuilt.key.id });
+
+		// 		let i = 0;
+
+		// 		for (const { videoId, title, timestamp, views, author } of result) {
+		// 			const caption = boxen(
+		// 				`NO. ${i + 1}
+		// ✦ Video ID : ${videoId}
+		// 📕 Title : ${title}
+		// 👀 Views : ${numberWithCommas(views)}
+		// 📡 Author Channel : ${author.name}
+		// ⏳ Duration : ${timestamp ?? 'No Data'}`.formatForm()
+		// 			);
+
+		// 			capt += `${caption}\n\n`;
+
+		// 			i++;
+		// 		}
 
 		// let jpegThumbnail = sharp(new Buffer.from(await fetchBUFFER(result[0].image), 'base64'));
 
 		// jpegThumbnail = await jpegThumbnail.resize(300, 300).toBuffer();
 
-		await client.instance.send(
-			from,
-			{
-				text: capt.trim()
+		// await client.instance.send(
+		// 	from,
+		// 	{
+		// 		text: capt.trim()
 
-				// caption: capt,
-				// footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
-				// buttons: [
-				// 	{
-				// 		buttonId: `.ytmp4 get ${url}`,
-				// 		buttonText: { displayText: '
-				// Video' },
-				// 		type: 1
-				// 	}
-				// ]
-			},
-			{
-				groupMetadata,
-				quoted: message
-			}
-		);
+		// 		// caption: capt,
+		// 		// footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
+		// 		// buttons: [
+		// 		// 	{
+		// 		// 		buttonId: `.ytmp4 get ${url}`,
+		// 		// 		buttonText: { displayText: '
+		// 		// Video' },
+		// 		// 		type: 1
+		// 		// 	}
+		// 		// ]
+		// 	},
+		// 	{
+		// 		groupMetadata,
+		// 		quoted: message
+		// 	}
+		// );
 
 		// const row = [];
 

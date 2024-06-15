@@ -19,6 +19,7 @@ import configuration from '../config/connect.js';
 import { S_WHATSAPP_NET, UPDATE, ZERO } from '../misc/wa_data/index.js';
 import { isURL, fetchBUFFER } from '../../utils/modules/index.js';
 import { reassign } from './parse-message.js';
+import { gif2mp4 } from '../../utils/index.js';
 
 const { readFile, unlink, writeFile } = (await import('fs-extra')).default;
 
@@ -393,24 +394,62 @@ export const assign = (client) => {
 			return this;
 		}
 
+		async getMessageType(media) {
+			const mime = (await fileTypeFromBuffer(media))?.mime;
+			const messageType = mime.includes('gif') || mime.includes('video') ? 'videoMessage' : 'imageMessage';
+
+			return { mime, messageType };
+		}
+
+		async prepareGif(media, messageType) {
+			const id = Date.now();
+			const filepath = (u) => `./src/media/temporary_files/${u}`;
+
+			await writeFile(filepath(`input-${id}.gif`), media);
+
+			const { output } = await gif2mp4(filepath(`input-${id}.gif`), filepath(`output-${id}.mp4`));
+
+			const preparedMedia = await this.client.instance.prepareMedia({ url: output }, messageType);
+
+			preparedMedia.message[messageType].gifPlayback = true;
+
+			await unlink(filepath(`input-${id}.gif`));
+			await unlink(filepath(`output-${id}.mp4`));
+
+			return preparedMedia;
+		}
+
 		async prepareMessage(media) {
 			if (Buffer.isBuffer(media)) {
-				const mime = (await fileTypeFromBuffer(media))?.mime;
-				const messageType = mime?.includes('video') ? 'videoMessage' : 'imageMessage';
+				const { mime, messageType } = await this.getMessageType(media);
+				let preparedMedia = null;
+
+				if (mime === 'image/gif') {
+					preparedMedia = await this.prepareGif(media, messageType);
+				} else {
+					preparedMedia = await this.client.instance.prepareMedia(media, messageType);
+				}
 
 				return {
-					[messageType]: (await this.client.instance.prepareMedia(media, messageType)).message[messageType],
+					[messageType]: preparedMedia.message[messageType],
 					hasMediaAttachment: true
 				};
 			} else if (typeof media === 'string') {
 				if (isURL(media)) {
 					const response = await fetch(media);
 					const buffer = Buffer.from(await response.arrayBuffer(), 'base64');
-					const mime = (await fileTypeFromBuffer(buffer)).mime;
-					const messageType = mime.includes('image') ? 'imageMessage' : 'videoMessage';
+
+					const { mime, messageType } = await this.getMessageType(buffer);
+					let preparedMedia = null;
+
+					if (mime === 'image/gif') {
+						preparedMedia = await this.prepareGif(buffer, messageType);
+					} else {
+						preparedMedia = await this.client.instance.prepareMedia(buffer, messageType);
+					}
 
 					return {
-						[messageType]: (await this.client.instance.prepareMedia(buffer, messageType)).message[messageType],
+						[messageType]: preparedMedia.message[messageType],
 						hasMediaAttachment: true
 					};
 				} else {
@@ -549,24 +588,61 @@ export const assign = (client) => {
 			return this;
 		}
 
+		async getMessageType(media) {
+			const mime = (await fileTypeFromBuffer(media))?.mime;
+			const messageType = mime.includes('gif') || mime.includes('video') ? 'videoMessage' : 'imageMessage';
+
+			return { mime, messageType };
+		}
+
+		async prepareGif(media, messageType) {
+			const id = Date.now();
+			const filepath = (u) => `./src/media/temporary_files/${u}`;
+
+			await writeFile(filepath(`input-${id}.gif`), media);
+
+			const { output } = await gif2mp4(filepath(`input-${id}.gif`), filepath(`output-${id}.mp4`));
+
+			const preparedMedia = await this.client.instance.prepareMedia({ url: output }, messageType);
+
+			preparedMedia.message[messageType].gifPlayback = true;
+
+			await unlink(filepath(`input-${id}.gif`));
+			await unlink(filepath(`output-${id}.mp4`));
+
+			return preparedMedia;
+		}
+
 		async prepareMessage(media) {
 			if (Buffer.isBuffer(media)) {
-				const mime = (await fileTypeFromBuffer(media))?.mime;
-				const messageType = mime?.includes('video') ? 'videoMessage' : 'imageMessage';
+				const { mime, messageType } = await this.getMessageType(media);
+				let preparedMedia = null;
+
+				if (mime === 'image/gif') {
+					preparedMedia = await this.prepareGif(media, messageType);
+				} else {
+					preparedMedia = await this.client.instance.prepareMedia(media, messageType);
+				}
 
 				return {
-					[messageType]: (await this.client.instance.prepareMedia(media, messageType)).message[messageType],
+					[messageType]: preparedMedia.message[messageType],
 					hasMediaAttachment: true
 				};
 			} else if (typeof media === 'string') {
 				if (isURL(media)) {
 					const response = await fetch(media);
 					const buffer = Buffer.from(await response.arrayBuffer(), 'base64');
-					const mime = (await fileTypeFromBuffer(buffer)).mime;
-					const messageType = mime.includes('image') ? 'imageMessage' : 'videoMessage';
+					const { mime, messageType } = await this.getMessageType(buffer);
+					let preparedMedia = null;
+
+					if (mime === 'image/gif') {
+						preparedMedia = await this.prepareGif(buffer, messageType);
+					} else {
+						preparedMedia = await this.client.instance.prepareMedia(buffer, messageType);
+					}
 
 					return {
-						[messageType]: (await this.client.instance.prepareMedia(buffer, messageType)).message[messageType],
+						[messageType]: preparedMedia.message[messageType],
 						hasMediaAttachment: true
 					};
 				} else {
