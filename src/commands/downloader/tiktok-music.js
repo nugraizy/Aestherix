@@ -35,11 +35,11 @@ export default {
 					groupMetadata
 				});
 
-				ERRLOG(`⚠️ ${color('Failed to Download TikTok Music', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(`⚠️ ${color('Failed to Download TikTok Music', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
 			}
 
-			INFOLOG(`${color('Downloading TikTok Music', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+			INFOLOG(`${color('Downloading TikTok Music', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			await client.instance.send(
 				from,
@@ -51,7 +51,7 @@ export default {
 				{ groupMetadata, quoted: message }
 			);
 
-			INFOLOG(`${color('Downloaded TikTok Music', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+			INFOLOG(`${color('Downloaded TikTok Music', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 		}
 	}
 };

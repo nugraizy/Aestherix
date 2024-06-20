@@ -50,6 +50,6 @@ export const githubWebhook = (isReconnect) => {
 	});
 
 	app.listen(8080, () => {
-		INFOLOG(color('GitHub Webhook', 'white'), color('started on port', '#ff71ce'), color('8080', 'white'));
+		INFOLOG(color('GitHub Webhook', 'white'), color('started on port', '#E4C1F9'), color('8080', 'white'));
 	});
 };

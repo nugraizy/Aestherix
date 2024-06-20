@@ -52,11 +52,11 @@ export default {
 					groupMetadata
 				});
 
-				ERRLOG(`⚠️ ${color('Failed to Download TikTok Post', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(`⚠️ ${color('Failed to Download TikTok Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
 			}
 
-			INFOLOG(`${color('Downloading TikTok Media', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+			INFOLOG(`${color('Downloading TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			const date = dayjs(posts[data].published * 1000).format('HH:mm:ss DD/MM/YYYY');
 			let capt = `TikTok ${posts[data].type === 'images' ? 'Slide' : 'Video'}`.formatHeaders();
@@ -112,7 +112,7 @@ export default {
 				}
 
 				await delay(100);
-				INFOLOG(`${color('Downloaded TikTok Media', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+				INFOLOG(`${color('Downloaded TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 				continue;
 			}
@@ -131,7 +131,7 @@ export default {
 			);
 
 			await delay(100);
-			INFOLOG(`${color('Downloaded TikTok Media', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+			INFOLOG(`${color('Downloaded TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 		}
 	}
 };

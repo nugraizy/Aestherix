@@ -23,7 +23,7 @@ export default {
 			});
 		}
 
-		INFOLOG(`${color('Prettifying an Image', 'cyan')} ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Prettifying an Image', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
 
 		let buffer = await client.instance.downloadMediaMessage(mediaData);
 
@@ -33,13 +33,13 @@ export default {
 
 		if ('error' in screenshot) {
 			client.instance.reply(screenshot.error, { from, quoted: message, groupMetadata });
-			ERRLOG(`⚠️ ${color('Failed to Prettify an Image', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
+			ERRLOG(`⚠️ ${color('Failed to Prettify an Image', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 			return;
 		}
 
 		await client.instance.send(from, { image: Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
 		buffer = null;
 
-		INFOLOG(`${color('Prettifying an Image Success', 'cyan')} ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Prettifying an Image Success', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

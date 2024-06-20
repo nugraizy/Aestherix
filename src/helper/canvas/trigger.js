@@ -101,7 +101,7 @@ export const trigger = async (image, sender, opt) =>
 				resolve(finalOutput);
 			}
 		} catch (err) {
-			ERRLOG(`⚠️ ${color('Failed to Trigger an image', '#FF5555')} for ${color(sender, '#ff71ce')}`);
+			ERRLOG(`⚠️ ${color('Failed to Trigger an image', '#FF5555')} for ${color(sender, '#E4C1F9')}`);
 
 			reject(err);
 		}

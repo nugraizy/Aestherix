@@ -48,7 +48,7 @@ export default {
 			});
 		}
 
-		INFOLOG(`${color('Removing Background image', 'cyan')} ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Removing Background image', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
 
 		const parsed = parser(query.toLowerCase(), {
 			configuration: {

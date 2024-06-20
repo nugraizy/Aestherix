@@ -42,6 +42,6 @@ export default {
 
 		await client.instance.send(from, { text: result.text.trim() }, { groupMetadata, quoted: message });
 		await client.instance.send(from, { audio: buffer }, { groupMetadata, quoted: message });
-		INFOLOG(`${color('Text is sent', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Text is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

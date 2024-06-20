@@ -25,7 +25,7 @@ export default {
 
 		const highlights = await instagram.search.highlight(input);
 
-		INFOLOG(`${color('Downloading Instagram highlights', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Downloading Instagram highlights', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const data in highlights) {
 			if ('error' in highlights[data]) {
@@ -34,7 +34,7 @@ export default {
 					quoted: message,
 					groupMetadata
 				});
-				ERRLOG(`⚠️ ${color('Failed to Download Instagram highlights', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(`⚠️ ${color('Failed to Download Instagram highlights', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
 			}
 
@@ -82,6 +82,6 @@ export default {
 			}
 		}
 
-		INFOLOG(`${color('Downloaded Instagram highlights', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Downloaded Instagram highlights', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

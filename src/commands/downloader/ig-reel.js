@@ -26,7 +26,7 @@ export default {
 
 		const reels = await instagram.download.post(urls);
 
-		INFOLOG(`${color('Downloading Instagram reel', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Downloading Instagram reel', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const data in reels) {
 			if ('error' in reels[data]) {
@@ -35,7 +35,7 @@ export default {
 					quoted: message,
 					groupMetadata
 				});
-				ERRLOG(`⚠️ ${color('Failed to Download Instagram reel', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(`⚠️ ${color('Failed to Download Instagram reel', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
 			}
 
@@ -67,6 +67,6 @@ export default {
 			await delay(100);
 		}
 
-		INFOLOG(`${color('Downloaded Instagram reel', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Downloaded Instagram reel', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

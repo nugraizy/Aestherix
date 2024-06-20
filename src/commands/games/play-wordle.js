@@ -31,7 +31,9 @@ export default {
 				return await client.instance.reply('You are already playing Wordle.', { from, quoted: message, groupMetadata });
 			}
 
-			INFOLOG(`${color('Wordle Game Answer : ', 'cyan')} ${color(wordle.word, 'white')} to ${color(prettyNumber, '#ff71ce')}`);
+			INFOLOG(
+				`${color('Wordle Game Answer : ', '#FF99C8')} ${color(wordle.word, 'white')} to ${color(prettyNumber, '#E4C1F9')}`
+			);
 
 			const data = await client.instance.reply(`${wordle.board.join('')}\nTot. words : ${wordle.word.length}`, {
 				from,

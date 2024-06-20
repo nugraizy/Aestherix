@@ -114,6 +114,6 @@ export default {
 			await client.instance.send(from, { sticker }, { groupMetadata, quoted: message });
 		}
 
-		INFOLOG(`${color('Sticker is sent', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Sticker is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

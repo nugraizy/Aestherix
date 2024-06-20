@@ -4,7 +4,7 @@ import { generateWAMessage } from '@adiwajshing/baileys';
 import configuration from '../../helper/config/connect.js';
 import { runtime } from '../../index.js';
 import { Limit, checkAfk, deleteAfk, getAfk, reassign } from '../../helper/index.js';
-import { color, getTimeSince, INFOLOG, ERRLOG, randomChar } from '../../utils/modules/index.js';
+import { color, getTimeSince, INFOLOG, ERRLOG, randomChar, wrapText } from '../../utils/modules/index.js';
 import { Cache } from '../../helper/modules/cache.js';
 
 const handler = new Cache();
@@ -31,15 +31,18 @@ const HANDLER_PATH = {
 };
 
 const logMessage = (message) => {
-	const senderInfo = `${color(message.pushname, 'white')} ${SEPERATOR} ${color(message.prettyNumber, '#ff71ce')}`;
-	const messageBody = color(message.query?.replace(/[\t\n]/g, ' ')?.substring(0, 20), '#05ffa1');
-	const typeInfo = `${SEPERATOR} ${color('type', '#ff71ce')} ${color(message.type, '#05ffa1')}`;
+	const senderInfo = `${color(
+		wrapText(message.pushname, { limit: 16, length: 18, center: true }),
+		'white'
+	)} ${SEPERATOR} ${color(wrapText(message.prettyNumber, { limit: 17, length: 19, center: true }), '#6d4eff')}`;
+	const messageBody = color(message.query?.replace(/[\t\n]/g, ' ').substring(0, 35), 'white');
+	const typeInfo = `${SEPERATOR} ${color('type', '#6d4eff')} ${color(message.type, 'white')}`;
 	const runtimeInfo = `${SEPERATOR} ${color(((Date.now() - runtime) / 1000).toFixed(0), '#F1FA8C')}${color('s', '#f5e700')}`;
 
 	const fullBody = message.isCmd
-		? `${color(message.isEval ? message.cmd : message.prefix, message.isEval ? 'cyan' : 'white')}${color(
+		? `${color(message.isEval ? message.cmd : message.prefix, message.isEval ? '#6d4eff' : 'white')}${color(
 				!message.isEval && message.cmd,
-				'cyan'
+				'#BDE0FE'
 		  )} ${messageBody}` // eslint-disable-line
 		: color(message.body?.substring(0, 20).replace(/[\t\n]/g, ' '), 'white');
 
@@ -427,14 +430,14 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 
 						if (match) {
 							const [fullMatch, text] = match;
-							const formattedStackEntry = `${color(stackEntry.replace(fullMatch, ''), 'white')}(${color(text, '#ff71ce')})`;
+							const formattedStackEntry = `${color(stackEntry.replace(fullMatch, ''), 'white')}(${color(text, '#6d4eff')})`;
 
 							return formattedStackEntry.replace('\n', '') + '\n';
 						} else {
 							return stackEntry.trim();
 						}
 					})
-					.join(`${color('❯ ', '#FF5555') + color('at ', '#ff71ce')}`);
+					.join(`${color('❯ ', '#6272A4') + color('at ', '#6d4eff')}`);
 
 				parseErr && ERRLOG(parseErr);
 			}

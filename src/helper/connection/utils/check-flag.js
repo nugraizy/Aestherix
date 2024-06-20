@@ -9,7 +9,7 @@ const deprecated = (flag, warning) => `${color(flag, 'gray')}[${color('Deprecate
 
 const helpFlag = `
 	 ${color('Usage', 'yellow')}
-	   $ node ${color('.', 'cyan')} <?session> [options]
+	   $ node ${color('.', '#FF99C8')} <?session> [options]
 
 	 ${color('Options', 'yellow')}
 	   --prefix, -p          ${color('Set your custom prefix.', '#05ffa1')}

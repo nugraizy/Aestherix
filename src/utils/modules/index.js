@@ -487,10 +487,10 @@ export const color = (text, color) => {
 };
 
 const TIME_FORMAT = 'HH:mm:ss DD/MM';
-const ICON = color('✦', '#ff71ce');
+const ICON = color('✦', '#E4C1F9');
 const SEPERATOR_1 = color(':', '#6272A4');
 const SEPERATOR_2 = color('/', '#6272A4');
-const SEPERATOR_3 = color('ᚚ', '#FF5555');
+const SEPERATOR_3 = color('ᚚ', '#cdb4db');
 const bracketsify = (text) => color('【', '#F8F8F2') + text + color('】', '#F8F8F2');
 const boldify = (string) => chalk.bold(string);
 
@@ -499,7 +499,7 @@ const coloring = (text, err) => {
 
 	const [hour, minute, second] = time.split(':');
 	const [day, month] = date.split('/');
-	const [HH, mm, ss, DD, MM] = [hour, minute, second, day, month].map((x) => color(x, err ? '#FF5555' : '#ff71ce'));
+	const [HH, mm, ss, DD, MM] = [hour, minute, second, day, month].map((x) => color(x, err ? '#FF5555' : '#E4C1F9'));
 
 	return `${HH}${SEPERATOR_1}${mm}${SEPERATOR_1}${ss} ${DD}${SEPERATOR_2}${MM}`;
 };
@@ -830,4 +830,34 @@ export const increment = (minimum, maximum) => {
 			return null;
 		}
 	};
+};
+
+const wrapCenter = (text, { limit = 0, length = 0 }) => {
+	if (text.length > limit) {
+		text = text.slice(0, limit);
+	}
+
+	if (text.length > length) {
+		text = text.slice(0, length);
+	}
+
+	const totalPadding = length - text.length;
+	const paddingLeft = Math.floor(totalPadding / 2);
+	const paddingRight = totalPadding - paddingLeft;
+
+	const centeredStr = ' '.repeat(paddingLeft) + text + ' '.repeat(paddingRight);
+
+	return centeredStr;
+};
+
+export const wrapText = (text, { limit = 0, length = 0, center = false }) => {
+	if (center) {
+		return wrapCenter(text, { limit, length });
+	}
+
+	text = text.slice(0, limit);
+
+	text += ' '.repeat(length - text.length);
+
+	return text;
 };

@@ -54,7 +54,7 @@ export default {
 				continue;
 			}
 
-			INFOLOG(`${color('Downloading Twitter Post', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+			INFOLOG(`${color('Downloading Twitter Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			const post = await twitterDownload(url);
 
@@ -64,7 +64,7 @@ export default {
 					quoted: message,
 					groupMetadata
 				});
-				ERRLOG(`⚠️ ${color('Failed to Download Twitter Post', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(`⚠️ ${color('Failed to Download Twitter Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 				continue;
 			}
@@ -94,7 +94,7 @@ export default {
 				);
 			}
 
-			INFOLOG(`${color('Downloaded Twitter Post', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+			INFOLOG(`${color('Downloaded Twitter Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 		}
 	}
 };

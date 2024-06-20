@@ -90,7 +90,7 @@ export const memeGenerator = (client, sender, input, topTexts = '', bottomTexts 
 				packname: configuration.packname
 			});
 
-			INFOLOG(`${color('Meme Generator is Done', 'cyan')} for ${color(sender, '#ff71ce')}`);
+			INFOLOG(`${color('Meme Generator is Done', '#FF99C8')} for ${color(sender, '#E4C1F9')}`);
 			resolve(buffer);
 		} else {
 			resolve(canvas.toBuffer('image/png'));

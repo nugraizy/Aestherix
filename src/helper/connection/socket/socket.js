@@ -140,7 +140,7 @@ const selectHostNumber = async ({ hostNumber, backupsHostNumbers }) => {
 const inputPhoneNumber = async () => {
 	await delay(1000);
 	const phoneNumber = await question(
-		INFOLOG(color('Insert your phone number', '#ff71ce'), color(':', '#ffff'), { ignore: true })
+		INFOLOG(color('Insert your phone number', '#E4C1F9'), color(':', '#ffff'), { ignore: true })
 	);
 
 	const formattedPhoneNumber = '+' + phoneNumber.trim().replace(/[^0-9]/g, '');
@@ -165,7 +165,7 @@ const askInputNumber = async ({ hostNumber, backupsHostNumbers }) => {
 const askWantNumber = async ({ hostNumber, backupsHostNumbers }) => {
 	const isWantNumber = await question(
 		INFOLOG(
-			color('Do you want to use a new number?', '#ff71ce'),
+			color('Do you want to use a new number?', '#E4C1F9'),
 			color('(', 'gray') + color('default', '#fff'),
 			color(`${PhoneNumber('+' + hostNumber.replace(/[^0-9]/g, '')).formatInternational()})`, 'gray'),
 			color('[y/n]: ', 'white'),
@@ -208,7 +208,7 @@ const handleNewInstance = async ({ OPTIONS, Client }) => {
 		const code = await Client.requestPairingCode(phoneNumber);
 
 		INFOLOG(
-			color('Pairing code :', '#ff71ce'),
+			color('Pairing code :', '#E4C1F9'),
 			color(
 				code.splitString({
 					length: 4
@@ -226,6 +226,6 @@ const handleNewInstance = async ({ OPTIONS, Client }) => {
 				ERRLOG(color('SSH detected.', 'red'), color('Could not copy the code.', 'gray'));
 			});
 		await delay(200);
-		INFOLOG(color('Waiting for code input', 'white'), color('. . .', 'cyan'));
+		INFOLOG(color('Waiting for code input', 'white'), color('. . .', '#FF99C8'));
 	}
 };

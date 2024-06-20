@@ -42,6 +42,6 @@ export default {
 			{ groupMetadata, quoted: message }
 		);
 
-		INFOLOG(`${color('Media is sent', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Media is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

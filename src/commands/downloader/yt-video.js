@@ -4,11 +4,11 @@ import youtube from '../../utils/youtube/index.js';
 const processVideo = async (url, client, { from, message, groupMetadata, prettyNumber }) => {
 	const video = await youtube.core.video.download(url);
 
-	INFOLOG(`${color('Downloading YouTube Video', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+	INFOLOG(`${color('Downloading YouTube Video', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 	if ('error' in video) {
 		client.instance.reply(video.error, { from, quoted: message, groupMetadata });
-		ERRLOG(`⚠️ ${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
+		ERRLOG(`⚠️ ${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 		return;
 	}
 
@@ -16,7 +16,7 @@ const processVideo = async (url, client, { from, message, groupMetadata, prettyN
 
 	if (!file) {
 		client.instance.reply(`Error while downloading YouTube Video\n\n${url}`, { from, quoted: message, groupMetadata });
-		ERRLOG(`⚠️ ${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
+		ERRLOG(`⚠️ ${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		return;
 	}
@@ -119,7 +119,7 @@ export default {
 				{}
 			);
 
-			INFOLOG(`${color('Downloaded YouTube Video', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+			INFOLOG(`${color('Downloaded YouTube Video', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			return;
 		}
@@ -200,6 +200,6 @@ export default {
 			{}
 		);
 
-		INFOLOG(`${color('Downloaded YouTube Video', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Downloaded YouTube Video', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

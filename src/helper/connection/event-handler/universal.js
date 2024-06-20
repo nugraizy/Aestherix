@@ -29,7 +29,7 @@ const HANDLER_PATH = {
 	GROUPSETTINGS: '../../../handlers/notification_handlers/group-settings-notification.js'
 };
 const SEPERATOR = color(' ✦ ', 'white');
-const SPLITTER = ['᠁✦', '✦', '✦', '✦᠁'].map((v) => color(` ${v} `, '#ff71ce'));
+const SPLITTER = ['᠁✦', '✦', '✦', '✦᠁'].map((v) => color(` ${v} `, '#E4C1F9'));
 
 let shouldPrintBanner = true;
 
@@ -50,28 +50,28 @@ export const handleConnectionUpdate = async (
 			const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
 
 			if (reason === DisconnectReason.badSession) {
-				INFOLOG(color('Bad session', 'white'), color('Please delete your previous session and do a rescan...', '#ff71ce'));
+				INFOLOG(color('Bad session', 'white'), color('Please delete your previous session and do a rescan...', '#E4C1F9'));
 				process.exit(0);
 			} else if (reason === DisconnectReason.loggedOut) {
-				INFOLOG(color('Logged out', 'white'), color('Please delete your previous session and do a rescan...', '#ff71ce'));
+				INFOLOG(color('Logged out', 'white'), color('Please delete your previous session and do a rescan...', '#E4C1F9'));
 				process.exit(0);
 			} else {
 				if (reason === DisconnectReason.restartRequired) {
-					INFOLOG(color('Restart required', 'white'), color('Restarting your WebScoket...', '#ff71ce'));
+					INFOLOG(color('Restart required', 'white'), color('Restarting your WebScoket...', '#E4C1F9'));
 				} else if (reason === DisconnectReason.timedOut) {
-					INFOLOG(color('Timed out', 'white'), color('Quick reconnecting...', '#ff71ce'));
+					INFOLOG(color('Timed out', 'white'), color('Quick reconnecting...', '#E4C1F9'));
 					newStart();
 				} else if (reason === DisconnectReason.connectionClosed) {
-					INFOLOG(color('Connection closed', 'white'), color('Quick reconnecting...', '#ff71ce'));
+					INFOLOG(color('Connection closed', 'white'), color('Quick reconnecting...', '#E4C1F9'));
 					newStart();
 				} else if (reason === DisconnectReason.connectionReplaced) {
-					INFOLOG(color('Connection replaced', 'white'), color('Quick reconnecting...', '#ff71ce'));
+					INFOLOG(color('Connection replaced', 'white'), color('Quick reconnecting...', '#E4C1F9'));
 					newStart();
 				} else if (reason === DisconnectReason.connectionLost) {
-					INFOLOG(color('Connection lost', 'white'), color('Quick reconnecting...', '#ff71ce'));
+					INFOLOG(color('Connection lost', 'white'), color('Quick reconnecting...', '#E4C1F9'));
 					newStart();
 				} else {
-					INFOLOG(color('Unknown reason', 'white'), color('Quick reconnecting...', '#ff71ce'));
+					INFOLOG(color('Unknown reason', 'white'), color('Quick reconnecting...', '#E4C1F9'));
 					newStart();
 				}
 
@@ -128,13 +128,13 @@ export const handleConnectionUpdate = async (
 								title: `${SEPERATOR}Made By Nanda${SEPERATOR}`,
 								textAlignment: 'center',
 								float: 'center',
-								borderColor: '#ff71ce',
+								borderColor: '#E4C1F9',
 								margin: 1,
 								borderStyle: 'round'
 							}
 						)
 					);
-					INFOLOG(color('Socket connected', 'white'), color('Successfully', '#ff71ce') + color('.', 'white'));
+					INFOLOG(color('Socket connected', 'white'), color('Successfully', '#E4C1F9') + color('.', 'white'));
 					shouldPrintBanner = false;
 				}
 
@@ -146,9 +146,9 @@ export const handleConnectionUpdate = async (
 				if (timeToConnect < data.best_time) {
 					INFOLOG(
 						color('Connection time', 'white'),
-						color(`${timeToConnect / 1000}s`, '#ff71ce'),
+						color(`${timeToConnect / 1000}s`, '#E4C1F9'),
 						color('is the best time', 'white'),
-						color(`(${data.best_time / 1000}s)`, '#ff71ce')
+						color(`(${data.best_time / 1000}s)`, '#E4C1F9')
 					);
 
 					data.best_time = timeToConnect; // eslint-disable-line
@@ -159,9 +159,9 @@ export const handleConnectionUpdate = async (
 				} else {
 					INFOLOG(
 						color('Connection time', 'white'),
-						color(`${timeToConnect / 1000}s`, '#ff71ce'),
+						color(`${timeToConnect / 1000}s`, '#E4C1F9'),
 						color('is not the best time', 'white'),
-						color(`(${data.best_time / 1000}s)`, '#ff71ce')
+						color(`(${data.best_time / 1000}s)`, '#E4C1F9')
 					);
 
 					capt += `Connection time ${timeToConnect / 1000}s is not the best time (${data.best_time / 1000}s)`;

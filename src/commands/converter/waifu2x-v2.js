@@ -46,7 +46,7 @@ export default {
 			});
 		}
 
-		INFOLOG(`${color('Enhancing image', 'cyan')} ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Enhancing image', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
 
 		const parsed = parser(query.toLowerCase(), {
 			configuration: {

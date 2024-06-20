@@ -56,7 +56,7 @@ export default {
 		}
 
 		if (bodyQuoted && !isMediaImage) {
-			INFOLOG(`${color('Petting', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+			INFOLOG(`${color('Petting', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			const profile = await client.instance
 				.profilePictureUrl(mediaData.participant, 'image')
@@ -72,7 +72,7 @@ export default {
 				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, { groupMetadata });
 			}
 
-			INFOLOG(`${color('Converted Media', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+			INFOLOG(`${color('Converted Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			return;
 		}
@@ -91,7 +91,7 @@ export default {
 				);
 			}
 
-			INFOLOG(`${color('Petting', 'cyan')} ${color(prettyNumber, '#ff71ce')}`);
+			INFOLOG(`${color('Petting', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
 
 			const file = await client.instance.downloadAndSaveMediaMessage(
 				extractMediaData,
@@ -106,13 +106,13 @@ export default {
 				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, { groupMetadata });
 			}
 
-			INFOLOG(`${color('Converted Media', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+			INFOLOG(`${color('Converted Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			return;
 		}
 
 		for (const mentioned of mention) {
-			INFOLOG(`${color('Petting', 'cyan')} ${color(mentioned, '#ff71ce')}`);
+			INFOLOG(`${color('Petting', '#FF99C8')} ${color(mentioned, '#E4C1F9')}`);
 
 			const profile = await client.instance
 				.profilePictureUrl(mentioned, 'image')
@@ -128,7 +128,7 @@ export default {
 				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, { groupMetadata });
 			}
 
-			INFOLOG(`${color('Petted', 'cyan')} ${color(mentioned, '#ff71ce')}`);
+			INFOLOG(`${color('Petted', '#FF99C8')} ${color(mentioned, '#E4C1F9')}`);
 		}
 	}
 };

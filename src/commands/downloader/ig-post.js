@@ -26,7 +26,7 @@ export default {
 
 		const posts = await instagram.download.post(urls);
 
-		INFOLOG(`${color('Downloading Instagram Post', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Downloading Instagram Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const data in posts) {
 			if ('error' in posts[data]) {
@@ -35,7 +35,7 @@ export default {
 					quoted: message,
 					groupMetadata
 				});
-				ERRLOG(`⚠️ ${color('Failed to Download Instagram Post', '#FF5555')} for ${color(prettyNumber, '#ff71ce')}`);
+				ERRLOG(`⚠️ ${color('Failed to Download Instagram Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
 			}
 
@@ -77,6 +77,6 @@ export default {
 			}
 		}
 
-		INFOLOG(`${color('Downloaded Instagram Post', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Downloaded Instagram Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

@@ -51,6 +51,6 @@ export default {
 
 		await client.instance.send(from, { text: scanning.result.text.trim() }, { groupMetadata, quoted: message });
 
-		INFOLOG(`${color('Text is sent', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Text is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

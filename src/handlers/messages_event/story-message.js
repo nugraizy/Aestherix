@@ -3,9 +3,10 @@ import { generateWAMessageFromContent } from '@adiwajshing/baileys';
 import configuration from '../../helper/config/connect.js';
 import { runtime } from '../../index.js';
 import { textStory } from '../../helper/index.js';
-import { color, INFOLOG } from '../../utils/modules/index.js';
+import { color, INFOLOG, wrapText } from '../../utils/modules/index.js';
 
 let meJid = null;
+const SEPERATOR = color('᚛', '#BD93F9');
 
 /**
  * @param {import('../../types/Socket/index.js').AdvancedClient} client
@@ -47,13 +48,16 @@ const handler = async (client, message) => {
 	}
 
 	INFOLOG(
-		`${color(message.pushname.trim(), 'white')} ${color(message.prettyNumber, '#ff71ce')} :`,
-		`${color(
+		`${color(wrapText(message.pushname, { limit: 16, length: 18, center: true }), 'white')} ${SEPERATOR} ${color(
+			wrapText(message.prettyNumber, { limit: 17, length: 19, center: true }),
+			'#6d4eff'
+		)} ${color('on', '#BDE0FE')} ${color(message.from, '#6d4eff')} ${SEPERATOR} ${color(
 			message.body === 'Unknown body' ? 'Bug Story' : message.body?.trim()?.replace('\n', '')?.substring(0, 20),
-			'#05ffa1'
+			'white'
+		)} ${SEPERATOR} ${color('type', '#6d4eff')} ${SEPERATOR} ${color('Story', 'white')}${color('::', 'white')}${color(
+			message.type,
+			'white'
 		)}`,
-		`${color(message.from, '#b967ff')}`,
-		`${color('type', '#ff71ce')} ${color(': Story', '#b967ff')} ${color(message.type, '#b967ff')}`,
 		`${color(runtimes, '#f18f15')}${color('s', '#f5e700')}`
 	);
 };

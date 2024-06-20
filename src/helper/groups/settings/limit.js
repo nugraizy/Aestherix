@@ -13,19 +13,17 @@ if (!(await fs.readdir(PATH.folder))) {
 	await fs.mkdir(PATH.folder);
 }
 
-const filenames = await fs.readdir(PATH.folder);
+const files = await fs.readdir(PATH.folder);
 const LIMIT = (await fs.readJSON(PATH.settings))?.limit || 100;
 
 configuration.cache.limit = LIMIT;
 
-for (const filename of filenames) {
-	const { id, limit, role } = JSON.parse(filename);
-
+(await Promise.all(files.map((file) => fs.readJSON(PATH.folder + file)))).forEach(({ id, limit, role }) =>
 	configuration.user.limit.set(id, {
 		limit,
 		role
-	});
-}
+	})
+);
 
 export class Limit {
 	static checkExist(sender) {
@@ -54,15 +52,15 @@ export class Limit {
 		const user = configuration.user.limit.get(sender);
 
 		if (!user) {
-			const filename = JSON.stringify({
+			const data = {
 				id: sender,
 				limit: LIMIT,
 				role: 'FREE'
-			});
+			};
 
 			this.upsert(sender, LIMIT, 'FREE');
 
-			fs.writeFileSync(PATH.folder + filename, '');
+			fs.writeJSONSync(`${PATH.folder + sender}.json`, data);
 
 			return { role: 'FREE' };
 		}
@@ -136,57 +134,49 @@ export class Limit {
 	}
 
 	static async resetAllLimit() {
-		const filenames = await fs.readdir(PATH.folder);
+		const files = await fs.readdir(PATH.folder);
 
-		for (const filename of filenames) {
-			const user = JSON.parse(filename);
+		await Promise.all(
+			files.map(async (filename) => {
+				const data = fs.readJSONSync(PATH.folder + filename);
 
-			if (!['OWNER', 'PREMIUM'].includes(user.role)) {
-				user.limit = LIMIT;
-				await fs.rename(PATH.folder + filename, PATH.folder + JSON.stringify(user));
+				if (!['OWNER', 'PREMIUM'].includes(data.role)) {
+					data.limit = LIMIT;
+					fs.writeJSONSync(PATH.folder + filename, data);
 
-				this.upsert(user.id, LIMIT, user.role);
-			}
-		}
+					this.upsert(data.id, LIMIT, data.role);
+				}
+			})
+		);
 	}
 
 	static async updateLimitFromCache() {
 		const [usersFiles, usersCache] = [await fs.readdir(PATH.folder), configuration.user.limit.entries()];
 
-		const safeParse = (element) => {
-			try {
-				return JSON.parse(element);
-			} catch (error) {
-				return {};
-			}
-		};
+		const usersParsed = usersFiles.map((filename) => fs.readJSONSync(PATH.folder + filename));
 
-		const usersParsed = usersFiles.map((v) => safeParse(v));
+		await Promise.all(
+			usersCache.map(([key, _data]) => {
+				const index = usersParsed.findIndex((v) => v.id === key);
 
-		usersCache.forEach(async (element) => {
-			const index = usersParsed.findIndex((v) => v.id === element[0]);
+				if (index === -1) {
+					const data = {
+						id: key,
+						role: _data.role,
+						limit: _data.limit
+					};
 
-			if (index === -1) {
-				const filename = JSON.stringify({
-					id: element[0],
-					role: element[1].role,
-					limit: element[1].limit
-				});
+					fs.writeJSONSync(`${PATH.folder + key}.json`, data);
 
-				await fs.writeFile(PATH.folder + filename, '');
+					return;
+				}
 
-				return;
-			}
+				usersParsed[index].role = _data.role;
+				usersParsed[index].limit = _data.limit;
 
-			const oldFilename = JSON.stringify(usersParsed[index]);
-
-			usersParsed[index].role = element[1].role;
-			usersParsed[index].limit = element[1].limit;
-
-			const newFilename = JSON.stringify(usersParsed[index]);
-
-			await fs.rename(PATH.folder + oldFilename, PATH.folder + newFilename);
-		});
+				fs.writeJSONSync(`${PATH.folder + key}.json`, usersParsed[index]);
+			})
+		);
 	}
 }
 

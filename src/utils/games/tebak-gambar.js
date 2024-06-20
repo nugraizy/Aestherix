@@ -41,7 +41,7 @@ export const startTG = async (client, id, { message, sender, groupMetadata }, re
 		.add(remainingTime + 2, 's')
 		.valueOf();
 
-	INFOLOG(`${color(`The Answer is : ${answer.trim()}`, 'cyan')}`);
+	INFOLOG(`${color(`The Answer is : ${answer.trim()}`, '#FF99C8')}`);
 	setIntervals(
 		configuration.intervals.tebakGambar,
 		id,

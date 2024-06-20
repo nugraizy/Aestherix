@@ -142,8 +142,8 @@ export const validatePlugins = async (filename, isWatch) => {
 		ERRLOG(
 			color(`${ICON.ERROR}${filename.split('/').slice(-2).join('/')}`, '#9f53ea'),
 			isWatch
-				? color('File Error! Waiting for changes...', '#FF5555')
-				: color('File Error! Fix the error and restart the bot to use this commands.', '#FF5555')
+				? color('File Error! Waiting for changes...', '#5954cc')
+				: color('File Error! Fix the error and restart the bot to use this commands.', '#5954cc')
 		);
 	}
 };
@@ -160,7 +160,7 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 
 		try {
 			module = await import(file);
-			INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('New File Added!', '#ff71ce'));
+			INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('New File Added!', 'white'));
 			INFOLOG(color('checking if its valid plugins...', '#ffb86c'));
 		} catch (error) {
 			return await validatePlugins(filename, true);
@@ -179,7 +179,7 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 		} else {
 			ERRLOG(
 				color(`${ICON.ERROR}${filename.split('/').slice(-2).join('/')}`, '#9f53ea'),
-				color('File Error! Waiting for changes...', '#FF5555') // not this
+				color('File Error! Waiting for changes...', '#5954cc') // not this
 			);
 			configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
 				absolutePath: file,
@@ -189,7 +189,7 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 	} else {
 		try {
 			await import(file);
-			INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('New File Added!', '#ff71ce'));
+			INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('New File Added!', 'white'));
 		} catch (error) {
 			console.log(error);
 			await validatePlugins(filename, true);
@@ -198,10 +198,7 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 };
 
 const change = async (filename, stats, icon = ICON.CHANGED) => {
-	INFOLOG(
-		color(`${icon} ${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
-		color('File has been changed!', '#ff71ce')
-	);
+	INFOLOG(color(`${icon} ${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('File has been changed!', 'white'));
 
 	const _command = nocache(normalizeImportPath(filename), true);
 
@@ -280,10 +277,10 @@ const unlink = (filename, icon = ICON.DELETED) => {
 
 		INFOLOG(
 			color(`${ICON.RENAMED}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
-			color('File Renamed!', '#ff71ce'),
-			color('to', 'cyan'),
+			color('File Renamed!', 'white'),
+			color('to', 'white'),
 			color(renamedFile.split('/')?.slice(-2).join('/'), '#9f53ea'),
-			color('Waiting for changes...', '#ff71ce')
+			color('Waiting for changes...', '#6d4eff')
 		);
 
 		return;
@@ -291,7 +288,7 @@ const unlink = (filename, icon = ICON.DELETED) => {
 
 	configuration.cmds.commands.delete(cmds[indexPath][0]);
 
-	INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('File Deleted!', '#FF5555'));
+	INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('File Deleted!', '#5954cc'));
 };
 
 export const watch = (folder) =>

@@ -43,7 +43,7 @@ export const tesseract = async (image, sender, lang = 'ind') =>
 				return;
 			}
 
-			INFOLOG(`${color('Recognizing the image..', 'cyan')} to ${color(sender, '#ff71ce')}`);
+			INFOLOG(`${color('Recognizing the image..', '#FF99C8')} to ${color(sender, '#E4C1F9')}`);
 			let {
 				data: { text, confidence, paragraphs }
 			} = await Tesseract.recognize(image, lang);

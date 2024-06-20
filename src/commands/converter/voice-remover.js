@@ -41,7 +41,7 @@ export default {
 			});
 		}
 
-		INFOLOG(`${color('Removing Sound', 'cyan')} for ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Removing Sound', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		const file = await client.instance.downloadAndSaveMediaMessage(
 			extractMediaData,
@@ -97,6 +97,6 @@ export default {
 			);
 		}
 
-		INFOLOG(`${color('Sound is sent', 'cyan')} to ${color(prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Sound is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

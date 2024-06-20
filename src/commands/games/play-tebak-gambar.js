@@ -15,7 +15,7 @@ export default {
 	limit: 2,
 	status: 'enable',
 	async run(message, client) {
-		INFOLOG(`${color('Starting Guess The Image Games.', 'cyan')}  to ${color(message.prettyNumber, '#ff71ce')}`);
+		INFOLOG(`${color('Starting Guess The Image Games.', '#FF99C8')}  to ${color(message.prettyNumber, '#E4C1F9')}`);
 
 		const game = await startTG(client, message.from, message, 20);
 
