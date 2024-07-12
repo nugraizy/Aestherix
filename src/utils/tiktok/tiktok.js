@@ -3,12 +3,25 @@ import { load } from 'cheerio';
 import asyncRetry from 'async-retry';
 import { fetch } from 'undici';
 import crypto from 'crypto';
+import { v4 } from 'uuid';
 
 import { randomChar, isURL } from '../modules/index.js';
 import { COOKIE } from './cookie.js';
 import { _api } from './util.js';
 
 const API_BASE_URL = _api;
+const iids = ['7379691220551141126', '7318518857994389254'];
+const deviceIds = ['7379690547022071302', '7318517321748022790'];
+const appVersion = ['35.1.3'];
+
+const random = (arr) => arr[~~(Math.random() * arr.length)];
+const lastInstall = () => {
+	const currentTimeSeconds = Math.floor(Date.now() / 1000);
+	const randomSeconds = Math.floor(Math.random() * (1123200 - 86400 + 1)) + 86400;
+	const result = currentTimeSeconds - randomSeconds;
+
+	return result;
+};
 const regex = (input) => /(?:https:?\/{2})?(?:w{3}|vm|vt|t)?\.?tiktok.com\/([^\s&]+)/gi.test(input);
 
 const checkValid = (url) => {
@@ -153,7 +166,7 @@ class ResponseParser {
 				avatar_medium: { url_list: avatarList }
 			},
 			video: {
-				download_addr: { url_list: withWatermarkList },
+				download_addr, // eslint-disable-line
 				play_addr: { url_list: noWatermarkList },
 				duration: videoDuration,
 				ratio,
@@ -166,6 +179,13 @@ class ResponseParser {
 				duration: musicDuration
 			}
 		} = data;
+
+		let withWatermarkList = [];
+
+		// eslint-disable-next-line
+		if (download_addr) {
+			withWatermarkList = download_addr.url_list; // eslint-disable-line
+		}
 
 		const musicCoverList =
 			data.music[data.music?.cover_hd ? 'cover_hd' : data.music?.cover_large ? 'cover_large' : 'cover_medium'].url_list;
@@ -250,7 +270,7 @@ class ResponseParser {
 		if (typeToUse === 'images') {
 			result.url.images = this._extractImageMetadata(data);
 		} else {
-			result.url.withWatermark = withWatermarkList[0];
+			result.url.withWatermark = withWatermarkList?.[0] || null;
 			result.url.withNoWatermark = noWatermarkList[0];
 		}
 
@@ -673,22 +693,78 @@ class RequestModule extends ResponseParser {
 	async _fetchVideoDataAttempt(videoId) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				const ranVersion = random(appVersion);
+				const versionCode = ranVersion
+					.split('.')
+					.map((v) => String(v).padStart(2, '0'))
+					.join('');
+
+				const mainParams = {
+					app_name: 'musical_ly', // eslint-disable-line
+					manifest_app_version: '2023501030' // eslint-disable-line
+				};
+
 				const body = this._buildApiUrl({
 					/* eslint-disable */
-					aweme_id: videoId,
-					device_id: Array.from({ length: 19 }, () => Math.floor(Math.random() * 10).toString()).join('')
+					aweme_ids: `[${videoId}]`,
+
+					iid: random(iids),
+					device_id: random(deviceIds),
+					channel: 'googleplay',
+					aid: '1233',
+					app_name: mainParams.app_name,
+					version_code: versionCode,
+					version_name: ranVersion,
+					device_platform: 'android',
+
+					os: 'android',
+					ssmix: 'a',
+					_rticket: Date.now(),
+					cdid: v4(),
+					update_version_code: mainParams.manifest_app_version,
+					update_version_code: mainParams.manifest_app_version,
+					ab_version: ranVersion,
+					resolution: '1080*2400',
+					dpi: 420,
+					device_type: 'Pixel 7',
+					device_brand: 'Google',
+					language: 'en',
+					os_api: '29',
+					os_version: '14',
+					ac: 'wifi',
+					is_pad: '0',
+					current_region: 'US',
+					app_type: 'normal',
+					sys_region: 'US',
+					last_install_time: lastInstall(),
+					timezone_name: 'America/New_York',
+					residence: 'US',
+					app_language: 'en',
+					timezone_offset: '-14400',
+					host_abi: 'armeabi-v7a',
+					locale: 'en',
+					ac2: 'wifi5g',
+					uoo: '1',
+					carrier_region: 'US',
+					op_region: 'US',
+					build_number: ranVersion,
+					region: 'US',
+					ts: Math.floor(Date.now() / 1000)
 					/* eslint-enable */
 				});
 
 				const config = this._getRequestConfig();
 
-				config.headers['User-Agent'] =
-					'com.ss.android.ugc.trill/260103 (Linux; U; Android 13; en_US; Pixel 7; Build/TD1A.220804.031; Cronet/58.0.2991.0)';
-				config.headers['Accept'] = 'application/json';
+				config.headers = {
+					'Content-Type': 'application/x-www-form-urlencoded',
+					'User-Agent':
+						'com.zhiliaoapp.musically/300904 (2018111632; U; Android 10; en_US; Pixel 4; Build/QQ3A.200805.001; Cronet/58.0.2991.0)',
+					'x-argus': ''
+				};
 				config.headers.Cookie = '';
 
 				const request = async () => {
-					const data = await this._awemeRequest('aweme/v1/feed/?', {
+					const data = await this._awemeRequest('aweme/v1/multi/aweme/detail/?', {
 						method: 'GET',
 						body,
 						config
@@ -703,7 +779,7 @@ class RequestModule extends ResponseParser {
 
 				const resultPromises = await request();
 
-				const data = this._mergeMediaResponse(resultPromises, videoId);
+				const data = this._mergeMediaResponse(resultPromises, videoId, 'aweme_details');
 
 				if (!data) {
 					resolve({ error: 'Post not found. Please try again later.' });
@@ -764,8 +840,8 @@ class RequestModule extends ResponseParser {
 	/**
 	 * @private
 	 */
-	async _mergeMediaResponse(dataPosts, videoId) {
-		dataPosts = dataPosts?.aweme_list?.find((v) => v.aweme_id === videoId);
+	async _mergeMediaResponse(dataPosts, videoId, property) {
+		dataPosts = dataPosts?.[property]?.find((v) => v.aweme_id === videoId);
 
 		if (!dataPosts) {
 			return { error: 'Download failed. either the access is denied, or other error.' };
