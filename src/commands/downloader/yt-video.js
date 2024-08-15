@@ -1,20 +1,29 @@
 import { color, delay, ERRLOG, INFOLOG, isURL, removeDuplicatesArray, isYoutubeURL } from '../../utils/modules/index.js';
-import youtube from '../../utils/youtube/index.js';
+import { YouTubei } from '../../utils/youtube/index.js';
 
+const youtube = new YouTubei();
+
+/**
+ *
+ * @param {string} url
+ * @param {import('../../types/Socket/index.js').AdvancedClient} client
+ * @param {{from: string, message: import('../../types/Reconstruct/index.js').ReassignResult['message'], groupMetadata: import('../../types/Reconstruct/index.js').ReassignResult['groupMetadata'], prettyNumber: string}} param2
+ * @returns
+ */
 const processVideo = async (url, client, { from, message, groupMetadata, prettyNumber }) => {
-	const video = await youtube.core.video.download(url);
+	const video = await youtube.video(url);
 
 	INFOLOG(`${color('Downloading YouTube Video', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
-	if ('error' in video) {
-		client.instance.reply(video.error, { from, quoted: message, groupMetadata });
-		ERRLOG(`⚠️ ${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
-		return;
-	}
+	// if ('error' in video) {
+	// 	client.instance.reply(video.error, { from, quoted: message, groupMetadata });
+	// 	ERRLOG(`⚠️ ${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+	// 	return;
+	// }
 
-	const { title, resolution, file, size, download } = video;
+	const { title, download } = video;
 
-	if (!file) {
+	if (!download) {
 		client.instance.reply(`Error while downloading YouTube Video\n\n${url}`, { from, quoted: message, groupMetadata });
 		ERRLOG(`⚠️ ${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 
@@ -24,8 +33,6 @@ const processVideo = async (url, client, { from, message, groupMetadata, prettyN
 	let capt = '';
 
 	capt += `Title : ${title}\n`;
-	capt += `Size : ${size}\n`;
-	capt += `Resolution : ${resolution}`;
 
 	await client.instance.send(
 		from,

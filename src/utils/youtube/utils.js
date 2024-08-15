@@ -1,4 +1,5 @@
 /* eslint-disable camelcase */
+import getVideoId from 'get-video-id';
 
 import { Cache } from '../../helper/modules/cache.js';
 
@@ -7,9 +8,9 @@ export const CACHE_MANAGER = new Cache({
 });
 
 export const extractVideoId = (url) => {
-	const match = url.match(/(?:youtube\.com\/(?:shorts\/)?(?:watch\?.*(?:|&)v=|embed\/|v\/)|youtu\.be\/)?\/(.+)/);
+	const { id } = getVideoId(url);
 
-	return match?.[1];
+	return id;
 };
 
 export const filterQualities = (items, format) => {

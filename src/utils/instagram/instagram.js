@@ -6,19 +6,18 @@ import { parse } from 'dotenv';
 
 const _baseApi = 'https://i.instagram.com';
 const _baseUrl = 'https://www.instagram.com';
-const _apiPost = (input) => `${_baseUrl}/p/${input}/?__a=1&__d=dis`;
-const _apiUser = (input) => `${_baseUrl}/${input}/?__a=1&__d=dis`;
+const _apiUser = (input) => `${_baseApi}/api/v1/users/web_profile_info/?username=${input}`;
 const _apiGraphql = `${_baseUrl}/graphql/query/?`;
 
 const USER_AGENTS = {
 	LOGIN_AGENT: 'Instagram 100.1.0.29.135 Android',
 	LOGIN_MOBILE:
-		'Instagram 123.0.0.21.114 (iPhone; CPU iPhone OS 11_4 like Mac OS X; en_US; en-US; scale=2.00; 750x1334) AppleWebKit/605.1.15',
+		'Mozilla/5.0 (iPhone; CPU iPhone OS 17_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1',
 	NON_LOGIN_AGENT:
 		'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
 };
 const LOGIN_HEADERS = {
-	'User-Agent': USER_AGENTS.LOGIN_AGENT,
+	'User-Agent': USER_AGENTS.LOGIN_MOBILE,
 	'Content-Type': 'application/x-www-form-urlencoded',
 	'Accept-Language': 'en-US,en;q=0.9',
 	authority: 'www.instagram.com',
@@ -28,7 +27,7 @@ const LOGIN_HEADERS = {
 	'sec-fetch-site': 'same-origin',
 	'sec-fetch-mode': 'cors',
 	'sec-fetch-dest': 'empty',
-	'x-ig-app-id': 936619743392459,
+	'x-ig-app-id': '936619743392459',
 	'x-ig-www-claim': 'hmac.AR11UXNtS_SOWkzS0mwFaVTUSNAsC3-YFVVCB9mfUhhu4Zcc',
 	'x-requested-with': 'XMLHttpRequest'
 };
@@ -39,30 +38,52 @@ class ResponseParser {
 	/**
 	 * @private
 	 */
-	_parsePost(response) {
-		let { username, full_name: fullName, is_private: isPrivate, is_verified: isVerified } = response.items[0].user;
-		let { like_count: likeCount, taken_at: takenAt, comment_count: commentCount, media_type: mediaType } = response.items[0];
+	_parsePost({ data: { shortcode_media: response } }) {
+		let { username, full_name: fullName, is_private: isPrivate, is_verified: isVerified } = response.owner;
+		let {
+			edge_media_preview_like: { count: likeCount },
+			taken_at_timestamp: takenAt,
+			edge_media_preview_comment: { count: commentCount },
+			__typename: mediaType
+		} = response;
 
-		const captions = response.items[0].caption?.text ?? 'No captions';
-		const type = mediaType === 8 ? 'slide' : mediaType === 2 ? 'video' : 'image';
+		const captions = response.edge_media_to_caption?.edges?.[0]?.node?.text ?? 'No captions';
+		const type = mediaType === 'GraphSidecar' ? 'slide' : mediaType === 'GraphVideo' ? 'video' : 'image';
 
 		let result = { username, fullName, isPrivate, isVerified, likeCount, takenAt, commentCount, captions, post: [] };
 
 		if (type === 'slide') {
-			let { carousel_media: posts } = response.items[0];
+			let { edges: posts } = response.edge_sidecar_to_children;
 
-			for (const post of posts) {
-				if (post.media_type === 1) {
-					result.post.push({ isVideo: false, url: post.image_versions2.candidates[0].url });
-				} else if (post.media_type === 2) {
-					result.post.push({ isVideo: true, url: post.video_versions[0].url, duration: post.video_duration });
+			for (const { node: post } of posts) {
+				if (post.__typename === 'GraphImage') {
+					result.post.push({
+						isVideo: false,
+						url: post.display_resources[post.display_resources.length - 1].src,
+						urlPost: `https://instagram/p/${post.shortcode}`
+					});
+				} else if (post.__typename === 'GraphVideo') {
+					result.post.push({
+						isVideo: true,
+						url: post.video_url,
+						urlPost: `https://instagram/p/${post.shortcode}`
+					});
 				}
 			}
 		} else if (type === 'image') {
-			result.post.push({ isVideo: false, url: response.items[0].image_versions2.candidates[0].url });
+			result.post.push({
+				isVideo: false,
+				url: response.display_resources[response.display_resources.length - 1].src,
+				urlPost: `https://instagram/p/${response.shortcode}`
+			});
 		} else if (type === 'video') {
-			result = { ...result, playCount: response.items[0].play_count };
-			result.post.push({ isVideo: true, url: response.items[0].video_versions[0].url });
+			result = { ...result, playCount: response.video_view_count };
+			result.post.push({
+				isVideo: true,
+				duration: response.video_duration,
+				url: response.video_url,
+				urlPost: `https://instagram/p/${response.shortcode}`
+			});
 		}
 
 		return result;
@@ -71,7 +92,7 @@ class ResponseParser {
 	/**
 	 * @private
 	 */
-	_parseProfile(response) {
+	_parseProfile({ data: { user: response } }) {
 		return {
 			id: response.id,
 			biography: response.biography,
@@ -98,8 +119,8 @@ class ResponseParser {
 						shortCode: edge.node.shortcode,
 						url: `https://www.instagram.com/p/${edge.node.shortcode}/`,
 						dimensions: edge.node.dimensions,
-						imageUrl: edge.node.display_url,
 						isVideo: edge.node.is_video,
+						mediaUrl: edge.node.is_video ? edge.node.video_url : edge.node.display_url,
 						caption: hasCaption ? hasCaption.node.text : '',
 						commentsCount: edge.node.edge_media_to_comment.count,
 						commentsDisabled: edge.node.comments_disabled,
@@ -111,8 +132,8 @@ class ResponseParser {
 									id: edge.node.id,
 									shortCode: edge.node.shortcode,
 									dimensions: edge.node.dimensions,
-									imageUrl: edge.node.display_url,
-									isVideo: edge.node.is_video
+									isVideo: edge.node.is_video,
+									mediaUrl: edge.node.is_video ? edge.node.video_url : edge.node.display_url
 							  })) /* eslint-disable-line */
 							: []
 					};
@@ -348,11 +369,26 @@ class InstagramMethods extends ResponseParser {
 
 		const code = this._parseCode(url);
 
-		const urlRequest = _apiPost(code);
+		const variables = {
+			shortcode: code,
+			child_comment_count: 20, // eslint-disable-line
+			fetch_comment_count: 100, // eslint-disable-line
+			parent_comment_count: 24, // eslint-disable-line
+			has_threaded_comments: true // eslint-disable-line
+		};
 
-		const { data } = await axios.get(urlRequest, {
-			headers: { 'User-Agent': USER_AGENTS.NON_LOGIN_AGENT, Cookie: cookie }
-		});
+		const { data } = await axios.get(
+			'https://www.instagram.com/graphql/query/?query_hash=b3055c01b4b222b8a47dc12b090e4e64&variables=' +
+				JSON.stringify(variables),
+			{
+				headers: {
+					'x-ig-app-id': '936619743392459',
+					'user-agent':
+						'Mozilla/5.0 (iPhone; CPU iPhone OS 17_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1',
+					cookie
+				}
+			}
+		);
 
 		return this._parsePost(data);
 	}

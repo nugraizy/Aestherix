@@ -1,5 +1,7 @@
 import { color, delay, ERRLOG, INFOLOG, isURL, removeDuplicatesArray, isYoutubeURL } from '../../utils/modules/index.js';
-import youtube from '../../utils/youtube/index.js';
+import { YouTubei } from '../../utils/youtube/index.js';
+
+const youtube = new YouTubei();
 
 /**
  *
@@ -9,43 +11,43 @@ import youtube from '../../utils/youtube/index.js';
  * @returns
  */
 const processAudio = async (url, client, { from, message, groupMetadata, prettyNumber }) => {
-	const audio = await youtube.core.audio.download(url);
+	const audio = await youtube.audio(url);
 
 	INFOLOG(`${color('Downloading YouTube Audio', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
-	if ('error' in audio) {
-		client.instance.reply(audio.error, { from, quoted: message, groupMetadata });
-		ERRLOG(`⚠️ ${color('Failed to Download YouTube Audio', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
-	} else {
-		const { title, resolution, file, size, download } = audio;
+	// if ('error' in audio) {
+	// 	client.instance.reply(audio.error, { from, quoted: message, groupMetadata });
+	// 	ERRLOG(`⚠️ ${color('Failed to Download YouTube Audio', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+	// }
 
-		if (!file) {
-			client.instance.reply(`Error while downloading YouTube Video\n\n${url}`, { from, quoted: message, groupMetadata });
-			ERRLOG(`⚠️ ${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+	const { title, download } = audio;
 
-			return;
-		}
+	console.log(title);
 
-		let capt = '';
+	if (!download) {
+		client.instance.reply(`Error while downloading YouTube Video\n\n${url}`, { from, quoted: message, groupMetadata });
+		ERRLOG(`⚠️ ${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 
-		capt += `Title : ${title}\n`;
-		capt += `Size : ${size}\n`;
-		capt += `Resolution : ${resolution}`;
-
-		await client.instance.send(
-			from,
-			{
-				document: Buffer.from(await download(), 'base64'),
-				fileName: `${title}.mp3`,
-				mimetype: 'audio/mp3',
-				caption: capt.formatForm()
-			},
-			{
-				groupMetadata,
-				quoted: message
-			}
-		);
+		return;
 	}
+
+	let capt = '';
+
+	capt += `Title : ${title}\n`;
+
+	await client.instance.send(
+		from,
+		{
+			document: Buffer.from(await download(), 'base64'),
+			fileName: `${title}.mp3`,
+			mimetype: 'audio/mp3',
+			caption: capt.formatForm()
+		},
+		{
+			groupMetadata,
+			quoted: message
+		}
+	);
 };
 
 /**

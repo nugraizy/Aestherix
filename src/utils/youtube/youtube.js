@@ -1,9 +1,23 @@
 import ytdl from 'ytdl-core';
 import { Client } from 'undici';
+import { Innertube, UniversalCache, Utils } from 'youtubei.js';
+import asyncRetry from 'async-retry';
 
 import { CACHE_MANAGER, constant, extractVideoId, filterQualities } from './utils.js';
 import { isYoutubeURL, isURL } from '../modules/index.js';
 import { searchYoutube } from './y2mate.js';
+
+const yt = await Innertube.create({ cache: new UniversalCache(false), generate_session_locally: true }); // eslint-disable-line
+
+class YoutubeiError extends Error {
+	constructor(message, info) {
+		super(message);
+
+		if (info) {
+			this.info = info;
+		}
+	}
+}
 
 class Requests {
 	#headers = {
@@ -304,5 +318,102 @@ export default class YouTube {
 				search: this.#search
 			}
 		};
+	}
+}
+
+export class YouTubei {
+	async tryWithRetry(fn) {
+		return await asyncRetry(fn, {
+			maxTimeout: 5000
+		});
+	}
+
+	async getBufferFromReadable(stream) {
+		const chunks = [];
+		let totalLength = 0;
+
+		for await (const chunk of Utils.streamToIterable(stream)) {
+			chunks.push(chunk);
+			totalLength += chunk.length;
+		}
+
+		const buffer = new Uint8Array(totalLength);
+		let offset = 0;
+
+		for (const chunk of chunks) {
+			buffer.set(chunk, offset);
+			offset += chunk.length;
+		}
+
+		return buffer;
+	}
+
+	async download(id, type) {
+		const { basic_info: basicInfo } = await yt.getBasicInfo(id);
+		const stream = await yt.download(id, { type, ...(type === 'video' ? { quality: 'best' } : {}) });
+
+		const container = {
+			id: basicInfo.id,
+			title: basicInfo.title,
+			duration: basicInfo.duration,
+			keywords: basicInfo.keywords,
+			description: basicInfo.short_description,
+			views: basicInfo.view_count,
+			thumbnail: basicInfo.thumbnail[0].url,
+
+			...(stream
+				? {
+						download: () => {
+							return this.getBufferFromReadable(stream);
+						}
+				  } // eslint-disable-line
+				: {})
+		};
+
+		return container;
+	}
+
+	audio(query) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				if (!(isURL(query) && isYoutubeURL(query))) {
+					const search = await yt.search(query);
+
+					if (!search.results.length) {
+						reject(new YoutubeiError('Container has no results'));
+					}
+
+					query = `https://youtu.be/${search.results[0].id}`;
+				}
+
+				const id = extractVideoId(query);
+
+				resolve(await this.download(id, 'audio'));
+			} catch (error) {
+				reject(new YoutubeiError(error.message || 'Unknown Error!'));
+			}
+		});
+	}
+
+	video(query) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				if (!(isURL(query) && isYoutubeURL(query))) {
+					const search = await yt.search(query);
+
+					if (!search.results.length) {
+						reject(new YoutubeiError('Container has no results'));
+					}
+
+					query = `https://youtu.be/${search.results[0].id}`;
+				}
+
+				const id = extractVideoId(query);
+
+				resolve(await this.download(id, 'video+audio'));
+			} catch (error) {
+				reject(new YoutubeiError(error.message || 'Unknown Error!'));
+			}
+		});
 	}
 }
