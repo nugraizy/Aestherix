@@ -1,13 +1,19 @@
 import ytdl from 'ytdl-core';
 import { Client } from 'undici';
-import { Innertube, UniversalCache, Utils } from 'youtubei.js';
+import { Innertube, Session, UniversalCache, Utils } from 'youtubei.js';
 import asyncRetry from 'async-retry';
 
 import { CACHE_MANAGER, constant, extractVideoId, filterQualities } from './utils.js';
 import { isYoutubeURL, isURL } from '../modules/index.js';
 import { searchYoutube } from './y2mate.js';
 
-const yt = await Innertube.create({ cache: new UniversalCache(false), generate_session_locally: true }); // eslint-disable-line
+let YOUTUBE_COOKIE = process.env.YOUTUBE_COOKIE;
+
+const yt = await Innertube.create({
+	cache: new UniversalCache(false),
+	generate_session_locally: true, // eslint-disable-line
+	...(YOUTUBE_COOKIE ? { cookie: YOUTUBE_COOKIE } : {})
+});
 
 class YoutubeiError extends Error {
 	constructor(message, info) {
@@ -322,6 +328,10 @@ export default class YouTube {
 }
 
 export class YouTubei {
+	constructor() {
+		this.yt = yt;
+		this.refreshedAt = +new Date();
+	}
 	async tryWithRetry(fn) {
 		return await asyncRetry(fn, {
 			maxTimeout: 5000
@@ -346,6 +356,27 @@ export class YouTubei {
 		}
 
 		return buffer;
+	}
+
+	async shouldRefreshInstance() {
+		const session = new Session(
+			this.yt.session.context,
+			this.yt.session.key,
+			this.yt.session.api_version,
+			this.yt.session.account_index,
+			this.yt.session.player,
+			YOUTUBE_COOKIE,
+			this.yt.session.http.fetch,
+			this.yt.session.cache
+		);
+
+		if (session.logged_in) {
+			if (session.oauth.shouldRefreshToken()) {
+				await session.oauth.refreshAccessToken();
+
+				this.yt = new Innertube(session);
+			}
+		}
 	}
 
 	async download(id, type) {
@@ -376,6 +407,8 @@ export class YouTubei {
 	audio(query) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				await this.shouldRefreshInstance();
+
 				if (!(isURL(query) && isYoutubeURL(query))) {
 					const search = await yt.search(query);
 
@@ -398,6 +431,8 @@ export class YouTubei {
 	video(query) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				await this.shouldRefreshInstance();
+
 				if (!(isURL(query) && isYoutubeURL(query))) {
 					const search = await yt.search(query);
 

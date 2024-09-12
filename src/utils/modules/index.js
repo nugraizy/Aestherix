@@ -475,23 +475,24 @@ export const delaySync = (ms) => {
 export const delay = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const color = (text, color) => {
-	const schemes = ['teen', 'passion', 'instagram'][_.random(0, 3)];
-
 	return configuration.OPTIONS.rainbow
 		? gradient['rainbow'](text)
 		: typeof color === 'object'
 		? gradient(...color)(text)
 		: typeof color === 'string'
 		? gradient(color, color)(text)
-		: gradient[schemes](text);
+		: (() => {
+				const schemes = _.sample(['teen', 'passion', 'instagram']);
+
+				return gradient[schemes](text);
+		  })(); // eslint-disable-line
 };
 
 const TIME_FORMAT = 'HH:mm:ss DD/MM';
 const ICON = color('✦', '#E4C1F9');
 const SEPERATOR_1 = color(':', '#6272A4');
 const SEPERATOR_2 = color('/', '#6272A4');
-const SEPERATOR_3 = color('ᚚ', '#cdb4db');
-const bracketsify = (text) => color('【', '#F8F8F2') + text + color('】', '#F8F8F2');
+const SEPERATOR_3 = color('✦', '#cdb4db');
 const boldify = (string) => chalk.bold(string);
 
 const coloring = (text, err) => {
@@ -515,12 +516,12 @@ export const INFOLOG = (...info) => {
 		if (isIgnorePrint !== -1) {
 			info.splice(isIgnorePrint, 1);
 
-			const str = ICON + boldify(bracketsify(coloring(time))) + SEPERATOR_3 + ' ' + info.join(' ');
+			const str = ICON + boldify(coloring(time)) + SEPERATOR_3 + ' ' + info.join(' ');
 
 			return str;
 		}
 
-		const str = ICON + boldify(bracketsify(coloring(time))) + SEPERATOR_3 + ' ' + info.join(' ');
+		const str = ICON + boldify(coloring(time)) + SEPERATOR_3 + ' ' + info.join(' ');
 
 		log(str);
 	}
@@ -532,7 +533,7 @@ export const ERRLOG = (...info) => {
 	if (!isLOGS) {
 		const time = dayjs().format('HH:mm:ss DD/MM');
 
-		log(color('✦', '#FF5555') + boldify(bracketsify(coloring(time, true))) + boldify(SEPERATOR_3), ...info);
+		log(color('✦', '#FF5555') + boldify(coloring(time, true)) + boldify(SEPERATOR_3), ...info);
 	}
 };
 

@@ -10,7 +10,8 @@
     "pm2kill": "pm2 kill",
     "dev": "nodemon",
     "start": "node . nanda10 -w -c -a -z -u -e",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "youtube:auth": "node ./src/utils/modules/youtube-auth.js"
   },
   "keywords": [
     "whatsapp",

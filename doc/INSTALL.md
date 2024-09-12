@@ -28,11 +28,11 @@ make
 sudo make install
 ```
 
-#### Or you can execute the ./install.sh to do everything for you
+#### Or you can execute the ./doc/install/install.sh to do everything for you
 
 ```sh
-chmod +x install.sh
-./install.sh
+chmod +x ./doc/install/install.sh
+./doc/install/install.sh
 npm i
 ```
 
@@ -55,12 +55,12 @@ npm i
 3. Open the folder, go to bin, copy the path
 4. Set/add the Environment path with the copied path
 
-#### Or you can execute the ./install.ps1 to do everything for you
+#### Or you can execute the ./doc/install/install.ps1 to do everything for you
 
 > **IMPORTANT** 
 > make sure to use Powershell with `administrator`
 
 ```powershell
-.\install-software.ps1
+.\doc\install\install.ps1
 npm i
 ```
