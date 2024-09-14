@@ -4,7 +4,7 @@ import { generateWAMessage } from '@adiwajshing/baileys';
 import configuration from '../../helper/config/connect.js';
 import { runtime } from '../../index.js';
 import { Limit, checkAfk, deleteAfk, getAfk, reassign } from '../../helper/index.js';
-import { color, getTimeSince, INFOLOG, ERRLOG, randomChar, wrapText } from '../../utils/modules/index.js';
+import { color, getTimeSince, loggers, randomChar, wrapText } from '../../utils/modules/index.js';
 import { Cache } from '../../helper/modules/cache.js';
 
 const handler = new Cache();
@@ -15,7 +15,7 @@ let isInit = false;
 
 let STATS_OFFLINE = true;
 const EVALY = ['/>', '$>', '=>', '!>'];
-const SEPERATOR = color('᚛', '#BD93F9');
+const SEPERATOR = color('৲', '#50FA7B');
 const HANDLER_PATH = {
 	STUBTYPE: './stub-message.js',
 	STORY: './story-message.js',
@@ -31,10 +31,7 @@ const HANDLER_PATH = {
 };
 
 const logMessage = (message) => {
-	const senderInfo = `${color(
-		wrapText(message.pushname, { limit: 16, length: 18, center: true }),
-		'white'
-	)} ${SEPERATOR} ${color(wrapText(message.prettyNumber, { limit: 17, length: 19, center: true }), '#6d4eff')}`;
+	const senderInfo = `${color(message.pushname, 'white')} ${SEPERATOR} ${color(message.prettyNumber, '#6d4eff')}`;
 	const messageBody = color(message.query?.replace(/[\t\n]/g, ' ').substring(0, 35), 'white');
 	const typeInfo = `${SEPERATOR} ${color('type', '#6d4eff')} ${color(message.type, 'white')}`;
 	const runtimeInfo = `${SEPERATOR} ${color(((Date.now() - runtime) / 1000).toFixed(0), '#F1FA8C')}${color('s', '#f5e700')}`;
@@ -46,7 +43,7 @@ const logMessage = (message) => {
 		  )} ${messageBody}` // eslint-disable-line
 		: color(message.body?.substring(0, 20).replace(/[\t\n]/g, ' '), 'white');
 
-	INFOLOG(`${senderInfo} ${SEPERATOR}`, fullBody, typeInfo, runtimeInfo);
+	loggers.INF(`${senderInfo} ${SEPERATOR}`, fullBody, typeInfo, runtimeInfo);
 };
 
 const handleStubMessage = async (client, message, store) => {
@@ -417,7 +414,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 					{ groupMetadata: message.groupMetadata }
 				);
 
-				ERRLOG(color(err.message, 'white'));
+				loggers.ERR(color(err.message, 'white'));
 				const parseErr = (
 					err.stack
 						?.split(err.name + ': ')[1]
@@ -439,7 +436,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 					})
 					.join(`${color('❯ ', '#6272A4') + color('at ', '#6d4eff')}`);
 
-				parseErr && ERRLOG(parseErr);
+				parseErr && loggers.ERR(parseErr);
 			}
 		}
 	}

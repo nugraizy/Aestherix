@@ -2,7 +2,7 @@ import express from 'express';
 import crypto from 'crypto';
 
 import { getFilesChanged, parseCommit } from './utils.js';
-import { INFOLOG, color } from '../../../utils/modules/index.js';
+import { loggers, color } from '../../../utils/modules/index.js';
 
 export const githubWebhook = (isReconnect) => {
 	if (isReconnect) {
@@ -50,6 +50,6 @@ export const githubWebhook = (isReconnect) => {
 	});
 
 	app.listen(8080, () => {
-		INFOLOG(color('GitHub Webhook', 'white'), color('started on port', '#E4C1F9'), color('8080', 'white'));
+		loggers.INF(color('GitHub Webhook', 'white'), color('started on port', '#E4C1F9'), color('8080', 'white'));
 	});
 };

@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
-import { color, delay, ERRLOG, INFOLOG, numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
+import { color, delay, loggers, numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
 
 /**
@@ -52,11 +52,11 @@ export default {
 					groupMetadata
 				});
 
-				ERRLOG(`⚠️ ${color('Failed to Download TikTok Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.ERR(`${color('Failed to Download TikTok Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
 			}
 
-			INFOLOG(`${color('Downloading TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.WRN(`${color('Downloading TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			const date = dayjs(posts[data].published * 1000).format('HH:mm:ss DD/MM/YYYY');
 			let capt = `TikTok ${posts[data].type === 'images' ? 'Slide' : 'Video'}`.formatHeaders();
@@ -112,7 +112,7 @@ export default {
 				}
 
 				await delay(100);
-				INFOLOG(`${color('Downloaded TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.INF(`${color('Downloaded TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 				continue;
 			}
@@ -131,7 +131,7 @@ export default {
 			);
 
 			await delay(100);
-			INFOLOG(`${color('Downloaded TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.INF(`${color('Downloaded TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 		}
 	}
 };

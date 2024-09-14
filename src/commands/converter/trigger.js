@@ -2,7 +2,7 @@ import _ from 'lodash';
 import path from 'path';
 import fs from 'fs-extra';
 
-import { color, INFOLOG } from '../../utils/index.js';
+import { color, loggers } from '../../utils/index.js';
 import { trigger } from '../../helper/index.js';
 
 const defaultOptions = {
@@ -56,7 +56,7 @@ export default {
 			: _.defaults({ output: 'sticker' }, defaultOptions);
 
 		if (bodyQuoted && !isMediaImage) {
-			INFOLOG(`${color('Triggering', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.WRN(`${color('Triggering', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			const profile = await client.instance
 				.profilePictureUrl(mediaData.participant, 'image')
@@ -72,7 +72,7 @@ export default {
 				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, { groupMetadata });
 			}
 
-			INFOLOG(`${color('Converted Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.INF(`${color('Converted Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			return;
 		}
@@ -91,7 +91,7 @@ export default {
 				);
 			}
 
-			INFOLOG(`${color('Triggering', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.WRN(`${color('Triggering', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
 
 			const buffer = await client.instance.downloadMediaMessage(mediaData);
 			const result = await trigger(buffer, sender, options);
@@ -102,11 +102,11 @@ export default {
 				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, { groupMetadata });
 			}
 
-			INFOLOG(`${color('Converted Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.INF(`${color('Converted Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 		}
 
 		for (const mentioned of mention) {
-			INFOLOG(`${color('Triggering', '#FF99C8')} ${color(mentioned, '#E4C1F9')}`);
+			loggers.WRN(`${color('Triggering', '#FF99C8')} ${color(mentioned, '#E4C1F9')}`);
 
 			const profile = await client.instance
 				.profilePictureUrl(mentioned, 'image')
@@ -122,7 +122,7 @@ export default {
 				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, { groupMetadata });
 			}
 
-			INFOLOG(`${color('Triggered', '#FF99C8')} ${color(mentioned, '#E4C1F9')}`);
+			loggers.INF(`${color('Triggered', '#FF99C8')} ${color(mentioned, '#E4C1F9')}`);
 		}
 	}
 };

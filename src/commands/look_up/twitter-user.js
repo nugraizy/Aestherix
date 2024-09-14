@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { color, ERRLOG, isURL } from '../../utils/modules/index.js';
+import { color, isURL } from '../../utils/modules/index.js';
 import { twitterUser } from '../../utils/twitter/index.js';
 
 /**
@@ -43,7 +43,7 @@ export default {
 					groupMetadata
 				});
 
-				ERRLOG(`⚠️ ${color('Failed to Searching Twitter User', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.ERR(`${color('Failed to Searching Twitter User', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 				continue;
 			}

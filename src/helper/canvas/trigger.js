@@ -3,7 +3,7 @@ import GIFEncoder from 'gifencoder';
 import sharp from 'sharp';
 
 import configuration from '../config/connect.js';
-import { color, ERRLOG, isURL } from '../../utils/modules/index.js';
+import { color, isURL } from '../../utils/modules/index.js';
 import { gif2mp4 } from '../../utils/converter/index.js';
 
 const { readFile, unlink, writeFile } = (await import('fs-extra')).default;
@@ -101,7 +101,7 @@ export const trigger = async (image, sender, opt) =>
 				resolve(finalOutput);
 			}
 		} catch (err) {
-			ERRLOG(`⚠️ ${color('Failed to Trigger an image', '#FF5555')} for ${color(sender, '#E4C1F9')}`);
+			loggers.ERR(`${color('Failed to Trigger an image', '#FF5555')} for ${color(sender, '#E4C1F9')}`);
 
 			reject(err);
 		}

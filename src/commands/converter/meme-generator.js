@@ -1,7 +1,7 @@
 import parser from 'yargs-parser';
 
 import { memeGenerator } from '../../helper/canvas/index.js';
-import { color, INFOLOG } from '../../utils/modules/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 
 const DEFAULT_TYPE = 'image';
 
@@ -110,6 +110,8 @@ export default {
 			);
 		}
 
-		INFOLOG(`${color(`${parsed.isStickers ? 'Sticker' : 'Image'} is sent`, '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.INF(
+			`${color(`${parsed.isStickers ? 'Sticker' : 'Image'} is sent`, '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`
+		);
 	}
 };

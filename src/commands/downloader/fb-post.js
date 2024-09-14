@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { color, ERRLOG, fetchBUFFER, INFOLOG, isURL, delay } from '../../utils/modules/index.js';
+import { color, fetchBUFFER, loggers, isURL, delay } from '../../utils/modules/index.js';
 import { fbDl } from '../../utils/facebook/index.js';
 
 const regex = (input) => /^(https?:\/\/)?((w{3}\.)|(m\.)?)?(facebook|fb)\.(com|watch)\/.*/.test(input);
@@ -46,7 +46,7 @@ export default {
 
 			const post = await fbDl(url.trim());
 
-			INFOLOG(`${color('Downloading Facebook Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.WRN(`${color('Downloading Facebook Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			if ('error' in post) {
 				await client.instance.reply(`Failed while downloading Facebook post\n\n${post.error}\n${url}`, {
@@ -54,7 +54,7 @@ export default {
 					quoted: message,
 					groupMetadata
 				});
-				ERRLOG(`⚠️ ${color('Failed to Download Facebook Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.ERR(`${color('Failed to Download Facebook Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 				continue;
 			}
@@ -72,6 +72,6 @@ export default {
 			await delay(300);
 		}
 
-		INFOLOG(`${color('Downloaded Facebook Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.INF(`${color('Downloaded Facebook Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

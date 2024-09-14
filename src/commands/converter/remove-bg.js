@@ -2,7 +2,7 @@ import path from 'path';
 import parser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
-import { color, INFOLOG } from '../../utils/modules/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 import { removeBg } from '../../utils/converter/file-processing.js';
 
 /**
@@ -48,7 +48,7 @@ export default {
 			});
 		}
 
-		INFOLOG(`${color('Removing Background image', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.WRN(`${color('Removing Background image', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
 
 		const parsed = parser(query.toLowerCase(), {
 			configuration: {

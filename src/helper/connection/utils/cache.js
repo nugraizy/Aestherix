@@ -6,7 +6,7 @@ import os from 'os';
 import chalk from 'chalk';
 
 import configuration from '../../config/connect.js';
-import { color, ERRLOG, INFOLOG, loadFiles } from '../../../utils/modules/index.js';
+import { color, loggers, loadFiles } from '../../../utils/modules/index.js';
 
 /**
  * @type {{name: string, id: string}[]}
@@ -139,7 +139,7 @@ export const validatePlugins = async (filename, isWatch) => {
 
 		console.log(`  ${linePaddingSecond}`, chalk.gray('⇢', typeError));
 
-		ERRLOG(
+		loggers.ERR(
 			color(`${ICON.ERROR}${filename.split('/').slice(-2).join('/')}`, '#9f53ea'),
 			isWatch
 				? color('File Error! Waiting for changes...', '#5954cc')
@@ -160,8 +160,8 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 
 		try {
 			module = await import(file);
-			INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('New File Added!', 'white'));
-			INFOLOG(color('checking if its valid plugins...', '#ffb86c'));
+			loggers.WRN(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('New File Added!', 'white'));
+			loggers.INF(color('checking if its valid plugins...', '#ffb86c'));
 		} catch (error) {
 			return await validatePlugins(filename, true);
 		}
@@ -172,12 +172,12 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 				absolutePath: file,
 				path: filename
 			});
-			INFOLOG(
+			loggers.WRN(
 				color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
 				color('Plugins are valid! Waiting for changes...', '#50fa7b')
 			);
 		} else {
-			ERRLOG(
+			loggers.ERR(
 				color(`${ICON.ERROR}${filename.split('/').slice(-2).join('/')}`, '#9f53ea'),
 				color('File Error! Waiting for changes...', '#5954cc') // not this
 			);
@@ -189,7 +189,7 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 	} else {
 		try {
 			await import(file);
-			INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('New File Added!', 'white'));
+			loggers.WRN(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('New File Added!', 'white'));
 		} catch (error) {
 			console.log(error);
 			await validatePlugins(filename, true);
@@ -198,7 +198,10 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 };
 
 const change = async (filename, stats, icon = ICON.CHANGED) => {
-	INFOLOG(color(`${icon} ${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('File has been changed!', 'white'));
+	loggers.WRN(
+		color(`${icon} ${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
+		color('File has been changed!', 'white')
+	);
 
 	const _command = nocache(normalizeImportPath(filename), true);
 
@@ -214,7 +217,7 @@ const change = async (filename, stats, icon = ICON.CHANGED) => {
 		command = (await _command.import)?.default;
 
 		if (!command) {
-			return ERRLOG(
+			return loggers.ERR(
 				color(`${ICON.ERROR}${cmds[index][1].path?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
 				color('File is not containing the correct Command Properties! Refer to Example to make new commands!', '#05ffa1')
 			);
@@ -225,7 +228,7 @@ const change = async (filename, stats, icon = ICON.CHANGED) => {
 
 	const _commandObj = cmds[index][1];
 
-	INFOLOG(
+	loggers.WRN(
 		color(`${ICON.REFRESH}${_commandObj.path?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
 		color('File Reloaded!', '#05ffa1')
 	);
@@ -275,7 +278,7 @@ const unlink = (filename, icon = ICON.DELETED) => {
 			Object.assign(file[1], { path: renamedFile, absolutePath: normalizeImportPath(renamedFile) })
 		);
 
-		INFOLOG(
+		loggers.WRN(
 			color(`${ICON.RENAMED}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
 			color('File Renamed!', 'white'),
 			color('to', 'white'),
@@ -288,7 +291,7 @@ const unlink = (filename, icon = ICON.DELETED) => {
 
 	configuration.cmds.commands.delete(cmds[indexPath][0]);
 
-	INFOLOG(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('File Deleted!', '#5954cc'));
+	loggers.WRN(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('File Deleted!', '#5954cc'));
 };
 
 export const watch = (folder) =>

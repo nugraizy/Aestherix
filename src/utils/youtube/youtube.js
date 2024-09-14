@@ -7,12 +7,12 @@ import { CACHE_MANAGER, constant, extractVideoId, filterQualities } from './util
 import { isYoutubeURL, isURL } from '../modules/index.js';
 import { searchYoutube } from './y2mate.js';
 
-let YOUTUBE_COOKIE = process.env.YOUTUBE_COOKIE;
+let YOUTUBE_AUTH = process.env.YOUTUBE_AUTH;
 
 const yt = await Innertube.create({
 	cache: new UniversalCache(false),
 	generate_session_locally: true, // eslint-disable-line
-	...(YOUTUBE_COOKIE ? { cookie: YOUTUBE_COOKIE } : {})
+	...(YOUTUBE_AUTH ? { cookie: YOUTUBE_AUTH } : {})
 });
 
 class YoutubeiError extends Error {
@@ -365,7 +365,7 @@ export class YouTubei {
 			this.yt.session.api_version,
 			this.yt.session.account_index,
 			this.yt.session.player,
-			YOUTUBE_COOKIE,
+			YOUTUBE_AUTH,
 			this.yt.session.http.fetch,
 			this.yt.session.cache
 		);

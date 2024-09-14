@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { color, ERRLOG, INFOLOG, numberWithCommas } from '../../utils/modules/index.js';
+import { color, loggers, numberWithCommas } from '../../utils/modules/index.js';
 import { instagram } from '../../utils/instagram/index.js';
 
 /**
@@ -25,7 +25,7 @@ export default {
 
 		const highlights = await instagram.search.highlight(input);
 
-		INFOLOG(`${color('Downloading Instagram highlights', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.WRN(`${color('Downloading Instagram highlights', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const data in highlights) {
 			if ('error' in highlights[data]) {
@@ -34,7 +34,7 @@ export default {
 					quoted: message,
 					groupMetadata
 				});
-				ERRLOG(`⚠️ ${color('Failed to Download Instagram highlights', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.ERR(`${color('Failed to Download Instagram highlights', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
 			}
 
@@ -82,6 +82,6 @@ export default {
 			}
 		}
 
-		INFOLOG(`${color('Downloaded Instagram highlights', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.INF(`${color('Downloaded Instagram highlights', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

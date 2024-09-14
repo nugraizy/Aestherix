@@ -2,7 +2,7 @@ import Canvas from '@napi-rs/canvas';
 import path from 'path';
 
 import configuration from '../config/connect.js';
-import { color, INFOLOG } from '../../utils/modules/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 
 const { createCanvas, loadImage, GlobalFonts } = Canvas;
 
@@ -56,6 +56,8 @@ export const memeGenerator = (client, sender, input, topTexts = '', bottomTexts 
 			return resolve({ error: 'No Texts Provided' });
 		}
 
+		loggers.WRN(`${color('Generating Meme', '#FF99C8')} for ${color(sender, '#E4C1F9')}`);
+
 		const images = await loadImage(input);
 
 		const { canvas, height } = (() => {
@@ -90,7 +92,7 @@ export const memeGenerator = (client, sender, input, topTexts = '', bottomTexts 
 				packname: configuration.packname
 			});
 
-			INFOLOG(`${color('Meme Generator is Done', '#FF99C8')} for ${color(sender, '#E4C1F9')}`);
+			loggers.INF(`${color('Meme generated', '#FF99C8')} for ${color(sender, '#E4C1F9')}`);
 			resolve(buffer);
 		} else {
 			resolve(canvas.toBuffer('image/png'));

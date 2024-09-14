@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { color, delay, ERRLOG, INFOLOG, numberWithCommas } from '../../utils/modules/index.js';
+import { color, delay, loggers, numberWithCommas } from '../../utils/modules/index.js';
 import { instagram } from '../../utils/instagram/index.js';
 
 /**
@@ -25,7 +25,7 @@ export default {
 
 		const stories = await instagram.search.story(input);
 
-		INFOLOG(`${color('Downloading Instagram Story', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.WRN(`${color('Downloading Instagram Story', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const data in stories) {
 			if ('error' in stories[data]) {
@@ -34,7 +34,7 @@ export default {
 					quoted: message,
 					groupMetadata
 				});
-				ERRLOG(`⚠️ ${color('Failed to Download Instagram Story', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.ERR(`${color('Failed to Download Instagram Story', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
 			}
 
@@ -67,6 +67,6 @@ export default {
 			}
 		}
 
-		INFOLOG(`${color('Downloaded Instagram Story', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.INF(`${color('Downloaded Instagram Story', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

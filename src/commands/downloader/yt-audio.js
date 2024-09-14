@@ -1,4 +1,4 @@
-import { color, delay, ERRLOG, INFOLOG, isURL, removeDuplicatesArray, isYoutubeURL } from '../../utils/modules/index.js';
+import { color, delay, loggers, isURL, removeDuplicatesArray, isYoutubeURL } from '../../utils/modules/index.js';
 import { YouTubei } from '../../utils/youtube/index.js';
 
 const youtube = new YouTubei();
@@ -13,20 +13,18 @@ const youtube = new YouTubei();
 const processAudio = async (url, client, { from, message, groupMetadata, prettyNumber }) => {
 	const audio = await youtube.audio(url);
 
-	INFOLOG(`${color('Downloading YouTube Audio', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+	loggers.WRN(`${color('Downloading YouTube Audio', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 	// if ('error' in audio) {
 	// 	client.instance.reply(audio.error, { from, quoted: message, groupMetadata });
-	// 	ERRLOG(`⚠️ ${color('Failed to Download YouTube Audio', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+	// 	loggers.ERR(`${color('Failed to Download YouTube Audio', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 	// }
 
 	const { title, download } = audio;
 
-	console.log(title);
-
 	if (!download) {
 		client.instance.reply(`Error while downloading YouTube Video\n\n${url}`, { from, quoted: message, groupMetadata });
-		ERRLOG(`⚠️ ${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.ERR(`${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		return;
 	}
@@ -129,7 +127,7 @@ export default {
 				{}
 			);
 
-			INFOLOG(`${color('Downloaded YouTube Audio', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.INF(`${color('Downloaded YouTube Audio', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			return;
 		}
@@ -208,6 +206,6 @@ export default {
 			{}
 		);
 
-		INFOLOG(`${color('Downloaded YouTube Audio', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.INF(`${color('Downloaded YouTube Audio', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

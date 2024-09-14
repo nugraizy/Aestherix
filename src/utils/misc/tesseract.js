@@ -1,7 +1,7 @@
 import Tesseract from 'tesseract.js';
 import fs from 'fs-extra';
 
-import { cheerioLOAD, color, fetchJSON, INFOLOG } from '../modules/index.js';
+import { cheerioLOAD, color, fetchJSON, loggers } from '../modules/index.js';
 
 let LANGUAGES;
 
@@ -38,12 +38,12 @@ export const tesseract = async (image, sender, lang = 'ind') =>
 
 			if (!languages.some((l) => l.code.toLowerCase() === lang.toLowerCase())) {
 				await fs.unlink(image);
-				INFOLOG(`${color(`Language ${lang} is not supported`, '#FF5555')}`);
+				loggers.ERR(`${color(`Language ${lang} is not supported`, '#FF5555')}`);
 				resolve({ error: `Language ${lang} not found`, languages });
 				return;
 			}
 
-			INFOLOG(`${color('Recognizing the image..', '#FF99C8')} to ${color(sender, '#E4C1F9')}`);
+			loggers.WRN(`${color('Recognizing the image..', '#FF99C8')} to ${color(sender, '#E4C1F9')}`);
 			let {
 				data: { text, confidence, paragraphs }
 			} = await Tesseract.recognize(image, lang);

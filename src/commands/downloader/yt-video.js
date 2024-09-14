@@ -1,4 +1,4 @@
-import { color, delay, ERRLOG, INFOLOG, isURL, removeDuplicatesArray, isYoutubeURL } from '../../utils/modules/index.js';
+import { color, delay, loggers, isURL, removeDuplicatesArray, isYoutubeURL } from '../../utils/modules/index.js';
 import { YouTubei } from '../../utils/youtube/index.js';
 
 const youtube = new YouTubei();
@@ -13,11 +13,11 @@ const youtube = new YouTubei();
 const processVideo = async (url, client, { from, message, groupMetadata, prettyNumber }) => {
 	const video = await youtube.video(url);
 
-	INFOLOG(`${color('Downloading YouTube Video', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+	loggers.WRN(`${color('Downloading YouTube Video', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 	// if ('error' in video) {
 	// 	client.instance.reply(video.error, { from, quoted: message, groupMetadata });
-	// 	ERRLOG(`⚠️ ${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+	// 	loggers.ERR(`${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 	// 	return;
 	// }
 
@@ -25,7 +25,7 @@ const processVideo = async (url, client, { from, message, groupMetadata, prettyN
 
 	if (!download) {
 		client.instance.reply(`Error while downloading YouTube Video\n\n${url}`, { from, quoted: message, groupMetadata });
-		ERRLOG(`⚠️ ${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.ERR(`${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		return;
 	}
@@ -126,7 +126,7 @@ export default {
 				{}
 			);
 
-			INFOLOG(`${color('Downloaded YouTube Video', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.INF(`${color('Downloaded YouTube Video', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			return;
 		}
@@ -207,6 +207,6 @@ export default {
 			{}
 		);
 
-		INFOLOG(`${color('Downloaded YouTube Video', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.INF(`${color('Downloaded YouTube Video', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

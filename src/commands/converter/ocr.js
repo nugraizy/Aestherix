@@ -1,6 +1,6 @@
 import path from 'path';
 
-import { color, INFOLOG } from '../../utils/modules/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 import { tesseract } from '../../utils/misc/index.js';
 
 /**
@@ -51,6 +51,6 @@ export default {
 
 		await client.instance.send(from, { text: scanning.result.text.trim() }, { groupMetadata, quoted: message });
 
-		INFOLOG(`${color('Text is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.INF(`${color('Text is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

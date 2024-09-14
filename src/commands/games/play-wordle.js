@@ -1,6 +1,6 @@
 import configuration from '../../helper/config/connect.js';
 import { Wordle } from '../../utils/games/index.js';
-import { INFOLOG, color } from '../../utils/modules/index.js';
+import { loggers, color } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -31,7 +31,7 @@ export default {
 				return await client.instance.reply('You are already playing Wordle.', { from, quoted: message, groupMetadata });
 			}
 
-			INFOLOG(
+			loggers.WRN(
 				`${color('Wordle Game Answer : ', '#FF99C8')} ${color(wordle.word, 'white')} to ${color(prettyNumber, '#E4C1F9')}`
 			);
 

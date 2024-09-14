@@ -3,7 +3,7 @@ import { generateWAMessageFromContent } from '@adiwajshing/baileys';
 import configuration from '../../helper/config/connect.js';
 import { runtime } from '../../index.js';
 import { textStory } from '../../helper/index.js';
-import { color, INFOLOG, wrapText } from '../../utils/modules/index.js';
+import { color, loggers, wrapText } from '../../utils/modules/index.js';
 
 let meJid = null;
 const SEPERATOR = color('᚛', '#BD93F9');
@@ -47,7 +47,7 @@ const handler = async (client, message) => {
 		await client.instance.relayMessage(meJid, messages.message, { messageId: messages.key.id });
 	}
 
-	INFOLOG(
+	loggers.WRN(
 		`${color(wrapText(message.pushname, { limit: 16, length: 18, center: true }), 'white')} ${SEPERATOR} ${color(
 			wrapText(message.prettyNumber, { limit: 17, length: 19, center: true }),
 			'#6d4eff'

@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
-import { color, delay, ERRLOG, INFOLOG, isURL, formatNumber } from '../../utils/modules/index.js';
+import { color, delay, loggers, isURL, formatNumber } from '../../utils/modules/index.js';
 import { twitterDownload } from '../../utils/twitter/index.js';
 
 const createPostCaption = (post) => {
@@ -54,7 +54,7 @@ export default {
 				continue;
 			}
 
-			INFOLOG(`${color('Downloading Twitter Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.WRN(`${color('Downloading Twitter Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			const post = await twitterDownload(url);
 
@@ -64,7 +64,7 @@ export default {
 					quoted: message,
 					groupMetadata
 				});
-				ERRLOG(`⚠️ ${color('Failed to Download Twitter Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.ERR(`${color('Failed to Download Twitter Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 				continue;
 			}
@@ -94,7 +94,7 @@ export default {
 				);
 			}
 
-			INFOLOG(`${color('Downloaded Twitter Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.INF(`${color('Downloaded Twitter Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 		}
 	}
 };

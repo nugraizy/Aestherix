@@ -1,4 +1,4 @@
-import { color, delay, ERRLOG, INFOLOG, isURL, removeDuplicatesArray } from '../../utils/modules/index.js';
+import { color, delay, loggers, isURL, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { spotifier } from '../../utils/index.js';
 
 const getSpotifyType = (url) => {
@@ -31,13 +31,13 @@ const processVideo = async (url, type, client, { from, message, groupMetadata, p
 
 	const { download } = tracks[0];
 
-	INFOLOG(`${color('Downloading Spotify ' + type, '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+	loggers.WRN(`${color('Downloading Spotify ' + type, '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 	const video = await download();
 
 	if ('error' in video && video.error) {
 		client.instance.reply(video.message, { from, quoted: message, groupMetadata });
-		ERRLOG(`⚠️ ${color('Failed to Download Spotify ' + type, '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.ERR(`${color('Failed to Download Spotify ' + type, '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 		return;
 	}
 
@@ -189,6 +189,6 @@ export default {
 			await delay(300);
 		}
 
-		INFOLOG(`${color('Downloaded Spotify Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.INF(`${color('Downloaded Spotify Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

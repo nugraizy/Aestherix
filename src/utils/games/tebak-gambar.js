@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs-extra';
 
 import configuration from '../../helper/config/connect.js';
-import { color, INFOLOG, randomize } from '../modules/index.js';
+import { color, loggers, randomize } from '../modules/index.js';
 import { checkIntervals, deleteIntervals, setIntervals } from '../misc/intervals.js';
 
 const pushMessageData = (id, data, message) => {
@@ -41,7 +41,7 @@ export const startTG = async (client, id, { message, sender, groupMetadata }, re
 		.add(remainingTime + 2, 's')
 		.valueOf();
 
-	INFOLOG(`${color(`The Answer is : ${answer.trim()}`, '#FF99C8')}`);
+	loggers.INF(`${color(`The Answer is : ${answer.trim()}`, '#FF99C8')}`);
 	setIntervals(
 		configuration.intervals.tebakGambar,
 		id,

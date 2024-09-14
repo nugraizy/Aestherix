@@ -1,6 +1,6 @@
 import path from 'path';
 
-import { color, INFOLOG } from '../../utils/modules/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 import { convertStickerToMedia } from '../../utils/converter/index.js';
 
 /**
@@ -42,6 +42,6 @@ export default {
 			{ groupMetadata, quoted: message }
 		);
 
-		INFOLOG(`${color('Media is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.INF(`${color('Media is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

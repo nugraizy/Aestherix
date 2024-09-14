@@ -1,5 +1,5 @@
 import { Prettify } from '../../helper/index.js';
-import { color, INFOLOG, ERRLOG } from '../../utils/modules/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -23,7 +23,7 @@ export default {
 			});
 		}
 
-		INFOLOG(`${color('Prettifying an Image', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.WRN(`${color('Prettifying an Image', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
 
 		let buffer = await client.instance.downloadMediaMessage(mediaData);
 
@@ -33,13 +33,13 @@ export default {
 
 		if ('error' in screenshot) {
 			client.instance.reply(screenshot.error, { from, quoted: message, groupMetadata });
-			ERRLOG(`⚠️ ${color('Failed to Prettify an Image', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.ERR(`${color('Failed to Prettify an Image', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 			return;
 		}
 
 		await client.instance.send(from, { image: Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
 		buffer = null;
 
-		INFOLOG(`${color('Prettifying an Image Success', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.INF(`${color('Prettifying an Image Success', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

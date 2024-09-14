@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { color, ERRLOG, INFOLOG } from '../../utils/modules/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 import { mime } from '../../utils/misc/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
 
@@ -35,11 +35,11 @@ export default {
 					groupMetadata
 				});
 
-				ERRLOG(`⚠️ ${color('Failed to Download TikTok Music', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.ERR(`${color('Failed to Download TikTok Music', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
 			}
 
-			INFOLOG(`${color('Downloading TikTok Music', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.WRN(`${color('Downloading TikTok Music', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			await client.instance.send(
 				from,
@@ -51,7 +51,7 @@ export default {
 				{ groupMetadata, quoted: message }
 			);
 
-			INFOLOG(`${color('Downloaded TikTok Music', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.INF(`${color('Downloaded TikTok Music', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 		}
 	}
 };

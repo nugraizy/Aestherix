@@ -1,7 +1,7 @@
 import path from 'path';
 
 import configuration from '../../helper/config/connect.js';
-import { color, INFOLOG, isURL } from '../../utils/modules/index.js';
+import { color, loggers, isURL } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -114,6 +114,6 @@ export default {
 			await client.instance.send(from, { sticker }, { groupMetadata, quoted: message });
 		}
 
-		INFOLOG(`${color('Sticker is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.INF(`${color('Sticker is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

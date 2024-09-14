@@ -7,7 +7,7 @@ import path from 'path';
 
 import { createExif } from '../../utils/misc/index.js';
 import { scheme } from '../misc/palettes/colors.js';
-import { color, ERRLOG, INFOLOG } from '../../utils/modules/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 
 const { createCanvas, GlobalFonts } = Canvas;
 const { CanvasTextWrapper } = Wrap;
@@ -34,7 +34,7 @@ const insertExif = async (paths, sender) =>
 
 		exec(`webpmux -set exif "${pathExif}" "${pathResults}" -o "${pathResults}-done.webp"`, (err) => {
 			if (err) {
-				ERRLOG(`⚠️ ${color('Failed to Convert Media to Sticker', '#FF5555')} for ${color(sender, '#E4C1F9')}`);
+				loggers.ERR(`${color('Failed to Convert Media to Sticker', '#FF5555')} for ${color(sender, '#E4C1F9')}`);
 
 				reject(err);
 			}
@@ -85,7 +85,7 @@ export const ttp = (sender, texts, colored, fonts) =>
 		fonts = fonts !== undefined ? fonts.toLowerCase() : 'chevin';
 		colored = colored.length ? colored : null;
 
-		INFOLOG(`${color('Making Static Image', '#FF99C8')} for ${color(sender, '#E4C1F9')}`);
+		loggers.WRN(`${color('Making Static Image', '#FF99C8')} for ${color(sender, '#E4C1F9')}`);
 
 		let { ctx, canvas } = createCanvasTemplates();
 		const colors = loadColorsPalette(colored);
@@ -110,7 +110,7 @@ export const ttp = (sender, texts, colored, fonts) =>
 			.then((saved) => {
 				insertExif(saved, sender)
 					.then(({ buffers }) => {
-						INFOLOG(`${color('Static Image is Done', '#FF99C8')} for ${color(sender, '#E4C1F9')}`);
+						loggers.INF(`${color('Static Image is generated', '#FF99C8')} for ${color(sender, '#E4C1F9')}`);
 
 						resolve(buffers);
 					})

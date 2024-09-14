@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs-extra';
 
-import { color, INFOLOG } from '../../utils/modules/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 import { pet } from '../../utils/converter/index.js';
 
 /**
@@ -56,7 +56,7 @@ export default {
 		}
 
 		if (bodyQuoted && !isMediaImage) {
-			INFOLOG(`${color('Petting', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.WRN(`${color('Petting', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			const profile = await client.instance
 				.profilePictureUrl(mediaData.participant, 'image')
@@ -72,7 +72,7 @@ export default {
 				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, { groupMetadata });
 			}
 
-			INFOLOG(`${color('Converted Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.INF(`${color('Converted Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			return;
 		}
@@ -91,7 +91,7 @@ export default {
 				);
 			}
 
-			INFOLOG(`${color('Petting', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.WRN(`${color('Petting', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
 
 			const file = await client.instance.downloadAndSaveMediaMessage(
 				extractMediaData,
@@ -106,13 +106,13 @@ export default {
 				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, { groupMetadata });
 			}
 
-			INFOLOG(`${color('Converted Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.INF(`${color('Converted Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			return;
 		}
 
 		for (const mentioned of mention) {
-			INFOLOG(`${color('Petting', '#FF99C8')} ${color(mentioned, '#E4C1F9')}`);
+			loggers.WRN(`${color('Petting', '#FF99C8')} ${color(mentioned, '#E4C1F9')}`);
 
 			const profile = await client.instance
 				.profilePictureUrl(mentioned, 'image')
@@ -128,7 +128,7 @@ export default {
 				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, { groupMetadata });
 			}
 
-			INFOLOG(`${color('Petted', '#FF99C8')} ${color(mentioned, '#E4C1F9')}`);
+			loggers.WRN(`${color('Petted', '#FF99C8')} ${color(mentioned, '#E4C1F9')}`);
 		}
 	}
 };

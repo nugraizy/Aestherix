@@ -8,10 +8,14 @@ import { fetch, Client } from 'undici';
 import ms from 'parse-ms';
 import _ from 'lodash';
 import dayjs from 'dayjs';
+import locale from 'dayjs/locale/id.js';
+import utc from 'dayjs/plugin/utc.js';
 import chalk from 'chalk';
 import progress from 'progress-stream';
 
 import configuration from '../../helper/config/connect.js';
+
+dayjs.extend(utc);
 
 /**
  * Fetches texts
@@ -488,14 +492,22 @@ export const color = (text, color) => {
 		  })(); // eslint-disable-line
 };
 
+const isFormat = false;
+const isFormatISO = true;
+const TIME_FORMAT_DEFAULT = 'ddd, DD MMM YYYY HH:mm:ss [GMT]Z';
 const TIME_FORMAT = 'HH:mm:ss DD/MM';
-const ICON = color('✦', '#E4C1F9');
+const ICON = color('ᛟ', '#E4C1F9');
 const SEPERATOR_1 = color(':', '#6272A4');
 const SEPERATOR_2 = color('/', '#6272A4');
-const SEPERATOR_3 = color('✦', '#cdb4db');
+const SEPERATOR_3 = color(' 一', '#50FA7B');
+
 const boldify = (string) => chalk.bold(string);
 
-const coloring = (text, err) => {
+const coloring = (text, format, err) => {
+	if (!format) {
+		return color(text, err ? '#FF5555' : '#E4C1F9');
+	}
+
 	const [time, date] = text.split(' ');
 
 	const [hour, minute, second] = time.split(':');
@@ -505,36 +517,41 @@ const coloring = (text, err) => {
 	return `${HH}${SEPERATOR_1}${mm}${SEPERATOR_1}${ss} ${DD}${SEPERATOR_2}${MM}`;
 };
 
-export const INFOLOG = (...info) => {
+const INFOLOG = (...info) => {
 	const isLOGS = configuration.OPTIONS.noLog || false;
 
 	if (!isLOGS) {
-		const time = dayjs().format(TIME_FORMAT);
+		const time = isFormat
+			? dayjs().format(TIME_FORMAT)
+			: isFormatISO
+			? dayjs().utc(true).toISOString()
+			: dayjs().format(TIME_FORMAT_DEFAULT);
 
-		const isIgnorePrint = info.findIndex((v) => v?.ignore);
+		const str = `${ICON} ${coloring(time, isFormat)}${SEPERATOR_3} ${info.join(' ')}`;
 
-		if (isIgnorePrint !== -1) {
-			info.splice(isIgnorePrint, 1);
-
-			const str = ICON + boldify(coloring(time)) + SEPERATOR_3 + ' ' + info.join(' ');
-
-			return str;
-		}
-
-		const str = ICON + boldify(coloring(time)) + SEPERATOR_3 + ' ' + info.join(' ');
-
-		log(str);
+		return str;
 	}
 };
 
-export const ERRLOG = (...info) => {
-	const isLOGS = configuration.OPTIONS.noLog || false;
+const loggersFns = (type, hexColor, ...info) => {
+	const ignoreIndex = info.findIndex((v) => v?.ignore);
 
-	if (!isLOGS) {
-		const time = dayjs().format('HH:mm:ss DD/MM');
+	if (ignoreIndex !== -1) {
+		info.splice(ignoreIndex, 1);
+		const str = `${color('[', 'gray')}${boldify(color(type, hexColor))}${color(']', 'gray')} ${INFOLOG(...info)}`;
 
-		log(color('✦', '#FF5555') + boldify(coloring(time, true)) + boldify(SEPERATOR_3), ...info);
+		return str;
 	}
+
+	const str = `${color('[', 'gray')}${boldify(color(type, hexColor))}${color(']', 'gray')} ${INFOLOG(...info)}`;
+
+	log(str);
+};
+
+export const loggers = {
+	WRN: (...info) => loggersFns('WRN', '#F1FA8C', ...info),
+	INF: (...info) => loggersFns('INF', '#50FA7B', ...info),
+	ERR: (...info) => loggersFns('ERR', '#FF5555', ...info)
 };
 
 export const isURL = (input) =>

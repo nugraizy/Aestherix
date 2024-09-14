@@ -1,7 +1,7 @@
 import cron from 'node-cron';
 import fs from 'fs-extra';
 
-import { INFOLOG, color } from '../../../utils/modules/index.js';
+import { loggers, color } from '../../../utils/modules/index.js';
 import configuration from '../../config/connect.js';
 
 const PATH = {
@@ -187,7 +187,7 @@ export const runLimitScheduler = (OPTIONS, clearDBConnection, cli) => {
 			await Limit.resetAllLimit();
 			await Limit.updateLimitFromCache();
 
-			INFOLOG(`${color('Sukses Reset User`s Limit', 'white')}`);
+			loggers.WRN(`${color('Successfully reset all limit usage.', 'white')}`);
 
 			if (OPTIONS.resetOnStart) {
 				await clearDBConnection(cli);

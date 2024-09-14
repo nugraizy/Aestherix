@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
-import { color, delay, ERRLOG, INFOLOG, numberWithCommas } from '../../utils/modules/index.js';
+import { color, delay, loggers, numberWithCommas } from '../../utils/modules/index.js';
 import { instagram } from '../../utils/instagram/index.js';
 
 /**
@@ -26,7 +26,7 @@ export default {
 
 		const posts = await instagram.download.post(urls);
 
-		INFOLOG(`${color('Downloading Instagram Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.WRN(`${color('Downloading Instagram Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const data in posts) {
 			if ('error' in posts[data]) {
@@ -35,7 +35,7 @@ export default {
 					quoted: message,
 					groupMetadata
 				});
-				ERRLOG(`⚠️ ${color('Failed to Download Instagram Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.ERR(`${color('Failed to Download Instagram Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
 			}
 
@@ -77,6 +77,6 @@ export default {
 			}
 		}
 
-		INFOLOG(`${color('Downloaded Instagram Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.INF(`${color('Downloaded Instagram Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

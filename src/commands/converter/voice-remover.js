@@ -1,6 +1,6 @@
 import path from 'path';
 
-import { color, INFOLOG } from '../../utils/modules/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 import { soundRemover } from '../../utils/converter/index.js';
 import { extension, audioFormat, videoFormat } from '../../utils/misc/mimetype.js';
 
@@ -41,7 +41,7 @@ export default {
 			});
 		}
 
-		INFOLOG(`${color('Removing Sound', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.WRN(`${color('Removing Sound', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		const file = await client.instance.downloadAndSaveMediaMessage(
 			extractMediaData,
@@ -97,6 +97,6 @@ export default {
 			);
 		}
 
-		INFOLOG(`${color('Sound is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.INF(`${color('Sound is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

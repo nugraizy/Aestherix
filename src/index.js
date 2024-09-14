@@ -6,7 +6,7 @@ import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 import mqtt from 'mqtt';
 
 import configuration from './helper/config/connect.js';
-import { color, ERRLOG } from './utils/modules/index.js';
+import { color, loggers } from './utils/modules/index.js';
 import { runLimitScheduler } from './helper/groups/settings/limit.js';
 import { clearDBConnection, resetSession } from './helper/connection/socket/reset-session.js';
 import { cli as clis } from './helper/connection/utils/check-flag.js';
@@ -58,7 +58,7 @@ export const runtime = Date.now();
 
 for (const option of Object.keys(OPTIONS).filter((key) => OPTIONS[key])) {
 	if (!regexOption.includes(option)) {
-		ERRLOG(`${color(option, '#FF5555')} ${color('is not a valid option', 'white')}`);
+		loggers.ERR(`${color(option, '#FF5555')} ${color('is not a valid option', 'white')}`);
 	}
 }
 

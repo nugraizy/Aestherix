@@ -1,7 +1,7 @@
 import parser from 'yargs-parser';
 import _ from 'lodash';
 
-import { color, ERRLOG, numberWithCommas } from '../../utils/modules/index.js';
+import { color, numberWithCommas } from '../../utils/modules/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
 
 /**
@@ -72,7 +72,7 @@ export default {
 					groupMetadata
 				});
 
-				ERRLOG(`⚠️ ${color('Failed to Search TikTok User', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.ERR(`${color('Failed to Search TikTok User', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
 			}
 

@@ -1,4 +1,4 @@
-import { color, INFOLOG } from '../../utils/modules/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 import { startTG } from '../../utils/games/index.js';
 
 /**
@@ -15,7 +15,7 @@ export default {
 	limit: 2,
 	status: 'enable',
 	async run(message, client) {
-		INFOLOG(`${color('Starting Guess The Image Games.', '#FF99C8')}  to ${color(message.prettyNumber, '#E4C1F9')}`);
+		loggers.WRN(`${color('Starting Guess The Image Games.', '#FF99C8')}  to ${color(message.prettyNumber, '#E4C1F9')}`);
 
 		const game = await startTG(client, message.from, message, 20);
 

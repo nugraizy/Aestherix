@@ -10,7 +10,7 @@ import clip from 'clipboardy';
 import { clearDBConnection } from './reset-session.js';
 import { patchInteractiveMessage } from '../utils/patch-message.js';
 import { Cache } from '../../modules/cache.js';
-import { ERRLOG, INFOLOG, color } from '../../../utils/modules/index.js';
+import { loggers, color } from '../../../utils/modules/index.js';
 
 const msgRetryCounterCache = new NodeCache();
 const SETTINGS = await fs.readJSON('./src/helper/config/settings.json');
@@ -140,14 +140,14 @@ const selectHostNumber = async ({ hostNumber, backupsHostNumbers }) => {
 const inputPhoneNumber = async () => {
 	await delay(1000);
 	const phoneNumber = await question(
-		INFOLOG(color('Insert your phone number', '#E4C1F9'), color(':', '#ffff'), { ignore: true })
+		loggers.INF(color('Insert your phone number', '#E4C1F9'), color(':', '#ffff'), { ignore: true }).trim()
 	);
 
 	const formattedPhoneNumber = '+' + phoneNumber.trim().replace(/[^0-9]/g, '');
 	const numberFormat = PhoneNumber(formattedPhoneNumber);
 
-	if (!numberFormat.isValid()) {
-		ERRLOG(color('Invalid phone number', 'red'));
+	if (!numberFormat?.isValid()) {
+		loggers.ERR(color('Invalid phone number.', 'red'), color('Try again with the valid country code.'));
 		return await inputPhoneNumber();
 	}
 
@@ -164,24 +164,27 @@ const askInputNumber = async ({ hostNumber, backupsHostNumbers }) => {
 
 const askWantNumber = async ({ hostNumber, backupsHostNumbers }) => {
 	const isWantNumber = await question(
-		INFOLOG(
-			color('Do you want to use a new number?', '#E4C1F9'),
-			color('(', 'gray') + color('default', '#fff'),
-			color(`${PhoneNumber('+' + hostNumber.replace(/[^0-9]/g, '')).formatInternational()})`, 'gray'),
-			color('[y/n]: ', 'white'),
-			{ ignore: true }
-		)
+		loggers
+			.INF(
+				color('Do you want to use the default number?', '#E4C1F9'),
+				color('(', 'gray') + color('default', '#fff'),
+				color(`${PhoneNumber('+' + hostNumber.replace(/[^0-9]/g, '')).formatInternational()})`, 'gray'),
+				color('[y/n]', 'white'),
+				':',
+				{ ignore: true }
+			)
+			.trim()
 	);
 
 	const answer = yn(isWantNumber);
 
 	if (answer === undefined) {
-		ERRLOG(color('Please answer with', 'red'), color('[y/n]', 'white'));
+		loggers.ERR(color('Please answer with', 'red'), color('[y/n]', 'white'));
 		await delay(1000);
 		return await askWantNumber({ hostNumber, backupsHostNumbers });
 	}
 
-	return answer ? await askInputNumber({ hostNumber, backupsHostNumbers }) : hostNumber;
+	return !answer ? await askInputNumber({ hostNumber, backupsHostNumbers }) : hostNumber;
 };
 
 const handleNewInstance = async ({ OPTIONS, Client }) => {
@@ -207,7 +210,7 @@ const handleNewInstance = async ({ OPTIONS, Client }) => {
 
 		const code = await Client.requestPairingCode(phoneNumber);
 
-		INFOLOG(
+		loggers.INF(
 			color('Pairing code :', '#E4C1F9'),
 			color(
 				code.splitString({
@@ -220,12 +223,12 @@ const handleNewInstance = async ({ OPTIONS, Client }) => {
 		await clip
 			.write(code)
 			.then(() => {
-				INFOLOG(color('Pairing code has been copied to clipboard!', 'white'));
+				loggers.INF(color('Pairing code has been copied to clipboard!', 'white'));
 			})
 			.catch(() => {
-				ERRLOG(color('SSH detected.', 'red'), color('Could not copy the code.', 'gray'));
+				loggers.ERR(color('SSH detected.', 'red'), color('Could not copy the code.', 'gray'));
 			});
 		await delay(200);
-		INFOLOG(color('Waiting for code input', 'white'), color('. . .', '#FF99C8'));
+		loggers.WRN(color('Waiting for code input', 'white'), color('. . .', '#FF99C8'));
 	}
 };

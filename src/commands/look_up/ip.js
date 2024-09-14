@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { color, ERRLOG } from '../../utils/modules/index.js';
+import { color } from '../../utils/modules/index.js';
 import { iplookup } from '../../utils/misc/index.js';
 
 const regex = (input) =>
@@ -48,7 +48,7 @@ export default {
 					groupMetadata
 				});
 
-				ERRLOG(`⚠️ ${color('Failed to Searching IP Address', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.ERR(`${color('Failed to Searching IP Address', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 				continue;
 			} else {

@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { color, ERRLOG, INFOLOG, numberWithCommas } from '../../utils/modules/index.js';
+import { color, loggers, numberWithCommas } from '../../utils/modules/index.js';
 import { instagram } from '../../utils/instagram/index.js';
 
 /**
@@ -25,7 +25,7 @@ export default {
 
 		const users = await instagram.search.user(usernames);
 
-		INFOLOG(`${color('Searching Instagram User', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.WRN(`${color('Searching Instagram User', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const data in users) {
 			if ('error' in users[data]) {
@@ -34,7 +34,7 @@ export default {
 					quoted: message,
 					groupMetadata
 				});
-				ERRLOG(`⚠️ ${color('Failed to Searching Instagram User', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.ERR(`${color('Failed to Searching Instagram User', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
 			}
 

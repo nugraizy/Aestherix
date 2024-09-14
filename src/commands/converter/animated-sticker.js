@@ -2,7 +2,7 @@ import rgbcolor from 'rgb-color';
 import yargsParser from 'yargs-parser';
 
 import { attp } from '../../helper/canvas/index.js';
-import { color, INFOLOG } from '../../utils/modules/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -56,7 +56,7 @@ export default {
 			const { buffer } = await attp(prettyNumber, bodyQuoted, parseOptions.color);
 
 			await client.instance.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
-			INFOLOG(`${color('Sticker is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.INF(`${color('Sticker is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 			return;
 		}
 
@@ -64,7 +64,7 @@ export default {
 			const { buffer } = await attp(prettyNumber, query, parseOptions.color);
 
 			await client.instance.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
-			INFOLOG(`${color('Sticker is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.INF(`${color('Sticker is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 			return;
 		}
 

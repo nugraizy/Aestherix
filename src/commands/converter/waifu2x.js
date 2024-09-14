@@ -2,7 +2,7 @@ import path from 'path';
 import parser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
-import { color, INFOLOG, waifu2x } from '../../utils/index.js';
+import { color, loggers, waifu2x } from '../../utils/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -46,7 +46,7 @@ export default {
 			});
 		}
 
-		INFOLOG(`${color('Enhancing image', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.WRN(`${color('Enhancing image', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
 
 		const parsed = parser(query.toLowerCase(), {
 			configuration: {
@@ -80,5 +80,7 @@ export default {
 		} else {
 			client.instance.send(from, { image: enhance }, { groupMetadata, quoted: message });
 		}
+
+		loggers.INF(`${color('Media is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };
