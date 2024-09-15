@@ -3,10 +3,10 @@ import { generateWAMessageFromContent } from '@adiwajshing/baileys';
 import configuration from '../../helper/config/connect.js';
 import { runtime } from '../../index.js';
 import { textStory } from '../../helper/index.js';
-import { color, loggers, wrapText } from '../../utils/modules/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 
 let meJid = null;
-const SEPERATOR = color('᚛', '#BD93F9');
+const SEPERATOR = color('ヽ', '#50FA7B');
 
 /**
  * @param {import('../../types/Socket/index.js').AdvancedClient} client
@@ -48,10 +48,10 @@ const handler = async (client, message) => {
 	}
 
 	loggers.WRN(
-		`${color(wrapText(message.pushname, { limit: 16, length: 18, center: true }), 'white')} ${SEPERATOR} ${color(
-			wrapText(message.prettyNumber, { limit: 17, length: 19, center: true }),
-			'#6d4eff'
-		)} ${color('on', '#BDE0FE')} ${color(message.from, '#6d4eff')} ${SEPERATOR} ${color(
+		`${color(message.pushname, 'white')} ${SEPERATOR} ${color(message.prettyNumber, '#6d4eff')} ${color(
+			'on',
+			'#BDE0FE'
+		)} ${color(message.from, '#6d4eff')} ${SEPERATOR} ${color(
 			message.body === 'Unknown body' ? 'Bug Story' : message.body?.trim()?.replace('\n', '')?.substring(0, 20),
 			'white'
 		)} ${SEPERATOR} ${color('type', '#6d4eff')} ${SEPERATOR} ${color('Story', 'white')}${color('::', 'white')}${color(

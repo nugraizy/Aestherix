@@ -1,12 +1,11 @@
 import { Boom } from '@hapi/boom';
 import fs from 'fs-extra';
 import { jidNormalizedUser, getKeyAuthor, getAggregateVotesInPollMessage, DisconnectReason } from '@adiwajshing/baileys';
-import boxen from 'boxen';
-import chalk from 'chalk';
+
 import readline from 'readline';
 
 import configuration from '../../config/connect.js';
-import { loggers, color } from '../../../utils/modules/index.js';
+import { loggers, color, printBanner } from '../../../utils/modules/index.js';
 import { connectMqtt } from '../utils/mqtt.js';
 import { loadCommands } from '../utils/commands.js';
 import { clearDBConnection } from '../socket/reset-session.js';
@@ -20,7 +19,6 @@ const newStart = () => (started = Date.now());
 let isClosed = false;
 let shouldWait = false;
 const handler = new Cache();
-const { version } = await fs.readJSON('./package.json');
 const HANDLER_PATH = {
 	INCOMING: '../../../handlers/messages_event/incoming-message.js',
 	DELETED: '../../../handlers/messages_event/deleted-message.js',
@@ -28,8 +26,6 @@ const HANDLER_PATH = {
 	PARTICIPANT: '../../../handlers/notification_handlers/group-participants-notification.js',
 	GROUPSETTINGS: '../../../handlers/notification_handlers/group-settings-notification.js'
 };
-const SEPERATOR = color(' ✦ ', 'white');
-const SPLITTER = ['᠁✦', '✦', '✦', '✦᠁'].map((v) => color(` ${v} `, '#E4C1F9'));
 
 let shouldPrintBanner = true;
 
@@ -110,30 +106,7 @@ export const handleConnectionUpdate = async (
 				(await import('../../modules/utils.js')).assign(client);
 
 				if (shouldPrintBanner) {
-					console.log(
-						boxen(
-							chalk.bold('Bot Version') +
-								`\n${version
-									.split(/(\d)/g)
-									.map((v) => (v === '.' ? '' : v))
-									.map((v) => {
-										if (v === '') {
-											return SPLITTER.shift();
-										} else {
-											return v;
-										}
-									})
-									.join('')}`,
-							{
-								title: `${SEPERATOR}Made By Nanda${SEPERATOR}`,
-								textAlignment: 'center',
-								float: 'center',
-								borderColor: '#E4C1F9',
-								margin: 1,
-								borderStyle: 'round'
-							}
-						)
-					);
+					printBanner();
 					loggers.INF(color('Socket connected', 'white'), color('Successfully', '#E4C1F9') + color('.', 'white'));
 					shouldPrintBanner = false;
 				}

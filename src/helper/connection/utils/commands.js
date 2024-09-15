@@ -1,8 +1,8 @@
 import path from 'path';
 
 import configuration from '../../config/connect.js';
-import { color, loadFiles } from '../../../utils/modules/index.js';
-import { ICON, normalizeImportPath, watch, validatePlugins } from './cache.js';
+import { color, loadFiles, loggers } from '../../../utils/modules/index.js';
+import { normalizeImportPath, watch, validatePlugins } from './cache.js';
 
 export const loadCommands = async (OPTIONS) => {
 	return new Promise(async (resolve) => {
@@ -22,7 +22,7 @@ export const loadCommands = async (OPTIONS) => {
 
 				if (!module?.default) {
 					loggers.ERR(
-						color(`${ICON.ERROR}${normalize.split('/').slice(-2).join('/')}`, '#9f53ea'),
+						color(normalize.split('/').slice(-2).join('/'), '#9f53ea'),
 						OPTIONS.watch
 							? color('File Error! Waiting for changes...', '#FF5555')
 							: color('File Error! Fix the error and restart the bot to use this commands.', '#FF5555')

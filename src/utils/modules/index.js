@@ -8,10 +8,10 @@ import { fetch, Client } from 'undici';
 import ms from 'parse-ms';
 import _ from 'lodash';
 import dayjs from 'dayjs';
-import locale from 'dayjs/locale/id.js';
 import utc from 'dayjs/plugin/utc.js';
 import chalk from 'chalk';
 import progress from 'progress-stream';
+import boxen from 'boxen';
 
 import configuration from '../../helper/config/connect.js';
 
@@ -478,18 +478,32 @@ export const delaySync = (ms) => {
 
 export const delay = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const color = (text, color) => {
-	return configuration.OPTIONS.rainbow
-		? gradient['rainbow'](text)
-		: typeof color === 'object'
-		? gradient(...color)(text)
-		: typeof color === 'string'
-		? gradient(color, color)(text)
-		: (() => {
-				const schemes = _.sample(['teen', 'passion', 'instagram']);
+export const color = (...obj) => {
+	if (obj.length % 2 !== 0) {
+		log('Invalid Number of arguments. Please pairs of text and color.', obj);
+		return;
+	}
 
-				return gradient[schemes](text);
-		  })(); // eslint-disable-line
+	let str = '';
+
+	for (let i = 0; i < obj.length; i += 2) {
+		const text = obj[i];
+		const color = obj[i + 1];
+
+		str += configuration.OPTIONS.rainbow
+			? gradient['rainbow'](text)
+			: typeof color === 'object'
+			? gradient(...color)(text)
+			: typeof color === 'string'
+			? chalk[color]?.(text) || chalk.hex(color)(text)
+			: (() => {
+					const schemes = _.sample(['teen', 'passion', 'instagram']);
+
+					return gradient[schemes](text);
+			  })(); // eslint-disable-line
+	}
+
+	return str;
 };
 
 const isFormat = false;
@@ -500,6 +514,10 @@ const ICON = color('ᛟ', '#E4C1F9');
 const SEPERATOR_1 = color(':', '#6272A4');
 const SEPERATOR_2 = color('/', '#6272A4');
 const SEPERATOR_3 = color(' 一', '#50FA7B');
+
+const { version } = await fs.readJSON('./package.json');
+const SPLITTER = ['᠁✦', '✦', '✦', '✦᠁']; //.map((v) => color(` ${v} `, '#E4C1F9'));
+const AUTHOR = color('nugraizy', '#FF5555');
 
 const boldify = (string) => chalk.bold(string);
 
@@ -553,6 +571,26 @@ export const loggers = {
 	INF: (...info) => loggersFns('INF', '#50FA7B', ...info),
 	ERR: (...info) => loggersFns('ERR', '#FF5555', ...info)
 };
+
+const BANNER_ICON_1 = color('❝', '#FF5555');
+const BANNER_ICON_2 = color('❞', '#FF5555');
+
+export const printBanner = () =>
+	log(
+		boxen(
+			`${BANNER_ICON_1}${chalk.italic.bold.hex('#6d4eff')('Aestherix')}${BANNER_ICON_2}
+version
+${SPLITTER[0]} ${version.split(/\./g).join(` ${SPLITTER[1]} `)} ${SPLITTER[SPLITTER.length - 1]}`,
+			{
+				title: `${ICON} Made by @${AUTHOR} ${ICON}`,
+				textAlignment: 'center',
+				float: 'center',
+				borderColor: 'gray',
+				margin: 1,
+				borderStyle: 'round'
+			}
+		)
+	);
 
 export const isURL = (input) =>
 	/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/gi.test(input);

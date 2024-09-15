@@ -1,7 +1,7 @@
 import parser from 'yargs-parser';
 import _ from 'lodash';
 
-import { color, numberWithCommas } from '../../utils/modules/index.js';
+import { color, numberWithCommas, loggers } from '../../utils/modules/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
 
 /**

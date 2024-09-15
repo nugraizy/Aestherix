@@ -3,7 +3,7 @@ import GIFEncoder from 'gifencoder';
 import sharp from 'sharp';
 
 import configuration from '../config/connect.js';
-import { color, isURL } from '../../utils/modules/index.js';
+import { color, isURL, loggers } from '../../utils/modules/index.js';
 import { gif2mp4 } from '../../utils/converter/index.js';
 
 const { readFile, unlink, writeFile } = (await import('fs-extra')).default;

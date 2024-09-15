@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { color } from '../../utils/modules/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 import { iplookup } from '../../utils/misc/index.js';
 
 const regex = (input) =>

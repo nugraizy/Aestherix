@@ -22,15 +22,6 @@ const nocache = (module, newFile = false) => {
 	return { import: import(newPath), param };
 };
 
-export const ICON = {
-	ADD: '🆕 ',
-	DELETED: '🗑️  ',
-	CHANGED: '✏️ ',
-	ERROR: '⚠️  ',
-	RENAMED: '🔂 ',
-	REFRESH: '🔄 '
-};
-
 export const normalizeImportPath = (file) => {
 	const absolutePath =
 		hostPlatform === 'win32' ? 'file:' + path.win32.resolve(path.win32.join(file)) : path.resolve(path.join(file));
@@ -140,7 +131,7 @@ export const validatePlugins = async (filename, isWatch) => {
 		console.log(`  ${linePaddingSecond}`, chalk.gray('⇢', typeError));
 
 		loggers.ERR(
-			color(`${ICON.ERROR}${filename.split('/').slice(-2).join('/')}`, '#9f53ea'),
+			color(filename.split('/').slice(-2).join('/'), '#9f53ea'),
 			isWatch
 				? color('File Error! Waiting for changes...', '#5954cc')
 				: color('File Error! Fix the error and restart the bot to use this commands.', '#5954cc')
@@ -148,7 +139,7 @@ export const validatePlugins = async (filename, isWatch) => {
 	}
 };
 
-const add = async (filename, stats, icon = ICON.ADD) => {
+const add = async (filename, stats) => {
 	const cmds = configuration.cmds.commands.entries();
 	const index = cmds.findIndex((v) => v[1].path === filename);
 	const files = loadFiles('./src/commands').filter((v) => !v.includes('template'));
@@ -160,7 +151,7 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 
 		try {
 			module = await import(file);
-			loggers.WRN(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('New File Added!', 'white'));
+			loggers.WRN(color(filename?.split('/')?.slice(-2).join('/'), '#9f53ea'), color('New File Added!', 'white'));
 			loggers.INF(color('checking if its valid plugins...', '#ffb86c'));
 		} catch (error) {
 			return await validatePlugins(filename, true);
@@ -173,12 +164,12 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 				path: filename
 			});
 			loggers.WRN(
-				color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
+				color(filename?.split('/')?.slice(-2).join('/'), '#9f53ea'),
 				color('Plugins are valid! Waiting for changes...', '#50fa7b')
 			);
 		} else {
 			loggers.ERR(
-				color(`${ICON.ERROR}${filename.split('/').slice(-2).join('/')}`, '#9f53ea'),
+				color(filename.split('/').slice(-2).join('/'), '#9f53ea'),
 				color('File Error! Waiting for changes...', '#5954cc') // not this
 			);
 			configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
@@ -189,7 +180,7 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 	} else {
 		try {
 			await import(file);
-			loggers.WRN(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('New File Added!', 'white'));
+			loggers.WRN(color(filename?.split('/')?.slice(-2).join('/'), '#9f53ea'), color('New File Added!', 'white'));
 		} catch (error) {
 			console.log(error);
 			await validatePlugins(filename, true);
@@ -197,11 +188,8 @@ const add = async (filename, stats, icon = ICON.ADD) => {
 	}
 };
 
-const change = async (filename, stats, icon = ICON.CHANGED) => {
-	loggers.WRN(
-		color(`${icon} ${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
-		color('File has been changed!', 'white')
-	);
+const change = async (filename, stats) => {
+	loggers.WRN(color(filename?.split('/')?.slice(-2).join('/'), '#9f53ea'), color('File has been changed!', 'white'));
 
 	const _command = nocache(normalizeImportPath(filename), true);
 
@@ -218,7 +206,7 @@ const change = async (filename, stats, icon = ICON.CHANGED) => {
 
 		if (!command) {
 			return loggers.ERR(
-				color(`${ICON.ERROR}${cmds[index][1].path?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
+				color(cmds[index][1].path?.split('/')?.slice(-2).join('/'), '#9f53ea'),
 				color('File is not containing the correct Command Properties! Refer to Example to make new commands!', '#05ffa1')
 			);
 		}
@@ -228,10 +216,7 @@ const change = async (filename, stats, icon = ICON.CHANGED) => {
 
 	const _commandObj = cmds[index][1];
 
-	loggers.WRN(
-		color(`${ICON.REFRESH}${_commandObj.path?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
-		color('File Reloaded!', '#05ffa1')
-	);
+	loggers.WRN(color(_commandObj.path?.split('/')?.slice(-2).join('/'), '#9f53ea'), color('File Reloaded!', '#05ffa1'));
 
 	const _absolutePath = _commandObj.absolutePath;
 	const _path = _commandObj.path;
@@ -249,7 +234,7 @@ const change = async (filename, stats, icon = ICON.CHANGED) => {
 	});
 };
 
-const unlink = (filename, icon = ICON.DELETED) => {
+const unlink = (filename) => {
 	const cmds = configuration.cmds.commands.entries();
 	const indexPath = cmds.findIndex((v) => v[1].path === filename);
 
@@ -279,7 +264,7 @@ const unlink = (filename, icon = ICON.DELETED) => {
 		);
 
 		loggers.WRN(
-			color(`${ICON.RENAMED}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'),
+			color(filename?.split('/')?.slice(-2).join('/'), '#9f53ea'),
 			color('File Renamed!', 'white'),
 			color('to', 'white'),
 			color(renamedFile.split('/')?.slice(-2).join('/'), '#9f53ea'),
@@ -291,7 +276,7 @@ const unlink = (filename, icon = ICON.DELETED) => {
 
 	configuration.cmds.commands.delete(cmds[indexPath][0]);
 
-	loggers.WRN(color(`${icon}${filename?.split('/')?.slice(-2).join('/')}`, '#9f53ea'), color('File Deleted!', '#5954cc'));
+	loggers.WRN(color(filename?.split('/')?.slice(-2).join('/'), '#9f53ea'), color('File Deleted!', '#5954cc'));
 };
 
 export const watch = (folder) =>

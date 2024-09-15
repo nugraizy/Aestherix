@@ -4,7 +4,7 @@ import { generateWAMessage } from '@adiwajshing/baileys';
 import configuration from '../../helper/config/connect.js';
 import { runtime } from '../../index.js';
 import { Limit, checkAfk, deleteAfk, getAfk, reassign } from '../../helper/index.js';
-import { color, getTimeSince, loggers, randomChar, wrapText } from '../../utils/modules/index.js';
+import { color, getTimeSince, loggers, randomChar } from '../../utils/modules/index.js';
 import { Cache } from '../../helper/modules/cache.js';
 
 const handler = new Cache();
@@ -15,7 +15,7 @@ let isInit = false;
 
 let STATS_OFFLINE = true;
 const EVALY = ['/>', '$>', '=>', '!>'];
-const SEPERATOR = color('৲', '#50FA7B');
+const SEPERATOR = color('ヽ', '#50FA7B');
 const HANDLER_PATH = {
 	STUBTYPE: './stub-message.js',
 	STORY: './story-message.js',
