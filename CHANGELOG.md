@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.0.1] - 2024-10-21
+## Fixed
+- Fix **Instagram** `highlights`, and `post`
+
+---
+
 ## [5.0.0] - 2024-10-20
 ### Breaking Changes
 - **Dropped Node.js version <18**: Many security risk on the older version, and may leaks performance.
