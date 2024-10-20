@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { color, loggers, numberWithCommas } from '../../utils/modules/index.js';
+import { color, loggers, numberWithCommas, isURL } from '../../utils/modules/index.js';
 import { instagram } from '../../utils/instagram/index.js';
 
 /**
@@ -46,9 +46,11 @@ export default {
 			capt += `Following : ${numberWithCommas(highlights[data].user.following)}\n`;
 			capt += highlights[data].user.biography === '' ? '' : `Biography : ${highlights[data].user.biography}\n`;
 			capt += `Tot. Highlights : ${numberWithCommas(highlights[data].highlights.length)}\n\n`;
-			capt += 'Each Sections of the Higlights will be send 2 media.\n';
-			capt += `Tot. Sections : ${highlights[data].highlights.length}\n`;
-			capt += `Tot. Estimated media per Section : ${numberWithCommas(highlights[data].highlights.length * 2)}\n\n`;
+			if (!isURL(input)) {
+				capt += 'Each Sections of the Higlights will be send 2 media.\n';
+				capt += `Tot. Sections : ${highlights[data].highlights.length}\n`;
+				capt += `Tot. Estimated media per Section : ${numberWithCommas(highlights[data].highlights.length * 2)}\n\n`;
+			}
 
 			await client.instance.reply(capt.trim().formatForm(), { from, quoted: message, groupMetadata });
 

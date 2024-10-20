@@ -38,7 +38,7 @@ class ResponseParser {
 	/**
 	 * @private
 	 */
-	_parsePost({ data: { shortcode_media: response } }) {
+	_parsePost({ data: { xdt_shortcode_media: response } }) {
 		let { username, full_name: fullName, is_private: isPrivate, is_verified: isVerified } = response.owner;
 		let {
 			edge_media_preview_like: { count: likeCount },
@@ -48,7 +48,7 @@ class ResponseParser {
 		} = response;
 
 		const captions = response.edge_media_to_caption?.edges?.[0]?.node?.text ?? 'No captions';
-		const type = mediaType === 'GraphSidecar' ? 'slide' : mediaType === 'GraphVideo' ? 'video' : 'image';
+		const type = mediaType === 'XDTGraphSidecar' ? 'slide' : mediaType === 'XDTGraphVideo' ? 'video' : 'image';
 
 		let result = { username, fullName, isPrivate, isVerified, likeCount, takenAt, commentCount, captions, post: [] };
 
@@ -56,13 +56,13 @@ class ResponseParser {
 			let { edges: posts } = response.edge_sidecar_to_children;
 
 			for (const { node: post } of posts) {
-				if (post.__typename === 'GraphImage') {
+				if (post.__typename === 'XDTGraphImage') {
 					result.post.push({
 						isVideo: false,
 						url: post.display_resources[post.display_resources.length - 1].src,
 						urlPost: `https://instagram/p/${post.shortcode}`
 					});
-				} else if (post.__typename === 'GraphVideo') {
+				} else if (post.__typename === 'XDTGraphVideo') {
 					result.post.push({
 						isVideo: true,
 						url: post.video_url,
@@ -92,7 +92,7 @@ class ResponseParser {
 	/**
 	 * @private
 	 */
-	_parseProfile({ data: { user: response } }) {
+	_parseProfile(response) {
 		return {
 			id: response.id,
 			biography: response.biography,
@@ -374,17 +374,17 @@ class InstagramMethods extends ResponseParser {
 
 		const code = this._parseCode(url);
 
-		const variables = {
-			shortcode: code,
-			child_comment_count: 20, // eslint-disable-line
-			fetch_comment_count: 100, // eslint-disable-line
-			parent_comment_count: 24, // eslint-disable-line
-			has_threaded_comments: true // eslint-disable-line
-		};
-
 		const { data } = await axios.get(
-			'https://www.instagram.com/graphql/query/?query_hash=b3055c01b4b222b8a47dc12b090e4e64&variables=' +
-				JSON.stringify(variables),
+			this._appendParams(_apiGraphql, {
+				doc_id: '8845758582119845',
+				variables: JSON.stringify({
+					shortcode: code,
+					child_comment_count: 20, // eslint-disable-line
+					fetch_comment_count: 100, // eslint-disable-line
+					parent_comment_count: 24, // eslint-disable-line
+					has_threaded_comments: true // eslint-disable-line
+				})
+			}),
 			{
 				headers: {
 					'x-ig-app-id': '936619743392459',
@@ -407,19 +407,20 @@ class InstagramMethods extends ResponseParser {
 		}
 
 		const {
-			data: { graphql }
+			data: {
+				data: { user }
+			}
 		} = await axios.get(_apiUser(username), {
 			headers: {
 				'User-Agent': USER_AGENTS.NON_LOGIN_AGENT,
-				Cookie: cookie
+				Cookie: cookie,
+				'x-ig-app-id': '936619743392459'
 			}
 		});
 
-		if (!graphql) {
+		if (!user) {
 			return { error: `User ${username} not found.` };
 		}
-
-		const { user } = graphql;
 
 		return this._parseProfile(user);
 	}
@@ -493,52 +494,70 @@ class InstagramMethods extends ResponseParser {
 	 * @private
 	 */
 	async _getHighlights(input, cookie) {
+		const payload = {
+			/* eslint-disable */
+			query_hash: '0a85e6ea60a4c99edc58ab2f3d17cfdf',
+			variables: {
+				reel_ids: [],
+				tag_names: [],
+				location_ids: [],
+				highlight_reel_ids: [],
+				precomposed_overlay: false,
+				show_story_viewer_list: true,
+				story_viewer_fetch_count: 50,
+				story_viewer_cursor: '',
+				stories_video_dash_manifest: false
+			}
+			/* eslint-enable */
+		};
 		if (input.startsWith('@')) {
 			input = input.replace('@', '');
 		}
 
 		if (this._isInstagramUrl(input)) {
-			const {
-				request: {
-					res: { responseUrl }
-				}
-			} = await axios.get(input);
+			const { data: html } = await axios.get(input);
 
-			const highlightsId = new URL(input).searchParams.get('story_media_id').split('_')[0];
-			const code = new URL(responseUrl).pathname.split('/')[3];
-			const { data } = await axios.get(
-				this._appendParams(_apiGraphql, {
-					/* eslint-disable */
-					query_hash: '0a85e6ea60a4c99edc58ab2f3d17cfdf',
-					variables: JSON.stringify({
-						reel_ids: [],
-						tag_names: [],
-						location_ids: [],
-						highlight_reel_ids: [code],
-						precomposed_overlay: false,
-						show_story_viewer_list: true,
-						story_viewer_fetch_count: 50,
-						story_viewer_cursor: '',
-						stories_video_dash_manifest: false
-					})
-					/* eslint-enable */
-				}),
-				{
-					method: 'GET',
-					headers: {
-						...Object.assign(LOGIN_HEADERS, {
-							'User-Agent': USER_AGENTS.LOGIN_MOBILE
-						}),
-						Cookie: cookie,
-						'x-csrf-token': /csrftoken=([^;]+)/.exec(cookie)[1]
-					}
+			const initialHighlightData = /"id":"(\d+)"/.exec(html);
+
+			if (!initialHighlightData) {
+				throw new Error('No highlights present');
+			}
+
+			const getId = () => {
+				const url = new URL(input);
+
+				const storyMediaId = url.searchParams.get('story_media_id');
+
+				if (storyMediaId) {
+					return {
+						mediaId: storyMediaId.split('_')[0],
+						key: 'highlight_reel_ids'
+					};
 				}
-			);
+
+				return { key: 'reel_ids', mediaId: url.pathname.split('/')[3] };
+			};
+
+			const { key, mediaId } = getId();
+
+			payload.variables[key].push(initialHighlightData[1]);
+			payload.variables = JSON.stringify(payload.variables);
+
+			const { data } = await axios.get(this._appendParams(_apiGraphql, payload), {
+				method: 'GET',
+				headers: {
+					...Object.assign(LOGIN_HEADERS, {
+						'User-Agent': USER_AGENTS.LOGIN_MOBILE
+					}),
+					Cookie: cookie,
+					'x-csrf-token': /csrftoken=([^;]+)/.exec(cookie)[1]
+				}
+			});
 
 			const user = await this._getProfile(data.data.reels_media[0].owner.username, cookie);
 
 			const container = {
-				items: data.data.reels_media[0].items.find((v) => v.id === highlightsId)
+				items: data.data.reels_media[0].items.find((v) => v.id === mediaId)
 			};
 
 			const highlights = this._parseHighlight(data);
@@ -576,11 +595,14 @@ class InstagramMethods extends ResponseParser {
 			}),
 			{
 				headers: {
-					...Object.assign(LOGIN_HEADERS, {
-						'User-Agent': USER_AGENTS.LOGIN_MOBILE
-					}),
+					// ...Object.assign(LOGIN_HEADERS, {
+					// 	'User-Agent': USER_AGENTS.LOGIN_MOBILE
+					// }),
+					'User-Agent':
+						'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36',
 					Cookie: cookie,
-					'x-csrf-token': /csrftoken=([^;]+)/.exec(cookie)[1]
+					'X-CSRFToken': /csrftoken=([^;]+)/.exec(cookie)[1],
+					'x-ig-app-id': '936619743392459'
 				}
 			}
 		);
@@ -635,7 +657,7 @@ class InstagramMethods extends ResponseParser {
 						'User-Agent': USER_AGENTS.LOGIN_MOBILE
 					}),
 					Cookie: cookie,
-					'x-csrf-token': /csrftoken=([^;]+)/.exec(cookie)[1]
+					'x-csrftoken': /csrftoken=([^;]+)/.exec(cookie)[1]
 				}
 			}
 		});
