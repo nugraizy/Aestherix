@@ -40,6 +40,7 @@ export interface GlobalConfig {
 	};
 	OPTIONS: Record<string, any>;
 	cli: Record<string, any>;
+	isFirstConnectionForCache: boolean;
 	isFirstConnection: boolean;
 	isConnected: boolean;
 	packname: string;

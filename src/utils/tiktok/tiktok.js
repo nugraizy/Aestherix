@@ -1,11 +1,11 @@
 import axios from 'axios';
-import { load } from 'cheerio';
 import asyncRetry from 'async-retry';
 import { fetch } from 'undici';
 import crypto from 'crypto';
 import { v4 } from 'uuid';
+import fs from 'fs-extra';
 
-import { randomChar, isURL } from '../modules/index.js';
+import { cheerioLOAD, randomChar, isURL } from '../modules/index.js';
 import { COOKIE } from './cookie.js';
 import { _api } from './util.js';
 
@@ -493,7 +493,7 @@ class RequestModule extends ResponseParser {
 
 				data = data.data;
 
-				const rawData = load(data)('script[id=__UNIVERSAL_DATA_FOR_REHYDRATION__]').html();
+				const rawData = cheerioLOAD(data)('script[id=__UNIVERSAL_DATA_FOR_REHYDRATION__]').html();
 
 				resolve(JSON.parse(rawData));
 			} catch (error) {
@@ -841,6 +841,10 @@ class RequestModule extends ResponseParser {
 	 * @private
 	 */
 	async _mergeMediaResponse(dataPosts, videoId, property) {
+		if (dataPosts.status_code !== 0) {
+			return { error: dataPosts.status_msg };
+		}
+
 		dataPosts = dataPosts?.[property]?.find((v) => v.aweme_id === videoId);
 
 		if (!dataPosts) {

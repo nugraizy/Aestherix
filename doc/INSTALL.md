@@ -10,15 +10,15 @@ sudo apt install gcc g++ make
 
 ... then install the rest.
 ```sh
-sudo apt install ffmpeg install libjpeg-dev libpng-dev libtiff-dev libgif-dev -y
+sudo apt install ffmpeg libjpeg-dev libpng-dev libtiff-dev libgif-dev -y
 ```
 
 ```sh
-wget https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.3.2.tar.gz
+wget https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.4.0.tar.gz
 ```
 
 ```sh
-tar xvzf libwebp-1.3.2.tar.gz
+tar xvzf libwebp-1.4.0.tar.gz
 ```
 
 ```sh
@@ -50,7 +50,7 @@ npm i
 
 ### LIBWEBP
 
-1. Download manual using this [link](https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.3.2-windows-x64.zip)
+1. Download manual using this [link](https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.4.0-windows-x64.zip)
 2. Extract it
 3. Open the folder, go to bin, copy the path
 4. Set/add the Environment path with the copied path

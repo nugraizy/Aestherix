@@ -10,14 +10,14 @@ const _apiUser = (input) => `${_baseApi}/api/v1/users/web_profile_info/?username
 const _apiGraphql = `${_baseUrl}/graphql/query/?`;
 
 const USER_AGENTS = {
-	LOGIN_AGENT: 'Instagram 100.1.0.29.135 Android',
+	LOGIN_AGENT: 'Instagram 134.0.0.26.121 Android',
 	LOGIN_MOBILE:
 		'Mozilla/5.0 (iPhone; CPU iPhone OS 17_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1',
 	NON_LOGIN_AGENT:
 		'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
 };
 const LOGIN_HEADERS = {
-	'User-Agent': USER_AGENTS.LOGIN_MOBILE,
+	'User-Agent': USER_AGENTS.LOGIN_AGENT,
 	'Content-Type': 'application/x-www-form-urlencoded',
 	'Accept-Language': 'en-US,en;q=0.9',
 	authority: 'www.instagram.com',
@@ -28,7 +28,7 @@ const LOGIN_HEADERS = {
 	'sec-fetch-mode': 'cors',
 	'sec-fetch-dest': 'empty',
 	'x-ig-app-id': '936619743392459',
-	'x-ig-www-claim': 'hmac.AR11UXNtS_SOWkzS0mwFaVTUSNAsC3-YFVVCB9mfUhhu4Zcc',
+	'x-ig-www-claim': 'hmac.AR2uidim8es5kYgDiNxY0UG_ZhffFFSt8TGCV5eA1VYYsMNx',
 	'x-requested-with': 'XMLHttpRequest'
 };
 
@@ -336,12 +336,17 @@ class InstagramMethods extends ResponseParser {
 				username: username,
 				enc_password: password,
 				guid: uuid,
+				adid: generateDeviceID(),
 				device_id: deviceId,
-				login_attempt_count: 0
+				login_attempt_count: 0,
+				phone_id: '6289522534401',
+				_csrftoken: /csrftoken=([^;]+)/.exec(cookie)[1],
+				google_tokens: '[]',
+				country_codes: '[{"country_code":"62","source":["default"]}]'
 			},
 			config: {
 				headers: {
-					Cookie: cookie
+					'x-csrftoken': /csrftoken=([^;]+)/.exec(cookie)[1]
 				}
 			}
 		});
@@ -727,7 +732,7 @@ class InstagramMethods extends ResponseParser {
 /**
  * @type {import('instagram').InstagramAPI}
  */
-class InstagramApi extends InstagramMethods {
+export class InstagramApi extends InstagramMethods {
 	/**
 	 * @private
 	 */

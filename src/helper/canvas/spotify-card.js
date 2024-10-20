@@ -12,7 +12,7 @@ import { createMeshGradient } from '../../utils/converter/file-processing.js';
 
 const { createCanvas, GlobalFonts, loadImage } = Canvas;
 
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Antebas-Regular.otf'), 'antre');
+GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/HelveticaNeueMedium.otf'), 'Helvetica');
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/texgyreadventor-bold.otf'), 'texgy');
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/AtypText-Semibold.ttf'), 'atyp');
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/SourceSansPro-Regular.ttf'), 'sans-regular');
@@ -422,7 +422,7 @@ export class SpotifyCard {
 
 		const x = this.#_w - 10;
 
-		this.#_ctx.font = '60px texgy';
+		this.#_ctx.font = 'bold 68px Helvetica';
 
 		const fadeOut = this.#_ctx.createLinearGradient(0, 0, this.#_w + 1500, 0);
 
@@ -432,7 +432,7 @@ export class SpotifyCard {
 		this.#_ctx.fillStyle = fadeOut;
 		this.#_ctx.fillText(this.#_title, x, this.#revampYCoords(this.#_canvas.height / 2 + 200));
 
-		this.#_ctx.font = '32px antre';
+		this.#_ctx.font = '32px Helvetica';
 
 		const baseColor = chroma('grey').brighten(2).rgba();
 

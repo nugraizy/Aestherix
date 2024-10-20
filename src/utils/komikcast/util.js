@@ -1,7 +1,7 @@
 import axios from 'axios';
-import cheerio from 'cheerio';
 
-import { img2pdf } from '../converter/file-processing.js';
+import { imageToPdf } from '../converter/file-processing.js';
+import { cheerioLOAD } from '../modules/index.js';
 
 export class KomikCast {
 	#base = (input) => `https://komikcast.net${input}`;
@@ -12,7 +12,7 @@ export class KomikCast {
 				try {
 					const { data } = await axios.get(this.#apiSearch(keyword));
 
-					const $ = cheerio.load(data);
+					const $ = cheerioLOAD(data);
 
 					if ($('h3.notfound').text() !== '') {
 						resolve({ error: 'Comic not found. Please try another keyword.' });
@@ -39,7 +39,7 @@ export class KomikCast {
 				try {
 					const { data } = await axios.get(url);
 
-					const $ = cheerio.load(data);
+					const $ = cheerioLOAD(data);
 
 					const getElement = (input) => $('.spe').find(`span:contains(${input})`).text().split(':')[1].trim();
 
@@ -59,7 +59,7 @@ export class KomikCast {
 							.find('ul > li')
 							.map((i, el) => $(el).find('span.dt > a').attr('href'))
 							.get()
-							.reverse(),
+							.reverse()
 					};
 
 					resolve(container);
@@ -73,7 +73,7 @@ export class KomikCast {
 				try {
 					const { data } = await axios.get(url);
 
-					const $ = cheerio.load(data);
+					const $ = cheerioLOAD(data);
 
 					const images = $('div[id=chimg]')
 						.find('img')
@@ -86,14 +86,14 @@ export class KomikCast {
 				}
 			});
 
-		this.toPdf = async (image, sender) =>
+		this.toPdf = async (image) =>
 			new Promise(async (resolve, reject) => {
 				try {
 					if (!Array.isArray(image)) {
 						image = [image];
 					}
 
-					const buffer = await img2pdf(image, sender);
+					const buffer = await imageToPdf(image);
 
 					resolve(buffer);
 				} catch (error) {

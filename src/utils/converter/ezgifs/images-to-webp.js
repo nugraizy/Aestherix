@@ -1,7 +1,8 @@
 import axios from 'axios';
-import * as cheerio from 'cheerio';
 import fs from 'fs-extra';
 import FormData from 'form-data';
+
+import { cheerioLOAD } from '../../modules/index.js';
 
 const _api = 'https://s2.ezgif.com/webp-maker';
 
@@ -28,7 +29,7 @@ export const imagesToWebp = (images) =>
 				}
 			});
 
-			let $ = cheerio.load(data);
+			let $ = cheerioLOAD(data);
 
 			const resultId = $('form#make-webp > input').attr('value');
 			const resultReferer = `https://ezgif.com/webp-maker/${resultId}`;
@@ -64,7 +65,7 @@ export const imagesToWebp = (images) =>
 				data: dataQuery
 			});
 
-			$ = cheerio.load(dataFinal);
+			$ = cheerioLOAD(dataFinal);
 			resolve({ result: `https:${$('p.outfile > img').attr('src')}` });
 		} catch (err) {
 			reject(err);

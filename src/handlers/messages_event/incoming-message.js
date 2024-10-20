@@ -36,12 +36,15 @@ const logMessage = (message) => {
 	const typeInfo = `${SEPERATOR} ${color('type', '#6d4eff')} ${color(message.type, 'white')}`;
 	const runtimeInfo = `${SEPERATOR} ${color(((Date.now() - runtime) / 1000).toFixed(0), '#F1FA8C')}${color('s', '#f5e700')}`;
 
-	const fullBody = message.isCmd
-		? `${color(message.isEval ? message.cmd : message.prefix, message.isEval ? '#6d4eff' : 'white')}${color(
-				!message.isEval && message.cmd,
-				'#BDE0FE'
-		  )} ${messageBody}` // eslint-disable-line
-		: color(message.body?.substring(0, 20).replace(/[\t\n]/g, ' '), 'white');
+	let fullBody = null;
+
+	if (message.isCmd && message.isEval) {
+		fullBody = `${color(message.cmd, '#6d4eff')} ${messageBody}`;
+	} else if (message.isCmd && !message.isEval) {
+		fullBody = `${color(message.prefix, '#6d4eff')}${color(message.cmd, '#BDE0FE')} ${messageBody}`;
+	} else {
+		fullBody = color(message.body?.substring(0, 20).replace(/[\t\n]/g, ' '), 'white');
+	}
 
 	loggers.INF(`${senderInfo} ${SEPERATOR}`, fullBody, typeInfo, runtimeInfo);
 };

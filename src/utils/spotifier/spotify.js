@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { fetch } from 'undici';
 import FormData from 'form-data';
-import { load } from 'cheerio';
+
+import { cheerioLOAD } from '../modules/index.js';
 
 class Spotifier {
 	#clientId = process.env.SPOTIFY_CLIENT_ID;
@@ -538,7 +539,7 @@ class Spotifier {
 
 				const $text2 = $response2.data;
 
-				const $ = load($text2);
+				const $ = cheerioLOAD($text2);
 
 				const urlDownload = $('a.abutton.is-success.is-fullwidth').attr('href');
 

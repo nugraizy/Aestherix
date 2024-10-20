@@ -1,4 +1,4 @@
-import { _3hentai, img2pdf, mime } from '../../utils/index.js';
+import { _3hentai, imageToPdf, mime } from '../../utils/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -13,7 +13,7 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	run: async ({ from, message, query, sender, groupMetadata }, client) => {
+	run: async ({ from, message, query, groupMetadata }, client) => {
 		if (!query) {
 			return client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
@@ -26,7 +26,7 @@ export default {
 
 		const { artists, categories, images, language, tags, title, totalPages, uploadDate } = result;
 
-		const buffer = await img2pdf(images, sender);
+		const buffer = await imageToPdf(images);
 		const caption = `${'3Hentai'.formatHeaders()}
         
 Title : ${title}

@@ -1,5 +1,6 @@
 import axios from 'axios';
-import * as cheerio from 'cheerio';
+
+import { cheerioLOAD } from '../modules/index.js';
 
 const _api = (input) => `https://3hentai.net/d/${input}`;
 
@@ -23,7 +24,7 @@ export const _3hentai = (code) =>
 				}
 			});
 
-			const $ = cheerio.load(data);
+			const $ = cheerioLOAD(data);
 
 			if ($('#main-content > div.large-container.bg-container.container > h1').text() === '404 - Oh no') {
 				resolve({ error: `Code (${code}) you are looking for is not found.` });

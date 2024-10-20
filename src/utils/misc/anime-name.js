@@ -1,5 +1,6 @@
 import axios from 'axios';
-import cheerio from 'cheerio';
+
+import { cheerioLOAD } from '../modules/index.js';
 
 const _api = 'https://www.fanbolt.com/anime-name-generator/';
 
@@ -9,14 +10,14 @@ export const animeNameOptions = {
 	cool: 117393,
 	girl: 117394,
 	girlWithMeanings: 117390,
-	modern: 117392,
+	modern: 117392
 };
 
 export const animeName = (input, type) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			const { data: dataSecret } = await axios.get(_api);
-			let $ = cheerio.load(dataSecret);
+			let $ = cheerioLOAD(dataSecret);
 			const secret = $('#ug-secret').val();
 
 			const { data } = await axios(_api, {
@@ -25,11 +26,11 @@ export const animeName = (input, type) =>
 				headers: {
 					'user-agent':
 						'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36',
-					'content-type': 'application/x-www-form-urlencoded',
-				},
+					'content-type': 'application/x-www-form-urlencoded'
+				}
 			});
 
-			$ = cheerio.load(data);
+			$ = cheerioLOAD(data);
 
 			resolve(
 				$('.ug-nicknames')
@@ -42,10 +43,10 @@ export const animeName = (input, type) =>
 
 						return {
 							name,
-							meaning,
+							meaning
 						};
 					})
-					.get(),
+					.get()
 			);
 		} catch (error) {
 			reject(error);

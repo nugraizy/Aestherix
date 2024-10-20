@@ -1,4 +1,4 @@
-import { Configuration, OpenAIApi } from 'openai';
+import OpenAI from 'openai';
 
 const updateApikey = () =>
 	process.env.OPENAI_KEY.split('\n')[Math.floor(Math.random() * process.env.OPENAI_KEY.split('\n').length)];
@@ -21,14 +21,13 @@ export default {
 			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
-		const configuration = new Configuration({ apiKey: updateApikey() });
-		const openai = new OpenAIApi(configuration);
+		const openai = new OpenAI({ apiKey: updateApikey() });
 
-		const image = await openai.createImage({
+		const image = await openai.images.generate({
 			prompt: query,
 			size: '512x512'
 		});
 
-		client.instance.send(from, { image: { url: image.data.data[0].url } }, { groupMetadata, quoted: message });
+		client.instance.send(from, { image: { url: image.data[0].url } }, { groupMetadata, quoted: message });
 	}
 };

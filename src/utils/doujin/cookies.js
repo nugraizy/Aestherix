@@ -2,6 +2,8 @@ import puppeteer from 'puppeteer-extra';
 import puppeteerSrealth from 'puppeteer-extra-plugin-stealth';
 import fs from 'fs-extra';
 
+const flag = process.argv.some((arg) => arg === '--get');
+
 export const getCookie = async () => {
 	puppeteer.use(puppeteerSrealth());
 
@@ -30,3 +32,7 @@ export const getCookie = async () => {
 
 	return cookie;
 };
+
+if (flag) {
+	await getCookie();
+}

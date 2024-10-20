@@ -11,6 +11,7 @@
 - [Installations](#installations)
   - [linux](./doc/INSTALL.md#linux)
   - [windows](./doc/INSTALL.md#windows)
+- [Changelog](./CHANGELOG.md)
 - [Run](#run-the-project)
   - [run with flags](#available-flags)
 

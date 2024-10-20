@@ -1,4 +1,4 @@
-import { Configuration, OpenAIApi } from 'openai';
+import OpenAI from 'openai';
 
 const updateApikey = () =>
 	process.env.OPENAI_KEY.split('\n')[Math.floor(Math.random() * process.env.OPENAI_KEY.split('\n').length)];
@@ -21,15 +21,14 @@ export default {
 			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
 
-		const configuration = new Configuration({ apiKey: updateApikey() });
-		const openai = new OpenAIApi(configuration);
+		const openai = new OpenAI({ apiKey: updateApikey() });
 
-		const completion = await openai.createCompletion({
+		const completion = await openai.chat.completions.create({
 			model: 'text-davinci-003',
 			prompt: query,
 			max_tokens: 200 /* eslint-disable-line */
 		});
 
-		client.instance.reply(completion.data.choices[0].text.trim(), { from, quoted: message, groupMetadata });
+		client.instance.reply(completion.choices[0].text.trim(), { from, quoted: message, groupMetadata });
 	}
 };

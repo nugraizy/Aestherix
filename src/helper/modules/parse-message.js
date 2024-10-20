@@ -41,7 +41,7 @@ const caching = async (clients, id) => {
 		resolve();
 	});
 
-	configuration.isFirstConnection = false;
+	configuration.isFirstConnectionForCache = false;
 };
 
 const waitForInput = (client, data) =>
@@ -133,7 +133,7 @@ export const reassign = async (m, client, store) => {
 			client.instance.ev.emit('poll.update', { ...m.message, msg: m, from, sender, func: PollUpdateDecrypt });
 		}
 
-		if (configuration.isFirstConnection) {
+		if (configuration.isFirstConnectionForCache) {
 			const SETTINGS = await fs.readJSON('./src/helper/config/settings.json');
 			const dataBanned = await fs.readJSON('./databases/users/banned.json');
 

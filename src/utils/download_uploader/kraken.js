@@ -1,7 +1,7 @@
 import { fetch } from 'undici';
-import { load } from 'cheerio';
 
 import { mime, whatFormat } from '../misc/index.js';
+import { cheerioLOAD } from '../modules/index.js';
 
 /**
  *
@@ -14,7 +14,7 @@ export const kraken = (url) =>
 		try {
 			const data = await (await fetch(url)).text();
 
-			const $ = load(data);
+			const $ = cheerioLOAD(data);
 
 			const find = (selector) => $(`.sub-text:contains("${selector}")`).next().text().trim();
 

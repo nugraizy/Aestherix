@@ -1,7 +1,6 @@
 import { Boom } from '@hapi/boom';
 import fs from 'fs-extra';
 import { jidNormalizedUser, getKeyAuthor, getAggregateVotesInPollMessage, DisconnectReason } from '@adiwajshing/baileys';
-
 import readline from 'readline';
 
 import configuration from '../../config/connect.js';
@@ -81,7 +80,7 @@ export const handleConnectionUpdate = async (
 				isClosed = true;
 			}
 
-			configuration.isFirstConnection = true;
+			configuration.isFirstConnectionForCache = true;
 
 			if (receivedPendingNotifications) {
 				shouldWait = true;

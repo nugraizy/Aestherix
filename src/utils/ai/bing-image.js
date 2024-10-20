@@ -1,7 +1,8 @@
 import { fetch } from 'undici';
-import { load } from 'cheerio';
 import crypto from 'crypto';
 import asyncRetry from 'async-retry';
+
+import { cheerioLOAD } from '../modules/index.js';
 
 const messageId = crypto.randomUUID();
 const host = 'https://www.bing.com';
@@ -49,7 +50,7 @@ export const createImageBing = (prompt) =>
 
 			const imgSrc = await body.text();
 
-			const $1 = load(imgSrc);
+			const $1 = cheerioLOAD(imgSrc);
 
 			const imgCheck = host + $1('div#gir').attr('data-mc');
 
@@ -66,7 +67,7 @@ export const createImageBing = (prompt) =>
 					}
 
 					const html = await imgBody.text();
-					const $2 = load(html);
+					const $2 = cheerioLOAD(html);
 
 					const imgSrc = $2('.dgControl.dtl')
 						.find('a.iusc')

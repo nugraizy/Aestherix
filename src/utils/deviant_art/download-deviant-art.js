@@ -1,6 +1,4 @@
-import * as cheerio from 'cheerio';
-
-import { fetchTEXT } from '../modules/index.js';
+import { cheerioLOAD, fetchTEXT } from '../modules/index.js';
 import { parse } from './utils.js';
 
 const check = (i) => (i === -1 ? undefined : i);
@@ -13,7 +11,7 @@ export const downloadDeviantArt = (input) =>
 			const deviantid = pathname.split('/').slice(-1)[0].split('-').slice(-1)[0];
 
 			const data = await fetchTEXT(input);
-			const $ = cheerio.load(data);
+			const $ = cheerioLOAD(data);
 
 			let json = $('body > script').get(0).firstChild.data;
 

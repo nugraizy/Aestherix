@@ -13,7 +13,7 @@ export default {
 	cooldown: 7,
 	limit: 7,
 	status: 'enable',
-	run: async ({ query, from, message, type, args, sender, groupMetadata }, client) => {
+	run: async ({ query, from, message, type, args, groupMetadata }, client) => {
 		if (!query) {
 			return client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
@@ -62,7 +62,7 @@ Tot. Chapters : ${chapters.length}`;
 		} else if (args[2] === 'extract' && type === 'listResponseMessage') {
 			const pages = await komik.getPanel(args[1]);
 
-			const buffer = await komik.toPdf(pages, sender);
+			const buffer = await komik.toPdf(pages);
 
 			await client.instance.send(
 				from,

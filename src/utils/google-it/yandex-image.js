@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { load } from 'cheerio';
+
+import { cheerioLOAD } from '../modules/index.js';
 
 const _api = (query) => `https://yandex.com/images/search?from=tabbar&text=${query}`;
 
@@ -13,7 +14,7 @@ export const yandexImage = async (query) =>
 				}
 			});
 
-			const $ = load(data);
+			const $ = cheerioLOAD(data);
 
 			const container = $('.serp-item[role=listitem]')
 				.get()

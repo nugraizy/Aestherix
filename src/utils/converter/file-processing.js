@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import path from 'path';
 import petting from 'pet-pet-gif';
 import sharp from 'sharp';
-import imgToPdf, { sizes } from 'image-to-pdf';
+import PDFDocument from 'pdfkit';
 import socksProxyAgent from 'socks-proxy-agent';
 import httpsProxyAgent from 'https-proxy-agent';
 import asyncRetry from 'async-retry';
@@ -16,7 +16,7 @@ import { SVG, registerWindow } from '@svgdotjs/svg.js';
 import puppeteer from 'puppeteer';
 
 import configuration from '../../helper/config/connect.js';
-import { color, delay, fetchBUFFER, fetchJSON, loggers, isURL } from '../modules/index.js';
+import { color, fetchBUFFER, fetchJSON, loggers, isURL } from '../modules/index.js';
 import { webp2mp4File } from './ezgifs/index.js';
 import { cropImage, imageToBuffer, signV1, streamFile, renderSvg, stringifyFunction } from './utils/index.js';
 import { videoFormat as VIDEO_MIMETYPE } from '../misc/mimetype.js';
@@ -666,18 +666,37 @@ export const waifu2xV2 = (input, filename) =>
 		}
 	});
 
-export const img2pdf = (image, sender) =>
+export const imageToPdf = (images) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			if (!Array.isArray(image)) {
-				image = [image];
+			if (!Array.isArray(images)) {
+				images = [images];
 			}
 
-			const filename = `./src/media/temporary_files/${sender}.pdf`;
+			const buffers = [];
+			const size = [595.28, 841.89];
+			const doc = new PDFDocument({ margin: 0, size, autoFirstPage: false });
+			const stream = new Writable({
+				write(chunk, encoding, callback) {
+					buffers.push(chunk);
+					callback();
+				}
+			});
 
-			const buffers = (
+			stream.on('finish', () => {
+				const pdfBuffer = Buffer.concat(buffers);
+				resolve(pdfBuffer);
+			});
+
+			stream.on('error', (err) => {
+				reject(err);
+			});
+
+			doc.pipe(stream);
+
+			images = (
 				await Promise.all(
-					image.map((v) => {
+					images.map((v) => {
 						if (isURL(v)) {
 							return axios.get(v, { responseType: 'arraybuffer' });
 						}
@@ -687,14 +706,12 @@ export const img2pdf = (image, sender) =>
 				)
 			).map((v) => v.data);
 
-			await imgToPdf(buffers, sizes.A4).pipe(fs.createWriteStream(filename));
+			for (let i = 0; i < images.length; i++) {
+				doc.addPage();
+				doc.image(images[i], 0, 0, { fit: size, align: 'center', valign: 'center' });
+			}
 
-			await delay(1000);
-
-			const buffer = await fs.readFile(filename);
-
-			await fs.unlink(filename);
-			resolve(buffer);
+			doc.end();
 		} catch (error) {
 			reject(error);
 		}

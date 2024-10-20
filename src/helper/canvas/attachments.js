@@ -14,7 +14,7 @@ const [signature, logo] = await Promise.all([
 ]);
 
 GlobalFonts.registerFromPath(path.join(__dirname, '/src/media/fonts/Nina-Bold.otf'), 'nina-bold');
-GlobalFonts.registerFromPath(path.join(__dirname, '/src/media/fonts/Abril-Text-Bold.otf'), 'abril-text-bold');
+GlobalFonts.registerFromPath(path.join(__dirname, '/src/media/fonts/Abril-Text-Bold.otf'), 'AbrilText-Bold');
 GlobalFonts.registerFromPath(path.join(__dirname, '/src/media/fonts/IBM.ttf'), 'ibm');
 
 const COPYRIGHT_TEXT = '© 2022 nugraizy, HF Inc.';
@@ -117,7 +117,7 @@ export class Attachment {
 		this.ctx.fillStyle = textColor;
 
 		CanvasTextWrapper(this.canvas, text, {
-			font: '30px abril-text-bold',
+			font: '30px AbrilText-Bold',
 			textAlign: 'center',
 			verticalAlign: 'bottom',
 			paddingX: x / 5,
@@ -134,7 +134,7 @@ export class Attachment {
 		this.ctx.fillStyle = groupNameColor;
 
 		CanvasTextWrapper(this.canvas, groupName, {
-			font: '42px abril-text-bold',
+			font: '42px AbrilText-Bold',
 			textAlign: 'center',
 			verticalAlign: 'bottom',
 			paddingX: x / 5,

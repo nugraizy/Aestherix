@@ -1,9 +1,9 @@
 import fs from 'fs-extra';
-import baileys, { delay, makeCacheableSignalKeyStore } from '@adiwajshing/baileys';
+import _baileys, { delay, makeCacheableSignalKeyStore } from '@adiwajshing/baileys';
 import P from 'pino';
-import yn from 'yn';
 import PhoneNumber from 'libphonenumber-js';
-import inquirer from 'inquirer';
+import { input, select, Separator } from '@inquirer/prompts';
+import _toggle from 'inquirer-toggle';
 import NodeCache from 'node-cache';
 import clip from 'clipboardy';
 
@@ -12,22 +12,33 @@ import { patchInteractiveMessage } from '../utils/patch-message.js';
 import { Cache } from '../../modules/cache.js';
 import { loggers, color } from '../../../utils/modules/index.js';
 
+const { default: makeWASocket, makeInMemoryStore, DEFAULT_CONNECTION_CONFIG } = _baileys;
+const { default: toggle } = _toggle;
+
 const msgRetryCounterCache = new NodeCache();
 const SETTINGS = await fs.readJSON('./src/helper/config/settings.json');
-const { default: makeWASocket, makeInMemoryStore, DEFAULT_CONNECTION_CONFIG } = baileys;
+
+const exitOnErr = (e) => {
+	if (e.name === 'AbortPromptError') {
+		loggers.ERR(color('Timeout.', 'red'), color('Exiting prompt...', 'grey'));
+	}
+
+	process.exit(0);
+};
 const logger = (OPTIONS) => P({ level: OPTIONS.trace ? 'trace' : OPTIONS.debugMode ? 'debug' : 'fatal' });
 const question = (text) =>
 	new Promise(async (resolve) => {
-		const ask = await inquirer.prompt([
+		const answer = await input(
 			{
-				type: 'input',
-				name: 'text',
 				message: text,
-				prefix: ''
+				required: true
+			},
+			{
+				signal: AbortSignal.timeout(15000)
 			}
-		]);
+		).catch(exitOnErr);
 
-		resolve(ask.text);
+		resolve(answer);
 	});
 
 /**
@@ -54,7 +65,7 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 		printQRInTerminal: !OPTIONS.pairMode,
 		mobile: false,
 		browser: ['Chrome (Linux)', '', ''],
-		version: [2, 2408, 1],
+		version: [2, 3000, 1015901307],
 		logger: logger(OPTIONS),
 		auth: {
 			creds: state.creds,
@@ -116,25 +127,31 @@ const storeToJson = async (cli, store, OPTIONS) => {
 };
 
 const selectHostNumber = async ({ hostNumber, backupsHostNumbers }) => {
-	const { hosts } = await inquirer.prompt([
+	const selected = await select(
 		{
-			type: 'list',
-			name: 'hosts',
 			message: 'Select host number',
 			choices: [
-				...[hostNumber, ...backupsHostNumbers].map((v) => PhoneNumber('+' + v.replace(/[^0-9]/g, '')).formatInternational()),
-				new inquirer.Separator(),
-				'New number'
-			],
-			prefix: ''
+				...[hostNumber, ...backupsHostNumbers].map((v) => {
+					const num = PhoneNumber('+' + v.replace(/[^0-9]/g, '')).formatInternational();
+					return { name: num, value: v };
+				}),
+				new Separator(),
+				{
+					name: 'New number',
+					value: 'new'
+				}
+			]
+		},
+		{
+			signal: AbortSignal.timeout(15000)
 		}
-	]);
+	).catch(exitOnErr);
 
-	if (hosts === 'New number') {
+	if (selected === 'new') {
 		return await inputPhoneNumber();
 	}
 
-	return hosts.replace(/[^0-9]/g, '');
+	return selected.replace(/[^0-9]/g, '');
 };
 
 const inputPhoneNumber = async () => {
@@ -163,28 +180,23 @@ const askInputNumber = async ({ hostNumber, backupsHostNumbers }) => {
 };
 
 const askWantNumber = async ({ hostNumber, backupsHostNumbers }) => {
-	const isWantNumber = await question(
-		loggers
+	const isWantNumber = await toggle({
+		message: loggers
 			.INF(
 				color('Do you want to use the default number?', '#E4C1F9'),
 				color('(', 'gray') + color('default', '#fff'),
 				color(`${PhoneNumber('+' + hostNumber.replace(/[^0-9]/g, '')).formatInternational()})`, 'gray'),
-				color('[y/n]', 'white'),
-				':',
 				{ ignore: true }
 			)
-			.trim()
-	);
+			.trim(),
+		default: false,
+		theme: {
+			active: 'no',
+			inactive: 'yes'
+		}
+	}).catch(exitOnErr);
 
-	const answer = yn(isWantNumber);
-
-	if (answer === undefined) {
-		loggers.ERR(color('Please answer with', 'red'), color('[y/n]', 'white'));
-		await delay(1000);
-		return await askWantNumber({ hostNumber, backupsHostNumbers });
-	}
-
-	return !answer ? await askInputNumber({ hostNumber, backupsHostNumbers }) : hostNumber;
+	return isWantNumber ? await askInputNumber({ hostNumber, backupsHostNumbers }) : hostNumber;
 };
 
 const handleNewInstance = async ({ OPTIONS, Client }) => {

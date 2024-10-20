@@ -4,7 +4,7 @@ import { fileTypeFromBuffer } from 'file-type';
 import FormData from 'form-data';
 import fs from 'fs-extra';
 import gradient from 'gradient-string';
-import { fetch, Client } from 'undici';
+import { fetch, Client, File, FormData as FormDataUndici } from 'undici';
 import ms from 'parse-ms';
 import _ from 'lodash';
 import dayjs from 'dayjs';
@@ -519,7 +519,7 @@ const { version } = await fs.readJSON('./package.json');
 const SPLITTER = ['᠁✦', '✦', '✦', '✦᠁']; //.map((v) => color(` ${v} `, '#E4C1F9'));
 const AUTHOR = color('nugraizy', '#FF5555');
 
-const boldify = (string) => chalk.bold(string);
+export const boldify = (string) => chalk.bold(string);
 
 const coloring = (text, format, err) => {
 	if (!format) {
@@ -917,3 +917,138 @@ export const wrapText = (text, { limit = 0, length = 0, center = false }) => {
 
 	return text;
 };
+
+const apiEndpoints = {
+	uguu: 'https://uguu.se/upload.php',
+	catbox: 'https://catbox.moe/user/api.php'
+};
+
+export class Uploader {
+	constructor(media) {
+		this._file = media;
+
+		/**
+		 * @returns {Promise<{filename: string, filesize: string, expired: '6 hours', url: string}>}
+		 */
+		this.uguu = async () => {
+			const form = new FormDataUndici();
+			let { success, message, ext } = await this.validateFile();
+
+			if (!success) {
+				throw new Error(message);
+			}
+
+			if (isURL(this._file)) {
+				this._file = await this.fetchFileFromURL(this._file);
+				const result = await this.validateFile();
+
+				ext = result.ext;
+			}
+
+			const file = this.newFile(ext);
+
+			form.set('files[]', file);
+
+			const response = await fetch(apiEndpoints.uguu, { body: form, method: 'POST' });
+			const data = await response.json();
+
+			if (!data.success) {
+				throw new Error(data.description);
+			}
+
+			const { filename, url, size } = data.files[0];
+
+			return {
+				filename,
+				size: getFilesizeFromBytes(size),
+				expired: '6 hours',
+				url
+			};
+		};
+
+		/**
+		 * @returns {Promise<{filename: string, filesize: string, expired: 'no expire', url: string}>}
+		 */
+		this.catbox = async () => {
+			const form = new FormDataUndici();
+			let { success, message, ext } = await this.validateFile();
+
+			if (!success) {
+				throw new Error(message);
+			}
+
+			if (isURL(this._file)) {
+				this._file = await this.fetchFileFromURL(this._file);
+				const result = await this.validateFile();
+
+				ext = result.ext;
+			}
+
+			const file = this.newFile(ext);
+
+			form.set('fileToUpload', file);
+			form.set('reqtype', 'fileupload');
+			form.set('userhash', '');
+
+			const response = await fetch(apiEndpoints.catbox, { body: form, method: 'POST' });
+			const data = await response.text();
+
+			if (data.includes('error')) {
+				throw new Error(data);
+			}
+
+			const url = data;
+
+			return {
+				filename: new URL(url).pathname.replace('/', ''),
+				filesize: extractFilesize(this._file),
+				expired: 'no expire',
+				url
+			};
+		};
+	}
+
+	/**
+	 * @private
+	 * @returns {Promise<{success: boolean, ext: string | null, message: string | undefined}>}
+	 */
+	async validateFile() {
+		if (Buffer.isBuffer(this._file)) {
+			const types = await fileTypeFromBuffer(this._file);
+
+			if (!types) {
+				return { success: false, message: 'Files is not being recognised by the library.', ext: null };
+			}
+
+			return { success: true, ext: types.ext };
+		} else if (!isURL(this._file)) {
+			return { success: false, message: 'Could not process input.', ext: null };
+		}
+
+		return { success: true, ext: null };
+	}
+
+	/**
+	 * @private
+	 * @param {string} ext
+	 * @returns {import('undici').File}
+	 */
+	newFile(ext) {
+		return new File([this._file], `file.${ext}`);
+	}
+
+	/**
+	 * @private
+	 * @param {string} url
+	 * @returns {Promise<Buffer>}
+	 */
+	async fetchFileFromURL(url) {
+		const response = await fetch(url, {
+			headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' }
+		});
+
+		const buffer = await response.arrayBuffer();
+
+		return Buffer.from(buffer);
+	}
+}
