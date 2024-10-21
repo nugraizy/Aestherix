@@ -169,6 +169,7 @@ class ResponseParser {
 	 */
 	_parseStory({ user, data, isInputURL, STORY_ID }) {
 		delete user.posts;
+		data = data.reel;
 		const result = { ...user, totalStories: data.media_count, stories: [] };
 
 		if (!result.totalStories && !user.isPrivate) {
@@ -188,22 +189,30 @@ class ResponseParser {
 			};
 		}
 
+		const parseItemMediaType = (data) => {
+			const mediaType = data.media_type;
+			if (mediaType === 1) {
+				return { isVideo: false, id: data.pk, url: data.image_versions2.candidates[0].url };
+			} else if (mediaType === 2) {
+				return { isVideo: true, duration: data.video_duration, url: data.video_versions[0].url };
+			}
+		};
+
+		if (isInputURL) {
+			const item = data.items.find((item) => item.pk === STORY_ID);
+
+			if (!item) {
+				return {
+					error: `Story with the id [${STORY_ID}] not found from \`${user.username}\`.`
+				};
+			}
+
+			result.stories.push(parseItemMediaType(item));
+			return result;
+		}
+
 		for (const item of data.items) {
-			if (isInputURL && item.id.split('_')[0] === STORY_ID) {
-				if (item.media_type === 1) {
-					result.stories.push({ isVideo: false, id: item.id.split('_')[0], url: item.image_versions2.candidates[0].url });
-				} else if (item.media_type === 2) {
-					result.stories.push({ isVideo: true, duration: item.video_duration, url: item.video_versions[0].url });
-				}
-
-				break;
-			}
-
-			if (item.media_type === 1) {
-				result.stories.push({ isVideo: false, id: item.id.split('_')[0], url: item.image_versions2.candidates[0].url });
-			} else if (item.media_type === 2) {
-				result.stories.push({ isVideo: true, duration: item.video_duration, url: item.video_versions[0].url });
-			}
+			result.stories.push(parseItemMediaType(item));
 		}
 
 		return result;
@@ -650,14 +659,15 @@ class InstagramMethods extends ResponseParser {
 		const STORY_ID = isInputURL ? input.pathname.split('/')[3] : input;
 		const USERNAME = isInputURL ? input.pathname.split('/')[2] : input;
 		const user = await this._getProfile(USERNAME, cookie);
-		const { data } = await this._requestApi('GET', `/api/v1/feed/user/${user.id}/reel_media/`, {
+		const { data } = await this._requestApi('GET', `/api/v1/feed/user/${user.id}/story/`, {
 			config: {
 				headers: {
 					...Object.assign(LOGIN_HEADERS, {
 						'User-Agent': USER_AGENTS.LOGIN_MOBILE
 					}),
 					Cookie: cookie,
-					'x-csrftoken': /csrftoken=([^;]+)/.exec(cookie)[1]
+					'X-CSRFtoken': /csrftoken=([^;]+)/.exec(cookie)[1],
+					'X-ASBD-ID': '129477'
 				}
 			}
 		});

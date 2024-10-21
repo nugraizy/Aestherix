@@ -234,12 +234,8 @@ const handleNewInstance = async ({ OPTIONS, Client }) => {
 		await delay(200);
 		await clip
 			.write(code)
-			.then(() => {
-				loggers.INF(color('Pairing code has been copied to clipboard!', 'white'));
-			})
-			.catch(() => {
-				loggers.ERR(color('SSH detected.', 'red'), color('Could not copy the code.', 'gray'));
-			});
+			.then(() => loggers.INF(color('Pairing code has been copied to clipboard!', 'white')))
+			.catch(() => loggers.ERR(color('SSH detected.', 'red'), color('Could not copy the code.', 'gray')));
 		await delay(200);
 		loggers.WRN(color('Waiting for code input', 'white'), color('. . .', '#FF99C8'));
 	}

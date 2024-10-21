@@ -68,7 +68,7 @@
     "flickr-sdk": "^6.0.0",
     "fluent-ffmpeg": "^2.1.2",
     "form-data": "^4.0.0",
-    "fs-extra": "^10.1.0",
+    "fs-extra": "^11.2.0",
     "g-i-s": "^2.1.6",
     "get-video-id": "^4.1.7",
     "gifencoder": "github:nugraizy/gifencoder",

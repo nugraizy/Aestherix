@@ -29,12 +29,8 @@ tube.session.once('auth', async ({ credentials }) => {
 	await delay(200);
 	await clip
 		.write(code)
-		.then(() => {
-			loggers.INF(color('YouTube Authentication cookie is copied to the clipboard!', '#E4C1F9'));
-		})
-		.catch(() => {
-			loggers.ERR(color('SSH detected.', 'red'), color('Could not copy the code.', 'gray'));
-		});
+		.then(() => loggers.INF(color('YouTube Authentication cookie is copied to the clipboard!', '#E4C1F9')))
+		.catch(() => loggers.ERR(color('SSH detected.', 'red'), color('Could not copy the code.', 'gray')));
 
 	await delay(200);
 
