@@ -2,9 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.0.2] 2024-10-21
+## Fixed
+- Fix **Instagram** `story`.
+
+---
+
 ## [5.0.1] - 2024-10-21
 ## Fixed
-- Fix **Instagram** `highlights`, and `post`
+- Fix **Instagram** `highlights`, and `post`.
 
 ---
 
