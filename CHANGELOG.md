@@ -2,19 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
-## [5.0.2] 2024-10-21
+# [5.0.3] 2024-10-22
+## Fixed
+- Fix **Instagram** utilities:
+   - *searchUser*: fix user agent mismatch.
+   - *hashtag*: fix source undefined.
+   - *highlights*: fix timeout on fetchHighlight function. now using chunked data.
+
+## Added
+- Logic to prevent plugins relogger trying to relog a file that has no `proper/valid properties`.
+- Logic to prevent plugins has the same `name` to other plugins.
+- New ability to download **Instagram** `hashtag` results. Reply to the result & Use `<prefix>igpost [number<1-n>]`.
+
+## Removed
+- Removing `spinnies`.
+
+---
+
+# [5.0.2] 2024-10-21
 ## Fixed
 - Fix **Instagram** `story`.
 
 ---
 
-## [5.0.1] - 2024-10-21
+# [5.0.1] - 2024-10-21
 ## Fixed
 - Fix **Instagram** `highlights`, and `post`.
 
 ---
 
-## [5.0.0] - 2024-10-20
+# [5.0.0] - 2024-10-20
 ### Breaking Changes
 - **Dropped Node.js version <18**: Many security risk on the older version, and may leaks performance.
 - **Rewritten the prompt**: Change the `inquirer` prompt to `@inquirer/prompts` mainly because the legacy deps are not developed regularly.
