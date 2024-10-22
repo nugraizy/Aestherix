@@ -3,45 +3,68 @@ import path from 'path';
 import configuration from '../../config/connect.js';
 import { color, loadFiles, loggers } from '../../../utils/modules/index.js';
 import { normalizeImportPath, watch, validatePlugins } from './cache.js';
-import { add, fail, success, spinner } from './spinners.js';
+import { isMissingProperty } from './util.js';
 
 const loadCommand = async (command, OPTIONS) => {
 	const start = Date.now();
 	const file = normalizeImportPath(command, true);
 	const normalize = path.normalize(command);
 
-	add(command, spinner);
-
 	try {
 		const module = await import(file);
 
 		if (!module?.default) {
-			loggers.ERR(
-				color(normalize.split('/').slice(-2).join('/'), '#9f53ea'),
-				OPTIONS.watch
-					? color('File Error! Waiting for changes...', '#FF5555')
-					: color('File Error! Fix the error and restart the bot to use this commands.', '#FF5555')
-			);
 			configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
 				absolutePath: file,
 				path: normalize
 			});
+			loggers.ERR(
+				color(command, '#BD93F9'),
+				color(
+					OPTIONS.watch
+						? 'File Error as it has no default property! Waiting for changes...'
+						: 'File Error as it has no default property! Fix the error and restart the bot to use this commands.',
+					'#FF5555'
+				)
+			);
+
 			return null;
+		}
+
+		if (configuration.cmds.commands.has(module.default.name)) {
+			loggers.ERR(
+				color(command, '#BD93F9'),
+				color('Has the same command name as the', 'white'),
+				color(configuration.cmds.commands.get(module.default.name).path.split('/').slice(-2).join('/'), '#BD93F9')
+			);
+
+			return null;
+		}
+
+		const check = isMissingProperty(module.default);
+
+		if (!check.status) {
+			if (check.shouldStop) {
+				loggers.ERR(color(command, '#BD93F9'), check.message);
+				return null;
+			}
+
+			loggers.WRN(color(command, '#BD93F9'), check.message);
 		}
 
 		module.default.absolutePath = file;
 		module.default.path = normalize;
 
 		configuration.cmds.commands.set(module.default.name, module.default);
-		configuration.cmds.aliases.push(...module.default.aliases);
+		configuration.cmds.aliases.push(...(module.default?.aliases || []));
 
 		const duration = Date.now() - start;
-		success(command, duration, spinner);
+		loggers.INF(color('Loaded', 'white'), color(command, '#BD93F9'), color('in', 'white'), color(duration + 'ms', '#F1FA8C'));
 
 		return path.dirname(command);
 	} catch (e) {
-		fail(command, spinner, e.message);
-		validatePlugins(command, OPTIONS.watch, spinnies);
+		loggers.ERR(color(command, '#BD93F9'), e.message);
+		validatePlugins(command, OPTIONS.watch);
 
 		configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
 			absolutePath: file,
@@ -66,24 +89,6 @@ export const loadCommands = async (OPTIONS) => {
 				folders.add(folder);
 			}
 		}
-
-		// await Promise.all(
-		// 	commands.map(async (command) => {
-		// 		if (command.includes('template') || command.includes('d.ts')) {
-		// 			return;
-		// 		}
-
-		// 		const folder = await loadCommand(command, OPTIONS);
-
-		// 		if (folder) {
-		// 			folders.add(folder);
-
-		// 			return {
-		// 				file: command
-		// 			};
-		// 		}
-		// 	})
-		// );
 
 		if (OPTIONS.watch) {
 			await watch('./src/commands/**/*.js', {

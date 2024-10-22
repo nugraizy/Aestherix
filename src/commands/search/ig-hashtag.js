@@ -13,7 +13,7 @@ export default {
 	cooldown: 8,
 	limit: 4,
 	status: 'enable',
-	async run({ query, from, message, groupMetadata }, client) {
+	async run({ query, from, message, groupMetadata, prefix }, client) {
 		if (!query) {
 			return client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}
@@ -30,22 +30,27 @@ export default {
 
 			for (const post of result[tag].posts) {
 				capt += `\n\nUsername : ${post.username}\n`;
-				capt += `Caption : ${post.caption}\n`;
 				capt += `Likes : ${post.likeCount}\n`;
 				capt += `Comments : ${post.commentCount}\n`;
-				capt += `Link : ${post.link}\n`;
-				capt += `Source : ${post.source}\n\n`;
+				capt += `Source : ${post.source}\n`;
+				capt += `Media Type : ${post.mediaType}\n`;
+				capt += `Caption : ${post.caption}\n\n`;
 			}
 
-			await client.instance.send(
+			const messageToQuoted = await client.instance.send(
 				from,
 				{
-					caption: 'Instagram Hashtag Search'.formatHeaders() + `\n\n${capt.trim().formatForm()}`,
-					image: { url: result[tag].thumbnail },
-					footer: `Tot. Post : ${result[tag].totalPostFormatted}`
+					caption: capt.trim().formatForm(),
+					image: { url: result[tag].thumbnail }
 				},
 				{ groupMetadata, quoted: message }
 			);
+
+			await client.instance.reply(`You can reply this message and type ${prefix}igp <number[1-${result[tag].posts.length}]>`, {
+				from,
+				groupMetadata,
+				quoted: messageToQuoted
+			});
 		}
 	}
 };

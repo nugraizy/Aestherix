@@ -17,7 +17,43 @@ export default {
 	cooldown: 10,
 	limit: 9,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
+	async run({ from, query, prettyNumber, message, groupMetadata, bodyQuoted }, client) {
+		if (bodyQuoted && query) {
+			const reg = /Source :\s*`([^`]+)`/g;
+
+			const videoIds = [];
+			let match;
+
+			while ((match = reg.exec(bodyQuoted)) !== null) {
+				videoIds.push(match[1]);
+			}
+
+			if (!videoIds.length) {
+				return await client.instance.reply('No id(s) found', { from, quoted: message, groupMetadata });
+			}
+
+			const numberiedQuery = Number(query);
+			const index = numberiedQuery - 1;
+
+			if (!numberiedQuery || index > videoIds.length) {
+				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
+					from,
+					quoted: message,
+					groupMetadata
+				});
+			}
+
+			const videoId = videoIds[index];
+
+			await client.instance.reply(`Downloading Instagram Posts :\n${videoId}\nPlease wait`.formatForm(), {
+				from,
+				quoted: message,
+				groupMetadata
+			});
+
+			query = videoId;
+		}
+
 		if (!query) {
 			return await client.instance.reply('Please specify a url', { from, quoted: message, groupMetadata });
 		}
@@ -54,12 +90,10 @@ export default {
 
 				await client.instance.send(
 					from,
-					posts[data].post[0].isVideo
-						? { video: { url: posts[data].post[0].url }, caption: capt.trim().formatForm() }
-						: {
-								image: { url: posts[data].post[0].url },
-								caption: capt.trim()
-						  } /* eslint-disable-line */,
+					{
+						[posts[data].post[0].isVideo ? 'video' : 'image']: { url: posts[data].post[0].url },
+						caption: capt.trim().formatForm()
+					},
 					{ groupMetadata, quoted: message }
 				);
 			} else {
@@ -69,10 +103,13 @@ export default {
 				await client.instance.send(from, { text: capt.trim().formatForm() }, { quoted: message });
 
 				for (const media of posts[data].post) {
-					await client.instance.send(from, media.isVideo ? { video: { url: media.url } } : { image: { url: media.url } }, {
-						groupMetadata
-					});
-					await delay(300);
+					await client.instance.send(
+						from,
+						{ [media.isVideo ? 'video' : 'image']: { url: media.url } },
+						{
+							groupMetadata
+						}
+					);
 				}
 			}
 		}

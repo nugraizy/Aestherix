@@ -7,6 +7,7 @@ import chalk from 'chalk';
 
 import configuration from '../../config/connect.js';
 import { color, loggers, loadFiles } from '../../../utils/modules/index.js';
+import { isMissingProperty } from './util.js';
 
 /**
  * @type {{name: string, id: string}[]}
@@ -93,7 +94,7 @@ export const updateContact = (store, contactsList) => {
 
 const handlePluginError = (filename) => {
 	loggers.ERR(
-		color(filename.split('/').slice(-2).join('/'), '#9f53ea'),
+		color(filename.split('/').slice(-2).join('/'), '#BD93F9'),
 		color('File Error! Waiting for changes...', '#5954cc')
 	);
 	configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
@@ -124,7 +125,7 @@ export const validatePlugins = async (filename, isWatch) => {
 
 	if (indexCode === -1) {
 		loggers.ERR(
-			color(filename.split('/').slice(-2).join('/'), '#9f53ea'),
+			color(filename.split('/').slice(-2).join('/'), '#BD93F9'),
 			isWatch
 				? color('Syntax Error! Waiting for changes...', '#5954cc')
 				: color('Syntax Error! Fix the error and restart the bot.', '#5954cc')
@@ -133,7 +134,7 @@ export const validatePlugins = async (filename, isWatch) => {
 	}
 
 	loggers.ERR(
-		color(filename.split('/').slice(-2).join('/'), '#9f53ea'),
+		color(filename.split('/').slice(-2).join('/'), '#BD93F9'),
 		isWatch
 			? color('File Error! Waiting for changes...', '#5954cc')
 			: color('File Error! Fix the error and restart the bot to use this commands.', '#5954cc')
@@ -175,17 +176,38 @@ const add = async (filename) => {
 	const files = loadFiles('./src/commands').filter((v) => !v.includes('template'));
 
 	const file = normalizeImportPath(filename, true);
+	const displayName = filename.split('/').slice(-2).join('/');
 
 	if (!fileExists && files.length !== existingCommands.length) {
 		try {
 			const module = await import(file);
 			if (module?.default) {
+				if (configuration.cmds.commands.has(module.default.name)) {
+					loggers.ERR(
+						color(displayName, '#BD93F9'),
+						'Has the same command name as the',
+						color(configuration.cmds.commands.get(module.default.name).path.split('/').slice(-2).join('/'))
+					);
+
+					return;
+				}
+
+				const check = isMissingProperty(module.default);
+
+				if (!check.status) {
+					loggers.WRN(color(displayName, '#BD93F9'), check.message);
+
+					if (check.shouldStop) {
+						return;
+					}
+				}
+
 				configuration.cmds.commands.set(module.default.name, {
 					...module.default,
 					absolutePath: file,
 					path: filename
 				});
-				loggers.WRN(color(filename.split('/').slice(-2).join('/'), '#9f53ea'), 'New plugin loaded');
+				loggers.INF(color(displayName, '#BD93F9'), 'New plugin loaded');
 			} else {
 				handlePluginError(filename);
 			}
@@ -197,7 +219,7 @@ const add = async (filename) => {
 
 const change = async (filename) => {
 	const displayName = filename?.split('/').slice(-2).join('/');
-	loggers.WRN(color(displayName, '#9f53ea'), color('File has been changed!', 'white'));
+	loggers.WRN(color(displayName, '#BD93F9'), color('File has been changed!', 'white'));
 
 	const normalizedPath = normalizeImportPath(filename, true);
 	const _command = nocache(normalizedPath, true);
@@ -206,21 +228,39 @@ const change = async (filename) => {
 	const index = cmds.findIndex((v) => v[1].path === filename);
 
 	if (index === -1) {
-		return loggers.ERR(color(displayName, '#9f53ea'), color('Command not found in configuration!', '#FF5555'));
+		return loggers.ERR(color(displayName, '#BD93F9'), color('Command not found in configuration!', '#FF5555'));
 	}
 
 	try {
 		const command = (await _command.import)?.default;
 
 		if (!command) {
-			return loggers.ERR(
-				color(displayName, '#9f53ea'),
+			loggers.ERR(
+				color(displayName, '#BD93F9'),
 				color('File does not contain valid Command Properties! Please check the example to create new commands.', '#05ffa1')
 			);
+			return;
+		}
+
+		const commandPath = configuration.cmds.commands.get(command.name).path.split('/').slice(-2).join('/');
+		if (configuration.cmds.commands.has(command.name) && displayName !== commandPath) {
+			loggers.ERR(color(displayName, '#BD93F9'), 'Has the same command name as the', color(commandPath, '#BD93F9 '));
+
+			return;
+		}
+
+		const check = isMissingProperty(command);
+
+		if (!check.status) {
+			loggers.WRN(color(displayName, '#BD93F9'), check.message);
+
+			if (check.shouldStop) {
+				return;
+			}
 		}
 
 		const currentCommand = cmds[index][1];
-		loggers.WRN(color(currentCommand.path?.split('/').slice(-2).join('/'), '#9f53ea'), color('File Reloaded!', '#05ffa1'));
+		loggers.INF(color(currentCommand.path?.split('/').slice(-2).join('/'), '#BD93F9'), color('File Reloaded!', '#05ffa1'));
 
 		let _commandName = cmds[index][0];
 
@@ -240,6 +280,7 @@ const change = async (filename) => {
 };
 
 const unlink = (filename) => {
+	const displayName = filename?.split('/')?.slice(-2).join('/');
 	const cmds = configuration.cmds.commands.entries();
 	const indexPath = cmds.findIndex((v) => v[1].path === filename);
 
@@ -264,16 +305,16 @@ const unlink = (filename) => {
 		configuration.cmds.commands.set(file[0], file[1]);
 
 		loggers.WRN(
-			color(filename?.split('/')?.slice(-2).join('/'), '#9f53ea'),
+			color(displayName, '#BD93F9'),
 			color('File Renamed!', 'white'),
 			color('to', 'white'),
-			color(renamedFile.split('/')?.slice(-2).join('/'), '#9f53ea'),
-			color('Waiting for changes...', '#6d4eff')
+			color(renamedFile.split('/')?.slice(-2).join('/'), '#BD93F9'),
+			color('Waiting for changes...', '#BD93F9')
 		);
 	} else {
 		configuration.cmds.commands.delete(cmds[indexPath][0]);
 
-		loggers.WRN(color(filename?.split('/')?.slice(-2).join('/'), '#9f53ea'), color('File Deleted!', '#5954cc'));
+		loggers.WRN(color(displayName, '#BD93F9'), color('File Deleted!', '#5954cc'));
 	}
 };
 

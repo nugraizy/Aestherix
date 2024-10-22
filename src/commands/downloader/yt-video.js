@@ -78,15 +78,7 @@ export default {
 			const numberiedQuery = Number(query);
 			const index = numberiedQuery - 1;
 
-			if (!numberiedQuery) {
-				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
-					from,
-					quoted: message,
-					groupMetadata
-				});
-			}
-
-			if (index > videoIds.length) {
+			if (!numberiedQuery || index > videoIds.length) {
 				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
 					from,
 					quoted: message,
@@ -95,14 +87,6 @@ export default {
 			}
 
 			const videoId = videoIds[index];
-
-			if (!videoId) {
-				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
-					from,
-					quoted: message,
-					groupMetadata
-				});
-			}
 
 			const { key } = await client.instance.reply(`Downloading YouTube audio :\n${videoId}\nPlease wait`.formatForm(), {
 				from,

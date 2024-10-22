@@ -3,6 +3,7 @@ import axios from 'axios';
 import { v4 } from 'uuid';
 import fs from 'fs-extra';
 import { parse } from 'dotenv';
+import _ from 'lodash';
 
 const _baseApi = 'https://i.instagram.com';
 const _baseUrl = 'https://www.instagram.com';
@@ -56,32 +57,19 @@ class ResponseParser {
 			let { edges: posts } = response.edge_sidecar_to_children;
 
 			for (const { node: post } of posts) {
-				if (post.__typename === 'XDTGraphImage') {
-					result.post.push({
-						isVideo: false,
-						url: post.display_resources[post.display_resources.length - 1].src,
-						urlPost: `https://instagram/p/${post.shortcode}`
-					});
-				} else if (post.__typename === 'XDTGraphVideo') {
-					result.post.push({
-						isVideo: true,
-						url: post.video_url,
-						urlPost: `https://instagram/p/${post.shortcode}`
-					});
-				}
+				const isVideo = post.__typename === 'XDTGraphVideo';
+				result.post.push({
+					isVideo: isVideo,
+					url: isVideo ? post.video_url : post.display_resources[post.display_resources.length - 1].src,
+					urlPost: `https://instagram/p/${post.shortcode}`
+				});
 			}
-		} else if (type === 'image') {
+		} else {
+			const isVideo = type === 'video';
 			result.post.push({
-				isVideo: false,
-				url: response.display_resources[response.display_resources.length - 1].src,
-				urlPost: `https://instagram/p/${response.shortcode}`
-			});
-		} else if (type === 'video') {
-			result = { ...result, playCount: response.video_view_count };
-			result.post.push({
-				isVideo: true,
-				duration: response.video_duration,
-				url: response.video_url,
+				isVideo: isVideo,
+				...(isVideo && { duration: response.video_duration }),
+				url: isVideo ? response.video_url : response.display_resources[response.display_resources.length - 1].src,
 				urlPost: `https://instagram/p/${response.shortcode}`
 			});
 		}
@@ -167,6 +155,19 @@ class ResponseParser {
 	/**
 	 * @private
 	 */
+	_parseItemMediaType(data) {
+		const isVideo = data.media_type === 2;
+
+		if (isVideo) {
+			return { isVideo, duration: data.video_duration, url: data.video_versions[0].url };
+		}
+
+		return { isVideo, id: data.pk, url: data.image_versions2.candidates[0].url };
+	}
+
+	/**
+	 * @private
+	 */
 	_parseStory({ user, data, isInputURL, STORY_ID }) {
 		delete user.posts;
 		data = data.reel;
@@ -189,15 +190,6 @@ class ResponseParser {
 			};
 		}
 
-		const parseItemMediaType = (data) => {
-			const mediaType = data.media_type;
-			if (mediaType === 1) {
-				return { isVideo: false, id: data.pk, url: data.image_versions2.candidates[0].url };
-			} else if (mediaType === 2) {
-				return { isVideo: true, duration: data.video_duration, url: data.video_versions[0].url };
-			}
-		};
-
 		if (isInputURL) {
 			const item = data.items.find((item) => item.pk === STORY_ID);
 
@@ -207,12 +199,12 @@ class ResponseParser {
 				};
 			}
 
-			result.stories.push(parseItemMediaType(item));
+			result.stories.push(this._parseItemMediaType(item));
 			return result;
 		}
 
 		for (const item of data.items) {
-			result.stories.push(parseItemMediaType(item));
+			result.stories.push(this._parseItemMediaType(item));
 		}
 
 		return result;
@@ -285,7 +277,8 @@ class ResponseParser {
 								source: `${_baseUrl}/p/${code}`,
 								commentCount,
 								likeCount,
-								media
+								media,
+								mediaType
 							};
 						}
 					);
@@ -369,16 +362,22 @@ class InstagramMethods extends ResponseParser {
 	 * @private
 	 */
 	async _getPost(url, cookie) {
+		const errors = {
+			noUrl: 'Argument "url" must be specified',
+			notValidUrl: 'Argument "url" must be a valid URL',
+			notInstagramUrl: 'Argument "url" must be a valid Instagram URL'
+		};
+
 		if (!url) {
-			return { error: 'Argument "url" must be specified' };
+			return { error: errors.noUrl };
 		}
 
 		if (!this._isUrl(url)) {
-			return { error: 'Argument "url" must be a valid url' };
+			return { error: errors.notValidUrl };
 		}
 
 		if (!this._isInstagramUrl(url)) {
-			return { error: 'Argument "url" must be a valid Instagram url' };
+			return { error: errors.notInstagramUrl };
 		}
 
 		const code = this._parseCode(url);
@@ -450,11 +449,9 @@ class InstagramMethods extends ResponseParser {
 			{
 				config: {
 					headers: {
-						...Object.assign(LOGIN_HEADERS, {
-							'User-Agent': USER_AGENTS.LOGIN_MOBILE
-						}),
+						...LOGIN_HEADERS,
 						Cookie: cookie,
-						'x-csrf-token': /csrftoken=([^;]+)/.exec(cookie)[1]
+						'X-CSRFToken': /csrftoken=([^;]+)/.exec(cookie)[1]
 					}
 				}
 			}
@@ -503,8 +500,7 @@ class InstagramMethods extends ResponseParser {
 	 * @private
 	 */
 	async _getHighlights(input, cookie) {
-		const payload = {
-			/* eslint-disable */
+		const defaultPayload = {
 			query_hash: '0a85e6ea60a4c99edc58ab2f3d17cfdf',
 			variables: {
 				reel_ids: [],
@@ -517,79 +513,19 @@ class InstagramMethods extends ResponseParser {
 				story_viewer_cursor: '',
 				stories_video_dash_manifest: false
 			}
-			/* eslint-enable */
 		};
+
 		if (input.startsWith('@')) {
 			input = input.replace('@', '');
 		}
 
 		if (this._isInstagramUrl(input)) {
-			const { data: html } = await axios.get(input);
-
-			const initialHighlightData = /"id":"(\d+)"/.exec(html);
-
-			if (!initialHighlightData) {
-				throw new Error('No highlights present');
-			}
-
-			const getId = () => {
-				const url = new URL(input);
-
-				const storyMediaId = url.searchParams.get('story_media_id');
-
-				if (storyMediaId) {
-					return {
-						mediaId: storyMediaId.split('_')[0],
-						key: 'highlight_reel_ids'
-					};
-				}
-
-				return { key: 'reel_ids', mediaId: url.pathname.split('/')[3] };
-			};
-
-			const { key, mediaId } = getId();
-
-			payload.variables[key].push(initialHighlightData[1]);
-			payload.variables = JSON.stringify(payload.variables);
-
-			const { data } = await axios.get(this._appendParams(_apiGraphql, payload), {
-				method: 'GET',
-				headers: {
-					...Object.assign(LOGIN_HEADERS, {
-						'User-Agent': USER_AGENTS.LOGIN_MOBILE
-					}),
-					Cookie: cookie,
-					'x-csrf-token': /csrftoken=([^;]+)/.exec(cookie)[1]
-				}
-			});
-
-			const user = await this._getProfile(data.data.reels_media[0].owner.username, cookie);
-
-			const container = {
-				items: data.data.reels_media[0].items.find((v) => v.id === mediaId)
-			};
-
-			const highlights = this._parseHighlight(data);
-
-			const highlightsData = highlights.find((v) => v.mediaId === container.items.id);
-
-			return {
-				user,
-				highlights: [container.items].map((v) => {
-					return {
-						thumbnail: v.display_url,
-						dataHighlight: [highlightsData]
-					};
-				})
-			};
+			return await this._handleInstagramUrl(input, cookie, defaultPayload);
 		}
 
 		const user = await this._getProfile(input, cookie);
-
 		const { data } = await axios.get(
 			this._appendParams(_apiGraphql, {
-				/* eslint-disable */
-
 				query_hash: 'c9100bf9110dd6361671f113dd02e7d6',
 				variables: JSON.stringify({
 					user_id: user.id,
@@ -600,13 +536,9 @@ class InstagramMethods extends ResponseParser {
 					include_highlight_reels: true,
 					include_live_status: false
 				})
-				/* eslint-enable */
 			}),
 			{
 				headers: {
-					// ...Object.assign(LOGIN_HEADERS, {
-					// 	'User-Agent': USER_AGENTS.LOGIN_MOBILE
-					// }),
 					'User-Agent':
 						'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36',
 					Cookie: cookie,
@@ -616,25 +548,98 @@ class InstagramMethods extends ResponseParser {
 			}
 		);
 
+		return await this._processHighlightData(data, user, cookie);
+	}
+
+	/**
+	 * @private
+	 */
+	async _handleInstagramUrl(input, cookie, payload) {
+		const { data: html } = await axios.get(input);
+		const initialHighlightData = /"id":"(\d+)"/.exec(html);
+
+		if (!initialHighlightData) {
+			throw new Error('No highlights present');
+		}
+
+		const { key, mediaId } = this._extractHighlightId(input);
+		payload.variables[key].push(initialHighlightData[1]);
+		payload.variables = JSON.stringify(payload.variables);
+
+		const { data } = await axios.get(this._appendParams(_apiGraphql, payload), {
+			method: 'GET',
+			headers: {
+				'User-Agent': USER_AGENTS.LOGIN_MOBILE,
+				Cookie: cookie,
+				'x-csrf-token': /csrftoken=([^;]+)/.exec(cookie)[1]
+			}
+		});
+
+		const user = await this._getProfile(data.data.reels_media[0].owner.username, cookie);
 		const container = {
-			items: data.data.user.edge_highlight_reels.edges.map((edge) => ({
-				highlightId: edge.node.id,
-				cover: edge.node.cover_media.thumbnail_src
-			}))
+			items: data.data.reels_media[0].items.find((v) => v.id === mediaId)
 		};
 
-		const highlights = (await Promise.all(container.items.map((v) => this._fetchHighlight(v.highlightId, cookie)))).flat();
+		const highlights = this._parseHighlight(data);
+		const highlightsData = highlights.find((v) => v.mediaId === container.items.id);
 
 		return {
 			user,
-			highlights: container.items.map((v) => {
-				const dataHighlight = highlights.filter((w) => w.parentId === v.highlightId);
+			highlights: [
+				{
+					thumbnail: container.items.display_url,
+					dataHighlight: [highlightsData]
+				}
+			]
+		};
+	}
 
-				return {
-					thumbnail: v.cover,
-					dataHighlight
-				};
-			})
+	/**
+	 * @private
+	 */
+	_extractHighlightId(input) {
+		const url = new URL(input);
+		const storyMediaId = url.searchParams.get('story_media_id');
+
+		if (storyMediaId) {
+			return { mediaId: storyMediaId.split('_')[0], key: 'highlight_reel_ids' };
+		}
+
+		return { key: 'reel_ids', mediaId: url.pathname.split('/')[3] };
+	}
+
+	/**
+	 * @private
+	 */
+	async _processHighlightData(data, user, cookie) {
+		const container = {
+			items: _.chunk(
+				data.data.user.edge_highlight_reels.edges.map((edge) => ({
+					title: edge.node.title,
+					highlightId: edge.node.id,
+					cover: edge.node.cover_media.thumbnail_src
+				})),
+				7
+			)
+		};
+
+		let highlights = [];
+
+		for (const highlight of container.items) {
+			const fetchedHighlights = await Promise.all(highlight.map((v) => this._fetchHighlight(v.highlightId, cookie)));
+			highlights.push(...fetchedHighlights.flat());
+		}
+
+		highlights = highlights.flat();
+		const flatItems = container.items.flat();
+
+		return {
+			user,
+			highlights: flatItems.map((v) => ({
+				title: v.title,
+				thumbnail: v.cover,
+				dataHighlight: highlights.filter((w) => w.parentId === v.highlightId)
+			}))
 		};
 	}
 
@@ -654,10 +659,11 @@ class InstagramMethods extends ResponseParser {
 
 		if (isInputURL) {
 			input = new URL(input);
+			input = input.pathname.split('/');
 		}
 
-		const STORY_ID = isInputURL ? input.pathname.split('/')[3] : input;
-		const USERNAME = isInputURL ? input.pathname.split('/')[2] : input;
+		const STORY_ID = isInputURL ? input[3] : input;
+		const USERNAME = isInputURL ? input[2] : input;
 		const user = await this._getProfile(USERNAME, cookie);
 		const { data } = await this._requestApi('GET', `/api/v1/feed/user/${user.id}/story/`, {
 			config: {

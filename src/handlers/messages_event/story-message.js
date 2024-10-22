@@ -48,13 +48,13 @@ const handler = async (client, message) => {
 	}
 
 	loggers.WRN(
-		`${color(message.pushname, 'white')} ${SEPERATOR} ${color(message.prettyNumber, '#6d4eff')} ${color(
+		`${color(message.pushname, 'white')} ${SEPERATOR} ${color(message.prettyNumber, '#BD93F9')} ${color(
 			'on',
 			'#BDE0FE'
-		)} ${color(message.from, '#6d4eff')} ${SEPERATOR} ${color(
+		)} ${color(message.from, '#BD93F9')} ${SEPERATOR} ${color(
 			message.body === 'Unknown body' ? 'Bug Story' : message.body?.trim()?.replace('\n', '')?.substring(0, 20),
 			'white'
-		)} ${SEPERATOR} ${color('type', '#6d4eff')} ${SEPERATOR} ${color('Story', 'white')}${color('::', 'white')}${color(
+		)} ${SEPERATOR} ${color('type', '#BD93F9')} ${SEPERATOR} ${color('Story', 'white')}${color('::', 'white')}${color(
 			message.type,
 			'white'
 		)}`,

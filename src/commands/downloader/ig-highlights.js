@@ -57,29 +57,32 @@ export default {
 			capt = '';
 
 			if (highlights[data].highlights.length === 1) {
-				for (const media of highlights[data].highlights[0].dataHighlight.slice(0, 2)) {
+				const highlight = highlights[data].highlights[0].dataHighlight.slice(0, 2);
+				for (const media of highlight) {
 					await client.instance.send(
 						from,
-						media.type === 'video' ? { video: { url: media.url } } : { image: { url: media.url } },
+						{ [media.type === 'video' ? 'video' : 'image']: { url: media.url } },
 						{ groupMetadata, quoted: message }
 					);
 				}
 			} else {
 				for (const media of highlights[data].highlights) {
-					await client.instance.send(
-						from,
-						media.dataHighlight[0].type === 'video'
-							? { video: { url: media.dataHighlight[0].url } }
-							: { image: { url: media.dataHighlight[0].url } },
-						{ groupMetadata }
-					);
-					await client.instance.send(
-						from,
-						media.dataHighlight[1].type === 'video'
-							? { video: { url: media.dataHighlight[1].url } }
-							: { image: { url: media.dataHighlight[1].url } },
-						{ groupMetadata }
-					);
+					const caption = media.title;
+					const dataHighlight =
+						media.dataHighlight.length >= 2 ? [media.dataHighlight[0], media.dataHighlight[1]] : [media.dataHighlight[0]];
+					let status = true;
+
+					for (const highlight of dataHighlight) {
+						await client.instance.send(
+							from,
+							{
+								[highlight.type === 'video' ? 'video' : 'image']: { url: highlight.url },
+								...(status && { caption })
+							},
+							{ groupMetadata }
+						);
+						status = false;
+					}
 				}
 			}
 		}

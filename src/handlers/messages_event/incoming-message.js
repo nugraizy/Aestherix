@@ -31,17 +31,17 @@ const HANDLER_PATH = {
 };
 
 const logMessage = (message) => {
-	const senderInfo = `${color(message.pushname, 'white')} ${SEPERATOR} ${color(message.prettyNumber, '#6d4eff')}`;
+	const senderInfo = `${color(message.pushname, 'white')} ${SEPERATOR} ${color(message.prettyNumber, '#BD93F9')}`;
 	const messageBody = color(message.query?.replace(/[\t\n]/g, ' ').substring(0, 35), 'white');
-	const typeInfo = `${SEPERATOR} ${color('type', '#6d4eff')} ${color(message.type, 'white')}`;
+	const typeInfo = `${SEPERATOR} ${color('type', '#BD93F9')} ${color(message.type, 'white')}`;
 	const runtimeInfo = `${SEPERATOR} ${color(((Date.now() - runtime) / 1000).toFixed(0), '#F1FA8C')}${color('s', '#f5e700')}`;
 
 	let fullBody = null;
 
 	if (message.isCmd && message.isEval) {
-		fullBody = `${color(message.cmd, '#6d4eff')} ${messageBody}`;
+		fullBody = `${color(message.cmd, '#BD93F9')} ${messageBody}`;
 	} else if (message.isCmd && !message.isEval) {
-		fullBody = `${color(message.prefix, '#6d4eff')}${color(message.cmd, '#BDE0FE')} ${messageBody}`;
+		fullBody = `${color(message.prefix, '#BD93F9')}${color(message.cmd, '#BDE0FE')} ${messageBody}`;
 	} else {
 		fullBody = color(message.body?.substring(0, 20).replace(/[\t\n]/g, ' '), 'white');
 	}
@@ -430,14 +430,14 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 
 						if (match) {
 							const [fullMatch, text] = match;
-							const formattedStackEntry = `${color(stackEntry.replace(fullMatch, ''), 'white')}(${color(text, '#6d4eff')})`;
+							const formattedStackEntry = `${color(stackEntry.replace(fullMatch, ''), 'white')}(${color(text, '#BD93F9')})`;
 
 							return formattedStackEntry.replace('\n', '') + '\n';
 						} else {
 							return stackEntry.trim();
 						}
 					})
-					.join(`${color('❯ ', '#6272A4') + color('at ', '#6d4eff')}`);
+					.join(`${color('❯ ', '#6272A4') + color('at ', '#BD93F9')}`);
 
 				parseErr && loggers.ERR(parseErr);
 			}

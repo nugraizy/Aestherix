@@ -15,6 +15,8 @@ export default {
 	limit: 4,
 	cooldown: 8,
 	status: 'disable',
+	premium: false,
+	minifiedDescription: 'Search P-Store Products',
 	async run({ query, from, message, groupMetadata }, client) {
 		if (!query) {
 			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
