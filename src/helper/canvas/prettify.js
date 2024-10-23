@@ -11,7 +11,6 @@ import chroma from 'chroma-js';
 import { colors, roundedRectData } from './utils.js';
 
 const { createCanvas, loadImage, GlobalFonts } = Canvas;
-const regex = /\t/g;
 
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/JetBrainsMono-Light.ttf'), 'JetBrainsMono');
 GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/zh-cn.ttf'), 'ZHCN');
@@ -61,47 +60,20 @@ export class Prettify {
 			widthCanvas: imageMetadata.width * (!isCarbon ? 1.1 : 1.01),
 			heightCanvas: !isCarbon
 				? imageMetadata.height * 1.2 + heightTops
-				: imageMetadata.height + Math.log(imageMetadata.height) * 5
+				: (imageMetadata.height + Math.log(imageMetadata.height)) / 1.1
 		};
 
 		let rounded = new Buffer.from(
 			`<svg><path d="${roundedRectData(imageMetadata.width, imageMetadata.height, 0, 0, config.round, config.round)}"/></svg>`
 		);
 		let tops = new Buffer.from(
-			`<svg><path d="${roundedRectData(imageMetadata.width, heightTops, config.round, config.round, 0, 0)}" fill="#282a36"
+			`<svg><path d="${roundedRectData(imageMetadata.width, heightTops + 1, config.round, config.round, 0, 0)}" fill="#282a36"
 			/></svg>`
 		);
-		let pathStars = new Buffer.from(`<svg viewBox="0 0 256 256" width="${heightTops}" height="${heightTops}">
-			<defs>
-			  <linearGradient id="starGrad">
-				<stop offset="0%" stop-color="#ff79c6"/>
-				<stop offset="50%" stop-color="#bd93f9"/>
-				<stop offset="100%" stop-color="#ff79c6"/>
-			  </linearGradient>
-			</defs>
-			<path fill="url(#starGrad)" d="M228.69141,116.72266,164.875,93.51562a3.986,3.986,0,0,1-2.3916-2.3916L139.27734,27.30859a12.00008,12.00008,0,0,0-22.55468,0L93.51562,91.125a3.986,3.986,0,0,1-2.3916,2.3916L27.30859,116.72266a12.00008,12.00008,0,0,0,0,22.55468l63.81641,23.207a3.986,3.986,0,0,1,2.3916,2.3916l23.20606,63.81543a12.00008,12.00008,0,0,0,22.55468,0L162.4834,164.876l.001-.001a3.986,3.986,0,0,1,2.3916-2.3916l63.81543-23.20606a12.00008,12.00008,0,0,0,0-22.55468ZM225.957,131.75977l-63.81445,23.20507a11.967,11.967,0,0,0-7.17676,7.17676L131.75977,225.957a4.001,4.001,0,0,1-7.51954,0l-23.20507-63.81445a11.96452,11.96452,0,0,0-7.17676-7.17676L30.043,131.75977a4.001,4.001,0,0,1,0-7.51954l63.81445-23.20507a11.96452,11.96452,0,0,0,7.17676-7.17676l23.206-63.81543a4.001,4.001,0,0,1,7.51954,0l23.20507,63.81445a11.96452,11.96452,0,0,0,7.17676,7.17676l63.81543,23.206a4.001,4.001,0,0,1,0,7.51954Z" />  
-		  </svg>`);
-
-		let pathStarsRotated =
-			new Buffer.from(`<svg viewBox="0 0 256 256" width="${heightTops}" height="${heightTops}" transform="rotate(45, ${
-				heightTops / 2
-			}, ${heightTops / 2})">
-			<defs>
-			  <linearGradient id="starGrad">
-			  <stop offset="0%" stop-color="#ff79c6"/>
-			  <stop offset="50%" stop-color="#bd93f9"/>
-			  <stop offset="100%" stop-color="#ff79c6"/>
-			  </linearGradient>
-			</defs>
-			<g id="SVGRepo_bgCarrier" stroke-width="0"/>
-			<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
-			<g id="SVGRepo_iconCarrier">
-			<path fill="url(#starGrad)" d="M240.58984,128a15.84794,15.84794,0,0,1-10.53125,15.03711l-63.81543,23.206-23.206,63.81543a16.001,16.001,0,0,1-30.07422,0L89.75684,166.24316l-63.81543-23.206a16.001,16.001,0,0,1,0-30.07422L89.75684,89.75684l23.20605-63.81543a16.001,16.001,0,0,1,30.07422,0l23.206,63.81543,63.81543,23.20605A15.84794,15.84794,0,0,1,240.58984,128Z" /> </g>
-		  </svg>`);
 
 		const { canvas, ctx } = this.#createCanvas(config.widthCanvas, config.heightCanvas);
-		const dWHMultiply = (num) => heightTops / 2 - (num * config.scaleSymbol) / 2;
-		const dWHSymbol = (num) => num * config.scaleSymbol;
+		const dWHMultiply = (num) => heightTops - num * config.scaleSymbol + 35;
+		const dWHSymbol = (num) => num * config.scaleSymbol - 10;
 
 		if (!('background' in imageMetadata)) {
 			let topsPadding = await sharp(tops).toBuffer();
@@ -110,65 +82,41 @@ export class Prettify {
 				.png()
 				.toBuffer();
 
-			let { assetRotated, assetNonRotated } = await this.#loadAssets(pathStarsRotated, pathStars);
-
 			const { canvas: tempCanvas, ctx: tempCtx } = this.#createCanvas(imageMetadata.width, imageMetadata.height + heightTops);
 
-			const [topsPaddingImage, roundedCornerResizedImage, assetRotatedImage, assetNonRotatedImage] = await Promise.all([
+			const [topsPaddingImage, roundedCornerResizedImage, close, minimize, maximize] = await Promise.all([
 				loadImage(topsPadding),
 				loadImage(roundedCornerResized),
-				loadImage(assetRotated),
-				loadImage(assetNonRotated)
+				loadImage('./src/media/assets/close.png'),
+				loadImage('./src/media/assets/minimize.png'),
+				loadImage('./src/media/assets/maximize.png')
 			]);
 
-			tempCtx.drawImage(topsPaddingImage, 0, 0, tempCanvas.width, heightTops);
+			tempCtx.drawImage(topsPaddingImage, 0, 0, tempCanvas.width, heightTops + 10);
 			tempCtx.drawImage(roundedCornerResizedImage, 0, heightTops, tempCanvas.width, tempCanvas.height - heightTops);
+
 			tempCtx.drawImage(
-				assetRotatedImage,
-				dWHMultiply(assetRotatedImage.width),
-				dWHMultiply(assetRotatedImage.height),
-				dWHSymbol(assetRotatedImage.width),
-				dWHSymbol(assetRotatedImage.height)
+				close,
+				dWHMultiply(close.width),
+				dWHMultiply(close.height),
+				dWHSymbol(close.width),
+				dWHSymbol(close.height)
 			);
 
 			tempCtx.drawImage(
-				assetNonRotatedImage,
-				dWHSymbol(assetNonRotatedImage.width) + dWHMultiply(assetNonRotatedImage.width),
-				dWHMultiply(assetNonRotatedImage.height),
-				dWHSymbol(assetNonRotatedImage.width),
-				dWHSymbol(assetNonRotatedImage.height)
+				minimize,
+				dWHSymbol(minimize.width) + dWHMultiply(minimize.width) + 5,
+				dWHMultiply(minimize.height),
+				dWHSymbol(minimize.width),
+				dWHSymbol(minimize.height)
 			);
 
 			tempCtx.drawImage(
-				assetRotatedImage,
-				dWHSymbol(assetRotatedImage.width) * 2 + dWHMultiply(assetRotatedImage.width),
-				dWHMultiply(assetRotatedImage.height),
-				dWHSymbol(assetRotatedImage.width),
-				dWHSymbol(assetRotatedImage.height)
-			);
-
-			tempCtx.drawImage(
-				assetRotatedImage,
-				tempCanvas.width - dWHSymbol(assetRotatedImage.width) - dWHMultiply(assetRotatedImage.width),
-				dWHMultiply(assetRotatedImage.height),
-				dWHSymbol(assetRotatedImage.width),
-				dWHSymbol(assetRotatedImage.height)
-			);
-
-			tempCtx.drawImage(
-				assetNonRotatedImage,
-				tempCanvas.width - dWHSymbol(assetNonRotatedImage.width) * 2 - dWHMultiply(assetNonRotatedImage.height),
-				dWHMultiply(assetNonRotatedImage.height),
-				dWHSymbol(assetNonRotatedImage.width),
-				dWHSymbol(assetNonRotatedImage.height)
-			);
-
-			tempCtx.drawImage(
-				assetRotatedImage,
-				tempCanvas.width - dWHSymbol(assetRotatedImage.width) * 3 - dWHMultiply(assetRotatedImage.height),
-				dWHMultiply(assetRotatedImage.height),
-				dWHSymbol(assetRotatedImage.width),
-				dWHSymbol(assetRotatedImage.height)
+				maximize,
+				dWHSymbol(maximize.width) * 2 + dWHMultiply(maximize.width) + 5 * 2,
+				dWHMultiply(maximize.height),
+				dWHSymbol(maximize.width),
+				dWHSymbol(maximize.height)
 			);
 
 			let combinedImage = tempCanvas.toBuffer('image/png');
@@ -217,22 +165,14 @@ export class Prettify {
 			ctx.drawImage(combinedImage, x, y, combinedImage.width * config.scaleImage, combinedImage.height * config.scaleImage);
 			topsPadding = null;
 			roundedCornerResized = null;
-
-			assetRotated = null;
-			assetNonRotated = null;
-			combinedImage = null;
 		} else {
 			rounded = null;
 			tops = null;
-			pathStars = null;
-			pathStarsRotated = null;
 			return { error: 'Requirement of the image not found. `Image` should not had transparent.' };
 		}
 
 		rounded = null;
 		tops = null;
-		pathStars = null;
-		pathStarsRotated = null;
 
 		const toBuffer = () => canvas.toBuffer('image/png');
 
@@ -247,38 +187,33 @@ export class Prettify {
 		return { image, imageMetadata };
 	}
 
-	async #loadAssets(...asset) {
-		const buffers = await Promise.all([sharp(asset[0]).toBuffer(), sharp(asset[1]).toBuffer()]);
-
-		return { assetRotated: buffers[0], assetNonRotated: buffers[1] };
-	}
-
 	#carbonNow(code, options) {
+		const tabWidth = 3;
 		const opts = Object.assign(this.defaultCarbonOptions, options);
 		const formatCode = prettier.format(code, {
 			printWidth: 80,
 			singleQuote: true,
 			trailingComma: 'all',
 			parser: 'babel',
-			useTabs: true,
-			tabWidth: 3
+			useTabs: tabWidth ? true : false,
+			tabWidth
 		});
 
 		const palette = colors[opts.palette];
-		const el = this.#highlightCode(formatCode);
+		const el = this.#highlightCode(formatCode, tabWidth);
 		const parsed = parse(el).childNodes[0].childNodes[1].childNodes;
 
 		const { ctx: tempCtx } = this.#createCanvas();
 
 		tempCtx.font = '30px JetBrains';
-		const width = this.#calculateWidth(tempCtx, formatCode) + 200;
+		const width = this.#calculateWidth(tempCtx, formatCode, tabWidth) + 70;
 		let height = 60;
 
 		const { ctx: tempCtx2 } = this.#createCanvas();
 
-		const x = 30;
-		const y = 30;
-		const lineHeight = tempCtx2.measureText(formatCode.split('\n')[0]).emHeightDescent + 1;
+		const x = 60;
+		const y = 90;
+		const lineHeight = tempCtx2.measureText(formatCode.split('\n')[0]).emHeightDescent + 2.4;
 		const fontSize = parseInt(tempCtx2.font.match(/\d+/)[0]) || 30;
 
 		height += this.#calculateHeight(y, lineHeight, fontSize, parsed);
@@ -322,23 +257,33 @@ export class Prettify {
 		return classNames?.value ? classNames.value.split(' ').slice(1).join(' ') : '';
 	}
 
-	#highlightCode(code) {
-		return prism.highlight(code, prism.languages.javascript, 'js').replace(/\n/g, '<br>');
+	#highlightCode(code, tabWidth) {
+		return prism.highlight(code, prism.languages.javascript, 'js').replace(/\n/g, '<br>').replace(/\t/g, ' '.repeat(tabWidth));
 	}
 
-	#calculateWidth(ctx, code) {
-		let width = 0;
+	#calculateWidth(ctx, code, tabWidth) {
+		let maxWidth = 0;
 
-		code.split('\n').forEach((text) => {
-			text = text.replace(regex, '    ');
-			const lenWidth = ctx.measureText(text).width;
+		const spaceWidth = ctx.measureText(' ').width;
 
-			if (lenWidth >= width) {
-				width = lenWidth + 100;
+		code.split(/(?<!["'`])\n(?!["'`])/).forEach((line) => {
+			let lineWidth = 0;
+
+			for (let char of line) {
+				if (char === '\t') {
+					lineWidth += spaceWidth * tabWidth;
+				} else {
+					lineWidth += ctx.measureText(char).width;
+				}
+			}
+
+			if (lineWidth > maxWidth) {
+				maxWidth = lineWidth;
 			}
 		});
 
-		return width;
+		const padding = 600;
+		return maxWidth + padding;
 	}
 
 	#calculateHeight(y, fontSize, lineHeight, parentNode) {
@@ -366,7 +311,7 @@ export class Prettify {
 
 		loop(parentNode);
 
-		return height;
+		return height + 50;
 	}
 
 	#fillText(ctx, x, y, fontSize, lineHeight, parentNode, colors, opts) {

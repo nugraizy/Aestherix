@@ -5,9 +5,9 @@ export const roundedRectData = (w, h, tlr, trr, brr, blr) =>
 
 export const colors = {
 	dracula: {
-		_default: '#f8f8f2',
+		_default: '#bd93f9',
 		background: '#282a36',
-		'': '#bd93f9',
+		'': '#f8f8f2',
 		'function-variable function': '#50fa7b',
 		comment: '#6272a4',
 		constant: '#bd93f9',
@@ -15,21 +15,27 @@ export const colors = {
 		string: '#f1fa8c',
 		variable: '#ff79c6',
 		'template-punctuation string': '#f1fa8c',
-		'interpolation-punctuation punctuation': '#ff79c6',
+		'interpolation-punctuation punctuation': '#f8f8f2',
 		interpolation: '#f8f8f2',
-		parameter: '#50fa7b',
+		parameter: '#FFB86C',
 		function: '#50fa7b',
-		punctuation: {
-			opacity: 0.7,
-			color: '#f8f8f2'
-		},
+		punctuation: '#f8f8f2',
 		'regex-flags': '#ff79c6',
 		'regex-delimiter': '#ff5555',
 		'regex-source language-regex': '#50fa7b',
 		'class-name': '#8be9fd',
 		number: '#ff79c6',
 		boolean: 'white',
-		operator: '#bd93f9',
-		keyword: '#ff79c6'
+		operator: '#ff79c6',
+		keyword: '#ff79c6',
+		'attr-name': '#ff79c6',
+		number: '#bd93f9',
+		boolean: '#50fa7b',
+		tag: '#ff79c6',
+		important: '#ff5555',
+		selector: '#50fa7b',
+		entity: '#f8f8f2',
+		'variable.language': '#ff79c6',
+		'literal-property property': '#f8f8f2'
 	}
 };
