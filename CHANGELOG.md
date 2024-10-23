@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+# [5.0.4] 2024-10-23
+## Fixed
+- Fix `carbon` padding not accurately represents real height.
+
+---
+
 # [5.0.3] 2024-10-22
 ## Fixed
 - Fix **Instagram** utilities:
