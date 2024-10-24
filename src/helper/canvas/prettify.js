@@ -34,11 +34,16 @@ export class Prettify {
 	get defaultCarbonOptions() {
 		return {
 			palette: 'dracula',
-			shadow: false
+			glow: false
 		};
 	}
 
-	async #screenshotNow(buffer, isCarbon, watermark = 'Prettify Screenshot by Hidden Finder') {
+	async #screenshotNow(
+		buffer,
+		isCarbon,
+		watermark = 'Prettify Screenshot by Hidden Finder',
+		baseBorderThicknessPercentage = 0.1
+	) {
 		let time = dayjs().format('ddd DD.MMM.YYYY HH:mmA');
 
 		if (isCarbon) {
@@ -49,51 +54,46 @@ export class Prettify {
 		this.#buffer = buffer;
 
 		const { image, imageMetadata } = await this.#loadImage();
-		const heightTops = Math.log2(imageMetadata.height) * 5;
 		const stats = await color.getPalette(this.#buffer);
+
+		const minDimension = Math.min(imageMetadata.width, imageMetadata.height);
+		const borderThickness = Math.max(5, minDimension * baseBorderThicknessPercentage);
 
 		const config = {
 			round: 10,
 			scaleSymbol: 0.5,
 			scaleImage: 0.8,
 			background: chroma(stats[0][0], stats[0][1], stats[0][2]).darken(0.6),
-			widthCanvas: imageMetadata.width * (!isCarbon ? 1.1 : 1.01),
-			heightCanvas: !isCarbon
-				? imageMetadata.height * 1.2 + heightTops
-				: (imageMetadata.height + Math.log(imageMetadata.height)) / 1.1
+			widthCanvas: imageMetadata.width + 2 * borderThickness,
+			heightCanvas: imageMetadata.height + 2 * borderThickness
 		};
 
-		let rounded = new Buffer.from(
-			`<svg><path d="${roundedRectData(imageMetadata.width, imageMetadata.height, 0, 0, config.round, config.round)}"/></svg>`
-		);
-		let tops = new Buffer.from(
-			`<svg><path d="${roundedRectData(imageMetadata.width, heightTops + 1, config.round, config.round, 0, 0)}" fill="#282a36"
-			/></svg>`
+		const rounded = new Buffer.from(
+			`<svg><path d="${roundedRectData(imageMetadata.width, imageMetadata.height, config.round)}"/></svg>`
 		);
 
 		const { canvas, ctx } = this.#createCanvas(config.widthCanvas, config.heightCanvas);
-		const dWHMultiply = (num) => heightTops - num * config.scaleSymbol + 35;
+		const dWHMultiply = (num) => num * config.scaleSymbol + 10;
 		const dWHSymbol = (num) => num * config.scaleSymbol - 10;
 
 		if (!('background' in imageMetadata)) {
-			let topsPadding = await sharp(tops).toBuffer();
 			let roundedCornerResized = await image
 				.composite([{ input: rounded, blend: 'dest-in' }])
 				.png()
 				.toBuffer();
 
-			const { canvas: tempCanvas, ctx: tempCtx } = this.#createCanvas(imageMetadata.width, imageMetadata.height + heightTops);
+			const { canvas: tempCanvas, ctx: tempCtx } = this.#createCanvas(imageMetadata.width, imageMetadata.height);
 
-			const [topsPaddingImage, roundedCornerResizedImage, close, minimize, maximize] = await Promise.all([
-				loadImage(topsPadding),
+			const [roundedCornerResizedImage, close, minimize, maximize] = await Promise.all([
 				loadImage(roundedCornerResized),
 				loadImage('./src/media/assets/close.png'),
 				loadImage('./src/media/assets/minimize.png'),
 				loadImage('./src/media/assets/maximize.png')
 			]);
 
-			tempCtx.drawImage(topsPaddingImage, 0, 0, tempCanvas.width, heightTops + 10);
-			tempCtx.drawImage(roundedCornerResizedImage, 0, heightTops, tempCanvas.width, tempCanvas.height - heightTops);
+			tempCtx.drawImage(roundedCornerResizedImage, 0, 0, tempCanvas.width, tempCanvas.height);
+
+			const space = 10;
 
 			tempCtx.drawImage(
 				close,
@@ -105,7 +105,7 @@ export class Prettify {
 
 			tempCtx.drawImage(
 				minimize,
-				dWHSymbol(minimize.width) + dWHMultiply(minimize.width) + 5,
+				dWHSymbol(minimize.width) + dWHMultiply(minimize.width) + space,
 				dWHMultiply(minimize.height),
 				dWHSymbol(minimize.width),
 				dWHSymbol(minimize.height)
@@ -113,7 +113,7 @@ export class Prettify {
 
 			tempCtx.drawImage(
 				maximize,
-				dWHSymbol(maximize.width) * 2 + dWHMultiply(maximize.width) + 5 * 2,
+				dWHSymbol(maximize.width) * 2 + dWHMultiply(maximize.width) + space * 2,
 				dWHMultiply(maximize.height),
 				dWHSymbol(maximize.width),
 				dWHSymbol(maximize.height)
@@ -142,8 +142,16 @@ export class Prettify {
 
 			combinedImage = await loadImage(combinedImage);
 
-			const x = (canvas.width - combinedImage.width * config.scaleImage) / 2;
-			const y = (canvas.height - combinedImage.height * config.scaleImage) / 2;
+			const scaleFactor = Math.min(
+				(config.widthCanvas - 2 * borderThickness) / combinedImage.width,
+				(config.heightCanvas - 2 * borderThickness) / combinedImage.height
+			);
+
+			const scaledWidth = combinedImage.width * scaleFactor;
+			const scaledHeight = combinedImage.height * scaleFactor;
+
+			const x = (config.widthCanvas - scaledWidth) / 2;
+			const y = (config.heightCanvas - scaledHeight) / 2;
 
 			if (!isCarbon) {
 				ctx.fillText(
@@ -160,19 +168,12 @@ export class Prettify {
 			ctx.shadowBlur = 70;
 			ctx.shadowColor = 'black';
 			ctx.shadowOffsetX = 0;
-			ctx.shadowOffsetY = 20;
+			ctx.shadowOffsetY = 0;
 
-			ctx.drawImage(combinedImage, x, y, combinedImage.width * config.scaleImage, combinedImage.height * config.scaleImage);
-			topsPadding = null;
-			roundedCornerResized = null;
+			ctx.drawImage(combinedImage, x, y, scaledWidth, scaledHeight);
 		} else {
-			rounded = null;
-			tops = null;
 			return { error: 'Requirement of the image not found. `Image` should not had transparent.' };
 		}
-
-		rounded = null;
-		tops = null;
 
 		const toBuffer = () => canvas.toBuffer('image/png');
 
@@ -195,7 +196,7 @@ export class Prettify {
 			singleQuote: true,
 			trailingComma: 'all',
 			parser: 'babel',
-			useTabs: tabWidth ? true : false,
+			useTabs: !!tabWidth,
 			tabWidth
 		});
 
@@ -212,7 +213,7 @@ export class Prettify {
 		const { ctx: tempCtx2 } = this.#createCanvas();
 
 		const x = 60;
-		const y = 90;
+		const y = 130;
 		const lineHeight = tempCtx2.measureText(formatCode.split('\n')[0]).emHeightDescent + 2.4;
 		const fontSize = parseInt(tempCtx2.font.match(/\d+/)[0]) || 30;
 
@@ -229,8 +230,8 @@ export class Prettify {
 		ctx.textBaseline = 'top';
 		ctx.textAlign = 'right';
 
-		if (opts.shadow) {
-			ctx.shadowBlur = typeof opts.shadow === 'boolean' ? 5 : opts.shadow;
+		if (opts.glow) {
+			ctx.shadowBlur = typeof opts.glow === 'boolean' ? 5 : opts.glow;
 		}
 
 		this.#fillText(ctx, x, y, fontSize, lineHeight, parsed, palette, opts);
@@ -350,7 +351,7 @@ export class Prettify {
 					ctx.fillStyle = color;
 				}
 
-				if (opts.shadow) {
+				if (opts.glow) {
 					ctx.shadowColor = color?.color || color;
 				}
 
