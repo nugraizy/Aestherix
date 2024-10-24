@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+# [5.0.5] 2024-10-24
+## Fixed
+- Fix `carbon` border overweight on long codes. Now it's ACCURATE and symmetrically on both sides.
+
+## Added
+- New `carbon` theme, `synthwave84`!
+
+---
+
 # [5.0.4] 2024-10-23
 ## Fixed
 - Fix `carbon` padding not accurately represents real height.
