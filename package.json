@@ -122,7 +122,8 @@
     "yn": "^5.0.0",
     "youtubei.js": "github:LuanRT/YouTube.js",
     "yt-search": "github:nugraizy/yt-search",
-    "ytdl-core": "^4.11.5"
+    "ytdl-core": "^4.11.5",
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@adiwajshing/keyed-db": "^0.2.4",

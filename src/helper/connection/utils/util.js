@@ -1,44 +1,61 @@
-const defaultProperties = {
-	name: 'required',
-	minifiedDescription: 'optional',
-	description: 'optional',
-	category: 'required',
-	usage: 'optional',
-	aliases: 'optional',
-	cooldown: 'optional',
-	limit: 'optional',
-	status: 'required',
-	premium: 'optional'
-};
+import { object, string, array, number, boolean, mixed } from 'yup';
 
-export const isMissingProperty = (data) => {
-	const missingRequiredProps = [];
-	const missingOptionalProps = [];
+const random = () => ~~(Math.random() * 10);
 
-	for (const props in defaultProperties) {
-		const dataProps = data[props];
-		if (!(props in data) && (defaultProperties[props] === 'required' || defaultProperties[props]?.[0] === 'required')) {
-			missingRequiredProps.push(props);
-		} else if (!dataProps && typeof dataProps !== 'string') {
-			missingOptionalProps.push(props);
-		}
+const schema = object({
+	name: string(),
+	minifiedDescription: string().optional().default('This is minified description'),
+	description: string().optional(),
+	category: string().oneOf([
+		'AI',
+		'AL-Quran',
+		'Anime',
+		'Anonymous',
+		'Converter',
+		'Debugging',
+		'Downloader',
+		'Games',
+		'Genshin Impact',
+		'Helper',
+		'Look-up',
+		'Misc',
+		'Moderation',
+		'News',
+		'Owner',
+		'Search'
+	]),
+	usage: string(),
+	aliases: array(string()),
+	cooldown: number().integer().min(0).default(random),
+	limit: number().integer().min(0).default(random),
+	status: string().oneOf(['enable', 'disable']),
+	restrict: boolean(),
+	premium: boolean(),
+	run: mixed()
+		.test({
+			test: (value) => typeof value === 'function',
+			message: 'Run must be a function',
+			name: 'run'
+		})
+		.default(() => {})
+});
+
+export class ModuleError extends Error {
+	constructor(message) {
+		super(message);
+
+		this.name = this.constructor.name;
+		this.info = this.name + ': ' + message.message.split('\n')[0];
+		Error.captureStackTrace(this, this.constructor);
 	}
+}
 
-	if (missingRequiredProps.length > 1) {
-		return {
-			status: false,
-			shouldStop: true,
-			message: `Missing ${missingRequiredProps.map((prop) => `'${prop}'`).join(', ')}. Could not proceed.`
-		};
+export const isMissingProperty = async (data) => {
+	try {
+		const validate = await schema.validate(data);
+
+		return validate;
+	} catch (error) {
+		throw new ModuleError(error);
 	}
-
-	if (missingOptionalProps.length > 1) {
-		return {
-			status: false,
-			shouldStop: false,
-			message: `Missing ${missingOptionalProps.map((prop) => `'${prop}'`).join(', ')}. Proceed with caution.`
-		};
-	}
-
-	return { status: true };
 };

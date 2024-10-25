@@ -7,7 +7,7 @@ import chalk from 'chalk';
 
 import configuration from '../../config/connect.js';
 import { color, loggers, loadFiles } from '../../../utils/modules/index.js';
-import { isMissingProperty } from './util.js';
+import { ModuleError, isMissingProperty } from './util.js';
 
 /**
  * @type {{name: string, id: string}[]}
@@ -192,18 +192,10 @@ const add = async (filename) => {
 					return;
 				}
 
-				const check = isMissingProperty(module.default);
-
-				if (!check.status) {
-					loggers.WRN(color(displayName, '#BD93F9'), check.message);
-
-					if (check.shouldStop) {
-						return;
-					}
-				}
+				const check = await isMissingProperty(module.default);
 
 				configuration.cmds.commands.set(module.default.name, {
-					...module.default,
+					...check,
 					absolutePath: file,
 					path: filename
 				});
@@ -212,6 +204,11 @@ const add = async (filename) => {
 				handlePluginError(filename);
 			}
 		} catch (error) {
+			if (error instanceof ModuleError) {
+				loggers.WRN(color(displayName, '#BD93F9'), error.info);
+				return;
+			}
+
 			await validatePlugins(filename, true);
 		}
 	}
@@ -249,15 +246,7 @@ const change = async (filename) => {
 			return;
 		}
 
-		const check = isMissingProperty(command);
-
-		if (!check.status) {
-			loggers.WRN(color(displayName, '#BD93F9'), check.message);
-
-			if (check.shouldStop) {
-				return;
-			}
-		}
+		const check = await isMissingProperty(command);
 
 		const currentCommand = cmds[index][1];
 		loggers.INF(color(currentCommand.path?.split('/').slice(-2).join('/'), '#BD93F9'), color('File Reloaded!', '#05ffa1'));
@@ -275,6 +264,11 @@ const change = async (filename) => {
 			path: currentCommand.path
 		});
 	} catch (error) {
+		if (error instanceof ModuleError) {
+			loggers.WRN(color(displayName, '#BD93F9'), error.info);
+			return;
+		}
+
 		await validatePlugins(filename, true);
 	}
 };

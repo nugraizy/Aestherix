@@ -3,7 +3,7 @@ import path from 'path';
 import configuration from '../../config/connect.js';
 import { color, loadFiles, loggers } from '../../../utils/modules/index.js';
 import { normalizeImportPath, watch, validatePlugins } from './cache.js';
-import { isMissingProperty } from './util.js';
+import { ModuleError, isMissingProperty } from './util.js';
 
 const loadCommand = async (command, OPTIONS) => {
 	const start = Date.now();
@@ -41,29 +41,29 @@ const loadCommand = async (command, OPTIONS) => {
 			return null;
 		}
 
-		const check = isMissingProperty(module.default);
+		const check = await isMissingProperty(module.default);
 
-		if (!check.status) {
-			if (check.shouldStop) {
-				loggers.ERR(color(command, '#BD93F9'), check.message);
-				return null;
-			}
+		check.absolutePath = file;
+		check.path = normalize;
 
-			loggers.WRN(color(command, '#BD93F9'), check.message);
-		}
-
-		module.default.absolutePath = file;
-		module.default.path = normalize;
-
-		configuration.cmds.commands.set(module.default.name, module.default);
-		configuration.cmds.aliases.push(...(module.default?.aliases || []));
+		configuration.cmds.commands.set(check.name, check);
+		configuration.cmds.aliases.push(...(check?.aliases || []));
 
 		const duration = Date.now() - start;
 		loggers.INF(color('Loaded', 'white'), color(command, '#BD93F9'), color('in', 'white'), color(duration + 'ms', '#F1FA8C'));
 
 		return path.dirname(command);
-	} catch (e) {
-		loggers.ERR(color(command, '#BD93F9'), e.message);
+	} catch (error) {
+		if (error instanceof ModuleError) {
+			loggers.WRN(color(command, '#BD93F9'), error.info);
+			configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
+				absolutePath: file,
+				path: normalize
+			});
+			return;
+		}
+
+		loggers.ERR(color(command, '#BD93F9'), error.message);
 		validatePlugins(command, OPTIONS.watch);
 
 		configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {

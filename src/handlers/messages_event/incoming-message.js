@@ -387,35 +387,44 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 					cooldownUser.requests = false;
 				}
 
-				let str = 'Something went wrong.\n';
+				const builder = new client.instance.TemplateBuilder.Native(client);
 
-				str += !message.isOwner ? 'Please send this error stack to the owner :\n\n' : '\n';
+				let str = !message.isOwner ? 'Please send this error stack to the owner :\n\n' : '\n';
 
 				str += `Type : ${err.name || 'Unknown'}\n`;
 				str += `Message : ${err.message || 'Unknown'}\n`;
-				str += `Stack Trace : ${(message.isOwner ? err?.stack : err?.stack?.substring(0, 20)) || 'Unknown'}`;
+				str += `Stack Trace :\n${(message.isOwner ? err?.stack : err?.stack?.substring(0, 20)) || 'Unknown'}`;
 
-				await client.instance.send(
-					message.from,
-					{
-						text: str,
-						footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
-						templateButtons: [
-							{ urlButton: { displayText: 'Copy Stack Trace', url: `https://www.whatsapp.com/otp/copy/${err.stack}` } },
-							(message.isOwner && {}) || {
-								urlButton: {
-									displayText: 'Report to Owner',
-									url: `https://wa.me/${message.settings.owner_number}?text=hi,%20bot%20mengalami%20error${encodeURI(
-										`\n\n${err.stack}`
-									)}`
-								}
-							},
-							(message.isOwner && {}) || { quickReplyButton: { displayText: 'Report via Bot', id: `.report ${err.stack}` } }
-						],
-						headerType: 1
-					},
-					{ groupMetadata: message.groupMetadata }
-				);
+				builder
+					.mainBody('Something went wrong.')
+					.mainFooter(str)
+					.mainHeader('Header')
+					.buttons(
+						builder.button.url({
+							display: 'GitHub User!',
+							url: 'https://github.com/nugraizy'
+						}),
+						(message.isOwner && {}) ||
+							builder.button.url({
+								display: 'Report to Owner',
+								url: `https://wa.me/${message.settings.owner_number}?text=hi,%20bot%20mengalami%20error${encodeURI(
+									`\n\n${err.stack}`
+								)}`
+							}),
+						(message.isOwner && {}) ||
+							builder.button.reply({
+								display: 'Report via Bot',
+								id: `.report ${err.stack}`
+							}),
+						builder.button.copy({
+							code: `https://www.whatsapp.com/otp/copy/${err.stack}`,
+							display: 'Copy Stack Trace'
+						})
+					);
+
+				const messageBuilt = await builder.render();
+
+				await client.instance.relayMessage(message.from, messageBuilt.message, { messageId: messageBuilt.key.id });
 
 				loggers.ERR(color(err.message, 'white'));
 				const parseErr = (
