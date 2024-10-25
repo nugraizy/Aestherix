@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+# [5.0.6] 2024-10-25
+## Fixed
+- Fix module validator. Now using `yup`.
+
+---
+
 # [5.0.5] 2024-10-24
 ## Fixed
 - Fix `carbon` border overweight on long codes. Now it's ACCURATE and symmetrically on both sides.
