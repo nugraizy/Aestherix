@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+# [5.0.7] 2024-10-29
+## Refactor
+- Change function name to be more readable and make sense.
+
+---
+
 # [5.0.6] 2024-10-25
 ## Fixed
 - Fix module validator. Now using `yup`.
