@@ -20,7 +20,7 @@ const SETTINGS = await fs.readJSON('./src/helper/config/settings.json');
 
 const exitOnErr = (e) => {
 	if (e.name === 'AbortPromptError') {
-		loggers.ERR(color('Timeout.', 'red'), color('Exiting prompt...', 'grey'));
+		loggers.error(color('Timeout.', 'red'), color('Exiting prompt...', 'grey'));
 	}
 
 	process.exit(0);
@@ -105,7 +105,7 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 
 	store.bind(Client.ev);
 
-	await handleNewInstance({ OPTIONS, Client });
+	await handleNewInstance({ OPTIONS, Client }); // eslint-disable-line
 
 	return { Client, store };
 };
@@ -126,6 +126,23 @@ const storeToJson = async (cli, store, OPTIONS) => {
 	}, 3 * 1000);
 };
 
+const inputPhoneNumber = async () => {
+	await delay(1000);
+	const phoneNumber = await question(
+		loggers.info(color('Insert your phone number', '#E4C1F9'), color(':', '#ffff'), { ignore: true }).trim()
+	);
+
+	const formattedPhoneNumber = '+' + phoneNumber.trim().replace(/[^0-9]/g, '');
+	const numberFormat = PhoneNumber(formattedPhoneNumber);
+
+	if (!numberFormat?.isValid()) {
+		loggers.error(color('Invalid phone number.', 'red'), color('Try again with the valid country code.'));
+		return await inputPhoneNumber();
+	}
+
+	return formattedPhoneNumber.replace(/[^0-9]/g, '');
+};
+
 const selectHostNumber = async ({ hostNumber, backupsHostNumbers }) => {
 	const selected = await select(
 		{
@@ -133,6 +150,7 @@ const selectHostNumber = async ({ hostNumber, backupsHostNumbers }) => {
 			choices: [
 				...[hostNumber, ...backupsHostNumbers].map((v) => {
 					const num = PhoneNumber('+' + v.replace(/[^0-9]/g, '')).formatInternational();
+
 					return { name: num, value: v };
 				}),
 				new Separator(),
@@ -154,23 +172,6 @@ const selectHostNumber = async ({ hostNumber, backupsHostNumbers }) => {
 	return selected.replace(/[^0-9]/g, '');
 };
 
-const inputPhoneNumber = async () => {
-	await delay(1000);
-	const phoneNumber = await question(
-		loggers.INF(color('Insert your phone number', '#E4C1F9'), color(':', '#ffff'), { ignore: true }).trim()
-	);
-
-	const formattedPhoneNumber = '+' + phoneNumber.trim().replace(/[^0-9]/g, '');
-	const numberFormat = PhoneNumber(formattedPhoneNumber);
-
-	if (!numberFormat?.isValid()) {
-		loggers.ERR(color('Invalid phone number.', 'red'), color('Try again with the valid country code.'));
-		return await inputPhoneNumber();
-	}
-
-	return formattedPhoneNumber.replace(/[^0-9]/g, '');
-};
-
 const askInputNumber = async ({ hostNumber, backupsHostNumbers }) => {
 	if (backupsHostNumbers.length) {
 		return await selectHostNumber({ hostNumber, backupsHostNumbers });
@@ -182,7 +183,7 @@ const askInputNumber = async ({ hostNumber, backupsHostNumbers }) => {
 const askWantNumber = async ({ hostNumber, backupsHostNumbers }) => {
 	const isWantNumber = await toggle({
 		message: loggers
-			.INF(
+			.info(
 				color('Do you want to use the default number?', '#E4C1F9'),
 				color('(', 'gray') + color('default', '#fff'),
 				color(`${PhoneNumber('+' + hostNumber.replace(/[^0-9]/g, '')).formatInternational()})`, 'gray'),
@@ -222,7 +223,7 @@ const handleNewInstance = async ({ OPTIONS, Client }) => {
 
 		const code = await Client.requestPairingCode(phoneNumber);
 
-		loggers.INF(
+		loggers.info(
 			color('Pairing code :', '#E4C1F9'),
 			color(
 				code.splitString({
@@ -234,9 +235,9 @@ const handleNewInstance = async ({ OPTIONS, Client }) => {
 		await delay(200);
 		await clip
 			.write(code)
-			.then(() => loggers.INF(color('Pairing code has been copied to clipboard!', 'white')))
-			.catch(() => loggers.ERR(color('SSH detected.', 'red'), color('Could not copy the code.', 'gray')));
+			.then(() => loggers.info(color('Pairing code has been copied to clipboard!', 'white')))
+			.catch(() => loggers.error(color('SSH detected.', 'red'), color('Could not copy the code.', 'gray')));
 		await delay(200);
-		loggers.WRN(color('Waiting for code input', 'white'), color('. . .', '#FF99C8'));
+		loggers.warning(color('Waiting for code input', 'white'), color('. . .', '#FF99C8'));
 	}
 };

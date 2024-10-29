@@ -10,5 +10,5 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	run: async (_, client) => {}
+	run: async (_, client) => {} /* eslint-disable-line */
 };

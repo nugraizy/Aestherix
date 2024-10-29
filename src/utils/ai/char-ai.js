@@ -81,6 +81,7 @@ export class ChatGPTDialogue {
 
 				const processImage = async (buffer, needPush) => {
 					const scanImage = await this.processImage(buffer);
+
 					needPush &&
 						this._postData.messages.push({
 							role: 'system',
@@ -104,6 +105,7 @@ export class ChatGPTDialogue {
 							success: [],
 							failed: []
 						};
+
 						for (const image of urls) {
 							const response = await fetch(image).then((res) =>
 								res.headers.get('content-type')?.startsWith('image') ? res : null
@@ -120,7 +122,7 @@ export class ChatGPTDialogue {
 							}
 						}
 
-						let caption = `Beritahu user bahwa kamu telah mendeteksi gambar-gambar yang user berikan.`;
+						let caption = 'Beritahu user bahwa kamu telah mendeteksi gambar-gambar yang user berikan.';
 						let index = 0;
 
 						if (container.success.length) {
@@ -134,7 +136,7 @@ export class ChatGPTDialogue {
 
 						if (container.failed.length) {
 							caption += `\n${container.failed
-								.map((v) => {
+								.map(() => {
 									index++;
 									return `gambar nomor ${index} adalah invalid`;
 								})
@@ -193,18 +195,18 @@ export class ChatGPTDialogue {
 
 	async assignFile() {
 		const payload = {
-			file_name: `aestherix_${Date.now()}`
+			file_name: `aestherix_${Date.now()}` // eslint-disable-line
 		};
 		const { data } = await this._request.axios('/v1/signed_url', 'POST', payload, {
 			Authorization: `Bearer ${generateGPTToken()}`
 		});
 
-		const file_id = data.file_id;
-		const signed_url = data.signed_url;
+		const file_id = data.file_id; // eslint-disable-line
+		const signed_url = data.signed_url; // eslint-disable-line
 
 		return {
-			file_id,
-			signed_url
+			file_id, // eslint-disable-line
+			signed_url // eslint-disable-line
 		};
 	}
 
@@ -228,7 +230,7 @@ export class ChatGPTDialogue {
 				'/v1/vqa',
 				'POST',
 				querystring.stringify({
-					file_id: fileId
+					file_id: fileId // eslint-disable-line
 				}),
 				{ Authorization: `Bearer ${generateGPTToken()}` }
 			);

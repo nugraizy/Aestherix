@@ -93,7 +93,7 @@ export const updateContact = (store, contactsList) => {
 };
 
 const handlePluginError = (filename) => {
-	loggers.ERR(
+	loggers.error(
 		color(filename.split('/').slice(-2).join('/'), '#BD93F9'),
 		color('File Error! Waiting for changes...', '#5954cc')
 	);
@@ -124,7 +124,7 @@ export const validatePlugins = async (filename, isWatch) => {
 	const indexCode = codesArr.findIndex((v) => v.includes(error));
 
 	if (indexCode === -1) {
-		loggers.ERR(
+		loggers.error(
 			color(filename.split('/').slice(-2).join('/'), '#BD93F9'),
 			isWatch
 				? color('Syntax Error! Waiting for changes...', '#5954cc')
@@ -133,7 +133,7 @@ export const validatePlugins = async (filename, isWatch) => {
 		return;
 	}
 
-	loggers.ERR(
+	loggers.error(
 		color(filename.split('/').slice(-2).join('/'), '#BD93F9'),
 		isWatch
 			? color('File Error! Waiting for changes...', '#5954cc')
@@ -172,7 +172,7 @@ const add = async (filename) => {
 	}
 
 	const existingCommands = Array.from(configuration.cmds.commands.entries());
-	const fileExists = existingCommands.some(([_, command]) => command.path === filename);
+	const fileExists = existingCommands.some(([, command]) => command.path === filename);
 	const files = loadFiles('./src/commands').filter((v) => !v.includes('template'));
 
 	const file = normalizeImportPath(filename, true);
@@ -181,9 +181,10 @@ const add = async (filename) => {
 	if (!fileExists && files.length !== existingCommands.length) {
 		try {
 			const module = await import(file);
+
 			if (module?.default) {
 				if (configuration.cmds.commands.has(module.default.name)) {
-					loggers.ERR(
+					loggers.error(
 						color(displayName, '#BD93F9'),
 						'Has the same command name as the',
 						color(configuration.cmds.commands.get(module.default.name).path.split('/').slice(-2).join('/'))
@@ -199,13 +200,13 @@ const add = async (filename) => {
 					absolutePath: file,
 					path: filename
 				});
-				loggers.INF(color(displayName, '#BD93F9'), 'New plugin loaded');
+				loggers.info(color(displayName, '#BD93F9'), 'New plugin loaded');
 			} else {
 				handlePluginError(filename);
 			}
 		} catch (error) {
 			if (error instanceof ModuleError) {
-				loggers.WRN(color(displayName, '#BD93F9'), error.info);
+				loggers.warning(color(displayName, '#BD93F9'), error.info);
 				return;
 			}
 
@@ -216,7 +217,8 @@ const add = async (filename) => {
 
 const change = async (filename) => {
 	const displayName = filename?.split('/').slice(-2).join('/');
-	loggers.WRN(color(displayName, '#BD93F9'), color('File has been changed!', 'white'));
+
+	loggers.warning(color(displayName, '#BD93F9'), color('File has been changed!', 'white'));
 
 	const normalizedPath = normalizeImportPath(filename, true);
 	const _command = nocache(normalizedPath, true);
@@ -225,14 +227,14 @@ const change = async (filename) => {
 	const index = cmds.findIndex((v) => v[1].path === filename);
 
 	if (index === -1) {
-		return loggers.ERR(color(displayName, '#BD93F9'), color('Command not found in configuration!', '#FF5555'));
+		return loggers.error(color(displayName, '#BD93F9'), color('Command not found in configuration!', '#FF5555'));
 	}
 
 	try {
 		const command = (await _command.import)?.default;
 
 		if (!command) {
-			loggers.ERR(
+			loggers.error(
 				color(displayName, '#BD93F9'),
 				color('File does not contain valid Command Properties! Please check the example to create new commands.', '#05ffa1')
 			);
@@ -240,16 +242,18 @@ const change = async (filename) => {
 		}
 
 		const commandPath = configuration.cmds.commands.get(command.name).path.split('/').slice(-2).join('/');
+
 		if (configuration.cmds.commands.has(command.name) && displayName !== commandPath) {
-			loggers.ERR(color(displayName, '#BD93F9'), 'Has the same command name as the', color(commandPath, '#BD93F9 '));
+			loggers.error(color(displayName, '#BD93F9'), 'Has the same command name as the', color(commandPath, '#BD93F9 '));
 
 			return;
 		}
 
-		const check = await isMissingProperty(command);
+		await isMissingProperty(command);
 
 		const currentCommand = cmds[index][1];
-		loggers.INF(color(currentCommand.path?.split('/').slice(-2).join('/'), '#BD93F9'), color('File Reloaded!', '#05ffa1'));
+
+		loggers.info(color(currentCommand.path?.split('/').slice(-2).join('/'), '#BD93F9'), color('File Reloaded!', '#05ffa1'));
 
 		let _commandName = cmds[index][0];
 
@@ -265,7 +269,7 @@ const change = async (filename) => {
 		});
 	} catch (error) {
 		if (error instanceof ModuleError) {
-			loggers.WRN(color(displayName, '#BD93F9'), error.info);
+			loggers.warning(color(displayName, '#BD93F9'), error.info);
 			return;
 		}
 
@@ -298,7 +302,7 @@ const unlink = (filename) => {
 
 		configuration.cmds.commands.set(file[0], file[1]);
 
-		loggers.WRN(
+		loggers.warning(
 			color(displayName, '#BD93F9'),
 			color('File Renamed!', 'white'),
 			color('to', 'white'),
@@ -308,7 +312,7 @@ const unlink = (filename) => {
 	} else {
 		configuration.cmds.commands.delete(cmds[indexPath][0]);
 
-		loggers.WRN(color(displayName, '#BD93F9'), color('File Deleted!', '#5954cc'));
+		loggers.warning(color(displayName, '#BD93F9'), color('File Deleted!', '#5954cc'));
 	}
 };
 

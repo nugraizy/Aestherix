@@ -12,7 +12,7 @@ import { reassign } from '../../helper/modules/parse-message.js';
  * @param {boolean} fetches
  * @param {import('../../types/Socket/index.js').Store} store
  */
-const deletedHandler = async (client, message, fetches, store) => {
+const deletedHandler = async (client, message, fetches) => {
 	try {
 		if (!message) {
 			return;
@@ -70,16 +70,16 @@ const deletedHandler = async (client, message, fetches, store) => {
 				const quotedType = Object.keys(messages[type].contextInfo.quotedMessage)[0];
 				const quotedContent = messages[type].contextInfo.quotedMessage[quotedType];
 
-				quotedMessage = buildQuotedMessage(quotedType, quotedContent);
+				quotedMessage = buildQuotedMessage(quotedType, quotedContent); // eslint-disable-line
 			}
 
 			switch (type) {
 				case 'extendedTextMessage':
 				case 'conversation':
 					{
-						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, body || 'Unknown', quotedMessage);
+						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, body || 'Unknown', quotedMessage); // eslint-disable-line
 
-						await sendMessageWithMentions(client, from, stringDeleted, options);
+						await sendMessageWithMentions(client, from, stringDeleted, options); // eslint-disable-line
 					}
 
 					break;
@@ -87,48 +87,54 @@ const deletedHandler = async (client, message, fetches, store) => {
 					{
 						const result = await client.instance.downloadMediaMessage(mediaData);
 						const fileSize = getFilesizeFromBytes(Buffer.byteLength(result));
-						const sticker = await prepareAndSendSticker(
+						const sticker = await /* eslint-disable-line */ prepareAndSendSticker(
 							client.instance,
 							result,
 							filename,
 							mediaData.message.stickerMessage.isAnimated
 						);
-						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, `\nSize : ${fileSize}`, quotedMessage);
+						const stringDeleted = /* eslint-disable-line */ buildDeletedTextMessage(
+							pushname,
+							type,
+							timeStamp,
+							`\nSize : ${fileSize}`,
+							quotedMessage
+						);
 
 						await client.instance.send(from, { sticker }, options);
-						await sendMessageWithMentions(client, from, stringDeleted, options);
+						await sendMessageWithMentions(client, from, stringDeleted, options); // eslint-disable-line
 					}
 
 					break;
 				case 'imageMessage':
 					{
-						const image = await downloadAndSaveMediaMessage(client.instance, extractMediaData, filename, 'imageMessage');
+						const image = await downloadAndSaveMediaMessage(client.instance, extractMediaData, filename, 'imageMessage'); // eslint-disable-line
 						const fileSize = getFilesize(image);
-						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, `\nSize : ${fileSize}`, quotedMessage);
+						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, `\nSize : ${fileSize}`, quotedMessage); // eslint-disable-line
 
-						await sendImageMessageWithCaption(client.instance, from, image, stringDeleted, options);
+						await sendImageMessageWithCaption(client.instance, from, image, stringDeleted, options); // eslint-disable-line
 						await fs.unlink(image);
 					}
 
 					break;
 				case 'videoMessage':
 					{
-						const video = await downloadAndSaveMediaMessage(client.instance, extractMediaData, filename, 'videoMessage');
+						const video = await downloadAndSaveMediaMessage(client.instance, extractMediaData, filename, 'videoMessage'); // eslint-disable-line
 						const fileSize = getFilesize(video);
-						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, `\nSize : ${fileSize}`, quotedMessage);
+						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, `\nSize : ${fileSize}`, quotedMessage); // eslint-disable-line
 
-						await sendVideoMessageWithCaption(client.instance, from, video, stringDeleted, options);
+						await sendVideoMessageWithCaption(client.instance, from, video, stringDeleted, options); // eslint-disable-line
 						await fs.unlink(video);
 					}
 
 					break;
 				case 'audioMessage':
 					{
-						const audio = await downloadAndSaveMediaMessage(client.instance, extractMediaData, filename, 'audioMessage');
+						const audio = await downloadAndSaveMediaMessage(client.instance, extractMediaData, filename, 'audioMessage'); // eslint-disable-line
 						const fileSize = getFilesize(audio);
 						const audioType = extractMediaData.ptt ? 'Voice Note' : 'Audio File';
 						const mimeType = extractMediaData.mimetype;
-						const stringDeleted = buildAudioDeletedTextMessage(
+						const stringDeleted = /* eslint-disable-line */ buildAudioDeletedTextMessage(
 							pushname,
 							type,
 							timeStamp,
@@ -138,14 +144,14 @@ const deletedHandler = async (client, message, fetches, store) => {
 							quotedMessage
 						);
 
-						await sendAudioMessageWithCaption(client.instance, from, audio, stringDeleted, options);
+						await sendAudioMessageWithCaption(client.instance, from, audio, stringDeleted, options); // eslint-disable-line
 						await fs.unlink(audio);
 					}
 
 					break;
 				case 'contactMessage':
 					{
-						const stringDeleted = buildContactDeletedTextMessage(
+						const stringDeleted = /* eslint-disable-line */ buildContactDeletedTextMessage(
 							pushname,
 							type,
 							timeStamp,
@@ -153,7 +159,7 @@ const deletedHandler = async (client, message, fetches, store) => {
 							quotedMessage
 						);
 
-						await sendContactMessage(
+						/* eslint-disable-line */ await sendContactMessage(
 							client.instance,
 							from,
 							extractMediaData.displayName,
@@ -166,7 +172,7 @@ const deletedHandler = async (client, message, fetches, store) => {
 					break;
 				case 'contactsArrayMessage':
 					{
-						const stringDeleted = buildContactsArrayDeletedTextMessage(
+						const stringDeleted = /* eslint-disable-line */ buildContactsArrayDeletedTextMessage(
 							pushname,
 							type,
 							timeStamp,
@@ -174,7 +180,7 @@ const deletedHandler = async (client, message, fetches, store) => {
 							quotedMessage
 						);
 
-						await sendContactsArrayMessage(
+						/* eslint-disable-line */ await sendContactsArrayMessage(
 							client.instance,
 							from,
 							extractMediaData.displayName,
@@ -188,7 +194,7 @@ const deletedHandler = async (client, message, fetches, store) => {
 				case 'locationMessage':
 				case 'liveLocationMessage':
 					{
-						const stringDeleted = buildLocationDeletedTextMessage(
+						const stringDeleted = /* eslint-disable-line */ buildLocationDeletedTextMessage(
 							pushname,
 							type,
 							timeStamp,
@@ -197,7 +203,7 @@ const deletedHandler = async (client, message, fetches, store) => {
 							quotedMessage
 						);
 
-						await sendLocationMessage(
+						/* eslint-disable-line */ await sendLocationMessage(
 							client.instance,
 							from,
 							extractMediaData.degreesLatitude,
@@ -229,8 +235,8 @@ const buildQuotedMessage = (type, content) => {
 		case 'contactMessage':
 			return `Displayname : ${content.displayName || 'Unknown'}`;
 		case 'contactsArrayMessage':
-			const contacts = content.contacts || []; // eslint-disable-line
-			const contactNames = contacts.map((contact) => contact.displayName || 'Unknown').join('\n'); // eslint-disable-line
+			const contacts = content.contacts || [];
+			const contactNames = contacts.map((contact) => contact.displayName || 'Unknown').join('\n');
 
 			return `Total Contact : ${contacts.length || 0}\nList Name :\n${contactNames}`;
 		case 'imageMessage':

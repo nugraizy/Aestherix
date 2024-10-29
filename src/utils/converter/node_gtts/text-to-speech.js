@@ -20,7 +20,7 @@ export const textToSpeech = (text, language, filename) =>
 
 		try {
 			gtts = Text2Speech(language);
-		} catch (/** @type {{name: string, message: string}} */ e) {
+		} catch {
 			reject({ name: 'lang not found', message: LANGUAGES });
 			return;
 		}
@@ -90,7 +90,7 @@ export const gttsAI = (text, uuid) =>
 						factor: 1
 					}
 				);
-			} catch (error) {
+			} catch {
 				resolve({ error: 'Could not process the request. Try again later.' });
 			}
 

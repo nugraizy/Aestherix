@@ -72,7 +72,7 @@ Content : ${pinnedAction?.banner.contents.message.toString()}`,
 					}
 				}
 			} catch (error) {
-				console;
+				console.log(error);
 			}
 		});
 
@@ -81,8 +81,8 @@ Content : ${pinnedAction?.banner.contents.message.toString()}`,
 
 			try {
 				live.stop();
-			} catch {
-				console;
+			} catch (error) {
+				console.log(error);
 			}
 
 			lives.delete(from);
@@ -95,7 +95,7 @@ Content : ${pinnedAction?.banner.contents.message.toString()}`,
 				live.stop();
 				lives.delete(from);
 			} catch (error) {
-				console;
+				console.log(error);
 			}
 		});
 
@@ -182,7 +182,7 @@ Content : ${action.banner?.contents}`
 					);
 				}
 			} catch (error) {
-				console;
+				console.log(error);
 			}
 		});
 
@@ -199,7 +199,7 @@ Likes : ${metadata.likes?.default_text} 👍🏻`
 					{ groupMetadata }
 				);
 			} catch (error) {
-				console;
+				console.log(error);
 			}
 		});
 

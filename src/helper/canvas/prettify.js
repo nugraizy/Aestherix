@@ -4,7 +4,6 @@ import { parse } from 'parse5';
 import path from 'path';
 import prettier from 'prettier';
 import sharp from 'sharp';
-import dayjs from 'dayjs';
 import color from 'colorthief';
 import chroma from 'chroma-js';
 
@@ -23,12 +22,23 @@ export class Prettify {
 		this.Screenshot = this.ScreenshotNow;
 	}
 
-	CarbonNow(code, options) {
+	/**
+	 * Carbonise the code
+	 * @param {string} code
+	 * @param {{palette: 'dracula' | 'synthwave84', glow?: boolean}} options
+	 * @returns {Promise<{toBuffer: () => Buffer}>}
+	 */
+	async CarbonNow(code, options) {
 		return this.#screenshotNow(this.#carbonNow(code, options).toBuffer(), true);
 	}
 
-	ScreenshotNow(buffer, watermark) {
-		return this.#screenshotNow(buffer, false, watermark);
+	/**
+	 * Prettify the picture
+	 * @param {Buffer} buffer
+	 * @returns {Promise<{toBuffer: () => Buffer}>}
+	 */
+	async ScreenshotNow(buffer) {
+		return this.#screenshotNow(buffer, false);
 	}
 
 	get defaultCarbonOptions() {
@@ -38,19 +48,7 @@ export class Prettify {
 		};
 	}
 
-	async #screenshotNow(
-		buffer,
-		isCarbon,
-		watermark = 'Prettify Screenshot by Hidden Finder',
-		baseBorderThicknessPercentage = 0.1
-	) {
-		let time = dayjs().format('ddd DD.MMM.YYYY HH:mmA');
-
-		if (isCarbon) {
-			watermark = '';
-			time = '';
-		}
-
+	async #screenshotNow(buffer, isCarbon, baseBorderThicknessPercentage = 0.1) {
 		this.#buffer = buffer;
 
 		const { image, imageMetadata } = await this.#loadImage();
@@ -86,59 +84,48 @@ export class Prettify {
 
 			const [roundedCornerResizedImage, close, minimize, maximize] = await Promise.all([
 				loadImage(roundedCornerResized),
-				loadImage('./src/media/assets/close.png'),
-				loadImage('./src/media/assets/minimize.png'),
-				loadImage('./src/media/assets/maximize.png')
+				...((isCarbon && [
+					loadImage('./src/media/assets/close.png'),
+					loadImage('./src/media/assets/minimize.png'),
+					loadImage('./src/media/assets/maximize.png')
+				]) ||
+					[])
 			]);
 
 			tempCtx.drawImage(roundedCornerResizedImage, 0, 0, tempCanvas.width, tempCanvas.height);
 
-			const space = 10;
+			if (isCarbon) {
+				const space = 10;
 
-			tempCtx.drawImage(
-				close,
-				dWHMultiply(close.width),
-				dWHMultiply(close.height),
-				dWHSymbol(close.width),
-				dWHSymbol(close.height)
-			);
+				tempCtx.drawImage(
+					close,
+					dWHMultiply(close.width),
+					dWHMultiply(close.height),
+					dWHSymbol(close.width),
+					dWHSymbol(close.height)
+				);
 
-			tempCtx.drawImage(
-				minimize,
-				dWHSymbol(minimize.width) + dWHMultiply(minimize.width) + space,
-				dWHMultiply(minimize.height),
-				dWHSymbol(minimize.width),
-				dWHSymbol(minimize.height)
-			);
+				tempCtx.drawImage(
+					minimize,
+					dWHSymbol(minimize.width) + dWHMultiply(minimize.width) + space,
+					dWHMultiply(minimize.height),
+					dWHSymbol(minimize.width),
+					dWHSymbol(minimize.height)
+				);
 
-			tempCtx.drawImage(
-				maximize,
-				dWHSymbol(maximize.width) * 2 + dWHMultiply(maximize.width) + space * 2,
-				dWHMultiply(maximize.height),
-				dWHSymbol(maximize.width),
-				dWHSymbol(maximize.height)
-			);
+				tempCtx.drawImage(
+					maximize,
+					dWHSymbol(maximize.width) * 2 + dWHMultiply(maximize.width) + space * 2,
+					dWHMultiply(maximize.height),
+					dWHSymbol(maximize.width),
+					dWHSymbol(maximize.height)
+				);
+			}
 
 			let combinedImage = tempCanvas.toBuffer('image/png');
 
 			ctx.fillStyle = `rgb(${config.background._rgb._unclipped[0]}, ${config.background._rgb._unclipped[1]}, ${config.background._rgb._unclipped[2]})`;
 			ctx.fillRect(0, 0, config.widthCanvas, config.heightCanvas);
-
-			let textWidth;
-			let longestText;
-			let fontSize;
-
-			if (!isCarbon) {
-				ctx.fillStyle = '#fff';
-				ctx.font = '1px JetBrainsMono';
-
-				longestText = time.length > watermark.length ? time : watermark;
-				fontSize = canvas.width / 1.55 / ctx.measureText(longestText).width;
-
-				ctx.font = `${fontSize - 1}px JetBrainsMono`;
-
-				textWidth = ctx.measureText(watermark).width;
-			}
 
 			combinedImage = await loadImage(combinedImage);
 
@@ -152,18 +139,6 @@ export class Prettify {
 
 			const x = (config.widthCanvas - scaledWidth) / 2;
 			const y = (config.heightCanvas - scaledHeight) / 2;
-
-			if (!isCarbon) {
-				ctx.fillText(
-					watermark,
-					canvas.width / 2 - textWidth / 2,
-					canvas.height - (canvas.height - combinedImage.height) / 2.4
-				);
-
-				textWidth = ctx.measureText(time).width;
-
-				ctx.fillText(time, canvas.width / 2 - textWidth / 2, y / 1.8);
-			}
 
 			ctx.shadowBlur = 70;
 			ctx.shadowColor = 'black';
@@ -284,6 +259,7 @@ export class Prettify {
 		});
 
 		const padding = 600;
+
 		return maxWidth + padding;
 	}
 

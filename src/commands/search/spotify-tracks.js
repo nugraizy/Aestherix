@@ -42,9 +42,7 @@ export default {
 		query = removeDuplicatesArray(query.split(','));
 
 		for (const querie of query) {
-			const result = regex(querie)
-				? await spotifier.getTracks(extractId(querie)) /* eslint-disable-line */
-				: await spotifier.searchTracks(querie);
+			const result = regex(querie) ? await spotifier.getTracks(extractId(querie)) : await spotifier.searchTracks(querie);
 
 			if (!result.status) {
 				await client.instance.reply(result.message, { from, quoted: message, groupMetadata });

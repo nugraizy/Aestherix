@@ -90,7 +90,7 @@ if (cli.flags.help) {
 }
 
 if (cli.flags.noLoad) {
-	loggers.WRN(
+	loggers.warning(
 		'-v',
 		'This flag is ' + color('deprecated', '#FF5555') + '. The module load animation will be disabled by default.'
 	);
@@ -99,7 +99,7 @@ if (cli.flags.noLoad) {
 }
 
 if (cli.flags.json) {
-	loggers.WRN('-j', 'This flag is ' + color('deprecated', '#FF5555') + '. The JSON DB will be disabled by default.');
+	loggers.warning('-j', 'This flag is ' + color('deprecated', '#FF5555') + '. The JSON DB will be disabled by default.');
 	cli.flags.json = false;
 	cli.unnormalizedFlags.j = false;
 }

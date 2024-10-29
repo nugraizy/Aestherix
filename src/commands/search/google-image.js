@@ -13,7 +13,7 @@ export default {
 	cooldown: 5,
 	limit: 4,
 	status: 'disable',
-	run: async ({ query, message, from, type, args, groupMetadata }, client) => {
+	run: async ({ query, message, from, groupMetadata }, client) => {
 		if (!query) {
 			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
 		}

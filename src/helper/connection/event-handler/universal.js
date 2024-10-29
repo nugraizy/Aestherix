@@ -45,28 +45,34 @@ export const handleConnectionUpdate = async (
 			const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
 
 			if (reason === DisconnectReason.badSession) {
-				loggers.ERR(color('Bad session', 'white'), color('Please delete your previous session and do a rescan...', '#E4C1F9'));
+				loggers.error(
+					color('Bad session', 'white'),
+					color('Please delete your previous session and do a rescan...', '#E4C1F9')
+				);
 				process.exit(0);
 			} else if (reason === DisconnectReason.loggedOut) {
-				loggers.ERR(color('Logged out', 'white'), color('Please delete your previous session and do a rescan...', '#E4C1F9'));
+				loggers.error(
+					color('Logged out', 'white'),
+					color('Please delete your previous session and do a rescan...', '#E4C1F9')
+				);
 				process.exit(0);
 			} else {
 				if (reason === DisconnectReason.restartRequired) {
-					loggers.WRN(color('Restart required', 'white'), color('Restarting your WebScoket...', '#E4C1F9'));
+					loggers.warning(color('Restart required', 'white'), color('Restarting your WebScoket...', '#E4C1F9'));
 				} else if (reason === DisconnectReason.timedOut) {
-					loggers.WRN(color('Timed out', 'white'), color('Quick reconnecting...', '#E4C1F9'));
+					loggers.warning(color('Timed out', 'white'), color('Quick reconnecting...', '#E4C1F9'));
 					newStart();
 				} else if (reason === DisconnectReason.connectionClosed) {
-					loggers.WRN(color('Connection closed', 'white'), color('Quick reconnecting...', '#E4C1F9'));
+					loggers.warning(color('Connection closed', 'white'), color('Quick reconnecting...', '#E4C1F9'));
 					newStart();
 				} else if (reason === DisconnectReason.connectionReplaced) {
-					loggers.WRN(color('Connection replaced', 'white'), color('Quick reconnecting...', '#E4C1F9'));
+					loggers.warning(color('Connection replaced', 'white'), color('Quick reconnecting...', '#E4C1F9'));
 					newStart();
 				} else if (reason === DisconnectReason.connectionLost) {
-					loggers.WRN(color('Connection lost', 'white'), color('Quick reconnecting...', '#E4C1F9'));
+					loggers.warning(color('Connection lost', 'white'), color('Quick reconnecting...', '#E4C1F9'));
 					newStart();
 				} else {
-					loggers.WRN(color('Unknown reason', 'white'), color('Quick reconnecting...', '#E4C1F9'));
+					loggers.warning(color('Unknown reason', 'white'), color('Quick reconnecting...', '#E4C1F9'));
 					newStart();
 				}
 
@@ -106,7 +112,7 @@ export const handleConnectionUpdate = async (
 
 				if (shouldPrintBanner) {
 					printBanner();
-					loggers.INF(color('Socket connected', 'white'), color('Successfully', '#E4C1F9') + color('.', 'white'));
+					loggers.info(color('Socket connected', 'white'), color('Successfully', '#E4C1F9') + color('.', 'white'));
 					shouldPrintBanner = false;
 				}
 
@@ -116,7 +122,7 @@ export const handleConnectionUpdate = async (
 				let capt = '';
 
 				if (timeToConnect < data.best_time) {
-					loggers.INF(
+					loggers.info(
 						color('Connection time', 'white'),
 						color(`${timeToConnect / 1000}s`, '#E4C1F9'),
 						color('is the best time', 'white'),
@@ -129,7 +135,7 @@ export const handleConnectionUpdate = async (
 
 					capt += `New Best!\nConnection time ${timeToConnect / 1000}s is the best time (${data.best_time / 1000}s)`;
 				} else {
-					loggers.INF(
+					loggers.info(
 						color('Connection time', 'white'),
 						color(`${timeToConnect / 1000}s`, '#E4C1F9'),
 						color('is not the best time', 'white'),
@@ -158,6 +164,7 @@ export const handleConnectionUpdate = async (
 							process.exit(0);
 						}
 
+						// eslint-disable-next-line
 						handleUpsertUpdate(
 							store,
 							{

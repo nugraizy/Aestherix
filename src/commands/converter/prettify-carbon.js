@@ -19,7 +19,7 @@ export default {
 			return client.instance.reply('Please provide a Codes.', { from, quoted: message, groupMetadata });
 		}
 
-		loggers.WRN(`${color('Carboning Codes', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.warning(`${color('Carboning Codes', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
 
 		const carbon = await new Prettify().Carbon(query, { theme: 'dracula' });
 
@@ -27,13 +27,13 @@ export default {
 
 		if ('error' in buffer) {
 			client.instance.reply(buffer.error, { from, quoted: message, groupMetadata });
-			loggers.ERR(`${color('Failed to Carboning a Codes', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.error(`${color('Failed to Carboning a Codes', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 			return;
 		}
 
 		await client.instance.send(from, { image: Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
 		buffer = null;
 
-		loggers.INF(`${color('Carboning Codes Success', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Carboning Codes Success', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

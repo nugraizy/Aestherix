@@ -46,7 +46,7 @@ export default {
 
 			const post = await fbDl(url.trim());
 
-			loggers.WRN(`${color('Downloading Facebook Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.warning(`${color('Downloading Facebook Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			if ('error' in post) {
 				await client.instance.reply(`Failed while downloading Facebook post\n\n${post.error}\n${url}`, {
@@ -54,7 +54,7 @@ export default {
 					quoted: message,
 					groupMetadata
 				});
-				loggers.ERR(`${color('Failed to Download Facebook Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Download Facebook Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 				continue;
 			}
@@ -72,6 +72,6 @@ export default {
 			await delay(300);
 		}
 
-		loggers.INF(`${color('Downloaded Facebook Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Downloaded Facebook Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

@@ -46,7 +46,7 @@ export default {
 			});
 		}
 
-		loggers.WRN(`${color('Enhancing image', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.warning(`${color('Enhancing image', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
 
 		const parsed = parser(query.toLowerCase(), {
 			configuration: {
@@ -81,6 +81,6 @@ export default {
 			client.instance.send(from, { image: enhance }, { groupMetadata, quoted: message });
 		}
 
-		loggers.INF(`${color('Media is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Media is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

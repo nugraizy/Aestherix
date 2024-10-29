@@ -110,7 +110,7 @@ export default {
 			);
 		}
 
-		loggers.INF(
+		loggers.info(
 			`${color(`${parsed.isStickers ? 'Sticker' : 'Image'} is sent`, '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`
 		);
 	}

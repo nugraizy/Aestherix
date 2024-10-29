@@ -3,7 +3,6 @@ import asyncRetry from 'async-retry';
 import { fetch } from 'undici';
 import crypto from 'crypto';
 import { v4 } from 'uuid';
-import fs from 'fs-extra';
 
 import { cheerioLOAD, randomChar, isURL } from '../modules/index.js';
 import { COOKIE } from './cookie.js';
@@ -79,7 +78,7 @@ class ResponseParser {
 		};
 
 		bioLink?.link
-			? (container.urls.externalUrls /* eslint-disable-line */ = {
+			? (container.urls.externalUrls = {
 					url: bioLink.link
 			  }) // eslint-disable-line
 			: null;

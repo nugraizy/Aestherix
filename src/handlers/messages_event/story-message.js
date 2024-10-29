@@ -47,7 +47,7 @@ const handler = async (client, message) => {
 		await client.instance.relayMessage(meJid, messages.message, { messageId: messages.key.id });
 	}
 
-	loggers.WRN(
+	loggers.warning(
 		`${color(message.pushname, 'white')} ${SEPERATOR} ${color(message.prettyNumber, '#BD93F9')} ${color(
 			'on',
 			'#BDE0FE'

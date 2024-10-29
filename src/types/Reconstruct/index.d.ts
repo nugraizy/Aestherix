@@ -1,8 +1,7 @@
 import type { GroupMetadata, GroupParticipant } from '../Groups/index';
 import type { MessageGenerated, WAGenericMediaMessage } from '../Messages/index';
 import type { AdvancedClient, MediaDataContext, Store } from '../Socket';
-
-export {};
+import type { MessageType } from '@adiwajshing/baileys';
 
 interface GroupMetadataParsed {
 	ownerGroup: string;
@@ -34,7 +33,7 @@ export interface ReassignResult {
 	ownerNumbers: string[];
 	isOwner: boolean;
 	settings: any;
-	type: string;
+	type: MessageType;
 	typeQuoted: string | undefined;
 	typeSticker: TypeSticker;
 	stickerAble: boolean;

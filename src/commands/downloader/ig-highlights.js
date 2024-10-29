@@ -25,7 +25,7 @@ export default {
 
 		const highlights = await instagram.search.highlight(input);
 
-		loggers.WRN(`${color('Downloading Instagram highlights', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.warning(`${color('Downloading Instagram highlights', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const data in highlights) {
 			if ('error' in highlights[data]) {
@@ -34,7 +34,7 @@ export default {
 					quoted: message,
 					groupMetadata
 				});
-				loggers.ERR(`${color('Failed to Download Instagram highlights', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Download Instagram highlights', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
 			}
 
@@ -46,6 +46,7 @@ export default {
 			capt += `Following : ${numberWithCommas(highlights[data].user.following)}\n`;
 			capt += highlights[data].user.biography === '' ? '' : `Biography : ${highlights[data].user.biography}\n`;
 			capt += `Tot. Highlights : ${numberWithCommas(highlights[data].highlights.length)}\n\n`;
+
 			if (!isURL(input)) {
 				capt += 'Each Sections of the Higlights will be send 2 media.\n';
 				capt += `Tot. Sections : ${highlights[data].highlights.length}\n`;
@@ -58,6 +59,7 @@ export default {
 
 			if (highlights[data].highlights.length === 1) {
 				const highlight = highlights[data].highlights[0].dataHighlight.slice(0, 2);
+
 				for (const media of highlight) {
 					await client.instance.send(
 						from,
@@ -87,6 +89,6 @@ export default {
 			}
 		}
 
-		loggers.INF(`${color('Downloaded Instagram highlights', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Downloaded Instagram highlights', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

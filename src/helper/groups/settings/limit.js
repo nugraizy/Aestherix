@@ -187,7 +187,7 @@ export const runLimitScheduler = (OPTIONS, clearDBConnection, cli) => {
 			await Limit.resetAllLimit();
 			await Limit.updateLimitFromCache();
 
-			loggers.WRN(`${color('Successfully reset all limit usage.', 'white')}`);
+			loggers.warning(`${color('Successfully reset all limit usage.', 'white')}`);
 
 			if (OPTIONS.resetOnStart) {
 				await clearDBConnection(cli);

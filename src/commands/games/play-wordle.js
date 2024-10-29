@@ -31,7 +31,7 @@ export default {
 				return await client.instance.reply('You are already playing Wordle.', { from, quoted: message, groupMetadata });
 			}
 
-			loggers.WRN(
+			loggers.warning(
 				`${color('Wordle Game Answer : ', '#FF99C8')} ${color(wordle.word, 'white')} to ${color(prettyNumber, '#E4C1F9')}`
 			);
 

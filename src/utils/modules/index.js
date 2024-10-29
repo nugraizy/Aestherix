@@ -567,9 +567,9 @@ const loggersFns = (type, hexColor, ...info) => {
 };
 
 export const loggers = {
-	WRN: (...info) => loggersFns('WRN', '#F1FA8C', ...info),
-	INF: (...info) => loggersFns('INF', '#50FA7B', ...info),
-	ERR: (...info) => loggersFns('ERR', '#FF5555', ...info)
+	warning: (...info) => loggersFns('WRN', '#F1FA8C', ...info),
+	info: (...info) => loggersFns('INF', '#50FA7B', ...info),
+	error: (...info) => loggersFns('ERR', '#FF5555', ...info)
 };
 
 const BANNER_ICON_1 = color('❝', '#FF5555');

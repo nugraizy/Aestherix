@@ -41,7 +41,7 @@ export const startTG = async (client, id, { message, sender, groupMetadata }, re
 		.add(remainingTime + 2, 's')
 		.valueOf();
 
-	loggers.INF(`${color(`The Answer is : ${answer.trim()}`, '#FF99C8')}`);
+	loggers.info(`${color(`The Answer is : ${answer.trim()}`, '#FF99C8')}`);
 	setIntervals(
 		configuration.intervals.tebakGambar,
 		id,

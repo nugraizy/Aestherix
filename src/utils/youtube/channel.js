@@ -80,7 +80,7 @@ export const youtubeChannel = async (query) =>
 					height: bannerHeight
 				}
 			});
-		} catch (e) {
+		} catch {
 			resolve({
 				error: 'Channel not found.'
 			});

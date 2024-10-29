@@ -83,7 +83,7 @@ export const cropImage = async (imgData, type = 'SINGLE') => {
 
 	try {
 		lib = await getImageProcessingLibrary();
-	} catch (error) {
+	} catch {
 		throw new Error('No image processing library available, please install jimp or sharp as a dependency');
 	}
 

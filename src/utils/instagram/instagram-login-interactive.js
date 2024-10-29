@@ -1,6 +1,7 @@
 import { input, password } from '@inquirer/prompts';
 import _toggle from 'inquirer-toggle';
 import { login } from './login.js';
+
 const { default: toggle } = _toggle;
 
 const loadFromEnv = async () => {
@@ -12,11 +13,13 @@ const loadFromEnv = async () => {
 			inactive: 'yes'
 		}
 	});
+
 	if (!yesOrNo) {
 		await import('dotenv/config.js');
 		console.log('Credentials loaded from .env.');
 		return true;
 	}
+
 	return false;
 };
 
@@ -30,10 +33,13 @@ const catchError = async (e) => {
 
 const askForInput = async (message, promptFunc, mask) => {
 	let input = await promptFunc({ message, mask }).catch(catchError);
+
 	input = input.replace(/\s*/g, '');
+
 	if (!input) {
 		return await askForInput(message, promptFunc);
 	}
+
 	return input;
 };
 
@@ -42,10 +48,14 @@ const askUsername = async () => await askForInput('Please type your username:', 
 const askPassword = async () => await askForInput('Please type your password:', password, true);
 
 const maskPassword = (password) => {
-	if (password.length <= 2) return password;
+	if (password.length <= 2) {
+		return password;
+	}
+
 	const firstChar = password[0];
 	const lastChar = password[password.length - 1];
 	const maskedMiddle = '*'.repeat(password.length - 2);
+
 	return `${firstChar}${maskedMiddle}${lastChar}`;
 };
 
@@ -67,7 +77,7 @@ const askConfirmation = async () => {
 		const isNotConfirmed = await askConfirmationForBoth(usernames, passwords);
 
 		if (isNotConfirmed) {
-			console.log("Let's try again.");
+			console.log("Let's try again."); // eslint-disable-line
 			continue;
 		}
 
@@ -105,11 +115,13 @@ const main = async () => {
 			await login(newUsername, newPassword);
 		} else {
 			const { passwords } = await askConfirmation();
+
 			console.log('Trying to login. Please wait.');
 			await login(username, passwords);
 		}
 	} else {
 		const { passwords, usernames } = await askConfirmation();
+
 		console.log('Trying to login. Please wait.');
 		await login(usernames, passwords);
 	}

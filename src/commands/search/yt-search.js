@@ -1,6 +1,7 @@
 import { youtube } from '../../utils/index.js';
 import { numberWithCommas } from '../../utils/modules/index.js';
 
+/* eslint-disable-next-line */
 const boxen = (text) => {
 	const texts = text.split('\n');
 	let box = `╭───╌┄ ${texts[0]} ┄┄╌────\n`;

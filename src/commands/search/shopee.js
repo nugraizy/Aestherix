@@ -44,7 +44,7 @@ export default {
 				likes,
 				ratings,
 				location,
-				productURL,
+				productURL, // eslint-disable-line
 				imageURL
 			} of items) {
 				await client.instance.send(

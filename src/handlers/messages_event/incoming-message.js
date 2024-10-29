@@ -30,32 +30,47 @@ const HANDLER_PATH = {
 	AI: './character-ai.js'
 };
 
+/**
+ *
+ * @param {import('../../types/Reconstruct').ReassignResult} message
+ */
 const logMessage = (message) => {
-	const senderInfo = `${color(message.pushname, 'white')} ${SEPERATOR} ${color(message.prettyNumber, '#BD93F9')}`;
+	const senderInfo = `${color(message.pushname, '#F1FA8C')} ${color(message.prettyNumber, '#BD93F9')}`;
 	const messageBody = color(message.query?.replace(/[\t\n]/g, ' ').substring(0, 35), 'white');
-	const typeInfo = `${SEPERATOR} ${color('type', '#BD93F9')} ${color(message.type, 'white')}`;
+	const typeInfo = `${SEPERATOR} ${color('type', '#f5bde6')} ${color(message.type, '#81c8be')}`;
 	const runtimeInfo = `${SEPERATOR} ${color(((Date.now() - runtime) / 1000).toFixed(0), '#F1FA8C')}${color('s', '#f5e700')}`;
+	const messageFrom = `${SEPERATOR} ${color('in', '#f5bde6')} ${color(
+		message.isGroup ? `group ${message.groupName}` : 'private chat',
+		'#81c8be'
+	)}${(message.isGroup && color('id', '#f5bde6') + color(message.groupId, '#74c7ec')) || ''}`;
 
 	let fullBody = null;
 
-	if (message.isCmd && message.isEval) {
-		fullBody = `${color(message.cmd, '#BD93F9')} ${messageBody}`;
-	} else if (message.isCmd && !message.isEval) {
-		fullBody = `${color(message.prefix, '#BD93F9')}${color(message.cmd, '#BDE0FE')} ${messageBody}`;
+	if (message.isCmd) {
+		fullBody = message.isEval
+			? `${color('eval', '#8caaee')} ${messageBody}`
+			: `${color('command', '#ea999c')} ${color(message.prefix, '#BD93F9')}${color(message.cmd, '#BDE0FE')} ${messageBody}`;
 	} else {
-		fullBody = color(message.body?.substring(0, 20).replace(/[\t\n]/g, ' '), 'white');
+		const isPossiblyCaption = [
+			'audioMessage',
+			'documentWithCaptionMessage',
+			'imageMessage',
+			'videoMessage',
+			'liveLocationMessage'
+		].includes(message.type);
+
+		fullBody = `${color(isPossiblyCaption && message.body !== 'No Caption' ? 'caption' : 'message', '#a6da95')} ${color(
+			message.body?.substring(0, 20).replace(/[\t\n]/g, ' '),
+			'white'
+		)}`;
 	}
 
-	loggers.INF(`${senderInfo} ${SEPERATOR}`, fullBody, typeInfo, runtimeInfo);
+	loggers.info(`${senderInfo} ${SEPERATOR}`, fullBody, typeInfo, messageFrom, runtimeInfo);
 };
 
-const handleStubMessage = async (client, message, store) => {
-	await handler.get('STUBTYPE')(client, message.messages[0], store);
-};
+const handleStubMessage = async (client, message, store) => handler.get('STUBTYPE')(client, message.messages[0], store);
 
-const handleStoryMessage = async (client, message) => {
-	await handler.get('STORY')(client, message);
-};
+const handleStoryMessage = async (client, message) => handler.get('STORY')(client, message);
 
 const handleOfflineMessage = async (client, message, cmds) => {
 	if (STATS_OFFLINE) {
@@ -76,12 +91,12 @@ const handleOfflineMessage = async (client, message, cmds) => {
 };
 
 const handleMentionedAfkUsers = (message, client) => {
-	let caption = 'You are Tagging People That Are AFK.'.formatHeaders() + '\n\n';
-	const container = [];
-
 	if (message.message.key.fromMe) {
 		return;
 	}
+
+	let caption = 'You are Tagging People That Are AFK.'.formatHeaders() + '\n\n';
+	const container = [];
 
 	for (const mention of message.mention) {
 		if (checkAfk(mention, message.from)) {
@@ -102,9 +117,7 @@ const handleMentionedAfkUsers = (message, client) => {
 	}
 };
 
-const handleAIMessage = async (message, client) => {
-	await handler.get('AI')(message, client);
-};
+const handleAIMessage = async (message, client) => handler.get('AI')(message, client);
 
 /**
  *
@@ -154,7 +167,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 				break check;
 			}
 
-			const tempCmd = message.isEval ? message.cmd.slice(1).trim().toLowerCase() : message.cmd.slice(1).trim().toLowerCase();
+			const tempCmd = message.cmd.slice(1).trim().toLowerCase();
 			const cmdMatch = findBestMatch(tempCmd, cmds.commands.keys());
 
 			if (cmdMatch.bestMatch.rating >= 0.6) {
@@ -195,7 +208,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 		}
 
 		if (!Tempcmds) {
-			await handleGames(message, client);
+			await handleGames(message, client); // eslint-disable-line
 		}
 
 		if (Tempcmds && !message.isOwner) {
@@ -364,7 +377,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 						Tempcmds.cooldown
 					}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v}`).join(', ')}.`;
 
-					client.instance.reply(help, {
+					await client.instance.reply(help, {
 						groupMetadata: message.groupMetadata,
 						from: message.from,
 						quoted: message.message
@@ -426,7 +439,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 
 				await client.instance.relayMessage(message.from, messageBuilt.message, { messageId: messageBuilt.key.id });
 
-				loggers.ERR(color(err.message, 'white'));
+				loggers.error(color(err.message, 'white'));
 				const parseErr = (
 					err.stack
 						?.split(err.name + ': ')[1]
@@ -448,7 +461,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 					})
 					.join(`${color('❯ ', '#6272A4') + color('at ', '#BD93F9')}`);
 
-				parseErr && loggers.ERR(parseErr);
+				parseErr && loggers.error(parseErr);
 			}
 		}
 	}

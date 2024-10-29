@@ -114,6 +114,6 @@ export default {
 			await client.instance.send(from, { sticker }, { groupMetadata, quoted: message });
 		}
 
-		loggers.INF(`${color('Sticker is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Sticker is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

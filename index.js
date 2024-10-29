@@ -14,7 +14,7 @@ global.__dirname = __dirname;
 await import('./src/helper/connection/utils/check-flag.js');
 
 if (!(await isInternetAvailable())) {
-	console.error('Internet connection is not available.\n Make sure to connect to the internet and try again.');
+	console.error('Internet connection is not available.\nMake sure to connect to the internet and try again.');
 	process.exit(1);
 }
 

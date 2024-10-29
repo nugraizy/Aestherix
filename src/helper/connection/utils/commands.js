@@ -18,7 +18,7 @@ const loadCommand = async (command, OPTIONS) => {
 				absolutePath: file,
 				path: normalize
 			});
-			loggers.ERR(
+			loggers.error(
 				color(command, '#BD93F9'),
 				color(
 					OPTIONS.watch
@@ -32,7 +32,7 @@ const loadCommand = async (command, OPTIONS) => {
 		}
 
 		if (configuration.cmds.commands.has(module.default.name)) {
-			loggers.ERR(
+			loggers.error(
 				color(command, '#BD93F9'),
 				color('Has the same command name as the', 'white'),
 				color(configuration.cmds.commands.get(module.default.name).path.split('/').slice(-2).join('/'), '#BD93F9')
@@ -50,12 +50,13 @@ const loadCommand = async (command, OPTIONS) => {
 		configuration.cmds.aliases.push(...(check?.aliases || []));
 
 		const duration = Date.now() - start;
-		loggers.INF(color('Loaded', 'white'), color(command, '#BD93F9'), color('in', 'white'), color(duration + 'ms', '#F1FA8C'));
+
+		loggers.info(color('Loaded', 'white'), color(command, '#BD93F9'), color('in', 'white'), color(duration + 'ms', '#F1FA8C'));
 
 		return path.dirname(command);
 	} catch (error) {
 		if (error instanceof ModuleError) {
-			loggers.WRN(color(command, '#BD93F9'), error.info);
+			loggers.warning(color(command, '#BD93F9'), error.info);
 			configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
 				absolutePath: file,
 				path: normalize
@@ -63,7 +64,7 @@ const loadCommand = async (command, OPTIONS) => {
 			return;
 		}
 
-		loggers.ERR(color(command, '#BD93F9'), error.message);
+		loggers.error(color(command, '#BD93F9'), error.message);
 		validatePlugins(command, OPTIONS.watch);
 
 		configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
@@ -75,12 +76,21 @@ const loadCommand = async (command, OPTIONS) => {
 	}
 };
 
-const dontInclude = (file) => !(file.includes('template') || file.includes('d.ts'));
+const folderToLoad = './src/commands';
+const filesToExclude = ['template', 'd.ts'];
+const filesToInclude = ['menu', 'ping'];
+
+const exclude = (file) => !filesToExclude.some((value) => file.includes(value));
+const include = (file) => filesToInclude.some((value) => file.includes(value));
 
 export const loadCommands = async (OPTIONS) => {
 	return new Promise(async (resolve) => {
 		const folders = new Set();
-		const commands = loadFiles('./src/commands').filter(dontInclude);
+		let commands = loadFiles(folderToLoad).filter(exclude);
+
+		if (configuration.OPTIONS.test) {
+			commands = commands.filter(include);
+		}
 
 		for await (const command of commands) {
 			const folder = await loadCommand(command, OPTIONS);
@@ -91,9 +101,9 @@ export const loadCommands = async (OPTIONS) => {
 		}
 
 		if (OPTIONS.watch) {
-			await watch('./src/commands/**/*.js', {
+			await watch(commands, {
 				alwaysStat: false,
-				ignored: (path) => path.includes('template.example.js')
+				ignored: (path) => include(path)
 			});
 		}
 

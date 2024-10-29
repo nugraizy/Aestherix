@@ -11,7 +11,6 @@ const MEDIA_TYPE = {
 		'contactMessage',
 		'contactsArrayMessage',
 		'listMessage',
-		'liveLocationMessage',
 		'groupInviteMessage',
 		'locationMessage',
 		'orderMessage',
@@ -19,7 +18,7 @@ const MEDIA_TYPE = {
 		'templateMessage',
 		'pollUpdateMessage'
 	],
-	_c: ['imageMessage', 'videoMessage', 'documentWithCaptionMessage'],
+	_c: ['imageMessage', 'videoMessage', 'documentWithCaptionMessage', 'liveLocationMessage'],
 	_d: [
 		'stickerMessage',
 		'audioMessage',

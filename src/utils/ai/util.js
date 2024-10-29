@@ -17,15 +17,8 @@ export const ROLES = (data) => [
 	'Jika ditanyakan tentang hal yang memalukan, jawablah dengan malu sembari menggigit bibir'
 ];
 
-export const generateGPTToken = () => {
-	const user = 'admin';
-	const secret = 'vulcan@v4-chatgpt';
-	const timeExp = 30;
-
-	const token = genToken(secret, user, timeExp);
-
-	return token;
-};
+const base64UrlEncode = (input) =>
+	Buffer.from(input).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
 const genToken = (secret, token, exp) => {
 	const headers = {
@@ -50,7 +43,14 @@ const genToken = (secret, token, exp) => {
 	return resultToken;
 };
 
-const base64UrlEncode = (input) =>
-	Buffer.from(input).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+export const generateGPTToken = () => {
+	const user = 'admin';
+	const secret = 'vulcan@v4-chatgpt';
+	const timeExp = 30;
+
+	const token = genToken(secret, user, timeExp);
+
+	return token;
+};
 
 export const generateDeviceID = () => (Math.random() * 1e24).toString(36).toUpperCase();

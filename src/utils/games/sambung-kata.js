@@ -44,13 +44,9 @@ const GAME_STATUS = {
 	WAITING: 'waiting'
 };
 
-const RegexEndWord = (arr) => {
-	return arr.filter((v) => /([aiueo])/.test(v.slice(-1)));
-};
+const RegexEndWord = (arr) => arr.filter((v) => /([aiueo])/.test(v.slice(-1)));
 
-export const getSambungkataSession = (group) => {
-	return configuration.games.word.get(group);
-};
+export const getSambungkataSession = (group) => configuration.games.word.get(group);
 
 export class SambungKata {
 	constructor(player1, player2, group) {
@@ -110,7 +106,7 @@ export class SambungKata {
 			(clients = client, group = this.group, remaining = remainings) => {
 				const data = configuration.intervals.word.get(group);
 
-				if (data === undefined) {
+				if (!data) {
 					return;
 				}
 
@@ -155,16 +151,9 @@ export class SambungKata {
 	}
 
 	async randomWord() {
-		try {
-			const WORDS = await fetchJSON(URL_RANDOM_WORD);
-			const RANDOM_WORD = randomize(RegexEndWord(WORDS));
+		const MAX_ATTEMPTS = 3;
 
-			this.words = RANDOM_WORD;
-			this.clue = this.random(RANDOM_WORD);
-			this.guessed.push(RANDOM_WORD);
-			this.turn = randomize([this.player1, this.player2]);
-			return { value: RANDOM_WORD, clue: this.clue.trim() };
-		} catch (err) {
+		for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
 			try {
 				const WORDS = await fetchJSON(URL_RANDOM_WORD);
 				const RANDOM_WORD = randomize(RegexEndWord(WORDS));
@@ -173,16 +162,12 @@ export class SambungKata {
 				this.clue = this.random(RANDOM_WORD);
 				this.guessed.push(RANDOM_WORD);
 				this.turn = randomize([this.player1, this.player2]);
-				return { value: RANDOM_WORD, clue: this.clue.trim() };
-			} catch (err) {
-				const WORDS = await fetchJSON(URL_RANDOM_WORD);
-				const RANDOM_WORD = randomize(RegexEndWord(WORDS));
 
-				this.words = RANDOM_WORD;
-				this.clue = this.random(RANDOM_WORD);
-				this.guessed.push(RANDOM_WORD);
-				this.turn = randomize([this.player1, this.player2]);
 				return { value: RANDOM_WORD, clue: this.clue.trim() };
+			} catch {
+				if (attempt === MAX_ATTEMPTS) {
+					throw new Error('Failed to retrieve a random word after multiple attempts.');
+				}
 			}
 		}
 	}

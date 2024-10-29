@@ -48,7 +48,7 @@ export default {
 			});
 		}
 
-		loggers.WRN(`${color('Removing Background image', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.warning(`${color('Removing Background image', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
 
 		const parsed = parser(query.toLowerCase(), {
 			configuration: {

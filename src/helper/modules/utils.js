@@ -700,7 +700,7 @@ export const assign = (client) => {
 		prepareSticker: async (media, filename, type, exif) => {
 			const isMediaURL = Buffer.isBuffer(media) ? false : isURL(media) ? true : false;
 
-			media = isMediaURL ? Buffer.from(await (await fetch(media)).arrayBuffer(), 'base64') /* eslint-disable-line */ : media;
+			media = isMediaURL ? Buffer.from(await (await fetch(media)).arrayBuffer(), 'base64') : media;
 
 			const bufferType =
 				type === 'imageMessage'
@@ -1087,7 +1087,6 @@ export const assign = (client) => {
 		 */
 		getStoryParticipants: async (client) => {
 			const node = await getStoryParticipantsNode(client);
-			/* eslint-disable-next-line */
 			const mode = node.content[0].content.find((v) => v.attrs?.default === 'true').attrs.type;
 
 			let jids = fs

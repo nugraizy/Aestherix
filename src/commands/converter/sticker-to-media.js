@@ -42,6 +42,6 @@ export default {
 			{ groupMetadata, quoted: message }
 		);
 
-		loggers.INF(`${color('Media is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Media is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

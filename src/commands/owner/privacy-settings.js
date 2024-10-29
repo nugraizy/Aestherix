@@ -132,7 +132,7 @@ export default {
 				quoted: message,
 				groupMetadata
 			});
-		} catch (error) {
+		} catch {
 			await client.instance.reply('An error occured while trying to change privacy settings.', {
 				from,
 				quoted: message,

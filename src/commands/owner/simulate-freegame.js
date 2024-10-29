@@ -20,7 +20,7 @@ async function updateGames() {
 				process.env.MQTT_FREEGAME,
 				JSON.stringify({ data, from: configuration.intervals.from, status: true })
 			);
-		} catch (error) {
+		} catch {
 			clearInterval(configuration.intervals.freegame);
 			delete configuration.intervals.freegame;
 		}

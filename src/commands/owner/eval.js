@@ -16,15 +16,15 @@ import * as d from '../../index.js';
 
 const func = { ...a, ...b, ...c, ...d, ...configuration }; /* eslint-disable-line */
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
-const col = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g; /* eslint-disable-line */
+const col = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
 
 class CustomArray extends Array {
 	constructor(...args) {
-		return typeof args[0] === 'number' ? super(Math.min(args[0], 10_000)) : super(...args); /* eslint-disable-line */
+		return typeof args[0] === 'number' ? super(Math.min(args[0], 10_000)) : super(...args); 
 	}
 }
 
-/* eslint-disable-line */ const print = ({ from, quoted, groupMetadata }, ...args) =>
+const print = ({ from, quoted, groupMetadata }, ...args) =>
 	client.instance.reply(format(...args), { from, quoted, groupMetadata });
 
 /**

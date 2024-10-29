@@ -60,6 +60,145 @@ const getLastDateOfMonth = (year, month) => {
 	return lastDate.getDate();
 };
 
+class API {
+	constructor(username, theme) {
+		this.username = username;
+		this.theme = theme.GRAPH;
+		this.dates = null;
+		this.client = new Client('https://api.github.com');
+
+		this.fetchDates = async () => {
+			if (this.dates) {
+				return this.dates;
+			}
+
+			const { body: $body1 } = await this.client.request({
+				method: 'POST',
+				path: '/graphql',
+				headers: {
+					'Content-Type': 'application/json',
+					'User-Agent': 'nugraizy',
+					Authorization: `Bearer ${process.env.GITHUB_AUTH_TOKEN}`
+				},
+				body: JSON.stringify({
+					query: graphQl(username, { type: 'YEARLY' })
+				})
+			});
+
+			const json = await $body1.json();
+
+			const started = new Date(json.data.user.createdAt).getFullYear();
+
+			const dates = {
+				started,
+				dates: new Array(new Date().getFullYear() - started + 1).fill(0).map((_, i) => {
+					const date = new Date(Date.UTC(started + i));
+
+					date.setMonth(0);
+					date.setDate(1);
+
+					return {
+						dates: date.toISOString(),
+						year: date.getFullYear()
+					};
+				})
+			};
+
+			this.dates = dates;
+
+			return dates;
+		};
+
+		this.parseDays = (data, theme) => {
+			const firstWeekOfFirstMonth = data.weeks[0].contributionDays.length;
+			const lastWeekOfLastMonth = data.weeks[data.weeks.length - 1].contributionDays.length;
+
+			const container = {
+				year: null,
+				month: data.months.length,
+				totContributionsInYear: data.totalContributions,
+				firstWeekOfFirstMonth,
+				lastWeekOfLastMonth,
+				days: [...Array(7 - firstWeekOfFirstMonth).fill(undefined)]
+			};
+
+			data.weeks.forEach((item) => {
+				const { contributionDays } = item;
+
+				contributionDays.forEach((item2) => {
+					const [year, month, day] = item2.date.split('-');
+					const level =
+						item2.contributionLevel === 'NONE'
+							? 0
+							: item2.contributionLevel === 'FIRST_QUARTILE'
+							? 1
+							: item2.contributionLevel === 'SECOND_QUARTILE'
+							? 2
+							: item2.contributionLevel === 'THIRD_QUARTILE'
+							? 3
+							: item2.contributionLevel === 'FOURTH_QUARTILE'
+							? 4
+							: 5;
+
+					container.year = year;
+
+					container.days.push({
+						day,
+						month,
+						color: theme[level],
+						level,
+						totalContri: item2.contributionCount
+					});
+				});
+			});
+
+			container.days.push(...Array(7 - lastWeekOfLastMonth).fill(undefined));
+
+			return container;
+		};
+
+		this.getTotalContribution = async () => {
+			const container = [];
+
+			const $data1 = await this.fetchDates();
+
+			for (let i = 0; i < $data1.dates.length; i++) {
+				const date = new Date($data1.dates[i].dates);
+
+				date.setMonth(0);
+				date.setDate(1);
+
+				const to = new Date(Date.UTC(date.getFullYear(), 11));
+
+				to.setDate(getLastDateOfMonth(date.getFullYear(), 12));
+
+				const { body: $body2 } = await this.client.request({
+					method: 'POST',
+					path: '/graphql',
+					headers: {
+						'Content-Type': 'application/json',
+						'User-Agent': 'nugraizy',
+						Authorization: `Bearer ${process.env.GITHUB_AUTH_TOKEN}`
+					},
+					body: JSON.stringify({
+						query: graphQl(username, {
+							type: 'CONTRIBUTIONS',
+							from: date.toISOString(),
+							to: to.toISOString()
+						})
+					})
+				});
+
+				const { data: $data2 } = await $body2.json();
+
+				container.push(this.parseDays($data2.user?.contributionsCollection?.contributionCalendar, this.theme));
+			}
+
+			return container;
+		};
+	}
+}
+
 export class GitHubGraph {
 	/**
 	 * @private
@@ -406,144 +545,5 @@ export class GitHubGraph {
 	_toBuffer() {
 		delete this._toBuffer;
 		return this.#_canvas.toBuffer('image/png');
-	}
-}
-
-class API {
-	constructor(username, theme) {
-		this.username = username;
-		this.theme = theme.GRAPH;
-		this.dates = null;
-		this.client = new Client('https://api.github.com');
-
-		this.fetchDates = async () => {
-			if (this.dates) {
-				return this.dates;
-			}
-
-			const { body: $body1 } = await this.client.request({
-				method: 'POST',
-				path: '/graphql',
-				headers: {
-					'Content-Type': 'application/json',
-					'User-Agent': 'nugraizy',
-					Authorization: `Bearer ${process.env.GITHUB_AUTH_TOKEN}`
-				},
-				body: JSON.stringify({
-					query: graphQl(username, { type: 'YEARLY' })
-				})
-			});
-
-			const json = await $body1.json();
-
-			const started = new Date(json.data.user.createdAt).getFullYear();
-
-			const dates = {
-				started,
-				dates: new Array(new Date().getFullYear() - started + 1).fill(0).map((_, i) => {
-					const date = new Date(Date.UTC(started + i));
-
-					date.setMonth(0);
-					date.setDate(1);
-
-					return {
-						dates: date.toISOString(),
-						year: date.getFullYear()
-					};
-				})
-			};
-
-			this.dates = dates;
-
-			return dates;
-		};
-
-		this.parseDays = (data, theme) => {
-			const firstWeekOfFirstMonth = data.weeks[0].contributionDays.length;
-			const lastWeekOfLastMonth = data.weeks[data.weeks.length - 1].contributionDays.length;
-
-			const container = {
-				year: null,
-				month: data.months.length,
-				totContributionsInYear: data.totalContributions,
-				firstWeekOfFirstMonth,
-				lastWeekOfLastMonth,
-				days: [...Array(7 - firstWeekOfFirstMonth).fill(undefined)]
-			};
-
-			data.weeks.forEach((item) => {
-				const { contributionDays } = item;
-
-				contributionDays.forEach((item2) => {
-					const [year, month, day] = item2.date.split('-');
-					const level =
-						item2.contributionLevel === 'NONE'
-							? 0
-							: item2.contributionLevel === 'FIRST_QUARTILE'
-							? 1
-							: item2.contributionLevel === 'SECOND_QUARTILE'
-							? 2
-							: item2.contributionLevel === 'THIRD_QUARTILE'
-							? 3
-							: item2.contributionLevel === 'FOURTH_QUARTILE'
-							? 4
-							: 5;
-
-					container.year = year;
-
-					container.days.push({
-						day,
-						month,
-						color: theme[level],
-						level,
-						totalContri: item2.contributionCount
-					});
-				});
-			});
-
-			container.days.push(...Array(7 - lastWeekOfLastMonth).fill(undefined));
-
-			return container;
-		};
-
-		this.getTotalContribution = async () => {
-			const container = [];
-
-			const $data1 = await this.fetchDates();
-
-			for (let i = 0; i < $data1.dates.length; i++) {
-				const date = new Date($data1.dates[i].dates);
-
-				date.setMonth(0);
-				date.setDate(1);
-
-				const to = new Date(Date.UTC(date.getFullYear(), 11));
-
-				to.setDate(getLastDateOfMonth(date.getFullYear(), 12));
-
-				const { body: $body2 } = await this.client.request({
-					method: 'POST',
-					path: '/graphql',
-					headers: {
-						'Content-Type': 'application/json',
-						'User-Agent': 'nugraizy',
-						Authorization: `Bearer ${process.env.GITHUB_AUTH_TOKEN}`
-					},
-					body: JSON.stringify({
-						query: graphQl(username, {
-							type: 'CONTRIBUTIONS',
-							from: date.toISOString(),
-							to: to.toISOString()
-						})
-					})
-				});
-
-				const { data: $data2 } = await $body2.json();
-
-				container.push(this.parseDays($data2.user?.contributionsCollection?.contributionCalendar, this.theme));
-			}
-
-			return container;
-		};
 	}
 }

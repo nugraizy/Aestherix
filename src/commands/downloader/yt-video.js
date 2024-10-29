@@ -13,11 +13,11 @@ const youtube = new YouTubei();
 const processVideo = async (url, client, { from, message, groupMetadata, prettyNumber }) => {
 	const video = await youtube.video(url);
 
-	loggers.WRN(`${color('Downloading YouTube Video', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+	loggers.warning(`${color('Downloading YouTube Video', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 	// if ('error' in video) {
 	// 	client.instance.reply(video.error, { from, quoted: message, groupMetadata });
-	// 	loggers.ERR(`${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+	// 	loggers.error(`${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 	// 	return;
 	// }
 
@@ -25,7 +25,7 @@ const processVideo = async (url, client, { from, message, groupMetadata, prettyN
 
 	if (!download) {
 		client.instance.reply(`Error while downloading YouTube Video\n\n${url}`, { from, quoted: message, groupMetadata });
-		loggers.ERR(`${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.error(`${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		return;
 	}
@@ -110,7 +110,7 @@ export default {
 				{}
 			);
 
-			loggers.INF(`${color('Downloaded YouTube Video', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.info(`${color('Downloaded YouTube Video', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			return;
 		}
@@ -191,6 +191,6 @@ export default {
 			{}
 		);
 
-		loggers.INF(`${color('Downloaded YouTube Video', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Downloaded YouTube Video', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

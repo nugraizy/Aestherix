@@ -15,7 +15,7 @@ const isValidImageURL = async (url) => {
 		}
 
 		return true;
-	} catch (error) {
+	} catch {
 		return false;
 	}
 };

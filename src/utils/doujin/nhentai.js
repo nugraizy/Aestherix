@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { fetchJSON, fetchTEXT } from '../modules/index.js';
 
 /**

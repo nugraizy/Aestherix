@@ -58,6 +58,7 @@ class ResponseParser {
 
 			for (const { node: post } of posts) {
 				const isVideo = post.__typename === 'XDTGraphVideo';
+
 				result.post.push({
 					isVideo: isVideo,
 					url: isVideo ? post.video_url : post.display_resources[post.display_resources.length - 1].src,
@@ -66,6 +67,7 @@ class ResponseParser {
 			}
 		} else {
 			const isVideo = type === 'video';
+
 			result.post.push({
 				isVideo: isVideo,
 				...(isVideo && { duration: response.video_duration }),
@@ -387,10 +389,10 @@ class InstagramMethods extends ResponseParser {
 				doc_id: '8845758582119845',
 				variables: JSON.stringify({
 					shortcode: code,
-					child_comment_count: 20, // eslint-disable-line
-					fetch_comment_count: 100, // eslint-disable-line
-					parent_comment_count: 24, // eslint-disable-line
-					has_threaded_comments: true // eslint-disable-line
+					child_comment_count: 20,
+					fetch_comment_count: 100,
+					parent_comment_count: 24,
+					has_threaded_comments: true
 				})
 			}),
 			{
@@ -500,6 +502,7 @@ class InstagramMethods extends ResponseParser {
 	 * @private
 	 */
 	async _getHighlights(input, cookie) {
+		/* eslint-disable */
 		const defaultPayload = {
 			query_hash: '0a85e6ea60a4c99edc58ab2f3d17cfdf',
 			variables: {
@@ -514,6 +517,7 @@ class InstagramMethods extends ResponseParser {
 				stories_video_dash_manifest: false
 			}
 		};
+		/* eslint-enable */
 
 		if (input.startsWith('@')) {
 			input = input.replace('@', '');
@@ -526,6 +530,7 @@ class InstagramMethods extends ResponseParser {
 		const user = await this._getProfile(input, cookie);
 		const { data } = await axios.get(
 			this._appendParams(_apiGraphql, {
+				/* eslint-disable */
 				query_hash: 'c9100bf9110dd6361671f113dd02e7d6',
 				variables: JSON.stringify({
 					user_id: user.id,
@@ -536,6 +541,7 @@ class InstagramMethods extends ResponseParser {
 					include_highlight_reels: true,
 					include_live_status: false
 				})
+				/* eslint-enable */
 			}),
 			{
 				headers: {
@@ -563,6 +569,7 @@ class InstagramMethods extends ResponseParser {
 		}
 
 		const { key, mediaId } = this._extractHighlightId(input);
+
 		payload.variables[key].push(initialHighlightData[1]);
 		payload.variables = JSON.stringify(payload.variables);
 
@@ -627,6 +634,7 @@ class InstagramMethods extends ResponseParser {
 
 		for (const highlight of container.items) {
 			const fetchedHighlights = await Promise.all(highlight.map((v) => this._fetchHighlight(v.highlightId, cookie)));
+
 			highlights.push(...fetchedHighlights.flat());
 		}
 

@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { color } from '../../utils/modules/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 import { genshinProfile, getCharacters } from '../../utils/games/index.js';
 
 const regex = async (input) => {
@@ -75,7 +75,7 @@ export default {
 					groupMetadata
 				});
 
-				loggers.ERR(
+				loggers.error(
 					`⚠️ ${color('Failed to Searching Genshin Impact player', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`
 				);
 

@@ -25,7 +25,7 @@ export default {
 
 		const stories = await instagram.search.story(input);
 
-		loggers.WRN(`${color('Downloading Instagram Story', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.warning(`${color('Downloading Instagram Story', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const data in stories) {
 			if ('error' in stories[data]) {
@@ -34,7 +34,7 @@ export default {
 					quoted: message,
 					groupMetadata
 				});
-				loggers.ERR(`${color('Failed to Download Instagram Story', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Download Instagram Story', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
 			}
 
@@ -67,6 +67,6 @@ export default {
 			}
 		}
 
-		loggers.INF(`${color('Downloaded Instagram Story', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Downloaded Instagram Story', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

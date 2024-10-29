@@ -35,7 +35,7 @@ export default {
 	limit: 2,
 	cooldown: 2,
 	status: 'enable',
-	async run({ query, from, message, args, type, /*cmd,*/ groupMetadata, sender, waitForInput }, client) {
+	async run({ query, from, message, groupMetadata, sender, waitForInput }, client) {
 		const mal = new Jikan();
 
 		const result = await mal.anime.search(query);

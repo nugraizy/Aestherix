@@ -15,7 +15,7 @@ export default {
 	limit: 9,
 	status: 'enable',
 	run: async ({ isMediaImage, from, prettyNumber, message, mediaData, sender, args, groupMetadata }, client) => {
-		loggers.WRN(`${color('Converting image to Anime-like', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.warning(`${color('Converting image to Anime-like', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 
 		let bufferMessage;
 		let buffer;
@@ -37,7 +37,7 @@ export default {
 			crop: 'SINGLE',
 			enhance: true,
 			proxy: 'socks5://arugaz:arugaz1717%40%23@8.210.154.33:1080',
-			onRetry: (e) => loggers.ERR(`${color(e.message, '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`)
+			onRetry: (e) => loggers.error(`${color(e.message, '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`)
 		});
 
 		buffer = Buffer.from(buffer, 'base64');
@@ -64,6 +64,6 @@ export default {
 		bufferMessage = null;
 		buffer = null;
 
-		loggers.INF(`${color('Anime-like image is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Anime-like image is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

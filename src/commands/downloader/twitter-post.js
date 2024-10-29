@@ -54,7 +54,7 @@ export default {
 				continue;
 			}
 
-			loggers.WRN(`${color('Downloading Twitter Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.warning(`${color('Downloading Twitter Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			const post = await twitterDownload(url);
 
@@ -64,7 +64,7 @@ export default {
 					quoted: message,
 					groupMetadata
 				});
-				loggers.ERR(`${color('Failed to Download Twitter Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Download Twitter Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 				continue;
 			}
@@ -94,7 +94,7 @@ export default {
 				);
 			}
 
-			loggers.INF(`${color('Downloaded Twitter Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.info(`${color('Downloaded Twitter Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 		}
 	}
 };

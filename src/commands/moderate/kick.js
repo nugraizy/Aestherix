@@ -1,5 +1,3 @@
-import { S_WHATSAPP_NET } from '../../helper/index.js';
-
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
  */

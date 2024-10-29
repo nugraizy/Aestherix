@@ -4,6 +4,9 @@ import _ from 'lodash';
 
 import { isURL, extension } from '../../utils/index.js';
 
+const isValidParser = (parser) =>
+	/^(\["[^"]+"\]|\w+|\[(?!0+\d)\d+\])((\.\w+)|(:?\["[^"]+"\])|(?:\['[^']+'\])|\[(?!0+\d)\d+\])*$/g.test(parser);
+
 const parseObject = (obj, str) => {
 	try {
 		if (!isValidParser(str)) {
@@ -25,12 +28,6 @@ const parseObject = (obj, str) => {
 			message: error.message
 		};
 	}
-};
-
-const isValidParser = (parser) => {
-	const regex = /^(\["[^"]+"\]|\w+|\[(?!0+\d)\d+\])((\.\w+)|(:?\["[^"]+"\])|(?:\['[^']+'\])|\[(?!0+\d)\d+\])*$/g;
-
-	return regex.test(parser);
 };
 
 const fetchData = async (url, { method, headers, body }) => {

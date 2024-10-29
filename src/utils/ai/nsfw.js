@@ -34,7 +34,7 @@ export const isNsfw = (input, filename) =>
 
 			fs.unlinkSync(filename);
 			resolve({ status: false, ...output });
-		} catch (err) {
+		} catch {
 			fs.unlinkSync(filename);
 			resolve({ status: false });
 		}

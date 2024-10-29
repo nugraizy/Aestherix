@@ -72,7 +72,7 @@ export default {
 					groupMetadata
 				});
 
-				loggers.ERR(`${color('Failed to Search TikTok User', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Search TikTok User', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
 			}
 

@@ -29,7 +29,7 @@ export default {
 				'short-option-groups': false
 			},
 			alias: {
-				withNoWatermark /* eslint-disable-line*/: ['nowm', 'no-wm', 'no-watermark', 'no_watermark', 'nowatermark'],
+				withNoWatermark: ['nowm', 'no-wm', 'no-watermark', 'no_watermark', 'nowatermark'],
 				withWatermark: ['with-watermark', 'with_watermark', 'watermark']
 			}
 		});
@@ -52,11 +52,11 @@ export default {
 					groupMetadata
 				});
 
-				loggers.ERR(`${color('Failed to Download TikTok Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Download TikTok Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
 			}
 
-			loggers.WRN(`${color('Downloading TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.warning(`${color('Downloading TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			const date = dayjs(posts[data].published * 1000).format('HH:mm:ss DD/MM/YYYY');
 			let capt = `TikTok ${posts[data].type === 'images' ? 'Slide' : 'Video'}`.formatHeaders();
@@ -112,7 +112,7 @@ export default {
 				}
 
 				await delay(100);
-				loggers.INF(`${color('Downloaded TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.info(`${color('Downloaded TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 				continue;
 			}
@@ -131,7 +131,7 @@ export default {
 			);
 
 			await delay(100);
-			loggers.INF(`${color('Downloaded TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.info(`${color('Downloaded TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 		}
 	}
 };

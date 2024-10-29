@@ -56,7 +56,7 @@ export default {
 		}
 
 		if (bodyQuoted && !isMediaImage) {
-			loggers.WRN(`${color('Petting', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.warning(`${color('Petting', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			const profile = await client.instance
 				.profilePictureUrl(mediaData.participant, 'image')
@@ -72,7 +72,7 @@ export default {
 				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, { groupMetadata });
 			}
 
-			loggers.INF(`${color('Converted Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.info(`${color('Converted Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			return;
 		}
@@ -91,7 +91,7 @@ export default {
 				);
 			}
 
-			loggers.WRN(`${color('Petting', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.warning(`${color('Petting', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
 
 			const file = await client.instance.downloadAndSaveMediaMessage(
 				extractMediaData,
@@ -106,13 +106,13 @@ export default {
 				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, { groupMetadata });
 			}
 
-			loggers.INF(`${color('Converted Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.info(`${color('Converted Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			return;
 		}
 
 		for (const mentioned of mention) {
-			loggers.WRN(`${color('Petting', '#FF99C8')} ${color(mentioned, '#E4C1F9')}`);
+			loggers.warning(`${color('Petting', '#FF99C8')} ${color(mentioned, '#E4C1F9')}`);
 
 			const profile = await client.instance
 				.profilePictureUrl(mentioned, 'image')
@@ -128,7 +128,7 @@ export default {
 				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, { groupMetadata });
 			}
 
-			loggers.WRN(`${color('Petted', '#FF99C8')} ${color(mentioned, '#E4C1F9')}`);
+			loggers.warning(`${color('Petted', '#FF99C8')} ${color(mentioned, '#E4C1F9')}`);
 		}
 	}
 };

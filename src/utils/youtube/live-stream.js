@@ -11,7 +11,7 @@ export const youtubeLiveComments = async (query) =>
 			}
 
 			resolve(info.getLiveChat());
-		} catch (err) {
+		} catch {
 			resolve({
 				error: 'video not found'
 			});
