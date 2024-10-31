@@ -78,7 +78,7 @@ const loadCommand = async (command, OPTIONS) => {
 
 const folderToLoad = './src/commands';
 const filesToExclude = ['template', 'd.ts'];
-const filesToInclude = ['menu', 'ping'];
+const filesToInclude = ['menu', 'ping', 'moderate', 'owner'];
 
 const exclude = (file) => !filesToExclude.some((value) => file.includes(value));
 const include = (file) => filesToInclude.some((value) => file.includes(value));
@@ -102,8 +102,7 @@ export const loadCommands = async (OPTIONS) => {
 
 		if (OPTIONS.watch) {
 			await watch(commands, {
-				alwaysStat: false,
-				ignored: (path) => include(path)
+				alwaysStat: false
 			});
 		}
 

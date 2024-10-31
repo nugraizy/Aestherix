@@ -1,4 +1,4 @@
-import { generateMessageID, getBinaryNodeChild, getBinaryNodeChildren } from '@adiwajshing/baileys';
+import { generateMessageID, getBinaryNodeChild, getBinaryNodeChildren } from 'baileys';
 
 const TYPES = {
 	ALL: ['all', 'contacts', 'contact_blacklist', 'none'],

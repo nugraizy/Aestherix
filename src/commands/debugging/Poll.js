@@ -1,4 +1,4 @@
-import { generateMessageID, generateWAMessageFromContent } from '@adiwajshing/baileys';
+import { generateMessageID, generateWAMessageFromContent } from 'baileys';
 import { randomBytes } from 'crypto';
 
 /**

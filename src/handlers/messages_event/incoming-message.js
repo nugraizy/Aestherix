@@ -1,5 +1,5 @@
 import { findBestMatch } from 'string-similarity';
-import { generateWAMessage } from '@adiwajshing/baileys';
+import { generateWAMessage } from 'baileys';
 
 import configuration from '../../helper/config/connect.js';
 import { runtime } from '../../index.js';
@@ -42,7 +42,7 @@ const logMessage = (message) => {
 	const messageFrom = `${SEPERATOR} ${color('in', '#f5bde6')} ${color(
 		message.isGroup ? `group ${message.groupName}` : 'private chat',
 		'#81c8be'
-	)}${(message.isGroup && color('id', '#f5bde6') + color(message.groupId, '#74c7ec')) || ''}`;
+	)}${(message.isGroup && color(' id ', '#f5bde6') + color(message.groupId, '#BD93F9')) || ''}`;
 
 	let fullBody = null;
 
@@ -521,97 +521,136 @@ const initHandler = async () => {
 	handler.set('OFFLINE', (await import(HANDLER_PATH.OFFLINE)).default);
 };
 
-const handleIncomingMessage = async (message, client, cmds, store, user, state, runtime) => {
-	if (message === undefined) {
-		return;
+const failedMessages = new Map();
+const MAX_RETRIES = 3;
+
+async function createRetryNode(msg, failedMessages, MAX_RETRIES) {
+	const messageId = msg.key.id;
+	let retryCount = failedMessages.get(messageId) || 0;
+
+	if (retryCount >= MAX_RETRIES) {
+		failedMessages.delete(messageId);
+		return null;
 	}
 
-	if (configuration.OPTIONS.test && message?.test) {
-		message = {
-			messages: [
-				await generateWAMessage(
-					client.instance.decodeJid(instance),
-					{
-						text: message.message
-					},
-					{
-						upload: client.instance.waUploadToServer,
-						messageId: randomChar('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 16)
+	retryCount++;
+	failedMessages.set(messageId, retryCount);
+
+	return {
+		key: {
+			id: messageId,
+			remoteJid: msg.key.remoteJid,
+			participant: msg.key.participant
+		},
+		message: msg.message,
+		messageTimestamp: msg.messageTimestamp,
+		status: msg.status
+	};
+}
+
+const handleIncomingMessage = async (upsert, client, cmds, store, user, state, runtime) => {
+	if (upsert.type === 'notify') {
+		for (let message of upsert.messages) {
+			if (message.key.fromMe && message.status === 0) {
+				const retryNode = await createRetryNode(message, failedMessages, MAX_RETRIES);
+
+				if (retryNode) {
+					try {
+						await client.instance.relayMessage(message.key.remoteJid, retryNode.message, { messageId: message.key.id });
+					} catch (error) {
+						console.error(`Error retrying message ${message.key.id}:`, error);
 					}
-				)
-			]
-		};
-	}
+				}
+			}
 
-	if (!isInit) {
-		await initHandler();
-		isInit = true;
-	}
+			if (message === undefined || message?.messageStubParameters?.[0] == 'No SenderKeyRecord found for decryption') {
+				return;
+			}
 
-	if (configuration.OPTIONS.debugMode && !message?.messages?.[0]?.key?.fromMe) {
-		log(JSON.stringify(message, undefined, 2));
-	}
+			if (configuration.OPTIONS.test && message?.test) {
+				message = {
+					messages: [
+						await generateWAMessage(
+							client.instance.decodeJid(instance),
+							{
+								text: message.message
+							},
+							{
+								upload: client.instance.waUploadToServer,
+								messageId: randomChar('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 16)
+							}
+						)
+					]
+				};
+			}
 
-	if (
-		message.messages[0] &&
-		'messageStubParameters' in message.messages[0] &&
-		message.messages[0]?.messageStubParameters?.length
-	) {
-		return handleStubMessage(client, message, store);
-	}
+			if (!isInit) {
+				await initHandler();
+				isInit = true;
+			}
 
-	message = await reassign(message.messages[0], client, store);
+			if (configuration.OPTIONS.debugMode && !message?.key?.fromMe) {
+				log(JSON.stringify(message, undefined, 2));
+			}
 
-	if (
-		!message ||
-		'error' in message ||
-		!message.message ||
-		message.isBaileys ||
-		message.type === 'protocolMessage' ||
-		message.type === 'senderKeyDistributionMessage' ||
-		!message.type
-	) {
-		return;
-	}
+			if (message && 'messageStubParameters' in message && message.messageStubParameters?.length) {
+				return handleStubMessage(client, message, store);
+			}
 
-	if (message.message.key && message.message.key.remoteJid === 'status@broadcast' && configuration.OPTIONS.story) {
-		return handleStoryMessage(client, message);
-	}
+			message = await reassign(message, client, store);
 
-	if (configuration.OPTIONS.offline) {
-		return handleOfflineMessage(client, message, cmds);
-	}
+			if (
+				!message ||
+				'error' in message ||
+				!message.message ||
+				message.isBaileys ||
+				message.type === 'protocolMessage' ||
+				message.type === 'senderKeyDistributionMessage' ||
+				!message.type
+			) {
+				return;
+			}
 
-	if (configuration.OPTIONS.autoRead && !configuration.OPTIONS.offline && !message.isBlocked && !message.isBanned) {
-		client.instance.readMessages([message.message.key]);
-	}
+			if (message.message.key && message.message.key.remoteJid === 'status@broadcast' && configuration.OPTIONS.story) {
+				return handleStoryMessage(client, message);
+			}
 
-	if (message.isGroup) {
-		handleAfk(client, message);
-	}
+			if (configuration.OPTIONS.offline) {
+				return handleOfflineMessage(client, message, cmds);
+			}
 
-	const isInputState = configuration.input.get(message.sender);
+			if (configuration.OPTIONS.autoRead && !configuration.OPTIONS.offline && !message.isBlocked && !message.isBanned) {
+				client.instance.readMessages([message.message.key]);
+			}
 
-	if (isInputState) {
-		if (isInputState.expectedType.some((v) => ['conversation', 'extendedTextMessage'].includes(v))) {
-			isInputState.message = message.body;
-			isInputState.quoted = message.message;
-			return;
+			if (message.isGroup) {
+				handleAfk(client, message);
+			}
+
+			const isInputState = configuration.input.get(message.sender);
+
+			if (isInputState) {
+				if (isInputState.expectedType.some((v) => ['conversation', 'extendedTextMessage'].includes(v))) {
+					isInputState.message = message.body;
+					isInputState.quoted = message.message;
+					return;
+				}
+
+				if (isInputState.expectedType.includes(message.type)) {
+					isInputState.message = message.message;
+					isInputState.quoted = message.message;
+					return;
+				}
+
+				isInputState.invalid = true;
+				isInputState.quoted = message.message;
+
+				return;
+			}
+
+			await handleCommandExecution(message, client, store, cmds, user, instance, runtime, state);
 		}
-
-		if (isInputState.expectedType.includes(message.type)) {
-			isInputState.message = message.message;
-			isInputState.quoted = message.message;
-			return;
-		}
-
-		isInputState.invalid = true;
-		isInputState.quoted = message.message;
-
-		return;
 	}
-
-	await handleCommandExecution(message, client, store, cmds, user, instance, runtime, state);
 };
 
 const incomingHandler = handleIncomingMessage;

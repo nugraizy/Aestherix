@@ -21,7 +21,7 @@ const EVENTS = {
 
 /**
  * @param {typeof client} client
- * @param {import('@adiwajshing/baileys').proto.IWebMessageInfo} message
+ * @param {import('baileys').proto.IWebMessageInfo} message
  * @param {import('../../helper/connection/type.js').Store} store
  */
 const handleGroupParticipantEvent = async (client, message, store) => {
@@ -35,7 +35,7 @@ const handleGroupParticipantEvent = async (client, message, store) => {
 
 /**
  * @param {typeof client} client
- * @param {import('@adiwajshing/baileys').proto.IWebMessageInfo} message
+ * @param {import('baileys').proto.IWebMessageInfo} message
  */
 const handleGroupSettingsEvent = (client, message) => {
 	client.instance.ev.emit('group.settings.update', message, client);
@@ -43,7 +43,7 @@ const handleGroupSettingsEvent = (client, message) => {
 
 /**
  * @param {typeof client} client
- * @param {import('@adiwajshing/baileys').proto.IWebMessageInfo} message
+ * @param {import('baileys').proto.IWebMessageInfo} message
  */
 const handleMiscEvent = (client, message) => {
 	client.instance.ev.emit('message.oversized', message, client);
@@ -51,7 +51,7 @@ const handleMiscEvent = (client, message) => {
 
 /**
  * @param {typeof client} client
- * @param {import('@adiwajshing/baileys').proto.IWebMessageInfo} message
+ * @param {import('baileys').proto.IWebMessageInfo} message
  * @param {import('../../helper/connection/type.js').Store} store
  */
 const stubMessageHandler = async (client, message, store) => {

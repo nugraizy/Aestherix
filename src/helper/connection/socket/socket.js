@@ -1,5 +1,13 @@
 import fs from 'fs-extra';
-import _baileys, { delay, makeCacheableSignalKeyStore } from '@adiwajshing/baileys';
+import _baileys, {
+	makeWASocket,
+	makeInMemoryStore,
+	useMultiFileAuthState,
+	delay,
+	makeCacheableSignalKeyStore,
+	isJidGroup,
+	fetchLatestBaileysVersion
+} from 'baileys';
 import P from 'pino';
 import PhoneNumber from 'libphonenumber-js';
 import { input, select, Separator } from '@inquirer/prompts';
@@ -7,12 +15,14 @@ import _toggle from 'inquirer-toggle';
 import NodeCache from 'node-cache';
 import clip from 'clipboardy';
 
+const { proto } = _baileys;
+
+import configuration from '../../config/connect.js';
 import { clearDBConnection } from './reset-session.js';
 import { patchInteractiveMessage } from '../utils/patch-message.js';
 import { Cache } from '../../modules/cache.js';
 import { loggers, color } from '../../../utils/modules/index.js';
 
-const { default: makeWASocket, makeInMemoryStore, DEFAULT_CONNECTION_CONFIG } = _baileys;
 const { default: toggle } = _toggle;
 
 const msgRetryCounterCache = new NodeCache();
@@ -45,45 +55,43 @@ const question = (text) =>
  * @typedef {import('meow').Result} Cli
  * @typedef {import('../../../types/Socket/index.js').ClientSocket} ClientSocket
  * @typedef {import('../../../types/Socket/index.js').Store} Store
- * @typedef {import('./../../../types/Socket/index.js').SingleAuthState['state']} State
- * @param {{cli: Cli, OPTIONS: {[_: string]: boolean}, state: State}} params
- * @returns {Promise<{Client: ClientSocket, store: Store}>}
+ * @typedef {import('./../../../types/Socket/index.js').MultiAuthState['state']} State
+ * @param {{cli: Cli, OPTIONS: {[_: string]: boolean}, store: Store}} params
+ * @returns {Promise<{Client: ClientSocket, store: Store, state: State, saveCreds: () => Promise<void>}>}
  */
-export const connectSocket = async ({ cli, OPTIONS, state }) => {
+export const connectSocket = async ({ cli, OPTIONS, store }) => {
 	/**
-	 * @type {Store}
+	 * @type {import('./types/Socket').MultiAuthState}
 	 */
-	const store = makeInMemoryStore({ logger: P().child({ level: 'fatal', stream: 'store' }) });
+	const { state, saveCreds } = await useMultiFileAuthState(
+		`./src/helper/connection/session/${cli.input[0] ?? 'Session-debug'}`
+	);
 
 	global.store = store;
 
+	const { version } = await fetchLatestBaileysVersion();
+
 	/**
-	 * @type {import('@adiwajshing/baileys').UserFacingSocketConfig}
+	 * @type {import('baileys').UserFacingSocketConfig}
 	 */
 	const CONNECTION_CONFIG = {
 		msgRetryCounterCache,
 		printQRInTerminal: !OPTIONS.pairMode,
-		mobile: false,
-		browser: ['Chrome (Linux)', '', ''],
-		version: [2, 3000, 1015901307],
 		logger: logger(OPTIONS),
 		auth: {
 			creds: state.creds,
 			keys: makeCacheableSignalKeyStore(state.keys, logger(OPTIONS))
 		},
-		markOnlineOnConnect: false,
-		shouldSyncHistoryMessage: () => true,
-		getMessage: (key) => {
+		markOnlineOnConnect: true,
+		version,
+		getMessage: async (key) => {
 			if (store) {
-				const { id, remoteJid } = key;
-				const message = store.loadMessage(remoteJid, id);
+				const msg = await store.loadMessage(key.remoteJid, key.id);
 
-				if (message) {
-					return message.message;
-				}
+				return msg?.message || undefined;
 			}
 
-			return { conversation: 'Success syncing. Please resend the command again.' };
+			return proto.Message.fromObject({});
 		},
 		generateHighQualityLinkPreview: true,
 		linkPreviewImageThumbnailWidth: 2,
@@ -91,7 +99,8 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 		userDevicesCache: new Cache(),
 		patchMessageBeforeSending: patchInteractiveMessage,
 		customId: 'HFINDER',
-		defaultQueryTimeoutMs: 0
+		defaultQueryTimeoutMs: 0,
+		cachedGroupMetadata: (jid) => (isJidGroup(jid) ? configuration.cache.metadata.get(jid) : {})
 	};
 
 	if (OPTIONS.json) {
@@ -107,15 +116,21 @@ export const connectSocket = async ({ cli, OPTIONS, state }) => {
 
 	await handleNewInstance({ OPTIONS, Client }); // eslint-disable-line
 
-	return { Client, store };
+	return { Client, store, state, saveCreds };
 };
 
+/**
+ *
+ * @param {Cli} cli
+ * @param {Store} store
+ * @param {{[_: string]: boolean}} OPTIONS
+ */
 const storeToJson = async (cli, store, OPTIONS) => {
 	if (!(await fs.exists('./src/media/connection_databases/'))) {
 		await fs.mkdir('./src/media/connection_databases/');
 	}
 
-	if ((await fs.exists(`./src/helper/connection/session/${cli.input[0] ?? 'Session-debug'}.json`)) && OPTIONS.resetOnStart) {
+	if ((await fs.exists(`./src/helper/connection/session/${cli.input[0] ?? 'Session-debug'}`)) && OPTIONS.resetOnStart) {
 		await clearDBConnection(cli);
 	}
 

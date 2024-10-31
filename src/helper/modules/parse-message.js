@@ -1,4 +1,4 @@
-import { getContentType, normalizeMessageContent } from '@adiwajshing/baileys';
+import { getContentType, normalizeMessageContent } from 'baileys';
 import PhoneNumber from 'libphonenumber-js';
 import fs from 'fs-extra';
 
@@ -173,10 +173,17 @@ export const reassign = async (m, client, store) => {
 		const groupMetadata = isGroup ? configuration.cache.metadata.get(from) : {};
 		const isGroupOwner = isGroup ? groupMetadata?.owner === sender : false;
 
-		if (!isUsers) {
+		if (!isUsers && !isGroup) {
 			configuration.cache.users.set(sender, {
 				prettyNumber: PhoneNumber(`+${sender?.replace(S_WHATSAPP_NET, '')}`)?.formatInternational() ?? 'No Data',
+				name: m.pushName,
 				ephemeralDuration: crawlProperty(m.message, 'expiration')
+			});
+		} else if (!isUsers && isGroup) {
+			configuration.cache.users.set(sender, {
+				prettyNumber: PhoneNumber(`+${sender?.replace(S_WHATSAPP_NET, '')}`)?.formatInternational() ?? 'No Data',
+				name: m.pushName,
+				ephemeralDuration: store.messages[sender] ? crawlProperty(store.messages[sender].array[0].message, 'expiration') : 0
 			});
 		}
 
@@ -191,10 +198,23 @@ export const reassign = async (m, client, store) => {
 			}
 		}
 
-		const { prettyNumber, name } = configuration.cache.users.get(sender);
+		const { prettyNumber, name, ephemeralDuration } = configuration.cache.users.get(sender);
 		const groupName = isGroup ? groupMetadata?.subject : NO_DATA;
 		const groupDescription = isGroup ? groupMetadata?.desc?.toString() : NO_DATA;
 		const groupId = isGroup ? groupMetadata?.id : NO_DATA;
+
+		let ephemeralUser = null;
+
+		if (isUsers && !isGroup) {
+			ephemeralUser = crawlProperty(m.message, 'expiration');
+		}
+
+		if (isUsers && !isGroup && ephemeralDuration !== ephemeralUser) {
+			configuration.cache.users.set(
+				sender,
+				Object.assign(configuration.cache.users.get(sender), { ephemeralDuration: ephemeralUser })
+			);
+		}
 
 		if (isGroup) {
 			if (!isSettings || typeof (await checkJSON(from)) === 'boolean') {

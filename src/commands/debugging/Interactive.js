@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import { generateWAMessageFromContent } from '@adiwajshing/baileys';
+import { generateWAMessageFromContent } from 'baileys';
 import fs from 'fs-extra';
 import { fileTypeFromBuffer } from 'file-type';
 

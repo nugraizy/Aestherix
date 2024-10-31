@@ -28,12 +28,12 @@ export const clearDBConnection = async (cli) => {
 	}
 
 	const data = await fs.readJSON(`./src/media/connection_databases/${cli.input[0] ?? 'Session-debug'}.json`);
-	const session = await fs.readJSON(`./src/helper/connection/session/${cli.input[0] ?? 'Session-debug'}.json`);
+	// const session = await fs.readJSON(`./src/helper/connection/session/${cli.input[0] ?? 'Session-debug'}.json`);
 
-	session.keys = {};
+	// session.keys = {};
 	data.chats = [];
 	data.contacts = {};
 	data.messages = {};
 	await fs.writeJSON(`./src/media/connection_databases/${cli.input[0] ?? 'Session-debug'}.json`, data);
-	await fs.writeJSON(`./src/helper/connection/session/${cli.input[0] ?? 'Session-debug'}.json`, session);
+	// await fs.writeJSON(`./src/helper/connection/session/${cli.input[0] ?? 'Session-debug'}.json`, session);
 };

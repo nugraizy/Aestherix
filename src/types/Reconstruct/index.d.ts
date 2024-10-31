@@ -1,7 +1,7 @@
 import type { GroupMetadata, GroupParticipant } from '../Groups/index';
 import type { MessageGenerated, WAGenericMediaMessage } from '../Messages/index';
 import type { AdvancedClient, MediaDataContext, Store } from '../Socket';
-import type { MessageType } from '@adiwajshing/baileys';
+import type { MessageType } from 'baileys';
 
 interface GroupMetadataParsed {
 	ownerGroup: string;

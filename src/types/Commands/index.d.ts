@@ -33,7 +33,7 @@ export type CommandProps = {
 	/**
 	 *  Your plugins description
 	 */
-	description: string;
+	description?: string;
 
 	/**
 	 *  Your plugins category
@@ -53,12 +53,12 @@ export type CommandProps = {
 	/**
 	 *  Your plugins cooldown
 	 */
-	cooldown: number;
+	cooldown?: number;
 
 	/**
 	 *  Your plugins limit
 	 */
-	limit: number;
+	limit?: number;
 
 	/**
 	 *  Your plugins status
@@ -78,5 +78,5 @@ export type CommandProps = {
 	/**
 	 *  Your plugins callbacks
 	 */
-	run: (ctx: ReassignResult & { state: SingleAuthState['state'] }, client: AdvancedClient, store: Store) => Promise<unknown>;
+	run?: (ctx: ReassignResult & { state: SingleAuthState['state'] }, client: AdvancedClient, store: Store) => Promise<unknown>;
 };

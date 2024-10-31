@@ -68,7 +68,7 @@ export default {
 
 			const mediaType = client.instance.clearType(typeQuoted || type, mime);
 
-			return await client.instance.sendMessage(
+			return await client.instance.send(
 				'status@broadcast',
 				{
 					[mediaType]: media,
@@ -83,7 +83,7 @@ export default {
 			);
 		}
 
-		return await client.instance.sendMessage(
+		return await client.instance.send(
 			'status@broadcast',
 			{
 				text: query

@@ -1,4 +1,4 @@
-import { downloadMediaMessage } from '@adiwajshing/baileys';
+import { downloadMediaMessage } from 'baileys';
 import fs from 'fs-extra';
 import path from 'path';
 

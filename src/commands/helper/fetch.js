@@ -169,7 +169,7 @@ export default {
 					const messageTypes = mime === 'audio' || mime === 'application' ? 'document' : mime;
 					const fileName = messageTypes === 'document' ? `file_fetched.${extension(responseTypes)}` : undefined;
 
-					await client.instance.sendMessage(from, {
+					await client.instance.send(from, {
 						[messageTypes]: Buffer.from(data),
 						...(fileName ? { fileName, mime: responseTypes } : {})
 					});

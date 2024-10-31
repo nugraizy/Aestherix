@@ -1,5 +1,5 @@
-import * as _ from '@adiwajshing/baileys'; /* eslint-disable-line */
-import { WAProto } from '@adiwajshing/baileys'; /* eslint-disable-line */
+import * as _ from 'baileys'; /* eslint-disable-line */
+import { WAProto } from 'baileys'; /* eslint-disable-line */
 import { exec } from 'child_process';
 import fs from 'fs';
 import fsX from 'fs-extra'; /* eslint-disable-line */
@@ -20,7 +20,7 @@ const col = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-n
 
 class CustomArray extends Array {
 	constructor(...args) {
-		return typeof args[0] === 'number' ? super(Math.min(args[0], 10_000)) : super(...args); 
+		return typeof args[0] === 'number' ? super(Math.min(args[0], 10_000)) : super(...args);
 	}
 }
 

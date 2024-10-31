@@ -1,4 +1,4 @@
-import { delay } from '@adiwajshing/baileys';
+import { delay } from 'baileys';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}

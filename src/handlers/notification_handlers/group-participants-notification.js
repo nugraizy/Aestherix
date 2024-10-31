@@ -1,169 +1,212 @@
 import configuration from '../../helper/config/connect.js';
-import { reassign, Attachment } from '../../helper/index.js';
+import { Attachment } from '../../helper/index.js';
 import { fetchBUFFER } from '../../utils/modules/index.js';
 
-const EVENT_UPDATE = {
-	GROUP_PARTICIPANT_LEAVE: 'Member Leave',
-	GROUP_PARTICIPANT_INVITE: 'Invited Member',
-	GROUP_PARTICIPANT_REMOVE: 'Removed Member',
-	GROUP_PARTICIPANT_ADD: 'Added Member',
-	GROUP_PARTICIPANT_PROMOTE: 'Promoted Member',
-	GROUP_PARTICIPANT_DEMOTE: 'Demoted Admin',
-	INVITE: 'Adding',
-	ADD: 'Joined',
-	REMOVE: 'Removing',
-	PROMOTE: 'Promoting',
-	DEMOTE: 'Demoting',
-	LEAVE: 'Left'
-};
+const getIndex = (arr, id, isObject) => arr.findIndex((item) => (isObject ? item.id === id : item === id));
 
-const getIndex = (arr, id, obj) => arr.findIndex((v) => (obj ? v.id === id : v === id));
+const updateParticipantAdminStatus = (participant, groupMetadataCache, isPromote) => {
+	const adminStatus = isPromote ? 'admin' : null;
+	const isAdmin = isPromote;
 
-const processMessageStubType = (cache, message) => {
-	const type = message.messageStubType;
+	const updateAdminInList = (list) => {
+		const index = getIndex(list, participant, true);
 
-	if (['GROUP_PARTICIPANT_ADD', 'GROUP_PARTICIPANT_INVITE'].includes(type)) {
-		for (const id of message.messageStubParameters) {
-			cache.participants?.push({ id, admin: null });
-			cache.rawParticipants?.push({ id, admin: null });
-			cache.participantsGroup?.push(id);
+		if (index !== -1) {
+			list[index].admin = adminStatus;
+			list[index].isAdmin = isAdmin;
 		}
-	} else if (['GROUP_PARTICIPANT_LEAVE', 'GROUP_PARTICIPANT_REMOVE'].includes(type)) {
-		for (const id of message.messageStubParameters) {
-			if (cache.adminGroups?.includes(id)) {
-				cache.adminGroups.splice(getIndex(cache.adminGroups, id, false), 1);
-			}
+	};
 
-			cache.participants?.splice(getIndex(cache.participants, id, true), 1);
-			cache.rawParticipants?.splice(getIndex(cache.rawParticipants, id, true), 1);
-			cache.participantsGroup?.splice(getIndex(cache.participantsGroup, id, false), 1);
-		}
-	} else if (['GROUP_PARTICIPANT_DEMOTE'].includes(type)) {
-		for (const id of message.messageStubParameters) {
-			let indexs = getIndex(cache.participants, id, true);
+	updateAdminInList(groupMetadataCache.rawParticipants);
+	updateAdminInList(groupMetadataCache.participants);
 
-			if (cache.participants && cache.participants[indexs]?.admin) {
-				cache.participants[indexs].admin = null;
-			}
+	if (isPromote) {
+		groupMetadataCache.adminGroups.push(participant);
+	} else {
+		const index = groupMetadataCache.adminGroups.indexOf(participant);
 
-			indexs = getIndex(cache.rawParticipants, id, true);
-
-			if (cache.rawParticipants && cache.rawParticipants[indexs]?.admin) {
-				cache.rawParticipants[indexs].admin = null;
-			}
-
-			cache.adminGroups.slice(getIndex(cache.adminGroups, id, false), 1);
-		}
-	} else if (['GROUP_PARTICIPANT_PROMOTE'].includes(type)) {
-		for (const id of message.messageStubParameters) {
-			let indexs = getIndex(cache.participants, id, true);
-
-			if (cache.participants && cache.participants[indexs]?.admin) {
-				cache.participants[indexs].admin = 'admin';
-			}
-
-			indexs = getIndex(cache.rawParticipants, id, true);
-
-			if (cache.rawParticipants && cache.rawParticipants[indexs]?.admin) {
-				cache.rawParticipants[indexs].admin = 'admin';
-			}
-
-			cache.adminGroups.push(id);
+		if (index !== -1) {
+			groupMetadataCache.adminGroups.splice(index, 1);
 		}
 	}
 };
 
-const sendGroupParticipantsNotification = async (client, message, text) => {
-	if (
-		['GROUP_PARTICIPANT_LEAVE', 'GROUP_PARTICIPANT_REMOVE', 'GROUP_PARTICIPANT_INVITE', 'GROUP_PARTICIPANT_ADD'].includes(
-			message.messageStubType
-		) &&
-		message.messageStubParameters.length === 1
-	) {
-		const attach = new Attachment(1024, 500);
-		const { profile, radi } = await client.instance
-			.profilePictureUrl(message.messageStubParameters[0], 'image')
-			.then(async (image) => ({ profile: new Buffer.from(await fetchBUFFER(image)), radi: 180 }))
-			.catch(() => ({ profile: './src/media/blank.png', radi: 80 }));
+const removeParticipant = (participant, groupMetadataCache) => {
+	groupMetadataCache.participantsGroup.splice(getIndex(groupMetadataCache.participantsGroup, participant, false), 1);
+	groupMetadataCache.rawParticipants.splice(getIndex(groupMetadataCache.rawParticipants, participant, true), 1);
+	groupMetadataCache.participants.splice(getIndex(groupMetadataCache.participants, participant, true), 1);
+};
 
-		await attach.init(profile);
+const EVENT_MAP = {
+	add: 'Joined',
+	invite: 'Invited',
+	remove: 'Removed',
+	left: 'Left',
+	promote: 'Promoted',
+	demote: 'Demoted'
+};
 
-		attach.fillBackground();
+const EVENT_UPDATE = {
+	left: 'Member Left',
+	invite: 'Invited Member',
+	remove: 'Removed Member',
+	add: 'Added Member',
+	promote: 'Promoted Member',
+	demote: 'Demoted Admin'
+};
 
-		await attach.putAssets();
-		await attach.appendImage({ roundedRadius: radi });
-		await attach
-			.appendText(
-				['GROUP_PARTICIPANT_LEAVE'].includes(message.messageStubType)
-					? 'Leaving the group'
-					: ['GROUP_PARTICIPANT_REMOVE'].includes(message.messageStubType)
-					? 'Kicked from the group'
-					: 'Welcome to',
-				message.messageStubParameters[0].split('@')[0],
-				message.groupName,
-				attach.canvas.width / 2,
-				attach.canvas.height / 2,
-				{
-					fontSize: 62,
-					color: attach.PALETTES.GREEN,
-					shadow: true,
-					participantColor: attach.PALETTES.GREEN,
-					groupNameColor: attach.PALETTES.PURPLE,
-					textColor: attach.PALETTES.RED
-				}
-			)
-			.placeCopyright();
+const writeCache = (groupId, author, participant, action, cache) => {
+	const groupMetadataCache = cache.get(groupId) || {
+		participantsGroup: [],
+		rawParticipants: [],
+		participants: [],
+		adminGroups: []
+	};
 
-		const image = attach.toBuffer();
+	if (action === 'add') {
+		if (author !== '') {
+			action = 'invite';
+		}
 
-		await client.instance.send(
-			message.from,
+		const newParticipant = { id: participant, admin: null, isAdmin: false };
+
+		groupMetadataCache.participantsGroup.push(participant);
+		groupMetadataCache.rawParticipants.push(newParticipant);
+		groupMetadataCache.participants.push(newParticipant);
+	} else {
+		if (author === participant && action !== 'add') {
+			action = 'left';
+		}
+
+		switch (action) {
+			case 'promote':
+				updateParticipantAdminStatus(participant, groupMetadataCache, true);
+				break;
+			case 'demote':
+				updateParticipantAdminStatus(participant, groupMetadataCache, false);
+				break;
+			case 'remove':
+			case 'left':
+				removeParticipant(participant, groupMetadataCache);
+				updateParticipantAdminStatus(participant, groupMetadataCache, false);
+				break;
+		}
+	}
+
+	cache.set(groupId, groupMetadataCache);
+
+	return {
+		eventNames: EVENT_UPDATE[action],
+		actionNames: action
+	};
+};
+
+const parseId = (id) => `@${id.split('@')[0]}`;
+
+const addContextCaption = (participant, action, data) => {
+	participant = parseId(participant);
+
+	return action === 'left' || action === 'add'
+		? `${participant} ${EVENT_MAP[action]}`
+		: `${parseId(data.author)} ${EVENT_MAP[action]} ${participant}`;
+};
+
+/**
+ *
+ * @param {import('./types/Socket/').AdvancedClient} client
+ * @param {string} text
+ * @param {string} id
+ * @param {string} author
+ * @param {string} participant
+ * @param {string} groupName
+ */
+const sendNotification = async (client, text, id, author, participant, groupName, action) => {
+	if (['left', 'remove', 'invite', 'add'].includes(action)) {
+		return client.instance.send(id, {
+			text,
+			mentions: [author || '', participant || '0@s.whatsapp.net']
+		});
+	}
+
+	const attach = new Attachment(1024, 500);
+	const { profile, radi } = await client.instance
+		.profilePictureUrl(participant, 'image')
+		.then(async (image) => ({ profile: new Buffer.from(await fetchBUFFER(image)), radi: 180 }))
+		.catch(() => ({ profile: './src/media/blank.png', radi: 80 }));
+
+	await attach.init(profile);
+
+	attach.fillBackground();
+
+	await attach.putAssets();
+	await attach.appendImage({ roundedRadius: radi });
+	await attach
+		.appendText(
+			action === 'left' ? 'Leaving the group' : action === 'remove' ? 'Kicked from the group' : 'Welcome to',
+			participant.split('@')[0],
+			groupName,
+			attach.canvas.width / 2,
+			attach.canvas.height / 2,
 			{
-				image,
-				caption: text,
-				mentions: [...message.messageStubParameters, message.participant || '0@s.whatsapp.net']
-			},
-			{ groupMetadata: message.groupMetadata }
-		);
+				fontSize: 62,
+				color: attach.PALETTES.GREEN,
+				shadow: true,
+				participantColor: attach.PALETTES.GREEN,
+				groupNameColor: attach.PALETTES.PURPLE,
+				textColor: attach.PALETTES.RED
+			}
+		)
+		.placeCopyright();
 
+	const image = attach.toBuffer();
+
+	return await client.instance.send(id, {
+		image,
+		caption: text,
+		mentions: [author || '', participant || '0@s.whatsapp.net']
+	});
+};
+
+/**
+ *
+ * @param {import('./types/Socket').AdvancedClient} client
+ * @param {*} update
+ */
+const groupParticipantsNotificationHandler = async (client, update) => {
+	const cache = configuration.cache.metadata;
+	const settings = configuration.cache.settings;
+	const { action, author, id, participants } = update;
+	let eventName = null;
+	let actionName = null;
+	const mentions = [];
+
+	participants.forEach((participant) => {
+		const { actionNames, eventNames } = writeCache(id, author, participant, action, cache);
+
+		mentions.push(participant);
+		eventName = eventNames;
+		actionName = actionNames;
+	});
+
+	if (!settings.has(id) || !settings.get(id)) {
 		return;
 	}
 
-	await client.instance.send(
-		message.from,
-		{
+	const text = `${'Group Participants Notification'.formatHeaders()}
+Event Update : ${eventName}
+${participants.map((v) => addContextCaption(v, action, update)).join('\n')}`;
+
+	if (participants.length > 1) {
+		await client.instance.send(id, {
 			text,
-			mentions: [message.participant, ...message.messageStubParameters]
-		},
-		{ groupMetadata: message.groupMetadata }
-	);
-};
-
-const groupParticipantsNotificationHandler = async (client, message, store) => {
-	message = await reassign(JSON.parse(JSON.stringify(message)), client, store, false);
-
-	if (Object.keys(EVENT_UPDATE).includes(message.messageStubType) && configuration.cache.metadata.has(message.from)) {
-		const cache = configuration.cache.metadata?.get(message.from);
-
-		processMessageStubType(cache, message);
+			mentions
+		});
 	}
 
-	if (message?.[message.from]?.notification === 'enable') {
-		const text = `${'Group Participants Notification'.formatHeaders()}\n
-Event Update : ${EVENT_UPDATE[message.messageStubType]}
+	const subject =
+		cache.get(id).subject || settings.get(id).groupName || (await client.instance.groupMetadata(id)).subject || '';
 
-${
-	message?.participant?.split('@')?.[0]
-		? `@${message?.participant?.split('@')?.[0]}`
-		: message?.messageStubParameters.map((v) => `@${v.split('@')[0]}`).join(', ')
-} ${EVENT_UPDATE[message.messageStubType.split('_').reverse()[0]]} ${
-			message.messageStubType.split('_').reverse()[0] !== 'LEAVE' && message.messageStubType.split('_').reverse()[0] !== 'ADD'
-				? message.messageStubParameters.map((v) => `@${v.split('@')[0]}`).join(', ')
-				: ''
-		}`;
-
-		await sendGroupParticipantsNotification(client, message, text);
-	}
+	await sendNotification(client, text, id, author, participants[0], subject, actionName);
 };
 
 export default groupParticipantsNotificationHandler;

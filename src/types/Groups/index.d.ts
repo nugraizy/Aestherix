@@ -1,3 +1,3 @@
-import type { GroupMetadata, GroupParticipant } from '@adiwajshing/baileys';
+import type { GroupMetadata, GroupParticipant } from 'baileys';
 
 export { GroupMetadata, GroupParticipant };

@@ -3,13 +3,12 @@ import type {
 	BinaryNode,
 	ButtonReplyInfo,
 	DownloadableMessage,
-	GroupMetadata,
 	MessageGenerationOptions,
 	MiscMessageGenerationOptions,
 	WAGenericMediaMessage,
 	WAMessage
-} from '@adiwajshing/baileys';
-import { proto } from '@adiwajshing/baileys';
+} from 'baileys';
+import { proto } from 'baileys';
 
 export type StickerType = 'imageMessage' | 'videoMessage' | 'stickerAnimated' | undefined;
 export type PrepareableMediaType =
@@ -25,7 +24,7 @@ export type MessageSendContent = AnyMessageContent;
 export type MessageGenerated = proto.IWebMessageInfo;
 
 export type PrepareMessageOptions = MessageGenerationOptions;
-export type MessageSendOptions = MiscMessageGenerationOptions & GroupMetadata;
+export type MessageSendOptions = MiscMessageGenerationOptions;
 export type GenerationOptions = MiscMessageGenerationOptions;
 
 export { BinaryNode, ButtonReplyInfo, DownloadableMessage, WAMessage, WAGenericMediaMessage };

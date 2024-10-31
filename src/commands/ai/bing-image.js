@@ -1,4 +1,4 @@
-import { delay } from '@adiwajshing/baileys';
+import { delay } from 'baileys';
 import { createImageBing } from '../../utils/index.js';
 
 /**

@@ -1,4 +1,4 @@
-import { generateWAMessageFromContent } from '@adiwajshing/baileys';
+import { generateWAMessageFromContent } from 'baileys';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}

@@ -1,4 +1,4 @@
-import { generateWAMessageFromContent } from '@adiwajshing/baileys';
+import { generateWAMessageFromContent } from 'baileys';
 import numeral from 'numeral';
 import yn from 'yn';
 

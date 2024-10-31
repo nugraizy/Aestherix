@@ -7,8 +7,8 @@ import { checkIntervals, deleteIntervals, setIntervals } from '../misc/index.js'
  * Search new Anonymous session.
  * @param {string} key string of the key/participant.
  * @param {number} timer timeout for how long the queue.
- * @param {Client} client socket connection.
- * @param {import('@adiwajshing/baileys').AnyMessageContent} message metadata of the message.
+ * @param {import('../../types/Socket/index.js').AdvancedClient} client socket connection.
+ * @param {import('baileys').AnyMessageContent} message metadata of the message.
  * @returns {(undefined|boolean)|{partner1: string, partner2: string, messages1: AnyMessageContent, messages2: AnyMessageContent}|{status: string, seconds?: number}}
  */
 export const search = (key, timer, client, message) => {
@@ -69,7 +69,10 @@ export const search = (key, timer, client, message) => {
 			}
 
 			if (second <= 0) {
-				clients.instance.reply('Your partner is not found! Try again later!', { from: partner1, quoted: partner1Message });
+				await clients.instance.reply('Your partner is not found! Try again later!', {
+					from: partner1,
+					quoted: partner1Message
+				});
 				configuration.anonymous.delete(id);
 				deleteIntervals(configuration.intervals['anonymous'].get(id), configuration.intervals['anonymous'], id);
 				return;

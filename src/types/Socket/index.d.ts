@@ -1,21 +1,16 @@
-import type {
-	AuthenticationState,
-	ConnectionState,
-	proto,
-	WAConnectionState,
-	WASocket,
-	WAMemoryStore
-} from '@adiwajshing/baileys';
+import type { AuthenticationState, ConnectionState, proto, WAConnectionState, WASocket, makeInMemoryStore } from 'baileys';
 
 import type { AssignedClient } from '../Utils';
 import type { ReassignResult } from '../Reconstruct';
+
+type WAMemoryStore = ReturnType<typeof makeInMemoryStore>;
 
 export type ClientSocket = WASocket;
 export type Client = { instance: ClientSocket };
 export type AdvancedClient = { instance: ClientSocket & AssignedClient };
 
 export type Store = WAMemoryStore & { localContacts: { [_: string]: { name: string; id: string } } };
-export type SingleAuthState = { state: AuthenticationState; saveState: () => void };
+export type MultiAuthState = { state: AuthenticationState; saveCreds: () => Promise<void> };
 
 export type ContextInfo = proto.IContextInfo;
 

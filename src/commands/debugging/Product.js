@@ -1,4 +1,4 @@
-import { generateWAMessage, generateWAMessageFromContent } from '@adiwajshing/baileys';
+import { generateWAMessage, generateWAMessageFromContent } from 'baileys';
 import fs from 'fs-extra';
 
 /**

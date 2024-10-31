@@ -1,5 +1,4 @@
 import type { Transform } from 'stream';
-
 import type { GroupMetadata } from '../Groups';
 import type {
 	BinaryNode,
@@ -15,7 +14,7 @@ import type {
 } from '../Messages';
 import type { Client, AdvancedClient } from '../Socket';
 import { TemplateBuilder } from '../Commands/Interactive';
-import { proto, WALocationMessage } from '@adiwajshing/baileys';
+import { proto, WALocationMessage } from 'baileys';
 
 export type ExifMetadata = Partial<{
 	/**
@@ -44,11 +43,6 @@ interface ReplyContainer {
 	 * quoting the message
 	 */
 	quoted?: WAMessage;
-
-	/**
-	 * groupMetadata for caching
-	 */
-	groupMetadata?: GroupMetadata;
 }
 
 /**
@@ -93,11 +87,7 @@ export type AppliedExif = (
 	metadata: ExifMetadata
 ) => Promise<Buffer>;
 
-type ContextInfo = MessageSendOptions['contextInfo'] & {
-	contextInfo: proto.ContextInfo;
-};
-
-type Options = MessageSendOptions & ContextInfo;
+type Options = MessageSendOptions;
 
 /**
  * Send message
@@ -121,6 +111,13 @@ export type SendMessage = (
 
 /**
  * Reply message
+ * @example ```js
+ * const options = {
+ * 		from: '62xxxxxx@s.whatsapp.net',
+ *		quoted: message.message
+ * }
+ * await client.instance.reply('Hello World!', options)
+ * ```
  */
 export type ReplyMessage = (
 	/**
@@ -128,7 +125,10 @@ export type ReplyMessage = (
 	 */
 	text: string,
 
-	_: ReplyContainer
+	/**
+	 * reply options
+	 */
+	options: ReplyContainer
 ) => Promise<MessageGenerated>;
 
 /**

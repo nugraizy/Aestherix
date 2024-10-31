@@ -1,8 +1,8 @@
 const {
 	default: { proto: Proto }
-} = await import('@adiwajshing/baileys');
+} = await import('baileys');
 /**
- * @type {import('@adiwajshing/baileys').proto} proto
+ * @type {import('baileys').proto} proto
  */
 const proto = Proto;
 

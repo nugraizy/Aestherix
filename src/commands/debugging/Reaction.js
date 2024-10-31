@@ -1,4 +1,4 @@
-import { generateMessageID, generateWAMessageFromContent } from '@adiwajshing/baileys';
+import { generateMessageID, generateWAMessageFromContent } from 'baileys';
 import emojiReg from 'emoji-regex';
 import { readFileSync } from 'fs';
 import { ZERO } from '../../helper/index.js';

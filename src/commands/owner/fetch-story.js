@@ -1,4 +1,4 @@
-import { generateWAMessageFromContent } from '@adiwajshing/baileys';
+import { generateWAMessageFromContent } from 'baileys';
 import { readFileSync } from 'fs';
 
 import configuration from '../../helper/config/connect.js';

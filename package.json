@@ -9,7 +9,7 @@
     "pm2": "pm2 start ./index.js && pm2 logs",
     "pm2kill": "pm2 kill",
     "dev": "nodemon",
-    "start": "node . nugraizy3 -s -z -w --test",
+    "start": "node . nugraizy -s -z -w --test",
     "test": "echo \"Error: no test specified\" && exit 1",
     "youtube:auth": "node ./src/utils/modules/youtube-auth.js",
     "nhentai:cookie": "node ./src/utils/doujin/cookies.js --get",
@@ -40,7 +40,6 @@
     "delay": 500
   },
   "dependencies": {
-    "@adiwajshing/baileys": "github:nugraizy/baileys",
     "@inquirer/prompts": "^7.0.0",
     "@napi-rs/canvas": "^0.1.58",
     "@svgdotjs/svg.js": "^3.2.0",
@@ -48,6 +47,7 @@
     "aki-api": "^6.0.8",
     "async-retry": "^1.3.3",
     "axios": "^1.6.0",
+    "baileys": "github:whiskeysockets/baileys",
     "boxen": "^7.0.2",
     "brainly-scraper-v2": "^2.2.8",
     "canvas-text-wrapper": "github:cyberj/canvas-text-wrapper#master",

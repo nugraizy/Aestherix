@@ -6,8 +6,8 @@ import { search } from './index.js';
  * Skip current Anonymous session id and find another session.
  * @param {string} key string of the key/participant.
  * @param {number} timer timeout for how long the queue.
- * @param {Client} client socket connection.
- * @param {import('@adiwajshing/baileys').AnyMessageContent} message metadata of the message.
+ * @param {import('../../types/Socket/index.js').AdvancedClient} client socket connection.
+ * @param {import('baileys').AnyMessageContent} message metadata of the message.
  * @param {boolean} isStop
  * @returns {boolean|{partner1: string, partner2: string}|{status: string, seconds: number}}
  */

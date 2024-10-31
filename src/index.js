@@ -1,9 +1,10 @@
-import baileys from '@adiwajshing/baileys';
 import fs from 'fs-extra';
+import { makeInMemoryStore } from 'baileys';
 import dayjs from 'dayjs';
 import localePlugins from 'dayjs/plugin/timezone.js';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 import mqtt from 'mqtt';
+import P from 'pino';
 
 import configuration from './helper/config/connect.js';
 import { color, loggers } from './utils/modules/index.js';
@@ -22,12 +23,11 @@ import {
 	handleParticipantsUpdate,
 	handleGroupSettingsUpdate,
 	handlePollUpdate,
-	handleWerewolfCycle
+	handleWerewolfCycle,
+	parseStubtypeUpdate
 } from './helper/connection/event-handler/universal.js';
 import { handleGithubWebhook } from './helper/connection/github-webhook/events.js';
 import { githubWebhook } from './helper/connection/github-webhook/server.js';
-
-const { useSingleFileAuthState } = baileys;
 
 console.clear();
 
@@ -77,9 +77,9 @@ clientMqttListen.on('connect', () => {
 });
 
 /**
- * @type {import('./helper/connection/type.js').SingleAuthState}
+ * @type {import('./types/Socket/index.js').Store}
  */
-const { state, saveState } = useSingleFileAuthState(`./src/helper/connection/session/${cli.input[0] ?? 'Session-debug'}.json`);
+const store = makeInMemoryStore({ logger: P().child({ level: 'fatal', stream: 'store' }) });
 
 /**
  * @param {boolean} isReconnect
@@ -91,7 +91,7 @@ export const start = async (isReconnect) => {
 			process.exit(0);
 		}
 
-		const { Client, store } = await connectSocket({ cli, OPTIONS, state });
+		const { Client, state, saveCreds } = await connectSocket({ cli, OPTIONS, store });
 
 		store.localContacts = {};
 
@@ -103,6 +103,9 @@ export const start = async (isReconnect) => {
 
 		Client.ev.on('connected', () => {
 			githubWebhook(isReconnect);
+			Client.ev.on('groups', handleGroupSettingsUpdate);
+			Client.ev.on('groups.update', (update) => Client.ev.emit('groups', update));
+			Client.ev.on('group-participants.update', async (update) => await handleParticipantsUpdate(update));
 			Client.ev.on('messages.upsert', async (message) => await handleUpsertUpdate(store, message, state, runtime));
 			Client.ev.on('messages.update', async (message) => await handleMessagesUpdate(store, message));
 			Client.ev.on('presence.update', async (presence) => await handlePresenceUpdate(presence));
@@ -110,15 +113,16 @@ export const start = async (isReconnect) => {
 				'call',
 				async ([{ isGroup, status, id, from }]) => await handleCallUpdate(isGroup, status, id, from, OPTIONS)
 			);
-			Client.ev.on('group.participants.update', async (message) => await handleParticipantsUpdate(store, message));
+			Client.ev.on('profile-picture.update', (update) => {
+				loggers.warning('Profile picture changed in', update.id, 'link :', update.content);
+			});
 			Client.ev.on('commit', async (commitInfo) => await handleGithubWebhook(commitInfo));
-			Client.ev.on('group.settings.update', async (message) => await handleGroupSettingsUpdate(store, message));
 			Client.ev.on('werewolf.cycle', async (update) => await handleWerewolfCycle(update));
 			Client.ev.on('poll.update', async (msg) => handlePollUpdate(store, msg));
-			Client.ws.on('CB:notification,type:w:gp2', (update) => emitGroupSettings.settings(update));
+			Client.ws.on('CB:notification,type:w:gp2', parseStubtypeUpdate);
 			Client.ws.on('CB:notification,type:picture', async (update) => await emitGroupSettings.picture(update));
 		});
-		Client.ev.on('auth-state.update', saveState);
+		Client.ev.on('creds.update', async () => await saveCreds());
 		Client.ev.on('contacts.upsert', (contacts) => initContact(store, contacts));
 		Client.ev.on('contacts.update', (update) => updateContact(store, update));
 		Client.ev.on('contacts.set', (update) => {

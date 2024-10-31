@@ -1,4 +1,4 @@
-import { delay } from '@adiwajshing/baileys';
+import { delay } from 'baileys';
 
 import configuration from '../../helper/config/connect.js';
 

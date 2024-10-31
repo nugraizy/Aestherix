@@ -1,6 +1,6 @@
 import { Boom } from '@hapi/boom';
 import fs from 'fs-extra';
-import { jidNormalizedUser, getKeyAuthor, getAggregateVotesInPollMessage, DisconnectReason } from '@adiwajshing/baileys';
+import { jidNormalizedUser, getKeyAuthor, getAggregateVotesInPollMessage, DisconnectReason, isJidGroup } from 'baileys';
 import readline from 'readline';
 
 import configuration from '../../config/connect.js';
@@ -23,7 +23,8 @@ const HANDLER_PATH = {
 	DELETED: '../../../handlers/messages_event/deleted-message.js',
 	COMPOSING: '../../../handlers/message_presence/composing.js',
 	PARTICIPANT: '../../../handlers/notification_handlers/group-participants-notification.js',
-	GROUPSETTINGS: '../../../handlers/notification_handlers/group-settings-notification.js'
+	GROUPSETTINGS: '../../../handlers/notification_handlers/group-settings-notification.js',
+	PARSE_STUBTYPE: '../../../handlers/notification_handlers/utils.js'
 };
 
 let shouldPrintBanner = true;
@@ -145,9 +146,9 @@ export const handleConnectionUpdate = async (
 					capt += `Connection time ${timeToConnect / 1000}s is not the best time (${data.best_time / 1000}s)`;
 				}
 
-				client.instance.send(configuration.cache.ownerNumbers[0], {
-					text: 'Bot is connected to socket.\n' + capt
-				});
+				// client.instance.send(configuration.cache.ownerNumbers[0], {
+				// 	text: 'Bot is connected to socket.\n' + capt
+				// });
 
 				Client.ev.emit('connected');
 				clearDBConnection(cli);
@@ -187,7 +188,7 @@ export const handleConnectionUpdate = async (
 
 /**
  * @param {import('../type.js').Store} store
- * @param {import('@adiwajshing/baileys').proto.IWebMessageInfo[]} message
+ * @param {import('baileys').proto.IWebMessageInfo[]} message
  * @param {import('../type.js').SingleAuthState['state']} state
  * @param {number} runtime
  */
@@ -201,7 +202,7 @@ export const handleUpsertUpdate = async (store, message, state, runtime) => {
 
 /**
  * @param {import('../type.js').Store} store
- * @param {import('@adiwajshing/baileys').WAMessageUpdate[]} message
+ * @param {import('baileys').WAMessageUpdate[]} message
  */
 export const handleMessagesUpdate = async (store, message) => {
 	if (message?.[0]?.update?.status === 4 || message?.[0]?.update?.status === 3) {
@@ -218,7 +219,7 @@ export const handleMessagesUpdate = async (store, message) => {
 };
 
 /**
- * @param {{ id: string, presences: { [participant: string]: import('@adiwajshing/baileys').PresenceData } }} presence
+ * @param {{ id: string, presences: { [participant: string]: import('baileys').PresenceData } }} presence
  */
 export const handlePresenceUpdate = async (presence) => {
 	const from = presence.id;
@@ -236,7 +237,7 @@ export const handlePresenceUpdate = async (presence) => {
 
 /**
  * @param {(string | undefined)} isGroup
- * @param {import('@adiwajshing/baileys').WACallUpdateType} status
+ * @param {import('baileys').WACallUpdateType} status
  * @param {string} id
  * @param {string} from
  * @param {{[_: string]: boolean}} OPTIONS
@@ -270,22 +271,30 @@ export const handleCallUpdate = async (isGroup, status, id, from, OPTIONS) => {
 
 /**
  * @param {import('../type.js').Store} store
- * @param {import('@adiwajshing/baileys').proto.IWebMessageInfo[]} message
+ * @param {import('baileys').proto.IWebMessageInfo[]} message
  */
-export const handleParticipantsUpdate = async (store, message) => {
+export const handleParticipantsUpdate = async (update) => {
 	if (!handler.has('PARTICIPANT')) {
 		handler.set('PARTICIPANT', (await import(HANDLER_PATH.PARTICIPANT)).default);
 	}
 
-	await handler.get('PARTICIPANT')(client, message, store);
+	await handler.get('PARTICIPANT')(client, update);
 };
 
-export const handleGroupSettingsUpdate = async (store, message) => {
+export const handleGroupSettingsUpdate = async (update) => {
 	if (!handler.has('GROUPSETTINGS')) {
 		handler.set('GROUPSETTINGS', (await import(HANDLER_PATH.GROUPSETTINGS)).default);
 	}
 
-	await handler.get('GROUPSETTINGS')(client, message, store);
+	await handler.get('GROUPSETTINGS')(client, update);
+};
+
+export const parseStubtypeUpdate = async (update) => {
+	if (!handler.has('PARSE_STUBTYPE')) {
+		handler.set('PARSE_STUBTYPE', (await import(HANDLER_PATH.PARSE_STUBTYPE)).processSettingsStubtype);
+	}
+
+	await handler.get('PARSE_STUBTYPE')(update);
 };
 
 export const handleWerewolfCycle = async (update) => {
@@ -450,26 +459,21 @@ export const handlePollUpdate = async (store, msg) => {
 };
 
 export const emitGroupSettings = {
-	settings: (update) => {
-		if (update?.content?.[0].tag !== 'description' && update?.content?.[0].tag !== 'invite') {
-			return;
-		}
-
-		const from = update?.attrs?.from || update?.content?.[0]?.attrs?.author;
-		const name = update?.attrs?.notify;
-		const action = update?.attrs?.content?.[0]?.tag || update?.content?.[0].tag;
-		const content = update?.content?.[0]?.content?.[0]?.content?.toString() || update?.content?.[0]?.attrs.code || '';
-		const participant = update?.attrs?.participant;
-
-		client.instance.ev.emit('group.settings.update', { from, name, action, participant, content });
-	},
 	picture: async (update) => {
+		const object = {};
 		const from = update?.attrs?.from || update?.content?.[0]?.attrs?.author;
 		const name = update?.attrs?.notify;
 		const action = update?.content?.[0]?.tag;
-		const participant = update?.content?.[0]?.attrs?.author;
+		const participant = update?.content?.[0]?.attrs?.author || '';
 		const content = action === 'delete' ? null : await client.instance.profilePictureUrl(from, 'image').catch(() => null);
 
-		client.instance.ev.emit('group.settings.update', { from, name, action, participant, content });
+		object.id = from;
+		object.name = name;
+		object.content = content;
+		object.action = action;
+		isJidGroup(from) ? (object.author = participant) : (object.author = '');
+
+		client.instance.ev.emit('profile-picture.update', object);
+		isJidGroup(from) && client.instance.ev.emit('groups', [object]);
 	}
 };

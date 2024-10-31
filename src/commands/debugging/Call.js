@@ -1,4 +1,4 @@
-import { encodeWAMessage, generateMessageID } from '@adiwajshing/baileys';
+import { encodeWAMessage, generateMessageID } from 'baileys';
 import crypto from 'crypto';
 
 const clearQuery = (query) => query.replace(/[^\d]/g, '');

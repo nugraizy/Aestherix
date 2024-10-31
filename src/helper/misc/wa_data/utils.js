@@ -1,4 +1,4 @@
-import baileys, { hmacSign, aesDecryptGCM } from '@adiwajshing/baileys';
+import baileys, { hmacSign, aesDecryptGCM } from 'baileys';
 
 const { proto } = baileys;
 
@@ -34,8 +34,8 @@ const MEDIA_TYPE = {
 
 /**
  * Extract main body of the WhatsApp message.
- * @param {import('@adiwajshing/baileys').proto.WebMessageInfo} m
- * @param {keyof import('@adiwajshing/baileys').proto.IMessage} type
+ * @param {import('baileys').proto.WebMessageInfo} m
+ * @param {keyof import('baileys').proto.IMessage} type
  * @returns {string | 'Unknown Body'}
  */
 export const extractBody = (m, type) => {
@@ -77,8 +77,8 @@ export const extractBody = (m, type) => {
 
 /**
  * Extract quoted body of WhatsApp message.
- * @param {import('@adiwajshing/baileys').proto.WebMessageInfo} m
- * @param {keyof import('@adiwajshing/baileys').proto.IMessage} type
+ * @param {import('baileys').proto.WebMessageInfo} m
+ * @param {keyof import('baileys').proto.IMessage} type
  * @returns {string}
  */
 export const extractQuotedBody = (m, type) => {
@@ -108,9 +108,9 @@ export const extractQuotedBody = (m, type) => {
 
 /**
  * Find type quoted of the WhatsApp message.
- * @param {import('@adiwajshing/baileys').proto.WebMessageInfo} m
- * @param {keyof import('@adiwajshing/baileys').proto.IMessage} type
- * @returns {keyof import('@adiwajshing/baileys').proto.IMessage}
+ * @param {import('baileys').proto.WebMessageInfo} m
+ * @param {keyof import('baileys').proto.IMessage} type
+ * @returns {keyof import('baileys').proto.IMessage}
  */
 export const extractTypeQuoted = (m, type) => {
 	return m.message?.extendedTextMessage
@@ -126,8 +126,8 @@ export const extractTypeQuoted = (m, type) => {
 
 /**
  * Extract mentions metadata from WhatsApp message.
- * @param {import('@adiwajshing/baileys').proto.WebMessageInfo} m
- * @param {(keyof import('@adiwajshing/baileys').proto.IMessage | 'mentionText')} type
+ * @param {import('baileys').proto.WebMessageInfo} m
+ * @param {(keyof import('baileys').proto.IMessage | 'mentionText')} type
  * @returns {string[]}
  */
 export const extractMentionedJid = (m, type) => {
@@ -142,9 +142,9 @@ export const extractMentionedJid = (m, type) => {
 
 /**
  * Extract metadata WhatsApp message.
- * @param {import('@adiwajshing/baileys').proto.WebMessageInfo} m
- * @param {keyof import('@adiwajshing/baileys').proto.IMessage} typeM
- * @param {keyof import('@adiwajshing/baileys').proto.IMessage} typeQ
+ * @param {import('baileys').proto.WebMessageInfo} m
+ * @param {keyof import('baileys').proto.IMessage} typeM
+ * @param {keyof import('baileys').proto.IMessage} typeQ
  * @returns {string[] | null}
  */
 export const extractMetadata = (m, typeM, typeQ) => {

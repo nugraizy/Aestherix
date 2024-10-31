@@ -1,4 +1,4 @@
-import { generateWAMessageFromContent } from '@adiwajshing/baileys';
+import { generateWAMessageFromContent } from 'baileys';
 
 import configuration from '../../helper/config/connect.js';
 import { runtime } from '../../index.js';

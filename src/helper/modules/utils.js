@@ -5,8 +5,9 @@ import {
 	generateWAMessageFromContent,
 	toBuffer,
 	jidDecode,
-	generateMessageID
-} from '@adiwajshing/baileys';
+	generateMessageIDV2,
+	isJidGroup
+} from 'baileys';
 import { fileTypeFromBuffer } from 'file-type';
 import ffmpeg from 'fluent-ffmpeg';
 import webpmux from 'node-webpmux';
@@ -117,12 +118,13 @@ export const assign = (client) => {
 	const send = async (to, message, options) => {
 		options = {
 			...options,
-			...(options?.groupMetadata ? { cachedGroupMetadata: () => options?.groupMetadata } : {}),
+			...(isJidGroup(to) && { useCachedGroupMetadata: true }),
 			ephemeralExpiration:
 				options?.groupMetadata?.ephemeralDuration ||
 				configuration.cache.metadata?.get(to)?.ephemeralDuration ||
 				configuration.cache.users?.get(to)?.ephemeralDuration ||
-				null
+				0,
+			messageId: 'HFINDER' + generateMessageIDV2(to)
 		};
 
 		if ('buttons' in message || 'templateButtons' in message) {
@@ -203,7 +205,7 @@ export const assign = (client) => {
 		client.instance.query({
 			tag: 'iq',
 			attrs: {
-				id: generateMessageID(),
+				id: generateMessageIDV2(),
 				to: '@s.whatsapp.net',
 				xmlns: 'status',
 				type: 'get'
@@ -681,17 +683,16 @@ export const assign = (client) => {
 		 * Send and reply any user message.
 		 * @type {import('../../types/Utils/index.js').ReplyMessage}
 		 */
-		reply: async (text, { from, groupMetadata, quoted }) =>
+		reply: async (text, { from, quoted }) => {
 			await send(
 				from,
 				{ text },
 				{
 					quoted,
-					cachedGroupMetadata: () => groupMetadata,
-					ephemeralExpiration:
-						groupMetadata?.ephemeralDuration || configuration.cache.users?.get(from)?.ephemeralDuration || null
+					ephemeralExpiration: configuration.cache.users?.get(from)?.ephemeralDuration || null
 				}
-			),
+			);
+		},
 
 		/**
 		 * Prepare media before sending it as readable WhatsApp sticker.

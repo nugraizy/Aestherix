@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { generateWAMessage, generateWAMessageFromContent } from '@adiwajshing/baileys';
+import { generateWAMessage, generateWAMessageFromContent } from 'baileys';
 import { ZERO, S_WHATSAPP_NET } from '../../helper/index.js';
 
 /**
