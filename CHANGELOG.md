@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+# [5.0.7] 2024-10-31
+## Fix
+- Cache Users and Groups.
+- Handle groups events and sync the cache.
+- `Waiting for this message` hopefully be fixed with this fix,
+
+---
+
 # [5.0.7] 2024-10-29
 ## Refactor
 - Change function name to be more readable and make sense.
