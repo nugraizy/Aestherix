@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+# [5.0.9] 2024-11-02
+## Fix
+- `updateProfilePicture`, and improve cropping image using sharp.
+
+---
+
 # [5.0.8] 2024-10-31
 ## Fix
 - Cache Users and Groups.
