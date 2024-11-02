@@ -40,6 +40,7 @@ const helpFlag = `
 	'This needs to input your host number to get the code.',
 	'#ef476f'
 )}
+	   --spin                ${color('Enable spinners for loading plugins.', '#05ffa1')}
 	   --test                ${color('Test your connection.', '#05ffa1')}
 	   --help, -h            ${color('Show this message.', '#05ffa1')}
 
@@ -78,7 +79,8 @@ export const parseCli = () =>
 			reset_on_start: { type: 'boolean', shortFlag: 'x' },
 			no_limit: { type: 'boolean', shortFlag: 'u' },
 			pair_mode: { type: 'boolean', shortFlag: 'z' },
-			test: { type: 'boolean' }
+			test: { type: 'boolean' },
+			spin: { type: 'boolean' }
 		}
 	});
 

@@ -3,7 +3,6 @@ import { load } from 'cheerio';
 import { fileTypeFromBuffer } from 'file-type';
 import FormData from 'form-data';
 import fs from 'fs-extra';
-import gradient from 'gradient-string';
 import { fetch, Client, File, FormData as FormDataUndici } from 'undici';
 import ms from 'parse-ms';
 import _ from 'lodash';
@@ -11,11 +10,13 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import chalk from 'chalk';
 import progress from 'progress-stream';
-import boxen from 'boxen';
 
 import configuration from '../../helper/config/connect.js';
+import { color } from './color.js';
 
 dayjs.extend(utc);
+
+export { color };
 
 /**
  * Fetches texts
@@ -478,34 +479,6 @@ export const delaySync = (ms) => {
 
 export const delay = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const color = (...obj) => {
-	if (obj.length % 2 !== 0) {
-		log('Invalid Number of arguments. Please pairs of text and color.', obj);
-		return;
-	}
-
-	let str = '';
-
-	for (let i = 0; i < obj.length; i += 2) {
-		const text = obj[i];
-		const color = obj[i + 1];
-
-		str += configuration.OPTIONS.rainbow
-			? gradient['rainbow'](text)
-			: typeof color === 'object'
-			? gradient(...color)(text)
-			: typeof color === 'string'
-			? chalk[color]?.(text) || chalk.hex(color)(text)
-			: (() => {
-					const schemes = _.sample(['teen', 'passion', 'instagram']);
-
-					return gradient[schemes](text);
-			  })(); // eslint-disable-line
-	}
-
-	return str;
-};
-
 const isFormat = false;
 const isFormatISO = true;
 const TIME_FORMAT_DEFAULT = 'ddd, DD MMM YYYY HH:mm:ss [GMT]Z';
@@ -514,10 +487,6 @@ const ICON = color('ᛟ', '#E4C1F9');
 const SEPERATOR_1 = color(':', '#6272A4');
 const SEPERATOR_2 = color('/', '#6272A4');
 const SEPERATOR_3 = color(' 一', '#50FA7B');
-
-const { version } = await fs.readJSON('./package.json');
-const SPLITTER = ['᠁✦', '✦', '✦', '✦᠁']; //.map((v) => color(` ${v} `, '#E4C1F9'));
-const AUTHOR = color('nugraizy', '#FF5555');
 
 export const boldify = (string) => chalk.bold(string);
 
@@ -571,26 +540,6 @@ export const loggers = {
 	info: (...info) => loggersFns('INF', '#50FA7B', ...info),
 	error: (...info) => loggersFns('ERR', '#FF5555', ...info)
 };
-
-const BANNER_ICON_1 = color('❝', '#FF5555');
-const BANNER_ICON_2 = color('❞', '#FF5555');
-
-export const printBanner = () =>
-	log(
-		boxen(
-			`${BANNER_ICON_1}${chalk.italic.bold.hex('#BD93F9')('Aestherix')}${BANNER_ICON_2}
-version
-${SPLITTER[0]} ${version.split(/\./g).join(` ${SPLITTER[1]} `)} ${SPLITTER[SPLITTER.length - 1]}`,
-			{
-				title: `${ICON} Made by @${AUTHOR} ${ICON}`,
-				textAlignment: 'center',
-				float: 'center',
-				borderColor: 'gray',
-				margin: 1,
-				borderStyle: 'round'
-			}
-		)
-	);
 
 export const isURL = (input) =>
 	/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/gi.test(input);

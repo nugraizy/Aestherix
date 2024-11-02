@@ -39,10 +39,10 @@ const logMessage = (message) => {
 	const messageBody = color(message.query?.replace(/[\t\n]/g, ' ').substring(0, 35), 'white');
 	const typeInfo = `${SEPERATOR} ${color('type', '#f5bde6')} ${color(message.type, '#81c8be')}`;
 	const runtimeInfo = `${SEPERATOR} ${color(((Date.now() - runtime) / 1000).toFixed(0), '#F1FA8C')}${color('s', '#f5e700')}`;
-	const messageFrom = `${SEPERATOR} ${color('in', '#f5bde6')} ${color(
+	const messageFrom = `${SEPERATOR} ${color('white', '#f5bde6')} ${color(
 		message.isGroup ? `group ${message.groupName}` : 'private chat',
 		'#81c8be'
-	)}${(message.isGroup && color(' id ', '#f5bde6') + color(message.groupId, '#BD93F9')) || ''}`;
+	)}${(message.isGroup && color(' id ', 'white') + color(message.groupId, '#BD93F9')) || ''}`;
 
 	let fullBody = null;
 

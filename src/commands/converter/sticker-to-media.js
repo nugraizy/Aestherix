@@ -2,6 +2,7 @@ import path from 'path';
 
 import { color, loggers } from '../../utils/modules/index.js';
 import { convertStickerToMedia } from '../../utils/converter/index.js';
+import { reassign } from '../../helper/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -16,10 +17,26 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	status: 'enable',
-	async run({ isQuotedSticker, from, message, filename, extractMediaData, prettyNumber, typeQuoted, groupMetadata }, client) {
+	async run(
+		{
+			isQuotedSticker,
+			from,
+			message,
+			filename,
+			extractMediaData,
+			prettyNumber,
+			typeQuoted,
+			groupMetadata,
+			waitForInput,
+			sender
+		},
+		client
+	) {
 		if (!isQuotedSticker) {
 			return await client.instance.reply('Please reply a sticker to decrypt', { from, quoted: message, groupMetadata });
 		}
+
+		loggers.info(`${color('Decrypting media', '#FF99C8')} from ${color(prettyNumber, '#E4C1F9')}`);
 
 		const results = await client.instance.downloadAndSaveMediaMessage(
 			extractMediaData,
@@ -41,6 +58,17 @@ export default {
 				  } /* eslint-disable-line */,
 			{ groupMetadata, quoted: message }
 		);
+
+		const wait = await waitForInput(client, {
+			expectedType: ['stickerMessage'],
+			from,
+			sender,
+			timeInSecond: 10
+		});
+
+		if (!wait.timeout) {
+			await this.run(await reassign(wait.message, client, store), client);
+		}
 
 		loggers.info(`${color('Media is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 	}

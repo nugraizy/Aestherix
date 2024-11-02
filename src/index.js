@@ -29,8 +29,6 @@ import {
 import { handleGithubWebhook } from './helper/connection/github-webhook/events.js';
 import { githubWebhook } from './helper/connection/github-webhook/server.js';
 
-console.clear();
-
 dayjs.extend(localePlugins);
 dayjs.extend(customParseFormat);
 dayjs.tz.setDefault('Asia/Jakarta');

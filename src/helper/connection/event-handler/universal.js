@@ -4,7 +4,7 @@ import { jidNormalizedUser, getKeyAuthor, getAggregateVotesInPollMessage, Discon
 import readline from 'readline';
 
 import configuration from '../../config/connect.js';
-import { loggers, color, printBanner } from '../../../utils/modules/index.js';
+import { loggers, color } from '../../../utils/modules/index.js';
 import { connectMqtt } from '../utils/mqtt.js';
 import { loadCommands } from '../utils/commands.js';
 import { clearDBConnection } from '../socket/reset-session.js';
@@ -112,7 +112,6 @@ export const handleConnectionUpdate = async (
 				(await import('../../modules/utils.js')).assign(client);
 
 				if (shouldPrintBanner) {
-					printBanner();
 					loggers.info(color('Socket connected', 'white'), color('Successfully', '#E4C1F9') + color('.', 'white'));
 					shouldPrintBanner = false;
 				}
