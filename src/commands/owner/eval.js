@@ -24,8 +24,7 @@ class CustomArray extends Array {
 	}
 }
 
-const print = ({ from, quoted, groupMetadata }, ...args) =>
-	client.instance.reply(format(...args), { from, quoted, groupMetadata });
+const print = ({ from, quoted }, ...args) => client.instance.reply(format(...args), { from, quoted });
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}

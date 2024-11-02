@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-# [5.0.7] 2024-10-31
+# [5.0.8] 2024-10-31
 ## Fix
 - Cache Users and Groups.
 - Handle groups events and sync the cache.

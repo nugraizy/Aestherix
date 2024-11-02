@@ -114,7 +114,7 @@ export const start = async (isReconnect) => {
 				async ([{ isGroup, status, id, from }]) => await handleCallUpdate(isGroup, status, id, from, OPTIONS)
 			);
 			Client.ev.on('profile-picture.update', (update) => {
-				loggers.warning('Profile picture changed in', update.id, 'link :', update.content);
+				loggers.warning('Profile picture changed in', update.id, 'link :', update.content || 'no link :(');
 			});
 			Client.ev.on('commit', async (commitInfo) => await handleGithubWebhook(commitInfo));
 			Client.ev.on('werewolf.cycle', async (update) => await handleWerewolfCycle(update));

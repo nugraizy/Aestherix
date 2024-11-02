@@ -6,7 +6,8 @@ import {
 	toBuffer,
 	jidDecode,
 	generateMessageIDV2,
-	isJidGroup
+	isJidGroup,
+	jidNormalizedUser
 } from 'baileys';
 import { fileTypeFromBuffer } from 'file-type';
 import ffmpeg from 'fluent-ffmpeg';
@@ -674,8 +675,62 @@ export const assign = (client) => {
 		static Native = Native;
 	}
 
-	client.instance = {
-		...client.instance,
+	const generateProfilePicture = async (mediaUpload, type) => {
+		let bufferOrFilePath;
+
+		if (Buffer.isBuffer(mediaUpload)) {
+			bufferOrFilePath = mediaUpload;
+		} else if (isURL(mediaUpload)) {
+			bufferOrFilePath = await fetchBUFFER(mediaUpload);
+		}
+
+		let image = sharp(bufferOrFilePath);
+
+		const { width, height } = await image.metadata();
+
+		let targetWidth = 640;
+		let targetHeight = 640;
+
+		if (type === 'no_crop') {
+			const aspectRatio = width / height;
+
+			if (width > height) {
+				targetWidth = 300;
+				targetHeight = Math.round(targetWidth / aspectRatio);
+			} else if (width < height) {
+				targetHeight = 700;
+				targetWidth = Math.round(targetHeight * aspectRatio);
+			}
+
+			image = image
+				.resize({
+					width: targetWidth,
+					height: targetHeight
+				})
+				.jpeg();
+		} else if (type === 'no_stretch') {
+			const min = Math.min(width, height);
+			const cropped = image
+				.extract({ left: 0, top: 0, width: min, height: min })
+				.resize(640, 640, { fit: 'fill' })
+				.jpeg({ quality: 50 });
+
+			image = cropped;
+		} else {
+			image = image
+				.resize({
+					width: targetWidth,
+					height: targetHeight
+				})
+				.jpeg();
+		}
+
+		return {
+			image: await image.toBuffer()
+		};
+	};
+
+	Object.assign(client.instance, {
 		send,
 		applyExif,
 
@@ -1108,8 +1163,40 @@ export const assign = (client) => {
 
 			return jids;
 		},
-		TemplateBuilder
-	};
+		TemplateBuilder,
+		updateProfilePicture: async (jid, media, option) => {
+			if (!jid) {
+				throw new Error(
+					'Illegal no-jid profile update. Please specify either your ID or the ID of the chat you wish to update'
+				);
+			}
+
+			let targetJid;
+
+			if (jidNormalizedUser(targetJid) !== jidNormalizedUser(client.instance.authState.creds.me.id)) {
+				targetJid = jidNormalizedUser(jid);
+			}
+
+			const { image } = await generateProfilePicture(media, option);
+
+			await client.instance.query({
+				tag: 'iq',
+				attrs: {
+					target: targetJid,
+					to: S_WHATSAPP_NET,
+					type: 'set',
+					xmlns: 'w:profile:picture'
+				},
+				content: [
+					{
+						tag: 'picture',
+						attrs: { type: 'image' },
+						content: image
+					}
+				]
+			});
+		}
+	});
 
 	return client;
 };

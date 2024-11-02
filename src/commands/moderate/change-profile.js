@@ -1,4 +1,5 @@
 import yargsParser from 'yargs-parser';
+import { jidNormalizedUser } from 'baileys';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -69,9 +70,9 @@ export default {
 		}
 
 		await client.instance.updateProfilePicture(
-			options.self ? instance : from,
+			options.self ? jidNormalizedUser(instance) : from,
 			media,
-			options.noCrop ? 'noCrop' : options.noStretch ? 'noStretch' : undefined
+			options.no_crop || options.noCrop ? 'no_crop' : options.no_stretch || options.noStretch ? 'no_stretch' : undefined
 		);
 	}
 };

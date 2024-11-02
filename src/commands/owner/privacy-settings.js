@@ -36,6 +36,33 @@ const parseValidValue = (name, value) => {
 	return null;
 };
 
+const sendQuery = (client, { name, value }) =>
+	client.instance.query({
+		tag: 'iq',
+		attrs: {
+			xmlns: 'privacy',
+			type: 'set',
+			to: '@s.whatsapp.net',
+			id: generateMessageID()
+		},
+		content: [
+			{
+				tag: 'privacy',
+				attrs: {},
+				content: [
+					{
+						tag: 'category',
+						attrs: {
+							name,
+							value
+						},
+						content: undefined
+					}
+				]
+			}
+		]
+	});
+
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
  */
@@ -101,31 +128,7 @@ export default {
 				);
 			}
 
-			await client.instance.query({
-				tag: 'iq',
-				attrs: {
-					xmlns: 'privacy',
-					type: 'set',
-					to: '@s.whatsapp.net',
-					id: generateMessageID()
-				},
-				content: [
-					{
-						tag: 'privacy',
-						attrs: {},
-						content: [
-							{
-								tag: 'category',
-								attrs: {
-									name,
-									value
-								},
-								content: undefined
-							}
-						]
-					}
-				]
-			});
+			await sendQuery(client, { name, query });
 
 			await client.instance.reply('Succesfully changed privacy settings.', {
 				from,
