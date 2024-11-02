@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+# [5.1.0] 2024-11-02
+## Added
+- Spinner when loading the plugins. Use `--spin` flag before running the client.
+
+## Refactoring
+- `printBanner` should printed before connecting.
+- `console.clear` should fired on start, and not before/after serilization of connections and plugins.
+
+---
+
 # [5.0.9] 2024-11-02
 ## Fix
 - `updateProfilePicture`, and improve cropping image using sharp.
