@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+# [5.1.3] 2024-11-05
+## Fixed
+- Commmand(**fetch**): fix parser, and removing the quotation mark on the response string as it is not conventional.
+
+## Chore
+- Adding CHANGELOG Screenshot.
+
+---
+
 # [5.1.2] 2024-11-04
 ## Refactoring
 - Cleanups unused variables.
