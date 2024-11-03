@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+# [5.1.2] 2024-11-04
+## Refactoring
+- Cleanups unused variables.
+
+---
+
 # [5.1.1] 2024-11-03
 ## Fixed
 - Facebook downloader. Now using [fdownloader.net](https://fdownloader.net).
