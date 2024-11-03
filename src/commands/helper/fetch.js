@@ -21,7 +21,7 @@ const parseObject = (obj, str) => {
 			throw new Error(`Cannot read properties of undefined.\n${err}\n${' '.repeat(err.length)}^^^^`);
 		}
 
-		return value !== undefined ? JSON.stringify(value, null, 2) : value;
+		return typeof value === 'object' || Array.isArray(value) ? JSON.stringify(value, null, 2) : value;
 	} catch (error) {
 		return {
 			error: true,
@@ -60,8 +60,26 @@ const processJsonResponse = async (response, parser) => {
 	return json;
 };
 
-const processTextResponse = async (response) => {
-	const text = await response.text();
+const processTextResponse = async (response, parser) => {
+	let text = await response.text();
+
+	try {
+		const json = JSON.parse(text);
+
+		if (parser) {
+			text = parseObject(json, parser);
+
+			if (!json || json.error) {
+				return { error: true, message: json.message || 'Cannot parse json' };
+			}
+		} else {
+			text = JSON.stringify(JSON.parse(json), null, 2);
+		}
+	} catch {
+		// do nothing
+	}
+
+	console.log(text);
 
 	return text;
 };
@@ -142,7 +160,7 @@ export default {
 			const response = await fetchData(url, { method, headers, body });
 
 			if (response.error) {
-				client.instance.reply(response.message, { from, quoted: message });
+				return client.instance.reply(response.message, { from, quoted: message });
 			}
 
 			const responseTypes = response.headers.get('content-type').split(';')[0];
@@ -156,7 +174,7 @@ export default {
 
 				await client.instance.reply(data, { from, quoted: message });
 			} else if (responseTypes.startsWith('text')) {
-				const data = await processTextResponse(response);
+				const data = await processTextResponse(response, queryParser);
 
 				await client.instance.reply(data, { from, quoted: message });
 			} else {
@@ -182,6 +200,7 @@ export default {
 				}
 			}
 		} catch (error) {
+			console.log(error);
 			await client.instance.reply(error.message, { from, quoted: message });
 		}
 	}

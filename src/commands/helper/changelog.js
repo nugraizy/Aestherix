@@ -1,6 +1,9 @@
 import parser from 'yargs-parser';
+import fs from 'fs-extra';
 
 import { getChangelogs, stringifyChangelogs } from '../../utils/github/index.js';
+
+const disable = true;
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -15,6 +18,10 @@ export default {
 	limit: 3,
 	status: 'enable',
 	run: async ({ query, from, message }, client) => {
+		if (disable) {
+			return await client.instance.send(from, { image: await fs.readFile('./CHANGELOG.png') }, { quoted: message });
+		}
+
 		const { quantity } = parser(query, {
 			number: ['quantity'],
 			configuration: {
