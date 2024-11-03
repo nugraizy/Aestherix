@@ -4,8 +4,16 @@ import yts from 'yt-search';
 import { isURL, fetchJSON } from '../modules/index.js';
 import { Cache } from '../../helper/modules/cache.js';
 
-const ajaxUrl = 'https://www.y2mate.com/mates/en865/analyzeV2/ajax';
-const convertUrl = 'https://www.y2mate.com/mates/convertV2/index';
+const ajaxUrl = 'https://www.yt1s.com/api/ajaxSearch/index';
+const convertUrl = 'https://www.yt1s.com/api/ajaxConvert/convert';
+const headers = {
+	'User-Agent':
+		'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+	'X-Requested-With': 'XMLHttpRequest',
+	referer: 'https://www.yt1s.com/en2aef',
+	origin: 'https://www.yt1s.com',
+	'Content-Type': 'application/x-www-form-urlencoded'
+};
 
 const isUrl = (url) =>
 	url.match(
@@ -18,12 +26,7 @@ const req = async (url, formdata) => {
 	return await fetchJSON(url, {
 		body: new URLSearchParams(formdata),
 		method: 'POST',
-		headers: {
-			'user-agent':
-				'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 YaBrowser/23.1.5.750 (beta) Yowser/2.5 Safari/537.36',
-			'x-requested-with': 'XMLHttpRequest',
-			'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
-		}
+		headers
 	});
 };
 
@@ -40,10 +43,8 @@ const yt = (url, type) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			const data = await req(ajaxUrl, {
-				k_query: url,
-				k_page: 'home',
-				hl: 'en',
-				q_auto: 0
+				q: url,
+				vt: 'home'
 			});
 
 			const obj = Object.entries(data.links[type]);

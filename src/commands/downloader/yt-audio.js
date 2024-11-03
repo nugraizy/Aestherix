@@ -1,7 +1,7 @@
-import { color, delay, loggers, isURL, removeDuplicatesArray, isYoutubeURL } from '../../utils/modules/index.js';
-import { YouTubei } from '../../utils/youtube/index.js';
+import { color, delay, loggers, isURL, removeDuplicatesArray, isYoutubeURL, fetchBUFFER } from '../../utils/modules/index.js';
+import { youtubeMainDownload } from '../../utils/youtube/index.js';
 
-const youtube = new YouTubei();
+// const youtube = new YouTubei();
 
 /**
  *
@@ -11,7 +11,7 @@ const youtube = new YouTubei();
  * @returns
  */
 const processAudio = async (url, client, { from, message, groupMetadata, prettyNumber }) => {
-	const audio = await youtube.audio(url);
+	const audio = await youtubeMainDownload(url, 'mp3');
 
 	loggers.warning(`${color('Downloading YouTube Audio', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
@@ -20,9 +20,9 @@ const processAudio = async (url, client, { from, message, groupMetadata, prettyN
 	// 	loggers.error(`${color('Failed to Download YouTube Audio', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 	// }
 
-	const { title, download } = audio;
+	const { title, link, description, resolution } = audio;
 
-	if (!download) {
+	if (!link) {
 		client.instance.reply(`Error while downloading YouTube Video\n\n${url}`, { from, quoted: message, groupMetadata });
 		loggers.error(`${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 
@@ -32,11 +32,13 @@ const processAudio = async (url, client, { from, message, groupMetadata, prettyN
 	let capt = '';
 
 	capt += `Title : ${title}\n`;
+	capt += `Resolution : ${resolution}\n`;
+	capt += `Descriptions : ${description || ''}`;
 
 	await client.instance.send(
 		from,
 		{
-			document: Buffer.from(await download(), 'base64'),
+			document: Buffer.from(await fetchBUFFER(link), 'base64'),
 			fileName: `${title}.mp3`,
 			mimetype: 'audio/mp3',
 			caption: capt.formatForm()

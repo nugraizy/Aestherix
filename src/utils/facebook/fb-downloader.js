@@ -1,37 +1,58 @@
 import { fetchJSON } from '../modules/index.js';
-import { parse } from './utils.js';
+import { parse, getTokens } from './utils.js';
 
-const _api = 'https://www.y2mate.com/mates/en/analyzeV2/ajax';
+const _api = 'https://v3.fdownloader.net/api/ajaxSearch?lang=en';
 
-export const fbDl = (url) =>
+/**
+ * Download Facebook videos.
+ * @param {string} url Facebook URL
+ * @returns {Promise<import('./utils.js').ParsedFacebookResponse>}
+ */
+export const facebook = (url) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const obj = {
-				// eslint-disable-next-line
-				k_query: url,
-				// eslint-disable-next-line
-				k_page: 'Facebook',
-				hl: 'en',
-				// eslint-disable-next-line
-				q_auto: 0
+			const { k_token: kToken, k_exp: kExp } = await getTokens();
+
+			const payload = {
+				k_exp: +kExp, // eslint-disable-line
+				k_token: kToken, // eslint-disable-line
+				q: url,
+				lang: 'en',
+				web: 'fdownloader.net',
+				v: 'v2',
+				w: ''
 			};
 
-			const data = await fetchJSON(_api, {
+			const json = await fetchJSON(_api, {
 				method: 'POST',
+				body: new URLSearchParams(payload),
 				headers: {
-					Referer: 'https://www.y2mate.com/en/facebook-downloader',
-					'User-Agent':
-						'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36'
-				},
-				body: new URLSearchParams(obj)
+					accept: '*/*',
+					'content-type': 'application/x-www-form-urlencoded',
+					origin: 'https://fdownloader.net',
+					referer: 'https://fdownloader.net/',
+					'sec-ch-ua': '"Chromium";v="130", "Brave";v="130", "Not?A_Brand";v="99"',
+					'sec-ch-ua-mobile': '?0',
+					'sec-ch-ua-platform': 'Windows',
+					'sec-fetch-dest': 'empty',
+					'sec-fetch-mode': 'cors',
+					'sec-fetch-site': 'same-site',
+					'sec-gpc': 1,
+					'user-agent':
+						'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'
+				}
 			});
 
-			if (data.mess !== '') {
-				resolve({ error: data.mess });
+			if (!json.v) {
+				resolve({
+					error: 'No Data.'
+				});
+
+				return;
 			}
 
-			resolve(parse(data));
-		} catch (err) {
-			reject(err);
+			resolve(parse(json.data));
+		} catch (error) {
+			reject(error);
 		}
 	});

@@ -1,7 +1,7 @@
 import parser from 'yargs-parser';
 
 import { color, fetchBUFFER, loggers, isURL, delay } from '../../utils/modules/index.js';
-import { fbDl } from '../../utils/facebook/index.js';
+import { facebook } from '../../utils/facebook/index.js';
 
 const regex = (input) => /^(https?:\/\/)?((w{3}\.)|(m\.)?)?(facebook|fb)\.(com|watch)\/.*/.test(input);
 
@@ -44,7 +44,7 @@ export default {
 				continue;
 			}
 
-			const post = await fbDl(url.trim());
+			const post = await facebook(url.trim());
 
 			loggers.warning(`${color('Downloading Facebook Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
@@ -59,13 +59,15 @@ export default {
 				continue;
 			}
 
-			const urlFilter = post.url.find((v) => v.resolution === '1080p' || v.resolution === '720p' || v.resolution === '480p');
+			const urlFilter = post.links.find(
+				(v) => v.quality.includes('1080p') || v.quality.includes('720p') || v.quality.includes('480p')
+			);
 
 			await client.instance.send(
 				from,
 				{
 					video: new Buffer.from(await fetchBUFFER(urlFilter.url)),
-					caption: `${'Facebook Video Downloader'.formatHeaders()}\n\nResolution : ${urlFilter.resolution}`.formatForm()
+					caption: `${'Facebook Video Downloader'.formatHeaders()}\n\nResolution : ${urlFilter.quality}`.formatForm()
 				},
 				{ groupMetadata }
 			);

@@ -398,7 +398,7 @@ export const assign = (client) => {
 		}
 
 		async getMessageType(media) {
-			const mime = (await fileTypeFromBuffer(media))?.mime;
+			const mime = (await fileTypeFromBuffer(media))?.mime || '';
 			const messageType = mime.includes('gif') || mime.includes('video') ? 'videoMessage' : 'imageMessage';
 
 			return { mime, messageType };
@@ -738,7 +738,7 @@ export const assign = (client) => {
 		 * Send and reply any user message.
 		 * @type {import('../../types/Utils/index.js').ReplyMessage}
 		 */
-		reply: async (text, { from, quoted }) => {
+		reply: async (text, { from, quoted }) =>
 			await send(
 				from,
 				{ text },
@@ -746,9 +746,7 @@ export const assign = (client) => {
 					quoted,
 					ephemeralExpiration: configuration.cache.users?.get(from)?.ephemeralDuration || null
 				}
-			);
-		},
-
+			),
 		/**
 		 * Prepare media before sending it as readable WhatsApp sticker.
 		 * @type {import('../../types/Utils/index.js').PrepareSticker}

@@ -6,7 +6,7 @@ type MediaType = 'videoMessage' | 'imageMessage';
 type Media = string | Buffer | undefined | null;
 type Rows = { header: string; title: string; description: string; id: string };
 type Sections = { title: string; highlight_label: string; rows: Rows[] };
-type Cards = { body: string | null; footer: string | null; title: string | null } & Partial<{ header: string | Buffer }>;
+type Cards = { body: string | null; footer: string | null; title: string | null, buttons: Buttons[] } & Partial<{ header: string | Buffer }>;
 type Buttons = {
 	name:
 		| 'cta_copy'
