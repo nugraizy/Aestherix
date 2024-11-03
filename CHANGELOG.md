@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+# [5.1.1] 2024-11-03
+## Fixed
+- Facebook downloader. Now using [fdownloader.net](https://fdownloader.net).
+- Fix loggers on incoming messages event.
+- Prevent reading undefined on Carousel.`getMessageType`.
+- Kinda fixed the youtube downloader when client deployed on a server. Though it still have cloudflare on the end. Please use `youtubei.js`.
+
+---
+
 # [5.1.0] 2024-11-02
 ## Added
 - Spinner when loading the plugins. Use `--spin` flag before running the client.
