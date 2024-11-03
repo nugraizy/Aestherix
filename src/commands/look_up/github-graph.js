@@ -13,9 +13,9 @@ export default {
 	cooldown: 6,
 	limit: 3,
 	status: 'enable',
-	async run({ from, query, message, groupMetadata }, client) {
+	async run({ from, query, message }, client) {
 		if (!query) {
-			return await client.instance.reply('Please specify a GitHub User', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a GitHub User', { from, quoted: message });
 		}
 
 		const git = new GitHubGraph();
@@ -26,6 +26,6 @@ export default {
 
 		const buffer = create.toBuffer();
 
-		await client.instance.send(from, { image: new Buffer.from(buffer) }, { groupMetadata, quoted: message });
+		await client.instance.send(from, { image: new Buffer.from(buffer) }, { quoted: message });
 	}
 };

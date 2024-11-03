@@ -35,8 +35,7 @@ const deletedHandler = async (client, message, fetches) => {
 			filename,
 			isBaileys,
 			isFromMe,
-			mediaData,
-			groupMetadata
+			mediaData
 		} = message;
 
 		const messages = message?.message?.message;
@@ -55,7 +54,6 @@ const deletedHandler = async (client, message, fetches) => {
 
 		if (stats) {
 			const options = {
-				groupMetadata,
 				quoted: message.message,
 				contextInfo: {
 					mentionedJid: []

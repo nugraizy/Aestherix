@@ -18,7 +18,6 @@ export default {
 	async run(message, client) {
 		if (!message.query) {
 			return await client.instance.reply('Please enter a query', {
-				groupMetadata: message.groupMetadata,
 				quoted: message.message,
 				from: message.from
 			});

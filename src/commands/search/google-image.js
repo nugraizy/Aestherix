@@ -13,9 +13,9 @@ export default {
 	cooldown: 5,
 	limit: 4,
 	status: 'disable',
-	run: async ({ query, message, from, groupMetadata }, client) => {
+	run: async ({ query, message, from }, client) => {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		let queries = query.split(',');
@@ -26,7 +26,7 @@ export default {
 			const result = await googleImage(querie, 10);
 
 			if ('error' in result) {
-				client.instance.reply(result.error, { from, quoted: message, groupMetadata });
+				client.instance.reply(result.error, { from, quoted: message });
 				continue;
 			}
 
@@ -48,7 +48,7 @@ export default {
 					],
 					footer: `Void Bot     1/${result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		}
 	}

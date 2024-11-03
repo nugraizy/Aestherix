@@ -13,9 +13,9 @@ export default {
 	cooldown: 5,
 	limit: 4,
 	status: 'enable',
-	run: async ({ query, message, from, type, args, groupMetadata }, client) => {
+	run: async ({ query, message, from, type, args }, client) => {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -48,7 +48,7 @@ export default {
 					],
 					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		}
 
@@ -60,7 +60,7 @@ export default {
 			const result = await yandexImage(querie);
 
 			if ('error' in result) {
-				client.instance.reply(result.error, { from, quoted: message, groupMetadata });
+				client.instance.reply(result.error, { from, quoted: message });
 				continue;
 			}
 
@@ -87,7 +87,7 @@ Article : ${result[index].url.article}`.formatForm()
 					// ],
 					// footer: ''
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		}
 	}

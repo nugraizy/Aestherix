@@ -21,7 +21,6 @@ export default {
 
 		if (game.status === 'playing') {
 			return await client.instance.reply(`Your game is already playing!\n${game.remaining}s left`, {
-				groupMetadata: message.groupMetadata,
 				from: message.from,
 				quoted: game.data
 			});

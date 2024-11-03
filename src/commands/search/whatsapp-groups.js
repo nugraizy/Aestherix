@@ -13,15 +13,15 @@ export default {
 	cooldown: 4,
 	limit: 3,
 	status: 'enable',
-	run: async ({ query, message, from, groupMetadata }, client) => {
+	run: async ({ query, message, from }, client) => {
 		if (!query) {
-			return client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		const result = await searchWAGroups(query);
 
 		if ('error' in result) {
-			client.instance.reply(result.error, { from, quoted: message, groupMetadata });
+			client.instance.reply(result.error, { from, quoted: message });
 		}
 
 		client.instance.reply(
@@ -31,7 +31,7 @@ ${result
 	.map((v) => `Title : ${v.title}\nURL : ${v.url}`)
 	.join('\n\n')
 	.trim()}`.formatForm(),
-			{ from, quoted: message, groupMetadata }
+			{ from, quoted: message }
 		);
 	}
 };

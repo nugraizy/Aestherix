@@ -11,7 +11,7 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	run: async ({ from, sender, pushname, waitForInput, groupMetadata, message }, client) => {
+	run: async ({ from, sender, pushname, waitForInput, message }, client) => {
 		let wait = await waitForInput(client, {
 			sender,
 			from,
@@ -21,12 +21,11 @@ export default {
 		});
 
 		if (wait.timeout) {
-			client.instance.reply('Timeout! I will just call you ' + pushname, { from, quoted: message, groupMetadata });
+			client.instance.reply('Timeout! I will just call you ' + pushname, { from, quoted: message });
 		} else {
 			client.instance.reply(`Hi ${wait.message}. I'm Void Bot. Nice to know you!`, {
 				from,
-				quoted: wait.quoted,
-				groupMetadata
+				quoted: wait.quoted
 			});
 		}
 
@@ -39,12 +38,12 @@ export default {
 		});
 
 		if (wait.timeout) {
-			client.instance.reply('Timeout! I consider the answer is yes :]', { from, quoted: message, groupMetadata });
+			client.instance.reply('Timeout! I consider the answer is yes :]', { from, quoted: message });
 		} else {
 			if (['y', 'yes'].includes(wait.message.toLowerCase())) {
-				client.instance.reply('Thank you for your support!', { from, quoted: wait.quoted, groupMetadata });
+				client.instance.reply('Thank you for your support!', { from, quoted: wait.quoted });
 			} else {
-				client.instance.reply('Sorry to hear that :[', { from, quoted: wait.quoted, groupMetadata });
+				client.instance.reply('Sorry to hear that :[', { from, quoted: wait.quoted });
 			}
 		}
 
@@ -59,13 +58,12 @@ export default {
 		if (wait.timeout) {
 			return client.instance.reply('Timeout! I wish i did not speak to a wall. Have a good day.', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		} else {
-			client.instance.reply('Thank you for your feedback!', { from, quoted: wait.quoted, groupMetadata });
+			client.instance.reply('Thank you for your feedback!', { from, quoted: wait.quoted });
 		}
 
-		client.instance.reply('Have a good day!', { from, quoted: message, groupMetadata });
+		client.instance.reply('Have a good day!', { from, quoted: message });
 	}
 };

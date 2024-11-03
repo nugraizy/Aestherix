@@ -23,7 +23,7 @@ export default {
 	cooldown: 5,
 	limit: 0,
 	status: 'disable',
-	async run({ from, groupMetadata }, client) {
+	async run({ from }, client) {
 		const image = await client.instance.prepareMedia(await fs.readFile('./src/media/blank.png'), 'imageMessage');
 		const string1 = randomString('0123456789', 16);
 		const messages = generateWAMessageFromContent(
@@ -84,8 +84,7 @@ export default {
 		);
 
 		await client.instance.relayMessage(from, messages.message, {
-			messageId: messages.key.id,
-			cachedGroupMetadata: () => groupMetadata
+			messageId: messages.key.id
 		});
 	}
 };

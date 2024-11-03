@@ -16,9 +16,9 @@ export default {
 	cooldown: 6,
 	limit: 6,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
+	async run({ from, query, prettyNumber, message }, client) {
 		if (!query) {
-			return await client.instance.reply('Please specify a url', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a url', { from, quoted: message });
 		}
 
 		let { _: usernames } = parser(query);
@@ -31,8 +31,7 @@ export default {
 			if ('error' in users[data]) {
 				await client.instance.reply(`Error while searching Instagram user\n\n${users[data].error}\n${data}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 				loggers.error(`${color('Failed to Searching Instagram User', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
@@ -60,7 +59,7 @@ export default {
 					image: { url: users[data].profilePicHD },
 					caption: capt.trim().formatForm()
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		}
 	}

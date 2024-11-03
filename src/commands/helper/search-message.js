@@ -13,7 +13,7 @@ export default {
 	cooldown: 10,
 	limit: 3,
 	status: 'enable',
-	async run({ from, query, message, groupMetadata }, client) {
+	async run({ from, query, message }, client) {
 		let capt = 'Void Bot Search\n\n';
 		const messages = await client.instance.searchMessage(from, query);
 
@@ -22,16 +22,16 @@ export default {
 		} else {
 			capt += `Found ${messages.length} messages.\n\n`;
 
-			await client.instance.reply(capt.trim(), { from, quoted: message, groupMetadata });
+			await client.instance.reply(capt.trim(), { from, quoted: message });
 
 			for (const messageElement of messages) {
-				await client.instance.reply('Found it.', { from, quoted: messageElement, groupMetadata });
+				await client.instance.reply('Found it.', { from, quoted: messageElement });
 				await delay(200);
 			}
 
 			return;
 		}
 
-		await client.instance.reply(capt.trim(), { from, quoted: message, groupMetadata });
+		await client.instance.reply(capt.trim(), { from, quoted: message });
 	}
 };

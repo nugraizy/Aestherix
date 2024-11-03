@@ -14,13 +14,13 @@ export default {
 	cooldown: 0,
 	limit: 2,
 	status: 'enable',
-	async run({ isOwner, isMediaImage, isMediaVid, from, message, groupMetadata, mediaData, query }, client) {
+	async run({ isOwner, isMediaImage, isMediaVid, from, message, mediaData, query }, client) {
 		if (!isMediaImage) {
-			return await client.instance.reply('Please send/reply a media[image]', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please send/reply a media[image]', { from, quoted: message });
 		}
 
 		if (isMediaVid) {
-			return await client.instance.reply('Please send/reply a media[image]', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please send/reply a media[image]', { from, quoted: message });
 		}
 
 		const media = await client.instance.downloadMediaMessage(mediaData);
@@ -64,8 +64,7 @@ export default {
 		if (options.self && !isOwner) {
 			return await client.instance.reply('You are not owner. This commands is only for owner.', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 

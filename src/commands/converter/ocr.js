@@ -16,15 +16,11 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	status: 'enable',
-	async run(
-		{ isMediaImage, from, prettyNumber, message, filename, query, extractMediaData, typeQuoted, groupMetadata },
-		client
-	) {
+	async run({ isMediaImage, from, prettyNumber, message, filename, query, extractMediaData, typeQuoted }, client) {
 		if (!isMediaImage) {
 			return await client.instance.reply('Please send/reply an image to recognize text', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -43,13 +39,12 @@ export default {
 
 			client.instance.reply(`${scanning.error}\n\nAvailable Languages :\n\n${lang}\n\nUse the code only.`, {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 			return;
 		}
 
-		await client.instance.send(from, { text: scanning.result.text.trim() }, { groupMetadata, quoted: message });
+		await client.instance.send(from, { text: scanning.result.text.trim() }, { quoted: message });
 
 		loggers.info(`${color('Text is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 	}

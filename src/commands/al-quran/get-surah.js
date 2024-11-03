@@ -13,7 +13,7 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	async run({ from, message, groupMetadata }, client) {
+	async run({ from, message }, client) {
 		const lists = await getListSurah();
 
 		await client.instance.reply(
@@ -25,7 +25,7 @@ export default {
 						}\nAudio : ${v.audio}\n`
 				)
 				.join('\n'),
-			{ from, quoted: message, groupMetadata }
+			{ from, quoted: message }
 		);
 	}
 };

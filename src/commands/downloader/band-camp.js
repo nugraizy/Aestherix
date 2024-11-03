@@ -15,9 +15,9 @@ export default {
 	limit: 4,
 	cooldown: 8,
 	status: 'enable',
-	async run({ query, from, message, filename, groupMetadata }, client) {
+	async run({ query, from, message, filename }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		let queries = query.split(',');
@@ -28,7 +28,7 @@ export default {
 			const regexs = isURL(querie.trim());
 
 			if (!regexs) {
-				await client.instance.reply('Please Use a Valid URL.', { from, quoted: message, groupMetadata });
+				await client.instance.reply('Please Use a Valid URL.', { from, quoted: message });
 
 				continue;
 			}
@@ -36,7 +36,7 @@ export default {
 			const result = await downloadBandcamp(querie);
 
 			if ('error' in result) {
-				await client.instance.reply(result.error, { from, quoted: message, groupMetadata });
+				await client.instance.reply(result.error, { from, quoted: message });
 
 				continue;
 			}
@@ -55,7 +55,7 @@ export default {
 
 Title : ${result.title}`.formatForm()
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		}
 	}

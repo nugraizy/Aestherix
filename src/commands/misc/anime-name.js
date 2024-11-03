@@ -15,9 +15,9 @@ export default {
 	cooldown: 3,
 	limit: 2,
 	status: 'enable',
-	run: async ({ query, from, message, groupMetadata }, client) => {
+	run: async ({ query, from, message }, client) => {
 		if (!query) {
-			return await client.instance.reply('You need to provide query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You need to provide query.', { from, quoted: message });
 		}
 
 		const options = !/[1-6]/.test(query) ? 0 : query.match(/[1-6]$/)?.[0] - 1 === undefined ? 0 : query.match(/[1-6]$/)[0] - 1;
@@ -28,7 +28,7 @@ export default {
 			`${'Anime Name'.formatHeaders()}
 
 ${result.map((v, i) => `${i + 1}. ${v.name}${v.meaning ? `\n${v.meaning}` : ''}`).join('\n\n')}`,
-			{ from, quoted: message, groupMetadata }
+			{ from, quoted: message }
 		);
 	}
 };

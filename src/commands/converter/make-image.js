@@ -13,17 +13,17 @@ export default {
 	limit: 2,
 	cooldown: 5,
 	status: 'enable',
-	async run({ query, from, message, groupMetadata }, client) {
+	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
-		await client.instance.reply('Creating. Please wait...', { from, quoted: message, groupMetadata });
+		await client.instance.reply('Creating. Please wait...', { from, quoted: message });
 
 		const result = await createImage(query);
 
 		const caption = `${'A.I Image Generator'.formatHeaders()}\n\nPowered by deepai.org`;
 
-		await client.instance.send(from, { image: { url: result }, caption }, { groupMetadata, quoted: message });
+		await client.instance.send(from, { image: { url: result }, caption }, { quoted: message });
 	}
 };

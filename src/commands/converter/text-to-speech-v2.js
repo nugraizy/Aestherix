@@ -31,12 +31,11 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	status: 'enable',
-	run: async ({ query, from, type, message, /*cmd,*/ args, filename, groupMetadata }, client) => {
+	run: async ({ query, from, type, message, /*cmd,*/ args, filename }, client) => {
 		if (!query) {
 			return await client.instance.reply('Please provide some text to convert to speech', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -44,7 +43,7 @@ export default {
 			const result = await gttsAI(args.slice(2).join(' '), args[1]);
 
 			if ('error' in result) {
-				return await client.instance.reply(result.error, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(result.error, { from, quoted: message });
 			}
 
 			const audioBuffer = await toOpus('opus', {
@@ -53,7 +52,7 @@ export default {
 				media: result.url.replace('https', 'http')
 			});
 
-			client.instance.send(from, { audio: Buffer.from(audioBuffer, 'base64') }, { groupMetadata, quoted: message });
+			client.instance.send(from, { audio: Buffer.from(audioBuffer, 'base64') }, { quoted: message });
 
 			return;
 		}
@@ -109,8 +108,7 @@ export default {
 
 			await client.instance.reply(caption, {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 
 			return;
@@ -121,7 +119,7 @@ export default {
 		const result = await gttsAI(queries.join(' '), model);
 
 		if ('error' in result) {
-			return await client.instance.reply(result.error, { from, quoted: message, groupMetadata });
+			return await client.instance.reply(result.error, { from, quoted: message });
 		}
 
 		const audioBuffer = await toOpus('opus', {
@@ -130,7 +128,7 @@ export default {
 			media: result.url.replace('https', 'http')
 		});
 
-		await client.instance.send(from, { audio: Buffer.from(audioBuffer, 'base64') }, { groupMetadata, quoted: message });
+		await client.instance.send(from, { audio: Buffer.from(audioBuffer, 'base64') }, { quoted: message });
 
 		// const container = {};
 		// const row = [];
@@ -180,7 +178,7 @@ export default {
 		// 		buttonText: 'Open List',
 		// 		sections: row
 		// 	},
-		// 	{ groupMetadata }
+		// 	{  }
 		// );
 	}
 };

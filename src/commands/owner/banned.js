@@ -16,9 +16,9 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	async run({ from, message, isOwner, args, mediaData, mention, bodyQuoted, query, groupMetadata }, client) {
+	async run({ from, message, isOwner, args, mediaData, mention, bodyQuoted, query }, client) {
 		if (!query && bodyQuoted) {
-			return await client.instance.reply('Please provide user to ban', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please provide user to ban', { from, quoted: message });
 		}
 
 		const userBanned = await fs.readJSON('./databases/users/banned.json');
@@ -33,8 +33,7 @@ export default {
 			client.instance.updateBlockStatus(args[3], 'block');
 			await client.instance.reply('You are banned from using bot.\n\nReason : Abusing Report command.', {
 				from,
-				quoted: JSON.parse(args.slice(4)),
-				groupMetadata
+				quoted: JSON.parse(args.slice(4))
 			});
 
 			return;
@@ -46,7 +45,7 @@ export default {
 					await client.instance.send(
 						from,
 						{ text: `@${mentioned.split('@')[0]} Already banned`, mentions: [mentioned] },
-						{ groupMetadata, quoted: message }
+						{ quoted: message }
 					);
 					continue;
 				}
@@ -63,7 +62,7 @@ export default {
 				await client.instance.send(
 					from,
 					{ text: `Success banning : ${banned.map((v) => `@${v.split('@')[0]}`).join(', ')}`, mentions: [banned] },
-					{ groupMetadata, quoted: message }
+					{ quoted: message }
 				);
 			}
 
@@ -85,7 +84,7 @@ export default {
 					await client.instance.send(
 						from,
 						{ text: `@${number} is already banned`, mentions: [`${number}${S_WHATSAPP_NET}`] },
-						{ groupMetadata, quoted: message }
+						{ quoted: message }
 					);
 					continue;
 				}
@@ -98,7 +97,7 @@ export default {
 				await client.instance.send(
 					from,
 					{ text: `Success banning : @${number}`, mentions: [`${number}${S_WHATSAPP_NET}`] },
-					{ groupMetadata, quoted: message }
+					{ quoted: message }
 				);
 			}
 
@@ -107,7 +106,7 @@ export default {
 
 		if (bodyQuoted) {
 			if (userBanned.includes(mediaData.participant)) {
-				return await client.instance.reply('Already banned', { from, quoted: message, groupMetadata });
+				return await client.instance.reply('Already banned', { from, quoted: message });
 			}
 
 			configuration.cache.bannedlist.push(mediaData.participant);
@@ -118,7 +117,7 @@ export default {
 			await client.instance.send(
 				from,
 				{ text: `Success banning : @${mediaData.participant.split('@')[0]}`, mentions: [mediaData.participant] },
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		}
 	}

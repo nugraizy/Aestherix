@@ -16,7 +16,6 @@ export default {
 	async run(message, client) {
 		if (!message.query) {
 			return await client.instance.reply('Please specify a command\n\nEx: antidelete <enable/disable>', {
-				groupMetadata: message.groupMetadata,
 				from: message.from,
 				quoted: message.message
 			});
@@ -31,7 +30,6 @@ export default {
 			case 'on':
 				if (isEnable) {
 					return await client.instance.reply('You already have this command enabled', {
-						groupMetadata: message.groupMetadata,
 						from: message.from,
 						quoted: message.message
 					});
@@ -43,15 +41,13 @@ export default {
 
 				await client.instance.reply('You have successfully enabled anti-delete', {
 					from: message.from,
-					quoted: message.message,
-					groupMetadata: message.groupMetadata
+					quoted: message.message
 				});
 				break;
 			case 'disable':
 			case 'off':
 				if (!isEnable) {
 					return await client.instance.reply('You already have this command disabled', {
-						groupMetadata: message.groupMetadata,
 						from: message.from,
 						quoted: message.message
 					});
@@ -62,14 +58,12 @@ export default {
 				await fs.writeJSON('./databases/groups/settingsManager.json', data);
 
 				await client.instance.reply('You have successfully disabled anti-delete', {
-					groupMetadata: message.groupMetadata,
 					from: message.from,
 					quoted: message.message
 				});
 				break;
 			default:
 				await client.instance.reply('Please specify a command\n\nEx: antidelete <enable/disable>', {
-					groupMetadata: message.groupMetadata,
 					from: message.from,
 					quoted: message.message
 				});

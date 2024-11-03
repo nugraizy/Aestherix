@@ -35,13 +35,13 @@ export default {
 	limit: 2,
 	cooldown: 2,
 	status: 'enable',
-	async run({ query, from, message, groupMetadata, sender, waitForInput }, client) {
+	async run({ query, from, message, sender, waitForInput }, client) {
 		const mal = new Jikan();
 
 		const result = await mal.anime.ranking(query || null);
 
 		if ('error' in result) {
-			return await client.instance.reply(result.message, { from, quoted: message, groupMetadata });
+			return await client.instance.reply(result.message, { from, quoted: message });
 		}
 
 		const incrementedIndex = increment(0, result.data.length - 1);
@@ -67,7 +67,7 @@ export default {
 					caption: `${'Myanimelist Ranking [ Anime ]'.formatHeaders()}\n\n${caption.trim()}
 \nAnime ${index + 1} of ${result.data.length}`
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 
 			if (index + 1 >= result.length) {

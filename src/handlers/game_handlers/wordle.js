@@ -1,6 +1,6 @@
 import configuration from '../../helper/config/connect.js';
 
-const handleWordle = async ({ from, isAdmin, isGroup, body, message, sender, groupMetadata }, client, settings) => {
+const handleWordle = async ({ from, isAdmin, isGroup, body, message, sender }, client, settings) => {
 	const playWordle = async () => {
 		const wordle = configuration.games.wordle.get(sender);
 
@@ -17,9 +17,9 @@ const handleWordle = async ({ from, isAdmin, isGroup, body, message, sender, gro
 					.join('\n')}\n\nLama permainan: ${wordle.timeLength}`
 			};
 
-			await client.instance.send(from, response, { groupMetadata, quoted: message });
+			await client.instance.send(from, response, { quoted: message });
 		} else {
-			await client.instance.reply(guess.board, { from, quoted: message, groupMetadata });
+			await client.instance.reply(guess.board, { from, quoted: message });
 		}
 	};
 

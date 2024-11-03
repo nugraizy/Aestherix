@@ -13,7 +13,7 @@ export default {
 	cooldown: 7,
 	limit: 4,
 	status: 'enable',
-	async run({ query, from, message, args, cmd, type, groupMetadata }, client) {
+	async run({ query, from, message, args, cmd, type }, client) {
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.thumbnail === args[2]);
@@ -66,7 +66,7 @@ export default {
 					],
 					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 			return await client.instance.send(
 				from,
@@ -77,13 +77,12 @@ export default {
 					title: 'Iflix'.formatHeaders(),
 					sections: rows
 				},
-				{ groupMetadata }
+				{}
 			);
 		} else if (args[1] === 'get') {
 			return await client.instance.reply(`${'Iflix Search'.formatHeaders()}\n\nURL : ${args[2]}`, {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -94,7 +93,7 @@ export default {
 			const data = await iflixSearch(querie);
 
 			if ('error' in data) {
-				return await client.instance.reply(data.error, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(data.error, { from, quoted: message });
 			}
 
 			let caption = 'Iflix Search'.formatHeaders();
@@ -134,7 +133,7 @@ export default {
 					],
 					footer: `Void Bot     1/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 			await client.instance.send(
 				from,
@@ -145,7 +144,7 @@ export default {
 					title: 'Iflix'.formatHeaders(),
 					sections: rows
 				},
-				{ groupMetadata }
+				{}
 			);
 		}
 	}

@@ -14,7 +14,7 @@ export default {
 	cooldown: 8,
 	limit: 9,
 	status: 'enable',
-	run: async ({ isMediaImage, from, prettyNumber, message, mediaData, sender, args, groupMetadata }, client) => {
+	run: async ({ isMediaImage, from, prettyNumber, message, mediaData, sender, args }, client) => {
 		loggers.warning(`${color('Converting image to Anime-like', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 
 		let bufferMessage;
@@ -27,8 +27,7 @@ export default {
 		if (!isMediaImage && args[1] !== '-variant') {
 			return await client.instance.reply('Please send/reply an image to convert to anime', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -58,7 +57,7 @@ export default {
 				],
 				headerType: 4
 			},
-			{ groupMetadata, quoted: message }
+			{ quoted: message }
 		);
 
 		bufferMessage = null;

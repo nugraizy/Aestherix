@@ -41,9 +41,9 @@ export default {
 	cooldown: 5,
 	limit: 0,
 	status: 'enable',
-	async run({ from, groupMetadata, query, waitForInput, sender }, client) {
+	async run({ from, query, waitForInput, sender }, client) {
 		if (!isURL(query) && query) {
-			return await client.instance.send(from, { text: 'Please provide a valid URL.' }, { groupMetadata });
+			return await client.instance.send(from, { text: 'Please provide a valid URL.' }, {});
 		}
 
 		if (downloader.has(sender)) {
@@ -56,17 +56,17 @@ export default {
 					message: 'Please wait for the previous process to finish.\nOr do you want to cancel the previous download?',
 					timeInSecond: 15
 				},
-				{ groupMetadata }
+				{}
 			);
 
 			if (wait.timeout) {
-				return await client.instance.send(from, { text: 'Timeout.' }, { groupMetadata, quoted: wait.quoted });
+				return await client.instance.send(from, { text: 'Timeout.' }, { quoted: wait.quoted });
 			}
 
 			const isCancel = yn(wait.message);
 
 			if (isCancel === undefined) {
-				return await client.instance.send(from, { text: 'Invalid input.' }, { groupMetadata, quoted: wait.quoted });
+				return await client.instance.send(from, { text: 'Invalid input.' }, { quoted: wait.quoted });
 			}
 
 			const downloadSession = downloader.get(sender);
@@ -77,17 +77,9 @@ export default {
 				}
 
 				downloader.delete(sender);
-				return await client.instance.send(
-					from,
-					{ text: 'Previous download canceled.' },
-					{ groupMetadata, quoted: wait.quoted }
-				);
+				return await client.instance.send(from, { text: 'Previous download canceled.' }, { quoted: wait.quoted });
 			} else {
-				return await client.instance.send(
-					from,
-					{ text: 'Previous download will continue.' },
-					{ groupMetadata, quoted: wait.quoted }
-				);
+				return await client.instance.send(from, { text: 'Previous download will continue.' }, { quoted: wait.quoted });
 			}
 		}
 
@@ -101,7 +93,7 @@ export default {
 
 		for (const url of query) {
 			if (!isURL(url)) {
-				return await client.instance.send(from, { text: 'Please provide a valid URL.' }, { groupMetadata });
+				return await client.instance.send(from, { text: 'Please provide a valid URL.' }, {});
 			}
 
 			const { origin } = new URL(url);
@@ -172,7 +164,7 @@ export default {
 
 					await client.instance.relayMessage(from, messages.message, {
 						messageId: messages.key.id,
-						cachedGroupMetadata: () => groupMetadata
+						useCachedGroupMetadata: true
 					});
 
 					const buffer = req.toBuffer();
@@ -192,7 +184,7 @@ export default {
 							benchmark: true,
 							timeOnProcess
 						},
-						{ groupMetadata }
+						{}
 					);
 				}
 			});
@@ -224,7 +216,7 @@ export default {
 
 				await client.instance.relayMessage(from, messages.message, {
 					messageId: messages.key.id,
-					cachedGroupMetadata: () => groupMetadata
+					useCachedGroupMetadata: true
 				});
 			});
 
@@ -255,7 +247,7 @@ export default {
 
 					await client.instance.relayMessage(from, messages.message, {
 						messageId: messages.key.id,
-						cachedGroupMetadata: () => groupMetadata
+						useCachedGroupMetadata: true
 					});
 				}
 			});

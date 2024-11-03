@@ -27,9 +27,9 @@ export default {
 	limit: 4,
 	cooldown: 7,
 	status: 'enable',
-	async run({ query, from, message, groupMetadata }, client) {
+	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		let queries = query.split(',');
@@ -64,7 +64,6 @@ export default {
 					caption: capt.trim().formatForm()
 				},
 				{
-					groupMetadata,
 					quoted: message
 				}
 			);

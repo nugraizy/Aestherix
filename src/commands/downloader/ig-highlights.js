@@ -16,9 +16,9 @@ export default {
 	cooldown: 13,
 	limit: 9,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
+	async run({ from, query, prettyNumber, message }, client) {
 		if (!query) {
-			return await client.instance.reply('Please specify a username', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a username', { from, quoted: message });
 		}
 
 		const { _: input } = parser(query);
@@ -31,8 +31,7 @@ export default {
 			if ('error' in highlights[data]) {
 				await client.instance.reply(`Error while downloading Instagram highlights\n\n${highlights.error}\n${data}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 				loggers.error(`${color('Failed to Download Instagram highlights', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
@@ -53,7 +52,7 @@ export default {
 				capt += `Tot. Estimated media per Section : ${numberWithCommas(highlights[data].highlights.length * 2)}\n\n`;
 			}
 
-			await client.instance.reply(capt.trim().formatForm(), { from, quoted: message, groupMetadata });
+			await client.instance.reply(capt.trim().formatForm(), { from, quoted: message });
 
 			capt = '';
 
@@ -64,7 +63,7 @@ export default {
 					await client.instance.send(
 						from,
 						{ [media.type === 'video' ? 'video' : 'image']: { url: media.url } },
-						{ groupMetadata, quoted: message }
+						{ quoted: message }
 					);
 				}
 			} else {
@@ -81,7 +80,7 @@ export default {
 								[highlight.type === 'video' ? 'video' : 'image']: { url: highlight.url },
 								...(status && { caption })
 							},
-							{ groupMetadata }
+							{}
 						);
 						status = false;
 					}

@@ -12,19 +12,18 @@ export default {
 	limit: 5,
 	restrict: true,
 	status: 'enable',
-	async run({ isAdmin, isOwner, from, query, bodyQuoted, participantsGroup, isGroup, message, groupMetadata }, client) {
+	async run({ isAdmin, isOwner, from, query, bodyQuoted, participantsGroup, isGroup, message }, client) {
 		if (!isGroup) {
-			return await client.instance.reply('This command only works in group.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('This command only works in group.', { from, quoted: message });
 		}
 
 		if (!isAdmin && !isOwner) {
 			return await client.instance.reply('You must be an admin to use this command.', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
-		await client.instance.send(from, { text: query || bodyQuoted || ':)', mentions: participantsGroup }, { groupMetadata });
+		await client.instance.send(from, { text: query || bodyQuoted || ':)', mentions: participantsGroup }, {});
 	}
 };

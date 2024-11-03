@@ -85,9 +85,9 @@ export default {
 	cooldown: 10,
 	limit: 3,
 	status: 'enable',
-	async run({ from, groupMetadata, message, query }, client) {
+	async run({ from, message, query }, client) {
 		if (!query) {
-			return await client.instance.reply('Fetch expect <url> <?parser>', { from, groupMetadata, quoted: message });
+			return await client.instance.reply('Fetch expect <url> <?parser>', { from, quoted: message });
 		}
 
 		let {
@@ -113,7 +113,7 @@ export default {
 		const url = queries.find((v) => isURL(v));
 
 		if (!url) {
-			return await client.instance.reply('Fetch expect <url>', { from, groupMetadata, quoted: message });
+			return await client.instance.reply('Fetch expect <url>', { from, quoted: message });
 		}
 
 		method = method || 'GET';
@@ -142,7 +142,7 @@ export default {
 			const response = await fetchData(url, { method, headers, body });
 
 			if (response.error) {
-				client.instance.reply(response.message, { from, groupMetadata, quoted: message });
+				client.instance.reply(response.message, { from, quoted: message });
 			}
 
 			const responseTypes = response.headers.get('content-type').split(';')[0];
@@ -151,14 +151,14 @@ export default {
 				const data = await processJsonResponse(response, queryParser);
 
 				if (data.error) {
-					return await client.instance.reply(data.message, { from, groupMetadata, quoted: message });
+					return await client.instance.reply(data.message, { from, quoted: message });
 				}
 
-				await client.instance.reply(data, { from, groupMetadata, quoted: message });
+				await client.instance.reply(data, { from, quoted: message });
 			} else if (responseTypes.startsWith('text')) {
 				const data = await processTextResponse(response);
 
-				await client.instance.reply(data, { from, groupMetadata, quoted: message });
+				await client.instance.reply(data, { from, quoted: message });
 			} else {
 				const disposition = response.headers['content-disposition'];
 
@@ -176,14 +176,13 @@ export default {
 				} else {
 					await client.instance.reply('Unhandled Content-Type : ' + response.headers['content-type'], {
 						from,
-						groupMetadata,
 						quoted: message
 					});
 					console.log('Unhandled Content-Type:', response.headers['content-type']);
 				}
 			}
 		} catch (error) {
-			await client.instance.reply(error.message, { from, groupMetadata, quoted: message });
+			await client.instance.reply(error.message, { from, quoted: message });
 		}
 	}
 };

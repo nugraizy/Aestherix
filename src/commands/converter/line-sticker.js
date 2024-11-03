@@ -16,9 +16,9 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	status: 'enable',
-	async run({ query, message, from, filename, groupMetadata }, client) {
+	async run({ query, message, from, filename }, client) {
 		if (!query) {
-			return await client.instance.reply('Please enter a query', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please enter a query', { from, quoted: message });
 		}
 
 		let result = await line(query);
@@ -29,7 +29,7 @@ export default {
 
 		const capt = `Line Stickers\n\nAuthor : ${result[0].author.capitalize()}\nTot. Stickers : ${result.length}`.formatForm();
 
-		await client.instance.send(from, { text: capt }, { groupMetadata, quoted: message });
+		await client.instance.send(from, { text: capt }, { quoted: message });
 
 		for (const { stickers } of result) {
 			const sticker = await client.instance.prepareSticker(
@@ -42,7 +42,7 @@ export default {
 				}
 			);
 
-			await client.instance.send(from, { sticker }, { groupMetadata, quoted: message });
+			await client.instance.send(from, { sticker }, { quoted: message });
 		}
 	}
 };

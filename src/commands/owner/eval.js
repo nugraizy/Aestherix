@@ -116,13 +116,12 @@ export default {
 		if (!isOwner) {
 			return await client.instance.reply('You are not allowed to use this command', {
 				from,
-				quoted: message.message,
-				groupMetadata
+				quoted: message.message
 			});
 		}
 
 		if (!query) {
-			return await client.instance.reply('Please specify code to evaluate', { from, quoted: message.message, groupMetadata });
+			return await client.instance.reply('Please specify code to evaluate', { from, quoted: message.message });
 		}
 
 		if (isBaileys) {
@@ -163,7 +162,7 @@ export default {
 				output = await func.call(
 					client,
 					async (...args) => {
-						return await client.instance.reply(format(...args), { from, quoted: message.message, groupMetadata });
+						return await client.instance.reply(format(...args), { from, quoted: message.message });
 					},
 					client,
 					message,
@@ -192,19 +191,18 @@ export default {
 
 				output = e;
 			} finally {
-				client.instance.reply(syntaxes + format(output), { from, quoted: message.message, groupMetadata });
+				client.instance.reply(syntaxes + format(output), { from, quoted: message.message });
 			}
 		} else if (body.startsWith('$> ')) {
 			try {
 				exec(body.slice(3), async (err, stdout) => {
 					if (err) {
-						return await client.instance.reply(format(err), { from, quoted: message.message, groupMetadata });
+						return await client.instance.reply(format(err), { from, quoted: message.message });
 					}
 
 					await client.instance.reply(format(stdout.replace(col, '').trim()), {
 						from,
-						quoted: message.message,
-						groupMetadata
+						quoted: message.message
 					});
 				});
 			} catch (err) {
@@ -213,8 +211,7 @@ export default {
 				str += `Message : ${err.message}`;
 				return await client.instance.reply(`\`ERROR\` \`\`\`\n\n${str}\`\`\``, {
 					from,
-					quoted: message.message,
-					groupMetadata
+					quoted: message.message
 				});
 			}
 		} else if (body.startsWith('=> ')) {
@@ -224,8 +221,7 @@ export default {
 					print(
 						{
 							from,
-							quoted: message.message,
-							groupMetadata
+							quoted: message.message
 						},
 						eval(prettier.js_beautify(query))
 					);
@@ -233,8 +229,7 @@ export default {
 					print(
 						{
 							from,
-							quoted: message.message,
-							groupMetadata
+							quoted: message.message
 						},
 						await eval(
 							prettier.js_beautify(`(async () => {
@@ -243,7 +238,7 @@ export default {
 							 .catch(err => print({
 								from,
 								quoted: message.message,
-								groupMetadata
+								
 							}, err))`)
 						)
 					);
@@ -256,7 +251,7 @@ export default {
 						.catch(err => print({
 							from,
 							quoted: message.message,
-							groupMetadata
+							
 						}, err))`,
 					'Execution Function',
 					{
@@ -275,8 +270,7 @@ export default {
 
 				return await client.instance.reply(`\`ERROR\` \`\`\`\n\n${str}\`\`\``, {
 					from,
-					quoted: message.message,
-					groupMetadata
+					quoted: message.message
 				});
 			}
 		} else if (body.startsWith('!> ')) {
@@ -297,7 +291,7 @@ export default {
 					'Array',
 					'process',
 					'args',
-					'groupMetadata',
+					'',
 					'exports',
 					'argument',
 					queries
@@ -310,7 +304,7 @@ export default {
 							return;
 						}
 
-						return await client.instance.reply(format(...args), { from, quoted: message.message, groupMetadata });
+						return await client.instance.reply(format(...args), { from, quoted: message.message });
 					},
 					message,
 					client,
@@ -336,7 +330,7 @@ export default {
 
 				returning = e;
 			} finally {
-				client.instance.reply(syntaxes + format(returning), { from, quoted: message.message, groupMetadata });
+				client.instance.reply(syntaxes + format(returning), { from, quoted: message.message });
 			}
 		}
 	}

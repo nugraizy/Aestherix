@@ -11,12 +11,11 @@ export default {
 	cooldown: 8,
 	limit: 4,
 	status: 'enable',
-	async run({ from, mediaData, message, bodyQuoted, isBotAdmin, groupMetadata }, client) {
+	async run({ from, mediaData, message, bodyQuoted, isBotAdmin }, client) {
 		if (!bodyQuoted) {
 			return await client.instance.reply('You must reply to a message to delete it.', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -25,8 +24,7 @@ export default {
 		if (!mediaData.participant.includes(myJid) && !isBotAdmin) {
 			return await client.instance.reply('You can not ask bot to delete people message when bot is not admin.', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -40,7 +38,7 @@ export default {
 					...(mediaData.participant.includes(myJid) ? { fromMe: true } : {})
 				}
 			},
-			{ groupMetadata }
+			{}
 		);
 	}
 };

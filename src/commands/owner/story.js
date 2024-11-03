@@ -18,7 +18,7 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	async run({ from, message, groupMetadata }, client, store) {
+	async run({ from, message }, client, store) {
 		const messages = configuration.OPTIONS.json
 			? JSON.parse(readFileSync(STATUS_PATH)).messages[STATUS]
 			: store.loadMessages(STATUS);
@@ -65,7 +65,7 @@ export default {
 		}
 
 		if (tempContainer.size === 0) {
-			return await client.instance.reply('No story are found.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('No story are found.', { from, quoted: message });
 		}
 
 		for (const value of Array.from(tempContainer.entries())) {
@@ -90,7 +90,7 @@ export default {
 				text: '\t',
 				sections: rows
 			},
-			{ groupMetadata }
+			{}
 		);
 	}
 };

@@ -18,12 +18,11 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	status: 'enable',
-	async run({ isMediaImage, from, prettyNumber, message, filename, extractMediaData, typeQuoted, groupMetadata }, client) {
+	async run({ isMediaImage, from, prettyNumber, message, filename, extractMediaData, typeQuoted }, client) {
 		if (!isMediaImage) {
 			return await client.instance.reply('Please send/reply an image to recognize text', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -40,8 +39,8 @@ export default {
 			path.join(__dirname, `src/media/temporary_files/${filename}`)
 		);
 
-		await client.instance.send(from, { text: result.text.trim() }, { groupMetadata, quoted: message });
-		await client.instance.send(from, { audio: buffer }, { groupMetadata, quoted: message });
+		await client.instance.send(from, { text: result.text.trim() }, { quoted: message });
+		await client.instance.send(from, { audio: buffer }, { quoted: message });
 		loggers.info(`${color('Text is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

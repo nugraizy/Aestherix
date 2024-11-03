@@ -15,12 +15,11 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	status: 'enable',
-	async run({ query, from, filename, message, groupMetadata }, client) {
+	async run({ query, from, filename, message }, client) {
 		if (!query) {
 			return await client.instance.reply('Please provide some text to convert to speech', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -35,18 +34,18 @@ export default {
 		try {
 			const { buffer } = await textToSpeech(query, language, path.join(__dirname, `src/media/temporary_files/${filename}`));
 
-			await client.instance.send(from, { audio: buffer }, { groupMetadata, quoted: message });
+			await client.instance.send(from, { audio: buffer }, { quoted: message });
 		} catch (e) {
 			if (e.error === 'lang not found') {
 				return await client.instance.reply(
 					`Language not found. Available languages :\n\n${Object.keys(e.lang)
 						.map((key, i) => `${i + 1}. ${key}   :  ${e.lang[key]}`)
 						.join('\n')}`,
-					{ from, quoted: message, groupMetadata }
+					{ from, quoted: message }
 				);
 			}
 
-			await client.instance.reply('Error while converting text to speech', { from, quoted: message, groupMetadata });
+			await client.instance.reply('Error while converting text to speech', { from, quoted: message });
 
 			log(e);
 		}

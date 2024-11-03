@@ -36,16 +36,14 @@ export default {
 			message,
 			stickerAble,
 			typeQuoted,
-			typeSticker,
-			groupMetadata
+			typeSticker
 		},
 		client
 	) {
 		if (!mention.length && !isMediaImage) {
 			return await client.instance.reply('Please mention or send/reply an image to pet', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -67,9 +65,9 @@ export default {
 			const result = await trigger(profile, sender, options);
 
 			if (options.output === 'sticker') {
-				await client.instance.send(from, { sticker: Buffer.from(result, 'base64') }, { groupMetadata });
+				await client.instance.send(from, { sticker: Buffer.from(result, 'base64') }, {});
 			} else {
-				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, { groupMetadata });
+				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, {});
 			}
 
 			loggers.info(`${color('Converted Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
@@ -87,7 +85,7 @@ export default {
 						)
 						.join(', ')
 						.capitalize()}`,
-					{ from, quoted: message, groupMetadata }
+					{ from, quoted: message }
 				);
 			}
 
@@ -97,9 +95,9 @@ export default {
 			const result = await trigger(buffer, sender, options);
 
 			if (options.output === 'sticker') {
-				await client.instance.send(from, { sticker: Buffer.from(result, 'base64') }, { groupMetadata });
+				await client.instance.send(from, { sticker: Buffer.from(result, 'base64') }, {});
 			} else {
-				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, { groupMetadata });
+				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, {});
 			}
 
 			loggers.info(`${color('Converted Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
@@ -117,9 +115,9 @@ export default {
 			const result = await trigger(profile, sender, options);
 
 			if (options.output === 'sticker') {
-				await client.instance.send(from, { sticker: Buffer.from(result, 'base64') }, { groupMetadata });
+				await client.instance.send(from, { sticker: Buffer.from(result, 'base64') }, {});
 			} else {
-				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, { groupMetadata });
+				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, {});
 			}
 
 			loggers.info(`${color('Triggered', '#FF99C8')} ${color(mentioned, '#E4C1F9')}`);

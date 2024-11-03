@@ -15,19 +15,19 @@ export default {
 	limit: 5,
 	status: 'enable',
 	premium: true,
-	async run({ query, from, message, groupMetadata }, client) {
+	async run({ query, from, message }, client) {
 		if (!query) {
-			return client.instance.reply('Please specify a query.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('Please specify a query.', { from, quoted: message });
 		}
 
 		const images = await createImageBing(query);
 
 		if (!images?.length) {
-			return client.instance.reply('No images found.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('No images found.', { from, quoted: message });
 		}
 
 		for (const image of images) {
-			await client.instance.send(from, { image: { url: image } }, { quoted: message, groupMetadata });
+			await client.instance.send(from, { image: { url: image } }, { quoted: message });
 			await delay(300);
 		}
 	}

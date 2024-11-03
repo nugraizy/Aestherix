@@ -42,24 +42,21 @@ export default {
 			typeQuoted,
 			typeSticker,
 			filename,
-			query,
-			groupMetadata
+			query
 		},
 		client
 	) {
 		if (!isMediaImage && !isMediaVid && !query) {
 			return await client.instance.reply('Please send/reply a media or send a url to convert to sticker', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
 		if (query && !isURL(query) && !isMediaImage && !isMediaVid) {
 			return await client.instance.reply('If you trying to convert sticker from url, please provide a valid url', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -68,7 +65,7 @@ export default {
 				`Please send/reply a regular media to convert to sticker. Can't convert ${typeQuoted} to sticker, only : ${typeSticker
 					.join(', ')
 					.capitalize()}`,
-				{ from, quoted: message, groupMetadata }
+				{ from, quoted: message }
 			);
 		}
 
@@ -83,7 +80,7 @@ export default {
 				}
 			);
 
-			await client.instance.send(from, { sticker }, { groupMetadata, quoted: message });
+			await client.instance.send(from, { sticker }, { quoted: message });
 		}
 
 		if (isMediaImage) {
@@ -97,7 +94,7 @@ export default {
 				}
 			);
 
-			await client.instance.send(from, { sticker }, { groupMetadata, quoted: message });
+			await client.instance.send(from, { sticker }, { quoted: message });
 		}
 
 		if (isMediaVid) {
@@ -111,7 +108,7 @@ export default {
 				}
 			);
 
-			await client.instance.send(from, { sticker }, { groupMetadata, quoted: message });
+			await client.instance.send(from, { sticker }, { quoted: message });
 		}
 
 		loggers.info(`${color('Sticker is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);

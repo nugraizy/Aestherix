@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 
-export const checkBan = async (client, { from, isBotAdmin, isGroup, messageStubParameters, groupMetadata }) => {
+export const checkBan = async (client, { from, isBotAdmin, isGroup, messageStubParameters }) => {
 	if (isGroup) {
 		const data = await fs.readJSON('./databases/groups/settingsManager.json');
 		const index = data.findIndex((v) => Object.keys(v)[0] === from);
@@ -24,7 +24,7 @@ export const checkBan = async (client, { from, isBotAdmin, isGroup, messageStubP
 					mentions: [participant]
 				};
 
-				await client.instance.send(from, messageOptions, { groupMetadata });
+				await client.instance.send(from, messageOptions);
 			}
 		}
 	}

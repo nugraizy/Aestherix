@@ -18,7 +18,7 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	async run({ from, message, args, settings, cmd, groupMetadata }, client, store) {
+	async run({ from, message, args, settings, cmd }, client, store) {
 		const messages = configuration.OPTIONS.json
 			? JSON.parse(fs.readFileSync(DB_PATH)).messages[from]
 			: store.loadMessages(from);
@@ -33,8 +33,7 @@ export default {
 
 			await client.instance.reply('Here.', {
 				from: dataMessage.from,
-				quoted: dataMessage.message,
-				groupMetadata: dataMessage.groupMetadata
+				quoted: dataMessage.message
 			});
 			await client.instance.reply(
 				`Message Metadata : 
@@ -62,7 +61,7 @@ Tot. Tags : ${dataMessage.mention.length}`,
 		}
 
 		if (!dataMessages.length) {
-			return await client.instance.reply('No messages scraped in this chat', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('No messages scraped in this chat', { from, quoted: message });
 		}
 
 		dataMessages = dataMessages.filter(
@@ -74,8 +73,7 @@ Tot. Tags : ${dataMessage.mention.length}`,
 		if (!dataMessages.length) {
 			return await client.instance.reply(`Your tags is not found. Chats scraped : ${messages.length}`, {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -121,7 +119,7 @@ Tot. Tags : ${dataMessage.mention.length}`,
 				text: '\t',
 				sections: row
 			},
-			{ groupMetadata }
+			{}
 		);
 	}
 };

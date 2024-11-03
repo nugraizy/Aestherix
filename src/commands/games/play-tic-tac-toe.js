@@ -19,7 +19,7 @@ export default {
 	limit: 2,
 	cooldown: 2,
 	status: 'enable',
-	async run({ message, query, from, sender, groupMetadata }, client) {
+	async run({ message, query, from, sender }, client) {
 		const capt = (game, status) => `TicTacToe Games by Void Bot.
 	${
 		status
@@ -60,25 +60,25 @@ Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 			const status = getTictactoeSession(sender);
 
 			if (!status) {
-				return await client.instance.reply('You do not have a game', { from, quoted: message, groupMetadata });
+				return await client.instance.reply('You do not have a game', { from, quoted: message });
 			}
 
 			deleteTictactoeSession(sender);
 
-			await client.instance.reply('Game deleted', { from, quoted: message, groupMetadata });
+			await client.instance.reply('Game deleted', { from, quoted: message });
 		}
 
 		if (!query) {
 			const game = new TicTacToe(sender, undefined, true);
 
 			if ('error' in game) {
-				return await client.instance.reply(game.error, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(game.error, { from, quoted: message });
 			}
 
 			await client.instance.send(
 				from,
 				{ text: capt(game, false), mentions: [game.PLAYER_1, game.PLAYER_2] },
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		}
 
@@ -86,35 +86,31 @@ Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 			const game = getTictactoeSession(sender);
 
 			if (!game) {
-				return await client.instance.reply('You do not have a game', { from, quoted: message, groupMetadata });
+				return await client.instance.reply('You do not have a game', { from, quoted: message });
 			}
 
 			const move = game.playMove(query, sender);
 
 			if ('error' in move) {
-				return await client.instance.reply(move.error, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(move.error, { from, quoted: message });
 			}
 
 			if (move.status === 'WINNER' || move.status === 'DRAW') {
 				await client.instance.send(
 					from,
 					{ text: capt(move, true), mentions: [game.PLAYER_1, game.PLAYER_2] },
-					{ groupMetadata, quoted: message }
+					{ quoted: message }
 				);
 
 				return deleteTictactoeSession(sender);
 			}
 
-			await client.instance.send(
-				from,
-				{ text: capt(move), mentions: [game.PLAYER_1, game.PLAYER_2] },
-				{ groupMetadata, quoted: message }
-			);
+			await client.instance.send(from, { text: capt(move), mentions: [game.PLAYER_1, game.PLAYER_2] }, { quoted: message });
 
 			if (move.PLAYER_TURN === 'Void Bot') {
 				const botGames = getTictactoeSession(sender);
 
-				await client.instance.reply('Void Bot TURN', { from, quoted: message, groupMetadata });
+				await client.instance.reply('Void Bot TURN', { from, quoted: message });
 				await delay(1000);
 
 				const botMove = botGames.playMove(botGames.displayPlayBoard(), 'Void Bot', sender);
@@ -123,7 +119,7 @@ Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 					await client.instance.send(
 						from,
 						{ text: capt(botMove, true), mentions: [botGames.PLAYER_1, botGames.PLAYER_2] },
-						{ groupMetadata, quoted: message }
+						{ quoted: message }
 					);
 
 					return deleteTictactoeSession(sender);
@@ -132,7 +128,7 @@ Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 				await client.instance.send(
 					from,
 					{ text: capt(botMove, false), mentions: [botGames.PLAYER_1, botGames.PLAYER_2] },
-					{ groupMetadata, quoted: message }
+					{ quoted: message }
 				);
 			}
 		}

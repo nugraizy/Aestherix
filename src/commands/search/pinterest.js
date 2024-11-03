@@ -20,9 +20,9 @@ export default {
 	limit: 4,
 	cooldown: 5,
 	status: 'enable',
-	async run({ query, from, message, groupMetadata, sender, waitForInput }, client) {
+	async run({ query, from, message, sender, waitForInput }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		let queries = query.split(',');
@@ -60,7 +60,7 @@ export default {
 			let result = await pinterest.search(query.trim());
 
 			if ('error' in result) {
-				await client.instance.reply(result.message, { from, quoted: message, groupMetadata });
+				await client.instance.reply(result.message, { from, quoted: message });
 			}
 
 			const { results } = result;
@@ -88,7 +88,7 @@ Followers : ${results[index].follower}
 Caption : ${results[index].caption}
 \nMedia ${index + 1} of ${results.length}`.formatForm()
 					},
-					{ groupMetadata, quoted: message }
+					{ quoted: message }
 				);
 
 				if (index + 1 >= results.length) {
@@ -199,8 +199,7 @@ Caption : ${results[index].caption}
 						`Could not retrieve these queries :\n\n${errors.map((v, i) => `${i + 1}. ${v.keyword}`).join('\n')}`,
 						{
 							from,
-							quoted: message,
-							groupMetadata
+							quoted: message
 						}
 					);
 				}

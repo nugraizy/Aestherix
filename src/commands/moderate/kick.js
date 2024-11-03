@@ -12,12 +12,11 @@ export default {
 	limit: 6,
 	status: 'enable',
 	restrict: true,
-	async run({ mediaData, isBotAdmin, type, message, from, mention, query, bodyQuoted, adminGroups, groupMetadata }, client) {
+	async run({ mediaData, isBotAdmin, type, message, from, mention, query, bodyQuoted, adminGroups }, client) {
 		if (!isBotAdmin) {
 			return await client.instance.reply('Bot is not admin, Please promote admin before using moderation commands.', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -29,15 +28,14 @@ export default {
 		} else if (!query && !mention.length && !bodyQuoted) {
 			return await client.instance.reply('Please reply people message or mention people.', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
 		const myJid = client.instance.decodeJid(instance);
 
 		if (message?.mention?.includes(myJid) || mediaData?.participant?.includes(myJid)) {
-			return await client.instance.reply('You can not kick me by myself.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You can not kick me by myself.', { from, quoted: message });
 		}
 
 		if (query || mention.length) {

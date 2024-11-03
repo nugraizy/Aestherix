@@ -19,9 +19,9 @@ export default {
 	limit: 5,
 	cooldown: 8,
 	status: 'enable',
-	async run({ query, from, message, groupMetadata }, client) {
+	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		query = removeDuplicatesArray(query.split(','));
@@ -38,14 +38,14 @@ export default {
 				result = await spotifier.getArtists(id);
 
 				if (!result.status) {
-					await client.instance.reply(result.message, { from, quoted: message, groupMetadata });
+					await client.instance.reply(result.message, { from, quoted: message });
 					continue;
 				}
 			} else {
 				result = await spotifier.searchArtist(querie);
 
 				if (!result.status) {
-					await client.instance.reply(result.message, { from, quoted: message, groupMetadata });
+					await client.instance.reply(result.message, { from, quoted: message });
 					continue;
 				}
 
@@ -118,7 +118,7 @@ export default {
 					// ],
 					// footer:
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 			await client.instance.send(
 				from,
@@ -129,7 +129,7 @@ export default {
 					title: 'Spotify Artist'.formatHeaders(),
 					sections: rows
 				},
-				{ groupMetadata }
+				{}
 			);
 		}
 	}

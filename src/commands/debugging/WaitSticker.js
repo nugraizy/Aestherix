@@ -15,7 +15,7 @@ export default {
 	limit: 0,
 	status: 'enable',
 	run: async (messages, client, store) => {
-		const { from, sender, waitForInput, groupMetadata, message } = messages;
+		const { from, sender, waitForInput, message } = messages;
 		const wait = await waitForInput(client, {
 			sender,
 			from,
@@ -25,11 +25,11 @@ export default {
 		});
 
 		if (wait.timeout) {
-			return client.instance.reply('Timeout!', { from, quoted: message, groupMetadata });
+			return client.instance.reply('Timeout!', { from, quoted: message });
 		}
 
 		if (wait.invalid) {
-			return client.instance.reply('Invalid media!', { from, quoted: message, groupMetadata });
+			return client.instance.reply('Invalid media!', { from, quoted: message });
 		}
 
 		const messageToConvert = await reassign(wait.message, client, store);

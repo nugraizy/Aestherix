@@ -13,12 +13,11 @@ export default {
 	limit: 1,
 	cooldown: 5,
 	status: 'enable',
-	async run({ query, from, message, extractMediaData, typeQuoted, groupMetadata }, client) {
+	async run({ query, from, message, extractMediaData, typeQuoted }, client) {
 		if (typeQuoted !== 'locationMessage' && typeQuoted !== 'liveLocationMessage' && !query) {
 			return await client.instance.reply('Please, input city name\nEx:\n*!weather Bekasi* or reply to location message', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -30,8 +29,7 @@ export default {
 		if ('error' in info) {
 			return await client.instance.reply(info.error, {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -54,7 +52,7 @@ Powered by openweathermap.org`;
 				// ],
 				// footer: text.trim()
 			},
-			{ groupMetadata, quoted: message }
+			{ quoted: message }
 		);
 	}
 };

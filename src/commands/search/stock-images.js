@@ -14,9 +14,9 @@ export default {
 	limit: 4,
 	cooldown: 5,
 	status: 'enable',
-	async run({ query, from, message, args, groupMetadata }, client) {
+	async run({ query, from, message, args }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		if (args[1] === 'next' || args[1] === 'prev') {
@@ -49,7 +49,7 @@ export default {
 					],
 					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		}
 
@@ -61,7 +61,7 @@ export default {
 			let result = await arq.searchImage(querie.trim());
 
 			if ('error' in result || !result.ok) {
-				await client.instance.reply(JSON.stringify(result), { from, quoted: message, groupMetadata });
+				await client.instance.reply(JSON.stringify(result), { from, quoted: message });
 				continue;
 			}
 
@@ -86,7 +86,7 @@ export default {
 					],
 					footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪'
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		}
 	}

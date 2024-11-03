@@ -18,19 +18,19 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	status: 'enable',
-	async run({ query, from, filename, message, groupMetadata }, client) {
+	async run({ query, from, filename, message }, client) {
 		if (!query) {
-			return await client.instance.reply('Please enter a query', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please enter a query', { from, quoted: message });
 		}
 
 		const regex = query.match(emojiReg());
 
 		if (!regex) {
-			return await client.instance.reply('Please enter a valid emoji', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please enter a valid emoji', { from, quoted: message });
 		}
 
 		if (regex.length < 2) {
-			return await client.instance.reply('Please enter 2 valid emoji', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please enter 2 valid emoji', { from, quoted: message });
 		}
 
 		const emojis = _.chunk(regex, 2);
@@ -43,7 +43,7 @@ export default {
 			const result = await emojimix(arr[0], arr[1]);
 
 			if (typeof result === 'object' && 'error' in result) {
-				await client.instance.reply(result.error, { from, quoted: message, groupMetadata });
+				await client.instance.reply(result.error, { from, quoted: message });
 
 				continue;
 			}
@@ -58,7 +58,7 @@ export default {
 				}
 			);
 
-			await client.instance.send(from, { sticker }, { groupMetadata, quoted: message });
+			await client.instance.send(from, { sticker }, { quoted: message });
 		}
 	}
 };

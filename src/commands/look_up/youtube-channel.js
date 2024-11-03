@@ -13,9 +13,9 @@ export default {
 	cooldown: 6,
 	limit: 6,
 	status: 'enable',
-	run: async ({ from, query, message, groupMetadata }, client) => {
+	run: async ({ from, query, message }, client) => {
 		if (!query) {
-			return await client.instance.reply('Please specify a query', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a query', { from, quoted: message });
 		}
 
 		const channel = await youtubeChannel(query);
@@ -23,8 +23,7 @@ export default {
 		if ('error' in channel) {
 			return await client.instance.reply(`Error while searching YouTube Channel\n\n${channel.error}`, {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 

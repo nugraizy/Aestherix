@@ -16,19 +16,19 @@ export default {
 	cooldown: 5,
 	limit: 7,
 	status: 'enable',
-	run: async ({ from, message, query, groupMetadata }, client) => {
+	run: async ({ from, message, query }, client) => {
 		if (!query) {
-			return client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		if (!regex(query)) {
-			return client.instance.reply('Please specify a valid Mediafire url.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('Please specify a valid Mediafire url.', { from, quoted: message });
 		}
 
 		const result = await mediafire(query);
 
 		if ('error' in result) {
-			return client.instance.reply(result.error, { from, quoted: message, groupMetadata });
+			return client.instance.reply(result.error, { from, quoted: message });
 		}
 
 		await client.instance.reply(
@@ -38,7 +38,7 @@ Filename: ${result.filename}
 Filesize: ${result.filesize}
 Filetype: ${result.filetype}
 Uploaded: ${result.uploaded}`.formatForm(),
-			{ from, quoted: message, groupMetadata }
+			{ from, quoted: message }
 		);
 
 		await client.instance.send(
@@ -47,7 +47,7 @@ Uploaded: ${result.uploaded}`.formatForm(),
 				[result.filetype]: { url: result.dlLink },
 				...(result.filetype === 'document' ? { fileName: result.filename, mimetype: result.mimetype } : {})
 			},
-			{ groupMetadata, quoted: message }
+			{ quoted: message }
 		);
 	}
 };

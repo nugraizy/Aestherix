@@ -14,12 +14,11 @@ export default {
 	cooldown: 5,
 	limit: 4,
 	status: 'enable',
-	run: async ({ from, isMediaImage, prettyNumber, mediaData, message, groupMetadata }, client) => {
+	run: async ({ from, isMediaImage, prettyNumber, mediaData, message }, client) => {
 		if (!isMediaImage) {
 			return client.instance.reply('Please reply/send image with caption the command.', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -32,12 +31,12 @@ export default {
 		buffer = screenshot.toBuffer();
 
 		if ('error' in screenshot) {
-			client.instance.reply(screenshot.error, { from, quoted: message, groupMetadata });
+			client.instance.reply(screenshot.error, { from, quoted: message });
 			loggers.error(`${color('Failed to Prettify an Image', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 			return;
 		}
 
-		await client.instance.send(from, { image: Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
+		await client.instance.send(from, { image: Buffer.from(buffer, 'base64') }, { quoted: message });
 		buffer = null;
 
 		loggers.info(`${color('Prettifying an Image Success', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);

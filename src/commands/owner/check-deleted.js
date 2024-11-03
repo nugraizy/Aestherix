@@ -24,7 +24,7 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	async run({ from, args, cmd, groupMetadata }, client, store) {
+	async run({ from, args, cmd }, client, store) {
 		const messages = configuration.OPTIONS.json
 			? JSON.parse(fs.readFileSync(DB_PATH)).messages[from]
 			: store.loadMessages(from);
@@ -66,7 +66,7 @@ export default {
 				text: '\t',
 				sections: row
 			},
-			{ groupMetadata }
+			{}
 		);
 	}
 };

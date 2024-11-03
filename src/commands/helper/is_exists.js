@@ -17,25 +17,25 @@ export default {
 	cooldown: 6,
 	limit: 5,
 	status: 'enable',
-	run: async ({ query, from, message, groupMetadata }, client) => {
+	run: async ({ query, from, message }, client) => {
 		if (!query) {
-			return await client.instance.reply('You must provide a number.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a number.', { from, quoted: message });
 		}
 
 		if (!/^[0-9xX]*$/.test(query)) {
-			return await client.instance.reply('You must provide only number.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide only number.', { from, quoted: message });
 		}
 
 		const regex = /[xX]/g;
 
 		if (!regex.test(query)) {
-			return await client.instance.reply('You must include "x" in your query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must include "x" in your query.', { from, quoted: message });
 		}
 
 		const total = 10 ** query.match(regex).length;
 
 		if (total > 100) {
-			return await client.instance.reply('Too much "x" in your query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Too much "x" in your query.', { from, quoted: message });
 		}
 
 		const container = cache.get(query) || [];
@@ -80,7 +80,7 @@ ${container
 	.map((v) => v.jid.split('@')[0])
 	.join('\n')}`;
 
-		await client.instance.send(from, { text, mentions: existedNumber.map((v) => v.jid) }, { groupMetadata });
+		await client.instance.send(from, { text, mentions: existedNumber.map((v) => v.jid) }, {});
 
 		cache.set(query, container);
 	}

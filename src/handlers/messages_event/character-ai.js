@@ -5,7 +5,7 @@ import configuration from '../../helper/config/connect.js';
 /**
  * @type {import('../../types/Commands/index.js').CommandProps['run']}
  */
-const handler = async ({ from, type, body, message, groupMetadata, mediaData }, client) => {
+const handler = async ({ from, type, body, message, mediaData }, client) => {
 	try {
 		/**
 		 * @type {import('../../utils/ai/char-ai.js').ChatGPTDialogue}
@@ -17,14 +17,14 @@ const handler = async ({ from, type, body, message, groupMetadata, mediaData }, 
 			let response = await ai.sendMessage(body);
 
 			if (response.error) {
-				await client.instance.reply(response.message, { from, quoted: message, groupMetadata });
+				await client.instance.reply(response.message, { from, quoted: message });
 
 				response = await ai.sendMessage(body);
 
 				await delay(1000);
 			}
 
-			await client.instance.reply(response.message, { from, quoted: message, groupMetadata });
+			await client.instance.reply(response.message, { from, quoted: message });
 		}
 	} catch (error) {
 		console.log(error);

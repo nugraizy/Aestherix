@@ -21,7 +21,7 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	async run({ from, message, query, groupMetadata }, client, store) {
+	async run({ from, message, query }, client, store) {
 		try {
 			const messages = configuration.OPTIONS.json
 				? JSON.parse(readFileSync(STATUS_PATH)).messages[STATUS]
@@ -67,7 +67,7 @@ export default {
 				null;
 
 			if (!data) {
-				return await client.instance.reply('Story not found', { from, quoted: message, groupMetadata });
+				return await client.instance.reply('Story not found', { from, quoted: message });
 			}
 
 			caption += ` • ${
@@ -78,7 +78,7 @@ export default {
 			caption += `Texts : ${data.stories?.extendedTextMessage?.length ?? 0}\n`;
 			caption += `Images : ${data.stories?.imageMessage?.length ?? 0}\n`;
 			caption += `Videos : ${data.stories?.videoMessage?.length ?? 0}\n\n`;
-			await client.instance.reply(caption.trim(), { from, quoted: message, groupMetadata });
+			await client.instance.reply(caption.trim(), { from, quoted: message });
 
 			for (const type of Object.keys(data.stories)) {
 				for (const message of data.stories[type]) {
@@ -88,7 +88,7 @@ export default {
 					if (type === 'extendedTextMessage') {
 						const buffer = await textStory(body, message.message.extendedTextMessage.backgroundArgb);
 
-						await client.instance.send(from, { image: buffer, caption: body }, { groupMetadata, quoted: message });
+						await client.instance.send(from, { image: buffer, caption: body }, { quoted: message });
 					} else {
 						const messages = generateWAMessageFromContent(from, { ...message.message }, {});
 
@@ -100,7 +100,6 @@ export default {
 							remoteJid: message.key.remoteJid
 						};
 						await client.instance.relayMessage(from, messages.message, {
-							cachedGroupMetadata: () => groupMetadata,
 							messageId: messages.key.id
 						});
 

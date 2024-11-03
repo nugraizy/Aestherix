@@ -13,7 +13,7 @@ export default {
 	cooldown: 2,
 	limit: 1,
 	status: 'enable',
-	async run({ query, from, message, args, cmd, groupMetadata }, client) {
+	async run({ query, from, message, args, cmd }, client) {
 		if (args[1] === 'next' || args[1] === 'prev') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.image === args[2]);
@@ -52,18 +52,18 @@ export default {
 					],
 					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		}
 
 		if (!query) {
-			return client.instance.reply('Please provide queries', { from, quoted: message, groupMetadata });
+			return client.instance.reply('Please provide queries', { from, quoted: message });
 		}
 
 		const data = await cnnindonesia(query);
 
 		if ('error' in data) {
-			return await client.instance.reply(data.error, { from, quoted: message, groupMetadata });
+			return await client.instance.reply(data.error, { from, quoted: message });
 		}
 
 		let caption = 'CNN Indonesia'.formatHeaders();
@@ -94,7 +94,7 @@ export default {
 				],
 				footer: `Void Bot     1/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
 			},
-			{ groupMetadata, quoted: message }
+			{ quoted: message }
 		);
 	}
 };

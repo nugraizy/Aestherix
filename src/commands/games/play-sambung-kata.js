@@ -13,9 +13,9 @@ export default {
 	cooldown: 2,
 	limit: 2,
 	status: 'enable',
-	async run({ isGroup, message, from, sender, query, groupMetadata }, client) {
+	async run({ isGroup, message, from, sender, query }, client) {
 		if (!isGroup) {
-			return await client.instance.reply('This feature only for groups', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('This feature only for groups', { from, quoted: message });
 		}
 
 		const statusGame = getSambungkataSession(from);
@@ -32,14 +32,14 @@ export default {
 					footer: 'Void Bot Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
 					sections: [{ rows: [{ title: 'Play', rowId: '.sambung player 2' }], title: 'VOID BOT | Word Game' }]
 				},
-				{ groupMetadata }
+				{}
 			);
 		} else if (query === 'player 2') {
 			if (statusGame.checkStatus() === 'waiting' && (statusGame.player1 === sender || statusGame.player2 === sender)) {
-				await client.instance.reply(statusGame.throwResponse().message, { from, quoted: message, groupMetadata });
+				await client.instance.reply(statusGame.throwResponse().message, { from, quoted: message });
 				return;
 			} else if (statusGame.checkStatus() === 'playing' && (statusGame.player1 === sender || statusGame.player2 === sender)) {
-				await client.instance.reply(statusGame.throwResponse().message, { from, quoted: message, groupMetadata });
+				await client.instance.reply(statusGame.throwResponse().message, { from, quoted: message });
 				return;
 			} else if (statusGame.player1 !== sender && statusGame.player2 === undefined && statusGame.checkStatus() === 'waiting') {
 				const data = await statusGame.start(sender, client);
@@ -55,7 +55,7 @@ Clue : ${data.clue}
 Turn : @${data.turn.split('@')[0]}`,
 						mentions: [data.turn]
 					},
-					{ groupMetadata }
+					{}
 				);
 			}
 		}

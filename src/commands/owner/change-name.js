@@ -11,15 +11,15 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	async run({ from, query, message, groupMetadata }, client) {
+	async run({ from, query, message }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a name to set', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a name to set', { from, quoted: message });
 		}
 
 		if (typeof client.instance.updateProfileName !== 'function') {
 			return await client.instance.reply(
 				"Your current Baileys didn't support changing profile name, please update to latest commit of the Baileys." /* eslint-disable-line */,
-				{ from, quoted: message, groupMetadata }
+				{ from, quoted: message }
 			);
 		}
 

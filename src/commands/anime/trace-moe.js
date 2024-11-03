@@ -28,23 +28,21 @@ export default {
 			message,
 			sender,
 			args,
-			typeQuoted,
-			groupMetadata
+			typeQuoted
 		},
 		client
 	) {
 		if (!isURL(query) && !isMediaImage) {
 			return await client.instance.reply('Please send/reply a image to find the similar image', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
 		let media = query && isURL(query) ? query : null;
 
 		if (typeMessage === 'listResponseMessage' && args[1] === 'get') {
-			await client.instance.reply('Searching. Please wait...', { from, quoted: message, groupMetadata });
+			await client.instance.reply('Searching. Please wait...', { from, quoted: message });
 
 			args = JSON.parse(JSON.parse(JSON.stringify(args.slice(2).join(' '))));
 
@@ -111,11 +109,11 @@ ${
 					],
 					footer: 'Powered by trace.moe'
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		}
 
-		await client.instance.reply('Searching. Please wait...', { from, quoted: message, groupMetadata });
+		await client.instance.reply('Searching. Please wait...', { from, quoted: message });
 
 		if (isMediaImage) {
 			media = await client.instance.downloadAndSaveMediaMessage(
@@ -132,7 +130,7 @@ ${
 				fs.unlinkSync(media);
 			}
 
-			return await client.instance.reply(result.error, { from, quoted: message, groupMetadata });
+			return await client.instance.reply(result.error, { from, quoted: message });
 		}
 
 		if (isMediaImage) {
@@ -200,7 +198,7 @@ ${externalLinks
 				],
 				footer: 'Powered by trace.moe'
 			},
-			{ groupMetadata, quoted: message }
+			{ quoted: message }
 		);
 
 		// let i = 0;
@@ -233,7 +231,7 @@ ${externalLinks
 		// 		buttonText: 'Open List',
 		// 		sections: row
 		// 	},
-		// 	{ groupMetadata }
+		// 	{  }
 		// );
 	}
 };

@@ -17,9 +17,9 @@ export default {
 	status: 'disable',
 	premium: false,
 	minifiedDescription: 'Search P-Store Products',
-	async run({ query, from, message, groupMetadata }, client) {
+	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		let queries = query.split(',');
@@ -30,7 +30,7 @@ export default {
 			let product = await pStoreProduct(querie.trim());
 
 			if ('error' in product) {
-				await client.instance.reply(product.error, { from, quoted: message, groupMetadata });
+				await client.instance.reply(product.error, { from, quoted: message });
 				continue;
 			}
 
@@ -81,7 +81,7 @@ Source : ${source}`.formatForm()
 						// ],
 						// footer:
 					},
-					{ groupMetadata, quoted: message }
+					{ quoted: message }
 				);
 			}
 		}

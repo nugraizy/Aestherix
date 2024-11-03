@@ -17,7 +17,7 @@ export default {
 	cooldown: 6,
 	limit: 6,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, type, args, groupMetadata }, client) {
+	async run({ from, query, prettyNumber, message, type, args }, client) {
 		if (type === 'templateButtonReplyMessage' && args[1] === '-crawl') {
 			let data = JSON.parse(args.slice(2).join(' '));
 			let len = '';
@@ -50,14 +50,14 @@ export default {
 					text: '\t',
 					sections: row
 				},
-				{ groupMetadata }
+				{}
 			);
 
 			return;
 		}
 
 		if (!query) {
-			return await client.instance.reply('Please specify a query', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a query', { from, quoted: message });
 		}
 
 		let { _: usernames } = parser(query);
@@ -68,8 +68,7 @@ export default {
 			if ('error' in users[data]) {
 				client.instance.reply(`Error while searching TikTok user\n\n${users[data].error}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 
 				loggers.error(`${color('Failed to Search TikTok User', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
@@ -107,7 +106,7 @@ export default {
 					image: { url: profileHD || profileSD },
 					caption: 'TikTok User Lookup'.formatHeaders() + `\n\n${capt.trim().formatForm()}`.trimEnd()
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		}
 	}

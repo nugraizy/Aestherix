@@ -13,11 +13,11 @@ export default {
 	cooldown: 2,
 	limit: 2,
 	status: 'enable',
-	async run({ from, message, groupMetadata }, client) {
+	async run({ from, message }, client) {
 		const aki = await startAkinator(from);
 
 		if ('error' in aki) {
-			return await client.instance.reply(aki.error, { from, quoted: message, groupMetadata });
+			return await client.instance.reply(aki.error, { from, quoted: message });
 		}
 
 		const { question, answers, progress, progressBar, arrow } = aki;
@@ -26,7 +26,7 @@ export default {
 			`[?] \`${question}\`\n\n${answers
 				.map((v, i) => `${i + 1}. ${v}`)
 				.join('\n')}\n6. Exit\n7. Back/Undo\n\n> Progress : ${progress.toFixed(2)}% ${arrow}\n${progressBar}`,
-			{ from, quoted: message, groupMetadata }
+			{ from, quoted: message }
 		);
 
 		setMessages(from, { originalMessage: messages });

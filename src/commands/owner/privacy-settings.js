@@ -75,7 +75,7 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	run: async ({ query, from, message, groupMetadata }, client) => {
+	run: async ({ query, from, message }, client) => {
 		try {
 			const node = await client.instance.query({
 				tag: 'iq',
@@ -107,8 +107,7 @@ export default {
 						.join('\n')}`,
 					{
 						from,
-						quoted: message,
-						groupMetadata
+						quoted: message
 					}
 				);
 			}
@@ -122,8 +121,7 @@ export default {
 					`Invalid value for ${name}. Valid values: ${PRIVACY_SETTINGS_TOGGLE[name].join(', ')}`,
 					{
 						from,
-						quoted: message,
-						groupMetadata
+						quoted: message
 					}
 				);
 			}
@@ -132,14 +130,12 @@ export default {
 
 			await client.instance.reply('Succesfully changed privacy settings.', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		} catch {
 			await client.instance.reply('An error occured while trying to change privacy settings.', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 	}

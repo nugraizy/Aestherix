@@ -12,27 +12,25 @@ export default {
 	limit: 6,
 	status: 'enable',
 	restrict: true,
-	async run({ isBotAdmin, query, from, bodyQuoted, mediaData, mention, message, adminGroups, groupMetadata }, client) {
+	async run({ isBotAdmin, query, from, bodyQuoted, mediaData, mention, message, adminGroups }, client) {
 		if (!query && !mention.length && !bodyQuoted) {
 			return await client.instance.reply('Please reply people message or mention people.', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
 		if (!isBotAdmin) {
 			return await client.instance.reply('Bot is not admin, Please promote admin before using moderation commands.', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
 		const myJid = client.instance.decodeJid(instance);
 
 		if (mention?.includes(myJid) || mediaData?.participant?.includes(myJid)) {
-			return await client.instance.reply('You can not promote me by myself.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You can not promote me by myself.', { from, quoted: message });
 		}
 
 		if (query || mention.length) {

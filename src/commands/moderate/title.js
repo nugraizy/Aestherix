@@ -11,17 +11,16 @@ export default {
 	cooldown: 2,
 	limit: 2,
 	status: 'enable',
-	async run({ isBotAdmin, from, query, bodyQuoted, message, groupMetadata }, client) {
+	async run({ isBotAdmin, from, query, bodyQuoted, message }, client) {
 		if (!isBotAdmin) {
 			return await client.instance.reply('Bot is not admin, Please promote admin before using moderation commands.', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
 		if (!query) {
-			return await client.instance.reply('Please input the title.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please input the title.', { from, quoted: message });
 		}
 
 		if (query) {

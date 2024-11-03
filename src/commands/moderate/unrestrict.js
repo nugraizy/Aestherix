@@ -11,17 +11,16 @@ export default {
 	cooldown: 2,
 	limit: 2,
 	status: 'enable',
-	async run({ groupMetadata, isBotAdmin, from, message }, client) {
+	async run({ isBotAdmin, from, message, groupMetadata }, client) {
 		if (!isBotAdmin) {
 			return await client.instance.reply('Bot is not admin, Please promote admin before using moderation commands.', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
 		if (!groupMetadata.restrict) {
-			return await client.instance.reply('Group is already unrestricted.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Group is already unrestricted.', { from, quoted: message });
 		}
 
 		await client.instance.updateGroup(from, undefined, 'UNLOCKED');

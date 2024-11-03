@@ -14,7 +14,7 @@ export default {
 	cooldown: 5,
 	limit: 3,
 	status: 'enable',
-	run: async ({ query, from, groupMetadata, message }, client) => {
+	run: async ({ query, from, message }, client) => {
 		const { quantity } = parser(query, {
 			number: ['quantity'],
 			configuration: {
@@ -29,11 +29,11 @@ export default {
 		});
 
 		if (!quantity) {
-			return await client.instance.reply('You must provide a quantity.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a quantity.', { from, quoted: message });
 		}
 
 		const changelog = await getChangelogs(quantity);
 
-		await client.instance.reply(stringifyChangelogs(changelog), { from, quoted: message, groupMetadata });
+		await client.instance.reply(stringifyChangelogs(changelog), { from, quoted: message });
 	}
 };

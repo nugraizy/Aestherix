@@ -41,7 +41,7 @@ export default {
 	cooldown: 5,
 	limit: 0,
 	status: 'enable',
-	async run({ isOwner, query, from, message, groupMetadata }, client) {
+	async run({ isOwner, query, from, message }, client) {
 		if (!isOwner) {
 			return;
 		}
@@ -68,7 +68,7 @@ export default {
 
 		if (enable) {
 			if (ids?.[from]?.enabled) {
-				return await client.instance.reply('Already enabled', { from, quoted: message, groupMetadata });
+				return await client.instance.reply('Already enabled', { from, quoted: message });
 			}
 
 			const messageReplies = await client.instance.send(
@@ -76,7 +76,7 @@ export default {
 				{
 					text: 'Enabling Spotify Player Playback...'
 				},
-				{ groupMetadata }
+				{}
 			);
 
 			configuration.intervals.spotifyPlaybacks.set('ids', { ...ids, [from]: { enabled: true, message: messageReplies } });
@@ -86,7 +86,7 @@ export default {
 
 		if (disable) {
 			if (!ids?.[from]?.enabled) {
-				return await client.instance.reply('Already disabled', { from, quoted: message, groupMetadata });
+				return await client.instance.reply('Already disabled', { from, quoted: message });
 			}
 
 			/**
@@ -99,7 +99,7 @@ export default {
 				{
 					text: 'Disabling Spotify Player Playback...'
 				},
-				{ groupMetadata, quted: messageToReply }
+				{ quted: messageToReply }
 			);
 
 			configuration.intervals.spotifyPlaybacks.set('ids', { ...ids, [from]: { enabled: false, message: messageReplies } });

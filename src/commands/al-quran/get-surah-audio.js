@@ -15,17 +15,17 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	async run({ query, from, cmd, message, groupMetadata }, client) {
+	async run({ query, from, cmd, message }, client) {
 		if (!query) {
-			return await client.instance.reply('Please specify a surah number', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a surah number', { from, quoted: message });
 		}
 
 		if (!regex(query)) {
-			return await client.instance.reply('Please specify a valid surah number', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a valid surah number', { from, quoted: message });
 		}
 
 		if (parseInt(query) > 114) {
-			return await client.instance.reply('Surah number must be less than 114', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Surah number must be less than 114', { from, quoted: message });
 		}
 
 		const audio = await getSurahAudio(query);

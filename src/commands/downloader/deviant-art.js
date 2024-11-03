@@ -31,9 +31,9 @@ export default {
 	limit: 4,
 	cooldown: 8,
 	status: 'enable',
-	async run({ query, from, message, groupMetadata }, client) {
+	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		let queries = query.split(',');
@@ -44,7 +44,7 @@ export default {
 			const regexs = regex(querie.trim());
 
 			if (!regexs.status) {
-				await client.instance.reply(regexs.message, { from, quoted: message, groupMetadata });
+				await client.instance.reply(regexs.message, { from, quoted: message });
 
 				continue;
 			}
@@ -52,7 +52,7 @@ export default {
 			const result = await downloadDeviantArt(querie);
 
 			if ('error' in result) {
-				await client.instance.reply(result.error, { from, quoted: message, groupMetadata });
+				await client.instance.reply(result.error, { from, quoted: message });
 
 				continue;
 			}
@@ -73,7 +73,7 @@ Views : ${numberWithCommas(result.views)}`.formatForm(),
 					],
 					footer: ''
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		}
 	}

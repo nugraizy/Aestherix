@@ -110,7 +110,6 @@ const handleMentionedAfkUsers = (message, client) => {
 
 	if (container.length) {
 		client.instance.reply(caption.trim(), {
-			groupMetadata: message.groupMetadata,
 			from: message.from,
 			quoted: message.message
 		});
@@ -217,17 +216,12 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 			}
 
 			if (message.isBanned) {
-				await client.instance.send(
-					message.from,
-					{ react: { text: '🖕🏼', key: message.message.key } },
-					{ groupMetadata: message.groupMetadata }
-				);
+				await client.instance.send(message.from, { react: { text: '🖕🏼', key: message.message.key } });
 				continue;
 			}
 
 			if (Tempcmds.category === 'Owner' && !message.isOwner) {
 				await client.instance.reply('This commands is only for owner.', {
-					groupMetadata: message.groupMetadata,
 					from: message.from,
 					quoted: message.message
 				});
@@ -236,7 +230,6 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 
 			if (configuration.OPTIONS.restrict && Tempcmds.restrict) {
 				await client.instance.reply('This command is restricted and currently bot are on restricted mode.', {
-					groupMetadata: message.groupMetadata,
 					from: message.from,
 					quoted: message.message
 				});
@@ -251,7 +244,6 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 				message?.[message?.from]?.games === 'disable'
 			) {
 				await client.instance.reply('Game Mode is Disabled. Type !games enable to enable Game Mode', {
-					groupMetadata: message.groupMetadata,
 					from: message.from,
 					quoted: message.message
 				});
@@ -260,7 +252,6 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 
 			if (Tempcmds.category === 'Moderation' && message.isGroup && !message.isAdmin && !message.isOwner) {
 				await client.instance.reply('You are not admin. This commands is only for admins.', {
-					groupMetadata: message.groupMetadata,
 					from: message.from,
 					quoted: message.message
 				});
@@ -269,7 +260,6 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 
 			if (Tempcmds.category === 'Moderation' && !message.isGroup) {
 				await client.instance.reply('This commands for group only', {
-					groupMetadata: message.groupMetadata,
 					from: message.from,
 					quoted: message.message
 				});
@@ -285,7 +275,6 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 					}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v}`).join(', ')}.\nThis Features Only for Premium users.`;
 
 					client.instance.reply(help, {
-						groupMetadata: message.groupMetadata,
 						from: message.from,
 						quoted: message.message
 					});
@@ -294,7 +283,6 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 				}
 
 				await client.instance.reply('This commands is only for premium user.', {
-					groupMetadata: message.groupMetadata,
 					from: message.from,
 					quoted: message.message
 				});
@@ -317,7 +305,6 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 
 				if (limit.error) {
 					client.instance.reply(limit.message.replace('%s', `But this command (${Tempcmds.name}) need ${Tempcmds.limit}`), {
-						groupMetadata: message.groupMetadata,
 						from: message.from,
 						quoted: message.message
 					});
@@ -333,7 +320,6 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 
 				if (isCooldown) {
 					await client.instance.reply('Please wait until your request is done', {
-						groupMetadata: message.groupMetadata,
 						from: message.from,
 						quoted: message.message
 					});
@@ -346,7 +332,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 				if (cooldownTime && Date.now() < cooldownTime) {
 					await client.instance.reply(
 						`${commandName} is on cooldown for ${((cooldownTime - Date.now()) / 1000).toFixed(1)} seconds.`,
-						{ groupMetadata: message.groupMetadata, from: message.from, quoted: message.message }
+						{ from: message.from, quoted: message.message }
 					);
 					continue;
 				}
@@ -378,7 +364,6 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 					}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v}`).join(', ')}.`;
 
 					await client.instance.reply(help, {
-						groupMetadata: message.groupMetadata,
 						from: message.from,
 						quoted: message.message
 					});
@@ -493,7 +478,7 @@ const handleAfk = (client, message) => {
 				text: `@${message.sender.split('@')[0]} is AFK since ${time} ago. Now they are out from AFK. Reason: ${reasons}`,
 				mentions: [message.sender]
 			},
-			{ groupMetadata: message.groupMetadata, quoted: message.message }
+			{ quoted: message.message }
 		);
 		deleteAfk(message.sender, message.from);
 	}
@@ -503,7 +488,6 @@ const handleAfk = (client, message) => {
 		const time = getTimeSince(since);
 
 		client.instance.reply(`${name} is AFK since ${time} ago. Reason: ${reasons}`, {
-			groupMetadata: message.groupMetadata,
 			from: message.from,
 			quoted: message.message
 		});

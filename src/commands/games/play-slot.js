@@ -13,7 +13,7 @@ export default {
 	cooldown: 2,
 	limit: 2,
 	status: 'enable',
-	async run({ from, message, query, groupMetadata }, client) {
+	async run({ from, message, query }, client) {
 		let capt;
 		const slot = slots(query);
 
@@ -25,6 +25,6 @@ export default {
 			capt += `\nYou Lose ${slot.lose}! Try again?\nSlot Machine by Void Bot. Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 		}
 
-		await client.instance.reply(capt, { from, quoted: message, groupMetadata });
+		await client.instance.reply(capt, { from, quoted: message });
 	}
 };

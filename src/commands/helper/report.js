@@ -13,15 +13,15 @@ export default {
 	cooldown: 40,
 	limit: 0,
 	status: 'enable',
-	async run({ from, message, query, sender, pushname, prettyNumber, settings, type, isOwner, args, groupMetadata }, client) {
+	async run({ from, message, query, sender, pushname, prettyNumber, settings, type, isOwner, args }, client) {
 		if (!query) {
-			return await client.instance.reply('Please provide a message to report', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please provide a message to report', { from, quoted: message });
 		}
 
 		if (args[1] === 'accept' && isOwner) {
 			await client.instance.reply(
 				'Your problem has been accepted by the Owner. Please wait for the fix. And for the bonuses you will be given 20 Limit.',
-				{ from: args[2], quoted: JSON.parse(args.slice(4)), groupMetadata }
+				{ from: args[2], quoted: JSON.parse(args.slice(4)) }
 			);
 
 			Limit.addLimit(args[3], 20);
@@ -32,8 +32,7 @@ export default {
 		if (query.length < 20 && type !== 'templateButtonReplyMessage') {
 			return await client.instance.reply('Please describe the problem in detail. Min. 20 characters', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -48,7 +47,7 @@ export default {
 				templateButtons: [],
 				headerType: 1
 			},
-			{ groupMetadata }
+			{}
 		);
 		await client.instance.send(settings.owner_number, {
 			text: query,

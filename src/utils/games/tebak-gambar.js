@@ -17,7 +17,7 @@ const pushMessageData = (id, data, message) => {
 const images = await fs.readJSON(path.join(__dirname, 'databases/games/tebak_gambar/db.json'));
 const getData = () => randomize(images);
 
-export const startTG = async (client, id, { message, sender, groupMetadata }, remainingTime) => {
+export const startTG = async (client, id, { message, sender }, remainingTime) => {
 	const Data = checkIntervals(configuration.intervals.tebakGambar.get(id));
 
 	if (Data !== 0) {
@@ -33,7 +33,7 @@ export const startTG = async (client, id, { message, sender, groupMetadata }, re
 		'_'
 	)}\n`;
 
-	await client.instance.send(id, { image: { url: image }, caption }, { groupMetadata, quoted: message }).then((data) => {
+	await client.instance.send(id, { image: { url: image }, caption }, { quoted: message }).then((data) => {
 		obj.message = data;
 		pushMessageData(id, obj, data);
 	});
@@ -46,14 +46,7 @@ export const startTG = async (client, id, { message, sender, groupMetadata }, re
 		configuration.intervals.tebakGambar,
 		id,
 		remainingTime + 2,
-		(
-			clients = client,
-			ids = id,
-			answers = answer,
-			messages = message,
-			remainingTimes = remainings,
-			groupMetadatas = groupMetadata
-		) => {
+		(clients = client, ids = id, answers = answer, messages = message, remainingTimes = remainings) => {
 			if (configuration.intervals.tebakGambar.get(ids) === undefined) {
 				return;
 			}
@@ -67,8 +60,7 @@ export const startTG = async (client, id, { message, sender, groupMetadata }, re
 			if (timer === 5) {
 				clients.instance.reply('Time is almost over! 5 seconds', {
 					from: ids,
-					quoted: messages,
-					groupMetadata: groupMetadatas
+					quoted: messages
 				});
 			}
 
@@ -76,8 +68,7 @@ export const startTG = async (client, id, { message, sender, groupMetadata }, re
 				deleteIntervals(configuration.intervals.tebakGambar.get(ids), configuration.intervals.tebakGambar, ids);
 				clients.instance.reply(`Time's up! The answer is ${answers}`, {
 					from: ids,
-					quoted: messages,
-					groupMetadata: groupMetadatas
+					quoted: messages
 				});
 				configuration.games.tebakGambar.delete(configuration.games.tebakGambar.get(ids).id);
 			}

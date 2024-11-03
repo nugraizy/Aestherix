@@ -19,32 +19,20 @@ export default {
 	limit: 4,
 	status: 'enable',
 	run: async (
-		{
-			from,
-			isMediaImage,
-			isQuotedSticker,
-			prettyNumber,
-			extractMediaData,
-			filename,
-			message,
-			query,
-			typeQuoted,
-			groupMetadata
-		},
+		{ from, isMediaImage, isQuotedSticker, prettyNumber, extractMediaData, filename, message, query, typeQuoted },
 		client
 	) => {
 		if (!isMediaImage && !isQuotedSticker) {
 			return client.instance.reply(
 				'Please reply/send image with caption the command. This command also accept sticker (reply one with command).',
-				{ from, quoted: message, groupMetadata }
+				{ from, quoted: message }
 			);
 		}
 
 		if (isQuotedSticker && extractMediaData.isAnimated) {
 			return client.instance.reply('The sticker are animated. Please reply static stickers only.', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -79,9 +67,9 @@ export default {
 				}
 			);
 
-			client.instance.send(from, { sticker: prepareSticker }, { groupMetadata, quoted: message });
+			client.instance.send(from, { sticker: prepareSticker }, { quoted: message });
 		} else {
-			client.instance.send(from, { image: resultRemoveBg }, { groupMetadata, quoted: message });
+			client.instance.send(from, { image: resultRemoveBg }, { quoted: message });
 		}
 	}
 };

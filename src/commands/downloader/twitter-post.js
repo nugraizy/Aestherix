@@ -36,20 +36,20 @@ export default {
 	cooldown: 10,
 	limit: 9,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
+	async run({ from, query, prettyNumber, message }, client) {
 		if (!query) {
-			return await client.instance.reply('Please specify a url', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a url', { from, quoted: message });
 		}
 
 		let { _: urls } = parser(query);
 
 		if (urls.length === 1 && !isURL(urls[0])) {
-			return await client.instance.reply('Please specify a valid url', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a valid url', { from, quoted: message });
 		}
 
 		for (const url of urls) {
 			if (!isURL(url.trim())) {
-				await client.instance.reply('Please specify a valid url', { from, quoted: message, groupMetadata });
+				await client.instance.reply('Please specify a valid url', { from, quoted: message });
 
 				continue;
 			}
@@ -61,8 +61,7 @@ export default {
 			if ('error' in post) {
 				await client.instance.reply(`Error while downloading Twitter post\n\n${post.error}\n${url}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 				loggers.error(`${color('Failed to Download Twitter Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 
@@ -72,15 +71,13 @@ export default {
 			const caption = createPostCaption(post);
 
 			if (post.medias.length > 1) {
-				await client.instance.send(from, { text: caption }, { groupMetadata, quoted: message });
+				await client.instance.send(from, { text: caption }, { quoted: message });
 
 				for (const media of post.medias) {
 					await client.instance.send(
 						from,
 						media.type === 'video' ? { video: { url: media.url } } : { image: { url: media.url } },
-						{
-							groupMetadata
-						}
+						{}
 					);
 					await delay(100);
 				}
@@ -90,7 +87,7 @@ export default {
 					post.medias[0].type === 'video'
 						? { video: { url: post.medias[0].url }, caption }
 						: { image: { url: post.medias[0].url }, caption },
-					{ groupMetadata, quoted: message }
+					{ quoted: message }
 				);
 			}
 

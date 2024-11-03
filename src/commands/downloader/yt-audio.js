@@ -7,23 +7,23 @@ import { youtubeMainDownload } from '../../utils/youtube/index.js';
  *
  * @param {string} url
  * @param {import('../../types/Socket/index.js').AdvancedClient} client
- * @param {{from: string, message: import('../../types/Reconstruct/index.js').ReassignResult['message'], groupMetadata: import('../../types/Reconstruct/index.js').ReassignResult['groupMetadata'], prettyNumber: string}} param2
+ * @param {{from: string, message: import('../../types/Reconstruct/index.js').ReassignResult['message'], : import('../../types/Reconstruct/index.js').ReassignResult[''], prettyNumber: string}} param2
  * @returns
  */
-const processAudio = async (url, client, { from, message, groupMetadata, prettyNumber }) => {
+const processAudio = async (url, client, { from, message, prettyNumber }) => {
 	const audio = await youtubeMainDownload(url, 'mp3');
 
 	loggers.warning(`${color('Downloading YouTube Audio', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 	// if ('error' in audio) {
-	// 	client.instance.reply(audio.error, { from, quoted: message, groupMetadata });
+	// 	client.instance.reply(audio.error, { from, quoted: message,  });
 	// 	loggers.error(`${color('Failed to Download YouTube Audio', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 	// }
 
 	const { title, link, description, resolution } = audio;
 
 	if (!link) {
-		client.instance.reply(`Error while downloading YouTube Video\n\n${url}`, { from, quoted: message, groupMetadata });
+		client.instance.reply(`Error while downloading YouTube Video\n\n${url}`, { from, quoted: message });
 		loggers.error(`${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		return;
@@ -44,7 +44,6 @@ const processAudio = async (url, client, { from, message, groupMetadata, prettyN
 			caption: capt.formatForm()
 		},
 		{
-			groupMetadata,
 			quoted: message
 		}
 	);
@@ -63,7 +62,7 @@ export default {
 	cooldown: 7,
 	limit: 8,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, /*type, args,*/ groupMetadata, mediaData, bodyQuoted, typeQuoted }, client) {
+	async run({ from, query, prettyNumber, message, /*type, args,*/ mediaData, bodyQuoted, typeQuoted }, client) {
 		if (typeQuoted === 'conversation' && mediaData.participant?.includes(client.instance.decodeJid(instance))) {
 			const reg = /✦ Video ID :\s*`([^\n]+)`/g;
 
@@ -75,7 +74,7 @@ export default {
 			}
 
 			if (!videoIds.length) {
-				return await client.instance.reply('No id(s) found', { from, quoted: message, groupMetadata });
+				return await client.instance.reply('No id(s) found', { from, quoted: message });
 			}
 
 			const numberiedQuery = Number(query);
@@ -84,16 +83,14 @@ export default {
 			if (!numberiedQuery) {
 				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 			}
 
 			if (index > videoIds.length) {
 				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 			}
 
@@ -102,18 +99,16 @@ export default {
 			if (!videoId) {
 				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 			}
 
 			const { key } = await client.instance.reply(`Downloading YouTube audio :\n${videoId}\nPlease wait`.formatForm(), {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 
-			await processAudio(`https://youtu.be/${videoId}`, client, { from, message, groupMetadata, prettyNumber });
+			await processAudio(`https://youtu.be/${videoId}`, client, { from, message, prettyNumber });
 
 			await client.instance.relayMessage(
 				from,
@@ -143,7 +138,7 @@ export default {
 		// 			mimetype: 'audio/opus',
 		// 			caption: ''
 		// 		},
-		// 		{ groupMetadata, quoted: message }
+		// 		{ quoted: message }
 		// 	);
 		// 	return;
 		// } else if (type === 'templateButtonReplyMessage' && args[1] === 'get') {
@@ -164,7 +159,7 @@ export default {
 		// }
 
 		if (!query) {
-			return await client.instance.reply('Please provide a URL or Query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please provide a URL or Query.', { from, quoted: message });
 		}
 
 		let queries = query.split(',');
@@ -172,25 +167,23 @@ export default {
 		queries = removeDuplicatesArray(queries);
 
 		if (queries.length === 1 && isURL(queries) && !isYoutubeURL(queries)) {
-			return await client.instance.reply('This is not a valid YouTube URL.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('This is not a valid YouTube URL.', { from, quoted: message });
 		}
 
 		const { key } = await client.instance.reply(`Downloading YouTube audio(s) :\n${queries.join('\n')}\nPlease wait`, {
 			from,
-			quoted: message,
-			groupMetadata
+			quoted: message
 		});
 
 		for (const Query of queries) {
 			if (isURL(Query) && !isYoutubeURL(Query)) {
 				return await client.instance.reply(`[ ${Query} ] This isn't a valid YouTube URL.`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 			}
 
-			await processAudio(Query, client, { from, message, groupMetadata, prettyNumber });
+			await processAudio(Query, client, { from, message, prettyNumber });
 			await delay(300);
 		}
 

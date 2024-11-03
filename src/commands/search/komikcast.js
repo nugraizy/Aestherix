@@ -13,9 +13,9 @@ export default {
 	cooldown: 7,
 	limit: 7,
 	status: 'enable',
-	run: async ({ query, from, message, type, args, groupMetadata }, client) => {
+	run: async ({ query, from, message, type, args }, client) => {
 		if (!query) {
-			return client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		const komik = new KomikCast();
@@ -35,11 +35,7 @@ Serialization : ${serialize}
 Views : ${views}
 Tot. Chapters : ${chapters.length}`;
 
-			await client.instance.send(
-				from,
-				{ image: { url: thumbnail }, caption: caption.formatForm() },
-				{ groupMetadata, quoted: message }
-			);
+			await client.instance.send(from, { image: { url: thumbnail }, caption: caption.formatForm() }, { quoted: message });
 
 			const row = [];
 
@@ -56,7 +52,7 @@ Tot. Chapters : ${chapters.length}`;
 					text: '\t',
 					sections: row
 				},
-				{ groupMetadata }
+				{}
 			);
 			return;
 		} else if (args[2] === 'extract' && type === 'listResponseMessage') {
@@ -71,7 +67,7 @@ Tot. Chapters : ${chapters.length}`;
 					mimetype: mime('pdf'),
 					fileName: args.slice(3).join('')
 				},
-				{ groupMetadata }
+				{}
 			);
 
 			return;
@@ -80,7 +76,7 @@ Tot. Chapters : ${chapters.length}`;
 		const result = await komik.search(query);
 
 		if ('error' in result) {
-			return client.instance.reply(result.error, { from, quoted: message, groupMetadata });
+			return client.instance.reply(result.error, { from, quoted: message });
 		}
 
 		const row = [];
@@ -98,7 +94,7 @@ Tot. Chapters : ${chapters.length}`;
 				text: '\t',
 				sections: row
 			},
-			{ groupMetadata }
+			{}
 		);
 	}
 };

@@ -113,16 +113,10 @@ ${result.title}`;
 					continue;
 				}
 
-				client.instance.send(
-					id,
-					{
-						edit: ids[id].message.key,
-						text: caption
-					},
-					{
-						groupMetadata: configuration.cache.metadata.get(id)
-					}
-				);
+				client.instance.send(id, {
+					edit: ids[id].message.key,
+					text: caption
+				});
 			}
 		}
 	});

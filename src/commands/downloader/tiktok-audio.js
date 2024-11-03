@@ -17,9 +17,9 @@ export default {
 	cooldown: 7,
 	limit: 6,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
+	async run({ from, query, prettyNumber, message }, client) {
 		if (!query) {
-			return await client.instance.reply('Please provide a URL', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please provide a URL', { from, quoted: message });
 		}
 
 		let { _: urls } = parser(query);
@@ -30,8 +30,7 @@ export default {
 			if ('error' in audios[data]) {
 				await client.instance.reply(`Error while downloading TikTok audio\n\n${audios[data].error}\n${data}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 
 				loggers.error(`${color('Failed to Download TikTok Audio', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
@@ -47,7 +46,7 @@ export default {
 					fileName: `${audios[data].musicTitle}.mp3`,
 					mimetype: mime('mp3')
 				},
-				{ groupMetadata, quotes: message }
+				{ quotes: message }
 			);
 		}
 

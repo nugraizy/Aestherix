@@ -16,7 +16,7 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	status: 'enable',
-	async run({ from, query, message, groupMetadata, prettyNumber, bodyQuoted }, client) {
+	async run({ from, query, message, prettyNumber, bodyQuoted }, client) {
 		if (!query) {
 			query = 'Mana text nya?';
 		}
@@ -48,18 +48,18 @@ export default {
 
 		if (bodyQuoted) {
 			ttp(prettyNumber, bodyQuoted, colors).then(async (buffer) => {
-				await client.instance.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
+				await client.instance.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { quoted: message });
 
 				loggers.info(`${color('Sticker is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 			});
 		} else if (query) {
 			ttp(prettyNumber, query, colors).then(async (buffer) => {
-				await client.instance.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
+				await client.instance.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { quoted: message });
 
 				loggers.info(`${color('Sticker is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 			});
 		} else {
-			await client.instance.reply('Please enter text to convert to sticker', { from, quoted: message, groupMetadata });
+			await client.instance.reply('Please enter text to convert to sticker', { from, quoted: message });
 		}
 	}
 };

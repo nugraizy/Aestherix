@@ -16,9 +16,9 @@ export default {
 	cooldown: 10,
 	limit: 9,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
+	async run({ from, query, prettyNumber, message }, client) {
 		if (!query) {
-			return await client.instance.reply('Please specify a username', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a username', { from, quoted: message });
 		}
 
 		const { _: input } = parser(query);
@@ -31,8 +31,7 @@ export default {
 			if ('error' in stories[data]) {
 				await client.instance.reply(`Error while downloading Instagram story\n\n${stories[data].error}\n${data}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 				loggers.error(`${color('Failed to Download Instagram Story', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
@@ -55,14 +54,12 @@ export default {
 			capt += `Tot. Post : ${numberWithCommas(stories[data].postsCount)}\n`;
 			capt += `Tot. Story : ${stories[data].stories.length}\n\n`;
 
-			await client.instance.reply(capt.trim().formatForm(), { from, quoted: message, groupMetadata });
+			await client.instance.reply(capt.trim().formatForm(), { from, quoted: message });
 
 			capt = '';
 
 			for (const media of stories[data].stories) {
-				await client.instance.send(from, media.isVideo ? { video: { url: media.url } } : { image: { url: media.url } }, {
-					groupMetadata
-				});
+				await client.instance.send(from, media.isVideo ? { video: { url: media.url } } : { image: { url: media.url } }, {});
 				await delay(300);
 			}
 		}

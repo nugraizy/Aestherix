@@ -14,9 +14,9 @@ export default {
 	limit: 4,
 	cooldown: 8,
 	status: 'enable',
-	async run({ from, query, message, cmd, groupMetadata }, client) {
+	async run({ from, query, message, cmd }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		let queries = query.split(',');
@@ -29,8 +29,7 @@ export default {
 			if ('error' in data) {
 				await client.instance.reply(`Failed while searching Pixiv novel\n\n${data.error}\n${querie}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 				continue;
 			}
@@ -54,7 +53,7 @@ ${content}`.formatForm(),
 					],
 					footer: ' • Pixiv Novel Content'
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 
 			for (const { id, title, pageCount, userName, type } of data.slice(1)) {
@@ -78,7 +77,7 @@ ${content}`.formatForm(),
 					buttonText: 'Open List',
 					sections: container
 				},
-				{ groupMetadata }
+				{}
 			);
 		}
 	}

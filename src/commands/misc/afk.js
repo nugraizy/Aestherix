@@ -13,12 +13,11 @@ export default {
 	limit: 2,
 	cooldown: 3,
 	status: 'enable',
-	async run({ message, from, query, isGroup, sender, pushname, groupMetadata }, client) {
+	async run({ message, from, query, isGroup, sender, pushname }, client) {
 		if (!isGroup) {
 			return await client.instance.reply('This command is only available in group chat.', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -27,7 +26,7 @@ export default {
 		await client.instance.send(
 			from,
 			{ text: `@${sender.split('@')[0]} is now AFK.`, mentions: [sender] },
-			{ groupMetadata, quoted: message }
+			{ quoted: message }
 		);
 	}
 };

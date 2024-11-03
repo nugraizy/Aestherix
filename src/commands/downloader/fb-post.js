@@ -18,28 +18,28 @@ export default {
 	cooldown: 8,
 	limit: 6,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
+	async run({ from, query, prettyNumber, message }, client) {
 		if (!query) {
-			return await client.instance.reply('Please provide a URL', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please provide a URL', { from, quoted: message });
 		}
 
 		const { _: urls } = parser(query);
 
 		if (urls.length === 1 && !isURL(urls[0])) {
-			return await client.instance.reply('Please specify a valid url', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a valid url', { from, quoted: message });
 		}
 
 		if (urls.length === 1 && !regex(urls[0])) {
-			return await client.instance.reply('Please specify a valid Facebook url', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a valid Facebook url', { from, quoted: message });
 		}
 
 		for (const url of urls) {
 			if (!isURL(url.trim())) {
-				await client.instance.reply('Please specify a valid url', { from, quoted: message, groupMetadata });
+				await client.instance.reply('Please specify a valid url', { from, quoted: message });
 
 				continue;
 			} else if (!regex(url.trim())) {
-				await client.instance.reply('Please specify a valid Facebook url', { from, quoted: message, groupMetadata });
+				await client.instance.reply('Please specify a valid Facebook url', { from, quoted: message });
 
 				continue;
 			}
@@ -51,8 +51,7 @@ export default {
 			if ('error' in post) {
 				await client.instance.reply(`Failed while downloading Facebook post\n\n${post.error}\n${url}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 				loggers.error(`${color('Failed to Download Facebook Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 
@@ -69,7 +68,7 @@ export default {
 					video: new Buffer.from(await fetchBUFFER(urlFilter.url)),
 					caption: `${'Facebook Video Downloader'.formatHeaders()}\n\nResolution : ${urlFilter.quality}`.formatForm()
 				},
-				{ groupMetadata }
+				{}
 			);
 			await delay(300);
 		}

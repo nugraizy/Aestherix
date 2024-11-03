@@ -28,9 +28,9 @@ export default {
 	cooldown: 10,
 	limit: 5,
 	status: 'enable',
-	async run({ from, query, message, groupMetadata }, client) {
+	async run({ from, query, message }, client) {
 		if (!query) {
-			return client.instance.reply('Please specify a query.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('Please specify a query.', { from, quoted: message });
 		}
 
 		let result = await youtube.core.search(query);
@@ -116,7 +116,7 @@ export default {
 		// 		// ]
 		// 	},
 		// 	{
-		// 		groupMetadata,
+		// 		,
 		// 		quoted: message
 		// 	}
 		// );
@@ -152,7 +152,7 @@ export default {
 		// 		text: '\t',
 		// 		sections: row
 		// 	},
-		// 	{ groupMetadata }
+		// 	{  }
 		// );
 	}
 };

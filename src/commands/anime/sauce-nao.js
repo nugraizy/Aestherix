@@ -16,18 +16,17 @@ export default {
 	limit: 2,
 	cooldown: 2,
 	status: 'enable',
-	async run({ isMediaImage, query, extractMediaData, filename, from, message, typeQuoted, groupMetadata }, client) {
+	async run({ isMediaImage, query, extractMediaData, filename, from, message, typeQuoted }, client) {
 		if (!isURL(query) && !isMediaImage) {
 			return await client.instance.reply('Please send/reply a image to find the similar image', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
 		let media = query && isURL(query) ? query : null;
 
-		await client.instance.reply('Searching. Please wait...', { from, quoted: message, groupMetadata });
+		await client.instance.reply('Searching. Please wait...', { from, quoted: message });
 
 		if (isMediaImage) {
 			media = await client.instance.downloadAndSaveMediaMessage(
@@ -44,14 +43,13 @@ export default {
 				fs.unlinkSync(media);
 			}
 
-			return await client.instance.reply(result.error, { from, quoted: message, groupMetadata });
+			return await client.instance.reply(result.error, { from, quoted: message });
 		}
 
 		if (result.title === '') {
 			return await client.instance.reply('Can not discover what anime is this. Try moe instead.', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -63,7 +61,7 @@ Similarity : ${result.similarity}%
 
 Powered by sauce.nao`.formatForm();
 
-		await client.instance.reply(capt.trim(), { from, quoted: message, groupMetadata });
+		await client.instance.reply(capt.trim(), { from, quoted: message });
 
 		if (isMediaImage) {
 			fs.unlinkSync(media);

@@ -13,9 +13,9 @@ export default {
 	cooldown: 5,
 	limit: 3,
 	status: 'enable',
-	async run({ from, message, query, groupMetadata }, client) {
+	async run({ from, message, query }, client) {
 		if (!query) {
-			return await client.instance.reply('Please provide a query', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please provide a query', { from, quoted: message });
 		}
 
 		const cover = new SpotifyCard(query, {
@@ -30,6 +30,6 @@ export default {
 
 		const { toBuffer } = await cover.render();
 
-		client.instance.send(from, { image: new Buffer.from(toBuffer(), 'base64') }, { groupMetadata, quoted: message });
+		client.instance.send(from, { image: new Buffer.from(toBuffer(), 'base64') }, { quoted: message });
 	}
 };

@@ -16,9 +16,9 @@ export default {
 	cooldown: 6,
 	limit: 6,
 	status: 'enable',
-	async run({ from, query, message, args, type, groupMetadata }, client) {
+	async run({ from, query, message, args, type }, client) {
 		if (!query) {
-			return await client.instance.reply('Please specify a url', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a url', { from, quoted: message });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -82,19 +82,19 @@ Powered by 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`.formatForm()
 					// 		: {}
 					// ],
 				},
-				{ groupMetadata }
+				{}
 			);
 		}
 
 		let { _: usernames } = parser(query);
 
 		if (usernames.length == 1 && isURL(usernames[0])) {
-			return await client.instance.reply('Please specify a valid Github usernames', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a valid Github usernames', { from, quoted: message });
 		}
 
 		for (const user of usernames) {
 			if (isURL(user.trim())) {
-				await client.instance.reply('Please specify a valid Github username', { from, quoted: message, groupMetadata });
+				await client.instance.reply('Please specify a valid Github username', { from, quoted: message });
 				continue;
 			}
 
@@ -102,7 +102,7 @@ Powered by 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`.formatForm()
 			let users = await git.searchUser(user);
 
 			if (users.total_count === 0) {
-				await client.instance.reply('User not found.', { from, quoted: message, groupMetadata });
+				await client.instance.reply('User not found.', { from, quoted: message });
 				continue;
 			}
 
@@ -175,7 +175,7 @@ Biography : ${bio}`;
 
 					// Void Bot     1/${users.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
 				},
-				{ groupMetadata }
+				{}
 			);
 		}
 	}

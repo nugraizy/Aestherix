@@ -14,9 +14,9 @@ export default {
 	limit: 4,
 	cooldown: 7,
 	status: 'enable',
-	async run({ query, from, message, args, type, groupMetadata }, client) {
+	async run({ query, from, message, args, type }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -59,7 +59,7 @@ Favourites : ${numberWithCommas(data[index].favourites)}
 Views : ${numberWithCommas(data[index].views)}
 Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		}
 
@@ -71,7 +71,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 			const result = await searchDeviantArt(querie.trim());
 
 			if ('error' in result) {
-				await client.instance.reply(result.error, { from, quoted: message, groupMetadata });
+				await client.instance.reply(result.error, { from, quoted: message });
 				continue;
 			}
 
@@ -100,7 +100,7 @@ Favourites : ${numberWithCommas(result[index].favourites)}
 Views : ${numberWithCommas(result[index].views)}
 \nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		}
 	}

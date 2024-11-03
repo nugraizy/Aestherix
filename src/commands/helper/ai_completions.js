@@ -16,9 +16,9 @@ export default {
 	cooldown: 7,
 	limit: 7,
 	status: 'enable',
-	run: async ({ query, from, message, groupMetadata }, client) => {
+	run: async ({ query, from, message }, client) => {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		const openai = new OpenAI({ apiKey: updateApikey() });
@@ -29,6 +29,6 @@ export default {
 			max_tokens: 200 /* eslint-disable-line */
 		});
 
-		client.instance.reply(completion.choices[0].text.trim(), { from, quoted: message, groupMetadata });
+		client.instance.reply(completion.choices[0].text.trim(), { from, quoted: message });
 	}
 };

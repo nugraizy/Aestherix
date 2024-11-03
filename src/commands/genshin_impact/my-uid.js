@@ -16,20 +16,19 @@ export default {
 	cooldown: 6,
 	limit: 2,
 	status: 'enable',
-	async run({ sender, query, message, from, groupMetadata }, client) {
+	async run({ sender, query, message, from }, client) {
 		const data = await fs.readJSON(path.join(__dirname, 'databases/games/genshin_impact/data.json'));
 		const index = data.findIndex((v) => v.user === sender);
 
 		if (index === -1) {
 			return await client.instance.reply('Your character seems nowhere in the Database.', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
 		query = `${data[index].uid} -uid`;
 
-		await configuration.cmds.commands.get('genshinstalk').run({ sender, query, message, from, groupMetadata }, client);
+		await configuration.cmds.commands.get('genshinstalk').run({ sender, query, message, from }, client);
 	}
 };

@@ -32,16 +32,14 @@ export default {
 			sender,
 			stickerAble,
 			typeQuoted,
-			typeSticker,
-			groupMetadata
+			typeSticker
 		},
 		client
 	) {
 		if (!isMediaImage && !(isQuotedSticker || isSticker)) {
 			return await client.instance.reply('Please send/reply a media to convert to sticker', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -54,15 +52,14 @@ export default {
 					)
 					.join(', ')
 					.capitalize()}`,
-				{ from, quoted: message, groupMetadata }
+				{ from, quoted: message }
 			);
 		}
 
 		if (!query) {
 			return await client.instance.reply('Please provide a query, use & to split top/bottom text', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -81,7 +78,7 @@ export default {
 		query = query.replace(regexs, '');
 
 		if (isQuotedSticker && extractMediaData.isAnimated) {
-			return client.instance.reply('Cannot use animated sticker.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('Cannot use animated sticker.', { from, quoted: message });
 		}
 
 		const image = await client.instance.downloadMediaMessage(mediaData);
@@ -97,7 +94,7 @@ export default {
 		);
 
 		if (buffer.error) {
-			return await client.instance.reply(buffer.error, { from, quoted: message, groupMetadata });
+			return await client.instance.reply(buffer.error, { from, quoted: message });
 		}
 
 		if (parsed.isStickers) {
@@ -106,7 +103,7 @@ export default {
 			await client.instance.send(
 				from,
 				{ image: buffer, caption: 'Meme Generator Made by Void Bot using Canvas. Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪' },
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		}
 

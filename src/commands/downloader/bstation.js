@@ -19,7 +19,7 @@ const regex = (input) => {
 	return { status: false, message: 'This URL is not a valid Bstation URL. Try another URL.' };
 };
 
-const processVideo = async (url, client, { from, message, groupMetadata, sender, filename }) => {
+const processVideo = async (url, client, { from, message, sender, filename }) => {
 	const video = await bilibiliDetailTv({ aid: url });
 
 	await client.instance.reply(
@@ -39,7 +39,7 @@ const processVideo = async (url, client, { from, message, groupMetadata, sender,
 	await client.instance.send(
 		from,
 		{ video: new Buffer.from(merge, 'base64'), caption: 'Bstation Downloader'.formatHeaders() },
-		{ groupMetadata, quoted: message }
+		{ quoted: message }
 	);
 };
 
@@ -56,10 +56,7 @@ export default {
 	limit: 4,
 	cooldown: 8,
 	status: 'enable',
-	async run(
-		{ query, from, message, filename, sender, groupMetadata, typeQuoted, mediaData, bodyQuoted, prettyNumber },
-		client
-	) {
+	async run({ query, from, message, filename, sender, typeQuoted, mediaData, bodyQuoted, prettyNumber }, client) {
 		if (typeQuoted === 'imageMessage' && mediaData.participant?.includes(client.instance.decodeJid(instance))) {
 			const reg = /✦ Video ID :\s*([^\n]+)/g;
 
@@ -71,7 +68,7 @@ export default {
 			}
 
 			if (!videoIds.length) {
-				return await client.instance.reply('No id(s) found', { from, quoted: message, groupMetadata });
+				return await client.instance.reply('No id(s) found', { from, quoted: message });
 			}
 
 			const numberiedQuery = Number(query);
@@ -80,16 +77,14 @@ export default {
 			if (!numberiedQuery) {
 				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 			}
 
 			if (index > videoIds.length) {
 				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 			}
 
@@ -98,24 +93,22 @@ export default {
 			if (!videoId) {
 				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 			}
 
 			await client.instance.reply(`Downloading Bstation audio :\n${videoId}\nPlease wait`, {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 
-			await processVideo(videoId, client, { from, message, groupMetadata, prettyNumber });
+			await processVideo(videoId, client, { from, message, prettyNumber });
 
 			return;
 		}
 
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		let queries = query.split(',');
@@ -126,16 +119,15 @@ export default {
 			const regexs = regex(querie.trim());
 
 			if (!regexs.status) {
-				return await client.instance.reply(regexs.message, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(regexs.message, { from, quoted: message });
 			}
 
 			await client.instance.reply(`Downloading Bstation video :\n${regexs.message}\nPlease wait`, {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 
-			await processVideo(regexs.message.trim(), client, { from, message, groupMetadata, sender, filename });
+			await processVideo(regexs.message.trim(), client, { from, message, sender, filename });
 		}
 	}
 };

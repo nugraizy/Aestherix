@@ -38,7 +38,7 @@ export default {
 	cooldown: 10,
 	limit: 5,
 	status: 'enable',
-	async run({ from, prefix, groupMetadata, message, query }, client) {
+	async run({ from, prefix, message, query }, client) {
 		let capt = `\`Aestherix ー ${version}\`\n\n`;
 
 		if (!Object.keys(configuration.cmds.menu).length) {
@@ -111,7 +111,6 @@ export default {
 				// headerType: 1
 			},
 			{
-				groupMetadata,
 				quoted: message,
 				contextInfo: {
 					isForwarded: true,

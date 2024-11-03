@@ -13,11 +13,11 @@ export default {
 	limit: 2,
 	cooldown: 3,
 	status: 'enable',
-	async run({ query, from, message, groupMetadata }, client) {
+	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply('You need to provide text', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You need to provide text', { from, quoted: message });
 		}
 
-		await client.instance.reply(extractZalgo(query), { from, quoted: message, groupMetadata });
+		await client.instance.reply(extractZalgo(query), { from, quoted: message });
 	}
 };

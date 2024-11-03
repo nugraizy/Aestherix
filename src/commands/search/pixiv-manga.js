@@ -14,9 +14,9 @@ export default {
 	limit: 4,
 	cooldown: 8,
 	status: 'enable',
-	async run({ from, query, message, cmd, groupMetadata }, client) {
+	async run({ from, query, message, cmd }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		let queries = query.split(',');
@@ -30,8 +30,7 @@ export default {
 			if ('error' in data) {
 				await client.instance.reply(`Failed while searching Pixiv manga\n\n${data.error}\n${querie}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 				continue;
 			}
@@ -58,7 +57,7 @@ Total Media : ${dataImage.pageCount}`.formatForm()
 					// ],
 					// footer:
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 
 			for (let j = 0; j < dataImage.url.original.length; j++) {
@@ -77,7 +76,7 @@ Total Media : ${dataImage.pageCount}`.formatForm()
 							],
 							footer: '\t'
 						},
-						{ groupMetadata, quoted: message }
+						{ quoted: message }
 					);
 				}
 			}
@@ -99,7 +98,7 @@ Total Media : ${dataImage.pageCount}`.formatForm()
 					buttonText: 'Open List',
 					sections: container
 				},
-				{ groupMetadata }
+				{}
 			);
 		}
 	}

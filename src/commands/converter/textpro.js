@@ -26,9 +26,9 @@ export default {
 	cooldown: 4,
 	limit: 3,
 	status: 'enable',
-	async run({ from, message, query, args, cmd, filename, groupMetadata }, client) {
+	async run({ from, message, query, args, cmd, filename }, client) {
 		if (!query) {
-			return await client.instance.reply('Please provide a query', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please provide a query', { from, quoted: message });
 		}
 
 		let {
@@ -95,7 +95,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 					buttons,
 					headerType: 1
 				},
-				{ groupMetadata }
+				{}
 			);
 		}
 
@@ -104,8 +104,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 		if (models?.length === 0) {
 			return await client.instance.reply(`Model ${models[0]} not found\n Type : !${this.name} -type`, {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -113,7 +112,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 			const result = await textpro(model, parsed.slice(1).join(' '));
 
 			if ('error' in result) {
-				await client.instance.reply(`something went wrong:\n\n${result.error}`, { from, quoted: message, groupMetadata });
+				await client.instance.reply(`something went wrong:\n\n${result.error}`, { from, quoted: message });
 
 				continue;
 			}
@@ -137,11 +136,11 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 						.toBuffer();
 
 			if (isImage) {
-				await client.instance.send(from, { image: buffer }, { groupMetadata, quoted: message });
+				await client.instance.send(from, { image: buffer }, { quoted: message });
 			} else if (isStickers) {
-				await client.instance.send(from, { sticker: buffer }, { groupMetadata, quoted: message });
+				await client.instance.send(from, { sticker: buffer }, { quoted: message });
 			} else {
-				await client.instance.send(from, { [defaulType]: buffer }, { groupMetadata, quoted: message });
+				await client.instance.send(from, { [defaulType]: buffer }, { quoted: message });
 			}
 		}
 	}

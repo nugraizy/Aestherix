@@ -18,44 +18,44 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	run: async ({ from, message, query, groupMetadata, args }, client) => {
+	run: async ({ from, message, query, args }, client) => {
 		if (!query) {
-			return client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		if (args[1] === 'stop') {
 			const live = lives.get(from);
 
 			if (!live) {
-				return client.instance.reply('No live stream is running.', { from, quoted: message, groupMetadata });
+				return client.instance.reply('No live stream is running.', { from, quoted: message });
 			}
 
 			live.stop();
 
-			return client.instance.reply('Live stream has been stopped.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('Live stream has been stopped.', { from, quoted: message });
 		} else if (args[1] === 'start') {
 			const live = lives.get(from);
 
 			if (!live) {
-				return client.instance.reply('No live stream is running.', { from, quoted: message, groupMetadata });
+				return client.instance.reply('No live stream is running.', { from, quoted: message });
 			}
 
 			live.start();
 
-			return client.instance.reply('Live stream has been started.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('Live stream has been started.', { from, quoted: message });
 		}
 
 		const live = await youtubeLiveComments(query);
 
 		if ('error' in live) {
-			return client.instance.reply(live.error, { from, quoted: message, groupMetadata });
+			return client.instance.reply(live.error, { from, quoted: message });
 		}
 
 		lives.set(from, live);
 
 		live.on('start', async (initialData) => {
 			try {
-				await client.instance.reply('Success join the live stream.', { from, quoted: message, groupMetadata });
+				await client.instance.reply('Success join the live stream.', { from, quoted: message });
 
 				const pinnedAction = initialData.actions.firstOfType(YTNodes.AddBannerToLiveChatCommand);
 
@@ -67,7 +67,7 @@ export default {
 Info : Pinned Message
 From : ${pinnedAction.banner.contents.author?.name.toString()}
 Content : ${pinnedAction?.banner.contents.message.toString()}`,
-							{ from, quoted: message, groupMetadata }
+							{ from, quoted: message }
 						);
 					}
 				}
@@ -77,7 +77,7 @@ Content : ${pinnedAction?.banner.contents.message.toString()}`,
 		});
 
 		live.on('error', async () => {
-			await client.instance.reply('Something went wrong with the socket.', { from, quoted: message, groupMetadata });
+			await client.instance.reply('Something went wrong with the socket.', { from, quoted: message });
 
 			try {
 				live.stop();
@@ -90,7 +90,7 @@ Content : ${pinnedAction?.banner.contents.message.toString()}`,
 
 		live.on('end', async () => {
 			try {
-				await client.instance.reply('The live stream has ended.', { from, quoted: message, groupMetadata });
+				await client.instance.reply('The live stream has ended.', { from, quoted: message });
 
 				live.stop();
 				lives.delete(from);
@@ -129,9 +129,7 @@ Content : ${pinnedAction?.banner.contents.message.toString()}`,
 										.author.name.toString()}\`\`\`
 MSG ~> ${item.as(YTNodes.LiveChatTextMessage).message.toString()}`.trim()
 								},
-								{
-									groupMetadata
-								}
+								{}
 							);
 							break;
 						case 'LiveChatPaidMessage':
@@ -146,7 +144,7 @@ MSG ~> ${item.as(YTNodes.LiveChatTextMessage).message.toString()}`.trim()
 (${item.as(YTNodes.LiveChatPaidMessage).purchase_amount})
 MSG ~> ${item.as(YTNodes.LiveChatPaidMessage).message.toString()}`.trim()
 								},
-								{ groupMetadata }
+								{}
 							);
 							break;
 						case 'LiveChatPaidSticker':
@@ -161,7 +159,7 @@ MSG ~> ${item.as(YTNodes.LiveChatPaidMessage).message.toString()}`.trim()
 										.author.name.toString()}\`\`\`
 (${item.as(YTNodes.LiveChatPaidSticker).purchase_amount})`.trim()
 								},
-								{ groupMetadata }
+								{}
 							);
 							break;
 						default:
@@ -178,7 +176,7 @@ MSG ~> ${item.as(YTNodes.LiveChatPaidMessage).message.toString()}`.trim()
 Info : Message Just Got Pinned
 Content : ${action.banner?.contents}`
 						},
-						{ groupMetadata }
+						{}
 					);
 				}
 			} catch (error) {
@@ -196,7 +194,7 @@ Content : ${action.banner?.contents}`
 Views : ${metadata.views?.view_count.toString()} 👀
 Likes : ${metadata.likes?.default_text} 👍🏻`
 					},
-					{ groupMetadata }
+					{}
 				);
 			} catch (error) {
 				console.log(error);

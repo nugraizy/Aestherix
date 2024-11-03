@@ -6,7 +6,7 @@ const checkURL = (input) =>
 	/(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])/g.test(input);
 
 const antiGroupLinkHandler = async (
-	{ from, isAdmin, isGroup, isBotAdmin, message, mediaData, sender, isFromMe, body, isOwner, groupMetadata },
+	{ from, isAdmin, isGroup, isBotAdmin, message, mediaData, sender, isFromMe, body, isOwner },
 	client,
 	settings
 ) => {
@@ -26,34 +26,28 @@ const antiGroupLinkHandler = async (
 		if (!isBotAdmin) {
 			return await client.instance.reply('Anti-URL is enabled, but I am not an admin, so I cannot kick you.', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
 		if (!isBanned) {
 			await client.instance.reply(
 				'Anti-URL is enabled in this group. You will be kicked if you continue to do this one more time.',
-				{ from, quoted: message, groupMetadata }
+				{ from, quoted: message }
 			);
-			await client.instance.send(
-				from,
-				{
-					delete: {
-						remoteJid: from,
-						participant: sender,
-						id: mediaData.stanzaId
-					}
-				},
-				{ groupMetadata }
-			);
+			await client.instance.send(from, {
+				delete: {
+					remoteJid: from,
+					participant: sender,
+					id: mediaData.stanzaId
+				}
+			});
 			data[index][from].banned.push(sender);
 			await fs.writeJSON('./databases/groups/settingsManager.json', data);
 		} else {
 			await client.instance.reply('You have been banned from this group for posting URLs. You will be kicked shortly.', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 			await client.instance.groupParticipantsUpdate(from, [sender], 'remove');
 		}

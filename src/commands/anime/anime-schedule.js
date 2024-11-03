@@ -23,9 +23,9 @@ export default {
 	cooldown: 4,
 	limit: 5,
 	status: 'enable',
-	run: async ({ from, message, isGroup, groupMetadata }, client) => {
+	run: async ({ from, message, isGroup }, client) => {
 		if (isGroup) {
-			return client.instance.reply('This command only works in private chat.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('This command only works in private chat.', { from, quoted: message });
 		}
 
 		const text = 'Anime Releases'.formatHeaders();
@@ -74,8 +74,7 @@ export default {
 					caption: capt.trim()
 				},
 				{
-					quoted: message,
-					groupMetadata
+					quoted: message
 				}
 			);
 

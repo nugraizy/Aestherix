@@ -21,13 +21,13 @@ export default {
 	cooldown: 2,
 	limit: 2,
 	status: 'enable',
-	async run({ from, message, args, sender, pushname, isGroup, groupMetadata }, client) {
+	async run({ from, message, args, sender, pushname, isGroup }, client) {
 		if (args[1] === 'kill') {
 			const werewolf = new Werewolf(sender, args[3], client);
 			const kill = werewolf.killPlayerAsWerewolf(sender, args[2], args[3]);
 
 			if (kill.error && !('data' in kill)) {
-				return await client.instance.reply(kill.message, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(kill.message, { from, quoted: message });
 			}
 
 			for (const data of kill.data) {
@@ -38,7 +38,7 @@ export default {
 			const seer = werewolf.seerSomeone(sender, args[2], args[3]);
 
 			if (seer.error && !('data' in seer)) {
-				return await client.instance.reply(seer.message, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(seer.message, { from, quoted: message });
 			}
 
 			for (const data of seer.data) {
@@ -49,7 +49,7 @@ export default {
 			const guard = werewolf.guardSomeone(sender, args[2], args[3]);
 
 			if (guard.error && !('data' in guard)) {
-				return await client.instance.reply(guard.message, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(guard.message, { from, quoted: message });
 			}
 
 			for (const data of guard.data) {
@@ -60,7 +60,7 @@ export default {
 			const vote = werewolf.voteSomeone(sender, args[2], args[3]);
 
 			if (vote.error && !('data' in vote)) {
-				return await client.instance.reply(vote.message, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(vote.message, { from, quoted: message });
 			}
 
 			for (const data of vote.data) {
@@ -78,7 +78,7 @@ export default {
 			const werewolf = new Werewolf(sender, from, client);
 			const deletes = werewolf.deleteGame(sender);
 
-			return await client.instance.reply(deletes.message, { from, quoted: message, groupMetadata });
+			return await client.instance.reply(deletes.message, { from, quoted: message });
 		} else if (args[1] === 'join') {
 			sender = args[2] || sender;
 			pushname = args[3] || pushname;
@@ -87,14 +87,14 @@ export default {
 			const join = werewolf.werewolfJoin(sender, from, pushname);
 
 			return join.error
-				? client.instance.reply(join.message, { from, quoted: message, groupMetadata })
+				? client.instance.reply(join.message, { from, quoted: message })
 				: client.instance.send(
 						from,
 						{
 							text: `${join.message}\n${join.mentions.map((v) => `@${v.split('@')[0]}`).join('\n')}`,
 							mentions: join.mentions
 						},
-						{ groupMetadata, quoted: message }
+						{ quoted: message }
 				  ); /* eslint-disable-line */
 		} else if (args[1] === 'newGame') {
 			const werewolf = new Werewolf(sender, from, client);
@@ -109,7 +109,7 @@ export default {
 						buttonText: 'Open list',
 						sections: row
 					},
-					{ groupMetadata }
+					{}
 				);
 
 				return;
@@ -128,22 +128,22 @@ export default {
 					title: `${caption}\nPilih salah satu.`,
 					sections: row
 				},
-				{ groupMetadata }
+				{}
 			);
 		} else if (args[1] === 'exit') {
 			const werewolf = new Werewolf(sender, from, client);
 			const exit = werewolf.exitGame(sender, from);
 
-			return await client.instance.reply(exit.message, { from, quoted: message, groupMetadata });
+			return await client.instance.reply(exit.message, { from, quoted: message });
 		} else if (args[1] === 'start') {
 			const werewolf = new Werewolf(sender, from, client);
 			const start = werewolf.startGame(sender, from);
 
 			if (start.error) {
-				return await client.instance.reply(start.message, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(start.message, { from, quoted: message });
 			}
 
-			await client.instance.send(from, { text: start.message }, { groupMetadata });
+			await client.instance.send(from, { text: start.message }, {});
 			await client.instance.send(
 				from,
 				{
@@ -152,16 +152,12 @@ export default {
 						.join('\n')}`,
 					mentions: start.data.playersData.map((v) => v.id)
 				},
-				{ groupMetadata }
+				{}
 			);
 
 			await delay(3000);
 
-			await client.instance.send(
-				from,
-				{ text: start.data.gameDialogue.replace('{0}', start.data.gameTime) },
-				{ groupMetadata }
-			);
+			await client.instance.send(from, { text: start.data.gameDialogue.replace('{0}', start.data.gameTime) }, {});
 
 			for (const player of start.data.playersData) {
 				if (player.role === 'villager') {
@@ -235,7 +231,7 @@ export default {
 			start.data.startGameCycle(from, start.data.gameTimeCycle);
 		} else {
 			if (!isGroup) {
-				return await client.instance.reply('This commands for group only', { from, quoted: message, groupMetadata });
+				return await client.instance.reply('This commands for group only', { from, quoted: message });
 			}
 
 			const werewolfs = new Werewolf(sender, from, client);
@@ -250,15 +246,14 @@ export default {
 						buttonText: 'Open list',
 						sections: row
 					},
-					{ groupMetadata }
+					{}
 				);
 
 				return;
 			} else if (werewolfs.getDataGame(from) && werewolfs.gameStarted) {
 				return await client.instance.reply('Sesi sudah ada di group ini dan permainan sudah dimulai.', {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 			}
 
@@ -275,7 +270,7 @@ export default {
 					title: `${caption}\nPilih salah satu.`,
 					sections: row
 				},
-				{ groupMetadata }
+				{}
 			);
 		}
 	}

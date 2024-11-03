@@ -13,16 +13,16 @@ export default {
 	cooldown: 8,
 	limit: 4,
 	status: 'enable',
-	async run({ query, from, message, groupMetadata, prefix }, client) {
+	async run({ query, from, message, prefix }, client) {
 		if (!query) {
-			return client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		const result = await instagram.search.hashtag(query);
 
 		for (const tag in result) {
 			if (result[tag].error) {
-				await client.instance.reply(result[tag].error, { from, quoted: message, groupMetadata });
+				await client.instance.reply(result[tag].error, { from, quoted: message });
 				continue;
 			}
 
@@ -43,12 +43,11 @@ export default {
 					caption: capt.trim().formatForm(),
 					image: { url: result[tag].thumbnail }
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 
 			await client.instance.reply(`You can reply this message and type ${prefix}igp <number[1-${result[tag].posts.length}]>`, {
 				from,
-				groupMetadata,
 				quoted: messageToQuoted
 			});
 		}

@@ -21,20 +21,20 @@ export default {
 	cooldown: 6,
 	limit: 3,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
+	async run({ from, query, prettyNumber, message }, client) {
 		if (!query) {
-			return await client.instance.reply('Please specify a IP Address', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a IP Address', { from, quoted: message });
 		}
 
 		let { _: IPs } = parser(query);
 
 		if (IPs.length === 1 && !regex(IPs[0])) {
-			return await client.instance.reply('Please specify a valid IP Address', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a valid IP Address', { from, quoted: message });
 		}
 
 		for (const IP of IPs) {
 			if (!regex(IP.trim())) {
-				await client.instance.reply('Please specify a valid IP Address', { from, quoted: message, groupMetadata });
+				await client.instance.reply('Please specify a valid IP Address', { from, quoted: message });
 
 				continue;
 			}
@@ -44,8 +44,7 @@ export default {
 			if ('error' in data) {
 				await client.instance.reply(`Error while searching IP Address\n\n${data.error}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 
 				loggers.error(`${color('Failed to Searching IP Address', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
@@ -102,7 +101,7 @@ export default {
 				capt += `Proxy : ${proxy ? 'Yes' : 'No'}\n`;
 				capt += `Hosting : ${hosting ? 'Yes' : 'No'}`;
 
-				await client.instance.send(from, { text: capt.trim().formatForm() }, { groupMetadata, quoted: message });
+				await client.instance.send(from, { text: capt.trim().formatForm() }, { quoted: message });
 			}
 		}
 	}

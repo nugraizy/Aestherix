@@ -14,9 +14,9 @@ export default {
 	limit: 4,
 	cooldown: 5,
 	status: 'enable',
-	async run({ query, from, message, args, type, groupMetadata }, client) {
+	async run({ query, from, message, args, type }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -58,7 +58,7 @@ Powered by 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`.formatForm()
 					// 		: {}
 					// ],
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		}
 
@@ -71,7 +71,7 @@ Powered by 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`.formatForm()
 			let result = await flickr.searchImages(querie.trim());
 
 			if ('error' in result) {
-				await client.instance.reply(result.error, { from, quoted: message, groupMetadata });
+				await client.instance.reply(result.error, { from, quoted: message });
 				continue;
 			}
 
@@ -110,7 +110,7 @@ Published : ${result[index].posted}`
 					// 					footer: `
 					// \nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		}
 	}

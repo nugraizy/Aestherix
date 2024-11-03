@@ -1,6 +1,6 @@
 import configuration from '../../helper/config/connect.js';
 
-const sambungKataHandler = async ({ from, isGroup, sender, body, message, isAdmin, groupMetadata }, client, settings) => {
+const sambungKataHandler = async ({ from, isGroup, sender, body, message, isAdmin }, client, settings) => {
 	const gameData = configuration.games['word'].get(from);
 
 	const playGame = async () => {
@@ -12,7 +12,7 @@ const sambungKataHandler = async ({ from, isGroup, sender, body, message, isAdmi
 
 		if (!result || ('status' in result && !result.status)) {
 			if (result && result.message) {
-				await client.instance.reply(result.message, { from, quoted: message, groupMetadata });
+				await client.instance.reply(result.message, { from, quoted: message });
 			}
 
 			return;
@@ -28,7 +28,7 @@ const sambungKataHandler = async ({ from, isGroup, sender, body, message, isAdmi
 					mentionedJid: [result.turn]
 				}
 			},
-			{ groupMetadata, quoted: message }
+			{ quoted: message }
 		);
 	};
 

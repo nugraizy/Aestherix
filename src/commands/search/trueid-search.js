@@ -14,9 +14,9 @@ export default {
 	cooldown: 6,
 	limit: 5,
 	status: 'enable',
-	async run({ query, from, message, args, cmd, type, groupMetadata }, client) {
+	async run({ query, from, message, args, cmd, type }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -81,7 +81,7 @@ export default {
 					],
 					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 
 			if (rows) {
@@ -94,7 +94,7 @@ export default {
 						title: 'True ID'.formatHeaders(),
 						sections: rows
 					},
-					{ groupMetadata }
+					{}
 				);
 			}
 
@@ -102,8 +102,7 @@ export default {
 		} else if (args[1] === 'get') {
 			return await client.instance.reply(`${'TrueID Search'.formatHeaders()}\n\nURL : ${args[2]}`, {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -114,7 +113,7 @@ export default {
 			const data = await trueidSearch(querie);
 
 			if ('error' in data) {
-				return await client.instance.reply(data.error, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(data.error, { from, quoted: message });
 			}
 
 			let caption = 'TrueID Search'.formatHeaders();
@@ -162,7 +161,7 @@ export default {
 					],
 					footer: `Void Bot     1/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 
 			if (rows) {
@@ -175,7 +174,7 @@ export default {
 						title: 'True ID'.formatHeaders(),
 						sections: rows
 					},
-					{ groupMetadata }
+					{}
 				);
 			}
 		}

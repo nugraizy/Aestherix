@@ -14,7 +14,7 @@ export default {
 	cooldown: 3,
 	limit: 0,
 	status: 'enable',
-	async run({ from, sender, message, groupMetadata }, client) {
+	async run({ from, sender, message }, client) {
 		const isExist = Limit.checkExist(sender);
 		let role = Limit.checkRole(sender).role;
 
@@ -28,8 +28,7 @@ export default {
 
 		await client.instance.reply(`Your limit : ${limit || 0}\nType user : ${role}`, {
 			from,
-			quoted: message,
-			groupMetadata
+			quoted: message
 		});
 	}
 };

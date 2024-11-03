@@ -28,16 +28,14 @@ export default {
 			filename,
 			query,
 			extractMediaData,
-			typeQuoted,
-			groupMetadata
+			typeQuoted
 		},
 		client
 	) {
 		if (!isQuotedAudio && !isQuotedDocument && !isMediaVid) {
 			return await client.instance.reply('Please send/reply an audio/video to remove voice', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -54,7 +52,7 @@ export default {
 			!audioFormat.includes(extractMediaData.mimetype) &&
 			!videoFormat.includes(extractMediaData.mimetype)
 		) {
-			return await client.instance.reply('This file is not an audio/video', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('This file is not an audio/video', { from, quoted: message });
 		}
 
 		const { result } = await soundRemover(file, prettyNumber);
@@ -62,8 +60,7 @@ export default {
 		if (/--?(voice|suara)/.test(query) && /--?(instrument(s)?)/.test(query)) {
 			return await client.instance.reply(`${result.vocal}\n${result.instrumental}`, {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		} else if (/--?(voice|suara)/.test(query)) {
 			await client.instance.send(
@@ -73,7 +70,7 @@ export default {
 					fileName: extractMediaData?.fileName?.replace(extension(extractMediaData.mimetype), 'mp3') ?? 'Made by Nanda.mp3',
 					mimetype: 'audio/mp3'
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		} else if (/--?(instrumen(ts)?)/.test(query)) {
 			await client.instance.send(
@@ -83,7 +80,7 @@ export default {
 					fileName: extractMediaData?.fileName?.replace(extension(extractMediaData.mimetype), 'mp3') ?? 'Made by Nanda.mp3',
 					mimetype: 'audio/mp3'
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		} else {
 			await client.instance.send(
@@ -93,7 +90,7 @@ export default {
 					fileName: extractMediaData.fileName ?? 'Made by Nanda.mp3',
 					mimetype: 'audio/mp3'
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		}
 

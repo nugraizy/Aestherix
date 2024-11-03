@@ -14,7 +14,7 @@ export default {
 	cooldown: 5,
 	limit: 0,
 	status: 'enable',
-	async run({ sender, mention, from, groupName, groupMetadata }, client) {
+	async run({ sender, mention, from, groupName }, client) {
 		const attach = new Attachment(1024, 500);
 
 		const { profile, radi } = await client.instance
@@ -39,6 +39,6 @@ export default {
 			})
 			.placeCopyright();
 
-		await client.instance.send(from, { image: attach.toBuffer() }, { groupMetadata });
+		await client.instance.send(from, { image: attach.toBuffer() }, {});
 	}
 };

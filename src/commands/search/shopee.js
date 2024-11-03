@@ -14,9 +14,9 @@ export default {
 	limit: 5,
 	cooldown: 10,
 	status: 'enable',
-	async run({ query, from, message, groupMetadata }, client) {
+	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		let queries = query.split(',');
@@ -27,7 +27,7 @@ export default {
 			const product = await shopeeProduct(querie.trim());
 
 			if ('error' in product) {
-				await client.instance.reply(product.error, { from, quoted: message, groupMetadata });
+				await client.instance.reply(product.error, { from, quoted: message });
 				continue;
 			}
 
@@ -82,7 +82,7 @@ Location : ${location}`.formatForm()
 						// ],
 						// footer:
 					},
-					{ groupMetadata, quoted: message }
+					{ quoted: message }
 				);
 			}
 		}

@@ -22,11 +22,11 @@ const isSpotifyURL = (url) => {
 	return reg.test(url);
 };
 
-const processVideo = async (url, type, client, { from, message, groupMetadata, prettyNumber }) => {
+const processVideo = async (url, type, client, { from, message, prettyNumber }) => {
 	const { tracks, status, message: respMessage } = await spotifier.getTracks(extractId(url));
 
 	if (!status) {
-		return await client.instance.reply(respMessage, { from, quoted: message, groupMetadata });
+		return await client.instance.reply(respMessage, { from, quoted: message });
 	}
 
 	const { download } = tracks[0];
@@ -36,7 +36,7 @@ const processVideo = async (url, type, client, { from, message, groupMetadata, p
 	const video = await download();
 
 	if ('error' in video && video.error) {
-		client.instance.reply(video.message, { from, quoted: message, groupMetadata });
+		client.instance.reply(video.message, { from, quoted: message });
 		loggers.error(`${color('Failed to Download Spotify ' + type, '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 		return;
 	}
@@ -65,7 +65,6 @@ const processVideo = async (url, type, client, { from, message, groupMetadata, p
 			// ]
 		},
 		{
-			groupMetadata,
 			quoted: message
 		}
 	);
@@ -84,7 +83,7 @@ export default {
 	cooldown: 4,
 	limit: 5,
 	status: 'enable',
-	run: async ({ query, bodyQuoted, typeQuoted, message, groupMetadata, from, mediaData, prettyNumber }, client) => {
+	run: async ({ query, bodyQuoted, typeQuoted, message, from, mediaData, prettyNumber }, client) => {
 		if (typeQuoted === 'imageMessage' && mediaData.participant?.includes(client.instance.decodeJid(instance))) {
 			const reg = /✦ Media ID :\s*([^\n]+)/g;
 			const type = /🖼️ Type :\s*([^\n]+)/g;
@@ -97,7 +96,7 @@ export default {
 			}
 
 			if (!videoIds.length) {
-				return await client.instance.reply('No id(s) found', { from, quoted: message, groupMetadata });
+				return await client.instance.reply('No id(s) found', { from, quoted: message });
 			}
 
 			const numberiedQuery = Number(query);
@@ -106,16 +105,14 @@ export default {
 			if (!numberiedQuery) {
 				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 			}
 
 			if (index > videoIds.length) {
 				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 			}
 
@@ -125,21 +122,18 @@ export default {
 			if (!videoId) {
 				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 			}
 
 			await client.instance.reply(`Downloading Spotify ${typeMedia} :\n${videoId}\nPlease wait`.formatForm(), {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 
 			await processVideo(`https://open.spotify.com/${typeMedia}/${videoId}`, typeMedia, client, {
 				from,
 				message,
-				groupMetadata,
 				prettyNumber
 			});
 
@@ -147,7 +141,7 @@ export default {
 		}
 
 		if (!query) {
-			return await client.instance.reply('Please provide a URL', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please provide a URL', { from, quoted: message });
 		}
 
 		let queries = query.split(',');
@@ -155,21 +149,19 @@ export default {
 		queries = removeDuplicatesArray(queries);
 
 		if (queries.length === 1 && isURL(queries) && !isSpotifyURL(queries)) {
-			return await client.instance.reply('This is not a valid Spotify URL.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('This is not a valid Spotify URL.', { from, quoted: message });
 		}
 
 		await client.instance.reply(`Downloading Spotify Media(s) :\n${queries.join('\n')}\nPlease wait`, {
 			from,
-			quoted: message,
-			groupMetadata
+			quoted: message
 		});
 
 		for (const Query of queries) {
 			if (isURL(Query) && !isSpotifyURL(Query)) {
 				return await client.instance.reply(`[ ${Query} ] This isn't a valid Spotify URL.`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 			}
 
@@ -178,14 +170,13 @@ export default {
 			if (typeMedia === 'artist') {
 				await client.instance.reply(`[ ${Query} ] This is an artist link. Please send media URL.`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 
 				continue;
 			}
 
-			await processVideo(Query, typeMedia, client, { from, message, groupMetadata, prettyNumber });
+			await processVideo(Query, typeMedia, client, { from, message, prettyNumber });
 			await delay(300);
 		}
 

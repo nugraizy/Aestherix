@@ -30,9 +30,9 @@ export default {
 	cooldown: 6,
 	limit: 4,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
+	async run({ from, query, prettyNumber, message }, client) {
 		if (!query) {
-			return await client.instance.reply('Please specify an UID', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify an UID', { from, quoted: message });
 		}
 
 		let {
@@ -55,7 +55,7 @@ export default {
 			const reg = await regex(String(uid));
 
 			if (!reg.status) {
-				return await client.instance.reply(reg.message, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(reg.message, { from, quoted: message });
 			}
 
 			let info;
@@ -71,8 +71,7 @@ export default {
 			if ('error' in info) {
 				await client.instance.reply(`Error while searching Genshin Impact player\n\n${info.error}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 
 				loggers.error(
@@ -156,7 +155,7 @@ Precious: ${info.stats.precious_chest_number}
 Magic: ${info.stats.magic_chest_number}`;
 				}
 
-				await client.instance.reply(capt.trim().formatForm(), { from, quoted: message, groupMetadata });
+				await client.instance.reply(capt.trim().formatForm(), { from, quoted: message });
 			}
 		}
 	}

@@ -16,9 +16,9 @@ export default {
 	cooldown: 7,
 	limit: 7,
 	status: 'enable',
-	run: async ({ query, from, message, groupMetadata }, client) => {
+	run: async ({ query, from, message }, client) => {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		const openai = new OpenAI({ apiKey: updateApikey() });
@@ -28,6 +28,6 @@ export default {
 			size: '512x512'
 		});
 
-		client.instance.send(from, { image: { url: image.data[0].url } }, { groupMetadata, quoted: message });
+		client.instance.send(from, { image: { url: image.data[0].url } }, { quoted: message });
 	}
 };

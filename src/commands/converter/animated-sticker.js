@@ -17,7 +17,7 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	status: 'enable',
-	async run({ from, query, message, prettyNumber, bodyQuoted, groupMetadata }, client) {
+	async run({ from, query, message, prettyNumber, bodyQuoted }, client) {
 		if (!query && !bodyQuoted) {
 			query = 'Mana text nya?';
 		}
@@ -55,7 +55,7 @@ export default {
 		if (bodyQuoted) {
 			const { buffer } = await attp(prettyNumber, bodyQuoted, parseOptions.color);
 
-			await client.instance.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
+			await client.instance.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { quoted: message });
 			loggers.info(`${color('Sticker is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 			return;
 		}
@@ -63,11 +63,11 @@ export default {
 		if (query) {
 			const { buffer } = await attp(prettyNumber, query, parseOptions.color);
 
-			await client.instance.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { groupMetadata, quoted: message });
+			await client.instance.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { quoted: message });
 			loggers.info(`${color('Sticker is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 			return;
 		}
 
-		return await client.instance.reply('Please enter text to convert to sticker', { from, quoted: message, groupMetadata });
+		return await client.instance.reply('Please enter text to convert to sticker', { from, quoted: message });
 	}
 };

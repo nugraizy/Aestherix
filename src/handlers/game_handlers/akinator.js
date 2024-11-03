@@ -1,7 +1,7 @@
 import configuration from '../../helper/config/connect.js';
 import { getSession, handleAnswer } from '../../utils/games/index.js';
 
-const akinatorHandler = async ({ from, isAdmin, isGroup, body, message, groupMetadata }, client, settings) => {
+const akinatorHandler = async ({ from, isAdmin, isGroup, body, message }, client, settings) => {
 	const session = getSession(from);
 
 	if (!session) {
@@ -25,13 +25,7 @@ const akinatorHandler = async ({ from, isAdmin, isGroup, body, message, groupMet
 		} = session;
 
 		if (status === 'playing') {
-			return await client.instance.send(
-				from,
-				{ edit: key, text: akinatorMessage },
-				{
-					groupMetadata
-				}
-			);
+			return await client.instance.send(from, { edit: key, text: akinatorMessage }, {});
 		}
 
 		if (status === 'win') {
@@ -40,9 +34,7 @@ const akinatorHandler = async ({ from, isAdmin, isGroup, body, message, groupMet
 			await client.instance.send(
 				from,
 				{ edit: key, text: `Akinator Game is Over.\n\nProgress : \`${progress}\`\n> ${progressBar}` },
-				{
-					groupMetadata
-				}
+				{}
 			);
 
 			return await client.instance.send(
@@ -51,20 +43,20 @@ const akinatorHandler = async ({ from, isAdmin, isGroup, body, message, groupMet
 					image: { url: absolutePath },
 					caption: `Name : \`${name}\`\nDescription : \`${description}\`\n\nProgress : \`${progress}\`\n> ${progressBar}`
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		}
 
 		if (status === 'exitted') {
-			return await client.instance.reply('You have exited the game.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You have exited the game.', { from, quoted: message });
 		}
 
 		if (status === 'back') {
 			if (handle.isFailed) {
-				return await client.instance.reply('You cannot go back.', { from, quoted: message, groupMetadata });
+				return await client.instance.reply('You cannot go back.', { from, quoted: message });
 			}
 
-			await client.instance.reply(akinatorMessage, { from, quoted: message, groupMetadata });
+			await client.instance.reply(akinatorMessage, { from, quoted: message });
 		}
 	};
 

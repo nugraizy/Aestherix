@@ -39,7 +39,7 @@ export default {
 		await client.instance.send(
 			message.from,
 			{ image: { url: data[0].shakemap }, caption: caption.formatForm() },
-			{ groupMetadata: message.groupMetadata, quoted: message.message }
+			{ quoted: message.message }
 		);
 	}
 };

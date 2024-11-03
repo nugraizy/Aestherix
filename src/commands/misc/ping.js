@@ -11,15 +11,14 @@ export default {
 	cooldown: 8,
 	limit: 0,
 	status: 'enable',
-	async run({ from, message, groupMetadata }, client) {
+	async run({ from, message }, client) {
 		const start = performance.now();
 
 		await client.instance.send(
 			from,
 			{ text: `Pong! ${(performance.now() - start).toFixed(3)} seconds` },
 			{
-				quoted: message,
-				groupMetadata
+				quoted: message
 			}
 		);
 	}

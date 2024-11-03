@@ -14,17 +14,17 @@ export default {
 	limit: 2,
 	cooldown: 3,
 	status: 'enable',
-	async run({ query, from, message, groupMetadata }, client) {
+	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a URL', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a URL', { from, quoted: message });
 		}
 
 		if (!isURL(query)) {
-			return await client.instance.reply('Please specify a valid URL', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please specify a valid URL', { from, quoted: message });
 		}
 
 		const urls = await tiny(query);
 
-		await client.instance.reply(urls, { from, quoted: message, groupMetadata });
+		await client.instance.reply(urls, { from, quoted: message });
 	}
 };

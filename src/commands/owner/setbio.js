@@ -11,9 +11,9 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	async run({ from, query, message, groupMetadata }, client) {
+	async run({ from, query, message }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a bio to set', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a bio to set', { from, quoted: message });
 		}
 
 		await client.instance.setStatus(query);

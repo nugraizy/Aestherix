@@ -24,9 +24,9 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	async run({ from, message, mediaData, mention, bodyQuoted, query, groupMetadata }, client) {
+	async run({ from, message, mediaData, mention, bodyQuoted, query }, client) {
 		if (!query) {
-			return await client.instance.reply('Please provide user to unban', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please provide user to unban', { from, quoted: message });
 		}
 
 		const userBanned = await fs.readJSON('./databases/users/banned.json');
@@ -38,7 +38,7 @@ export default {
 					await client.instance.send(
 						from,
 						{ text: `@${mentioned.split('@')[0]} is not banned`, mentions: [mentioned] },
-						{ groupMetadata, quoted: message }
+						{ quoted: message }
 					);
 					continue;
 				} else {
@@ -57,7 +57,7 @@ export default {
 				await client.instance.send(
 					from,
 					{ text: `Success unbanning : ${unbanned.map((v) => `@${v.split('@')[0]}`).join(', ')}`, mentions: [unbanned] },
-					{ groupMetadata, quoted: message }
+					{ quoted: message }
 				);
 			}
 
@@ -77,11 +77,7 @@ export default {
 				const isBanned = userBanned.includes(`${number}${S_WHATSAPP_NET}`);
 
 				if (!isBanned) {
-					await client.instance.send(
-						from,
-						{ text: `@${number} is not banned`, mentions: [`${number}${S_WHATSAPP_NET}`] },
-						{ groupMetadata }
-					);
+					await client.instance.send(from, { text: `@${number} is not banned`, mentions: [`${number}${S_WHATSAPP_NET}`] }, {});
 					continue;
 				}
 
@@ -95,7 +91,7 @@ export default {
 				await client.instance.send(
 					from,
 					{ text: `Success unbanning : @${number}`, mentions: [`${number}${S_WHATSAPP_NET}`] },
-					{ groupMetadata, quoted: message }
+					{ quoted: message }
 				);
 			}
 
@@ -104,7 +100,7 @@ export default {
 
 		if (bodyQuoted) {
 			if (!userBanned.includes(mediaData.participant)) {
-				return await client.instance.reply('not banned', { from, quoted: message, groupMetadata });
+				return await client.instance.reply('not banned', { from, quoted: message });
 			}
 
 			const index = userBanned.indexOf(mediaData.participant);

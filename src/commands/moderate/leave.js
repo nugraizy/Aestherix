@@ -12,8 +12,8 @@ export default {
 	limit: 20,
 	restrict: true,
 	status: 'enable',
-	async run({ from, message, groupMetadata }, client) {
-		const data = await client.instance.reply('I will leave.', { from, quoted: message, groupMetadata });
+	async run({ from, message }, client) {
+		const data = await client.instance.reply('I will leave.', { from, quoted: message });
 
 		await client.instance.groupLeave(from);
 		await client.instance.chatModify({ delete: true, lastMessages: [data] }, from);

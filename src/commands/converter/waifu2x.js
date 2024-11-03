@@ -18,18 +18,7 @@ export default {
 	limit: 4,
 	status: 'enable',
 	run: async (
-		{
-			from,
-			isMediaImage,
-			isQuotedSticker,
-			prettyNumber,
-			extractMediaData,
-			filename,
-			message,
-			query,
-			mediaData,
-			groupMetadata
-		},
+		{ from, isMediaImage, isQuotedSticker, prettyNumber, extractMediaData, filename, message, query, mediaData },
 		client
 	) => {
 		if (!isMediaImage && !isQuotedSticker) {
@@ -41,8 +30,7 @@ export default {
 		if (isQuotedSticker && extractMediaData.isAnimated) {
 			return client.instance.reply('The sticker are animated. Please reply static stickers only.', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -76,9 +64,9 @@ export default {
 				}
 			);
 
-			client.instance.send(from, { sticker: prepareSticker }, { groupMetadata, quoted: message });
+			client.instance.send(from, { sticker: prepareSticker }, { quoted: message });
 		} else {
-			client.instance.send(from, { image: enhance }, { groupMetadata, quoted: message });
+			client.instance.send(from, { image: enhance }, { quoted: message });
 		}
 
 		loggers.info(`${color('Media is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);

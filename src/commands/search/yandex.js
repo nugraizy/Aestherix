@@ -17,19 +17,18 @@ export default {
 	limit: 5,
 	cooldown: 8,
 	status: 'enable',
-	async run({ isMediaImage, query, extractMediaData, filename, from, message, typeQuoted, groupMetadata }, client) {
+	async run({ isMediaImage, query, extractMediaData, filename, from, message, typeQuoted }, client) {
 		if (!isURL(query) && !isMediaImage) {
 			return await client.instance.reply('Please send/reply a image to find the similar image', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
 		let media = query && isURL(query) ? query : null;
 
 		try {
-			await client.instance.reply('Searching. Please wait...', { from, quoted: message, groupMetadata });
+			await client.instance.reply('Searching. Please wait...', { from, quoted: message });
 
 			if (isMediaImage) {
 				media = await client.instance.downloadAndSaveMediaMessage(
@@ -46,13 +45,13 @@ export default {
 					fs.unlinkSync(media);
 				}
 
-				return await client.instance.reply(result.error, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(result.error, { from, quoted: message });
 			} else if (!result.information.length) {
 				if (isMediaImage && fs.existsSync(media)) {
 					fs.unlinkSync(media);
 				}
 
-				return await client.instance.reply('Similar images not found.', { from, quoted: message, groupMetadata });
+				return await client.instance.reply('Similar images not found.', { from, quoted: message });
 			}
 
 			let i = 1;
@@ -82,7 +81,7 @@ export default {
 							{ urlButton: { displayText: 'Content Source', url: item.source } }
 						]
 					},
-					{ groupMetadata, quoted: message }
+					{ quoted: message }
 				);
 				capt = '';
 
@@ -101,7 +100,7 @@ export default {
 
 			str += `Type : ${err.name}\n`;
 			str += `Message : ${err.message}`;
-			await client.instance.reply(str, { from, quoted: message, groupMetadata });
+			await client.instance.reply(str, { from, quoted: message });
 			log(err);
 		}
 	}

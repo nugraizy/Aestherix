@@ -29,10 +29,10 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	async run({ from, query, message, sender, groupMetadata }, client) {
+	async run({ from, query, message, sender }, client) {
 		try {
 			if (!query) {
-				return await client.instance.reply('You must enter text', { from, quoted: message, groupMetadata });
+				return await client.instance.reply('You must enter text', { from, quoted: message });
 			}
 
 			const getGroups = await client.instance.groupFetchAllParticipating();
@@ -51,7 +51,7 @@ export default {
 			}
 		} catch (err) {
 			log(err);
-			await client.instance.reply(err.stack, { from, quoted: message, groupMetadata });
+			await client.instance.reply(err.stack, { from, quoted: message });
 		}
 	}
 };

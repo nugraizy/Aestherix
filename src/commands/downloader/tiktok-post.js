@@ -18,9 +18,9 @@ export default {
 	limit: 2,
 	cooldown: 8,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, groupMetadata }, client) {
+	async run({ from, query, prettyNumber, message }, client) {
 		if (!query) {
-			return await client.instance.reply('Please provide a URL', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please provide a URL', { from, quoted: message });
 		}
 
 		let { _: urls } = parser(query);
@@ -48,8 +48,7 @@ export default {
 			if ('error' in posts[data]) {
 				await client.instance.reply(`Error while downloading TikTok post\n\n${posts[data].error}\n${data}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 
 				loggers.error(`${color('Failed to Download TikTok Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
@@ -95,7 +94,7 @@ export default {
 								image: { url },
 								caption: capt.trim().formatForm()
 							},
-							{ groupMetadata, quoted: message }
+							{ quoted: message }
 						);
 						continue;
 					}
@@ -105,7 +104,7 @@ export default {
 						{
 							image: { url }
 						},
-						{ groupMetadata, quoted: dataMessage }
+						{ quoted: dataMessage }
 					);
 
 					await delay(100);
@@ -127,7 +126,7 @@ export default {
 					},
 					caption: capt.trim()
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 
 			await delay(100);

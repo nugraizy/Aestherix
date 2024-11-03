@@ -13,9 +13,9 @@ export default {
 	cooldown: 5,
 	limit: 4,
 	status: 'enable',
-	run: async ({ query, message, from, args, type, groupMetadata }, client) => {
+	run: async ({ query, message, from, args, type }, client) => {
 		if (!query) {
-			return client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -58,14 +58,14 @@ Powered by 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`.formatForm(),
 							: {}
 					]
 				},
-				{ groupMetadata, quoted: message }
+				{ quoted: message }
 			);
 		}
 
 		const result = await layarkaca21(query);
 
 		if ('error' in result) {
-			client.instance.reply(result.error, { from, quoted: message, groupMetadata });
+			client.instance.reply(result.error, { from, quoted: message });
 		}
 
 		await client.instance.send(
@@ -95,7 +95,7 @@ Void Bot     1/${result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅ�
 						: {}
 				]
 			},
-			{ groupMetadata, quoted: message }
+			{ quoted: message }
 		);
 	}
 };

@@ -31,9 +31,9 @@ export default {
 	limit: 4,
 	cooldown: 7,
 	status: 'enable',
-	async run({ from, query, message, groupMetadata }, client) {
+	async run({ from, query, message }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		let queries = query.split(',');
@@ -44,7 +44,7 @@ export default {
 			const regexs = regex(querie.trim());
 
 			if (!regexs.status) {
-				return await client.instance.reply(regexs.message, { from, quoted: message, groupMetadata });
+				return await client.instance.reply(regexs.message, { from, quoted: message });
 			}
 
 			const data = await downloadManga(regexs.message);
@@ -52,8 +52,7 @@ export default {
 			if ('error' in data) {
 				await client.instance.reply(`Failed while downloading Pixiv manga\n\n${data.error}\n${querie}`, {
 					from,
-					quoted: message,
-					groupMetadata
+					quoted: message
 				});
 
 				continue;
@@ -78,7 +77,7 @@ Total Media : ${pageCount}`;
 						image: new Buffer.from(images, 'base64'),
 						caption: caption + `\nSource : https://www.pixiv.net/en/artworks/${id}`.formatForm()
 					},
-					{ groupMetadata, quoted: message }
+					{ quoted: message }
 				);
 			}
 
@@ -93,7 +92,7 @@ Total Media : ${pageCount}`;
 						image: new Buffer.from(buffer, 'base64'),
 						caption: caption
 					},
-					{ groupMetadata, quoted: message }
+					{ quoted: message }
 				);
 				i++;
 			}

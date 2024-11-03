@@ -12,7 +12,7 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'disable',
-	run: async ({ from, mediaData, groupMetadata }, client) => {
+	run: async ({ from, mediaData }, client) => {
 		const messageToPin = mediaData.extract();
 
 		const messages = generateWAMessageFromContent(
@@ -32,7 +32,7 @@ export default {
 
 		await client.instance.relayMessage(from, messages.message, {
 			messageId: messages.key.id,
-			cachedGroupMetadata: () => groupMetadata
+			useCachedGroupMetadata: true
 		});
 	}
 };

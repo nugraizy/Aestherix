@@ -14,9 +14,9 @@ export default {
 	cooldown: 5,
 	limit: 5,
 	status: 'enable',
-	async run({ from, query, message, groupMetadata }, client) {
+	async run({ from, query, message }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		query = query.split(',');
@@ -26,7 +26,7 @@ export default {
 			const result = await searchBandcamp(queries);
 
 			if ('error' in result) {
-				await client.instance.reply(result.error, { from, quoted: message, groupMetadata });
+				await client.instance.reply(result.error, { from, quoted: message });
 				continue;
 			}
 
@@ -60,7 +60,7 @@ Album ID : ${albumId || 'n/a'}`;
 					// 	{ quickReplyButton: { displayText: 'Download', id: `.bandcampdl ${urlBase}` } }
 					// ]
 				},
-				{ groupMetadata }
+				{}
 			);
 			await client.instance.send(
 				from,
@@ -74,7 +74,7 @@ Album ID : ${albumId || 'n/a'}`;
 						title: `${v.bandName} - ${v.title}`
 					}))
 				},
-				{ groupMetadata }
+				{}
 			);
 		}
 	}

@@ -23,7 +23,6 @@ export default {
 
 			from,
 			message,
-			groupMetadata,
 
 			type,
 			typeQuoted,
@@ -34,8 +33,7 @@ export default {
 		if (!query && !bodyQuoted && !isMediaVid && !isMediaImage && !isMediaDocument && !isQuotedSticker) {
 			return client.instance.reply('Please provide a message or media', {
 				from,
-				quoted: message,
-				groupMetadata
+				quoted: message
 			});
 		}
 
@@ -54,8 +52,7 @@ export default {
 				if (!/video|image/g.test(mime)) {
 					return await client.instance.reply('Media type must be video or image', {
 						from,
-						quoted: message,
-						groupMetadata
+						quoted: message
 					});
 				}
 

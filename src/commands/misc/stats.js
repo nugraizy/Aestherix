@@ -30,7 +30,7 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	run: async ({ from, message, groupMetadata }, client) => {
+	run: async ({ from, message }, client) => {
 		let caption = '';
 
 		const {
@@ -71,6 +71,6 @@ export default {
 		caption += '⪨ ＣＰＵｓ Ｉｎｆｏ ⪩\n\n';
 		caption += `${getCpus(cpus)}`;
 
-		client.instance.reply(caption, { from, quoted: message, groupMetadata });
+		client.instance.reply(caption, { from, quoted: message });
 	}
 };

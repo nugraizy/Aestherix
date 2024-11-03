@@ -18,22 +18,11 @@ export default {
 	limit: 1,
 	status: 'enable',
 	async run(
-		{
-			isQuotedSticker,
-			from,
-			message,
-			filename,
-			extractMediaData,
-			prettyNumber,
-			typeQuoted,
-			groupMetadata,
-			waitForInput,
-			sender
-		},
+		{ isQuotedSticker, from, message, filename, extractMediaData, prettyNumber, typeQuoted, waitForInput, sender },
 		client
 	) {
 		if (!isQuotedSticker) {
-			return await client.instance.reply('Please reply a sticker to decrypt', { from, quoted: message, groupMetadata });
+			return await client.instance.reply('Please reply a sticker to decrypt', { from, quoted: message });
 		}
 
 		loggers.info(`${color('Decrypting media', '#FF99C8')} from ${color(prettyNumber, '#E4C1F9')}`);
@@ -56,7 +45,7 @@ export default {
 							url: result
 						}
 				  } /* eslint-disable-line */,
-			{ groupMetadata, quoted: message }
+			{ quoted: message }
 		);
 
 		const wait = await waitForInput(client, {
