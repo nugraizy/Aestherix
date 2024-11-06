@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+# [5.2.0] 2024-11-06
+## Added
+- **Tiktok**: Ability to download highest resolution of a video.
+- Adding a few `wait message` before processing a downloader.
+
+---
+
 # [5.1.3] 2024-11-05
 ## Fixed
 - Commmand(**fetch**): fix parser, and removing the quotation mark on the response string as it is not conventional.
@@ -117,7 +124,7 @@ All notable changes to this project will be documented in this file.
 - Introduced `AbortSignal.timeout` onto the prompt as it could take memory if you left them idle.
 - Added `Spinners` into the plugins as a loading.
 - Added more uploader [`catbox`](https://catbox.moe) and [`uguu`](https://uguu.se).
-- Added script `instagram:login`. Add your `username`and `password` to .env, with `INSTAGRAM_USERNAME` and `INSTAGRAM_PASSWORD`, then run :
+- Added script `instagram:login`. Add your `username` and `password` to .env, with `INSTAGRAM_USERNAME` and `INSTAGRAM_PASSWORD`, then run :
 ```sh
 npm run instagram:login
 ```
