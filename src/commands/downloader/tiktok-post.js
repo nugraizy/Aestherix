@@ -1,11 +1,11 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
-import { color, delay, loggers, numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
+import { color, delay, loggers, numberWithCommas, removeDuplicatesArray, formatNumber } from '../../utils/modules/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
 
 /**
- * @type {import('../types.js').Plugins}
+ * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
 	name: 'tiktokpost',
@@ -22,6 +22,12 @@ export default {
 		if (!query) {
 			return await client.instance.reply('Please provide a URL', { from, quoted: message });
 		}
+
+		if (!tiktok) {
+			tiktok = (await import('../../utils/tiktok/index.js')).tiktok;
+		}
+
+		await client.instance.reply('Please wait.', { from, quoted: message });
 
 		let { _: urls } = parser(query);
 		let { withNoWatermark, withWatermark } = parser(query.toLowerCase(), {
@@ -63,24 +69,26 @@ export default {
 			capt += `\n\nAuthor : ${posts[data].author}\n`;
 			capt += `Username : ${posts[data].nickname}\n`;
 			capt += `Verifies : ${posts[data].verified ? 'Verified' : 'Not Verified'}\n`;
-			capt += `Followers : ${numberWithCommas(posts[data].followers)}\n`;
-			capt += `Following : ${numberWithCommas(posts[data].following)}\n`;
-			capt += `Tot. Video : ${numberWithCommas(posts[data].totalVideo)}\n`;
-			capt += `Liked : ${numberWithCommas(posts[data].liked)}\n`;
-			capt += `Shared : ${numberWithCommas(posts[data].shared)}\n`;
-			capt += `Comment : ${numberWithCommas(posts[data].comment)}\n`;
 			capt += `Published : ${date}\n`;
-			capt += `View : ${numberWithCommas(posts[data].view)}\n`;
 
 			if (posts[data].type !== 'images') {
+				capt += `Ratio : ${posts[data].ratioHighest || posts[data].ratio}\n`;
+				posts[data].fps && posts[data].ratioHighest && (capt += `Frame Rates : ${posts[data].fps}\n`);
 				capt += `Duration : ${posts[data].videoDuration}\n`;
 			}
 
 			capt += `Music : ${posts[data].musicTitle}\n`;
-			capt += `Description : ${posts[data].videoDescription}\n`;
+
+			capt += `👥 ${formatNumber(posts[data].followers)} 👤 ${formatNumber(posts[data].following)}\n`;
+			capt += `👍 ${formatNumber(posts[data].liked)} 🔄 ${formatNumber(posts[data].shared)} 💬 ${formatNumber(
+				posts[data].comment
+			)} 👀 ${formatNumber(posts[data].view)}\n`;
+			capt += `🎞️ ${formatNumber(posts[data].totalVideo)}\n\n`;
+
+			capt += `📝 ${posts[data].videoDescription}\n`;
 
 			if (posts[data].type === 'images') {
-				capt += `Tot. Image : ${posts[data].urls.images.length}\n`;
+				capt += `Total Images : ${posts[data].urls.images.length}\n`;
 
 				const images = posts[data].urls.images;
 
@@ -116,13 +124,26 @@ export default {
 				continue;
 			}
 
+			const urls = [
+				posts[data].urls['withoutWatermarkHighest'],
+				posts[data].urls['withoutWatermark'],
+				posts[data].urls['withWatermark']
+			];
+
+			const url = (withWatermark ? urls[2] || urls[0] || urls[1] : urls[0] || urls[1] || urls[2]) || null;
+
+			if (!url) {
+				return await client.instance.reply('No download url found, Might check your url and try again.', {
+					quoted: message,
+					from
+				});
+			}
+
 			await client.instance.send(
 				from,
 				{
 					video: {
-						url: posts[data].urls[
-							!withNoWatermark && !withWatermark ? 'withNoWatermark' : withWatermark ? 'withWatermark' : 'withNoWatermark'
-						]
+						url
 					},
 					caption: capt.trim()
 				},

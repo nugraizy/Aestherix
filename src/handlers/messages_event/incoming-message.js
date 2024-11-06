@@ -393,8 +393,6 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 				str += `Message : ${err.message || 'Unknown'}\n`;
 				str += `Stack Trace :\n${(message.isOwner ? err?.stack : err?.stack?.substring(0, 20)) || 'Unknown'}`;
 
-				console.log(`https://www.whatsapp.com/otp/copy/${err.stack}`);
-
 				builder
 					.mainBody('')
 					.mainFooter('')
@@ -434,8 +432,6 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 					);
 
 				const messageBuilt = await builder.render();
-
-				console.log(JSON.stringify(messageBuilt, null, 2));
 
 				await client.instance.relayMessage(message.from, messageBuilt.message, { messageId: messageBuilt.key.id });
 

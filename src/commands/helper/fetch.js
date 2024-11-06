@@ -79,8 +79,6 @@ const processTextResponse = async (response, parser) => {
 		// do nothing
 	}
 
-	console.log(text);
-
 	return text;
 };
 

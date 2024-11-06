@@ -21,6 +21,8 @@ export default {
 			return await client.instance.reply('Please specify a username', { from, quoted: message });
 		}
 
+		await client.instance.reply('Please wait.', { from, quoted: message });
+
 		const { _: input } = parser(query);
 
 		const highlights = await instagram.search.highlight(input);
@@ -44,12 +46,12 @@ export default {
 			capt += `Follower  : ${numberWithCommas(highlights[data].user.followers)}\n`;
 			capt += `Following : ${numberWithCommas(highlights[data].user.following)}\n`;
 			capt += highlights[data].user.biography === '' ? '' : `Biography : ${highlights[data].user.biography}\n`;
-			capt += `Tot. Highlights : ${numberWithCommas(highlights[data].highlights.length)}\n\n`;
+			capt += `Total Highlights : ${numberWithCommas(highlights[data].highlights.length)}\n\n`;
 
 			if (!isURL(input)) {
 				capt += 'Each Sections of the Higlights will be send 2 media.\n';
-				capt += `Tot. Sections : ${highlights[data].highlights.length}\n`;
-				capt += `Tot. Estimated media per Section : ${numberWithCommas(highlights[data].highlights.length * 2)}\n\n`;
+				capt += `Total Sections : ${highlights[data].highlights.length}\n`;
+				capt += `Total Estimated media per Section : ${numberWithCommas(highlights[data].highlights.length * 2)}\n\n`;
 			}
 
 			await client.instance.reply(capt.trim().formatForm(), { from, quoted: message });

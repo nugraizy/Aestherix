@@ -9,8 +9,8 @@ const _apiV3 = (input) =>
 	`https://cdn.syndication.twimg.com/tweet-result?features=tfw_timeline_list:;tfw_follower_count_sunset:true;tfw_tweet_edit_backend:on;tfw_refsrc_session:on;tfw_fosnr_soft_interventions_enabled:on;tfw_mixed_media_15897:treatment;tfw_experiments_cookie_expiration:1209600;tfw_show_birdwatch_pivots_enabled:on;tfw_duplicate_scribes_to_settings:on;tfw_use_profile_image_shape_enabled:on;tfw_video_hls_dynamic_manifests_15082:true_bitrate;tfw_legacy_timeline_sunset:true;tfw_tweet_edit_frontend:on&id=${input}&lang=en&token=463csqei5v&er314w=5d3k84nflgwx&sotjrh=hq2m8l1pd0al&w93msi=e0rv68u9uca&i4l8z0=9sif78bj1wos&11ga8a=1c5q80rjdxtfo&i3ssqg=hf38hgb8fyc9&o3x2ug=971aofk8p5bm&ovkh3k=2c8tmlyqfiv2`;
 
 const regex = (input) => {
-	const regex = /twitter\.com\/.*\/status(?:es)?\/([^/?]+)/.test(input)
-		? input.match(/twitter\.com\/.*\/status(?:es)?\/([^/?]+)/gm)?.[0]?.match(/[0-9]{19,20}/g)?.[0]
+	const regex = /(twitter|x)\.com\/.*\/status(?:es)?\/([^/?]+)/.test(input)
+		? input.match(/(twitter|x)\.com\/.*\/status(?:es)?\/([^/?]+)/gm)?.[0]?.match(/[0-9]{19,20}/g)?.[0]
 		: false;
 
 	if (!regex) {

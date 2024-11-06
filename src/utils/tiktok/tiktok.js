@@ -3,6 +3,7 @@ import asyncRetry from 'async-retry';
 import { fetch } from 'undici';
 import crypto from 'crypto';
 import { v4 } from 'uuid';
+import _ from 'lodash';
 
 import { cheerioLOAD, randomChar, isURL } from '../modules/index.js';
 import { COOKIE } from './cookie.js';
@@ -132,7 +133,8 @@ class ResponseParser {
 						},
 						video: {
 							withWatermark: { size: video.download_addr.data_size, url: video.download_addr.url_list[0] },
-							withoutWatermark: { size: video.play_addr.data_size, url: video.play_addr.url_list[0] }
+							withoutWatermark: { size: video.play_addr.data_size, url: video.play_addr.url_list[0] },
+							withoutWatermarkHighest: { size: video.bit_rate[0].data_size, url: video.bit_rate[0].play_addr.url_list[0] }
 						}
 					}
 				},
@@ -167,6 +169,8 @@ class ResponseParser {
 			video: {
 				download_addr, // eslint-disable-line
 				play_addr: { url_list: noWatermarkList },
+				bit_rate: bitRate,
+				play_addr_bytevc1: playAddrByteVC1,
 				duration: videoDuration,
 				ratio,
 				cover: { url_list: videoThumbnailList }
@@ -189,7 +193,7 @@ class ResponseParser {
 		const musicCoverList =
 			data.music[data.music?.cover_hd ? 'cover_hd' : data.music?.cover_large ? 'cover_large' : 'cover_medium'].url_list;
 
-		return {
+		const result = {
 			keyword: data.aweme_id,
 			videoDescription,
 			published,
@@ -203,6 +207,7 @@ class ResponseParser {
 			avatarList,
 			noWatermarkList,
 			withWatermarkList,
+			highestNoWatermarkList: null,
 			videoDuration,
 			ratio,
 			videoThumbnailList,
@@ -212,6 +217,26 @@ class ResponseParser {
 			musicDuration,
 			musicCoverList
 		};
+
+		if (bitRate?.[0]) {
+			const {
+				fps,
+				play_addr: { width: ratio, url_list: highestNoWatermarkList }
+			} = bitRate[0];
+
+			result.highestNoWatermarkList = highestNoWatermarkList;
+			result.ratio = `${ratio}p`;
+			result.fps = fps;
+		} else if (playAddrByteVC1) {
+			const {
+				play_addr: { width: ratio, url_list: highestNoWatermarkList }
+			} = bitRate[0];
+
+			result.highestNoWatermarkList = highestNoWatermarkList;
+			result.ratio = `${ratio}p`;
+		}
+
+		return result;
 	}
 
 	/**
@@ -240,7 +265,15 @@ class ResponseParser {
 
 		const typeToUse = type || 'video';
 
-		const { avatarList, videoThumbnailList, musicList, musicCoverList, noWatermarkList, withWatermarkList } = videoMetadata;
+		const {
+			avatarList,
+			videoThumbnailList,
+			musicList,
+			musicCoverList,
+			noWatermarkList,
+			withWatermarkList,
+			highestNoWatermarkList
+		} = videoMetadata;
 
 		delete videoMetadata.avatarList;
 		delete videoMetadata.videoThumbnailList;
@@ -248,6 +281,7 @@ class ResponseParser {
 		delete videoMetadata.musicCoverList;
 		delete videoMetadata.noWatermarkList;
 		delete videoMetadata.withWatermarkList;
+		delete videoMetadata.highestNoWatermarkList;
 
 		const result = {
 			keyword: aweme_id /* eslint-disable-line*/,
@@ -269,8 +303,9 @@ class ResponseParser {
 		if (typeToUse === 'images') {
 			result.url.images = this._extractImageMetadata(data);
 		} else {
-			result.url.withWatermark = withWatermarkList?.[0] || null;
-			result.url.withNoWatermark = noWatermarkList[0];
+			result.url.withWatermark = _.find(withWatermarkList, _.identity) || null;
+			result.url.withNoWatermark = _.find(noWatermarkList, _.identity) || null;
+			result.url.withoutWatermarkHighest = _.find(highestNoWatermarkList, _.identity) || null;
 		}
 
 		return result;

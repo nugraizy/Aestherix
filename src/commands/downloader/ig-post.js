@@ -56,6 +56,8 @@ export default {
 			return await client.instance.reply('Please specify a url', { from, quoted: message });
 		}
 
+		await client.instance.reply('Please wait.', { from, quoted: message });
+
 		const { _: urls } = parser(query);
 
 		const posts = await instagram.download.post(urls);

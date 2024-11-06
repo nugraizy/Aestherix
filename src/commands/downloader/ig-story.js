@@ -21,6 +21,8 @@ export default {
 			return await client.instance.reply('Please specify a username', { from, quoted: message });
 		}
 
+		await client.instance.reply('Please wait.', { from, quoted: message });
+
 		const { _: input } = parser(query);
 
 		const stories = await instagram.search.story(input);

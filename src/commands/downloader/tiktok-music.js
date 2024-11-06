@@ -23,6 +23,8 @@ export default {
 			return await client.instance.reply('Please provide a URL', { from, quoted: message });
 		}
 
+		await client.instance.reply('Please wait.', { from, quoted: message });
+
 		let { _: urls } = parser(query);
 
 		const musics = await tiktok.download.post(urls);
