@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+# [5.2.2] 2024-11-09
+## Refactoring
+- **Tiktok, Instagram**: Moved functions to a different file.
+
+---
+
 # [5.2.1] 2024-11-09
 ## Added
 - **Tiktok, Instagram**: Adding Cache mechanism to the responses.
@@ -20,7 +26,7 @@ All notable changes to this project will be documented in this file.
 
 # [5.1.3] 2024-11-05
 ## Fixed
-- Commmand(**fetch**): fix parser, and removing the quotation mark on the response string as it is not conventional.
+- **Command(`fetch`)**: fix parser, and removing the quotation mark on the response string as it is not conventional.
 
 ## Chore
 - Adding CHANGELOG Screenshot.
