@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+# [5.2.1] 2024-11-09
+## Added
+- **Tiktok, Instagram**: Adding Cache mechanism to the responses.
+
+## Refactoring
+- Use optional chaining operator (`?.`) for safest guard clause rather than `in` keyword. 
+
+---
+
 # [5.2.0] 2024-11-06
 ## Added
 - **Tiktok**: Ability to download highest resolution of a video.
@@ -26,16 +35,16 @@ All notable changes to this project will be documented in this file.
 
 # [5.1.1] 2024-11-03
 ## Fixed
-- Facebook downloader. Now using [fdownloader.net](https://fdownloader.net).
+- **Facebook** downloader. Now using [fdownloader.net](https://fdownloader.net).
 - Fix loggers on incoming messages event.
-- Prevent reading undefined on Carousel.`getMessageType`.
+- Prevent reading `undefined` on Carousel.`getMessageType`.
 - Kinda fixed the youtube downloader when client deployed on a server. Though it still have cloudflare on the end. Please use `youtubei.js`.
 
 ---
 
 # [5.1.0] 2024-11-02
 ## Added
-- Spinner when loading the plugins. Use `--spin` flag before running the client.
+- **Spinner** when loading the plugins. Use `--spin` flag before running the client.
 
 ## Refactoring
 - `printBanner` should printed before connecting.
@@ -71,25 +80,25 @@ All notable changes to this project will be documented in this file.
 
 # [5.0.5] 2024-10-24
 ## Fixed
-- Fix `carbon` border overweight on long codes. Now it's ACCURATE and symmetrically on both sides.
+- Fix **Carbon** border overweight on long codes. Now it's ACCURATE and symmetrically on both sides.
 
 ## Added
-- New `carbon` theme, `synthwave84`!
+- New **Carbon** theme, `synthwave84`!
 
 ---
 
 # [5.0.4] 2024-10-23
 ## Fixed
-- Fix `carbon` padding not accurately represents real height.
+- Fix **Carbon** padding not accurately represents real height.
 
 ---
 
 # [5.0.3] 2024-10-22
 ## Fixed
 - Fix **Instagram** utilities:
-   - *searchUser*: fix user agent mismatch.
-   - *hashtag*: fix source undefined.
-   - *highlights*: fix timeout on fetchHighlight function. now using chunked data.
+   - *searchUser*: fix `user agent mismatch`.
+   - *hashtag*: fix source `undefined`.
+   - *highlights*: fix timeout on `fetchHighlight` function. now using chunked data.
 
 ## Added
 - Logic to prevent plugins relogger trying to relog a file that has no `proper/valid properties`.
@@ -133,11 +142,11 @@ npm run instagram:login
 - Unused Fonts are being removed as it takes very big space.
 
 ## Fixed
-- Fix `Instagram` login.
-- Fix the `Nhentai` as per today they don't have CloudFlare enabled on their APIs.
-- Fix 404 `Nhentai` with their image hosting domain.
+- Fix **Instagram** login.
+- Fix the **Nhentai** as per today they don't have CloudFlare enabled on their APIs.
+- Fix 404 **Nhentai** with their image hosting domain.
 - Fix the risk of memory leak cause by `@napi-rs/canvas`.
 - Fix dead uploader ([`telegra.ph`](https://telegra.ph)), added more uploader as said above.
-- Fix WritableStream on `imageToPdf` utility as it does not has event on `finish`
+- Fix **WritableStream** on `imageToPdf` utility as it does not has event on `finish`
 - Fix `eval` is not readable by bot causing it always print `boolean` on the body. Which is not as the behavior that was expected.
-- Fix `SpotifyCard` is not properly render the text of the title and the song artists.
+- Fix **SpotifyCard** is not properly render the text of the title and the song artists.
