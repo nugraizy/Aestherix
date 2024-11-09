@@ -35,7 +35,7 @@ const processVideo = async (url, type, client, { from, message, prettyNumber }) 
 
 	const video = await download();
 
-	if ('error' in video && video.error) {
+	if (video?.error) {
 		client.instance.reply(video.message, { from, quoted: message });
 		loggers.error(`${color('Failed to Download Spotify ' + type, '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 		return;

@@ -124,7 +124,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 
 			const result = await ephoto360(model, parsed.slice(1).join(' '), buffers);
 
-			if ('error' in result) {
+			if (result?.error) {
 				await client.instance.reply(`something went wrong:\n\n${result.error}`, { from, quoted: message });
 
 				continue;

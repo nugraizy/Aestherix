@@ -26,7 +26,7 @@ export default {
 				? await getWeather('coordinate', extractMediaData.degreesLatitude, extractMediaData.degreesLongitude)
 				: await getWeather('city', query);
 
-		if ('error' in info) {
+		if (info?.error) {
 			return await client.instance.reply(info.error, {
 				from,
 				quoted: message

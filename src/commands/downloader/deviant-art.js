@@ -51,7 +51,7 @@ export default {
 
 			const result = await downloadDeviantArt(querie);
 
-			if ('error' in result) {
+			if (result?.error) {
 				await client.instance.reply(result.error, { from, quoted: message });
 
 				continue;

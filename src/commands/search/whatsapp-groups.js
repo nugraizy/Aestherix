@@ -20,7 +20,7 @@ export default {
 
 		const result = await searchWAGroups(query);
 
-		if ('error' in result) {
+		if (result?.error) {
 			client.instance.reply(result.error, { from, quoted: message });
 		}
 

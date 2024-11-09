@@ -92,7 +92,7 @@ export default {
 		for (const querie of query) {
 			const data = await iflixSearch(querie);
 
-			if ('error' in data) {
+			if (data?.error) {
 				return await client.instance.reply(data.error, { from, quoted: message });
 			}
 

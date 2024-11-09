@@ -26,7 +26,7 @@ export default {
 		for (const querie of queries) {
 			const data = await searchNovel(querie.trim());
 
-			if ('error' in data) {
+			if (data?.error) {
 				await client.instance.reply(`Failed while searching Pixiv novel\n\n${data.error}\n${querie}`, {
 					from,
 					quoted: message

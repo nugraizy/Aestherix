@@ -41,7 +41,7 @@ export default {
 
 			const data = await iplookup(IP.trim());
 
-			if ('error' in data) {
+			if (data?.error) {
 				await client.instance.reply(`Error while searching IP Address\n\n${data.error}`, {
 					from,
 					quoted: message

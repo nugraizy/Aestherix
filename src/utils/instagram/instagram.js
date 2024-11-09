@@ -5,6 +5,8 @@ import fs from 'fs-extra';
 import { parse } from 'dotenv';
 import _ from 'lodash';
 
+import { Cache } from '../../helper/modules/cache.js';
+
 const _baseApi = 'https://i.instagram.com';
 const _baseUrl = 'https://www.instagram.com';
 const _apiUser = (input) => `${_baseApi}/api/v1/users/web_profile_info/?username=${input}`;
@@ -799,9 +801,21 @@ export class InstagramApi extends InstagramMethods {
 	 */
 	#_cookie;
 
+	/**
+	 * @private
+	 */
 	#_uuid;
 
+	/**
+	 * @private
+	 */
 	#_deviceId;
+
+	/**
+	 * @private
+	 */
+	#cache;
+
 	constructor(username, password, { uuid = v4(), deviceId = generateDeviceID(), cookie = null } = {}) {
 		super();
 
@@ -834,6 +848,11 @@ export class InstagramApi extends InstagramMethods {
 		 * @private
 		 */
 		this.#_deviceId = deviceId;
+
+		/**
+		 * @private
+		 */
+		this.#cache = new Cache();
 
 		this.account = {
 			login: () =>
@@ -880,9 +899,17 @@ export class InstagramApi extends InstagramMethods {
 								continue;
 							}
 
+							url = this._clearUrl(url);
+
+							if (this._isCacheExist(url)) {
+								result[url] = this._getFromCache(url);
+								continue;
+							}
+
 							const response = await this._getPost(url, this.#_cookie);
 
 							result[url] = response;
+							this._setToCache(url, response);
 						}
 
 						resolve(result);
@@ -909,9 +936,15 @@ export class InstagramApi extends InstagramMethods {
 								continue;
 							}
 
+							if (this._isCacheExist(username)) {
+								result[username] = this._getFromCache(username);
+								continue;
+							}
+
 							const response = await this._getProfile(username, this.#_cookie);
 
 							result[username] = response;
+							this._setToCache(username, response);
 						}
 
 						resolve(result);
@@ -936,9 +969,15 @@ export class InstagramApi extends InstagramMethods {
 								continue;
 							}
 
+							if (this._isCacheExist(username)) {
+								result[username] = this._getFromCache(username);
+								continue;
+							}
+
 							const response = await this._searchProfile(username, this.#_cookie);
 
 							result[username] = response;
+							this._setToCache(username, response);
 						}
 
 						resolve(result);
@@ -963,9 +1002,15 @@ export class InstagramApi extends InstagramMethods {
 								continue;
 							}
 
+							if (this._isCacheExist(username)) {
+								result[username] = this._getFromCache(username);
+								continue;
+							}
+
 							const response = await this._getHighlights(username, this.#_cookie);
 
 							result[username] = response;
+							this._setToCache(username, response);
 						}
 
 						resolve(result);
@@ -990,9 +1035,15 @@ export class InstagramApi extends InstagramMethods {
 								continue;
 							}
 
+							if (this._isCacheExist(username)) {
+								result[username] = this._getFromCache(username);
+								continue;
+							}
+
 							const response = await this._getStory(username, this.#_cookie);
 
 							result[username] = response;
+							this._setToCache(username, response);
 						}
 
 						resolve(result);
@@ -1017,9 +1068,15 @@ export class InstagramApi extends InstagramMethods {
 								continue;
 							}
 
+							if (this._isCacheExist(hashtag)) {
+								result[hashtag] = this._getFromCache(hashtag);
+								continue;
+							}
+
 							const response = await this._getHashtag(hashtag, this.#_cookie);
 
 							result[hashtag] = response;
+							this._setToCache(hashtag, response);
 						}
 
 						resolve(result);
@@ -1076,6 +1133,25 @@ export class InstagramApi extends InstagramMethods {
 	 */
 	_encryptPassword() {
 		return `#PWD_INSTAGRAM_BROWSER:0:${Date.now()}:${this.#_password}`;
+	}
+
+	_isCacheExist(input) {
+		return this.#cache.has(input);
+	}
+
+	_getFromCache(input) {
+		return this.#cache.get(input);
+	}
+
+	_setToCache(input, data) {
+		return this.#cache.set(input, data);
+	}
+
+	_clearUrl(url) {
+		url = new URL(url);
+		url = url.origin + url.pathname;
+
+		return url;
 	}
 }
 

@@ -31,7 +31,7 @@ export default {
 		loggers.warning(`${color('Downloading Instagram reel', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const data in reels) {
-			if ('error' in reels[data]) {
+			if (reels[data]?.error) {
 				await client.instance.reply(`Error while downloading Instagram reel\n\n${reels[data].error}\n${data}`, {
 					from,
 					quoted: message

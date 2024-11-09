@@ -27,7 +27,7 @@ export default {
 			const data = await searchManga(querie.trim());
 			const dataImage = await downloadManga(data[0].id);
 
-			if ('error' in data) {
+			if (data?.error) {
 				await client.instance.reply(`Failed while searching Pixiv manga\n\n${data.error}\n${querie}`, {
 					from,
 					quoted: message

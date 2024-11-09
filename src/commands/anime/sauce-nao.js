@@ -38,7 +38,7 @@ export default {
 
 		const result = await sauceNao(media);
 
-		if ('error' in result) {
+		if (result?.error) {
 			if (isMediaImage) {
 				fs.unlinkSync(media);
 			}

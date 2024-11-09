@@ -28,7 +28,7 @@ export default {
 		loggers.warning(`${color('Searching Instagram User', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const data in users) {
-			if ('error' in users[data]) {
+			if (users[data]?.error) {
 				await client.instance.reply(`Error while searching Instagram user\n\n${users[data].error}\n${data}`, {
 					from,
 					quoted: message

@@ -42,7 +42,7 @@ export default {
 
 			const result = await emojimix(arr[0], arr[1]);
 
-			if (typeof result === 'object' && 'error' in result) {
+			if (typeof result === 'object' && result?.error) {
 				await client.instance.reply(result.error, { from, quoted: message });
 
 				continue;

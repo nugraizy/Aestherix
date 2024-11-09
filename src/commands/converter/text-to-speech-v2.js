@@ -42,7 +42,7 @@ export default {
 		if (type === 'listResponseMessage') {
 			const result = await gttsAI(args.slice(2).join(' '), args[1]);
 
-			if ('error' in result) {
+			if (result?.error) {
 				return await client.instance.reply(result.error, { from, quoted: message });
 			}
 
@@ -118,7 +118,7 @@ export default {
 
 		const result = await gttsAI(queries.join(' '), model);
 
-		if ('error' in result) {
+		if (result?.error) {
 			return await client.instance.reply(result.error, { from, quoted: message });
 		}
 

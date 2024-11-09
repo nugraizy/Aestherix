@@ -30,7 +30,7 @@ export default {
 		const musics = await tiktok.download.post(urls);
 
 		for (const data in musics) {
-			if ('error' in musics[data]) {
+			if (musics[data]?.error) {
 				await client.instance.reply(`Error while downloading TikTok music\n\n${musics[data].error}\n${data}`, {
 					from,
 					quoted: message

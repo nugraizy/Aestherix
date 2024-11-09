@@ -75,7 +75,7 @@ Tot. Chapters : ${chapters.length}`;
 
 		const result = await komik.search(query);
 
-		if ('error' in result) {
+		if (result?.error) {
 			return client.instance.reply(result.error, { from, quoted: message });
 		}
 

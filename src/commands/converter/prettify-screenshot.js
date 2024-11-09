@@ -30,7 +30,7 @@ export default {
 
 		buffer = screenshot.toBuffer();
 
-		if ('error' in screenshot) {
+		if (screenshot?.error) {
 			client.instance.reply(screenshot.error, { from, quoted: message });
 			loggers.error(`${color('Failed to Prettify an Image', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 			return;

@@ -71,7 +71,7 @@ Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 		if (!query) {
 			const game = new TicTacToe(sender, undefined, true);
 
-			if ('error' in game) {
+			if (game?.error) {
 				return await client.instance.reply(game.error, { from, quoted: message });
 			}
 
@@ -91,7 +91,7 @@ Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 
 			const move = game.playMove(query, sender);
 
-			if ('error' in move) {
+			if (move?.error) {
 				return await client.instance.reply(move.error, { from, quoted: message });
 			}
 

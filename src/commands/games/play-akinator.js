@@ -16,7 +16,7 @@ export default {
 	async run({ from, message }, client) {
 		const aki = await startAkinator(from);
 
-		if ('error' in aki) {
+		if (aki?.error) {
 			return await client.instance.reply(aki.error, { from, quoted: message });
 		}
 

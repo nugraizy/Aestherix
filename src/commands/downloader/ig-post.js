@@ -65,7 +65,7 @@ export default {
 		loggers.warning(`${color('Downloading Instagram Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const data in posts) {
-			if ('error' in posts[data]) {
+			if (posts[data]?.error) {
 				await client.instance.reply(`Error while downloading Instagram post\n\n${posts[data].error}\n${data}`, {
 					from,
 					quoted: message

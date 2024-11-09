@@ -64,7 +64,7 @@ Powered by 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`.formatForm(),
 
 		const result = await layarkaca21(query);
 
-		if ('error' in result) {
+		if (result?.error) {
 			client.instance.reply(result.error, { from, quoted: message });
 		}
 

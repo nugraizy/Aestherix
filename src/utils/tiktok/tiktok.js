@@ -8,6 +8,7 @@ import _ from 'lodash';
 import { cheerioLOAD, randomChar, isURL } from '../modules/index.js';
 import { COOKIE } from './cookie.js';
 import { _api } from './util.js';
+import { Cache } from '../../helper/modules/cache.js';
 
 const API_BASE_URL = _api;
 const iids = ['7379691220551141126', '7318518857994389254'];
@@ -403,6 +404,7 @@ class ResponseParser {
 }
 
 class RequestModule extends ResponseParser {
+	#cookie = COOKIE.TIKTOK_COOKIE.replace(/\n/g, '');
 	constructor() {
 		super();
 
@@ -436,7 +438,6 @@ class RequestModule extends ResponseParser {
 			webcast_language: 'en'
 			/* eslint-enable */
 		};
-		this.cookie = COOKIE.TIKTOK_COOKIE.replace(/\n/g, '');
 	}
 
 	/**
@@ -458,7 +459,7 @@ class RequestModule extends ResponseParser {
 			headers: {
 				'User-Agent':
 					'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 YaBrowser/23.1.5.750 (beta) Yowser/2.5 Safari/537.36',
-				Cookie: this.cookie
+				Cookie: this.#cookie
 			}
 		};
 	}
@@ -500,8 +501,13 @@ class RequestModule extends ResponseParser {
 			const json = await data.json().catch(() => '');
 
 			return json;
-		} else {
+		} else if (method === 'POST') {
 			const data = await fetch(API_BASE_URL + path + body, { ...config, method: 'POST' });
+			const json = await data.json().catch(() => '');
+
+			return json;
+		} else if (method === 'OPTIONS') {
+			const data = await fetch(API_BASE_URL + path + body, { ...config, method: 'OPTIONS' });
 			const json = await data.json().catch(() => '');
 
 			return json;
@@ -681,7 +687,7 @@ class RequestModule extends ResponseParser {
 					async () => {
 						const request = async () => {
 							const data = await this._awemeRequest('aweme/v1/discover/search/?', {
-								method: 'GET',
+								method: 'OPTIONS',
 								body,
 								config
 							});
@@ -999,8 +1005,11 @@ class TiktokUtils extends RequestModule {
 }
 
 class Tiktok extends TiktokUtils {
+	#cache;
 	constructor() {
 		super();
+
+		this.#cache = new Cache();
 
 		this.search = {
 			users: async (...usernames) =>
@@ -1015,9 +1024,15 @@ class Tiktok extends TiktokUtils {
 								continue;
 							}
 
+							if (this._isCacheExist(username)) {
+								result[username] = this._getFromCache(username);
+								continue;
+							}
+
 							const response = await this._fetchSearchUserData(username);
 
 							result[username] = response;
+							this._setToCache(username, response);
 						}
 
 						resolve(result);
@@ -1037,9 +1052,15 @@ class Tiktok extends TiktokUtils {
 								continue;
 							}
 
+							if (this._isCacheExist(username)) {
+								result[username] = this._getFromCache(username);
+								continue;
+							}
+
 							const response = await this._fetchUserDetail(username);
 
 							result[username] = response;
+							this._setToCache(username, response);
 						}
 
 						resolve(result);
@@ -1062,9 +1083,15 @@ class Tiktok extends TiktokUtils {
 								continue;
 							}
 
+							if (this._isCacheExist(username)) {
+								result[username] = this._getFromCache(username);
+								continue;
+							}
+
 							const response = await this._fetchUserPosts(username);
 
 							result[username] = response;
+							this._setToCache(username, response);
 						}
 
 						resolve(result);
@@ -1082,22 +1109,30 @@ class Tiktok extends TiktokUtils {
 
 						let result = {};
 
-						for (const url of urls) {
+						for (let url of urls) {
 							const isValidURL = checkValid(url);
 
 							if (isValidURL.error) {
 								result[url] = { error: isValidURL.message };
-
 								continue;
 							}
 
+							url = this._clearUrl(url);
+
 							if (result[url]) {
+								continue;
+							}
+
+							if (this._isCacheExist(url)) {
+								result[url] = this._getFromCache(url);
+
 								continue;
 							}
 
 							const response = await this._fetchVideoData(url);
 
 							result[url] = response;
+							this._setToCache(url, response);
 						}
 
 						resolve(result);
@@ -1106,6 +1141,25 @@ class Tiktok extends TiktokUtils {
 					}
 				})
 		};
+	}
+
+	_isCacheExist(input) {
+		return this.#cache.has(input);
+	}
+
+	_getFromCache(input) {
+		return this.#cache.get(input);
+	}
+
+	_setToCache(input, data) {
+		return this.#cache.set(input, data);
+	}
+
+	_clearUrl(url) {
+		url = new URL(url);
+		url = url.origin + url.pathname;
+
+		return url;
 	}
 }
 

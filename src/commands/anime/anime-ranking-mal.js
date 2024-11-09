@@ -40,7 +40,7 @@ export default {
 
 		const result = await mal.anime.ranking(query || null);
 
-		if ('error' in result) {
+		if (result?.error) {
 			return await client.instance.reply(result.message, { from, quoted: message });
 		}
 

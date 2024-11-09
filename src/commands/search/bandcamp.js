@@ -25,7 +25,7 @@ export default {
 		for (const queries of query) {
 			const result = await searchBandcamp(queries);
 
-			if ('error' in result) {
+			if (result?.error) {
 				await client.instance.reply(result.error, { from, quoted: message });
 				continue;
 			}

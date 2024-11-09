@@ -70,7 +70,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 		for (const querie of queries) {
 			const result = await searchDeviantArt(querie.trim());
 
-			if ('error' in result) {
+			if (result?.error) {
 				await client.instance.reply(result.error, { from, quoted: message });
 				continue;
 			}

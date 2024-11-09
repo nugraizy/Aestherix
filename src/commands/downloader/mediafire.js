@@ -27,7 +27,7 @@ export default {
 
 		const result = await mediafire(query);
 
-		if ('error' in result) {
+		if (result?.error) {
 			return client.instance.reply(result.error, { from, quoted: message });
 		}
 

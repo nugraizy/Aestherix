@@ -81,7 +81,7 @@ export default {
 		for (const querie of queries) {
 			const result = await getWaifu(querie.trim(), nsfw ? 'nsfw' : 'sfw');
 
-			if ('error' in result) {
+			if (result?.error) {
 				await client.instance.reply(result.error, { from, quoted: message });
 
 				continue;

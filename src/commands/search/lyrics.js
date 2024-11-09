@@ -62,7 +62,7 @@ Song : ${data[index].song}
 		for (const querie of queries) {
 			const result = await arq.findLyrics(querie.trim());
 
-			if ('error' in result || !result.ok) {
+			if (result?.error || !result.ok) {
 				client.instance.reply(JSON.stringify(result));
 				continue;
 			}

@@ -25,7 +25,7 @@ export default {
 		for (const querie of queries) {
 			const result = await googleImage(querie, 10);
 
-			if ('error' in result) {
+			if (result?.error) {
 				client.instance.reply(result.error, { from, quoted: message });
 				continue;
 			}

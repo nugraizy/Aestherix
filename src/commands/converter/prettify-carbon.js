@@ -25,7 +25,7 @@ export default {
 
 		let buffer = carbon.toBuffer();
 
-		if ('error' in buffer) {
+		if (buffer?.error) {
 			client.instance.reply(buffer.error, { from, quoted: message });
 			loggers.error(`${color('Failed to Carboning a Codes', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 			return;

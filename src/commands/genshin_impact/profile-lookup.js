@@ -68,7 +68,7 @@ export default {
 				info = await genshinProfile(String(uid));
 			}
 
-			if ('error' in info) {
+			if (info?.error) {
 				await client.instance.reply(`Error while searching Genshin Impact player\n\n${info.error}`, {
 					from,
 					quoted: message

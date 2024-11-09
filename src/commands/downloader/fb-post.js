@@ -48,7 +48,7 @@ export default {
 
 			loggers.warning(`${color('Downloading Facebook Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
-			if ('error' in post) {
+			if (post?.error) {
 				await client.instance.reply(`Failed while downloading Facebook post\n\n${post.error}\n${url}`, {
 					from,
 					quoted: message

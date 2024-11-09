@@ -26,7 +26,7 @@ export default {
 		for (const querie of queries) {
 			const result = await arq.subreddits(querie.trim());
 
-			if ('error' in result || !result.ok) {
+			if (result?.error || !result.ok) {
 				await client.instance.reply(JSON.stringify(result), { from, quoted: message });
 				continue;
 			}

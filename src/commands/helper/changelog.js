@@ -1,9 +1,12 @@
 import parser from 'yargs-parser';
 import fs from 'fs-extra';
+import path from 'path';
 
 import { getChangelogs, stringifyChangelogs } from '../../utils/github/index.js';
 
 const disable = true;
+let image = null;
+let isCache = false;
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -18,22 +21,36 @@ export default {
 	limit: 3,
 	status: 'enable',
 	run: async ({ query, from, message }, client) => {
-		if (disable) {
-			return await client.instance.send(from, { image: await fs.readFile('./CHANGELOG.png') }, { quoted: message });
-		}
-
-		const { quantity } = parser(query, {
-			number: ['quantity'],
+		const { quantity, text } = parser(query, {
+			number: 'quantity',
+			boolean: 'text',
 			configuration: {
 				'short-option-groups': false
 			},
 			alias: {
-				quantity: ['q']
+				quantity: 'q',
+				text: 't'
 			},
 			default: {
 				quantity: 5
 			}
 		});
+
+		if (disable) {
+			if (!image && !text) {
+				image = await fs.readFile(path.join(__dirname, 'src/media/CHANGELOG.png'));
+			}
+
+			await client.instance.send(
+				from,
+				text
+					? { text: await fs.readFile(path.join(__dirname, 'CHANGELOG.md'), { encoding: 'utf-8' }) }
+					: { image, caption: (isCache && 'cached image.') || '' },
+				{ quoted: message }
+			);
+
+			isCache = true;
+		}
 
 		if (!quantity) {
 			return await client.instance.reply('You must provide a quantity.', { from, quoted: message });

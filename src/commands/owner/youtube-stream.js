@@ -47,7 +47,7 @@ export default {
 
 		const live = await youtubeLiveComments(query);
 
-		if ('error' in live) {
+		if (live?.error) {
 			return client.instance.reply(live.error, { from, quoted: message });
 		}
 

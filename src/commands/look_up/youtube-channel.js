@@ -20,7 +20,7 @@ export default {
 
 		const channel = await youtubeChannel(query);
 
-		if ('error' in channel) {
+		if (channel?.error) {
 			return await client.instance.reply(`Error while searching YouTube Channel\n\n${channel.error}`, {
 				from,
 				quoted: message

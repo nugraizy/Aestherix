@@ -111,7 +111,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 		for (const model of models) {
 			const result = await textpro(model, parsed.slice(1).join(' '));
 
-			if ('error' in result) {
+			if (result?.error) {
 				await client.instance.reply(`something went wrong:\n\n${result.error}`, { from, quoted: message });
 
 				continue;

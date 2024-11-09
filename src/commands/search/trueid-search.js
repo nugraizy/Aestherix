@@ -112,7 +112,7 @@ export default {
 		for (const querie of query) {
 			const data = await trueidSearch(querie);
 
-			if ('error' in data) {
+			if (data?.error) {
 				return await client.instance.reply(data.error, { from, quoted: message });
 			}
 

@@ -49,7 +49,7 @@ export default {
 
 			const data = await downloadManga(regexs.message);
 
-			if ('error' in data) {
+			if (data?.error) {
 				await client.instance.reply(`Failed while downloading Pixiv manga\n\n${data.error}\n${querie}`, {
 					from,
 					quoted: message

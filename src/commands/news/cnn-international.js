@@ -64,7 +64,7 @@ export default {
 
 		const data = await cnninternational(query);
 
-		if ('error' in data) {
+		if (data?.error) {
 			return await client.instance.reply(data.error, { from, quoted: message });
 		}
 

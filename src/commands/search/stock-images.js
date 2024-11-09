@@ -60,7 +60,7 @@ export default {
 		for (const querie of queries) {
 			let result = await arq.searchImage(querie.trim());
 
-			if ('error' in result || !result.ok) {
+			if (result?.error || !result.ok) {
 				await client.instance.reply(JSON.stringify(result), { from, quoted: message });
 				continue;
 			}

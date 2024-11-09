@@ -58,7 +58,7 @@ export default {
 
 			const post = await twitterDownload(url);
 
-			if ('error' in post) {
+			if (post?.error) {
 				await client.instance.reply(`Error while downloading Twitter post\n\n${post.error}\n${url}`, {
 					from,
 					quoted: message

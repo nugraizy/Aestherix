@@ -176,26 +176,16 @@ export default {
 
 				await client.instance.reply(data, { from, quoted: message });
 			} else {
-				const disposition = response.headers['content-disposition'];
+				const data = await processBinaryResponse(response);
 
-				if (disposition && disposition.includes('attachment')) {
-					const data = await processBinaryResponse(response);
+				const mime = responseTypes.split('/')[0];
+				const messageTypes = mime === 'audio' || mime === 'application' ? 'document' : mime;
+				const fileName = messageTypes === 'document' ? `file_fetched.${extension(responseTypes)}` : undefined;
 
-					const mime = responseTypes.split('/')[1];
-					const messageTypes = mime === 'audio' || mime === 'application' ? 'document' : mime;
-					const fileName = messageTypes === 'document' ? `file_fetched.${extension(responseTypes)}` : undefined;
-
-					await client.instance.send(from, {
-						[messageTypes]: Buffer.from(data),
-						...(fileName ? { fileName, mime: responseTypes } : {})
-					});
-				} else {
-					await client.instance.reply('Unhandled Content-Type : ' + response.headers['content-type'], {
-						from,
-						quoted: message
-					});
-					console.log('Unhandled Content-Type:', response.headers['content-type']);
-				}
+				await client.instance.send(from, {
+					[messageTypes]: Buffer.from(data),
+					...(fileName ? { fileName, mime: responseTypes } : {})
+				});
 			}
 		} catch (error) {
 			console.log(error);

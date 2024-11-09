@@ -31,7 +31,7 @@ export default {
 		);
 		const scanning = await tesseract(file, prettyNumber, query);
 
-		if ('error' in scanning) {
+		if (scanning?.error) {
 			const lang = scanning.languages
 				.map(({ code, name }) => `${code.toUpperCase()} | ${name}`)
 				.join('\n')

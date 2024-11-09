@@ -29,7 +29,7 @@ export default {
 		for (const querie of queries) {
 			let product = await pStoreProduct(querie.trim());
 
-			if ('error' in product) {
+			if (product?.error) {
 				await client.instance.reply(product.error, { from, quoted: message });
 				continue;
 			}

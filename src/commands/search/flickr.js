@@ -70,7 +70,7 @@ Powered by 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`.formatForm()
 			const flickr = new FlickerAPI();
 			let result = await flickr.searchImages(querie.trim());
 
-			if ('error' in result) {
+			if (result?.error) {
 				await client.instance.reply(result.error, { from, quoted: message });
 				continue;
 			}

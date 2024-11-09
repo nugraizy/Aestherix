@@ -20,7 +20,7 @@ const deletedHandler = async (client, message, fetches) => {
 
 		message = await reassign(JSON.parse(JSON.stringify(message)), client);
 
-		if (message && 'error' in message) {
+		if (message?.error) {
 			return;
 		}
 

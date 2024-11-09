@@ -30,7 +30,7 @@ export default {
 		loggers.warning(`${color('Downloading Instagram highlights', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const data in highlights) {
-			if ('error' in highlights[data]) {
+			if (highlights[data]?.error) {
 				await client.instance.reply(`Error while downloading Instagram highlights\n\n${highlights.error}\n${data}`, {
 					from,
 					quoted: message

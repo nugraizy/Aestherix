@@ -60,7 +60,7 @@ export default {
 		for (const querie of queries) {
 			const result = await stockImagesPexel(querie.trim());
 
-			if ('error' in result || !result) {
+			if (result?.error || !result) {
 				await client.instance.reply(JSON.stringify(result), { from, quoted: message });
 				continue;
 			}

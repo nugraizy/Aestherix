@@ -59,7 +59,7 @@ export default {
 
 			let result = await pinterest.search(query.trim());
 
-			if ('error' in result) {
+			if (result?.error) {
 				await client.instance.reply(result.message, { from, quoted: message });
 			}
 

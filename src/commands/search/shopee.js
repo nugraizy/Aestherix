@@ -26,7 +26,7 @@ export default {
 		for (const querie of queries) {
 			const product = await shopeeProduct(querie.trim());
 
-			if ('error' in product) {
+			if (product?.error) {
 				await client.instance.reply(product.error, { from, quoted: message });
 				continue;
 			}

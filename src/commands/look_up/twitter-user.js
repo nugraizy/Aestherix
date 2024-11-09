@@ -36,7 +36,7 @@ export default {
 
 			const user = await twitterUser(username);
 
-			if ('error' in user) {
+			if (user?.error) {
 				await client.instance.reply(`Error while searching Twitter user\n\n${user.error}\n${username}`, {
 					from,
 					quoted: message

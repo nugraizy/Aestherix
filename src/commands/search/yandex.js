@@ -40,7 +40,7 @@ export default {
 
 			const result = await yandex(media);
 
-			if ('error' in result) {
+			if (result?.error) {
 				if (isMediaImage && fs.existsSync(media)) {
 					fs.unlinkSync(media);
 				}

@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
-import { color, delay, loggers, numberWithCommas, removeDuplicatesArray, formatNumber } from '../../utils/modules/index.js';
+import { color, delay, loggers, removeDuplicatesArray, formatNumber } from '../../utils/modules/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
 
 /**
@@ -51,7 +51,7 @@ export default {
 		const posts = await tiktok.download.post(urls);
 
 		for (const data in posts) {
-			if ('error' in posts[data]) {
+			if (posts[data]?.error) {
 				await client.instance.reply(`Error while downloading TikTok post\n\n${posts[data].error}\n${data}`, {
 					from,
 					quoted: message

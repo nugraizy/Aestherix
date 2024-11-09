@@ -35,7 +35,7 @@ export default {
 
 			const result = await downloadBandcamp(querie);
 
-			if ('error' in result) {
+			if (result?.error) {
 				await client.instance.reply(result.error, { from, quoted: message });
 
 				continue;

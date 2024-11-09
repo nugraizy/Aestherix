@@ -27,7 +27,7 @@ export default {
 			const data = await searchArtwork(querie.trim());
 			const dataImage = await downloadArtworks(data[0].id);
 
-			if ('error' in data) {
+			if (data?.error) {
 				await client.instance.reply(`Failed while searching Pixiv artworks\n\n${data.error}\n${querie}`, {
 					from,
 					quoted: message

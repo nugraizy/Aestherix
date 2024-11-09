@@ -20,7 +20,7 @@ export default {
 
 		const result = await _3hentai(query);
 
-		if ('error' in result) {
+		if (result?.error) {
 			return client.instance.reply(result.error, { from, quoted: message });
 		}
 

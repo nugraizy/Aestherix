@@ -32,7 +32,7 @@ export default {
 		options.count = Object.keys(parseOptions).find((v) => /\d{2,2}/i.test(v))?.[0] || undefined;
 		const brainly = await brainlySearch(query, options);
 
-		if ('error' in brainly) {
+		if (brainly?.error) {
 			return await client.instance.reply(brainly.error, { from, quoted: message });
 		}
 

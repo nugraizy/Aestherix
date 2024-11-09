@@ -29,7 +29,7 @@ export default {
 		const audios = await tiktok.download.post(urls);
 
 		for (const data in audios) {
-			if ('error' in audios[data]) {
+			if (audios[data]?.error) {
 				await client.instance.reply(`Error while downloading TikTok audio\n\n${audios[data].error}\n${data}`, {
 					from,
 					quoted: message
@@ -44,7 +44,7 @@ export default {
 			await client.instance.send(
 				from,
 				{
-					document: { url: audios[data].url.images ? audios[data].urls.music : audios[data].urls.withNoWatermark },
+					document: { url: audios[data].urls.images ? audios[data].urls.music : audios[data].urls.withNoWatermark },
 					fileName: `${audios[data].musicTitle}.mp3`,
 					mimetype: mime('mp3')
 				},

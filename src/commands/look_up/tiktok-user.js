@@ -1,7 +1,7 @@
 import parser from 'yargs-parser';
 import _ from 'lodash';
 
-import { color, numberWithCommas, loggers } from '../../utils/modules/index.js';
+import { color, numberWithCommas, loggers, formatNumber } from '../../utils/modules/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
 
 /**
@@ -65,7 +65,7 @@ export default {
 		const users = await tiktok.search.lookup(usernames);
 
 		for (const data in users) {
-			if ('error' in users[data]) {
+			if (users[data]?.error) {
 				client.instance.reply(`Error while searching TikTok user\n\n${users[data].error}`, {
 					from,
 					quoted: message
@@ -91,14 +91,13 @@ export default {
 
 			let capt = `Username : ${username}\n`;
 
-			capt += `Fullname : ${fullName}\n`;
-			capt += `Followers : ${numberWithCommas(followers)}\n`;
-			capt += `Following : ${numberWithCommas(following)}\n`;
-			capt += `Tot. Like : ${numberWithCommas(heart)}\n`;
-			capt += `Tot. Post : ${numberWithCommas(totalVideo)}\n`;
-			capt += `Verified? : ${isVerified ? 'Yes' : 'No'}\n`;
+			capt += `Author : ${fullName}\n`;
+			capt += `Verifies : ${isVerified ? 'Verified' : 'Not Verified'}\n`;
 			capt += `ID Profile : ${keyword}\n`;
-			capt += `Biography : ${biography}\n`;
+			capt += `👥 ${formatNumber(followers)} 👤 ${formatNumber(following)} ❤️ ${formatNumber(heart)}\n`;
+			capt += `🎞️ ${formatNumber(totalVideo)}\n\n`;
+
+			capt += `📝 ${biography}\n`;
 
 			await client.instance.send(
 				from,

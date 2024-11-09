@@ -49,7 +49,7 @@ export default {
 
 			const data = await getNovelContent(regexs.message);
 
-			if ('error' in data) {
+			if (data?.errors) {
 				await client.instance.reply(`Failed while looking for Pixiv novel content\n\n${data.error}\n${querie}`, {
 					from,
 					quoted: message

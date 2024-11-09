@@ -26,7 +26,7 @@ export default {
 
 		const result = await kraken(query);
 
-		if ('error' in result) {
+		if (result?.error) {
 			return client.instance.reply(result.error, { from, quoted: message });
 		}
 
