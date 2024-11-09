@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { color, loggers, numberWithCommas, isURL } from '../../utils/modules/index.js';
+import { color, loggers, formatNumber, isURL } from '../../utils/modules/index.js';
 import { instagram } from '../../utils/instagram/index.js';
 
 /**
@@ -43,15 +43,16 @@ export default {
 
 			capt += `\n\nUsername  : ${highlights[data].user.username}\n`;
 			capt += `Fullname  : ${highlights[data].user.fullName}\n`;
-			capt += `Follower  : ${numberWithCommas(highlights[data].user.followers)}\n`;
-			capt += `Following : ${numberWithCommas(highlights[data].user.following)}\n`;
 			capt += highlights[data].user.biography === '' ? '' : `Biography : ${highlights[data].user.biography}\n`;
-			capt += `Total Highlights : ${numberWithCommas(highlights[data].highlights.length)}\n\n`;
+			capt += `Total Highlights : ${formatNumber(highlights[data].highlights.length)}\n`;
+			capt += `👥 ${formatNumber(highlights[data].followers)} 👤 ${formatNumber(highlights[data].following)}\n`;
 
 			if (!isURL(input)) {
 				capt += 'Each Sections of the Higlights will be send 2 media.\n';
 				capt += `Total Sections : ${highlights[data].highlights.length}\n`;
-				capt += `Total Estimated media per Section : ${numberWithCommas(highlights[data].highlights.length * 2)}\n\n`;
+				capt += `Total Estimated media per Section : ${formatNumber(
+					highlights[data].highlights.length >= 2 ? 2 : highlights[data].highlights.length
+				)}\n\n`;
 			}
 
 			await client.instance.reply(capt.trim().formatForm(), { from, quoted: message });

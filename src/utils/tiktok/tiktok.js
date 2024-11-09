@@ -5,35 +5,10 @@ import crypto from 'crypto';
 import { v4 } from 'uuid';
 import _ from 'lodash';
 
-import { cheerioLOAD, randomChar, isURL } from '../modules/index.js';
+import { cheerioLOAD, randomChar } from '../modules/index.js';
 import { COOKIE } from './cookie.js';
-import { _api } from './util.js';
+import { _api as API_BASE_URL, appVersion, checkValid, deviceIds, iids, lastInstall, random } from './util.js';
 import { Cache } from '../../helper/modules/cache.js';
-
-const API_BASE_URL = _api;
-const iids = ['7379691220551141126', '7318518857994389254'];
-const deviceIds = ['7379690547022071302', '7318517321748022790'];
-const appVersion = ['35.1.3'];
-
-const random = (arr) => arr[~~(Math.random() * arr.length)];
-const lastInstall = () => {
-	const currentTimeSeconds = Math.floor(Date.now() / 1000);
-	const randomSeconds = Math.floor(Math.random() * (1123200 - 86400 + 1)) + 86400;
-	const result = currentTimeSeconds - randomSeconds;
-
-	return result;
-};
-const regex = (input) => /(?:https:?\/{2})?(?:w{3}|vm|vt|t)?\.?tiktok.com\/([^\s&]+)/gi.test(input);
-
-const checkValid = (url) => {
-	if (!isURL(url)) {
-		return { error: true, message: 'Please specify a valid url' };
-	} else if (!regex(url)) {
-		return { error: true, message: 'Please specify a valid TikTok url' };
-	}
-
-	return { error: false, message: '' };
-};
 
 class ResponseParser {
 	/**
@@ -1005,10 +980,16 @@ class TiktokUtils extends RequestModule {
 }
 
 class Tiktok extends TiktokUtils {
+	/**
+	 * @private
+	 */
 	#cache;
 	constructor() {
 		super();
 
+		/**
+		 * @private
+		 */
 		this.#cache = new Cache();
 
 		this.search = {
@@ -1143,18 +1124,30 @@ class Tiktok extends TiktokUtils {
 		};
 	}
 
+	/**
+	 * @private
+	 */
 	_isCacheExist(input) {
 		return this.#cache.has(input);
 	}
 
+	/**
+	 * @private
+	 */
 	_getFromCache(input) {
 		return this.#cache.get(input);
 	}
 
+	/**
+	 * @private
+	 */
 	_setToCache(input, data) {
 		return this.#cache.set(input, data);
 	}
 
+	/**
+	 * @private
+	 */
 	_clearUrl(url) {
 		url = new URL(url);
 		url = url.origin + url.pathname;

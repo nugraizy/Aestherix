@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
-import { color, loggers, numberWithCommas } from '../../utils/modules/index.js';
+import { color, loggers, formatNumber } from '../../utils/modules/index.js';
 import { instagram } from '../../utils/instagram/index.js';
 
 /**
@@ -79,13 +79,12 @@ export default {
 			capt += `\n\nUsername : ${posts[data].username}\n`;
 			capt += `Fullname : ${posts[data].fullName}\n`;
 			capt += `Privacy : ${posts[data].isPrivate ? 'Private' : 'Public'}\n`;
-			capt += `Verified : ${posts[data].isVerified ? 'Verified' : 'Not Verified'}\n`;
-			capt += `Published : ${dayjs(posts[data].takenAt * 1000).format('HH:mm:ss DD/MM/YYYY')}\n`;
-			capt += `Tot. Comment : ${numberWithCommas(posts[data].commentCount)}\n`;
-			capt += `Tot. Like : ${numberWithCommas(posts[data].likeCount)}\n`;
+			capt += `Verifies : ${posts[data].isVerified ? 'Verified' : 'Not Verified'}\n`;
+			capt += `📅 ${dayjs(posts[data].takenAt * 1000).format('HH:mm:ss DD/MM/YYYY')}\n`;
+			capt += `👍 ${formatNumber(posts[data].likeCount)} 💬 ${formatNumber(posts[data].commentCount)}\n\n`;
 
 			if (posts[data].post.length === 1) {
-				capt += `Caption : ${posts[data].captions.trim()}\n`;
+				capt += `📝 ${(posts[data].captions || '').trim()}\n`;
 
 				await client.instance.send(
 					from,
@@ -96,8 +95,8 @@ export default {
 					{ quoted: message }
 				);
 			} else {
-				capt += `Tot. Media : ${posts[data].post.length}\n`;
-				capt += `Caption : ${posts[data].captions.trim()}\n`;
+				capt += `🖼️ ${posts[data].post.length}\n\n`;
+				capt += `📝 ${(posts[data].captions || '').trim()}\n`;
 
 				await client.instance.send(from, { text: capt.trim().formatForm() }, { quoted: message });
 

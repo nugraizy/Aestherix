@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { color, delay, loggers, numberWithCommas } from '../../utils/modules/index.js';
+import { color, delay, loggers, formatNumber } from '../../utils/modules/index.js';
 import { instagram } from '../../utils/instagram/index.js';
 
 /**
@@ -43,22 +43,19 @@ export default {
 
 			capt += `\n\nUsername : ${stories[data].username}\n`;
 			capt += `Fullname : ${stories[data].fullName}\n`;
-			capt += `Follower : ${numberWithCommas(stories[data].followers)}\n`;
-			capt += `Following : ${numberWithCommas(stories[data].following)}\n`;
 			capt += stories[data].biography === '' ? '' : `Biography : ${stories[data].biography}\n`;
-			capt += `Verified : ${stories[data].isVerified ? 'Verified' : 'Not Verified'}\n`;
+			capt += `Verifies : ${stories[data].isVerified ? 'Verified' : 'Not Verified'}\n`;
 			capt += `Private : ${stories[data].isPrivate ? 'Private' : 'Public'}\n`;
 			capt += `Business : ${stories[data].isBusinessAccount ? 'Yes' : 'No'}\n`;
 			capt += `New User : ${stories[data].isRecentUser ? 'Yes' : 'No'}\n`;
 			capt += `Category : ${stories[data].accountCategory ? stories[data].accountCategory : 'No'}\n`;
 			capt += `Facebook Linked : ${stories[data].linkedFacebookPage ? 'Yes' : 'No'}\n`;
-			capt += `Tot. Highlight : ${numberWithCommas(stories[data].highlightCount)}\n`;
-			capt += `Tot. Post : ${numberWithCommas(stories[data].postsCount)}\n`;
-			capt += `Tot. Story : ${stories[data].stories.length}\n\n`;
+			capt += `Total Highlights : ${formatNumber(stories[data].highlightCount)}\n`;
+			capt += `Total Posts : ${formatNumber(stories[data].postsCount)}\n`;
+			capt += `Total Stories : ${stories[data].stories.length}\n`;
+			capt += `👥 ${formatNumber(stories[data].followers)} 👤 ${formatNumber(stories[data].following)}\n\n`;
 
 			await client.instance.reply(capt.trim().formatForm(), { from, quoted: message });
-
-			capt = '';
 
 			for (const media of stories[data].stories) {
 				await client.instance.send(from, media.isVideo ? { video: { url: media.url } } : { image: { url: media.url } }, {});

@@ -1,7 +1,7 @@
 import parser from 'yargs-parser';
 import dayjs from 'dayjs';
 
-import { color, delay, loggers } from '../../utils/modules/index.js';
+import { color, delay, loggers, formatNumber } from '../../utils/modules/index.js';
 import { instagram } from '../../utils/instagram/index.js';
 
 /**
@@ -45,13 +45,12 @@ export default {
 			capt += `\n\nUsername : ${reels[data].username}\n`;
 			capt += `Fullname : ${reels[data].fullName}\n`;
 			capt += `Privacy : ${reels[data].isPrivate ? 'Private' : 'Public'}\n`;
-			capt += `Verified : ${reels[data].isVerified ? 'Verified' : 'Not Verified'}\n`;
-			capt += `Published : ${dayjs(reels[data].takenAt * 1000).format('HH:mm:ss DD/MM/YYYY')}\n`;
-			capt += `Tot. Comment : ${reels[data].commentCount}\n`;
-			capt += `Tot. Like : ${reels[data].likeCount}\n`;
+			capt += `Verifies : ${reels[data].isVerified ? 'Verified' : 'Not Verified'}\n`;
+			capt += `📅 ${dayjs(reels[data].takenAt * 1000).format('HH:mm:ss DD/MM/YYYY')}\n`;
+			capt += `👍 ${formatNumber(reels[data].likeCount)} 💬 ${formatNumber(reels[data].commentCount)}\n\n`;
 
 			if (reels[data].post.length === 1) {
-				capt += `Caption : ${reels[data].captions.trim()}\n`;
+				capt += `📝 ${(reels[data].captions || '').trim()}\n`;
 
 				await client.instance.send(
 					from,
