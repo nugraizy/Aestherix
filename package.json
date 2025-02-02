@@ -9,7 +9,7 @@
     "pm2": "pm2 start ./index.js && pm2 logs",
     "pm2kill": "pm2 kill",
     "dev": "nodemon",
-    "start": "node . nugraizy -s -z -w --test",
+    "start": "node . nugraizy -s -z -w",
     "test": "echo \"Error: no test specified\" && exit 1",
     "youtube:auth": "node ./src/utils/modules/youtube-auth.js",
     "nhentai:cookie": "node ./src/utils/doujin/cookies.js --get",
@@ -40,6 +40,7 @@
     "delay": 500
   },
   "dependencies": {
+    "@atproto/api": "^0.13.32",
     "@inquirer/prompts": "^7.0.0",
     "@napi-rs/canvas": "^0.1.58",
     "@svgdotjs/svg.js": "^3.2.0",

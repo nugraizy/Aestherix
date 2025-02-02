@@ -19,5 +19,19 @@ export const patchInteractiveMessage = (message) => {
 		message.listMessage.listType = proto.Message.ListMessage.ListType.SINGLE_SELECT;
 	}
 
+	if (message?.buttonsMessage) {
+		return {
+			viewOnceMessage: {
+				message: {
+					messageContextInfo: {
+						deviceListMetadataVersion: 2,
+						deviceListMetadata: {}
+					},
+					...message
+				}
+			}
+		};
+	}
+
 	return message;
 };

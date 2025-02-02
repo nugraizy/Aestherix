@@ -558,7 +558,7 @@ const handleIncomingMessage = async (upsert, client, cmds, store, user, state, r
 				}
 			}
 
-			if (message === undefined || message?.messageStubParameters?.[0] == 'No SenderKeyRecord found for decryption') {
+			if (message === undefined || message?.messageStubParameters?.[0] === 'No SenderKeyRecord found for decryption') {
 				return;
 			}
 
@@ -589,6 +589,10 @@ const handleIncomingMessage = async (upsert, client, cmds, store, user, state, r
 			}
 
 			if (message && 'messageStubParameters' in message && message.messageStubParameters?.length) {
+				if (message.messageStubParameters[0] === 'Message absent from node') {
+					return;
+				}
+
 				return handleStubMessage(client, message, store);
 			}
 

@@ -89,19 +89,20 @@ class API {
 
 			const started = new Date(json.data.user.createdAt).getFullYear();
 
+			const currentYear = new Date().getFullYear();
+			const years = Array.from({ length: currentYear - started + 1 }, (_, i) => {
+				const year = started + i;
+				const date = new Date(Date.UTC(year, 0, 1));
+
+				return {
+					dates: date.toISOString(),
+					year: year
+				};
+			});
+
 			const dates = {
 				started,
-				dates: new Array(new Date().getFullYear() - started + 1).fill(0).map((_, i) => {
-					const date = new Date(Date.UTC(started + i));
-
-					date.setMonth(0);
-					date.setDate(1);
-
-					return {
-						dates: date.toISOString(),
-						year: date.getFullYear()
-					};
-				})
+				dates: years
 			};
 
 			this.dates = dates;

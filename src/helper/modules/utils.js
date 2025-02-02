@@ -129,13 +129,13 @@ export const assign = (client) => {
 		};
 
 		if ('buttons' in message || 'templateButtons' in message) {
-			delete message.buttons;
-			delete message.footer;
-			delete message.headerType;
-			delete message.templateButtons;
-			delete message.title;
-			delete message.buttonText;
-			delete message.sections;
+			// delete message.buttons;
+			// delete message.footer;
+			// delete message.headerType;
+			// delete message.templateButtons;
+			// delete message.title;
+			// delete message.buttonText;
+			// delete message.sections;
 		}
 
 		if (('image' in message || 'video' in message) && 'footer' in message) {
