@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+# [5.3.0] 2025-02-03
+## Added
+- **Bluesky**: Adding the ability to download bluesky posts.
+
+---
+
 # [5.2.2] 2024-11-09
 ## Refactoring
 - **Tiktok, Instagram**: Moved functions to a different file.
