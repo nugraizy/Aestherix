@@ -6,7 +6,7 @@ import sharp from 'sharp';
 
 import { fetchBUFFER, fetchJSON, isURL } from '../modules/index.js';
 
-const graphql = await fs.readFile(path.join(__dirname, 'src/utils/image_reverse_search/Query.graphql'), { encoding: 'utf-8' });
+const graphql = await fs.readFile(path.join(__dirname, 'src/utils/image_reverse_search/query.graphql'), { encoding: 'utf-8' });
 const _api = 'https://api.trace.moe/search?cutBorders&';
 const _apiPost = 'https://trace.moe/anilist/';
 
@@ -32,7 +32,7 @@ export const traceMoe = async (file) =>
 			} else if (isURL(file) && !(await isValidImageURL(file))) {
 				return resolve({ error: 'Invalid image URL' });
 			} else {
-				file = readFileSync(file);
+				file = fs.readFileSync(file);
 			}
 
 			file = await sharp(file).jpeg({ quality: 100 }).toBuffer();
