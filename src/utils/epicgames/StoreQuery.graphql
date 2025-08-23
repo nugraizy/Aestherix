@@ -1,0 +1,56 @@
+query searchStoreQuery(
+	$allowCountries: String
+	$category: String
+	$namespace: String
+	$itemNs: String
+	$sortBy: String
+	$sortDir: String
+	$start: Int
+	$tag: String
+	$releaseDate: String
+	$keywords: String
+	$country: String = "US"
+	$locale: String = "id-ID"
+	$withPrice: Boolean = true
+) {
+	Catalog {
+		searchStore(
+			allowCountries: $allowCountries
+			category: $category
+			count: 5
+			country: $country
+			keywords: $keywords
+			namespace: $namespace
+			itemNs: $itemNs
+			sortBy: $sortBy
+			sortDir: $sortDir
+			releaseDate: $releaseDate
+			start: $start
+			tag: $tag
+		) {
+			elements {
+				title
+				description
+				keyImages {
+					type
+					url
+				}
+				seller {
+					name
+				}
+				categories {
+					path
+				}
+				productSlug
+				price(country: $country) @include(if: $withPrice) {
+					totalPrice {
+						fmtPrice(locale: $locale) {
+							discountPrice
+							originalPrice
+						}
+					}
+				}
+			}
+		}
+	}
+}

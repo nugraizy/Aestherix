@@ -1,8 +1,6 @@
 import fs from 'fs-extra';
-
 import configuration from '../../helper/config/connect.js';
 
-const ALPHABET_ON_KEYBOARD = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
 const BLOCKS = {
 	WHITE: '⬜',
 	BLACK: '⬛',
@@ -32,103 +30,118 @@ export class Wordle {
 		this.message = null;
 		this.guessed = [];
 		this.gameTimeStarted = new Date().getTime();
+		this.tries = 6;
 
 		this.play();
 
 		this.checkInput = (input) => {
 			const data = this.session();
 
-			input = input.toLowerCase().split('');
+			this.tries -= 1;
 
-			if (input.length !== data.word.length) {
-				const board = data.board.map((v) => (v === ' ' ? ' ' : BLOCKS.BLACK));
-
-				data.guessed.push({ input: input.join(''), board: board.join('') });
-				data.board = board;
+			if (this.tries === 0) {
+				this.exit();
 				return {
-					board: board.join(''),
-					words: data.words
+					isWin: false,
+					board: data.board.join(''),
+					message: `No tries left. The word was "${data.word}".`,
+					duration: this.getGameDuration()
 				};
 			}
 
-			for (let i = 0; i < input.length; i++) {
-				const blocks = data.checkClosesAlphabet(input[i], data.word[i]);
+			input = input.toLowerCase();
 
-				if (input[i] !== ' ' && data.word[i] !== ' ') {
-					if (blocks.green) {
-						data.board[i] = BLOCKS.GREEN;
-					} else if (blocks.yellow) {
-						data.board[i] = BLOCKS.YELLOW;
-					} else {
-						data.board[i] = BLOCKS.BLACK;
-					}
-				} else {
-					data.board[i] = ' ';
-				}
+			if (input.length !== data.word.length) {
+				const board = Array(input.length).fill(BLOCKS.BLACK);
+
+				data.guessed.push({ input, board: board.join('') });
+				data.board = board;
+				return {
+					board: board.join(''),
+					words: data.word,
+					message: 'Incorrect word length.'
+				};
 			}
 
-			data.guessed.push({ input: input.join(''), board: data.board.join('') });
+			const board = this.evaluateGuess(input, data.word);
 
-			if (data.checkWin()) {
-				const boardWon = data.board;
-				const board = boardWon.join('');
-				const words = data.word;
+			data.board = board;
+			data.guessed.push({ input, board: board.join('') });
 
-				data.exit();
+			const isWin = board.every((b) => b === BLOCKS.GREEN);
+
+			if (isWin) {
+				this.exit();
 				return {
 					isWin: true,
-					board,
-					words,
-					guessed: data.guessed
+					board: board.join(''),
+					words: data.word,
+					guessed: data.guessed,
+					duration: this.getGameDuration()
 				};
 			}
 
 			return {
-				board: data.board.join(''),
-				words: data.words
+				board: board.join(''),
+				words: data.word,
+				message: `❤️x${this.tries} remaining.`
 			};
 		};
-
-		this.exit = () => {
-			configuration.games.wordle.delete(this.id);
-		};
 	}
 
-	checkWin() {
-		return this.board.every((v) => v === BLOCKS.GREEN || v === ' ');
+	getGameDuration() {
+		const endTime = new Date().getTime();
+		const durationMs = endTime - this.gameTimeStarted;
+
+		const seconds = Math.floor((durationMs / 1000) % 60);
+		const minutes = Math.floor((durationMs / (1000 * 60)) % 60);
+		const hours = Math.floor(durationMs / (1000 * 60 * 60));
+
+		const parts = [];
+
+		if (hours > 0) {
+			parts.push(`${hours}h`);
+		}
+
+		if (minutes > 0) {
+			parts.push(`${minutes}m`);
+		}
+
+		if (seconds > 0 || parts.length === 0) {
+			parts.push(`${seconds}s`);
+		}
+
+		return parts.join(' ');
 	}
 
-	checkClosesAlphabet(inp, alp) {
-		switch (true) {
-			case inp === alp:
-				return {
-					green: true
-				};
-			case ALPHABET_ON_KEYBOARD.some((v) => v.includes(inp) && v.includes(alp)): {
-				const indexAlp = ALPHABET_ON_KEYBOARD[ALPHABET_ON_KEYBOARD.findIndex((v) => v.includes(alp))]
-					.split('')
-					.findIndex((v) => v === alp);
-				const indexInp = ALPHABET_ON_KEYBOARD[ALPHABET_ON_KEYBOARD.findIndex((v) => v.includes(inp))]
-					.split('')
-					.findIndex((v) => v === inp);
-				const index = Math.abs(indexAlp - indexInp);
+	evaluateGuess(guess, target) {
+		const result = Array(guess.length).fill(BLOCKS.BLACK);
+		const targetLetters = target.split('');
+		const guessLetters = guess.split('');
+		const used = Array(target.length).fill(false);
 
-				if (index >= 3) {
-					return {
-						black: true
-					};
-				}
-
-				return {
-					yellow: true
-				};
-			}
-			default: {
-				return {
-					black: true
-				};
+		for (let i = 0; i < guessLetters.length; i++) {
+			if (guessLetters[i] === targetLetters[i]) {
+				result[i] = BLOCKS.GREEN;
+				used[i] = true;
+				guessLetters[i] = null;
 			}
 		}
+
+		for (let i = 0; i < guessLetters.length; i++) {
+			if (!guessLetters[i]) {
+				continue;
+			}
+
+			const index = targetLetters.findIndex((char, idx) => char === guessLetters[i] && !used[idx]);
+
+			if (index !== -1) {
+				result[i] = BLOCKS.YELLOW;
+				used[index] = true;
+			}
+		}
+
+		return result;
 	}
 
 	session() {
@@ -147,15 +160,11 @@ export class Wordle {
 		return this.message;
 	}
 
-	play() {
-		configuration.games.wordle.set(this.id, this);
+	exit() {
+		configuration.games.wordle.delete(this.id);
 	}
 
-	get timeLength() {
-		const difference = new Date().getTime() - this.gameTimeStarted;
-		const minutes = Math.floor(difference / (1000 * 60)) % 60;
-		const seconds = Math.floor(difference / 1000) % 60;
-
-		return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+	play() {
+		configuration.games.wordle.set(this.id, this);
 	}
 }

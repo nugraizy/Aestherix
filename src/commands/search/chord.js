@@ -21,10 +21,10 @@ export default {
 		const result = await chords(query);
 
 		if (result?.error) {
-			client.instance.reply(result.error, { from, quoted: message });
+			return await client.instance.reply(result.error, { from, quoted: message });
 		}
 
-		client.instance.reply(
+		return await client.instance.reply(
 			`${'Chords'.formatHeaders()}
 
 Title : ${result.title}

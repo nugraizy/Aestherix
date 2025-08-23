@@ -11,6 +11,7 @@ export * from './converter/index.js';
 export * from './deviant_art/index.js';
 export * from './doujin/index.js';
 export * from './download_uploader/index.js';
+export * from './epicgames/index.js';
 export * from './equran/index.js';
 export * from './facebook/index.js';
 export * from './flickr/index.js';

@@ -721,7 +721,7 @@ class RequestModule extends ResponseParser {
 
 				const body = this._buildApiUrl({
 					/* eslint-disable */
-					aweme_ids: `[${videoId}]`,
+					aweme_id: videoId,
 
 					iid: random(iids),
 					device_id: random(deviceIds),
@@ -771,16 +771,15 @@ class RequestModule extends ResponseParser {
 				const config = this._getRequestConfig();
 
 				config.headers = {
-					'Content-Type': 'application/x-www-form-urlencoded',
 					'User-Agent':
-						'com.zhiliaoapp.musically/300904 (2018111632; U; Android 10; en_US; Pixel 4; Build/QQ3A.200805.001; Cronet/58.0.2991.0)',
-					'x-argus': ''
+						'com.zhiliaoapp.musically/300904 (2018111632; U; Android 10; en_US; Pixel 4; Build/QQ3A.200805.001; Cronet/58.0.2991.0)'
 				};
-				config.headers.Cookie = '';
+
+				delete config.headers.Cookie;
 
 				const request = async () => {
-					const data = await this._awemeRequest('aweme/v1/multi/aweme/detail/?', {
-						method: 'GET',
+					const data = await this._awemeRequest('aweme/v1/feed/?', {
+						method: 'OPTIONS',
 						body,
 						config
 					});
@@ -794,7 +793,7 @@ class RequestModule extends ResponseParser {
 
 				const resultPromises = await request();
 
-				const data = this._mergeMediaResponse(resultPromises, videoId, 'aweme_details');
+				const data = this._mergeMediaResponse(resultPromises, videoId, 'aweme_list');
 
 				if (!data) {
 					resolve({ error: 'Post not found. Please try again later.' });

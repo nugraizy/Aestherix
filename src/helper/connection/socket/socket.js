@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import _baileys, {
 	makeWASocket,
-	makeInMemoryStore,
+	// makeInMemoryStore,
 	useMultiFileAuthState,
 	delay,
 	makeCacheableSignalKeyStore,
@@ -19,7 +19,7 @@ const { proto } = _baileys;
 
 import configuration from '../../config/connect.js';
 import { clearDBConnection } from './reset-session.js';
-import { patchInteractiveMessage } from '../utils/patch-message.js';
+// import { patchInteractiveMessage } from '../utils/patch-message.js';
 import { Cache } from '../../modules/cache.js';
 import { loggers, color } from '../../../utils/modules/index.js';
 
@@ -97,10 +97,11 @@ export const connectSocket = async ({ cli, OPTIONS, store }) => {
 		linkPreviewImageThumbnailWidth: 2,
 		mediaCache: new Cache(),
 		userDevicesCache: new Cache(),
-		patchMessageBeforeSending: patchInteractiveMessage,
+		// patchMessageBeforeSending: patchInteractiveMessage,
 		customId: 'HFINDER',
 		defaultQueryTimeoutMs: 0,
-		cachedGroupMetadata: (jid) => (isJidGroup(jid) ? configuration.cache.metadata.get(jid) : {})
+		cachedGroupMetadata: (jid) => (isJidGroup(jid) ? configuration.cache.metadata.get(jid) : {}),
+		browser: ['Windows', 'Chrome', 'Chrome 114.0.5735.198']
 	};
 
 	if (OPTIONS.json) {

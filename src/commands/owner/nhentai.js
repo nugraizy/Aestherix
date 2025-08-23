@@ -1,14 +1,14 @@
-import { _3hentai, imageToPdf, mime } from '../../utils/index.js';
+import { nhentai, imageToPdf, mime } from '../../utils/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
-	name: '3hentai',
-	minifiedDescription: 'Search Doujin',
-	description: 'Search Doujin from 3hentai.net.',
-	usage: '!3hentai <query>',
-	aliases: ['3hent'],
+	name: 'nhentai',
+	minifiedDescription: 'Search Doujin from NHentai',
+	description: 'Search Doujin from nhentai.net.',
+	usage: '!nhentai <query>',
+	aliases: ['nhent'],
 	category: 'Owner',
 	cooldown: 0,
 	limit: 0,
@@ -18,22 +18,23 @@ export default {
 			return client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
-		const result = await _3hentai(query);
+		const result = await nhentai(query);
 
 		if (result?.error) {
 			return client.instance.reply(result.error, { from, quoted: message });
 		}
 
-		const { artists, categories, images, language, tags, title, totalPages, uploadDate } = result;
+		const { artists, categories, images, languages, tags, title, totalPages, uploadDate, totalFavorites } = result;
 
-		const caption = `${'3Hentai'.formatHeaders()}
+		const caption = `${'NHentai'.formatHeaders()}
         
-Title : ${title}
+Title : ${title.pretty}
 Upload Date: ${uploadDate}
-Tags : ${tags.join(', ')}
 Artists : ${artists.join(', ')}
-Language : ${language.join(', ')}
+Language : ${languages.join(', ')}
+Tags : ${tags.join(', ')}
 Categories : ${categories.join(', ')}
+Tot. Favorites : ${totalFavorites}
 Tot. Pages : ${totalPages}`;
 
 		await client.instance.reply(caption.formatForm(), { from, quoted: message });
@@ -45,7 +46,7 @@ Tot. Pages : ${totalPages}`;
 		await client.instance.send(from, {
 			document: Buffer.from(buffer, 'base64'),
 			mimetype: mime('pdf'),
-			fileName: title
+			fileName: title.pretty + '.pdf'
 		});
 	}
 };

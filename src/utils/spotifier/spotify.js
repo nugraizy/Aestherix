@@ -17,6 +17,7 @@ class Spotifier {
 	#accessTokenExpiredAt = null;
 	#_api = 'https://api.spotify.com/v1';
 	#_apiAuth = 'https://accounts.spotify.com/api/token';
+	device_id = process.env.SPOTIFY_DEVICE_ID; // eslint-disable-line
 	constructor() {
 		if (!(this.#clientId || this.#clientSecret)) {
 			throw new Error('Please add CLIENT_ID and CLIENT_SECRET to your .env files');
@@ -430,13 +431,78 @@ class Spotifier {
 			try {
 				await this._getAccessTokenFromRefreshToken();
 				const data = await (
-					await fetch(`${this.#_api}/me/player/next?device_id=d9fe42af9e32ef6748395b0cf0479cc8642a5640`, {
+					await fetch(`${this.#_api}/me/player/next?device_id=${this.device_id}`, {
 						method: 'POST',
 						headers: {
 							Authorization: `Bearer ${this.#accessToken}`
 						}
 					})
-				).json();
+				).text();
+
+				return data;
+			} catch (err) {
+				return { status: false, message: err };
+			}
+		};
+
+		this.previousPlayback = async () => {
+			try {
+				await this._getAccessTokenFromRefreshToken();
+				const data = await (
+					await fetch(`${this.#_api}/me/player/previous?device_id=${this.device_id}`, {
+						method: 'POST',
+						headers: {
+							Authorization: `Bearer ${this.#accessToken}`
+						}
+					})
+				).text();
+
+				return data;
+			} catch (err) {
+				return { status: false, message: err };
+			}
+		};
+
+		this.setRepeatState = async (state) => {
+			if (!['track', 'context', 'off'].includes(state)) {
+				return { status: false, message: 'Invalid state. Use "track", "context", or "off".' };
+			}
+
+			try {
+				await this._getAccessTokenFromRefreshToken();
+				const data = await (
+					await fetch(`${this.#_api}/me/player/repeat?device_id=${this.device_id}&state=${state}`, {
+						method: 'PUT',
+						headers: {
+							Authorization: `Bearer ${this.#accessToken}`,
+							'Content-Type': 'application/json'
+						}
+					})
+				).text();
+
+				return data;
+			} catch (err) {
+				return { status: false, message: err };
+			}
+		};
+
+		this.toggleShuffle = async (state) => {
+			if (typeof state !== 'boolean') {
+				return { status: false, message: 'Invalid state. Use true or false.' };
+			}
+
+			try {
+				await this._getAccessTokenFromRefreshToken();
+				const data = await (
+					await fetch(`${this.#_api}/me/player/shuffle?device_id=${this.device_id}`, {
+						method: 'PUT',
+						body: JSON.stringify({ state }),
+						headers: {
+							Authorization: `Bearer ${this.#accessToken}`,
+							'Content-Type': 'application/json'
+						}
+					})
+				).text();
 
 				return data;
 			} catch (err) {
@@ -448,13 +514,35 @@ class Spotifier {
 			try {
 				await this._getAccessTokenFromRefreshToken();
 				const data = await (
-					await fetch(`${this.#_api}/me/player/pause?device_id=d9fe42af9e32ef6748395b0cf0479cc8642a5640`, {
+					await fetch(`${this.#_api}/me/player/pause?device_id=${this.device_id}`, {
 						method: 'PUT',
 						headers: {
 							Authorization: `Bearer ${this.#accessToken}`
 						}
 					})
-				).json();
+				).text();
+
+				return data;
+			} catch (err) {
+				return { status: false, message: err };
+			}
+		};
+
+		this.addToQueue = async (trackId) => {
+			if (!trackId) {
+				return { status: false, message: 'Parameter trackId must provided' };
+			}
+
+			try {
+				await this._getAccessTokenFromRefreshToken();
+				const data = await (
+					await fetch(`${this.#_api}/me/player/queue?uri=spotify:track:${trackId}&device_id=${this.device_id}`, {
+						method: 'POST',
+						headers: {
+							Authorization: `Bearer ${this.#accessToken}`
+						}
+					})
+				).text();
 
 				return data;
 			} catch (err) {
@@ -466,13 +554,13 @@ class Spotifier {
 			try {
 				await this._getAccessTokenFromRefreshToken();
 				const data = await (
-					await fetch(`${this.#_api}/me/player/play?device_id=d9fe42af9e32ef6748395b0cf0479cc8642a5640`, {
+					await fetch(`${this.#_api}/me/player/play?device_id=${this.device_id}`, {
 						method: 'PUT',
 						headers: {
 							Authorization: `Bearer ${this.#accessToken}`
 						}
 					})
-				).json();
+				).text();
 
 				return data;
 			} catch (err) {
@@ -480,22 +568,80 @@ class Spotifier {
 			}
 		};
 
-		this.startNewPlayback = async (trackId) => {
+		this.startNewPlayback = async (input, offset) => {
+			if (!input) {
+				return { status: false, message: 'Parameter input must provided' };
+			}
+
+			if (offset && isNaN(offset)) {
+				return { status: false, message: 'Parameter offset must be a number' };
+			}
+
+			const trackId =
+				input.match(/spotify:track:([a-zA-Z0-9]+)/)?.[1] ||
+				input.match(/https?:\/\/open.spotify.com\/track\/([a-zA-Z0-9]+)/)?.[1];
+			const albumId =
+				input.match(/spotify:album:([a-zA-Z0-9]+)/)?.[1] ||
+				input.match(/https?:\/\/open.spotify.com\/album\/([a-zA-Z0-9]+)/)?.[1];
+			const playlistId =
+				input.match(/spotify:playlist:([a-zA-Z0-9]+)/)?.[1] ||
+				input.match(/https?:\/\/open.spotify.com\/playlist\/([a-zA-Z0-9]+)/)?.[1];
+
+			if (!trackId && !albumId && !playlistId) {
+				return { status: false, message: 'Invalid input. Must be a valid Spotify track, album, or playlist link.' };
+			}
+
+			const body = {
+				uris: [],
+				context_uri: null, // eslint-disable-line
+				position_ms: 0, // eslint-disable-line
+				offset: offset ? { position: offset } : undefined
+			};
+
+			if (trackId) {
+				body.uris.push(`spotify:track:${trackId}`);
+			} else if (albumId) {
+				body.context_uri = `spotify:album:${albumId}`; // eslint-disable-line
+				delete body.uris;
+			} else if (playlistId) {
+				body.context_uri = `spotify:playlist:${playlistId}`; // eslint-disable-line
+				delete body.uris;
+			}
+
 			try {
 				await this._getAccessTokenFromRefreshToken();
 				const data = await (
-					await fetch(
-						`${
-							this.#_api
-						}/me/player/play?device_id=d9fe42af9e32ef6748395b0cf0479cc8642a5640&context_uri=spotify:track:${trackId}&position_ms=0`,
-						{
-							method: 'PUT',
-							headers: {
-								Authorization: `Bearer ${this.#accessToken}`
-							}
+					await fetch(`${this.#_api}/me/player/play?device_id=${this.device_id}`, {
+						method: 'PUT',
+						body: JSON.stringify(body),
+						headers: {
+							Authorization: `Bearer ${this.#accessToken}`,
+							'Content-Type': 'application/json'
 						}
-					)
-				).json();
+					})
+				).text();
+
+				return data;
+			} catch (err) {
+				return { status: false, message: err };
+			}
+		};
+
+		this.setVolume = async (volume) => {
+			if (isNaN(volume) || volume < 0 || volume > 100) {
+				return { status: false, message: 'Volume must be a number between 0 and 100' };
+			}
+
+			try {
+				await this._getAccessTokenFromRefreshToken();
+				const data = await (
+					await fetch(`${this.#_api}/me/player/volume?device_id=${this.device_id}&volume_percent=${volume}`, {
+						method: 'PUT',
+						headers: {
+							Authorization: `Bearer ${this.#accessToken}`
+						}
+					})
+				).text();
 
 				return data;
 			} catch (err) {

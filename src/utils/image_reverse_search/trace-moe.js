@@ -1,11 +1,12 @@
 import axios from 'axios';
 import FormData from 'form-data';
-import { readFileSync } from 'fs';
+import fs from 'fs-extra';
 import path from 'path';
 import sharp from 'sharp';
 
 import { fetchBUFFER, fetchJSON, isURL } from '../modules/index.js';
 
+const graphql = await fs.readFile(path.join(__dirname, 'src/utils/image_reverse_search/Query.graphql'), { encoding: 'utf-8' });
 const _api = 'https://api.trace.moe/search?cutBorders&';
 const _apiPost = 'https://trace.moe/anilist/';
 
@@ -52,7 +53,7 @@ export const traceMoe = async (file) =>
 			} = await fetchJSON(_apiPost, {
 				method: 'POST',
 				body: JSON.stringify({
-					query: readFileSync(path.join(__dirname, 'src/utils/image_reverse_search/query.graphql')).toString(),
+					query: graphql,
 					variables: {
 						ids: result.map((v) => v.anilist)
 					}

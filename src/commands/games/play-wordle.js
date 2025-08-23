@@ -34,7 +34,7 @@ export default {
 				`${color('Wordle Game Answer : ', '#FF99C8')} ${color(wordle.word, 'white')} to ${color(prettyNumber, '#E4C1F9')}`
 			);
 
-			const data = await client.instance.reply(`${wordle.board.join('')}\nTot. words : ${wordle.word.length}`, {
+			const data = await client.instance.reply(`${wordle.board.join('')}\n\nTot. words : ${wordle.word.length}`, {
 				from,
 				quoted: message
 			});
@@ -52,7 +52,17 @@ export default {
 			await client.instance.reply('You have exited Wordle.', { from, quoted: message });
 		} else if (args[1] === 'info') {
 			await client.instance.reply(
-				'This is a Wordle Game. You have given a word with only 5 letter. And you have to guess the word, Every guessed word will checked and measured by how closed the input to the word is.\n\nGreen [🟩] : Correct Alphabet\nYellow [🟨] : Close\nBlack [⬛] : Not Close/Invalid\nWhite [⬜] : First Board Play.\n\nUsage: !wordle <play/exit/info>',
+				`Wordle Game
+
+Guess the hidden 5-letter word.
+Each time you make a guess, the game will evaluate how close your guess is to the correct word.
+
+- 🟩 Green: Correct letter in the correct position
+- 🟨 Yellow: Correct letter in the wrong position
+- ⬛ Black: Letter is not in the word
+- ⬜ White: Initial state before any guesses
+
+Can you find the word in as few attempts as possible?\n\nUsage: !wordle <play/exit/info>`,
 				{ from, quoted: message }
 			);
 		}

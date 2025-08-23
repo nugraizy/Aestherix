@@ -4,6 +4,9 @@ import Wrap from 'canvas-text-wrapper';
 import * as color from 'colorthief';
 import fs from 'fs-extra';
 import path from 'path';
+import { fetch } from 'undici';
+
+import { isURL } from '../../utils/modules/index.js';
 
 const { createCanvas, GlobalFonts, loadImage } = Canvas;
 const { CanvasTextWrapper } = Wrap;
@@ -39,6 +42,12 @@ export class Attachment {
 	async init(image) {
 		this.canvas = createCanvas(this.x, this.y);
 		this.ctx = this.canvas.getContext('2d');
+
+		if (typeof image === 'string' && isURL(image)) {
+			const response = await fetch(image);
+
+			image = await response.arrayBuffer();
+		}
 
 		this._colorPalettes = (await color.getPalette(image))[0].join(', ');
 		this._image.buffer = image;

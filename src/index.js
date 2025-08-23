@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { makeInMemoryStore } from 'baileys';
+import { makeInMemoryStore } from '@rodrigogs/baileys-store';
 import dayjs from 'dayjs';
 import localePlugins from 'dayjs/plugin/timezone.js';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';

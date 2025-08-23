@@ -12,18 +12,23 @@ const moduleURL = new URL(import.meta.url);
 export const __dirname = platform === 'win32' ? path.dirname(moduleURL.pathname).slice(1) : path.dirname(moduleURL.pathname);
 global.__dirname = __dirname;
 
-console.clear();
+async function main() {
+	console.clear();
+	console.warn('Checking internet connection.');
 
-console.warn('Checking internet connection.');
+	const online = await isInternetAvailable();
 
-if (!(await isInternetAvailable())) {
-	console.error('Internet connection is not available.\nMake sure to connect to the internet and try again.');
-	process.exit(1);
+	if (!online) {
+		console.error('Internet connection is not available.\nMake sure to connect to the internet and try again.');
+		process.exit(1);
+	}
+
+	await import('./src/helper/connection/utils/check-flag.js');
+
+	console.log('Internet connection is available.');
+	printBanner();
+
+	await import('./src/index.js');
 }
 
-await import('./src/helper/connection/utils/check-flag.js');
-
-console.log('Internet connection is available.');
-printBanner();
-
-await import('./src/index.js');
+main();

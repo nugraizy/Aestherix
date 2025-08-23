@@ -12,14 +12,17 @@ const handleWordle = async ({ from, isAdmin, isGroup, body, message, sender }, c
 
 		if (guess?.isWin) {
 			const response = {
-				text: `You win!\n\n${guess.board}\n${guess.words}\n\nStatistic:\n${guess.guessed
+				text: `You win!\n\n${guess.board}\n${guess.words}\n\nStatistic :\n${guess.guessed
 					.map((v, i) => `${i + 1}. ${v.input}\n${v.board}`)
-					.join('\n')}\n\nLama permainan: ${wordle.timeLength}`
+					.join('\n')}\n\nPlay time : ${guess.duration}`
 			};
 
 			await client.instance.send(from, response, { quoted: message });
 		} else {
-			await client.instance.reply(guess.board, { from, quoted: message });
+			await client.instance.reply(guess.board + `\n\n${guess.message}\nPlay time : ${guess.duration}`, {
+				from,
+				quoted: message
+			});
 		}
 	};
 

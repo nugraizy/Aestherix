@@ -25,12 +25,15 @@ const _imageType = (input) => {
  * @returns {ParsedResponse}
  */
 const parseNhentaiMetadata = (data) => ({
-	titles: data.title,
+	title: data.title,
 	uploadDate: data.upload_date,
-	totPages: data.num_pages,
-	totFavorites: data.num_favorites,
-	tags: data.tags.map((v) => v.name),
-	images: data.images.pages.map((v, i) => `https://i.nhentai.net/galleries/${data.media_id}/${i + 1}.${_imageType(v.t)}`)
+	totalPages: data.num_pages,
+	totalFavorites: data.num_favorites,
+	tags: data.tags.filter((v) => v.type === 'tag')?.map((v) => v.name),
+	languages: data.tags.filter((v) => v.type === 'language')?.map((v) => v.name),
+	artists: data.tags.filter((v) => v.type === 'artist')?.map((v) => v.name),
+	categories: data.tags.filter((v) => v.type === 'category')?.map((v) => v.name),
+	images: data.images.pages.map((v, i) => `https://i3.nhentai.net/galleries/${data.media_id}/${i + 1}.${_imageType(v.t)}`)
 });
 
 /**
