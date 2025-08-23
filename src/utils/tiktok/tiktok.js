@@ -223,7 +223,7 @@ class ResponseParser {
 
 		return images
 			? images.map((v, i) => ({
-					url: v.display_image.url_list[1],
+					url: v.display_image.url_list[0],
 					index: i + 1
 			  })) /* eslint-disable-line*/
 			: [];
