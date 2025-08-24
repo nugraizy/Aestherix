@@ -14,7 +14,7 @@ const createPostCaption = (post) => {
 	capt += ` 💭 : ${post.caption.trim()}\n`;
 
 	const postInfo = `*${dayjs(post.published).format('HH.mm A · MMM, YYYY')}${
-		post.medias[0].type === 'video' ? ` · ${formatNumber(post.viewCount)} 👀` : ''
+		['video', 'animated_gif'].includes(post.medias[0].type) ? ` · ${formatNumber(post.viewCount)} 👀` : ''
 	}*\n`;
 
 	capt += postInfo;
@@ -76,7 +76,9 @@ export default {
 				for (const media of post.medias) {
 					await client.instance.send(
 						from,
-						media.type === 'video' ? { video: { url: media.url } } : { image: { url: media.url } },
+						media.type === 'video' || media.type === 'animated_gif'
+							? { video: { url: media.url } }
+							: { image: { url: media.url } },
 						{}
 					);
 					await delay(100);
@@ -84,7 +86,7 @@ export default {
 			} else {
 				await client.instance.send(
 					from,
-					post.medias[0].type === 'video'
+					post.medias[0].type === 'video' || post.medias[0].type === 'animated_gif'
 						? { video: { url: post.medias[0].url }, caption }
 						: { image: { url: post.medias[0].url }, caption },
 					{ quoted: message }

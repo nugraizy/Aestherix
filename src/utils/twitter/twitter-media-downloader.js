@@ -65,12 +65,16 @@ const _parseDestructuring = (data) => {
 
 		let info;
 
-		if (v.type === 'video') {
+		if (v.type === 'video' || v.type === 'animated_gif') {
 			info = v.video_info.variants
 				.filter((w) => w?.content_type === 'video/mp4')
 				?.sort((a, b) => (b?.bit_rate > a?.bit_rate ? 1 : -1));
 			detail.url = info[0].url;
-			detail.duration = v.video_info.duration_millis / 1000;
+
+			if (v.type === 'video') {
+				detail.duration = v.video_info.duration_millis / 1000;
+			}
+
 			detail.bitrates = info[0].bitrate;
 		} else {
 			detail.url = v.media_url_https;
