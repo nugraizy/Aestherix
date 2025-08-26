@@ -1,4 +1,4 @@
-import { Aki } from 'aki-api';
+// import { Aki } from 'aki-api';
 
 import configuration from '../../helper/config/connect.js';
 
@@ -31,7 +31,7 @@ export const getSession = (key) => {
 };
 
 const setSession = (key) => {
-	return configuration.games.akinator.set(key, new Aki({ region: 'id' }));
+	return configuration.games.akinator.set(key /*new Aki({ region: 'id' })*/);
 };
 
 export const setMessages = (key, message) => {

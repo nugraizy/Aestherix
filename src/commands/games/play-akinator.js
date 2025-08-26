@@ -12,7 +12,7 @@ export default {
 	aliases: ['aki', 'playaki', 'playakinator'],
 	cooldown: 2,
 	limit: 2,
-	status: 'enable',
+	status: 'disable',
 	async run({ from, message }, client) {
 		const aki = await startAkinator(from);
 
