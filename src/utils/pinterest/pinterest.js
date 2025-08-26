@@ -6,6 +6,15 @@ const _regex = new RegExp(
 );
 const _id = /\/?pin\/?([\d]+)/;
 
+const headers = {
+	search: {
+		'X-Pinterest-PWS-Handler': 'www/search/[scope].js'
+	},
+	download: {
+		'X-Pinterest-PWS-Handler': 'www/pin/[id].js'
+	}
+};
+
 /**
  * @typedef {Partial<{error: boolean, message: string, keyword: string}>} PinterestErrorResponse
  * @typedef {Partial<{authorUsername: string, authorFullname: string, follower: number, caption: string, type: 'image' | 'video' | 'gif', url: string, pinSource: string}>} PinterestResponse
@@ -49,7 +58,9 @@ class Pinterest {
 
 				const path = new URLSearchParams(context);
 
-				const response = await fetch(`https://pinterest.com/resource/BaseSearchResource/get/?${path.toString()}`);
+				const response = await fetch(`https://pinterest.com/resource/BaseSearchResource/get/?${path.toString()}`, {
+					headers: headers.search
+				});
 
 				const { resource_response: resourceResponse } = await response.json();
 
@@ -129,7 +140,9 @@ class Pinterest {
 
 				const path = new URLSearchParams(context);
 
-				const response = await fetch(`https://www.pinterest.com/resource/PinResource/get/?${path.toString()}`);
+				const response = await fetch(`https://www.pinterest.com/resource/PinResource/get/?${path.toString()}`, {
+					headers: headers.download
+				});
 
 				const { resource_response: resourceResponse } = await response.json();
 
