@@ -21,7 +21,7 @@ export default {
 	name: 'join',
 	minifiedDescription: 'Invite Bot',
 	description: 'Ask bot to join your group.',
-	usage: '!join <url>',
+	usage: '!join `<url>`',
 	aliases: ['j'],
 	category: 'Helper',
 	limit: 7,

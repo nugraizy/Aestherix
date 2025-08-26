@@ -39,10 +39,7 @@ export default {
 								title: 'Nanda',
 								products: [
 									{
-										productId: 'productId[0]'
-									},
-									{
-										productId: 'productId[1]'
+										productId: '4311556755568341'
 									}
 								]
 							}

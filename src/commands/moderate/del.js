@@ -5,7 +5,7 @@ export default {
 	name: 'delete',
 	minifiedDescription: 'Delete Message',
 	description: 'Delete people messages',
-	usage: '!delete <reply chat>',
+	usage: '!delete `<reply chat>`',
 	aliases: ['del'],
 	category: 'Moderation',
 	cooldown: 8,

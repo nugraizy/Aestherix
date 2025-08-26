@@ -18,7 +18,7 @@ export default {
 	name: 'unbanned',
 	minifiedDescription: 'Unban User',
 	description: 'Unbanned user.',
-	usage: '!unbanned <tag/reply>',
+	usage: '!unbanned `<tag/reply user>`',
 	aliases: ['unban'],
 	category: 'Owner',
 	cooldown: 0,

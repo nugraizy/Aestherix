@@ -10,7 +10,7 @@ export default {
 	name: 'aiimage',
 	minifiedDescription: 'Generate Image',
 	description: 'Ask A.I to make an image based on your text.',
-	usage: '!aiimage <query>',
+	usage: '!aiimage `<query>`',
 	aliases: ['aimg'],
 	category: 'Helper',
 	cooldown: 7,

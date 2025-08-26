@@ -9,7 +9,7 @@ export default {
 	minifiedDescription: 'Search Bandcamp',
 	description: 'Search Musics from Bandcamp.',
 	category: 'Search',
-	usage: '!bandcamp <query>',
+	usage: '!bandcamp `<query>`',
 	aliases: ['bcamp', 'bandc'],
 	cooldown: 5,
 	limit: 5,

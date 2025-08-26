@@ -82,6 +82,7 @@
     "inquirer-toggle": "^1.0.1",
     "instagram_mqtt": "^1.2.2",
     "instagram-private-api": "^1.45.3",
+    "is-buffer": "^2.0.5",
     "is-online": "^10.0.0",
     "js-beautify": "^1.14.0",
     "jsdom": "^26.1.0",

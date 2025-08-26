@@ -8,7 +8,7 @@ export default {
 	name: 'tiny',
 	minifiedDescription: 'Shorten URL',
 	description: 'URL shortener using tinyurl.',
-	usage: '!tiny <query>',
+	usage: '!tiny `<query>`',
 	category: 'Misc',
 	aliases: ['tinyurl', 'urlshort', 'short', 'shorten'],
 	limit: 2,

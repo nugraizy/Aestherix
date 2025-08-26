@@ -7,7 +7,7 @@ export default {
 	name: 'chords',
 	minifiedDescription: 'Search Chords',
 	description: 'Search music chords.',
-	usage: '!chords <query>',
+	usage: '!chords `<query>`',
 	aliases: ['chord'],
 	category: 'Search',
 	cooldown: 3,

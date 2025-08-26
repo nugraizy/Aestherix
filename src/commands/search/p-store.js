@@ -9,7 +9,7 @@ const regex = (str1, str2) => new RegExp(`\\b${str1}\\b`).test(str2.toLowerCase(
 export default {
 	name: 'pstore',
 	description: 'Search products from p-store',
-	usage: '!pstore <query>',
+	usage: '!pstore `<query>`',
 	category: 'Search',
 	aliases: ['pstor'],
 	limit: 4,

@@ -7,7 +7,7 @@ export default {
 	name: 'nhentai',
 	minifiedDescription: 'Search Doujin from NHentai',
 	description: 'Search Doujin from nhentai.net.',
-	usage: '!nhentai <query>',
+	usage: '!nhentai `<query>`',
 	aliases: ['nhent'],
 	category: 'Owner',
 	cooldown: 0,

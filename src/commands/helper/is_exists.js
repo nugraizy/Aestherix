@@ -11,7 +11,7 @@ export default {
 	name: 'nowhatsapp',
 	minifiedDescription: 'Check WhatsApp Number',
 	description: 'Check if the number is exist or not.',
-	usage: '!nowhatsapp 628952253440x',
+	usage: '!nowhatsapp `<628952253440x>`',
 	aliases: ['nowa'],
 	category: 'Helper',
 	cooldown: 6,

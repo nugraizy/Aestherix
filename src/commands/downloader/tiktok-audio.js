@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { color, loggers } from '../../utils/modules/index.js';
+import { color, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { mime } from '../../utils/misc/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
 
@@ -11,7 +11,7 @@ export default {
 	name: 'tiktokaudio',
 	minifiedDescription: 'Download TikTok Audio',
 	description: 'Downloads TikTok audio.',
-	usage: '!tiktokaudio <url> (you can send multiple link using space in between)',
+	usage: '!tiktokaudio `<url(s)>` (you can send multiple link using space in between)',
 	aliases: ['tiktokaudio', 'ttaudio', 'ttaud'],
 	category: 'Downloader',
 	cooldown: 7,
@@ -25,6 +25,8 @@ export default {
 		await client.instance.reply('Please wait.', { from, quoted: message });
 
 		let { _: urls } = parser(query);
+
+		urls = removeDuplicatesArray(urls);
 
 		const audios = await tiktok.download.post(urls);
 

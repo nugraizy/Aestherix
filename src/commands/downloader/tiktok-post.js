@@ -12,7 +12,7 @@ export default {
 	minifiedDescription: 'Download TikTok Post',
 	description: 'Downloads TikTok posts.',
 	usage:
-		'!tiktokpost <url(s)> (you can send multiple link using space in between) [options]\nOptions:\n-wm, --watermark: Download with watermark\n-nowm, --nowatermark: Download without watermark',
+		'!tiktokpost `<url(s)>` (you can send multiple link using space in between) `[options]`\nOptions:\n-wm, --watermark: Download with watermark\n-nowm, --nowatermark: Download without watermark',
 	aliases: ['tiktokposts', 'ttimage', 'ttphoto', 'ttimages', 'ttphotos', 'ttvideo', 'ttvideos', 'ttvid', 'ttv', 'tiktok'],
 	category: 'Downloader',
 	limit: 2,

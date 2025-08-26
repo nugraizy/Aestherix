@@ -12,7 +12,7 @@ export default {
 	name: 'audiobook',
 	minifiedDescription: 'Audio book',
 	description: 'Take a picture and turn it into an audio book.',
-	usage: '!audiobook <reply media/send media>',
+	usage: '!audiobook `<reply media/send media>`',
 	aliases: ['audbook'],
 	category: 'Converter',
 	cooldown: 5,

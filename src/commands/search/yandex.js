@@ -11,7 +11,7 @@ export default {
 	name: 'yandex',
 	minifiedDescription: 'Reverse Image Yandex',
 	description: 'Reverse image search from Yandex.',
-	usage: '!yandex <reply image/send image>',
+	usage: '!yandex `<reply/send image>`',
 	category: 'Search',
 	aliases: ['ri', 'similar', 'whatimage', 'whatimg', 'findimg'],
 	limit: 5,

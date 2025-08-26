@@ -34,7 +34,7 @@ export default {
 	name: 'freegame',
 	minifiedDescription: 'Simulate Freegame',
 	description: 'Fetch freegames from games platform.',
-	usage: '!freegame <enable|disable>',
+	usage: '!freegame `<enable/disable>`',
 	aliases: ['f2p'],
 	category: 'Owner',
 	cooldown: 0,

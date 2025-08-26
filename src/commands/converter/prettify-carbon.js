@@ -8,7 +8,7 @@ export default {
 	name: 'carbon',
 	minifiedDescription: 'Carbonify Code',
 	description: 'Prettify code.',
-	usage: '!carbon <reply/send image>',
+	usage: '!carbon `<reply/send image>`',
 	aliases: ['carbon'],
 	category: 'Converter',
 	cooldown: 5,

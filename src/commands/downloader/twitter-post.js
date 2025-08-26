@@ -30,7 +30,7 @@ export default {
 	name: 'twitterdl',
 	minifiedDescription: 'Download Twitter post',
 	description: 'Download Twitter post',
-	usage: '!twitterdl <url>',
+	usage: '!twitterdl `<url(s)>` (you can send multiple link using space in between)',
 	aliases: ['twtdl', 'twitdl'],
 	category: 'Downloader',
 	cooldown: 10,
@@ -49,8 +49,7 @@ export default {
 
 		for (const url of urls) {
 			if (!isURL(url.trim())) {
-				await client.instance.reply('Please specify a valid url', { from, quoted: message });
-
+				await client.instance.reply('Please specify a valid url\nInvalid : ' + url, { from, quoted: message });
 				continue;
 			}
 
@@ -64,7 +63,6 @@ export default {
 					quoted: message
 				});
 				loggers.error(`${color('Failed to Download Twitter Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
-
 				continue;
 			}
 

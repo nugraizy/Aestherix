@@ -70,7 +70,7 @@ export default {
 	name: 'premium',
 	minifiedDescription: 'Configure Users',
 	description: 'Configure users status.',
-	usage: '!premium (add/remove) <tag/reply>',
+	usage: '!premium `(add/remove)` `<tag/reply user>`',
 	aliases: ['prem'],
 	category: 'Owner',
 	cooldown: 0,

@@ -1,6 +1,7 @@
 import path from 'path';
+import parser from 'yargs-parser';
 
-import { removeDuplicatesArray, isURL, toOpus, downloadBandcamp } from '../../utils/index.js';
+import { removeDuplicatesArray, isURL, toOpus, downloadBandcamp, color, loggers } from '../../utils/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -9,35 +10,40 @@ export default {
 	name: 'bandcampdl',
 	minifiedDescription: 'Download Bandcamp',
 	description: 'Download Musics from Bandcamp',
-	usage: '!bandcampdl <url>',
+	usage: '!bandcampdl `<url(s)>` (you can send multiple link using space in between)',
 	category: 'Downloader',
 	aliases: ['bcampdl', 'bandcdl'],
 	limit: 4,
 	cooldown: 8,
 	status: 'enable',
-	async run({ query, from, message, filename }, client) {
+	async run({ query, from, message, filename, prettyNumber }, client) {
 		if (!query) {
 			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
-		let queries = query.split(',');
+		await client.instance.reply('Please wait...', { from, quoted: message });
 
-		queries = removeDuplicatesArray(queries);
+		let { _: urls } = parser(query);
 
-		for (const querie of queries) {
-			const regexs = isURL(querie.trim());
+		urls = removeDuplicatesArray(urls);
 
-			if (!regexs) {
-				await client.instance.reply('Please Use a Valid URL.', { from, quoted: message });
+		if (urls.length === 1 && !isURL(urls[0])) {
+			return await client.instance.reply('Please specify a valid url', { from, quoted: message });
+		}
 
+		loggers.warning(`${color('Downloading Bandcamp File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+
+		for (const url of urls) {
+			if (!isURL(url.trim())) {
+				await client.instance.reply('Please Use a Valid URL.\nInvalid : ' + url, { from, quoted: message });
 				continue;
 			}
 
-			const result = await downloadBandcamp(querie);
+			const result = await downloadBandcamp(url);
 
 			if (result?.error) {
 				await client.instance.reply(result.error, { from, quoted: message });
-
+				loggers.error(`${color('Failed to Download Bandcamp File', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
 			}
 
@@ -58,5 +64,7 @@ Title : ${result.title}`.formatForm()
 				{ quoted: message }
 			);
 		}
+
+		loggers.info(`${color('Downloaded Bandcamp File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

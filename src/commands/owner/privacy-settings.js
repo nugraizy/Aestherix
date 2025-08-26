@@ -69,7 +69,7 @@ const sendQuery = (client, { name, value }) =>
 export default {
 	name: 'privacy',
 	description: 'Change the privacy settings of the bot.',
-	usage: '!privacy <setting> <value>',
+	usage: '!privacy `<setting>` `<value>`',
 	aliases: ['prv'],
 	category: 'Owner',
 	cooldown: 0,

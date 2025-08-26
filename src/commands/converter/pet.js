@@ -13,7 +13,7 @@ export default {
 	description: 'Pet someone profile picture or send/reply an image to pet.',
 	category: 'Converter',
 	aliases: ['pet', 'petpetpet'],
-	usage: '!petpet <@user/(reply/send image)>',
+	usage: '!petpet `<@user/(reply/send image)>`',
 	cooldown: 5,
 	limit: 1,
 	status: 'enable',

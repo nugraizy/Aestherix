@@ -9,7 +9,7 @@ export default {
 	name: 'githubcode',
 	minifiedDescription: 'Search Github Code',
 	description: 'Search code from Github.',
-	usage: '!githubcode <query>',
+	usage: '!githubcode `<query>`',
 	category: 'Search',
 	aliases: ['ghcode'],
 	limit: 4,

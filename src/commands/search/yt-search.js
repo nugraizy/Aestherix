@@ -22,7 +22,7 @@ export default {
 	name: 'ytsearch',
 	minifiedDescription: 'Search YouTube',
 	description: 'Search YouTube',
-	usage: '!ytsearch',
+	usage: '!ytsearch `<query>`',
 	aliases: ['yts', 'ytsr'],
 	category: 'Search',
 	cooldown: 10,

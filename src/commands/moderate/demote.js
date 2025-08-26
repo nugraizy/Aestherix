@@ -5,7 +5,7 @@ export default {
 	name: 'demote',
 	minifiedDescription: 'Demote Admin',
 	description: 'Demote admin to member.',
-	usage: '!demote <reply/tag member>',
+	usage: '!demote `<reply/tag member>`',
 	aliases: ['demt', 'member', 'mem', 'dmt'],
 	category: 'Moderation',
 	cooldown: 10,

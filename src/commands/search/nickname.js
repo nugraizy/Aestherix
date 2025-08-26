@@ -7,7 +7,7 @@ export default {
 	name: 'nickname',
 	minifiedDescription: 'Search Nickname',
 	description: 'Find nickname.',
-	usage: '!nickname <query>',
+	usage: '!nickname `<query>`',
 	aliases: ['nickfind'],
 	category: 'Search',
 	cooldown: 2,

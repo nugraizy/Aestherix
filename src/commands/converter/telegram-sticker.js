@@ -10,7 +10,7 @@ export default {
 	name: 'telegramsticker',
 	minifiedDescription: 'Telegram Sticker',
 	description: 'Find Telegram stickers.',
-	usage: '!telegramsticker <query>',
+	usage: '!telegramsticker `<query>`',
 	aliases: ['ts', 'telestick', 'telegramstickers'],
 	category: 'Converter',
 	cooldown: 5,

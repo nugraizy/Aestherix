@@ -33,7 +33,7 @@ export default {
 	name: 'malmangaranking',
 	minifiedDescription: 'MAL Ranking Manga',
 	description: 'Looks for Top Ranked Manga on MyAnimeList.',
-	usage: '!malmangaranking <type>',
+	usage: '!malmangaranking <type (oneof manga, novel, lightnovel, oneshot, doujin, manhwa, manhua)>',
 	category: 'Anime',
 	aliases: ['malmangarank'],
 	limit: 2,

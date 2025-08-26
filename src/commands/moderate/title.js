@@ -5,7 +5,7 @@ export default {
 	name: 'title',
 	minifiedDescription: 'Group Title',
 	description: 'Change the title of the group.',
-	usage: '!title <texts>',
+	usage: '!title `<texts>`',
 	aliases: ['subject', 'topic', 'name'],
 	category: 'Moderation',
 	cooldown: 2,

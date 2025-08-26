@@ -8,7 +8,7 @@ export default {
 	name: 'shopee',
 	minifiedDescription: 'Search Shopee',
 	description: 'Search products from Shopee.',
-	usage: '!shopee <query>',
+	usage: '!shopee `<query>`',
 	category: 'Search',
 	aliases: ['shop'],
 	limit: 5,

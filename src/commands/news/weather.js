@@ -7,7 +7,7 @@ export default {
 	name: 'weather',
 	minifiedDescription: 'Get Weather',
 	description: 'Get Weather on Your City.',
-	usage: '!weather <query>',
+	usage: '!weather `<query>`',
 	category: 'News',
 	aliases: ['cuaca'],
 	limit: 1,

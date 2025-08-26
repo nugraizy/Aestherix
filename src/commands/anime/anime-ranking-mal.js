@@ -29,7 +29,7 @@ export default {
 	name: 'malanimeranking',
 	minifiedDescription: 'MAL Ranking Anime',
 	description: 'Looks for Top Ranked Anime on MyAnimeList.',
-	usage: '!malanimeranking <type>',
+	usage: '!malanimeranking `<type (oneof tv, movie, ova, special, ona, music, cm, pv, tv_special>`',
 	category: 'Anime',
 	aliases: ['malanimrank'],
 	limit: 2,

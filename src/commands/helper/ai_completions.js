@@ -10,7 +10,7 @@ export default {
 	name: 'aicompletions',
 	minifiedDescription: 'AI Completions',
 	description: 'Ask A.I to complete your sentence or give A.I any task within texts.',
-	usage: '!aicompletions <query>',
+	usage: '!aicompletions `<query>`',
 	aliases: ['complete'],
 	category: 'Helper',
 	cooldown: 7,

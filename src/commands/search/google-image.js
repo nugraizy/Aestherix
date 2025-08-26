@@ -7,7 +7,7 @@ export default {
 	name: 'googleimage',
 	minifiedDescription: 'Search Google Images',
 	description: 'Search images from Google.',
-	usage: '!googleimage <query>',
+	usage: '!googleimage `<query>`',
 	aliases: ['gim', 'gis', 'image'],
 	category: 'Search',
 	cooldown: 5,

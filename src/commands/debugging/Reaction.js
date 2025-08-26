@@ -14,7 +14,7 @@ export default {
 	name: 'reaction',
 	description: 'Send reaction to a message.',
 	category: 'Debugging',
-	usage: '!reaction <emoji>',
+	usage: '!reaction `<emoji>`',
 	aliases: ['react', 'reactwith'],
 	cooldown: 5,
 	limit: 0,

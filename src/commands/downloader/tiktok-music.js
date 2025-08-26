@@ -12,7 +12,7 @@ export default {
 	minifiedDescription: 'Download TikTok Music',
 	description: 'Downloads TikTok music that used in the video.',
 	usage:
-		'!tiktokmusic <url> (you can send multiple link using space in between) [options]\nOptions:\n-wm, --watermark: Download with watermark\n-nowm, --nowatermark: Download without watermark',
+		'!tiktokmusic `<url(s)>` (you can send multiple link using space in between) [options]\nOptions:\n-wm, --watermark: Download with watermark\n-nowm, --nowatermark: Download without watermark',
 	aliases: ['tiktokmusics', 'tiktokmusik', 'ttmusic', 'ttmusik', 'ttm'],
 	category: 'Downloader',
 	cooldown: 7,

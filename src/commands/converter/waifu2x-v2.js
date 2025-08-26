@@ -11,7 +11,7 @@ export default {
 	name: 'waifu2xv2',
 	minifiedDescription: 'Waifu2x V2',
 	description: 'Enhance image using image processing A.I. called waifu2x.',
-	usage: '!waifu2xv2 <reply/send (image/sticker)>',
+	usage: '!waifu2xv2 `<reply/send image/sticker>`',
 	aliases: ['w2xv2', 'enhancev2', 'upscalev2', 'remminiv2'],
 	category: 'Converter',
 	cooldown: 6,

@@ -10,7 +10,7 @@ export default {
 	minifiedDescription: 'Surah Tafsir',
 	description: 'Get surah tafsir',
 	category: 'AL-Quran',
-	usage: '!getsurahtafsir <surah number>',
+	usage: '!getsurahtafsir `<surah number>`',
 	aliases: ['gettafsir', 'tafsir'],
 	cooldown: 0,
 	limit: 0,

@@ -10,7 +10,7 @@ export default {
 	minifiedDescription: 'Surah Details',
 	description: 'Get surah details',
 	category: 'AL-Quran',
-	usage: '!surahdetail <surah number>',
+	usage: '!surahdetail `<surah number>`',
 	aliases: ['surahdetail'],
 	cooldown: 0,
 	limit: 0,

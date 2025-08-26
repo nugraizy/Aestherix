@@ -12,7 +12,7 @@ export default {
 	minifiedDescription: 'Animated Text',
 	description: 'Generate animated gif sticker',
 	category: 'Converter',
-	usage: '!gittp <text> [--color]',
+	usage: '!gittp `<text>` `[--color in hex]`',
 	aliases: ['gittp'],
 	cooldown: 5,
 	limit: 1,

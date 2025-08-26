@@ -8,7 +8,7 @@ export default {
 	name: 'pixivmanga',
 	minifiedDescription: 'Search Pixiv Manga',
 	description: 'Search manga from Pixiv.',
-	usage: '!pixivmanga <query>',
+	usage: '!pixivmanga `<query>`',
 	aliases: ['pixmanga'],
 	category: 'Search',
 	limit: 4,

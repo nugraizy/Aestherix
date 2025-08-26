@@ -11,7 +11,7 @@ export default {
 	name: 'igpost',
 	minifiedDescription: 'Download Instagram Post',
 	description: 'Downloads the post of the user',
-	usage: '!igpost <url>',
+	usage: '!igpost `<url(s)>` (you can send multiple link using space in between)',
 	aliases: ['igpost', 'igp'],
 	category: 'Downloader',
 	cooldown: 10,
@@ -56,7 +56,7 @@ export default {
 			return await client.instance.reply('Please specify a url', { from, quoted: message });
 		}
 
-		await client.instance.reply('Please wait.', { from, quoted: message });
+		await client.instance.reply('Please wait...', { from, quoted: message });
 
 		const { _: urls } = parser(query);
 

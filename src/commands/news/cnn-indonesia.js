@@ -8,7 +8,7 @@ export default {
 	minifiedDescription: 'CNN-Indonesia News',
 	description: 'Showing latest news in Indonesia from CNN.',
 	category: 'News',
-	usage: '!cnnindonesia <keyword/blank(to fetch newest)>',
+	usage: '!cnnindonesia `<keyword/blank(to fetch latest news)>`',
 	aliases: ['cnnid', 'cnid'],
 	cooldown: 2,
 	limit: 1,

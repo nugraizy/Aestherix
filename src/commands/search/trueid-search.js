@@ -9,7 +9,7 @@ export default {
 	minifiedDescription: 'Search TrueID',
 	description: 'Search movie on TrueID.',
 	category: 'Search',
-	usage: '!trueid <query>',
+	usage: '!trueid `<query>`',
 	aliases: ['tid'],
 	cooldown: 6,
 	limit: 5,

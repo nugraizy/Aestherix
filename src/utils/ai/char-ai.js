@@ -1,6 +1,7 @@
 import axios from 'axios';
 import querystring from 'node:querystring';
 import { fetch } from 'undici';
+import isBuffer from 'is-buffer';
 
 import { generateDeviceID, generateGPTToken, ROLES } from './util.js';
 import { fetchJSON } from '../modules/index.js';
@@ -92,7 +93,7 @@ export class ChatGPTDialogue {
 				};
 
 				check: {
-					if (Buffer.isBuffer(content)) {
+					if (isBuffer(content)) {
 						await processImage(content, true);
 
 						break check;

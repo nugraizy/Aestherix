@@ -5,7 +5,7 @@ export default {
 	name: 'description',
 	minifiedDescription: 'Change Description',
 	description: 'Change the description of the group.',
-	usage: '!description <texts>',
+	usage: '!description `<texts>`',
 	aliases: ['desc'],
 	category: 'Moderation',
 	cooldown: 4,

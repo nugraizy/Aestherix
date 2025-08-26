@@ -15,7 +15,7 @@ export default {
 	name: 'iplookup',
 	minifiedDescription: 'Look-up IP Address',
 	description: 'Look-up IP Address.',
-	usage: '!iplookup <IPv4/IPv6>',
+	usage: '!iplookup `<IPv4/IPv6>`',
 	aliases: ['iplook', 'ipfind'],
 	category: 'Look-up',
 	cooldown: 6,

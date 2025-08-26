@@ -24,7 +24,7 @@ export default {
 	name: 'savechar',
 	minifiedDescription: 'Save Genshin Impact Character',
 	description: 'Save your Genshin Impact character.',
-	usage: '!savechar <uids>',
+	usage: '!savechar `<uids>`',
 	aliases: ['saveuid'],
 	category: 'Genshin Impact',
 	cooldown: 6,

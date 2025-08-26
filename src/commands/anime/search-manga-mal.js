@@ -33,7 +33,7 @@ export default {
 	name: 'malsearchmanga',
 	minifiedDescription: 'MAL Search Manga',
 	description: 'Search a manga on MyAnimeList',
-	usage: '!malsearchmanga <query>',
+	usage: '!malsearchmanga `<query>`',
 	category: 'Anime',
 	aliases: ['malmanga'],
 	limit: 2,

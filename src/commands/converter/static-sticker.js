@@ -11,7 +11,7 @@ export default {
 	minifiedDescription: 'Static Text',
 	description: 'Generate static sticker',
 	category: 'Converter',
-	usage: '!staticsticker <text> [--color] [--fonts]',
+	usage: '!staticsticker `<text>` `[--color in hex]` `[--fonts]`',
 	aliases: ['sittp'],
 	cooldown: 5,
 	limit: 1,

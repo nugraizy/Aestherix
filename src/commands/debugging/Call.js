@@ -10,7 +10,7 @@ export default {
 	name: 'call',
 	description: 'Send call.',
 	category: 'Debugging',
-	usage: '!call <mention/query[,]>',
+	usage: '!call `<mention/query[,]>`',
 	aliases: ['call'],
 	cooldown: 5,
 	limit: 0,

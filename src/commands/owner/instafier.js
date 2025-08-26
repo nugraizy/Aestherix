@@ -9,7 +9,7 @@ export default {
 	name: 'instafier',
 	minifiedDescription: 'Instafier Listener',
 	description: 'Change current state of the Instafier listener.',
-	usage: '!instafier <enable/disable/check>',
+	usage: '!instafier `<enable/disable/check>`',
 	aliases: ['instaf'],
 	category: 'Owner',
 	cooldown: 0,

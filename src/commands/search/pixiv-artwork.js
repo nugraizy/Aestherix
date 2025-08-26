@@ -8,7 +8,7 @@ export default {
 	name: 'pixivartwork',
 	minifiedDescription: 'Search Pixiv Art',
 	description: 'Search artworks from Pixiv.',
-	usage: '!pixivartwork <query>',
+	usage: '!pixivartwork `<query>`',
 	aliases: ['pixart', 'pixivart'],
 	category: 'Search',
 	limit: 4,

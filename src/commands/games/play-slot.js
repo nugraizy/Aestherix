@@ -7,7 +7,7 @@ export default {
 	name: 'slotmachine',
 	minifiedDescription: 'Play Slot',
 	description: 'Play Slot Machine.',
-	usage: '!slot <bet>',
+	usage: '!slot `<bet>`',
 	category: 'Games',
 	aliases: ['slot'],
 	cooldown: 2,

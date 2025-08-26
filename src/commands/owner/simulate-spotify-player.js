@@ -31,7 +31,7 @@ export default {
 	name: 'spotifyplayer',
 	minifiedDescription: 'Simulate Spotify',
 	description: 'Simulates a spotify player on bio',
-	usage: '!spotifyplayer <enable|disable>',
+	usage: '!spotifyplayer `<enable/disable>`',
 	aliases: ['spotifybio'],
 	category: 'Owner',
 	cooldown: 0,

@@ -9,7 +9,7 @@ export default {
 	name: 'brainly',
 	minifiedDescription: 'Search Brainly',
 	description: 'Search answers from brainly.',
-	usage: '!brainly <query> -<?lang> (id, us, es, ru, ro, pt, tr, ph, pl, hi) -<?count> (1-30)',
+	usage: '!brainly `<query>` `-<?lang (oneof id, us, es, ru, ro, pt, tr, ph, pl, hi)>`  -<?count (min 1 - max 30)> ',
 	category: 'Search',
 	aliases: ['brainli', 'brainly-search', 'tugas'],
 	limit: 4,

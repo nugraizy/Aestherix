@@ -25,7 +25,7 @@ export default {
 	name: 'aitts',
 	minifiedDescription: 'TTS V2',
 	description: 'Convert text to speech with real people voice over it',
-	usage: '!aitts <query>',
+	usage: '!aitts `<query>`',
 	aliases: ['aitt', 'aispeech'],
 	category: 'Converter',
 	cooldown: 5,

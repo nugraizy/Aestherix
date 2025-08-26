@@ -21,7 +21,7 @@ export default {
 	name: 'bstation',
 	minifiedDescription: 'Search Bilibili/Bstation',
 	description: 'Search videos from Bilibili/Bstation ID Server.',
-	usage: '!bstation <query>',
+	usage: '!bstation `<query>`',
 	category: 'Search',
 	aliases: ['bstat', 'blindo'],
 	limit: 4,

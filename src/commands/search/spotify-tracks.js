@@ -28,7 +28,7 @@ export default {
 	name: 'spotifytracks',
 	minifiedDescription: 'Search Spotify Tracks',
 	description: 'Search song on Spotify.',
-	usage: '!spotifytracks <query>',
+	usage: '!spotifytracks `<query>`',
 	category: 'Search',
 	aliases: ['spotifytra'],
 	limit: 4,

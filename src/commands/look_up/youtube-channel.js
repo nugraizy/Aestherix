@@ -7,7 +7,7 @@ export default {
 	name: 'youtubestalk',
 	minifiedDescription: 'Look-up YouTube Channel',
 	description: 'Look-up YouTube Channel.',
-	usage: '!youtubestalk <channel_id|@channel_username|channel_url>',
+	usage: '!youtubestalk `<channel_id|@channel_username|channel_url>`',
 	aliases: ['ytstalk', 'ytinfo', 'ytchannel'],
 	category: 'Look-up',
 	cooldown: 6,

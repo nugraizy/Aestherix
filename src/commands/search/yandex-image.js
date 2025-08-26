@@ -7,7 +7,7 @@ export default {
 	name: 'yandeximage',
 	minifiedDescription: 'Yandex Images',
 	description: 'Search images from Yandex.',
-	usage: '!yandeximage <query>',
+	usage: '!yandeximage `<query>`',
 	aliases: ['yim', 'yis', 'yandimage'],
 	category: 'Search',
 	cooldown: 5,

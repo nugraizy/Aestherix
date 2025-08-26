@@ -10,7 +10,7 @@ export default {
 	name: 'igstory',
 	minifiedDescription: 'Download Instagram Story',
 	description: 'Downloads the story of the user',
-	usage: '!igstory <username>',
+	usage: '!igstory `<username(s)>` (you can send multiple username using space in between)',
 	aliases: ['igstory', 'igs'],
 	category: 'Downloader',
 	cooldown: 10,
@@ -21,7 +21,7 @@ export default {
 			return await client.instance.reply('Please specify a username', { from, quoted: message });
 		}
 
-		await client.instance.reply('Please wait.', { from, quoted: message });
+		await client.instance.reply('Please wait...', { from, quoted: message });
 
 		const { _: input } = parser(query);
 
@@ -35,7 +35,7 @@ export default {
 					from,
 					quoted: message
 				});
-				loggers.error(`${color('Failed to Download Instagram Story', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Download Instagram Story', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
 			}
 

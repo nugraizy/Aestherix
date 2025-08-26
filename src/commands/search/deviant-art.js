@@ -8,7 +8,7 @@ export default {
 	name: 'deviantart',
 	minifiedDescription: 'Search Deviant Art',
 	description: 'Search images from Deviant Art',
-	usage: '!deviantart <query>',
+	usage: '!deviantart `<query>`',
 	category: 'Search',
 	aliases: ['dvart', 'devart'],
 	limit: 4,

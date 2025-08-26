@@ -5,7 +5,7 @@ export default {
 	name: 'promote',
 	minifiedDescription: 'Promote User',
 	description: 'Promote member to admin.',
-	usage: '!promote <reply/tag member>',
+	usage: '!promote `<reply/tag member>`',
 	aliases: ['prmt', 'admin', 'adm'],
 	category: 'Moderation',
 	cooldown: 8,

@@ -8,7 +8,7 @@ export default {
 	name: 'changeprofile',
 	minifiedDescription: 'Profile Picture',
 	description: 'Set the icon group or bot.',
-	usage: '!changeprofile <reply media/send media>',
+	usage: '!changeprofile `<reply media/send media>`',
 	aliases: ['setpp', 'seticon'],
 	category: 'Moderation',
 	cooldown: 0,

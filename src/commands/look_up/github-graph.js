@@ -7,7 +7,7 @@ export default {
 	name: 'githubgraph',
 	minifiedDescription: 'Github Contribution Graph',
 	description: 'Lookup for User Contribution Graph.',
-	usage: '!githubgraph <query>',
+	usage: '!githubgraph `<query>`',
 	aliases: ['ghgraph', 'gitgraph'],
 	category: 'Look-up',
 	cooldown: 6,

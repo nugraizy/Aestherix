@@ -1,4 +1,5 @@
 import path from 'path';
+import isBuffer from 'is-buffer';
 
 import { color, loggers } from '../../utils/modules/index.js';
 import { convertStickerToMedia } from '../../utils/converter/index.js';
@@ -11,7 +12,7 @@ export default {
 	name: 'decrypt',
 	minifiedDescription: 'Sticker to Media',
 	description: 'Decrypt a sticker to media',
-	usage: '!decrypt <reply sticker/send sticker>',
+	usage: '!decrypt `<reply/send sticker>`',
 	aliases: ['d'],
 	category: 'Converter',
 	cooldown: 5,
@@ -36,7 +37,7 @@ export default {
 
 		await client.instance.send(
 			from,
-			Buffer.isBuffer(result)
+			isBuffer(result)
 				? {
 						image: new Buffer.from(result, 'base64')
 				  } /* eslint-disable-line */

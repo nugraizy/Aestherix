@@ -25,7 +25,7 @@ export default {
 	name: 'pixivnovelget',
 	minifiedDescription: 'Get Novel',
 	description: 'Get novel content from Pixiv.',
-	usage: '!pixivnovelget <url>',
+	usage: '!pixivnovelget `<url>`',
 	aliases: ['pixnovelget'],
 	category: 'Search',
 	limit: 4,

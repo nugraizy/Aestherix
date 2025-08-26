@@ -10,7 +10,7 @@ export default {
 	name: 'gitstalk',
 	minifiedDescription: 'Look-up Github User',
 	description: 'Look-up Github user.',
-	usage: '!gitstalk <username>',
+	usage: '!gitstalk `<username>`',
 	aliases: ['ghstalk', 'ghuser'],
 	category: 'Look-up',
 	cooldown: 6,

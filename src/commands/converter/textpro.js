@@ -20,7 +20,8 @@ export default {
 	name: 'textpro',
 	minifiedDescription: 'Textpro Text Maker',
 	description: 'Image maker using texts',
-	usage: '!textpro <query> <model/number[REQUIRED]> [options]\nOptions:\n-stk / -img\nAvailable Model Type : !textpro -model',
+	usage:
+		'!textpro `<query>` `<model/number[REQUIRED]>` `[options]`\nOptions:\n-stk / -img\nAvailable Model Type : !textpro -model',
 	aliases: ['imgmake', 'maker', 'tpro'],
 	category: 'Converter',
 	cooldown: 4,

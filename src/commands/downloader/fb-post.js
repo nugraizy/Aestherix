@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { color, fetchBUFFER, loggers, isURL, delay } from '../../utils/modules/index.js';
+import { color, fetchBUFFER, loggers, isURL, delay, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { facebook } from '../../utils/facebook/index.js';
 
 const regex = (input) => /^(https?:\/\/)?((w{3}\.)|(m\.)?)?(facebook|fb)\.(com|watch)\/.*/.test(input);
@@ -12,7 +12,7 @@ export default {
 	name: 'fbpost',
 	minifiedDescription: 'Download Facebook Post',
 	description: 'Downloads a Facebook post',
-	usage: '!fbpost <url>',
+	usage: '!fbpost `<url(s)>` (you can send multiple link using space in between)',
 	aliases: ['fbpost', 'fbp', 'fb', 'fbdl'],
 	category: 'Downloader',
 	cooldown: 8,
@@ -23,7 +23,11 @@ export default {
 			return await client.instance.reply('Please provide a URL', { from, quoted: message });
 		}
 
+		await client.instance.reply('Please wait....', { from, quoted: message });
+
 		const { _: urls } = parser(query);
+
+		urls = removeDuplicatesArray(urls);
 
 		if (urls.length === 1 && !isURL(urls[0])) {
 			return await client.instance.reply('Please specify a valid url', { from, quoted: message });
@@ -33,20 +37,18 @@ export default {
 			return await client.instance.reply('Please specify a valid Facebook url', { from, quoted: message });
 		}
 
+		loggers.warning(`${color('Downloading Facebook Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+
 		for (const url of urls) {
 			if (!isURL(url.trim())) {
-				await client.instance.reply('Please specify a valid url', { from, quoted: message });
-
+				await client.instance.reply('Please specify a valid url\nInvalid : ' + url, { from, quoted: message });
 				continue;
 			} else if (!regex(url.trim())) {
-				await client.instance.reply('Please specify a valid Facebook url', { from, quoted: message });
-
+				await client.instance.reply('Please specify a valid Facebook url\nInvalid : ' + url, { from, quoted: message });
 				continue;
 			}
 
 			const post = await facebook(url.trim());
-
-			loggers.warning(`${color('Downloading Facebook Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			if (post?.error) {
 				await client.instance.reply(`Failed while downloading Facebook post\n\n${post.error}\n${url}`, {

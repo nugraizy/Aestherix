@@ -1,8 +1,10 @@
 import { fetch } from 'undici';
 import parser from 'yargs-parser';
 import _ from 'lodash';
+import { fileTypeFromBuffer } from 'file-type';
+import fs from 'fs-extra';
 
-import { isURL, extension } from '../../utils/index.js';
+import { isURL, extension, gif2mp4 } from '../../utils/index.js';
 
 const isValidParser = (parser) =>
 	/^(\["[^"]+"\]|\w+|\[(?!0+\d)\d+\])((\.\w+)|(:?\["[^"]+"\])|(?:\['[^']+'\])|\[(?!0+\d)\d+\])*$/g.test(parser);
@@ -95,7 +97,8 @@ export default {
 	name: 'fetch',
 	minifiedDescription: 'HTTP Requests',
 	description: 'Do a HTTP request and send the results.',
-	usage: '!fetch',
+	usage:
+		'!fetch\nUsage :\n!fetch `www.example.com` -X `POST/GET` -H `"key1: value1"` -H `"ke2: value2"` -d `"{...JSONObjects}"` -T "conte"',
 	aliases: ['get'],
 	category: 'Helper',
 	cooldown: 10,
@@ -111,15 +114,19 @@ export default {
 			method,
 			headers,
 			body,
-			parser: queryParser
+			parser: queryParser,
+			media,
+			contentType
 		} = parser(query, {
 			alias: {
 				method: ['X'],
 				headers: ['H'],
 				body: ['d'],
-				'content-type': ['T'],
-				parser: ['p']
+				contentType: ['T'],
+				parser: ['p'],
+				media: ['m']
 			},
+			boolean: ['media'],
 			configuration: {
 				'short-option-groups': false,
 				'strip-aliased': true
@@ -132,16 +139,49 @@ export default {
 			return await client.instance.reply('Fetch expect <url>', { from, quoted: message });
 		}
 
+		if (method && !/^(GET|POST)$/i.test(method)) {
+			return await client.instance.reply('Method must be `GET` or `POST` (case-insensitive).', { from, quoted: message });
+		}
+
+		if (body && /^GET$/i.test(method)) {
+			return await client.instance.reply('`GET` method cannot accept body.', { from, quoted: message });
+		}
+
+		if (body && /^POST$/i.test(method)) {
+			try {
+				JSON.parse(body);
+			} catch {
+				return await client.instance.reply('`body` MUST be a valid JSON string.', { from, quoted: message });
+			}
+		}
+
+		if (contentType && !/^[a-z0-9!#$&^_-]+\/[a-z0-9!#$&^_.+-]+$/i.test(contentType)) {
+			return await client.instance.reply(`Invalid content-type: "${contentType}"`, { quoted: message, from });
+		}
+
 		method = method || 'GET';
 		method = Array.isArray(method) ? method[0] : method;
 
+		headers = headers ? (Array.isArray(headers) ? headers : [headers]) : null;
 		headers = headers
 			? headers.reduce((acc, cur) => {
-					const [key, value] = cur.split(':');
+					if (!/^[^:\s]+:\s?.+$/.test(cur)) {
+						client.instance.reply(`Invalid header format: "${cur}" (expected "key: value")`, { quoted: message, from });
+						return acc;
+					}
+
+					const [key, ...rest] = cur.split(':');
+
+					const value = rest.join(':').trim();
+
+					if (key.toLowerCase() === 'content-type' && !/^[a-z0-9!#$&^_-]+\/[a-z0-9!#$&^_.+-]+$/i.test(value)) {
+						client.instance.reply(`Invalid content-type: "${contentType}"`, { quoted: message, from });
+						return acc;
+					}
 
 					return {
 						...acc,
-						[key]: value
+						[key.trim()]: value
 					};
 			  }, {}) // eslint-disable-line
 			: {};
@@ -168,6 +208,53 @@ export default {
 
 				if (data.error) {
 					return await client.instance.reply(data.message, { from, quoted: message });
+				}
+
+				if (media && typeof data === 'string' && isURL(data)) {
+					const response = await fetch(data);
+					let fileBuffer = Buffer.from(await response.arrayBuffer());
+					const { mime, ext } = await fileTypeFromBuffer(fileBuffer);
+
+					const isGif = mime.includes('gif');
+					const messageType = isGif || mime.includes('video') ? 'video' : mime.includes('image') ? 'image' : 'document';
+
+					if (isGif) {
+						const id = Date.now();
+						const filepath = (u) => `./src/media/temporary_files/${u}`;
+
+						const inputPath = filepath(`input-${id}.gif`);
+						const outputPath = filepath(`output-${id}.mp4`);
+
+						fs.writeFileSync(inputPath, fileBuffer);
+
+						const { output } = await gif2mp4(inputPath, outputPath);
+
+						fileBuffer = await fs.readFile(output);
+
+						await client.instance.send(
+							from,
+							{
+								[messageType]: fileBuffer,
+								gifPlayback: true
+							},
+							{ quoted: message }
+						);
+
+						fs.unlinkSync(inputPath);
+						fs.unlinkSync(outputPath);
+
+						return;
+					}
+
+					await client.instance.send(
+						from,
+						{
+							[messageType]: fileBuffer,
+							...(messageType === 'document' ? { fileName: `file.${ext}` } : {})
+						},
+						{ quoted: message }
+					);
+					return;
 				}
 
 				await client.instance.reply(data, { from, quoted: message });

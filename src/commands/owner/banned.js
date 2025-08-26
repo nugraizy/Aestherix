@@ -10,7 +10,7 @@ export default {
 	name: 'banned',
 	minifiedDescription: 'Ban User',
 	description: 'Ban user.',
-	usage: '!banned <tag/reply>',
+	usage: '!banned `<tag/reply>`',
 	aliases: ['ban'],
 	category: 'Owner',
 	cooldown: 0,

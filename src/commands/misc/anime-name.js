@@ -9,7 +9,9 @@ export default {
 	name: 'animename',
 	minifiedDescription: 'Convert Anime Name',
 	description: 'Find your Nickname in Anime Style.',
-	usage: `!animename <query> <--options>\n\nOptions : \n${animeNameOptions.map((v, i) => `${i + 1}. ${v}`).join('\n')}`,
+	usage: `!animename \`<query>\` \`<--options>\`\n\nOptions : \n${animeNameOptions
+		.map((v, i) => `${i + 1}. ${v}`)
+		.join('\n')}`,
 	aliases: ['animname', 'animnama'],
 	category: 'Misc',
 	cooldown: 3,

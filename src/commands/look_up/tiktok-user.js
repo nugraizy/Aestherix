@@ -1,7 +1,7 @@
 import parser from 'yargs-parser';
 import _ from 'lodash';
 
-import { color, numberWithCommas, loggers, formatNumber } from '../../utils/modules/index.js';
+import { color, loggers, formatNumber } from '../../utils/modules/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
 
 /**
@@ -11,7 +11,7 @@ export default {
 	name: 'tikstalk',
 	minifiedDescription: 'Look-up TikTok User',
 	description: 'Look-up TikTok user.',
-	usage: '!tikstalk <username>',
+	usage: '!tikstalk `<username>`',
 	aliases: ['ttstalk', 'ttuser'],
 	category: 'Look-up',
 	cooldown: 6,

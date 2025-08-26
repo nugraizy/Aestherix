@@ -15,6 +15,7 @@ import { createSVGWindow } from 'svgdom';
 import { SVG, registerWindow } from '@svgdotjs/svg.js';
 import puppeteer from 'puppeteer';
 import { Writable } from 'node:stream';
+import isBuffer from 'is-buffer';
 
 import configuration from '../../helper/config/connect.js';
 import { color, fetchBUFFER, fetchJSON, loggers, isURL } from '../modules/index.js';
@@ -123,7 +124,7 @@ export const toOpus = (ext, opts = {}) =>
 		} else {
 			tmp = `${opts.input}.${ext}`;
 
-			if (Buffer.isBuffer(opts.media)) {
+			if (isBuffer(opts.media)) {
 				await fs.writeFile(tmp, opts.media);
 			}
 
@@ -337,9 +338,7 @@ export const mp42mp3 = (input, output, sender) =>
 export const gif2mp4 = (input, output, opts = {}) =>
 	new Promise((resolve, reject) => {
 		exec(
-			`ffmpeg -stream_loop -1 -i "${input}" -vcodec libx264 -acodec libmp3lame -pix_fmt yuv420p -crf 23 -ss 00:00:00.000 -t 00:00:${
-				opts.duration || 4
-			}.000 "${output}"`,
+			`ffmpeg -i "${input}" -movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" "${output}"`,
 			(err) => {
 				if (err) {
 					loggers.error(`${color('Failed to Convert Gif to Video', '#FF5555')}`);
@@ -550,7 +549,7 @@ export const waifu2x = (input, sender) =>
 	new Promise(async (resolve, reject) => {
 		let output;
 
-		if (Buffer.isBuffer) {
+		if (isBuffer) {
 			output = path.join(__dirname, `src/media/temporary_files/${sender}.png`);
 			await sharp(input).toFormat('png').toFile(output);
 		} else if (await fs.exists(input)) {

@@ -56,7 +56,7 @@ export default {
 	name: 'ytaudio',
 	minifiedDescription: 'Downloads YouTube Audio',
 	description: 'Downloads a YouTube audio',
-	usage: '!ytaudio <url>',
+	usage: '!ytaudio `<url(s)>` (you can send multiple url using space in between)',
 	aliases: ['yta', 'ytmp3'],
 	category: 'Downloader',
 	cooldown: 7,

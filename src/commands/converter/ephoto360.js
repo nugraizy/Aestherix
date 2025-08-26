@@ -20,7 +20,7 @@ export default {
 	minifiedDescription: 'Ephoto360 Text Maker',
 	description: 'Image maker using texts',
 	usage:
-		'!ephoto360 <query> <model/number[REQUIRED]> [options]\nOptions:\n-stk / -img\nAvailable Model Type : !ephoto360 -model',
+		'!ephoto360 `<query>` `<model/number[REQUIRED]>` `[options]`\nOptions:\n-stk / -img\nAvailable Model Type : !ephoto360 -model',
 	aliases: ['ephoto', 'epht'],
 	category: 'Converter',
 	cooldown: 4,

@@ -55,7 +55,7 @@ export default {
 	name: 'ytvideo',
 	minifiedDescription: 'Downloads YouTube Video',
 	description: 'Downloads a YouTube video',
-	usage: '!ytvideo <url>',
+	usage: '!ytvideo `<url(s)>` (you can send multiple url using space in between)',
 	aliases: ['ytv', 'ytmp4'],
 	category: 'Downloader',
 	cooldown: 12,

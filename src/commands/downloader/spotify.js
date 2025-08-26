@@ -1,3 +1,5 @@
+import parser from 'yargs-parser';
+
 import { color, delay, loggers, isURL, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { spotifier } from '../../utils/index.js';
 
@@ -77,7 +79,7 @@ export default {
 	name: 'spotifydl',
 	minifiedDescription: 'Download Spotify',
 	description: 'Download media from Spotify.',
-	usage: '!spotifydl <url>',
+	usage: '!spotifydl `<url(s)>` (you can send multiple url using space in between)',
 	aliases: ['spdl', 'spotdl'],
 	category: 'Downloader',
 	cooldown: 4,
@@ -144,31 +146,32 @@ export default {
 			return await client.instance.reply('Please provide a URL', { from, quoted: message });
 		}
 
-		let queries = query.split(',');
+		await client.instance.reply('Please wait...', { from, quoted: message });
 
-		queries = removeDuplicatesArray(queries);
+		let { _: urls } = parser(query);
 
-		if (queries.length === 1 && isURL(queries) && !isSpotifyURL(queries)) {
+		urls = removeDuplicatesArray(urls);
+
+		loggers.warning(`${color('Downloading Pixiv File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+
+		if (urls.length === 1 && isURL(urls) && !isSpotifyURL(urls)) {
 			return await client.instance.reply('This is not a valid Spotify URL.', { from, quoted: message });
 		}
 
-		await client.instance.reply(`Downloading Spotify Media(s) :\n${queries.join('\n')}\nPlease wait`, {
-			from,
-			quoted: message
-		});
-
-		for (const Query of queries) {
-			if (isURL(Query) && !isSpotifyURL(Query)) {
-				return await client.instance.reply(`[ ${Query} ] This isn't a valid Spotify URL.`, {
+		for (const url of urls) {
+			if (isURL(url) && !isSpotifyURL(url)) {
+				await client.instance.reply(`[ ${url} ] This isn't a valid Spotify URL.`, {
 					from,
 					quoted: message
 				});
+				loggers.error(`${color('Failed to Download Spotify Media', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				continue;
 			}
 
-			const typeMedia = getSpotifyType(Query);
+			const typeMedia = getSpotifyType(url);
 
 			if (typeMedia === 'artist') {
-				await client.instance.reply(`[ ${Query} ] This is an artist link. Please send media URL.`, {
+				await client.instance.reply(`[ ${url} ] This is an artist link. Please send media URL.`, {
 					from,
 					quoted: message
 				});
@@ -176,7 +179,7 @@ export default {
 				continue;
 			}
 
-			await processVideo(Query, typeMedia, client, { from, message, prettyNumber });
+			await processVideo(url, typeMedia, client, { from, message, prettyNumber });
 			await delay(300);
 		}
 

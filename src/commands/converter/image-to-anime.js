@@ -8,12 +8,12 @@ export default {
 	name: 'toanime',
 	minifiedDescription: 'Animefy Picture',
 	description: 'Change your selfie picture to Anime-like using QQ A.I.',
-	usage: '!toanime <reply media/send media>',
+	usage: '!toanime `<reply media/send media>`',
 	aliases: ['toanim', 'ai2d', 'faceplay'],
 	category: 'Converter',
 	cooldown: 8,
 	limit: 9,
-	status: 'enable',
+	status: 'disable',
 	run: async ({ isMediaImage, from, prettyNumber, message, mediaData, sender, args }, client) => {
 		loggers.warning(`${color('Converting image to Anime-like', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 

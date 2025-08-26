@@ -13,7 +13,7 @@ export default {
 	name: 'spotifyalbum',
 	minifiedDescription: 'Search Spotify Album',
 	description: 'Search album on Spotify.',
-	usage: '!spotifyalbum <query>',
+	usage: '!spotifyalbum `<query>`',
 	category: 'Search',
 	aliases: ['spotifyalb'],
 	limit: 5,
@@ -56,7 +56,6 @@ export default {
 			tracks = await spotifier.getAlbumTracks(id);
 			images = result.albums[0].images[0].url;
 			let caption = '';
-			let count = 0;
 			const rows = [];
 
 			for (const { artists, name, duration_ms: durationMs } of tracks.items) {

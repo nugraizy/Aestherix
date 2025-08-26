@@ -8,7 +8,7 @@ export default {
 	name: 'wallpaper',
 	minifiedDescription: 'Search Wallpaper',
 	description: 'Search wallpaper.',
-	usage: '!wallpaper <query>',
+	usage: '!wallpaper `<query>`',
 	category: 'Search',
 	aliases: ['wall'],
 	limit: 4,

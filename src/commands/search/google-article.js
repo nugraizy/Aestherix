@@ -7,7 +7,7 @@ export default {
 	name: 'googlearticle',
 	minifiedDescription: 'Search Google Articles',
 	description: 'Search articles from Google.',
-	usage: '!googlearticle <query>',
+	usage: '!googlearticle `<query>`',
 	aliases: ['gar', 'goarticle', 'articles'],
 	category: 'Search',
 	cooldown: 5,

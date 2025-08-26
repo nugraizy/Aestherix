@@ -9,7 +9,7 @@ export default {
 	aliases: ['eventupd', 'eventupdate', 'notify'],
 	description: 'Enable or disable group event notification',
 	category: 'Moderation',
-	usage: '!notification <enable/disable>',
+	usage: '!notification `<enable/disable>`',
 	cooldown: 2,
 	limit: 2,
 	status: 'enable',

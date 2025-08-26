@@ -9,7 +9,7 @@ export default {
 	aliases: ['antiporn', 'noporn', 'nonsfw'],
 	description: 'Enable or disable anti-porn.',
 	category: 'Moderation',
-	usage: '!antinsfw <enable/disable>',
+	usage: '!antinsfw `<enable/disable>`',
 	cooldown: 2,
 	limit: 2,
 	status: 'enable',

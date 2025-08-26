@@ -8,7 +8,7 @@ export default {
 	name: 'stockimages',
 	minifiedDescription: 'Stock Images V1',
 	description: 'Search stock images.',
-	usage: '!stockimages <query>',
+	usage: '!stockimages `<query>`',
 	category: 'Search',
 	aliases: ['stockimg'],
 	limit: 4,

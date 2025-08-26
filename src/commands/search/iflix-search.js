@@ -8,7 +8,7 @@ export default {
 	minifiedDescription: 'Search Iflix',
 	description: 'Search movie on iflix.',
 	category: 'Search',
-	usage: '!iflix <query>',
+	usage: '!iflix `<query>`',
 	aliases: ['iflx'],
 	cooldown: 7,
 	limit: 4,

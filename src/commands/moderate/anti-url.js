@@ -9,7 +9,7 @@ export default {
 	aliases: ['antilink', 'antitautan'],
 	description: 'Enable or disable anti-url.',
 	category: 'Moderation',
-	usage: '!antiurl <enable/disable>',
+	usage: '!antiurl `<enable/disable>`',
 	cooldown: 2,
 	limit: 2,
 	status: 'enable',

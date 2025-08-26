@@ -10,6 +10,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc.js';
 import chalk from 'chalk';
 import progress from 'progress-stream';
+import isBuffer from 'is-buffer';
 
 import configuration from '../../helper/config/connect.js';
 import { color } from './color.js';
@@ -541,8 +542,7 @@ export const loggers = {
 	error: (...info) => loggersFns('ERR', '#FF5555', ...info)
 };
 
-export const isURL = (input) =>
-	/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/gi.test(input);
+export const isURL = (input) => /^(https?:\/\/)([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(:[0-9]{2,5})?(\/\S*)?$/i.test(input);
 
 export const isYoutubeURL = (input) =>
 	/(?:http(?:s|):\/\/|)(?:(?:www\.|)youtube(?:-nocookie|)\.com\/(?:shorts\/)?(?:watch\?.*(?:|&)v=|embed\/|v\/)|youtu\.be\/)?\/.+/.test(
@@ -627,7 +627,7 @@ export const uploadToTelegraph = async (file) => {
 	try {
 		const tempFile = file;
 
-		if (Buffer.isBuffer(file)) {
+		if (isBuffer(file)) {
 			file = file.toString('base64');
 		} else if (isFilePath(file)) {
 			file = Buffer.from(fs.readFileSync(file), 'base64');
@@ -962,7 +962,7 @@ export class Uploader {
 	 * @returns {Promise<{success: boolean, ext: string | null, message: string | undefined}>}
 	 */
 	async validateFile() {
-		if (Buffer.isBuffer(this._file)) {
+		if (isBuffer(this._file)) {
 			const types = await fileTypeFromBuffer(this._file);
 
 			if (!types) {

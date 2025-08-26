@@ -7,7 +7,7 @@ export default {
 	name: '3hentai',
 	minifiedDescription: 'Search Doujin',
 	description: 'Search Doujin from 3hentai.net.',
-	usage: '!3hentai <query>',
+	usage: '!3hentai `<query>`',
 	aliases: ['3hent'],
 	category: 'Owner',
 	cooldown: 0,

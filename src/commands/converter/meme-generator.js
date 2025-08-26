@@ -12,7 +12,7 @@ export default {
 	name: 'memegen',
 	minifiedDescription: 'Generate Meme',
 	description: 'Meme Generator, You know the drill.',
-	usage: '!memegen <reply media/send media> <[Top Texts] & [Bottom Texts]> [options]\nOptions:\n-stk / -img',
+	usage: '!memegen `<reply media/send media>` <[Top Texts] & [Bottom Texts]> [options]\nOptions:\n-stk / -img',
 	aliases: ['mgen', 'memgen', 'memegen'],
 	category: 'Converter',
 	cooldown: 5,

@@ -8,7 +8,7 @@ export default {
 	minifiedDescription: 'CNN-International News',
 	description: 'Showing latest news in International from CNN.',
 	category: 'News',
-	usage: '!cnninternational <keywords/blank(to fetch newest)>',
+	usage: '!cnninternational `<keywords/blank(to fetch latest news)>`',
 	aliases: ['cnnint'],
 	cooldown: 2,
 	limit: 3,

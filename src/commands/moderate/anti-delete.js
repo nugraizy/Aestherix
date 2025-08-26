@@ -9,7 +9,7 @@ export default {
 	aliases: ['antidelet', 'antihapus'],
 	description: 'Enable or disable anti-delete.',
 	category: 'Moderation',
-	usage: '!antidelete <enable/disable>',
+	usage: '!antidelete `<enable/disable>`',
 	cooldown: 2,
 	limit: 2,
 	status: 'enable',

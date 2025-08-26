@@ -12,7 +12,7 @@ export default {
 	name: 'removebg',
 	minifiedDescription: 'Remove Background',
 	description: 'Remove background from image.',
-	usage: '!removebg <reply/send (image/sticker)>',
+	usage: '!removebg `<reply/send (image/sticker)>`',
 	aliases: ['rmbg', 'rbg', 'nobg'],
 	category: 'Converter',
 	cooldown: 5,

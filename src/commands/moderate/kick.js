@@ -5,7 +5,7 @@ export default {
 	name: 'kick',
 	minifiedDescription: 'Kick User',
 	description: 'Kick member from group.',
-	usage: '!kick <reply/tag member>',
+	usage: '!kick `<reply/tag member>`',
 	aliases: ['remove', 'rem', 'rm'],
 	category: 'Moderation',
 	cooldown: 12,

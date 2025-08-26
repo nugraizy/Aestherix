@@ -5,7 +5,7 @@ export default {
 	name: 'setbio',
 	minifiedDescription: 'Change Bio',
 	description: "Set the bot's bio" /* eslint-disable-line */,
-	usage: '!setbio <bio>',
+	usage: '!setbio `<bio>`',
 	aliases: ['setinfo'],
 	category: 'Owner',
 	cooldown: 0,

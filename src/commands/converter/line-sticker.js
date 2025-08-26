@@ -10,7 +10,7 @@ export default {
 	name: 'linesticker',
 	minifiedDescription: 'Line Sticker',
 	description: 'Find Line stickers.',
-	usage: '!linesticker <query>',
+	usage: '!linesticker `<query>`',
 	aliases: ['ls', 'linestick', 'linestickers'],
 	category: 'Converter',
 	cooldown: 5,

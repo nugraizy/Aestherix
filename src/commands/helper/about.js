@@ -1,7 +1,6 @@
 import fs from 'fs-extra';
 
 import configuration from '../../helper/config/connect.js';
-import { romanize } from '../../utils/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -19,9 +18,9 @@ export default {
 	async run({ from, message }, client) {
 		const capt = `Bot Name : Void
 Total Commands : ${configuration.cmds.commands.size}
-Bot Version : ${romanize((await fs.readJSON('./package.json')).version).toUpperCase()}
+Bot Version : ${(await fs.readJSON('./package.json')).version}
 Bot Creator : Nanda
-Github Uname : nugraizy
+Github Username : nugraizy
 Github Repo : Currently not available (private)
 
 Our Motto :

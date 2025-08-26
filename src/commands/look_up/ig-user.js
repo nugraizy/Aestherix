@@ -10,7 +10,7 @@ export default {
 	name: 'instalk',
 	minifiedDescription: 'Look-up Instagram User',
 	description: 'Look-up Instagram user.',
-	usage: '!instalk <username>',
+	usage: '!instalk `<username>`',
 	aliases: ['instauser', 'iguser', 'igstalk'],
 	category: 'Look-up',
 	cooldown: 6,

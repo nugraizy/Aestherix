@@ -24,7 +24,7 @@ export default {
 	name: 'epicgames',
 	minifiedDescription: 'Search Epicgames',
 	description: 'Search games from Epicgames.',
-	usage: '!epicgames <query/--free>',
+	usage: '!epicgames `<query/--free>`',
 	aliases: ['epgames'],
 	category: 'Search',
 	cooldown: 3,

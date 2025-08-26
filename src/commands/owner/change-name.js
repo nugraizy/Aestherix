@@ -5,7 +5,7 @@ export default {
 	name: 'setname',
 	minifiedDescription: 'Change Name',
 	description: "Set the bot's name." /* eslint-disable-line */,
-	usage: '!setname <name>',
+	usage: '!setname `<name>`',
 	aliases: ['setnick', 'nick', 'name'],
 	category: 'Owner',
 	cooldown: 0,

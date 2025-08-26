@@ -9,7 +9,7 @@ export default {
 	minifiedDescription: 'Create Image',
 	description: 'Create Image from text using Bing AI.',
 	category: 'AI',
-	usage: '!bingimage <query>',
+	usage: '!bingimage `<query>`',
 	aliases: ['bingimg', 'imgbing'],
 	cooldown: 3,
 	limit: 5,

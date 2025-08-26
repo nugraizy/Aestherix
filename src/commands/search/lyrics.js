@@ -8,7 +8,7 @@ export default {
 	name: 'findlyrics',
 	minifiedDescription: 'Search Lyrics',
 	description: 'Search song lyrics.',
-	usage: '!findlyrics <query>',
+	usage: '!findlyrics `<query>`',
 	category: 'Search',
 	aliases: ['lyrics', 'lyric'],
 	limit: 4,

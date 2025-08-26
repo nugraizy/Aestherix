@@ -29,7 +29,7 @@ export default {
 	name: 'malanime',
 	minifiedDescription: 'MAL Search Anime',
 	description: 'Search an anime on MyAnimeList',
-	usage: '!malanime <query>',
+	usage: '!malanime `<query>`',
 	category: 'Anime',
 	aliases: ['malanim'],
 	limit: 2,

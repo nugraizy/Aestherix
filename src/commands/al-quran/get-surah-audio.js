@@ -10,7 +10,7 @@ export default {
 	minifiedDescription: 'Surah Audio',
 	description: 'Get surah audio',
 	category: 'AL-Quran',
-	usage: '!surahaudio <surah number>',
+	usage: '!surahaudio `<surah number>`',
 	aliases: ['surah'],
 	cooldown: 0,
 	limit: 0,

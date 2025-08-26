@@ -7,7 +7,7 @@ export default {
 	name: 'zalgo',
 	minifiedDescription: 'Zalgofie Text',
 	description: 'Convert Text to Zalgo text',
-	usage: '!zalgo <query>',
+	usage: '!zalgo `<query>`',
 	category: 'Misc',
 	aliases: ['tozalgo', 'zalg'],
 	limit: 2,

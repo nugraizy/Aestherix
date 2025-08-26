@@ -8,7 +8,7 @@ export default {
 	minifiedDescription: 'AFK Mode',
 	description: 'Going away from keyboard.',
 	category: 'Misc',
-	usage: '!afk <reason|no reason>',
+	usage: '!afk `<reason|no reason>`',
 	aliases: ['away', 'idle'],
 	limit: 2,
 	cooldown: 3,

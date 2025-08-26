@@ -7,7 +7,7 @@ export default {
 	name: 'extractzalgo',
 	minifiedDescription: 'Unzalgofie Text',
 	description: 'Extract Zalgo text to Text',
-	usage: '!extractzalgo <query>',
+	usage: '!extractzalgo `<query>`',
 	category: 'Misc',
 	aliases: ['conzalgo', 'conzalg'],
 	limit: 2,

@@ -10,7 +10,7 @@ export default {
 	name: 'twitstalk',
 	minifiedDescription: 'Look-up Twitter User',
 	description: 'Look-up Twitter user.',
-	usage: '!twitstalk <username>',
+	usage: '!twitstalk `<username>`',
 	aliases: ['twtlu', 'twtlookup', 'twtuser'],
 	category: 'Look-up',
 	cooldown: 6,

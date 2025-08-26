@@ -11,7 +11,7 @@ export default {
 	name: 'igreel',
 	minifiedDescription: 'Download Instagram Reel',
 	description: 'Downloads the reel of the user',
-	usage: '!igreel <url>',
+	usage: '!igreel `<url(s)>` (you can send multiple link using space in between)',
 	aliases: ['igreel', 'igr'],
 	category: 'Downloader',
 	cooldown: 10,
@@ -22,7 +22,7 @@ export default {
 			return await client.instance.reply('Please specify a url', { from, quoted: message });
 		}
 
-		await client.instance.reply('Please wait.', { from, quoted: message });
+		await client.instance.reply('Please wait...', { from, quoted: message });
 
 		const { _: urls } = parser(query);
 

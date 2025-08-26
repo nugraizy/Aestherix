@@ -13,7 +13,7 @@ export default {
 	name: 'spotifyartist',
 	minifiedDescription: 'Search Spotify Artists',
 	description: 'Search artist on Spotify.',
-	usage: '!spotifyartist <query>',
+	usage: '!spotifyartist `<query>`',
 	category: 'Search',
 	aliases: ['spotifyart'],
 	limit: 5,

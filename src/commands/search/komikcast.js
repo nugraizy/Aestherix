@@ -7,7 +7,7 @@ export default {
 	name: 'komikcast',
 	minifiedDescription: 'Search Komikcast',
 	description: 'Search comics from Komikcast.net.',
-	usage: '!komikcast <query>',
+	usage: '!komikcast `<query>`',
 	aliases: ['komik', 'comic', 'manga'],
 	category: 'Search',
 	cooldown: 7,

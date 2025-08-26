@@ -7,7 +7,7 @@ export default {
 	name: 'layarkaca21',
 	minifiedDescription: 'Search Layarkaca21',
 	description: 'Search movies from Layarkaca21 websites.',
-	usage: '!layarkaca21 <query>',
+	usage: '!layarkaca21 `<query>`',
 	aliases: ['lk21', 'd21'],
 	category: 'Search',
 	cooldown: 5,

@@ -24,7 +24,7 @@ export default {
 	name: 'genshinstalk',
 	minifiedDescription: 'Look-up Genshin Impact Player',
 	description: 'Look-up Genshin Impact player.',
-	usage: '!genshinstalk <uids>',
+	usage: '!genshinstalk `<uids>`',
 	aliases: ['genshinuser', 'giuser', 'gistalk'],
 	category: 'Genshin Impact',
 	cooldown: 6,

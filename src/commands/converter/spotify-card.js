@@ -9,7 +9,7 @@ export default {
 	description: 'Make Spotif Card',
 	category: 'Converter',
 	aliases: ['scard'],
-	usage: '!spotifycard <query>',
+	usage: '!spotifycard `<query>`',
 	cooldown: 5,
 	limit: 3,
 	status: 'enable',

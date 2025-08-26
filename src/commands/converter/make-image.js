@@ -7,12 +7,12 @@ export default {
 	name: 'makeimage',
 	minifiedDescription: 'Create Image',
 	description: 'Create an image based on your description',
-	usage: '!makeimage <scenario>',
+	usage: '!makeimage `<scenario>`',
 	category: 'Converter',
 	aliases: ['createimage', 'makeimg', 'createimg'],
 	limit: 2,
 	cooldown: 5,
-	status: 'enable',
+	status: 'disable',
 	async run({ query, from, message }, client) {
 		if (!query) {
 			return await client.instance.reply('You must provide a query.', { from, quoted: message });

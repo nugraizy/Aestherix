@@ -10,7 +10,7 @@ export default {
 	name: 'scanimagetext',
 	minifiedDescription: 'Image to text',
 	description: 'Recognize text from image.',
-	usage: '!scanimagetext <Image(reply/send)>',
+	usage: '!scanimagetext `<reply media/send media>`',
 	category: 'Converter',
 	aliases: ['ocr'],
 	cooldown: 5,

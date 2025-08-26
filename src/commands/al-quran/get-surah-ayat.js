@@ -10,7 +10,7 @@ export default {
 	minifiedDescription: 'Surah Ayat',
 	description: 'Get surah ayat',
 	category: 'AL-Quran',
-	usage: '!surahayat <surah number>',
+	usage: '!surahayat `<surah number>`',
 	aliases: ['ayat'],
 	cooldown: 0,
 	limit: 0,

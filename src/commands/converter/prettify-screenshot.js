@@ -8,7 +8,7 @@ export default {
 	name: 'prettify',
 	minifiedDescription: 'Prettify Screenshot',
 	description: 'Prettify image.',
-	usage: '!prettify <reply/send image>',
+	usage: '!prettify `<reply/send image>`',
 	aliases: ['pretty'],
 	category: 'Converter',
 	cooldown: 5,

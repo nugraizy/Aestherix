@@ -358,7 +358,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 			const cooldownUser = user.cooldown.get(message.sender);
 
 			try {
-				if (/-{1,2}((help(s)?|info|des(c|k)rip(t|s)i(on)?)|H)$/i.test(message.args[1]) && Tempcmds.name !== 'eval') {
+				if (/-{1,2}(help(s)?|info|des(c|k)rip(t|s)i(on)?)$/i.test(message.args[1]) && Tempcmds.name !== 'eval') {
 					const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${
 						Tempcmds.cooldown
 					}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v}`).join(', ')}.`;
@@ -385,7 +385,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 					cooldownUser.requests = false;
 				}
 
-				const builder = new client.instance.TemplateBuilder.Carousel(client);
+				const builder = new client.instance.TemplateBuilder.Native(client);
 
 				let str = !message.isOwner ? 'Please send this error stack to the owner :\n\n' : '\n';
 
@@ -394,40 +394,36 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 				str += `Stack Trace :\n${(message.isOwner ? err?.stack : err?.stack?.substring(0, 20)) || 'Unknown'}`;
 
 				builder
-					.mainBody('')
-					.mainFooter('')
-					.cards(
-						[
-							{
-								body: 'This error is from the client. Please report to owneer.',
-								title: 'Something went wrong.',
-								footer: str,
-								header: Buffer.alloc(10),
-								buttons: [
-									builder.button.url({
-										display: 'GitHub User!',
-										url: 'https://github.com/nugraizy'
-									}),
-									message.isOwner
-										? builder.button.url({
-												display: 'Report to Owner',
-												url: `https://wa.me/${message.settings.owner_number}?text=hi,%20bot%20mengalami%20error${encodeURI(
-													`\n\n${err.stack}`
-												)}`
-										  }) // eslint-disable-line
-										: null,
-									message.isOwner
-										? builder.button.reply({
-												display: 'Report via Bot',
-												id: `.report ${err.stack}`
-										  }) // eslint-disable-line
-										: null,
-									builder.button.copy({
-										code: err.stack,
-										display: 'Copy Stack Trace'
-									})
-								]
-							}
+					.mainBody(
+						message.isOwner
+							? 'Something went unexpected. Please read below :'
+							: 'This error is from the client. Please report to owneer.'
+					)
+					.mainFooter(str)
+					.buttons(
+						...[
+							builder.button.url({
+								display: 'GitHub User!',
+								url: 'https://github.com/nugraizy'
+							}),
+							message.isOwner
+								? builder.button.url({
+										display: 'Report to Owner',
+										url: `https://wa.me/${message.settings.owner_number}?text=hi,%20bot%20mengalami%20error${encodeURI(
+											`\n\n${err.stack}`
+										)}`
+								  }) // eslint-disable-line
+								: null,
+							message.isOwner
+								? builder.button.reply({
+										display: 'Report via Bot',
+										id: `.report ${err.stack}`
+								  }) // eslint-disable-line
+								: null,
+							builder.button.copy({
+								code: err.stack,
+								display: 'Copy Stack Trace'
+							})
 						].filter(Boolean)
 					);
 

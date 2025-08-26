@@ -1,4 +1,6 @@
-import { fetchBUFFER, removeDuplicatesArray } from '../../utils/modules/index.js';
+import parser from 'yargs-parser';
+
+import { fetchBUFFER, removeDuplicatesArray, loggers, color } from '../../utils/modules/index.js';
 import { downloadArtworks } from '../../utils/pixiv/index.js';
 
 const regex = (input) => {
@@ -25,41 +27,46 @@ export default {
 	name: 'pixivartworkdl',
 	minifiedDescription: 'Download Pixiv Artwork',
 	description: 'Download artworks from Pixiv',
-	usage: '!pixivartworkdl <url>',
+	usage: '!pixivartworkdl `<url(s)>` (you can send multiple url using space in between)',
 	aliases: ['pixartdl', 'pixivartdl'],
 	category: 'Downloader',
 	limit: 4,
 	cooldown: 7,
 	status: 'enable',
-	async run({ from, query, message }, client) {
+	async run({ from, query, message, prettyNumber }, client) {
 		if (!query) {
 			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
-		let queries = query.split(',');
+		await client.instance.reply('Please wait...', { from, quoted: message });
 
-		queries = removeDuplicatesArray(queries);
+		let { _: urls } = parser(query);
 
-		for (const querie of queries) {
-			const regexs = regex(querie.trim());
+		urls = removeDuplicatesArray(urls);
+
+		loggers.warning(`${color('Downloading Pixiv File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+
+		for (const url of urls) {
+			const regexs = regex(url.trim());
 
 			if (!regexs.status) {
-				return await client.instance.reply(regexs.message, { from, quoted: message });
+				await client.instance.reply(regexs.message + `\nInvalid : ${url}`, { from, quoted: message });
+				continue;
 			}
 
 			const data = await downloadArtworks(regexs.message);
 
 			if (data?.error) {
-				await client.instance.reply(`Failed while downloading Pixiv artworks\n\n${data.error}\n${querie}`, {
+				await client.instance.reply(`Failed while downloading Pixiv artworks\n\n${data.error}\n${url}`, {
 					from,
 					quoted: message
 				});
-
+				loggers.error(`${color('Failed to Download Pixiv File', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
 			}
 
 			let i = 0;
-			const { id, title, userId, userName, pageCount, url: urls } = data;
+			const { id, title, userId, userName, pageCount, url: content } = data;
 			let caption = `${'Pixiv Artworks Downloader'.formatHeaders()}
 			
 Title : ${title.capitalize()}
@@ -68,8 +75,8 @@ ID Artwork : ${id}
 ID Author : ${userId}
 Total Media : ${pageCount}`;
 
-			if (urls.original.length === 1) {
-				const images = await fetchBUFFER(urls.original[0], {
+			if (content.original.length === 1) {
+				const images = await fetchBUFFER(content.original[0], {
 					headers: { referer: `https://www.pixiv.net/ajax/illust/${id}` }
 				});
 
@@ -83,10 +90,10 @@ Total Media : ${pageCount}`;
 				);
 			}
 
-			for (const url of urls.original) {
+			for (const urlImage of content.original) {
 				caption = i === 0 ? caption + `\nSource https://www.pixiv.net/en/artworks/${id}` : '\t';
 
-				const buffer = await fetchBUFFER(url, { headers: { referer: `https://www.pixiv.net/ajax/illust/${id}` } });
+				const buffer = await fetchBUFFER(urlImage, { headers: { referer: `https://www.pixiv.net/ajax/illust/${id}` } });
 
 				await client.instance.send(
 					from,
@@ -99,5 +106,7 @@ Total Media : ${pageCount}`;
 				i++;
 			}
 		}
+
+		loggers.info(`${color('Downloaded Pixiv File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

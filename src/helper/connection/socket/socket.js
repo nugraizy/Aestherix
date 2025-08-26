@@ -61,7 +61,7 @@ const question = (text) =>
  */
 export const connectSocket = async ({ cli, OPTIONS, store }) => {
 	/**
-	 * @type {import('./types/Socket').MultiAuthState}
+	 * @type {import('../../../types/Socket/index.js').MultiAuthState}
 	 */
 	const { state, saveCreds } = await useMultiFileAuthState(
 		`./src/helper/connection/session/${cli.input[0] ?? 'Session-debug'}`
@@ -237,7 +237,7 @@ const handleNewInstance = async ({ OPTIONS, Client }) => {
 
 		phoneNumber = phoneNumber.trim();
 
-		const code = await Client.requestPairingCode(phoneNumber);
+		const code = await Client.requestPairingCode(phoneNumber, 'AESTHERX');
 
 		loggers.info(
 			color('Pairing code :', '#E4C1F9'),

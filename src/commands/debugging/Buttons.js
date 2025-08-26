@@ -1,4 +1,5 @@
 import baileys, { generateWAMessageFromContent } from 'baileys';
+
 const { proto } = baileys;
 
 /**
@@ -38,6 +39,7 @@ export default {
 			},
 			{}
 		);
+
 		await client.instance.relayMessage(from, button.message, { messageId: button.key.id });
 		await client.instance.send(
 			from,

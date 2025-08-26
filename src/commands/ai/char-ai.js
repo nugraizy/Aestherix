@@ -9,7 +9,7 @@ export default {
 	minifiedDescription: 'Chat AI',
 	description: 'Chat with AI.',
 	category: 'AI',
-	usage: '!charai <start/stop>',
+	usage: '!charai `<start/stop>`',
 	aliases: ['ai'],
 	cooldown: 3,
 	limit: 5,

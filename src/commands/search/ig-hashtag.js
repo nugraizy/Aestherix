@@ -7,7 +7,7 @@ export default {
 	name: 'ighashtag',
 	minifiedDescription: 'Search Instagram Hashtag',
 	description: 'Search for hashtag on Instagram.',
-	usage: '!ighashtag <keyword>',
+	usage: '!ighashtag `<keyword>`',
 	aliases: ['ighash'],
 	category: 'Search',
 	cooldown: 8,

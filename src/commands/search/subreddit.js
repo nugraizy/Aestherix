@@ -8,7 +8,7 @@ export default {
 	name: 'subreddit',
 	minifiedDescription: 'Search Subreddit',
 	description: 'Search Subreddit.',
-	usage: '!subreddit <query>',
+	usage: '!subreddit `<query>`',
 	category: 'Search',
 	aliases: ['subr'],
 	limit: 4,

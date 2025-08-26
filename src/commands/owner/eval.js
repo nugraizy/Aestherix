@@ -1,5 +1,4 @@
 import * as _ from 'baileys'; /* eslint-disable-line */
-import { WAProto } from 'baileys'; /* eslint-disable-line */
 import { exec } from 'child_process';
 import fs from 'fs';
 import fsX from 'fs-extra'; /* eslint-disable-line */
@@ -17,6 +16,7 @@ import * as d from '../../index.js';
 const func = { ...a, ...b, ...c, ...d, ...configuration }; /* eslint-disable-line */
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 const col = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+const WAProto = _.WAProto;
 
 class CustomArray extends Array {
 	constructor(...args) {
@@ -33,7 +33,7 @@ export default {
 	name: 'eval',
 	minifiedDescription: 'Evaluate Code',
 	description: 'Evaluates code.',
-	usage: '!eval <code>',
+	usage: '!eval `<code>`',
 	aliases: ['/>', '$>', '=>', '!>'],
 	category: 'Owner',
 	cooldown: 0,

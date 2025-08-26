@@ -9,61 +9,55 @@ export default {
 	name: 'waifupic',
 	minifiedDescription: 'Random Waifupics',
 	description: 'Search images from waifu pics',
-	usage: '!waifupic <query>',
+	usage:
+		'!waifupic `<query>` `--(nsfw/sfw)`\n\nExample : \n!waifupic (oneof `waifu,neko,trap,blowjob`) --nsfw\n!waifupic (oneof `waifu,neko,shinobu,megumin,bully,cuddle,cry,hug,awoo,kiss,lick,pat,smug,bonk,yeet,blush,smile,wave,highfive,handhold,nom,bite,glomp,slap,kill,kick,happy,wink,poke,dance,cringe`) --sfw',
 	category: 'Anime',
 	aliases: ['wpic'],
 	limit: 4,
 	cooldown: 5,
 	status: 'enable',
-	async run({ query, from, message, args, sender }, client) {
+	async run({ query, from, message, args }, client) {
 		if (!query) {
 			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
 		if (args[1] === 'next' || args[1] === 'prev') {
-			let buffer;
-
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(5).join(' '))));
 			const index = data.findIndex((v) => v === args[4]);
-			const isGif = data[index].endsWith('gif');
 
-			if (isGif) {
-				buffer = await gifToMp4(data[index], sender);
-			}
+			const builder = new client.instance.TemplateBuilder.Native(client);
 
-			return await client.instance.send(
-				from,
-				{
-					...(isGif ? { video: buffer, gifPlayback: true } : { image: { url: data[index] } }),
-					caption: 'Waifu Pics'.formatHeaders(),
-					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: args[1] === 'next' ? data[index] : data[index] } },
+			builder
+				.mainBody('Waifu Pics'.formatHeaders())
+				.mainFooter(`Provided by waifu.pics\nVoid Bot     ${index + 1}/${data.length}`)
+				.mainHeader('Header', data[index])
+				.buttons(
+					...[
+						builder.button.url({
+							display: 'Original Source',
+							url: data[index]
+						}),
 						index + 1 !== data.length
-							? {
-									quickReplyButton: {
-										displayText: 'Next Image',
-										id: `.waifupic next ${args[2]} ${args[3]} ${data[index + 1]} ${JSON.stringify(data)}`
-									}
-							  } /* eslint-disable-line */
-							: {
-									quickReplyButton: {
-										displayText: `Search More ${args[2].capitalize()}`,
-										id: `.waifupic ${args[2]} -${args[3]}`
-									}
-							  } /* eslint-disable-line */,
+							? builder.button.reply({
+									display: 'Next Image',
+									id: `.waifupic next ${args[2]} ${args[3]} ${data[index + 1]} ${JSON.stringify(data)}`
+							  }) /* eslint-disable-line */
+							: builder.button.reply({
+									display: `Search More ${args[2].capitalize()}`,
+									id: `.waifupic ${args[2]} -${args[3]}`
+							  }) /* eslint-disable-line */,
 						index !== 0
-							? {
-									quickReplyButton: {
-										displayText: 'Previous Image',
-										id: `.waifupic prev ${args[2]} ${args[3]} ${data[index - 1]} ${JSON.stringify(data)}`
-									}
-							  } /* eslint-disable-line */
-							: {}
-					],
-					footer: `Provided by waifu.pics\nVoid Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
-				},
-				{ quoted: message }
-			);
+							? builder.button.reply({
+									display: 'Previous Image',
+									id: `.waifupic prev ${args[2]} ${args[3]} ${data[index - 1]} ${JSON.stringify(data)}`
+							  }) /* eslint-disable-line */
+							: null
+					].filter(Boolean)
+				);
+
+			const messageBuilt = await builder.render();
+
+			return await client.instance.relayMessage(from, messageBuilt.message, { messageId: messageBuilt.key.id });
 		}
 
 		let { _: queries, nsfw } = parser(query.toLowerCase(), {
@@ -87,34 +81,28 @@ export default {
 				continue;
 			}
 
-			let buffer;
-			const isGif = result[0].endsWith('gif');
+			const builder = new client.instance.TemplateBuilder.Native(client);
 
-			if (isGif) {
-				buffer = await gifToMp4(result[0], sender);
-			}
+			builder
+				.mainBody('Waifu Pics'.formatHeaders())
+				.mainFooter(`Provided by waifu.pics\nVoid Bot     1/${result.length}`)
+				.mainHeader('Header', result[0])
+				.buttons(
+					...[
+						builder.button.url({
+							display: 'Original Source',
+							url: result[0]
+						}),
+						builder.button.reply({
+							display: 'Next Image',
+							id: `.waifupic next ${querie} ${nsfw ? 'nsfw' : 'sfw'} ${result[1]} ${JSON.stringify(result)}`
+						})
+					]
+				);
 
-			await client.instance.send(
-				from,
-				{
-					...(isGif ? { video: buffer } : { image: { url: result[0] } }),
-					image: { url: result[0] },
-					caption: 'Waifu Pics'.formatHeaders(),
-					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: result[0] } },
-						result.length !== 1
-							? {
-									quickReplyButton: {
-										displayText: 'Next Image',
-										id: `.waifupic next ${querie} ${nsfw ? 'nsfw' : 'sfw'} ${result[1]} ${JSON.stringify(result)}`
-									}
-							  } /* eslint-disable-line */
-							: {}
-					],
-					footer: `Provided by waifu.pics\nVoid Bot     1/${result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
-				},
-				{ quoted: message }
-			);
+			const messageBuilt = await builder.render();
+
+			return await client.instance.relayMessage(from, messageBuilt.message, { messageId: messageBuilt.key.id });
 		}
 	}
 };

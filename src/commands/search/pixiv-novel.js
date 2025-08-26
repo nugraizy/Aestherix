@@ -8,7 +8,7 @@ export default {
 	name: 'pixivnovel',
 	minifiedDescription: 'Search Novel',
 	description: 'Search novel from Pixiv.',
-	usage: '!pixivnovel <query>',
+	usage: '!pixivnovel `<query>`',
 	aliases: ['pixnovel'],
 	category: 'Search',
 	limit: 4,

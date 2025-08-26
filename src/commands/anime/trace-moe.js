@@ -10,7 +10,7 @@ export default {
 	name: 'tracemoe',
 	minifiedDescription: 'Tracemoe Image Search',
 	description: 'Reverse image anime search',
-	usage: '!tracemoe <reply image/send image>',
+	usage: '!tracemoe `<reply image/send image>`',
 	category: 'Anime',
 	aliases: ['moe', 'waitmoe', 'whatanime'],
 	limit: 2,

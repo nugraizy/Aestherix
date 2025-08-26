@@ -10,7 +10,7 @@ export default {
 	name: 'sticker',
 	minifiedDescription: 'Media to Sticker',
 	description: 'Convert media to sticker.',
-	usage: '!sticker <reply media/send media>',
+	usage: '!sticker `<reply media/send media>`',
 	aliases: [
 		'stickers',
 		'st',

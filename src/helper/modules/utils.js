@@ -5,7 +5,7 @@ import {
 	generateWAMessageFromContent,
 	toBuffer,
 	jidDecode,
-	generateMessageIDV2,
+	generateMessageID,
 	isJidGroup,
 	jidNormalizedUser
 } from 'baileys';
@@ -16,6 +16,7 @@ import sharp from 'sharp';
 import { TextEncoder } from 'util';
 import { fetch } from 'undici';
 import fs from 'fs-extra';
+import isBuffer from 'is-buffer';
 
 import configuration from '../config/connect.js';
 import { S_WHATSAPP_NET, UPDATE, ZERO } from '../misc/wa_data/index.js';
@@ -125,7 +126,8 @@ export const assign = (client) => {
 				configuration.cache.metadata?.get(to)?.ephemeralDuration ||
 				configuration.cache.users?.get(to)?.ephemeralDuration ||
 				0,
-			messageId: 'HFINDER' + generateMessageIDV2(to)
+			messageId: 'HFINDER' + generateMessageID(to),
+			ai: true
 		};
 
 		if ('buttons' in message || 'templateButtons' in message) {
@@ -206,7 +208,7 @@ export const assign = (client) => {
 		client.instance.query({
 			tag: 'iq',
 			attrs: {
-				id: generateMessageIDV2(),
+				id: generateMessageID(),
 				to: '@s.whatsapp.net',
 				xmlns: 'status',
 				type: 'get'
@@ -408,22 +410,27 @@ export const assign = (client) => {
 			const id = Date.now();
 			const filepath = (u) => `./src/media/temporary_files/${u}`;
 
-			await writeFile(filepath(`input-${id}.gif`), media);
+			const inputPath = filepath(`input-${id}.gif`);
+			const outputPath = filepath(`output-${id}.mp4`);
 
-			const { output } = await gif2mp4(filepath(`input-${id}.gif`), filepath(`output-${id}.mp4`));
+			await fs.writeFile(inputPath, media);
 
-			const preparedMedia = await this.client.instance.prepareMedia({ url: output }, messageType);
+			const { output } = await gif2mp4(inputPath, outputPath);
+
+			const fileBuffer = await fs.readFile(output);
+
+			const preparedMedia = await this.client.instance.prepareMedia(fileBuffer, messageType);
 
 			preparedMedia.message[messageType].gifPlayback = true;
 
-			await unlink(filepath(`input-${id}.gif`));
-			await unlink(filepath(`output-${id}.mp4`));
+			await unlink(inputPath);
+			await unlink(outputPath);
 
 			return preparedMedia;
 		}
 
 		async prepareMessage(media) {
-			if (Buffer.isBuffer(media)) {
+			if (isBuffer(media)) {
 				const { mime, messageType } = await this.getMessageType(media);
 				let preparedMedia = null;
 
@@ -602,22 +609,27 @@ export const assign = (client) => {
 			const id = Date.now();
 			const filepath = (u) => `./src/media/temporary_files/${u}`;
 
-			await writeFile(filepath(`input-${id}.gif`), media);
+			const inputPath = filepath(`input-${id}.gif`);
+			const outputPath = filepath(`output-${id}.mp4`);
 
-			const { output } = await gif2mp4(filepath(`input-${id}.gif`), filepath(`output-${id}.mp4`));
+			await fs.writeFile(inputPath, media);
 
-			const preparedMedia = await this.client.instance.prepareMedia({ url: output }, messageType);
+			const { output } = await gif2mp4(inputPath, outputPath);
+
+			const fileBuffer = await fs.readFile(output);
+
+			const preparedMedia = await this.client.instance.prepareMedia(fileBuffer, messageType);
 
 			preparedMedia.message[messageType].gifPlayback = true;
 
-			await unlink(filepath(`input-${id}.gif`));
-			await unlink(filepath(`output-${id}.mp4`));
+			await unlink(inputPath);
+			await unlink(outputPath);
 
 			return preparedMedia;
 		}
 
 		async prepareMessage(media) {
-			if (Buffer.isBuffer(media)) {
+			if (isBuffer(media)) {
 				const { mime, messageType } = await this.getMessageType(media);
 				let preparedMedia = null;
 
@@ -678,7 +690,7 @@ export const assign = (client) => {
 	const generateProfilePicture = async (mediaUpload, type) => {
 		let bufferOrFilePath;
 
-		if (Buffer.isBuffer(mediaUpload)) {
+		if (isBuffer(mediaUpload)) {
 			bufferOrFilePath = mediaUpload;
 		} else if (isURL(mediaUpload)) {
 			bufferOrFilePath = await fetchBUFFER(mediaUpload);
@@ -752,7 +764,7 @@ export const assign = (client) => {
 		 * @type {import('../../types/Utils/index.js').PrepareSticker}
 		 */
 		prepareSticker: async (media, filename, type, exif) => {
-			const isMediaURL = Buffer.isBuffer(media) ? false : isURL(media) ? true : false;
+			const isMediaURL = isBuffer(media) ? false : isURL(media) ? true : false;
 
 			media = isMediaURL ? Buffer.from(await (await fetch(media)).arrayBuffer(), 'base64') : media;
 

@@ -12,7 +12,7 @@ export default {
 	name: 'youtubelive',
 	minifiedDescription: 'Live Stream Events',
 	description: 'Listen to a YouTube live stream.',
-	usage: '!youtubelive <youtube_id>',
+	usage: '!youtubelive `<youtube_id>`',
 	aliases: ['ytlive'],
 	category: 'Owner',
 	cooldown: 0,

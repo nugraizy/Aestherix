@@ -8,7 +8,7 @@ export default {
 	name: 'flickr',
 	minifiedDescription: 'Search Flickr',
 	description: 'Search images from Flickr.',
-	usage: '!flickr <query>',
+	usage: '!flickr `<query>`',
 	category: 'Search',
 	aliases: ['flick'],
 	limit: 4,

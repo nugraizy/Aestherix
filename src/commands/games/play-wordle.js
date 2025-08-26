@@ -9,7 +9,7 @@ export default {
 	name: 'wordle',
 	minifiedDescription: 'Play Wordle',
 	description: 'Play Wordle.',
-	usage: '!wordle <play/exit/info>',
+	usage: '!wordle `<play/exit/info>`',
 	category: 'Games',
 	aliases: ['wordl'],
 	cooldown: 2,

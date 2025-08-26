@@ -14,7 +14,7 @@ export default {
 	name: 'pinterest',
 	minifiedDescription: 'Search Pinterest',
 	description: 'Search images from Pinterest.',
-	usage: '!pinterest <query>',
+	usage: '!pinterest `<quer(y/ies)/url(s)>`',
 	category: 'Search',
 	aliases: ['pin'],
 	limit: 4,
@@ -22,7 +22,13 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, sender, waitForInput }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message });
+			return await client.instance.reply(
+				'You must provide a `quer(y/ies)` or `url(s)`.\nYou can use `commas` as a separator.',
+				{
+					from,
+					quoted: message
+				}
+			);
 		}
 
 		let queries = query.split(',');

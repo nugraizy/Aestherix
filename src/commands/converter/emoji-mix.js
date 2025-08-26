@@ -12,7 +12,7 @@ export default {
 	name: 'emojimixer',
 	minifiedDescription: 'Mix Emoji',
 	description: 'Mix emoji.',
-	usage: '!emojimix <Emoji1> <Emoji2>',
+	usage: '!emojimix `<emoji1>` `<emoji2>`',
 	aliases: ['emojimix', 'emx'],
 	category: 'Converter',
 	cooldown: 5,

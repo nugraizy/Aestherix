@@ -12,7 +12,7 @@ export default {
 	minifiedDescription: 'Remove Voice',
 	description: 'Remove specific sound from audio/video',
 	category: 'Converter',
-	usage: '!soundremover <Audio/Video(reply/send)>',
+	usage: '!soundremover <reply/send audio/video>',
 	aliases: ['soundremove', 'soundrem', 'soundremoveaudio', 'soundremovevideo', 'soundremoveaudiovideo', 'vrm', 'srm'],
 	cooldown: 5,
 	limit: 1,

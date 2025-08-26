@@ -51,7 +51,7 @@ export default {
 	name: 'simulates',
 	minifiedDescription: 'Simulates Event',
 	description: 'Simulates an event update.',
-	usage: '!simulates <events>',
+	usage: '!simulates `<events>`',
 	aliases: ['simulate'],
 	category: 'Owner',
 	cooldown: 0,

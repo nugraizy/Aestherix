@@ -5,7 +5,7 @@ export default {
 	name: 'add',
 	minifiedDescription: 'Invite User',
 	description: 'Add people to group.',
-	usage: '!add <reply/tag member>',
+	usage: '!add `<reply/tag member>`',
 	aliases: ['addmem', 'invite'],
 	category: 'Moderation',
 	cooldown: 10,

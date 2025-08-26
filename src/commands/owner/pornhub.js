@@ -8,7 +8,7 @@ export default {
 	name: 'pornhub',
 	minifiedDescription: 'Search PornHub',
 	description: 'Search pornhub.',
-	usage: '!pornhub <query>',
+	usage: '!pornhub `<query>`',
 	category: 'Owner',
 	aliases: ['ph', 'phub'],
 	limit: 4,

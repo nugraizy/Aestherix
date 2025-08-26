@@ -9,7 +9,7 @@ export default {
 	aliases: ['game'],
 	description: 'Play games with your friends',
 	category: 'Moderation',
-	usage: '!games <enable/disable>',
+	usage: '!games `<enable/disable>`',
 	cooldown: 2,
 	limit: 2,
 	status: 'enable',

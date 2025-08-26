@@ -14,7 +14,7 @@ let isCache = false;
 export default {
 	name: 'changelogs',
 	description: 'Get the latest changelogs directly from GitHub',
-	usage: '!changelog -q <number> / --quantity <number>',
+	usage: '!changelog -q `<number>` / --quantity `<number>`',
 	aliases: ['cl', 'changelog'],
 	category: 'Helper',
 	cooldown: 5,

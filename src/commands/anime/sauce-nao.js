@@ -10,7 +10,7 @@ export default {
 	name: 'saucenao',
 	minifiedDescription: 'Saucenao Image Search',
 	description: 'Reverse image anime search',
-	usage: '!saucenao <reply image/send image>',
+	usage: '!saucenao `<reply image/send image>`',
 	category: 'Anime',
 	aliases: ['nao', 'waitnao'],
 	limit: 2,

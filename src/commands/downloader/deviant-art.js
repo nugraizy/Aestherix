@@ -1,4 +1,6 @@
-import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
+import parser from 'yargs-parser';
+
+import { numberWithCommas, removeDuplicatesArray, loggers, color } from '../../utils/modules/index.js';
 import { downloadDeviantArt } from '../../utils/deviant_art/index.js';
 
 const regex = (input) => {
@@ -25,35 +27,39 @@ export default {
 	name: 'deviantartdl',
 	minifiedDescription: 'Download Deviant Art',
 	description: 'Download images from Deviant Art',
-	usage: '!deviantartdl <url>',
+	usage: '!deviantartdl `<url(s)>` (you can send multiple link using space in between)',
 	category: 'Downloader',
 	aliases: ['dvartdl', 'devartdl'],
 	limit: 4,
 	cooldown: 8,
 	status: 'enable',
-	async run({ query, from, message }, client) {
+	async run({ query, from, message, prettyNumber }, client) {
 		if (!query) {
 			return await client.instance.reply('You must provide a query.', { from, quoted: message });
 		}
 
-		let queries = query.split(',');
+		await client.instance.reply('Please wait....', { from, quoted: message });
 
-		queries = removeDuplicatesArray(queries);
+		let { _: urls } = parser(query);
 
-		for (const querie of queries) {
-			const regexs = regex(querie.trim());
+		urls = removeDuplicatesArray(urls);
+
+		loggers.warning(`${color('Downloading Deviantart File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+
+		for (const url of urls) {
+			const regexs = regex(url.trim());
 
 			if (!regexs.status) {
-				await client.instance.reply(regexs.message, { from, quoted: message });
+				await client.instance.reply(regexs.message + `\nInvalid : ${url}`, { from, quoted: message });
 
 				continue;
 			}
 
-			const result = await downloadDeviantArt(querie);
+			const result = await downloadDeviantArt(url);
 
 			if (result?.error) {
 				await client.instance.reply(result.error, { from, quoted: message });
-
+				loggers.error(`${color('Failed to Download Deviantart File', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
 			}
 
@@ -76,5 +82,7 @@ Views : ${numberWithCommas(result.views)}`.formatForm(),
 				{ quoted: message }
 			);
 		}
+
+		loggers.info(`${color('Downloaded Deviantart File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

@@ -15,7 +15,7 @@ export default {
 	name: 'werewolf',
 	minifiedDescription: 'Play Werewolf',
 	description: 'Play Werewolf.',
-	usage: '!ww <arguments>',
+	usage: '!ww `<arguments>`',
 	category: 'Games',
 	aliases: ['ww'],
 	cooldown: 2,

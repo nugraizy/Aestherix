@@ -7,7 +7,7 @@ export default {
 	name: 'findgroup',
 	minifiedDescription: 'Public Group',
 	description: 'Search for public WhatsApp groups.',
-	usage: '!findgroup <query>',
+	usage: '!findgroup `<query>`',
 	aliases: ['gc', 'publicgc'],
 	category: 'Search',
 	cooldown: 4,

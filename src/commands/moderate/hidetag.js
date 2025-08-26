@@ -5,7 +5,7 @@ export default {
 	name: 'hidetag',
 	minifiedDescription: 'Hide tag',
 	description: 'Hide tag everyone in the group.',
-	usage: '!hidetag <?query>',
+	usage: '!hidetag `<?query>`',
 	aliases: ['tag', 'h'],
 	category: 'Moderation',
 	cooldown: 10,

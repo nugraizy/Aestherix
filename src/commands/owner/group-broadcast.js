@@ -23,7 +23,7 @@ export default {
 	name: 'groupbc',
 	minifiedDescription: 'Group Broadcast',
 	description: 'Send Broadcast to all groups.',
-	usage: '!groupbc <text>',
+	usage: '!groupbc `<texts>`',
 	aliases: ['gcbc'],
 	category: 'Owner',
 	cooldown: 0,
