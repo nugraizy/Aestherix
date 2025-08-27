@@ -1183,8 +1183,10 @@ export const assign = (client) => {
 
 			let targetJid;
 
-			if (jidNormalizedUser(targetJid) !== jidNormalizedUser(client.instance.authState.creds.me.id)) {
+			if (jidNormalizedUser(jid) !== jidNormalizedUser(client.instance.authState.creds.me.id)) {
 				targetJid = jidNormalizedUser(jid);
+			} else {
+				targetJid = undefined;
 			}
 
 			const { image } = await generateProfilePicture(media, option);
@@ -1192,7 +1194,7 @@ export const assign = (client) => {
 			await client.instance.query({
 				tag: 'iq',
 				attrs: {
-					target: targetJid,
+					...(targetJid ? { target: targetJid } : {}),
 					to: S_WHATSAPP_NET,
 					type: 'set',
 					xmlns: 'w:profile:picture'
