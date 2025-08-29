@@ -145,9 +145,9 @@ export const handleConnectionUpdate = async (
 					capt += `Connection time ${timeToConnect / 1000}s is not the best time (${data.best_time / 1000}s)`;
 				}
 
-				// client.instance.send(configuration.cache.ownerNumbers[0], {
-				// 	text: 'Bot is connected to socket.\n' + capt
-				// });
+				client.instance.send(configuration.cache.ownerNumbers[0], {
+					text: 'Bot is connected to socket.\n' + capt
+				});
 
 				Client.ev.emit('connected');
 				clearDBConnection(cli);

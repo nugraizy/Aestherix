@@ -5,6 +5,7 @@ import localePlugins from 'dayjs/plugin/timezone.js';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 import mqtt from 'mqtt';
 import P from 'pino';
+import cron from 'node-cron';
 
 import configuration from './helper/config/connect.js';
 import { color, loggers } from './utils/modules/index.js';
@@ -28,6 +29,10 @@ import {
 } from './helper/connection/event-handler/universal.js';
 import { handleGithubWebhook } from './helper/connection/github-webhook/events.js';
 import { githubWebhook } from './helper/connection/github-webhook/server.js';
+import { pinterest } from './utils/pinterest/index.js';
+import axios from 'axios';
+
+const autoProfilePictureChangeEnabled = true;
 
 dayjs.extend(localePlugins);
 dayjs.extend(customParseFormat);
@@ -119,7 +124,37 @@ export const start = async (isReconnect) => {
 			Client.ev.on('poll.update', async (msg) => handlePollUpdate(store, msg));
 			Client.ws.on('CB:notification,type:w:gp2', parseStubtypeUpdate);
 			Client.ws.on('CB:notification,type:picture', async (update) => await emitGroupSettings.picture(update));
+
+			if (autoProfilePictureChangeEnabled) {
+				let images = [];
+
+				const fetchImagesIfEmpty = async () => {
+					if (images.length === 0) {
+						images = await pinterest.getHomefeed();
+					}
+				};
+
+				const downloadImage = async (url) => {
+					const { data } = await axios.get(url, { responseType: 'arraybuffer' });
+
+					return data;
+				};
+
+				cron.schedule('*/1 * * * *', async () => {
+					await fetchImagesIfEmpty();
+
+					if (images.length === 0) {
+						return;
+					}
+
+					const imageUrl = images.shift().url;
+					const image = await downloadImage(imageUrl);
+
+					await client.instance.updateProfilePicture(instance, image, 'no_crop');
+				});
+			}
 		});
+
 		Client.ev.on('creds.update', async () => await saveCreds());
 		Client.ev.on('contacts.upsert', (contacts) => initContact(store, contacts));
 		Client.ev.on('contacts.update', (update) => updateContact(store, update));

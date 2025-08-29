@@ -12,6 +12,10 @@ const headers = {
 	},
 	download: {
 		'X-Pinterest-PWS-Handler': 'www/pin/[id].js'
+	},
+	homefeed: {
+		'X-Pinterest-PWS-Handler': 'www/index.js',
+		Cookie: process.env.PINTEREST_COOKIE
 	}
 };
 
@@ -37,6 +41,8 @@ class Pinterest {
 		 * @returns {Promise<PinterestDownloadResponse>}
 		 */
 		this.download = (url) => this.#_download(url);
+
+		this.getHomefeed = () => this.#_getHomefeed();
 	}
 
 	async #_search(query) {
@@ -172,6 +178,45 @@ class Pinterest {
 					url: mediaUrl,
 					pinSource: _apiBase(data.id)
 				});
+			} catch (error) {
+				reject(error);
+			}
+		});
+	}
+
+	async #_getHomefeed() {
+		return new Promise(async (resolve, reject) => {
+			try {
+				const context = {
+					source_url: '/', // eslint-disable-line
+					data: JSON.stringify({
+						options: {
+							field_set_key: 'hf_grid', // eslint-disable-line
+							in_nux: false, // eslint-disable-line
+							in_news_hub: false, // eslint-disable-line
+							static_feed: false, // eslint-disable-line
+							isPrefetch: false,
+							prependPartner: true,
+							prependUserNews: false,
+							page_size: 100, // eslint-disable-line
+							bookmarks: []
+						},
+						context: {}
+					}),
+					_: Date.now()
+				};
+
+				const path = new URLSearchParams(context);
+
+				const response = await fetch(`https://id.pinterest.com/resource/UserHomefeedResource/get/?${path.toString()}`, {
+					headers: headers.homefeed
+				});
+
+				const json = await response.json();
+
+				const result = json.resource_response.data.filter((v) => !v.is_video && v.images).map((v) => v.images.orig);
+
+				resolve(result);
 			} catch (error) {
 				reject(error);
 			}
