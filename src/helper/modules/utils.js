@@ -5,7 +5,6 @@ import {
 	generateWAMessageFromContent,
 	toBuffer,
 	jidDecode,
-	generateMessageID,
 	isJidGroup,
 	jidNormalizedUser
 } from 'baileys';
@@ -17,6 +16,7 @@ import { TextEncoder } from 'util';
 import { fetch } from 'undici';
 import fs from 'fs-extra';
 import isBuffer from 'is-buffer';
+import { randomBytes } from 'node:crypto';
 
 import configuration from '../config/connect.js';
 import { S_WHATSAPP_NET, UPDATE, ZERO } from '../misc/wa_data/index.js';
@@ -25,6 +25,8 @@ import { reassign } from './parse-message.js';
 import { gif2mp4 } from '../../utils/index.js';
 
 const { readFile, unlink, writeFile } = (await import('fs-extra')).default;
+
+const generateMessageID = () => randomBytes(18).toString('hex').toUpperCase();
 
 /**
  * Assign functions for easier use.

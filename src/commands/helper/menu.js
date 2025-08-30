@@ -72,7 +72,7 @@ export default {
 								let capt = `> ${i + 1}.) ${cmd}`;
 
 								if (rest.length) {
-									capt += ` _\`${rest.join(' ')}\`_`;
+									capt += ` _${rest.join(' ')}_`;
 								}
 
 								return capt;

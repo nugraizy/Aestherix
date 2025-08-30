@@ -269,7 +269,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 			let userRole = Limit.checkRole(message.sender);
 
 			if (Tempcmds.premium && !(userRole.role === 'PREMIUM' || userRole.role === 'OWNER')) {
-				if (/-{1,2}((help(s)?|info|des(c|k)rip(t|s)i(on)?)|H)$/i.test(message.args[1]) && Tempcmds.name !== 'eval') {
+				if (/-{1,2}((help(s)?|info|des(c|k)rip(t|s)i(on)?)|h)$/i.test(message.args[1]) && Tempcmds.name !== 'eval') {
 					const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${
 						Tempcmds.cooldown
 					}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v}`).join(', ')}.\nThis Features Only for Premium users.`;
@@ -358,7 +358,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 			const cooldownUser = user.cooldown.get(message.sender);
 
 			try {
-				if (/-{1,2}(help(s)?|info|des(c|k)rip(t|s)i(on)?)$/i.test(message.args[1]) && Tempcmds.name !== 'eval') {
+				if (/-{1,2}((help(s)?|info|des(c|k)rip(t|s)i(on)?)|h)$/i.test(message.args[1]) && Tempcmds.name !== 'eval') {
 					const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${
 						Tempcmds.cooldown
 					}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v}`).join(', ')}.`;
@@ -585,7 +585,11 @@ const handleIncomingMessage = async (upsert, client, cmds, store, user, state, r
 			}
 
 			if (message && 'messageStubParameters' in message && message.messageStubParameters?.length) {
-				if (message.messageStubParameters[0] === 'Message absent from node') {
+				if (
+					message.messageStubParameters[0] === 'Message absent from node' ||
+					message.messageStubParameters[0] === 'No session found to decrypt message' ||
+					message.messageStubParameters[0] === 'No session record'
+				) {
 					return;
 				}
 
