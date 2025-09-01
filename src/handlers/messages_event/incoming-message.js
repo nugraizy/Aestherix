@@ -588,7 +588,8 @@ const handleIncomingMessage = async (upsert, client, cmds, store, user, state, r
 				if (
 					message.messageStubParameters[0] === 'Message absent from node' ||
 					message.messageStubParameters[0] === 'No session found to decrypt message' ||
-					message.messageStubParameters[0] === 'No session record'
+					message.messageStubParameters[0] === 'No session record' ||
+					message.messageStubParameters[0] === 'Bad MAC'
 				) {
 					return;
 				}

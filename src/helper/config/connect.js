@@ -57,7 +57,8 @@ const globalConfig = {
 	author: 'Powered by Hidden Finder',
 	anonymous: new Cache(),
 	input: new Cache(),
-	mqtt: null
+	mqtt: null,
+	pinterestId: null
 };
 
 global.log = console.log;

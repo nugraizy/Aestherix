@@ -127,10 +127,28 @@ export const start = async (isReconnect) => {
 
 			if (autoProfilePictureChangeEnabled) {
 				let images = [];
+				let bookmarks = null;
+				let currentPinterestId = null;
 
-				const fetchImagesIfEmpty = async () => {
-					if (images.length === 0) {
-						images = await pinterest.getHomefeed();
+				const fetchImages = async (pinterestId) => {
+					let response;
+
+					if (pinterestId) {
+						response = await pinterest.getSimilarPin(pinterestId, bookmarks);
+					} else {
+						response = await pinterest.getHomefeed();
+					}
+
+					if (response?.images) {
+						images = response.images;
+					} else {
+						images = response;
+					}
+
+					if (response?.bookmarks) {
+						bookmarks = response.bookmarks;
+					} else {
+						bookmarks = null;
 					}
 				};
 
@@ -140,8 +158,24 @@ export const start = async (isReconnect) => {
 					return data;
 				};
 
-				cron.schedule('*/1 * * * *', async () => {
-					await fetchImagesIfEmpty();
+				cron.schedule('*/30 * * * * *', async () => {
+					const pinterestId = configuration.pinterestId;
+
+					if (images.length === 0 && !currentPinterestId) {
+						await fetchImages(pinterestId);
+						currentPinterestId = pinterestId || null;
+					}
+
+					if (pinterestId !== currentPinterestId) {
+						images = [];
+						bookmarks = null;
+						await fetchImages(pinterestId);
+						currentPinterestId = pinterestId || null;
+					}
+
+					if (images.length === 0) {
+						await fetchImages(pinterestId);
+					}
 
 					if (images.length === 0) {
 						return;

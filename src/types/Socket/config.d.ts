@@ -48,4 +48,5 @@ export interface GlobalConfig {
 	anonymous: Cache;
 	input: Cache;
 	mqtt: import('mqtt').Client | null;
+	pinterestId: string | null;
 }

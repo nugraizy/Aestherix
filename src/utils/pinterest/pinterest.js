@@ -16,7 +16,11 @@ const headers = {
 	homefeed: {
 		'X-Pinterest-PWS-Handler': 'www/index.js',
 		Cookie: process.env.PINTEREST_COOKIE
-	}
+	},
+	similars: (id) => ({
+		'X-Pinterest-PWS-Handler': 'www/pin/[id].js',
+		'X-Pinterest-Source-Url': `/pin/${id}/`
+	})
 };
 
 /**
@@ -43,6 +47,8 @@ class Pinterest {
 		this.download = (url) => this.#_download(url);
 
 		this.getHomefeed = () => this.#_getHomefeed();
+
+		this.getSimilarPin = (url) => this.#_getSimilarPin(url);
 	}
 
 	async #_search(query) {
@@ -217,6 +223,58 @@ class Pinterest {
 				const result = json.resource_response.data.filter((v) => !v.is_video && v.images).map((v) => v.images.orig);
 
 				resolve(result);
+			} catch (error) {
+				reject(error);
+			}
+		});
+	}
+
+	async #_getSimilarPin(url, bookmarks) {
+		return new Promise(async (resolve, reject) => {
+			try {
+				let pinId = this._getPinId(url);
+
+				if (pinId instanceof Promise) {
+					pinId = _id.exec((await pinId).url)?.[1];
+				} else if (pinId.length) {
+					pinId = pinId[1];
+				}
+
+				if (!pinId) {
+					resolve({ error: true, message: 'Could not find the id on the URL.', keyword: url });
+				}
+
+				const context = {
+					source_url: `/pin/${pinId}/`, // eslint-disable-line
+					data: JSON.stringify({
+						options: {
+							additional_fields: ['pin.gen_ai_topics'], // eslint-disable-line
+							pin_id: pinId, // eslint-disable-line
+							context_pin_ids: [], // eslint-disable-line
+							page_size: 50, // eslint-disable-line
+							search_query: '', // eslint-disable-line
+							source: 'deep_linking',
+							top_level_source: 'deep_linking', // eslint-disable-line
+							top_level_source_depth: 1, // eslint-disable-line
+							is_pdp: false, // eslint-disable-line
+							bookmarks: bookmarks ? [bookmarks] : []
+						},
+						context: {}
+					}),
+					_: Date.now()
+				};
+
+				const path = new URLSearchParams(context);
+
+				const response = await fetch(`https://id.pinterest.com/resource/RelatedModulesResource/get/?${path.toString()}`, {
+					headers: headers.similars(pinId)
+				});
+
+				const json = await response.json();
+
+				const result = json.resource_response.data.filter((v) => !v.is_video && v.images).map((v) => v.images.orig);
+
+				resolve({ images: result, bookmarks: json.resource.options.bookmarks[0] });
 			} catch (error) {
 				reject(error);
 			}
