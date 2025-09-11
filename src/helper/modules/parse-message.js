@@ -1,19 +1,19 @@
 import { getContentType, normalizeMessageContent } from 'baileys';
-import PhoneNumber from 'libphonenumber-js';
 import fs from 'fs-extra';
+import PhoneNumber from 'libphonenumber-js';
 
 import configuration from '../config/connect.js';
 import { checkJSON, pushDefaultSettings, updateSettings } from '../groups/settings/index.js';
 import {
-	NO_DATA,
 	extractBody,
-	extractTypeQuoted,
-	extractQuotedBody,
-	typeMessage,
 	extractMentionedJid,
 	extractMetadata,
+	extractQuotedBody,
+	extractTypeQuoted,
+	NO_DATA,
+	PollUpdateDecrypt,
 	S_WHATSAPP_NET,
-	PollUpdateDecrypt
+	typeMessage
 } from '../misc/wa_data/index.js';
 
 /**
@@ -107,7 +107,7 @@ export const reassign = async (m, client, store) => {
 		if (m.message?.protocolMessage?.type === 0) {
 			return m;
 		}
-
+		
 		delete m?.message?.senderKeyDistributionMessage;
 
 		const isFromMe = m?.key?.fromMe;
@@ -120,7 +120,7 @@ export const reassign = async (m, client, store) => {
 		const sender = isFromMe
 			? myJid
 			: isGroup
-			? m?.key?.participant
+			? m?.key?.participant?.endsWith('@lid') ? m?.key?.participantAlt : m?.key?.participant
 			: m?.key?.remoteJid === 'status@broadcast'
 			? m?.key?.participant
 			: m?.key?.remoteJid;
