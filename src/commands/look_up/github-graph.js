@@ -1,3 +1,4 @@
+import parser from 'yargs-parser';
 import { GitHubGraph } from '../../helper/index.js';
 
 /**
@@ -18,9 +19,30 @@ export default {
 			return await client.instance.reply('Please specify a GitHub User', { from, quoted: message });
 		}
 
+		const { _: username, theme } = parser(query, {
+			configuration: {
+				'short-option-groups': false
+			},
+			alias: {
+				theme: ['t']
+			},
+			default: {
+				theme: 'DEFAULT'
+			}
+		});
+
 		const git = new GitHubGraph();
 
-		const init = await git.init(query, { round: true, theme: 'DRACULA' });
+		const themes = Object.keys(git.themes).map((v) => v.toLowerCase());
+
+		if (!themes.includes(theme.toLowerCase())) {
+			return await client.instance.reply(
+				`Please specify a valid GitHub User, this is a list of available themes:\n\n${themes.join(', ')}`,
+				{ from, quoted: message }
+			);
+		}
+
+		const init = await git.init(username, { round: true, theme: theme.toUpperCase() });
 
 		const create = await init.createGitHubGraph();
 

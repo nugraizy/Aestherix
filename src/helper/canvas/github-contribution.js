@@ -1,9 +1,9 @@
 import Canvas from '@napi-rs/canvas';
-import path from 'path';
 import _ from 'lodash';
+import path from 'path';
 import { Client } from 'undici';
 
-const copyright = '© 2022 Hidden Finder, Inc | Made by Nanda using Canvas Module.';
+const copyright = '© 2022 Hidden Finder, Inc | Made by Aestherix using Canvas Module.';
 
 const { createCanvas, GlobalFonts, loadImage } = Canvas;
 
@@ -132,14 +132,14 @@ class API {
 						item2.contributionLevel === 'NONE'
 							? 0
 							: item2.contributionLevel === 'FIRST_QUARTILE'
-							? 1
-							: item2.contributionLevel === 'SECOND_QUARTILE'
-							? 2
-							: item2.contributionLevel === 'THIRD_QUARTILE'
-							? 3
-							: item2.contributionLevel === 'FOURTH_QUARTILE'
-							? 4
-							: 5;
+								? 1
+								: item2.contributionLevel === 'SECOND_QUARTILE'
+									? 2
+									: item2.contributionLevel === 'THIRD_QUARTILE'
+										? 3
+										: item2.contributionLevel === 'FOURTH_QUARTILE'
+											? 4
+											: 5;
 
 					container.year = year;
 
@@ -208,12 +208,102 @@ export class GitHubGraph {
 		DEFAULT: {
 			isDark: false,
 			GENERAL: ['#FFFFFF', '#8B6CFA', 'rgba(175,143,251,0.3)', '#245278', 'rgba(108, 122, 137, 0.3'],
-			GRAPH: ['#9BB1DA', '#668ADA', '#4771DA', '#1E53D9', '#012D5E']
+			GRAPH: ['#9BB1DA', '#668ADA', '#4771DA', '#2E63C9', '#1E53D9']
 		},
 		DRACULA: {
 			isDark: true,
 			GENERAL: ['#282A36', '#F8F8F2', '#FF79C6', '#50FA7B', 'rgba(239, 239, 240, 0.3)'],
-			GRAPH: ['#1E1738', '#503E69', '#745A99', '#BD36F9', '#FF79C6']
+			GRAPH: ['#3A2648', '#5A3E78', '#7A56A8', '#9A6ED8', '#BD36F9']
+		},
+		GRUVBOX: {
+			isDark: true,
+			GENERAL: ['#282828', '#EBDBB2', '#FB4934', '#B8BB26', 'rgba(235, 219, 178, 0.3)'],
+			GRAPH: ['#3C3836', '#6C5036', '#9C6836', '#CC8036', '#FABD2F']
+		},
+		SOLARIZED_LIGHT: {
+			isDark: false,
+			GENERAL: ['#FDF6E3', '#657B83', '#268BD2', '#859900', 'rgba(101, 123, 131, 0.3)'],
+			GRAPH: ['#EEE8D5', '#C9D6A2', '#A3C46F', '#7DB23C', '#859900']
+		},
+		SOLARIZED_DARK: {
+			isDark: true,
+			GENERAL: ['#002B36', '#839496', '#268BD2', '#2AA198', 'rgba(131, 148, 150, 0.3)'],
+			GRAPH: ['#073642', '#1C4C60', '#316680', '#4680A0', '#268BD2']
+		},
+		NORD: {
+			isDark: true,
+			GENERAL: ['#2E3440', '#D8DEE9', '#88C0D0', '#A3BE8C', 'rgba(216, 222, 233, 0.3)'],
+			GRAPH: ['#3B4252', '#47556A', '#537882', '#5F9B9A', '#88C0D0']
+		},
+		MONOKAI: {
+			isDark: true,
+			GENERAL: ['#272822', '#F8F8F2', '#F92672', '#A6E22E', 'rgba(248, 248, 242, 0.3)'],
+			GRAPH: ['#49483E', '#6D6553', '#918268', '#B59F7D', '#FD971F']
+		},
+		CATPPUCCIN_LATTE: {
+			isDark: false,
+			GENERAL: ['#EFF1F5', '#4C4F69', '#D20F39', '#40A02B', 'rgba(76, 79, 105, 0.3)'],
+			GRAPH: ['#BCC0CC', '#95A2D0', '#6E84D4', '#4866D8', '#1E66F5']
+		},
+		CATPPUCCIN_FRAPPE: {
+			isDark: true,
+			GENERAL: ['#303446', '#C6D0F5', '#E78284', '#A6D189', 'rgba(198, 208, 245, 0.3)'],
+			GRAPH: ['#51576D', '#6675A0', '#7B93D3', '#90B1F6', '#8CAAEE']
+		},
+		CATPPUCCIN_MACCHIATO: {
+			isDark: true,
+			GENERAL: ['#24273A', '#CAD3F5', '#ED8796', '#A6DA95', 'rgba(202, 211, 245, 0.3)'],
+			GRAPH: ['#494D64', '#6475A0', '#7F9DDC', '#9AC5FF', '#8AADF4']
+		},
+		CATPPUCCIN_MOCHA: {
+			isDark: true,
+			GENERAL: ['#1E1E2E', '#CDD6F4', '#F38BA8', '#A6E3A1', 'rgba(205, 214, 244, 0.3)'],
+			GRAPH: ['#45475A', '#5D6A90', '#759DC6', '#8DD0FC', '#89B4FA']
+		},
+		ROSE_PINE: {
+			isDark: true,
+			GENERAL: ['#191724', '#E0DEF4', '#EB6F92', '#9CCFD8', 'rgba(224, 222, 244, 0.3)'],
+			GRAPH: ['#2A1E34', '#5A3E64', '#8A5E94', '#BA7EC4', '#EB6F92']
+		},
+		ROSE_PINE_MOON: {
+			isDark: true,
+			GENERAL: ['#232136', '#E0DEF4', '#EB6F92', '#3E8FB0', 'rgba(224, 222, 244, 0.3)'],
+			GRAPH: ['#393552', '#59607C', '#799BA6', '#99D6D0', '#9CCFD8']
+		},
+		ROSE_PINE_DAWN: {
+			isDark: false,
+			GENERAL: ['#FAF4ED', '#575279', '#B4637A', '#56949F', 'rgba(87, 82, 121, 0.3)'],
+			GRAPH: ['#F2E9E1', '#D9C0B6', '#C0978B', '#A86E60', '#B4637A']
+		},
+
+		CITY_LIGHTS: {
+			isDark: true,
+			GENERAL: ['#1D252C', '#A0B3C5', '#70A5EB', '#5CCFE6', 'rgba(160, 179, 197, 0.3)'],
+			GRAPH: ['#2C3E50', '#3E5878', '#5072A0', '#628CC8', '#70A5EB']
+		},
+
+		SYNTHWAVE84: {
+			isDark: true,
+			GENERAL: ['#2B213A', '#F5F5F5', '#FF6B97', '#FAD000', 'rgba(245, 245, 245, 0.3)'],
+			GRAPH: ['#602260', '#802280', '#A020A0', '#C020C0', '#FF6B97']
+		},
+
+		ONE_DARK: {
+			isDark: true,
+			GENERAL: ['#282C34', '#ABB2BF', '#E06C75', '#98C379', 'rgba(171, 178, 191, 0.3)'],
+			GRAPH: ['#3E4451', '#51607A', '#657CA3', '#7998CC', '#61AFEF']
+		},
+
+		MATERIAL: {
+			isDark: true,
+			GENERAL: ['#263238', '#ECEFF1', '#FF5370', '#C3E88D', 'rgba(236, 239, 241, 0.3)'],
+			GRAPH: ['#37474F', '#4E6173', '#657B97', '#7C95BB', '#82AAFF']
+		},
+
+		TOKYO_NIGHT: {
+			isDark: true,
+			GENERAL: ['#1A1B26', '#C0CAF5', '#F7768E', '#9ECE6A', 'rgba(192, 202, 245, 0.3)'],
+			GRAPH: ['#24283B', '#38446A', '#4C6099', '#607CC8', '#7AA2F7']
 		}
 	};
 
@@ -248,6 +338,7 @@ export class GitHubGraph {
 	#_ctx = null;
 
 	constructor() {
+		this.themes = this.#_themes;
 		/**
 		 * @type {import('../../types/Canvas').GithubGraph<Omit<GitHubGraph, 'init' | 'createGitHubGraph'>>}
 		 */

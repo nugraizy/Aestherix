@@ -1,7 +1,7 @@
-import cron from 'node-cron';
 import fs from 'fs-extra';
+import cron from 'node-cron';
 
-import { loggers, color } from '../../../utils/modules/index.js';
+import { color, loggers } from '../../../utils/modules/index.js';
 import configuration from '../../config/connect.js';
 
 const PATH = {
@@ -13,7 +13,7 @@ if (!(await fs.readdir(PATH.folder))) {
 	await fs.mkdir(PATH.folder);
 }
 
-const files = await fs.readdir(PATH.folder);
+const files = (await fs.readdir(PATH.folder)).filter((v) => v.endsWith('.json'));
 const LIMIT = (await fs.readJSON(PATH.settings))?.limit || 100;
 
 configuration.cache.limit = LIMIT;
