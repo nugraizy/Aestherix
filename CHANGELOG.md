@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+# [5.5.0] 2025-09-13
+## Added
+- Get similar images on Pinterest.
+- `github-graph`: Added more color palettes.
+
+## Fix
+- Crashes on missing message on StubType Property.
+- Handles @lid for the group participants.
+- Fix missing user's limit folder.
+- Fix `generateMessageID` that would prevent sending messages to group, causing session failure.
+
+## Chore
+- Uncomment sending connected client message on host.
+
+---
+
 # [5.4.1] 2025-08-27
 ## Fix
 - Pass correct variable to `updateProfilePicture` function.
