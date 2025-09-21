@@ -61,28 +61,22 @@ export default {
 
 			const sortedCommands = configuration.cmds.menu[category]
 				.sort((a, b) => a.name.localeCompare(b.name))
-				.map((v, i, arr /* eslint-disable-line */) => {
+				.map((v) => {
 					const commonPart = isNeedDescription
 						? `╭ ${v.minifiedDescription || v.description}\n├ _${prefix}${v.name}_\n├ ${v.usage}\n╰ ⏳ ${v.cooldown}s | ${
 								v.premium ? 'Premium' : 'Free'
-						  } | 🆔 ${v.aliases.join(', ')}` // eslint-disable-line
+							} | 🆔 ${v.aliases.join(', ')}` // eslint-disable-line
 						: (() => {
-								const [cmd, ...rest] = v.usage.split(' ');
-
-								let capt = `> ${i + 1}.) ${cmd}`;
-
-								if (rest.length) {
-									capt += ` _${rest.join(' ')}_`;
-								}
+								let capt = `\`${prefix}\` ${v.name}`;
 
 								return capt;
-						  })(); // eslint-disable-line
+							})(); // eslint-disable-line
 
 					return commonPart;
 				})
 				.join('\n');
 
-			capt += `> _✦ ${format[category]}_ ー\n${sortedCommands}\n\n\n`;
+			capt += `> ✦ ${format[category]} ー\n${sortedCommands}\n\n\n`;
 
 			if (query) {
 				isFound = true;
