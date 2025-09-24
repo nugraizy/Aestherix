@@ -32,9 +32,9 @@ echo "Checking libwebp installation"
 if ! command -v cwebp &> /dev/null; then
     echo "libwebp not found."
     echo "Installing libwebp..."
-    wget https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.4.0.tar.gz
-    tar xvzf libwebp-1.4.0.tar.gz
-    cd libwebp-1.4.0
+    wget https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0.tar.gz
+    tar xvzf libwebp-1.6.0.tar.gz
+    cd libwebp-1.6.0
     ./configure
     make
     sudo make install

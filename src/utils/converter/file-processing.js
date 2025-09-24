@@ -1,27 +1,23 @@
+import asyncRetry from 'async-retry';
 import axios from 'axios';
 import { exec } from 'child_process';
+import dayjs from 'dayjs';
 import FormData from 'form-data';
 import fs from 'fs-extra';
-import dayjs from 'dayjs';
+import httpsProxyAgent from 'https-proxy-agent';
+import isBuffer from 'is-buffer';
+import { Writable } from 'node:stream';
 import path from 'path';
+import PDFDocument from 'pdfkit';
 import petting from 'pet-pet-gif';
 import sharp from 'sharp';
-import PDFDocument from 'pdfkit';
 import socksProxyAgent from 'socks-proxy-agent';
-import httpsProxyAgent from 'https-proxy-agent';
-import asyncRetry from 'async-retry';
-import { generateMeshGradient } from 'meshgrad';
-import { createSVGWindow } from 'svgdom';
-import { SVG, registerWindow } from '@svgdotjs/svg.js';
-import puppeteer from 'puppeteer';
-import { Writable } from 'node:stream';
-import isBuffer from 'is-buffer';
 
 import configuration from '../../helper/config/connect.js';
-import { color, fetchBUFFER, fetchJSON, loggers, isURL } from '../modules/index.js';
-import { webp2mp4File } from './ezgifs/index.js';
-import { cropImage, imageToBuffer, signV1, streamFile, renderSvg, stringifyFunction } from './utils/index.js';
 import { videoFormat as VIDEO_MIMETYPE } from '../misc/mimetype.js';
+import { color, fetchBUFFER, fetchJSON, isURL, loggers } from '../modules/index.js';
+import { webp2mp4File } from './ezgifs/index.js';
+import { cropImage, imageToBuffer, signV1, streamFile } from './utils/index.js';
 
 /**
  * Convert to MP4.
@@ -835,58 +831,59 @@ export const imageToAnime = async (image, sender, options = defaultOpts) => {
 					options.crop === 'SINGLE' ? 'SINGLE' : options.crop === 'COMPARED' ? 'COMPARED' : undefined
 				),
 				`./src/media/temporary_files/${sender}`
-		  ) /* eslint-disable-line */
+			) /* eslint-disable-line */
 		: await cropImage(
 				await imageToBuffer(result, options.proxy?.image ? httpsAgent : undefined, options),
 				options.crop === 'SINGLE' ? 'SINGLE' : options.crop === 'COMPARED' ? 'COMPARED' : undefined
-		  ); /* eslint-disable-line */
+			); /* eslint-disable-line */
 };
 
-export const createMeshGradient = async (baseColor) =>
+/**
+ * Generate a mesh gradient SVG buffer
+ * @param {Object} options
+ * @param {string[]} options.colors - Array of colors in HEX format
+ * @param {number} [options.width=800] - Width of output
+ * @param {number} [options.height=600] - Height of output
+ * @returns {Promise<Buffer>} SVG buffer
+ */
+export const createMeshGradient = async ({ colors, width = 800, height = 600 }) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			if (baseColor) {
-				baseColor = baseColor.toUpperCase();
+			if (!Array.isArray(colors) || colors.length < 2) {
+				reject(new Error('At least two colors are required to create a mesh gradient.'));
+				return;
 			}
 
-			const browser = await puppeteer.launch({
-				headless: 'new',
-				args: ['--no-sandbox', '--disable-setuid-sandbox']
+			let palette = colors;
+
+			let defs = '';
+			let rects = '';
+
+			palette.forEach((color, i) => {
+				const id = `grad${i}`;
+				const cx = Math.random() * 100;
+				const cy = Math.random() * 100;
+				const r = 50 + Math.random() * 50;
+
+				defs += `
+      <radialGradient id="${id}" cx="${cx}%" cy="${cy}%" r="${r}%">
+        <stop offset="0%" stop-color="${color}" stop-opacity="1"/>
+        <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+      </radialGradient>
+    `;
+
+				rects += `<rect width="100%" height="100%" fill="url(#${id})"/>`;
 			});
 
-			const page = await browser.newPage();
+			const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+      <defs>${defs}</defs>
+      <rect width="100%" height="100%" fill="${palette[0]}"/>
+      ${rects}
+    </svg>
+  `;
 
-			const ELEMENTS = 6;
-			const vp = { width: 1080, height: 2400 };
-
-			const style = generateMeshGradient(ELEMENTS, baseColor, ~~(Math.random() * 10_000));
-
-			const window = createSVGWindow();
-			const document = window.document;
-
-			registerWindow(window, document);
-
-			/**
-			 * @type {import('@svgdotjs/svg.js').Dom}
-			 */
-			const canvas = SVG(document.documentElement);
-
-			canvas.attr('width', vp.width);
-			canvas.attr('height', vp.height);
-			canvas.attr('style', style);
-
-			const svgString = canvas.svg();
-
-			await page.setOfflineMode(true);
-
-			/**
-			 * @type {string}
-			 */
-			const base64 = await page.evaluate(stringifyFunction(renderSvg, svgString, { ...vp, type: 'png', quality: 1 }));
-
-			await browser.close();
-
-			resolve(Buffer.from(base64, 'base64'));
+			resolve(Buffer.from(svg));
 		} catch (error) {
 			reject(error);
 		}

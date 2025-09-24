@@ -1,14 +1,14 @@
 import Canvas, { clearAllCache } from '@napi-rs/canvas';
 import chroma from 'chroma-js';
-import fs from 'fs-extra';
-import sharp from 'sharp';
 import * as color from 'colorthief';
-import path from 'path';
-import { fetch } from 'undici';
 import crypto from 'crypto';
+import fs from 'fs-extra';
+import path from 'path';
+import sharp from 'sharp';
+import { fetch } from 'undici';
 
-import { spotifier } from '../../utils/spotifier/index.js';
 import { createMeshGradient } from '../../utils/converter/file-processing.js';
+import { spotifier } from '../../utils/spotifier/index.js';
 
 const { createCanvas, GlobalFonts, loadImage } = Canvas;
 
@@ -25,7 +25,7 @@ const assets = {
 	model: null
 };
 
-const instagramUsername = 'dizy.env';
+const instagramUsername = 'dizy.prod';
 const githubUsername = 'nugraizy';
 const watermark = 'Spotify Card by Void';
 
@@ -261,7 +261,12 @@ export class SpotifyCard {
 			const gradientNumber = this.generateRandomNumber(1, 3);
 
 			if (opts.mesh) {
-				const meshGradient = await createMeshGradient(chroma(this.#_colorPalettes[gradientNumber]).hex().toUpperCase());
+				const colors = this.#_colorPalettes.map((rgb) => chroma(rgb).hex().toUpperCase());
+				const meshGradient = await createMeshGradient({
+					width: this.#_canvas.width,
+					height: this.#_canvas.height,
+					colors
+				});
 
 				const image = await loadImage(meshGradient);
 

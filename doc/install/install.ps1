@@ -26,7 +26,7 @@ if (Test-ProgramInstalled "ffmpeg") {
 if (Test-ProgramInstalled "cwebp") {
     Write-Host "LIBWEBP is already installed."
 } else {
-    $libwebpUrl = "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.4.0-windows-x64.zip"
+    $libwebpUrl = "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0-windows-x64.zip"
 
     $libwebpDir = "C:\libwebp"
 
