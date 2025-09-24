@@ -42,7 +42,7 @@ export default {
 			);
 		}
 
-		const init = await git.init(username, { round: true, theme: theme.toUpperCase() });
+		const init = await git.init(username, { round: true, theme: theme.toUpperCase(), backgroundMesh: true });
 
 		const create = await init.createGitHubGraph();
 

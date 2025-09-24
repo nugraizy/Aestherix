@@ -844,38 +844,31 @@ export const imageToAnime = async (image, sender, options = defaultOpts) => {
  * @param {string[]} options.colors - Array of colors in HEX format
  * @param {number} [options.width=800] - Width of output
  * @param {number} [options.height=600] - Height of output
- * @returns {Promise<Buffer>} SVG buffer
+ * @returns {Buffer} SVG buffer
  */
-export const createMeshGradient = async ({ colors, width = 800, height = 600 }) =>
-	new Promise(async (resolve, reject) => {
-		try {
-			if (!Array.isArray(colors) || colors.length < 2) {
-				reject(new Error('At least two colors are required to create a mesh gradient.'));
-				return;
-			}
+export const createMeshGradient = ({ colors, width = 800, height = 600 }) => {
+	let palette = colors;
 
-			let palette = colors;
+	let defs = '';
+	let rects = '';
 
-			let defs = '';
-			let rects = '';
+	palette.forEach((color, i) => {
+		const id = `grad${i}`;
+		const cx = Math.random() * 100;
+		const cy = Math.random() * 100;
+		const r = 50 + Math.random() * 50;
 
-			palette.forEach((color, i) => {
-				const id = `grad${i}`;
-				const cx = Math.random() * 100;
-				const cy = Math.random() * 100;
-				const r = 50 + Math.random() * 50;
-
-				defs += `
+		defs += `
       <radialGradient id="${id}" cx="${cx}%" cy="${cy}%" r="${r}%">
         <stop offset="0%" stop-color="${color}" stop-opacity="1"/>
         <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
       </radialGradient>
     `;
 
-				rects += `<rect width="100%" height="100%" fill="url(#${id})"/>`;
-			});
+		rects += `<rect width="100%" height="100%" fill="url(#${id})"/>`;
+	});
 
-			const svg = `
+	const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
       <defs>${defs}</defs>
       <rect width="100%" height="100%" fill="${palette[0]}"/>
@@ -883,8 +876,5 @@ export const createMeshGradient = async ({ colors, width = 800, height = 600 }) 
     </svg>
   `;
 
-			resolve(Buffer.from(svg));
-		} catch (error) {
-			reject(error);
-		}
-	});
+	return Buffer.from(svg);
+};

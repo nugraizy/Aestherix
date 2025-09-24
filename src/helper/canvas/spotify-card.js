@@ -261,8 +261,8 @@ export class SpotifyCard {
 			const gradientNumber = this.generateRandomNumber(1, 3);
 
 			if (opts.mesh) {
-				const colors = this.#_colorPalettes.map((rgb) => chroma(rgb).hex().toUpperCase());
-				const meshGradient = await createMeshGradient({
+				const colors = this.#_colorPalettes.map((rgb) => chroma(rgb).brighten(1.5).hex().toUpperCase());
+				const meshGradient = createMeshGradient({
 					width: this.#_canvas.width,
 					height: this.#_canvas.height,
 					colors

@@ -1,7 +1,10 @@
 import Canvas from '@napi-rs/canvas';
+import chroma from 'chroma-js';
 import _ from 'lodash';
 import path from 'path';
 import { Client } from 'undici';
+
+import { createMeshGradient } from '../../utils/converter/file-processing.js';
 
 const copyright = '© 2022 Hidden Finder, Inc | Made by Aestherix using Canvas Module.';
 
@@ -337,6 +340,11 @@ export class GitHubGraph {
 	 */
 	#_ctx = null;
 
+	/**
+	 * @private
+	 */
+	#_backgroundMesh = false;
+
 	constructor() {
 		this.themes = this.#_themes;
 		/**
@@ -349,8 +357,8 @@ export class GitHubGraph {
 		/**
 		 * @type {import('../../types/Canvas').InitGithubGraph<Omit<GitHubGraph, 'init'>>}
 		 */
-		this.init = (username, { theme = 'DEFAULT', round = false } = {}) => {
-			return this._init(username, { theme, round });
+		this.init = (username, { theme = 'DEFAULT', round = false, backgroundMesh = false } = {}) => {
+			return this._init(username, { theme, round, backgroundMesh });
 		};
 
 		/**
@@ -365,7 +373,11 @@ export class GitHubGraph {
 	 * @private
 	 */
 	async _createGitHubGraph() {
-		await this._fillBackground()._createLines({ round: this.#_optsRound })._placeCopyright()._placeIcons()._textHeaders();
+		await (await this._fillBackground())
+			._createLines({ round: this.#_optsRound })
+			._placeCopyright()
+			._placeIcons()
+			._textHeaders();
 
 		const dates = await this.#_api.getTotalContribution();
 		let yPos = 290;
@@ -383,7 +395,7 @@ export class GitHubGraph {
 	/**
 	 * @private
 	 */
-	async _init(username, { theme, round }) {
+	async _init(username, { theme, round, backgroundMesh }) {
 		if (!username) {
 			throw new Error('Username is required.');
 		}
@@ -391,6 +403,7 @@ export class GitHubGraph {
 		this.#_username = username;
 		this.#_theme = this.#_themes[theme];
 		this.#_optsRound = round;
+		this.#_backgroundMesh = backgroundMesh;
 		this.#_api = new API(this.#_username, this.#_theme);
 
 		await this._initCanvas();
@@ -515,9 +528,22 @@ export class GitHubGraph {
 	/**
 	 * @private
 	 */
-	_fillBackground() {
-		this.#_ctx.fillStyle = this.#_theme.GENERAL[0];
-		this.#_ctx.fillRect(0, 0, this.#_canvas.width, this.#_canvas.height);
+	async _fillBackground() {
+		if (this.#_backgroundMesh) {
+			const meshGradient = createMeshGradient({
+				colors: this.#_theme.GRAPH.slice(1).map((color) => chroma(color).darken(1.5).hex()),
+				width: this.#_canvas.width,
+				height: this.#_canvas.height
+			});
+
+			const image = await loadImage(meshGradient);
+
+			this.#_ctx.drawImage(image, 0, 0, this.#_canvas.width, this.#_canvas.height);
+		} else {
+			this.#_ctx.fillStyle = this.#_theme.GENERAL[0];
+			this.#_ctx.fillRect(0, 0, this.#_canvas.width, this.#_canvas.height);
+		}
+
 		return this;
 	}
 
