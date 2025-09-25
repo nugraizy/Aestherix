@@ -1,0 +1,27 @@
+import MeshGradient from 'mesh-gradient.js';
+import { useEffect } from 'react';
+
+function App() {
+	const params = new URLSearchParams(window.location.search);
+
+	const colors = params.get('colors');
+
+	const gradient = new MeshGradient();
+	const canvasId = 'my-canvas';
+	const COLORS = colors ? colors.split(',').map((c) => '#' + c) : ['#295C96', '#D0CBC7', '#899FB6'];
+
+	useEffect(() => {
+		gradient.initGradient('#' + canvasId, COLORS);
+
+		const value = Math.floor(Math.random() * 1000);
+		gradient.changePosition(value);
+	}, []);
+
+	return (
+		<div className="App">
+			<canvas id={canvasId} width="1080" height="5340" />
+		</div>
+	);
+}
+
+export default App;

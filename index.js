@@ -1,6 +1,7 @@
-import './src/helper/prototypes.js';
 import 'dotenv/config.js';
+import './src/helper/prototypes.js';
 
+import axios from 'axios';
 import path from 'path';
 import { platform } from 'process';
 
@@ -22,6 +23,10 @@ async function main() {
 		console.error('Internet connection is not available.\nMake sure to connect to the internet and try again.');
 		process.exit(1);
 	}
+
+	axios.head('http://localhost:5173').catch(() => {
+		throw new Error('Vite server is not running. Please run "npm run dev:react".');
+	});
 
 	await import('./src/helper/connection/utils/check-flag.js');
 

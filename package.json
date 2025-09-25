@@ -14,7 +14,9 @@
     "youtube:auth": "node ./src/utils/modules/youtube-auth.js",
     "nhentai:cookie": "node ./src/utils/doujin/cookies.js --get",
     "instagram:login": "node ./src/utils/instagram/instagram-login.js",
-    "instagram:login:interactive": "node ./src/utils/instagram/instagram-login-interactive.js"
+    "instagram:login:interactive": "node ./src/utils/instagram/instagram-login-interactive.js",
+    "build": "cd frontend && npm run build",
+    "dev:react": "cd frontend && npm run dev"
   },
   "keywords": [
     "whatsapp",
@@ -90,6 +92,7 @@
     "lodash": "^4.17.21",
     "md5": "^2.3.0",
     "meow": "^12.1.1",
+    "mesh-gradient.js": "^0.0.5",
     "mime-types": "^2.1.34",
     "mqtt": "^4.3.7",
     "ms": "^2.1.3",
@@ -108,6 +111,7 @@
     "puppeteer": "^23.5.3",
     "puppeteer-extra": "^3.3.4",
     "puppeteer-extra-plugin-stealth": "^2.11.1",
+    "react": "^19.1.1",
     "readline": "^1.3.0",
     "remove.bg": "^1.3.0",
     "rgb-color": "^2.1.2",
@@ -137,6 +141,7 @@
     "@types/chroma-js": "^3.1.1",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "18.8.2",
+    "@types/react": "^19.1.13",
     "ava": "^5.3.1",
     "bun-types": "latest",
     "eslint": "^8.57.1",

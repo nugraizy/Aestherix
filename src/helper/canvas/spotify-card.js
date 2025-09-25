@@ -7,7 +7,6 @@ import path from 'path';
 import sharp from 'sharp';
 import { fetch } from 'undici';
 
-import { createMeshGradient } from '../../utils/converter/file-processing.js';
 import { spotifier } from '../../utils/spotifier/index.js';
 
 const { createCanvas, GlobalFonts, loadImage } = Canvas;
@@ -261,14 +260,17 @@ export class SpotifyCard {
 			const gradientNumber = this.generateRandomNumber(1, 3);
 
 			if (opts.mesh) {
-				const colors = this.#_colorPalettes.map((rgb) => chroma(rgb).brighten(1.5).hex().toUpperCase());
-				const meshGradient = createMeshGradient({
-					width: this.#_canvas.width,
-					height: this.#_canvas.height,
-					colors
-				});
+				const colors = this.#_colorPalettes.map((rgb) => chroma(rgb).brighten(1).hex().toUpperCase().slice(1)).join(',');
+				const response = await fetch(`http://localhost:4000/gradient?colors=${colors}`);
+				const meshGradient = await response.arrayBuffer();
 
-				const image = await loadImage(meshGradient);
+				// const meshGradient = createMeshGradient({
+				// 	width: this.#_canvas.width,
+				// 	height: this.#_canvas.height,
+				// 	colors
+				// });
+
+				const image = await loadImage(Buffer.from(meshGradient));
 
 				this.#_ctx.drawImage(image, 0, 0, this.#_canvas.width, this.#_canvas.height);
 

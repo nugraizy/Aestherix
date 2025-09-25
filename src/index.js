@@ -1,36 +1,37 @@
-import fs from 'fs-extra';
 import { makeInMemoryStore } from '@rodrigogs/baileys-store';
+import axios from 'axios';
 import dayjs from 'dayjs';
-import localePlugins from 'dayjs/plugin/timezone.js';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
+import localePlugins from 'dayjs/plugin/timezone.js';
+import fs from 'fs-extra';
 import mqtt from 'mqtt';
-import P from 'pino';
 import cron from 'node-cron';
+import P from 'pino';
 
 import configuration from './helper/config/connect.js';
-import { color, loggers } from './utils/modules/index.js';
-import { runLimitScheduler } from './helper/groups/settings/limit.js';
-import { clearDBConnection, resetSession } from './helper/connection/socket/reset-session.js';
-import { cli as clis } from './helper/connection/utils/check-flag.js';
-import { initContact, updateContact } from './helper/connection/utils/cache.js';
-import { connectSocket } from './helper/connection/socket/socket.js';
 import {
 	emitGroupSettings,
-	handleConnectionUpdate,
-	handleUpsertUpdate,
-	handleMessagesUpdate,
-	handlePresenceUpdate,
 	handleCallUpdate,
-	handleParticipantsUpdate,
+	handleConnectionUpdate,
 	handleGroupSettingsUpdate,
+	handleMessagesUpdate,
+	handleParticipantsUpdate,
 	handlePollUpdate,
+	handlePresenceUpdate,
+	handleUpsertUpdate,
 	handleWerewolfCycle,
 	parseStubtypeUpdate
 } from './helper/connection/event-handler/universal.js';
 import { handleGithubWebhook } from './helper/connection/github-webhook/events.js';
 import { githubWebhook } from './helper/connection/github-webhook/server.js';
+import { server } from './helper/connection/gradient/server.js';
+import { clearDBConnection, resetSession } from './helper/connection/socket/reset-session.js';
+import { connectSocket } from './helper/connection/socket/socket.js';
+import { initContact, updateContact } from './helper/connection/utils/cache.js';
+import { cli as clis } from './helper/connection/utils/check-flag.js';
+import { runLimitScheduler } from './helper/groups/settings/limit.js';
+import { color, loggers } from './utils/modules/index.js';
 import { pinterest } from './utils/pinterest/index.js';
-import axios from 'axios';
 
 const autoProfilePictureChangeEnabled = true;
 
@@ -106,6 +107,7 @@ export const start = async (isReconnect) => {
 
 		Client.ev.on('connected', () => {
 			githubWebhook(isReconnect);
+			server(isReconnect);
 			Client.ev.on('groups', handleGroupSettingsUpdate);
 			Client.ev.on('groups.update', (update) => Client.ev.emit('groups', update));
 			Client.ev.on('group-participants.update', async (update) => await handleParticipantsUpdate(update));
