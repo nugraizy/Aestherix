@@ -16,7 +16,7 @@ export const server = (isReconnect) => {
 	app.get('/gradient', async (req, res) => {
 		const { colors } = req.query;
 
-		const browser = await puppeteer.launch({ headless: 'new' });
+		const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
 		const page = await browser.newPage();
 
 		const reactUrl = `http://localhost:5173/?colors=${encodeURIComponent(colors || '')}`;

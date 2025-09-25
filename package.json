@@ -16,7 +16,8 @@
     "instagram:login": "node ./src/utils/instagram/instagram-login.js",
     "instagram:login:interactive": "node ./src/utils/instagram/instagram-login-interactive.js",
     "build": "cd frontend && npm run build",
-    "dev:react": "cd frontend && npm run dev"
+    "dev:react": "cd frontend && npm run dev",
+    "pm2:react": "pm2 start npm --name \"aestherix-react\" -- run dev:react"
   },
   "keywords": [
     "whatsapp",
