@@ -160,7 +160,7 @@ export const start = async (isReconnect) => {
 					return data;
 				};
 
-				cron.schedule('*/30 * * * * *', async () => {
+				cron.schedule('*/20 * * * * *', async () => {
 					const pinterestId = configuration.pinterestId;
 
 					if (images.length === 0 && !currentPinterestId) {

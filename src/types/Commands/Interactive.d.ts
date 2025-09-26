@@ -1,12 +1,14 @@
-import type { AdvancedClient as Client } from '../Socket';
-import type { MessageGenerated } from '../Messages';
 import type { FileTypeResult } from 'file-type';
+import type { MessageGenerated } from '../Messages';
+import type { AdvancedClient as Client } from '../Socket';
 
 type MediaType = 'videoMessage' | 'imageMessage';
 type Media = string | Buffer | undefined | null;
 type Rows = { header: string; title: string; description: string; id: string };
 type Sections = { title: string; highlight_label: string; rows: Rows[] };
-type Cards = { body: string | null; footer: string | null; title: string | null, buttons: Buttons[] } & Partial<{ header: string | Buffer }>;
+type Cards = { body: string | null; footer: string | null; title: string | null; buttons: Buttons[] } & Partial<{
+	header: string | Buffer;
+}>;
 type Buttons = {
 	name:
 		| 'cta_copy'
@@ -17,7 +19,8 @@ type Buttons = {
 		| 'cta_reminder'
 		| 'cta_cancel_reminder'
 		| 'address_message'
-		| 'send_location';
+		| 'send_location'
+		| 'webview';
 	buttonParamsJson: string;
 };
 
@@ -31,7 +34,8 @@ declare class InteractiveButtons {
 		reminder: ({ display: string, id: string }) => { name: 'cta_reminder'; buttonParamsJson: string };
 		cancel: ({ display: string, id: string }) => { name: 'cta_cancel_reminder'; buttonParamsJson: string };
 		address: ({ display: string, id: string }) => { name: 'address_message'; buttonParamsJson: string };
-		location: () => { name: 'send_location'; buttonParamsJson: '' };
+		location: ({ display: string }) => { name: 'send_location'; buttonParamsJson: string };
+		webview: ({ title: string, url: string, inApp: boolean }) => { name: 'open_webview'; buttonParamsJson: string };
 	};
 }
 

@@ -3,26 +3,26 @@ import {
 	downloadMediaMessage as downloadMessage,
 	generateWAMessage,
 	generateWAMessageFromContent,
-	toBuffer,
-	jidDecode,
 	isJidGroup,
-	jidNormalizedUser
+	jidDecode,
+	jidNormalizedUser,
+	toBuffer
 } from 'baileys';
 import { fileTypeFromBuffer } from 'file-type';
 import ffmpeg from 'fluent-ffmpeg';
-import webpmux from 'node-webpmux';
-import sharp from 'sharp';
-import { TextEncoder } from 'util';
-import { fetch } from 'undici';
 import fs from 'fs-extra';
 import isBuffer from 'is-buffer';
+import webpmux from 'node-webpmux';
 import { randomBytes } from 'node:crypto';
+import sharp from 'sharp';
+import { fetch } from 'undici';
+import { TextEncoder } from 'util';
 
+import { gif2mp4 } from '../../utils/index.js';
+import { fetchBUFFER, isURL } from '../../utils/modules/index.js';
 import configuration from '../config/connect.js';
 import { S_WHATSAPP_NET, UPDATE, ZERO } from '../misc/wa_data/index.js';
-import { isURL, fetchBUFFER } from '../../utils/modules/index.js';
 import { reassign } from './parse-message.js';
-import { gif2mp4 } from '../../utils/index.js';
 
 const { readFile, unlink, writeFile } = (await import('fs-extra')).default;
 
@@ -109,7 +109,7 @@ export const assign = (client) => {
 
 						await img.load(buffer);
 						return img;
-				  })(); /* eslint-disable-line */
+					})(); /* eslint-disable-line */
 		buffer.exif = exif;
 
 		return await buffer.save(null);
@@ -307,10 +307,25 @@ export const assign = (client) => {
 				};
 			},
 
-			location() {
+			location(data) {
 				return {
 					name: 'send_location',
-					buttonParamsJson: ''
+					buttonParamsJson: JSON.stringify({
+						display_text: data.display /* eslint-disable-line */
+					})
+				};
+			},
+
+			webview(data) {
+				return {
+					name: 'open_webview',
+					buttonParamsJson: JSON.stringify({
+						title: data.title,
+						link: {
+							in_app_webview: data.inApp /* eslint-disable-line */,
+							url: data.url
+						}
+					})
 				};
 			}
 		};
@@ -774,12 +789,12 @@ export const assign = (client) => {
 				type === 'imageMessage'
 					? 'image'
 					: type === 'videoMessage'
-					? 'video'
-					: type === 'stickerAnimated'
-					? 'sticker'
-					: (await fileTypeFromBuffer(media)).mime.includes('video')
-					? 'video'
-					: 'image';
+						? 'video'
+						: type === 'stickerAnimated'
+							? 'sticker'
+							: (await fileTypeFromBuffer(media)).mime.includes('video')
+								? 'video'
+								: 'image';
 
 			if (bufferType === 'video') {
 				const [video, webp] = ['video', 'webp'].map((ext) => `${filename}.${ext}`);
@@ -974,7 +989,7 @@ export const assign = (client) => {
 			const quoted = message
 				? {
 						quoted: message
-				  } // eslint-disable-line
+					} // eslint-disable-line
 				: {};
 
 			if (update.isExist('ADD', 'REMOVE', 'DEMOTE', 'PROMOTE')) {
