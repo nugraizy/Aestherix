@@ -49,4 +49,5 @@ export interface GlobalConfig {
 	input: Cache;
 	mqtt: import('mqtt').Client | null;
 	pinterestId: string | null;
+	pinterestImages: Cache;
 }

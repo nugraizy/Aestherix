@@ -58,7 +58,8 @@ const globalConfig = {
 	anonymous: new Cache(),
 	input: new Cache(),
 	mqtt: null,
-	pinterestId: null
+	pinterestId: null,
+	pinterestImages: new Cache()
 };
 
 global.log = console.log;

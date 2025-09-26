@@ -186,6 +186,10 @@ export const start = async (isReconnect) => {
 					const imageUrl = images.shift().url;
 					const image = await downloadImage(imageUrl);
 
+					const date = dayjs().format('YYYY/MM/DD HH:mm:ss');
+
+					configuration.pinterestImages.set(date, imageUrl);
+
 					await client.instance.updateProfilePicture(instance, image, 'no_crop');
 				});
 			}
