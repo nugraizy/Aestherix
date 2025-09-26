@@ -1,6 +1,6 @@
 import { Innertube } from 'youtubei.js';
 
-const youtube = await Innertube.create();
+let youtube = null;
 const reg = /^(?:http?s?:\/\/)?(?:(?:www|gaming)\.)?youtube\.com\/(?:channel\/|(?:user\/)?)([@a-z\-_0-9.]+)\/?(?:[?#]?.*)/i;
 
 const isChannelURL = (url) => ({
@@ -11,6 +11,10 @@ const isChannelURL = (url) => ({
 export const youtubeChannel = async (query) =>
 	new Promise(async (resolve) => {
 		try {
+			if (!youtube) {
+				youtube = await Innertube.create();
+			}
+
 			let author;
 
 			const check = isChannelURL(query);

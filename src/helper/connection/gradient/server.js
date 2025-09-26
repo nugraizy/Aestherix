@@ -14,12 +14,12 @@ export const server = (isReconnect) => {
 	app.use(express.static(path.join(__dirname, 'frontend/dist')));
 
 	app.get('/gradient', async (req, res) => {
-		const { colors } = req.query;
+		const { colors, dimensions } = req.query;
 
 		const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
 		const page = await browser.newPage();
 
-		const reactUrl = `http://localhost:5173/?colors=${encodeURIComponent(colors || '')}`;
+		const reactUrl = `http://localhost:5173/?colors=${encodeURIComponent(colors || '')}&dimensions=${encodeURIComponent(dimensions || '')}`;
 
 		await page.goto(reactUrl, { waitUntil: 'networkidle0' });
 

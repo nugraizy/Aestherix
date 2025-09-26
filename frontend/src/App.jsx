@@ -5,6 +5,7 @@ function App() {
 	const params = new URLSearchParams(window.location.search);
 
 	const colors = params.get('colors');
+	const [width, height] = params.get('dimensions').split('x');
 
 	const gradient = new MeshGradient();
 	const canvasId = 'my-canvas';
@@ -12,6 +13,7 @@ function App() {
 
 	useEffect(() => {
 		gradient.initGradient('#' + canvasId, COLORS);
+		gradient.setCanvasSize(width, height);
 
 		const value = Math.floor(Math.random() * 1000);
 		gradient.changePosition(value);
@@ -19,7 +21,7 @@ function App() {
 
 	return (
 		<div className="App">
-			<canvas id={canvasId} width="1080" height="5340" />
+			<canvas id={canvasId} />
 		</div>
 	);
 }

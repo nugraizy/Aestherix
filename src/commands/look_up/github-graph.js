@@ -1,6 +1,8 @@
 import parser from 'yargs-parser';
 import { GitHubGraph } from '../../helper/index.js';
 
+let themes = null;
+
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
  */
@@ -25,19 +27,26 @@ export default {
 			},
 			alias: {
 				theme: ['t']
-			},
-			default: {
-				theme: 'DEFAULT'
 			}
 		});
 
 		const git = new GitHubGraph();
 
-		const themes = Object.keys(git.themes).map((v) => v.toLowerCase());
+		if (!themes) {
+			themes = Object.keys(git.themes).map((v) => v.toLowerCase());
+		}
+
+		if (!username || username.length === 0) {
+			return await client.instance.reply('Please specify a GitHub User', { from, quoted: message });
+		}
+
+		if (theme === true) {
+			return await client.instance.reply(`List of themes:\n\n${themes.join(', ')}`, { from, quoted: message });
+		}
 
 		if (!themes.includes(theme.toLowerCase())) {
 			return await client.instance.reply(
-				`Please specify a valid GitHub User, this is a list of available themes:\n\n${themes.join(', ')}`,
+				`Please specify a valid themes, this is a list of available themes:\n\n${themes.join(', ')}`,
 				{ from, quoted: message }
 			);
 		}

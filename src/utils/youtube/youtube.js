@@ -1,19 +1,15 @@
-import ytdl from 'ytdl-core';
+import asyncRetry from 'async-retry';
 import { Client } from 'undici';
 import { Innertube, Session, UniversalCache, Utils } from 'youtubei.js';
-import asyncRetry from 'async-retry';
+import ytdl from 'ytdl-core';
 
+import { isURL, isYoutubeURL } from '../modules/index.js';
 import { CACHE_MANAGER, constant, extractVideoId, filterQualities } from './utils.js';
-import { isYoutubeURL, isURL } from '../modules/index.js';
 import { searchYoutube } from './y2mate.js';
 
 let YOUTUBE_AUTH = process.env.YOUTUBE_AUTH;
 
-const yt = await Innertube.create({
-	cache: new UniversalCache(false),
-	generate_session_locally: true, // eslint-disable-line
-	...(YOUTUBE_AUTH ? { cookie: YOUTUBE_AUTH } : {})
-});
+let yt = null;
 
 class YoutubeiError extends Error {
 	constructor(message, info) {
@@ -329,7 +325,7 @@ export default class YouTube {
 
 export class YouTubei {
 	constructor() {
-		this.yt = yt;
+		this.yt;
 		this.refreshedAt = +new Date();
 	}
 	async tryWithRetry(fn) {
@@ -380,6 +376,15 @@ export class YouTubei {
 	}
 
 	async download(id, type) {
+		if (!this.yt) {
+			yt = await Innertube.create({
+				cache: new UniversalCache(false),
+				generate_session_locally: true, // eslint-disable-line
+				...(YOUTUBE_AUTH ? { cookie: YOUTUBE_AUTH } : {})
+			});
+			this.yt = yt;
+		}
+
 		const { basic_info: basicInfo } = await yt.getBasicInfo(id);
 		const stream = await yt.download(id, { type, ...(type === 'video' ? { quality: 'best' } : {}) });
 
@@ -397,7 +402,7 @@ export class YouTubei {
 						download: () => {
 							return this.getBufferFromReadable(stream);
 						}
-				  } // eslint-disable-line
+					} // eslint-disable-line
 				: {})
 		};
 
@@ -407,6 +412,15 @@ export class YouTubei {
 	audio(query) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				if (!this.yt) {
+					yt = await Innertube.create({
+						cache: new UniversalCache(false),
+						generate_session_locally: true, // eslint-disable-line
+						...(YOUTUBE_AUTH ? { cookie: YOUTUBE_AUTH } : {})
+					});
+					this.yt = yt;
+				}
+
 				await this.shouldRefreshInstance();
 
 				if (!(isURL(query) && isYoutubeURL(query))) {
@@ -431,6 +445,15 @@ export class YouTubei {
 	video(query) {
 		return new Promise(async (resolve, reject) => {
 			try {
+				if (!this.yt) {
+					yt = await Innertube.create({
+						cache: new UniversalCache(false),
+						generate_session_locally: true, // eslint-disable-line
+						...(YOUTUBE_AUTH ? { cookie: YOUTUBE_AUTH } : {})
+					});
+					this.yt = yt;
+				}
+
 				await this.shouldRefreshInstance();
 
 				if (!(isURL(query) && isYoutubeURL(query))) {

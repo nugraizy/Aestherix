@@ -4,8 +4,6 @@ import _ from 'lodash';
 import path from 'path';
 import { Client } from 'undici';
 
-import { createMeshGradient } from '../../utils/converter/file-processing.js';
-
 const copyright = '© 2022 Hidden Finder, Inc | Made by Aestherix using Canvas Module.';
 
 const { createCanvas, GlobalFonts, loadImage } = Canvas;
@@ -530,13 +528,14 @@ export class GitHubGraph {
 	 */
 	async _fillBackground() {
 		if (this.#_backgroundMesh) {
-			const meshGradient = createMeshGradient({
-				colors: this.#_theme.GRAPH.slice(1).map((color) => chroma(color).darken(1.5).hex()),
-				width: this.#_canvas.width,
-				height: this.#_canvas.height
-			});
-
-			const image = await loadImage(meshGradient);
+			const colors = this.#_theme.GRAPH.slice(1)
+				.map((color) => chroma(color).darken(1).hex().slice(1))
+				.join(',');
+			const response = await fetch(
+				`http://localhost:4000/gradient?colors=${colors}&dimensions=${this.#_canvas.width - 1000}x${this.#_canvas.height - 1000}`
+			);
+			const meshGradient = await response.arrayBuffer();
+			const image = await loadImage(Buffer.from(meshGradient));
 
 			this.#_ctx.drawImage(image, 0, 0, this.#_canvas.width, this.#_canvas.height);
 		} else {
