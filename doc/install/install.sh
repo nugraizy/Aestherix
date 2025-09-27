@@ -27,7 +27,6 @@ DEBIAN_PACKAGES=(
     ffmpeg libjpeg-dev libpng-dev libtiff-dev libgif-dev librsvg2-dev
     pkg-config build-essential libcairo2-dev libpixman-1-dev libpango1.0-dev
     libheif1 libheif-dev libde265-0 libde265-dev imagemagick heif-gdk-pixbuf
-    heif-convert
 )
 
 ARCH_PACKAGES=(
