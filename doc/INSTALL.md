@@ -1,4 +1,4 @@
-## Linux
+## Linux (Ubuntu / Debian based)
 
 > **IMPORTANT** 
 > make sure to install `gcc`, `g++` and `make`
@@ -10,7 +10,7 @@ sudo apt install gcc g++ make
 
 ... then install the rest.
 ```sh
-sudo apt install ffmpeg libjpeg-dev libpng-dev libtiff-dev libgif-dev librsvg2-dev pkg-config build-essential libcairo2-dev libpixman-1-dev libpango1.0-dev -y
+sudo apt install ffmpeg libjpeg-dev libpng-dev libtiff-dev libgif-dev librsvg2-dev pkg-config build-essential libcairo2-dev libpixman-1-dev libpango1.0-dev libheif1 libheif-dev libde265-0 libde265-dev imagemagick heif-gdk-pixbuf heif-convert -y
 ```
 
 required for headless operation :
@@ -32,6 +32,15 @@ cd libwebp-1.6.0
 make
 sudo make install
 ```
+
+
+
+## Arch Based
+```sh
+sudo pacman -S --needed base-devel ffmpeg libjpeg libpng libtiff giflib librsvg pkgconf cairo pixman pango libheif libde265 imagemagick gdk-pixbuf2 webp
+```
+
+---
 
 #### Or you can execute the ./doc/install/install.sh to do everything for you
 

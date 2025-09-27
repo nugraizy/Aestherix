@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
-import { color, delay, loggers, removeDuplicatesArray, formatNumber } from '../../utils/modules/index.js';
+import { color, delay, formatNumber, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
 
 /**
@@ -64,61 +64,56 @@ export default {
 			loggers.warning(`${color('Downloading TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			const date = dayjs(posts[data].published * 1000).format('HH:mm:ss DD/MM/YYYY');
-			let capt = `TikTok ${posts[data].type === 'images' ? 'Slide' : 'Video'}`.formatHeaders();
+			let caption = `TikTok ${posts[data].type === 'images' ? 'Slide' : 'Video'}`.formatHeaders();
 
-			capt += `\n\nAuthor : ${posts[data].author}\n`;
-			capt += `Username : ${posts[data].nickname}\n`;
-			capt += `Verifies : ${posts[data].verified ? 'Verified' : 'Not Verified'}\n`;
-			capt += `Published : ${date}\n`;
+			caption += `\n\nAuthor : ${posts[data].author}\n`;
+			caption += `Username : ${posts[data].nickname}\n`;
+			caption += `Verifies : ${posts[data].verified ? 'Verified' : 'Not Verified'}\n`;
+			caption += `Published : ${date}\n`;
 
 			if (posts[data].type !== 'images') {
-				capt += `Ratio : ${posts[data].ratioHighest || posts[data].ratio}\n`;
-				posts[data].fps && posts[data].ratioHighest && (capt += `Frame Rates : ${posts[data].fps}\n`);
-				capt += `Duration : ${posts[data].videoDuration}\n`;
+				caption += `Ratio : ${posts[data].ratioHighest || posts[data].ratio}\n`;
+				posts[data].fps && posts[data].ratioHighest && (caption += `Frame Rates : ${posts[data].fps}\n`);
+				caption += `Duration : ${posts[data].videoDuration}\n`;
 			}
 
-			capt += `Music : ${posts[data].musicTitle}\n`;
+			caption += `Music : ${posts[data].musicTitle}\n`;
 
-			capt += `👥 ${formatNumber(posts[data].followers)} 👤 ${formatNumber(posts[data].following)}\n`;
-			capt += `👍 ${formatNumber(posts[data].liked)} 🔄 ${formatNumber(posts[data].shared)} 💬 ${formatNumber(
+			caption += `👥 ${formatNumber(posts[data].followers)} 👤 ${formatNumber(posts[data].following)}\n`;
+			caption += `👍 ${formatNumber(posts[data].liked)} 🔄 ${formatNumber(posts[data].shared)} 💬 ${formatNumber(
 				posts[data].comment
 			)} 👀 ${formatNumber(posts[data].view)}\n`;
-			capt += `🎞️ ${formatNumber(posts[data].totalVideo)}\n\n`;
+			caption += `🎞️ ${formatNumber(posts[data].totalVideo)}\n\n`;
 
-			capt += `📝 ${posts[data].videoDescription}\n`;
+			caption += `📝 ${posts[data].videoDescription}\n`;
 
 			if (posts[data].type === 'images') {
-				capt += `Total Images : ${posts[data].urls.images.length}\n`;
+				caption += `Total Images : ${posts[data].urls.images.length}\n`;
 
 				const images = posts[data].urls.images;
 
-				let dataMessage;
+				const builder = new client.instance.TemplateBuilder.Carousel(client);
 
-				for (const { url, index } of images) {
-					if (index === 1) {
-						dataMessage = await client.instance.send(
-							from,
-							{
-								image: { url },
-								caption: capt.trim().formatForm()
-							},
-							{ quoted: message }
-						);
-						continue;
-					}
-
-					client.instance.send(
-						from,
-						{
-							image: { url }
-						},
-						{ quoted: dataMessage }
+				builder
+					.mainBody(caption)
+					.mainFooter('Powered by Aestherix')
+					.mainHeader('Header')
+					.cards(
+						images.map(({ url, buffer, index, urlWithWatermark }) => ({
+							body: `Image ${index} of ${images.length}`,
+							footer: '',
+							title: '',
+							header: buffer,
+							buttons: [builder.button.url({ display: `Image ${index}`, url: urlWithWatermark })]
+						}))
 					);
 
-					await delay(100);
-				}
+				const messageBuilt = await builder.render();
 
-				await delay(100);
+				// console.log(JSON.stringify(messageBuilt, null, 2));
+
+				await client.instance.relayMessage(from, messageBuilt.message, { messageId: messageBuilt.key.id });
+
 				loggers.info(`${color('Downloaded TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 				continue;
@@ -145,7 +140,7 @@ export default {
 					video: {
 						url
 					},
-					caption: capt.trim()
+					caption: caption.trim()
 				},
 				{ quoted: message }
 			);

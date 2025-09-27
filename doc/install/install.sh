@@ -1,44 +1,62 @@
 #!/bin/bash
+set -e
 
-echo "Checking ffmpeg"
-if ! command -v ffmpeg &> /dev/null; then
-    echo "ffmpeg not found."
-    echo "Installing ffmpeg..."
-    sudo apt-get install -qq -y ffmpeg > installation.txt 2>&1
+LOG_FILE="installation.txt"
+
+echo "=== Dependency Installer ==="
+
+# Detect package manager
+if command -v apt-get &> /dev/null; then
+    PM="apt-get"
+    INSTALL="sudo apt-get install -y -qq"
+    PKG_CHECK="dpkg -l"
+elif command -v pacman &> /dev/null; then
+    PM="pacman"
+    INSTALL="sudo pacman -S --noconfirm --needed"
+    PKG_CHECK="pacman -Q"
+else
+    echo "Error: No supported package manager found (apt-get or pacman required)."
+    exit 1
 fi
 
-echo "Checking required packages for libwebp"
-if ! dpkg -l | grep libjpeg-dev &> /dev/null; then
-    echo "Installing libjpeg-dev..."
-    sudo apt-get install -y -qq libjpeg-dev > installation.txt 2>&1
+echo "Using package manager: $PM"
+echo "Logging to $LOG_FILE"
+
+# Package lists
+DEBIAN_PACKAGES=(
+    ffmpeg libjpeg-dev libpng-dev libtiff-dev libgif-dev librsvg2-dev
+    pkg-config build-essential libcairo2-dev libpixman-1-dev libpango1.0-dev
+    libheif1 libheif-dev libde265-0 libde265-dev imagemagick heif-gdk-pixbuf
+    heif-convert
+)
+
+ARCH_PACKAGES=(
+    ffmpeg libjpeg libpng libtiff giflib librsvg pkgconf base-devel cairo pixman
+    pango libheif libde265 imagemagick gdk-pixbuf2 libwebp
+)
+
+# Install dependencies
+if [[ "$PM" == "apt-get" ]]; then
+    echo "Installing Debian/Ubuntu packages..."
+    $INSTALL "${DEBIAN_PACKAGES[@]}" > "$LOG_FILE" 2>&1
+elif [[ "$PM" == "pacman" ]]; then
+    echo "Installing Arch Linux packages..."
+    $INSTALL "${ARCH_PACKAGES[@]}" > "$LOG_FILE" 2>&1
 fi
 
-if ! dpkg -l | grep libpng-dev &> /dev/null; then
-    echo "Installing libpng-dev..."
-    sudo apt-get install -y -qq libpng-dev > installation.txt 2>&1
-fi
-
-if ! dpkg -l | grep libtiff-dev &> /dev/null; then
-    echo "Installing libtiff-dev..."
-    sudo apt-get install -y -qq libtiff-dev > installation.txt 2>&1
-fi
-
-if ! dpkg -l | grep libgif-dev &> /dev/null; then
-    echo "Installing libgif-dev..."
-    sudo apt-get install -y -qq libgif-dev > installation.txt 2>&1
-fi
-
-echo "Checking libwebp installation"
+# Check libwebp installation (cwebp binary)
 if ! command -v cwebp &> /dev/null; then
-    echo "libwebp not found."
-    echo "Installing libwebp..."
-    wget https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0.tar.gz
-    tar xvzf libwebp-1.6.0.tar.gz
+    echo "libwebp not found. Building from source..."
+    wget -q https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0.tar.gz
+    tar xf libwebp-1.6.0.tar.gz
     cd libwebp-1.6.0
-    ./configure
-    make
-    sudo make install
+    ./configure >> ../"$LOG_FILE" 2>&1
+    make >> ../"$LOG_FILE" 2>&1
+    sudo make install >> ../"$LOG_FILE" 2>&1
     cd ..
+    rm -rf libwebp-1.6.0 libwebp-1.6.0.tar.gz
+else
+    echo "libwebp is already installed."
 fi
 
 echo "All required packages are installed."

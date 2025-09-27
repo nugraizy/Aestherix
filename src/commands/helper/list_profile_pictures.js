@@ -2,8 +2,6 @@ import _ from 'lodash';
 
 import configuration from '../../helper/config/connect.js';
 
-const getTotalPictures = (pictures) => pictures.values().values.reduce((acc, curr) => acc + curr.length, 0);
-
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
  */
@@ -28,7 +26,7 @@ export default {
 
 		const builder = new client.instance.TemplateBuilder.Carousel(client);
 
-		const entries = _.chunk(pictures.entries(), 10);
+		const entries = _.chunk(pictures.entries(), 30);
 
 		const parsedEntries = entries
 			.map((group) =>
@@ -48,13 +46,15 @@ export default {
 			.mainFooter('Powered by Aestherix')
 			.mainHeader('Header')
 			.cards(
-				parsedEntries.map((data) => ({
-					body: `Sequence from ${data[0].timestamp.split(' ')[1]} to ${data[data.length - 1].timestamp.split(' ')[1]}`,
-					footer: `Total Pictures: ${data.length}`,
-					title: '',
-					header: data[0].url,
-					buttons: data.map((v) => builder.button.url({ display: v.timestamp, url: v.url }))
-				}))
+				parsedEntries
+					.map((data) => ({
+						body: `Sequence from ${data[0].timestamp.split(' ')[1]} to ${data[data.length - 1].timestamp.split(' ')[1]}`,
+						footer: `Total Pictures: ${data.length}`,
+						title: '',
+						header: data[0].url,
+						buttons: data.map((v) => builder.button.url({ display: v.timestamp, url: v.url }))
+					}))
+					.slice(0, 30)
 			);
 
 		const messageBuilt = await builder.render();

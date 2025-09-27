@@ -1,14 +1,17 @@
-import axios from 'axios';
 import asyncRetry from 'async-retry';
-import { fetch } from 'undici';
+import axios from 'axios';
 import crypto from 'crypto';
-import { v4 } from 'uuid';
+import fs from 'fs-extra';
+import im from 'imagemagick';
 import _ from 'lodash';
+import { Readable } from 'stream';
+import { fetch } from 'undici';
+import { v4 } from 'uuid';
 
+import { Cache } from '../../helper/modules/cache.js';
 import { cheerioLOAD, randomChar } from '../modules/index.js';
 import { COOKIE } from './cookie.js';
 import { _api as API_BASE_URL, appVersion, checkValid, deviceIds, iids, lastInstall, random } from './util.js';
-import { Cache } from '../../helper/modules/cache.js';
 
 class ResponseParser {
 	/**
@@ -57,7 +60,7 @@ class ResponseParser {
 		bioLink?.link
 			? (container.urls.externalUrls = {
 					url: bioLink.link
-			  }) // eslint-disable-line
+				}) // eslint-disable-line
 			: null;
 
 		container.urls.posts = dataPosts.aweme_list.map((v) => {
@@ -98,7 +101,7 @@ class ResponseParser {
 									musicUrl: music?.play_url.url_list[0]
 								}
 							}
-					  } // eslint-disable-line
+						} // eslint-disable-line
 					: { music: 'copyrighted music' }),
 
 				video: {
@@ -215,6 +218,50 @@ class ResponseParser {
 		return result;
 	}
 
+	async _convertHeicToJpg(url) {
+		const tempPath = `./src/media/temporary_files/${v4()}.heic`;
+		const outputPath = `./src/media/temporary_files/${v4()}.jpg`;
+
+		try {
+			const res = await fetch(url);
+
+			const nodeStream = Readable.fromWeb(res.body);
+
+			await new Promise((resolve, reject) => {
+				const dest = fs.createWriteStream(tempPath);
+
+				nodeStream.pipe(dest);
+				dest.on('finish', resolve);
+				dest.on('error', reject);
+			});
+
+			await new Promise((resolve, reject) => {
+				im.convert([tempPath, outputPath], (err) => {
+					if (err) {
+						return reject(err);
+					}
+
+					resolve();
+				});
+			});
+
+			const buffer = fs.readFileSync(outputPath);
+
+			fs.unlinkSync(tempPath);
+			fs.unlinkSync(outputPath);
+
+			return buffer;
+		} catch (error) {
+			if (fs.existsSync(tempPath)) {
+				fs.unlinkSync(tempPath);
+			}
+
+			if (fs.existsSync(outputPath)) {
+				fs.unlinkSync(outputPath);
+			}
+		}
+	}
+
 	/**
 	 * @private
 	 */
@@ -222,17 +269,19 @@ class ResponseParser {
 		const images = data?.image_post_info?.images;
 
 		return images
-			? images.map((v, i) => ({
+			? images.map(async (v, i) => ({
 					url: v.display_image.url_list[0],
+					urlWithWatermark: images[i].owner_watermark_image.url_list[0],
+					buffer: await this._convertHeicToJpg(v.display_image.url_list[0]),
 					index: i + 1
-			  })) /* eslint-disable-line*/
+				})) /* eslint-disable-line*/
 			: [];
 	}
 
 	/**
 	 * @private
 	 */
-	_mapDataToResult(data, type) {
+	async _mapDataToResult(data, type) {
 		const {
 			keyword: /* eslint-disable-line*/ aweme_id,
 			author: { /* eslint-disable-line*/ unique_id, uid, signature: biograph, custom_verify: verified, nickname },
@@ -277,7 +326,7 @@ class ResponseParser {
 		};
 
 		if (typeToUse === 'images') {
-			result.url.images = this._extractImageMetadata(data);
+			result.url.images = await Promise.all(await this._extractImageMetadata(data));
 		} else {
 			result.url.withWatermark = _.find(withWatermarkList, _.identity) || null;
 			result.url.withNoWatermark = _.find(noWatermarkList, _.identity) || null;
@@ -777,23 +826,39 @@ class RequestModule extends ResponseParser {
 
 				delete config.headers.Cookie;
 
-				const request = async () => {
-					const data = await this._awemeRequest('aweme/v1/feed/?', {
-						method: 'OPTIONS',
-						body,
-						config
-					});
+				const data = await asyncRetry(
+					async () => {
+						const request = async () => {
+							const data = await this._awemeRequest('aweme/v1/feed/?', {
+								method: 'OPTIONS',
+								body,
+								config
+							});
 
-					if (data === '') {
-						throw new Error('No data');
+							if (data === '') {
+								throw new Error('No data');
+							}
+
+							return data;
+						};
+						const container = [];
+
+						for (let i = 0; i < 200; i++) {
+							container.push(request());
+						}
+
+						const resultPromises = await Promise.any(container);
+
+						const response = this._mergeMediaResponse(resultPromises, videoId, 'aweme_list');
+
+						return response;
+					},
+					{
+						maxRetryTime: 60 * 1000,
+						minTimeout: 0,
+						retries: 20
 					}
-
-					return data;
-				};
-
-				const resultPromises = await request();
-
-				const data = this._mergeMediaResponse(resultPromises, videoId, 'aweme_list');
+				);
 
 				if (!data) {
 					resolve({ error: 'Post not found. Please try again later.' });
@@ -871,7 +936,7 @@ class RequestModule extends ResponseParser {
 			return userData;
 		}
 
-		dataPosts = this._parseMediaResponse(
+		dataPosts = await this._parseMediaResponse(
 			dataPosts,
 			dataPosts.image_post_info && dataPosts.image_post_info?.images.length ? 'images' : undefined
 		);
