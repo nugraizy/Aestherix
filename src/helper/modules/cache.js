@@ -80,7 +80,7 @@ export class Cache {
 	 * @returns {boolean}
 	 */
 	has(key) {
-		return !!this.cache[key];
+		return key in this.cache;
 	}
 
 	/**
@@ -154,7 +154,7 @@ export class Cache {
 
 			return container;
 		} else {
-			throw new TypeError('`action` expected. the value is either `find` or `remove`');
+			throw new TypeError('`action` expected. the value is either `find`, `remove`, or `filter`');
 		}
 	}
 
@@ -164,7 +164,7 @@ export class Cache {
 	 * @returns {any | null}
 	 */
 	get(key) {
-		if (!this.cache[key]) {
+		if (!(key in this.cache)) {
 			if (this.#throws) {
 				throw new Error('Key not found');
 			}
@@ -182,19 +182,22 @@ export class Cache {
 	 * @returns {this}
 	 */
 	set(key, value) {
-		this.#count++;
+		const isNewKey = !(key in this.cache);
 
-		if (this.#count > this.#limit) {
-			this.delete(this.keys()[0]);
-			this.#count--;
-		}
-
-		if (!this.#allowOverwrite && this.cache[key]) {
+		if (!this.#allowOverwrite && !isNewKey) {
 			if (this.#throws) {
 				throw new Error('Key already exists');
 			}
 
 			return this;
+		}
+
+		if (isNewKey) {
+			this.#count++;
+
+			if (this.#count > this.#limit) {
+				this.delete(this.keys()[0]);
+			}
 		}
 
 		this.cache[key] = value;
@@ -208,7 +211,7 @@ export class Cache {
 	 * @returns {this}
 	 */
 	delete(key) {
-		if (!this.cache[key]) {
+		if (!(key in this.cache)) {
 			if (this.#throws) {
 				throw new Error('Key not found');
 			}

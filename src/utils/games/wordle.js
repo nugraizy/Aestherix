@@ -59,7 +59,8 @@ export class Wordle {
 				return {
 					board: board.join(''),
 					words: data.word,
-					message: 'Incorrect word length.'
+					message: 'Incorrect word length.',
+					duration: this.getGameDuration()
 				};
 			}
 
@@ -84,7 +85,8 @@ export class Wordle {
 			return {
 				board: board.join(''),
 				words: data.word,
-				message: `❤️x${this.tries} remaining.`
+				message: `❤️x${this.tries} remaining.`,
+				duration: this.getGameDuration()
 			};
 		};
 	}

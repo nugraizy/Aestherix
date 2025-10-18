@@ -1,7 +1,7 @@
 ## Linux (Ubuntu / Debian based)
 
 > **IMPORTANT** 
-> make sure to install `gcc`, `g++` and `make`
+> make sure to install `python`, `gcc`, `g++` and `make`
 
 ```sh
 # if you haven't installed gcc, g++ and make
@@ -47,13 +47,25 @@ sudo pacman -S --needed base-devel ffmpeg libjpeg libpng libtiff giflib librsvg 
 ```sh
 chmod +x ./doc/install/install.sh
 ./doc/install/install.sh
-npm i
+npm i -f
 ```
+
+---
 
 ## Windows
 
 > **IMPORTANT** 
 > make sure to install [visual studio community](https://c2rsetup.officeapps.live.com/c2r/downloadVS.aspx?sku=community&channel=Release&version=VS2022&source=VSLandingPage&cid=2030) with `Desktop development with C++` workload selected
+
+`Command Prompt` :
+```bash
+curl -Lo vs_buildtools.exe https://aka.ms/vs/17/release/vs_buildtools.exe
+```
+
+`PowerShell` :
+```ps1
+Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vs_buildtools.exe" -OutFile "vs_buildtools.exe"
+```
 
 ### FFMPEG
 
@@ -76,5 +88,5 @@ npm i
 
 ```powershell
 .\doc\install\install.ps1
-npm i
+npm i -f
 ```

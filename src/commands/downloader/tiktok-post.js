@@ -27,7 +27,7 @@ export default {
 			tiktok = (await import('../../utils/tiktok/index.js')).tiktok;
 		}
 
-		await client.instance.reply('Please wait.', { from, quoted: message });
+		await client.instance.reply('Please wait...', { from, quoted: message });
 
 		let { _: urls } = parser(query);
 		let { withNoWatermark, withWatermark } = parser(query.toLowerCase(), {

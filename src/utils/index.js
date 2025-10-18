@@ -8,6 +8,7 @@ export * from './bluesky/index.js';
 export * from './brainly/index.js';
 export * from './cnn/index.js';
 export * from './converter/index.js';
+export * from './dab/index.js';
 export * from './deviant_art/index.js';
 export * from './doujin/index.js';
 export * from './download_uploader/index.js';

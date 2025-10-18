@@ -48,7 +48,7 @@ class Pinterest {
 
 		this.getHomefeed = () => this.#_getHomefeed();
 
-		this.getSimilarPin = (url) => this.#_getSimilarPin(url);
+		this.getSimilarPin = (url, bookmarks) => this.#_getSimilarPin(url, bookmarks);
 	}
 
 	async #_search(query) {

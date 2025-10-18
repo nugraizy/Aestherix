@@ -26,12 +26,13 @@ echo "Logging to $LOG_FILE"
 DEBIAN_PACKAGES=(
     ffmpeg libjpeg-dev libpng-dev libtiff-dev libgif-dev librsvg2-dev
     pkg-config build-essential libcairo2-dev libpixman-1-dev libpango1.0-dev
-    libheif1 libheif-dev libde265-0 libde265-dev imagemagick heif-gdk-pixbuf
+    libheif1 libheif-dev libde265-0 libde265-dev imagemagick heif-gdk-pixbuf python3
 )
 
 ARCH_PACKAGES=(
     ffmpeg libjpeg libpng libtiff giflib librsvg pkgconf base-devel cairo pixman
-    pango libheif libde265 imagemagick gdk-pixbuf2 libwebp
+    pango libheif libde265 imagemagick gdk-pixbuf2 libwebp python
+
 )
 
 # Install dependencies

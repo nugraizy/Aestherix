@@ -148,6 +148,12 @@ export const start = async (isReconnect) => {
 					}
 
 					if (response?.bookmarks) {
+						if (response.bookmarks === '-end-') {
+							bookmarks = null;
+							currentPinterestId = null;
+							return;
+						}
+
 						bookmarks = response.bookmarks;
 					} else {
 						bookmarks = null;

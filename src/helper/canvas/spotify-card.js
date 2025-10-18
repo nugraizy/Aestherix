@@ -637,19 +637,21 @@ export class SpotifyCard {
 		);
 
 		this.#_ctx.drawImage(
-			assets.model[`${iconType}_github`],
-			120,
-			this.#_canvas.height - 220,
-			assets.model[`${iconType}_github`].width / 2,
-			assets.model[`${iconType}_github`].height / 2
-		);
-		this.#_ctx.drawImage(
 			assets.model[`${iconType}_add`],
 			x(w / (n + 0.7)) + 390,
 			y(h / (n + 0.7)) - 220,
 			w / (n + 0.5),
 			h / (n + 0.5)
 		);
+
+		this.#_ctx.drawImage(
+			assets.model[`${iconType}_github`],
+			120,
+			this.#_canvas.height - 220,
+			assets.model[`${iconType}_github`].width / 2,
+			assets.model[`${iconType}_github`].height / 2
+		);
+
 		this.#_ctx.font = '32px galyon';
 		this.#_ctx.fillStyle = 'white';
 		this.#_ctx.fillText(githubUsername, 220, this.#_canvas.height - 180);
