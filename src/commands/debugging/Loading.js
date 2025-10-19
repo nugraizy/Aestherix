@@ -159,7 +159,7 @@ export default {
 								}
 							}
 						},
-						{}
+						{ messageId: client.instance.generateMessageID() }
 					);
 
 					await client.instance.relayMessage(from, messages.message, {
@@ -171,10 +171,10 @@ export default {
 					const mediaType = videoFormat.includes(req.headers['content-type'])
 						? 'video'
 						: imageFormat.includes(req.headers['content-type'])
-						? 'image'
-						: audioFormat.includes(req.headers['content-type'])
-						? 'audio'
-						: 'document';
+							? 'image'
+							: audioFormat.includes(req.headers['content-type'])
+								? 'audio'
+								: 'document';
 
 					await client.instance.send(
 						from,
@@ -211,7 +211,7 @@ export default {
 							}
 						}
 					},
-					{}
+					{ messageId: client.instance.generateMessageID() }
 				);
 
 				await client.instance.relayMessage(from, messages.message, {
@@ -242,7 +242,7 @@ export default {
 								}
 							}
 						},
-						{}
+						{ messageId: client.instance.generateMessageID() }
 					);
 
 					await client.instance.relayMessage(from, messages.message, {

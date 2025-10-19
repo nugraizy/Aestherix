@@ -46,7 +46,7 @@ export default {
 					footer: 'Nanda is a footer'
 				}
 			},
-			{}
+			{ messageId: client.instance.generateMessageID() }
 		);
 
 		await client.instance.relayMessage(from, content.message, { messageId: content.key.id });

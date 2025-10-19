@@ -26,7 +26,7 @@ import { reassign } from './parse-message.js';
 
 const { readFile, unlink, writeFile } = (await import('fs-extra')).default;
 
-const generateMessageID = () => randomBytes(18).toString('hex').toUpperCase();
+const generateMessageID = () => 'HFINDER' + randomBytes(18).toString('hex').toUpperCase();
 
 /**
  * Assign functions for easier use.
@@ -128,7 +128,7 @@ export const assign = (client) => {
 				configuration.cache.metadata?.get(to)?.ephemeralDuration ||
 				configuration.cache.users?.get(to)?.ephemeralDuration ||
 				0,
-			messageId: 'HFINDER' + generateMessageID(to),
+			messageId: generateMessageID(),
 			ai: true
 		};
 
@@ -393,7 +393,7 @@ export const assign = (client) => {
 				{
 					viewOnceMessage: this._buildParams
 				},
-				{}
+				{ messageId: generateMessageID() }
 			);
 		}
 
@@ -1224,7 +1224,8 @@ export const assign = (client) => {
 					}
 				]
 			});
-		}
+		},
+		generateMessageID
 	});
 
 	return client;

@@ -90,7 +90,11 @@ export default {
 
 						await client.instance.send(from, { image: buffer, caption: body }, { quoted: message });
 					} else {
-						const messages = generateWAMessageFromContent(from, { ...message.message }, {});
+						const messages = generateWAMessageFromContent(
+							from,
+							{ ...message.message },
+							{ messageId: client.instance.generateMessageID() }
+						);
 
 						messages.message[type].caption = body;
 						messages.message[type].contextInfo = {

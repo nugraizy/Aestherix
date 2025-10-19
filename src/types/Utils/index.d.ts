@@ -400,4 +400,5 @@ export type AssignedClient = {
 	clearType: ClearType;
 	TemplateBuilder: TemplateBuilder;
 	getStoryParticipants: GetStoryParticipants;
+	generateMessageID: string;
 };

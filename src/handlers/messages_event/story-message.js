@@ -36,7 +36,11 @@ const handler = async (client, message) => {
 		return await client.instance.send(meJid, { image: buffer, caption: caption.trim() });
 	} else if (message.type === 'videoMessage' || message.type === 'imageMessage') {
 		caption += `Caption : ${message.body}`;
-		messages = generateWAMessageFromContent(meJid, { ...JSON.parse(JSON.stringify(message.message.message)) }, {});
+		messages = generateWAMessageFromContent(
+			meJid,
+			{ ...JSON.parse(JSON.stringify(message.message.message)) },
+			{ messageId: client.instance.generateMessageID() }
+		);
 		messages.message[message.type].caption = caption;
 		messages.message[message.type].contextInfo = {
 			stanzaId: message.message.key.id,

@@ -1,4 +1,4 @@
-import { generateMessageID, getBinaryNodeChild, getBinaryNodeChildren } from 'baileys';
+import { getBinaryNodeChild, getBinaryNodeChildren } from 'baileys';
 
 const TYPES = {
 	ALL: ['all', 'contacts', 'contact_blacklist', 'none'],
@@ -43,7 +43,7 @@ const sendQuery = (client, { name, value }) =>
 			xmlns: 'privacy',
 			type: 'set',
 			to: '@s.whatsapp.net',
-			id: generateMessageID()
+			id: client.instance.generateMessageID()
 		},
 		content: [
 			{
@@ -83,7 +83,7 @@ export default {
 					xmlns: 'privacy',
 					type: 'get',
 					to: '@s.whatsapp.net',
-					id: generateMessageID()
+					id: client.instance.generateMessageID()
 				},
 				content: [
 					{

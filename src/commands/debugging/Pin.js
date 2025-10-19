@@ -24,7 +24,7 @@ export default {
 					type: 'PIN_FOR_ALL'
 				}
 			},
-			{}
+			{ messageId: client.instance.generateMessageID() }
 		);
 
 		messages.message.pinInChatMessage.type = 'PIN_FOR_ALL';

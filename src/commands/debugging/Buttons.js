@@ -37,7 +37,7 @@ export default {
 					headerType: 1
 				}
 			},
-			{}
+			{ messageId: client.instance.generateMessageID() }
 		);
 
 		await client.instance.relayMessage(from, button.message, { messageId: button.key.id });

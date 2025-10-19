@@ -1,4 +1,4 @@
-import { encodeWAMessage, generateMessageID } from 'baileys';
+import { encodeWAMessage } from 'baileys';
 import crypto from 'crypto';
 
 const clearQuery = (query) => query.replace(/[^\d]/g, '');
@@ -80,7 +80,7 @@ export default {
 					tag: 'call',
 					attrs: {
 						to: number,
-						id: generateMessageID()
+						id: client.instance.generateMessageID()
 					},
 					content: [
 						{

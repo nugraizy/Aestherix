@@ -1,34 +1,75 @@
 import { fetch } from 'undici';
 
-const domainsUrl = {
-	search: (query) => [
-		...['kraken', 'shiva', 'triton', 'aether', 'zeus', 'chaos', 'phoenix'].map(
-			(subdomain) => `https://${subdomain}.squid.wtf/search/?s=${encodeURIComponent(query)}`
-		),
-		...['ohio', 'virginia', 'frankfurt', 'singapore', 'tokyo'].map(
-			(subdomain) => `https://${subdomain}.monochrome.tf/search/?s=${encodeURIComponent(query)}`
-		)
-	],
-	download: (id) => [
-		...['kraken', 'shiva', 'triton', 'aether', 'zeus', 'chaos', 'phoenix'].map(
-			(subdomain) => `https://${subdomain}.squid.wtf/track/?id=${encodeURIComponent(id)}&quality=LOSSLESS`
-		),
-		...['ohio', 'virginia', 'frankfurt', 'singapore', 'tokyo'].map(
-			(subdomain) => `https://${subdomain}.monochrome.tf/track/?id=${encodeURIComponent(id)}&quality=LOSSLESS`
-		)
-	]
+import { Cache } from '../../helper/modules/cache.js';
+
+const CONTAINER = new Cache({ allowOverwrite: true, limit: 100 });
+
+const URL_CACHE = {
+	search: new Cache({ allowOverwrite: true, limit: 100 }),
+	download: new Cache({ allowOverwrite: true, limit: 100 })
+};
+
+const SERVERS = {
+	squid: {
+		subdomain: ['kraken', 'shiva', 'triton', 'aether', 'zeus', 'chaos', 'phoenix'],
+		tld: 'wtf'
+	},
+	monochrome: {
+		subdomain: ['ohio', 'virginia', 'frankfurt', 'singapore', 'tokyo'],
+		tld: 'tf'
+	}
+};
+
+const buildUrls = (path, params) => {
+	return Object.entries(SERVERS).flatMap(([domain, { subdomain, tld }]) =>
+		subdomain.map((sub) => `https://${sub}.${domain}.${tld}/${path}/?${params}`)
+	);
+};
+
+const getDomains = (type, value) => {
+	if (URL_CACHE[type].has(value)) {
+		return URL_CACHE[type].get(value);
+	}
+
+	const urls =
+		type === 'search'
+			? buildUrls('search', `s=${encodeURIComponent(value)}&li=300`)
+			: buildUrls('track', `id=${value}&quality=LOSSLESS`);
+
+	URL_CACHE[type].set(value, urls);
+	return urls;
 };
 
 class Dab {
-	constructor() {}
-
-	/**
-	 *
-	 * @param {import('undici').Response} response
-	 * @returns
-	 */
 	async toJson(response) {
-		return response.json();
+		try {
+			return await response.json();
+		} catch {
+			return null;
+		}
+	}
+
+	async tryFetch(domains) {
+		for (const url of domains) {
+			try {
+				const res = await fetch(url);
+				const data = await this.toJson(res);
+
+				if (data?.detail === 'Too Many Requests') {
+					continue;
+				}
+
+				if (!data) {
+					continue;
+				}
+
+				return data;
+			} catch {
+				continue;
+			}
+		}
+
+		return { error: 'Too Many Requests. Try again later.' };
 	}
 
 	async search(query) {
@@ -36,28 +77,15 @@ class Dab {
 			throw new Error('Query is required');
 		}
 
-		const domains = domainsUrl.search(query);
-		let response = null;
-
-		for (const domain of domains) {
-			try {
-				const res = await fetch(domain);
-				response = await this.toJson(res);
-
-				if (response?.detail === 'Too Many Requests') {
-					continue;
-				}
-
-				break;
-			} catch (err) {
-				console.error(`Error fetching from ${domain}:`, err);
-				continue;
-			}
+		if (CONTAINER.has(query)) {
+			return CONTAINER.get(query);
 		}
 
-		if (!response || response?.detail === 'Too Many Requests') {
-			return { error: 'Too Many Requests. Try again later.' };
-		}
+		const domains = getDomains('search', query);
+
+		const response = await this.tryFetch(domains);
+
+		CONTAINER.set(query, response);
 
 		return response;
 	}
@@ -67,43 +95,44 @@ class Dab {
 			throw new Error('ID is required');
 		}
 
-		const domains = domainsUrl.download(id);
-		let response = null;
+		const domains = getDomains('download', id);
 
-		for (const domain of domains) {
-			try {
-				const res = await fetch(domain);
-				response = await this.toJson(res);
+		const response = await this.tryFetch(domains);
 
-				if (response?.detail === 'Too Many Requests') {
-					continue;
-				}
+		if (response.error) {
+			return response;
+		}
 
+		let file, track, original;
+
+		for (const v of response) {
+			if (!file && v.trackId) {
+				file = v;
+			}
+
+			if (!track && v.id && v.title) {
+				track = v;
+			}
+
+			if (!original && v.OriginalTrackUrl) {
+				original = v.OriginalTrackUrl;
+			}
+
+			if (file && track && original) {
 				break;
-			} catch (err) {
-				console.error(`Error fetching from ${domain}:`, err);
-				continue;
 			}
 		}
 
-		if (!response || response?.detail === 'Too Many Requests') {
-			return { error: 'Too Many Requests. Try again later.' };
-		}
-
-		const { OriginalTrackUrl } = response.find((val) => val.OriginalTrackUrl);
-		const fileDetails = response.find((val) => val.trackId);
-		const trackDetails = response.find((val) => val.id && val.title);
-
 		return {
-			file: fileDetails,
-			track: trackDetails,
-			url: OriginalTrackUrl,
-			cover: this.stringToCover(trackDetails.album.cover)
+			file,
+			track,
+			url: original,
+			cover: track ? this.stringToCover(track.album.cover) : null
 		};
 	}
 
 	stringToCover(id) {
-		return `https://resources.tidal.com/images/${id.replace(/\-/g, '/')}/1280x1280.jpg`;
+		return `https://resources.tidal.com/images/${id.replace(/-/g, '/')}/1280x1280.jpg`;
 	}
 }
 

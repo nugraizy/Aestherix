@@ -1,9 +1,3 @@
-/* eslint-disable */
-
-import { generateWAMessageFromContent } from 'baileys';
-import fs from 'fs-extra';
-import { fileTypeFromBuffer } from 'file-type';
-
 import { randomChar } from '../../utils/index.js';
 
 /**

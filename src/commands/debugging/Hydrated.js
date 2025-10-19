@@ -80,7 +80,7 @@ export default {
 					}
 				}
 			},
-			{}
+			{ messageId: client.instance.generateMessageID() }
 		);
 
 		await client.instance.relayMessage(from, messages.message, {

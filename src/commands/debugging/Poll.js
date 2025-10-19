@@ -1,4 +1,4 @@
-import { generateMessageID, generateWAMessageFromContent } from 'baileys';
+import { generateWAMessageFromContent } from 'baileys';
 import { randomBytes } from 'crypto';
 
 /**
@@ -18,7 +18,7 @@ export default {
 			from,
 			{
 				pollCreationMessage: {
-					encKey: generateMessageID(),
+					encKey: client.instance.generateMessageID(),
 					name: 'Poll',
 					selectableOptionsCount: 1,
 					options: [
@@ -34,7 +34,7 @@ export default {
 					messageSecret: randomBytes(32)
 				}
 			},
-			{}
+			{ messageId: client.instance.generateMessageID() }
 		);
 
 		await client.instance.relayMessage(from, messages.message, { messageId: messages.key.id });

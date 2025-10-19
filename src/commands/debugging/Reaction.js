@@ -1,4 +1,4 @@
-import { generateMessageID, generateWAMessageFromContent } from 'baileys';
+import { generateWAMessageFromContent } from 'baileys';
 import emojiReg from 'emoji-regex';
 import { readFileSync } from 'fs';
 import { ZERO } from '../../helper/index.js';
@@ -33,7 +33,8 @@ export default {
 						}
 					},
 					{
-						quoted: message
+						quoted: message,
+						messageId: client.instance.generateMessageID()
 					}
 				);
 
@@ -56,7 +57,7 @@ export default {
 				await client.instance.relayMessage(
 					from,
 					{ reactionMessage: { key: chat, text: emojis[0] } },
-					{ messageId: generateMessageID() }
+					{ messageId: client.instance.generateMessageID() }
 				);
 			}
 		}
