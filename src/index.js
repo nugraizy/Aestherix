@@ -1,8 +1,6 @@
 import { makeInMemoryStore } from '@rodrigogs/baileys-store';
 import axios from 'axios';
 import dayjs from 'dayjs';
-import customParseFormat from 'dayjs/plugin/customParseFormat.js';
-import localePlugins from 'dayjs/plugin/timezone.js';
 import fs from 'fs-extra';
 import mqtt from 'mqtt';
 import cron from 'node-cron';
@@ -34,10 +32,6 @@ import { color, loggers } from './utils/modules/index.js';
 import { pinterest } from './utils/pinterest/index.js';
 
 const autoProfilePictureChangeEnabled = true;
-
-dayjs.extend(localePlugins);
-dayjs.extend(customParseFormat);
-dayjs.tz.setDefault('Asia/Jakarta');
 
 configuration.cli = clis;
 configuration.OPTIONS = configuration.cli.flags;
@@ -192,7 +186,7 @@ export const start = async (isReconnect) => {
 					const imageUrl = images.shift().url;
 					const image = await downloadImage(imageUrl);
 
-					const date = dayjs().format('YYYY/MM/DD HH:mm:ss');
+					const date = dayjs.tz().format('YYYY/MM/DD HH:mm:ss');
 
 					configuration.pinterestImages.set(date, imageUrl);
 

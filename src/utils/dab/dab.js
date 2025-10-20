@@ -33,7 +33,7 @@ const getDomains = (type, value) => {
 
 	const urls =
 		type === 'search'
-			? buildUrls('search', `s=${encodeURIComponent(value)}&li=300`)
+			? buildUrls('search', `s=${encodeURIComponent(value)}&li=100`)
 			: buildUrls('track', `id=${value}&quality=LOSSLESS`);
 
 	URL_CACHE[type].set(value, urls);
@@ -63,7 +63,7 @@ class Dab {
 					continue;
 				}
 
-				return data;
+				return { data, domain: url };
 			} catch {
 				continue;
 			}
@@ -83,11 +83,17 @@ class Dab {
 
 		const domains = getDomains('search', query);
 
-		const response = await this.tryFetch(domains);
+		const { error, data, domain } = await this.tryFetch(domains);
 
-		CONTAINER.set(query, response);
+		if (error) {
+			return error;
+		}
 
-		return response;
+		console.log(domain, data.items.length);
+
+		CONTAINER.set(query, data);
+
+		return data;
 	}
 
 	async download(id) {
@@ -97,15 +103,15 @@ class Dab {
 
 		const domains = getDomains('download', id);
 
-		const response = await this.tryFetch(domains);
+		const { error, data, domain } = await this.tryFetch(domains);
 
-		if (response.error) {
-			return response;
+		if (error) {
+			return error;
 		}
 
 		let file, track, original;
 
-		for (const v of response) {
+		for (const v of data) {
 			if (!file && v.trackId) {
 				file = v;
 			}
@@ -127,7 +133,8 @@ class Dab {
 			file,
 			track,
 			url: original,
-			cover: track ? this.stringToCover(track.album.cover) : null
+			cover: track ? this.stringToCover(track.album.cover) : null,
+			domain: new URL(domain).host
 		};
 	}
 

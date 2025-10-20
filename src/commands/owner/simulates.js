@@ -14,7 +14,7 @@ const WAPresence = {
 const events = async (client, containers, presence) => {
 	try {
 		if (presence === 'bio') {
-			const time = dayjs().format('HH:mm:ss DD/MM');
+			const time = dayjs.tz().format('HH:mm:ss DD/MM');
 			const uptime = getRuntime(process.uptime());
 			const bio = `Made by nanda | Void bot info : UPTIME : ${uptime} | TIME : ${time} | Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 

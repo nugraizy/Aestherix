@@ -382,6 +382,14 @@ export type GetStoryParticipants = (client: AdvancedClient) => Promise<string[]>
 
 export type AssignSocketClient = (client: Client) => AdvancedClient;
 
+export type GenerateMessageID = () => string;
+
+export type UpdateProfilePicture = (jid: string, media: Buffer, type: 'no_crop' | 'no_stretch' | undefined) => Promise<void>;
+
+export type UpdateMessage = (message: string) => Promise<void>;
+
+export type WaitMessage = (message: string, jid: string, quoted: WAMessage) => Promise<{ update: UpdateMessage }>;
+
 export type AssignedClient = {
 	prepareMedia: PrepareMedia;
 	applyExif: AppliedExif;
@@ -400,5 +408,7 @@ export type AssignedClient = {
 	clearType: ClearType;
 	TemplateBuilder: TemplateBuilder;
 	getStoryParticipants: GetStoryParticipants;
-	generateMessageID: string;
+	generateMessageID: GenerateMessageID;
+	updateProfilePicture: UpdateProfilePicture;
+	waitMessage: WaitMessage;
 };

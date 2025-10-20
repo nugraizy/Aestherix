@@ -7,15 +7,12 @@ import { fetch, Client, File, FormData as FormDataUndici } from 'undici';
 import ms from 'parse-ms';
 import _ from 'lodash';
 import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc.js';
 import chalk from 'chalk';
 import progress from 'progress-stream';
 import isBuffer from 'is-buffer';
 
 import configuration from '../../helper/config/connect.js';
 import { color } from './color.js';
-
-dayjs.extend(utc);
 
 export { color };
 
@@ -481,7 +478,7 @@ export const delaySync = (ms) => {
 export const delay = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const isFormat = false;
-const isFormatISO = true;
+const isFormatISO = false;
 const TIME_FORMAT_DEFAULT = 'ddd, DD MMM YYYY HH:mm:ss [GMT]Z';
 const TIME_FORMAT = 'HH:mm:ss DD/MM';
 const ICON = color('ᛟ', '#E4C1F9');
@@ -510,10 +507,10 @@ const INFOLOG = (...info) => {
 
 	if (!isLOGS) {
 		const time = isFormat
-			? dayjs().format(TIME_FORMAT)
+			? dayjs.tz().format(TIME_FORMAT)
 			: isFormatISO
-			? dayjs().utc(true).toISOString()
-			: dayjs().format(TIME_FORMAT_DEFAULT);
+				? dayjs.tz().utc(true).toISOString()
+				: dayjs.tz().format(TIME_FORMAT_DEFAULT);
 
 		const str = `${ICON} ${coloring(time, isFormat)}${SEPERATOR_3} ${info.join(' ')}`;
 

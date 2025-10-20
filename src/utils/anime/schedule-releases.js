@@ -30,17 +30,6 @@ export const animeReleases = () =>
 					SCHEDULES[day] = child;
 				});
 
-			// $('div.lc-timetable > div.lc-timetable-day.past')
-			// 	.get()
-			// 	.forEach((v) => {
-			// 		const day = dayjs($(v).find('div.lc-timetable-day__heading').text().trim() + ' 2023', {
-			// 			format: 'ddd MMM DD YYYY'
-			// 		}).format('dddd');
-			// 		const child = parseSchedule($, $(v));
-
-			// 		SCHEDULES[day] = child;
-			// 	});
-
 			resolve(SCHEDULES);
 		} catch (error) {
 			reject(error);

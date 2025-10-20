@@ -68,7 +68,13 @@ const logMessage = (message) => {
 	loggers.info(`${senderInfo} ${SEPERATOR}`, fullBody, typeInfo, messageFrom, runtimeInfo);
 };
 
-const handleStubMessage = async (client, message, store) => handler.get('STUBTYPE')(client, message.messages[0], store);
+const handleStubMessage = async (client, message, store) => {
+	if (message.messageStubParameters.length && message.messageStubParameters[0] === 'No matching sessions found for message') {
+		return;
+	}
+
+	handler.get('STUBTYPE')(client, message.messages[0], store);
+};
 
 const handleStoryMessage = async (client, message) => handler.get('STORY')(client, message);
 
@@ -156,6 +162,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 		message.isCmd = message.body.startsWith(prefix);
 		message.cmd = message.isEval ? message.args[0] : message.isCmd ? message.cmd : '';
 		message.query = message.args.slice(1).join(' ').trim();
+
 		let correctedCommand = null;
 		let correctedAliases = null;
 
@@ -266,6 +273,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 				continue;
 			}
 
+			const cooldownEnabled = configuration.OPTIONS.coolDown;
 			let userRole = Limit.checkRole(message.sender);
 
 			if (Tempcmds.premium && !(userRole.role === 'PREMIUM' || userRole.role === 'OWNER')) {
@@ -312,17 +320,20 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 				}
 			}
 
-			const cooldownEnabled = configuration.OPTIONS.coolDown;
-
 			if (cooldownEnabled) {
 				const cooldownUser = user.cooldown.get(message.sender) || new Cache();
 				const isCooldown = cooldownUser.requests;
 
 				if (isCooldown) {
-					await client.instance.reply('Please wait until your request is done', {
-						from: message.from,
-						quoted: message.message
-					});
+					await client.instance.reply(
+						`Command still running. Please wait for the command ${
+							cooldownEnabled ? 'and the cooldown after it finish.' : 'to finish.'
+						}`,
+						{
+							from: message.from,
+							quoted: message.message
+						}
+					);
 					continue;
 				}
 
@@ -331,7 +342,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 
 				if (cooldownTime && Date.now() < cooldownTime) {
 					await client.instance.reply(
-						`${commandName} is on cooldown for ${((cooldownTime - Date.now()) / 1000).toFixed(1)} seconds.`,
+						`Command \`${commandName}\` is still on cooldown for ${((cooldownTime - Date.now()) / 1000).toFixed(1)} seconds.`,
 						{ from: message.from, quoted: message.message }
 					);
 					continue;
@@ -409,20 +420,24 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 							message.isOwner
 								? builder.button.url({
 										display: 'Report to Owner',
-										url: `https://wa.me/${message.settings.owner_number}?text=hi,%20bot%20mengalami%20error${encodeURI(
+										url: `https://wa.me/${message.settings.owner_number.replace(/[^\d]/g, '')}?text=hi,%20bot%20mengalami%20error${encodeURI(
 											`\n\n${err.stack}`
 										)}`
-								  }) // eslint-disable-line
+									}) // eslint-disable-line
 								: null,
 							message.isOwner
 								? builder.button.reply({
 										display: 'Report via Bot',
 										id: `.report ${err.stack}`
-								  }) // eslint-disable-line
+									}) // eslint-disable-line
 								: null,
 							builder.button.copy({
 								code: err.stack,
 								display: 'Copy Stack Trace'
+							}),
+							builder.button.reply({
+								display: 'Retry',
+								id: message.body
 							})
 						].filter(Boolean)
 					);

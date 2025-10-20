@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
-import { color, delay, formatNumber, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
+import { color, formatNumber, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
 
 /**
@@ -29,8 +29,11 @@ export default {
 
 		await client.instance.reply('Please wait...', { from, quoted: message });
 
-		let { _: urls } = parser(query);
-		let { withNoWatermark, withWatermark } = parser(query.toLowerCase(), {
+		let {
+			_: urls,
+			withNoWatermark,
+			withWatermark
+		} = parser(query.toLowerCase(), {
 			configuration: {
 				'short-option-groups': false
 			},
@@ -99,7 +102,7 @@ export default {
 					.mainFooter('Powered by Aestherix')
 					.mainHeader('Header')
 					.cards(
-						images.map(({ url, buffer, index, urlWithWatermark }) => ({
+						images.map(({ buffer, index, urlWithWatermark }) => ({
 							body: `Image ${index} of ${images.length}`,
 							footer: '',
 							title: '',
@@ -109,8 +112,6 @@ export default {
 					);
 
 				const messageBuilt = await builder.render();
-
-				// console.log(JSON.stringify(messageBuilt, null, 2));
 
 				await client.instance.relayMessage(from, messageBuilt.message, { messageId: messageBuilt.key.id });
 
@@ -145,7 +146,6 @@ export default {
 				{ quoted: message }
 			);
 
-			await delay(100);
 			loggers.info(`${color('Downloaded TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 		}
 	}

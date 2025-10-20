@@ -18,7 +18,7 @@ const offlineHandler = async (client, { isGroup, from, sender, message }) => {
 		}
 
 		const dataUser = data.find((v) => v.participant === sender);
-		const dateNow = dayjs().valueOf();
+		const dateNow = dayjs.tz().valueOf();
 
 		if (!dataUser || dateNow > dayjs(dataUser.date).add(30, 's').valueOf()) {
 			dataUser ? (dataUser.date = dateNow) : data.push({ participant: sender, date: dateNow });

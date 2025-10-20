@@ -4,6 +4,15 @@ import './src/helper/prototypes.js';
 import axios from 'axios';
 import path from 'path';
 import { platform } from 'process';
+import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone.js';
+import customParseFormat from 'dayjs/plugin/customParseFormat.js';
+import utc from 'dayjs/plugin/utc.js';
+
+dayjs.extend(timezone);
+dayjs.extend(utc);
+dayjs.extend(customParseFormat);
+dayjs.tz.setDefault('Asia/Jakarta');
 
 import isInternetAvailable from './src/helper/connection/net.js';
 import { printBanner } from './src/utils/modules/color.js';

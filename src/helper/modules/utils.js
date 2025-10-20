@@ -1191,6 +1191,11 @@ export const assign = (client) => {
 			return jids;
 		},
 		TemplateBuilder,
+
+		/**
+		 * Change Profile Picture of the Host or Group.
+		 * @type {import('../../types/Utils/index.js').UpdateProfilePicture}
+		 */
 		updateProfilePicture: async (jid, media, option) => {
 			if (!jid) {
 				throw new Error(
@@ -1225,7 +1230,37 @@ export const assign = (client) => {
 				]
 			});
 		},
-		generateMessageID
+
+		/**
+		 * Generate message ID before sending.
+		 * @type {import('../../types/Utils/index.js').GenerateMessageID}
+		 */
+		generateMessageID,
+
+		/**
+		 * Send waits message and update function.
+		 * @type {import('../../types/Utils/index.js').WaitMessage}
+		 */
+		waitMessage: async (message, jid, quoted) => {
+			const { key } = await send(
+				jid,
+				{
+					text: message
+				},
+				{ quoted, ephemeralExpiration: configuration.cache.users?.get(jid)?.ephemeralDuration || null }
+			);
+
+			/**
+			 * @type {import('../../types/Utils/index.js').UpdateMessage}
+			 */
+			const update = async (message) => {
+				await client.instance.sendMessage(jid, { edit: key, text: message });
+			};
+
+			return {
+				update
+			};
+		}
 	});
 
 	return client;
