@@ -13,14 +13,15 @@ export default {
 	status: 'enable',
 	async run({ isBotAdmin, from, message, groupMetadata }, client) {
 		if (!isBotAdmin) {
-			return await client.instance.reply('Bot is not admin, Please promote admin before using moderation commands.', {
+			return await client.instance.reply(
 				from,
-				quoted: message
-			});
+				'Bot is not admin, Please promote admin before using moderation commands.',
+				message
+			);
 		}
 
 		if (groupMetadata.announce) {
-			return await client.instance.reply('Group is already locked.', { from, quoted: message });
+			return await client.instance.reply(from, 'Group is already locked.', message);
 		}
 
 		await client.instance.updateGroup(from, 'ANNOUNCEMENT');

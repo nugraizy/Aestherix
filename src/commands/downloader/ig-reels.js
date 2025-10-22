@@ -1,8 +1,8 @@
 import parser from 'yargs-parser';
 import dayjs from 'dayjs';
 
-import { color, delay, loggers, formatNumber } from '../../utils/modules/index.js';
-import { instagram } from '../../utils/instagram/index.js';
+import configuration from '../../helper/config/connect.js';
+import { color, loggers, formatNumber } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -17,26 +17,35 @@ export default {
 	cooldown: 10,
 	limit: 9,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message }, client) {
-		if (!query) {
-			return await client.instance.reply('Please specify a url', { from, quoted: message });
+	async run({ from, query, prettyNumber, message, isOwner, prefix }, client) {
+		if (!configuration.isInstagramInitiated) {
+			return await client.instance.reply(
+				from,
+				`Instagram session is not initialized. ${isOwner ? `Type ${prefix}instagraminit to initialize it.` : `Please ask the owner to initialize it first using the command ${prefix}instagraminit`}`,
+				message
+			);
 		}
 
-		await client.instance.reply('Please wait...', { from, quoted: message });
+		if (!query) {
+			return await client.instance.reply(from, 'Please specify a url', message);
+		}
+
+		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
 
 		const { _: urls } = parser(query);
 
-		const reels = await instagram.download.post(urls);
+		const reels = await configuration.instagram.download.post(urls);
+
+		let success = 0;
+		let error = 0;
 
 		loggers.warning(`${color('Downloading Instagram reel', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const data in reels) {
 			if (reels[data]?.error) {
-				await client.instance.reply(`Error while downloading Instagram reel\n\n${reels[data].error}\n${data}`, {
-					from,
-					quoted: message
-				});
+				await client.instance.reply(from, `Error while downloading Instagram reel\n\n${reels[data].error}\n${data}`, message);
 				loggers.error(`${color('Failed to Download Instagram reel', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				error++;
 				continue;
 			}
 
@@ -59,13 +68,15 @@ export default {
 						: {
 								image: { url: reels[data].post[0].url },
 								caption: capt.trim().formatForm()
-						  } /* eslint-disable-line */,
+							} /* eslint-disable-line */,
 					{ quoted: message }
 				);
 			}
 
-			await delay(100);
+			success++;
 		}
+
+		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
 
 		loggers.info(`${color('Downloaded Instagram reel', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}

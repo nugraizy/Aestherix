@@ -15,10 +15,10 @@ export default {
 	status: 'disable',
 	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
 
-		await client.instance.reply('Creating. Please wait...', { from, quoted: message });
+		await client.instance.reply(from, 'Creating. Please wait...', message);
 
 		const result = await createImage(query);
 

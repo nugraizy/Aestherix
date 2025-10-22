@@ -12,7 +12,7 @@ const sambungKataHandler = async ({ from, isGroup, sender, body, message, isAdmi
 
 		if (!result || ('status' in result && !result.status)) {
 			if (result && result.message) {
-				await client.instance.reply(result.message, { from, quoted: message });
+				await client.instance.reply(from, result.message, message);
 			}
 
 			return;

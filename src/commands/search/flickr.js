@@ -16,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, type }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -71,7 +71,7 @@ Powered by 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`.formatForm()
 			let result = await flickr.searchImages(querie.trim());
 
 			if (result?.error) {
-				await client.instance.reply(result.error, { from, quoted: message });
+				await client.instance.reply(from, result.error, message);
 				continue;
 			}
 

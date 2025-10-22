@@ -33,17 +33,14 @@ export default {
 	status: 'enable',
 	run: async ({ query, from, type, message, /*cmd,*/ args, filename }, client) => {
 		if (!query) {
-			return await client.instance.reply('Please provide some text to convert to speech', {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, 'Please provide some text to convert to speech', message);
 		}
 
 		if (type === 'listResponseMessage') {
 			const result = await gttsAI(args.slice(2).join(' '), args[1]);
 
 			if (result?.error) {
-				return await client.instance.reply(result.error, { from, quoted: message });
+				return await client.instance.reply(from, result.error, message);
 			}
 
 			const audioBuffer = await toOpus('opus', {
@@ -106,10 +103,7 @@ export default {
 					.trimEnd();
 			}
 
-			await client.instance.reply(caption, {
-				from,
-				quoted: message
-			});
+			await client.instance.reply(from, caption, message);
 
 			return;
 		}
@@ -119,7 +113,7 @@ export default {
 		const result = await gttsAI(queries.join(' '), model);
 
 		if (result?.error) {
-			return await client.instance.reply(result.error, { from, quoted: message });
+			return await client.instance.reply(from, result.error, message);
 		}
 
 		const audioBuffer = await toOpus('opus', {

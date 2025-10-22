@@ -13,7 +13,7 @@ export default {
 	restrict: true,
 	status: 'enable',
 	async run({ from, message }, client) {
-		const data = await client.instance.reply('I will leave.', { from, quoted: message });
+		const data = await client.instance.reply(from, 'I will leave.', message);
 
 		await client.instance.groupLeave(from);
 		await client.instance.chatModify({ delete: true, lastMessages: [data] }, from);

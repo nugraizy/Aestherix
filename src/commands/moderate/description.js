@@ -13,14 +13,15 @@ export default {
 	status: 'enable',
 	async run({ isBotAdmin, query, bodyQuoted, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply('Please input the description.', { from, quoted: message });
+			return await client.instance.reply(from, 'Please input the description.', message);
 		}
 
 		if (!isBotAdmin) {
-			return await client.instance.reply('Bot is not admin, Please promote admin before using moderation commands.', {
+			return await client.instance.reply(
 				from,
-				quoted: message
-			});
+				'Bot is not admin, Please promote admin before using moderation commands.',
+				message
+			);
 		}
 
 		if (query) {

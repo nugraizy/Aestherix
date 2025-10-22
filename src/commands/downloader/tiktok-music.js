@@ -20,27 +20,27 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
 		if (!query) {
-			return await client.instance.reply('Please provide a URL', { from, quoted: message });
+			return await client.instance.reply(from, 'Please provide a URL', message);
 		}
 
-		await client.instance.reply('Please wait...', { from, quoted: message });
+		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
 
 		let { _: urls } = parser(query);
+
+		let success = 0;
+		let error = 0;
+
+		loggers.warning(`${color('Downloading TikTok Music', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		const musics = await tiktok.download.post(urls);
 
 		for (const data in musics) {
 			if (musics[data]?.error) {
-				await client.instance.reply(`Error while downloading TikTok music\n\n${musics[data].error}\n${data}`, {
-					from,
-					quoted: message
-				});
-
+				await client.instance.reply(from, `Error while downloading TikTok music\n\n${musics[data].error}\n${data}`, message);
 				loggers.error(`${color('Failed to Download TikTok Music', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				error++;
 				continue;
 			}
-
-			loggers.warning(`${color('Downloading TikTok Music', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			await client.instance.send(
 				from,
@@ -51,8 +51,11 @@ export default {
 				},
 				{ quoted: message }
 			);
-
-			loggers.info(`${color('Downloaded TikTok Music', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			success++;
 		}
+
+		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
+
+		loggers.info(`${color('Downloaded TikTok Music', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

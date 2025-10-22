@@ -32,7 +32,7 @@ export default {
 	async run({ from, query, message, sender }, client) {
 		try {
 			if (!query) {
-				return await client.instance.reply('You must enter text', { from, quoted: message });
+				return await client.instance.reply(from, 'You must enter text', message);
 			}
 
 			const getGroups = await client.instance.groupFetchAllParticipating();
@@ -51,7 +51,7 @@ export default {
 			}
 		} catch (err) {
 			log(err);
-			await client.instance.reply(err.stack, { from, quoted: message });
+			await client.instance.reply(from, err.stack, message);
 		}
 	}
 };

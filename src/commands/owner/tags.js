@@ -31,17 +31,15 @@ export default {
 				await import('../../helper/modules/parse-message.js')
 			).reassign(JSON.parse(JSON.stringify(messages.find((v) => v.key.id === args[2]))), client, store, false);
 
-			await client.instance.reply('Here.', {
-				from: dataMessage.from,
-				quoted: dataMessage.message
-			});
+			await client.instance.reply(dataMessage.from, 'Here.', dataMessage.message);
 			await client.instance.reply(
+				dataMessage?.from,
 				`Message Metadata : 
 
 Possibly Hidetag : ${dataMessage.mention.length && !dataMessage.body.match(/@[0-9]+/g) ? 'Yup' : 'Nope'}
 Type Message : ${dataMessage.type}
 Tot. Tags : ${dataMessage.mention.length}`,
-				{ from: dataMessage?.from, quoted: dataMessage.message }
+				dataMessage.message
 			);
 
 			return;
@@ -61,7 +59,7 @@ Tot. Tags : ${dataMessage.mention.length}`,
 		}
 
 		if (!dataMessages.length) {
-			return await client.instance.reply('No messages scraped in this chat', { from, quoted: message });
+			return await client.instance.reply(from, 'No messages scraped in this chat', message);
 		}
 
 		dataMessages = dataMessages.filter(
@@ -71,10 +69,7 @@ Tot. Tags : ${dataMessage.mention.length}`,
 		);
 
 		if (!dataMessages.length) {
-			return await client.instance.reply(`Your tags is not found. Chats scraped : ${messages.length}`, {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, `Your tags is not found. Chats scraped : ${messages.length}`, message);
 		}
 
 		dataMessages = dataMessages.map((v) => ({
@@ -85,10 +80,10 @@ Tot. Tags : ${dataMessage.mention.length}`,
 				v.mention.includes(settings.owner_number) && (v.type === 'mentionText' || v.type === 'extendedTextMessage')
 					? 'Tags & Reply'
 					: v.mention.includes(settings.owner_number) && v.mediaData.participant !== settings.owner_number
-					? 'Tags'
-					: !v.mention.includes(settings.owner_number) && v.mediaData.participant === settings.owner_number
-					? 'Reply'
-					: '',
+						? 'Tags'
+						: !v.mention.includes(settings.owner_number) && v.mediaData.participant === settings.owner_number
+							? 'Reply'
+							: '',
 			time: getTimeSince(Number(v.timeStamp) * 1000),
 			pushName: v.pushname,
 			media: v.type

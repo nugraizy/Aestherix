@@ -17,6 +17,7 @@ export default {
 		const lists = await getListSurah();
 
 		await client.instance.reply(
+			from,
 			lists
 				.map(
 					(v, i) =>
@@ -25,7 +26,7 @@ export default {
 						}\nAudio : ${v.audio}\n`
 				)
 				.join('\n'),
-			{ from, quoted: message }
+			message
 		);
 	}
 };

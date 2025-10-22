@@ -53,11 +53,11 @@ export default {
 		}
 
 		if (!quantity) {
-			return await client.instance.reply('You must provide a quantity.', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a quantity.', message);
 		}
 
 		const changelog = await getChangelogs(quantity);
 
-		await client.instance.reply(stringifyChangelogs(changelog), { from, quoted: message });
+		await client.instance.reply(from, stringifyChangelogs(changelog), message);
 	}
 };

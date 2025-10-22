@@ -53,7 +53,7 @@ export default {
 										displayText: 'Next Series',
 										id: `${cmd} next ${data[index + 1].thumbnail} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {},
 						index !== 0
 							? {
@@ -61,7 +61,7 @@ export default {
 										displayText: 'Previous Series',
 										id: `${cmd} prev ${data[index - 1].thumbnail} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {}
 					],
 					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
@@ -80,10 +80,7 @@ export default {
 				{}
 			);
 		} else if (args[1] === 'get') {
-			return await client.instance.reply(`${'Iflix Search'.formatHeaders()}\n\nURL : ${args[2]}`, {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, `${'Iflix Search'.formatHeaders()}\n\nURL : ${args[2]}`, message);
 		}
 
 		query = query.split(',');
@@ -93,7 +90,7 @@ export default {
 			const data = await iflixSearch(querie);
 
 			if (data?.error) {
-				return await client.instance.reply(data.error, { from, quoted: message });
+				return await client.instance.reply(from, data.error, message);
 			}
 
 			let caption = 'Iflix Search'.formatHeaders();
@@ -128,7 +125,7 @@ export default {
 										displayText: 'Next Series',
 										id: `${cmd} next ${data[1].thumbnail} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {}
 					],
 					footer: `Void Bot     1/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`

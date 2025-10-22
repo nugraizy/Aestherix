@@ -16,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, cmd, type }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -46,7 +46,7 @@ export default {
 								],
 								title: 'VOID BOT | Powered by TrueID'
 							};
-					  }) /* eslint-disable-line */
+						}) /* eslint-disable-line */
 					: false;
 
 			await client.instance.send(
@@ -68,7 +68,7 @@ export default {
 										displayText: 'Next Series',
 										id: `${cmd} next ${data[index + 1].thumbnail} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {},
 						index !== 0
 							? {
@@ -76,7 +76,7 @@ export default {
 										displayText: 'Previous Series',
 										id: `${cmd} prev ${data[index - 1].thumbnail} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {}
 					],
 					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
@@ -100,10 +100,7 @@ export default {
 
 			return;
 		} else if (args[1] === 'get') {
-			return await client.instance.reply(`${'TrueID Search'.formatHeaders()}\n\nURL : ${args[2]}`, {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, `${'TrueID Search'.formatHeaders()}\n\nURL : ${args[2]}`, message);
 		}
 
 		query = query.split(',');
@@ -113,7 +110,7 @@ export default {
 			const data = await trueidSearch(querie);
 
 			if (data?.error) {
-				return await client.instance.reply(data.error, { from, quoted: message });
+				return await client.instance.reply(from, data.error, message);
 			}
 
 			let caption = 'TrueID Search'.formatHeaders();
@@ -139,7 +136,7 @@ export default {
 								],
 								title: 'VOID BOT | Powered by TrueID'
 							};
-					  }) /* eslint-disable-line */
+						}) /* eslint-disable-line */
 					: false;
 
 			await client.instance.send(
@@ -156,7 +153,7 @@ export default {
 										displayText: 'Next Series',
 										id: `${cmd} next ${data[1].thumbnail} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {}
 					],
 					footer: `Void Bot     1/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`

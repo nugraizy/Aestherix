@@ -17,39 +17,37 @@ export default {
 	status: 'enable',
 	async run({ from, message, query, args, sender, prettyNumber }, client) {
 		if (!query) {
-			return await client.instance.reply('Please specify arguments.\n\nUsage: !wordle <play/exit/info>', {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, 'Please specify arguments.\n\nUsage: !wordle <play/exit/info>', message);
 		}
 
 		if (args[1] === 'play') {
 			const wordle = new Wordle(sender);
 
 			if (configuration.games.wordle.has(sender) && wordle.message) {
-				return await client.instance.reply('You are already playing Wordle.', { from, quoted: message });
+				return await client.instance.reply(from, 'You are already playing Wordle.', message);
 			}
 
 			loggers.warning(
 				`${color('Wordle Game Answer : ', '#FF99C8')} ${color(wordle.word, 'white')} to ${color(prettyNumber, '#E4C1F9')}`
 			);
 
-			const data = await client.instance.reply(`${wordle.board.join('')}\n\nTot. words : ${wordle.word.length}`, {
+			const data = await client.instance.reply(
 				from,
-				quoted: message
-			});
+				`${wordle.board.join('')}\n\nTot. words : ${wordle.word.length}`,
+				message
+			);
 
 			wordle.messages = data;
 		} else if (args[1] === 'exit') {
 			if (!configuration.games.wordle.has(sender)) {
-				return await client.instance.reply('You are not playing Wordle.', { from, quoted: message });
+				return await client.instance.reply(from, 'You are not playing Wordle.', message);
 			}
 
 			const wordle = new Wordle(sender);
 
 			wordle.exit();
 
-			await client.instance.reply('You have exited Wordle.', { from, quoted: message });
+			await client.instance.reply(from, 'You have exited Wordle.', message);
 		} else if (args[1] === 'info') {
 			await client.instance.reply(
 				`Wordle Game
@@ -63,7 +61,7 @@ Each time you make a guess, the game will evaluate how close your guess is to th
 - ⬜ White: Initial state before any guesses
 
 Can you find the word in as few attempts as possible?\n\nUsage: !wordle <play/exit/info>`,
-				{ from, quoted: message }
+				message
 			);
 		}
 	}

@@ -59,7 +59,7 @@ export default {
 				loggers.info(`${color('Sticker is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
 			});
 		} else {
-			await client.instance.reply('Please enter text to convert to sticker', { from, quoted: message });
+			await client.instance.reply(from, 'Please enter text to convert to sticker', message);
 		}
 	}
 };

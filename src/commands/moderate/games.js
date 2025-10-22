@@ -15,10 +15,11 @@ export default {
 	status: 'enable',
 	async run(message, client) {
 		if (!message.query) {
-			return await client.instance.reply(`Please specify a command\n\nEx: ${message.cmd} <enable/disable>`, {
-				from: message.from,
-				quoted: message.message
-			});
+			return await client.instance.reply(
+				message.from,
+				`Please specify a command\n\nEx: ${message.cmd} <enable/disable>`,
+				message.message
+			);
 		}
 
 		const data = await fs.readJSON('./databases/groups/settingsManager.json');
@@ -28,44 +29,33 @@ export default {
 			case 'enable':
 			case 'on':
 				if (isEnable) {
-					return await client.instance.reply('You already have this command enabled', {
-						from: message.from,
-						quoted: message.message
-					});
+					return await client.instance.reply(message.from, 'You already have this command enabled', message.message);
 				}
 
 				message[message.from].games = 'enable';
 				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].games = 'enable';
 				await fs.writeJSON('./databases/groups/settingsManager.json', data);
 
-				await client.instance.reply('You have successfully enabled games', {
-					from: message.from,
-					quoted: message.message
-				});
+				await client.instance.reply(message.from, 'You have successfully enabled games', message.message);
 				break;
 			case 'disable':
 			case 'off':
 				if (!isEnable) {
-					return await client.instance.reply('You already have this command disabled', {
-						from: message.from,
-						quoted: message.message
-					});
+					return await client.instance.reply(message.from, 'You already have this command disabled', message.message);
 				}
 
 				message[message.from].games = 'disable';
 				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].games = 'disable';
 				await fs.writeJSON('./databases/groups/settingsManager.json', data);
 
-				await client.instance.reply('You have successfully disabled games', {
-					from: message.from,
-					quoted: message.message
-				});
+				await client.instance.reply(message.from, 'You have successfully disabled games', message.message);
 				break;
 			default:
-				await client.instance.reply(`Please specify a command\n\nEx: ${message.cmd} <enable/disable>`, {
-					from: message.from,
-					quoted: message.message
-				});
+				await client.instance.reply(
+					message.from,
+					`Please specify a command\n\nEx: ${message.cmd} <enable/disable>`,
+					message.message
+				);
 		}
 	}
 };

@@ -19,10 +19,7 @@ const handleWordle = async ({ from, isAdmin, isGroup, body, message, sender }, c
 
 			await client.instance.send(from, response, { quoted: message });
 		} else {
-			await client.instance.reply(guess.board + `\n\n${guess.message}\nPlay time : ${guess.duration}`, {
-				from,
-				quoted: message
-			});
+			await client.instance.reply(from, `${guess.board}\n\n${guess.message}\nPlay time : ${guess.duration}`, message);
 		}
 	};
 

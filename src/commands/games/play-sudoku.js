@@ -32,10 +32,7 @@ export default {
 					const gridSolved = stringifyGrid(solved);
 
 					if (isOwner) {
-						await client.instance.reply(gridSolved, {
-							from: configuration.cache.config.owner_number,
-							quoted: message
-						});
+						await client.instance.reply(configuration.cache.config.owner_number, gridSolved, message);
 					}
 
 					const messages = await client.instance.send(
@@ -60,14 +57,14 @@ export default {
 					return await fs.writeJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'), data);
 				}
 
-				await client.instance.reply('You already have a game in progress.', { from, quoted: message });
+				await client.instance.reply(from, 'You already have a game in progress.', message);
 			} else if (/([A-Ia-i])[1-9]/.test(args[1])) {
 				if (args[2].length > 2) {
-					return await client.instance.reply(`Wrong format!\n\nex : ${cmd} A2 7`, { from, quoted: message });
+					return await client.instance.reply(from, `Wrong format!\n\nex : ${cmd} A2 7`, message);
 				}
 
 				if (!args[2]) {
-					return await client.instance.reply(`Pleas provide a row indexs\n\nex : ${cmd} A2 7`, {
+					return await client.instance.reply(from, `Pleas provide a row indexs\n\nex : ${cmd} A2 7`, {
 						from,
 						quoted: message
 					});
@@ -121,7 +118,7 @@ export default {
 						return await fs.writeJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'), data);
 					}
 
-					return await client.instance.reply(fill.message, { from, quoted: message });
+					return await client.instance.reply(from, fill.message, message);
 				}
 
 				return await client.instance.send(
@@ -156,7 +153,7 @@ export default {
 										data[index].startedAt
 									)}\nThis game is still work on progress\nDifficulty is still on try mode.`
 								},
-								{ from, quoted: message }
+								message
 							);
 						}
 
@@ -178,7 +175,7 @@ export default {
 						return await fs.writeJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'), data);
 					}
 
-					return await client.instance.reply('Clue has run out!', { from, quoted: message });
+					return await client.instance.reply(from, 'Clue has run out!', message);
 				}
 
 				return await client.instance.send(
@@ -222,17 +219,17 @@ export default {
 					data = [];
 					await fs.writeJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'), data);
 
-					return await client.instance.reply('All games reset!', { from, quoted: message });
+					return await client.instance.reply(from, 'All games reset!', message);
 				}
 
 				if (index !== -1) {
 					data.splice(index, 1);
 					await fs.writeJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'), data);
 
-					return await client.instance.reply('Game reset!', { from, quoted: message });
+					return await client.instance.reply(from, 'Game reset!', message);
 				}
 
-				return await client.instance.reply('There is no game to reset!', { from, quoted: message });
+				return await client.instance.reply(from, 'There is no game to reset!', message);
 			}
 		} catch (err) {
 			console.log(err);

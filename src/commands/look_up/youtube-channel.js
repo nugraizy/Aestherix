@@ -15,16 +15,13 @@ export default {
 	status: 'enable',
 	run: async ({ from, query, message }, client) => {
 		if (!query) {
-			return await client.instance.reply('Please specify a query', { from, quoted: message });
+			return await client.instance.reply(from, 'Please specify a query', message);
 		}
 
 		const channel = await youtubeChannel(query);
 
 		if (channel?.error) {
-			return await client.instance.reply(`Error while searching YouTube Channel\n\n${channel.error}`, {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, `Error while searching YouTube Channel\n\n${channel.error}`, message);
 		}
 
 		const { author, avatar } = channel;

@@ -767,13 +767,13 @@ export const assign = (client) => {
 		 * Send and reply any user message.
 		 * @type {import('../../types/Utils/index.js').ReplyMessage}
 		 */
-		reply: async (text, { from, quoted }) =>
+		reply: async (jid, text, message) =>
 			await send(
-				from,
+				jid,
 				{ text },
 				{
-					quoted,
-					ephemeralExpiration: configuration.cache.users?.get(from)?.ephemeralDuration || null
+					quoted: message,
+					ephemeralExpiration: configuration.cache.users?.get(jid)?.ephemeralDuration || null
 				}
 			),
 		/**
@@ -1241,7 +1241,7 @@ export const assign = (client) => {
 		 * Send waits message and update function.
 		 * @type {import('../../types/Utils/index.js').WaitMessage}
 		 */
-		waitMessage: async (message, jid, quoted) => {
+		waitMessage: async (jid, message, quoted) => {
 			const { key } = await send(
 				jid,
 				{
@@ -1260,6 +1260,14 @@ export const assign = (client) => {
 			return {
 				update
 			};
+		},
+
+		/**
+		 * Edit message
+		 * @type {import('../../types/Utils/index.js').EditMessage}
+		 */
+		edit: async (jid, message, key) => {
+			await client.instance.sendMessage(jid, { edit: key, text: message });
 		}
 	});
 

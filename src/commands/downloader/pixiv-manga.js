@@ -35,14 +35,17 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, prettyNumber }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
 
-		await client.instance.reply('Please wait...', { from, quoted: message });
+		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
 
 		let { _: urls } = parser(query);
 
 		urls = removeDuplicatesArray(urls);
+
+		let success = 0;
+		let error = 0;
 
 		loggers.warning(`${color('Downloading Pixiv File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
@@ -50,18 +53,17 @@ export default {
 			const regexs = regex(url.trim());
 
 			if (!regexs.status) {
-				await client.instance.reply(regexs.message + `\nInvalid : ${url}`, { from, quoted: message });
+				await client.instance.reply(from, regexs.message + `\nInvalid : ${url}`, message);
+				error++;
 				continue;
 			}
 
 			const data = await downloadManga(regexs.message);
 
 			if (data?.error) {
-				await client.instance.reply(`Failed while downloading Pixiv manga\n\n${data.error}\n${url}`, {
-					from,
-					quoted: message
-				});
+				await client.instance.reply(from, `Failed while downloading Pixiv manga\n\n${data.error}\n${url}`, message);
 				loggers.error(`${color('Failed to Download Pixiv File', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				error++;
 				continue;
 			}
 
@@ -80,7 +82,7 @@ Total Media : ${pageCount}`;
 					headers: { referer: `https://www.pixiv.net/ajax/manga/${id}` }
 				});
 
-				return await client.instance.send(
+				await client.instance.send(
 					from,
 					{
 						image: new Buffer.from(images, 'base64'),
@@ -88,6 +90,9 @@ Total Media : ${pageCount}`;
 					},
 					{ quoted: message }
 				);
+
+				success++;
+				continue;
 			}
 
 			for (const urlImage of content.original) {
@@ -105,7 +110,11 @@ Total Media : ${pageCount}`;
 				);
 				i++;
 			}
+
+			success++;
 		}
+
+		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
 
 		loggers.info(`${color('Downloaded Pixiv File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}

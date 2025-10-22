@@ -24,16 +24,14 @@ const antiGroupLinkHandler = async (
 		}
 
 		if (!isBotAdmin) {
-			return await client.instance.reply('Anti-URL is enabled, but I am not an admin, so I cannot kick you.', {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, 'Anti-URL is enabled, but I am not an admin, so I cannot kick you.', message);
 		}
 
 		if (!isBanned) {
 			await client.instance.reply(
+				from,
 				'Anti-URL is enabled in this group. You will be kicked if you continue to do this one more time.',
-				{ from, quoted: message }
+				message
 			);
 			await client.instance.send(from, {
 				delete: {
@@ -45,10 +43,11 @@ const antiGroupLinkHandler = async (
 			data[index][from].banned.push(sender);
 			await fs.writeJSON('./databases/groups/settingsManager.json', data);
 		} else {
-			await client.instance.reply('You have been banned from this group for posting URLs. You will be kicked shortly.', {
+			await client.instance.reply(
 				from,
-				quoted: message
-			});
+				'You have been banned from this group for posting URLs. You will be kicked shortly.',
+				message
+			);
 			await client.instance.groupParticipantsUpdate(from, [sender], 'remove');
 		}
 	}

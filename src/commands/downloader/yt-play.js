@@ -17,10 +17,7 @@ export default {
 	status: 'enable',
 	async run(message, client) {
 		if (!message.query) {
-			return await client.instance.reply('Please enter a query', {
-				quoted: message.message,
-				from: message.from
-			});
+			return await client.instance.reply(message.from, 'Please enter a query', message.message);
 		}
 
 		let { audio, video } = parser(message.query.toLowerCase(), {

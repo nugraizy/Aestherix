@@ -17,7 +17,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a query', message);
 		}
 
 		const parseOptions = yargsParser(query, {
@@ -33,7 +33,7 @@ export default {
 		const brainly = await brainlySearch(query, options);
 
 		if (brainly?.error) {
-			return await client.instance.reply(brainly.error, { from, quoted: message });
+			return await client.instance.reply(from, brainly.error, message);
 		}
 
 		let capt = 'Brainly'.formatHeaders();
@@ -49,6 +49,6 @@ export default {
 		}
 
 		capt += '\nBrainly by Void Bot. Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪';
-		await client.instance.reply(capt.trim().formatForm(), { from, quoted: message });
+		await client.instance.reply(from, capt.trim().formatForm(), message);
 	}
 };

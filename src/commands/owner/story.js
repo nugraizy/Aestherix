@@ -65,7 +65,7 @@ export default {
 		}
 
 		if (tempContainer.size === 0) {
-			return await client.instance.reply('No story are found.', { from, quoted: message });
+			return await client.instance.reply(from, 'No story are found.', message);
 		}
 
 		for (const value of Array.from(tempContainer.entries())) {

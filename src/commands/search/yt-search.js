@@ -30,7 +30,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message }, client) {
 		if (!query) {
-			return client.instance.reply('Please specify a query.', { from, quoted: message });
+			return client.instance.reply(from, 'Please specify a query.', message);
 		}
 
 		let result = await youtube.core.search(query);

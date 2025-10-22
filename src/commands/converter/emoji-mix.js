@@ -20,17 +20,17 @@ export default {
 	status: 'enable',
 	async run({ query, from, filename, message }, client) {
 		if (!query) {
-			return await client.instance.reply('Please enter a query', { from, quoted: message });
+			return await client.instance.reply(from, 'Please enter a query', message);
 		}
 
 		const regex = query.match(emojiReg());
 
 		if (!regex) {
-			return await client.instance.reply('Please enter a valid emoji', { from, quoted: message });
+			return await client.instance.reply(from, 'Please enter a valid emoji', message);
 		}
 
 		if (regex.length < 2) {
-			return await client.instance.reply('Please enter 2 valid emoji', { from, quoted: message });
+			return await client.instance.reply(from, 'Please enter 2 valid emoji', message);
 		}
 
 		const emojis = _.chunk(regex, 2);
@@ -43,7 +43,7 @@ export default {
 			const result = await emojimix(arr[0], arr[1]);
 
 			if (typeof result === 'object' && result?.error) {
-				await client.instance.reply(result.error, { from, quoted: message });
+				await client.instance.reply(from, result.error, message);
 
 				continue;
 			}

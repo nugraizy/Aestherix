@@ -18,10 +18,7 @@ export default {
 	status: 'enable',
 	async run({ isMediaImage, from, prettyNumber, message, filename, query, extractMediaData, typeQuoted }, client) {
 		if (!isMediaImage) {
-			return await client.instance.reply('Please send/reply an image to recognize text', {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, 'Please send/reply an image to recognize text', message);
 		}
 
 		const file = await client.instance.downloadAndSaveMediaMessage(
@@ -37,10 +34,7 @@ export default {
 				.join('\n')
 				.trim();
 
-			client.instance.reply(`${scanning.error}\n\nAvailable Languages :\n\n${lang}\n\nUse the code only.`, {
-				from,
-				quoted: message
-			});
+			client.instance.reply(from, `${scanning.error}\n\nAvailable Languages :\n\n${lang}\n\nUse the code only.`, message);
 			return;
 		}
 

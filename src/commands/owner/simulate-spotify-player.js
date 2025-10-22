@@ -39,7 +39,7 @@ export default {
 	status: 'enable',
 	async run({ from, args, message, query }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a status to simulate', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a status to simulate', message);
 		}
 
 		const started = Date.now();
@@ -49,10 +49,11 @@ export default {
 				case 'status':
 				case 'stats':
 					{
-						await client.instance.reply(Object.keys(configuration.presences).includes('spotify') ? 'Enabled' : 'Disabled', {
+						await client.instance.reply(
 							from,
-							quoted: message
-						});
+							Object.keys(configuration.presences).includes('spotify') ? 'Enabled' : 'Disabled',
+							message
+						);
 					}
 
 					break;
@@ -60,12 +61,12 @@ export default {
 				case 'off':
 					{
 						if (!('spotify' in configuration.presences)) {
-							return await client.instance.reply('Already disabled', { from, quoted: message });
+							return await client.instance.reply(from, 'Already disabled', message);
 						}
 
 						clearTimeout(configuration.presences.spotify.timeout);
 						delete configuration.presences.spotify;
-						await client.instance.reply('Simulate Spotify Player Bio Disabled', { from, quoted: message });
+						await client.instance.reply(from, 'Simulate Spotify Player Bio Disabled', message);
 					}
 
 					break;
@@ -73,20 +74,17 @@ export default {
 				case 'on':
 					{
 						if ('spotify' in configuration.presences) {
-							return await client.instance.reply('Already enabled', { from, quoted: message });
+							return await client.instance.reply(from, 'Already enabled', message);
 						}
 
 						configuration.presences.spotify = { started, timeout: setTimeout(() => updateSpotifyTracks(), 0) };
-						await client.instance.reply('Simulate Spotify Player Bio Enabled', { from, quoted: message });
+						await client.instance.reply(from, 'Simulate Spotify Player Bio Enabled', message);
 					}
 
 					break;
 				default:
 					{
-						await client.instance.reply('Usage: !spotifyplayer [enable|disable|status]', {
-							from,
-							quoted: message
-						});
+						await client.instance.reply(from, 'Usage: !spotifyplayer [enable|disable|status]', message);
 					}
 
 					break;

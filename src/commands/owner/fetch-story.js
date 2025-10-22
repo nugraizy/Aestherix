@@ -67,7 +67,7 @@ export default {
 				null;
 
 			if (!data) {
-				return await client.instance.reply('Story not found', { from, quoted: message });
+				return await client.instance.reply(from, 'Story not found', message);
 			}
 
 			caption += ` • ${
@@ -78,7 +78,7 @@ export default {
 			caption += `Texts : ${data.stories?.extendedTextMessage?.length ?? 0}\n`;
 			caption += `Images : ${data.stories?.imageMessage?.length ?? 0}\n`;
 			caption += `Videos : ${data.stories?.videoMessage?.length ?? 0}\n\n`;
-			await client.instance.reply(caption.trim(), { from, quoted: message });
+			await client.instance.reply(from, caption.trim(), message);
 
 			for (const type of Object.keys(data.stories)) {
 				for (const message of data.stories[type]) {

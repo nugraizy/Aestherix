@@ -16,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		query = query.split(',');
@@ -26,7 +26,7 @@ export default {
 			const result = await searchBandcamp(queries);
 
 			if (result?.error) {
-				await client.instance.reply(result.error, { from, quoted: message });
+				await client.instance.reply(from, result.error, message);
 				continue;
 			}
 

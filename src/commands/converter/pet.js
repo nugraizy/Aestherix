@@ -37,10 +37,7 @@ export default {
 		client
 	) {
 		if (!mention.length && !isMediaImage) {
-			return await client.instance.reply('Please mention or send/reply an image to pet', {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, 'Please mention or send/reply an image to pet', message);
 		}
 
 		const defaultOptions = {
@@ -78,6 +75,7 @@ export default {
 		if (isMediaImage) {
 			if (!stickerAble || typeQuoted === 'videoMessage') {
 				return await client.instance.reply(
+					from,
 					`Please send/reply a regular media to be petted. Can't convert ${typeQuoted}, only : ${typeSticker
 						.slice(
 							typeSticker.findIndex((v) => v === 'videoMessage'),
@@ -85,7 +83,7 @@ export default {
 						)
 						.join(', ')
 						.capitalize()}`,
-					{ from, quoted: message }
+					message
 				);
 			}
 

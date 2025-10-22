@@ -14,7 +14,7 @@ export default {
 	limit: 3,
 	status: 'enable',
 	async run({ from, query, message }, client) {
-		let capt = 'Void Bot Search\n\n';
+		let capt = 'Aestherix Bot Search\n\n';
 		const messages = await client.instance.searchMessage(from, query);
 
 		if (!messages.length) {
@@ -22,16 +22,16 @@ export default {
 		} else {
 			capt += `Found ${messages.length} messages.\n\n`;
 
-			await client.instance.reply(capt.trim(), { from, quoted: message });
+			await client.instance.reply(from, capt.trim(), message);
 
 			for (const messageElement of messages) {
-				await client.instance.reply('Found it.', { from, quoted: messageElement });
+				await client.instance.reply(from, 'Found it.', messageElement);
 				await delay(200);
 			}
 
 			return;
 		}
 
-		await client.instance.reply(capt.trim(), { from, quoted: message });
+		await client.instance.reply(from, capt.trim(), message);
 	}
 };

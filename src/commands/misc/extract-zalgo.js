@@ -15,9 +15,9 @@ export default {
 	status: 'enable',
 	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply('You need to provide text', { from, quoted: message });
+			return await client.instance.reply(from, 'You need to provide text', message);
 		}
 
-		await client.instance.reply(extractZalgo(query), { from, quoted: message });
+		await client.instance.reply(from, extractZalgo(query), message);
 	}
 };

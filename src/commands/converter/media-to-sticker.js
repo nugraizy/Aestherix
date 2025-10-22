@@ -47,25 +47,24 @@ export default {
 		client
 	) {
 		if (!isMediaImage && !isMediaVid && !query) {
-			return await client.instance.reply('Please send/reply a media or send a url to convert to sticker', {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, 'Please send/reply a media or send a url to convert to sticker', message);
 		}
 
 		if (query && !isURL(query) && !isMediaImage && !isMediaVid) {
-			return await client.instance.reply('If you trying to convert sticker from url, please provide a valid url', {
+			return await client.instance.reply(
 				from,
-				quoted: message
-			});
+				'If you trying to convert sticker from url, please provide a valid url',
+				message
+			);
 		}
 
 		if (!stickerAble && !query) {
 			return await client.instance.reply(
+				from,
 				`Please send/reply a regular media to convert to sticker. Can't convert ${typeQuoted} to sticker, only : ${typeSticker
 					.join(', ')
 					.capitalize()}`,
-				{ from, quoted: message }
+				message
 			);
 		}
 

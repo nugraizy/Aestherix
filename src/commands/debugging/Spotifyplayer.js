@@ -68,7 +68,7 @@ export default {
 
 		if (enable) {
 			if (ids?.[from]?.enabled) {
-				return await client.instance.reply('Already enabled', { from, quoted: message });
+				return await client.instance.reply(from, 'Already enabled', message);
 			}
 
 			const messageReplies = await client.instance.send(
@@ -86,7 +86,7 @@ export default {
 
 		if (disable) {
 			if (!ids?.[from]?.enabled) {
-				return await client.instance.reply('Already disabled', { from, quoted: message });
+				return await client.instance.reply(from, 'Already disabled', message);
 			}
 
 			/**

@@ -16,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, type }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -42,7 +42,7 @@ export default {
 										displayText: 'Next Post',
 										id: `.phub next ${data[index + 1].mainThumb} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {},
 						index !== 0
 							? {
@@ -50,7 +50,7 @@ export default {
 										displayText: 'Previous Post',
 										id: `.phub prev ${data[index - 1].mainThumb} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {}
 					],
 					footer: `Title : ${data[index].title}
@@ -76,7 +76,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 			const result = await arq.searchPHub(querie.trim());
 
 			if (result?.error || !result.ok) {
-				await client.instance.reply(JSON.stringify(result), { from, quoted: message });
+				await client.instance.reply(from, JSON.stringify(result), message);
 				continue;
 			}
 

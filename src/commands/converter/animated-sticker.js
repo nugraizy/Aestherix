@@ -68,6 +68,6 @@ export default {
 			return;
 		}
 
-		return await client.instance.reply('Please enter text to convert to sticker', { from, quoted: message });
+		return await client.instance.reply(from, 'Please enter text to convert to sticker', message);
 	}
 };

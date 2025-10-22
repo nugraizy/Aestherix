@@ -58,18 +58,12 @@ export const startTG = async (client, id, { message, sender }, remainingTime) =>
 			const { timer } = checkIntervals(configuration.intervals.tebakGambar.get(ids));
 
 			if (timer === 5) {
-				clients.instance.reply('Time is almost over! 5 seconds', {
-					from: ids,
-					quoted: messages
-				});
+				clients.instance.reply(ids, 'Time is almost over! 5 seconds', messages);
 			}
 
 			if (timer <= 0) {
 				deleteIntervals(configuration.intervals.tebakGambar.get(ids), configuration.intervals.tebakGambar, ids);
-				clients.instance.reply(`Time's up! The answer is ${answers}`, {
-					from: ids,
-					quoted: messages
-				});
+				clients.instance.reply(ids, `Time's up! The answer is ${answers}`, messages);
 				configuration.games.tebakGambar.delete(configuration.games.tebakGambar.get(ids).id);
 			}
 		}

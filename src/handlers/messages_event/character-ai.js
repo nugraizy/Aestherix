@@ -17,14 +17,14 @@ const handler = async ({ from, type, body, message, mediaData }, client) => {
 			let response = await ai.sendMessage(body);
 
 			if (response.error) {
-				await client.instance.reply(response.message, { from, quoted: message });
+				await client.instance.reply(from, response.message, message);
 
 				response = await ai.sendMessage(body);
 
 				await delay(1000);
 			}
 
-			await client.instance.reply(response.message, { from, quoted: message });
+			await client.instance.reply(from, response.message, message);
 		}
 	} catch (error) {
 		console.log(error);

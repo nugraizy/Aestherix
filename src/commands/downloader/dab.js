@@ -6,11 +6,6 @@ import { Cache } from '../../helper/modules/cache.js';
 import { dab, metadata } from '../../utils/dab/index.js';
 import { color, loggers, delay } from '../../utils/modules/index.js';
 
-const waitMessage = new Cache({
-	limit: 100,
-	allowOverwrite: false
-});
-
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
  */
@@ -24,15 +19,15 @@ export default {
 	cooldown: 8,
 	limit: 3,
 	status: 'enable',
-	run: async ({ from, query, message, prettyNumber, prefix, sender }, client) => {
+	run: async ({ from, query, message, prettyNumber, prefix }, client) => {
+		let wait = null;
+
 		try {
 			if (!query) {
-				return await client.instance.reply('You must provide a query.', { from, quoted: message });
+				return await client.instance.reply(from, 'You must provide a query.', message);
 			}
 
-			const wait = await client.instance.waitMessage('Please wait...', from, message);
-
-			waitMessage.set(sender, wait);
+			wait = await client.instance.waitMessage(from, 'Please wait...', message);
 
 			let { _, index, id } = parser(query, {
 				configuration: { 'short-option-groups': false },
@@ -48,32 +43,29 @@ export default {
 				const searchResults = await dab.search(query);
 
 				if (searchResults.items.length === 0) {
-					waitMessage.delete(sender);
-					return await waitMessage.get(sender).update('No results found for your query. Try again with another keyword.');
+					return await wait.update('No results found for your query. Try again with another keyword.');
 				}
 
 				if (index > searchResults.length - 1) {
-					waitMessage.delete(sender);
-					return await waitMessage
-						.get(sender)
-						.update('Index are not match with the response length. Response length : ' + searchResults.length - 1);
+					return await wait.update(
+						'Index are not match with the response length. Response length : ' + searchResults.length - 1
+					);
 				}
 
-				await downloadAudio(client, searchResults, { index, from, sender, message, prettyNumber });
+				await downloadAudio(client, searchResults, { index, from, message, prettyNumber, wait });
 			} else if (id) {
-				await downloadAudio(client, null, { id, from, sender, message, prettyNumber });
+				await downloadAudio(client, null, { id, from, message, prettyNumber, wait });
 			} else {
 				const searchResults = await dab.search(query);
 
 				if (searchResults.items.length === 0) {
-					waitMessage.delete(sender);
-					return await waitMessage.get(sender).update('No results found for your query. Try again with another keyword.');
+					return await wait.update('No results found for your query. Try again with another keyword.');
 				}
 
 				const total = searchResults.items.length;
 				const searchResultsChunk = lodash.chunk(searchResults.items, 30);
 
-				await waitMessage.get(sender).update(`Songs with keyword ${query} found. Total Response : ${total}`);
+				await wait.update(`Songs with keyword ${query} found. Total Response : ${total}`);
 
 				const builder = new client.instance.TemplateBuilder.Carousel(client);
 
@@ -123,19 +115,16 @@ export default {
 					watermark = '';
 				}
 
-				await waitMessage.get(sender).update('Please press the "Download" button on one of the results below :');
-
-				waitMessage.delete(sender);
+				await wait.update('Please press the "Download" button on one of the results below :');
 			}
 		} catch (error) {
-			await waitMessage.get(sender).update('Something went wrong. Please try again.');
-			waitMessage.delete(sender);
+			await wait.update('Something went wrong. Please try again.');
 		}
 	}
 };
 
-const downloadAudio = async (client, data, { from, sender, message, prettyNumber, id, index }) => {
-	await waitMessage.get(sender).update('Downloading Music...');
+const downloadAudio = async (client, data, { from, message, prettyNumber, id, index, wait }) => {
+	await wait.update('Downloading Music...');
 
 	const downloadInfo = await dab.download(id ? id : data.items[index].id);
 
@@ -144,16 +133,16 @@ const downloadAudio = async (client, data, { from, sender, message, prettyNumber
 	);
 
 	if (downloadInfo?.error) {
-		return await waitMessage.get(sender).update(`Error while downloading music.\n\n${downloadInfo.error}`);
+		return await wait.update(`Error while downloading music.\n\n${downloadInfo.error}`);
 	}
 
-	await waitMessage.get(sender).update('Writing metadata to the file...');
+	await wait.update('Writing metadata to the file...');
 
 	const buffer = await metadata(downloadInfo.track, downloadInfo.url, downloadInfo.cover);
 
-	await waitMessage.get(sender).update('Writing metadata to the file success.');
+	await wait.update('Writing metadata to the file success.');
 	await delay(2000);
-	await waitMessage.get(sender).update('Sending the file...');
+	await wait.update('Sending the file...');
 
 	await client.instance.send(
 		from,
@@ -165,9 +154,7 @@ const downloadAudio = async (client, data, { from, sender, message, prettyNumber
 		{ quoted: message }
 	);
 
-	await waitMessage.get(sender).update('Downloading Success.');
-
-	waitMessage.delete(sender);
+	await wait.update('Command Finished. With total 1 Success.');
 
 	loggers.warning(
 		`${color('Downloaded DAB Audio from', '#FF99C8')} ${color(downloadInfo.domain, '#FFB86C')} for ${color(prettyNumber, '#E4C1F9')}`

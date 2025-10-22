@@ -78,7 +78,7 @@ export default {
 	status: 'enable',
 	async run({ from, message, args, mediaData, mention, bodyQuoted, query }, client) {
 		if (!query && bodyQuoted) {
-			return await client.instance.reply('Please provide user to ban', { from, quoted: message });
+			return await client.instance.reply(from, 'Please provide user to ban', message);
 		}
 
 		/**
@@ -93,17 +93,11 @@ export default {
 		const configure = args[1];
 
 		if (!configure) {
-			return await client.instance.reply('Please provide params.\n!prem add/remove [tag/reply]', {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, 'Please provide params.\n!prem add/remove [tag/reply]', message);
 		}
 
 		if (!['add', 'remove'].includes(configure)) {
-			return await client.instance.reply('Please provide params.\n!prem add/remove [tag/reply]', {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, 'Please provide params.\n!prem add/remove [tag/reply]', message);
 		}
 
 		if (mention.length) {
@@ -149,17 +143,17 @@ export default {
 				const mentioned = mediaData.participant;
 
 				if (mentioned === configuration.botNumber) {
-					return await client.instance.reply('Cannot add bot as premium', { from, quoted: message });
+					return await client.instance.reply(from, 'Cannot add bot as premium', message);
 				}
 
 				const index = USERS.findIndex((v) => v.id === mentioned);
 
 				if (index === -1) {
-					return await client.instance.reply('User not found', { from, quoted: message });
+					return await client.instance.reply(from, 'User not found', message);
 				}
 
 				if (USERS[index].role === 'PREMIUM') {
-					return await client.instance.reply('User already premium', { from, quoted: message });
+					return await client.instance.reply(from, 'User already premium', message);
 				}
 
 				USERS[index].role = 'PREMIUM';
@@ -171,17 +165,17 @@ export default {
 				const mentioned = mediaData.participant;
 
 				if (mentioned === configuration.botNumber) {
-					return await client.instance.reply('Cannot remove bot as premium', { from, quoted: message });
+					return await client.instance.reply(from, 'Cannot remove bot as premium', message);
 				}
 
 				const index = USERS.findIndex((v) => v.id === mentioned);
 
 				if (index === -1) {
-					return await client.instance.reply('User not found', { from, quoted: message });
+					return await client.instance.reply(from, 'User not found', message);
 				}
 
 				if (USERS[index].role === 'FREE') {
-					return await client.instance.reply('User already user', { from, quoted: message });
+					return await client.instance.reply(from, 'User already user', message);
 				}
 
 				USERS[index].role = 'FREE';

@@ -15,23 +15,24 @@ export default {
 	status: 'enable',
 	run: async ({ query, message, from }, client) => {
 		if (!query) {
-			return client.instance.reply('You must provide a query.', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		const result = await searchWAGroups(query);
 
 		if (result?.error) {
-			client.instance.reply(result.error, { from, quoted: message });
+			return await client.instance.reply(from, result.error, message);
 		}
 
-		client.instance.reply(
+		await client.instance.reply(
+			from,
 			`${'WhatsApp Public Groups'.formatHeaders()}
 
 ${result
 	.map((v) => `Title : ${v.title}\nURL : ${v.url}`)
 	.join('\n\n')
 	.trim()}`.formatForm(),
-			{ from, quoted: message }
+			message
 		);
 	}
 };

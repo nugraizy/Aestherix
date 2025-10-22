@@ -15,7 +15,7 @@ export default {
 	status: 'enable',
 	run: async ({ query, from, message, type, args }, client) => {
 		if (!query) {
-			return client.instance.reply('You must provide a query.', { from, quoted: message });
+			return client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		const komik = new KomikCast();
@@ -76,7 +76,7 @@ Tot. Chapters : ${chapters.length}`;
 		const result = await komik.search(query);
 
 		if (result?.error) {
-			return client.instance.reply(result.error, { from, quoted: message });
+			return client.instance.reply(from, result.error, message);
 		}
 
 		const row = [];

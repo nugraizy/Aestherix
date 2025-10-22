@@ -15,7 +15,7 @@ export default {
 	status: 'enable',
 	async run({ isGroup, message, from, sender, query }, client) {
 		if (!isGroup) {
-			return await client.instance.reply('This feature only for groups', { from, quoted: message });
+			return await client.instance.reply(from, 'This feature only for groups', message);
 		}
 
 		const statusGame = getSambungkataSession(from);
@@ -36,10 +36,10 @@ export default {
 			);
 		} else if (query === 'player 2') {
 			if (statusGame.checkStatus() === 'waiting' && (statusGame.player1 === sender || statusGame.player2 === sender)) {
-				await client.instance.reply(statusGame.throwResponse().message, { from, quoted: message });
+				await client.instance.reply(from, statusGame.throwResponse().message, message);
 				return;
 			} else if (statusGame.checkStatus() === 'playing' && (statusGame.player1 === sender || statusGame.player2 === sender)) {
-				await client.instance.reply(statusGame.throwResponse().message, { from, quoted: message });
+				await client.instance.reply(from, statusGame.throwResponse().message, message);
 				return;
 			} else if (statusGame.player1 !== sender && statusGame.player2 === undefined && statusGame.checkStatus() === 'waiting') {
 				const data = await statusGame.start(sender, client);

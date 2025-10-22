@@ -15,7 +15,7 @@ export default {
 	status: 'enable',
 	async run({ from, message, query }, client) {
 		if (!query) {
-			return await client.instance.reply('Please provide a query', { from, quoted: message });
+			return await client.instance.reply(from, 'Please provide a query', message);
 		}
 
 		const cover = new SpotifyCard(query, {

@@ -50,4 +50,7 @@ export interface GlobalConfig {
 	mqtt: import('mqtt').Client | null;
 	pinterestId: string | null;
 	pinterestImages: Cache;
+	anonymousMessages: Cache;
+	isInstagramInitiated: boolean;
+	instagram: import('../../utils/instagram/instagram.js').InstagramApi | null;
 }

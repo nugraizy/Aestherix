@@ -20,43 +20,45 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
 		if (!query) {
-			return await client.instance.reply('Please provide a URL', { from, quoted: message });
+			return await client.instance.reply(from, 'Please provide a URL', message);
 		}
 
-		await client.instance.reply('Please wait....', { from, quoted: message });
+		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
 
 		const { _: urls } = parser(query);
 
 		urls = removeDuplicatesArray(urls);
 
 		if (urls.length === 1 && !isURL(urls[0])) {
-			return await client.instance.reply('Please specify a valid url', { from, quoted: message });
+			return await wait.update('Please specify a valid url');
 		}
 
 		if (urls.length === 1 && !regex(urls[0])) {
-			return await client.instance.reply('Please specify a valid Facebook url', { from, quoted: message });
+			return await wait.update('Please specify a valid Facebook url');
 		}
+
+		let success = 0;
+		let error = 0;
 
 		loggers.warning(`${color('Downloading Facebook Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const url of urls) {
 			if (!isURL(url.trim())) {
-				await client.instance.reply('Please specify a valid url\nInvalid : ' + url, { from, quoted: message });
+				await client.instance.reply(from, 'Please specify a valid url\nInvalid : ' + url, message);
+				error++;
 				continue;
 			} else if (!regex(url.trim())) {
-				await client.instance.reply('Please specify a valid Facebook url\nInvalid : ' + url, { from, quoted: message });
+				await client.instance.reply(from, 'Please specify a valid Facebook url\nInvalid : ' + url, message);
+				error++;
 				continue;
 			}
 
 			const post = await facebook(url.trim());
 
 			if (post?.error) {
-				await client.instance.reply(`Failed while downloading Facebook post\n\n${post.error}\n${url}`, {
-					from,
-					quoted: message
-				});
+				await client.instance.reply(from, `Failed while downloading Facebook post\n\n${post.error}\n${url}`, message);
 				loggers.error(`${color('Failed to Download Facebook Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
-
+				error++;
 				continue;
 			}
 
@@ -73,7 +75,10 @@ export default {
 				{}
 			);
 			await delay(300);
+			success++;
 		}
+
+		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
 
 		loggers.info(`${color('Downloaded Facebook Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}

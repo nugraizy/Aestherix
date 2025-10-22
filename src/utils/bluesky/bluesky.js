@@ -54,6 +54,7 @@ class Bluesky {
 			});
 
 		const data = post.data.thread.post;
+
 		if (data.embed.$type === 'app.bsky.embed.images#view') {
 			return {
 				images: data.embed.images.map((v) => v.fullsize),
@@ -68,6 +69,7 @@ class Bluesky {
 
 			if (did) {
 				let url;
+
 				if (did.startsWith('did:web:')) {
 					url = 'https://' + did.split(':')[2] + '/.well-known/did.json';
 				} else {
@@ -78,6 +80,7 @@ class Bluesky {
 					const {
 						data: { service }
 					} = await axios.get(url);
+
 					for (const { type, serviceEndpoint } of service) {
 						if (type === 'AtprotoPersonalDataServer') {
 							url = serviceEndpoint;
@@ -106,6 +109,7 @@ class Bluesky {
 }
 
 const bluesky = new Bluesky();
+
 await bluesky.login();
 
 export { bluesky };

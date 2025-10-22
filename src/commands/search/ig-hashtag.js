@@ -1,4 +1,4 @@
-import { instagram } from '../../utils/index.js';
+import configuration from '../../helper/config/connect.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -13,16 +13,24 @@ export default {
 	cooldown: 8,
 	limit: 4,
 	status: 'enable',
-	async run({ query, from, message, prefix }, client) {
-		if (!query) {
-			return client.instance.reply('You must provide a query.', { from, quoted: message });
+	async run({ query, from, message, isOwner, prefix }, client) {
+		if (!configuration.isInstagramInitiated) {
+			return await client.instance.reply(
+				from,
+				`Instagram session is not initialized. ${isOwner ? `Type ${prefix}instagraminit to initialize it.` : `Please ask the owner to initialize it first using the command ${prefix}instagraminit`}`,
+				message
+			);
 		}
 
-		const result = await instagram.search.hashtag(query);
+		if (!query) {
+			return client.instance.reply(from, 'You must provide a query.', message);
+		}
+
+		const result = await configuration.instagram.search.hashtag(query);
 
 		for (const tag in result) {
 			if (result[tag].error) {
-				await client.instance.reply(result[tag].error, { from, quoted: message });
+				await client.instance.reply(from, result[tag].error, message);
 				continue;
 			}
 
@@ -46,10 +54,11 @@ export default {
 				{ quoted: message }
 			);
 
-			await client.instance.reply(`You can reply this message and type ${prefix}igp <number[1-${result[tag].posts.length}]>`, {
+			await client.instance.reply(
 				from,
-				quoted: messageToQuoted
-			});
+				`You can reply this message and type ${prefix}igp <number[1-${result[tag].posts.length}]>`,
+				messageToQuoted
+			);
 		}
 	}
 };

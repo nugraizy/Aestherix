@@ -23,11 +23,9 @@ export default {
 	async run({ query, from, message, sender, waitForInput }, client) {
 		if (!query) {
 			return await client.instance.reply(
+				from,
 				'You must provide a `quer(y/ies)` or `url(s)`.\nYou can use `commas` as a separator.',
-				{
-					from,
-					quoted: message
-				}
+				message
 			);
 		}
 
@@ -66,7 +64,7 @@ export default {
 			let result = await pinterest.search(query.trim());
 
 			if (result?.error) {
-				await client.instance.reply(result.message, { from, quoted: message });
+				await client.instance.reply(from, result.message, message);
 			}
 
 			const { results } = result;
@@ -202,11 +200,9 @@ Caption : ${results[index].caption}
 
 				if (errors.length) {
 					await client.instance.reply(
+						from,
 						`Could not retrieve these queries :\n\n${errors.map((v, i) => `${i + 1}. ${v.keyword}`).join('\n')}`,
-						{
-							from,
-							quoted: message
-						}
+						message
 					);
 				}
 			}

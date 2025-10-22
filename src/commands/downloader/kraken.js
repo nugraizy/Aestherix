@@ -19,39 +19,45 @@ export default {
 	status: 'enable',
 	run: async ({ from, message, query, prettyNumber }, client) => {
 		if (!query) {
-			return client.instance.reply('You must provide a query.', { from, quoted: message });
+			return client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		const { _: urls } = parser(query);
 
 		urls = removeDuplicatesArray(urls);
 
-		await client.instance.reply('Please wait...', { from, quoted: message });
+		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+
+		let success = 0;
+		let error = 0;
 
 		loggers.warning(`${color('Downloading Kraken File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const url of urls) {
 			if (!regex(url)) {
-				await client.instance.reply('Please specify a valid Kraken url.\nInvalid : ' + url, { from, quoted: message });
+				await client.instance.reply(from, 'Please specify a valid Kraken url.\nInvalid : ' + url, message);
+				error++;
 				continue;
 			}
 
 			const result = await kraken(url);
 
 			if (result?.error) {
-				await client.instance.reply(result.error, { from, quoted: message });
+				await client.instance.reply(from, result.error, message);
 				loggers.error(`${color('Failed to Download Kraken File', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				error++;
 				continue;
 			}
 
 			await client.instance.reply(
+				from,
 				`${'Kraken Downloader'.formatHeaders()}
 		
 Filename: ${result.filename}
 Filesize: ${result.filesize}
 Filetype: ${result.filetype}
 Uploaded: ${result.uploaded}`.formatForm(),
-				{ from, quoted: message }
+				message
 			);
 
 			await client.instance.send(
@@ -62,7 +68,10 @@ Uploaded: ${result.uploaded}`.formatForm(),
 				},
 				{ quoted: message }
 			);
+			success++;
 		}
+
+		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
 
 		loggers.info(`${color('Downloaded Kraken File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}

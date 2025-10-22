@@ -16,11 +16,11 @@ export default {
 	status: 'enable',
 	async run({ isOwner, isMediaImage, isMediaVid, from, message, mediaData, query }, client) {
 		if (!isMediaImage) {
-			return await client.instance.reply('Please send/reply a media[image]', { from, quoted: message });
+			return await client.instance.reply(from, 'Please send/reply a media[image]', message);
 		}
 
 		if (isMediaVid) {
-			return await client.instance.reply('Please send/reply a media[image]', { from, quoted: message });
+			return await client.instance.reply(from, 'Please send/reply a media[image]', message);
 		}
 
 		const media = await client.instance.downloadMediaMessage(mediaData);
@@ -62,10 +62,7 @@ export default {
 		})();
 
 		if (options.self && !isOwner) {
-			return await client.instance.reply('You are not owner. This commands is only for owner.', {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, 'You are not owner. This commands is only for owner.', message);
 		}
 
 		await client.instance.updateProfilePicture(

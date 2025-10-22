@@ -18,7 +18,7 @@ export default {
 	status: 'enable',
 	async run({ query, message, from, filename }, client) {
 		if (!query) {
-			return await client.instance.reply('Please enter a query', { from, quoted: message });
+			return await client.instance.reply(from, 'Please enter a query', message);
 		}
 
 		let result = await line(query);

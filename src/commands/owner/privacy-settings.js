@@ -98,6 +98,7 @@ export default {
 
 			if (!query) {
 				return await client.instance.reply(
+					from,
 					`Privacy settings:\n${result
 						.map((setting) => `${setting.attrs.name}: ${setting.attrs.value}`)
 						.join('\n')}\n\nUsage: !privacy <setting> <value>\nValid Settings with Values: \n${Object.entries(
@@ -105,10 +106,7 @@ export default {
 					)
 						.map(([setting, values]) => `${setting}: ${values.join(', ')}`)
 						.join('\n')}`,
-					{
-						from,
-						quoted: message
-					}
+					message
 				);
 			}
 
@@ -118,25 +116,17 @@ export default {
 
 			if (!validValue) {
 				return await client.instance.reply(
+					from,
 					`Invalid value for ${name}. Valid values: ${PRIVACY_SETTINGS_TOGGLE[name].join(', ')}`,
-					{
-						from,
-						quoted: message
-					}
+					message
 				);
 			}
 
 			await sendQuery(client, { name, query });
 
-			await client.instance.reply('Succesfully changed privacy settings.', {
-				from,
-				quoted: message
-			});
+			await client.instance.reply(from, 'Succesfully changed privacy settings.', message);
 		} catch {
-			await client.instance.reply('An error occured while trying to change privacy settings.', {
-				from,
-				quoted: message
-			});
+			await client.instance.reply(from, 'An error occured while trying to change privacy settings.', message);
 		}
 	}
 };

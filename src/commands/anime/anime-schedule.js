@@ -25,7 +25,7 @@ export default {
 	status: 'enable',
 	run: async ({ from, message, isGroup }, client) => {
 		if (isGroup) {
-			return client.instance.reply('This command only works in private chat.', { from, quoted: message });
+			return client.instance.reply(from, 'This command only works in private chat.', message);
 		}
 
 		const text = 'Anime Releases'.formatHeaders();

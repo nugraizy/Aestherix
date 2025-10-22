@@ -15,9 +15,9 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, bodyQuoted }, client) {
 		if (!query && !bodyQuoted) {
-			return await client.instance.reply('You need to provide text', { from, quoted: message });
+			return await client.instance.reply(from, 'You need to provide text', message);
 		}
 
-		await client.instance.reply(zalgo(query || bodyQuoted, { size: 'maxi' }), { from, quoted: message });
+		await client.instance.reply(from, zalgo(query || bodyQuoted, { size: 'maxi' }), message);
 	}
 };

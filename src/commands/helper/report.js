@@ -15,13 +15,14 @@ export default {
 	status: 'enable',
 	async run({ from, message, query, sender, pushname, prettyNumber, settings, type, isOwner, args }, client) {
 		if (!query) {
-			return await client.instance.reply('Please provide a message to report', { from, quoted: message });
+			return await client.instance.reply(from, 'Please provide a message to report', message);
 		}
 
 		if (args[1] === 'accept' && isOwner) {
 			await client.instance.reply(
+				args[2],
 				'Your problem has been accepted by the Owner. Please wait for the fix. And for the bonuses you will be given 20 Limit.',
-				{ from: args[2], quoted: JSON.parse(args.slice(4)) }
+				JSON.parse(args.slice(4))
 			);
 
 			Limit.addLimit(args[3], 20);
@@ -30,10 +31,7 @@ export default {
 		}
 
 		if (query.length < 20 && type !== 'templateButtonReplyMessage') {
-			return await client.instance.reply('Please describe the problem in detail. Min. 20 characters', {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, 'Please describe the problem in detail. Min. 20 characters', message);
 		}
 
 		const capt =

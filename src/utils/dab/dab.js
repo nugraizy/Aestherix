@@ -83,13 +83,11 @@ class Dab {
 
 		const domains = getDomains('search', query);
 
-		const { error, data, domain } = await this.tryFetch(domains);
+		const { error, data } = await this.tryFetch(domains);
 
 		if (error) {
 			return error;
 		}
-
-		console.log(domain, data.items.length);
 
 		CONTAINER.set(query, data);
 

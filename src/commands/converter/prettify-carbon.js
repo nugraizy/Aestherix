@@ -16,7 +16,7 @@ export default {
 	status: 'enable',
 	run: async ({ from, prettyNumber, message, query }, client) => {
 		if (!query) {
-			return client.instance.reply('Please provide a Codes.', { from, quoted: message });
+			return client.instance.reply(from, 'Please provide a Codes.', message);
 		}
 
 		loggers.warning(`${color('Carboning Codes', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
@@ -26,7 +26,7 @@ export default {
 		let buffer = carbon.toBuffer();
 
 		if (buffer?.error) {
-			client.instance.reply(buffer.error, { from, quoted: message });
+			client.instance.reply(from, buffer.error, message);
 			loggers.error(`${color('Failed to Carboning a Codes', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 			return;
 		}

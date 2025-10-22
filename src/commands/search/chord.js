@@ -15,22 +15,23 @@ export default {
 	status: 'enable',
 	run: async ({ query, message, from }, client) => {
 		if (!query) {
-			return client.instance.reply('You must provide a query.', { from, quoted: message });
+			return client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		const result = await chords(query);
 
 		if (result?.error) {
-			return await client.instance.reply(result.error, { from, quoted: message });
+			return await client.instance.reply(from, result.error, message);
 		}
 
 		return await client.instance.reply(
+			from,
 			`${'Chords'.formatHeaders()}
 
 Title : ${result.title}
 
 ${result.chord.trim()}`.formatForm(),
-			{ from, quoted: message }
+			message
 		);
 	}
 };

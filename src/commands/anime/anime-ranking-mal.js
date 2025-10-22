@@ -41,7 +41,7 @@ export default {
 		const result = await mal.anime.ranking(query || null);
 
 		if (result?.error) {
-			return await client.instance.reply(result.message, { from, quoted: message });
+			return await client.instance.reply(from, result.message, message);
 		}
 
 		const incrementedIndex = increment(0, result.data.length - 1);

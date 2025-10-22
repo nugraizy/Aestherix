@@ -48,15 +48,15 @@ const akinatorHandler = async ({ from, isAdmin, isGroup, body, message }, client
 		}
 
 		if (status === 'exitted') {
-			return await client.instance.reply('You have exited the game.', { from, quoted: message });
+			return await client.instance.reply(from, 'You have exited the game.', message);
 		}
 
 		if (status === 'back') {
 			if (handle.isFailed) {
-				return await client.instance.reply('You cannot go back.', { from, quoted: message });
+				return await client.instance.reply(from, 'You cannot go back.', message);
 			}
 
-			await client.instance.reply(akinatorMessage, { from, quoted: message });
+			await client.instance.reply(from, akinatorMessage, message);
 		}
 	};
 

@@ -28,21 +28,19 @@ const processNsfwImage = async ({ from, isAdmin, isBotAdmin, message, mediaData,
 	await unlink(filePath);
 
 	if (isAdmin) {
-		return await client.reply(JSON.stringify(check, undefined, 2), { from, quoted: message });
+		return await client.reply(from, JSON.stringify(check, undefined, 2), message);
 	}
 
 	if ((check.ok && (check.result.hentai > 65 || check.result.porn > 65)) || check.reesult.is_nsfw) {
 		if (!isBotAdmin) {
-			return await client.reply('Anti-NSFW is enabled, but I am not an admin, so I cannot kick you.', {
-				from,
-				quoted: message
-			});
+			return await client.reply(from, 'Anti-NSFW is enabled, but I am not an admin, so I cannot kick you.', message);
 		}
 
 		if (!isBanned) {
 			await client.reply(
+				from,
 				'Any kind of NSFW Images is Prohibited. This is a warning, you will be kicked if you continue to do this one more time.',
-				{ from, quoted: message }
+				message
 			);
 			await client.send(from, {
 				delete: {
@@ -54,10 +52,11 @@ const processNsfwImage = async ({ from, isAdmin, isBotAdmin, message, mediaData,
 			data[index][from].banned.push(sender);
 			await fs.writeJSON('./databases/groups/settingsManager.json', data);
 		} else {
-			await client.reply('You have been banned from this group for NSFW Images. And you will be kicked in any second.', {
+			await client.reply(
 				from,
-				quoted: message
-			});
+				'You have been banned from this group for NSFW Images. And you will be kicked in any second.',
+				message
+			);
 			await delay(350);
 			await client.groupParticipantsUpdate(from, [sender], 'remove');
 		}

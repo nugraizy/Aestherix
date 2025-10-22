@@ -20,54 +20,55 @@ export default {
 	status: 'enable',
 	run: async ({ from, message, query, args }, client) => {
 		if (!query) {
-			return client.instance.reply('You must provide a query.', { from, quoted: message });
+			return client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		if (args[1] === 'stop') {
 			const live = lives.get(from);
 
 			if (!live) {
-				return client.instance.reply('No live stream is running.', { from, quoted: message });
+				return client.instance.reply(from, 'No live stream is running.', message);
 			}
 
 			live.stop();
 
-			return client.instance.reply('Live stream has been stopped.', { from, quoted: message });
+			return client.instance.reply(from, 'Live stream has been stopped.', message);
 		} else if (args[1] === 'start') {
 			const live = lives.get(from);
 
 			if (!live) {
-				return client.instance.reply('No live stream is running.', { from, quoted: message });
+				return client.instance.reply(from, 'No live stream is running.', message);
 			}
 
 			live.start();
 
-			return client.instance.reply('Live stream has been started.', { from, quoted: message });
+			return client.instance.reply(from, 'Live stream has been started.', message);
 		}
 
 		const live = await youtubeLiveComments(query);
 
 		if (live?.error) {
-			return client.instance.reply(live.error, { from, quoted: message });
+			return client.instance.reply(from, live.error, message);
 		}
 
 		lives.set(from, live);
 
 		live.on('start', async (initialData) => {
 			try {
-				await client.instance.reply('Success join the live stream.', { from, quoted: message });
+				await client.instance.reply(from, 'Success join the live stream.', message);
 
 				const pinnedAction = initialData.actions.firstOfType(YTNodes.AddBannerToLiveChatCommand);
 
 				if (pinnedAction) {
 					if (pinnedAction.banner?.contents?.is(YTNodes.LiveChatTextMessage)) {
 						await client.instance.reply(
+							from,
 							`${'Live Stream Info'.formatHeaders()}
 
 Info : Pinned Message
 From : ${pinnedAction.banner.contents.author?.name.toString()}
 Content : ${pinnedAction?.banner.contents.message.toString()}`,
-							{ from, quoted: message }
+							message
 						);
 					}
 				}
@@ -77,7 +78,7 @@ Content : ${pinnedAction?.banner.contents.message.toString()}`,
 		});
 
 		live.on('error', async () => {
-			await client.instance.reply('Something went wrong with the socket.', { from, quoted: message });
+			await client.instance.reply(from, 'Something went wrong with the socket.', message);
 
 			try {
 				live.stop();
@@ -90,7 +91,7 @@ Content : ${pinnedAction?.banner.contents.message.toString()}`,
 
 		live.on('end', async () => {
 			try {
-				await client.instance.reply('The live stream has ended.', { from, quoted: message });
+				await client.instance.reply(from, 'The live stream has ended.', message);
 
 				live.stop();
 				lives.delete(from);

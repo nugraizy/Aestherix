@@ -16,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, cmd }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		let queries = query.split(',');
@@ -28,10 +28,7 @@ export default {
 			const dataImage = await downloadArtworks(data[0].id);
 
 			if (data?.error) {
-				await client.instance.reply(`Failed while searching Pixiv artworks\n\n${data.error}\n${querie}`, {
-					from,
-					quoted: message
-				});
+				await client.instance.reply(from, `Failed while searching Pixiv artworks\n\n${data.error}\n${querie}`, message);
 				continue;
 			}
 

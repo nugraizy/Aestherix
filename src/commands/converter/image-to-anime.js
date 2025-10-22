@@ -25,10 +25,7 @@ export default {
 		}
 
 		if (!isMediaImage && args[1] !== '-variant') {
-			return await client.instance.reply('Please send/reply an image to convert to anime', {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, 'Please send/reply an image to convert to anime', message);
 		}
 
 		bufferMessage = await client.instance.downloadMediaMessage(mediaData);

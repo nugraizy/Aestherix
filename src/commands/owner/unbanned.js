@@ -26,7 +26,7 @@ export default {
 	status: 'enable',
 	async run({ from, message, mediaData, mention, bodyQuoted, query }, client) {
 		if (!query) {
-			return await client.instance.reply('Please provide user to unban', { from, quoted: message });
+			return await client.instance.reply(from, 'Please provide user to unban', message);
 		}
 
 		const userBanned = await fs.readJSON('./databases/users/banned.json');
@@ -100,7 +100,7 @@ export default {
 
 		if (bodyQuoted) {
 			if (!userBanned.includes(mediaData.participant)) {
-				return await client.instance.reply('not banned', { from, quoted: message });
+				return await client.instance.reply(from, 'not banned', message);
 			}
 
 			const index = userBanned.indexOf(mediaData.participant);

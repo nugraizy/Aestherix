@@ -33,16 +33,13 @@ export default {
 		client
 	) {
 		if (!isURL(query) && !isMediaImage) {
-			return await client.instance.reply('Please send/reply a image to find the similar image', {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, 'Please send/reply a image to find the similar image', message);
 		}
 
 		let media = query && isURL(query) ? query : null;
 
 		if (typeMessage === 'listResponseMessage' && args[1] === 'get') {
-			await client.instance.reply('Searching. Please wait...', { from, quoted: message });
+			await client.instance.reply(from, 'Searching. Please wait...', message);
 
 			args = JSON.parse(JSON.parse(JSON.stringify(args.slice(2).join(' '))));
 
@@ -113,7 +110,7 @@ ${
 			);
 		}
 
-		await client.instance.reply('Searching. Please wait...', { from, quoted: message });
+		await client.instance.reply(from, 'Searching. Please wait...', message);
 
 		if (isMediaImage) {
 			media = await client.instance.downloadAndSaveMediaMessage(
@@ -130,7 +127,7 @@ ${
 				fs.unlinkSync(media);
 			}
 
-			return await client.instance.reply(result.error, { from, quoted: message });
+			return await client.instance.reply(from, result.error, message);
 		}
 
 		if (isMediaImage) {

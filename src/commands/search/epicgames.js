@@ -32,16 +32,14 @@ export default {
 	status: 'enable',
 	run: async ({ query, message, from }, client) => {
 		if (!query) {
-			return client.instance.reply('You must provide a query.', { from, quoted: message });
+			return client.instance.reply(from, 'You must provide a query.', message);
 		}
-
-		console.log(`"${query}"`);
 
 		if (query === '--free') {
 			const result = await epicgamesFree();
 
 			if (result?.error) {
-				return await client.instance.reply(result.error, { from, quoted: message });
+				return await client.instance.reply(from, result.error, message);
 			}
 
 			let caption = `${'Free Epicgames'.formatHeaders()}
@@ -69,7 +67,7 @@ https://store.epicgames.com/p/${v.productSlug}`
 		const result = await epicgames(query);
 
 		if (result?.error) {
-			return await client.instance.reply(result.error, { from, quoted: message });
+			return await client.instance.reply(from, result.error, message);
 		}
 
 		console.log(result[2]);

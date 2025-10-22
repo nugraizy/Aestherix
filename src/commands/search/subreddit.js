@@ -16,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		let queries = query.split(',');
@@ -27,7 +27,7 @@ export default {
 			const result = await arq.subreddits(querie.trim());
 
 			if (result?.error || !result.ok) {
-				await client.instance.reply(JSON.stringify(result), { from, quoted: message });
+				await client.instance.reply(from, JSON.stringify(result), message);
 				continue;
 			}
 

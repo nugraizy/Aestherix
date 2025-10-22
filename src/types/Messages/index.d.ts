@@ -6,7 +6,8 @@ import type {
 	MessageGenerationOptions,
 	MiscMessageGenerationOptions,
 	WAGenericMediaMessage,
-	WAMessage
+	WAMessage,
+	WAMessageKey
 } from 'baileys';
 import { proto } from 'baileys';
 
@@ -27,4 +28,4 @@ export type PrepareMessageOptions = MessageGenerationOptions;
 export type MessageSendOptions = MiscMessageGenerationOptions;
 export type GenerationOptions = MiscMessageGenerationOptions;
 
-export { BinaryNode, ButtonReplyInfo, DownloadableMessage, WAMessage, WAGenericMediaMessage };
+export { BinaryNode, ButtonReplyInfo, DownloadableMessage, WAMessage, WAGenericMediaMessage, WAMessageKey };

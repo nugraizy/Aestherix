@@ -20,20 +20,20 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
 		if (!query) {
-			return await client.instance.reply('Please provide a URL', { from, quoted: message });
+			return await client.instance.reply(from, 'Please provide a URL', message);
 		}
 
 		if (!tiktok) {
 			tiktok = (await import('../../utils/tiktok/index.js')).tiktok;
 		}
 
-		await client.instance.reply('Please wait...', { from, quoted: message });
+		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
 
 		let {
 			_: urls,
 			withNoWatermark,
 			withWatermark
-		} = parser(query.toLowerCase(), {
+		} = parser(query, {
 			configuration: {
 				'short-option-groups': false
 			},
@@ -51,20 +51,20 @@ export default {
 			withWatermark = removeDuplicatesArray(withWatermark)[0];
 		}
 
-		const posts = await tiktok.download.post(urls);
+		let success = 0;
+		let error = 0;
+
+		loggers.warning(`${color('Downloading TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+
+		const posts = await tiktok.download.post(urls, wait);
 
 		for (const data in posts) {
 			if (posts[data]?.error) {
-				await client.instance.reply(`Error while downloading TikTok post\n\n${posts[data].error}\n${data}`, {
-					from,
-					quoted: message
-				});
-
+				await client.instance.reply(from, `Error while downloading TikTok post\n\n${posts[data].error}\n${data}`, message);
 				loggers.error(`${color('Failed to Download TikTok Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				error++;
 				continue;
 			}
-
-			loggers.warning(`${color('Downloading TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			const date = dayjs(posts[data].published * 1000).format('HH:mm:ss DD/MM/YYYY');
 			let caption = `TikTok ${posts[data].type === 'images' ? 'Slide' : 'Video'}`.formatHeaders();
@@ -97,6 +97,8 @@ export default {
 
 				const builder = new client.instance.TemplateBuilder.Carousel(client);
 
+				await wait.update(`Preparing TikTok Carousel Message for ${images.length} Images. Please wait...`);
+
 				builder
 					.mainBody(caption)
 					.mainFooter('Powered by Aestherix')
@@ -114,9 +116,7 @@ export default {
 				const messageBuilt = await builder.render();
 
 				await client.instance.relayMessage(from, messageBuilt.message, { messageId: messageBuilt.key.id });
-
-				loggers.info(`${color('Downloaded TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
-
+				success++;
 				continue;
 			}
 
@@ -129,11 +129,11 @@ export default {
 			const url = (withWatermark ? urls[2] || urls[0] || urls[1] : urls[0] || urls[1] || urls[2]) || null;
 
 			if (!url) {
-				return await client.instance.reply('No download url found, Might check your url and try again.', {
-					quoted: message,
-					from
-				});
+				await client.instance.reply(from, 'No download url found, Might check your url and try again.', message);
+				error++;
 			}
+
+			await wait.update('Downloading TikTok Media. Please wait...');
 
 			await client.instance.send(
 				from,
@@ -146,7 +146,11 @@ export default {
 				{ quoted: message }
 			);
 
-			loggers.info(`${color('Downloaded TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			success++;
 		}
+
+		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
+
+		loggers.info(`${color('Downloaded TikTok Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

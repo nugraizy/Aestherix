@@ -41,7 +41,7 @@ export default {
 										displayText: 'Next Article',
 										id: `${cmd} next ${data[index + 1].image ?? data[index + 1].link} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {},
 						index !== 0
 							? {
@@ -49,7 +49,7 @@ export default {
 										displayText: 'Previous Article',
 										id: `${cmd} prev ${data[index - 1].image ?? data[index + 1].link} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {}
 					],
 					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
@@ -59,13 +59,13 @@ export default {
 		}
 
 		if (!query) {
-			return client.instance.reply('Please provide queries', { from, quoted: message });
+			return client.instance.reply(from, 'Please provide queries', message);
 		}
 
 		const data = await cnninternational(query);
 
 		if (data?.error) {
-			return await client.instance.reply(data.error, { from, quoted: message });
+			return await client.instance.reply(from, data.error, message);
 		}
 
 		let caption = 'CNN International'.formatHeaders();
@@ -93,7 +93,7 @@ export default {
 									displayText: 'Next Article',
 									id: `${cmd} next ${data[1].image ?? data[1].link} ${JSON.stringify(data)}`
 								}
-						  } /* eslint-disable-line */
+							} /* eslint-disable-line */
 						: {}
 				],
 				footer: `Void Bot     1/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`

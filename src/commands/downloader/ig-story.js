@@ -1,7 +1,7 @@
 import parser from 'yargs-parser';
 
+import configuration from '../../helper/config/connect.js';
 import { color, delay, loggers, formatNumber } from '../../utils/modules/index.js';
-import { instagram } from '../../utils/instagram/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -16,26 +16,39 @@ export default {
 	cooldown: 10,
 	limit: 9,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message }, client) {
-		if (!query) {
-			return await client.instance.reply('Please specify a username', { from, quoted: message });
+	async run({ from, query, prettyNumber, message, isOwner, prefix }, client) {
+		if (!configuration.isInstagramInitiated) {
+			return await client.instance.reply(
+				from,
+				`Instagram session is not initialized. ${isOwner ? `Type ${prefix}instagraminit to initialize it.` : `Please ask the owner to initialize it first using the command ${prefix}instagraminit`}`,
+				message
+			);
 		}
 
-		await client.instance.reply('Please wait...', { from, quoted: message });
+		if (!query) {
+			return await client.instance.reply(from, 'Please specify a username', message);
+		}
+
+		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
 
 		const { _: input } = parser(query);
 
-		const stories = await instagram.search.story(input);
+		const stories = await configuration.instagram.search.story(input);
+
+		let success = 0;
+		let error = 0;
 
 		loggers.warning(`${color('Downloading Instagram Story', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const data in stories) {
 			if (stories[data]?.error) {
-				await client.instance.reply(`Error while downloading Instagram story\n\n${stories[data].error}\n${data}`, {
+				await client.instance.reply(
 					from,
-					quoted: message
-				});
+					`Error while downloading Instagram story\n\n${stories[data].error}\n${data}`,
+					message
+				);
 				loggers.error(`${color('Failed to Download Instagram Story', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				error++;
 				continue;
 			}
 
@@ -55,13 +68,17 @@ export default {
 			capt += `Total Stories : ${stories[data].stories.length}\n`;
 			capt += `👥 ${formatNumber(stories[data].followers)} 👤 ${formatNumber(stories[data].following)}\n\n`;
 
-			await client.instance.reply(capt.trim().formatForm(), { from, quoted: message });
+			await client.instance.reply(from, capt.trim().formatForm(), message);
 
 			for (const media of stories[data].stories) {
 				await client.instance.send(from, media.isVideo ? { video: { url: media.url } } : { image: { url: media.url } }, {});
 				await delay(300);
 			}
+
+			success++;
 		}
+
+		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
 
 		loggers.info(`${color('Downloaded Instagram Story', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}

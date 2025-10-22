@@ -27,14 +27,13 @@ const regex = (input) => {
 	return { status: false, message: 'This URL is not a valid Bstation URL. Try another URL.' };
 };
 
-const processVideo = async (url, client, { from, message, sender, filename }) => {
+const processVideo = async (url, client, { from, message, sender, filename, wait }) => {
 	const video = await bilibiliDetailTv({ aid: url });
 
-	await client.instance.reply(
+	await wait.update(
 		` • Converting videos, this might take a while please wait.\n\nResolution : ${
 			video.resolution
-		}\nSize : ${getFilesizeFromBytes(video.size)}`.formatForm(),
-		{ from, quoted: message }
+		}\nSize : ${getFilesizeFromBytes(video.size)}`.formatForm()
 	);
 
 	const merge = await mergeVideoWithAudio(
@@ -76,39 +75,27 @@ export default {
 			}
 
 			if (!videoIds.length) {
-				return await client.instance.reply('No id(s) found', { from, quoted: message });
+				return await client.instance.reply(from, 'No id(s) found', message);
 			}
 
 			const numberiedQuery = Number(query);
 			const index = numberiedQuery - 1;
 
 			if (!numberiedQuery) {
-				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
-					from,
-					quoted: message
-				});
+				return await client.instance.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
 			}
 
 			if (index > videoIds.length) {
-				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
-					from,
-					quoted: message
-				});
+				return await client.instance.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
 			}
 
 			const videoId = videoIds[index];
 
 			if (!videoId) {
-				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
-					from,
-					quoted: message
-				});
+				return await client.instance.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
 			}
 
-			await client.instance.reply(`Downloading Bstation audio :\n${videoId}\nPlease wait`, {
-				from,
-				quoted: message
-			});
+			await client.instance.reply(from, `Downloading Bstation audio :\n${videoId}\nPlease wait`, message);
 
 			await processVideo(videoId, client, { from, message, prettyNumber });
 
@@ -116,10 +103,10 @@ export default {
 		}
 
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
 
-		await client.instance.reply('Please wait...', { from, quoted: message });
+		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
 
 		let { _: urls } = parser(query);
 
@@ -128,8 +115,11 @@ export default {
 		let regexs = urls.length === 1 ? regex(urls[0]) : null;
 
 		if (urls.length === 1 && !regexs?.status) {
-			return await client.instance.reply(regexs.message, { from, quoted: message });
+			return await wait.update(regexs.message);
 		}
+
+		let success = 0;
+		let error = 0;
 
 		loggers.warning(`${color('Downloading Bstation File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
@@ -137,17 +127,18 @@ export default {
 			const regexs = regex(url.trim());
 
 			if (!regexs.status) {
-				await client.instance.reply(regexs.message + `\nInvalid : ${url}`, { from, quoted: message });
+				await client.instance.reply(from, `${regexs.message}\nInvalid : ${url}`, message);
+				error++;
 				continue;
 			}
 
-			await client.instance.reply(`Downloading Bstation video :\n${regexs.message}\nPlease wait`, {
-				from,
-				quoted: message
-			});
+			await wait.update(`Downloading Bstation video :\n${regexs.message}\nPlease wait`);
 
-			await processVideo(regexs.message.trim(), client, { from, message, sender, filename });
+			await processVideo(regexs.message.trim(), client, { from, message, sender, filename, wait });
+			success++;
 		}
+
+		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
 
 		loggers.info(`${color('Downloaded Bstation File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}

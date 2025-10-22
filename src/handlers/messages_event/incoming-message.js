@@ -115,10 +115,7 @@ const handleMentionedAfkUsers = (message, client) => {
 	}
 
 	if (container.length) {
-		client.instance.reply(caption.trim(), {
-			from: message.from,
-			quoted: message.message
-		});
+		client.instance.reply(message.from, caption.trim(), message.message);
 	}
 };
 
@@ -228,18 +225,16 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 			}
 
 			if (Tempcmds.category === 'Owner' && !message.isOwner) {
-				await client.instance.reply('This commands is only for owner.', {
-					from: message.from,
-					quoted: message.message
-				});
+				await client.instance.reply(message.from, 'This commands is only for owner.', message.message);
 				continue;
 			}
 
 			if (configuration.OPTIONS.restrict && Tempcmds.restrict) {
-				await client.instance.reply('This command is restricted and currently bot are on restricted mode.', {
-					from: message.from,
-					quoted: message.message
-				});
+				await client.instance.reply(
+					message.from,
+					'This command is restricted and currently bot are on restricted mode.',
+					message.message
+				);
 				continue;
 			}
 
@@ -250,26 +245,21 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 				!message.isOwner &&
 				message?.[message?.from]?.games === 'disable'
 			) {
-				await client.instance.reply('Game Mode is Disabled. Type !games enable to enable Game Mode', {
-					from: message.from,
-					quoted: message.message
-				});
+				await client.instance.reply(
+					message.from,
+					'Game Mode is Disabled. Type !games enable to enable Game Mode',
+					message.message
+				);
 				continue;
 			}
 
 			if (Tempcmds.category === 'Moderation' && message.isGroup && !message.isAdmin && !message.isOwner) {
-				await client.instance.reply('You are not admin. This commands is only for admins.', {
-					from: message.from,
-					quoted: message.message
-				});
+				await client.instance.reply(message.from, 'You are not admin. This commands is only for admins.', message.message);
 				continue;
 			}
 
 			if (Tempcmds.category === 'Moderation' && !message.isGroup) {
-				await client.instance.reply('This commands for group only', {
-					from: message.from,
-					quoted: message.message
-				});
+				await client.instance.reply(message.from, 'This commands for group only', message.message);
 				continue;
 			}
 
@@ -282,18 +272,12 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 						Tempcmds.cooldown
 					}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v}`).join(', ')}.\nThis Features Only for Premium users.`;
 
-					client.instance.reply(help, {
-						from: message.from,
-						quoted: message.message
-					});
+					client.instance.reply(message.from, help, message.message);
 
 					continue;
 				}
 
-				await client.instance.reply('This commands is only for premium user.', {
-					from: message.from,
-					quoted: message.message
-				});
+				await client.instance.reply(message.from, 'This commands is only for premium user.', message.message);
 
 				continue;
 			}
@@ -312,10 +296,11 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 				const limit = Limit.reduceLimit(message.sender, Tempcmds.limit);
 
 				if (limit.error) {
-					client.instance.reply(limit.message.replace('%s', `But this command (${Tempcmds.name}) need ${Tempcmds.limit}`), {
-						from: message.from,
-						quoted: message.message
-					});
+					client.instance.reply(
+						message.from,
+						limit.message.replace('%s', `But this command (${Tempcmds.name}) need ${Tempcmds.limit}`),
+						message.message
+					);
 					continue;
 				}
 			}
@@ -326,13 +311,11 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 
 				if (isCooldown) {
 					await client.instance.reply(
+						message.from,
 						`Command still running. Please wait for the command ${
 							cooldownEnabled ? 'and the cooldown after it finish.' : 'to finish.'
 						}`,
-						{
-							from: message.from,
-							quoted: message.message
-						}
+						message.message
 					);
 					continue;
 				}
@@ -342,8 +325,9 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 
 				if (cooldownTime && Date.now() < cooldownTime) {
 					await client.instance.reply(
+						message.from,
 						`Command \`${commandName}\` is still on cooldown for ${((cooldownTime - Date.now()) / 1000).toFixed(1)} seconds.`,
-						{ from: message.from, quoted: message.message }
+						message.message
 					);
 					continue;
 				}
@@ -374,10 +358,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 						Tempcmds.cooldown
 					}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v}`).join(', ')}.`;
 
-					await client.instance.reply(help, {
-						from: message.from,
-						quoted: message.message
-					});
+					await client.instance.reply(message.from, help, message.message);
 
 					if (cooldownUser?.requests) {
 						cooldownUser.requests = false;
@@ -494,10 +475,7 @@ const handleAfk = (client, message) => {
 		const { reasons, since, name } = getAfk(message.mediaData.participant);
 		const time = getTimeSince(since);
 
-		client.instance.reply(`${name} is AFK since ${time} ago. Reason: ${reasons}`, {
-			from: message.from,
-			quoted: message.message
-		});
+		client.instance.reply(message.from, `${name} is AFK since ${time} ago. Reason: ${reasons}`, message.message);
 	}
 
 	if (message.mention?.length) {

@@ -59,7 +59,7 @@ export default {
 	status: 'enable',
 	async run({ from, args, message }, client, store) {
 		if (args.length === 1) {
-			return await client.instance.reply('You must provide a status to simulate', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a status to simulate', message);
 		}
 
 		const started = Date.now();
@@ -74,8 +74,9 @@ export default {
 							case 'stats':
 								{
 									await client.instance.reply(
+										from,
 										Object.keys(configuration.presences).includes('available') ? 'Available' : 'Unavailable',
-										{ from, quoted: message }
+										message
 									);
 								}
 
@@ -84,7 +85,7 @@ export default {
 							case 'off':
 								{
 									if ('unavailable' in configuration.presences) {
-										return await client.instance.reply('Already offline', { from, quoted: message });
+										return await client.instance.reply(from, 'Already offline', message);
 									}
 
 									if ('available' in configuration.presences) {
@@ -102,10 +103,7 @@ export default {
 									};
 
 									if (from) {
-										await client.instance.reply('Simulate Available Presence Disabled', {
-											from,
-											quoted: message
-										});
+										await client.instance.reply(from, 'Simulate Available Presence Disabled', message);
 									}
 								}
 
@@ -114,7 +112,7 @@ export default {
 							case 'on':
 								{
 									if ('available' in configuration.presences) {
-										return await client.instance.reply('Already online', { from, quoted: message });
+										return await client.instance.reply(from, 'Already online', message);
 									}
 
 									if ('unavailable' in configuration.presences) {
@@ -126,20 +124,14 @@ export default {
 									}
 
 									if (from) {
-										await client.instance.reply('Simulate Available Presence Enabled', {
-											from,
-											quoted: message
-										});
+										await client.instance.reply(from, 'Simulate Available Presence Enabled', message);
 									}
 								}
 
 								break;
 							default:
 								{
-									await client.instance.reply('Usage: !presence online [enable|disable|status]', {
-										from,
-										quoted: message
-									});
+									await client.instance.reply(from, 'Usage: !presence online [enable|disable|status]', message);
 								}
 
 								break;
@@ -156,8 +148,9 @@ export default {
 							case 'stats':
 								{
 									await client.instance.reply(
+										from,
 										Object.keys(configuration.presences).includes('composing') ? 'Composing' : 'Not composing',
-										{ from, quoted: message }
+										message
 									);
 								}
 
@@ -166,7 +159,7 @@ export default {
 							case 'off':
 								{
 									if (!('composing' in configuration.presences)) {
-										return await client.instance.reply('Already not writing', { from, quoted: message });
+										return await client.instance.reply(from, 'Already not writing', message);
 									}
 
 									const messages = Object.keys(store.messages);
@@ -174,7 +167,7 @@ export default {
 									pause(client, messages);
 									clearInterval(configuration.presences.composing.interval);
 									delete configuration.presences.composing;
-									await client.instance.reply('Simulate Composing Disabled', { from, quoted: message });
+									await client.instance.reply(from, 'Simulate Composing Disabled', message);
 								}
 
 								break;
@@ -182,7 +175,7 @@ export default {
 							case 'on':
 								{
 									if ('composing' in configuration.presences) {
-										return await client.instance.reply('Already writing', { from, quoted: message });
+										return await client.instance.reply(from, 'Already writing', message);
 									}
 
 									configuration.presences.composing = {
@@ -194,16 +187,13 @@ export default {
 											events(client, messages, 'composing');
 										}, 8_000)
 									};
-									await client.instance.reply('Simulate Composing Enabled', { from, quoted: message });
+									await client.instance.reply(from, 'Simulate Composing Enabled', message);
 								}
 
 								break;
 							default:
 								{
-									await client.instance.reply('Usage: !presence composing [enable|disable|status]', {
-										from,
-										quoted: message
-									});
+									await client.instance.reply(from, 'Usage: !presence composing [enable|disable|status]', message);
 								}
 
 								break;
@@ -219,8 +209,9 @@ export default {
 							case 'stats':
 								{
 									await client.instance.reply(
+										from,
 										Object.keys(configuration.presences).includes('recording') ? 'Recording' : 'Not recording',
-										{ from, quoted: message }
+										message
 									);
 								}
 
@@ -229,7 +220,7 @@ export default {
 							case 'off':
 								{
 									if (!('recording' in configuration.presences)) {
-										return await client.instance.reply('Already not recording', { from, quoted: message });
+										return await client.instance.reply(from, 'Already not recording', message);
 									}
 
 									const messages = Object.keys(store.messages);
@@ -237,7 +228,7 @@ export default {
 									pause(client, messages);
 									clearInterval(configuration.presences.recording.interval);
 									delete configuration.presences.recording;
-									await client.instance.reply('Simulate Recording Disabled', { from, quoted: message });
+									await client.instance.reply(from, 'Simulate Recording Disabled', message);
 								}
 
 								break;
@@ -245,7 +236,7 @@ export default {
 							case 'on':
 								{
 									if ('recording' in configuration.presences) {
-										return await client.instance.reply('Already recording', { from, quoted: message });
+										return await client.instance.reply(from, 'Already recording', message);
 									}
 
 									configuration.presences.recording = {
@@ -257,16 +248,13 @@ export default {
 											events(client, messages, 'recording');
 										}, 10_000)
 									};
-									await client.instance.reply('Simulate Recording Enabled', { from, quoted: message });
+									await client.instance.reply(from, 'Simulate Recording Enabled', message);
 								}
 
 								break;
 							default:
 								{
-									await client.instance.reply('Usage: !presence recording [enable|disable|status]', {
-										from,
-										quoted: message
-									});
+									await client.instance.reply(from, 'Usage: !presence recording [enable|disable|status]', message);
 								}
 
 								break;
@@ -279,10 +267,11 @@ export default {
 						case 'status':
 						case 'stats':
 							{
-								await client.instance.reply(Object.keys(configuration.presences).includes('bio') ? 'Enabled' : 'Disabled', {
+								await client.instance.reply(
 									from,
-									quoted: message
-								});
+									Object.keys(configuration.presences).includes('bio') ? 'Enabled' : 'Disabled',
+									message
+								);
 							}
 
 							break;
@@ -290,12 +279,12 @@ export default {
 						case 'off':
 							{
 								if (!('bio' in configuration.presences)) {
-									return await client.instance.reply('Already disabled', { from, quoted: message });
+									return await client.instance.reply(from, 'Already disabled', message);
 								}
 
 								clearInterval(configuration.presences.bio.interval);
 								delete configuration.presences.bio;
-								await client.instance.reply('Simulate Bio Disabled', { from, quoted: message });
+								await client.instance.reply(from, 'Simulate Bio Disabled', message);
 							}
 
 							break;
@@ -303,7 +292,7 @@ export default {
 						case 'on':
 							{
 								if ('bio' in configuration.presences) {
-									return await client.instance.reply('Already enabled', { from, quoted: message });
+									return await client.instance.reply(from, 'Already enabled', message);
 								}
 
 								configuration.presences.bio = {
@@ -311,16 +300,13 @@ export default {
 									started,
 									interval: setInterval(() => events(client, [], 'bio'), 10_000)
 								};
-								await client.instance.reply('Simulate Bio Enabled', { from, quoted: message });
+								await client.instance.reply(from, 'Simulate Bio Enabled', message);
 							}
 
 							break;
 						default:
 							{
-								await client.instance.reply('Usage: !presence bio [enable|disable|status]', {
-									from,
-									quoted: message
-								});
+								await client.instance.reply(from, 'Usage: !presence bio [enable|disable|status]', message);
 							}
 
 							break;
@@ -329,7 +315,7 @@ export default {
 				}
 				default:
 					{
-						await client.instance.reply('Invalid command', { from, quoted: message });
+						await client.instance.reply(from, 'Invalid command', message);
 					}
 
 					break;

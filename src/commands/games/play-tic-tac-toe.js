@@ -20,21 +20,21 @@ export default {
 	cooldown: 2,
 	status: 'enable',
 	async run({ message, query, from, sender }, client) {
-		const capt = (game, status) => `TicTacToe Games by Void Bot.
+		const capt = (game, status) => `TicTacToe Games by Aestherix Bot.
 	${
 		status
 			? game.status === 'WINNER'
-				? `${game.winner === 'Void Bot' ? 'Void Bot' : `@${game.winner.split('@')[0]}`} wins!`
+				? `${game.winner === 'Aestherix Bot' ? 'Aestherix Bot' : `@${game.winner.split('@')[0]}`} wins!`
 				: game.status === 'DRAW'
-				? 'Game is Draw!'
-				: `${game.PLAYER_TURN === game.PLAYER_1 ? game.PLAYER_1_MODEL : game.PLAYER_2_MODEL} ${
-						game.PLAYER_TURN === 'Void Bot' ? 'Void Bot' : `@${game.PLAYER_TURN.split('@')[0]}`
-				  }'s turn\n\n` /* eslint-disable-line */
+					? 'Game is Draw!'
+					: `${game.PLAYER_TURN === game.PLAYER_1 ? game.PLAYER_1_MODEL : game.PLAYER_2_MODEL} ${
+							game.PLAYER_TURN === 'Aestherix Bot' ? 'Aestherix Bot' : `@${game.PLAYER_TURN.split('@')[0]}`
+						}'s turn\n\n` /* eslint-disable-line */
 			: ''
 	}
 	${game.PLAYER_1_MODEL} @${game.PLAYER_1.split('@')[0]} vs ${game.PLAYER_2_MODEL} ${
-			game.PLAYER_2 === 'Void Bot' ? 'Void Bot' : `@${game.PLAYER_2.split('@')[0]}`
-		}
+		game.PLAYER_2 === 'Aestherix Bot' ? 'Aestherix Bot' : `@${game.PLAYER_2.split('@')[0]}`
+	}
 	
 ${game.BOARD.map((v, i) => {
 	const ICON = WINNER_SETS[game.TURN];
@@ -49,8 +49,8 @@ ${game.BOARD.map((v, i) => {
 				? v
 				: `${v}\n          ---------\n          `
 			: i === 0
-			? `          ${v}|`
-			: `${v}|`;
+				? `          ${v}|`
+				: `${v}|`;
 	return v;
 }).join('')}
 
@@ -60,19 +60,19 @@ Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 			const status = getTictactoeSession(sender);
 
 			if (!status) {
-				return await client.instance.reply('You do not have a game', { from, quoted: message });
+				return await client.instance.reply(from, 'You do not have a game', message);
 			}
 
 			deleteTictactoeSession(sender);
 
-			await client.instance.reply('Game deleted', { from, quoted: message });
+			await client.instance.reply(from, 'Game deleted', message);
 		}
 
 		if (!query) {
 			const game = new TicTacToe(sender, undefined, true);
 
 			if (game?.error) {
-				return await client.instance.reply(game.error, { from, quoted: message });
+				return await client.instance.reply(from, game.error, message);
 			}
 
 			await client.instance.send(
@@ -86,13 +86,13 @@ Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 			const game = getTictactoeSession(sender);
 
 			if (!game) {
-				return await client.instance.reply('You do not have a game', { from, quoted: message });
+				return await client.instance.reply(from, 'You do not have a game', message);
 			}
 
 			const move = game.playMove(query, sender);
 
 			if (move?.error) {
-				return await client.instance.reply(move.error, { from, quoted: message });
+				return await client.instance.reply(from, move.error, message);
 			}
 
 			if (move.status === 'WINNER' || move.status === 'DRAW') {
@@ -107,13 +107,13 @@ Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 
 			await client.instance.send(from, { text: capt(move), mentions: [game.PLAYER_1, game.PLAYER_2] }, { quoted: message });
 
-			if (move.PLAYER_TURN === 'Void Bot') {
+			if (move.PLAYER_TURN === 'Aestherix Bot') {
 				const botGames = getTictactoeSession(sender);
 
-				await client.instance.reply('Void Bot TURN', { from, quoted: message });
+				await client.instance.reply(from, 'Aestherix Bot TURN', message);
 				await delay(1000);
 
-				const botMove = botGames.playMove(botGames.displayPlayBoard(), 'Void Bot', sender);
+				const botMove = botGames.playMove(botGames.displayPlayBoard(), 'Aestherix Bot', sender);
 
 				if (botMove.status === 'WINNER' || botMove.status === 'DRAW') {
 					await client.instance.send(

@@ -17,7 +17,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, type }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -54,7 +54,7 @@ ${data[index].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).
 										displayText: 'Next Code',
 										id: `.githubcode next ${data[index + 1].source} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {},
 						index !== 0
 							? {
@@ -62,7 +62,7 @@ ${data[index].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).
 										displayText: 'Previous Code',
 										id: `.githubcode prev ${data[index - 1].source} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {}
 					],
 					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
@@ -75,7 +75,7 @@ ${data[index].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).
 		let result = await git.searchCode(query.trim());
 
 		if (result.total_count === 0) {
-			return await client.instance.reply('Code not found.', { from, quoted: message });
+			return await client.instance.reply(from, 'Code not found.', message);
 		}
 
 		result = result.items.map((v) => ({
@@ -107,7 +107,7 @@ ${result[0].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).jo
 									displayText: 'Next Code',
 									id: `.githubcode next ${result[1].source} ${JSON.stringify(result).replace(/\|/g, '')}`
 								}
-						  } /* eslint-disable-line */
+							} /* eslint-disable-line */
 						: {}
 				],
 				footer: `Void Bot     1/${result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`

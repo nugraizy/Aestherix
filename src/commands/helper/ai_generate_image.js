@@ -18,7 +18,7 @@ export default {
 	status: 'enable',
 	run: async ({ query, from, message }, client) => {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		const openai = new OpenAI({ apiKey: updateApikey() });

@@ -23,15 +23,14 @@ export default {
 	) => {
 		if (!isMediaImage && !isQuotedSticker) {
 			return client.instance.reply(
-				'Please reply/send image with caption the command. This command also accept sticker (reply one with command).'
+				from,
+				'Please reply/send image with caption the command. This command also accept sticker (reply one with command).',
+				message
 			);
 		}
 
 		if (isQuotedSticker && extractMediaData.isAnimated) {
-			return client.instance.reply('The sticker are animated. Please reply static stickers only.', {
-				from,
-				quoted: message
-			});
+			return client.instance.reply(from, 'The sticker are animated. Please reply static stickers only.', message);
 		}
 
 		loggers.warning(`${color('Enhancing image', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);

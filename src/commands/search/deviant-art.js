@@ -16,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, type }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -42,7 +42,7 @@ export default {
 										displayText: 'Next Image',
 										id: `.deviantart next ${data[index + 1].image} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {},
 						index !== 0
 							? {
@@ -50,7 +50,7 @@ export default {
 										displayText: 'Previous Image',
 										id: `.deviantart prev ${data[index - 1].image} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {}
 					],
 					footer: `Title : ${data[index].title.capitalize()}
@@ -71,7 +71,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 			const result = await searchDeviantArt(querie.trim());
 
 			if (result?.error) {
-				await client.instance.reply(result.error, { from, quoted: message });
+				await client.instance.reply(from, result.error, message);
 				continue;
 			}
 
@@ -91,7 +91,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 										displayText: 'Next Image',
 										id: `.deviantart next ${result[1].image} ${JSON.stringify(result).replace(/\|/g, '')}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {}
 					],
 					footer: `Title : ${result[index].author.capitalize()}

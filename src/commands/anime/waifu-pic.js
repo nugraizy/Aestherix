@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { removeDuplicatesArray, getWaifu, gifToMp4 } from '../../utils/index.js';
+import { removeDuplicatesArray, getWaifu } from '../../utils/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -18,7 +18,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		if (args[1] === 'next' || args[1] === 'prev') {
@@ -41,16 +41,16 @@ export default {
 							? builder.button.reply({
 									display: 'Next Image',
 									id: `.waifupic next ${args[2]} ${args[3]} ${data[index + 1]} ${JSON.stringify(data)}`
-							  }) /* eslint-disable-line */
+								}) /* eslint-disable-line */
 							: builder.button.reply({
 									display: `Search More ${args[2].capitalize()}`,
 									id: `.waifupic ${args[2]} -${args[3]}`
-							  }) /* eslint-disable-line */,
+								}) /* eslint-disable-line */,
 						index !== 0
 							? builder.button.reply({
 									display: 'Previous Image',
 									id: `.waifupic prev ${args[2]} ${args[3]} ${data[index - 1]} ${JSON.stringify(data)}`
-							  }) /* eslint-disable-line */
+								}) /* eslint-disable-line */
 							: null
 					].filter(Boolean)
 				);
@@ -76,8 +76,7 @@ export default {
 			const result = await getWaifu(querie.trim(), nsfw ? 'nsfw' : 'sfw');
 
 			if (result?.error) {
-				await client.instance.reply(result.error, { from, quoted: message });
-
+				await client.instance.reply(from, result.error, message);
 				continue;
 			}
 

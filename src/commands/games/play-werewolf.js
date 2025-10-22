@@ -2,10 +2,10 @@ import { delay } from '../../utils/modules/index.js';
 import { Werewolf } from '../../utils/games/index.js';
 
 const row = [
-	{ rows: [{ title: 'JOIN', rowId: '.ww join' }], title: 'VOID BOT | Werewolf Games' },
-	{ rows: [{ title: 'NEW GAME', rowId: '.ww newGame' }], title: 'VOID BOT | Werewolf Games' },
-	{ rows: [{ title: 'EXIT GAME', rowId: '.ww exit' }], title: 'VOID BOT | Werewolf Games' },
-	{ rows: [{ title: 'DELETE GAME', rowId: '.ww delete' }], title: 'VOID BOT | Werewolf Games' }
+	{ rows: [{ title: 'JOIN', rowId: '.ww join' }], title: 'message BOT | Werewolf Games' },
+	{ rows: [{ title: 'NEW GAME', rowId: '.ww newGame' }], title: 'message BOT | Werewolf Games' },
+	{ rows: [{ title: 'EXIT GAME', rowId: '.ww exit' }], title: 'message BOT | Werewolf Games' },
+	{ rows: [{ title: 'DELETE GAME', rowId: '.ww delete' }], title: 'message BOT | Werewolf Games' }
 ];
 
 /**
@@ -27,7 +27,7 @@ export default {
 			const kill = werewolf.killPlayerAsWerewolf(sender, args[2], args[3]);
 
 			if (kill.error && !('data' in kill)) {
-				return await client.instance.reply(kill.message, { from, quoted: message });
+				return await client.instance.reply(from, kill.message, message);
 			}
 
 			for (const data of kill.data) {
@@ -38,7 +38,7 @@ export default {
 			const seer = werewolf.seerSomeone(sender, args[2], args[3]);
 
 			if (seer.error && !('data' in seer)) {
-				return await client.instance.reply(seer.message, { from, quoted: message });
+				return await client.instance.reply(from, seer.message, message);
 			}
 
 			for (const data of seer.data) {
@@ -49,7 +49,7 @@ export default {
 			const guard = werewolf.guardSomeone(sender, args[2], args[3]);
 
 			if (guard.error && !('data' in guard)) {
-				return await client.instance.reply(guard.message, { from, quoted: message });
+				return await client.instance.reply(from, guard.message, message);
 			}
 
 			for (const data of guard.data) {
@@ -60,7 +60,7 @@ export default {
 			const vote = werewolf.voteSomeone(sender, args[2], args[3]);
 
 			if (vote.error && !('data' in vote)) {
-				return await client.instance.reply(vote.message, { from, quoted: message });
+				return await client.instance.reply(from, vote.message, message);
 			}
 
 			for (const data of vote.data) {
@@ -78,7 +78,7 @@ export default {
 			const werewolf = new Werewolf(sender, from, client);
 			const deletes = werewolf.deleteGame(sender);
 
-			return await client.instance.reply(deletes.message, { from, quoted: message });
+			return await client.instance.reply(from, deletes.message, message);
 		} else if (args[1] === 'join') {
 			sender = args[2] || sender;
 			pushname = args[3] || pushname;
@@ -87,7 +87,7 @@ export default {
 			const join = werewolf.werewolfJoin(sender, from, pushname);
 
 			return join.error
-				? client.instance.reply(join.message, { from, quoted: message })
+				? client.instance.reply(from, join.message, message)
 				: client.instance.send(
 						from,
 						{
@@ -95,7 +95,7 @@ export default {
 							mentions: join.mentions
 						},
 						{ quoted: message }
-				  ); /* eslint-disable-line */
+					); /* eslint-disable-line */
 		} else if (args[1] === 'newGame') {
 			const werewolf = new Werewolf(sender, from, client);
 
@@ -105,7 +105,7 @@ export default {
 					{
 						text: '\t',
 						title: 'Sesi sudah ada di group ini. Pilih join untuk bergabung ke permainan',
-						footer: 'Made by Void Bot. Powered by Hidden Finder',
+						footer: 'Made by message Bot. Powered by Hidden Finder',
 						buttonText: 'Open list',
 						sections: row
 					},
@@ -124,7 +124,7 @@ export default {
 				{
 					text: '\t',
 					buttonText: 'Open list',
-					footer: 'Made by Void Bot. Powered by Hidden Finder',
+					footer: 'Made by message Bot. Powered by Hidden Finder',
 					title: `${caption}\nPilih salah satu.`,
 					sections: row
 				},
@@ -134,13 +134,13 @@ export default {
 			const werewolf = new Werewolf(sender, from, client);
 			const exit = werewolf.exitGame(sender, from);
 
-			return await client.instance.reply(exit.message, { from, quoted: message });
+			return await client.instance.reply(from, exit.message, message);
 		} else if (args[1] === 'start') {
 			const werewolf = new Werewolf(sender, from, client);
 			const start = werewolf.startGame(sender, from);
 
 			if (start.error) {
-				return await client.instance.reply(start.message, { from, quoted: message });
+				return await client.instance.reply(from, start.message, message);
 			}
 
 			await client.instance.send(from, { text: start.message }, {});
@@ -165,7 +165,7 @@ export default {
 				} else if (player.role === 'werewolf') {
 					client.instance.send(player.id, {
 						buttonText: 'Open list',
-						footer: 'Made by Void Bot. Powered by Hidden Finder',
+						footer: 'Made by message Bot. Powered by Hidden Finder',
 						title:
 							'Kamu adalah Serigala. Dan saat ini merupakan waktu yang tepat untuk membunuh seseorang.\nPilih salah satu player.',
 						text: '\t',
@@ -179,14 +179,14 @@ export default {
 											rowId: `.ww kill ${start.data.playersData[i].id} ${from}`
 										}
 									],
-									title: 'VOID BOT | Werewolf Games'
+									title: 'message BOT | Werewolf Games'
 								};
 							})
 					});
 				} else if (player.role === 'seer') {
 					client.instance.send(player.id, {
 						buttonText: 'Open list',
-						footer: 'Made by Void Bot. Powered by Hidden Finder',
+						footer: 'Made by message Bot. Powered by Hidden Finder',
 						title:
 							'Kamu adalah Penerawang. Dan saat ini merupakan waktu yang tepat untuk menerawang seseorang.\nPilih salah satu player.',
 						text: '\t',
@@ -200,14 +200,14 @@ export default {
 											rowId: `.ww seer ${start.data.playersData[i].id} ${from}`
 										}
 									],
-									title: 'VOID BOT | Werewolf Games'
+									title: 'message BOT | Werewolf Games'
 								};
 							})
 					});
 				} else if (player.role === 'guard') {
 					client.instance.send(player.id, {
 						buttonText: 'Open list',
-						footer: 'Made by Void Bot. Powered by Hidden Finder',
+						footer: 'Made by message Bot. Powered by Hidden Finder',
 						title:
 							'Kamu adalah Penjaga. Dan saat ini merupakan waktu yang tepat untuk memjaga seseorang.\nPilih salah satu player.',
 						text: '\t',
@@ -221,7 +221,7 @@ export default {
 											rowId: `.ww guard ${start.data.playersData[i].id} ${from}`
 										}
 									],
-									title: 'VOID BOT | Werewolf Games'
+									title: 'message BOT | Werewolf Games'
 								};
 							})
 					});
@@ -231,7 +231,7 @@ export default {
 			start.data.startGameCycle(from, start.data.gameTimeCycle);
 		} else {
 			if (!isGroup) {
-				return await client.instance.reply('This commands for group only', { from, quoted: message });
+				return await client.instance.reply(from, 'This commands for group only', message);
 			}
 
 			const werewolfs = new Werewolf(sender, from, client);
@@ -242,7 +242,7 @@ export default {
 					{
 						text: '\t',
 						title: 'Sesi sudah ada di group ini. Pilih join untuk bergabung ke permainan',
-						footer: 'Made by Void Bot. Powered by Hidden Finder',
+						footer: 'Made by message Bot. Powered by Hidden Finder',
 						buttonText: 'Open list',
 						sections: row
 					},
@@ -251,10 +251,7 @@ export default {
 
 				return;
 			} else if (werewolfs.getDataGame(from) && werewolfs.gameStarted) {
-				return await client.instance.reply('Sesi sudah ada di group ini dan permainan sudah dimulai.', {
-					from,
-					quoted: message
-				});
+				return await client.instance.reply(from, 'Sesi sudah ada di group ini dan permainan sudah dimulai.', message);
 			}
 
 			new Werewolf(sender, from, client, pushname, true);
@@ -266,7 +263,7 @@ export default {
 				{
 					text: '\t',
 					buttonText: 'Open list',
-					footer: 'Made by Void Bot. Powered by Hidden Finder',
+					footer: 'Made by message Bot. Powered by Hidden Finder',
 					title: `${caption}\nPilih salah satu.`,
 					sections: row
 				},

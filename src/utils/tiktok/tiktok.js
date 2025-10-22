@@ -1,12 +1,10 @@
 import asyncRetry from 'async-retry';
 import axios from 'axios';
 import crypto from 'crypto';
-import fs from 'fs-extra';
-import im from 'imagemagick';
 import _ from 'lodash';
-import { Readable } from 'stream';
 import { fetch } from 'undici';
 import { v4 } from 'uuid';
+import heic from 'heic-convert';
 
 import { Cache } from '../../helper/modules/cache.js';
 import { cheerioLOAD, randomChar } from '../modules/index.js';
@@ -219,47 +217,10 @@ class ResponseParser {
 	}
 
 	async _convertHeicToJpg(url) {
-		const tempPath = `./src/media/temporary_files/${v4()}.heic`;
-		const outputPath = `./src/media/temporary_files/${v4()}.jpg`;
+		const res = await fetch(url);
+		const buffer = await heic({ buffer: Buffer.from(await res.arrayBuffer()), format: 'JPEG', quality: 100 });
 
-		try {
-			const res = await fetch(url);
-
-			const nodeStream = Readable.fromWeb(res.body);
-
-			await new Promise((resolve, reject) => {
-				const dest = fs.createWriteStream(tempPath);
-
-				nodeStream.pipe(dest);
-				dest.on('finish', resolve);
-				dest.on('error', reject);
-			});
-
-			await new Promise((resolve, reject) => {
-				im.convert([tempPath, outputPath], (err) => {
-					if (err) {
-						return reject(err);
-					}
-
-					resolve();
-				});
-			});
-
-			const buffer = fs.readFileSync(outputPath);
-
-			fs.unlinkSync(tempPath);
-			fs.unlinkSync(outputPath);
-
-			return buffer;
-		} catch (error) {
-			if (fs.existsSync(tempPath)) {
-				fs.unlinkSync(tempPath);
-			}
-
-			if (fs.existsSync(outputPath)) {
-				fs.unlinkSync(outputPath);
-			}
-		}
+		return buffer;
 	}
 
 	/**
@@ -281,7 +242,7 @@ class ResponseParser {
 	/**
 	 * @private
 	 */
-	async _mapDataToResult(data, type) {
+	async _mapDataToResult(data, type, wait) {
 		const {
 			keyword: /* eslint-disable-line*/ aweme_id,
 			author: { /* eslint-disable-line*/ unique_id, uid, signature: biograph, custom_verify: verified, nickname },
@@ -326,6 +287,9 @@ class ResponseParser {
 		};
 
 		if (typeToUse === 'images') {
+			await wait.update(
+				`Preparing TikTok ${data?.image_post_info?.images.length} Images. Converting HEIC to JPG if needed. Please wait...`
+			);
 			result.url.images = await Promise.all(await this._extractImageMetadata(data));
 		} else {
 			result.url.withWatermark = _.find(withWatermarkList, _.identity) || null;
@@ -339,8 +303,8 @@ class ResponseParser {
 	/**
 	 * @private
 	 */
-	_parseMediaResponse(data, type) {
-		return this._mapDataToResult(data, type);
+	_parseMediaResponse(data, type, wait) {
+		return this._mapDataToResult(data, type, wait);
 	}
 
 	/**
@@ -754,7 +718,7 @@ class RequestModule extends ResponseParser {
 	/**
 	 * @private
 	 */
-	async _fetchVideoDataAttempt(videoId) {
+	async _fetchVideoDataAttempt(videoId, wait) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const ranVersion = random(appVersion);
@@ -849,7 +813,7 @@ class RequestModule extends ResponseParser {
 
 						const resultPromises = await Promise.any(container);
 
-						const response = this._mergeMediaResponse(resultPromises, videoId, 'aweme_list');
+						const response = this._mergeMediaResponse(resultPromises, videoId, 'aweme_list', wait);
 
 						return response;
 					},
@@ -891,7 +855,7 @@ class RequestModule extends ResponseParser {
 		url = url.includes('vm.tiktok.com') ? url.replace('vm.tiktok.com', 'vt.tiktok.com') : url;
 		let videoId;
 
-		if (/((vt|vm|vk)\.tiktok\.com)/g.test(url) || !url.includes('video')) {
+		if (/((vt|vm|vk)\.tiktok\.com)/g.test(url) || !url.includes('video') || !url.includes('photo')) {
 			const req = (
 				await axios.head(url, {
 					validateStatus: () => true
@@ -902,11 +866,9 @@ class RequestModule extends ResponseParser {
 				return { error: 'download failed. either the access is denied, or other error.' };
 			}
 
-			const { origin, pathname } = new URL(req);
+			const { pathname } = new URL(req);
 
 			videoId = pathname.split('/').slice(-1)[0];
-
-			url = origin + pathname;
 		} else {
 			const { pathname } = new URL(url);
 
@@ -919,7 +881,7 @@ class RequestModule extends ResponseParser {
 	/**
 	 * @private
 	 */
-	async _mergeMediaResponse(dataPosts, videoId, property) {
+	async _mergeMediaResponse(dataPosts, videoId, property, wait) {
 		if (dataPosts.status_code !== 0) {
 			return { error: dataPosts.status_msg };
 		}
@@ -938,7 +900,8 @@ class RequestModule extends ResponseParser {
 
 		dataPosts = await this._parseMediaResponse(
 			dataPosts,
-			dataPosts.image_post_info && dataPosts.image_post_info?.images.length ? 'images' : undefined
+			dataPosts.image_post_info && dataPosts.image_post_info?.images.length ? 'images' : undefined,
+			wait
 		);
 
 		const dataClone = { ...dataPosts };
@@ -965,7 +928,7 @@ class TiktokUtils extends RequestModule {
 	/**
 	 * @private
 	 */
-	async _fetchVideoData(url) {
+	async _fetchVideoData(url, wait) {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const videoId = await this._getVideoId(url);
@@ -974,7 +937,7 @@ class TiktokUtils extends RequestModule {
 					resolve(videoId);
 				}
 
-				resolve(await this._fetchVideoDataAttempt(videoId));
+				resolve(await this._fetchVideoDataAttempt(videoId, wait));
 			} catch (error) {
 				reject(error);
 			}
@@ -1147,10 +1110,10 @@ class Tiktok extends TiktokUtils {
 		};
 
 		this.download = {
-			post: async (...urls) =>
+			post: async (urls, wait) =>
 				new Promise(async (resolve, reject) => {
 					try {
-						urls = urls.flat();
+						urls = [...urls.flat()];
 
 						let result = {};
 
@@ -1174,7 +1137,7 @@ class Tiktok extends TiktokUtils {
 								continue;
 							}
 
-							const response = await this._fetchVideoData(url);
+							const response = await this._fetchVideoData(url, wait);
 
 							result[url] = response;
 							this._setToCache(url, response);

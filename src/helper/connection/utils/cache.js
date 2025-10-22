@@ -218,8 +218,6 @@ const add = async (filename) => {
 const change = async (filename) => {
 	const displayName = filename?.split('/').slice(-2).join('/');
 
-	loggers.warning(color(displayName, '#BD93F9'), color('File has been changed!', 'white'));
-
 	const normalizedPath = normalizeImportPath(filename, true);
 	const _command = nocache(normalizedPath, true);
 
@@ -253,7 +251,12 @@ const change = async (filename) => {
 
 		const currentCommand = cmds[index][1];
 
-		loggers.info(color(currentCommand.path?.split('/').slice(-2).join('/'), '#BD93F9'), color('File Reloaded!', '#05ffa1'));
+		loggers.info(
+			color(currentCommand.path?.split('/').slice(-2).join('/'), '#BD93F9'),
+			color('File has been changed', '#05ffa1'),
+			color('&', 'white'),
+			color('Reloaded!', '#E4C1F9')
+		);
 
 		let _commandName = cmds[index][0];
 

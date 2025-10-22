@@ -33,10 +33,7 @@ export default {
 		client
 	) {
 		if (!isQuotedAudio && !isQuotedDocument && !isMediaVid) {
-			return await client.instance.reply('Please send/reply an audio/video to remove voice', {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, 'Please send/reply an audio/video to remove voice', message);
 		}
 
 		loggers.warning(`${color('Removing Sound', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
@@ -52,16 +49,13 @@ export default {
 			!audioFormat.includes(extractMediaData.mimetype) &&
 			!videoFormat.includes(extractMediaData.mimetype)
 		) {
-			return await client.instance.reply('This file is not an audio/video', { from, quoted: message });
+			return await client.instance.reply(from, 'This file is not an audio/video', message);
 		}
 
 		const { result } = await soundRemover(file, prettyNumber);
 
 		if (/--?(voice|suara)/.test(query) && /--?(instrument(s)?)/.test(query)) {
-			return await client.instance.reply(`${result.vocal}\n${result.instrumental}`, {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, `${result.vocal}\n${result.instrumental}`, message);
 		} else if (/--?(voice|suara)/.test(query)) {
 			await client.instance.send(
 				from,

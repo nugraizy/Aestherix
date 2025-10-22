@@ -37,14 +37,12 @@ export default {
 		client
 	) {
 		if (!isMediaImage && !(isQuotedSticker || isSticker)) {
-			return await client.instance.reply('Please send/reply a media to convert to sticker', {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, 'Please send/reply a media to convert to sticker', message);
 		}
 
 		if (!stickerAble) {
 			return await client.instance.reply(
+				from,
 				`Please send/reply a regular media to be meme'd. Can't convert ${typeQuoted}, only : ${typeSticker
 					.slice(
 						typeSticker.findIndex((v) => v === 'videoMessage'),
@@ -52,15 +50,12 @@ export default {
 					)
 					.join(', ')
 					.capitalize()}`,
-				{ from, quoted: message }
+				message
 			);
 		}
 
 		if (!query) {
-			return await client.instance.reply('Please provide a query, use & to split top/bottom text', {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, 'Please provide a query, use & to split top/bottom text', message);
 		}
 
 		const parsed = parser(query.toLowerCase(), {
@@ -78,7 +73,7 @@ export default {
 		query = query.replace(regexs, '');
 
 		if (isQuotedSticker && extractMediaData.isAnimated) {
-			return client.instance.reply('Cannot use animated sticker.', { from, quoted: message });
+			return client.instance.reply(from, 'Cannot use animated sticker.', message);
 		}
 
 		const image = await client.instance.downloadMediaMessage(mediaData);
@@ -94,7 +89,7 @@ export default {
 		);
 
 		if (buffer.error) {
-			return await client.instance.reply(buffer.error, { from, quoted: message });
+			return await client.instance.reply(from, buffer.error, message);
 		}
 
 		if (parsed.isStickers) {

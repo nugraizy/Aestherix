@@ -18,7 +18,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, args, type }, client) {
 		if (!query) {
-			return await client.instance.reply('Please specify a url', { from, quoted: message });
+			return await client.instance.reply(from, 'Please specify a url', message);
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -89,12 +89,12 @@ Powered by 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`.formatForm()
 		let { _: usernames } = parser(query);
 
 		if (usernames.length == 1 && isURL(usernames[0])) {
-			return await client.instance.reply('Please specify a valid Github usernames', { from, quoted: message });
+			return await client.instance.reply(from, 'Please specify a valid Github usernames', message);
 		}
 
 		for (const user of usernames) {
 			if (isURL(user.trim())) {
-				await client.instance.reply('Please specify a valid Github username', { from, quoted: message });
+				await client.instance.reply(from, 'Please specify a valid Github username', message);
 				continue;
 			}
 
@@ -102,7 +102,7 @@ Powered by 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`.formatForm()
 			let users = await git.searchUser(user);
 
 			if (users.total_count === 0) {
-				await client.instance.reply('User not found.', { from, quoted: message });
+				await client.instance.reply(from, 'User not found.', message);
 				continue;
 			}
 

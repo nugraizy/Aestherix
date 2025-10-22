@@ -17,16 +17,17 @@ export default {
 		const aki = await startAkinator(from);
 
 		if (aki?.error) {
-			return await client.instance.reply(aki.error, { from, quoted: message });
+			return await client.instance.reply(from, aki.error, message);
 		}
 
 		const { question, answers, progress, progressBar, arrow } = aki;
 
 		const messages = await client.instance.reply(
+			from,
 			`[?] \`${question}\`\n\n${answers
 				.map((v, i) => `${i + 1}. ${v}`)
 				.join('\n')}\n6. Exit\n7. Back/Undo\n\n> Progress : ${progress.toFixed(2)}% ${arrow}\n${progressBar}`,
-			{ from, quoted: message }
+			message
 		);
 
 		setMessages(from, { originalMessage: messages });

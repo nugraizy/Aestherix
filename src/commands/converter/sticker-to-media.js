@@ -23,7 +23,7 @@ export default {
 		client
 	) {
 		if (!isQuotedSticker) {
-			return await client.instance.reply('Please reply a sticker to decrypt', { from, quoted: message });
+			return await client.instance.reply(from, 'Please reply a sticker to decrypt', message);
 		}
 
 		loggers.info(`${color('Decrypting media', '#FF99C8')} from ${color(prettyNumber, '#E4C1F9')}`);
@@ -40,12 +40,12 @@ export default {
 			isBuffer(result)
 				? {
 						image: new Buffer.from(result, 'base64')
-				  } /* eslint-disable-line */
+					} /* eslint-disable-line */
 				: {
 						video: {
 							url: result
 						}
-				  } /* eslint-disable-line */,
+					} /* eslint-disable-line */,
 			{ quoted: message }
 		);
 

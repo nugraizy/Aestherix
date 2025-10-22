@@ -38,31 +38,36 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
 		if (!query) {
-			return await client.instance.reply('Please specify a url', { from, quoted: message });
+			return await client.instance.reply(from, 'Please specify a url', message);
 		}
 
 		let { _: urls } = parser(query);
 
 		if (urls.length === 1 && !isURL(urls[0])) {
-			return await client.instance.reply('Please specify a valid url', { from, quoted: message });
+			return await client.instance.reply(from, 'Please specify a valid url', message);
 		}
+
+		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+
+		let success = 0;
+		let error = 0;
+
+		loggers.warning(`${color('Downloading Twitter Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const url of urls) {
 			if (!isURL(url.trim())) {
-				await client.instance.reply('Please specify a valid url\nInvalid : ' + url, { from, quoted: message });
+				await client.instance.reply(from, 'Please specify a valid url\nInvalid : ' + url, message);
+				loggers.error(`${color('Failed to Download Twitter Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				error++;
 				continue;
 			}
-
-			loggers.warning(`${color('Downloading Twitter Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 			const post = await twitterDownload(url);
 
 			if (post?.error) {
-				await client.instance.reply(`Error while downloading Twitter post\n\n${post.error}\n${url}`, {
-					from,
-					quoted: message
-				});
+				await client.instance.reply(from, `Error while downloading Twitter post\n\n${post.error}\n${url}`, message);
 				loggers.error(`${color('Failed to Download Twitter Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				error++;
 				continue;
 			}
 
@@ -91,7 +96,11 @@ export default {
 				);
 			}
 
-			loggers.info(`${color('Downloaded Twitter Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			success++;
 		}
+
+		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
+
+		loggers.info(`${color('Downloaded Twitter Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

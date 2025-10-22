@@ -15,7 +15,7 @@ export default {
 	status: 'enable',
 	run: async ({ query, message, from, type, args }, client) => {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -35,7 +35,7 @@ export default {
 										displayText: 'Next Article',
 										id: `.googlearticle next ${data[index + 1].url} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {},
 						index !== 0
 							? {
@@ -43,7 +43,7 @@ export default {
 										displayText: 'Previous Image',
 										id: `.googlearticle prev ${data[index - 1].url} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {}
 					],
 					footer: `${data[index].date ? `${data[index].date} ` : ''}${data[index].description}
@@ -62,7 +62,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 			const result = await googleArticle(querie, 10);
 
 			if (result?.error) {
-				client.instance.reply(result.error, { from, quoted: message });
+				client.instance.reply(from, result.error, message);
 				continue;
 			}
 
@@ -79,7 +79,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 										displayText: 'Next Article',
 										id: `.googlearticle next ${result[1].url} ${JSON.stringify(result).replace(/\|/g, '')}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {}
 					],
 					footer: `${result[0].date ? `${result[0].date} ` : ''}${result[0].description}

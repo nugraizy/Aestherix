@@ -10,11 +10,12 @@ import type {
 	MessageTypes,
 	PrepareableMediaType,
 	PrepareMessageOptions,
-	WAMessage
+	WAMessage,
+	WAMessageKey
 } from '../Messages';
 import type { Client, AdvancedClient } from '../Socket';
 import { TemplateBuilder } from '../Commands/Interactive';
-import { proto, WALocationMessage } from 'baileys';
+import { proto, WALocationMessage, WAMessageKey } from 'baileys';
 
 export type ExifMetadata = Partial<{
 	/**
@@ -32,18 +33,6 @@ export type ExifMetadata = Partial<{
 	 */
 	author: string;
 }>;
-
-interface ReplyContainer {
-	/**
-	 * destination of the message
-	 */
-	from: string;
-
-	/**
-	 * quoting the message
-	 */
-	quoted?: WAMessage;
-}
 
 /**
  * Prepare message media before sending
@@ -112,23 +101,26 @@ export type SendMessage = (
 /**
  * Reply message
  * @example ```js
- * const options = {
- * 		from: '62xxxxxx@s.whatsapp.net',
- *		quoted: message.message
- * }
- * await client.instance.reply('Hello World!', options)
+ * const from: '62xxxxxx@s.whatsapp.net',
+ * const messageToQuote = message
+ *
+ * await client.instance.reply(from, 'Hello World!', messageToQuote)
  * ```
  */
 export type ReplyMessage = (
+	/**
+	 * the destination to reply
+	 */
+	jid: string,
 	/**
 	 * the text message
 	 */
 	text: string,
 
 	/**
-	 * reply options
+	 * the message property you want to quote
 	 */
-	options: ReplyContainer
+	message: WAMessage
 ) => Promise<MessageGenerated>;
 
 /**
@@ -388,7 +380,9 @@ export type UpdateProfilePicture = (jid: string, media: Buffer, type: 'no_crop' 
 
 export type UpdateMessage = (message: string) => Promise<void>;
 
-export type WaitMessage = (message: string, jid: string, quoted: WAMessage) => Promise<{ update: UpdateMessage }>;
+export type WaitMessage = (jid: string, message: string, quotedMessage: WAMessage) => Promise<{ update: UpdateMessage }>;
+
+export type EditMessage = (jid: string, message: string, key: WAMessageKey) => Promise<void>;
 
 export type AssignedClient = {
 	prepareMedia: PrepareMedia;
@@ -411,4 +405,5 @@ export type AssignedClient = {
 	generateMessageID: GenerateMessageID;
 	updateProfilePicture: UpdateProfilePicture;
 	waitMessage: WaitMessage;
+	edit: EditMessage;
 };

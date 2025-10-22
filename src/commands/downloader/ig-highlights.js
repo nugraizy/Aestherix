@@ -1,7 +1,7 @@
 import parser from 'yargs-parser';
 
+import configuration from '../../helper/config/connect.js';
 import { color, loggers, formatNumber, isURL } from '../../utils/modules/index.js';
-import { instagram } from '../../utils/instagram/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -16,26 +16,39 @@ export default {
 	cooldown: 13,
 	limit: 9,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message }, client) {
-		if (!query) {
-			return await client.instance.reply('Please specify a username', { from, quoted: message });
+	async run({ from, query, prettyNumber, message, isOwner, prefix }, client) {
+		if (!configuration.isInstagramInitiated) {
+			return await client.instance.reply(
+				from,
+				`Instagram session is not initialized. ${isOwner ? `Type ${prefix}instagraminit to initialize it.` : `Please ask the owner to initialize it first using the command ${prefix}instagraminit`}`,
+				message
+			);
 		}
 
-		await client.instance.reply('Please wait...', { from, quoted: message });
+		if (!query) {
+			return await client.instance.reply(from, 'Please specify a username', message);
+		}
+
+		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
 
 		const { _: input } = parser(query);
 
-		const highlights = await instagram.search.highlight(input);
+		const highlights = await configuration.instagram.search.highlight(input);
+
+		let success = 0;
+		let error = 0;
 
 		loggers.warning(`${color('Downloading Instagram highlights', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const data in highlights) {
 			if (highlights[data]?.error) {
-				await client.instance.reply(`Error while downloading Instagram highlights\n\n${highlights.error}\n${data}`, {
+				await client.instance.reply(
 					from,
-					quoted: message
-				});
+					`Error while downloading Instagram highlights\n\n${highlights.error}\n${data}`,
+					message
+				);
 				loggers.error(`${color('Failed to Download Instagram highlights', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				error++;
 				continue;
 			}
 
@@ -55,7 +68,7 @@ export default {
 				)}\n\n`;
 			}
 
-			await client.instance.reply(capt.trim().formatForm(), { from, quoted: message });
+			await client.instance.reply(from, capt.trim().formatForm(), message);
 
 			capt = '';
 
@@ -89,7 +102,11 @@ export default {
 					}
 				}
 			}
+
+			success++;
 		}
+
+		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
 
 		loggers.info(`${color('Downloaded Instagram highlights', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}

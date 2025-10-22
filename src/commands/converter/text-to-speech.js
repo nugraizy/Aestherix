@@ -17,10 +17,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, filename, message }, client) {
 		if (!query) {
-			return await client.instance.reply('Please provide some text to convert to speech', {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, 'Please provide some text to convert to speech', message);
 		}
 
 		let language = 'id';
@@ -38,14 +35,15 @@ export default {
 		} catch (e) {
 			if (e.error === 'lang not found') {
 				return await client.instance.reply(
+					from,
 					`Language not found. Available languages :\n\n${Object.keys(e.lang)
 						.map((key, i) => `${i + 1}. ${key}   :  ${e.lang[key]}`)
 						.join('\n')}`,
-					{ from, quoted: message }
+					message
 				);
 			}
 
-			await client.instance.reply('Error while converting text to speech', { from, quoted: message });
+			await client.instance.reply(from, 'Error while converting text to speech', message);
 
 			log(e);
 		}

@@ -17,13 +17,13 @@ export default {
 	premium: true,
 	async run({ query, from, message }, client) {
 		if (!query) {
-			return client.instance.reply('Please specify a query.', { from, quoted: message });
+			return client.instance.reply(from, 'Please specify a query.', message);
 		}
 
 		const images = await createImageBing(query);
 
 		if (!images?.length) {
-			return client.instance.reply('No images found.', { from, quoted: message });
+			return client.instance.reply(from, 'No images found.', message);
 		}
 
 		for (const image of images) {

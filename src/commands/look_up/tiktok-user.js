@@ -57,7 +57,7 @@ export default {
 		}
 
 		if (!query) {
-			return await client.instance.reply('Please specify a query', { from, quoted: message });
+			return await client.instance.reply(from, 'Please specify a query', message);
 		}
 
 		let { _: usernames } = parser(query);
@@ -66,10 +66,7 @@ export default {
 
 		for (const data in users) {
 			if (users[data]?.error) {
-				client.instance.reply(`Error while searching TikTok user\n\n${users[data].error}`, {
-					from,
-					quoted: message
-				});
+				client.instance.reply(from, `Error while searching TikTok user\n\n${users[data].error}`, message);
 
 				loggers.error(`${color('Failed to Search TikTok User', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;

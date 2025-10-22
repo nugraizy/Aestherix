@@ -16,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, type }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -38,7 +38,7 @@ Song : ${data[index].song}
 										displayText: 'Next Lyrics',
 										id: `.lyrics next ${data[index + 1].index} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {},
 						index !== 0
 							? {
@@ -46,7 +46,7 @@ Song : ${data[index].song}
 										displayText: 'Previous Lyrics',
 										id: `.lyrics prev ${data[index - 1].index} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {}
 					],
 					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
@@ -63,7 +63,7 @@ Song : ${data[index].song}
 			const result = await arq.findLyrics(querie.trim());
 
 			if (result?.error || !result.ok) {
-				client.instance.reply(JSON.stringify(result));
+				client.instance.reply(from, JSON.stringify(result), message);
 				continue;
 			}
 
@@ -84,7 +84,7 @@ Song : ${result.result[0].song}
 										displayText: 'Next Lyrics',
 										id: `.lyrics next ${result.result[1].index} ${JSON.stringify(result.result)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {}
 					],
 					footer: `Void Bot     1/${result.result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`

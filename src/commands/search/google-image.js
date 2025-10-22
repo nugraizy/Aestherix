@@ -15,7 +15,7 @@ export default {
 	status: 'disable',
 	run: async ({ query, message, from }, client) => {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		let queries = query.split(',');
@@ -26,7 +26,7 @@ export default {
 			const result = await googleImage(querie, 10);
 
 			if (result?.error) {
-				client.instance.reply(result.error, { from, quoted: message });
+				client.instance.reply(from, result.error, message);
 				continue;
 			}
 
@@ -43,7 +43,7 @@ export default {
 										displayText: 'Next Image',
 										id: `.googleimage next ${result[1]} ${JSON.stringify(result).replace(/\|/g, '')}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {}
 					],
 					footer: `Void Bot     1/${result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`

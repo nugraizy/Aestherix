@@ -15,7 +15,7 @@ export default {
 	status: 'enable',
 	run: async ({ query, message, from, args, type }, client) => {
 		if (!query) {
-			return client.instance.reply('You must provide a query.', { from, quoted: message });
+			return client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -46,7 +46,7 @@ Powered by 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`.formatForm(),
 										displayText: 'Next Movie',
 										id: `.layarkaca21 next ${data[index + 1].source} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {},
 						index !== 0
 							? {
@@ -54,7 +54,7 @@ Powered by 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`.formatForm(),
 										displayText: 'Previous Movie',
 										id: `.layarkaca21 prev ${data[index - 1].source} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {}
 					]
 				},
@@ -65,7 +65,7 @@ Powered by 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`.formatForm(),
 		const result = await layarkaca21(query);
 
 		if (result?.error) {
-			client.instance.reply(result.error, { from, quoted: message });
+			client.instance.reply(from, result.error, message);
 		}
 
 		await client.instance.send(
@@ -91,7 +91,7 @@ Void Bot     1/${result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅ�
 									displayText: 'Next Movie',
 									id: `.layarkaca21 next ${result[1].source} ${JSON.stringify(result)}`
 								}
-						  } /* eslint-disable-line */
+							} /* eslint-disable-line */
 						: {}
 				]
 			},

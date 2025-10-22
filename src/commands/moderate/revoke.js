@@ -13,10 +13,11 @@ export default {
 	status: 'enable',
 	async run({ isBotAdmin, from, message, sender }, client) {
 		if (!isBotAdmin) {
-			return await client.instance.reply('Bot is not admin, Please promote admin before using moderation commands.', {
+			return await client.instance.reply(
 				from,
-				quoted: message
-			});
+				'Bot is not admin, Please promote admin before using moderation commands.',
+				message
+			);
 		}
 
 		const code = (await client.instance.updateGroup(from, 'REVOKE'))[0];

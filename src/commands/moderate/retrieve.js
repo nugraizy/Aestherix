@@ -13,19 +13,18 @@ export default {
 	status: 'enable',
 	async run({ isBotAdmin, from, message }, client) {
 		if (!isBotAdmin) {
-			return await client.instance.reply('Bot is not admin, Please promote admin before using moderation commands.', {
+			return await client.instance.reply(
 				from,
-				quoted: message
-			});
+				'Bot is not admin, Please promote admin before using moderation commands.',
+				message
+			);
 		}
 
 		await client.instance.send(
 			from,
 			{
 				text: `Succeeded to retrieve the group's invitation URL.\n\nhttps://chat.whatsapp.com/${
-					(
-						await client.instance.updateGroup(from, 'RETRIEVE')
-					)[0]
+					(await client.instance.updateGroup(from, 'RETRIEVE'))[0]
 				}`
 			},
 			{ quoted: message }

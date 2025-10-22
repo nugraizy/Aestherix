@@ -5,6 +5,7 @@ import fs from 'fs-extra';
 import { parse } from 'dotenv';
 import _ from 'lodash';
 
+import configuration from '../../helper/config/connect.js';
 import { Cache } from '../../helper/modules/cache.js';
 import { LOGIN_HEADERS, USER_AGENTS, _apiGraphql, _apiUser, _baseApi, _baseUrl, generateDeviceID } from './utils.js';
 
@@ -97,7 +98,7 @@ class ResponseParser {
 									dimensions: edge.node.dimensions,
 									isVideo: edge.node.is_video,
 									mediaUrl: edge.node.is_video ? edge.node.video_url : edge.node.display_url
-							  })) /* eslint-disable-line */
+								})) /* eslint-disable-line */
 							: []
 					};
 				}) || []
@@ -748,9 +749,6 @@ class InstagramMethods extends ResponseParser {
 	}
 }
 
-/**
- * @type {import('instagram').InstagramAPI}
- */
 export class InstagramApi extends InstagramMethods {
 	/**
 	 * @private
@@ -1138,4 +1136,7 @@ export class InstagramApi extends InstagramMethods {
 	}
 }
 
-export const instagram = InstagramApi.init();
+if (fs.existsSync('./.instagram.env')) {
+	configuration.instagram = InstagramApi.init();
+	configuration.isInstagramInitiated = true;
+}

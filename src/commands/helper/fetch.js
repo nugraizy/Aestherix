@@ -106,7 +106,7 @@ export default {
 	status: 'enable',
 	async run({ from, message, query }, client) {
 		if (!query) {
-			return await client.instance.reply('Fetch expect <url> <?parser>', { from, quoted: message });
+			return await client.instance.reply(from, 'Fetch expect <url> <?parser>', message);
 		}
 
 		let {
@@ -136,27 +136,27 @@ export default {
 		const url = queries.find((v) => isURL(v));
 
 		if (!url) {
-			return await client.instance.reply('Fetch expect <url>', { from, quoted: message });
+			return await client.instance.reply(from, 'Fetch expect <url>', message);
 		}
 
 		if (method && !/^(GET|POST)$/i.test(method)) {
-			return await client.instance.reply('Method must be `GET` or `POST` (case-insensitive).', { from, quoted: message });
+			return await client.instance.reply(from, 'Method must be `GET` or `POST` (case-insensitive).', message);
 		}
 
 		if (body && /^GET$/i.test(method)) {
-			return await client.instance.reply('`GET` method cannot accept body.', { from, quoted: message });
+			return await client.instance.reply(from, '`GET` method cannot accept body.', message);
 		}
 
 		if (body && /^POST$/i.test(method)) {
 			try {
 				JSON.parse(body);
 			} catch {
-				return await client.instance.reply('`body` MUST be a valid JSON string.', { from, quoted: message });
+				return await client.instance.reply(from, '`body` MUST be a valid JSON string.', message);
 			}
 		}
 
 		if (contentType && !/^[a-z0-9!#$&^_-]+\/[a-z0-9!#$&^_.+-]+$/i.test(contentType)) {
-			return await client.instance.reply(`Invalid content-type: "${contentType}"`, { quoted: message, from });
+			return await client.instance.reply(from, `Invalid content-type: "${contentType}"`, message);
 		}
 
 		method = method || 'GET';
@@ -166,7 +166,7 @@ export default {
 		headers = headers
 			? headers.reduce((acc, cur) => {
 					if (!/^[^:\s]+:\s?.+$/.test(cur)) {
-						client.instance.reply(`Invalid header format: "${cur}" (expected "key: value")`, { quoted: message, from });
+						client.instance.reply(from, `Invalid header format: "${cur}" (expected "key: value")`, message);
 						return acc;
 					}
 
@@ -175,7 +175,7 @@ export default {
 					const value = rest.join(':').trim();
 
 					if (key.toLowerCase() === 'content-type' && !/^[a-z0-9!#$&^_-]+\/[a-z0-9!#$&^_.+-]+$/i.test(value)) {
-						client.instance.reply(`Invalid content-type: "${contentType}"`, { quoted: message, from });
+						client.instance.reply(from, `Invalid content-type: "${contentType}"`, message);
 						return acc;
 					}
 
@@ -183,7 +183,7 @@ export default {
 						...acc,
 						[key.trim()]: value
 					};
-			  }, {}) // eslint-disable-line
+				}, {}) // eslint-disable-line
 			: {};
 
 		if (method === 'GET') {
@@ -198,7 +198,7 @@ export default {
 			const response = await fetchData(url, { method, headers, body });
 
 			if (response.error) {
-				return client.instance.reply(response.message, { from, quoted: message });
+				return client.instance.reply(from, response.message, message);
 			}
 
 			const responseTypes = response.headers.get('content-type').split(';')[0];
@@ -207,7 +207,7 @@ export default {
 				const data = await processJsonResponse(response, queryParser);
 
 				if (data.error) {
-					return await client.instance.reply(data.message, { from, quoted: message });
+					return await client.instance.reply(from, data.message, message);
 				}
 
 				if (media && typeof data === 'string' && isURL(data)) {
@@ -257,11 +257,11 @@ export default {
 					return;
 				}
 
-				await client.instance.reply(data, { from, quoted: message });
+				await client.instance.reply(from, data, message);
 			} else if (responseTypes.startsWith('text')) {
 				const data = await processTextResponse(response, queryParser);
 
-				await client.instance.reply(data, { from, quoted: message });
+				await client.instance.reply(from, data, message);
 			} else {
 				const data = await processBinaryResponse(response);
 
@@ -276,7 +276,7 @@ export default {
 			}
 		} catch (error) {
 			console.log(error);
-			await client.instance.reply(error.message, { from, quoted: message });
+			await client.instance.reply(from, error.message, message);
 		}
 	}
 };

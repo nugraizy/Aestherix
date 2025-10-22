@@ -28,7 +28,9 @@ const processVideo = async (url, type, client, { from, message, prettyNumber }) 
 	const { tracks, status, message: respMessage } = await spotifier.getTracks(extractId(url));
 
 	if (!status) {
-		return await client.instance.reply(respMessage, { from, quoted: message });
+		await client.instance.reply(from, respMessage, message);
+		loggers.error(`${color('Failed to Download Spotify ' + type, '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+		return false;
 	}
 
 	const { download } = tracks[0];
@@ -38,9 +40,9 @@ const processVideo = async (url, type, client, { from, message, prettyNumber }) 
 	const video = await download();
 
 	if (video?.error) {
-		client.instance.reply(video.message, { from, quoted: message });
+		await client.instance.reply(from, video.message, message);
 		loggers.error(`${color('Failed to Download Spotify ' + type, '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
-		return;
+		return false;
 	}
 
 	const { url: downloadUrl } = video;
@@ -54,17 +56,6 @@ const processVideo = async (url, type, client, { from, message, prettyNumber }) 
 				.map((v, i) => (tracks[0].artists.length !== 1 && i + 1 === tracks[0].artists.length ? `and ${v}` : v))
 				.join(', ')}.mp3`,
 			mimetype: 'audio/mp3'
-
-			// caption: capt,
-			// footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
-			// buttons: [
-			// 	{
-			// 		buttonId: `.ytmp4 get ${url}`,
-			// 		buttonText: { displayText: '
-			// Video' },
-			// 		type: 1
-			// 	}
-			// ]
 		},
 		{
 			quoted: message
@@ -98,40 +89,28 @@ export default {
 			}
 
 			if (!videoIds.length) {
-				return await client.instance.reply('No id(s) found', { from, quoted: message });
+				return await client.instance.reply(from, 'No id(s) found', message);
 			}
 
 			const numberiedQuery = Number(query);
 			const index = numberiedQuery - 1;
 
 			if (!numberiedQuery) {
-				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
-					from,
-					quoted: message
-				});
+				return await client.instance.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
 			}
 
 			if (index > videoIds.length) {
-				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
-					from,
-					quoted: message
-				});
+				return await client.instance.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
 			}
 
 			const videoId = videoIds[index][0];
 			const typeMedia = videoIds[index][1];
 
 			if (!videoId) {
-				return await client.instance.reply(`Please specify a number beteen 1 - ${videoIds.length}`, {
-					from,
-					quoted: message
-				});
+				return await client.instance.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
 			}
 
-			await client.instance.reply(`Downloading Spotify ${typeMedia} :\n${videoId}\nPlease wait`.formatForm(), {
-				from,
-				quoted: message
-			});
+			await client.instance.reply(from, `Downloading Spotify ${typeMedia} :\n${videoId}\nPlease wait`.formatForm(), message);
 
 			await processVideo(`https://open.spotify.com/${typeMedia}/${videoId}`, typeMedia, client, {
 				from,
@@ -143,45 +122,53 @@ export default {
 		}
 
 		if (!query) {
-			return await client.instance.reply('Please provide a URL', { from, quoted: message });
+			return await client.instance.reply(from, 'Please provide a URL.', from);
 		}
 
-		await client.instance.reply('Please wait...', { from, quoted: message });
+		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
 
 		let { _: urls } = parser(query);
 
 		urls = removeDuplicatesArray(urls);
 
-		loggers.warning(`${color('Downloading Pixiv File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		let success = 0;
+		let error = 0;
+
+		loggers.warning(`${color('Downloading Spotify Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		if (urls.length === 1 && isURL(urls) && !isSpotifyURL(urls)) {
-			return await client.instance.reply('This is not a valid Spotify URL.', { from, quoted: message });
+			loggers.error(`${color('Failed to Download Spotify Media', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+			return await wait.update('This is not a valid Spotify URL.');
 		}
 
 		for (const url of urls) {
 			if (isURL(url) && !isSpotifyURL(url)) {
-				await client.instance.reply(`[ ${url} ] This isn't a valid Spotify URL.`, {
-					from,
-					quoted: message
-				});
+				await client.instance.reply(from, `[ ${url} ] This isn't a valid Spotify URL.`, message);
 				loggers.error(`${color('Failed to Download Spotify Media', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				error++;
 				continue;
 			}
 
 			const typeMedia = getSpotifyType(url);
 
 			if (typeMedia === 'artist') {
-				await client.instance.reply(`[ ${url} ] This is an artist link. Please send media URL.`, {
-					from,
-					quoted: message
-				});
-
+				await client.instance.reply(from, `[ ${url} ] This is an artist link. Please send media URL.`, message);
+				loggers.error(`${color('Failed to Download Spotify Media', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				error++;
 				continue;
 			}
 
-			await processVideo(url, typeMedia, client, { from, message, prettyNumber });
-			await delay(300);
+			const status = await processVideo(url, typeMedia, client, { from, message, prettyNumber });
+
+			if (!status) {
+				error++;
+				continue;
+			}
+
+			success++;
 		}
+
+		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
 
 		loggers.info(`${color('Downloaded Spotify Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}

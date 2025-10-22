@@ -18,7 +18,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message }, client) {
 		if (!query) {
-			return await client.instance.reply('Please specify a GitHub User', { from, quoted: message });
+			return await client.instance.reply(from, 'Please specify a GitHub User', message);
 		}
 
 		const { _: username, theme } = parser(query, {
@@ -37,17 +37,18 @@ export default {
 		}
 
 		if (!username || username.length === 0) {
-			return await client.instance.reply('Please specify a GitHub User', { from, quoted: message });
+			return await client.instance.reply(from, 'Please specify a GitHub User', message);
 		}
 
 		if (theme === true) {
-			return await client.instance.reply(`List of themes:\n\n${themes.join(', ')}`, { from, quoted: message });
+			return await client.instance.reply(from, `List of themes:\n\n${themes.join(', ')}`, message);
 		}
 
 		if (!themes.includes(theme.toLowerCase())) {
 			return await client.instance.reply(
+				from,
 				`Please specify a valid themes, this is a list of available themes:\n\n${themes.join(', ')}`,
-				{ from, quoted: message }
+				message
 			);
 		}
 

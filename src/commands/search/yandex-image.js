@@ -15,7 +15,7 @@ export default {
 	status: 'enable',
 	run: async ({ query, message, from, type, args }, client) => {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -35,7 +35,7 @@ export default {
 										displayText: 'Next Image',
 										id: `.yandeximage next ${data[index + 1].url.image} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {},
 						index !== 0
 							? {
@@ -43,7 +43,7 @@ export default {
 										displayText: 'Previous Image',
 										id: `.yandeximage prev ${data[index - 1].url.image} ${JSON.stringify(data)}`
 									}
-							  } /* eslint-disable-line */
+								} /* eslint-disable-line */
 							: {}
 					],
 					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
@@ -60,7 +60,7 @@ export default {
 			const result = await yandexImage(querie);
 
 			if (result?.error) {
-				client.instance.reply(result.error, { from, quoted: message });
+				client.instance.reply(from, result.error, message);
 				continue;
 			}
 

@@ -31,10 +31,7 @@ export default {
 		client
 	) {
 		if (!query && !bodyQuoted && !isMediaVid && !isMediaImage && !isMediaDocument && !isQuotedSticker) {
-			return client.instance.reply('Please provide a message or media', {
-				from,
-				quoted: message
-			});
+			return client.instance.reply(from, 'Please provide a message or media', message);
 		}
 
 		const ownJid = client.instance.decodeJid(instance);
@@ -50,10 +47,7 @@ export default {
 					mediaData.message?.documentWithCaptionMessage?.message?.documentMessage?.mimetype;
 
 				if (!/video|image/g.test(mime)) {
-					return await client.instance.reply('Media type must be video or image', {
-						from,
-						quoted: message
-					});
+					return await client.instance.reply(from, 'Media type must be video or image', message);
 				}
 
 				mime = mime.split('/')[0];

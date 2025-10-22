@@ -19,18 +19,19 @@ export default {
 	status: 'enable',
 	run: async ({ query, from, message }, client) => {
 		if (!query) {
-			return await client.instance.reply('You need to provide query.', { from, quoted: message });
+			return await client.instance.reply(from, 'You need to provide query.', message);
 		}
 
 		const options = !/[1-6]/.test(query) ? 0 : query.match(/[1-6]$/)?.[0] - 1 === undefined ? 0 : query.match(/[1-6]$/)[0] - 1;
 
 		const result = await animeName(query.replace(/[0-9]/g, ''), animeNameOptions[options]);
 
-		client.instance.reply(
+		await client.instance.reply(
+			from,
 			`${'Anime Name'.formatHeaders()}
 
 ${result.map((v, i) => `${i + 1}. ${v.name}${v.meaning ? `\n${v.meaning}` : ''}`).join('\n\n')}`,
-			{ from, quoted: message }
+			message
 		);
 	}
 };

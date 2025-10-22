@@ -25,11 +25,11 @@ export default {
 		});
 
 		if (wait.timeout) {
-			return client.instance.reply('Timeout!', { from, quoted: message });
+			return client.instance.reply(from, 'Timeout!', message);
 		}
 
 		if (wait.invalid) {
-			return client.instance.reply('Invalid media!', { from, quoted: message });
+			return client.instance.reply(from, 'Invalid media!', message);
 		}
 
 		const messageToConvert = await reassign(wait.message, client, store);

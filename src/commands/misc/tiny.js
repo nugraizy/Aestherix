@@ -16,15 +16,15 @@ export default {
 	status: 'enable',
 	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a URL', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a URL', message);
 		}
 
 		if (!isURL(query)) {
-			return await client.instance.reply('Please specify a valid URL', { from, quoted: message });
+			return await client.instance.reply(from, 'Please specify a valid URL', message);
 		}
 
 		const urls = await tiny(query);
 
-		await client.instance.reply(urls, { from, quoted: message });
+		await client.instance.reply(from, urls, message);
 	}
 };

@@ -46,7 +46,7 @@ export default {
 
 		caption = `${'Bot Status'.formatHeaders()}\n\n`;
 
-		caption += '⪨ Ｈｏｓｔ Ｉｎｆｏ ⪩\n\n';
+		caption += '`Host Info`\n\n';
 		caption += `App Runtime : ${getRuntime(appUptime()) || '0 ms'}\n`;
 		caption += `Host Uptime : ${getRuntime(hostUptime())}\n`;
 		caption += `Host : ${hostname()}\n`;
@@ -55,7 +55,7 @@ export default {
 		caption += `Releases : ${release()}\n`;
 		caption += `Release Version : ${version()}\n\n`;
 
-		caption += '⪨ Ｓｔｏｒａｇｅ Ｓｙｓｔｅｍ Ｉｎｆｏ ⪩\n\n';
+		caption += '`Storage System Info`\n\n';
 		caption += '';
 		caption += `Memory : ${getFilesizeFromBytes(freemem)}/${getFilesizeFromBytes(totalmem)}\n`;
 
@@ -64,13 +64,13 @@ export default {
 		}
 
 		caption += '\n\n';
-		caption += '⪨ Ｎｏｄｅ Ｉｎｆｏ ⪩\n\n';
+		caption += '`Node Info`\n\n';
 		caption += `Version : ${nodeVersion}\n`;
 		caption += `LTS : ${lts}\n\n`;
 
-		caption += '⪨ ＣＰＵｓ Ｉｎｆｏ ⪩\n\n';
+		caption += '`CPU Info`\n\n';
 		caption += `${getCpus(cpus)}`;
 
-		client.instance.reply(caption, { from, quoted: message });
+		client.instance.reply(from, caption, message);
 	}
 };

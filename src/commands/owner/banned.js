@@ -18,7 +18,7 @@ export default {
 	status: 'enable',
 	async run({ from, message, isOwner, args, mediaData, mention, bodyQuoted, query }, client) {
 		if (!query && bodyQuoted) {
-			return await client.instance.reply('Please provide user to ban', { from, quoted: message });
+			return await client.instance.reply(from, 'Please provide user to ban', message);
 		}
 
 		const userBanned = await fs.readJSON('./databases/users/banned.json');
@@ -31,10 +31,11 @@ export default {
 			await fs.writeJSON('./databases/users/banned.json', userBanned);
 
 			client.instance.updateBlockStatus(args[3], 'block');
-			await client.instance.reply('You are banned from using bot.\n\nReason : Abusing Report command.', {
+			await client.instance.reply(
 				from,
-				quoted: JSON.parse(args.slice(4))
-			});
+				'You are banned from using bot.\n\nReason : Abusing Report command.',
+				JSON.parse(args.slice(4))
+			);
 
 			return;
 		}
@@ -106,7 +107,7 @@ export default {
 
 		if (bodyQuoted) {
 			if (userBanned.includes(mediaData.participant)) {
-				return await client.instance.reply('Already banned', { from, quoted: message });
+				return await client.instance.reply(from, 'Already banned', message);
 			}
 
 			configuration.cache.bannedlist.push(mediaData.participant);

@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { mediafire, isURL, removeDuplicatesArray } from '../../utils/index.js';
+import { mediafire, isURL, removeDuplicatesArray, loggers, color } from '../../utils/index.js';
 
 const regex = (url) =>
 	/^(https?:\/\/)?(www\.)?mediafire\.com\/(file|view|download)\/[a-zA-Z0-9]+(\/[a-zA-Z0-9_\-.~%]+)?(\/file)?.*$/.test(url);
@@ -18,9 +18,9 @@ export default {
 	cooldown: 5,
 	limit: 7,
 	status: 'enable',
-	run: async ({ from, message, query }, client) => {
+	run: async ({ from, message, query, prettyNumber }, client) => {
 		if (!query) {
-			return client.instance.reply('You must provide a query.', { from, quoted: message });
+			return client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		let { _: urls } = parser(query);
@@ -28,38 +28,45 @@ export default {
 		urls = removeDuplicatesArray(urls);
 
 		if (urls.length === 1 && !isURL(urls[0])) {
-			return await client.instance.reply('Please specify a valid url', { from, quoted: message });
+			return await client.instance.reply(from, 'Please specify a valid url.', message);
 		}
 
 		if (urls.length === 1 && !regex(urls[0])) {
-			return await client.instance.reply('Please specify a valid Mediafire url.', { from, quoted: message });
+			return await client.instance.reply(from, 'Please specify a valid Mediafire url.', message);
 		}
 
-		await client.instance.reply('Please wait...', { from, quoted: message });
+		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+
+		let success = 0;
+		let error = 0;
+
+		loggers.warning(`${color('Downloading Mediafire File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const url of urls) {
 			if (!regex(url)) {
-				await client.instance.reply('Please specify a valid Mediafire url.\nInvalid : ' + url, {
-					from,
-					quoted: message
-				});
+				await client.instance.reply(from, 'Please specify a valid Mediafire url.\nInvalid : ' + url, message);
+				error++;
 				continue;
 			}
 
 			const result = await mediafire(url);
 
 			if (result?.error) {
-				return client.instance.reply(result.error, { from, quoted: message });
+				client.instance.reply(from, result.error, message);
+				loggers.error(`${color('Failed to Download Mediafire File', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				error++;
+				return;
 			}
 
 			await client.instance.reply(
+				from,
 				`${'Mediafire Downloader'.formatHeaders()}
 		
 Filename: ${result.filename}
 Filesize: ${result.filesize}
 Filetype: ${result.filetype}
 Uploaded: ${result.uploaded}`.formatForm(),
-				{ from, quoted: message }
+				message
 			);
 
 			await client.instance.send(
@@ -70,6 +77,11 @@ Uploaded: ${result.uploaded}`.formatForm(),
 				},
 				{ quoted: message }
 			);
+			success++;
 		}
+
+		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
+
+		loggers.info(`${color('Downloaded Mediafire File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
 };

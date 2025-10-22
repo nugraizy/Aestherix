@@ -29,7 +29,7 @@ export default {
 	status: 'enable',
 	async run({ from, message, query, args, cmd, filename }, client) {
 		if (!query) {
-			return await client.instance.reply('Please provide a query', { from, quoted: message });
+			return await client.instance.reply(from, 'Please provide a query', message);
 		}
 
 		let {
@@ -103,18 +103,14 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 		models = !_.isNumber(parsed[0]) ? [randomize(dataJSON).url] : [_.get(dataJSON, parsed[0] - 1)?.url].filter(Boolean);
 
 		if (models?.length === 0) {
-			return await client.instance.reply(`Model ${models[0]} not found\n Type : !${this.name} -type`, {
-				from,
-				quoted: message
-			});
+			return await client.instance.reply(from, `Model ${models[0]} not found\n Type : !${this.name} -type`, message);
 		}
 
 		for (const model of models) {
 			const result = await textpro(model, parsed.slice(1).join(' '));
 
 			if (result?.error) {
-				await client.instance.reply(`something went wrong:\n\n${result.error}`, { from, quoted: message });
-
+				await client.instance.reply(from, `something went wrong:\n\n${result.error}`, message);
 				continue;
 			}
 
@@ -131,7 +127,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 							author: configuration.author,
 							packname: configuration.packname
 						}
-				  ) /* eslint-disable-line */
+					) /* eslint-disable-line */
 				: await sharp(data)
 						.extract({ width: width - 40, height: height - 40, left: 0, top: 0 })
 						.toBuffer();

@@ -4,27 +4,30 @@ import { getNewGames } from '../../utils/index.js';
 let games = {};
 
 async function updateGames() {
-	configuration.intervals.freegame = setInterval(async () => {
-		try {
-			const data = await getNewGames();
+	configuration.intervals.freegame = setInterval(
+		async () => {
+			try {
+				const data = await getNewGames();
 
-			if (JSON.stringify(data) === JSON.stringify(games)) {
-				return;
+				if (JSON.stringify(data) === JSON.stringify(games)) {
+					return;
+				}
+
+				const clientMqttListen = configuration.mqtt;
+
+				games = data;
+
+				clientMqttListen?.publish(
+					process.env.MQTT_FREEGAME,
+					JSON.stringify({ data, from: configuration.intervals.from, status: true })
+				);
+			} catch {
+				clearInterval(configuration.intervals.freegame);
+				delete configuration.intervals.freegame;
 			}
-
-			const clientMqttListen = configuration.mqtt;
-
-			games = data;
-
-			clientMqttListen?.publish(
-				process.env.MQTT_FREEGAME,
-				JSON.stringify({ data, from: configuration.intervals.from, status: true })
-			);
-		} catch {
-			clearInterval(configuration.intervals.freegame);
-			delete configuration.intervals.freegame;
-		}
-	}, 3 * 60 * 1000);
+		},
+		3 * 60 * 1000
+	);
 }
 
 /**
@@ -42,7 +45,7 @@ export default {
 	status: 'enable',
 	async run({ from, args, message, query }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a status to simulate', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a status to simulate', message);
 		}
 
 		try {
@@ -50,10 +53,7 @@ export default {
 				case 'status':
 				case 'stats':
 					{
-						await client.instance.reply(configuration.intervals.from.includes(from) ? 'Enabled' : 'Disabled', {
-							from,
-							quoted: message
-						});
+						await client.instance.reply(from, configuration.intervals.from.includes(from) ? 'Enabled' : 'Disabled', message);
 					}
 
 					break;
@@ -61,11 +61,11 @@ export default {
 				case 'off':
 					{
 						if (!configuration.intervals.from.includes(from)) {
-							return await client.instance.reply('Already disabled', { from, quoted: message });
+							return await client.instance.reply(from, 'Already disabled', message);
 						}
 
 						configuration.intervals.from.splice(configuration.intervals.from.indexOf(from), 1);
-						await client.instance.reply('Simulate Freegame Disabled', { from, quoted: message });
+						await client.instance.reply(from, 'Simulate Freegame Disabled', message);
 					}
 
 					break;
@@ -73,7 +73,7 @@ export default {
 				case 'on':
 					{
 						if (configuration.intervals.from.includes(from)) {
-							return await client.instance.reply('Already enabled', { from, quoted: message });
+							return await client.instance.reply(from, 'Already enabled', message);
 						}
 
 						configuration.intervals.from.push(from);
@@ -82,16 +82,13 @@ export default {
 							await updateGames();
 						}
 
-						await client.instance.reply('Simulate Freegame Enabled', { from, quoted: message });
+						await client.instance.reply(from, 'Simulate Freegame Enabled', message);
 					}
 
 					break;
 				default:
 					{
-						await client.instance.reply('Usage: !freegame [enable|disable|status]', {
-							from,
-							quoted: message
-						});
+						await client.instance.reply(from, 'Usage: !freegame [enable|disable|status]', message);
 					}
 
 					break;

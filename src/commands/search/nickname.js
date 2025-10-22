@@ -15,20 +15,21 @@ export default {
 	status: 'enable',
 	run: async ({ query, message, from }, client) => {
 		if (!query) {
-			return client.instance.reply('You must provide a query.', { from, quoted: message });
+			return client.instance.reply(from, 'You must provide a query.', message);
 		}
 
 		const result = await nickname(query);
 
 		if (result?.error) {
-			client.instance.reply(result.error, { from, quoted: message });
+			client.instance.reply(from, result.error, message);
 		}
 
 		client.instance.reply(
+			from,
 			`${'Nickfinder'.formatHeaders()}
 
 ${result.join('\n').trim()}`,
-			{ from, quoted: message }
+			message
 		);
 	}
 };

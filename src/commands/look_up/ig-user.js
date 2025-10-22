@@ -1,7 +1,7 @@
 import parser from 'yargs-parser';
 
+import configuration from '../../helper/config/connect.js';
 import { color, loggers, numberWithCommas } from '../../utils/modules/index.js';
-import { instagram } from '../../utils/instagram/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -16,23 +16,28 @@ export default {
 	cooldown: 6,
 	limit: 6,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message }, client) {
+	async run({ from, query, prettyNumber, message, isOwner, prefix }, client) {
+		if (!configuration.isInstagramInitiated) {
+			return await client.instance.reply(
+				from,
+				`Instagram session is not initialized. ${isOwner ? `Type ${prefix}instagraminit to initialize it.` : `Please ask the owner to initialize it first using the command ${prefix}instagraminit`}`,
+				message
+			);
+		}
+
 		if (!query) {
-			return await client.instance.reply('Please specify a url', { from, quoted: message });
+			return await client.instance.reply(from, 'Please specify a url', message);
 		}
 
 		let { _: usernames } = parser(query);
 
-		const users = await instagram.search.user(usernames);
+		const users = await configuration.instagram.search.user(usernames);
 
 		loggers.warning(`${color('Searching Instagram User', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const data in users) {
 			if (users[data]?.error) {
-				await client.instance.reply(`Error while searching Instagram user\n\n${users[data].error}\n${data}`, {
-					from,
-					quoted: message
-				});
+				await client.instance.reply(from, `Error while searching Instagram user\n\n${users[data].error}\n${data}`, message);
 				loggers.error(`${color('Failed to Searching Instagram User', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 				continue;
 			}

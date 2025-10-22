@@ -59,7 +59,10 @@ const globalConfig = {
 	input: new Cache(),
 	mqtt: null,
 	pinterestId: null,
-	pinterestImages: new Cache({ limit: 900 })
+	pinterestImages: new Cache({ limit: 900 }),
+	anonymousMessages: new Cache(),
+	isInstagramInitiated: false,
+	instagram: null
 };
 
 global.log = console.log;

@@ -21,9 +21,9 @@ export default {
 		});
 
 		if (wait.timeout) {
-			return client.instance.reply('Timeout! I will just call you ' + pushname, { from, quoted: message });
+			return client.instance.reply(from, 'Timeout! I will just call you ' + pushname, message);
 		}
 
-		client.instance.reply('hi there ' + wait.message, { from, quoted: wait.quoted });
+		client.instance.reply(from, 'hi there ' + wait.message, wait.quoted);
 	}
 };

@@ -11,7 +11,7 @@ export default {
 	category: 'Misc',
 	usage: '!limit',
 	aliases: ['limit', 'lim'],
-	cooldown: 3,
+	cooldown: 10,
 	limit: 0,
 	status: 'enable',
 	async run({ from, sender, message }, client) {
@@ -26,9 +26,6 @@ export default {
 
 		const limit = Limit.checkLimit(sender);
 
-		await client.instance.reply(`Your limit : ${limit || 0}\nType user : ${role}`, {
-			from,
-			quoted: message
-		});
+		await client.instance.reply(from, `Your limit : ${limit || 0}\nType user : ${role}`, message);
 	}
 };

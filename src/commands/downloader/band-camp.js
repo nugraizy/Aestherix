@@ -18,32 +18,37 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, filename, prettyNumber }, client) {
 		if (!query) {
-			return await client.instance.reply('You must provide a query.', { from, quoted: message });
+			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
 
-		await client.instance.reply('Please wait...', { from, quoted: message });
+		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
 
 		let { _: urls } = parser(query);
 
 		urls = removeDuplicatesArray(urls);
 
 		if (urls.length === 1 && !isURL(urls[0])) {
-			return await client.instance.reply('Please specify a valid url', { from, quoted: message });
+			return await wait.update('Please specify a valid url');
 		}
+
+		let success = 0;
+		let error = 0;
 
 		loggers.warning(`${color('Downloading Bandcamp File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
 		for (const url of urls) {
 			if (!isURL(url.trim())) {
-				await client.instance.reply('Please Use a Valid URL.\nInvalid : ' + url, { from, quoted: message });
+				await client.instance.reply(from, 'Please Use a Valid URL.\nInvalid : ' + url, message);
+				error++;
 				continue;
 			}
 
 			const result = await downloadBandcamp(url);
 
 			if (result?.error) {
-				await client.instance.reply(result.error, { from, quoted: message });
+				await client.instance.reply(from, result.error, message);
 				loggers.error(`${color('Failed to Download Bandcamp File', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				error++;
 				continue;
 			}
 
@@ -63,7 +68,11 @@ Title : ${result.title}`.formatForm()
 				},
 				{ quoted: message }
 			);
+
+			success++;
 		}
+
+		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
 
 		loggers.info(`${color('Downloaded Bandcamp File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 	}
