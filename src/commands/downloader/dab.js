@@ -2,9 +2,8 @@ import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 import lodash from 'lodash';
 
-import { Cache } from '../../helper/modules/cache.js';
 import { dab, metadata } from '../../utils/dab/index.js';
-import { color, loggers, delay } from '../../utils/modules/index.js';
+import { color, delay, loggers } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}

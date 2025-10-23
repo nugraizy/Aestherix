@@ -1,30 +1,196 @@
 import parser from 'yargs-parser';
+import archiver from 'archiver';
+import fs from 'fs-extra';
 
-import { color, delay, loggers, isURL, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { spotifier } from '../../utils/index.js';
+import { dab, metadata } from '../../utils/dab/index.js';
+import { color, delay, loggers, isURL, removeDuplicatesArray } from '../../utils/modules/index.js';
+
+const spotifyRedirectUrlRegex = /https?:\/\/spotify\.link\/([a-zA-Z0-9]+)/;
+const regexUrlLocation = /window\.top\.location = validateProtocol\("([^"]+)"\);/g;
+
+const getRedirect = async (shortUrl) => {
+	try {
+		const response = await fetch(shortUrl, { redirect: 'follow' });
+		const text = await response.text();
+		const matches = [...text.matchAll(regexUrlLocation)].map((m) => m[1]);
+
+		return matches[1] ?? null;
+	} catch {
+		console.error('Error fetching redirect URL:', shortUrl);
+		return null;
+	}
+};
 
 const getSpotifyType = (url) => {
-	const reg = /^(https:\/\/open\.spotify\.com\/(track|album|playlist|artist)\/[a-zA-Z0-9]+)(\?.+)?$/gi;
+	const reg = /^(https:\/\/open\.spotify\.com\/(track|album|playlist|artist)\/[a-zA-Z0-9]+)(\?.+)?$/i;
 	const match = reg.exec(url);
 
-	if (!match) {
-		return 'track';
+	return match?.[2] ?? 'track';
+};
+
+const extractId = (url) =>
+	url.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/)?.[1] || null;
+
+const isSpotifyURL = (url) =>
+	/^(https:\/\/open\.spotify\.com\/(track|album|playlist|artist)\/[a-zA-Z0-9]+)(\?.+)?$/i.test(url);
+
+const sanitizeFilename = (name) =>
+	name
+		.replace(/[\/\\?%*:|"<>]/g, '_')
+		.replace(/\s+/g, ' ')
+		.trim()
+		.slice(0, 150);
+
+const searchTracksOnDab = async (tracksNames, wait, type) => {
+	let processCaption = `Processing Spotify ${type}...\nSearching ${tracksNames.length} tracks on DAB...`;
+
+	await wait.update(processCaption);
+
+	processCaption = `Processing Spotify ${type}...\nFetching DAB results...`;
+	await wait.update(processCaption);
+
+	const dabResults = await Promise.all(
+		tracksNames.map(async (trackName) => {
+			const res = await dab.search(trackName);
+
+			return { name: trackName, result: res };
+		})
+	);
+
+	const tracksNotFound = dabResults.filter(({ result }) => !result.items || result.items.length === 0).map(({ name }) => name);
+
+	const dabTracks = dabResults.filter(({ result }) => result.items && result.items.length > 0).map(({ result }) => result);
+
+	if (tracksNotFound.length > 0) {
+		processCaption = processCaption.replace('Fetching DAB results...', '⚠️  Tracks not found on DAB:');
+
+		for (const name of tracksNotFound) {
+			processCaption += `\n • ${name}`;
+		}
 	}
 
-	return match[2];
+	processCaption = processCaption.replace(
+		'Fetching DAB results...',
+		`✅ Found ${dabTracks.length}/${tracksNames.length} tracks on DAB.`
+	);
+	processCaption += `\n • ${dabTracks.map((track) => track.items[0].title).join(', ')}`;
+	await wait.update(processCaption);
+
+	return { dabTracks, processCaption };
 };
 
-const extractId = (url) => {
-	return url.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:track\/|\?uri=spotify:track:)((\w|-){22})/)?.[1] || null;
+const downloadTracksFromDab = async (dabTracks, wait, processCaption) => {
+	processCaption += '\n\nDownloading tracks...';
+	await wait.update(processCaption);
+
+	let dabDownloads = await Promise.all(
+		dabTracks.map(async (track) => {
+			const first = track.items[0];
+			const downloadData = await dab.download(first.id);
+
+			if (downloadData.error) {
+				return null;
+			}
+
+			const buffer = await metadata(downloadData.track, downloadData.url, downloadData.cover);
+			const filename = sanitizeFilename(`${downloadData.track.artist.name} - ${downloadData.track.title}`);
+
+			return { name: filename, buffer };
+		})
+	);
+
+	dabDownloads = dabDownloads.filter((t) => t !== null);
+	return { dabDownloads, processCaption };
 };
 
-const isSpotifyURL = (url) => {
-	const reg = /^(https:\/\/open\.spotify\.com\/(track|album|playlist|artist)\/[a-zA-Z0-9]+)(\?.+)?$/gi;
+const createZipArchive = async (downloads, output, wait, processCaption) => {
+	processCaption = processCaption.replace('Downloading tracks...', '📦 Creating ZIP archive...');
+	await wait.update(processCaption);
 
-	return reg.test(url);
+	const stream = fs.createWriteStream(output);
+	const archive = archiver('zip');
+
+	stream.on('close', () => stream.end());
+	archive.on('error', (err) => {
+		throw err;
+	});
+
+	archive.pipe(stream);
+
+	for (const track of downloads) {
+		archive.append(track.buffer, { name: `${track.name}.flac` });
+	}
+
+	await archive.finalize();
+
+	processCaption = processCaption.replace(
+		'Creating ZIP archive...',
+		'ZIP archive created! With Zipped ' + archive.pointer() + ' total bytes'
+	);
+	await wait.update(processCaption);
+
+	return processCaption;
 };
 
-const processVideo = async (url, type, client, { from, message, prettyNumber }) => {
+const handleSpotifyCollection = async (url, type, client, { from, message, wait }) => {
+	let processCaption = `Searching Spotify ${type}...`;
+
+	await wait.update(processCaption);
+
+	const regex = new RegExp(`${type}\\/([a-zA-Z0-9]+)`);
+	const id = url.match(regex)[1];
+
+	let tracksNames, collectionName;
+
+	if (type === 'playlist') {
+		const playlist = await spotifier.getPlaylists(id);
+
+		collectionName = sanitizeFilename(playlist.name);
+		tracksNames = playlist.tracks.items.map((item) => `${item.track.artists[0].name} - ${item.track.name}`);
+	} else {
+		const tracks = await spotifier.getAlbumTracks(id);
+		const album = await spotifier.getAlbum(id);
+
+		collectionName = sanitizeFilename(album.albums[0].name);
+		tracksNames = tracks.items.map((item) => `${item.artists[0].name} - ${item.name}`);
+	}
+
+	tracksNames = [...new Set(tracksNames)];
+
+	const { dabTracks, processCaption: searchCaption } = await searchTracksOnDab(tracksNames, wait, type);
+	const { dabDownloads, processCaption: downloadCaption } = await downloadTracksFromDab(dabTracks, wait, searchCaption);
+	const output = `./src/media/temporary_files/${collectionName}.zip`;
+
+	const finalCaption = await createZipArchive(dabDownloads, output, wait, downloadCaption);
+
+	let sendCaption = finalCaption + '\n\n↻ Sending file...';
+
+	await wait.update(sendCaption);
+
+	await client.instance.send(
+		from,
+		{
+			document: await fs.readFile(output),
+			fileName: `${collectionName}.zip`,
+			mimetype: 'application/zip'
+		},
+		{
+			quoted: message
+		}
+	);
+
+	fs.unlinkSync(output);
+
+	sendCaption = sendCaption.replace('↻ Sending file...', 'Command finished successfully!');
+	sendCaption = sendCaption.replace('Processing Spotify ' + type, 'Finished processing Spotify');
+	await wait.update(sendCaption);
+
+	return { status: true, caption: sendCaption };
+};
+
+const handleSingleTrack = async (url, type, client, { from, message, prettyNumber, wait }) => {
+	await wait.update(`Downloading Spotify ${type}...`);
 	const { tracks, status, message: respMessage } = await spotifier.getTracks(extractId(url));
 
 	if (!status) {
@@ -33,34 +199,60 @@ const processVideo = async (url, type, client, { from, message, prettyNumber }) 
 		return false;
 	}
 
-	const { download } = tracks[0];
-
 	loggers.warning(`${color('Downloading Spotify ' + type, '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
-	const video = await download();
+	const searchResults = await dab.search(`${tracks[0].artists[0].name} - ${tracks[0].name}`);
 
-	if (video?.error) {
-		await client.instance.reply(from, video.message, message);
+	if (searchResults.items.length === 0) {
+		await client.instance.reply(from, 'No results found on DAB.', message);
 		loggers.error(`${color('Failed to Download Spotify ' + type, '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 		return false;
 	}
 
-	const { url: downloadUrl } = video;
+	await wait.update('Downloading Music...');
+
+	const downloadInfo = await dab.download(searchResults.items[0].id);
+
+	if (downloadInfo?.error) {
+		await client.instance.reply(from, downloadInfo?.error, message);
+		loggers.error(`${color('Failed to Download Spotify ' + type, '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+		return false;
+	}
+
+	await wait.update('Writing metadata to the file...');
+
+	const buffer = await metadata(downloadInfo.track, downloadInfo.url, downloadInfo.cover);
+
+	await wait.update('Writing metadata to the file success.');
+	await delay(2000);
+	await wait.update('Sending the file...');
+
+	const fileName = `${tracks[0].name} - ${tracks[0].artists
+		.map((v) => v.name)
+		.map((v, i) => (tracks[0].artists.length !== 1 && i + 1 === tracks[0].artists.length ? `and ${v}` : v))
+		.join(', ')}.flac`;
 
 	await client.instance.send(
 		from,
 		{
-			document: { url: downloadUrl },
-			fileName: `${tracks[0].name} - ${tracks[0].artists
-				.map((v) => v.name)
-				.map((v, i) => (tracks[0].artists.length !== 1 && i + 1 === tracks[0].artists.length ? `and ${v}` : v))
-				.join(', ')}.mp3`,
-			mimetype: 'audio/mp3'
+			document: buffer,
+			fileName,
+			mimetype: 'audio/flac'
 		},
 		{
 			quoted: message
 		}
 	);
+
+	return true;
+};
+
+const processVideo = async (url, type, client, ctx) => {
+	if (['playlist', 'album'].includes(type)) {
+		return handleSpotifyCollection(url, type, client, ctx);
+	}
+
+	return handleSingleTrack(url, type, client, ctx);
 };
 
 /**
@@ -136,13 +328,31 @@ export default {
 
 		loggers.warning(`${color('Downloading Spotify Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
-		if (urls.length === 1 && isURL(urls) && !isSpotifyURL(urls)) {
+		check: if (urls.length === 1 && isURL(urls) && !isSpotifyURL(urls)) {
+			if (spotifyRedirectUrlRegex.test(urls[0])) {
+				const redirectUrl = await getRedirect(urls[0]);
+
+				loggers.info(`${color('Resolved Spotify Redirect URL', '#99FFC8')} for ${color(prettyNumber, '#E4C1F9')}`);
+
+				urls = [redirectUrl];
+				break check;
+			}
+
 			loggers.error(`${color('Failed to Download Spotify Media', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 			return await wait.update('This is not a valid Spotify URL.');
 		}
 
-		for (const url of urls) {
-			if (isURL(url) && !isSpotifyURL(url)) {
+		for (let url of urls) {
+			check: if (isURL(url) && !isSpotifyURL(url)) {
+				if (spotifyRedirectUrlRegex.test(url)) {
+					const redirectUrl = await getRedirect(url);
+
+					loggers.info(`${color('Resolved Spotify Redirect URL', '#99FFC8')} for ${color(prettyNumber, '#E4C1F9')}`);
+
+					url = redirectUrl;
+					break check;
+				}
+
 				await client.instance.reply(from, `[ ${url} ] This isn't a valid Spotify URL.`, message);
 				loggers.error(`${color('Failed to Download Spotify Media', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 				error++;
@@ -158,7 +368,7 @@ export default {
 				continue;
 			}
 
-			const status = await processVideo(url, typeMedia, client, { from, message, prettyNumber });
+			const status = await processVideo(url, typeMedia, client, { from, message, prettyNumber, wait });
 
 			if (!status) {
 				error++;
