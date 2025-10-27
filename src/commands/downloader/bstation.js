@@ -3,11 +3,11 @@ import parser from 'yargs-parser';
 
 import {
 	bilibiliDetailTv,
-	mergeVideoWithAudio,
+	color,
 	getFilesizeFromBytes,
-	removeDuplicatesArray,
 	loggers,
-	color
+	mergeVideoWithAudio,
+	removeDuplicatesArray
 } from '../../utils/index.js';
 
 const regex = (input) => {

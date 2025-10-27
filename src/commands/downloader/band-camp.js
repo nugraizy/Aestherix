@@ -1,7 +1,7 @@
 import path from 'path';
 import parser from 'yargs-parser';
 
-import { removeDuplicatesArray, isURL, toOpus, downloadBandcamp, color, loggers } from '../../utils/index.js';
+import { color, downloadBandcamp, isURL, loggers, removeDuplicatesArray, toOpus } from '../../utils/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}

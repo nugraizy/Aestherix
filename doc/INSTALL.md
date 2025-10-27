@@ -19,7 +19,7 @@ sudo apt install gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 l
 ```
 
 ```sh
-wget https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0.tar.gz
+wget "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0.tar.gz"
 ```
 
 ```sh
@@ -37,7 +37,22 @@ sudo make install
 
 ## Arch Based
 ```sh
-sudo pacman -S --needed base-devel ffmpeg libjpeg libpng libtiff giflib librsvg pkgconf cairo pixman pango libheif libde265 imagemagick gdk-pixbuf2 webp
+sudo pacman -S --needed base-devel ffmpeg libjpeg libpng libtiff giflib librsvg pkgconf cairo pixman pango libheif libde265 imagemagick gdk-pixbuf2 libwebp
+```
+
+```sh
+wget "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0.tar.gz"
+```
+
+```sh
+tar xvzf libwebp-1.6.0.tar.gz
+```
+
+```sh
+cd libwebp-1.6.0
+./configure
+make
+sudo make install
 ```
 
 ---

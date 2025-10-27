@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { bluesky, isURL, removeDuplicatesArray, loggers, color } from '../../utils/index.js';
+import { bluesky, color, isURL, loggers, removeDuplicatesArray } from '../../utils/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}

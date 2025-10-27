@@ -1,7 +1,7 @@
 import parser from 'yargs-parser';
 
-import { numberWithCommas, removeDuplicatesArray, loggers, color } from '../../utils/modules/index.js';
 import { downloadDeviantArt } from '../../utils/deviant_art/index.js';
+import { color, loggers, numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 
 const regex = (input) => {
 	const reg = /^https?:\/\/(www\.)?deviantart\.com\/[0-9a-bA-Z-?]*\/art\/[0-9a-zA-Z-?]*[0-9]*/gi;

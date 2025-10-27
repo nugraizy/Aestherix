@@ -1,5 +1,7 @@
 import configuration from '../../helper/config/connect.js';
 import { login } from '../../utils/instagram/login.js';
+		const { InstagramApi } = await import('../../utils/instagram/instagram.js');
+
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -18,9 +20,8 @@ export default {
 			return await client.instance.reply(from, 'Instagram session is already initialized.', message);
 		}
 
-		await login('dizy.prod', 'Nugradizynanda260802?');
+		await login(process.env.INSTAGRAM_USERNAME, process.env.INSTAGRAM_PASSWORD);
 
-		const { InstagramApi } = await import('../../utils/instagram/instagram.js');
 
 		configuration.instagram = InstagramApi.init();
 

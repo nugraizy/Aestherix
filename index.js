@@ -2,12 +2,12 @@ import 'dotenv/config.js';
 import './src/helper/prototypes.js';
 
 import axios from 'axios';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat.js';
+import timezone from 'dayjs/plugin/timezone.js';
+import utc from 'dayjs/plugin/utc.js';
 import path from 'path';
 import { platform } from 'process';
-import dayjs from 'dayjs';
-import timezone from 'dayjs/plugin/timezone.js';
-import customParseFormat from 'dayjs/plugin/customParseFormat.js';
-import utc from 'dayjs/plugin/utc.js';
 
 dayjs.extend(timezone);
 dayjs.extend(utc);

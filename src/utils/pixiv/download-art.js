@@ -4,9 +4,9 @@ import { downloadManga, URL_API_DOWNLOAD_ARTWORKS } from './index.js';
 export const downloadArtworks = (input) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { body } = await fetchJSON(URL_API_DOWNLOAD_ARTWORKS(input));
+			const { body, error } = await fetchJSON(URL_API_DOWNLOAD_ARTWORKS(input));
 
-			if (!body.length) {
+			if (error) {
 				resolve({ error: 'No downloadable media found with this keyword.' });
 			}
 
