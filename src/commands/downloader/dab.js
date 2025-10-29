@@ -38,7 +38,7 @@ export default {
 			let caption = 'DAB Downloader'.formatHeaders();
 			let watermark = 'Powered by Aestherix';
 
-			if (index) {
+			if (typeof index === 'number') {
 				const searchResults = await dab.search(query);
 
 				if (searchResults.items.length === 0) {

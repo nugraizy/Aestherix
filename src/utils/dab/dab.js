@@ -2,11 +2,15 @@ import { fetch } from 'undici';
 
 import { Cache } from '../../helper/modules/cache.js';
 
-const CONTAINER = new Cache({ allowOverwrite: true, limit: 100 });
+const QUERY_CACHE = {
+	search: new Cache({ allowOverwrite: true, limit: 100 }),
+	album: new Cache({ allowOverwrite: true, limit: 100 })
+};
 
 const URL_CACHE = {
 	search: new Cache({ allowOverwrite: true, limit: 100 }),
-	download: new Cache({ allowOverwrite: true, limit: 100 })
+	download: new Cache({ allowOverwrite: true, limit: 100 }),
+	album: new Cache({ allowOverwrite: true, limit: 100 })
 };
 
 const SERVERS = {
@@ -31,10 +35,22 @@ const getDomains = (type, value) => {
 		return URL_CACHE[type].get(value);
 	}
 
+	value = Object.keys(value)
+		.map((k) => `${k}=${value[k]}`)
+		.join('&');
+
 	const urls =
 		type === 'search'
-			? buildUrls('search', `s=${encodeURIComponent(value)}&li=100`)
-			: buildUrls('track', `id=${value}&quality=LOSSLESS`);
+			? buildUrls('search', value)
+			: type === 'download'
+				? buildUrls('track', value)
+				: type === 'album'
+					? buildUrls('album', value)
+					: null;
+
+	if (!urls) {
+		throw new Error('Invalid type');
+	}
 
 	URL_CACHE[type].set(value, urls);
 	return urls;
@@ -72,16 +88,19 @@ class Dab {
 		return { error: 'Too Many Requests. Try again later.' };
 	}
 
-	async search(query) {
+	async search(query, type = 'track') {
 		if (!query) {
 			throw new Error('Query is required');
 		}
 
-		if (CONTAINER.has(query)) {
-			return CONTAINER.get(query);
+		if (QUERY_CACHE.search.has(query)) {
+			return QUERY_CACHE.search.get(query);
 		}
 
-		const domains = getDomains('search', query);
+		const container =
+			type === 'track' ? { type: 'search', params: { s: query, li: 50 } } : { type: 'albums', params: { al: query } };
+
+		const domains = getDomains('search', container.params, type);
 
 		const { error, data } = await this.tryFetch(domains);
 
@@ -89,7 +108,7 @@ class Dab {
 			return error;
 		}
 
-		CONTAINER.set(query, data);
+		QUERY_CACHE.search.set(query + '-' + container.type, data);
 
 		return data;
 	}
@@ -99,7 +118,7 @@ class Dab {
 			throw new Error('ID is required');
 		}
 
-		const domains = getDomains('download', id);
+		const domains = getDomains('download', { id });
 
 		const { error, data, domain } = await this.tryFetch(domains);
 
@@ -134,6 +153,28 @@ class Dab {
 			cover: track ? this.stringToCover(track.album.cover) : null,
 			domain: new URL(domain).host
 		};
+	}
+
+	async getAlbum(id) {
+		if (!id) {
+			throw new Error('ID is required');
+		}
+
+		if (QUERY_CACHE.album.has(id)) {
+			return QUERY_CACHE.album.get(id);
+		}
+
+		const domains = getDomains('album', { id });
+
+		const { error, data } = await this.tryFetch(domains);
+
+		if (error) {
+			return error;
+		}
+
+		QUERY_CACHE.album.set(id, data);
+
+		return data;
 	}
 
 	stringToCover(id) {

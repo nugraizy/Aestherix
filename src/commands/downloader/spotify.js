@@ -1,10 +1,10 @@
-import parser from 'yargs-parser';
 import archiver from 'archiver';
 import fs from 'fs-extra';
+import parser from 'yargs-parser';
 
-import { spotifier } from '../../utils/index.js';
 import { dab, metadata } from '../../utils/dab/index.js';
-import { color, delay, loggers, isURL, removeDuplicatesArray } from '../../utils/modules/index.js';
+import { spotifier } from '../../utils/index.js';
+import { color, delay, isURL, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
 
 const spotifyRedirectUrlRegex = /https?:\/\/spotify\.link\/([a-zA-Z0-9]+)/;
 const regexUrlLocation = /window\.top\.location = validateProtocol\("([^"]+)"\);/g;
@@ -43,11 +43,11 @@ const sanitizeFilename = (name) =>
 		.slice(0, 150);
 
 const searchTracksOnDab = async (tracksNames, wait, type) => {
-	let processCaption = `Processing Spotify ${type}...\nSearching ${tracksNames.length} tracks on DAB...`;
+	let processCaption = `Processing Spotify ${type}...\nSearching ${tracksNames.length} tracks...`;
 
 	await wait.update(processCaption);
 
-	processCaption = `Processing Spotify ${type}...\nFetching DAB results...`;
+	processCaption = `Processing Spotify ${type}...\nFetching Spotify results...`;
 	await wait.update(processCaption);
 
 	const dabResults = await Promise.all(
@@ -63,7 +63,7 @@ const searchTracksOnDab = async (tracksNames, wait, type) => {
 	const dabTracks = dabResults.filter(({ result }) => result.items && result.items.length > 0).map(({ result }) => result);
 
 	if (tracksNotFound.length > 0) {
-		processCaption = processCaption.replace('Fetching DAB results...', '⚠️  Tracks not found on DAB:');
+		processCaption = processCaption.replace('Fetching Spotify results...', '⚠️  Tracks not found:');
 
 		for (const name of tracksNotFound) {
 			processCaption += `\n • ${name}`;
@@ -71,8 +71,8 @@ const searchTracksOnDab = async (tracksNames, wait, type) => {
 	}
 
 	processCaption = processCaption.replace(
-		'Fetching DAB results...',
-		`✅ Found ${dabTracks.length}/${tracksNames.length} tracks on DAB.`
+		'Fetching Spotify results...',
+		`✅ Found ${dabTracks.length}/${tracksNames.length} tracks.`
 	);
 	processCaption += `\n • ${dabTracks.map((track) => track.items[0].title).join(', ')}`;
 	await wait.update(processCaption);
@@ -80,14 +80,14 @@ const searchTracksOnDab = async (tracksNames, wait, type) => {
 	return { dabTracks, processCaption };
 };
 
-const downloadTracksFromDab = async (dabTracks, wait, processCaption) => {
+const downloadTracksFromDab = async (dabTracks, wait, processCaption, type) => {
 	processCaption += '\n\nDownloading tracks...';
 	await wait.update(processCaption);
 
 	let dabDownloads = await Promise.all(
 		dabTracks.map(async (track) => {
-			const first = track.items[0];
-			const downloadData = await dab.download(first.id);
+			track = type === 'album' ? track.item : track.items[0];
+			const downloadData = await dab.download(track.id);
 
 			if (downloadData.error) {
 				return null;
@@ -141,25 +141,44 @@ const handleSpotifyCollection = async (url, type, client, { from, message, wait 
 	const regex = new RegExp(`${type}\\/([a-zA-Z0-9]+)`);
 	const id = url.match(regex)[1];
 
-	let tracksNames, collectionName;
+	let tracksNames, collectionName, dabDownloads, downloadCaption;
 
 	if (type === 'playlist') {
 		const playlist = await spotifier.getPlaylists(id);
 
 		collectionName = sanitizeFilename(playlist.name);
 		tracksNames = playlist.tracks.items.map((item) => `${item.track.artists[0].name} - ${item.track.name}`);
+
+		tracksNames = [...new Set(tracksNames)];
+
+		const { dabTracks, processCaption: searchCaption } = await searchTracksOnDab(tracksNames, wait, type);
+		const { dabDownloads: downloads, processCaption } = await downloadTracksFromDab(dabTracks, wait, searchCaption);
+
+		dabDownloads = downloads;
+		downloadCaption = processCaption;
 	} else {
-		const tracks = await spotifier.getAlbumTracks(id);
 		const album = await spotifier.getAlbum(id);
 
 		collectionName = sanitizeFilename(album.albums[0].name);
-		tracksNames = tracks.items.map((item) => `${item.artists[0].name} - ${item.name}`);
+
+		const albumTracksId = await dab.search(collectionName, 'album');
+		const albumData = await dab.getAlbum(albumTracksId.albums.items[0].id);
+
+		let processCaption = `Processing Spotify ${type}...\n✅ Found ${albumData[1].items.length}/${album.albums[0].total_tracks} tracks.`;
+
+		await wait.update(processCaption);
+
+		const { dabDownloads: downloads, processCaption: caption } = await downloadTracksFromDab(
+			albumData[1].items,
+			wait,
+			processCaption,
+			'album'
+		);
+
+		dabDownloads = downloads;
+		downloadCaption = caption;
 	}
 
-	tracksNames = [...new Set(tracksNames)];
-
-	const { dabTracks, processCaption: searchCaption } = await searchTracksOnDab(tracksNames, wait, type);
-	const { dabDownloads, processCaption: downloadCaption } = await downloadTracksFromDab(dabTracks, wait, searchCaption);
 	const output = `./src/media/temporary_files/${collectionName}.zip`;
 
 	const finalCaption = await createZipArchive(dabDownloads, output, wait, downloadCaption);
