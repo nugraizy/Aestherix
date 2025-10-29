@@ -38,7 +38,7 @@ export default {
 					}
 				);
 
-				await client.instance.relayMessage(from, messages.message, { messageId: messages.key.id });
+				await client.instance.relay(from, messages.message, { messageId: messages.key.id });
 			}
 
 			return;
@@ -54,11 +54,7 @@ export default {
 			for (const chat of chats) {
 				chat.participant = chat.fromMe ? client.instance.decodeJid(instance) : chat.participant;
 
-				await client.instance.relayMessage(
-					from,
-					{ reactionMessage: { key: chat, text: emojis[0] } },
-					{ messageId: client.instance.generateMessageID() }
-				);
+				await client.instance.relay(from, { reactionMessage: { key: chat, text: emojis[0] } });
 			}
 		}
 	}

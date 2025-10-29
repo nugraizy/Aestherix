@@ -1,6 +1,6 @@
-import fs from 'fs-extra';
 import { generateWAMessage, generateWAMessageFromContent } from 'baileys';
-import { ZERO, S_WHATSAPP_NET } from '../../helper/index.js';
+import fs from 'fs-extra';
+import { S_WHATSAPP_NET, ZERO } from '../../helper/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -47,7 +47,7 @@ export default {
 			{ messageId: client.instance.generateMessageID() }
 		);
 
-		await client.instance.relayMessage(
+		await client.instance.relay(
 			`${(query || mediaData.participant).replace(/([@s.+\s-]|whatsapp|net)/g, '')}${S_WHATSAPP_NET}`,
 			messages.message,
 			{

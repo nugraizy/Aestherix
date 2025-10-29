@@ -115,7 +115,7 @@ export default {
 
 				const messageBuilt = await builder.render();
 
-				await client.instance.relayMessage(from, messageBuilt.message, { messageId: messageBuilt.key.id });
+				await client.instance.relay(from, messageBuilt.message, { messageId: messageBuilt.key.id });
 				success++;
 				continue;
 			}

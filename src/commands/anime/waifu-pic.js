@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { removeDuplicatesArray, getWaifu } from '../../utils/index.js';
+import { getWaifu, removeDuplicatesArray } from '../../utils/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -57,7 +57,7 @@ export default {
 
 			const messageBuilt = await builder.render();
 
-			return await client.instance.relayMessage(from, messageBuilt.message, { messageId: messageBuilt.key.id });
+			return await client.instance.relay(from, messageBuilt.message, { messageId: messageBuilt.key.id });
 		}
 
 		let { _: queries, nsfw } = parser(query.toLowerCase(), {
@@ -101,7 +101,7 @@ export default {
 
 			const messageBuilt = await builder.render();
 
-			return await client.instance.relayMessage(from, messageBuilt.message, { messageId: messageBuilt.key.id });
+			return await client.instance.relay(from, messageBuilt.message, { messageId: messageBuilt.key.id });
 		}
 	}
 };

@@ -4,12 +4,12 @@ import type {
 	ButtonReplyInfo,
 	DownloadableMessage,
 	MessageGenerationOptions,
+	MessageRelayOptions,
 	MiscMessageGenerationOptions,
 	WAGenericMediaMessage,
 	WAMessage,
 	WAMessageKey
 } from 'baileys';
-import { proto } from 'baileys';
 
 export type StickerType = 'imageMessage' | 'videoMessage' | 'stickerAnimated' | undefined;
 export type PrepareableMediaType =
@@ -28,4 +28,12 @@ export type PrepareMessageOptions = MessageGenerationOptions;
 export type MessageSendOptions = MiscMessageGenerationOptions;
 export type GenerationOptions = MiscMessageGenerationOptions;
 
-export { BinaryNode, ButtonReplyInfo, DownloadableMessage, WAMessage, WAGenericMediaMessage, WAMessageKey };
+export {
+	BinaryNode,
+	ButtonReplyInfo,
+	DownloadableMessage,
+	MessageRelayOptions,
+	WAGenericMediaMessage,
+	WAMessage,
+	WAMessageKey
+};

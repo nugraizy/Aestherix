@@ -1,8 +1,8 @@
 import { generateWAMessageFromContent } from 'baileys';
 import { readFileSync } from 'fs';
 
-import configuration from '../../helper/config/connect.js';
 import { textStory } from '../../helper/canvas/index.js';
+import configuration from '../../helper/config/connect.js';
 import { Cache } from '../../helper/modules/cache.js';
 
 const STATUS = 'status@broadcast';
@@ -103,7 +103,7 @@ export default {
 							quotedMessage: message.message,
 							remoteJid: message.key.remoteJid
 						};
-						await client.instance.relayMessage(from, messages.message, {
+						await client.instance.relay(from, messages.message, {
 							messageId: messages.key.id
 						});
 

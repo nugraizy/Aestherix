@@ -1,8 +1,8 @@
 import { generateWAMessageFromContent } from 'baileys';
 
 import configuration from '../../helper/config/connect.js';
-import { runtime } from '../../index.js';
 import { textStory } from '../../helper/index.js';
+import { runtime } from '../../index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 
 let meJid = null;
@@ -48,7 +48,7 @@ const handler = async (client, message) => {
 			quotedMessage: message.message.message,
 			remoteJid: message.message.key.remoteJid
 		};
-		await client.instance.relayMessage(meJid, messages.message, { messageId: messages.key.id });
+		await client.instance.relay(meJid, messages.message, { messageId: messages.key.id });
 	}
 
 	loggers.warning(

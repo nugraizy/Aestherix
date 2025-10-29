@@ -1,6 +1,6 @@
 import yn from 'yn';
 
-import { isURL, removeDuplicatesArray, increment } from '../../utils/modules/index.js';
+import { increment, isURL, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { pinterest } from '../../utils/pinterest/index.js';
 
 const _regex = new RegExp(
@@ -58,7 +58,7 @@ export default {
 
 				const messageBuilt = await builder.render();
 
-				return await client.instance.relayMessage(from, messageBuilt.message, { messageId: messageBuilt.key.id });
+				return await client.instance.relay(from, messageBuilt.message, { messageId: messageBuilt.key.id });
 			}
 
 			let result = await pinterest.search(query.trim());
@@ -158,7 +158,7 @@ Caption : ${results[index].caption}
 
 				const messageBuilt = await builder.render();
 
-				await client.instance.relayMessage(from, messageBuilt.message, { messageId: messageBuilt.key.id });
+				await client.instance.relay(from, messageBuilt.message, { messageId: messageBuilt.key.id });
 			}
 
 			if (nonUrl.length) {
@@ -195,7 +195,7 @@ Caption : ${results[index].caption}
 
 					const messageBuilt = await builder.render();
 
-					await client.instance.relayMessage(from, messageBuilt.message, { messageId: messageBuilt.key.id });
+					await client.instance.relay(from, messageBuilt.message, { messageId: messageBuilt.key.id });
 				}
 
 				if (errors.length) {

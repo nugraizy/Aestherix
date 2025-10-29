@@ -55,6 +55,6 @@ export default {
 			{ messageId: client.instance.generateMessageID() }
 		);
 
-		await client.instance.relayMessage(from, messages.message, { messageId: messages.key.id });
+		await client.instance.relay(from, messages.message, { messageId: messages.key.id });
 	}
 };

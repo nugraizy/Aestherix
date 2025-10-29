@@ -1,5 +1,6 @@
+import makeWASocket, { WALocationMessage } from 'baileys';
 import type { Transform } from 'stream';
-import type { GroupMetadata } from '../Groups';
+import { TemplateBuilder } from '../Commands/Interactive';
 import type {
 	BinaryNode,
 	DownloadableMessage,
@@ -13,9 +14,7 @@ import type {
 	WAMessage,
 	WAMessageKey
 } from '../Messages';
-import type { Client, AdvancedClient } from '../Socket';
-import { TemplateBuilder } from '../Commands/Interactive';
-import { proto, WALocationMessage, WAMessageKey } from 'baileys';
+import type { AdvancedClient, Client } from '../Socket';
 
 export type ExifMetadata = Partial<{
 	/**
@@ -85,7 +84,7 @@ export type SendMessage = (
 	/**
 	 * destination of sending the message
 	 */
-	to: string,
+	jid: string,
 
 	/**
 	 * the message object
@@ -183,7 +182,7 @@ export type SendButtonText = (
 	/**
 	 * destination of the message
 	 */
-	to: string,
+	jid: string,
 
 	/**
 	 * text in content
@@ -213,7 +212,7 @@ export type SendButtonDocument = (
 	/**
 	 * destination of the message
 	 */
-	to: string,
+	jid: string,
 
 	/**
 	 * text in content
@@ -248,7 +247,7 @@ export type SendButtonLocation = (
 	/**
 	 * destination of the message
 	 */
-	to: string,
+	jid: string,
 
 	/**
 	 * text in content
@@ -293,7 +292,7 @@ export type UpdateGroup = (
 	/**
 	 * destination of update
 	 */
-	to: string,
+	jid: string,
 
 	/**
 	 * type of the update
@@ -335,7 +334,7 @@ export type SearchMessage = (
 	/**
 	 * destination of update
 	 */
-	to: string,
+	jid: string,
 
 	/**
 	 * the keyword of the message
@@ -384,6 +383,8 @@ export type WaitMessage = (jid: string, message: string, quotedMessage: WAMessag
 
 export type EditMessage = (jid: string, message: string, key: WAMessageKey) => Promise<void>;
 
+export type RelayMessage = ReturnType<typeof makeWASocket>['relayMessage'];
+
 export type AssignedClient = {
 	prepareMedia: PrepareMedia;
 	applyExif: AppliedExif;
@@ -406,4 +407,5 @@ export type AssignedClient = {
 	updateProfilePicture: UpdateProfilePicture;
 	waitMessage: WaitMessage;
 	edit: EditMessage;
+	relay: RelayMessage;
 };

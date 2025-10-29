@@ -116,37 +116,70 @@ export const handleConnectionUpdate = async (
 					shouldPrintBanner = false;
 				}
 
-				const timeToConnect = Date.now() - started;
-
+				const builder = new client.instance.TemplateBuilder.Native(client);
+				const timeToConnect = (Date.now() - started) / 1000;
 				const data = await fs.readJSON('./src/helper/config/settings.json');
+				const buttons = [];
 				let capt = '';
 
-				if (timeToConnect < data.best_time) {
-					loggers.info(
-						color('Connection time', 'white'),
-						color(`${timeToConnect / 1000}s`, '#E4C1F9'),
-						color('is the best time', 'white'),
-						color(`(${data.best_time / 1000}s)`, '#E4C1F9')
-					);
+				loggers.info(
+					color('Connection time', 'white'),
+					color(`${timeToConnect}s`, '#E4C1F9'),
+					color(timeToConnect < data.best_time ? 'is the best time' : 'is not the best time', 'white'),
+					color('(', '#E4C1F9') + color(`${data.best_time}s`, '#fff568ff') + color(')', '#E4C1F9')
+				);
 
+				if (timeToConnect < data.best_time) {
+					const bestTime = data.best_time;
 					data.best_time = timeToConnect; // eslint-disable-line
 
 					await fs.writeJSON('./src/helper/config/settings.json', data, { spaces: 2 });
-
-					capt += `New Best!\nConnection time ${timeToConnect / 1000}s is the best time (${data.best_time / 1000}s)`;
-				} else {
-					loggers.info(
-						color('Connection time', 'white'),
-						color(`${timeToConnect / 1000}s`, '#E4C1F9'),
-						color('is not the best time', 'white'),
-						color(`(${data.best_time / 1000}s)`, '#E4C1F9')
+					buttons.push(
+						builder.button.url({
+							display: `Fastest Now ${timeToConnect}s 🎉`,
+							url: 'hello'
+						})
+					);
+					buttons.push(
+						builder.button.url({
+							display: `Previous Best Time ${bestTime}s`,
+							url: 'hello'
+						})
 					);
 
-					capt += `Connection time ${timeToConnect / 1000}s is not the best time (${data.best_time / 1000}s)`;
+					capt += 'New Best!';
+				} else {
+					buttons.push(
+						builder.button.url({
+							display: `Time Now ${timeToConnect}s`,
+							url: 'hello'
+						})
+					);
+					buttons.push(
+						builder.button.url({
+							display: `Best Time ${data.best_time}s`,
+							url: 'hello'
+						})
+					);
+
+					capt += 'Not the Best.';
 				}
 
-				client.instance.send(configuration.cache.ownerNumbers[0], {
-					text: 'Bot is connected to socket.\n' + capt
+				buttons.push(
+					builder.button.reply({
+						display: 'Ping Bot',
+						id: '!ping'
+					})
+				);
+
+				const messageBuilt = await builder
+					.mainBody('Bot is connected to socket.')
+					.mainFooter(capt)
+					.buttons(...buttons.filter(Boolean))
+					.render();
+
+				await client.instance.relay(configuration.cache.ownerNumbers[0], messageBuilt.message, {
+					messageId: messageBuilt.key.id
 				});
 
 				Client.ev.emit('connected');

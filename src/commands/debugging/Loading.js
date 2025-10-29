@@ -2,8 +2,8 @@ import { generateWAMessageFromContent } from 'baileys';
 import numeral from 'numeral';
 import yn from 'yn';
 
-import { getWaifu, Fetch, isURL, audioFormat, imageFormat, videoFormat } from '../../utils/index.js';
 import { Cache } from '../../helper/modules/cache.js';
+import { audioFormat, Fetch, getWaifu, imageFormat, isURL, videoFormat } from '../../utils/index.js';
 
 const frames = ['▓', '▒'];
 
@@ -162,9 +162,8 @@ export default {
 						{ messageId: client.instance.generateMessageID() }
 					);
 
-					await client.instance.relayMessage(from, messages.message, {
-						messageId: messages.key.id,
-						useCachedGroupMetadata: true
+					await client.instance.relay(from, messages.message, {
+						messageId: messages.key.id
 					});
 
 					const buffer = req.toBuffer();
@@ -214,9 +213,8 @@ export default {
 					{ messageId: client.instance.generateMessageID() }
 				);
 
-				await client.instance.relayMessage(from, messages.message, {
-					messageId: messages.key.id,
-					useCachedGroupMetadata: true
+				await client.instance.relay(from, messages.message, {
+					messageId: messages.key.id
 				});
 			});
 
@@ -245,9 +243,8 @@ export default {
 						{ messageId: client.instance.generateMessageID() }
 					);
 
-					await client.instance.relayMessage(from, messages.message, {
-						messageId: messages.key.id,
-						useCachedGroupMetadata: true
+					await client.instance.relay(from, messages.message, {
+						messageId: messages.key.id
 					});
 				}
 			});

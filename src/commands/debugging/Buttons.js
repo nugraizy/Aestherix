@@ -40,7 +40,7 @@ export default {
 			{ messageId: client.instance.generateMessageID() }
 		);
 
-		await client.instance.relayMessage(from, button.message, { messageId: button.key.id });
+		await client.instance.relay(from, button.message, { messageId: button.key.id });
 		await client.instance.send(
 			from,
 			{

@@ -26,6 +26,10 @@ import { reassign } from './parse-message.js';
 
 const { readFile, unlink, writeFile } = (await import('fs-extra')).default;
 
+/**
+ * Generate message ID before sending.
+ * @type {import('../../types/Utils/index.js').GenerateMessageID}
+ */
 const generateMessageID = () => 'HFINDER' + randomBytes(18).toString('hex').toUpperCase();
 
 /**
@@ -119,28 +123,18 @@ export const assign = (client) => {
 	 * Send any message.
 	 * @type {import('../../types/Utils/index.js').SendMessage}
 	 */
-	const send = async (to, message, options) => {
+	const send = async (jid, message, options) => {
 		options = {
 			...options,
-			...(isJidGroup(to) && { useCachedGroupMetadata: true }),
+			...(isJidGroup(jid) && { useCachedGroupMetadata: true }),
 			ephemeralExpiration:
 				options?.groupMetadata?.ephemeralDuration ||
-				configuration.cache.metadata?.get(to)?.ephemeralDuration ||
-				configuration.cache.users?.get(to)?.ephemeralDuration ||
+				configuration.cache.metadata?.get(jid)?.ephemeralDuration ||
+				configuration.cache.users?.get(jid)?.ephemeralDuration ||
 				0,
 			messageId: generateMessageID(),
 			ai: true
 		};
-
-		if ('buttons' in message || 'templateButtons' in message) {
-			// delete message.buttons;
-			// delete message.footer;
-			// delete message.headerType;
-			// delete message.templateButtons;
-			// delete message.title;
-			// delete message.buttonText;
-			// delete message.sections;
-		}
 
 		if (('image' in message || 'video' in message) && 'footer' in message) {
 			if (message.caption) {
@@ -171,39 +165,27 @@ export const assign = (client) => {
 			}
 		}
 
-		// filter: if ('templateButtons' in message) {
-		// 	const filteredButtons = message.templateButtons.filter((v) => v.quickReplyButton);
+		return client.instance.sendMessage(jid, message, options);
+	};
 
-		// 	if (filteredButtons.length === 0) {
-		// 		delete message.templateButtons;
-		// 		delete message.footer;
+	/**
+	 * Relay any message.
+	 * @type {import('../../types/Utils/index.js').SendMessage}
+	 */
+	const relay = async (jid, message, options) => {
+		options = {
+			...options,
+			...(isJidGroup(jid) && { useCachedGroupMetadata: true }),
+			ephemeralExpiration:
+				options?.groupMetadata?.ephemeralDuration ||
+				configuration.cache.metadata?.get(jid)?.ephemeralDuration ||
+				configuration.cache.users?.get(jid)?.ephemeralDuration ||
+				0,
+			messageId: generateMessageID(),
+			AI: true
+		};
 
-		// 		break filter;
-		// 	}
-
-		// 	message.buttons = filteredButtons.map((v) => ({
-		// 		buttonId: v.quickReplyButton.id,
-		// 		buttonText: { displayText: v.quickReplyButton.displayText },
-		// 		type: 1
-		// 	}));
-
-		// 	if ('text' in message) {
-		// 		message.headerType = proto.Message.ButtonsMessage.HeaderType.TEXT;
-		// 	} else if ('image' in message) {
-		// 		message.headerType = proto.Message.ButtonsMessage.HeaderType.IMAGE;
-		// 	} else if ('video' in message) {
-		// 		message.headerType = proto.Message.ButtonsMessage.HeaderType.VIDEO;
-		// 	} else if ('document' in message) {
-		// 		message.headerType = proto.Message.ButtonsMessage.HeaderType.DOCUMENT;
-		// 	} else if ('location' in message) {
-		// 		message.headerType = proto.Message.ButtonsMessage.HeaderType.LOCATION;
-		// 	}
-
-		// 	delete message.templateButtons;
-		// 	delete options.ephemeralExpiration;
-		// }
-
-		return client.instance.sendMessage(to, message, options);
+		return client.instance.relayMessage(jid, message, options);
 	};
 
 	const getStoryParticipantsNode = (client) =>
@@ -762,6 +744,9 @@ export const assign = (client) => {
 	Object.assign(client.instance, {
 		send,
 		applyExif,
+		TemplateBuilder,
+		relay,
+		generateMessageID,
 
 		/**
 		 * Send and reply any user message.
@@ -859,13 +844,13 @@ export const assign = (client) => {
 		 * Send button text.
 		 * @type {import('../../types/Utils/index.js').SendButtonText}
 		 */
-		buttonText: async (to, contentText, footerText, buttons, options = {}) => {
+		buttonText: async (jid, contentText, footerText, buttons, options = {}) => {
 			if (!buttons.length) {
 				return new Error('Buttons is empty');
 			}
 
 			return await send(
-				to,
+				jid,
 				{
 					text: contentText,
 					footer: footerText,
@@ -883,7 +868,7 @@ export const assign = (client) => {
 		 * Send button document.
 		 * @type {import('../../types/Utils/index.js').SendButtonDocument}
 		 */
-		buttonDocument: async (to, contentText, footerText, buttons, media, options = {}) => {
+		buttonDocument: async (jid, contentText, footerText, buttons, media, options = {}) => {
 			if (!buttons.length) {
 				return new Error('Buttons is empty');
 			}
@@ -905,7 +890,7 @@ export const assign = (client) => {
 				options
 			);
 
-			await client.instance.relayMessage(to, message.message, { messageId: message.key.id });
+			await client.instance.relay(jid, message.message, { messageId: message.key.id });
 
 			process.nextTick(async () => {
 				await client.instance.upsertMessage(message, 'append');
@@ -918,7 +903,7 @@ export const assign = (client) => {
 		 * Send button location.
 		 * @type {import('../../types/Utils/index.js').SendButtonLocation}
 		 */
-		buttonLocation: async (dari, contentText, footerText, buttons, media, options = {}) => {
+		buttonLocation: async (jid, contentText, footerText, buttons, media, options = {}) => {
 			if (!buttons.length) {
 				return new Error('Buttons is empty');
 			}
@@ -944,7 +929,7 @@ export const assign = (client) => {
 				options
 			);
 
-			await client.instance.relayMessage(dari, message.message, { messageId: message.key.id });
+			await client.instance.relayMessage(jid, message.message, { messageId: message.key.id });
 
 			process.nextTick(async () => {
 				await client.instance.upsertMessage(message, 'append');
@@ -983,7 +968,7 @@ export const assign = (client) => {
 		 * Update group's participants or settings.
 		 * @type {import('../../types/Utils/index.js').UpdateGroup}
 		 */
-		updateGroup: async (to, update, participants, adminGroups, { force = false, message = null, texts = '' } = {}) => {
+		updateGroup: async (jid, update, participants, adminGroups, { force = false, message = null, texts = '' } = {}) => {
 			const responses = [];
 
 			const quoted = message
@@ -997,7 +982,7 @@ export const assign = (client) => {
 					try {
 						if (!force && adminGroups.includes(participant) && update === 'REMOVE') {
 							await send(
-								to,
+								jid,
 								{
 									text: `You can't ${update} @${
 										participant.split('@')[0]
@@ -1012,7 +997,7 @@ export const assign = (client) => {
 
 						if (adminGroups.includes(participant) && update === 'PROMOTE') {
 							await send(
-								to,
+								jid,
 								{
 									text: `You can't ${update} @${participant.split('@')[0]} because they already an admin group.`,
 									mentions: [participant]
@@ -1025,7 +1010,7 @@ export const assign = (client) => {
 
 						if (!adminGroups.includes(participant) && update === 'DEMOTE') {
 							await send(
-								to,
+								jid,
 								{
 									text: `You can't ${update} @${participant.split('@')[0]} because they already a member group.`,
 									mentions: [participant]
@@ -1036,31 +1021,31 @@ export const assign = (client) => {
 							continue;
 						}
 
-						const response = await client.instance[UPDATE[update]](to, [participant], update.toLowerCase());
+						const response = await client.instance[UPDATE[update]](jid, [participant], update.toLowerCase());
 
 						if (update.isExist('ADD')) {
 							if (response?.[0]?.status === '500') {
-								await send(to, { text: 'Group is already full' }, quoted);
+								await send(jid, { text: 'Group is already full' }, quoted);
 							} else if (response?.[0]?.status === '408') {
-								await send(to, { text: `${participant} is just left a while ago` }, quoted);
+								await send(jid, { text: `${participant} is just left a while ago` }, quoted);
 							} else if (response?.[0]?.status === '403') {
 								await send(
-									to,
+									jid,
 									{ text: `${participant} is privated their number. Trying to invite them via invitational message.` },
 									quoted
 								);
 
 								const messages = generateWAMessageFromContent(
-									to,
+									jid,
 									{
 										groupInviteMessage: {
-											groupJid: to,
+											groupJid: jid,
 											inviteCode: response?.[0]?.code,
 											inviteExpiration: response?.[0]?.expiration,
-											groupName: (await client.instance.groupMetadata(to)).subject,
+											groupName: (await client.instance.groupMetadata(jid)).subject,
 											caption: 'Invitation to join my WhatsApp group',
 											jpegThumbnail: new Buffer.from(
-												await fetchBUFFER(await client.instance.profilePictureUrl(to, 'preview'))
+												await fetchBUFFER(await client.instance.profilePictureUrl(jid, 'preview'))
 											).toString('base64')
 										}
 									},
@@ -1073,7 +1058,7 @@ export const assign = (client) => {
 									await client.instance.upsertMessage(message, 'append');
 								});
 							} else if (response?.[0]?.status === '401') {
-								await send(to, { text: `${participant} blocked bot number` }, quoted);
+								await send(jid, { text: `${participant} blocked bot number` }, quoted);
 							}
 						}
 
@@ -1082,7 +1067,7 @@ export const assign = (client) => {
 						responses.push({ error: e.message, id: participant });
 
 						if (e?.[0]?.status === '400') {
-							await send(to, { text: `${participant} is not a valid number` }, quoted);
+							await send(jid, { text: `${participant} is not a valid number` }, quoted);
 						}
 
 						return;
@@ -1091,19 +1076,19 @@ export const assign = (client) => {
 			}
 
 			if (update.isExist('SUBJECT', 'DESCRIPTION')) {
-				const response = await client.instance[UPDATE[update]](to, texts);
+				const response = await client.instance[UPDATE[update]](jid, texts);
 
 				responses.push(response);
 			}
 
 			if (update.isExist('ANNOUNCEMENT', 'NOT_ANNOUNCEMENT', 'UNLOCKED', 'LOCKED')) {
-				const response = await client.instance[UPDATE[update]](to, update.toLowerCase());
+				const response = await client.instance[UPDATE[update]](jid, update.toLowerCase());
 
 				responses.push(response);
 			}
 
 			if (update.isExist('RETRIEVE', 'REVOKE')) {
-				const response = await client.instance[UPDATE[update]](to);
+				const response = await client.instance[UPDATE[update]](jid);
 
 				responses.push(response);
 			}
@@ -1115,9 +1100,9 @@ export const assign = (client) => {
 		 * Search a message from the destination.
 		 * @type {import('../../types/Utils/index.js').SearchMessage}
 		 */
-		searchMessage: async (to, query) => {
+		searchMessage: async (jid, query) => {
 			let i = 0;
-			const containers = store.loadMessages(to);
+			const containers = store.loadMessages(jid);
 			const keys = [];
 
 			if (!containers.length) {
@@ -1190,7 +1175,6 @@ export const assign = (client) => {
 
 			return jids;
 		},
-		TemplateBuilder,
 
 		/**
 		 * Change Profile Picture of the Host or Group.
@@ -1230,12 +1214,6 @@ export const assign = (client) => {
 				]
 			});
 		},
-
-		/**
-		 * Generate message ID before sending.
-		 * @type {import('../../types/Utils/index.js').GenerateMessageID}
-		 */
-		generateMessageID,
 
 		/**
 		 * Send waits message and update function.

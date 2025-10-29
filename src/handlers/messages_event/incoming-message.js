@@ -1,11 +1,11 @@
-import { findBestMatch } from 'string-similarity';
 import { generateWAMessage } from 'baileys';
+import { findBestMatch } from 'string-similarity';
 
 import configuration from '../../helper/config/connect.js';
-import { runtime } from '../../index.js';
 import { Limit, checkAfk, deleteAfk, getAfk, reassign } from '../../helper/index.js';
-import { color, getTimeSince, loggers, randomChar } from '../../utils/modules/index.js';
 import { Cache } from '../../helper/modules/cache.js';
+import { runtime } from '../../index.js';
+import { color, getTimeSince, loggers, randomChar } from '../../utils/modules/index.js';
 
 const handler = new Cache();
 
@@ -383,7 +383,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 
 				str += `Type : ${err.name || 'Unknown'}\n`;
 				str += `Message : ${err.message || 'Unknown'}\n`;
-				str += `Stack Trace :\n${(message.isOwner ? err?.stack : err?.stack?.substring(0, 20)) || 'Unknown'}`;
+				str += `Stack Trace :\n${(message.isOwner ? err?.stack?.substring(0, 70) : err?.stack?.substring(0, 20)) || 'Unknown'}`;
 
 				builder
 					.mainBody(
@@ -425,7 +425,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 
 				const messageBuilt = await builder.render();
 
-				await client.instance.relayMessage(message.from, messageBuilt.message, { messageId: messageBuilt.key.id });
+				await client.instance.relay(message.from, messageBuilt.message, { messageId: messageBuilt.key.id });
 
 				loggers.error(color(err.message, 'white'));
 				const parseErr = (
@@ -540,7 +540,7 @@ const handleIncomingMessage = async (upsert, client, cmds, store, user, state, r
 
 				if (retryNode) {
 					try {
-						await client.instance.relayMessage(message.key.remoteJid, retryNode.message, { messageId: message.key.id });
+						await client.instance.relay(message.key.remoteJid, retryNode.message, { messageId: message.key.id });
 					} catch (error) {
 						console.error(`Error retrying message ${message.key.id}:`, error);
 					}

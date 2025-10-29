@@ -30,9 +30,8 @@ export default {
 		messages.message.pinInChatMessage.type = 'PIN_FOR_ALL';
 		messages.message.pinInChatMessage.senderTimestampMs = Number(messages.message.pinInChatMessage.senderTimestampMs);
 
-		await client.instance.relayMessage(from, messages.message, {
-			messageId: messages.key.id,
-			useCachedGroupMetadata: true
+		await client.instance.relay(from, messages.message, {
+			messageId: messages.key.id
 		});
 	}
 };
