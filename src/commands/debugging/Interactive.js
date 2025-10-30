@@ -1,5 +1,3 @@
-import { randomChar } from '../../utils/index.js';
-
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
  */
@@ -76,7 +74,7 @@ export default {
 						footer: 'Footer Cards',
 						title: 'Title Cards',
 						header: Buffer.alloc(10),
-						buttons: [builder.button.location()]
+						buttons: [builder.button.location({ display: 'Hello World' })]
 					},
 					{
 						body: 'Body Cards',
@@ -201,49 +199,3 @@ export default {
 		await native();
 	}
 };
-
-const container = () => ({
-	order: {
-		shipping: {
-			value: 150000,
-			offset: 1
-		},
-		status: 'pending',
-		items: [
-			{
-				amount: {
-					offset: 1,
-					value: 5000000
-				},
-				name: 'Test',
-				quantity: 1,
-				retailer_id: 'custom-item-1694865264'
-			}
-		],
-		discount: {
-			value: 50000,
-			offset: 1
-		},
-		subtotal: {
-			value: 5000000,
-			offset: 1
-		},
-		tax: {
-			value: 12375,
-			offset: 1
-		}
-	},
-	total_amount: {
-		offset: 1,
-		value: 5112375
-	},
-	reference_id: '4MVS' + randomChar('abcdefghijklmnopqrstuvwxyz0123456789', 11 - 4).toUpperCase(),
-	currency: 'IDR',
-	external_payment_configurations: [
-		{
-			type: 'payment_instruction',
-			payment_instruction: 'Haloo'
-		}
-	],
-	type: 'physical-goods'
-});

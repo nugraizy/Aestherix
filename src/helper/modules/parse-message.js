@@ -1,4 +1,4 @@
-import { getContentType, normalizeMessageContent } from 'baileys';
+import { getContentType, getDevice, normalizeMessageContent } from 'baileys';
 import fs from 'fs-extra';
 import PhoneNumber from 'libphonenumber-js';
 
@@ -107,7 +107,7 @@ export const reassign = async (m, client, store) => {
 		if (m.message?.protocolMessage?.type === 0) {
 			return m;
 		}
-		
+
 		delete m?.message?.senderKeyDistributionMessage;
 
 		const isFromMe = m?.key?.fromMe;
@@ -116,14 +116,17 @@ export const reassign = async (m, client, store) => {
 		let groupSettings;
 		const isBaileys =
 			(m?.key?.id?.startsWith('BAE5') && m?.key?.id?.length === 16) || (isFromMe && m?.key?.id?.startsWith('HFINDER'));
+		const device = getDevice(m.key.id);
 		const myJid = client.instance.decodeJid(instance);
 		const sender = isFromMe
 			? myJid
 			: isGroup
-			? m?.key?.participant?.endsWith('@lid') ? m?.key?.participantAlt : m?.key?.participant
-			: m?.key?.remoteJid === 'status@broadcast'
-			? m?.key?.participant
-			: m?.key?.remoteJid;
+				? m?.key?.participant?.endsWith('@lid')
+					? m?.key?.participantAlt
+					: m?.key?.participant
+				: m?.key?.remoteJid === 'status@broadcast'
+					? m?.key?.participant
+					: m?.key?.remoteJid;
 
 		const isMetadata = configuration.cache.metadata?.has(from);
 		const isUsers = configuration.cache.users.has(sender);
@@ -264,7 +267,8 @@ export const reassign = async (m, client, store) => {
 				isOwner,
 				timeStamp,
 				filename,
-				groupMetadata
+				groupMetadata,
+				device
 			};
 		}
 
@@ -311,7 +315,8 @@ export const reassign = async (m, client, store) => {
 				type,
 				isBlocked,
 				isBanned,
-				isCmd
+				isCmd,
+				device
 			};
 		}
 
@@ -455,7 +460,8 @@ export const reassign = async (m, client, store) => {
 			mediaData,
 			extractMediaData,
 			bodyQuoted,
-			waitForInput
+			waitForInput,
+			device
 		};
 	} catch (e) {
 		log(e);

@@ -1,15 +1,15 @@
 import axios from 'axios';
+import chalk from 'chalk';
 import { load } from 'cheerio';
+import dayjs from 'dayjs';
 import { fileTypeFromBuffer } from 'file-type';
 import FormData from 'form-data';
 import fs from 'fs-extra';
-import { fetch, Client, File, FormData as FormDataUndici } from 'undici';
-import ms from 'parse-ms';
-import _ from 'lodash';
-import dayjs from 'dayjs';
-import chalk from 'chalk';
-import progress from 'progress-stream';
 import isBuffer from 'is-buffer';
+import _ from 'lodash';
+import ms from 'parse-ms';
+import progress from 'progress-stream';
+import { Client, fetch, File, FormData as FormDataUndici } from 'undici';
 
 import configuration from '../../helper/config/connect.js';
 import { color } from './color.js';
@@ -158,6 +158,14 @@ export const calcCrow = (lats1, lon1, lats2, lon2) => {
 };
 
 export const getFilesizeFromBytes = (bytes = 0) => {
+	if (Number.isNaN(bytes)) {
+		throw new Error('Not a Number');
+	}
+
+	if (Number(bytes) === 0) {
+		return '0 B';
+	}
+
 	const size = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 	const factor = Math.floor((String(bytes).length - 1) / 3);
 
@@ -677,6 +685,18 @@ export const formatNumber = (number) => {
 	const value = (number / 10 ** unit).toFixed(1);
 
 	return `${value}${units[unit / 3 - 1]}`;
+};
+
+export const formatBytes = (bytes, base = 1024, decimals = 2) => {
+	if (!bytes) {
+		return '0 B';
+	}
+
+	const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+	const i = Math.floor(Math.log(bytes) / Math.log(base));
+	const value = (bytes / Math.pow(base, i)).toFixed(decimals);
+
+	return `${value} ${sizes[i]}`;
 };
 
 export const convertSecondstoTime = (ms) => {

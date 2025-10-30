@@ -1,7 +1,7 @@
+import type { getDevice, MessageType } from 'baileys';
 import type { GroupMetadata, GroupParticipant } from '../Groups/index';
 import type { MessageGenerated, WAGenericMediaMessage } from '../Messages/index';
 import type { AdvancedClient, MediaDataContext, Store } from '../Socket';
-import type { MessageType } from 'baileys';
 
 interface GroupMetadataParsed {
 	ownerGroup: string;
@@ -97,6 +97,7 @@ export interface ReassignResult {
 			invalid: boolean;
 		}>
 	>;
+	device: ReturnType<typeof getDevice>;
 }
 
 export type Reconstructuring = (m: MessageGenerated, client: AdvancedClient, store?: Store) => Promise<ReassignResult>;

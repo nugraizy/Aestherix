@@ -1,3 +1,4 @@
+import 'dayjs/locale/id.js';
 import 'dotenv/config.js';
 import './src/helper/prototypes.js';
 
@@ -9,6 +10,7 @@ import utc from 'dayjs/plugin/utc.js';
 import path from 'path';
 import { platform } from 'process';
 
+dayjs.locale('id');
 dayjs.extend(timezone);
 dayjs.extend(utc);
 dayjs.extend(customParseFormat);

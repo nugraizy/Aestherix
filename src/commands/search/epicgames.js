@@ -70,8 +70,6 @@ https://store.epicgames.com/p/${v.productSlug}`
 			return await client.instance.reply(from, result.error, message);
 		}
 
-		console.log(result[2]);
-
 		let caption = `${'Epicgames'.formatHeaders()}
 
 ${result

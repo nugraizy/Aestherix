@@ -17,7 +17,7 @@
     "instagram:login:interactive": "node ./src/utils/instagram/instagram-login-interactive.js",
     "build": "cd frontend && npm run build",
     "dev:react": "cd frontend && npm run dev",
-    "pm2:react": "pm2 start npm --name \"aestherix-react\" -- run dev:react"
+    "pm2:react": "pm2 start npm --name \"frontend\" -- run dev:react"
   },
   "keywords": [
     "whatsapp",
@@ -110,6 +110,7 @@
     "parse5": "^7.1.2",
     "pdfkit": "^0.15.0",
     "pet-pet-gif": "github:nugraizy/pet-pet-gif",
+    "pm2": "^6.0.13",
     "prismjs": "^1.29.0",
     "puppeteer": "^23.5.3",
     "puppeteer-extra": "^3.3.4",
