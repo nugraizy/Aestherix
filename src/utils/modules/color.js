@@ -1,8 +1,8 @@
-import gradient from 'gradient-string';
-import chalk from 'chalk';
-import _ from 'lodash';
 import boxen from 'boxen';
+import chalk from 'chalk';
 import fs from 'fs-extra';
+import gradient from 'gradient-string';
+import _ from 'lodash';
 
 export const color = (...obj) => {
 	if (obj.length % 2 !== 0) {
@@ -20,12 +20,12 @@ export const color = (...obj) => {
 			typeof color === 'object'
 				? gradient(...color)(text)
 				: typeof color === 'string'
-				? chalk[color]?.(text) || chalk.hex(color)(text)
-				: (() => {
-						const schemes = _.sample(['teen', 'passion', 'instagram']);
+					? chalk[color]?.(text) || chalk.hex(color)(text)
+					: (() => {
+							const schemes = _.sample(['teen', 'passion', 'instagram']);
 
-						return gradient[schemes](text);
-				  })(); // eslint-disable-line
+							return gradient[schemes](text);
+						})(); // eslint-disable-line
 	}
 
 	return str;
@@ -47,7 +47,7 @@ ${SPLITTER[0]} ${version.split(/\./g).join(` ${SPLITTER[1]} `)} ${SPLITTER[SPLIT
 			{
 				title: `${ICON} Made by @${AUTHOR} ${ICON}`,
 				textAlignment: 'center',
-				float: 'center',
+				float: 'left',
 				borderColor: 'gray',
 				margin: 1,
 				borderStyle: 'round'

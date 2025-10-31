@@ -1,20 +1,13 @@
-import { input, password } from '@inquirer/prompts';
-import _toggle from 'inquirer-toggle';
+import { confirm, input, password } from '@inquirer/prompts';
 import { login } from './login.js';
 
-const { default: toggle } = _toggle;
-
 const loadFromEnv = async () => {
-	const yesOrNo = await toggle({
+	const yesOrNo = await confirm({
 		message: 'Do you want to load credentials from .env?',
-		default: false,
-		theme: {
-			active: 'no',
-			inactive: 'yes'
-		}
+		default: true
 	});
 
-	if (!yesOrNo) {
+	if (yesOrNo) {
 		await import('dotenv/config.js');
 		console.log('Credentials loaded from .env.');
 		return true;
@@ -60,13 +53,9 @@ const maskPassword = (password) => {
 };
 
 const askConfirmationForBoth = async (usernames, passwords) => {
-	return await toggle({
+	return await confirm({
 		message: `Is this your username \`${usernames}\` and is this your password \`${maskPassword(passwords)}\`?`,
-		default: false,
-		theme: {
-			active: 'no',
-			inactive: 'yes'
-		}
+		default: true
 	}).catch(catchError);
 };
 
@@ -74,9 +63,9 @@ const askConfirmation = async () => {
 	while (true) {
 		const usernames = await askUsername();
 		const passwords = await askPassword();
-		const isNotConfirmed = await askConfirmationForBoth(usernames, passwords);
+		const isConfirmed = await askConfirmationForBoth(usernames, passwords);
 
-		if (isNotConfirmed) {
+		if (isConfirmed) {
 			console.log("Let's try again."); // eslint-disable-line
 			continue;
 		}
@@ -90,20 +79,16 @@ const main = async () => {
 
 	if (loadedFromEnv) {
 		const username = process.env.INSTAGRAM_USERNAME;
-		const usernameConfirm = await toggle({
+		const usernameConfirm = await confirm({
 			message: `Is this your username ${username}?`,
-			default: false,
-			theme: {
-				active: 'no',
-				inactive: 'yes'
-			}
+			default: true
 		}).catch(catchError);
 
-		if (!usernameConfirm) {
+		if (usernameConfirm) {
 			const passwords = await askPassword();
-			const isNotValid = await askConfirmationForBoth(username, passwords);
+			const isValid = await askConfirmationForBoth(username, passwords);
 
-			if (!isNotValid) {
+			if (isValid) {
 				console.log('Trying to login. Please wait.');
 				return await login(username, passwords);
 			}
@@ -127,4 +112,8 @@ const main = async () => {
 	}
 };
 
-main();
+try {
+	await main();
+} catch (error) {
+	console.log(error.message);
+}

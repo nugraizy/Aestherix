@@ -1,32 +1,28 @@
-import fs from 'fs-extra';
+import { confirm, input, select, Separator } from '@inquirer/prompts';
 import _baileys, {
-	makeWASocket,
-	// makeInMemoryStore,
-	useMultiFileAuthState,
 	delay,
-	makeCacheableSignalKeyStore,
+	fetchLatestBaileysVersion,
 	isJidGroup,
-	fetchLatestBaileysVersion
+	makeCacheableSignalKeyStore,
+	makeWASocket,
+	useMultiFileAuthState
 } from 'baileys';
-import P from 'pino';
-import PhoneNumber from 'libphonenumber-js';
-import { input, select, Separator } from '@inquirer/prompts';
-import _toggle from 'inquirer-toggle';
-import NodeCache from 'node-cache';
 import clip from 'clipboardy';
+import fs from 'fs-extra';
+import PhoneNumber from 'libphonenumber-js';
+import NodeCache from 'node-cache';
+import P from 'pino';
 
 const { proto } = _baileys;
 
+import { color, loggers } from '../../../utils/modules/index.js';
 import configuration from '../../config/connect.js';
-import { clearDBConnection } from './reset-session.js';
-// import { patchInteractiveMessage } from '../utils/patch-message.js';
 import { Cache } from '../../modules/cache.js';
-import { loggers, color } from '../../../utils/modules/index.js';
-
-const { default: toggle } = _toggle;
+import { clearDBConnection } from './reset-session.js';
 
 const msgRetryCounterCache = new NodeCache();
 const SETTINGS = await fs.readJSON('./src/helper/config/settings.json');
+const DEFAULT_PROMPT_TIMEOUT = 15 * 1000;
 
 const exitOnErr = (e) => {
 	if (e.name === 'AbortPromptError') {
@@ -162,22 +158,37 @@ const inputPhoneNumber = async () => {
 const selectHostNumber = async ({ hostNumber, backupsHostNumbers }) => {
 	const selected = await select(
 		{
-			message: 'Select host number',
+			message: loggers.info(color('Select host number', '#E4C1F9'), { ignore: true }),
 			choices: [
 				...[hostNumber, ...backupsHostNumbers].map((v) => {
 					const num = PhoneNumber('+' + v.replace(/[^0-9]/g, '')).formatInternational();
 
 					return { name: num, value: v };
 				}),
-				new Separator(),
+				new Separator(color('⸺⸺⸺⸺⸺❈❖☀❖❈⸺⸺⸺⸺⸺⸺', 'grey')),
 				{
 					name: 'New number',
-					value: 'new'
+					value: 'new',
+					description: 'Write your number to use.'
 				}
-			]
+			],
+			theme: {
+				prefix: '✦',
+				icon: {
+					cursor: color(' ⇢ ', 'white')
+				},
+
+				style: {
+					answer: (value) => color(value, 'white'),
+					highlight: (value) =>
+						`${color(value, '#E4C1F9')} ${color('(', 'gray')}${color('selected', 'white')}${color(')', 'gray')}`,
+					description: (value) => color(value, 'grey'),
+					keysHelpTip: (keys) => keys.map(([key, action]) => `${key} : ${action}`).join(' | ')
+				}
+			}
 		},
 		{
-			signal: AbortSignal.timeout(15000)
+			signal: AbortSignal.timeout(DEFAULT_PROMPT_TIMEOUT)
 		}
 	).catch(exitOnErr);
 
@@ -197,23 +208,23 @@ const askInputNumber = async ({ hostNumber, backupsHostNumbers }) => {
 };
 
 const askWantNumber = async ({ hostNumber, backupsHostNumbers }) => {
-	const isWantNumber = await toggle({
-		message: loggers
-			.info(
+	const useDefaultNumber = await confirm(
+		{
+			message: loggers.info(
 				color('Do you want to use the default number?', '#E4C1F9'),
 				color('(', 'gray') + color('default', '#fff'),
 				color(`${PhoneNumber('+' + hostNumber.replace(/[^0-9]/g, '')).formatInternational()})`, 'gray'),
 				{ ignore: true }
-			)
-			.trim(),
-		default: false,
-		theme: {
-			active: 'no',
-			inactive: 'yes'
-		}
-	}).catch(exitOnErr);
+			),
+			default: true,
+			theme: {
+				prefix: '✦'
+			}
+		},
+		{ signal: AbortSignal.timeout(DEFAULT_PROMPT_TIMEOUT) }
+	).catch(exitOnErr);
 
-	return isWantNumber ? await askInputNumber({ hostNumber, backupsHostNumbers }) : hostNumber;
+	return useDefaultNumber ? hostNumber : await askInputNumber({ hostNumber, backupsHostNumbers });
 };
 
 const handleNewInstance = async ({ OPTIONS, Client }) => {
