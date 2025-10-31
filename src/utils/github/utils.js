@@ -1,11 +1,52 @@
 import fs from 'fs-extra';
 
 const { version } = await fs.readJSON('./package.json');
+const { GITHUB_AUTH_TOKEN } = process.env;
 
-export const stringifyChangelogs = (data) => {
+const graphqlQuery = `
+		{
+			repository(owner: "nugraizy", name: "aestherix") {
+				ref(qualifiedName: "main") {
+					target {
+						... on Commit {
+							history {
+								totalCount
+							}
+						}
+					}
+				}
+			}
+		}
+	`;
+
+const getTotalCommit = async () => {
+	const response = await fetch('https://api.github.com/graphql', {
+		method: 'POST',
+		body: JSON.stringify({ query: graphqlQuery }),
+		headers: {
+			Authorization: `Bearer ${GITHUB_AUTH_TOKEN}`
+		}
+	});
+
+	if (!response.ok) {
+		throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+	}
+
+	const data = await response.json();
+	const count = data?.data?.repository?.ref?.target?.history?.totalCount ?? null;
+
+	if (count === null) {
+		throw new Error('Unable to fetch commit count (invalid repo or branch)');
+	}
+
+	return count;
+};
+
+export const stringifyChangelogs = async (data) => {
+	const totalCommit = await getTotalCommit();
 	let caption = `⚙️ ${'Aestherix'.formatHeaders(true)} *Changelog* v${version} ⚙️
 
-Total Commits **
+Total Commits *${totalCommit}*
 From: ${data[data.length - 1].author.formattedDate}
 To: ${data[0].author.formattedDate}
 

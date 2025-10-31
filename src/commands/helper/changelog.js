@@ -1,6 +1,6 @@
-import parser from 'yargs-parser';
 import fs from 'fs-extra';
 import path from 'path';
+import parser from 'yargs-parser';
 
 import { getChangelogs, stringifyChangelogs } from '../../utils/github/index.js';
 
@@ -57,7 +57,8 @@ export default {
 		}
 
 		const changelog = await getChangelogs(quantity);
+		const caption = await stringifyChangelogs(changelog);
 
-		await client.instance.reply(from, stringifyChangelogs(changelog), message);
+		await client.instance.reply(from, caption, message);
 	}
 };
