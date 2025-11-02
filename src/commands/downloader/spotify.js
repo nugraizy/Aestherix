@@ -159,7 +159,7 @@ const handleSpotifyCollection = async (url, type, client, { from, message, wait 
 	} else {
 		const album = await spotifier.getAlbum(id);
 
-		collectionName = sanitizeFilename(album.albums[0].name);
+		collectionName = sanitizeFilename(`${album.albums[0].artists[0].name} ${album.albums[0].name}`);
 
 		const albumTracksId = await dab.search(collectionName, 'album');
 		const albumData = await dab.getAlbum(albumTracksId.albums.items[0].id);

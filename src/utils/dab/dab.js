@@ -118,12 +118,16 @@ class Dab {
 			throw new Error('ID is required');
 		}
 
-		const domains = getDomains('download', { id });
+		const domains = getDomains('download', { id, quality: 'LOSSLESS' });
 
 		const { error, data, domain } = await this.tryFetch(domains);
 
 		if (error) {
 			return error;
+		}
+
+		if (data.error) {
+			return data.error;
 		}
 
 		let file, track, original;
