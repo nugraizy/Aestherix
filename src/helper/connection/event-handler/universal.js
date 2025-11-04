@@ -122,6 +122,21 @@ export const handleConnectionUpdate = async (
 				const buttons = [];
 				let capt = '';
 
+				const getPlatform = (platform) => {
+					return platform === 'iphone'
+						? 'iPhone'
+						: platform === 'android'
+							? 'Android'
+							: platform === 'smbi'
+								? 'iPhone Business'
+								: 'Android Business';
+				};
+
+				loggers.info(
+					color('Device Platform', 'white'),
+					color(`${getPlatform(client.instance.authState.creds.platform)}`, '#E4C1F9')
+				);
+
 				loggers.info(
 					color('Connection time', 'white'),
 					color(`${timeToConnect}s`, '#E4C1F9'),

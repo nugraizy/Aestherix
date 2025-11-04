@@ -1,10 +1,12 @@
 import { makeInMemoryStore } from '@rodrigogs/baileys-store';
 import axios from 'axios';
+import { isWABusinessPlatform } from 'baileys';
 import dayjs from 'dayjs';
 import fs from 'fs-extra';
 import mqtt from 'mqtt';
 import cron from 'node-cron';
 import P from 'pino';
+import sharp from 'sharp';
 
 import configuration from './helper/config/connect.js';
 import {
@@ -191,6 +193,10 @@ export const start = async (isReconnect) => {
 					configuration.pinterestImages.set(date, imageUrl);
 
 					await client.instance.updateProfilePicture(instance, image, 'no_crop');
+
+					if (isWABusinessPlatform(client.instance.authState.creds.platform)) {
+						await client.instance.updateCoverPhoto(await sharp(image).blur(10).png().toBuffer());
+					}
 				});
 			}
 		});

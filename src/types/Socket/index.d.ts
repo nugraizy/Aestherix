@@ -1,11 +1,11 @@
-import type { AuthenticationState, ConnectionState, proto, WAConnectionState, WASocket, makeInMemoryStore } from 'baileys';
+import type { AuthenticationState, ConnectionState, makeInMemoryStore, makeWASocket, WAConnectionState } from 'baileys';
 
-import type { AssignedClient } from '../Utils';
 import type { ReassignResult } from '../Reconstruct';
+import type { AssignedClient } from '../Utils';
 
 type WAMemoryStore = ReturnType<typeof makeInMemoryStore>;
 
-export type ClientSocket = WASocket;
+export type ClientSocket = ReturnType<typeof makeWASocket>;
 export type Client = { instance: ClientSocket };
 export type AdvancedClient = { instance: ClientSocket & AssignedClient };
 

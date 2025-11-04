@@ -97,7 +97,7 @@ export const connectSocket = async ({ cli, OPTIONS, store }) => {
 		customId: 'HFINDER',
 		defaultQueryTimeoutMs: 0,
 		cachedGroupMetadata: (jid) => (isJidGroup(jid) ? configuration.cache.metadata.get(jid) : {}),
-		browser: ['Windows', 'Chrome', 'Chrome 114.0.5735.198']
+		browser: ['Mac OS', 'Chrome', 'Chrome 114.0.5735.198']
 	};
 
 	if (OPTIONS.json) {

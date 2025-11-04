@@ -104,7 +104,7 @@
     "node-gtts": "github:nugraizy/node-gtts",
     "node-webpmux": "^3.1.1",
     "openai": "^4.67.3",
-    "ora": "^8.1.1",
+    "ora": "^8.2.0",
     "parse-ms": "^3.0.0",
     "parse5": "^7.1.2",
     "pdfkit": "^0.15.0",

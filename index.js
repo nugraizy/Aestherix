@@ -8,6 +8,7 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 import timezone from 'dayjs/plugin/timezone.js';
 import utc from 'dayjs/plugin/utc.js';
+import ora from 'ora';
 import path from 'path';
 import { platform } from 'process';
 import table from 'text-table';
@@ -49,26 +50,66 @@ const printFlags = (flags) => {
 	console.log(table(data));
 };
 
+const waitForViteConnection = async (timeout = 10000, interval = 1000) => {
+	const spinner = ora('Checking Vite server...').start();
+	const viteUrl = 'http://localhost:5173';
+	const startTime = Date.now();
+
+	while (Date.now() - startTime < timeout) {
+		try {
+			await axios.head(viteUrl, { timeout: 1000 });
+			spinner.succeed(chalk.green('Vite server is running.'));
+			return true;
+		} catch {
+			spinner.text = 'Waiting for Vite server to start. Please run "npm run dev:react".';
+			await new Promise((resolve) => setTimeout(resolve, interval));
+		}
+	}
+
+	spinner.fail('Vite server is not running. Please run "npm run dev:react".');
+	return false;
+};
+
+const waitForInternetConnection = async (timeout = 10000, interval = 1000) => {
+	const spinner = ora('Checking Internet connection...').start();
+	const startTime = Date.now();
+
+	while (Date.now() - startTime < timeout) {
+		try {
+			const online = await isInternetAvailable();
+
+			if (online) {
+				spinner.succeed(chalk.green('Internet connection is available.'));
+				return true;
+			}
+
+			throw new Error('Internet connection is not available. Waiting for internet connection.');
+		} catch (error) {
+			spinner.text = error.message;
+			await new Promise((resolve) => setTimeout(resolve, interval));
+		}
+	}
+
+	spinner.fail('Could not establish connection. Please make sure you are connected to the internet.');
+	return false;
+};
+
 async function main() {
 	const flags = await import('./src/helper/connection/utils/check-flag.js');
 
 	console.clear();
-	console.warn('Checking internet connection.');
 
-	const online = await isInternetAvailable();
+	const isInternetConnected = await waitForInternetConnection(20_000);
 
-	console.clear();
-
-	if (!online) {
-		console.error('Internet connection is not available.\nMake sure to connect to the internet and try again.');
-		process.exit(1);
+	if (!isInternetConnected) {
+		process.exit(0);
 	}
 
-	console.log(chalk.green('Internet connection is available.'));
+	const isViteConnected = await waitForViteConnection(20_000);
 
-	axios.head('http://localhost:5173').catch(() => {
-		throw new Error('Vite server is not running. Please run "npm run dev:react".');
-	});
+	if (!isViteConnected) {
+		process.exit(0);
+	}
 
 	printBanner();
 	printFlags(Object.entries(flags.cli.flags));
