@@ -93,7 +93,6 @@ export const connectSocket = async ({ cli, OPTIONS, store }) => {
 		linkPreviewImageThumbnailWidth: 2,
 		mediaCache: new Cache(),
 		userDevicesCache: new Cache(),
-		// patchMessageBeforeSending: patchInteractiveMessage,
 		customId: 'HFINDER',
 		defaultQueryTimeoutMs: 0,
 		cachedGroupMetadata: (jid) => (isJidGroup(jid) ? configuration.cache.metadata.get(jid) : {}),

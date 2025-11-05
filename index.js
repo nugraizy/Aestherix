@@ -2,7 +2,6 @@ import 'dayjs/locale/id.js';
 import 'dotenv/config.js';
 import './src/helper/prototypes.js';
 
-import axios from 'axios';
 import chalk from 'chalk';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
@@ -50,26 +49,6 @@ const printFlags = (flags) => {
 	console.log(table(data));
 };
 
-const waitForViteConnection = async (timeout = 10000, interval = 1000) => {
-	const spinner = ora('Checking Vite server...').start();
-	const viteUrl = 'http://localhost:5173';
-	const startTime = Date.now();
-
-	while (Date.now() - startTime < timeout) {
-		try {
-			await axios.head(viteUrl, { timeout: 1000 });
-			spinner.succeed(chalk.green('Vite server is running.'));
-			return true;
-		} catch {
-			spinner.text = 'Waiting for Vite server to start. Please run "npm run dev:react".';
-			await new Promise((resolve) => setTimeout(resolve, interval));
-		}
-	}
-
-	spinner.fail('Vite server is not running. Please run "npm run dev:react".');
-	return false;
-};
-
 const waitForInternetConnection = async (timeout = 10000, interval = 1000) => {
 	const spinner = ora('Checking Internet connection...').start();
 	const startTime = Date.now();
@@ -102,12 +81,6 @@ async function main() {
 	const isInternetConnected = await waitForInternetConnection(20_000);
 
 	if (!isInternetConnected) {
-		process.exit(0);
-	}
-
-	const isViteConnected = await waitForViteConnection(20_000);
-
-	if (!isViteConnected) {
 		process.exit(0);
 	}
 
