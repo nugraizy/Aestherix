@@ -1,5 +1,4 @@
 import globals from 'globals';
-import pluginJs from '@eslint/js';
 
 export default [
 	{
@@ -12,7 +11,8 @@ export default [
 				store: true,
 				Bun: true,
 				...globals.node,
-				...globals.browser
+				...globals.browser,
+				__botName: 'Aestherix'
 			}
 		},
 		rules: {

@@ -36,7 +36,7 @@ export default {
 			query = _.join(' ');
 
 			let caption = 'DAB Downloader'.formatHeaders();
-			let watermark = 'Powered by Aestherix';
+			let watermark = 'Powered by Hidden Finder';
 
 			if (typeof index === 'number') {
 				const searchResults = await dab.search(query);

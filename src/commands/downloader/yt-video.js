@@ -1,4 +1,4 @@
-import { color, delay, loggers, isURL, removeDuplicatesArray, isYoutubeURL, fetchBUFFER } from '../../utils/modules/index.js';
+import { color, fetchBUFFER, isURL, isYoutubeURL, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { youtubeMainDownload } from '../../utils/youtube/index.js';
 
 // const youtube = new YouTubei();
@@ -30,7 +30,7 @@ const processVideo = async (url, client, { from, message, prettyNumber }) => {
 	await client.instance.send(
 		from,
 		{
-			video: Buffer.from(await fetchBUFFER(link), 'base64'),
+			video: await fetchBUFFER(link),
 			caption: capt.trim().formatForm()
 		},
 		{

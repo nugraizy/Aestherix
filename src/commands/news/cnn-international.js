@@ -27,9 +27,7 @@ export default {
 			return await client.instance.send(
 				from,
 				{
-					...(data[index].image !== undefined
-						? { image: new Buffer.from(await fetchBUFFER(data[index].image), 'base64'), caption }
-						: { text: caption }),
+					...(data[index].image !== undefined ? { image: await fetchBUFFER(data[index].image), caption } : { text: caption }),
 					templateButtons: [
 						data[index].image !== undefined
 							? { urlButton: { displayText: 'Image Source', url: args[1] === 'next' ? data[index].image : data[index].image } }
@@ -52,7 +50,7 @@ export default {
 								} /* eslint-disable-line */
 							: {}
 					],
-					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+					footer: `${index + 1}/${data.length}\nPowered by Hidden Finder`
 				},
 				{ quoted: message }
 			);
@@ -82,7 +80,7 @@ export default {
 			from,
 			{
 				...(data[0].image !== undefined
-					? { image: new Buffer.from(await fetchBUFFER(data[0].image), 'base64'), caption: caption.formatForm() }
+					? { image: await fetchBUFFER(data[0].image), caption: caption.formatForm() }
 					: { text: caption.formatForm() }),
 				templateButtons: [
 					data[0].image !== undefined ? { urlButton: { displayText: 'Image Source', url: data[0].image } } : {},
@@ -96,7 +94,7 @@ export default {
 							} /* eslint-disable-line */
 						: {}
 				],
-				footer: `Void Bot     1/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+				footer: `1/${data.length}\nPowered by Hidden Finder`
 			},
 			{ quoted: message }
 		);

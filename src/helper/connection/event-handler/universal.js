@@ -361,14 +361,14 @@ export const handleWerewolfCycle = async (update) => {
 		for (const id of update.playersData.filter((v) => v.isAlive)) {
 			client.instance.send(id.id, {
 				title: 'Pilih salah satu dari pemain berikut untuk divoting',
-				footer: 'Made by Void Bot. Powered by Hidden Finder',
+				footer: `Made by ${__botName}. Powered by Hidden Finder`,
 				text: '\t',
 				buttonText: 'Open List',
 				sections: update.playersData
 					.filter((v) => v.isAlive)
 					.map((v) => ({
 						rows: [{ title: `VOTE ${v.name}`, rowId: `.ww vote ${v.id} ${update.id}` }],
-						title: 'VOID BOT | Werewolf Games'
+						title: `${__botName} | Werewolf Games`
 					}))
 			});
 		}
@@ -397,9 +397,9 @@ ${update.playersData
 		for (const { id, role, isAlive } of update.playersData) {
 			if (isAlive) {
 				if (role === 'werewolf') {
-					client.instance.send(id, {
+					await client.instance.send(id, {
 						buttonText: 'Open list',
-						footer: 'Made by Void Bot. Powered by Hidden Finder',
+						footer: `Made by ${__botName}. Powered by Hidden Finder`,
 						title:
 							'Kamu adalah Serigala. Dan saat ini merupakan waktu yang tepat untuk membunuh seseorang.\nPilih salah satu player.',
 						text: '\t',
@@ -408,14 +408,14 @@ ${update.playersData
 							.map((v) => {
 								return {
 									rows: [{ title: `KILL ${v.name}`, rowId: `.ww kill ${v.id} ${update.id}` }],
-									title: 'VOID BOT | Werewolf Games'
+									title: `${__botName} | Werewolf Games`
 								};
 							})
 					});
 				} else if (role === 'seer') {
-					client.instance.send(id, {
+					await client.instance.send(id, {
 						buttonText: 'Open list',
-						footer: 'Made by Void Bot. Powered by Hidden Finder',
+						footer: `Made by ${__botName}. Powered by Hidden Finder`,
 						text: '\t',
 						title:
 							'Kamu adalah Penerawang. Dan saat ini merupakan waktu yang tepat untuk menerawang seseorang.\nPilih salah satu player.',
@@ -429,16 +429,16 @@ ${update.playersData
 											rowId: `.ww seer ${update.playersData[i].id} ${update.id}`
 										}
 									],
-									title: 'VOID BOT | Werewolf Games'
+									title: `${__botName} | Werewolf Games`
 								};
 							})
 					});
 				} else if (role === 'guard') {
-					client.instance.send(id, {
+					await client.instance.send(id, {
 						buttonText: 'Open list',
 						title:
 							'Kamu adalah Penjaga. Dan saat ini merupakan waktu yang tepat untuk memjaga seseorang.\nPilih salah satu player.',
-						footer: 'Made by Void Bot. Powered by Hidden Finder',
+						footer: `Made by ${__botName}. Powered by Hidden Finder`,
 						text: '\t',
 						sections: update.playersData
 							.filter((v) => v.isAlive)
@@ -450,12 +450,12 @@ ${update.playersData
 											rowId: `.ww guard ${update.playersData[i].id} ${update.id}`
 										}
 									],
-									title: 'VOID BOT | Werewolf Games'
+									title: `${__botName} | Werewolf Games`
 								};
 							})
 					});
 				} else if (role === 'villager') {
-					client.instance.send(id, {
+					await client.instance.send(id, {
 						text: 'Kamu adalah Penduduk. Tunggu sampai pagi. Saat ini hanya pemain malam yang beraksi'
 					});
 				}

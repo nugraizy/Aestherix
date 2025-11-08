@@ -41,7 +41,7 @@ export default {
 			from,
 			{
 				text: capt.trim(),
-				footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
+				footer: 'Powered by Hidden Finder',
 				templateButtons: [],
 				headerType: 1
 			},

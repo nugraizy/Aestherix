@@ -1,5 +1,5 @@
-import { removeDuplicatesArray } from '../../utils/modules/index.js';
 import { arq } from '../../utils/arq/index.js';
+import { removeDuplicatesArray } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -47,7 +47,7 @@ export default {
 								} /* eslint-disable-line */
 							: {}
 					],
-					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+					footer: `${index + 1}/${data.length}\nPowered by Hidden Finder`
 				},
 				{ quoted: message }
 			);
@@ -84,7 +84,7 @@ export default {
 								} /* eslint-disable-line */
 							: {}
 					],
-					footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪'
+					footer: 'Powered by Hidden Finder'
 				},
 				{ quoted: message }
 			);

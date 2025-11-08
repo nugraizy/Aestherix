@@ -17,21 +17,21 @@ export default {
 		const row = Array(Number(query || 1)).fill({
 			rows: [
 				{
-					title: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
-					rowId: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪'
+					title: 'Powered by Hidden Finder',
+					rowId: 'Powered by Hidden Finder'
 				}
 			],
-			title: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪'
+			title: 'Powered by Hidden Finder'
 		});
 
 		const messages = generateWAMessageFromContent(
 			from,
 			{
 				listMessage: {
-					buttonText: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
+					buttonText: 'Powered by Hidden Finder',
 					description: 'List Message',
 					listType: 2,
-					footerText: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
+					footerText: 'Powered by Hidden Finder',
 					sections: row,
 					productListInfo: {
 						productSections: [

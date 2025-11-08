@@ -18,7 +18,7 @@ export const checkBan = async (client, { from, isBotAdmin, isGroup, messageStubP
 
 				const messageOptions = {
 					text: kickMessage,
-					footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
+					footer: 'Powered by Hidden Finder',
 					buttons,
 					headerType: 1,
 					mentions: [participant]

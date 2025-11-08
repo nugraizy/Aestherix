@@ -59,7 +59,7 @@ export default {
 							rowId: `.fetchstory ${message.key.participant}`
 						}
 					],
-					title: `VOID BOT | ${message?.pushName ?? 'No Name'}`
+					title: `${__botName} | ${message?.pushName ?? 'No Name'}`
 				});
 			}
 		}

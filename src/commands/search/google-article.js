@@ -48,7 +48,7 @@ export default {
 					],
 					footer: `${data[index].date ? `${data[index].date} ` : ''}${data[index].description}
                     
-Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+${index + 1}/${data.length}\nPowered by Hidden Finder`
 				},
 				{ quoted: message }
 			);
@@ -84,7 +84,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 					],
 					footer: `${result[0].date ? `${result[0].date} ` : ''}${result[0].description}
 
-Void Bot     1/${result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+1/${result.length}\nPowered by Hidden Finder`
 				},
 				{ quoted: message }
 			);

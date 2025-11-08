@@ -43,7 +43,7 @@ export default {
 
 		builder
 			.mainBody(caption)
-			.mainFooter('Powered by Aestherix')
+			.mainFooter('Powered by Hidden Finder')
 			.mainHeader('Header')
 			.cards(
 				parsedEntries

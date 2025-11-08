@@ -28,6 +28,7 @@ declare global {
 	var store: Store;
 	var instance: string;
 	var log: (typeof console)['log'];
+	var __botName: string;
 	interface String {
 		/**
 		 * Convert string to time.

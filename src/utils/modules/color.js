@@ -18,7 +18,7 @@ export const color = (...obj) => {
 
 		str +=
 			typeof color === 'object'
-				? gradient(...color)(text)
+				? gradient(color)(text)
 				: typeof color === 'string'
 					? chalk[color]?.(text) || chalk.hex(color)(text)
 					: (() => {
@@ -41,7 +41,7 @@ const AUTHOR = color('nugraizy', '#FF5555');
 export const printBanner = () =>
 	log(
 		boxen(
-			`${BANNER_ICON_1}${chalk.italic.bold.hex('#BD93F9')('Aestherix')}${BANNER_ICON_2}
+			`${BANNER_ICON_1}${chalk.italic.bold.hex('#BD93F9')(__botName)}${BANNER_ICON_2}
 version
 ${SPLITTER[0]} ${version.split(/\./g).join(` ${SPLITTER[1]} `)} ${SPLITTER[SPLITTER.length - 1]}`,
 			{

@@ -1,15 +1,9 @@
-import emoji from 'node-emoji';
+import { get } from 'node-emoji';
 
 import { randomize } from '../modules/index.js';
 
 const randomFruitEmoji = () => {
-	const emojis = [
-		emoji.emojify(':apple:'),
-		emoji.emojify(':grapes:'),
-		emoji.emojify(':banana:'),
-		emoji.emojify(':pineapple:'),
-		emoji.emojify(':watermelon:')
-	];
+	const emojis = [get(':apple:'), get(':grapes:'), get(':banana:'), get(':pineapple:'), get(':watermelon:')];
 
 	return Array(9)
 		.fill()

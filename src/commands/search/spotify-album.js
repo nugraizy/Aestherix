@@ -87,7 +87,7 @@ export default {
 			await client.instance.send(
 				from,
 				{
-					image: new Buffer.from(await fetchBUFFER(images), 'base64'),
+					image: await fetchBUFFER(images),
 					caption: 'Spotify Album'.formatHeaders() + `\n\n${caption.formatForm()}`
 					// templateButtons: [
 					// 	{

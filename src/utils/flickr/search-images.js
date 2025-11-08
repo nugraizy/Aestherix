@@ -1,17 +1,17 @@
-import Flickr from 'flickr-sdk';
+import { createFlickr } from 'flickr-sdk';
 
 const _key = process.env.FLICKR_KEY;
 
-export class FlickerAPI extends Flickr {
+export class FlickerAPI {
 	#_api;
 	constructor() {
-		const API = super(_key);
+		const { flickr } = createFlickr(_key);
 
-		this.#_api = API;
+		this.#_api = flickr;
 
 		this.searchImages = async (keyword) =>
 			new Promise(async (resolve, reject) => {
-				let { photos } = await this.req('photos', 'search', { text: keyword });
+				let { photos } = await this.#req('photos', 'search', { text: keyword });
 
 				if (!photos.photo.length) {
 					reject(new Error('Image Not Found'));
@@ -23,7 +23,7 @@ export class FlickerAPI extends Flickr {
 		this.detailImage = async (id) =>
 			new Promise(async (resolve, reject) => {
 				try {
-					let { photo } = await this.req('photos', 'getInfo', { photo_id: Number(id) }); /* eslint-disable-line */
+					let { photo } = await this.#req('photos', 'getInfo', { photo_id: Number(id) }); /* eslint-disable-line */
 
 					resolve({
 						id: photo.id,
@@ -36,20 +36,21 @@ export class FlickerAPI extends Flickr {
 						tags: photo.tags.tag.map((v) => v.raw).join(', '),
 						posted: photo.dates.taken,
 						source: photo.urls.url[0]._content,
-						download: this.urlDownload(photo.id, photo.server, photo.originalsecret, photo.originalformat)
+						download: this.#urlDownload(photo.id, photo.server, photo.originalsecret, photo.originalformat)
 					});
 				} catch (err) {
 					reject(err);
 				}
 			});
 	}
-	async req(type, method, options) {
-		let { text } = await this.#_api[type][method](options);
 
-		return JSON.parse(text);
+	async #req(type, method, options) {
+		let response = await this.#_api(`flickr.${type}.${method}`, options);
+
+		return response;
 	}
 
-	urlDownload(id, server, secret, mime) {
+	#urlDownload(id, server, secret, mime) {
 		return `https://live.staticflickr.com/${server}/${id}_${secret}_o_d.${mime}`;
 	}
 }

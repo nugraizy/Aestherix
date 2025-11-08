@@ -1,10 +1,10 @@
 import fs from 'fs';
 import imageSize from 'image-size';
+import _ from 'lodash';
 import path from 'path';
 import sharp from 'sharp';
-import yargsParser from 'yargs-parser';
-import _ from 'lodash';
 import { fetch } from 'undici';
+import yargsParser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
 import { randomize } from '../../utils/modules/index.js';
@@ -92,7 +92,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 				from,
 				{
 					text: texts,
-					footer: `Void Bot   page : ${Number(index) + 1}/${splitData.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
+					footer: `Page : ${Number(index) + 1}/${splitData.length}\nPowered by Hidden Finder`,
 					buttons,
 					headerType: 1
 				},

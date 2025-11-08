@@ -1,8 +1,31 @@
+import { spawn } from 'child_process';
 import express from 'express';
+import validate from 'express-zod-safe';
 import path from 'path';
 import puppeteer from 'puppeteer';
+import { z } from 'zod';
 
 import { color, loggers } from '../../../utils/modules/index.js';
+
+const query = {
+	colors: z.string().optional(),
+	dimensions: z
+		.string()
+		.regex(/^\d+x\d+$/)
+		.optional(),
+	animate: z
+		.string()
+		.transform((v) => v === 'true')
+		.optional(),
+	time: z
+		.string()
+		.transform((v) => parseInt(v, 10))
+		.optional(),
+	seed: z
+		.string()
+		.transform((v) => parseInt(v, 10))
+		.optional()
+};
 
 export const server = (isReconnect) => {
 	if (isReconnect) {
@@ -14,13 +37,20 @@ export const server = (isReconnect) => {
 
 	app.use(express.static(path.join(__dirname, 'public')));
 
-	app.get('/render', (req, res) => {
-		const { colors, dimensions, animate, seed, time } = req.query;
+	const parseQuery = (query) => {
+		const { colors, dimensions, animate, seed, time } = query;
 
-		const [width, height] = (dimensions === 'undefined' || !dimensions ? '1280x720' : dimensions).split('x').map(Number);
-		const COLORS = (colors === 'undefined' || !colors ? ['#295C96', '#D0CBC7', '#899FB6'] : colors)
-			.split(',')
-			.map((c) => '#' + c);
+		const SEED = seed !== 'undefined' ? Number(seed) : Math.floor(Math.random() * 10_000);
+		const [WIDTH, HEIGHT] = (dimensions || '1280x720').split('x').map(Number);
+		const COLORS = (colors || '295C96,D0CBC7,899FB6').split(',').map((c) => `#${c}`);
+		const SHOULD_ANIMATE = animate === true;
+		const TIME = time ? Number(time) : 2;
+
+		return { SEED, WIDTH, HEIGHT, COLORS, SHOULD_ANIMATE, TIME };
+	};
+
+	app.get('/render', validate({ query }), (req, res) => {
+		const { SEED, WIDTH, HEIGHT, COLORS, SHOULD_ANIMATE, TIME } = parseQuery(req.query);
 
 		const html = `
 <!DOCTYPE html>
@@ -35,7 +65,7 @@ export const server = (isReconnect) => {
   </style>
 </head>
 <body>
-  <canvas id="canvas" width="${width}" height="${height}"></canvas>
+  <canvas id="canvas" width="${WIDTH}" height="${HEIGHT}"></canvas>
   <script type="module">
     import MeshGradient from "https://esm.sh/mesh-gradient.js";
 
@@ -48,17 +78,17 @@ export const server = (isReconnect) => {
       };
     }
 
-    const seedValue = ${seed === 'undefined' ? 'null' : seed};
+    const seedValue = ${SEED};
     const rng = seedValue ? mulberry32(seedValue) : Math.random;
     if (seedValue) Math.random = rng;
 
     const gradient = new MeshGradient();
     gradient.initGradient('#canvas', ${JSON.stringify(COLORS)});
-    gradient.setCanvasSize(${width}, ${height});
+    gradient.setCanvasSize(${WIDTH}, ${HEIGHT});
 
-    const animate = ${animate === 'true' ? 'true' : 'false'};
+    const animate = ${SHOULD_ANIMATE};
     const fps = 30;
-    const runningTime = ${time === 'undefined' || !time ? 2 : time} * fps
+    const runningTime = ${TIME} * fps
     const capturer = new CCapture({ format: 'webm', quality: 100, framerate: fps });
     const frames = runningTime;
 
@@ -74,6 +104,7 @@ export const server = (isReconnect) => {
       if (animate) capturer.capture(document.querySelector('canvas'));
       t += speed;
       frameCount++;
+
 
       if (frameCount < frames) {
         setTimeout(renderFrame, interval);
@@ -97,47 +128,80 @@ export const server = (isReconnect) => {
 		res.send(html);
 	});
 
-	app.get('/gradient', async (req, res) => {
-		const { colors, dimensions, animate, seed, time } = req.query;
+	app.get('/gradient', validate({ query }), async (req, res) => {
+		const { SEED, WIDTH, HEIGHT, COLORS, SHOULD_ANIMATE, TIME } = parseQuery(req.query);
 
-		const [width, height] = dimensions.split('x').map(Number);
-
-		const browser = await puppeteer.launch({ headless: 'shell' });
+		const browser = await puppeteer.launch({ headless: false });
 		const page = await browser.newPage();
 
-		await page.setViewport({ width, height });
-		await page.goto(
-			`http://localhost:${PORT}/render?colors=${colors}&dimensions=${dimensions}&animate=${animate}&seed=${seed}&time=${time}`,
-			{
-				waitUntil: 'networkidle0'
-			}
-		);
+		await page.setViewport({ width: WIDTH, height: HEIGHT });
 
-		await page.waitForFunction('window.ready === true');
+		const url = `http://localhost:${PORT}/render?colors=${COLORS.map((c) => c.replace('#', '')).join(',')}&dimensions=${WIDTH}x${HEIGHT}&animate=${SHOULD_ANIMATE}&seed=${isNaN(SEED) ? 0 : SEED}&time=${TIME}`;
 
-		if (animate === 'true') {
+		await page.goto(url, { waitUntil: 'networkidle0' });
+
+		await page.waitForFunction('window.ready === true', { timeout: 0 });
+
+		let buffer;
+		let contentType;
+
+		if (SHOULD_ANIMATE) {
 			const blobBuffer = await page.evaluate(async () => {
 				const arrayBuffer = await window.finalBlob.arrayBuffer();
 
 				return Array.from(new Uint8Array(arrayBuffer));
 			});
 
-			const buffer = Buffer.from(blobBuffer);
+			buffer = await webmToMp4Buffer(Buffer.from(blobBuffer));
 
-			res.setHeader('Content-Type', 'image/webm');
-			res.end(buffer);
+			contentType = 'video/mp4';
 		} else {
-			const buffer = await page.screenshot({ omitBackground: false });
-
-			res.setHeader('Content-Type', 'image/png');
-			res.setHeader('Content-Disposition', 'inline; filename="gradient.png"');
-			res.end(Buffer.from(buffer));
+			buffer = await page.screenshot({ omitBackground: false });
+			contentType = 'image/png';
 		}
 
 		await browser.close();
+
+		res.setHeader('Content-Type', contentType);
+		res.setHeader('Content-Disposition', `inline; filename="gradient.${SHOULD_ANIMATE ? 'mp4' : 'png'}"`);
+		res.end(buffer);
 	});
 
 	app.listen(PORT, () => {
 		loggers.info(color('Server Mesh Gradient', 'white'), color('started on port', '#E4C1F9'), color(PORT, 'white'));
 	});
 };
+
+async function webmToMp4Buffer(inputBuffer) {
+	return new Promise((resolve, reject) => {
+		const ffmpeg = spawn('ffmpeg', [
+			'-i',
+			'pipe:0',
+			'-f',
+			'mp4',
+			'-movflags',
+			'frag_keyframe+empty_moov',
+			'-preset',
+			'ultrafast',
+			'-an',
+			'pipe:1'
+		]);
+
+		const chunks = [];
+		let stderr = '';
+
+		ffmpeg.stdout.on('data', (chunk) => chunks.push(chunk));
+		ffmpeg.stderr.on('data', (data) => (stderr += data.toString()));
+
+		ffmpeg.on('close', (code) => {
+			if (code === 0) {
+				resolve(Buffer.concat(chunks));
+			} else {
+				reject(new Error(`ffmpeg exited with code ${code}: ${stderr}`));
+			}
+		});
+
+		ffmpeg.stdin.write(inputBuffer);
+		ffmpeg.stdin.end();
+	});
+}

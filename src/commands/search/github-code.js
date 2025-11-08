@@ -65,7 +65,7 @@ ${data[index].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).
 								} /* eslint-disable-line */
 							: {}
 					],
-					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+					footer: `${index + 1}/${data.length}\nPowered by Hidden Finder`
 				},
 				{ quoted: message }
 			);
@@ -110,7 +110,7 @@ ${result[0].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).jo
 							} /* eslint-disable-line */
 						: {}
 				],
-				footer: `Void Bot     1/${result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+				footer: `1/${result.length}\nPowered by Hidden Finder`
 			},
 			{ quoted: message }
 		);

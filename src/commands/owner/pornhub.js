@@ -1,5 +1,5 @@
-import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { arq } from '../../utils/arq/index.js';
+import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -62,7 +62,7 @@ Uploaded : ${data[index].uploaded}
 Type : ${data[index].type}
 Category : ${data[index].categories.join(', ')}
 Tags : ${data[index].tags.join(', ')}
-Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+${index + 1}/${data.length}\nPowered by Hidden Finder`
 				},
 				{ quoted: message }
 			);
@@ -112,7 +112,7 @@ Tags : ${tags.join(', ')}`;
 					// 							: {}
 					// 					],
 					// 					footer: `
-					// Void Bot     1/${result.result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+					// Void Bot     1/${result.result.length}\nPowered by Hidden Finder`
 				},
 				{ quoted: message }
 			);

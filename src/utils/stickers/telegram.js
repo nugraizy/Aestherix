@@ -1,35 +1,27 @@
-import { cheerioLOAD, fetchJSON, fetchTEXT } from '../modules/index.js';
+import { fetchJSON } from '../modules/index.js';
 
-const _apiBase = (input) => `https://api.telegram.org/bot1324131825:AAFA5kj-T55WZ6nnOmU35A4iKhRsPVyLAU8/${input}`;
-const _apiDatabase = (input) => `https://api.telegram.org/file/bot1324131825:AAFA5kj-T55WZ6nnOmU35A4iKhRsPVyLAU8/${input}`;
-const _apiCombot = (input) => `https://combot.org/telegram/stickers?q=${encodeURI(input)}`;
+const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
+
+const _apiBase = (input) => `https://api.telegram.org/bot${TELEGRAM_TOKEN}/${input}`;
+const _apiDatabase = (input) => `https://api.telegram.org/file/bot${TELEGRAM_TOKEN}/${input}`;
+const _apiSigStick = (keyword) => `https://www.sigstick.com/_next/data/9rEJZP6nb1uI-eY-NyCy3/stickers.json?keyword=${keyword}`;
 
 const telegramFind = (query) =>
 	new Promise(async (resolve) => {
 		try {
-			const data = await fetchTEXT(_apiCombot(query), {
+			const data = await fetchJSON(_apiSigStick(query), {
 				headers: {
 					'User-Agent':
 						'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.210 Mobile Safari/537.36'
 				}
 			});
-			const results = [];
-			const $ = cheerioLOAD(data);
-			const bound = $('body > div > main > div.page > div > div.stickers-catalogue > div.tab-content > div > div');
 
-			bound.each(function () {
-				const title = $(this).find('.sticker-pack__title').text()?.trim();
-				const thumbnail = $(this)
-					.find('.sticker-pack__sticker > div.sticker-pack__sticker-inner > div.sticker-pack__sticker-img')
-					.attr('data-src');
-				const url = $(this).find('.sticker-pack__header > a.sticker-pack__btn').attr('href');
+			const results = data.pageProps.packs.map((v) => ({
+				title: v.title,
+				thumbnail: v.cover.url,
+				url: v.telegramUrl
+			}));
 
-				results.push({
-					title,
-					thumbnail,
-					url
-				});
-			});
 			resolve({ status: true, results });
 		} catch (e) {
 			resolve({ error: e.message });
@@ -60,6 +52,7 @@ export const telegram = (query) =>
 			}
 
 			const results = await telegramFind(query);
+
 			const data = await fetchJSON(
 				_apiBase(
 					`getStickerSet?name=${

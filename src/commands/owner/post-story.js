@@ -63,7 +63,7 @@ export default {
 				'status@broadcast',
 				{
 					[mediaType]: media,
-					caption: query || 'Sent from Aestherix'
+					caption: query || `Sent from ${__botName}`
 				},
 				{
 					backgroundColor: '#FFFF',

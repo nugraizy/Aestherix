@@ -23,10 +23,9 @@ export const getScreenshotAPI = async (url, type) =>
 					type = 'dimension=1024x768&device=desktop';
 					break;
 			}
-			const response = await fetchBUFFER(
+			const buffer = await fetchBUFFER(
 				`https://api.screenshotmachine.com/?key=${process.env.WEB_SCREENSHOT}&url=${url}&${type}`
 			);
-			const buffer = Buffer.from(response);
 
 			resolve({
 				buffer

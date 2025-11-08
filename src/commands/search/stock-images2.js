@@ -47,7 +47,7 @@ export default {
 								} /* eslint-disable-line */
 							: {}
 					],
-					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+					footer: `${index + 1}/${data.length}\nPowered by Hidden Finder`
 				},
 				{ quoted: message }
 			);
@@ -83,7 +83,7 @@ export default {
 								} /* eslint-disable-line */
 							: {}
 					],
-					footer: '\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪'
+					footer: '\nPowered by Hidden Finder'
 				},
 				{ quoted: message }
 			);

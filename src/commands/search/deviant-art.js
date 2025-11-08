@@ -1,5 +1,5 @@
-import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { searchDeviantArt } from '../../utils/deviant_art/index.js';
+import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -57,7 +57,7 @@ export default {
 Author : ${data[index].author}
 Favourites : ${numberWithCommas(data[index].favourites)}
 Views : ${numberWithCommas(data[index].views)}
-Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+${index + 1}/${data.length}\nPowered by Hidden Finder`
 				},
 				{ quoted: message }
 			);
@@ -98,7 +98,7 @@ Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅
 Author : ${result[index].author}
 Favourites : ${numberWithCommas(result[index].favourites)}
 Views : ${numberWithCommas(result[index].views)}
-\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+\nPowered by Hidden Finder`
 				},
 				{ quoted: message }
 			);

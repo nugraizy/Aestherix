@@ -1,0 +1,56 @@
+declare namespace NodeJS {
+	interface ProcessEnv {
+		BLUESKY_IDENTIFIER?: string;
+		BLUESKY_PASSWORD?: string;
+		INSTAGRAM_SESI?: string;
+		INSTAGRAM_USERNAME?: string;
+		INSTAGRAM_PASSWORD?: string;
+		GITHUB_SECRET_WEBHOOK?: string;
+		GITHUB_AUTH_TOKEN?: string;
+		COOKIE_BRAINANS_COM?: string;
+		COOKIE_TIKTOK_COM?: string;
+		WEB_SCREENSHOT_KEY?: string;
+		MONGO_COMPASS?: string;
+		MONGO_URI?: string;
+		TWITTER_API_KEY?: string;
+		TWITTER_API_KEY_SECRET?: string;
+		TWITTER_ACCESS_TOKEN?: string;
+		TWITTER_GUEST_ACCESS_TOKEN?: string;
+		DEEP_KEY?: string;
+		SPOTIFY_CLIENT_ID?: string;
+		SPOTIFY_CLIENT_SECRET?: string;
+		SPOTIFY_REFRESH_TOKEN?: string;
+		SPOTIFY_ACCESS_TOKEN?: string;
+		SPOTIFY_ACCESS_CREDENTIAL_TOKEN?: string;
+		SPOTIFY_DEVICE_ID?: string;
+		MQTT_SPOTIFY_BIO?: string;
+		MQTT_SPOTIFY_PLAYBACK?: string;
+		MQTT_FREEGAME?: string;
+		MQTT_URL?: string;
+		MAL_ID?: string;
+		MAL_SECRET?: string;
+		MAL_REFRESH?: string;
+		MAL_ACCESS?: string;
+		ARQ_KEY?: string;
+		PEXEL_TOKEN?: string;
+		RAPID_TOKEN?: string;
+		FLICKR_KEY?: string;
+		FLICKR_SECRET?: string;
+		GITHUB_CLIENT_ID?: string;
+		GITHUB_SECRET?: string;
+		GITHUB_ACCESS?: string;
+		REMOVEBG_KEY?: string;
+		ACR_KEY?: string;
+		ACR_SECRET?: string;
+		ACR_HOST?: string;
+		OPENAI_KEY?: string;
+		UBERDUCK_BASIC?: string;
+		'API-ID'?: string;
+		'API-HASH'?: string;
+		TELEGRAM_TOKEN?: string;
+		BING_COOKIE?: string;
+		WEATHER_KEY?: string;
+		YOUTUBE_AUTH?: string;
+		PINTEREST_COOKIE?: string;
+	}
+}

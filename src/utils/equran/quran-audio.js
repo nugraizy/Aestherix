@@ -9,7 +9,7 @@ export const getSurahAudio = (nomor) =>
 
 			resolve({
 				url: data.audio,
-				buffer: Buffer.from(await fetchBUFFER(data.audio))
+				buffer: await fetchBUFFER(data.audio)
 			});
 		} catch (err) {
 			reject(err);

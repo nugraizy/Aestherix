@@ -1,9 +1,9 @@
-import path from 'path';
 import ora from 'ora';
+import path from 'path';
 
-import configuration from '../../config/connect.js';
 import { color, loadFiles, loggers } from '../../../utils/modules/index.js';
-import { normalizeImportPath, watch, validatePlugins } from './cache.js';
+import configuration from '../../config/connect.js';
+import { normalizeImportPath, validatePlugins, watch } from './cache.js';
 import { ModuleError, isMissingProperty } from './util.js';
 
 /**
@@ -117,7 +117,7 @@ export const loadCommands = async (OPTIONS) => {
 					text: 'Loading Plugins...',
 					hideCursor: true,
 					discardStdin: false
-			  }).start() // eslint-disable-line
+				}).start() // eslint-disable-line
 			: null;
 
 		const folders = new Set();

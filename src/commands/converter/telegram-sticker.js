@@ -21,6 +21,8 @@ export default {
 			return await client.instance.reply(from, 'Please enter a query', message);
 		}
 
+		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+
 		const result = await telegram(query);
 
 		if (result?.stickers?.length > 10) {
@@ -31,7 +33,7 @@ export default {
 			result.stickers.length
 		}`;
 
-		await client.instance.send(from, { text: capt }, { quoted: message });
+		await wait.update(capt);
 
 		for (const stickers of result.stickers) {
 			const sticker = await client.instance.prepareSticker(
@@ -44,7 +46,7 @@ export default {
 				}
 			);
 
-			await client.instance.send(from, { sticker }, { quoted: message });
+			await client.instance.send(from, { sticker });
 		}
 	}
 };

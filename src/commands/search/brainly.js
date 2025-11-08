@@ -48,7 +48,7 @@ export default {
 				.trim()}\n\n\n`;
 		}
 
-		capt += '\nBrainly by Void Bot. Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪';
+		capt += `\nBrainly by ${__botName}. Powered by Hidden Finder`;
 		await client.instance.reply(from, capt.trim().formatForm(), message);
 	}
 };

@@ -9,7 +9,7 @@ import isBuffer from 'is-buffer';
 import _ from 'lodash';
 import ms from 'parse-ms';
 import progress from 'progress-stream';
-import { Client, fetch, File, FormData as FormDataUndici } from 'undici';
+import { Client, fetch, FormData as FormDataUndici } from 'undici';
 
 import configuration from '../../helper/config/connect.js';
 import { color } from './color.js';
@@ -22,7 +22,17 @@ export { color };
  * @param {RequestInit} options node-fetch options
  * @returns {Promise<string>}
  */
-export const fetchTEXT = async (url, options) => await (await fetch(url, options)).text();
+export const fetchTEXT = async (url, options) => {
+	const response = await fetch(url, options);
+
+	if (!response.ok) {
+		throw new Error(response.status);
+	}
+
+	const text = await response.text();
+
+	return text;
+};
 
 /**
  * Fetches objects
@@ -30,7 +40,17 @@ export const fetchTEXT = async (url, options) => await (await fetch(url, options
  * @param {RequestInit} options node-fetch options
  * @returns {Promise<object>}
  */
-export const fetchJSON = async (url, options) => await (await fetch(url, options)).json();
+export const fetchJSON = async (url, options) => {
+	const response = await fetch(url, options);
+
+	if (!response.ok) {
+		throw new Error(response.status);
+	}
+
+	const json = await response.json();
+
+	return json;
+};
 
 /**
  * Fetches buffers
@@ -38,7 +58,17 @@ export const fetchJSON = async (url, options) => await (await fetch(url, options
  * @param {RequestInit} options node-fetch options
  * @returns {Promise<ArrayBuffer>}
  */
-export const fetchBUFFER = async (url, options) => await (await fetch(url, options)).arrayBuffer();
+export const fetchBUFFER = async (url, options) => {
+	const response = await fetch(url, options);
+
+	if (!response.ok) {
+		throw new Error(response.status);
+	}
+
+	const buffer = await response.arrayBuffer();
+
+	return new Buffer.from(buffer);
+};
 
 /**
  * Fetches responses headers
@@ -46,7 +76,17 @@ export const fetchBUFFER = async (url, options) => await (await fetch(url, optio
  * @param {RequestInit} options node-fetch options
  * @returns {Promise<import('undici').Response['headers']>}
  */
-export const fetchHEADERS = async (url, options) => (await fetch(url, options)).headers;
+export const fetchHEADERS = async (url, options) => {
+	const response = await fetch(url, options);
+
+	if (!response.ok) {
+		throw new Error(response.status);
+	}
+
+	const { headers } = response;
+
+	return headers;
+};
 
 /**
  * Load HTML using cheerio
@@ -997,7 +1037,7 @@ export class Uploader {
 	/**
 	 * @private
 	 * @param {string} ext
-	 * @returns {import('undici').File}
+	 * @returns {File}
 	 */
 	newFile(ext) {
 		return new File([this._file], `file.${ext}`);

@@ -1,5 +1,5 @@
-import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { FlickerAPI } from '../../utils/flickr/index.js';
+import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -37,7 +37,7 @@ Description : ${data[index].description}
 Tags : ${data[index].tags || 'n/a'}
 Published : ${data[index].posted}
 
-Powered by 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`.formatForm()
+Powered by Hidden Finder`.formatForm()
 					// templateButtons: [
 					// 	{ urlButton: { displayText: 'Flickr Source', url: args[1] === 'next' ? data[index].source : data[index].source } },
 					// 	index + 1 !== data.length
@@ -108,7 +108,7 @@ Published : ${result[index].posted}`
 					// 							: {}
 					// 					],
 					// 					footer: `
-					// \nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+					// \nPowered by Hidden Finder`
 				},
 				{ quoted: message }
 			);

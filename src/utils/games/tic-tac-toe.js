@@ -17,7 +17,7 @@ const MODEL = {
 };
 
 const RANDOM_TURN_BASED_ON_MODEL = (player1, player2) => {
-	const players = player2 === 'Void Bot' ? [player1, player2] : shuffleArray([player1, player2]);
+	const players = player2 === __botName ? [player1, player2] : shuffleArray([player1, player2]);
 
 	return {
 		player1: players[0],
@@ -58,7 +58,7 @@ export const getTictactoeSession = (session) => {
 };
 
 export class TicTacToe {
-	constructor(player1, player2 = 'Void Bot', newGame) {
+	constructor(player1, player2 = __botName, newGame) {
 		const container = RANDOM_TURN_BASED_ON_MODEL(player1, player2);
 
 		this.COMBO = COMBOS;
@@ -117,11 +117,11 @@ export class TicTacToe {
 			return { error: 'It is not your turn' };
 		}
 
-		if (player === 'Void Bot') {
+		if (player === __botName) {
 			location = this.minimax(location, 0, true, pcRival).move;
-			this.BOARD[player === 'Void Bot' ? location : location - 1] =
+			this.BOARD[player === __botName ? location : location - 1] =
 				this.PLAYER_TURN === this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL;
-			this.PLAY_BOARD[player === 'Void Bot' ? location : location - 1] =
+			this.PLAY_BOARD[player === __botName ? location : location - 1] =
 				this.PLAYER_TURN === this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL;
 
 			if (this.isWinner(this.PLAYER_TURN === this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL)) {
@@ -137,9 +137,9 @@ export class TicTacToe {
 		}
 
 		if (this.isCorrectMove(location)) {
-			this.BOARD[player === 'Void Bot' ? location : location - 1] =
+			this.BOARD[player === __botName ? location : location - 1] =
 				this.PLAYER_TURN === this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL;
-			this.PLAY_BOARD[player === 'Void Bot' ? location : location - 1] =
+			this.PLAY_BOARD[player === __botName ? location : location - 1] =
 				this.PLAYER_TURN === this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL;
 
 			if (this.isWinner(this.PLAYER_TURN === this.PLAYER_1 ? this.PLAYER_1_MODEL : this.PLAYER_2_MODEL)) {

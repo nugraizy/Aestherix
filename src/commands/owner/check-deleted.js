@@ -1,8 +1,8 @@
 import fs from 'fs';
 
 import configuration from '../../helper/config/connect.js';
-import { getTimeSince } from '../../utils/modules/index.js';
 import { Cache } from '../../helper/modules/cache.js';
+import { getTimeSince } from '../../utils/modules/index.js';
 
 const DB_PATH = `./src/media/connection_databases/${configuration.cli.input[0] ?? 'Session-debug'}.json`;
 
@@ -52,7 +52,7 @@ export default {
 						rowId: `${cmd} get ${message.message.protocolMessage.key.id}`
 					}
 				],
-				title: `VOID BOT | ${message?.pushName ?? 'No Name'}`
+				title: `${__botName} | ${message?.pushName ?? 'No Name'}`
 			});
 			i++;
 		}

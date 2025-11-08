@@ -48,7 +48,7 @@ Tot. Chapters : ${chapters.length}`;
 				{
 					buttonText: 'Open list',
 					title: 'See chapters',
-					footer: 'Made by Void Bot. Powered by Hidden Finder',
+					footer: `Made by ${__botName}. Powered by Hidden Finder`,
 					text: '\t',
 					sections: row
 				},
@@ -90,7 +90,7 @@ Tot. Chapters : ${chapters.length}`;
 			{
 				buttonText: 'Open list',
 				title: 'See result',
-				footer: 'Made by Void Bot. Powered by Hidden Finder',
+				footer: `Made by ${__botName}. Powered by Hidden Finder`,
 				text: '\t',
 				sections: row
 			},

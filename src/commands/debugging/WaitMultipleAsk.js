@@ -23,7 +23,7 @@ export default {
 		if (wait.timeout) {
 			client.instance.reply(from, 'Timeout! I will just call you ' + pushname, message);
 		} else {
-			client.instance.reply(from, `Hi ${wait.message}. I'm Void Bot. Nice to know you!`, {
+			client.instance.reply(from, `Hi ${wait.message}. I'm ${__botName} Bot. Nice to know you!`, {
 				from,
 				quoted: wait.quoted
 			});

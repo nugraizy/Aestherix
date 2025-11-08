@@ -131,7 +131,7 @@ const sendNotification = async (client, text, id, author, participant, groupName
 	const attach = new Attachment(1024, 500);
 	const { profile, radi } = await client.instance
 		.profilePictureUrl(participant, 'image')
-		.then(async (image) => ({ profile: new Buffer.from(await fetchBUFFER(image)), radi: 180 }))
+		.then(async (image) => ({ profile: await fetchBUFFER(image), radi: 180 }))
 		.catch(() => ({ profile: './src/media/blank.png', radi: 80 }));
 
 	await attach.init(profile);

@@ -46,7 +46,7 @@ export default {
 								} /* eslint-disable-line */
 							: {}
 					],
-					footer: `Void Bot     1/${result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+					footer: `1/${result.length}\nPowered by Hidden Finder`
 				},
 				{ quoted: message }
 			);

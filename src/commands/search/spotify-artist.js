@@ -78,7 +78,7 @@ export default {
 								rowId: `.spotifydl ${name} - ${artists[0].name}`
 							}
 						],
-						title: 'VOID BOT | Powered by Spotify'
+						title: `${__botName} | Powered by Spotify`
 					});
 				}
 
@@ -88,7 +88,7 @@ export default {
 			await client.instance.send(
 				from,
 				{
-					image: new Buffer.from(await fetchBUFFER(images), 'base64'),
+					image: await fetchBUFFER(images),
 					caption: 'Spotify Artist'.formatHeaders() + `\n\n${caption.formatForm()}`
 					// templateButtons: [
 					// 	{

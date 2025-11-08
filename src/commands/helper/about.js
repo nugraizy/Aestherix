@@ -37,7 +37,7 @@ Hanif a.k.a Mrhrtz
 Nafiz a.k.a VoIP
 Toby a.k.a Tobz
 
-Powered by 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`,
+Powered by Hidden Finder`,
 			message
 		);
 	}

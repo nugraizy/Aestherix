@@ -14,7 +14,7 @@ export default {
 	limit: 3,
 	status: 'enable',
 	async run({ from, query, message }, client) {
-		let capt = 'Aestherix Bot Search\n\n';
+		let capt = `${__botName} Search\n\n`;
 		const messages = await client.instance.searchMessage(from, query);
 
 		if (!messages.length) {

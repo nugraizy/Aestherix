@@ -1,6 +1,6 @@
-import { S_WHATSAPP_NET } from '../../index.js';
 import { delay } from '../../../utils/modules/index.js';
 import configuration from '../../config/connect.js';
+import { S_WHATSAPP_NET } from '../../index.js';
 
 function generatePlaybackStatus({ trackTitle, artists, durationMs, progressMs, isPlaying }) {
 	const progressBarLength = 10;
@@ -83,7 +83,7 @@ ${result.title}`;
 				await client?.instance?.send(destination, {
 					image: { url: result.preview.images[0].source.url.replace('amp;', '') },
 					caption,
-					footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
+					footer: 'Powered by Hidden Finder',
 					templateButtons: [
 						{ urlButton: { displayText: 'Open Platform', url: result.url_overridden_by_dest } },
 						{ urlButton: { displayText: 'Image Source', url: result.preview.images[0].source.url.replace('amp;', '') } }

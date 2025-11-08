@@ -1,7 +1,7 @@
-import parser from 'yargs-parser';
 import _ from 'lodash';
+import parser from 'yargs-parser';
 
-import { color, loggers, formatNumber } from '../../utils/modules/index.js';
+import { color, formatNumber, loggers } from '../../utils/modules/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
 
 /**
@@ -46,7 +46,7 @@ export default {
 				{
 					buttonText: 'Open list',
 					title: 'See List Videos',
-					footer: 'Made by Void Bot. Powered by Hidden Finder',
+					footer: `Made by ${__botName}. Powered by Hidden Finder`,
 					text: '\t',
 					sections: row
 				},

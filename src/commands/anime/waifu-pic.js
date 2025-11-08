@@ -29,7 +29,7 @@ export default {
 
 			builder
 				.mainBody('Waifu Pics'.formatHeaders())
-				.mainFooter(`Provided by waifu.pics\nVoid Bot     ${index + 1}/${data.length}`)
+				.mainFooter(`Provided by waifu.pics\n${index + 1}/${data.length}`)
 				.mainHeader('Header', data[index])
 				.buttons(
 					...[
@@ -84,7 +84,7 @@ export default {
 
 			builder
 				.mainBody('Waifu Pics'.formatHeaders())
-				.mainFooter(`Provided by waifu.pics\nVoid Bot     1/${result.length}`)
+				.mainFooter(`Provided by waifu.pics\n1/${result.length}`)
 				.mainHeader('Header', result[0])
 				.buttons(
 					...[

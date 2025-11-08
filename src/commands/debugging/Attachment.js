@@ -1,5 +1,5 @@
-import { fetchBUFFER } from '../../utils/index.js';
 import { Attachment } from '../../helper/index.js';
+import { fetchBUFFER } from '../../utils/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -19,7 +19,7 @@ export default {
 
 		const { profile, radi } = await client.instance
 			.profilePictureUrl(mention[0] || sender, 'image')
-			.then(async (image) => ({ profile: new Buffer.from(await fetchBUFFER(image)), radi: 180 }))
+			.then(async (image) => ({ profile: await fetchBUFFER(image), radi: 180 }))
 			.catch(() => ({ profile: './src/media/blank.png', radi: 80 }));
 
 		await attach.init(profile);

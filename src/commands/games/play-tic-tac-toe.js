@@ -1,5 +1,5 @@
-import { delay } from '../../utils/modules/index.js';
 import { deleteTictactoeSession, getTictactoeSession, TicTacToe } from '../../utils/games/index.js';
+import { delay } from '../../utils/modules/index.js';
 
 const WINNER_SETS = {
 	O: '🚫',
@@ -20,20 +20,20 @@ export default {
 	cooldown: 2,
 	status: 'enable',
 	async run({ message, query, from, sender }, client) {
-		const capt = (game, status) => `TicTacToe Games by Aestherix Bot.
+		const capt = (game, status) => `TicTacToe Games by ${__botName} Bot.
 	${
 		status
 			? game.status === 'WINNER'
-				? `${game.winner === 'Aestherix Bot' ? 'Aestherix Bot' : `@${game.winner.split('@')[0]}`} wins!`
+				? `${game.winner === __botName ? __botName : `@${game.winner.split('@')[0]}`} wins!`
 				: game.status === 'DRAW'
 					? 'Game is Draw!'
 					: `${game.PLAYER_TURN === game.PLAYER_1 ? game.PLAYER_1_MODEL : game.PLAYER_2_MODEL} ${
-							game.PLAYER_TURN === 'Aestherix Bot' ? 'Aestherix Bot' : `@${game.PLAYER_TURN.split('@')[0]}`
+							game.PLAYER_TURN === __botName ? __botName : `@${game.PLAYER_TURN.split('@')[0]}`
 						}'s turn\n\n` /* eslint-disable-line */
 			: ''
 	}
 	${game.PLAYER_1_MODEL} @${game.PLAYER_1.split('@')[0]} vs ${game.PLAYER_2_MODEL} ${
-		game.PLAYER_2 === 'Aestherix Bot' ? 'Aestherix Bot' : `@${game.PLAYER_2.split('@')[0]}`
+		game.PLAYER_2 === __botName ? __botName : `@${game.PLAYER_2.split('@')[0]}`
 	}
 	
 ${game.BOARD.map((v, i) => {
@@ -54,7 +54,7 @@ ${game.BOARD.map((v, i) => {
 	return v;
 }).join('')}
 
-Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
+Powered by Hidden Finder`;
 
 		if (/(del|dlt|d)/i.test(query)) {
 			const status = getTictactoeSession(sender);
@@ -107,13 +107,13 @@ Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
 
 			await client.instance.send(from, { text: capt(move), mentions: [game.PLAYER_1, game.PLAYER_2] }, { quoted: message });
 
-			if (move.PLAYER_TURN === 'Aestherix Bot') {
+			if (move.PLAYER_TURN === __botName) {
 				const botGames = getTictactoeSession(sender);
 
-				await client.instance.reply(from, 'Aestherix Bot TURN', message);
+				await client.instance.reply(from, `${__botName} Bot TURN`, message);
 				await delay(1000);
 
-				const botMove = botGames.playMove(botGames.displayPlayBoard(), 'Aestherix Bot', sender);
+				const botMove = botGames.playMove(botGames.displayPlayBoard(), __botName, sender);
 
 				if (botMove.status === 'WINNER' || botMove.status === 'DRAW') {
 					await client.instance.send(

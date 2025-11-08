@@ -38,7 +38,7 @@ IMDb : ${data[index].ratings}
 Release Date : ${data[index].released}
 Translate By : ${data[index].translateBy}
 					
-Powered by 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`.formatForm(),
+Powered by Hidden Finder`.formatForm(),
 					templateButtons: [
 						index + 1 !== data.length
 							? {
@@ -83,7 +83,7 @@ IMDb : ${result[0].ratings}
 Release Date : ${result[0].released}
 Translate By : ${result[0].translateBy}
 
-Void Bot     1/${result.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`,
+1/${result.length}\nPowered by Hidden Finder`,
 				templateButtons: [
 					result.length !== 1
 						? {

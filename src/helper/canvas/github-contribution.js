@@ -4,7 +4,7 @@ import _ from 'lodash';
 import path from 'path';
 import { Client } from 'undici';
 
-const copyright = '© 2022 Hidden Finder, Inc | Made by Aestherix using Canvas Module.';
+const copyright = `© 2025 Hidden Finder, Inc | Made by ${__botName} using Canvas Module.`;
 
 const { createCanvas, GlobalFonts, loadImage } = Canvas;
 

@@ -163,39 +163,43 @@ export const start = async (isReconnect) => {
 				};
 
 				cron.schedule('*/20 * * * * *', async () => {
-					const pinterestId = configuration.pinterestId;
+					try {
+						const pinterestId = configuration.pinterestId;
 
-					if (images.length === 0 && !currentPinterestId) {
-						await fetchImages(pinterestId);
-						currentPinterestId = pinterestId || null;
-					}
+						if (images.length === 0 && !currentPinterestId) {
+							await fetchImages(pinterestId);
+							currentPinterestId = pinterestId || null;
+						}
 
-					if (pinterestId !== currentPinterestId) {
-						images = [];
-						bookmarks = null;
-						await fetchImages(pinterestId);
-						currentPinterestId = pinterestId || null;
-					}
+						if (pinterestId !== currentPinterestId) {
+							images = [];
+							bookmarks = null;
+							await fetchImages(pinterestId);
+							currentPinterestId = pinterestId || null;
+						}
 
-					if (images.length === 0) {
-						await fetchImages(pinterestId);
-					}
+						if (images.length === 0) {
+							await fetchImages(pinterestId);
+						}
 
-					if (images.length === 0) {
-						return;
-					}
+						if (images.length === 0) {
+							return;
+						}
 
-					const imageUrl = images.shift().url;
-					const image = await downloadImage(imageUrl);
+						const imageUrl = images.shift().url;
+						const image = await downloadImage(imageUrl);
 
-					const date = dayjs.tz().format('YYYY/MM/DD HH:mm:ss');
+						const date = dayjs.tz().format('YYYY/MM/DD HH:mm:ss');
 
-					configuration.pinterestImages.set(date, imageUrl);
+						configuration.pinterestImages.set(date, imageUrl);
 
-					await client.instance.updateProfilePicture(instance, image, 'no_crop');
+						await client.instance.updateProfilePicture(instance, image, 'no_crop');
 
-					if (isWABusinessPlatform(client.instance.authState.creds.platform)) {
-						await client.instance.updateCoverPhoto(await sharp(image).blur(10).png().toBuffer());
+						if (isWABusinessPlatform(client.instance.authState.creds.platform)) {
+							await client.instance.updateCoverPhoto(await sharp(image).blur(10).png().toBuffer());
+						}
+					} catch {
+						// do nothing
 					}
 				});
 			}

@@ -113,7 +113,7 @@ export const assign = (client) => {
 
 						await img.load(buffer);
 						return img;
-					})(); /* eslint-disable-line */
+					})();
 		buffer.exif = exif;
 
 		return await buffer.save(null);
@@ -143,10 +143,7 @@ export const assign = (client) => {
 		}
 
 		if ((message?.video || message?.image || message?.document || message?.audio)?.url) {
-			const buffer = Buffer.from(
-				await fetchBUFFER((message.video || message.image || message.document || message.audio)?.url),
-				'base64'
-			);
+			const buffer = await fetchBUFFER((message.video || message.image || message.document || message.audio)?.url);
 
 			if (message.video) {
 				message.video = buffer;
@@ -974,7 +971,7 @@ export const assign = (client) => {
 			const quoted = message
 				? {
 						quoted: message
-					} // eslint-disable-line
+					}
 				: {};
 
 			if (update.isExist('ADD', 'REMOVE', 'DEMOTE', 'PROMOTE')) {
@@ -1044,9 +1041,7 @@ export const assign = (client) => {
 											inviteExpiration: response?.[0]?.expiration,
 											groupName: (await client.instance.groupMetadata(jid)).subject,
 											caption: 'Invitation to join my WhatsApp group',
-											jpegThumbnail: new Buffer.from(
-												await fetchBUFFER(await client.instance.profilePictureUrl(jid, 'preview'))
-											).toString('base64')
+											jpegThumbnail: await fetchBUFFER(await client.instance.profilePictureUrl(jid, 'preview'))
 										}
 									},
 									{}

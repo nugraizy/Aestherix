@@ -44,7 +44,7 @@ const getTotalCommit = async () => {
 
 export const stringifyChangelogs = async (data) => {
 	const totalCommit = await getTotalCommit();
-	let caption = `⚙️ ${'Aestherix'.formatHeaders(true)} *Changelog* v${version} ⚙️
+	let caption = `⚙️ ${__botName.formatHeaders(true)} *Changelog* v${version} ⚙️
 
 Total Commits *${totalCommit}*
 From: ${data[data.length - 1].author.formattedDate}

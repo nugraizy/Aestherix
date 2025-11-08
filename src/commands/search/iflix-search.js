@@ -34,7 +34,7 @@ export default {
 							rowId: `${cmd} get ${v}`
 						}
 					],
-					title: 'VOID BOT | Powered by Iflix'
+					title: `${__botName} | Powered by Iflix`
 				};
 			});
 
@@ -64,7 +64,7 @@ export default {
 								} /* eslint-disable-line */
 							: {}
 					],
-					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+					footer: `${index + 1}/${data.length}\nPowered by Hidden Finder`
 				},
 				{ quoted: message }
 			);
@@ -108,7 +108,7 @@ export default {
 							rowId: `${cmd} get ${v}`
 						}
 					],
-					title: 'VOID BOT | Powered by Iflix'
+					title: `${__botName} | Powered by Iflix`
 				};
 			});
 
@@ -128,7 +128,7 @@ export default {
 								} /* eslint-disable-line */
 							: {}
 					],
-					footer: `Void Bot     1/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+					footer: `1/${data.length}\nPowered by Hidden Finder`
 				},
 				{ quoted: message }
 			);

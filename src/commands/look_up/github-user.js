@@ -1,7 +1,7 @@
 import parser from 'yargs-parser';
 
-import { numberWithCommas, isURL } from '../../utils/modules/index.js';
 import { Github } from '../../utils/github/index.js';
+import { isURL, numberWithCommas } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -53,7 +53,7 @@ Created : ${createdAt}
 Updated : ${updatedAt}
 Biography : ${bio}
                     
-Powered by 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`.formatForm()
+Powered by Hidden Finder`.formatForm()
 					// templateButtons: [
 					// 	{
 					// 		urlButton: {
@@ -173,7 +173,7 @@ Biography : ${bio}`;
 					// Updated : ${updatedAt}
 					// Biography : ${bio}
 
-					// Void Bot     1/${users.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+					// Void Bot     1/${users.length}\nPowered by Hidden Finder`
 				},
 				{}
 			);

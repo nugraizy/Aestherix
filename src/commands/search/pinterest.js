@@ -42,7 +42,7 @@ export default {
 				builder
 					.mainBody('Pinterest Downloader')
 					.mainFooter(
-						`Username : ${result.authorUsername}\nFullname : ${result.authorFullname}\nFollowers : ${result.follower}\n\nPowered by Aestherix`
+						`Username : ${result.authorUsername}\nFullname : ${result.authorFullname}\nFollowers : ${result.follower}\n\nPowered by Hidden Finder`
 					)
 					.mainHeader('Header', result.url)
 					.buttons(
@@ -140,7 +140,7 @@ Caption : ${results[index].caption}
 					.cards(
 						results.map(({ authorUsername, authorFullname, follower, caption, url, pinSource }) => ({
 							body: `Username : ${authorUsername}\nFullname : ${authorFullname}\nFollowers : ${follower}`,
-							footer: 'Powered by Aestherix',
+							footer: 'Powered by Hidden Finder',
 							title: caption === 'No caption' ? 'Title is n/a' : caption,
 							header: url,
 							buttons: [
@@ -177,7 +177,7 @@ Caption : ${results[index].caption}
 						.cards(
 							result.results.map(({ authorUsername, authorFullname, follower, caption, url, pinSource }) => ({
 								body: `Username : ${authorUsername}\nFullname : ${authorFullname}\nFollowers : ${follower}`,
-								footer: 'Powered by Aestherix',
+								footer: 'Powered by Hidden Finder',
 								title: caption === 'No caption' ? 'Title is n/a' : caption,
 								header: url,
 								buttons: [

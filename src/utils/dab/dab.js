@@ -15,20 +15,27 @@ const URL_CACHE = {
 
 const SERVERS = {
 	squid: {
-		subdomain: ['kraken', 'shiva', 'triton', 'aether', 'zeus', 'chaos', 'phoenix'],
+		subdomains: ['aether', 'chaos', 'kraken', 'phoenix', 'shiva', 'triton', 'zeus'],
 		tld: 'wtf'
 	},
 	monochrome: {
-		subdomain: ['ohio', 'virginia', 'frankfurt', 'singapore', 'tokyo'],
+		subdomains: ['california', 'frankfurt', 'jakarta', 'london', 'ohio', 'oregon', 'singapore', 'tokyo', 'virginia'],
 		tld: 'tf'
+	},
+	qqdl: {
+		subdomains: ['hund', 'katze', 'maus', 'vogel', 'wolf'],
+		tld: 'site'
+	},
+	prigoana: {
+		subdomains: ['hifi'],
+		tld: 'com'
 	}
 };
 
-const buildUrls = (path, params) => {
-	return Object.entries(SERVERS).flatMap(([domain, { subdomain, tld }]) =>
-		subdomain.map((sub) => `https://${sub}.${domain}.${tld}/${path}/?${params}`)
+const buildUrls = (path, params) =>
+	Object.entries(SERVERS).flatMap(([domain, { subdomains, tld }]) =>
+		subdomains.map((sub) => `https://${sub}.${domain}.${tld}/${path}/?${params}`)
 	);
-};
 
 const getDomains = (type, value) => {
 	if (URL_CACHE[type].has(value)) {
@@ -69,13 +76,22 @@ class Dab {
 		for (const url of domains) {
 			try {
 				const res = await fetch(url);
+
+				if (!res.ok) {
+					continue;
+				}
+
 				const data = await this.toJson(res);
+
+				if (!data) {
+					continue;
+				}
 
 				if (data?.detail === 'Too Many Requests') {
 					continue;
 				}
 
-				if (!data) {
+				if (data?.error) {
 					continue;
 				}
 
@@ -97,15 +113,18 @@ class Dab {
 			return QUERY_CACHE.search.get(query);
 		}
 
-		const container =
-			type === 'track' ? { type: 'search', params: { s: query, li: 50 } } : { type: 'albums', params: { al: query } };
+		const container = type === 'track' ? { params: { s: query, li: 50 } } : { params: { al: query } };
 
-		const domains = getDomains('search', container.params, type);
+		const domains = getDomains('search', container.params);
 
 		const { error, data } = await this.tryFetch(domains);
 
 		if (error) {
 			return error;
+		}
+
+		if (data.error) {
+			return data;
 		}
 
 		QUERY_CACHE.search.set(query + '-' + container.type, data);
@@ -127,7 +146,7 @@ class Dab {
 		}
 
 		if (data.error) {
-			return data.error;
+			return data;
 		}
 
 		let file, track, original;
@@ -174,6 +193,10 @@ class Dab {
 
 		if (error) {
 			return error;
+		}
+
+		if (data.error) {
+			return data;
 		}
 
 		QUERY_CACHE.album.set(id, data);

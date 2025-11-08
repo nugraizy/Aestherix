@@ -16,7 +16,7 @@ const events = async (client, containers, presence) => {
 		if (presence === 'bio') {
 			const time = dayjs.tz().format('HH:mm:ss DD/MM');
 			const uptime = getRuntime(process.uptime());
-			const bio = `Made by nanda | Void bot info : UPTIME : ${uptime} | TIME : ${time} | Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`;
+			const bio = `Made by nanda | ${__botName} Bot Info : UPTIME : ${uptime} | TIME : ${time} | Powered by Hidden Finder`;
 
 			await client.instance.setStatus(bio);
 			return;

@@ -43,7 +43,7 @@ export default {
 			{
 				image: buffer,
 				caption: 'Different of me',
-				footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
+				footer: 'Powered by Hidden Finder',
 
 				buttons: [
 					{

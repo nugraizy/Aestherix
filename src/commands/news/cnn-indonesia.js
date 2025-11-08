@@ -50,7 +50,7 @@ export default {
 								} /* eslint-disable-line */
 							: {}
 					],
-					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+					footer: `${index + 1}/${data.length}\nPowered by Hidden Finder`
 				},
 				{ quoted: message }
 			);
@@ -92,7 +92,7 @@ export default {
 						? { quickReplyButton: { displayText: 'Next Article', id: `${cmd} next ${data[1].image} ${JSON.stringify(data)}` } }
 						: {}
 				],
-				footer: `Void Bot     1/${data.length}\nPowered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪`
+				footer: `1/${data.length}\nPowered by Hidden Finder`
 			},
 			{ quoted: message }
 		);

@@ -25,6 +25,7 @@ const moduleURL = new URL(import.meta.url);
 
 export const __dirname = platform === 'win32' ? path.dirname(moduleURL.pathname).slice(1) : path.dirname(moduleURL.pathname);
 global.__dirname = __dirname;
+global.__botName = 'VoidBOT';
 
 const printFlags = (flags) => {
 	const isAscending = false;

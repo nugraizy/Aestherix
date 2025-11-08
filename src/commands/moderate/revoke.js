@@ -26,7 +26,7 @@ export default {
 			from,
 			{
 				text: "Succeeded to revoke the group's invitation URL." /* eslint-disable-line */,
-				footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
+				footer: 'Powered by Hidden Finder',
 				templateButtons: [
 					{
 						urlButton: {

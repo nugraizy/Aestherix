@@ -74,7 +74,7 @@ const renderProcess = (processes, builder, isCarousel) => {
 		const restartBtn = builder.button.reply({ display: `Restart ${name}`, id: `!pm2 -r ${name}` });
 		const stopBtn = builder.button.reply({ display: `Stop ${name}`, id: `!pm2 -s ${name}` });
 		const killBtn = builder.button.reply({ display: 'Kill', id: '!pm2 -k' });
-		const separator = builder.button.url({ display: '', url: 'Made By Aestherix' });
+		const separator = builder.button.url({ display: '', url: `Made By ${__botName}` });
 
 		container.buttons.push(
 			{ caption, button: restartBtn },

@@ -14,18 +14,18 @@ export default {
 		const row = Array(Number(query || 1)).fill({
 			rows: [
 				{
-					title: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
-					rowId: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪'
+					title: 'Powered by Hidden Finder',
+					rowId: 'Powered by Hidden Finder'
 				}
 			],
-			title: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪'
+			title: 'Powered by Hidden Finder'
 		});
 
 		await client.instance.send(from, {
-			buttonText: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
+			buttonText: 'Powered by Hidden Finder',
 			title: 'List Message',
 			text: '\t',
-			footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
+			footer: 'Powered by Hidden Finder',
 			sections: row
 		});
 	}

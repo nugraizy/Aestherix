@@ -29,8 +29,8 @@ export default {
 					buttonText: 'Open List',
 					title: 'Sambung Kata',
 					text: '\t',
-					footer: 'Void Bot Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
-					sections: [{ rows: [{ title: 'Play', rowId: '.sambung player 2' }], title: 'VOID BOT | Word Game' }]
+					footer: 'Powered by Hidden Finder',
+					sections: [{ rows: [{ title: 'Play', rowId: '.sambung player 2' }], title: `${__botName} | Word Game` }]
 				},
 				{}
 			);

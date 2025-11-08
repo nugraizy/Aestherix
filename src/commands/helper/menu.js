@@ -39,7 +39,7 @@ export default {
 	limit: 5,
 	status: 'enable',
 	async run({ from, prefix, message, query }, client) {
-		let capt = `\`Aestherix ー ${version}\`\n\n`;
+		let capt = `\`${__botName} ー ${version}\`\n\n`;
 
 		if (!Object.keys(configuration.cmds.menu).length) {
 			const container = configuration.cmds.commands
@@ -92,7 +92,7 @@ export default {
 			Object.values(configuration.cmds.menu).flat()
 		)} \`-H\`\nー> \`To see the detail of the command.\`\nー> Total Commands : \`${
 			configuration.cmds.commands.size
-		}\`\n\nＰｏｗｅｒｅｄ ｂｙ\n> 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ`;
+		}\`\n\nＰｏｗｅｒｅｄ ｂｙ\n> Hidden Finder`;
 
 		configuration.cmds.menuStr = capt;
 
@@ -100,7 +100,7 @@ export default {
 			from,
 			{
 				text: capt.trim()
-				// footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
+				// footer: 'Powered by Hidden Finder',
 				// buttons: [{ buttonId: '.about', buttonText: { displayText: 'About Us.' }, type: 1 }],
 				// headerType: 1
 			},
@@ -110,7 +110,7 @@ export default {
 					isForwarded: true,
 					forwardedNewsletterMessageInfo: {
 						newsletterJid: 'aestherix@newsletter',
-						newsletterName: 'Ｐｏｗｅｒｅｄ ｂｙ 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ',
+						newsletterName: 'Powered by Hidden Finder',
 						serverMessageId: 103
 					}
 				}

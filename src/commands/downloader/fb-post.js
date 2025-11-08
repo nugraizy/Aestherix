@@ -1,7 +1,7 @@
 import parser from 'yargs-parser';
 
-import { color, fetchBUFFER, loggers, isURL, delay, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { facebook } from '../../utils/facebook/index.js';
+import { color, delay, fetchBUFFER, isURL, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
 
 const regex = (input) => /^(https?:\/\/)?((w{3}\.)|(m\.)?)?(facebook|fb)\.(com|watch)\/.*/.test(input);
 
@@ -69,7 +69,7 @@ export default {
 			await client.instance.send(
 				from,
 				{
-					video: new Buffer.from(await fetchBUFFER(urlFilter.url)),
+					video: await fetchBUFFER(urlFilter.url),
 					caption: `${'Facebook Video Downloader'.formatHeaders()}\n\nResolution : ${urlFilter.quality}`.formatForm()
 				},
 				{}

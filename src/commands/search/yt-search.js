@@ -43,7 +43,7 @@ export default {
 
 		builder
 			.mainBody(capt)
-			.mainFooter('Powered by Aestherix')
+			.mainFooter('Powered by Hidden Finder')
 			.mainHeader('Header')
 			.cards(
 				result.map(({ title, timestamp, views, author, image, thumbnail, url }) => ({
@@ -105,7 +105,7 @@ export default {
 		// 		text: capt.trim()
 
 		// 		// caption: capt,
-		// 		// footer: 'Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪',
+		// 		// footer: 'Powered by Hidden Finder',
 		// 		// buttons: [
 		// 		// 	{
 		// 		// 		buttonId: `.ytmp4 get ${url}`,

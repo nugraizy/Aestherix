@@ -97,7 +97,7 @@ export default {
 		} else {
 			await client.instance.send(
 				from,
-				{ image: buffer, caption: 'Meme Generator Made by Void Bot using Canvas. Powered by 𓆩 𝚮ɪᴅᴅᴇɴ 𝐅ɪɴᴅᴇʀ ⁣𓆪' },
+				{ image: buffer, caption: `Meme Generator Made by ${__botName} using Canvas. Powered by Hidden Finder` },
 				{ quoted: message }
 			);
 		}
