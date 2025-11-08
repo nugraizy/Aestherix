@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file.
 
+# ࿎「6.0.0」2025-11-08
+## BREAKING!
+- Drops node 18, and bump to 20 `(REQUIRED)`.
+
+## Added
+- Adds necessary `env` types.
+
+## Fix
+- `Telegram` stickers using other API.
+- Migrating `Flickr` from breaking changes issues.
+
+---
+
+# ࿎「5.16.2」2025-11-04
+## Fixed
+- Waits for `Internet` and `Vite` server side connection rather than exit (with `process.exit`) immediately.
+
+---
+
+# ࿎「5.16.1」2025-11-02
+## Fixed
+- Fix `DAB` missing `quality` parameter causing error from the API end.
+
+---
+
+# ࿎「5.16.0」2025-10-31
+## Added
+- Adds total commits count to `Changelog` command.
+
+---
+
 # ࿎「5.15.0」2025-10-30
 ## Added
 - `PM2` Utilities as a command. Type `{prefix}pm2 --help` to see further detail.
