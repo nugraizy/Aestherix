@@ -3,11 +3,17 @@
   Aestherix</br>
 </h2>
 <h3 align='center'>
-  Next Generation Whatsapp bot built on top of Javascript using <a href="https://github.com/whiskeysockets/baileys">Baileys</a>, and latest version of <a href="https://github.com/nugraizy/aestherix">Aestherix</a>
+  Next Generation Whatsapp bot built on top of Javascript using <a href="https://github.com/whiskeysockets/baileys">Baileys</a>, and latest version of <a href="https://github.com/nugraizy/aestherix">Aestherix</a> with all-in-on utilities, easy to use, and <i>Blazingly Fast ⚡️</i>
 </h3>
+
+<img src="./src/media/terminal.png" style="max-width: 70%; height: auto; display: block; margin: 0 auto;">
+
+<br></br>
 
 # Table of Contents <a name='table'></a>
 - [Documentation](./doc/DOC.md#documentations)
+- [Pronounciation](#how-is-the-name-written-and-pronounced)
+- [Philosophy](#how-is-the-name-written-and-pronounced)
 - [Installations](#installations)
   - [linux](./doc/INSTALL.md#linux)
   - [windows](./doc/INSTALL.md#windows)
@@ -16,6 +22,9 @@
   - [run with flags](#available-flags)
 
 ---
+
+<br></br>
+
 
 ### How is the name written and pronounced?
 
@@ -29,9 +38,13 @@
 
 ---
 
+<br></br>
+
 # Installations
 
 See: [INSTALL.md](./doc/INSTALL.md)
+
+<br></br>
 
 # Run the project
 
@@ -42,6 +55,6 @@ node . your_session_name --flag
 you can find the available flags [here](./doc/DOC.md#available-flags)
 
 <div align='center'>
-<a href='#table'>⬆️</a>
+<a href='#table'>⬆️ Go Up</a>
 </div>
 

@@ -1,33 +1,13 @@
 # Documentations
 
 ## Table of Contents <a name='table'></a>
-- [Known Error Fixed](#common-occured-error)
-  - [this.isZero() not a function](#zero)
-  - [crash when added to a group](#crash)
 - [Additional Context](#additional-context)
 - [Instagram method](#instagram-methods)
 - [Flags](#available-flags)
 
 ---
 
-# Common Occured Error
-
-### <a name="zero"></a> this.isZero() not a function (happened usually when using the self mode)
-
-Go to `node_modules\long\src\long.js:474`
-
-
-Add this code to line 474 (don't change the original 474 code. just add the code below) :
-
-```js
-if (typeof this.isZero !== 'function') {
-	return '1';
-}
-```
-
-### <a name="crash"></a> crash when added to a group
-
-Please install the latest Baileys-md commit
+<br></br>
 
 # Additional Context
 
@@ -52,8 +32,9 @@ const CONNECTION_CONFIG = {
 ```
 
 <div align='center'>
-<a href='#table'>⬆️</a>
+<a href='#table'>⬆️ Go Up</a>
 </div>
+
 
 # Instagram Methods
 #### before started you must do a login method
@@ -70,7 +51,7 @@ const login = async () => {
  ```
  
 <div align='center'>
-<a href='#table'>⬆️</a>
+<a href='#table'>⬆️ Go Up</a>
 </div>
 
 
@@ -106,5 +87,5 @@ const login = async () => {
 
 
 <div align='center'>
-<a href='#table'>⬆️</a>
+<a href='#table'>⬆️ Go Up</a>
 </div>

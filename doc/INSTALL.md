@@ -13,20 +13,18 @@ sudo apt install gcc g++ make
 sudo apt install ffmpeg libjpeg-dev libpng-dev libtiff-dev libgif-dev librsvg2-dev pkg-config build-essential libcairo2-dev libpixman-1-dev libpango1.0-dev libheif1 libheif-dev libde265-0 libde265-dev imagemagick heif-gdk-pixbuf -y
 ```
 
-required for headless operation :
+required for headless operations :
 ```sh
 sudo apt install gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget libgbm-dev libnss3-dev
 ```
 
+install necessary library for converts operations :
 ```sh
 wget "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0.tar.gz"
 ```
 
 ```sh
 tar xvzf libwebp-1.6.0.tar.gz
-```
-
-```sh
 cd libwebp-1.6.0
 ./configure
 make
@@ -40,15 +38,14 @@ sudo make install
 sudo pacman -S --needed base-devel ffmpeg libjpeg libpng libtiff giflib librsvg pkgconf cairo pixman pango libheif libde265 imagemagick gdk-pixbuf2 libwebp
 ```
 
+install necessary library for converts operations :
+
 ```sh
 wget "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0.tar.gz"
 ```
 
 ```sh
 tar xvzf libwebp-1.6.0.tar.gz
-```
-
-```sh
 cd libwebp-1.6.0
 ./configure
 make
