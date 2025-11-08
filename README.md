@@ -3,7 +3,7 @@
   Aestherix</br>
 </h2>
 <h3 align='center'>
-  Next Generation Whatsapp bot built on top of Javascript using <a href="https://github.com/whiskeysockets/baileys">Baileys</a>, and latest version of <a href="https://github.com/nugraizy/aestherix">Aestherix</a> with all-in-on utilities, easy to use, and <i>Blazingly Fast ⚡️</i>
+  Next Generation Whatsapp bot built on top of Javascript using <a href="https://github.com/whiskeysockets/baileys">Baileys</a>, and latest version of <a href="https://github.com/nugraizy/aestherix">Aestherix</a> with all-in-one utilities, easy to use, and <i>Blazingly Fast ⚡️</i>
 </h3>
 
 <img src="./src/media/terminal.png" style="max-width: 70%; height: auto; display: block; margin: 0 auto;">
