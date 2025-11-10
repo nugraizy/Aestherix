@@ -1,3 +1,4 @@
+import { generateWAMessageFromContent } from 'baileys';
 import type { FileTypeResult } from 'file-type';
 import type { MessageGenerated } from '../Messages';
 import type { AdvancedClient as Client } from '../Socket';
@@ -44,7 +45,7 @@ declare class Carousel extends InteractiveButtons {
 
 	constructor(client: Client);
 
-	render(): Promise<void>;
+	render(): Promise<ReturnType<typeof generateWAMessageFromContent>>;
 
 	mainBody(text: string): Carousel;
 
@@ -66,7 +67,7 @@ declare class Native extends InteractiveButtons {
 
 	constructor(client: Client);
 
-	render(): Promise<void>;
+	render(): Promise<ReturnType<typeof generateWAMessageFromContent>>;
 
 	mainBody(text: string): Native;
 

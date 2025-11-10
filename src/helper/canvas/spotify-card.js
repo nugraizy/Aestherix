@@ -262,7 +262,7 @@ export class SpotifyCard {
 			if (opts.mesh) {
 				const colors = this.#_colorPalettes.map((rgb) => chroma(rgb).brighten(1).hex().toUpperCase().slice(1)).join(',');
 				const response = await fetch(
-					`http://localhost:4000/gradient?colors=${colors}&dimensions=${this.#_canvas.width}x${this.#_canvas.height}`
+					`http://localhost:4000/gradient?colors=${colors}&dimensions=${this.#_canvas.width}x${this.#_canvas.height}&animate=false`
 				);
 				const meshGradient = await response.arrayBuffer();
 				const image = await loadImage(Buffer.from(meshGradient));

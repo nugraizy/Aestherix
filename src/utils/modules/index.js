@@ -516,11 +516,9 @@ export const getFunctions = (module) => {
 };
 
 export const delaySync = (ms) => {
-	const start = new Date();
+	const start = Date.now();
 
-	while (new Date() - start <= ms) {
-		false;
-	}
+	while (Date.now() - start <= ms) {}
 };
 
 export const delay = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -1056,5 +1054,53 @@ export class Uploader {
 		const buffer = await response.arrayBuffer();
 
 		return Buffer.from(buffer);
+	}
+}
+
+export class Timer {
+	#startTime = null;
+	#endTime = null;
+	#format;
+
+	constructor(format = '${ms} ms') {
+		this.#format = format;
+	}
+
+	start() {
+		this.#startTime = process.hrtime.bigint();
+		this.#endTime = null;
+	}
+
+	stop() {
+		if (!this.#startTime) throw new Error('Timer has not been started.');
+		this.#endTime = process.hrtime.bigint();
+	}
+
+	reset() {
+		this.#startTime = null;
+		this.#endTime = null;
+	}
+
+	elapsed() {
+		if (!this.#startTime) return 0n;
+		const end = this.#endTime ?? process.hrtime.bigint();
+		return Number(end - this.#startTime) / 1e6; // milliseconds
+	}
+
+	formatted() {
+		const ms = this.elapsed();
+		const s = ms / 1000;
+		const m = Math.floor(s / 60);
+		const remainingS = s % 60;
+
+		return this.#format
+			.replace('${ms}', ms.toFixed(2))
+			.replace('${s}', s.toFixed(2))
+			.replace('${m}', m.toString())
+			.replace('${sec}', remainingS.toFixed(2));
+	}
+
+	toString() {
+		return this.formatted();
 	}
 }

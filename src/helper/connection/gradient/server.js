@@ -131,7 +131,7 @@ export const server = (isReconnect) => {
 	app.get('/gradient', validate({ query }), async (req, res) => {
 		const { SEED, WIDTH, HEIGHT, COLORS, SHOULD_ANIMATE, TIME } = parseQuery(req.query);
 
-		const browser = await puppeteer.launch({ headless: false });
+		const browser = await puppeteer.launch({ headless: 'shell', args: ['--no-sandbox'] });
 		const page = await browser.newPage();
 
 		await page.setViewport({ width: WIDTH, height: HEIGHT });

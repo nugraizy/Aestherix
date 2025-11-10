@@ -1,4 +1,5 @@
 import { SpotifyCard } from '../../helper/canvas/index.js';
+import { Timer } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -18,6 +19,11 @@ export default {
 			return await client.instance.reply(from, 'Please provide a query', message);
 		}
 
+		const timer = new Timer('${s}s (${ms} ms)');
+		timer.start();
+
+		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+
 		const cover = new SpotifyCard(query, {
 			background: {
 				// blur: 60
@@ -32,6 +38,9 @@ export default {
 
 		const { toBuffer } = await cover.render();
 
-		client.instance.send(from, { image: new Buffer.from(toBuffer(), 'base64') }, { quoted: message });
+		await client.instance.send(from, { image: new Buffer.from(toBuffer(), 'base64') }, { quoted: message });
+
+		timer.stop();
+		await wait.update('Spotify Card is finished in ' + timer);
 	}
 };

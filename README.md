@@ -8,8 +8,6 @@
 
 <img src="./src/media/terminal.png" style="max-width: 70%; height: auto; display: block; margin: 0 auto;">
 
-<br></br>
-
 # Table of Contents <a name='table'></a>
 - [Documentation](./doc/DOC.md#documentations)
 - [Pronounciation](#how-is-the-name-written-and-pronounced)
@@ -23,9 +21,6 @@
 
 ---
 
-<br></br>
-
-
 ### How is the name written and pronounced?
 
 ***Aestherix***. Pronounced [`/ɛsˈθɛrɪks/`](src/media/pronounciation.m4a?raw=true): ES (l**ess**, str**ess**) THEH (e**ther**) RIKS (t**ricks**, b**ricks**).
@@ -38,13 +33,9 @@
 
 ---
 
-<br></br>
-
 # Installations
 
 See: [INSTALL.md](./doc/INSTALL.md)
-
-<br></br>
 
 # Run the project
 
