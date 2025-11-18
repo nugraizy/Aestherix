@@ -9,3 +9,7 @@ src/commands/debugging/Story.js
 src/commands/debugging/Logout.js
 src/commands/debugging/Socket.js
 databases/users/contacts-backup.json
+.env*
+.flaskenv*
+!.env.project
+!.env.vault

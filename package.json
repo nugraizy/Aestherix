@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "@atproto/api": "^0.13.32",
+    "@dotenvx/dotenvx": "^1.51.1",
     "@inquirer/prompts": "^7.9.0",
     "@napi-rs/canvas": "^0.1.81",
     "@rodrigogs/baileys-store": "^1.0.1",
@@ -66,7 +67,6 @@
     "clipboardy": "^5.0.0",
     "colorthief": "^2.6.0",
     "dayjs": "^1.11.19",
-    "dotenv": "^17.2.3",
     "emojibase-regex": "^16.0.0",
     "express": "^5.1.0",
     "express-zod-safe": "^3.1.0",

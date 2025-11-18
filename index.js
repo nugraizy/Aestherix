@@ -1,7 +1,7 @@
 import 'dayjs/locale/id.js';
-import 'dotenv/config.js';
 import './src/helper/prototypes.js';
 
+import dotenvx from '@dotenvx/dotenvx';
 import chalk from 'chalk';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
@@ -11,6 +11,10 @@ import ora from 'ora';
 import path from 'path';
 import { platform } from 'process';
 import table from 'text-table';
+
+dotenvx.config({
+	quiet: true
+});
 
 dayjs.locale('id');
 dayjs.extend(timezone);

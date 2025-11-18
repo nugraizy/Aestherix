@@ -1,4 +1,4 @@
-import 'dotenv/config.js';
+import '@dotenvx/dotenvx/config';
 import { login } from './login.js';
 
 const exit = () => process.exit(0);

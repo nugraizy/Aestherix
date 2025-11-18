@@ -8,7 +8,7 @@ const loadFromEnv = async () => {
 	});
 
 	if (yesOrNo) {
-		await import('dotenv/config.js');
+		await import('@dotenvx/dotenvx/config');
 		console.log('Credentials loaded from .env.');
 		return true;
 	}

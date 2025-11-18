@@ -1,9 +1,9 @@
 /* eslint-disable camelcase */
+import { parse } from '@dotenvx/dotenvx';
 import axios from 'axios';
-import { v4 } from 'uuid';
 import fs from 'fs-extra';
-import { parse } from 'dotenv';
 import _ from 'lodash';
+import { v4 } from 'uuid';
 
 import configuration from '../../helper/config/connect.js';
 import { Cache } from '../../helper/modules/cache.js';
