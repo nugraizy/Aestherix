@@ -39,12 +39,13 @@ export default {
 
 		let capt = 'YouTube Search'.formatHeaders();
 
-		const builder = new client.instance.TemplateBuilder.Carousel(client);
+		const builder = new client.instance.TemplateBuilder.Carousel();
 
-		builder
-			.mainBody(capt)
-			.mainFooter('Powered by Hidden Finder')
-			.mainHeader('Header')
+		await builder
+			.destination(from)
+			.body(capt)
+			.footer('Powered by Hidden Finder')
+			.header('Header')
 			.cards(
 				result.map(({ title, timestamp, views, author, image, thumbnail, url }) => ({
 					body: `📡 Author Channel : ${author.name}\n👀 Views : ${numberWithCommas(views)}\n⏳ Duration : ${(
@@ -72,11 +73,8 @@ export default {
 						})
 					]
 				}))
-			);
-
-		const messageBuilt = await builder.render();
-
-		await client.instance.relay(from, messageBuilt.message, { messageId: messageBuilt.key.id });
+			)
+			.send();
 
 		// 		let i = 0;
 

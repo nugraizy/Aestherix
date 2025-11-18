@@ -377,7 +377,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 					cooldownUser.requests = false;
 				}
 
-				const builder = new client.instance.TemplateBuilder.Native(client);
+				const builder = new client.instance.TemplateBuilder.Native();
 
 				let str = !message.isOwner ? 'Please send this error stack to the owner :\n\n' : '\n';
 
@@ -385,13 +385,14 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 				str += `Message : ${err.message || 'Unknown'}\n`;
 				str += `Stack Trace :\n${(message.isOwner ? err?.stack?.substring(0, 70) : err?.stack?.substring(0, 20)) || 'Unknown'}`;
 
-				builder
-					.mainBody(
+				await builder
+					.destination(message.from)
+					.body(
 						message.isOwner
 							? 'Something went unexpected. Please read below :'
 							: 'This error is from the client. Please report to owneer.'
 					)
-					.mainFooter(str)
+					.footer(str)
 					.buttons(
 						...[
 							builder.button.url({
@@ -421,11 +422,8 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 								id: message.body
 							})
 						].filter(Boolean)
-					);
-
-				const messageBuilt = await builder.render();
-
-				await client.instance.relay(message.from, messageBuilt.message, { messageId: messageBuilt.key.id });
+					)
+					.send();
 
 				loggers.error(color(err.message, 'white'));
 				const parseErr = (

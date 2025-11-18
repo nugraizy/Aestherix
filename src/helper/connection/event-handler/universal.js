@@ -59,7 +59,7 @@ export const handleConnectionUpdate = async (
 				process.exit(0);
 			} else {
 				if (reason === DisconnectReason.restartRequired) {
-					loggers.warning(color('Restart required', 'white'), color('Restarting your WebScoket...', '#E4C1F9'));
+					loggers.warning(color('Restart required', 'white'), color('Restarting your Socket...', '#E4C1F9'));
 				} else if (reason === DisconnectReason.timedOut) {
 					loggers.warning(color('Timed out', 'white'), color('Quick reconnecting...', '#E4C1F9'));
 					newStart();
@@ -116,7 +116,7 @@ export const handleConnectionUpdate = async (
 					shouldPrintBanner = false;
 				}
 
-				const builder = new client.instance.TemplateBuilder.Native(client);
+				const builder = new client.instance.TemplateBuilder.Native();
 				const timeToConnect = (Date.now() - started) / 1000;
 				const data = await fs.readJSON('./src/helper/config/settings.json');
 				const buttons = [];
@@ -187,15 +187,12 @@ export const handleConnectionUpdate = async (
 					})
 				);
 
-				const messageBuilt = await builder
-					.mainBody('Bot is connected to socket.')
-					.mainFooter(capt)
+				await builder
+					.destination(configuration.cache.ownerNumbers[0])
+					.body('Bot is connected to socket.')
+					.footer(capt)
 					.buttons(...buttons.filter(Boolean))
-					.render();
-
-				await client.instance.relay(configuration.cache.ownerNumbers[0], messageBuilt.message, {
-					messageId: messageBuilt.key.id
-				});
+					.send();
 
 				Client.ev.emit('connected');
 				clearDBConnection(cli);
@@ -229,7 +226,7 @@ export const handleConnectionUpdate = async (
 	} catch (error) {
 		console.log(error);
 		connectMqtt(clientMqttListen, true);
-		await (await import('../../../index.js')).start();
+		await (await import('../../../index.js')).start(true);
 	}
 };
 

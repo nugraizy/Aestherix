@@ -28,7 +28,7 @@ global.__dirname = __dirname;
 global.__botName = 'Aestherix';
 
 const printFlags = (flags) => {
-	const isAscending = false;
+	const isAscending = true;
 
 	flags = flags.sort(([a], [b]) => (isAscending ? a.localeCompare(b) : b.localeCompare(a)));
 	const columns = 3;

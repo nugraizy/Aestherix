@@ -95,14 +95,15 @@ export default {
 
 				const images = posts[data].urls.images;
 
-				const builder = new client.instance.TemplateBuilder.Carousel(client);
+				const builder = new client.instance.TemplateBuilder.Carousel();
 
 				await wait.update(`Preparing TikTok Carousel Message for ${images.length} Images. Please wait...`);
 
-				builder
-					.mainBody(caption)
-					.mainFooter('Powered by Hidden Finder')
-					.mainHeader('Header')
+				await builder
+					.destination(from)
+					.body(caption)
+					.footer('Powered by Hidden Finder')
+					.header('Header')
 					.cards(
 						images.map(({ buffer, index, urlWithWatermark }) => ({
 							body: `Image ${index} of ${images.length}`,
@@ -111,11 +112,9 @@ export default {
 							header: buffer,
 							buttons: [builder.button.url({ display: `Image ${index}`, url: urlWithWatermark })]
 						}))
-					);
+					)
+					.send();
 
-				const messageBuilt = await builder.render();
-
-				await client.instance.relay(from, messageBuilt.message, { messageId: messageBuilt.key.id });
 				success++;
 				continue;
 			}

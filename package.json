@@ -9,15 +9,12 @@
     "pm2": "pm2 start ./index.js && pm2 logs",
     "pm2kill": "pm2 kill",
     "dev": "nodemon",
-    "start": "node . nugraizy -z -w -c",
+    "start": "node . nugraizy_ios -z -w -c",
     "test": "echo \"Error: no test specified\" && exit 1",
     "youtube:auth": "node ./src/utils/modules/youtube-auth.js",
     "nhentai:cookie": "node ./src/utils/doujin/cookies.js --get",
     "instagram:login": "node ./src/utils/instagram/instagram-login.js",
-    "instagram:login:interactive": "node ./src/utils/instagram/instagram-login-interactive.js",
-    "build": "cd frontend && npm run build",
-    "dev:react": "cd frontend && npm run dev",
-    "pm2:react": "pm2 start npm --name \"frontend\" -- run dev:react"
+    "instagram:login:interactive": "node ./src/utils/instagram/instagram-login-interactive.js"
   },
   "keywords": [
     "whatsapp",

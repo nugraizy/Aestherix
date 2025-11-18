@@ -24,7 +24,7 @@ export default {
 
 		let caption = `📌 Total saved sequences: ${pictures.size}\n\n`;
 
-		const builder = new client.instance.TemplateBuilder.Carousel(client);
+		const builder = new client.instance.TemplateBuilder.Carousel();
 
 		const entries = _.chunk(pictures.entries(), 30);
 
@@ -41,10 +41,11 @@ export default {
 			)
 			.reverse();
 
-		builder
-			.mainBody(caption)
-			.mainFooter('Powered by Hidden Finder')
-			.mainHeader('Header')
+		await builder
+			.destination(from)
+			.body(caption)
+			.footer('Powered by Hidden Finder')
+			.header('Header')
 			.cards(
 				parsedEntries
 					.map((data) => ({
@@ -55,10 +56,7 @@ export default {
 						buttons: data.map((v) => builder.button.url({ display: v.timestamp, url: v.url }))
 					}))
 					.slice(0, 30)
-			);
-
-		const messageBuilt = await builder.render();
-
-		await client.instance.relay(from, messageBuilt.message, { messageId: messageBuilt.key.id, AI: true });
+			)
+			.send();
 	}
 };

@@ -1,7 +1,6 @@
 import { generateWAMessageFromContent } from 'baileys';
 import type { FileTypeResult } from 'file-type';
 import type { MessageGenerated } from '../Messages';
-import type { AdvancedClient as Client } from '../Socket';
 
 type MediaType = 'videoMessage' | 'imageMessage';
 type Media = string | Buffer | undefined | null;
@@ -41,47 +40,47 @@ declare class InteractiveButtons {
 }
 
 declare class Carousel extends InteractiveButtons {
-	client: Client;
-
-	constructor(client: Client);
+	constructor();
 
 	render(): Promise<ReturnType<typeof generateWAMessageFromContent>>;
 
-	mainBody(text: string): Carousel;
+	body(text: string): Carousel;
 
-	mainFooter(text: string): Carousel;
+	footer(text: string): Carousel;
 
-	mainBody(text: string): Carousel;
-
-	mainHeader(text: string, media: Media): Carousel;
+	header(text: string, media: Media): Carousel;
 
 	getMessageType(media: Buffer): { mime: FileTypeResult['mime']; messageType: MediaType };
 
 	prepareGif(media: Buffer, messageType: MediaType): MessageGenerated;
 
 	cards(cards: Cards): Carousel;
+
+	send(): Promise<void>;
+
+	destination(to: string): Carousel;
 }
 
 declare class Native extends InteractiveButtons {
-	client: Client;
-
-	constructor(client: Client);
+	constructor();
 
 	render(): Promise<ReturnType<typeof generateWAMessageFromContent>>;
 
-	mainBody(text: string): Native;
+	body(text: string): Native;
 
-	mainFooter(text: string): Native;
+	footer(text: string): Native;
 
-	mainBody(text: string): Native;
-
-	mainHeader(text: string, media: Media): Native;
+	header(text: string, media: Media): Native;
 
 	getMessageType(media: Buffer): { mime: FileTypeResult['mime']; messageType: MediaType };
 
 	prepareGif(media: Buffer, messageType: MediaType): MessageGenerated;
 
 	buttons(...buttons: Buttons[]): Native;
+
+	send(): Promise<void>;
+
+	destination(to: string): Native;
 }
 
 export declare class TemplateBuilder {

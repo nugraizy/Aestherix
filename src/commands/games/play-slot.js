@@ -27,17 +27,16 @@ export default {
 
 		const builder = new client.instance.TemplateBuilder.Native();
 
-		const { message: messages } = await builder
-			.mainBody(capt)
-			.mainFooter(`Slot Game by ${__botName}`)
+		await builder
+			.destination(from)
+			.body(capt)
+			.footer(`Slot Game by ${__botName}`)
 			.buttons(
 				builder.button.reply({
 					display: 'Play Again',
 					id: `${prefix}slot`
 				})
 			)
-			.render();
-
-		client.instance.relay(from, messages, { messageId: client.instance.generateMessageID() });
+			.send();
 	}
 };

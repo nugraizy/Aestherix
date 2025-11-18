@@ -119,30 +119,25 @@ export default {
 			}
 
 			if (device === 'ios') {
-				const builder = new client.instance.TemplateBuilder.Native(client);
+				const builder = new client.instance.TemplateBuilder.Native();
 				const { captionFull, buttons } = renderProcess(processes, builder);
 
-				builder
-					.mainBody(captionFull.trim())
-					.mainFooter('PM2 Instances')
-					.buttons(...buttons.map((v) => v.buttonUrl || v.button));
+				await builder
+					.destination(from)
+					.body(captionFull.trim())
+					.footer('PM2 Instances')
+					.buttons(...buttons.map((v) => v.buttonUrl || v.button))
+					.send();
 
-				const built = await builder.render();
-
-				return client.instance.relay(from, built.message, { messageId: built.key.id });
+				return;
 			}
 
-			const builder = new client.instance.TemplateBuilder.Carousel(client);
+			const builder = new client.instance.TemplateBuilder.Carousel();
 			const { carousel } = renderProcess(processes, builder, true);
 
-			const built = await builder
-				.mainBody('PM2 Monitor')
-				.mainFooter('PM2 Instances')
-				.mainHeader('Header')
-				.cards(carousel)
-				.render();
+			await builder.destination(from).body('PM2 Monitor').footer('PM2 Instances').header('Header').cards(carousel).send();
 
-			return client.instance.relay(from, built.message, { messageId: built.key.id });
+			return;
 		}
 
 		if (query && type === 'templateButtonReplyMessage') {

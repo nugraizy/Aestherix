@@ -66,15 +66,16 @@ export default {
 
 				await wait.update(`Songs with keyword ${query} found. Total Response : ${total}`);
 
-				const builder = new client.instance.TemplateBuilder.Carousel(client);
+				const builder = new client.instance.TemplateBuilder.Carousel();
 
 				let length = 0;
 
 				for (const result of searchResultsChunk) {
-					builder
-						.mainBody(caption)
-						.mainFooter(watermark)
-						.mainHeader('Header')
+					await builder
+						.destination(from)
+						.body(caption)
+						.footer(watermark)
+						.header('Header')
 						.cards(
 							result.map((value, index) => {
 								let {
@@ -103,11 +104,8 @@ export default {
 									]
 								};
 							})
-						);
-
-					const messageBuilt = await builder.render();
-
-					await client.instance.relay(from, messageBuilt.message, { messageId: messageBuilt.key.id });
+						)
+						.send();
 
 					length += result.length;
 					caption = '';

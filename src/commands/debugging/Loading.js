@@ -154,7 +154,8 @@ export default {
 										type: 'MESSAGE_EDIT',
 										editedMessage: {
 											conversation: captionLoading
-										}
+										},
+										timestampMs: Date.now()
 									}
 								}
 							}

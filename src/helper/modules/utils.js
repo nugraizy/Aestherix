@@ -311,13 +311,13 @@ export const assign = (client) => {
 	}
 
 	class Carousel extends InteractiveButtons {
-		constructor(client) {
+		constructor() {
 			super();
 
 			/**
 			 * @private
 			 */
-			this.client = client;
+			this._destination = null;
 
 			/**
 			 * @private
@@ -357,7 +357,33 @@ export const assign = (client) => {
 			};
 		}
 
+		destination(to) {
+			this._destination = to;
+
+			return this;
+		}
+
 		async render() {
+			this._media = !this._media ? { hasMediaAttachment: false } : await this.prepareMessage(this._media);
+
+			this._buildParams.message.interactiveMessage.header = {
+				...this._buildParams.message.interactiveMessage.header,
+				...this._media
+			};
+			this._buildParams.message.interactiveMessage.nativeFlowMessage.buttons = this._buttons;
+
+			const message = generateWAMessageFromContent(
+				'0@s.whatsapp.net',
+				{
+					viewOnceMessage: this._buildParams
+				},
+				{ messageId: generateMessageID() }
+			);
+
+			return message;
+		}
+
+		async send() {
 			this._cards = await Promise.all(this._cards);
 			this._media = !this._media ? { hasMediaAttachment: false } : await this.prepareMessage(this._media);
 
@@ -367,29 +393,34 @@ export const assign = (client) => {
 				...this._media
 			};
 
-			return generateWAMessageFromContent(
+			const {
+				key: { id },
+				message
+			} = generateWAMessageFromContent(
 				'0@s.whatsapp.net',
 				{
 					viewOnceMessage: this._buildParams
 				},
 				{ messageId: generateMessageID() }
 			);
+
+			await relay(this._destination, message, { messageId: id });
 		}
 
-		mainBody(text) {
+		body(text) {
 			this._buildParams.message.interactiveMessage.body.text = text;
 
 			return this;
 		}
 
-		mainFooter(text) {
+		footer(text) {
 			this._buildParams.message.interactiveMessage.footer.text = text;
 
 			return this;
 		}
 
-		mainHeader(text, media) {
-			this._buildParams.message.interactiveMessage.header.text = text;
+		header(text, media) {
+			this._buildParams.message.interactiveMessage.header.title = text;
 			this._media = media;
 
 			return this;
@@ -415,7 +446,7 @@ export const assign = (client) => {
 
 			const fileBuffer = await fs.readFile(output);
 
-			const preparedMedia = await this.client.instance.prepareMedia(fileBuffer, messageType);
+			const preparedMedia = await prepareMedia(fileBuffer, messageType);
 
 			preparedMedia.message[messageType].gifPlayback = true;
 
@@ -433,7 +464,7 @@ export const assign = (client) => {
 				if (mime === 'image/gif') {
 					preparedMedia = await this.prepareGif(media, messageType);
 				} else {
-					preparedMedia = await this.client.instance.prepareMedia(media, messageType);
+					preparedMedia = await prepareMedia(media, messageType);
 				}
 
 				return {
@@ -451,7 +482,7 @@ export const assign = (client) => {
 					if (mime === 'image/gif') {
 						preparedMedia = await this.prepareGif(buffer, messageType);
 					} else {
-						preparedMedia = await this.client.instance.prepareMedia(buffer, messageType);
+						preparedMedia = await prepareMedia(buffer, messageType);
 					}
 
 					return {
@@ -462,7 +493,7 @@ export const assign = (client) => {
 					const messageType = 'imageMessage';
 
 					return {
-						[messageType]: (await this.client.instance.prepareMedia(Buffer.alloc(10), messageType)).message[messageType],
+						[messageType]: (await prepareMedia(Buffer.alloc(10), messageType)).message[messageType],
 						hasMediaAttachment: true
 					};
 				}
@@ -470,7 +501,7 @@ export const assign = (client) => {
 				const messageType = 'imageMessage';
 
 				return {
-					[messageType]: (await this.client.instance.prepareMedia(Buffer.alloc(10), messageType)).message[messageType],
+					[messageType]: (await prepareMedia(Buffer.alloc(10), messageType)).message[messageType],
 					hasMediaAttachment: true
 				};
 			}
@@ -505,13 +536,13 @@ export const assign = (client) => {
 	}
 
 	class Native extends InteractiveButtons {
-		constructor(client) {
+		constructor() {
 			super();
 
 			/**
 			 * @private
 			 */
-			this.client = client;
+			this._destination = null;
 
 			/**
 			 * @private
@@ -551,20 +582,26 @@ export const assign = (client) => {
 			};
 		}
 
-		mainBody(text) {
+		destination(to) {
+			this._destination = to;
+
+			return this;
+		}
+
+		body(text) {
 			this._buildParams.message.interactiveMessage.body.text = text;
 
 			return this;
 		}
 
-		mainFooter(text) {
+		footer(text) {
 			this._buildParams.message.interactiveMessage.footer.text = text;
 
 			return this;
 		}
 
-		mainHeader(text, media) {
-			this._buildParams.message.interactiveMessage.header.text = text;
+		header(text, media) {
+			this._buildParams.message.interactiveMessage.header.title = text;
 			this._media = media;
 
 			return this;
@@ -577,15 +614,41 @@ export const assign = (client) => {
 				...this._buildParams.message.interactiveMessage.header,
 				...this._media
 			};
+
 			this._buildParams.message.interactiveMessage.nativeFlowMessage.buttons = this._buttons;
 
-			return generateWAMessageFromContent(
+			const message = generateWAMessageFromContent(
 				'0@s.whatsapp.net',
 				{
 					viewOnceMessage: this._buildParams
 				},
-				{}
+				{ messageId: generateMessageID() }
 			);
+
+			return message;
+		}
+
+		async send() {
+			this._media = !this._media ? { hasMediaAttachment: false } : await this.prepareMessage(this._media);
+
+			this._buildParams.message.interactiveMessage.header = {
+				...this._buildParams.message.interactiveMessage.header,
+				...this._media
+			};
+			this._buildParams.message.interactiveMessage.nativeFlowMessage.buttons = this._buttons;
+
+			const {
+				key: { id },
+				message
+			} = generateWAMessageFromContent(
+				'0@s.whatsapp.net',
+				{
+					viewOnceMessage: this._buildParams
+				},
+				{ messageId: generateMessageID() }
+			);
+
+			await relay(this._destination, message, { messageId: id });
 		}
 
 		buttons(...buttons) {
@@ -614,7 +677,7 @@ export const assign = (client) => {
 
 			const fileBuffer = await fs.readFile(output);
 
-			const preparedMedia = await this.client.instance.prepareMedia(fileBuffer, messageType);
+			const preparedMedia = await prepareMedia(fileBuffer, messageType);
 
 			preparedMedia.message[messageType].gifPlayback = true;
 
@@ -632,7 +695,7 @@ export const assign = (client) => {
 				if (mime === 'image/gif') {
 					preparedMedia = await this.prepareGif(media, messageType);
 				} else {
-					preparedMedia = await this.client.instance.prepareMedia(media, messageType);
+					preparedMedia = await prepareMedia(media, messageType);
 				}
 
 				return {
@@ -649,7 +712,7 @@ export const assign = (client) => {
 					if (mime === 'image/gif') {
 						preparedMedia = await this.prepareGif(buffer, messageType);
 					} else {
-						preparedMedia = await this.client.instance.prepareMedia(buffer, messageType);
+						preparedMedia = await prepareMedia(buffer, messageType);
 					}
 
 					return {
@@ -660,7 +723,7 @@ export const assign = (client) => {
 					const messageType = 'imageMessage';
 
 					return {
-						[messageType]: (await this.client.instance.prepareMedia(Buffer.alloc(10), messageType)).message[messageType],
+						[messageType]: (await prepareMedia(Buffer.alloc(10), messageType)).message[messageType],
 						hasMediaAttachment: true
 					};
 				}
@@ -668,7 +731,7 @@ export const assign = (client) => {
 				const messageType = 'imageMessage';
 
 				return {
-					[messageType]: (await this.client.instance.prepareMedia(Buffer.alloc(10), messageType)).message[messageType],
+					[messageType]: (await prepareMedia(Buffer.alloc(10), messageType)).message[messageType],
 					hasMediaAttachment: true
 				};
 			}
@@ -1227,7 +1290,7 @@ export const assign = (client) => {
 			 * @type {import('../../types/Utils/index.js').UpdateMessage}
 			 */
 			const update = async (message) => {
-				await client.instance.sendMessage(jid, { edit: key, text: message });
+				client.instance.sendMessage(jid, { edit: key, text: message });
 			};
 
 			return {

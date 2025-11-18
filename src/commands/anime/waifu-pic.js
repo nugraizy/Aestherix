@@ -25,12 +25,13 @@ export default {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(5).join(' '))));
 			const index = data.findIndex((v) => v === args[4]);
 
-			const builder = new client.instance.TemplateBuilder.Native(client);
+			const builder = new client.instance.TemplateBuilder.Native();
 
-			builder
-				.mainBody('Waifu Pics'.formatHeaders())
-				.mainFooter(`Provided by waifu.pics\n${index + 1}/${data.length}`)
-				.mainHeader('Header', data[index])
+			await builder
+				.destination(from)
+				.body('Waifu Pics'.formatHeaders())
+				.footer(`Provided by waifu.pics\n${index + 1}/${data.length}`)
+				.header('Header', data[index])
 				.buttons(
 					...[
 						builder.button.url({
@@ -53,11 +54,10 @@ export default {
 								}) /* eslint-disable-line */
 							: null
 					].filter(Boolean)
-				);
+				)
+				.send();
 
-			const messageBuilt = await builder.render();
-
-			return await client.instance.relay(from, messageBuilt.message, { messageId: messageBuilt.key.id });
+			return;
 		}
 
 		let { _: queries, nsfw } = parser(query.toLowerCase(), {
@@ -80,12 +80,13 @@ export default {
 				continue;
 			}
 
-			const builder = new client.instance.TemplateBuilder.Native(client);
+			const builder = new client.instance.TemplateBuilder.Native();
 
-			builder
-				.mainBody('Waifu Pics'.formatHeaders())
-				.mainFooter(`Provided by waifu.pics\n1/${result.length}`)
-				.mainHeader('Header', result[0])
+			await builder
+				.destination(from)
+				.body('Waifu Pics'.formatHeaders())
+				.footer(`Provided by waifu.pics\n1/${result.length}`)
+				.header('Header', result[0])
 				.buttons(
 					...[
 						builder.button.url({
@@ -97,11 +98,10 @@ export default {
 							id: `.waifupic next ${querie} ${nsfw ? 'nsfw' : 'sfw'} ${result[1]} ${JSON.stringify(result)}`
 						})
 					]
-				);
+				)
+				.send();
 
-			const messageBuilt = await builder.render();
-
-			return await client.instance.relay(from, messageBuilt.message, { messageId: messageBuilt.key.id });
+			return;
 		}
 	}
 };

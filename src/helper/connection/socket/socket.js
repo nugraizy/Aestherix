@@ -37,10 +37,13 @@ const question = (text) =>
 		const answer = await input(
 			{
 				message: text,
-				required: true
+				required: true,
+				theme: {
+					prefix: '✦'
+				}
 			},
 			{
-				signal: AbortSignal.timeout(15000)
+				signal: AbortSignal.timeout(60000)
 			}
 		).catch(exitOnErr);
 
@@ -66,13 +69,14 @@ export const connectSocket = async ({ cli, OPTIONS, store }) => {
 	global.store = store;
 
 	const { version } = await fetchLatestBaileysVersion();
+	const printQRInTerminal = !OPTIONS.pairMode;
 
 	/**
 	 * @type {import('baileys').UserFacingSocketConfig}
 	 */
 	const CONNECTION_CONFIG = {
 		msgRetryCounterCache,
-		printQRInTerminal: !OPTIONS.pairMode,
+		printQRInTerminal,
 		logger: logger(OPTIONS),
 		auth: {
 			creds: state.creds,
@@ -227,7 +231,7 @@ const askWantNumber = async ({ hostNumber, backupsHostNumbers }) => {
 };
 
 const handleNewInstance = async ({ OPTIONS, Client }) => {
-	if (OPTIONS.pairMode && !Client.authState.creds.registered) {
+	if (OPTIONS.pairMode && !Client.authState.creds.registered && !Client.authState.creds.me?.id) {
 		let phoneNumber = '';
 
 		check: if (!phoneNumber) {

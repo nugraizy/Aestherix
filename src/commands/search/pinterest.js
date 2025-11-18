@@ -37,14 +37,15 @@ export default {
 			if (isURL(query.trim())) {
 				const result = await pinterest.download(query);
 
-				const builder = new client.instance.TemplateBuilder.Native(client);
+				const builder = new client.instance.TemplateBuilder.Native();
 
-				builder
-					.mainBody('Pinterest Downloader')
-					.mainFooter(
+				await builder
+					.destination(from)
+					.body('Pinterest Downloader')
+					.footer(
 						`Username : ${result.authorUsername}\nFullname : ${result.authorFullname}\nFollowers : ${result.follower}\n\nPowered by Hidden Finder`
 					)
-					.mainHeader('Header', result.url)
+					.header('Header', result.url)
 					.buttons(
 						builder.button.url({
 							display: 'Original Source',
@@ -54,11 +55,10 @@ export default {
 							display: 'Original Media',
 							url: result.url
 						})
-					);
+					)
+					.send();
 
-				const messageBuilt = await builder.render();
-
-				return await client.instance.relay(from, messageBuilt.message, { messageId: messageBuilt.key.id });
+				return;
 			}
 
 			let result = await pinterest.search(query.trim());
@@ -132,11 +132,12 @@ Caption : ${results[index].caption}
 			if (url.length) {
 				const promises = url.map(pinterest.download);
 				const results = await Promise.all(promises);
-				const builder = new client.instance.TemplateBuilder.Carousel(client);
+				const builder = new client.instance.TemplateBuilder.Carousel();
 
-				builder
-					.mainBody('Pinterest Downloader')
-					.mainFooter(`Total Media : ${results.length}`)
+				await builder
+					.destination(from)
+					.body('Pinterest Downloader')
+					.footer(`Total Media : ${results.length}`)
 					.cards(
 						results.map(({ authorUsername, authorFullname, follower, caption, url, pinSource }) => ({
 							body: `Username : ${authorUsername}\nFullname : ${authorFullname}\nFollowers : ${follower}`,
@@ -154,11 +155,8 @@ Caption : ${results[index].caption}
 								})
 							]
 						}))
-					);
-
-				const messageBuilt = await builder.render();
-
-				await client.instance.relay(from, messageBuilt.message, { messageId: messageBuilt.key.id });
+					)
+					.send();
 			}
 
 			if (nonUrl.length) {
@@ -169,11 +167,12 @@ Caption : ${results[index].caption}
 				const errors = results.filter((v) => v.error);
 
 				for (const result of notErrors) {
-					const builder = new client.instance.TemplateBuilder.Carousel(client);
+					const builder = new client.instance.TemplateBuilder.Carousel();
 
-					builder
-						.mainBody('Pinterest Downloader')
-						.mainFooter(`Keyword : ${result.keyword}\nTotal Media : ${result.results.length}`)
+					await builder
+						.destination(from)
+						.body('Pinterest Downloader')
+						.footer(`Keyword : ${result.keyword}\nTotal Media : ${result.results.length}`)
 						.cards(
 							result.results.map(({ authorUsername, authorFullname, follower, caption, url, pinSource }) => ({
 								body: `Username : ${authorUsername}\nFullname : ${authorFullname}\nFollowers : ${follower}`,
@@ -191,11 +190,8 @@ Caption : ${results[index].caption}
 									})
 								]
 							}))
-						);
-
-					const messageBuilt = await builder.render();
-
-					await client.instance.relay(from, messageBuilt.message, { messageId: messageBuilt.key.id });
+						)
+						.send();
 				}
 
 				if (errors.length) {
