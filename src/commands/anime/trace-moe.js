@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-import { isURL, traceMoe, toMp4 } from '../../utils/index.js';
+import { isURL, toMp4, traceMoe } from '../../utils/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -44,21 +44,24 @@ export default {
 			args = JSON.parse(JSON.parse(JSON.stringify(args.slice(2).join(' '))));
 
 			const {
-				title: { native, romaji },
-				type,
-				format,
-				status,
-				startDate: { year: sYear, month: sMonth, day: sDay },
-				endDate: { year: eYear, month: eMonth, day: eDay },
-				episodes,
-				duration,
-				source,
-				coverImage: { large },
-				genres,
-				isAdult,
-				externalLinks,
-				siteUrl
-			} = args.media;
+				anilist: {
+					title: { native, romaji },
+					type,
+					format,
+					status,
+					startDate: { year: sYear, month: sMonth, day: sDay },
+					endDate: { year: eYear, month: eMonth, day: eDay },
+					episodes,
+					duration,
+					source,
+					coverImage: { large },
+					genres,
+					isAdult,
+					externalLinks,
+					siteUrl,
+					studios
+				}
+			} = args;
 
 			const capt = `\`\`\`• Tracking Information\`\`\`\n
 Title : ${native} (${romaji})
@@ -77,7 +80,7 @@ Starts Airing : ${sDay} ${sMonth} ${sYear}
 Ends Airing : ${eDay} ${eMonth} ${eYear}
 Genres : ${genres.join(', ')}
 +18? : ${isAdult ? 'Yes' : 'No'}
-Studios : ${args.media.studios.edges
+Studios : ${studios.edges
 				.map((v) => {
 					return v.node.name;
 				})
@@ -135,21 +138,24 @@ ${
 		}
 
 		const {
-			title: { native, romaji },
-			type,
-			format,
-			status,
-			startDate: { year: sYear, month: sMonth, day: sDay },
-			endDate: { year: eYear, month: eMonth, day: eDay },
-			episodes,
-			duration,
-			source,
-			coverImage: { large },
-			genres,
-			isAdult,
-			externalLinks,
-			siteUrl
-		} = result[0].media;
+			anilist: {
+				title: { native, romaji },
+				type,
+				format,
+				status,
+				startDate: { year: sYear, month: sMonth, day: sDay },
+				endDate: { year: eYear, month: eMonth, day: eDay },
+				episodes,
+				duration,
+				source,
+				coverImage: { large },
+				genres,
+				isAdult,
+				externalLinks,
+				siteUrl,
+				studios
+			}
+		} = result[0];
 		const capt = `\`\`\`• Tracking Information\`\`\`\n
 Title : ${native} (${romaji})
 Similarity : ${result[0].similarity}%
@@ -167,7 +173,7 @@ Starts Airing : ${sDay} ${sMonth} ${sYear}
 Ends Airing : ${eDay} ${eMonth} ${eYear}
 Genres : ${genres.join(', ')}
 +18? : ${isAdult ? 'Yes' : 'No'}
-Studios : ${result[0].media.studios.edges
+Studios : ${studios.edges
 			.map((v) => {
 				return v.node.name;
 			})
@@ -183,20 +189,34 @@ ${externalLinks
 
 		const buffer = await toMp4(result[0].video, sender);
 
-		await client.instance.send(
-			from,
-			{
-				video: new Buffer.from(buffer, 'base64'),
-				caption: `${'What Anime ?'.formatHeaders()}\n\n${capt.trim()}`,
-				templateButtons: [
-					{ urlButton: { displayText: 'Image Source', url: large } },
-					{ urlButton: { displayText: 'Video Source', url: result[0].video } },
-					{ urlButton: { displayText: 'Anilist Source', url: siteUrl } }
-				],
-				footer: 'Powered by trace.moe'
-			},
-			{ quoted: message }
-		);
+		const builder = new client.instance.TemplateBuilder.Native();
+
+		await builder
+			.destination(from)
+			.footer('Powered by trace.moe')
+			.header('', new Buffer.from(buffer, 'base64'))
+			.body(`${'What Anime ?'.formatHeaders()}\n\n${capt.trim()}`)
+			.buttons(
+				builder.button.url({ display: 'Image Source', url: large }),
+				builder.button.url({ display: 'Video Source', url: result[0].video }),
+				builder.button.url({ display: 'Anilist Source', url: siteUrl })
+			)
+			.send();
+
+		// await client.instance.send(
+		// 	from,
+		// 	{
+		// 		video: new Buffer.from(buffer, 'base64'),
+		// 		caption: `${'What Anime ?'.formatHeaders()}\n\n${capt.trim()}`,
+		// 		templateButtons: [
+		// 			{ urlButton: { displayText: 'Image Source', url: large } },
+		// 			{ urlButton: { displayText: 'Video Source', url: result[0].video } },
+		// 			{ urlButton: { displayText: 'Anilist Source', url: siteUrl } }
+		// 		],
+		// 		footer: 'Powered by trace.moe'
+		// 	},
+		// 	{ quoted: message }
+		// );
 
 		// let i = 0;
 		// const row = [];
