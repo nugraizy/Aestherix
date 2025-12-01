@@ -414,8 +414,8 @@ export const pet = (input, sender, opts = {}) =>
 					packname: configuration.packname
 				});
 
-				await fs.unlink(`${opts.filename}.gif`);
-				await fs.unlink(`${opts.filename}-done.webp`);
+				fs.existsSync(`${opts.filename}.gif`) && (await fs.unlink(`${opts.filename}.gif`));
+				fs.existsSync(`${opts.filename}-done.webp`) && (await fs.unlink(`${opts.filename}-done.webp`));
 				resolve(sticker);
 				return;
 			}
@@ -423,9 +423,9 @@ export const pet = (input, sender, opts = {}) =>
 			const { output } = await gif2mp4(`${input}.gif`, `${input}.mp4`, opts);
 
 			resolve(await fs.readFile(output));
-			await fs.unlink(input);
-			await fs.unlink(`${input}.gif`);
-			await fs.unlink(output);
+			fs.existsSync(input) && (await fs.unlink(input));
+			fs.existsSync(`${input}.gif`) && (await fs.unlink(`${input}.gif`));
+			fs.existsSync(output) && (await fs.unlink(output));
 		} catch (err) {
 			loggers.error(`${color('Failed to Pet Image', '#FF5555')} for ${color(sender, '#E4C1F9')}`);
 			reject(err);

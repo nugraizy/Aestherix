@@ -15,6 +15,7 @@ import {
 	S_WHATSAPP_NET,
 	typeMessage
 } from '../misc/wa_data/index.js';
+import { Cache } from './cache.js';
 
 /**
  * @constant
@@ -78,6 +79,8 @@ const waitForInput = (client, data) =>
 		});
 	});
 
+const lidMaps = new Cache();
+
 /**
  *
  * @param {Object} obj
@@ -102,7 +105,7 @@ function crawlProperty(obj, propName) {
  * Reassigns and normalizes message data for easier handling and access.
  * @type {import('../../types/Reconstruct/index.js').Reconstructuring}
  */
-export const reassign = async (m, client, store) => {
+export const reassign = async (m, client, store, state) => {
 	try {
 		if (m.message?.protocolMessage?.type === 0) {
 			return m;
@@ -111,11 +114,11 @@ export const reassign = async (m, client, store) => {
 		delete m?.message?.senderKeyDistributionMessage;
 
 		const isFromMe = m?.key?.fromMe;
+
 		const from = m?.key?.remoteJid || m?.from;
 		const isGroup = from.endsWith('@g.us');
 		let groupSettings;
-		const isBaileys =
-			(m?.key?.id?.startsWith('BAE5') && m?.key?.id?.length === 16) || (isFromMe && m?.key?.id?.startsWith('HFINDER'));
+		const isBaileys = m?.key?.id?.startsWith('BAE5') && m?.key?.id?.length === 16;
 		const device = getDevice(m.key.id);
 		const myJid = client.instance.decodeJid(instance);
 		const sender = isFromMe
@@ -127,6 +130,25 @@ export const reassign = async (m, client, store) => {
 				: m?.key?.remoteJid === 'status@broadcast'
 					? m?.key?.participant
 					: m?.key?.remoteJid;
+
+		const lid = isFromMe
+			? state && state.creds.me?.lid?.endsWith('@lid')
+				? client.instance.decodeJid(state.creds.me?.lid)
+				: null
+			: isGroup
+				? m?.key?.participant?.endsWith('@lid')
+					? m?.key?.participant
+					: m?.key?.remoteJid?.endsWith('@lid')
+						? m?.key?.remoteJid
+						: null
+				: null;
+
+		if (lid && !lidMaps.has(lid) && lid.endsWith('@lid')) {
+			lidMaps.set(lid, {
+				pushName: isFromMe ? state.creds.me?.name : m.pushName,
+				id: sender
+			});
+		}
 
 		const isMetadata = configuration.cache.metadata?.has(from);
 		const isUsers = configuration.cache.users.has(sender);
@@ -186,7 +208,10 @@ export const reassign = async (m, client, store) => {
 			configuration.cache.users.set(sender, {
 				prettyNumber: PhoneNumber(`+${sender?.replace(S_WHATSAPP_NET, '')}`)?.formatInternational() ?? 'No Data',
 				name: m.pushName,
-				ephemeralDuration: store.messages[sender] ? crawlProperty(store.messages[sender].array[0].message, 'expiration') : 0
+				ephemeralDuration:
+					store.messages[sender] && store.messages[sender].array.length
+						? crawlProperty(store.messages[sender].array[0].message, 'expiration')
+						: 0
 			});
 		}
 
@@ -367,7 +392,7 @@ export const reassign = async (m, client, store) => {
 			type === 'extendedTextMessage' || type === 'mentionText'
 				? typeQuoted === 'thumbnailMessage'
 					? m
-					: mMediaData || {}
+					: { ...mMediaData, ...lidMaps.get(mMediaData?.participant) } || {}
 				: m || {};
 
 		mediaData.extract = () => {

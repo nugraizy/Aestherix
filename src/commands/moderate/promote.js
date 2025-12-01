@@ -17,18 +17,18 @@ export default {
 			return await client.instance.reply(from, 'Please reply people message or mention people.', message);
 		}
 
+		const myJid = client.instance.decodeJid(instance);
+
+		if (!isBotAdmin && (mention?.includes(myJid) || mediaData?.id?.includes(myJid))) {
+			return await client.instance.reply(from, 'You can not promote me by myself.', message);
+		}
+
 		if (!isBotAdmin) {
 			return await client.instance.reply(
 				from,
 				'Bot is not admin, Please promote admin before using moderation commands.',
 				message
 			);
-		}
-
-		const myJid = client.instance.decodeJid(instance);
-
-		if (mention?.includes(myJid) || mediaData?.participant?.includes(myJid)) {
-			return await client.instance.reply(from, 'You can not promote me by myself.', message);
 		}
 
 		if (query || mention.length) {

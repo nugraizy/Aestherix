@@ -1,8 +1,8 @@
-import path from 'path';
 import fs from 'fs-extra';
+import path from 'path';
 
-import { color, loggers } from '../../utils/modules/index.js';
 import { pet } from '../../utils/converter/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -36,7 +36,7 @@ export default {
 		},
 		client
 	) {
-		if (!mention.length && !isMediaImage) {
+		if (!mention.length && !isMediaImage && !bodyQuoted) {
 			return await client.instance.reply(from, 'Please mention or send/reply an image to pet', message);
 		}
 

@@ -121,7 +121,7 @@ const addContextCaption = (participant, action, data) => {
  * @param {string} groupName
  */
 const sendNotification = async (client, text, id, author, participant, groupName, action) => {
-	if (['left', 'remove', 'invite', 'add'].includes(action)) {
+	if (!['left', 'remove', 'invite', 'add'].includes(action)) {
 		return client.instance.send(id, {
 			text,
 			mentions: [author || '', participant || '0@s.whatsapp.net']
@@ -188,7 +188,7 @@ const groupParticipantsNotificationHandler = async (client, update) => {
 		actionName = actionNames;
 	});
 
-	if (!settings.has(id) || !settings.get(id)) {
+	if (!settings.has(id)) {
 		return;
 	}
 

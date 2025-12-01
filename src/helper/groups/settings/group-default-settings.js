@@ -1,8 +1,8 @@
 import fs from 'fs-extra';
 
-export const checkJSON = async (dari) => {
+export const checkJSON = async (from) => {
 	const data = await fs.readJSON('./databases/groups/settingsManager.json');
-	const index = data.findIndex((v) => Object.keys(v)[0] === dari);
+	const index = data.findIndex((v) => Object.keys(v)[0] === from);
 
 	if (index !== -1) {
 		return data[index];
@@ -11,13 +11,13 @@ export const checkJSON = async (dari) => {
 	return false;
 };
 
-export const pushDefaultSettings = async (dari, groupName, groupDescription) => {
+export const pushDefaultSettings = async (from, groupName, groupDescription) => {
 	const data = await fs.readJSON('./databases/groups/settingsManager.json');
-	const index = data.findIndex((v) => Object.keys(v)[0] === dari);
+	const index = data.findIndex((v) => Object.keys(v)[0] === from);
 
 	if (index === -1) {
 		data.push({
-			[dari]: {
+			[from]: {
 				groupName,
 				groupDescription,
 				welcome1: 'disable',
@@ -47,15 +47,15 @@ export const pushDefaultSettings = async (dari, groupName, groupDescription) => 
 	return data[index];
 };
 
-export const updateSettings = async (setting, value, dari) => {
+export const updateSettings = async (setting, value, from) => {
 	const data = await fs.readJSON('./databases/groups/settingsManager.json');
-	const index = data.findIndex((v) => Object.keys(v)[0] === dari);
+	const index = data.findIndex((v) => Object.keys(v)[0] === from);
 
 	if (index === -1) {
 		return false;
 	}
 
-	data[index][dari][setting] = value;
+	data[index][from][setting] = value;
 	await fs.writeJSON('./databases/groups/settingsManager.json', data);
 	return data[index];
 };

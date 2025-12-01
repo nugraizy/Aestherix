@@ -1,9 +1,9 @@
 import Canvas from '@napi-rs/canvas';
-import wrap from 'wordwrap';
+import EMOJI_REGEX from 'emojibase-regex';
+import fs from 'fs-extra';
 import path from 'path';
 import sharp from 'sharp';
-import fs from 'fs-extra';
-import EMOJI_REGEX from 'emojibase-regex';
+import wrap from 'wordwrap';
 
 const { createCanvas, loadImage, GlobalFonts } = Canvas;
 const parseOnEmoji = (text) => text.split(new RegExp(`(${EMOJI_REGEX.source})`, 'g'));
@@ -357,7 +357,7 @@ const bubble = new BubbleChat();
 bubble
 	.init()
 	.setUsername('Nanda')
-	.setBody('Hello Everyone My Name is Nanda. Nice to meet you all!'.repeat(10))
+	.setBody('Hello Everyone My Name is Nanda ☺️💌🤗🔨💘. Nice to meet you all!'.repeat(10))
 	.setType('text');
 
 await bubble.build();
