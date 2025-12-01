@@ -1,4 +1,4 @@
-import { getScreenshotAPI, isURL } from '../../utils/index.js';
+import { isURL, screenshot } from '../../utils/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -18,22 +18,16 @@ export default {
 			return await client.instance.reply(message.from, 'Please specify a website URL', message.message);
 		}
 
-		let type = 'desktop';
-		const parseOptions = message.query.includes('--') ? message.query.split('--') : message.query;
-
-		if (Array.isArray(parseOptions)) {
-			if (!isURL(parseOptions[0])) {
-				return await client.instance.reply(message.from, 'Please specify a valid URL', message.message);
-			}
-
-			message.query = parseOptions[0];
-			type = parseOptions[1];
-		} else if (!isURL(message.query)) {
+		if (!isURL(message.query)) {
 			return await client.instance.reply(message.from, 'Please specify a valid URL', message.message);
 		}
 
-		const { buffer } = await getScreenshotAPI(message.query, type);
+		const { buffer, error } = await screenshot(message.query);
 
-		await client.instance.send(message.from, { image: new Buffer.from(buffer, 'base64') }, { quoted: message.message });
+		if (error) {
+			return await client.instance.reply(message.from, error, message.message);
+		}
+
+		await client.instance.send(message.from, { image: buffer }, { quoted: message.message });
 	}
 };

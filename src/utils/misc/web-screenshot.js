@@ -1,4 +1,4 @@
-import { KnownDevices } from 'puppeteer';
+import Pageres from 'pageres';
 import puppeteer from 'puppeteer-extra';
 import puppeteerSrealth from 'puppeteer-extra-plugin-stealth';
 
@@ -35,33 +35,14 @@ export const getScreenshotAPI = async (url, type) =>
 		}
 	});
 
-export const getScreenshotDriver = (url, type) =>
+export const screenshot = (url) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			type = Object.entries(KnownDevices)[type - 1]?.[1];
+			const data = await new Pageres({ timeout: 10000 })
+				.source('https://github.com/home', ['2560x768'], { crop: false })
+				.run();
 
-			if (!type) {
-				resolve({
-					error: `Type not found. Available types :
-${Object.keys(KnownDevices)
-	.map((v, i) => `${i + 1}. ${v}`)
-	.join('\n')}`
-				});
-				return;
-			}
-
-			const browser = await puppeteer.launch({ headless: true });
-			const page = await browser.newPage();
-
-			await page.emulate(type);
-
-			await page.goto(url);
-
-			const image = await page.screenshot();
-
-			await browser.close();
-
-			resolve({ buffer: image });
+			resolve({ buffer: Buffer.from(data.at(0).buffer) });
 		} catch (error) {
 			reject(error);
 		}

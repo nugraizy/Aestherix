@@ -34,9 +34,9 @@ const caching = async (clients, id) => {
 		configuration.cache.metadata.set(id, {
 			...groupMetadata,
 			rawParticipants: partc || [],
-			adminGroups: partc?.filter((v) => v.admin !== null)?.map((v) => v.id),
-			participantsGroup: partc?.map((v) => v.id),
-			ownerGroups: partc?.find((v) => v.admin === 'superadmin')?.id || null
+			adminGroups: partc?.filter((v) => v.admin !== null)?.map((v) => v.phoneNumber),
+			participantsGroup: partc?.map((v) => v.phoneNumber),
+			ownerGroups: groupMetadata?.ownerPn || null
 		});
 		resolve();
 	});
