@@ -75,7 +75,9 @@ const handleStubMessage = async (client, message, store) => {
 		return;
 	}
 
-	handler.get('STUBTYPE')(client, message.messages[0], store);
+	if (message.messages?.[0]) {
+		handler.get('STUBTYPE')(client, message.messages?.[0], store);
+	}
 };
 
 const handleStoryMessage = async (client, message) => handler.get('STORY')(client, message);

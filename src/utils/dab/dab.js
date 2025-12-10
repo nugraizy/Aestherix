@@ -121,7 +121,7 @@ class Dab {
 
 		const domains = getDomains('search', container.params);
 
-		const { error, data } = await this.tryFetch(domains);
+		let { error, data } = await this.tryFetch(domains);
 
 		if (error) {
 			return error;
@@ -130,6 +130,8 @@ class Dab {
 		if (data.error) {
 			return data;
 		}
+
+		data = data.data;
 
 		QUERY_CACHE.search.set(query + '-' + container.type, data);
 
@@ -192,7 +194,7 @@ class Dab {
 
 		const domains = getDomains('album', { id });
 
-		const { error, data } = await this.tryFetch(domains);
+		let { error, data } = await this.tryFetch(domains);
 
 		if (error) {
 			return error;
@@ -201,6 +203,8 @@ class Dab {
 		if (data.error) {
 			return data;
 		}
+
+		data = data.data;
 
 		QUERY_CACHE.album.set(id, data);
 

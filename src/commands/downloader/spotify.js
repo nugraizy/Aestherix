@@ -162,14 +162,14 @@ const handleSpotifyCollection = async (url, type, client, { from, message, wait 
 		collectionName = sanitizeFilename(`${album.albums[0].artists[0].name} ${album.albums[0].name}`);
 
 		const albumTracksId = await dab.search(collectionName, 'album');
-		const albumData = await dab.getAlbum(albumTracksId.albums.items[0].id);
+		const { items: albumData } = await dab.getAlbum(albumTracksId.albums.items[0].id);
 
-		let processCaption = `Processing Spotify ${type}...\n✅ Found ${albumData[1].items.length}/${album.albums[0].total_tracks} tracks.`;
+		let processCaption = `Processing Spotify ${type}...\n✅ Found ${albumData.length}/${album.albums[0].total_tracks} tracks.`;
 
 		await wait.update(processCaption);
 
 		const { dabDownloads: downloads, processCaption: caption } = await downloadTracksFromDab(
-			albumData[1].items,
+			albumData,
 			wait,
 			processCaption,
 			'album'
