@@ -6,7 +6,7 @@
   "main": "./index.js",
   "type": "module",
   "scripts": {
-    "pm2": "pm2 start ./index.js && pm2 logs",
+    "pm2": "pm2 start ./index.js -- nugraizy_android -z -w -c && pm2 logs",
     "pm2kill": "pm2 kill",
     "dev": "nodemon",
     "start": "node . nugraizy_android -z -w -c",

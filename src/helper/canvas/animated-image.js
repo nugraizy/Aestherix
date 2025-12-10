@@ -6,8 +6,8 @@ import { readFileSync, unlinkSync, writeFileSync } from 'fs';
 import path from 'path';
 
 import { createExif } from '../../utils/misc/index.js';
-import { scheme } from '../misc/palettes/colors.js';
 import { color, loggers } from '../../utils/modules/index.js';
+import { scheme } from '../misc/palettes/colors.js';
 
 const { createCanvas, GlobalFonts } = Canvas;
 const { CanvasTextWrapper } = Wrap;

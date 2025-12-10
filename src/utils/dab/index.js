@@ -1,2 +1,2 @@
 export * from './dab.js';
-export * from './metadata.js';
+export * from './utils/index.js';

@@ -1,6 +1,7 @@
 import { fetch } from 'undici';
 
 import { Cache } from '../../helper/modules/cache.js';
+import { decodeManifestBase64 } from './utils/decode.js';
 
 const QUERY_CACHE = {
 	search: new Cache({ allowOverwrite: true, limit: 100 }),
@@ -10,7 +11,8 @@ const QUERY_CACHE = {
 const URL_CACHE = {
 	search: new Cache({ allowOverwrite: true, limit: 100 }),
 	download: new Cache({ allowOverwrite: true, limit: 100 }),
-	album: new Cache({ allowOverwrite: true, limit: 100 })
+	album: new Cache({ allowOverwrite: true, limit: 100 }),
+	info: new Cache({ allowOverwrite: true, limit: 100 })
 };
 
 const SERVERS = {
@@ -53,7 +55,9 @@ const getDomains = (type, value) => {
 				? buildUrls('track', value)
 				: type === 'album'
 					? buildUrls('album', value)
-					: null;
+					: type === 'info'
+						? buildUrls('info', value)
+						: null;
 
 	if (!urls) {
 		throw new Error('Invalid type');
@@ -72,10 +76,10 @@ class Dab {
 		}
 	}
 
-	async tryFetch(domains) {
+	async tryFetch(domains, config = {}) {
 		for (const url of domains) {
 			try {
-				const res = await fetch(url);
+				const res = await fetch(url, config);
 
 				if (!res.ok) {
 					continue;
@@ -83,7 +87,7 @@ class Dab {
 
 				const data = await this.toJson(res);
 
-				if (!data) {
+				if (!data || !data.data) {
 					continue;
 				}
 
@@ -137,9 +141,20 @@ class Dab {
 			throw new Error('ID is required');
 		}
 
-		const domains = getDomains('download', { id, quality: 'LOSSLESS' });
+		const domainsDownload = getDomains('download', { id, quality: 'LOSSLESS' });
+		const domainsInfo = getDomains('info', { id });
 
-		const { error, data, domain } = await this.tryFetch(domains);
+		const { error, data, domain } = await this.tryFetch(domainsDownload, {
+			headers: {
+				'x-client': 'BiniLossless/v3.2'
+			}
+		});
+
+		const info = await this.tryFetch(domainsInfo, {
+			headers: {
+				'x-client': 'BiniLossless/v3.2'
+			}
+		});
 
 		if (error) {
 			return error;
@@ -149,24 +164,12 @@ class Dab {
 			return data;
 		}
 
-		let file, track, original;
+		let file = data.data,
+			track = info.data.data,
+			original = JSON.parse(decodeManifestBase64(data.data.manifest))?.urls?.[0] || null;
 
-		for (const v of data) {
-			if (!file && v.trackId) {
-				file = v;
-			}
-
-			if (!track && v.id && v.title) {
-				track = v;
-			}
-
-			if (!original && v.OriginalTrackUrl) {
-				original = v.OriginalTrackUrl;
-			}
-
-			if (file && track && original) {
-				break;
-			}
+		if (!original) {
+			throw new Error('Could not retrieve original track URL');
 		}
 
 		return {
