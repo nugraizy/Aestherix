@@ -16,20 +16,28 @@ const URL_CACHE = {
 };
 
 const SERVERS = {
-	squid: {
-		subdomains: ['aether', 'chaos', 'kraken', 'phoenix', 'shiva', 'triton', 'zeus'],
-		tld: 'wtf'
-	},
 	monochrome: {
-		subdomains: ['california', 'frankfurt', 'jakarta', 'london', 'ohio', 'oregon', 'singapore', 'tokyo', 'virginia'],
+		subdomains: ['api', 'frankfurt-1', 'ohio-1', 'singapore-1', 'eu-central', 'us-west', 'arran'],
 		tld: 'tf'
 	},
 	qqdl: {
 		subdomains: ['hund', 'katze', 'maus', 'vogel', 'wolf'],
 		tld: 'site'
 	},
-	prigoana: {
+	geeked: {
 		subdomains: ['hifi'],
+		tld: 'wtf'
+	},
+	spotisaver: {
+		subdomains: ['hifi-one', 'hifi-two'],
+		tld: 'net'
+	},
+	kinoplus: {
+		subdomains: ['tidal'],
+		tld: 'online'
+	},
+	samidy: {
+		subdomains: ['monochrome-api'],
 		tld: 'com'
 	}
 };
