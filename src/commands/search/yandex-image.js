@@ -46,7 +46,7 @@ export default {
 								} /* eslint-disable-line */
 							: {}
 					],
-					footer: `Void Bot     ${index + 1}/${data.length}\nPowered by Hidden Finder`
+					footer: `Aestherix Bot     ${index + 1}/${data.length}\nPowered by Hidden Finder`
 				},
 				{ quoted: message }
 			);

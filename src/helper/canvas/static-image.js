@@ -6,8 +6,8 @@ import fs, { readFileSync, unlinkSync } from 'fs';
 import path from 'path';
 
 import { createExif } from '../../utils/misc/index.js';
-import { scheme } from '../misc/palettes/colors.js';
 import { color, loggers } from '../../utils/modules/index.js';
+import { scheme } from '../misc/palettes/colors.js';
 
 const { createCanvas, GlobalFonts } = Canvas;
 const { CanvasTextWrapper } = Wrap;
@@ -80,7 +80,7 @@ const loadColorsPalette = (color = null) => {
 
 export const ttp = (sender, texts, colored, fonts) =>
 	new Promise(async (resolve, reject) => {
-		createExif('Made by Nanda', 'Void Static Sticker using Canvas and WebP');
+		createExif('Made by Nanda', 'Aestherix Static Sticker using Canvas and WebP');
 
 		fonts = fonts !== undefined ? fonts.toLowerCase() : 'chevin';
 		colored = colored.length ? colored : null;

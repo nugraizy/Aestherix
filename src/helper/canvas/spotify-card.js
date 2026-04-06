@@ -26,7 +26,7 @@ const assets = {
 
 const instagramUsername = 'dizy.prod';
 const githubUsername = 'nugraizy';
-const watermark = 'Spotify Card by Void';
+const watermark = 'Spotify Card by Aestherix';
 
 export class SpotifyCard {
 	/**

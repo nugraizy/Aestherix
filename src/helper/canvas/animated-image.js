@@ -84,7 +84,7 @@ const loadColorsPalette = (color) => {
 
 export const attp = (sender, texts, colored, fonts) =>
 	new Promise(async (resolve) => {
-		createExif('Made by Nanda', 'Void Animated Sticker using Canvas and WebP');
+		createExif('Made by Nanda', 'Aestherix Animated Sticker using Canvas and WebP');
 
 		fonts = fonts !== undefined ? fonts.toLowerCase() : 'chevin';
 		colored = colored.length ? colored : null;

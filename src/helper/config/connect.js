@@ -53,7 +53,7 @@ const globalConfig = {
 	isFirstConnectionForCache: true,
 	isFirstConnection: true,
 	isConnected: false,
-	packname: 'Made by Void',
+	packname: 'Made by Aestherix',
 	author: 'Powered by Hidden Finder',
 	anonymous: new Cache(),
 	input: new Cache(),
