@@ -96,7 +96,7 @@ export const fetchHEADERS = async (url, options) => {
 export const cheerioLOAD = (html) => load(html);
 
 /**
- * Douwnload files using axios
+ * Download files using axios
  * @param {string} url direct url download.
  * @param {string} path local filepath where the file will be save.
  * @returns {Promise<string>}
@@ -186,10 +186,10 @@ export const wordWrapping = (string, options = {}) => {
 
 export const calcCrow = (lats1, lon1, lats2, lon2) => {
 	const R = 6371;
-	const dLat = () => lats2 - (lats1 * Math.PI) / 180;
-	const dLon = () => lon2 - (lon1 * Math.PI) / 180;
-	const lat1 = () => (lats1 * Math.PI) / 18_080;
-	const lat2 = () => (lats2 * Math.PI) / 180;
+	const dLat = lats2 - (lats1 * Math.PI) / 180;
+	const dLon = lon2 - (lon1 * Math.PI) / 180;
+	const lat1 = (lats1 * Math.PI) / 180;
+	const lat2 = (lats2 * Math.PI) / 180;
 	const a =
 		Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
 	const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
@@ -246,7 +246,7 @@ export const extractFilesize = (bytes = 0) => getFilesizeFromBytes(Buffer.byteLe
 
 export const closestNumberFromArray = (number, array = []) => {
 	if (typeof number !== 'number') {
-		Number(number);
+		number = Number(number);
 	}
 
 	return array.reduce((previous, current) => (Math.abs(current - number) < Math.abs(previous - number) ? current : previous));
@@ -415,6 +415,7 @@ export const zalgo = (text = 'Mana textnya?', options = {}) => {
 	let counts;
 	let result = '';
 	const types = [];
+	const charData = chars();
 
 	if (options.up !== false) {
 		types.push('up');
@@ -429,7 +430,7 @@ export const zalgo = (text = 'Mana textnya?', options = {}) => {
 	}
 
 	for (let i = 0, l = text.length; i < l; i++) {
-		if (chars().pattern.test(text[i])) {
+		if (charData.pattern.test(text[i])) {
 			continue;
 		}
 
@@ -463,7 +464,7 @@ export const zalgo = (text = 'Mana textnya?', options = {}) => {
 		for (let j = 0, m = types.length; j < m; j++) {
 			const type = types[j];
 			let count = counts[type];
-			const tchars = chars()[type];
+			const tchars = charData[type];
 			const max = tchars.length - 1;
 
 			while (count--) {
@@ -475,13 +476,15 @@ export const zalgo = (text = 'Mana textnya?', options = {}) => {
 	return result;
 };
 
-export const extractZalgo = (text) => text.replace(chars().pattern, '');
+const getZalgoPattern = () => chars().pattern;
+
+export const extractZalgo = (text) => text.replace(getZalgoPattern(), '');
 
 export const convertToOrdinal = (number) => {
 	const ordinal = ['th', 'st', 'nd', 'rd'];
-	const Metta = number % 100;
+	const lastTwoDigits = number % 100;
 
-	return number + (ordinal[(Metta - 20) % 10] || ordinal[Metta] || ordinal[0]);
+	return number + (ordinal[(lastTwoDigits - 20) % 10] || ordinal[lastTwoDigits] || ordinal[0]);
 };
 
 export function loadFiles(dir) {
@@ -510,15 +513,15 @@ export function loadFiles(dir) {
 export const isZilgoo = (str) => str.match(/\u{1F1E6}/g);
 
 export const getFunctions = (module) => {
-	Object.keys(module).filter((key) => {
-		typeof module[key] === 'function';
-	});
+	return Object.keys(module).filter((key) => typeof module[key] === 'function');
 };
 
 export const delaySync = (ms) => {
 	const start = Date.now();
 
-	while (Date.now() - start <= ms) {}
+	while (Date.now() - start <= ms) {
+		// Do nothing
+	}
 };
 
 export const delay = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -924,7 +927,8 @@ export const wrapText = (text, { limit = 0, length = 0, center = false }) => {
 
 const apiEndpoints = {
 	uguu: 'https://uguu.se/upload.php',
-	catbox: 'https://catbox.moe/user/api.php'
+	catbox: 'https://catbox.moe/user/api.php',
+	monochrome: 'https://worker.uploads.monochrome.qzz.io'
 };
 
 export class Uploader {
@@ -1010,6 +1014,58 @@ export class Uploader {
 				url
 			};
 		};
+
+		/**
+		 * @returns {Promise<{filename: string, url: string}>}
+		 */
+		this.monochrome = async () => {
+			try {
+				let fileData;
+				let fileName = 'file';
+
+				if (isBuffer(this._file)) {
+					fileData = this._file;
+				} else if (isFilePath(this._file)) {
+					fileData = await fs.readFile(this._file);
+					fileName = this._file;
+				} else {
+					throw new Error('Could not process input.');
+				}
+
+				const fileNameWithoutSpace = fileName.replace(/\s/g, '_');
+				const file = new File([fileData], fileNameWithoutSpace);
+				const response = await fetch(`${apiEndpoints.monochrome}/${fileNameWithoutSpace}`, {
+					method: 'PUT',
+					headers: {
+						'x-api-key': 'if_youre_reading_this_fuck_off',
+						'Content-Type': file.type || 'application/octet-stream'
+					},
+					body: file
+				});
+
+				if (!response.ok) {
+					if (response.status === 413) {
+						throw new Error('File exceeds 10MB');
+					}
+
+					throw new Error(`Upload failed: ${response.status}`);
+				}
+
+				const responseText = await response.text();
+				const parsedResponse = await this.#tryJsonString(responseText);
+
+				if (typeof parsedResponse === 'string' && parsedResponse !== null) {
+					return {
+						filename: fileNameWithoutSpace,
+						url: `${apiEndpoints.monochrome.replace('worker.uploads', 'images')}/${parsedResponse}`
+					};
+				}
+
+				throw new Error('Upload error with response: ' + parsedResponse.status + ': ' + parsedResponse.message);
+			} catch (error) {
+				throw error;
+			}
+		};
 	}
 
 	/**
@@ -1055,6 +1111,19 @@ export class Uploader {
 
 		return Buffer.from(buffer);
 	}
+
+	/**
+	 * @private
+	 * @param {string} text
+	 * @returns {Promise<any>}
+	 */
+	async #tryJsonString(text) {
+		try {
+			return JSON.parse(text);
+		} catch {
+			return text;
+		}
+	}
 }
 
 export class Timer {
@@ -1072,7 +1141,10 @@ export class Timer {
 	}
 
 	stop() {
-		if (!this.#startTime) throw new Error('Timer has not been started.');
+		if (!this.#startTime) {
+			throw new Error('Timer has not been started.');
+		}
+
 		this.#endTime = process.hrtime.bigint();
 	}
 
@@ -1082,9 +1154,13 @@ export class Timer {
 	}
 
 	elapsed() {
-		if (!this.#startTime) return 0n;
+		if (!this.#startTime) {
+			return 0n;
+		}
+
 		const end = this.#endTime ?? process.hrtime.bigint();
-		return Number(end - this.#startTime) / 1e6; // milliseconds
+
+		return Number(end - this.#startTime) / 1e6;
 	}
 
 	formatted() {

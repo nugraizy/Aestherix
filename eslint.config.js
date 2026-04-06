@@ -11,26 +11,25 @@ export default [
 				store: true,
 				Bun: true,
 				...globals.node,
-				...globals.browser,
-				__botName: 'Aestherix'
+				...globals.browser
 			}
 		},
 		rules: {
 			'no-undef': 'error',
-			'no-unsafe-optional-chaining': 0,
+			'no-unsafe-optional-chaining': 'off',
 			'no-unused-vars': 'warn',
-			'no-use-before-define': 1,
+			'no-use-before-define': 'warn',
 			'no-async-promise-executor': 'off',
-			'no-mixed-spaces-and-tabs': 2,
-			'no-dupe-keys': 1,
-			'no-global-assign': 0,
-			camelcase: 2,
-			'no-empty': 2,
-			curly: 2,
-			'no-whitespace-before-property': 2,
-			quotes: [2, 'single'],
+			'no-mixed-spaces-and-tabs': 'error',
+			'no-dupe-keys': 'warn',
+			'no-global-assign': 'off',
+			camelcase: 'error',
+			'no-empty': 'error',
+			curly: 'error',
+			'no-whitespace-before-property': 'error',
+			quotes: ['error', 'single'],
 			'padding-line-between-statements': [
-				2,
+				'error',
 				{
 					blankLine: 'always',
 					prev: ['const', 'let', 'var'],

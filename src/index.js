@@ -34,6 +34,95 @@ import { color, loggers } from './utils/modules/index.js';
 import { pinterest } from './utils/pinterest/index.js';
 
 const autoProfilePictureChangeEnabled = true;
+const PROFILE_PICTURE_UPDATE_INTERVAL = '*/20 * * * * *';
+const PROFILE_PICTURE_NO_CROP = 'no_crop';
+const BOOKMARK_END_FLAG = '-end-';
+
+/**
+ * Starts the auto profile picture change service
+ * @param {import('./types/Socket/index').AdvancedClient} client
+ * @param {import('./types/Socket/index').MultiAuthState['state']} state
+ * @param {import('./types/Socket/config').GlobalConfig} config
+ */
+const startAutoProfilePictureChangeService = async (client, state, config) => {
+	let images = [];
+	let bookmarks = null;
+	let currentPinterestId = null;
+
+	const fetchImages = async (pinterestId) => {
+		let response;
+
+		if (pinterestId) {
+			response = await pinterest.getSimilarPin(pinterestId, bookmarks);
+		} else {
+			response = await pinterest.getHomefeed();
+		}
+
+		if (response?.images) {
+			images = response.images;
+		} else {
+			images = response;
+		}
+
+		if (response?.bookmarks) {
+			if (response.bookmarks === BOOKMARK_END_FLAG) {
+				bookmarks = null;
+				currentPinterestId = null;
+				return;
+			}
+
+			bookmarks = response.bookmarks;
+		} else {
+			bookmarks = null;
+		}
+	};
+
+	const downloadImage = async (url) => {
+		const { data } = await axios.get(url, { responseType: 'arraybuffer' });
+
+		return data;
+	};
+
+	cron.schedule(PROFILE_PICTURE_UPDATE_INTERVAL, async () => {
+		try {
+			const pinterestId = config.pinterestId;
+
+			if (images.length === 0 && !currentPinterestId) {
+				await fetchImages(pinterestId);
+				currentPinterestId = pinterestId || null;
+			}
+
+			if (pinterestId !== currentPinterestId) {
+				images = [];
+				bookmarks = null;
+				await fetchImages(pinterestId);
+				currentPinterestId = pinterestId || null;
+			}
+
+			if (images.length === 0) {
+				await fetchImages(pinterestId);
+			}
+
+			if (images.length === 0) {
+				return;
+			}
+
+			const imageUrl = images.shift().url;
+			const image = await downloadImage(imageUrl);
+			const date = dayjs.tz().format('YYYY/MM/DD HH:mm:ss');
+
+			config.pinterestImages.set(date, imageUrl);
+
+			await client.instance.updateProfilePicture(instance, image, PROFILE_PICTURE_NO_CROP);
+
+			if (isWABusinessPlatform(state.creds.platform)) {
+				await client.instance.updateCoverPhoto(await sharp(image).blur(10).png().toBuffer());
+			}
+		} catch (error) {
+			loggers.error('Profile picture update failed:', error.message);
+		}
+	});
+};
 
 configuration.cli = clis;
 configuration.OPTIONS = configuration.cli.flags;
@@ -133,84 +222,7 @@ export const start = async (isReconnect) => {
 			Client.ws.on('CB:notification,type:picture', async (update) => await emitGroupSettings.picture(update));
 
 			if (autoProfilePictureChangeEnabled) {
-				let images = [];
-				let bookmarks = null;
-				let currentPinterestId = null;
-
-				const fetchImages = async (pinterestId) => {
-					let response;
-
-					if (pinterestId) {
-						response = await pinterest.getSimilarPin(pinterestId, bookmarks);
-					} else {
-						response = await pinterest.getHomefeed();
-					}
-
-					if (response?.images) {
-						images = response.images;
-					} else {
-						images = response;
-					}
-
-					if (response?.bookmarks) {
-						if (response.bookmarks === '-end-') {
-							bookmarks = null;
-							currentPinterestId = null;
-							return;
-						}
-
-						bookmarks = response.bookmarks;
-					} else {
-						bookmarks = null;
-					}
-				};
-
-				const downloadImage = async (url) => {
-					const { data } = await axios.get(url, { responseType: 'arraybuffer' });
-
-					return data;
-				};
-
-				cron.schedule('*/20 * * * * *', async () => {
-					try {
-						const pinterestId = configuration.pinterestId;
-
-						if (images.length === 0 && !currentPinterestId) {
-							await fetchImages(pinterestId);
-							currentPinterestId = pinterestId || null;
-						}
-
-						if (pinterestId !== currentPinterestId) {
-							images = [];
-							bookmarks = null;
-							await fetchImages(pinterestId);
-							currentPinterestId = pinterestId || null;
-						}
-
-						if (images.length === 0) {
-							await fetchImages(pinterestId);
-						}
-
-						if (images.length === 0) {
-							return;
-						}
-
-						const imageUrl = images.shift().url;
-						const image = await downloadImage(imageUrl);
-
-						const date = dayjs.tz().format('YYYY/MM/DD HH:mm:ss');
-
-						configuration.pinterestImages.set(date, imageUrl);
-
-						await client.instance.updateProfilePicture(instance, image, 'no_crop');
-
-						if (isWABusinessPlatform(client.instance.authState.creds.platform)) {
-							await client.instance.updateCoverPhoto(await sharp(image).blur(10).png().toBuffer());
-						}
-					} catch {
-						// do nothing
-					}
-				});
+				startAutoProfilePictureChangeService(Client, state, configuration);
 			}
 		});
 
@@ -220,7 +232,6 @@ export const start = async (isReconnect) => {
 		Client.ev.on('contacts.set', (update) => {
 			console.log(update, 'contacts.set');
 		});
-		Client.ev.on('groups.update', () => {});
 	} catch (error) {
 		console.log(error);
 	}

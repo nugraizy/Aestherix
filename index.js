@@ -25,6 +25,14 @@ dayjs.tz.setDefault('Asia/Jakarta');
 import isInternetAvailable from './src/helper/connection/net.js';
 import { printBanner } from './src/utils/modules/color.js';
 
+const INTERNET_CHECK_TIMEOUT = 20_000;
+const INTERNET_CHECK_INTERVAL = 1_000;
+const DEFAULT_TIMEOUT = 10_000;
+const DEFAULT_INTERVAL = 1_000;
+const FLAGS_COLUMNS = 3;
+const FLAGS_COLUMN_SPACING = 9;
+const FLAGS_KEY_WIDTH = 14;
+
 const moduleURL = new URL(import.meta.url);
 
 export const __dirname = platform === 'win32' ? path.dirname(moduleURL.pathname).slice(1) : path.dirname(moduleURL.pathname);
@@ -32,29 +40,31 @@ global.__dirname = __dirname;
 global.__botName = 'Aestherix';
 
 const printFlags = (flags) => {
-	const isAscending = true;
-
-	flags = flags.sort(([a], [b]) => (isAscending ? a.localeCompare(b) : b.localeCompare(a)));
-	const columns = 3;
-	const rows = Math.ceil(flags.length / columns);
-	const columnSpacing = 9;
-	const pad = ' '.repeat(columnSpacing);
+	flags = flags.sort(([a], [b]) => a.localeCompare(b));
+	const rows = Math.ceil(flags.length / FLAGS_COLUMNS);
+	const pad = ' '.repeat(FLAGS_COLUMN_SPACING);
 
 	const data = Array.from({ length: rows }, (_, r) =>
-		Array.from({ length: columns }, (_, c) => {
+		Array.from({ length: FLAGS_COLUMNS }, (_, c) => {
 			const i = r + c * rows;
 			const [key, value] = flags[i] || [];
 
 			const boolText = value ? chalk.green('true') : chalk.grey('false');
 
-			return key ? `${key.padEnd(14).capitalize()} ${boolText}${pad}` : '';
+			return key ? `${key.padEnd(FLAGS_KEY_WIDTH).capitalize()} ${boolText}${pad}` : '';
 		})
 	);
 
 	console.log(table(data));
 };
 
-const waitForInternetConnection = async (timeout = 10000, interval = 1000) => {
+/**
+ * Waits for internet connection with timeout and interval
+ * @param {number} timeout - Maximum time to wait in milliseconds
+ * @param {number} interval - Interval between checks in milliseconds
+ * @returns {Promise<boolean>} - True if connected, false otherwise
+ */
+const waitForInternetConnection = async (timeout = DEFAULT_TIMEOUT, interval = DEFAULT_INTERVAL) => {
 	const spinner = ora('Checking Internet connection...').start();
 	const startTime = Date.now();
 
@@ -78,21 +88,29 @@ const waitForInternetConnection = async (timeout = 10000, interval = 1000) => {
 	return false;
 };
 
+/**
+ * Main application entry point
+ */
 async function main() {
-	const flags = await import('./src/helper/connection/utils/check-flag.js');
+	try {
+		const flags = await import('./src/helper/connection/utils/check-flag.js');
 
-	console.clear();
+		console.clear();
 
-	const isInternetConnected = await waitForInternetConnection(20_000);
+		const isInternetConnected = await waitForInternetConnection(INTERNET_CHECK_TIMEOUT, INTERNET_CHECK_INTERVAL);
 
-	if (!isInternetConnected) {
-		process.exit(0);
+		if (!isInternetConnected) {
+			process.exit(1);
+		}
+
+		printBanner();
+		printFlags(Object.entries(flags.cli.flags));
+
+		await import('./src/index.js');
+	} catch (error) {
+		console.error(chalk.red('Fatal error during startup:'), error.message);
+		process.exit(1);
 	}
-
-	printBanner();
-	printFlags(Object.entries(flags.cli.flags));
-
-	await import('./src/index.js');
 }
 
 main();
