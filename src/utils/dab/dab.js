@@ -48,30 +48,28 @@ const buildUrls = (path, params) =>
 	);
 
 const getDomains = (type, value) => {
-	if (URL_CACHE[type].has(value)) {
-		return URL_CACHE[type].get(value);
-	}
+	const query = new URLSearchParams(value).toString();
 
-	value = Object.keys(value)
-		.map((k) => `${k}=${value[k]}`)
-		.join('&');
+	if (URL_CACHE[type].has(query)) {
+		return URL_CACHE[type].get(query);
+	}
 
 	const urls =
 		type === 'search'
-			? buildUrls('search', value)
+			? buildUrls('search', query)
 			: type === 'download'
-				? buildUrls('track', value)
+				? buildUrls('track', query)
 				: type === 'album'
-					? buildUrls('album', value)
+					? buildUrls('album', query)
 					: type === 'info'
-						? buildUrls('info', value)
+						? buildUrls('info', query)
 						: null;
 
 	if (!urls) {
 		throw new Error('Invalid type');
 	}
 
-	URL_CACHE[type].set(value, urls);
+	URL_CACHE[type].set(query, urls);
 	return urls;
 };
 
@@ -121,8 +119,10 @@ class Dab {
 			throw new Error('Query is required');
 		}
 
-		if (QUERY_CACHE.search.has(query)) {
-			return QUERY_CACHE.search.get(query);
+		const cacheKey = `${type}:${query}`;
+
+		if (QUERY_CACHE.search.has(cacheKey)) {
+			return QUERY_CACHE.search.get(cacheKey);
 		}
 
 		const container = type === 'track' ? { params: { s: query, li: 50 } } : { params: { al: query } };
@@ -141,7 +141,7 @@ class Dab {
 
 		data = data.data;
 
-		QUERY_CACHE.search.set(query + '-' + container.type, data);
+		QUERY_CACHE.search.set(cacheKey, data);
 
 		return data;
 	}
