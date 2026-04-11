@@ -331,7 +331,7 @@ export const mp42mp3 = (input, output, sender) =>
  * @returns {Promise<{output: string}>}
  * @throws {Error}
  */
-export const gif2mp4 = (input, output, opts = {}) =>
+export const gif2mp4 = (input, output) =>
 	new Promise((resolve, reject) => {
 		exec(
 			`ffmpeg -i "${input}" -movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" "${output}"`,

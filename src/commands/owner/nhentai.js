@@ -1,4 +1,4 @@
-import { nhentai, imageToPdf, mime } from '../../utils/index.js';
+import { imageToPdf, mime, nhentai } from '../../utils/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -24,29 +24,32 @@ export default {
 			return client.instance.reply(from, result.error, message);
 		}
 
-		const { artists, categories, images, languages, tags, title, totalPages, uploadDate, totalFavorites } = result;
+		const { artists, categories, images, languages, tags, titles, uploaded, groups, pages, parodies, totalFavorites } = result;
 
 		const caption = `${'NHentai'.formatHeaders()}
         
-Title : ${title.pretty}
-Upload Date: ${uploadDate}
-Artists : ${artists.join(', ')}
-Language : ${languages.join(', ')}
+*${titles.english}*
+#${query}
+Parodies : ${parodies || 'N/A'}
 Tags : ${tags.join(', ')}
+Artists : ${artists.join(', ')}
+Groups : ${groups.join(', ')}
+Languages : ${languages.join(', ')}
 Categories : ${categories.join(', ')}
-Tot. Favorites : ${totalFavorites}
-Tot. Pages : ${totalPages}`;
+Pages : ${pages}
+Uploaded : ${uploaded}
+❤️ : ${totalFavorites}`;
 
 		await client.instance.reply(from, caption.formatForm(), message);
 
 		const wait = await client.instance.waitMessage(from, 'Processing PDFs', message);
 
-		const buffer = await imageToPdf(images);
+		const buffer = await imageToPdf(images.pages);
 
 		await client.instance.send(from, {
 			document: Buffer.from(buffer, 'base64'),
 			mimetype: mime('pdf'),
-			fileName: title.pretty + '.pdf'
+			fileName: titles.pretty + '.pdf'
 		});
 
 		await wait.update('PDFs successfully processed.');

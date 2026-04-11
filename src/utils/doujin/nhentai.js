@@ -1,22 +1,88 @@
-import { fetchJSON, fetchTEXT } from '../modules/index.js';
+import { fetch } from 'undici';
 
-/**
- * Get the type of the image
- * @param {string} input
- * @returns {'png' | 'jpg' | 'gif' | null}
- */
-const _imageType = (input) => {
-	const types = {
-		p: 'png',
-		j: 'jpg',
-		g: 'gif'
-	};
+const timeAgo = (unixTimestamp) => {
+	const now = Math.floor(Date.now() / 1000);
+	let diff = now - unixTimestamp;
 
-	return types[input] || null;
+	if (diff < 5) {
+		return 'just now';
+	}
+
+	if (diff < 0) {
+		return 'in the future';
+	}
+
+	const year = 31536000;
+	const month = 2592000;
+	const day = 86400;
+	const hour = 3600;
+	const minute = 60;
+
+	const years = Math.floor(diff / year);
+
+	diff %= year;
+
+	const months = Math.floor(diff / month);
+
+	diff %= month;
+
+	const days = Math.floor(diff / day);
+
+	diff %= day;
+
+	const hours = Math.floor(diff / hour);
+
+	diff %= hour;
+
+	const minutes = Math.floor(diff / minute);
+
+	const plural = (n, str) => `${n} ${str}${n > 1 ? 's' : ''}`;
+
+	if (years > 0) {
+		if (months > 0) {
+			return `${plural(years, 'year')}, ${plural(months, 'month')} ago`;
+		}
+
+		return `${plural(years, 'year')} ago`;
+	}
+
+	if (months > 0) {
+		if (days > 0) {
+			return `${plural(months, 'month')}, ${plural(days, 'day')} ago`;
+		}
+
+		return `${plural(months, 'month')} ago`;
+	}
+
+	if (days > 0) {
+		if (days === 1) {
+			return 'yesterday';
+		}
+
+		return `${plural(days, 'day')} ago`;
+	}
+
+	if (hours > 0) {
+		if (hours === 1) {
+			return 'an hour ago';
+		}
+
+		return `${plural(hours, 'hour')} ago`;
+	}
+
+	if (minutes > 0) {
+		if (minutes === 1) {
+			return 'a minute ago';
+		}
+
+		return `${plural(minutes, 'minute')} ago`;
+	}
+
+	return 'just now';
 };
 
 /**
- * @typedef {{titles: {english: string, japanese: string, pretty: string}, uploadDate: number, totPages: number, totFavorites: number, tags: string[], images: string[]}} ParsedResponse
+ * @typedef {{titles: {english: string, japanese: string, pretty: string}, uploaded: string, uploadedInUnix: number, pages: number, totalFavorites: number, parodies: string, tags: string[], artists: string[], groups: string[], languages: string[], categories: string[], images: {cover: string, pages: string[]}}} ParsedResponse
  */
 
 /**
@@ -25,15 +91,21 @@ const _imageType = (input) => {
  * @returns {ParsedResponse}
  */
 const parseNhentaiMetadata = (data) => ({
-	title: data.title,
-	uploadDate: data.upload_date,
-	totalPages: data.num_pages,
+	titles: data.title,
+	uploaded: timeAgo(data.upload_date),
+	uploadedInUnix: data.upload_date,
+	pages: data.num_pages,
 	totalFavorites: data.num_favorites,
+	parodies: data.tags.find((v) => v.type === 'parody')?.name,
 	tags: data.tags.filter((v) => v.type === 'tag')?.map((v) => v.name),
-	languages: data.tags.filter((v) => v.type === 'language')?.map((v) => v.name),
 	artists: data.tags.filter((v) => v.type === 'artist')?.map((v) => v.name),
+	groups: data.tags.filter((v) => v.type === 'group')?.map((v) => v.name),
+	languages: data.tags.filter((v) => v.type === 'language')?.map((v) => v.name),
 	categories: data.tags.filter((v) => v.type === 'category')?.map((v) => v.name),
-	images: data.images.pages.map((v, i) => `https://i3.nhentai.net/galleries/${data.media_id}/${i + 1}.${_imageType(v.t)}`)
+	images: {
+		cover: `https://i3.nhentai.net/${data.cover.path}`,
+		pages: data.pages.map((v) => `https://i3.nhentai.net/${v.path}`)
+	}
 });
 
 /**
@@ -53,94 +125,42 @@ const isValidCode = (code) => {
  * @returns {Promise<object>}
  */
 const requestApi = async (code) => {
-	const data = await fetchJSON(`https://nhentai.net/api/gallery/${code}`);
+	const data = await fetch(`https://nhentai.net/api/v2/galleries/${code}`);
 
-	if (data.error) {
+	if (!data.ok) {
 		return {
 			status: false,
-			message: data.error,
-			shouldDone: true
+			message: 'Something went wrong. Code: ' + data.status
 		};
 	}
 
-	return { ...data, status: true };
+	return { ...(await data.json()), status: true };
 };
 
 /**
- * Request NHentai Web
+ * Request data via API
  * @param {number} code
- * @param {string} cookie
- * @returns
- */
-const requestWeb = async (code, cookie) => {
-	const html = await fetchTEXT('https://nhentai.net/g/' + code, {
-		headers: {
-			cookie,
-			'user-agent':
-				'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36'
-		}
-	});
-
-	const jsonString = /window\._gallery\s*=\s*JSON\.parse\("(.*?)"\)/.exec(html);
-
-	if (!jsonString) {
-		return {
-			status: false,
-			message: 'not found',
-			shouldDone: true
-		};
-	}
-
-	const data = JSON.parse(jsonString[1].replace(/\\"/g, ''));
-
-	if (data.error) {
-		return {
-			status: false,
-			message: data.error
-		};
-	}
-
-	return { ...data, status: true };
-};
-
-/**
- * Request data either via API or web
- * @param {number} code
- * @param {boolean} isApi
- * @param {string} cookie
  * @returns {Promise<object>}
  */
-const request = async (code, isApi, cookie) => {
+const request = async (code) => {
 	if (!isValidCode(code)) {
 		return {
 			status: false,
-			message: 'Not a number',
-			shouldDone: true
+			message: 'Not a number'
 		};
 	}
 
-	return isApi ? requestApi(code) : requestWeb(code, cookie);
+	return requestApi(code);
 };
 
 /**
  * Fetch NHentai
  * @param {string} code - the doujin code
- * @param {string} cookie - cookie for cloudflare bypass
  * @returns {Promise<ParsedResponse>}
  */
-export const nhentai = async (code, cookie) => {
+export const nhentai = async (code) => {
 	try {
-		let data = await request(code, true);
-
-		if (data.shouldDone) {
-			if (!cookie) {
-				throw new Error(
-					'No Cookie found to proceed the website request. You will be catched with Cloudflare anti-bot. Please run `npm run nhentai:cookie`'
-				);
-			}
-
-			data = await request(code, false, cookie);
-		}
+		let data = await request(code);
 
 		if (!data.status) {
 			throw new Error(data.message);
