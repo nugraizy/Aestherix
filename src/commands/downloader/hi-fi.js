@@ -2,18 +2,18 @@ import dayjs from 'dayjs';
 import lodash from 'lodash';
 import parser from 'yargs-parser';
 
-import { dab, metadata } from '../../utils/dab/index.js';
+import { hifi, metadata } from '../../utils/hi-fi/index.js';
 import { color, delay, loggers } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
  */
 export default {
-	name: 'dabdownload',
-	description: 'Download lolssless music from Tidal via Dab',
+	name: 'hifidownload',
+	description: 'Download lossless music from Tidal via Hi-Fi API',
 	usage:
-		'!dabdl `<query>`\n\nAvailable Flags :\n--index, -i , Directly download without sending the search result first. Starts from 0-<Response.length>',
-	aliases: ['dabdl'],
+		'!hifidownload `<query>`\n\nAvailable Flags :\n--index, -i , Directly download without sending the search result first. Starts from 0-<Response.length>',
+	aliases: ['hifidownload', 'hifidl', 'hifidownloader', 'hifi-dl', 'hifi-download'],
 	category: 'Downloader',
 	cooldown: 8,
 	limit: 3,
@@ -35,11 +35,11 @@ export default {
 
 			query = _.join(' ');
 
-			let caption = 'DAB Downloader'.formatHeaders();
+			let caption = 'Hi-Fi Downloader'.formatHeaders();
 			let watermark = 'Powered by Hidden Finder';
 
 			if (typeof index === 'number') {
-				const searchResults = await dab.search(query);
+				const searchResults = await hifi.search(query);
 
 				if (searchResults.items.length === 0) {
 					return await wait.update('No results found for your query. Try again with another keyword.');
@@ -55,7 +55,7 @@ export default {
 			} else if (id) {
 				await downloadAudio(client, null, { id, from, message, prettyNumber, wait });
 			} else {
-				const searchResults = await dab.search(query);
+				const searchResults = await hifi.search(query);
 
 				if (searchResults.items.length === 0) {
 					return await wait.update('No results found for your query. Try again with another keyword.');
@@ -89,7 +89,7 @@ export default {
 
 								const songNumber = length + index + 1;
 
-								cover = dab.stringToCover(cover);
+								cover = hifi.stringToCover(cover);
 
 								return {
 									body: `Title : ${title}\nArtist(s) : ${artists.map((v) => v.name).join(', ')}\nDuration : ${dayjs(duration * 1000).format('HH:mm:ss')}\nReleased : ${dayjs(streamStartDate).format('DD/MM/YYYY')}`,
@@ -99,7 +99,7 @@ export default {
 										builder.button.url({ display: `Cover ${songNumber}`, url: cover }),
 										builder.button.reply({
 											display: 'Download',
-											id: `${prefix}dabdl --id ${id}`
+											id: `${prefix}hifidownload --id ${id}`
 										})
 									]
 								};
@@ -123,10 +123,10 @@ export default {
 const downloadAudio = async (client, data, { from, message, prettyNumber, id, index, wait }) => {
 	await wait.update('Downloading Music...');
 
-	const downloadInfo = await dab.download(id ? id : data.items[index].id);
+	const downloadInfo = await hifi.download(id ? id : data.items[index].id);
 
 	loggers.warning(
-		`${color('Downloading DAB Audio from', '#FF99C8')} ${color(downloadInfo.domain, '#FFB86C')} for ${color(prettyNumber, '#E4C1F9')}`
+		`${color('Downloading Hi-Fi Audio from', '#FF99C8')} ${color(downloadInfo.domain, '#FFB86C')} for ${color(prettyNumber, '#E4C1F9')}`
 	);
 
 	if (downloadInfo?.error) {
@@ -154,6 +154,6 @@ const downloadAudio = async (client, data, { from, message, prettyNumber, id, in
 	await wait.update('Command Finished. With total 1 Success.');
 
 	loggers.warning(
-		`${color('Downloaded DAB Audio from', '#FF99C8')} ${color(downloadInfo.domain, '#FFB86C')} for ${color(prettyNumber, '#E4C1F9')}`
+		`${color('Downloaded Hi-Fi Audio from', '#FF99C8')} ${color(downloadInfo.domain, '#FFB86C')} for ${color(prettyNumber, '#E4C1F9')}`
 	);
 };

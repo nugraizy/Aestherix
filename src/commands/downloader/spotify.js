@@ -2,7 +2,7 @@ import archiver from 'archiver';
 import fs from 'fs-extra';
 import parser from 'yargs-parser';
 
-import { dab, metadata } from '../../utils/dab/index.js';
+import { hifi, metadata } from '../../utils/hi-fi/index.js';
 import { spotifier } from '../../utils/index.js';
 import { color, delay, isURL, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
 
@@ -42,7 +42,7 @@ const sanitizeFilename = (name) =>
 		.trim()
 		.slice(0, 150);
 
-const searchTracksOnDab = async (tracksNames, wait, type) => {
+const searchTracksOnHifi = async (tracksNames, wait, type) => {
 	let processCaption = `Processing Spotify ${type}...\nSearching ${tracksNames.length} tracks...`;
 
 	await wait.update(processCaption);
@@ -50,17 +50,19 @@ const searchTracksOnDab = async (tracksNames, wait, type) => {
 	processCaption = `Processing Spotify ${type}...\nFetching Spotify results...`;
 	await wait.update(processCaption);
 
-	const dabResults = await Promise.all(
+	const hifiResults = await Promise.all(
 		tracksNames.map(async (trackName) => {
-			const res = await dab.search(trackName);
+			const res = await hifi.search(trackName);
 
 			return { name: trackName, result: res };
 		})
 	);
 
-	const tracksNotFound = dabResults.filter(({ result }) => !result.items || result.items.length === 0).map(({ name }) => name);
+	const tracksNotFound = hifiResults
+		.filter(({ result }) => !result.items || result.items.length === 0)
+		.map(({ name }) => name);
 
-	const dabTracks = dabResults.filter(({ result }) => result.items && result.items.length > 0).map(({ result }) => result);
+	const hifiTracks = hifiResults.filter(({ result }) => result.items && result.items.length > 0).map(({ result }) => result);
 
 	if (tracksNotFound.length > 0) {
 		processCaption = processCaption.replace('Fetching Spotify results...', '⚠️  Tracks not found:');
@@ -72,22 +74,22 @@ const searchTracksOnDab = async (tracksNames, wait, type) => {
 
 	processCaption = processCaption.replace(
 		'Fetching Spotify results...',
-		`✅ Found ${dabTracks.length}/${tracksNames.length} tracks.`
+		`✅ Found ${hifiTracks.length}/${tracksNames.length} tracks.`
 	);
-	processCaption += `\n • ${dabTracks.map((track) => track.items[0].title).join(', ')}`;
+	processCaption += `\n • ${hifiTracks.map((track) => track.items[0].title).join(', ')}`;
 	await wait.update(processCaption);
 
-	return { dabTracks, processCaption };
+	return { hifiTracks, processCaption };
 };
 
-const downloadTracksFromDab = async (dabTracks, wait, processCaption, type) => {
+const downloadTracksFromHifi = async (hifiTracks, wait, processCaption, type) => {
 	processCaption += '\n\nDownloading tracks...';
 	await wait.update(processCaption);
 
-	let dabDownloads = await Promise.all(
-		dabTracks.map(async (track) => {
+	let hifiDownloads = await Promise.all(
+		hifiTracks.map(async (track) => {
 			track = type === 'album' ? track.item : track.items[0];
-			const downloadData = await dab.download(track.id);
+			const downloadData = await hifi.download(track.id);
 
 			if (downloadData.error) {
 				return null;
@@ -100,8 +102,8 @@ const downloadTracksFromDab = async (dabTracks, wait, processCaption, type) => {
 		})
 	);
 
-	dabDownloads = dabDownloads.filter((t) => t !== null);
-	return { dabDownloads, processCaption };
+	hifiDownloads = hifiDownloads.filter((t) => t !== null);
+	return { hifiDownloads, processCaption };
 };
 
 const createZipArchive = async (downloads, output, wait, processCaption) => {
@@ -141,7 +143,7 @@ const handleSpotifyCollection = async (url, type, client, { from, message, wait 
 	const regex = new RegExp(`${type}\\/([a-zA-Z0-9]+)`);
 	const id = url.match(regex)[1];
 
-	let tracksNames, collectionName, dabDownloads, downloadCaption;
+	let tracksNames, collectionName, hifiDownloads, downloadCaption;
 
 	if (type === 'playlist') {
 		const playlist = await spotifier.getPlaylists(id);
@@ -151,37 +153,37 @@ const handleSpotifyCollection = async (url, type, client, { from, message, wait 
 
 		tracksNames = [...new Set(tracksNames)];
 
-		const { dabTracks, processCaption: searchCaption } = await searchTracksOnDab(tracksNames, wait, type);
-		const { dabDownloads: downloads, processCaption } = await downloadTracksFromDab(dabTracks, wait, searchCaption);
+		const { hifiTracks, processCaption: searchCaption } = await searchTracksOnHifi(tracksNames, wait, type);
+		const { hifiDownloads: downloads, processCaption } = await downloadTracksFromHifi(hifiTracks, wait, searchCaption);
 
-		dabDownloads = downloads;
+		hifiDownloads = downloads;
 		downloadCaption = processCaption;
 	} else {
 		const album = await spotifier.getAlbum(id);
 
 		collectionName = sanitizeFilename(`${album.albums[0].artists[0].name} ${album.albums[0].name}`);
 
-		const albumTracksId = await dab.search(collectionName, 'album');
-		const { items: albumData } = await dab.getAlbum(albumTracksId.albums.items[0].id);
+		const albumTracksId = await hifi.search(collectionName, 'album');
+		const { items: albumData } = await hifi.getAlbum(albumTracksId.albums.items[0].id);
 
 		let processCaption = `Processing Spotify ${type}...\n✅ Found ${albumData.length}/${album.albums[0].total_tracks} tracks.`;
 
 		await wait.update(processCaption);
 
-		const { dabDownloads: downloads, processCaption: caption } = await downloadTracksFromDab(
+		const { hifiDownloads: downloads, processCaption: caption } = await downloadTracksFromHifi(
 			albumData,
 			wait,
 			processCaption,
 			'album'
 		);
 
-		dabDownloads = downloads;
+		hifiDownloads = downloads;
 		downloadCaption = caption;
 	}
 
 	const output = `./src/media/temporary_files/${collectionName}.zip`;
 
-	const finalCaption = await createZipArchive(dabDownloads, output, wait, downloadCaption);
+	const finalCaption = await createZipArchive(hifiDownloads, output, wait, downloadCaption);
 
 	let sendCaption = finalCaption + '\n\n↻ Sending file...';
 
@@ -220,17 +222,17 @@ const handleSingleTrack = async (url, type, client, { from, message, prettyNumbe
 
 	loggers.warning(`${color('Downloading Spotify ' + type, '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
 
-	const searchResults = await dab.search(`${tracks[0].artists[0].name} - ${tracks[0].name}`);
+	const searchResults = await hifi.search(`${tracks[0].artists[0].name} - ${tracks[0].name}`);
 
 	if (searchResults.items.length === 0) {
-		await client.instance.reply(from, 'No results found on DAB.', message);
+		await client.instance.reply(from, 'No results found. Please try a different search query.', message);
 		loggers.error(`${color('Failed to Download Spotify ' + type, '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
 		return false;
 	}
 
 	await wait.update('Downloading Music...');
 
-	const downloadInfo = await dab.download(searchResults.items[0].id);
+	const downloadInfo = await hifi.download(searchResults.items[0].id);
 
 	if (downloadInfo?.error) {
 		await client.instance.reply(from, downloadInfo?.error, message);
