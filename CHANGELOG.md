@@ -2,6 +2,76 @@
 
 All notable changes to this project will be documented in this file.
 
+# ࿎「6.4.0」2026-04-14
+## Added
+- `Hi-Fi` downloader command for lossless Tidal downloads.
+- New `Hi-Fi` utility module with Tidal API integration, manifest decoding, and FLAC metadata writer.
+
+## Changed
+- Migrated `Spotify` downloader internals from `DAB` to `Hi-Fi` provider.
+- Updated utility exports to use `hi-fi` module path.
+
+## Removed
+- Legacy `DAB` downloader command and utility modules.
+
+## Fixed
+- Improved JID normalization with `remoteJidAlt` handling in message parsing flow.
+- Exposed normalized user JID helper in instance utilities.
+- Improved profile-picture update event handling for `@lid` mapping.
+
+---
+
+# ࿎「6.3.1」2026-04-06
+## Fixed
+- Optimized `DAB` caching mechanism for URL and query handling.
+- Updated bot naming references from `Void` to `Aestherix`.
+
+## Refactor
+- Updated ESLint rules and improved code structure in core utility modules.
+
+---
+
+# ࿎「6.3.0」2025-12-10
+## Fixed
+- Updated `DAB` response parsing to support newer API format.
+- Added decoder handling for new `DAB` API response payloads.
+
+---
+
+# ࿎「6.2.0」2025-12-02
+## Added
+- Added `lid maps` and `pushName` to `mediaData` payload.
+- Added caching for `lid maps`.
+
+---
+
+# ࿎「6.1.0」2025-12-01
+## Added
+- Web screenshot now uses `pageres` module.
+
+---
+
+# ࿎「6.0.2」2025-11-19
+## Fixed
+- `image_reverse_search`: uses `anilistInfo` params directly on Trace.moe API instead of external GraphQL request.
+
+## Refactor
+- Migrated environment loading from `dotenv` to `@dotenvx/dotenvx`.
+
+## BREAKING!
+- Changed how `TemplateBuilder` behaves.
+
+---
+
+# ࿎「6.0.1」2025-11-10
+## Fixed
+- Updated gradient generator headless mode and required server-hosted launch arguments.
+
+## Chore
+- Updated bot naming cleanup from old `Void` reference.
+
+---
+
 # ࿎「6.0.0」2025-11-08
 ## BREAKING!
 - Drops node 18, and bump to 20 `(REQUIRED)`.
