@@ -1,11 +1,49 @@
 import { TidalApi } from './utils/api.tidal.js';
 import { decodeManifestBase64 } from './utils/decode.js';
 
+/**
+ * @typedef {import('./hi-fi.types').ApiErrorPayload} ApiErrorPayload
+ */
+
+/**
+ * @typedef {import('./hi-fi.types').HiFiSearchResult} HiFiSearchResult
+ */
+
+/**
+ * @typedef {import('./hi-fi.types').HiFiTrackSearchPayload} HiFiTrackSearchPayload
+ */
+
+/**
+ * @typedef {import('./hi-fi.types').HiFiAlbumSearchPayload} HiFiAlbumSearchPayload
+ */
+
+/**
+ * @typedef {import('./hi-fi.types').HiFiDownloadResponse} HiFiDownloadResponse
+ */
+
+/**
+ * @typedef {import('./hi-fi.types').HiFiAlbumResponse} HiFiAlbumResponse
+ */
+
+/**
+ * @typedef {import('./hi-fi.types').HiFiMixResponse} HiFiMixResponse
+ */
+
 class HiFi {
+	/**
+	 * @param {TidalApi} [tidalApi]
+	 */
 	constructor(tidalApi = new TidalApi()) {
 		this.tidalApi = tidalApi;
 	}
 
+	/**
+	 * Returns response.data when available, otherwise returns the original response.
+	 *
+	 * @template T
+	 * @param {T} response
+	 * @returns {T extends { data: infer D } ? D : T}
+	 */
 	extractPayload(response) {
 		if (!response || typeof response !== 'object') {
 			return response;
@@ -14,6 +52,12 @@ class HiFi {
 		return response.data ?? response;
 	}
 
+	/**
+	 * Maps low-level API errors to user-facing messages.
+	 *
+	 * @param {unknown} error
+	 * @returns {string}
+	 */
 	toFriendlyError(error) {
 		if (error?.message?.includes('All servers failed')) {
 			return 'Too Many Requests. Try again later.';
@@ -22,6 +66,28 @@ class HiFi {
 		return error?.message || 'Too Many Requests. Try again later.';
 	}
 
+	/**
+	 * @overload
+	 * @param {string} query
+	 * @param {'track'} [type]
+	 * @returns {Promise<HiFiTrackSearchPayload | ApiErrorPayload | string>}
+	 */
+	/**
+	 * @overload
+	 * @param {string} query
+	 * @param {'album'} type
+	 * @returns {Promise<HiFiAlbumSearchPayload | ApiErrorPayload | string>}
+	 */
+	/**
+	 * Search tracks or albums and return the normalized payload.
+	 *
+	 * - track: returns track search payload (`data` from `s` query)
+	 * - album: returns only `data.albums` from grouped `al` query
+	 *
+	 * @param {string} query
+	 * @param {'track' | 'album'} [type='track']
+	 * @returns {Promise<HiFiSearchResult>}
+	 */
 	async search(query, type = 'track') {
 		if (!query) {
 			throw new Error('Query is required');
@@ -37,12 +103,24 @@ class HiFi {
 				return response;
 			}
 
-			return this.extractPayload(response);
+			const payload = this.extractPayload(response);
+
+			if (type === 'album') {
+				return payload?.albums ?? {};
+			}
+
+			return payload;
 		} catch (error) {
 			return this.toFriendlyError(error);
 		}
 	}
 
+	/**
+	 * Resolve a track download URL and include track metadata.
+	 *
+	 * @param {number | string} id
+	 * @returns {Promise<HiFiDownloadResponse>}
+	 */
 	async download(id) {
 		if (!id) {
 			throw new Error('ID is required');
@@ -54,7 +132,7 @@ class HiFi {
 			const infoResponse = await this.tidalApi.getInfo(id);
 
 			if (downloadResponse?.error) {
-				return downloadResponse;
+				return /** @type {ApiErrorPayload} */ (downloadResponse);
 			}
 
 			const file = this.extractPayload(downloadResponse);
@@ -77,6 +155,12 @@ class HiFi {
 		}
 	}
 
+	/**
+	 * Fetch album details by album ID.
+	 *
+	 * @param {number | string} id
+	 * @returns {Promise<HiFiAlbumResponse>}
+	 */
 	async getAlbum(id) {
 		if (!id) {
 			throw new Error('ID is required');
@@ -86,7 +170,7 @@ class HiFi {
 			const response = await this.tidalApi.getAlbum({ id });
 
 			if (response?.error) {
-				return response;
+				return /** @type {ApiErrorPayload} */ (response);
 			}
 
 			return this.extractPayload(response);
@@ -95,6 +179,12 @@ class HiFi {
 		}
 	}
 
+	/**
+	 * Find a track by query, then fetch and normalize its track mix.
+	 *
+	 * @param {string} query
+	 * @returns {Promise<HiFiMixResponse>}
+	 */
 	async getMix(query) {
 		if (!query) {
 			throw new Error('Query is required');
@@ -116,7 +206,7 @@ class HiFi {
 			const mixResponse = await this.tidalApi.getMix({ id: mixId });
 
 			if (mixResponse?.error) {
-				return mixResponse;
+				return /** @type {ApiErrorPayload} */ (mixResponse);
 			}
 
 			return this.tidalApi.withDomain({ tracks: this.tidalApi.parseMixData(mixResponse.items) });
@@ -125,6 +215,12 @@ class HiFi {
 		}
 	}
 
+	/**
+	 * Build a full TIDAL image URL from a cover UUID.
+	 *
+	 * @param {string} id
+	 * @returns {string}
+	 */
 	stringToCover(id) {
 		return `https://resources.tidal.com/images/${id.replace(/-/g, '/')}/1280x1280.jpg`;
 	}
