@@ -34,7 +34,7 @@ import { color, loggers } from './utils/modules/index.js';
 import { pinterest } from './utils/pinterest/index.js';
 
 const autoProfilePictureChangeEnabled = true;
-const PROFILE_PICTURE_UPDATE_INTERVAL = '*/20 * * * * *';
+const PROFILE_PICTURE_UPDATE_INTERVAL = '*/50 * * * * *';
 const PROFILE_PICTURE_NO_CROP = 'no_crop';
 const BOOKMARK_END_FLAG = '-end-';
 
@@ -212,8 +212,26 @@ export const start = async (isReconnect) => {
 				'call',
 				async ([{ isGroup, status, id, from }]) => await handleCallUpdate(isGroup, status, id, from, OPTIONS)
 			);
-			Client.ev.on('profile-picture.update', (update) => {
-				loggers.warning('Profile picture changed in', update.id, 'link :', update.content || 'no link :(');
+			Client.ev.on('profile-picture.update', async (update) => {
+				const id = update.id.split('@');
+				const isLid = id[1] === 'lid';
+
+				if (isLid) {
+					const lidMap = await state.keys.get('lid-mapping', [id[0] + '_reverse']);
+
+					update.id = lidMap[id[0] + '_reverse'];
+				}
+
+				if (update.id === state.creds.me?.id.split(':')[0]) {
+					return;
+				}
+
+				loggers.warning(
+					'Profile picture changed in',
+					update.id,
+					'link :',
+					update.content || 'link is missing; inspect the profile-picture.update event payload or retry after the next update'
+				);
 			});
 			Client.ev.on('commit', async (commitInfo) => await handleGithubWebhook(commitInfo));
 			Client.ev.on('werewolf.cycle', async (update) => await handleWerewolfCycle(update));
@@ -222,7 +240,7 @@ export const start = async (isReconnect) => {
 			Client.ws.on('CB:notification,type:picture', async (update) => await emitGroupSettings.picture(update));
 
 			if (autoProfilePictureChangeEnabled) {
-				startAutoProfilePictureChangeService(Client, state, configuration);
+				startAutoProfilePictureChangeService(client, state, configuration);
 			}
 		});
 

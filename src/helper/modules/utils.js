@@ -1304,7 +1304,8 @@ export const assign = (client) => {
 		 */
 		edit: async (jid, message, key) => {
 			await client.instance.sendMessage(jid, { edit: key, text: message });
-		}
+		},
+		jidNormalizedUser
 	});
 
 	return client;
