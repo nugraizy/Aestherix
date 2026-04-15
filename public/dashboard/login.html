@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Aestherix Dashboard Login</title>
+		<link rel="icon" type="image/png" href="/favicon.png" />
+		<link rel="stylesheet" href="/dashboard/styles.css" />
+	</head>
+	<body>
+		<div class="app-bg"></div>
+		<main class="dashboard login-dashboard">
+			<section class="panel login-panel">
+				<p class="eyebrow">Dashboard Access</p>
+				<h1>Login to Dashboard</h1>
+				<p class="footer-subtitle">Owners can approve login from WhatsApp. Regular users can continue in read-only mode.</p>
+
+				<form id="login-form" class="login-form">
+					<label for="phone-number">WhatsApp Number</label>
+					<div class="login-inline">
+						<input id="phone-number" name="phone-number" type="tel" placeholder="628xxxxxxxxxx" />
+						<button id="request-code" class="hidden" type="submit">Request Confirmation</button>
+						<div id="owner-waiting" class="owner-waiting hidden" aria-live="polite">
+							<div class="owner-waiting-line"></div>
+						</div>
+					</div>
+				</form>
+
+				<div class="login-actions login-secondary">
+					<button id="viewer-login" type="button">Continue as Viewer (Read-Only)</button>
+				</div>
+
+				<p id="login-message" class="login-message"></p>
+			</section>
+		</main>
+
+		<script src="/dashboard/login.js" type="module"></script>
+	</body>
+</html>
