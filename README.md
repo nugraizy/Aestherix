@@ -18,6 +18,7 @@
 - [Changelog](./CHANGELOG.md)
 - [Run](#run-the-project)
   - [run with flags](#available-flags)
+- [Contributors](#contributors)
 
 ---
 
@@ -37,6 +38,8 @@
 
 See: [INSTALL.md](./doc/INSTALL.md)
 
+---
+
 # Run the project
 
 ```sh
@@ -45,7 +48,24 @@ node . your_session_name --flag
 
 you can find the available flags [here](./doc/DOC.md#available-flags)
 
-<div align='center'>
-<a href='#table'>⬆️ Go Up</a>
-</div>
+---
+# Contributors
 
+<div align="center">
+  <a href="https://github.com/nugraizy" target="_blank" rel="noopener noreferrer" style="text-decoration:none; margin:0 10px; display:inline-block; text-align:center;">
+    <img src="https://github.com/nugraizy.png?size=96" width="96" height="96" alt="Nugraizy" style="border-radius:50%;" /><br/>
+    <sub><b>Nugraizy</b></sub>
+  </a>
+  <a href="https://github.com/TobyG74" target="_blank" rel="noopener noreferrer" style="text-decoration:none; margin:0 10px; display:inline-block; text-align:center;">
+    <img src="https://github.com/TobyG74.png?size=96" width="96" height="96" alt="TobyG74" style="border-radius:50%;" /><br/>
+    <sub><b>Tobi Saputra</b></sub>
+  </a>
+  <a href="https://github.com/xbnfz01" target="_blank" rel="noopener noreferrer" style="text-decoration:none; margin:0 10px; display:inline-block; text-align:center;">
+    <img src="https://github.com/xbnfz01.png?size=96" width="96" height="96" alt="xbnfz01" style="border-radius:50%;" /><br/>
+    <sub><b>xbnfz01</b></sub>
+  </a>
+  <a href="https://github.com/Alphanum404" target="_blank" rel="noopener noreferrer" style="text-decoration:none; margin:0 10px; display:inline-block; text-align:center;">
+    <img src="https://github.com/Alphanum404.png?size=96" width="96" height="96" alt="Alphanum404" style="border-radius:50%;" /><br/>
+    <sub><b>Alphanum404</b></sub>
+  </a>
+</div>
