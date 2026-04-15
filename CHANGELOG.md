@@ -420,7 +420,7 @@ All notable changes to this project will be documented in this file.
 ---
 
 # ࿎「5.0.0」- 2024-10-20
-### Breaking Changes
+## BREAKING!
 - `Dropped Node.js version <18`: Many security risk on the older version, and may leaks performance.
 - `Rewritten the prompt`: Change the `inquirer` prompt to `@inquirer/prompts` mainly because the legacy deps are not developed regularly.
 - `Openai breaking changes on v4.`
@@ -429,7 +429,7 @@ All notable changes to this project will be documented in this file.
 - Logic to prevent `chokidar` from printing on the added files into the watch container.
 - Introduced `AbortSignal.timeout` onto the prompt as it could take memory if you left them idle.
 - Added `Spinners` into the plugins as a loading.
-- Added more uploader [`catbox`](https://catbox.moe) and [`uguu`」(https://uguu.se).
+- Added more uploader [`catbox`](https://catbox.moe) and [`uguu`](https://uguu.se).
 - Added script `instagram:login`. Add your `username` and `password` to .env, with `INSTAGRAM_USERNAME` and `INSTAGRAM_PASSWORD`, then run :
 ```sh
 npm run instagram:login
