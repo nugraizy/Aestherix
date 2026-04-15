@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+# ࿎「6.5.0」2026-04-16
+## Added
+- New web `Dashboard` with owner/viewer authentication, realtime status cards, live logs, and activity timeline.
+- Dashboard controls for command toggles, runtime flags, user moderation, limit editing, and undo-capable actions.
+- Dashboard UI pages with login flow, theme switching, changelog modal, contributors modal, and responsive layout.
+
+## Changed
+- Migrated dashboard server bootstrap from legacy `gradient` route to the new dashboard connection server.
+- Extended command handling to respect dashboard-disabled commands and WhatsApp confirmation actions.
+- Added persistent dashboard monitor state for disabled commands, flag states, sessions, and audit log tracking.
+
+## Removed
+- Removed legacy `gradient` server module wiring from runtime startup path.
+- Removed tracked `nh_cookies` file from repository configuration assets.
+
+---
+
 # ࿎「6.4.0」2026-04-14
 ## Added
 - `Hi-Fi` downloader command for lossless Tidal downloads.
