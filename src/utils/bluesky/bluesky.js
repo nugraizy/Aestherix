@@ -89,7 +89,7 @@ class Bluesky {
 
 						url = 'https://bsky.social';
 					}
-				} catch (error) {
+				} catch {
 					console.log({
 						error: 'Cannot fetch PDS Endpoint.'
 					});

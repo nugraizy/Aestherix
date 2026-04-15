@@ -1,13 +1,13 @@
 {
-  "main_host_number": "6289522534401",
+  "main_host_number": "6287882837264",
   "backups_host_numbers": [
     "6289607055246",
-    "16367421471"
+    "16367421471",
+    "6287882837264",
+    "6289522534401"
   ],
   "owner_number": "6289607055246@s.whatsapp.net",
-  "team_number": [
-    "6289522534401@s.whatsapp.net"
-  ],
+  "team_number": [],
   "state": "public",
   "maintenance": false,
   "main_session": "debug",
@@ -28,5 +28,5 @@
   },
   "debugger": false,
   "delay": 2,
-  "best_time": 3.558
+  "best_time": 1.638
 }

@@ -104,7 +104,7 @@ async function main() {
 		}
 
 		printBanner();
-		printFlags(Object.entries(flags.cli.flags));
+		// printFlags(Object.entries(flags.cli.flags));
 
 		await import('./src/index.js');
 	} catch (error) {

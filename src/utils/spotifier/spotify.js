@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { fetch } from 'undici';
 import FormData from 'form-data';
+import { fetch } from 'undici';
 
 import { cheerioLOAD } from '../modules/index.js';
 
