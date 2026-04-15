@@ -9,6 +9,7 @@ import P from 'pino';
 import sharp from 'sharp';
 
 import configuration from './helper/config/connect.js';
+import { server } from './helper/connection/dashboard/server.js';
 import {
 	emitGroupSettings,
 	handleCallUpdate,
@@ -24,7 +25,6 @@ import {
 } from './helper/connection/event-handler/universal.js';
 import { handleGithubWebhook } from './helper/connection/github-webhook/events.js';
 import { githubWebhook } from './helper/connection/github-webhook/server.js';
-import { server } from './helper/connection/gradient/server.js';
 import { clearDBConnection, resetSession } from './helper/connection/socket/reset-session.js';
 import { connectSocket } from './helper/connection/socket/socket.js';
 import { initContact, updateContact } from './helper/connection/utils/cache.js';
@@ -119,6 +119,14 @@ const startAutoProfilePictureChangeService = async (client, state, config) => {
 				await client.instance.updateCoverPhoto(await sharp(image).blur(10).png().toBuffer());
 			}
 		} catch (error) {
+			if (
+				error.message.includes('not-acceptable') ||
+				error.message.includes('internal-server-error') ||
+				error.message.includes('bad-request')
+			) {
+				return;
+			}
+
 			loggers.error('Profile picture update failed:', error.message);
 		}
 	});

@@ -2,6 +2,7 @@ import { generateWAMessage } from 'baileys';
 import { findBestMatch } from 'string-similarity';
 
 import configuration from '../../helper/config/connect.js';
+import { processDashboardConfirmationAction } from '../../helper/connection/dashboard/server.js';
 import { Limit, checkAfk, deleteAfk, getAfk, reassign } from '../../helper/index.js';
 import { Cache } from '../../helper/modules/cache.js';
 import { runtime } from '../../index.js';
@@ -219,6 +220,15 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 		}
 
 		if (Tempcmds && !message.isOwner) {
+			if (configuration.cmds.disabledCommands?.has(Tempcmds.name)) {
+				await client.instance.reply(
+					message.from,
+					`The command \`${Tempcmds.name}\` is currently disabled by dashboard.`,
+					message.message
+				);
+				continue;
+			}
+
 			if (configuration.OPTIONS.selfMode) {
 				continue;
 			}
@@ -350,6 +360,15 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 					: false
 				: true)
 		) {
+			if (configuration.cmds.disabledCommands?.has(Tempcmds.name)) {
+				await client.instance.reply(
+					message.from,
+					`The command \`${Tempcmds.name}\` is currently disabled by dashboard.`,
+					message.message
+				);
+				continue;
+			}
+
 			if (!message.isOwner && configuration.OPTIONS.selfMode) {
 				continue;
 			}
@@ -596,6 +615,25 @@ const handleIncomingMessage = async (upsert, client, cmds, store, user, state, r
 		}
 
 		message = await reassign(message, client, store, state);
+
+		const confirmation = processDashboardConfirmationAction({
+			actionId: message?.body,
+			senderJid: message?.sender
+		});
+
+		if (confirmation.handled) {
+			if (confirmation.approved) {
+				await client.instance.reply(
+					message.from,
+					'Dashboard login confirmation accepted. You can return to the browser now.',
+					message.message
+				);
+			} else {
+				await client.instance.reply(message.from, confirmation.message || 'Dashboard confirmation failed.', message.message);
+			}
+
+			continue;
+		}
 
 		if (
 			!message ||

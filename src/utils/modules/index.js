@@ -12,6 +12,7 @@ import progress from 'progress-stream';
 import { Client, fetch, FormData as FormDataUndici } from 'undici';
 
 import configuration from '../../helper/config/connect.js';
+import { pushDashboardLog } from '../../helper/connection/dashboard/dashboard-monitor.js';
 import { color } from './color.js';
 
 export { color };
@@ -578,6 +579,7 @@ const loggersFns = (type, hexColor, ...info) => {
 	}
 
 	const str = `${color('[', 'gray')}${boldify(color(type, hexColor))}${color(']', 'gray')} ${INFOLOG(...info)}`;
+	pushDashboardLog(type, str);
 
 	log(str);
 };
