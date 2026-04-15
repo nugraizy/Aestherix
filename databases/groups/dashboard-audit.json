@@ -1,0 +1,569 @@
+{
+  "lastId": 39,
+  "logs": [
+    {
+      "id": 1,
+      "timestamp": 1776272476901,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "bingimage",
+      "status": "ok",
+      "message": null,
+      "before": null,
+      "after": {
+        "enabled": false
+      }
+    },
+    {
+      "id": 2,
+      "timestamp": 1776272491906,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "charai",
+      "status": "ok",
+      "message": null,
+      "before": null,
+      "after": {
+        "enabled": false
+      }
+    },
+    {
+      "id": 3,
+      "timestamp": 1776272497281,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "bingimage",
+      "status": "ok",
+      "message": null,
+      "before": null,
+      "after": {
+        "enabled": true
+      }
+    },
+    {
+      "id": 4,
+      "timestamp": 1776272501898,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "charai",
+      "status": "ok",
+      "message": null,
+      "before": null,
+      "after": {
+        "enabled": true
+      }
+    },
+    {
+      "id": 5,
+      "timestamp": 1776273232128,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "bingimage",
+      "status": "ok",
+      "message": null,
+      "before": null,
+      "after": {
+        "enabled": false
+      }
+    },
+    {
+      "id": 6,
+      "timestamp": 1776273234795,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "bingimage",
+      "status": "ok",
+      "message": null,
+      "before": null,
+      "after": {
+        "enabled": true
+      }
+    },
+    {
+      "id": 7,
+      "timestamp": 1776274031234,
+      "action": "user.premium",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6289522534401@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "premium": true
+      },
+      "after": {
+        "premium": false
+      }
+    },
+    {
+      "id": 8,
+      "timestamp": 1776274046003,
+      "action": "user.premium",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6289522534401@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "premium": false
+      },
+      "after": {
+        "premium": true
+      }
+    },
+    {
+      "id": 9,
+      "timestamp": 1776274229940,
+      "action": "user.premium",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6289522534401@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "premium": true
+      },
+      "after": {
+        "premium": false
+      }
+    },
+    {
+      "id": 10,
+      "timestamp": 1776274231774,
+      "action": "undo.apply",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6289522534401@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "kind": "user.premium"
+      },
+      "after": {
+        "premium": true
+      }
+    },
+    {
+      "id": 11,
+      "timestamp": 1776274297139,
+      "action": "user.premium",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6289522534401@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "premium": true
+      },
+      "after": {
+        "premium": false
+      }
+    },
+    {
+      "id": 12,
+      "timestamp": 1776274299149,
+      "action": "undo.apply",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6289522534401@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "kind": "user.premium"
+      },
+      "after": {
+        "premium": true
+      }
+    },
+    {
+      "id": 13,
+      "timestamp": 1776274310695,
+      "action": "user.banned",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6289522534401@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "banned": false
+      },
+      "after": {
+        "banned": true
+      }
+    },
+    {
+      "id": 14,
+      "timestamp": 1776274313067,
+      "action": "undo.apply",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6289522534401@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "kind": "user.banned"
+      },
+      "after": {
+        "banned": false
+      }
+    },
+    {
+      "id": 15,
+      "timestamp": 1776274337254,
+      "action": "user.premium",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6289522534401@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "premium": true
+      },
+      "after": {
+        "premium": false
+      }
+    },
+    {
+      "id": 16,
+      "timestamp": 1776274339368,
+      "action": "undo.apply",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6289522534401@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "kind": "user.premium"
+      },
+      "after": {
+        "premium": true
+      }
+    },
+    {
+      "id": 17,
+      "timestamp": 1776274345963,
+      "action": "user.limit",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6289522534401@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "limit": 20
+      },
+      "after": {
+        "limit": 23
+      }
+    },
+    {
+      "id": 18,
+      "timestamp": 1776274351599,
+      "action": "user.limit",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6289522534401@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "limit": 23
+      },
+      "after": {
+        "limit": 20
+      }
+    },
+    {
+      "id": 19,
+      "timestamp": 1776274352793,
+      "action": "user.premium",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6289522534401@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "premium": true
+      },
+      "after": {
+        "premium": false
+      }
+    },
+    {
+      "id": 20,
+      "timestamp": 1776274354429,
+      "action": "user.premium",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6289522534401@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "premium": false
+      },
+      "after": {
+        "premium": true
+      }
+    },
+    {
+      "id": 21,
+      "timestamp": 1776274370601,
+      "action": "flag.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "multiCmd",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": false
+      },
+      "after": {
+        "enabled": true
+      }
+    },
+    {
+      "id": 22,
+      "timestamp": 1776274373025,
+      "action": "flag.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "multiCmd",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": true
+      },
+      "after": {
+        "enabled": false
+      }
+    },
+    {
+      "id": 23,
+      "timestamp": 1776274601698,
+      "action": "flag.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "ai",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": false
+      },
+      "after": {
+        "enabled": true
+      }
+    },
+    {
+      "id": 24,
+      "timestamp": 1776274607548,
+      "action": "flag.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "ai",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": true
+      },
+      "after": {
+        "enabled": false
+      }
+    },
+    {
+      "id": 25,
+      "timestamp": 1776275060004,
+      "action": "user.limit",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6289522534401@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "limit": 20
+      },
+      "after": {
+        "limit": 30
+      }
+    },
+    {
+      "id": 26,
+      "timestamp": 1776275062273,
+      "action": "user.limit",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6289522534401@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "limit": 30
+      },
+      "after": {
+        "limit": 20
+      }
+    },
+    {
+      "id": 27,
+      "timestamp": 1776275070834,
+      "action": "user.limit",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6289522534401@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "limit": 20
+      },
+      "after": {
+        "limit": 33
+      }
+    },
+    {
+      "id": 28,
+      "timestamp": 1776275513313,
+      "action": "auth.owner_login",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Owner login confirmed by WhatsApp.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 29,
+      "timestamp": 1776282772373,
+      "action": "auth.logout",
+      "actorRole": "viewer",
+      "actor": "Viewer",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Session logged out.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 30,
+      "timestamp": 1776282903695,
+      "action": "auth.viewer_login",
+      "actorRole": "viewer",
+      "actor": "Viewer",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Viewer session started.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 31,
+      "timestamp": 1776283523425,
+      "action": "auth.owner_login",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Owner login confirmed by WhatsApp.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 32,
+      "timestamp": 1776283537253,
+      "action": "auth.logout",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Session logged out.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 33,
+      "timestamp": 1776283537276,
+      "action": "auth.logout",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Session logged out.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 34,
+      "timestamp": 1776283537286,
+      "action": "auth.logout",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Session logged out.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 35,
+      "timestamp": 1776283595203,
+      "action": "auth.owner_login",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Owner login confirmed by WhatsApp.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 36,
+      "timestamp": 1776283632976,
+      "action": "auth.logout",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Session logged out.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 37,
+      "timestamp": 1776283649559,
+      "action": "auth.owner_login",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Owner login confirmed by WhatsApp.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 38,
+      "timestamp": 1776283714103,
+      "action": "auth.logout",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Session logged out.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 39,
+      "timestamp": 1776283734425,
+      "action": "auth.owner_login",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Owner login confirmed by WhatsApp.",
+      "before": null,
+      "after": null
+    }
+  ]
+}

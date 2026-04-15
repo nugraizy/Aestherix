@@ -1,0 +1,20 @@
+{
+  "sessions": [
+    {
+      "token": "fb0414b851f941d50cefc46597947760c4d7b82c20c411aa6ba41ea57e086366",
+      "role": "viewer",
+      "phoneNumber": null,
+      "name": "Viewer",
+      "lastSeenAt": 1776283407583,
+      "expiresAt": 1776369303694
+    },
+    {
+      "token": "d42cab9fb19ceb0bc3e2e334e7fd28a4ad52635bf90475acd23e06c38b9ac26e",
+      "role": "owner",
+      "phoneNumber": "6289607055246",
+      "name": "Owner",
+      "lastSeenAt": 1776283734425,
+      "expiresAt": 1776370134425
+    }
+  ]
+}
