@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+# ࿎「6.6.0」2026-04-16
+## Added
+- Added dashboard theme palette selector with persisted preference across sessions.
+- Added logout confirmation dialog with animated states and loading feedback.
+- Added login page theme toggle with animated icon morph and shared zen cursor behavior.
+
+## Changed
+- Refactored dashboard frontend into modular app files for constants, DOM bindings, formatters, and state.
+- Updated dashboard and login visual theme system with expanded palette variables and cohesive color mapping.
+- Updated chart line rendering to follow active theme colors dynamically.
+
+## Security
+- Redacted viewer-visible dashboard user identifiers while preserving full owner visibility.
+
+---
+
 # ࿎「6.5.0」2026-04-16
 ## Added
 - New web `Dashboard` with owner/viewer authentication, realtime status cards, live logs, and activity timeline.
