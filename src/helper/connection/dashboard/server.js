@@ -708,7 +708,29 @@ const writeUserLimitState = async (jid, data) => {
 	return nextState;
 };
 
-const listDashboardUsers = async () => {
+const redactUserIdMiddle = (rawId) => {
+	const safeId = String(rawId || '').trim();
+
+	if (!safeId) {
+		return safeId;
+	}
+
+	const [localPart, domainPart] = safeId.split('@');
+	const local = String(localPart || '');
+
+	if (local.length <= 6) {
+		return domainPart ? `${local}@${domainPart}` : local;
+	}
+
+	const prefix = local.slice(0, 3);
+	const suffix = local.slice(-3);
+	const middle = '*'.repeat(Math.max(1, local.length - 6));
+	const masked = `${prefix}${middle}${suffix}`;
+
+	return domainPart ? `${masked}@${domainPart}` : masked;
+};
+
+const listDashboardUsers = async ({ redactNumbers = false } = {}) => {
 	await fs.ensureDir(USERS_LIMIT_DIR);
 	const files = (await fs.readdir(USERS_LIMIT_DIR)).filter((name) => name.endsWith('.json'));
 	const bannedUsers = await readBannedUsers();
@@ -729,7 +751,7 @@ const listDashboardUsers = async () => {
 			const role = raw?.role === 'PREMIUM' ? 'PREMIUM' : 'FREE';
 
 			return {
-				id,
+				id: redactNumbers ? redactUserIdMiddle(id) : id,
 				limit,
 				role,
 				premium: role === 'PREMIUM',
@@ -1221,7 +1243,9 @@ export const server = (isReconnect) => {
 			flags: listDashboardFlags(configuration)
 		});
 		socket.emit('dashboard:users', {
-			users: await listDashboardUsers()
+			users: await listDashboardUsers({
+				redactNumbers: session.role !== 'owner'
+			})
 		});
 
 		if (session.role === 'owner') {
@@ -1363,11 +1387,20 @@ export const server = (isReconnect) => {
 
 			const commands = listDashboardCommands(configuration);
 			const flags = listDashboardFlags(configuration);
-			const users = await listDashboardUsers();
+			const usersForOwner = await listDashboardUsers({ redactNumbers: false });
+			const usersForViewer = await listDashboardUsers({ redactNumbers: true });
 
 			io.emit('dashboard:commands', { commands });
 			io.emit('dashboard:flags', { flags });
-			io.emit('dashboard:users', { users });
+
+			const sockets = Array.from(io.of('/').sockets.values());
+
+			for (const socket of sockets) {
+				const session = socket.data?.session || null;
+				const users = session?.role === 'owner' ? usersForOwner : usersForViewer;
+
+				socket.emit('dashboard:users', { users });
+			}
 		})();
 	}, 8000);
 
@@ -1795,8 +1828,11 @@ export const server = (isReconnect) => {
 		});
 	});
 
-	app.get('/api/dashboard/users', requireDashboardAuth, async (_req, res) => {
-		const users = await listDashboardUsers();
+	app.get('/api/dashboard/users', requireDashboardAuth, async (req, res) => {
+		const session = req.dashboardSession || getSessionFromRequest(req);
+		const users = await listDashboardUsers({
+			redactNumbers: session?.role !== 'owner'
+		});
 
 		res.json({
 			count: users.length,
