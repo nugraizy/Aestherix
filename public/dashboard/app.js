@@ -1,197 +1,32 @@
-const state = {
-	lastLogId: 0,
-	logs: [],
-	auditLogs: [],
-	lastAuditId: 0,
-	commands: [],
-	flags: [],
-	users: [],
-	metricHistory: {
-		sysCpu: [],
-		procCpu: [],
-		memoryPercent: []
-	},
-	chartHoverIndices: {
-		sysCpu: null,
-		procCpu: null,
-		memoryPercent: null
-	},
-	alertSnapshot: {
-		sysCpu: 0,
-		procCpu: 0,
-		memoryPercent: 0
-	},
-	selectedUserIds: new Set(),
-	bulkUsersBusy: false,
-	userLimitDrafts: new Map(),
-	userLimitSaveVersions: new Map(),
-	collapsedCategories: new Set(),
-	searchByFolder: {
-		commands: '',
-		flags: '',
-		users: ''
-	},
-	searchFilters: {
-		commandsState: 'all',
-		flagsState: 'all',
-		usersRole: 'all',
-		usersStatus: 'all'
-	},
-	sectionStates: {
-		logs: { kind: 'idle', message: '' },
-		audit: { kind: 'idle', message: '' },
-		commands: { kind: 'idle', message: '' },
-		flags: { kind: 'idle', message: '' },
-		users: { kind: 'idle', message: '' }
-	},
-	settings: {
-		statusRefreshMs: 4000,
-		logsRefreshMs: 3000,
-		auditRefreshMs: 5000,
-		dataRefreshMs: 12000,
-		chartHistoryLimit: 45,
-		autosaveDelayMs: 2000
-	},
-	auditActionCollapsed: false,
-	auditRoleCollapsed: false,
-	activeFolder: 'commands',
-	role: null,
-	canEdit: false
-};
-
-const COLLAPSE_STORAGE_KEY = 'aestherix.dashboard.collapsedCategories';
-const ACTIVE_FOLDER_STORAGE_KEY = 'aestherix.dashboard.activeFolder';
-const SETTINGS_STORAGE_KEY = 'aestherix.dashboard.settings';
-const THEME_STORAGE_KEY = 'aestherix.dashboard.theme';
-const AUDIT_ACTIONS_COLLAPSED_KEY = 'aestherix.dashboard.auditActionsCollapsed';
-const AUDIT_ROLES_COLLAPSED_KEY = 'aestherix.dashboard.auditRolesCollapsed';
-const AUDIT_ACTION_PARAM = 'auditAction';
-const AUDIT_ROLE_PARAM = 'auditRole';
-const AUDIT_QUERY_PARAM = 'auditQuery';
-const THEME_TRANSITION_MS = 520;
-const THEME_ICON_MORPH_MS = 760;
-const CHANGELOG_MARKDOWN_PATH = '/api/dashboard/changelog';
-const CONTRIBUTORS_PATH = '/api/dashboard/contributors';
+import {
+	ACTIVE_FOLDER_STORAGE_KEY,
+	ALERT_RULES,
+	ansiRegex,
+	AUDIT_ACTION_PARAM,
+	AUDIT_ACTIONS_COLLAPSED_KEY,
+	AUDIT_QUERY_PARAM,
+	AUDIT_ROLE_PARAM,
+	AUDIT_ROLES_COLLAPSED_KEY,
+	CHANGELOG_MARKDOWN_PATH,
+	COLLAPSE_STORAGE_KEY,
+	CONTRIBUTORS_PATH,
+	DEFAULT_DASHBOARD_SETTINGS,
+	DEFAULT_THEME_PALETTE,
+	ERROR_SPIKE_PATTERN,
+	SEARCH_PLACEHOLDERS,
+	SETTINGS_STORAGE_KEY,
+	THEME_ICON_MORPH_MS,
+	THEME_PALETTE_STORAGE_KEY,
+	THEME_PALETTES,
+	THEME_STORAGE_KEY,
+	THEME_TRANSITION_MS
+} from './app/constants.js';
+import { els } from './app/dom.js';
+import { escapeHtml, fuzzyIncludes, highlightMatch, renderChangelogMarkdown, sanitizeMarkdownUrl } from './app/formatters.js';
+import { state } from './app/state.js';
 
 let themeTransitionTimer = null;
 let themeIconMorphTimer = null;
-
-const els = {
-	clock: document.getElementById('clock'),
-	statusDot: document.querySelector('.hero-meta .dot'),
-	connection: document.getElementById('connection'),
-	activeSessions: document.getElementById('active-sessions'),
-	projectVersion: document.getElementById('project-version'),
-	projectVersionValue: document.getElementById('project-version-value'),
-	openChangelog: document.getElementById('open-changelog'),
-	openContributors: document.getElementById('open-contributors'),
-	changelogDialog: document.getElementById('changelog-dialog'),
-	changelogClose: document.getElementById('changelog-close'),
-	changelogMeta: document.getElementById('changelog-meta'),
-	changelogContent: document.getElementById('changelog-content'),
-	contributorsDialog: document.getElementById('contributors-dialog'),
-	contributorsClose: document.getElementById('contributors-close'),
-	contributorsMeta: document.getElementById('contributors-meta'),
-	contributorsContent: document.getElementById('contributors-content'),
-	headerAlerts: document.getElementById('header-alerts'),
-	headerAlertTitle: document.getElementById('header-alert-title'),
-	headerAlertMessage: document.getElementById('header-alert-message'),
-	headerAlertMeta: document.getElementById('header-alert-meta'),
-	themeToggle: document.getElementById('theme-toggle'),
-	// spotifyNowPlaying: document.getElementById('spotify-now-playing'),
-	logoutButton: document.getElementById('logout-button'),
-	sysCpu: document.getElementById('sys-cpu'),
-	sysCpuChart: document.getElementById('sys-cpu-chart'),
-	procCpu: document.getElementById('proc-cpu'),
-	procCpuChart: document.getElementById('proc-cpu-chart'),
-	memory: document.getElementById('memory'),
-	memoryChart: document.getElementById('memory-chart'),
-	commandsCount: document.getElementById('commands-count'),
-	commandsSub: document.getElementById('commands-sub'),
-	usersKpiTotal: document.getElementById('users-kpi-total'),
-	usersKpiPremium: document.getElementById('users-kpi-premium'),
-	usersKpiBanned: document.getElementById('users-kpi-banned'),
-	usersKpiBlocked: document.getElementById('users-kpi-blocked'),
-	usersKpiLowLimit: document.getElementById('users-kpi-low-limit'),
-	logsPanel: document.querySelector('.logs-panel'),
-	loggerConsole: document.getElementById('logger-console'),
-	clearConsole: document.getElementById('clear-console'),
-	logsState: document.getElementById('logs-state'),
-	auditList: document.getElementById('audit-list'),
-	auditWrap: document.querySelector('.audit-wrap'),
-	auditState: document.getElementById('audit-state'),
-	auditActionChips: document.getElementById('audit-action-chips'),
-	auditRoleChips: document.getElementById('audit-role-chips'),
-	auditActionSeparator: document.getElementById('audit-action-separator'),
-	auditRoleSeparator: document.getElementById('audit-role-separator'),
-	auditSearch: document.getElementById('audit-search'),
-	auditClearFilters: document.getElementById('audit-clear-filters'),
-	confirmDialog: document.getElementById('confirm-dialog'),
-	confirmTitle: document.getElementById('confirm-title'),
-	confirmMessage: document.getElementById('confirm-message'),
-	confirmCancel: document.getElementById('confirm-cancel'),
-	confirmAccept: document.getElementById('confirm-accept'),
-	folderSwitcher: document.getElementById('folder-switcher'),
-	controlsSearch: document.getElementById('controls-search'),
-	settingsSummary: document.getElementById('settings-summary'),
-	settingsStatusRefreshMs: document.getElementById('setting-status-refresh-ms'),
-	settingsLogsRefreshMs: document.getElementById('setting-logs-refresh-ms'),
-	settingsAuditRefreshMs: document.getElementById('setting-audit-refresh-ms'),
-	settingsDataRefreshMs: document.getElementById('setting-data-refresh-ms'),
-	settingsChartHistoryLimit: document.getElementById('setting-chart-history-limit'),
-	settingsAutosaveDelayMs: document.getElementById('setting-autosave-delay-ms'),
-	settingsSave: document.getElementById('settings-save'),
-	settingsReset: document.getElementById('settings-reset'),
-	controlsCommandFilter: document.getElementById('controls-command-filter'),
-	controlsFlagFilter: document.getElementById('controls-flag-filter'),
-	controlsUserRoleFilter: document.getElementById('controls-user-role-filter'),
-	controlsUserStatusFilter: document.getElementById('controls-user-status-filter'),
-	commandsView: document.getElementById('commands-view'),
-	commandsState: document.getElementById('commands-state'),
-	commandsWrap: document.querySelector('#commands-view .commands-wrap'),
-	flagsView: document.getElementById('flags-view'),
-	flagsState: document.getElementById('flags-state'),
-	flagsWrap: document.querySelector('#flags-view .commands-wrap'),
-	usersView: document.getElementById('users-view'),
-	usersState: document.getElementById('users-state'),
-	usersWrap: document.querySelector('#users-view .commands-wrap'),
-	usersBulkToolbar: document.getElementById('users-bulk-toolbar'),
-	usersBulkSelectedCount: document.getElementById('users-bulk-selected-count'),
-	usersBulkSelectVisible: document.getElementById('users-bulk-select-visible'),
-	usersBulkClear: document.getElementById('users-bulk-clear'),
-	usersBulkLimitValue: document.getElementById('users-bulk-limit-value'),
-	commandsGroups: document.getElementById('commands-groups'),
-	flagsGroups: document.getElementById('flags-groups'),
-	usersGroups: document.getElementById('users-groups')
-};
-
-const SEARCH_PLACEHOLDERS = {
-	commands: 'Search command/category/alias...',
-	flags: 'Search bot flags...',
-	users: 'Search users by number/id/role...'
-};
-
-const ansiRegex = /\u001b\[[0-9;]*m/g;
-const DEFAULT_DASHBOARD_SETTINGS = {
-	statusRefreshMs: 4000,
-	logsRefreshMs: 3000,
-	auditRefreshMs: 5000,
-	dataRefreshMs: 12000,
-	chartHistoryLimit: 45,
-	autosaveDelayMs: 2000
-};
-const ALERT_RULES = {
-	systemCpuWarn: 85,
-	systemCpuCritical: 95,
-	processCpuWarn: 80,
-	processCpuCritical: 92,
-	memoryWarn: 85,
-	memoryCritical: 94,
-	errorSpikeWarnCount: 6,
-	errorSpikeCriticalCount: 12,
-	errorSpikeWindowSize: 120
-};
-const ERROR_SPIKE_PATTERN = /(error|failed|exception|fatal|timeout|unhandled)/i;
 let toastHost = null;
 const userLimitSaveTimers = new Map();
 const pollingTimers = {
@@ -205,183 +40,115 @@ const pollingTimers = {
 let floatingTooltipHost = null;
 let floatingTooltipTarget = null;
 let chartHoverTooltipHost = null;
+let renderStatusCharts = () => {};
 let pendingConfirmResolver = null;
 let dashboardSocket = null;
 let realtimeConnected = false;
 let changelogHtmlCache = '';
 let contributorsHtmlCache = '';
+const DIALOG_ANIMATION_MS = 240;
+const dialogHideTimers = new WeakMap();
+const CONTRIBUTORS_AVATAR_CACHE_NAME = 'aestherix.dashboard.contributor-avatars.v1';
+const contributorAvatarObjectUrlCache = new Map();
+const LOGOUT_MIN_LOADING_MS = 3500;
+let logoutInProgress = false;
+const ZEN_CURSOR_LOGOUT_LOCK_ATTR = 'data-logout-lock';
+
+const getZenCursorElement = () => document.getElementById('zen-cursor');
+
+const isZenCursorLogoutLocked = () => getZenCursorElement()?.getAttribute(ZEN_CURSOR_LOGOUT_LOCK_ATTR) === '1';
+
+const setZenCursorLogoutHoverState = (isActive) => {
+	const cursor = getZenCursorElement();
+
+	if (!cursor || isZenCursorLogoutLocked()) {
+		return;
+	}
+
+	cursor.classList.toggle('is-logout-alert', Boolean(isActive));
+};
+
+const lockZenCursorLogoutState = () => {
+	const cursor = getZenCursorElement();
+
+	if (!cursor) {
+		return;
+	}
+
+	cursor.setAttribute(ZEN_CURSOR_LOGOUT_LOCK_ATTR, '1');
+	cursor.classList.add('is-logout-alert');
+};
 
 const STATUS_CHART_SERIES = {
 	sysCpu: {
 		label: 'System CPU',
-		color: 'rgba(135, 240, 193, 1)',
+		toneVar: '--mint',
+		fallbackColor: '#87f0c1',
 		canvas: () => els.sysCpuChart
 	},
 	procCpu: {
 		label: 'Process CPU',
-		color: 'rgba(255, 209, 102, 1)',
+		toneVar: '--amber',
+		fallbackColor: '#ffd166',
 		canvas: () => els.procCpuChart
 	},
 	memoryPercent: {
 		label: 'Memory Usage',
-		color: 'rgba(142, 207, 255, 1)',
+		toneVar: '--sky',
+		fallbackColor: '#8ecfff',
 		canvas: () => els.memoryChart
 	}
 };
 
-const escapeHtml = (value) =>
-	String(value ?? '')
-		.replaceAll('&', '&amp;')
-		.replaceAll('<', '&lt;')
-		.replaceAll('>', '&gt;')
-		.replaceAll('"', '&quot;')
-		.replaceAll(/'/g, '&#39;');
+const toRgbaWithAlpha = (color, alpha) => {
+	const safeColor = String(color || '').trim();
+	const safeAlpha = Math.max(0, Math.min(1, Number(alpha ?? 1)));
+	const hexMatch = safeColor.match(/^#([\da-f]{3}|[\da-f]{6}|[\da-f]{8})$/i);
 
-const sanitizeMarkdownUrl = (rawUrl) => {
-	const url = String(rawUrl ?? '').trim();
+	if (hexMatch) {
+		let hex = hexMatch[1];
 
-	if (/^(https?:\/\/|mailto:|\/|#)/i.test(url)) {
-		return url;
+		if (hex.length === 3) {
+			hex = hex
+				.split('')
+				.map((chunk) => `${chunk}${chunk}`)
+				.join('');
+		}
+
+		if (hex.length === 8) {
+			hex = hex.slice(0, 6);
+		}
+
+		const red = parseInt(hex.slice(0, 2), 16);
+		const green = parseInt(hex.slice(2, 4), 16);
+		const blue = parseInt(hex.slice(4, 6), 16);
+
+		return `rgba(${red}, ${green}, ${blue}, ${safeAlpha})`;
 	}
 
-	return '';
+	const rgbMatch = safeColor.match(/^rgba?\(([^)]+)\)$/i);
+
+	if (rgbMatch) {
+		const parts = rgbMatch[1]
+			.split(',')
+			.slice(0, 3)
+			.map((part) => Number.parseFloat(part.trim()));
+
+		if (parts.length === 3 && parts.every((part) => Number.isFinite(part))) {
+			const [red, green, blue] = parts;
+
+			return `rgba(${Math.round(red)}, ${Math.round(green)}, ${Math.round(blue)}, ${safeAlpha})`;
+		}
+	}
+
+	return safeColor;
 };
 
-const formatInlineMarkdown = (value) => {
-	const source = String(value ?? '');
-	const tokenRegex = /\[`([^`]+)`\]\(([^)\s]+)\)|\[([^\]]+)\]\(([^)\s]+)\)|`([^`]+)`/g;
-	let cursor = 0;
-	let markup = '';
-	let match = tokenRegex.exec(source);
+const resolveThemeSeriesColor = (toneVar, fallbackColor) => {
+	const styles = getComputedStyle(document.documentElement);
+	const resolved = styles.getPropertyValue(toneVar).trim();
 
-	while (match) {
-		const matchIndex = match.index;
-		const [fullMatch, codeLinkLabelRaw, codeLinkUrlRaw, plainLinkLabelRaw, plainLinkUrlRaw, inlineCodeRaw] = match;
-
-		markup += escapeHtml(source.slice(cursor, matchIndex));
-
-		if (inlineCodeRaw !== undefined) {
-			markup += `<code>${escapeHtml(inlineCodeRaw)}</code>`;
-		} else {
-			const isCodeLabelLink = codeLinkLabelRaw !== undefined;
-			const labelRaw = isCodeLabelLink ? codeLinkLabelRaw : plainLinkLabelRaw;
-			const urlRaw = isCodeLabelLink ? codeLinkUrlRaw : plainLinkUrlRaw;
-			const safeUrl = sanitizeMarkdownUrl(urlRaw);
-
-			if (safeUrl) {
-				const safeLabel = escapeHtml(labelRaw);
-				const labelMarkup = isCodeLabelLink ? `<code>${safeLabel}</code>` : safeLabel;
-
-				markup += `<a class="changelog-link" href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer">${labelMarkup}</a>`;
-			} else {
-				markup += escapeHtml(fullMatch);
-			}
-		}
-
-		cursor = matchIndex + fullMatch.length;
-		match = tokenRegex.exec(source);
-	}
-
-	markup += escapeHtml(source.slice(cursor));
-
-	return markup;
-};
-
-const renderChangelogMarkdown = (raw) => {
-	const lines = String(raw ?? '').split(/\r?\n/);
-	const htmlParts = [];
-	let isInList = false;
-	let isInCodeBlock = false;
-
-	const closeList = () => {
-		if (!isInList) {
-			return;
-		}
-
-		htmlParts.push('</ul>');
-		isInList = false;
-	};
-
-	const closeCodeBlock = () => {
-		if (!isInCodeBlock) {
-			return;
-		}
-
-		htmlParts.push('</code></pre>');
-		isInCodeBlock = false;
-	};
-
-	for (const line of lines) {
-		const trimmed = line.trim();
-
-		if (trimmed.startsWith('```')) {
-			closeList();
-
-			if (isInCodeBlock) {
-				closeCodeBlock();
-			} else {
-				const language = trimmed.slice(3).trim();
-				const languageAttr = language ? ` data-language="${escapeHtml(language)}"` : '';
-
-				htmlParts.push(`<pre class="changelog-code"><code${languageAttr}>`);
-				isInCodeBlock = true;
-			}
-
-			continue;
-		}
-
-		if (isInCodeBlock) {
-			htmlParts.push(`${escapeHtml(line)}\n`);
-			continue;
-		}
-
-		if (!trimmed) {
-			closeList();
-			continue;
-		}
-
-		if (trimmed === '---') {
-			closeList();
-			htmlParts.push('<hr class="changelog-separator" />');
-			continue;
-		}
-
-		if (trimmed.startsWith('# ')) {
-			closeList();
-
-			const headingText = trimmed.slice(2).trim();
-
-			if (headingText.toLowerCase() !== 'changelog') {
-				htmlParts.push(`<h3 class="changelog-release">${formatInlineMarkdown(headingText)}</h3>`);
-			}
-
-			continue;
-		}
-
-		if (trimmed.startsWith('## ')) {
-			closeList();
-			htmlParts.push(`<p class="changelog-section">${formatInlineMarkdown(trimmed.slice(3).trim())}</p>`);
-			continue;
-		}
-
-		if (trimmed.startsWith('- ')) {
-			if (!isInList) {
-				htmlParts.push('<ul class="changelog-list">');
-				isInList = true;
-			}
-
-			htmlParts.push(`<li>${formatInlineMarkdown(trimmed.slice(2).trim())}</li>`);
-			continue;
-		}
-
-		closeList();
-		htmlParts.push(`<p class="changelog-note">${formatInlineMarkdown(trimmed)}</p>`);
-	}
-
-	closeCodeBlock();
-	closeList();
-
-	return htmlParts.join('');
+	return resolved || fallbackColor;
 };
 
 const ensureChangelogRendered = async () => {
@@ -394,7 +161,16 @@ const ensureChangelogRendered = async () => {
 		return;
 	}
 
-	els.changelogContent.innerHTML = '<p class="changelog-note">Loading changelog...</p>';
+	els.changelogContent.innerHTML = `
+		<div class="popup-skeleton changelog-popup-skeleton" aria-hidden="true">
+			<div class="popup-skeleton-line w-35"></div>
+			<div class="popup-skeleton-line w-85"></div>
+			<div class="popup-skeleton-line w-92"></div>
+			<div class="popup-skeleton-line w-80"></div>
+			<div class="popup-skeleton-line w-68"></div>
+			<div class="popup-skeleton-line w-88"></div>
+		</div>
+	`;
 
 	try {
 		const response = await fetch(CHANGELOG_MARKDOWN_PATH, {
@@ -416,6 +192,53 @@ const ensureChangelogRendered = async () => {
 	}
 };
 
+const resolveContributorAvatarUrl = async (avatarUrl) => {
+	const safeAvatarUrl = String(sanitizeMarkdownUrl(String(avatarUrl || '').trim()) || '').trim();
+
+	if (!safeAvatarUrl) {
+		return '';
+	}
+
+	if (contributorAvatarObjectUrlCache.has(safeAvatarUrl)) {
+		return contributorAvatarObjectUrlCache.get(safeAvatarUrl) || safeAvatarUrl;
+	}
+
+	if (typeof caches === 'undefined') {
+		return safeAvatarUrl;
+	}
+
+	try {
+		const cacheStore = await caches.open(CONTRIBUTORS_AVATAR_CACHE_NAME);
+		let response = await cacheStore.match(safeAvatarUrl);
+
+		if (!response) {
+			response = await fetch(safeAvatarUrl, {
+				cache: 'force-cache',
+				mode: 'cors'
+			});
+
+			if (!response.ok) {
+				return safeAvatarUrl;
+			}
+
+			await cacheStore.put(safeAvatarUrl, response.clone());
+		}
+
+		if (!response.ok) {
+			return safeAvatarUrl;
+		}
+
+		const avatarBlob = await response.blob();
+		const objectUrl = URL.createObjectURL(avatarBlob);
+
+		contributorAvatarObjectUrlCache.set(safeAvatarUrl, objectUrl);
+
+		return objectUrl;
+	} catch {
+		return safeAvatarUrl;
+	}
+};
+
 const renderContributors = (contributors) => {
 	if (!Array.isArray(contributors) || !contributors.length) {
 		return '<p class="changelog-note">No contributors available right now.</p>';
@@ -427,7 +250,7 @@ const renderContributors = (contributors) => {
 			const name = escapeHtml(String(entry.name || '').trim());
 			const login = escapeHtml(String(entry.login || '').trim());
 			const profileUrl = String(entry.profileUrl || '').trim();
-			const avatarUrl = String(entry.avatarUrl || '').trim();
+			const avatarUrl = String(entry.cachedAvatarUrl || entry.avatarUrl || '').trim();
 			const commits = Number(entry.commits || 0);
 			const safeProfileUrl = sanitizeMarkdownUrl(profileUrl);
 			const safeAvatarUrl = sanitizeMarkdownUrl(avatarUrl);
@@ -464,7 +287,26 @@ const ensureContributorsRendered = async () => {
 		return;
 	}
 
-	els.contributorsContent.innerHTML = '<p class="changelog-note">Loading contributors...</p>';
+	els.contributorsContent.innerHTML = `
+		<div class="popup-skeleton contributors-popup-skeleton" aria-hidden="true">
+			<div class="contributor-skeleton-card">
+				<div class="contributor-skeleton-avatar"></div>
+				<div class="contributor-skeleton-meta">
+					<div class="popup-skeleton-line w-70"></div>
+					<div class="popup-skeleton-line w-52"></div>
+					<div class="popup-skeleton-line w-40"></div>
+				</div>
+			</div>
+			<div class="contributor-skeleton-card">
+				<div class="contributor-skeleton-avatar"></div>
+				<div class="contributor-skeleton-meta">
+					<div class="popup-skeleton-line w-76"></div>
+					<div class="popup-skeleton-line w-58"></div>
+					<div class="popup-skeleton-line w-44"></div>
+				</div>
+			</div>
+		</div>
+	`;
 
 	try {
 		const response = await fetch(CONTRIBUTORS_PATH, {
@@ -477,9 +319,19 @@ const ensureContributorsRendered = async () => {
 
 		const payload = await response.json();
 		const contributors = Array.isArray(payload?.contributors) ? payload.contributors : [];
+		const contributorsWithCachedAvatars = await Promise.all(
+			contributors.map(async (entry) => {
+				const cachedAvatarUrl = await resolveContributorAvatarUrl(entry?.avatarUrl);
+
+				return {
+					...entry,
+					cachedAvatarUrl
+				};
+			})
+		);
 		const total = Number(payload?.totalContributors || contributors.length || 0);
 
-		contributorsHtmlCache = renderContributors(contributors);
+		contributorsHtmlCache = renderContributors(contributorsWithCachedAvatars);
 		els.contributorsContent.innerHTML = contributorsHtmlCache;
 
 		if (els.contributorsMeta) {
@@ -489,53 +341,6 @@ const ensureContributorsRendered = async () => {
 		console.error(error);
 		els.contributorsContent.innerHTML = '<p class="changelog-note">Unable to load contributors right now.</p>';
 	}
-};
-
-const fuzzyIncludes = (haystack, needle) => {
-	const source = String(haystack || '').toLowerCase();
-	const query = String(needle || '').toLowerCase();
-
-	if (!query) {
-		return true;
-	}
-
-	if (source.includes(query)) {
-		return true;
-	}
-
-	let pointer = 0;
-
-	for (let i = 0; i < source.length && pointer < query.length; i += 1) {
-		if (source[i] === query[pointer]) {
-			pointer += 1;
-		}
-	}
-
-	return pointer === query.length;
-};
-
-const highlightMatch = (value, query) => {
-	const raw = String(value ?? '');
-	const keyword = String(query || '')
-		.trim()
-		.toLowerCase();
-
-	if (!keyword) {
-		return escapeHtml(raw);
-	}
-
-	const lower = raw.toLowerCase();
-	const index = lower.indexOf(keyword);
-
-	if (index === -1) {
-		return escapeHtml(raw);
-	}
-
-	const start = raw.slice(0, index);
-	const hit = raw.slice(index, index + keyword.length);
-	const end = raw.slice(index + keyword.length);
-
-	return `${escapeHtml(start)}<mark class="search-hit">${escapeHtml(hit)}</mark>${escapeHtml(end)}`;
 };
 
 const getCustomFilterOptions = (filterElement) => {
@@ -565,7 +370,8 @@ const closeAllCustomFilters = (except = null) => {
 		els.controlsCommandFilter,
 		els.controlsFlagFilter,
 		els.controlsUserRoleFilter,
-		els.controlsUserStatusFilter
+		els.controlsUserStatusFilter,
+		els.settingsThemePalette
 	].filter(Boolean);
 
 	for (const filter of filters) {
@@ -1181,12 +987,46 @@ const closeConfirmDialog = (accepted) => {
 	}
 };
 
+const openAnimatedDialog = (dialogElement) => {
+	if (!dialogElement) {
+		return;
+	}
+
+	const activeTimer = dialogHideTimers.get(dialogElement);
+
+	if (activeTimer) {
+		clearTimeout(activeTimer);
+		dialogHideTimers.delete(dialogElement);
+	}
+
+	dialogElement.classList.remove('hidden');
+
+	requestAnimationFrame(() => {
+		dialogElement.classList.add('is-visible');
+	});
+};
+
+const closeAnimatedDialog = (dialogElement) => {
+	if (!dialogElement || dialogElement.classList.contains('hidden')) {
+		return;
+	}
+
+	dialogElement.classList.remove('is-visible');
+
+	const hideTimer = setTimeout(() => {
+		dialogElement.classList.add('hidden');
+		dialogHideTimers.delete(dialogElement);
+	}, DIALOG_ANIMATION_MS);
+
+	dialogHideTimers.set(dialogElement, hideTimer);
+};
+
 const closeChangelogDialog = () => {
 	if (!els.changelogDialog) {
 		return;
 	}
 
-	els.changelogDialog.classList.add('hidden');
+	closeAnimatedDialog(els.changelogDialog);
 };
 
 const openChangelogDialog = () => {
@@ -1194,7 +1034,7 @@ const openChangelogDialog = () => {
 		return;
 	}
 
-	els.changelogDialog.classList.remove('hidden');
+	openAnimatedDialog(els.changelogDialog);
 	changelogHtmlCache = '';
 	void ensureChangelogRendered();
 };
@@ -1204,7 +1044,7 @@ const closeContributorsDialog = () => {
 		return;
 	}
 
-	els.contributorsDialog.classList.add('hidden');
+	closeAnimatedDialog(els.contributorsDialog);
 };
 
 const openContributorsDialog = () => {
@@ -1212,9 +1052,105 @@ const openContributorsDialog = () => {
 		return;
 	}
 
-	els.contributorsDialog.classList.remove('hidden');
+	openAnimatedDialog(els.contributorsDialog);
 	contributorsHtmlCache = '';
 	void ensureContributorsRendered();
+};
+
+const closeLogoutDialog = () => {
+	if (!els.logoutDialog || logoutInProgress) {
+		return;
+	}
+
+	setZenCursorLogoutHoverState(false);
+
+	closeAnimatedDialog(els.logoutDialog);
+};
+
+const openLogoutDialog = () => {
+	if (!els.logoutDialog) {
+		return;
+	}
+
+	els.logoutDialog.classList.remove('is-logging-out');
+
+	logoutInProgress = false;
+
+	if (els.logoutMessage) {
+		els.logoutMessage.textContent = 'You are about to end your dashboard session and return to login.';
+	}
+
+	const waitingLabel = els.logoutWaiting?.querySelector('span');
+
+	if (waitingLabel) {
+		waitingLabel.textContent = 'Terminating session...';
+	}
+
+	if (els.logoutWaiting) {
+		els.logoutWaiting.classList.add('hidden');
+	}
+
+	if (els.logoutCancel) {
+		els.logoutCancel.disabled = false;
+	}
+
+	if (els.logoutConfirm) {
+		els.logoutConfirm.disabled = false;
+		els.logoutConfirm.textContent = 'Log Out';
+		els.logoutConfirm.classList.remove('is-waiting');
+	}
+
+	openAnimatedDialog(els.logoutDialog);
+};
+
+const logoutDashboard = async () => {
+	if (logoutInProgress) {
+		return;
+	}
+
+	const logoutStartMs = Date.now();
+
+	logoutInProgress = true;
+	lockZenCursorLogoutState();
+	els.logoutDialog?.classList.add('is-logging-out');
+
+	if (els.logoutCancel) {
+		els.logoutCancel.disabled = true;
+	}
+
+	if (els.logoutConfirm) {
+		els.logoutConfirm.disabled = true;
+		els.logoutConfirm.textContent = 'Logging out...';
+		els.logoutConfirm.classList.add('is-waiting');
+	}
+
+	if (els.logoutMessage) {
+		els.logoutMessage.textContent = 'Closing dashboard session securely.';
+	}
+
+	if (els.logoutWaiting) {
+		els.logoutWaiting.classList.remove('hidden');
+	}
+
+	try {
+		await fetch('/api/dashboard/auth/logout', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
+	} finally {
+		const elapsedMs = Date.now() - logoutStartMs;
+		const remainingMs = Math.max(0, LOGOUT_MIN_LOADING_MS - elapsedMs);
+
+		if (remainingMs > 0) {
+			await new Promise((resolve) => {
+				setTimeout(resolve, remainingMs);
+			});
+		}
+
+		window.location.href = '/dashboard/login';
+	}
 };
 
 const confirmRiskAction = ({ title, message, confirmLabel = 'Confirm' }) => {
@@ -1449,7 +1385,9 @@ const updateSettingsSummary = () => {
 		return;
 	}
 
-	els.settingsSummary.textContent = `Status ${state.settings.statusRefreshMs}ms, Logs ${state.settings.logsRefreshMs}ms, Audit ${state.settings.auditRefreshMs}ms, Data ${state.settings.dataRefreshMs}ms, History ${state.settings.chartHistoryLimit}, Autosave ${state.settings.autosaveDelayMs}ms`;
+	const activePalette = document.documentElement.getAttribute('data-palette') || DEFAULT_THEME_PALETTE;
+
+	els.settingsSummary.textContent = `Palette ${activePalette}, Status ${state.settings.statusRefreshMs}ms, Logs ${state.settings.logsRefreshMs}ms, Audit ${state.settings.auditRefreshMs}ms, Data ${state.settings.dataRefreshMs}ms, History ${state.settings.chartHistoryLimit}, Autosave ${state.settings.autosaveDelayMs}ms`;
 };
 
 const syncSettingsInputs = () => {
@@ -1475,6 +1413,13 @@ const syncSettingsInputs = () => {
 
 	if (els.settingsAutosaveDelayMs) {
 		els.settingsAutosaveDelayMs.value = String(state.settings.autosaveDelayMs);
+	}
+
+	if (els.settingsThemePalette) {
+		setCustomFilterValue(
+			els.settingsThemePalette,
+			document.documentElement.getAttribute('data-palette') || DEFAULT_THEME_PALETTE
+		);
 	}
 
 	updateSettingsSummary();
@@ -1583,6 +1528,7 @@ const applyTheme = (theme, options = {}) => {
 
 	const applyThemeState = () => {
 		document.documentElement.setAttribute('data-theme', safeTheme);
+		renderStatusCharts();
 
 		if (els.themeToggle) {
 			els.themeToggle.setAttribute('aria-label', `Switch to ${safeTheme === 'light' ? 'dark' : 'light'} mode`);
@@ -1625,6 +1571,54 @@ const loadThemePreference = () => {
 	const prefersLight = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: light)').matches;
 
 	applyTheme(prefersLight ? 'light' : 'dark', { animate: false });
+};
+
+const normalizeThemePalette = (palette) => {
+	const safePalette = String(palette || '')
+		.trim()
+		.toLowerCase();
+
+	if (THEME_PALETTES.includes(safePalette)) {
+		return safePalette;
+	}
+
+	return DEFAULT_THEME_PALETTE;
+};
+
+const applyThemePalette = (palette, options = {}) => {
+	const safePalette = normalizeThemePalette(palette);
+
+	document.documentElement.setAttribute('data-palette', safePalette);
+
+	if (els.settingsThemePalette) {
+		setCustomFilterValue(els.settingsThemePalette, safePalette);
+	}
+
+	updateSettingsSummary();
+	renderStatusCharts();
+
+	if (options.persist !== false) {
+		try {
+			localStorage.setItem(THEME_PALETTE_STORAGE_KEY, safePalette);
+		} catch {
+			// ignore storage write errors
+		}
+	}
+};
+
+const loadThemePalettePreference = () => {
+	try {
+		const savedPalette = localStorage.getItem(THEME_PALETTE_STORAGE_KEY);
+
+		if (savedPalette) {
+			applyThemePalette(savedPalette, { persist: false });
+			return;
+		}
+	} catch {
+		// ignore storage read errors and fallback to default palette
+	}
+
+	applyThemePalette(DEFAULT_THEME_PALETTE, { persist: false });
 };
 
 const toggleThemePreference = () => {
@@ -1673,11 +1667,13 @@ const ensureChartHoverTooltipHost = () => {
 
 const showChartHoverTooltip = ({ event, label, value }) => {
 	const host = ensureChartHoverTooltipHost();
+
 	host.textContent = `${label}: ${fmtPercent(clampPercent(value))}`;
 	host.classList.add('visible');
 	host.setAttribute('aria-hidden', 'false');
 
 	const offset = 14;
+
 	host.style.left = '0px';
 	host.style.top = '0px';
 
@@ -1778,8 +1774,8 @@ const drawMetricChart = (canvas, points, color, hoverIndex = null) => {
 
 	const gradient = ctx.createLinearGradient(0, 0, 0, height);
 
-	gradient.addColorStop(0, color.replace('1)', '0.34)'));
-	gradient.addColorStop(1, color.replace('1)', '0.02)'));
+	gradient.addColorStop(0, toRgbaWithAlpha(color, 0.34));
+	gradient.addColorStop(1, toRgbaWithAlpha(color, 0.02));
 
 	ctx.beginPath();
 
@@ -1818,7 +1814,7 @@ const drawMetricChart = (canvas, points, color, hoverIndex = null) => {
 
 	// Draw a soft under-stroke first to reduce jagged appearance on high-contrast light theme.
 	ctx.lineWidth = 3.2;
-	ctx.strokeStyle = color.replace('1)', '0.22)');
+	ctx.strokeStyle = toRgbaWithAlpha(color, 0.22);
 	ctx.stroke();
 
 	ctx.beginPath();
@@ -1864,9 +1860,11 @@ const drawMetricChart = (canvas, points, color, hoverIndex = null) => {
 	ctx.stroke();
 };
 
-const renderStatusCharts = () => {
+renderStatusCharts = () => {
 	for (const [key, config] of Object.entries(STATUS_CHART_SERIES)) {
-		drawMetricChart(config.canvas(), state.metricHistory[key], config.color, state.chartHoverIndices[key]);
+		const chartColor = resolveThemeSeriesColor(config.toneVar, config.fallbackColor);
+
+		drawMetricChart(config.canvas(), state.metricHistory[key], chartColor, state.chartHoverIndices[key]);
 	}
 };
 
@@ -1941,31 +1939,50 @@ const setupZenCursor = () => {
 
 	const cursor = document.createElement('div');
 	const cursorText = document.createElement('div');
+	let isCursorVisible = true;
 
 	cursor.id = 'zen-cursor';
 	cursor.className = 'zen-cursor rounded blur cursor-normal';
 	cursorText.id = 'zen-cursor-text';
 	cursorText.className = 'zen-cursor-text';
-	cursor.appendChild(cursorText);
 	document.body.appendChild(cursor);
+	document.body.appendChild(cursorText);
+	document.documentElement.classList.add('zen-cursor-enabled');
 	document.body.classList.add('zen-cursor-enabled');
+	document.body.style.cursor = 'none';
+
+	const setCursorVisibility = (isVisible) => {
+		if (isCursorVisible === isVisible) {
+			return;
+		}
+
+		isCursorVisible = isVisible;
+		cursor.style.opacity = isVisible ? '1' : '0';
+
+		if (!isVisible) {
+			cursorText.style.scale = '0';
+		}
+	};
 
 	const moveCursor = (event) => {
 		const mouseY = event.clientY;
 		const mouseX = event.clientX;
+		const tooltipGap = 24;
 
-		cursor.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0)`;
+		setCursorVisibility(true);
 
-		if (mouseX > window.innerWidth - cursorText.clientWidth) {
-			cursorText.style.left = `${-cursorText.clientWidth}px`;
+		cursor.style.translate = `${mouseX}px ${mouseY}px`;
+
+		if (mouseX > window.innerWidth - cursorText.clientWidth - tooltipGap) {
+			cursorText.style.left = `${mouseX - cursorText.clientWidth - tooltipGap}px`;
 		} else {
-			cursorText.style.left = '50px';
+			cursorText.style.left = `${mouseX + tooltipGap}px`;
 		}
 
-		if (mouseY > window.innerHeight - cursorText.clientHeight) {
-			cursorText.style.top = `${-cursorText.clientHeight}px`;
+		if (mouseY > window.innerHeight - cursorText.clientHeight - tooltipGap) {
+			cursorText.style.top = `${mouseY - cursorText.clientHeight - tooltipGap}px`;
 		} else {
-			cursorText.style.top = '50px';
+			cursorText.style.top = `${mouseY + tooltipGap}px`;
 		}
 	};
 
@@ -1994,54 +2011,99 @@ const setupZenCursor = () => {
 
 	const handleMouseEnterTarget = (event) => {
 		const target = event.currentTarget;
+		const isLogoutTarget = target === els.logoutButton || target === els.logoutConfirm;
 
 		cursor.classList.add('blur-mini');
 		cursor.classList.add('cursor-grow');
+
+		if (isLogoutTarget) {
+			setZenCursorLogoutHoverState(true);
+		}
+
 		updateTitle(target.getAttribute('data-title') || target.getAttribute('data-tooltip'));
 	};
 
-	const handleMouseLeaveTarget = () => {
+	const handleMouseLeaveTarget = (event) => {
+		const target = event.currentTarget;
+		const isLogoutTarget = target === els.logoutButton || target === els.logoutConfirm;
+
 		cursor.classList.remove('blur-mini');
 		cursor.classList.remove('cursor-grow');
+
+		if (isLogoutTarget) {
+			setZenCursorLogoutHoverState(false);
+		}
+
 		updateTitle('');
-	};
-
-	const handleMouseEnterHoverable = () => {
-		cursor.style.display = 'none';
-		document.body.style.cursor = 'pointer';
-	};
-
-	const handleMouseLeaveHoverable = () => {
-		cursor.style.display = 'block';
-		document.body.style.cursor = 'none';
 	};
 
 	const handleMouseEnterChart = () => {
 		cursor.classList.add('is-chart-compact');
-		document.body.style.cursor = 'none';
 		updateTitle('');
 	};
 
 	const handleMouseLeaveChart = () => {
 		cursor.classList.remove('is-chart-compact');
-		document.body.style.cursor = 'none';
+	};
+
+	const handleMouseDown = (event) => {
+		if (event.button !== 0) {
+			return;
+		}
+
+		cursor.classList.add('is-holding');
+	};
+
+	const handleMouseUp = (event) => {
+		if (event.button !== 0) {
+			return;
+		}
+
+		cursor.classList.remove('is-holding');
+	};
+
+	const handleWindowBlur = () => {
+		setCursorVisibility(false);
+	};
+
+	const handleWindowFocus = () => {
+		if (!document.hidden) {
+			setCursorVisibility(true);
+		}
+	};
+
+	const handleVisibilityChange = () => {
+		setCursorVisibility(!document.hidden);
+	};
+
+	const handleDocumentMouseOut = (event) => {
+		if (!event.relatedTarget && !event.toElement) {
+			setCursorVisibility(false);
+		}
+	};
+
+	const handleDocumentMouseEnter = () => {
+		if (!document.hidden && document.hasFocus()) {
+			setCursorVisibility(true);
+		}
 	};
 
 	window.addEventListener('mousemove', moveCursor);
+	window.addEventListener('mousedown', handleMouseDown);
+	window.addEventListener('mouseup', handleMouseUp);
+	window.addEventListener('blur', handleWindowBlur);
+	window.addEventListener('focus', handleWindowFocus);
+	document.addEventListener('visibilitychange', handleVisibilityChange);
+	document.addEventListener('mouseout', handleDocumentMouseOut);
+	document.addEventListener('mouseenter', handleDocumentMouseEnter);
 
 	const attachListeners = () => {
 		const targets = document.querySelectorAll('a, button, [data-title], [data-tooltip]');
-		const hoverables = document.querySelectorAll('.hover-state');
 		const chartTargets = document.querySelectorAll('.status-chart');
 
 		targets.forEach((target) => {
 			target.addEventListener('mouseenter', handleMouseEnterTarget);
 			target.addEventListener('mouseleave', handleMouseLeaveTarget);
-		});
-
-		hoverables.forEach((hoverable) => {
-			hoverable.addEventListener('mouseenter', handleMouseEnterHoverable);
-			hoverable.addEventListener('mouseleave', handleMouseLeaveHoverable);
 		});
 
 		chartTargets.forEach((chart) => {
@@ -2053,11 +2115,6 @@ const setupZenCursor = () => {
 			targets.forEach((target) => {
 				target.removeEventListener('mouseenter', handleMouseEnterTarget);
 				target.removeEventListener('mouseleave', handleMouseLeaveTarget);
-			});
-
-			hoverables.forEach((hoverable) => {
-				hoverable.removeEventListener('mouseenter', handleMouseEnterHoverable);
-				hoverable.removeEventListener('mouseleave', handleMouseLeaveHoverable);
 			});
 
 			chartTargets.forEach((chart) => {
@@ -2078,6 +2135,13 @@ const setupZenCursor = () => {
 
 	window.addEventListener('beforeunload', () => {
 		window.removeEventListener('mousemove', moveCursor);
+		window.removeEventListener('mousedown', handleMouseDown);
+		window.removeEventListener('mouseup', handleMouseUp);
+		window.removeEventListener('blur', handleWindowBlur);
+		window.removeEventListener('focus', handleWindowFocus);
+		document.removeEventListener('visibilitychange', handleVisibilityChange);
+		document.removeEventListener('mouseout', handleDocumentMouseOut);
+		document.removeEventListener('mouseenter', handleDocumentMouseEnter);
 		cleanupListeners();
 		observer.disconnect();
 	});
@@ -2241,6 +2305,7 @@ const renderStatus = (payload) => {
 
 	els.commandsCount.textContent = String(payload.commands.total);
 	els.commandsSub.textContent = `enabled ${payload.commands.enabled}, disabled ${payload.commands.disabled}`;
+
 	els.activeSessions.textContent = `users: ${Number(payload.sessions?.activeUsers || 0)}`;
 
 	const versionLabel = payload.project?.version || 'unknown';
@@ -2332,7 +2397,7 @@ const renderAudit = () => {
 
 	if (!state.canEdit) {
 		setSectionContentVisibility('audit', true);
-		setSectionState('audit', 'redacted', 'Audit timeline is owner-only.');
+		setSectionState('audit', 'idle');
 		renderSectionState('audit');
 		els.auditList.innerHTML = '<li class="empty-commands">[REDACTED] Audit timeline is owner-only.</li>';
 		return;
@@ -2985,6 +3050,10 @@ const renderUsers = () => {
 		return;
 	}
 
+	if (!state.canEdit) {
+		els.usersBulkToolbar?.classList.add('hidden');
+	}
+
 	const filtered = getFilteredUsers();
 	const keyword = (state.searchByFolder.users || '').trim().toLowerCase();
 
@@ -2999,7 +3068,13 @@ const renderUsers = () => {
 	}
 
 	setSectionState('users', 'idle');
-	els.usersBulkToolbar?.classList.remove('hidden');
+
+	if (state.canEdit) {
+		els.usersBulkToolbar?.classList.remove('hidden');
+	} else {
+		els.usersBulkToolbar?.classList.add('hidden');
+	}
+
 	els.usersWrap?.classList.remove('hidden');
 	renderSectionState('users');
 
@@ -3158,30 +3233,59 @@ const fetchSession = async () => {
 
 	state.role = payload.role || 'viewer';
 	state.canEdit = state.role === 'owner';
+	const settingsPanel = document.querySelector('.settings-panel');
 
 	if (!state.canEdit) {
 		els.clearConsole.disabled = true;
+		els.usersBulkToolbar?.classList.add('hidden');
+		settingsPanel?.classList.add('hidden');
 
 		if (els.auditActionChips) {
 			els.auditActionChips.classList.add('is-disabled');
+			els.auditActionChips.classList.add('hidden');
 		}
 
 		if (els.auditRoleChips) {
 			els.auditRoleChips.classList.add('is-disabled');
+			els.auditRoleChips.classList.add('hidden');
 		}
 
 		if (els.auditSearch) {
 			els.auditSearch.disabled = true;
+			els.auditSearch.classList.add('hidden');
 		}
 
 		if (els.auditClearFilters) {
 			els.auditClearFilters.disabled = true;
+			els.auditClearFilters.classList.add('hidden');
 		}
 
 		renderAuditChipCounts([]);
 
 		els.loggerConsole.textContent = '[REDACTED] Console logs are hidden for regular users.';
 		renderAudit();
+	} else {
+		settingsPanel?.classList.remove('hidden');
+
+		if (els.auditActionChips) {
+			els.auditActionChips.classList.remove('is-disabled');
+			els.auditActionChips.classList.remove('hidden');
+		}
+
+		if (els.auditRoleChips) {
+			els.auditRoleChips.classList.remove('is-disabled');
+			els.auditRoleChips.classList.remove('hidden');
+		}
+
+		if (els.auditSearch) {
+			els.auditSearch.disabled = false;
+			els.auditSearch.classList.remove('hidden');
+		}
+
+		if (els.auditClearFilters) {
+			els.auditClearFilters.disabled = false;
+			els.auditClearFilters.classList.remove('hidden');
+		}
 	}
 };
 
@@ -3442,22 +3546,6 @@ const setUserBlocked = async (userId, enabled) => {
 	return response.json();
 };
 
-const logoutDashboard = async () => {
-	els.logoutButton.disabled = true;
-	els.logoutButton.textContent = 'Logging out...';
-
-	try {
-		await fetch('/api/dashboard/auth/logout', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			}
-		});
-	} finally {
-		window.location.href = '/dashboard/login';
-	}
-};
-
 const runSafe = async (fn) => {
 	try {
 		await fn();
@@ -3664,6 +3752,20 @@ const bindEvents = () => {
 		}
 	});
 
+	els.logoutCancel?.addEventListener('click', () => {
+		closeLogoutDialog();
+	});
+
+	els.logoutConfirm?.addEventListener('click', () => {
+		void logoutDashboard();
+	});
+
+	els.logoutDialog?.addEventListener('click', (event) => {
+		if (event.target === els.logoutDialog) {
+			closeLogoutDialog();
+		}
+	});
+
 	document.addEventListener('keydown', (event) => {
 		if (event.key !== 'Escape') {
 			return;
@@ -3683,6 +3785,11 @@ const bindEvents = () => {
 
 		if (!els.confirmDialog?.classList.contains('hidden')) {
 			closeConfirmDialog(false);
+			return;
+		}
+
+		if (!els.logoutDialog?.classList.contains('hidden')) {
+			closeLogoutDialog();
 		}
 	});
 
@@ -3806,6 +3913,33 @@ const bindEvents = () => {
 		toggleThemePreference();
 	});
 
+	els.settingsThemePalette?.addEventListener('click', (event) => {
+		const option = event.target.closest('.custom-select-option');
+
+		if (option) {
+			const selectedValue = setCustomFilterValue(
+				els.settingsThemePalette,
+				option.getAttribute('data-value') || DEFAULT_THEME_PALETTE
+			);
+			const currentPalette = document.documentElement.getAttribute('data-palette') || DEFAULT_THEME_PALETTE;
+
+			closeCustomFilter(els.settingsThemePalette);
+
+			if (selectedValue !== currentPalette) {
+				applyThemePalette(selectedValue);
+				showToast('Theme palette updated.', 'success');
+			}
+
+			return;
+		}
+
+		const trigger = event.target.closest('.custom-select-trigger');
+
+		if (trigger) {
+			toggleCustomFilter(els.settingsThemePalette);
+		}
+	});
+
 	setupStatusChartHover();
 
 	els.settingsSave?.addEventListener('click', () => {
@@ -3820,6 +3954,7 @@ const bindEvents = () => {
 
 	els.settingsReset?.addEventListener('click', () => {
 		applyDashboardSettings(DEFAULT_DASHBOARD_SETTINGS);
+		applyThemePalette(DEFAULT_THEME_PALETTE);
 		trimMetricHistoryToLimit();
 		renderStatusCharts();
 		startPollingLoops();
@@ -3843,7 +3978,7 @@ const bindEvents = () => {
 	});
 
 	els.logoutButton.addEventListener('click', () => {
-		void logoutDashboard();
+		openLogoutDialog();
 	});
 
 	els.folderSwitcher.addEventListener('click', (event) => {
@@ -4341,6 +4476,7 @@ const init = async () => {
 	loadCollapsedCategories();
 	loadActiveFolder();
 	loadDashboardSettings();
+	loadThemePalettePreference();
 	loadThemePreference();
 	loadAuditActionCollapsed();
 	loadAuditRoleCollapsed();

@@ -17,11 +17,21 @@
 					<p id="project-version" class="hero-version">
 						<span class="hero-version-label">Version: <span id="project-version-value">-</span></span>
 						<span class="hero-version-divider" aria-hidden="true"></span>
-						<button id="open-changelog" class="hero-changelog-link" type="button" data-tooltip="Open recent project changes">Changelog</button>
+						<button id="open-changelog" class="hero-changelog-link" type="button" data-tooltip="Open recent project changes">
+							Changelog
+						</button>
 						<span class="hero-version-divider" aria-hidden="true"></span>
-						<button id="open-contributors" class="hero-changelog-link" type="button" data-tooltip="Open project contributors">Contributors</button>
+						<button id="open-contributors" class="hero-changelog-link" type="button" data-tooltip="Open project contributors">
+							Contributors
+						</button>
 						<span class="hero-version-divider" aria-hidden="true"></span>
-						<button id="logout-button" class="hero-changelog-link" type="button" data-tooltip="End your dashboard session and return to login">Log Out</button>
+						<button
+							id="logout-button"
+							class="hero-changelog-link"
+							type="button"
+							data-tooltip="End your dashboard session and return to login">
+							Log Out
+						</button>
 					</p>
 					<!-- <p id="spotify-now-playing" class="hero-spotify">Spotify: loading...</p> -->
 				</div>
@@ -36,8 +46,7 @@
 					class="theme-toggle"
 					type="button"
 					aria-label="Switch to light mode"
-					data-tooltip="Switch between light and dark dashboard themes"
-				>
+					data-tooltip="Switch between light and dark dashboard themes">
 					<span class="theme-icon theme-icon-sun" aria-hidden="true">☀</span>
 					<span class="theme-icon theme-icon-moon" aria-hidden="true">☾</span>
 				</button>
@@ -118,7 +127,9 @@
 					<h2>Activity Timeline</h2>
 					<div class="actions audit-filters">
 						<div id="audit-action-chips" class="audit-chips" role="group" aria-label="Filter audit by action">
-							<button class="audit-chip is-active" type="button" data-audit-action="" data-tooltip="Show all action types">All Actions <span class="audit-chip-count">0</span></button>
+							<button class="audit-chip is-active" type="button" data-audit-action="" data-tooltip="Show all action types">
+								All Actions <span class="audit-chip-count">0</span>
+							</button>
 							<span
 								id="audit-action-separator"
 								class="audit-action-separator"
@@ -126,18 +137,53 @@
 								tabindex="0"
 								aria-expanded="true"
 								aria-controls="audit-action-chips"
-								data-tooltip="Hide individual action chips"
-							>
+								data-tooltip="Hide individual action chips">
 								|
 							</span>
-							<button class="audit-chip audit-action-extra" type="button" data-audit-action="auth" data-tooltip="Filter timeline to authentication events">Auth <span class="audit-chip-count">0</span></button>
-							<button class="audit-chip audit-action-extra" type="button" data-audit-action="command" data-tooltip="Filter timeline to command toggle events">Commands <span class="audit-chip-count">0</span></button>
-							<button class="audit-chip audit-action-extra" type="button" data-audit-action="flag" data-tooltip="Filter timeline to bot flag updates">Flags <span class="audit-chip-count">0</span></button>
-							<button class="audit-chip audit-action-extra" type="button" data-audit-action="user" data-tooltip="Filter timeline to user moderation and limit actions">Users <span class="audit-chip-count">0</span></button>
-							<button class="audit-chip audit-action-extra" type="button" data-audit-action="undo" data-tooltip="Filter timeline to undo operations">Undo <span class="audit-chip-count">0</span></button>
+							<button
+								class="audit-chip audit-action-extra"
+								type="button"
+								data-audit-action="auth"
+								data-tooltip="Filter timeline to authentication events">
+								Auth <span class="audit-chip-count">0</span>
+							</button>
+							<button
+								class="audit-chip audit-action-extra"
+								type="button"
+								data-audit-action="command"
+								data-tooltip="Filter timeline to command toggle events">
+								Commands <span class="audit-chip-count">0</span>
+							</button>
+							<button
+								class="audit-chip audit-action-extra"
+								type="button"
+								data-audit-action="flag"
+								data-tooltip="Filter timeline to bot flag updates">
+								Flags <span class="audit-chip-count">0</span>
+							</button>
+							<button
+								class="audit-chip audit-action-extra"
+								type="button"
+								data-audit-action="user"
+								data-tooltip="Filter timeline to user moderation and limit actions">
+								Users <span class="audit-chip-count">0</span>
+							</button>
+							<button
+								class="audit-chip audit-action-extra"
+								type="button"
+								data-audit-action="undo"
+								data-tooltip="Filter timeline to undo operations">
+								Undo <span class="audit-chip-count">0</span>
+							</button>
 						</div>
 						<div id="audit-role-chips" class="audit-chips" role="group" aria-label="Filter audit by role">
-							<button class="audit-chip is-active" type="button" data-audit-role="" data-tooltip="Show actions from all actor roles">All Roles <span class="audit-chip-count">0</span></button>
+							<button
+								class="audit-chip is-active"
+								type="button"
+								data-audit-role=""
+								data-tooltip="Show actions from all actor roles">
+								All Roles <span class="audit-chip-count">0</span>
+							</button>
 							<span
 								id="audit-role-separator"
 								class="audit-role-separator"
@@ -145,21 +191,39 @@
 								tabindex="0"
 								aria-expanded="true"
 								aria-controls="audit-role-chips"
-								data-tooltip="Hide individual role chips"
-							>
+								data-tooltip="Hide individual role chips">
 								|
 							</span>
-							<button class="audit-chip audit-role-extra" type="button" data-audit-role="owner" data-tooltip="Show only owner-initiated actions">Owner <span class="audit-chip-count">0</span></button>
-							<button class="audit-chip audit-role-extra" type="button" data-audit-role="viewer" data-tooltip="Show only viewer-initiated actions">Viewer <span class="audit-chip-count">0</span></button>
-							<button class="audit-chip audit-role-extra" type="button" data-audit-role="system" data-tooltip="Show only system-generated actions">System <span class="audit-chip-count">0</span></button>
+							<button
+								class="audit-chip audit-role-extra"
+								type="button"
+								data-audit-role="owner"
+								data-tooltip="Show only owner-initiated actions">
+								Owner <span class="audit-chip-count">0</span>
+							</button>
+							<button
+								class="audit-chip audit-role-extra"
+								type="button"
+								data-audit-role="viewer"
+								data-tooltip="Show only viewer-initiated actions">
+								Viewer <span class="audit-chip-count">0</span>
+							</button>
+							<button
+								class="audit-chip audit-role-extra"
+								type="button"
+								data-audit-role="system"
+								data-tooltip="Show only system-generated actions">
+								System <span class="audit-chip-count">0</span>
+							</button>
 						</div>
-						<button id="audit-clear-filters" type="button" data-tooltip="Reset action, role, and search filters">Clear Filters</button>
+						<button id="audit-clear-filters" type="button" data-tooltip="Reset action, role, and search filters">
+							Clear Filters
+						</button>
 						<input
 							id="audit-search"
 							type="search"
-							placeholder="Search actor/action/target..."
-							data-tooltip="Search inside action, role, actor, target, and message"
-						/>
+							placeholder="Search actor/action/target"
+							data-tooltip="Search inside action, role, actor, target, and message" />
 					</div>
 				</div>
 				<div id="audit-state" class="section-state hidden" aria-live="polite"></div>
@@ -180,61 +244,108 @@
 						data-folder-toggle="commands"
 						role="tab"
 						aria-selected="true"
-						data-tooltip="Open command controls"
-					>
+						data-tooltip="Open command controls">
 						Commands
 					</button>
 					<span class="folder-divider" aria-hidden="true">\</span>
-					<button class="folder-path" type="button" data-folder-toggle="flags" role="tab" aria-selected="false" data-tooltip="Open bot flag controls">
+					<button
+						class="folder-path"
+						type="button"
+						data-folder-toggle="flags"
+						role="tab"
+						aria-selected="false"
+						data-tooltip="Open bot flag controls">
 						Bot Flags
 					</button>
 					<span class="folder-divider" aria-hidden="true">\</span>
-					<button class="folder-path" type="button" data-folder-toggle="users" role="tab" aria-selected="false" data-tooltip="Open user moderation controls">Users</button>
+					<button
+						class="folder-path"
+						type="button"
+						data-folder-toggle="users"
+						role="tab"
+						aria-selected="false"
+						data-tooltip="Open user moderation controls">
+						Users
+					</button>
 					<div class="folder-filters">
-						<div id="controls-command-filter" class="folder-filter custom-select hidden" data-tooltip="Filter commands by enabled state" data-value="all">
+						<div
+							id="controls-command-filter"
+							class="folder-filter custom-select hidden"
+							data-tooltip="Filter commands by enabled state"
+							data-value="all">
 							<button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false">
 								<span class="custom-select-label">All Commands</span>
 								<span class="custom-select-caret" aria-hidden="true"></span>
 							</button>
 							<div class="custom-select-menu" role="listbox" aria-label="Commands filter">
-								<button type="button" class="custom-select-option is-selected" data-value="all" aria-selected="true">All Commands</button>
-								<button type="button" class="custom-select-option" data-value="enabled" aria-selected="false">Enabled Only</button>
-								<button type="button" class="custom-select-option" data-value="disabled" aria-selected="false">Disabled Only</button>
+								<button type="button" class="custom-select-option is-selected" data-value="all" aria-selected="true">
+									All Commands
+								</button>
+								<button type="button" class="custom-select-option" data-value="enabled" aria-selected="false">
+									Enabled Only
+								</button>
+								<button type="button" class="custom-select-option" data-value="disabled" aria-selected="false">
+									Disabled Only
+								</button>
 							</div>
 						</div>
-						<div id="controls-flag-filter" class="folder-filter custom-select hidden" data-tooltip="Filter flags by enabled state" data-value="all">
+						<div
+							id="controls-flag-filter"
+							class="folder-filter custom-select hidden"
+							data-tooltip="Filter flags by enabled state"
+							data-value="all">
 							<button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false">
 								<span class="custom-select-label">All Flags</span>
 								<span class="custom-select-caret" aria-hidden="true"></span>
 							</button>
 							<div class="custom-select-menu" role="listbox" aria-label="Flags filter">
-								<button type="button" class="custom-select-option is-selected" data-value="all" aria-selected="true">All Flags</button>
-								<button type="button" class="custom-select-option" data-value="enabled" aria-selected="false">Enabled Only</button>
-								<button type="button" class="custom-select-option" data-value="disabled" aria-selected="false">Disabled Only</button>
+								<button type="button" class="custom-select-option is-selected" data-value="all" aria-selected="true">
+									All Flags
+								</button>
+								<button type="button" class="custom-select-option" data-value="enabled" aria-selected="false">
+									Enabled Only
+								</button>
+								<button type="button" class="custom-select-option" data-value="disabled" aria-selected="false">
+									Disabled Only
+								</button>
 							</div>
 						</div>
-						<div id="controls-user-role-filter" class="folder-filter custom-select hidden" data-tooltip="Filter users by role" data-value="all">
+						<div
+							id="controls-user-role-filter"
+							class="folder-filter custom-select hidden"
+							data-tooltip="Filter users by role"
+							data-value="all">
 							<button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false">
 								<span class="custom-select-label">All Roles</span>
 								<span class="custom-select-caret" aria-hidden="true"></span>
 							</button>
 							<div class="custom-select-menu" role="listbox" aria-label="User role filter">
-								<button type="button" class="custom-select-option is-selected" data-value="all" aria-selected="true">All Roles</button>
+								<button type="button" class="custom-select-option is-selected" data-value="all" aria-selected="true">
+									All Roles
+								</button>
 								<button type="button" class="custom-select-option" data-value="premium" aria-selected="false">Premium</button>
 								<button type="button" class="custom-select-option" data-value="free" aria-selected="false">Free</button>
 							</div>
 						</div>
-						<div id="controls-user-status-filter" class="folder-filter custom-select hidden" data-tooltip="Filter users by moderation status" data-value="all">
+						<div
+							id="controls-user-status-filter"
+							class="folder-filter custom-select hidden"
+							data-tooltip="Filter users by moderation status"
+							data-value="all">
 							<button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false">
 								<span class="custom-select-label">All Statuses</span>
 								<span class="custom-select-caret" aria-hidden="true"></span>
 							</button>
 							<div class="custom-select-menu" role="listbox" aria-label="User status filter">
-								<button type="button" class="custom-select-option is-selected" data-value="all" aria-selected="true">All Statuses</button>
+								<button type="button" class="custom-select-option is-selected" data-value="all" aria-selected="true">
+									All Statuses
+								</button>
 								<button type="button" class="custom-select-option" data-value="clean" aria-selected="false">Clean</button>
 								<button type="button" class="custom-select-option" data-value="banned" aria-selected="false">Banned</button>
 								<button type="button" class="custom-select-option" data-value="blocked" aria-selected="false">Blocked</button>
-								<button type="button" class="custom-select-option" data-value="flagged" aria-selected="false">Banned Or Blocked</button>
+								<button type="button" class="custom-select-option" data-value="flagged" aria-selected="false">
+									Banned Or Blocked
+								</button>
 							</div>
 						</div>
 					</div>
@@ -243,8 +354,7 @@
 						class="folder-search"
 						type="search"
 						placeholder="Search command/category/alias..."
-						data-tooltip="Search items in the currently open controls tab"
-					/>
+						data-tooltip="Search items in the currently open controls tab" />
 				</div>
 
 				<section id="commands-view" class="controls-view" data-folder-view="commands">
@@ -266,22 +376,52 @@
 					<div id="users-bulk-toolbar" class="users-bulk-toolbar">
 						<div class="users-bulk-summary">
 							<span id="users-bulk-selected-count" class="users-bulk-count">0 selected</span>
-							<button id="users-bulk-select-visible" type="button" data-tooltip="Select or unselect all currently visible users">Select Visible</button>
+							<button
+								id="users-bulk-select-visible"
+								type="button"
+								data-tooltip="Select or unselect all currently visible users">
+								Select Visible
+							</button>
 							<button id="users-bulk-clear" type="button" data-tooltip="Clear all selected users">Clear</button>
 						</div>
 						<div class="users-bulk-actions">
-							<button type="button" data-bulk-user-action="premium-on" data-tooltip="Grant premium role to selected users">Premium +</button>
-							<button type="button" data-bulk-user-action="premium-off" data-tooltip="Remove premium role from selected users">Premium -</button>
+							<button type="button" data-bulk-user-action="premium-on" data-tooltip="Grant premium role to selected users">
+								Premium +
+							</button>
+							<button type="button" data-bulk-user-action="premium-off" data-tooltip="Remove premium role from selected users">
+								Premium -
+							</button>
 							<button type="button" data-bulk-user-action="ban-on" data-tooltip="Ban selected users">Ban</button>
 							<button type="button" data-bulk-user-action="ban-off" data-tooltip="Unban selected users">Unban</button>
 							<button type="button" data-bulk-user-action="block-on" data-tooltip="Block selected users">Block</button>
 							<button type="button" data-bulk-user-action="block-off" data-tooltip="Unblock selected users">Unblock</button>
 						</div>
 						<div class="users-bulk-limit-row">
-							<input id="users-bulk-limit-value" type="number" min="0" step="1" value="10" data-tooltip="Value used for bulk limit operations" />
-							<button type="button" data-bulk-user-action="limit-add" data-tooltip="Increase selected user limits by this amount">+ Limit</button>
-							<button type="button" data-bulk-user-action="limit-sub" data-tooltip="Decrease selected user limits by this amount">- Limit</button>
-							<button type="button" data-bulk-user-action="limit-set" data-tooltip="Set selected user limits to this exact value">Set Limit</button>
+							<input
+								id="users-bulk-limit-value"
+								type="number"
+								min="0"
+								step="1"
+								value="10"
+								data-tooltip="Value used for bulk limit operations" />
+							<button
+								type="button"
+								data-bulk-user-action="limit-add"
+								data-tooltip="Increase selected user limits by this amount">
+								+ Limit
+							</button>
+							<button
+								type="button"
+								data-bulk-user-action="limit-sub"
+								data-tooltip="Decrease selected user limits by this amount">
+								- Limit
+							</button>
+							<button
+								type="button"
+								data-bulk-user-action="limit-set"
+								data-tooltip="Set selected user limits to this exact value">
+								Set Limit
+							</button>
 						</div>
 					</div>
 					<div class="commands-wrap">
@@ -322,7 +462,9 @@
 					</label>
 				</div>
 				<div class="settings-actions">
-					<button id="settings-save" type="button" data-tooltip="Apply settings and persist them in this browser">Save Settings</button>
+					<button id="settings-save" type="button" data-tooltip="Apply settings and persist them in this browser">
+						Save Settings
+					</button>
 					<button id="settings-reset" type="button" data-tooltip="Reset settings to default values">Reset Defaults</button>
 				</div>
 			</section>
@@ -366,6 +508,47 @@
 						><span>Source: nugraizy/aestherix</span></a
 					>
 				</div>
+				<div class="footer-theme-controls">
+					<div
+						id="setting-theme-palette"
+						class="custom-select settings-custom-select footer-palette-select"
+						data-tooltip="Choose your dashboard color palette"
+						data-value="aestherix">
+						<button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false">
+							<span class="custom-select-label">Aestherix (Default)</span>
+							<span class="custom-select-caret" aria-hidden="true"></span>
+						</button>
+						<div class="custom-select-menu" role="listbox" aria-label="Theme palette">
+							<button type="button" class="custom-select-option is-selected" data-value="aestherix" aria-selected="true">
+								Aestherix (Default)
+							</button>
+							<button type="button" class="custom-select-option" data-value="nord" aria-selected="false">Nord</button>
+							<button type="button" class="custom-select-option" data-value="gruvbox" aria-selected="false">Gruvbox</button>
+							<button type="button" class="custom-select-option" data-value="solarized" aria-selected="false">
+								Solarized
+							</button>
+							<button type="button" class="custom-select-option" data-value="tokyo-night" aria-selected="false">
+								Tokyo Night
+							</button>
+							<button type="button" class="custom-select-option" data-value="catppuccin-latte" aria-selected="false">
+								Catppuccin Latte
+							</button>
+							<button type="button" class="custom-select-option" data-value="catppuccin-frappe" aria-selected="false">
+								Catppuccin Frappe
+							</button>
+							<button type="button" class="custom-select-option" data-value="catppuccin-macchiato" aria-selected="false">
+								Catppuccin Macchiato
+							</button>
+							<button type="button" class="custom-select-option" data-value="catppuccin-mocha" aria-selected="false">
+								Catppuccin Mocha
+							</button>
+							<button type="button" class="custom-select-option" data-value="cyberpunk-2077" aria-selected="false">
+								Cyberpunk 2077
+							</button>
+							<button type="button" class="custom-select-option" data-value="dracula" aria-selected="false">Dracula</button>
+						</div>
+					</div>
+				</div>
 				<div class="footer-meta">
 					<span>Built for Aestherix</span>
 					<span aria-hidden="true">•</span>
@@ -374,7 +557,12 @@
 			</footer>
 		</main>
 
-		<div id="changelog-dialog" class="confirm-overlay changelog-dialog hidden" role="dialog" aria-modal="true" aria-labelledby="changelog-title">
+		<div
+			id="changelog-dialog"
+			class="confirm-overlay changelog-dialog hidden"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="changelog-title">
 			<div class="confirm-card changelog-card">
 				<div class="changelog-head">
 					<h3 id="changelog-title">Project Changelog</h3>
@@ -385,7 +573,12 @@
 			</div>
 		</div>
 
-		<div id="contributors-dialog" class="confirm-overlay changelog-dialog hidden" role="dialog" aria-modal="true" aria-labelledby="contributors-title">
+		<div
+			id="contributors-dialog"
+			class="confirm-overlay changelog-dialog hidden"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="contributors-title">
 			<div class="confirm-card changelog-card contributors-card">
 				<div class="changelog-head">
 					<h3 id="contributors-title">Project Contributors</h3>
@@ -403,6 +596,26 @@
 				<div class="confirm-actions">
 					<button id="confirm-cancel" type="button">Cancel</button>
 					<button id="confirm-accept" type="button" class="confirm-danger">Confirm</button>
+				</div>
+			</div>
+		</div>
+
+		<div
+			id="logout-dialog"
+			class="confirm-overlay logout-dialog hidden"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="logout-title">
+			<div class="confirm-card logout-card">
+				<h3 id="logout-title">Log Out Session</h3>
+				<p id="logout-message">You are about to end your dashboard session and return to login.</p>
+				<div id="logout-waiting" class="logout-waiting hidden" aria-live="polite">
+					<span>Terminating session...</span>
+					<div class="logout-waiting-line"></div>
+				</div>
+				<div class="confirm-actions logout-actions">
+					<button id="logout-cancel" type="button">Cancel</button>
+					<button id="logout-confirm" type="button" class="confirm-danger">Log Out</button>
 				</div>
 			</div>
 		</div>
