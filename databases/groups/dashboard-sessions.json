@@ -1,20 +1,3 @@
 {
-  "sessions": [
-    {
-      "token": "fb0414b851f941d50cefc46597947760c4d7b82c20c411aa6ba41ea57e086366",
-      "role": "viewer",
-      "phoneNumber": null,
-      "name": "Viewer",
-      "lastSeenAt": 1776283407583,
-      "expiresAt": 1776369303694
-    },
-    {
-      "token": "f2511dcc210732ef7a3631c8274c657859cb781ce86756dd88ee363ac5e74286",
-      "role": "viewer",
-      "phoneNumber": null,
-      "name": "Viewer",
-      "lastSeenAt": 1776327201469,
-      "expiresAt": 1776413417677
-    }
-  ]
+  "sessions": []
 }

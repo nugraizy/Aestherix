@@ -5,6 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Aestherix Dashboard Login</title>
 		<link rel="icon" type="image/png" href="/favicon.png" />
+		<link rel="stylesheet" href="https://www.nerdfonts.com/assets/css/webfont.css" />
 		<link rel="stylesheet" href="/dashboard/styles.css" />
 	</head>
 	<body>
@@ -17,8 +18,8 @@
 					type="button"
 					aria-label="Switch to light mode"
 					data-tooltip="Switch between light and dark dashboard themes">
-					<span class="theme-icon theme-icon-sun" aria-hidden="true">☀</span>
-					<span class="theme-icon theme-icon-moon" aria-hidden="true">☾</span>
+					<span class="theme-icon theme-icon-sun" aria-hidden="true">&#xf522;</span>
+					<span class="theme-icon theme-icon-moon" aria-hidden="true">&#xf186;</span>
 				</button>
 				<p class="eyebrow">Dashboard Access</p>
 				<h1>Login to Dashboard</h1>
@@ -27,8 +28,15 @@
 				<form id="login-form" class="login-form">
 					<label for="phone-number">WhatsApp Number</label>
 					<div class="login-inline">
-						<input id="phone-number" name="phone-number" type="tel" placeholder="628xxxxxxxxxx" />
-						<button id="request-code" class="hidden" type="submit">Request Confirmation</button>
+						<input
+							id="phone-number"
+							name="phone-number"
+							type="tel"
+							placeholder="628xxxxxxxxxx"
+							data-tooltip="Input your owner number." />
+						<button id="request-code" class="hidden" type="submit" data-tooltip="Request a confirmation via WhatsApp">
+							Request Confirmation
+						</button>
 						<div id="owner-waiting" class="owner-waiting hidden" aria-live="polite">
 							<div class="owner-waiting-line"></div>
 						</div>
@@ -36,7 +44,12 @@
 				</form>
 
 				<div class="login-actions login-secondary">
-					<button id="viewer-login" type="button">Continue as Viewer (Read-Only)</button>
+					<button
+						id="viewer-login"
+						type="button"
+						data-tooltip="Login as Viewer meaning you will have read-only access to the dashboard.">
+						Login as Viewer (Read-Only)
+					</button>
 				</div>
 
 				<p id="login-message" class="login-message"></p>

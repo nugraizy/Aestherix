@@ -1,5 +1,5 @@
 {
-  "lastId": 99,
+  "lastId": 106,
   "logs": [
     {
       "id": 1,
@@ -1276,6 +1276,90 @@
     {
       "id": 99,
       "timestamp": 1776328843476,
+      "action": "auth.logout",
+      "actorRole": "viewer",
+      "actor": "Viewer",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Session logged out.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 100,
+      "timestamp": 1776329617103,
+      "action": "auth.viewer_login",
+      "actorRole": "viewer",
+      "actor": "Viewer",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Viewer session started.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 101,
+      "timestamp": 1776329641623,
+      "action": "auth.logout",
+      "actorRole": "viewer",
+      "actor": "Viewer",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Session logged out.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 102,
+      "timestamp": 1776329664904,
+      "action": "auth.owner_login",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Owner login confirmed by WhatsApp.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 103,
+      "timestamp": 1776418035087,
+      "action": "auth.owner_login",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Owner login confirmed by WhatsApp.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 104,
+      "timestamp": 1776419338487,
+      "action": "auth.logout",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Session logged out.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 105,
+      "timestamp": 1776419343564,
+      "action": "auth.viewer_login",
+      "actorRole": "viewer",
+      "actor": "Viewer",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Viewer session started.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 106,
+      "timestamp": 1776419957344,
       "action": "auth.logout",
       "actorRole": "viewer",
       "actor": "Viewer",

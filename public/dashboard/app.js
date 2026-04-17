@@ -2791,10 +2791,6 @@ const getFilteredUsers = () => {
 			return false;
 		}
 
-		if (statusFilter === 'flagged' && !(user.banned || user.blocked)) {
-			return false;
-		}
-
 		if (!keyword) {
 			return true;
 		}

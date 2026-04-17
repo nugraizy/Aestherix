@@ -25,7 +25,7 @@ export const color = (...obj) => {
 							const schemes = _.sample(['teen', 'passion', 'instagram']);
 
 							return gradient[schemes](text);
-						})(); // eslint-disable-line
+						})();
 	}
 
 	return str;

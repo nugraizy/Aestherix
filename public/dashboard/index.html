@@ -5,6 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Aestherix Monitor Dashboard</title>
 		<link rel="icon" type="image/png" href="/favicon.png" />
+		<link rel="stylesheet" href="https://www.nerdfonts.com/assets/css/webfont.css" />
 		<link rel="stylesheet" href="/dashboard/styles.css" />
 	</head>
 	<body>
@@ -39,7 +40,7 @@
 					<span id="clock">-</span>
 					<span class="dot"></span>
 					<span id="connection">connecting...</span>
-					<span id="active-sessions" class="hero-badge">users: 0</span>
+					<span id="active-sessions" class="hero-badge" data-tooltip="Active user sessions"> users: 0 </span>
 				</div>
 				<button
 					id="theme-toggle"
@@ -47,8 +48,8 @@
 					type="button"
 					aria-label="Switch to light mode"
 					data-tooltip="Switch between light and dark dashboard themes">
-					<span class="theme-icon theme-icon-sun" aria-hidden="true">☀</span>
-					<span class="theme-icon theme-icon-moon" aria-hidden="true">☾</span>
+					<span class="theme-icon theme-icon-sun" aria-hidden="true">&#xf522;</span>
+					<span class="theme-icon theme-icon-moon" aria-hidden="true">&#xf186;</span>
 				</button>
 			</header>
 
@@ -268,44 +269,76 @@
 						Users
 					</button>
 					<div class="folder-filters">
-						<div
-							id="controls-command-filter"
-							class="folder-filter custom-select hidden"
-							data-tooltip="Filter commands by enabled state"
-							data-value="all">
-							<button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false">
+						<div id="controls-command-filter" class="folder-filter custom-select hidden" data-value="all">
+							<button
+								type="button"
+								class="custom-select-trigger"
+								aria-haspopup="listbox"
+								aria-expanded="false"
+								data-tooltip="Filter commands by enabled state">
 								<span class="custom-select-label">All Commands</span>
 								<span class="custom-select-caret" aria-hidden="true"></span>
 							</button>
 							<div class="custom-select-menu" role="listbox" aria-label="Commands filter">
-								<button type="button" class="custom-select-option is-selected" data-value="all" aria-selected="true">
+								<button
+									type="button"
+									class="custom-select-option is-selected"
+									data-value="all"
+									aria-selected="true"
+									data-tooltip="Show all commands">
 									All Commands
 								</button>
-								<button type="button" class="custom-select-option" data-value="enabled" aria-selected="false">
+								<button
+									type="button"
+									class="custom-select-option"
+									data-value="enabled"
+									aria-selected="false"
+									data-tooltip="Show only enabled commands">
 									Enabled Only
 								</button>
-								<button type="button" class="custom-select-option" data-value="disabled" aria-selected="false">
+								<button
+									type="button"
+									class="custom-select-option"
+									data-value="disabled"
+									aria-selected="false"
+									data-tooltip="Show only disabled commands">
 									Disabled Only
 								</button>
 							</div>
 						</div>
-						<div
-							id="controls-flag-filter"
-							class="folder-filter custom-select hidden"
-							data-tooltip="Filter flags by enabled state"
-							data-value="all">
-							<button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false">
+						<div id="controls-flag-filter" class="folder-filter custom-select hidden" data-value="all">
+							<button
+								type="button"
+								class="custom-select-trigger"
+								aria-haspopup="listbox"
+								aria-expanded="false"
+								data-tooltip="Filter flags by enabled state">
 								<span class="custom-select-label">All Flags</span>
 								<span class="custom-select-caret" aria-hidden="true"></span>
 							</button>
 							<div class="custom-select-menu" role="listbox" aria-label="Flags filter">
-								<button type="button" class="custom-select-option is-selected" data-value="all" aria-selected="true">
+								<button
+									type="button"
+									class="custom-select-option is-selected"
+									data-value="all"
+									aria-selected="true"
+									data-tooltip="Show all flags">
 									All Flags
 								</button>
-								<button type="button" class="custom-select-option" data-value="enabled" aria-selected="false">
+								<button
+									type="button"
+									class="custom-select-option"
+									data-value="enabled"
+									aria-selected="false"
+									data-tooltip="Show only enabled flags">
 									Enabled Only
 								</button>
-								<button type="button" class="custom-select-option" data-value="disabled" aria-selected="false">
+								<button
+									type="button"
+									class="custom-select-option"
+									data-value="disabled"
+									aria-selected="false"
+									data-tooltip="Show only disabled flags">
 									Disabled Only
 								</button>
 							</div>
@@ -315,16 +348,40 @@
 							class="folder-filter custom-select hidden"
 							data-tooltip="Filter users by role"
 							data-value="all">
-							<button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false">
+							<button
+								type="button"
+								class="custom-select-trigger"
+								aria-haspopup="listbox"
+								aria-expanded="false"
+								data-tooltip="Filter users by role">
 								<span class="custom-select-label">All Roles</span>
 								<span class="custom-select-caret" aria-hidden="true"></span>
 							</button>
 							<div class="custom-select-menu" role="listbox" aria-label="User role filter">
-								<button type="button" class="custom-select-option is-selected" data-value="all" aria-selected="true">
+								<button
+									type="button"
+									class="custom-select-option is-selected"
+									data-value="all"
+									aria-selected="true"
+									data-tooltip="Show users of all roles">
 									All Roles
 								</button>
-								<button type="button" class="custom-select-option" data-value="premium" aria-selected="false">Premium</button>
-								<button type="button" class="custom-select-option" data-value="free" aria-selected="false">Free</button>
+								<button
+									type="button"
+									class="custom-select-option"
+									data-value="premium"
+									aria-selected="false"
+									data-tooltip="Show only premium users">
+									Premium
+								</button>
+								<button
+									type="button"
+									class="custom-select-option"
+									data-value="free"
+									aria-selected="false"
+									data-tooltip="Show only free users">
+									Free
+								</button>
 							</div>
 						</div>
 						<div
@@ -332,19 +389,47 @@
 							class="folder-filter custom-select hidden"
 							data-tooltip="Filter users by moderation status"
 							data-value="all">
-							<button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false">
+							<button
+								type="button"
+								class="custom-select-trigger"
+								aria-haspopup="listbox"
+								aria-expanded="false"
+								data-tooltip="Filter users by moderation status">
 								<span class="custom-select-label">All Statuses</span>
 								<span class="custom-select-caret" aria-hidden="true"></span>
 							</button>
 							<div class="custom-select-menu" role="listbox" aria-label="User status filter">
-								<button type="button" class="custom-select-option is-selected" data-value="all" aria-selected="true">
+								<button
+									type="button"
+									class="custom-select-option is-selected"
+									data-value="all"
+									aria-selected="true"
+									data-tooltip="Show users of all statuses">
 									All Statuses
 								</button>
-								<button type="button" class="custom-select-option" data-value="clean" aria-selected="false">Clean</button>
-								<button type="button" class="custom-select-option" data-value="banned" aria-selected="false">Banned</button>
-								<button type="button" class="custom-select-option" data-value="blocked" aria-selected="false">Blocked</button>
-								<button type="button" class="custom-select-option" data-value="flagged" aria-selected="false">
-									Banned Or Blocked
+								<button
+									type="button"
+									class="custom-select-option"
+									data-value="clean"
+									aria-selected="false"
+									data-tooltip="Show only clean users">
+									Clean
+								</button>
+								<button
+									type="button"
+									class="custom-select-option"
+									data-value="banned"
+									aria-selected="false"
+									data-tooltip="Show only banned users">
+									Banned
+								</button>
+								<button
+									type="button"
+									class="custom-select-option"
+									data-value="blocked"
+									aria-selected="false"
+									data-tooltip="Show only blocked users">
+									Blocked
 								</button>
 							</div>
 						</div>
@@ -473,7 +558,7 @@
 				<p class="footer-title">Aestherix Dashboard</p>
 				<p class="footer-subtitle">Runtime monitoring, live logs, and command control in one place.</p>
 				<div class="footer-links" aria-label="Social links">
-					<a href="https://github.com/nugraizy" target="_blank" rel="noopener noreferrer"
+					<a href="https://github.com/nugraizy" target="_blank" rel="noopener noreferrer" data-tooltip="GitHub profile"
 						><span class="social-icon" aria-hidden="true">
 							<svg viewBox="0 0 24 24" role="img" focusable="false">
 								<path
@@ -481,7 +566,11 @@
 							</svg> </span
 						><span>GitHub: nugraizy</span></a
 					>
-					<a href="https://www.instagram.com/dizy.himself/" target="_blank" rel="noopener noreferrer"
+					<a
+						href="https://www.instagram.com/dizy.himself/"
+						target="_blank"
+						rel="noopener noreferrer"
+						data-tooltip="Instagram profile"
 						><span class="social-icon" aria-hidden="true">
 							<svg viewBox="0 0 24 24" role="img" focusable="false">
 								<path
@@ -489,7 +578,11 @@
 							</svg> </span
 						><span>Instagram: @dizy.himself</span></a
 					>
-					<a href="https://x.com/dizydotenv" target="_blank" rel="noopener noreferrer"
+					<a
+						href="https://x.com/dizydotenv"
+						target="_blank"
+						rel="noopener noreferrer"
+						data-tooltip="X (formerly Twitter) profile"
 						><span class="social-icon" aria-hidden="true">
 							<svg viewBox="0 0 24 24" role="img" focusable="false">
 								<path
@@ -499,7 +592,11 @@
 					>
 				</div>
 				<div class="footer-links footer-source-link" aria-label="Project source link">
-					<a href="https://github.com/nugraizy/aestherix" target="_blank" rel="noopener noreferrer"
+					<a
+						href="https://github.com/nugraizy/aestherix"
+						target="_blank"
+						rel="noopener noreferrer"
+						data-tooltip="View project source code on GitHub"
 						><span class="social-icon" aria-hidden="true">
 							<svg viewBox="0 0 24 24" role="img" focusable="false">
 								<path
@@ -512,9 +609,13 @@
 					<div
 						id="setting-theme-palette"
 						class="custom-select settings-custom-select footer-palette-select"
-						data-tooltip="Choose your dashboard color palette"
 						data-value="aestherix">
-						<button type="button" class="custom-select-trigger" aria-haspopup="listbox" aria-expanded="false">
+						<button
+							type="button"
+							class="custom-select-trigger"
+							aria-haspopup="listbox"
+							aria-expanded="false"
+							data-tooltip="Switch dashboard color palette">
 							<span class="custom-select-label">Aestherix (Default)</span>
 							<span class="custom-select-caret" aria-hidden="true"></span>
 						</button>
