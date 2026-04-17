@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { parse } from '@dotenvx/dotenvx';
+import { parse, set } from '@dotenvx/dotenvx';
 import axios from 'axios';
 import fs from 'fs-extra';
 import _ from 'lodash';
@@ -843,11 +843,11 @@ export class InstagramApi extends InstagramMethods {
 			parseCookie: () => this._parseCookie(),
 
 			writeLoginInfo: () => {
-				const loginInfo = `USERNAME="${this.#_username}"\nPASSWORD="${
-					this.#_password
-				}"\nCOOKIE="${this.account.parseCookie()}"\nUUID="${this.#_uuid}"\nDEVICE_ID="${this.#_deviceId}"`;
-
-				fs.writeFileSync('./.instagram.env', loginInfo);
+				set('USERNAME', this.#_username, { encrypt: true, path: '.instagram.env' });
+				set('PASSWORD', this.#_password, { encrypt: true, path: '.instagram.env' });
+				set('COOKIE', this.account.parseCookie(), { encrypt: true, path: '.instagram.env' });
+				set('UUID', this.#_uuid, { encrypt: true, path: '.instagram.env' });
+				set('DEVICE_ID', this.#_deviceId, { encrypt: true, path: '.instagram.env' });
 			}
 		};
 

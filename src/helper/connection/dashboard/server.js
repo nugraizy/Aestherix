@@ -1541,6 +1541,10 @@ export const server = (isReconnect) => {
 		res.end(buffer);
 	});
 
+	app.get('/', (req, res) => {
+		res.redirect('/dashboard');
+	});
+
 	app.get('/dashboard/login', (req, res) => {
 		if (isDashboardAuthenticated(req)) {
 			return res.redirect('/dashboard');
@@ -2204,7 +2208,7 @@ export const server = (isReconnect) => {
 		}
 	);
 
-	httpServer.listen(PORT, () => {
+	httpServer.listen(PORT, '0.0.0.0', () => {
 		loggers.info(color('Server Mesh Gradient', 'white'), color('started on port', '#E4C1F9'), color(PORT, 'white'));
 		loggers.info(
 			color('Dashboard', 'white'),
