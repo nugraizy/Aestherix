@@ -1986,7 +1986,7 @@ select {
 	padding: 0 4px;
 	font-size: 0.9rem;
 	font-weight: 700;
-	color: rgba(244, 248, 238, 0.84);
+	color: var(--line);
 	line-height: 1;
 	user-select: none;
 	cursor: pointer;
@@ -1994,7 +1994,7 @@ select {
 
 .audit-action-separator:hover,
 .audit-role-separator:hover {
-	color: var(--ink);
+	color: var(--line);
 }
 
 .audit-action-extra,
@@ -2602,7 +2602,7 @@ select {
 }
 
 .folder-divider {
-	color: rgba(244, 248, 238, 0.78);
+	color: var(--line);
 	font-weight: 700;
 	font-size: 0.82rem;
 	user-select: none;
