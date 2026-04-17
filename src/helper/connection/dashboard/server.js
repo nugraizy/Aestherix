@@ -1542,7 +1542,7 @@ export const server = (isReconnect) => {
 	});
 
 	app.get('/', (req, res) => {
-		res.redirect('/dashboard');
+		res.redirect('/dashboard/login');
 	});
 
 	app.get('/dashboard/login', (req, res) => {
