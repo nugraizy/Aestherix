@@ -53,4 +53,5 @@ export interface GlobalConfig {
 	anonymousMessages: Cache;
 	isInstagramInitiated: boolean;
 	instagram: import('../../utils/instagram/instagram.js').InstagramApi | null;
+	expressInstances: Cache;
 }

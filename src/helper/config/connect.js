@@ -63,7 +63,8 @@ const globalConfig = {
 	pinterestImages: new Cache({ limit: 900 }),
 	anonymousMessages: new Cache(),
 	isInstagramInitiated: false,
-	instagram: null
+	instagram: null,
+	expressInstances: new Cache()
 };
 
 global.log = console.log;

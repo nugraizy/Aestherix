@@ -4,12 +4,16 @@ import fs from 'fs-extra';
 import readline from 'readline';
 
 import { startingConnection } from '../../../helper/connection/utils/check-flag.js';
-import { color, loggers } from '../../../utils/modules/index.js';
+import { color, delay, loggers } from '../../../utils/modules/index.js';
 import configuration from '../../config/connect.js';
 import { Cache } from '../../modules/cache.js';
 import { clearDBConnection } from '../socket/reset-session.js';
 import { loadCommands } from '../utils/commands.js';
 import { connectMqtt } from '../utils/mqtt.js';
+
+const retryCount = new Cache();
+
+retryCount.set('count', 0);
 
 let rl = null;
 let started = startingConnection;
@@ -60,25 +64,51 @@ export const handleConnectionUpdate = async (
 			} else {
 				if (reason === DisconnectReason.restartRequired) {
 					loggers.warning(color('Restart required', 'white'), color('Restarting your Socket...', '#E4C1F9'));
-				} else if (reason === DisconnectReason.timedOut) {
-					loggers.warning(color('Timed out', 'white'), color('Quick reconnecting...', '#E4C1F9'));
+				}
+
+				const reconnectableReasons = [
+					{ code: DisconnectReason.timedOut, label: 'Timed out' },
+					{ code: DisconnectReason.connectionClosed, label: 'Connection closed' },
+					{ code: DisconnectReason.connectionReplaced, label: 'Connection replaced' },
+					{ code: DisconnectReason.connectionLost, label: 'Connection lost' },
+					{ code: undefined, label: 'Unknown reason' }
+				];
+				const foundReason =
+					reconnectableReasons.find((r) => r.code === reason) || reconnectableReasons[reconnectableReasons.length - 1];
+
+				if (reconnectableReasons.some((r) => r.code === reason)) {
+					const count = retryCount.get('count') || 0;
+					const maxRetries = 5;
+					const interval = 5000;
+
+					if (count >= maxRetries) {
+						loggers.error(
+							color(`${foundReason.label ? `[${foundReason.label}] ` : ''}Max retry attempts reached`, 'white'),
+							color('Please try again later...', '#E4C1F9')
+						);
+						await shutdownServers();
+					}
+
+					loggers.warning(
+						color(
+							`${foundReason.label ? `[${foundReason.label}] ` : ''}Reconnect attempt ${count} failed. Retrying in ${interval / 1000} seconds...`,
+							'white'
+						)
+					);
+
+					await delay(interval);
+
+					retryCount.set('count', count + 1);
+
 					newStart();
-				} else if (reason === DisconnectReason.connectionClosed) {
-					loggers.warning(color('Connection closed', 'white'), color('Quick reconnecting...', '#E4C1F9'));
-					newStart();
-				} else if (reason === DisconnectReason.connectionReplaced) {
-					loggers.warning(color('Connection replaced', 'white'), color('Quick reconnecting...', '#E4C1F9'));
-					newStart();
-				} else if (reason === DisconnectReason.connectionLost) {
-					loggers.warning(color('Connection lost', 'white'), color('Quick reconnecting...', '#E4C1F9'));
-					newStart();
+					connectMqtt(clientMqttListen, true);
+					await (await import('../../../index.js')).start();
 				} else {
 					loggers.warning(color('Unknown reason', 'white'), color('Quick reconnecting...', '#E4C1F9'));
 					newStart();
+					connectMqtt(clientMqttListen, true);
+					await (await import('../../../index.js')).start();
 				}
-
-				connectMqtt(clientMqttListen, true);
-				await (await import('../../../index.js')).start(true);
 			}
 		} else if (connection === 'open') {
 			if (!isClosed) {
@@ -143,6 +173,8 @@ export const handleConnectionUpdate = async (
 					color(timeToConnect < data.best_time ? 'is the best time' : 'is not the best time', 'white'),
 					color('(', '#E4C1F9') + color(`${data.best_time}s`, '#fff568ff') + color(')', '#E4C1F9')
 				);
+
+				retryCount.set('counter', 0);
 
 				if (timeToConnect < data.best_time) {
 					const bestTime = data.best_time;
@@ -226,7 +258,7 @@ export const handleConnectionUpdate = async (
 	} catch (error) {
 		console.log(error);
 		connectMqtt(clientMqttListen, true);
-		await (await import('../../../index.js')).start(true);
+		await (await import('../../../index.js')).start();
 	}
 };
 
@@ -521,3 +553,27 @@ export const emitGroupSettings = {
 		isJidGroup(from) && client.instance.ev.emit('groups', [object]);
 	}
 };
+
+async function shutdownServers() {
+	const servers = [...configuration.expressInstances.entries()];
+
+	await Promise.all(
+		servers.map(([name, server]) => {
+			loggers.warning(color('Shutting down', 'white'), color(name, '#E4C1F9'), color('server...', 'white'));
+
+			return new Promise((resolve, reject) => {
+				server.close((err) => {
+					if (err) {
+						return reject(err);
+					}
+
+					configuration.expressInstances.delete(name);
+					resolve();
+				});
+			});
+		})
+	);
+}
+
+process.on('SIGINT', shutdownServers);
+process.on('SIGTERM', shutdownServers);

@@ -1,11 +1,12 @@
-import express from 'express';
 import crypto from 'crypto';
+import express from 'express';
 
+import { color, loggers } from '../../../utils/modules/index.js';
+import configuration from '../../config/connect.js';
 import { getFilesChanged, parseCommit } from './utils.js';
-import { loggers, color } from '../../../utils/modules/index.js';
 
-export const githubWebhook = (isReconnect) => {
-	if (isReconnect) {
+export const githubWebhook = () => {
+	if (configuration.expressInstances.has('github-webhook')) {
 		return;
 	}
 
@@ -49,7 +50,9 @@ export const githubWebhook = (isReconnect) => {
 		}
 	});
 
-	app.listen(8080, () => {
+	const appToStore = app.listen(8080, () => {
 		loggers.info(color('GitHub Webhook', 'white'), color('started on port', '#E4C1F9'), color('8080', 'white'));
 	});
+
+	configuration.expressInstances.set('github-webhook', appToStore);
 };

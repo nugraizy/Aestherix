@@ -122,7 +122,8 @@ const startAutoProfilePictureChangeService = async (client, state, config) => {
 			if (
 				error.message.includes('not-acceptable') ||
 				error.message.includes('internal-server-error') ||
-				error.message.includes('bad-request')
+				error.message.includes('bad-request') ||
+				error.message.includes('fetch failed')
 			) {
 				return;
 			}
@@ -178,10 +179,7 @@ clientMqttListen.on('connect', () => {
  */
 const store = makeInMemoryStore({ logger: P().child({ level: 'fatal', stream: 'store' }) });
 
-/**
- * @param {boolean} isReconnect
- */
-export const start = async (isReconnect) => {
+export const start = async () => {
 	try {
 		if (OPTIONS.help) {
 			console.log(cli.help);
@@ -207,9 +205,8 @@ export const start = async (isReconnect) => {
 		);
 
 		Client.ev.on('connected', () => {
-			isReconnect = isReconnect && !state.creds.me?.id;
-			githubWebhook(isReconnect);
-			server(isReconnect);
+			githubWebhook();
+			server();
 			Client.ev.on('groups', handleGroupSettingsUpdate);
 			Client.ev.on('groups.update', (update) => Client.ev.emit('groups', update));
 			Client.ev.on('group-participants.update', async (update) => await handleParticipantsUpdate(update));

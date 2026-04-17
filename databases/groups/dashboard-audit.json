@@ -1,5 +1,5 @@
 {
-  "lastId": 106,
+  "lastId": 107,
   "logs": [
     {
       "id": 1,
@@ -1366,6 +1366,18 @@
       "target": "dashboard",
       "status": "ok",
       "message": "Session logged out.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 107,
+      "timestamp": 1776447032118,
+      "action": "auth.viewer_login",
+      "actorRole": "viewer",
+      "actor": "Viewer",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Viewer session started.",
       "before": null,
       "after": null
     }

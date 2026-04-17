@@ -10,6 +10,7 @@ export default [
 				log: true,
 				store: true,
 				Bun: true,
+				__botName: true,
 				...globals.node,
 				...globals.browser
 			}

@@ -1201,8 +1201,8 @@ async function webmToMp4Buffer(inputBuffer) {
 	});
 }
 
-export const server = (isReconnect) => {
-	if (isReconnect) {
+export const server = () => {
+	if (configuration.expressInstances.has('dashboard')) {
 		return;
 	}
 
@@ -2208,7 +2208,7 @@ export const server = (isReconnect) => {
 		}
 	);
 
-	httpServer.listen(PORT, '0.0.0.0', () => {
+	const appToStore = httpServer.listen(PORT, '0.0.0.0', () => {
 		loggers.info(color('Server Mesh Gradient', 'white'), color('started on port', '#E4C1F9'), color(PORT, 'white'));
 		loggers.info(
 			color('Dashboard', 'white'),
@@ -2216,4 +2216,6 @@ export const server = (isReconnect) => {
 			color(`http://localhost:${PORT}/dashboard`, 'white')
 		);
 	});
+
+	configuration.expressInstances.set('dashboard', appToStore);
 };
