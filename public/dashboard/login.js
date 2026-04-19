@@ -373,6 +373,36 @@ const wait = (ms) =>
 		setTimeout(resolve, ms);
 	});
 
+const prefetchDashboardAssets = () => {
+	if (document.getElementById('dashboard-prefetch')) {
+		return;
+	}
+
+	const marker = document.createElement('span');
+
+	marker.id = 'dashboard-prefetch';
+	marker.hidden = true;
+	(document.head || document.documentElement).appendChild(marker);
+
+	const hints = [
+		{ href: '/dashboard', as: 'document' },
+		{ href: '/dashboard/styles.css', as: 'style' },
+		{ href: '/dashboard/app.js', as: 'script' },
+		{ href: '/socket.io/socket.io.js', as: 'script' }
+	];
+
+	for (const hint of hints) {
+		const link = document.createElement('link');
+
+		link.rel = 'prefetch';
+		link.href = hint.href;
+		link.as = hint.as;
+		marker.appendChild(link);
+	}
+
+	fetch('/dashboard', { credentials: 'include' }).catch(() => {});
+};
+
 const runLoginTransition = async (message) => {
 	state.redirecting = true;
 	setMessage(message);
@@ -442,6 +472,7 @@ const finalizeOwnerLogin = async () => {
 		})
 	});
 
+	prefetchDashboardAssets();
 	await runLoginTransition('Login successful. Initializing secure session...');
 	window.location.href = '/dashboard';
 };
@@ -544,6 +575,7 @@ const loginAsViewer = async () => {
 			body: JSON.stringify({ name: 'Viewer' })
 		});
 
+		prefetchDashboardAssets();
 		await runLoginTransition('Viewer login successful. Preparing dashboard...');
 		window.location.href = '/dashboard';
 	} catch (error) {

@@ -16,6 +16,16 @@ export const sanitizeMarkdownUrl = (rawUrl) => {
 	return '';
 };
 
+const applyInlineFormatting = (value) => {
+	let formatted = escapeHtml(value);
+
+	formatted = formatted.replace(/~~([^~]+)~~/g, '<del>$1</del>');
+	formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+	formatted = formatted.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+	return formatted;
+};
+
 export const formatInlineMarkdown = (value) => {
 	const source = String(value ?? '');
 	const tokenRegex = /\[`([^`]+)`\]\(([^)\s]+)\)|\[([^\]]+)\]\(([^)\s]+)\)|`([^`]+)`/g;
@@ -27,7 +37,7 @@ export const formatInlineMarkdown = (value) => {
 		const matchIndex = match.index;
 		const [fullMatch, codeLinkLabelRaw, codeLinkUrlRaw, plainLinkLabelRaw, plainLinkUrlRaw, inlineCodeRaw] = match;
 
-		markup += escapeHtml(source.slice(cursor, matchIndex));
+		markup += applyInlineFormatting(source.slice(cursor, matchIndex));
 
 		if (inlineCodeRaw !== undefined) {
 			markup += `<code>${escapeHtml(inlineCodeRaw)}</code>`;
@@ -51,24 +61,44 @@ export const formatInlineMarkdown = (value) => {
 		match = tokenRegex.exec(source);
 	}
 
-	markup += escapeHtml(source.slice(cursor));
+	markup += applyInlineFormatting(source.slice(cursor));
 
 	return markup;
 };
 
 export const renderChangelogMarkdown = (raw) => {
 	const lines = String(raw ?? '').split(/\r?\n/);
-	const htmlParts = [];
-	let isInList = false;
+	const releases = [];
+	let currentRelease = null;
+	let currentSection = null;
 	let isInCodeBlock = false;
+	let codeBuffer = [];
+	let codeLanguage = '';
 
-	const closeList = () => {
-		if (!isInList) {
-			return;
+	const ensureRelease = () => {
+		if (!currentRelease) {
+			currentRelease = {
+				title: 'Unreleased',
+				sections: new Map(),
+				sectionOrder: []
+			};
+			releases.push(currentRelease);
 		}
+	};
 
-		htmlParts.push('</ul>');
-		isInList = false;
+	const ensureSection = (label) => {
+		ensureRelease();
+		const key = label || 'Notes';
+		if (!currentRelease.sections.has(key)) {
+			currentRelease.sections.set(key, []);
+			currentRelease.sectionOrder.push(key);
+		}
+		currentSection = key;
+	};
+
+	const pushItem = (item) => {
+		ensureSection(currentSection || 'Notes');
+		currentRelease.sections.get(currentSection).push(item);
 	};
 
 	const closeCodeBlock = () => {
@@ -76,81 +106,128 @@ export const renderChangelogMarkdown = (raw) => {
 			return;
 		}
 
-		htmlParts.push('</code></pre>');
+		const codeValue = codeBuffer.join('\n');
+		pushItem({
+			type: 'code',
+			value: escapeHtml(codeValue),
+			language: codeLanguage
+		});
 		isInCodeBlock = false;
+		codeBuffer = [];
+		codeLanguage = '';
 	};
 
 	for (const line of lines) {
 		const trimmed = line.trim();
 
 		if (trimmed.startsWith('```')) {
-			closeList();
-
 			if (isInCodeBlock) {
 				closeCodeBlock();
 			} else {
-				const language = trimmed.slice(3).trim();
-				const languageAttr = language ? ` data-language="${escapeHtml(language)}"` : '';
-
-				htmlParts.push(`<pre class="changelog-code"><code${languageAttr}>`);
+				codeLanguage = trimmed.slice(3).trim();
 				isInCodeBlock = true;
+				codeBuffer = [];
 			}
-
 			continue;
 		}
 
 		if (isInCodeBlock) {
-			htmlParts.push(`${escapeHtml(line)}\n`);
+			codeBuffer.push(line);
 			continue;
 		}
 
 		if (!trimmed) {
-			closeList();
 			continue;
 		}
 
 		if (trimmed === '---') {
-			closeList();
-			htmlParts.push('<hr class="changelog-separator" />');
 			continue;
 		}
 
 		if (trimmed.startsWith('# ')) {
-			closeList();
-
 			const headingText = trimmed.slice(2).trim();
 
 			if (headingText.toLowerCase() !== 'changelog') {
-				htmlParts.push(`<h3 class="changelog-release">${formatInlineMarkdown(headingText)}</h3>`);
+				currentRelease = {
+					title: headingText,
+					sections: new Map(),
+					sectionOrder: []
+				};
+				releases.push(currentRelease);
+				currentSection = null;
 			}
 
 			continue;
 		}
 
 		if (trimmed.startsWith('## ')) {
-			closeList();
-			htmlParts.push(`<p class="changelog-section">${formatInlineMarkdown(trimmed.slice(3).trim())}</p>`);
+			ensureSection(trimmed.slice(3).trim());
 			continue;
 		}
 
 		if (trimmed.startsWith('- ')) {
-			if (!isInList) {
-				htmlParts.push('<ul class="changelog-list">');
-				isInList = true;
-			}
-
-			htmlParts.push(`<li>${formatInlineMarkdown(trimmed.slice(2).trim())}</li>`);
+			pushItem({ type: 'text', value: formatInlineMarkdown(trimmed.slice(2).trim()) });
 			continue;
 		}
 
-		closeList();
-		htmlParts.push(`<p class="changelog-note">${formatInlineMarkdown(trimmed)}</p>`);
+		pushItem({ type: 'text', value: formatInlineMarkdown(trimmed) });
 	}
 
 	closeCodeBlock();
-	closeList();
 
-	return htmlParts.join('');
+	if (!releases.length) {
+		return '';
+	}
+
+	const buildSectionLabelClass = (label) => {
+		return String(label || 'notes')
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, '-')
+			.replace(/(^-|-$)/g, '');
+	};
+
+	const cardsMarkup = releases
+		.map((release) => {
+			const titleMarkup = formatInlineMarkdown(release.title);
+			const sectionsMarkup = release.sectionOrder
+				.map((label) => {
+					const items = release.sections.get(label) || [];
+					const labelClass = buildSectionLabelClass(label);
+					const itemsMarkup = items
+						.map((item) => {
+							if (item.type === 'code') {
+								const languageAttr = item.language ? ` data-language="${escapeHtml(item.language)}"` : '';
+								return `<li class="is-code"><pre class="changelog-code"><code${languageAttr}>${item.value}</code></pre></li>`;
+							}
+							return `<li>${item.value}</li>`;
+						})
+						.join('');
+
+					return `
+						<section class="changelog-section-card">
+							<div class="changelog-section-head">
+								<span class="changelog-section-label label-${labelClass}">${formatInlineMarkdown(label)}</span>
+							</div>
+							<ul class="changelog-section-list">${itemsMarkup}</ul>
+						</section>
+					`;
+				})
+				.join('');
+
+			return `
+				<article class="changelog-card-item">
+					<header class="changelog-card-head">
+						<span class="changelog-version">${titleMarkup}</span>
+					</header>
+					<div class="changelog-card-body">
+						${sectionsMarkup}
+					</div>
+				</article>
+			`;
+		})
+		.join('');
+
+	return `<div class="changelog-cards">${cardsMarkup}</div>`;
 };
 
 export const fuzzyIncludes = (haystack, needle) => {

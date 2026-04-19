@@ -8,6 +8,7 @@ export const state = {
 	commands: [],
 	flags: [],
 	users: [],
+	profilePictures: [],
 	metricHistory: {
 		sysCpu: [],
 		procCpu: [],
@@ -31,10 +32,12 @@ export const state = {
 	searchByFolder: {
 		commands: '',
 		flags: '',
-		users: ''
+		users: '',
+		profilePictures: ''
 	},
 	searchFilters: {
 		commandsState: 'all',
+		commandsSort: 'name-asc',
 		flagsState: 'all',
 		usersRole: 'all',
 		usersStatus: 'all'
@@ -44,7 +47,8 @@ export const state = {
 		audit: { kind: 'idle', message: '' },
 		commands: { kind: 'idle', message: '' },
 		flags: { kind: 'idle', message: '' },
-		users: { kind: 'idle', message: '' }
+		users: { kind: 'idle', message: '' },
+		profilePictures: { kind: 'idle', message: '' }
 	},
 	settings: {
 		...DEFAULT_DASHBOARD_SETTINGS

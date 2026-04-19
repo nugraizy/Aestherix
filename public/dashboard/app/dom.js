@@ -7,6 +7,7 @@ export const els = {
 	projectVersionValue: document.getElementById('project-version-value'),
 	openChangelog: document.getElementById('open-changelog'),
 	openContributors: document.getElementById('open-contributors'),
+	openAlbums: document.getElementById('open-albums'),
 	changelogDialog: document.getElementById('changelog-dialog'),
 	changelogClose: document.getElementById('changelog-close'),
 	changelogMeta: document.getElementById('changelog-meta'),
@@ -36,6 +37,7 @@ export const els = {
 	usersKpiBlocked: document.getElementById('users-kpi-blocked'),
 	usersKpiLowLimit: document.getElementById('users-kpi-low-limit'),
 	logsPanel: document.querySelector('.logs-panel'),
+	auditPanel: document.querySelector('.audit-panel'),
 	loggerConsole: document.getElementById('logger-console'),
 	clearConsole: document.getElementById('clear-console'),
 	logsState: document.getElementById('logs-state'),
@@ -71,6 +73,7 @@ export const els = {
 	settingsSave: document.getElementById('settings-save'),
 	settingsReset: document.getElementById('settings-reset'),
 	controlsCommandFilter: document.getElementById('controls-command-filter'),
+	controlsCommandSort: document.getElementById('controls-command-sort'),
 	controlsFlagFilter: document.getElementById('controls-flag-filter'),
 	controlsUserRoleFilter: document.getElementById('controls-user-role-filter'),
 	controlsUserStatusFilter: document.getElementById('controls-user-status-filter'),
@@ -90,5 +93,10 @@ export const els = {
 	usersBulkLimitValue: document.getElementById('users-bulk-limit-value'),
 	commandsGroups: document.getElementById('commands-groups'),
 	flagsGroups: document.getElementById('flags-groups'),
-	usersGroups: document.getElementById('users-groups')
+	usersGroups: document.getElementById('users-groups'),
+	profilePicturesView: document.getElementById('profile-pictures-view'),
+	profilePicturesOpenAlbums: document.getElementById('profile-pictures-open-albums'),
+	profilePicturesState: document.getElementById('profile-pictures-state'),
+	profilePicturesWrap: document.querySelector('#profile-pictures-view .commands-wrap'),
+	profilePicturesGroups: document.getElementById('profile-pictures-groups')
 };

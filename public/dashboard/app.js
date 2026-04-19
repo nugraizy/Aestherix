@@ -35,7 +35,8 @@ const pollingTimers = {
 	audit: null,
 	commands: null,
 	flags: null,
-	users: null
+	users: null,
+	profilePictures: null
 };
 let floatingTooltipHost = null;
 let floatingTooltipTarget = null;
@@ -52,7 +53,9 @@ const CONTRIBUTORS_AVATAR_CACHE_NAME = 'aestherix.dashboard.contributor-avatars.
 const contributorAvatarObjectUrlCache = new Map();
 const LOGOUT_MIN_LOADING_MS = 3500;
 let logoutInProgress = false;
+let albumsNavigationInProgress = false;
 const ZEN_CURSOR_LOGOUT_LOCK_ATTR = 'data-logout-lock';
+const ZEN_CURSOR_POINTER_CACHE_KEY = 'aestherix.dashboard.cursor.pointer';
 
 const getZenCursorElement = () => document.getElementById('zen-cursor');
 
@@ -368,6 +371,7 @@ const closeCustomFilter = (filterElement) => {
 const closeAllCustomFilters = (except = null) => {
 	const filters = [
 		els.controlsCommandFilter,
+		els.controlsCommandSort,
 		els.controlsFlagFilter,
 		els.controlsUserRoleFilter,
 		els.controlsUserStatusFilter,
@@ -460,6 +464,10 @@ const getSectionStateElement = (section) => {
 		return els.usersState;
 	}
 
+	if (section === 'profilePictures') {
+		return els.profilePicturesState;
+	}
+
 	return null;
 };
 
@@ -546,6 +554,11 @@ const setSectionContentVisibility = (section, visible) => {
 
 	if (section === 'flags') {
 		els.flagsWrap?.classList.toggle('hidden', !isVisible);
+		return;
+	}
+
+	if (section === 'profilePictures') {
+		els.profilePicturesWrap?.classList.toggle('hidden', !isVisible);
 	}
 };
 
@@ -584,6 +597,10 @@ const renderSectionState = (section) => {
 		users: {
 			title: 'Preparing User Controls',
 			message: 'Loading users, limits, and moderation status for this panel.'
+		},
+		profilePictures: {
+			title: 'Preparing Profile Picture Album',
+			message: 'Loading Pinterest profile picture history and building album cards.'
 		}
 	};
 	const loadingCopy = loadingCopyBySection[section] || {
@@ -807,6 +824,84 @@ const applyAuditFiltersFromUrl = () => {
 
 const redirectToLogin = () => {
 	window.location.href = '/dashboard/login';
+};
+
+const prefetchRoute = (href) => {
+	if (!href || typeof document === 'undefined') {
+		return;
+	}
+
+	if (document.querySelector(`link[data-prefetch-route="${href}"]`)) {
+		return;
+	}
+
+	const link = document.createElement('link');
+	link.rel = 'prefetch';
+	link.href = href;
+	link.as = 'document';
+	link.setAttribute('data-prefetch-route', href);
+	document.head.appendChild(link);
+};
+
+const persistZenPointerPosition = (x, y) => {
+	if (!Number.isFinite(x) || !Number.isFinite(y) || typeof window === 'undefined') {
+		return;
+	}
+
+	try {
+		window.sessionStorage.setItem(
+			ZEN_CURSOR_POINTER_CACHE_KEY,
+			JSON.stringify({
+				x: Math.round(x),
+				y: Math.round(y)
+			})
+		);
+	} catch {
+		// Ignore storage write errors.
+	}
+};
+
+const persistZenPointerFromEvent = (event) => {
+	if (!event || typeof event.clientX !== 'number' || typeof event.clientY !== 'number') {
+		return;
+	}
+
+	persistZenPointerPosition(event.clientX, event.clientY);
+};
+
+const readCachedZenPointerPosition = () => {
+	if (typeof window === 'undefined') {
+		return null;
+	}
+
+	try {
+		const raw = window.sessionStorage.getItem(ZEN_CURSOR_POINTER_CACHE_KEY);
+
+		if (!raw) {
+			return null;
+		}
+
+		const parsed = JSON.parse(raw);
+		const x = Number(parsed?.x);
+		const y = Number(parsed?.y);
+
+		if (!Number.isFinite(x) || !Number.isFinite(y)) {
+			return null;
+		}
+
+		return { x, y };
+	} catch {
+		return null;
+	}
+};
+
+const navigateToAlbums = () => {
+	if (albumsNavigationInProgress) {
+		return;
+	}
+
+	albumsNavigationInProgress = true;
+	window.location.assign('/albums');
 };
 
 const ensureToastHost = () => {
@@ -1926,14 +2021,17 @@ const setOnlineState = (online) => {
 
 const setupZenCursor = () => {
 	if (typeof window === 'undefined' || !document?.body) {
+		document?.documentElement?.classList.remove('zen-cursor-preload');
 		return false;
 	}
 
 	if (!window.matchMedia('(pointer: fine)').matches) {
+		document.documentElement.classList.remove('zen-cursor-preload');
 		return false;
 	}
 
 	if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+		document.documentElement.classList.remove('zen-cursor-preload');
 		return false;
 	}
 
@@ -1947,6 +2045,7 @@ const setupZenCursor = () => {
 	cursorText.className = 'zen-cursor-text';
 	document.body.appendChild(cursor);
 	document.body.appendChild(cursorText);
+	document.documentElement.classList.remove('zen-cursor-preload');
 	document.documentElement.classList.add('zen-cursor-enabled');
 	document.body.classList.add('zen-cursor-enabled');
 	document.body.style.cursor = 'none';
@@ -1984,6 +2083,8 @@ const setupZenCursor = () => {
 		} else {
 			cursorText.style.top = `${mouseY + tooltipGap}px`;
 		}
+
+		persistZenPointerPosition(mouseX, mouseY);
 	};
 
 	const updateTitle = (titleText) => {
@@ -2096,6 +2197,15 @@ const setupZenCursor = () => {
 	document.addEventListener('visibilitychange', handleVisibilityChange);
 	document.addEventListener('mouseout', handleDocumentMouseOut);
 	document.addEventListener('mouseenter', handleDocumentMouseEnter);
+
+	const cachedPointer = readCachedZenPointerPosition();
+
+	if (cachedPointer) {
+		moveCursor({
+			clientX: cachedPointer.x,
+			clientY: cachedPointer.y
+		});
+	}
 
 	const attachListeners = () => {
 		const targets = document.querySelectorAll('a, button, [data-title], [data-tooltip]');
@@ -2355,12 +2465,11 @@ const renderUsersKpi = () => {
 
 const renderLogs = () => {
 	if (!state.canEdit) {
-		setSectionContentVisibility('logs', true);
-		setSectionState('logs', 'redacted', 'Console logs are hidden for regular users.');
-		renderSectionState('logs');
-		els.loggerConsole.textContent = '[REDACTED] Console logs are hidden for regular users.';
+		els.logsPanel?.classList.add('hidden');
 		return;
 	}
+
+	els.logsPanel?.classList.remove('hidden');
 
 	if (state.sectionStates.logs.kind === 'loading' || state.sectionStates.logs.kind === 'error') {
 		setSectionContentVisibility('logs', false);
@@ -2396,12 +2505,11 @@ const renderAudit = () => {
 	}
 
 	if (!state.canEdit) {
-		setSectionContentVisibility('audit', true);
-		setSectionState('audit', 'idle');
-		renderSectionState('audit');
-		els.auditList.innerHTML = '<li class="empty-commands">[REDACTED] Audit timeline is owner-only.</li>';
+		els.auditPanel?.classList.add('hidden');
 		return;
 	}
+
+	els.auditPanel?.classList.remove('hidden');
 
 	if (state.sectionStates.audit.kind === 'loading' || state.sectionStates.audit.kind === 'error') {
 		setSectionContentVisibility('audit', false);
@@ -2465,6 +2573,7 @@ const commandCardMarkup = (command, keyword = '') => {
 		: `Enable command ${escapeHtml(command.name)}`;
 	const highlightedName = highlightMatch(command.name, keyword);
 	const highlightedAliases = highlightMatch(aliases, keyword);
+	const usageCount = Number(command.usageCount || 0).toLocaleString();
 
 	const actionMarkup = state.canEdit
 		? `<button class="toggle-btn ${buttonAction}" data-command="${command.name}" data-enabled="${String(!command.enabled)}" data-tooltip="${commandTitle}">${buttonLabel}</button>`
@@ -2480,6 +2589,7 @@ const commandCardMarkup = (command, keyword = '') => {
 			<div class="command-meta">
 				<span>Cooldown: ${command.cooldown}s</span>
 				<span>Limit: ${command.limit}</span>
+				<span>Used: ${usageCount}</span>
 			</div>
 			<div class="command-actions">
 				${actionMarkup}
@@ -2554,6 +2664,15 @@ const setActiveFolder = (folderName) => {
 		}
 	}
 
+	if (els.controlsCommandSort) {
+		els.controlsCommandSort.classList.toggle('hidden', state.activeFolder !== 'commands');
+		setCustomFilterValue(els.controlsCommandSort, state.searchFilters.commandsSort);
+
+		if (state.activeFolder !== 'commands') {
+			closeCustomFilter(els.controlsCommandSort);
+		}
+	}
+
 	if (els.controlsFlagFilter) {
 		els.controlsFlagFilter.classList.toggle('hidden', state.activeFolder !== 'flags');
 		setCustomFilterValue(els.controlsFlagFilter, state.searchFilters.flagsState);
@@ -2584,10 +2703,11 @@ const setActiveFolder = (folderName) => {
 	localStorage.setItem(ACTIVE_FOLDER_STORAGE_KEY, state.activeFolder);
 };
 
-const categoryGroupMarkup = (category, commands) => {
+const categoryGroupMarkup = (category, commands, keyword = '') => {
 	const enabled = commands.filter((command) => command.enabled).length;
 	const disabled = commands.length - enabled;
 	const cards = commands.map((command) => commandCardMarkup(command, state.searchByFolder.commands || '')).join('');
+	const highlightedCategory = keyword ? highlightMatch(category, keyword) : escapeHtml(category);
 	const categoryKey = getCategoryKey(category);
 	const collapsed = state.collapsedCategories.has(categoryKey);
 	const collapseClass = collapsed ? 'collapsed' : '';
@@ -2597,7 +2717,7 @@ const categoryGroupMarkup = (category, commands) => {
 		<section class="category-group ${collapseClass}">
 			<header class="category-head">
 				<button class="category-toggle" type="button" data-category-toggle="${categoryKey}" aria-expanded="${ariaExpanded}">
-					<strong>${category}</strong>
+					<strong>${highlightedCategory}</strong>
 					<span>${commands.length} commands</span>
 					<span>${enabled} enabled</span>
 					<span>${disabled} disabled</span>
@@ -2626,7 +2746,7 @@ const groupCommandsByCategory = (commands) => {
 	return Object.entries(grouped)
 		.sort(([a], [b]) => a.localeCompare(b))
 		.map(([category, categoryCommands]) => {
-			return [category, categoryCommands.sort((a, b) => a.name.localeCompare(b.name))];
+			return [category, categoryCommands];
 		});
 };
 
@@ -2655,10 +2775,42 @@ const renderCommands = () => {
 			return true;
 		}
 
-		return fuzzyIncludes([command.name, command.category, command.aliases.join(',')].join(' '), keyword);
+		const name = String(command.name || '').toLowerCase();
+		const category = String(command.category || '').toLowerCase();
+		const aliases = Array.isArray(command.aliases) ? command.aliases.join(',').toLowerCase() : '';
+
+		return name.includes(keyword) || category.includes(keyword) || aliases.includes(keyword);
 	});
 
-	if (!filtered.length) {
+	const sorted = filtered.slice();
+	const sortMode = state.searchFilters.commandsSort || 'name-asc';
+	const sortByName = (a, b) => a.name.localeCompare(b.name);
+	const sortByNumber = (value) => Number(value) || 0;
+
+	sorted.sort((a, b) => {
+		switch (sortMode) {
+			case 'name-desc':
+				return sortByName(b, a);
+			case 'usage-asc':
+				return sortByNumber(a.usageCount) - sortByNumber(b.usageCount) || sortByName(a, b);
+			case 'usage-desc':
+				return sortByNumber(b.usageCount) - sortByNumber(a.usageCount) || sortByName(a, b);
+			case 'limit-asc':
+				return sortByNumber(a.limit) - sortByNumber(b.limit) || sortByName(a, b);
+			case 'limit-desc':
+				return sortByNumber(b.limit) - sortByNumber(a.limit) || sortByName(a, b);
+			case 'cooldown-asc':
+				return sortByNumber(a.cooldown) - sortByNumber(b.cooldown) || sortByName(a, b);
+			case 'cooldown-desc':
+				return sortByNumber(b.cooldown) - sortByNumber(a.cooldown) || sortByName(a, b);
+			case 'name-asc':
+			default:
+				return sortByName(a, b);
+		}
+	});
+
+	if (!sorted.length) {
+		setSectionContentVisibility('commands', false);
 		setSectionState('commands', 'empty', keyword ? 'No command matched your search.' : 'No commands available right now.');
 		renderSectionState('commands');
 		els.commandsGroups.innerHTML = '';
@@ -2668,9 +2820,11 @@ const renderCommands = () => {
 	setSectionState('commands', 'idle');
 	renderSectionState('commands');
 
-	const grouped = groupCommandsByCategory(filtered);
+	const grouped = groupCommandsByCategory(sorted);
 
-	els.commandsGroups.innerHTML = grouped.map(([category, commands]) => categoryGroupMarkup(category, commands)).join('');
+	els.commandsGroups.innerHTML = grouped
+		.map(([category, commands]) => categoryGroupMarkup(category, commands, keyword))
+		.join('');
 };
 
 const flagCardMarkup = (flag, keyword = '') => {
@@ -3078,6 +3232,76 @@ const renderUsers = () => {
 	updateUsersBulkToolbar();
 };
 
+const getFilteredProfilePictures = () => {
+	const keyword = (state.searchByFolder.profilePictures || '').trim().toLowerCase();
+
+	if (!keyword) {
+		return state.profilePictures;
+	}
+
+	return state.profilePictures.filter((picture) => {
+		return fuzzyIncludes([picture.timestamp, picture.url].join(' '), keyword);
+	});
+};
+
+const profilePictureCardMarkup = (picture, keyword = '') => {
+	const safeUrl = String(picture?.url || '').trim();
+	const highlightedTimestamp = highlightMatch(String(picture?.timestamp || ''), keyword);
+	const highlightedUrl = highlightMatch(safeUrl, keyword);
+
+	return `
+		<article class="command-card enabled profile-picture-card">
+			<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="profile-picture-preview-link">
+				<img src="${safeUrl}" alt="Profile picture from ${escapeHtml(String(picture?.timestamp || 'unknown time'))}" class="profile-picture-preview" loading="lazy" referrerpolicy="no-referrer" />
+			</a>
+			<div class="command-meta profile-picture-meta">
+				<span class="profile-picture-timestamp">${highlightedTimestamp || 'Unknown timestamp'}</span>
+			</div>
+			<div class="profile-picture-url">${highlightedUrl}</div>
+			<div class="command-actions">
+				<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="toggle-btn">Open Image</a>
+			</div>
+		</article>
+	`;
+};
+
+const renderProfilePictures = () => {
+	const groupsHost = els.profilePicturesGroups;
+
+	if (!(groupsHost instanceof HTMLElement)) {
+		return;
+	}
+
+	if (state.sectionStates.profilePictures.kind === 'loading' || state.sectionStates.profilePictures.kind === 'error') {
+		setSectionContentVisibility('profilePictures', false);
+		renderSectionState('profilePictures');
+		return;
+	}
+
+	setSectionContentVisibility('profilePictures', true);
+
+	const keyword = (state.searchByFolder.profilePictures || '').trim().toLowerCase();
+	const filtered = getFilteredProfilePictures();
+
+	if (!filtered.length) {
+		setSectionContentVisibility('profilePictures', false);
+		setSectionState(
+			'profilePictures',
+			'empty',
+			keyword ? 'No profile picture matched your search.' : 'No profile pictures have been captured yet.'
+		);
+		renderSectionState('profilePictures');
+		groupsHost.innerHTML = '';
+		return;
+	}
+
+	setSectionState('profilePictures', 'idle');
+	renderSectionState('profilePictures');
+	groupsHost.innerHTML = `<div class="commands-grid profile-pictures-grid">${filtered
+		.map((picture) => profilePictureCardMarkup(picture, keyword))
+		.join('')}</div>`;
+};
+
 const emitRealtimeAuditFilters = () => {
 	if (!dashboardSocket || !realtimeConnected || !state.canEdit) {
 		return;
@@ -3203,6 +3427,16 @@ const setupRealtime = () => {
 		renderUsersKpi();
 		renderUsers();
 	});
+
+	dashboardSocket.on('dashboard:profile-pictures', (payload) => {
+		if (!payload || typeof payload !== 'object') {
+			return;
+		}
+
+		state.profilePictures = Array.isArray(payload.pictures) ? payload.pictures : [];
+		setSectionState('profilePictures', 'idle');
+		renderProfilePictures();
+	});
 };
 
 const fetchStatus = async () => {
@@ -3233,6 +3467,8 @@ const fetchSession = async () => {
 
 	if (!state.canEdit) {
 		els.clearConsole.disabled = true;
+		els.logsPanel?.classList.add('hidden');
+		els.auditPanel?.classList.add('hidden');
 		els.usersBulkToolbar?.classList.add('hidden');
 		settingsPanel?.classList.add('hidden');
 
@@ -3258,9 +3494,10 @@ const fetchSession = async () => {
 
 		renderAuditChipCounts([]);
 
-		els.loggerConsole.textContent = '[REDACTED] Console logs are hidden for regular users.';
 		renderAudit();
 	} else {
+		els.logsPanel?.classList.remove('hidden');
+		els.auditPanel?.classList.remove('hidden');
 		settingsPanel?.classList.remove('hidden');
 
 		if (els.auditActionChips) {
@@ -3472,6 +3709,31 @@ async function fetchUsers() {
 	}
 }
 
+const fetchProfilePictures = async () => {
+	if (!state.profilePictures.length) {
+		setSectionState('profilePictures', 'loading', 'Loading Pinterest profile picture history and building album cards.');
+		setSectionContentVisibility('profilePictures', false);
+		renderSectionState('profilePictures');
+	}
+
+	try {
+		const response = await fetch('/api/dashboard/profile-pictures?limit=100');
+
+		ensureAuthorizedResponse(response, 'Failed fetching profile picture album');
+
+		const payload = await response.json();
+
+		state.profilePictures = Array.isArray(payload.pictures) ? payload.pictures : [];
+		setSectionState('profilePictures', 'idle');
+		renderProfilePictures();
+	} catch (error) {
+		setSectionState('profilePictures', 'error', error?.message || 'Could not fetch profile pictures section.');
+		setSectionContentVisibility('profilePictures', false);
+		renderSectionState('profilePictures');
+		throw error;
+	}
+};
+
 const setCommandState = async (name, enabled) => {
 	const response = await fetch(`/api/dashboard/commands/${encodeURIComponent(name)}`, {
 		method: 'POST',
@@ -3610,6 +3872,14 @@ function startPollingLoops() {
 
 		void runSafe(fetchUsers);
 	}, state.settings.dataRefreshMs);
+
+	pollingTimers.profilePictures = setInterval(() => {
+		if (realtimeConnected) {
+			return;
+		}
+
+		void runSafe(fetchProfilePictures);
+	}, state.settings.dataRefreshMs);
 }
 
 const resetAuditFilters = () => {
@@ -3728,6 +3998,28 @@ const bindEvents = () => {
 		openContributorsDialog();
 	});
 
+	els.openAlbums?.addEventListener('pointerdown', (event) => {
+		if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+			return;
+		}
+
+		persistZenPointerFromEvent(event);
+		navigateToAlbums();
+	});
+
+	els.openAlbums?.addEventListener('click', (event) => {
+		persistZenPointerFromEvent(event);
+		navigateToAlbums();
+	});
+
+	els.openAlbums?.addEventListener('pointerenter', () => {
+		prefetchRoute('/albums');
+	});
+
+	els.openAlbums?.addEventListener('focus', () => {
+		prefetchRoute('/albums');
+	});
+
 	els.changelogClose?.addEventListener('click', () => {
 		closeChangelogDialog();
 	});
@@ -3831,6 +4123,11 @@ const bindEvents = () => {
 
 		if (section === 'users') {
 			void runSafe(fetchUsers);
+			return;
+		}
+
+		if (section === 'profilePictures') {
+			void runSafe(fetchProfilePictures);
 		}
 	});
 
@@ -3995,6 +4292,16 @@ const bindEvents = () => {
 
 			if (filterElement === els.controlsCommandFilter) {
 				state.searchFilters.commandsState = selectedValue || 'all';
+
+				if (state.activeFolder === 'commands') {
+					renderCommands();
+				}
+
+				return;
+			}
+
+			if (filterElement === els.controlsCommandSort) {
+				state.searchFilters.commandsSort = selectedValue || 'name-asc';
 
 				if (state.activeFolder === 'commands') {
 					renderCommands();
@@ -4486,11 +4793,12 @@ const init = async () => {
 	}
 
 	bindEvents();
+	prefetchRoute('/albums');
 	setActiveFolder(state.activeFolder);
 	window.addEventListener('resize', renderStatusCharts);
 	await runSafe(fetchSession);
 	await runSafe(async () => {
-		await Promise.all([fetchStatus(), fetchLogs(), fetchAudit(), fetchCommands(), fetchFlags(), fetchUsers()]);
+		await Promise.all([fetchStatus(), fetchLogs(), fetchAudit(), fetchCommands(), fetchFlags(), fetchUsers(), fetchProfilePictures()]);
 	});
 
 	setupRealtime();

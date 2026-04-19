@@ -5,6 +5,57 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Aestherix Monitor Dashboard</title>
 		<link rel="icon" type="image/png" href="/favicon.png" />
+		<script>
+			(() => {
+				const THEME_KEY = 'aestherix.dashboard.theme';
+				const PALETTE_KEY = 'aestherix.dashboard.palette';
+				const root = document.documentElement;
+
+				try {
+					const savedTheme = localStorage.getItem(THEME_KEY);
+
+					if (savedTheme === 'light' || savedTheme === 'dark') {
+						root.setAttribute('data-theme', savedTheme);
+					} else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+						root.setAttribute('data-theme', 'light');
+					}
+
+					const savedPalette = localStorage.getItem(PALETTE_KEY);
+					if (savedPalette) {
+						root.setAttribute('data-palette', savedPalette);
+					}
+				} catch {
+					if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+						root.setAttribute('data-theme', 'light');
+					}
+				}
+
+				try {
+					const canUseZenCursor =
+						window.matchMedia &&
+						window.matchMedia('(pointer: fine)').matches &&
+						!window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+					if (canUseZenCursor) {
+						root.classList.add('zen-cursor-preload');
+
+						window.addEventListener(
+							'DOMContentLoaded',
+							() => {
+								window.setTimeout(() => {
+									if (!root.classList.contains('zen-cursor-enabled')) {
+										root.classList.remove('zen-cursor-preload');
+									}
+								}, 1200);
+							},
+							{ once: true }
+						);
+					}
+				} catch {
+					root.classList.remove('zen-cursor-preload');
+				}
+			})();
+		</script>
 		<link rel="stylesheet" href="https://www.nerdfonts.com/assets/css/webfont.css" />
 		<link rel="stylesheet" href="/dashboard/styles.css" />
 	</head>
@@ -24,6 +75,10 @@
 						<span class="hero-version-divider" aria-hidden="true"></span>
 						<button id="open-contributors" class="hero-changelog-link" type="button" data-tooltip="Open project contributors">
 							Contributors
+						</button>
+						<span class="hero-version-divider" aria-hidden="true"></span>
+						<button id="open-albums" class="hero-changelog-link" type="button" data-tooltip="Open profile picture albums">
+							Albums
 						</button>
 						<span class="hero-version-divider" aria-hidden="true"></span>
 						<button
@@ -306,6 +361,83 @@
 								</button>
 							</div>
 						</div>
+						<div id="controls-command-sort" class="folder-filter custom-select hidden" data-value="name-asc">
+							<button
+								type="button"
+								class="custom-select-trigger"
+								aria-haspopup="listbox"
+								aria-expanded="false"
+								data-tooltip="Sort commands">
+								<span class="custom-select-label">Name (A-Z)</span>
+								<span class="custom-select-caret" aria-hidden="true"></span>
+							</button>
+							<div class="custom-select-menu" role="listbox" aria-label="Commands sort">
+								<button
+									type="button"
+									class="custom-select-option is-selected"
+									data-value="name-asc"
+									aria-selected="true"
+									data-tooltip="Sort by name A-Z">
+									Name (A-Z)
+								</button>
+								<button
+									type="button"
+									class="custom-select-option"
+									data-value="name-desc"
+									aria-selected="false"
+									data-tooltip="Sort by name Z-A">
+									Name (Z-A)
+								</button>
+								<button
+									type="button"
+									class="custom-select-option"
+									data-value="usage-desc"
+									aria-selected="false"
+									data-tooltip="Most used first">
+									Usage (High-Low)
+								</button>
+								<button
+									type="button"
+									class="custom-select-option"
+									data-value="usage-asc"
+									aria-selected="false"
+									data-tooltip="Least used first">
+									Usage (Low-High)
+								</button>
+								<button
+									type="button"
+									class="custom-select-option"
+									data-value="limit-desc"
+									aria-selected="false"
+									data-tooltip="Highest limit first">
+									Limit (High-Low)
+								</button>
+								<button
+									type="button"
+									class="custom-select-option"
+									data-value="limit-asc"
+									aria-selected="false"
+									data-tooltip="Lowest limit first">
+									Limit (Low-High)
+								</button>
+								<button
+									type="button"
+									class="custom-select-option"
+									data-value="cooldown-desc"
+									aria-selected="false"
+									data-tooltip="Highest cooldown first">
+									Cooldown (High-Low)
+								</button>
+								<button
+									type="button"
+									class="custom-select-option"
+									data-value="cooldown-asc"
+									aria-selected="false"
+									data-tooltip="Lowest cooldown first">
+									Cooldown (Low-High)
+								</button>
+							</div>
+						</div>
 						<div id="controls-flag-filter" class="folder-filter custom-select hidden" data-value="all">
 							<button
 								type="button"
@@ -513,6 +645,7 @@
 						<div id="users-groups" class="commands-groups"></div>
 					</div>
 				</section>
+
 			</section>
 
 			<section class="panel settings-panel" aria-label="Dashboard settings">

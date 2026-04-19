@@ -5,6 +5,31 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Aestherix Dashboard Login</title>
 		<link rel="icon" type="image/png" href="/favicon.png" />
+		<script>
+			(() => {
+				const THEME_KEY = 'aestherix.dashboard.theme';
+				const PALETTE_KEY = 'aestherix.dashboard.palette';
+				const root = document.documentElement;
+
+				try {
+					const savedTheme = localStorage.getItem(THEME_KEY);
+					if (savedTheme === 'light' || savedTheme === 'dark') {
+						root.setAttribute('data-theme', savedTheme);
+					} else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+						root.setAttribute('data-theme', 'light');
+					}
+
+					const savedPalette = localStorage.getItem(PALETTE_KEY);
+					if (savedPalette) {
+						root.setAttribute('data-palette', savedPalette);
+					}
+				} catch {
+					if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+						root.setAttribute('data-theme', 'light');
+					}
+				}
+			})();
+		</script>
 		<link rel="stylesheet" href="https://www.nerdfonts.com/assets/css/webfont.css" />
 		<link rel="stylesheet" href="/dashboard/styles.css" />
 	</head>

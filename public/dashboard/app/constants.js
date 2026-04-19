@@ -16,7 +16,8 @@ export const CONTRIBUTORS_PATH = '/api/dashboard/contributors';
 export const SEARCH_PLACEHOLDERS = {
 	commands: 'Search command/category/alias',
 	flags: 'Search bot flags',
-	users: 'Search users by number/id/role'
+	users: 'Search users by number/id/role',
+	profilePictures: 'Search profile pictures by timestamp/url'
 };
 
 export const ansiRegex = /\u001b\[[0-9;]*m/g;
