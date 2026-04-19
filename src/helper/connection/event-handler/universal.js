@@ -238,7 +238,8 @@ export const handleConnectionUpdate = async (
 
 					rl.on('line', async (line) => {
 						if (line === 'exit') {
-							process.exit(0);
+							await handleShutdown('manual');
+							return;
 						}
 
 						// eslint-disable-next-line
@@ -554,8 +555,16 @@ export const emitGroupSettings = {
 	}
 };
 
+let isShuttingDown = false;
+let shutdownTimer = null;
+const SHUTDOWN_TIMEOUT_MS = 10_000;
+
 async function shutdownServers() {
 	const servers = [...configuration.expressInstances.entries()];
+
+	if (!servers.length) {
+		return;
+	}
 
 	await Promise.all(
 		servers.map(([name, server]) => {
@@ -575,5 +584,37 @@ async function shutdownServers() {
 	);
 }
 
-process.on('SIGINT', shutdownServers);
-process.on('SIGTERM', shutdownServers);
+const handleShutdown = async (signal = 'shutdown') => {
+	if (isShuttingDown) {
+		return;
+	}
+
+	isShuttingDown = true;
+
+	loggers.warning(color('Received', 'white'), color(signal, '#E4C1F9'), color('signal, shutting down...', 'white'));
+
+	shutdownTimer = setTimeout(() => {
+		loggers.error(color('Force shutdown after timeout.', '#FF5555'));
+		process.exit(1);
+	}, SHUTDOWN_TIMEOUT_MS);
+
+	if (typeof shutdownTimer.unref === 'function') {
+		shutdownTimer.unref();
+	}
+
+	try {
+		await shutdownServers();
+
+		if (shutdownTimer) {
+			clearTimeout(shutdownTimer);
+		}
+
+		process.exit(0);
+	} catch (error) {
+		loggers.error(color('Shutdown failed:', '#FF5555'), color(error.message, 'white'));
+		process.exit(1);
+	}
+};
+
+process.on('SIGINT', () => void handleShutdown('SIGINT'));
+process.on('SIGTERM', () => void handleShutdown('SIGTERM'));
