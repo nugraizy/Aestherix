@@ -4,6 +4,7 @@ export interface GlobalConfig {
 	cmds: {
 		commands: Cache;
 		aliases: string[];
+		commandUsage: Cache;
 	};
 	user: {
 		cooldown: Cache;

@@ -3,6 +3,7 @@ import { findBestMatch } from 'string-similarity';
 
 import configuration from '../../helper/config/connect.js';
 import { processDashboardConfirmationAction } from '../../helper/connection/dashboard/server.js';
+import { incrementCommandUsage } from '../../helper/connection/utils/command-usage.js';
 import { Limit, checkAfk, deleteAfk, getAfk, reassign } from '../../helper/index.js';
 import { Cache } from '../../helper/modules/cache.js';
 import { runtime } from '../../index.js';
@@ -395,6 +396,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 				}
 
 				await Tempcmds.run({ ...message, state }, client, store);
+				void incrementCommandUsage(configuration, Tempcmds.name);
 
 				if (cooldownUser?.requests) {
 					cooldownUser.requests = false;

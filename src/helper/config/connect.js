@@ -12,6 +12,7 @@ const globalConfig = {
 	cmds: {
 		commands: new Cache(),
 		aliases: [],
+		commandUsage: new Cache(),
 		disabledCommands: new Set(),
 		menu: {},
 		menuStr: ''
