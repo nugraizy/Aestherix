@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file.
 
+# ࿎「6.7.0」2026-04-20
+## Added
+- Added dedicated dashboard `Albums` page with lightbox carousel, mobile gesture support, and cache-first loading.
+- Added dashboard API support for profile picture albums with download/delete handlers and realtime update broadcasts.
+- Added command usage tracking with persisted usage stats integration for dashboard monitoring.
+- Added `Douyin` downloader command and utility parser export.
+- Added richer dashboard changelog markdown rendering with section-style formatting and improved inline emphasis parsing.
+- Added dashboard root-route behavior to redirect unauthenticated access to the login page.
+
+## Changed
+- Migrated dashboard session/audit/settings storage from `databases/groups` to `databases/dashboard`.
+- Persisted and hydrated Pinterest profile picture history through JSON storage.
+- Improved dashboard/login frontend navigation and perceived loading performance.
+- Updated command handling and socket config typing to expose command-usage metrics consistently.
+- Updated utility module exports to include `Douyin` parser wiring.
+- Enhanced connection/server management with improved retry and startup stability behavior.
+- Removed unused dashboard flagged-filter user control type and related UI wiring cleanup.
+
+## Removed
+- Removed legacy dashboard sessions storage file usage under `databases/groups` in favor of dashboard-scoped paths.
+
+## Fixed
+- Updated dashboard style color variables for more consistent select-element and separator rendering.
+
+## Security
+- Encrypted sensitive Instagram credentials when writing `.instagram.env` configuration values.
+
+## Refactor
+- Implemented graceful shutdown flow for manual/process exit signals.
+
+---
+
 # ࿎「6.6.0」2026-04-16
 ## Added
 - Added dashboard theme palette selector with persisted preference across sessions.
