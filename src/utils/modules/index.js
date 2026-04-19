@@ -579,6 +579,7 @@ const loggersFns = (type, hexColor, ...info) => {
 	}
 
 	const str = `${color('[', 'gray')}${boldify(color(type, hexColor))}${color(']', 'gray')} ${INFOLOG(...info)}`;
+
 	pushDashboardLog(type, str);
 
 	log(str);
