@@ -4,7 +4,7 @@ import { isWABusinessPlatform } from 'baileys';
 import dayjs from 'dayjs';
 import fs from 'fs-extra';
 import mqtt from 'mqtt';
-import cron from 'node-cron';
+import path from 'path';
 import P from 'pino';
 import sharp from 'sharp';
 
@@ -34,9 +34,52 @@ import { color, loggers } from './utils/modules/index.js';
 import { pinterest } from './utils/pinterest/index.js';
 
 const autoProfilePictureChangeEnabled = true;
-const PROFILE_PICTURE_UPDATE_INTERVAL = '*/50 * * * * *';
+const PROFILE_PICTURE_UPDATE_INTERVAL_MS = 120_000;
 const PROFILE_PICTURE_NO_CROP = 'no_crop';
 const BOOKMARK_END_FLAG = '-end-';
+const PROFILE_PICTURE_HISTORY_PATH = './databases/pictures/pinterest-profile-pictures.json';
+const PROFILE_PICTURE_HISTORY_LIMIT = 900;
+
+const hydrateProfilePictureHistory = async (config) => {
+	try {
+		if (!(await fs.pathExists(PROFILE_PICTURE_HISTORY_PATH))) {
+			await fs.ensureDir(path.dirname(PROFILE_PICTURE_HISTORY_PATH));
+			await fs.writeJSON(PROFILE_PICTURE_HISTORY_PATH, { entries: [] }, { spaces: 2 });
+			return;
+		}
+
+		const raw = await fs.readJSON(PROFILE_PICTURE_HISTORY_PATH).catch(() => ({ entries: [] }));
+		const entries = Array.isArray(raw?.entries) ? raw.entries : [];
+
+		config.pinterestImages.clear();
+
+		for (const entry of entries) {
+			const timestamp = String(entry?.timestamp || '').trim();
+			const url = String(entry?.url || '').trim();
+
+			if (!timestamp || !/^https?:\/\//i.test(url)) {
+				continue;
+			}
+
+			config.pinterestImages.set(timestamp, url);
+		}
+	} catch (error) {
+		loggers.warning(color('Failed loading pinterest profile pictures JSON:', '#FF5555'), color(error.message, 'white'));
+	}
+};
+
+const persistProfilePictureHistory = async (config) => {
+	const entries = (Array.isArray(config.pinterestImages?.entries?.()) ? config.pinterestImages.entries() : [])
+		.map(([timestamp, url]) => ({
+			timestamp: String(timestamp || ''),
+			url: String(url || '').trim()
+		}))
+		.filter((entry) => entry.timestamp && /^https?:\/\//i.test(entry.url))
+		.slice(-PROFILE_PICTURE_HISTORY_LIMIT);
+
+	await fs.ensureDir(path.dirname(PROFILE_PICTURE_HISTORY_PATH));
+	await fs.writeJSON(PROFILE_PICTURE_HISTORY_PATH, { entries }, { spaces: 2 });
+};
 
 /**
  * Starts the auto profile picture change service
@@ -48,6 +91,8 @@ const startAutoProfilePictureChangeService = async (client, state, config) => {
 	let images = [];
 	let bookmarks = null;
 	let currentPinterestId = null;
+
+	await hydrateProfilePictureHistory(config);
 
 	const fetchImages = async (pinterestId) => {
 		let response;
@@ -83,7 +128,15 @@ const startAutoProfilePictureChangeService = async (client, state, config) => {
 		return data;
 	};
 
-	cron.schedule(PROFILE_PICTURE_UPDATE_INTERVAL, async () => {
+	let isUpdatingProfilePicture = false;
+
+	const runProfilePictureUpdate = async () => {
+		if (isUpdatingProfilePicture) {
+			return;
+		}
+
+		isUpdatingProfilePicture = true;
+
 		try {
 			const pinterestId = config.pinterestId;
 
@@ -112,6 +165,7 @@ const startAutoProfilePictureChangeService = async (client, state, config) => {
 			const date = dayjs.tz().format('YYYY/MM/DD HH:mm:ss');
 
 			config.pinterestImages.set(date, imageUrl);
+			await persistProfilePictureHistory(config);
 
 			await client.instance.updateProfilePicture(instance, image, PROFILE_PICTURE_NO_CROP);
 
@@ -123,14 +177,22 @@ const startAutoProfilePictureChangeService = async (client, state, config) => {
 				error.message.includes('not-acceptable') ||
 				error.message.includes('internal-server-error') ||
 				error.message.includes('bad-request') ||
-				error.message.includes('fetch failed')
+				error.message.includes('fetch failed') ||
+				error.message.includes('Connection Closed') ||
+				error.message.includes('source: bad seek')
 			) {
 				return;
 			}
 
 			loggers.error('Profile picture update failed:', error.message);
+		} finally {
+			isUpdatingProfilePicture = false;
 		}
-	});
+	};
+
+	setInterval(() => {
+		void runProfilePictureUpdate();
+	}, PROFILE_PICTURE_UPDATE_INTERVAL_MS);
 };
 
 configuration.cli = clis;
@@ -181,6 +243,8 @@ const store = makeInMemoryStore({ logger: P().child({ level: 'fatal', stream: 's
 
 export const start = async () => {
 	try {
+		await hydrateProfilePictureHistory(configuration);
+
 		if (OPTIONS.help) {
 			console.log(cli.help);
 			process.exit(0);
