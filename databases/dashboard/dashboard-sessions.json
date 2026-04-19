@@ -1,0 +1,36 @@
+{
+  "sessions": [
+    {
+      "token": "796291f5d0bdc19a66f18318ea2ecbb5f5b4f5978076ec6a0f096185ca415b6b",
+      "role": "owner",
+      "phoneNumber": "6289607055246",
+      "name": "Owner",
+      "lastSeenAt": 1776619897108,
+      "expiresAt": 1776700875857
+    },
+    {
+      "token": "01ea53ef911d7c6be2db3bddeca23919cabeb13f75802a105f7bf9e29ab75ab7",
+      "role": "owner",
+      "phoneNumber": "6289607055246",
+      "name": "Owner",
+      "lastSeenAt": 1776619726776,
+      "expiresAt": 1776706094370
+    },
+    {
+      "token": "cb4bd1e410609c1671feae3c45a6f7b984facff2a0ef11cc553be2dac4f0e93a",
+      "role": "owner",
+      "phoneNumber": "6289607055246",
+      "name": "Owner",
+      "lastSeenAt": 1776620440931,
+      "expiresAt": 1776706769657
+    },
+    {
+      "token": "df24d34546d64ce59e62ccd0726d517e69c71a76229a448eb324b417331db485",
+      "role": "owner",
+      "phoneNumber": "6289607055246",
+      "name": "Owner",
+      "lastSeenAt": 1776620476184,
+      "expiresAt": 1776706876184
+    }
+  ]
+}

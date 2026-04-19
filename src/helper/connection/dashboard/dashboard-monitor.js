@@ -1,7 +1,9 @@
 import fs from 'fs-extra';
 import path from 'path';
 
-const DASHBOARD_STATE_PATH = './databases/groups/dashboard-settings.json';
+import { loadCommandUsage } from '../utils/command-usage.js';
+
+const DASHBOARD_STATE_PATH = './databases/dashboard/dashboard-settings.json';
 const MAX_LOGS = 500;
 
 const state = {
@@ -89,6 +91,7 @@ export const initializeDashboardMonitor = async (configuration) => {
 
 	configuration.cmds.disabledCommands = new Set(data.disabledCommands);
 	applyPersistedFlags(configuration, data.flagStates);
+	await loadCommandUsage(configuration);
 	state.initialized = true;
 };
 
@@ -110,6 +113,7 @@ export const listDashboardCommands = (configuration) => {
 		.filter(([name]) => !name.startsWith('UNKNOWN-'))
 		.map(([, command]) => {
 			const aliases = Array.isArray(command?.aliases) ? command.aliases : [];
+			const usageCount = Number(configuration?.cmds?.commandUsage?.get?.(command.name) || 0);
 
 			return {
 				name: command.name,
@@ -121,6 +125,7 @@ export const listDashboardCommands = (configuration) => {
 				limit: Number(command.limit || 0),
 				premium: Boolean(command.premium),
 				restrict: Boolean(command.restrict),
+				usageCount,
 				enabled: !disabled.has(command.name)
 			};
 		})

@@ -28,8 +28,10 @@ const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 const LIVE_SESSION_WINDOW_MS = 30 * 1000;
 const USERS_LIMIT_DIR = './databases/users/limit';
 const USERS_BANNED_PATH = './databases/users/banned.json';
-const DASHBOARD_SESSIONS_PATH = './databases/groups/dashboard-sessions.json';
-const DASHBOARD_AUDIT_PATH = './databases/groups/dashboard-audit.json';
+const DASHBOARD_SESSIONS_PATH = './databases/dashboard/dashboard-sessions.json';
+const DASHBOARD_AUDIT_PATH = './databases/dashboard/dashboard-audit.json';
+const PROFILE_PICTURE_HISTORY_PATH = './databases/pictures/pinterest-profile-pictures.json';
+const PROFILE_PICTURE_HISTORY_LIMIT = 900;
 const ROOT_CHANGELOG_PATH = path.resolve(process.cwd(), 'CHANGELOG.md');
 const MAX_AUDIT_LOGS = 1000;
 const UNDO_WINDOW_MS = 12000;
@@ -593,6 +595,16 @@ const userToggleBody = z.object({
 	enabled: z.boolean()
 });
 
+const deleteProfilePictureBody = z.object({
+	timestamp: z.string().min(1),
+	url: z.string().url()
+});
+
+const downloadProfilePictureQuery = z.object({
+	url: z.string().url(),
+	timestamp: z.string().optional()
+});
+
 const undoActionBody = z.object({
 	token: z.string().min(12)
 });
@@ -609,6 +621,90 @@ const normalizePhoneNumber = (input) => {
 	}
 
 	return digits;
+};
+
+const extensionFromMime = (mimeType) => {
+	const normalized = String(mimeType || '').toLowerCase().split(';')[0].trim();
+
+	if (normalized === 'image/jpeg') {
+		return 'jpg';
+	}
+
+	if (normalized === 'image/png') {
+		return 'png';
+	}
+
+	if (normalized === 'image/webp') {
+		return 'webp';
+	}
+
+	if (normalized === 'image/gif') {
+		return 'gif';
+	}
+
+	if (normalized === 'image/bmp') {
+		return 'bmp';
+	}
+
+	if (normalized === 'image/avif') {
+		return 'avif';
+	}
+
+	if (normalized === 'image/svg+xml') {
+		return 'svg';
+	}
+
+	return '';
+};
+
+const extensionFromUrl = (urlValue) => {
+	try {
+		const parsed = new URL(String(urlValue || ''));
+		const ext = path.extname(parsed.pathname || '').replace('.', '').toLowerCase();
+
+		if (!/^[a-z0-9]{2,5}$/i.test(ext)) {
+			return '';
+		}
+
+		return ext;
+	} catch {
+		return '';
+	}
+};
+
+const sanitizeDownloadFilename = (rawValue) => {
+	const safeValue = String(rawValue || '')
+		.trim()
+		.replace(/[^a-z0-9._-]+/gi, '_')
+		.replace(/_+/g, '_')
+		.slice(0, 120);
+
+	if (!safeValue) {
+		return 'album-image';
+	}
+
+	return safeValue;
+};
+
+const buildProfilePictureFilename = ({ timestamp = '', imageUrl = '', mimeType = '' } = {}) => {
+	const base = sanitizeDownloadFilename(timestamp ? `album-${timestamp}` : `album-${Date.now()}`);
+	const extension = extensionFromMime(mimeType) || extensionFromUrl(imageUrl) || 'jpg';
+
+	return `${base}.${extension}`;
+};
+
+const isBlockedDownloadHost = (hostname) => {
+	const safeHost = String(hostname || '').trim().toLowerCase();
+
+	if (!safeHost) {
+		return true;
+	}
+
+	if (safeHost === 'localhost' || safeHost === '127.0.0.1' || safeHost === '::1') {
+		return true;
+	}
+
+	return false;
 };
 
 const normalizeUserJid = (input) => {
@@ -762,6 +858,103 @@ const listDashboardUsers = async ({ redactNumbers = false } = {}) => {
 	);
 
 	return users.filter(Boolean).sort((a, b) => a.id.localeCompare(b.id));
+};
+
+const listDashboardProfilePictures = ({ limit = 180 } = {}) => {
+	const entries = Array.isArray(configuration.pinterestImages?.entries?.())
+		? configuration.pinterestImages.entries()
+		: [];
+	const safeLimit = Math.max(1, Math.min(500, Number(limit) || 180));
+	const seenUrls = new Set();
+
+	const pictures = entries
+		.map(([timestamp, url]) => {
+			const safeUrl = String(url || '').trim();
+
+			if (!/^https?:\/\//i.test(safeUrl)) {
+				return null;
+			}
+
+			return {
+				id: `${timestamp}-${safeUrl}`,
+				timestamp: String(timestamp || ''),
+				url: safeUrl
+			};
+		})
+		.filter(Boolean)
+		.reverse()
+		.filter((picture) => {
+			const dedupeKey = picture.url.toLowerCase();
+
+			if (seenUrls.has(dedupeKey)) {
+				return false;
+			}
+
+			seenUrls.add(dedupeKey);
+			return true;
+		})
+		.slice(0, safeLimit);
+
+	return pictures;
+};
+
+const persistDashboardProfilePictures = async () => {
+	const seenUrls = new Set();
+	const entries = (Array.isArray(configuration.pinterestImages?.entries?.()) ? configuration.pinterestImages.entries() : [])
+		.map(([timestamp, url]) => ({
+			timestamp: String(timestamp || '').trim(),
+			url: String(url || '').trim()
+		}))
+		.filter((entry) => entry.timestamp && /^https?:\/\//i.test(entry.url))
+		.reverse()
+		.filter((entry) => {
+			const dedupeKey = entry.url.toLowerCase();
+
+			if (seenUrls.has(dedupeKey)) {
+				return false;
+			}
+
+			seenUrls.add(dedupeKey);
+			return true;
+		})
+		.reverse()
+		.slice(-PROFILE_PICTURE_HISTORY_LIMIT);
+
+	await fs.ensureDir(path.dirname(PROFILE_PICTURE_HISTORY_PATH));
+	await fs.writeJSON(PROFILE_PICTURE_HISTORY_PATH, { entries }, { spaces: 2 });
+};
+
+const deleteDashboardProfilePicture = async ({ timestamp = '', url = '' } = {}) => {
+	const safeTimestamp = String(timestamp || '').trim();
+	const safeUrl = String(url || '').trim();
+
+	if (!safeTimestamp || !/^https?:\/\//i.test(safeUrl)) {
+		return { ok: false, message: 'Invalid profile picture payload.' };
+	}
+
+	let deleted = false;
+	const currentUrl = String(configuration.pinterestImages.get(safeTimestamp) || '').trim();
+
+	if (currentUrl && currentUrl === safeUrl) {
+		configuration.pinterestImages.delete(safeTimestamp);
+		deleted = true;
+	} else {
+		for (const [key, value] of configuration.pinterestImages.entries()) {
+			if (String(key).trim() === safeTimestamp && String(value || '').trim() === safeUrl) {
+				configuration.pinterestImages.delete(key);
+				deleted = true;
+				break;
+			}
+		}
+	}
+
+	if (!deleted) {
+		return { ok: false, message: 'Profile picture not found.' };
+	}
+
+	await persistDashboardProfilePictures();
+
+	return { ok: true };
 };
 
 const setDashboardUserLimit = async (userId, limit) => {
@@ -1247,6 +1440,9 @@ export const server = () => {
 				redactNumbers: session.role !== 'owner'
 			})
 		});
+		socket.emit('dashboard:profile-pictures', {
+			pictures: listDashboardProfilePictures()
+		});
 
 		if (session.role === 'owner') {
 			const logsPayload = getDashboardLogs({ since: 0, limit: 250 });
@@ -1389,9 +1585,11 @@ export const server = () => {
 			const flags = listDashboardFlags(configuration);
 			const usersForOwner = await listDashboardUsers({ redactNumbers: false });
 			const usersForViewer = await listDashboardUsers({ redactNumbers: true });
+			const pictures = listDashboardProfilePictures();
 
 			io.emit('dashboard:commands', { commands });
 			io.emit('dashboard:flags', { flags });
+			io.emit('dashboard:profile-pictures', { pictures });
 
 			const sockets = Array.from(io.of('/').sockets.values());
 
@@ -1559,6 +1757,14 @@ export const server = () => {
 		}
 
 		res.sendFile(path.join(__dirname, 'public', 'dashboard', 'index.html'));
+	});
+
+	app.get('/albums', (req, res) => {
+		if (!isDashboardAuthenticated(req)) {
+			return res.redirect('/dashboard/login');
+		}
+
+		res.sendFile(path.join(__dirname, 'public', 'dashboard', 'albums.html'));
 	});
 
 	app.post('/api/dashboard/auth/request-code', validate({ body: authRequestBody }), async (req, res) => {
@@ -1841,6 +2047,104 @@ export const server = () => {
 		res.json({
 			count: users.length,
 			users
+		});
+	});
+
+	app.get('/api/dashboard/profile-pictures', requireDashboardAuth, (req, res) => {
+		const limit = Number(req.query?.limit || 100);
+		const pictures = listDashboardProfilePictures({ limit });
+
+		res.json({
+			count: pictures.length,
+			pictures
+		});
+	});
+
+	app.get('/api/dashboard/profile-pictures/download', requireDashboardAuth, validate({ query: downloadProfilePictureQuery }), async (req, res) => {
+		const imageUrl = String(req.query?.url || '').trim();
+		const timestamp = String(req.query?.timestamp || '').trim();
+
+		let parsedUrl;
+
+		try {
+			parsedUrl = new URL(imageUrl);
+		} catch {
+			return res.status(400).json({ ok: false, message: 'Invalid image URL.' });
+		}
+
+		if (!/^https?:$/i.test(parsedUrl.protocol) || isBlockedDownloadHost(parsedUrl.hostname)) {
+			return res.status(400).json({ ok: false, message: 'Image URL is not allowed.' });
+		}
+
+		let upstream;
+
+		try {
+			upstream = await fetch(parsedUrl.toString(), { redirect: 'follow' });
+		} catch {
+			return res.status(502).json({ ok: false, message: 'Failed fetching image source.' });
+		}
+
+		if (!upstream.ok) {
+			return res.status(502).json({ ok: false, message: 'Image source is unavailable.' });
+		}
+
+		const mimeType = String(upstream.headers.get('content-type') || 'application/octet-stream');
+		const filename = buildProfilePictureFilename({
+			timestamp,
+			imageUrl: parsedUrl.toString(),
+			mimeType
+		});
+		const encodedFilename = encodeURIComponent(filename);
+
+		const bytes = Buffer.from(await upstream.arrayBuffer());
+
+		res.setHeader('Content-Type', mimeType);
+		res.setHeader('Content-Disposition', `attachment; filename="${filename}"; filename*=UTF-8''${encodedFilename}`);
+		res.setHeader('Cache-Control', 'no-store');
+		res.setHeader('X-Content-Type-Options', 'nosniff');
+
+		res.send(bytes);
+	});
+
+	app.delete('/api/dashboard/profile-pictures', requireOwnerAuth, validate({ body: deleteProfilePictureBody }), async (req, res) => {
+		const session = req.dashboardSession || null;
+		const payload = {
+			timestamp: String(req.body?.timestamp || '').trim(),
+			url: String(req.body?.url || '').trim()
+		};
+
+		const result = await deleteDashboardProfilePicture(payload);
+
+		if (!result.ok) {
+			pushAuditEvent({
+				action: 'profile_picture.delete',
+				session,
+				target: payload.timestamp || payload.url || 'profile-picture',
+				status: 'failed',
+				message: result.message || 'Failed deleting profile picture.'
+			});
+
+			return res.status(404).json({
+				ok: false,
+				message: result.message || 'Profile picture not found.'
+			});
+		}
+
+		const pictures = listDashboardProfilePictures({ limit: 500 });
+		
+		io.emit('dashboard:profile-pictures', { pictures });
+
+		pushAuditEvent({
+			action: 'profile_picture.delete',
+			session,
+			target: payload.timestamp || payload.url || 'profile-picture',
+			message: 'Owner deleted a profile picture from albums.'
+		});
+
+		res.json({
+			ok: true,
+			count: pictures.length,
+			pictures
 		});
 	});
 
