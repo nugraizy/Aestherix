@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+# ࿎「6.7.1」2026-04-20
+## Added
+- Added seamless dashboard `Albums` route with in-dashboard navigation and integrated lightbox controls.
+- Added iOS-style toggle controls for dashboard command and flag state switches.
+
+## Changed
+- Improved profile picture record handling to normalize `original` and `thumbnail` payload variants across dashboard and command outputs.
+- Updated albums caching strategy to share profile picture cache state between dashboard and albums pages.
+
+## Fixed
+- Fixed owner-only delete visibility and action handling for profile pictures in seamless lightbox view.
+- Fixed profile picture realtime updates to enforce consistent dashboard limits.
+- Removed disable confirmation dialogs for command and flag toggles to align with switch interaction.
+
+---
+
 # ࿎「6.7.0」2026-04-20
 ## Added
 - Added dedicated dashboard `Albums` page with lightbox carousel, mobile gesture support, and cache-first loading.
