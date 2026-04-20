@@ -9,6 +9,7 @@
 			(() => {
 				const THEME_KEY = 'aestherix.dashboard.theme';
 				const PALETTE_KEY = 'aestherix.dashboard.palette';
+				const ZEN_CURSOR_ENABLED_KEY = 'aestherix.dashboard.cursor.enabled';
 				const root = document.documentElement;
 
 				try {
@@ -31,6 +32,12 @@
 				}
 
 				try {
+					const shouldPreloadFromCache = window.sessionStorage.getItem(ZEN_CURSOR_ENABLED_KEY) === '1';
+
+					if (shouldPreloadFromCache) {
+						root.classList.add('zen-cursor-preload');
+					}
+
 					const canUseZenCursor =
 						window.matchMedia &&
 						window.matchMedia('(pointer: fine)').matches &&
@@ -38,6 +45,7 @@
 
 					if (canUseZenCursor) {
 						root.classList.add('zen-cursor-preload');
+						const preloadReleaseMs = shouldPreloadFromCache ? 3600 : 1200;
 
 						window.addEventListener(
 							'DOMContentLoaded',
@@ -46,12 +54,20 @@
 									if (!root.classList.contains('zen-cursor-enabled')) {
 										root.classList.remove('zen-cursor-preload');
 									}
-								}, 1200);
+								}, preloadReleaseMs);
 							},
 							{ once: true }
 						);
+					} else {
+						window.sessionStorage.removeItem(ZEN_CURSOR_ENABLED_KEY);
 					}
 				} catch {
+					try {
+						window.sessionStorage.removeItem(ZEN_CURSOR_ENABLED_KEY);
+					} catch {
+						// Ignore storage cleanup errors.
+					}
+
 					root.classList.remove('zen-cursor-preload');
 				}
 			})();
@@ -59,7 +75,7 @@
 		<link rel="stylesheet" href="https://www.nerdfonts.com/assets/css/webfont.css" />
 		<link rel="stylesheet" href="/dashboard/styles.css" />
 	</head>
-	<body>
+	<body class="dashboard-page">
 		<div class="app-bg"></div>
 		<main class="dashboard">
 			<header class="hero">
@@ -790,6 +806,74 @@
 				</div>
 			</footer>
 		</main>
+
+		<main id="albums-seamless-page" class="albums-shell is-seamless hidden" aria-label="Profile picture albums">
+			<header class="albums-head">
+				<div class="albums-head-copy">
+					<button id="albums-seamless-back" class="albums-back-nav" type="button" aria-label="Back to dashboard">
+						<span class="nf-back-icon" aria-hidden="true">&lt;</span>
+					</button>
+					<h1>Albums</h1>
+				</div>
+			</header>
+			<p id="albums-seamless-state" class="albums-state" aria-live="polite">Loading images...</p>
+			<section id="albums-seamless-grid" class="albums-grid hidden" aria-label="Albums image grid"></section>
+		</main>
+
+		<div id="profile-pictures-lightbox" class="albums-lightbox hidden" role="dialog" aria-modal="true" aria-label="Image preview">
+			<div id="profile-pictures-lightbox-backdrop" class="albums-lightbox-backdrop"></div>
+			<div class="albums-lightbox-content" role="document">
+				<div class="albums-lightbox-stage">
+					<button id="profile-pictures-lightbox-prev" class="albums-lightbox-nav prev" type="button" aria-label="Previous image">
+						<span class="nf-back-icon" aria-hidden="true">&lt;</span>
+					</button>
+					<div id="profile-pictures-lightbox-track" class="albums-lightbox-track" aria-live="polite"></div>
+					<button id="profile-pictures-lightbox-next" class="albums-lightbox-nav next" type="button" aria-label="Next image">
+						<span class="nf-back-icon" aria-hidden="true">&gt;</span>
+					</button>
+					<p id="profile-pictures-lightbox-meta" class="albums-lightbox-meta" aria-live="polite"></p>
+					<div id="profile-pictures-lightbox-menu" class="albums-lightbox-menu hidden">
+						<button
+							id="profile-pictures-lightbox-menu-toggle"
+							class="albums-lightbox-menu-toggle"
+							type="button"
+							aria-label="Image actions"
+							aria-haspopup="true"
+							aria-expanded="false"
+						>
+							<span class="albums-lightbox-menu-dots" aria-hidden="true">
+								<span></span>
+								<span></span>
+								<span></span>
+							</span>
+						</button>
+						<div
+							id="profile-pictures-lightbox-menu-panel"
+							class="albums-lightbox-menu-panel hidden"
+							role="menu"
+							aria-label="Image actions menu"
+						>
+							<button
+								id="profile-pictures-lightbox-menu-download"
+								class="albums-lightbox-menu-item"
+								type="button"
+								role="menuitem"
+							>
+								Download
+							</button>
+							<button
+								id="profile-pictures-lightbox-menu-delete"
+								class="albums-lightbox-menu-item danger hidden"
+								type="button"
+								role="menuitem"
+							>
+								Delete
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 
 		<div
 			id="changelog-dialog"

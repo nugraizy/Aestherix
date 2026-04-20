@@ -2,6 +2,28 @@ import _ from 'lodash';
 
 import configuration from '../../helper/config/connect.js';
 
+const getDisplayUrl = (value) => {
+	if (typeof value === 'string' && /^https?:\/\//i.test(value.trim())) {
+		return value.trim();
+	}
+
+	if (value && typeof value === 'object') {
+		const originalUrl = String(value?.original?.url || '').trim();
+
+		if (/^https?:\/\//i.test(originalUrl)) {
+			return originalUrl;
+		}
+
+		const legacyUrl = String(value?.url || '').trim();
+
+		if (/^https?:\/\//i.test(legacyUrl)) {
+			return legacyUrl;
+		}
+	}
+
+	return '';
+};
+
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
  */
@@ -30,15 +52,23 @@ export default {
 
 		const parsedEntries = entries
 			.map((group) =>
-				group.map(([stamp, url]) => {
+				group
+					.map(([stamp, value]) => {
 					const [date, time] = stamp.split(/[ + ]+/);
+					const url = getDisplayUrl(value);
+
+					if (!url) {
+						return null;
+					}
 
 					return {
 						timestamp: `${date} ${time}`,
 						url
 					};
 				})
+				.filter(Boolean)
 			)
+			.filter((group) => group.length > 0)
 			.reverse();
 
 		await builder

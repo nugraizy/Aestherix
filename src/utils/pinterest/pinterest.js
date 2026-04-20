@@ -82,6 +82,7 @@ class Pinterest {
 					resolve({ error: true, message: 'Could not find media with the keyword. Try other keyword.', keyword: query });
 				}
 
+
 				resolve({
 					keyword: query,
 					results: data
@@ -220,7 +221,9 @@ class Pinterest {
 
 				const json = await response.json();
 
-				const result = json.resource_response.data.filter((v) => !v.is_video && v.images).map((v) => v.images.orig);
+
+				const result = json.resource_response.data.filter((v) => !v.is_video && v.images).map((v) => ({
+					original:v.images.orig, thumbnail: /**take the third best before original**/v.images[Object.keys(v.images)[Object.keys(v.images).length-4]]	}));
 
 				resolve(result);
 			} catch (error) {
@@ -272,7 +275,8 @@ class Pinterest {
 
 				const json = await response.json();
 
-				const result = json.resource_response.data.filter((v) => !v.is_video && v.images).map((v) => v.images.orig);
+				const result = json.resource_response.data.filter((v) => !v.is_video && v.images).map((v) => ({
+					original:v.images.orig, thumbnail: /**take the third best before original**/v.images[Object.keys(v.images)[Object.keys(v.images).length-4]]	}));
 
 				resolve({ images: result, bookmarks: json.resource.options.bookmarks[0] });
 			} catch (error) {

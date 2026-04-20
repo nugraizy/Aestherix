@@ -3109,7 +3109,21 @@ select {
 	animation: albums-shell-enter 0.46s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-body.albums-page {
+.albums-shell.is-seamless {
+	max-width: min(96vw, 1680px);
+	padding-top: 18px;
+	animation: none;
+	transition: none;
+	position: relative;
+	z-index: 2;
+	isolation: isolate;
+}
+
+body.dashboard-page.albums-page .app-bg {
+	opacity: 0.38;
+}
+
+body.albums-page:not(.dashboard-page) {
 	zoom: 1.25;
 }
 
@@ -3272,6 +3286,11 @@ body.albums-page.albums-scroll-locked {
 		box-shadow 0.18s ease;
 }
 
+#albums-seamless-page .album-image-card {
+	background: var(--bg-dark);
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 14%, transparent) inset;
+}
+
 .album-image-card.scroll-reveal-ready {
 	opacity: 0;
 	transform: translateY(18px);
@@ -3321,6 +3340,16 @@ body.albums-page.albums-scroll-locked {
 		transform 0.26s ease,
 		opacity 0.24s ease,
 		filter 0.24s ease;
+}
+
+#albums-seamless-page .album-image {
+	background: var(--bg-dark);
+	mix-blend-mode: normal;
+}
+
+#albums-seamless-page .album-image.is-loaded {
+	opacity: 1;
+	filter: none;
 }
 
 .album-image.is-lazy {
@@ -3576,6 +3605,19 @@ body.albums-page.albums-scroll-locked {
 	display: grid;
 	justify-items: end;
 	gap: 6px;
+}
+
+.albums-lightbox-menu .albums-lightbox-meta {
+	position: static;
+	top: auto;
+	left: auto;
+	transform: none;
+	z-index: auto;
+	padding: 4px 10px;
+	font-size: 0.74rem;
+	line-height: 1;
+	background: rgba(6, 17, 22, 0.52);
+	border-color: rgba(255, 255, 255, 0.24);
 }
 
 .albums-lightbox-menu-toggle {
@@ -4843,6 +4885,68 @@ body.albums-page.albums-scroll-locked {
 .toggle-btn {
 	padding: 6px 10px;
 	font-size: 0.8rem;
+}
+
+.toggle-btn.ios-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	min-width: 40px;
+	transition:
+		box-shadow 0.2s ease,
+		opacity 0.2s ease;
+}
+
+.toggle-btn.ios-toggle .ios-toggle-track {
+	position: relative;
+	width: 40px;
+	height: 24px;
+	border-radius: 999px;
+	background: rgba(255, 142, 116, 0.34);
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+	transition: background-color 0.2s ease;
+}
+
+.toggle-btn.ios-toggle .ios-toggle-thumb {
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	background: #ffffff;
+	box-shadow:
+		0 1px 2px rgba(0, 0, 0, 0.35),
+		0 0 0 1px rgba(255, 255, 255, 0.18);
+	transition: transform 0.2s ease;
+}
+.toggle-btn.ios-toggle.is-on {
+	background: transparent;
+}
+
+.toggle-btn.ios-toggle.is-on .ios-toggle-track {
+	background: rgba(135, 240, 193, 0.9);
+}
+
+.toggle-btn.ios-toggle.is-on .ios-toggle-thumb {
+	transform: translateX(16px);
+}
+
+.toggle-btn.ios-toggle.is-off {
+	background: transparent;
+}
+
+.toggle-btn.ios-toggle:hover {
+	box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16);
+}
+
+.toggle-btn.ios-toggle:disabled {
+	opacity: 0.58;
+	cursor: not-allowed;
+	box-shadow: none;
 }
 
 .toggle-btn.enable:hover {

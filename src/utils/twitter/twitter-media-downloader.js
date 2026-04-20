@@ -119,7 +119,7 @@ export const twitterDownload = (input) =>
 			});
 
 			if ('tombstone' in data) {
-				return resolve({ error: data.tombstone.text.text });
+				return resolve({ error: 'Possible deleted, private tweet, or adult content.' });
 			}
 
 			resolve(_parseDestructuring(data));
