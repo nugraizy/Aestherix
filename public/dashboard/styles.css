@@ -1274,10 +1274,10 @@ body.zen-cursor-enabled * {
 	rotate: 0deg;
 	transform-origin: center center;
 	position: fixed;
-	top: -25px;
-	left: -25px;
-	width: 50px;
-	height: 50px;
+	top: -21px;
+	left: -21px;
+	width: 42px;
+	height: 42px;
 	border-radius: 50%;
 	background-color: rgba(255, 255, 255, 0.08);
 	outline: 2px dashed var(--sky);
@@ -1306,10 +1306,10 @@ body.zen-cursor-enabled * {
 }
 
 .zen-cursor.is-chart-compact {
-	width: 22px;
-	height: 22px;
-	top: -11px;
-	left: -11px;
+	width: 18px;
+	height: 18px;
+	top: -9px;
+	left: -9px;
 	opacity: 0.94;
 }
 

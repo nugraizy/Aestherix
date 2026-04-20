@@ -1,25 +1,25 @@
 import {
-    ACTIVE_FOLDER_STORAGE_KEY,
-    ALERT_RULES,
-    ansiRegex,
-    AUDIT_ACTION_PARAM,
-    AUDIT_ACTIONS_COLLAPSED_KEY,
-    AUDIT_QUERY_PARAM,
-    AUDIT_ROLE_PARAM,
-    AUDIT_ROLES_COLLAPSED_KEY,
-    CHANGELOG_MARKDOWN_PATH,
-    COLLAPSE_STORAGE_KEY,
-    CONTRIBUTORS_PATH,
-    DEFAULT_DASHBOARD_SETTINGS,
-    DEFAULT_THEME_PALETTE,
-    ERROR_SPIKE_PATTERN,
-    SEARCH_PLACEHOLDERS,
-    SETTINGS_STORAGE_KEY,
-    THEME_ICON_MORPH_MS,
-    THEME_PALETTE_STORAGE_KEY,
-    THEME_PALETTES,
-    THEME_STORAGE_KEY,
-    THEME_TRANSITION_MS
+	ACTIVE_FOLDER_STORAGE_KEY,
+	ALERT_RULES,
+	ansiRegex,
+	AUDIT_ACTION_PARAM,
+	AUDIT_ACTIONS_COLLAPSED_KEY,
+	AUDIT_QUERY_PARAM,
+	AUDIT_ROLE_PARAM,
+	AUDIT_ROLES_COLLAPSED_KEY,
+	CHANGELOG_MARKDOWN_PATH,
+	COLLAPSE_STORAGE_KEY,
+	CONTRIBUTORS_PATH,
+	DEFAULT_DASHBOARD_SETTINGS,
+	DEFAULT_THEME_PALETTE,
+	ERROR_SPIKE_PATTERN,
+	SEARCH_PLACEHOLDERS,
+	SETTINGS_STORAGE_KEY,
+	THEME_ICON_MORPH_MS,
+	THEME_PALETTE_STORAGE_KEY,
+	THEME_PALETTES,
+	THEME_STORAGE_KEY,
+	THEME_TRANSITION_MS
 } from './app/constants.js';
 import { els } from './app/dom.js';
 import { escapeHtml, fuzzyIncludes, highlightMatch, renderChangelogMarkdown, sanitizeMarkdownUrl } from './app/formatters.js';
@@ -67,8 +67,6 @@ const WHEEL_GESTURE_RESET_MS = 180;
 const WHEEL_NAV_LOCK_BASE_MS = 46;
 const LIGHTBOX_TOUCH_SWIPE_THRESHOLD_PX = 42;
 const LIGHTBOX_TOUCH_MAX_VERTICAL_DRIFT_PX = 64;
-const LIGHTBOX_SWIPE_VELOCITY_STEP_2 = 0.85;
-const LIGHTBOX_SWIPE_VELOCITY_STEP_3 = 1.35;
 let profilePicturesCarouselItems = [];
 let profilePicturesCarouselIndex = -1;
 const PROFILE_PICTURES_CAROUSEL_OFFSETS = [-2, -1, 0, 1, 2];
@@ -82,8 +80,6 @@ let profilePicturesTouchStartX = null;
 let profilePicturesTouchStartY = null;
 let profilePicturesTouchLastX = null;
 let profilePicturesTouchLastY = null;
-let profilePicturesTouchStartAt = 0;
-let profilePicturesTouchLastAt = 0;
 let profilePicturesTouchTrackingActive = false;
 let profilePicturesTouchSwipeTriggered = false;
 
@@ -2551,12 +2547,15 @@ const renderLogs = () => {
 	if (!state.dashboardLogs.length && !state.botLogs.length) {
 		setSectionState('logs', 'empty', 'No live logs yet. New log entries will appear here automatically.');
 		renderSectionState('logs');
+
 		if (els.dashboardLoggerConsole) {
 			els.dashboardLoggerConsole.textContent = '';
 		}
+		
 		if (els.botLoggerConsole) {
 			els.botLoggerConsole.textContent = '';
 		}
+		
 		return;
 	}
 
@@ -3439,7 +3438,7 @@ const getCurrentProfilePicture = () => {
 	return profilePicturesCarouselItems[safeIndex] || null;
 };
 
-const downloadCurrentProfilePicture = () => {
+const downloadCurrentProfilePicture = async () => {
 	const picture = getCurrentProfilePicture();
 	const originalUrl = getProfilePictureOriginalUrl(picture);
 
@@ -3447,15 +3446,55 @@ const downloadCurrentProfilePicture = () => {
 		return;
 	}
 
-	const anchor = document.createElement('a');
+	const downloadUrl = new URL('/api/dashboard/profile-pictures/download', window.location.origin);
 
-	anchor.href = originalUrl;
-	anchor.target = '_blank';
-	anchor.rel = 'noopener noreferrer';
-	anchor.download = '';
-	document.body.appendChild(anchor);
-	anchor.click();
-	anchor.remove();
+	downloadUrl.searchParams.set('url', originalUrl);
+
+	if (picture?.timestamp) {
+		downloadUrl.searchParams.set('timestamp', picture.timestamp);
+	}
+
+	showToast(`Downloading ${String(picture?.timestamp || 'image')}...`, 'info', {
+		duration: 2000
+	});
+
+	try {
+		const response = await fetch(downloadUrl.toString(), {
+			method: 'GET',
+			credentials: 'same-origin'
+		});
+
+		if (!response.ok) {
+			const fallbackMessage = 'File was not available for download.';
+			const payload = await response.json().catch(() => ({}));
+
+			throw new Error(payload?.message || fallbackMessage);
+		}
+
+		const contentDisposition = String(response.headers.get('content-disposition') || '');
+		const encodedMatch = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
+		const plainMatch = contentDisposition.match(/filename="?([^";]+)"?/i);
+		const filename = encodedMatch?.[1]
+			? decodeURIComponent(encodedMatch[1])
+			: plainMatch?.[1] || `album-${picture?.timestamp || Date.now()}.jpg`;
+		const blob = await response.blob();
+		const objectUrl = URL.createObjectURL(blob);
+
+		const downloadLink = document.createElement('a');
+
+		downloadLink.href = objectUrl;
+		downloadLink.download = filename;
+		downloadLink.rel = 'noopener noreferrer';
+		document.body.appendChild(downloadLink);
+		downloadLink.click();
+		downloadLink.remove();
+
+		setTimeout(() => {
+			URL.revokeObjectURL(objectUrl);
+		}, 1000);
+	} catch (error) {
+		showToast(error?.message || 'Unable to download image right now.', 'error');
+	}
 };
 
 const deleteCurrentProfilePicture = async () => {
@@ -3558,8 +3597,6 @@ const resetProfilePicturesTouchState = () => {
 	profilePicturesTouchStartY = null;
 	profilePicturesTouchLastX = null;
 	profilePicturesTouchLastY = null;
-	profilePicturesTouchStartAt = 0;
-	profilePicturesTouchLastAt = 0;
 	profilePicturesTouchTrackingActive = false;
 	profilePicturesTouchSwipeTriggered = false;
 };
@@ -3576,14 +3613,11 @@ const handleProfilePicturesLightboxTouchStart = (event) => {
 	}
 
 	const touch = event.touches[0];
-	const now = Date.now();
 
 	profilePicturesTouchStartX = touch.clientX;
 	profilePicturesTouchStartY = touch.clientY;
 	profilePicturesTouchLastX = touch.clientX;
 	profilePicturesTouchLastY = touch.clientY;
-	profilePicturesTouchStartAt = now;
-	profilePicturesTouchLastAt = now;
 	profilePicturesTouchTrackingActive = true;
 	profilePicturesTouchSwipeTriggered = false;
 };
@@ -3597,7 +3631,6 @@ const handleProfilePicturesLightboxTouchMove = (event) => {
 
 	profilePicturesTouchLastX = touch.clientX;
 	profilePicturesTouchLastY = touch.clientY;
-	profilePicturesTouchLastAt = Date.now();
 
 	if (!Number.isFinite(profilePicturesTouchStartX) || !Number.isFinite(profilePicturesTouchStartY)) {
 		return;
@@ -3609,10 +3642,6 @@ const handleProfilePicturesLightboxTouchMove = (event) => {
 	if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > LIGHTBOX_TOUCH_MAX_VERTICAL_DRIFT_PX) {
 		resetProfilePicturesTouchState();
 		return;
-	}
-
-	if (Math.abs(deltaX) > Math.abs(deltaY)) {
-		event.preventDefault();
 	}
 };
 
@@ -3632,26 +3661,13 @@ const handleProfilePicturesLightboxTouchEnd = () => {
 		Number.isFinite(profilePicturesTouchStartY) && Number.isFinite(profilePicturesTouchLastY)
 			? profilePicturesTouchLastY - profilePicturesTouchStartY
 			: 0;
-	const elapsedMs = Math.max(1, (profilePicturesTouchLastAt || Date.now()) - (profilePicturesTouchStartAt || Date.now()));
-	const velocityPxPerMs = Math.abs(deltaX) / elapsedMs;
-	const horizontalDistance = Math.abs(deltaX);
 
 	if (
-		horizontalDistance >= LIGHTBOX_TOUCH_SWIPE_THRESHOLD_PX &&
+		Math.abs(deltaX) >= LIGHTBOX_TOUCH_SWIPE_THRESHOLD_PX &&
 		Math.abs(deltaY) <= LIGHTBOX_TOUCH_MAX_VERTICAL_DRIFT_PX
 	) {
-		let stepCount = 1;
-
-		if (velocityPxPerMs >= LIGHTBOX_SWIPE_VELOCITY_STEP_3) {
-			stepCount = 3;
-		} else if (velocityPxPerMs >= LIGHTBOX_SWIPE_VELOCITY_STEP_2) {
-			stepCount = 2;
-		}
-
-		const direction = deltaX < 0 ? 1 : -1;
-
 		profilePicturesTouchSwipeTriggered = true;
-		moveProfilePicturesCarousel(direction * stepCount);
+		moveProfilePicturesCarousel(deltaX < 0 ? 1 : -1);
 	}
 
 	resetProfilePicturesTouchState();
@@ -3712,6 +3728,7 @@ const renderProfilePicturesCarousel = () => {
 	}
 
 	updateProfilePicturesActionMenuVisibility();
+	closeProfilePicturesActionMenu();
 
 	if (els.profilePicturesLightboxPrev) {
 		els.profilePicturesLightboxPrev.disabled = total < 2;
@@ -3728,6 +3745,9 @@ const openProfilePicturesCarousel = (index) => {
 	}
 
 	profilePicturesCarouselIndex = Number.isFinite(index) ? index : 0;
+	profilePicturesWheelDeltaAccumulator = 0;
+	profilePicturesWheelLastInputAt = 0;
+	profilePicturesWheelNavigationLockUntil = 0;
 	renderProfilePicturesCarousel();
 	els.profilePicturesLightbox.classList.remove('hidden');
 	els.profilePicturesLightbox.classList.remove('is-closing');
@@ -4148,9 +4168,11 @@ const fetchSession = async () => {
 
 	if (!state.canEdit) {
 		els.clearConsole.disabled = true;
+
 		if (els.restartBot) {
 			els.restartBot.disabled = true;
 		}
+
 		els.logsPanel?.classList.add('hidden');
 		els.auditPanel?.classList.add('hidden');
 		els.usersBulkToolbar?.classList.add('hidden');
@@ -4181,9 +4203,11 @@ const fetchSession = async () => {
 		renderAudit();
 	} else {
 		els.clearConsole.disabled = false;
+
 		if (els.restartBot) {
 			els.restartBot.disabled = false;
 		}
+		
 		els.logsPanel?.classList.remove('hidden');
 		els.auditPanel?.classList.remove('hidden');
 		settingsPanel?.classList.remove('hidden');
@@ -4474,7 +4498,9 @@ const fetchProfilePictures = async () => {
 	}
 
 	try {
-		const response = await fetch(`/api/dashboard/profile-pictures?limit=${PROFILE_PICTURES_LIMIT}`);
+		const response = await fetch(`/api/dashboard/profile-pictures?limit=${PROFILE_PICTURES_LIMIT}&_ts=${Date.now()}`, {
+			cache: 'no-store'
+		});
 
 		ensureAuthorizedResponse(response, 'Failed fetching profile picture album');
 
@@ -4823,8 +4849,18 @@ const bindEvents = () => {
 			const targetIndex = Number.parseInt(String(selectedCard.dataset.targetIndex || ''), 10);
 
 			if (Number.isFinite(targetIndex) && profilePicturesCarouselItems.length > 1) {
-				profilePicturesCarouselIndex = targetIndex;
-				renderProfilePicturesCarousel();
+				const total = profilePicturesCarouselItems.length;
+				const current = wrapProfilePicturesIndex(profilePicturesCarouselIndex, total);
+				const next = wrapProfilePicturesIndex(targetIndex, total);
+
+				if (next !== current) {
+					const forward = (next - current + total) % total;
+					const backward = (current - next + total) % total;
+
+					profilePicturesCarouselIndex = next;
+					renderProfilePicturesCarousel();
+					triggerProfilePicturesCycleAnimation(forward <= backward ? 1 : -1);
+				}
 			}
 
 			return;
@@ -4882,7 +4918,7 @@ const bindEvents = () => {
 	els.profilePicturesLightboxMenuDownload?.addEventListener('click', (event) => {
 		event.preventDefault();
 		event.stopPropagation();
-		downloadCurrentProfilePicture();
+		void downloadCurrentProfilePicture();
 		closeProfilePicturesActionMenu();
 	});
 	els.profilePicturesLightboxMenuDelete?.addEventListener('click', (event) => {
@@ -4898,7 +4934,7 @@ const bindEvents = () => {
 		passive: true
 	});
 	els.profilePicturesLightbox?.addEventListener('touchmove', handleProfilePicturesLightboxTouchMove, {
-		passive: false
+		passive: true
 	});
 	els.profilePicturesLightbox?.addEventListener('touchend', handleProfilePicturesLightboxTouchEnd, {
 		passive: true
@@ -5708,12 +5744,15 @@ const init = async () => {
 	bindEvents();
 	prefetchRoute('/albums');
 	setActiveFolder(state.activeFolder);
+	
 	if (typeof window !== 'undefined' && window.location.pathname !== ALBUMS_ROUTE_PATH) {
 		lastDashboardRouteHref = `${window.location.pathname}${window.location.search}${window.location.hash}`;
 	}
+	
 	if (typeof window !== 'undefined' && window.location.pathname === ALBUMS_ROUTE_PATH) {
 		openSeamlessAlbumsPage({ updateHistory: false });
 	}
+
 	window.addEventListener('resize', renderStatusCharts);
 	await runSafe(fetchSession);
 	await runSafe(async () => {

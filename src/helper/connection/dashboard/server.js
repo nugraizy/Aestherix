@@ -34,6 +34,7 @@ const DASHBOARD_OTP_PATH = './databases/dashboard/dashboard-otp.json';
 const DASHBOARD_BLOCKLIST_PATH = './databases/dashboard/dashboard-blocklist.json';
 const PROFILE_PICTURE_HISTORY_PATH = './databases/pictures/pinterest-profile-pictures.json';
 const PROFILE_PICTURE_HISTORY_LIMIT = 900;
+const PROFILE_PICTURES_DISK_SYNC_THROTTLE_MS = 1000;
 const ROOT_CHANGELOG_PATH = path.resolve(process.cwd(), 'CHANGELOG.md');
 const MAX_AUDIT_LOGS = 1000;
 const UNDO_WINDOW_MS = 12000;
@@ -63,6 +64,11 @@ const spotifyNowPlayingCache = {
 const auditState = {
 	logs: [],
 	lastId: 0
+};
+const profilePicturesDiskState = {
+	mtimeMs: 0,
+	size: -1,
+	lastSyncAt: 0
 };
 const projectVersion = (() => {
 	try {
@@ -180,9 +186,81 @@ const hydrateProfilePicturesCache = async () => {
 
 			configuration.pinterestImages.set(timestamp, normalized);
 		}
+
+		const stats = await fs.stat(PROFILE_PICTURE_HISTORY_PATH).catch(() => null);
+
+		if (stats) {
+			profilePicturesDiskState.mtimeMs = Number(stats.mtimeMs || 0);
+			profilePicturesDiskState.size = Number(stats.size || 0);
+			profilePicturesDiskState.lastSyncAt = Date.now();
+		}
 	} catch (error) {
 		loggers.warning(color('Failed hydrating dashboard profile pictures:', '#FF5555'), color(error.message, 'white'));
 	}
+};
+
+const refreshProfilePicturesCacheFromDisk = ({ force = false } = {}) => {
+	const now = Date.now();
+
+	if (!force && now - profilePicturesDiskState.lastSyncAt < PROFILE_PICTURES_DISK_SYNC_THROTTLE_MS) {
+		return;
+	}
+
+	profilePicturesDiskState.lastSyncAt = now;
+
+	let stats;
+
+	try {
+		stats = fs.statSync(PROFILE_PICTURE_HISTORY_PATH);
+	} catch {
+		return;
+	}
+
+	const mtimeMs = Number(stats?.mtimeMs || 0);
+	const size = Number(stats?.size || 0);
+
+	if (!force && mtimeMs === profilePicturesDiskState.mtimeMs && size === profilePicturesDiskState.size) {
+		return;
+	}
+
+	let raw;
+
+	try {
+		raw = fs.readJSONSync(PROFILE_PICTURE_HISTORY_PATH);
+	} catch {
+		return;
+	}
+
+	const entries = Array.isArray(raw?.entries) ? raw.entries : [];
+	const normalizedEntries = [];
+
+	for (const entry of entries) {
+		const timestamp = String(entry?.timestamp || '').trim();
+		const normalized = normalizePersistedPictureEntry(entry);
+
+		if (!timestamp || !normalized) {
+			continue;
+		}
+
+		normalizedEntries.push([timestamp, normalized]);
+	}
+
+	if (typeof configuration.pinterestImages?.clear === 'function') {
+		configuration.pinterestImages.clear();
+	}
+
+	for (const [timestamp, normalized] of normalizedEntries) {
+		configuration.pinterestImages.set(timestamp, normalized);
+	}
+
+	profilePicturesDiskState.mtimeMs = mtimeMs;
+	profilePicturesDiskState.size = size;
+};
+
+const applyNoStoreJsonHeaders = (res) => {
+	res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+	res.setHeader('Pragma', 'no-cache');
+	res.setHeader('Expires', '0');
 };
 
 const loadSessionStore = () => {
@@ -1028,6 +1106,8 @@ const normalizeDashboardPicture = (value) => {
 };
 
 const listDashboardProfilePictures = ({ limit = 180 } = {}) => {
+	refreshProfilePicturesCacheFromDisk();
+
 	const entries = Array.isArray(configuration.pinterestImages?.entries?.())
 		? configuration.pinterestImages.entries()
 		: [];
@@ -1101,6 +1181,14 @@ const persistDashboardProfilePictures = async () => {
 
 	await fs.ensureDir(path.dirname(PROFILE_PICTURE_HISTORY_PATH));
 	await fs.writeJSON(PROFILE_PICTURE_HISTORY_PATH, { entries }, { spaces: 2 });
+
+	const stats = await fs.stat(PROFILE_PICTURE_HISTORY_PATH).catch(() => null);
+
+	if (stats) {
+		profilePicturesDiskState.mtimeMs = Number(stats.mtimeMs || 0);
+		profilePicturesDiskState.size = Number(stats.size || 0);
+		profilePicturesDiskState.lastSyncAt = Date.now();
+	}
 };
 
 const deleteDashboardProfilePicture = async ({ timestamp = '', url = '' } = {}) => {
@@ -2000,6 +2088,7 @@ export const server = () => {
 			}
 
 			const payload = result.data || { lastId: realtimeBotLogCursor, logs: [] };
+			
 			realtimeBotLogCursor = Number(payload?.lastId || realtimeBotLogCursor || 0);
 
 			if (!Array.isArray(payload?.logs) || payload.logs.length === 0) {
@@ -2596,6 +2685,8 @@ export const server = () => {
 	});
 
 	app.get('/api/dashboard/profile-pictures', requireDashboardAuth, (req, res) => {
+		applyNoStoreJsonHeaders(res);
+
 		const limit = Number(req.query?.limit || 100);
 		const pictures = listDashboardProfilePictures({ limit });
 
