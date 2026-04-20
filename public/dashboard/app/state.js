@@ -1,8 +1,10 @@
 import { DEFAULT_DASHBOARD_SETTINGS } from './constants.js';
 
 export const state = {
-	lastLogId: 0,
-	logs: [],
+	lastDashboardLogId: 0,
+	dashboardLogs: [],
+	lastBotLogId: 0,
+	botLogs: [],
 	auditLogs: [],
 	lastAuditId: 0,
 	commands: [],

@@ -187,11 +187,23 @@
 				<div class="panel-head">
 					<h2>Logger Console</h2>
 					<div class="actions">
+						<button id="restart-bot" type="button" data-tooltip="Restart bot process via bridge service">
+							Restart Bot
+						</button>
 						<button id="clear-console" type="button" data-tooltip="Clear the visible console output panel">Clear View</button>
 					</div>
 				</div>
 				<div id="logs-state" class="section-state hidden" aria-live="polite"></div>
-				<pre id="logger-console" class="console"></pre>
+				<div id="logs-console-grid" class="logs-console-grid">
+					<div class="console-wrap">
+						<p class="console-label">Bot Console</p>
+						<pre id="bot-logger-console" class="console"></pre>
+					</div>
+					<div class="console-wrap">
+						<p class="console-label">Dashboard Console</p>
+						<pre id="dashboard-logger-console" class="console"></pre>
+					</div>
+				</div>
 			</section>
 
 			<section class="panel audit-panel">

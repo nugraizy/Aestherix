@@ -45,6 +45,7 @@ let renderStatusCharts = () => {};
 let pendingConfirmResolver = null;
 let dashboardSocket = null;
 let realtimeConnected = false;
+let botLogsBridgeWarningShown = false;
 let changelogHtmlCache = '';
 let contributorsHtmlCache = '';
 const DIALOG_ANIMATION_MS = 240;
@@ -586,7 +587,7 @@ const setSectionContentVisibility = (section, visible) => {
 	const isVisible = Boolean(visible);
 
 	if (section === 'logs') {
-		els.loggerConsole?.classList.toggle('hidden', !isVisible);
+		els.logsConsoleGrid?.classList.toggle('hidden', !isVisible);
 		return;
 	}
 
@@ -2336,7 +2337,9 @@ const getAlertSeverityRank = (severity) => {
 };
 
 const getRecentErrorSpikeCount = () => {
-	const recent = state.logs.slice(-ALERT_RULES.errorSpikeWindowSize);
+	const recent = [...state.botLogs, ...state.dashboardLogs]
+		.sort((a, b) => Number(a?.timestamp || 0) - Number(b?.timestamp || 0))
+		.slice(-ALERT_RULES.errorSpikeWindowSize);
 
 	return recent.filter((entry) => {
 		const message = String(entry?.message || '').replace(ansiRegex, '');
@@ -2427,7 +2430,7 @@ const setupAlertDebugHooks = () => {
 			message: `ERROR [debug] synthetic spike event ${index + 1}`
 		}));
 
-		state.logs = [...state.logs, ...entries].slice(-500);
+		state.dashboardLogs = [...state.dashboardLogs, ...entries].slice(-500);
 	};
 
 	window.dashboardAlertDebug = {
@@ -2449,7 +2452,9 @@ const setupAlertDebugHooks = () => {
 			state.alertSnapshot.sysCpu = 0;
 			state.alertSnapshot.procCpu = 0;
 			state.alertSnapshot.memoryPercent = 0;
-			state.logs = state.logs.filter((entry) => !String(entry?.message || '').includes('[debug] synthetic spike event'));
+			state.dashboardLogs = state.dashboardLogs.filter(
+				(entry) => !String(entry?.message || '').includes('[debug] synthetic spike event')
+			);
 			renderHeaderAlerts();
 		}
 	};
@@ -2543,24 +2548,64 @@ const renderLogs = () => {
 
 	setSectionContentVisibility('logs', true);
 
-	if (!state.logs.length) {
+	if (!state.dashboardLogs.length && !state.botLogs.length) {
 		setSectionState('logs', 'empty', 'No live logs yet. New log entries will appear here automatically.');
 		renderSectionState('logs');
-		els.loggerConsole.textContent = '';
+		if (els.dashboardLoggerConsole) {
+			els.dashboardLoggerConsole.textContent = '';
+		}
+		if (els.botLoggerConsole) {
+			els.botLoggerConsole.textContent = '';
+		}
 		return;
 	}
 
 	setSectionState('logs', 'idle');
 	renderSectionState('logs');
 
-	const text = state.logs
-		.slice(-300)
-		.map((entry) => `[${new Date(entry.timestamp).toLocaleTimeString()}] ${entry.message.replace(ansiRegex, '')}`)
-		.join('\n');
+	const formatLogsText = (entries) =>
+		(entries || [])
+			.slice(-300)
+			.map((entry) => `[${new Date(entry.timestamp).toLocaleTimeString()}] ${String(entry.message || '').replace(ansiRegex, '')}`)
+			.join('\n');
 
-	els.loggerConsole.textContent = text;
-	els.loggerConsole.scrollTop = els.loggerConsole.scrollHeight;
+	if (els.dashboardLoggerConsole) {
+		els.dashboardLoggerConsole.textContent = formatLogsText(state.dashboardLogs);
+		els.dashboardLoggerConsole.scrollTop = els.dashboardLoggerConsole.scrollHeight;
+	}
+
+	if (els.botLoggerConsole) {
+		els.botLoggerConsole.textContent = formatLogsText(state.botLogs);
+		els.botLoggerConsole.scrollTop = els.botLoggerConsole.scrollHeight;
+	}
+
 	renderHeaderAlerts();
+};
+
+const appendRealtimeLogs = ({ target, incoming, limit = 500 } = {}) => {
+	if (!Array.isArray(target) || !Array.isArray(incoming) || !incoming.length) {
+		return;
+	}
+
+	const seenIds = new Set(target.map((entry) => Number(entry?.id || 0)).filter((id) => id > 0));
+
+	for (const entry of incoming) {
+		const entryId = Number(entry?.id || 0);
+
+		if (entryId > 0 && seenIds.has(entryId)) {
+			continue;
+		}
+
+		target.push(entry);
+
+		if (entryId > 0) {
+			seenIds.add(entryId);
+		}
+	}
+
+	if (target.length > limit) {
+		target.splice(0, target.length - limit);
+	}
 };
 
 const renderAudit = () => {
@@ -3967,15 +4012,40 @@ const setupRealtime = () => {
 			return;
 		}
 
-		state.lastLogId = Number(payload.lastId || state.lastLogId || 0);
+		state.lastDashboardLogId = Number(payload.lastId || state.lastDashboardLogId || 0);
+		appendRealtimeLogs({
+			target: state.dashboardLogs,
+			incoming: payload.logs,
+			limit: 500
+		});
 
-		if (Array.isArray(payload.logs) && payload.logs.length) {
-			state.logs.push(...payload.logs);
+		botLogsBridgeWarningShown = false;
+		setSectionState('logs', 'idle');
+		renderLogs();
+	});
 
-			if (state.logs.length > 500) {
-				state.logs.splice(0, state.logs.length - 500);
-			}
+	dashboardSocket.on('dashboard:bot-logs', (payload) => {
+		if (!state.canEdit || !payload || typeof payload !== 'object') {
+			return;
 		}
+
+		if (payload.ok === false) {
+			if (!botLogsBridgeWarningShown) {
+				botLogsBridgeWarningShown = true;
+				showToast(payload.message || 'Bot log stream is not reachable right now.', 'warning');
+			}
+
+			return;
+		}
+
+		state.lastBotLogId = Number(payload.lastId || state.lastBotLogId || 0);
+		appendRealtimeLogs({
+			target: state.botLogs,
+			incoming: payload.logs,
+			limit: 500
+		});
+
+		botLogsBridgeWarningShown = false;
 
 		setSectionState('logs', 'idle');
 		renderLogs();
@@ -4078,6 +4148,9 @@ const fetchSession = async () => {
 
 	if (!state.canEdit) {
 		els.clearConsole.disabled = true;
+		if (els.restartBot) {
+			els.restartBot.disabled = true;
+		}
 		els.logsPanel?.classList.add('hidden');
 		els.auditPanel?.classList.add('hidden');
 		els.usersBulkToolbar?.classList.add('hidden');
@@ -4107,6 +4180,10 @@ const fetchSession = async () => {
 
 		renderAudit();
 	} else {
+		els.clearConsole.disabled = false;
+		if (els.restartBot) {
+			els.restartBot.disabled = false;
+		}
 		els.logsPanel?.classList.remove('hidden');
 		els.auditPanel?.classList.remove('hidden');
 		settingsPanel?.classList.remove('hidden');
@@ -4138,27 +4215,58 @@ const fetchLogs = async () => {
 		return;
 	}
 
-	if (!state.logs.length) {
+	if (!state.dashboardLogs.length && !state.botLogs.length) {
 		setSectionState('logs', 'loading', 'Fetching the latest logger output and building your console view.');
 		setSectionContentVisibility('logs', false);
 		renderSectionState('logs');
 	}
 
 	try {
-		const response = await fetch(`/api/dashboard/logs?since=${state.lastLogId}&limit=250`);
+		const [dashboardResponse, botResponse] = await Promise.allSettled([
+			fetch(`/api/dashboard/logs/dashboard?since=${state.lastDashboardLogId}&limit=250`),
+			fetch(`/api/dashboard/logs/bot?since=${state.lastBotLogId}&limit=250`)
+		]);
 
-		ensureAuthorizedResponse(response, 'Failed fetching logs');
+		if (dashboardResponse.status === 'rejected') {
+			throw dashboardResponse.reason;
+		}
 
-		const payload = await response.json();
+		ensureAuthorizedResponse(dashboardResponse.value, 'Failed fetching dashboard logs');
 
-		state.lastLogId = payload.lastId;
+		const dashboardPayload = await dashboardResponse.value.json();
 
-		if (Array.isArray(payload.logs) && payload.logs.length) {
-			state.logs.push(...payload.logs);
+		state.lastDashboardLogId = Number(dashboardPayload.lastId || state.lastDashboardLogId || 0);
 
-			if (state.logs.length > 500) {
-				state.logs.splice(0, state.logs.length - 500);
+		if (Array.isArray(dashboardPayload.logs) && dashboardPayload.logs.length) {
+			state.dashboardLogs.push(...dashboardPayload.logs);
+
+			if (state.dashboardLogs.length > 500) {
+				state.dashboardLogs.splice(0, state.dashboardLogs.length - 500);
 			}
+		}
+
+		if (botResponse.status === 'fulfilled') {
+			if (botResponse.value.ok) {
+				const botPayload = await botResponse.value.json();
+
+				state.lastBotLogId = Number(botPayload.lastId || state.lastBotLogId || 0);
+
+				if (Array.isArray(botPayload.logs) && botPayload.logs.length) {
+					state.botLogs.push(...botPayload.logs);
+
+					if (state.botLogs.length > 500) {
+						state.botLogs.splice(0, state.botLogs.length - 500);
+					}
+				}
+
+				botLogsBridgeWarningShown = false;
+			} else if (!botLogsBridgeWarningShown) {
+				botLogsBridgeWarningShown = true;
+				showToast('Bot log stream is not reachable right now.', 'warning');
+			}
+		} else if (!botLogsBridgeWarningShown) {
+			botLogsBridgeWarningShown = true;
+			showToast('Bot log stream is not reachable right now.', 'warning');
 		}
 
 		setSectionState('logs', 'idle');
@@ -4168,6 +4276,45 @@ const fetchLogs = async () => {
 		setSectionContentVisibility('logs', false);
 		renderSectionState('logs');
 		throw error;
+	}
+};
+
+const restartBot = async () => {
+	const approved = await confirmRiskAction({
+		title: 'Restart Bot Runtime?',
+		message: 'Bot process will restart via PM2. Dashboard will stay online.',
+		confirmLabel: 'Restart Bot'
+	});
+
+	if (!approved) {
+		return;
+	}
+
+	if (els.restartBot) {
+		els.restartBot.disabled = true;
+	}
+
+	try {
+		const response = await fetch('/api/dashboard/bot/restart', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
+
+		ensureAuthorizedResponse(response, 'Failed to restart bot');
+		showToast('Restart signal sent. Bot should reconnect shortly.', 'warning');
+
+		setTimeout(() => {
+			void runSafe(fetchStatus);
+			void runSafe(fetchLogs);
+		}, 1800);
+	} catch (error) {
+		showToast(error?.message || 'Failed restarting bot.', 'error');
+	} finally {
+		if (els.restartBot) {
+			els.restartBot.disabled = false;
+		}
 	}
 };
 
@@ -4828,8 +4975,22 @@ const bindEvents = () => {
 	});
 
 	els.clearConsole.addEventListener('click', () => {
-		state.logs = [];
-		els.loggerConsole.textContent = '';
+		state.dashboardLogs = [];
+		state.botLogs = [];
+		state.lastDashboardLogId = 0;
+		state.lastBotLogId = 0;
+
+		if (els.dashboardLoggerConsole) {
+			els.dashboardLoggerConsole.textContent = '';
+		}
+
+		if (els.botLoggerConsole) {
+			els.botLoggerConsole.textContent = '';
+		}
+	});
+
+	els.restartBot?.addEventListener('click', () => {
+		void restartBot();
 	});
 
 	document.addEventListener('click', (event) => {

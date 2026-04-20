@@ -1734,6 +1734,46 @@ select {
 	padding: 12px;
 }
 
+.logs-console-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	grid-auto-rows: 1fr;
+	align-items: stretch;
+	gap: 10px;
+}
+
+.console-wrap {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	min-height: 0;
+}
+
+.console-label {
+	margin: 0;
+	font-size: 0.74rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--ink-muted);
+}
+
+.logs-console-grid .console {
+	height: 300px;
+	min-height: 300px;
+	max-height: 300px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	flex: 1;
+}
+
+@media (max-width: 980px) {
+	.logs-console-grid .console {
+		height: 240px;
+		min-height: 240px;
+		max-height: 240px;
+	}
+}
+
 :root[data-theme='light'] .hero,
 :root[data-theme='light'] .card,
 :root[data-theme='light'] .panel,
@@ -2069,7 +2109,8 @@ select {
 }
 
 #audit-clear-filters,
-#clear-console {
+#clear-console,
+#restart-bot {
 	padding: 5px 10px;
 	border-radius: 999px;
 	font-size: 0.74rem;
@@ -2080,24 +2121,57 @@ select {
 }
 
 #audit-clear-filters:hover,
-#clear-console:hover {
+#clear-console:hover,
+#restart-bot:hover {
 	border-color: rgba(255, 110, 110, 0.6);
 	background: rgba(255, 110, 110, 0.08);
 	color: var(--ink);
 }
 
 :root[data-theme='light'] #audit-clear-filters,
-:root[data-theme='light'] #clear-console {
+:root[data-theme='light'] #clear-console,
+:root[data-theme='light'] #restart-bot {
 	border-color: rgba(17, 49, 58, 0.38);
 	background: rgba(17, 49, 58, 0.05);
 	color: #2a4750;
 }
 
 :root[data-theme='light'] #audit-clear-filters:hover,
-:root[data-theme='light'] #clear-console:hover {
+:root[data-theme='light'] #clear-console:hover,
+:root[data-theme='light'] #restart-bot:hover {
 	border-color: rgba(183, 79, 79, 0.62);
 	background: rgba(209, 92, 92, 0.14);
 	color: #1f3136;
+}
+
+#restart-bot {
+	border-color: rgba(255, 177, 79, 0.55);
+	background: rgba(255, 177, 79, 0.1);
+	color: #ffd6a0;
+}
+
+#restart-bot:hover {
+	border-color: rgba(255, 205, 129, 0.7);
+	background: rgba(255, 177, 79, 0.18);
+	color: #fff1de;
+}
+
+:root[data-theme='light'] #restart-bot {
+	border-color: rgba(179, 107, 31, 0.46);
+	background: rgba(179, 107, 31, 0.1);
+	color: #7c4612;
+}
+
+:root[data-theme='light'] #restart-bot:hover {
+	border-color: rgba(179, 107, 31, 0.66);
+	background: rgba(179, 107, 31, 0.17);
+	color: #5f340b;
+}
+
+@media (max-width: 980px) {
+	.logs-console-grid {
+		grid-template-columns: 1fr;
+	}
 }
 
 #audit-clear-filters:disabled {
