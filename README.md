@@ -48,6 +48,42 @@ node . your_session_name --flag
 
 you can find the available flags [here](./doc/DOC.md#available-flags)
 
+## Run bot and dashboard separately
+
+Run bot only:
+
+```sh
+npm run start:bot
+```
+
+Run dashboard only:
+
+```sh
+npm run start:dashboard
+```
+
+By default dashboard runs on port `4000`. You can change it with `DASHBOARD_PORT`.
+
+## PM2 split runtime
+
+Start both as separate PM2 apps:
+
+```sh
+npm run pm2:split
+```
+
+See logs:
+
+```sh
+npm run pm2:split:logs
+```
+
+Stop both split apps:
+
+```sh
+npm run pm2:split:stop
+```
+
 ---
 # Contributors
 
