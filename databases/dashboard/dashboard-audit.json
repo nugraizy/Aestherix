@@ -1,5 +1,5 @@
 {
-  "lastId": 144,
+  "lastId": 163,
   "logs": [
     {
       "id": 1,
@@ -1824,6 +1824,310 @@
       "message": "Owner deleted a profile picture from albums.",
       "before": null,
       "after": null
+    },
+    {
+      "id": 145,
+      "timestamp": 1776667337810,
+      "action": "user.premium",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6281220439155@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "premium": false
+      },
+      "after": {
+        "premium": true
+      }
+    },
+    {
+      "id": 146,
+      "timestamp": 1776672747885,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "bingimage",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": true
+      },
+      "after": {
+        "enabled": false
+      }
+    },
+    {
+      "id": 147,
+      "timestamp": 1776672750273,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "bingimage",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": false
+      },
+      "after": {
+        "enabled": true
+      }
+    },
+    {
+      "id": 148,
+      "timestamp": 1776673433001,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "bingimage",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": true
+      },
+      "after": {
+        "enabled": false
+      }
+    },
+    {
+      "id": 149,
+      "timestamp": 1776673434186,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "bingimage",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": false
+      },
+      "after": {
+        "enabled": true
+      }
+    },
+    {
+      "id": 150,
+      "timestamp": 1776673437889,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "bingimage",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": true
+      },
+      "after": {
+        "enabled": false
+      }
+    },
+    {
+      "id": 151,
+      "timestamp": 1776673618503,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "bingimage",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": false
+      },
+      "after": {
+        "enabled": true
+      }
+    },
+    {
+      "id": 152,
+      "timestamp": 1776673721027,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "charai",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": true
+      },
+      "after": {
+        "enabled": false
+      }
+    },
+    {
+      "id": 153,
+      "timestamp": 1776673725203,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "charai",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": false
+      },
+      "after": {
+        "enabled": true
+      }
+    },
+    {
+      "id": 154,
+      "timestamp": 1776673729340,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "charai",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": true
+      },
+      "after": {
+        "enabled": false
+      }
+    },
+    {
+      "id": 155,
+      "timestamp": 1776673730095,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "getsurahtafsir",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": true
+      },
+      "after": {
+        "enabled": false
+      }
+    },
+    {
+      "id": 156,
+      "timestamp": 1776673730609,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "surahdetails",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": true
+      },
+      "after": {
+        "enabled": false
+      }
+    },
+    {
+      "id": 157,
+      "timestamp": 1776673731610,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "surahaudio",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": true
+      },
+      "after": {
+        "enabled": false
+      }
+    },
+    {
+      "id": 158,
+      "timestamp": 1776673738341,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "charai",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": false
+      },
+      "after": {
+        "enabled": true
+      }
+    },
+    {
+      "id": 159,
+      "timestamp": 1776673739260,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "getsurahtafsir",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": false
+      },
+      "after": {
+        "enabled": true
+      }
+    },
+    {
+      "id": 160,
+      "timestamp": 1776673739773,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "surahdetails",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": false
+      },
+      "after": {
+        "enabled": true
+      }
+    },
+    {
+      "id": 161,
+      "timestamp": 1776673740787,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "surahaudio",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": false
+      },
+      "after": {
+        "enabled": true
+      }
+    },
+    {
+      "id": 162,
+      "timestamp": 1776673751017,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "waifu2x",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": true
+      },
+      "after": {
+        "enabled": false
+      }
+    },
+    {
+      "id": 163,
+      "timestamp": 1776673751863,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "waifu2xv2",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": true
+      },
+      "after": {
+        "enabled": false
+      }
     }
   ]
 }

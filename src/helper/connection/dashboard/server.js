@@ -13,12 +13,12 @@ import { z } from 'zod';
 import { color, loggers } from '../../../utils/modules/index.js';
 import configuration from '../../config/connect.js';
 import {
-	getDashboardLogs,
-	initializeDashboardMonitor,
-	listDashboardCommands,
-	listDashboardFlags,
-	setDashboardCommandState,
-	setDashboardFlagState
+    getDashboardLogs,
+    initializeDashboardMonitor,
+    listDashboardCommands,
+    listDashboardFlags,
+    setDashboardCommandState,
+    setDashboardFlagState
 } from './dashboard-monitor.js';
 
 const AUTH_COOKIE_NAME = 'aestherix_dashboard_auth';
@@ -36,6 +36,7 @@ const ROOT_CHANGELOG_PATH = path.resolve(process.cwd(), 'CHANGELOG.md');
 const MAX_AUDIT_LOGS = 1000;
 const UNDO_WINDOW_MS = 12000;
 const UNDO_WINDOW_SHORT_MS = 8000;
+const DASHBOARD_PROFILE_PICTURES_REALTIME_LIMIT = 100;
 const UNDO_WINDOW_MEDIUM_MS = 10000;
 const UNDO_WINDOW_LONG_MS = 15000;
 const S_WHATSAPP_NET = '@s.whatsapp.net';
@@ -860,6 +861,57 @@ const listDashboardUsers = async ({ redactNumbers = false } = {}) => {
 	return users.filter(Boolean).sort((a, b) => a.id.localeCompare(b.id));
 };
 
+const getSafeHttpUrl = (value) => {
+	const normalized = String(value || '').trim();
+
+	if (!/^https?:\/\//i.test(normalized)) {
+		return '';
+	}
+
+	return normalized;
+};
+
+const toImageVariant = (variant, fallbackUrl) => {
+	const variantUrl = getSafeHttpUrl(variant?.url) || getSafeHttpUrl(variant) || fallbackUrl;
+
+	if (!variantUrl) {
+		return null;
+	}
+
+	if (variant && typeof variant === 'object') {
+		return {
+			...variant,
+			url: variantUrl
+		};
+	}
+
+	return {
+		url: variantUrl
+	};
+};
+
+const normalizeDashboardPicture = (value) => {
+	const originalUrl =
+		getSafeHttpUrl(value?.original?.url) ||
+		getSafeHttpUrl(value?.url) ||
+		getSafeHttpUrl(value?.original) ||
+		getSafeHttpUrl(value);
+
+	if (!originalUrl) {
+		return null;
+	}
+
+	const original = toImageVariant(value?.original, originalUrl) || { url: originalUrl };
+	const thumbnail =
+		toImageVariant(value?.thumbnail, getSafeHttpUrl(value?.thumbnail?.url) || getSafeHttpUrl(value?.thumbnail) || originalUrl) ||
+		{ url: originalUrl };
+
+	return {
+		original,
+		thumbnail
+	};
+};
+
 const listDashboardProfilePictures = ({ limit = 180 } = {}) => {
 	const entries = Array.isArray(configuration.pinterestImages?.entries?.())
 		? configuration.pinterestImages.entries()
@@ -868,17 +920,19 @@ const listDashboardProfilePictures = ({ limit = 180 } = {}) => {
 	const seenUrls = new Set();
 
 	const pictures = entries
-		.map(([timestamp, url]) => {
-			const safeUrl = String(url || '').trim();
+		.map(([timestamp, value]) => {
+			const normalized = normalizeDashboardPicture(value);
 
-			if (!/^https?:\/\//i.test(safeUrl)) {
+			if (!normalized) {
 				return null;
 			}
 
 			return {
-				id: `${timestamp}-${safeUrl}`,
+				id: `${timestamp}-${normalized.original.url}`,
 				timestamp: String(timestamp || ''),
-				url: safeUrl
+				url: normalized.original.url,
+				original: normalized.original,
+				thumbnail: normalized.thumbnail
 			};
 		})
 		.filter(Boolean)
@@ -901,11 +955,21 @@ const listDashboardProfilePictures = ({ limit = 180 } = {}) => {
 const persistDashboardProfilePictures = async () => {
 	const seenUrls = new Set();
 	const entries = (Array.isArray(configuration.pinterestImages?.entries?.()) ? configuration.pinterestImages.entries() : [])
-		.map(([timestamp, url]) => ({
-			timestamp: String(timestamp || '').trim(),
-			url: String(url || '').trim()
-		}))
-		.filter((entry) => entry.timestamp && /^https?:\/\//i.test(entry.url))
+		.map(([timestamp, value]) => {
+			const normalized = normalizeDashboardPicture(value);
+
+			if (!normalized) {
+				return null;
+			}
+
+			return {
+				timestamp: String(timestamp || '').trim(),
+				url: normalized.original.url,
+				original: normalized.original,
+				thumbnail: normalized.thumbnail
+			};
+		})
+		.filter((entry) => entry && entry.timestamp && /^https?:\/\//i.test(entry.url))
 		.reverse()
 		.filter((entry) => {
 			const dedupeKey = entry.url.toLowerCase();
@@ -933,14 +997,17 @@ const deleteDashboardProfilePicture = async ({ timestamp = '', url = '' } = {}) 
 	}
 
 	let deleted = false;
-	const currentUrl = String(configuration.pinterestImages.get(safeTimestamp) || '').trim();
+	const currentValue = configuration.pinterestImages.get(safeTimestamp);
+	const currentUrl = normalizeDashboardPicture(currentValue)?.original?.url || '';
 
 	if (currentUrl && currentUrl === safeUrl) {
 		configuration.pinterestImages.delete(safeTimestamp);
 		deleted = true;
 	} else {
 		for (const [key, value] of configuration.pinterestImages.entries()) {
-			if (String(key).trim() === safeTimestamp && String(value || '').trim() === safeUrl) {
+			const parsed = normalizeDashboardPicture(value);
+
+			if (String(key).trim() === safeTimestamp && parsed?.original?.url === safeUrl) {
 				configuration.pinterestImages.delete(key);
 				deleted = true;
 				break;
@@ -1441,7 +1508,7 @@ export const server = () => {
 			})
 		});
 		socket.emit('dashboard:profile-pictures', {
-			pictures: listDashboardProfilePictures()
+			pictures: listDashboardProfilePictures({ limit: DASHBOARD_PROFILE_PICTURES_REALTIME_LIMIT })
 		});
 
 		if (session.role === 'owner') {
@@ -1585,7 +1652,7 @@ export const server = () => {
 			const flags = listDashboardFlags(configuration);
 			const usersForOwner = await listDashboardUsers({ redactNumbers: false });
 			const usersForViewer = await listDashboardUsers({ redactNumbers: true });
-			const pictures = listDashboardProfilePictures();
+			const pictures = listDashboardProfilePictures({ limit: DASHBOARD_PROFILE_PICTURES_REALTIME_LIMIT });
 
 			io.emit('dashboard:commands', { commands });
 			io.emit('dashboard:flags', { flags });
@@ -2130,7 +2197,7 @@ export const server = () => {
 			});
 		}
 
-		const pictures = listDashboardProfilePictures({ limit: 500 });
+		const pictures = listDashboardProfilePictures({ limit: DASHBOARD_PROFILE_PICTURES_REALTIME_LIMIT });
 		
 		io.emit('dashboard:profile-pictures', { pictures });
 

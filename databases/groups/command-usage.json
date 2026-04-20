@@ -1,5 +1,9 @@
 {
-  "ping": 1,
+  "ping": 5,
   "tiktokpost": 1,
-  "setpin": 2
+  "setpin": 6,
+  "menu": 2,
+  "hifidownload": 1,
+  "twitterdl": 1,
+  "douyin": 1
 }

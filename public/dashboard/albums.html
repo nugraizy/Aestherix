@@ -9,6 +9,7 @@
 			(() => {
 				const THEME_KEY = 'aestherix.dashboard.theme';
 				const PALETTE_KEY = 'aestherix.dashboard.palette';
+				const ZEN_CURSOR_ENABLED_KEY = 'aestherix.dashboard.cursor.enabled';
 				const root = document.documentElement;
 
 				try {
@@ -31,6 +32,12 @@
 				}
 
 				try {
+					const shouldPreloadFromCache = window.sessionStorage.getItem(ZEN_CURSOR_ENABLED_KEY) === '1';
+
+					if (shouldPreloadFromCache) {
+						root.classList.add('zen-cursor-preload');
+					}
+
 					const canUseZenCursor =
 						window.matchMedia &&
 						window.matchMedia('(pointer: fine)').matches &&
@@ -38,6 +45,7 @@
 
 					if (canUseZenCursor) {
 						root.classList.add('zen-cursor-preload');
+						const preloadReleaseMs = shouldPreloadFromCache ? 3600 : 1200;
 
 						window.addEventListener(
 							'DOMContentLoaded',
@@ -46,12 +54,20 @@
 									if (!root.classList.contains('zen-cursor-enabled')) {
 										root.classList.remove('zen-cursor-preload');
 									}
-								}, 1200);
+								}, preloadReleaseMs);
 							},
 							{ once: true }
 						);
+					} else {
+						window.sessionStorage.removeItem(ZEN_CURSOR_ENABLED_KEY);
 					}
 				} catch {
+					try {
+						window.sessionStorage.removeItem(ZEN_CURSOR_ENABLED_KEY);
+					} catch {
+						// Ignore storage cleanup errors.
+					}
+
 					root.classList.remove('zen-cursor-preload');
 				}
 			})();
