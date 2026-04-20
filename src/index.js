@@ -2,13 +2,22 @@ import { makeInMemoryStore } from '@rodrigogs/baileys-store';
 import axios from 'axios';
 import { isWABusinessPlatform } from 'baileys';
 import dayjs from 'dayjs';
+import express from 'express';
 import fs from 'fs-extra';
+import { createServer } from 'http';
 import mqtt from 'mqtt';
 import path from 'path';
 import P from 'pino';
 import sharp from 'sharp';
 
 import configuration from './helper/config/connect.js';
+import {
+	getDashboardLogs,
+	initializeDashboardMonitor,
+	refreshDashboardCommandCatalog,
+	setDashboardCommandState,
+	setDashboardFlagState
+} from './helper/connection/dashboard/dashboard-monitor.js';
 import { server } from './helper/connection/dashboard/server.js';
 import {
 	emitGroupSettings,
@@ -39,6 +48,197 @@ const PROFILE_PICTURE_NO_CROP = 'no_crop';
 const BOOKMARK_END_FLAG = '-end-';
 const PROFILE_PICTURE_HISTORY_PATH = './databases/pictures/pinterest-profile-pictures.json';
 const PROFILE_PICTURE_HISTORY_LIMIT = 900;
+const ENABLE_EMBEDDED_DASHBOARD = String(process.env.DASHBOARD_EMBEDDED || '1') !== '0';
+const DASHBOARD_BRIDGE_PORT = Number(process.env.DASHBOARD_BRIDGE_PORT || 4010);
+const DASHBOARD_BRIDGE_TOKEN = String(process.env.DASHBOARD_BRIDGE_TOKEN || 'aestherix-local-bridge-token');
+
+let dashboardBridgeInstance = null;
+const S_WHATSAPP_NET = '@s.whatsapp.net';
+const USERS_LIMIT_DIR = './databases/users/limit';
+const USERS_BANNED_PATH = './databases/users/banned.json';
+
+const normalizeUserJid = (input) => {
+	let raw = String(input || '').trim();
+
+	if (!raw) {
+		return null;
+	}
+
+	if (raw.endsWith('@c.us')) {
+		raw = raw.replace(/@c\.us$/i, S_WHATSAPP_NET);
+	}
+
+	if (raw.endsWith(S_WHATSAPP_NET)) {
+		const local = raw.split('@')[0].replace(/\D/g, '');
+
+		return local ? `${local}${S_WHATSAPP_NET}` : null;
+	}
+
+	if (raw.includes('@')) {
+		const local = raw.split('@')[0].replace(/\D/g, '');
+
+		return local ? `${local}${S_WHATSAPP_NET}` : null;
+	}
+
+	const digits = raw.replace(/\D/g, '');
+
+	if (!digits) {
+		return null;
+	}
+
+	return `${digits}${S_WHATSAPP_NET}`;
+};
+
+const readUserLimitFile = async (jid) => {
+	const filePath = path.join(USERS_LIMIT_DIR, `${jid}.json`);
+
+	if (!(await fs.pathExists(filePath))) {
+		const fallback = {
+			id: jid,
+			limit: 30,
+			role: 'FREE'
+		};
+
+		await fs.ensureDir(USERS_LIMIT_DIR);
+		await fs.writeJSON(filePath, fallback, { spaces: 2 });
+		return fallback;
+	}
+
+	const raw = await fs.readJSON(filePath);
+
+	return {
+		id: normalizeUserJid(raw?.id || jid) || jid,
+		limit: Math.max(0, Number(raw?.limit || 0)),
+		role: raw?.role === 'PREMIUM' ? 'PREMIUM' : 'FREE'
+	};
+};
+
+const writeUserLimitFile = async (jid, data) => {
+	const payload = {
+		id: jid,
+		limit: Math.max(0, Number(data?.limit || 0)),
+		role: data?.role === 'PREMIUM' ? 'PREMIUM' : 'FREE'
+	};
+
+	await fs.ensureDir(USERS_LIMIT_DIR);
+	await fs.writeJSON(path.join(USERS_LIMIT_DIR, `${jid}.json`), payload, { spaces: 2 });
+	configuration.user.limit.set(jid, { limit: payload.limit, role: payload.role });
+
+	return payload;
+};
+
+const readBannedUsers = async () => {
+	if (!(await fs.pathExists(USERS_BANNED_PATH))) {
+		await fs.ensureDir(path.dirname(USERS_BANNED_PATH));
+		await fs.writeJSON(USERS_BANNED_PATH, [], { spaces: 2 });
+		return [];
+	}
+
+	const list = await fs.readJSON(USERS_BANNED_PATH);
+
+	return Array.isArray(list) ? list : [];
+};
+
+const writeBannedUsers = async (list) => {
+	await fs.ensureDir(path.dirname(USERS_BANNED_PATH));
+	await fs.writeJSON(USERS_BANNED_PATH, Array.from(new Set(list)), { spaces: 2 });
+};
+
+const applyDashboardRuntimeMutation = async (waClient, type, payload = {}) => {
+	if (type === 'command.toggle') {
+		return setDashboardCommandState(configuration, String(payload.commandName || ''), Boolean(payload.enabled));
+	}
+
+	if (type === 'flag.toggle') {
+		return setDashboardFlagState(configuration, String(payload.flagName || ''), Boolean(payload.enabled));
+	}
+
+	if (type === 'user.limit') {
+		const jid = normalizeUserJid(payload.userId);
+
+		if (!jid) {
+			return { ok: false, message: 'Invalid user id.' };
+		}
+
+		const current = await readUserLimitFile(jid);
+
+		await writeUserLimitFile(jid, {
+			...current,
+			limit: Number(payload.limit || 0)
+		});
+
+		return { ok: true, userId: jid };
+	}
+
+	if (type === 'user.premium') {
+		const jid = normalizeUserJid(payload.userId);
+
+		if (!jid) {
+			return { ok: false, message: 'Invalid user id.' };
+		}
+
+		const current = await readUserLimitFile(jid);
+
+		await writeUserLimitFile(jid, {
+			...current,
+			role: Boolean(payload.enabled) ? 'PREMIUM' : 'FREE'
+		});
+
+		return { ok: true, userId: jid };
+	}
+
+	if (type === 'user.banned') {
+		const jid = normalizeUserJid(payload.userId);
+
+		if (!jid) {
+			return { ok: false, message: 'Invalid user id.' };
+		}
+
+		const list = await readBannedUsers();
+		const set = new Set(list);
+
+		if (Boolean(payload.enabled)) {
+			set.add(jid);
+		} else {
+			set.delete(jid);
+		}
+
+		const next = Array.from(set);
+
+		await writeBannedUsers(next);
+		configuration.cache.bannedlist = next;
+
+		return { ok: true, userId: jid };
+	}
+
+	if (type === 'user.blocked') {
+		const jid = normalizeUserJid(payload.userId);
+
+		if (!jid) {
+			return { ok: false, message: 'Invalid user id.' };
+		}
+
+		if (!waClient?.updateBlockStatus) {
+			return { ok: false, status: 503, message: 'WhatsApp client is not connected yet.' };
+		}
+
+		await waClient.updateBlockStatus(jid, Boolean(payload.enabled) ? 'block' : 'unblock');
+
+		const set = new Set(Array.isArray(configuration.cache?.blocklist) ? configuration.cache.blocklist : []);
+
+		if (Boolean(payload.enabled)) {
+			set.add(jid);
+		} else {
+			set.delete(jid);
+		}
+
+		configuration.cache.blocklist = Array.from(set);
+
+		return { ok: true, userId: jid };
+	}
+
+	return { ok: false, message: 'Unsupported runtime sync action.' };
+};
 
 const getSafeHttpUrl = (value) => {
 	const normalized = String(value || '').trim();
@@ -143,6 +343,141 @@ const persistProfilePictureHistory = async (config) => {
 
 	await fs.ensureDir(path.dirname(PROFILE_PICTURE_HISTORY_PATH));
 	await fs.writeJSON(PROFILE_PICTURE_HISTORY_PATH, { entries }, { spaces: 2 });
+};
+
+const sendDashboardConfirmationButton = async ({ waClient, to, buttonId, phoneNumber }) => {
+	if (!waClient) {
+		throw new Error('WhatsApp client is not ready.');
+	}
+
+	if (waClient.TemplateBuilder?.Native) {
+		const builder = new waClient.TemplateBuilder.Native();
+
+		await builder
+			.destination(to)
+			.body('A dashboard login request was made for your owner account. Confirm if this was you.')
+			.footer(`Requested number: ${phoneNumber}`)
+			.buttons(
+				builder.button.reply({
+					display: 'Confirm Login',
+					id: buttonId
+				})
+			)
+			.send();
+
+		return;
+	}
+
+	await waClient.send(to, {
+		text: `Dashboard login request detected.\n\nReply this exact code to confirm:\n${buttonId}`
+	});
+};
+
+const startDashboardBridge = (resolveWaClient) => {
+	if (dashboardBridgeInstance) {
+		return;
+	}
+
+	const app = express();
+
+	app.use(express.json());
+
+	app.post('/internal/dashboard/send-confirmation', async (req, res) => {
+		const token = String(req.headers['x-dashboard-bridge-token'] || '');
+
+		if (!token || token !== DASHBOARD_BRIDGE_TOKEN) {
+			return res.status(401).json({ ok: false, message: 'Unauthorized bridge token.' });
+		}
+
+		const to = String(req.body?.to || '').trim();
+		const buttonId = String(req.body?.buttonId || '').trim();
+		const phoneNumber = String(req.body?.phoneNumber || '').trim();
+
+		if (!to || !buttonId || !phoneNumber) {
+			return res.status(400).json({ ok: false, message: 'Invalid bridge payload.' });
+		}
+
+		const waClient =
+			typeof resolveWaClient === 'function' ? resolveWaClient() || global.client?.instance || null : global.client?.instance || null;
+
+		if (!waClient?.send) {
+			return res.status(503).json({ ok: false, message: 'WhatsApp client is not connected yet.' });
+		}
+
+		try {
+			await sendDashboardConfirmationButton({
+				waClient,
+				to,
+				buttonId,
+				phoneNumber
+			});
+
+			return res.json({ ok: true });
+		} catch (error) {
+			loggers.warning(color('Dashboard bridge send failed:', '#FF5555'), color(error.message, 'white'));
+			return res.status(500).json({ ok: false, message: 'Failed sending WhatsApp confirmation.' });
+		}
+	});
+
+	app.post('/internal/dashboard/runtime-sync', async (req, res) => {
+		const token = String(req.headers['x-dashboard-bridge-token'] || '');
+
+		if (!token || token !== DASHBOARD_BRIDGE_TOKEN) {
+			return res.status(401).json({ ok: false, message: 'Unauthorized bridge token.' });
+		}
+
+		const type = String(req.body?.type || '').trim();
+		const payload = req.body?.payload && typeof req.body.payload === 'object' ? req.body.payload : {};
+		const waClient =
+			typeof resolveWaClient === 'function' ? resolveWaClient() || global.client?.instance || null : global.client?.instance || null;
+
+		try {
+			const result = await applyDashboardRuntimeMutation(waClient, type, payload);
+
+			if (!result?.ok) {
+				return res.status(result?.status || 400).json(result);
+			}
+
+			return res.json(result);
+		} catch (error) {
+			loggers.warning(color('Dashboard runtime sync failed:', '#FF5555'), color(error.message, 'white'));
+			return res.status(500).json({ ok: false, message: 'Runtime sync failed.' });
+		}
+	});
+
+	app.get('/internal/dashboard/logs', (req, res) => {
+		const token = String(req.headers['x-dashboard-bridge-token'] || '');
+
+		if (!token || token !== DASHBOARD_BRIDGE_TOKEN) {
+			return res.status(401).json({ ok: false, message: 'Unauthorized bridge token.' });
+		}
+
+		const since = Number(req.query?.since || 0);
+		const limit = Number(req.query?.limit || 200);
+
+		return res.json(getDashboardLogs({ since, limit }));
+	});
+
+	app.post('/internal/dashboard/restart', (req, res) => {
+		const token = String(req.headers['x-dashboard-bridge-token'] || '');
+
+		if (!token || token !== DASHBOARD_BRIDGE_TOKEN) {
+			return res.status(401).json({ ok: false, message: 'Unauthorized bridge token.' });
+		}
+
+		res.json({ ok: true, restarting: true });
+
+		setTimeout(() => {
+			process.exit(0);
+		}, 220);
+	});
+
+	const safePort = Number.isFinite(DASHBOARD_BRIDGE_PORT) && DASHBOARD_BRIDGE_PORT > 0 ? DASHBOARD_BRIDGE_PORT : 4010;
+	const server = createServer(app).listen(safePort, '127.0.0.1', () => {
+		loggers.info(color('Dashboard bridge', 'white'), color('listening on', '#E4C1F9'), color(String(safePort), 'white'));
+	});
+
+	dashboardBridgeInstance = server;
 };
 
 /**
@@ -269,6 +604,8 @@ const startAutoProfilePictureChangeService = async (client, state, config) => {
 configuration.cli = clis;
 configuration.OPTIONS = configuration.cli.flags;
 
+await initializeDashboardMonitor(configuration);
+
 const { OPTIONS, cli } = configuration;
 
 const regexOption = Object.keys(OPTIONS);
@@ -341,7 +678,18 @@ export const start = async () => {
 
 		Client.ev.on('connected', () => {
 			githubWebhook();
-			server();
+			startDashboardBridge(() => Client.instance);
+
+			if (ENABLE_EMBEDDED_DASHBOARD) {
+				server();
+			}
+
+			refreshDashboardCommandCatalog(configuration);
+
+			setInterval(() => {
+				refreshDashboardCommandCatalog(configuration);
+			}, 30_000);
+
 			Client.ev.on('groups', handleGroupSettingsUpdate);
 			Client.ev.on('groups.update', (update) => Client.ev.emit('groups', update));
 			Client.ev.on('group-participants.update', async (update) => await handleParticipantsUpdate(update));

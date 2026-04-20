@@ -13,12 +13,12 @@ import { z } from 'zod';
 import { color, loggers } from '../../../utils/modules/index.js';
 import configuration from '../../config/connect.js';
 import {
-    getDashboardLogs,
-    initializeDashboardMonitor,
-    listDashboardCommands,
-    listDashboardFlags,
-    setDashboardCommandState,
-    setDashboardFlagState
+	getDashboardLogs,
+	initializeDashboardMonitor,
+	listDashboardCommands,
+	listDashboardFlags,
+	setDashboardCommandState,
+	setDashboardFlagState
 } from './dashboard-monitor.js';
 
 const AUTH_COOKIE_NAME = 'aestherix_dashboard_auth';
@@ -30,6 +30,8 @@ const USERS_LIMIT_DIR = './databases/users/limit';
 const USERS_BANNED_PATH = './databases/users/banned.json';
 const DASHBOARD_SESSIONS_PATH = './databases/dashboard/dashboard-sessions.json';
 const DASHBOARD_AUDIT_PATH = './databases/dashboard/dashboard-audit.json';
+const DASHBOARD_OTP_PATH = './databases/dashboard/dashboard-otp.json';
+const DASHBOARD_BLOCKLIST_PATH = './databases/dashboard/dashboard-blocklist.json';
 const PROFILE_PICTURE_HISTORY_PATH = './databases/pictures/pinterest-profile-pictures.json';
 const PROFILE_PICTURE_HISTORY_LIMIT = 900;
 const ROOT_CHANGELOG_PATH = path.resolve(process.cwd(), 'CHANGELOG.md');
@@ -69,6 +71,119 @@ const projectVersion = (() => {
 		return 'unknown';
 	}
 })();
+
+const DASHBOARD_PORT = Number(process.env.DASHBOARD_PORT || 4000);
+const DASHBOARD_BOT_BRIDGE_URL = String(process.env.DASHBOARD_BOT_BRIDGE_URL || 'http://127.0.0.1:4010').replace(/\/+$/, '');
+const DASHBOARD_BRIDGE_TOKEN = String(process.env.DASHBOARD_BRIDGE_TOKEN || 'aestherix-local-bridge-token');
+
+const normalizePersistedUserJid = (input) => {
+	let raw = String(input || '').trim();
+
+	if (!raw) {
+		return null;
+	}
+
+	if (raw.endsWith('@c.us')) {
+		raw = raw.replace(/@c\.us$/i, S_WHATSAPP_NET);
+	}
+
+	if (raw.endsWith(S_WHATSAPP_NET)) {
+		const local = raw.split('@')[0].replace(/\D/g, '');
+
+		return local ? `${local}${S_WHATSAPP_NET}` : null;
+	}
+
+	const digits = raw.replace(/\D/g, '');
+
+	if (!digits) {
+		return null;
+	}
+
+	return `${digits}${S_WHATSAPP_NET}`;
+};
+
+const normalizePersistedPictureEntry = (entry) => {
+	const originalUrl = String(entry?.original?.url || entry?.url || entry?.original || '').trim();
+
+	if (!/^https?:\/\//i.test(originalUrl)) {
+		return null;
+	}
+
+	const thumbnailUrl = String(entry?.thumbnail?.url || entry?.thumbnail || originalUrl).trim();
+
+	return {
+		original: {
+			...(entry?.original && typeof entry.original === 'object' ? entry.original : {}),
+			url: originalUrl
+		},
+		thumbnail: {
+			...(entry?.thumbnail && typeof entry.thumbnail === 'object' ? entry.thumbnail : {}),
+			url: /^https?:\/\//i.test(thumbnailUrl) ? thumbnailUrl : originalUrl
+		}
+	};
+};
+
+const loadDashboardBlocklist = async () => {
+	try {
+		if (!(await fs.pathExists(DASHBOARD_BLOCKLIST_PATH))) {
+			configuration.cache.blocklist = Array.isArray(configuration.cache?.blocklist) ? configuration.cache.blocklist : [];
+			return;
+		}
+
+		const raw = await fs.readJSON(DASHBOARD_BLOCKLIST_PATH);
+		const list = Array.isArray(raw?.blocklist)
+			? raw.blocklist.map((value) => normalizePersistedUserJid(value)).filter(Boolean)
+			: [];
+
+		configuration.cache.blocklist = list;
+	} catch (error) {
+		loggers.warning(color('Failed loading dashboard blocklist:', '#FF5555'), color(error.message, 'white'));
+		configuration.cache.blocklist = Array.isArray(configuration.cache?.blocklist) ? configuration.cache.blocklist : [];
+	}
+};
+
+const persistDashboardBlocklist = async () => {
+	try {
+		const blocklist = Array.isArray(configuration.cache?.blocklist)
+			? Array.from(new Set(configuration.cache.blocklist.map((value) => normalizePersistedUserJid(value)).filter(Boolean)))
+			: [];
+
+		await fs.ensureDir(path.dirname(DASHBOARD_BLOCKLIST_PATH));
+		await fs.writeJSON(DASHBOARD_BLOCKLIST_PATH, { blocklist }, { spaces: 2 });
+	} catch (error) {
+		loggers.warning(color('Failed persisting dashboard blocklist:', '#FF5555'), color(error.message, 'white'));
+	}
+};
+
+const hydrateProfilePicturesCache = async () => {
+	if (typeof configuration.pinterestImages?.clear === 'function') {
+		configuration.pinterestImages.clear();
+	}
+
+	try {
+		if (!(await fs.pathExists(PROFILE_PICTURE_HISTORY_PATH))) {
+			await fs.ensureDir(path.dirname(PROFILE_PICTURE_HISTORY_PATH));
+			await fs.writeJSON(PROFILE_PICTURE_HISTORY_PATH, { entries: [] }, { spaces: 2 });
+			return;
+		}
+
+		const raw = await fs.readJSON(PROFILE_PICTURE_HISTORY_PATH).catch(() => ({ entries: [] }));
+		const entries = Array.isArray(raw?.entries) ? raw.entries : [];
+
+		for (const entry of entries) {
+			const timestamp = String(entry?.timestamp || '').trim();
+			const normalized = normalizePersistedPictureEntry(entry);
+
+			if (!timestamp || !normalized) {
+				continue;
+			}
+
+			configuration.pinterestImages.set(timestamp, normalized);
+		}
+	} catch (error) {
+		loggers.warning(color('Failed hydrating dashboard profile pictures:', '#FF5555'), color(error.message, 'white'));
+	}
+};
 
 const loadSessionStore = () => {
 	try {
@@ -1088,12 +1203,12 @@ const setDashboardUserBlocked = async (userId, enabled) => {
 	}
 
 	const waClient = global.client?.instance || null;
+	let liveApplied = false;
 
-	if (!waClient?.updateBlockStatus) {
-		return { ok: false, status: 503, message: 'WhatsApp client is not connected yet.' };
+	if (waClient?.updateBlockStatus) {
+		await waClient.updateBlockStatus(jid, enabled ? 'block' : 'unblock');
+		liveApplied = true;
 	}
-
-	await waClient.updateBlockStatus(jid, enabled ? 'block' : 'unblock');
 
 	const list = Array.isArray(configuration.cache?.blocklist) ? [...configuration.cache.blocklist] : [];
 	const set = new Set(list);
@@ -1105,8 +1220,15 @@ const setDashboardUserBlocked = async (userId, enabled) => {
 	}
 
 	configuration.cache.blocklist = Array.from(set);
+	await persistDashboardBlocklist();
 
-	return { ok: true, userId: jid, blocked: enabled };
+	return {
+		ok: true,
+		userId: jid,
+		blocked: enabled,
+		liveApplied,
+		pendingSync: !liveApplied
+	};
 };
 
 const cleanExpiredUndoActions = () => {
@@ -1267,13 +1389,78 @@ const hasActiveOwnerSession = (phoneNumber) => {
 	return false;
 };
 
+const loadOtpStore = () => {
+	otpStore.clear();
+
+	try {
+		if (!fs.pathExistsSync(DASHBOARD_OTP_PATH)) {
+			return;
+		}
+
+		const raw = fs.readJSONSync(DASHBOARD_OTP_PATH);
+		const entries = Array.isArray(raw?.otps) ? raw.otps : [];
+		const now = Date.now();
+
+		for (const item of entries) {
+			const phoneNumber = normalizePhoneNumber(item?.phoneNumber || '');
+			const expiresAt = Number(item?.expiresAt || 0);
+
+			if (!phoneNumber || expiresAt <= now) {
+				continue;
+			}
+
+			otpStore.set(phoneNumber, {
+				requestId: String(item?.requestId || ''),
+				requestKeyHash: String(item?.requestKeyHash || ''),
+				actionTokenHash: String(item?.actionTokenHash || ''),
+				status: item?.status === 'approved' ? 'approved' : 'pending',
+				createdAt: Number(item?.createdAt || now),
+				expiresAt,
+				confirmedAt: item?.confirmedAt ? Number(item.confirmedAt) : null
+			});
+		}
+	} catch (error) {
+		loggers.warning(color('Failed loading dashboard OTP store:', '#FF5555'), color(error.message, 'white'));
+	}
+};
+
+const persistOtpStore = () => {
+	try {
+		const now = Date.now();
+		const otps = Array.from(otpStore.entries())
+			.filter(([, value]) => Number(value?.expiresAt || 0) > now)
+			.map(([phoneNumber, value]) => ({
+				phoneNumber,
+				requestId: String(value?.requestId || ''),
+				requestKeyHash: String(value?.requestKeyHash || ''),
+				actionTokenHash: String(value?.actionTokenHash || ''),
+				status: value?.status === 'approved' ? 'approved' : 'pending',
+				createdAt: Number(value?.createdAt || now),
+				expiresAt: Number(value?.expiresAt || 0),
+				confirmedAt: value?.confirmedAt ? Number(value.confirmedAt) : null
+			}));
+
+		fs.ensureDirSync(path.dirname(DASHBOARD_OTP_PATH));
+		fs.writeJSONSync(DASHBOARD_OTP_PATH, { otps }, { spaces: 2 });
+	} catch (error) {
+		loggers.warning(color('Failed persisting dashboard OTP store:', '#FF5555'), color(error.message, 'white'));
+	}
+};
+
 const cleanExpiredOtps = () => {
+	loadOtpStore();
 	const now = Date.now();
+	let hasChanges = false;
 
 	for (const [phone, value] of otpStore.entries()) {
 		if (value.expiresAt <= now) {
 			otpStore.delete(phone);
+			hasChanges = true;
 		}
+	}
+
+	if (hasChanges) {
+		persistOtpStore();
 	}
 };
 
@@ -1388,6 +1575,152 @@ const sendConfirmationButton = async ({ waClient, to, buttonId, phoneNumber }) =
 	});
 };
 
+const sendConfirmationThroughBridge = async ({ to, buttonId, phoneNumber }) => {
+	if (!DASHBOARD_BOT_BRIDGE_URL) {
+		return false;
+	}
+
+	try {
+		const response = await fetch(`${DASHBOARD_BOT_BRIDGE_URL}/internal/dashboard/send-confirmation`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-dashboard-bridge-token': DASHBOARD_BRIDGE_TOKEN
+			},
+			body: JSON.stringify({
+				to,
+				buttonId,
+				phoneNumber
+			})
+		});
+
+		if (!response.ok) {
+			return false;
+		}
+
+		const payload = await response.json().catch(() => ({}));
+
+		return payload?.ok === true;
+	} catch {
+		return false;
+	}
+};
+
+const sendRuntimeSyncThroughBridge = async ({ type, payload }) => {
+	if (!DASHBOARD_BOT_BRIDGE_URL) {
+		return { ok: false, status: 503, message: 'Runtime bridge URL is not configured.' };
+	}
+
+	try {
+		const response = await fetch(`${DASHBOARD_BOT_BRIDGE_URL}/internal/dashboard/runtime-sync`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-dashboard-bridge-token': DASHBOARD_BRIDGE_TOKEN
+			},
+			body: JSON.stringify({ type, payload })
+		});
+
+		const data = await response.json().catch(() => ({}));
+
+		if (!response.ok) {
+			return {
+				ok: false,
+				status: response.status,
+				message: data?.message || 'Runtime bridge request failed.'
+			};
+		}
+
+		return {
+			ok: true,
+			data
+		};
+	} catch {
+		return {
+			ok: false,
+			status: 503,
+			message: 'Runtime bridge is not reachable.'
+		};
+	}
+};
+
+const fetchBotLogsThroughBridge = async ({ since = 0, limit = 200 } = {}) => {
+	if (!DASHBOARD_BOT_BRIDGE_URL) {
+		return { ok: false, status: 503, message: 'Runtime bridge URL is not configured.' };
+	}
+
+	try {
+		const params = new URLSearchParams({
+			since: String(Number(since) || 0),
+			limit: String(Math.max(1, Math.min(500, Number(limit) || 200)))
+		});
+
+		const response = await fetch(`${DASHBOARD_BOT_BRIDGE_URL}/internal/dashboard/logs?${params.toString()}`, {
+			headers: {
+				'x-dashboard-bridge-token': DASHBOARD_BRIDGE_TOKEN
+			}
+		});
+
+		const data = await response.json().catch(() => ({}));
+
+		if (!response.ok) {
+			return {
+				ok: false,
+				status: response.status,
+				message: data?.message || 'Bot logs bridge request failed.'
+			};
+		}
+
+		return {
+			ok: true,
+			data
+		};
+	} catch {
+		return {
+			ok: false,
+			status: 503,
+			message: 'Bot logs bridge is not reachable.'
+		};
+	}
+};
+
+const requestBotRestartThroughBridge = async () => {
+	if (!DASHBOARD_BOT_BRIDGE_URL) {
+		return { ok: false, status: 503, message: 'Runtime bridge URL is not configured.' };
+	}
+
+	try {
+		const response = await fetch(`${DASHBOARD_BOT_BRIDGE_URL}/internal/dashboard/restart`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-dashboard-bridge-token': DASHBOARD_BRIDGE_TOKEN
+			}
+		});
+
+		const data = await response.json().catch(() => ({}));
+
+		if (!response.ok) {
+			return {
+				ok: false,
+				status: response.status,
+				message: data?.message || 'Bot restart bridge request failed.'
+			};
+		}
+
+		return {
+			ok: true,
+			data
+		};
+	} catch {
+		return {
+			ok: false,
+			status: 503,
+			message: 'Bot restart bridge is not reachable.'
+		};
+	}
+};
+
 export const processDashboardConfirmationAction = ({ actionId, senderJid }) => {
 	cleanExpiredOtps();
 
@@ -1423,6 +1756,7 @@ export const processDashboardConfirmationAction = ({ actionId, senderJid }) => {
 	otpData.status = 'approved';
 	otpData.confirmedAt = Date.now();
 	otpStore.set(phoneNumber, otpData);
+	persistOtpStore();
 
 	return { handled: true, approved: true, phoneNumber };
 };
@@ -1466,8 +1800,17 @@ export const server = () => {
 		return;
 	}
 
+	configuration.cache.blocklist = Array.isArray(configuration.cache?.blocklist) ? configuration.cache.blocklist : [];
+	
+	if (!configuration?.OPTIONS || typeof configuration.OPTIONS !== 'object') {
+		configuration.OPTIONS = {};
+	}
+
 	loadSessionStore();
 	loadAuditStore();
+	loadOtpStore();
+	void loadDashboardBlocklist();
+	void hydrateProfilePicturesCache();
 
 	const app = express();
 	const httpServer = createServer(app);
@@ -1475,7 +1818,8 @@ export const server = () => {
 		path: '/socket.io',
 		serveClient: true
 	});
-	const PORT = 4000;
+	const PORT = Number.isFinite(DASHBOARD_PORT) && DASHBOARD_PORT > 0 ? DASHBOARD_PORT : 4000;
+	let realtimeBotLogCursor = 0;
 
 	const getSocketSession = (socket) => {
 		const cookie = String(socket?.handshake?.headers?.cookie || '');
@@ -1517,6 +1861,23 @@ export const server = () => {
 			socket.data.lastLogId = Number(logsPayload?.lastId || 0);
 			socket.emit('dashboard:logs', logsPayload);
 
+			const botLogsResult = await fetchBotLogsThroughBridge({ since: 0, limit: 250 });
+
+			if (botLogsResult.ok) {
+				const botLogsPayload = botLogsResult.data || { lastId: 0, logs: [] };
+
+				socket.data.lastBotLogId = Number(botLogsPayload?.lastId || 0);
+				realtimeBotLogCursor = Math.max(realtimeBotLogCursor, socket.data.lastBotLogId);
+				socket.emit('dashboard:bot-logs', botLogsPayload);
+			} else {
+				socket.emit('dashboard:bot-logs', {
+					ok: false,
+					message: botLogsResult.message || 'Bot log stream is not reachable.',
+					lastId: Number(socket.data.lastBotLogId || 0),
+					logs: []
+				});
+			}
+
 			const filters = sanitizeAuditRealtimeFilters(socket.data?.auditFilters || {});
 			const auditPayload = getDashboardAuditLogs({
 				since: 0,
@@ -1540,6 +1901,7 @@ export const server = () => {
 
 		socket.data.session = session;
 		socket.data.lastLogId = 0;
+		socket.data.lastBotLogId = 0;
 		socket.data.lastAuditId = 0;
 		socket.data.auditFilters = sanitizeAuditRealtimeFilters({});
 
@@ -1615,6 +1977,43 @@ export const server = () => {
 	}, 1200);
 
 	setInterval(() => {
+		void (async () => {
+			const sockets = Array.from(io.of('/').sockets.values()).filter((socket) => socket.data?.session?.role === 'owner');
+
+			if (!sockets.length) {
+				return;
+			}
+
+			const result = await fetchBotLogsThroughBridge({ since: realtimeBotLogCursor, limit: 250 });
+
+			if (!result.ok) {
+				for (const socket of sockets) {
+					socket.emit('dashboard:bot-logs', {
+						ok: false,
+						message: result.message || 'Bot log stream is not reachable.',
+						lastId: Number(socket.data?.lastBotLogId || realtimeBotLogCursor || 0),
+						logs: []
+					});
+				}
+
+				return;
+			}
+
+			const payload = result.data || { lastId: realtimeBotLogCursor, logs: [] };
+			realtimeBotLogCursor = Number(payload?.lastId || realtimeBotLogCursor || 0);
+
+			if (!Array.isArray(payload?.logs) || payload.logs.length === 0) {
+				return;
+			}
+
+			for (const socket of sockets) {
+				socket.data.lastBotLogId = realtimeBotLogCursor;
+				socket.emit('dashboard:bot-logs', payload);
+			}
+		})();
+	}, 1200);
+
+	setInterval(() => {
 		const sockets = Array.from(io.of('/').sockets.values());
 
 		if (!sockets.length) {
@@ -1674,7 +2073,11 @@ export const server = () => {
 	});
 
 	app.use(express.json());
-	app.use(express.static(path.join(__dirname, 'public')));
+	app.use(
+		express.static(path.join(__dirname, 'public'), {
+			index: false
+		})
+	);
 
 	const parseQuery = (query) => {
 		const { colors, dimensions, animate, seed, time } = query;
@@ -1865,10 +2268,6 @@ export const server = () => {
 
 			const waClient = getWhatsAppClient();
 
-			if (!waClient?.send) {
-				return res.status(503).json({ ok: false, message: 'WhatsApp client is not connected yet.' });
-			}
-
 			const requestId = crypto.randomBytes(16).toString('hex');
 			const requestKey = crypto.randomBytes(24).toString('hex');
 			const actionToken = crypto.randomBytes(24).toString('hex');
@@ -1884,13 +2283,35 @@ export const server = () => {
 				expiresAt,
 				confirmedAt: null
 			});
+			persistOtpStore();
 
-			await sendConfirmationButton({
-				waClient,
-				to: `${phoneNumber}@s.whatsapp.net`,
-				buttonId,
-				phoneNumber
-			});
+			const recipient = `${phoneNumber}@s.whatsapp.net`;
+			let sent = false;
+
+			if (waClient?.send) {
+				await sendConfirmationButton({
+					waClient,
+					to: recipient,
+					buttonId,
+					phoneNumber
+				});
+				sent = true;
+			} else {
+				sent = await sendConfirmationThroughBridge({
+					to: recipient,
+					buttonId,
+					phoneNumber
+				});
+			}
+
+			if (!sent) {
+				otpStore.delete(phoneNumber);
+				persistOtpStore();
+				return res.status(503).json({
+					ok: false,
+					message: 'WhatsApp bridge is not reachable yet. Please ensure bot process is online and try again.'
+				});
+			}
 
 			loggers.info(color('Dashboard login confirmation sent to', 'white'), color(phoneNumber, '#E4C1F9'));
 			res.json({
@@ -1921,6 +2342,7 @@ export const server = () => {
 
 		if (!otpData || otpData.expiresAt <= Date.now()) {
 			otpStore.delete(phoneNumber);
+			persistOtpStore();
 			return res.status(400).json({ ok: false, message: 'Confirmation expired or not found. Request a new code.' });
 		}
 
@@ -1949,6 +2371,7 @@ export const server = () => {
 
 		if (otpData.expiresAt <= Date.now()) {
 			otpStore.delete(phoneNumber);
+			persistOtpStore();
 			return res.status(400).json({ ok: false, message: 'Confirmation request expired.' });
 		}
 
@@ -1961,6 +2384,7 @@ export const server = () => {
 		}
 
 		otpStore.delete(phoneNumber);
+		persistOtpStore();
 		createSession(res, {
 			role: 'owner',
 			phoneNumber,
@@ -2085,6 +2509,60 @@ export const server = () => {
 		const limit = Number(req.query?.limit || 200);
 
 		res.json(getDashboardLogs({ since, limit }));
+	});
+
+	app.get('/api/dashboard/logs/dashboard', requireDashboardAuth, (req, res) => {
+		const session = getSessionFromRequest(req);
+
+		if (session?.role !== 'owner') {
+			return res.json({
+				lastId: 0,
+				logs: [],
+				redacted: true
+			});
+		}
+
+		const since = Number(req.query?.since || 0);
+		const limit = Number(req.query?.limit || 200);
+
+		res.json(getDashboardLogs({ since, limit }));
+	});
+
+	app.get('/api/dashboard/logs/bot', requireDashboardAuth, async (req, res) => {
+		const session = getSessionFromRequest(req);
+
+		if (session?.role !== 'owner') {
+			return res.json({
+				lastId: 0,
+				logs: [],
+				redacted: true
+			});
+		}
+
+		const since = Number(req.query?.since || 0);
+		const limit = Number(req.query?.limit || 200);
+		const result = await fetchBotLogsThroughBridge({ since, limit });
+
+		if (!result.ok) {
+			return res.status(result.status || 503).json({
+				ok: false,
+				message: result.message || 'Failed loading bot logs.',
+				lastId: since,
+				logs: []
+			});
+		}
+
+		return res.json(result.data || { lastId: since, logs: [] });
+	});
+
+	app.post('/api/dashboard/bot/restart', requireOwnerAuth, async (_req, res) => {
+		const result = await requestBotRestartThroughBridge();
+
+		if (!result.ok) {
+			return res.status(result.status || 503).json({ ok: false, message: result.message || 'Failed restarting bot.' });
+		}
+
+		return res.json({ ok: true, restarting: true });
 	});
 
 	app.get('/api/dashboard/commands', requireDashboardAuth, (_req, res) => {
@@ -2283,6 +2761,20 @@ export const server = () => {
 			return res.status(404).json(result);
 		}
 
+		if (!getWhatsAppClient()?.send) {
+			const runtimeSync = await sendRuntimeSyncThroughBridge({
+				type: 'command.toggle',
+				payload: {
+					commandName,
+					enabled
+				}
+			});
+
+			if (!runtimeSync.ok) {
+				return res.status(runtimeSync.status || 503).json({ ok: false, message: runtimeSync.message });
+			}
+		}
+
 		pushAuditEvent({
 			action: 'command.toggle',
 			session,
@@ -2330,6 +2822,20 @@ export const server = () => {
 				after: { enabled }
 			});
 			return res.status(404).json(result);
+		}
+
+		if (!getWhatsAppClient()?.send) {
+			const runtimeSync = await sendRuntimeSyncThroughBridge({
+				type: 'flag.toggle',
+				payload: {
+					flagName,
+					enabled
+				}
+			});
+
+			if (!runtimeSync.ok) {
+				return res.status(runtimeSync.status || 503).json({ ok: false, message: runtimeSync.message });
+			}
 		}
 
 		pushAuditEvent({
@@ -2384,6 +2890,20 @@ export const server = () => {
 				return res.status(400).json(result);
 			}
 
+			if (!getWhatsAppClient()?.send) {
+				const runtimeSync = await sendRuntimeSyncThroughBridge({
+					type: 'user.limit',
+					payload: {
+						userId: result.user.id,
+						limit: result.user.limit
+					}
+				});
+
+				if (!runtimeSync.ok) {
+					return res.status(runtimeSync.status || 503).json({ ok: false, message: runtimeSync.message });
+				}
+			}
+
 			pushAuditEvent({
 				action: 'user.limit',
 				session,
@@ -2435,6 +2955,20 @@ export const server = () => {
 					after: { enabled: req.body.enabled }
 				});
 				return res.status(400).json(result);
+			}
+
+			if (!getWhatsAppClient()?.send) {
+				const runtimeSync = await sendRuntimeSyncThroughBridge({
+					type: 'user.premium',
+					payload: {
+						userId: result.user.id,
+						enabled: result.user.role === 'PREMIUM'
+					}
+				});
+
+				if (!runtimeSync.ok) {
+					return res.status(runtimeSync.status || 503).json({ ok: false, message: runtimeSync.message });
+				}
 			}
 
 			pushAuditEvent({
@@ -2493,6 +3027,20 @@ export const server = () => {
 				return res.status(400).json(result);
 			}
 
+			if (!getWhatsAppClient()?.send) {
+				const runtimeSync = await sendRuntimeSyncThroughBridge({
+					type: 'user.banned',
+					payload: {
+						userId: result.userId,
+						enabled: result.banned
+					}
+				});
+
+				if (!runtimeSync.ok) {
+					return res.status(runtimeSync.status || 503).json({ ok: false, message: runtimeSync.message });
+				}
+			}
+
 			pushAuditEvent({
 				action: 'user.banned',
 				session,
@@ -2548,6 +3096,23 @@ export const server = () => {
 				return res.status(result.status || 400).json(result);
 			}
 
+			if (!getWhatsAppClient()?.send || result.pendingSync) {
+				const runtimeSync = await sendRuntimeSyncThroughBridge({
+					type: 'user.blocked',
+					payload: {
+						userId: result.userId,
+						enabled: result.blocked
+					}
+				});
+
+				if (!runtimeSync.ok) {
+					return res.status(runtimeSync.status || 503).json({ ok: false, message: runtimeSync.message });
+				}
+
+				result.liveApplied = true;
+				result.pendingSync = false;
+			}
+
 			pushAuditEvent({
 				action: 'user.blocked',
 				session,
@@ -2575,7 +3140,14 @@ export const server = () => {
 				color(result.blocked ? 'blocked' : 'unblocked', result.blocked ? '#FF5555' : '#50FA7B')
 			);
 
-			res.json({ ok: true, userId: result.userId, blocked: result.blocked, undo });
+			res.json({
+				ok: true,
+				userId: result.userId,
+				blocked: result.blocked,
+				liveApplied: Boolean(result.liveApplied),
+				pendingSync: Boolean(result.pendingSync),
+				undo
+			});
 		}
 	);
 
