@@ -25,12 +25,12 @@
       "expiresAt": 1776706769657
     },
     {
-      "token": "df24d34546d64ce59e62ccd0726d517e69c71a76229a448eb324b417331db485",
-      "role": "owner",
-      "phoneNumber": "6289607055246",
-      "name": "Owner",
-      "lastSeenAt": 1776620476184,
-      "expiresAt": 1776706876184
+      "token": "ea0e734175e98a86b4a5d9ec40d0f516e7770c6665b6f71162c8794b5284c54d",
+      "role": "viewer",
+      "phoneNumber": null,
+      "name": "Viewer",
+      "lastSeenAt": 1776688582308,
+      "expiresAt": 1776774982308
     }
   ]
 }

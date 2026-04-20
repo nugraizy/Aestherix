@@ -1,9 +1,12 @@
 {
-  "ping": 5,
+  "ping": 13,
   "tiktokpost": 1,
   "setpin": 6,
   "menu": 2,
   "hifidownload": 1,
   "twitterdl": 1,
-  "douyin": 1
+  "douyin": 1,
+  "waifu2x": 8,
+  "waifu2xv2": 1,
+  "limit": 2
 }

@@ -1,0 +1,3124 @@
+{
+  "updatedAt": 1776688668473,
+  "commands": [
+    {
+      "name": "3hentai",
+      "category": "Owner",
+      "aliases": [
+        "3hent"
+      ],
+      "description": "Search Doujin from 3hentai.net.",
+      "usage": "!3hentai `<query>`",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "about",
+      "category": "Helper",
+      "aliases": [
+        "info"
+      ],
+      "description": "Shows the bot information",
+      "usage": "!about",
+      "cooldown": 10,
+      "limit": 5,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "add",
+      "category": "Moderation",
+      "aliases": [
+        "addmem",
+        "invite"
+      ],
+      "description": "Add people to group.",
+      "usage": "!add `<reply/tag member>`",
+      "cooldown": 10,
+      "limit": 4,
+      "premium": false,
+      "restrict": true,
+      "enabled": true
+    },
+    {
+      "name": "afk",
+      "category": "Misc",
+      "aliases": [
+        "away",
+        "idle"
+      ],
+      "description": "Going away from keyboard.",
+      "usage": "!afk `<reason|no reason>`",
+      "cooldown": 3,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "aicompletions",
+      "category": "Helper",
+      "aliases": [
+        "complete"
+      ],
+      "description": "Ask A.I to complete your sentence or give A.I any task within texts.",
+      "usage": "!aicompletions `<query>`",
+      "cooldown": 7,
+      "limit": 7,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "aiimage",
+      "category": "Helper",
+      "aliases": [
+        "aimg"
+      ],
+      "description": "Ask A.I to make an image based on your text.",
+      "usage": "!aiimage `<query>`",
+      "cooldown": 7,
+      "limit": 7,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "aitts",
+      "category": "Converter",
+      "aliases": [
+        "aitt",
+        "aispeech"
+      ],
+      "description": "Convert text to speech with real people voice over it",
+      "usage": "!aitts `<query>`",
+      "cooldown": 5,
+      "limit": 1,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "akinator",
+      "category": "Games",
+      "aliases": [
+        "aki",
+        "playaki",
+        "playakinator"
+      ],
+      "description": "Play Akinator.",
+      "usage": "!akinator",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "animatedsticker",
+      "category": "Converter",
+      "aliases": [
+        "gittp"
+      ],
+      "description": "Generate animated gif sticker",
+      "usage": "!gittp `<text>` `[--color in hex]`",
+      "cooldown": 5,
+      "limit": 1,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "animename",
+      "category": "Misc",
+      "aliases": [
+        "animname",
+        "animnama"
+      ],
+      "description": "Find your Nickname in Anime Style.",
+      "usage": "!animename `<query>` `<--options>`\n\nOptions : \n1. boy\n2. boyWithMeanings\n3. cool\n4. girl\n5. girlWithMeanings\n6. modern",
+      "cooldown": 3,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "animeschedule",
+      "category": "Anime",
+      "aliases": [
+        "animerelease",
+        "animrelease"
+      ],
+      "description": "Check Anime schedule.",
+      "usage": "!animeschedule",
+      "cooldown": 4,
+      "limit": 5,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "antidelete",
+      "category": "Moderation",
+      "aliases": [
+        "antidelet",
+        "antihapus"
+      ],
+      "description": "Enable or disable anti-delete.",
+      "usage": "!antidelete `<enable/disable>`",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "antinsfw",
+      "category": "Moderation",
+      "aliases": [
+        "antiporn",
+        "noporn",
+        "nonsfw"
+      ],
+      "description": "Enable or disable anti-porn.",
+      "usage": "!antinsfw `<enable/disable>`",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "antiurl",
+      "category": "Moderation",
+      "aliases": [
+        "antilink",
+        "antitautan"
+      ],
+      "description": "Enable or disable anti-url.",
+      "usage": "!antiurl `<enable/disable>`",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "attachment",
+      "category": "Debugging",
+      "aliases": [
+        "attach"
+      ],
+      "description": "Debugging Welcome/bye message",
+      "usage": "!attachment",
+      "cooldown": 5,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "audiobook",
+      "category": "Converter",
+      "aliases": [
+        "audbook"
+      ],
+      "description": "Take a picture and turn it into an audio book.",
+      "usage": "!audiobook `<reply media/send media>`",
+      "cooldown": 5,
+      "limit": 1,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "bandcamp",
+      "category": "Search",
+      "aliases": [
+        "bcamp",
+        "bandc"
+      ],
+      "description": "Search Musics from Bandcamp.",
+      "usage": "!bandcamp `<query>`",
+      "cooldown": 5,
+      "limit": 5,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "bandcampdl",
+      "category": "Downloader",
+      "aliases": [
+        "bcampdl",
+        "bandcdl"
+      ],
+      "description": "Download Musics from Bandcamp",
+      "usage": "!bandcampdl `<url(s)>` (you can send multiple link using space in between)",
+      "cooldown": 8,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "banned",
+      "category": "Owner",
+      "aliases": [
+        "ban"
+      ],
+      "description": "Ban user.",
+      "usage": "!banned `<tag/reply>`",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "bingimage",
+      "category": "AI",
+      "aliases": [
+        "bingimg",
+        "imgbing"
+      ],
+      "description": "Create Image from text using Bing AI.",
+      "usage": "!bingimage `<query>`",
+      "cooldown": 3,
+      "limit": 5,
+      "premium": true,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "bluesky",
+      "category": "Downloader",
+      "aliases": [
+        "bsky"
+      ],
+      "description": "Download media from Bluesky",
+      "usage": "!bluesky `<url(s)>` (you can send multiple link using space in between)",
+      "cooldown": 8,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "brainly",
+      "category": "Search",
+      "aliases": [
+        "brainli",
+        "brainly-search",
+        "tugas"
+      ],
+      "description": "Search answers from brainly.",
+      "usage": "!brainly `<query>` `-<?lang (oneof id, us, es, ru, ro, pt, tr, ph, pl, hi)>`  -<?count (min 1 - max 30)> ",
+      "cooldown": 7,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "bstation",
+      "category": "Search",
+      "aliases": [
+        "bstat",
+        "blindo"
+      ],
+      "description": "Search videos from Bilibili/Bstation ID Server.",
+      "usage": "!bstation `<query>`",
+      "cooldown": 7,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "bstationdl",
+      "category": "Downloader",
+      "aliases": [
+        "bstatdl",
+        "bsdl"
+      ],
+      "description": "Download videos from Bilibili/Bstation",
+      "usage": "!bstationdl `<url(s)/code>` (you can send multiple link/code using space in between)",
+      "cooldown": 8,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "bug",
+      "category": "Debugging",
+      "aliases": [
+        "bug"
+      ],
+      "description": "Send bug.",
+      "usage": "!bug",
+      "cooldown": 5,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "button",
+      "category": "Debugging",
+      "aliases": [
+        "butt"
+      ],
+      "description": "Send bug.",
+      "usage": "!button",
+      "cooldown": 5,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "call",
+      "category": "Debugging",
+      "aliases": [
+        "call"
+      ],
+      "description": "Send call.",
+      "usage": "!call `<mention/query[,]>`",
+      "cooldown": 5,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "carbon",
+      "category": "Converter",
+      "aliases": [
+        "carbon"
+      ],
+      "description": "Prettify code.",
+      "usage": "!carbon `<reply/send image>`",
+      "cooldown": 5,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "changelogs",
+      "category": "Helper",
+      "aliases": [
+        "cl",
+        "changelog"
+      ],
+      "description": "Get the latest changelogs directly from GitHub",
+      "usage": "!changelog -q `<number>` / --quantity `<number>`",
+      "cooldown": 5,
+      "limit": 3,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "changeprofile",
+      "category": "Moderation",
+      "aliases": [
+        "setpp",
+        "seticon"
+      ],
+      "description": "Set the icon group or bot.",
+      "usage": "!changeprofile `<reply media/send media>`",
+      "cooldown": 0,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "charai",
+      "category": "AI",
+      "aliases": [
+        "ai"
+      ],
+      "description": "Chat with AI.",
+      "usage": "!charai `<start/stop>`",
+      "cooldown": 3,
+      "limit": 5,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "checkdeleted",
+      "category": "Owner",
+      "aliases": [
+        "cekdel",
+        "checkdel"
+      ],
+      "description": "Fetch every deleted messages in chat.",
+      "usage": "!checkdeleted",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "chords",
+      "category": "Search",
+      "aliases": [
+        "chord"
+      ],
+      "description": "Search music chords.",
+      "usage": "!chords `<query>`",
+      "cooldown": 3,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "cnnindonesia",
+      "category": "News",
+      "aliases": [
+        "cnnid",
+        "cnid"
+      ],
+      "description": "Showing latest news in Indonesia from CNN.",
+      "usage": "!cnnindonesia `<keyword/blank(to fetch latest news)>`",
+      "cooldown": 2,
+      "limit": 1,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "cnninternational",
+      "category": "News",
+      "aliases": [
+        "cnnint"
+      ],
+      "description": "Showing latest news in International from CNN.",
+      "usage": "!cnninternational `<keywords/blank(to fetch latest news)>`",
+      "cooldown": 2,
+      "limit": 3,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "decrypt",
+      "category": "Converter",
+      "aliases": [
+        "d"
+      ],
+      "description": "Decrypt a sticker to media",
+      "usage": "!decrypt `<reply/send sticker>`",
+      "cooldown": 5,
+      "limit": 1,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "delete",
+      "category": "Moderation",
+      "aliases": [
+        "del"
+      ],
+      "description": "Delete people messages",
+      "usage": "!delete `<reply chat>`",
+      "cooldown": 8,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "demote",
+      "category": "Moderation",
+      "aliases": [
+        "demt",
+        "member",
+        "mem",
+        "dmt"
+      ],
+      "description": "Demote admin to member.",
+      "usage": "!demote `<reply/tag member>`",
+      "cooldown": 10,
+      "limit": 2,
+      "premium": false,
+      "restrict": true,
+      "enabled": true
+    },
+    {
+      "name": "description",
+      "category": "Moderation",
+      "aliases": [
+        "desc"
+      ],
+      "description": "Change the description of the group.",
+      "usage": "!description `<texts>`",
+      "cooldown": 4,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "deviantart",
+      "category": "Search",
+      "aliases": [
+        "dvart",
+        "devart"
+      ],
+      "description": "Search images from Deviant Art",
+      "usage": "!deviantart `<query>`",
+      "cooldown": 7,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "deviantartdl",
+      "category": "Downloader",
+      "aliases": [
+        "dvartdl",
+        "devartdl"
+      ],
+      "description": "Download images from Deviant Art",
+      "usage": "!deviantartdl `<url(s)>` (you can send multiple link using space in between)",
+      "cooldown": 8,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "douyin",
+      "category": "Downloader",
+      "aliases": [
+        "douyindl",
+        "douyinpost",
+        "dy",
+        "dydl"
+      ],
+      "description": "Downloads Douyin posts.",
+      "usage": "!douyin `<url(s)>` (you can send multiple link using space in between)",
+      "cooldown": 8,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "emojimixer",
+      "category": "Converter",
+      "aliases": [
+        "emojimix",
+        "emx"
+      ],
+      "description": "Mix emoji.",
+      "usage": "!emojimix `<emoji1>` `<emoji2>`",
+      "cooldown": 5,
+      "limit": 1,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "ephoto360",
+      "category": "Converter",
+      "aliases": [
+        "ephoto",
+        "epht"
+      ],
+      "description": "Image maker using texts",
+      "usage": "!ephoto360 `<query>` `<model/number[REQUIRED]>` `[options]`\nOptions:\n-stk / -img\nAvailable Model Type : !ephoto360 -model",
+      "cooldown": 4,
+      "limit": 3,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "epicgames",
+      "category": "Search",
+      "aliases": [
+        "epgames"
+      ],
+      "description": "Search games from Epicgames.",
+      "usage": "!epicgames `<query/--free>`",
+      "cooldown": 3,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "eval",
+      "category": "Owner",
+      "aliases": [
+        "/>",
+        "$>",
+        "=>",
+        "!>"
+      ],
+      "description": "Evaluates code.",
+      "usage": "!eval `<code>`",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "extractzalgo",
+      "category": "Misc",
+      "aliases": [
+        "conzalgo",
+        "conzalg"
+      ],
+      "description": "Extract Zalgo text to Text",
+      "usage": "!extractzalgo `<query>`",
+      "cooldown": 3,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "fbpost",
+      "category": "Downloader",
+      "aliases": [
+        "fbpost",
+        "fbp",
+        "fb",
+        "fbdl"
+      ],
+      "description": "Downloads a Facebook post",
+      "usage": "!fbpost `<url(s)>` (you can send multiple link using space in between)",
+      "cooldown": 8,
+      "limit": 6,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "fetch",
+      "category": "Helper",
+      "aliases": [
+        "get"
+      ],
+      "description": "Do a HTTP request and send the results.",
+      "usage": "!fetch\nUsage :\n!fetch `www.example.com` -X `POST/GET` -H `\"key1: value1\"` -H `\"ke2: value2\"` -d `\"{...JSONObjects}\"` -T \"conte\"",
+      "cooldown": 10,
+      "limit": 3,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "fetchstory",
+      "category": "Owner",
+      "aliases": [
+        "getstory",
+        "getsw"
+      ],
+      "description": "Fetch story from host WhatsApp.",
+      "usage": "!fetchstory",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "findgroup",
+      "category": "Search",
+      "aliases": [
+        "gc",
+        "publicgc"
+      ],
+      "description": "Search for public WhatsApp groups.",
+      "usage": "!findgroup `<query>`",
+      "cooldown": 4,
+      "limit": 3,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "findlyrics",
+      "category": "Search",
+      "aliases": [
+        "lyrics",
+        "lyric"
+      ],
+      "description": "Search song lyrics.",
+      "usage": "!findlyrics `<query>`",
+      "cooldown": 5,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "flickr",
+      "category": "Search",
+      "aliases": [
+        "flick"
+      ],
+      "description": "Search images from Flickr.",
+      "usage": "!flickr `<query>`",
+      "cooldown": 5,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "freegame",
+      "category": "Owner",
+      "aliases": [
+        "f2p"
+      ],
+      "description": "Fetch freegames from games platform.",
+      "usage": "!freegame `<enable/disable>`",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "games",
+      "category": "Moderation",
+      "aliases": [
+        "game"
+      ],
+      "description": "Play games with your friends",
+      "usage": "!games `<enable/disable>`",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "gempa",
+      "category": "News",
+      "aliases": [
+        "earthquake"
+      ],
+      "description": "Showing latest earthquake in Indonesia.",
+      "usage": "!gempa",
+      "cooldown": 2,
+      "limit": 1,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "genshinstalk",
+      "category": "Genshin Impact",
+      "aliases": [
+        "genshinuser",
+        "giuser",
+        "gistalk"
+      ],
+      "description": "Look-up Genshin Impact player.",
+      "usage": "!genshinstalk `<uids>`",
+      "cooldown": 6,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "getsurah",
+      "category": "AL-Quran",
+      "aliases": [
+        "surah"
+      ],
+      "description": "Get List of Surah from The Quran",
+      "usage": "!getsurah",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "getsurahtafsir",
+      "category": "AL-Quran",
+      "aliases": [
+        "gettafsir",
+        "tafsir"
+      ],
+      "description": "Get surah tafsir",
+      "usage": "!getsurahtafsir `<surah number>`",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "githubcode",
+      "category": "Search",
+      "aliases": [
+        "ghcode"
+      ],
+      "description": "Search code from Github.",
+      "usage": "!githubcode `<query>`",
+      "cooldown": 5,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "githubgraph",
+      "category": "Look-up",
+      "aliases": [
+        "ghgraph",
+        "gitgraph"
+      ],
+      "description": "Lookup for User Contribution Graph.",
+      "usage": "!githubgraph `<query>`",
+      "cooldown": 6,
+      "limit": 3,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "gitstalk",
+      "category": "Look-up",
+      "aliases": [
+        "ghstalk",
+        "ghuser"
+      ],
+      "description": "Look-up Github user.",
+      "usage": "!gitstalk `<username>`",
+      "cooldown": 6,
+      "limit": 6,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "googlearticle",
+      "category": "Search",
+      "aliases": [
+        "gar",
+        "goarticle",
+        "articles"
+      ],
+      "description": "Search articles from Google.",
+      "usage": "!googlearticle `<query>`",
+      "cooldown": 5,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "googleimage",
+      "category": "Search",
+      "aliases": [
+        "gim",
+        "gis",
+        "image"
+      ],
+      "description": "Search images from Google.",
+      "usage": "!googleimage `<query>`",
+      "cooldown": 5,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "groupbc",
+      "category": "Owner",
+      "aliases": [
+        "gcbc"
+      ],
+      "description": "Send Broadcast to all groups.",
+      "usage": "!groupbc `<texts>`",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "grouptag",
+      "category": "Debugging",
+      "aliases": [
+        "gctag"
+      ],
+      "description": "Tag everyone in the group with the new messages protocol",
+      "usage": "!grouptag",
+      "cooldown": 0,
+      "limit": 20,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "hidetag",
+      "category": "Moderation",
+      "aliases": [
+        "tag",
+        "h"
+      ],
+      "description": "Hide tag everyone in the group.",
+      "usage": "!hidetag `<?query>`",
+      "cooldown": 10,
+      "limit": 5,
+      "premium": false,
+      "restrict": true,
+      "enabled": true
+    },
+    {
+      "name": "hifidownload",
+      "category": "Downloader",
+      "aliases": [
+        "hifidownload",
+        "hifidl",
+        "hifidownloader",
+        "hifi-dl",
+        "hifi-download"
+      ],
+      "description": "Download lossless music from Tidal via Hi-Fi API",
+      "usage": "!hifidownload `<query>`\n\nAvailable Flags :\n--index, -i , Directly download without sending the search result first. Starts from 0-<Response.length>",
+      "cooldown": 8,
+      "limit": 3,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "hydrated",
+      "category": "Debugging",
+      "aliases": [
+        "hd"
+      ],
+      "description": "Send hydrated image.",
+      "usage": "!hydrated",
+      "cooldown": 5,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "iflix",
+      "category": "Search",
+      "aliases": [
+        "iflx"
+      ],
+      "description": "Search movie on iflix.",
+      "usage": "!iflix `<query>`",
+      "cooldown": 7,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "ighashtag",
+      "category": "Search",
+      "aliases": [
+        "ighash"
+      ],
+      "description": "Search for hashtag on Instagram.",
+      "usage": "!ighashtag `<keyword>`",
+      "cooldown": 8,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "ighighlights",
+      "category": "Downloader",
+      "aliases": [
+        "igh",
+        "ighl"
+      ],
+      "description": "Downloads the highlights of the user",
+      "usage": "!ighighlights `<username(s)>` (you can send multiple username using space in between)",
+      "cooldown": 13,
+      "limit": 9,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "igpost",
+      "category": "Downloader",
+      "aliases": [
+        "igpost",
+        "igp"
+      ],
+      "description": "Downloads the post of the user",
+      "usage": "!igpost `<url(s)>` (you can send multiple link using space in between)",
+      "cooldown": 10,
+      "limit": 9,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "igreel",
+      "category": "Downloader",
+      "aliases": [
+        "igreel",
+        "igr"
+      ],
+      "description": "Downloads the reel of the user",
+      "usage": "!igreel `<url(s)>` (you can send multiple link using space in between)",
+      "cooldown": 10,
+      "limit": 9,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "igstory",
+      "category": "Downloader",
+      "aliases": [
+        "igstory",
+        "igs"
+      ],
+      "description": "Downloads the story of the user",
+      "usage": "!igstory `<username(s)>` (you can send multiple username using space in between)",
+      "cooldown": 10,
+      "limit": 9,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "instafier",
+      "category": "Owner",
+      "aliases": [
+        "instaf"
+      ],
+      "description": "Change current state of the Instafier listener.",
+      "usage": "!instafier `<enable/disable/check>`",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "instagraminit",
+      "category": "Owner",
+      "aliases": [
+        "instainit"
+      ],
+      "description": "Initialize Instagram session.",
+      "usage": "!instagraminit",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "instalk",
+      "category": "Look-up",
+      "aliases": [
+        "instauser",
+        "iguser",
+        "igstalk"
+      ],
+      "description": "Look-up Instagram user.",
+      "usage": "!instalk `<username>`",
+      "cooldown": 6,
+      "limit": 6,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "interactive",
+      "category": "Debugging",
+      "aliases": [
+        "inter"
+      ],
+      "description": "Send interactive.",
+      "usage": "!interactive",
+      "cooldown": 5,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "iplookup",
+      "category": "Look-up",
+      "aliases": [
+        "iplook",
+        "ipfind"
+      ],
+      "description": "Look-up IP Address.",
+      "usage": "!iplookup `<IPv4/IPv6>`",
+      "cooldown": 6,
+      "limit": 3,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "join",
+      "category": "Helper",
+      "aliases": [
+        "j"
+      ],
+      "description": "Ask bot to join your group.",
+      "usage": "!join `<url>`",
+      "cooldown": 5,
+      "limit": 7,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "kick",
+      "category": "Moderation",
+      "aliases": [
+        "remove",
+        "rem",
+        "rm"
+      ],
+      "description": "Kick member from group.",
+      "usage": "!kick `<reply/tag member>`",
+      "cooldown": 12,
+      "limit": 6,
+      "premium": false,
+      "restrict": true,
+      "enabled": true
+    },
+    {
+      "name": "komikcast",
+      "category": "Search",
+      "aliases": [
+        "komik",
+        "comic",
+        "manga"
+      ],
+      "description": "Search comics from Komikcast.net.",
+      "usage": "!komikcast `<query>`",
+      "cooldown": 7,
+      "limit": 7,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "kraken",
+      "category": "Downloader",
+      "aliases": [
+        "kkn"
+      ],
+      "description": "Download files from Kraken",
+      "usage": "!kraken `<url(s)>` (you can send multiple url using space in between)",
+      "cooldown": 5,
+      "limit": 7,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "layarkaca21",
+      "category": "Search",
+      "aliases": [
+        "lk21",
+        "d21"
+      ],
+      "description": "Search movies from Layarkaca21 websites.",
+      "usage": "!layarkaca21 `<query>`",
+      "cooldown": 5,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "leave",
+      "category": "Moderation",
+      "aliases": [
+        "out",
+        "bye"
+      ],
+      "description": "Leave the group",
+      "usage": "!leave",
+      "cooldown": 6,
+      "limit": 20,
+      "premium": false,
+      "restrict": true,
+      "enabled": true
+    },
+    {
+      "name": "limit",
+      "category": "Misc",
+      "aliases": [
+        "limit",
+        "lim"
+      ],
+      "description": "Check your daily limit.",
+      "usage": "!limit",
+      "cooldown": 10,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "linesticker",
+      "category": "Converter",
+      "aliases": [
+        "ls",
+        "linestick",
+        "linestickers"
+      ],
+      "description": "Find Line stickers.",
+      "usage": "!linesticker `<query>`",
+      "cooldown": 5,
+      "limit": 1,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "list",
+      "category": "Debugging",
+      "aliases": [
+        "lst"
+      ],
+      "description": "Send list message.",
+      "usage": "!list",
+      "cooldown": 5,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "listpp",
+      "category": "Helper",
+      "aliases": [
+        "lspp"
+      ],
+      "description": "List every pictures of the profile, started from the project startup.",
+      "usage": "!listpp",
+      "cooldown": 10,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "loading",
+      "category": "Debugging",
+      "aliases": [
+        "load"
+      ],
+      "description": "Loading.",
+      "usage": "!loading",
+      "cooldown": 5,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "lock",
+      "category": "Moderation",
+      "aliases": [
+        "lockgroup",
+        "lockgroupchat",
+        "lockgroupchatroom"
+      ],
+      "description": "Lock the group.",
+      "usage": "!lock",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "makeimage",
+      "category": "Converter",
+      "aliases": [
+        "createimage",
+        "makeimg",
+        "createimg"
+      ],
+      "description": "Create an image based on your description",
+      "usage": "!makeimage `<scenario>`",
+      "cooldown": 5,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "malanime",
+      "category": "Anime",
+      "aliases": [
+        "malanim"
+      ],
+      "description": "Search an anime on MyAnimeList",
+      "usage": "!malanime `<query>`",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "malanimeranking",
+      "category": "Anime",
+      "aliases": [
+        "malanimrank"
+      ],
+      "description": "Looks for Top Ranked Anime on MyAnimeList.",
+      "usage": "!malanimeranking `<type (oneof tv, movie, ova, special, ona, music, cm, pv, tv_special>`",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "malmangaranking",
+      "category": "Anime",
+      "aliases": [
+        "malmangarank"
+      ],
+      "description": "Looks for Top Ranked Manga on MyAnimeList.",
+      "usage": "!malmangaranking <type (oneof manga, novel, lightnovel, oneshot, doujin, manhwa, manhua)>",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "malsearchmanga",
+      "category": "Anime",
+      "aliases": [
+        "malmanga"
+      ],
+      "description": "Search a manga on MyAnimeList",
+      "usage": "!malsearchmanga `<query>`",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "mediafire",
+      "category": "Downloader",
+      "aliases": [
+        "mf",
+        "mfire",
+        "mediaf"
+      ],
+      "description": "Download files from Mediafire",
+      "usage": "!mediafire `<url(s)>` (you can send multiple url using space in between)",
+      "cooldown": 5,
+      "limit": 7,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "memegen",
+      "category": "Converter",
+      "aliases": [
+        "mgen",
+        "memgen",
+        "memegen"
+      ],
+      "description": "Meme Generator, You know the drill.",
+      "usage": "!memegen `<reply media/send media>` <[Top Texts] & [Bottom Texts]> [options]\nOptions:\n-stk / -img",
+      "cooldown": 5,
+      "limit": 1,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "menu",
+      "category": "Helper",
+      "aliases": [
+        "help"
+      ],
+      "description": "Shows the menu.",
+      "usage": "!menu",
+      "cooldown": 10,
+      "limit": 5,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "mycharacter",
+      "category": "Genshin Impact",
+      "aliases": [
+        "mychar"
+      ],
+      "description": "Look-up your Genshin Impact character.",
+      "usage": "!mycharacter",
+      "cooldown": 6,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "mystats",
+      "category": "Genshin Impact",
+      "aliases": [
+        "myuid"
+      ],
+      "description": "Look-up your Genshin Impact statistic",
+      "usage": "!mystats",
+      "cooldown": 6,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "nhentai",
+      "category": "Owner",
+      "aliases": [
+        "nhent"
+      ],
+      "description": "Search Doujin from nhentai.net.",
+      "usage": "!nhentai `<query>`",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "nickname",
+      "category": "Search",
+      "aliases": [
+        "nickfind"
+      ],
+      "description": "Find nickname.",
+      "usage": "!nickname `<query>`",
+      "cooldown": 2,
+      "limit": 3,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "notification",
+      "category": "Moderation",
+      "aliases": [
+        "eventupd",
+        "eventupdate",
+        "notify"
+      ],
+      "description": "Enable or disable group event notification",
+      "usage": "!notification `<enable/disable>`",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "nowhatsapp",
+      "category": "Helper",
+      "aliases": [
+        "nowa"
+      ],
+      "description": "Check if the number is exist or not.",
+      "usage": "!nowhatsapp `<628952253440x>`",
+      "cooldown": 6,
+      "limit": 5,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "order",
+      "category": "Debugging",
+      "aliases": [
+        "order"
+      ],
+      "description": "Send order.",
+      "usage": "!order",
+      "cooldown": 5,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "petpet",
+      "category": "Converter",
+      "aliases": [
+        "pet",
+        "petpetpet"
+      ],
+      "description": "Pet someone profile picture or send/reply an image to pet.",
+      "usage": "!petpet `<@user/(reply/send image)>`",
+      "cooldown": 5,
+      "limit": 1,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "ping",
+      "category": "Misc",
+      "aliases": [
+        "pong"
+      ],
+      "description": "Ping the bot or Show bot latency.",
+      "usage": "!ping",
+      "cooldown": 8,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "pinmessage",
+      "category": "Debugging",
+      "aliases": [
+        "pinmsg"
+      ],
+      "description": "Pin message in chat.",
+      "usage": "!pinmessage",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "pinterest",
+      "category": "Search",
+      "aliases": [
+        "pin"
+      ],
+      "description": "Search images from Pinterest.",
+      "usage": "!pinterest `<quer(y/ies)/url(s)>`",
+      "cooldown": 5,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "pixivartwork",
+      "category": "Search",
+      "aliases": [
+        "pixart",
+        "pixivart"
+      ],
+      "description": "Search artworks from Pixiv.",
+      "usage": "!pixivartwork `<query>`",
+      "cooldown": 8,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "pixivartworkdl",
+      "category": "Downloader",
+      "aliases": [
+        "pixartdl",
+        "pixivartdl"
+      ],
+      "description": "Download artworks from Pixiv",
+      "usage": "!pixivartworkdl `<url(s)>` (you can send multiple url using space in between)",
+      "cooldown": 7,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "pixivmanga",
+      "category": "Search",
+      "aliases": [
+        "pixmanga"
+      ],
+      "description": "Search manga from Pixiv.",
+      "usage": "!pixivmanga `<query>`",
+      "cooldown": 8,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "pixivmangadl",
+      "category": "Downloader",
+      "aliases": [
+        "pixmangadl"
+      ],
+      "description": "Download manga from Pixiv",
+      "usage": "!pixivmangadl `<url(s)>` (you can send multiple url using space in between)",
+      "cooldown": 7,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "pixivnovel",
+      "category": "Search",
+      "aliases": [
+        "pixnovel"
+      ],
+      "description": "Search novel from Pixiv.",
+      "usage": "!pixivnovel `<query>`",
+      "cooldown": 8,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "pixivnovelget",
+      "category": "Search",
+      "aliases": [
+        "pixnovelget"
+      ],
+      "description": "Get novel content from Pixiv.",
+      "usage": "!pixivnovelget `<url>`",
+      "cooldown": 8,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "playtictactoe",
+      "category": "Games",
+      "aliases": [
+        "ttt"
+      ],
+      "description": "Play Tic Tac Toe",
+      "usage": "!playtictactoe",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "pm2",
+      "category": "Owner",
+      "aliases": [],
+      "description": "Manage PM2 Instance Processes, such as Listing, Stopping, Restarting, and Killing process.",
+      "usage": "!pm2",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "polling",
+      "category": "Debugging",
+      "aliases": [
+        "poll",
+        "pollwith"
+      ],
+      "description": "Send polling.",
+      "usage": "!polling",
+      "cooldown": 5,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "pornhub",
+      "category": "Owner",
+      "aliases": [
+        "ph",
+        "phub"
+      ],
+      "description": "Search pornhub.",
+      "usage": "!pornhub `<query>`",
+      "cooldown": 5,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "premium",
+      "category": "Owner",
+      "aliases": [
+        "prem"
+      ],
+      "description": "Configure users status.",
+      "usage": "!premium `(add/remove)` `<tag/reply user>`",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "prettify",
+      "category": "Converter",
+      "aliases": [
+        "pretty"
+      ],
+      "description": "Prettify image.",
+      "usage": "!prettify `<reply/send image>`",
+      "cooldown": 5,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "privacy",
+      "category": "Owner",
+      "aliases": [
+        "prv"
+      ],
+      "description": "Change the privacy settings of the bot.",
+      "usage": "!privacy `<setting>` `<value>`",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "product",
+      "category": "Debugging",
+      "aliases": [
+        "prd"
+      ],
+      "description": "Send product.",
+      "usage": "!product",
+      "cooldown": 5,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "productlist",
+      "category": "Debugging",
+      "aliases": [
+        "plst"
+      ],
+      "description": "Send list product message.",
+      "usage": "!productlist",
+      "cooldown": 5,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "promote",
+      "category": "Moderation",
+      "aliases": [
+        "prmt",
+        "admin",
+        "adm"
+      ],
+      "description": "Promote member to admin.",
+      "usage": "!promote `<reply/tag member>`",
+      "cooldown": 8,
+      "limit": 6,
+      "premium": false,
+      "restrict": true,
+      "enabled": true
+    },
+    {
+      "name": "pstore",
+      "category": "Search",
+      "aliases": [
+        "pstor"
+      ],
+      "description": "Search products from p-store",
+      "usage": "!pstore `<query>`",
+      "cooldown": 8,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "reaction",
+      "category": "Debugging",
+      "aliases": [
+        "react",
+        "reactwith"
+      ],
+      "description": "Send reaction to a message.",
+      "usage": "!reaction `<emoji>`",
+      "cooldown": 5,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "removebg",
+      "category": "Converter",
+      "aliases": [
+        "rmbg",
+        "rbg",
+        "nobg"
+      ],
+      "description": "Remove background from image.",
+      "usage": "!removebg `<reply/send (image/sticker)>`",
+      "cooldown": 5,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "report",
+      "category": "Helper",
+      "aliases": [
+        "lapor"
+      ],
+      "description": "Report bug or error to the owner.",
+      "usage": "!report",
+      "cooldown": 40,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "resend",
+      "category": "Misc",
+      "aliases": [
+        "revive"
+      ],
+      "description": "Resend message.",
+      "usage": "!resend",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "restrict",
+      "category": "Moderation",
+      "aliases": [
+        "restrictgroup",
+        "restrictgroupchat"
+      ],
+      "description": "Restrict the group.",
+      "usage": "!restrict",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "retrieve",
+      "category": "Moderation",
+      "aliases": [
+        "invite",
+        "inv",
+        "link"
+      ],
+      "description": "Retrieve the group's invitation URL.",
+      "usage": "!retrieve",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "revoke",
+      "category": "Moderation",
+      "aliases": [
+        "rvk",
+        "tarik"
+      ],
+      "description": "Revoke group's invitation URL.",
+      "usage": "!revoke",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "sambungkata",
+      "category": "Games",
+      "aliases": [
+        "sambung"
+      ],
+      "description": "Word Play Game.",
+      "usage": "!sambungkata",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "saucenao",
+      "category": "Anime",
+      "aliases": [
+        "nao",
+        "waitnao"
+      ],
+      "description": "Reverse image anime search",
+      "usage": "!saucenao `<reply image/send image>`",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "savechar",
+      "category": "Genshin Impact",
+      "aliases": [
+        "saveuid"
+      ],
+      "description": "Save your Genshin Impact character.",
+      "usage": "!savechar `<uids>`",
+      "cooldown": 6,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "scanimagetext",
+      "category": "Converter",
+      "aliases": [
+        "ocr"
+      ],
+      "description": "Recognize text from image.",
+      "usage": "!scanimagetext `<reply media/send media>`",
+      "cooldown": 5,
+      "limit": 1,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "screenshots",
+      "category": "Misc",
+      "aliases": [
+        "screenshot",
+        "ss"
+      ],
+      "description": "Get a screenshot of a website.",
+      "usage": "!screenshot `<url>` `--<?type (oneof phone, tablet, desktop)>` default is `desktop`.",
+      "cooldown": 3,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "search",
+      "category": "Anonymous",
+      "aliases": [
+        "find",
+        "findpartner"
+      ],
+      "description": "Search for a partner",
+      "usage": "!search",
+      "cooldown": 5,
+      "limit": 1,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "searchmessage",
+      "category": "Helper",
+      "aliases": [
+        "findmessage",
+        "searchmsg",
+        "findmsg"
+      ],
+      "description": "Search for a message in the current group",
+      "usage": "!searchmessage",
+      "cooldown": 10,
+      "limit": 3,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "setbio",
+      "category": "Owner",
+      "aliases": [
+        "setinfo"
+      ],
+      "description": "Set the bot's bio",
+      "usage": "!setbio `<bio>`",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "setname",
+      "category": "Owner",
+      "aliases": [
+        "setnick",
+        "nick",
+        "name"
+      ],
+      "description": "Set the bot's name.",
+      "usage": "!setname `<name>`",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "setpin",
+      "category": "Owner",
+      "aliases": [],
+      "description": "Set the pinterest bookmarks for profile pictures interval.",
+      "usage": "!setpin `<url>`",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "shopee",
+      "category": "Search",
+      "aliases": [
+        "shop"
+      ],
+      "description": "Search products from Shopee.",
+      "usage": "!shopee `<query>`",
+      "cooldown": 10,
+      "limit": 5,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "simulates",
+      "category": "Owner",
+      "aliases": [
+        "simulate"
+      ],
+      "description": "Simulates an event update.",
+      "usage": "!simulates `<events>`",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "skip",
+      "category": "Anonymous",
+      "aliases": [
+        "skippartner"
+      ],
+      "description": "Skip a partner",
+      "usage": "!skip",
+      "cooldown": 5,
+      "limit": 1,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "slotmachine",
+      "category": "Games",
+      "aliases": [
+        "slot"
+      ],
+      "description": "Play Slot Machine.",
+      "usage": "!slot `<bet>`",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "soundremover",
+      "category": "Converter",
+      "aliases": [
+        "soundremove",
+        "soundrem",
+        "soundremoveaudio",
+        "soundremovevideo",
+        "soundremoveaudiovideo",
+        "vrm",
+        "srm"
+      ],
+      "description": "Remove specific sound from audio/video",
+      "usage": "!soundremover <reply/send audio/video>",
+      "cooldown": 5,
+      "limit": 1,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "spotifyalbum",
+      "category": "Search",
+      "aliases": [
+        "spotifyalb"
+      ],
+      "description": "Search album on Spotify.",
+      "usage": "!spotifyalbum `<query>`",
+      "cooldown": 8,
+      "limit": 5,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "spotifyartist",
+      "category": "Search",
+      "aliases": [
+        "spotifyart"
+      ],
+      "description": "Search artist on Spotify.",
+      "usage": "!spotifyartist `<query>`",
+      "cooldown": 8,
+      "limit": 5,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "spotifycard",
+      "category": "Converter",
+      "aliases": [
+        "scard"
+      ],
+      "description": "Make Spotif Card",
+      "usage": "!spotifycard `<query>`",
+      "cooldown": 5,
+      "limit": 3,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "spotifydl",
+      "category": "Downloader",
+      "aliases": [
+        "spdl",
+        "spotdl"
+      ],
+      "description": "Download media from Spotify.",
+      "usage": "!spotifydl `<url(s)>` (you can send multiple url using space in between)",
+      "cooldown": 4,
+      "limit": 5,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "spotifyplayer",
+      "category": "Owner",
+      "aliases": [
+        "spotifybio"
+      ],
+      "description": "Simulates a spotify player on bio",
+      "usage": "!spotifyplayer `<enable/disable>`",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "spotifyplayerplayback",
+      "category": "Debugging",
+      "aliases": [
+        "spp"
+      ],
+      "description": "Enable/Disable Spotify Player Playback.",
+      "usage": "!spotifyplayerplayback",
+      "cooldown": 5,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "spotifytracks",
+      "category": "Search",
+      "aliases": [
+        "spotifytra"
+      ],
+      "description": "Search song on Spotify.",
+      "usage": "!spotifytracks `<query>`",
+      "cooldown": 8,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "staticsticker",
+      "category": "Converter",
+      "aliases": [
+        "sittp"
+      ],
+      "description": "Generate static sticker",
+      "usage": "!staticsticker `<text>` `[--color in hex]` `[--fonts]`",
+      "cooldown": 5,
+      "limit": 1,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "stats",
+      "category": "Misc",
+      "aliases": [
+        "status"
+      ],
+      "description": "Check bot status.",
+      "usage": "!stats",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "sticker",
+      "category": "Converter",
+      "aliases": [
+        "stickers",
+        "st",
+        "stk",
+        "s",
+        "sgif",
+        "sgifs",
+        "stickergif",
+        "stickergifs",
+        "tosticker",
+        "tostickers",
+        "tosticker",
+        "tostickers",
+        "tosticker"
+      ],
+      "description": "Convert media to sticker.",
+      "usage": "!sticker `<reply media/send media>`",
+      "cooldown": 5,
+      "limit": 1,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "stockimages",
+      "category": "Search",
+      "aliases": [
+        "stockimg"
+      ],
+      "description": "Search stock images.",
+      "usage": "!stockimages `<query>`",
+      "cooldown": 5,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "stockimages2",
+      "category": "Search",
+      "aliases": [
+        "stockimg2"
+      ],
+      "description": "Search stock images.",
+      "usage": "!stockimages2 `<query>`",
+      "cooldown": 5,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "stop",
+      "category": "Anonymous",
+      "aliases": [
+        "stoppartner"
+      ],
+      "description": "Stop a partner",
+      "usage": "!stop",
+      "cooldown": 5,
+      "limit": 1,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "story",
+      "category": "Owner",
+      "aliases": [
+        "sw"
+      ],
+      "description": "Fetch story from host WhatsApp.",
+      "usage": "!story",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "subreddit",
+      "category": "Search",
+      "aliases": [
+        "subr"
+      ],
+      "description": "Search Subreddit.",
+      "usage": "!subreddit `<query>`",
+      "cooldown": 5,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "sudoku",
+      "category": "Games",
+      "aliases": [
+        "sd"
+      ],
+      "description": "Play Sudoku.",
+      "usage": "!sudoku",
+      "cooldown": 2,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "surahaudio",
+      "category": "AL-Quran",
+      "aliases": [
+        "surah"
+      ],
+      "description": "Get surah audio",
+      "usage": "!surahaudio `<surah number>`",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "surahayat",
+      "category": "AL-Quran",
+      "aliases": [
+        "ayat"
+      ],
+      "description": "Get surah ayat",
+      "usage": "!surahayat `<surah number>`",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "surahdetails",
+      "category": "AL-Quran",
+      "aliases": [
+        "surahdetail"
+      ],
+      "description": "Get surah details",
+      "usage": "!surahdetail `<surah number>`",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "sus",
+      "category": "Debugging",
+      "aliases": [
+        "sus"
+      ],
+      "description": "sus",
+      "usage": "!sus",
+      "cooldown": 5,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "tags",
+      "category": "Owner",
+      "aliases": [
+        "mytag",
+        "tagged"
+      ],
+      "description": "Fetch every tags",
+      "usage": "!tags",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "tebakgambar",
+      "category": "Games",
+      "aliases": [
+        "tg",
+        "tebak"
+      ],
+      "description": "Play Guess the image.",
+      "usage": "!tebakgambar",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "telegramsticker",
+      "category": "Converter",
+      "aliases": [
+        "ts",
+        "telestick",
+        "telegramstickers"
+      ],
+      "description": "Find Telegram stickers.",
+      "usage": "!telegramsticker `<query>`",
+      "cooldown": 5,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "text2speech",
+      "category": "Converter",
+      "aliases": [
+        "tts",
+        "gtts",
+        "t2s"
+      ],
+      "description": "Convert text to speech",
+      "usage": "!text2speech `<text>` [--language]",
+      "cooldown": 5,
+      "limit": 1,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "textpro",
+      "category": "Converter",
+      "aliases": [
+        "imgmake",
+        "maker",
+        "tpro"
+      ],
+      "description": "Image maker using texts",
+      "usage": "!textpro `<query>` `<model/number[REQUIRED]>` `[options]`\nOptions:\n-stk / -img\nAvailable Model Type : !textpro -model",
+      "cooldown": 4,
+      "limit": 3,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "tikstalk",
+      "category": "Look-up",
+      "aliases": [
+        "ttstalk",
+        "ttuser"
+      ],
+      "description": "Look-up TikTok user.",
+      "usage": "!tikstalk `<username>`",
+      "cooldown": 6,
+      "limit": 6,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "tiktokaudio",
+      "category": "Downloader",
+      "aliases": [
+        "tiktokaudio",
+        "ttaudio",
+        "ttaud"
+      ],
+      "description": "Downloads TikTok audio.",
+      "usage": "!tiktokaudio `<url(s)>` (you can send multiple link using space in between)",
+      "cooldown": 7,
+      "limit": 6,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "tiktokmusic",
+      "category": "Downloader",
+      "aliases": [
+        "tiktokmusics",
+        "tiktokmusik",
+        "ttmusic",
+        "ttmusik",
+        "ttm"
+      ],
+      "description": "Downloads TikTok music that used in the video.",
+      "usage": "!tiktokmusic `<url(s)>` (you can send multiple link using space in between) [options]\nOptions:\n-wm, --watermark: Download with watermark\n-nowm, --nowatermark: Download without watermark",
+      "cooldown": 7,
+      "limit": 6,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "tiktokpost",
+      "category": "Downloader",
+      "aliases": [
+        "tiktokposts",
+        "ttimage",
+        "ttphoto",
+        "ttimages",
+        "ttphotos",
+        "ttvideo",
+        "ttvideos",
+        "ttvid",
+        "ttv",
+        "tiktok"
+      ],
+      "description": "Downloads TikTok posts.",
+      "usage": "!tiktokpost `<url(s)>` (you can send multiple link using space in between) `[options]`\nOptions:\n-wm, --watermark: Download with watermark\n-nowm, --nowatermark: Download without watermark",
+      "cooldown": 8,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "tiny",
+      "category": "Misc",
+      "aliases": [
+        "tinyurl",
+        "urlshort",
+        "short",
+        "shorten"
+      ],
+      "description": "URL shortener using tinyurl.",
+      "usage": "!tiny `<query>`",
+      "cooldown": 3,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "title",
+      "category": "Moderation",
+      "aliases": [
+        "subject",
+        "topic",
+        "name"
+      ],
+      "description": "Change the title of the group.",
+      "usage": "!title `<texts>`",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "toanime",
+      "category": "Converter",
+      "aliases": [
+        "toanim",
+        "ai2d",
+        "faceplay"
+      ],
+      "description": "Change your selfie picture to Anime-like using QQ A.I.",
+      "usage": "!toanime `<reply media/send media>`",
+      "cooldown": 8,
+      "limit": 9,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "tracemoe",
+      "category": "Anime",
+      "aliases": [
+        "moe",
+        "waitmoe",
+        "whatanime"
+      ],
+      "description": "Reverse image anime search",
+      "usage": "!tracemoe `<reply image/send image>`",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "trigger",
+      "category": "Converter",
+      "aliases": [
+        "trig",
+        "t"
+      ],
+      "description": "Trigger someone profile picture or send/reply an image to trigger",
+      "usage": "!trigger `<@user/(reply/send image)>`",
+      "cooldown": 5,
+      "limit": 1,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "trueid",
+      "category": "Search",
+      "aliases": [
+        "tid"
+      ],
+      "description": "Search movie on TrueID.",
+      "usage": "!trueid `<query>`",
+      "cooldown": 6,
+      "limit": 5,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "twitstalk",
+      "category": "Look-up",
+      "aliases": [
+        "twtlu",
+        "twtlookup",
+        "twtuser"
+      ],
+      "description": "Look-up Twitter user.",
+      "usage": "!twitstalk `<username>`",
+      "cooldown": 6,
+      "limit": 6,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "twitterdl",
+      "category": "Downloader",
+      "aliases": [
+        "twtdl",
+        "twitdl"
+      ],
+      "description": "Download Twitter post",
+      "usage": "!twitterdl `<url(s)>` (you can send multiple link using space in between)",
+      "cooldown": 10,
+      "limit": 9,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "unbanned",
+      "category": "Owner",
+      "aliases": [
+        "unban"
+      ],
+      "description": "Unbanned user.",
+      "usage": "!unbanned `<tag/reply user>`",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "unlock",
+      "category": "Moderation",
+      "aliases": [
+        "unlocked",
+        "unlockgroup",
+        "unlockgroupchat"
+      ],
+      "description": "Unlock the group.",
+      "usage": "!unlock",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "unrestrict",
+      "category": "Moderation",
+      "aliases": [
+        "unrestrict",
+        "unrestrictgroup",
+        "unrestrictgroupchat"
+      ],
+      "description": "Unrestrict the group.",
+      "usage": "!unlock",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "upstory",
+      "category": "Owner",
+      "aliases": [
+        "upsw"
+      ],
+      "description": "upstory",
+      "usage": "!upstory",
+      "cooldown": 5,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "waifu2x",
+      "category": "Converter",
+      "aliases": [
+        "w2x",
+        "enhance",
+        "upscale",
+        "remmini"
+      ],
+      "description": "Enhance image using image processing A.I. called waifu2x.",
+      "usage": "!waifu2x `<reply/send image/sticker>`",
+      "cooldown": 6,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": false
+    },
+    {
+      "name": "waifu2xv2",
+      "category": "Converter",
+      "aliases": [
+        "w2xv2",
+        "enhancev2",
+        "upscalev2",
+        "remminiv2"
+      ],
+      "description": "Enhance image using image processing A.I. called waifu2x.",
+      "usage": "!waifu2xv2 `<reply/send image/sticker>`",
+      "cooldown": 6,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": false
+    },
+    {
+      "name": "waifupic",
+      "category": "Anime",
+      "aliases": [
+        "wpic"
+      ],
+      "description": "Search images from waifu pics",
+      "usage": "!waifupic `<query>` `--(nsfw/sfw)`\n\nExample : \n!waifupic (oneof `waifu,neko,trap,blowjob`) --nsfw\n!waifupic (oneof `waifu,neko,shinobu,megumin,bully,cuddle,cry,hug,awoo,kiss,lick,pat,smug,bonk,yeet,blush,smile,wave,highfive,handhold,nom,bite,glomp,slap,kill,kick,happy,wink,poke,dance,cringe`) --sfw",
+      "cooldown": 5,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "waitmessage",
+      "category": "Debugging",
+      "aliases": [
+        "waitmsg"
+      ],
+      "description": "Wait for users input then proceed.",
+      "usage": "!waitmessage",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "waitmessages",
+      "category": "Debugging",
+      "aliases": [
+        "waitmsgs"
+      ],
+      "description": "Wait for users input then proceed.",
+      "usage": "!waitmessage",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "waitsticker",
+      "category": "Debugging",
+      "aliases": [
+        "stickwait"
+      ],
+      "description": "Wait for users input then proceed.",
+      "usage": "!waitsticker",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "wallpaper",
+      "category": "Search",
+      "aliases": [
+        "wall"
+      ],
+      "description": "Search wallpaper.",
+      "usage": "!wallpaper `<query>`",
+      "cooldown": 5,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "weather",
+      "category": "News",
+      "aliases": [
+        "cuaca"
+      ],
+      "description": "Get Weather on Your City.",
+      "usage": "!weather `<query>`",
+      "cooldown": 5,
+      "limit": 1,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "werewolf",
+      "category": "Games",
+      "aliases": [
+        "ww"
+      ],
+      "description": "Play Werewolf.",
+      "usage": "!ww `<arguments>`",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "wordle",
+      "category": "Games",
+      "aliases": [
+        "wordl"
+      ],
+      "description": "Play Wordle.",
+      "usage": "!wordle `<play/exit/info>`",
+      "cooldown": 2,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "yandex",
+      "category": "Search",
+      "aliases": [
+        "ri",
+        "similar",
+        "whatimage",
+        "whatimg",
+        "findimg"
+      ],
+      "description": "Reverse image search from Yandex.",
+      "usage": "!yandex `<reply/send image>`",
+      "cooldown": 8,
+      "limit": 5,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "yandeximage",
+      "category": "Search",
+      "aliases": [
+        "yim",
+        "yis",
+        "yandimage"
+      ],
+      "description": "Search images from Yandex.",
+      "usage": "!yandeximage `<query>`",
+      "cooldown": 5,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "youtubelive",
+      "category": "Owner",
+      "aliases": [
+        "ytlive"
+      ],
+      "description": "Listen to a YouTube live stream.",
+      "usage": "!youtubelive `<youtube_id>`",
+      "cooldown": 0,
+      "limit": 0,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "youtubestalk",
+      "category": "Look-up",
+      "aliases": [
+        "ytstalk",
+        "ytinfo",
+        "ytchannel"
+      ],
+      "description": "Look-up YouTube Channel.",
+      "usage": "!youtubestalk `<channel_id|@channel_username|channel_url>`",
+      "cooldown": 6,
+      "limit": 6,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "ytaudio",
+      "category": "Downloader",
+      "aliases": [
+        "yta",
+        "ytmp3"
+      ],
+      "description": "Downloads a YouTube audio",
+      "usage": "!ytaudio `<url(s)>` (you can send multiple url using space in between)",
+      "cooldown": 7,
+      "limit": 8,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "ytplay",
+      "category": "Downloader",
+      "aliases": [
+        "ytp",
+        "yt",
+        "play"
+      ],
+      "description": "Instantly Download a YouTube video/audio.",
+      "usage": "!ytplay `<query>` `[options]`\nOptions:\n-mp3, Download as Audio\n-mp4, Download as Video",
+      "cooldown": 5,
+      "limit": 4,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "ytsearch",
+      "category": "Search",
+      "aliases": [
+        "yts",
+        "ytsr"
+      ],
+      "description": "Search YouTube",
+      "usage": "!ytsearch `<query>`",
+      "cooldown": 10,
+      "limit": 5,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "ytvideo",
+      "category": "Downloader",
+      "aliases": [
+        "ytv",
+        "ytmp4"
+      ],
+      "description": "Downloads a YouTube video",
+      "usage": "!ytvideo `<url(s)>` (you can send multiple url using space in between)",
+      "cooldown": 12,
+      "limit": 8,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    },
+    {
+      "name": "zalgo",
+      "category": "Misc",
+      "aliases": [
+        "tozalgo",
+        "zalg"
+      ],
+      "description": "Convert Text to Zalgo text",
+      "usage": "!zalgo `<query>`",
+      "cooldown": 3,
+      "limit": 2,
+      "premium": false,
+      "restrict": false,
+      "enabled": true
+    }
+  ]
+}

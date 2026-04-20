@@ -1,5 +1,5 @@
 {
-  "lastId": 163,
+  "lastId": 184,
   "logs": [
     {
       "id": 1,
@@ -2128,6 +2128,318 @@
       "after": {
         "enabled": false
       }
+    },
+    {
+      "id": 164,
+      "timestamp": 1776684188708,
+      "action": "auth.logout",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Session logged out.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 165,
+      "timestamp": 1776684205453,
+      "action": "auth.viewer_login",
+      "actorRole": "viewer",
+      "actor": "Viewer",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Viewer session started.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 166,
+      "timestamp": 1776685283059,
+      "action": "auth.logout",
+      "actorRole": "viewer",
+      "actor": "Viewer",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Session logged out.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 167,
+      "timestamp": 1776686114311,
+      "action": "auth.owner_login",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Owner login confirmed by WhatsApp.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 168,
+      "timestamp": 1776686131085,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "waifu2x",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": false
+      },
+      "after": {
+        "enabled": true
+      }
+    },
+    {
+      "id": 169,
+      "timestamp": 1776686143221,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "waifu2x",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": true
+      },
+      "after": {
+        "enabled": false
+      }
+    },
+    {
+      "id": 170,
+      "timestamp": 1776686213322,
+      "action": "flag.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "autoRead",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": false
+      },
+      "after": {
+        "enabled": true
+      }
+    },
+    {
+      "id": 171,
+      "timestamp": 1776686441034,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "waifu2x",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": false
+      },
+      "after": {
+        "enabled": true
+      }
+    },
+    {
+      "id": 172,
+      "timestamp": 1776686457006,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "waifu2x",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": true
+      },
+      "after": {
+        "enabled": false
+      }
+    },
+    {
+      "id": 173,
+      "timestamp": 1776686522412,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "waifu2x",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": false
+      },
+      "after": {
+        "enabled": true
+      }
+    },
+    {
+      "id": 174,
+      "timestamp": 1776686529108,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "waifu2x",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": true
+      },
+      "after": {
+        "enabled": false
+      }
+    },
+    {
+      "id": 175,
+      "timestamp": 1776686533381,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "waifu2xv2",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": false
+      },
+      "after": {
+        "enabled": true
+      }
+    },
+    {
+      "id": 176,
+      "timestamp": 1776686536245,
+      "action": "command.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "waifu2xv2",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": true
+      },
+      "after": {
+        "enabled": false
+      }
+    },
+    {
+      "id": 177,
+      "timestamp": 1776686815402,
+      "action": "flag.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "autoRead",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": false
+      },
+      "after": {
+        "enabled": true
+      }
+    },
+    {
+      "id": 178,
+      "timestamp": 1776686831277,
+      "action": "flag.toggle",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "autoRead",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "enabled": true
+      },
+      "after": {
+        "enabled": false
+      }
+    },
+    {
+      "id": 179,
+      "timestamp": 1776687113261,
+      "action": "user.limit",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6289522534401@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "limit": 33
+      },
+      "after": {
+        "limit": 30
+      }
+    },
+    {
+      "id": 180,
+      "timestamp": 1776687136437,
+      "action": "user.premium",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6289522534401@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "premium": true
+      },
+      "after": {
+        "premium": false
+      }
+    },
+    {
+      "id": 181,
+      "timestamp": 1776687161821,
+      "action": "user.blocked",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6289522534401@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "blocked": false
+      },
+      "after": {
+        "blocked": true
+      }
+    },
+    {
+      "id": 182,
+      "timestamp": 1776687166894,
+      "action": "user.blocked",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "6289522534401@s.whatsapp.net",
+      "status": "ok",
+      "message": null,
+      "before": {
+        "blocked": true
+      },
+      "after": {
+        "blocked": false
+      }
+    },
+    {
+      "id": 183,
+      "timestamp": 1776688573524,
+      "action": "auth.logout",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Session logged out.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 184,
+      "timestamp": 1776688582308,
+      "action": "auth.viewer_login",
+      "actorRole": "viewer",
+      "actor": "Viewer",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Viewer session started.",
+      "before": null,
+      "after": null
     }
   ]
 }
