@@ -1,5 +1,8 @@
 {
-  "disabledCommands": [],
+  "disabledCommands": [
+    "waifu2x",
+    "waifu2xv2"
+  ],
   "flagStates": {
     "pairMode": true,
     "watch": true,

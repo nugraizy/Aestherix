@@ -1,25 +1,25 @@
 import {
-	ACTIVE_FOLDER_STORAGE_KEY,
-	ALERT_RULES,
-	ansiRegex,
-	AUDIT_ACTION_PARAM,
-	AUDIT_ACTIONS_COLLAPSED_KEY,
-	AUDIT_QUERY_PARAM,
-	AUDIT_ROLE_PARAM,
-	AUDIT_ROLES_COLLAPSED_KEY,
-	CHANGELOG_MARKDOWN_PATH,
-	COLLAPSE_STORAGE_KEY,
-	CONTRIBUTORS_PATH,
-	DEFAULT_DASHBOARD_SETTINGS,
-	DEFAULT_THEME_PALETTE,
-	ERROR_SPIKE_PATTERN,
-	SEARCH_PLACEHOLDERS,
-	SETTINGS_STORAGE_KEY,
-	THEME_ICON_MORPH_MS,
-	THEME_PALETTE_STORAGE_KEY,
-	THEME_PALETTES,
-	THEME_STORAGE_KEY,
-	THEME_TRANSITION_MS
+    ACTIVE_FOLDER_STORAGE_KEY,
+    ALERT_RULES,
+    ansiRegex,
+    AUDIT_ACTION_PARAM,
+    AUDIT_ACTIONS_COLLAPSED_KEY,
+    AUDIT_QUERY_PARAM,
+    AUDIT_ROLE_PARAM,
+    AUDIT_ROLES_COLLAPSED_KEY,
+    CHANGELOG_MARKDOWN_PATH,
+    COLLAPSE_STORAGE_KEY,
+    CONTRIBUTORS_PATH,
+    DEFAULT_DASHBOARD_SETTINGS,
+    DEFAULT_THEME_PALETTE,
+    ERROR_SPIKE_PATTERN,
+    SEARCH_PLACEHOLDERS,
+    SETTINGS_STORAGE_KEY,
+    THEME_ICON_MORPH_MS,
+    THEME_PALETTE_STORAGE_KEY,
+    THEME_PALETTES,
+    THEME_STORAGE_KEY,
+    THEME_TRANSITION_MS
 } from './app/constants.js';
 import { els } from './app/dom.js';
 import { escapeHtml, fuzzyIncludes, highlightMatch, renderChangelogMarkdown, sanitizeMarkdownUrl } from './app/formatters.js';
@@ -53,9 +53,61 @@ const CONTRIBUTORS_AVATAR_CACHE_NAME = 'aestherix.dashboard.contributor-avatars.
 const contributorAvatarObjectUrlCache = new Map();
 const LOGOUT_MIN_LOADING_MS = 3500;
 let logoutInProgress = false;
-let albumsNavigationInProgress = false;
 const ZEN_CURSOR_LOGOUT_LOCK_ATTR = 'data-logout-lock';
 const ZEN_CURSOR_POINTER_CACHE_KEY = 'aestherix.dashboard.cursor.pointer';
+const ZEN_CURSOR_ENABLED_CACHE_KEY = 'aestherix.dashboard.cursor.enabled';
+const DASHBOARD_PROFILE_PICTURES_CACHE_KEY = 'aestherix.dashboard.profilePictures.cache.v1';
+const PROFILE_PICTURES_LIMIT = 100;
+const ALBUMS_ROUTE_PATH = '/albums';
+const DASHBOARD_ROUTE_PATH = '/dashboard';
+const CYCLE_ANIMATION_MS = 180;
+const WHEEL_DELTA_PER_IMAGE = 48;
+const WHEEL_GESTURE_RESET_MS = 180;
+const WHEEL_NAV_LOCK_BASE_MS = 46;
+const LIGHTBOX_TOUCH_SWIPE_THRESHOLD_PX = 42;
+const LIGHTBOX_TOUCH_MAX_VERTICAL_DRIFT_PX = 64;
+const LIGHTBOX_SWIPE_VELOCITY_STEP_2 = 0.85;
+const LIGHTBOX_SWIPE_VELOCITY_STEP_3 = 1.35;
+let profilePicturesCarouselItems = [];
+let profilePicturesCarouselIndex = -1;
+const PROFILE_PICTURES_CAROUSEL_OFFSETS = [-2, -1, 0, 1, 2];
+let seamlessAlbumsOpen = false;
+let lastDashboardRouteHref = DASHBOARD_ROUTE_PATH;
+let profilePicturesWheelDeltaAccumulator = 0;
+let profilePicturesWheelLastInputAt = 0;
+let profilePicturesWheelNavigationLockUntil = 0;
+let profilePicturesCycleTimer = null;
+let profilePicturesTouchStartX = null;
+let profilePicturesTouchStartY = null;
+let profilePicturesTouchLastX = null;
+let profilePicturesTouchLastY = null;
+let profilePicturesTouchStartAt = 0;
+let profilePicturesTouchLastAt = 0;
+let profilePicturesTouchTrackingActive = false;
+let profilePicturesTouchSwipeTriggered = false;
+
+const clampProfilePictures = (pictures) =>
+	(Array.isArray(pictures) ? pictures : []).slice(0, PROFILE_PICTURES_LIMIT);
+
+const persistSharedProfilePicturesCache = (pictures) => {
+	if (typeof window === 'undefined') {
+		return;
+	}
+
+	const limitedPictures = clampProfilePictures(pictures);
+
+	try {
+		window.sessionStorage.setItem(
+			DASHBOARD_PROFILE_PICTURES_CACHE_KEY,
+			JSON.stringify({
+				updatedAt: Date.now(),
+				pictures: limitedPictures
+			})
+		);
+	} catch {
+		// Ignore cache write errors.
+	}
+};
 
 const getZenCursorElement = () => document.getElementById('zen-cursor');
 
@@ -464,10 +516,6 @@ const getSectionStateElement = (section) => {
 		return els.usersState;
 	}
 
-	if (section === 'profilePictures') {
-		return els.profilePicturesState;
-	}
-
 	return null;
 };
 
@@ -554,11 +602,6 @@ const setSectionContentVisibility = (section, visible) => {
 
 	if (section === 'flags') {
 		els.flagsWrap?.classList.toggle('hidden', !isVisible);
-		return;
-	}
-
-	if (section === 'profilePictures') {
-		els.profilePicturesWrap?.classList.toggle('hidden', !isVisible);
 	}
 };
 
@@ -836,6 +879,7 @@ const prefetchRoute = (href) => {
 	}
 
 	const link = document.createElement('link');
+
 	link.rel = 'prefetch';
 	link.href = href;
 	link.as = 'document';
@@ -896,12 +940,11 @@ const readCachedZenPointerPosition = () => {
 };
 
 const navigateToAlbums = () => {
-	if (albumsNavigationInProgress) {
-		return;
+	if (typeof window !== 'undefined' && window.location.pathname !== ALBUMS_ROUTE_PATH) {
+		lastDashboardRouteHref = `${window.location.pathname}${window.location.search}${window.location.hash}`;
 	}
 
-	albumsNavigationInProgress = true;
-	window.location.assign('/albums');
+	openSeamlessAlbumsPage({ updateHistory: true });
 };
 
 const ensureToastHost = () => {
@@ -2022,16 +2065,31 @@ const setOnlineState = (online) => {
 const setupZenCursor = () => {
 	if (typeof window === 'undefined' || !document?.body) {
 		document?.documentElement?.classList.remove('zen-cursor-preload');
+		try {
+			window?.sessionStorage?.removeItem(ZEN_CURSOR_ENABLED_CACHE_KEY);
+		} catch {
+			// Ignore storage cleanup errors.
+		}
 		return false;
 	}
 
 	if (!window.matchMedia('(pointer: fine)').matches) {
 		document.documentElement.classList.remove('zen-cursor-preload');
+		try {
+			window.sessionStorage.removeItem(ZEN_CURSOR_ENABLED_CACHE_KEY);
+		} catch {
+			// Ignore storage cleanup errors.
+		}
 		return false;
 	}
 
 	if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 		document.documentElement.classList.remove('zen-cursor-preload');
+		try {
+			window.sessionStorage.removeItem(ZEN_CURSOR_ENABLED_CACHE_KEY);
+		} catch {
+			// Ignore storage cleanup errors.
+		}
 		return false;
 	}
 
@@ -2049,6 +2107,12 @@ const setupZenCursor = () => {
 	document.documentElement.classList.add('zen-cursor-enabled');
 	document.body.classList.add('zen-cursor-enabled');
 	document.body.style.cursor = 'none';
+
+	try {
+		window.sessionStorage.setItem(ZEN_CURSOR_ENABLED_CACHE_KEY, '1');
+	} catch {
+		// Ignore storage write errors.
+	}
 
 	const setCursorVisibility = (isVisible) => {
 		if (isCursorVisible === isVisible) {
@@ -2565,9 +2629,6 @@ const renderAudit = () => {
 const commandCardMarkup = (command, keyword = '') => {
 	const aliases = command.aliases.length ? command.aliases.join(', ') : '-';
 	const statusClass = command.enabled ? 'enabled' : 'disabled';
-	const statusLabel = command.enabled ? 'ENABLED' : 'DISABLED';
-	const buttonLabel = command.enabled ? 'Disable' : 'Enable';
-	const buttonAction = command.enabled ? 'disable' : 'enable';
 	const commandTitle = command.enabled
 		? `Disable command ${escapeHtml(command.name)}`
 		: `Enable command ${escapeHtml(command.name)}`;
@@ -2576,23 +2637,20 @@ const commandCardMarkup = (command, keyword = '') => {
 	const usageCount = Number(command.usageCount || 0).toLocaleString();
 
 	const actionMarkup = state.canEdit
-		? `<button class="toggle-btn ${buttonAction}" data-command="${command.name}" data-enabled="${String(!command.enabled)}" data-tooltip="${commandTitle}">${buttonLabel}</button>`
+		? `<button class="toggle-btn ios-toggle ${command.enabled ? 'is-on' : 'is-off'}" data-command="${command.name}" data-enabled="${String(!command.enabled)}" data-tooltip="${commandTitle}" role="switch" aria-checked="${command.enabled ? 'true' : 'false'}" aria-label="${commandTitle}"><span class="ios-toggle-track" aria-hidden="true"><span class="ios-toggle-thumb"></span></span></button>`
 		: '<span class="readonly-chip">Read-only</span>';
 
 	return `
 		<article class="command-card ${statusClass}">
 			<div class="command-card-head">
 				<strong class="command-name">${highlightedName}</strong>
-				<span class="status-pill ${statusClass}">${statusLabel}</span>
+				${actionMarkup}
 			</div>
 			<p class="command-aliases"><span>Aliases:</span> ${highlightedAliases}</p>
 			<div class="command-meta">
 				<span>Cooldown: ${command.cooldown}s</span>
 				<span>Limit: ${command.limit}</span>
 				<span>Used: ${usageCount}</span>
-			</div>
-			<div class="command-actions">
-				${actionMarkup}
 			</div>
 		</article>
 	`;
@@ -2829,23 +2887,17 @@ const renderCommands = () => {
 
 const flagCardMarkup = (flag, keyword = '') => {
 	const statusClass = flag.enabled ? 'enabled' : 'disabled';
-	const statusLabel = flag.enabled ? 'ENABLED' : 'DISABLED';
-	const buttonLabel = flag.enabled ? 'Disable' : 'Enable';
-	const buttonAction = flag.enabled ? 'disable' : 'enable';
 	const flagTitle = flag.enabled ? `Disable flag ${escapeHtml(flag.name)}` : `Enable flag ${escapeHtml(flag.name)}`;
 	const highlightedName = highlightMatch(flag.name, keyword);
 
 	const actionMarkup = state.canEdit
-		? `<button class="toggle-btn ${buttonAction}" data-flag="${flag.name}" data-enabled="${String(!flag.enabled)}" data-tooltip="${flagTitle}">${buttonLabel}</button>`
+		? `<button class="toggle-btn ios-toggle ${flag.enabled ? 'is-on' : 'is-off'}" data-flag="${flag.name}" data-enabled="${String(!flag.enabled)}" data-tooltip="${flagTitle}" role="switch" aria-checked="${flag.enabled ? 'true' : 'false'}" aria-label="${flagTitle}"><span class="ios-toggle-track" aria-hidden="true"><span class="ios-toggle-thumb"></span></span></button>`
 		: '<span class="readonly-chip">Read-only</span>';
 
 	return `
 		<article class="command-card ${statusClass}">
 			<div class="command-card-head">
 				<strong class="command-name">${highlightedName}</strong>
-				<span class="status-pill ${statusClass}">${statusLabel}</span>
-			</div>
-			<div class="command-actions">
 				${actionMarkup}
 			</div>
 		</article>
@@ -3244,62 +3296,619 @@ const getFilteredProfilePictures = () => {
 	});
 };
 
-const profilePictureCardMarkup = (picture, keyword = '') => {
-	const safeUrl = String(picture?.url || '').trim();
-	const highlightedTimestamp = highlightMatch(String(picture?.timestamp || ''), keyword);
-	const highlightedUrl = highlightMatch(safeUrl, keyword);
+const getProfilePictureOriginalUrl = (picture) =>
+	String(picture?.original?.url || picture?.url || '').trim();
+
+const getProfilePicturePreviewUrl = (picture) =>
+	String(picture?.thumbnail?.url || picture?.previewUrl || getProfilePictureOriginalUrl(picture)).trim();
+
+const getRenderableProfilePictures = () => state.profilePictures.filter((picture) => Boolean(getProfilePictureOriginalUrl(picture)));
+
+const profilePictureCardMarkup = (picture, index) => {
+	const originalUrl = getProfilePictureOriginalUrl(picture);
+	const previewUrl = getProfilePicturePreviewUrl(picture);
+
+	if (!originalUrl) {
+		return '';
+	}
 
 	return `
-		<article class="command-card enabled profile-picture-card">
-			<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="profile-picture-preview-link">
-				<img src="${safeUrl}" alt="Profile picture from ${escapeHtml(String(picture?.timestamp || 'unknown time'))}" class="profile-picture-preview" loading="lazy" referrerpolicy="no-referrer" />
-			</a>
-			<div class="command-meta profile-picture-meta">
-				<span class="profile-picture-timestamp">${highlightedTimestamp || 'Unknown timestamp'}</span>
-			</div>
-			<div class="profile-picture-url">${highlightedUrl}</div>
-			<div class="command-actions">
-				<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="toggle-btn">Open Image</a>
-			</div>
+		<article class="album-image-card">
+			<img
+				src="${previewUrl || originalUrl}"
+				alt="Profile picture"
+				class="album-image is-loaded"
+				loading="lazy"
+				decoding="async"
+				fetchpriority="low"
+				referrerpolicy="no-referrer"
+				data-profile-index="${index}"
+			/>
 		</article>
 	`;
 };
 
+const wrapProfilePicturesIndex = (index, total) => ((index % total) + total) % total;
+
+const getProfilePicturesCarouselSlotClass = (offset) => {
+	if (offset === 0) {
+		return 'is-center';
+	}
+
+	if (offset === -1) {
+		return 'is-left';
+	}
+
+	if (offset === 1) {
+		return 'is-right';
+	}
+
+	if (offset === -2) {
+		return 'is-far-left';
+	}
+
+	return 'is-far-right';
+};
+
+const closeProfilePicturesActionMenu = () => {
+	if (els.profilePicturesLightboxMenuPanel) {
+		els.profilePicturesLightboxMenuPanel.classList.add('hidden');
+	}
+
+	if (els.profilePicturesLightboxMenuToggle) {
+		els.profilePicturesLightboxMenuToggle.setAttribute('aria-expanded', 'false');
+	}
+};
+
+const setProfilePicturesActionMenuOwnerState = () => {
+	if (!els.profilePicturesLightboxMenuDelete) {
+		return;
+	}
+
+	els.profilePicturesLightboxMenuDelete.classList.toggle('hidden', !state.canEdit);
+};
+
+const updateProfilePicturesActionMenuVisibility = () => {
+	if (!els.profilePicturesLightboxMenu) {
+		return;
+	}
+
+	const shouldShow =
+		!els.profilePicturesLightbox?.classList.contains('hidden') &&
+		profilePicturesCarouselIndex >= 0 &&
+		profilePicturesCarouselItems.length > 0;
+
+	els.profilePicturesLightboxMenu.classList.toggle('hidden', !shouldShow);
+	setProfilePicturesActionMenuOwnerState();
+};
+
+const getCurrentProfilePicture = () => {
+	const total = profilePicturesCarouselItems.length;
+
+	if (!total || profilePicturesCarouselIndex < 0) {
+		return null;
+	}
+
+	const safeIndex = wrapProfilePicturesIndex(profilePicturesCarouselIndex, total);
+
+	return profilePicturesCarouselItems[safeIndex] || null;
+};
+
+const downloadCurrentProfilePicture = () => {
+	const picture = getCurrentProfilePicture();
+	const originalUrl = getProfilePictureOriginalUrl(picture);
+
+	if (!originalUrl) {
+		return;
+	}
+
+	const anchor = document.createElement('a');
+
+	anchor.href = originalUrl;
+	anchor.target = '_blank';
+	anchor.rel = 'noopener noreferrer';
+	anchor.download = '';
+	document.body.appendChild(anchor);
+	anchor.click();
+	anchor.remove();
+};
+
+const deleteCurrentProfilePicture = async () => {
+	const current = getCurrentProfilePicture();
+
+	if (!current) {
+		return;
+	}
+
+	if (!state.canEdit) {
+		showToast('Only owner can delete images.', 'error');
+		return;
+	}
+
+	const deleteButton = els.profilePicturesLightboxMenuDelete;
+
+	deleteButton?.setAttribute('disabled', 'disabled');
+
+	const currentUrl = getProfilePictureOriginalUrl(current);
+	const currentTimestamp = String(current?.timestamp || '');
+	const previousIndex = profilePicturesCarouselIndex;
+
+	try {
+		const response = await fetch('/api/dashboard/profile-pictures', {
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				timestamp: currentTimestamp,
+				url: currentUrl
+			})
+		});
+
+		ensureAuthorizedResponse(response, 'Failed deleting profile picture');
+
+		const payload = await response.json().catch(() => ({}));
+
+		if (!response.ok || payload?.ok === false) {
+			throw new Error(payload?.message || 'Failed deleting profile picture');
+		}
+
+		state.profilePictures = state.profilePictures.filter((picture) => {
+			const pictureUrl = getProfilePictureOriginalUrl(picture);
+			const pictureTimestamp = String(picture?.timestamp || '');
+
+			return !(pictureTimestamp === currentTimestamp && pictureUrl === currentUrl);
+		});
+
+		persistSharedProfilePicturesCache(state.profilePictures);
+		renderProfilePictures();
+
+		if (!profilePicturesCarouselItems.length) {
+			closeProfilePicturesCarousel();
+			showToast('Profile picture deleted.', 'success');
+			return;
+		}
+
+		if (els.profilePicturesLightbox && !els.profilePicturesLightbox.classList.contains('hidden')) {
+			profilePicturesCarouselIndex = Math.min(
+				Math.max(previousIndex, 0),
+				profilePicturesCarouselItems.length - 1
+			);
+			renderProfilePicturesCarousel();
+		}
+
+		showToast('Profile picture deleted.', 'success');
+	} catch (error) {
+		if (error?.message !== 'Unauthorized') {
+			showToast(error?.message || 'Unable to delete image right now.', 'error');
+		}
+	} finally {
+		deleteButton?.removeAttribute('disabled');
+	}
+};
+
+const triggerProfilePicturesCycleAnimation = (direction) => {
+	if (!els.profilePicturesLightboxContent) {
+		return;
+	}
+
+	const className = direction < 0 ? 'is-cycling-left' : 'is-cycling-right';
+
+	els.profilePicturesLightboxContent.classList.remove('is-cycling-left', 'is-cycling-right');
+	void els.profilePicturesLightboxContent.offsetWidth;
+	els.profilePicturesLightboxContent.classList.add(className);
+
+	if (profilePicturesCycleTimer) {
+		clearTimeout(profilePicturesCycleTimer);
+	}
+
+	profilePicturesCycleTimer = setTimeout(() => {
+		els.profilePicturesLightboxContent?.classList.remove('is-cycling-left', 'is-cycling-right');
+		profilePicturesCycleTimer = null;
+	}, CYCLE_ANIMATION_MS);
+};
+
+const resetProfilePicturesTouchState = () => {
+	profilePicturesTouchStartX = null;
+	profilePicturesTouchStartY = null;
+	profilePicturesTouchLastX = null;
+	profilePicturesTouchLastY = null;
+	profilePicturesTouchStartAt = 0;
+	profilePicturesTouchLastAt = 0;
+	profilePicturesTouchTrackingActive = false;
+	profilePicturesTouchSwipeTriggered = false;
+};
+
+const handleProfilePicturesLightboxTouchStart = (event) => {
+	if (!els.profilePicturesLightbox || els.profilePicturesLightbox.classList.contains('hidden') || profilePicturesCarouselItems.length < 2) {
+		resetProfilePicturesTouchState();
+		return;
+	}
+
+	if (event.touches.length !== 1) {
+		resetProfilePicturesTouchState();
+		return;
+	}
+
+	const touch = event.touches[0];
+	const now = Date.now();
+
+	profilePicturesTouchStartX = touch.clientX;
+	profilePicturesTouchStartY = touch.clientY;
+	profilePicturesTouchLastX = touch.clientX;
+	profilePicturesTouchLastY = touch.clientY;
+	profilePicturesTouchStartAt = now;
+	profilePicturesTouchLastAt = now;
+	profilePicturesTouchTrackingActive = true;
+	profilePicturesTouchSwipeTriggered = false;
+};
+
+const handleProfilePicturesLightboxTouchMove = (event) => {
+	if (!profilePicturesTouchTrackingActive || profilePicturesTouchSwipeTriggered || event.touches.length !== 1) {
+		return;
+	}
+
+	const touch = event.touches[0];
+
+	profilePicturesTouchLastX = touch.clientX;
+	profilePicturesTouchLastY = touch.clientY;
+	profilePicturesTouchLastAt = Date.now();
+
+	if (!Number.isFinite(profilePicturesTouchStartX) || !Number.isFinite(profilePicturesTouchStartY)) {
+		return;
+	}
+
+	const deltaX = touch.clientX - profilePicturesTouchStartX;
+	const deltaY = touch.clientY - profilePicturesTouchStartY;
+
+	if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > LIGHTBOX_TOUCH_MAX_VERTICAL_DRIFT_PX) {
+		resetProfilePicturesTouchState();
+		return;
+	}
+
+	if (Math.abs(deltaX) > Math.abs(deltaY)) {
+		event.preventDefault();
+	}
+};
+
+const handleProfilePicturesLightboxTouchEnd = () => {
+	if (!profilePicturesTouchTrackingActive || profilePicturesTouchSwipeTriggered) {
+		resetProfilePicturesTouchState();
+		return;
+	}
+
+	if (!Number.isFinite(profilePicturesTouchStartX) || !Number.isFinite(profilePicturesTouchLastX)) {
+		resetProfilePicturesTouchState();
+		return;
+	}
+
+	const deltaX = profilePicturesTouchLastX - profilePicturesTouchStartX;
+	const deltaY =
+		Number.isFinite(profilePicturesTouchStartY) && Number.isFinite(profilePicturesTouchLastY)
+			? profilePicturesTouchLastY - profilePicturesTouchStartY
+			: 0;
+	const elapsedMs = Math.max(1, (profilePicturesTouchLastAt || Date.now()) - (profilePicturesTouchStartAt || Date.now()));
+	const velocityPxPerMs = Math.abs(deltaX) / elapsedMs;
+	const horizontalDistance = Math.abs(deltaX);
+
+	if (
+		horizontalDistance >= LIGHTBOX_TOUCH_SWIPE_THRESHOLD_PX &&
+		Math.abs(deltaY) <= LIGHTBOX_TOUCH_MAX_VERTICAL_DRIFT_PX
+	) {
+		let stepCount = 1;
+
+		if (velocityPxPerMs >= LIGHTBOX_SWIPE_VELOCITY_STEP_3) {
+			stepCount = 3;
+		} else if (velocityPxPerMs >= LIGHTBOX_SWIPE_VELOCITY_STEP_2) {
+			stepCount = 2;
+		}
+
+		const direction = deltaX < 0 ? 1 : -1;
+
+		profilePicturesTouchSwipeTriggered = true;
+		moveProfilePicturesCarousel(direction * stepCount);
+	}
+
+	resetProfilePicturesTouchState();
+};
+
+const renderProfilePicturesCarousel = () => {
+	if (!els.profilePicturesLightboxTrack || !profilePicturesCarouselItems.length) {
+		return;
+	}
+
+	const total = profilePicturesCarouselItems.length;
+	const safeIndex = wrapProfilePicturesIndex(profilePicturesCarouselIndex, total);
+
+	profilePicturesCarouselIndex = safeIndex;
+
+	els.profilePicturesLightboxTrack.innerHTML = PROFILE_PICTURES_CAROUSEL_OFFSETS.map((offset) => {
+		const targetIndex = wrapProfilePicturesIndex(safeIndex + offset, total);
+		const picture = profilePicturesCarouselItems[targetIndex] || null;
+		const originalUrl = getProfilePictureOriginalUrl(picture);
+		const slotClass = getProfilePicturesCarouselSlotClass(offset);
+		const isCenter = offset === 0;
+		const loadingValue = isCenter ? 'eager' : 'lazy';
+		const fetchPriority = isCenter ? 'high' : 'low';
+
+		return `
+			<button
+				type="button"
+				class="albums-carousel-item ${slotClass}${isCenter ? ' is-active' : ''}"
+				data-target-index="${targetIndex}"
+				aria-label="Open image ${targetIndex + 1}"
+				${isCenter ? 'aria-current="true"' : ''}
+			>
+				<img src="${originalUrl}" alt="Carousel image ${targetIndex + 1}" class="albums-carousel-image" loading="${loadingValue}" fetchpriority="${fetchPriority}" decoding="async" referrerpolicy="no-referrer" />
+			</button>
+		`;
+	}).join('');
+
+	if (els.profilePicturesLightboxMeta) {
+		els.profilePicturesLightboxMeta.textContent = `${safeIndex + 1} / ${total}`;
+	}
+
+	if (els.profilePicturesLightboxMenu) {
+		const centerCard = els.profilePicturesLightboxTrack.querySelector('.albums-carousel-item.is-center');
+
+		if (centerCard instanceof HTMLElement) {
+			centerCard.appendChild(els.profilePicturesLightboxMenu);
+
+			if (els.profilePicturesLightboxMeta) {
+				els.profilePicturesLightboxMenu.prepend(els.profilePicturesLightboxMeta);
+			}
+		}
+	} else if (els.profilePicturesLightboxMeta) {
+		const centerCard = els.profilePicturesLightboxTrack.querySelector('.albums-carousel-item.is-center');
+
+		if (centerCard instanceof HTMLElement) {
+			centerCard.appendChild(els.profilePicturesLightboxMeta);
+		}
+	}
+
+	updateProfilePicturesActionMenuVisibility();
+
+	if (els.profilePicturesLightboxPrev) {
+		els.profilePicturesLightboxPrev.disabled = total < 2;
+	}
+
+	if (els.profilePicturesLightboxNext) {
+		els.profilePicturesLightboxNext.disabled = total < 2;
+	}
+};
+
+const openProfilePicturesCarousel = (index) => {
+	if (!els.profilePicturesLightbox || !profilePicturesCarouselItems.length) {
+		return;
+	}
+
+	profilePicturesCarouselIndex = Number.isFinite(index) ? index : 0;
+	renderProfilePicturesCarousel();
+	els.profilePicturesLightbox.classList.remove('hidden');
+	els.profilePicturesLightbox.classList.remove('is-closing');
+
+	requestAnimationFrame(() => {
+		els.profilePicturesLightbox?.classList.add('is-open');
+	});
+
+	updateProfilePicturesActionMenuVisibility();
+};
+
+const closeProfilePicturesCarousel = () => {
+	if (!els.profilePicturesLightbox) {
+		return;
+	}
+
+	els.profilePicturesLightbox.classList.remove('is-open');
+	els.profilePicturesLightbox.classList.add('is-closing');
+
+	window.setTimeout(() => {
+		els.profilePicturesLightbox?.classList.add('hidden');
+		els.profilePicturesLightbox?.classList.remove('is-closing');
+
+		if (els.profilePicturesLightboxTrack) {
+			els.profilePicturesLightboxTrack.innerHTML = '';
+		}
+
+		if (els.profilePicturesLightboxMeta) {
+			els.profilePicturesLightboxMeta.textContent = '';
+		}
+
+		closeProfilePicturesActionMenu();
+		updateProfilePicturesActionMenuVisibility();
+		els.profilePicturesLightboxContent?.classList.remove('is-cycling-left', 'is-cycling-right');
+
+		if (profilePicturesCycleTimer) {
+			clearTimeout(profilePicturesCycleTimer);
+			profilePicturesCycleTimer = null;
+		}
+
+		profilePicturesWheelDeltaAccumulator = 0;
+		profilePicturesWheelLastInputAt = 0;
+		profilePicturesWheelNavigationLockUntil = 0;
+		resetProfilePicturesTouchState();
+	}, 220);
+};
+
+const moveProfilePicturesCarousel = (step) => {
+	if (!profilePicturesCarouselItems.length || !els.profilePicturesLightbox || els.profilePicturesLightbox.classList.contains('hidden')) {
+		return;
+	}
+
+	profilePicturesCarouselIndex += step;
+	renderProfilePicturesCarousel();
+	triggerProfilePicturesCycleAnimation(step);
+	closeProfilePicturesActionMenu();
+};
+
+const handleProfilePicturesLightboxWheel = (event) => {
+	if (!els.profilePicturesLightbox || els.profilePicturesLightbox.classList.contains('hidden')) {
+		return;
+	}
+
+	event.preventDefault();
+
+	if (profilePicturesCarouselItems.length < 2 || event.ctrlKey) {
+		return;
+	}
+
+	const primaryDelta = Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
+
+	if (!Number.isFinite(primaryDelta) || Math.abs(primaryDelta) < 1) {
+		return;
+	}
+
+	const now = Date.now();
+
+	if (now - profilePicturesWheelLastInputAt > WHEEL_GESTURE_RESET_MS) {
+		profilePicturesWheelDeltaAccumulator = 0;
+	}
+
+	profilePicturesWheelDeltaAccumulator += primaryDelta;
+	profilePicturesWheelLastInputAt = now;
+
+	if (now < profilePicturesWheelNavigationLockUntil) {
+		return;
+	}
+
+	const stepsFromDelta = Math.trunc(Math.abs(profilePicturesWheelDeltaAccumulator) / WHEEL_DELTA_PER_IMAGE);
+
+	if (stepsFromDelta < 1) {
+		return;
+	}
+
+	const direction = profilePicturesWheelDeltaAccumulator > 0 ? 1 : -1;
+
+	profilePicturesWheelDeltaAccumulator -= direction * WHEEL_DELTA_PER_IMAGE;
+
+	if (Math.abs(profilePicturesWheelDeltaAccumulator) < WHEEL_DELTA_PER_IMAGE * 0.35) {
+		profilePicturesWheelDeltaAccumulator = 0;
+	}
+
+	profilePicturesWheelNavigationLockUntil = now + WHEEL_NAV_LOCK_BASE_MS;
+	moveProfilePicturesCarousel(direction);
+};
+
+const renderSeamlessAlbumsPage = () => {
+	if (!els.albumsSeamlessGrid || !els.albumsSeamlessState) {
+		return;
+	}
+
+	if (state.sectionStates.profilePictures.kind === 'loading') {
+		els.albumsSeamlessState.textContent = 'Loading images...';
+		els.albumsSeamlessState.classList.remove('hidden');
+		els.albumsSeamlessGrid.classList.add('hidden');
+		els.albumsSeamlessGrid.innerHTML = '';
+		return;
+	}
+
+	if (state.sectionStates.profilePictures.kind === 'error') {
+		els.albumsSeamlessState.textContent = state.sectionStates.profilePictures.message || 'Could not load album right now.';
+		els.albumsSeamlessState.classList.remove('hidden');
+		els.albumsSeamlessGrid.classList.add('hidden');
+		els.albumsSeamlessGrid.innerHTML = '';
+		return;
+	}
+
+	const pictures = getRenderableProfilePictures();
+
+	if (!pictures.length) {
+		els.albumsSeamlessState.textContent = 'No profile pictures have been captured yet.';
+		els.albumsSeamlessState.classList.remove('hidden');
+		els.albumsSeamlessGrid.classList.add('hidden');
+		els.albumsSeamlessGrid.innerHTML = '';
+		return;
+	}
+
+	profilePicturesCarouselItems = pictures;
+	els.albumsSeamlessState.classList.add('hidden');
+	els.albumsSeamlessGrid.classList.remove('hidden');
+	els.albumsSeamlessGrid.innerHTML = pictures.map((picture, index) => profilePictureCardMarkup(picture, index)).join('');
+};
+
+const openSeamlessAlbumsPage = ({ updateHistory = false } = {}) => {
+	if (!els.dashboardMain || !els.albumsSeamlessPage) {
+		return;
+	}
+
+	seamlessAlbumsOpen = true;
+	els.dashboardMain.classList.add('hidden');
+	els.albumsSeamlessPage.classList.remove('hidden');
+	document.body.classList.add('albums-page');
+	renderSeamlessAlbumsPage();
+
+	if (!state.profilePictures.length && state.sectionStates.profilePictures.kind !== 'loading') {
+		void runSafe(fetchProfilePictures);
+	}
+
+	if (updateHistory && typeof window !== 'undefined' && window.location.pathname !== ALBUMS_ROUTE_PATH) {
+		window.history.pushState({ view: 'albums' }, '', ALBUMS_ROUTE_PATH);
+	}
+};
+
+const closeSeamlessAlbumsPage = ({ updateHistory = false, replaceHistory = false } = {}) => {
+	if (!els.dashboardMain || !els.albumsSeamlessPage) {
+		return;
+	}
+
+	seamlessAlbumsOpen = false;
+	closeProfilePicturesCarousel();
+	els.albumsSeamlessPage.classList.add('hidden');
+	els.dashboardMain.classList.remove('hidden');
+	document.body.classList.remove('albums-page');
+
+	if (!updateHistory || typeof window === 'undefined' || window.location.pathname !== ALBUMS_ROUTE_PATH) {
+		return;
+	}
+
+	if (replaceHistory) {
+		window.history.replaceState({ view: 'dashboard' }, '', lastDashboardRouteHref || DASHBOARD_ROUTE_PATH);
+		return;
+	}
+
+	window.history.pushState({ view: 'dashboard' }, '', lastDashboardRouteHref || DASHBOARD_ROUTE_PATH);
+};
+
+const handleAlbumsBackNavigation = () => {
+	if (typeof window === 'undefined') {
+		closeSeamlessAlbumsPage({ updateHistory: false });
+		return;
+	}
+
+	if (window.location.pathname === ALBUMS_ROUTE_PATH && window.history.length > 1) {
+		window.history.back();
+		return;
+	}
+
+	closeSeamlessAlbumsPage({
+		updateHistory: true,
+		replaceHistory: true
+	});
+};
+
 const renderProfilePictures = () => {
-	const groupsHost = els.profilePicturesGroups;
-
-	if (!(groupsHost instanceof HTMLElement)) {
-		return;
-	}
-
 	if (state.sectionStates.profilePictures.kind === 'loading' || state.sectionStates.profilePictures.kind === 'error') {
-		setSectionContentVisibility('profilePictures', false);
-		renderSectionState('profilePictures');
+		renderSeamlessAlbumsPage();
 		return;
 	}
-
-	setSectionContentVisibility('profilePictures', true);
 
 	const keyword = (state.searchByFolder.profilePictures || '').trim().toLowerCase();
 	const filtered = getFilteredProfilePictures();
 
 	if (!filtered.length) {
-		setSectionContentVisibility('profilePictures', false);
 		setSectionState(
 			'profilePictures',
 			'empty',
 			keyword ? 'No profile picture matched your search.' : 'No profile pictures have been captured yet.'
 		);
-		renderSectionState('profilePictures');
-		groupsHost.innerHTML = '';
+		profilePicturesCarouselItems = [];
+		renderSeamlessAlbumsPage();
 		return;
 	}
 
 	setSectionState('profilePictures', 'idle');
-	renderSectionState('profilePictures');
-	groupsHost.innerHTML = `<div class="commands-grid profile-pictures-grid">${filtered
-		.map((picture) => profilePictureCardMarkup(picture, keyword))
-		.join('')}</div>`;
+	profilePicturesCarouselItems = filtered;
+	renderSeamlessAlbumsPage();
 };
 
 const emitRealtimeAuditFilters = () => {
@@ -3433,9 +4042,11 @@ const setupRealtime = () => {
 			return;
 		}
 
-		state.profilePictures = Array.isArray(payload.pictures) ? payload.pictures : [];
+		state.profilePictures = clampProfilePictures(payload.pictures);
+		persistSharedProfilePicturesCache(state.profilePictures);
 		setSectionState('profilePictures', 'idle');
 		renderProfilePictures();
+		renderSeamlessAlbumsPage();
 	});
 };
 
@@ -3712,24 +4323,24 @@ async function fetchUsers() {
 const fetchProfilePictures = async () => {
 	if (!state.profilePictures.length) {
 		setSectionState('profilePictures', 'loading', 'Loading Pinterest profile picture history and building album cards.');
-		setSectionContentVisibility('profilePictures', false);
-		renderSectionState('profilePictures');
+		renderSeamlessAlbumsPage();
 	}
 
 	try {
-		const response = await fetch('/api/dashboard/profile-pictures?limit=100');
+		const response = await fetch(`/api/dashboard/profile-pictures?limit=${PROFILE_PICTURES_LIMIT}`);
 
 		ensureAuthorizedResponse(response, 'Failed fetching profile picture album');
 
 		const payload = await response.json();
 
-		state.profilePictures = Array.isArray(payload.pictures) ? payload.pictures : [];
+		state.profilePictures = clampProfilePictures(payload.pictures);
+		persistSharedProfilePicturesCache(state.profilePictures);
 		setSectionState('profilePictures', 'idle');
 		renderProfilePictures();
+		renderSeamlessAlbumsPage();
 	} catch (error) {
 		setSectionState('profilePictures', 'error', error?.message || 'Could not fetch profile pictures section.');
-		setSectionContentVisibility('profilePictures', false);
-		renderSectionState('profilePictures');
+		renderSeamlessAlbumsPage();
 		throw error;
 	}
 };
@@ -4004,12 +4615,17 @@ const bindEvents = () => {
 		}
 
 		persistZenPointerFromEvent(event);
-		navigateToAlbums();
 	});
 
 	els.openAlbums?.addEventListener('click', (event) => {
+		event.preventDefault();
 		persistZenPointerFromEvent(event);
 		navigateToAlbums();
+	});
+
+	els.albumsSeamlessBack?.addEventListener('click', (event) => {
+		persistZenPointerFromEvent(event);
+		handleAlbumsBackNavigation();
 	});
 
 	els.openAlbums?.addEventListener('pointerenter', () => {
@@ -4018,6 +4634,130 @@ const bindEvents = () => {
 
 	els.openAlbums?.addEventListener('focus', () => {
 		prefetchRoute('/albums');
+	});
+
+	els.albumsSeamlessGrid?.addEventListener('click', (event) => {
+		const image = event.target.closest('.album-image[data-profile-index]');
+
+		if (!(image instanceof HTMLImageElement)) {
+			return;
+		}
+
+		const index = Number.parseInt(image.getAttribute('data-profile-index') || '', 10);
+
+		if (!Number.isFinite(index)) {
+			return;
+		}
+
+		openProfilePicturesCarousel(index);
+	});
+
+	els.profilePicturesLightboxBackdrop?.addEventListener('click', closeProfilePicturesCarousel);
+	els.profilePicturesLightboxPrev?.addEventListener('click', () => {
+		moveProfilePicturesCarousel(-1);
+	});
+	els.profilePicturesLightboxNext?.addEventListener('click', () => {
+		moveProfilePicturesCarousel(1);
+	});
+	els.profilePicturesLightbox?.addEventListener('click', (event) => {
+		const target = event.target;
+
+		if (!(target instanceof Element)) {
+			return;
+		}
+
+		const selectedCard = target.closest('.albums-carousel-item');
+
+		if (selectedCard instanceof HTMLElement) {
+			if (selectedCard.classList.contains('is-center')) {
+				return;
+			}
+
+			const targetIndex = Number.parseInt(String(selectedCard.dataset.targetIndex || ''), 10);
+
+			if (Number.isFinite(targetIndex) && profilePicturesCarouselItems.length > 1) {
+				profilePicturesCarouselIndex = targetIndex;
+				renderProfilePicturesCarousel();
+			}
+
+			return;
+		}
+
+		if (!target.closest('.albums-lightbox-menu')) {
+			closeProfilePicturesActionMenu();
+		}
+
+		if (target.closest('.albums-lightbox-nav, .albums-lightbox-menu, .albums-lightbox-content')) {
+			if (target.closest('.albums-lightbox-nav')) {
+				return;
+			}
+
+			if (target.closest('.albums-lightbox-menu')) {
+				return;
+			}
+
+			const centerCard = els.profilePicturesLightboxTrack?.querySelector('.albums-carousel-item.is-center');
+
+			if (!(centerCard instanceof HTMLElement)) {
+				return;
+			}
+
+			const centerRect = centerCard.getBoundingClientRect();
+			const clickedInsideCenterImage =
+				event.clientX >= centerRect.left &&
+				event.clientX <= centerRect.right &&
+				event.clientY >= centerRect.top &&
+				event.clientY <= centerRect.bottom;
+
+			if (clickedInsideCenterImage) {
+				return;
+			}
+
+			closeProfilePicturesCarousel();
+			return;
+		}
+
+		closeProfilePicturesCarousel();
+	});
+	els.profilePicturesLightboxMenuToggle?.addEventListener('click', (event) => {
+		event.preventDefault();
+		event.stopPropagation();
+
+		if (!els.profilePicturesLightboxMenuPanel || !els.profilePicturesLightboxMenuToggle) {
+			return;
+		}
+
+		const shouldOpen = els.profilePicturesLightboxMenuPanel.classList.contains('hidden');
+
+		els.profilePicturesLightboxMenuPanel.classList.toggle('hidden', !shouldOpen);
+		els.profilePicturesLightboxMenuToggle.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+	});
+	els.profilePicturesLightboxMenuDownload?.addEventListener('click', (event) => {
+		event.preventDefault();
+		event.stopPropagation();
+		downloadCurrentProfilePicture();
+		closeProfilePicturesActionMenu();
+	});
+	els.profilePicturesLightboxMenuDelete?.addEventListener('click', (event) => {
+		event.preventDefault();
+		event.stopPropagation();
+		void deleteCurrentProfilePicture();
+		closeProfilePicturesActionMenu();
+	});
+	els.profilePicturesLightbox?.addEventListener('wheel', handleProfilePicturesLightboxWheel, {
+		passive: false
+	});
+	els.profilePicturesLightbox?.addEventListener('touchstart', handleProfilePicturesLightboxTouchStart, {
+		passive: true
+	});
+	els.profilePicturesLightbox?.addEventListener('touchmove', handleProfilePicturesLightboxTouchMove, {
+		passive: false
+	});
+	els.profilePicturesLightbox?.addEventListener('touchend', handleProfilePicturesLightboxTouchEnd, {
+		passive: true
+	});
+	els.profilePicturesLightbox?.addEventListener('touchcancel', resetProfilePicturesTouchState, {
+		passive: true
 	});
 
 	els.changelogClose?.addEventListener('click', () => {
@@ -4350,6 +5090,42 @@ const bindEvents = () => {
 		setActiveFolder(folderToggle.getAttribute('data-folder-toggle'));
 	});
 
+	document.addEventListener('keydown', (event) => {
+		if (event.key === 'Escape' && els.profilePicturesLightbox && !els.profilePicturesLightbox.classList.contains('hidden')) {
+			closeProfilePicturesCarousel();
+			return;
+		}
+
+		if (event.key === 'Escape' && seamlessAlbumsOpen) {
+			handleAlbumsBackNavigation();
+			return;
+		}
+
+		if (event.key === 'ArrowLeft') {
+			moveProfilePicturesCarousel(-1);
+			return;
+		}
+
+		if (event.key === 'ArrowRight') {
+			moveProfilePicturesCarousel(1);
+		}
+	});
+
+	window.addEventListener('popstate', () => {
+		if (typeof window === 'undefined') {
+			return;
+		}
+
+		if (window.location.pathname === ALBUMS_ROUTE_PATH) {
+			openSeamlessAlbumsPage({ updateHistory: false });
+			return;
+		}
+
+		if (seamlessAlbumsOpen) {
+			closeSeamlessAlbumsPage({ updateHistory: false });
+		}
+	});
+
 	els.commandsGroups.addEventListener('click', async (event) => {
 		const categoryToggle = event.target.closest('button[data-category-toggle]');
 
@@ -4375,18 +5151,6 @@ const bindEvents = () => {
 
 		const commandName = button.getAttribute('data-command');
 		const enabled = button.getAttribute('data-enabled') === 'true';
-
-		if (!enabled) {
-			const approved = await confirmRiskAction({
-				title: 'Disable Command?',
-				message: `This will disable ${commandName} for everyone until re-enabled.`,
-				confirmLabel: 'Disable'
-			});
-
-			if (!approved) {
-				return;
-			}
-		}
 
 		button.disabled = true;
 
@@ -4418,18 +5182,6 @@ const bindEvents = () => {
 
 		const flagName = button.getAttribute('data-flag');
 		const enabled = button.getAttribute('data-enabled') === 'true';
-
-		if (!enabled) {
-			const approved = await confirmRiskAction({
-				title: 'Disable Flag?',
-				message: `This will set ${flagName} to OFF until changed again.`,
-				confirmLabel: 'Disable'
-			});
-
-			if (!approved) {
-				return;
-			}
-		}
 
 		button.disabled = true;
 
@@ -4795,6 +5547,12 @@ const init = async () => {
 	bindEvents();
 	prefetchRoute('/albums');
 	setActiveFolder(state.activeFolder);
+	if (typeof window !== 'undefined' && window.location.pathname !== ALBUMS_ROUTE_PATH) {
+		lastDashboardRouteHref = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+	}
+	if (typeof window !== 'undefined' && window.location.pathname === ALBUMS_ROUTE_PATH) {
+		openSeamlessAlbumsPage({ updateHistory: false });
+	}
 	window.addEventListener('resize', renderStatusCharts);
 	await runSafe(fetchSession);
 	await runSafe(async () => {

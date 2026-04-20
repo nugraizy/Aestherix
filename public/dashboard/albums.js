@@ -30,9 +30,12 @@ const NEW_CARD_ANIMATION_STAGGER_MS = 34;
 const NEW_CARD_ANIMATION_STAGGER_LIMIT = 10;
 const IMAGE_PLACEHOLDER_DATA_URI = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
 const ZEN_CURSOR_POINTER_CACHE_KEY = 'aestherix.dashboard.cursor.pointer';
+const ZEN_CURSOR_ENABLED_CACHE_KEY = 'aestherix.dashboard.cursor.enabled';
 const ALBUMS_PICTURES_CACHE_KEY = 'aestherix.dashboard.albums.pictures.cache.v1';
+const DASHBOARD_PROFILE_PICTURES_CACHE_KEY = 'aestherix.dashboard.profilePictures.cache.v1';
 const ALBUMS_FETCH_TIMEOUT_MS = 12000;
 const ALBUMS_IMAGES_LIMIT = 100;
+const ALBUMS_DEFERRED_BOOT_DELAY_MS = 120;
 
 let lightboxCloseTimer = null;
 let lightboxPictures = [];
@@ -486,27 +489,6 @@ const warmLightboxNeighbors = (centerIndex, total) => {
 	}
 };
 
-const syncLightboxMetaPosition = () => {
-	if (!els.lightboxMeta || !els.lightboxTrack || !els.lightboxStage) {
-		return;
-	}
-
-	const centerCard = els.lightboxTrack.querySelector('.albums-carousel-item.is-center');
-
-	if (!(centerCard instanceof HTMLElement)) {
-		return;
-	}
-
-	const stageRect = els.lightboxStage.getBoundingClientRect();
-	const cardRect = centerCard.getBoundingClientRect();
-	const stageHeight = Math.max(0, Math.round(stageRect.height));
-	const rawMetaTop = Math.round(cardRect.top - stageRect.top - 18);
-	const maxMetaTop = Math.max(6, stageHeight - 34);
-	const dynamicTop = Math.max(2, Math.min(rawMetaTop, maxMetaTop));
-
-	els.lightboxMeta.style.top = `${dynamicTop}px`;
-};
-
 const getCurrentLightboxPicture = () => {
 	if (!lightboxPictures.length || lightboxIndex < 0) {
 		return null;
@@ -608,15 +590,21 @@ const updateLightboxFrame = () => {
 			els.lightboxMenu.style.top = '10px';
 			els.lightboxMenu.style.right = '10px';
 			els.lightboxMenu.style.bottom = '';
+
+			if (els.lightboxMeta) {
+				els.lightboxMenu.prepend(els.lightboxMeta);
+			}
+		}
+	} else if (els.lightboxMeta) {
+		const centerCard = els.lightboxTrack.querySelector('.albums-carousel-item.is-center');
+
+		if (centerCard instanceof HTMLElement) {
+			centerCard.appendChild(els.lightboxMeta);
 		}
 	}
 
 	closeActionMenu();
 	setActionMenuOwnerState();
-
-	requestAnimationFrame(() => {
-		syncLightboxMetaPosition();
-	});
 
 	warmLightboxNeighbors(safeIndex, total);
 
@@ -848,9 +836,54 @@ const handleLightboxTouchEnd = () => {
 	resetLightboxTouchState();
 };
 
+const getSafeHttpUrl = (value) => {
+	const normalized = String(value || '').trim();
+
+	if (!/^https?:\/\//i.test(normalized)) {
+		return '';
+	}
+
+	return normalized;
+};
+
+const normalizePictureRecord = (picture) => {
+	const timestamp = String(picture?.timestamp || '').trim();
+
+	if (!timestamp) {
+		return null;
+	}
+
+	const originalUrl =
+		getSafeHttpUrl(picture?.original?.url) ||
+		getSafeHttpUrl(picture?.url) ||
+		getSafeHttpUrl(picture?.original);
+
+	if (!originalUrl) {
+		return null;
+	}
+
+	const previewUrl =
+		getSafeHttpUrl(picture?.thumbnail?.url) ||
+		getSafeHttpUrl(picture?.previewUrl) ||
+		getSafeHttpUrl(picture?.thumbnail) ||
+		originalUrl;
+
+	return {
+		timestamp,
+		url: originalUrl,
+		previewUrl,
+		original: {
+			url: originalUrl
+		},
+		thumbnail: {
+			url: previewUrl
+		}
+	};
+};
+
 const getPictureKey = (picture) => `${picture.timestamp}|${picture.url}`;
 
-const readCachedAlbumsPictures = () => {
+const readPicturesCacheByKey = (storageKey) => {
 	if (typeof window === 'undefined') {
 		return {
 			pictures: [],
@@ -860,7 +893,7 @@ const readCachedAlbumsPictures = () => {
 	}
 
 	try {
-		const raw = window.sessionStorage.getItem(ALBUMS_PICTURES_CACHE_KEY);
+		const raw = window.sessionStorage.getItem(storageKey);
 
 		if (!raw) {
 			return {
@@ -877,11 +910,8 @@ const readCachedAlbumsPictures = () => {
 		const validUpdatedAt = Number.isFinite(updatedAt) && updatedAt > 0 ? updatedAt : 0;
 
 		const pictures = cachedPictures
-			.map((picture) => ({
-				timestamp: String(picture?.timestamp || '').trim(),
-				url: String(picture?.url || '').trim()
-			}))
-			.filter((picture) => picture.timestamp && /^https?:\/\//i.test(picture.url))
+			.map((picture) => normalizePictureRecord(picture))
+			.filter(Boolean)
 			.slice(0, ALBUMS_IMAGES_LIMIT);
 
 		return {
@@ -898,20 +928,48 @@ const readCachedAlbumsPictures = () => {
 	}
 };
 
+const readCachedAlbumsPictures = () => {
+	const localCache = readPicturesCacheByKey(ALBUMS_PICTURES_CACHE_KEY);
+	const sharedCache = readPicturesCacheByKey(DASHBOARD_PROFILE_PICTURES_CACHE_KEY);
+
+	if (!sharedCache.pictures.length) {
+		return localCache;
+	}
+
+	if (!localCache.pictures.length) {
+		return {
+			pictures: sharedCache.pictures,
+			signature: sharedCache.signature,
+			updatedAt: sharedCache.updatedAt
+		};
+	}
+
+	if (sharedCache.updatedAt >= localCache.updatedAt) {
+		return {
+			pictures: sharedCache.pictures,
+			signature: sharedCache.signature,
+			updatedAt: sharedCache.updatedAt
+		};
+	}
+
+	return localCache;
+};
+
 const persistAlbumsPicturesCache = (pictures, signature, updatedAt = Date.now()) => {
 	if (typeof window === 'undefined') {
 		return;
 	}
 
 	try {
-		window.sessionStorage.setItem(
-			ALBUMS_PICTURES_CACHE_KEY,
-			JSON.stringify({
-				signature: String(signature || ''),
-				pictures: Array.isArray(pictures) ? pictures : [],
-				updatedAt: Number.isFinite(updatedAt) ? updatedAt : Date.now()
-			})
-		);
+		const normalizedUpdatedAt = Number.isFinite(updatedAt) ? updatedAt : Date.now();
+		const payload = JSON.stringify({
+			signature: String(signature || ''),
+			pictures: Array.isArray(pictures) ? pictures : [],
+			updatedAt: normalizedUpdatedAt
+		});
+
+		window.sessionStorage.setItem(ALBUMS_PICTURES_CACHE_KEY, payload);
+		window.sessionStorage.setItem(DASHBOARD_PROFILE_PICTURES_CACHE_KEY, payload);
 	} catch {
 		// Ignore cache write errors.
 	}
@@ -952,7 +1010,7 @@ const renderAlbumsGrid = ({ enteringIndexes = [] } = {}) => {
 	}
 
 	els.grid.innerHTML = lightboxPictures
-		.map((picture, index) => imageCard(String(picture?.url || '').trim(), index))
+		.map((picture, index) => imageCard(picture, index))
 		.join('');
 
 	setupGridLazyLoading();
@@ -1020,11 +1078,8 @@ const cleanupScrollReveal = () => {
 
 const applyPictures = (pictures, { fromRealtime = false } = {}) => {
 	const validPictures = (Array.isArray(pictures) ? pictures : [])
-		.map((picture) => ({
-			timestamp: String(picture?.timestamp || '').trim(),
-			url: String(picture?.url || '').trim()
-		}))
-		.filter((picture) => picture.timestamp && /^https?:\/\//i.test(picture.url))
+		.map((picture) => normalizePictureRecord(picture))
+		.filter(Boolean)
 		.slice(0, ALBUMS_IMAGES_LIMIT);
 
 	const nextSignature = getPicturesSignature(validPictures);
@@ -1314,16 +1369,31 @@ const downloadCurrentPicture = async () => {
 const setupZenCursor = () => {
 	if (typeof window === 'undefined' || !document?.body) {
 		document?.documentElement?.classList.remove('zen-cursor-preload');
+		try {
+			window?.sessionStorage?.removeItem(ZEN_CURSOR_ENABLED_CACHE_KEY);
+		} catch {
+			// Ignore storage cleanup errors.
+		}
 		return false;
 	}
 
 	if (!window.matchMedia('(pointer: fine)').matches) {
 		document.documentElement.classList.remove('zen-cursor-preload');
+		try {
+			window.sessionStorage.removeItem(ZEN_CURSOR_ENABLED_CACHE_KEY);
+		} catch {
+			// Ignore storage cleanup errors.
+		}
 		return false;
 	}
 
 	if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
 		document.documentElement.classList.remove('zen-cursor-preload');
+		try {
+			window.sessionStorage.removeItem(ZEN_CURSOR_ENABLED_CACHE_KEY);
+		} catch {
+			// Ignore storage cleanup errors.
+		}
 		return false;
 	}
 
@@ -1341,6 +1411,12 @@ const setupZenCursor = () => {
 	document.documentElement.classList.add('zen-cursor-enabled');
 	document.body.classList.add('zen-cursor-enabled');
 	document.body.style.cursor = 'none';
+
+	try {
+		window.sessionStorage.setItem(ZEN_CURSOR_ENABLED_CACHE_KEY, '1');
+	} catch {
+		// Ignore storage write errors.
+	}
 
 	const setCursorVisibility = (isVisible) => {
 		if (isCursorVisible === isVisible) {
@@ -1542,24 +1618,6 @@ const redirectToLogin = () => {
 	window.location.href = '/dashboard/login';
 };
 
-const prefetchRoute = (href) => {
-	if (!href || typeof document === 'undefined') {
-		return;
-	}
-
-	if (document.querySelector(`link[data-prefetch-route="${href}"]`)) {
-		return;
-	}
-
-	const link = document.createElement('link');
-    
-	link.rel = 'prefetch';
-	link.href = href;
-	link.as = 'document';
-	link.setAttribute('data-prefetch-route', href);
-	document.head.appendChild(link);
-};
-
 const navigateToDashboard = () => {
 	window.location.href = '/dashboard';
 };
@@ -1579,9 +1637,9 @@ const ensureAuthorizedResponse = (response, context) => {
 	}
 };
 
-const imageCard = (url, index) => `
+const imageCard = (picture, index) => `
 	<article class="album-image-card">
-		<img src="${IMAGE_PLACEHOLDER_DATA_URI}" data-src="${url}" alt="Album profile picture" class="album-image is-lazy" loading="lazy" decoding="async" fetchpriority="low" referrerpolicy="no-referrer" data-image-index="${index}" />
+		<img src="${IMAGE_PLACEHOLDER_DATA_URI}" data-src="${String(picture?.previewUrl || picture?.url || '').trim()}" alt="Album profile picture" class="album-image is-lazy" loading="lazy" decoding="async" fetchpriority="low" referrerpolicy="no-referrer" data-image-index="${index}" />
 	</article>
 `;
 
@@ -1597,6 +1655,7 @@ const loadAlbums = async () => {
 		setLoadingState(false);
 		els.state.textContent = '';
 		els.grid.classList.remove('hidden');
+		setupGridLazyLoading();
 	}
 
 	await new Promise((resolve) => {
@@ -1609,13 +1668,23 @@ const loadAlbums = async () => {
 	});
 
 	try {
-		const sessionResponse = await fetch('/api/dashboard/auth/session');
+		const sessionPromise = fetch('/api/dashboard/auth/session', {
+			cache: 'no-store'
+		}).then(async (response) => {
+			ensureAuthorizedResponse(response, 'Failed checking session');
 
-		ensureAuthorizedResponse(sessionResponse, 'Failed checking session');
+			return response.json();
+		});
+		const picturesPromise = fetchAlbumsPictures();
+		const [sessionResult, picturesResult] = await Promise.allSettled([sessionPromise, picturesPromise]);
 
-		const session = await sessionResponse.json();
+		if (sessionResult.status === 'rejected') {
+			throw sessionResult.reason;
+		}
 
-		isOwnerSession = session?.role === 'owner';
+		const session = sessionResult.value;
+
+		isOwnerSession = String(session?.role || '').toLowerCase() === 'owner';
 		updateActionMenuVisibility();
 
 		if (!session?.authenticated) {
@@ -1625,17 +1694,17 @@ const loadAlbums = async () => {
 
 		setupRealtimeProfileUpdates();
 
-		let pictures = [];
+		if (picturesResult.status === 'rejected') {
+			const error = picturesResult.reason;
 
-		try {
-			pictures = await fetchAlbumsPictures();
-		} catch (error) {
 			if (!hasCachedPictures && error?.message !== 'Unauthorized') {
 				throw error;
 			}
 
 			return;
 		}
+
+		const pictures = picturesResult.value;
 
 		if (!pictures.length) {
 			if (hasCachedPictures) {
@@ -1660,6 +1729,7 @@ const loadAlbums = async () => {
 		setLoadingState(false);
 		els.state.textContent = '';
 		els.grid.classList.remove('hidden');
+		setupGridLazyLoading();
 	} catch (error) {
 		setLoadingState(false);
 		console.error(error);
@@ -1670,7 +1740,29 @@ const loadAlbums = async () => {
 	}
 };
 
-prefetchRoute('/dashboard');
+const scheduleDeferredAlbumsLoad = () => {
+	const startAlbumsLoad = () => {
+		window.setTimeout(() => {
+			void loadAlbums();
+		}, 0);
+	};
+
+	if (typeof window.requestIdleCallback === 'function') {
+		window.requestIdleCallback(startAlbumsLoad, {
+			timeout: 1200
+		});
+		return;
+	}
+
+	if (typeof window.requestAnimationFrame === 'function') {
+		window.requestAnimationFrame(() => {
+			window.setTimeout(startAlbumsLoad, ALBUMS_DEFERRED_BOOT_DELAY_MS);
+		});
+		return;
+	}
+
+	window.setTimeout(startAlbumsLoad, ALBUMS_DEFERRED_BOOT_DELAY_MS);
+};
 
 els.back?.addEventListener('pointerdown', (event) => {
 	if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
@@ -1683,12 +1775,6 @@ els.back?.addEventListener('pointerdown', (event) => {
 els.back?.addEventListener('click', (event) => {
 	persistZenPointerFromEvent(event);
 	navigateToDashboard();
-});
-els.back?.addEventListener('pointerenter', () => {
-	prefetchRoute('/dashboard');
-});
-els.back?.addEventListener('focus', () => {
-	prefetchRoute('/dashboard');
 });
 
 els.grid?.addEventListener('click', (event) => {
@@ -1832,8 +1918,6 @@ window.addEventListener('resize', () => {
 	if (!els.lightbox || els.lightbox.classList.contains('hidden')) {
 		return;
 	}
-
-	syncLightboxMetaPosition();
 });
 
 window.addEventListener('beforeunload', () => {
@@ -1863,4 +1947,4 @@ window.addEventListener('storage', (event) => {
 });
 
 scheduleZenCursorInit();
-void loadAlbums();
+scheduleDeferredAlbumsLoad();

@@ -40,6 +40,60 @@ const BOOKMARK_END_FLAG = '-end-';
 const PROFILE_PICTURE_HISTORY_PATH = './databases/pictures/pinterest-profile-pictures.json';
 const PROFILE_PICTURE_HISTORY_LIMIT = 900;
 
+const getSafeHttpUrl = (value) => {
+	const normalized = String(value || '').trim();
+
+	if (!/^https?:\/\//i.test(normalized)) {
+		return '';
+	}
+
+	return normalized;
+};
+
+const toImageVariant = (variant, fallbackUrl) => {
+	const variantUrl = getSafeHttpUrl(variant?.url) || getSafeHttpUrl(variant) || fallbackUrl;
+
+	if (!variantUrl) {
+		return null;
+	}
+
+	if (variant && typeof variant === 'object') {
+		return {
+			...variant,
+			url: variantUrl
+		};
+	}
+
+	return {
+		url: variantUrl
+	};
+};
+
+const normalizePinterestPictureRecord = (record) => {
+	const originalUrl =
+		getSafeHttpUrl(record?.original?.url) ||
+		getSafeHttpUrl(record?.url) ||
+		getSafeHttpUrl(record?.original) ||
+		getSafeHttpUrl(record);
+
+	if (!originalUrl) {
+		return null;
+	}
+
+	const original = toImageVariant(record?.original, originalUrl);
+	const thumbnail =
+		toImageVariant(record?.thumbnail, getSafeHttpUrl(record?.thumbnail?.url) || getSafeHttpUrl(record?.thumbnail) || originalUrl) ||
+		toImageVariant(record?.preview, originalUrl) ||
+		{
+			url: originalUrl
+		};
+
+	return {
+		original,
+		thumbnail
+	};
+};
+
 const hydrateProfilePictureHistory = async (config) => {
 	try {
 		if (!(await fs.pathExists(PROFILE_PICTURE_HISTORY_PATH))) {
@@ -55,13 +109,13 @@ const hydrateProfilePictureHistory = async (config) => {
 
 		for (const entry of entries) {
 			const timestamp = String(entry?.timestamp || '').trim();
-			const url = String(entry?.url || '').trim();
+			const normalized = normalizePinterestPictureRecord(entry);
 
-			if (!timestamp || !/^https?:\/\//i.test(url)) {
+			if (!timestamp || !normalized) {
 				continue;
 			}
 
-			config.pinterestImages.set(timestamp, url);
+			config.pinterestImages.set(timestamp, normalized);
 		}
 	} catch (error) {
 		loggers.warning(color('Failed loading pinterest profile pictures JSON:', '#FF5555'), color(error.message, 'white'));
@@ -70,11 +124,21 @@ const hydrateProfilePictureHistory = async (config) => {
 
 const persistProfilePictureHistory = async (config) => {
 	const entries = (Array.isArray(config.pinterestImages?.entries?.()) ? config.pinterestImages.entries() : [])
-		.map(([timestamp, url]) => ({
-			timestamp: String(timestamp || ''),
-			url: String(url || '').trim()
-		}))
-		.filter((entry) => entry.timestamp && /^https?:\/\//i.test(entry.url))
+		.map(([timestamp, value]) => {
+			const normalized = normalizePinterestPictureRecord(value);
+
+			if (!normalized) {
+				return null;
+			}
+
+			return {
+				timestamp: String(timestamp || ''),
+				url: normalized.original.url,
+				original: normalized.original,
+				thumbnail: normalized.thumbnail
+			};
+		})
+		.filter((entry) => entry && entry.timestamp && /^https?:\/\//i.test(entry.url))
 		.slice(-PROFILE_PICTURE_HISTORY_LIMIT);
 
 	await fs.ensureDir(path.dirname(PROFILE_PICTURE_HISTORY_PATH));
@@ -160,11 +224,18 @@ const startAutoProfilePictureChangeService = async (client, state, config) => {
 				return;
 			}
 
-			const imageUrl = images.shift().url;
+			const nextImage = images.shift();
+			const normalizedImage = normalizePinterestPictureRecord(nextImage);
+
+			if (!normalizedImage) {
+				return;
+			}
+
+			const imageUrl = normalizedImage.original.url;
 			const image = await downloadImage(imageUrl);
 			const date = dayjs.tz().format('YYYY/MM/DD HH:mm:ss');
 
-			config.pinterestImages.set(date, imageUrl);
+			config.pinterestImages.set(date, normalizedImage);
 			await persistProfilePictureHistory(config);
 
 			await client.instance.updateProfilePicture(instance, image, PROFILE_PICTURE_NO_CROP);
