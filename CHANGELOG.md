@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+# ࿎「6.8.0」2026-04-21
+## Added
+- Added dashboard JavaScript minify pipeline with `uglify-js` and a dedicated build script.
+
+## Changed
+- Switched dashboard pages to load compiled assets from `public/dashboard/build`.
+- Updated dashboard albums route handling to preload seamlessly through the main dashboard entry.
+- Improved profile picture grid rendering to prefer original GIF sources.
+- Expanded albums layout and carousel sizing for better desktop and mobile viewing.
+
+## Fixed
+- Synced profile picture delete state with server-returned picture lists when available.
+- Reduced albums route flash by introducing preload class toggling during route transitions.
+
+---
+
 # ࿎「6.7.1」2026-04-20
 ## Added
 - Added seamless dashboard `Albums` route with in-dashboard navigation and integrated lightbox controls.
