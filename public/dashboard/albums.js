@@ -32,7 +32,7 @@ const ZEN_CURSOR_ENABLED_CACHE_KEY = 'aestherix.dashboard.cursor.enabled';
 const ALBUMS_PICTURES_CACHE_KEY = 'aestherix.dashboard.albums.pictures.cache.v1';
 const DASHBOARD_PROFILE_PICTURES_CACHE_KEY = 'aestherix.dashboard.profilePictures.cache.v1';
 const ALBUMS_FETCH_TIMEOUT_MS = 12000;
-const ALBUMS_IMAGES_LIMIT = 100;
+const ALBUMS_IMAGES_LIMIT = 250;
 const ALBUMS_DEFERRED_BOOT_DELAY_MS = 120;
 
 let lightboxCloseTimer = null;
@@ -1217,7 +1217,61 @@ const setupRealtimeProfileUpdates = () => {
 		transports: ['websocket', 'polling']
 	});
 
+	const mergeRealtimeLatestPicture = (picture) => {
+		const normalized = normalizePictureRecord(picture);
+
+		if (!normalized) {
+			return;
+		}
+
+		const pictureKey = getPictureKey(normalized);
+		const nextPictures = [
+			normalized,
+			...lightboxPictures.filter((item) => getPictureKey(item) !== pictureKey)
+		].slice(0, ALBUMS_IMAGES_LIMIT);
+
+		applyPictures(nextPictures, { fromRealtime: true });
+	};
+
+	const removeRealtimePicture = (picture) => {
+		const timestamp = String(picture?.timestamp || '').trim();
+		const url =
+			getSafeHttpUrl(picture?.url) ||
+			getSafeHttpUrl(picture?.original?.url) ||
+			getSafeHttpUrl(picture?.original);
+
+		if (!timestamp && !url) {
+			return;
+		}
+
+		const nextPictures = lightboxPictures.filter((item) => {
+			const sameTimestamp = timestamp ? item.timestamp === timestamp : true;
+			const sameUrl = url ? item.url === url : true;
+
+			return !(sameTimestamp && sameUrl);
+		});
+
+		if (nextPictures.length === lightboxPictures.length) {
+			return;
+		}
+
+		applyPictures(nextPictures, { fromRealtime: true });
+	};
+
 	realtimeSocket.on('dashboard:profile-pictures', (payload) => {
+		if (payload?.deleted) {
+			removeRealtimePicture(payload.deleted);
+		}
+
+		if (payload?.picture) {
+			mergeRealtimeLatestPicture(payload.picture);
+			return;
+		}
+
+		if (!Object.prototype.hasOwnProperty.call(payload || {}, 'pictures')) {
+			return;
+		}
+
 		const nextPictures = Array.isArray(payload?.pictures) ? payload.pictures : [];
 
 		if (!nextPictures.length && picturesSignature) {

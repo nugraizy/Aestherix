@@ -58,7 +58,7 @@ const ZEN_CURSOR_LOGOUT_LOCK_ATTR = 'data-logout-lock';
 const ZEN_CURSOR_POINTER_CACHE_KEY = 'aestherix.dashboard.cursor.pointer';
 const ZEN_CURSOR_ENABLED_CACHE_KEY = 'aestherix.dashboard.cursor.enabled';
 const DASHBOARD_PROFILE_PICTURES_CACHE_KEY = 'aestherix.dashboard.profilePictures.cache.v1';
-const PROFILE_PICTURES_LIMIT = 100;
+const PROFILE_PICTURES_LIMIT = 250;
 const ALBUMS_ROUTE_PATH = '/albums';
 const DASHBOARD_ROUTE_PATH = '/dashboard';
 const CYCLE_ANIMATION_MS = 180;
@@ -3346,6 +3346,39 @@ const getProfilePictureOriginalUrl = (picture) =>
 const getProfilePicturePreviewUrl = (picture) =>
 	String(picture?.thumbnail?.url || picture?.previewUrl || getProfilePictureOriginalUrl(picture)).trim();
 
+const getProfilePictureIdentityKey = (picture) => {
+	const timestamp = String(picture?.timestamp || '').trim();
+	const originalUrl = getProfilePictureOriginalUrl(picture);
+
+	return `${timestamp}|${originalUrl}`;
+};
+
+const normalizeRealtimeProfilePicture = (picture) => {
+	const timestamp = String(picture?.timestamp || '').trim();
+	const originalUrl = getProfilePictureOriginalUrl(picture);
+
+	if (!originalUrl) {
+		return null;
+	}
+
+	const previewUrl = String(picture?.thumbnail?.url || picture?.previewUrl || picture?.thumbnail || originalUrl).trim() || originalUrl;
+
+	return {
+		...picture,
+		timestamp,
+		url: originalUrl,
+		previewUrl,
+		original: {
+			...(picture?.original && typeof picture.original === 'object' ? picture.original : {}),
+			url: originalUrl
+		},
+		thumbnail: {
+			...(picture?.thumbnail && typeof picture.thumbnail === 'object' ? picture.thumbnail : {}),
+			url: previewUrl
+		}
+	};
+};
+
 const isGifMediaUrl = (value) => {
 	const normalized = String(value || '').trim();
 
@@ -4156,7 +4189,48 @@ const setupRealtime = () => {
 			return;
 		}
 
-		state.profilePictures = clampProfilePictures(payload.pictures);
+		let nextPictures = state.profilePictures;
+		let hasChanges = false;
+
+		if (payload.deleted) {
+			const deletedTimestamp = String(payload.deleted?.timestamp || '').trim();
+			const deletedUrl = String(payload.deleted?.url || payload.deleted?.original?.url || payload.deleted?.original || '').trim();
+
+			if (deletedTimestamp || deletedUrl) {
+				nextPictures = nextPictures.filter((picture) => {
+					const sameTimestamp = deletedTimestamp ? String(picture?.timestamp || '').trim() === deletedTimestamp : true;
+					const sameUrl = deletedUrl ? getProfilePictureOriginalUrl(picture) === deletedUrl : true;
+
+					return !(sameTimestamp && sameUrl);
+				});
+				hasChanges = true;
+			}
+		}
+
+		if (payload.picture) {
+			const normalizedLatest = normalizeRealtimeProfilePicture(payload.picture);
+
+			if (normalizedLatest) {
+				const latestKey = getProfilePictureIdentityKey(normalizedLatest);
+				
+				nextPictures = [
+					normalizedLatest,
+					...nextPictures.filter((picture) => getProfilePictureIdentityKey(picture) !== latestKey)
+				];
+				hasChanges = true;
+			}
+		}
+
+		if (Object.prototype.hasOwnProperty.call(payload, 'pictures')) {
+			nextPictures = Array.isArray(payload.pictures) ? payload.pictures : [];
+			hasChanges = true;
+		}
+
+		if (!hasChanges) {
+			return;
+		}
+
+		state.profilePictures = clampProfilePictures(nextPictures);
 		persistSharedProfilePicturesCache(state.profilePictures);
 		setSectionState('profilePictures', 'idle');
 		renderProfilePictures();

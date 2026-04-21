@@ -39,7 +39,6 @@ const ROOT_CHANGELOG_PATH = path.resolve(process.cwd(), 'CHANGELOG.md');
 const MAX_AUDIT_LOGS = 1000;
 const UNDO_WINDOW_MS = 12000;
 const UNDO_WINDOW_SHORT_MS = 8000;
-const DASHBOARD_PROFILE_PICTURES_REALTIME_LIMIT = 100;
 const UNDO_WINDOW_MEDIUM_MS = 10000;
 const UNDO_WINDOW_LONG_MS = 15000;
 const S_WHATSAPP_NET = '@s.whatsapp.net';
@@ -1147,6 +1146,12 @@ const listDashboardProfilePictures = ({ limit = 180 } = {}) => {
 	return pictures;
 };
 
+const getLatestDashboardProfilePicture = () => {
+	const [latestPicture] = listDashboardProfilePictures({ limit: 1 });
+
+	return latestPicture || null;
+};
+
 const persistDashboardProfilePictures = async () => {
 	const seenUrls = new Set();
 	const entries = (Array.isArray(configuration.pinterestImages?.entries?.()) ? configuration.pinterestImages.entries() : [])
@@ -1940,7 +1945,7 @@ export const server = () => {
 			})
 		});
 		socket.emit('dashboard:profile-pictures', {
-			pictures: listDashboardProfilePictures({ limit: DASHBOARD_PROFILE_PICTURES_REALTIME_LIMIT })
+			picture: getLatestDashboardProfilePicture()
 		});
 
 		if (session.role === 'owner') {
@@ -2140,11 +2145,11 @@ export const server = () => {
 			const flags = listDashboardFlags(configuration);
 			const usersForOwner = await listDashboardUsers({ redactNumbers: false });
 			const usersForViewer = await listDashboardUsers({ redactNumbers: true });
-			const pictures = listDashboardProfilePictures({ limit: DASHBOARD_PROFILE_PICTURES_REALTIME_LIMIT });
+			const latestPicture = getLatestDashboardProfilePicture();
 
 			io.emit('dashboard:commands', { commands });
 			io.emit('dashboard:flags', { flags });
-			io.emit('dashboard:profile-pictures', { pictures });
+			io.emit('dashboard:profile-pictures', { picture: latestPicture });
 
 			const sockets = Array.from(io.of('/').sockets.values());
 
@@ -2766,9 +2771,10 @@ export const server = () => {
 			});
 		}
 
-		const pictures = listDashboardProfilePictures({ limit: DASHBOARD_PROFILE_PICTURES_REALTIME_LIMIT });
-		
-		io.emit('dashboard:profile-pictures', { pictures });
+		io.emit('dashboard:profile-pictures', {
+			picture: getLatestDashboardProfilePicture(),
+			deleted: payload
+		});
 
 		pushAuditEvent({
 			action: 'profile_picture.delete',
@@ -2776,6 +2782,8 @@ export const server = () => {
 			target: payload.timestamp || payload.url || 'profile-picture',
 			message: 'Owner deleted a profile picture from albums.'
 		});
+
+		const pictures = listDashboardProfilePictures();
 
 		res.json({
 			ok: true,
