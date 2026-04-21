@@ -106,8 +106,6 @@ export const els = {
 	profilePicturesLightboxBackdrop: document.getElementById('profile-pictures-lightbox-backdrop'),
 	profilePicturesLightboxContent: document.querySelector('#profile-pictures-lightbox .albums-lightbox-content'),
 	profilePicturesLightboxTrack: document.getElementById('profile-pictures-lightbox-track'),
-	profilePicturesLightboxPrev: document.getElementById('profile-pictures-lightbox-prev'),
-	profilePicturesLightboxNext: document.getElementById('profile-pictures-lightbox-next'),
 	profilePicturesLightboxMeta: document.getElementById('profile-pictures-lightbox-meta'),
 	profilePicturesLightboxMenu: document.getElementById('profile-pictures-lightbox-menu'),
 	profilePicturesLightboxMenuToggle: document.getElementById('profile-pictures-lightbox-menu-toggle'),

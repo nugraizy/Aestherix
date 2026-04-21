@@ -2323,7 +2323,7 @@ export const server = () => {
 			return res.redirect('/dashboard/login');
 		}
 
-		res.sendFile(path.join(__dirname, 'public', 'dashboard', 'albums.html'));
+		res.sendFile(path.join(__dirname, 'public', 'dashboard', 'index.html'));
 	});
 
 	app.post('/api/dashboard/auth/request-code', validate({ body: authRequestBody }), async (req, res) => {

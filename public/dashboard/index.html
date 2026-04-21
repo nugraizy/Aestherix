@@ -11,6 +11,11 @@
 				const PALETTE_KEY = 'aestherix.dashboard.palette';
 				const ZEN_CURSOR_ENABLED_KEY = 'aestherix.dashboard.cursor.enabled';
 				const root = document.documentElement;
+				const isAlbumsRoute = window.location.pathname === '/albums';
+
+				if (isAlbumsRoute) {
+					root.classList.add('albums-route-preload');
+				}
 
 				try {
 					const savedTheme = localStorage.getItem(THEME_KEY);
@@ -836,13 +841,7 @@
 			<div id="profile-pictures-lightbox-backdrop" class="albums-lightbox-backdrop"></div>
 			<div class="albums-lightbox-content" role="document">
 				<div class="albums-lightbox-stage">
-					<button id="profile-pictures-lightbox-prev" class="albums-lightbox-nav prev" type="button" aria-label="Previous image">
-						<span class="nf-back-icon" aria-hidden="true">&lt;</span>
-					</button>
 					<div id="profile-pictures-lightbox-track" class="albums-lightbox-track" aria-live="polite"></div>
-					<button id="profile-pictures-lightbox-next" class="albums-lightbox-nav next" type="button" aria-label="Next image">
-						<span class="nf-back-icon" aria-hidden="true">&gt;</span>
-					</button>
 					<p id="profile-pictures-lightbox-meta" class="albums-lightbox-meta" aria-live="polite"></p>
 					<div id="profile-pictures-lightbox-menu" class="albums-lightbox-menu hidden">
 						<button
@@ -951,6 +950,6 @@
 		</div>
 
 		<script src="/socket.io/socket.io.js"></script>
-		<script src="/dashboard/app.js" type="module"></script>
+		<script src="/dashboard/build/app.js" type="module"></script>
 	</body>
 </html>

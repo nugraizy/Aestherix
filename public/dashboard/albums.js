@@ -10,8 +10,6 @@ const els = {
 	lightboxBackdrop: document.getElementById('albums-lightbox-backdrop'),
 	lightboxTrack: document.getElementById('albums-lightbox-track'),
 	lightboxMeta: document.getElementById('albums-lightbox-meta'),
-	lightboxPrev: document.getElementById('albums-lightbox-prev'),
-	lightboxNext: document.getElementById('albums-lightbox-next'),
 	lightboxMenu: document.getElementById('albums-lightbox-menu'),
 	lightboxMenuToggle: document.getElementById('albums-lightbox-menu-toggle'),
 	lightboxMenuPanel: document.getElementById('albums-lightbox-menu-panel'),
@@ -607,14 +605,6 @@ const updateLightboxFrame = () => {
 	setActionMenuOwnerState();
 
 	warmLightboxNeighbors(safeIndex, total);
-
-	if (els.lightboxPrev) {
-		els.lightboxPrev.disabled = total < 2;
-	}
-
-	if (els.lightboxNext) {
-		els.lightboxNext.disabled = total < 2;
-	}
 };
 
 const openLightbox = (index) => {
@@ -1637,9 +1627,36 @@ const ensureAuthorizedResponse = (response, context) => {
 	}
 };
 
+const isGifMediaUrl = (value) => {
+	const normalized = String(value || '').trim();
+
+	if (!normalized) {
+		return false;
+	}
+
+	try {
+		const parsed = new URL(normalized);
+
+		return /\.gif$/i.test(parsed.pathname || '');
+	} catch {
+		return /\.gif(?:$|[?#])/i.test(normalized);
+	}
+};
+
+const getGridImageSource = (picture) => {
+	const originalUrl = String(picture?.url || '').trim();
+	const previewUrl = String(picture?.previewUrl || '').trim();
+
+	if (isGifMediaUrl(originalUrl)) {
+		return originalUrl;
+	}
+
+	return previewUrl || originalUrl;
+};
+
 const imageCard = (picture, index) => `
 	<article class="album-image-card">
-		<img src="${IMAGE_PLACEHOLDER_DATA_URI}" data-src="${String(picture?.previewUrl || picture?.url || '').trim()}" alt="Album profile picture" class="album-image is-lazy" loading="lazy" decoding="async" fetchpriority="low" referrerpolicy="no-referrer" data-image-index="${index}" />
+		<img src="${IMAGE_PLACEHOLDER_DATA_URI}" data-src="${getGridImageSource(picture)}" alt="Album profile picture" class="album-image is-lazy" loading="lazy" decoding="async" fetchpriority="low" referrerpolicy="no-referrer" data-image-index="${index}" />
 	</article>
 `;
 
@@ -1859,12 +1876,6 @@ els.lightbox?.addEventListener('click', (event) => {
 	}
 
 	closeLightbox();
-});
-els.lightboxPrev?.addEventListener('click', () => {
-	moveLightbox(-1);
-});
-els.lightboxNext?.addEventListener('click', () => {
-	moveLightbox(1);
 });
 els.lightboxMenuToggle?.addEventListener('click', (event) => {
 	event.stopPropagation();

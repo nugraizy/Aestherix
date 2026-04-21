@@ -3346,6 +3346,33 @@ const getProfilePictureOriginalUrl = (picture) =>
 const getProfilePicturePreviewUrl = (picture) =>
 	String(picture?.thumbnail?.url || picture?.previewUrl || getProfilePictureOriginalUrl(picture)).trim();
 
+const isGifMediaUrl = (value) => {
+	const normalized = String(value || '').trim();
+
+	if (!normalized) {
+		return false;
+	}
+
+	try {
+		const parsed = new URL(normalized);
+
+		return /\.gif$/i.test(parsed.pathname || '');
+	} catch {
+		return /\.gif(?:$|[?#])/i.test(normalized);
+	}
+};
+
+const getProfilePictureGridUrl = (picture) => {
+	const originalUrl = getProfilePictureOriginalUrl(picture);
+	const previewUrl = getProfilePicturePreviewUrl(picture);
+
+	if (isGifMediaUrl(originalUrl)) {
+		return originalUrl;
+	}
+
+	return previewUrl || originalUrl;
+};
+
 const getRenderableProfilePictures = () => state.profilePictures.filter((picture) => Boolean(getProfilePictureOriginalUrl(picture)));
 
 const profilePictureCardMarkup = (picture, index) => {
@@ -3359,7 +3386,7 @@ const profilePictureCardMarkup = (picture, index) => {
 	return `
 		<article class="album-image-card">
 			<img
-				src="${previewUrl || originalUrl}"
+				src="${getProfilePictureGridUrl(picture)}"
 				alt="Profile picture"
 				class="album-image is-loaded"
 				loading="lazy"
@@ -3537,12 +3564,18 @@ const deleteCurrentProfilePicture = async () => {
 			throw new Error(payload?.message || 'Failed deleting profile picture');
 		}
 
-		state.profilePictures = state.profilePictures.filter((picture) => {
-			const pictureUrl = getProfilePictureOriginalUrl(picture);
-			const pictureTimestamp = String(picture?.timestamp || '');
+		const nextPictures = Array.isArray(payload?.pictures) ? payload.pictures : null;
 
-			return !(pictureTimestamp === currentTimestamp && pictureUrl === currentUrl);
-		});
+		if (nextPictures) {
+			state.profilePictures = clampProfilePictures(nextPictures);
+		} else {
+			state.profilePictures = state.profilePictures.filter((picture) => {
+				const pictureUrl = getProfilePictureOriginalUrl(picture);
+				const pictureTimestamp = String(picture?.timestamp || '');
+
+				return !(pictureTimestamp === currentTimestamp && pictureUrl === currentUrl);
+			});
+		}
 
 		persistSharedProfilePicturesCache(state.profilePictures);
 		renderProfilePictures();
@@ -3729,14 +3762,6 @@ const renderProfilePicturesCarousel = () => {
 
 	updateProfilePicturesActionMenuVisibility();
 	closeProfilePicturesActionMenu();
-
-	if (els.profilePicturesLightboxPrev) {
-		els.profilePicturesLightboxPrev.disabled = total < 2;
-	}
-
-	if (els.profilePicturesLightboxNext) {
-		els.profilePicturesLightboxNext.disabled = total < 2;
-	}
 };
 
 const openProfilePicturesCarousel = (index) => {
@@ -3896,6 +3921,8 @@ const openSeamlessAlbumsPage = ({ updateHistory = false } = {}) => {
 		return;
 	}
 
+	document.documentElement.classList.remove('albums-route-preload');
+
 	seamlessAlbumsOpen = true;
 	els.dashboardMain.classList.add('hidden');
 	els.albumsSeamlessPage.classList.remove('hidden');
@@ -3915,6 +3942,8 @@ const closeSeamlessAlbumsPage = ({ updateHistory = false, replaceHistory = false
 	if (!els.dashboardMain || !els.albumsSeamlessPage) {
 		return;
 	}
+
+	document.documentElement.classList.remove('albums-route-preload');
 
 	seamlessAlbumsOpen = false;
 	closeProfilePicturesCarousel();
@@ -3937,11 +3966,6 @@ const closeSeamlessAlbumsPage = ({ updateHistory = false, replaceHistory = false
 const handleAlbumsBackNavigation = () => {
 	if (typeof window === 'undefined') {
 		closeSeamlessAlbumsPage({ updateHistory: false });
-		return;
-	}
-
-	if (window.location.pathname === ALBUMS_ROUTE_PATH && window.history.length > 1) {
-		window.history.back();
 		return;
 	}
 
@@ -4826,12 +4850,6 @@ const bindEvents = () => {
 	});
 
 	els.profilePicturesLightboxBackdrop?.addEventListener('click', closeProfilePicturesCarousel);
-	els.profilePicturesLightboxPrev?.addEventListener('click', () => {
-		moveProfilePicturesCarousel(-1);
-	});
-	els.profilePicturesLightboxNext?.addEventListener('click', () => {
-		moveProfilePicturesCarousel(1);
-	});
 	els.profilePicturesLightbox?.addEventListener('click', (event) => {
 		const target = event.target;
 
@@ -4870,11 +4888,7 @@ const bindEvents = () => {
 			closeProfilePicturesActionMenu();
 		}
 
-		if (target.closest('.albums-lightbox-nav, .albums-lightbox-menu, .albums-lightbox-content')) {
-			if (target.closest('.albums-lightbox-nav')) {
-				return;
-			}
-
+		if (target.closest('.albums-lightbox-menu, .albums-lightbox-content')) {
 			if (target.closest('.albums-lightbox-menu')) {
 				return;
 			}

@@ -13,3 +13,4 @@ databases/users/contacts-backup.json
 .flaskenv*
 !.env.project
 !.env.vault
+public/dashboard/build/

@@ -6,6 +6,8 @@
   "main": "./index.js",
   "type": "module",
   "scripts": {
+    "build": "npm run build:dashboard:minify",
+    "build:dashboard:minify": "node ./scripts/minify-dashboard.mjs",
     "pm2": "pm2 start ./index.js -- nugraizy_android -z -w -c && pm2 logs",
     "pm2:split": "pm2 start ecosystem.config.cjs",
     "pm2:split:logs": "pm2 logs aestherix-bot aestherix-dashboard",
@@ -167,7 +169,8 @@
     "progress-stream": "^2.0.0",
     "qrcode-terminal": "^0.12.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "uglify-js": "^3.19.3"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
