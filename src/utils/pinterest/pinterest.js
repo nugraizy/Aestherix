@@ -6,6 +6,72 @@ const _regex = new RegExp(
 );
 const _id = /\/?pin\/?([\d]+)/;
 
+const getSafeHttpUrl = (value) => {
+	const normalized = String(value || '').trim();
+
+	if (!/^https?:\/\//i.test(normalized)) {
+		return '';
+	}
+
+	return normalized;
+};
+
+const getImageVariantsFromMap = (images) => {
+	if (!images || typeof images !== 'object') {
+		return [];
+	}
+
+	const variants = [];
+
+	for (const [key, value] of Object.entries(images)) {
+		const url = getSafeHttpUrl(value?.url || value);
+
+		if (!url) {
+			continue;
+		}
+
+		const width = Number(value?.width || String(key).match(/(\d+)x/i)?.[1] || 0);
+		const height = Number(value?.height || String(key).match(/x(\d+)/i)?.[1] || 0);
+
+		variants.push({
+			url,
+			width: Number.isFinite(width) ? width : 0,
+			height: Number.isFinite(height) ? height : 0
+		});
+	}
+
+	return variants;
+};
+
+const resolvePinImageUrls = (payload) => {
+	const variants = getImageVariantsFromMap(payload?.images);
+	const sortedByArea = [...variants].sort((a, b) => b.width * b.height - a.width * a.height);
+
+	const originalUrl =
+		getSafeHttpUrl(payload?.original?.url) ||
+		getSafeHttpUrl(payload?.url) ||
+		getSafeHttpUrl(payload?.original) ||
+		getSafeHttpUrl(payload?.image_url) ||
+		getSafeHttpUrl(payload?.image) ||
+		getSafeHttpUrl(payload?.images?.orig?.url) ||
+		sortedByArea[0]?.url ||
+		'';
+
+	const previewUrl =
+		getSafeHttpUrl(payload?.thumbnail?.url) ||
+		getSafeHttpUrl(payload?.previewUrl) ||
+		getSafeHttpUrl(payload?.thumbnail) ||
+		getSafeHttpUrl(payload?.images?.['474x']?.url) ||
+		getSafeHttpUrl(payload?.images?.['236x']?.url) ||
+		sortedByArea.at(-1)?.url ||
+		originalUrl;
+
+	return {
+		originalUrl,
+		previewUrl: previewUrl || originalUrl
+	};
+};
+
 const headers = {
 	search: {
 		'X-Pinterest-PWS-Handler': 'www/search/[scope].js'
@@ -82,7 +148,6 @@ class Pinterest {
 					resolve({ error: true, message: 'Could not find media with the keyword. Try other keyword.', keyword: query });
 				}
 
-
 				resolve({
 					keyword: query,
 					results: data
@@ -100,7 +165,13 @@ class Pinterest {
 								}
 							}
 
-							!mediaUrl && (mediaUrl = result.images.orig.url);
+							if (!mediaUrl) {
+								mediaUrl = resolvePinImageUrls(result).originalUrl;
+							}
+
+							if (!mediaUrl) {
+								return null;
+							}
 
 							return {
 								authorUsername: result.pinner.username,
@@ -174,7 +245,14 @@ class Pinterest {
 					mediaUrl = videos.find(([key]) => data.videos.video_list[key].url.endsWith('.mp4'))[1].url;
 				}
 
-				!mediaUrl && (mediaUrl = data.images.orig.url);
+				if (!mediaUrl) {
+					mediaUrl = resolvePinImageUrls(data).originalUrl;
+				}
+
+				if (!mediaUrl) {
+					resolve({ error: true, message: 'Could not process pinterest media.', keyword: url });
+					return;
+				}
 
 				resolve({
 					authorUsername: data.pinner.username,
@@ -221,9 +299,21 @@ class Pinterest {
 
 				const json = await response.json();
 
+				const result = json.resource_response.data
+					.filter((v) => !v.is_video)
+					.map((v) => {
+						const { originalUrl, previewUrl } = resolvePinImageUrls(v);
 
-				const result = json.resource_response.data.filter((v) => !v.is_video && v.images).map((v) => ({
-					original:v.images.orig, thumbnail: /**take the third best before original**/v.images[Object.keys(v.images)[Object.keys(v.images).length-4]]	}));
+						if (!originalUrl) {
+							return null;
+						}
+
+						return {
+							original: originalUrl,
+							thumbnail: previewUrl || originalUrl
+						};
+					})
+					.filter(Boolean);
 
 				resolve(result);
 			} catch (error) {
@@ -251,7 +341,6 @@ class Pinterest {
 					source_url: `/pin/${pinId}/`, // eslint-disable-line
 					data: JSON.stringify({
 						options: {
-							additional_fields: ['pin.gen_ai_topics'], // eslint-disable-line
 							pin_id: pinId, // eslint-disable-line
 							context_pin_ids: [], // eslint-disable-line
 							page_size: 50, // eslint-disable-line
@@ -275,8 +364,21 @@ class Pinterest {
 
 				const json = await response.json();
 
-				const result = json.resource_response.data.filter((v) => !v.is_video && v.images).map((v) => ({
-					original:v.images.orig, thumbnail: /**take the third best before original**/v.images[Object.keys(v.images)[Object.keys(v.images).length-4]]	}));
+				const result = json.resource_response.data
+					.filter((v) => !v.is_video)
+					.map((v) => {
+						const { originalUrl, previewUrl } = resolvePinImageUrls(v);
+
+						if (!originalUrl) {
+							return null;
+						}
+
+						return {
+							original: originalUrl,
+							thumbnail: previewUrl || originalUrl
+						};
+					})
+					.filter(Boolean);
 
 				resolve({ images: result, bookmarks: json.resource.options.bookmarks[0] });
 			} catch (error) {

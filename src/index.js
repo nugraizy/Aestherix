@@ -269,11 +269,45 @@ const toImageVariant = (variant, fallbackUrl) => {
 	};
 };
 
+const getImageVariantsFromMap = (images) => {
+	if (!images || typeof images !== 'object') {
+		return [];
+	}
+
+	const variants = [];
+
+	for (const [key, value] of Object.entries(images)) {
+		const url = getSafeHttpUrl(value?.url || value);
+
+		if (!url) {
+			continue;
+		}
+
+		const width = Number(value?.width || String(key).match(/(\d+)x/i)?.[1] || 0);
+		const height = Number(value?.height || String(key).match(/x(\d+)/i)?.[1] || 0);
+
+		variants.push({
+			url,
+			width: Number.isFinite(width) ? width : 0,
+			height: Number.isFinite(height) ? height : 0
+		});
+	}
+
+	return variants;
+};
+
 const normalizePinterestPictureRecord = (record) => {
+	const variants = getImageVariantsFromMap(record?.images);
+	const sortedByArea = [...variants].sort((a, b) => b.width * b.height - a.width * a.height);
+
 	const originalUrl =
 		getSafeHttpUrl(record?.original?.url) ||
 		getSafeHttpUrl(record?.url) ||
 		getSafeHttpUrl(record?.original) ||
+		getSafeHttpUrl(record?.image_url) ||
+		getSafeHttpUrl(record?.image) ||
+		getSafeHttpUrl(record?.images?.orig?.url) ||
+		sortedByArea[0]?.url ||
 		getSafeHttpUrl(record);
 
 	if (!originalUrl) {
@@ -281,10 +315,17 @@ const normalizePinterestPictureRecord = (record) => {
 	}
 
 	const original = toImageVariant(record?.original, originalUrl);
-	const thumbnail =
-		toImageVariant(record?.thumbnail, getSafeHttpUrl(record?.thumbnail?.url) || getSafeHttpUrl(record?.thumbnail) || originalUrl) ||
-		toImageVariant(record?.preview, originalUrl) ||
-		{
+	const thumbnail = toImageVariant(
+		record?.thumbnail,
+		getSafeHttpUrl(record?.thumbnail?.url) ||
+			getSafeHttpUrl(record?.previewUrl) ||
+			getSafeHttpUrl(record?.thumbnail) ||
+			getSafeHttpUrl(record?.images?.['474x']?.url) ||
+			getSafeHttpUrl(record?.images?.['236x']?.url) ||
+			sortedByArea.at(-1)?.url ||
+			originalUrl
+	) ||
+		toImageVariant(record?.preview, originalUrl) || {
 			url: originalUrl
 		};
 
@@ -334,8 +375,8 @@ const persistProfilePictureHistory = async (config) => {
 			return {
 				timestamp: String(timestamp || ''),
 				url: normalized.original.url,
-				original: normalized.original,
-				thumbnail: normalized.thumbnail
+				original: normalized.original.url,
+				thumbnail: normalized.thumbnail.url
 			};
 		})
 		.filter((entry) => entry && entry.timestamp && /^https?:\/\//i.test(entry.url))
@@ -398,7 +439,9 @@ const startDashboardBridge = (resolveWaClient) => {
 		}
 
 		const waClient =
-			typeof resolveWaClient === 'function' ? resolveWaClient() || global.client?.instance || null : global.client?.instance || null;
+			typeof resolveWaClient === 'function'
+				? resolveWaClient() || global.client?.instance || null
+				: global.client?.instance || null;
 
 		if (!waClient?.send) {
 			return res.status(503).json({ ok: false, message: 'WhatsApp client is not connected yet.' });
@@ -429,7 +472,9 @@ const startDashboardBridge = (resolveWaClient) => {
 		const type = String(req.body?.type || '').trim();
 		const payload = req.body?.payload && typeof req.body.payload === 'object' ? req.body.payload : {};
 		const waClient =
-			typeof resolveWaClient === 'function' ? resolveWaClient() || global.client?.instance || null : global.client?.instance || null;
+			typeof resolveWaClient === 'function'
+				? resolveWaClient() || global.client?.instance || null
+				: global.client?.instance || null;
 
 		try {
 			const result = await applyDashboardRuntimeMutation(waClient, type, payload);

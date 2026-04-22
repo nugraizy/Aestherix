@@ -3270,12 +3270,7 @@ body.albums-page.albums-scroll-locked {
 }
 
 .nf-back-icon {
-	font-family:
-		'Symbols Nerd Font Mono',
-		'Symbols Nerd Font',
-		'Hack Nerd Font Mono',
-		'Hack Nerd Font',
-		monospace;
+	font-family: 'Symbols Nerd Font Mono', 'Symbols Nerd Font', 'Hack Nerd Font Mono', 'Hack Nerd Font', monospace;
 	font-size: 1.05rem;
 	font-weight: 700;
 	line-height: 1;
@@ -3348,12 +3343,7 @@ body.albums-page.albums-scroll-locked {
 }
 
 :root[data-theme='light'] .album-skeleton-block {
-	background: linear-gradient(
-		100deg,
-		rgba(17, 49, 58, 0.08) 0%,
-		rgba(63, 135, 184, 0.28) 50%,
-		rgba(17, 49, 58, 0.08) 100%
-	);
+	background: linear-gradient(100deg, rgba(17, 49, 58, 0.08) 0%, rgba(63, 135, 184, 0.28) 50%, rgba(17, 49, 58, 0.08) 100%);
 	background-size: 220% 100%;
 }
 
@@ -3606,6 +3596,7 @@ body.albums-page.albums-scroll-locked {
 	max-width: min(84vw, 1120px);
 	max-height: min(78vh, 860px);
 	z-index: 5;
+	overflow: visible;
 	opacity: 1;
 	transform: translate(-50%, -50%) scale(1);
 	filter: none;
@@ -3663,6 +3654,7 @@ body.albums-page.albums-scroll-locked {
 	max-height: 100%;
 	object-fit: contain;
 	display: block;
+	border-radius: inherit;
 }
 
 .albums-lightbox-meta {
@@ -3681,6 +3673,8 @@ body.albums-page.albums-scroll-locked {
 	color: #effcff;
 	backdrop-filter: blur(4px);
 	pointer-events: none;
+	max-width: calc(100% - 112px);
+	white-space: nowrap;
 }
 
 .albums-lightbox-menu {
@@ -3691,19 +3685,6 @@ body.albums-page.albums-scroll-locked {
 	display: grid;
 	justify-items: end;
 	gap: 6px;
-}
-
-.albums-lightbox-menu .albums-lightbox-meta {
-	position: static;
-	top: auto;
-	left: auto;
-	transform: none;
-	z-index: auto;
-	padding: 4px 10px;
-	font-size: 0.74rem;
-	line-height: 1;
-	background: rgba(6, 17, 22, 0.52);
-	border-color: rgba(255, 255, 255, 0.24);
 }
 
 .albums-lightbox-menu-toggle {
@@ -3918,6 +3899,12 @@ body.albums-page.albums-scroll-locked {
 	.albums-lightbox-meta {
 		top: 8px;
 		font-size: 0.74rem;
+		max-width: calc(100% - 96px);
+	}
+
+	.albums-lightbox-menu {
+		top: 6px;
+		right: 6px;
 	}
 }
 

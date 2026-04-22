@@ -186,12 +186,15 @@ const showToast = (message, type = 'info', duration = 1800) => {
 		toast.classList.add('visible');
 	});
 
-	setTimeout(() => {
-		toast.classList.remove('visible');
-		setTimeout(() => {
-			toast.remove();
-		}, 220);
-	}, Math.max(1200, Number(duration || 1800)));
+	setTimeout(
+		() => {
+			toast.classList.remove('visible');
+			setTimeout(() => {
+				toast.remove();
+			}, 220);
+		},
+		Math.max(1200, Number(duration || 1800))
+	);
 };
 
 const getPictureFilename = (picture) => {
@@ -649,23 +652,23 @@ const closeLightbox = () => {
 		if (els.lightboxTrack) {
 			els.lightboxTrack.innerHTML = '';
 		}
-		
-        if (els.lightboxMeta) {
+
+		if (els.lightboxMeta) {
 			els.lightboxMeta.textContent = '';
 			els.lightboxMeta.style.top = '';
 		}
-		
-        if (els.lightboxMenu) {
+
+		if (els.lightboxMenu) {
 			els.lightboxMenu.style.top = '';
 			els.lightboxMenu.style.right = '';
 			els.lightboxMenu.style.bottom = '';
 		}
-		
-        if (els.lightboxContent) {
+
+		if (els.lightboxContent) {
 			els.lightboxContent.classList.remove('is-cycling-left', 'is-cycling-right');
 		}
-		
-        lightboxIndex = -1;
+
+		lightboxIndex = -1;
 		wheelDeltaAccumulator = 0;
 		wheelLastInputAt = 0;
 		wheelNavigationLockUntil = 0;
@@ -815,10 +818,7 @@ const handleLightboxTouchEnd = () => {
 	const deltaX = touchLastX - touchStartX;
 	const deltaY = Number.isFinite(touchStartY) && Number.isFinite(touchLastY) ? touchLastY - touchStartY : 0;
 
-	if (
-		Math.abs(deltaX) >= LIGHTBOX_TOUCH_SWIPE_THRESHOLD_PX &&
-		Math.abs(deltaY) <= LIGHTBOX_TOUCH_MAX_VERTICAL_DRIFT_PX
-	) {
+	if (Math.abs(deltaX) >= LIGHTBOX_TOUCH_SWIPE_THRESHOLD_PX && Math.abs(deltaY) <= LIGHTBOX_TOUCH_MAX_VERTICAL_DRIFT_PX) {
 		touchSwipeTriggered = true;
 		moveLightbox(deltaX < 0 ? 1 : -1);
 	}
@@ -836,26 +836,61 @@ const getSafeHttpUrl = (value) => {
 	return normalized;
 };
 
-const normalizePictureRecord = (picture) => {
-	const timestamp = String(picture?.timestamp || '').trim();
-
-	if (!timestamp) {
-		return null;
+const getImageVariantsFromMap = (images) => {
+	if (!images || typeof images !== 'object') {
+		return [];
 	}
+
+	const variants = [];
+
+	for (const [key, value] of Object.entries(images)) {
+		const url = getSafeHttpUrl(value?.url || value);
+
+		if (!url) {
+			continue;
+		}
+
+		const width = Number(value?.width || String(key).match(/(\d+)x/i)?.[1] || 0);
+		const height = Number(value?.height || String(key).match(/x(\d+)/i)?.[1] || 0);
+
+		variants.push({
+			url,
+			width: Number.isFinite(width) ? width : 0,
+			height: Number.isFinite(height) ? height : 0
+		});
+	}
+
+	return variants;
+};
+
+const normalizePictureRecord = (picture) => {
+	const variants = getImageVariantsFromMap(picture?.images);
+	const sortedByArea = [...variants].sort((a, b) => b.width * b.height - a.width * a.height);
 
 	const originalUrl =
 		getSafeHttpUrl(picture?.original?.url) ||
 		getSafeHttpUrl(picture?.url) ||
-		getSafeHttpUrl(picture?.original);
+		getSafeHttpUrl(picture?.original) ||
+		getSafeHttpUrl(picture?.image_url) ||
+		getSafeHttpUrl(picture?.image) ||
+		getSafeHttpUrl(picture?.images?.orig?.url) ||
+		sortedByArea[0]?.url;
 
 	if (!originalUrl) {
 		return null;
 	}
 
+	const timestamp = String(
+		picture?.timestamp || picture?.createdAt || picture?.created_at || picture?.id || originalUrl
+	).trim();
+
 	const previewUrl =
 		getSafeHttpUrl(picture?.thumbnail?.url) ||
 		getSafeHttpUrl(picture?.previewUrl) ||
 		getSafeHttpUrl(picture?.thumbnail) ||
+		getSafeHttpUrl(picture?.images?.['474x']?.url) ||
+		getSafeHttpUrl(picture?.images?.['236x']?.url) ||
+		sortedByArea.at(-1)?.url ||
 		originalUrl;
 
 	return {
@@ -999,9 +1034,7 @@ const renderAlbumsGrid = ({ enteringIndexes = [] } = {}) => {
 		return;
 	}
 
-	els.grid.innerHTML = lightboxPictures
-		.map((picture, index) => imageCard(picture, index))
-		.join('');
+	els.grid.innerHTML = lightboxPictures.map((picture, index) => imageCard(picture, index)).join('');
 
 	setupGridLazyLoading();
 
@@ -1084,12 +1117,12 @@ const applyPictures = (pictures, { fromRealtime = false } = {}) => {
 	const hasPreviousPictures = Boolean(picturesSignature);
 	const enteringIndexes = hasPreviousPictures
 		? validPictures.reduce((indexes, picture, index) => {
-			if (!previousPictureKeys.has(getPictureKey(picture))) {
-				indexes.push(index);
-			}
+				if (!previousPictureKeys.has(getPictureKey(picture))) {
+					indexes.push(index);
+				}
 
-			return indexes;
-		}, [])
+				return indexes;
+			}, [])
 		: [];
 
 	picturesSignature = nextSignature;
@@ -1225,20 +1258,18 @@ const setupRealtimeProfileUpdates = () => {
 		}
 
 		const pictureKey = getPictureKey(normalized);
-		const nextPictures = [
-			normalized,
-			...lightboxPictures.filter((item) => getPictureKey(item) !== pictureKey)
-		].slice(0, ALBUMS_IMAGES_LIMIT);
+		const nextPictures = [normalized, ...lightboxPictures.filter((item) => getPictureKey(item) !== pictureKey)].slice(
+			0,
+			ALBUMS_IMAGES_LIMIT
+		);
 
 		applyPictures(nextPictures, { fromRealtime: true });
 	};
 
 	const removeRealtimePicture = (picture) => {
-		const timestamp = String(picture?.timestamp || '').trim();
-		const url =
-			getSafeHttpUrl(picture?.url) ||
-			getSafeHttpUrl(picture?.original?.url) ||
-			getSafeHttpUrl(picture?.original);
+		const normalized = normalizePictureRecord(picture);
+		const timestamp = String(picture?.timestamp || picture?.createdAt || picture?.created_at || '').trim();
+		const url = normalized?.url || '';
 
 		if (!timestamp && !url) {
 			return;
@@ -1509,8 +1540,7 @@ const setupZenCursor = () => {
 		cursorText.style.scale = '0';
 	};
 
-	const interactiveCursorSelector =
-		'a, button, input, .album-image, .albums-carousel-image, [data-title], [data-tooltip]';
+	const interactiveCursorSelector = 'a, button, input, .album-image, .albums-carousel-image, [data-title], [data-tooltip]';
 	let activeInteractiveTarget = null;
 
 	const setInteractiveTarget = (target) => {

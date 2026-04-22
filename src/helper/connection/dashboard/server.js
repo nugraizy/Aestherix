@@ -107,14 +107,69 @@ const normalizePersistedUserJid = (input) => {
 	return `${digits}${S_WHATSAPP_NET}`;
 };
 
+const getSafeHttpUrl = (value) => {
+	const normalized = String(value || '').trim();
+
+	if (!/^https?:\/\//i.test(normalized)) {
+		return '';
+	}
+
+	return normalized;
+};
+
+const getImageVariantsFromMap = (images) => {
+	if (!images || typeof images !== 'object') {
+		return [];
+	}
+
+	const variants = [];
+
+	for (const [key, value] of Object.entries(images)) {
+		const url = getSafeHttpUrl(value?.url || value);
+
+		if (!url) {
+			continue;
+		}
+
+		const width = Number(value?.width || String(key).match(/(\d+)x/i)?.[1] || 0);
+		const height = Number(value?.height || String(key).match(/x(\d+)/i)?.[1] || 0);
+
+		variants.push({
+			url,
+			width: Number.isFinite(width) ? width : 0,
+			height: Number.isFinite(height) ? height : 0
+		});
+	}
+
+	return variants;
+};
+
 const normalizePersistedPictureEntry = (entry) => {
-	const originalUrl = String(entry?.original?.url || entry?.url || entry?.original || '').trim();
+	const variants = getImageVariantsFromMap(entry?.images);
+	const sortedByArea = [...variants].sort((a, b) => b.width * b.height - a.width * a.height);
+
+	const originalUrl =
+		getSafeHttpUrl(entry?.original?.url) ||
+		getSafeHttpUrl(entry?.url) ||
+		getSafeHttpUrl(entry?.original) ||
+		getSafeHttpUrl(entry?.image_url) ||
+		getSafeHttpUrl(entry?.image) ||
+		getSafeHttpUrl(entry?.images?.orig?.url) ||
+		sortedByArea[0]?.url ||
+		'';
 
 	if (!/^https?:\/\//i.test(originalUrl)) {
 		return null;
 	}
 
-	const thumbnailUrl = String(entry?.thumbnail?.url || entry?.thumbnail || originalUrl).trim();
+	const thumbnailUrl =
+		getSafeHttpUrl(entry?.thumbnail?.url) ||
+		getSafeHttpUrl(entry?.previewUrl) ||
+		getSafeHttpUrl(entry?.thumbnail) ||
+		getSafeHttpUrl(entry?.images?.['474x']?.url) ||
+		getSafeHttpUrl(entry?.images?.['236x']?.url) ||
+		sortedByArea.at(-1)?.url ||
+		originalUrl;
 
 	return {
 		original: {
@@ -817,7 +872,10 @@ const normalizePhoneNumber = (input) => {
 };
 
 const extensionFromMime = (mimeType) => {
-	const normalized = String(mimeType || '').toLowerCase().split(';')[0].trim();
+	const normalized = String(mimeType || '')
+		.toLowerCase()
+		.split(';')[0]
+		.trim();
 
 	if (normalized === 'image/jpeg') {
 		return 'jpg';
@@ -853,7 +911,10 @@ const extensionFromMime = (mimeType) => {
 const extensionFromUrl = (urlValue) => {
 	try {
 		const parsed = new URL(String(urlValue || ''));
-		const ext = path.extname(parsed.pathname || '').replace('.', '').toLowerCase();
+		const ext = path
+			.extname(parsed.pathname || '')
+			.replace('.', '')
+			.toLowerCase();
 
 		if (!/^[a-z0-9]{2,5}$/i.test(ext)) {
 			return '';
@@ -887,7 +948,9 @@ const buildProfilePictureFilename = ({ timestamp = '', imageUrl = '', mimeType =
 };
 
 const isBlockedDownloadHost = (hostname) => {
-	const safeHost = String(hostname || '').trim().toLowerCase();
+	const safeHost = String(hostname || '')
+		.trim()
+		.toLowerCase();
 
 	if (!safeHost) {
 		return true;
@@ -1053,16 +1116,6 @@ const listDashboardUsers = async ({ redactNumbers = false } = {}) => {
 	return users.filter(Boolean).sort((a, b) => a.id.localeCompare(b.id));
 };
 
-const getSafeHttpUrl = (value) => {
-	const normalized = String(value || '').trim();
-
-	if (!/^https?:\/\//i.test(normalized)) {
-		return '';
-	}
-
-	return normalized;
-};
-
 const toImageVariant = (variant, fallbackUrl) => {
 	const variantUrl = getSafeHttpUrl(variant?.url) || getSafeHttpUrl(variant) || fallbackUrl;
 
@@ -1083,10 +1136,17 @@ const toImageVariant = (variant, fallbackUrl) => {
 };
 
 const normalizeDashboardPicture = (value) => {
+	const variants = getImageVariantsFromMap(value?.images);
+	const sortedByArea = [...variants].sort((a, b) => b.width * b.height - a.width * a.height);
+
 	const originalUrl =
 		getSafeHttpUrl(value?.original?.url) ||
 		getSafeHttpUrl(value?.url) ||
 		getSafeHttpUrl(value?.original) ||
+		getSafeHttpUrl(value?.image_url) ||
+		getSafeHttpUrl(value?.image) ||
+		getSafeHttpUrl(value?.images?.orig?.url) ||
+		sortedByArea[0]?.url ||
 		getSafeHttpUrl(value);
 
 	if (!originalUrl) {
@@ -1094,9 +1154,16 @@ const normalizeDashboardPicture = (value) => {
 	}
 
 	const original = toImageVariant(value?.original, originalUrl) || { url: originalUrl };
-	const thumbnail =
-		toImageVariant(value?.thumbnail, getSafeHttpUrl(value?.thumbnail?.url) || getSafeHttpUrl(value?.thumbnail) || originalUrl) ||
-		{ url: originalUrl };
+	const thumbnail = toImageVariant(
+		value?.thumbnail,
+		getSafeHttpUrl(value?.thumbnail?.url) ||
+			getSafeHttpUrl(value?.previewUrl) ||
+			getSafeHttpUrl(value?.thumbnail) ||
+			getSafeHttpUrl(value?.images?.['474x']?.url) ||
+			getSafeHttpUrl(value?.images?.['236x']?.url) ||
+			sortedByArea.at(-1)?.url ||
+			originalUrl
+	) || { url: originalUrl };
 
 	return {
 		original,
@@ -1107,9 +1174,7 @@ const normalizeDashboardPicture = (value) => {
 const listDashboardProfilePictures = ({ limit = 180 } = {}) => {
 	refreshProfilePicturesCacheFromDisk();
 
-	const entries = Array.isArray(configuration.pinterestImages?.entries?.())
-		? configuration.pinterestImages.entries()
-		: [];
+	const entries = Array.isArray(configuration.pinterestImages?.entries?.()) ? configuration.pinterestImages.entries() : [];
 	const safeLimit = Math.max(1, Math.min(500, Number(limit) || 180));
 	const seenUrls = new Set();
 
@@ -1165,8 +1230,8 @@ const persistDashboardProfilePictures = async () => {
 			return {
 				timestamp: String(timestamp || '').trim(),
 				url: normalized.original.url,
-				original: normalized.original,
-				thumbnail: normalized.thumbnail
+				original: normalized.original.url,
+				thumbnail: normalized.thumbnail.url
 			};
 		})
 		.filter((entry) => entry && entry.timestamp && /^https?:\/\//i.test(entry.url))
@@ -1894,7 +1959,7 @@ export const server = () => {
 	}
 
 	configuration.cache.blocklist = Array.isArray(configuration.cache?.blocklist) ? configuration.cache.blocklist : [];
-	
+
 	if (!configuration?.OPTIONS || typeof configuration.OPTIONS !== 'object') {
 		configuration.OPTIONS = {};
 	}
@@ -2093,7 +2158,7 @@ export const server = () => {
 			}
 
 			const payload = result.data || { lastId: realtimeBotLogCursor, logs: [] };
-			
+
 			realtimeBotLogCursor = Number(payload?.lastId || realtimeBotLogCursor || 0);
 
 			if (!Array.isArray(payload?.logs) || payload.logs.length === 0) {
@@ -2701,96 +2766,106 @@ export const server = () => {
 		});
 	});
 
-	app.get('/api/dashboard/profile-pictures/download', requireDashboardAuth, validate({ query: downloadProfilePictureQuery }), async (req, res) => {
-		const imageUrl = String(req.query?.url || '').trim();
-		const timestamp = String(req.query?.timestamp || '').trim();
+	app.get(
+		'/api/dashboard/profile-pictures/download',
+		requireDashboardAuth,
+		validate({ query: downloadProfilePictureQuery }),
+		async (req, res) => {
+			const imageUrl = String(req.query?.url || '').trim();
+			const timestamp = String(req.query?.timestamp || '').trim();
 
-		let parsedUrl;
+			let parsedUrl;
 
-		try {
-			parsedUrl = new URL(imageUrl);
-		} catch {
-			return res.status(400).json({ ok: false, message: 'Invalid image URL.' });
+			try {
+				parsedUrl = new URL(imageUrl);
+			} catch {
+				return res.status(400).json({ ok: false, message: 'Invalid image URL.' });
+			}
+
+			if (!/^https?:$/i.test(parsedUrl.protocol) || isBlockedDownloadHost(parsedUrl.hostname)) {
+				return res.status(400).json({ ok: false, message: 'Image URL is not allowed.' });
+			}
+
+			let upstream;
+
+			try {
+				upstream = await fetch(parsedUrl.toString(), { redirect: 'follow' });
+			} catch {
+				return res.status(502).json({ ok: false, message: 'Failed fetching image source.' });
+			}
+
+			if (!upstream.ok) {
+				return res.status(502).json({ ok: false, message: 'Image source is unavailable.' });
+			}
+
+			const mimeType = String(upstream.headers.get('content-type') || 'application/octet-stream');
+			const filename = buildProfilePictureFilename({
+				timestamp,
+				imageUrl: parsedUrl.toString(),
+				mimeType
+			});
+			const encodedFilename = encodeURIComponent(filename);
+
+			const bytes = Buffer.from(await upstream.arrayBuffer());
+
+			res.setHeader('Content-Type', mimeType);
+			res.setHeader('Content-Disposition', `attachment; filename="${filename}"; filename*=UTF-8''${encodedFilename}`);
+			res.setHeader('Cache-Control', 'no-store');
+			res.setHeader('X-Content-Type-Options', 'nosniff');
+
+			res.send(bytes);
 		}
+	);
 
-		if (!/^https?:$/i.test(parsedUrl.protocol) || isBlockedDownloadHost(parsedUrl.hostname)) {
-			return res.status(400).json({ ok: false, message: 'Image URL is not allowed.' });
-		}
+	app.delete(
+		'/api/dashboard/profile-pictures',
+		requireOwnerAuth,
+		validate({ body: deleteProfilePictureBody }),
+		async (req, res) => {
+			const session = req.dashboardSession || null;
+			const payload = {
+				timestamp: String(req.body?.timestamp || '').trim(),
+				url: String(req.body?.url || '').trim()
+			};
 
-		let upstream;
+			const result = await deleteDashboardProfilePicture(payload);
 
-		try {
-			upstream = await fetch(parsedUrl.toString(), { redirect: 'follow' });
-		} catch {
-			return res.status(502).json({ ok: false, message: 'Failed fetching image source.' });
-		}
+			if (!result.ok) {
+				pushAuditEvent({
+					action: 'profile_picture.delete',
+					session,
+					target: payload.timestamp || payload.url || 'profile-picture',
+					status: 'failed',
+					message: result.message || 'Failed deleting profile picture.'
+				});
 
-		if (!upstream.ok) {
-			return res.status(502).json({ ok: false, message: 'Image source is unavailable.' });
-		}
+				return res.status(404).json({
+					ok: false,
+					message: result.message || 'Profile picture not found.'
+				});
+			}
 
-		const mimeType = String(upstream.headers.get('content-type') || 'application/octet-stream');
-		const filename = buildProfilePictureFilename({
-			timestamp,
-			imageUrl: parsedUrl.toString(),
-			mimeType
-		});
-		const encodedFilename = encodeURIComponent(filename);
+			io.emit('dashboard:profile-pictures', {
+				picture: getLatestDashboardProfilePicture(),
+				deleted: payload
+			});
 
-		const bytes = Buffer.from(await upstream.arrayBuffer());
-
-		res.setHeader('Content-Type', mimeType);
-		res.setHeader('Content-Disposition', `attachment; filename="${filename}"; filename*=UTF-8''${encodedFilename}`);
-		res.setHeader('Cache-Control', 'no-store');
-		res.setHeader('X-Content-Type-Options', 'nosniff');
-
-		res.send(bytes);
-	});
-
-	app.delete('/api/dashboard/profile-pictures', requireOwnerAuth, validate({ body: deleteProfilePictureBody }), async (req, res) => {
-		const session = req.dashboardSession || null;
-		const payload = {
-			timestamp: String(req.body?.timestamp || '').trim(),
-			url: String(req.body?.url || '').trim()
-		};
-
-		const result = await deleteDashboardProfilePicture(payload);
-
-		if (!result.ok) {
 			pushAuditEvent({
 				action: 'profile_picture.delete',
 				session,
 				target: payload.timestamp || payload.url || 'profile-picture',
-				status: 'failed',
-				message: result.message || 'Failed deleting profile picture.'
+				message: 'Owner deleted a profile picture from albums.'
 			});
 
-			return res.status(404).json({
-				ok: false,
-				message: result.message || 'Profile picture not found.'
+			const pictures = listDashboardProfilePictures();
+
+			res.json({
+				ok: true,
+				count: pictures.length,
+				pictures
 			});
 		}
-
-		io.emit('dashboard:profile-pictures', {
-			picture: getLatestDashboardProfilePicture(),
-			deleted: payload
-		});
-
-		pushAuditEvent({
-			action: 'profile_picture.delete',
-			session,
-			target: payload.timestamp || payload.url || 'profile-picture',
-			message: 'Owner deleted a profile picture from albums.'
-		});
-
-		const pictures = listDashboardProfilePictures();
-
-		res.json({
-			ok: true,
-			count: pictures.length,
-			pictures
-		});
-	});
+	);
 
 	app.get('/api/dashboard/audit', requireOwnerAuth, (req, res) => {
 		const since = Number(req.query?.since || 0);

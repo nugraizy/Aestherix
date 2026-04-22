@@ -82,9 +82,9 @@ let profilePicturesTouchLastX = null;
 let profilePicturesTouchLastY = null;
 let profilePicturesTouchTrackingActive = false;
 let profilePicturesTouchSwipeTriggered = false;
+let seamlessAlbumsRenderedSignature = '';
 
-const clampProfilePictures = (pictures) =>
-	(Array.isArray(pictures) ? pictures : []).slice(0, PROFILE_PICTURES_LIMIT);
+const clampProfilePictures = (pictures) => (Array.isArray(pictures) ? pictures : []).slice(0, PROFILE_PICTURES_LIMIT);
 
 const persistSharedProfilePicturesCache = (pictures) => {
 	if (typeof window === 'undefined') {
@@ -937,6 +937,8 @@ const readCachedZenPointerPosition = () => {
 };
 
 const navigateToAlbums = () => {
+	hideFloatingTooltip();
+
 	if (typeof window !== 'undefined' && window.location.pathname !== ALBUMS_ROUTE_PATH) {
 		lastDashboardRouteHref = `${window.location.pathname}${window.location.search}${window.location.hash}`;
 	}
@@ -1441,6 +1443,28 @@ const setupFloatingTooltips = () => {
 			hideFloatingTooltip();
 		}
 	});
+
+	document.addEventListener(
+		'click',
+		(event) => {
+			if (!floatingTooltipTarget) {
+				return;
+			}
+
+			if (event.target.closest('[data-tooltip]') === floatingTooltipTarget) {
+				hideFloatingTooltip();
+			}
+		},
+		true
+	);
+
+	document.addEventListener(
+		'touchstart',
+		() => {
+			hideFloatingTooltip();
+		},
+		{ passive: true, capture: true }
+	);
 
 	window.addEventListener(
 		'scroll',
@@ -2551,11 +2575,11 @@ const renderLogs = () => {
 		if (els.dashboardLoggerConsole) {
 			els.dashboardLoggerConsole.textContent = '';
 		}
-		
+
 		if (els.botLoggerConsole) {
 			els.botLoggerConsole.textContent = '';
 		}
-		
+
 		return;
 	}
 
@@ -2565,7 +2589,9 @@ const renderLogs = () => {
 	const formatLogsText = (entries) =>
 		(entries || [])
 			.slice(-300)
-			.map((entry) => `[${new Date(entry.timestamp).toLocaleTimeString()}] ${String(entry.message || '').replace(ansiRegex, '')}`)
+			.map(
+				(entry) => `[${new Date(entry.timestamp).toLocaleTimeString()}] ${String(entry.message || '').replace(ansiRegex, '')}`
+			)
 			.join('\n');
 
 	if (els.dashboardLoggerConsole) {
@@ -3340,11 +3366,75 @@ const getFilteredProfilePictures = () => {
 	});
 };
 
-const getProfilePictureOriginalUrl = (picture) =>
-	String(picture?.original?.url || picture?.url || '').trim();
+const getSafeProfilePictureUrl = (value) => {
+	const normalized = String(value || '').trim();
 
-const getProfilePicturePreviewUrl = (picture) =>
-	String(picture?.thumbnail?.url || picture?.previewUrl || getProfilePictureOriginalUrl(picture)).trim();
+	if (!/^https?:\/\//i.test(normalized)) {
+		return '';
+	}
+
+	return normalized;
+};
+
+const getProfilePictureImageVariants = (images) => {
+	if (!images || typeof images !== 'object') {
+		return [];
+	}
+
+	const variants = [];
+
+	for (const [key, value] of Object.entries(images)) {
+		const url = getSafeProfilePictureUrl(value?.url || value);
+
+		if (!url) {
+			continue;
+		}
+
+		const width = Number(value?.width || String(key).match(/(\d+)x/i)?.[1] || 0);
+		const height = Number(value?.height || String(key).match(/x(\d+)/i)?.[1] || 0);
+
+		variants.push({
+			url,
+			width: Number.isFinite(width) ? width : 0,
+			height: Number.isFinite(height) ? height : 0
+		});
+	}
+
+	return variants;
+};
+
+const getProfilePictureImageUrls = (picture) => {
+	const variants = getProfilePictureImageVariants(picture?.images);
+	const sortedByArea = [...variants].sort((a, b) => b.width * b.height - a.width * a.height);
+
+	const originalUrl =
+		getSafeProfilePictureUrl(picture?.original?.url) ||
+		getSafeProfilePictureUrl(picture?.url) ||
+		getSafeProfilePictureUrl(picture?.original) ||
+		getSafeProfilePictureUrl(picture?.image_url) ||
+		getSafeProfilePictureUrl(picture?.image) ||
+		getSafeProfilePictureUrl(picture?.images?.orig?.url) ||
+		sortedByArea[0]?.url ||
+		'';
+
+	const previewUrl =
+		getSafeProfilePictureUrl(picture?.thumbnail?.url) ||
+		getSafeProfilePictureUrl(picture?.previewUrl) ||
+		getSafeProfilePictureUrl(picture?.thumbnail) ||
+		getSafeProfilePictureUrl(picture?.images?.['474x']?.url) ||
+		getSafeProfilePictureUrl(picture?.images?.['236x']?.url) ||
+		sortedByArea.at(-1)?.url ||
+		originalUrl;
+
+	return {
+		originalUrl,
+		previewUrl: previewUrl || originalUrl
+	};
+};
+
+const getProfilePictureOriginalUrl = (picture) => getProfilePictureImageUrls(picture).originalUrl;
+
+const getProfilePicturePreviewUrl = (picture) => getProfilePictureImageUrls(picture).previewUrl;
 
 const getProfilePictureIdentityKey = (picture) => {
 	const timestamp = String(picture?.timestamp || '').trim();
@@ -3353,15 +3443,26 @@ const getProfilePictureIdentityKey = (picture) => {
 	return `${timestamp}|${originalUrl}`;
 };
 
+const getProfilePicturesSignature = (pictures) =>
+	(Array.isArray(pictures) ? pictures : [])
+		.map((picture) => {
+			const identityKey = getProfilePictureIdentityKey(picture);
+			const previewUrl = getProfilePicturePreviewUrl(picture);
+
+			return `${identityKey}|${previewUrl}`;
+		})
+		.join('\n');
+
 const normalizeRealtimeProfilePicture = (picture) => {
-	const timestamp = String(picture?.timestamp || '').trim();
-	const originalUrl = getProfilePictureOriginalUrl(picture);
+	const { originalUrl, previewUrl } = getProfilePictureImageUrls(picture);
 
 	if (!originalUrl) {
 		return null;
 	}
 
-	const previewUrl = String(picture?.thumbnail?.url || picture?.previewUrl || picture?.thumbnail || originalUrl).trim() || originalUrl;
+	const timestamp = String(
+		picture?.timestamp || picture?.createdAt || picture?.created_at || picture?.id || originalUrl
+	).trim();
 
 	return {
 		...picture,
@@ -3378,6 +3479,11 @@ const normalizeRealtimeProfilePicture = (picture) => {
 		}
 	};
 };
+
+const normalizeProfilePicturesCollection = (pictures) =>
+	clampProfilePictures(
+		(Array.isArray(pictures) ? pictures : []).map((picture) => normalizeRealtimeProfilePicture(picture)).filter(Boolean)
+	);
 
 const isGifMediaUrl = (value) => {
 	const normalized = String(value || '').trim();
@@ -3406,11 +3512,11 @@ const getProfilePictureGridUrl = (picture) => {
 	return previewUrl || originalUrl;
 };
 
-const getRenderableProfilePictures = () => state.profilePictures.filter((picture) => Boolean(getProfilePictureOriginalUrl(picture)));
+const getRenderableProfilePictures = () =>
+	state.profilePictures.filter((picture) => Boolean(getProfilePictureOriginalUrl(picture)));
 
 const profilePictureCardMarkup = (picture, index) => {
 	const originalUrl = getProfilePictureOriginalUrl(picture);
-	const previewUrl = getProfilePicturePreviewUrl(picture);
 
 	if (!originalUrl) {
 		return '';
@@ -3620,10 +3726,7 @@ const deleteCurrentProfilePicture = async () => {
 		}
 
 		if (els.profilePicturesLightbox && !els.profilePicturesLightbox.classList.contains('hidden')) {
-			profilePicturesCarouselIndex = Math.min(
-				Math.max(previousIndex, 0),
-				profilePicturesCarouselItems.length - 1
-			);
+			profilePicturesCarouselIndex = Math.min(Math.max(previousIndex, 0), profilePicturesCarouselItems.length - 1);
 			renderProfilePicturesCarousel();
 		}
 
@@ -3668,7 +3771,11 @@ const resetProfilePicturesTouchState = () => {
 };
 
 const handleProfilePicturesLightboxTouchStart = (event) => {
-	if (!els.profilePicturesLightbox || els.profilePicturesLightbox.classList.contains('hidden') || profilePicturesCarouselItems.length < 2) {
+	if (
+		!els.profilePicturesLightbox ||
+		els.profilePicturesLightbox.classList.contains('hidden') ||
+		profilePicturesCarouselItems.length < 2
+	) {
 		resetProfilePicturesTouchState();
 		return;
 	}
@@ -3728,10 +3835,7 @@ const handleProfilePicturesLightboxTouchEnd = () => {
 			? profilePicturesTouchLastY - profilePicturesTouchStartY
 			: 0;
 
-	if (
-		Math.abs(deltaX) >= LIGHTBOX_TOUCH_SWIPE_THRESHOLD_PX &&
-		Math.abs(deltaY) <= LIGHTBOX_TOUCH_MAX_VERTICAL_DRIFT_PX
-	) {
+	if (Math.abs(deltaX) >= LIGHTBOX_TOUCH_SWIPE_THRESHOLD_PX && Math.abs(deltaY) <= LIGHTBOX_TOUCH_MAX_VERTICAL_DRIFT_PX) {
 		profilePicturesTouchSwipeTriggered = true;
 		moveProfilePicturesCarousel(deltaX < 0 ? 1 : -1);
 	}
@@ -3775,21 +3879,15 @@ const renderProfilePicturesCarousel = () => {
 		els.profilePicturesLightboxMeta.textContent = `${safeIndex + 1} / ${total}`;
 	}
 
-	if (els.profilePicturesLightboxMenu) {
-		const centerCard = els.profilePicturesLightboxTrack.querySelector('.albums-carousel-item.is-center');
+	const centerCard = els.profilePicturesLightboxTrack.querySelector('.albums-carousel-item.is-center');
 
-		if (centerCard instanceof HTMLElement) {
-			centerCard.appendChild(els.profilePicturesLightboxMenu);
-
-			if (els.profilePicturesLightboxMeta) {
-				els.profilePicturesLightboxMenu.prepend(els.profilePicturesLightboxMeta);
-			}
-		}
-	} else if (els.profilePicturesLightboxMeta) {
-		const centerCard = els.profilePicturesLightboxTrack.querySelector('.albums-carousel-item.is-center');
-
-		if (centerCard instanceof HTMLElement) {
+	if (centerCard instanceof HTMLElement) {
+		if (els.profilePicturesLightboxMeta) {
 			centerCard.appendChild(els.profilePicturesLightboxMeta);
+		}
+
+		if (els.profilePicturesLightboxMenu) {
+			centerCard.appendChild(els.profilePicturesLightboxMenu);
 		}
 	}
 
@@ -3854,7 +3952,11 @@ const closeProfilePicturesCarousel = () => {
 };
 
 const moveProfilePicturesCarousel = (step) => {
-	if (!profilePicturesCarouselItems.length || !els.profilePicturesLightbox || els.profilePicturesLightbox.classList.contains('hidden')) {
+	if (
+		!profilePicturesCarouselItems.length ||
+		!els.profilePicturesLightbox ||
+		els.profilePicturesLightbox.classList.contains('hidden')
+	) {
 		return;
 	}
 
@@ -3918,6 +4020,7 @@ const renderSeamlessAlbumsPage = () => {
 	}
 
 	if (state.sectionStates.profilePictures.kind === 'loading') {
+		seamlessAlbumsRenderedSignature = '';
 		els.albumsSeamlessState.textContent = 'Loading images...';
 		els.albumsSeamlessState.classList.remove('hidden');
 		els.albumsSeamlessGrid.classList.add('hidden');
@@ -3926,6 +4029,7 @@ const renderSeamlessAlbumsPage = () => {
 	}
 
 	if (state.sectionStates.profilePictures.kind === 'error') {
+		seamlessAlbumsRenderedSignature = '';
 		els.albumsSeamlessState.textContent = state.sectionStates.profilePictures.message || 'Could not load album right now.';
 		els.albumsSeamlessState.classList.remove('hidden');
 		els.albumsSeamlessGrid.classList.add('hidden');
@@ -3936,6 +4040,7 @@ const renderSeamlessAlbumsPage = () => {
 	const pictures = getRenderableProfilePictures();
 
 	if (!pictures.length) {
+		seamlessAlbumsRenderedSignature = '';
 		els.albumsSeamlessState.textContent = 'No profile pictures have been captured yet.';
 		els.albumsSeamlessState.classList.remove('hidden');
 		els.albumsSeamlessGrid.classList.add('hidden');
@@ -3946,6 +4051,14 @@ const renderSeamlessAlbumsPage = () => {
 	profilePicturesCarouselItems = pictures;
 	els.albumsSeamlessState.classList.add('hidden');
 	els.albumsSeamlessGrid.classList.remove('hidden');
+
+	const nextSignature = getProfilePicturesSignature(pictures);
+
+	if (nextSignature === seamlessAlbumsRenderedSignature) {
+		return;
+	}
+
+	seamlessAlbumsRenderedSignature = nextSignature;
 	els.albumsSeamlessGrid.innerHTML = pictures.map((picture, index) => profilePictureCardMarkup(picture, index)).join('');
 };
 
@@ -4191,10 +4304,12 @@ const setupRealtime = () => {
 
 		let nextPictures = state.profilePictures;
 		let hasChanges = false;
+		const previousSignature = getProfilePicturesSignature(state.profilePictures);
+		const wasIdle = state.sectionStates.profilePictures.kind === 'idle';
 
 		if (payload.deleted) {
 			const deletedTimestamp = String(payload.deleted?.timestamp || '').trim();
-			const deletedUrl = String(payload.deleted?.url || payload.deleted?.original?.url || payload.deleted?.original || '').trim();
+			const deletedUrl = getProfilePictureOriginalUrl(payload.deleted);
 
 			if (deletedTimestamp || deletedUrl) {
 				nextPictures = nextPictures.filter((picture) => {
@@ -4212,7 +4327,7 @@ const setupRealtime = () => {
 
 			if (normalizedLatest) {
 				const latestKey = getProfilePictureIdentityKey(normalizedLatest);
-				
+
 				nextPictures = [
 					normalizedLatest,
 					...nextPictures.filter((picture) => getProfilePictureIdentityKey(picture) !== latestKey)
@@ -4222,7 +4337,7 @@ const setupRealtime = () => {
 		}
 
 		if (Object.prototype.hasOwnProperty.call(payload, 'pictures')) {
-			nextPictures = Array.isArray(payload.pictures) ? payload.pictures : [];
+			nextPictures = normalizeProfilePicturesCollection(payload.pictures);
 			hasChanges = true;
 		}
 
@@ -4230,8 +4345,18 @@ const setupRealtime = () => {
 			return;
 		}
 
-		state.profilePictures = clampProfilePictures(nextPictures);
-		persistSharedProfilePicturesCache(state.profilePictures);
+		const normalizedPictures = normalizeProfilePicturesCollection(nextPictures);
+		const nextSignature = getProfilePicturesSignature(normalizedPictures);
+
+		if (nextSignature === previousSignature && wasIdle) {
+			return;
+		}
+
+		if (nextSignature !== previousSignature) {
+			state.profilePictures = normalizedPictures;
+			persistSharedProfilePicturesCache(state.profilePictures);
+		}
+
 		setSectionState('profilePictures', 'idle');
 		renderProfilePictures();
 		renderSeamlessAlbumsPage();
@@ -4305,7 +4430,7 @@ const fetchSession = async () => {
 		if (els.restartBot) {
 			els.restartBot.disabled = false;
 		}
-		
+
 		els.logsPanel?.classList.remove('hidden');
 		els.auditPanel?.classList.remove('hidden');
 		settingsPanel?.classList.remove('hidden');
@@ -4603,10 +4728,22 @@ const fetchProfilePictures = async () => {
 		ensureAuthorizedResponse(response, 'Failed fetching profile picture album');
 
 		const payload = await response.json();
+		const normalizedPictures = normalizeProfilePicturesCollection(payload.pictures);
+		const previousSignature = getProfilePicturesSignature(state.profilePictures);
+		const nextSignature = getProfilePicturesSignature(normalizedPictures);
+		const wasIdle = state.sectionStates.profilePictures.kind === 'idle';
 
-		state.profilePictures = clampProfilePictures(payload.pictures);
-		persistSharedProfilePicturesCache(state.profilePictures);
+		if (nextSignature !== previousSignature) {
+			state.profilePictures = normalizedPictures;
+			persistSharedProfilePicturesCache(state.profilePictures);
+		}
+
 		setSectionState('profilePictures', 'idle');
+
+		if (nextSignature === previousSignature && wasIdle) {
+			return;
+		}
+
 		renderProfilePictures();
 		renderSeamlessAlbumsPage();
 	} catch (error) {
@@ -5832,11 +5969,11 @@ const init = async () => {
 	bindEvents();
 	prefetchRoute('/albums');
 	setActiveFolder(state.activeFolder);
-	
+
 	if (typeof window !== 'undefined' && window.location.pathname !== ALBUMS_ROUTE_PATH) {
 		lastDashboardRouteHref = `${window.location.pathname}${window.location.search}${window.location.hash}`;
 	}
-	
+
 	if (typeof window !== 'undefined' && window.location.pathname === ALBUMS_ROUTE_PATH) {
 		openSeamlessAlbumsPage({ updateHistory: false });
 	}
@@ -5844,7 +5981,15 @@ const init = async () => {
 	window.addEventListener('resize', renderStatusCharts);
 	await runSafe(fetchSession);
 	await runSafe(async () => {
-		await Promise.all([fetchStatus(), fetchLogs(), fetchAudit(), fetchCommands(), fetchFlags(), fetchUsers(), fetchProfilePictures()]);
+		await Promise.all([
+			fetchStatus(),
+			fetchLogs(),
+			fetchAudit(),
+			fetchCommands(),
+			fetchFlags(),
+			fetchUsers(),
+			fetchProfilePictures()
+		]);
 	});
 
 	setupRealtime();
