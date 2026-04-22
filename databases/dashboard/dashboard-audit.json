@@ -1,5 +1,5 @@
 {
-  "lastId": 184,
+  "lastId": 186,
   "logs": [
     {
       "id": 1,
@@ -2432,6 +2432,30 @@
     {
       "id": 184,
       "timestamp": 1776688582308,
+      "action": "auth.viewer_login",
+      "actorRole": "viewer",
+      "actor": "Viewer",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Viewer session started.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 185,
+      "timestamp": 1776844141737,
+      "action": "auth.owner_login",
+      "actorRole": "owner",
+      "actor": "6289607055246",
+      "target": "dashboard",
+      "status": "ok",
+      "message": "Owner login confirmed by WhatsApp.",
+      "before": null,
+      "after": null
+    },
+    {
+      "id": 186,
+      "timestamp": 1776869134382,
       "action": "auth.viewer_login",
       "actorRole": "viewer",
       "actor": "Viewer",

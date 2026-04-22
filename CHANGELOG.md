@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+# ࿎「6.9.0」2026-04-22
+## Changed
+- Switch `Pinterest` responses and adapt it to the albums APIs entry.
+
+---
+
 # ࿎「6.8.0」2026-04-21
 ## Added
 - Added dashboard JavaScript minify pipeline with `uglify-js` and a dedicated build script.

@@ -1,5 +1,5 @@
 {
-  "ping": 13,
+  "ping": 14,
   "tiktokpost": 1,
   "setpin": 6,
   "menu": 2,
@@ -8,5 +8,6 @@
   "douyin": 1,
   "waifu2x": 8,
   "waifu2xv2": 1,
-  "limit": 2
+  "limit": 2,
+  "igpost": 2
 }

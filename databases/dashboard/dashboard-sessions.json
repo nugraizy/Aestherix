@@ -1,36 +1,20 @@
 {
   "sessions": [
     {
-      "token": "796291f5d0bdc19a66f18318ea2ecbb5f5b4f5978076ec6a0f096185ca415b6b",
+      "token": "1448ed7cbb545190127141e6444938e48d2c77db02095e7af562fabb8b91976a",
       "role": "owner",
       "phoneNumber": "6289607055246",
       "name": "Owner",
-      "lastSeenAt": 1776619897108,
-      "expiresAt": 1776700875857
+      "lastSeenAt": 1776868797411,
+      "expiresAt": 1776930541736
     },
     {
-      "token": "01ea53ef911d7c6be2db3bddeca23919cabeb13f75802a105f7bf9e29ab75ab7",
-      "role": "owner",
-      "phoneNumber": "6289607055246",
-      "name": "Owner",
-      "lastSeenAt": 1776619726776,
-      "expiresAt": 1776706094370
-    },
-    {
-      "token": "cb4bd1e410609c1671feae3c45a6f7b984facff2a0ef11cc553be2dac4f0e93a",
-      "role": "owner",
-      "phoneNumber": "6289607055246",
-      "name": "Owner",
-      "lastSeenAt": 1776620440931,
-      "expiresAt": 1776706769657
-    },
-    {
-      "token": "ea0e734175e98a86b4a5d9ec40d0f516e7770c6665b6f71162c8794b5284c54d",
+      "token": "60dcfa4b4a304ebf73d8081897adfb2a3511d7673dd06ccae8e2acad2c516396",
       "role": "viewer",
       "phoneNumber": null,
       "name": "Viewer",
-      "lastSeenAt": 1776688582308,
-      "expiresAt": 1776774982308
+      "lastSeenAt": 1776869134381,
+      "expiresAt": 1776955534381
     }
   ]
 }

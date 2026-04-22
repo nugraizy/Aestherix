@@ -1,6 +1,6 @@
 {
   "name": "aestherix",
-  "version": "6.8.0",
+  "version": "6.9.0",
   "description": "WhatsApp bot using Baileys library with Javascript language.",
   "exports": "./index.js",
   "main": "./index.js",
@@ -133,6 +133,7 @@
     "terminal-link": "^5.0.0",
     "tesseract.js": "^6.0.1",
     "text-table": "^0.2.0",
+    "tinybench": "^6.0.0",
     "undici": "^7.16.0",
     "util": "^0.12.5",
     "uuid": "^13.0.0",
