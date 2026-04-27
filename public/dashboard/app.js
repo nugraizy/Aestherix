@@ -59,6 +59,7 @@ const ZEN_CURSOR_POINTER_CACHE_KEY = 'aestherix.dashboard.cursor.pointer';
 const ZEN_CURSOR_ENABLED_CACHE_KEY = 'aestherix.dashboard.cursor.enabled';
 const DASHBOARD_PROFILE_PICTURES_CACHE_KEY = 'aestherix.dashboard.profilePictures.cache.v1';
 const PROFILE_PICTURES_LIMIT = 250;
+const PROFILE_PICTURES_COLOR_FILTER_TOLERANCE = 88;
 const ALBUMS_ROUTE_PATH = '/albums';
 const DASHBOARD_ROUTE_PATH = '/dashboard';
 const CYCLE_ANIMATION_MS = 180;
@@ -83,8 +84,208 @@ let profilePicturesTouchLastY = null;
 let profilePicturesTouchTrackingActive = false;
 let profilePicturesTouchSwipeTriggered = false;
 let seamlessAlbumsRenderedSignature = '';
+let seamlessAlbumsColorFilterHex = '';
+let seamlessAlbumsColorisPickerInput = null;
+let seamlessAlbumsColorisConfigured = false;
+let seamlessAlbumsColorisPickerDraftHex = '';
 
 const clampProfilePictures = (pictures) => (Array.isArray(pictures) ? pictures : []).slice(0, PROFILE_PICTURES_LIMIT);
+
+const normalizeHexColor = (value) => {
+	const raw = String(value || '')
+		.trim()
+		.replace(/^#/, '');
+
+	if (/^[0-9a-fA-F]{3}$/.test(raw)) {
+		const expanded = raw
+			.split('')
+			.map((character) => `${character}${character}`)
+			.join('');
+
+		return `#${expanded.toLowerCase()}`;
+	}
+
+	if (/^[0-9a-fA-F]{6}$/.test(raw)) {
+		return `#${raw.toLowerCase()}`;
+	}
+
+	if (/^[0-9a-fA-F]{8}$/.test(raw)) {
+		return `#${raw.slice(0, 6).toLowerCase()}`;
+	}
+
+	return '';
+};
+
+const hasActiveSeamlessAlbumsColorFilter = () => Boolean(seamlessAlbumsColorFilterHex);
+
+const getSeamlessAlbumsNoPicturesMessage = () => {
+	if (!hasActiveSeamlessAlbumsColorFilter()) {
+		return 'No profile pictures have been captured yet.';
+	}
+
+	return `No images matched ${seamlessAlbumsColorFilterHex.toUpperCase()}.`;
+};
+
+const updateSeamlessAlbumsColorFilterUi = () => {
+	const colorHex = hasActiveSeamlessAlbumsColorFilter() ? seamlessAlbumsColorFilterHex : '#7ecfff';
+
+	if (els.albumsSeamlessColorSwatch) {
+		els.albumsSeamlessColorSwatch.style.background = colorHex;
+	}
+
+	if (els.albumsSeamlessColorLabel) {
+		els.albumsSeamlessColorLabel.textContent = hasActiveSeamlessAlbumsColorFilter()
+			? seamlessAlbumsColorFilterHex.toUpperCase()
+			: 'All colors';
+	}
+
+	if (els.albumsSeamlessColorClear) {
+		els.albumsSeamlessColorClear.classList.toggle('hidden', !hasActiveSeamlessAlbumsColorFilter());
+	}
+};
+
+const updateSeamlessAlbumsColorPickerPreviewUi = (nextHex) => {
+	if (els.albumsSeamlessColorSwatch) {
+		els.albumsSeamlessColorSwatch.style.background = nextHex;
+	}
+
+	if (els.albumsSeamlessColorLabel) {
+		els.albumsSeamlessColorLabel.textContent = nextHex.toUpperCase();
+	}
+};
+
+const getColorisApi = () => {
+	if (typeof window === 'undefined' || typeof window.Coloris !== 'function') {
+		return null;
+	}
+
+	return window.Coloris;
+};
+
+const stageSeamlessAlbumsColorPickerSelection = (value) => {
+	const normalized = normalizeHexColor(value);
+
+	if (!normalized) {
+		return;
+	}
+
+	seamlessAlbumsColorisPickerDraftHex = normalized;
+	updateSeamlessAlbumsColorPickerPreviewUi(normalized);
+};
+
+const commitSeamlessAlbumsColorPickerSelection = ({ forceReload = false } = {}) => {
+	const normalized = normalizeHexColor(seamlessAlbumsColorisPickerDraftHex || seamlessAlbumsColorFilterHex || '#7ecfff');
+
+	if (!normalized) {
+		updateSeamlessAlbumsColorFilterUi();
+		return;
+	}
+
+	if (!forceReload && normalized === seamlessAlbumsColorFilterHex) {
+		updateSeamlessAlbumsColorFilterUi();
+		return;
+	}
+
+	seamlessAlbumsColorFilterHex = normalized;
+	updateSeamlessAlbumsColorFilterUi();
+	void runSafe(fetchProfilePictures);
+};
+
+const ensureSeamlessAlbumsColorisPickerInput = () => {
+	if (seamlessAlbumsColorisPickerInput?.isConnected) {
+		return seamlessAlbumsColorisPickerInput;
+	}
+
+	const input = document.createElement('input');
+
+	input.id = 'albums-seamless-coloris-input';
+	input.type = 'text';
+	input.className = 'albums-coloris-input';
+	input.setAttribute('data-coloris', '');
+	input.setAttribute('aria-hidden', 'true');
+	input.setAttribute('tabindex', '-1');
+	input.autocomplete = 'off';
+	input.spellcheck = false;
+	input.value = (seamlessAlbumsColorFilterHex || '#7ecfff').toUpperCase();
+	input.addEventListener('open', () => {
+		seamlessAlbumsColorisPickerDraftHex =
+			normalizeHexColor(input.value || seamlessAlbumsColorFilterHex || '#7ecfff') || '#7ecfff';
+		els.albumsSeamlessColorTrigger?.setAttribute('aria-expanded', 'true');
+	});
+	input.addEventListener('close', () => {
+		els.albumsSeamlessColorTrigger?.setAttribute('aria-expanded', 'false');
+		commitSeamlessAlbumsColorPickerSelection();
+	});
+	document.body.appendChild(input);
+	seamlessAlbumsColorisPickerInput = input;
+
+	return input;
+};
+
+const ensureSeamlessAlbumsColorisConfigured = () => {
+	const Coloris = getColorisApi();
+
+	if (!Coloris) {
+		return false;
+	}
+
+	if (!seamlessAlbumsColorisConfigured) {
+		Coloris({
+			el: '#albums-seamless-coloris-input',
+			onChange: (nextColor) => {
+				const normalized = normalizeHexColor(nextColor);
+
+				if (!normalized) {
+					return;
+				}
+
+				stageSeamlessAlbumsColorPickerSelection(normalized);
+			}
+		});
+
+		seamlessAlbumsColorisConfigured = true;
+	}
+
+	return true;
+};
+
+const toggleSeamlessAlbumsColorPicker = () => {
+	const input = ensureSeamlessAlbumsColorisPickerInput();
+
+	if (!ensureSeamlessAlbumsColorisConfigured()) {
+		showToast('Color picker is unavailable right now.', 'error');
+		return;
+	}
+
+	const currentColor = normalizeHexColor(seamlessAlbumsColorFilterHex || '#7ecfff') || '#7ecfff';
+
+	seamlessAlbumsColorisPickerDraftHex = currentColor;
+	input.value = currentColor.toUpperCase();
+	updateSeamlessAlbumsColorPickerPreviewUi(currentColor);
+
+	if (els.albumsSeamlessColorTrigger instanceof HTMLElement) {
+		const triggerRect = els.albumsSeamlessColorTrigger.getBoundingClientRect();
+
+		input.style.left = `${Math.round(triggerRect.left)}px`;
+		input.style.top = `${Math.round(triggerRect.bottom)}px`;
+	}
+
+	input.click();
+	input.focus();
+};
+
+const buildProfilePicturesRequestUrl = () => {
+	const requestUrl = new URL('/api/dashboard/profile-pictures', window.location.origin);
+
+	requestUrl.searchParams.set('limit', String(PROFILE_PICTURES_LIMIT));
+
+	if (hasActiveSeamlessAlbumsColorFilter()) {
+		requestUrl.searchParams.set('color', seamlessAlbumsColorFilterHex);
+		requestUrl.searchParams.set('tolerance', String(PROFILE_PICTURES_COLOR_FILTER_TOLERANCE));
+	}
+
+	return requestUrl.toString();
+};
 
 const persistSharedProfilePicturesCache = (pictures) => {
 	if (typeof window === 'undefined') {
@@ -2152,8 +2353,15 @@ const setupZenCursor = () => {
 		const mouseY = event.clientY;
 		const mouseX = event.clientX;
 		const tooltipGap = 24;
+		const hoverTarget = event.target;
 
 		setCursorVisibility(true);
+
+		if (hoverTarget instanceof Element) {
+			cursor.classList.toggle('is-picker-compact', Boolean(hoverTarget.closest('.clr-picker')));
+		} else {
+			cursor.classList.remove('is-picker-compact');
+		}
 
 		cursor.style.translate = `${mouseX}px ${mouseY}px`;
 
@@ -2198,12 +2406,19 @@ const setupZenCursor = () => {
 	const handleMouseEnterTarget = (event) => {
 		const target = event.currentTarget;
 		const isLogoutTarget = target === els.logoutButton || target === els.logoutConfirm;
+		const isColorPickerTarget = target.closest('.clr-picker') instanceof Element;
 
 		cursor.classList.add('blur-mini');
 		cursor.classList.add('cursor-grow');
+		cursor.classList.toggle('is-picker-compact', isColorPickerTarget);
 
 		if (isLogoutTarget) {
 			setZenCursorLogoutHoverState(true);
+		}
+
+		if (isColorPickerTarget) {
+			updateTitle('');
+			return;
 		}
 
 		updateTitle(target.getAttribute('data-title') || target.getAttribute('data-tooltip'));
@@ -2215,6 +2430,7 @@ const setupZenCursor = () => {
 
 		cursor.classList.remove('blur-mini');
 		cursor.classList.remove('cursor-grow');
+		cursor.classList.remove('is-picker-compact');
 
 		if (isLogoutTarget) {
 			setZenCursorLogoutHoverState(false);
@@ -2275,6 +2491,7 @@ const setupZenCursor = () => {
 	};
 
 	window.addEventListener('mousemove', moveCursor);
+	window.addEventListener('pointermove', moveCursor);
 	window.addEventListener('mousedown', handleMouseDown);
 	window.addEventListener('mouseup', handleMouseUp);
 	window.addEventListener('blur', handleWindowBlur);
@@ -2330,6 +2547,7 @@ const setupZenCursor = () => {
 
 	window.addEventListener('beforeunload', () => {
 		window.removeEventListener('mousemove', moveCursor);
+		window.removeEventListener('pointermove', moveCursor);
 		window.removeEventListener('mousedown', handleMouseDown);
 		window.removeEventListener('mouseup', handleMouseUp);
 		window.removeEventListener('blur', handleWindowBlur);
@@ -4041,7 +4259,7 @@ const renderSeamlessAlbumsPage = () => {
 
 	if (!pictures.length) {
 		seamlessAlbumsRenderedSignature = '';
-		els.albumsSeamlessState.textContent = 'No profile pictures have been captured yet.';
+		els.albumsSeamlessState.textContent = getSeamlessAlbumsNoPicturesMessage();
 		els.albumsSeamlessState.classList.remove('hidden');
 		els.albumsSeamlessGrid.classList.add('hidden');
 		els.albumsSeamlessGrid.innerHTML = '';
@@ -4299,6 +4517,11 @@ const setupRealtime = () => {
 
 	dashboardSocket.on('dashboard:profile-pictures', (payload) => {
 		if (!payload || typeof payload !== 'object') {
+			return;
+		}
+
+		if (hasActiveSeamlessAlbumsColorFilter()) {
+			void runSafe(fetchProfilePictures);
 			return;
 		}
 
@@ -4721,7 +4944,7 @@ const fetchProfilePictures = async () => {
 	}
 
 	try {
-		const response = await fetch(`/api/dashboard/profile-pictures?limit=${PROFILE_PICTURES_LIMIT}&_ts=${Date.now()}`, {
+		const response = await fetch(buildProfilePicturesRequestUrl(), {
 			cache: 'no-store'
 		});
 
@@ -5034,6 +5257,23 @@ const bindEvents = () => {
 	els.albumsSeamlessBack?.addEventListener('click', (event) => {
 		persistZenPointerFromEvent(event);
 		handleAlbumsBackNavigation();
+	});
+
+	els.albumsSeamlessColorTrigger?.addEventListener('click', (event) => {
+		event.preventDefault();
+		event.stopPropagation();
+		toggleSeamlessAlbumsColorPicker();
+	});
+
+	els.albumsSeamlessColorClear?.addEventListener('click', () => {
+		if (!hasActiveSeamlessAlbumsColorFilter()) {
+			return;
+		}
+
+		seamlessAlbumsColorFilterHex = '';
+		seamlessAlbumsColorisPickerDraftHex = '';
+		updateSeamlessAlbumsColorFilterUi();
+		void runSafe(fetchProfilePictures);
 	});
 
 	els.openAlbums?.addEventListener('pointerenter', () => {
@@ -5967,6 +6207,7 @@ const init = async () => {
 	}
 
 	bindEvents();
+	updateSeamlessAlbumsColorFilterUi();
 	prefetchRoute('/albums');
 	setActiveFolder(state.activeFolder);
 

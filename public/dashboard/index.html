@@ -78,6 +78,7 @@
 			})();
 		</script>
 		<link rel="stylesheet" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.css" />
 		<link rel="stylesheet" href="/dashboard/styles.css" />
 	</head>
 	<body class="dashboard-page">
@@ -829,7 +830,24 @@
 					</button>
 					<h1>Albums</h1>
 				</div>
+				<div class="albums-filter-controls" aria-label="Filter albums by color">
+					<button
+						id="albums-seamless-color-trigger"
+						class="albums-color-trigger"
+						type="button"
+						aria-haspopup="dialog"
+						aria-expanded="false">
+						<span id="albums-seamless-color-swatch" class="albums-color-swatch" aria-hidden="true"></span>
+						<span id="albums-seamless-color-label">All colors</span>
+					</button>
+					<button id="albums-seamless-color-clear" class="albums-color-clear hidden" type="button">Clear</button>
+				</div>
 			</header>
+			<section
+				id="albums-seamless-color-picker-host"
+				class="albums-color-picker-host hidden"
+				aria-label="Albums color picker"
+				aria-hidden="true"></section>
 			<p id="albums-seamless-state" class="albums-state" aria-live="polite">Loading images...</p>
 			<section id="albums-seamless-grid" class="albums-grid hidden" aria-label="Albums image grid"></section>
 		</main>
@@ -944,6 +962,7 @@
 		</div>
 
 		<script src="/socket.io/socket.io.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.js"></script>
 		<script src="/dashboard/build/app.js" type="module"></script>
 	</body>
 </html>

@@ -309,7 +309,7 @@ class Pinterest {
 						}
 
 						return {
-							original: originalUrl,
+							url: originalUrl,
 							thumbnail: previewUrl || originalUrl
 						};
 					})
@@ -374,7 +374,7 @@ class Pinterest {
 						}
 
 						return {
-							original: originalUrl,
+							url: originalUrl,
 							thumbnail: previewUrl || originalUrl
 						};
 					})

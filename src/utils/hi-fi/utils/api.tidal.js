@@ -2,29 +2,9 @@ import { fetch as undiciFetch } from 'undici';
 import { Cache } from '../../../helper/modules/cache.js';
 
 const SERVERS = {
-	monochrome: {
-		subdomains: ['api', 'frankfurt-1', 'ohio-1', 'singapore-1', 'eu-central', 'us-west', 'arran'],
-		tld: 'tf'
-	},
 	qqdl: {
-		subdomains: ['hund', 'katze', 'maus', 'vogel', 'wolf'],
+		subdomains: ['hund', 'katze'],
 		tld: 'site'
-	},
-	geeked: {
-		subdomains: ['hifi'],
-		tld: 'wtf'
-	},
-	spotisaver: {
-		subdomains: ['hifi-one', 'hifi-two'],
-		tld: 'net'
-	},
-	kinoplus: {
-		subdomains: ['tidal'],
-		tld: 'online'
-	},
-	samidy: {
-		subdomains: ['monochrome-api'],
-		tld: 'com'
 	}
 };
 

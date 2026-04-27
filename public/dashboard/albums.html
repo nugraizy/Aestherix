@@ -73,6 +73,7 @@
 			})();
 		</script>
 		<link rel="stylesheet" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.css" />
 		<link rel="stylesheet" href="/dashboard/styles.css" />
 	</head>
 	<body class="albums-page">
@@ -84,7 +85,24 @@
 					</button>
 					<h1>Albums</h1>
 				</div>
+				<div class="albums-filter-controls" aria-label="Filter albums by color">
+					<button
+						id="albums-color-trigger"
+						class="albums-color-trigger"
+						type="button"
+						aria-haspopup="dialog"
+						aria-expanded="false">
+						<span id="albums-color-swatch" class="albums-color-swatch" aria-hidden="true"></span>
+						<span id="albums-color-label">All colors</span>
+					</button>
+					<button id="albums-color-clear" class="albums-color-clear hidden" type="button">Clear</button>
+				</div>
 			</header>
+			<section
+				id="albums-color-picker-host"
+				class="albums-color-picker-host hidden"
+				aria-label="Albums color picker"
+				aria-hidden="true"></section>
 			<p id="albums-state" class="albums-state" aria-live="polite">Loading images...</p>
 			<section id="albums-skeleton" class="albums-grid albums-grid-skeleton" aria-hidden="true"></section>
 			<section id="albums-grid" class="albums-grid hidden" aria-label="Albums image grid"></section>
@@ -102,23 +120,35 @@
 							type="button"
 							aria-label="Image actions"
 							aria-haspopup="true"
-							aria-expanded="false"
-						>
+							aria-expanded="false">
 							<span class="albums-lightbox-menu-dots" aria-hidden="true">
 								<span></span>
 								<span></span>
 								<span></span>
 							</span>
 						</button>
-						<div id="albums-lightbox-menu-panel" class="albums-lightbox-menu-panel hidden" role="menu" aria-label="Image actions menu">
-							<button id="albums-lightbox-menu-download" class="albums-lightbox-menu-item" type="button" role="menuitem">Download</button>
-							<button id="albums-lightbox-menu-delete" class="albums-lightbox-menu-item danger hidden" type="button" role="menuitem">Delete</button>
+						<div
+							id="albums-lightbox-menu-panel"
+							class="albums-lightbox-menu-panel hidden"
+							role="menu"
+							aria-label="Image actions menu">
+							<button id="albums-lightbox-menu-download" class="albums-lightbox-menu-item" type="button" role="menuitem">
+								Download
+							</button>
+							<button
+								id="albums-lightbox-menu-delete"
+								class="albums-lightbox-menu-item danger hidden"
+								type="button"
+								role="menuitem">
+								Delete
+							</button>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 		<script src="/socket.io/socket.io.js"></script>
+		<script src="https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.js"></script>
 		<script src="/dashboard/build/albums.js" type="module"></script>
 	</body>
 </html>

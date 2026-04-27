@@ -2,6 +2,7 @@ import { spawn } from 'child_process';
 import crypto from 'crypto';
 import express from 'express';
 import validate from 'express-zod-safe';
+import { getAverageColor } from 'fast-average-color-node';
 import fs from 'fs-extra';
 import { createServer } from 'http';
 import os from 'os';
@@ -35,6 +36,13 @@ const DASHBOARD_BLOCKLIST_PATH = './databases/dashboard/dashboard-blocklist.json
 const PROFILE_PICTURE_HISTORY_PATH = './databases/pictures/pinterest-profile-pictures.json';
 const PROFILE_PICTURE_HISTORY_LIMIT = 900;
 const PROFILE_PICTURES_DISK_SYNC_THROTTLE_MS = 1000;
+const PROFILE_PICTURES_COLOR_TOLERANCE_DEFAULT = 88;
+const PROFILE_PICTURES_COLOR_TOLERANCE_MAX = 441;
+const PROFILE_PICTURES_COLOR_FILTER_CONCURRENCY = Math.min(
+	12,
+	Math.max(4, Number(os.availableParallelism?.() || os.cpus()?.length || 6))
+);
+const PROFILE_PICTURE_COLOR_CACHE_LIMIT = 1500;
 const ROOT_CHANGELOG_PATH = path.resolve(process.cwd(), 'CHANGELOG.md');
 const MAX_AUDIT_LOGS = 1000;
 const UNDO_WINDOW_MS = 12000;
@@ -69,6 +77,8 @@ const profilePicturesDiskState = {
 	size: -1,
 	lastSyncAt: 0
 };
+const profilePictureColorCache = new Map();
+const profilePictureColorPending = new Map();
 const projectVersion = (() => {
 	try {
 		return fs.readJSONSync('./package.json')?.version || 'unknown';
@@ -769,7 +779,10 @@ const getSpotifyNowPlaying = async () => {
 
 const getDashboardStatus = async () => {
 	const mem = process.memoryUsage();
-	const disabledCount = configuration.cmds.disabledCommands?.size || 0;
+	const commands = listDashboardCommands(configuration);
+	const totalCommands = commands.length;
+	const enabledCommands = commands.filter((command) => command.enabled).length;
+	const disabledCount = Math.max(0, totalCommands - enabledCommands);
 	const flagEntries = Object.entries(configuration.OPTIONS || {}).filter(([, value]) => typeof value === 'boolean');
 	const enabledFlags = flagEntries.filter(([, value]) => Boolean(value)).length;
 	const spotify = spotifyNowPlayingCache.data;
@@ -800,9 +813,9 @@ const getDashboardStatus = async () => {
 			external: mem.external
 		},
 		commands: {
-			total: configuration.cmds.commands.size,
+			total: totalCommands,
 			disabled: disabledCount,
-			enabled: Math.max(0, configuration.cmds.commands.size - disabledCount)
+			enabled: enabledCommands
 		},
 		flags: {
 			total: flagEntries.length,
@@ -1171,6 +1184,196 @@ const normalizeDashboardPicture = (value) => {
 	};
 };
 
+const normalizeHexColor = (value) => {
+	const normalized = String(value || '')
+		.trim()
+		.replace(/^#/, '');
+
+	if (/^[0-9a-fA-F]{3}$/.test(normalized)) {
+		const expanded = normalized
+			.split('')
+			.map((character) => `${character}${character}`)
+			.join('');
+
+		return `#${expanded.toLowerCase()}`;
+	}
+
+	if (/^[0-9a-fA-F]{6}$/.test(normalized)) {
+		return `#${normalized.toLowerCase()}`;
+	}
+
+	if (/^[0-9a-fA-F]{8}$/.test(normalized)) {
+		return `#${normalized.slice(0, 6).toLowerCase()}`;
+	}
+
+	return '';
+};
+
+const hexToRgb = (value) => {
+	const normalized = normalizeHexColor(value);
+
+	if (!normalized) {
+		return null;
+	}
+
+	const hex = normalized.slice(1);
+
+	return {
+		r: Number.parseInt(hex.slice(0, 2), 16),
+		g: Number.parseInt(hex.slice(2, 4), 16),
+		b: Number.parseInt(hex.slice(4, 6), 16)
+	};
+};
+
+const rgbToHex = ({ r = 0, g = 0, b = 0 } = {}) => {
+	const toHex = (channel) => {
+		const safe = Math.max(0, Math.min(255, Number(channel) || 0));
+
+		return safe.toString(16).padStart(2, '0');
+	};
+
+	return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+};
+
+const rgbDistance = (left, right) => {
+	if (!left || !right) {
+		return Number.POSITIVE_INFINITY;
+	}
+
+	const deltaR = Number(left.r || 0) - Number(right.r || 0);
+	const deltaG = Number(left.g || 0) - Number(right.g || 0);
+	const deltaB = Number(left.b || 0) - Number(right.b || 0);
+
+	return Math.sqrt(deltaR * deltaR + deltaG * deltaG + deltaB * deltaB);
+};
+
+const setProfilePictureColorCache = (cacheKey, colorPayload) => {
+	if (!cacheKey || !colorPayload) {
+		return;
+	}
+
+	if (profilePictureColorCache.has(cacheKey)) {
+		profilePictureColorCache.delete(cacheKey);
+	}
+
+	profilePictureColorCache.set(cacheKey, colorPayload);
+
+	if (profilePictureColorCache.size <= PROFILE_PICTURE_COLOR_CACHE_LIMIT) {
+		return;
+	}
+
+	const oldestKey = profilePictureColorCache.keys().next().value;
+
+	if (oldestKey) {
+		profilePictureColorCache.delete(oldestKey);
+	}
+};
+
+const getProfilePictureDominantColor = async (url) => {
+	const normalizedUrl = getSafeHttpUrl(url);
+
+	if (!normalizedUrl) {
+		return null;
+	}
+
+	const cacheKey = normalizedUrl.toLowerCase();
+	const cached = profilePictureColorCache.get(cacheKey);
+
+	if (cached) {
+		return cached;
+	}
+
+	const pending = profilePictureColorPending.get(cacheKey);
+
+	if (pending) {
+		return pending;
+	}
+
+	const task = (async () => {
+		try {
+			const color = await getAverageColor(normalizedUrl, {
+				mode: 'speed'
+			});
+			const rgb = Array.isArray(color?.value)
+				? {
+						r: Math.round(Number(color.value[0] || 0)),
+						g: Math.round(Number(color.value[1] || 0)),
+						b: Math.round(Number(color.value[2] || 0))
+					}
+				: null;
+
+			if (!rgb) {
+				return null;
+			}
+
+			const payload = {
+				hex: rgbToHex(rgb),
+				rgb
+			};
+
+			setProfilePictureColorCache(cacheKey, payload);
+
+			return payload;
+		} catch {
+			return null;
+		} finally {
+			profilePictureColorPending.delete(cacheKey);
+		}
+	})();
+
+	profilePictureColorPending.set(cacheKey, task);
+
+	return task;
+};
+
+const mapWithConcurrency = async (items, mapper, { concurrency = PROFILE_PICTURES_COLOR_FILTER_CONCURRENCY } = {}) => {
+	const safeConcurrency = Math.max(1, Number(concurrency || PROFILE_PICTURES_COLOR_FILTER_CONCURRENCY));
+	const input = Array.isArray(items) ? items : [];
+	const results = new Array(input.length);
+	let index = 0;
+
+	const worker = async () => {
+		while (index < input.length) {
+			const currentIndex = index;
+
+			index += 1;
+
+			results[currentIndex] = await mapper(input[currentIndex], currentIndex);
+		}
+	};
+
+	const workers = Array.from({ length: Math.min(safeConcurrency, input.length) }, () => worker());
+
+	await Promise.all(workers);
+
+	return results;
+};
+
+const filterDashboardProfilePicturesByColor = async (pictures, { colorHex, tolerance } = {}) => {
+	const target = hexToRgb(colorHex);
+
+	if (!target) {
+		return Array.isArray(pictures) ? pictures : [];
+	}
+
+	const safeTolerance = Math.max(
+		0,
+		Math.min(PROFILE_PICTURES_COLOR_TOLERANCE_MAX, Number(tolerance || PROFILE_PICTURES_COLOR_TOLERANCE_DEFAULT))
+	);
+	const source = Array.isArray(pictures) ? pictures : [];
+	const matched = await mapWithConcurrency(source, async (picture) => {
+		const dominant = await getProfilePictureDominantColor(picture?.url);
+
+		if (!dominant?.rgb) {
+			return false;
+		}
+
+		return rgbDistance(target, dominant.rgb) <= safeTolerance;
+	});
+
+	return source.filter((_picture, pictureIndex) => matched[pictureIndex]);
+};
+
 const listDashboardProfilePictures = ({ limit = 180 } = {}) => {
 	refreshProfilePicturesCacheFromDisk();
 
@@ -1187,11 +1390,9 @@ const listDashboardProfilePictures = ({ limit = 180 } = {}) => {
 			}
 
 			return {
-				id: `${timestamp}-${normalized.original.url}`,
 				timestamp: String(timestamp || ''),
 				url: normalized.original.url,
-				original: normalized.original,
-				thumbnail: normalized.thumbnail
+				thumbnail: normalized.thumbnail.url
 			};
 		})
 		.filter(Boolean)
@@ -1230,7 +1431,6 @@ const persistDashboardProfilePictures = async () => {
 			return {
 				timestamp: String(timestamp || '').trim(),
 				url: normalized.original.url,
-				original: normalized.original.url,
 				thumbnail: normalized.thumbnail.url
 			};
 		})
@@ -1269,32 +1469,36 @@ const deleteDashboardProfilePicture = async ({ timestamp = '', url = '' } = {}) 
 		return { ok: false, message: 'Invalid profile picture payload.' };
 	}
 
-	let deleted = false;
+	let deletedCount = 0;
+	const safeUrlKey = safeUrl.toLowerCase();
 	const currentValue = configuration.pinterestImages.get(safeTimestamp);
-	const currentUrl = normalizeDashboardPicture(currentValue)?.original?.url || '';
+	const currentUrl = String(normalizeDashboardPicture(currentValue)?.original?.url || '')
+		.trim()
+		.toLowerCase();
 
-	if (currentUrl && currentUrl === safeUrl) {
+	if (currentUrl && currentUrl === safeUrlKey) {
 		configuration.pinterestImages.delete(safeTimestamp);
-		deleted = true;
-	} else {
-		for (const [key, value] of configuration.pinterestImages.entries()) {
-			const parsed = normalizeDashboardPicture(value);
+		deletedCount += 1;
+	}
 
-			if (String(key).trim() === safeTimestamp && parsed?.original?.url === safeUrl) {
-				configuration.pinterestImages.delete(key);
-				deleted = true;
-				break;
-			}
+	for (const [key, value] of configuration.pinterestImages.entries()) {
+		const parsedUrl = String(normalizeDashboardPicture(value)?.original?.url || '')
+			.trim()
+			.toLowerCase();
+
+		if (parsedUrl && parsedUrl === safeUrlKey) {
+			configuration.pinterestImages.delete(key);
+			deletedCount += 1;
 		}
 	}
 
-	if (!deleted) {
+	if (!deletedCount) {
 		return { ok: false, message: 'Profile picture not found.' };
 	}
 
 	await persistDashboardProfilePictures();
 
-	return { ok: true };
+	return { ok: true, deletedCount };
 };
 
 const setDashboardUserLimit = async (userId, limit) => {
@@ -2369,7 +2573,7 @@ export const server = () => {
 	});
 
 	app.get('/', (req, res) => {
-		res.redirect('/dashboard/login');
+		res.sendFile(path.join(__dirname, 'public', 'dashboard', 'home.html'));
 	});
 
 	app.get('/dashboard/login', (req, res) => {
@@ -2754,15 +2958,33 @@ export const server = () => {
 		});
 	});
 
-	app.get('/api/dashboard/profile-pictures', requireDashboardAuth, (req, res) => {
+	app.get('/api/dashboard/profile-pictures', requireDashboardAuth, async (req, res) => {
 		applyNoStoreJsonHeaders(res);
 
 		const limit = Number(req.query?.limit || 100);
-		const pictures = listDashboardProfilePictures({ limit });
+		const color = normalizeHexColor(req.query?.color);
+		const tolerance = Math.max(
+			0,
+			Math.min(PROFILE_PICTURES_COLOR_TOLERANCE_MAX, Number(req.query?.tolerance || PROFILE_PICTURES_COLOR_TOLERANCE_DEFAULT))
+		);
+		let pictures = listDashboardProfilePictures({ limit });
+
+		if (color) {
+			pictures = await filterDashboardProfilePicturesByColor(pictures, {
+				colorHex: color,
+				tolerance
+			});
+		}
 
 		res.json({
 			count: pictures.length,
-			pictures
+			pictures,
+			filter: color
+				? {
+						color,
+						tolerance
+					}
+				: null
 		});
 	});
 
@@ -3324,6 +3546,14 @@ export const server = () => {
 			});
 		}
 	);
+
+	app.use('/api', (req, res) => {
+		res.status(404).json({ ok: false, message: 'API route not found.' });
+	});
+
+	app.use((req, res) => {
+		res.status(404).sendFile(path.join(__dirname, 'public', 'dashboard', '404.html'));
+	});
 
 	const appToStore = httpServer.listen(PORT, '0.0.0.0', () => {
 		loggers.info(color('Server Mesh Gradient', 'white'), color('started on port', '#E4C1F9'), color(PORT, 'white'));

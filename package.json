@@ -76,6 +76,7 @@
     "emojibase-regex": "^16.0.0",
     "express": "^5.1.0",
     "express-zod-safe": "^3.1.0",
+    "fast-average-color-node": "^3.2.0",
     "ffmpeg": "^0.0.4",
     "file-type": "^21.0.0",
     "flickr-sdk": "^7.1.0",

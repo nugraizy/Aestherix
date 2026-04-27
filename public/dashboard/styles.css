@@ -764,6 +764,7 @@ h1 {
 		var(--brand-wave-1) 100%
 	);
 	background-size: 200% 100%;
+	background-position: center;
 	color: transparent;
 	-webkit-background-clip: text;
 	background-clip: text;
@@ -1311,6 +1312,14 @@ body.zen-cursor-enabled * {
 	top: -9px;
 	left: -9px;
 	opacity: 0.94;
+}
+
+.zen-cursor.is-picker-compact {
+	width: 16px;
+	height: 16px;
+	top: -8px;
+	left: -8px;
+	opacity: 0.92;
 }
 
 .zen-cursor.cursor-grow {
@@ -3179,6 +3188,7 @@ select {
 	padding: 24px;
 	display: grid;
 	gap: 18px;
+	position: relative;
 	transition: filter 0.22s ease;
 	animation: albums-shell-enter 0.46s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -3234,7 +3244,7 @@ body.albums-page.albums-scroll-locked {
 		linear-gradient(120deg, rgba(142, 240, 255, 0.08), rgba(135, 240, 193, 0.06) 45%, rgba(255, 209, 102, 0.08)),
 		rgba(255, 255, 255, 0.02);
 	display: flex;
-	justify-content: flex-start;
+	justify-content: space-between;
 	align-items: center;
 	gap: 10px;
 	backdrop-filter: blur(8px);
@@ -3246,6 +3256,319 @@ body.albums-page.albums-scroll-locked {
 	align-items: center;
 	gap: 10px;
 	max-width: 780px;
+}
+
+.albums-filter-controls {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+}
+
+.albums-color-trigger,
+.albums-color-clear {
+	border-radius: 999px;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	background: rgba(255, 255, 255, 0.06);
+	color: var(--ink);
+	font-size: 0.78rem;
+	font-weight: 600;
+	line-height: 1;
+	height: 34px;
+	padding: 0 12px;
+	cursor: pointer;
+	transition:
+		border-color 0.2s ease,
+		background 0.2s ease,
+		transform 0.2s ease;
+}
+
+.albums-color-trigger {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 132px;
+	justify-content: flex-start;
+}
+
+.albums-color-swatch {
+	width: 14px;
+	height: 14px;
+	border-radius: 999px;
+	border: 1px solid rgba(255, 255, 255, 0.34);
+	box-shadow: 0 0 0 1px rgba(16, 34, 44, 0.2) inset;
+	background: #7ecfff;
+	flex: 0 0 14px;
+}
+
+.albums-color-trigger:hover,
+.albums-color-clear:hover {
+	border-color: rgba(142, 207, 255, 0.56);
+	background: rgba(142, 207, 255, 0.14);
+	transform: translateY(-1px);
+}
+
+.albums-color-picker-host {
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: 8;
+	padding: 10px;
+	border-radius: 14px;
+	border: 1px solid rgba(255, 255, 255, 0.14);
+	background: rgba(11, 29, 36, 0.72);
+	backdrop-filter: blur(9px);
+	width: fit-content;
+	max-width: 100%;
+	justify-self: end;
+}
+
+.albums-coloris-input {
+	position: fixed;
+	left: -9999px;
+	top: 0;
+	width: 1px;
+	height: 1px;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.clr-picker input,
+.clr-picker button {
+	min-width: 0;
+}
+
+.clr-picker input {
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+.albums-custom-picker {
+	min-width: min(86vw, 280px);
+	box-shadow:
+		0 18px 34px rgba(0, 0, 0, 0.24),
+		0 0 0 1px color-mix(in srgb, var(--line) 86%, transparent);
+	border-radius: 12px;
+	padding: 12px;
+	background:
+		linear-gradient(
+			160deg,
+			color-mix(in srgb, var(--sky) 18%, transparent),
+			color-mix(in srgb, var(--mint) 12%, transparent) 48%,
+			color-mix(in srgb, var(--amber) 14%, transparent)
+		),
+		color-mix(in srgb, var(--bg-mid) 92%, rgba(0, 0, 0, 0.25));
+	border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
+	color: var(--ink);
+	display: grid;
+	gap: 10px;
+}
+
+.albums-custom-picker-preview-row {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	align-items: center;
+	gap: 8px;
+}
+
+.albums-custom-picker-preview {
+	width: 24px;
+	height: 24px;
+	border-radius: 999px;
+	border: 1px solid color-mix(in srgb, var(--line) 92%, transparent);
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--bg-dark) 40%, transparent) inset;
+	background: #7ecfff;
+}
+
+.albums-custom-picker-hex {
+	width: 100%;
+	border-radius: 8px;
+	border: 1px solid color-mix(in srgb, var(--line) 96%, transparent);
+	background: color-mix(in srgb, var(--bg-dark) 60%, transparent);
+	color: var(--ink);
+	padding: 0 10px;
+	height: 32px;
+	font-family: 'JetBrains Mono', monospace;
+	font-size: 0.78rem;
+	text-transform: uppercase;
+}
+
+.albums-custom-picker-spectrum {
+	display: grid;
+	gap: 8px;
+}
+
+.albums-custom-picker-canvas {
+	position: relative;
+	width: 100%;
+	height: 144px;
+	border-radius: 10px;
+	border: 1px solid color-mix(in srgb, var(--line) 92%, transparent);
+	cursor: crosshair;
+	overflow: hidden;
+	background: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, hsl(199 100% 50%));
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--bg-dark) 35%, transparent) inset;
+}
+
+.albums-custom-picker-thumb {
+	position: absolute;
+	left: 50%;
+	top: 0;
+	width: 14px;
+	height: 14px;
+	border-radius: 999px;
+	border: 2px solid #fff;
+	box-shadow:
+		0 0 0 1px color-mix(in srgb, var(--bg-dark) 62%, transparent),
+		0 4px 10px rgba(0, 0, 0, 0.28);
+	transform: translate(-50%, -50%);
+	pointer-events: none;
+}
+
+.albums-custom-picker-hue {
+	width: 100%;
+	appearance: none;
+	height: 12px;
+	border-radius: 999px;
+	border: 1px solid color-mix(in srgb, var(--line) 92%, transparent);
+	background: linear-gradient(
+		90deg,
+		hsl(0 100% 50%),
+		hsl(60 100% 50%),
+		hsl(120 100% 50%),
+		hsl(180 100% 50%),
+		hsl(240 100% 50%),
+		hsl(300 100% 50%),
+		hsl(360 100% 50%)
+	);
+	cursor: pointer;
+}
+
+.albums-custom-picker-hue::-webkit-slider-thumb {
+	appearance: none;
+	width: 14px;
+	height: 14px;
+	border-radius: 999px;
+	border: 2px solid #fff;
+	background: color-mix(in srgb, var(--bg-dark) 72%, white 28%);
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--bg-dark) 55%, transparent);
+}
+
+.albums-custom-picker-hue::-moz-range-thumb {
+	width: 14px;
+	height: 14px;
+	border-radius: 999px;
+	border: 2px solid #fff;
+	background: color-mix(in srgb, var(--bg-dark) 72%, white 28%);
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--bg-dark) 55%, transparent);
+}
+
+.albums-custom-picker-swatches {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 7px;
+}
+
+.albums-custom-picker-swatches button {
+	width: 22px;
+	height: 22px;
+	border-radius: 999px;
+	border: 1px solid color-mix(in srgb, var(--line) 92%, transparent);
+	background: var(--sw, #7ecfff);
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--bg-dark) 40%, transparent) inset;
+	cursor: pointer;
+	transition:
+		transform 0.2s ease,
+		border-color 0.2s ease,
+		box-shadow 0.2s ease;
+}
+
+.albums-custom-picker-swatches button:hover {
+	transform: translateY(-1px) scale(1.04);
+	border-color: color-mix(in srgb, var(--sky) 58%, transparent);
+	box-shadow:
+		0 0 0 1px color-mix(in srgb, var(--bg-dark) 40%, transparent) inset,
+		0 0 0 2px color-mix(in srgb, var(--sky) 22%, transparent);
+}
+
+.albums-custom-picker-ranges {
+	display: grid;
+	gap: 8px;
+}
+
+.albums-custom-picker-ranges label {
+	display: grid;
+	grid-template-columns: 16px 1fr;
+	align-items: center;
+	gap: 8px;
+	font-size: 0.72rem;
+	color: var(--ink-muted);
+	font-weight: 700;
+	letter-spacing: 0.04em;
+}
+
+.albums-custom-picker-ranges input[type='range'] {
+	width: 100%;
+	accent-color: color-mix(in srgb, var(--sky) 68%, var(--mint) 32%);
+	cursor: pointer;
+}
+
+.albums-custom-picker-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+.albums-custom-picker-actions button {
+	height: 30px;
+	padding: 0 12px;
+	border-radius: 999px;
+	border: 1px solid color-mix(in srgb, var(--line) 96%, transparent);
+	background: color-mix(in srgb, var(--sky) 12%, transparent);
+	color: var(--ink);
+	font-size: 0.75rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition:
+		background 0.2s ease,
+		border-color 0.2s ease,
+		transform 0.2s ease;
+}
+
+.albums-custom-picker-actions button:hover {
+	background: color-mix(in srgb, var(--mint) 16%, transparent);
+	border-color: color-mix(in srgb, var(--sky) 58%, transparent);
+	transform: translateY(-1px);
+}
+
+:root[data-theme='light'] .albums-color-trigger,
+:root[data-theme='light'] .albums-color-clear {
+	border-color: rgba(22, 63, 74, 0.28);
+	background: rgba(255, 255, 255, 0.62);
+}
+
+:root[data-theme='light'] .albums-color-picker-host {
+	border-color: rgba(22, 63, 74, 0.22);
+	background: rgba(244, 250, 255, 0.88);
+}
+
+:root[data-theme='light'] .albums-custom-picker {
+	box-shadow:
+		0 16px 28px rgba(24, 58, 72, 0.18),
+		0 0 0 1px color-mix(in srgb, var(--line) 86%, transparent);
+	background:
+		linear-gradient(
+			160deg,
+			color-mix(in srgb, var(--sky) 14%, white),
+			color-mix(in srgb, var(--mint) 10%, white) 52%,
+			color-mix(in srgb, var(--amber) 14%, white)
+		),
+		color-mix(in srgb, var(--bg-mid) 94%, white);
+}
+
+:root[data-theme='light'] .albums-custom-picker-hex {
+	background: color-mix(in srgb, white 78%, var(--bg-mid) 22%);
 }
 
 .albums-head h1 {

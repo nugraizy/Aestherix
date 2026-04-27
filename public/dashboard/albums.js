@@ -4,6 +4,11 @@ const els = {
 	state: document.getElementById('albums-state'),
 	skeleton: document.getElementById('albums-skeleton'),
 	grid: document.getElementById('albums-grid'),
+	colorTrigger: document.getElementById('albums-color-trigger'),
+	colorSwatch: document.getElementById('albums-color-swatch'),
+	colorLabel: document.getElementById('albums-color-label'),
+	colorClear: document.getElementById('albums-color-clear'),
+	colorPickerHost: document.getElementById('albums-color-picker-host'),
 	lightbox: document.getElementById('albums-lightbox'),
 	lightboxContent: document.querySelector('.albums-lightbox-content'),
 	lightboxStage: document.querySelector('.albums-lightbox-stage'),
@@ -34,6 +39,7 @@ const DASHBOARD_PROFILE_PICTURES_CACHE_KEY = 'aestherix.dashboard.profilePicture
 const ALBUMS_FETCH_TIMEOUT_MS = 12000;
 const ALBUMS_IMAGES_LIMIT = 250;
 const ALBUMS_DEFERRED_BOOT_DELAY_MS = 120;
+const ALBUMS_COLOR_FILTER_TOLERANCE = 88;
 
 let lightboxCloseTimer = null;
 let lightboxPictures = [];
@@ -56,6 +62,10 @@ let touchLastX = null;
 let touchLastY = null;
 let touchTrackingActive = false;
 let touchSwipeTriggered = false;
+let activeColorFilterHex = '';
+let colorisPickerInput = null;
+let colorisPickerConfigured = false;
+let colorisPickerDraftHex = '';
 const imageLoadQueue = [];
 const activeImageLoads = new Set();
 const MAX_CONCURRENT_IMAGE_LOADS = 5;
@@ -220,6 +230,184 @@ const getPictureFilename = (picture) => {
 	} catch {
 		return `album-${fallbackBase}.jpg`;
 	}
+};
+
+const normalizeHexColor = (value) => {
+	const raw = String(value || '')
+		.trim()
+		.replace(/^#/, '');
+
+	if (/^[0-9a-fA-F]{3}$/.test(raw)) {
+		const expanded = raw
+			.split('')
+			.map((character) => `${character}${character}`)
+			.join('');
+
+		return `#${expanded.toLowerCase()}`;
+	}
+
+	if (/^[0-9a-fA-F]{6}$/.test(raw)) {
+		return `#${raw.toLowerCase()}`;
+	}
+
+	if (/^[0-9a-fA-F]{8}$/.test(raw)) {
+		return `#${raw.slice(0, 6).toLowerCase()}`;
+	}
+
+	return '';
+};
+
+const hasActiveColorFilter = () => Boolean(activeColorFilterHex);
+
+const persistAlbumsPicturesCacheIfAllowed = (pictures, signature, updatedAt = Date.now()) => {
+	if (hasActiveColorFilter()) {
+		return;
+	}
+
+	persistAlbumsPicturesCache(pictures, signature, updatedAt);
+};
+
+const getNoPicturesMessage = () => {
+	if (!hasActiveColorFilter()) {
+		return 'No profile pictures available yet.';
+	}
+
+	return `No images matched ${activeColorFilterHex.toUpperCase()}.`;
+};
+
+const updateColorFilterUi = () => {
+	const colorHex = hasActiveColorFilter() ? activeColorFilterHex : '#7ecfff';
+
+	if (els.colorSwatch) {
+		els.colorSwatch.style.background = colorHex;
+	}
+
+	if (els.colorLabel) {
+		els.colorLabel.textContent = hasActiveColorFilter() ? activeColorFilterHex.toUpperCase() : 'All colors';
+	}
+
+	if (els.colorClear) {
+		els.colorClear.classList.toggle('hidden', !hasActiveColorFilter());
+	}
+};
+
+const updateColorPickerPreviewUi = (nextHex) => {
+	if (els.colorSwatch) {
+		els.colorSwatch.style.background = nextHex;
+	}
+
+	if (els.colorLabel) {
+		els.colorLabel.textContent = nextHex.toUpperCase();
+	}
+};
+
+const getColorisApi = () => {
+	if (typeof window === 'undefined' || typeof window.Coloris !== 'function') {
+		return null;
+	}
+
+	return window.Coloris;
+};
+
+const stageColorPickerSelection = (value) => {
+	const normalized = normalizeHexColor(value);
+
+	if (!normalized) {
+		return;
+	}
+
+	colorisPickerDraftHex = normalized;
+	updateColorPickerPreviewUi(normalized);
+};
+
+const commitColorPickerSelection = ({ forceReload = false } = {}) => {
+	const normalized = normalizeHexColor(colorisPickerDraftHex || activeColorFilterHex || '#7ecfff');
+
+	if (!normalized) {
+		updateColorFilterUi();
+		return;
+	}
+
+	if (!forceReload && normalized === activeColorFilterHex) {
+		updateColorFilterUi();
+		return;
+	}
+
+	activeColorFilterHex = normalized;
+	updateColorFilterUi();
+	void loadAlbums();
+};
+
+const ensureColorisPickerInput = () => {
+	if (colorisPickerInput?.isConnected) {
+		return colorisPickerInput;
+	}
+
+	const input = document.createElement('input');
+
+	input.id = 'albums-coloris-input';
+	input.type = 'text';
+	input.className = 'albums-coloris-input';
+	input.setAttribute('data-coloris', '');
+	input.setAttribute('aria-hidden', 'true');
+	input.setAttribute('tabindex', '-1');
+	input.autocomplete = 'off';
+	input.spellcheck = false;
+	input.value = (activeColorFilterHex || '#7ecfff').toUpperCase();
+	input.addEventListener('open', () => {
+		colorisPickerDraftHex = normalizeHexColor(input.value || activeColorFilterHex || '#7ecfff') || '#7ecfff';
+		els.colorTrigger?.setAttribute('aria-expanded', 'true');
+	});
+	input.addEventListener('close', () => {
+		els.colorTrigger?.setAttribute('aria-expanded', 'false');
+		commitColorPickerSelection();
+	});
+	document.body.appendChild(input);
+	colorisPickerInput = input;
+
+	return input;
+};
+
+const ensureColorisPickerConfigured = () => {
+	const Coloris = getColorisApi();
+
+	if (!Coloris) {
+		return false;
+	}
+
+	if (!colorisPickerConfigured) {
+		Coloris({
+			el: '#albums-coloris-input',
+			onChange: (nextColor) => {
+				const normalized = normalizeHexColor(nextColor);
+
+				if (!normalized) {
+					return;
+				}
+
+				stageColorPickerSelection(normalized);
+			}
+		});
+
+		colorisPickerConfigured = true;
+	}
+
+	return true;
+};
+
+const buildAlbumsPicturesRequestUrl = () => {
+	const requestUrl = new URL('/api/dashboard/profile-pictures', window.location.origin);
+
+	requestUrl.searchParams.set('limit', String(ALBUMS_IMAGES_LIMIT));
+
+	if (!hasActiveColorFilter()) {
+		return requestUrl.toString();
+	}
+
+	requestUrl.searchParams.set('color', activeColorFilterHex);
+	requestUrl.searchParams.set('tolerance', String(ALBUMS_COLOR_FILTER_TOLERANCE));
+
+	return requestUrl.toString();
 };
 
 const closeActionMenu = () => {
@@ -896,13 +1084,7 @@ const normalizePictureRecord = (picture) => {
 	return {
 		timestamp,
 		url: originalUrl,
-		previewUrl,
-		original: {
-			url: originalUrl
-		},
-		thumbnail: {
-			url: previewUrl
-		}
+		thumbnail: previewUrl
 	};
 };
 
@@ -1007,7 +1189,7 @@ const fetchAlbumsPictures = async () => {
 	}, ALBUMS_FETCH_TIMEOUT_MS);
 
 	try {
-		const response = await fetch(`/api/dashboard/profile-pictures?limit=${ALBUMS_IMAGES_LIMIT}`, {
+		const response = await fetch(buildAlbumsPicturesRequestUrl(), {
 			signal: controller?.signal,
 			cache: 'no-store'
 		});
@@ -1077,7 +1259,7 @@ const renderAlbumsGrid = ({ enteringIndexes = [] } = {}) => {
 
 	if (!els.grid.innerHTML.trim()) {
 		els.grid.classList.add('hidden');
-		els.state.textContent = 'No profile pictures available yet.';
+		els.state.textContent = getNoPicturesMessage();
 		return;
 	}
 
@@ -1086,6 +1268,27 @@ const renderAlbumsGrid = ({ enteringIndexes = [] } = {}) => {
 };
 
 const getPicturesSignature = (pictures) => pictures.map((picture) => getPictureKey(picture)).join('\n');
+
+const dedupePicturesByUrl = (pictures) => {
+	const seenUrls = new Set();
+
+	return (Array.isArray(pictures) ? pictures : []).filter((picture) => {
+		const normalizedUrl = String(picture?.url || '')
+			.trim()
+			.toLowerCase();
+
+		if (!normalizedUrl) {
+			return false;
+		}
+
+		if (seenUrls.has(normalizedUrl)) {
+			return false;
+		}
+
+		seenUrls.add(normalizedUrl);
+		return true;
+	});
+};
 
 const cleanupScrollReveal = () => {
 	if (revealScrollListener) {
@@ -1100,15 +1303,14 @@ const cleanupScrollReveal = () => {
 };
 
 const applyPictures = (pictures, { fromRealtime = false } = {}) => {
-	const validPictures = (Array.isArray(pictures) ? pictures : [])
-		.map((picture) => normalizePictureRecord(picture))
-		.filter(Boolean)
-		.slice(0, ALBUMS_IMAGES_LIMIT);
+	const validPictures = dedupePicturesByUrl(
+		(Array.isArray(pictures) ? pictures : []).map((picture) => normalizePictureRecord(picture)).filter(Boolean)
+	).slice(0, ALBUMS_IMAGES_LIMIT);
 
 	const nextSignature = getPicturesSignature(validPictures);
 
 	if (nextSignature === picturesSignature) {
-		persistAlbumsPicturesCache(lightboxPictures, picturesSignature);
+		persistAlbumsPicturesCacheIfAllowed(lightboxPictures, picturesSignature);
 		return;
 	}
 
@@ -1127,7 +1329,7 @@ const applyPictures = (pictures, { fromRealtime = false } = {}) => {
 
 	picturesSignature = nextSignature;
 	lightboxPictures = validPictures;
-	persistAlbumsPicturesCache(lightboxPictures, picturesSignature);
+	persistAlbumsPicturesCacheIfAllowed(lightboxPictures, picturesSignature);
 	renderAlbumsGrid({ enteringIndexes });
 
 	if (!lightboxPictures.length) {
@@ -1257,11 +1459,18 @@ const setupRealtimeProfileUpdates = () => {
 			return;
 		}
 
-		const pictureKey = getPictureKey(normalized);
-		const nextPictures = [normalized, ...lightboxPictures.filter((item) => getPictureKey(item) !== pictureKey)].slice(
-			0,
-			ALBUMS_IMAGES_LIMIT
-		);
+		const normalizedUrl = String(normalized.url || '')
+			.trim()
+			.toLowerCase();
+		const nextPictures = [
+			normalized,
+			...lightboxPictures.filter(
+				(item) =>
+					String(item?.url || '')
+						.trim()
+						.toLowerCase() !== normalizedUrl
+			)
+		].slice(0, ALBUMS_IMAGES_LIMIT);
 
 		applyPictures(nextPictures, { fromRealtime: true });
 	};
@@ -1269,15 +1478,20 @@ const setupRealtimeProfileUpdates = () => {
 	const removeRealtimePicture = (picture) => {
 		const normalized = normalizePictureRecord(picture);
 		const timestamp = String(picture?.timestamp || picture?.createdAt || picture?.created_at || '').trim();
-		const url = normalized?.url || '';
+		const url = String(normalized?.url || '').trim();
+		const normalizedUrl = url.toLowerCase();
 
 		if (!timestamp && !url) {
 			return;
 		}
 
 		const nextPictures = lightboxPictures.filter((item) => {
-			const sameTimestamp = timestamp ? item.timestamp === timestamp : true;
-			const sameUrl = url ? item.url === url : true;
+			const sameTimestamp = timestamp ? item.timestamp === timestamp : false;
+			const sameUrl = normalizedUrl
+				? String(item?.url || '')
+						.trim()
+						.toLowerCase() === normalizedUrl
+				: false;
 
 			return !(sameTimestamp && sameUrl);
 		});
@@ -1290,11 +1504,22 @@ const setupRealtimeProfileUpdates = () => {
 	};
 
 	realtimeSocket.on('dashboard:profile-pictures', (payload) => {
+		const deletedUrl = String(payload?.deleted?.url || '')
+			.trim()
+			.toLowerCase();
+		const nextPictureUrl = String(payload?.picture?.url || '')
+			.trim()
+			.toLowerCase();
+
 		if (payload?.deleted) {
 			removeRealtimePicture(payload.deleted);
 		}
 
-		if (payload?.picture) {
+		if (hasActiveColorFilter()) {
+			return;
+		}
+
+		if (payload?.picture && (!deletedUrl || deletedUrl !== nextPictureUrl)) {
 			mergeRealtimeLatestPicture(payload.picture);
 			return;
 		}
@@ -1357,12 +1582,13 @@ const deleteCurrentPicture = async () => {
 		lightboxPictures = lightboxPictures.filter(
 			(picture) => !(picture.timestamp === current.timestamp && picture.url === current.url)
 		);
+		picturesSignature = getPicturesSignature(lightboxPictures);
 
 		if (!lightboxPictures.length) {
-			persistAlbumsPicturesCache(lightboxPictures, getPicturesSignature(lightboxPictures));
+			persistAlbumsPicturesCacheIfAllowed(lightboxPictures, picturesSignature);
 			closeLightbox();
 			renderAlbumsGrid();
-			els.state.textContent = 'No profile pictures available yet.';
+			els.state.textContent = getNoPicturesMessage();
 			return;
 		}
 
@@ -1370,7 +1596,7 @@ const deleteCurrentPicture = async () => {
 			lightboxIndex = lightboxPictures.length - 1;
 		}
 
-		persistAlbumsPicturesCache(lightboxPictures, getPicturesSignature(lightboxPictures));
+		persistAlbumsPicturesCacheIfAllowed(lightboxPictures, picturesSignature);
 
 		renderAlbumsGrid();
 		updateLightboxFrame();
@@ -1510,8 +1736,15 @@ const setupZenCursor = () => {
 		const mouseY = event.clientY;
 		const mouseX = event.clientX;
 		const tooltipGap = 24;
+		const hoverTarget = event.target;
 
 		setCursorVisibility(true);
+
+		if (hoverTarget instanceof Element) {
+			cursor.classList.toggle('is-picker-compact', Boolean(hoverTarget.closest('.clr-picker')));
+		} else {
+			cursor.classList.remove('is-picker-compact');
+		}
 
 		cursor.style.translate = `${mouseX}px ${mouseY}px`;
 
@@ -1540,7 +1773,8 @@ const setupZenCursor = () => {
 		cursorText.style.scale = '0';
 	};
 
-	const interactiveCursorSelector = 'a, button, input, .album-image, .albums-carousel-image, [data-title], [data-tooltip]';
+	const interactiveCursorSelector =
+		'a, button, input, .album-image, .albums-carousel-image, .clr-picker, [data-title], [data-tooltip]';
 	let activeInteractiveTarget = null;
 
 	const setInteractiveTarget = (target) => {
@@ -1553,12 +1787,23 @@ const setupZenCursor = () => {
 		if (!(target instanceof Element)) {
 			cursor.classList.remove('blur-mini');
 			cursor.classList.remove('cursor-grow');
+			cursor.classList.remove('is-picker-compact');
 			updateTitle('');
 			return;
 		}
 
+		const isColorPickerTarget = target.closest('.clr-picker') instanceof Element;
+
+		cursor.classList.toggle('is-picker-compact', isColorPickerTarget);
+
 		cursor.classList.add('blur-mini');
 		cursor.classList.add('cursor-grow');
+
+		if (isColorPickerTarget) {
+			updateTitle('');
+			return;
+		}
+
 		updateTitle(target.getAttribute('data-title') || target.getAttribute('data-tooltip'));
 	};
 
@@ -1572,6 +1817,12 @@ const setupZenCursor = () => {
 
 		const isLightboxOpen = Boolean(els.lightbox && !els.lightbox.classList.contains('hidden'));
 		const inCarouselStage = rawTarget.closest('.albums-lightbox-stage');
+		const inColorPicker = rawTarget.closest('.clr-picker');
+
+		if (inColorPicker instanceof Element) {
+			setInteractiveTarget(inColorPicker);
+			return;
+		}
 
 		if (isLightboxOpen && inCarouselStage instanceof Element) {
 			setInteractiveTarget(inCarouselStage);
@@ -1626,6 +1877,7 @@ const setupZenCursor = () => {
 	};
 
 	window.addEventListener('mousemove', moveCursor);
+	window.addEventListener('pointermove', moveCursor);
 	window.addEventListener('mousedown', handleMouseDown);
 	window.addEventListener('mouseup', handleMouseUp);
 	window.addEventListener('blur', handleWindowBlur);
@@ -1646,6 +1898,7 @@ const setupZenCursor = () => {
 
 	window.addEventListener('beforeunload', () => {
 		window.removeEventListener('mousemove', moveCursor);
+		window.removeEventListener('pointermove', moveCursor);
 		window.removeEventListener('mousedown', handleMouseDown);
 		window.removeEventListener('mouseup', handleMouseUp);
 		window.removeEventListener('blur', handleWindowBlur);
@@ -1677,10 +1930,16 @@ const setLoadingState = (isLoading) => {
 	}
 
 	if (isLoading) {
+		const hasVisibleGridContent = Boolean(String(els.grid?.innerHTML || '').trim());
+
 		els.skeleton.innerHTML = buildSkeletonCards();
 		els.skeleton.classList.remove('hidden');
-		els.grid.classList.add('hidden');
-		els.state.textContent = 'Loading your albums...';
+
+		if (!hasVisibleGridContent) {
+			els.grid.classList.add('hidden');
+		}
+
+		els.state.textContent = hasVisibleGridContent ? 'Refreshing your albums...' : 'Loading your albums...';
 		return;
 	}
 
@@ -1729,13 +1988,13 @@ const isGifMediaUrl = (value) => {
 
 const getGridImageSource = (picture) => {
 	const originalUrl = String(picture?.url || '').trim();
-	const previewUrl = String(picture?.previewUrl || '').trim();
+	const thumbnailUrl = String(picture?.thumbnail || picture?.previewUrl || '').trim();
 
 	if (isGifMediaUrl(originalUrl)) {
 		return originalUrl;
 	}
 
-	return previewUrl || originalUrl;
+	return thumbnailUrl || originalUrl;
 };
 
 const imageCard = (picture, index) => `
@@ -1747,14 +2006,18 @@ const imageCard = (picture, index) => `
 const loadAlbums = async () => {
 	setLoadingState(true);
 
-	const cachedEntry = readCachedAlbumsPictures();
+	const cachedEntry = hasActiveColorFilter()
+		? {
+				pictures: [],
+				signature: '',
+				updatedAt: 0
+			}
+		: readCachedAlbumsPictures();
 	const cachedPictures = cachedEntry.pictures;
 	const hasCachedPictures = cachedPictures.length > 0;
 
 	if (hasCachedPictures) {
 		applyPictures(cachedPictures);
-		setLoadingState(false);
-		els.state.textContent = '';
 		els.grid.classList.remove('hidden');
 		setupGridLazyLoading();
 	}
@@ -1802,6 +2065,12 @@ const loadAlbums = async () => {
 				throw error;
 			}
 
+			setLoadingState(false);
+
+			if (hasCachedPictures) {
+				els.state.textContent = '';
+			}
+
 			return;
 		}
 
@@ -1809,11 +2078,13 @@ const loadAlbums = async () => {
 
 		if (!pictures.length) {
 			if (hasCachedPictures) {
+				setLoadingState(false);
+				els.state.textContent = '';
 				return;
 			}
 
 			setLoadingState(false);
-			els.state.textContent = 'No profile pictures available yet.';
+			els.state.textContent = getNoPicturesMessage();
 			els.grid.classList.add('hidden');
 			return;
 		}
@@ -1865,6 +2136,31 @@ const scheduleDeferredAlbumsLoad = () => {
 	window.setTimeout(startAlbumsLoad, ALBUMS_DEFERRED_BOOT_DELAY_MS);
 };
 
+const toggleColorPicker = () => {
+	const input = ensureColorisPickerInput();
+
+	if (!ensureColorisPickerConfigured()) {
+		showToast('Color picker is unavailable right now.', 'error');
+		return;
+	}
+
+	const currentColor = normalizeHexColor(activeColorFilterHex || '#7ecfff') || '#7ecfff';
+
+	colorisPickerDraftHex = currentColor;
+	input.value = currentColor.toUpperCase();
+	updateColorPickerPreviewUi(currentColor);
+
+	if (els.colorTrigger instanceof HTMLElement) {
+		const triggerRect = els.colorTrigger.getBoundingClientRect();
+
+		input.style.left = `${Math.round(triggerRect.left)}px`;
+		input.style.top = `${Math.round(triggerRect.bottom)}px`;
+	}
+
+	input.click();
+	input.focus();
+};
+
 els.back?.addEventListener('pointerdown', (event) => {
 	if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
 		return;
@@ -1876,6 +2172,22 @@ els.back?.addEventListener('pointerdown', (event) => {
 els.back?.addEventListener('click', (event) => {
 	persistZenPointerFromEvent(event);
 	navigateToDashboard();
+});
+
+els.colorTrigger?.addEventListener('click', (event) => {
+	event.stopPropagation();
+	toggleColorPicker();
+});
+
+els.colorClear?.addEventListener('click', () => {
+	if (!hasActiveColorFilter()) {
+		return;
+	}
+
+	activeColorFilterHex = '';
+	colorisPickerDraftHex = '';
+	updateColorFilterUi();
+	void loadAlbums();
 });
 
 els.grid?.addEventListener('click', (event) => {
@@ -2042,4 +2354,5 @@ window.addEventListener('storage', (event) => {
 });
 
 scheduleZenCursorInit();
+updateColorFilterUi();
 scheduleDeferredAlbumsLoad();

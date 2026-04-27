@@ -375,7 +375,6 @@ const persistProfilePictureHistory = async (config) => {
 			return {
 				timestamp: String(timestamp || ''),
 				url: normalized.original.url,
-				original: normalized.original.url,
 				thumbnail: normalized.thumbnail.url
 			};
 		})
