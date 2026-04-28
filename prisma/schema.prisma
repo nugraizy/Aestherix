@@ -1,0 +1,165 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Prisma Schema — Aestherix Bot
+//
+// Supported providers (set DATABASE_PROVIDER in .env):
+//   "postgresql"  →  PostgreSQL / Supabase / Neon / Railway
+//   "mysql"       →  MySQL / MariaDB / PlanetScale
+//   "sqlite"      →  SQLite (local file, good for development)
+//   "mongodb"     →  MongoDB Atlas / self-hosted
+//
+// NOTE for MySQL users: the `session` field on the Session model stores
+// Baileys serialised state which can exceed varchar(191). Run
+// `prisma migrate dev` and then manually ALTER TABLE to TEXT if you see
+// truncation errors.
+//
+// NOTE for MongoDB users: `prisma migrate` is NOT supported; use
+// `prisma db push` instead.  Alternatively, copy prisma/schema.mongodb.prisma
+// to prisma/schema.prisma and run `prisma generate && prisma db push`.
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = env("DATABASE_PROVIDER")
+  url      = env("DATABASE_URL")
+}
+
+
+/// Stores Baileys signal-key state and credentials (one row per key/creds).
+model Session {
+  id        String   @id @default(cuid())
+  sessionId String   @unique
+  session   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+/// Per-user command limit and subscription role.
+model UserLimit {
+  id        String   @id @default(cuid())
+  jid       String   @unique
+  limit     Int      @default(30)
+  /// FREE | PREMIUM | OWNER
+  role      String   @default("FREE")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Globally banned WhatsApp JIDs.
+model BannedUser {
+  id        String   @id @default(cuid())
+  jid       String   @unique
+  createdAt DateTime @default(now())
+}
+
+/// WhatsApp contact name cache.
+model Contact {
+  id        String   @id @default(cuid())
+  jid       String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Feature flags and settings for each WhatsApp group.
+model GroupSettings {
+  id               String   @id @default(cuid())
+  groupId          String   @unique
+  groupName        String?
+  groupDescription String?
+  welcome1         String   @default("disable")
+  welcome1msg      String   @default("Welcome to {groupName}")
+  welcome2         String   @default("disable")
+  welcome2msg      String   @default("Welcome to {groupName}")
+  left1            String   @default("disable")
+  left1msg         String   @default("Bye bye {groupName}")
+  left2            String   @default("disable")
+  left2msg         String   @default("Bye bye {groupName}")
+  antiDelete       String   @default("disable")
+  antiGroupURL     String   @default("disable")
+  antiURL          String   @default("disable")
+  antiSpam         String   @default("disable")
+  antiVirus        String   @default("disable")
+  autoReader       String   @default("disable")
+  antiNSFW         String   @default("disable")
+  games            String   @default("disable")
+  notification     String   @default("disable")
+  /// JSON-encoded array of banned member JIDs within this group.
+  bannedMembers    String   @default("[]")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+/// Web-dashboard login sessions.
+model DashboardSession {
+  id          String   @id @default(cuid())
+  token       String   @unique
+  /// owner | viewer
+  role        String
+  phoneNumber String?
+  name        String?
+  lastSeenAt  BigInt?
+  expiresAt   BigInt?
+  createdAt   DateTime @default(now())
+}
+
+/// Immutable audit trail of dashboard actions.
+model DashboardAuditLog {
+  id        String   @id @default(cuid())
+  /// Sequential display ID (application-managed).
+  logId     Int
+  timestamp BigInt
+  action    String
+  actorRole String
+  actor     String
+  target    String?
+  status    String
+  message   String?
+  /// JSON-serialised before/after snapshots.
+  before    String?
+  after     String?
+  createdAt DateTime @default(now())
+}
+
+/// Blocked JIDs / IPs for the dashboard.
+model DashboardBlocklist {
+  id        String   @id @default(cuid())
+  value     String   @unique
+  createdAt DateTime @default(now())
+}
+
+/// Short-lived OTPs for dashboard login.
+model DashboardOtp {
+  id          String   @id @default(cuid())
+  phoneNumber String   @unique
+  otp         String
+  expiresAt   BigInt?
+  createdAt   DateTime @default(now())
+}
+
+/// Cumulative per-command invocation counter.
+model CommandUsage {
+  id      String @id @default(cuid())
+  command String @unique
+  count   Int    @default(0)
+}
+
+/// Tracks users who received messages while they were offline.
+model OfflineUser {
+  id          String   @id @default(cuid())
+  participant String   @unique
+  date        BigInt
+}
+
+// Used for dashboard-settings.json and dashboard-commands-cache.json.
+// `key` is a logical name; `value` is a JSON blob.
+
+model DashboardKV {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}

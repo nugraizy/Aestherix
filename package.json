@@ -21,7 +21,15 @@
     "youtube:auth": "node ./src/utils/modules/youtube-auth.js",
     "nhentai:cookie": "node ./src/utils/doujin/cookies.js --get",
     "instagram:login": "node ./src/utils/instagram/instagram-login.js",
-    "instagram:login:interactive": "node ./src/utils/instagram/instagram-login-interactive.js"
+    "instagram:login:interactive": "node ./src/utils/instagram/instagram-login-interactive.js",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio",
+    "db:reset": "prisma migrate reset",
+    "db:push:mongo": "prisma db push --schema=prisma/schema.mongodb.prisma",
+    "db:generate:mongo": "prisma generate --schema=prisma/schema.mongodb.prisma"
   },
   "keywords": [
     "whatsapp",
@@ -151,6 +159,7 @@
     "@adiwajshing/keyed-db": "^0.2.4",
     "@eslint/js": "^9.39.1",
     "@hapi/boom": "^10.0.1",
+    "@prisma/client": "^6.19.3",
     "@types/chroma-js": "^3.1.2",
     "@types/fs-extra": "^11.0.4",
     "@types/lodash": "^4.17.20",
@@ -168,6 +177,7 @@
     "numeral": "^2.0.6",
     "pino": "^10.1.0",
     "prettier": "^3.6.2",
+    "prisma": "^6.19.3",
     "progress-stream": "^2.0.0",
     "qrcode-terminal": "^0.12.0",
     "ts-node": "^10.9.2",

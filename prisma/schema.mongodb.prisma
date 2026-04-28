@@ -1,0 +1,142 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Prisma Schema — Aestherix Bot  (MongoDB variant)
+//
+// Usage:
+//   1. Set DATABASE_URL=mongodb+srv://... in your .env
+//   2. Copy this file over prisma/schema.prisma:
+//        cp prisma/schema.mongodb.prisma prisma/schema.prisma
+//   3. Run:
+//        npx prisma generate
+//        npx prisma db push
+//
+// MongoDB does NOT support `prisma migrate`. Always use `prisma db push`.
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionId String   @unique
+  session   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserLimit {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  jid       String   @unique
+  limit     Int      @default(30)
+  role      String   @default("FREE")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BannedUser {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  jid       String   @unique
+  createdAt DateTime @default(now())
+}
+
+model Contact {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  jid       String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GroupSettings {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  groupId          String   @unique
+  groupName        String?
+  groupDescription String?
+  welcome1         String   @default("disable")
+  welcome1msg      String   @default("Welcome to {groupName}")
+  welcome2         String   @default("disable")
+  welcome2msg      String   @default("Welcome to {groupName}")
+  left1            String   @default("disable")
+  left1msg         String   @default("Bye bye {groupName}")
+  left2            String   @default("disable")
+  left2msg         String   @default("Bye bye {groupName}")
+  antiDelete       String   @default("disable")
+  antiGroupURL     String   @default("disable")
+  antiURL          String   @default("disable")
+  antiSpam         String   @default("disable")
+  antiVirus        String   @default("disable")
+  autoReader       String   @default("disable")
+  antiNSFW         String   @default("disable")
+  games            String   @default("disable")
+  notification     String   @default("disable")
+  bannedMembers    String   @default("[]")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model DashboardSession {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  token       String   @unique
+  role        String
+  phoneNumber String?
+  name        String?
+  lastSeenAt  BigInt?
+  expiresAt   BigInt?
+  createdAt   DateTime @default(now())
+}
+
+model DashboardAuditLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  logId     Int
+  timestamp BigInt
+  action    String
+  actorRole String
+  actor     String
+  target    String?
+  status    String
+  message   String?
+  before    String?
+  after     String?
+  createdAt DateTime @default(now())
+}
+
+model DashboardBlocklist {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  value     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model DashboardOtp {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  phoneNumber String   @unique
+  otp         String
+  expiresAt   BigInt?
+  createdAt   DateTime @default(now())
+}
+
+model CommandUsage {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  command String @unique
+  count   Int    @default(0)
+}
+
+model OfflineUser {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  participant String @unique
+  date        BigInt
+}
+
+// Used for dashboard-settings.json and dashboard-commands-cache.json.
+// `key` is a logical name; `value` is a JSON blob.
+
+model DashboardKV {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
