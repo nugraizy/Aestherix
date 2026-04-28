@@ -1,9 +1,11 @@
-import fs from 'fs-extra';
-import path from 'path';
-
+import prisma from '../../database/prisma.js';
+import {
+	loadCommandUsage as loadCommandUsageFromDB,
+	incrementCommandUsage as incrementCommandUsageInDB,
+	setCommandUsage as setCommandUsageInDB
+} from '../../database/adapters/command-usage.js';
 import { Cache } from '../../modules/cache.js';
 
-const COMMAND_USAGE_PATH = './databases/groups/command-usage.json';
 const WRITE_DEBOUNCE_MS = 1500;
 
 const state = {
@@ -17,47 +19,27 @@ const ensureUsageCache = (configuration) => {
 	}
 };
 
-const normalizeUsagePayload = (raw) => {
-	if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
-		return {};
-	}
-
-	return Object.entries(raw).reduce((acc, [key, value]) => {
-		const numeric = Number(value);
-
-		if (Number.isFinite(numeric) && numeric >= 0) {
-			acc[key] = Math.floor(numeric);
-		}
-
-		return acc;
-	}, {});
-};
-
-const buildPayload = (configuration) => {
-	const usageCache = configuration?.cmds?.commandUsage;
-	const payload = {};
-
-	if (!usageCache || typeof usageCache.entries !== 'function') {
-		return payload;
-	}
-
-	for (const [key, value] of usageCache.entries()) {
-		const numeric = Number(value);
-
-		if (!Number.isFinite(numeric) || numeric < 0) {
-			continue;
-		}
-
-		payload[key] = Math.floor(numeric);
-	}
-
-	return payload;
-};
-
 const persistCommandUsage = async (configuration) => {
 	state.writeTimer = null;
-	await fs.ensureDir(path.dirname(COMMAND_USAGE_PATH));
-	await fs.writeJSON(COMMAND_USAGE_PATH, buildPayload(configuration), { spaces: 2 });
+	const usageCache = configuration?.cmds?.commandUsage;
+
+	if (!usageCache || typeof usageCache.entries !== 'function') {
+		return;
+	}
+
+	const tasks = [];
+
+	for (const [command, value] of usageCache.entries()) {
+		const count = Math.floor(Number(value) || 0);
+
+		if (Number.isFinite(count) && count >= 0) {
+			tasks.push(setCommandUsageInDB(prisma, command, count));
+		}
+	}
+
+	if (tasks.length) {
+		await Promise.all(tasks);
+	}
 };
 
 const schedulePersist = (configuration) => {
@@ -78,16 +60,9 @@ export const loadCommandUsage = async (configuration) => {
 	state.loaded = true;
 	ensureUsageCache(configuration);
 
-	if (!(await fs.pathExists(COMMAND_USAGE_PATH))) {
-		await fs.ensureDir(path.dirname(COMMAND_USAGE_PATH));
-		await fs.writeJSON(COMMAND_USAGE_PATH, {}, { spaces: 2 });
-		return;
-	}
+	const raw = await loadCommandUsageFromDB(prisma).catch(() => ({}));
 
-	const raw = await fs.readJSON(COMMAND_USAGE_PATH).catch(() => ({}));
-	const normalized = normalizeUsagePayload(raw);
-
-	for (const [commandName, count] of Object.entries(normalized)) {
+	for (const [commandName, count] of Object.entries(raw)) {
 		configuration.cmds.commandUsage.set(commandName, count);
 	}
 };
@@ -102,6 +77,9 @@ export const incrementCommandUsage = async (configuration, commandName) => {
 	const currentCount = Number(configuration.cmds.commandUsage.get(commandName) || 0);
 
 	configuration.cmds.commandUsage.set(commandName, currentCount + 1);
+
+	// Fire-and-forget the DB increment (no need to wait)
+	void incrementCommandUsageInDB(prisma, commandName);
 
 	schedulePersist(configuration);
 };
