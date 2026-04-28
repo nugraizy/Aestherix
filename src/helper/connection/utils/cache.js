@@ -8,13 +8,21 @@ import chalk from 'chalk';
 import configuration from '../../config/connect.js';
 import { color, loggers, loadFiles } from '../../../utils/modules/index.js';
 import { ModuleError, isMissingProperty } from './util.js';
-
-/**
- * @type {{name: string, id: string}[]}
- */
-const conctactsDatabases = fs.readJSONSync('./databases/users/contacts.json');
+import prisma from '../../database/prisma.js';
+import { getAllContacts, upsertContacts } from '../../database/adapters/user.js';
 
 const hostPlatform = os.platform();
+
+// In-memory contacts cache — populated lazily via initContact/updateContact.
+let contactsDbCache = null;
+
+const getContactsCache = async () => {
+	if (!contactsDbCache) {
+		contactsDbCache = await getAllContacts(prisma).catch(() => []);
+	}
+
+	return contactsDbCache;
+};
 
 const nocache = (module, newFile = false) => {
 	let param = '?v=' + Date.now();
@@ -37,59 +45,47 @@ export const normalizeImportPath = (file, asURL = false) => {
  * @param {import('../../../types/Socket/index.js').Store} store
  * @param {{name: string, id: string}[]} contactsList
  */
-export const initContact = (store, contactsList) => {
+export const initContact = async (store, contactsList) => {
+	const storedContacts = await getContactsCache();
+
 	if (!contactsList.length) {
-		for (const { id, name } of conctactsDatabases) {
+		for (const { id, name } of storedContacts) {
 			store.localContacts[id] = { name, id };
 		}
 	}
 
-	if (!conctactsDatabases.length) {
-		fs.writeJSONSync('./databases/users/contacts.json', contactsList);
-	}
+	if (contactsList.length) {
+		const toUpsert = contactsList.map(({ id, name }) => ({ jid: id, name: name || 'Unknown' }));
+		await upsertContacts(prisma, toUpsert).catch(() => {});
+		contactsDbCache = null; // Invalidate cache
 
-	const freshContactsDatabases = fs.readJSONSync('./databases/users/contacts.json');
-
-	if (!Object.keys(store.localContacts).length) {
 		for (const { id, name } of contactsList) {
-			const index = freshContactsDatabases.findIndex((v) => v.id === id);
-
-			if (index !== -1) {
-				freshContactsDatabases[index].name = name;
-			}
-
 			store.localContacts[id] = { name, id };
 		}
 	}
-
-	fs.writeJSONSync('./databases/users/contacts.json', freshContactsDatabases);
 };
 
-export const updateContact = (store, contactsList) => {
-	const freshContactsDatabases = fs.readJSONSync('./databases/users/contacts.json');
-
+export const updateContact = async (store, contactsList) => {
 	const { localContacts } = store;
-
 	const contactsValue = Object.keys(localContacts);
+	const toUpsert = [];
 
 	for (const { id, notify, verifiedName, name } of contactsList) {
+		const resolvedName = name || notify || verifiedName || 'Unknown';
+
 		if (contactsValue.includes(id)) {
-			localContacts[id].name = name || notify || verifiedName;
-
-			if (conctactsDatabases.length !== 0) {
-				if (freshContactsDatabases?.[freshContactsDatabases.findIndex((v) => v.id === id)]?.name) {
-					freshContactsDatabases[freshContactsDatabases.findIndex((v) => v.id === id)].name = name || notify || verifiedName;
-				}
-			}
-
-			continue;
+			localContacts[id].name = resolvedName;
+		} else {
+			localContacts[id] = { name: resolvedName, id };
 		}
 
-		localContacts[id] = { name: name || notify || verifiedName || 'Unknown', id };
-		freshContactsDatabases.push({ name: name || notify || verifiedName || 'Unknown', id });
+		toUpsert.push({ jid: id, name: resolvedName });
 	}
 
-	fs.writeJSONSync('./databases/users/contacts.json', freshContactsDatabases);
+	if (toUpsert.length) {
+		await upsertContacts(prisma, toUpsert).catch(() => {});
+		contactsDbCache = null; // Invalidate cache
+	}
 };
 
 const handlePluginError = (filename) => {
