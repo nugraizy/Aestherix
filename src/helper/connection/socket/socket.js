@@ -1,12 +1,5 @@
 import { confirm, input, select, Separator } from '@inquirer/prompts';
-import _baileys, {
-	delay,
-	fetchLatestBaileysVersion,
-	isJidGroup,
-	makeCacheableSignalKeyStore,
-	makeWASocket,
-	useMultiFileAuthState
-} from 'baileys';
+import _baileys, { delay, fetchLatestBaileysVersion, isJidGroup, makeCacheableSignalKeyStore, makeWASocket } from 'baileys';
 import clip from 'clipboardy';
 import fs from 'fs-extra';
 import PhoneNumber from 'libphonenumber-js';
@@ -19,6 +12,8 @@ import { color, loggers } from '../../../utils/modules/index.js';
 import configuration from '../../config/connect.js';
 import { Cache } from '../../modules/cache.js';
 import { clearDBConnection } from './reset-session.js';
+import prisma from '../../database/prisma.js';
+import { useMultiAuthState } from '../../database/auth.js';
 
 const msgRetryCounterCache = new NodeCache();
 const SETTINGS = await fs.readJSON('./src/helper/config/settings.json');
@@ -60,11 +55,12 @@ const question = (text) =>
  */
 export const connectSocket = async ({ cli, OPTIONS, store }) => {
 	/**
+	 * Prisma-backed auth state — stores Baileys signal keys in the configured
+	 * database instead of the local file system.
+	 *
 	 * @type {import('../../../types/Socket/index.js').MultiAuthState}
 	 */
-	const { state, saveCreds } = await useMultiFileAuthState(
-		`./src/helper/connection/session/${cli.input[0] ?? 'Session-debug'}`
-	);
+	const { state, saveCreds, clearState } = await useMultiAuthState(prisma);
 
 	global.store = store;
 
@@ -117,7 +113,7 @@ export const connectSocket = async ({ cli, OPTIONS, store }) => {
 
 	await handleNewInstance({ OPTIONS, Client }); // eslint-disable-line
 
-	return { Client, store, state, saveCreds };
+	return { Client, store, state, saveCreds, clearState };
 };
 
 /**
