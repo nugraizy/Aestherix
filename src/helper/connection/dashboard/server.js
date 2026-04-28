@@ -21,18 +21,29 @@ import {
 	setDashboardCommandState,
 	setDashboardFlagState
 } from './dashboard-monitor.js';
+import prisma from '../../database/prisma.js';
+import {
+	getDashboardSessions,
+	upsertDashboardSession,
+	deleteDashboardSession,
+	purgeExpiredDashboardSessions,
+	appendAuditLog,
+	getAuditLogs,
+	getLastAuditLogId,
+	getDashboardBlocklist,
+	addToBlocklist,
+	removeFromBlocklist,
+	upsertOtp,
+	getOtp,
+	deleteOtp
+} from '../../database/adapters/dashboard.js';
+import { getBannedUsers, banUser, unbanUser, getUserLimit, upsertUserLimit, getAllUserLimits } from '../../database/adapters/user.js';
 
 const AUTH_COOKIE_NAME = 'aestherix_dashboard_auth';
 const OTP_TTL_MS = 5 * 60 * 1000;
 const OTP_COOLDOWN_MS = 60 * 1000;
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 const LIVE_SESSION_WINDOW_MS = 30 * 1000;
-const USERS_LIMIT_DIR = './databases/users/limit';
-const USERS_BANNED_PATH = './databases/users/banned.json';
-const DASHBOARD_SESSIONS_PATH = './databases/dashboard/dashboard-sessions.json';
-const DASHBOARD_AUDIT_PATH = './databases/dashboard/dashboard-audit.json';
-const DASHBOARD_OTP_PATH = './databases/dashboard/dashboard-otp.json';
-const DASHBOARD_BLOCKLIST_PATH = './databases/dashboard/dashboard-blocklist.json';
 const PROFILE_PICTURE_HISTORY_PATH = './databases/pictures/pinterest-profile-pictures.json';
 const PROFILE_PICTURE_HISTORY_LIMIT = 900;
 const PROFILE_PICTURES_DISK_SYNC_THROTTLE_MS = 1000;
@@ -195,31 +206,23 @@ const normalizePersistedPictureEntry = (entry) => {
 
 const loadDashboardBlocklist = async () => {
 	try {
-		if (!(await fs.pathExists(DASHBOARD_BLOCKLIST_PATH))) {
-			configuration.cache.blocklist = Array.isArray(configuration.cache?.blocklist) ? configuration.cache.blocklist : [];
-			return;
-		}
-
-		const raw = await fs.readJSON(DASHBOARD_BLOCKLIST_PATH);
-		const list = Array.isArray(raw?.blocklist)
-			? raw.blocklist.map((value) => normalizePersistedUserJid(value)).filter(Boolean)
-			: [];
-
-		configuration.cache.blocklist = list;
+		const list = await getDashboardBlocklist(prisma);
+		configuration.cache.blocklist = list.map((jid) => normalizePersistedUserJid(jid)).filter(Boolean);
 	} catch (error) {
 		loggers.warning(color('Failed loading dashboard blocklist:', '#FF5555'), color(error.message, 'white'));
 		configuration.cache.blocklist = Array.isArray(configuration.cache?.blocklist) ? configuration.cache.blocklist : [];
 	}
 };
 
-const persistDashboardBlocklist = async () => {
+const persistDashboardBlocklist = async (addedJids = [], removedJids = []) => {
 	try {
-		const blocklist = Array.isArray(configuration.cache?.blocklist)
-			? Array.from(new Set(configuration.cache.blocklist.map((value) => normalizePersistedUserJid(value)).filter(Boolean)))
-			: [];
+		for (const jid of removedJids) {
+			if (jid) await removeFromBlocklist(prisma, jid).catch(() => {});
+		}
 
-		await fs.ensureDir(path.dirname(DASHBOARD_BLOCKLIST_PATH));
-		await fs.writeJSON(DASHBOARD_BLOCKLIST_PATH, { blocklist }, { spaces: 2 });
+		for (const jid of addedJids) {
+			if (jid) await addToBlocklist(prisma, jid).catch(() => {});
+		}
 	} catch (error) {
 		loggers.warning(color('Failed persisting dashboard blocklist:', '#FF5555'), color(error.message, 'white'));
 	}
@@ -327,17 +330,12 @@ const applyNoStoreJsonHeaders = (res) => {
 	res.setHeader('Expires', '0');
 };
 
-const loadSessionStore = () => {
+const loadSessionStore = async () => {
 	try {
-		if (!fs.pathExistsSync(DASHBOARD_SESSIONS_PATH)) {
-			return;
-		}
-
-		const raw = fs.readJSONSync(DASHBOARD_SESSIONS_PATH);
-		const sessions = Array.isArray(raw?.sessions) ? raw.sessions : [];
 		const now = Date.now();
+		const rows = await getDashboardSessions(prisma);
 
-		for (const item of sessions) {
+		for (const item of rows) {
 			const token = String(item?.token || '');
 			const expiresAt = Number(item?.expiresAt || 0);
 
@@ -358,35 +356,34 @@ const loadSessionStore = () => {
 	}
 };
 
-const persistSessionStore = () => {
+const persistSessionStore = async () => {
 	try {
 		const now = Date.now();
-		const sessions = Array.from(sessionStore.entries())
-			.filter(([, value]) => Number(value?.expiresAt || 0) > now)
-			.map(([token, value]) => ({
+
+		for (const [token, value] of sessionStore.entries()) {
+			if (Number(value?.expiresAt || 0) <= now) {
+				sessionStore.delete(token);
+				await deleteDashboardSession(prisma, token).catch(() => {});
+				continue;
+			}
+
+			await upsertDashboardSession(prisma, {
 				token,
 				role: value.role,
 				phoneNumber: value.phoneNumber || null,
 				name: value.name || null,
 				lastSeenAt: Number(value.lastSeenAt || now),
 				expiresAt: Number(value.expiresAt || 0)
-			}));
-
-		fs.ensureDirSync(path.dirname(DASHBOARD_SESSIONS_PATH));
-		fs.writeJSONSync(DASHBOARD_SESSIONS_PATH, { sessions }, { spaces: 2 });
+			}).catch(() => {});
+		}
 	} catch (error) {
 		loggers.warning(color('Failed persisting dashboard sessions:', '#FF5555'), color(error.message, 'white'));
 	}
 };
 
-const loadAuditStore = () => {
+const loadAuditStore = async () => {
 	try {
-		if (!fs.pathExistsSync(DASHBOARD_AUDIT_PATH)) {
-			return;
-		}
-
-		const raw = fs.readJSONSync(DASHBOARD_AUDIT_PATH);
-		const logs = Array.isArray(raw?.logs) ? raw.logs : [];
+		const logs = await getAuditLogs(prisma, MAX_AUDIT_LOGS);
 
 		auditState.logs = logs
 			.map((entry) => ({
@@ -403,25 +400,9 @@ const loadAuditStore = () => {
 			}))
 			.filter((entry) => entry.id > 0)
 			.slice(-MAX_AUDIT_LOGS);
-		auditState.lastId = Number(raw?.lastId || auditState.logs.at(-1)?.id || 0);
+		auditState.lastId = await getLastAuditLogId(prisma);
 	} catch (error) {
 		loggers.warning(color('Failed loading dashboard audit logs:', '#FF5555'), color(error.message, 'white'));
-	}
-};
-
-const persistAuditStore = () => {
-	try {
-		fs.ensureDirSync(path.dirname(DASHBOARD_AUDIT_PATH));
-		fs.writeJSONSync(
-			DASHBOARD_AUDIT_PATH,
-			{
-				lastId: auditState.lastId,
-				logs: auditState.logs.slice(-MAX_AUDIT_LOGS)
-			},
-			{ spaces: 2 }
-		);
-	} catch (error) {
-		loggers.warning(color('Failed persisting dashboard audit logs:', '#FF5555'), color(error.message, 'white'));
 	}
 };
 
@@ -456,7 +437,18 @@ const pushAuditEvent = ({
 		auditState.logs.splice(0, auditState.logs.length - MAX_AUDIT_LOGS);
 	}
 
-	persistAuditStore();
+	void appendAuditLog(prisma, {
+		id: auditState.lastId,
+		timestamp: auditState.logs.at(-1)?.timestamp || Date.now(),
+		action: String(action || 'unknown'),
+		actorRole,
+		actor,
+		target: target ? String(target) : null,
+		status: status === 'failed' ? 'failed' : 'ok',
+		message: message ? String(message) : null,
+		before: before ?? null,
+		after: after ?? null
+	}).catch(() => {});
 };
 
 const getDashboardAuditLogs = ({ since = 0, limit = 200, action = '', role = '', query = '' } = {}) => {
@@ -1014,8 +1006,6 @@ const normalizeUserJid = (input) => {
 	return `${digits}${S_WHATSAPP_NET}`;
 };
 
-const getUserLimitFilePath = (jid) => path.join(USERS_LIMIT_DIR, `${jid}.json`);
-
 const defaultLimitState = (jid) => ({
 	id: jid,
 	limit: 30,
@@ -1023,34 +1013,29 @@ const defaultLimitState = (jid) => ({
 });
 
 const readBannedUsers = async () => {
-	if (!(await fs.pathExists(USERS_BANNED_PATH))) {
-		await fs.ensureDir(path.dirname(USERS_BANNED_PATH));
-		await fs.writeJSON(USERS_BANNED_PATH, [], { spaces: 2 });
-		return [];
-	}
-
-	const list = await fs.readJSON(USERS_BANNED_PATH);
-
-	return Array.isArray(list) ? list : [];
+	return getBannedUsers(prisma);
 };
 
 const writeBannedUsers = async (list) => {
-	await fs.ensureDir(path.dirname(USERS_BANNED_PATH));
-	await fs.writeJSON(USERS_BANNED_PATH, Array.from(new Set(list)), { spaces: 2 });
+	const current = await getBannedUsers(prisma);
+	const currentSet = new Set(current);
+	const newSet = new Set(Array.from(new Set(list)));
+
+	for (const jid of newSet) {
+		if (!currentSet.has(jid)) await banUser(prisma, jid).catch(() => {});
+	}
+
+	for (const jid of currentSet) {
+		if (!newSet.has(jid)) await unbanUser(prisma, jid).catch(() => {});
+	}
 };
 
 const readUserLimitState = async (jid) => {
-	const filePath = getUserLimitFilePath(jid);
+	const raw = await getUserLimit(prisma, jid);
 
-	if (!(await fs.pathExists(filePath))) {
-		const fallback = defaultLimitState(jid);
-
-		await fs.ensureDir(USERS_LIMIT_DIR);
-		await fs.writeJSON(filePath, fallback, { spaces: 2 });
-		return fallback;
+	if (!raw) {
+		return defaultLimitState(jid);
 	}
-
-	const raw = await fs.readJSON(filePath);
 
 	return {
 		id: normalizeUserJid(raw?.id) || jid,
@@ -1066,8 +1051,7 @@ const writeUserLimitState = async (jid, data) => {
 		role: data?.role === 'PREMIUM' ? 'PREMIUM' : 'FREE'
 	};
 
-	await fs.ensureDir(USERS_LIMIT_DIR);
-	await fs.writeJSON(getUserLimitFilePath(jid), nextState, { spaces: 2 });
+	await upsertUserLimit(prisma, jid, nextState.limit, nextState.role);
 	configuration.user.limit.set(jid, { limit: nextState.limit, role: nextState.role });
 
 	return nextState;
@@ -1096,37 +1080,28 @@ const redactUserIdMiddle = (rawId) => {
 };
 
 const listDashboardUsers = async ({ redactNumbers = false } = {}) => {
-	await fs.ensureDir(USERS_LIMIT_DIR);
-	const files = (await fs.readdir(USERS_LIMIT_DIR)).filter((name) => name.endsWith('.json'));
+	const allUsers = await getAllUserLimits(prisma);
 	const bannedUsers = await readBannedUsers();
 	const bannedSet = new Set(bannedUsers);
 	const blockSet = new Set(Array.isArray(configuration.cache?.blocklist) ? configuration.cache.blocklist : []);
 
-	const users = await Promise.all(
-		files.map(async (fileName) => {
-			const filePath = path.join(USERS_LIMIT_DIR, fileName);
-			const raw = await fs.readJSON(filePath).catch(() => null);
-			const id = normalizeUserJid(raw?.id || fileName.replace(/\.json$/i, ''));
+	return allUsers
+		.map(({ id, limit, role }) => {
+			const normalizedId = normalizeUserJid(id);
 
-			if (!id) {
-				return null;
-			}
-
-			const limit = Math.max(0, Number(raw?.limit || 0));
-			const role = raw?.role === 'PREMIUM' ? 'PREMIUM' : 'FREE';
+			if (!normalizedId) return null;
 
 			return {
-				id: redactNumbers ? redactUserIdMiddle(id) : id,
+				id: redactNumbers ? redactUserIdMiddle(normalizedId) : normalizedId,
 				limit,
 				role,
 				premium: role === 'PREMIUM',
-				banned: bannedSet.has(id),
-				blocked: blockSet.has(id)
+				banned: bannedSet.has(normalizedId),
+				blocked: blockSet.has(normalizedId)
 			};
 		})
-	);
-
-	return users.filter(Boolean).sort((a, b) => a.id.localeCompare(b.id));
+		.filter(Boolean)
+		.sort((a, b) => a.id.localeCompare(b.id));
 };
 
 const toImageVariant = (variant, fallbackUrl) => {
@@ -1582,7 +1557,7 @@ const setDashboardUserBlocked = async (userId, enabled) => {
 	}
 
 	configuration.cache.blocklist = Array.from(set);
-	await persistDashboardBlocklist();
+	await persistDashboardBlocklist(enabled ? [jid] : [], enabled ? [] : [jid]);
 
 	return {
 		ok: true,
@@ -1751,19 +1726,14 @@ const hasActiveOwnerSession = (phoneNumber) => {
 	return false;
 };
 
-const loadOtpStore = () => {
+const loadOtpStore = async () => {
 	otpStore.clear();
 
 	try {
-		if (!fs.pathExistsSync(DASHBOARD_OTP_PATH)) {
-			return;
-		}
-
-		const raw = fs.readJSONSync(DASHBOARD_OTP_PATH);
-		const entries = Array.isArray(raw?.otps) ? raw.otps : [];
 		const now = Date.now();
+		const rows = await prisma.dashboardOtp.findMany();
 
-		for (const item of entries) {
+		for (const item of rows) {
 			const phoneNumber = normalizePhoneNumber(item?.phoneNumber || '');
 			const expiresAt = Number(item?.expiresAt || 0);
 
@@ -1786,43 +1756,44 @@ const loadOtpStore = () => {
 	}
 };
 
-const persistOtpStore = () => {
+const persistOtpStore = async () => {
 	try {
 		const now = Date.now();
-		const otps = Array.from(otpStore.entries())
-			.filter(([, value]) => Number(value?.expiresAt || 0) > now)
-			.map(([phoneNumber, value]) => ({
+
+		for (const [phoneNumber, value] of otpStore.entries()) {
+			const expiresAt = Number(value?.expiresAt || 0);
+
+			if (expiresAt <= now) {
+				otpStore.delete(phoneNumber);
+				await deleteOtp(prisma, phoneNumber).catch(() => {});
+				continue;
+			}
+
+			await upsertOtp(prisma, {
 				phoneNumber,
 				requestId: String(value?.requestId || ''),
 				requestKeyHash: String(value?.requestKeyHash || ''),
 				actionTokenHash: String(value?.actionTokenHash || ''),
 				status: value?.status === 'approved' ? 'approved' : 'pending',
 				createdAt: Number(value?.createdAt || now),
-				expiresAt: Number(value?.expiresAt || 0),
+				expiresAt,
 				confirmedAt: value?.confirmedAt ? Number(value.confirmedAt) : null
-			}));
-
-		fs.ensureDirSync(path.dirname(DASHBOARD_OTP_PATH));
-		fs.writeJSONSync(DASHBOARD_OTP_PATH, { otps }, { spaces: 2 });
+			}).catch(() => {});
+		}
 	} catch (error) {
 		loggers.warning(color('Failed persisting dashboard OTP store:', '#FF5555'), color(error.message, 'white'));
 	}
 };
 
-const cleanExpiredOtps = () => {
-	loadOtpStore();
+const cleanExpiredOtps = async () => {
+	await loadOtpStore();
 	const now = Date.now();
-	let hasChanges = false;
 
 	for (const [phone, value] of otpStore.entries()) {
 		if (value.expiresAt <= now) {
 			otpStore.delete(phone);
-			hasChanges = true;
+			await deleteOtp(prisma, phone).catch(() => {});
 		}
-	}
-
-	if (hasChanges) {
-		persistOtpStore();
 	}
 };
 
@@ -1903,7 +1874,7 @@ const createSession = (res, payload) => {
 		lastSeenAt: Date.now(),
 		expiresAt: Date.now() + SESSION_TTL_MS
 	});
-	persistSessionStore();
+	void persistSessionStore();
 
 	res.cookie(AUTH_COOKIE_NAME, token, {
 		httpOnly: true,
@@ -2118,7 +2089,7 @@ export const processDashboardConfirmationAction = ({ actionId, senderJid }) => {
 	otpData.status = 'approved';
 	otpData.confirmedAt = Date.now();
 	otpStore.set(phoneNumber, otpData);
-	persistOtpStore();
+	void persistOtpStore();
 
 	return { handled: true, approved: true, phoneNumber };
 };
@@ -2157,7 +2128,7 @@ async function webmToMp4Buffer(inputBuffer) {
 	});
 }
 
-export const server = () => {
+export const server = async () => {
 	if (configuration.expressInstances.has('dashboard')) {
 		return;
 	}
@@ -2168,9 +2139,9 @@ export const server = () => {
 		configuration.OPTIONS = {};
 	}
 
-	loadSessionStore();
-	loadAuditStore();
-	loadOtpStore();
+	await loadSessionStore();
+	await loadAuditStore();
+	await loadOtpStore();
 	void loadDashboardBlocklist();
 	void hydrateProfilePicturesCache();
 
@@ -2646,7 +2617,7 @@ export const server = () => {
 				expiresAt,
 				confirmedAt: null
 			});
-			persistOtpStore();
+			void persistOtpStore();
 
 			const recipient = `${phoneNumber}@s.whatsapp.net`;
 			let sent = false;
@@ -2669,7 +2640,7 @@ export const server = () => {
 
 			if (!sent) {
 				otpStore.delete(phoneNumber);
-				persistOtpStore();
+				void persistOtpStore();
 				return res.status(503).json({
 					ok: false,
 					message: 'WhatsApp bridge is not reachable yet. Please ensure bot process is online and try again.'
@@ -2705,7 +2676,7 @@ export const server = () => {
 
 		if (!otpData || otpData.expiresAt <= Date.now()) {
 			otpStore.delete(phoneNumber);
-			persistOtpStore();
+			void persistOtpStore();
 			return res.status(400).json({ ok: false, message: 'Confirmation expired or not found. Request a new code.' });
 		}
 
@@ -2734,7 +2705,7 @@ export const server = () => {
 
 		if (otpData.expiresAt <= Date.now()) {
 			otpStore.delete(phoneNumber);
-			persistOtpStore();
+			void persistOtpStore();
 			return res.status(400).json({ ok: false, message: 'Confirmation request expired.' });
 		}
 
@@ -2747,7 +2718,7 @@ export const server = () => {
 		}
 
 		otpStore.delete(phoneNumber);
-		persistOtpStore();
+		void persistOtpStore();
 		createSession(res, {
 			role: 'owner',
 			phoneNumber,
@@ -2837,7 +2808,7 @@ export const server = () => {
 
 		if (token) {
 			sessionStore.delete(token);
-			persistSessionStore();
+			void persistSessionStore();
 		}
 
 		if (session) {
