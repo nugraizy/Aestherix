@@ -4,6 +4,7 @@ import { exec } from 'child_process';
 import emojiReg from 'emoji-regex';
 import fs, { readFileSync, unlinkSync } from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 import { createExif } from '../../utils/misc/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
@@ -11,11 +12,12 @@ import { scheme } from '../misc/palettes/colors.js';
 
 const { createCanvas, GlobalFonts } = Canvas;
 const { CanvasTextWrapper } = Wrap;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Chevin Bold.ttf'), 'chevin');
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/texgyreadventor-bold.otf'), 'texgy');
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/SourceSansPro-Italic.ttf'), 'sanspro');
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/KeepCalm-Medium.ttf'), 'calm');
+GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/Chevin Bold.ttf'), 'chevin');
+GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/texgyreadventor-bold.otf'), 'texgy');
+GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/SourceSansPro-Italic.ttf'), 'sanspro');
+GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/KeepCalm-Medium.ttf'), 'calm');
 
 const random = (input) => input[Math.floor(Math.random() * input.length)];
 
@@ -29,7 +31,7 @@ const saveImages = async (buffer) => {
 
 const insertExif = async (paths, sender) =>
 	new Promise(async (resolve, reject) => {
-		const pathExif = path.join(__dirname, 'src/media/temporary_files/data.exif');
+		const pathExif = path.join(__dirname, '../../media/temporary_files/data.exif');
 		const pathResults = paths;
 
 		exec(`webpmux -set exif "${pathExif}" "${pathResults}" -o "${pathResults}-done.webp"`, (err) => {

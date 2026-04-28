@@ -4,6 +4,7 @@ import { exec } from 'child_process';
 import emojiReg from 'emoji-regex';
 import { readFileSync, unlinkSync, writeFileSync } from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 import { createExif } from '../../utils/misc/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
@@ -11,22 +12,23 @@ import { scheme } from '../misc/palettes/colors.js';
 
 const { createCanvas, GlobalFonts } = Canvas;
 const { CanvasTextWrapper } = Wrap;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Chevin Bold.ttf'), 'chevin');
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/texgyreadventor-bold.otf'), 'texgy');
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/SourceSansPro-Italic.ttf'), 'sanspro');
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/KeepCalm-Medium.ttf'), 'calm');
+GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/Chevin Bold.ttf'), 'chevin');
+GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/texgyreadventor-bold.otf'), 'texgy');
+GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/SourceSansPro-Italic.ttf'), 'sanspro');
+GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/KeepCalm-Medium.ttf'), 'calm');
 
 const saveImages = (buffer, sequence) => {
-	const fileName = path.join(__dirname, `src/media/temporary_files/animated_images-${sequence}.webp`);
+	const fileName = path.join(__dirname, `../../media/temporary_files/animated_images-${sequence}.webp`);
 
 	writeFileSync(fileName, buffer);
 	return fileName;
 };
 
 const createSequence = async (images, sender) => {
-	const pathExif = path.join(__dirname, 'src/media/temporary_files/data.exif');
-	const pathResults = path.join(__dirname, `src/media/temporary_files/animated_images-${Date.now()}`);
+	const pathExif = path.join(__dirname, '../../media/temporary_files/data.exif');
+	const pathResults = path.join(__dirname, `../../media/temporary_files/animated_images-${Date.now()}`);
 
 	return new Promise(async (resolve, reject) => {
 		exec(`img2webp -loop 1 ${images.map((v) => `"${v}"`).join(' ')} -o "${pathResults}.webp"`, (er) => {
@@ -130,3 +132,4 @@ export const attp = (sender, texts, colored, fonts) =>
 			resolve(buffers);
 		});
 	});
+

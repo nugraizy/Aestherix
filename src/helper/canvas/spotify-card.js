@@ -4,21 +4,23 @@ import * as color from 'colorthief';
 import crypto from 'crypto';
 import fs from 'fs-extra';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 import { fetch } from 'undici';
 
 import { spotifier } from '../../utils/spotifier/index.js';
 
 const { createCanvas, GlobalFonts, loadImage } = Canvas;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/HelveticaNeueMedium.otf'), 'Helvetica');
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/texgyreadventor-bold.otf'), 'texgy');
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/AtypText-Semibold.ttf'), 'atyp');
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/SourceSansPro-Regular.ttf'), 'sans-regular');
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Galyon-Book.otf'), 'galyon');
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Lemon-Milk-Pro-Regular.ttf'), 'lemon');
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/SFUIDisplay-Medium.otf'), 'sf-pro');
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/Roboto-Medium.ttf'), 'roboto-medium');
+GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/HelveticaNeueMedium.otf'), 'Helvetica');
+GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/texgyreadventor-bold.otf'), 'texgy');
+GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/AtypText-Semibold.ttf'), 'atyp');
+GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/SourceSansPro-Regular.ttf'), 'sans-regular');
+GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/Galyon-Book.otf'), 'galyon');
+GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/Lemon-Milk-Pro-Regular.ttf'), 'lemon');
+GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/SFUIDisplay-Medium.otf'), 'sf-pro');
+GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/Roboto-Medium.ttf'), 'roboto-medium');
 
 const assets = {
 	model: null
@@ -723,3 +725,4 @@ export class SpotifyCard {
 		return min + Math.floor((randomNumber / (Math.pow(2, 32) - 1)) * range);
 	}
 }
+

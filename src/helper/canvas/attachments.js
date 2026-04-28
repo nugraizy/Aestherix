@@ -4,21 +4,23 @@ import Wrap from 'canvas-text-wrapper';
 import * as color from 'colorthief';
 import fs from 'fs-extra';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { fetch } from 'undici';
 
 import { isURL } from '../../utils/modules/index.js';
 
 const { createCanvas, GlobalFonts, loadImage } = Canvas;
 const { CanvasTextWrapper } = Wrap;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const [signature, logo] = await Promise.all([
 	loadImage('./src/media/assets/1_icon_github_signature.png'),
 	loadImage('./src/media/assets/1_icon_github.png')
 ]);
 
-GlobalFonts.registerFromPath(path.join(__dirname, '/src/media/fonts/Nina-Bold.otf'), 'nina-bold');
-GlobalFonts.registerFromPath(path.join(__dirname, '/src/media/fonts/Abril-Text-Bold.otf'), 'AbrilText-Bold');
-GlobalFonts.registerFromPath(path.join(__dirname, '/src/media/fonts/IBM.ttf'), 'ibm');
+GlobalFonts.registerFromPath(path.join(__dirname, '/../../media/fonts/Nina-Bold.otf'), 'nina-bold');
+GlobalFonts.registerFromPath(path.join(__dirname, '/../../media/fonts/Abril-Text-Bold.otf'), 'AbrilText-Bold');
+GlobalFonts.registerFromPath(path.join(__dirname, '/../../media/fonts/IBM.ttf'), 'ibm');
 
 const COPYRIGHT_TEXT = '© 2022 nugraizy, HF Inc.';
 
@@ -330,3 +332,4 @@ export class Attachment {
 		return this.canvas.toBuffer('image/png');
 	}
 }
+

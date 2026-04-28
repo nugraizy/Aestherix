@@ -2,13 +2,15 @@ import Canvas from '@napi-rs/canvas';
 import chroma from 'chroma-js';
 import _ from 'lodash';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { Client } from 'undici';
 
-const copyright = `© 2025 Hidden Finder, Inc | Made by ${__botName} using Canvas Module.`;
+const getCopyright = () => `© 2025 Hidden Finder, Inc | Made by ${global.__botName ?? 'Bot'} using Canvas Module.`;
 
 const { createCanvas, GlobalFonts, loadImage } = Canvas;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/IBM.ttf'), 'ibm');
+GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/IBM.ttf'), 'ibm');
 
 /* eslint-disable-next-line */
 const [icons_1, signature_1, icons_2, signature_2] = await Promise.all([
@@ -549,7 +551,7 @@ export class GitHubGraph {
 	/**
 	 * @private
 	 */
-	_placeCopyright(watermark = copyright) {
+	_placeCopyright(watermark = getCopyright()) {
 		this.#_ctx.fillStyle = this.#_theme.GENERAL[3];
 		this.#_ctx.font = '32px ibm';
 		this.#_ctx.fillText(watermark, 145, this.#_canvas.height - 65, this.#_canvas.width - 130);
@@ -664,3 +666,4 @@ export class GitHubGraph {
 		return this.#_canvas.toBuffer('image/png');
 	}
 }
+

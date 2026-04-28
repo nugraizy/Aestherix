@@ -1,11 +1,13 @@
 import Canvas from '@napi-rs/canvas';
 import Wrap from 'canvas-text-wrapper';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 const { createCanvas, GlobalFonts } = Canvas;
 const { CanvasTextWrapper } = Wrap;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/coolvetica rg.otf'), 'coolvetica');
+GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/coolvetica rg.otf'), 'coolvetica');
 
 const ARGBtoRGBA = (num) => {
 	num >>>= 0;
@@ -38,3 +40,4 @@ export const textStory = async (texts, color) => {
 
 	return new Buffer.from(canvas.toBuffer('image/png'));
 };
+

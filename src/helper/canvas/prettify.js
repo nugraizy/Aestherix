@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'url';
 import prism from 'prismjs';
 import Canvas from '@napi-rs/canvas';
 import { parse } from 'parse5';
@@ -9,10 +10,11 @@ import chroma from 'chroma-js';
 
 import { colors, roundedRectData } from './utils.js';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const { createCanvas, loadImage, GlobalFonts } = Canvas;
 
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/JetBrainsMono-Light.ttf'), 'JetBrainsMono');
-GlobalFonts.registerFromPath(path.join(__dirname, 'src/media/fonts/zh-cn.ttf'), 'ZHCN');
+GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/JetBrainsMono-Light.ttf'), 'JetBrainsMono');
+GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/zh-cn.ttf'), 'ZHCN');
 
 export class Prettify {
 	#buffer = null;
