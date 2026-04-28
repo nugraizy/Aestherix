@@ -16,6 +16,8 @@ import {
 	typeMessage
 } from '../misc/wa_data/index.js';
 import { Cache } from './cache.js';
+import prisma from '../database/prisma.js';
+import { getBannedUsers } from '../database/adapters/user.js';
 
 /**
  * @constant
@@ -160,7 +162,7 @@ export const reassign = async (m, client, store, state) => {
 
 		if (configuration.isFirstConnectionForCache) {
 			const SETTINGS = await fs.readJSON('./src/helper/config/settings.json');
-			const dataBanned = await fs.readJSON('./databases/users/banned.json');
+			const dataBanned = await getBannedUsers(prisma);
 
 			const { multi, noPref } = SETTINGS.prefix;
 			const botNumber = myJid;
