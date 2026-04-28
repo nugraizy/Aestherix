@@ -1,10 +1,6 @@
-import fs from 'fs-extra';
-import path from 'path';
-
 import { loadCommandUsage } from '../utils/command-usage.js';
-
-const DASHBOARD_STATE_PATH = './databases/dashboard/dashboard-settings.json';
-const DASHBOARD_COMMANDS_CACHE_PATH = './databases/dashboard/dashboard-commands-cache.json';
+import prisma from '../../database/prisma.js';
+import { loadDashboardState, saveDashboardState, loadCommandsCatalog, saveCommandsCatalog } from '../../database/adapters/dashboard-settings.js';
 const MAX_LOGS = 500;
 
 const state = {
@@ -37,28 +33,8 @@ const extractBooleanFlags = (configuration) => {
 };
 
 const safeRead = async () => {
-	if (!(await fs.pathExists(DASHBOARD_STATE_PATH))) {
-		await fs.ensureDir(path.dirname(DASHBOARD_STATE_PATH));
-		await fs.writeJSON(DASHBOARD_STATE_PATH, { disabledCommands: [], flagStates: {} }, { spaces: 2 });
-		return { disabledCommands: [], flagStates: {} };
-	}
-
-	const raw = await fs.readJSON(DASHBOARD_STATE_PATH);
-	const disabledCommands = Array.isArray(raw?.disabledCommands) ? raw.disabledCommands : [];
-	const flagStates =
-		raw?.flagStates && typeof raw.flagStates === 'object' && !Array.isArray(raw.flagStates) ? raw.flagStates : {};
-
-	const normalizedFlagStates = Object.entries(flagStates)
-		.filter(([, value]) => typeof value === 'boolean')
-		.reduce((acc, [key, value]) => {
-			acc[key] = value;
-			return acc;
-		}, {});
-
-	return {
-		disabledCommands,
-		flagStates: normalizedFlagStates
-	};
+	const data = await loadDashboardState(prisma).catch(() => ({ disabledCommands: [], flagStates: {} }));
+	return data;
 };
 
 const applyPersistedFlags = (configuration, flagStates) => {
@@ -79,8 +55,7 @@ const persist = async (configuration) => {
 	const disabledCommands = Array.from(normalizeSet(configuration?.cmds?.disabledCommands)).sort((a, b) => a.localeCompare(b));
 	const flagStates = extractBooleanFlags(configuration);
 
-	await fs.ensureDir(path.dirname(DASHBOARD_STATE_PATH));
-	await fs.writeJSON(DASHBOARD_STATE_PATH, { disabledCommands, flagStates }, { spaces: 2 });
+	await saveDashboardState(prisma, { disabledCommands, flagStates }).catch(() => {});
 };
 
 const toCommandPayload = (command, disabled) => {
@@ -100,6 +75,9 @@ const toCommandPayload = (command, disabled) => {
 	};
 };
 
+// In-memory fallback cache for command catalog (populated when writeCommandsCatalog runs or on first access)
+let _commandsCatalogCache = null;
+
 const writeCommandsCatalog = (configuration) => {
 	try {
 		const disabled = normalizeSet(configuration?.cmds?.disabledCommands);
@@ -109,45 +87,26 @@ const writeCommandsCatalog = (configuration) => {
 			.map(([, command]) => toCommandPayload(command, disabled))
 			.sort((a, b) => a.name.localeCompare(b.name));
 
-		fs.ensureDirSync(path.dirname(DASHBOARD_COMMANDS_CACHE_PATH));
-		fs.writeJSONSync(
-			DASHBOARD_COMMANDS_CACHE_PATH,
-			{
-				updatedAt: Date.now(),
-				commands
-			},
-			{ spaces: 2 }
-		);
+		_commandsCatalogCache = commands;
+		void saveCommandsCatalog(prisma, { updatedAt: Date.now(), commands });
 	} catch {
 		// Ignore command catalog persistence issues.
 	}
 };
 
-const readCommandsCatalog = () => {
+const readCommandsCatalogSync = () => {
+	return _commandsCatalogCache || [];
+};
+
+// Pre-load commands catalog from DB into in-memory cache.
+const hydrateCommandsCatalogCache = async () => {
 	try {
-		if (!fs.pathExistsSync(DASHBOARD_COMMANDS_CACHE_PATH)) {
-			return [];
+		const commands = await loadCommandsCatalog(prisma);
+		if (commands.length) {
+			_commandsCatalogCache = commands;
 		}
-
-		const raw = fs.readJSONSync(DASHBOARD_COMMANDS_CACHE_PATH);
-		const commands = Array.isArray(raw?.commands) ? raw.commands : [];
-
-		return commands
-			.map((command) => ({
-				name: String(command?.name || ''),
-				category: String(command?.category || 'Uncategorized'),
-				aliases: Array.isArray(command?.aliases) ? command.aliases.map((alias) => String(alias)) : [],
-				description: String(command?.description || ''),
-				usage: String(command?.usage || ''),
-				cooldown: Number(command?.cooldown || 0),
-				limit: Number(command?.limit || 0),
-				premium: Boolean(command?.premium),
-				restrict: Boolean(command?.restrict),
-				enabled: Boolean(command?.enabled)
-			}))
-			.filter((command) => Boolean(command.name));
 	} catch {
-		return [];
+		// Ignore DB errors; catalog will populate when commands are loaded.
 	}
 };
 
@@ -176,6 +135,7 @@ export const initializeDashboardMonitor = async (configuration) => {
 	}
 
 	await loadCommandUsage(configuration);
+	await hydrateCommandsCatalogCache();
 	state.initialized = true;
 };
 
@@ -194,7 +154,7 @@ export const listDashboardCommands = (configuration) => {
 	const commands = configuration?.cmds?.commands?.entries?.() || [];
 
 	if (!commands.length) {
-		const cached = readCommandsCatalog();
+		const cached = readCommandsCatalogSync();
 
 		return cached
 			.map((command) => ({
