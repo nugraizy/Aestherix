@@ -11,6 +11,8 @@ import P from 'pino';
 import sharp from 'sharp';
 
 import configuration from './helper/config/connect.js';
+import prisma from './helper/database/prisma.js';
+import { getUserLimit, upsertUserLimit, getBannedUsers, banUser, unbanUser } from './helper/database/adapters/user.js';
 import {
 	getDashboardLogs,
 	initializeDashboardMonitor,
@@ -54,8 +56,6 @@ const DASHBOARD_BRIDGE_TOKEN = String(process.env.DASHBOARD_BRIDGE_TOKEN || 'aes
 
 let dashboardBridgeInstance = null;
 const S_WHATSAPP_NET = '@s.whatsapp.net';
-const USERS_LIMIT_DIR = './databases/users/limit';
-const USERS_BANNED_PATH = './databases/users/banned.json';
 
 const normalizeUserJid = (input) => {
 	let raw = String(input || '').trim();
@@ -90,24 +90,14 @@ const normalizeUserJid = (input) => {
 };
 
 const readUserLimitFile = async (jid) => {
-	const filePath = path.join(USERS_LIMIT_DIR, `${jid}.json`);
+	const raw = await getUserLimit(prisma, jid);
 
-	if (!(await fs.pathExists(filePath))) {
-		const fallback = {
-			id: jid,
-			limit: 30,
-			role: 'FREE'
-		};
-
-		await fs.ensureDir(USERS_LIMIT_DIR);
-		await fs.writeJSON(filePath, fallback, { spaces: 2 });
-		return fallback;
+	if (!raw) {
+		return { id: jid, limit: 30, role: 'FREE' };
 	}
 
-	const raw = await fs.readJSON(filePath);
-
 	return {
-		id: normalizeUserJid(raw?.id || jid) || jid,
+		id: normalizeUserJid(raw?.id) || jid,
 		limit: Math.max(0, Number(raw?.limit || 0)),
 		role: raw?.role === 'PREMIUM' ? 'PREMIUM' : 'FREE'
 	};
@@ -120,28 +110,28 @@ const writeUserLimitFile = async (jid, data) => {
 		role: data?.role === 'PREMIUM' ? 'PREMIUM' : 'FREE'
 	};
 
-	await fs.ensureDir(USERS_LIMIT_DIR);
-	await fs.writeJSON(path.join(USERS_LIMIT_DIR, `${jid}.json`), payload, { spaces: 2 });
+	await upsertUserLimit(prisma, jid, payload.limit, payload.role);
 	configuration.user.limit.set(jid, { limit: payload.limit, role: payload.role });
 
 	return payload;
 };
 
 const readBannedUsers = async () => {
-	if (!(await fs.pathExists(USERS_BANNED_PATH))) {
-		await fs.ensureDir(path.dirname(USERS_BANNED_PATH));
-		await fs.writeJSON(USERS_BANNED_PATH, [], { spaces: 2 });
-		return [];
-	}
-
-	const list = await fs.readJSON(USERS_BANNED_PATH);
-
-	return Array.isArray(list) ? list : [];
+	return getBannedUsers(prisma);
 };
 
 const writeBannedUsers = async (list) => {
-	await fs.ensureDir(path.dirname(USERS_BANNED_PATH));
-	await fs.writeJSON(USERS_BANNED_PATH, Array.from(new Set(list)), { spaces: 2 });
+	const current = await getBannedUsers(prisma);
+	const currentSet = new Set(current);
+	const newSet = new Set(Array.from(new Set(list)));
+
+	for (const jid of newSet) {
+		if (!currentSet.has(jid)) await banUser(prisma, jid).catch(() => {});
+	}
+
+	for (const jid of currentSet) {
+		if (!newSet.has(jid)) await unbanUser(prisma, jid).catch(() => {});
+	}
 };
 
 const applyDashboardRuntimeMutation = async (waClient, type, payload = {}) => {
