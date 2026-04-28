@@ -1,7 +1,7 @@
-import fs from 'fs-extra';
-
 import configuration from '../../helper/config/connect.js';
 import { S_WHATSAPP_NET } from '../../helper/index.js';
+import prisma from '../../helper/database/prisma.js';
+import { getBannedUsers, unbanUser } from '../../helper/database/adapters/user.js';
 
 /**
  *
@@ -29,7 +29,7 @@ export default {
 			return await client.instance.reply(from, 'Please provide user to unban', message);
 		}
 
-		const userBanned = await fs.readJSON('./databases/users/banned.json');
+		const userBanned = await getBannedUsers(prisma);
 		const unbanned = [];
 
 		if (mention.length) {
@@ -42,12 +42,9 @@ export default {
 					);
 					continue;
 				} else {
-					const index = userBanned.indexOf(mentioned);
-
-					configuration.cache.bannedlist.splice(indexs(configuration.cache.bannedlist, mentioned), 1);
-					configuration.cache.blocklist.splice(indexs(configuration.cache.bannedlist, mentioned), 1);
-					userBanned.splice(index, 1);
-					await fs.writeJSON('./databases/users/banned.json', userBanned);
+				await unbanUser(prisma, mentioned);
+				configuration.cache.bannedlist.splice(indexs(configuration.cache.bannedlist, mentioned), 1);
+				configuration.cache.blocklist.splice(indexs(configuration.cache.blocklist, mentioned), 1);
 					unbanned.push(mentioned);
 					await client.instance.updateBlockStatus(mentioned, 'unblock');
 				}
@@ -81,12 +78,9 @@ export default {
 					continue;
 				}
 
-				const index = userBanned.indexOf(`${number}${S_WHATSAPP_NET}`);
-
+					await unbanUser(prisma, `${number}${S_WHATSAPP_NET}`);
 				configuration.cache.bannedlist.splice(indexs(configuration.cache.bannedlist, `${number}${S_WHATSAPP_NET}`), 1);
-				configuration.cache.blocklist.splice(indexs(configuration.cache.bannedlist, `${number}${S_WHATSAPP_NET}`), 1);
-				userBanned.splice(index, 1);
-				await fs.writeJSON('./databases/users/banned.json', userBanned);
+				configuration.cache.blocklist.splice(indexs(configuration.cache.blocklist, `${number}${S_WHATSAPP_NET}`), 1);
 				await client.instance.updateBlockStatus(`${number}${S_WHATSAPP_NET}`, 'unblock');
 				await client.instance.send(
 					from,
@@ -105,11 +99,9 @@ export default {
 
 			const index = userBanned.indexOf(mediaData.participant);
 
+			await unbanUser(prisma, mediaData.participant);
 			configuration.cache.bannedlist.splice(indexs(configuration.cache.bannedlist, mediaData.participant), 1);
-			configuration.cache.blocklist.splice(indexs(configuration.cache.bannedlist, mediaData.participant), 1);
-			userBanned.splice(index, 1);
-			await fs.writeJSON('./databases/users/banned.json', userBanned);
-
+			configuration.cache.blocklist.splice(indexs(configuration.cache.blocklist, mediaData.participant), 1);
 			await client.instance.updateBlockStatus(mediaData.participant, 'unblock');
 			await client.instance.send(
 				from,

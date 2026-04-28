@@ -1,13 +1,13 @@
-import fs from 'fs-extra';
-
 import configuration from '../../helper/config/connect.js';
 import { S_WHATSAPP_NET, Limit } from '../../helper/index.js';
+import prisma from '../../helper/database/prisma.js';
+import { getUserLimit, updateUserRole } from '../../helper/database/adapters/user.js';
 
-const configureUser = async (client, { mode, user, USERS, PREMS_CONTAINER, from, message }) => {
-	const index = USERS.findIndex((v) => v.id === user);
+const configureUser = async (client, { mode, user, PREMS_CONTAINER, from, message }) => {
+	const record = await getUserLimit(prisma, user).catch(() => null);
 
-	if (index === -1) {
-		await client.instance.send(
+	if (!record) {
+		return await client.instance.send(
 			from,
 			{ text: `User @${user.replace(/[^\d]/g, '')} not found`, mentions: [user] },
 			{ from, quoted: message }
@@ -15,7 +15,7 @@ const configureUser = async (client, { mode, user, USERS, PREMS_CONTAINER, from,
 	}
 
 	if (mode === 'add') {
-		if (USERS[index].role === 'PREMIUM') {
+		if (record.role === 'PREMIUM') {
 			return await client.instance.send(
 				from,
 				{ text: `User @${user.replace(/[^\d]/g, '')} is already premium`, mentions: [user] },
@@ -23,14 +23,13 @@ const configureUser = async (client, { mode, user, USERS, PREMS_CONTAINER, from,
 			);
 		}
 
-		USERS[index].role = 'PREMIUM';
-		await fs.writeJSON('./databases/users/limit.json', USERS, { spaces: 4 });
+		await updateUserRole(prisma, user, 'PREMIUM');
 		PREMS_CONTAINER.adding.push(user);
 		Limit.updateRole(user, 'PREMIUM');
 	}
 
 	if (mode === 'remove') {
-		if (USERS[index].role === 'FREE') {
+		if (record.role === 'FREE') {
 			return await client.instance.send(
 				from,
 				{ text: `User @${user.replace(/[^\d]/g, '')} is already user`, mentions: [user] },
@@ -38,8 +37,7 @@ const configureUser = async (client, { mode, user, USERS, PREMS_CONTAINER, from,
 			);
 		}
 
-		USERS[index].role = 'FREE';
-		await fs.writeJSON('./databases/users/limit.json', USERS, { spaces: 4 });
+		await updateUserRole(prisma, user, 'FREE');
 		PREMS_CONTAINER.removing.push(user);
 		Limit.updateRole(user, 'FREE');
 	}
@@ -81,10 +79,6 @@ export default {
 			return await client.instance.reply(from, 'Please provide user to ban', message);
 		}
 
-		/**
-		 * @type {string[]}
-		 */
-		const USERS = await fs.readJSON('./databases/users/limit.json');
 		const PREMS_CONTAINER = {
 			adding: [],
 			removing: []
@@ -105,7 +99,6 @@ export default {
 				await configureUser(client, {
 					mode: configure,
 					user: mentioned,
-					USERS,
 					PREMS_CONTAINER,
 					from,
 					message
@@ -128,7 +121,6 @@ export default {
 				await configureUser(client, {
 					mode: configure,
 					user: `${number}@${S_WHATSAPP_NET}`,
-					USERS,
 					PREMS_CONTAINER,
 					from,
 					message
@@ -139,67 +131,19 @@ export default {
 		}
 
 		if (bodyQuoted) {
-			if (configure === 'add') {
-				const mentioned = mediaData.participant;
+			const mentioned = mediaData.participant;
 
-				if (mentioned === configuration.botNumber) {
-					return await client.instance.reply(from, 'Cannot add bot as premium', message);
-				}
-
-				const index = USERS.findIndex((v) => v.id === mentioned);
-
-				if (index === -1) {
-					return await client.instance.reply(from, 'User not found', message);
-				}
-
-				if (USERS[index].role === 'PREMIUM') {
-					return await client.instance.reply(from, 'User already premium', message);
-				}
-
-				USERS[index].role = 'PREMIUM';
-				await fs.writeJSON('./databases/users/limit.json', USERS, { spaces: 4 });
-				PREMS_CONTAINER.adding.push(mentioned);
+			if (mentioned === configuration.botNumber) {
+				return await client.instance.reply(from, 'Cannot modify bot premium status', message);
 			}
 
-			if (configure === 'remove') {
-				const mentioned = mediaData.participant;
-
-				if (mentioned === configuration.botNumber) {
-					return await client.instance.reply(from, 'Cannot remove bot as premium', message);
-				}
-
-				const index = USERS.findIndex((v) => v.id === mentioned);
-
-				if (index === -1) {
-					return await client.instance.reply(from, 'User not found', message);
-				}
-
-				if (USERS[index].role === 'FREE') {
-					return await client.instance.reply(from, 'User already user', message);
-				}
-
-				USERS[index].role = 'FREE';
-				await fs.writeJSON('./databases/users/limit.json', USERS, { spaces: 4 });
-				PREMS_CONTAINER.removing.push(mentioned);
-			}
-
-			if (PREMS_CONTAINER.adding.length || PREMS_CONTAINER.removing.length) {
-				let capt = '';
-
-				if (PREMS_CONTAINER.adding.length) {
-					capt += `Success adding premium : ${PREMS_CONTAINER.adding.map((v) => `@${v.split('@')[0]}`).join(', ')}\n`;
-				}
-
-				if (PREMS_CONTAINER.removing.length) {
-					capt += `Success removing premium : ${PREMS_CONTAINER.removing.map((v) => `@${v.split('@')[0]}`).join(', ')}`;
-				}
-
-				await client.instance.send(
-					from,
-					{ text: capt.trim(), mentions: [].concat(PREMS_CONTAINER.adding, PREMS_CONTAINER.removing) },
-					{ quoted: message }
-				);
-			}
+			await configureUser(client, {
+				mode: configure,
+				user: mentioned,
+				PREMS_CONTAINER,
+				from,
+				message
+			});
 		}
 	}
 };

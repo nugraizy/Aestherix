@@ -1,7 +1,7 @@
-import fs from 'fs-extra';
-
 import configuration from '../../helper/config/connect.js';
 import { S_WHATSAPP_NET } from '../../helper/index.js';
+import prisma from '../../helper/database/prisma.js';
+import { getBannedUsers, banUser } from '../../helper/database/adapters/user.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -21,14 +21,13 @@ export default {
 			return await client.instance.reply(from, 'Please provide user to ban', message);
 		}
 
-		const userBanned = await fs.readJSON('./databases/users/banned.json');
+		const userBanned = await getBannedUsers(prisma);
 		const banned = [];
 
 		if (args[1] === 'report' && isOwner) {
-			userBanned.push(args[3]);
+			await banUser(prisma, args[3]);
 			configuration.cache.bannedlist.push(args[3]);
 			configuration.cache.blocklist.push(args[3]);
-			await fs.writeJSON('./databases/users/banned.json', userBanned);
 
 			client.instance.updateBlockStatus(args[3], 'block');
 			await client.instance.reply(
@@ -51,10 +50,9 @@ export default {
 					continue;
 				}
 
+				await banUser(prisma, mentioned);
 				configuration.cache.bannedlist.push(mentioned);
 				configuration.cache.blocklist.push(mentioned);
-				userBanned.push(mentioned);
-				await fs.writeJSON('./databases/users/banned.json', userBanned);
 				banned.push(mentioned);
 				await client.instance.updateBlockStatus(mentioned, 'block');
 			}
@@ -90,10 +88,9 @@ export default {
 					continue;
 				}
 
+				await banUser(prisma, `${number}${S_WHATSAPP_NET}`);
 				configuration.cache.bannedlist.push(`${number}${S_WHATSAPP_NET}`);
 				configuration.cache.blocklist.push(`${number}${S_WHATSAPP_NET}`);
-				userBanned.push(`${number}${S_WHATSAPP_NET}`);
-				await fs.writeJSON('./databases/users/banned.json', userBanned);
 				await client.instance.updateBlockStatus(`${number}${S_WHATSAPP_NET}`, 'block');
 				await client.instance.send(
 					from,
@@ -110,10 +107,9 @@ export default {
 				return await client.instance.reply(from, 'Already banned', message);
 			}
 
+			await banUser(prisma, mediaData.participant);
 			configuration.cache.bannedlist.push(mediaData.participant);
 			configuration.cache.blocklist.push(mediaData.participant);
-			userBanned.push(mediaData.participant);
-			await fs.writeJSON('./databases/users/banned.json', userBanned);
 			await client.instance.updateBlockStatus(mediaData.participant, 'block');
 			await client.instance.send(
 				from,
