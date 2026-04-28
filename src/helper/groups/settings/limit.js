@@ -1,29 +1,27 @@
-import fs from 'fs-extra';
 import cron from 'node-cron';
+import fs from 'fs-extra';
 
 import { color, loggers } from '../../../utils/modules/index.js';
 import configuration from '../../config/connect.js';
+import prisma from '../../database/prisma.js';
+import { getAllUserLimits, upsertUserLimit } from '../../database/adapters/user.js';
 
-const PATH = {
-	folder: './databases/users/limit/',
-	settings: './src/helper/config/settings.json'
-};
+const SETTINGS_PATH = './src/helper/config/settings.json';
 
-if (!(await fs.readdir(PATH.folder))) {
-	await fs.mkdir(PATH.folder);
-}
-
-const files = (await fs.readdir(PATH.folder)).filter((v) => v.endsWith('.json'));
-const LIMIT = (await fs.readJSON(PATH.settings))?.limit || 100;
+const LIMIT = (await fs.readJSON(SETTINGS_PATH).catch(() => ({}))).limit || 100;
 
 configuration.cache.limit = LIMIT;
 
-(await Promise.all(files.map((file) => fs.readJSON(PATH.folder + file)))).forEach(({ id, limit, role }) =>
-	configuration.user.limit.set(id, {
-		limit,
-		role
-	})
-);
+// Warm in-memory limit cache from DB at startup
+try {
+	const rows = await getAllUserLimits(prisma);
+
+	for (const { id, limit, role } of rows) {
+		configuration.user.limit.set(id, { limit, role });
+	}
+} catch {
+	// DB may not be reachable on first boot; the cache starts empty.
+}
 
 export class Limit {
 	static checkExist(sender) {
@@ -52,15 +50,8 @@ export class Limit {
 		const user = configuration.user.limit.get(sender);
 
 		if (!user) {
-			const data = {
-				id: sender,
-				limit: LIMIT,
-				role: 'FREE'
-			};
-
 			this.upsert(sender, LIMIT, 'FREE');
-
-			fs.writeJSONSync(`${PATH.folder + sender}.json`, data);
+			void upsertUserLimit(prisma, sender, LIMIT, 'FREE');
 
 			return { role: 'FREE' };
 		}
@@ -134,49 +125,30 @@ export class Limit {
 	}
 
 	static async resetAllLimit() {
-		const files = await fs.readdir(PATH.folder);
+		const tasks = [];
 
-		await Promise.all(
-			files.map(async (filename) => {
-				const data = fs.readJSONSync(PATH.folder + filename);
+		for (const [id, data] of configuration.user.limit.entries()) {
+			if (!['OWNER', 'PREMIUM'].includes(data.role)) {
+				this.upsert(id, LIMIT, data.role);
+				tasks.push(upsertUserLimit(prisma, id, LIMIT, data.role));
+			}
+		}
 
-				if (!['OWNER', 'PREMIUM'].includes(data.role)) {
-					data.limit = LIMIT;
-					fs.writeJSONSync(PATH.folder + filename, data);
-
-					this.upsert(data.id, LIMIT, data.role);
-				}
-			})
-		);
+		if (tasks.length) {
+			await Promise.all(tasks);
+		}
 	}
 
 	static async updateLimitFromCache() {
-		const [usersFiles, usersCache] = [await fs.readdir(PATH.folder), configuration.user.limit.entries()];
+		const tasks = [];
 
-		const usersParsed = usersFiles.map((filename) => fs.readJSONSync(PATH.folder + filename));
+		for (const [id, data] of configuration.user.limit.entries()) {
+			tasks.push(upsertUserLimit(prisma, id, data.limit, data.role));
+		}
 
-		await Promise.all(
-			usersCache.map(([key, _data]) => {
-				const index = usersParsed.findIndex((v) => v.id === key);
-
-				if (index === -1) {
-					const data = {
-						id: key,
-						role: _data.role,
-						limit: _data.limit
-					};
-
-					fs.writeJSONSync(`${PATH.folder + key}.json`, data);
-
-					return;
-				}
-
-				usersParsed[index].role = _data.role;
-				usersParsed[index].limit = _data.limit;
-
-				fs.writeJSONSync(`${PATH.folder + key}.json`, usersParsed[index]);
-			})
-		);
+		if (tasks.length) {
+			await Promise.all(tasks);
+		}
 	}
 }
 
