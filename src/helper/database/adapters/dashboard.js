@@ -9,10 +9,6 @@
 
 /** @typedef {import('@prisma/client').PrismaClient} PrismaClient */
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Sessions
-// ─────────────────────────────────────────────────────────────────────────────
-
 /**
  * @typedef {Object} DashboardSessionData
  * @property {string}      token
@@ -125,10 +121,6 @@ export const purgeExpiredDashboardSessions = async (db, now) => {
 	});
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Audit logs
-// ─────────────────────────────────────────────────────────────────────────────
-
 /**
  * @typedef {Object} AuditLogData
  * @property {number}      id
@@ -206,7 +198,7 @@ export const getAuditLogs = async (db, limit = 100) => {
  */
 export const getLastAuditLogId = async (db) => {
 	const row = await db.dashboardAuditLog.findFirst({ orderBy: { logId: 'desc' } });
-	
+
 	return row?.logId ?? 0;
 };
 
@@ -218,7 +210,6 @@ export const getLastAuditLogId = async (db) => {
  * @returns {Promise<void>}
  */
 export const pruneAuditLogs = async (db, maxLogs) => {
-	// Find the Nth newest entry and delete everything older.
 	const rows = await db.dashboardAuditLog.findMany({
 		orderBy: { logId: 'desc' },
 		skip: maxLogs,
@@ -230,10 +221,6 @@ export const pruneAuditLogs = async (db, maxLogs) => {
 		await db.dashboardAuditLog.deleteMany({ where: { logId: { lte: rows[0].logId } } });
 	}
 };
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Blocklist
-// ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * Return all blocklisted values.
@@ -273,15 +260,16 @@ export const removeFromBlocklist = async (db, value) => {
 	await db.dashboardBlocklist.deleteMany({ where: { value } });
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// OTPs
-// ─────────────────────────────────────────────────────────────────────────────
-
 /**
  * @typedef {Object} OtpData
  * @property {string}      phoneNumber
- * @property {string}      otp
+ * @property {string}      requestId
+ * @property {string}      requestKeyHash
+ * @property {string}      actionTokenHash
+ * @property {string}      status
+ * @property {number}      createdAt
  * @property {number|null} expiresAt
+ * @property {number|null} confirmedAt
  */
 
 /**
@@ -295,13 +283,23 @@ export const upsertOtp = async (db, data) => {
 	await db.dashboardOtp.upsert({
 		where: { phoneNumber: data.phoneNumber },
 		update: {
-			otp: data.otp,
-			expiresAt: data.expiresAt !== null ? BigInt(Math.round(data.expiresAt)) : null
+			requestId: data.requestId,
+			requestKeyHash: data.requestKeyHash,
+			actionTokenHash: data.actionTokenHash,
+			status: data.status,
+			createdAt: new Date(data.createdAt),
+			expiresAt: data.expiresAt !== null ? BigInt(Math.round(data.expiresAt)) : null,
+			confirmedAt: data.confirmedAt !== null ? new Date(data.confirmedAt) : null
 		},
 		create: {
 			phoneNumber: data.phoneNumber,
-			otp: data.otp,
-			expiresAt: data.expiresAt !== null ? BigInt(Math.round(data.expiresAt)) : null
+			requestId: data.requestId,
+			requestKeyHash: data.requestKeyHash,
+			actionTokenHash: data.actionTokenHash,
+			status: data.status,
+			createdAt: new Date(data.createdAt),
+			expiresAt: data.expiresAt !== null ? BigInt(Math.round(data.expiresAt)) : null,
+			confirmedAt: data.confirmedAt !== null ? new Date(data.confirmedAt) : null
 		}
 	});
 };
@@ -316,12 +314,19 @@ export const upsertOtp = async (db, data) => {
 export const getOtp = async (db, phoneNumber) => {
 	const row = await db.dashboardOtp.findUnique({ where: { phoneNumber } });
 
-	if (!row) return null;
+	if (!row) {
+		return null;
+	}
 
 	return {
 		phoneNumber: row.phoneNumber,
-		otp: row.otp,
-		expiresAt: row.expiresAt !== null ? Number(row.expiresAt) : null
+		requestId: row.requestId,
+		requestKeyHash: row.requestKeyHash,
+		actionTokenHash: row.actionTokenHash,
+		status: row.status,
+		createdAt: Number(row.createdAt),
+		expiresAt: row.expiresAt !== null ? Number(row.expiresAt) : null,
+		confirmedAt: row.confirmedAt ? Number(row.confirmedAt) : null
 	};
 };
 

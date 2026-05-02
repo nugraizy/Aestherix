@@ -11,8 +11,6 @@ import P from 'pino';
 import sharp from 'sharp';
 
 import configuration from './helper/config/connect.js';
-import prisma from './helper/database/prisma.js';
-import { getUserLimit, upsertUserLimit, getBannedUsers, banUser, unbanUser } from './helper/database/adapters/user.js';
 import {
 	getDashboardLogs,
 	initializeDashboardMonitor,
@@ -40,6 +38,8 @@ import { clearDBConnection, resetSession } from './helper/connection/socket/rese
 import { connectSocket } from './helper/connection/socket/socket.js';
 import { initContact, updateContact } from './helper/connection/utils/cache.js';
 import { cli as clis } from './helper/connection/utils/check-flag.js';
+import { banUser, getBannedUsers, getUserLimit, unbanUser, upsertUserLimit } from './helper/database/adapters/user.js';
+import prisma from './helper/database/prisma.js';
 import { runLimitScheduler } from './helper/groups/settings/limit.js';
 import { color, loggers } from './utils/modules/index.js';
 import { pinterest } from './utils/pinterest/index.js';
@@ -126,11 +126,15 @@ const writeBannedUsers = async (list) => {
 	const newSet = new Set(Array.from(new Set(list)));
 
 	for (const jid of newSet) {
-		if (!currentSet.has(jid)) await banUser(prisma, jid).catch(() => {});
+		if (!currentSet.has(jid)) {
+			await banUser(prisma, jid).catch(() => {});
+		}
 	}
 
 	for (const jid of currentSet) {
-		if (!newSet.has(jid)) await unbanUser(prisma, jid).catch(() => {});
+		if (!newSet.has(jid)) {
+			await unbanUser(prisma, jid).catch(() => {});
+		}
 	}
 };
 

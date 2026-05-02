@@ -135,9 +135,13 @@ model DashboardBlocklist {
 model DashboardOtp {
   id          String   @id @default(cuid())
   phoneNumber String   @unique
-  otp         String
-  expiresAt   BigInt?
-  createdAt   DateTime @default(now())
+  requestId      String
+  requestKeyHash String
+  actionTokenHash String
+  status         String
+  createdAt      DateTime @default(now())
+  expiresAt      BigInt?
+  confirmedAt    DateTime?
 }
 
 /// Cumulative per-command invocation counter.

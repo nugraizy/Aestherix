@@ -401,7 +401,17 @@ class Spotifier {
 					};
 				}
 
-				const { name: trackTitle, artists, duration_ms: durationMs } = data.item;
+				const {
+					name: trackTitle,
+					artists,
+					duration_ms: durationMs,
+					album,
+					id: trackId,
+					uri: trackUri,
+					external_urls
+				} = data.item || {};
+				const coverUrl = Array.isArray(album?.images) ? album.images[0]?.url || null : null;
+				const trackUrl = external_urls?.spotify || null;
 
 				this.#currentlyPlaying = data.item.name;
 
@@ -418,6 +428,10 @@ class Spotifier {
 						.map((v) => v.name)
 						.map((v, i) => (artists.length !== 1 && i + 1 === artists.length ? `and ${v}` : v))
 						.join(', '),
+					trackId: trackId || null,
+					trackUri: trackUri || null,
+					trackUrl,
+					coverUrl,
 					durationMs,
 					progressMs,
 					isPlaying

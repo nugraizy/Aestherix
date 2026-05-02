@@ -95,8 +95,6 @@ async function main() {
 	try {
 		const flags = await import('./src/helper/connection/utils/check-flag.js');
 
-		// console.clear();
-
 		const isInternetConnected = await waitForInternetConnection(INTERNET_CHECK_TIMEOUT, INTERNET_CHECK_INTERVAL);
 
 		if (!isInternetConnected) {
@@ -104,7 +102,7 @@ async function main() {
 		}
 
 		printBanner();
-		// printFlags(Object.entries(flags.cli.flags));
+		printFlags(Object.entries(flags.cli.flags));
 
 		await import('./src/index.js');
 	} catch (error) {

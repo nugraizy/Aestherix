@@ -48,6 +48,10 @@ let realtimeConnected = false;
 let botLogsBridgeWarningShown = false;
 let changelogHtmlCache = '';
 let contributorsHtmlCache = '';
+let spotifyPollTimer = null;
+let spotifyProgressTimer = null;
+let spotifyLastProgressAt = 0;
+let latestSpotify = null;
 const DIALOG_ANIMATION_MS = 240;
 const dialogHideTimers = new WeakMap();
 const CONTRIBUTORS_AVATAR_CACHE_NAME = 'aestherix.dashboard.contributor-avatars.v1';
@@ -2172,7 +2176,6 @@ const drawMetricChart = (canvas, points, color, hoverIndex = null) => {
 	ctx.lineJoin = 'round';
 	ctx.lineCap = 'round';
 
-	// Draw a soft under-stroke first to reduce jagged appearance on high-contrast light theme.
 	ctx.lineWidth = 3.2;
 	ctx.strokeStyle = toRgbaWithAlpha(color, 0.22);
 	ctx.stroke();
@@ -2738,7 +2741,308 @@ const renderStatus = (payload) => {
 	}
 
 	renderHeaderAlerts();
-	// renderSpotifyNowPlaying(payload.spotify);
+	renderSpotifyNowPlaying(payload.spotify);
+};
+
+const formatSpotifyTime = (value) => {
+	const totalSeconds = Math.max(0, Math.floor(Number(value || 0) / 1000));
+	const minutes = Math.floor(totalSeconds / 60);
+	const seconds = totalSeconds % 60;
+
+	return `${minutes}:${String(seconds).padStart(2, '0')}`;
+};
+
+const getSpotifyLinkTargets = (data) => {
+	const trackUri = String(data?.trackUri || '').trim();
+	const trackUrl = String(data?.trackUrl || '').trim();
+
+	if (trackUri) {
+		return { primary: trackUri, fallback: trackUrl || '' };
+	}
+
+	if (trackUrl) {
+		return { primary: trackUrl, fallback: '' };
+	}
+
+	return { primary: '', fallback: '' };
+};
+
+const applySpotifyLink = (element, data) => {
+	if (!element) {
+		return;
+	}
+
+	const { primary, fallback } = getSpotifyLinkTargets(data);
+	const href = primary || fallback || '#';
+
+	element.dataset.spotifyPrimary = primary;
+	element.dataset.spotifyFallback = fallback;
+	element.href = href;
+	element.classList.toggle('is-disabled', href === '#');
+	element.setAttribute('aria-disabled', href === '#' ? 'true' : 'false');
+};
+
+const updateSpotifyProgress = ({ force } = {}) => {
+	if (!latestSpotify) {
+		return;
+	}
+
+	const available = Boolean(latestSpotify.available);
+	const isPlaying = Boolean(latestSpotify.isPlaying);
+	const shouldShow = available && isPlaying;
+
+	if (!shouldShow) {
+		return;
+	}
+
+	const durationMs = Number(latestSpotify.durationMs || 0);
+	const baseProgressMs = Number(latestSpotify.progressMs || 0);
+	const now = Date.now();
+	const elapsedMs = force ? 0 : Math.max(0, now - spotifyLastProgressAt);
+	const nextProgressMs = durationMs > 0 ? Math.min(durationMs, baseProgressMs + elapsedMs) : baseProgressMs + elapsedMs;
+	const ratio = durationMs > 0 ? Math.min(1, Math.max(0, nextProgressMs / durationMs)) : 0;
+	const durationLabel = durationMs > 0 ? formatSpotifyTime(durationMs) : '--:--';
+	const progressLabel = formatSpotifyTime(nextProgressMs);
+	const fullDurationLabel = `${progressLabel} / ${durationLabel}`;
+
+	latestSpotify.progressMs = nextProgressMs;
+	spotifyLastProgressAt = now;
+
+	if (els.spotifyProgress) {
+		els.spotifyProgress.style.width = `${Math.round(ratio * 100)}%`;
+		els.spotifyProgress.setAttribute('title', fullDurationLabel);
+	}
+
+	if (els.spotifyTimestamp) {
+		els.spotifyTimestamp.textContent = fullDurationLabel;
+	}
+
+	if (els.spotifyPopupTimestamp) {
+		els.spotifyPopupTimestamp.textContent = fullDurationLabel;
+	}
+};
+
+const startSpotifyProgressTicker = () => {
+	if (spotifyProgressTimer) {
+		return;
+	}
+
+	spotifyProgressTimer = setInterval(() => {
+		updateSpotifyProgress();
+	}, 1000);
+};
+
+const applySpotifyCoverColor = (img, container) => {
+	if (!img || !container) {
+		return;
+	}
+
+	const extract = async () => {
+		try {
+			if (!window.Vibrant || !img.complete || img.naturalWidth === 0) {
+				return;
+			}
+
+			const palette = await window.Vibrant.from(img).getPalette();
+
+			const vibrant = palette.Vibrant || palette.LightVibrant || palette.Muted;
+			const dark = palette.DarkVibrant || palette.DarkMuted || vibrant;
+
+			if (!vibrant) {
+				return;
+			}
+
+			const [r1, g1, b1] = vibrant.rgb.map(Math.round);
+			const [r2, g2, b2] = dark.rgb.map(Math.round);
+
+			container.style.setProperty('--spotify-cover-color', `rgb(${r1},${g1},${b1})`);
+			container.style.setProperty('--spotify-cover-color-2', `rgb(${r2},${g2},${b2})`);
+
+			const waveSvg = encodeURIComponent(
+				`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='12' viewBox='0 0 40 12'>` +
+					`<path d='M0 6 C7.33 1,12.67 1,20 6 C27.33 11,32.67 11,40 6' fill='none' stroke='rgb(${r1},${g1},${b1})' stroke-width='2.5' stroke-linecap='round'/>` +
+					`</svg>`
+			);
+			const pausedSvg = encodeURIComponent(
+				`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='12' viewBox='0 0 40 12'>` +
+					`<path d='M0 6 L40 6' fill='none' stroke='rgb(${r1},${g1},${b1})' stroke-opacity='0.42' stroke-width='2.5' stroke-linecap='round'/>` +
+					`</svg>`
+			);
+
+			container.style.setProperty('--spotify-wave-image', `url("data:image/svg+xml,${waveSvg}")`);
+			container.style.setProperty('--spotify-paused-image', `url("data:image/svg+xml,${pausedSvg}")`);
+		} catch {
+			// CORS or Vibrant decode error — keep CSS defaults
+		}
+	};
+
+	if (img.complete && img.naturalWidth > 0) {
+		extract();
+	} else {
+		img.addEventListener('load', extract, { once: true });
+	}
+};
+
+const renderSpotifyNowPlaying = (payload) => {
+	if (!els.spotifyNowPlaying) {
+		return;
+	}
+
+	const data = payload || {};
+	const available = Boolean(data.available);
+	const isPlaying = Boolean(data.isPlaying);
+	const trackTitle = String(data.trackTitle || '').trim() + (available && !isPlaying ? ' (Paused)' : '');
+	const artists = String(data.artists || '').trim();
+	const message = String(data.message || '').trim();
+	const durationMs = Number(data.durationMs || 0);
+	const progressMs = Number(data.progressMs || 0);
+	const coverUrl = String(data.coverUrl || '').trim();
+
+	latestSpotify = {
+		...data,
+		available,
+		isPlaying,
+		durationMs,
+		progressMs
+	};
+	spotifyLastProgressAt = Date.now();
+
+	els.spotifyNowPlaying.classList.toggle('is-playing', isPlaying);
+	els.spotifyNowPlaying.classList.toggle('is-idle', available && !isPlaying);
+	els.spotifyNowPlaying.classList.toggle('is-unavailable', !available);
+
+	els.spotifyNowPlaying.classList.toggle('hidden', !available);
+
+	if (!available) {
+		closeSpotifyPopup();
+		return;
+	}
+
+	if (els.spotifyTrack) {
+		els.spotifyTrack.textContent = trackTitle || message || 'Spotify idle';
+	}
+
+	if (els.spotifyArtist) {
+		els.spotifyArtist.textContent = artists || '-';
+	}
+
+	if (isPlaying) {
+		updateSpotifyProgress({ force: true });
+	} else {
+		const durationLabel = durationMs > 0 ? formatSpotifyTime(durationMs) : '--:--';
+		const pausedLabel = `${formatSpotifyTime(progressMs)} / ${durationLabel}`;
+		const ratio = durationMs > 0 ? Math.min(1, Math.max(0, progressMs / durationMs)) : 0;
+
+		if (els.spotifyProgress) {
+			els.spotifyProgress.style.width = `${Math.round(ratio * 100)}%`;
+			els.spotifyProgress.setAttribute('title', pausedLabel);
+		}
+
+		if (els.spotifyTimestamp) {
+			els.spotifyTimestamp.textContent = pausedLabel;
+		}
+
+		if (els.spotifyPopupTimestamp) {
+			els.spotifyPopupTimestamp.textContent = pausedLabel;
+		}
+	}
+
+	if (els.spotifyCover) {
+		if (coverUrl) {
+			els.spotifyCover.crossOrigin = 'anonymous';
+			els.spotifyCover.src = coverUrl;
+			els.spotifyCover.removeAttribute('aria-hidden');
+			els.spotifyCover.alt = `${trackTitle} cover`;
+			applySpotifyCoverColor(els.spotifyCover, els.spotifyNowPlaying);
+		} else {
+			els.spotifyCover.removeAttribute('src');
+			els.spotifyCover.setAttribute('aria-hidden', 'true');
+			els.spotifyNowPlaying?.style.removeProperty('--spotify-cover-color');
+			els.spotifyNowPlaying?.style.removeProperty('--spotify-cover-color-2');
+		}
+	}
+
+	applySpotifyLink(els.spotifyLink, data);
+	applySpotifyLink(els.spotifyPopupLink, data);
+
+	if (els.spotifyPopupTrack) {
+		els.spotifyPopupTrack.textContent = trackTitle || message || 'Spotify idle';
+	}
+
+	if (els.spotifyPopupArtist) {
+		els.spotifyPopupArtist.textContent = artists || '-';
+	}
+
+	if (els.spotifyPopupCover) {
+		if (coverUrl) {
+			els.spotifyPopupCover.src = coverUrl;
+			els.spotifyPopupCover.removeAttribute('aria-hidden');
+			els.spotifyPopupCover.alt = `${trackTitle} cover`;
+		} else {
+			els.spotifyPopupCover.removeAttribute('src');
+			els.spotifyPopupCover.setAttribute('aria-hidden', 'true');
+		}
+	}
+};
+
+const closeSpotifyPopup = () => {
+	els.spotifyPopup?.classList.add('hidden');
+};
+
+const openSpotifyPopup = () => {
+	if (!els.spotifyPopup || !latestSpotify?.isPlaying) {
+		return;
+	}
+
+	els.spotifyPopup.classList.remove('hidden');
+};
+
+const handleSpotifyLinkClick = (event) => {
+	const link = event.currentTarget;
+
+	if (!link) {
+		return;
+	}
+
+	const primary = link.dataset.spotifyPrimary || '';
+	const fallback = link.dataset.spotifyFallback || '';
+
+	if (!primary) {
+		event.preventDefault();
+		return;
+	}
+
+	if (primary.startsWith('spotify:') && fallback) {
+		event.preventDefault();
+		window.open(primary, '_blank', 'noopener,noreferrer');
+	}
+};
+
+const fetchSpotifyStatus = async () => {
+	try {
+		const response = await fetch('/api/dashboard/spotify', { cache: 'no-store' });
+
+		if (!response.ok) {
+			throw new Error('Spotify unavailable');
+		}
+
+		const payload = await response.json();
+
+		renderSpotifyNowPlaying(payload.spotify || payload);
+	} catch {
+		renderSpotifyNowPlaying({ available: false, message: 'Spotify unavailable' });
+	}
+};
+
+const startSpotifyPolling = () => {
+	if (spotifyPollTimer) {
+		return;
+	}
+
+	void fetchSpotifyStatus();
+	spotifyPollTimer = setInterval(() => {
+		void fetchSpotifyStatus();
+	}, 1000);
 };
 
 const renderUsersKpi = () => {
@@ -4383,6 +4687,8 @@ const emitRealtimeAuditFilters = () => {
 
 const setupRealtime = () => {
 	if (typeof window === 'undefined' || typeof window.io !== 'function') {
+		renderSpotifyNowPlaying({ available: false, message: 'Spotify unavailable' });
+		startSpotifyPolling();
 		return;
 	}
 
@@ -4404,6 +4710,8 @@ const setupRealtime = () => {
 
 	dashboardSocket.on('connect_error', () => {
 		realtimeConnected = false;
+		renderSpotifyNowPlaying({ available: false, message: 'Spotify unavailable' });
+		startSpotifyPolling();
 	});
 
 	dashboardSocket.on('dashboard:status', (payload) => {
@@ -4413,6 +4721,7 @@ const setupRealtime = () => {
 
 		renderStatus(payload);
 		setOnlineState(true);
+		// renderSpotifyNowPlaying(payload.spotify || { available: false, message: 'Spotify unavailable' });
 	});
 
 	dashboardSocket.on('dashboard:logs', (payload) => {
@@ -5240,6 +5549,19 @@ const bindEvents = () => {
 		openContributorsDialog();
 	});
 
+	els.spotifyCoverButton?.addEventListener('click', () => {
+		openSpotifyPopup();
+	});
+
+	els.spotifyPopup?.addEventListener('click', (event) => {
+		if (event.target === els.spotifyPopup) {
+			closeSpotifyPopup();
+		}
+	});
+
+	els.spotifyLink?.addEventListener('click', handleSpotifyLinkClick);
+	els.spotifyPopupLink?.addEventListener('click', handleSpotifyLinkClick);
+
 	els.openAlbums?.addEventListener('pointerdown', (event) => {
 		if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
 			return;
@@ -5447,6 +5769,7 @@ const bindEvents = () => {
 			return;
 		}
 
+		closeSpotifyPopup();
 		closeAllCustomFilters();
 
 		if (!els.changelogDialog?.classList.contains('hidden')) {
@@ -6207,6 +6530,7 @@ const init = async () => {
 	}
 
 	bindEvents();
+	startSpotifyProgressTicker();
 	updateSeamlessAlbumsColorFilterUi();
 	prefetchRoute('/albums');
 	setActiveFolder(state.activeFolder);

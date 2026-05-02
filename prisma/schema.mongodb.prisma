@@ -114,9 +114,13 @@ model DashboardBlocklist {
 model DashboardOtp {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   phoneNumber String   @unique
-  otp         String
-  expiresAt   BigInt?
-  createdAt   DateTime @default(now())
+  requestId      String
+  requestKeyHash String
+  actionTokenHash String
+  status         String
+  createdAt      DateTime @default(now())
+  expiresAt      BigInt?
+  confirmedAt    DateTime?
 }
 
 model CommandUsage {

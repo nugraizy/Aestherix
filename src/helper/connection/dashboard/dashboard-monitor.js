@@ -1,6 +1,12 @@
-import { loadCommandUsage } from '../utils/command-usage.js';
+import {
+	loadCommandsCatalog,
+	loadDashboardState,
+	saveCommandsCatalog,
+	saveDashboardState
+} from '../../database/adapters/dashboard-settings.js';
 import prisma from '../../database/prisma.js';
-import { loadDashboardState, saveDashboardState, loadCommandsCatalog, saveCommandsCatalog } from '../../database/adapters/dashboard-settings.js';
+import { loadCommandUsage } from '../utils/command-usage.js';
+
 const MAX_LOGS = 500;
 
 const state = {
@@ -34,6 +40,7 @@ const extractBooleanFlags = (configuration) => {
 
 const safeRead = async () => {
 	const data = await loadDashboardState(prisma).catch(() => ({ disabledCommands: [], flagStates: {} }));
+
 	return data;
 };
 
@@ -75,7 +82,6 @@ const toCommandPayload = (command, disabled) => {
 	};
 };
 
-// In-memory fallback cache for command catalog (populated when writeCommandsCatalog runs or on first access)
 let _commandsCatalogCache = null;
 
 const writeCommandsCatalog = (configuration) => {
@@ -102,6 +108,7 @@ const readCommandsCatalogSync = () => {
 const hydrateCommandsCatalogCache = async () => {
 	try {
 		const commands = await loadCommandsCatalog(prisma);
+
 		if (commands.length) {
 			_commandsCatalogCache = commands;
 		}

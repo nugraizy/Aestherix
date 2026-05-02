@@ -14,6 +14,28 @@ import { z } from 'zod';
 import { color, loggers } from '../../../utils/modules/index.js';
 import configuration from '../../config/connect.js';
 import {
+	addToBlocklist,
+	appendAuditLog,
+	deleteDashboardSession,
+	deleteOtp,
+	getAuditLogs,
+	getDashboardBlocklist,
+	getDashboardSessions,
+	getLastAuditLogId,
+	removeFromBlocklist,
+	upsertDashboardSession,
+	upsertOtp
+} from '../../database/adapters/dashboard.js';
+import {
+	banUser,
+	getAllUserLimits,
+	getBannedUsers,
+	getUserLimit,
+	unbanUser,
+	upsertUserLimit
+} from '../../database/adapters/user.js';
+import prisma from '../../database/prisma.js';
+import {
 	getDashboardLogs,
 	initializeDashboardMonitor,
 	listDashboardCommands,
@@ -21,23 +43,6 @@ import {
 	setDashboardCommandState,
 	setDashboardFlagState
 } from './dashboard-monitor.js';
-import prisma from '../../database/prisma.js';
-import {
-	getDashboardSessions,
-	upsertDashboardSession,
-	deleteDashboardSession,
-	purgeExpiredDashboardSessions,
-	appendAuditLog,
-	getAuditLogs,
-	getLastAuditLogId,
-	getDashboardBlocklist,
-	addToBlocklist,
-	removeFromBlocklist,
-	upsertOtp,
-	getOtp,
-	deleteOtp
-} from '../../database/adapters/dashboard.js';
-import { getBannedUsers, banUser, unbanUser, getUserLimit, upsertUserLimit, getAllUserLimits } from '../../database/adapters/user.js';
 
 const AUTH_COOKIE_NAME = 'aestherix_dashboard_auth';
 const OTP_TTL_MS = 5 * 60 * 1000;
@@ -65,16 +70,20 @@ const S_WHATSAPP_NET = '@s.whatsapp.net';
 const otpStore = new Map();
 const sessionStore = new Map();
 const undoActionStore = new Map();
-const SPOTIFY_STATUS_TTL_MS = 8000;
 const spotifyNowPlayingCache = {
 	data: {
 		available: false,
 		isPlaying: false,
 		trackTitle: null,
 		artists: null,
+		trackId: null,
+		trackUri: null,
+		trackUrl: null,
+		coverUrl: null,
 		progressMs: null,
 		durationMs: null,
-		message: 'Unavailable'
+		message: 'Unavailable',
+		timestamp: 0
 	},
 	expiresAt: 0,
 	pending: null
@@ -88,6 +97,10 @@ const profilePicturesDiskState = {
 	size: -1,
 	lastSyncAt: 0
 };
+// Tracks timestamps/keys deleted via the dashboard DELETE API so that
+// refreshProfilePicturesCacheFromDisk never re-adds them when the
+// auto-changer overwrites the disk file with a stale snapshot.
+const deletedPictureTombstones = new Set();
 const profilePictureColorCache = new Map();
 const profilePictureColorPending = new Map();
 const projectVersion = (() => {
@@ -207,6 +220,7 @@ const normalizePersistedPictureEntry = (entry) => {
 const loadDashboardBlocklist = async () => {
 	try {
 		const list = await getDashboardBlocklist(prisma);
+
 		configuration.cache.blocklist = list.map((jid) => normalizePersistedUserJid(jid)).filter(Boolean);
 	} catch (error) {
 		loggers.warning(color('Failed loading dashboard blocklist:', '#FF5555'), color(error.message, 'white'));
@@ -217,11 +231,15 @@ const loadDashboardBlocklist = async () => {
 const persistDashboardBlocklist = async (addedJids = [], removedJids = []) => {
 	try {
 		for (const jid of removedJids) {
-			if (jid) await removeFromBlocklist(prisma, jid).catch(() => {});
+			if (jid) {
+				await removeFromBlocklist(prisma, jid).catch(() => {});
+			}
 		}
 
 		for (const jid of addedJids) {
-			if (jid) await addToBlocklist(prisma, jid).catch(() => {});
+			if (jid) {
+				await addToBlocklist(prisma, jid).catch(() => {});
+			}
 		}
 	} catch (error) {
 		loggers.warning(color('Failed persisting dashboard blocklist:', '#FF5555'), color(error.message, 'white'));
@@ -317,6 +335,11 @@ const refreshProfilePicturesCacheFromDisk = ({ force = false } = {}) => {
 	}
 
 	for (const [timestamp, normalized] of normalizedEntries) {
+		// Never restore a picture that was explicitly deleted via the dashboard API.
+		if (deletedPictureTombstones.has(timestamp)) {
+			continue;
+		}
+
 		configuration.pinterestImages.set(timestamp, normalized);
 	}
 
@@ -724,9 +747,13 @@ const getSpotifyNowPlaying = async () => {
 			isPlaying: false,
 			trackTitle: null,
 			artists: null,
+			trackId: null,
+			trackUri: null,
+			trackUrl: null,
 			progressMs: null,
 			durationMs: null,
-			message: 'Unavailable'
+			message: 'Unavailable',
+			timestamp: Date.now()
 		};
 
 		try {
@@ -750,9 +777,14 @@ const getSpotifyNowPlaying = async () => {
 					isPlaying: Boolean(data.isPlaying),
 					trackTitle: data.trackTitle,
 					artists: data.artists || null,
+					trackId: data.trackId || null,
+					trackUri: data.trackUri || null,
+					trackUrl: data.trackUrl || null,
+					coverUrl: data.coverUrl || null,
 					progressMs: Number(data.progressMs || 0),
 					durationMs: Number(data.durationMs || 0),
-					message: null
+					message: null,
+					timestamp: Date.now()
 				};
 			}
 		} catch {
@@ -760,7 +792,7 @@ const getSpotifyNowPlaying = async () => {
 		}
 
 		spotifyNowPlayingCache.data = next;
-		spotifyNowPlayingCache.expiresAt = Date.now() + SPOTIFY_STATUS_TTL_MS;
+		spotifyNowPlayingCache.expiresAt = Date.now();
 		spotifyNowPlayingCache.pending = null;
 
 		return next;
@@ -777,8 +809,7 @@ const getDashboardStatus = async () => {
 	const disabledCount = Math.max(0, totalCommands - enabledCommands);
 	const flagEntries = Object.entries(configuration.OPTIONS || {}).filter(([, value]) => typeof value === 'boolean');
 	const enabledFlags = flagEntries.filter(([, value]) => Boolean(value)).length;
-	const spotify = spotifyNowPlayingCache.data;
-	// const spotify = await getSpotifyNowPlaying();
+	const spotify = await getSpotifyNowPlaying();
 
 	return {
 		timestamp: Date.now(),
@@ -1022,11 +1053,15 @@ const writeBannedUsers = async (list) => {
 	const newSet = new Set(Array.from(new Set(list)));
 
 	for (const jid of newSet) {
-		if (!currentSet.has(jid)) await banUser(prisma, jid).catch(() => {});
+		if (!currentSet.has(jid)) {
+			await banUser(prisma, jid).catch(() => {});
+		}
 	}
 
 	for (const jid of currentSet) {
-		if (!newSet.has(jid)) await unbanUser(prisma, jid).catch(() => {});
+		if (!newSet.has(jid)) {
+			await unbanUser(prisma, jid).catch(() => {});
+		}
 	}
 };
 
@@ -1089,7 +1124,9 @@ const listDashboardUsers = async ({ redactNumbers = false } = {}) => {
 		.map(({ id, limit, role }) => {
 			const normalizedId = normalizeUserJid(id);
 
-			if (!normalizedId) return null;
+			if (!normalizedId) {
+				return null;
+			}
 
 			return {
 				id: redactNumbers ? redactUserIdMiddle(normalizedId) : normalizedId,
@@ -1453,6 +1490,7 @@ const deleteDashboardProfilePicture = async ({ timestamp = '', url = '' } = {}) 
 
 	if (currentUrl && currentUrl === safeUrlKey) {
 		configuration.pinterestImages.delete(safeTimestamp);
+		deletedPictureTombstones.add(safeTimestamp);
 		deletedCount += 1;
 	}
 
@@ -1463,6 +1501,7 @@ const deleteDashboardProfilePicture = async ({ timestamp = '', url = '' } = {}) 
 
 		if (parsedUrl && parsedUrl === safeUrlKey) {
 			configuration.pinterestImages.delete(key);
+			deletedPictureTombstones.add(key);
 			deletedCount += 1;
 		}
 	}
@@ -2054,8 +2093,8 @@ const requestBotRestartThroughBridge = async () => {
 	}
 };
 
-export const processDashboardConfirmationAction = ({ actionId, senderJid }) => {
-	cleanExpiredOtps();
+export const processDashboardConfirmationAction = async ({ actionId, senderJid }) => {
+	await cleanExpiredOtps();
 
 	const id = String(actionId || '').trim();
 
@@ -2282,7 +2321,7 @@ export const server = async () => {
 
 			io.emit('dashboard:status', status);
 		})();
-	}, 2000);
+	}, 1000);
 
 	setInterval(() => {
 		const sockets = Array.from(io.of('/').sockets.values());
@@ -2573,7 +2612,7 @@ export const server = async () => {
 
 	app.post('/api/dashboard/auth/request-code', validate({ body: authRequestBody }), async (req, res) => {
 		try {
-			cleanExpiredOtps();
+			await cleanExpiredOtps();
 
 			const phoneNumber = normalizePhoneNumber(req.body.phoneNumber);
 
@@ -2617,7 +2656,7 @@ export const server = async () => {
 				expiresAt,
 				confirmedAt: null
 			});
-			void persistOtpStore();
+			await persistOtpStore();
 
 			const recipient = `${phoneNumber}@s.whatsapp.net`;
 			let sent = false;
@@ -2640,7 +2679,7 @@ export const server = async () => {
 
 			if (!sent) {
 				otpStore.delete(phoneNumber);
-				void persistOtpStore();
+				await persistOtpStore();
 				return res.status(503).json({
 					ok: false,
 					message: 'WhatsApp bridge is not reachable yet. Please ensure bot process is online and try again.'
@@ -2661,7 +2700,7 @@ export const server = async () => {
 	});
 
 	app.post('/api/dashboard/auth/confirmation-status', validate({ body: confirmationStatusBody }), async (req, res) => {
-		cleanExpiredOtps();
+		await cleanExpiredOtps();
 
 		const phoneNumber = normalizePhoneNumber(req.body.phoneNumber);
 		const { requestId, requestKey } = req.body;
@@ -2676,7 +2715,7 @@ export const server = async () => {
 
 		if (!otpData || otpData.expiresAt <= Date.now()) {
 			otpStore.delete(phoneNumber);
-			void persistOtpStore();
+			await persistOtpStore();
 			return res.status(400).json({ ok: false, message: 'Confirmation expired or not found. Request a new code.' });
 		}
 
@@ -2692,7 +2731,7 @@ export const server = async () => {
 	});
 
 	app.post('/api/dashboard/auth/finalize-confirmation', validate({ body: finalizeConfirmationBody }), async (req, res) => {
-		cleanExpiredOtps();
+		await cleanExpiredOtps();
 		const { requestId, requestKey } = req.body;
 
 		const phoneEntry = Array.from(otpStore.entries()).find(([, value]) => value.requestId === requestId);
@@ -2705,7 +2744,7 @@ export const server = async () => {
 
 		if (otpData.expiresAt <= Date.now()) {
 			otpStore.delete(phoneNumber);
-			void persistOtpStore();
+			await persistOtpStore();
 			return res.status(400).json({ ok: false, message: 'Confirmation request expired.' });
 		}
 
@@ -2718,7 +2757,7 @@ export const server = async () => {
 		}
 
 		otpStore.delete(phoneNumber);
-		void persistOtpStore();
+		await persistOtpStore();
 		createSession(res, {
 			role: 'owner',
 			phoneNumber,
@@ -2822,6 +2861,10 @@ export const server = async () => {
 
 		res.clearCookie(AUTH_COOKIE_NAME, { path: '/' });
 		res.json({ ok: true });
+	});
+
+	app.get('/api/dashboard/spotify', async (_req, res) => {
+		res.json({ ok: true, spotify: await getSpotifyNowPlaying() });
 	});
 
 	app.get('/api/dashboard/status', requireDashboardAuth, async (_req, res) => {

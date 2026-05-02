@@ -434,13 +434,13 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 										url: `https://wa.me/${message.settings.owner_number.replace(/[^\d]/g, '')}?text=hi,%20bot%20mengalami%20error${encodeURI(
 											`\n\n${err.stack}`
 										)}`
-									}) // eslint-disable-line
+									})
 								: null,
 							message.isOwner
 								? builder.button.reply({
 										display: 'Report via Bot',
 										id: `.report ${err.stack}`
-									}) // eslint-disable-line
+									})
 								: null,
 							builder.button.copy({
 								code: err.stack,
@@ -618,7 +618,7 @@ const handleIncomingMessage = async (upsert, client, cmds, store, user, state, r
 
 		message = await reassign(message, client, store, state);
 
-		const confirmation = processDashboardConfirmationAction({
+		const confirmation = await processDashboardConfirmationAction({
 			actionId: message?.body,
 			senderJid: message?.sender
 		});

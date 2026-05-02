@@ -17,24 +17,17 @@
 
 /** @typedef {import('@prisma/client').PrismaClient} PrismaClient */
 
-// ---------------------------------------------------------------------------
-// Baileys is an ESM-only package.  Use a cached dynamic import so this module
-// can be imported from CJS callers (e.g. via jest) without issues.
-// ---------------------------------------------------------------------------
 let _baileys = null;
 
 async function getBaileys() {
 	if (!_baileys) {
 		const dynamicImport = new Function('s', 'return import(s)');
+
 		_baileys = await dynamicImport('baileys');
 	}
 
 	return _baileys;
 }
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 /**
  * Sanitise a file name so it can be used as a DB `sessionId`.
@@ -61,20 +54,16 @@ const withRetry = async (fn, maxRetries = 5) => {
 		} catch (err) {
 			const isConflict =
 				err?.code === 'P2034' ||
-				(typeof err?.message === 'string' &&
-					(err.message.includes('write conflict') || err.message.includes('deadlock')));
+				(typeof err?.message === 'string' && (err.message.includes('write conflict') || err.message.includes('deadlock')));
 
-			if (!isConflict || attempt === maxRetries - 1) throw err;
+			if (!isConflict || attempt === maxRetries - 1) {
+				throw err;
+			}
 
-			// Exponential back-off: 50 ms, 100 ms, 200 ms, 400 ms …
 			await new Promise((r) => setTimeout(r, 50 * 2 ** attempt));
 		}
 	}
 };
-
-// ---------------------------------------------------------------------------
-// useMultiAuthState
-// ---------------------------------------------------------------------------
 
 /**
  * Prisma-backed multi-key auth state.
@@ -92,8 +81,6 @@ const withRetry = async (fn, maxRetries = 5) => {
 export const useMultiAuthState = async (db) => {
 	const { BufferJSON, initAuthCreds, proto } = await getBaileys();
 
-	// ── Persistence helpers ────────────────────────────────────────────────
-
 	const writeData = async (data, fileName) => {
 		try {
 			const sessionId = fixFileName(fileName);
@@ -107,7 +94,7 @@ export const useMultiAuthState = async (db) => {
 				})
 			);
 		} catch {
-			// swallow – Baileys tolerates transient write failures
+			//
 		}
 	};
 
@@ -125,17 +112,14 @@ export const useMultiAuthState = async (db) => {
 	const removeData = async (fileName) => {
 		try {
 			const sessionId = fixFileName(fileName);
-			await db.session.delete({ where: { sessionId } });
+
+			await db.session.deleteMany({ where: { sessionId } });
 		} catch {
-			// row may not exist
+			//
 		}
 	};
 
-	// ── Bootstrap credentials ──────────────────────────────────────────────
-
 	const creds = (await readData('creds')) || initAuthCreds();
-
-	// ── Auth state ─────────────────────────────────────────────────────────
 
 	return {
 		state: {
@@ -161,8 +145,6 @@ export const useMultiAuthState = async (db) => {
 				},
 
 				set: async (data) => {
-					// Run writes sequentially within each batch to avoid concurrent
-					// upserts on the same document causing MongoDB write conflicts.
 					for (const category in data) {
 						for (const id in data[category]) {
 							const value = data[category][id];
@@ -171,7 +153,7 @@ export const useMultiAuthState = async (db) => {
 							try {
 								await (value ? writeData(value, file) : removeData(file));
 							} catch {
-								// best-effort – Baileys tolerates transient write failures
+								//
 							}
 						}
 					}
@@ -196,10 +178,6 @@ export const useMultiAuthState = async (db) => {
 		}
 	};
 };
-
-// ---------------------------------------------------------------------------
-// useSingleAuthState
-// ---------------------------------------------------------------------------
 
 /**
  * In-memory single-row auth state backed by Prisma.
@@ -233,8 +211,6 @@ export const useSingleAuthState = async (db) => {
 
 	const SESSION_ID = 'creds';
 
-	// ── Load or initialise ─────────────────────────────────────────────────
-
 	let creds;
 	let keys = {};
 
@@ -242,6 +218,7 @@ export const useSingleAuthState = async (db) => {
 
 	if (storedRow?.session) {
 		const parsed = JSON.parse(storedRow.session, BufferJSON.reviver);
+
 		creds = parsed.creds;
 		keys = parsed.keys ?? {};
 	} else {
@@ -251,8 +228,6 @@ export const useSingleAuthState = async (db) => {
 
 		creds = initAuthCreds();
 	}
-
-	// ── Persist helper ─────────────────────────────────────────────────────
 
 	const saveCreds = async () => {
 		try {
@@ -266,8 +241,6 @@ export const useSingleAuthState = async (db) => {
 			//
 		}
 	};
-
-	// ── Auth state ─────────────────────────────────────────────────────────
 
 	return {
 		state: {
@@ -294,6 +267,7 @@ export const useSingleAuthState = async (db) => {
 				set: async (data) => {
 					for (const _key in data) {
 						const storageKey = KEY_MAP[_key];
+
 						keys[storageKey] = keys[storageKey] || {};
 						Object.assign(keys[storageKey], data[_key]);
 					}
@@ -311,7 +285,7 @@ export const useSingleAuthState = async (db) => {
 
 		clearState: async () => {
 			try {
-				await db.session.delete({ where: { sessionId: SESSION_ID } });
+				await db.session.deleteMany({ where: { sessionId: SESSION_ID } });
 			} catch {
 				//
 			}

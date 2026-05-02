@@ -89,10 +89,12 @@ export const renderChangelogMarkdown = (raw) => {
 	const ensureSection = (label) => {
 		ensureRelease();
 		const key = label || 'Notes';
+
 		if (!currentRelease.sections.has(key)) {
 			currentRelease.sections.set(key, []);
 			currentRelease.sectionOrder.push(key);
 		}
+
 		currentSection = key;
 	};
 
@@ -107,6 +109,7 @@ export const renderChangelogMarkdown = (raw) => {
 		}
 
 		const codeValue = codeBuffer.join('\n');
+
 		pushItem({
 			type: 'code',
 			value: escapeHtml(codeValue),
@@ -128,6 +131,7 @@ export const renderChangelogMarkdown = (raw) => {
 				isInCodeBlock = true;
 				codeBuffer = [];
 			}
+
 			continue;
 		}
 
@@ -197,8 +201,10 @@ export const renderChangelogMarkdown = (raw) => {
 						.map((item) => {
 							if (item.type === 'code') {
 								const languageAttr = item.language ? ` data-language="${escapeHtml(item.language)}"` : '';
+
 								return `<li class="is-code"><pre class="changelog-code"><code${languageAttr}>${item.value}</code></pre></li>`;
 							}
+
 							return `<li>${item.value}</li>`;
 						})
 						.join('');

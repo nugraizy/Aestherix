@@ -14,7 +14,6 @@
 import { config } from '@dotenvx/dotenvx';
 import { defineConfig } from 'prisma/config';
 
-// Load .env before accessing process.env
 config({ quiet: true });
 
 export default defineConfig({
