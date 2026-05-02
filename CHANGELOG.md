@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「6.11.0」2026-05-02
+## Added
+- Added Spotify `now-playing` widget exclusively for the dashboard. Please read this [repo](https://github.com/spotify/web-api-examples/tree/master/authorization/authorization_code) on how to authorize the widget. note: this authorization keys need a premium account to access the APIs.
+
+## Fixed
+- Database session.delete() on missing records.
+- Image deleted from albums stays deleted.
+
+## Removed
+- Remove the redundant comments that was made by friends.
+
+## Refactor
+- Fixes code that makes ESLint happy.
+---
+
 # 「6.10.0」2026-04-28
 ## Added
 - Added homepage and 404s handler.
