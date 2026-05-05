@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「6.12.0」2026-05-05
+## Added
+- `Editor` section for editing commands codes on the fly.
+
+## Changed
+- Refactored login approval flow to the dashboard: replaced global message event listener with a command-based trigger, eliminating unnecessary checks on unrelated messages.
+
+## Refactor
+- Cleaning unnecessary comments.
+- Fix lint.
+
+---
+
 # 「6.11.0」2026-05-02
 ## Added
 - Added Spotify `now-playing` widget exclusively for the dashboard. Please read this [repo](https://github.com/spotify/web-api-examples/tree/master/authorization/authorization_code) on how to authorize the widget. note: this authorization keys need a premium account to access the APIs.
