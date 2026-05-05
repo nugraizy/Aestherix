@@ -82,10 +82,6 @@ const rowToData = (row) => ({
 	banned: JSON.parse(row.bannedMembers || '[]')
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Public API
-// ─────────────────────────────────────────────────────────────────────────────
-
 /**
  * Return the settings for `groupId`, or `null` if the group has no record.
  *
@@ -95,6 +91,7 @@ const rowToData = (row) => ({
  */
 export const getGroupSettings = async (db, groupId) => {
 	const row = await db.groupSettings.findUnique({ where: { groupId } });
+
 	return row ? rowToData(row) : null;
 };
 
@@ -136,7 +133,9 @@ export const pushDefaultSettings = async (db, groupId, groupName, groupDescripti
 export const updateGroupSetting = async (db, groupId, setting, value) => {
 	const existing = await db.groupSettings.findUnique({ where: { groupId } });
 
-	if (!existing) return null;
+	if (!existing) {
+		return null;
+	}
 
 	const row = await db.groupSettings.update({
 		where: { groupId },
@@ -157,7 +156,9 @@ export const updateGroupSetting = async (db, groupId, setting, value) => {
 export const banGroupMember = async (db, groupId, memberJid) => {
 	const row = await db.groupSettings.findUnique({ where: { groupId } });
 
-	if (!row) return;
+	if (!row) {
+		return;
+	}
 
 	const banned = JSON.parse(row.bannedMembers || '[]');
 
@@ -181,7 +182,9 @@ export const banGroupMember = async (db, groupId, memberJid) => {
 export const unbanGroupMember = async (db, groupId, memberJid) => {
 	const row = await db.groupSettings.findUnique({ where: { groupId } });
 
-	if (!row) return;
+	if (!row) {
+		return;
+	}
 
 	const banned = JSON.parse(row.bannedMembers || '[]').filter((jid) => jid !== memberJid);
 
@@ -199,5 +202,6 @@ export const unbanGroupMember = async (db, groupId, memberJid) => {
  */
 export const getAllGroupSettings = async (db) => {
 	const rows = await db.groupSettings.findMany();
+
 	return rows.map(rowToData);
 };

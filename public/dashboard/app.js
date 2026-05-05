@@ -43,9 +43,11 @@ let floatingTooltipTarget = null;
 let chartHoverTooltipHost = null;
 let renderStatusCharts = () => {};
 let pendingConfirmResolver = null;
+let pendingEditorCloseResolver = null;
 let dashboardSocket = null;
 let realtimeConnected = false;
 let botLogsBridgeWarningShown = false;
+let auditRenderSignature = '';
 let changelogHtmlCache = '';
 let contributorsHtmlCache = '';
 let spotifyPollTimer = null;
@@ -66,6 +68,7 @@ const PROFILE_PICTURES_LIMIT = 250;
 const PROFILE_PICTURES_COLOR_FILTER_TOLERANCE = 88;
 const ALBUMS_ROUTE_PATH = '/albums';
 const DASHBOARD_ROUTE_PATH = '/dashboard';
+const EDITOR_ROUTE_PATH = '/dashboard/editor';
 const CYCLE_ANIMATION_MS = 180;
 const WHEEL_DELTA_PER_IMAGE = 48;
 const WHEEL_GESTURE_RESET_MS = 180;
@@ -92,6 +95,19 @@ let seamlessAlbumsColorFilterHex = '';
 let seamlessAlbumsColorisPickerInput = null;
 let seamlessAlbumsColorisConfigured = false;
 let seamlessAlbumsColorisPickerDraftHex = '';
+let editorTreeSnapshot = null;
+let editorTreeExpanded = new Set();
+let editorTabs = new Map();
+let editorActivePath = '';
+let editorView = null;
+let editorModules = null;
+let editorLoading = false;
+let editorRouteIntent = false;
+let editorActiveTheme = 'dracula';
+const editorSyntaxTimers = new Map();
+const editorSyntaxErrors = new Map();
+let editorCursorBound = false;
+const EDITOR_THEME_STORAGE_KEY = 'aestherix.dashboard.editor.theme';
 
 const clampProfilePictures = (pictures) => (Array.isArray(pictures) ? pictures : []).slice(0, PROFILE_PICTURES_LIMIT);
 
@@ -629,7 +645,8 @@ const closeAllCustomFilters = (except = null) => {
 		els.controlsFlagFilter,
 		els.controlsUserRoleFilter,
 		els.controlsUserStatusFilter,
-		els.settingsThemePalette
+		els.settingsThemePalette,
+		els.editorThemeSelect
 	].filter(Boolean);
 
 	for (const filter of filters) {
@@ -718,6 +735,10 @@ const getSectionStateElement = (section) => {
 		return els.usersState;
 	}
 
+	if (section === 'editor') {
+		return els.editorState;
+	}
+
 	return null;
 };
 
@@ -804,6 +825,11 @@ const setSectionContentVisibility = (section, visible) => {
 
 	if (section === 'flags') {
 		els.flagsWrap?.classList.toggle('hidden', !isVisible);
+		return;
+	}
+
+	if (section === 'editor') {
+		els.editorShell?.classList.toggle('hidden', !isVisible);
 	}
 };
 
@@ -842,6 +868,10 @@ const renderSectionState = (section) => {
 		users: {
 			title: 'Preparing User Controls',
 			message: 'Loading users, limits, and moderation status for this panel.'
+		},
+		editor: {
+			title: 'Preparing Command Editor',
+			message: 'Loading command files and initializing the editor workspace.'
 		},
 		profilePictures: {
 			title: 'Preparing Profile Picture Album',
@@ -1329,6 +1359,39 @@ const closeConfirmDialog = (accepted) => {
 	}
 };
 
+const closeEditorCloseDialog = (choice) => {
+	if (els.editorCloseDialog) {
+		closeAnimatedDialog(els.editorCloseDialog);
+	}
+
+	if (pendingEditorCloseResolver) {
+		const resolver = pendingEditorCloseResolver;
+
+		pendingEditorCloseResolver = null;
+		resolver(choice || 'cancel');
+	}
+};
+
+const openEditorCloseDialog = ({ fileName } = {}) => {
+	if (!els.editorCloseDialog || !els.editorCloseMessage) {
+		return Promise.resolve(window.confirm('Save changes before closing?') ? 'save' : 'cancel');
+	}
+
+	if (pendingEditorCloseResolver) {
+		pendingEditorCloseResolver('cancel');
+		pendingEditorCloseResolver = null;
+	}
+
+	const safeName = String(fileName || 'this file');
+
+	els.editorCloseMessage.textContent = `Save changes to ${safeName} before closing?`;
+	openAnimatedDialog(els.editorCloseDialog);
+
+	return new Promise((resolve) => {
+		pendingEditorCloseResolver = resolve;
+	});
+};
+
 const openAnimatedDialog = (dialogElement) => {
 	if (!dialogElement) {
 		return;
@@ -1420,12 +1483,6 @@ const openLogoutDialog = () => {
 
 	if (els.logoutMessage) {
 		els.logoutMessage.textContent = 'You are about to end your dashboard session and return to login.';
-	}
-
-	const waitingLabel = els.logoutWaiting?.querySelector('span');
-
-	if (waitingLabel) {
-		waitingLabel.textContent = 'Terminating session...';
 	}
 
 	if (els.logoutWaiting) {
@@ -2280,6 +2337,7 @@ const setOnlineState = (online) => {
 	if (els.statusDot) {
 		els.statusDot.style.background = online ? 'var(--mint)' : 'var(--salmon)';
 		els.statusDot.style.boxShadow = online ? '0 0 0 0 rgba(135, 240, 193, 0.5)' : '0 0 0 0 rgba(255, 142, 116, 0.5)';
+		els.statusDot.style.animation = online ? 'pulse-online 2s infinite' : 'pulse-offline 2s infinite';
 	}
 
 	if (!online) {
@@ -2859,14 +2917,14 @@ const applySpotifyCoverColor = (img, container) => {
 			container.style.setProperty('--spotify-cover-color-2', `rgb(${r2},${g2},${b2})`);
 
 			const waveSvg = encodeURIComponent(
-				`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='12' viewBox='0 0 40 12'>` +
-					`<path d='M0 6 C7.33 1,12.67 1,20 6 C27.33 11,32.67 11,40 6' fill='none' stroke='rgb(${r1},${g1},${b1})' stroke-width='2.5' stroke-linecap='round'/>` +
-					`</svg>`
+				`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='12' viewBox='0 0 40 12'>
+					<path d='M0 6 C7.33 1,12.67 1,20 6 C27.33 11,32.67 11,40 6' fill='none' stroke='rgb(${r1},${g1},${b1})' stroke-width='2.5' stroke-linecap='round'/>
+				</svg>`
 			);
 			const pausedSvg = encodeURIComponent(
-				`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='12' viewBox='0 0 40 12'>` +
-					`<path d='M0 6 L40 6' fill='none' stroke='rgb(${r1},${g1},${b1})' stroke-opacity='0.42' stroke-width='2.5' stroke-linecap='round'/>` +
-					`</svg>`
+				`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='12' viewBox='0 0 40 12'>
+					<path d='M0 6 L40 6' fill='none' stroke='rgb(${r1},${g1},${b1})' stroke-opacity='0.42' stroke-width='2.5' stroke-linecap='round'/>
+				</svg>`
 			);
 
 			container.style.setProperty('--spotify-wave-image', `url("data:image/svg+xml,${waveSvg}")`);
@@ -2949,13 +3007,20 @@ const renderSpotifyNowPlaying = (payload) => {
 
 	if (els.spotifyCover) {
 		if (coverUrl) {
-			els.spotifyCover.crossOrigin = 'anonymous';
-			els.spotifyCover.src = coverUrl;
+			const currentCover = els.spotifyCover.dataset.coverUrl || '';
+
+			if (currentCover !== coverUrl) {
+				els.spotifyCover.dataset.coverUrl = coverUrl;
+				els.spotifyCover.crossOrigin = 'anonymous';
+				els.spotifyCover.src = coverUrl;
+				applySpotifyCoverColor(els.spotifyCover, els.spotifyNowPlaying);
+			}
+
 			els.spotifyCover.removeAttribute('aria-hidden');
 			els.spotifyCover.alt = `${trackTitle} cover`;
-			applySpotifyCoverColor(els.spotifyCover, els.spotifyNowPlaying);
 		} else {
 			els.spotifyCover.removeAttribute('src');
+			els.spotifyCover.dataset.coverUrl = '';
 			els.spotifyCover.setAttribute('aria-hidden', 'true');
 			els.spotifyNowPlaying?.style.removeProperty('--spotify-cover-color');
 			els.spotifyNowPlaying?.style.removeProperty('--spotify-cover-color-2');
@@ -2975,11 +3040,18 @@ const renderSpotifyNowPlaying = (payload) => {
 
 	if (els.spotifyPopupCover) {
 		if (coverUrl) {
-			els.spotifyPopupCover.src = coverUrl;
+			const currentCover = els.spotifyPopupCover.dataset.coverUrl || '';
+
+			if (currentCover !== coverUrl) {
+				els.spotifyPopupCover.dataset.coverUrl = coverUrl;
+				els.spotifyPopupCover.src = coverUrl;
+			}
+
 			els.spotifyPopupCover.removeAttribute('aria-hidden');
 			els.spotifyPopupCover.alt = `${trackTitle} cover`;
 		} else {
 			els.spotifyPopupCover.removeAttribute('src');
+			els.spotifyPopupCover.dataset.coverUrl = '';
 			els.spotifyPopupCover.setAttribute('aria-hidden', 'true');
 		}
 	}
@@ -3177,6 +3249,7 @@ const renderAudit = () => {
 
 	if (!state.auditLogs.length) {
 		setSectionState('audit', 'empty', 'No activity found for the current filters.');
+		setSectionContentVisibility('audit', false);
 		renderSectionState('audit');
 		els.auditList.innerHTML = '';
 		return;
@@ -3221,16 +3294,20 @@ const renderAudit = () => {
 const commandCardMarkup = (command, keyword = '') => {
 	const aliases = command.aliases.length ? command.aliases.join(', ') : '-';
 	const statusClass = command.enabled ? 'enabled' : 'disabled';
-	const commandTitle = command.enabled
-		? `Disable command ${escapeHtml(command.name)}`
-		: `Enable command ${escapeHtml(command.name)}`;
+	const commandTitle = state.canEdit
+		? command.enabled
+			? `Disable command ${escapeHtml(command.name)}`
+			: `Enable command ${escapeHtml(command.name)}`
+		: command.enabled
+			? `Command ${escapeHtml(command.name)} is enabled`
+			: `Command ${escapeHtml(command.name)} is disabled`;
 	const highlightedName = highlightMatch(command.name, keyword);
 	const highlightedAliases = highlightMatch(aliases, keyword);
 	const usageCount = Number(command.usageCount || 0).toLocaleString();
 
 	const actionMarkup = state.canEdit
 		? `<button class="toggle-btn ios-toggle ${command.enabled ? 'is-on' : 'is-off'}" data-command="${command.name}" data-enabled="${String(!command.enabled)}" data-tooltip="${commandTitle}" role="switch" aria-checked="${command.enabled ? 'true' : 'false'}" aria-label="${commandTitle}"><span class="ios-toggle-track" aria-hidden="true"><span class="ios-toggle-thumb"></span></span></button>`
-		: '<span class="readonly-chip">Read-only</span>';
+		: `<button class="toggle-btn ios-toggle ${command.enabled ? 'is-on' : 'is-off'} inactive" data-command="${command.name}" data-enabled="${String(!command.enabled)}" data-tooltip="${commandTitle}" role="switch" aria-checked="${command.enabled ? 'true' : 'false'}" aria-label="${commandTitle}"><span class="ios-toggle-track" aria-hidden="true"><span class="ios-toggle-thumb"></span></span></button>`;
 
 	return `
 		<article class="command-card ${statusClass}">
@@ -3273,7 +3350,7 @@ const loadActiveFolder = () => {
 	try {
 		const value = localStorage.getItem(ACTIVE_FOLDER_STORAGE_KEY);
 
-		if (value === 'commands' || value === 'flags' || value === 'users') {
+		if (value === 'commands' || value === 'flags' || value === 'users' || value === 'editor') {
 			state.activeFolder = value;
 		}
 	} catch {
@@ -3282,14 +3359,18 @@ const loadActiveFolder = () => {
 };
 
 const setActiveFolder = (folderName) => {
-	state.activeFolder = ['commands', 'flags', 'users'].includes(folderName) ? folderName : 'commands';
+	const nextFolder = ['commands', 'flags', 'users', 'editor'].includes(folderName) ? folderName : 'commands';
+
+	state.activeFolder = nextFolder === 'editor' && !state.canEdit ? 'commands' : nextFolder;
 	const isCommands = state.activeFolder === 'commands';
 	const isFlags = state.activeFolder === 'flags';
 	const isUsers = state.activeFolder === 'users';
+	const isEditor = state.activeFolder === 'editor';
 
 	els.commandsView.classList.toggle('hidden', !isCommands);
 	els.flagsView.classList.toggle('hidden', !isFlags);
 	els.usersView.classList.toggle('hidden', !isUsers);
+	els.editorView?.classList.toggle('hidden', !isEditor);
 
 	const toggles = els.folderSwitcher.querySelectorAll('button[data-folder-toggle]');
 
@@ -3350,6 +3431,10 @@ const setActiveFolder = (folderName) => {
 		}
 	}
 
+	if (isEditor) {
+		void ensureEditorReady();
+	}
+
 	localStorage.setItem(ACTIVE_FOLDER_STORAGE_KEY, state.activeFolder);
 };
 
@@ -3367,11 +3452,11 @@ const categoryGroupMarkup = (category, commands, keyword = '') => {
 		<section class="category-group ${collapseClass}">
 			<header class="category-head">
 				<button class="category-toggle" type="button" data-category-toggle="${categoryKey}" aria-expanded="${ariaExpanded}">
+					<i class="category-caret nf ${collapsed ? 'nf-fa-chevron_right' : 'nf-fa-chevron_down'}"></i>
 					<strong>${highlightedCategory}</strong>
 					<span>${commands.length} commands</span>
-					<span>${enabled} enabled</span>
-					<span>${disabled} disabled</span>
-					<i class="category-caret"></i>
+					<span>${enabled} ON</span>
+					<span>${disabled} OFF</span>
 				</button>
 			</header>
 			<div class="commands-grid">
@@ -3874,6 +3959,1167 @@ const renderUsers = () => {
 
 	els.usersGroups.innerHTML = `<div class="commands-grid users-grid">${filtered.map((user) => userCardMarkup(user, keyword)).join('')}</div>`;
 	updateUsersBulkToolbar();
+};
+
+const loadEditorModules = async () => {
+	if (editorModules) {
+		return editorModules;
+	}
+
+	const esm = (pkg) => `https://esm.sh/${pkg}`;
+
+	const [
+		stateModule,
+		viewModule,
+		commandsModule,
+		languageModule,
+		jsModule,
+		jsonModule,
+		htmlModule,
+		cssModule,
+		mdModule,
+		highlightModule,
+		lintModule,
+		acornLooseModule
+	] = await Promise.all([
+		import(esm('@codemirror/state')),
+		import(esm('@codemirror/view')),
+		import(esm('@codemirror/commands')),
+		import(esm('@codemirror/language')),
+		import(esm('@codemirror/lang-javascript')),
+		import(esm('@codemirror/lang-json')),
+		import(esm('@codemirror/lang-html')),
+		import(esm('@codemirror/lang-css')),
+		import(esm('@codemirror/lang-markdown')),
+		import(esm('@lezer/highlight')),
+		import(esm('@codemirror/lint')),
+		import(esm('acorn-loose'))
+	]);
+
+	editorModules = {
+		EditorState: stateModule.EditorState,
+		EditorView: viewModule.EditorView,
+		Compartment: stateModule.Compartment,
+		undo: commandsModule.undo,
+		keymap: viewModule.keymap,
+		lineNumbers: viewModule.lineNumbers,
+		highlightActiveLineGutter: viewModule.highlightActiveLineGutter,
+		highlightSpecialChars: viewModule.highlightSpecialChars,
+		drawSelection: viewModule.drawSelection,
+		dropCursor: viewModule.dropCursor,
+		rectangularSelection: viewModule.rectangularSelection,
+		crosshairCursor: viewModule.crosshairCursor,
+		highlightActiveLine: viewModule.highlightActiveLine,
+		defaultKeymap: commandsModule.defaultKeymap,
+		historyKeymap: commandsModule.historyKeymap,
+		indentWithTab: commandsModule.indentWithTab,
+		history: commandsModule.history,
+		bracketMatching: languageModule.bracketMatching,
+		syntaxHighlighting: languageModule.syntaxHighlighting,
+		HighlightStyle: languageModule.HighlightStyle,
+		tags: highlightModule.tags,
+		defaultHighlightStyle: languageModule.defaultHighlightStyle,
+		linter: lintModule.linter,
+		javascript: jsModule.javascript,
+		json: jsonModule.json,
+		html: htmlModule.html,
+		css: cssModule.css,
+		markdown: mdModule.markdown,
+		acornLoose: acornLooseModule
+	};
+
+	const { EditorView, HighlightStyle, syntaxHighlighting, tags } = editorModules;
+
+	const draculaChrome = EditorView.theme(
+		{
+			'&': { backgroundColor: '#282a36', color: '#f8f8f2' },
+			'.cm-content': { caretColor: '#f8f8f2' },
+			'.cm-cursor, .cm-dropCursor': { borderLeftColor: '#f8f8f2' },
+			'&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': { backgroundColor: '#44475a' },
+			'.cm-gutters': { backgroundColor: '#282a36', color: '#6272a4', borderRight: '1px solid #44475a' },
+			'.cm-activeLineGutter': { backgroundColor: '#44475a' },
+			'.cm-activeLine': { backgroundColor: '#44475a55' }
+		},
+		{ dark: true }
+	);
+	const draculaHighlight = HighlightStyle.define([
+		{ tag: tags.keyword, color: '#ff79c6' },
+		{ tag: [tags.name, tags.deleted, tags.character, tags.macroName], color: '#f8f8f2' },
+		{ tag: [tags.function(tags.variableName)], color: '#50fa7b' },
+		{ tag: [tags.labelName], color: '#ff79c6' },
+		{ tag: [tags.color, tags.constant(tags.name), tags.standard(tags.name)], color: '#bd93f9' },
+		{ tag: [tags.definition(tags.name), tags.separator], color: '#f8f8f2' },
+		{
+			tag: [
+				tags.typeName,
+				tags.className,
+				tags.number,
+				tags.changed,
+				tags.annotation,
+				tags.modifier,
+				tags.self,
+				tags.namespace
+			],
+			color: '#bd93f9'
+		},
+		{
+			tag: [tags.operator, tags.operatorKeyword, tags.url, tags.escape, tags.regexp, tags.special(tags.string)],
+			color: '#ff79c6'
+		},
+		{ tag: [tags.meta, tags.comment], color: '#6272a4' },
+		{ tag: tags.strong, fontWeight: 'bold' },
+		{ tag: tags.emphasis, fontStyle: 'italic' },
+		{ tag: tags.strikethrough, textDecoration: 'line-through' },
+		{ tag: tags.link, color: '#8be9fd', textDecoration: 'underline' },
+		{ tag: tags.heading, fontWeight: 'bold', color: '#bd93f9' },
+		{ tag: [tags.atom, tags.bool, tags.special(tags.variableName)], color: '#bd93f9' },
+		{ tag: [tags.processingInstruction, tags.string, tags.inserted], color: '#f1fa8c' },
+		{ tag: tags.invalid, color: '#ff5555' }
+	]);
+
+	const cityLightsChrome = EditorView.theme(
+		{
+			'&': { backgroundColor: '#1d252c', color: '#b7c5d3' },
+			'.cm-content': { caretColor: '#b7c5d3' },
+			'.cm-cursor, .cm-dropCursor': { borderLeftColor: '#b7c5d3' },
+			'&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': { backgroundColor: '#28323b' },
+			'.cm-gutters': { backgroundColor: '#1d252c', color: '#41505e', borderRight: '1px solid #28323b' },
+			'.cm-activeLineGutter': { backgroundColor: '#28323b' },
+			'.cm-activeLine': { backgroundColor: '#28323b55' }
+		},
+		{ dark: true }
+	);
+	const cityLightsHighlight = HighlightStyle.define([
+		{ tag: tags.keyword, color: '#e27e8d' },
+		{ tag: [tags.name, tags.deleted, tags.character, tags.macroName], color: '#b7c5d3' },
+		{ tag: [tags.function(tags.variableName)], color: '#5ec4ff' },
+		{ tag: [tags.labelName], color: '#e27e8d' },
+		{ tag: [tags.color, tags.constant(tags.name), tags.standard(tags.name)], color: '#e27e8d' },
+		{ tag: [tags.definition(tags.name), tags.separator], color: '#b7c5d3' },
+		{
+			tag: [tags.typeName, tags.className, tags.changed, tags.annotation, tags.modifier, tags.self, tags.namespace],
+			color: '#70e1e8'
+		},
+		{ tag: [tags.number], color: '#e27e8d' },
+		{
+			tag: [tags.operator, tags.operatorKeyword, tags.url, tags.escape, tags.regexp, tags.special(tags.string)],
+			color: '#5ec4ff'
+		},
+		{ tag: [tags.meta, tags.comment], color: '#41505e' },
+		{ tag: tags.strong, fontWeight: 'bold' },
+		{ tag: tags.emphasis, fontStyle: 'italic' },
+		{ tag: tags.link, color: '#70e1e8', textDecoration: 'underline' },
+		{ tag: tags.heading, fontWeight: 'bold', color: '#5ec4ff' },
+		{ tag: [tags.atom, tags.bool, tags.special(tags.variableName)], color: '#e27e8d' },
+		{ tag: [tags.processingInstruction, tags.string, tags.inserted], color: '#68a1f0' },
+		{ tag: tags.invalid, color: '#d95468' }
+	]);
+
+	const catppuccinChrome = EditorView.theme(
+		{
+			'&': { backgroundColor: '#1e1e2e', color: '#cdd6f4' },
+			'.cm-content': { caretColor: '#cdd6f4' },
+			'.cm-cursor, .cm-dropCursor': { borderLeftColor: '#cdd6f4' },
+			'&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': { backgroundColor: '#45475a' },
+			'.cm-gutters': { backgroundColor: '#1e1e2e', color: '#6c7086', borderRight: '1px solid #45475a' },
+			'.cm-activeLineGutter': { backgroundColor: '#45475a' },
+			'.cm-activeLine': { backgroundColor: '#45475a55' }
+		},
+		{ dark: true }
+	);
+	const catppuccinHighlight = HighlightStyle.define([
+		{ tag: tags.keyword, color: '#cba6f7' },
+		{ tag: [tags.name, tags.deleted, tags.character, tags.macroName], color: '#cdd6f4' },
+		{ tag: [tags.function(tags.variableName)], color: '#89b4fa' },
+		{ tag: [tags.labelName], color: '#f38ba8' },
+		{ tag: [tags.color, tags.constant(tags.name), tags.standard(tags.name)], color: '#fab387' },
+		{ tag: [tags.definition(tags.name), tags.separator], color: '#cdd6f4' },
+		{
+			tag: [tags.typeName, tags.className, tags.changed, tags.annotation, tags.modifier, tags.self, tags.namespace],
+			color: '#f9e2af'
+		},
+		{ tag: [tags.number], color: '#fab387' },
+		{ tag: [tags.operator, tags.operatorKeyword], color: '#89dceb' },
+		{ tag: [tags.url, tags.escape, tags.regexp, tags.special(tags.string)], color: '#f5c2e7' },
+		{ tag: [tags.meta, tags.comment], color: '#6c7086' },
+		{ tag: tags.strong, fontWeight: 'bold' },
+		{ tag: tags.emphasis, fontStyle: 'italic' },
+		{ tag: tags.link, color: '#89b4fa', textDecoration: 'underline' },
+		{ tag: tags.heading, fontWeight: 'bold', color: '#cba6f7' },
+		{ tag: [tags.atom, tags.bool, tags.special(tags.variableName)], color: '#fab387' },
+		{ tag: [tags.processingInstruction, tags.string, tags.inserted], color: '#a6e3a1' },
+		{ tag: tags.invalid, color: '#f38ba8' }
+	]);
+
+	const tokyoNightChrome = EditorView.theme(
+		{
+			'&': { backgroundColor: '#1a1b26', color: '#a9b1d6' },
+			'.cm-content': { caretColor: '#a9b1d6' },
+			'.cm-cursor, .cm-dropCursor': { borderLeftColor: '#a9b1d6' },
+			'&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': { backgroundColor: '#283457' },
+			'.cm-gutters': { backgroundColor: '#1a1b26', color: '#3b4261', borderRight: '1px solid #283457' },
+			'.cm-activeLineGutter': { backgroundColor: '#283457' },
+			'.cm-activeLine': { backgroundColor: '#28345755' }
+		},
+		{ dark: true }
+	);
+	const tokyoNightHighlight = HighlightStyle.define([
+		{ tag: tags.keyword, color: '#bb9af7' },
+		{ tag: [tags.name, tags.deleted, tags.character, tags.macroName], color: '#a9b1d6' },
+		{ tag: [tags.function(tags.variableName)], color: '#7aa2f7' },
+		{ tag: [tags.labelName], color: '#e0af68' },
+		{ tag: [tags.color, tags.constant(tags.name), tags.standard(tags.name)], color: '#ff9e64' },
+		{ tag: [tags.definition(tags.name), tags.separator], color: '#a9b1d6' },
+		{
+			tag: [tags.typeName, tags.className, tags.changed, tags.annotation, tags.modifier, tags.self, tags.namespace],
+			color: '#2ac3de'
+		},
+		{ tag: [tags.number], color: '#ff9e64' },
+		{ tag: [tags.operator, tags.operatorKeyword], color: '#89ddff' },
+		{ tag: [tags.url, tags.escape, tags.regexp, tags.special(tags.string)], color: '#b4f9f8' },
+		{ tag: [tags.meta, tags.comment], color: '#565f89' },
+		{ tag: tags.strong, fontWeight: 'bold' },
+		{ tag: tags.emphasis, fontStyle: 'italic' },
+		{ tag: tags.link, color: '#7aa2f7', textDecoration: 'underline' },
+		{ tag: tags.heading, fontWeight: 'bold', color: '#bb9af7' },
+		{ tag: [tags.atom, tags.bool, tags.special(tags.variableName)], color: '#ff9e64' },
+		{ tag: [tags.processingInstruction, tags.string, tags.inserted], color: '#9ece6a' },
+		{ tag: tags.invalid, color: '#f7768e' }
+	]);
+
+	editorModules.themes = {
+		dracula: [draculaChrome, syntaxHighlighting(draculaHighlight)],
+		'city-lights': [cityLightsChrome, syntaxHighlighting(cityLightsHighlight)],
+		catppuccin: [catppuccinChrome, syntaxHighlighting(catppuccinHighlight)],
+		'tokyo-night': [tokyoNightChrome, syntaxHighlighting(tokyoNightHighlight)]
+	};
+
+	editorModules.themeCompartment = new editorModules.Compartment();
+
+	const savedTheme = (() => {
+		try {
+			return localStorage.getItem(EDITOR_THEME_STORAGE_KEY) || 'dracula';
+		} catch {
+			return 'dracula';
+		}
+	})();
+
+	if (editorModules.themes[savedTheme]) {
+		editorActiveTheme = savedTheme;
+	}
+
+	editorModules.baseExtensions = [
+		editorModules.lineNumbers(),
+		editorModules.highlightActiveLineGutter(),
+		editorModules.highlightSpecialChars(),
+		editorModules.drawSelection(),
+		editorModules.dropCursor(),
+		editorModules.rectangularSelection(),
+		editorModules.crosshairCursor(),
+		editorModules.highlightActiveLine(),
+		editorModules.history(),
+		editorModules.bracketMatching(),
+		editorModules.themeCompartment.of(editorModules.themes[editorActiveTheme] || editorModules.themes.dracula),
+		editorModules.keymap.of([...editorModules.defaultKeymap, ...editorModules.historyKeymap, editorModules.indentWithTab])
+	];
+
+	if (els.editorThemeSelect) {
+		setCustomFilterValue(els.editorThemeSelect, editorActiveTheme);
+	}
+
+	return editorModules;
+};
+
+const setEditorTheme = (themeKey) => {
+	if (!editorModules || !editorModules.themes[themeKey]) {
+		return;
+	}
+
+	editorActiveTheme = themeKey;
+
+	try {
+		localStorage.setItem(EDITOR_THEME_STORAGE_KEY, themeKey);
+	} catch {
+		// Ignore storage errors.
+	}
+
+	if (editorView && editorModules.themeCompartment) {
+		editorView.dispatch({
+			effects: editorModules.themeCompartment.reconfigure(editorModules.themes[themeKey])
+		});
+	}
+};
+
+const getEditorLanguage = (filePath, modules) => {
+	const ext = String(filePath || '')
+		.trim()
+		.toLowerCase()
+		.split('.')
+		.pop();
+
+	if (ext === 'json') {
+		return modules.json();
+	}
+
+	if (ext === 'html' || ext === 'htm') {
+		return modules.html();
+	}
+
+	if (ext === 'css') {
+		return modules.css();
+	}
+
+	if (ext === 'md') {
+		return modules.markdown();
+	}
+
+	return modules.javascript();
+};
+
+const isEditorSyntaxCheckable = (pathValue) => {
+	const ext = String(pathValue || '')
+		.trim()
+		.toLowerCase()
+		.split('.')
+		.pop();
+
+	return ['js', 'mjs', 'cjs'].includes(ext);
+};
+
+const getEditorSyntaxErrors = (content, pathValue, modules) => {
+	if (!modules?.acornLoose || !isEditorSyntaxCheckable(pathValue)) {
+		return [];
+	}
+
+	const parseFn = modules.acornLoose?.parse || modules.acornLoose?.default?.parse || modules.acornLoose?.default || null;
+	const isDummyFn = modules.acornLoose?.isDummy || modules.acornLoose?.default?.isDummy || null;
+
+	if (typeof parseFn !== 'function') {
+		return [];
+	}
+
+	const errors = [];
+	const isDummyNode = (node) => {
+		if (!node || typeof node !== 'object') {
+			return false;
+		}
+
+		if (typeof isDummyFn === 'function') {
+			return isDummyFn(node);
+		}
+
+		if (node.type === 'Identifier') {
+			return node.name === '✖';
+		}
+
+		if (node.type === 'Literal') {
+			return node.raw === '✖' || node.value === '✖';
+		}
+
+		return false;
+	};
+
+	const visitNode = (node) => {
+		if (!node || typeof node !== 'object') {
+			return;
+		}
+
+		if (isDummyNode(node)) {
+			errors.push({
+				message: 'Invalid syntax.',
+				loc: node.loc?.start || null
+			});
+		}
+
+		for (const value of Object.values(node)) {
+			if (!value) {
+				continue;
+			}
+
+			if (Array.isArray(value)) {
+				value.forEach((entry) => {
+					if (entry && typeof entry === 'object' && entry.type) {
+						visitNode(entry);
+					}
+				});
+				continue;
+			}
+
+			if (value && typeof value === 'object' && value.type) {
+				visitNode(value);
+			}
+		}
+	};
+
+	try {
+		const ast = parseFn(String(content || ''), {
+			ecmaVersion: 'latest',
+			sourceType: 'module',
+			locations: true,
+			allowHashBang: true
+		});
+
+		visitNode(ast);
+
+		return errors;
+	} catch (error) {
+		return error ? [error] : [];
+	}
+};
+
+const buildEditorSyntaxLintExtension = (pathValue, modules) => {
+	if (!modules?.linter || !modules?.acornLoose || !isEditorSyntaxCheckable(pathValue)) {
+		return [];
+	}
+
+	return modules.linter(
+		(view) => {
+			const content = view.state.doc.toString();
+			const errors = getEditorSyntaxErrors(content, pathValue, modules);
+
+			if (!errors.length) {
+				return [];
+			}
+
+			return errors.map((error) => {
+				const loc = error?.loc || {};
+				const line = Number(loc.line || 1);
+				const column = Number(loc.column || 0);
+				const docLine = view.state.doc.line(Math.max(1, Math.min(line, view.state.doc.lines)));
+				const from = Math.min(docLine.from + Math.max(0, column), docLine.to);
+				const to = Math.min(from + 1, docLine.to || view.state.doc.length);
+
+				return {
+					from,
+					to,
+					severity: 'error',
+					message: error?.message || 'Invalid syntax.'
+				};
+			});
+		},
+		{ delay: 250 }
+	);
+};
+
+const clearEditorSyntaxError = (pathValue) => {
+	if (pathValue) {
+		editorSyntaxErrors.delete(pathValue);
+	}
+
+	if (els.editorSyntaxError) {
+		els.editorSyntaxError.classList.add('hidden');
+		els.editorSyntaxError.textContent = '';
+	}
+};
+
+const renderEditorSyntaxError = (pathValue) => {
+	if (!els.editorSyntaxError) {
+		return;
+	}
+
+	const error = editorSyntaxErrors.get(pathValue);
+
+	if (!error) {
+		els.editorSyntaxError.classList.add('hidden');
+		els.editorSyntaxError.textContent = '';
+		return;
+	}
+
+	const line = Number(error.line || error.lineNumber || 0);
+	const column = Number(error.column || error.col || 0);
+	const location = line > 0 && column > 0 ? `Line ${line}, column ${column}` : line > 0 ? `Line ${line}` : 'Syntax error';
+
+	els.editorSyntaxError.textContent = `${location}: ${error.message || 'Invalid syntax.'}`;
+	els.editorSyntaxError.classList.remove('hidden');
+};
+
+const runEditorSyntaxCheck = (pathValue, content) => {
+	if (!editorModules?.acornLoose || !isEditorSyntaxCheckable(pathValue)) {
+		clearEditorSyntaxError(pathValue);
+		return;
+	}
+
+	const errors = getEditorSyntaxErrors(String(content || ''), pathValue, editorModules);
+
+	if (!errors.length) {
+		clearEditorSyntaxError(pathValue);
+		return;
+	}
+
+	editorSyntaxErrors.set(pathValue, errors[0]);
+
+	if (pathValue === editorActivePath) {
+		renderEditorSyntaxError(pathValue);
+	}
+};
+
+const scheduleEditorSyntaxCheck = (pathValue, content) => {
+	if (!pathValue) {
+		return;
+	}
+
+	const previous = editorSyntaxTimers.get(pathValue);
+
+	if (previous) {
+		clearTimeout(previous);
+	}
+
+	const timer = setTimeout(() => {
+		editorSyntaxTimers.delete(pathValue);
+		runEditorSyntaxCheck(pathValue, content);
+	}, 350);
+
+	editorSyntaxTimers.set(pathValue, timer);
+};
+
+const bindEditorCursorHover = () => {
+	if (editorCursorBound || !els.editorCanvas) {
+		return;
+	}
+
+	editorCursorBound = true;
+
+	const setCompact = (isCompact) => {
+		const cursor = getZenCursorElement();
+
+		if (!cursor) {
+			return;
+		}
+
+		cursor.classList.toggle('is-editor-compact', isCompact);
+	};
+
+	const setSystemCursor = (isActive) => {
+		els.editorCanvas?.classList.toggle('is-system-cursor', isActive);
+
+		const cursor = getZenCursorElement();
+		const cursorText = document.getElementById('zen-cursor-text');
+
+		cursor?.classList.toggle('is-hidden', isActive);
+		cursorText?.classList.toggle('is-hidden', isActive);
+	};
+
+	els.editorCanvas.addEventListener('pointerenter', () => {
+		setCompact(true);
+		setSystemCursor(true);
+	});
+	els.editorCanvas.addEventListener('pointerleave', () => {
+		setCompact(false);
+		setSystemCursor(false);
+	});
+	els.editorCanvas.addEventListener('mouseenter', () => {
+		setCompact(true);
+		setSystemCursor(true);
+	});
+	els.editorCanvas.addEventListener('mouseleave', () => {
+		setCompact(false);
+		setSystemCursor(false);
+	});
+};
+
+const setEditorLoadingState = (isLoading) => {
+	if (!els.editorLoading) {
+		return;
+	}
+
+	els.editorLoading.classList.toggle('hidden', !isLoading);
+};
+
+const getActiveEditorTab = () => (editorActivePath ? editorTabs.get(editorActivePath) : null);
+
+const updateEditorMeta = () => {
+	const activeTab = getActiveEditorTab();
+
+	if (!els.editorFilePath || !els.editorLineCount) {
+		return;
+	}
+
+	if (!activeTab) {
+		els.editorFilePath.textContent = 'No file selected';
+		els.editorLineCount.textContent = '0 lines';
+		return;
+	}
+
+	els.editorFilePath.textContent = activeTab.path;
+	els.editorLineCount.textContent = `${activeTab.lineCount} lines`;
+};
+
+const updateEditorButtons = () => {
+	const activeTab = getActiveEditorTab();
+	const hasTab = Boolean(activeTab);
+
+	if (els.editorSave) {
+		els.editorSave.disabled = !hasTab || !activeTab.dirty;
+	}
+
+	if (els.editorUndo) {
+		els.editorUndo.disabled = !hasTab;
+	}
+
+	if (els.editorFormat) {
+		els.editorFormat.disabled = !hasTab;
+	}
+};
+
+const updateEditorShellState = () => {
+	const hasTabs = editorTabs.size > 0;
+
+	els.editorShell?.classList.toggle('is-idle', !hasTabs);
+	els.editorCanvas?.classList.toggle('is-empty', !hasTabs);
+
+	if (!hasTabs) {
+		editorActivePath = '';
+
+		if (els.editorEmpty) {
+			els.editorEmpty.classList.remove('hidden');
+		}
+
+		clearEditorSyntaxError();
+		updateEditorMeta();
+		updateEditorButtons();
+	}
+};
+
+const renderEditorTabs = () => {
+	if (!els.editorTabs) {
+		return;
+	}
+
+	const tabs = Array.from(editorTabs.values());
+
+	if (!tabs.length) {
+		els.editorTabs.innerHTML = '';
+		updateEditorShellState();
+		return;
+	}
+
+	els.editorTabs.innerHTML = tabs
+		.map((tab) => {
+			const isActive = tab.path === editorActivePath;
+			const classes = ['editor-tab'];
+
+			if (isActive) {
+				classes.push('is-active');
+			}
+
+			if (tab.dirty) {
+				classes.push('is-dirty');
+			}
+
+			return `
+				<div class="${classes.join(' ')}" role="presentation">
+					<button
+						type="button"
+						class="editor-tab-label"
+						data-editor-tab="${escapeHtml(tab.path)}"
+						role="tab"
+						aria-selected="${isActive ? 'true' : 'false'}">
+						${escapeHtml(tab.name)}
+					</button>
+					<button
+						type="button"
+						class="editor-tab-close"
+						data-editor-close="${escapeHtml(tab.path)}"
+						aria-label="Close ${escapeHtml(tab.name)}">
+						x
+					</button>
+				</div>
+			`;
+		})
+		.join('');
+
+	updateEditorShellState();
+};
+
+const ensureEditorView = async (tab) => {
+	if (!els.editorCanvas) {
+		return;
+	}
+
+	const modules = await loadEditorModules();
+
+	if (!editorView) {
+		editorView = new modules.EditorView({
+			state:
+				tab?.state ||
+				modules.EditorState.create({
+					doc: '',
+					extensions: [...modules.baseExtensions, modules.EditorView.lineWrapping]
+				}),
+			parent: els.editorCanvas
+		});
+	}
+
+	bindEditorCursorHover();
+};
+
+const setActiveEditorTab = async (pathValue) => {
+	const tab = editorTabs.get(pathValue);
+
+	if (!tab) {
+		return;
+	}
+
+	editorActivePath = tab.path;
+
+	await ensureEditorView(tab);
+
+	if (editorView) {
+		editorView.setState(tab.state);
+		editorView.focus();
+	}
+
+	if (els.editorEmpty) {
+		els.editorEmpty.classList.add('hidden');
+	}
+
+	updateEditorMeta();
+	updateEditorButtons();
+	renderEditorTabs();
+	renderEditorTree();
+
+	if (!editorSyntaxErrors.has(tab.path)) {
+		runEditorSyntaxCheck(tab.path, tab.state.doc.toString());
+	}
+
+	renderEditorSyntaxError(tab.path);
+};
+
+const createEditorState = (pathValue, content, modules) => {
+	const languageExtension = getEditorLanguage(pathValue, modules);
+	const lintExtension = buildEditorSyntaxLintExtension(pathValue, modules);
+
+	const updateListener = modules.EditorView.updateListener.of((update) => {
+		if (!update.docChanged) {
+			return;
+		}
+
+		const tab = editorTabs.get(pathValue);
+
+		if (!tab) {
+			return;
+		}
+
+		tab.state = update.state;
+		tab.lineCount = update.state.doc.lines;
+		tab.dirty = update.state.doc.toString() !== tab.savedContent;
+		scheduleEditorSyntaxCheck(pathValue, update.state.doc.toString());
+
+		if (pathValue === editorActivePath) {
+			updateEditorMeta();
+			updateEditorButtons();
+		}
+
+		renderEditorTabs();
+	});
+
+	return modules.EditorState.create({
+		doc: content,
+		extensions: [...modules.baseExtensions, modules.EditorView.lineWrapping, languageExtension, lintExtension, updateListener]
+	});
+};
+
+const openEditorFile = async (pathValue) => {
+	if (!pathValue || !state.canEdit) {
+		return;
+	}
+
+	if (editorTabs.has(pathValue)) {
+		await setActiveEditorTab(pathValue);
+		return;
+	}
+
+	setSectionContentVisibility('editor', true);
+	setSectionState('editor', 'idle');
+	renderSectionState('editor');
+	setEditorLoadingState(true);
+
+	renderSectionState('editor');
+
+	try {
+		const response = await fetch(`/api/dashboard/editor/file?path=${encodeURIComponent(pathValue)}`);
+
+		ensureAuthorizedResponse(response, 'Failed opening command file.');
+
+		const payload = await response.json();
+		const content = String(payload?.content || '');
+		const modules = await loadEditorModules();
+		const stateValue = createEditorState(pathValue, content, modules);
+		const tab = {
+			path: pathValue,
+			name: pathValue.split('/').pop() || pathValue,
+			state: stateValue,
+			savedContent: content,
+			dirty: false,
+			lineCount: stateValue.doc.lines
+		};
+
+		editorTabs.set(pathValue, tab);
+		setSectionState('editor', 'idle');
+		setSectionContentVisibility('editor', true);
+		renderSectionState('editor');
+		renderEditorTabs();
+		runEditorSyntaxCheck(pathValue, content);
+		await setActiveEditorTab(pathValue);
+	} catch (error) {
+		setSectionState('editor', 'error', error?.message || 'Unable to open file.');
+		setSectionContentVisibility('editor', false);
+		renderSectionState('editor');
+	} finally {
+		setEditorLoadingState(false);
+	}
+};
+
+const setEditorTreeCount = (count) => {
+	if (!els.editorTreeCount) {
+		return;
+	}
+
+	const safeCount = Math.max(0, Number(count) || 0);
+
+	els.editorTreeCount.textContent = `${safeCount} file${safeCount === 1 ? '' : 's'}`;
+};
+
+const countEditorFiles = (node) => {
+	if (!node) {
+		return 0;
+	}
+
+	if (node.type === 'file') {
+		return 1;
+	}
+
+	return (node.children || []).reduce((sum, child) => sum + countEditorFiles(child), 0);
+};
+
+const filterEditorTree = (node, query) => {
+	if (!node) {
+		return null;
+	}
+
+	if (!query) {
+		return node;
+	}
+
+	const nameMatch = node.name.toLowerCase().includes(query);
+
+	if (node.type === 'file') {
+		return nameMatch ? node : null;
+	}
+
+	const children = (node.children || []).map((child) => filterEditorTree(child, query)).filter(Boolean);
+
+	if (nameMatch || children.length) {
+		return {
+			...node,
+			children
+		};
+	}
+
+	return null;
+};
+
+const buildEditorTreeChevronMarkup = (isExpanded) => {
+	const chevronClass = isExpanded ? 'nf nf-fa-chevron_down' : 'nf nf-fa-chevron_right';
+
+	return `<span class="editor-tree-icon editor-tree-chevron ${chevronClass}" aria-hidden="true"></span>`;
+};
+
+const buildEditorTreeFolderMarkup = (isExpanded) => {
+	const folderClass = isExpanded ? 'nf nf-fa-folder_open' : 'nf nf-fa-folder';
+
+	return `<span class="editor-tree-icon editor-tree-folder-icon ${folderClass}" aria-hidden="true"></span>`;
+};
+
+const buildEditorTreeFileMarkup = () =>
+	'<span class="editor-tree-icon editor-tree-file-icon nf nf-fa-file" aria-hidden="true"></span>';
+
+const buildEditorTreeMarkup = (node, depth, query) => {
+	if (!node) {
+		return '';
+	}
+
+	const safeDepth = Math.max(0, depth || 0);
+
+	if (node.type === 'file') {
+		const isActive = node.path === editorActivePath;
+		const rowClass = ['editor-tree-row', 'editor-tree-indent'];
+
+		if (isActive) {
+			rowClass.push('is-active');
+		}
+
+		return `
+			<button
+				type="button"
+				class="${rowClass.join(' ')}"
+				data-editor-file="${escapeHtml(node.path)}"
+				style="--depth: ${safeDepth}"
+				role="treeitem">
+				${buildEditorTreeFileMarkup()}
+				<span>${escapeHtml(node.name)}</span>
+			</button>
+		`;
+	}
+
+	const isExpanded = query ? true : editorTreeExpanded.has(node.path);
+	const childrenMarkup = (node.children || []).map((child) => buildEditorTreeMarkup(child, safeDepth + 1, query)).join('');
+
+	return `
+		<div class="editor-tree-node ${isExpanded ? 'is-open' : ''}">
+			<button
+				type="button"
+				class="editor-tree-row editor-tree-indent"
+				data-editor-toggle="${escapeHtml(node.path)}"
+				style="--depth: ${safeDepth}"
+				role="treeitem"
+				aria-expanded="${isExpanded ? 'true' : 'false'}">
+				${buildEditorTreeChevronMarkup(isExpanded)}
+				${buildEditorTreeFolderMarkup(isExpanded)}
+				<span>${escapeHtml(node.name)}</span>
+			</button>
+			<div class="editor-tree-children" role="group">
+				${childrenMarkup}
+			</div>
+		</div>
+	`;
+};
+
+const renderEditorTree = () => {
+	if (!els.editorTree) {
+		return;
+	}
+
+	if (!editorTreeSnapshot) {
+		els.editorTree.innerHTML = '<p class="muted">No command files loaded.</p>';
+		return;
+	}
+
+	const query = (state.searchByFolder.editor || '').trim().toLowerCase();
+	const filtered = filterEditorTree(editorTreeSnapshot, query);
+
+	if (!filtered) {
+		els.editorTree.innerHTML = '<p class="muted">No command matched this search.</p>';
+		return;
+	}
+
+	const fileCount = countEditorFiles(filtered);
+
+	setEditorTreeCount(fileCount);
+	els.editorTree.innerHTML = buildEditorTreeMarkup(filtered, 0, query);
+};
+
+const ensureEditorReady = async () => {
+	if (!state.canEdit || editorLoading) {
+		return;
+	}
+
+	if (editorTreeSnapshot) {
+		renderEditorTree();
+		updateEditorMeta();
+		updateEditorButtons();
+		updateEditorShellState();
+		return;
+	}
+
+	editorLoading = true;
+	setSectionState('editor', 'loading', 'Loading command file tree...');
+	setSectionContentVisibility('editor', false);
+	renderSectionState('editor');
+
+	try {
+		const response = await fetch('/api/dashboard/editor/tree');
+
+		ensureAuthorizedResponse(response, 'Failed loading command tree.');
+
+		const payload = await response.json();
+
+		editorTreeSnapshot = payload?.root || null;
+		editorTreeExpanded = new Set(['']);
+		setSectionState('editor', 'idle');
+		setSectionContentVisibility('editor', true);
+		renderSectionState('editor');
+		renderEditorTree();
+		updateEditorMeta();
+		updateEditorButtons();
+		updateEditorShellState();
+	} catch (error) {
+		setSectionState('editor', 'error', error?.message || 'Unable to load command tree.');
+		setSectionContentVisibility('editor', false);
+		renderSectionState('editor');
+	} finally {
+		editorLoading = false;
+	}
+};
+
+const saveEditorTab = async (tab) => {
+	if (!tab) {
+		return false;
+	}
+
+	if (els.editorSave && tab.path === editorActivePath) {
+		els.editorSave.disabled = true;
+	}
+
+	try {
+		const content = tab.state?.doc?.toString() || '';
+		const response = await fetch('/api/dashboard/editor/file', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				path: tab.path,
+				content
+			})
+		});
+
+		ensureAuthorizedResponse(response, 'Failed saving file.');
+
+		tab.savedContent = content;
+		tab.dirty = false;
+		updateEditorButtons();
+		renderEditorTabs();
+		showToast('File saved.', 'success');
+		return true;
+	} catch (error) {
+		showToast(error?.message || 'Unable to save file.', 'error');
+		return false;
+	} finally {
+		if (els.editorSave && tab.path === editorActivePath) {
+			els.editorSave.disabled = !tab?.dirty;
+		}
+	}
+};
+
+const saveEditorFile = async () => {
+	const activeTab = getActiveEditorTab();
+
+	if (!activeTab) {
+		return;
+	}
+
+	await saveEditorTab(activeTab);
+};
+
+const closeEditorTab = async (pathValue) => {
+	const tab = editorTabs.get(pathValue);
+
+	if (!tab) {
+		return;
+	}
+
+	if (tab.dirty) {
+		const choice = await openEditorCloseDialog({ fileName: tab.name });
+
+		if (choice === 'cancel') {
+			return;
+		}
+
+		if (choice === 'save') {
+			const saved = await saveEditorTab(tab);
+
+			if (!saved) {
+				return;
+			}
+		}
+	}
+
+	const paths = Array.from(editorTabs.keys());
+	const index = paths.indexOf(pathValue);
+
+	editorTabs.delete(pathValue);
+	editorSyntaxErrors.delete(pathValue);
+
+	if (pathValue === editorActivePath) {
+		const remaining = Array.from(editorTabs.keys());
+		const nextIndex = index < 0 ? 0 : Math.min(index, remaining.length - 1);
+		const nextPath = remaining[nextIndex] || '';
+
+		if (nextPath) {
+			await setActiveEditorTab(nextPath);
+		} else {
+			editorActivePath = '';
+
+			if (editorView) {
+				editorView.destroy();
+				editorView = null;
+			}
+
+			els.editorCanvas?.querySelector('.cm-editor')?.remove();
+
+			clearEditorSyntaxError();
+			updateEditorMeta();
+			updateEditorButtons();
+			renderEditorTabs();
+			renderEditorTree();
+
+			if (els.editorEmpty) {
+				els.editorEmpty.classList.remove('hidden');
+			}
+		}
+	} else {
+		renderEditorTabs();
+	}
+
+	updateEditorShellState();
+};
+
+const formatEditorFile = async () => {
+	const activeTab = getActiveEditorTab();
+
+	if (!activeTab || !editorView) {
+		return;
+	}
+
+	if (els.editorFormat) {
+		els.editorFormat.disabled = true;
+	}
+
+	try {
+		const configJson = String(els.editorConfigInput?.value || '').trim();
+		const content = editorView.state.doc.toString();
+		const response = await fetch('/api/dashboard/editor/format', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				path: activeTab.path,
+				content,
+				configJson: configJson || null
+			})
+		});
+
+		ensureAuthorizedResponse(response, 'Failed formatting file.');
+
+		const payload = await response.json();
+		const formatted = String(payload?.content || '');
+		const docLength = editorView.state.doc.length;
+
+		editorView.dispatch({
+			changes: { from: 0, to: docLength, insert: formatted }
+		});
+		showToast('Formatted with Prettier.', 'success');
+	} catch (error) {
+		showToast(error?.message || 'Unable to format file.', 'error');
+	} finally {
+		if (els.editorFormat) {
+			els.editorFormat.disabled = false;
+		}
+	}
+};
+
+const undoEditorChange = async () => {
+	const activeTab = getActiveEditorTab();
+
+	if (!activeTab || !editorView) {
+		return;
+	}
+
+	const modules = await loadEditorModules();
+
+	modules.undo(editorView);
 };
 
 const getFilteredProfilePictures = () => {
@@ -4773,8 +6019,36 @@ const setupRealtime = () => {
 			return;
 		}
 
+		const nextLogs = Array.isArray(payload.logs) ? payload.logs : [];
+		const payloadLastId = Number(payload.lastId || 0);
+
+		if (nextLogs.length === 0) {
+			if (payloadLastId > 0) {
+				void runSafe(fetchAudit);
+				return;
+			}
+
+			if (state.auditLogs.length > 0) {
+				return;
+			}
+		}
+
+		const firstId = Number(nextLogs[0]?.id || 0);
+		const lastId = Number(nextLogs.at(-1)?.id || 0);
+		const nextSignature = `${payloadLastId}|${nextLogs.length}|${firstId}|${lastId}`;
+
+		if (
+			nextSignature === auditRenderSignature &&
+			state.sectionStates.audit.kind === 'idle' &&
+			nextLogs.length > 0 &&
+			nextLogs.length === state.auditLogs.length
+		) {
+			return;
+		}
+
+		auditRenderSignature = nextSignature;
 		state.lastAuditId = Number(payload.lastId || state.lastAuditId || 0);
-		state.auditLogs = Array.isArray(payload.logs) ? payload.logs : [];
+		state.auditLogs = nextLogs;
 		setSectionState('audit', 'idle');
 		renderAuditChipCounts(state.auditLogs);
 		renderAudit();
@@ -4920,9 +6194,21 @@ const fetchSession = async () => {
 	state.role = payload.role || 'viewer';
 	state.canEdit = state.role === 'owner';
 	const settingsPanel = document.querySelector('.settings-panel');
+	const ownerOnlyItems = Array.from(document.querySelectorAll('.owner-only'));
+	const showEditor = state.canEdit;
+
+	for (const item of ownerOnlyItems) {
+		item.classList.toggle('hidden', !showEditor);
+	}
+
+	if (!showEditor && state.activeFolder === 'editor') {
+		setActiveFolder('commands');
+	}
 
 	if (!state.canEdit) {
 		els.clearConsole.disabled = true;
+		els.editorView?.classList.add('hidden');
+		editorRouteIntent = false;
 
 		if (els.restartBot) {
 			els.restartBot.disabled = true;
@@ -4985,6 +6271,11 @@ const fetchSession = async () => {
 		if (els.auditClearFilters) {
 			els.auditClearFilters.disabled = false;
 			els.auditClearFilters.classList.remove('hidden');
+		}
+
+		if (editorRouteIntent) {
+			setActiveFolder('editor');
+			editorRouteIntent = false;
 		}
 	}
 };
@@ -5139,9 +6430,23 @@ async function fetchAudit() {
 		}
 
 		const payload = await response.json();
+		const incomingLogs = Array.isArray(payload?.logs) ? payload.logs : [];
+		const hasQueryFilter = Boolean(queryValue);
+
+		if (!hasDimensionFilters && !hasQueryFilter && realtimeConnected && state.auditLogs.length && !incomingLogs.length) {
+			setSectionState('audit', 'idle');
+			renderAuditChipCounts(state.auditLogs);
+			renderAudit();
+			return;
+		}
 
 		state.lastAuditId = Number(payload?.lastId || 0);
-		state.auditLogs = Array.isArray(payload?.logs) ? payload.logs : [];
+		state.auditLogs = incomingLogs;
+
+		const firstId = Number(state.auditLogs[0]?.id || 0);
+		const lastId = Number(state.auditLogs.at(-1)?.id || 0);
+
+		auditRenderSignature = `${state.lastAuditId}|${state.auditLogs.length}|${firstId}|${lastId}`;
 
 		const countLogs = Array.isArray(countPayload?.logs) ? countPayload.logs : state.auditLogs;
 
@@ -5454,7 +6759,8 @@ const setAuditActionCollapsed = (collapsed, options = {}) => {
 	}
 
 	if (els.auditActionSeparator) {
-		els.auditActionSeparator.textContent = state.auditActionCollapsed ? '>' : '|';
+		els.auditActionSeparator.classList.add('nf');
+		els.auditActionSeparator.classList.add(state.auditActionCollapsed ? 'nf-fa-chevron_right' : 'nf-fa-ellipsis_vertical');
 		els.auditActionSeparator.setAttribute('aria-expanded', state.auditActionCollapsed ? 'false' : 'true');
 		els.auditActionSeparator.setAttribute(
 			'data-tooltip',
@@ -5494,7 +6800,8 @@ const setAuditRoleCollapsed = (collapsed, options = {}) => {
 	}
 
 	if (els.auditRoleSeparator) {
-		els.auditRoleSeparator.textContent = state.auditRoleCollapsed ? '>' : '|';
+		els.auditRoleSeparator.classList.add('nf');
+		els.auditRoleSeparator.classList.add(state.auditRoleCollapsed ? 'nf-fa-chevron_right' : 'nf-fa-ellipsis_vertical');
 		els.auditRoleSeparator.setAttribute('aria-expanded', state.auditRoleCollapsed ? 'false' : 'true');
 		els.auditRoleSeparator.setAttribute(
 			'data-tooltip',
@@ -5535,9 +6842,27 @@ const bindEvents = () => {
 		closeConfirmDialog(true);
 	});
 
+	els.editorCloseCancel?.addEventListener('click', () => {
+		closeEditorCloseDialog('cancel');
+	});
+
+	els.editorCloseDiscard?.addEventListener('click', () => {
+		closeEditorCloseDialog('discard');
+	});
+
+	els.editorCloseSave?.addEventListener('click', () => {
+		closeEditorCloseDialog('save');
+	});
+
 	els.confirmDialog?.addEventListener('click', (event) => {
 		if (event.target === els.confirmDialog) {
 			closeConfirmDialog(false);
+		}
+	});
+
+	els.editorCloseDialog?.addEventListener('click', (event) => {
+		if (event.target === els.editorCloseDialog) {
+			closeEditorCloseDialog('cancel');
 		}
 	});
 
@@ -5792,6 +7117,23 @@ const bindEvents = () => {
 		}
 	});
 
+	document.addEventListener('keydown', (event) => {
+		if (!(event.ctrlKey || event.metaKey)) {
+			return;
+		}
+
+		if (event.key.toLowerCase() !== 's') {
+			return;
+		}
+
+		if (state.activeFolder !== 'editor') {
+			return;
+		}
+
+		event.preventDefault();
+		void saveEditorFile();
+	});
+
 	document.addEventListener('click', (event) => {
 		if (!event.target.closest('.custom-select')) {
 			closeAllCustomFilters();
@@ -5992,6 +7334,11 @@ const bindEvents = () => {
 			return;
 		}
 
+		if (state.activeFolder === 'editor') {
+			renderEditorTree();
+			return;
+		}
+
 		renderUsers();
 	});
 
@@ -6075,7 +7422,104 @@ const bindEvents = () => {
 		setActiveFolder(folderToggle.getAttribute('data-folder-toggle'));
 	});
 
+	els.editorRefreshTree?.addEventListener('click', () => {
+		editorTreeSnapshot = null;
+		editorTreeExpanded = new Set(['']);
+		void ensureEditorReady();
+	});
+
+	els.editorThemeSelect?.querySelector('.custom-select-trigger')?.addEventListener('click', () => {
+		toggleCustomFilter(els.editorThemeSelect);
+	});
+
+	els.editorThemeSelect?.querySelector('.custom-select-menu')?.addEventListener('click', (event) => {
+		const option = event.target.closest('.custom-select-option');
+
+		if (!option) {
+			return;
+		}
+
+		const value = option.getAttribute('data-value') || '';
+
+		setCustomFilterValue(els.editorThemeSelect, value);
+		closeCustomFilter(els.editorThemeSelect);
+		setEditorTheme(value);
+	});
+
+	els.editorTree?.addEventListener('click', (event) => {
+		const toggle = event.target.closest('[data-editor-toggle]');
+
+		if (toggle) {
+			const pathValue = toggle.getAttribute('data-editor-toggle') || '';
+
+			if (editorTreeExpanded.has(pathValue)) {
+				editorTreeExpanded.delete(pathValue);
+			} else {
+				editorTreeExpanded.add(pathValue);
+			}
+
+			renderEditorTree();
+			return;
+		}
+
+		const file = event.target.closest('[data-editor-file]');
+
+		if (!file) {
+			return;
+		}
+
+		const pathValue = file.getAttribute('data-editor-file') || '';
+
+		void openEditorFile(pathValue);
+	});
+
+	els.editorTabs?.addEventListener('click', (event) => {
+		const closeButton = event.target.closest('[data-editor-close]');
+
+		if (closeButton) {
+			const pathValue = closeButton.getAttribute('data-editor-close') || '';
+
+			void closeEditorTab(pathValue);
+			return;
+		}
+
+		const tab = event.target.closest('[data-editor-tab]');
+
+		if (!tab) {
+			return;
+		}
+
+		const pathValue = tab.getAttribute('data-editor-tab') || '';
+
+		void setActiveEditorTab(pathValue);
+	});
+
+	els.editorSave?.addEventListener('click', () => {
+		void saveEditorFile();
+	});
+
+	els.editorUndo?.addEventListener('click', () => {
+		void undoEditorChange();
+	});
+
+	els.editorFormat?.addEventListener('click', () => {
+		void formatEditorFile();
+	});
+
+	els.editorConfigClear?.addEventListener('click', () => {
+		if (els.editorConfigInput) {
+			els.editorConfigInput.value = '';
+		}
+
+		showToast('Using default Prettier config.', 'info');
+	});
+
 	document.addEventListener('keydown', (event) => {
+		if (event.key === 'Escape' && els.editorCloseDialog && !els.editorCloseDialog.classList.contains('hidden')) {
+			closeEditorCloseDialog('cancel');
+			return;
+		}
+
 		if (event.key === 'Escape' && els.profilePicturesLightbox && !els.profilePicturesLightbox.classList.contains('hidden')) {
 			closeProfilePicturesCarousel();
 			return;
@@ -6533,6 +7977,15 @@ const init = async () => {
 	startSpotifyProgressTicker();
 	updateSeamlessAlbumsColorFilterUi();
 	prefetchRoute('/albums');
+
+	if (typeof window !== 'undefined' && window.location.pathname === EDITOR_ROUTE_PATH) {
+		editorRouteIntent = true;
+	}
+
+	if (state.activeFolder === 'editor') {
+		editorRouteIntent = true;
+	}
+
 	setActiveFolder(state.activeFolder);
 
 	if (typeof window !== 'undefined' && window.location.pathname !== ALBUMS_ROUTE_PATH) {

@@ -11,10 +11,6 @@
 /** @typedef {import('@prisma/client').PrismaClient} PrismaClient */
 /** @typedef {{ id: string, limit: number, role: string }} UserLimitData */
 
-// ─────────────────────────────────────────────────────────────────────────────
-// User Limits
-// ─────────────────────────────────────────────────────────────────────────────
-
 /**
  * Read the limit/role record for a JID, creating a FREE default if missing.
  *
@@ -94,7 +90,9 @@ export const reduceUserLimit = async (db, jid, amount, defaultLimit = 30) => {
 export const addUserLimit = async (db, jid, amount, defaultLimit = 30) => {
 	const user = await getUserLimit(db, jid, defaultLimit);
 
-	if (user.role === 'OWNER' || user.role === 'PREMIUM') return;
+	if (user.role === 'OWNER' || user.role === 'PREMIUM') {
+		return;
+	}
 
 	await upsertUserLimit(db, jid, user.limit + amount, user.role);
 };
@@ -123,12 +121,9 @@ export const updateUserRole = async (db, jid, role) => {
  */
 export const getAllUserLimits = async (db) => {
 	const rows = await db.userLimit.findMany();
+
 	return rows.map((r) => ({ id: r.jid, limit: r.limit, role: r.role }));
 };
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Banned users
-// ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * Return all banned JIDs as a plain array of strings.
@@ -138,6 +133,7 @@ export const getAllUserLimits = async (db) => {
  */
 export const getBannedUsers = async (db) => {
 	const rows = await db.bannedUser.findMany({ select: { jid: true } });
+
 	return rows.map((r) => r.jid);
 };
 
@@ -176,12 +172,9 @@ export const unbanUser = async (db, jid) => {
  */
 export const isUserBanned = async (db, jid) => {
 	const row = await db.bannedUser.findUnique({ where: { jid } });
+
 	return row !== null;
 };
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Contacts
-// ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * Return all stored contacts.
@@ -191,6 +184,7 @@ export const isUserBanned = async (db, jid) => {
  */
 export const getAllContacts = async (db) => {
 	const rows = await db.contact.findMany({ select: { jid: true, name: true } });
+
 	return rows.map((r) => ({ id: r.jid, name: r.name ?? 'Unknown' }));
 };
 

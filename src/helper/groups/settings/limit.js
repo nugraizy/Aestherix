@@ -1,10 +1,10 @@
-import cron from 'node-cron';
 import fs from 'fs-extra';
+import cron from 'node-cron';
 
 import { color, loggers } from '../../../utils/modules/index.js';
 import configuration from '../../config/connect.js';
-import prisma from '../../database/prisma.js';
 import { getAllUserLimits, upsertUserLimit } from '../../database/adapters/user.js';
+import prisma from '../../database/prisma.js';
 
 const SETTINGS_PATH = './src/helper/config/settings.json';
 
@@ -12,7 +12,6 @@ const LIMIT = (await fs.readJSON(SETTINGS_PATH).catch(() => ({}))).limit || 100;
 
 configuration.cache.limit = LIMIT;
 
-// Warm in-memory limit cache from DB at startup
 try {
 	const rows = await getAllUserLimits(prisma);
 

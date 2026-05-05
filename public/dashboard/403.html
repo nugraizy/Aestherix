@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>404 | Aestherix Dashboard</title>
+		<title>403 | Aestherix Dashboard</title>
 
 		<link rel="icon" type="image/png" href="/favicon.png" />
 		<link rel="stylesheet" href="https://www.nerdfonts.com/assets/css/webfont.css" />
@@ -40,79 +40,61 @@
 			}
 
 			body.dashboard-page,
-			.not-found-page {
+			.forbidden-page {
 				min-height: 100vh;
 			}
 
-			.not-found-page {
+			.forbidden-page {
 				display: flex;
 				align-items: center;
 				justify-content: center;
 				padding: 24px;
 			}
 
-			.not-found-card {
+			.forbidden-card {
 				width: min(720px, 100%);
 				display: grid;
 				gap: 12px;
 				padding: 26px;
 			}
 
-			.not-found-top,
-			.not-found-actions {
+			.forbidden-top,
+			.forbidden-actions {
 				display: flex;
 				flex-wrap: wrap;
 				gap: 12px;
 			}
 
-			.not-found-top {
+			.forbidden-top {
 				align-items: center;
 			}
 
-			.not-found-actions {
+			.forbidden-actions {
 				margin-top: 8px;
 			}
 
-			.not-found-code {
+			.forbidden-code {
 				margin: 0;
 				font-size: clamp(62px, 13vw, 120px);
 				line-height: 0.9;
 				letter-spacing: 0.02em;
-				font-weight: 900;
-				color: transparent;
-
-				background-image: linear-gradient(
-					120deg,
-					var(--brand-wave-1) 0%,
-					var(--brand-wave-2) 12.5%,
-					var(--brand-wave-3) 25%,
-					var(--brand-wave-4) 37.5%,
-					var(--brand-wave-1) 50%,
-					var(--brand-wave-2) 62.5%,
-					var(--brand-wave-3) 75%,
-					var(--brand-wave-4) 87.5%,
-					var(--brand-wave-1) 100%
-				);
-
-				background-size: 200% 100%;
-				background-position: center;
-				background-clip: text;
-				-webkit-background-clip: text;
-
-				-webkit-text-stroke: 1px color-mix(in srgb, var(--sky) 28%, transparent);
-				text-shadow: 0 0 26px color-mix(in srgb, var(--sky) 30%, transparent);
-
-				animation: hero-brand-shimmer 5.6s linear infinite;
 			}
 
-			.not-found-title {
-				margin: 2px 0 0;
-				font-size: 24px;
-				font-weight: 200;
-				letter-spacing: 0.01em;
+			.forbidden-eyebrow {
+				margin: 0;
+				text-transform: uppercase;
+				letter-spacing: 0.18em;
+				font-size: 0.8rem;
+				color: var(--ink-muted);
 			}
 
-			.not-found-btn {
+			.forbidden-copy {
+				margin: 0;
+				font-size: 1.05rem;
+				color: var(--ink-muted);
+			}
+
+			.btn {
 				display: inline-flex;
 				align-items: center;
 				justify-content: center;
@@ -133,33 +115,33 @@
 					border-color 120ms ease;
 			}
 
-			.not-found-btn.primary {
+			.btn.primary {
 				background: color-mix(in srgb, var(--mint) 24%, transparent);
 				border-color: color-mix(in srgb, var(--mint) 56%, transparent);
 			}
 
-			.not-found-btn:hover,
-			.not-found-btn:focus-visible {
+			.btn:hover,
+			.btn:focus-visible {
 				transform: translateY(-1px);
 				border-color: color-mix(in srgb, var(--sky) 55%, transparent);
 				background: color-mix(in srgb, var(--sky) 20%, transparent);
 			}
 		</style>
 	</head>
-
 	<body class="dashboard-page">
 		<div class="app-bg"></div>
-
-		<main class="dashboard not-found-page" role="main" aria-labelledby="page-title">
-			<section class="panel not-found-card">
-				<div class="not-found-top">
-					<p class="not-found-code" aria-hidden="true">404</p>
+		<main class="dashboard forbidden-page" role="main" aria-labelledby="page-title">
+			<section class="panel forbidden-card">
+				<p class="forbidden-eyebrow">Access Blocked</p>
+				<div class="forbidden-top">
+					<h1 id="page-title" class="forbidden-code">403</h1>
+					<div>
+						<p class="hero-version">Owner access required.</p>
+						<p class="forbidden-copy">This editor is locked to owner sessions only.</p>
+					</div>
 				</div>
-
-				<h1 id="page-title" class="not-found-title">Page not found</h1>
-
-				<div class="not-found-actions">
-					<a class="not-found-btn primary" href="/dashboard"> Dashboard </a>
+				<div class="forbidden-actions">
+					<a class="btn primary" href="/dashboard">Back to Dashboard</a>
 				</div>
 			</section>
 		</main>

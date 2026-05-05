@@ -1,19 +1,18 @@
-import path from 'path';
+import chalk from 'chalk';
 import chokidar from 'chokidar';
 import fs from 'fs-extra';
-import syntaxError from 'syntax-error';
 import os from 'os';
-import chalk from 'chalk';
+import path from 'path';
+import syntaxError from 'syntax-error';
 
+import { color, loadFiles, loggers } from '../../../utils/modules/index.js';
 import configuration from '../../config/connect.js';
-import { color, loggers, loadFiles } from '../../../utils/modules/index.js';
-import { ModuleError, isMissingProperty } from './util.js';
-import prisma from '../../database/prisma.js';
 import { getAllContacts, upsertContacts } from '../../database/adapters/user.js';
+import prisma from '../../database/prisma.js';
+import { ModuleError, isMissingProperty } from './util.js';
 
 const hostPlatform = os.platform();
 
-// In-memory contacts cache — populated lazily via initContact/updateContact.
 let contactsDbCache = null;
 
 const getContactsCache = async () => {
@@ -56,8 +55,9 @@ export const initContact = async (store, contactsList) => {
 
 	if (contactsList.length) {
 		const toUpsert = contactsList.map(({ id, name }) => ({ jid: id, name: name || 'Unknown' }));
+
 		await upsertContacts(prisma, toUpsert).catch(() => {});
-		contactsDbCache = null; // Invalidate cache
+		contactsDbCache = null;
 
 		for (const { id, name } of contactsList) {
 			store.localContacts[id] = { name, id };
@@ -84,7 +84,7 @@ export const updateContact = async (store, contactsList) => {
 
 	if (toUpsert.length) {
 		await upsertContacts(prisma, toUpsert).catch(() => {});
-		contactsDbCache = null; // Invalidate cache
+		contactsDbCache = null;
 	}
 };
 

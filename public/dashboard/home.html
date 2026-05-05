@@ -61,7 +61,7 @@
 				display: flex;
 				flex-wrap: wrap;
 				gap: 12px;
-				margin-top: 28px;
+				margin-top: 8px;
 			}
 
 			.home-actions a {
@@ -107,6 +107,39 @@
 					grid-template-columns: 1fr;
 				}
 			}
+
+			.btn {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+
+				padding: 10px 16px;
+				border: 1px solid var(--line);
+				border-radius: 12px;
+
+				color: var(--ink);
+				text-decoration: none;
+				font-weight: 600;
+
+				background: color-mix(in srgb, var(--bg-mid) 45%, transparent);
+
+				transition:
+					transform 120ms ease,
+					background-color 120ms ease,
+					border-color 120ms ease;
+			}
+
+			.btn.primary {
+				background: color-mix(in srgb, var(--mint) 24%, transparent);
+				border-color: color-mix(in srgb, var(--mint) 56%, transparent);
+			}
+
+			.btn:hover,
+			.btn:focus-visible {
+				transform: translateY(-1px);
+				border-color: color-mix(in srgb, var(--sky) 55%, transparent);
+				background: color-mix(in srgb, var(--sky) 20%, transparent);
+			}
 		</style>
 	</head>
 	<body>
@@ -145,8 +178,8 @@
 				</div>
 
 				<div class="home-actions">
-					<a class="folder-path" type="button" href="/dashboard">Dashboard</a>
-					<a class="folder-path" type="button" href="/albums">Albums</a>
+					<a class="btn primary" href="/dashboard">Dashboard</a>
+					<a class="btn primary" href="/albums">Albums</a>
 				</div>
 
 				<div class="home-grid" aria-label="dashboard highlights">

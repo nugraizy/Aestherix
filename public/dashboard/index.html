@@ -89,8 +89,6 @@
 					<p class="eyebrow">Aestherix Runtime</p>
 					<h1><span class="hero-brand-animated">Aestherix</span> Dashboard</h1>
 					<p id="project-version" class="hero-version">
-						<span class="hero-version-label">Version: <span id="project-version-value">-</span></span>
-						<span class="hero-version-divider" aria-hidden="true"></span>
 						<button id="open-changelog" class="hero-changelog-link" type="button" data-tooltip="Open recent project changes">
 							Changelog
 						</button>
@@ -225,7 +223,6 @@
 								aria-expanded="true"
 								aria-controls="audit-action-chips"
 								data-tooltip="Hide individual action chips">
-								|
 							</span>
 							<button
 								class="audit-chip audit-action-extra"
@@ -279,7 +276,6 @@
 								aria-expanded="true"
 								aria-controls="audit-role-chips"
 								data-tooltip="Hide individual role chips">
-								|
 							</span>
 							<button
 								class="audit-chip audit-role-extra"
@@ -353,6 +349,17 @@
 						aria-selected="false"
 						data-tooltip="Open user moderation controls">
 						Users
+					</button>
+					<span class="folder-divider owner-only hidden" aria-hidden="true">\</span>
+					<button
+						id="editor-folder-toggle"
+						class="folder-path owner-only hidden"
+						type="button"
+						data-folder-toggle="editor"
+						role="tab"
+						aria-selected="false"
+						data-tooltip="Open command file editor">
+						Editor
 					</button>
 					<div class="folder-filters">
 						<div id="controls-command-filter" class="folder-filter custom-select hidden" data-value="all">
@@ -676,6 +683,98 @@
 						<div id="users-groups" class="commands-groups"></div>
 					</div>
 				</section>
+
+				<section id="editor-view" class="controls-view hidden" data-folder-view="editor">
+					<div id="editor-state" class="section-state hidden" aria-live="polite"></div>
+					<div id="editor-shell" class="editor-shell">
+						<aside class="editor-sidebar">
+							<div class="editor-sidebar-head">
+								<div>
+									<p class="editor-sidebar-title">src/commands</p>
+									<p id="editor-tree-count" class="editor-sidebar-meta">0 files</p>
+								</div>
+								<div class="editor-sidebar-actions">
+									<div id="editor-theme-select" class="custom-select editor-theme-select" data-value="dracula">
+										<button
+											type="button"
+											class="custom-select-trigger"
+											aria-haspopup="listbox"
+											aria-expanded="false"
+											data-tooltip="Switch editor syntax theme">
+											<span class="custom-select-label">Dracula</span>
+											<span class="custom-select-caret" aria-hidden="true"></span>
+										</button>
+										<div class="custom-select-menu" role="listbox" aria-label="Editor syntax theme">
+											<button type="button" class="custom-select-option is-selected" data-value="dracula" aria-selected="true">
+												Dracula
+											</button>
+											<button type="button" class="custom-select-option" data-value="city-lights" aria-selected="false">
+												City Lights
+											</button>
+											<button type="button" class="custom-select-option" data-value="catppuccin" aria-selected="false">
+												Catppuccin
+											</button>
+											<button type="button" class="custom-select-option" data-value="tokyo-night" aria-selected="false">
+												Tokyo Night
+											</button>
+										</div>
+									</div>
+									<button id="editor-refresh-tree" type="button" data-tooltip="Reload command tree">Refresh</button>
+								</div>
+							</div>
+							<div id="editor-tree" class="editor-tree" role="tree"></div>
+						</aside>
+						<div class="editor-main">
+							<div id="editor-tabs" class="editor-tabs" role="tablist" aria-label="Open files"></div>
+							<div class="editor-toolbar">
+								<div class="editor-actions">
+									<button id="editor-save" type="button" data-tooltip="Save file (Ctrl+S)">Save</button>
+									<button id="editor-undo" type="button" data-tooltip="Undo last change">Undo</button>
+									<button id="editor-format" type="button" data-tooltip="Format with Prettier">Format</button>
+								</div>
+								<div class="editor-meta">
+									<span id="editor-file-path" class="editor-meta-path">No file selected</span>
+									<span id="editor-line-count" class="editor-meta-lines">0 lines</span>
+								</div>
+							</div>
+							<div id="editor-canvas" class="editor-canvas">
+								<div id="editor-empty" class="editor-empty">Select a command file to begin editing.</div>
+								<div id="editor-loading" class="editor-loading hidden" aria-hidden="true">
+									<div class="popup-skeleton editor-loading-skeleton">
+										<div class="popup-skeleton-line w-85"></div>
+										<div class="popup-skeleton-line w-70"></div>
+										<div class="popup-skeleton-line w-92"></div>
+										<div class="popup-skeleton-line w-76"></div>
+										<div class="popup-skeleton-line w-68"></div>
+										<div class="popup-skeleton-line w-80"></div>
+										<div class="popup-skeleton-line w-58"></div>
+										<div class="popup-skeleton-line w-88"></div>
+										<div class="popup-skeleton-line w-76"></div>
+										<div class="popup-skeleton-line w-92"></div>
+										<div class="popup-skeleton-line w-40"></div>
+										<div class="popup-skeleton-line w-70"></div>
+										<div class="popup-skeleton-line w-85"></div>
+										<div class="popup-skeleton-line w-52"></div>
+										<div class="popup-skeleton-line w-80"></div>
+										<div class="popup-skeleton-line w-68"></div>
+										<div class="popup-skeleton-line w-92"></div>
+										<div class="popup-skeleton-line w-58"></div>
+									</div>
+								</div>
+							</div>
+							<div id="editor-syntax-error" class="editor-syntax-error hidden" aria-live="polite"></div>
+							<div class="editor-config">
+								<label for="editor-prettier-config">Custom Prettier config (JSON)</label>
+								<textarea id="editor-prettier-config" rows="4" placeholder='{"singleQuote": true, "semi": true}'></textarea>
+								<div class="editor-config-actions">
+									<button id="editor-prettier-clear" type="button" data-tooltip="Use root .prettierrc.json">
+										Use Default
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
 			</section>
 
 			<section class="panel settings-panel" aria-label="Dashboard settings">
@@ -727,7 +826,7 @@
 								<path
 									d="M12 .5A12 12 0 0 0 8.2 23.9c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.4-4-1.4-.5-1.4-1.3-1.7-1.3-1.7-1.1-.8.1-.8.1-.8 1.2.1 1.9 1.3 1.9 1.3 1.1 1.9 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.4-5.5-6A4.7 4.7 0 0 1 5.5 8c-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2a4.7 4.7 0 0 1 1.3 3.3c0 4.6-2.8 5.6-5.5 6 .4.4.8 1.1.8 2.3v3.4c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z" />
 							</svg> </span
-						><span>GitHub: nugraizy</span></a
+						><span>nugraizy</span></a
 					>
 					<a
 						href="https://www.instagram.com/dizy.himself/"
@@ -739,33 +838,15 @@
 								<path
 									d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm0 1.8A4 4 0 0 0 3.8 7.8v8.4a4 4 0 0 0 4 4h8.4a4 4 0 0 0 4-4V7.8a4 4 0 0 0-4-4H7.8Zm9.1 1.3a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4ZM12 6.9a5.1 5.1 0 1 1 0 10.2 5.1 5.1 0 0 1 0-10.2Zm0 1.8a3.3 3.3 0 1 0 0 6.6 3.3 3.3 0 0 0 0-6.6Z" />
 							</svg> </span
-						><span>Instagram: @dizy.himself</span></a
+						><span>@dizy.himself</span></a
 					>
-					<a
-						href="https://x.com/dizydotenv"
-						target="_blank"
-						rel="noopener noreferrer"
-						data-tooltip="X (formerly Twitter) profile"
+					<a href="https://x.com/dizydotenv" target="_blank" rel="noopener noreferrer" data-tooltip="X profile"
 						><span class="social-icon" aria-hidden="true">
 							<svg viewBox="0 0 24 24" role="img" focusable="false">
 								<path
 									d="M18.9 2H22l-6.8 7.8L23.2 22h-6.2l-4.9-7.3L5.8 22H2.7l7.3-8.3L.8 2H7l4.4 6.7L18.9 2Zm-1.1 18h1.7L6.1 3.9H4.2L17.8 20Z" />
 							</svg> </span
-						><span>X: @dizydotenv</span></a
-					>
-				</div>
-				<div class="footer-links footer-source-link" aria-label="Project source link">
-					<a
-						href="https://github.com/nugraizy/aestherix"
-						target="_blank"
-						rel="noopener noreferrer"
-						data-tooltip="View project source code on GitHub"
-						><span class="social-icon" aria-hidden="true">
-							<svg viewBox="0 0 24 24" role="img" focusable="false">
-								<path
-									d="M12 .5A12 12 0 0 0 8.2 23.9c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.4-4-1.4-.5-1.4-1.3-1.7-1.3-1.7-1.1-.8.1-.8.1-.8 1.2.1 1.9 1.3 1.9 1.3 1.1 1.9 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.4-5.5-6A4.7 4.7 0 0 1 5.5 8c-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2a4.7 4.7 0 0 1 1.3 3.3c0 4.6-2.8 5.6-5.5 6 .4.4.8 1.1.8 2.3v3.4c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z" />
-							</svg> </span
-						><span>Source: nugraizy/aestherix</span></a
+						><span>@dizydotenv</span></a
 					>
 				</div>
 				<div class="footer-theme-controls">
@@ -814,9 +895,27 @@
 					</div>
 				</div>
 				<div class="footer-meta">
-					<span>Built for Aestherix</span>
-					<span aria-hidden="true">•</span>
-					<span>Updated live from bot state</span>
+					<div class="hero-version-label">Version <span id="project-version-value">-</span></div>
+					<div class="hero-sub">
+						<p class="hero-commit-label">
+							Commit
+							<a
+								id="project-commit-value"
+								href="https://github.com/nugraizy/Aestherix/commit/8822acb062872f7fe7bc14f038cbc32c0406307e"
+								target="_blank"
+								rel="noopener noreferrer"
+								>8822acb</a
+							>
+						</p>
+						<span class="separator">·</span>
+						<a
+							href="https://github.com/nugraizy/aestherix"
+							target="_blank"
+							rel="noopener noreferrer"
+							data-tooltip="View project source code on GitHub">
+							<span>nugraizy/aestherix</span>
+						</a>
+					</div>
 				</div>
 			</footer>
 		</main>
@@ -990,6 +1089,23 @@
 		</div>
 
 		<div
+			id="editor-close-dialog"
+			class="confirm-overlay editor-close-dialog hidden"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="editor-close-title">
+			<div class="confirm-card editor-close-card">
+				<h3 id="editor-close-title">Unsaved changes</h3>
+				<p id="editor-close-message">Save changes before closing?</p>
+				<div class="confirm-actions">
+					<button id="editor-close-cancel" type="button">Cancel</button>
+					<button id="editor-close-discard" type="button" class="confirm-danger">Don't Save</button>
+					<button id="editor-close-save" type="button" class="confirm-primary">Save</button>
+				</div>
+			</div>
+		</div>
+
+		<div
 			id="logout-dialog"
 			class="confirm-overlay logout-dialog hidden"
 			role="dialog"
@@ -999,7 +1115,6 @@
 				<h3 id="logout-title">Log Out Session</h3>
 				<p id="logout-message">You are about to end your dashboard session and return to login.</p>
 				<div id="logout-waiting" class="logout-waiting hidden" aria-live="polite">
-					<span>Terminating session...</span>
 					<div class="logout-waiting-line"></div>
 				</div>
 				<div class="confirm-actions logout-actions">

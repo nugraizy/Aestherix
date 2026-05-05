@@ -75,7 +75,7 @@ cd aestherix
 npm install -f
 
 # 3. Copy and fill in environment variables
-cp .env.example .env   # then edit .env with your values
+cp example.env .env   # then edit .env with your values
 ```
 
 > **Linux/macOS** users: run `chmod +x ./doc/install/install.sh && ./doc/install/install.sh` to install all native deps automatically.

@@ -11,13 +11,13 @@
 const KV_STATE_KEY = 'dashboard_state';
 const KV_COMMANDS_CACHE_KEY = 'dashboard_commands_cache';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Low-level helpers
-// ─────────────────────────────────────────────────────────────────────────────
-
 const getKV = async (db, key) => {
 	const row = await db.dashboardKV.findUnique({ where: { key } });
-	if (!row) return null;
+
+	if (!row) {
+		return null;
+	}
+
 	try {
 		return JSON.parse(row.value);
 	} catch {
@@ -27,16 +27,13 @@ const getKV = async (db, key) => {
 
 const setKV = async (db, key, value) => {
 	const serialized = JSON.stringify(value);
+
 	await db.dashboardKV.upsert({
 		where: { key },
 		update: { value: serialized },
 		create: { key, value: serialized }
 	});
 };
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Dashboard state  (disabledCommands + flagStates)
-// ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * Load the persisted dashboard state.
@@ -49,9 +46,7 @@ export const loadDashboardState = async (db) => {
 
 	const disabledCommands = Array.isArray(raw?.disabledCommands) ? raw.disabledCommands : [];
 	const rawFlags = raw?.flagStates && typeof raw.flagStates === 'object' ? raw.flagStates : {};
-	const flagStates = Object.fromEntries(
-		Object.entries(rawFlags).filter(([, v]) => typeof v === 'boolean')
-	);
+	const flagStates = Object.fromEntries(Object.entries(rawFlags).filter(([, v]) => typeof v === 'boolean'));
 
 	return { disabledCommands, flagStates };
 };
@@ -67,10 +62,6 @@ export const saveDashboardState = async (db, { disabledCommands = [], flagStates
 	await setKV(db, KV_STATE_KEY, { disabledCommands, flagStates });
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Commands catalog cache  (dashboard-commands-cache.json)
-// ─────────────────────────────────────────────────────────────────────────────
-
 /**
  * Load the cached command catalog.
  *
@@ -79,6 +70,7 @@ export const saveDashboardState = async (db, { disabledCommands = [], flagStates
  */
 export const loadCommandsCatalog = async (db) => {
 	const raw = await getKV(db, KV_COMMANDS_CACHE_KEY);
+
 	return Array.isArray(raw?.commands) ? raw.commands : [];
 };
 

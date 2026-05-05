@@ -1,9 +1,9 @@
-import prisma from '../../database/prisma.js';
 import {
-	loadCommandUsage as loadCommandUsageFromDB,
 	incrementCommandUsage as incrementCommandUsageInDB,
+	loadCommandUsage as loadCommandUsageFromDB,
 	setCommandUsage as setCommandUsageInDB
 } from '../../database/adapters/command-usage.js';
+import prisma from '../../database/prisma.js';
 import { Cache } from '../../modules/cache.js';
 
 const WRITE_DEBOUNCE_MS = 1500;
@@ -47,8 +47,8 @@ const schedulePersist = (configuration) => {
 		return;
 	}
 
-	state.writeTimer = setTimeout(() => {
-		void persistCommandUsage(configuration);
+	state.writeTimer = setTimeout(async () => {
+		await persistCommandUsage(configuration);
 	}, WRITE_DEBOUNCE_MS);
 };
 
@@ -78,8 +78,7 @@ export const incrementCommandUsage = async (configuration, commandName) => {
 
 	configuration.cmds.commandUsage.set(commandName, currentCount + 1);
 
-	// Fire-and-forget the DB increment (no need to wait)
-	void incrementCommandUsageInDB(prisma, commandName);
+	await incrementCommandUsageInDB(prisma, commandName);
 
 	schedulePersist(configuration);
 };

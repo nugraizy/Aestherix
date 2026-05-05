@@ -379,7 +379,7 @@ const persistProfilePictureHistory = async (config) => {
 	await fs.writeJSON(PROFILE_PICTURE_HISTORY_PATH, { entries }, { spaces: 2 });
 };
 
-const sendDashboardConfirmationButton = async ({ waClient, to, buttonId, phoneNumber }) => {
+const sendDashboardConfirmationButton = async ({ waClient, to, approveButtonId, rejectButtonId, phoneNumber }) => {
 	if (!waClient) {
 		throw new Error('WhatsApp client is not ready.');
 	}
@@ -394,7 +394,11 @@ const sendDashboardConfirmationButton = async ({ waClient, to, buttonId, phoneNu
 			.buttons(
 				builder.button.reply({
 					display: 'Confirm Login',
-					id: buttonId
+					id: approveButtonId
+				}),
+				builder.button.reply({
+					display: 'Reject Login',
+					id: rejectButtonId
 				})
 			)
 			.send();
@@ -403,7 +407,7 @@ const sendDashboardConfirmationButton = async ({ waClient, to, buttonId, phoneNu
 	}
 
 	await waClient.send(to, {
-		text: `Dashboard login request detected.\n\nReply this exact code to confirm:\n${buttonId}`
+		text: `Dashboard login request detected.\n\nReply one of these codes:\nConfirm: ${approveButtonId}\nReject: ${rejectButtonId}`
 	});
 };
 
@@ -424,10 +428,11 @@ const startDashboardBridge = (resolveWaClient) => {
 		}
 
 		const to = String(req.body?.to || '').trim();
-		const buttonId = String(req.body?.buttonId || '').trim();
+		const approveButtonId = String(req.body?.approveButtonId || '').trim();
+		const rejectButtonId = String(req.body?.rejectButtonId || '').trim();
 		const phoneNumber = String(req.body?.phoneNumber || '').trim();
 
-		if (!to || !buttonId || !phoneNumber) {
+		if (!to || !approveButtonId || !rejectButtonId || !phoneNumber) {
 			return res.status(400).json({ ok: false, message: 'Invalid bridge payload.' });
 		}
 
@@ -444,7 +449,8 @@ const startDashboardBridge = (resolveWaClient) => {
 			await sendDashboardConfirmationButton({
 				waClient,
 				to,
-				buttonId,
+				approveButtonId,
+				rejectButtonId,
 				phoneNumber
 			});
 

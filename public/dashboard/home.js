@@ -134,14 +134,14 @@ const applySpotifyCoverColor = (img, container) => {
 			container.style.setProperty('--spotify-cover-color-2', `rgb(${r2},${g2},${b2})`);
 
 			const waveSvg = encodeURIComponent(
-				`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='12' viewBox='0 0 40 12'>` +
-					`<path d='M0 6 C7.33 1,12.67 1,20 6 C27.33 11,32.67 11,40 6' fill='none' stroke='rgb(${r1},${g1},${b1})' stroke-width='2.5' stroke-linecap='round'/>` +
-					`</svg>`
+				`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='12' viewBox='0 0 40 12'>
+					<path d='M0 6 C7.33 1,12.67 1,20 6 C27.33 11,32.67 11,40 6' fill='none' stroke='rgb(${r1},${g1},${b1})' stroke-width='2.5' stroke-linecap='round'/>
+				</svg>`
 			);
 			const pausedSvg = encodeURIComponent(
-				`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='12' viewBox='0 0 40 12'>` +
-					`<path d='M0 6 L40 6' fill='none' stroke='rgb(${r1},${g1},${b1})' stroke-opacity='0.42' stroke-width='2.5' stroke-linecap='round'/>` +
-					`</svg>`
+				`<svg xmlns='http://www.w3.org/2000/svg' width='40' height='12' viewBox='0 0 40 12'>
+					<path d='M0 6 L40 6' fill='none' stroke='rgb(${r1},${g1},${b1})' stroke-opacity='0.42' stroke-width='2.5' stroke-linecap='round'/>
+				</svg>`
 			);
 
 			container.style.setProperty('--spotify-wave-image', `url("data:image/svg+xml,${waveSvg}")`);

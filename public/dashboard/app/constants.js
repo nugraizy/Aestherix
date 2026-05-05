@@ -17,7 +17,8 @@ export const SEARCH_PLACEHOLDERS = {
 	commands: 'Search command/category/alias',
 	flags: 'Search bot flags',
 	users: 'Search users by number/id/role',
-	profilePictures: 'Search profile pictures by timestamp/url'
+	profilePictures: 'Search profile pictures by timestamp/url',
+	editor: 'Search command files'
 };
 
 export const ansiRegex = /\u001b\[[0-9;]*m/g;

@@ -7,6 +7,7 @@ import fs from 'fs-extra';
 import { createServer } from 'http';
 import os from 'os';
 import path from 'path';
+import prettier from 'prettier';
 import puppeteer from 'puppeteer';
 import { Server as SocketIOServer } from 'socket.io';
 import { z } from 'zod';
@@ -60,6 +61,10 @@ const PROFILE_PICTURES_COLOR_FILTER_CONCURRENCY = Math.min(
 );
 const PROFILE_PICTURE_COLOR_CACHE_LIMIT = 1500;
 const ROOT_CHANGELOG_PATH = path.resolve(process.cwd(), 'CHANGELOG.md');
+const EDITOR_ROOT_PATH = path.resolve(process.cwd(), 'src', 'commands');
+const EDITOR_MAX_FILE_SIZE = 600 * 1024;
+const EDITOR_MAX_NODES = 1400;
+const EDITOR_MAX_DEPTH = 8;
 const MAX_AUDIT_LOGS = 1000;
 const UNDO_WINDOW_MS = 12000;
 const UNDO_WINDOW_SHORT_MS = 8000;
@@ -97,9 +102,7 @@ const profilePicturesDiskState = {
 	size: -1,
 	lastSyncAt: 0
 };
-// Tracks timestamps/keys deleted via the dashboard DELETE API so that
-// refreshProfilePicturesCacheFromDisk never re-adds them when the
-// auto-changer overwrites the disk file with a stale snapshot.
+
 const deletedPictureTombstones = new Set();
 const profilePictureColorCache = new Map();
 const profilePictureColorPending = new Map();
@@ -335,7 +338,6 @@ const refreshProfilePicturesCacheFromDisk = ({ force = false } = {}) => {
 	}
 
 	for (const [timestamp, normalized] of normalizedEntries) {
-		// Never restore a picture that was explicitly deleted via the dashboard API.
 		if (deletedPictureTombstones.has(timestamp)) {
 			continue;
 		}
@@ -460,18 +462,22 @@ const pushAuditEvent = ({
 		auditState.logs.splice(0, auditState.logs.length - MAX_AUDIT_LOGS);
 	}
 
-	void appendAuditLog(prisma, {
-		id: auditState.lastId,
-		timestamp: auditState.logs.at(-1)?.timestamp || Date.now(),
-		action: String(action || 'unknown'),
-		actorRole,
-		actor,
-		target: target ? String(target) : null,
-		status: status === 'failed' ? 'failed' : 'ok',
-		message: message ? String(message) : null,
-		before: before ?? null,
-		after: after ?? null
-	}).catch(() => {});
+	void appendAuditLog(
+		prisma,
+		{
+			id: auditState.lastId,
+			timestamp: auditState.logs.at(-1)?.timestamp || Date.now(),
+			action: String(action || 'unknown'),
+			actorRole,
+			actor,
+			target: target ? String(target) : null,
+			status: status === 'failed' ? 'failed' : 'ok',
+			message: message ? String(message) : null,
+			before: before ?? null,
+			after: after ?? null
+		},
+		auditState.lastId
+	).catch(() => {});
 };
 
 const getDashboardAuditLogs = ({ since = 0, limit = 200, action = '', role = '', query = '' } = {}) => {
@@ -891,6 +897,21 @@ const downloadProfilePictureQuery = z.object({
 
 const undoActionBody = z.object({
 	token: z.string().min(12)
+});
+
+const editorFileQuery = z.object({
+	path: z.string().min(1)
+});
+
+const editorWriteBody = z.object({
+	path: z.string().min(1),
+	content: z.string()
+});
+
+const editorFormatBody = z.object({
+	path: z.string().min(1),
+	content: z.string(),
+	configJson: z.string().nullable().optional()
 });
 
 const userIdParams = z.object({
@@ -1780,11 +1801,13 @@ const loadOtpStore = async () => {
 				continue;
 			}
 
+			const status = item?.status === 'approved' ? 'approved' : item?.status === 'rejected' ? 'rejected' : 'pending';
+
 			otpStore.set(phoneNumber, {
 				requestId: String(item?.requestId || ''),
 				requestKeyHash: String(item?.requestKeyHash || ''),
 				actionTokenHash: String(item?.actionTokenHash || ''),
-				status: item?.status === 'approved' ? 'approved' : 'pending',
+				status,
 				createdAt: Number(item?.createdAt || now),
 				expiresAt,
 				confirmedAt: item?.confirmedAt ? Number(item.confirmedAt) : null
@@ -1808,12 +1831,14 @@ const persistOtpStore = async () => {
 				continue;
 			}
 
+			const status = value?.status === 'approved' ? 'approved' : value?.status === 'rejected' ? 'rejected' : 'pending';
+
 			await upsertOtp(prisma, {
 				phoneNumber,
 				requestId: String(value?.requestId || ''),
 				requestKeyHash: String(value?.requestKeyHash || ''),
 				actionTokenHash: String(value?.actionTokenHash || ''),
-				status: value?.status === 'approved' ? 'approved' : 'pending',
+				status,
 				createdAt: Number(value?.createdAt || now),
 				expiresAt,
 				confirmedAt: value?.confirmedAt ? Number(value.confirmedAt) : null
@@ -1888,6 +1913,147 @@ const requireOwnerAuth = (req, res, next) => {
 	next();
 };
 
+const normalizeEditorPath = (value) => {
+	const raw = String(value || '')
+		.trim()
+		.replace(/\\/g, '/')
+		.replace(/^\/+/, '');
+
+	if (!raw || raw.includes('\u0000')) {
+		return null;
+	}
+
+	const resolved = path.resolve(EDITOR_ROOT_PATH, raw);
+	const relative = path.relative(EDITOR_ROOT_PATH, resolved);
+
+	if (!relative || relative.startsWith('..') || path.isAbsolute(relative)) {
+		return null;
+	}
+
+	return {
+		resolved,
+		relative: relative.replace(/\\/g, '/')
+	};
+};
+
+const buildEditorTree = async () => {
+	let nodeCount = 0;
+
+	const walk = async (dirPath, relativePath, depth) => {
+		if (depth > EDITOR_MAX_DEPTH || nodeCount >= EDITOR_MAX_NODES) {
+			return null;
+		}
+
+		let entries = [];
+
+		try {
+			entries = await fs.readdir(dirPath, { withFileTypes: true });
+		} catch {
+			return null;
+		}
+
+		const children = [];
+
+		for (const entry of entries) {
+			if (nodeCount >= EDITOR_MAX_NODES) {
+				break;
+			}
+
+			if (entry.isSymbolicLink()) {
+				continue;
+			}
+
+			const nextPath = path.join(dirPath, entry.name);
+			const nextRelative = path.join(relativePath, entry.name).replace(/\\/g, '/');
+
+			if (entry.isDirectory()) {
+				const child = await walk(nextPath, nextRelative, depth + 1);
+
+				if (child) {
+					children.push(child);
+					nodeCount += 1;
+				}
+
+				continue;
+			}
+
+			if (entry.isFile()) {
+				children.push({
+					type: 'file',
+					name: entry.name,
+					path: nextRelative
+				});
+				nodeCount += 1;
+			}
+		}
+
+		children.sort((a, b) => {
+			if (a.type !== b.type) {
+				return a.type === 'folder' ? -1 : 1;
+			}
+
+			return a.name.localeCompare(b.name);
+		});
+
+		return {
+			type: 'folder',
+			name: relativePath ? path.basename(dirPath) : 'commands',
+			path: relativePath,
+			children
+		};
+	};
+
+	return await walk(EDITOR_ROOT_PATH, '', 0);
+};
+
+const loadPrettierConfig = async (filePath, configJson) => {
+	let baseConfig = {};
+
+	try {
+		const resolved = await prettier.resolveConfig(filePath, {
+			config: path.resolve(process.cwd(), '.prettierrc.json')
+		});
+
+		if (resolved && typeof resolved === 'object') {
+			baseConfig = resolved;
+		}
+	} catch {
+		baseConfig = {};
+	}
+
+	if (!Object.keys(baseConfig).length) {
+		try {
+			baseConfig = await fs.readJSON(path.resolve(process.cwd(), '.prettierrc.json'));
+		} catch {
+			baseConfig = {};
+		}
+	}
+
+	let customConfig = {};
+
+	if (configJson) {
+		try {
+			const parsed = JSON.parse(configJson);
+
+			if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+				return { error: 'Custom Prettier config must be a JSON object.' };
+			}
+
+			customConfig = parsed;
+		} catch {
+			return { error: 'Invalid custom Prettier config JSON.' };
+		}
+	}
+
+	return {
+		config: {
+			...baseConfig,
+			...customConfig,
+			filepath: filePath
+		}
+	};
+};
+
 const getOwnerNumbers = async () => {
 	const settings = await fs.readJSON('./src/helper/config/settings.json');
 	const ownerCandidates = [settings.owner_number, ...(settings.team_number || [])]
@@ -1904,6 +2070,37 @@ function getWhatsAppClient() {
 }
 
 const hashValue = (value) => crypto.createHash('sha256').update(String(value)).digest('hex');
+
+const resolveConfirmationStatus = async ({ phoneNumber, requestId, requestKey }) => {
+	await cleanExpiredOtps();
+
+	const normalizedPhone = normalizePhoneNumber(phoneNumber);
+	const safeRequestId = String(requestId || '').trim();
+	const safeRequestKey = String(requestKey || '').trim();
+	const owners = await getOwnerNumbers();
+
+	if (!owners.has(normalizedPhone)) {
+		return { ok: false, status: 403, message: 'This number does not have owner permission.' };
+	}
+
+	const otpData = otpStore.get(normalizedPhone);
+
+	if (!otpData || otpData.expiresAt <= Date.now()) {
+		otpStore.delete(normalizedPhone);
+		await persistOtpStore();
+		return { ok: false, status: 400, message: 'Confirmation expired or not found. Request a new code.' };
+	}
+
+	if (otpData.requestId !== safeRequestId) {
+		return { ok: false, status: 400, message: 'Request mismatch. Start over.' };
+	}
+
+	if (otpData.requestKeyHash !== hashValue(safeRequestKey)) {
+		return { ok: false, status: 403, message: 'Invalid request key.' };
+	}
+
+	return { ok: true, status: otpData.status || 'pending' };
+};
 
 const createSession = (res, payload) => {
 	const token = crypto.randomBytes(32).toString('hex');
@@ -1923,7 +2120,7 @@ const createSession = (res, payload) => {
 	});
 };
 
-const sendConfirmationButton = async ({ waClient, to, buttonId, phoneNumber }) => {
+const sendConfirmationButton = async ({ waClient, to, approveButtonId, rejectButtonId, phoneNumber }) => {
 	if (waClient.TemplateBuilder?.Native) {
 		const builder = new waClient.TemplateBuilder.Native();
 
@@ -1934,7 +2131,11 @@ const sendConfirmationButton = async ({ waClient, to, buttonId, phoneNumber }) =
 			.buttons(
 				builder.button.reply({
 					display: 'Confirm Login',
-					id: buttonId
+					id: approveButtonId
+				}),
+				builder.button.reply({
+					display: 'Reject Login',
+					id: rejectButtonId
 				})
 			)
 			.send();
@@ -1943,11 +2144,11 @@ const sendConfirmationButton = async ({ waClient, to, buttonId, phoneNumber }) =
 	}
 
 	await waClient.send(to, {
-		text: `Dashboard login request detected.\n\nReply this exact code to confirm:\n${buttonId}`
+		text: `Dashboard login request detected.\n\nReply one of these codes:\nConfirm: ${approveButtonId}\nReject: ${rejectButtonId}`
 	});
 };
 
-const sendConfirmationThroughBridge = async ({ to, buttonId, phoneNumber }) => {
+const sendConfirmationThroughBridge = async ({ to, approveButtonId, rejectButtonId, phoneNumber }) => {
 	if (!DASHBOARD_BOT_BRIDGE_URL) {
 		return false;
 	}
@@ -1961,7 +2162,8 @@ const sendConfirmationThroughBridge = async ({ to, buttonId, phoneNumber }) => {
 			},
 			body: JSON.stringify({
 				to,
-				buttonId,
+				approveButtonId,
+				rejectButtonId,
 				phoneNumber
 			})
 		});
@@ -2098,7 +2300,7 @@ export const processDashboardConfirmationAction = async ({ actionId, senderJid }
 
 	const id = String(actionId || '').trim();
 
-	if (!id.startsWith('dashauth:confirm:')) {
+	if (!id.startsWith('dashauth:confirm:') && !id.startsWith('dashauth:reject:')) {
 		return { handled: false };
 	}
 
@@ -2108,7 +2310,7 @@ export const processDashboardConfirmationAction = async ({ actionId, senderJid }
 		return { handled: true, approved: false, message: 'Malformed confirmation button payload.' };
 	}
 
-	const [, , requestId, token] = parts;
+	const [, action, requestId, token] = parts;
 	const phoneNumber = normalizePhoneNumber(String(senderJid || '').split('@')[0]);
 	const otpData = otpStore.get(phoneNumber);
 
@@ -2125,10 +2327,22 @@ export const processDashboardConfirmationAction = async ({ actionId, senderJid }
 		return { handled: true, approved: false, message: 'Invalid confirmation token.' };
 	}
 
+	if (action === 'reject') {
+		otpData.status = 'rejected';
+		otpData.confirmedAt = Date.now();
+		otpStore.set(phoneNumber, otpData);
+		await persistOtpStore();
+		return { handled: true, approved: false, message: 'Dashboard login request rejected.' };
+	}
+
+	if (action !== 'confirm') {
+		return { handled: true, approved: false, message: 'Unknown confirmation action.' };
+	}
+
 	otpData.status = 'approved';
 	otpData.confirmedAt = Date.now();
 	otpStore.set(phoneNumber, otpData);
-	void persistOtpStore();
+	await persistOtpStore();
 
 	return { handled: true, approved: true, phoneNumber };
 };
@@ -2190,8 +2404,84 @@ export const server = async () => {
 		path: '/socket.io',
 		serveClient: true
 	});
+	const loginIo = io.of('/login');
 	const PORT = Number.isFinite(DASHBOARD_PORT) && DASHBOARD_PORT > 0 ? DASHBOARD_PORT : 4000;
 	let realtimeBotLogCursor = 0;
+
+	loginIo.on('connection', (socket) => {
+		let pollTimer = null;
+		let lastStatus = null;
+
+		const stopConfirmationPolling = () => {
+			if (pollTimer) {
+				clearInterval(pollTimer);
+				pollTimer = null;
+			}
+		};
+
+		const emitConfirmationStatus = async () => {
+			if (!socket.data?.confirmation) {
+				return;
+			}
+
+			const result = await resolveConfirmationStatus(socket.data.confirmation);
+
+			if (!result.ok) {
+				socket.emit('dashboard:confirmation:error', {
+					message: result.message || 'Confirmation failed.',
+					status: result.status || 400
+				});
+				stopConfirmationPolling();
+				return;
+			}
+
+			if (result.status === lastStatus) {
+				return;
+			}
+
+			lastStatus = result.status;
+			socket.emit('dashboard:confirmation:status', { status: result.status });
+
+			if (result.status === 'approved' || result.status === 'rejected') {
+				stopConfirmationPolling();
+			}
+		};
+
+		socket.on('dashboard:confirmation:start', (payload) => {
+			stopConfirmationPolling();
+			lastStatus = null;
+
+			const phoneNumber = normalizePhoneNumber(payload?.phoneNumber || '');
+			const requestId = String(payload?.requestId || '').trim();
+			const requestKey = String(payload?.requestKey || '').trim();
+
+			if (!phoneNumber || !requestId || !requestKey) {
+				socket.emit('dashboard:confirmation:error', { message: 'Invalid confirmation payload.' });
+				return;
+			}
+
+			socket.data.confirmation = {
+				phoneNumber,
+				requestId,
+				requestKey
+			};
+
+			void emitConfirmationStatus();
+
+			pollTimer = setInterval(() => {
+				void emitConfirmationStatus();
+			}, 1500);
+		});
+
+		socket.on('dashboard:confirmation:stop', () => {
+			socket.data.confirmation = null;
+			stopConfirmationPolling();
+		});
+
+		socket.on('disconnect', () => {
+			stopConfirmationPolling();
+		});
+	});
 
 	const getSocketSession = (socket) => {
 		const cookie = String(socket?.handshake?.headers?.cookie || '');
@@ -2602,6 +2892,20 @@ export const server = async () => {
 		res.sendFile(path.join(__dirname, 'public', 'dashboard', 'index.html'));
 	});
 
+	app.get('/dashboard/editor', (req, res) => {
+		const session = getSessionFromRequest(req);
+
+		if (!session) {
+			return res.redirect('/dashboard/login');
+		}
+
+		if (session.role !== 'owner') {
+			return res.status(403).sendFile(path.join(__dirname, 'public', 'dashboard', '403.html'));
+		}
+
+		res.sendFile(path.join(__dirname, 'public', 'dashboard', 'index.html'));
+	});
+
 	app.get('/albums', (req, res) => {
 		if (!isDashboardAuthenticated(req)) {
 			return res.redirect('/dashboard/login');
@@ -2644,7 +2948,10 @@ export const server = async () => {
 			const requestId = crypto.randomBytes(16).toString('hex');
 			const requestKey = crypto.randomBytes(24).toString('hex');
 			const actionToken = crypto.randomBytes(24).toString('hex');
-			const buttonId = `dashauth:confirm:${requestId}:${actionToken}`;
+			const approveActionId = `dashauth:confirm:${requestId}:${actionToken}`;
+			const rejectActionId = `dashauth:reject:${requestId}:${actionToken}`;
+			const approveButtonId = `.dashconfirm ${approveActionId}`;
+			const rejectButtonId = `.dashconfirm ${rejectActionId}`;
 			const expiresAt = Date.now() + OTP_TTL_MS;
 
 			otpStore.set(phoneNumber, {
@@ -2665,14 +2972,16 @@ export const server = async () => {
 				await sendConfirmationButton({
 					waClient,
 					to: recipient,
-					buttonId,
+					approveButtonId,
+					rejectButtonId,
 					phoneNumber
 				});
 				sent = true;
 			} else {
 				sent = await sendConfirmationThroughBridge({
 					to: recipient,
-					buttonId,
+					approveButtonId,
+					rejectButtonId,
 					phoneNumber
 				});
 			}
@@ -2700,34 +3009,17 @@ export const server = async () => {
 	});
 
 	app.post('/api/dashboard/auth/confirmation-status', validate({ body: confirmationStatusBody }), async (req, res) => {
-		await cleanExpiredOtps();
+		const result = await resolveConfirmationStatus({
+			phoneNumber: req.body.phoneNumber,
+			requestId: req.body.requestId,
+			requestKey: req.body.requestKey
+		});
 
-		const phoneNumber = normalizePhoneNumber(req.body.phoneNumber);
-		const { requestId, requestKey } = req.body;
-
-		const owners = await getOwnerNumbers();
-
-		if (!owners.has(phoneNumber)) {
-			return res.status(403).json({ ok: false, message: 'This number does not have owner permission.' });
+		if (!result.ok) {
+			return res.status(result.status || 400).json({ ok: false, message: result.message || 'Request failed.' });
 		}
 
-		const otpData = otpStore.get(phoneNumber);
-
-		if (!otpData || otpData.expiresAt <= Date.now()) {
-			otpStore.delete(phoneNumber);
-			await persistOtpStore();
-			return res.status(400).json({ ok: false, message: 'Confirmation expired or not found. Request a new code.' });
-		}
-
-		if (otpData.requestId !== requestId) {
-			return res.status(400).json({ ok: false, message: 'Request mismatch. Start over.' });
-		}
-
-		if (otpData.requestKeyHash !== hashValue(requestKey)) {
-			return res.status(403).json({ ok: false, message: 'Invalid request key.' });
-		}
-
-		return res.json({ ok: true, status: otpData.status || 'pending' });
+		return res.json({ ok: true, status: result.status || 'pending' });
 	});
 
 	app.post('/api/dashboard/auth/finalize-confirmation', validate({ body: finalizeConfirmationBody }), async (req, res) => {
@@ -2865,6 +3157,103 @@ export const server = async () => {
 
 	app.get('/api/dashboard/spotify', async (_req, res) => {
 		res.json({ ok: true, spotify: await getSpotifyNowPlaying() });
+	});
+
+	app.get('/api/dashboard/editor/tree', requireOwnerAuth, async (_req, res) => {
+		applyNoStoreJsonHeaders(res);
+		const tree = await buildEditorTree();
+
+		if (!tree) {
+			return res.status(500).json({ ok: false, message: 'Failed building command tree.' });
+		}
+
+		return res.json({ ok: true, root: tree });
+	});
+
+	app.get('/api/dashboard/editor/file', requireOwnerAuth, validate({ query: editorFileQuery }), async (req, res) => {
+		applyNoStoreJsonHeaders(res);
+		const resolved = normalizeEditorPath(req.query?.path);
+
+		if (!resolved) {
+			return res.status(400).json({ ok: false, message: 'Invalid file path.' });
+		}
+
+		try {
+			const stats = await fs.stat(resolved.resolved);
+
+			if (!stats.isFile()) {
+				return res.status(400).json({ ok: false, message: 'Path is not a file.' });
+			}
+
+			if (stats.size > EDITOR_MAX_FILE_SIZE) {
+				return res.status(413).json({ ok: false, message: 'File is too large to open.' });
+			}
+
+			const content = await fs.readFile(resolved.resolved, 'utf8');
+
+			return res.json({ ok: true, path: resolved.relative, content });
+		} catch (error) {
+			return res.status(404).json({ ok: false, message: error?.message || 'File not found.' });
+		}
+	});
+
+	app.post('/api/dashboard/editor/file', requireOwnerAuth, validate({ body: editorWriteBody }), async (req, res) => {
+		applyNoStoreJsonHeaders(res);
+		const resolved = normalizeEditorPath(req.body?.path);
+		const content = String(req.body?.content ?? '');
+
+		if (!resolved) {
+			return res.status(400).json({ ok: false, message: 'Invalid file path.' });
+		}
+
+		if (Buffer.byteLength(content, 'utf8') > EDITOR_MAX_FILE_SIZE) {
+			return res.status(413).json({ ok: false, message: 'File is too large to save.' });
+		}
+
+		try {
+			const stats = await fs.stat(resolved.resolved);
+
+			if (!stats.isFile()) {
+				return res.status(400).json({ ok: false, message: 'Path is not a file.' });
+			}
+
+			await fs.writeFile(resolved.resolved, content, 'utf8');
+			pushAuditEvent({
+				action: 'editor.save',
+				session: req.dashboardSession,
+				target: resolved.relative,
+				message: 'Command file saved.'
+			});
+
+			return res.json({ ok: true, path: resolved.relative });
+		} catch (error) {
+			return res.status(500).json({ ok: false, message: error?.message || 'Failed saving file.' });
+		}
+	});
+
+	app.post('/api/dashboard/editor/format', requireOwnerAuth, validate({ body: editorFormatBody }), async (req, res) => {
+		applyNoStoreJsonHeaders(res);
+		const resolved = normalizeEditorPath(req.body?.path);
+		const content = String(req.body?.content ?? '');
+		const configJson = req.body?.configJson ?? null;
+
+		if (!resolved) {
+			return res.status(400).json({ ok: false, message: 'Invalid file path.' });
+		}
+
+		const configResult = await loadPrettierConfig(resolved.resolved, configJson);
+
+		if (configResult?.error) {
+			return res.status(400).json({ ok: false, message: configResult.error });
+		}
+
+		try {
+			const formatted = await prettier.format(content, configResult.config);
+
+			return res.json({ ok: true, content: formatted });
+		} catch (error) {
+			return res.status(400).json({ ok: false, message: error?.message || 'Failed formatting file.' });
+		}
 	});
 
 	app.get('/api/dashboard/status', requireDashboardAuth, async (_req, res) => {

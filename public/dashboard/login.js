@@ -14,6 +14,7 @@ const els = {
 	panel: document.querySelector('.login-panel'),
 	themeToggle: document.getElementById('theme-toggle'),
 	form: document.getElementById('login-form'),
+	loginInline: document.querySelector('.login-inline'),
 	phoneNumber: document.getElementById('phone-number'),
 	requestCode: document.getElementById('request-code'),
 	viewerLogin: document.getElementById('viewer-login'),
@@ -27,15 +28,19 @@ const state = {
 	phoneNumber: null,
 	pollTimer: null,
 	pollingStartedAt: 0,
-	redirecting: false
+	redirecting: false,
+	pollTimeout: null,
+	awaitingConfirmation: false
 };
 
 const MAX_POLL_MS = 5 * 60 * 1000;
 const MIN_OWNER_DIGITS = 9;
-const LOGIN_TRANSITION_MS = 3400;
+const LOGIN_TRANSITION_MS = 2200;
 const REQUEST_LABEL = 'Request Confirmation';
-const WAITING_LABEL = 'Awaiting Approval';
-const REDIRECT_LABEL = 'Opening Dashboard...';
+const WAITING_MESSAGE = 'Awaiting approval. Please confirm via WhatsApp...';
+
+let confirmationSocket = null;
+let confirmationSocketConnected = false;
 
 const prefersReducedMotion = () =>
 	typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -347,19 +352,65 @@ const updateRequestButtonVisibility = () => {
 	els.requestCode.classList.toggle('hidden', !hasValue);
 };
 
-const setWaitingState = (isWaiting) => {
-	const locked = isWaiting || state.redirecting;
+const clearPendingRequest = () => {
+	state.requestId = null;
+	state.requestKey = null;
+	state.phoneNumber = null;
+	state.pollingStartedAt = 0;
+};
 
+const clearPollTimeout = () => {
+	if (state.pollTimeout) {
+		clearTimeout(state.pollTimeout);
+		state.pollTimeout = null;
+	}
+};
+
+const resetRequestUI = () => {
+	els.requestCode.disabled = false;
+	els.requestCode.textContent = REQUEST_LABEL;
+	els.requestCode.classList.remove('is-waiting', 'is-redirecting');
+	els.ownerWaiting?.classList.add('hidden');
+	els.message.classList.remove('waiting');
+
+	if (els.message.textContent === WAITING_MESSAGE) {
+		setMessage('');
+	}
+
+	updateRequestButtonVisibility();
+};
+
+const setWaitingState = (isWaiting) => {
+	const isRedirecting = state.redirecting;
+	const locked = isWaiting;
+
+	els.panel?.classList.toggle('is-redirecting', isRedirecting);
+	els.panel?.classList.toggle('is-waiting', isWaiting && !isRedirecting);
+	els.loginInline?.classList.toggle('is-waiting', isWaiting && !isRedirecting);
 	els.phoneNumber.readOnly = locked;
 	els.phoneNumber.disabled = locked;
 	els.requestCode.disabled = locked;
-	els.requestCode.textContent = state.redirecting ? REDIRECT_LABEL : isWaiting ? WAITING_LABEL : REQUEST_LABEL;
-	els.requestCode.classList.toggle('is-waiting', isWaiting && !state.redirecting);
-	els.requestCode.classList.toggle('is-redirecting', state.redirecting);
+	els.requestCode.textContent = REQUEST_LABEL;
+	els.requestCode.classList.toggle('is-waiting', isWaiting);
+	els.requestCode.classList.toggle('is-redirecting', isRedirecting);
+	els.requestCode.classList.toggle('hidden', isWaiting);
 	els.viewerLogin.disabled = locked;
-	els.viewerLogin.classList.toggle('hidden', isWaiting || state.redirecting);
-	els.ownerWaiting?.classList.toggle('hidden', !isWaiting || state.redirecting);
-	updateRequestButtonVisibility();
+	els.viewerLogin.classList.toggle('hidden', isWaiting || isRedirecting);
+	els.ownerWaiting?.classList.add('hidden');
+
+	if (isWaiting && !isRedirecting) {
+		els.message.classList.add('waiting');
+		setMessage(WAITING_MESSAGE);
+	} else if (!isWaiting && !isRedirecting && els.message.textContent === WAITING_MESSAGE) {
+		els.message.classList.remove('waiting');
+		setMessage('');
+	} else if (!isWaiting) {
+		els.message.classList.remove('waiting');
+	}
+
+	if (!isRedirecting && !isWaiting) {
+		updateRequestButtonVisibility();
+	}
 };
 
 const setMessage = (text, isError = false) => {
@@ -419,6 +470,7 @@ const runLoginTransition = async (message) => {
 const resetRedirectState = () => {
 	state.redirecting = false;
 	els.panel?.classList.remove('login-transitioning');
+	setWaitingState(false);
 };
 
 const fetchJson = async (url, options = {}) => {
@@ -454,13 +506,94 @@ const checkSession = async () => {
 	}
 };
 
-const stopPolling = () => {
+const stopPolling = ({ clearRequest = true, resetUI = true } = {}) => {
 	if (state.pollTimer) {
 		clearInterval(state.pollTimer);
 		state.pollTimer = null;
 	}
 
+	clearPollTimeout();
+	state.awaitingConfirmation = false;
+
 	setWaitingState(false);
+
+	if (confirmationSocketConnected) {
+		confirmationSocket.emit('dashboard:confirmation:stop');
+	}
+
+	if (clearRequest) {
+		clearPendingRequest();
+	}
+
+	if (resetUI) {
+		resetRequestUI();
+	}
+};
+
+const scheduleConfirmationTimeout = () => {
+	clearPollTimeout();
+	state.pollTimeout = setTimeout(() => {
+		stopPolling();
+		setMessage('Confirmation timed out. Please request a new confirmation.', true);
+	}, MAX_POLL_MS);
+};
+
+const handleSocketConfirmationStatus = (payload) => {
+	if (!payload || typeof payload !== 'object') {
+		return;
+	}
+
+	if (payload.status === 'approved') {
+		state.redirecting = true;
+		stopPolling({ clearRequest: false, resetUI: false });
+		void finalizeOwnerLogin();
+		return;
+	}
+
+	if (payload.status === 'rejected') {
+		stopPolling();
+		setMessage('Login request rejected. Please request a new confirmation.', true);
+	}
+};
+
+const ensureConfirmationSocket = () => {
+	if (typeof window === 'undefined' || typeof window.io !== 'function') {
+		return false;
+	}
+
+	if (confirmationSocket) {
+		return true;
+	}
+
+	confirmationSocket = window.io('/login', {
+		path: '/socket.io',
+		transports: ['websocket', 'polling'],
+		withCredentials: true
+	});
+
+	confirmationSocket.on('connect', () => {
+		confirmationSocketConnected = true;
+
+		if (state.requestId && state.requestKey && state.phoneNumber) {
+			confirmationSocket.emit('dashboard:confirmation:start', {
+				phoneNumber: state.phoneNumber,
+				requestId: state.requestId,
+				requestKey: state.requestKey
+			});
+		}
+	});
+
+	confirmationSocket.on('disconnect', () => {
+		confirmationSocketConnected = false;
+	});
+
+	confirmationSocket.on('dashboard:confirmation:status', handleSocketConfirmationStatus);
+	confirmationSocket.on('dashboard:confirmation:error', (payload) => {
+		stopPolling();
+		setMessage(payload?.message || 'Confirmation failed.', true);
+	});
+
+	return true;
 };
 
 const finalizeOwnerLogin = async () => {
@@ -500,8 +633,11 @@ const pollConfirmationStatus = async () => {
 
 		if (payload.status === 'approved') {
 			state.redirecting = true;
-			stopPolling();
+			stopPolling({ clearRequest: false, resetUI: false });
 			await finalizeOwnerLogin();
+		} else if (payload.status === 'rejected') {
+			stopPolling();
+			setMessage('Login request rejected. Please request a new confirmation.', true);
 		}
 	} catch (error) {
 		resetRedirectState();
@@ -539,22 +675,33 @@ const requestOwnerConfirmation = async (event) => {
 		state.requestId = payload.requestId;
 		state.requestKey = payload.requestKey;
 		state.pollingStartedAt = Date.now();
+		state.awaitingConfirmation = true;
 
 		els.phoneNumber.value = phoneNumber;
 		setWaitingState(true);
-		setMessage('');
+		scheduleConfirmationTimeout();
 
-		state.pollTimer = setInterval(() => {
+		if (ensureConfirmationSocket()) {
+			if (confirmationSocketConnected) {
+				confirmationSocket.emit('dashboard:confirmation:start', {
+					phoneNumber: state.phoneNumber,
+					requestId: state.requestId,
+					requestKey: state.requestKey
+				});
+			}
+		} else {
+			state.pollTimer = setInterval(() => {
+				void pollConfirmationStatus();
+			}, 2000);
+
 			void pollConfirmationStatus();
-		}, 2000);
-
-		void pollConfirmationStatus();
+		}
 	} catch (error) {
 		resetRedirectState();
 		setWaitingState(false);
 		setMessage(error.message || 'Failed to request code.', true);
 	} finally {
-		if (!state.pollTimer && !state.redirecting) {
+		if (!state.pollTimer && !state.redirecting && !state.awaitingConfirmation) {
 			els.requestCode.disabled = false;
 			els.requestCode.textContent = REQUEST_LABEL;
 			els.requestCode.classList.remove('is-waiting');

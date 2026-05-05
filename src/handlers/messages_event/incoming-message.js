@@ -2,7 +2,6 @@ import { generateWAMessage } from 'baileys';
 import { findBestMatch } from 'string-similarity';
 
 import configuration from '../../helper/config/connect.js';
-import { processDashboardConfirmationAction } from '../../helper/connection/dashboard/server.js';
 import { incrementCommandUsage } from '../../helper/connection/utils/command-usage.js';
 import { Limit, checkAfk, deleteAfk, getAfk, reassign } from '../../helper/index.js';
 import { Cache } from '../../helper/modules/cache.js';
@@ -396,7 +395,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 				}
 
 				await Tempcmds.run({ ...message, state }, client, store);
-				void incrementCommandUsage(configuration, Tempcmds.name);
+				await incrementCommandUsage(configuration, Tempcmds.name);
 
 				if (cooldownUser?.requests) {
 					cooldownUser.requests = false;
@@ -617,25 +616,6 @@ const handleIncomingMessage = async (upsert, client, cmds, store, user, state, r
 		}
 
 		message = await reassign(message, client, store, state);
-
-		const confirmation = await processDashboardConfirmationAction({
-			actionId: message?.body,
-			senderJid: message?.sender
-		});
-
-		if (confirmation.handled) {
-			if (confirmation.approved) {
-				await client.instance.reply(
-					message.from,
-					'Dashboard login confirmation accepted. You can return to the browser now.',
-					message.message
-				);
-			} else {
-				await client.instance.reply(message.from, confirmation.message || 'Dashboard confirmation failed.', message.message);
-			}
-
-			continue;
-		}
 
 		if (
 			!message ||

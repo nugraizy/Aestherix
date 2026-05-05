@@ -15,7 +15,7 @@
  */
 export const loadCommandUsage = async (db) => {
 	const rows = await db.commandUsage.findMany();
-	
+
 	return Object.fromEntries(rows.map((r) => [r.command, r.count]));
 };
 
@@ -27,7 +27,9 @@ export const loadCommandUsage = async (db) => {
  * @returns {Promise<void>}
  */
 export const incrementCommandUsage = async (db, commandName) => {
-	if (!commandName) return;
+	if (!commandName) {
+		return;
+	}
 
 	await db.commandUsage.upsert({
 		where: { command: commandName },

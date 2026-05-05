@@ -35,7 +35,8 @@ export const state = {
 		commands: '',
 		flags: '',
 		users: '',
-		profilePictures: ''
+		profilePictures: '',
+		editor: ''
 	},
 	searchFilters: {
 		commandsState: 'all',
@@ -50,7 +51,8 @@ export const state = {
 		commands: { kind: 'idle', message: '' },
 		flags: { kind: 'idle', message: '' },
 		users: { kind: 'idle', message: '' },
-		profilePictures: { kind: 'idle', message: '' }
+		profilePictures: { kind: 'idle', message: '' },
+		editor: { kind: 'idle', message: '' }
 	},
 	settings: {
 		...DEFAULT_DASHBOARD_SETTINGS
