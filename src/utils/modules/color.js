@@ -4,44 +4,98 @@ import fs from 'fs-extra';
 import gradient from 'gradient-string';
 import _ from 'lodash';
 
-export const color = (...obj) => {
-	if (obj.length % 2 !== 0) {
-		log('Invalid Number of arguments. Please pairs of text and color.', obj);
-		return;
+import { THEMES } from './themes/index.js';
+
+export class LoggerThemeManager {
+	constructor(themes, defaultTheme = 'dracula') {
+		this.themes = themes || {};
+		this.setTheme(defaultTheme);
 	}
 
-	let str = '';
+	setTheme(name) {
+		const key = String(name || '').toLowerCase();
+		const themeKey = this.themes[key] ? key : 'dracula';
 
-	for (let i = 0; i < obj.length; i += 2) {
-		const text = obj[i];
-		const color = obj[i + 1];
-
-		str +=
-			typeof color === 'object'
-				? gradient(color)(text)
-				: typeof color === 'string'
-					? chalk[color]?.(text) || chalk.hex(color)(text)
-					: (() => {
-							const schemes = _.sample(['teen', 'passion', 'instagram']);
-
-							return gradient[schemes](text);
-						})();
+		this.name = themeKey;
+		this.palette = { ...this.themes[themeKey] };
 	}
 
-	return str;
+	resolveColor(value) {
+		if (typeof value === 'string' && this.palette?.[value]) {
+			return this.palette[value];
+		}
+
+		return value;
+	}
+
+	apply(...obj) {
+		if (obj.length % 2 !== 0) {
+			log('Invalid Number of arguments. Please pairs of text and color.', obj);
+			return;
+		}
+
+		let str = '';
+
+		for (let i = 0; i < obj.length; i += 2) {
+			const text = obj[i];
+			const rawColor = obj[i + 1];
+			const resolved = this.resolveColor(rawColor);
+
+			str +=
+				typeof resolved === 'object'
+					? gradient(resolved)(text)
+					: typeof resolved === 'string'
+						? chalk[resolved]?.(text) || chalk.hex(resolved)(text)
+						: (() => {
+								const schemes = _.sample(['teen', 'passion', 'instagram']);
+
+								return gradient[schemes](text);
+							})();
+		}
+
+		return str;
+	}
+}
+
+const themeManager = new LoggerThemeManager(THEMES, 'dracula');
+
+const applyThemeProps = (target, palette) => {
+	const keys = Object.keys(palette || {});
+	const props = {};
+
+	for (const key of keys) {
+		props[key] = palette[key];
+	}
+
+	Object.assign(target, props, {
+		theme: palette
+	});
 };
 
-const ICON = color('ᛟ', '#E4C1F9');
-const BANNER_ICON_1 = color('❝', '#FF5555');
-const BANNER_ICON_2 = color('❞', '#FF5555');
+export const color = Object.assign((...obj) => themeManager.apply(...obj), {
+	setTheme: (name) => {
+		themeManager.setTheme(name);
+		applyThemeProps(color, themeManager.palette);
+		return themeManager.name;
+	},
+	getTheme: () => themeManager.name,
+	getThemes: () => Object.keys(THEMES),
+	theme: themeManager.palette
+});
+
+applyThemeProps(color, themeManager.palette);
+
+const ICON = color('ᛟ', 'lilac');
+const BANNER_ICON_1 = color('❝', 'red');
+const BANNER_ICON_2 = color('❞', 'red');
 const { version } = await fs.readJSON('./package.json');
 const SPLITTER = ['᠁✦', '✦', '✦', '✦᠁'];
-const AUTHOR = color('nugraizy', '#FF5555');
+const AUTHOR = color('nugraizy', 'red');
 
 export const printBanner = () =>
 	log(
 		boxen(
-			`${BANNER_ICON_1}${chalk.italic.bold.hex('#BD93F9')(__botName)}${BANNER_ICON_2}
+			`${BANNER_ICON_1}${chalk.italic.bold.hex(themeManager.palette.purple || '#BD93F9')(__botName)}${BANNER_ICON_2}
 version
 ${SPLITTER[0]} ${version.split(/\./g).join(` ${SPLITTER[1]} `)} ${SPLITTER[SPLITTER.length - 1]}`,
 			{

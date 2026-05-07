@@ -103,7 +103,7 @@ export default {
 		}
 
 		loggers.info(
-			`${color(`${parsed.isStickers ? 'Sticker' : 'Image'} is sent`, '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`
+			`${color(`${parsed.isStickers ? 'Sticker' : 'Image'} is sent`, 'pink')} to ${color(prettyNumber, 'lilac')}`
 		);
 	}
 };

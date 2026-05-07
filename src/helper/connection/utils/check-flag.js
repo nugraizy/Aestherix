@@ -6,42 +6,40 @@ import { color } from '../../../utils/modules/index.js';
 
 export const startingConnection = Date.now();
 
-const deprecated = (flag, warning) => `${color(flag, 'gray')}[${color('Deprecated!', '#FF5555')}] ${color(warning, 'gray')}`;
+const deprecated = (flag, warning) => `${color(flag, 'gray')}[${color('Deprecated!', 'red')}] ${color(warning, 'gray')}`;
 
 const helpFlag = `
 	 ${color('Usage', 'yellow')}
-	   $ node ${color('.', '#FF99C8')} <?session> [options]
+	   $ node ${color('.', 'pink')} <?session> [options]
 
 	 ${color('Options', 'yellow')}
-	   --prefix, -p          ${color('Set your custom prefix.', '#05ffa1')}
-	   --readOnly, -y        ${color('Read only.', '#05ffa1')}
-	   --autoRead, -r        ${color('Auto read every incoming message.', '#05ffa1')}
-	   --restrict, -e        ${color('Restrict every moderator commands.', '#05ffa1')}
-	   --onlyLogs, -o        ${color('Only showing logs but will ignore every message and commands.', '#05ffa1')}
-	   --noLogs, -n          ${color('Not showing any logs in the meantime still respond for any commands.', '#05ffa1')}
-	   --selfMode, -s        ${color('Set self mode that only owner and the bot can use.', '#05ffa1')}
-	   --debugMode, -g       ${color('Show every metadata of any message.', '#05ffa1')}
-	   --multiCmd, -m        ${color('Loop every command on your script. Use | to seperate each commands.', '#05ffa1')}
-	   --rainbow, -b         ${color('make your logs rainbow colors.', '#05ffa1')}
-	   --trace, -t           ${color('Show errors.', '#05ffa1')}
-	   --watch, -w           ${color('Watch every file on your script and reload it when it changed.', '#05ffa1')}
-	   --coolDown, -c        ${color('Set cool down for every command.', '#05ffa1')}
-	   --autoCorrect, -a     ${color('Enable auto correct for every incoming command.', '#05ffa1')}
-	   --story, -q           ${color('Auto download people story after the bot received the story.', '#05ffa1')}
-	   --offline, -f         ${color('Set your current presence to offline.', '#05ffa1')}
-	   --noCall, -d          ${color('Reject incoming call.', '#05ffa1')}
-	   --ai, -i              ${color('Handle incoming Messages, with AI.', '#05ffa1')}
-	   --limitReset, -l      ${color('Enable Auto-reset user limit.', '#05ffa1')}
-	   --resetOnStart, -x    ${color('Auto reset DB-Connections every start of the script.', '#05ffa1')}
-	   --noLimit, -u         ${color('Set commands limit to None.', '#05ffa1')}
-	   --pairMode, -z        ${color('Enable pair mode.', '#05ffa1')} ${color(
-				'This needs to input your host number to get the code.',
-				'#ef476f'
-			)}
+	   --prefix, -p          ${color('Set your custom prefix.', 'neonGreen')}
+	   --readOnly, -y        ${color('Read only.', 'neonGreen')}
+	   --autoRead, -r        ${color('Auto read every incoming message.', 'neonGreen')}
+	   --restrict, -e        ${color('Restrict every moderator commands.', 'neonGreen')}
+	   --onlyLogs, -o        ${color('Only showing logs but will ignore every message and commands.', 'neonGreen')}
+	   --noLogs, -n          ${color('Not showing any logs in the meantime still respond for any commands.', 'neonGreen')}
+	   --selfMode, -s        ${color('Set self mode that only owner and the bot can use.', 'neonGreen')}
+	   --debugMode, -g       ${color('Show every metadata of any message.', 'neonGreen')}
+	   --multiCmd, -m        ${color('Loop every command on your script. Use | to seperate each commands.', 'neonGreen')}
+	   --rainbow, -b         ${color('make your logs rainbow colors.', 'neonGreen')}
+	   --trace, -t           ${color('Show errors.', 'neonGreen')}
+	   --watch, -w           ${color('Watch every file on your script and reload it when it changed.', 'neonGreen')}
+	   --coolDown, -c        ${color('Set cool down for every command.', 'neonGreen')}
+	   --autoCorrect, -a     ${color('Enable auto correct for every incoming command.', 'neonGreen')}
+	   --story, -q           ${color('Auto download people story after the bot received the story.', 'neonGreen')}
+	   --offline, -f         ${color('Set your current presence to offline.', 'neonGreen')}
+	   --noCall, -d          ${color('Reject incoming call.', 'neonGreen')}
+	   --ai, -i              ${color('Handle incoming Messages, with AI.', 'neonGreen')}
+	   --limitReset, -l      ${color('Enable Auto-reset user limit.', 'neonGreen')}
+	   --resetOnStart, -x    ${color('Auto reset DB-Connections every start of the script.', 'neonGreen')}
+	   --noLimit, -u         ${color('Set commands limit to None.', 'neonGreen')}
+	   --pairMode, -z        ${color('Enable pair mode.', 'neonGreen')} ${color(
+				'This needs to input your host number to get the code.', 'magenta')}
 	   --pairNumber          ${color('Use this number for pairing (no prompt).', '#05ffa1')}
-	   --spin                ${color('Enable spinners for loading plugins.', '#05ffa1')}
-	   --test                ${color('Test your connection.', '#05ffa1')}
-	   --help, -h            ${color('Show this message.', '#05ffa1')}
+	   --spin                ${color('Enable spinners for loading plugins.', 'neonGreen')}
+	   --test                ${color('Test your connection.', 'neonGreen')}
+	   --help, -h            ${color('Show this message.', 'neonGreen')}
 
 	 ${color('Examples', 'yellow')}
 	   ${chalk.italic('$ node . --readOnly -t')}

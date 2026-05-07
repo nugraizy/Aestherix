@@ -15,7 +15,7 @@ export default {
 	limit: 2,
 	status: 'enable',
 	async run(message, client) {
-		loggers.warning(`${color('Starting Guess The Image Games.', '#FF99C8')}  to ${color(message.prettyNumber, '#E4C1F9')}`);
+		loggers.warning(`${color('Starting Guess The Image Games.', 'pink')}  to ${color(message.prettyNumber, 'lilac')}`);
 
 		const game = await startTG(client, message.from, message, 20);
 

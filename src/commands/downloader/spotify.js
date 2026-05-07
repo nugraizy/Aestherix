@@ -216,17 +216,17 @@ const handleSingleTrack = async (url, type, client, { from, message, prettyNumbe
 
 	if (!status) {
 		await client.instance.reply(from, respMessage, message);
-		loggers.error(`${color('Failed to Download Spotify ' + type, '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.error(`${color('Failed to Download Spotify ' + type, 'red')} for ${color(prettyNumber, 'lilac')}`);
 		return false;
 	}
 
-	loggers.warning(`${color('Downloading Spotify ' + type, '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+	loggers.warning(`${color('Downloading Spotify ' + type, 'pink')} for ${color(prettyNumber, 'lilac')}`);
 
 	const searchResults = await hifi.search(`${tracks[0].artists[0].name} - ${tracks[0].name}`);
 
 	if (searchResults.items.length === 0) {
 		await client.instance.reply(from, 'No results found. Please try a different search query.', message);
-		loggers.error(`${color('Failed to Download Spotify ' + type, '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.error(`${color('Failed to Download Spotify ' + type, 'red')} for ${color(prettyNumber, 'lilac')}`);
 		return false;
 	}
 
@@ -236,7 +236,7 @@ const handleSingleTrack = async (url, type, client, { from, message, prettyNumbe
 
 	if (downloadInfo?.error) {
 		await client.instance.reply(from, downloadInfo?.error, message);
-		loggers.error(`${color('Failed to Download Spotify ' + type, '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.error(`${color('Failed to Download Spotify ' + type, 'red')} for ${color(prettyNumber, 'lilac')}`);
 		return false;
 	}
 
@@ -347,19 +347,19 @@ export default {
 		let success = 0;
 		let error = 0;
 
-		loggers.warning(`${color('Downloading Spotify Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.warning(`${color('Downloading Spotify Media', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 
 		check: if (urls.length === 1 && isURL(urls) && !isSpotifyURL(urls)) {
 			if (spotifyRedirectUrlRegex.test(urls[0])) {
 				const redirectUrl = await getRedirect(urls[0]);
 
-				loggers.info(`${color('Resolved Spotify Redirect URL', '#99FFC8')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.info(`${color('Resolved Spotify Redirect URL', 'mint')} for ${color(prettyNumber, 'lilac')}`);
 
 				urls = [redirectUrl];
 				break check;
 			}
 
-			loggers.error(`${color('Failed to Download Spotify Media', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.error(`${color('Failed to Download Spotify Media', 'red')} for ${color(prettyNumber, 'lilac')}`);
 			return await wait.update('This is not a valid Spotify URL.');
 		}
 
@@ -368,14 +368,14 @@ export default {
 				if (spotifyRedirectUrlRegex.test(url)) {
 					const redirectUrl = await getRedirect(url);
 
-					loggers.info(`${color('Resolved Spotify Redirect URL', '#99FFC8')} for ${color(prettyNumber, '#E4C1F9')}`);
+					loggers.info(`${color('Resolved Spotify Redirect URL', 'mint')} for ${color(prettyNumber, 'lilac')}`);
 
 					url = redirectUrl;
 					break check;
 				}
 
 				await client.instance.reply(from, `[ ${url} ] This isn't a valid Spotify URL.`, message);
-				loggers.error(`${color('Failed to Download Spotify Media', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Download Spotify Media', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
 			}
@@ -384,7 +384,7 @@ export default {
 
 			if (typeMedia === 'artist') {
 				await client.instance.reply(from, `[ ${url} ] This is an artist link. Please send media URL.`, message);
-				loggers.error(`${color('Failed to Download Spotify Media', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Download Spotify Media', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
 			}
@@ -401,6 +401,6 @@ export default {
 
 		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
 
-		loggers.info(`${color('Downloaded Spotify Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Downloaded Spotify Media', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
 };

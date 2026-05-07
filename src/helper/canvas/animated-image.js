@@ -33,13 +33,13 @@ const createSequence = async (images, sender) => {
 	return new Promise(async (resolve, reject) => {
 		exec(`img2webp -loop 1 ${images.map((v) => `"${v}"`).join(' ')} -o "${pathResults}.webp"`, (er) => {
 			if (er) {
-				loggers.error(`${color('Failed to Convert Media to Sticker', '#FF5555')} for ${color(sender, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, 'lilac')}`);
 				reject(er);
 			}
 
 			exec(`webpmux -set exif "${pathExif}" "${pathResults}.webp" -o "${pathResults}-done.webp"`, (err) => {
 				if (err) {
-					loggers.error(`${color('Failed to Convert Media to Sticker', '#FF5555')} for ${color(sender, '#E4C1F9')}`);
+					loggers.error(`${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, 'lilac')}`);
 					reject(err);
 				}
 
@@ -91,7 +91,7 @@ export const attp = (sender, texts, colored, fonts) =>
 		fonts = fonts !== undefined ? fonts.toLowerCase() : 'chevin';
 		colored = colored.length ? colored : null;
 
-		loggers.warning(`${color('Generating Animated Image', '#FF99C8')} for ${color(sender, '#E4C1F9')}`);
+		loggers.warning(`${color('Generating Animated Image', 'pink')} for ${color(sender, 'lilac')}`);
 
 		let i = 0;
 		let { ctx, canvas } = createCanvasTemplates();
@@ -127,7 +127,7 @@ export const attp = (sender, texts, colored, fonts) =>
 		}
 
 		createSequence(bufferContainer, sender).then(({ buffers }) => {
-			loggers.info(`${color('Animated Image is generated', '#FF99C8')} for ${color(sender, '#E4C1F9')}`);
+			loggers.info(`${color('Animated Image is generated', 'pink')} for ${color(sender, 'lilac')}`);
 
 			resolve(buffers);
 		});

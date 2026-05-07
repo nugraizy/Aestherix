@@ -44,7 +44,7 @@ export default {
 			if (data?.error) {
 				await client.instance.reply(from, `Error while searching IP Address\n\n${data.error}`, message);
 
-				loggers.error(`${color('Failed to Searching IP Address', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Searching IP Address', 'red')} for ${color(prettyNumber, 'lilac')}`);
 
 				continue;
 			} else {

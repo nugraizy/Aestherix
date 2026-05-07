@@ -56,7 +56,7 @@ export const memeGenerator = (client, sender, input, topTexts = '', bottomTexts 
 			return resolve({ error: 'No Texts Provided' });
 		}
 
-		loggers.warning(`${color('Generating Meme', '#FF99C8')} for ${color(sender, '#E4C1F9')}`);
+		loggers.warning(`${color('Generating Meme', 'pink')} for ${color(sender, 'lilac')}`);
 
 		const images = await loadImage(input);
 
@@ -92,7 +92,7 @@ export const memeGenerator = (client, sender, input, topTexts = '', bottomTexts 
 				packname: configuration.packname
 			});
 
-			loggers.info(`${color('Meme generated', '#FF99C8')} for ${color(sender, '#E4C1F9')}`);
+			loggers.info(`${color('Meme generated', 'pink')} for ${color(sender, 'lilac')}`);
 			resolve(buffer);
 		} else {
 			resolve(canvas.toBuffer('image/png'));

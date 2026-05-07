@@ -52,20 +52,20 @@ export const handleConnectionUpdate = async (
 			if (reason === DisconnectReason.badSession) {
 				loggers.error(
 					color('Bad session', 'white'),
-					color('Please delete your previous session and do a rescan...', '#E4C1F9')
+					color('Please delete your previous session and do a rescan...', 'lilac')
 				);
 				await resetSession(cli);
 				process.exit(0);
 			} else if (reason === DisconnectReason.loggedOut) {
 				loggers.error(
 					color('Logged out', 'white'),
-					color('Please delete your previous session and do a rescan...', '#E4C1F9')
+					color('Please delete your previous session and do a rescan...', 'lilac')
 				);
 				await resetSession(cli);
 				process.exit(0);
 			} else {
 				if (reason === DisconnectReason.restartRequired) {
-					loggers.warning(color('Restart required', 'white'), color('Restarting your Socket...', '#E4C1F9'));
+					loggers.warning(color('Restart required', 'white'), color('Restarting your Socket...', 'lilac'));
 				}
 
 				const reconnectableReasons = [
@@ -86,7 +86,7 @@ export const handleConnectionUpdate = async (
 					if (count >= maxRetries) {
 						loggers.error(
 							color(`${foundReason.label ? `[${foundReason.label}] ` : ''}Max retry attempts reached`, 'white'),
-							color('Please try again later...', '#E4C1F9')
+							color('Please try again later...', 'lilac')
 						);
 						await shutdownServers();
 					}
@@ -106,7 +106,7 @@ export const handleConnectionUpdate = async (
 					connectMqtt(clientMqttListen, true);
 					await (await import('../../../index.js')).start();
 				} else {
-					loggers.warning(color('Unknown reason', 'white'), color('Quick reconnecting...', '#E4C1F9'));
+					loggers.warning(color('Unknown reason', 'white'), color('Quick reconnecting...', 'lilac'));
 					newStart();
 					connectMqtt(clientMqttListen, true);
 					await (await import('../../../index.js')).start();
@@ -144,7 +144,7 @@ export const handleConnectionUpdate = async (
 				(await import('../../modules/utils.js')).assign(client);
 
 				if (shouldPrintBanner) {
-					loggers.info(color('Socket connected', 'white'), color('Successfully', '#E4C1F9') + color('.', 'white'));
+					loggers.info(color('Socket connected', 'white'), color('Successfully', 'lilac') + color('.', 'white'));
 					shouldPrintBanner = false;
 				}
 
@@ -171,9 +171,9 @@ export const handleConnectionUpdate = async (
 
 				loggers.info(
 					color('Connection time', 'white'),
-					color(`${timeToConnect}s`, '#E4C1F9'),
+					color(`${timeToConnect}s`, 'lilac'),
 					color(timeToConnect < data.best_time ? 'is the best time' : 'is not the best time', 'white'),
-					color('(', '#E4C1F9') + color(`${data.best_time}s`, '#fff568ff') + color(')', '#E4C1F9')
+					color('(', 'lilac') + color(`${data.best_time}s`, 'glowYellow') + color(')', '#E4C1F9')
 				);
 
 				retryCount.set('counter', 0);
@@ -569,7 +569,7 @@ async function shutdownServers() {
 
 	await Promise.all(
 		servers.map(([name, server]) => {
-			loggers.warning(color('Shutting down', 'white'), color(name, '#E4C1F9'), color('server...', 'white'));
+			loggers.warning(color('Shutting down', 'white'), color(name, 'lilac'), color('server...', 'white'));
 
 			return new Promise((resolve, reject) => {
 				server.close((err) => {
@@ -592,10 +592,10 @@ const handleShutdown = async (signal = 'shutdown') => {
 
 	isShuttingDown = true;
 
-	loggers.warning(color('Received', 'white'), color(signal, '#E4C1F9'), color('signal, shutting down...', 'white'));
+	loggers.warning(color('Received', 'white'), color(signal, 'lilac'), color('signal, shutting down...', 'white'));
 
 	shutdownTimer = setTimeout(() => {
-		loggers.error(color('Force shutdown after timeout.', '#FF5555'));
+		loggers.error(color('Force shutdown after timeout.', 'red'));
 		process.exit(1);
 	}, SHUTDOWN_TIMEOUT_MS);
 
@@ -612,7 +612,7 @@ const handleShutdown = async (signal = 'shutdown') => {
 
 		process.exit(0);
 	} catch (error) {
-		loggers.error(color('Shutdown failed:', '#FF5555'), color(error.message, 'white'));
+		loggers.error(color('Shutdown failed:', 'red'), color(error.message, 'white'));
 		process.exit(1);
 	}
 };

@@ -40,7 +40,7 @@ export default {
 		let success = 0;
 		let error = 0;
 
-		loggers.warning(`${color('Downloading Facebook Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.warning(`${color('Downloading Facebook Post', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 
 		for (const url of urls) {
 			if (!isURL(url.trim())) {
@@ -57,7 +57,7 @@ export default {
 
 			if (post?.error) {
 				await client.instance.reply(from, `Failed while downloading Facebook post\n\n${post.error}\n${url}`, message);
-				loggers.error(`${color('Failed to Download Facebook Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Download Facebook Post', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
 			}
@@ -80,6 +80,6 @@ export default {
 
 		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
 
-		loggers.info(`${color('Downloaded Facebook Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Downloaded Facebook Post', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
 };

@@ -16,7 +16,7 @@ let isInit = false;
 
 let STATS_OFFLINE = true;
 const EVALY = ['/>', '$>', '=>', '!>'];
-const SEPARATOR = color('⤑', '#50FA7B');
+const SEPARATOR = color('⤑', 'green');
 const HANDLER_PATH = {
 	STUBTYPE: './stub-message.js',
 	STORY: './story-message.js',
@@ -37,22 +37,20 @@ const HANDLER_PATH = {
  */
 const logMessage = (message) => {
 	const senderInfo = message.isFromMe
-		? `${color('[', 'gray')}${color('HOST', '#ea999c')}${color(']', 'gray')} ${color(`${global.__botName}`, '#F1FA8C')} ${color(message.prettyNumber, '#BD93F9')}`
-		: `${color(message.pushname, '#F1FA8C')} ${color(message.prettyNumber, '#BD93F9')}`;
+		? `${color('[', 'gray')}${color('HOST', 'salmon')}${color(']', 'gray')} ${color(`${global.__botName}`, 'yellow')} ${color(message.prettyNumber, 'purple')}`
+		: `${color(message.pushname, 'yellow')} ${color(message.prettyNumber, 'purple')}`;
 	const messageBody = color(message.query?.replace(/[\t\n]/g, ' ').substring(0, 35), 'white');
-	// const typeInfo = `${SEPARATOR} ${color('type', '#f5bde6')} ${color(message.type, '#81c8be')}`;
-	const runtimeInfo = `${SEPARATOR}  ${color(((Date.now() - runtime) / 1000).toFixed(0), '#F1FA8C')}${color('s', '#f5e700')}`;
+	// const typeInfo = `${SEPARATOR} ${color('type', 'rose')} ${color(message.type, 'teal')}`;
+	const runtimeInfo = `${SEPARATOR}  ${color(((Date.now() - runtime) / 1000).toFixed(0), '#F1FA8C')}${color('s', 'lemon')}`;
 	const messageFrom = `${SEPARATOR}  ${color('in', 'white')} ${color(
-		message.isGroup ? `group ${message.groupName}` : 'private chat',
-		'#d6a9ff'
-	)}${(message.isGroup && color(' id ', 'white') + color(message.groupId, '#BD93F9')) || ''}`;
+		message.isGroup ? `group ${message.groupName}` : 'private chat', 'lavender')}${(message.isGroup && color(' id ', 'white') + color(message.groupId, 'purple')) || ''}`;
 
 	let fullBody = null;
 
 	if (message.isCmd) {
 		fullBody = message.isEval
-			? `${color('eval', '#8caaee')} ${messageBody}`
-			: `${color('command', '#ea999c')} ${color(message.prefix, '#BD93F9')}${color(message.cmd, '#BDE0FE')} ${messageBody}`;
+			? `${color('eval', 'periwinkle')} ${messageBody}`
+			: `${color('command', 'salmon')} ${color(message.prefix, 'purple')}${color(message.cmd, 'powderBlue')} ${messageBody}`;
 	} else {
 		const isPossiblyCaption = [
 			'audioMessage',
@@ -62,7 +60,7 @@ const logMessage = (message) => {
 			'liveLocationMessage'
 		].includes(message.type);
 
-		fullBody = `${color(isPossiblyCaption && message.body !== 'No Caption' ? 'caption' : 'message', '#a6da95')} ${color(
+		fullBody = `${color(isPossiblyCaption && message.body !== 'No Caption' ? 'caption' : 'message', 'softGreen')} ${color(
 			message.body?.substring(0, 20).replace(/[\t\n]/g, ' '),
 			'white'
 		)}`;
@@ -472,14 +470,14 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 
 						if (match) {
 							const [fullMatch, text] = match;
-							const formattedStackEntry = `${color(stackEntry.replace(fullMatch, ''), 'white')}(${color(text, '#BD93F9')})`;
+							const formattedStackEntry = `${color(stackEntry.replace(fullMatch, ''), 'white')}(${color(text, 'purple')})`;
 
 							return formattedStackEntry.replace('\n', '') + '\n';
 						} else {
 							return stackEntry.trim();
 						}
 					})
-					.join(`${color('❯ ', '#6272A4') + color('at ', '#BD93F9')}`);
+					.join(`${color('❯ ', 'gray') + color('at ', 'purple')}`);
 
 				parseErr && loggers.error(parseErr);
 			}

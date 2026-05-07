@@ -110,6 +110,6 @@ export default {
 			await client.instance.send(from, { sticker }, { quoted: message });
 		}
 
-		loggers.info(`${color('Sticker is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Sticker is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 	}
 };

@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 
 import { Cache } from '../modules/cache.js';
 
-const users = await fs.readJSON('./src/helper/config/settings.json');
+const settings = await fs.readJSON('./src/helper/config/settings.json');
 
 /**
  * @type {import('../../types/Socket/config.js').GlobalConfig}
@@ -48,7 +48,7 @@ const globalConfig = {
 		settings: new Cache(),
 		users: new Cache(),
 		interval: new Cache(),
-		ownerNumbers: [users.owner_number, ...users.team_number]
+		ownerNumbers: [settings.owner_number, ...settings.team_number]
 	},
 	OPTIONS: {},
 	cli: {},
@@ -60,6 +60,7 @@ const globalConfig = {
 	anonymous: new Cache(),
 	input: new Cache(),
 	mqtt: null,
+	logger_theme: settings.logger_theme || 'dracula', // eslint-disable-line
 	pinterestId: null,
 	pinterestImages: new Cache({ limit: 900 }),
 	anonymousMessages: new Cache(),

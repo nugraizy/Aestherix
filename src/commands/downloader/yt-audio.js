@@ -17,7 +17,7 @@ const processAudio = async (url, client, { from, message, prettyNumber }) => {
 
 	if (!link) {
 		client.instance.reply(from, `Error while downloading YouTube Video\n\n${url}`, message);
-		loggers.error(`${color('Failed to Download YouTube Video', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.error(`${color('Failed to Download YouTube Video', 'red')} for ${color(prettyNumber, 'lilac')}`);
 		return false;
 	}
 
@@ -104,7 +104,7 @@ export default {
 
 			await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
 
-			loggers.info(`${color('Downloaded YouTube Audio', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+			loggers.info(`${color('Downloaded YouTube Audio', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 
 			return;
 		}
@@ -159,12 +159,12 @@ export default {
 		let success = 0;
 		let error = 0;
 
-		loggers.warning(`${color('Downloading YouTube Audio', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.warning(`${color('Downloading YouTube Audio', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 
 		for (const Query of queries) {
 			if (isURL(Query) && !isYoutubeURL(Query)) {
 				await client.instance.reply(from, `[ ${Query} ] This isn't a valid YouTube URL.`, message);
-				loggers.error(`${color('Failed to Download YouTube Audio', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Download YouTube Audio', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
 			}
@@ -181,6 +181,6 @@ export default {
 
 		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
 
-		loggers.info(`${color('Downloaded YouTube Audio', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Downloaded YouTube Audio', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
 };

@@ -10,9 +10,9 @@ const bail = (...msg) => {
 const tube = await Innertube.create();
 
 tube.session.once('auth-pending', ({ verification_url: verificationUrl, user_code: userCode }) => {
-	loggers.info(color('URL  :', '#E4C1F9'), color(verificationUrl, 'white'));
-	loggers.info(color('Code :', '#E4C1F9'), color(userCode, 'white'));
-	loggers.warning(color('Open the link on your browser. Copy the code and paste it to the prompt.', '#E4C1F9'));
+	loggers.info(color('URL  :', 'lilac'), color(verificationUrl, 'white'));
+	loggers.info(color('Code :', 'lilac'), color(userCode, 'white'));
+	loggers.warning(color('Open the link on your browser. Copy the code and paste it to the prompt.', 'lilac'));
 });
 tube.session.once('auth-error', (err) => bail(color('An error occurred :', 'red'), err));
 tube.session.once('auth', async ({ credentials }) => {
@@ -29,14 +29,14 @@ tube.session.once('auth', async ({ credentials }) => {
 	await delay(200);
 	await clip
 		.write(code)
-		.then(() => loggers.info(color('YouTube Authentication cookie is copied to the clipboard!', '#E4C1F9')))
+		.then(() => loggers.info(color('YouTube Authentication cookie is copied to the clipboard!', 'lilac')))
 		.catch(() => loggers.error(color('SSH detected.', 'red'), color('Could not copy the code.', 'gray')));
 
 	await delay(200);
 
-	loggers.info(color('Manually copy the cookie :', '#E4C1F9'), color(code, 'white'));
+	loggers.info(color('Manually copy the cookie :', 'lilac'), color(code, 'white'));
 
-	loggers.info(color('Paste them onto your environment [.env] file in YOUTUBE_AUTH key.', '#E4C1F9'));
+	loggers.info(color('Paste them onto your environment [.env] file in YOUTUBE_AUTH key.', 'lilac'));
 });
 
 await tube.session.signIn();

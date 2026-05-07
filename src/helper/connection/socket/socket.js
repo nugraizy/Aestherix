@@ -114,7 +114,7 @@ export const connectSocket = async ({ cli, OPTIONS, store, sessionName }) => {
 const inputPhoneNumber = async () => {
 	await delay(1000);
 	const phoneNumber = await question(
-		loggers.info(color('Insert your phone number', '#E4C1F9'), color(':', '#ffff'), { ignore: true }).trim()
+		loggers.info(color('Insert your phone number', 'lilac'), color(':', 'white'), { ignore: true }).trim()
 	);
 
 	const formattedPhoneNumber = '+' + phoneNumber.trim().replace(/[^0-9]/g, '');
@@ -146,7 +146,7 @@ const normalizePairNumber = (value) => {
 const selectHostNumber = async ({ hostNumber, backupsHostNumbers }) => {
 	const selected = await select(
 		{
-			message: loggers.info(color('Select host number', '#E4C1F9'), { ignore: true }),
+			message: loggers.info(color('Select host number', 'lilac'), { ignore: true }),
 			choices: [
 				...[hostNumber, ...backupsHostNumbers].map((v) => {
 					const num = PhoneNumber('+' + v.replace(/[^0-9]/g, '')).formatInternational();
@@ -169,7 +169,7 @@ const selectHostNumber = async ({ hostNumber, backupsHostNumbers }) => {
 				style: {
 					answer: (value) => color(value, 'white'),
 					highlight: (value) =>
-						`${color(value, '#E4C1F9')} ${color('(', 'gray')}${color('selected', 'white')}${color(')', 'gray')}`,
+						`${color(value, 'lilac')} ${color('(', 'gray')}${color('selected', 'white')}${color(')', 'gray')}`,
 					description: (value) => color(value, 'grey'),
 					keysHelpTip: (keys) => keys.map(([key, action]) => `${key} : ${action}`).join(' | ')
 				}
@@ -199,9 +199,9 @@ const askWantNumber = async ({ hostNumber, backupsHostNumbers }) => {
 	const useDefaultNumber = await confirm(
 		{
 			message: loggers.info(
-				color('Do you want to use the default number?', '#E4C1F9'),
-				color('(', 'gray') + color('default', '#fff'),
-				color(`${PhoneNumber('+' + hostNumber.replace(/[^0-9]/g, '')).formatInternational()})`, '#50FA7B'),
+				color('Do you want to use the default number?', 'lilac'),
+				color('(', 'gray') + color('default', 'white'),
+				color(`${PhoneNumber('+' + hostNumber.replace(/[^0-9]/g, '')).formatInternational()})`, 'green'),
 				{ ignore: true }
 			),
 			default: true
@@ -264,7 +264,7 @@ const handleNewInstance = async ({ OPTIONS, Client }) => {
 		const code = await Client.requestPairingCode(phoneNumber, 'AESTHERX');
 
 		loggers.info(
-			color('Pairing code :', '#E4C1F9'),
+			color('Pairing code :', 'lilac'),
 			color(
 				code.splitString({
 					length: 4
@@ -278,6 +278,6 @@ const handleNewInstance = async ({ OPTIONS, Client }) => {
 			.then(() => loggers.info(color('Pairing code has been copied to clipboard!', 'white')))
 			.catch(() => loggers.error(color('SSH detected.', 'red'), color('Could not copy the code.', 'gray')));
 		await delay(200);
-		loggers.warning(color('Waiting for code input', 'white'), color('. . .', '#FF99C8'));
+		loggers.warning(color('Waiting for code input', 'white'), color('. . .', 'pink'));
 	}
 };

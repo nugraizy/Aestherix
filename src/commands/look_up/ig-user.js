@@ -33,12 +33,12 @@ export default {
 
 		const users = await configuration.instagram.search.user(usernames);
 
-		loggers.warning(`${color('Searching Instagram User', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.warning(`${color('Searching Instagram User', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 
 		for (const data in users) {
 			if (users[data]?.error) {
 				await client.instance.reply(from, `Error while searching Instagram user\n\n${users[data].error}\n${data}`, message);
-				loggers.error(`${color('Failed to Searching Instagram User', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Searching Instagram User', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				continue;
 			}
 

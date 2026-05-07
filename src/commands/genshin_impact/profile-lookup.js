@@ -72,7 +72,7 @@ export default {
 				await client.instance.reply(from, `Error while searching Genshin Impact player\n\n${info.error}`, message);
 
 				loggers.error(
-					`⚠️ ${color('Failed to Searching Genshin Impact player', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`
+					`⚠️ ${color('Failed to Searching Genshin Impact player', 'red')} for ${color(prettyNumber, 'lilac')}`
 				);
 
 				continue;

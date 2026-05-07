@@ -34,7 +34,7 @@ export default {
 			return client.instance.reply(from, 'The sticker are animated. Please reply static stickers only.', message);
 		}
 
-		loggers.warning(`${color('Removing Background image', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.warning(`${color('Removing Background image', 'pink')} ${color(prettyNumber, 'lilac')}`);
 
 		const parsed = parser(query.toLowerCase(), {
 			configuration: {

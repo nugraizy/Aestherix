@@ -227,7 +227,7 @@ const loadDashboardBlocklist = async () => {
 
 		configuration.cache.blocklist = list.map((jid) => normalizePersistedUserJid(jid)).filter(Boolean);
 	} catch (error) {
-		loggers.warning(color('Failed loading dashboard blocklist:', '#FF5555'), color(error.message, 'white'));
+		loggers.warning(color('Failed loading dashboard blocklist:', 'red'), color(error.message, 'white'));
 		configuration.cache.blocklist = Array.isArray(configuration.cache?.blocklist) ? configuration.cache.blocklist : [];
 	}
 };
@@ -246,7 +246,7 @@ const persistDashboardBlocklist = async (addedJids = [], removedJids = []) => {
 			}
 		}
 	} catch (error) {
-		loggers.warning(color('Failed persisting dashboard blocklist:', '#FF5555'), color(error.message, 'white'));
+		loggers.warning(color('Failed persisting dashboard blocklist:', 'red'), color(error.message, 'white'));
 	}
 };
 
@@ -275,7 +275,7 @@ const hydrateProfilePicturesCache = async () => {
 
 		profilePicturesDbState.lastSyncAt = Date.now();
 	} catch (error) {
-		loggers.warning(color('Failed hydrating dashboard profile pictures:', '#FF5555'), color(error.message, 'white'));
+		loggers.warning(color('Failed hydrating dashboard profile pictures:', 'red'), color(error.message, 'white'));
 	}
 };
 
@@ -317,7 +317,7 @@ const loadSessionStore = async () => {
 			});
 		}
 	} catch (error) {
-		loggers.warning(color('Failed loading dashboard sessions:', '#FF5555'), color(error.message, 'white'));
+		loggers.warning(color('Failed loading dashboard sessions:', 'red'), color(error.message, 'white'));
 	}
 };
 
@@ -342,7 +342,7 @@ const persistSessionStore = async () => {
 			}).catch(() => {});
 		}
 	} catch (error) {
-		loggers.warning(color('Failed persisting dashboard sessions:', '#FF5555'), color(error.message, 'white'));
+		loggers.warning(color('Failed persisting dashboard sessions:', 'red'), color(error.message, 'white'));
 	}
 };
 
@@ -367,7 +367,7 @@ const loadAuditStore = async () => {
 			.slice(-MAX_AUDIT_LOGS);
 		auditState.lastId = await getLastAuditLogId(prisma);
 	} catch (error) {
-		loggers.warning(color('Failed loading dashboard audit logs:', '#FF5555'), color(error.message, 'white'));
+		loggers.warning(color('Failed loading dashboard audit logs:', 'red'), color(error.message, 'white'));
 	}
 };
 
@@ -1746,7 +1746,7 @@ const loadOtpStore = async () => {
 			});
 		}
 	} catch (error) {
-		loggers.warning(color('Failed loading dashboard OTP store:', '#FF5555'), color(error.message, 'white'));
+		loggers.warning(color('Failed loading dashboard OTP store:', 'red'), color(error.message, 'white'));
 	}
 };
 
@@ -1777,7 +1777,7 @@ const persistOtpStore = async () => {
 			}).catch(() => {});
 		}
 	} catch (error) {
-		loggers.warning(color('Failed persisting dashboard OTP store:', '#FF5555'), color(error.message, 'white'));
+		loggers.warning(color('Failed persisting dashboard OTP store:', 'red'), color(error.message, 'white'));
 	}
 };
 
@@ -2664,7 +2664,7 @@ export const server = async () => {
 	}, 8000);
 
 	void initializeDashboardMonitor(configuration).catch((error) => {
-		loggers.error(color('Dashboard monitor init failed:', '#FF5555'), color(error.message, 'white'));
+		loggers.error(color('Dashboard monitor init failed:', 'red'), color(error.message, 'white'));
 	});
 
 	app.use(express.json());
@@ -2927,7 +2927,7 @@ export const server = async () => {
 				});
 			}
 
-			loggers.info(color('Dashboard login confirmation sent to', 'white'), color(phoneNumber, '#E4C1F9'));
+			loggers.info(color('Dashboard login confirmation sent to', 'white'), color(phoneNumber, 'lilac'));
 			res.json({
 				ok: true,
 				message: 'Confirmation request sent to your WhatsApp.',
@@ -2935,7 +2935,7 @@ export const server = async () => {
 				requestKey
 			});
 		} catch (error) {
-			loggers.error(color('Failed to send dashboard confirmation:', '#FF5555'), color(error.message, 'white'));
+			loggers.error(color('Failed to send dashboard confirmation:', 'red'), color(error.message, 'white'));
 			res.status(500).json({ ok: false, message: 'Failed to send code. Try again.' });
 		}
 	});
@@ -2994,7 +2994,7 @@ export const server = async () => {
 			message: 'Owner login confirmed by WhatsApp.'
 		});
 
-		loggers.info(color('Dashboard login verified for', 'white'), color(phoneNumber, '#E4C1F9'));
+		loggers.info(color('Dashboard login verified for', 'white'), color(phoneNumber, 'lilac'));
 		res.json({ ok: true });
 	});
 
@@ -3040,7 +3040,7 @@ export const server = async () => {
 			res.setHeader('Content-Type', 'text/markdown; charset=utf-8');
 			return res.status(200).send(markdown);
 		} catch (error) {
-			loggers.error(color('Failed reading root changelog:', '#FF5555'), color(error.message, 'white'));
+			loggers.error(color('Failed reading root changelog:', 'red'), color(error.message, 'white'));
 			return res.status(500).send('Failed to load changelog.');
 		}
 	});
@@ -3055,7 +3055,7 @@ export const server = async () => {
 				contributors
 			});
 		} catch (error) {
-			loggers.error(color('Failed loading dashboard contributors:', '#FF5555'), color(error.message, 'white'));
+			loggers.error(color('Failed loading dashboard contributors:', 'red'), color(error.message, 'white'));
 			return res.status(500).json({
 				ok: false,
 				message: 'Failed to load contributors.',
@@ -3528,9 +3528,9 @@ export const server = async () => {
 
 		loggers.info(
 			color('Dashboard changed command state:', 'white'),
-			color(commandName, '#E4C1F9'),
+			color(commandName, 'lilac'),
 			color('=>', 'white'),
-			color(enabled ? 'enabled' : 'disabled', enabled ? '#50FA7B' : '#FF5555')
+			color(enabled ? 'enabled' : 'disabled', enabled ? 'green' : 'red')
 		);
 
 		res.json({ ok: true, commandName, enabled, undo });
@@ -3591,9 +3591,9 @@ export const server = async () => {
 
 		loggers.info(
 			color('Dashboard changed flag state:', 'white'),
-			color(flagName, '#E4C1F9'),
+			color(flagName, 'lilac'),
 			color('⤑', 'white'),
-			color(enabled ? 'enabled' : 'disabled', enabled ? '#50FA7B' : '#FF5555')
+			color(enabled ? 'enabled' : 'disabled', enabled ? 'green' : 'red')
 		);
 
 		res.json({ ok: true, flagName, enabled, undo });
@@ -3657,9 +3657,9 @@ export const server = async () => {
 
 			loggers.info(
 				color('Dashboard changed user limit:', 'white'),
-				color(result.user.id, '#E4C1F9'),
+				color(result.user.id, 'lilac'),
 				color('=>', 'white'),
-				color(String(result.user.limit), '#50FA7B')
+				color(String(result.user.limit), 'green')
 			);
 
 			res.json({ ok: true, user: result.user, undo });
@@ -3726,9 +3726,9 @@ export const server = async () => {
 
 			loggers.info(
 				color('Dashboard changed user role:', 'white'),
-				color(result.user.id, '#E4C1F9'),
+				color(result.user.id, 'lilac'),
 				color('=>', 'white'),
-				color(result.user.role, result.user.role === 'PREMIUM' ? '#50FA7B' : '#FF5555')
+				color(result.user.role, result.user.role === 'PREMIUM' ? 'green' : 'red')
 			);
 
 			res.json({ ok: true, user: result.user, undo });
@@ -3794,9 +3794,9 @@ export const server = async () => {
 
 			loggers.info(
 				color('Dashboard changed user banned state:', 'white'),
-				color(result.userId, '#E4C1F9'),
+				color(result.userId, 'lilac'),
 				color('=>', 'white'),
-				color(result.banned ? 'banned' : 'unbanned', result.banned ? '#FF5555' : '#50FA7B')
+				color(result.banned ? 'banned' : 'unbanned', result.banned ? 'red' : 'green')
 			);
 
 			res.json({ ok: true, userId: result.userId, banned: result.banned, undo });
@@ -3866,9 +3866,9 @@ export const server = async () => {
 
 			loggers.info(
 				color('Dashboard changed user block state:', 'white'),
-				color(result.userId, '#E4C1F9'),
+				color(result.userId, 'lilac'),
 				color('=>', 'white'),
-				color(result.blocked ? 'blocked' : 'unblocked', result.blocked ? '#FF5555' : '#50FA7B')
+				color(result.blocked ? 'blocked' : 'unblocked', result.blocked ? 'red' : 'green')
 			);
 
 			res.json({
@@ -3891,10 +3891,10 @@ export const server = async () => {
 	});
 
 	const appToStore = httpServer.listen(PORT, '0.0.0.0', () => {
-		loggers.info(color('Server Mesh Gradient', 'white'), color('started on port', '#E4C1F9'), color(PORT, 'white'));
+		loggers.info(color('Server Mesh Gradient', 'white'), color('started on port', 'lilac'), color(PORT, 'white'));
 		loggers.info(
 			color('Dashboard', 'white'),
-			color('available at', '#E4C1F9'),
+			color('available at', 'lilac'),
 			color(`http://localhost:${PORT}/dashboard`, 'white')
 		);
 	});

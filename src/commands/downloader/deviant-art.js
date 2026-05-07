@@ -47,7 +47,7 @@ export default {
 		let success = 0;
 		let error = 0;
 
-		loggers.warning(`${color('Downloading Deviantart File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.warning(`${color('Downloading Deviantart File', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 
 		for (const url of urls) {
 			const regexs = regex(url.trim());
@@ -62,7 +62,7 @@ export default {
 
 			if (result?.error) {
 				await client.instance.reply(from, result.error, message);
-				loggers.error(`${color('Failed to Download Deviantart File', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Download Deviantart File', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
 			}
@@ -91,6 +91,6 @@ Views : ${numberWithCommas(result.views)}`.formatForm(),
 
 		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
 
-		loggers.info(`${color('Downloaded Deviantart File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Downloaded Deviantart File', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
 };

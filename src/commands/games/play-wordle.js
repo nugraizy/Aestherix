@@ -28,7 +28,7 @@ export default {
 			}
 
 			loggers.warning(
-				`${color('Wordle Game Answer : ', '#FF99C8')} ${color(wordle.word, 'white')} to ${color(prettyNumber, '#E4C1F9')}`
+				`${color('Wordle Game Answer : ', 'pink')} ${color(wordle.word, 'white')} to ${color(prettyNumber, 'lilac')}`
 			);
 
 			const data = await client.instance.reply(

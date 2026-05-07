@@ -26,7 +26,7 @@ export default {
 			return await client.instance.reply(from, 'Please reply a sticker to decrypt', message);
 		}
 
-		loggers.info(`${color('Decrypting media', '#FF99C8')} from ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Decrypting media', 'pink')} from ${color(prettyNumber, 'lilac')}`);
 
 		const results = await client.instance.downloadAndSaveMediaMessage(
 			extractMediaData,
@@ -60,6 +60,6 @@ export default {
 			await this.run(await reassign(wait.message, client, store), client);
 		}
 
-		loggers.info(`${color('Media is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Media is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 	}
 };

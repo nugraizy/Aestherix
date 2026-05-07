@@ -47,7 +47,7 @@ export default {
 		let success = 0;
 		let error = 0;
 
-		loggers.warning(`${color('Downloading Pixiv File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.warning(`${color('Downloading Pixiv File', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 
 		for (const url of urls) {
 			const regexs = regex(url.trim());
@@ -62,7 +62,7 @@ export default {
 
 			if (data?.error) {
 				await client.instance.reply(from, `Failed while downloading Pixiv manga\n\n${data.error}\n${url}`, message);
-				loggers.error(`${color('Failed to Download Pixiv File', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Download Pixiv File', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
 			}
@@ -116,6 +116,6 @@ Total Media : ${pageCount}`;
 
 		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
 
-		loggers.info(`${color('Downloaded Pixiv File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Downloaded Pixiv File', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
 };

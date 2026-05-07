@@ -39,7 +39,7 @@ export default {
 			if (user?.error) {
 				await client.instance.reply(from, `Error while searching Twitter user\n\n${user.error}\n${username}`, message);
 
-				loggers.error(`${color('Failed to Searching Twitter User', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Searching Twitter User', 'red')} for ${color(prettyNumber, 'lilac')}`);
 
 				continue;
 			}

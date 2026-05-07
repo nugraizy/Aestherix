@@ -68,7 +68,7 @@ export default {
 			if (users[data]?.error) {
 				client.instance.reply(from, `Error while searching TikTok user\n\n${users[data].error}`, message);
 
-				loggers.error(`${color('Failed to Search TikTok User', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Search TikTok User', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				continue;
 			}
 

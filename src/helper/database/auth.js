@@ -208,6 +208,7 @@ export const useSingleAuthState = async (db, sessionName = '') => {
 
 	/** @type {Record<string, string>} Maps Baileys key types to storage keys. */
 	const KEY_MAP = {
+		'identity-key': 'identityKeys',
 		'pre-key': 'preKeys',
 		session: 'sessions',
 		'sender-key': 'senderKeys',

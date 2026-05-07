@@ -39,12 +39,12 @@ export default {
 		let success = 0;
 		let error = 0;
 
-		loggers.warning(`${color('Downloading Instagram reel', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.warning(`${color('Downloading Instagram reel', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 
 		for (const data in reels) {
 			if (reels[data]?.error) {
 				await client.instance.reply(from, `Error while downloading Instagram reel\n\n${reels[data].error}\n${data}`, message);
-				loggers.error(`${color('Failed to Download Instagram reel', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Download Instagram reel', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
 			}
@@ -78,6 +78,6 @@ export default {
 
 		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
 
-		loggers.info(`${color('Downloaded Instagram reel', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Downloaded Instagram reel', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
 };

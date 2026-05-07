@@ -40,7 +40,7 @@ export default {
 		let success = 0;
 		let error = 0;
 
-		loggers.warning(`${color('Downloading Douyin Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.warning(`${color('Downloading Douyin Media', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 
 		for (const url of urls) {
 			if (!isURL(url)) {
@@ -59,7 +59,7 @@ export default {
 				info = await getDouyinInfo(url);
 			} catch (err) {
 				await client.instance.reply(from, `Error while downloading Douyin post\n\n${err?.message || err}\n${url}`, message);
-				loggers.error(`${color('Failed to Download Douyin Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Download Douyin Post', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
 			}
@@ -123,6 +123,6 @@ export default {
 
 		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
 
-		loggers.info(`${color('Downloaded Douyin Media', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Downloaded Douyin Media', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
 };

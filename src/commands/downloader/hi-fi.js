@@ -126,7 +126,7 @@ const downloadAudio = async (client, data, { from, message, prettyNumber, id, in
 	const downloadInfo = await hifi.download(id ? id : data.items[index].id);
 
 	loggers.warning(
-		`${color('Downloading Hi-Fi Audio from', '#FF99C8')} ${color(downloadInfo.domain, '#FFB86C')} for ${color(prettyNumber, '#E4C1F9')}`
+		`${color('Downloading Hi-Fi Audio from', 'pink')} ${color(downloadInfo.domain, 'orange')} for ${color(prettyNumber, 'lilac')}`
 	);
 
 	if (downloadInfo?.error) {
@@ -154,6 +154,6 @@ const downloadAudio = async (client, data, { from, message, prettyNumber, id, in
 	await wait.update('Command Finished. With total 1 Success.');
 
 	loggers.warning(
-		`${color('Downloaded Hi-Fi Audio from', '#FF99C8')} ${color(downloadInfo.domain, '#FFB86C')} for ${color(prettyNumber, '#E4C1F9')}`
+		`${color('Downloaded Hi-Fi Audio from', 'pink')} ${color(downloadInfo.domain, 'orange')} for ${color(prettyNumber, 'lilac')}`
 	);
 };

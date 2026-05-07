@@ -31,7 +31,7 @@ export default {
 		let success = 0;
 		let error = 0;
 
-		loggers.warning(`${color('Downloading Kraken File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.warning(`${color('Downloading Kraken File', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 
 		for (const url of urls) {
 			if (!regex(url)) {
@@ -44,7 +44,7 @@ export default {
 
 			if (result?.error) {
 				await client.instance.reply(from, result.error, message);
-				loggers.error(`${color('Failed to Download Kraken File', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Download Kraken File', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
 			}
@@ -73,6 +73,6 @@ Uploaded: ${result.uploaded}`.formatForm(),
 
 		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
 
-		loggers.info(`${color('Downloaded Kraken File', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Downloaded Kraken File', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
 };

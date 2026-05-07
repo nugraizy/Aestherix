@@ -38,7 +38,7 @@ export default {
 		let success = 0;
 		let error = 0;
 
-		loggers.warning(`${color('Downloading Instagram highlights', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.warning(`${color('Downloading Instagram highlights', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 
 		for (const data in highlights) {
 			if (highlights[data]?.error) {
@@ -47,7 +47,7 @@ export default {
 					`Error while downloading Instagram highlights\n\n${highlights.error}\n${data}`,
 					message
 				);
-				loggers.error(`${color('Failed to Download Instagram highlights', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Download Instagram highlights', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
 			}
@@ -108,6 +108,6 @@ export default {
 
 		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
 
-		loggers.info(`${color('Downloaded Instagram highlights', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Downloaded Instagram highlights', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
 };

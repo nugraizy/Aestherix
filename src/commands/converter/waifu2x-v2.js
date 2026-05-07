@@ -33,7 +33,7 @@ export default {
 			return client.instance.reply(from, 'The sticker are animated. Please reply static stickers only.', message);
 		}
 
-		loggers.warning(`${color('Enhancing image', '#FF99C8')} ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.warning(`${color('Enhancing image', 'pink')} ${color(prettyNumber, 'lilac')}`);
 
 		const parsed = parser(query.toLowerCase(), {
 			configuration: {
@@ -68,6 +68,6 @@ export default {
 			client.instance.send(from, { image: Buffer.from(enhance, 'base64') }, { quoted: message });
 		}
 
-		loggers.info(`${color('Media is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Media is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 	}
 };

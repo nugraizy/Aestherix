@@ -38,6 +38,6 @@ export default {
 
 		await client.instance.send(from, { text: result.text.trim() }, { quoted: message });
 		await client.instance.send(from, { audio: buffer }, { quoted: message });
-		loggers.info(`${color('Text is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Text is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 	}
 };

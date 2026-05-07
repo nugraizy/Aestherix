@@ -36,7 +36,7 @@ const insertExif = async (paths, sender) =>
 
 		exec(`webpmux -set exif "${pathExif}" "${pathResults}" -o "${pathResults}-done.webp"`, (err) => {
 			if (err) {
-				loggers.error(`${color('Failed to Convert Media to Sticker', '#FF5555')} for ${color(sender, '#E4C1F9')}`);
+				loggers.error(`${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, 'lilac')}`);
 
 				reject(err);
 			}
@@ -87,7 +87,7 @@ export const ttp = (sender, texts, colored, fonts) =>
 		fonts = fonts !== undefined ? fonts.toLowerCase() : 'chevin';
 		colored = colored.length ? colored : null;
 
-		loggers.warning(`${color('Making Static Image', '#FF99C8')} for ${color(sender, '#E4C1F9')}`);
+		loggers.warning(`${color('Making Static Image', 'pink')} for ${color(sender, 'lilac')}`);
 
 		let { ctx, canvas } = createCanvasTemplates();
 		const colors = loadColorsPalette(colored);
@@ -112,7 +112,7 @@ export const ttp = (sender, texts, colored, fonts) =>
 			.then((saved) => {
 				insertExif(saved, sender)
 					.then(({ buffers }) => {
-						loggers.info(`${color('Static Image is generated', '#FF99C8')} for ${color(sender, '#E4C1F9')}`);
+						loggers.info(`${color('Static Image is generated', 'pink')} for ${color(sender, 'lilac')}`);
 
 						resolve(buffers);
 					})

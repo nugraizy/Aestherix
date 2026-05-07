@@ -90,8 +90,8 @@ export const updateContact = async (store, contactsList) => {
 
 const handlePluginError = (filename) => {
 	loggers.error(
-		color(filename.split('/').slice(-2).join('/'), '#BD93F9'),
-		color('File Error! Waiting for changes...', '#5954cc')
+		color(filename.split('/').slice(-2).join('/'), 'purple'),
+		color('File Error! Waiting for changes...', 'indigo')
 	);
 	configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
 		absolutePath: normalizeImportPath(filename),
@@ -121,19 +121,19 @@ export const validatePlugins = async (filename, isWatch) => {
 
 	if (indexCode === -1) {
 		loggers.error(
-			color(filename.split('/').slice(-2).join('/'), '#BD93F9'),
+			color(filename.split('/').slice(-2).join('/'), 'purple'),
 			isWatch
-				? color('Syntax Error! Waiting for changes...', '#5954cc')
-				: color('Syntax Error! Fix the error and restart the bot.', '#5954cc')
+				? color('Syntax Error! Waiting for changes...', 'indigo')
+				: color('Syntax Error! Fix the error and restart the bot.', 'indigo')
 		);
 		return;
 	}
 
 	loggers.error(
-		color(filename.split('/').slice(-2).join('/'), '#BD93F9'),
+		color(filename.split('/').slice(-2).join('/'), 'purple'),
 		isWatch
-			? color('File Error! Waiting for changes...', '#5954cc')
-			: color('File Error! Fix the error and restart the bot to use this commands.', '#5954cc')
+			? color('File Error! Waiting for changes...', 'indigo')
+			: color('File Error! Fix the error and restart the bot to use this commands.', 'indigo')
 	);
 
 	const firstCode = codesArr[indexCode - 1] || '';
@@ -181,7 +181,7 @@ const add = async (filename) => {
 			if (module?.default) {
 				if (configuration.cmds.commands.has(module.default.name)) {
 					loggers.error(
-						color(displayName, '#BD93F9'),
+						color(displayName, 'purple'),
 						'Has the same command name as the',
 						color(configuration.cmds.commands.get(module.default.name).path.split('/').slice(-2).join('/'))
 					);
@@ -196,13 +196,13 @@ const add = async (filename) => {
 					absolutePath: file,
 					path: filename
 				});
-				loggers.info(color(displayName, '#BD93F9'), 'New plugin loaded');
+				loggers.info(color(displayName, 'purple'), 'New plugin loaded');
 			} else {
 				handlePluginError(filename);
 			}
 		} catch (error) {
 			if (error instanceof ModuleError) {
-				loggers.warning(color(displayName, '#BD93F9'), error.info);
+				loggers.warning(color(displayName, 'purple'), error.info);
 				return;
 			}
 
@@ -221,7 +221,7 @@ const change = async (filename) => {
 	const index = cmds.findIndex((v) => v[1].path === filename);
 
 	if (index === -1) {
-		return loggers.error(color(displayName, '#BD93F9'), color('Command not found in configuration!', '#FF5555'));
+		return loggers.error(color(displayName, 'purple'), color('Command not found in configuration!', 'red'));
 	}
 
 	try {
@@ -229,8 +229,8 @@ const change = async (filename) => {
 
 		if (!command) {
 			loggers.error(
-				color(displayName, '#BD93F9'),
-				color('File does not contain valid Command Properties! Please check the example to create new commands.', '#05ffa1')
+				color(displayName, 'purple'),
+				color('File does not contain valid Command Properties! Please check the example to create new commands.', 'neonGreen')
 			);
 			return;
 		}
@@ -238,7 +238,7 @@ const change = async (filename) => {
 		const commandPath = configuration.cmds.commands.get(command.name).path.split('/').slice(-2).join('/');
 
 		if (configuration.cmds.commands.has(command.name) && displayName !== commandPath) {
-			loggers.error(color(displayName, '#BD93F9'), 'Has the same command name as the', color(commandPath, '#BD93F9 '));
+			loggers.error(color(displayName, 'purple'), 'Has the same command name as the', color(commandPath, 'purple'));
 
 			return;
 		}
@@ -248,10 +248,10 @@ const change = async (filename) => {
 		const currentCommand = cmds[index][1];
 
 		loggers.info(
-			color(currentCommand.path?.split('/').slice(-2).join('/'), '#BD93F9'),
-			color('File has been changed', '#05ffa1'),
+			color(currentCommand.path?.split('/').slice(-2).join('/'), 'purple'),
+			color('File has been changed', 'neonGreen'),
 			color('&', 'white'),
-			color('Reloaded!', '#E4C1F9')
+			color('Reloaded!', 'lilac')
 		);
 
 		let _commandName = cmds[index][0];
@@ -268,7 +268,7 @@ const change = async (filename) => {
 		});
 	} catch (error) {
 		if (error instanceof ModuleError) {
-			loggers.warning(color(displayName, '#BD93F9'), error.info);
+			loggers.warning(color(displayName, 'purple'), error.info);
 			return;
 		}
 
@@ -302,16 +302,16 @@ const unlink = (filename) => {
 		configuration.cmds.commands.set(file[0], file[1]);
 
 		loggers.warning(
-			color(displayName, '#BD93F9'),
+			color(displayName, 'purple'),
 			color('File Renamed!', 'white'),
 			color('to', 'white'),
-			color(renamedFile.split('/')?.slice(-2).join('/'), '#BD93F9'),
-			color('Waiting for changes...', '#BD93F9')
+			color(renamedFile.split('/')?.slice(-2).join('/'), 'purple'),
+			color('Waiting for changes...', 'purple')
 		);
 	} else {
 		configuration.cmds.commands.delete(cmds[indexPath][0]);
 
-		loggers.warning(color(displayName, '#BD93F9'), color('File Deleted!', '#5954cc'));
+		loggers.warning(color(displayName, 'purple'), color('File Deleted!', 'indigo'));
 	}
 };
 

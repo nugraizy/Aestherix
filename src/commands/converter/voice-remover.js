@@ -36,7 +36,7 @@ export default {
 			return await client.instance.reply(from, 'Please send/reply an audio/video to remove voice', message);
 		}
 
-		loggers.warning(`${color('Removing Sound', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.warning(`${color('Removing Sound', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 
 		const file = await client.instance.downloadAndSaveMediaMessage(
 			extractMediaData,
@@ -88,6 +88,6 @@ export default {
 			);
 		}
 
-		loggers.info(`${color('Sound is sent', '#FF99C8')} to ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Sound is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 	}
 };

@@ -38,12 +38,12 @@ export const tesseract = async (image, sender, lang = 'ind') =>
 
 			if (!languages.some((l) => l.code.toLowerCase() === lang.toLowerCase())) {
 				await fs.unlink(image);
-				loggers.error(`${color(`Language ${lang} is not supported`, '#FF5555')}`);
+				loggers.error(`${color(`Language ${lang} is not supported`, 'red')}`);
 				resolve({ error: `Language ${lang} not found`, languages });
 				return;
 			}
 
-			loggers.warning(`${color('Recognizing the image..', '#FF99C8')} to ${color(sender, '#E4C1F9')}`);
+			loggers.warning(`${color('Recognizing the image..', 'pink')} to ${color(sender, 'lilac')}`);
 			let {
 				data: { text, confidence, paragraphs }
 			} = await Tesseract.recognize(image, lang);

@@ -15,7 +15,7 @@ import { ModuleError, isMissingProperty } from './util.js';
  */
 const loadCommand = async (command, OPTIONS, spinner) =>
 	new Promise(async (resolve) => {
-		spinner && (spinner.text = loggers.warning(color('Loading', 'white'), color(command, '#BD93F9'), { ignore: true }));
+		spinner && (spinner.text = loggers.warning(color('Loading', 'white'), color(command, 'purple'), { ignore: true }));
 
 		const start = Date.now();
 		const file = normalizeImportPath(command, true);
@@ -33,12 +33,12 @@ const loadCommand = async (command, OPTIONS, spinner) =>
 				spinner && spinner.clear();
 
 				loggers.error(
-					color(command, '#BD93F9'),
+					color(command, 'purple'),
 					color(
 						OPTIONS.watch
 							? 'File Error as it has no default property! Waiting for changes...'
 							: 'File Error as it has no default property! Fix the error and restart the bot to use this commands.',
-						'#FF5555'
+						'red'
 					)
 				);
 
@@ -49,9 +49,9 @@ const loadCommand = async (command, OPTIONS, spinner) =>
 				spinner && spinner.clear();
 
 				loggers.error(
-					color(command, '#BD93F9'),
+					color(command, 'purple'),
 					color('Has the same command name as the', 'white'),
-					color(configuration.cmds.commands.get(module.default.name).path.split('/').slice(-2).join('/'), '#BD93F9')
+					color(configuration.cmds.commands.get(module.default.name).path.split('/').slice(-2).join('/'), 'purple')
 				);
 
 				resolve(null);
@@ -72,9 +72,9 @@ const loadCommand = async (command, OPTIONS, spinner) =>
 			spinner &&
 				(spinner.text = loggers.info(
 					color('Loaded', 'white'),
-					color(command, '#BD93F9'),
+					color(command, 'purple'),
 					color('in', 'white'),
-					color(duration + 'ms', '#F1FA8C'),
+					color(duration + 'ms', 'yellow'),
 					{ ignore: true }
 				));
 
@@ -83,7 +83,7 @@ const loadCommand = async (command, OPTIONS, spinner) =>
 			spinner && spinner.clear();
 
 			if (error instanceof ModuleError) {
-				loggers.warning(color(command, '#BD93F9'), error.info);
+				loggers.warning(color(command, 'purple'), error.info);
 				configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
 					absolutePath: file,
 					path: normalize
@@ -91,7 +91,7 @@ const loadCommand = async (command, OPTIONS, spinner) =>
 				resolve();
 			}
 
-			loggers.error(color(command, '#BD93F9'), error.message);
+			loggers.error(color(command, 'purple'), error.message);
 			validatePlugins(command, OPTIONS.watch);
 
 			configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {

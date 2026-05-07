@@ -48,6 +48,8 @@ import { runLimitScheduler } from './helper/groups/settings/limit.js';
 import { color, loggers } from './utils/modules/index.js';
 import { pinterest } from './utils/pinterest/index.js';
 
+color.setTheme(configuration.logger_theme || 'dracula');
+
 const autoProfilePictureChangeEnabled = true;
 const PROFILE_PICTURE_UPDATE_INTERVAL_MS = 120_000;
 const PROFILE_PICTURE_NO_CROP = 'no_crop';
@@ -349,7 +351,7 @@ const hydrateProfilePictureHistory = async (config) => {
 			config.pinterestImages.set(timestamp, normalized);
 		}
 	} catch (error) {
-		loggers.warning(color('Failed loading pinterest profile pictures JSON:', '#FF5555'), color(error.message, 'white'));
+		loggers.warning(color('Failed loading pinterest profile pictures JSON:', 'red'), color(error.message, 'white'));
 	}
 };
 
@@ -451,7 +453,7 @@ const startDashboardBridge = (resolveWaClient) => {
 
 			return res.json({ ok: true });
 		} catch (error) {
-			loggers.warning(color('Dashboard bridge send failed:', '#FF5555'), color(error.message, 'white'));
+			loggers.warning(color('Dashboard bridge send failed:', 'red'), color(error.message, 'white'));
 			return res.status(500).json({ ok: false, message: 'Failed sending WhatsApp confirmation.' });
 		}
 	});
@@ -479,7 +481,7 @@ const startDashboardBridge = (resolveWaClient) => {
 
 			return res.json(result);
 		} catch (error) {
-			loggers.warning(color('Dashboard runtime sync failed:', '#FF5555'), color(error.message, 'white'));
+			loggers.warning(color('Dashboard runtime sync failed:', 'red'), color(error.message, 'white'));
 			return res.status(500).json({ ok: false, message: 'Runtime sync failed.' });
 		}
 	});
@@ -522,7 +524,7 @@ const startDashboardBridge = (resolveWaClient) => {
 
 	const safePort = Number.isFinite(DASHBOARD_BRIDGE_PORT) && DASHBOARD_BRIDGE_PORT > 0 ? DASHBOARD_BRIDGE_PORT : 4010;
 	const server = createServer(app).listen(safePort, '127.0.0.1', () => {
-		loggers.info(color('Dashboard bridge', 'white'), color('listening on', '#E4C1F9'), color(String(safePort), 'white'));
+		loggers.info(color('Dashboard bridge', 'white'), color('listening on', 'lilac'), color(String(safePort), 'white'));
 	});
 
 	dashboardBridgeInstance = server;
@@ -671,7 +673,7 @@ export const runtime = Date.now();
 
 for (const option of Object.keys(OPTIONS).filter((key) => OPTIONS[key])) {
 	if (!regexOption.includes(option)) {
-		loggers.error(`${color(option, '#FF5555')} ${color('is not a valid option', 'white')}`);
+		loggers.error(`${color(option, 'red')} ${color('is not a valid option', 'white')}`);
 	}
 }
 

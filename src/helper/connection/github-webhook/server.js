@@ -51,7 +51,7 @@ export const githubWebhook = () => {
 	});
 
 	const appToStore = app.listen(8080, () => {
-		loggers.info(color('GitHub Webhook', 'white'), color('started on port', '#E4C1F9'), color('8080', 'white'));
+		loggers.info(color('GitHub Webhook', 'white'), color('started on port', 'lilac'), color('8080', 'white'));
 	});
 
 	configuration.expressInstances.set('github-webhook', appToStore);

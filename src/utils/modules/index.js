@@ -532,37 +532,43 @@ export const delaySync = (ms) => {
 
 export const delay = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const COLOR_INFO = {
-	INF: '#50FA7B',
-	WRN: '#FFB86C',
-	ERR: '#FF5555',
-	MISC: '#E4C1F9',
-	MUTE: '#6272A4'
-};
+const getLoggerColorInfo = () => ({
+	INF: color.theme?.INF || '#50FA7B',
+	WRN: color.theme?.WRN || '#FFB86C',
+	ERR: color.theme?.ERR || '#FF5555',
+	MISC: color.theme?.MISC || '#E4C1F9',
+	MUTE: color.theme?.MUTE || '#6272A4'
+});
 
 const isFormat = true;
 const isFormatISO = false;
 const TIME_FORMAT_DEFAULT = 'ddd, DD MMM YYYY HH:mm:ss [GMT]Z';
 const TIME_FORMAT = 'HH:mm DD/MM';
-const SEPARATOR_1 = color(':', COLOR_INFO.MUTE);
-const SEPARATOR_2 = color('/', COLOR_INFO.MUTE);
+const SEPARATOR_1 = () => color(':', getLoggerColorInfo().MUTE);
+const SEPARATOR_2 = () => color('/', getLoggerColorInfo().MUTE);
 
-const SEPARATOR_3 = (type) => color(' •', COLOR_INFO[type] || COLOR_INFO.ERR);
+const SEPARATOR_3 = (type) => {
+	const colors = getLoggerColorInfo();
+
+	return color(' •', colors[type] || colors.ERR);
+};
 
 export const boldify = (string) => chalk.bold(string);
 
 const coloring = (text, format, err) => {
+	const colors = getLoggerColorInfo();
+
 	if (!format) {
-		return color(text, err ? COLOR_INFO.ERR : COLOR_INFO.MISC);
+		return color(text, err ? colors.ERR : colors.MISC);
 	}
 
 	const [time, date] = text.split(' ');
 
 	const [hour, minute, second] = time.split(':').filter(Boolean);
 	const [day, month] = date.split('/');
-	const [HH, mm, ss, DD, MM] = [hour, minute, second, day, month].map((x) => color(x, err ? COLOR_INFO.ERR : COLOR_INFO.MISC));
+	const [HH, mm, ss, DD, MM] = [hour, minute, second, day, month].map((x) => color(x, err ? colors.ERR : colors.MISC));
 
-	return `${HH}${SEPARATOR_1}${mm} ${DD}${SEPARATOR_2}${MM}`;
+	return `${HH}${SEPARATOR_1()}${mm} ${DD}${SEPARATOR_2()}${MM}`;
 };
 
 const INFOLOG = (...info) => {
@@ -582,16 +588,17 @@ const INFOLOG = (...info) => {
 };
 
 const loggersFns = (type, ...info) => {
+	const colors = getLoggerColorInfo();
 	const ignoreIndex = info.findIndex((v) => v?.ignore);
 
 	if (ignoreIndex !== -1) {
 		info.splice(ignoreIndex, 1);
-		const str = `${color('[', 'gray')}${boldify(color(type, COLOR_INFO[type]))}${color(']', 'gray')} ${INFOLOG(type, ...info)}`;
+		const str = `${color('[', 'gray')}${boldify(color(type, colors[type]))}${color(']', 'gray')} ${INFOLOG(type, ...info)}`;
 
 		return str;
 	}
 
-	const str = `${color('[', 'gray')}${boldify(color(type, COLOR_INFO[type]))}${color(']', 'gray')} ${INFOLOG(type, ...info)}`;
+	const str = `${color('[', 'gray')}${boldify(color(type, colors[type]))}${color(']', 'gray')} ${INFOLOG(type, ...info)}`;
 
 	pushDashboardLog(type, str);
 

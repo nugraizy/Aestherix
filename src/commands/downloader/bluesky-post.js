@@ -32,7 +32,7 @@ export default {
 		let success = 0;
 		let error = 0;
 
-		loggers.warning(`${color('Downloading Bluesky Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.warning(`${color('Downloading Bluesky Post', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 
 		for (const url of urls) {
 			if (!isURL(url.trim())) {
@@ -54,7 +54,7 @@ export default {
 				for (const item of media[mediaType]) {
 					if (item.error) {
 						await client.instance.reply(from, item.error, message);
-						loggers.error(`${color('Failed to Download Bluesky Post', '#FF5555')} for ${color(prettyNumber, '#E4C1F9')}`);
+						loggers.error(`${color('Failed to Download Bluesky Post', 'red')} for ${color(prettyNumber, 'lilac')}`);
 						error++;
 						break;
 					}
@@ -68,6 +68,6 @@ export default {
 
 		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
 
-		loggers.info(`${color('Downloaded Bluesky Post', '#FF99C8')} for ${color(prettyNumber, '#E4C1F9')}`);
+		loggers.info(`${color('Downloaded Bluesky Post', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
 };
