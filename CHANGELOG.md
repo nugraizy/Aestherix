@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「6.12.2」2026-05-07
+## Changed
+- DashboardKV writes are now debounced and retried, with coalescing and debug logs.
+- Baileys store and Pinterest history writes are queued to avoid conflicts.
+- Store snapshots now flush on change and during graceful shutdown.
+- CLI flags use camelCase, with updated docs and help text.
+- Session name now falls back to config and default values when missing.
+- Dashboard restart now reports PM2-only support with a clear toast message.
+
+## Fixed
+- `resetOnStart` now consistently clears the resolved auth session.
+- Dashboard flag persistence no longer overrides explicit CLI flags.
+- Restart failures now show the server-provided error message.
+- Pinterest history persistence no longer deletes DB rows when the cache is empty.
+
 # 「6.12.1」2026-05-07
 ## Changed
 - Implement a minimal port for the `in-memory store` connected to the Prisma database.
