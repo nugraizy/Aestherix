@@ -7,7 +7,7 @@ import { startingConnection } from '../../../helper/connection/utils/check-flag.
 import { color, delay, loggers } from '../../../utils/modules/index.js';
 import configuration from '../../config/connect.js';
 import { Cache } from '../../modules/cache.js';
-import { clearDBConnection, resetSession } from '../socket/reset-session.js';
+import { resetSession } from '../socket/reset-session.js';
 import { loadCommands } from '../utils/commands.js';
 import { connectMqtt } from '../utils/mqtt.js';
 
@@ -229,7 +229,6 @@ export const handleConnectionUpdate = async (
 					.send();
 
 				Client.ev.emit('connected');
-				clearDBConnection(cli);
 				connectMqtt(clientMqttListen);
 
 				if (configuration.OPTIONS.test && !rl) {

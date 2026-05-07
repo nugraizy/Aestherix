@@ -28,6 +28,6 @@ export default {
 
 		const end = performance.now();
 
-		wait.update(`Pong! ${formatDuration(end - start)}`);
+		await wait.update(`Pong! ${formatDuration(end - start)}`);
 	}
 };

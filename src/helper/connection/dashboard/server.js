@@ -3592,7 +3592,7 @@ export const server = async () => {
 		loggers.info(
 			color('Dashboard changed flag state:', 'white'),
 			color(flagName, '#E4C1F9'),
-			color('=>', 'white'),
+			color('⤑', 'white'),
 			color(enabled ? 'enabled' : 'disabled', enabled ? '#50FA7B' : '#FF5555')
 		);
 

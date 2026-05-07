@@ -16,7 +16,7 @@ let isInit = false;
 
 let STATS_OFFLINE = true;
 const EVALY = ['/>', '$>', '=>', '!>'];
-const SEPERATOR = color('ヽ', '#50FA7B');
+const SEPARATOR = color('⤑', '#50FA7B');
 const HANDLER_PATH = {
 	STUBTYPE: './stub-message.js',
 	STORY: './story-message.js',
@@ -40,9 +40,9 @@ const logMessage = (message) => {
 		? `${color('[', 'gray')}${color('HOST', '#ea999c')}${color(']', 'gray')} ${color(`${global.__botName}`, '#F1FA8C')} ${color(message.prettyNumber, '#BD93F9')}`
 		: `${color(message.pushname, '#F1FA8C')} ${color(message.prettyNumber, '#BD93F9')}`;
 	const messageBody = color(message.query?.replace(/[\t\n]/g, ' ').substring(0, 35), 'white');
-	const typeInfo = `${SEPERATOR} ${color('type', '#f5bde6')} ${color(message.type, '#81c8be')}`;
-	const runtimeInfo = `${SEPERATOR} ${color(((Date.now() - runtime) / 1000).toFixed(0), '#F1FA8C')}${color('s', '#f5e700')}`;
-	const messageFrom = `${SEPERATOR} ${color('in', 'white')} ${color(
+	// const typeInfo = `${SEPARATOR} ${color('type', '#f5bde6')} ${color(message.type, '#81c8be')}`;
+	const runtimeInfo = `${SEPARATOR}  ${color(((Date.now() - runtime) / 1000).toFixed(0), '#F1FA8C')}${color('s', '#f5e700')}`;
+	const messageFrom = `${SEPARATOR}  ${color('in', 'white')} ${color(
 		message.isGroup ? `group ${message.groupName}` : 'private chat',
 		'#d6a9ff'
 	)}${(message.isGroup && color(' id ', 'white') + color(message.groupId, '#BD93F9')) || ''}`;
@@ -68,7 +68,13 @@ const logMessage = (message) => {
 		)}`;
 	}
 
-	loggers.info(`${senderInfo} ${SEPERATOR}`, fullBody, typeInfo, messageFrom, runtimeInfo);
+	loggers.info(
+		`${senderInfo} ${SEPARATOR} `,
+		fullBody,
+		// typeInfo,
+		messageFrom,
+		runtimeInfo
+	);
 };
 
 const handleStubMessage = async (client, message, store) => {

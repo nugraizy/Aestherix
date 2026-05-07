@@ -14,3 +14,4 @@ databases/users/contacts-backup.json
 !.env.project
 !.env.vault
 public/dashboard/build/
+next_release/

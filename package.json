@@ -60,7 +60,7 @@
   "dependencies": {
     "@atproto/api": "^0.13.32",
     "@dotenvx/dotenvx": "^1.51.1",
-    "@inquirer/prompts": "^7.9.0",
+    "@inquirer/prompts": "^8.4.2",
     "@napi-rs/canvas": "^0.1.81",
     "@svgdotjs/svg.js": "^3.2.5",
     "@vitalets/google-translate-api": "^9.2.0",
@@ -108,7 +108,7 @@
     "link-preview-js": "^3.1.0",
     "lodash": "^4.17.21",
     "md5": "^2.3.0",
-    "meow": "^14.0.0",
+    "meow": "^14.1.0",
     "mesh-gradient.js": "^0.0.5",
     "mime-types": "^3.0.1",
     "mqtt": "^5.14.1",

@@ -6,6 +6,55 @@
 
 /** @typedef {import('@prisma/client').PrismaClient} PrismaClient */
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const isRetryablePrismaError = (error) => {
+	return Boolean(
+		error &&
+			(error.code === 'P2034' ||
+				error.code === 'P2028' ||
+				/Transaction.*aborted/i.test(error.message || '') ||
+				/write conflict|deadlock/i.test(error.message || ''))
+	);
+};
+
+const withRetry = async (operation, { retries = 3, baseDelayMs = 80 } = {}) => {
+	let attempt = 0;
+
+	while (true) {
+		try {
+			return await operation();
+		} catch (error) {
+			attempt += 1;
+
+			if (attempt > retries || !isRetryablePrismaError(error)) {
+				throw error;
+			}
+
+			const jitter = Math.floor(Math.random() * baseDelayMs);
+
+			await sleep(baseDelayMs * attempt + jitter);
+		}
+	}
+};
+
+const writeQueues = new Map();
+
+const enqueueWrite = (key, task) => {
+	const previous = writeQueues.get(key) || Promise.resolve();
+	const next = previous
+		.catch(() => undefined)
+		.then(task)
+		.finally(() => {
+			if (writeQueues.get(key) === next) {
+				writeQueues.delete(key);
+			}
+		});
+
+	writeQueues.set(key, next);
+	return next;
+};
+
 const normalizeEntry = (entry) => {
 	const timestamp = String(entry?.timestamp || '').trim();
 	const url = String(entry?.url || '').trim();
@@ -45,23 +94,19 @@ export const listPinterestProfilePictures = async (db, { limit } = {}) => {
 export const upsertPinterestProfilePictures = async (db, entries) => {
 	const normalized = entries.map(normalizeEntry).filter(Boolean);
 
-	if (!normalized.length) {
-		await db.pinterestProfilePicture.deleteMany({});
-		return;
-	}
+	await enqueueWrite('pinterestProfilePicture', async () => {
+		if (!normalized.length) {
+			return;
+		}
 
-	const timestamps = normalized.map((entry) => entry.timestamp);
-
-	await db.$transaction([
-		db.pinterestProfilePicture.deleteMany({
-			where: { timestamp: { notIn: timestamps } }
-		}),
-		...normalized.map((entry) =>
-			db.pinterestProfilePicture.upsert({
-				where: { timestamp: entry.timestamp },
-				update: { url: entry.url, thumbnail: entry.thumbnail || entry.url },
-				create: { timestamp: entry.timestamp, url: entry.url, thumbnail: entry.thumbnail || entry.url }
-			})
-		)
-	]);
+		for (const entry of normalized) {
+			await withRetry(() =>
+				db.pinterestProfilePicture.upsert({
+					where: { timestamp: entry.timestamp },
+					update: { url: entry.url, thumbnail: entry.thumbnail || entry.url },
+					create: { timestamp: entry.timestamp, url: entry.url, thumbnail: entry.thumbnail || entry.url }
+				})
+			);
+		}
+	});
 };

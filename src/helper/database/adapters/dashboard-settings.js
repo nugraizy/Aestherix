@@ -10,6 +10,139 @@
 
 const KV_STATE_KEY = 'dashboard_state';
 const KV_COMMANDS_CACHE_KEY = 'dashboard_commands_cache';
+const KV_FLUSH_MS = 1000;
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const isRetryablePrismaError = (error) => {
+	return Boolean(
+		error &&
+			(error.code === 'P2034' ||
+				error.code === 'P2028' ||
+				/Transaction.*aborted/i.test(error.message || '') ||
+				/write conflict|deadlock/i.test(error.message || ''))
+	);
+};
+
+const withRetry = async (operation, { retries = 3, baseDelayMs = 60 } = {}) => {
+	let attempt = 0;
+
+	while (true) {
+		try {
+			return await operation();
+		} catch (error) {
+			attempt += 1;
+
+			if (isRetryablePrismaError(error)) {
+				console.warn('[dashboardKV] retryable write error', {
+					attempt,
+					code: error?.code,
+					message: error?.message
+				});
+			}
+
+			if (attempt > retries || !isRetryablePrismaError(error)) {
+				throw error;
+			}
+
+			const jitter = Math.floor(Math.random() * baseDelayMs);
+
+			await sleep(baseDelayMs * attempt + jitter);
+		}
+	}
+};
+
+const writeQueues = new Map();
+const pendingWrites = new Map();
+const lastPersisted = new Map();
+
+const enqueueWrite = (key, task) => {
+	const previous = writeQueues.get(key) || Promise.resolve();
+	const next = previous
+		.catch(() => undefined)
+		.then(task)
+		.finally(() => {
+			if (writeQueues.get(key) === next) {
+				writeQueues.delete(key);
+			}
+		});
+
+	writeQueues.set(key, next);
+	return next;
+};
+
+const flushKVWrite = async (key) => {
+	const entry = pendingWrites.get(key);
+
+	if (!entry || entry.inFlight || !entry.serialized) {
+		return;
+	}
+
+	const { db } = entry;
+	const serialized = entry.serialized;
+
+	entry.serialized = null;
+	entry.inFlight = true;
+	entry.timer = null;
+
+	try {
+		await enqueueWrite(key, () =>
+			withRetry(() =>
+				db.dashboardKV.upsert({
+					where: { key },
+					update: { value: serialized },
+					create: { key, value: serialized }
+				})
+			)
+		);
+
+		lastPersisted.set(key, serialized);
+	} catch {
+		console.warn('[dashboardKV] flush failed, will retry', { key });
+		entry.serialized = serialized;
+		entry.timer = setTimeout(() => {
+			void flushKVWrite(key);
+		}, KV_FLUSH_MS * 2);
+	} finally {
+		entry.inFlight = false;
+
+		if (entry.serialized) {
+			entry.timer = setTimeout(() => {
+				void flushKVWrite(key);
+			}, KV_FLUSH_MS);
+			return;
+		}
+
+		pendingWrites.delete(key);
+	}
+};
+
+const scheduleKVWrite = (db, key, serialized) => {
+	let entry = pendingWrites.get(key);
+
+	if (!entry && lastPersisted.get(key) === serialized) {
+		return;
+	}
+
+	if (!entry) {
+		entry = { db, serialized: null, timer: null, inFlight: false };
+		pendingWrites.set(key, entry);
+	}
+
+	entry.db = db;
+
+	if (entry.serialized === serialized) {
+		return;
+	}
+
+	entry.serialized = serialized;
+
+	if (!entry.timer && !entry.inFlight) {
+		entry.timer = setTimeout(() => {
+			void flushKVWrite(key);
+		}, KV_FLUSH_MS);
+	}
+};
 
 const getKV = async (db, key) => {
 	const row = await db.dashboardKV.findUnique({ where: { key } });
@@ -28,11 +161,7 @@ const getKV = async (db, key) => {
 const setKV = async (db, key, value) => {
 	const serialized = JSON.stringify(value);
 
-	await db.dashboardKV.upsert({
-		where: { key },
-		update: { value: serialized },
-		create: { key, value: serialized }
-	});
+	scheduleKVWrite(db, key, serialized);
 };
 
 /**

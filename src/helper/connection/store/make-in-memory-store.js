@@ -22,7 +22,7 @@ const require = createRequire(import.meta.url);
  * @typedef {import('baileys/lib/Types/LabelAssociation').LabelAssociation} LabelAssociation
  * @typedef {import('baileys/lib/Types/LabelAssociation').MessageLabelAssociation} MessageLabelAssociation
  * @typedef {import('baileys/lib/Utils/logger').ILogger} ILogger
- * @typedef {{ chatKey?: Comparable, labelAssociationKey?: Comparable, logger?: ILogger, socket?: any }} BaileysInMemoryStoreConfig
+ * @typedef {{ chatKey?: Comparable, labelAssociationKey?: Comparable, logger?: ILogger, socket?: any, onUpdate?: () => void }} BaileysInMemoryStoreConfig
  */
 
 export const waChatKey = (pin) => ({
@@ -52,7 +52,9 @@ const makeInMemoryStore = (config) => {
 	const chatKey = config.chatKey || waChatKey(true);
 	const labelAssociationKey = config.labelAssociationKey || waLabelAssociationKey;
 	const logger = config.logger || DEFAULT_CONNECTION_CONFIG.logger.child({ stream: 'in-mem-store' });
+	const onUpdate = typeof config.onUpdate === 'function' ? config.onUpdate : null;
 	const KeyedDB = require('@adiwajshing/keyed-db').default;
+	const touch = () => onUpdate?.();
 
 	/** @type {KeyedDB} */
 	const chats = new KeyedDB(chatKey, (c) => c.id);
@@ -138,10 +140,12 @@ const makeInMemoryStore = (config) => {
 			}
 
 			logger.debug({ messages: newMessages.length }, 'synced messages');
+			touch();
 		});
 
 		ev.on('contacts.upsert', (contactsBatch) => {
 			contactsUpsert(contactsBatch);
+			touch();
 		});
 
 		ev.on('contacts.update', async (updates) => {
@@ -174,10 +178,13 @@ const makeInMemoryStore = (config) => {
 
 				Object.assign(contacts[contact.id], contact);
 			}
+
+			touch();
 		});
 
 		ev.on('chats.upsert', (newChats) => {
 			chats.upsert(...newChats);
+			touch();
 		});
 
 		ev.on('chats.update', (updates) => {
@@ -195,14 +202,18 @@ const makeInMemoryStore = (config) => {
 					logger.debug({ update }, 'got update for non-existant chat');
 				}
 			}
+
+			touch();
 		});
 
 		ev.on('labels.edit', (label) => {
 			if (label.deleted) {
+				touch();
 				return labels.deleteById(label.id);
 			}
 
 			if (labels.count() < 20) {
+				touch();
 				return labels.upsertById(label.id, label);
 			}
 
@@ -213,9 +224,11 @@ const makeInMemoryStore = (config) => {
 			switch (type) {
 				case 'add':
 					labelAssociations.upsert(association);
+					touch();
 					break;
 				case 'remove':
 					labelAssociations.delete(association);
+					touch();
 					break;
 				default:
 					console.error(`unknown operation type [${type}]`);
@@ -233,6 +246,8 @@ const makeInMemoryStore = (config) => {
 					chats.deleteById(item);
 				}
 			}
+
+			touch();
 		});
 
 		ev.on('messages.upsert', ({ messages: newMessages, type }) => {
@@ -258,6 +273,8 @@ const makeInMemoryStore = (config) => {
 
 					break;
 			}
+
+			touch();
 		});
 
 		ev.on('messages.update', (updates) => {
@@ -280,6 +297,8 @@ const makeInMemoryStore = (config) => {
 					logger.debug({ update }, 'got update for non-existent message');
 				}
 			}
+
+			touch();
 		});
 
 		ev.on('messages.delete', (item) => {
@@ -287,6 +306,7 @@ const makeInMemoryStore = (config) => {
 				const list = messages[item.jid];
 
 				list?.clear();
+				touch();
 				return;
 			}
 
@@ -297,6 +317,7 @@ const makeInMemoryStore = (config) => {
 				const idSet = new Set(item.keys.map((k) => k.id));
 
 				list.filter((m) => !idSet.has(m.key.id));
+				touch();
 			}
 		});
 
@@ -349,6 +370,7 @@ const makeInMemoryStore = (config) => {
 
 				if (msg) {
 					updateMessageWithReceipt(msg, receipt);
+					touch();
 				}
 			}
 		});
@@ -360,6 +382,7 @@ const makeInMemoryStore = (config) => {
 
 				if (msg) {
 					updateMessageWithReaction(msg, reaction);
+					touch();
 				}
 			}
 		});
@@ -512,7 +535,63 @@ const warnStoreError = (logger, message, error) => {
 export const makePersistentStore = async (config) => {
 	const sessionName = String(config.sessionName || '').trim();
 	const persistIntervalMs = Number(config.persistIntervalMs || DEFAULT_PERSIST_INTERVAL_MS);
-	const store = makeInMemoryStore(config);
+	let flushTimer = null;
+	let flushInProgress = false;
+	let pendingFlush = false;
+	let store;
+
+	const scheduleFlush = () => {
+		if (!sessionName || !config.prisma) {
+			return;
+		}
+
+		pendingFlush = true;
+
+		if (flushTimer) {
+			return;
+		}
+
+		flushTimer = setTimeout(() => {
+			flushTimer = null;
+			void flushSnapshot();
+		}, persistIntervalMs);
+	};
+
+	const flushSnapshot = async (force = false) => {
+		if (!sessionName || !config.prisma) {
+			return;
+		}
+
+		if (flushInProgress) {
+			pendingFlush = pendingFlush || force;
+			return;
+		}
+
+		if (!pendingFlush && !force) {
+			return;
+		}
+
+		flushInProgress = true;
+		pendingFlush = false;
+
+		try {
+			await upsertBaileysStore(config.prisma, sessionName, store.toJSON());
+		} catch (error) {
+			pendingFlush = true;
+			warnStoreError(config.logger, 'Failed saving store snapshot:', error);
+		} finally {
+			flushInProgress = false;
+
+			if (pendingFlush && !flushTimer) {
+				flushTimer = setTimeout(() => {
+					flushTimer = null;
+					void flushSnapshot();
+				}, persistIntervalMs);
+			}
+		}
+	};
+
+	store = makeInMemoryStore({ ...config, onUpdate: scheduleFlush });
 
 	if (!sessionName || !config.prisma) {
 		return store;
@@ -528,11 +607,23 @@ export const makePersistentStore = async (config) => {
 		warnStoreError(config.logger, 'Failed loading store snapshot:', error);
 	}
 
-	setInterval(() => {
-		void upsertBaileysStore(config.prisma, sessionName, store.toJSON()).catch((error) => {
-			warnStoreError(config.logger, 'Failed saving store snapshot:', error);
+	if (config.socket?.ev?.on) {
+		config.socket.ev.on('connection.update', (update) => {
+			if (update.connection === 'close') {
+				void flushSnapshot(true);
+			}
 		});
-	}, persistIntervalMs);
+	}
+
+	if (typeof process !== 'undefined' && process?.once) {
+		const handleExit = () => {
+			void flushSnapshot(true);
+		};
+
+		process.once('SIGINT', handleExit);
+		process.once('SIGTERM', handleExit);
+		process.once('beforeExit', handleExit);
+	}
 
 	return store;
 };

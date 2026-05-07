@@ -50,17 +50,17 @@ const question = (text) =>
  * @typedef {import('../../../types/Socket/index.js').ClientSocket} ClientSocket
  * @typedef {import('../../../types/Socket/index.js').Store} Store
  * @typedef {import('./../../../types/Socket/index.js').MultiAuthState['state']} State
- * @param {{cli: Cli, OPTIONS: {[_: string]: boolean}, store: Store}} params
+ * @param {{cli: Cli, OPTIONS: {[_: string]: boolean}, store: Store, sessionName: string}} params
  * @returns {Promise<{Client: ClientSocket, store: Store, state: State, saveCreds: () => Promise<void>}>}
  */
-export const connectSocket = async ({ cli, OPTIONS, store }) => {
+export const connectSocket = async ({ cli, OPTIONS, store, sessionName }) => {
 	/**
 	 * Prisma-backed auth state — stores Baileys signal keys in the configured
 	 * database instead of the local file system.
 	 *
 	 * @type {import('../../../types/Socket/index.js').MultiAuthState}
 	 */
-	const { state, saveCreds, clearState } = await useMultiAuthState(prisma, cli.input[0]);
+	const { state, saveCreds, clearState } = await useMultiAuthState(prisma, sessionName);
 
 	global.store = store;
 
@@ -201,13 +201,10 @@ const askWantNumber = async ({ hostNumber, backupsHostNumbers }) => {
 			message: loggers.info(
 				color('Do you want to use the default number?', '#E4C1F9'),
 				color('(', 'gray') + color('default', '#fff'),
-				color(`${PhoneNumber('+' + hostNumber.replace(/[^0-9]/g, '')).formatInternational()})`, 'gray'),
+				color(`${PhoneNumber('+' + hostNumber.replace(/[^0-9]/g, '')).formatInternational()})`, '#50FA7B'),
 				{ ignore: true }
 			),
-			default: true,
-			theme: {
-				prefix: '✦'
-			}
+			default: true
 		},
 		{ signal: AbortSignal.timeout(DEFAULT_PROMPT_TIMEOUT) }
 	).catch(exitOnErr);

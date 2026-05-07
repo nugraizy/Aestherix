@@ -151,7 +151,7 @@ export class Limit {
 	}
 }
 
-export const runLimitScheduler = (OPTIONS, clearDBConnection, cli) => {
+export const runLimitScheduler = () => {
 	cron.schedule(
 		'0 0 * * *',
 		async () => {
@@ -159,10 +159,6 @@ export const runLimitScheduler = (OPTIONS, clearDBConnection, cli) => {
 			await Limit.updateLimitFromCache();
 
 			loggers.warning(`${color('Successfully reset all limit usage.', 'white')}`);
-
-			if (OPTIONS.resetOnStart) {
-				await clearDBConnection(cli);
-			}
 		},
 		{
 			timezone: 'Asia/Jakarta',

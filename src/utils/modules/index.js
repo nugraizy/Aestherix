@@ -2,11 +2,8 @@ import axios from 'axios';
 import chalk from 'chalk';
 import { load } from 'cheerio';
 import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc.js';
 import timezone from 'dayjs/plugin/timezone.js';
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
+import utc from 'dayjs/plugin/utc.js';
 import { fileTypeFromBuffer } from 'file-type';
 import FormData from 'form-data';
 import fs from 'fs-extra';
@@ -15,6 +12,9 @@ import _ from 'lodash';
 import ms from 'parse-ms';
 import progress from 'progress-stream';
 import { Client, fetch, FormData as FormDataUndici } from 'undici';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 import configuration from '../../helper/config/connect.js';
 import { pushDashboardLog } from '../../helper/connection/dashboard/dashboard-monitor.js';
@@ -532,58 +532,66 @@ export const delaySync = (ms) => {
 
 export const delay = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const isFormat = false;
+const COLOR_INFO = {
+	INF: '#50FA7B',
+	WRN: '#FFB86C',
+	ERR: '#FF5555',
+	MISC: '#E4C1F9',
+	MUTE: '#6272A4'
+};
+
+const isFormat = true;
 const isFormatISO = false;
 const TIME_FORMAT_DEFAULT = 'ddd, DD MMM YYYY HH:mm:ss [GMT]Z';
-const TIME_FORMAT = 'HH:mm:ss DD/MM';
-const ICON = color('ᛟ', '#E4C1F9');
-const SEPERATOR_1 = color(':', '#6272A4');
-const SEPERATOR_2 = color('/', '#6272A4');
-const SEPERATOR_3 = color(' 一', '#50FA7B');
+const TIME_FORMAT = 'HH:mm DD/MM';
+const SEPARATOR_1 = color(':', COLOR_INFO.MUTE);
+const SEPARATOR_2 = color('/', COLOR_INFO.MUTE);
+
+const SEPARATOR_3 = (type) => color(' •', COLOR_INFO[type] || COLOR_INFO.ERR);
 
 export const boldify = (string) => chalk.bold(string);
 
 const coloring = (text, format, err) => {
 	if (!format) {
-		return color(text, err ? '#FF5555' : '#E4C1F9');
+		return color(text, err ? COLOR_INFO.ERR : COLOR_INFO.MISC);
 	}
 
 	const [time, date] = text.split(' ');
 
-	const [hour, minute, second] = time.split(':');
+	const [hour, minute, second] = time.split(':').filter(Boolean);
 	const [day, month] = date.split('/');
-	const [HH, mm, ss, DD, MM] = [hour, minute, second, day, month].map((x) => color(x, err ? '#FF5555' : '#E4C1F9'));
+	const [HH, mm, ss, DD, MM] = [hour, minute, second, day, month].map((x) => color(x, err ? COLOR_INFO.ERR : COLOR_INFO.MISC));
 
-	return `${HH}${SEPERATOR_1}${mm}${SEPERATOR_1}${ss} ${DD}${SEPERATOR_2}${MM}`;
+	return `${HH}${SEPARATOR_1}${mm} ${DD}${SEPARATOR_2}${MM}`;
 };
 
 const INFOLOG = (...info) => {
-	const isLOGS = configuration.OPTIONS.noLog || false;
+	const isLogs = !configuration.OPTIONS.noLog || false;
 
-	if (!isLOGS) {
+	if (isLogs) {
 		const time = isFormat
 			? dayjs.tz().format(TIME_FORMAT)
 			: isFormatISO
 				? dayjs.tz().utc(true).toISOString()
 				: dayjs.tz().format(TIME_FORMAT_DEFAULT);
 
-		const str = `${ICON} ${coloring(time, isFormat)}${SEPERATOR_3} ${info.join(' ')}`;
+		const str = `${coloring(time, isFormat)}${SEPARATOR_3(info[0])} ${info.slice(1).join(' ')}`;
 
 		return str;
 	}
 };
 
-const loggersFns = (type, hexColor, ...info) => {
+const loggersFns = (type, ...info) => {
 	const ignoreIndex = info.findIndex((v) => v?.ignore);
 
 	if (ignoreIndex !== -1) {
 		info.splice(ignoreIndex, 1);
-		const str = `${color('[', 'gray')}${boldify(color(type, hexColor))}${color(']', 'gray')} ${INFOLOG(...info)}`;
+		const str = `${color('[', 'gray')}${boldify(color(type, COLOR_INFO[type]))}${color(']', 'gray')} ${INFOLOG(type, ...info)}`;
 
 		return str;
 	}
 
-	const str = `${color('[', 'gray')}${boldify(color(type, hexColor))}${color(']', 'gray')} ${INFOLOG(...info)}`;
+	const str = `${color('[', 'gray')}${boldify(color(type, COLOR_INFO[type]))}${color(']', 'gray')} ${INFOLOG(type, ...info)}`;
 
 	pushDashboardLog(type, str);
 
@@ -591,9 +599,9 @@ const loggersFns = (type, hexColor, ...info) => {
 };
 
 export const loggers = {
-	warning: (...info) => loggersFns('WRN', '#F1FA8C', ...info),
-	info: (...info) => loggersFns('INF', '#50FA7B', ...info),
-	error: (...info) => loggersFns('ERR', '#FF5555', ...info)
+	warning: (...info) => loggersFns('WRN', ...info),
+	info: (...info) => loggersFns('INF', ...info),
+	error: (...info) => loggersFns('ERR', ...info)
 };
 
 export const isURL = (input) => /^(https?:\/\/)([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(:[0-9]{2,5})?(\/\S*)?$/i.test(input);

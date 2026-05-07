@@ -6,6 +6,55 @@
 
 /** @typedef {import('@prisma/client').PrismaClient} PrismaClient */
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const isRetryablePrismaError = (error) => {
+	return Boolean(
+		error &&
+			(error.code === 'P2034' ||
+				error.code === 'P2028' ||
+				/Transaction.*aborted/i.test(error.message || '') ||
+				/write conflict|deadlock/i.test(error.message || ''))
+	);
+};
+
+const withRetry = async (operation, { retries = 3, baseDelayMs = 60 } = {}) => {
+	let attempt = 0;
+
+	while (true) {
+		try {
+			return await operation();
+		} catch (error) {
+			attempt += 1;
+
+			if (attempt > retries || !isRetryablePrismaError(error)) {
+				throw error;
+			}
+
+			const jitter = Math.floor(Math.random() * baseDelayMs);
+
+			await sleep(baseDelayMs * attempt + jitter);
+		}
+	}
+};
+
+const writeQueues = new Map();
+
+const enqueueWrite = (key, task) => {
+	const previous = writeQueues.get(key) || Promise.resolve();
+	const next = previous
+		.catch(() => undefined)
+		.then(task)
+		.finally(() => {
+			if (writeQueues.get(key) === next) {
+				writeQueues.delete(key);
+			}
+		});
+
+	writeQueues.set(key, next);
+	return next;
+};
+
 /**
  * Load the persisted store snapshot for a session.
  *
@@ -46,11 +95,15 @@ export const upsertBaileysStore = async (db, sessionName, state) => {
 
 	const payload = JSON.stringify(state ?? {});
 
-	await db.baileysStore.upsert({
-		where: { sessionName },
-		update: { state: payload },
-		create: { sessionName, state: payload }
-	});
+	await enqueueWrite(sessionName, () =>
+		withRetry(() =>
+			db.baileysStore.upsert({
+				where: { sessionName },
+				update: { state: payload },
+				create: { sessionName, state: payload }
+			})
+		)
+	);
 };
 
 /**

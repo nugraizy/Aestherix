@@ -49,8 +49,14 @@ const applyPersistedFlags = (configuration, flagStates) => {
 		return;
 	}
 
+	const cliFlags = configuration?.cli?.flags || {};
+
 	for (const [key, value] of Object.entries(flagStates)) {
 		if (typeof configuration.OPTIONS[key] !== 'boolean') {
+			continue;
+		}
+
+		if (typeof cliFlags[key] === 'boolean') {
 			continue;
 		}
 

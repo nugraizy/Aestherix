@@ -1,9 +1,9 @@
-import type { AuthenticationState, ConnectionState, makeInMemoryStore, makeWASocket, WAConnectionState } from 'baileys';
+import type { AuthenticationState, ConnectionState, makeWASocket, WAConnectionState } from 'baileys';
 
 import type { ReassignResult } from '../Reconstruct';
 import type { AssignedClient } from '../Utils';
 
-type WAMemoryStore = ReturnType<typeof makeInMemoryStore>;
+type WAMemoryStore = ReturnType<typeof import('../../helper/connection/store/make-in-memory-store.js').makePersistentStore>;
 
 export type ClientSocket = ReturnType<typeof makeWASocket>;
 export type Client = { instance: ClientSocket };

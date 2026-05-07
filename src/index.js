@@ -33,10 +33,11 @@ import {
 } from './helper/connection/event-handler/universal.js';
 import { handleGithubWebhook } from './helper/connection/github-webhook/events.js';
 import { githubWebhook } from './helper/connection/github-webhook/server.js';
-import { clearDBConnection, resetSession } from './helper/connection/socket/reset-session.js';
+import { resetSession } from './helper/connection/socket/reset-session.js';
 import { connectSocket } from './helper/connection/socket/socket.js';
 import { initContact, updateContact } from './helper/connection/utils/cache.js';
 import { cli as clis } from './helper/connection/utils/check-flag.js';
+import { resolveSessionName } from './helper/connection/utils/session-name.js';
 import {
 	listPinterestProfilePictures,
 	upsertPinterestProfilePictures
@@ -503,6 +504,15 @@ const startDashboardBridge = (resolveWaClient) => {
 			return res.status(401).json({ ok: false, message: 'Unauthorized bridge token.' });
 		}
 
+		const runningUnderPm2 = Boolean(process.env.pm_id || process.env.PM2_HOME);
+
+		if (!runningUnderPm2) {
+			return res.status(409).json({
+				ok: false,
+				message: 'Restart is only supported when the bot is managed by PM2.'
+			});
+		}
+
 		res.json({ ok: true, restarting: true });
 
 		setTimeout(() => {
@@ -645,19 +655,16 @@ configuration.OPTIONS = configuration.cli.flags;
 await initializeDashboardMonitor(configuration);
 
 const { OPTIONS, cli } = configuration;
+const sessionName = await resolveSessionName(cli?.input?.[0]);
 
 const regexOption = Object.keys(OPTIONS);
 
-if (OPTIONS.reset) {
-	await resetSession(cli);
-}
-
 if (OPTIONS.limitReset) {
-	runLimitScheduler(OPTIONS, clearDBConnection, cli);
+	runLimitScheduler();
 }
 
 if (OPTIONS.resetOnStart) {
-	await clearDBConnection(cli);
+	await resetSession(cli);
 }
 
 export const runtime = Date.now();
@@ -687,7 +694,7 @@ clientMqttListen.on('connect', () => {
  */
 const store = await makePersistentStore({
 	prisma,
-	sessionName: cli.input[0],
+	sessionName,
 	resetOnStart: OPTIONS.resetOnStart,
 	logger: P().child({ level: 'fatal', stream: 'store' })
 });
@@ -701,7 +708,7 @@ export const start = async () => {
 			process.exit(0);
 		}
 
-		const { Client, state, saveCreds } = await connectSocket({ cli, OPTIONS, store });
+		const { Client, state, saveCreds } = await connectSocket({ cli, OPTIONS, store, sessionName });
 
 		store.localContacts = {};
 

@@ -6372,7 +6372,16 @@ const restartBot = async () => {
 			}
 		});
 
-		ensureAuthorizedResponse(response, 'Failed to restart bot');
+		if (response.status === 401) {
+			ensureAuthorizedResponse(response, 'Failed to restart bot');
+		}
+
+		if (!response.ok) {
+			const payload = await response.json().catch(() => ({}));
+
+			throw new Error(payload?.message || 'Failed restarting bot.');
+		}
+
 		showToast('Restart signal sent. Bot should reconnect shortly.', 'warning');
 
 		setTimeout(() => {

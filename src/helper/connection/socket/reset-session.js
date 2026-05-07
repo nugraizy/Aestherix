@@ -1,4 +1,5 @@
 import prisma from '../../database/prisma.js';
+import { resolveSessionName } from '../utils/session-name.js';
 
 const fixFileName = (fileName) => fileName.replace(/\//g, '__').replace(/:/g, '-');
 
@@ -16,23 +17,11 @@ const getSessionIdPrefix = (sessionName) => {
  * @param {import('meow').Result} cli
  */
 export const resetSession = async (cli) => {
-	const sessionName = `${cli.input[0] ?? 'Session-debug'}`;
-	const sessionPrefix = getSessionIdPrefix(sessionName);
-
-	await prisma.session.deleteMany({
-		where: { sessionId: { startsWith: sessionPrefix } }
-	});
-};
-
-/**
- * @param {import('meow').Result} cli
- */
-export const clearDBConnection = async (cli) => {
 	if (!cli.flags.resetOnStart) {
 		return;
 	}
 
-	const sessionName = `${cli.input[0] ?? 'Session-debug'}`;
+	const sessionName = await resolveSessionName(cli?.input?.[0]);
 	const sessionPrefix = getSessionIdPrefix(sessionName);
 
 	await prisma.session.deleteMany({
