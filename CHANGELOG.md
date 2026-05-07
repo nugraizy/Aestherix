@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「6.12.1」2026-05-07
+## Changed
+- Implement a minimal port for the `in-memory store` connected to the Prisma database.
+- Group settings management now uses the Prisma database.
+- Pinterest album pictures are now persisted in the database.
+
+## Fixed
+- Fix the dashboard file tree view on mobile devices.
+- `resetOnStart` now properly resets the active auth session, and both `loggedOut` and `badSession` errors now trigger a session reset.
+- Interactive CLI authentication login now requires a TTY; otherwise, the default `host_number` is used.
+- Named auth sessions are now properly wired to the CLI argument, with fallback values loaded from the config file when not provided.
+
+## Refactor
+- Complete the database migration process.
+
+
 # 「6.12.0」2026-05-05
 ## Added
 - `Editor` section for editing commands codes on the fly.
