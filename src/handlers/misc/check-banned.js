@@ -1,12 +1,13 @@
-import fs from 'fs-extra';
+import { getGroupSettings } from '../../helper/database/adapters/group-settings.js';
+import prisma from '../../helper/database/prisma.js';
 
 export const checkBan = async (client, { from, isBotAdmin, isGroup, messageStubParameters }) => {
 	if (isGroup) {
-		const data = await fs.readJSON('./databases/groups/settingsManager.json');
-		const index = data.findIndex((v) => Object.keys(v)[0] === from);
+		const row = await getGroupSettings(prisma, from);
+		const bannedMembers = row?.banned ?? [];
 
 		for (const participant of messageStubParameters) {
-			const isBanned = data[index][from].banned.includes(participant);
+			const isBanned = bannedMembers.includes(participant);
 			const bannedUserName = participant.split('@')[0];
 
 			if (isBanned && isBotAdmin) {

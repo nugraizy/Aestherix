@@ -6760,6 +6760,7 @@ const setAuditActionCollapsed = (collapsed, options = {}) => {
 
 	if (els.auditActionSeparator) {
 		els.auditActionSeparator.classList.add('nf');
+		els.auditActionSeparator.classList.remove('nf-fa-chevron_right', 'nf-fa-ellipsis_vertical');
 		els.auditActionSeparator.classList.add(state.auditActionCollapsed ? 'nf-fa-chevron_right' : 'nf-fa-ellipsis_vertical');
 		els.auditActionSeparator.setAttribute('aria-expanded', state.auditActionCollapsed ? 'false' : 'true');
 		els.auditActionSeparator.setAttribute(
@@ -6801,6 +6802,7 @@ const setAuditRoleCollapsed = (collapsed, options = {}) => {
 
 	if (els.auditRoleSeparator) {
 		els.auditRoleSeparator.classList.add('nf');
+		els.auditRoleSeparator.classList.remove('nf-fa-chevron_right', 'nf-fa-ellipsis_vertical');
 		els.auditRoleSeparator.classList.add(state.auditRoleCollapsed ? 'nf-fa-chevron_right' : 'nf-fa-ellipsis_vertical');
 		els.auditRoleSeparator.setAttribute('aria-expanded', state.auditRoleCollapsed ? 'false' : 'true');
 		els.auditRoleSeparator.setAttribute(

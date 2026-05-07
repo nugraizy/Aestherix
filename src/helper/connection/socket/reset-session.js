@@ -1,18 +1,27 @@
-import fs from 'fs-extra';
+import prisma from '../../database/prisma.js';
+
+const fixFileName = (fileName) => fileName.replace(/\//g, '__').replace(/:/g, '-');
+
+const getSessionIdPrefix = (sessionName) => {
+	const name = String(sessionName || '').trim();
+
+	if (!name) {
+		return '';
+	}
+
+	return fixFileName(`${name}:`);
+};
 
 /**
  * @param {import('meow').Result} cli
  */
 export const resetSession = async (cli) => {
 	const sessionName = `${cli.input[0] ?? 'Session-debug'}`;
+	const sessionPrefix = getSessionIdPrefix(sessionName);
 
-	if (await fs.exists(`./src/helper/connection/session/${sessionName}.json`)) {
-		await fs.unlink(`./src/helper/connection/session/${sessionName}.json`);
-	}
-
-	if (await fs.exists(`./src/media/connection_databases/${sessionName}.json`)) {
-		await fs.unlink(`./src/media/connection_databases/${sessionName}.json`);
-	}
+	await prisma.session.deleteMany({
+		where: { sessionId: { startsWith: sessionPrefix } }
+	});
 };
 
 /**
@@ -23,17 +32,10 @@ export const clearDBConnection = async (cli) => {
 		return;
 	}
 
-	if (!(await fs.exists(`./src/media/connection_databases/${cli.input[0] ?? 'Session-debug'}.json`))) {
-		await fs.writeFile(`./src/media/connection_databases/${cli.input[0] ?? 'Session-debug'}.json`, JSON.stringify({}));
-	}
+	const sessionName = `${cli.input[0] ?? 'Session-debug'}`;
+	const sessionPrefix = getSessionIdPrefix(sessionName);
 
-	const data = await fs.readJSON(`./src/media/connection_databases/${cli.input[0] ?? 'Session-debug'}.json`);
-	// const session = await fs.readJSON(`./src/helper/connection/session/${cli.input[0] ?? 'Session-debug'}.json`);
-
-	// session.keys = {};
-	data.chats = [];
-	data.contacts = {};
-	data.messages = {};
-	await fs.writeJSON(`./src/media/connection_databases/${cli.input[0] ?? 'Session-debug'}.json`, data);
-	// await fs.writeJSON(`./src/helper/connection/session/${cli.input[0] ?? 'Session-debug'}.json`, session);
+	await prisma.session.deleteMany({
+		where: { sessionId: { startsWith: sessionPrefix } }
+	});
 };

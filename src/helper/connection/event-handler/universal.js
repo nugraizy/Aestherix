@@ -7,7 +7,7 @@ import { startingConnection } from '../../../helper/connection/utils/check-flag.
 import { color, delay, loggers } from '../../../utils/modules/index.js';
 import configuration from '../../config/connect.js';
 import { Cache } from '../../modules/cache.js';
-import { clearDBConnection } from '../socket/reset-session.js';
+import { clearDBConnection, resetSession } from '../socket/reset-session.js';
 import { loadCommands } from '../utils/commands.js';
 import { connectMqtt } from '../utils/mqtt.js';
 
@@ -54,12 +54,14 @@ export const handleConnectionUpdate = async (
 					color('Bad session', 'white'),
 					color('Please delete your previous session and do a rescan...', '#E4C1F9')
 				);
+				await resetSession(cli);
 				process.exit(0);
 			} else if (reason === DisconnectReason.loggedOut) {
 				loggers.error(
 					color('Logged out', 'white'),
 					color('Please delete your previous session and do a rescan...', '#E4C1F9')
 				);
+				await resetSession(cli);
 				process.exit(0);
 			} else {
 				if (reason === DisconnectReason.restartRequired) {

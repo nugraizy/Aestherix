@@ -1,7 +1,8 @@
-import meow from 'meow';
 import chalk from 'chalk';
+import fs from 'fs-extra';
+import meow from 'meow';
 
-import { loggers, color } from '../../../utils/modules/index.js';
+import { color, loggers } from '../../../utils/modules/index.js';
 
 export const startingConnection = Date.now();
 
@@ -37,9 +38,10 @@ const helpFlag = `
 	   --reset_on_start, -x  ${color('Auto reset DB-Connections every start of the script.', '#05ffa1')}
 	   --no_limit, -u        ${color('Set commands limit to None.', '#05ffa1')}
 	   --pair_mode, -z       ${color('Enable pair mode.', '#05ffa1')} ${color(
-	'This needs to input your host number to get the code.',
-	'#ef476f'
-)}
+				'This needs to input your host number to get the code.',
+				'#ef476f'
+			)}
+	   --pair_number         ${color('Use this number for pairing (no prompt).', '#05ffa1')}
 	   --spin                ${color('Enable spinners for loading plugins.', '#05ffa1')}
 	   --test                ${color('Test your connection.', '#05ffa1')}
 	   --help, -h            ${color('Show this message.', '#05ffa1')}
@@ -47,6 +49,17 @@ const helpFlag = `
 	 ${color('Examples', 'yellow')}
 	   ${chalk.italic('$ node . --read_only -t')}
  `;
+
+const DEFAULT_SESSION_NAME = (() => {
+	try {
+		const settings = fs.readJSONSync('./src/helper/config/settings.json');
+		const value = String(settings?.main_session || '').trim();
+
+		return value || 'Session-debug';
+	} catch {
+		return 'Session-debug';
+	}
+})();
 
 export const parseCli = () =>
 	meow(helpFlag, {
@@ -79,12 +92,17 @@ export const parseCli = () =>
 			reset_on_start: { type: 'boolean', shortFlag: 'x' },
 			no_limit: { type: 'boolean', shortFlag: 'u' },
 			pair_mode: { type: 'boolean', shortFlag: 'z' },
+			pair_number: { type: 'string' },
 			test: { type: 'boolean' },
 			spin: { type: 'boolean' }
 		}
 	});
 
 const cli = parseCli();
+
+if (!cli.input?.[0]) {
+	cli.input[0] = DEFAULT_SESSION_NAME;
+}
 
 if (cli.flags.help) {
 	console.log(cli.help);

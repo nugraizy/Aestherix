@@ -1,9 +1,21 @@
-import fs from 'fs-extra';
-
 import configuration from '../../helper/config/connect.js';
+import { banGroupMember, getGroupSettings } from '../../helper/database/adapters/group-settings.js';
+import prisma from '../../helper/database/prisma.js';
 
 const checkURL = (input) =>
 	/(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])/g.test(input);
+
+const getBannedMembers = async (from, settings) => {
+	const cached = settings?.[from]?.banned;
+
+	if (Array.isArray(cached)) {
+		return cached;
+	}
+
+	const row = await getGroupSettings(prisma, from);
+
+	return row?.banned ?? [];
+};
 
 const antiGroupLinkHandler = async (
 	{ from, isAdmin, isGroup, isBotAdmin, message, mediaData, sender, isFromMe, body, isOwner },
@@ -11,9 +23,8 @@ const antiGroupLinkHandler = async (
 	settings
 ) => {
 	if (isGroup && settings?.[from]?.antiURL === 'enable' && !isAdmin && isBotAdmin && !configuration.OPTIONS.onlyLogs) {
-		const data = await fs.readJSON('./databases/groups/settingsManager.json');
-		const index = data.findIndex((v) => Object.keys(v)[0] === from);
-		const isBanned = data[index][from].banned.includes(sender);
+		const bannedMembers = await getBannedMembers(from, settings);
+		const isBanned = bannedMembers.includes(sender);
 
 		if (!checkURL(body)) {
 			return;
@@ -40,8 +51,10 @@ const antiGroupLinkHandler = async (
 					id: mediaData.stanzaId
 				}
 			});
-			data[index][from].banned.push(sender);
-			await fs.writeJSON('./databases/groups/settingsManager.json', data);
+			await banGroupMember(prisma, from, sender);
+			if (Array.isArray(settings?.[from]?.banned) && !settings[from].banned.includes(sender)) {
+				settings[from].banned.push(sender);
+			}
 		} else {
 			await client.instance.reply(
 				from,

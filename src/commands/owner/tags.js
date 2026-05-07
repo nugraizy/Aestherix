@@ -1,9 +1,4 @@
-import fs from 'fs';
-
-import configuration from '../../helper/config/connect.js';
 import { getTimeSince } from '../../utils/modules/index.js';
-
-const DB_PATH = `./src/media/connection_databases/${configuration.cli.input[0] ?? 'Session-debug'}.json`;
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -19,9 +14,7 @@ export default {
 	limit: 0,
 	status: 'enable',
 	async run({ from, message, args, settings, cmd }, client, store) {
-		const messages = configuration.OPTIONS.json
-			? JSON.parse(fs.readFileSync(DB_PATH)).messages[from]
-			: store.loadMessages(from);
+		const messages = store.loadMessages(from);
 
 		if (args[1] === 'get') {
 			/**

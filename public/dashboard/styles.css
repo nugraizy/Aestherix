@@ -3795,11 +3795,26 @@ select {
 @media (max-width: 980px) {
 	.editor-shell {
 		grid-template-columns: 1fr;
+		grid-auto-rows: minmax(0, auto);
+		max-height: none;
+		overflow: visible;
 	}
 
 	.editor-sidebar,
 	.editor-main {
-		min-height: unset;
+		min-height: 0;
+	}
+
+	.editor-sidebar {
+		max-height: min(45vh, 420px);
+	}
+
+	.editor-tree {
+		min-height: 180px;
+	}
+
+	.editor-main {
+		min-height: 320px;
 	}
 
 	.editor-meta-path {

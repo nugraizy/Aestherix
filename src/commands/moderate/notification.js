@@ -1,4 +1,5 @@
-import fs from 'fs-extra';
+import { pushDefaultSettings, updateGroupSetting } from '../../helper/database/adapters/group-settings.js';
+import prisma from '../../helper/database/prisma.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -30,7 +31,6 @@ export default {
 			);
 		}
 
-		const data = await fs.readJSON('./databases/groups/settingsManager.json');
 		const isEnable = message?.[message?.from]?.notification === 'enable';
 
 		switch (message.query.toLowerCase()) {
@@ -41,8 +41,10 @@ export default {
 				}
 
 				message[message.from].notification = 'enable';
-				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].notification = 'enable';
-				await fs.writeJSON('./databases/groups/settingsManager.json', data);
+				if (!(await updateGroupSetting(prisma, message.from, 'notification', 'enable'))) {
+					await pushDefaultSettings(prisma, message.from, message.groupName, message.groupDescription);
+					await updateGroupSetting(prisma, message.from, 'notification', 'enable');
+				}
 
 				await client.instance.reply(message.from, 'You have successfully enabled group notification', message.message);
 				break;
@@ -53,8 +55,10 @@ export default {
 				}
 
 				message[message.from].notification = 'disable';
-				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].notification = 'disable';
-				await fs.writeJSON('./databases/groups/settingsManager.json', data);
+				if (!(await updateGroupSetting(prisma, message.from, 'notification', 'disable'))) {
+					await pushDefaultSettings(prisma, message.from, message.groupName, message.groupDescription);
+					await updateGroupSetting(prisma, message.from, 'notification', 'disable');
+				}
 
 				await client.instance.reply(message.from, 'You have successfully disabled group notification', message.message);
 				break;

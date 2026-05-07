@@ -1,4 +1,5 @@
-import fs from 'fs-extra';
+import { pushDefaultSettings, updateGroupSetting } from '../../helper/database/adapters/group-settings.js';
+import prisma from '../../helper/database/prisma.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -22,8 +23,6 @@ export default {
 			);
 		}
 
-		const data = await fs.readJSON('./databases/groups/settingsManager.json');
-
 		const isEnable = message?.[message?.from]?.antiDelete === 'enable';
 
 		switch (message.query.toLowerCase()) {
@@ -34,8 +33,11 @@ export default {
 				}
 
 				message[message.from].antiDelete = 'enable';
-				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].antiDelete = 'enable';
-				await fs.writeJSON('./databases/groups/settingsManager.json', data);
+
+				if (!(await updateGroupSetting(prisma, message.from, 'antiDelete', 'enable'))) {
+					await pushDefaultSettings(prisma, message.from, message.groupName, message.groupDescription);
+					await updateGroupSetting(prisma, message.from, 'antiDelete', 'enable');
+				}
 
 				await client.instance.reply(message.from, 'You have successfully enabled anti-delete', message.message);
 				break;
@@ -46,8 +48,11 @@ export default {
 				}
 
 				message[message.from].antiDelete = 'disable';
-				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].antiDelete = 'disable';
-				await fs.writeJSON('./databases/groups/settingsManager.json', data);
+
+				if (!(await updateGroupSetting(prisma, message.from, 'antiDelete', 'disable'))) {
+					await pushDefaultSettings(prisma, message.from, message.groupName, message.groupDescription);
+					await updateGroupSetting(prisma, message.from, 'antiDelete', 'disable');
+				}
 
 				await client.instance.reply(message.from, 'You have successfully disabled anti-delete', message.message);
 				break;

@@ -29,6 +29,22 @@ model Session {
   updatedAt DateTime @updatedAt
 }
 
+model BaileysStore {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionName String   @unique
+  state       String
+  updatedAt   DateTime @updatedAt
+}
+
+model PinterestProfilePicture {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  timestamp String   @unique
+  url       String
+  thumbnail String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model UserLimit {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   jid       String   @unique
@@ -52,7 +68,7 @@ model Contact {
   updatedAt DateTime @updatedAt
 }
 
-model GroupSettings {
+model SettingsManager {
   id               String   @id @default(auto()) @map("_id") @db.ObjectId
   groupId          String   @unique
   groupName        String?

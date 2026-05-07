@@ -1,4 +1,3 @@
-import { makeInMemoryStore } from '@rodrigogs/baileys-store';
 import axios from 'axios';
 import { isWABusinessPlatform } from 'baileys';
 import dayjs from 'dayjs';
@@ -6,9 +5,9 @@ import express from 'express';
 import fs from 'fs-extra';
 import { createServer } from 'http';
 import mqtt from 'mqtt';
-import path from 'path';
 import P from 'pino';
 import sharp from 'sharp';
+import { makePersistentStore } from './helper/connection/store/make-in-memory-store.js';
 
 import configuration from './helper/config/connect.js';
 import {
@@ -38,6 +37,10 @@ import { clearDBConnection, resetSession } from './helper/connection/socket/rese
 import { connectSocket } from './helper/connection/socket/socket.js';
 import { initContact, updateContact } from './helper/connection/utils/cache.js';
 import { cli as clis } from './helper/connection/utils/check-flag.js';
+import {
+	listPinterestProfilePictures,
+	upsertPinterestProfilePictures
+} from './helper/database/adapters/pinterest-profile-pictures.js';
 import { banUser, getBannedUsers, getUserLimit, unbanUser, upsertUserLimit } from './helper/database/adapters/user.js';
 import prisma from './helper/database/prisma.js';
 import { runLimitScheduler } from './helper/groups/settings/limit.js';
@@ -48,7 +51,6 @@ const autoProfilePictureChangeEnabled = true;
 const PROFILE_PICTURE_UPDATE_INTERVAL_MS = 120_000;
 const PROFILE_PICTURE_NO_CROP = 'no_crop';
 const BOOKMARK_END_FLAG = '-end-';
-const PROFILE_PICTURE_HISTORY_PATH = './databases/pictures/pinterest-profile-pictures.json';
 const PROFILE_PICTURE_HISTORY_LIMIT = 900;
 const ENABLE_EMBEDDED_DASHBOARD = String(process.env.DASHBOARD_EMBEDDED || '1') !== '0';
 const DASHBOARD_BRIDGE_PORT = Number(process.env.DASHBOARD_BRIDGE_PORT || 4010);
@@ -331,14 +333,7 @@ const normalizePinterestPictureRecord = (record) => {
 
 const hydrateProfilePictureHistory = async (config) => {
 	try {
-		if (!(await fs.pathExists(PROFILE_PICTURE_HISTORY_PATH))) {
-			await fs.ensureDir(path.dirname(PROFILE_PICTURE_HISTORY_PATH));
-			await fs.writeJSON(PROFILE_PICTURE_HISTORY_PATH, { entries: [] }, { spaces: 2 });
-			return;
-		}
-
-		const raw = await fs.readJSON(PROFILE_PICTURE_HISTORY_PATH).catch(() => ({ entries: [] }));
-		const entries = Array.isArray(raw?.entries) ? raw.entries : [];
+		const entries = await listPinterestProfilePictures(prisma, { limit: PROFILE_PICTURE_HISTORY_LIMIT });
 
 		config.pinterestImages.clear();
 
@@ -375,8 +370,7 @@ const persistProfilePictureHistory = async (config) => {
 		.filter((entry) => entry && entry.timestamp && /^https?:\/\//i.test(entry.url))
 		.slice(-PROFILE_PICTURE_HISTORY_LIMIT);
 
-	await fs.ensureDir(path.dirname(PROFILE_PICTURE_HISTORY_PATH));
-	await fs.writeJSON(PROFILE_PICTURE_HISTORY_PATH, { entries }, { spaces: 2 });
+	await upsertPinterestProfilePictures(prisma, entries);
 };
 
 const sendDashboardConfirmationButton = async ({ waClient, to, approveButtonId, rejectButtonId, phoneNumber }) => {
@@ -691,7 +685,12 @@ clientMqttListen.on('connect', () => {
 /**
  * @type {import('./types/Socket/index.js').Store}
  */
-const store = makeInMemoryStore({ logger: P().child({ level: 'fatal', stream: 'store' }) });
+const store = await makePersistentStore({
+	prisma,
+	sessionName: cli.input[0],
+	resetOnStart: OPTIONS.resetOnStart,
+	logger: P().child({ level: 'fatal', stream: 'store' })
+});
 
 export const start = async () => {
 	try {
@@ -779,9 +778,6 @@ export const start = async () => {
 		Client.ev.on('creds.update', async () => await saveCreds());
 		Client.ev.on('contacts.upsert', (contacts) => initContact(store, contacts));
 		Client.ev.on('contacts.update', (update) => updateContact(store, update));
-		Client.ev.on('contacts.set', (update) => {
-			console.log(update, 'contacts.set');
-		});
 	} catch (error) {
 		console.log(error);
 	}

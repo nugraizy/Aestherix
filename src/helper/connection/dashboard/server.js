@@ -28,6 +28,10 @@ import {
 	upsertOtp
 } from '../../database/adapters/dashboard.js';
 import {
+	listPinterestProfilePictures,
+	upsertPinterestProfilePictures
+} from '../../database/adapters/pinterest-profile-pictures.js';
+import {
 	banUser,
 	getAllUserLimits,
 	getBannedUsers,
@@ -50,9 +54,8 @@ const OTP_TTL_MS = 5 * 60 * 1000;
 const OTP_COOLDOWN_MS = 60 * 1000;
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 const LIVE_SESSION_WINDOW_MS = 30 * 1000;
-const PROFILE_PICTURE_HISTORY_PATH = './databases/pictures/pinterest-profile-pictures.json';
 const PROFILE_PICTURE_HISTORY_LIMIT = 900;
-const PROFILE_PICTURES_DISK_SYNC_THROTTLE_MS = 1000;
+const PROFILE_PICTURES_DB_SYNC_THROTTLE_MS = 1000;
 const PROFILE_PICTURES_COLOR_TOLERANCE_DEFAULT = 88;
 const PROFILE_PICTURES_COLOR_TOLERANCE_MAX = 441;
 const PROFILE_PICTURES_COLOR_FILTER_CONCURRENCY = Math.min(
@@ -97,9 +100,7 @@ const auditState = {
 	logs: [],
 	lastId: 0
 };
-const profilePicturesDiskState = {
-	mtimeMs: 0,
-	size: -1,
+const profilePicturesDbState = {
 	lastSyncAt: 0
 };
 
@@ -255,14 +256,7 @@ const hydrateProfilePicturesCache = async () => {
 	}
 
 	try {
-		if (!(await fs.pathExists(PROFILE_PICTURE_HISTORY_PATH))) {
-			await fs.ensureDir(path.dirname(PROFILE_PICTURE_HISTORY_PATH));
-			await fs.writeJSON(PROFILE_PICTURE_HISTORY_PATH, { entries: [] }, { spaces: 2 });
-			return;
-		}
-
-		const raw = await fs.readJSON(PROFILE_PICTURE_HISTORY_PATH).catch(() => ({ entries: [] }));
-		const entries = Array.isArray(raw?.entries) ? raw.entries : [];
+		const entries = await listPinterestProfilePictures(prisma, { limit: PROFILE_PICTURE_HISTORY_LIMIT });
 
 		for (const entry of entries) {
 			const timestamp = String(entry?.timestamp || '').trim();
@@ -272,81 +266,27 @@ const hydrateProfilePicturesCache = async () => {
 				continue;
 			}
 
+			if (deletedPictureTombstones.has(timestamp)) {
+				continue;
+			}
+
 			configuration.pinterestImages.set(timestamp, normalized);
 		}
 
-		const stats = await fs.stat(PROFILE_PICTURE_HISTORY_PATH).catch(() => null);
-
-		if (stats) {
-			profilePicturesDiskState.mtimeMs = Number(stats.mtimeMs || 0);
-			profilePicturesDiskState.size = Number(stats.size || 0);
-			profilePicturesDiskState.lastSyncAt = Date.now();
-		}
+		profilePicturesDbState.lastSyncAt = Date.now();
 	} catch (error) {
 		loggers.warning(color('Failed hydrating dashboard profile pictures:', '#FF5555'), color(error.message, 'white'));
 	}
 };
 
-const refreshProfilePicturesCacheFromDisk = ({ force = false } = {}) => {
+const refreshProfilePicturesCacheFromDb = async ({ force = false } = {}) => {
 	const now = Date.now();
 
-	if (!force && now - profilePicturesDiskState.lastSyncAt < PROFILE_PICTURES_DISK_SYNC_THROTTLE_MS) {
+	if (!force && now - profilePicturesDbState.lastSyncAt < PROFILE_PICTURES_DB_SYNC_THROTTLE_MS) {
 		return;
 	}
 
-	profilePicturesDiskState.lastSyncAt = now;
-
-	let stats;
-
-	try {
-		stats = fs.statSync(PROFILE_PICTURE_HISTORY_PATH);
-	} catch {
-		return;
-	}
-
-	const mtimeMs = Number(stats?.mtimeMs || 0);
-	const size = Number(stats?.size || 0);
-
-	if (!force && mtimeMs === profilePicturesDiskState.mtimeMs && size === profilePicturesDiskState.size) {
-		return;
-	}
-
-	let raw;
-
-	try {
-		raw = fs.readJSONSync(PROFILE_PICTURE_HISTORY_PATH);
-	} catch {
-		return;
-	}
-
-	const entries = Array.isArray(raw?.entries) ? raw.entries : [];
-	const normalizedEntries = [];
-
-	for (const entry of entries) {
-		const timestamp = String(entry?.timestamp || '').trim();
-		const normalized = normalizePersistedPictureEntry(entry);
-
-		if (!timestamp || !normalized) {
-			continue;
-		}
-
-		normalizedEntries.push([timestamp, normalized]);
-	}
-
-	if (typeof configuration.pinterestImages?.clear === 'function') {
-		configuration.pinterestImages.clear();
-	}
-
-	for (const [timestamp, normalized] of normalizedEntries) {
-		if (deletedPictureTombstones.has(timestamp)) {
-			continue;
-		}
-
-		configuration.pinterestImages.set(timestamp, normalized);
-	}
-
-	profilePicturesDiskState.mtimeMs = mtimeMs;
-	profilePicturesDiskState.size = size;
+	await hydrateProfilePicturesCache();
 };
 
 const applyNoStoreJsonHeaders = (res) => {
@@ -1407,8 +1347,8 @@ const filterDashboardProfilePicturesByColor = async (pictures, { colorHex, toler
 	return source.filter((_picture, pictureIndex) => matched[pictureIndex]);
 };
 
-const listDashboardProfilePictures = ({ limit = 180 } = {}) => {
-	refreshProfilePicturesCacheFromDisk();
+const listDashboardProfilePictures = async ({ limit = 180 } = {}) => {
+	await refreshProfilePicturesCacheFromDb();
 
 	const entries = Array.isArray(configuration.pinterestImages?.entries?.()) ? configuration.pinterestImages.entries() : [];
 	const safeLimit = Math.max(1, Math.min(500, Number(limit) || 180));
@@ -1445,8 +1385,8 @@ const listDashboardProfilePictures = ({ limit = 180 } = {}) => {
 	return pictures;
 };
 
-const getLatestDashboardProfilePicture = () => {
-	const [latestPicture] = listDashboardProfilePictures({ limit: 1 });
+const getLatestDashboardProfilePicture = async () => {
+	const [latestPicture] = await listDashboardProfilePictures({ limit: 1 });
 
 	return latestPicture || null;
 };
@@ -1482,16 +1422,8 @@ const persistDashboardProfilePictures = async () => {
 		.reverse()
 		.slice(-PROFILE_PICTURE_HISTORY_LIMIT);
 
-	await fs.ensureDir(path.dirname(PROFILE_PICTURE_HISTORY_PATH));
-	await fs.writeJSON(PROFILE_PICTURE_HISTORY_PATH, { entries }, { spaces: 2 });
-
-	const stats = await fs.stat(PROFILE_PICTURE_HISTORY_PATH).catch(() => null);
-
-	if (stats) {
-		profilePicturesDiskState.mtimeMs = Number(stats.mtimeMs || 0);
-		profilePicturesDiskState.size = Number(stats.size || 0);
-		profilePicturesDiskState.lastSyncAt = Date.now();
-	}
+	await upsertPinterestProfilePictures(prisma, entries);
+	profilePicturesDbState.lastSyncAt = Date.now();
 };
 
 const deleteDashboardProfilePicture = async ({ timestamp = '', url = '' } = {}) => {
@@ -2514,7 +2446,7 @@ export const server = async () => {
 			})
 		});
 		socket.emit('dashboard:profile-pictures', {
-			picture: getLatestDashboardProfilePicture()
+			picture: await getLatestDashboardProfilePicture()
 		});
 
 		if (session.role === 'owner') {
@@ -2714,7 +2646,7 @@ export const server = async () => {
 			const flags = listDashboardFlags(configuration);
 			const usersForOwner = await listDashboardUsers({ redactNumbers: false });
 			const usersForViewer = await listDashboardUsers({ redactNumbers: true });
-			const latestPicture = getLatestDashboardProfilePicture();
+			const latestPicture = await getLatestDashboardProfilePicture();
 
 			io.emit('dashboard:commands', { commands });
 			io.emit('dashboard:flags', { flags });
@@ -3370,7 +3302,7 @@ export const server = async () => {
 			0,
 			Math.min(PROFILE_PICTURES_COLOR_TOLERANCE_MAX, Number(req.query?.tolerance || PROFILE_PICTURES_COLOR_TOLERANCE_DEFAULT))
 		);
-		let pictures = listDashboardProfilePictures({ limit });
+		let pictures = await listDashboardProfilePictures({ limit });
 
 		if (color) {
 			pictures = await filterDashboardProfilePicturesByColor(pictures, {
@@ -3471,7 +3403,7 @@ export const server = async () => {
 			}
 
 			io.emit('dashboard:profile-pictures', {
-				picture: getLatestDashboardProfilePicture(),
+				picture: await getLatestDashboardProfilePicture(),
 				deleted: payload
 			});
 
@@ -3482,7 +3414,7 @@ export const server = async () => {
 				message: 'Owner deleted a profile picture from albums.'
 			});
 
-			const pictures = listDashboardProfilePictures();
+			const pictures = await listDashboardProfilePictures();
 
 			res.json({
 				ok: true,

@@ -1,10 +1,5 @@
-import fs from 'fs';
-
-import configuration from '../../helper/config/connect.js';
 import { Cache } from '../../helper/modules/cache.js';
 import { getTimeSince } from '../../utils/modules/index.js';
-
-const DB_PATH = `./src/media/connection_databases/${configuration.cli.input[0] ?? 'Session-debug'}.json`;
 
 const path = {
 	deleted: '../../handlers/messages_event/deleted-message.js'
@@ -25,9 +20,7 @@ export default {
 	limit: 0,
 	status: 'enable',
 	async run({ from, args, cmd }, client, store) {
-		const messages = configuration.OPTIONS.json
-			? JSON.parse(fs.readFileSync(DB_PATH)).messages[from]
-			: store.loadMessages(from);
+		const messages = store.loadMessages(from);
 
 		if (args[1] === 'get') {
 			const dataMessage = messages.find((v) => v.key.id === args[2]);

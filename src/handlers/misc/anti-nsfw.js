@@ -3,6 +3,8 @@ import fs from 'fs-extra';
 import path from 'path';
 
 import configuration from '../../helper/config/connect.js';
+import { banGroupMember, getGroupSettings } from '../../helper/database/adapters/group-settings.js';
+import prisma from '../../helper/database/prisma.js';
 import { arq, delay } from '../../utils/index.js';
 
 const { createReadStream, unlink } = fs;
@@ -15,15 +17,26 @@ const getMediaFilePath = (filename, extractMediaData) => {
 	return path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`);
 };
 
-const processNsfwImage = async ({ from, isAdmin, isBotAdmin, message, mediaData, sender, filePath, client }) => {
+const getBannedMembers = async (from, settings) => {
+	const cached = settings?.[from]?.banned;
+
+	if (Array.isArray(cached)) {
+		return cached;
+	}
+
+	const row = await getGroupSettings(prisma, from);
+
+	return row?.banned ?? [];
+};
+
+const processNsfwImage = async ({ from, isAdmin, isBotAdmin, message, mediaData, sender, filePath, client, settings }) => {
 	const media = await downloadMediaMessage(mediaData, 'buffer');
-	const data = await fs.readJSON('./databases/groups/settingsManager.json');
-	const index = data.findIndex((v) => Object.keys(v)[0] === from);
 
 	await fs.writeFile(filePath, media);
 
 	const check = await arq.isNsfw(createReadStream(filePath));
-	const isBanned = data?.[index]?.[from]?.banned?.includes(sender);
+	const bannedMembers = await getBannedMembers(from, settings);
+	const isBanned = bannedMembers.includes(sender);
 
 	await unlink(filePath);
 
@@ -49,8 +62,10 @@ const processNsfwImage = async ({ from, isAdmin, isBotAdmin, message, mediaData,
 					id: mediaData.stanzaId
 				}
 			});
-			data[index][from].banned.push(sender);
-			await fs.writeJSON('./databases/groups/settingsManager.json', data);
+			await banGroupMember(prisma, from, sender);
+			if (Array.isArray(settings?.[from]?.banned) && !settings[from].banned.includes(sender)) {
+				settings[from].banned.push(sender);
+			}
 		} else {
 			await client.reply(
 				from,
@@ -81,7 +96,8 @@ const antiNSFWHandler = async (
 			filename,
 			extractMediaData,
 			filePath,
-			client: client.instance
+			client: client.instance,
+			settings
 		});
 	}
 };

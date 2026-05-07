@@ -36,6 +36,24 @@ model Session {
   updatedAt DateTime @updatedAt
 }
 
+/// Persisted Baileys in-memory store snapshot (per session).
+model BaileysStore {
+  id          String   @id @default(cuid())
+  sessionName String   @unique
+  state       String
+  updatedAt   DateTime @updatedAt
+}
+
+/// Pinterest profile picture history entries.
+model PinterestProfilePicture {
+  id        String   @id @default(cuid())
+  timestamp String   @unique
+  url       String
+  thumbnail String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 
 /// Per-user command limit and subscription role.
 model UserLimit {
@@ -65,7 +83,7 @@ model Contact {
 }
 
 /// Feature flags and settings for each WhatsApp group.
-model GroupSettings {
+model SettingsManager {
   id               String   @id @default(cuid())
   groupId          String   @unique
   groupName        String?

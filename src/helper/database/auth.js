@@ -38,6 +38,16 @@ async function getBaileys() {
  */
 const fixFileName = (fileName) => fileName.replace(/\//g, '__').replace(/:/g, '-');
 
+const buildSessionId = (sessionName, fileName) => {
+	const name = String(sessionName || '').trim();
+
+	if (!name) {
+		return fixFileName(fileName);
+	}
+
+	return fixFileName(`${name}:${fileName}`);
+};
+
 /**
  * Retry an async operation with exponential back-off when MongoDB reports a
  * write conflict or deadlock (error code 112 / P2034).
@@ -78,12 +88,12 @@ const withRetry = async (fn, maxRetries = 5) => {
  *   clearState: () => Promise<void>
  * }>}
  */
-export const useMultiAuthState = async (db) => {
+export const useMultiAuthState = async (db, sessionName = '') => {
 	const { BufferJSON, initAuthCreds, proto } = await getBaileys();
 
 	const writeData = async (data, fileName) => {
 		try {
-			const sessionId = fixFileName(fileName);
+			const sessionId = buildSessionId(sessionName, fileName);
 			const session = JSON.stringify(data, BufferJSON.replacer);
 
 			await withRetry(() =>
@@ -100,7 +110,7 @@ export const useMultiAuthState = async (db) => {
 
 	const readData = async (fileName) => {
 		try {
-			const sessionId = fixFileName(fileName);
+			const sessionId = buildSessionId(sessionName, fileName);
 			const row = await db.session.findFirst({ where: { sessionId } });
 
 			return row?.session ? JSON.parse(row.session, BufferJSON.reviver) : null;
@@ -111,7 +121,7 @@ export const useMultiAuthState = async (db) => {
 
 	const removeData = async (fileName) => {
 		try {
-			const sessionId = fixFileName(fileName);
+			const sessionId = buildSessionId(sessionName, fileName);
 
 			await db.session.deleteMany({ where: { sessionId } });
 		} catch {
@@ -193,7 +203,7 @@ export const useMultiAuthState = async (db) => {
  *   clearState: () => Promise<void>
  * }>}
  */
-export const useSingleAuthState = async (db) => {
+export const useSingleAuthState = async (db, sessionName = '') => {
 	const { BufferJSON, initAuthCreds, proto } = await getBaileys();
 
 	/** @type {Record<string, string>} Maps Baileys key types to storage keys. */
@@ -209,7 +219,7 @@ export const useSingleAuthState = async (db) => {
 		tctoken: 'tcTokens'
 	};
 
-	const SESSION_ID = 'creds';
+	const SESSION_ID = buildSessionId(sessionName, 'creds');
 
 	let creds;
 	let keys = {};

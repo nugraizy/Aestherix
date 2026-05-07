@@ -1,4 +1,5 @@
-import fs from 'fs-extra';
+import { pushDefaultSettings, updateGroupSetting } from '../../helper/database/adapters/group-settings.js';
+import prisma from '../../helper/database/prisma.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -30,7 +31,6 @@ export default {
 			);
 		}
 
-		const data = await fs.readJSON('./databases/groups/settingsManager.json');
 		const isEnable = message?.[message?.from]?.antiNSFW === 'enable';
 
 		switch (message.query.toLowerCase()) {
@@ -41,8 +41,10 @@ export default {
 				}
 
 				message[message.from].antiNSFW = 'enable';
-				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].antiNSFW = 'enable';
-				await fs.writeJSON('./databases/groups/settingsManager.json', data);
+				if (!(await updateGroupSetting(prisma, message.from, 'antiNSFW', 'enable'))) {
+					await pushDefaultSettings(prisma, message.from, message.groupName, message.groupDescription);
+					await updateGroupSetting(prisma, message.from, 'antiNSFW', 'enable');
+				}
 
 				await client.instance.reply(message.from, 'You have successfully enabled anti-nsfw', message.message);
 				break;
@@ -53,8 +55,10 @@ export default {
 				}
 
 				message[message.from].antiNSFW = 'disable';
-				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].antiNSFW = 'disable';
-				await fs.writeJSON('./databases/groups/settingsManager.json', data);
+				if (!(await updateGroupSetting(prisma, message.from, 'antiNSFW', 'disable'))) {
+					await pushDefaultSettings(prisma, message.from, message.groupName, message.groupDescription);
+					await updateGroupSetting(prisma, message.from, 'antiNSFW', 'disable');
+				}
 
 				await client.instance.reply(message.from, 'You have successfully disabled anti-nsfw', message.message);
 				break;

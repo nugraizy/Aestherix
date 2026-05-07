@@ -15,6 +15,7 @@ const els = {
 	themeToggle: document.getElementById('theme-toggle'),
 	form: document.getElementById('login-form'),
 	loginInline: document.querySelector('.login-inline'),
+	phoneLabel: document.querySelector('label[for="phone-number"]'),
 	phoneNumber: document.getElementById('phone-number'),
 	requestCode: document.getElementById('request-code'),
 	viewerLogin: document.getElementById('viewer-login'),
@@ -366,12 +367,17 @@ const clearPollTimeout = () => {
 	}
 };
 
+const setPhoneLabelHidden = (hidden) => {
+	els.phoneLabel?.classList.toggle('hidden', hidden);
+};
+
 const resetRequestUI = () => {
 	els.requestCode.disabled = false;
 	els.requestCode.textContent = REQUEST_LABEL;
 	els.requestCode.classList.remove('is-waiting', 'is-redirecting');
 	els.ownerWaiting?.classList.add('hidden');
 	els.message.classList.remove('waiting');
+	setPhoneLabelHidden(false);
 
 	if (els.message.textContent === WAITING_MESSAGE) {
 		setMessage('');
@@ -459,6 +465,7 @@ const runLoginTransition = async (message) => {
 	setMessage(message);
 	els.panel?.classList.add('login-transitioning');
 	setWaitingState(false);
+	setPhoneLabelHidden(true);
 
 	els.phoneNumber.disabled = true;
 	els.requestCode.disabled = true;
@@ -471,6 +478,7 @@ const resetRedirectState = () => {
 	state.redirecting = false;
 	els.panel?.classList.remove('login-transitioning');
 	setWaitingState(false);
+	setPhoneLabelHidden(false);
 };
 
 const fetchJson = async (url, options = {}) => {

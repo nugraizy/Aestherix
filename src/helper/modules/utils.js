@@ -21,6 +21,8 @@ import { TextEncoder } from 'util';
 import { gif2mp4 } from '../../utils/index.js';
 import { fetchBUFFER, isURL } from '../../utils/modules/index.js';
 import configuration from '../config/connect.js';
+import { getAllContacts } from '../database/adapters/user.js';
+import prisma from '../database/prisma.js';
 import { S_WHATSAPP_NET, UPDATE, ZERO } from '../misc/wa_data/index.js';
 import { reassign } from './parse-message.js';
 
@@ -1215,10 +1217,7 @@ export const assign = (client) => {
 			const node = await getStoryParticipantsNode(client);
 			const mode = node.content[0].content.find((v) => v.attrs?.default === 'true').attrs.type;
 
-			let jids = fs
-				.readJSONSync('./databases/users/contacts.json')
-				.sortUnique('id')
-				.map((v) => v.id);
+			let jids = (await getAllContacts(prisma)).map((v) => v.id);
 
 			if (mode === 'whitelist') {
 				jids = node.content[0].content.find((v) => v.attrs?.type === 'whitelist').content.map((v) => v.attrs?.jid);

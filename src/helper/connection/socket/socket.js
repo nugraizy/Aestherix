@@ -10,14 +10,14 @@ const { proto } = _baileys;
 
 import { color, loggers } from '../../../utils/modules/index.js';
 import configuration from '../../config/connect.js';
-import { Cache } from '../../modules/cache.js';
-import { clearDBConnection } from './reset-session.js';
-import prisma from '../../database/prisma.js';
 import { useMultiAuthState } from '../../database/auth.js';
+import prisma from '../../database/prisma.js';
+import { Cache } from '../../modules/cache.js';
 
 const msgRetryCounterCache = new NodeCache();
 const SETTINGS = await fs.readJSON('./src/helper/config/settings.json');
 const DEFAULT_PROMPT_TIMEOUT = 15 * 1000;
+const PAIR_NUMBER_ENV = 'PAIR_NUMBER';
 
 const exitOnErr = (e) => {
 	if (e.name === 'AbortPromptError') {
@@ -60,7 +60,7 @@ export const connectSocket = async ({ cli, OPTIONS, store }) => {
 	 *
 	 * @type {import('../../../types/Socket/index.js').MultiAuthState}
 	 */
-	const { state, saveCreds, clearState } = await useMultiAuthState(prisma);
+	const { state, saveCreds, clearState } = await useMultiAuthState(prisma, cli.input[0]);
 
 	global.store = store;
 
@@ -100,10 +100,6 @@ export const connectSocket = async ({ cli, OPTIONS, store }) => {
 		emitOwnEvents: true
 	};
 
-	if (OPTIONS.json) {
-		await storeToJson(cli, store, OPTIONS); /* eslint-disable-line */
-	}
-
 	/**
 	 * @type {ClientSocket}
 	 */
@@ -115,29 +111,6 @@ export const connectSocket = async ({ cli, OPTIONS, store }) => {
 
 	return { Client, store, state, saveCreds, clearState };
 };
-
-/**
- *
- * @param {Cli} cli
- * @param {Store} store
- * @param {{[_: string]: boolean}} OPTIONS
- */
-const storeToJson = async (cli, store, OPTIONS) => {
-	if (!(await fs.exists('./src/media/connection_databases/'))) {
-		await fs.mkdir('./src/media/connection_databases/');
-	}
-
-	if ((await fs.exists(`./src/helper/connection/session/${cli.input[0] ?? 'Session-debug'}`)) && OPTIONS.resetOnStart) {
-		await clearDBConnection(cli);
-	}
-
-	store.readFromFile(`./src/media/connection_databases/${cli.input[0] ?? 'Session-debug'}.json`);
-
-	setInterval(() => {
-		store.writeToFile(`./src/media/connection_databases/${cli.input[0] ?? 'Session-debug'}.json`);
-	}, 3 * 1000);
-};
-
 const inputPhoneNumber = async () => {
 	await delay(1000);
 	const phoneNumber = await question(
@@ -153,6 +126,21 @@ const inputPhoneNumber = async () => {
 	}
 
 	return formattedPhoneNumber.replace(/[^0-9]/g, '');
+};
+
+const normalizePairNumber = (value) => {
+	const normalized =
+		'+' +
+		String(value || '')
+			.trim()
+			.replace(/[^0-9]/g, '');
+	const numberFormat = PhoneNumber(normalized);
+
+	if (!numberFormat?.isValid()) {
+		return null;
+	}
+
+	return normalized.replace(/[^0-9]/g, '');
 };
 
 const selectHostNumber = async ({ hostNumber, backupsHostNumbers }) => {
@@ -230,6 +218,34 @@ const askWantNumber = async ({ hostNumber, backupsHostNumbers }) => {
 const handleNewInstance = async ({ OPTIONS, Client }) => {
 	if (OPTIONS.pairMode && !Client.authState.creds.registered && !Client.authState.creds.me?.id) {
 		let phoneNumber = '';
+		const nonInteractiveNumber = OPTIONS.pairNumber || process.env[PAIR_NUMBER_ENV];
+		const hasTty = Boolean(process.stdin?.isTTY && process.stdout?.isTTY);
+
+		if (nonInteractiveNumber) {
+			const normalized = normalizePairNumber(nonInteractiveNumber);
+
+			if (!normalized) {
+				loggers.error(color('Invalid pairing number.', 'red'), color('Provide a valid E.164 number.', 'white'));
+				return;
+			}
+
+			phoneNumber = normalized;
+		}
+
+		if (!phoneNumber && !hasTty) {
+			const configured = normalizePairNumber(SETTINGS?.main_host_number);
+
+			if (configured) {
+				phoneNumber = configured;
+				await delay(2000);
+			} else {
+				loggers.error(
+					color('Pairing requires a TTY.', 'red'),
+					color('Use --pair_number, set PAIR_NUMBER, or configure main_host_number.', 'white')
+				);
+				return;
+			}
+		}
 
 		check: if (!phoneNumber) {
 			const { main_host_number: hostNumber = null, backups_host_numbers: backupsHostNumbers = [] } = SETTINGS;

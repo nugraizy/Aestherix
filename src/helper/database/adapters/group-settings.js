@@ -56,7 +56,7 @@ const DEFAULT_SETTINGS = {
 	notification: 'disable'
 };
 
-/** @param {import('@prisma/client').GroupSettings} row */
+/** @param {import('@prisma/client').SettingsManager} row */
 const rowToData = (row) => ({
 	groupId: row.groupId,
 	groupName: row.groupName ?? '',
@@ -90,7 +90,7 @@ const rowToData = (row) => ({
  * @returns {Promise<GroupSettingsData | null>}
  */
 export const getGroupSettings = async (db, groupId) => {
-	const row = await db.groupSettings.findUnique({ where: { groupId } });
+	const row = await db.settingsManager.findUnique({ where: { groupId } });
 
 	return row ? rowToData(row) : null;
 };
@@ -106,7 +106,7 @@ export const getGroupSettings = async (db, groupId) => {
  * @returns {Promise<GroupSettingsData>}
  */
 export const pushDefaultSettings = async (db, groupId, groupName, groupDescription) => {
-	const row = await db.groupSettings.upsert({
+	const row = await db.settingsManager.upsert({
 		where: { groupId },
 		update: {},
 		create: {
@@ -131,13 +131,13 @@ export const pushDefaultSettings = async (db, groupId, groupName, groupDescripti
  * @returns {Promise<GroupSettingsData | null>}
  */
 export const updateGroupSetting = async (db, groupId, setting, value) => {
-	const existing = await db.groupSettings.findUnique({ where: { groupId } });
+	const existing = await db.settingsManager.findUnique({ where: { groupId } });
 
 	if (!existing) {
 		return null;
 	}
 
-	const row = await db.groupSettings.update({
+	const row = await db.settingsManager.update({
 		where: { groupId },
 		data: { [setting]: value }
 	});
@@ -154,7 +154,7 @@ export const updateGroupSetting = async (db, groupId, setting, value) => {
  * @returns {Promise<void>}
  */
 export const banGroupMember = async (db, groupId, memberJid) => {
-	const row = await db.groupSettings.findUnique({ where: { groupId } });
+	const row = await db.settingsManager.findUnique({ where: { groupId } });
 
 	if (!row) {
 		return;
@@ -164,7 +164,7 @@ export const banGroupMember = async (db, groupId, memberJid) => {
 
 	if (!banned.includes(memberJid)) {
 		banned.push(memberJid);
-		await db.groupSettings.update({
+		await db.settingsManager.update({
 			where: { groupId },
 			data: { bannedMembers: JSON.stringify(banned) }
 		});
@@ -180,7 +180,7 @@ export const banGroupMember = async (db, groupId, memberJid) => {
  * @returns {Promise<void>}
  */
 export const unbanGroupMember = async (db, groupId, memberJid) => {
-	const row = await db.groupSettings.findUnique({ where: { groupId } });
+	const row = await db.settingsManager.findUnique({ where: { groupId } });
 
 	if (!row) {
 		return;
@@ -188,7 +188,7 @@ export const unbanGroupMember = async (db, groupId, memberJid) => {
 
 	const banned = JSON.parse(row.bannedMembers || '[]').filter((jid) => jid !== memberJid);
 
-	await db.groupSettings.update({
+	await db.settingsManager.update({
 		where: { groupId },
 		data: { bannedMembers: JSON.stringify(banned) }
 	});
@@ -201,7 +201,7 @@ export const unbanGroupMember = async (db, groupId, memberJid) => {
  * @returns {Promise<GroupSettingsData[]>}
  */
 export const getAllGroupSettings = async (db) => {
-	const rows = await db.groupSettings.findMany();
+	const rows = await db.settingsManager.findMany();
 
 	return rows.map(rowToData);
 };

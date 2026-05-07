@@ -1,4 +1,5 @@
-import fs from 'fs-extra';
+import { pushDefaultSettings, updateGroupSetting } from '../../helper/database/adapters/group-settings.js';
+import prisma from '../../helper/database/prisma.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -22,7 +23,6 @@ export default {
 			);
 		}
 
-		const data = await fs.readJSON('./databases/groups/settingsManager.json');
 		const isEnable = message?.[message?.from]?.games === 'enable';
 
 		switch (message.query.toLowerCase()) {
@@ -33,8 +33,10 @@ export default {
 				}
 
 				message[message.from].games = 'enable';
-				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].games = 'enable';
-				await fs.writeJSON('./databases/groups/settingsManager.json', data);
+				if (!(await updateGroupSetting(prisma, message.from, 'games', 'enable'))) {
+					await pushDefaultSettings(prisma, message.from, message.groupName, message.groupDescription);
+					await updateGroupSetting(prisma, message.from, 'games', 'enable');
+				}
 
 				await client.instance.reply(message.from, 'You have successfully enabled games', message.message);
 				break;
@@ -45,8 +47,10 @@ export default {
 				}
 
 				message[message.from].games = 'disable';
-				data[data.findIndex((v) => Object.keys(v)[0] === message.from)][message.from].games = 'disable';
-				await fs.writeJSON('./databases/groups/settingsManager.json', data);
+				if (!(await updateGroupSetting(prisma, message.from, 'games', 'disable'))) {
+					await pushDefaultSettings(prisma, message.from, message.groupName, message.groupDescription);
+					await updateGroupSetting(prisma, message.from, 'games', 'disable');
+				}
 
 				await client.instance.reply(message.from, 'You have successfully disabled games', message.message);
 				break;
