@@ -72,6 +72,27 @@ const applyThemeProps = (target, palette) => {
 	});
 };
 
+/**
+ * @typedef {'red'|'orange'|'yellow'|'green'|'cyan'|'blue'|'purple'|'pink'
+ * |'neonGreen'|'indigo'|'teal'|'periwinkle'|'mint'|'softGreen'|'powderBlue'
+ * |'lavender'|'lilac'|'salmon'|'magenta'|'amber'|'rose'|'lemon'|'glowYellow'
+ * |'black'|'darkGray'|'lightGray'|'slate'|'steel'|'silver'|'gold'|'aqua'
+ * |'sky'|'violet'|'coral'|'lime'|'olive'|'maroon'|'white'|'gray'
+ * |'foreground'|'background'} ThemeColorName
+ */
+
+/**
+ * Applies themed colors to text strings.
+ * Accepts pairs of (text, colorName) arguments.
+ *
+ * @type {((text: string, color: ThemeColorName | (string & {})) => string) & {
+ *   setTheme: (name: string) => string,
+ *   getTheme: () => string,
+ *   getThemes: () => string[],
+ *   getHex: (name: ThemeColorName) => string,
+ *   theme: Record<string, string>
+ * }}
+ */
 export const color = Object.assign((...obj) => themeManager.apply(...obj), {
 	setTheme: (name) => {
 		themeManager.setTheme(name);
@@ -80,6 +101,18 @@ export const color = Object.assign((...obj) => themeManager.apply(...obj), {
 	},
 	getTheme: () => themeManager.name,
 	getThemes: () => Object.keys(THEMES),
+	getHex: (name) => themeManager.palette[name] || null,
+	getSyntaxTheme: () => {
+		const palette = themeManager.palette;
+		const mapping = palette.syntax || {};
+		const resolved = {};
+
+		for (const [token, colorName] of Object.entries(mapping)) {
+			resolved[token] = chalk.hex(palette[colorName] || colorName);
+		}
+
+		return resolved;
+	},
 	theme: themeManager.palette
 });
 

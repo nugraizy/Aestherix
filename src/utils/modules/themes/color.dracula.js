@@ -45,6 +45,26 @@ export const theme = {
 		WRN: '#FFB86C',
 		ERR: '#FF5555',
 		MISC: '#BD93F9',
-		MUTE: '#6272A4'
+		MUTE: '#6272A4',
+		syntax: {
+			keyword: 'pink',
+			built_in: 'cyan',
+			type: 'cyan',
+			literal: 'purple',
+			number: 'purple',
+			regexp: 'yellow',
+			string: 'yellow',
+			symbol: 'orange',
+			class: 'cyan',
+			function: 'green',
+			title: 'green',
+			params: 'orange',
+			comment: 'gray',
+			doctag: 'gray',
+			meta: 'pink',
+			attr: 'green',
+			attribute: 'green',
+			default: 'foreground'
+		}
 	}
 };

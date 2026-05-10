@@ -1,10 +1,12 @@
 import chalk from 'chalk';
 import chokidar from 'chokidar';
+import { highlight } from 'cli-highlight';
 import fs from 'fs-extra';
 import os from 'os';
 import path from 'path';
 import syntaxError from 'syntax-error';
 
+import { getSyntaxAdvice } from '../../../utils/ai/syntax-check-agent.js';
 import { color, loadFiles, loggers } from '../../../utils/modules/index.js';
 import configuration from '../../config/connect.js';
 import { getAllContacts, upsertContacts } from '../../database/adapters/user.js';
@@ -12,9 +14,12 @@ import prisma from '../../database/prisma.js';
 import { ModuleError, isMissingProperty } from './util.js';
 
 const hostPlatform = os.platform();
-
+const NOTE_BY_AGENT = true;
+const NOTE_LANGUAGE = 'id';
 let contactsDbCache = null;
 
+const hl = (code) =>
+	highlight(code.replace(/\t/g, ' '), { language: 'js', ignoreIllegals: true, theme: color.getSyntaxTheme() });
 const getContactsCache = async () => {
 	if (!contactsDbCache) {
 		contactsDbCache = await getAllContacts(prisma).catch(() => []);
@@ -88,17 +93,6 @@ export const updateContact = async (store, contactsList) => {
 	}
 };
 
-const handlePluginError = (filename) => {
-	loggers.error(
-		color(filename.split('/').slice(-2).join('/'), 'purple'),
-		color('File Error! Waiting for changes...', 'indigo')
-	);
-	configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
-		absolutePath: normalizeImportPath(filename),
-		path: filename
-	});
-};
-
 export const validatePlugins = async (filename, isWatch) => {
 	const normalizedPath = normalizeImportPath(filename);
 
@@ -114,28 +108,29 @@ export const validatePlugins = async (filename, isWatch) => {
 		return;
 	}
 
-	const [, path, error, arrow, typeError] = String(syntax).split('\n');
+	const [, , error, arrow, typeError] = String(syntax).split('\n');
 
 	const codesArr = str.split('\n');
-	const indexCode = codesArr.findIndex((v) => v.includes(error));
+	const displayName = path.relative(process.cwd(), filename);
 
-	if (indexCode === -1) {
+	if (!syntax.line || syntax.line < 1) {
 		loggers.error(
-			color(filename.split('/').slice(-2).join('/'), 'purple'),
+			color(displayName, 'purple'),
 			isWatch
-				? color('Syntax Error! Waiting for changes...', 'indigo')
-				: color('Syntax Error! Fix the error and restart the bot.', 'indigo')
+				? color('Syntax Error! Waiting for changes...', 'red')
+				: color('Syntax Error! Fix the error and restart the bot.', 'red')
 		);
 		return;
 	}
 
 	loggers.error(
-		color(filename.split('/').slice(-2).join('/'), 'purple'),
+		color(displayName, 'purple'),
 		isWatch
-			? color('File Error! Waiting for changes...', 'indigo')
-			: color('File Error! Fix the error and restart the bot to use this commands.', 'indigo')
+			? color('Syntax Error! Waiting for changes...', 'red')
+			: color('Syntax Error! Fix the error and restart the bot.', 'red')
 	);
 
+	const indexCode = syntax.line - 1;
 	const firstCode = codesArr[indexCode - 1] || '';
 	const secondCode = codesArr[indexCode + 1] || '';
 
@@ -147,19 +142,60 @@ export const validatePlugins = async (filename, isWatch) => {
 
 	const linePadding = (line) => ' '.repeat(longestLineLength - String(line).length + 2);
 
-	console.log(`  ${linePadding(firstLine)}`, chalk.gray('⇢', path));
-	console.log(`  ${linePadding(secondLine)}`, chalk.gray('⇢', typeError));
+	loggers.error(
+		`${linePadding(firstLine)}`,
+		color('⇢ ', 'white'),
+		color(`${displayName}`, 'purple') +
+			color(':', 'gray') +
+			color(syntax.line, 'yellow') +
+			color(':', 'gray') +
+			color(syntax.column || 0, 'yellow')
+	);
+	loggers.error(`${linePadding(secondLine)}`, color('⇢ ', 'white'), color(typeError, 'red'));
 
 	if (firstLine > 0) {
-		console.log(chalk.gray(`  ${linePadding(firstLine)}${firstLine}:`), chalk.hex('#fff')(firstCode));
+		loggers.error(
+			chalk.bgHex(color.getHex('lavender'))(' ') + ` ${color(firstLine, 'gray')}` + hl(firstCode).trimEnd().replace('\n', '')
+		);
 	}
 
-	console.log('  ' + chalk.bold.hex('#fff').bgRed(`${linePadding(currentLine)}${currentLine}: ${error}`));
-	console.log(
-		chalk.gray(`  ${linePadding(currentLine)}${' '.repeat(longestLineLength)}:`) + chalk.bold.hex('#fff')(arrow + '^^')
+	loggers.error(chalk.bgRed(' ') + ` ${color(currentLine, 'white')}` + hl(error).trimEnd().replace('\n', ''));
+
+	loggers.error(
+		chalk.bgHex(color.getHex('lavender'))(' ') + ' '.repeat(longestLineLength) + color(arrow.replace(' ^', '˜˜˜'), 'red')
+	);
+	loggers.error(
+		chalk.bgHex(color.getHex('lavender'))(' ') + ` ${color(secondLine, 'gray')}` + hl(secondCode).trimEnd().replace('\n', '')
 	);
 
-	console.log(chalk.gray(`  ${linePadding(secondLine)}${secondLine}:`), chalk.hex('#fff')(secondCode));
+	if (NOTE_BY_AGENT) {
+		const codeSnippet = [firstCode, codesArr[indexCode] || '', secondCode].join('\n');
+
+		getSyntaxAdvice({
+			filename: displayName,
+			error: typeError || error,
+			line: syntax.line,
+			column: syntax.column || 0,
+			code: codeSnippet,
+			language: NOTE_LANGUAGE
+		})
+			.then((advice) => {
+				if (advice) {
+					const results = [...advice.matchAll(/```(\w+)?\n([\s\S]*?)```/g)];
+
+					for (const result of results) {
+						const original = result[0];
+						const stripped = result[2];
+
+						advice = advice.replaceAll(original, hl(stripped.trim()));
+					}
+
+					advice = advice.replace(/\n{2,}/g, '\n').trim();
+					loggers.warning(color('💡 Agent Note:', 'cyan'), chalk.hex(color.getHex('lightGray')).italic(advice));
+				}
+			})
+			.catch(() => {});
+	}
 };
 
 const add = async (filename) => {
@@ -168,74 +204,90 @@ const add = async (filename) => {
 	}
 
 	const existingCommands = Array.from(configuration.cmds.commands.entries());
-	const fileExists = existingCommands.some(([, command]) => command.path === filename);
-	const files = loadFiles('./src/commands').filter((v) => !v.includes('template'));
+	const resolvedFilename = path.resolve(filename);
+	const fileExists = existingCommands.some(([, command]) => path.resolve(command.path) === resolvedFilename);
+
+	if (fileExists) {
+		return;
+	}
 
 	const file = normalizeImportPath(filename, true);
-	const displayName = filename.split('/').slice(-2).join('/');
+	const displayName = path.relative(process.cwd(), filename);
 
-	if (!fileExists && files.length !== existingCommands.length) {
-		try {
-			const module = await import(file);
+	try {
+		const _command = nocache(file, true);
+		const module = await _command.import;
 
-			if (module?.default) {
-				if (configuration.cmds.commands.has(module.default.name)) {
-					loggers.error(
-						color(displayName, 'purple'),
-						'Has the same command name as the',
-						color(configuration.cmds.commands.get(module.default.name).path.split('/').slice(-2).join('/'))
-					);
-
-					return;
-				}
-
-				const check = await isMissingProperty(module.default);
-
-				configuration.cmds.commands.set(module.default.name, {
-					...check,
-					absolutePath: file,
-					path: filename
-				});
-				loggers.info(color(displayName, 'purple'), 'New plugin loaded');
-			} else {
-				handlePluginError(filename);
-			}
-		} catch (error) {
-			if (error instanceof ModuleError) {
-				loggers.warning(color(displayName, 'purple'), error.info);
-				return;
-			}
-
-			await validatePlugins(filename, true);
+		if (!module?.default) {
+			loggers.warning(color(displayName, 'purple'), color('No default export. Waiting for changes...', 'indigo'));
+			return;
 		}
+
+		if (!module.default.name) {
+			loggers.error(color(displayName, 'purple'), color('Missing required "name" property. Waiting for changes...', 'red'));
+			return;
+		}
+
+		if (configuration.cmds.commands.has(module.default.name)) {
+			loggers.error(
+				color(displayName, 'purple'),
+				'Has the same command name as the',
+				color(configuration.cmds.commands.get(module.default.name).path.split('/').slice(-2).join('/'), 'purple')
+			);
+			return;
+		}
+
+		const check = isMissingProperty(module.default);
+
+		configuration.cmds.commands.set(module.default.name, {
+			...check,
+			absolutePath: file,
+			path: resolvedFilename
+		});
+		loggers.info(color(displayName, 'purple'), color('New plugin loaded', 'neonGreen'));
+	} catch (error) {
+		if (error instanceof ModuleError) {
+			loggers.error(color(displayName, 'purple'), color(error.info, 'red'), color('Waiting for changes...', 'indigo'));
+			return;
+		}
+
+		await validatePlugins(filename, true);
 	}
 };
 
 const change = async (filename) => {
-	const displayName = filename?.split('/').slice(-2).join('/');
+	const displayName = path.relative(process.cwd(), filename);
 
 	const normalizedPath = normalizeImportPath(filename, true);
 	const _command = nocache(normalizedPath, true);
 
 	const cmds = configuration.cmds.commands.entries();
-	const index = cmds.findIndex((v) => v[1].path === filename);
+	const resolvedFilename = path.resolve(filename);
+	const index = cmds.findIndex((v) => path.resolve(v[1].path) === resolvedFilename);
 
 	if (index === -1) {
-		return loggers.error(color(displayName, 'purple'), color('Command not found in configuration!', 'red'));
+		return add(filename);
 	}
 
 	try {
 		const command = (await _command.import)?.default;
 
 		if (!command) {
-			loggers.error(
-				color(displayName, 'purple'),
-				color('File does not contain valid Command Properties! Please check the example to create new commands.', 'neonGreen')
-			);
+			loggers.error(color(displayName, 'purple'), color('No default export. Waiting for changes...', 'indigo'));
 			return;
 		}
 
-		const commandPath = configuration.cmds.commands.get(command.name).path.split('/').slice(-2).join('/');
+		if (typeof command.run !== 'function') {
+			loggers.error(color(displayName, 'purple'), color('Missing required "run" function. Waiting for changes...', 'red'));
+			return;
+		}
+
+		if (!command.name) {
+			loggers.error(color(displayName, 'purple'), color('Missing required "name" property. Waiting for changes...', 'red'));
+			return;
+		}
+
+		const commandPath = configuration.cmds.commands.get(command.name)?.path?.split('/').slice(-2).join('/');
 
 		if (configuration.cmds.commands.has(command.name) && displayName !== commandPath) {
 			loggers.error(color(displayName, 'purple'), 'Has the same command name as the', color(commandPath, 'purple'));
@@ -243,15 +295,16 @@ const change = async (filename) => {
 			return;
 		}
 
-		await isMissingProperty(command);
+		const validated = isMissingProperty(command);
 
 		const currentCommand = cmds[index][1];
 
 		loggers.info(
 			color(currentCommand.path?.split('/').slice(-2).join('/'), 'purple'),
+			color('⤑ ', 'lavender'),
 			color('File has been changed', 'neonGreen'),
 			color('&', 'white'),
-			color('Reloaded!', 'lilac')
+			color('Reloaded!', 'neonGreen')
 		);
 
 		let _commandName = cmds[index][0];
@@ -262,13 +315,13 @@ const change = async (filename) => {
 		}
 
 		configuration.cmds.commands.set(_commandName, {
-			...command,
+			...validated,
 			absolutePath: currentCommand.absolutePath,
 			path: currentCommand.path
 		});
 	} catch (error) {
 		if (error instanceof ModuleError) {
-			loggers.warning(color(displayName, 'purple'), error.info);
+			loggers.error(color(displayName, 'purple'), color(error.info, 'red'), color('Waiting for changes...', 'indigo'));
 			return;
 		}
 
@@ -277,9 +330,10 @@ const change = async (filename) => {
 };
 
 const unlink = (filename) => {
-	const displayName = filename?.split('/')?.slice(-2).join('/');
+	const displayName = path.relative(process.cwd(), filename);
 	const cmds = configuration.cmds.commands.entries();
-	const indexPath = cmds.findIndex((v) => v[1].path === filename);
+	const resolvedFilename = path.resolve(filename);
+	const indexPath = cmds.findIndex((v) => path.resolve(v[1].path) === resolvedFilename);
 
 	if (indexPath === -1) {
 		return;

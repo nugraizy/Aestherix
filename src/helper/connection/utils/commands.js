@@ -1,4 +1,3 @@
-import ora from 'ora';
 import path from 'path';
 
 import { color, loadFiles, loggers } from '../../../utils/modules/index.js';
@@ -10,14 +9,10 @@ import { ModuleError, isMissingProperty } from './util.js';
  *
  * @param {string} command
  * @param {{[key: string]: boolean}} OPTIONS
- * @param {import('ora').Ora} spinner
  * @returns
  */
-const loadCommand = async (command, OPTIONS, spinner) =>
+const loadCommand = async (command, OPTIONS, seenErrors) =>
 	new Promise(async (resolve) => {
-		spinner && (spinner.text = loggers.warning(color('Loading', 'white'), color(command, 'purple'), { ignore: true }));
-
-		const start = Date.now();
 		const file = normalizeImportPath(command, true);
 		const normalize = path.normalize(command);
 
@@ -30,8 +25,6 @@ const loadCommand = async (command, OPTIONS, spinner) =>
 					path: normalize
 				});
 
-				spinner && spinner.clear();
-
 				loggers.error(
 					color(command, 'purple'),
 					color(
@@ -42,19 +35,17 @@ const loadCommand = async (command, OPTIONS, spinner) =>
 					)
 				);
 
-				resolve(null);
+				return resolve(null);
 			}
 
 			if (configuration.cmds.commands.has(module.default.name)) {
-				spinner && spinner.clear();
-
 				loggers.error(
 					color(command, 'purple'),
 					color('Has the same command name as the', 'white'),
 					color(configuration.cmds.commands.get(module.default.name).path.split('/').slice(-2).join('/'), 'purple')
 				);
 
-				resolve(null);
+				return resolve(null);
 			}
 
 			const check = await isMissingProperty(module.default);
@@ -65,41 +56,33 @@ const loadCommand = async (command, OPTIONS, spinner) =>
 			configuration.cmds.commands.set(check.name, check);
 			configuration.cmds.aliases.push(...(check?.aliases || []));
 
-			const duration = Date.now() - start;
-
 			await new Promise((resolve) => setTimeout(resolve, 100));
-
-			spinner &&
-				(spinner.text = loggers.info(
-					color('Loaded', 'white'),
-					color(command, 'purple'),
-					color('in', 'white'),
-					color(duration + 'ms', 'yellow'),
-					{ ignore: true }
-				));
 
 			resolve(path.dirname(command));
 		} catch (error) {
-			spinner && spinner.clear();
-
 			if (error instanceof ModuleError) {
 				loggers.warning(color(command, 'purple'), error.info);
 				configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
 					absolutePath: file,
 					path: normalize
 				});
-				resolve();
+				return resolve();
 			}
 
-			loggers.error(color(command, 'purple'), error.message);
-			validatePlugins(command, OPTIONS.watch);
+			const key = String(error?.message || error);
+
+			if (!seenErrors.has(key)) {
+				seenErrors.add(key);
+				loggers.error(color(command, 'purple'), key);
+				validatePlugins(command, OPTIONS.watch);
+			}
 
 			configuration.cmds.commands.set('UNKNOWN-' + Date.now(), {
 				absolutePath: file,
 				path: normalize
 			});
 
-			resolve(null);
+			return resolve(null);
 		}
 	});
 
@@ -112,15 +95,8 @@ const include = (file) => filesToInclude.some((value) => file.includes(value));
 
 export const loadCommands = async (OPTIONS) => {
 	return new Promise(async (resolve) => {
-		const spinner = OPTIONS.spin
-			? ora({
-					text: 'Loading Plugins...',
-					hideCursor: true,
-					discardStdin: false
-				}).start() // eslint-disable-line
-			: null;
-
 		const folders = new Set();
+		const seenErrors = new Set();
 		let commands = loadFiles(folderToLoad).filter(exclude);
 
 		if (configuration.OPTIONS.test) {
@@ -129,7 +105,7 @@ export const loadCommands = async (OPTIONS) => {
 
 		await Promise.all(
 			commands.map(async (command) => {
-				const folder = await loadCommand(command, OPTIONS, spinner);
+				const folder = await loadCommand(command, OPTIONS, seenErrors);
 
 				if (folder) {
 					folders.add(folder);
@@ -137,16 +113,14 @@ export const loadCommands = async (OPTIONS) => {
 			})
 		);
 
-		(spinner &&
-			spinner.stopAndPersist({
-				text: loggers.info(color('Loaded all the plugins.', 'white'), { ignore: true }),
-				symbol: ''
-			})) ||
-			loggers.info(color('Loaded all the plugins.', 'white'));
+		loggers.info(color('Loaded all the plugins.', 'white'));
 
 		if (OPTIONS.watch) {
-			await watch(commands, {
-				alwaysStat: false
+			const watchPath = path.resolve(folderToLoad);
+
+			await watch(watchPath, {
+				ignoreInitial: true,
+				ignored: /(template|\.d\.ts$)/
 			});
 		}
 
