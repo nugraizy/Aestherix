@@ -1,3 +1,4 @@
+import { cmdId } from '../../helper/modules/prefix.js';
 import { iflixSearch, removeDuplicatesArray } from '../../utils/index.js';
 
 /**
@@ -13,7 +14,7 @@ export default {
 	cooldown: 7,
 	limit: 4,
 	status: 'enable',
-	async run({ query, from, message, args, cmd, type }, client) {
+	async run({ query, from, message, args, cmd, type }, client, store, ctx) {
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.thumbnail === args[2]);
@@ -31,7 +32,7 @@ export default {
 					rows: [
 						{
 							title: `${count}. Episode ${count} - ${data[index].title}`,
-							rowId: `${cmd} get ${v}`
+							rowId: cmdId(cmd, `get ${v}`, ctx)
 						}
 					],
 					title: `${__botName} | Powered by Iflix`
@@ -51,17 +52,17 @@ export default {
 							? {
 									quickReplyButton: {
 										displayText: 'Next Series',
-										id: `${cmd} next ${data[index + 1].thumbnail} ${JSON.stringify(data)}`
+										id: cmdId(cmd, `next ${data[index + 1].thumbnail} ${JSON.stringify(data)}`, ctx)
 									}
-								} /* eslint-disable-line */
+								}
 							: {},
 						index !== 0
 							? {
 									quickReplyButton: {
 										displayText: 'Previous Series',
-										id: `${cmd} prev ${data[index - 1].thumbnail} ${JSON.stringify(data)}`
+										id: cmdId(cmd, `prev ${data[index - 1].thumbnail} ${JSON.stringify(data)}`, ctx)
 									}
-								} /* eslint-disable-line */
+								}
 							: {}
 					],
 					footer: `${index + 1}/${data.length}\nPowered by Hidden Finder`
@@ -105,7 +106,7 @@ export default {
 					rows: [
 						{
 							title: `Episode ${i + 1} - ${data[0].title}`,
-							rowId: `${cmd} get ${v}`
+							rowId: cmdId(cmd, `get ${v}`, ctx)
 						}
 					],
 					title: `${__botName} | Powered by Iflix`
@@ -123,9 +124,9 @@ export default {
 							? {
 									quickReplyButton: {
 										displayText: 'Next Series',
-										id: `${cmd} next ${data[1].thumbnail} ${JSON.stringify(data)}`
+										id: cmdId(cmd, `next ${data[1].thumbnail} ${JSON.stringify(data)}`, ctx)
 									}
-								} /* eslint-disable-line */
+								}
 							: {}
 					],
 					footer: `1/${data.length}\nPowered by Hidden Finder`

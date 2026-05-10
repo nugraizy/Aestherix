@@ -1,3 +1,4 @@
+import { cmdId } from '../../helper/modules/prefix.js';
 import { fetchBUFFER, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { spotifier } from '../../utils/spotifier/index.js';
 
@@ -31,7 +32,7 @@ export default {
 			let images;
 			let tracks;
 			let id;
-			const source = (ids) => `https://open.spotify.com${ids}`; /* eslint-disable-line */
+			const source = (ids) => `https://open.spotify.com${ids}`;
 
 			if (regex(querie)) {
 				id = querie.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:artist\/|\?uri=spotify:artist:)((\w|-){22})/)[1];
@@ -75,7 +76,7 @@ export default {
 									.map((v) => v.name)
 									.map((v, i) => (artists.length !== 1 && i + 1 === artists.length ? `and ${v}` : v))
 									.join(', ')} - ${name}`,
-								rowId: `.spotifydl ${name} - ${artists[0].name}`
+								rowId: cmdId('spotifydl', `${name} - ${artists[0].name}`)
 							}
 						],
 						title: `${__botName} | Powered by Spotify`

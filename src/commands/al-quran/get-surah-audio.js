@@ -1,4 +1,5 @@
-import { getAyat, getSurahAudio, getSurahDetail, extension, mime } from '../../utils/index.js';
+import { cmdId } from '../../helper/modules/prefix.js';
+import { extension, getAyat, getSurahAudio, getSurahDetail, mime } from '../../utils/index.js';
 
 const regex = (input) => /[1-9][0-9]*/.test(input);
 
@@ -35,15 +36,15 @@ export default {
 		const buttons = [{ buttonId: '', buttonText: { displayText: '' }, type: 1 }];
 
 		if (query === 1) {
-			buttons[0].buttonId = `${cmd} ${parseInt(query) + 1}`;
+			buttons[0].buttonId = cmdId(cmd, parseInt(query) + 1);
 			buttons[0].buttonText.displayText = 'Next';
 		} else if (query === 114) {
-			buttons[0].buttonId = `${cmd} ${parseInt(query) - 1}`;
+			buttons[0].buttonId = cmdId(cmd, parseInt(query) - 1);
 			buttons[0].buttonText.displayText = 'Previous';
 		} else {
-			buttons[0].buttonId = `${cmd} ${parseInt(query) - 1}`;
+			buttons[0].buttonId = cmdId(cmd, parseInt(query) - 1);
 			buttons[0].buttonText.displayText = 'Previous';
-			buttons.push({ buttonId: `${cmd} ${parseInt(query) + 1}` });
+			buttons.push({ buttonId: cmdId(cmd, parseInt(query) + 1) });
 			buttons.push({ buttonText: { displayText: 'Next' } });
 		}
 

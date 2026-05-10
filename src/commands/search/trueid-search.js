@@ -1,3 +1,4 @@
+import { cmdId } from '../../helper/modules/prefix.js';
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { trueidSearch } from '../../utils/movies/true-id-search.js';
 
@@ -14,7 +15,7 @@ export default {
 	cooldown: 6,
 	limit: 5,
 	status: 'enable',
-	async run({ query, from, message, args, cmd, type }, client) {
+	async run({ query, from, message, args, cmd, type }, client, store, ctx) {
 		if (!query) {
 			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
@@ -41,12 +42,12 @@ export default {
 								rows: [
 									{
 										title: `${i + 1}. Episode ${i + 1} - ${data[index].title}`,
-										rowId: `${cmd} get ${v}`
+										rowId: cmdId(cmd, `get ${v}`, ctx)
 									}
 								],
 								title: `${__botName} | Powered by TrueID`
 							};
-						}) /* eslint-disable-line */
+						})
 					: false;
 
 			await client.instance.send(
@@ -66,17 +67,17 @@ export default {
 							? {
 									quickReplyButton: {
 										displayText: 'Next Series',
-										id: `${cmd} next ${data[index + 1].thumbnail} ${JSON.stringify(data)}`
+										id: cmdId(cmd, `next ${data[index + 1].thumbnail} ${JSON.stringify(data)}`, ctx)
 									}
-								} /* eslint-disable-line */
+								}
 							: {},
 						index !== 0
 							? {
 									quickReplyButton: {
 										displayText: 'Previous Series',
-										id: `${cmd} prev ${data[index - 1].thumbnail} ${JSON.stringify(data)}`
+										id: cmdId(cmd, `prev ${data[index - 1].thumbnail} ${JSON.stringify(data)}`, ctx)
 									}
-								} /* eslint-disable-line */
+								}
 							: {}
 					],
 					footer: `${index + 1}/${data.length}\nPowered by Hidden Finder`
@@ -131,12 +132,12 @@ export default {
 								rows: [
 									{
 										title: `Episode ${i + 1} - ${data[0].title}`,
-										rowId: `${cmd} get ${v}`
+										rowId: cmdId(cmd, `get ${v}`, ctx)
 									}
 								],
 								title: `${__botName} | Powered by TrueID`
 							};
-						}) /* eslint-disable-line */
+						})
 					: false;
 
 			await client.instance.send(
@@ -151,9 +152,9 @@ export default {
 							? {
 									quickReplyButton: {
 										displayText: 'Next Series',
-										id: `${cmd} next ${data[1].thumbnail} ${JSON.stringify(data)}`
+										id: cmdId(cmd, `next ${data[1].thumbnail} ${JSON.stringify(data)}`, ctx)
 									}
-								} /* eslint-disable-line */
+								}
 							: {}
 					],
 					footer: `1/${data.length}\nPowered by Hidden Finder`

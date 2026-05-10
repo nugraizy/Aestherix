@@ -1,3 +1,4 @@
+import { cmdId } from '../../helper/modules/prefix.js';
 import { googleArticle, removeDuplicatesArray } from '../../utils/index.js';
 
 /**
@@ -33,17 +34,17 @@ export default {
 							? {
 									quickReplyButton: {
 										displayText: 'Next Article',
-										id: `.googlearticle next ${data[index + 1].url} ${JSON.stringify(data)}`
+										id: cmdId('googlearticle', `next ${data[index + 1].url} ${JSON.stringify(data)}`)
 									}
-								} /* eslint-disable-line */
+								}
 							: {},
 						index !== 0
 							? {
 									quickReplyButton: {
 										displayText: 'Previous Image',
-										id: `.googlearticle prev ${data[index - 1].url} ${JSON.stringify(data)}`
+										id: cmdId('googlearticle', `prev ${data[index - 1].url} ${JSON.stringify(data)}`)
 									}
-								} /* eslint-disable-line */
+								}
 							: {}
 					],
 					footer: `${data[index].date ? `${data[index].date} ` : ''}${data[index].description}
@@ -77,9 +78,9 @@ ${index + 1}/${data.length}\nPowered by Hidden Finder`
 							? {
 									quickReplyButton: {
 										displayText: 'Next Article',
-										id: `.googlearticle next ${result[1].url} ${JSON.stringify(result).replace(/\|/g, '')}`
+										id: cmdId('googlearticle', `next ${result[1].url} ${JSON.stringify(result).replace(/\|/g, '')}`)
 									}
-								} /* eslint-disable-line */
+								}
 							: {}
 					],
 					footer: `${result[0].date ? `${result[0].date} ` : ''}${result[0].description}

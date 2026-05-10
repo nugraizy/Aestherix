@@ -1,8 +1,8 @@
-import parser from 'yargs-parser';
 import dayjs from 'dayjs';
+import parser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
-import { color, loggers, formatNumber } from '../../utils/modules/index.js';
+import { color, formatNumber, loggers } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -68,7 +68,7 @@ export default {
 						: {
 								image: { url: reels[data].post[0].url },
 								caption: capt.trim().formatForm()
-							} /* eslint-disable-line */,
+							},
 					{ quoted: message }
 				);
 			}

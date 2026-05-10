@@ -1,3 +1,4 @@
+import { cmdId } from '../../helper/modules/prefix.js';
 import { removeDuplicatesArray, yandexImage } from '../../utils/index.js';
 
 /**
@@ -33,17 +34,17 @@ export default {
 							? {
 									quickReplyButton: {
 										displayText: 'Next Image',
-										id: `.yandeximage next ${data[index + 1].url.image} ${JSON.stringify(data)}`
+										id: cmdId('yandeximage', `next ${data[index + 1].url.image} ${JSON.stringify(data)}`)
 									}
-								} /* eslint-disable-line */
+								}
 							: {},
 						index !== 0
 							? {
 									quickReplyButton: {
 										displayText: 'Previous Image',
-										id: `.yandeximage prev ${data[index - 1].url.image} ${JSON.stringify(data)}`
+										id: cmdId('yandeximage', `prev ${data[index - 1].url.image} ${JSON.stringify(data)}`)
 									}
-								} /* eslint-disable-line */
+								}
 							: {}
 					],
 					footer: `Aestherix Bot     ${index + 1}/${data.length}\nPowered by Hidden Finder`
@@ -82,7 +83,7 @@ Article : ${result[index].url.article}`.formatForm()
 					// 					displayText: 'Next Image',
 					// 					id: `.yandeximage next ${result[1].url.image} ${JSON.stringify(result).replace(/\|/g, '')}`
 					// 				}
-					// 		  } /* eslint-disable-line */
+					// 		  }
 					// 		: {}
 					// ],
 					// footer: ''

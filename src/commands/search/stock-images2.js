@@ -1,3 +1,4 @@
+import { cmdId } from '../../helper/modules/prefix.js';
 import { removeDuplicatesArray } from '../../utils/modules/index.js';
 import { stockImagesPexel } from '../../utils/wallpapers/index.js';
 
@@ -34,17 +35,17 @@ export default {
 							? {
 									quickReplyButton: {
 										displayText: 'Next Image',
-										id: `.stockimages next ${data[index + 1]} ${JSON.stringify(data)}`
+										id: cmdId('stockimages', `next ${data[index + 1]} ${JSON.stringify(data)}`)
 									}
-								} /* eslint-disable-line */
+								}
 							: {},
 						index !== 0
 							? {
 									quickReplyButton: {
 										displayText: 'Previous Image',
-										id: `.stockimages prev ${data[index - 1]} ${JSON.stringify(data)}`
+										id: cmdId('stockimages', `prev ${data[index - 1]} ${JSON.stringify(data)}`)
 									}
-								} /* eslint-disable-line */
+								}
 							: {}
 					],
 					footer: `${index + 1}/${data.length}\nPowered by Hidden Finder`
@@ -78,9 +79,9 @@ export default {
 							? {
 									quickReplyButton: {
 										displayText: 'Next Image',
-										id: `.stockimages next ${result[1]} ${JSON.stringify(result)}`
+										id: cmdId('stockimages', `next ${result[1]} ${JSON.stringify(result)}`)
 									}
-								} /* eslint-disable-line */
+								}
 							: {}
 					],
 					footer: '\nPowered by Hidden Finder'

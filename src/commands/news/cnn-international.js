@@ -1,3 +1,4 @@
+import { cmdId } from '../../helper/modules/prefix.js';
 import { cnninternational, fetchBUFFER } from '../../utils/index.js';
 
 /**
@@ -37,17 +38,17 @@ export default {
 							? {
 									quickReplyButton: {
 										displayText: 'Next Article',
-										id: `${cmd} next ${data[index + 1].image ?? data[index + 1].link} ${JSON.stringify(data)}`
+										id: cmdId(cmd, `next ${data[index + 1].image ?? data[index + 1].link} ${JSON.stringify(data)}`)
 									}
-								} /* eslint-disable-line */
+								}
 							: {},
 						index !== 0
 							? {
 									quickReplyButton: {
 										displayText: 'Previous Article',
-										id: `${cmd} prev ${data[index - 1].image ?? data[index + 1].link} ${JSON.stringify(data)}`
+										id: cmdId(cmd, `prev ${data[index - 1].image ?? data[index + 1].link} ${JSON.stringify(data)}`)
 									}
-								} /* eslint-disable-line */
+								}
 							: {}
 					],
 					footer: `${index + 1}/${data.length}\nPowered by Hidden Finder`
@@ -89,9 +90,9 @@ export default {
 						? {
 								quickReplyButton: {
 									displayText: 'Next Article',
-									id: `${cmd} next ${data[1].image ?? data[1].link} ${JSON.stringify(data)}`
+									id: cmdId(cmd, `next ${data[1].image ?? data[1].link} ${JSON.stringify(data)}`)
 								}
-							} /* eslint-disable-line */
+							}
 						: {}
 				],
 				footer: `1/${data.length}\nPowered by Hidden Finder`

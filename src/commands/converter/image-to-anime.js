@@ -1,4 +1,5 @@
 import { imageToAnime } from '../../utils/converter/file-processing.js';
+import { cmdId } from '../../helper/modules/prefix.js';
 import { color, loggers } from '../../utils/modules/index.js';
 
 /**
@@ -14,7 +15,7 @@ export default {
 	cooldown: 8,
 	limit: 9,
 	status: 'disable',
-	run: async ({ isMediaImage, from, prettyNumber, message, mediaData, sender, args }, client) => {
+	run: async ({ isMediaImage, from, prettyNumber, message, mediaData, sender, args, prefix }, client) => {
 		loggers.warning(`${color('Converting image to Anime-like', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 
 		let bufferMessage;
@@ -47,7 +48,7 @@ export default {
 
 				buttons: [
 					{
-						buttonId: `.ai2d -variant ${JSON.stringify(mediaData)}`,
+						buttonId: cmdId('ai2d', '-variant ' + JSON.stringify(mediaData), { prefix }),
 						buttonText: { displayText: 'Try other variants' },
 						type: 1
 					}

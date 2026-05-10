@@ -29,7 +29,6 @@ export default {
 		}
 
 		const text = 'Anime Releases'.formatHeaders();
-
 		const result = await animeReleases();
 
 		let index = 0;

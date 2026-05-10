@@ -1,9 +1,9 @@
-import path from 'path';
 import isBuffer from 'is-buffer';
+import path from 'path';
 
-import { color, loggers } from '../../utils/modules/index.js';
-import { convertStickerToMedia } from '../../utils/converter/index.js';
 import { reassign } from '../../helper/index.js';
+import { convertStickerToMedia } from '../../utils/converter/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -13,7 +13,7 @@ export default {
 	minifiedDescription: 'Sticker to Media',
 	description: 'Decrypt a sticker to media',
 	usage: '!decrypt `<reply/send sticker>`',
-	aliases: ['d'],
+	aliases: ['d', 'tomedia'],
 	category: 'Converter',
 	cooldown: 5,
 	limit: 1,
@@ -40,12 +40,12 @@ export default {
 			isBuffer(result)
 				? {
 						image: new Buffer.from(result, 'base64')
-					} /* eslint-disable-line */
+					}
 				: {
 						video: {
 							url: result
 						}
-					} /* eslint-disable-line */,
+					},
 			{ quoted: message }
 		);
 

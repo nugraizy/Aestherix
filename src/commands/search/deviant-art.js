@@ -1,3 +1,4 @@
+import { cmdId } from '../../helper/modules/prefix.js';
 import { searchDeviantArt } from '../../utils/deviant_art/index.js';
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 
@@ -14,7 +15,7 @@ export default {
 	limit: 4,
 	cooldown: 7,
 	status: 'enable',
-	async run({ query, from, message, args, type }, client) {
+	async run({ query, from, message, args, type }, client, store, ctx) {
 		if (!query) {
 			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
@@ -40,17 +41,17 @@ export default {
 							? {
 									quickReplyButton: {
 										displayText: 'Next Image',
-										id: `.deviantart next ${data[index + 1].image} ${JSON.stringify(data)}`
+										id: cmdId('deviantart', `next ${data[index + 1].image} ${JSON.stringify(data)}`, ctx)
 									}
-								} /* eslint-disable-line */
+								}
 							: {},
 						index !== 0
 							? {
 									quickReplyButton: {
 										displayText: 'Previous Image',
-										id: `.deviantart prev ${data[index - 1].image} ${JSON.stringify(data)}`
+										id: cmdId('deviantart', `prev ${data[index - 1].image} ${JSON.stringify(data)}`, ctx)
 									}
-								} /* eslint-disable-line */
+								}
 							: {}
 					],
 					footer: `Title : ${data[index].title.capitalize()}
@@ -89,9 +90,9 @@ ${index + 1}/${data.length}\nPowered by Hidden Finder`
 							? {
 									quickReplyButton: {
 										displayText: 'Next Image',
-										id: `.deviantart next ${result[1].image} ${JSON.stringify(result).replace(/\|/g, '')}`
+										id: cmdId('deviantart', `next ${result[1].image} ${JSON.stringify(result).replace(/\|/g, '')}`, ctx)
 									}
-								} /* eslint-disable-line */
+								}
 							: {}
 					],
 					footer: `Title : ${result[index].author.capitalize()}

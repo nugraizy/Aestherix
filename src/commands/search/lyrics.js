@@ -1,3 +1,4 @@
+import { cmdId } from '../../helper/modules/prefix.js';
 import { arq } from '../../utils/arq/index.js';
 import { removeDuplicatesArray } from '../../utils/modules/index.js';
 
@@ -36,17 +37,17 @@ Song : ${data[index].song}
 							? {
 									quickReplyButton: {
 										displayText: 'Next Lyrics',
-										id: `.lyrics next ${data[index + 1].index} ${JSON.stringify(data)}`
+										id: cmdId('lyrics', `next ${data[index + 1].index} ${JSON.stringify(data)}`)
 									}
-								} /* eslint-disable-line */
+								}
 							: {},
 						index !== 0
 							? {
 									quickReplyButton: {
 										displayText: 'Previous Lyrics',
-										id: `.lyrics prev ${data[index - 1].index} ${JSON.stringify(data)}`
+										id: cmdId('lyrics', `prev ${data[index - 1].index} ${JSON.stringify(data)}`)
 									}
-								} /* eslint-disable-line */
+								}
 							: {}
 					],
 					footer: `${index + 1}/${data.length}\nPowered by Hidden Finder`
@@ -82,9 +83,9 @@ Song : ${result.result[0].song}
 							? {
 									quickReplyButton: {
 										displayText: 'Next Lyrics',
-										id: `.lyrics next ${result.result[1].index} ${JSON.stringify(result.result)}`
+										id: cmdId('lyrics', `next ${result.result[1].index} ${JSON.stringify(result.result)}`)
 									}
-								} /* eslint-disable-line */
+								}
 							: {}
 					],
 					footer: `1/${result.result.length}\nPowered by Hidden Finder`

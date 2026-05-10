@@ -1,5 +1,6 @@
 import { generateWAMessageFromContent } from 'baileys';
 import fs from 'fs-extra';
+import { cmdId } from '../../helper/modules/prefix.js';
 
 const randomString = (chars, length) => {
 	let strings = '';
@@ -47,7 +48,7 @@ export default {
 									},
 									{
 										quickReplyButton: {
-											id: '.menu',
+											id: cmdId('menu'),
 											displayText: 'Open Menu'
 										},
 										index: 1
@@ -69,7 +70,7 @@ export default {
 									},
 									{
 										quickReplyButton: {
-											id: '.menu',
+											id: cmdId('menu'),
 											displayText: 'Open Menu'
 										},
 										index: 1

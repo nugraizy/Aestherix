@@ -1,3 +1,4 @@
+import { cmdId } from '../../helper/modules/prefix.js';
 import { cnnindonesia } from '../../utils/index.js';
 
 /**
@@ -13,7 +14,9 @@ export default {
 	cooldown: 2,
 	limit: 1,
 	status: 'enable',
-	async run({ query, from, message, args, cmd }, client) {
+	async run({ query, from, message, args, cmd, prefix }, client) {
+		const cmdName = cmd.replace(/^[^a-zA-Z]+/, '');
+
 		if (args[1] === 'next' || args[1] === 'prev') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.image === args[2]);
@@ -37,17 +40,17 @@ export default {
 							? {
 									quickReplyButton: {
 										displayText: 'Next Article',
-										id: `${cmd} next ${data[index + 1].image} ${JSON.stringify(data)}`
+										id: cmdId(cmdName, `next ${data[index + 1].image} ${JSON.stringify(data)}`, { prefix })
 									}
-								} /* eslint-disable-line */
+								}
 							: {},
 						index !== 0
 							? {
 									quickReplyButton: {
 										displayText: 'Previous Article',
-										id: `${cmd} prev ${data[index - 1].image} ${JSON.stringify(data)}`
+										id: cmdId(cmdName, `prev ${data[index - 1].image} ${JSON.stringify(data)}`, { prefix })
 									}
-								} /* eslint-disable-line */
+								}
 							: {}
 					],
 					footer: `${index + 1}/${data.length}\nPowered by Hidden Finder`
@@ -89,7 +92,12 @@ export default {
 					{ urlButton: { displayText: 'Image Source', url: data[0].image } },
 					{ urlButton: { displayText: 'Article Source', url: data[0].link } },
 					data.length !== 1
-						? { quickReplyButton: { displayText: 'Next Article', id: `${cmd} next ${data[1].image} ${JSON.stringify(data)}` } }
+						? {
+								quickReplyButton: {
+									displayText: 'Next Article',
+									id: cmdId(cmdName, `next ${data[1].image} ${JSON.stringify(data)}`, { prefix })
+								}
+							}
 						: {}
 				],
 				footer: `1/${data.length}\nPowered by Hidden Finder`

@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import parser from 'yargs-parser';
 
+import { cmdId } from '../../helper/modules/prefix.js';
 import { color, formatNumber, loggers } from '../../utils/modules/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
 
@@ -17,7 +18,7 @@ export default {
 	cooldown: 6,
 	limit: 6,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, type, args }, client) {
+	async run({ from, query, prettyNumber, message, type, args, prefix }, client) {
 		if (type === 'templateButtonReplyMessage' && args[1] === '-crawl') {
 			let data = JSON.parse(args.slice(2).join(' '));
 			let len = '';
@@ -36,7 +37,7 @@ export default {
 
 			data.forEach((v) =>
 				row.push({
-					rows: [{ title: `${v.int}`, rowId: `.ttv ${v.videos.map((v) => v.url.sourceUrl).join(' ')}` }],
+					rows: [{ title: `${v.int}`, rowId: cmdId('ttv', v.videos.map((v) => v.url.sourceUrl).join(' '), { prefix }) }],
 					title: '\t'
 				})
 			);

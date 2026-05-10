@@ -1,5 +1,6 @@
 import parser from 'yargs-parser';
 
+import { cmdId } from '../../helper/modules/prefix.js';
 import { getWaifu, removeDuplicatesArray } from '../../utils/index.js';
 
 /**
@@ -16,7 +17,7 @@ export default {
 	limit: 4,
 	cooldown: 5,
 	status: 'enable',
-	async run({ query, from, message, args }, client) {
+	async run({ query, from, message, args, prefix }, client) {
 		if (!query) {
 			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
@@ -41,17 +42,17 @@ export default {
 						index + 1 !== data.length
 							? builder.button.reply({
 									display: 'Next Image',
-									id: `.waifupic next ${args[2]} ${args[3]} ${data[index + 1]} ${JSON.stringify(data)}`
-								}) /* eslint-disable-line */
+									id: cmdId('waifupic', `next ${args[2]} ${args[3]} ${data[index + 1]} ${JSON.stringify(data)}`, { prefix })
+								})
 							: builder.button.reply({
 									display: `Search More ${args[2].capitalize()}`,
-									id: `.waifupic ${args[2]} -${args[3]}`
-								}) /* eslint-disable-line */,
+									id: cmdId('waifupic', `${args[2]} -${args[3]}`, { prefix })
+								}),
 						index !== 0
 							? builder.button.reply({
 									display: 'Previous Image',
-									id: `.waifupic prev ${args[2]} ${args[3]} ${data[index - 1]} ${JSON.stringify(data)}`
-								}) /* eslint-disable-line */
+									id: cmdId('waifupic', `prev ${args[2]} ${args[3]} ${data[index - 1]} ${JSON.stringify(data)}`, { prefix })
+								})
 							: null
 					].filter(Boolean)
 				)
@@ -95,7 +96,7 @@ export default {
 						}),
 						builder.button.reply({
 							display: 'Next Image',
-							id: `.waifupic next ${querie} ${nsfw ? 'nsfw' : 'sfw'} ${result[1]} ${JSON.stringify(result)}`
+							id: cmdId('waifupic', `next ${querie} ${nsfw ? 'nsfw' : 'sfw'} ${result[1]} ${JSON.stringify(result)}`)
 						})
 					]
 				)

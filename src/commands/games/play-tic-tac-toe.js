@@ -29,7 +29,7 @@ export default {
 					? 'Game is Draw!'
 					: `${game.PLAYER_TURN === game.PLAYER_1 ? game.PLAYER_1_MODEL : game.PLAYER_2_MODEL} ${
 							game.PLAYER_TURN === __botName ? __botName : `@${game.PLAYER_TURN.split('@')[0]}`
-						}'s turn\n\n` /* eslint-disable-line */
+						}'s turn\n\n`
 			: ''
 	}
 	${game.PLAYER_1_MODEL} @${game.PLAYER_1.split('@')[0]} vs ${game.PLAYER_2_MODEL} ${

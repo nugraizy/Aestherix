@@ -1,7 +1,7 @@
+import { cmdId } from '../../helper/modules/prefix.js';
 import { youtube } from '../../utils/index.js';
 import { numberWithCommas } from '../../utils/modules/index.js';
 
-/* eslint-disable-next-line */
 const boxen = (text) => {
 	const texts = text.split('\n');
 	let box = `╭───╌┄ ${texts[0]} ┄┄╌────\n`;
@@ -65,11 +65,11 @@ export default {
 						}),
 						builder.button.reply({
 							display: 'Download Video',
-							id: `.ytmp4 ${url}`
+							id: cmdId('ytmp4', url)
 						}),
 						builder.button.reply({
 							display: 'Download Audio',
-							id: `.ytmp3 ${url}`
+							id: cmdId('ytmp3', url)
 						})
 					]
 				}))

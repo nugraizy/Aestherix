@@ -1,10 +1,10 @@
-import { fetch } from 'undici';
-import parser from 'yargs-parser';
-import _ from 'lodash';
 import { fileTypeFromBuffer } from 'file-type';
 import fs from 'fs-extra';
+import _ from 'lodash';
+import { fetch } from 'undici';
+import parser from 'yargs-parser';
 
-import { isURL, extension, gif2mp4 } from '../../utils/index.js';
+import { extension, gif2mp4, isURL } from '../../utils/index.js';
 
 const isValidParser = (parser) =>
 	/^(\["[^"]+"\]|\w+|\[(?!0+\d)\d+\])((\.\w+)|(:?\["[^"]+"\])|(?:\['[^']+'\])|\[(?!0+\d)\d+\])*$/g.test(parser);

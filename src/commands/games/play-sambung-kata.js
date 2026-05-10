@@ -1,3 +1,4 @@
+import { cmdId } from '../../helper/modules/prefix.js';
 import { getSambungkataSession, SambungKata } from '../../utils/games/index.js';
 
 /**
@@ -30,7 +31,7 @@ export default {
 					title: 'Sambung Kata',
 					text: '\t',
 					footer: 'Powered by Hidden Finder',
-					sections: [{ rows: [{ title: 'Play', rowId: '.sambung player 2' }], title: `${__botName} | Word Game` }]
+					sections: [{ rows: [{ title: 'Play', rowId: cmdId('sambung', 'player 2') }], title: `${__botName} | Word Game` }]
 				},
 				{}
 			);

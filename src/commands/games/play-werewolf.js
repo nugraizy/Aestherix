@@ -1,11 +1,12 @@
-import { delay } from '../../utils/modules/index.js';
+import { cmdId } from '../../helper/modules/prefix.js';
 import { Werewolf } from '../../utils/games/index.js';
+import { delay } from '../../utils/modules/index.js';
 
 const row = [
-	{ rows: [{ title: 'JOIN', rowId: '.ww join' }], title: 'message BOT | Werewolf Games' },
-	{ rows: [{ title: 'NEW GAME', rowId: '.ww newGame' }], title: 'message BOT | Werewolf Games' },
-	{ rows: [{ title: 'EXIT GAME', rowId: '.ww exit' }], title: 'message BOT | Werewolf Games' },
-	{ rows: [{ title: 'DELETE GAME', rowId: '.ww delete' }], title: 'message BOT | Werewolf Games' }
+	{ rows: [{ title: 'JOIN', rowId: cmdId('ww', 'join', null) }], title: 'message BOT | Werewolf Games' },
+	{ rows: [{ title: 'NEW GAME', rowId: cmdId('ww', 'newGame', null) }], title: 'message BOT | Werewolf Games' },
+	{ rows: [{ title: 'EXIT GAME', rowId: cmdId('ww', 'exit', null) }], title: 'message BOT | Werewolf Games' },
+	{ rows: [{ title: 'DELETE GAME', rowId: cmdId('ww', 'delete', null) }], title: 'message BOT | Werewolf Games' }
 ];
 
 /**
@@ -95,7 +96,7 @@ export default {
 							mentions: join.mentions
 						},
 						{ quoted: message }
-					); /* eslint-disable-line */
+					);
 		} else if (args[1] === 'newGame') {
 			const werewolf = new Werewolf(sender, from, client);
 
@@ -176,7 +177,7 @@ export default {
 									rows: [
 										{
 											title: `KILL ${start.data.playersData[i].name}`,
-											rowId: `.ww kill ${start.data.playersData[i].id} ${from}`
+											rowId: cmdId('ww', `kill ${start.data.playersData[i].id} ${from}`)
 										}
 									],
 									title: 'message BOT | Werewolf Games'
@@ -197,7 +198,7 @@ export default {
 									rows: [
 										{
 											title: `TERAWANG ${start.data.playersData[i].name}`,
-											rowId: `.ww seer ${start.data.playersData[i].id} ${from}`
+											rowId: cmdId('ww', `seer ${start.data.playersData[i].id} ${from}`)
 										}
 									],
 									title: 'message BOT | Werewolf Games'
@@ -218,7 +219,7 @@ export default {
 									rows: [
 										{
 											title: `JAGA ${start.data.playersData[i].name}`,
-											rowId: `.ww guard ${start.data.playersData[i].id} ${from}`
+											rowId: cmdId('ww', `guard ${start.data.playersData[i].id} ${from}`)
 										}
 									],
 									title: 'message BOT | Werewolf Games'

@@ -1,4 +1,5 @@
 import { getWaifu } from '../../utils/index.js';
+import { cmdId } from '../../helper/modules/prefix.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -31,7 +32,7 @@ export default {
 						buttons: [
 							builder.button.reply({
 								display: 'Open Menu!',
-								id: '.menu'
+								id: cmdId('menu')
 							})
 						]
 					},
@@ -106,7 +107,7 @@ export default {
 											{
 												description: '',
 												header: 'Show all the menu from this bot!',
-												id: '.menu',
+												id: cmdId('menu'),
 												title: 'Menu'
 											}
 										]
@@ -117,7 +118,7 @@ export default {
 											{
 												description: '',
 												header: 'Show latency!',
-												id: '.ping',
+												id: cmdId('ping'),
 												title: 'Ping'
 											}
 										]
@@ -142,7 +143,7 @@ export default {
 				.buttons(
 					builder.button.reply({
 						display: 'Open Menu!',
-						id: '.menu'
+						id: cmdId('menu')
 					}),
 					builder.button.url({
 						display: 'GitHub User!',

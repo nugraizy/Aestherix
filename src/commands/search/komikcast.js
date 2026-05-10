@@ -1,4 +1,5 @@
 import { KomikCast, mime } from '../../utils/index.js';
+import { cmdId } from '../../helper/modules/prefix.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -40,7 +41,7 @@ Tot. Chapters : ${chapters.length}`;
 			const row = [];
 
 			chapters.forEach((v, i) =>
-				row.push({ rows: [{ title: `Chapter ${i + 1}`, rowId: `.komikcast ${v} extract ${altTitle}` }], title: '\t' })
+				row.push({ rows: [{ title: `Chapter ${i + 1}`, rowId: cmdId('komikcast', `${v} extract ${altTitle}`) }], title: '\t' })
 			);
 
 			await client.instance.send(
@@ -82,7 +83,7 @@ Tot. Chapters : ${chapters.length}`;
 		const row = [];
 
 		result.forEach(({ name, source }) =>
-			row.push({ rows: [{ title: `${name}`, rowId: `.komikcast ${source} detail` }], title: '\t' })
+			row.push({ rows: [{ title: `${name}`, rowId: cmdId('komikcast', `${source} detail`) }], title: '\t' })
 		);
 
 		await client.instance.send(

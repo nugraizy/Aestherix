@@ -5,6 +5,7 @@ import configuration from '../../helper/config/connect.js';
 import { incrementCommandUsage } from '../../helper/connection/utils/command-usage.js';
 import { Limit, checkAfk, deleteAfk, getAfk, reassign } from '../../helper/index.js';
 import { Cache } from '../../helper/modules/cache.js';
+import { cmdId, setPrefix } from '../../helper/modules/prefix.js';
 import { runtime } from '../../index.js';
 import { color, getTimeSince, loggers, randomChar } from '../../utils/modules/index.js';
 
@@ -36,6 +37,10 @@ const HANDLER_PATH = {
  * @param {import('../../types/Reconstruct').ReassignResult} message
  */
 const logMessage = (message) => {
+	if (message.isFromMe && !configuration.OPTIONS.printSelf) {
+		return;
+	}
+
 	const senderInfo = message.isFromMe
 		? `${color('[', 'gray')}${color('HOST', 'salmon')}${color(']', 'gray')} ${color(`${global.__botName}`, 'yellow')} ${color(message.prettyNumber, 'purple')}`
 		: `${color(message.pushname, 'yellow')} ${color(message.prettyNumber, 'purple')}`;
@@ -43,7 +48,9 @@ const logMessage = (message) => {
 	// const typeInfo = `${SEPARATOR} ${color('type', 'rose')} ${color(message.type, 'teal')}`;
 	const runtimeInfo = `${SEPARATOR}  ${color(((Date.now() - runtime) / 1000).toFixed(0), '#F1FA8C')}${color('s', 'lemon')}`;
 	const messageFrom = `${SEPARATOR}  ${color('in', 'white')} ${color(
-		message.isGroup ? `group ${message.groupName}` : 'private chat', 'lavender')}${(message.isGroup && color(' id ', 'white') + color(message.groupId, 'purple')) || ''}`;
+		message.isGroup ? `group ${message.groupName}` : 'private chat',
+		'lavender'
+	)}${(message.isGroup && color(' id ', 'white') + color(message.groupId, 'purple')) || ''}`;
 
 	let fullBody = null;
 
@@ -156,18 +163,27 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 		message.args = message.body.split(/ +/g);
 		message.cmd = message.args?.[0].toLowerCase() || '';
 		let prefix = configuration.cache.prf;
+		const { prefixMode, prefixReg, prefixValues } = configuration.cache;
 
-		if (configuration.cache.prefixMode === 'multi_prefix') {
-			prefix = configuration.cache.prefixReg.test(message.cmd)
-				? message.cmd.match(new RegExp(configuration.cache.prefixReg, 'gi'))[0]
-				: '-';
+		if (prefixMode === 'multi' && prefixReg) {
+			const escCharClass = (str) => str.replace(/[[\]\\^$]/g, (m) => `\\${m}`);
+
+			prefix = prefixReg.test(message.cmd)
+				? message.cmd.match(new RegExp(`[${prefixValues.map(escCharClass).join('')}]`, 'gi'))?.[0]
+				: null;
+		} else if (prefixMode === 'nopref') {
+			prefix = '';
 		}
 
 		message.isEval = EVALY.includes(message.args[0]);
 
-		message.isCmd = message.body.startsWith(prefix);
+		message.isCmd = prefixMode === 'nopref' ? true : prefix != null && message.body.startsWith(prefix);
 		message.cmd = message.isEval ? message.args[0] : message.isCmd ? message.cmd : '';
 		message.query = message.args.slice(1).join(' ').trim();
+
+		if (message.isCmd) {
+			setPrefix(prefix);
+		}
 
 		let correctedCommand = null;
 		let correctedAliases = null;
@@ -427,10 +443,6 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 					.footer(str)
 					.buttons(
 						...[
-							builder.button.url({
-								display: 'GitHub User!',
-								url: 'https://github.com/nugraizy'
-							}),
 							message.isOwner
 								? builder.button.url({
 										display: 'Report to Owner',
@@ -442,13 +454,9 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 							message.isOwner
 								? builder.button.reply({
 										display: 'Report via Bot',
-										id: `.report ${err.stack}`
+										id: cmdId('report', err.stack, message)
 									})
 								: null,
-							builder.button.copy({
-								code: err.stack,
-								display: 'Copy Stack Trace'
-							}),
 							builder.button.reply({
 								display: 'Retry',
 								id: message.body
@@ -458,7 +466,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 					.send();
 
 				loggers.error(color(err.message, 'white'));
-				const parseErr = (
+				const stackEntries = (
 					err.stack
 						?.split(err.name + ': ')[1]
 						?.replace(err.message + '\n', '')
@@ -470,16 +478,17 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 
 						if (match) {
 							const [fullMatch, text] = match;
-							const formattedStackEntry = `${color(stackEntry.replace(fullMatch, ''), 'white')}(${color(text, 'purple')})`;
 
-							return formattedStackEntry.replace('\n', '') + '\n';
-						} else {
-							return stackEntry.trim();
+							return `${color(stackEntry.replace(fullMatch, '').replace('\n', ''), 'white')}(${color(text, 'purple')})`;
 						}
-					})
-					.join(`${color('❯ ', 'gray') + color('at ', 'purple')}`);
 
-				parseErr && loggers.error(parseErr);
+						return stackEntry.trim();
+					})
+					.filter(Boolean);
+
+				for (const entry of stackEntries) {
+					loggers.error(`${color('❯ ', 'gray')}${color('at ', 'purple')}${entry}`);
+				}
 			}
 		}
 	}
@@ -652,22 +661,31 @@ const handleIncomingMessage = async (upsert, client, cmds, store, user, state, r
 		const isInputState = configuration.input.get(message.sender);
 
 		if (isInputState) {
-			if (isInputState.expectedType.some((v) => ['conversation', 'extendedTextMessage'].includes(v))) {
-				isInputState.message = message.body;
-				isInputState.quoted = message.message;
+			const textLikeTypes = [
+				'conversation',
+				'extendedTextMessage',
+				'templateButtonReplyMessage',
+				'buttonsMessage',
+				'buttonsResponseMessage',
+				'listResponseMessage'
+			];
+
+			if (isInputState.expectedType.some((v) => textLikeTypes.includes(v)) && textLikeTypes.includes(message.type)) {
+				const isCommand = message.isCmd;
+
+				if (isCommand) {
+					isInputState.resolve({ message: message.body, quoted: message.message, invalid: false, command: true });
+				} else {
+					isInputState.resolve({ message: message.body, quoted: message.message, invalid: false });
+					return;
+				}
+			} else if (isInputState.expectedType.includes(message.type)) {
+				isInputState.resolve({ message: message.message, quoted: message.message, invalid: false });
+				return;
+			} else {
+				isInputState.resolve({ message: message.body, quoted: message.message, invalid: true });
 				return;
 			}
-
-			if (isInputState.expectedType.includes(message.type)) {
-				isInputState.message = message.message;
-				isInputState.quoted = message.message;
-				return;
-			}
-
-			isInputState.invalid = true;
-			isInputState.quoted = message.message;
-
-			return;
 		}
 
 		await handleCommandExecution(message, client, store, cmds, user, instance, runtime, state);

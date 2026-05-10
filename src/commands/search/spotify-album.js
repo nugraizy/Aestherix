@@ -31,7 +31,7 @@ export default {
 			let images;
 			let tracks;
 			let id;
-			const source = (ids) => `https://open.spotify.com${ids}`; /* eslint-disable-line */
+			const source = (ids) => `https://open.spotify.com${ids}`;
 
 			if (regex(querie)) {
 				id = querie.match(/https?:\/\/(?:embed\.|open\.)(?:spotify\.com\/)(?:album\/|\?uri=spotify:album:)((\w|-){22})/)[1];

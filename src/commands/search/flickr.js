@@ -1,5 +1,6 @@
 import { FlickerAPI } from '../../utils/flickr/index.js';
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
+import { cmdId } from '../../helper/modules/prefix.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}

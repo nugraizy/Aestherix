@@ -1,3 +1,4 @@
+import { cmdId } from '../../helper/modules/prefix.js';
 import { arq } from '../../utils/arq/index.js';
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 
@@ -14,7 +15,7 @@ export default {
 	limit: 4,
 	cooldown: 5,
 	status: 'enable',
-	async run({ query, from, message, args, type }, client) {
+	async run({ query, from, message, args, type, prefix }, client) {
 		if (!query) {
 			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
@@ -40,17 +41,17 @@ export default {
 							? {
 									quickReplyButton: {
 										displayText: 'Next Post',
-										id: `.phub next ${data[index + 1].mainThumb} ${JSON.stringify(data)}`
+										id: cmdId('phub', `next ${data[index + 1].mainThumb} ${JSON.stringify(data)}`, { prefix })
 									}
-								} /* eslint-disable-line */
+								}
 							: {},
 						index !== 0
 							? {
 									quickReplyButton: {
 										displayText: 'Previous Post',
-										id: `.phub prev ${data[index - 1].mainThumb} ${JSON.stringify(data)}`
+										id: cmdId('phub', `prev ${data[index - 1].mainThumb} ${JSON.stringify(data)}`, { prefix })
 									}
-								} /* eslint-disable-line */
+								}
 							: {}
 					],
 					footer: `Title : ${data[index].title}
@@ -108,7 +109,7 @@ Tags : ${tags.join(', ')}`;
 					// 										displayText: 'Next Post',
 					// 										id: `.phub next ${result.result[1].mainThumb} ${JSON.stringify(result.result)}`
 					// 									}
-					// 							  } /* eslint-disable-line */
+					// 							  }
 					// 							: {}
 					// 					],
 					// 					footer: `

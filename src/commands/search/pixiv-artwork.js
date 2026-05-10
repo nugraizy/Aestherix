@@ -1,3 +1,4 @@
+import { cmdId } from '../../helper/modules/prefix.js';
 import { fetchBUFFER, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { downloadArtworks, searchArtwork } from '../../utils/pixiv/index.js';
 
@@ -82,7 +83,7 @@ Total Media : ${dataImage.pageCount}`.formatForm()
 
 			for (const { id, title } of data.slice(1)) {
 				container.push({
-					rows: [{ title: `${i + 1}. ${title}`, rowId: `${cmd}dl https://www.pixiv.net/en/artworks/${id}` }],
+					rows: [{ title: `${i + 1}. ${title}`, rowId: cmdId(cmd, `dl https://www.pixiv.net/en/artworks/${id}`) }],
 					title: '\t'
 				});
 				i++;

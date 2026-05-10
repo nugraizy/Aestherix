@@ -1,4 +1,5 @@
 import { Limit } from '../../helper/index.js';
+import { cmdId } from '../../helper/modules/prefix.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -13,7 +14,7 @@ export default {
 	cooldown: 40,
 	limit: 0,
 	status: 'enable',
-	async run({ from, message, query, sender, pushname, prettyNumber, settings, type, isOwner, args }, client) {
+	async run({ from, message, query, sender, pushname, prettyNumber, settings, type, isOwner, args, prefix }, client) {
 		if (!query) {
 			return await client.instance.reply(from, 'Please provide a message to report', message);
 		}
@@ -56,8 +57,8 @@ ID API : wa.me/${sender.split('@')[0]}
 The Problem Occured in : ${from}`,
 			templateButtons: [
 				{ urlButton: { displayText: 'Contact Person', url: `https://wa.me/${sender.split('@')[0]}` } },
-				{ quickReplyButton: { displayText: 'Accept', id: `.report accept ${from} ${sender} ${JSON.stringify(message)}` } },
-				{ quickReplyButton: { displayText: 'Banned', id: `.ban report ${from} ${sender} ${JSON.stringify(message)}` } }
+				{ quickReplyButton: { displayText: 'Accept', id: cmdId('report', 'accept ' + from + ' ' + sender + ' ' + JSON.stringify(message), { prefix }) } },
+				{ quickReplyButton: { displayText: 'Banned', id: cmdId('ban', 'report ' + from + ' ' + sender + ' ' + JSON.stringify(message), { prefix }) } }
 			],
 			headerType: 1
 		});

@@ -1,4 +1,5 @@
 import { Cache } from '../../helper/modules/cache.js';
+import { cmdId } from '../../helper/modules/prefix.js';
 
 const STATUS = 'status@broadcast';
 
@@ -14,7 +15,7 @@ export default {
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	async run({ from, message }, client, store) {
+	async run({ from, message, prefix }, client, store) {
 		const messages = store.loadMessages(STATUS);
 		const tempContainer = new Cache();
 		let caption = 'Fetch WhatsApp Story'.formatHeaders();
@@ -50,7 +51,7 @@ export default {
 					rows: [
 						{
 							title: 'Download',
-							rowId: `.fetchstory ${message.key.participant}`
+							rowId: cmdId('fetchstory', message.key.participant, { prefix })
 						}
 					],
 					title: `${__botName} | ${message?.pushName ?? 'No Name'}`

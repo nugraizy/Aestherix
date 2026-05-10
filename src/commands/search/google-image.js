@@ -1,3 +1,4 @@
+import { cmdId } from '../../helper/modules/prefix.js';
 import { googleImage, removeDuplicatesArray } from '../../utils/index.js';
 
 /**
@@ -41,9 +42,9 @@ export default {
 							? {
 									quickReplyButton: {
 										displayText: 'Next Image',
-										id: `.googleimage next ${result[1]} ${JSON.stringify(result).replace(/\|/g, '')}`
+										id: cmdId('googleimage', `next ${result[1]} ${JSON.stringify(result).replace(/\|/g, '')}`)
 									}
-								} /* eslint-disable-line */
+								}
 							: {}
 					],
 					footer: `1/${result.length}\nPowered by Hidden Finder`

@@ -1,3 +1,4 @@
+import { cmdId } from '../../helper/modules/prefix.js';
 import { layarkaca21 } from '../../utils/index.js';
 
 /**
@@ -44,17 +45,17 @@ Powered by Hidden Finder`.formatForm(),
 							? {
 									quickReplyButton: {
 										displayText: 'Next Movie',
-										id: `.layarkaca21 next ${data[index + 1].source} ${JSON.stringify(data)}`
+										id: cmdId('layarkaca21', `next ${data[index + 1].source} ${JSON.stringify(data)}`)
 									}
-								} /* eslint-disable-line */
+								}
 							: {},
 						index !== 0
 							? {
 									quickReplyButton: {
 										displayText: 'Previous Movie',
-										id: `.layarkaca21 prev ${data[index - 1].source} ${JSON.stringify(data)}`
+										id: cmdId('layarkaca21', `prev ${data[index - 1].source} ${JSON.stringify(data)}`)
 									}
-								} /* eslint-disable-line */
+								}
 							: {}
 					]
 				},
@@ -89,9 +90,9 @@ Translate By : ${result[0].translateBy}
 						? {
 								quickReplyButton: {
 									displayText: 'Next Movie',
-									id: `.layarkaca21 next ${result[1].source} ${JSON.stringify(result)}`
+									id: cmdId('layarkaca21', `next ${result[1].source} ${JSON.stringify(result)}`)
 								}
-							} /* eslint-disable-line */
+							}
 						: {}
 				]
 			},

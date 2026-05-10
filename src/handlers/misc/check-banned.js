@@ -1,7 +1,8 @@
 import { getGroupSettings } from '../../helper/database/adapters/group-settings.js';
 import prisma from '../../helper/database/prisma.js';
+import { cmdId } from '../../helper/modules/prefix.js';
 
-export const checkBan = async (client, { from, isBotAdmin, isGroup, messageStubParameters }) => {
+export const checkBan = async (client, { from, isBotAdmin, isGroup, messageStubParameters, prefix }) => {
 	if (isGroup) {
 		const row = await getGroupSettings(prisma, from);
 		const bannedMembers = row?.banned ?? [];
@@ -13,7 +14,7 @@ export const checkBan = async (client, { from, isBotAdmin, isGroup, messageStubP
 			if (isBanned && isBotAdmin) {
 				const kickMessage = `You were adding someone who is banned from this group (@${bannedUserName}). Are you sure you want to add them?`;
 				const buttons = [
-					{ buttonId: `.kick ${bannedUserName}`, buttonText: { displayText: 'Kick.' }, type: 1 },
+					{ buttonId: cmdId('kick', bannedUserName, { prefix }), buttonText: { displayText: 'Kick.' }, type: 1 },
 					{ buttonId: 'ID', buttonText: { displayText: 'Dont kick.' }, type: 1 }
 				];
 

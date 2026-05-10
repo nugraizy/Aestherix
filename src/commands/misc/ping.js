@@ -1,3 +1,5 @@
+import { Timer } from '../../utils/modules/index.js';
+
 const formatDuration = (ms) => {
 	const seconds = ms / 1000;
 
@@ -22,12 +24,14 @@ export default {
 	limit: 0,
 	status: 'enable',
 	async run({ from, message }, client) {
-		const start = performance.now();
+		const timer = new Timer('${s}s (${ms} ms)');
+
+		timer.start();
 
 		const wait = await client.instance.waitMessage(from, 'Pong!', message);
 
-		const end = performance.now();
+		timer.stop();
 
-		await wait.update(`Pong! ${formatDuration(end - start)}`);
+		await wait.update(`Pong! ${timer.toString()}`);
 	}
 };

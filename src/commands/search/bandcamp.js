@@ -1,5 +1,6 @@
-import { removeDuplicatesArray } from '../../utils/modules/index.js';
+import { cmdId } from '../../helper/modules/prefix.js';
 import { searchBandcamp } from '../../utils/bandcamp/index.js';
+import { removeDuplicatesArray } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -14,7 +15,7 @@ export default {
 	cooldown: 5,
 	limit: 5,
 	status: 'enable',
-	async run({ from, query, message }, client) {
+	async run({ from, query, message, prefix }, client) {
 		if (!query) {
 			return await client.instance.reply(from, 'You must provide a query.', message);
 		}
@@ -70,7 +71,7 @@ Album ID : ${albumId || 'n/a'}`;
 					footer: '```Looking for some more? Choose between these options.```',
 					title: 'Bandcamp Tracks'.formatHeaders(),
 					sections: result.slice(1).map((v) => ({
-						rows: [{ title: `MP3 | ${v.title}`, rowId: `.bandcampdl ${v.urlBase}` }],
+						rows: [{ title: `MP3 | ${v.title}`, rowId: cmdId('bandcampdl', v.urlBase, { prefix }) }],
 						title: `${v.bandName} - ${v.title}`
 					}))
 				},

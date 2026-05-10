@@ -1,3 +1,4 @@
+import { cmdId } from '../../helper/modules/prefix.js';
 import { arq } from '../../utils/arq/index.js';
 import { removeDuplicatesArray } from '../../utils/modules/index.js';
 
@@ -34,17 +35,17 @@ export default {
 							? {
 									quickReplyButton: {
 										displayText: 'Next Image',
-										id: `.wallpaper next ${data[index + 1]} ${JSON.stringify(data)}`
+										id: cmdId('wallpaper', `next ${data[index + 1]} ${JSON.stringify(data)}`)
 									}
-								} /* eslint-disable-line */
+								}
 							: {},
 						index !== 0
 							? {
 									quickReplyButton: {
 										displayText: 'Previous Image',
-										id: `.wallpaper prev ${data[index - 1]} ${JSON.stringify(data)}`
+										id: cmdId('wallpaper', `prev ${data[index - 1]} ${JSON.stringify(data)}`)
 									}
-								} /* eslint-disable-line */
+								}
 							: {}
 					],
 					footer: `${index + 1}/${data.length}\nPowered by Hidden Finder`
@@ -77,9 +78,9 @@ export default {
 							? {
 									quickReplyButton: {
 										displayText: 'Next Image',
-										id: `.wallpaper next ${result[1]} ${JSON.stringify(result)}`
+										id: cmdId('wallpaper', `next ${result[1]} ${JSON.stringify(result)}`)
 									}
-								} /* eslint-disable-line */
+								}
 							: {}
 					],
 					footer: `1/${result.length}\nPowered by Hidden Finder`

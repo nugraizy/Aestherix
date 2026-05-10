@@ -1,3 +1,4 @@
+import { cmdId } from '../../helper/modules/prefix.js';
 import { Github } from '../../utils/github/index.js';
 
 const _baseUrl = (input) => `https://github.com/${input}`;
@@ -52,17 +53,17 @@ ${data[index].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).
 							? {
 									quickReplyButton: {
 										displayText: 'Next Code',
-										id: `.githubcode next ${data[index + 1].source} ${JSON.stringify(data)}`
+										id: cmdId('githubcode', `next ${data[index + 1].source} ${JSON.stringify(data)}`)
 									}
-								} /* eslint-disable-line */
+								}
 							: {},
 						index !== 0
 							? {
 									quickReplyButton: {
 										displayText: 'Previous Code',
-										id: `.githubcode prev ${data[index - 1].source} ${JSON.stringify(data)}`
+										id: cmdId('githubcode', `prev ${data[index - 1].source} ${JSON.stringify(data)}`)
 									}
-								} /* eslint-disable-line */
+								}
 							: {}
 					],
 					footer: `${index + 1}/${data.length}\nPowered by Hidden Finder`
@@ -105,9 +106,9 @@ ${result[0].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).jo
 						? {
 								quickReplyButton: {
 									displayText: 'Next Code',
-									id: `.githubcode next ${result[1].source} ${JSON.stringify(result).replace(/\|/g, '')}`
+									id: cmdId('githubcode', `next ${result[1].source} ${JSON.stringify(result).replace(/\|/g, '')}`)
 								}
-							} /* eslint-disable-line */
+							}
 						: {}
 				],
 				footer: `1/${result.length}\nPowered by Hidden Finder`

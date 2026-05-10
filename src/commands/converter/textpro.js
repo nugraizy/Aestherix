@@ -7,6 +7,7 @@ import { fetch } from 'undici';
 import yargsParser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
+import { cmdId } from '../../helper/modules/prefix.js';
 import { randomize } from '../../utils/modules/index.js';
 import { textpro } from '../../utils/textmaker/textpro.js';
 
@@ -77,13 +78,25 @@ ${data.join('\n')}
 Use ${cmd} ${randomize(numbers)} Texts Here.`;
 
 			if (!isParam) {
-				buttons.push({ buttonId: `${cmd} next ${index + 1} -model`, buttonText: { displayText: 'Next' }, type: 1 });
+				buttons.push({
+					buttonId: cmdId(cmd, 'next ' + (index + 1) + ' -model'),
+					buttonText: { displayText: 'Next' },
+					type: 1
+				});
 			} else if (isParam && splitData[index + 1] !== undefined) {
-				buttons.push({ buttonId: `${cmd} next ${index + 1} -model`, buttonText: { displayText: 'Next' }, type: 1 });
+				buttons.push({
+					buttonId: cmdId(cmd, 'next ' + (index + 1) + ' -model'),
+					buttonText: { displayText: 'Next' },
+					type: 1
+				});
 			}
 
 			if (isParam && index !== 0) {
-				buttons.push({ buttonId: `${cmd} prev ${index - 1} -model`, buttonText: { displayText: 'Previous' }, type: 1 });
+				buttons.push({
+					buttonId: cmdId(cmd, 'prev ' + (index - 1) + ' -model'),
+					buttonText: { displayText: 'Previous' },
+					type: 1
+				});
 			}
 
 			buttons = buttons.reverse();
@@ -127,7 +140,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 							author: configuration.author,
 							packname: configuration.packname
 						}
-					) /* eslint-disable-line */
+					)
 				: await sharp(data)
 						.extract({ width: width - 40, height: height - 40, left: 0, top: 0 })
 						.toBuffer();

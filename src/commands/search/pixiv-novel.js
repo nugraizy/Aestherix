@@ -1,3 +1,4 @@
+import { cmdId } from '../../helper/modules/prefix.js';
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { getNovelContent, searchNovel } from '../../utils/pixiv/index.js';
 
@@ -58,7 +59,7 @@ ${content}`.formatForm(),
 					rows: [
 						{
 							title: `Read ${title}`,
-							rowId: `${cmd}get https://www.pixiv.net/novel/show.php?id=${id}`
+							rowId: cmdId(cmd, `get https://www.pixiv.net/novel/show.php?id=${id}`)
 						}
 					],
 					title: `PIXIV | ${title.capitalize()} | by ${userName} | ${pageCount} | ${type.capitalize()}`

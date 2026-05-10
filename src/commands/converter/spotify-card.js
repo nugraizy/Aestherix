@@ -20,6 +20,7 @@ export default {
 		}
 
 		const timer = new Timer('${s}s (${ms} ms)');
+
 		timer.start();
 
 		const wait = await client.instance.waitMessage(from, 'Please wait...', message);

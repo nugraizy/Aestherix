@@ -2,7 +2,10 @@ import { getContentType, getDevice, normalizeMessageContent } from 'baileys';
 import fs from 'fs-extra';
 import PhoneNumber from 'libphonenumber-js';
 
+import { color, loggers } from '../../utils/modules/index.js';
 import configuration from '../config/connect.js';
+import { getBannedUsers } from '../database/adapters/user.js';
+import prisma from '../database/prisma.js';
 import { checkJSON, pushDefaultSettings, updateSettings } from '../groups/settings/index.js';
 import {
 	extractBody,
@@ -16,8 +19,6 @@ import {
 	typeMessage
 } from '../misc/wa_data/index.js';
 import { Cache } from './cache.js';
-import prisma from '../database/prisma.js';
-import { getBannedUsers } from '../database/adapters/user.js';
 
 /**
  * @constant
@@ -47,39 +48,31 @@ const caching = async (clients, id) => {
 	configuration.isFirstConnectionForCache = false;
 };
 
-const waitForInput = (client, data) =>
-	new Promise(async (resolve) => {
-		if (data.message) {
-			await client.instance.send(data.from, {
-				text: data.message
-			});
-		}
+const waitForInput = async (client, data) => {
+	if (data.sendImpl) {
+		await data.sendImpl();
+	} else if (data.message) {
+		await client.instance.send(data.from, { text: data.message });
+	}
 
-		let times = Date.now();
+	return new Promise((resolve) => {
+		const timeoutMs = (data.timeInSecond || 10) * 1000;
+
+		const timer = setTimeout(() => {
+			configuration.input.delete(data.sender);
+			resolve({ timeout: true });
+		}, timeoutMs);
 
 		configuration.input.set(data.sender, {
-			timeout: setInterval(() => {
-				const sender = data.sender;
-				const { timeout, message, quoted, invalid } = configuration.input.get(sender);
-
-				if (message !== '') {
-					clearInterval(timeout);
-					configuration.input.delete(sender);
-					resolve({ message, quoted, invalid });
-				}
-
-				if (Date.now() - times > (data.timeInSecond || 10) * 1000) {
-					clearInterval(timeout);
-					configuration.input.delete(sender);
-					resolve({ timeout: true });
-				}
-			}, 1000),
 			expectedType: data.expectedType,
-			message: '',
-			quoted: null,
-			invalid: false
+			resolve(result) {
+				clearTimeout(timer);
+				configuration.input.delete(data.sender);
+				resolve(result);
+			}
 		});
 	});
+};
 
 const lidMaps = new Cache();
 
@@ -160,30 +153,84 @@ export const reassign = async (m, client, store, state) => {
 			client.instance.ev.emit('poll.update', { ...m.message, msg: m, from, sender, func: PollUpdateDecrypt });
 		}
 
-		if (configuration.isFirstConnectionForCache) {
+		if (configuration.isFirstConnectionForCache || !configuration.cache.prefixValues) {
 			const SETTINGS = await fs.readJSON('./src/helper/config/settings.json');
 			const dataBanned = await getBannedUsers(prisma);
 
-			const { multi, noPref } = SETTINGS.prefix;
 			const botNumber = myJid;
-
 			const dataBlock = await client.instance.fetchBlocklist();
 
 			configuration.cache.bannedlist = dataBanned;
 			configuration.cache.blocklist = dataBlock;
 
-			const prefixMode = multi ? 'multi_prefix' : noPref ? 'no_prefix' : SETTINGS.prefix.pref || '.';
+			const cliPrefixFlag = configuration.OPTIONS?.prefix || '';
+			const cliPrefixes = cliPrefixFlag
+				? cliPrefixFlag
+						.split(',')
+						.map((p) => p.trim())
+						.filter(Boolean)
+				: [];
 
-			const prf =
-				prefixMode === 'multi_prefix' ? /^[°π÷×¶∆£¢€¥®™✓_=+|~!#$%^&./\\©^>]/ : prefixMode === 'no_prefix' ? '' : prefixMode;
+			let prefixMode = 'single';
+			let prefixValues = [];
+
+			if (cliPrefixFlag) {
+				if (SETTINGS.prefix.multi) {
+					prefixMode = 'multi';
+					const baseMultiChars = [...'°π÷×¶∆£¢€¥®™✓_=+|~!#$%^&./\\©^>'];
+
+					prefixValues = [...new Set([...baseMultiChars, ...cliPrefixes])];
+				} else {
+					prefixMode = 'single';
+					prefixValues = cliPrefixes.length > 1 ? cliPrefixes : cliPrefixes.length === 1 ? [cliPrefixes[0]] : [];
+				}
+			} else if (SETTINGS.prefix.multi && SETTINGS.prefix.nopref) {
+				loggers.warning(
+					color('Prefix mode conflict:', 'red'),
+					color('multi and nopref cannot both be true in settings.json.', 'white'),
+					color('Falling back to multi-prefix mode.', 'yellow')
+				);
+
+				prefixMode = 'multi';
+				const baseConflict = [...'°π÷×¶∆£¢€¥®™✓_=+|~!#$%^&./\\©^>'];
+				const customConflict = Array.isArray(SETTINGS.prefix.customPrefixes) ? SETTINGS.prefix.customPrefixes : [];
+
+				prefixValues = customConflict.length ? [...new Set([...baseConflict, ...customConflict])] : baseConflict;
+			} else if (SETTINGS.prefix.multi) {
+				prefixMode = 'multi';
+				const baseMultiChars = [...'°π÷×¶∆£¢€¥®™✓_=+|~!#$%^&./\\©^>'];
+				const customPrefixes = Array.isArray(SETTINGS.prefix.customPrefixes) ? SETTINGS.prefix.customPrefixes : [];
+
+				prefixValues = customPrefixes.length ? [...new Set([...baseMultiChars, ...customPrefixes])] : baseMultiChars;
+			} else if (SETTINGS.prefix.nopref) {
+				prefixMode = 'nopref';
+				prefixValues = [];
+			} else {
+				prefixMode = 'single';
+				prefixValues = [SETTINGS.prefix.pref || '.'];
+			}
+
+			const escCharClass = (str) => str.replace(/[[\]\\^$]/g, (m) => `\\${m}`);
+			const escapedValues = prefixValues.map(escCharClass).join('');
+
+			const prefixReg = prefixMode === 'multi' ? new RegExp(`^[${escapedValues}]`) : null;
 
 			configuration.cache = {
 				...configuration.cache,
-				prf,
+				prf: prefixMode === 'nopref' ? '' : prefixValues[0] || '.',
 				prefixMode,
-				prefixReg: /^[°π÷×¶∆£¢€¥®™✓_=+|~!#$%^&./\\©^>]/,
+				prefixReg,
+				prefixValues,
 				botNumber,
 				ownerNumbers: [SETTINGS.owner_number, ...SETTINGS.team_number, botNumber]
+			};
+
+			configuration.cache.prefixConfig = {
+				multi: prefixMode === 'multi',
+				nopref: prefixMode === 'nopref',
+				pref: prefixValues[0] || '.',
+				cliPrefixes: cliPrefixes.length ? cliPrefixes : (SETTINGS.prefix.customPrefixes || []),
+				prefixValues
 			};
 
 			configuration.cache.config = SETTINGS;
@@ -315,13 +362,17 @@ export const reassign = async (m, client, store, state) => {
 		const body = extractBody(m, type);
 		const args = body?.split(/ +/g);
 		let cmd = body?.toLowerCase()?.split(' ')[0] || '';
-		let { prf, prefixMode, prefixReg } = configuration.cache;
+		let { prf, prefixMode, prefixReg, prefixValues } = configuration.cache;
 
-		if (prefixMode === 'multi_prefix') {
-			prf = prefixReg.test(cmd) ? cmd.match(new RegExp(prefixReg, 'gi')) : '-';
+		if (prefixMode === 'multi' && prefixReg) {
+			const escCharClass = (str) => str.replace(/[[\]\\^$]/g, (m) => `\\${m}`);
+
+			prf = prefixReg.test(cmd) ? cmd.match(new RegExp(`[${prefixValues.map(escCharClass).join('')}]`, 'gi'))?.[0] : null;
+		} else if (prefixMode === 'nopref') {
+			prf = '';
 		}
 
-		const isCmd = body?.startsWith(prf);
+		const isCmd = prefixMode === 'nopref' ? true : body != null && prf != null && body.startsWith(prf);
 
 		cmd = isCmd ? cmd : '';
 		const query = args?.slice(1)?.join(' ');
@@ -488,7 +539,8 @@ export const reassign = async (m, client, store, state) => {
 			extractMediaData,
 			bodyQuoted,
 			waitForInput,
-			device
+			device,
+			prefixInfo: configuration.cache.prefixConfig
 		};
 	} catch (e) {
 		log(e);

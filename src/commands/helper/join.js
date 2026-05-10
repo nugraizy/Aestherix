@@ -1,3 +1,5 @@
+import { cmdId } from '../../helper/modules/prefix.js';
+
 const regex = (input) => {
 	const regex = /^(?:https?:\/\/)?(?:chat\.)?(?:whatsapp\.com)\/([\d\w]{21,23})/;
 
@@ -27,7 +29,7 @@ export default {
 	limit: 7,
 	cooldown: 5,
 	status: 'enable',
-	async run({ from, query, message, sender, isOwner, settings }, client) {
+	async run({ from, query, message, sender, isOwner, settings, prefix }, client) {
 		if (!query) {
 			return await client.instance.reply(from, 'You must provide a url.', message);
 		}
@@ -77,7 +79,7 @@ export default {
 				{
 					text: 'Click to open menu',
 					footer: 'Powered by Hidden Finder',
-					buttons: [{ buttonId: '.menu', buttonText: { displayText: 'Menu' }, type: 1 }],
+					buttons: [{ buttonId: cmdId('menu', '', { prefix }), buttonText: { displayText: 'Menu' }, type: 1 }],
 					headerType: 1
 				},
 				{}
