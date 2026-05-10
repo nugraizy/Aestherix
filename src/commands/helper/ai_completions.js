@@ -26,7 +26,7 @@ export default {
 		const completion = await openai.chat.completions.create({
 			model: 'text-davinci-003',
 			prompt: query,
-			max_tokens: 200 /* eslint-disable-line */
+			max_tokens: 200
 		});
 
 		client.instance.reply(from, completion.choices[0].text.trim(), message);

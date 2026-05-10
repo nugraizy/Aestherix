@@ -34,10 +34,7 @@ export default {
 
 			configuration.user.charAI.set(
 				from,
-				new ChatGPTDialogue({
-					name: pushname,
-					time: new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })
-				})
+				new ChatGPTDialogue(pushname, new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }), 'Zero_Two')
 			);
 
 			return await client.instance.reply(from, 'AI chat has been started', message);

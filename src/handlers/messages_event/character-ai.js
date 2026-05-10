@@ -5,14 +5,14 @@ import configuration from '../../helper/config/connect.js';
 /**
  * @type {import('../../types/Commands/index.js').CommandProps['run']}
  */
-const handler = async ({ from, type, body, message, mediaData }, client) => {
+const handler = async ({ from, type, body, message, mediaData, isFromMe }, client) => {
 	try {
 		/**
 		 * @type {import('../../utils/ai/char-ai.js').ChatGPTDialogue}
 		 */
 		const ai = configuration.user.charAI.get(from);
 
-		if (ai && (type === 'conversation' || type === 'extendedTextMessage' || type === 'imageMessage')) {
+		if (ai && !isFromMe && (type === 'conversation' || type === 'extendedTextMessage' || type === 'imageMessage')) {
 			body = type === 'imageMessage' ? await client.instance.downloadMediaMessage(mediaData) : body;
 			let response = await ai.sendMessage(body);
 
@@ -24,7 +24,13 @@ const handler = async ({ from, type, body, message, mediaData }, client) => {
 				await delay(1000);
 			}
 
-			await client.instance.reply(from, response.message, message);
+			response = response.message.split('{OTHER_MESSAGE}');
+
+			for (const aiMessage of response) {
+				await client.instance.reply(from, aiMessage.trim(), message);
+
+				await delay(1000);
+			}
 		}
 	} catch (error) {
 		console.log(error);
