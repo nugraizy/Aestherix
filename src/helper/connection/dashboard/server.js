@@ -13,6 +13,7 @@ import { Server as SocketIOServer } from 'socket.io';
 import { z } from 'zod';
 
 import { color, loggers } from '../../../utils/modules/index.js';
+import { cmdId } from '../../modules/prefix.js';
 import configuration from '../../config/connect.js';
 import {
 	addToBlocklist,
@@ -556,103 +557,76 @@ const isSessionLive = (session) => {
 	return Date.now() - Number(session?.lastSeenAt || 0) <= LIVE_SESSION_WINDOW_MS;
 };
 
-const parseGithubLogin = ({ name = '', email = '' } = {}) => {
-	const safeName = String(name || '').trim();
-	const safeEmail = String(email || '')
-		.trim()
-		.toLowerCase();
-	const emailMatch = safeEmail.match(/^(?:\d+\+)?([^@]+)@users\.noreply\.github\.com$/i);
+const KV_CONTRIBUTORS_KEY = 'dashboard_contributors';
 
-	if (emailMatch?.[1]) {
-		return emailMatch[1].trim();
+const getLatestCommitHash = async () => {
+	const headers = {
+		Accept: 'application/vnd.github+json',
+		'User-Agent': 'aestherix-bot'
+	};
+
+	if (process.env.GITHUB_AUTH_TOKEN) {
+		headers.Authorization = `Bearer ${process.env.GITHUB_AUTH_TOKEN}`;
 	}
 
-	if (/^[a-z0-9-]{2,39}$/i.test(safeName) && !safeName.includes(' ')) {
-		return safeName;
+	const response = await fetch('https://api.github.com/repos/nugraizy/aestherix/commits?per_page=1', { headers });
+
+	if (!response.ok) {
+		return null;
 	}
 
-	return '';
+	const [commit] = await response.json();
+
+	return commit?.sha || null;
+};
+
+const fetchContributorsFromGitHub = async () => {
+	const headers = {
+		Accept: 'application/vnd.github+json',
+		'User-Agent': 'aestherix-bot'
+	};
+
+	if (process.env.GITHUB_AUTH_TOKEN) {
+		headers.Authorization = `Bearer ${process.env.GITHUB_AUTH_TOKEN}`;
+	}
+
+	const response = await fetch('https://api.github.com/repos/nugraizy/aestherix/contributors?per_page=50', { headers });
+
+	if (!response.ok) {
+		throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+	}
+
+	const data = await response.json();
+
+	return data
+		.filter((user) => user.type === 'User')
+		.map((user) => ({
+			name: user.login,
+			login: user.login,
+			email: '',
+			commits: user.contributions,
+			profileUrl: user.html_url,
+			avatarUrl: `https://avatars.githubusercontent.com/${user.login}?size=128`
+		}));
 };
 
 const loadDashboardContributorsFromGit = async () => {
-	return await new Promise((resolve, reject) => {
-		const git = spawn('git', ['shortlog', '-sne', 'HEAD'], {
-			cwd: process.cwd(),
-			shell: false
-		});
+	const cached = await prisma.dashboardKV.findUnique({ where: { key: KV_CONTRIBUTORS_KEY } });
+	const parsed = cached?.value ? JSON.parse(cached.value) : null;
+	const latestHash = await getLatestCommitHash();
 
-		let stdout = '';
-		let stderr = '';
+	if (parsed && latestHash && parsed.commitHash === latestHash) {
+		return parsed.contributors;
+	}
 
-		git.stdout.on('data', (chunk) => {
-			stdout += chunk.toString();
-		});
+	const contributors = await fetchContributorsFromGitHub();
 
-		git.stderr.on('data', (chunk) => {
-			stderr += chunk.toString();
-		});
-
-		git.on('error', (error) => {
-			reject(error);
-		});
-
-		git.on('close', (code) => {
-			if (code !== 0) {
-				reject(new Error(stderr || `git shortlog failed with code ${code}`));
-				return;
-			}
-
-			const rows = stdout
-				.split(/\r?\n/)
-				.map((line) => line.trimEnd())
-				.filter(Boolean)
-				.map((line) => {
-					const match = line.match(/^\s*(\d+)\s+(.+?)\s+<([^>]+)>\s*$/);
-
-					if (!match) {
-						return null;
-					}
-
-					const commits = Number.parseInt(match[1], 10) || 0;
-					const name = String(match[2] || '').trim();
-					const email = String(match[3] || '').trim();
-					const login = parseGithubLogin({ name, email });
-
-					if (/\[bot\]$/i.test(login)) {
-						return null;
-					}
-
-					const profileUrl = login ? `https://github.com/${login}` : '';
-					const avatarUrl = login ? `https://github.com/${login}.png?size=128` : '';
-
-					return {
-						name,
-						login,
-						email,
-						commits,
-						profileUrl,
-						avatarUrl
-					};
-				})
-				.filter(Boolean);
-
-			const deduped = [];
-			const seen = new Set();
-
-			for (const entry of rows) {
-				const key = entry.login ? `login:${entry.login.toLowerCase()}` : `name:${entry.name.toLowerCase()}`;
-
-				if (seen.has(key)) {
-					continue;
-				}
-
-				seen.add(key);
-				deduped.push(entry);
-			}
-
-			resolve(deduped);
-		});
+	await prisma.dashboardKV.deleteMany({ where: { key: KV_CONTRIBUTORS_KEY } });
+	await prisma.dashboardKV.create({
+		data: { key: KV_CONTRIBUTORS_KEY, value: JSON.stringify({ commitHash: latestHash, contributors }) }
 	});
+
+	return contributors;
 };
 
 const countActiveDashboardSessions = () => {
@@ -2882,8 +2856,8 @@ export const server = async () => {
 			const actionToken = crypto.randomBytes(24).toString('hex');
 			const approveActionId = `dashauth:confirm:${requestId}:${actionToken}`;
 			const rejectActionId = `dashauth:reject:${requestId}:${actionToken}`;
-			const approveButtonId = `.dashconfirm ${approveActionId}`;
-			const rejectButtonId = `.dashconfirm ${rejectActionId}`;
+			const approveButtonId = cmdId('dashconfirm', approveActionId);
+			const rejectButtonId = cmdId('dashconfirm', rejectActionId);
 			const expiresAt = Date.now() + OTP_TTL_MS;
 
 			otpStore.set(phoneNumber, {
@@ -3281,6 +3255,113 @@ export const server = async () => {
 		});
 	});
 
+	app.get('/api/dashboard/prefix', requireDashboardAuth, (_req, res) => {
+		const prefixConfig = configuration.cache?.prefixConfig || {};
+		const settings = fs.readJSONSync('./src/helper/config/settings.json', { throws: false }) || {};
+		const settingsPrefix = settings.prefix || {};
+
+		res.json({
+			mode: prefixConfig.multi ? 'multi' : prefixConfig.nopref ? 'nopref' : 'single',
+			pref: prefixConfig.pref || settingsPrefix.pref || '.',
+			multi: prefixConfig.multi ?? Boolean(settingsPrefix.multi),
+			nopref: prefixConfig.nopref ?? Boolean(settingsPrefix.nopref),
+			cliPrefixes: prefixConfig.cliPrefixes || [],
+			prefixValues: prefixConfig.prefixValues || []
+		});
+	});
+
+	app.post('/api/dashboard/prefix', requireOwnerAuth, async (req, res) => {
+		const session = req.dashboardSession || null;
+		const { mode, pref } = req.body || {};
+
+		if (!['single', 'multi', 'nopref'].includes(mode)) {
+			pushAuditEvent({
+				action: 'prefix.change',
+				session,
+				target: 'prefix',
+				status: 'failed',
+				message: 'Invalid prefix mode. Must be single, multi, or nopref.'
+			});
+			return res.status(400).json({ ok: false, message: 'Invalid mode. Must be single, multi, or nopref.' });
+		}
+
+		let newPrefixConfig;
+		let newPrefixReg = null;
+		let newPrefixValues = [];
+
+		if (mode === 'multi') {
+			const cliPrefixes = Array.isArray(req.body.prefixes)
+				? req.body.prefixes.filter((p) => typeof p === 'string' && p.length > 0)
+				: [];
+			const baseMultiChars = '°π÷×¶∆£¢€¥®™✓_=+|~!#$%^&./\\©^>';
+
+			newPrefixValues = cliPrefixes.length ? [...new Set([...baseMultiChars, ...cliPrefixes])] : [...baseMultiChars];
+			const escCharClass = (str) => str.replace(/[[\]\\^$]/g, (m) => `\\${m}`);
+			const escaped = newPrefixValues.map(escCharClass).join('');
+
+			newPrefixReg = new RegExp(`^[${escaped}]`);
+			newPrefixConfig = {
+				multi: true,
+				nopref: false,
+				pref: '.',
+				cliPrefixes,
+				prefixValues: newPrefixValues
+			};
+		} else if (mode === 'nopref') {
+			newPrefixConfig = {
+				multi: false,
+				nopref: true,
+				pref: pref || '.',
+				cliPrefixes: [],
+				prefixValues: []
+			};
+		} else {
+			const singlePref = typeof pref === 'string' && pref.length > 0 ? pref[0] : '.';
+
+			newPrefixConfig = {
+				multi: false,
+				nopref: false,
+				pref: singlePref,
+				cliPrefixes: [],
+				prefixValues: [singlePref]
+			};
+		}
+
+		configuration.cache.prefixConfig = newPrefixConfig;
+		configuration.cache.prefixMode = mode;
+		configuration.cache.prefixReg = newPrefixReg;
+		configuration.cache.prefixValues = newPrefixValues;
+		configuration.cache.prf = mode === 'nopref' ? '' : newPrefixConfig.pref || '.';
+
+		const settingsPath = './src/helper/config/settings.json';
+		const currentSettings = await fs.readJSON(settingsPath).catch(() => ({}));
+
+		currentSettings.prefix = {
+			multi: newPrefixConfig.multi,
+			nopref: newPrefixConfig.nopref,
+			pref: newPrefixConfig.pref,
+			customPrefixes: newPrefixConfig.cliPrefixes || []
+		};
+		await fs.writeJSON(settingsPath, currentSettings, { spaces: 2 }).catch(() => {});
+
+		pushAuditEvent({
+			action: 'prefix.change',
+			session,
+			target: 'prefix',
+			before: { mode: configuration.cache.prefixConfig?.multi ? 'multi' : configuration.cache.prefixConfig?.nopref ? 'nopref' : 'single', pref: configuration.cache.prefixConfig?.pref },
+			after: { mode, pref: newPrefixConfig.pref }
+		});
+
+		loggers.info(
+			color('Dashboard changed prefix:', 'white'),
+			color(mode, 'lilac'),
+			color('pref:', 'white'),
+			color(newPrefixConfig.pref, 'lilac')
+		);
+
+		res.json({ ok: true, mode, pref: newPrefixConfig.pref, multi: newPrefixConfig.multi, nopref: newPrefixConfig.nopref });
+	});
+
 	app.get('/api/dashboard/users', requireDashboardAuth, async (req, res) => {
 		const session = req.dashboardSession || getSessionFromRequest(req);
 		const users = await listDashboardUsers({
@@ -3592,7 +3673,7 @@ export const server = async () => {
 		loggers.info(
 			color('Dashboard changed flag state:', 'white'),
 			color(flagName, 'lilac'),
-			color('⤑', 'white'),
+			color('⤑ ', 'white'),
 			color(enabled ? 'enabled' : 'disabled', enabled ? 'green' : 'red')
 		);
 
@@ -3900,4 +3981,6 @@ export const server = async () => {
 	});
 
 	configuration.expressInstances.set('dashboard', appToStore);
+
+	configuration.dashboardIO = io;
 };

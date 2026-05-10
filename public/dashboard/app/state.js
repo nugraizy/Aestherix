@@ -52,8 +52,18 @@ export const state = {
 		flags: { kind: 'idle', message: '' },
 		users: { kind: 'idle', message: '' },
 		profilePictures: { kind: 'idle', message: '' },
-		editor: { kind: 'idle', message: '' }
+		editor: { kind: 'idle', message: '' },
+		prefix: { kind: 'idle', message: '' }
 	},
+	prefixConfig: {
+		mode: 'multi',
+		pref: '.',
+		multi: true,
+		nopref: false,
+		cliPrefixes: [],
+		prefixValues: []
+	},
+	prefixActiveMode: 'multi',
 	settings: {
 		...DEFAULT_DASHBOARD_SETTINGS
 	},

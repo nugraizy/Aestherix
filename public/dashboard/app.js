@@ -518,7 +518,12 @@ const renderContributors = (contributors) => {
 	}
 
 	const people = contributors
-		.filter((entry) => String(entry?.name || '').trim())
+		.filter((entry) => {
+			const name = String(entry?.name || '').trim();
+			const profileUrl = String(entry?.profileUrl || '').trim();
+
+			return name && profileUrl;
+		})
 		.map((entry) => {
 			const name = escapeHtml(String(entry.name || '').trim());
 			const login = escapeHtml(String(entry.login || '').trim());
@@ -6737,15 +6742,42 @@ function startPollingLoops() {
 
 		void runSafe(fetchUsers);
 	}, state.settings.dataRefreshMs);
-
-	pollingTimers.profilePictures = setInterval(() => {
-		if (realtimeConnected) {
-			return;
-		}
-
-		void runSafe(fetchProfilePictures);
-	}, state.settings.dataRefreshMs);
 }
+
+let fetchPrefix = async () => {
+	try {
+		const response = await fetch('/api/dashboard/prefix');
+
+		ensureAuthorizedResponse(response, 'Failed fetching prefix');
+		const data = await response.json();
+
+		state.prefixConfig = {
+			mode: data.mode || 'multi',
+			pref: data.pref || '.',
+			multi: Boolean(data.multi),
+			nopref: Boolean(data.nopref),
+			cliPrefixes: data.cliPrefixes || [],
+			prefixValues: data.prefixValues || []
+		};
+	} catch {
+		// Silently fail on prefix fetch
+	}
+};
+
+const savePrefix = async (mode, pref, prefixes) => {
+	const response = await fetch('/api/dashboard/prefix', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ mode, pref, prefixes })
+	});
+
+	ensureAuthorizedResponse(response, 'Failed saving prefix');
+	return response.json();
+};
+
+void runSafe(fetchPrefix);
+
+void runSafe(fetchProfilePictures);
 
 const resetAuditFilters = () => {
 	setAuditChipValues(els.auditActionChips, 'data-audit-action', []);
@@ -7331,6 +7363,148 @@ const bindEvents = () => {
 		startPollingLoops();
 		showToast('Dashboard settings reset to defaults.', 'info');
 	});
+
+	const prefixRadioListeners = () => {
+		const setPrefixMode = (mode) => {
+			state.prefixActiveMode = mode;
+			const modes = ['single', 'multi', 'nopref'];
+
+			modes.forEach((m) => {
+				const btn = document.querySelector(`[data-prefix-mode="${m}"]`);
+
+				if (!btn) {
+					return;
+				}
+
+				const isActive = m === mode;
+
+				btn.classList.toggle('is-on', isActive);
+				btn.classList.toggle('is-off', !isActive);
+				btn.setAttribute('aria-checked', String(isActive));
+			});
+
+			els.prefixSingleOptions?.classList.toggle('hidden', mode !== 'single');
+			els.prefixMultiOptions?.classList.toggle('hidden', mode !== 'multi');
+		};
+
+		const handleToggleClick = (event) => {
+			const btn = event.target.closest('[data-prefix-mode]');
+
+			if (!btn) {
+				return;
+			}
+
+			setPrefixMode(btn.dataset.prefixMode);
+		};
+
+		els.prefixModeSingle?.addEventListener('click', handleToggleClick);
+		els.prefixModeMulti?.addEventListener('click', handleToggleClick);
+		els.prefixModeNopref?.addEventListener('click', handleToggleClick);
+	};
+
+	prefixRadioListeners();
+
+	els.prefixSave?.addEventListener('click', async () => {
+		const mode = state.prefixActiveMode || 'single';
+		const pref = els.prefixSingleValue?.value?.trim() || '.';
+		const customRaw = els.prefixMultiCustom?.value?.trim() || '';
+		const prefixes = customRaw
+			? customRaw
+					.split(',')
+					.map((p) => p.trim())
+					.filter(Boolean)
+			: [];
+
+		try {
+			await savePrefix(mode, pref, prefixes);
+			await fetchPrefix();
+			showToast(`Prefix saved: ${mode} mode, pref "${mode === 'single' ? pref : '(multi)'}"`, 'success');
+		} catch (error) {
+			showToast(error?.message || 'Failed to save prefix.', 'error');
+		}
+	});
+
+	els.prefixReset?.addEventListener('click', async () => {
+		state.prefixActiveMode = 'single';
+		['single', 'multi', 'nopref'].forEach((m) => {
+			const btn = document.querySelector(`[data-prefix-mode="${m}"]`);
+
+			if (!btn) {
+				return;
+			}
+
+			btn.classList.toggle('is-on', m === 'single');
+			btn.classList.toggle('is-off', m !== 'single');
+			btn.setAttribute('aria-checked', String(m === 'single'));
+		});
+		els.prefixSingleOptions?.classList.remove('hidden');
+		els.prefixMultiOptions?.classList.add('hidden');
+
+		if (els.prefixSingleValue) {
+			els.prefixSingleValue.value = '.';
+		}
+
+		if (els.prefixMultiCustom) {
+			els.prefixMultiCustom.value = '';
+		}
+
+		try {
+			await savePrefix('single', '.', []);
+			await fetchPrefix();
+			showToast('Prefix reset to defaults.', 'info');
+		} catch (error) {
+			showToast(error?.message || 'Failed to reset prefix.', 'error');
+		}
+	});
+
+	const originalFetchPrefix = fetchPrefix;
+
+	fetchPrefix = async () => {
+		await originalFetchPrefix();
+
+		if (state.prefixConfig) {
+			state.prefixActiveMode = state.prefixConfig.mode || 'single';
+			['single', 'multi', 'nopref'].forEach((m) => {
+				const btn = document.querySelector(`[data-prefix-mode="${m}"]`);
+
+				if (!btn) {
+					return;
+				}
+
+				const isActive = m === state.prefixConfig.mode;
+
+				btn.classList.toggle('is-on', isActive);
+				btn.classList.toggle('is-off', !isActive);
+				btn.setAttribute('aria-checked', String(isActive));
+			});
+
+			if (els.prefixSingleValue) {
+				els.prefixSingleValue.value = state.prefixConfig.pref || '.';
+			}
+
+			if (els.prefixMultiCustom && state.prefixConfig.cliPrefixes) {
+				els.prefixMultiCustom.value = state.prefixConfig.cliPrefixes
+					.filter((p) => !'°π÷×¶∆£¢€¥®™✓_=+|~!#$%^&./\\©^>'.includes(p))
+					.join(', ');
+			}
+
+			els.prefixSingleOptions?.classList.toggle('hidden', state.prefixConfig.mode !== 'single');
+			els.prefixMultiOptions?.classList.toggle('hidden', state.prefixConfig.mode !== 'multi');
+
+			if (els.prefixCurrentDisplay) {
+				const displayMode =
+					state.prefixConfig.mode === 'multi'
+						? 'Multi-prefix mode'
+						: state.prefixConfig.mode === 'nopref'
+							? 'No-prefix mode'
+							: 'Single prefix mode';
+
+				els.prefixCurrentDisplay.textContent = `${displayMode} — current pref: "${state.prefixConfig.pref}"`;
+			}
+		}
+	};
+
+	void fetchPrefix();
 
 	els.controlsSearch.addEventListener('input', () => {
 		state.searchByFolder[state.activeFolder] = els.controlsSearch.value;

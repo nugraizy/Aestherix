@@ -775,12 +775,80 @@
 						</div>
 					</div>
 				</section>
+
 			</section>
 
 			<section class="panel settings-panel" aria-label="Dashboard settings">
 				<div class="panel-head">
 					<h2>Settings</h2>
 					<p id="settings-summary" class="muted settings-summary">Configure polling, chart history, and autosave timing.</p>
+				</div>
+				<div id="prefix-panel" class="prefix-panel" aria-label="Bot prefix configuration">
+					<h3 class="settings-subhead">Prefix Settings</h3>
+					<p id="prefix-summary" class="muted prefix-summary">Configure how the bot recognizes commands.</p>
+					<div class="prefix-mode-selector">
+						<div class="prefix-mode-option">
+							<label for="prefix-mode-single">Single Prefix</label>
+							<button
+								type="button"
+								id="prefix-mode-single"
+								class="toggle-btn ios-toggle is-off"
+								role="switch"
+								aria-checked="false"
+								aria-label="Single Prefix"
+								data-prefix-mode="single">
+								<span class="ios-toggle-track" aria-hidden="true"><span class="ios-toggle-thumb"></span></span>
+							</button>
+						</div>
+						<div class="prefix-mode-option">
+							<label for="prefix-mode-multi">Multi Prefix</label>
+							<button
+								type="button"
+								id="prefix-mode-multi"
+								class="toggle-btn ios-toggle is-off"
+								role="switch"
+								aria-checked="false"
+								aria-label="Multi Prefix"
+								data-prefix-mode="multi">
+								<span class="ios-toggle-track" aria-hidden="true"><span class="ios-toggle-thumb"></span></span>
+							</button>
+						</div>
+						<div class="prefix-mode-option">
+							<label for="prefix-mode-nopref">No Prefix</label>
+							<button
+								type="button"
+								id="prefix-mode-nopref"
+								class="toggle-btn ios-toggle is-off"
+								role="switch"
+								aria-checked="false"
+								aria-label="No Prefix"
+								data-prefix-mode="nopref">
+								<span class="ios-toggle-track" aria-hidden="true"><span class="ios-toggle-thumb"></span></span>
+							</button>
+						</div>
+					</div>
+					<div id="prefix-single-options" class="prefix-options hidden">
+						<label class="settings-field" for="prefix-single-value">
+							<span>Default Prefix</span>
+							<input id="prefix-single-value" type="text" maxlength="5" placeholder="." />
+						</label>
+					</div>
+					<div id="prefix-multi-options" class="prefix-options hidden">
+						<label class="settings-field" for="prefix-multi-custom">
+							<span>Additional Prefix Characters (comma-separated)</span>
+							<input id="prefix-multi-custom" type="text" placeholder="e.g. !, #, $" />
+						</label>
+						<p class="muted prefix-hint">Base multi prefixes are always included. Add custom characters here.</p>
+					</div>
+					<div class="prefix-current">
+						<p id="prefix-current-display" class="muted prefix-summary"></p>
+					</div>
+					<div class="prefix-actions">
+						<button id="prefix-save" type="button" data-tooltip="Save prefix settings and persist to settings.json">
+							Save Prefix
+						</button>
+						<button id="prefix-reset" type="button" data-tooltip="Reset to default settings.json values">Reset</button>
+					</div>
 				</div>
 				<div class="settings-grid">
 					<label class="settings-field" for="setting-status-refresh-ms">
