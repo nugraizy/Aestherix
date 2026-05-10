@@ -8,7 +8,7 @@ export const genshinProfile = (uid) =>
 				'get',
 				'index',
 				{
-					/* eslint-disable-line */ role_id: uid,
+					role_id: uid,
 					server: completeServer
 				},
 				simplifiedServer

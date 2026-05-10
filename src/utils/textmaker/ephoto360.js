@@ -108,7 +108,6 @@ export const ephoto360 = async (api, texts, path) =>
 				formData.append('file_image_input', '');
 				formData.append(
 					'image[]',
-					/* eslint-disable */
 					JSON.stringify({
 						image: payloadImages.uploaded_file,
 						image_thumb: payloadImages.thumb_file,
@@ -122,7 +121,6 @@ export const ephoto360 = async (api, texts, path) =>
 						scaleY: 1,
 						thumb_width: 400
 					})
-					/* eslint-enable */
 				);
 			}
 

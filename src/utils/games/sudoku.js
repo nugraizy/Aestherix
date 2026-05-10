@@ -1,4 +1,3 @@
-/* eslint-disable */
 const keycaps = {
 	0: '0️⃣',
 	1: '1️⃣',

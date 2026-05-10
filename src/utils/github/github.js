@@ -8,7 +8,7 @@ export class Github {
 		this.searchUser = (user) =>
 			new Promise(async (resolve, reject) => {
 				try {
-					const res = await this.req('/search/users', { q: user, /* eslint-disable-line */ per_page: 100 }, 'GET', true);
+					const res = await this.req('/search/users', { q: user, per_page: 100 }, 'GET', true);
 
 					resolve(res);
 				} catch (err) {
@@ -20,12 +20,7 @@ export class Github {
 		this.searchRepository = (repo) =>
 			new Promise(async (resolve, reject) => {
 				try {
-					const res = await this.req(
-						'/search/repositories',
-						{ q: encodeURI(repo), /* eslint-disable-line */ per_page: 100 },
-						'GET',
-						true
-					);
+					const res = await this.req('/search/repositories', { q: encodeURI(repo), per_page: 100 }, 'GET', true);
 
 					resolve(res);
 				} catch (err) {
@@ -39,7 +34,7 @@ export class Github {
 				try {
 					const res = await this.req(
 						'/search/issues',
-						{ q: `${encodeURI(keyword)}+user:adiwajshing`, /* eslint-disable-line */ per_page: 100 },
+						{ q: `${encodeURI(keyword)}+user:adiwajshing`, per_page: 100 },
 						'GET',
 						true
 					);
@@ -54,7 +49,7 @@ export class Github {
 		this.searchCode = (code) =>
 			new Promise(async (resolve, reject) => {
 				try {
-					const res = await this.req('/search/code', { q: code, /* eslint-disable-line */ per_page: 100 }, 'GET');
+					const res = await this.req('/search/code', { q: code, per_page: 100 }, 'GET');
 
 					resolve(res);
 				} catch (err) {

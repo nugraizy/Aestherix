@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { parse, set } from '@dotenvx/dotenvx';
 import axios from 'axios';
 import fs from 'fs-extra';
@@ -98,7 +97,7 @@ class ResponseParser {
 									dimensions: edge.node.dimensions,
 									isVideo: edge.node.is_video,
 									mediaUrl: edge.node.is_video ? edge.node.video_url : edge.node.display_url
-								})) /* eslint-disable-line */
+								}))
 							: []
 					};
 				}) || []
@@ -442,7 +441,6 @@ class InstagramMethods extends ResponseParser {
 	async _fetchHighlight(id, cookie) {
 		const { data } = await axios.get(
 			this._appendParams(_apiGraphql, {
-				/* eslint-disable */
 				query_hash: '0a85e6ea60a4c99edc58ab2f3d17cfdf',
 				variables: JSON.stringify({
 					reel_ids: [],
@@ -455,7 +453,6 @@ class InstagramMethods extends ResponseParser {
 					story_viewer_cursor: '',
 					stories_video_dash_manifest: false
 				})
-				/* eslint-enable */
 			}),
 			{
 				method: 'GET',
@@ -476,7 +473,6 @@ class InstagramMethods extends ResponseParser {
 	 * @private
 	 */
 	async _getHighlights(input, cookie) {
-		/* eslint-disable */
 		const defaultPayload = {
 			query_hash: '0a85e6ea60a4c99edc58ab2f3d17cfdf',
 			variables: {
@@ -491,7 +487,6 @@ class InstagramMethods extends ResponseParser {
 				stories_video_dash_manifest: false
 			}
 		};
-		/* eslint-enable */
 
 		if (input.startsWith('@')) {
 			input = input.replace('@', '');
@@ -504,7 +499,6 @@ class InstagramMethods extends ResponseParser {
 		const user = await this._getProfile(input, cookie);
 		const { data } = await axios.get(
 			this._appendParams(_apiGraphql, {
-				/* eslint-disable */
 				query_hash: 'c9100bf9110dd6361671f113dd02e7d6',
 				variables: JSON.stringify({
 					user_id: user.id,
@@ -515,7 +509,6 @@ class InstagramMethods extends ResponseParser {
 					include_highlight_reels: true,
 					include_live_status: false
 				})
-				/* eslint-enable */
 			}),
 			{
 				headers: {

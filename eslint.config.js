@@ -24,7 +24,12 @@ export default [
 			'no-mixed-spaces-and-tabs': 'error',
 			'no-dupe-keys': 'warn',
 			'no-global-assign': 'off',
-			camelcase: 'error',
+			camelcase: [
+				'error',
+				{
+					properties: 'never'
+				}
+			],
 			'no-empty': 'error',
 			curly: 'error',
 			'no-whitespace-before-property': 'error',

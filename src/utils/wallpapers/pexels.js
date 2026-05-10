@@ -16,11 +16,11 @@ export const stockImagesPexel = (query) =>
 				params: {
 					query,
 					size: 'large',
-					per_page: 80 /* eslint-disable-line */,
+					per_page: 80
 				},
 				headers: {
-					Authorization: TOKEN,
-				},
+					Authorization: TOKEN
+				}
 			});
 
 			resolve(data?.photos?.map((v) => v.src.original));

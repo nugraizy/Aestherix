@@ -121,13 +121,13 @@ class Pinterest {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const context = {
-					source_url: `/search/pins/q=${query}` /* eslint-disable-line */,
+					source_url: `/search/pins/q=${query}`,
 					data: JSON.stringify({
 						options: {
 							isPrefetch: false,
 							query,
 							scope: 'pins',
-							no_fetch_context_on_resource: false /* eslint-disable-line */,
+							no_fetch_context_on_resource: false,
 							context: {}
 						}
 					}),
@@ -207,17 +207,16 @@ class Pinterest {
 				}
 
 				const context = {
-					source_url: `/pin/${pinId}/` /* eslint-disable-line */,
+					source_url: `/pin/${pinId}/`,
 					data: JSON.stringify({
 						options: {
-							field_set_key: 'detailed' /* eslint-disable-line */,
+							field_set_key: 'detailed',
 							ptrf: null,
-							fetch_visual_search_objects: true /* eslint-disable-line */,
+							fetch_visual_search_objects: true,
 							id: pinId,
 							context: {}
 						}
 					}),
-					/* eslint-disable-next-line */
 					module_path: 'Pin(show_pinner=true,+show_board=true,+is_original_pin_in_related_pins_grid=true)',
 					_: Date.now()
 				};

@@ -23,7 +23,7 @@ export class FlickerAPI {
 		this.detailImage = async (id) =>
 			new Promise(async (resolve, reject) => {
 				try {
-					let { photo } = await this.#req('photos', 'getInfo', { photo_id: Number(id) }); /* eslint-disable-line */
+					let { photo } = await this.#req('photos', 'getInfo', { photo_id: Number(id) });
 
 					resolve({
 						id: photo.id,

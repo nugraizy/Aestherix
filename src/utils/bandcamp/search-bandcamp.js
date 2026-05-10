@@ -28,7 +28,7 @@ export const searchBandcamp = (keyword) =>
 			const { data } = await axios({
 				url: _api,
 				method: 'POST',
-				data: { search_text: keyword, search_filter: '', full_page: true, fan_id: null } /* eslint-disable-line */,
+				data: { search_text: keyword, search_filter: '', full_page: true, fan_id: null },
 				headers: {
 					Cookie: parseCookie(headers['set-cookie']),
 					'Content-Type': 'application/json; charset=UTF-8',

@@ -1,10 +1,10 @@
 import asyncRetry from 'async-retry';
 import axios from 'axios';
 import crypto from 'crypto';
+import heic from 'heic-convert';
 import _ from 'lodash';
 import { fetch } from 'undici';
 import { v4 } from 'uuid';
-import heic from 'heic-convert';
 
 import { Cache } from '../../helper/modules/cache.js';
 import { cheerioLOAD, randomChar } from '../modules/index.js';
@@ -62,7 +62,7 @@ class ResponseParser {
 			: null;
 
 		container.urls.posts = dataPosts.aweme_list.map((v) => {
-			const { music, share_url, statistics, status, video, video_control } = v; // eslint-disable-line
+			const { music, share_url, statistics, status, video, video_control: videoControl } = v; // eslint-disable-line
 
 			return {
 				statistic: {
@@ -76,13 +76,11 @@ class ResponseParser {
 				status: {
 					comment: status.allow_comment,
 					share: status.allow_share,
-					/* eslint-disable */
-					download: video_control.allow_download,
-					duet: video_control.allow_duet,
-					music: video_control.allow_music,
-					reacts: video_control.allow_react,
-					stitch: video_control.allow_stitch
-					/* eslint-enable */
+					download: videoControl.allow_download,
+					duet: videoControl.allow_duet,
+					music: videoControl.allow_music,
+					reacts: videoControl.allow_react,
+					stitch: videoControl.allow_stitch
 				},
 				...(music.owner_handle
 					? {
@@ -235,7 +233,7 @@ class ResponseParser {
 					urlWithWatermark: images[i].owner_watermark_image.url_list[0],
 					buffer: await this._convertHeicToJpg(v.display_image.url_list[0]),
 					index: i + 1
-				})) /* eslint-disable-line*/
+				}))
 			: [];
 	}
 
@@ -397,7 +395,6 @@ class RequestModule extends ResponseParser {
 		super();
 
 		this.commonParameters = {
-			/* eslint-disable */
 			WebIdLastTime: Date.now(),
 			aid: '1988',
 			app_language: 'en',
@@ -424,7 +421,6 @@ class RequestModule extends ResponseParser {
 			screen_width: 1366,
 			tz_name: 'Asia/Jakarta',
 			webcast_language: 'en'
-			/* eslint-enable */
 		};
 	}
 
@@ -466,15 +462,12 @@ class RequestModule extends ResponseParser {
 	 */
 	_buildRequestParams(params) {
 		const defaultParams = {
-			/* eslint-disable */
 			version_name: '30.9.4',
 			version_code: '300904',
 			build_number: '30.9.4',
 			manifest_version_code: '300904',
 			update_version_code: '300904',
 			iid: '7318518857994389254'
-
-			/* eslint-enable */
 		};
 
 		return Object.assign(defaultParams, params);
@@ -537,20 +530,17 @@ class RequestModule extends ResponseParser {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const body = this._buildApiUrl({
-					/* eslint-disable */
 					version_name: '26.1.3',
 					version_code: '260103',
 					build_number: '26.1.3',
 					manifest_version_code: '260103',
 					update_version_code: '260103',
-
 					sec_user_id: userDetails.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.user.secUid,
 					count: 30,
 					max_cursor: 0,
 					min_cursor: 0,
 					device_id: Array.from({ length: 19 }, () => Math.floor(Math.random() * 10).toString()).join(''),
 					mas: this._msToken()
-					/* eslint-enable */
 				});
 
 				const config = this._getRequestConfig();
@@ -625,7 +615,6 @@ class RequestModule extends ResponseParser {
 	_fetchSearchUserDataAttempt(username) {
 		return new Promise(async (resolve, reject) => {
 			try {
-				/* eslint-disable */
 				const body = this._buildApiUrl({
 					version_name: '10.3.3',
 					version_code: '100303',
@@ -666,7 +655,6 @@ class RequestModule extends ResponseParser {
 					hot_search: '0',
 					source: 'discover',
 					mas: this._msToken()
-					/* eslint-enable */
 				});
 
 				const config = this._getRequestConfig();
@@ -733,9 +721,7 @@ class RequestModule extends ResponseParser {
 				};
 
 				const body = this._buildApiUrl({
-					/* eslint-disable */
 					aweme_id: videoId,
-
 					iid: random(iids),
 					device_id: random(deviceIds),
 					channel: 'googleplay',
@@ -744,12 +730,10 @@ class RequestModule extends ResponseParser {
 					version_code: versionCode,
 					version_name: ranVersion,
 					device_platform: 'android',
-
 					os: 'android',
 					ssmix: 'a',
 					_rticket: Date.now(),
 					cdid: v4(),
-					update_version_code: mainParams.manifest_app_version,
 					update_version_code: mainParams.manifest_app_version,
 					ab_version: ranVersion,
 					resolution: '1080*2400',
@@ -778,7 +762,6 @@ class RequestModule extends ResponseParser {
 					build_number: ranVersion,
 					region: 'US',
 					ts: Math.floor(Date.now() / 1000)
-					/* eslint-enable */
 				});
 
 				const config = this._getRequestConfig();

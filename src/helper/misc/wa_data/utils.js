@@ -1,4 +1,4 @@
-import baileys, { hmacSign, aesDecryptGCM } from 'baileys';
+import baileys, { aesDecryptGCM, hmacSign } from 'baileys';
 
 const { proto } = baileys;
 
@@ -120,7 +120,7 @@ export const extractTypeQuoted = (m, type) => {
 						? m.message.extendedTextMessage.contextInfo.quotedMessage
 						: ''
 					: ''
-		  )[0] /* eslint-disable-line*/
+			)[0] /* eslint-disable-line*/
 		: type;
 };
 

@@ -13,13 +13,11 @@ export const getCharacters = async (uid) => {
 			'post',
 			'character',
 			{
-				/* eslint-disable */
 				character_ids: charIds,
 				server: completeServer,
-				role_id: uid,
-				/* eslint-enable */
+				role_id: uid
 			},
-			simplifiedServer,
+			simplifiedServer
 		)
 	).data.avatars;
 };

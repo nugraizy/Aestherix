@@ -60,7 +60,7 @@ const globalConfig = {
 	anonymous: new Cache(),
 	input: new Cache(),
 	mqtt: null,
-	logger_theme: settings.logger_theme || 'dracula', // eslint-disable-line
+	logger_theme: settings.logger_theme || 'dracula',
 	pinterestId: null,
 	pinterestImages: new Cache({ limit: 900 }),
 	anonymousMessages: new Cache(),
