@@ -51,30 +51,34 @@ Edit settings in `src/helper/config/settings.json`.
 
 ## Available Flags
 
-| Flags | Descriptions | Alias |
-| --- | --- | --- |
-| --prf your_prefix | Set your custom `prefix`. Don't use it if you want `multi-prefixes`. | -p |
-| --readOnly | Bot will ignore every incoming command and only read the chat with no logs. | -y |
-| --autoRead | Bot will enable `auto-read` chat. | -r |
-| --restrict | Bot will ignore restricted command. Such Add, Promote, and Demote. | -e |
-| --onlyLogs | Only shows logs for incoming message and command. But will ignore message and command. | -o |
-| --noLogs | This will disable the logs. But not ignore the incoming messages and command. | -n |
-| --selfMode | This mode will only listening to your own message and command. | -s |
-| --debugMode | Every incoming message will be extracted the metadata and showed to the logs. | -g |
-| --multiCmd | You can use multiple command. Use `\|` to separate each command. | -m |
-| --autoCorrect | Automatically correcting every incoming command. | -a |
-| --rainbow | Make your console colorful. | -b |
-| --watch | Watch files for changes and will auto remove previous cache. | -w |
-| --coolDown | Enable cooldown for each commands. | -c |
-| --story | Fetch every incoming Story from your contacts. | -q |
-| --offline | Set your current client devices to offline. | -f |
-| --noCall | Do not disturb. Every incoming call will be rejected and the caller will be blocked. | -d |
-| --instaNotifier | Handle incoming Instagram DMs. | -i |
-| --limitReset | Enable Auto-reset user's limit. | -l |
-| --resetOnStart | Auto reset DB-Connections every start of the script. | -x |
-| --noLimit | Set commands limit to None. | -u |
-| --pairMode | Pair your number with code. | -z |
-| --help | Will show this message in the console. | -h |
+| Flag | Short | Description |
+|---|---|---|
+| `--prefix` | `-p` | Custom prefix(es), comma-separated for multiple |
+| `--readOnly` | `-y` | Bot ignores all commands, reads chat only |
+| `--autoRead` | `-r` | Auto read every incoming message |
+| `--restrict` | `-e` | Ignore moderator commands (Add, Promote, Demote) |
+| `--selfMode` | `-s` | Only owner and bot can use commands |
+| `--debugMode` | `-g` | Show full message metadata in logs |
+| `--multiCmd` | `-m` | Enable multi-cmd with `\|` separator |
+| `--watch` | `-w` | Watch files and hot-reload on change |
+| `--coolDown` | `-c` | Enable command cooldowns |
+| `--ai` | `-i` | Handle messages with AI |
+| `--limitReset` | `-l` | Auto-reset user limits |
+| `--resetOnStart` | `-x` | Reset DB connections on start |
+| `--noLimit` | `-u` | Disable command limits |
+| `--pairMode` | `-z` | Pair number with code |
+| `--pairNumber` | `-j` | Use specific number for pairing |
+| `--story` | `-q` | Auto-download stories |
+| `--offline` | `-f` | Set presence to offline |
+| `--noCall` | `-d` | Reject incoming calls |
+| `--printSelf` | `-v` | Print host's own messages in terminal |
+| `--test` | | Test connection |
+| `--help` | `-h` | Show help message |
+| `--spin` | | Enable loading spinners |
+| `--rainbow` | `-b` | Rainbow-colored logs |
+| `--trace` | `-t` | Show errors |
+| `--onlyLogs` | `-o` | Show logs only, ignore messages |
+| `--noLogs` | `-n` | Suppress logs, still respond |
 
 
 <div align='center'>

@@ -3,7 +3,7 @@ module.exports = {
 		{
 			name: 'aestherix-bot',
 			script: './index.js',
-			args: 'nugraizy_android -z -w -c',
+			args: 'nugraizy_android --watch --pair-mode --limit-reset --multi-cmd --cooldown',
 			env: {
 				NODE_ENV: 'production',
 				DASHBOARD_EMBEDDED: '0',
