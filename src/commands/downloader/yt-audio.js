@@ -1,5 +1,5 @@
-import { color, fetchBUFFER, isURL, isYoutubeURL, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
-import { youtubeMainDownload } from '../../utils/youtube/index.js';
+import { color, isURL, isYoutubeURL, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
+import { youtube } from '../../utils/youtube/index.js';
 
 // const youtube = new YouTubei();
 
@@ -11,26 +11,27 @@ import { youtubeMainDownload } from '../../utils/youtube/index.js';
  * @returns
  */
 const processAudio = async (url, client, { from, message, prettyNumber }) => {
-	const audio = await youtubeMainDownload(url, 'mp3');
+	const audio = await youtube.audio(url);
 
-	const { title, link, description, resolution } = audio;
+	const { title, description, download } = audio;
 
-	if (!link) {
-		client.instance.reply(from, `Error while downloading YouTube Video\n\n${url}`, message);
-		loggers.error(`${color('Failed to Download YouTube Video', 'red')} for ${color(prettyNumber, 'lilac')}`);
+	if (!download) {
+		client.instance.reply(from, `Error while downloading YouTube Audio\n\n${url}`, message);
+		loggers.error(`${color('Failed to Download YouTube Audio', 'red')} for ${color(prettyNumber, 'lilac')}`);
 		return false;
 	}
+
+	const buffer = await download();
 
 	let capt = '';
 
 	capt += `Title : ${title}\n`;
-	capt += `Resolution : ${resolution}\n`;
 	capt += `Descriptions : ${description || ''}`;
 
 	await client.instance.send(
 		from,
 		{
-			document: await fetchBUFFER(link),
+			document: Buffer.from(buffer),
 			fileName: `${title}.mp3`,
 			mimetype: 'audio/mp3',
 			caption: capt.formatForm()
@@ -108,35 +109,6 @@ export default {
 
 			return;
 		}
-
-		// if (type === 'listResponseMessage' && args[1] === 'download') {
-		// 	await client.instance.send(
-		// 		from,
-		// 		{
-		// 			document: { url: args[2] },
-		// 			fileName: `${args.slice(3).join(' ')}.opus`,
-		// 			mimetype: 'audio/opus',
-		// 			caption: ''
-		// 		},
-		// 		{ quoted: message }
-		// 	);
-		// 	return;
-		// } else if (type === 'templateButtonReplyMessage' && args[1] === 'get') {
-		// 	const video = await yta(args[2], 'mp4');
-		// 	const { title, mp4 } = video;
-
-		// 	await client.instance.send(from, {
-		// 		title: 'YouTube MP3'.formatHeaders(),
-		// 		footer: 'Made by Void Bot. Powered by Hidden Finder',
-		// 		text: '\t',
-		// 		buttonText: 'Open List',
-		// 		sections: mp4.map((v, i) => ({
-		// 			rows: [{ title: `${i + 1}. ${v.quality} ${v.filesizeF}`, rowId: `.ytmp4 download ${v.dlUrl} ${title}` }],
-		// 			title: '\t'
-		// 		}))
-		// 	});
-		// 	return;
-		// }
 
 		if (!query) {
 			return await client.instance.reply(from, 'Please provide a URL or Query.', message);

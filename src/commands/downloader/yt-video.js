@@ -1,5 +1,5 @@
-import { color, fetchBUFFER, isURL, isYoutubeURL, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
-import { youtubeMainDownload } from '../../utils/youtube/index.js';
+import { color, isURL, isYoutubeURL, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
+import { youtube } from '../../utils/youtube/index.js';
 
 // const youtube = new YouTubei();
 
@@ -11,11 +11,11 @@ import { youtubeMainDownload } from '../../utils/youtube/index.js';
  * @returns
  */
 const processVideo = async (url, client, { from, message, prettyNumber }) => {
-	const video = await youtubeMainDownload(url, 'mp4');
+	const video = await youtube.video(url);
 
-	const { title, link, description, resolution } = video;
+	const { title, description, download } = video;
 
-	if (!link) {
+	if (!download) {
 		client.instance.reply(from, `Error while downloading YouTube Video\n\n${url}`, message);
 		loggers.error(`${color('Failed to Download YouTube Video', 'red')} for ${color(prettyNumber, 'lilac')}`);
 		return false;
@@ -24,13 +24,12 @@ const processVideo = async (url, client, { from, message, prettyNumber }) => {
 	let capt = '';
 
 	capt += `Title : ${title}\n`;
-	capt += `Resolution : ${resolution}\n`;
 	capt += `Descriptions : ${description || ''}`;
 
 	await client.instance.send(
 		from,
 		{
-			video: await fetchBUFFER(link),
+			video: await download(),
 			caption: capt.trim().formatForm()
 		},
 		{
