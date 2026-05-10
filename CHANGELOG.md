@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「6.13.1」2026-05-11
+## Fixed
+- **Dashboard owner OTP** no longer reports "Confirmation expired or not found" immediately after requesting a code, nor "Confirmation request mismatch" when tapping the WhatsApp button. `loadOtpStore` previously cleared the in-memory map on every call and reloaded from the DB asynchronously; a silent failure or a stale DB row would overwrite the freshly-created OTP. The loader now merges DB rows into the map and preserves any in-memory entry that is newer than the DB row, so an in-flight write can no longer get clobbered. `persistOtpStore` also stops swallowing upsert errors so any future failure shows up in the logs. ([`43beb90`](https://github.com/nugraizy/aestherix/commit/43beb90dbe9cc5866ddf0134f1ed8ed3187aca99))
+
+---
+
 # 「6.13.0」2026-05-11
 ## Added
 - New `Comix` manga scraper module with five commands: search, detail, chapters, read, and popular. ([`e103cb6`](https://github.com/nugraizy/aestherix/commit/e103cb6e9335aaae70e943d1d51d2fa1671365da))
