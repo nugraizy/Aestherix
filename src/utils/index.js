@@ -25,6 +25,7 @@ export * from './instagram/index.js';
 export * from './instagram_notifier/index.js';
 export * from './jikan/index.js';
 export * from './komikcast/index.js';
+export * from './kiryuu/index.js';
 export * from './mangatoon/index.js';
 export * from './misc/index.js';
 export * from './modules/index.js';
