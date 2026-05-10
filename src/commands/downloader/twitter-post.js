@@ -1,7 +1,9 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
-import { color, delay, loggers, isURL, formatNumber } from '../../utils/modules/index.js';
-import { twitterDownload } from '../../utils/twitter/index.js';
+import { color, delay, formatNumber, isURL, loggers } from '../../utils/modules/index.js';
+import { Twitter } from '../../utils/twitter/index.js';
+
+const twitter = new Twitter({ cookie: process.env.TWITTER_COOKIE });
 
 const createPostCaption = (post) => {
 	let capt = 'Twitter Post'.formatHeaders();
@@ -62,7 +64,7 @@ export default {
 				continue;
 			}
 
-			const post = await twitterDownload(url);
+			const post = await twitter.download(url);
 
 			if (post?.error) {
 				await client.instance.reply(from, `Error while downloading Twitter post\n\n${post.error}\n${url}`, message);

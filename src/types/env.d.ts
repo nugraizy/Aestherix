@@ -45,12 +45,11 @@ declare namespace NodeJS {
 		ACR_HOST?: string;
 		OPENAI_KEY?: string;
 		UBERDUCK_BASIC?: string;
-		'API-ID'?: string;
-		'API-HASH'?: string;
 		TELEGRAM_TOKEN?: string;
 		BING_COOKIE?: string;
 		WEATHER_KEY?: string;
 		YOUTUBE_AUTH?: string;
 		PINTEREST_COOKIE?: string;
+		TWITTER_COOKIE?: string;
 	}
 }

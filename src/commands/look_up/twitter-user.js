@@ -1,7 +1,11 @@
+import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
-import { color, isURL, loggers } from '../../utils/modules/index.js';
-import { twitterUser } from '../../utils/twitter/index.js';
+import { cmdId } from '../../helper/modules/prefix.js';
+import { color, formatNumber, isURL, loggers } from '../../utils/modules/index.js';
+import { Twitter } from '../../utils/twitter/index.js';
+
+const twitter = new Twitter({ cookie: process.env.TWITTER_COOKIE });
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -16,25 +20,26 @@ export default {
 	cooldown: 6,
 	limit: 6,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message }, client) {
+	async run({ from, query, prettyNumber, message, prefix }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please specify a url', message);
+			return await client.instance.reply(from, 'Please specify a username.', message);
 		}
 
 		let { _: usernames } = parser(query);
 
 		if (usernames.length === 1 && isURL(usernames[0])) {
-			return await client.instance.reply(from, 'Please specify a valid Twitter usernames', message);
+			return await client.instance.reply(from, 'Please specify a valid Twitter username, not a URL.', message);
 		}
 
 		for (const username of usernames) {
 			if (isURL(username.trim())) {
-				await client.instance.reply(from, 'Please specify a valid Twitter username', message);
+				await client.instance.reply(from, 'Please specify a valid Twitter username, not a URL.', message);
 
 				continue;
 			}
 
-			const user = await twitterUser(username);
+			const user = await twitter.getUser(username);
+			const builder = new client.instance.TemplateBuilder.Native(client);
 
 			if (user?.error) {
 				await client.instance.reply(from, `Error while searching Twitter user\n\n${user.error}\n${username}`, message);
@@ -44,22 +49,42 @@ export default {
 				continue;
 			}
 
-			const { biograph, username: userName, name, joined, verified, imageProfile, personalUrl } = user;
+			const {
+				biograph,
+				username: userName,
+				name,
+				joined,
+				verified,
+				isBlueVerified,
+				imageProfile,
+				personalUrl,
+				followers,
+				following,
+				tweets,
+				likes
+			} = user;
 
 			let capt = 'Twitter User Lookup'.formatHeaders();
 
-			capt += `Username : ${userName}\n`;
+			capt += `\n\nUsername : @${userName}\n`;
 			capt += `Fullname : ${name}\n`;
-			capt += `Verified? : ${verified ? 'Yes' : 'No'}\n`;
-			capt += `Joined : ${joined}\n`;
-			capt += `Personal URL : ${personalUrl}\n`;
-			capt += `Biograph : ${biograph}`;
+			capt += `Verified : ${verified ? '✅ Yes' : 'No'}\n`;
+			capt += `Blue Verified : ${isBlueVerified ? '✅ Yes' : 'No'}\n`;
+			capt += `Joined : ${dayjs(joined).format('MMM D, YYYY')}\n`;
+			capt += `Followers : ${formatNumber(followers)}\n`;
+			capt += `Following : ${formatNumber(following)}\n`;
+			capt += `Tweets : ${formatNumber(tweets)}\n`;
+			capt += `Likes : ${formatNumber(likes)}\n`;
+			capt += `Personal URL : ${personalUrl || 'n/a'}\n`;
+			capt += `Bio : ${biograph || 'n/a'}`;
 
-			await client.instance.send(
-				from,
-				{ image: { url: imageProfile }, caption: capt.trim().formatForm() },
-				{ quoted: message }
-			);
+			await builder
+				.destination(from)
+				.body(capt.trim().formatForm())
+				.header('image', imageProfile)
+				.footer('Powered by ' + __botName)
+				.buttons(builder.button.reply({ display: 'Get User Tweets', id: cmdId('twttweets', username, { prefix }) }))
+				.send();
 		}
 	}
 };
