@@ -1693,17 +1693,25 @@ const hasActiveOwnerSession = (phoneNumber) => {
 };
 
 const loadOtpStore = async () => {
-	otpStore.clear();
-
 	try {
 		const now = Date.now();
 		const rows = await prisma.dashboardOtp.findMany();
+		const seen = new Set();
 
 		for (const item of rows) {
 			const phoneNumber = normalizePhoneNumber(item?.phoneNumber || '');
 			const expiresAt = Number(item?.expiresAt || 0);
 
 			if (!phoneNumber || expiresAt <= now) {
+				continue;
+			}
+
+			seen.add(phoneNumber);
+
+			const existing = otpStore.get(phoneNumber);
+			const dbCreatedAt = Number(item?.createdAt || now);
+
+			if (existing && Number(existing.createdAt || 0) > dbCreatedAt) {
 				continue;
 			}
 
@@ -1714,10 +1722,16 @@ const loadOtpStore = async () => {
 				requestKeyHash: String(item?.requestKeyHash || ''),
 				actionTokenHash: String(item?.actionTokenHash || ''),
 				status,
-				createdAt: Number(item?.createdAt || now),
+				createdAt: dbCreatedAt,
 				expiresAt,
 				confirmedAt: item?.confirmedAt ? Number(item.confirmedAt) : null
 			});
+		}
+
+		for (const [phone, value] of otpStore.entries()) {
+			if (!seen.has(phone) && value.expiresAt <= now) {
+				otpStore.delete(phone);
+			}
 		}
 	} catch (error) {
 		loggers.warning(color('Failed loading dashboard OTP store:', 'red'), color(error.message, 'white'));
@@ -1733,7 +1747,9 @@ const persistOtpStore = async () => {
 
 			if (expiresAt <= now) {
 				otpStore.delete(phoneNumber);
-				await deleteOtp(prisma, phoneNumber).catch(() => {});
+				await deleteOtp(prisma, phoneNumber).catch((error) => {
+					loggers.warning(color('Failed deleting expired OTP:', 'red'), color(error.message, 'white'));
+				});
 				continue;
 			}
 
@@ -1748,7 +1764,9 @@ const persistOtpStore = async () => {
 				createdAt: Number(value?.createdAt || now),
 				expiresAt,
 				confirmedAt: value?.confirmedAt ? Number(value.confirmedAt) : null
-			}).catch(() => {});
+			}).catch((error) => {
+				loggers.warning(color('Failed upserting OTP for', 'red'), color(phoneNumber, 'lilac'), color(error.message, 'white'));
+			});
 		}
 	} catch (error) {
 		loggers.warning(color('Failed persisting dashboard OTP store:', 'red'), color(error.message, 'white'));
