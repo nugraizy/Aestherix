@@ -10,7 +10,7 @@
 
 <div align="center">
 
-  <img src="https://img.shields.io/badge/version-6.11.0-blue?style=flat-square" alt="version"/>
+  <img src="https://img.shields.io/badge/version-6.12.2-blue?style=flat-square" alt="version"/>
 
   <a href="https://github.com/nugraizy/aestherix/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" title="MIT License">
     <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="license"/>
@@ -41,8 +41,11 @@
   - [Bot & Dashboard separately](#bot--dashboard-separately)
   - [PM2 split runtime](#pm2-split-runtime)
   - [Available flags](./doc/DOC.md#available-flags)
+- [Dashboard](#dashboard)
+- [Development](#development)
 - [Changelog](./CHANGELOG.md)
 - [Documentation](./doc/DOC.md#documentations)
+- [Agent Guide](./AGENTS.md)
 - [Contributors](#contributors)
 
 ---
@@ -180,6 +183,39 @@ npm run pm2:split:stop
     <img title="Live-Demo" alt="Live-Demo" src="https://img.shields.io/badge/Visit-aestherix.dev-blue?style=for-the-badge">
   </a>
 </div>
+
+---
+
+## Dashboard
+
+The embedded dashboard (default `http://localhost:4000`, override with `DASHBOARD_PORT`) gives you live control over the bot:
+
+- Toggle boolean CLI flags and individual commands at runtime.
+- Configure prefix mode (single, multi, or no-prefix) with custom prefix characters — persisted to `settings.json`.
+- Live status, logs, and audit panels via Socket.IO.
+- Owner-authenticated actions via OTP; admin sessions via cookies.
+
+Full REST endpoints, Socket.IO rooms, and internals are documented in [AGENTS.md](./AGENTS.md#dashboard). User-facing configuration lives in [doc/DOC.md](./doc/DOC.md#dashboard).
+
+---
+
+## Development
+
+```sh
+# lint the whole project
+npm run lint
+
+# lint a specific file
+npm run lint:file src/commands/misc/ping.js
+```
+
+`nodemon` is available via `npm run dev`, but the recommended dev loop uses the built-in `--watch` flag which hot-reloads changed command files without restarting the socket connection:
+
+```sh
+node . <session_name> --watch --pair-mode --cool-down
+```
+
+See [AGENTS.md](./AGENTS.md) for architecture, event flow, command shape, and code standards.
 
 ---
 
