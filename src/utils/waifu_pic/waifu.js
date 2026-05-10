@@ -10,8 +10,8 @@ const _api = (type, input) => `https://api.waifu.pics/many/${type}/${input}`;
 const _type = {
 	nsfw: 'waifu,neko,trap,blowjob'.split(','),
 	sfw: 'waifu,neko,shinobu,megumin,bully,cuddle,cry,hug,awoo,kiss,lick,pat,smug,bonk,yeet,blush,smile,wave,highfive,handhold,nom,bite,glomp,slap,kill,kick,happy,wink,poke,dance,cringe'.split(
-		',',
-	),
+		','
+	)
 };
 
 /**
@@ -19,38 +19,29 @@ const _type = {
  * @param {NSFWTypes & SFWTypes} input
  * @param {WaifuTypes} type
  * @returns {Promise<string[] & {error?: string}>}
- * @throws {Error}
  */
-export const getWaifu = (input = 'neko', type = 'sfw') =>
-	new Promise(async (resolve, reject) => {
-		try {
-			if (!Object.keys(_type).includes(type)) {
-				return resolve({ error: `No data with the type : ${type}\nAvailable Type : ${Object.keys(_type).join(', ')}`.trim() });
-			}
+export const getWaifu = async (input = 'neko', type = 'sfw') => {
+	if (!(type in _type)) {
+		return { error: `No data with the type : ${type}\nAvailable Type : ${Object.keys(_type).join(', ')}` };
+	}
 
-			if (!_type[type].includes(input)) {
-				return resolve({
-					error: `No data with the input : ${input}\nCurrent option are ${type}\nList of ${type} : ${_type[type].join(
-						', ',
-					)}.\n${
-						_type.nsfw.find((v) => v === input)
-							? '\nThis input are on nsfw section.'
-							: _type.sfw.find((v) => v === input)
-							? '\nThis input are on sfw section.'
-							: ''
-					}`.trim(),
-				});
-			}
+	if (!_type[type].includes(input)) {
+		const hint = _type.nsfw.includes(input)
+			? '\nThis input is in the nsfw section.'
+			: _type.sfw.includes(input)
+				? '\nThis input is in the sfw section.'
+				: '';
 
-			const { data } = await axios.post(_api(type, input), {
-				headers: {
-					'content-type': 'application/json;charset=UTF-8',
-				},
-				data: { exclude: [] },
-			});
+		return {
+			error: `No data with the input : ${input}\nCurrent option is ${type}\nList of ${type} : ${_type[type].join(', ')}.${hint}`
+		};
+	}
 
-			resolve(data.files);
-		} catch (err) {
-			reject(err);
-		}
-	});
+	const { data } = await axios.post(
+		_api(type, input),
+		{ exclude: [] },
+		{ headers: { 'content-type': 'application/json;charset=UTF-8' } }
+	);
+
+	return data.files;
+};
