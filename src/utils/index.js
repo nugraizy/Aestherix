@@ -7,6 +7,7 @@ export * from './bilibili/index.js';
 export * from './bluesky/index.js';
 export * from './brainly/index.js';
 export * from './cnn/index.js';
+export * from './comix/index.js';
 export * from './converter/index.js';
 export * from './deviant_art/index.js';
 export * from './doujin/index.js';
