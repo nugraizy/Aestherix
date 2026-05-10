@@ -522,7 +522,9 @@ export const removeBg = (input, sender) =>
 
 			loggers.error(
 				`⚠️ ${color('Failed to Remove image background', 'red')} for ${color(
-					sender, 'lilac')}\nRemove Background Token Used : ${apiKey}`
+					sender,
+					'lilac'
+				)}\nRemove Background Token Used : ${apiKey}`
 			);
 			reject(error);
 		}
@@ -701,9 +703,29 @@ export const imageToPdf = (images) =>
 				)
 			).map((v) => v.data);
 
+			images = await Promise.all(
+				images.map(async (buffer) => {
+					try {
+						const meta = await sharp(buffer).metadata();
+						let nextBuffer = buffer;
+
+						if (meta?.format === 'webp') {
+							nextBuffer = await sharp(buffer).jpeg({ quality: 80 }).toBuffer();
+						}
+
+						return { buffer: nextBuffer, width: meta?.width || 0, height: meta?.height || 0 };
+					} catch {
+						return { buffer, width: 0, height: 0 };
+					}
+				})
+			);
+
 			for (let i = 0; i < images.length; i++) {
-				doc.addPage();
-				doc.image(images[i], 0, 0, { fit: size, align: 'center', valign: 'center' });
+				const entry = images[i];
+				const pageSize = entry.width && entry.height ? [entry.width, entry.height] : size;
+
+				doc.addPage({ size: pageSize });
+				doc.image(entry.buffer, 0, 0, { width: pageSize[0], height: pageSize[1] });
 			}
 
 			doc.end();
@@ -747,14 +769,14 @@ export const imageToAnime = async (image, sender, options = defaultOpts) => {
 		busiId: 'ai_painting_anime_img_entry',
 		images: [imgString],
 		extra: JSON.stringify({
-			face_rects: [] /* eslint-disable-line */,
+			face_rects: [],
 			version: 2,
 			platform: 'web'
 		})
 	};
 
 	let data = {
-		img_urls: [imgString] /* eslint-disable-line */
+		img_urls: [imgString]
 	};
 
 	try {
@@ -829,11 +851,11 @@ export const imageToAnime = async (image, sender, options = defaultOpts) => {
 					options.crop === 'SINGLE' ? 'SINGLE' : options.crop === 'COMPARED' ? 'COMPARED' : undefined
 				),
 				`./src/media/temporary_files/${sender}`
-			) /* eslint-disable-line */
+			)
 		: await cropImage(
 				await imageToBuffer(result, options.proxy?.image ? httpsAgent : undefined, options),
 				options.crop === 'SINGLE' ? 'SINGLE' : options.crop === 'COMPARED' ? 'COMPARED' : undefined
-			); /* eslint-disable-line */
+			);
 };
 
 /**
