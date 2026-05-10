@@ -635,7 +635,8 @@ const startAutoProfilePictureChangeService = async (client, state, config) => {
 				error.message.includes('bad-request') ||
 				error.message.includes('fetch failed') ||
 				error.message.includes('Connection Closed') ||
-				error.message.includes('source: bad seek')
+				error.message.includes('source: bad seek') ||
+				error.message.includes('403')
 			) {
 				return;
 			}

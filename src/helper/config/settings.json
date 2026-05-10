@@ -1,28 +1,36 @@
 {
-	"main_host_number": "6287882837264",
-	"backups_host_numbers": ["6289607055246", "16367421471", "6287882837264", "6289522534401"],
-	"owner_number": "6289607055246@s.whatsapp.net",
-	"team_number": [],
-	"state": "public",
-	"maintenance": false,
-	"main_session": "debug",
-	"max_group": 20,
-	"min_members": 20,
-	"limit": 30,
-	"reset_time": {
-		"minute": "6",
-		"hour": "00"
-	},
-	"tebak_gambar": {
-		"expired_time": 20
-	},
-	"prefix": {
-		"multi": true,
-		"nopref": false,
-		"pref": "z"
-	},
-	"debugger": false,
-	"logger_theme": "catppuccin",
-	"delay": 2,
-	"best_time": 1.638
+  "main_host_number": "6287882837264",
+  "backups_host_numbers": [
+    "6289607055246",
+    "16367421471",
+    "6287882837264",
+    "6289522534401"
+  ],
+  "owner_number": "6289607055246@s.whatsapp.net",
+  "team_number": [],
+  "state": "public",
+  "maintenance": false,
+  "main_session": "debug",
+  "max_group": 20,
+  "min_members": 20,
+  "limit": 30,
+  "reset_time": {
+    "minute": "6",
+    "hour": "00"
+  },
+  "tebak_gambar": {
+    "expired_time": 20
+  },
+  "prefix": {
+    "multi": true,
+    "nopref": false,
+    "pref": ".",
+    "customPrefixes": [
+      "a"
+    ]
+  },
+  "debugger": false,
+  "logger_theme": "cyberpunk2077",
+  "delay": 2,
+  "best_time": 1.638
 }

@@ -15,3 +15,4 @@ databases/users/contacts-backup.json
 !.env.vault
 public/dashboard/build/
 next_release/
+cache/
