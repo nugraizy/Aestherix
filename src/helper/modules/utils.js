@@ -211,8 +211,8 @@ export const assign = (client) => {
 				return {
 					name: 'cta_copy',
 					buttonParamsJson: JSON.stringify({
-						display_text: data.display /* eslint-disable-line */,
-						copy_code: data.code /* eslint-disable-line */
+						display_text: data.display,
+						copy_code: data.code
 					})
 				};
 			},
@@ -221,7 +221,7 @@ export const assign = (client) => {
 				return {
 					name: 'quick_reply',
 					buttonParamsJson: JSON.stringify({
-						display_text: data.display /* eslint-disable-line */,
+						display_text: data.display,
 						id: data.id
 					})
 				};
@@ -231,9 +231,9 @@ export const assign = (client) => {
 				return {
 					name: 'cta_url',
 					buttonParamsJson: JSON.stringify({
-						display_text: data.display /* eslint-disable-line */,
+						display_text: data.display,
 						url: data.url,
-						merchant_url: data.url /* eslint-disable-line */
+						merchant_url: data.url
 					})
 				};
 			},
@@ -252,28 +252,26 @@ export const assign = (client) => {
 				return {
 					name: 'cta_call',
 					buttonParamsJson: JSON.stringify({
-						display_text: data.display /* eslint-disable-line */,
-						id: data.id
+						display_text: data.display,
+						phone_number: data.phoneNumber
 					})
 				};
 			},
 
-			reminder(data) {
+			setReminder(data) {
 				return {
 					name: 'cta_reminder',
 					buttonParamsJson: JSON.stringify({
-						display_text: data.display /* eslint-disable-line */,
-						id: data.id
+						display_text: data.display
 					})
 				};
 			},
 
-			cancel(data) {
+			cancelReminder(data) {
 				return {
 					name: 'cta_cancel_reminder',
 					buttonParamsJson: JSON.stringify({
-						display_text: data.display /* eslint-disable-line */,
-						id: data.id
+						display_text: data.display
 					})
 				};
 			},
@@ -282,8 +280,7 @@ export const assign = (client) => {
 				return {
 					name: 'address_message',
 					buttonParamsJson: JSON.stringify({
-						display_text: data.display /* eslint-disable-line */,
-						id: data.id
+						display_text: data.display
 					})
 				};
 			},
@@ -292,7 +289,7 @@ export const assign = (client) => {
 				return {
 					name: 'send_location',
 					buttonParamsJson: JSON.stringify({
-						display_text: data.display /* eslint-disable-line */
+						display_text: data.display
 					})
 				};
 			},
@@ -303,7 +300,7 @@ export const assign = (client) => {
 					buttonParamsJson: JSON.stringify({
 						title: data.title,
 						link: {
-							in_app_webview: data.inApp /* eslint-disable-line */,
+							in_app_webview: data.inApp,
 							url: data.url
 						}
 					})
