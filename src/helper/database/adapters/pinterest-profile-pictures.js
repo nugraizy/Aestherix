@@ -6,6 +6,8 @@
 
 /** @typedef {import('@prisma/client').PrismaClient} PrismaClient */
 
+let disposed = false;
+
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const isRetryablePrismaError = (error) => {
@@ -100,6 +102,10 @@ export const upsertPinterestProfilePictures = async (db, entries) => {
 		}
 
 		for (const entry of normalized) {
+			if (disposed) {
+				return;
+			}
+
 			await withRetry(() =>
 				db.pinterestProfilePicture.upsert({
 					where: { timestamp: entry.timestamp },
@@ -109,4 +115,11 @@ export const upsertPinterestProfilePictures = async (db, entries) => {
 			);
 		}
 	});
+};
+
+/**
+ * Stop in-progress bulk writes so the process can exit gracefully.
+ */
+export const shutdownPinterestProfilePictures = () => {
+	disposed = true;
 };

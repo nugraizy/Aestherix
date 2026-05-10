@@ -5,6 +5,7 @@ import readline from 'readline';
 
 import { startingConnection } from '../../../helper/connection/utils/check-flag.js';
 import { color, delay, loggers } from '../../../utils/modules/index.js';
+import { cmdId } from '../../../helper/modules/prefix.js';
 import configuration from '../../config/connect.js';
 import { Cache } from '../../modules/cache.js';
 import { resetSession } from '../socket/reset-session.js';
@@ -50,17 +51,11 @@ export const handleConnectionUpdate = async (
 			const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
 
 			if (reason === DisconnectReason.badSession) {
-				loggers.error(
-					color('Bad session', 'white'),
-					color('Please delete your previous session and do a rescan...', 'lilac')
-				);
+				loggers.error(color('Bad session', 'white'), color('Please delete your previous session and do a rescan...', 'lilac'));
 				await resetSession(cli);
 				process.exit(0);
 			} else if (reason === DisconnectReason.loggedOut) {
-				loggers.error(
-					color('Logged out', 'white'),
-					color('Please delete your previous session and do a rescan...', 'lilac')
-				);
+				loggers.error(color('Logged out', 'white'), color('Please delete your previous session and do a rescan...', 'lilac'));
 				await resetSession(cli);
 				process.exit(0);
 			} else {
@@ -217,7 +212,7 @@ export const handleConnectionUpdate = async (
 				buttons.push(
 					builder.button.reply({
 						display: 'Ping Bot',
-						id: '!ping'
+						id: cmdId('ping')
 					})
 				);
 
@@ -398,7 +393,7 @@ export const handleWerewolfCycle = async (update) => {
 				sections: update.playersData
 					.filter((v) => v.isAlive)
 					.map((v) => ({
-						rows: [{ title: `VOTE ${v.name}`, rowId: `.ww vote ${v.id} ${update.id}` }],
+						rows: [{ title: `VOTE ${v.name}`, rowId: cmdId('ww', `vote ${v.id} ${update.id}`) }],
 						title: `${__botName} | Werewolf Games`
 					}))
 			});
@@ -438,7 +433,7 @@ ${update.playersData
 							.filter((v) => v.isAlive)
 							.map((v) => {
 								return {
-									rows: [{ title: `KILL ${v.name}`, rowId: `.ww kill ${v.id} ${update.id}` }],
+									rows: [{ title: `KILL ${v.name}`, rowId: cmdId('ww', `kill ${v.id} ${update.id}`) }],
 									title: `${__botName} | Werewolf Games`
 								};
 							})
@@ -457,7 +452,7 @@ ${update.playersData
 									rows: [
 										{
 											title: `TERAWANG ${update.playersData[i].name}`,
-											rowId: `.ww seer ${update.playersData[i].id} ${update.id}`
+											rowId: cmdId('ww', `seer ${update.playersData[i].id} ${update.id}`)
 										}
 									],
 									title: `${__botName} | Werewolf Games`
@@ -478,7 +473,7 @@ ${update.playersData
 									rows: [
 										{
 											title: `JAGA ${update.playersData[i].name}`,
-											rowId: `.ww guard ${update.playersData[i].id} ${update.id}`
+											rowId: cmdId('ww', `guard ${update.playersData[i].id} ${update.id}`)
 										}
 									],
 									title: `${__botName} | Werewolf Games`
@@ -561,6 +556,13 @@ let shutdownTimer = null;
 const SHUTDOWN_TIMEOUT_MS = 10_000;
 
 async function shutdownServers() {
+	if (configuration.dashboardIO) {
+		const io = configuration.dashboardIO;
+
+		io.disconnectSockets(true);
+		io.close();
+	}
+
 	const servers = [...configuration.expressInstances.entries()];
 
 	if (!servers.length) {
@@ -570,6 +572,14 @@ async function shutdownServers() {
 	await Promise.all(
 		servers.map(([name, server]) => {
 			loggers.warning(color('Shutting down', 'white'), color(name, 'lilac'), color('server...', 'white'));
+
+			if (typeof server.closeAllConnections === 'function') {
+				server.closeAllConnections();
+			}
+
+			if (typeof server.closeIdleConnections === 'function') {
+				server.closeIdleConnections();
+			}
 
 			return new Promise((resolve, reject) => {
 				server.close((err) => {
@@ -604,6 +614,11 @@ const handleShutdown = async (signal = 'shutdown') => {
 	}
 
 	try {
+		const { shutdownDashboardKV } = await import('../../database/adapters/dashboard-settings.js');
+		const { shutdownPinterestProfilePictures } = await import('../../database/adapters/pinterest-profile-pictures.js');
+
+		shutdownDashboardKV();
+		shutdownPinterestProfilePictures();
 		await shutdownServers();
 
 		if (shutdownTimer) {

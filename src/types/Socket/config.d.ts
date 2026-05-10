@@ -55,4 +55,5 @@ export interface GlobalConfig {
 	isInstagramInitiated: boolean;
 	instagram: import('../../utils/instagram/instagram.js').InstagramApi | null;
 	expressInstances: Cache;
+	dashboardIO?: import('socket.io').Server;
 }

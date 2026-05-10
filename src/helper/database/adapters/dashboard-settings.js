@@ -12,6 +12,8 @@ const KV_STATE_KEY = 'dashboard_state';
 const KV_COMMANDS_CACHE_KEY = 'dashboard_commands_cache';
 const KV_FLUSH_MS = 1000;
 
+let disposed = false;
+
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const isRetryablePrismaError = (error) => {
@@ -47,98 +49,97 @@ const withRetry = async (operation, { retries = 3, baseDelayMs = 60 } = {}) => {
 
 			const jitter = Math.floor(Math.random() * baseDelayMs);
 
-			await sleep(baseDelayMs * attempt + jitter);
+			await sleep(baseDelayMs * 2 ** (attempt - 1) + jitter);
 		}
 	}
 };
 
-const writeQueues = new Map();
 const pendingWrites = new Map();
 const lastPersisted = new Map();
 
-const enqueueWrite = (key, task) => {
-	const previous = writeQueues.get(key) || Promise.resolve();
-	const next = previous
-		.catch(() => undefined)
-		.then(task)
-		.finally(() => {
-			if (writeQueues.get(key) === next) {
-				writeQueues.delete(key);
-			}
-		});
-
-	writeQueues.set(key, next);
-	return next;
-};
-
+/**
+ * Flush a single KV key to the database.
+ * Uses the same flushInProgress/pendingFlush guard pattern as makePersistentStore
+ * to prevent concurrent writes on the same key.
+ */
 const flushKVWrite = async (key) => {
 	const entry = pendingWrites.get(key);
 
-	if (!entry || entry.inFlight || !entry.serialized) {
+	if (!entry) {
 		return;
 	}
 
-	const { db } = entry;
+	if (entry.flushInProgress) {
+		entry.pendingFlush = true;
+		return;
+	}
+
+	if (!entry.pendingFlush) {
+		return;
+	}
+
+	entry.flushInProgress = true;
+	entry.pendingFlush = false;
+
 	const serialized = entry.serialized;
 
-	entry.serialized = null;
-	entry.inFlight = true;
-	entry.timer = null;
-
 	try {
-		await enqueueWrite(key, () =>
-			withRetry(() =>
-				db.dashboardKV.upsert({
-					where: { key },
-					update: { value: serialized },
-					create: { key, value: serialized }
-				})
-			)
+		await withRetry(() =>
+			entry.db.dashboardKV.upsert({
+				where: { key },
+				update: { value: serialized },
+				create: { key, value: serialized }
+			})
 		);
 
 		lastPersisted.set(key, serialized);
+
+		if (!entry.pendingFlush) {
+			pendingWrites.delete(key);
+		}
 	} catch {
 		console.warn('[dashboardKV] flush failed, will retry', { key });
-		entry.serialized = serialized;
-		entry.timer = setTimeout(() => {
-			void flushKVWrite(key);
-		}, KV_FLUSH_MS * 2);
+		entry.pendingFlush = true;
 	} finally {
-		entry.inFlight = false;
+		entry.flushInProgress = false;
 
-		if (entry.serialized) {
-			entry.timer = setTimeout(() => {
+		if (entry.pendingFlush && !entry.flushTimer) {
+			entry.flushTimer = setTimeout(() => {
+				entry.flushTimer = null;
 				void flushKVWrite(key);
 			}, KV_FLUSH_MS);
-			return;
 		}
-
-		pendingWrites.delete(key);
 	}
 };
 
 const scheduleKVWrite = (db, key, serialized) => {
-	let entry = pendingWrites.get(key);
-
-	if (!entry && lastPersisted.get(key) === serialized) {
+	if (disposed) {
 		return;
 	}
 
+	if (!pendingWrites.has(key) && lastPersisted.get(key) === serialized) {
+		return;
+	}
+
+	let entry = pendingWrites.get(key);
+
 	if (!entry) {
-		entry = { db, serialized: null, timer: null, inFlight: false };
+		entry = { db, serialized, pendingFlush: false, flushInProgress: false, flushTimer: null };
 		pendingWrites.set(key, entry);
 	}
 
 	entry.db = db;
 
-	if (entry.serialized === serialized) {
+	if (entry.serialized === serialized && !entry.pendingFlush && !entry.flushInProgress) {
 		return;
 	}
 
 	entry.serialized = serialized;
+	entry.pendingFlush = true;
 
-	if (!entry.timer && !entry.inFlight) {
-		entry.timer = setTimeout(() => {
+	if (!entry.flushTimer && !entry.flushInProgress) {
+		entry.flushTimer = setTimeout(() => {
+			entry.flushTimer = null;
 			void flushKVWrite(key);
 		}, KV_FLUSH_MS);
 	}
@@ -212,4 +213,21 @@ export const loadCommandsCatalog = async (db) => {
  */
 export const saveCommandsCatalog = async (db, payload) => {
 	await setKV(db, KV_COMMANDS_CACHE_KEY, payload);
+};
+
+/**
+ * Stop all pending flush timers and reject future writes.
+ * Call this during graceful shutdown so the process can exit.
+ */
+export const shutdownDashboardKV = () => {
+	disposed = true;
+
+	for (const [key, entry] of pendingWrites) {
+		if (entry.flushTimer) {
+			clearTimeout(entry.flushTimer);
+			entry.flushTimer = null;
+		}
+
+		pendingWrites.delete(key);
+	}
 };
