@@ -31,7 +31,6 @@ ${chalk.yellow('  Options')}
   --no-limit               ${chalk.green('Set commands limit to none.')}
   --pair-mode              ${chalk.green('Enable pair mode.')} ${chalk.hex('#ff00ff')('This needs to input your host number to get the code.')}
   --pair-number            ${chalk.hex('#05ffa1')('Use this number for pairing (no prompt).')}
-  --spin                   ${chalk.green('Enable spinners for loading plugins.')}
   --test                   ${chalk.green('Test your connection.')}
   --print-self             ${chalk.green('Print every incoming messages from host number in terminal.')}
   --help, -h               ${chalk.green('Show this message.')}

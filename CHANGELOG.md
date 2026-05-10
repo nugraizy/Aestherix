@@ -2,6 +2,48 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「6.13.0」2026-05-11
+## Added
+- New `Comix` manga scraper module with five commands: search, detail, chapters, read, and popular.
+- New `Kiryuu` manga scraper module with five commands: search, detail, chapters, read, and popular.
+- New Twitter commands: `twitter-tweets` (user timeline), `twitter-timeline` (home feed, owner-only), and `twitter-search`.
+- New `checkprefix` helper command that prints the current prefix configuration for operators.
+- Dashboard `Settings > Prefix` panel for configuring single / multi / no-prefix mode with custom prefix characters, persisted to `settings.json`.
+- Syntax-highlighted plugin error reporting: failing source lines are rendered with `cli-highlight` using the active theme palette, with short AI-generated fix suggestions from a dedicated syntax-check agent.
+- New CLI flags: `--pair-number` (pair without prompt), `--print-self` (echo host's own messages).
+- `AGENTS.md` contributor guide covering project structure, architecture flow, command shape, and code standards.
+
+## Changed
+- **Twitter scraper** rewritten as a class-based client with cookie auth and ClientTransaction request signing. Replaces the previous ad-hoc `twitterDownload` / `twitterUser` helpers.
+- **YouTube** switched to a unified `YouTubei.js` implementation. Dropped `ytdl-core` and the y2mate fallback, which were breaking frequently on upstream changes.
+- **Character AI** client (`ChatGPTDialogue`) rewritten with positional constructor, agent mode support, and multi-message splitting via `{OTHER_MESSAGE}` markers.
+- **Prefix resolution** extracted into `src/helper/modules/prefix.js` exposing `cmdId()`, `getPrefix()`, and `setPrefix()`. Every hardcoded `!cmd` or `.cmd` button ID and rowId across commands and handlers now rebuilds with the active prefix at runtime.
+- **Anonymous partner matching** rewritten with explicit map accessors and atomic interval updates; the old flow called `Array.from(values().values)` (not a function) and had racey interval cleanup.
+- **Command schema validation** now calls `schema.validateSync` with `run`, `name`, `usage`, `cooldown`, `limit`, `status`, and `category` marked required, so invalid plugins fail at load instead of silently registering with random defaults.
+- **ESLint `camelcase`** rule relaxed to `{ properties: 'never' }` since third-party API payloads (Bandcamp, Pinterest, TikTok, Instagram, Twitter, Pexels, MiHoYo) ship snake_case properties the code has to mirror verbatim. Removed the resulting disable comments across scraper modules.
+- **Shutdown lifecycle** now disconnects socket.io clients, calls `closeAllConnections` / `closeIdleConnections`, and invokes new `shutdownDashboardKV` / `shutdownPinterestProfilePictures` hooks so pending flushes stop instead of racing the exit.
+- **Dashboard KV persistence** rewritten with a `flushInProgress` / `pendingFlush` guard pattern mirroring `makePersistentStore` and exponential backoff in `withRetry`.
+- **Interactive button handlers** renamed: `button.reminder` → `setReminder`, `button.cancel` → `cancelReminder`. `button.call` now takes `phoneNumber` instead of `id`. Unused `id` field removed from `reminder`, `cancel`, `address`, and `location`.
+- **CLI flags** are now kebab-case on the command line (`--pair-mode`, `--self-mode`, `--read-only`, ...). meow maps them to camelCase in `configuration.OPTIONS`. Most single-letter aliases previously listed in the docs were removed since they never existed in code.
+- **Help text and meow configuration** moved into the top-level `index.js` so the banner fires before module-level side effects. `check-flag.js` now only exports `DEFAULT_SESSION_NAME` and `meowFlags`, breaking a circular dependency with the configuration singleton.
+- **Logger themes** (Catppuccin, Dracula, Cyberpunk, Synthwave) extended with syntax palette entries so code blocks in logs match the terminal theme.
+
+## Fixed
+- **Prefix multi-mode regex** now escapes character-class metacharacters in user prefixes, so commands with regex-sensitive prefix characters are matched correctly.
+- **`getWaifu`** passed axios the wrong argument shape, sending the headers object as the JSON body so the API received no exclude list. Now uses the three-arg axios form with the body in the right place, and drops the `new Promise(async ...)` wrapper that swallowed rejections thrown outside the inner try/catch.
+- **`imageToPdf`** crashed with "unknown image format" on webp buffers. Each input is now probed with sharp and transcoded to jpeg when needed. Pages also use each image's real dimensions instead of letterboxing everything into a fixed A4-ish size.
+- **`InteractiveButtons` type signatures** corrected. The previous `({ display: string, sections: Sections })` form was JS destructuring in a type position, not a valid parameter type. All entries now use `(params: { ... })`.
+- **Own-message log spam** avoided — `isFromMe` messages now gate behind the new `--print-self` flag instead of always printing alongside the incoming message log.
+- **Character AI feedback loops** avoided by skipping AI replies on host-own messages.
+- **Profile picture rotation service** now also ignores `403` errors alongside the other transient responses, so one bad fetch no longer spams the logger.
+
+## Removed
+- `ytdl-core` dependency (replaced by YouTubei.js).
+- `src/utils/twitter/twitter-media-downloader.js` and `twitter-user-lookup.js` (folded into the new class-based client).
+- `src/utils/youtube/y2mate.js` (obsolete scraping fallback).
+
+---
+
 # 「6.12.2」2026-05-07
 ## Changed
 - DashboardKV writes are now debounced and retried, with coalescing and debug logs.

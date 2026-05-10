@@ -201,7 +201,6 @@ Flags are kebab-case on the CLI. The bot reads them via [meow](https://github.co
 | `--no-limit` | | Disable command limits globally. |
 | `--pair-mode` | | Pair the host number via code instead of QR. |
 | `--pair-number <num>` | | Use this number for pairing without a prompt. |
-| `--spin` | | Enable the ora spinner during plugin loading. |
 | `--test` | | Run connection self-test and exit. |
 | `--print-self` | | Print host's own outgoing messages in the terminal. |
 

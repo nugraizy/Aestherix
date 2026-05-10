@@ -10,20 +10,20 @@
 
 <div align="center">
 
-  <img src="https://img.shields.io/badge/version-6.12.2-blue?style=flat-square" alt="version"/>
+  <img src="https://img.shields.io/badge/version-6.13.0-purple?style=flat-square" alt="version"/>
 
   <a href="https://github.com/nugraizy/aestherix/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" title="MIT License">
-    <img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="license"/>
+    <img src="https://img.shields.io/badge/license-MIT-red?style=flat-square" alt="license"/>
   </a>
 
   <a href="https://github.com/nugraizy/aestherix/stargazers/">
-    <img title="Stars"  alt="Stars" src="https://img.shields.io/github/stars/nugraizy/aestherix?label=Stars&color=%23ffb7b2&style=flat-square">
+    <img title="Stars"  alt="Stars" src="https://img.shields.io/github/stars/nugraizy/aestherix?label=Stars&color=gold&style=flat-square">
   </a>
   <a href="https://github.com/nugraizy/aestherix/network/members">
-    <img title="Forks" alt="Forks" src="https://img.shields.io/github/forks/nugraizy/aestherix?label=Forks&color=%23ffdac1&style=flat-square">
+    <img title="Forks" alt="Forks" src="https://img.shields.io/github/forks/nugraizy/aestherix?label=Forks&color=silver&style=flat-square">
   </a>
   <a href="https://github.com/nugraizy/aestherix/watchers">
-    <img title="Watching" alt="Watching" src="https://img.shields.io/github/watchers/nugraizy/aestherix?label=Watchers&color=%23e2f0cb&style=flat-square">
+    <img title="Watching" alt="Watching" src="https://img.shields.io/github/watchers/nugraizy/aestherix?label=Watchers&color=green&style=flat-square">
   </a>
 
   <img src="https://img.shields.io/badge/node-%3E%3D18-brightgreen?style=flat-square" alt="node"/>
