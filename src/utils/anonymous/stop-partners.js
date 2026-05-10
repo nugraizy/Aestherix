@@ -3,9 +3,7 @@ import { skip } from './skip-partners.js';
 /**
  * Stop current Anonymous session id.
  * @param {string} key string of the key/participant.
- * @param {number} timer timeout for how long the queue.
  * @param {import('../../types/Socket/index.js').AdvancedClient} client socket connection.
- * @param {import('baileys').AnyMessageContent} message metadata of the message.
- * @returns
+ * @returns {false | {partner1: string, partner2: string} | {status: string, seconds: number}}
  */
-export const stop = (key, timer, client, message) => skip(key, timer, client, message, true);
+export const stop = (key, client) => skip(key, 0, client, undefined, true);

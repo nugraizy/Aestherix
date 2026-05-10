@@ -2,6 +2,10 @@ import dayjs from 'dayjs';
 
 import configuration from '../../helper/config/connect.js';
 import { checkIntervals, deleteIntervals, setIntervals } from '../misc/index.js';
+import { findOwnerOf } from './handlers-partners.js';
+
+const anonMap = () => configuration.anonymous;
+const intervalsMap = () => configuration.intervals['anonymous'];
 
 /**
  * Search new Anonymous session.
@@ -9,78 +13,99 @@ import { checkIntervals, deleteIntervals, setIntervals } from '../misc/index.js'
  * @param {number} timer timeout for how long the queue.
  * @param {import('../../types/Socket/index.js').AdvancedClient} client socket connection.
  * @param {import('baileys').AnyMessageContent} message metadata of the message.
- * @returns {(undefined|boolean)|{partner1: string, partner2: string, messages1: AnyMessageContent, messages2: AnyMessageContent}|{status: string, seconds?: number}}
+ * @returns {true | {partner1: string, partner2: string, messages1: AnyMessageContent, messages2: AnyMessageContent} | {status: string, seconds?: number}}
  */
 export const search = (jid, timer, client, message) => {
-	const status = Array.from(configuration.anonymous.values().values).find((k) => k.partner === null) || undefined;
+	const waitingKey = findWaitingKey();
 
-	if (status) {
-		if (configuration.anonymous.has(jid)) {
-			return { status: 'searching', seconds: checkIntervals(configuration.intervals['anonymous'].get(jid)).timer };
+	if (waitingKey) {
+		if (anonMap().has(jid)) {
+			return {
+				status: 'searching',
+				seconds: checkIntervals(intervalsMap().get(jid)).timer
+			};
 		}
 
-		status.partner = jid;
-		configuration.intervals['anonymous'].get(
-			Array.from(configuration.anonymous.keys()).find((k) => configuration.anonymous.get(k).partner === jid)
-		).partner2 = jid;
-		const tempMessage = configuration.anonymous.get(
-			Array.from(configuration.anonymous.keys()).find((k) => configuration.anonymous.get(k).partner === jid)
-		).message;
+		const waitingEntry = anonMap().get(waitingKey);
 
-		delete configuration.anonymous.get(
-			Array.from(configuration.anonymous.keys()).find((k) => configuration.anonymous.get(k).partner === jid)
-		).message;
+		waitingEntry.partner = jid;
+
+		const intervalEntry = intervalsMap().get(waitingKey);
+
+		if (intervalEntry) {
+			intervalEntry.partner2 = jid;
+		}
+
+		const tempMessage = waitingEntry.message;
+
+		delete waitingEntry.message;
+
 		return {
-			partner1: Array.from(configuration.anonymous.keys()).find((k) => configuration.anonymous.get(k).partner === jid),
+			partner1: waitingKey,
 			partner2: jid,
 			messages1: tempMessage,
 			messages2: message
 		};
 	}
 
-	if (configuration.anonymous.has(jid)) {
-		return { status: 'chatting' };
-	} else if (Array.from(configuration.anonymous.values().values).find((k) => k.partner === jid)) {
+	if (anonMap().has(jid) || findOwnerOf(jid)) {
 		return { status: 'chatting' };
 	}
 
-	configuration.anonymous.set(jid, { partner: null, message });
-	const timers = dayjs(new Date())
+	anonMap().set(jid, { partner: null, message });
+
+	const expiresAt = dayjs(new Date())
 		.add(timer + 2, 's')
 		.valueOf();
 
 	setIntervals(
-		configuration.intervals['anonymous'],
+		intervalsMap(),
 		jid,
 		timer + 2,
-		async (clients = client, id = jid, remaining = timers) => {
-			if (configuration.intervals['anonymous'].get(id) === undefined) {
+		async (clients = client, id = jid, remaining = expiresAt) => {
+			const interval = intervalsMap().get(id);
+
+			if (!interval) {
 				return;
 			}
 
-			const second = Math.floor(((remaining - new Date().getTime()) % (1000 * 60)) / 1000);
-			const { partner1, partner2 } = checkIntervals(configuration.intervals['anonymous'].get(id));
+			const second = Math.floor(((remaining - Date.now()) % (1000 * 60)) / 1000);
+			const { partner2 } = checkIntervals(interval);
 
-			configuration.intervals['anonymous'].get(id).timer = second;
+			interval.timer = second;
 
 			if (partner2 !== null) {
-				deleteIntervals(configuration.intervals['anonymous'].get(id), configuration.intervals['anonymous'], id);
+				deleteIntervals(interval, intervalsMap(), id);
 				return;
 			}
 
 			if (second <= 0) {
 				await clients.instance.edit(
-					partner1,
+					id,
 					'Your partner is not found! Try again later!',
-					configuration.anonymousMessages.get(partner1)
+					configuration.anonymousMessages.get(id)
 				);
-				configuration.anonymous.delete(id);
-				configuration.anonymousMessages.delete(partner1);
-				deleteIntervals(configuration.intervals['anonymous'].get(id), configuration.intervals['anonymous'], id);
-				return;
+				anonMap().delete(id);
+				configuration.anonymousMessages.delete(id);
+				deleteIntervals(interval, intervalsMap(), id);
 			}
 		},
 		{ partner1: jid, partner2: null, partner1Message: message }
 	);
+
 	return true;
 };
+
+/**
+ * Finds the map key of the first entry that is waiting (partner === null).
+ * @returns {string|undefined}
+ */
+function findWaitingKey() {
+	for (const [key, value] of anonMap()) {
+		if (value.partner === null) {
+			return key;
+		}
+	}
+
+	return undefined;
+}

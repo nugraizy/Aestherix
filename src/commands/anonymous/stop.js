@@ -14,17 +14,18 @@ export default {
 	limit: 1,
 	status: 'enable',
 	async run({ from, message }, client) {
-		const stopping = stop(from, 0, client);
+		const result = stop(from, client);
 
-		if (typeof stopping === 'boolean' && !stopping) {
+		if (!result) {
 			return await client.instance.reply(from, 'You are not in a search!', message);
 		}
 
-		if (typeof stopping === 'object' && stopping.partner2) {
-			client.instance.reply(from, 'You have stopped the chat!', message);
-			return client.instance.send(stopping.partner2, { text: 'Your partner stoped the chat!' }, {});
+		if (result.partner2) {
+			await client.instance.reply(from, 'You have stopped the chat!', message);
+			await client.instance.send(result.partner2, { text: 'Your partner stopped the chat!' }, {});
+			return;
 		}
 
-		await client.instance.reply(from, `You already searching for a partner!\nPlease wait for ${stopping.seconds}s`, message);
+		await client.instance.reply(from, `You are already searching for a partner!\nPlease wait for ${result.seconds}s`, message);
 	}
 };

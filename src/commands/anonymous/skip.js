@@ -14,17 +14,18 @@ export default {
 	limit: 1,
 	status: 'enable',
 	async run({ from, message }, client) {
-		const skipping = skip(from, 20, client, message);
+		const result = skip(from, 20, client, message);
 
-		if (typeof skipping === 'boolean' && !skipping) {
+		if (!result) {
 			return await client.instance.reply(from, 'You are not in a search!', message);
 		}
 
-		if (typeof skipping === 'object' && skipping.partner2) {
-			client.instance.reply(skipping.partner1, 'You have skipped your partner!', message);
-			client.instance.send(skipping.partner2, { text: 'Your partner skipped the chat!' }, {});
-		} else {
-			await client.instance.reply(from, `You already searching for a partner!\nPlease wait for ${skipping.seconds}s`, message);
+		if (result.partner2) {
+			await client.instance.reply(from, 'You have skipped your partner!', message);
+			await client.instance.send(result.partner2, { text: 'Your partner skipped the chat!' }, {});
+			return;
 		}
+
+		await client.instance.reply(from, `You are already searching for a partner!\nPlease wait for ${result.seconds}s`, message);
 	}
 };

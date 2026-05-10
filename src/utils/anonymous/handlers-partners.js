@@ -1,26 +1,31 @@
 import configuration from '../../helper/config/connect.js';
 
-/**
- *
- * @param {string} key the key/participants that sent message to bot.
- * @returns {{partner1: string, partner2: string}} key1 and key2.
- */
-export const handlers = (key) => {
-	const status =
-		configuration.anonymous.get(key) ||
-		Array.from(configuration.anonymous.values().values).find((k) => k.partner === key) ||
-		undefined;
+const anonCache = () => configuration.anonymous;
 
-	if (status === undefined) {
-		return false;
+const findOwnerOf = (jid) => {
+	for (const [key, value] of anonCache().entries()) {
+		if (value.partner === jid) {
+			return key;
+		}
 	}
 
-	return configuration.anonymous.has(key)
-		? { partner1: key, partner2: configuration.anonymous.get(key).partner }
-		: {
-				partner1: configuration.anonymous.get(
-					Array.from(configuration.anonymous.keys()).find((k) => configuration.anonymous.get(k).partner === key)
-				).partner,
-				partner2: Array.from(configuration.anonymous.keys()).find((k) => configuration.anonymous.get(k).partner === key)
-		  }; /* eslint-disable-line */
+	return undefined;
 };
+
+export const handlers = (key) => {
+	const entry = anonCache().get(key);
+
+	if (entry) {
+		return { partner1: key, partner2: entry.partner };
+	}
+
+	const owner = findOwnerOf(key);
+
+	if (owner) {
+		return { partner1: key, partner2: owner };
+	}
+
+	return false;
+};
+
+export { findOwnerOf };
