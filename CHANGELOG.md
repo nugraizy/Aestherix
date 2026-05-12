@@ -2,6 +2,43 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.0.0」2026-05-12
+
+## BREAKING CHANGES
+- **`client.instance` removed** — all commands now use `client.send()`, `client.reply()`, `client.TemplateBuilder` directly. External plugins using `client.instance.X` must update to `client.X`. ([`2d3070b`](https://github.com/nugraizy/aestherix/commit/2d3070b))
+- **`MessageParser` renamed to `Context`** — `MessageParser.parse()` is now `Context.from()`. ([`2d3070b`](https://github.com/nugraizy/aestherix/commit/2d3070b))
+- **Database schema** — `UserLimit`, `Contact`, `SettingsManager`, `DashboardKV` now have compound unique keys with `sessionName`. Requires `prisma db push`. ([`fdd0e14`](https://github.com/nugraizy/aestherix/commit/fdd0e14))
+
+## Added
+- **Multi-instance support** — `!addbot`, `!removebot`, `!listbots`, `!botflags` commands. Sub-bots run in the same process with restricted permissions. Auto-spawns persisted sub-bots on startup. ([`fdd0e14`](https://github.com/nugraizy/aestherix/commit/fdd0e14))
+- **`BotInstance` Prisma model** — persists sub-bot sessions, flags, and active state. ([`fdd0e14`](https://github.com/nugraizy/aestherix/commit/fdd0e14))
+- **Context convenience methods** — `ctx.reply()`, `ctx.react()`, `ctx.send()`, `ctx.sendTo()`, `ctx.delete()`. ([`2d3070b`](https://github.com/nugraizy/aestherix/commit/2d3070b))
+- **ClientSocket proxy methods** — `client.profilePictureUrl()`, `client.groupMetadata()`, `client.fetchBlocklist()`, `client.readMessages()`, `client.user`, `client.authState`. ([`2d3070b`](https://github.com/nugraizy/aestherix/commit/2d3070b))
+- **Core types** — `src/types/Core/index.d.ts` with full type definitions for all core classes. ([`f92f8ca`](https://github.com/nugraizy/aestherix/commit/f92f8ca))
+- **Graceful shutdown** — SIGINT/SIGTERM handler closes all sockets, dashboard, and bridge. ([`2d3070b`](https://github.com/nugraizy/aestherix/commit/2d3070b))
+- **Pairing flow** — interactive number selection (default → list → manual input). ([`fdd0e14`](https://github.com/nugraizy/aestherix/commit/fdd0e14))
+
+## Performance
+- **Store init non-blocking** — socket connects while store hydrates in background (33s → 6s startup). ([`abe6431`](https://github.com/nugraizy/aestherix/commit/abe6431))
+- **Auth key writes batched** — dirty keys flushed every 10s instead of per-write, eliminates MongoDB write conflicts. ([`abe6431`](https://github.com/nugraizy/aestherix/commit/abe6431))
+
+## Refactored
+- **`src/helper/modules/utils.js` deleted** (1200+ lines) — all `assign()` methods moved to `ClientSocket` class. ([`2d3070b`](https://github.com/nugraizy/aestherix/commit/2d3070b))
+- **`src/index.js` slimmed** (554 → 84 lines) — dashboard bridge and profile picture service extracted to `src/core/services/`. ([`4f9e75e`](https://github.com/nugraizy/aestherix/commit/4f9e75e))
+- **Root `index.js` rewritten** (130 → 39 lines) — env, banner, import. ([`4f9e75e`](https://github.com/nugraizy/aestherix/commit/4f9e75e))
+- **Logger consolidated** — old `loggers` object replaced with `Logger` class instance. ([`2d3070b`](https://github.com/nugraizy/aestherix/commit/2d3070b))
+- **Auth state moved** — `src/helper/database/auth.js` → `src/core/auth-state.js`. ([`abe6431`](https://github.com/nugraizy/aestherix/commit/abe6431))
+- **Dead code deleted** — old `src/handlers/`, `src/helper/connection/` directories removed. ([`6072a44`](https://github.com/nugraizy/aestherix/commit/6072a44))
+
+## Fixed
+- **Dashboard import paths** — `server.js` and `monitor.js` corrected to `../../helper/database/adapters/`. ([`4f9e75e`](https://github.com/nugraizy/aestherix/commit/4f9e75e))
+- **Prisma runtime URL** — `datasourceUrl` passed explicitly for dotenvx compatibility. ([`4f9e75e`](https://github.com/nugraizy/aestherix/commit/4f9e75e))
+- **Context null guards** — `decodeJid`, store access, and `#ensureUserCache` handle undefined gracefully. ([`2d3070b`](https://github.com/nugraizy/aestherix/commit/2d3070b))
+- **MQTT typo** — `waclient` → `waClient`. ([`6072a44`](https://github.com/nugraizy/aestherix/commit/6072a44))
+- **`resetSession`** — prefix now matches `fixFileName` format used by auth-state. ([`2d3070b`](https://github.com/nugraizy/aestherix/commit/2d3070b))
+
+---
+
 # 「6.14.0」2026-05-12
 ## Added
 - **Werewolf game rewrite** — full modular architecture with scheduler-driven phase machine, 10 roles (Villager, Werewolf, Alpha Werewolf, Seer, Guard, Witch, Hunter, Cupid, Little Girl, Jester), lobby timer with auto-start/disband, button-based DM actions, i18n (id/en), and persistent sessions that survive bot restarts. ([`73b22c5`](https://github.com/nugraizy/aestherix/commit/73b22c5))
