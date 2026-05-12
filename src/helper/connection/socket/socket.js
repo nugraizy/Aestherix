@@ -50,21 +50,24 @@ const question = (text) =>
  * @typedef {import('../../../types/Socket/index.js').ClientSocket} ClientSocket
  * @typedef {import('../../../types/Socket/index.js').Store} Store
  * @typedef {import('./../../../types/Socket/index.js').MultiAuthState['state']} State
- * @param {{cli: Cli, OPTIONS: {[_: string]: boolean}, store: Store, sessionName: string}} params
+ * @param {{OPTIONS: {[_: string]: boolean}, store: Store, sessionName: string}} params
  * @returns {Promise<{Client: ClientSocket, store: Store, state: State, saveCreds: () => Promise<void>}>}
  */
-export const connectSocket = async ({ cli, OPTIONS, store, sessionName }) => {
-	/**
-	 * Prisma-backed auth state — stores Baileys signal keys in the configured
-	 * database instead of the local file system.
-	 *
-	 * @type {import('../../../types/Socket/index.js').MultiAuthState}
-	 */
-	const { state, saveCreds, clearState } = await useMultiAuthState(prisma, sessionName);
+export const connectSocket = async ({ OPTIONS, store, sessionName }) => {
+	const [authResult, versionResult] = await Promise.all([
+		useMultiAuthState(prisma, sessionName).then((result) => {
+			return result;
+		}),
+		fetchLatestBaileysVersion().then((result) => {
+			return result;
+		})
+	]);
+
+	const { state, saveCreds, clearState } = authResult;
+	const { version } = versionResult;
 
 	global.store = store;
 
-	const { version } = await fetchLatestBaileysVersion();
 	const printQRInTerminal = !OPTIONS.pairMode;
 
 	/**
@@ -93,7 +96,6 @@ export const connectSocket = async ({ cli, OPTIONS, store, sessionName }) => {
 		linkPreviewImageThumbnailWidth: 2,
 		mediaCache: new Cache(),
 		userDevicesCache: new Cache(),
-		customId: 'HFINDER',
 		defaultQueryTimeoutMs: 0,
 		cachedGroupMetadata: (jid) => (isJidGroup(jid) ? configuration.cache.metadata.get(jid) : {}),
 		browser: ['Mac OS', 'Chrome', 'Chrome 114.0.5735.198'],
@@ -249,7 +251,7 @@ const handleNewInstance = async ({ OPTIONS, Client }) => {
 
 			if (!hostNumber) {
 				phoneNumber = await askInputNumber({ hostNumber, backupsHostNumbers });
-				SETTINGS.main_host_number = phoneNumber.replace(/[^0-9]/g, ''); // eslint-disable-line
+				SETTINGS.main_host_number = phoneNumber.replace(/[^0-9]/g, '');
 				fs.writeJSON('./src/helper/config/settings.json', SETTINGS);
 				break check;
 			} else {

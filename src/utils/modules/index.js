@@ -1,6 +1,7 @@
 import axios from 'axios';
 import chalk from 'chalk';
 import { load } from 'cheerio';
+import { highlight } from 'cli-highlight';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone.js';
 import utc from 'dayjs/plugin/utc.js';
@@ -493,21 +494,31 @@ export const convertToOrdinal = (number) => {
 	return number + (ordinal[(lastTwoDigits - 20) % 10] || ordinal[lastTwoDigits] || ordinal[0]);
 };
 
-export function loadFiles(dir) {
+export function loadFiles(dir, options = {}) {
 	const files = [];
+	const excludeDir = options.excludeDir || null;
+	const excludeFile = options.excludeFile || null;
 
 	const walkDir = (curDir) => {
-		const list = fs.readdirSync(curDir);
+		const list = fs.readdirSync(curDir, { withFileTypes: true });
 
-		for (const file of list) {
-			const path = `${curDir}/${file}`;
-			const stat = fs.statSync(path);
+		for (const entry of list) {
+			const entryPath = `${curDir}/${entry.name}`;
 
-			if (stat?.isDirectory()) {
-				walkDir(path);
-			} else {
-				files.push(path);
+			if (entry.isDirectory()) {
+				if (excludeDir && excludeDir.test(entryPath)) {
+					continue;
+				}
+
+				walkDir(entryPath);
+				continue;
 			}
+
+			if (excludeFile && excludeFile.test(entryPath)) {
+				continue;
+			}
+
+			files.push(entryPath);
 		}
 	};
 
@@ -566,7 +577,7 @@ const coloring = (text, format, err) => {
 
 	const [hour, minute, second] = time.split(':').filter(Boolean);
 	const [day, month] = date.split('/');
-	const [HH, mm, ss, DD, MM] = [hour, minute, second, day, month].map((x) => color(x, err ? colors.ERR : colors.MISC));
+	const [HH, mm, , DD, MM] = [hour, minute, second, day, month].map((x) => color(x, err ? colors.ERR : colors.MISC));
 
 	return `${HH}${SEPARATOR_1()}${mm} ${DD}${SEPARATOR_2()}${MM}`;
 };
@@ -608,7 +619,21 @@ const loggersFns = (type, ...info) => {
 export const loggers = {
 	warning: (...info) => loggersFns('WRN', ...info),
 	info: (...info) => loggersFns('INF', ...info),
-	error: (...info) => loggersFns('ERR', ...info)
+	error: (...info) => loggersFns('ERR', ...info),
+	prettyCode: (...args) => {
+		const lastArg = args[args.length - 1];
+		const hasOptions = lastArg && typeof lastArg === 'object' && !isBuffer(lastArg) && !Array.isArray(lastArg);
+		const options = hasOptions ? lastArg : {};
+		const codes = hasOptions ? args.slice(0, -1) : args;
+		const language = options.language;
+		const highlightedBlocks = codes.map((code) => {
+			const source = String(code ?? '');
+
+			return highlight(source, { language, ignoreIllegals: true });
+		});
+
+		return loggersFns('INF', `\n${highlightedBlocks.join('\n')}`);
+	}
 };
 
 export const isURL = (input) => /^(https?:\/\/)([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(:[0-9]{2,5})?(\/\S*)?$/i.test(input);

@@ -300,12 +300,10 @@ const sendMessageWithMentions = async (client, from, message, options) => {
 
 const prepareAndSendSticker = async (client, data, filename, isAnimated) => {
 	const result = await client.downloadMediaMessage(data);
-	const sticker = await client.prepareSticker(
-		result,
-		path.join(__dirname, `src/media/temporary_files/${filename}`),
-		isAnimated ? 'stickerAnimated' : 'imageMessage',
-		{ author: configuration.author, packname: configuration.packname }
-	);
+	const sticker = await client.prepareSticker(result, isAnimated ? 'stickerAnimated' : 'imageMessage', {
+		author: configuration.author,
+		packname: configuration.packname
+	});
 
 	return sticker;
 };

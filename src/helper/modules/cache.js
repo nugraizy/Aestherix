@@ -21,6 +21,7 @@ export class Cache {
 	#throws;
 	#allowOverwrite;
 	#count;
+	#valuesArray;
 
 	constructor({ limit = Infinity, throws = false, allowOverwrite = true } = {}) {
 		/**
@@ -56,6 +57,13 @@ export class Cache {
 		 * @private
 		 */
 		this.#count = 0;
+
+		/**
+		 * Cached values array for fast access.
+		 * @type {any[]}
+		 * @private
+		 */
+		this.#valuesArray = [];
 	}
 
 	/**
@@ -92,6 +100,14 @@ export class Cache {
 	}
 
 	/**
+	 * Returns cached values array (rebuilt only on set/delete/clear).
+	 * @returns {any[]}
+	 */
+	valuesOnly() {
+		return this.#valuesArray;
+	}
+
+	/**
 	 * Returns an object containing values from the cache and a function to find keys by value.
 	 * @returns {{ values: any[], returns: (value: any) => Key | null }}
 	 */
@@ -109,9 +125,17 @@ export class Cache {
 		};
 
 		return {
-			values: Object.values(this.cache),
+			values: this.#valuesArray,
 			returns: returnsKey
 		};
+	}
+
+	/**
+	 * Rebuild cached values array. Called after mutations.
+	 * @private
+	 */
+	#rebuildValuesArray() {
+		this.#valuesArray = Object.values(this.cache);
 	}
 
 	/**
@@ -201,6 +225,7 @@ export class Cache {
 		}
 
 		this.cache[key] = value;
+		this.#rebuildValuesArray();
 
 		return this;
 	}
@@ -221,6 +246,7 @@ export class Cache {
 
 		delete this.cache[key];
 		this.#count--;
+		this.#rebuildValuesArray();
 
 		return this;
 	}
@@ -232,6 +258,7 @@ export class Cache {
 	clear() {
 		this.cache = Object.create(null);
 		this.#count = 0;
+		this.#rebuildValuesArray();
 		return this;
 	}
 

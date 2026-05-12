@@ -339,7 +339,10 @@ const unlink = (filename) => {
 		return;
 	}
 
-	const commandFiles = loadFiles('./src/commands').filter((v) => !v.includes('template'));
+	const commandFiles = loadFiles('./src/commands', {
+		excludeDir: /([/\\])(subcommands|ui|__tests__|_)([/\\]|$)/,
+		excludeFile: /(template|\.d\.ts$)/
+	}).filter((v) => !v.includes('template'));
 	const existingPaths = cmds.map((v) => v[1].path);
 	const normalizedCommands = commandFiles.map((c) => path.normalize(c));
 

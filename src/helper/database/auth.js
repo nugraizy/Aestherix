@@ -90,6 +90,7 @@ const withRetry = async (fn, maxRetries = 5) => {
  */
 export const useMultiAuthState = async (db, sessionName = '') => {
 	const { BufferJSON, initAuthCreds, proto } = await getBaileys();
+	const keyCache = new Map();
 
 	const writeData = async (data, fileName) => {
 		try {
@@ -111,9 +112,19 @@ export const useMultiAuthState = async (db, sessionName = '') => {
 	const readData = async (fileName) => {
 		try {
 			const sessionId = buildSessionId(sessionName, fileName);
-			const row = await db.session.findFirst({ where: { sessionId } });
 
-			return row?.session ? JSON.parse(row.session, BufferJSON.reviver) : null;
+			if (keyCache.has(sessionId)) {
+				return keyCache.get(sessionId);
+			}
+
+			const row = await db.session.findFirst({ where: { sessionId } });
+			const parsed = row?.session ? JSON.parse(row.session, BufferJSON.reviver) : null;
+
+			if (parsed !== null) {
+				keyCache.set(sessionId, parsed);
+			}
+
+			return parsed;
 		} catch {
 			return null;
 		}
@@ -122,6 +133,8 @@ export const useMultiAuthState = async (db, sessionName = '') => {
 	const removeData = async (fileName) => {
 		try {
 			const sessionId = buildSessionId(sessionName, fileName);
+
+			keyCache.delete(sessionId);
 
 			await db.session.deleteMany({ where: { sessionId } });
 		} catch {
@@ -155,24 +168,38 @@ export const useMultiAuthState = async (db, sessionName = '') => {
 				},
 
 				set: async (data) => {
+					const tasks = [];
+
 					for (const category in data) {
 						for (const id in data[category]) {
 							const value = data[category][id];
 							const file = `${category}-${id}`;
+							const sessionId = buildSessionId(sessionName, file);
+
+							if (value) {
+								keyCache.set(sessionId, value);
+							} else {
+								keyCache.delete(sessionId);
+							}
 
 							try {
-								await (value ? writeData(value, file) : removeData(file));
+								tasks.push(value ? writeData(value, file) : removeData(file));
 							} catch {
 								//
 							}
 						}
 					}
+
+					Promise.allSettled(tasks).catch(() => undefined);
 				}
 			}
 		},
 
 		saveCreds: async () => {
 			try {
+				const sessionId = buildSessionId(sessionName, 'creds');
+
+				keyCache.set(sessionId, creds);
 				await writeData(creds, 'creds');
 			} catch {
 				//
@@ -181,7 +208,17 @@ export const useMultiAuthState = async (db, sessionName = '') => {
 
 		clearState: async () => {
 			try {
-				await db.session.deleteMany({});
+				keyCache.clear();
+				const name = String(sessionName || '').trim();
+
+				if (!name) {
+					await db.session.deleteMany({});
+					return;
+				}
+
+				const sessionPrefix = fixFileName(`${name}:`);
+
+				await db.session.deleteMany({ where: { sessionId: { startsWith: sessionPrefix } } });
 			} catch {
 				//
 			}

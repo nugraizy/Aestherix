@@ -13,6 +13,7 @@ import {
 	extractMetadata,
 	extractQuotedBody,
 	extractTypeQuoted,
+	firstKey,
 	NO_DATA,
 	PollUpdateDecrypt,
 	S_WHATSAPP_NET,
@@ -31,18 +32,15 @@ const typeSticker = ['imageMessage', 'videoMessage', 'stickerMessage'];
  * @param {string} id
  */
 const caching = async (clients, id) => {
-	await new Promise(async (resolve) => {
-		const groupMetadata = await clients.instance.groupMetadata(id).catch(() => ({}));
-		const partc = groupMetadata.participants;
+	const groupMetadata = await clients.instance.groupMetadata(id).catch(() => ({}));
+	const partc = groupMetadata.participants;
 
-		configuration.cache.metadata.set(id, {
-			...groupMetadata,
-			rawParticipants: partc || [],
-			adminGroups: partc?.filter((v) => v.admin !== null)?.map((v) => v.phoneNumber),
-			participantsGroup: partc?.map((v) => v.phoneNumber),
-			ownerGroups: groupMetadata?.ownerPn || null
-		});
-		resolve();
+	configuration.cache.metadata.set(id, {
+		...groupMetadata,
+		rawParticipants: partc || [],
+		adminGroups: partc?.filter((v) => v.admin !== null)?.map((v) => v.phoneNumber),
+		participantsGroup: partc?.map((v) => v.phoneNumber),
+		ownerGroups: groupMetadata?.ownerPn || null
 	});
 
 	configuration.isFirstConnectionForCache = false;
@@ -229,7 +227,7 @@ export const reassign = async (m, client, store, state) => {
 				multi: prefixMode === 'multi',
 				nopref: prefixMode === 'nopref',
 				pref: prefixValues[0] || '.',
-				cliPrefixes: cliPrefixes.length ? cliPrefixes : (SETTINGS.prefix.customPrefixes || []),
+				cliPrefixes: cliPrefixes.length ? cliPrefixes : SETTINGS.prefix.customPrefixes || [],
 				prefixValues
 			};
 
@@ -247,20 +245,19 @@ export const reassign = async (m, client, store, state) => {
 		const groupMetadata = isGroup ? configuration.cache.metadata.get(from) : {};
 		const isGroupOwner = isGroup ? groupMetadata?.owner === sender : false;
 
-		if (!isUsers && !isGroup) {
+		if (!isUsers) {
+			const cachedUser = configuration.cache.users.get(sender);
+			const prettyNumber =
+				cachedUser?.prettyNumber || PhoneNumber(`+${sender?.replace(S_WHATSAPP_NET, '')}`)?.formatInternational() || 'No Data';
+
 			configuration.cache.users.set(sender, {
-				prettyNumber: PhoneNumber(`+${sender?.replace(S_WHATSAPP_NET, '')}`)?.formatInternational() ?? 'No Data',
+				prettyNumber,
 				name: m.pushName,
-				ephemeralDuration: crawlProperty(m.message, 'expiration')
-			});
-		} else if (!isUsers && isGroup) {
-			configuration.cache.users.set(sender, {
-				prettyNumber: PhoneNumber(`+${sender?.replace(S_WHATSAPP_NET, '')}`)?.formatInternational() ?? 'No Data',
-				name: m.pushName,
-				ephemeralDuration:
-					store.messages[sender] && store.messages[sender].array.length
+				ephemeralDuration: isGroup
+					? store.messages[sender] && store.messages[sender].array.length
 						? crawlProperty(store.messages[sender].array[0].message, 'expiration')
 						: 0
+					: crawlProperty(m.message, 'expiration')
 			});
 		}
 
@@ -294,12 +291,18 @@ export const reassign = async (m, client, store, state) => {
 		}
 
 		if (isGroup) {
-			if (!isSettings || typeof (await checkJSON(from)) === 'boolean') {
-				if (typeof (await checkJSON(from)) === 'boolean') {
+			if (!isSettings) {
+				let settingsEntry = await checkJSON(from);
+
+				if (typeof settingsEntry === 'boolean') {
 					await pushDefaultSettings(from, groupName, groupDescription);
+					settingsEntry = await checkJSON(from);
 				}
 
-				configuration.cache.settings.set(from, await checkJSON(from));
+				if (settingsEntry) {
+					configuration.cache.settings.set(from, settingsEntry);
+				}
+
 				groupSettings = configuration.cache.settings.get(from);
 			} else if ('GROUP_CHANGE_SUBJECT' === m.messageStubType) {
 				groupSettings = configuration.cache.settings.get(from);
@@ -312,7 +315,14 @@ export const reassign = async (m, client, store, state) => {
 			}
 		}
 
-		const content = JSON.stringify(m?.message, null, 2);
+		let content = null;
+		const getContent = () => {
+			if (content === null) {
+				content = JSON.stringify(m?.message, null, 2);
+			}
+
+			return content;
+		};
 		const pushname = m?.pushName
 			? m?.pushName?.trim()
 			: name || store?.contacts?.[sender]?.verifiedName || store?.contacts?.[sender]?.notify || prettyNumber;
@@ -362,12 +372,10 @@ export const reassign = async (m, client, store, state) => {
 		const body = extractBody(m, type);
 		const args = body?.split(/ +/g);
 		let cmd = body?.toLowerCase()?.split(' ')[0] || '';
-		let { prf, prefixMode, prefixReg, prefixValues } = configuration.cache;
+		let { prf, prefixMode, prefixReg } = configuration.cache;
 
 		if (prefixMode === 'multi' && prefixReg) {
-			const escCharClass = (str) => str.replace(/[[\]\\^$]/g, (m) => `\\${m}`);
-
-			prf = prefixReg.test(cmd) ? cmd.match(new RegExp(`[${prefixValues.map(escCharClass).join('')}]`, 'gi'))?.[0] : null;
+			prf = prefixReg.test(cmd) ? cmd.match(prefixReg)?.[0] : null;
 		} else if (prefixMode === 'nopref') {
 			prf = '';
 		}
@@ -399,19 +407,20 @@ export const reassign = async (m, client, store, state) => {
 		}
 
 		const isMedia = ['videoMessage', 'imageMessage', 'documentMessage'].includes(type);
+		const contentText = type === 'extendedTextMessage' ? getContent() : '';
 		const isQuotedImage =
-			type === 'extendedTextMessage' && !content.includes('viewOnceMessage') && content.includes('imageMessage');
+			type === 'extendedTextMessage' && !contentText.includes('viewOnceMessage') && contentText.includes('imageMessage');
 		const isQuotedVideo =
-			type === 'extendedTextMessage' && !content.includes('viewOnceMessage') && content.includes('videoMessage');
-		const isQuotedSticker = type === 'extendedTextMessage' && content.includes('stickerMessage');
-		const isQuotedAudio = type === 'extendedTextMessage' && content.includes('audioMessage');
+			type === 'extendedTextMessage' && !contentText.includes('viewOnceMessage') && contentText.includes('videoMessage');
+		const isQuotedSticker = type === 'extendedTextMessage' && contentText.includes('stickerMessage');
+		const isQuotedAudio = type === 'extendedTextMessage' && contentText.includes('audioMessage');
 		const isQuotedDocument =
 			type === 'extendedTextMessage' &&
-			(content.includes('documentMessage') || content.includes('documentWithCaptionMessage'));
-		const isQuotedContact = type === 'extendedTextMessage' && content.includes('contactMessage');
-		const isQuotedLocation = type === 'extendedTextMessage' && content.includes('locationMessage');
-		const isQuotedLiveLocation = type === 'extendedTextMessage' && content.includes('liveLocationMessage');
-		const isQuotedContactsArray = type === 'extendedTextMessage' && content.includes('contactsArrayMessage');
+			(contentText.includes('documentMessage') || contentText.includes('documentWithCaptionMessage'));
+		const isQuotedContact = type === 'extendedTextMessage' && contentText.includes('contactMessage');
+		const isQuotedLocation = type === 'extendedTextMessage' && contentText.includes('locationMessage');
+		const isQuotedLiveLocation = type === 'extendedTextMessage' && contentText.includes('liveLocationMessage');
+		const isQuotedContactsArray = type === 'extendedTextMessage' && contentText.includes('contactsArrayMessage');
 
 		const typeQuoted = extractTypeQuoted(m, type);
 
@@ -431,9 +440,11 @@ export const reassign = async (m, client, store, state) => {
 
 		const isViewOnceImage = viewOnceMessage.imageMessage ? true : false;
 		const isViewOnceVideo = viewOnceMessage.videoMessage ? true : false;
-		const isQuotedViewOnce = type === 'extendedTextMessage' && content.includes('viewOnceMessage');
-		const isQuotedViewOnceImage = isQuotedViewOnce && content.includes('viewOnceMessage') && content.includes('imageMessage');
-		const isQuotedViewOnceVideo = isQuotedViewOnce && content.includes('viewOnceMessage') && content.includes('videoMessage');
+		const isQuotedViewOnce = type === 'extendedTextMessage' && contentText.includes('viewOnceMessage');
+		const isQuotedViewOnceImage =
+			isQuotedViewOnce && contentText.includes('viewOnceMessage') && contentText.includes('imageMessage');
+		const isQuotedViewOnceVideo =
+			isQuotedViewOnce && contentText.includes('viewOnceMessage') && contentText.includes('videoMessage');
 		const typeViewOnce = Object.keys(viewOnceMessage)?.[0];
 
 		const mMediaData =
@@ -457,9 +468,7 @@ export const reassign = async (m, client, store, state) => {
 		};
 
 		const bodyQuoted = typeMessage.includes(
-			type === 'extendedTextMessage' && mMediaData
-				? Object.keys(mMediaData.message ? mMediaData.message : { CLIENT: 'm' })[0]
-				: 'none'
+			type === 'extendedTextMessage' && mMediaData ? firstKey(mMediaData.message || { CLIENT: 'm' }) : 'none'
 		)
 			? extractQuotedBody(mMediaData, typeQuoted)
 			: '';

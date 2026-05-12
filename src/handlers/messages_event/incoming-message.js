@@ -150,101 +150,95 @@ const handleAIMessage = async (message, client) => handler.get('AI')(message, cl
  * @returns
  */
 const handleCommandExecution = async (message, client, store, cmds, user, instance, runtime, state) => {
-	let bodies = [];
-
-	if (configuration.OPTIONS.multiCmd) {
-		bodies = EVALY.includes(message.cmd) ? [message.body] : message.body.split('|');
-	} else {
-		bodies.push(message.body);
-	}
+	const useMultiCmd = Boolean(configuration.OPTIONS.multiCmd);
+	const hasSeparator = useMultiCmd && !EVALY.includes(message.cmd) && message.body.includes('|');
+	const bodies = hasSeparator ? message.body.split('|') : [message.body];
 
 	for (const body of bodies) {
-		message.body = body.trim();
-		message.args = message.body.split(/ +/g);
-		message.cmd = message.args?.[0].toLowerCase() || '';
+		const localMessage = { ...message, body: body.trim() };
+
+		localMessage.args = localMessage.body.split(/ +/g);
+		localMessage.cmd = localMessage.args?.[0].toLowerCase() || '';
 		let prefix = configuration.cache.prf;
-		const { prefixMode, prefixReg, prefixValues } = configuration.cache;
+		const { prefixMode, prefixReg } = configuration.cache;
 
 		if (prefixMode === 'multi' && prefixReg) {
-			const escCharClass = (str) => str.replace(/[[\]\\^$]/g, (m) => `\\${m}`);
-
-			prefix = prefixReg.test(message.cmd)
-				? message.cmd.match(new RegExp(`[${prefixValues.map(escCharClass).join('')}]`, 'gi'))?.[0]
-				: null;
+			prefix = prefixReg.test(localMessage.cmd) ? localMessage.cmd.match(prefixReg)?.[0] : null;
 		} else if (prefixMode === 'nopref') {
 			prefix = '';
 		}
 
-		message.isEval = EVALY.includes(message.args[0]);
+		localMessage.isEval = EVALY.includes(localMessage.args[0]);
 
-		message.isCmd = prefixMode === 'nopref' ? true : prefix != null && message.body.startsWith(prefix);
-		message.cmd = message.isEval ? message.args[0] : message.isCmd ? message.cmd : '';
-		message.query = message.args.slice(1).join(' ').trim();
+		localMessage.isCmd = prefixMode === 'nopref' ? true : prefix != null && localMessage.body.startsWith(prefix);
+		localMessage.cmd = localMessage.isEval ? localMessage.args[0] : localMessage.isCmd ? localMessage.cmd : '';
+		localMessage.query = localMessage.args.slice(1).join(' ').trim();
 
-		if (message.isCmd) {
+		if (localMessage.isCmd) {
 			setPrefix(prefix);
 		}
 
 		let correctedCommand = null;
 		let correctedAliases = null;
 
-		check: if (message.isCmd && configuration.OPTIONS.autoCorrect) {
-			const prf = message.prefix;
+		check: if (localMessage.isCmd && configuration.OPTIONS.autoCorrect) {
+			const prf = localMessage.prefix;
 
-			if (message.isEval) {
+			if (localMessage.isEval) {
 				break check;
 			}
 
-			const tempCmd = message.cmd.slice(1).trim().toLowerCase();
+			const tempCmd = localMessage.cmd.slice(1).trim().toLowerCase();
 			const cmdMatch = findBestMatch(tempCmd, cmds.commands.keys());
 
 			if (cmdMatch.bestMatch.rating >= 0.6) {
 				correctedCommand = prf + cmdMatch.bestMatch.target;
-				message.cmd = correctedCommand || correctedAliases || '';
+				localMessage.cmd = correctedCommand || correctedAliases || '';
 			} else {
 				const aliasMatch = findBestMatch(tempCmd, cmds.aliases);
 
 				if (aliasMatch.bestMatch.rating >= 0.57) {
 					correctedAliases = prf + aliasMatch.bestMatch.target;
-					message.cmd = correctedCommand || correctedAliases || '';
+					localMessage.cmd = correctedCommand || correctedAliases || '';
 				}
 			}
 
-			message.cmd = message.cmd.slice(1).toLowerCase();
-		} else if (message.isCmd && !configuration.OPTIONS.autoCorrect) {
-			if (message.isEval) {
+			localMessage.cmd = localMessage.cmd.slice(1).toLowerCase();
+		} else if (localMessage.isCmd && !configuration.OPTIONS.autoCorrect) {
+			if (localMessage.isEval) {
 				break check;
 			}
 
-			message.cmd = message.cmd.slice(1).toLowerCase();
+			localMessage.cmd = localMessage.cmd.slice(1).toLowerCase();
 		}
 
-		const commands = cmds.commands.values().values;
+		const commands = cmds.commands.valuesOnly();
 
 		/**
 		 * @type {import('../../types/Commands/index.js').CommandProps}
 		 */
-		const Tempcmds = cmds.commands.get(message.cmd) || commands.find((v) => v.aliases?.includes(message.cmd)) || false;
+		const Tempcmds =
+			cmds.commands.get(localMessage.cmd) || commands.find((v) => v.aliases?.includes(localMessage.cmd)) || false;
 
 		if (!configuration.OPTIONS.noLogs) {
-			logMessage(message, runtime);
+			logMessage(localMessage, runtime);
 		}
 
-		if (!Tempcmds && !message.isGroup && configuration.OPTIONS.ai) {
-			await handleAIMessage(message, client);
+		if (!Tempcmds && !localMessage.isGroup && configuration.OPTIONS.ai) {
+			await handleAIMessage(localMessage, client);
 			return;
 		}
 
 		if (!Tempcmds) {
-			await handleGames(message, client); // eslint-disable-line
+			await handleGames(localMessage, client); // eslint-disable-line
 		}
 
-		if (Tempcmds && !message.isOwner) {
+		if (Tempcmds && !localMessage.isOwner) {
 			if (configuration.cmds.disabledCommands?.has(Tempcmds.name)) {
 				await client.instance.reply(
-					message.from,
+					localMessage.from,
 					`The command \`${Tempcmds.name}\` is currently disabled by dashboard.`,
-					message.message
+					localMessage.message
 				);
 				continue;
 			}
@@ -253,103 +247,107 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 				continue;
 			}
 
-			if (message.isBanned) {
-				await client.instance.send(message.from, { react: { text: '🖕🏼', key: message.message.key } });
+			if (localMessage.isBanned) {
+				await client.instance.send(localMessage.from, { react: { text: '🖕🏼', key: localMessage.message.key } });
 				continue;
 			}
 
-			if (Tempcmds.category === 'Owner' && !message.isOwner) {
-				await client.instance.reply(message.from, 'This commands is only for owner.', message.message);
+			if (Tempcmds.category === 'Owner' && !localMessage.isOwner) {
+				await client.instance.reply(localMessage.from, 'This commands is only for owner.', localMessage.message);
 				continue;
 			}
 
 			if (configuration.OPTIONS.restrict && Tempcmds.restrict) {
 				await client.instance.reply(
-					message.from,
+					localMessage.from,
 					'This command is restricted and currently bot are on restricted mode.',
-					message.message
+					localMessage.message
 				);
 				continue;
 			}
 
 			if (
 				Tempcmds.category === 'Games' &&
-				message.isGroup &&
-				!message.isAdmin &&
-				!message.isOwner &&
-				message?.[message?.from]?.games === 'disable'
+				localMessage.isGroup &&
+				!localMessage.isAdmin &&
+				!localMessage.isOwner &&
+				localMessage?.[localMessage?.from]?.games === 'disable'
 			) {
 				await client.instance.reply(
-					message.from,
+					localMessage.from,
 					'Game Mode is Disabled. Type !games enable to enable Game Mode',
-					message.message
+					localMessage.message
 				);
 				continue;
 			}
 
-			if (Tempcmds.category === 'Moderation' && message.isGroup && !message.isAdmin && !message.isOwner) {
-				await client.instance.reply(message.from, 'You are not admin. This commands is only for admins.', message.message);
+			if (Tempcmds.category === 'Moderation' && localMessage.isGroup && !localMessage.isAdmin && !localMessage.isOwner) {
+				await client.instance.reply(
+					localMessage.from,
+					'You are not admin. This commands is only for admins.',
+					localMessage.message
+				);
 				continue;
 			}
 
-			if (Tempcmds.category === 'Moderation' && !message.isGroup) {
-				await client.instance.reply(message.from, 'This commands for group only', message.message);
+			if (Tempcmds.category === 'Moderation' && !localMessage.isGroup) {
+				await client.instance.reply(localMessage.from, 'This commands for group only', localMessage.message);
 				continue;
 			}
 
 			const cooldownEnabled = configuration.OPTIONS.coolDown;
-			let userRole = Limit.checkRole(message.sender);
+			let userRole = Limit.checkRole(localMessage.sender);
 
 			if (Tempcmds.premium && !(userRole.role === 'PREMIUM' || userRole.role === 'OWNER')) {
-				if (/-{1,2}((help(s)?|info|des(c|k)rip(t|s)i(on)?)|h)$/i.test(message.args[1]) && Tempcmds.name !== 'eval') {
+				if (/-{1,2}((help(s)?|info|des(c|k)rip(t|s)i(on)?)|h)$/i.test(localMessage.args[1]) && Tempcmds.name !== 'eval') {
 					const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${
 						Tempcmds.cooldown
 					}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v}`).join(', ')}.\nThis Features Only for Premium users.`;
 
-					client.instance.reply(message.from, help, message.message);
+					client.instance.reply(localMessage.from, help, localMessage.message);
 
 					continue;
 				}
 
-				await client.instance.reply(message.from, 'This commands is only for premium user.', message.message);
+				await client.instance.reply(localMessage.from, 'This commands is only for premium user.', localMessage.message);
 
 				continue;
 			}
 
 			if (!configuration.OPTIONS.noLimit) {
-				const isExist = Limit.checkExist(message.sender);
+				const isExist = Limit.checkExist(localMessage.sender);
 
 				if (!isExist) {
-					const { role } = Limit.checkRole(message.sender);
+					const { role } = Limit.checkRole(localMessage.sender);
 
 					if (!(role === 'OWNER' || role === 'PREMIUM')) {
-						Limit.upsert(message.sender, 0, role);
+						Limit.upsert(localMessage.sender, 0, role);
 					}
 				}
 
-				const limit = Limit.reduceLimit(message.sender, Tempcmds.limit);
+				const limit = Limit.reduceLimit(localMessage.sender, Tempcmds.limit);
 
 				if (limit.error) {
 					client.instance.reply(
-						message.from,
+						localMessage.from,
 						limit.message.replace('%s', `But this command (${Tempcmds.name}) need ${Tempcmds.limit}`),
-						message.message
+						localMessage.message
 					);
 					continue;
 				}
 			}
 
 			if (cooldownEnabled) {
-				const cooldownUser = user.cooldown.get(message.sender) || new Cache();
+				const cooldownUser = user.cooldown.get(localMessage.sender) || new Cache();
 				const isCooldown = cooldownUser.requests;
 
 				if (isCooldown) {
 					await client.instance.reply(
-						message.from,
+						localMessage.from,
 						`Command still running. Please wait for the command ${
 							cooldownEnabled ? 'and the cooldown after it finish.' : 'to finish.'
 						}`,
-						message.message
+						localMessage.message
 					);
 					continue;
 				}
@@ -359,53 +357,53 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 
 				if (cooldownTime && Date.now() < cooldownTime) {
 					await client.instance.reply(
-						message.from,
+						localMessage.from,
 						`Command \`${commandName}\` is still on cooldown for ${((cooldownTime - Date.now()) / 1000).toFixed(1)} seconds.`,
-						message.message
+						localMessage.message
 					);
 					continue;
 				}
 
 				cooldownUser.set(commandName, Date.now() + Tempcmds.cooldown * 1000);
 				cooldownUser.requests = true;
-				user.cooldown.set(message.sender, cooldownUser);
+				user.cooldown.set(localMessage.sender, cooldownUser);
 			}
 		}
 
 		if (
 			Tempcmds &&
 			(configuration.OPTIONS.onlyLogs
-				? message.cmd.startsWith('==>') || message.cmd.startsWith('//>') || message.cmd.startsWith('$$>')
+				? localMessage.cmd.startsWith('==>') || localMessage.cmd.startsWith('//>') || localMessage.cmd.startsWith('$$>')
 					? true
 					: false
 				: true)
 		) {
 			if (configuration.cmds.disabledCommands?.has(Tempcmds.name)) {
 				await client.instance.reply(
-					message.from,
+					localMessage.from,
 					`The command \`${Tempcmds.name}\` is currently disabled by dashboard.`,
-					message.message
+					localMessage.message
 				);
 				continue;
 			}
 
-			if (!message.isOwner && configuration.OPTIONS.selfMode) {
+			if (!localMessage.isOwner && configuration.OPTIONS.selfMode) {
 				continue;
 			}
 
-			if (message.isBaileys) {
+			if (localMessage.isBaileys) {
 				continue;
 			}
 
-			const cooldownUser = user.cooldown.get(message.sender);
+			const cooldownUser = user.cooldown.get(localMessage.sender);
 
 			try {
-				if (/-{1,2}((help(s)?|info|des(c|k)rip(t|s)i(on)?)|h)$/i.test(message.args[1]) && Tempcmds.name !== 'eval') {
+				if (/-{1,2}((help(s)?|info|des(c|k)rip(t|s)i(on)?)|h)$/i.test(localMessage.args[1]) && Tempcmds.name !== 'eval') {
 					const help = `Description : ${Tempcmds.description}\nUsage : ${Tempcmds.usage}\nCooldown : ${
 						Tempcmds.cooldown
 					}s\nAliases : ${Tempcmds.aliases.map((v) => `!${v}`).join(', ')}.`;
 
-					await client.instance.reply(message.from, help, message.message);
+					await client.instance.reply(localMessage.from, help, localMessage.message);
 
 					if (cooldownUser?.requests) {
 						cooldownUser.requests = false;
@@ -414,7 +412,7 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 					continue;
 				}
 
-				await Tempcmds.run({ ...message, state }, client, store);
+				await Tempcmds.run({ ...localMessage, state }, client, store);
 				await incrementCommandUsage(configuration, Tempcmds.name);
 
 				if (cooldownUser?.requests) {
@@ -427,39 +425,39 @@ const handleCommandExecution = async (message, client, store, cmds, user, instan
 
 				const builder = new client.instance.TemplateBuilder.Native();
 
-				let str = !message.isOwner ? 'Please send this error stack to the owner :\n\n' : '\n';
+				let str = !localMessage.isOwner ? 'Please send this error stack to the owner :\n\n' : '\n';
 
 				str += `Type : ${err.name || 'Unknown'}\n`;
 				str += `Message : ${err.message || 'Unknown'}\n`;
 				str += `Stack Trace :\n${(message.isOwner ? err?.stack?.substring(0, 70) : err?.stack?.substring(0, 20)) || 'Unknown'}`;
 
 				await builder
-					.destination(message.from)
+					.destination(localMessage.from)
 					.body(
-						message.isOwner
+						localMessage.isOwner
 							? 'Something went unexpected. Please read below :'
-							: 'This error is from the client. Please report to owneer.'
+							: 'This error is from the client. Please report to owner.'
 					)
 					.footer(str)
 					.buttons(
 						...[
-							message.isOwner
+							localMessage.isOwner
 								? builder.button.url({
 										display: 'Report to Owner',
-										url: `https://wa.me/${message.settings.owner_number.replace(/[^\d]/g, '')}?text=hi,%20bot%20mengalami%20error${encodeURI(
+										url: `https://wa.me/${localMessage.settings.owner_number.replace(/[^\d]/g, '')}?text=hi,%20bot%20mengalami%20error${encodeURI(
 											`\n\n${err.stack}`
 										)}`
 									})
 								: null,
-							message.isOwner
+							localMessage.isOwner
 								? builder.button.reply({
 										display: 'Report via Bot',
-										id: cmdId('report', err.stack, message)
+										id: cmdId('report', err.stack, localMessage)
 									})
 								: null,
 							builder.button.reply({
 								display: 'Retry',
-								id: message.body
+								id: localMessage.body
 							})
 						].filter(Boolean)
 					)

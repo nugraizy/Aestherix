@@ -106,6 +106,8 @@ export const extractQuotedBody = (m, type) => {
 	return '';
 };
 
+export const firstKey = (value) => (value && typeof value === 'object' ? Object.keys(value)[0] : null);
+
 /**
  * Find type quoted of the WhatsApp message.
  * @param {import('baileys').proto.WebMessageInfo} m
@@ -113,15 +115,10 @@ export const extractQuotedBody = (m, type) => {
  * @returns {keyof import('baileys').proto.IMessage}
  */
 export const extractTypeQuoted = (m, type) => {
-	return m.message?.extendedTextMessage
-		? Object.keys(
-				m.message.extendedTextMessage.contextInfo
-					? m.message.extendedTextMessage.contextInfo.quotedMessage
-						? m.message.extendedTextMessage.contextInfo.quotedMessage
-						: ''
-					: ''
-			)[0] /* eslint-disable-line*/
-		: type;
+	const quoted = m.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+	const quotedKey = firstKey(quoted);
+
+	return quotedKey || type;
 };
 
 /**
@@ -148,13 +145,13 @@ export const extractMentionedJid = (m, type) => {
  * @returns {string[] | null}
  */
 export const extractMetadata = (m, typeM, typeQ) => {
-	return (
-		m.message?.[typeM]?.message?.[Object.keys(m.message[typeM].message)[0]] ||
-		m.message?.[typeM] ||
-		m.message?.[typeQ]?.message?.[Object.keys(m.message[typeQ].message)[0]] ||
-		m.message?.[typeQ] ||
-		null
-	);
+	const message = m?.message;
+	const dataM = message?.[typeM];
+	const dataQ = message?.[typeQ];
+	const keyM = firstKey(dataM?.message);
+	const keyQ = firstKey(dataQ?.message);
+
+	return (keyM ? dataM?.message?.[keyM] : null) || dataM || (keyQ ? dataQ?.message?.[keyQ] : null) || dataQ || null;
 };
 
 /**

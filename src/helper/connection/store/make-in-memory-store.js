@@ -539,6 +539,11 @@ export const makePersistentStore = async (config) => {
 	let flushInProgress = false;
 	let pendingFlush = false;
 	let store;
+	let hydrationResolve;
+	const hydration = new Promise((resolve) => {
+		hydrationResolve = resolve;
+	});
+	let hydrated = false;
 
 	const scheduleFlush = () => {
 		if (!sessionName || !config.prisma) {
@@ -560,6 +565,11 @@ export const makePersistentStore = async (config) => {
 	const flushSnapshot = async (force = false) => {
 		if (!sessionName || !config.prisma) {
 			return;
+		}
+
+		if (!hydrated) {
+			pendingFlush = pendingFlush || force;
+			await hydration;
 		}
 
 		if (flushInProgress) {
@@ -592,20 +602,33 @@ export const makePersistentStore = async (config) => {
 	};
 
 	store = makeInMemoryStore({ ...config, onUpdate: scheduleFlush });
+	store.hydration = hydration;
+	store.isHydrated = () => hydrated;
 
 	if (!sessionName || !config.prisma) {
+		hydrated = true;
+		hydrationResolve();
 		return store;
 	}
 
-	try {
-		const snapshot = await getBaileysStore(config.prisma, sessionName);
+	const hydrate = async () => {
+		try {
+			const snapshot = await getBaileysStore(config.prisma, sessionName);
 
-		if (snapshot) {
+			if (!snapshot) {
+				return;
+			}
+
 			store.fromJSON(snapshot);
+		} catch (error) {
+			warnStoreError(config.logger, 'Failed loading store snapshot:', error);
+		} finally {
+			hydrated = true;
+			hydrationResolve();
 		}
-	} catch (error) {
-		warnStoreError(config.logger, 'Failed loading store snapshot:', error);
-	}
+	};
+
+	void hydrate();
 
 	if (config.socket?.ev?.on) {
 		config.socket.ev.on('connection.update', (update) => {

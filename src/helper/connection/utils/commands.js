@@ -48,15 +48,13 @@ const loadCommand = async (command, OPTIONS, seenErrors) =>
 				return resolve(null);
 			}
 
-			const check = await isMissingProperty(module.default);
+			const check = isMissingProperty(module.default);
 
 			check.absolutePath = file;
 			check.path = normalize;
 
 			configuration.cmds.commands.set(check.name, check);
 			configuration.cmds.aliases.push(...(check?.aliases || []));
-
-			await new Promise((resolve) => setTimeout(resolve, 100));
 
 			resolve(path.dirname(command));
 		} catch (error) {
@@ -87,7 +85,7 @@ const loadCommand = async (command, OPTIONS, seenErrors) =>
 	});
 
 const folderToLoad = './src/commands';
-const filesToExclude = ['template', 'd.ts'];
+const filesToExclude = ['template', 'd.ts', '__tests__', '/subcommands/', '/ui/', '/_'];
 const filesToInclude = ['menu', 'ping', 'moderate', 'owner'];
 
 const exclude = (file) => !filesToExclude.some((value) => file.includes(value));
@@ -97,7 +95,10 @@ export const loadCommands = async (OPTIONS) => {
 	return new Promise(async (resolve) => {
 		const folders = new Set();
 		const seenErrors = new Set();
-		let commands = loadFiles(folderToLoad).filter(exclude);
+		let commands = loadFiles(folderToLoad, {
+			excludeDir: /([/\\])(subcommands|ui|__tests__|_)([/\\]|$)/,
+			excludeFile: /(template|\.d\.ts$)/
+		}).filter(exclude);
 
 		if (configuration.OPTIONS.test) {
 			commands = commands.filter(include);
@@ -120,7 +121,7 @@ export const loadCommands = async (OPTIONS) => {
 
 			await watch(watchPath, {
 				ignoreInitial: true,
-				ignored: /(template|\.d\.ts$)/
+				ignored: /(template|\.d\.ts$|[/\\]subcommands[/\\]|[/\\]ui[/\\]|[/\\]__tests__[/\\]|[/\\]_)/
 			});
 		}
 
