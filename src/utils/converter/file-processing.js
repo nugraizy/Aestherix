@@ -2,11 +2,12 @@ import asyncRetry from 'async-retry';
 import axios from 'axios';
 import { exec } from 'child_process';
 import dayjs from 'dayjs';
+import ffmpeg from 'fluent-ffmpeg';
 import FormData from 'form-data';
 import fs from 'fs-extra';
 import httpsProxyAgent from 'https-proxy-agent';
 import isBuffer from 'is-buffer';
-import { Writable } from 'node:stream';
+import { Readable, Writable } from 'node:stream';
 import path from 'path';
 import PDFDocument from 'pdfkit';
 import petting from 'pet-pet-gif';
@@ -16,7 +17,6 @@ import socksProxyAgent from 'socks-proxy-agent';
 import configuration from '../../helper/config/connect.js';
 import { videoFormat as VIDEO_MIMETYPE } from '../misc/mimetype.js';
 import { color, fetchBUFFER, fetchJSON, isURL, loggers } from '../modules/index.js';
-import { webp2mp4File } from './ezgifs/index.js';
 import { cropImage, imageToBuffer, signV1, streamFile } from './utils/index.js';
 
 /**
@@ -262,42 +262,43 @@ export const convertMediaToSticker = (filePath, sender, output, mimetype) =>
  * @param {string} filepath input of the path.
  * @param {string} sender
  * @param {*} mediaData
- * @returns {Promise<{result: string | Buffer}>}
+ * @returns {Promise<{result: Buffer, isVideo: boolean}>}
  */
-export const convertStickerToMedia = (filePath, sender, mediaData) =>
-	new Promise(async (resolve) => {
-		const pathResults = path.join(__dirname, 'src/media/temporary_files/sticker_conversion.png');
+export const convertStickerToMedia = (input, sender, mediaData) =>
+	new Promise(async (resolve, reject) => {
+		try {
+			const isInputBuffer = isBuffer(input);
 
-		if (mediaData.isAnimated) {
-			const { result } = await webp2mp4File(filePath);
+			if (mediaData.isAnimated) {
+				const buffer = isInputBuffer ? input : await fs.readFile(input);
+				const resultBuffer = await new Promise((resolve, reject) => {
+					const output = ffmpeg(Readable.from(buffer))
+						.inputFormat('webp')
+						.outputOptions(['-movflags faststart', '-pix_fmt yuv420p'])
+						.videoFilters('scale=trunc(iw/2)*2:trunc(ih/2)*2')
+						.format('mp4')
+						.on('error', reject)
+						.pipe();
+
+					const chunks = [];
+
+					output.on('data', (chunk) => chunks.push(chunk));
+					output.on('end', () => resolve(Buffer.concat(chunks)));
+					output.on('error', reject);
+				});
+
+				loggers.info(`${color('Converted Media', 'pink')} for ${color(sender, 'lilac')}`);
+				resolve({ result: resultBuffer, isVideo: true });
+				return;
+			}
+
+			const buffer = isInputBuffer ? input : await fs.readFile(input);
+			const resultBuffer = await sharp(buffer).png().toBuffer();
 
 			loggers.info(`${color('Converted Media', 'pink')} for ${color(sender, 'lilac')}`);
-			await fs.unlink(filePath);
-			resolve({
-				result
-			});
-		} else {
-			exec(`dwebp '${filePath}' -o '${pathResults}'`, async (err) => {
-				if (err) {
-					const { result } = await webp2mp4File(filePath);
-
-					loggers.info(`${color('Converted Media', 'pink')} for ${color(sender, 'lilac')}`);
-					await fs.unlink(filePath);
-					resolve({
-						result
-					});
-					return;
-				}
-
-				const buffer = await fs.readFile(pathResults);
-
-				await fs.unlink(pathResults);
-				await fs.unlink(filePath);
-				loggers.info(`${color('Converted Media', 'pink')} for ${color(sender, 'lilac')}`);
-				resolve({
-					result: buffer
-				});
-			});
+			resolve({ result: resultBuffer, isVideo: false });
+		} catch (err) {
+			reject(err);
 		}
 	});
 
@@ -409,7 +410,7 @@ export const pet = (input, sender, opts = {}) =>
 					.toFormat('webp')
 					.webp()
 					.toBuffer();
-				const sticker = await client.instance.prepareSticker(file, `${opts.filename}-done.webp`, 'stickerAnimated', {
+				const sticker = await client.instance.prepareSticker(file, 'stickerAnimated', {
 					author: configuration.author,
 					packname: configuration.packname
 				});

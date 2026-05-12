@@ -14,6 +14,7 @@ import fs from 'fs-extra';
 import isBuffer from 'is-buffer';
 import webpmux from 'node-webpmux';
 import { randomBytes } from 'node:crypto';
+import { Readable } from 'node:stream';
 import sharp from 'sharp';
 import { fetch } from 'undici';
 import { TextEncoder } from 'util';
@@ -824,7 +825,7 @@ export const assign = (client) => {
 		 * Prepare media before sending it as readable WhatsApp sticker.
 		 * @type {import('../../types/Utils/index.js').PrepareSticker}
 		 */
-		prepareSticker: async (media, filename, type, exif) => {
+		prepareSticker: async (media, type, exif) => {
 			const isMediaURL = isBuffer(media) ? false : isURL(media) ? true : false;
 
 			media = isMediaURL ? Buffer.from(await (await fetch(media)).arrayBuffer(), 'base64') : media;
@@ -841,12 +842,8 @@ export const assign = (client) => {
 								: 'image';
 
 			if (bufferType === 'video') {
-				const [video, webp] = ['video', 'webp'].map((ext) => `${filename}.${ext}`);
-
-				await writeFile(video, media);
-
-				await new Promise((resolve) => {
-					ffmpeg(video)
+				media = await new Promise((resolve, reject) => {
+					const output = ffmpeg(Readable.from(media))
 						.videoCodec('libwebp')
 						.outputOptions('-fs 800k')
 						.outputFPS(15)
@@ -855,13 +852,16 @@ export const assign = (client) => {
 							'scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1'
 						)
 						.duration(10)
-						.save(webp)
-						.on('end', resolve);
+						.format('webp')
+						.on('error', reject)
+						.pipe();
+
+					const chunks = [];
+
+					output.on('data', (chunk) => chunks.push(chunk));
+					output.on('end', () => resolve(Buffer.concat(chunks)));
+					output.on('error', reject);
 				});
-
-				media = await readFile(webp);
-
-				[video, webp].forEach((file) => unlink(file));
 			} else if (bufferType === 'sticker') {
 				return await applyExif(media, exif);
 			} else {

@@ -1,5 +1,4 @@
 import emojiReg from 'emoji-regex';
-import path from 'path';
 import _ from 'lodash';
 
 import configuration from '../../helper/config/connect.js';
@@ -48,15 +47,10 @@ export default {
 				continue;
 			}
 
-			const sticker = await client.instance.prepareSticker(
-				result,
-				path.join(__dirname, `src/media/temporary_files/${filename}`),
-				undefined,
-				{
-					author: configuration.author,
-					packname: configuration.packname
-				}
-			);
+			const sticker = await client.instance.prepareSticker(result, 'imageMessage', {
+				author: configuration.author,
+				packname: configuration.packname
+			});
 
 			await client.instance.send(from, { sticker }, { quoted: message });
 		}

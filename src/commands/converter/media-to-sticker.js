@@ -1,7 +1,5 @@
-import path from 'path';
-
 import configuration from '../../helper/config/connect.js';
-import { color, loggers, isURL } from '../../utils/modules/index.js';
+import { color, isURL, loggers } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -69,43 +67,28 @@ export default {
 		}
 
 		if (query && isURL(query)) {
-			const sticker = await client.instance.prepareSticker(
-				query,
-				path.join(__dirname, `src/media/temporary_files/${filename}`),
-				undefined,
-				{
-					author: configuration.author,
-					packname: configuration.packname
-				}
-			);
+			const sticker = await client.instance.prepareSticker(query, undefined, {
+				author: configuration.author,
+				packname: configuration.packname
+			});
 
 			await client.instance.send(from, { sticker }, { quoted: message });
 		}
 
 		if (isMediaImage) {
-			const sticker = await client.instance.prepareSticker(
-				await client.instance.downloadMediaMessage(mediaData),
-				path.join(__dirname, `src/media/temporary_files/${filename}`),
-				typeQuoted,
-				{
-					author: configuration.author,
-					packname: configuration.packname
-				}
-			);
+			const sticker = await client.instance.prepareSticker(await client.instance.downloadMediaMessage(mediaData), typeQuoted, {
+				author: configuration.author,
+				packname: configuration.packname
+			});
 
 			await client.instance.send(from, { sticker }, { quoted: message });
 		}
 
 		if (isMediaVid) {
-			const sticker = await client.instance.prepareSticker(
-				await client.instance.downloadMediaMessage(mediaData),
-				path.join(__dirname, `src/media/temporary_files/${filename}`),
-				typeQuoted,
-				{
-					author: configuration.author,
-					packname: configuration.packname
-				}
-			);
+			const sticker = await client.instance.prepareSticker(await client.instance.downloadMediaMessage(mediaData), typeQuoted, {
+				author: configuration.author,
+				packname: configuration.packname
+			});
 
 			await client.instance.send(from, { sticker }, { quoted: message });
 		}

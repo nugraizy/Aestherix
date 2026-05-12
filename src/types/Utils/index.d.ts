@@ -132,11 +132,6 @@ export type PrepareSticker = (
 	media: Buffer | string,
 
 	/**
-	 * filename of the media
-	 */
-	filename: string,
-
-	/**
 	 * type of the sticker
 	 */
 	type: StickerType,

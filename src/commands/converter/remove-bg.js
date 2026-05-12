@@ -2,8 +2,8 @@ import path from 'path';
 import parser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
-import { color, loggers } from '../../utils/modules/index.js';
 import { removeBg } from '../../utils/converter/file-processing.js';
+import { color, loggers } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -55,15 +55,10 @@ export default {
 		const resultRemoveBg = await removeBg(media, prettyNumber);
 
 		if (parsed.isStickers) {
-			const prepareSticker = await client.instance.prepareSticker(
-				resultRemoveBg,
-				path.join(__dirname, `src/media/temporary_files/${filename}`),
-				undefined,
-				{
-					author: configuration.author,
-					packname: configuration.packname
-				}
-			);
+			const prepareSticker = await client.instance.prepareSticker(resultRemoveBg, 'imageMessage', {
+				author: configuration.author,
+				packname: configuration.packname
+			});
 
 			client.instance.send(from, { sticker: prepareSticker }, { quoted: message });
 		} else {

@@ -143,15 +143,10 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 			const data = Buffer.from(await (await fetch(result.preview)).arrayBuffer(), 'base64');
 
 			const buffer = isStickers
-				? await client.instance.prepareSticker(
-						data,
-						path.join(__dirname, `src/media/temporary_files/${filename}`),
-						undefined,
-						{
-							author: configuration.author,
-							packname: configuration.packname
-						}
-					)
+				? await client.instance.prepareSticker(data, 'imageMessage', {
+						author: configuration.author,
+						packname: configuration.packname
+					})
 				: (async () => {
 						const image = sharp(data);
 						const { width, height } = await image.metadata();

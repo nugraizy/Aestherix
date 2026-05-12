@@ -1,7 +1,6 @@
 import fs from 'fs';
 import imageSize from 'image-size';
 import _ from 'lodash';
-import path from 'path';
 import sharp from 'sharp';
 import { fetch } from 'undici';
 import yargsParser from 'yargs-parser';
@@ -132,15 +131,10 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 			const { width, height } = imageSize(data);
 
 			const buffer = isStickers
-				? await client.instance.prepareSticker(
-						data,
-						path.join(__dirname, `src/media/temporary_files/${filename}`),
-						undefined,
-						{
-							author: configuration.author,
-							packname: configuration.packname
-						}
-					)
+				? await client.instance.prepareSticker(data, undefined, {
+						author: configuration.author,
+						packname: configuration.packname
+					})
 				: await sharp(data)
 						.extract({ width: width - 40, height: height - 40, left: 0, top: 0 })
 						.toBuffer();

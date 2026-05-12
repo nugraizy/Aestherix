@@ -53,15 +53,10 @@ export default {
 		);
 
 		if (parsed.isStickers) {
-			const prepareSticker = await client.instance.prepareSticker(
-				enhance,
-				path.join(__dirname, `src/media/temporary_files/${filename}`),
-				undefined,
-				{
-					author: configuration.author,
-					packname: configuration.packname
-				}
-			);
+			const prepareSticker = await client.instance.prepareSticker(enhance, 'imageMessage', {
+				author: configuration.author,
+				packname: configuration.packname
+			});
 
 			client.instance.send(from, { sticker: prepareSticker }, { quoted: message });
 		} else {
