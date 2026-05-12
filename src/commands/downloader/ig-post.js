@@ -19,7 +19,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, bodyQuoted, isOwner, prefix }, client) {
 		if (!configuration.isInstagramInitiated) {
-			return await client.instance.reply(
+			return await client.reply(
 				from,
 				`Instagram session is not initialized. ${isOwner ? `Type ${prefix}instagraminit to initialize it.` : `Please ask the owner to initialize it first using the command ${prefix}instagraminit`}`,
 				message
@@ -37,28 +37,28 @@ export default {
 			}
 
 			if (!videoIds.length) {
-				return await client.instance.reply(from, 'No id(s) found', message);
+				return await client.reply(from, 'No id(s) found', message);
 			}
 
 			const numberiedQuery = Number(query);
 			const index = numberiedQuery - 1;
 
 			if (!numberiedQuery || index > videoIds.length) {
-				return await client.instance.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
+				return await client.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
 			}
 
 			const videoId = videoIds[index];
 
-			await client.instance.reply(from, `Downloading Instagram Posts :\n${videoId}\nPlease wait`.formatForm(), message);
+			await client.reply(from, `Downloading Instagram Posts :\n${videoId}\nPlease wait`.formatForm(), message);
 
 			query = videoId;
 		}
 
 		if (!query) {
-			return await client.instance.reply(from, 'Please specify a url', message);
+			return await client.reply(from, 'Please specify a url', message);
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, 'Please wait...', message);
 
 		const { _: urls } = parser(query);
 
@@ -71,7 +71,7 @@ export default {
 
 		for (const data in posts) {
 			if (posts[data]?.error) {
-				await client.instance.reply(from, `Error while downloading Instagram post\n\n${posts[data].error}\n${data}`, message);
+				await client.reply(from, `Error while downloading Instagram post\n\n${posts[data].error}\n${data}`, message);
 				loggers.error(`${color('Failed to Download Instagram Post', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
@@ -89,7 +89,7 @@ export default {
 			if (posts[data].post.length === 1) {
 				capt += `📝 ${(posts[data].captions || '').trim()}\n`;
 
-				await client.instance.send(
+				await client.send(
 					from,
 					{
 						[posts[data].post[0].isVideo ? 'video' : 'image']: { url: posts[data].post[0].url },
@@ -101,10 +101,10 @@ export default {
 				capt += `🖼️ ${posts[data].post.length}\n\n`;
 				capt += `📝 ${(posts[data].captions || '').trim()}\n`;
 
-				await client.instance.send(from, { text: capt.trim().formatForm() }, { quoted: message });
+				await client.send(from, { text: capt.trim().formatForm() }, { quoted: message });
 
 				for (const media of posts[data].post) {
-					await client.instance.send(from, { [media.isVideo ? 'video' : 'image']: { url: media.url } });
+					await client.send(from, { [media.isVideo ? 'video' : 'image']: { url: media.url } });
 				}
 			}
 

@@ -22,7 +22,7 @@ export default {
 		client
 	) => {
 		if (!isMediaImage && !isQuotedSticker) {
-			return client.instance.reply(
+			return client.reply(
 				from,
 				'Please reply/send image with caption the command. This command also accept sticker (reply one with command).',
 				message
@@ -30,7 +30,7 @@ export default {
 		}
 
 		if (isQuotedSticker && extractMediaData.isAnimated) {
-			return client.instance.reply(from, 'The sticker are animated. Please reply static stickers only.', message);
+			return client.reply(from, 'The sticker are animated. Please reply static stickers only.', message);
 		}
 
 		loggers.warning(`${color('Enhancing image', 'pink')} ${color(prettyNumber, 'lilac')}`);
@@ -45,7 +45,7 @@ export default {
 			}
 		});
 
-		const media = await client.instance.downloadMediaMessage(mediaData);
+		const media = await client.downloadMediaMessage(mediaData);
 
 		const enhance = await waifu2xV2(
 			media,
@@ -53,14 +53,14 @@ export default {
 		);
 
 		if (parsed.isStickers) {
-			const prepareSticker = await client.instance.prepareSticker(enhance, 'imageMessage', {
+			const prepareSticker = await client.prepareSticker(enhance, 'imageMessage', {
 				author: configuration.author,
 				packname: configuration.packname
 			});
 
-			client.instance.send(from, { sticker: prepareSticker }, { quoted: message });
+			client.send(from, { sticker: prepareSticker }, { quoted: message });
 		} else {
-			client.instance.send(from, { image: Buffer.from(enhance, 'base64') }, { quoted: message });
+			client.send(from, { image: Buffer.from(enhance, 'base64') }, { quoted: message });
 		}
 
 		loggers.info(`${color('Media is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);

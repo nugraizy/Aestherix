@@ -37,13 +37,13 @@ const parseValidValue = (name, value) => {
 };
 
 const sendQuery = (client, { name, value }) =>
-	client.instance.query({
+	client.query({
 		tag: 'iq',
 		attrs: {
 			xmlns: 'privacy',
 			type: 'set',
 			to: '@s.whatsapp.net',
-			id: client.instance.generateMessageID()
+			id: client.generateMessageID()
 		},
 		content: [
 			{
@@ -77,13 +77,13 @@ export default {
 	status: 'enable',
 	run: async ({ query, from, message }, client) => {
 		try {
-			const node = await client.instance.query({
+			const node = await client.query({
 				tag: 'iq',
 				attrs: {
 					xmlns: 'privacy',
 					type: 'get',
 					to: '@s.whatsapp.net',
-					id: client.instance.generateMessageID()
+					id: client.generateMessageID()
 				},
 				content: [
 					{
@@ -97,7 +97,7 @@ export default {
 			const result = processPrivacySettings(node);
 
 			if (!query) {
-				return await client.instance.reply(
+				return await client.reply(
 					from,
 					`Privacy settings:\n${result
 						.map((setting) => `${setting.attrs.name}: ${setting.attrs.value}`)
@@ -115,7 +115,7 @@ export default {
 			const validValue = parseValidValue(name, value);
 
 			if (!validValue) {
-				return await client.instance.reply(
+				return await client.reply(
 					from,
 					`Invalid value for ${name}. Valid values: ${PRIVACY_SETTINGS_TOGGLE[name].join(', ')}`,
 					message
@@ -124,9 +124,9 @@ export default {
 
 			await sendQuery(client, { name, query });
 
-			await client.instance.reply(from, 'Succesfully changed privacy settings.', message);
+			await client.reply(from, 'Succesfully changed privacy settings.', message);
 		} catch {
-			await client.instance.reply(from, 'An error occured while trying to change privacy settings.', message);
+			await client.reply(from, 'An error occured while trying to change privacy settings.', message);
 		}
 	}
 };

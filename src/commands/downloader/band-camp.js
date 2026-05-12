@@ -18,10 +18,10 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, filename, prettyNumber }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, 'Please wait...', message);
 
 		let { _: urls } = parser(query);
 
@@ -38,7 +38,7 @@ export default {
 
 		for (const url of urls) {
 			if (!isURL(url.trim())) {
-				await client.instance.reply(from, 'Please Use a Valid URL.\nInvalid : ' + url, message);
+				await client.reply(from, 'Please Use a Valid URL.\nInvalid : ' + url, message);
 				error++;
 				continue;
 			}
@@ -46,13 +46,13 @@ export default {
 			const result = await downloadBandcamp(url);
 
 			if (result?.error) {
-				await client.instance.reply(from, result.error, message);
+				await client.reply(from, result.error, message);
 				loggers.error(`${color('Failed to Download Bandcamp File', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
 			}
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					document: await toOpus('opus', {

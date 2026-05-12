@@ -14,17 +14,17 @@ export default {
 	restrict: true,
 	async run({ isBotAdmin, mention, from, mediaData, query, bodyQuoted, message, adminGroups }, client) {
 		if (!query && !mention.length && !bodyQuoted) {
-			return await client.instance.reply(from, 'Please reply people message or mention people.', message);
+			return await client.reply(from, 'Please reply people message or mention people.', message);
 		}
 
-		const myJid = client.instance.decodeJid(instance);
+		const myJid = client.decodeJid(instance);
 
 		if (mention?.includes(myJid) || mediaData?.id?.includes(myJid)) {
-			return await client.instance.reply(from, 'You can not demote me by myself.', message);
+			return await client.reply(from, 'You can not demote me by myself.', message);
 		}
 
 		if (!isBotAdmin) {
-			return await client.instance.reply(
+			return await client.reply(
 				from,
 				'Bot is not admin, Please promote admin before using moderation commands.',
 				message
@@ -32,13 +32,13 @@ export default {
 		}
 
 		if (query) {
-			await client.instance.updateGroup(from, 'DEMOTE', mention.length ? mention : query.parseNumber(), adminGroups, {
+			await client.updateGroup(from, 'DEMOTE', mention.length ? mention : query.parseNumber(), adminGroups, {
 				message
 			});
 		}
 
 		if (bodyQuoted) {
-			await client.instance.updateGroup(from, 'DEMOTE', [mediaData.participant], adminGroups, { message });
+			await client.updateGroup(from, 'DEMOTE', [mediaData.participant], adminGroups, { message });
 		}
 	}
 };

@@ -1,5 +1,9 @@
 import { Cache } from '../helper/modules/cache.js';
-import { loadCommands } from '../helper/connection/utils/commands.js';
+import {
+	incrementCommandUsage as incrementInDB,
+	loadCommandUsage as loadFromDB
+} from '../helper/database/adapters/command-usage.js';
+import prisma from '../helper/database/prisma.js';
 
 const BLOCKED_FOR_SUB = new Set([
 	'eval', 'exec', 'shell', 'terminal',
@@ -8,21 +12,30 @@ const BLOCKED_FOR_SUB = new Set([
 	'restart', 'shutdown', 'setprefix', 'settings'
 ]);
 
+/** @implements {import('../types/Core/index.d.ts').Router} */
 export class Router {
 	#client;
 	#commands;
 	#aliases;
 	#cooldowns;
-	#options;
+	#prefixConfig;
+	#usage;
+	#usageLoaded = false;
 
+	/**
+	 * @param {import('../types/Core/index.d.ts').ClientSocket} client
+	 * @param {{ prefix?: string; prefixMode?: string; prefixReg?: RegExp | null; commands?: object; aliases?: string[] }} [options]
+	 */
 	constructor(client, options = {}) {
 		this.#client = client;
 		this.#commands = options.commands ?? new Cache();
 		this.#aliases = options.aliases ?? [];
 		this.#cooldowns = new Cache();
-		this.#options = {
-			prefix: options.prefix ?? '.',
-			...options
+		this.#usage = new Cache();
+		this.#prefixConfig = {
+			mode: options.prefixMode ?? 'single',
+			value: options.prefix ?? '.',
+			regex: options.prefixReg ?? null
 		};
 	}
 
@@ -30,59 +43,134 @@ export class Router {
 		return this.#commands;
 	}
 
+	set commands(value) {
+		this.#commands = value;
+	}
+
 	get aliases() {
 		return this.#aliases;
+	}
+
+	set aliases(value) {
+		this.#aliases = value;
 	}
 
 	get cooldowns() {
 		return this.#cooldowns;
 	}
 
-	get prefix() {
-		return this.#options.prefix;
+	get prefixConfig() {
+		return this.#prefixConfig;
 	}
 
-	async loadCommands(flags = {}) {
-		await loadCommands(flags);
-	}
-
-	resolve(body) {
-		if (!body) return null;
-
-		const prefix = this.#options.prefix;
-		const hasPrefix = body.startsWith(prefix);
-
-		if (!hasPrefix) return null;
-
-		const args = body.split(/ +/g);
-		const cmdName = args[0].slice(prefix.length).toLowerCase();
-
-		let command = this.#commands.get(cmdName);
-
-		if (!command) {
-			const aliasMatch = this.#aliases.find((a) => a === cmdName);
-
-			if (aliasMatch) {
-				command = this.#commands.filter(
-					(_key, cmd) => cmd.aliases?.includes(aliasMatch),
-					'find'
-				);
-			}
+	/** @param {{ mode?: string; value?: string; regex?: RegExp | null }} config */
+	updatePrefix({ mode, value, regex }) {
+		if (mode) {
+			this.#prefixConfig.mode = mode;
 		}
 
-		if (!command) return null;
+		if (value !== undefined) {
+			this.#prefixConfig.value = value;
+		}
 
-		return { command, args, prefix, cmdName };
+		if (regex !== undefined) {
+			this.#prefixConfig.regex = regex;
+		}
 	}
 
-	isBlocked(command) {
-		if (this.#client.role !== 'sub') return false;
+	/**
+	 * @param {string} body
+	 * @returns {{ command: object; args: string[]; cmdName: string; prefix: string; query: string; isEval: boolean } | null}
+	 */
+	resolve(body) {
+		if (!body) {
+			return null;
+		}
 
-		if (command.category === 'Owner') return true;
+		const args = body.split(/ +/g);
+		const raw = args[0].toLowerCase();
+		const prefix = this.#extractPrefix(raw, body);
+		const isEval = ['/>', '$>', '=>', '!>'].includes(args[0]);
+
+		if (!isEval && prefix === null) {
+			return null;
+		}
+
+		const cmdName = isEval ? args[0] : raw.slice(prefix.length);
+		const command = this.#findCommand(cmdName);
+
+		if (!command && !isEval) {
+			return null;
+		}
+
+		return {
+			command: command || null,
+			args,
+			prefix: prefix ?? '',
+			cmdName,
+			isEval,
+			query: args.slice(1).join(' ').trim()
+		};
+	}
+
+	#extractPrefix(raw, body) {
+		const { mode, value, regex } = this.#prefixConfig;
+
+		if (mode === 'nopref') {
+			return '';
+		}
+
+		if (mode === 'multi' && regex) {
+			const match = raw.match(regex);
+
+			return match ? match[0] : null;
+		}
+
+		if (body.startsWith(value)) {
+			return value;
+		}
+
+		return null;
+	}
+
+	#findCommand(cmdName) {
+		const command = this.#commands.get(cmdName);
+
+		if (command) {
+			return command;
+		}
+
+		const aliasMatch = this.#aliases.find((a) => a === cmdName);
+
+		if (aliasMatch) {
+			return this.#commands.filter((_key, cmd) => cmd.aliases?.includes(aliasMatch), 'find') || null;
+		}
+
+		return null;
+	}
+
+	/**
+	 * @param {{ name: string; category: string }} command
+	 * @returns {boolean}
+	 */
+	isBlocked(command) {
+		if (this.#client?.role !== 'sub') {
+			return false;
+		}
+
+		if (command.category === 'Owner') {
+			return true;
+		}
 
 		return BLOCKED_FOR_SUB.has(command.name);
 	}
 
+	/**
+	 * @param {string} senderId
+	 * @param {string} commandName
+	 * @param {number} cooldownSec
+	 * @returns {{ onCooldown: boolean; remaining: number }}
+	 */
 	checkCooldown(senderId, commandName, cooldownSec) {
 		const key = `${senderId}:${commandName}`;
 		const now = Date.now();
@@ -97,5 +185,39 @@ export class Router {
 		}
 
 		return { onCooldown: false, remaining: 0 };
+	}
+
+	get usage() {
+		return this.#usage;
+	}
+
+	async loadUsage() {
+		if (this.#usageLoaded) {
+			return;
+		}
+
+		this.#usageLoaded = true;
+		const raw = await loadFromDB(prisma).catch(() => ({}));
+
+		for (const [name, count] of Object.entries(raw)) {
+			this.#usage.set(name, count);
+		}
+	}
+
+	/**
+	 * @param {string} commandName
+	 * @returns {Promise<void>}
+	 */
+	async trackUsage(commandName) {
+		if (!commandName) {
+			return;
+		}
+
+		await this.loadUsage();
+
+		const current = Number(this.#usage.get(commandName) || 0);
+
+		this.#usage.set(commandName, current + 1);
+		await incrementInDB(prisma, commandName);
 	}
 }

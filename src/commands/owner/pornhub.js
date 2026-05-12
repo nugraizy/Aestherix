@@ -17,14 +17,14 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, type, prefix }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.mainThumb === args[2]);
 
-			return await client.instance.send(
+			return await client.send(
 				from,
 				{
 					image: { url: data[index].mainThumb },
@@ -77,11 +77,11 @@ ${index + 1}/${data.length}\nPowered by Hidden Finder`
 			const result = await arq.searchPHub(querie.trim());
 
 			if (result?.error || !result.ok) {
-				await client.instance.reply(from, JSON.stringify(result), message);
+				await client.reply(from, JSON.stringify(result), message);
 				continue;
 			}
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					image: { url: result.result[0].mainThumb },

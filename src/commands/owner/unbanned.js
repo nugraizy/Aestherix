@@ -26,7 +26,7 @@ export default {
 	status: 'enable',
 	async run({ from, message, mediaData, mention, bodyQuoted, query }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please provide user to unban', message);
+			return await client.reply(from, 'Please provide user to unban', message);
 		}
 
 		const userBanned = await getBannedUsers(prisma);
@@ -35,7 +35,7 @@ export default {
 		if (mention.length) {
 			for (const mentioned of mention) {
 				if (!userBanned.includes(mentioned)) {
-					await client.instance.send(
+					await client.send(
 						from,
 						{ text: `@${mentioned.split('@')[0]} is not banned`, mentions: [mentioned] },
 						{ quoted: message }
@@ -46,12 +46,12 @@ export default {
 				configuration.cache.bannedlist.splice(indexs(configuration.cache.bannedlist, mentioned), 1);
 				configuration.cache.blocklist.splice(indexs(configuration.cache.blocklist, mentioned), 1);
 					unbanned.push(mentioned);
-					await client.instance.updateBlockStatus(mentioned, 'unblock');
+					await client.updateBlockStatus(mentioned, 'unblock');
 				}
 			}
 
 			if (unbanned.length) {
-				await client.instance.send(
+				await client.send(
 					from,
 					{ text: `Success unbanning : ${unbanned.map((v) => `@${v.split('@')[0]}`).join(', ')}`, mentions: [unbanned] },
 					{ quoted: message }
@@ -74,15 +74,15 @@ export default {
 				const isBanned = userBanned.includes(`${number}${S_WHATSAPP_NET}`);
 
 				if (!isBanned) {
-					await client.instance.send(from, { text: `@${number} is not banned`, mentions: [`${number}${S_WHATSAPP_NET}`] }, {});
+					await client.send(from, { text: `@${number} is not banned`, mentions: [`${number}${S_WHATSAPP_NET}`] }, {});
 					continue;
 				}
 
 					await unbanUser(prisma, `${number}${S_WHATSAPP_NET}`);
 				configuration.cache.bannedlist.splice(indexs(configuration.cache.bannedlist, `${number}${S_WHATSAPP_NET}`), 1);
 				configuration.cache.blocklist.splice(indexs(configuration.cache.blocklist, `${number}${S_WHATSAPP_NET}`), 1);
-				await client.instance.updateBlockStatus(`${number}${S_WHATSAPP_NET}`, 'unblock');
-				await client.instance.send(
+				await client.updateBlockStatus(`${number}${S_WHATSAPP_NET}`, 'unblock');
+				await client.send(
 					from,
 					{ text: `Success unbanning : @${number}`, mentions: [`${number}${S_WHATSAPP_NET}`] },
 					{ quoted: message }
@@ -94,7 +94,7 @@ export default {
 
 		if (bodyQuoted) {
 			if (!userBanned.includes(mediaData.participant)) {
-				return await client.instance.reply(from, 'not banned', message);
+				return await client.reply(from, 'not banned', message);
 			}
 
 			const index = userBanned.indexOf(mediaData.participant);
@@ -102,8 +102,8 @@ export default {
 			await unbanUser(prisma, mediaData.participant);
 			configuration.cache.bannedlist.splice(indexs(configuration.cache.bannedlist, mediaData.participant), 1);
 			configuration.cache.blocklist.splice(indexs(configuration.cache.blocklist, mediaData.participant), 1);
-			await client.instance.updateBlockStatus(mediaData.participant, 'unblock');
-			await client.instance.send(
+			await client.updateBlockStatus(mediaData.participant, 'unblock');
+			await client.send(
 				from,
 				{ text: `Success unbanning : @${mediaData.participant.split('@')[0]}`, mentions: [mediaData.participant] },
 				{ quoted: message }

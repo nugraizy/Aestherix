@@ -30,7 +30,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message }, client) {
 		if (!query) {
-			return client.instance.reply(from, 'Please specify a query.', message);
+			return client.reply(from, 'Please specify a query.', message);
 		}
 
 		let result = await youtube.core.search(query);
@@ -39,7 +39,7 @@ export default {
 
 		let capt = 'YouTube Search'.formatHeaders();
 
-		const builder = new client.instance.TemplateBuilder.Carousel();
+		const builder = new client.TemplateBuilder.Carousel();
 
 		await builder
 			.destination(from)
@@ -97,7 +97,7 @@ export default {
 
 		// jpegThumbnail = await jpegThumbnail.resize(300, 300).toBuffer();
 
-		// await client.instance.send(
+		// await client.send(
 		// 	from,
 		// 	{
 		// 		text: capt.trim()
@@ -141,7 +141,7 @@ export default {
 		// 	}
 		// });
 
-		// await client.instance.send(
+		// await client.send(
 		// 	from,
 		// 	{
 		// 		buttonText: 'Open list',

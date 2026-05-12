@@ -23,9 +23,9 @@ export default {
 		});
 
 		if (bodyQuoted && quoted) {
-			return await client.instance.relay(from, (await mediaData.extract().parse()).mediaData.message, {});
+			return await client.relay(from, (await mediaData.extract().parse()).mediaData.message, {});
 		}
 
-		return await client.instance.relay(from, mediaData.message, {});
+		return await client.relay(from, mediaData.message, {});
 	}
 };

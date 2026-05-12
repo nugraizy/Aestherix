@@ -41,12 +41,12 @@ export default {
 		const pictures = configuration.pinterestImages;
 
 		if (!pictures.size) {
-			return client.instance.send(from, { text: 'No profile pictures have been saved yet.' }, { quoted: message });
+			return client.send(from, { text: 'No profile pictures have been saved yet.' }, { quoted: message });
 		}
 
 		let caption = `📌 Total saved sequences: ${pictures.size}\n\n`;
 
-		const builder = new client.instance.TemplateBuilder.Carousel();
+		const builder = new client.TemplateBuilder.Carousel();
 
 		const entries = _.chunk(pictures.entries(), 30);
 

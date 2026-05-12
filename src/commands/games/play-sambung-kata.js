@@ -16,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ isGroup, message, from, sender, query }, client) {
 		if (!isGroup) {
-			return await client.instance.reply(from, 'This feature only for groups', message);
+			return await client.reply(from, 'This feature only for groups', message);
 		}
 
 		const statusGame = getSambungkataSession(from);
@@ -24,7 +24,7 @@ export default {
 		if (!statusGame) {
 			new SambungKata(sender, undefined, from);
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					buttonText: 'Open List',
@@ -37,15 +37,15 @@ export default {
 			);
 		} else if (query === 'player 2') {
 			if (statusGame.checkStatus() === 'waiting' && (statusGame.player1 === sender || statusGame.player2 === sender)) {
-				await client.instance.reply(from, statusGame.throwResponse().message, message);
+				await client.reply(from, statusGame.throwResponse().message, message);
 				return;
 			} else if (statusGame.checkStatus() === 'playing' && (statusGame.player1 === sender || statusGame.player2 === sender)) {
-				await client.instance.reply(from, statusGame.throwResponse().message, message);
+				await client.reply(from, statusGame.throwResponse().message, message);
 				return;
 			} else if (statusGame.player1 !== sender && statusGame.player2 === undefined && statusGame.checkStatus() === 'waiting') {
 				const data = await statusGame.start(sender, client);
 
-				await client.instance.send(
+				await client.send(
 					from,
 					{
 						text: `This is Word Play Game.

@@ -17,14 +17,14 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
 		if (args[1] === 'next' || args[1] === 'prev') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v === args[2]);
 
-			return await client.instance.send(
+			return await client.send(
 				from,
 				{
 					image: { url: data[index] },
@@ -62,13 +62,13 @@ export default {
 			const result = await stockImagesPexel(querie.trim());
 
 			if (result?.error || !result) {
-				await client.instance.reply(from, JSON.stringify(result), message);
+				await client.reply(from, JSON.stringify(result), message);
 				continue;
 			}
 
 			const index = ~~(Math.random() * result.length);
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					image: { url: result[index] },

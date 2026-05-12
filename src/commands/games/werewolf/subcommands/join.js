@@ -31,5 +31,5 @@ export const run = async (ctx, client) => {
 		.map((p, i) => `${i + 1}. @${p.id.split('@')[0]} ${p.name}`)
 		.join('\n')}`;
 
-	return client.instance.send(ctx.from, { text: body, mentions: session.playersData.map((p) => p.id) }, { quoted: ctx.message });
+	return client.send(ctx.from, { text: body, mentions: session.playersData.map((p) => p.id) }, { quoted: ctx.message });
 };

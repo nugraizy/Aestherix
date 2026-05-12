@@ -20,14 +20,14 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please provide a URL', message);
+			return await client.reply(from, 'Please provide a URL', message);
 		}
 
 		if (!tiktok) {
 			tiktok = (await import('../../utils/tiktok/index.js')).tiktok;
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, 'Please wait...', message);
 
 		let {
 			_: urls,
@@ -60,7 +60,7 @@ export default {
 
 		for (const data in posts) {
 			if (posts[data]?.error) {
-				await client.instance.reply(from, `Error while downloading TikTok post\n\n${posts[data].error}\n${data}`, message);
+				await client.reply(from, `Error while downloading TikTok post\n\n${posts[data].error}\n${data}`, message);
 				loggers.error(`${color('Failed to Download TikTok Post', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
@@ -95,7 +95,7 @@ export default {
 
 				const images = posts[data].urls.images;
 
-				const builder = new client.instance.TemplateBuilder.Carousel();
+				const builder = new client.TemplateBuilder.Carousel();
 
 				await wait.update(`Preparing TikTok Carousel Message for ${images.length} Images. Please wait...`);
 
@@ -128,13 +128,13 @@ export default {
 			const url = (withWatermark ? urls[2] || urls[0] || urls[1] : urls[0] || urls[1] || urls[2]) || null;
 
 			if (!url) {
-				await client.instance.reply(from, 'No download url found, Might check your url and try again.', message);
+				await client.reply(from, 'No download url found, Might check your url and try again.', message);
 				error++;
 			}
 
 			await wait.update('Downloading TikTok Media. Please wait...');
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					video: {

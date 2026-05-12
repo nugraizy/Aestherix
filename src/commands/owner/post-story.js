@@ -31,14 +31,14 @@ export default {
 		client
 	) {
 		if (!query && !bodyQuoted && !isMediaVid && !isMediaImage && !isMediaDocument && !isQuotedSticker) {
-			return client.instance.reply(from, 'Please provide a message or media', message);
+			return client.reply(from, 'Please provide a message or media', message);
 		}
 
-		const ownJid = client.instance.decodeJid(instance);
-		const jids = await client.instance.getStoryParticipants(client);
+		const ownJid = client.decodeJid(instance);
+		const jids = await client.getStoryParticipants(client);
 
 		if (isMediaVid || isMediaImage || isMediaDocument || isQuotedSticker) {
-			const media = await client.instance.downloadMediaMessage(mediaData);
+			const media = await client.downloadMediaMessage(mediaData);
 			let mime;
 
 			if (isMediaDocument) {
@@ -47,7 +47,7 @@ export default {
 					mediaData.message?.documentWithCaptionMessage?.message?.documentMessage?.mimetype;
 
 				if (!/video|image/g.test(mime)) {
-					return await client.instance.reply(from, 'Media type must be video or image', message);
+					return await client.reply(from, 'Media type must be video or image', message);
 				}
 
 				mime = mime.split('/')[0];
@@ -57,9 +57,9 @@ export default {
 				mime = mediaData.message?.stickerMessage?.isAnimated ? 'video' : 'image';
 			}
 
-			const mediaType = client.instance.clearType(typeQuoted || type, mime);
+			const mediaType = client.clearType(typeQuoted || type, mime);
 
-			return await client.instance.send(
+			return await client.send(
 				'status@broadcast',
 				{
 					[mediaType]: media,
@@ -74,7 +74,7 @@ export default {
 			);
 		}
 
-		return await client.instance.send(
+		return await client.send(
 			'status@broadcast',
 			{
 				text: query

@@ -15,15 +15,15 @@ export default {
 	status: 'disable',
 	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
-		await client.instance.reply(from, 'Creating. Please wait...', message);
+		await client.reply(from, 'Creating. Please wait...', message);
 
 		const result = await createImage(query);
 
 		const caption = `${'A.I Image Generator'.formatHeaders()}\n\nPowered by deepai.org`;
 
-		await client.instance.send(from, { image: { url: result }, caption }, { quoted: message });
+		await client.send(from, { image: { url: result }, caption }, { quoted: message });
 	}
 };

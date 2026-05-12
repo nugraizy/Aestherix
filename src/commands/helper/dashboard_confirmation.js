@@ -1,4 +1,4 @@
-import { processDashboardConfirmationAction } from '../../helper/connection/dashboard/server.js';
+import { processDashboardConfirmationAction } from '../../core/dashboard/server.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -24,17 +24,17 @@ export default {
 		});
 
 		if (!confirmation.handled) {
-			return await client.instance.reply(from, 'Invalid dashboard confirmation code.', message);
+			return await client.reply(from, 'Invalid dashboard confirmation code.', message);
 		}
 
 		if (confirmation.approved) {
-			return await client.instance.reply(
+			return await client.reply(
 				from,
 				'Dashboard login confirmation accepted. You can return to the browser now.',
 				message
 			);
 		}
 
-		return await client.instance.reply(from, confirmation.message || 'Dashboard confirmation failed.', message);
+		return await client.reply(from, confirmation.message || 'Dashboard confirmation failed.', message);
 	}
 };

@@ -1,8 +1,16 @@
 export { Auth } from './auth.js';
+export { boot } from './boot.js';
+export { Cli } from './cli.js';
 export { ClientSocket } from './client-socket.js';
 export { CommandLoader } from './command-loader.js';
+export { ConnectionHandler } from './connection-handler.js';
 export { Context } from './context.js';
+export { EventHandler } from './event-handler.js';
 export { Logger } from './logger.js';
 export { Manager, manager } from './manager.js';
+export { MessageHandler } from './message-handler.js';
+export { MqttBridge } from './mqtt.js';
 export { Router } from './router.js';
 export { Store } from './store.js';
+export { WebhookServer } from './webhook.js';
+export { checkNetwork, initContact, patchMessage, updateContact } from './utils.js';

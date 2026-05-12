@@ -17,7 +17,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, prefix }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
 		query = query.split(',');
@@ -27,13 +27,13 @@ export default {
 			const result = await searchBandcamp(queries);
 
 			if (result?.error) {
-				await client.instance.reply(from, result.error, message);
+				await client.reply(from, result.error, message);
 				continue;
 			}
 
 			// const { bandId, bandName, title, albumName, albumId, urlBase, thumbnailUrl } = result[0];
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					image: { url: result[0].thumbnailUrl },
@@ -63,7 +63,7 @@ Album ID : ${albumId || 'n/a'}`;
 				},
 				{}
 			);
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					buttonText: 'Open List',

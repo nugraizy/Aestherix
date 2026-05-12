@@ -15,13 +15,13 @@ export default {
 	status: 'enable',
 	run: async ({ from, message, query }, client) => {
 		if (!query) {
-			return client.instance.reply(from, 'You must provide a query.', message);
+			return client.reply(from, 'You must provide a query.', message);
 		}
 
 		const result = await nhentai(query);
 
 		if (result?.error) {
-			return client.instance.reply(from, result.error, message);
+			return client.reply(from, result.error, message);
 		}
 
 		const { artists, categories, images, languages, tags, titles, uploaded, groups, pages, parodies, totalFavorites } = result;
@@ -40,13 +40,13 @@ Pages : ${pages}
 Uploaded : ${uploaded}
 ❤️ : ${totalFavorites}`;
 
-		await client.instance.reply(from, caption.formatForm(), message);
+		await client.reply(from, caption.formatForm(), message);
 
-		const wait = await client.instance.waitMessage(from, 'Processing PDFs', message);
+		const wait = await client.waitMessage(from, 'Processing PDFs', message);
 
 		const buffer = await imageToPdf(images.pages);
 
-		await client.instance.send(from, {
+		await client.send(from, {
 			document: Buffer.from(buffer, 'base64'),
 			mimetype: mime('pdf'),
 			fileName: titles.pretty + '.pdf'

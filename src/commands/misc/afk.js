@@ -15,12 +15,12 @@ export default {
 	status: 'enable',
 	async run({ message, from, query, isGroup, sender, pushname }, client) {
 		if (!isGroup) {
-			return await client.instance.reply(from, 'This command is only available in group chat.', message);
+			return await client.reply(from, 'This command is only available in group chat.', message);
 		}
 
 		setAfk(sender, from, query, pushname);
 
-		await client.instance.send(
+		await client.send(
 			from,
 			{ text: `@${sender.split('@')[0]} is now AFK.`, mentions: [sender] },
 			{ quoted: message }

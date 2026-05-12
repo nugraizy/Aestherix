@@ -32,7 +32,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please specify an UID', message);
+			return await client.reply(from, 'Please specify an UID', message);
 		}
 
 		let {
@@ -55,7 +55,7 @@ export default {
 			const reg = await regex(String(uid));
 
 			if (!reg.status) {
-				return await client.instance.reply(from, reg.message, message);
+				return await client.reply(from, reg.message, message);
 			}
 
 			let info;
@@ -69,7 +69,7 @@ export default {
 			}
 
 			if (info?.error) {
-				await client.instance.reply(from, `Error while searching Genshin Impact player\n\n${info.error}`, message);
+				await client.reply(from, `Error while searching Genshin Impact player\n\n${info.error}`, message);
 
 				loggers.error(
 					`⚠️ ${color('Failed to Searching Genshin Impact player', 'red')} for ${color(prettyNumber, 'lilac')}`
@@ -152,7 +152,7 @@ Precious: ${info.stats.precious_chest_number}
 Magic: ${info.stats.magic_chest_number}`;
 				}
 
-				await client.instance.reply(from, capt.trim().formatForm(), message);
+				await client.reply(from, capt.trim().formatForm(), message);
 			}
 		}
 	}

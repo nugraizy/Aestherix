@@ -29,7 +29,7 @@ export default {
 	status: 'enable',
 	async run({ from, message, query, args, cmd, filename }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please provide a query', message);
+			return await client.reply(from, 'Please provide a query', message);
 		}
 
 		let {
@@ -100,7 +100,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 
 			buttons = buttons.reverse();
 
-			return await client.instance.send(
+			return await client.send(
 				from,
 				{
 					text: texts,
@@ -115,14 +115,14 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 		models = !_.isNumber(parsed[0]) ? [randomize(dataJSON).url] : [_.get(dataJSON, parsed[0] - 1)?.url].filter(Boolean);
 
 		if (models?.length === 0) {
-			return await client.instance.reply(from, `Model ${models[0]} not found\n Type : !${this.name} -type`, message);
+			return await client.reply(from, `Model ${models[0]} not found\n Type : !${this.name} -type`, message);
 		}
 
 		for (const model of models) {
 			const result = await textpro(model, parsed.slice(1).join(' '));
 
 			if (result?.error) {
-				await client.instance.reply(from, `something went wrong:\n\n${result.error}`, message);
+				await client.reply(from, `something went wrong:\n\n${result.error}`, message);
 				continue;
 			}
 
@@ -131,7 +131,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 			const { width, height } = imageSize(data);
 
 			const buffer = isStickers
-				? await client.instance.prepareSticker(data, undefined, {
+				? await client.prepareSticker(data, undefined, {
 						author: configuration.author,
 						packname: configuration.packname
 					})
@@ -140,11 +140,11 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 						.toBuffer();
 
 			if (isImage) {
-				await client.instance.send(from, { image: buffer }, { quoted: message });
+				await client.send(from, { image: buffer }, { quoted: message });
 			} else if (isStickers) {
-				await client.instance.send(from, { sticker: buffer }, { quoted: message });
+				await client.send(from, { sticker: buffer }, { quoted: message });
 			} else {
-				await client.instance.send(from, { [defaulType]: buffer }, { quoted: message });
+				await client.send(from, { [defaulType]: buffer }, { quoted: message });
 			}
 		}
 	}

@@ -37,7 +37,7 @@ export default {
 		client
 	) {
 		if (!mention.length && !isMediaImage && !bodyQuoted) {
-			return await client.instance.reply(from, 'Please mention or send/reply an image to pet', message);
+			return await client.reply(from, 'Please mention or send/reply an image to pet', message);
 		}
 
 		const defaultOptions = {
@@ -53,7 +53,7 @@ export default {
 		if (bodyQuoted && !isMediaImage) {
 			loggers.warning(`${color('Petting', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 
-			const profile = await client.instance
+			const profile = await client
 				.profilePictureUrl(mediaData.participant, 'image')
 				.catch(async () => await fs.readFile(path.join(__dirname, 'src/media/blank.png')));
 
@@ -62,9 +62,9 @@ export default {
 			const result = await pet(profile, sender, defaultOptions);
 
 			if (defaultOptions.output === 'sticker') {
-				await client.instance.send(from, { sticker: Buffer.from(result, 'base64') }, {});
+				await client.send(from, { sticker: Buffer.from(result, 'base64') }, {});
 			} else {
-				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, {});
+				await client.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, {});
 			}
 
 			loggers.info(`${color('Converted Media', 'pink')} for ${color(prettyNumber, 'lilac')}`);
@@ -74,7 +74,7 @@ export default {
 
 		if (isMediaImage) {
 			if (!stickerAble || typeQuoted === 'videoMessage') {
-				return await client.instance.reply(
+				return await client.reply(
 					from,
 					`Please send/reply a regular media to be petted. Can't convert ${typeQuoted}, only : ${typeSticker
 						.slice(
@@ -89,7 +89,7 @@ export default {
 
 			loggers.warning(`${color('Petting', 'pink')} ${color(prettyNumber, 'lilac')}`);
 
-			const file = await client.instance.downloadAndSaveMediaMessage(
+			const file = await client.downloadAndSaveMediaMessage(
 				extractMediaData,
 				path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
 				typeQuoted
@@ -97,9 +97,9 @@ export default {
 			const result = await pet(file, sender, defaultOptions);
 
 			if (defaultOptions.output === 'sticker') {
-				await client.instance.send(from, { sticker: Buffer.from(result, 'base64') }, {});
+				await client.send(from, { sticker: Buffer.from(result, 'base64') }, {});
 			} else {
-				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, {});
+				await client.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, {});
 			}
 
 			loggers.info(`${color('Converted Media', 'pink')} for ${color(prettyNumber, 'lilac')}`);
@@ -110,7 +110,7 @@ export default {
 		for (const mentioned of mention) {
 			loggers.warning(`${color('Petting', 'pink')} ${color(mentioned, 'lilac')}`);
 
-			const profile = await client.instance
+			const profile = await client
 				.profilePictureUrl(mentioned, 'image')
 				.catch(async () => await fs.readFile(path.join(__dirname, 'src/media/blank.png')));
 
@@ -119,9 +119,9 @@ export default {
 			const result = await pet(profile, sender, defaultOptions);
 
 			if (defaultOptions.output === 'sticker') {
-				await client.instance.send(from, { sticker: Buffer.from(result, 'base64') }, {});
+				await client.send(from, { sticker: Buffer.from(result, 'base64') }, {});
 			} else {
-				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, {});
+				await client.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, {});
 			}
 
 			loggers.warning(`${color('Petted', 'pink')} ${color(mentioned, 'lilac')}`);

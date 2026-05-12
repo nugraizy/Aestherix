@@ -11,7 +11,7 @@ export default {
 	limit: 20,
 	status: 'enable',
 	run: async ({ from, query, groupMetadata }, client) => {
-		return await client.instance.send(from, {
+		return await client.send(from, {
 			text: `@${from}`,
 			contextInfo: {
 				mentionedJid: groupMetadata.participantsGroup,

@@ -55,7 +55,7 @@ export default {
 		if (bodyQuoted) {
 			const { buffer } = await attp(prettyNumber, bodyQuoted, parseOptions.color);
 
-			await client.instance.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { quoted: message });
+			await client.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { quoted: message });
 			loggers.info(`${color('Sticker is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 			return;
 		}
@@ -63,11 +63,11 @@ export default {
 		if (query) {
 			const { buffer } = await attp(prettyNumber, query, parseOptions.color);
 
-			await client.instance.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { quoted: message });
+			await client.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { quoted: message });
 			loggers.info(`${color('Sticker is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 			return;
 		}
 
-		return await client.instance.reply(from, 'Please enter text to convert to sticker', message);
+		return await client.reply(from, 'Please enter text to convert to sticker', message);
 	}
 };

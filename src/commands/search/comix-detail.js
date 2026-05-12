@@ -51,10 +51,10 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, prefix }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please provide a manga ID, slug, or Comix URL.', message);
+			return await client.reply(from, 'Please provide a manga ID, slug, or Comix URL.', message);
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Fetching detail...', message);
+		const wait = await client.waitMessage(from, 'Fetching detail...', message);
 
 		const result = await comix.getDetail(query.trim());
 		const manga = result.items[0];
@@ -66,7 +66,7 @@ export default {
 		const caption = formatDetailCaption(manga);
 		const body = `${'Comix Detail'.formatHeaders()}\n\n${caption.formatForm()}`;
 
-		const builder = new client.instance.TemplateBuilder.Native(client);
+		const builder = new client.TemplateBuilder.Native(client);
 
 		builder
 			.destination(from)

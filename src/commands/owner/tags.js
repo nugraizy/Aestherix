@@ -21,11 +21,11 @@ export default {
 			 * @type {import('../../types/Reconstruct/index.js').ReassignResult}
 			 */
 			const dataMessage = await (
-				await import('../../helper/modules/parse-message.js')
-			).reassign(JSON.parse(JSON.stringify(messages.find((v) => v.key.id === args[2]))), client, store, false);
+				await import('../../core/context.js')
+			).Context.from(JSON.parse(JSON.stringify(messages.find((v) => v.key.id === args[2]))), client, store, false);
 
-			await client.instance.reply(dataMessage.from, 'Here.', dataMessage.message);
-			await client.instance.reply(
+			await client.reply(dataMessage.from, 'Here.', dataMessage.message);
+			await client.reply(
 				dataMessage?.from,
 				`Message Metadata : 
 
@@ -46,13 +46,13 @@ Tot. Tags : ${dataMessage.mention.length}`,
 		for (const message of messages) {
 			dataMessages.push(
 				await (
-					await import('../../helper/modules/parse-message.js')
-				).reassign(JSON.parse(JSON.stringify(message)), client, store, false)
+					await import('../../core/context.js')
+				).Context.from(JSON.parse(JSON.stringify(message)), client, store, false)
 			);
 		}
 
 		if (!dataMessages.length) {
-			return await client.instance.reply(from, 'No messages scraped in this chat', message);
+			return await client.reply(from, 'No messages scraped in this chat', message);
 		}
 
 		dataMessages = dataMessages.filter(
@@ -62,7 +62,7 @@ Tot. Tags : ${dataMessage.mention.length}`,
 		);
 
 		if (!dataMessages.length) {
-			return await client.instance.reply(from, `Your tags is not found. Chats scraped : ${messages.length}`, message);
+			return await client.reply(from, `Your tags is not found. Chats scraped : ${messages.length}`, message);
 		}
 
 		dataMessages = dataMessages.map((v) => ({
@@ -98,7 +98,7 @@ Tot. Tags : ${dataMessage.mention.length}`,
 			i++;
 		}
 
-		await client.instance.send(
+		await client.send(
 			from,
 			{
 				buttonText: 'Open List',

@@ -32,20 +32,20 @@ export default {
 	status: 'enable',
 	async run({ sender, query, message, from }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please specify an UID', message);
+			return await client.reply(from, 'Please specify an UID', message);
 		}
 
 		const data = await fs.readJSON(path.join(__dirname, 'databases/games/genshin_impact/data.json'));
 		const index = data.findIndex((v) => v.user === sender);
 
 		if (index !== -1) {
-			return await client.instance.reply(from, 'Your character already in Database.', message);
+			return await client.reply(from, 'Your character already in Database.', message);
 		}
 
 		const findUid = await regex(query);
 
 		if (!findUid.status) {
-			return await client.instance.reply(from, findUid.message, message);
+			return await client.reply(from, findUid.message, message);
 		}
 
 		data.push({
@@ -54,6 +54,6 @@ export default {
 		});
 		await fs.writeJSON(path.join(__dirname, 'databases/games/genshin_impact/data.json'), data);
 
-		await client.instance.reply(from, 'Your char is saved', message);
+		await client.reply(from, 'Your char is saved', message);
 	}
 };

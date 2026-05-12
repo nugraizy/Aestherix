@@ -24,13 +24,13 @@ export default {
 					type: 'PIN_FOR_ALL'
 				}
 			},
-			{ messageId: client.instance.generateMessageID() }
+			{ messageId: client.generateMessageID() }
 		);
 
 		messages.message.pinInChatMessage.type = 'PIN_FOR_ALL';
 		messages.message.pinInChatMessage.senderTimestampMs = Number(messages.message.pinInChatMessage.senderTimestampMs);
 
-		await client.instance.relay(from, messages.message, {
+		await client.relay(from, messages.message, {
 			messageId: messages.key.id
 		});
 	}

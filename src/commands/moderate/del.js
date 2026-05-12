@@ -13,16 +13,16 @@ export default {
 	status: 'enable',
 	async run({ from, mediaData, message, bodyQuoted, isBotAdmin }, client) {
 		if (!bodyQuoted) {
-			return await client.instance.reply(from, 'You must reply to a message to delete it.', message);
+			return await client.reply(from, 'You must reply to a message to delete it.', message);
 		}
 
-		const myJid = client.instance.decodeJid(instance);
+		const myJid = client.decodeJid(instance);
 
 		if (!mediaData.participant.includes(myJid) && !isBotAdmin) {
-			return await client.instance.reply(from, 'You can not ask bot to delete people message when bot is not admin.', message);
+			return await client.reply(from, 'You can not ask bot to delete people message when bot is not admin.', message);
 		}
 
-		await client.instance.send(
+		await client.send(
 			from,
 			{
 				delete: {

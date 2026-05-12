@@ -16,7 +16,7 @@ export default {
 	async run({ from }, client) {
 		const carousel = async () => {
 			const waifu = (await getWaifu('waifu', 'sfw'))[0];
-			const builder = new client.instance.TemplateBuilder.Carousel();
+			const builder = new client.TemplateBuilder.Carousel();
 
 			await builder
 				.destination(from)
@@ -133,7 +133,7 @@ export default {
 
 		const native = async () => {
 			// const waifu = (await getWaifu('waifu', 'sfw'))[0];
-			const builder = new client.instance.TemplateBuilder.Native();
+			const builder = new client.TemplateBuilder.Native();
 
 			const n = 100;
 

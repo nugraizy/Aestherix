@@ -16,14 +16,14 @@ export default {
 	status: 'enable',
 	async run({ isOwner, isMediaImage, isMediaVid, from, message, mediaData, query }, client) {
 		if (!isMediaImage) {
-			return await client.instance.reply(from, 'Please send/reply a media[image]', message);
+			return await client.reply(from, 'Please send/reply a media[image]', message);
 		}
 
 		if (isMediaVid) {
-			return await client.instance.reply(from, 'Please send/reply a media[image]', message);
+			return await client.reply(from, 'Please send/reply a media[image]', message);
 		}
 
-		const media = await client.instance.downloadMediaMessage(mediaData);
+		const media = await client.downloadMediaMessage(mediaData);
 
 		const options = yargsParser(query, {
 			configuration: {
@@ -62,10 +62,10 @@ export default {
 		})();
 
 		if (options.self && !isOwner) {
-			return await client.instance.reply(from, 'You are not owner. This commands is only for owner.', message);
+			return await client.reply(from, 'You are not owner. This commands is only for owner.', message);
 		}
 
-		await client.instance.updateProfilePicture(
+		await client.updateProfilePicture(
 			options.self ? jidNormalizedUser(instance) : from,
 			media,
 			options.no_crop || options.noCrop ? 'no_crop' : options.no_stretch || options.noStretch ? 'no_stretch' : undefined

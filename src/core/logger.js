@@ -8,14 +8,16 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 import { color } from '../utils/modules/color.js';
-import { pushDashboardLog } from '../helper/connection/dashboard/dashboard-monitor.js';
+import { pushDashboardLog } from './dashboard/monitor.js';
 
 const TIME_FORMAT = 'HH:mm DD/MM';
 
+/** @implements {import('../types/Core/index.d.ts').Logger} */
 export class Logger {
 	#muted = false;
 	#name;
 
+	/** @param {{ name?: string; muted?: boolean }} [options] */
 	constructor(options = {}) {
 		this.#name = options.name ?? null;
 		this.#muted = options.muted ?? false;
@@ -41,18 +43,34 @@ export class Logger {
 		return color(text, colorName);
 	}
 
+	/**
+	 * @param {...unknown} args
+	 * @returns {string | undefined}
+	 */
 	info(...args) {
 		return this.#log('INF', ...args);
 	}
 
+	/**
+	 * @param {...unknown} args
+	 * @returns {string | undefined}
+	 */
 	warning(...args) {
 		return this.#log('WRN', ...args);
 	}
 
+	/**
+	 * @param {...unknown} args
+	 * @returns {string | undefined}
+	 */
 	error(...args) {
 		return this.#log('ERR', ...args);
 	}
 
+	/**
+	 * @param {...(string | { language?: string })} args
+	 * @returns {string | undefined}
+	 */
 	prettyCode(...args) {
 		const lastArg = args[args.length - 1];
 		const hasOptions = lastArg && typeof lastArg === 'object' && !Buffer.isBuffer(lastArg) && !Array.isArray(lastArg);
@@ -67,7 +85,9 @@ export class Logger {
 	}
 
 	#log(type, ...args) {
-		if (this.#muted) return;
+		if (this.#muted) {
+			return;
+		}
 
 		const ignoreIndex = args.findIndex((v) => v?.ignore);
 

@@ -16,10 +16,10 @@ export default {
 	status: 'enable',
 	async run({ query, message, from }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please enter a query', message);
+			return await client.reply(from, 'Please enter a query', message);
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, 'Please wait...', message);
 
 		const result = await telegram(query);
 
@@ -34,12 +34,12 @@ export default {
 		await wait.update(capt);
 
 		for (const stickers of result.stickers) {
-			const sticker = await client.instance.prepareSticker(stickers, undefined, {
+			const sticker = await client.prepareSticker(stickers, undefined, {
 				author: configuration.author,
 				packname: configuration.packname
 			});
 
-			await client.instance.send(from, { sticker });
+			await client.send(from, { sticker });
 		}
 	}
 };

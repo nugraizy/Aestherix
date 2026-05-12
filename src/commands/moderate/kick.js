@@ -14,7 +14,7 @@ export default {
 	restrict: true,
 	async run({ mediaData, isBotAdmin, type, message, from, mention, query, bodyQuoted, adminGroups }, client) {
 		if (!isBotAdmin) {
-			return await client.instance.reply(
+			return await client.reply(
 				from,
 				'Bot is not admin, Please promote admin before using moderation commands.',
 				message
@@ -22,29 +22,29 @@ export default {
 		}
 
 		if (type === 'buttonsResponseMessage') {
-			return await client.instance.updateGroup(from, 'REMOVE', mention.length ? mention : query.parseNumber(), adminGroups, {
+			return await client.updateGroup(from, 'REMOVE', mention.length ? mention : query.parseNumber(), adminGroups, {
 				force: /--?(force|F)/.test(query),
 				message
 			});
 		} else if (!query && !mention.length && !bodyQuoted) {
-			return await client.instance.reply(from, 'Please reply people message or mention people.', message);
+			return await client.reply(from, 'Please reply people message or mention people.', message);
 		}
 
-		const myJid = client.instance.decodeJid(instance);
+		const myJid = client.decodeJid(instance);
 
 		if (message?.mention?.includes(myJid) || mediaData?.participant?.includes(myJid)) {
-			return await client.instance.reply(from, 'You can not kick me by myself.', message);
+			return await client.reply(from, 'You can not kick me by myself.', message);
 		}
 
 		if (query || mention.length) {
-			await client.instance.updateGroup(from, 'REMOVE', mention.length ? mention : query.parseNumber(), adminGroups, {
+			await client.updateGroup(from, 'REMOVE', mention.length ? mention : query.parseNumber(), adminGroups, {
 				force: /--?(force|F)/.test(query),
 				message
 			});
 		}
 
 		if (bodyQuoted) {
-			await client.instance.updateGroup(from, 'REMOVE', [mediaData.participant], adminGroups, {
+			await client.updateGroup(from, 'REMOVE', [mediaData.participant], adminGroups, {
 				force: /--?(force|F)/.test(query),
 				message
 			});

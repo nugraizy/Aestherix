@@ -16,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
 		let queries = query.split(',');
@@ -27,11 +27,11 @@ export default {
 			const result = await arq.subreddits(querie.trim());
 
 			if (result?.error || !result.ok) {
-				await client.instance.reply(from, JSON.stringify(result), message);
+				await client.reply(from, JSON.stringify(result), message);
 				continue;
 			}
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					image: { url: result.result.url },

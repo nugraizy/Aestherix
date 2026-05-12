@@ -1,7 +1,7 @@
 import { makeCacheableSignalKeyStore } from 'baileys';
 import P from 'pino';
 
-import { useMultiAuthState, useSingleAuthState } from '../helper/database/auth.js';
+import { useMultiAuthState, useSingleAuthState } from './auth-state.js';
 
 export class Auth {
 	#prisma;
@@ -13,8 +13,13 @@ export class Auth {
 	#initialized = false;
 
 	constructor(prisma, sessionName, options = {}) {
-		if (!prisma) throw new TypeError('Auth: prisma is required');
-		if (!sessionName) throw new TypeError('Auth: sessionName is required');
+		if (!prisma) {
+			throw new TypeError('Auth: prisma is required');
+		}
+
+		if (!sessionName) {
+			throw new TypeError('Auth: sessionName is required');
+		}
 
 		this.#prisma = prisma;
 		this.#sessionName = sessionName;
@@ -30,7 +35,10 @@ export class Auth {
 	}
 
 	get state() {
-		if (!this.#initialized) throw new Error('Auth: not initialized. Call initialize() first.');
+		if (!this.#initialized) {
+			throw new Error('Auth: not initialized. Call initialize() first.');
+		}
+
 		return this.#state;
 	}
 
@@ -39,7 +47,9 @@ export class Auth {
 	}
 
 	async initialize(options = {}) {
-		if (this.#initialized) return this;
+		if (this.#initialized) {
+			return this;
+		}
 
 		const authFn = this.#mode === 'single' ? useSingleAuthState : useMultiAuthState;
 		const result = await authFn(this.#prisma, this.#sessionName);
@@ -62,12 +72,18 @@ export class Auth {
 	}
 
 	async saveCreds() {
-		if (!this.#saveCreds) throw new Error('Auth: not initialized');
+		if (!this.#saveCreds) {
+			throw new Error('Auth: not initialized');
+		}
+
 		return this.#saveCreds();
 	}
 
 	async clearState() {
-		if (!this.#clearState) throw new Error('Auth: not initialized');
+		if (!this.#clearState) {
+			throw new Error('Auth: not initialized');
+		}
+
 		await this.#clearState();
 		this.#initialized = false;
 		this.#state = null;

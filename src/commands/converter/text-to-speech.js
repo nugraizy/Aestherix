@@ -17,7 +17,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, filename, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please provide some text to convert to speech', message);
+			return await client.reply(from, 'Please provide some text to convert to speech', message);
 		}
 
 		let language = 'id';
@@ -31,10 +31,10 @@ export default {
 		try {
 			const { buffer } = await textToSpeech(query, language, path.join(__dirname, `src/media/temporary_files/${filename}`));
 
-			await client.instance.send(from, { audio: buffer }, { quoted: message });
+			await client.send(from, { audio: buffer }, { quoted: message });
 		} catch (e) {
 			if (e.error === 'lang not found') {
-				return await client.instance.reply(
+				return await client.reply(
 					from,
 					`Language not found. Available languages :\n\n${Object.keys(e.lang)
 						.map((key, i) => `${i + 1}. ${key}   :  ${e.lang[key]}`)
@@ -43,7 +43,7 @@ export default {
 				);
 			}
 
-			await client.instance.reply(from, 'Error while converting text to speech', message);
+			await client.reply(from, 'Error while converting text to speech', message);
 
 			log(e);
 		}

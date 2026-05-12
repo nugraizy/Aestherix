@@ -20,7 +20,7 @@ export default {
 	status: 'enable',
 	run: async ({ from, message, query, prettyNumber }, client) => {
 		if (!query) {
-			return client.instance.reply(from, 'You must provide a query.', message);
+			return client.reply(from, 'You must provide a query.', message);
 		}
 
 		let { _: urls } = parser(query);
@@ -28,14 +28,14 @@ export default {
 		urls = removeDuplicatesArray(urls);
 
 		if (urls.length === 1 && !isURL(urls[0])) {
-			return await client.instance.reply(from, 'Please specify a valid url.', message);
+			return await client.reply(from, 'Please specify a valid url.', message);
 		}
 
 		if (urls.length === 1 && !regex(urls[0])) {
-			return await client.instance.reply(from, 'Please specify a valid Mediafire url.', message);
+			return await client.reply(from, 'Please specify a valid Mediafire url.', message);
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, 'Please wait...', message);
 
 		let success = 0;
 		let error = 0;
@@ -44,7 +44,7 @@ export default {
 
 		for (const url of urls) {
 			if (!regex(url)) {
-				await client.instance.reply(from, 'Please specify a valid Mediafire url.\nInvalid : ' + url, message);
+				await client.reply(from, 'Please specify a valid Mediafire url.\nInvalid : ' + url, message);
 				error++;
 				continue;
 			}
@@ -52,13 +52,13 @@ export default {
 			const result = await mediafire(url);
 
 			if (result?.error) {
-				client.instance.reply(from, result.error, message);
+				client.reply(from, result.error, message);
 				loggers.error(`${color('Failed to Download Mediafire File', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				return;
 			}
 
-			await client.instance.reply(
+			await client.reply(
 				from,
 				`${'Mediafire Downloader'.formatHeaders()}
 		
@@ -69,7 +69,7 @@ Uploaded: ${result.uploaded}`.formatForm(),
 				message
 			);
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					[result.filetype]: { url: result.dlLink },

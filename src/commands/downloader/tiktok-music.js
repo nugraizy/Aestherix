@@ -20,10 +20,10 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please provide a URL', message);
+			return await client.reply(from, 'Please provide a URL', message);
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, 'Please wait...', message);
 
 		let { _: urls } = parser(query);
 
@@ -36,13 +36,13 @@ export default {
 
 		for (const data in musics) {
 			if (musics[data]?.error) {
-				await client.instance.reply(from, `Error while downloading TikTok music\n\n${musics[data].error}\n${data}`, message);
+				await client.reply(from, `Error while downloading TikTok music\n\n${musics[data].error}\n${data}`, message);
 				loggers.error(`${color('Failed to Download TikTok Music', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
 			}
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					document: { url: musics[data].urls.music },

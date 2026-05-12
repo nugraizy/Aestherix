@@ -15,16 +15,16 @@ export default {
 	status: 'enable',
 	run: async ({ query, message, from }, client) => {
 		if (!query) {
-			return client.instance.reply(from, 'You must provide a query.', message);
+			return client.reply(from, 'You must provide a query.', message);
 		}
 
 		const result = await chords(query);
 
 		if (result?.error) {
-			return await client.instance.reply(from, result.error, message);
+			return await client.reply(from, result.error, message);
 		}
 
-		return await client.instance.reply(
+		return await client.reply(
 			from,
 			`${'Chords'.formatHeaders()}
 

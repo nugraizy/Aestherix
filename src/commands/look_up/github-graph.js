@@ -18,7 +18,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please specify a GitHub User', message);
+			return await client.reply(from, 'Please specify a GitHub User', message);
 		}
 
 		const { _: username, theme } = parser(query, {
@@ -37,15 +37,15 @@ export default {
 		}
 
 		if (!username || username.length === 0) {
-			return await client.instance.reply(from, 'Please specify a GitHub User', message);
+			return await client.reply(from, 'Please specify a GitHub User', message);
 		}
 
 		if (theme === true) {
-			return await client.instance.reply(from, `List of themes:\n\n${themes.join(', ')}`, message);
+			return await client.reply(from, `List of themes:\n\n${themes.join(', ')}`, message);
 		}
 
 		if (!themes.includes(theme.toLowerCase())) {
-			return await client.instance.reply(
+			return await client.reply(
 				from,
 				`Please specify a valid themes, this is a list of available themes:\n\n${themes.join(', ')}`,
 				message
@@ -58,6 +58,6 @@ export default {
 
 		const buffer = create.toBuffer();
 
-		await client.instance.send(from, { image: new Buffer.from(buffer) }, { quoted: message });
+		await client.send(from, { image: new Buffer.from(buffer) }, { quoted: message });
 	}
 };

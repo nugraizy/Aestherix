@@ -25,7 +25,7 @@ export default {
 			capt += `\nYou Lose ${slot.lose}! Try again?`;
 		}
 
-		const builder = new client.instance.TemplateBuilder.Native();
+		const builder = new client.TemplateBuilder.Native();
 
 		await builder
 			.destination(from)

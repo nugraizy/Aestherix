@@ -39,7 +39,7 @@ export default {
 	status: 'enable',
 	async run({ from, args, message, query }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a status to simulate', message);
+			return await client.reply(from, 'You must provide a status to simulate', message);
 		}
 
 		const started = Date.now();
@@ -49,7 +49,7 @@ export default {
 				case 'status':
 				case 'stats':
 					{
-						await client.instance.reply(
+						await client.reply(
 							from,
 							Object.keys(configuration.presences).includes('spotify') ? 'Enabled' : 'Disabled',
 							message
@@ -61,12 +61,12 @@ export default {
 				case 'off':
 					{
 						if (!('spotify' in configuration.presences)) {
-							return await client.instance.reply(from, 'Already disabled', message);
+							return await client.reply(from, 'Already disabled', message);
 						}
 
 						clearTimeout(configuration.presences.spotify.timeout);
 						delete configuration.presences.spotify;
-						await client.instance.reply(from, 'Simulate Spotify Player Bio Disabled', message);
+						await client.reply(from, 'Simulate Spotify Player Bio Disabled', message);
 					}
 
 					break;
@@ -74,17 +74,17 @@ export default {
 				case 'on':
 					{
 						if ('spotify' in configuration.presences) {
-							return await client.instance.reply(from, 'Already enabled', message);
+							return await client.reply(from, 'Already enabled', message);
 						}
 
 						configuration.presences.spotify = { started, timeout: setTimeout(() => updateSpotifyTracks(), 0) };
-						await client.instance.reply(from, 'Simulate Spotify Player Bio Enabled', message);
+						await client.reply(from, 'Simulate Spotify Player Bio Enabled', message);
 					}
 
 					break;
 				default:
 					{
-						await client.instance.reply(from, 'Usage: !spotifyplayer [enable|disable|status]', message);
+						await client.reply(from, 'Usage: !spotifyplayer [enable|disable|status]', message);
 					}
 
 					break;

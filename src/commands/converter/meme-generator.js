@@ -37,11 +37,11 @@ export default {
 		client
 	) {
 		if (!isMediaImage && !(isQuotedSticker || isSticker)) {
-			return await client.instance.reply(from, 'Please send/reply a media to convert to sticker', message);
+			return await client.reply(from, 'Please send/reply a media to convert to sticker', message);
 		}
 
 		if (!stickerAble) {
-			return await client.instance.reply(
+			return await client.reply(
 				from,
 				`Please send/reply a regular media to be meme'd. Can't convert ${typeQuoted}, only : ${typeSticker
 					.slice(
@@ -55,7 +55,7 @@ export default {
 		}
 
 		if (!query) {
-			return await client.instance.reply(from, 'Please provide a query, use & to split top/bottom text', message);
+			return await client.reply(from, 'Please provide a query, use & to split top/bottom text', message);
 		}
 
 		const parsed = parser(query.toLowerCase(), {
@@ -73,13 +73,13 @@ export default {
 		query = query.replace(regexs, '');
 
 		if (isQuotedSticker && extractMediaData.isAnimated) {
-			return client.instance.reply(from, 'Cannot use animated sticker.', message);
+			return client.reply(from, 'Cannot use animated sticker.', message);
 		}
 
-		const image = await client.instance.downloadMediaMessage(mediaData);
+		const image = await client.downloadMediaMessage(mediaData);
 
 		const buffer = await memeGenerator(
-			client.instance,
+			client,
 			sender,
 			image,
 			query.split('&')[0],
@@ -89,13 +89,13 @@ export default {
 		);
 
 		if (buffer.error) {
-			return await client.instance.reply(from, buffer.error, message);
+			return await client.reply(from, buffer.error, message);
 		}
 
 		if (parsed.isStickers) {
-			await client.instance.send(from, { sticker: buffer }, { quoted: message });
+			await client.send(from, { sticker: buffer }, { quoted: message });
 		} else {
-			await client.instance.send(
+			await client.send(
 				from,
 				{ image: buffer, caption: `Meme Generator Made by ${__botName} using Canvas. Powered by Hidden Finder` },
 				{ quoted: message }

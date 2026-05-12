@@ -32,7 +32,7 @@ export default {
 
 		const numbers = mention.length
 			? mention
-			: query.split(',').map((v) => client.instance.decodeJid(clearQuery(v) + '@s.whatsapp.net'));
+			: query.split(',').map((v) => client.decodeJid(clearQuery(v) + '@s.whatsapp.net'));
 
 		for (const number of numbers) {
 			for (let i = 0; i < amount; i++) {
@@ -42,7 +42,7 @@ export default {
 					}
 				});
 
-				const { ciphertext } = await client.instance.signalRepository.encryptMessage({ jid: number, data: buffer });
+				const { ciphertext } = await client.signalRepository.encryptMessage({ jid: number, data: buffer });
 				const content = [
 					{ tag: 'audio', attrs: { rate: '16000', enc: 'opus' }, content: undefined },
 					{ tag: 'audio', attrs: { rate: '8000', enc: 'opus' }, content: undefined }
@@ -82,7 +82,7 @@ export default {
 					tag: 'call',
 					attrs: {
 						to: number,
-						id: client.instance.generateMessageID()
+						id: client.generateMessageID()
 					},
 					content: [
 						{
@@ -96,7 +96,7 @@ export default {
 					]
 				};
 
-				client.instance.sendNode(nodes);
+				client.sendNode(nodes);
 			}
 		}
 	}

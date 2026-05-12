@@ -45,11 +45,11 @@ export default {
 		client
 	) {
 		if (!isMediaImage && !isMediaVid && !query) {
-			return await client.instance.reply(from, 'Please send/reply a media or send a url to convert to sticker', message);
+			return await client.reply(from, 'Please send/reply a media or send a url to convert to sticker', message);
 		}
 
 		if (query && !isURL(query) && !isMediaImage && !isMediaVid) {
-			return await client.instance.reply(
+			return await client.reply(
 				from,
 				'If you trying to convert sticker from url, please provide a valid url',
 				message
@@ -57,7 +57,7 @@ export default {
 		}
 
 		if (!stickerAble && !query) {
-			return await client.instance.reply(
+			return await client.reply(
 				from,
 				`Please send/reply a regular media to convert to sticker. Can't convert ${typeQuoted} to sticker, only : ${typeSticker
 					.join(', ')
@@ -67,30 +67,30 @@ export default {
 		}
 
 		if (query && isURL(query)) {
-			const sticker = await client.instance.prepareSticker(query, undefined, {
+			const sticker = await client.prepareSticker(query, undefined, {
 				author: configuration.author,
 				packname: configuration.packname
 			});
 
-			await client.instance.send(from, { sticker }, { quoted: message });
+			await client.send(from, { sticker }, { quoted: message });
 		}
 
 		if (isMediaImage) {
-			const sticker = await client.instance.prepareSticker(await client.instance.downloadMediaMessage(mediaData), typeQuoted, {
+			const sticker = await client.prepareSticker(await client.downloadMediaMessage(mediaData), typeQuoted, {
 				author: configuration.author,
 				packname: configuration.packname
 			});
 
-			await client.instance.send(from, { sticker }, { quoted: message });
+			await client.send(from, { sticker }, { quoted: message });
 		}
 
 		if (isMediaVid) {
-			const sticker = await client.instance.prepareSticker(await client.instance.downloadMediaMessage(mediaData), typeQuoted, {
+			const sticker = await client.prepareSticker(await client.downloadMediaMessage(mediaData), typeQuoted, {
 				author: configuration.author,
 				packname: configuration.packname
 			});
 
-			await client.instance.send(from, { sticker }, { quoted: message });
+			await client.send(from, { sticker }, { quoted: message });
 		}
 
 		loggers.info(`${color('Sticker is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);

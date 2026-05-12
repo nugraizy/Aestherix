@@ -41,7 +41,7 @@ export default {
 		client
 	) {
 		if (!mention.length && !isMediaImage) {
-			return await client.instance.reply(from, 'Please mention or send/reply an image to pet', message);
+			return await client.reply(from, 'Please mention or send/reply an image to pet', message);
 		}
 
 		let options = {};
@@ -53,7 +53,7 @@ export default {
 		if (bodyQuoted && !isMediaImage) {
 			loggers.warning(`${color('Triggering', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 
-			const profile = await client.instance
+			const profile = await client
 				.profilePictureUrl(mediaData.participant, 'image')
 				.catch(async () => await fs.readFile(path.join(__dirname, 'src/media/blank.png')));
 
@@ -62,9 +62,9 @@ export default {
 			const result = await trigger(profile, sender, options);
 
 			if (options.output === 'sticker') {
-				await client.instance.send(from, { sticker: Buffer.from(result, 'base64') }, {});
+				await client.send(from, { sticker: Buffer.from(result, 'base64') }, {});
 			} else {
-				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, {});
+				await client.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, {});
 			}
 
 			loggers.info(`${color('Converted Media', 'pink')} for ${color(prettyNumber, 'lilac')}`);
@@ -74,7 +74,7 @@ export default {
 
 		if (isMediaImage) {
 			if (!stickerAble) {
-				return await client.instance.reply(
+				return await client.reply(
 					from,
 					`Please send/reply a regular media to be triggered. Can't convert ${typeQuoted}, only : ${typeSticker
 						.slice(
@@ -89,13 +89,13 @@ export default {
 
 			loggers.warning(`${color('Triggering', 'pink')} ${color(prettyNumber, 'lilac')}`);
 
-			const buffer = await client.instance.downloadMediaMessage(mediaData);
+			const buffer = await client.downloadMediaMessage(mediaData);
 			const result = await trigger(buffer, sender, options);
 
 			if (options.output === 'sticker') {
-				await client.instance.send(from, { sticker: Buffer.from(result, 'base64') }, {});
+				await client.send(from, { sticker: Buffer.from(result, 'base64') }, {});
 			} else {
-				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, {});
+				await client.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, {});
 			}
 
 			loggers.info(`${color('Converted Media', 'pink')} for ${color(prettyNumber, 'lilac')}`);
@@ -104,7 +104,7 @@ export default {
 		for (const mentioned of mention) {
 			loggers.warning(`${color('Triggering', 'pink')} ${color(mentioned, 'lilac')}`);
 
-			const profile = await client.instance
+			const profile = await client
 				.profilePictureUrl(mentioned, 'image')
 				.catch(async () => await fs.readFile(path.join(__dirname, 'src/media/blank.png')));
 
@@ -113,9 +113,9 @@ export default {
 			const result = await trigger(profile, sender, options);
 
 			if (options.output === 'sticker') {
-				await client.instance.send(from, { sticker: Buffer.from(result, 'base64') }, {});
+				await client.send(from, { sticker: Buffer.from(result, 'base64') }, {});
 			} else {
-				await client.instance.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, {});
+				await client.send(from, { video: Buffer.from(result, 'base64'), mimetype: 'video/mp4' }, {});
 			}
 
 			loggers.info(`${color('Triggered', 'pink')} ${color(mentioned, 'lilac')}`);

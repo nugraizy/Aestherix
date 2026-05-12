@@ -33,7 +33,7 @@ export default {
 	status: 'enable',
 	async run({ from, message, query }, client) {
 		if (!query) {
-			return client.instance.reply(from, 'You must provide a query.', message);
+			return client.reply(from, 'You must provide a query.', message);
 		}
 
 		const pinId = getPinId(query);
@@ -44,6 +44,6 @@ export default {
 
 		configuration.pinterestId = query;
 
-		client.instance.reply(from, 'Pinterest intervals has been updated.', message);
+		client.reply(from, 'Pinterest intervals has been updated.', message);
 	}
 };

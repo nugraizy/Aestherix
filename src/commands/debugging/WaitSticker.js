@@ -1,5 +1,5 @@
 import configuration from '../../helper/config/connect.js';
-import { reassign } from '../../helper/index.js';
+import { Context } from '../../core/context.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -25,14 +25,14 @@ export default {
 		});
 
 		if (wait.timeout) {
-			return client.instance.reply(from, 'Timeout!', message);
+			return client.reply(from, 'Timeout!', message);
 		}
 
 		if (wait.invalid) {
-			return client.instance.reply(from, 'Invalid media!', message);
+			return client.reply(from, 'Invalid media!', message);
 		}
 
-		const messageToConvert = await reassign(wait.message, client, store);
+		const messageToConvert = await Context.from(wait.message, client, store);
 
 		await configuration.cmds.commands.get('sticker').run(messageToConvert, client);
 	}

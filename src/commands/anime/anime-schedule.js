@@ -25,7 +25,7 @@ export default {
 	status: 'enable',
 	run: async ({ from, message, isGroup }, client) => {
 		if (isGroup) {
-			return client.instance.reply(from, 'This command only works in private chat.', message);
+			return client.reply(from, 'This command only works in private chat.', message);
 		}
 
 		const text = 'Anime Releases'.formatHeaders();
@@ -66,7 +66,7 @@ export default {
 
 			const INFO = result[day][0];
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					image: { url: INFO[Object.keys(INFO)][0].thumbnail },
