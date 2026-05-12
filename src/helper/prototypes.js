@@ -1,9 +1,9 @@
-import _ from 'lodash';
 import chalk from 'chalk';
 import { findPhoneNumbersInText } from 'libphonenumber-js';
+import _ from 'lodash';
 
-import { S_WHATSAPP_NET } from './misc/wa_data/constants.js';
 import { color } from '../utils/modules/color.js';
+import { S_WHATSAPP_NET } from './misc/wa_data/constants.js';
 
 Object.setPrototypeOf(String.prototype, {
 	...String.prototype,
@@ -124,31 +124,81 @@ Object.setPrototypeOf(String.prototype, {
 			this.substring(i * length, i * length + length)
 		).join(join);
 	},
-	red: function () { return color(this, 'red'); },
-	green: function () { return color(this, 'green'); },
-	blue: function () { return color(this, 'blue'); },
-	yellow: function () { return color(this, 'yellow'); },
-	cyan: function () { return color(this, 'cyan'); },
-	magenta: function () { return color(this, 'magenta'); },
-	purple: function () { return color(this, 'purple'); },
-	orange: function () { return color(this, 'orange'); },
-	pink: function () { return color(this, 'pink'); },
-	white: function () { return color(this, 'white'); },
-	gray: function () { return color(this, 'gray'); },
-	lilac: function () { return color(this, 'lilac'); },
-	gold: function () { return color(this, 'gold'); },
-	lime: function () { return color(this, 'lime'); },
-	teal: function () { return color(this, 'teal'); },
-	coral: function () { return color(this, 'coral'); },
-	mint: function () { return color(this, 'mint'); },
-	lavender: function () { return color(this, 'lavender'); },
-	indigo: function () { return color(this, 'indigo'); },
-	neonGreen: function () { return color(this, 'neonGreen'); },
-	bold: function () { return chalk.bold(this); },
-	italic: function () { return chalk.italic(this); },
-	dim: function () { return chalk.dim(this); },
-	underline: function () { return chalk.underline(this); },
-	themed: function (colorName) { return color(this, colorName); }
+	red: function () {
+		return color(this, 'red');
+	},
+	green: function () {
+		return color(this, 'green');
+	},
+	blue: function () {
+		return color(this, 'blue');
+	},
+	yellow: function () {
+		return color(this, 'yellow');
+	},
+	cyan: function () {
+		return color(this, 'cyan');
+	},
+	magenta: function () {
+		return color(this, 'magenta');
+	},
+	purple: function () {
+		return color(this, 'purple');
+	},
+	orange: function () {
+		return color(this, 'orange');
+	},
+	pink: function () {
+		return color(this, 'pink');
+	},
+	white: function () {
+		return color(this, 'white');
+	},
+	gray: function () {
+		return color(this, 'gray');
+	},
+	lilac: function () {
+		return color(this, 'lilac');
+	},
+	gold: function () {
+		return color(this, 'gold');
+	},
+	lime: function () {
+		return color(this, 'lime');
+	},
+	teal: function () {
+		return color(this, 'teal');
+	},
+	coral: function () {
+		return color(this, 'coral');
+	},
+	mint: function () {
+		return color(this, 'mint');
+	},
+	lavender: function () {
+		return color(this, 'lavender');
+	},
+	indigo: function () {
+		return color(this, 'indigo');
+	},
+	neonGreen: function () {
+		return color(this, 'neonGreen');
+	},
+	bold: function () {
+		return chalk.bold(this);
+	},
+	italic: function () {
+		return chalk.italic(this);
+	},
+	dim: function () {
+		return chalk.dim(this);
+	},
+	underline: function () {
+		return chalk.underline(this);
+	},
+	themed: function (colorName) {
+		return color(this, colorName);
+	}
 });
 
 Object.setPrototypeOf(Array.prototype, {

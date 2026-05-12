@@ -126,7 +126,7 @@ const SPLITTER = ['᠁✦', '✦', '✦', '✦᠁'];
 const AUTHOR = color('nugraizy', 'red');
 
 export const printBanner = () =>
-	log(
+	console.log(
 		boxen(
 			`${BANNER_ICON_1}${chalk.italic.bold.hex(themeManager.palette.purple || '#BD93F9')(__botName)}${BANNER_ICON_2}
 version

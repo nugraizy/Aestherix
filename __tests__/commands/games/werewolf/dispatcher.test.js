@@ -1,9 +1,9 @@
 /**
  * Dispatcher + subcommand tests.
  *
- * Uses a real Cache-backed repository with an in-memory Prisma double and a
- * minimal fake `client.instance` that records every `.reply()` and
- * `.send()` call. No mocking library involved — just plain record-and-check.
+ * Uses a real Cache-backed repository with an in-memory Prisma double, and a
+ * fake client that records sends and replies for inspection.
+ * No mocking library involved — just plain record-and-check.
  */
 
 import assert from 'node:assert/strict';
