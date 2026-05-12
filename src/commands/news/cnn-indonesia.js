@@ -28,7 +28,7 @@ export default {
 			caption += `Published : ${data[index].published}\n`;
 			caption += `Content : ${data[index].body}\n`;
 
-			return await client.instance.send(
+			return await client.send(
 				from,
 				{
 					image: { url: data[index].image },
@@ -60,13 +60,13 @@ export default {
 		}
 
 		if (!query) {
-			return client.instance.reply(from, 'Please provide queries', message);
+			return client.reply(from, 'Please provide queries', message);
 		}
 
 		const data = await cnnindonesia(query);
 
 		if (data?.error) {
-			return await client.instance.reply(from, data.error, message);
+			return await client.reply(from, data.error, message);
 		}
 
 		let caption = 'CNN Indonesia'.formatHeaders();
@@ -83,7 +83,7 @@ export default {
 			)
 			.join('\n\n')}`.trimEnd();
 
-		await client.instance.send(
+		await client.send(
 			from,
 			{
 				image: { url: data[0].image },

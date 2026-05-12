@@ -17,21 +17,21 @@ export default {
 	status: 'enable',
 	async run({ from, message, query, args, sender, prettyNumber }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please specify arguments.\n\nUsage: !wordle <play/exit/info>', message);
+			return await client.reply(from, 'Please specify arguments.\n\nUsage: !wordle <play/exit/info>', message);
 		}
 
 		if (args[1] === 'play') {
 			const wordle = new Wordle(sender);
 
 			if (configuration.games.wordle.has(sender) && wordle.message) {
-				return await client.instance.reply(from, 'You are already playing Wordle.', message);
+				return await client.reply(from, 'You are already playing Wordle.', message);
 			}
 
 			loggers.warning(
 				`${color('Wordle Game Answer : ', 'pink')} ${color(wordle.word, 'white')} to ${color(prettyNumber, 'lilac')}`
 			);
 
-			const data = await client.instance.reply(
+			const data = await client.reply(
 				from,
 				`${wordle.board.join('')}\n\nTot. words : ${wordle.word.length}`,
 				message
@@ -40,16 +40,16 @@ export default {
 			wordle.messages = data;
 		} else if (args[1] === 'exit') {
 			if (!configuration.games.wordle.has(sender)) {
-				return await client.instance.reply(from, 'You are not playing Wordle.', message);
+				return await client.reply(from, 'You are not playing Wordle.', message);
 			}
 
 			const wordle = new Wordle(sender);
 
 			wordle.exit();
 
-			await client.instance.reply(from, 'You have exited Wordle.', message);
+			await client.reply(from, 'You have exited Wordle.', message);
 		} else if (args[1] === 'info') {
-			await client.instance.reply(
+			await client.reply(
 				`Wordle Game
 
 Guess the hidden 5-letter word.

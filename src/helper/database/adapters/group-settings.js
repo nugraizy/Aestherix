@@ -89,8 +89,8 @@ const rowToData = (row) => ({
  * @param {string}       groupId
  * @returns {Promise<GroupSettingsData | null>}
  */
-export const getGroupSettings = async (db, groupId) => {
-	const row = await db.settingsManager.findUnique({ where: { groupId } });
+export const getGroupSettings = async (db, groupId, sessionName = 'main') => {
+	const row = await db.settingsManager.findUnique({ where: { groupId_sessionName: { groupId, sessionName } } });
 
 	return row ? rowToData(row) : null;
 };
@@ -105,12 +105,13 @@ export const getGroupSettings = async (db, groupId) => {
  * @param {string}       [groupDescription]
  * @returns {Promise<GroupSettingsData>}
  */
-export const pushDefaultSettings = async (db, groupId, groupName, groupDescription) => {
+export const pushDefaultSettings = async (db, groupId, groupName, groupDescription, sessionName = 'main') => {
 	const row = await db.settingsManager.upsert({
-		where: { groupId },
+		where: { groupId_sessionName: { groupId, sessionName } },
 		update: {},
 		create: {
 			groupId,
+			sessionName,
 			groupName: groupName ?? '',
 			groupDescription: groupDescription ?? '',
 			...DEFAULT_SETTINGS,
@@ -130,15 +131,15 @@ export const pushDefaultSettings = async (db, groupId, groupName, groupDescripti
  * @param {string}       value
  * @returns {Promise<GroupSettingsData | null>}
  */
-export const updateGroupSetting = async (db, groupId, setting, value) => {
-	const existing = await db.settingsManager.findUnique({ where: { groupId } });
+export const updateGroupSetting = async (db, groupId, setting, value, sessionName = 'main') => {
+	const existing = await db.settingsManager.findUnique({ where: { groupId_sessionName: { groupId, sessionName } } });
 
 	if (!existing) {
 		return null;
 	}
 
 	const row = await db.settingsManager.update({
-		where: { groupId },
+		where: { groupId_sessionName: { groupId, sessionName } },
 		data: { [setting]: value }
 	});
 
@@ -153,8 +154,8 @@ export const updateGroupSetting = async (db, groupId, setting, value) => {
  * @param {string}       memberJid
  * @returns {Promise<void>}
  */
-export const banGroupMember = async (db, groupId, memberJid) => {
-	const row = await db.settingsManager.findUnique({ where: { groupId } });
+export const banGroupMember = async (db, groupId, memberJid, sessionName = 'main') => {
+	const row = await db.settingsManager.findUnique({ where: { groupId_sessionName: { groupId, sessionName } } });
 
 	if (!row) {
 		return;
@@ -165,7 +166,7 @@ export const banGroupMember = async (db, groupId, memberJid) => {
 	if (!banned.includes(memberJid)) {
 		banned.push(memberJid);
 		await db.settingsManager.update({
-			where: { groupId },
+			where: { groupId_sessionName: { groupId, sessionName } },
 			data: { bannedMembers: JSON.stringify(banned) }
 		});
 	}
@@ -179,8 +180,8 @@ export const banGroupMember = async (db, groupId, memberJid) => {
  * @param {string}       memberJid
  * @returns {Promise<void>}
  */
-export const unbanGroupMember = async (db, groupId, memberJid) => {
-	const row = await db.settingsManager.findUnique({ where: { groupId } });
+export const unbanGroupMember = async (db, groupId, memberJid, sessionName = 'main') => {
+	const row = await db.settingsManager.findUnique({ where: { groupId_sessionName: { groupId, sessionName } } });
 
 	if (!row) {
 		return;
@@ -189,7 +190,7 @@ export const unbanGroupMember = async (db, groupId, memberJid) => {
 	const banned = JSON.parse(row.bannedMembers || '[]').filter((jid) => jid !== memberJid);
 
 	await db.settingsManager.update({
-		where: { groupId },
+		where: { groupId_sessionName: { groupId, sessionName } },
 		data: { bannedMembers: JSON.stringify(banned) }
 	});
 };

@@ -68,10 +68,10 @@ export default {
 
 		if (enable) {
 			if (ids?.[from]?.enabled) {
-				return await client.instance.reply(from, 'Already enabled', message);
+				return await client.reply(from, 'Already enabled', message);
 			}
 
-			const messageReplies = await client.instance.send(
+			const messageReplies = await client.send(
 				from,
 				{
 					text: 'Enabling Spotify Player Playback...'
@@ -86,7 +86,7 @@ export default {
 
 		if (disable) {
 			if (!ids?.[from]?.enabled) {
-				return await client.instance.reply(from, 'Already disabled', message);
+				return await client.reply(from, 'Already disabled', message);
 			}
 
 			/**
@@ -94,7 +94,7 @@ export default {
 			 */
 			const messageToReply = configuration.intervals.spotifyPlaybacks.get('ids')[from].message;
 
-			const messageReplies = await client.instance.send(
+			const messageReplies = await client.send(
 				from,
 				{
 					text: 'Disabling Spotify Player Playback...'

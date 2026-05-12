@@ -31,30 +31,30 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, sender, isOwner, settings, prefix }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a url.', message);
+			return await client.reply(from, 'You must provide a url.', message);
 		}
 
-		const groups = await client.instance.groupFetchAllParticipating();
+		const groups = await client.groupFetchAllParticipating();
 
 		const isGroupMaxed = Object.keys(groups).length > settings.max_group;
 		const reg = regex(query);
 
 		if (isGroupMaxed && !isOwner) {
-			return await client.instance.reply(from, 'Bot already maxed the group.', message);
+			return await client.reply(from, 'Bot already maxed the group.', message);
 		}
 
 		if (!reg) {
-			return await client.instance.reply(from, 'Invalid url.', message);
+			return await client.reply(from, 'Invalid url.', message);
 		}
 
-		const metadataInvite = await client.instance.groupGetInviteInfo(reg).catch(() => null);
+		const metadataInvite = await client.groupGetInviteInfo(reg).catch(() => null);
 
 		if (Object.keys(groups).includes(metadataInvite.id)) {
-			await client.instance.reply(from, 'I am already in this group.', message);
+			await client.reply(from, 'I am already in this group.', message);
 		} else if (!isOwner && metadataInvite.size >= 1024) {
-			await client.instance.reply(from, 'Bot cannot join. Reason : Group is full.', message);
+			await client.reply(from, 'Bot cannot join. Reason : Group is full.', message);
 		} else if (!isOwner && metadataInvite.size < settings.min_members) {
-			await client.instance.reply(
+			await client.reply(
 				from,
 				`This group is not big enough to join. Minimum ${settings.min_members} participants.`,
 				message
@@ -66,15 +66,15 @@ export default {
 				.map((v) => v.id)
 				?.includes(sender)
 		) {
-			await client.instance.reply(from, 'You must be an admin to invite bot to group.', message);
+			await client.reply(from, 'You must be an admin to invite bot to group.', message);
 		} else if (metadataInvite) {
-			await client.instance.groupAcceptInvite(reg);
-			await client.instance.reply(from, 'I am joining this group.', message);
-			await client.instance.send(metadataInvite.id, {
+			await client.groupAcceptInvite(reg);
+			await client.reply(from, 'I am joining this group.', message);
+			await client.send(metadataInvite.id, {
 				text: `@${sender.split('@')[0]} has invited me to the group. Tysm.`,
 				mentions: [sender]
 			});
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					text: 'Click to open menu',

@@ -17,7 +17,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, cmd, type }, client, store, ctx) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -50,7 +50,7 @@ export default {
 						})
 					: false;
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					image: { url: data[index].thumbnail },
@@ -86,7 +86,7 @@ export default {
 			);
 
 			if (rows) {
-				await client.instance.send(
+				await client.send(
 					from,
 					{
 						buttonText: 'Open List',
@@ -101,7 +101,7 @@ export default {
 
 			return;
 		} else if (args[1] === 'get') {
-			return await client.instance.reply(from, `${'TrueID Search'.formatHeaders()}\n\nURL : ${args[2]}`, message);
+			return await client.reply(from, `${'TrueID Search'.formatHeaders()}\n\nURL : ${args[2]}`, message);
 		}
 
 		query = query.split(',');
@@ -111,7 +111,7 @@ export default {
 			const data = await trueidSearch(querie);
 
 			if (data?.error) {
-				return await client.instance.reply(from, data.error, message);
+				return await client.reply(from, data.error, message);
 			}
 
 			let caption = 'TrueID Search'.formatHeaders();
@@ -140,7 +140,7 @@ export default {
 						})
 					: false;
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					image: { url: data[0].thumbnail },
@@ -163,7 +163,7 @@ export default {
 			);
 
 			if (rows) {
-				await client.instance.send(
+				await client.send(
 					from,
 					{
 						buttonText: 'Open List',

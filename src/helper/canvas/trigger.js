@@ -80,7 +80,7 @@ export const trigger = async (image, sender, opt) =>
 					.webp({ quality: 60 })
 					.toBuffer();
 
-				const results = await client.instance.applyExif(file, {
+				const results = await client.applyExif(file, {
 					packname: configuration.packname,
 					author: configuration.author
 				});

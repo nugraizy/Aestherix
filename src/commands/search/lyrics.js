@@ -17,14 +17,14 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, type }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.index === args[2]);
 
-			return await client.instance.send(
+			return await client.send(
 				from,
 				{
 					text: `${'Lyrics'.formatHeaders()}
@@ -64,13 +64,13 @@ Song : ${data[index].song}
 			const result = await arq.findLyrics(querie.trim());
 
 			if (result?.error || !result.ok) {
-				client.instance.reply(from, JSON.stringify(result), message);
+				client.reply(from, JSON.stringify(result), message);
 				continue;
 			}
 
 			result.result.forEach((v) => v.lyrics.replace('Paroles de la chanson par', ''));
 			result.result = result.result.map((v, i) => ({ index: i, ...v }));
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					text: `${'Lyrics'.formatHeaders()}

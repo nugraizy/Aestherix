@@ -52,14 +52,14 @@ const sendTweetWithMedia = async (tweet, index, from, message, client) => {
 	const caption = formatTweetCaption(tweet, index);
 
 	if (!tweet.medias.length) {
-		await client.instance.reply(from, caption, message);
+		await client.reply(from, caption, message);
 		return;
 	}
 
 	const firstMedia = tweet.medias[0];
 	const isVideo = firstMedia.type === 'video' || firstMedia.type === 'animated_gif';
 
-	await client.instance.send(
+	await client.send(
 		from,
 		isVideo ? { video: { url: firstMedia.url }, caption } : { image: { url: firstMedia.url }, caption },
 		{ quoted: message }
@@ -71,7 +71,7 @@ const sendTweetWithMedia = async (tweet, index, from, message, client) => {
 		const media = tweet.medias[i];
 		const isMediaVideo = media.type === 'video' || media.type === 'animated_gif';
 
-		await client.instance.send(from, isMediaVideo ? { video: { url: media.url } } : { image: { url: media.url } }, {});
+		await client.send(from, isMediaVideo ? { video: { url: media.url } } : { image: { url: media.url } }, {});
 	}
 };
 
@@ -96,7 +96,7 @@ const sendTweetBatch = async (tweets, from, message, client) => {
  * Sends the "Next" prompt after a tweet batch.
  */
 const sendNextPrompt = async (sessionId, batchSize, from, client, prefix = '.') => {
-	const builder = new client.instance.TemplateBuilder.Native(client);
+	const builder = new client.TemplateBuilder.Native(client);
 
 	await builder
 		.destination(from)
@@ -131,11 +131,11 @@ export default {
 			const cached = timelineSessions.get(sessionId);
 
 			if (!cached) {
-				return await client.instance.reply(from, 'Session expired. Please fetch the timeline again.', message);
+				return await client.reply(from, 'Session expired. Please fetch the timeline again.', message);
 			}
 
 			if (!cached.buffer.length && cached.cursor) {
-				const nextWait = await client.instance.waitMessage(from, 'Fetching more tweets...', message);
+				const nextWait = await client.waitMessage(from, 'Fetching more tweets...', message);
 
 				const nextPage = await twitter.getTimeline({ cursor: cached.cursor, isFollowing: cached.isFollowing });
 
@@ -152,7 +152,7 @@ export default {
 
 			if (!cached.buffer.length) {
 				timelineSessions.delete(sessionId);
-				return await client.instance.reply(from, 'No more tweets.', message);
+				return await client.reply(from, 'No more tweets.', message);
 			}
 
 			const nextBatch = cached.buffer.splice(0, TWEETS_PER_PAGE);
@@ -171,7 +171,7 @@ export default {
 		const isFollowing = query?.includes('--following');
 		const feedLabel = isFollowing ? 'Following' : 'For You';
 
-		const wait = await client.instance.waitMessage(from, `Fetching your ${feedLabel} timeline...`, message);
+		const wait = await client.waitMessage(from, `Fetching your ${feedLabel} timeline...`, message);
 
 		loggers.warning(`${color(`Fetching Twitter Timeline (${feedLabel})`, 'pink')} for ${color(prettyNumber, 'lilac')}`);
 

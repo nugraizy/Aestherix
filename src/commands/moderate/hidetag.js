@@ -14,13 +14,13 @@ export default {
 	status: 'enable',
 	async run({ isAdmin, isOwner, from, query, bodyQuoted, participantsGroup, isGroup, message }, client) {
 		if (!isGroup) {
-			return await client.instance.reply(from, 'This command only works in group.', message);
+			return await client.reply(from, 'This command only works in group.', message);
 		}
 
 		if (!isAdmin && !isOwner) {
-			return await client.instance.reply(from, 'You must be an admin to use this command.', message);
+			return await client.reply(from, 'You must be an admin to use this command.', message);
 		}
 
-		await client.instance.send(from, { text: query || bodyQuoted || ':)', mentions: participantsGroup }, {});
+		await client.send(from, { text: query || bodyQuoted || ':)', mentions: participantsGroup }, {});
 	}
 };

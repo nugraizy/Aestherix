@@ -106,7 +106,7 @@ export default {
 	status: 'enable',
 	async run({ from, message, query }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Fetch expect <url> <?parser>', message);
+			return await client.reply(from, 'Fetch expect <url> <?parser>', message);
 		}
 
 		let {
@@ -136,27 +136,27 @@ export default {
 		const url = queries.find((v) => isURL(v));
 
 		if (!url) {
-			return await client.instance.reply(from, 'Fetch expect <url>', message);
+			return await client.reply(from, 'Fetch expect <url>', message);
 		}
 
 		if (method && !/^(GET|POST)$/i.test(method)) {
-			return await client.instance.reply(from, 'Method must be `GET` or `POST` (case-insensitive).', message);
+			return await client.reply(from, 'Method must be `GET` or `POST` (case-insensitive).', message);
 		}
 
 		if (body && /^GET$/i.test(method)) {
-			return await client.instance.reply(from, '`GET` method cannot accept body.', message);
+			return await client.reply(from, '`GET` method cannot accept body.', message);
 		}
 
 		if (body && /^POST$/i.test(method)) {
 			try {
 				JSON.parse(body);
 			} catch {
-				return await client.instance.reply(from, '`body` MUST be a valid JSON string.', message);
+				return await client.reply(from, '`body` MUST be a valid JSON string.', message);
 			}
 		}
 
 		if (contentType && !/^[a-z0-9!#$&^_-]+\/[a-z0-9!#$&^_.+-]+$/i.test(contentType)) {
-			return await client.instance.reply(from, `Invalid content-type: "${contentType}"`, message);
+			return await client.reply(from, `Invalid content-type: "${contentType}"`, message);
 		}
 
 		method = method || 'GET';
@@ -166,7 +166,7 @@ export default {
 		headers = headers
 			? headers.reduce((acc, cur) => {
 					if (!/^[^:\s]+:\s?.+$/.test(cur)) {
-						client.instance.reply(from, `Invalid header format: "${cur}" (expected "key: value")`, message);
+						client.reply(from, `Invalid header format: "${cur}" (expected "key: value")`, message);
 						return acc;
 					}
 
@@ -175,7 +175,7 @@ export default {
 					const value = rest.join(':').trim();
 
 					if (key.toLowerCase() === 'content-type' && !/^[a-z0-9!#$&^_-]+\/[a-z0-9!#$&^_.+-]+$/i.test(value)) {
-						client.instance.reply(from, `Invalid content-type: "${contentType}"`, message);
+						client.reply(from, `Invalid content-type: "${contentType}"`, message);
 						return acc;
 					}
 
@@ -198,7 +198,7 @@ export default {
 			const response = await fetchData(url, { method, headers, body });
 
 			if (response.error) {
-				return client.instance.reply(from, response.message, message);
+				return client.reply(from, response.message, message);
 			}
 
 			const responseTypes = response.headers.get('content-type').split(';')[0];
@@ -207,7 +207,7 @@ export default {
 				const data = await processJsonResponse(response, queryParser);
 
 				if (data.error) {
-					return await client.instance.reply(from, data.message, message);
+					return await client.reply(from, data.message, message);
 				}
 
 				if (media && typeof data === 'string' && isURL(data)) {
@@ -231,7 +231,7 @@ export default {
 
 						fileBuffer = await fs.readFile(output);
 
-						await client.instance.send(
+						await client.send(
 							from,
 							{
 								[messageType]: fileBuffer,
@@ -246,7 +246,7 @@ export default {
 						return;
 					}
 
-					await client.instance.send(
+					await client.send(
 						from,
 						{
 							[messageType]: fileBuffer,
@@ -257,11 +257,11 @@ export default {
 					return;
 				}
 
-				await client.instance.reply(from, data, message);
+				await client.reply(from, data, message);
 			} else if (responseTypes.startsWith('text')) {
 				const data = await processTextResponse(response, queryParser);
 
-				await client.instance.reply(from, data, message);
+				await client.reply(from, data, message);
 			} else {
 				const data = await processBinaryResponse(response);
 
@@ -269,14 +269,14 @@ export default {
 				const messageTypes = mime === 'audio' || mime === 'application' ? 'document' : mime;
 				const fileName = messageTypes === 'document' ? `file_fetched.${extension(responseTypes)}` : undefined;
 
-				await client.instance.send(from, {
+				await client.send(from, {
 					[messageTypes]: Buffer.from(data),
 					...(fileName ? { fileName, mime: responseTypes } : {})
 				});
 			}
 		} catch (error) {
 			console.log(error);
-			await client.instance.reply(from, error.message, message);
+			await client.reply(from, error.message, message);
 		}
 	}
 };

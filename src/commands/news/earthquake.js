@@ -36,7 +36,7 @@ export default {
 			}
 		}
 
-		await client.instance.send(
+		await client.send(
 			message.from,
 			{ image: { url: data[0].shakemap }, caption: caption.formatForm() },
 			{ quoted: message.message }

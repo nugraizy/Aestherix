@@ -16,7 +16,7 @@ export default {
 	status: 'enable',
 	run: async ({ query, from, message, type, args }, client) => {
 		if (!query) {
-			return client.instance.reply(from, 'You must provide a query.', message);
+			return client.reply(from, 'You must provide a query.', message);
 		}
 
 		const komik = new KomikCast();
@@ -36,7 +36,7 @@ Serialization : ${serialize}
 Views : ${views}
 Tot. Chapters : ${chapters.length}`;
 
-			await client.instance.send(from, { image: { url: thumbnail }, caption: caption.formatForm() }, { quoted: message });
+			await client.send(from, { image: { url: thumbnail }, caption: caption.formatForm() }, { quoted: message });
 
 			const row = [];
 
@@ -44,7 +44,7 @@ Tot. Chapters : ${chapters.length}`;
 				row.push({ rows: [{ title: `Chapter ${i + 1}`, rowId: cmdId('komikcast', `${v} extract ${altTitle}`) }], title: '\t' })
 			);
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					buttonText: 'Open list',
@@ -61,7 +61,7 @@ Tot. Chapters : ${chapters.length}`;
 
 			const buffer = await komik.toPdf(pages);
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					document: Buffer.from(buffer, 'base64'),
@@ -77,7 +77,7 @@ Tot. Chapters : ${chapters.length}`;
 		const result = await komik.search(query);
 
 		if (result?.error) {
-			return client.instance.reply(from, result.error, message);
+			return client.reply(from, result.error, message);
 		}
 
 		const row = [];
@@ -86,7 +86,7 @@ Tot. Chapters : ${chapters.length}`;
 			row.push({ rows: [{ title: `${name}`, rowId: cmdId('komikcast', `${source} detail`) }], title: '\t' })
 		);
 
-		await client.instance.send(
+		await client.send(
 			from,
 			{
 				buttonText: 'Open list',

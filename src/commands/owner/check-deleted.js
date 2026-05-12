@@ -50,7 +50,7 @@ export default {
 			i++;
 		}
 
-		await client.instance.send(
+		await client.send(
 			from,
 			{
 				buttonText: 'Open List',

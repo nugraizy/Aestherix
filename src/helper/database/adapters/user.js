@@ -19,15 +19,15 @@
  * @param {number}       [defaultLimit=30]
  * @returns {Promise<UserLimitData>}
  */
-export const getUserLimit = async (db, jid, defaultLimit = 30) => {
-	const row = await db.userLimit.findUnique({ where: { jid } });
+export const getUserLimit = async (db, jid, defaultLimit = 30, sessionName = 'main') => {
+	const row = await db.userLimit.findUnique({ where: { jid_sessionName: { jid, sessionName } } });
 
 	if (row) {
 		return { id: row.jid, limit: row.limit, role: row.role };
 	}
 
 	const created = await db.userLimit.create({
-		data: { jid, limit: defaultLimit, role: 'FREE' }
+		data: { jid, sessionName, limit: defaultLimit, role: 'FREE' }
 	});
 
 	return { id: created.jid, limit: created.limit, role: created.role };
@@ -42,11 +42,11 @@ export const getUserLimit = async (db, jid, defaultLimit = 30) => {
  * @param {string}       role
  * @returns {Promise<void>}
  */
-export const upsertUserLimit = async (db, jid, limit, role) => {
+export const upsertUserLimit = async (db, jid, limit, role, sessionName = 'main') => {
 	await db.userLimit.upsert({
-		where: { jid },
+		where: { jid_sessionName: { jid, sessionName } },
 		update: { limit, role },
-		create: { jid, limit, role }
+		create: { jid, sessionName, limit, role }
 	});
 };
 
@@ -105,11 +105,11 @@ export const addUserLimit = async (db, jid, amount, defaultLimit = 30) => {
  * @param {string}       role
  * @returns {Promise<void>}
  */
-export const updateUserRole = async (db, jid, role) => {
+export const updateUserRole = async (db, jid, role, sessionName = 'main') => {
 	await db.userLimit.upsert({
-		where: { jid },
+		where: { jid_sessionName: { jid, sessionName } },
 		update: { role },
-		create: { jid, limit: 30, role }
+		create: { jid, sessionName, limit: 30, role }
 	});
 };
 
@@ -196,11 +196,11 @@ export const getAllContacts = async (db) => {
  * @param {string|null}  name
  * @returns {Promise<void>}
  */
-export const upsertContact = async (db, jid, name) => {
+export const upsertContact = async (db, jid, name, sessionName = 'main') => {
 	await db.contact.upsert({
-		where: { jid },
+		where: { jid_sessionName: { jid, sessionName } },
 		update: { name: name ?? undefined },
-		create: { jid, name }
+		create: { jid, sessionName, name }
 	});
 };
 
@@ -211,16 +211,16 @@ export const upsertContact = async (db, jid, name) => {
  * @param {{ id: string, name?: string|null }[]} contacts
  * @returns {Promise<void>}
  */
-export const upsertContacts = async (db, contacts) => {
+export const upsertContacts = async (db, contacts, sessionName = 'main') => {
 	await Promise.all(
 		contacts
 			.map((c) => ({ jid: c.jid ?? c.id, name: c.name }))
 			.filter(({ jid }) => typeof jid === 'string' && jid.length > 0)
 			.map(({ jid, name }) =>
 				db.contact.upsert({
-					where: { jid },
+					where: { jid_sessionName: { jid, sessionName } },
 					update: { name: name ?? undefined },
-					create: { jid, name: name ?? null }
+					create: { jid, sessionName, name: name ?? null }
 				})
 			)
 	);

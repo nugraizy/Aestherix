@@ -17,15 +17,15 @@ export default {
 		const result = stop(from, client);
 
 		if (!result) {
-			return await client.instance.reply(from, 'You are not in a search!', message);
+			return await client.reply(from, 'You are not in a search!', message);
 		}
 
 		if (result.partner2) {
-			await client.instance.reply(from, 'You have stopped the chat!', message);
-			await client.instance.send(result.partner2, { text: 'Your partner stopped the chat!' }, {});
+			await client.reply(from, 'You have stopped the chat!', message);
+			await client.send(result.partner2, { text: 'Your partner stopped the chat!' }, {});
 			return;
 		}
 
-		await client.instance.reply(from, `You are already searching for a partner!\nPlease wait for ${result.seconds}s`, message);
+		await client.reply(from, `You are already searching for a partner!\nPlease wait for ${result.seconds}s`, message);
 	}
 };

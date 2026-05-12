@@ -33,7 +33,7 @@ export const startTG = async (client, id, { message, sender }, remainingTime) =>
 		'_'
 	)}\n`;
 
-	await client.instance.send(id, { image: { url: image }, caption }, { quoted: message }).then((data) => {
+	await client.send(id, { image: { url: image }, caption }, { quoted: message }).then((data) => {
 		obj.message = data;
 		pushMessageData(id, obj, data);
 	});

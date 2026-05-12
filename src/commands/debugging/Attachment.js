@@ -17,7 +17,7 @@ export default {
 	async run({ sender, mention, from, groupName }, client) {
 		const attach = new Attachment(1024, 500);
 
-		const { profile, radi } = await client.instance
+		const { profile, radi } = await client
 			.profilePictureUrl(mention[0] || sender, 'image')
 			.then(async (image) => ({ profile: await fetchBUFFER(image), radi: 180 }))
 			.catch(() => ({ profile: './src/media/blank.png', radi: 80 }));
@@ -39,6 +39,6 @@ export default {
 			})
 			.placeCopyright();
 
-		await client.instance.send(from, { image: attach.toBuffer() }, {});
+		await client.send(from, { image: attach.toBuffer() }, {});
 	}
 };

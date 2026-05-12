@@ -16,7 +16,7 @@ export default {
 	status: 'enable',
 	async run(message, client) {
 		if (!message.query) {
-			return await client.instance.reply(
+			return await client.reply(
 				message.from,
 				`Please specify a command\n\nEx: ${message.cmd} <enable/disable>`,
 				message.message
@@ -29,7 +29,7 @@ export default {
 			case 'enable':
 			case 'on':
 				if (isEnable) {
-					return await client.instance.reply(message.from, 'You already have this command enabled', message.message);
+					return await client.reply(message.from, 'You already have this command enabled', message.message);
 				}
 
 				message[message.from].games = 'enable';
@@ -38,12 +38,12 @@ export default {
 					await updateGroupSetting(prisma, message.from, 'games', 'enable');
 				}
 
-				await client.instance.reply(message.from, 'You have successfully enabled games', message.message);
+				await client.reply(message.from, 'You have successfully enabled games', message.message);
 				break;
 			case 'disable':
 			case 'off':
 				if (!isEnable) {
-					return await client.instance.reply(message.from, 'You already have this command disabled', message.message);
+					return await client.reply(message.from, 'You already have this command disabled', message.message);
 				}
 
 				message[message.from].games = 'disable';
@@ -52,10 +52,10 @@ export default {
 					await updateGroupSetting(prisma, message.from, 'games', 'disable');
 				}
 
-				await client.instance.reply(message.from, 'You have successfully disabled games', message.message);
+				await client.reply(message.from, 'You have successfully disabled games', message.message);
 				break;
 			default:
-				await client.instance.reply(
+				await client.reply(
 					message.from,
 					`Please specify a command\n\nEx: ${message.cmd} <enable/disable>`,
 					message.message

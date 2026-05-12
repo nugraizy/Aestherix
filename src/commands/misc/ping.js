@@ -1,15 +1,3 @@
-import { Timer } from '../../utils/modules/index.js';
-
-const formatDuration = (ms) => {
-	const seconds = ms / 1000;
-
-	if (seconds < 1) {
-		return `${seconds.toFixed(3)} s`;
-	} else {
-		return `${parseFloat(seconds.toFixed(3))} s`;
-	}
-};
-
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
  */
@@ -24,14 +12,10 @@ export default {
 	limit: 0,
 	status: 'enable',
 	async run({ from, message }, client) {
-		const timer = new Timer('${s}s (${ms} ms)');
+		const t = performance.now();
 
-		timer.start();
+		const wait = await client.waitMessage(from, 'Pong!', message);
 
-		const wait = await client.instance.waitMessage(from, 'Pong!', message);
-
-		timer.stop();
-
-		await wait.update(`Pong! ${timer.toString()}`);
+		await wait.update(`Pong! ${(performance.now() - t).toFixed(1)} ms`);
 	}
 };

@@ -1,6 +1,6 @@
 {
   "name": "aestherix",
-  "version": "6.13.1",
+  "version": "7.0.0",
   "description": "WhatsApp bot using Baileys library with Javascript language.",
   "exports": "./index.js",
   "main": "./index.js",
@@ -17,7 +17,7 @@
     "start": "node . nugraizy_android --watch --pair-mode --limit-reset --multi-cmd --cooldown",
     "start:bot": "node . nugraizy_android --watch --pair-mode --limit-reset --multi-cmd --cooldown",
     "start:dashboard": "node ./dashboard.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test --test-reporter=spec __tests__/",
     "lint": "eslint .",
     "lint:file": "eslint",
     "youtube:auth": "node ./src/utils/modules/youtube-auth.js",

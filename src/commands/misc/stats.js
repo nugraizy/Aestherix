@@ -71,6 +71,6 @@ export default {
 		caption += '`CPU Info`\n\n';
 		caption += `${getCpus(cpus)}`;
 
-		client.instance.reply(from, caption, message);
+		client.reply(from, caption, message);
 	}
 };

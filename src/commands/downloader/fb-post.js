@@ -20,10 +20,10 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please provide a URL', message);
+			return await client.reply(from, 'Please provide a URL', message);
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, 'Please wait...', message);
 
 		const { _: urls } = parser(query);
 
@@ -44,11 +44,11 @@ export default {
 
 		for (const url of urls) {
 			if (!isURL(url.trim())) {
-				await client.instance.reply(from, 'Please specify a valid url\nInvalid : ' + url, message);
+				await client.reply(from, 'Please specify a valid url\nInvalid : ' + url, message);
 				error++;
 				continue;
 			} else if (!regex(url.trim())) {
-				await client.instance.reply(from, 'Please specify a valid Facebook url\nInvalid : ' + url, message);
+				await client.reply(from, 'Please specify a valid Facebook url\nInvalid : ' + url, message);
 				error++;
 				continue;
 			}
@@ -56,7 +56,7 @@ export default {
 			const post = await facebook(url.trim());
 
 			if (post?.error) {
-				await client.instance.reply(from, `Failed while downloading Facebook post\n\n${post.error}\n${url}`, message);
+				await client.reply(from, `Failed while downloading Facebook post\n\n${post.error}\n${url}`, message);
 				loggers.error(`${color('Failed to Download Facebook Post', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
@@ -66,7 +66,7 @@ export default {
 				(v) => v.quality.includes('1080p') || v.quality.includes('720p') || v.quality.includes('480p')
 			);
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					video: await fetchBUFFER(urlFilter.url),

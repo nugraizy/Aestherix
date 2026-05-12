@@ -16,7 +16,7 @@ const processAudio = async (url, client, { from, message, prettyNumber }) => {
 	const { title, description, download } = audio;
 
 	if (!download) {
-		client.instance.reply(from, `Error while downloading YouTube Audio\n\n${url}`, message);
+		client.reply(from, `Error while downloading YouTube Audio\n\n${url}`, message);
 		loggers.error(`${color('Failed to Download YouTube Audio', 'red')} for ${color(prettyNumber, 'lilac')}`);
 		return false;
 	}
@@ -28,7 +28,7 @@ const processAudio = async (url, client, { from, message, prettyNumber }) => {
 	capt += `Title : ${title}\n`;
 	capt += `Descriptions : ${description || ''}`;
 
-	await client.instance.send(
+	await client.send(
 		from,
 		{
 			document: Buffer.from(buffer),
@@ -56,7 +56,7 @@ export default {
 	limit: 8,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, /*type, args,*/ mediaData, bodyQuoted, typeQuoted }, client) {
-		if (typeQuoted === 'conversation' && mediaData.participant?.includes(client.instance.decodeJid(instance))) {
+		if (typeQuoted === 'conversation' && mediaData.participant?.includes(client.decodeJid(instance))) {
 			const reg = /✦ Video ID :\s*`([^\n]+)`/g;
 
 			const videoIds = [];
@@ -69,27 +69,27 @@ export default {
 			}
 
 			if (!videoIds.length) {
-				return await client.instance.reply(from, 'No id(s) found', message);
+				return await client.reply(from, 'No id(s) found', message);
 			}
 
 			const numberiedQuery = Number(query);
 			const index = numberiedQuery - 1;
 
 			if (!numberiedQuery) {
-				return await client.instance.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
+				return await client.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
 			}
 
 			if (index > videoIds.length) {
-				return await client.instance.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
+				return await client.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
 			}
 
 			const videoId = videoIds[index];
 
 			if (!videoId) {
-				return await client.instance.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
+				return await client.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
 			}
 
-			const wait = await client.instance.waitMessage(
+			const wait = await client.waitMessage(
 				from,
 				`Please wait...\nDownloading YouTube audio :\n${videoId}`.formatForm(),
 				message
@@ -111,7 +111,7 @@ export default {
 		}
 
 		if (!query) {
-			return await client.instance.reply(from, 'Please provide a URL or Query.', message);
+			return await client.reply(from, 'Please provide a URL or Query.', message);
 		}
 
 		let queries = query.split(',');
@@ -119,10 +119,10 @@ export default {
 		queries = removeDuplicatesArray(queries);
 
 		if (queries.length === 1 && isURL(queries) && !isYoutubeURL(queries)) {
-			return await client.instance.reply(from, 'This is not a valid YouTube URL.', message);
+			return await client.reply(from, 'This is not a valid YouTube URL.', message);
 		}
 
-		const wait = await client.instance.waitMessage(
+		const wait = await client.waitMessage(
 			from,
 			`Please wait...\nDownloading YouTube audio(s) :\n${queries.join('\n')}`,
 			message
@@ -135,7 +135,7 @@ export default {
 
 		for (const Query of queries) {
 			if (isURL(Query) && !isYoutubeURL(Query)) {
-				await client.instance.reply(from, `[ ${Query} ] This isn't a valid YouTube URL.`, message);
+				await client.reply(from, `[ ${Query} ] This isn't a valid YouTube URL.`, message);
 				loggers.error(`${color('Failed to Download YouTube Audio', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;

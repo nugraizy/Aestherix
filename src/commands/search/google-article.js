@@ -16,14 +16,14 @@ export default {
 	status: 'enable',
 	run: async ({ query, message, from, type, args }, client) => {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.url === args[2]);
 
-			return await client.instance.send(
+			return await client.send(
 				from,
 				{
 					text: data[index].title,
@@ -63,11 +63,11 @@ ${index + 1}/${data.length}\nPowered by Hidden Finder`
 			const result = await googleArticle(querie, 10);
 
 			if (result?.error) {
-				client.instance.reply(from, result.error, message);
+				client.reply(from, result.error, message);
 				continue;
 			}
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					text: result[0].title,

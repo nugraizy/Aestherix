@@ -17,19 +17,19 @@ export default {
 	status: 'enable',
 	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please specify a surah number', message);
+			return await client.reply(from, 'Please specify a surah number', message);
 		}
 
 		if (!regex(query)) {
-			return await client.instance.reply(from, 'Please specify a valid surah number', message);
+			return await client.reply(from, 'Please specify a valid surah number', message);
 		}
 
 		if (parseInt(query) > 114) {
-			return await client.instance.reply(from, 'Surah number must be less than 114', message);
+			return await client.reply(from, 'Surah number must be less than 114', message);
 		}
 
 		const tafsir = await getTafsirSurah(query);
 
-		await client.instance.reply(from, tafsir.map((v) => `${v.arab} • \n • ${v.tafsir}`).join('\n\n'), message);
+		await client.reply(from, tafsir.map((v) => `${v.arab} • \n • ${v.tafsir}`).join('\n\n'), message);
 	}
 };

@@ -96,7 +96,7 @@ export default {
 
 		configuration.cmds.menuStr = capt;
 
-		await client.instance.send(
+		await client.send(
 			from,
 			{
 				text: capt.trim()

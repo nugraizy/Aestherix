@@ -15,7 +15,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, extractMediaData, typeQuoted }, client) {
 		if (typeQuoted !== 'locationMessage' && typeQuoted !== 'liveLocationMessage' && !query) {
-			return await client.instance.reply(
+			return await client.reply(
 				from,
 				'Please, input city name\nEx:\n*!weather Bekasi* or reply to location message',
 				message
@@ -28,7 +28,7 @@ export default {
 				: await getWeather('city', query);
 
 		if (info?.error) {
-			return await client.instance.reply(from, info.error, message);
+			return await client.reply(from, info.error, message);
 		}
 
 		const text = ` ~> ${info.name}\n
@@ -41,7 +41,7 @@ Visibility : ${info.visible}
 Wind Speed : ${info.wind}\n
 Powered by openweathermap.org`;
 
-		await client.instance.send(
+		await client.send(
 			from,
 			{
 				text: `${info.emoji} Weather Report ${info.emoji}`.formatHeaders() + `\n\n${text.trim().formatForm()}`

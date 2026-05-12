@@ -17,7 +17,7 @@ export default {
 		const config = configuration.cache.prefixConfig;
 
 		if (!config) {
-			return await client.instance.reply(from, 'Prefix configuration is not available yet.', message);
+			return await client.reply(from, 'Prefix configuration is not available yet.', message);
 		}
 
 		const mode = config.multi ? 'Multi' : config.nopref ? 'No Prefix' : 'Single';
@@ -29,6 +29,6 @@ Mode : ${mode}
 Default Prefix : ${config.pref || '.'}
 Active Prefixes : ${config.nopref ? '(any text triggers commands)' : prefixes.join(' ')}`;
 
-		await client.instance.reply(from, text.trim(), message);
+		await client.reply(from, text.trim(), message);
 	}
 };

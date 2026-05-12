@@ -35,10 +35,10 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, prettyNumber }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, 'Please wait...', message);
 
 		let { _: urls } = parser(query);
 
@@ -53,7 +53,7 @@ export default {
 			const regexs = regex(url.trim());
 
 			if (!regexs.status) {
-				await client.instance.reply(from, regexs.message + `\nInvalid : ${url}`, message);
+				await client.reply(from, regexs.message + `\nInvalid : ${url}`, message);
 				error++;
 				continue;
 			}
@@ -61,7 +61,7 @@ export default {
 			const data = await downloadManga(regexs.message);
 
 			if (data?.error) {
-				await client.instance.reply(from, `Failed while downloading Pixiv manga\n\n${data.error}\n${url}`, message);
+				await client.reply(from, `Failed while downloading Pixiv manga\n\n${data.error}\n${url}`, message);
 				loggers.error(`${color('Failed to Download Pixiv File', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
@@ -82,7 +82,7 @@ Total Media : ${pageCount}`;
 					headers: { referer: `https://www.pixiv.net/ajax/manga/${id}` }
 				});
 
-				await client.instance.send(
+				await client.send(
 					from,
 					{
 						image: new Buffer.from(images, 'base64'),
@@ -100,7 +100,7 @@ Total Media : ${pageCount}`;
 
 				const buffer = await fetchBUFFER(urlImage, { headers: { referer: `https://www.pixiv.net/ajax/manga/${id}` } });
 
-				await client.instance.send(
+				await client.send(
 					from,
 					{
 						image: new Buffer.from(buffer, 'base64'),

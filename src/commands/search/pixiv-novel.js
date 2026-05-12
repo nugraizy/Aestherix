@@ -17,7 +17,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, cmd }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
 		let queries = query.split(',');
@@ -28,14 +28,14 @@ export default {
 			const data = await searchNovel(querie.trim());
 
 			if (data?.error) {
-				await client.instance.reply(from, `Failed while searching Pixiv novel\n\n${data.error}\n${querie}`, message);
+				await client.reply(from, `Failed while searching Pixiv novel\n\n${data.error}\n${querie}`, message);
 				continue;
 			}
 
 			const container = [];
 			const { userName, id, userId, likeCount, viewCount, content } = await getNovelContent(data[0].id);
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					text: `Title : ${data[0].title.capitalize()}
@@ -66,7 +66,7 @@ ${content}`.formatForm(),
 				});
 			}
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					title: 'Pixiv Novel Search'.formatHeaders(),

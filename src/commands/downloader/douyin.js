@@ -20,10 +20,10 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please provide a URL', message);
+			return await client.reply(from, 'Please provide a URL', message);
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, 'Please wait...', message);
 
 		let { _: urls } = parser(query);
 
@@ -44,11 +44,11 @@ export default {
 
 		for (const url of urls) {
 			if (!isURL(url)) {
-				await client.instance.reply(from, `Please specify a valid url\nInvalid : ${url}`, message);
+				await client.reply(from, `Please specify a valid url\nInvalid : ${url}`, message);
 				error++;
 				continue;
 			} else if (!isDouyinUrl(url)) {
-				await client.instance.reply(from, `Please specify a valid Douyin url\nInvalid : ${url}`, message);
+				await client.reply(from, `Please specify a valid Douyin url\nInvalid : ${url}`, message);
 				error++;
 				continue;
 			}
@@ -58,7 +58,7 @@ export default {
 			try {
 				info = await getDouyinInfo(url);
 			} catch (err) {
-				await client.instance.reply(from, `Error while downloading Douyin post\n\n${err?.message || err}\n${url}`, message);
+				await client.reply(from, `Error while downloading Douyin post\n\n${err?.message || err}\n${url}`, message);
 				loggers.error(`${color('Failed to Download Douyin Post', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
@@ -93,10 +93,10 @@ export default {
 			if (isImages) {
 				caption += `Total Images : ${info.images.length}\n`;
 
-				await client.instance.send(from, { text: caption.trim().formatForm() }, { quoted: message });
+				await client.send(from, { text: caption.trim().formatForm() }, { quoted: message });
 
 				for (const image of info.images) {
-					await client.instance.send(from, { image: { url: image } });
+					await client.send(from, { image: { url: image } });
 				}
 
 				success++;
@@ -104,12 +104,12 @@ export default {
 			}
 
 			if (!info.video) {
-				await client.instance.reply(from, 'No download url found, Might check your url and try again.', message);
+				await client.reply(from, 'No download url found, Might check your url and try again.', message);
 				error++;
 				continue;
 			}
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					video: { url: info.video },

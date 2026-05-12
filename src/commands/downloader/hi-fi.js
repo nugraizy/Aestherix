@@ -23,10 +23,10 @@ export default {
 
 		try {
 			if (!query) {
-				return await client.instance.reply(from, 'You must provide a query.', message);
+				return await client.reply(from, 'You must provide a query.', message);
 			}
 
-			wait = await client.instance.waitMessage(from, 'Please wait...', message);
+			wait = await client.waitMessage(from, 'Please wait...', message);
 
 			let { _, index, id } = parser(query, {
 				configuration: { 'short-option-groups': false },
@@ -66,7 +66,7 @@ export default {
 
 				await wait.update(`Songs with keyword ${query} found. Total Response : ${total}`);
 
-				const builder = new client.instance.TemplateBuilder.Carousel();
+				const builder = new client.TemplateBuilder.Carousel();
 
 				let length = 0;
 
@@ -141,7 +141,7 @@ const downloadAudio = async (client, data, { from, message, prettyNumber, id, in
 	await delay(2000);
 	await wait.update('Sending the file...');
 
-	await client.instance.send(
+	await client.send(
 		from,
 		{
 			document: buffer,

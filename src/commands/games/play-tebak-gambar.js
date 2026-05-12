@@ -20,7 +20,7 @@ export default {
 		const game = await startTG(client, message.from, message, 20);
 
 		if (game.status === 'playing') {
-			return await client.instance.reply(message.from, `Your game is already playing!\n${game.remaining}s left`, game.data);
+			return await client.reply(message.from, `Your game is already playing!\n${game.remaining}s left`, game.data);
 		}
 	}
 };

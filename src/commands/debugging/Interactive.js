@@ -1,5 +1,5 @@
-import { getWaifu } from '../../utils/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
+import { getWaifu } from '../../utils/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -16,7 +16,7 @@ export default {
 	async run({ from }, client) {
 		const carousel = async () => {
 			const waifu = (await getWaifu('waifu', 'sfw'))[0];
-			const builder = new client.instance.TemplateBuilder.Carousel();
+			const builder = new client.TemplateBuilder.Carousel();
 
 			await builder
 				.destination(from)
@@ -132,32 +132,29 @@ export default {
 		};
 
 		const native = async () => {
-			const waifu = (await getWaifu('waifu', 'sfw'))[0];
-			const builder = new client.instance.TemplateBuilder.Native();
+			// const waifu = (await getWaifu('waifu', 'sfw'))[0];
+			const builder = new client.TemplateBuilder.Native();
+
+			const n = 100;
+
+			const buttons = Array.from({ length: n }, (_, i) =>
+				builder.button.reply({
+					display: `Open Menu! ${i + 1}`,
+					id: cmdId(`menu_${i + 1}`)
+				})
+			);
+
+			console.log(buttons);
 
 			await builder
 				.destination(from)
 				.body('Body')
 				.footer('Footer')
-				.header('Header', waifu)
-				.buttons(
-					builder.button.reply({
-						display: 'Open Menu!',
-						id: cmdId('menu')
-					}),
-					builder.button.url({
-						display: 'GitHub User!',
-						url: 'https://github.com/nugraizy'
-					}),
-					builder.button.copy({
-						code: '123-456',
-						display: 'Copy Code!'
-					})
-				)
+				.buttons(...buttons)
 				.send();
 		};
 
-		await carousel();
+		// await carousel();
 		await native();
 	}
 };

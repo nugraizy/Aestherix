@@ -18,14 +18,14 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, type }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.source === args[2]);
 
-			return await client.instance.send(
+			return await client.send(
 				from,
 				{
 					text: `${'Github Code'.formatHeaders()}
@@ -76,7 +76,7 @@ ${data[index].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).
 		let result = await git.searchCode(query.trim());
 
 		if (result.total_count === 0) {
-			return await client.instance.reply(from, 'Code not found.', message);
+			return await client.reply(from, 'Code not found.', message);
 		}
 
 		result = result.items.map((v) => ({
@@ -88,7 +88,7 @@ ${data[index].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).
 			textMatches: v.text_matches.map((w) => ({ fragment: w.fragment, texts: w.matches.map((x) => x.text).join(', ') }))
 		}));
 
-		await client.instance.send(
+		await client.send(
 			from,
 			{
 				text: `${'Github Code'.formatHeaders()}

@@ -1,5 +1,3 @@
-import path from 'path';
-
 import configuration from '../../helper/config/connect.js';
 import { telegram } from '../../utils/stickers/telegram.js';
 
@@ -16,12 +14,12 @@ export default {
 	cooldown: 5,
 	limit: 4,
 	status: 'enable',
-	async run({ query, message, from, filename }, client) {
+	async run({ query, message, from }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please enter a query', message);
+			return await client.reply(from, 'Please enter a query', message);
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, 'Please wait...', message);
 
 		const result = await telegram(query);
 
@@ -36,17 +34,12 @@ export default {
 		await wait.update(capt);
 
 		for (const stickers of result.stickers) {
-			const sticker = await client.instance.prepareSticker(
-				stickers,
-				path.join(__dirname, `src/media/temporary_files/${filename}`),
-				undefined,
-				{
-					author: configuration.author,
-					packname: configuration.packname
-				}
-			);
+			const sticker = await client.prepareSticker(stickers, undefined, {
+				author: configuration.author,
+				packname: configuration.packname
+			});
 
-			await client.instance.send(from, { sticker });
+			await client.send(from, { sticker });
 		}
 	}
 };

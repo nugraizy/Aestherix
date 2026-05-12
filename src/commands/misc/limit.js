@@ -26,6 +26,6 @@ export default {
 
 		const limit = Limit.checkLimit(sender);
 
-		await client.instance.reply(from, `Your limit : ${limit || 0}\nType user : ${role}`, message);
+		await client.reply(from, `Your limit : ${limit || 0}\nType user : ${role}`, message);
 	}
 };

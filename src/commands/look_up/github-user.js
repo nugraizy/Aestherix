@@ -18,7 +18,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message, args, type }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please specify a url', message);
+			return await client.reply(from, 'Please specify a url', message);
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -37,7 +37,7 @@ export default {
 				updated_at: updatedAt
 			} = data[index];
 
-			return await client.instance.send(
+			return await client.send(
 				from,
 				{
 					image: { url: avatarUrl },
@@ -89,12 +89,12 @@ Powered by Hidden Finder`.formatForm()
 		let { _: usernames } = parser(query);
 
 		if (usernames.length == 1 && isURL(usernames[0])) {
-			return await client.instance.reply(from, 'Please specify a valid Github usernames', message);
+			return await client.reply(from, 'Please specify a valid Github usernames', message);
 		}
 
 		for (const user of usernames) {
 			if (isURL(user.trim())) {
-				await client.instance.reply(from, 'Please specify a valid Github username', message);
+				await client.reply(from, 'Please specify a valid Github username', message);
 				continue;
 			}
 
@@ -102,7 +102,7 @@ Powered by Hidden Finder`.formatForm()
 			let users = await git.searchUser(user);
 
 			if (users.total_count === 0) {
-				await client.instance.reply(from, 'User not found.', message);
+				await client.reply(from, 'User not found.', message);
 				continue;
 			}
 
@@ -146,7 +146,7 @@ Biography : ${bio}`;
 			// 	updated_at: updatedAt
 			// } = users[0];
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					image: { url: users[0].avatar_url },

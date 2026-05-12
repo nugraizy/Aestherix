@@ -52,14 +52,14 @@ const sendTweetWithMedia = async (tweet, index, from, message, client) => {
 	const caption = formatTweetCaption(tweet, index);
 
 	if (!tweet.medias.length) {
-		await client.instance.reply(from, caption, message);
+		await client.reply(from, caption, message);
 		return;
 	}
 
 	const firstMedia = tweet.medias[0];
 	const isVideo = firstMedia.type === 'video' || firstMedia.type === 'animated_gif';
 
-	await client.instance.send(
+	await client.send(
 		from,
 		isVideo ? { video: { url: firstMedia.url }, caption } : { image: { url: firstMedia.url }, caption },
 		{ quoted: message }
@@ -71,7 +71,7 @@ const sendTweetWithMedia = async (tweet, index, from, message, client) => {
 		const media = tweet.medias[i];
 		const isMediaVideo = media.type === 'video' || media.type === 'animated_gif';
 
-		await client.instance.send(from, isMediaVideo ? { video: { url: media.url } } : { image: { url: media.url } }, {});
+		await client.send(from, isMediaVideo ? { video: { url: media.url } } : { image: { url: media.url } }, {});
 	}
 };
 
@@ -96,7 +96,7 @@ const sendTweetBatch = async (tweets, from, message, client) => {
  * Sends the "Next" prompt after a tweet batch.
  */
 const sendNextPrompt = async (sessionId, batchSize, username, from, client, ctx) => {
-	const builder = new client.instance.TemplateBuilder.Native(client);
+	const builder = new client.TemplateBuilder.Native(client);
 
 	await builder
 		.destination(from)
@@ -126,7 +126,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, prefix }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please specify a Twitter username.', message);
+			return await client.reply(from, 'Please specify a Twitter username.', message);
 		}
 
 		if (query.startsWith('next ')) {
@@ -134,11 +134,11 @@ export default {
 			const cached = tweetSessions.get(sessionId);
 
 			if (!cached) {
-				return await client.instance.reply(from, 'Session expired. Please search again.', message);
+				return await client.reply(from, 'Session expired. Please search again.', message);
 			}
 
 			if (!cached.buffer.length && cached.cursor) {
-				const nextWait = await client.instance.waitMessage(from, 'Fetching more tweets...', message);
+				const nextWait = await client.waitMessage(from, 'Fetching more tweets...', message);
 
 				const nextPage = await twitter.getUserTweets(cached.username, { cursor: cached.cursor });
 
@@ -155,7 +155,7 @@ export default {
 
 			if (!cached.buffer.length) {
 				tweetSessions.delete(sessionId);
-				return await client.instance.reply(from, 'No more tweets.', message);
+				return await client.reply(from, 'No more tweets.', message);
 			}
 
 			const nextBatch = cached.buffer.splice(0, TWEETS_PER_PAGE);
@@ -172,7 +172,7 @@ export default {
 		}
 
 		const username = query.replace(/^@/, '');
-		const wait = await client.instance.waitMessage(from, `Fetching tweets for @${username}...`, message);
+		const wait = await client.waitMessage(from, `Fetching tweets for @${username}...`, message);
 
 		loggers.warning(`${color('Fetching Twitter Tweets', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 

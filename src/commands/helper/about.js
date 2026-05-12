@@ -27,8 +27,8 @@ Our Motto :
 
 Using less module and try to find every private api from the provider (if they using one).`;
 
-		await client.instance.reply(from, capt.trim().formatForm(), message);
-		await client.instance.reply(
+		await client.reply(from, capt.trim().formatForm(), message);
+		await client.reply(
 			from,
 			`Thanks To :
 Aldi a.k.a Alphanum404

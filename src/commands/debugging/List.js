@@ -21,7 +21,7 @@ export default {
 			title: 'Powered by Hidden Finder'
 		});
 
-		await client.instance.send(from, {
+		await client.send(from, {
 			buttonText: 'Powered by Hidden Finder',
 			title: 'List Message',
 			text: '\t',

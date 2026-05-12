@@ -46,25 +46,52 @@ aestherix/
 │       │   └── state.js
 │       └── zen-cursor.js
 └── src/
-    ├── index.js                     # Main bot module (~796 lines)
-    ├── handlers/                    # Message & event handlers
-    │   ├── game_handlers/           # Akinator, Sambung Kata, Tebak Gambar, Wordle
-    │   ├── instagram_notifier/
-    │   ├── message_presence/
-    │   ├── messages_event/           # Incoming, deleted, stub, anonymous, offline, story
-    │   ├── misc/                     # Anti-NSFW, check-banned, group-url
-    │   └── notification_handlers/    # Group participants, group settings
+    ├── index.js                     # Main bot module — CLI, store, profile pictures, dashboard bridge
+    ├── core/                        # Class-based connection layer
+    │   ├── index.js                 # Barrel exports (15 classes + utils)
+    │   ├── auth.js                  # Auth class (Prisma-backed credentials)
+    │   ├── boot.js                  # Boot orchestrator
+    │   ├── cli.js                   # Cli class (meow wrapper)
+    │   ├── client-socket.js         # ClientSocket class (send, reply, relay, media, templates)
+    │   ├── command-loader.js        # CommandLoader class (load + watch + validate)
+    │   ├── connection-handler.js    # ConnectionHandler class (reconnect, metrics)
+    │   ├── context.js               # Context class (lazy getters + convenience methods)
+    │   ├── event-handler.js         # EventHandler class (binds all Baileys events)
+    │   ├── logger.js                # Logger class
+    │   ├── manager.js               # Manager class (multi-instance)
+    │   ├── message-handler.js       # MessageHandler class (parse → resolve → guard → run)
+    │   ├── mqtt.js                  # MqttBridge class
+    │   ├── router.js                # Router class (prefix resolve, cooldown, sub-bot blocking)
+    │   ├── store.js                 # Store class (persistent Baileys store)
+    │   ├── utils.js                 # Shared utilities (initContact, checkNetwork, etc.)
+    │   ├── webhook.js               # WebhookServer class (GitHub webhook)
+    │   ├── dashboard/
+    │   │   ├── server.js            # Dashboard Express + Socket.IO (~4000 lines)
+    │   │   └── monitor.js           # Dashboard state monitor
+    │   └── handlers/
+    │       ├── anonymous.js
+    │       ├── anti-nsfw.js
+    │       ├── character-ai.js
+    │       ├── check-banned.js
+    │       ├── deleted-message.js
+    │       ├── group-participants.js
+    │       ├── group-settings.js
+    │       ├── group-url.js
+    │       ├── instagram.js
+    │       ├── notification-utils.js
+    │       ├── offline.js
+    │       ├── story.js
+    │       ├── stub.js
+    │       └── games/
+    │           ├── akinator.js
+    │           ├── sambung-kata.js
+    │           ├── tebak-gambar.js
+    │           ├── werewolf.js
+    │           └── wordle.js
+    ├── commands/                     # Command files (auto-loaded)
     ├── helper/
     │   ├── canvas/                  # Image generators (meme, spotify-card, trigger, etc.)
     │   ├── config/                  # connect.js singleton, settings.json
-    │   ├── connection/
-    │   │   ├── dashboard/           # server.js, dashboard-monitor.js
-    │   │   ├── event-handler/       # universal.js (routing hub)
-    │   │   ├── github-webhook/      # events.js, server.js, utils.js
-    │   │   ├── session/             # Session storage
-    │   │   ├── socket/              # socket.js, reset-session.js
-    │   │   ├── store/               # In-memory store helpers
-    │   │   └── utils/               # commands.js, cache.js, check-flag.js, mqtt.js, etc.
     │   ├── database/
     │   │   ├── adapters/            # Prisma model adapters (user, group-settings, etc.)
     │   │   ├── auth.js
@@ -83,8 +110,7 @@ aestherix/
     │   ├── modules/
     │   │   ├── cache.js
     │   │   ├── index.js
-    │   │   ├── parse-message.js
-    │   │   └── utils.js
+    │   │   └── prefix.js
     │   └── prototypes.js
     ├── media/
     │   ├── assets/
@@ -96,6 +122,7 @@ aestherix/
     └── types/                       # TypeScript definitions
         ├── Canvas/
         ├── Commands/
+        ├── Core/                    # Core class types (ClientSocket, Context, Router, etc.)
         ├── Groups/
         ├── Messages/
         ├── Reconstruct/
@@ -303,34 +330,35 @@ Loads env, checks internet, prints banner + active flags, then imports `src/inde
 node . <session_name> [--flags]
 ```
 
-### `src/index.js` — Main bot module (~796 lines)
+### `src/index.js` — Main bot module
 - Imports `configuration` singleton from `connect.js` — holds all runtime state
 - Sets `configuration.OPTIONS = configuration.cli.flags` (CLI flags accessible everywhere)
-- Initializes MQTT client for Spotify/Freegame pub-sub
-- Creates a persistent Baileys store backed by Prisma
-- Calls `start()` which wires all Baileys event listeners:
+- Calls `boot()` from `src/core/boot.js` which orchestrates the connection
+- Handles profile picture auto-rotation service
+- Handles dashboard bridge for standalone dashboard mode
 
-| Event | Handler |
-|---|---|
-| `connection.update` | `handleConnectionUpdate` (reconnect, pairing, etc.) |
-| `connected` | Wires message/notification handlers, starts MQTT, dashboard server |
-| `messages.upsert` | `handleUpsertUpdate` — **entry to command processing** |
-| `messages.update` | `handleMessagesUpdate` (deleted messages) |
-| `group-participants.update` | `handleParticipantsUpdate` |
-| `groups` / `groups.update` | `handleGroupSettingsUpdate` |
-| `presence.update` | `handlePresenceUpdate` |
-| `call` | `handleCallUpdate` |
-| `profile-picture.update` | Profile picture auto-rotation |
-| `creds.update` | Saves auth credentials |
-| `contacts.upsert/update` | Contact cache |
-| `poll.update` | Poll vote decryption |
-| `werewolf.cycle` | Werewolf game cycle |
-| `commit` | GitHub webhook trigger |
+### `src/core/boot.js` — Boot orchestrator
+Creates and wires all core classes:
+
+```
+boot({ cli, OPTIONS, store, sessionName })
+├── Auth(prisma, sessionName)
+├── ClientSocket(auth, { role: 'primary', flags })
+│   └── clientSocket.connect({ store })
+├── handlePairing(clientSocket, flags)
+├── manager.add(sessionName, clientSocket)
+├── MqttBridge().connect()
+├── WebhookServer()
+├── CommandLoader + Router
+├── EventHandler(clientSocket, { router, store }).bind()
+├── on 'connected': dashboard, webhook, werewolf, watcher
+└── spawnPersistedSubBots() — auto-starts saved sub-bots
+```
 
 ### `dashboard.js` — Standalone dashboard (35 lines)
 Runs only the Express + Socket.IO dashboard server without the bot. Used for `npm run start:dashboard`.
 
-### `src/helper/connection/dashboard/server.js` — Dashboard server (~4000 lines)
+### `src/core/dashboard/server.js` — Dashboard server (~4000 lines)
 Express + Socket.IO server on `DASHBOARD_PORT` (default 4000). Handles:
 - REST API under `/api/dashboard/` (prefix, flags, commands, users, profile pictures, file editor)
 - Socket.IO rooms: `dashboard:status`, `dashboard:commands`, `dashboard:users`, `dashboard:logs`, `dashboard:confirmation:*`
@@ -350,52 +378,50 @@ Static files served by the dashboard server. Key files:
 | `app/formatters.js` | Text rendering, markdown, syntax highlighting utilities |
 | `styles.css` | All dashboard styling (~6571 lines) |
 
-### `src/helper/connection/event-handler/universal.js` — Event routing hub (~635 lines)
-Routes all Baileys events to specialized handlers. Contains:
-- `handleUpsertUpdate()` — lazy-loads `incoming-message.js` and forwards messages
-- `handleMessagesUpdate()`, `handleParticipantsUpdate()`, etc.
-- `HANDLER_PATH` map for lazy handler loading via `Cache` (avoids circular deps)
-
-### `src/helper/connection/socket/socket.js` — Baileys WebSocket connection
-Creates the `Client` via `connectSocket()`, manages auth state, pairing, session reset.
-
 ---
 
 ## Architecture Flow
 
 ```
-Baileys WebSocket (socket.js)
+Baileys WebSocket (ClientSocket.connect())
         │
         ▼
-universal.js — handleUpsertUpdate()
-        │     (lazy-loads handler via Cache on first message)
-        ▼
-incoming-message.js — handleIncomingMessage()
+EventHandler.bind() — forwards all Baileys events
         │
-        │  1. Retry relay for fromMe messages
-        │  2. Stub message guard
-        │  3. initHandler() on first run (loads commands)
-        │  4. reassign() — normalizes message + resolves prefix
-        ▼
-parse-message.js — reassign()
-        │     (runs once per connection, caches prefix config)
-        │  Resolves: prefixMode, prefixValues, prefixReg, prefixConfig
+        ├── connection.update → ConnectionHandler.handle()
+        │                        (reconnect, metrics, banner)
         │
-        ▼  Returns normalized ReassignResult
-incoming-message.js — handleCommandExecution() loop
-        │  - Re-parses prefix per body (multi-cmd support)
-        │  - Auto-correct misspelled commands
-        │  - Checks: isOwner, isBlocked, isBanned, cooldowns, limits
-        │  - Dispatches to command handler
-        ▼
-Command handler (src/commands/<category>/<name>.js)
+        ├── messages.upsert → MessageHandler.handle()
+        │   │
+        │   │  1. Retry relay for fromMe messages
+        │   │  2. Stub message guard
+        │   │  3. Context.from(rawMessage, client, store)
+        │   │     (lazy getters, prefix cache, group cache)
+        │   │  4. Dispatch loop (multi-cmd support)
+        │   ▼
+        │   Router.resolve(body) → command lookup
+        │   │  - Auto-correct misspelled commands
+        │   │  - Sub-bot blocking (router.isBlocked)
+        │   │  - Guard: isOwner, isBanned, cooldowns, limits
+        │   ▼
+        │   command.run(ctx, client, store)
+        │
+        ├── messages.update → deleted-message handler
+        ├── group-participants.update → group-participants handler
+        ├── groups.update → group-settings handler
+        ├── presence.update → AFK handler (inlined)
+        ├── call → call rejection (inlined)
+        ├── contacts.upsert/update → contact cache
+        ├── creds.update → auth.saveCreds()
+        └── poll.update → poll vote decryption
 ```
 
 ### Supporting flows
-- **Deleted messages:** `handleMessagesUpdate()` → lazy-loads `deleted-message.js` → `reassign()`
-- **Stub messages:** `parseStubtypeUpdate()` → `stub-message.js` → `reassign()`
+- **Deleted messages:** `MessageHandler.onDeleted()` → lazy-loads `deleted-message.js` → `Context.from()`
+- **Stub messages:** `parseStubtypeUpdate()` → `stub.js` → `Context.from()`
 - **Dashboard real-time:** Socket.IO emits on state changes; embedded bridge on port 4010 syncs between standalone dashboard and bot
-- **Commands loading:** `loadCommands()` in `commands.js` reads `src/commands/**/*.js`, registers in `configuration.cmds.commands` (Cache Map)
+- **Commands loading:** `CommandLoader.load()` reads `src/commands/**/*.js`, validates via Yup schema, registers in `configuration.cmds.commands` (Cache Map)
+- **Multi-instance:** `Manager` holds all `ClientSocket` instances; sub-bots spawned via `!addbot` or auto-loaded from `BotInstance` table on startup
 
 ---
 
@@ -417,7 +443,7 @@ Cache is initialized on first message per connection. `configuration.cache.prefi
 
 ## Commands System
 
-Commands live in `src/commands/<category>/<name>.js`. Each is a default-exported object validated by a Yup schema in `src/helper/connection/utils/util.js:5` via `isMissingProperty()`.
+Commands live in `src/commands/<category>/<name>.js`. Each is a default-exported object validated by a Yup schema via `isMissingProperty()`.
 
 ### Command object shape
 ```js
@@ -444,9 +470,28 @@ export default {
 ```js
 async run(ctx, client, store) {}
 ```
-- `ctx` — full `ReassignResult` object from `parse-message.js:reassign()`
-- `client` — Baileys `AdvancedClient` instance (access `client.instance` for the raw WaClient)
+- `ctx` — `Context` instance from `Context.from()` (lazy getters + convenience methods)
+- `client` — `ClientSocket` instance (call `client.send()`, `client.reply()`, `client.TemplateBuilder`, etc.)
 - `store` — persistent in-memory store (messages, contacts, etc.)
+
+Commands can destructure `ctx` directly:
+```js
+async run({ from, query, message, prettyNumber }, client) {
+    await client.reply(from, 'Hello!', message);
+}
+```
+
+Or use convenience methods:
+```js
+async run(ctx, client) {
+    await ctx.reply('Hello!');
+}
+```
+
+For raw Baileys socket access (e.g. `profilePictureUrl`, `groupMetadata`):
+```js
+client.socket.profilePictureUrl(jid, 'image');
+```
 
 ### Key `ctx` properties
 | Property | Description |
@@ -463,28 +508,37 @@ async run(ctx, client, store) {}
 | `ctx.isAdmin` | True if sender is a group admin |
 | `ctx.isBotAdmin` | True if bot is a group admin |
 | `ctx.message` | Raw Baileys WAMessage object |
+| `ctx.raw` | Same as `ctx.message` (alias for eval.js) |
 | `ctx.pushname` | Sender's display name |
-| `ctx.settings` | Merged group + global settings |
-| `ctx.prefixInfo` | Current prefix config `{ mode, pref, cliPrefixes, ... }` |
+| `ctx.settings` | Global settings from settings.json |
+
+### Context convenience methods
+| Method | Equivalent |
+|---|---|
+| `ctx.reply(text)` | `client.send(ctx.from, { text }, { quoted: ctx.message })` |
+| `ctx.react(emoji)` | `client.send(ctx.from, { react: { text: emoji, key: ctx.message.key } })` |
+| `ctx.send(content, opts)` | `client.send(ctx.from, content, { quoted: ctx.message, ...opts })` |
+| `ctx.sendTo(jid, content)` | `client.send(jid, content)` |
+| `ctx.delete()` | `client.send(ctx.from, { delete: ctx.message.key })` |
 
 ### How commands are loaded
-1. `loadCommands(OPTIONS)` in `src/helper/connection/utils/commands.js` reads all `.js` files under `src/commands/` (excludes files containing `template` or `d.ts`)
+1. `CommandLoader.load()` reads all `.js` files under `src/commands/` (excludes files containing `template` or `d.ts`)
 2. Each file is imported; `isMissingProperty()` validates against the Yup schema
 3. Valid commands → `configuration.cmds.commands` (Cache Map, key = command name)
 4. Aliases → `configuration.cmds.aliases` array
 5. Duplicate names, missing `run`, or validation errors are logged and skip registration
-6. If `--watch` flag: `cache.js:watch()` re-imports changed files live
+6. If `--watch` flag: `CommandLoader.watch()` re-imports changed files live
 
 ### Command execution flow
-1. `handleIncomingMessage()` → calls `reassign()` to parse the message
-2. `reassign()` normalizes and extracts: prefix, cmd, args, query, sender, etc.
-3. `handleCommandExecution()` loop:
-   - Re-parses prefix per body (for multi-cmd `|` separated)
-   - Looks up command in `configuration.cmds.commands`
-   - Checks: disabled (dashboard), isOwner, cooldown, limit, restrict, premium
+1. `MessageHandler.handle()` receives message upsert
+2. `Context.from()` parses the raw message (lazy getters, prefix cache, group cache)
+3. `MessageHandler.#dispatch()` loop (multi-cmd `|` support):
+   - `Router.resolve(body)` → command lookup
+   - `Router.isBlocked(command)` → sub-bot permission check
+   - Guard: disabled (dashboard), isOwner, cooldown, limit, restrict, premium
    - Auto-correct misspelled commands (if `--autoCorrect` flag)
    - Dispatches to `command.run(ctx, client, store)`
-4. `incrementCommandUsage()` tracks usage count in memory
+4. `Router.trackUsage()` persists usage count to DB
 
 ### Adding a new command
 1. Create `src/commands/<category>/my-command.js`
@@ -551,20 +605,23 @@ Uses **Prisma** with two separate schemas. Provider is set via `DATABASE_PROVIDE
 > **MongoDB note:** `prisma migrate` is NOT supported. Use `prisma db push` instead.
 
 ### SQL Schema Models
-| Model | Purpose |
-|---|---|
-| `Session` | Baileys signal-key state and credentials |
-| `BaileysStore` | Persisted Baileys in-memory store snapshot (per session) |
-| `PinterestProfilePicture` | Profile picture history entries |
-| `UserLimit` | Per-user command limit and subscription role (`FREE`, `PREMIUM`, `OWNER`) |
-| `BannedUser` | Globally banned WhatsApp JIDs |
-| `Contact` | WhatsApp contact name cache |
-| `GroupSettings` | Per-group settings (welcome, anti-link, etc.) |
-| `DashboardSession` | Dashboard auth sessions (token/role/phone/expiry) |
-| `DashboardAuditLog` | All admin actions logged |
-| `DashboardBlocklist` | Blocked IPs/values |
-| `DashboardOtp` | One-time passwords for owner login |
-| `DashboardKV` | Generic key-value store (dashboard state + command catalog) |
+| Model | Purpose | Scoped |
+|---|---|---|
+| `Session` | Baileys signal-key state and credentials | Per-bot (by sessionId prefix) |
+| `BaileysStore` | Persisted Baileys in-memory store snapshot (per session) | Per-bot |
+| `PinterestProfilePicture` | Profile picture history entries | Shared |
+| `UserLimit` | Per-user command limit and subscription role (`FREE`, `PREMIUM`, `OWNER`) | Per-bot (`sessionName`) |
+| `BannedUser` | Globally banned WhatsApp JIDs | Shared |
+| `Contact` | WhatsApp contact name cache | Per-bot (`sessionName`) |
+| `SettingsManager` | Per-group settings (welcome, anti-link, etc.) | Per-bot (`sessionName`) |
+| `DashboardSession` | Dashboard auth sessions (token/role/phone/expiry) | Shared |
+| `DashboardAuditLog` | All admin actions logged | Shared |
+| `DashboardBlocklist` | Blocked IPs/values | Shared |
+| `DashboardOtp` | One-time passwords for owner login | Shared |
+| `DashboardKV` | Generic key-value store (dashboard state + command catalog) | Per-bot (`sessionName`) |
+| `BotInstance` | Persisted sub-bot instances (flags, role, pairNumber, isActive) | Shared |
+| `CommandUsage` | Cumulative per-command invocation counter | Shared |
+| `WerewolfSession` | Persisted werewolf game sessions | Shared (keyed by group) |
 
 ### Commands
 ```sh
@@ -630,8 +687,13 @@ Flag parsing via `meow` in `check-flag.js`. Flags added there are available in `
 
 ## Important Files
 - `src/helper/config/connect.js` — global config singleton, reads `settings.json`, holds `configuration.OPTIONS`, `configuration.cache`
-- `src/helper/connection/utils/check-flag.js` — `parseCli()` via `meow`, exports `cli`. All CLI flags here
+- `src/core/cli.js` — `Cli` class (meow wrapper), exports parsed flags and session name
 - `src/helper/config/settings.json` — bot config (prefix, owner, limits, etc.). Write via `fs.writeJSON` to persist
+- `src/core/boot.js` — boot orchestrator, wires all core classes
+- `src/core/client-socket.js` — `ClientSocket` class, owns all send/media/template methods
+- `src/core/context.js` — `Context` class, per-message lazy getters + convenience methods
+- `src/core/router.js` — `Router` class, command lookup + cooldown + sub-bot blocking
+- `src/core/manager.js` — `Manager` class, multi-instance orchestration
 - `src/helper/groups/settings/group-default-settings.js` — `updateSettings()` updates group settings in DB, not settings.json
 
 ---

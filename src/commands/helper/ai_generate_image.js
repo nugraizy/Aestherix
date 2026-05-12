@@ -18,7 +18,7 @@ export default {
 	status: 'enable',
 	run: async ({ query, from, message }, client) => {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
 		const openai = new OpenAI({ apiKey: updateApikey() });
@@ -28,6 +28,6 @@ export default {
 			size: '512x512'
 		});
 
-		client.instance.send(from, { image: { url: image.data[0].url } }, { quoted: message });
+		client.send(from, { image: { url: image.data[0].url } }, { quoted: message });
 	}
 };

@@ -1,5 +1,3 @@
-import path from 'path';
-
 import configuration from '../../helper/config/connect.js';
 import { line } from '../../utils/stickers/index.js';
 
@@ -18,7 +16,7 @@ export default {
 	status: 'enable',
 	async run({ query, message, from, filename }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please enter a query', message);
+			return await client.reply(from, 'Please enter a query', message);
 		}
 
 		let result = await line(query);
@@ -29,20 +27,15 @@ export default {
 
 		const capt = `Line Stickers\n\nAuthor : ${result[0].author.capitalize()}\nTot. Stickers : ${result.length}`.formatForm();
 
-		await client.instance.send(from, { text: capt }, { quoted: message });
+		await client.send(from, { text: capt }, { quoted: message });
 
 		for (const { stickers } of result) {
-			const sticker = await client.instance.prepareSticker(
-				stickers.animated || stickers.static,
-				path.join(__dirname, `src/media/temporary_files/${filename}`),
-				undefined,
-				{
-					author: configuration.author,
-					packname: configuration.packname
-				}
-			);
+			const sticker = await client.prepareSticker(stickers.animated || stickers.static, undefined, {
+				author: configuration.author,
+				packname: configuration.packname
+			});
 
-			await client.instance.send(from, { sticker }, { quoted: message });
+			await client.send(from, { sticker }, { quoted: message });
 		}
 	}
 };

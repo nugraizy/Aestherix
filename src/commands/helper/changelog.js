@@ -41,7 +41,7 @@ export default {
 				image = await fs.readFile(path.join(__dirname, 'src/media/CHANGELOG.png'));
 			}
 
-			await client.instance.send(
+			await client.send(
 				from,
 				text
 					? { text: await fs.readFile(path.join(__dirname, 'CHANGELOG.md'), { encoding: 'utf-8' }) }
@@ -53,12 +53,12 @@ export default {
 		}
 
 		if (!quantity) {
-			return await client.instance.reply(from, 'You must provide a quantity.', message);
+			return await client.reply(from, 'You must provide a quantity.', message);
 		}
 
 		const changelog = await getChangelogs(quantity);
 		const caption = await stringifyChangelogs(changelog);
 
-		await client.instance.reply(from, caption, message);
+		await client.reply(from, caption, message);
 	}
 };

@@ -18,7 +18,7 @@ export default {
 	status: 'enable',
 	async run({ isMediaImage, query, extractMediaData, filename, from, message, typeQuoted }, client) {
 		if (!isURL(query) && !isMediaImage) {
-			return await client.instance.reply(from, 'Please send/reply a image to find the similar image', {
+			return await client.reply(from, 'Please send/reply a image to find the similar image', {
 				from,
 				quoted: message
 			});
@@ -26,10 +26,10 @@ export default {
 
 		let media = query && isURL(query) ? query : null;
 
-		const wait = await client.instance.waitMessage(from, 'Searching. Please wait...', message);
+		const wait = await client.waitMessage(from, 'Searching. Please wait...', message);
 
 		if (isMediaImage) {
-			media = await client.instance.downloadAndSaveMediaMessage(
+			media = await client.downloadAndSaveMediaMessage(
 				extractMediaData,
 				path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
 				typeQuoted

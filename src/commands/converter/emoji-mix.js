@@ -1,5 +1,4 @@
 import emojiReg from 'emoji-regex';
-import path from 'path';
 import _ from 'lodash';
 
 import configuration from '../../helper/config/connect.js';
@@ -20,17 +19,17 @@ export default {
 	status: 'enable',
 	async run({ query, from, filename, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please enter a query', message);
+			return await client.reply(from, 'Please enter a query', message);
 		}
 
 		const regex = query.match(emojiReg());
 
 		if (!regex) {
-			return await client.instance.reply(from, 'Please enter a valid emoji', message);
+			return await client.reply(from, 'Please enter a valid emoji', message);
 		}
 
 		if (regex.length < 2) {
-			return await client.instance.reply(from, 'Please enter 2 valid emoji', message);
+			return await client.reply(from, 'Please enter 2 valid emoji', message);
 		}
 
 		const emojis = _.chunk(regex, 2);
@@ -43,22 +42,17 @@ export default {
 			const result = await emojimix(arr[0], arr[1]);
 
 			if (typeof result === 'object' && result?.error) {
-				await client.instance.reply(from, result.error, message);
+				await client.reply(from, result.error, message);
 
 				continue;
 			}
 
-			const sticker = await client.instance.prepareSticker(
-				result,
-				path.join(__dirname, `src/media/temporary_files/${filename}`),
-				undefined,
-				{
-					author: configuration.author,
-					packname: configuration.packname
-				}
-			);
+			const sticker = await client.prepareSticker(result, 'imageMessage', {
+				author: configuration.author,
+				packname: configuration.packname
+			});
 
-			await client.instance.send(from, { sticker }, { quoted: message });
+			await client.send(from, { sticker }, { quoted: message });
 		}
 	}
 };

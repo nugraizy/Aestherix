@@ -14,17 +14,17 @@ export default {
 	status: 'enable',
 	async run({ isBotAdmin, from, query, mention, bodyQuoted, mediaData, message, adminGroups }, client) {
 		if (!query && !bodyQuoted) {
-			return await client.instance.reply(from, 'Please reply people message or reply people', message);
+			return await client.reply(from, 'Please reply people message or reply people', message);
 		}
 
-		const myJid = client.instance.decodeJid(instance);
+		const myJid = client.decodeJid(instance);
 
 		if (mention?.includes(myJid) || mediaData?.id?.includes(myJid)) {
-			return await client.instance.reply(from, 'You can not add me by myself.', message);
+			return await client.reply(from, 'You can not add me by myself.', message);
 		}
 
 		if (!isBotAdmin) {
-			return await client.instance.reply(
+			return await client.reply(
 				from,
 				'Bot is not admin, Please promote admin before using moderation commands.',
 				message
@@ -33,14 +33,14 @@ export default {
 
 		if (query) {
 			if (mention.length) {
-				return await client.instance.reply(from, 'Please reply people message or input people number.', message);
+				return await client.reply(from, 'Please reply people message or input people number.', message);
 			}
 
-			await client.instance.updateGroup(from, 'ADD', query.parseNumber(), adminGroups, { message });
+			await client.updateGroup(from, 'ADD', query.parseNumber(), adminGroups, { message });
 		}
 
 		if (bodyQuoted) {
-			await client.instance.updateGroup(from, 'ADD', [mediaData.id], adminGroups, { message });
+			await client.updateGroup(from, 'ADD', [mediaData.id], adminGroups, { message });
 		}
 	}
 };

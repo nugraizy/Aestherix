@@ -33,7 +33,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
 		let queries = query.split(',');
@@ -44,13 +44,13 @@ export default {
 			const regexs = regex(querie.trim());
 
 			if (!regexs.status) {
-				return await client.instance.reply(from, regexs.message, message);
+				return await client.reply(from, regexs.message, message);
 			}
 
 			const data = await getNovelContent(regexs.message);
 
 			if (data?.errors) {
-				await client.instance.reply(from, `Failed while looking for Pixiv novel content\n\n${data.error}\n${querie}`, message);
+				await client.reply(from, `Failed while looking for Pixiv novel content\n\n${data.error}\n${querie}`, message);
 				continue;
 			}
 
@@ -64,7 +64,7 @@ Tot. View : ${numberWithCommas(viewCount)}
 
 ${content}`;
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					text: caption.formatForm(),

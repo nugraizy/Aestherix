@@ -189,7 +189,7 @@ const handleSpotifyCollection = async (url, type, client, { from, message, wait 
 
 	await wait.update(sendCaption);
 
-	await client.instance.send(
+	await client.send(
 		from,
 		{
 			document: await fs.readFile(output),
@@ -215,7 +215,7 @@ const handleSingleTrack = async (url, type, client, { from, message, prettyNumbe
 	const { tracks, status, message: respMessage } = await spotifier.getTracks(extractId(url));
 
 	if (!status) {
-		await client.instance.reply(from, respMessage, message);
+		await client.reply(from, respMessage, message);
 		loggers.error(`${color('Failed to Download Spotify ' + type, 'red')} for ${color(prettyNumber, 'lilac')}`);
 		return false;
 	}
@@ -225,7 +225,7 @@ const handleSingleTrack = async (url, type, client, { from, message, prettyNumbe
 	const searchResults = await hifi.search(`${tracks[0].artists[0].name} - ${tracks[0].name}`);
 
 	if (searchResults.items.length === 0) {
-		await client.instance.reply(from, 'No results found. Please try a different search query.', message);
+		await client.reply(from, 'No results found. Please try a different search query.', message);
 		loggers.error(`${color('Failed to Download Spotify ' + type, 'red')} for ${color(prettyNumber, 'lilac')}`);
 		return false;
 	}
@@ -235,7 +235,7 @@ const handleSingleTrack = async (url, type, client, { from, message, prettyNumbe
 	const downloadInfo = await hifi.download(searchResults.items[0].id);
 
 	if (downloadInfo?.error) {
-		await client.instance.reply(from, downloadInfo?.error, message);
+		await client.reply(from, downloadInfo?.error, message);
 		loggers.error(`${color('Failed to Download Spotify ' + type, 'red')} for ${color(prettyNumber, 'lilac')}`);
 		return false;
 	}
@@ -253,7 +253,7 @@ const handleSingleTrack = async (url, type, client, { from, message, prettyNumbe
 		.map((v, i) => (tracks[0].artists.length !== 1 && i + 1 === tracks[0].artists.length ? `and ${v}` : v))
 		.join(', ')}.flac`;
 
-	await client.instance.send(
+	await client.send(
 		from,
 		{
 			document: buffer,
@@ -290,7 +290,7 @@ export default {
 	limit: 5,
 	status: 'enable',
 	run: async ({ query, bodyQuoted, typeQuoted, message, from, mediaData, prettyNumber }, client) => {
-		if (typeQuoted === 'imageMessage' && mediaData.participant?.includes(client.instance.decodeJid(instance))) {
+		if (typeQuoted === 'imageMessage' && mediaData.participant?.includes(client.decodeJid(instance))) {
 			const reg = /✦ Media ID :\s*([^\n]+)/g;
 			const type = /🖼️ Type :\s*([^\n]+)/g;
 
@@ -302,28 +302,28 @@ export default {
 			}
 
 			if (!videoIds.length) {
-				return await client.instance.reply(from, 'No id(s) found', message);
+				return await client.reply(from, 'No id(s) found', message);
 			}
 
 			const numberiedQuery = Number(query);
 			const index = numberiedQuery - 1;
 
 			if (!numberiedQuery) {
-				return await client.instance.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
+				return await client.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
 			}
 
 			if (index > videoIds.length) {
-				return await client.instance.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
+				return await client.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
 			}
 
 			const videoId = videoIds[index][0];
 			const typeMedia = videoIds[index][1];
 
 			if (!videoId) {
-				return await client.instance.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
+				return await client.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
 			}
 
-			await client.instance.reply(from, `Downloading Spotify ${typeMedia} :\n${videoId}\nPlease wait`.formatForm(), message);
+			await client.reply(from, `Downloading Spotify ${typeMedia} :\n${videoId}\nPlease wait`.formatForm(), message);
 
 			await processVideo(`https://open.spotify.com/${typeMedia}/${videoId}`, typeMedia, client, {
 				from,
@@ -335,10 +335,10 @@ export default {
 		}
 
 		if (!query) {
-			return await client.instance.reply(from, 'Please provide a URL.', from);
+			return await client.reply(from, 'Please provide a URL.', from);
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, 'Please wait...', message);
 
 		let { _: urls } = parser(query);
 
@@ -374,7 +374,7 @@ export default {
 					break check;
 				}
 
-				await client.instance.reply(from, `[ ${url} ] This isn't a valid Spotify URL.`, message);
+				await client.reply(from, `[ ${url} ] This isn't a valid Spotify URL.`, message);
 				loggers.error(`${color('Failed to Download Spotify Media', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
@@ -383,7 +383,7 @@ export default {
 			const typeMedia = getSpotifyType(url);
 
 			if (typeMedia === 'artist') {
-				await client.instance.reply(from, `[ ${url} ] This is an artist link. Please send media URL.`, message);
+				await client.reply(from, `[ ${url} ] This is an artist link. Please send media URL.`, message);
 				loggers.error(`${color('Failed to Download Spotify Media', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;

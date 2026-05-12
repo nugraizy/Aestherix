@@ -57,13 +57,16 @@ model PinterestProfilePicture {
 
 /// Per-user command limit and subscription role.
 model UserLimit {
-  id        String   @id @default(cuid())
-  jid       String   @unique
-  limit     Int      @default(30)
+  id          String   @id @default(cuid())
+  jid         String
+  sessionName String   @default("main")
+  limit       Int      @default(30)
   /// FREE | PREMIUM | OWNER
-  role      String   @default("FREE")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  role        String   @default("FREE")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([jid, sessionName])
 }
 
 /// Globally banned WhatsApp JIDs.
@@ -75,17 +78,21 @@ model BannedUser {
 
 /// WhatsApp contact name cache.
 model Contact {
-  id        String   @id @default(cuid())
-  jid       String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  jid         String
+  sessionName String   @default("main")
+  name        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([jid, sessionName])
 }
 
 /// Feature flags and settings for each WhatsApp group.
 model SettingsManager {
   id               String   @id @default(cuid())
-  groupId          String   @unique
+  groupId          String
+  sessionName      String   @default("main")
   groupName        String?
   groupDescription String?
   welcome1         String   @default("disable")
@@ -109,6 +116,8 @@ model SettingsManager {
   bannedMembers    String   @default("[]")
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+
+  @@unique([groupId, sessionName])
 }
 
 /// Web-dashboard login sessions.
@@ -180,8 +189,33 @@ model OfflineUser {
 // `key` is a logical name; `value` is a JSON blob.
 
 model DashboardKV {
-  id        Int      @id @default(autoincrement())
-  key       String   @unique
-  value     String
+  id          Int      @id @default(autoincrement())
+  key         String
+  sessionName String   @default("main")
+  value       String
+  updatedAt   DateTime @updatedAt
+
+  @@unique([key, sessionName])
+}
+
+/// Persisted Werewolf game sessions so in-flight games survive a bot
+/// restart. `state` holds the whole Session serialized as JSON.
+model WerewolfSession {
+  id        String   @id @default(cuid())
+  roomId    String   @unique
+  phase     String
+  state     String
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+/// Persisted sub-bot instances for multi-instance support.
+model BotInstance {
+  sessionName String   @id
+  flags       String   @default("{}")
+  role        String   @default("sub")
+  pairNumber  String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

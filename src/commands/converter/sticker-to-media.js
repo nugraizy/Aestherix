@@ -1,7 +1,4 @@
-import isBuffer from 'is-buffer';
-import path from 'path';
-
-import { reassign } from '../../helper/index.js';
+import { Context } from '../../core/context.js';
 import { convertStickerToMedia } from '../../utils/converter/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 
@@ -18,33 +15,24 @@ export default {
 	cooldown: 5,
 	limit: 1,
 	status: 'enable',
-	async run(
-		{ isQuotedSticker, from, message, filename, extractMediaData, prettyNumber, typeQuoted, waitForInput, sender },
-		client
-	) {
-		if (!isQuotedSticker) {
-			return await client.instance.reply(from, 'Please reply a sticker to decrypt', message);
+	async run({ isQuotedSticker, from, message, mediaData, prettyNumber, waitForInput, sender, shouldSkipCheck }, client) {
+		if (!isQuotedSticker && !shouldSkipCheck) {
+			return await client.reply(from, 'Please reply a sticker to decrypt', message);
 		}
 
 		loggers.info(`${color('Decrypting media', 'pink')} from ${color(prettyNumber, 'lilac')}`);
 
-		const results = await client.instance.downloadAndSaveMediaMessage(
-			extractMediaData,
-			path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
-			typeQuoted
-		);
-		const { result } = await convertStickerToMedia(results, prettyNumber, extractMediaData);
+		const stickerBuffer = await client.downloadMediaMessage(mediaData, 'buffer');
+		const { result, isVideo } = await convertStickerToMedia(stickerBuffer, prettyNumber, mediaData);
 
-		await client.instance.send(
+		await client.send(
 			from,
-			isBuffer(result)
+			isVideo
 				? {
-						image: new Buffer.from(result, 'base64')
+						video: result
 					}
 				: {
-						video: {
-							url: result
-						}
+						image: result
 					},
 			{ quoted: message }
 		);
@@ -57,7 +45,7 @@ export default {
 		});
 
 		if (!wait.timeout) {
-			await this.run(await reassign(wait.message, client, store), client);
+			await this.run({ ...(await Context.from(wait.message, client, store)), shouldSkipCheck: true }, client);
 		}
 
 		loggers.info(`${color('Media is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);

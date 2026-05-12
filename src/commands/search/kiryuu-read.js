@@ -43,7 +43,7 @@ const downloadChapterAsPdf = async ({ from, message }, client, wait, chapterUrl,
 
 	const buffer = await imageToPdf(pages);
 
-	await client.instance.send(
+	await client.send(
 		from,
 		{
 			document: Buffer.from(buffer, 'base64'),
@@ -65,7 +65,7 @@ async function sendBatch(state, from, message, client, ctx) {
 
 	const body = `${'Kiryuu Reader'.formatHeaders()}\n\n${safeName}\nTotal : ${allChapters.length} chapter(s)\nShowing : ${start + 1}–${start + batch.length}\n\nSelect a chapter to download as PDF.`;
 
-	const builder = new client.instance.TemplateBuilder.Native(client);
+	const builder = new client.TemplateBuilder.Native(client);
 
 	builder
 		.destination(from)
@@ -103,7 +103,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, prefix }, client) {
 		if (!query) {
-			return await client.instance.reply(
+			return await client.reply(
 				from,
 				'Please provide a chapter URL or a search query.\n\nExamples:\n• !kyread https://v5.kiryuu.to/...\n• !kyread Solo Leveling',
 				message
@@ -117,14 +117,14 @@ export default {
 			const cached = readerSessions.get(sessionId);
 
 			if (!cached) {
-				return await client.instance.reply(from, 'Session expired. Please search again.', message);
+				return await client.reply(from, 'Session expired. Please search again.', message);
 			}
 
 			cached.currentBatch++;
 			return await sendBatch(cached, from, message, client, { prefix });
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Processing...', message);
+		const wait = await client.waitMessage(from, 'Processing...', message);
 
 		if (isChapterInput(input)) {
 			const fileName = input.split('/').filter(Boolean).pop() || 'kiryuu-chapter';

@@ -16,11 +16,11 @@ export default {
 	status: 'enable',
 	async run({ args, query, from, cmd, message, prefix, pushname }, client) {
 		if (!configuration.OPTIONS.ai) {
-			return await client.instance.reply(from, 'ChatGPT AI is disabled', message);
+			return await client.reply(from, 'ChatGPT AI is disabled', message);
 		}
 
 		if (!query) {
-			return await client.instance.reply(
+			return await client.reply(
 				from,
 				`Please specify a command.\n\nUsage : \n${prefix + cmd} start\n${prefix + cmd} stop`,
 				message
@@ -29,7 +29,7 @@ export default {
 
 		if (args[1] === 'start') {
 			if (configuration.user.charAI.get(from)) {
-				return await client.instance.reply(from, 'You already chatting with AI', message);
+				return await client.reply(from, 'You already chatting with AI', message);
 			}
 
 			configuration.user.charAI.set(
@@ -37,18 +37,18 @@ export default {
 				new ChatGPTDialogue(pushname, new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }), 'Zero_Two')
 			);
 
-			return await client.instance.reply(from, 'AI chat has been started', message);
+			return await client.reply(from, 'AI chat has been started', message);
 		}
 
 		if (args[1] === 'stop') {
 			if (!configuration.user.charAI.get(from)) {
-				return await client.instance.reply(from, 'You not chatting with AI', message);
+				return await client.reply(from, 'You not chatting with AI', message);
 			}
 
 			configuration.user.charAI.delete(from);
-			return await client.instance.reply(from, 'AI chat has been stopped', message);
+			return await client.reply(from, 'AI chat has been stopped', message);
 		}
 
-		return await client.instance.reply(from, `Invalid command.\n\nUsage : \n${cmd} start\n${cmd} stop`, message);
+		return await client.reply(from, `Invalid command.\n\nUsage : \n${cmd} start\n${cmd} stop`, message);
 	}
 };

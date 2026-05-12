@@ -29,11 +29,11 @@ export default {
 					},
 					{
 						quoted: message,
-						messageId: client.instance.generateMessageID()
+						messageId: client.generateMessageID()
 					}
 				);
 
-				await client.instance.relay(from, messages.message, { messageId: messages.key.id });
+				await client.relay(from, messages.message, { messageId: messages.key.id });
 			}
 
 			return;
@@ -45,9 +45,9 @@ export default {
 			const chats = store.loadMessages(from).map((v) => v.key);
 
 			for (const chat of chats) {
-				chat.participant = chat.fromMe ? client.instance.decodeJid(instance) : chat.participant;
+				chat.participant = chat.fromMe ? client.decodeJid(instance) : chat.participant;
 
-				await client.instance.relay(from, { reactionMessage: { key: chat, text: emojis[0] } });
+				await client.relay(from, { reactionMessage: { key: chat, text: emojis[0] } });
 			}
 		}
 	}

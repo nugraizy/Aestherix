@@ -40,16 +40,16 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please specify a url', message);
+			return await client.reply(from, 'Please specify a url', message);
 		}
 
 		let { _: urls } = parser(query);
 
 		if (urls.length === 1 && !isURL(urls[0])) {
-			return await client.instance.reply(from, 'Please specify a valid url', message);
+			return await client.reply(from, 'Please specify a valid url', message);
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, 'Please wait...', message);
 
 		let success = 0;
 		let error = 0;
@@ -58,7 +58,7 @@ export default {
 
 		for (const url of urls) {
 			if (!isURL(url.trim())) {
-				await client.instance.reply(from, 'Please specify a valid url\nInvalid : ' + url, message);
+				await client.reply(from, 'Please specify a valid url\nInvalid : ' + url, message);
 				loggers.error(`${color('Failed to Download Twitter Post', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
@@ -67,7 +67,7 @@ export default {
 			const post = await twitter.download(url);
 
 			if (post?.error) {
-				await client.instance.reply(from, `Error while downloading Twitter post\n\n${post.error}\n${url}`, message);
+				await client.reply(from, `Error while downloading Twitter post\n\n${post.error}\n${url}`, message);
 				loggers.error(`${color('Failed to Download Twitter Post', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
@@ -76,10 +76,10 @@ export default {
 			const caption = createPostCaption(post);
 
 			if (post.medias.length > 1) {
-				await client.instance.send(from, { text: caption }, { quoted: message });
+				await client.send(from, { text: caption }, { quoted: message });
 
 				for (const media of post.medias) {
-					await client.instance.send(
+					await client.send(
 						from,
 						media.type === 'video' || media.type === 'animated_gif'
 							? { video: { url: media.url } }
@@ -89,7 +89,7 @@ export default {
 					await delay(100);
 				}
 			} else {
-				await client.instance.send(
+				await client.send(
 					from,
 					post.medias[0].type === 'video' || post.medias[0].type === 'animated_gif'
 						? { video: { url: post.medias[0].url }, caption }

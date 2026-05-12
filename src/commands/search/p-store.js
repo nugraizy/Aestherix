@@ -19,7 +19,7 @@ export default {
 	minifiedDescription: 'Search P-Store Products',
 	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
 		let queries = query.split(',');
@@ -30,7 +30,7 @@ export default {
 			let product = await pStoreProduct(querie.trim());
 
 			if (product?.error) {
-				await client.instance.reply(from, product.error, message);
+				await client.reply(from, product.error, message);
 				continue;
 			}
 
@@ -50,7 +50,7 @@ export default {
 				source,
 				thumbnail
 			} of product) {
-				await client.instance.send(
+				await client.send(
 					from,
 					{
 						image: { url: thumbnail },
