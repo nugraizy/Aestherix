@@ -160,3 +160,14 @@ model DashboardKV {
   value     String
   updatedAt DateTime @updatedAt
 }
+
+/// Persisted Werewolf game sessions so in-flight games survive a bot
+/// restart. `state` holds the whole Session serialized as JSON.
+model WerewolfSession {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  roomId    String   @unique
+  phase     String
+  state     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
