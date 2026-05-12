@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「6.14.0」2026-05-12
+## Added
+- **Werewolf game rewrite** — full modular architecture with scheduler-driven phase machine, 10 roles (Villager, Werewolf, Alpha Werewolf, Seer, Guard, Witch, Hunter, Cupid, Little Girl, Jester), lobby timer with auto-start/disband, button-based DM actions, i18n (id/en), and persistent sessions that survive bot restarts. ([`73b22c5`](https://github.com/nugraizy/aestherix/commit/73b22c5))
+- **Werewolf test suite** — 184 tests covering session state, roles, balance, voting, win conditions, night resolution, phase machine, scheduler, lobby timer, full cycle (N=5–20), realistic flow with real timers, dispatcher, UI prompts/buttons, and i18n coverage. Tests moved to `__tests__/` root. ([`33e65bd`](https://github.com/nugraizy/aestherix/commit/33e65bd))
+- **`findByPlayer` session lookup** — players can type night actions in DM without the roomId; the bot finds their active game automatically. ([`73b22c5`](https://github.com/nugraizy/aestherix/commit/73b22c5))
+- **WerewolfSession** Prisma model for persisting in-flight games across restarts. ([`dbff4c6`](https://github.com/nugraizy/aestherix/commit/dbff4c6))
+
+## Fixed
+- **Cupid button pairing** — pressing a button in DM no longer fails because the group JID at `args[3]` was mis-parsed as a player index. ([`73b22c5`](https://github.com/nugraizy/aestherix/commit/73b22c5))
+- **Dashboard** — werewolf session endpoints added; Interactive debug command formatting fixed. ([`b16fea8`](https://github.com/nugraizy/aestherix/commit/b16fea8))
+
+## Refactored
+- **`prepareSticker` API** — removed unused `filename` parameter; all converter commands updated to new `(media, type, exif)` signature. ([`8943b81`](https://github.com/nugraizy/aestherix/commit/8943b81))
+- **Core message handling** — multi-cmd loop no longer mutates the shared message object; auth state uses write-conflict retry with exponential backoff; command loading and store persistence improved. ([`907b585`](https://github.com/nugraizy/aestherix/commit/907b585))
+
+---
+
 # 「6.13.1」2026-05-11
 ## Fixed
 - **Dashboard owner OTP** no longer reports "Confirmation expired or not found" immediately after requesting a code, nor "Confirmation request mismatch" when tapping the WhatsApp button. `loadOtpStore` previously cleared the in-memory map on every call and reloaded from the DB asynchronously; a silent failure or a stale DB row would overwrite the freshly-created OTP. The loader now merges DB rows into the map and preserves any in-memory entry that is newer than the DB row, so an in-flight write can no longer get clobbered. `persistOtpStore` also stops swallowing upsert errors so any future failure shows up in the logs. ([`43beb90`](https://github.com/nugraizy/aestherix/commit/43beb90dbe9cc5866ddf0134f1ed8ed3187aca99))
