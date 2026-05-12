@@ -135,6 +135,7 @@ export const handleConnectionUpdate = async (
 				global.instance = instance;
 
 				client.instance = Client;
+				client.sessionName = configuration.core?.sessionName ?? '';
 
 				(await import('../../modules/utils.js')).assign(client);
 

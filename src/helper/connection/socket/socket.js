@@ -10,6 +10,8 @@ const { proto } = _baileys;
 
 import { color, loggers } from '../../../utils/modules/index.js';
 import configuration from '../../config/connect.js';
+import { Auth } from '../../../core/auth.js';
+import { manager } from '../../../core/manager.js';
 import { useMultiAuthState } from '../../database/auth.js';
 import prisma from '../../database/prisma.js';
 import { Cache } from '../../modules/cache.js';
@@ -108,6 +110,16 @@ export const connectSocket = async ({ OPTIONS, store, sessionName }) => {
 	const Client = makeWASocket(CONNECTION_CONFIG);
 
 	store.bind(Client.ev);
+
+	const auth = new Auth(prisma, sessionName);
+
+	auth._skipInit = true;
+	auth._state = state;
+	auth._saveCreds = saveCreds;
+	auth._clearState = clearState;
+
+	manager.add(sessionName, { socket: Client, auth, store, sessionName, role: 'primary', state: 'connected' });
+	configuration.core = { sessionName, manager };
 
 	await handleNewInstance({ OPTIONS, Client }); // eslint-disable-line
 
