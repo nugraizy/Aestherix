@@ -9,6 +9,7 @@ import P from 'pino';
 import sharp from 'sharp';
 import { makePersistentStore } from './helper/connection/store/make-in-memory-store.js';
 
+import { initWerewolfHandler } from './handlers/game_handlers/werewolf.js';
 import configuration from './helper/config/connect.js';
 import {
 	getDashboardLogs,
@@ -28,7 +29,6 @@ import {
 	handlePollUpdate,
 	handlePresenceUpdate,
 	handleUpsertUpdate,
-	handleWerewolfCycle,
 	parseStubtypeUpdate
 } from './helper/connection/event-handler/universal.js';
 import { handleGithubWebhook } from './helper/connection/github-webhook/events.js';
@@ -37,6 +37,7 @@ import { resetSession } from './helper/connection/socket/reset-session.js';
 import { connectSocket } from './helper/connection/socket/socket.js';
 import { initContact, updateContact } from './helper/connection/utils/cache.js';
 import { cli as clis } from './helper/connection/utils/check-flag.js';
+import { loadCommands } from './helper/connection/utils/commands.js';
 import { resolveSessionName } from './helper/connection/utils/session-name.js';
 import {
 	listPinterestProfilePictures,
@@ -655,7 +656,11 @@ const startAutoProfilePictureChangeService = async (client, state, config) => {
 configuration.cli = clis;
 configuration.OPTIONS = configuration.cli.flags;
 
-await initializeDashboardMonitor(configuration);
+configuration.cmds.loadPromise = loadCommands(configuration.OPTIONS);
+
+void initializeDashboardMonitor(configuration).catch((error) => {
+	loggers.error(color('Dashboard monitor init failed:', 'red'), color(error.message, 'white'));
+});
 
 const { OPTIONS, cli } = configuration;
 const sessionName = await resolveSessionName(cli?.input?.[0]);
@@ -775,7 +780,7 @@ export const start = async () => {
 				);
 			});
 			Client.ev.on('commit', async (commitInfo) => await handleGithubWebhook(commitInfo));
-			Client.ev.on('werewolf.cycle', async (update) => await handleWerewolfCycle(update));
+			initWerewolfHandler(Client, loggers);
 			Client.ev.on('poll.update', async (msg) => handlePollUpdate(store, msg));
 			Client.ws.on('CB:notification,type:w:gp2', parseStubtypeUpdate);
 			Client.ws.on('CB:notification,type:picture', async (update) => await emitGroupSettings.picture(update));

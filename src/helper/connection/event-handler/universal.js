@@ -109,7 +109,7 @@ export const handleConnectionUpdate = async (
 			}
 		} else if (connection === 'open') {
 			if (!isClosed) {
-				await loadCommands(OPTIONS);
+				await (configuration.cmds.loadPromise || loadCommands(OPTIONS));
 
 				isClosed = true;
 			}
