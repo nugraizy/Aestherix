@@ -1,8 +1,8 @@
 import Canvas from '@napi-rs/canvas';
 import path from 'path';
 
-import configuration from '../config/connect.js';
 import { color, loggers } from '../../utils/modules/index.js';
+import configuration from '../config/connect.js';
 
 const { createCanvas, loadImage, GlobalFonts } = Canvas;
 
@@ -87,7 +87,7 @@ export const memeGenerator = (client, sender, input, topTexts = '', bottomTexts 
 		}
 
 		if (type === 'sticker') {
-			const buffer = client.prepareSticker(canvas.toBuffer('image/webp'), undefined, undefined, {
+			const buffer = client.prepareSticker(canvas.toBuffer('image/webp'), 'imageMessage', {
 				author: configuration.author,
 				packname: configuration.packname
 			});

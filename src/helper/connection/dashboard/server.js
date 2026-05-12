@@ -13,7 +13,6 @@ import { Server as SocketIOServer } from 'socket.io';
 import { z } from 'zod';
 
 import { color, loggers } from '../../../utils/modules/index.js';
-import { cmdId } from '../../modules/prefix.js';
 import configuration from '../../config/connect.js';
 import {
 	addToBlocklist,
@@ -41,6 +40,7 @@ import {
 	upsertUserLimit
 } from '../../database/adapters/user.js';
 import prisma from '../../database/prisma.js';
+import { cmdId } from '../../modules/prefix.js';
 import {
 	getDashboardLogs,
 	initializeDashboardMonitor,
@@ -3306,6 +3306,8 @@ export const server = async () => {
 		let newPrefixConfig;
 		let newPrefixReg = null;
 		let newPrefixValues = [];
+		const currentPrefixConfig = configuration.cache?.prefixConfig || {};
+		const currentMode = currentPrefixConfig.multi ? 'multi' : currentPrefixConfig.nopref ? 'nopref' : 'single';
 
 		if (mode === 'multi') {
 			const cliPrefixes = Array.isArray(req.body.prefixes)
@@ -3333,6 +3335,7 @@ export const server = async () => {
 				cliPrefixes: [],
 				prefixValues: []
 			};
+			newPrefixValues = [];
 		} else {
 			const singlePref = typeof pref === 'string' && pref.length > 0 ? pref[0] : '.';
 
@@ -3343,6 +3346,31 @@ export const server = async () => {
 				cliPrefixes: [],
 				prefixValues: [singlePref]
 			};
+			newPrefixValues = [singlePref];
+		}
+
+		const sameArray = (left, right) =>
+			Array.isArray(left) &&
+			Array.isArray(right) &&
+			left.length === right.length &&
+			left.every((value, index) => value === right[index]);
+
+		const isSameConfig =
+			currentMode === mode &&
+			currentPrefixConfig.pref === newPrefixConfig.pref &&
+			Boolean(currentPrefixConfig.multi) === Boolean(newPrefixConfig.multi) &&
+			Boolean(currentPrefixConfig.nopref) === Boolean(newPrefixConfig.nopref) &&
+			sameArray(currentPrefixConfig.cliPrefixes || [], newPrefixConfig.cliPrefixes || []) &&
+			sameArray(currentPrefixConfig.prefixValues || [], newPrefixConfig.prefixValues || []);
+
+		if (isSameConfig) {
+			return res.json({
+				ok: true,
+				mode,
+				pref: newPrefixConfig.pref,
+				multi: newPrefixConfig.multi,
+				nopref: newPrefixConfig.nopref
+			});
 		}
 
 		configuration.cache.prefixConfig = newPrefixConfig;
@@ -3366,7 +3394,14 @@ export const server = async () => {
 			action: 'prefix.change',
 			session,
 			target: 'prefix',
-			before: { mode: configuration.cache.prefixConfig?.multi ? 'multi' : configuration.cache.prefixConfig?.nopref ? 'nopref' : 'single', pref: configuration.cache.prefixConfig?.pref },
+			before: {
+				mode: configuration.cache.prefixConfig?.multi
+					? 'multi'
+					: configuration.cache.prefixConfig?.nopref
+						? 'nopref'
+						: 'single',
+				pref: configuration.cache.prefixConfig?.pref
+			},
 			after: { mode, pref: newPrefixConfig.pref }
 		});
 

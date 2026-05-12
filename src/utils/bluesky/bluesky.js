@@ -33,6 +33,8 @@ class Bluesky {
 	}
 
 	async getPost(url) {
+		await this.login();
+
 		const info = extractInfoFromUrl(url);
 
 		if (!info) {
@@ -109,7 +111,5 @@ class Bluesky {
 }
 
 const bluesky = new Bluesky();
-
-await bluesky.login();
 
 export { bluesky };
