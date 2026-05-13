@@ -1052,25 +1052,25 @@ export class InstagramApi extends InstagramMethods {
 	static init() {
 		let err;
 
-		if (!fs.existsSync('./.instagram.env')) {
+		if (!fs.existsSync('./.env.instagram')) {
 			err = new Error(
-				'`.instagram.env` file not found. Use the constructor to login and create file. ex: `new InstagramApi(username, password).login()`'
+				'`.env.instagram` file not found. Use the constructor to login and create file. ex: `new InstagramApi(username, password).login()`'
 			);
 			console.log(err);
 			process.exit(0);
 		}
 
-		const loginInfo = parse(fs.readFileSync('./.instagram.env', 'utf-8'));
+		const loginInfo = parse(fs.readFileSync('./.env.instagram', 'utf-8'));
 		let { USERNAME, PASSWORD, UUID, DEVICE_ID, COOKIE } = loginInfo;
 
 		if (!USERNAME) {
-			err = new Error('`USERNAME` not found in `.instagram.env`');
+			err = new Error('`USERNAME` not found in `.env.instagram`');
 			console.log(err);
 			process.exit(0);
 		}
 
 		if (!PASSWORD) {
-			err = new Error('`PASSWORD` not found in `.instagram.env`');
+			err = new Error('`PASSWORD` not found in `.env.instagram`');
 			console.log(err);
 			process.exit(0);
 		}
@@ -1129,7 +1129,7 @@ export class InstagramApi extends InstagramMethods {
 	}
 }
 
-if (fs.existsSync('./.instagram.env')) {
+if (fs.existsSync('./.env.instagram')) {
 	configuration.instagram = InstagramApi.init();
 	configuration.isInstagramInitiated = true;
 }

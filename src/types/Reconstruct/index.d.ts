@@ -1,7 +1,6 @@
 import type { getDevice, MessageType } from 'baileys';
-import type { GroupMetadata, GroupParticipant } from '../Groups/index';
+import type { ClientSocket } from '../Core';
 import type { MessageGenerated, WAGenericMediaMessage } from '../Messages/index';
-import type { ClientSocket, Context } from '../Core';
 import type { MediaDataContext } from '../Socket';
 
 /**
@@ -12,7 +11,7 @@ export interface ReassignResult {
 	isFromMe: boolean;
 	from: string;
 	isGroup: boolean;
-	isBaileys: boolean;
+	isBotInstance: boolean;
 	sender: string;
 	prettyNumber: string;
 	timeStamp: number;
@@ -53,7 +52,13 @@ export interface ReassignResult {
 		message?: string;
 		timeInSecond?: number;
 		sendImpl?: () => Promise<void>;
-	}) => Promise<{ message?: string | MessageGenerated; quoted?: MessageGenerated; timeout?: boolean; invalid?: boolean; command?: boolean }>;
+	}) => Promise<{
+		message?: string | MessageGenerated;
+		quoted?: MessageGenerated;
+		timeout?: boolean;
+		invalid?: boolean;
+		command?: boolean;
+	}>;
 	device: ReturnType<typeof getDevice>;
 }
 

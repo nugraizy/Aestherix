@@ -76,8 +76,10 @@ export class Configuration {
 	userLimit = new Cache();
 
 	mqtt = null;
+
+	/** @type {import('../utils/instagram/instagram.js').InstagramApi | null} */
 	instagram = null;
-	isInstagramInitiated = false;
+	isInstagramInitiated = Boolean(process.env.INSTAGRAM_USERNAME && process.env.INSTAGRAM_PASSWORD);
 
 	settings = {};
 	defaultLimit = 100;

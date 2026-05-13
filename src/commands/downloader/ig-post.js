@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
-import { color, loggers, formatNumber } from '../../utils/modules/index.js';
+import { color, formatNumber, loggers } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}

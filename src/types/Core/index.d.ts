@@ -191,7 +191,7 @@ export declare class Context {
 	get from(): string;
 	get isGroup(): boolean;
 	get isFromMe(): boolean;
-	get isBaileys(): boolean;
+	get isBotInstance(): boolean;
 	get sender(): string;
 	get type(): string | null;
 	get body(): string;
@@ -373,3 +373,98 @@ export declare function checkNetwork(): Promise<boolean>;
 export declare function initContact(store: Store, contacts: object[]): void;
 export declare function updateContact(store: Store, update: object[]): void;
 export declare function patchMessage(message: WAMessage): WAMessage;
+
+export declare class Configuration {
+	registry: {
+		commands: Cache;
+		aliases: string[];
+		commandUsage: Cache;
+		disabledCommands: Set<string>;
+		menu: Record<string, unknown>;
+		menuStr: string;
+		loadPromise: Promise<void> | null;
+	};
+
+	flags: Record<string, boolean | string>;
+	cli: Record<string, unknown>;
+	input: Cache;
+
+	groups: {
+		metadata: Cache;
+		settings: Cache;
+	};
+
+	users: {
+		afk: Cache;
+		info: Cache;
+	};
+
+	prefix: {
+		mode: string;
+		values: string[];
+		regex: RegExp | null;
+		default: string;
+		config: Record<string, unknown>;
+	};
+
+	owners: string[];
+	botJid: string;
+	blocklist: string[];
+	bannedlist: string[];
+
+	games: {
+		tebakGambar: Cache;
+		sudoku: Cache;
+		akinator: Cache;
+		tictactoe: Cache;
+		word: Cache;
+		werewolf: Cache;
+		wordle: Cache;
+	};
+
+	timers: {
+		tebakGambar: Cache;
+		sudoku: Cache;
+		anonymous: Cache;
+		word: Cache;
+		from: string[];
+		freegame: unknown;
+		spotifyPlaybacks: Cache;
+	};
+
+	anonymous: {
+		sessions: Cache;
+		messages: Cache;
+	};
+
+	pinterest: {
+		id: string | null;
+		images: Cache;
+	};
+
+	dashboard: {
+		io: unknown;
+		expressInstances: Cache;
+	};
+
+	charAI: Cache;
+	userLimit: Cache;
+
+	mqtt: unknown;
+	instagram: import('../../utils/instagram/instagram.js').InstagramApi;
+	isInstagramInitiated: boolean;
+
+	settings: Record<string, unknown>;
+	defaultLimit: number;
+	packname: string;
+	author: string;
+	logger_theme: string;
+
+	isFirstConnectionForCache: boolean;
+	isFirstConnection: boolean;
+	isConnected: boolean;
+
+	core: Record<string, unknown>;
+}
+
+export declare const configuration: Configuration;
