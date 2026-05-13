@@ -1,3 +1,14 @@
+import { Cli } from './src/core/cli.js';
+
+const cli = new Cli();
+
+if (cli.flags.help) {
+	cli.raw.showHelp();
+	process.exit(0);
+}
+
+cli.checkUnknownFlags();
+
 import dotenvx from '@dotenvx/dotenvx';
 
 dotenvx.config({ quiet: true });
@@ -27,13 +38,13 @@ import { checkNetwork } from './src/core/utils.js';
 import { printBanner } from './src/utils/modules/color.js';
 import { color, loggers } from './src/utils/modules/index.js';
 
+printBanner();
+
 const online = await checkNetwork();
 
 if (!online) {
 	loggers.error(color('No internet connection.', 'red'));
 	process.exit(1);
 }
-
-printBanner();
 
 await import('./src/index.js');

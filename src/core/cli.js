@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import meow from 'meow';
+import stringSimilarity from 'string-similarity';
 
 const SETTINGS_PATH = './src/helper/config/settings.json';
 const DEFAULT_SESSION = 'aestherix-bot';
@@ -31,8 +32,7 @@ const FLAGS = {
 	pairMode: { type: 'boolean' },
 	pairNumber: { type: 'string' },
 	test: { type: 'boolean' },
-	printSelf: { type: 'boolean' },
-	spin: { type: 'boolean' }
+	printSelf: { type: 'boolean' }
 };
 
 const HELP_TEXT = `
@@ -142,5 +142,57 @@ export class Cli {
 
 	static get validFlags() {
 		return Object.keys(FLAGS);
+	}
+
+	checkUnknownFlags() {
+		const known = new Set(Object.keys(FLAGS));
+		const shortFlags = new Set(
+			Object.values(FLAGS)
+				.map((v) => v.shortFlag)
+				.filter(Boolean)
+		);
+
+		const rawArgs = process.argv.slice(2);
+		const unknown = [];
+
+		for (const arg of rawArgs) {
+			if (!arg.startsWith('-')) {
+				continue;
+			}
+
+			const cleaned = arg.replace(/^--?/, '').split('=')[0];
+
+			if (arg.startsWith('--')) {
+				const camel = cleaned.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+
+				if (!known.has(camel)) {
+					unknown.push({ raw: arg, camel });
+				}
+			} else if (cleaned.length === 1) {
+				if (!shortFlags.has(cleaned)) {
+					unknown.push({ raw: arg, camel: cleaned });
+				}
+			}
+		}
+
+		if (!unknown.length) {
+			return;
+		}
+
+		const { findBestMatch } = stringSimilarity;
+		const targets = [...known];
+
+		for (const { raw, camel } of unknown) {
+			const { bestMatch } = findBestMatch(camel, targets);
+			const kebab = bestMatch.target.replace(/([A-Z])/g, '-$1').toLowerCase();
+
+			if (bestMatch.rating >= 0.4) {
+				console.log(chalk.yellow(`  Unknown flag ${chalk.red(raw)}. Did you mean ${chalk.green(`--${kebab}`)}?`));
+			} else {
+				console.log(chalk.yellow(`  Unknown flag ${chalk.red(raw)}.`));
+			}
+		}
+
+		console.log();
 	}
 }
