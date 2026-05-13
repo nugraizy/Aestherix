@@ -43,7 +43,7 @@ const processVideo = async (url, client, { from, message, sender, filename, wait
 		sender
 	);
 
-	await client.instance.send(
+	await client.send(
 		from,
 		{ video: new Buffer.from(merge, 'base64'), caption: 'Bstation Downloader'.formatHeaders() },
 		{ quoted: message }
@@ -64,7 +64,7 @@ export default {
 	cooldown: 8,
 	status: 'enable',
 	async run({ query, from, message, filename, sender, typeQuoted, mediaData, bodyQuoted, prettyNumber }, client) {
-		if (typeQuoted === 'imageMessage' && mediaData.participant?.includes(client.instance.decodeJid(instance))) {
+		if (typeQuoted === 'imageMessage' && mediaData.participant?.includes(client.decodeJid(instance))) {
 			const reg = /✦ Video ID :\s*([^\n]+)/g;
 
 			const videoIds = [];
@@ -75,27 +75,27 @@ export default {
 			}
 
 			if (!videoIds.length) {
-				return await client.instance.reply(from, 'No id(s) found', message);
+				return await client.reply(from, 'No id(s) found', message);
 			}
 
 			const numberiedQuery = Number(query);
 			const index = numberiedQuery - 1;
 
 			if (!numberiedQuery) {
-				return await client.instance.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
+				return await client.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
 			}
 
 			if (index > videoIds.length) {
-				return await client.instance.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
+				return await client.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
 			}
 
 			const videoId = videoIds[index];
 
 			if (!videoId) {
-				return await client.instance.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
+				return await client.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
 			}
 
-			await client.instance.reply(from, `Downloading Bstation audio :\n${videoId}\nPlease wait`, message);
+			await client.reply(from, `Downloading Bstation audio :\n${videoId}\nPlease wait`, message);
 
 			await processVideo(videoId, client, { from, message, prettyNumber });
 
@@ -103,10 +103,10 @@ export default {
 		}
 
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, 'Please wait...', message);
 
 		let { _: urls } = parser(query);
 
@@ -127,7 +127,7 @@ export default {
 			const regexs = regex(url.trim());
 
 			if (!regexs.status) {
-				await client.instance.reply(from, `${regexs.message}\nInvalid : ${url}`, message);
+				await client.reply(from, `${regexs.message}\nInvalid : ${url}`, message);
 				error++;
 				continue;
 			}

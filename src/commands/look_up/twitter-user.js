@@ -22,27 +22,27 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, prefix }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please specify a username.', message);
+			return await client.reply(from, 'Please specify a username.', message);
 		}
 
 		let { _: usernames } = parser(query);
 
 		if (usernames.length === 1 && isURL(usernames[0])) {
-			return await client.instance.reply(from, 'Please specify a valid Twitter username, not a URL.', message);
+			return await client.reply(from, 'Please specify a valid Twitter username, not a URL.', message);
 		}
 
 		for (const username of usernames) {
 			if (isURL(username.trim())) {
-				await client.instance.reply(from, 'Please specify a valid Twitter username, not a URL.', message);
+				await client.reply(from, 'Please specify a valid Twitter username, not a URL.', message);
 
 				continue;
 			}
 
 			const user = await twitter.getUser(username);
-			const builder = new client.instance.TemplateBuilder.Native(client);
+			const builder = new client.TemplateBuilder.Native(client);
 
 			if (user?.error) {
-				await client.instance.reply(from, `Error while searching Twitter user\n\n${user.error}\n${username}`, message);
+				await client.reply(from, `Error while searching Twitter user\n\n${user.error}\n${username}`, message);
 
 				loggers.error(`${color('Failed to Searching Twitter User', 'red')} for ${color(prettyNumber, 'lilac')}`);
 

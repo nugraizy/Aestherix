@@ -16,7 +16,7 @@ export default {
 	status: 'disable',
 	run: async ({ query, message, from }, client) => {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
 		let queries = query.split(',');
@@ -27,11 +27,11 @@ export default {
 			const result = await googleImage(querie, 10);
 
 			if (result?.error) {
-				client.instance.reply(from, result.error, message);
+				client.reply(from, result.error, message);
 				continue;
 			}
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					image: { url: result[0] },

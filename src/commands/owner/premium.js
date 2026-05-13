@@ -7,7 +7,7 @@ const configureUser = async (client, { mode, user, PREMS_CONTAINER, from, messag
 	const record = await getUserLimit(prisma, user).catch(() => null);
 
 	if (!record) {
-		return await client.instance.send(
+		return await client.send(
 			from,
 			{ text: `User @${user.replace(/[^\d]/g, '')} not found`, mentions: [user] },
 			{ from, quoted: message }
@@ -16,7 +16,7 @@ const configureUser = async (client, { mode, user, PREMS_CONTAINER, from, messag
 
 	if (mode === 'add') {
 		if (record.role === 'PREMIUM') {
-			return await client.instance.send(
+			return await client.send(
 				from,
 				{ text: `User @${user.replace(/[^\d]/g, '')} is already premium`, mentions: [user] },
 				{ from, quoted: message }
@@ -30,7 +30,7 @@ const configureUser = async (client, { mode, user, PREMS_CONTAINER, from, messag
 
 	if (mode === 'remove') {
 		if (record.role === 'FREE') {
-			return await client.instance.send(
+			return await client.send(
 				from,
 				{ text: `User @${user.replace(/[^\d]/g, '')} is already user`, mentions: [user] },
 				{ from, quoted: message }
@@ -53,7 +53,7 @@ const configureUser = async (client, { mode, user, PREMS_CONTAINER, from, messag
 			capt += `Success removing premium : ${PREMS_CONTAINER.removing.map((v) => `@${v.split('@')[0]}`).join(', ')}`;
 		}
 
-		await client.instance.send(
+		await client.send(
 			from,
 			{ text: capt.trim(), mentions: [].concat(PREMS_CONTAINER.adding, PREMS_CONTAINER.removing) },
 			{ quoted: message }
@@ -76,7 +76,7 @@ export default {
 	status: 'enable',
 	async run({ from, message, args, mediaData, mention, bodyQuoted, query }, client) {
 		if (!query && bodyQuoted) {
-			return await client.instance.reply(from, 'Please provide user to ban', message);
+			return await client.reply(from, 'Please provide user to ban', message);
 		}
 
 		const PREMS_CONTAINER = {
@@ -87,11 +87,11 @@ export default {
 		const configure = args[1];
 
 		if (!configure) {
-			return await client.instance.reply(from, 'Please provide params.\n!prem add/remove [tag/reply]', message);
+			return await client.reply(from, 'Please provide params.\n!prem add/remove [tag/reply]', message);
 		}
 
 		if (!['add', 'remove'].includes(configure)) {
-			return await client.instance.reply(from, 'Please provide params.\n!prem add/remove [tag/reply]', message);
+			return await client.reply(from, 'Please provide params.\n!prem add/remove [tag/reply]', message);
 		}
 
 		if (mention.length) {
@@ -134,7 +134,7 @@ export default {
 			const mentioned = mediaData.participant;
 
 			if (mentioned === configuration.botNumber) {
-				return await client.instance.reply(from, 'Cannot modify bot premium status', message);
+				return await client.reply(from, 'Cannot modify bot premium status', message);
 			}
 
 			await configureUser(client, {

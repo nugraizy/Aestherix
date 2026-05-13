@@ -36,7 +36,7 @@ function sendResult(state, from, message, client, ctx) {
 	const isLast = currentIndex + 1 >= items.length;
 	const body = `${'Comix Search'.formatHeaders()}\n\n${caption.formatForm()}\n\nResult ${currentIndex + 1} of ${items.length}\nID : ${manga.id}`;
 
-	const builder = new client.instance.TemplateBuilder.Native(client);
+	const builder = new client.TemplateBuilder.Native(client);
 
 	builder
 		.destination(from)
@@ -78,7 +78,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, prefix }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please provide a search query.', message);
+			return await client.reply(from, 'Please provide a search query.', message);
 		}
 
 		if (query.startsWith('next ')) {
@@ -86,20 +86,20 @@ export default {
 			const cached = searchSessions.get(sessionId);
 
 			if (!cached) {
-				return await client.instance.reply(from, 'Session expired. Please search again.', message);
+				return await client.reply(from, 'Session expired. Please search again.', message);
 			}
 
 			cached.currentIndex++;
 
 			if (cached.currentIndex >= cached.items.length) {
 				searchSessions.delete(sessionId);
-				return await client.instance.reply(from, 'No more results.', message);
+				return await client.reply(from, 'No more results.', message);
 			}
 
 			return await sendResult(cached, from, message, client, { prefix });
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Searching...', message);
+		const wait = await client.waitMessage(from, 'Searching...', message);
 
 		const result = await comix.search(query, { limit: 10, excludeNsfw: true });
 

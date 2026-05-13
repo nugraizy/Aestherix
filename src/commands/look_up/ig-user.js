@@ -18,7 +18,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, isOwner, prefix }, client) {
 		if (!configuration.isInstagramInitiated) {
-			return await client.instance.reply(
+			return await client.reply(
 				from,
 				`Instagram session is not initialized. ${isOwner ? `Type ${prefix}instagraminit to initialize it.` : `Please ask the owner to initialize it first using the command ${prefix}instagraminit`}`,
 				message
@@ -26,7 +26,7 @@ export default {
 		}
 
 		if (!query) {
-			return await client.instance.reply(from, 'Please specify a url', message);
+			return await client.reply(from, 'Please specify a url', message);
 		}
 
 		let { _: usernames } = parser(query);
@@ -37,7 +37,7 @@ export default {
 
 		for (const data in users) {
 			if (users[data]?.error) {
-				await client.instance.reply(from, `Error while searching Instagram user\n\n${users[data].error}\n${data}`, message);
+				await client.reply(from, `Error while searching Instagram user\n\n${users[data].error}\n${data}`, message);
 				loggers.error(`${color('Failed to Searching Instagram User', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				continue;
 			}
@@ -58,7 +58,7 @@ export default {
 			capt += `Tot. Highlight : ${numberWithCommas(users[data].highlightCount)}\n`;
 			capt += `Tot. Post : ${numberWithCommas(users[data].postsCount)}\n\n`;
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					image: { url: users[data].profilePicHD },

@@ -17,36 +17,36 @@ export default {
 	status: 'enable',
 	async run({ from, query, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a state to set', message);
+			return await client.reply(from, 'You must provide a state to set', message);
 		}
 
 		switch (query.toLowerCase()) {
 			case 'enable':
 				if (instafierState) {
-					return await client.instance.reply(from, 'Instafier is already enabled', message);
+					return await client.reply(from, 'Instafier is already enabled', message);
 				}
 
 				await (await import('../../handlers/instagram_notifier/handlers.js')).handler();
 				instafierState = true;
-				return await client.instance.reply(from, 'Instafier is now enabled', message);
+				return await client.reply(from, 'Instafier is now enabled', message);
 			case 'disable': {
 				if (!instafierState) {
-					return await client.instance.reply(from, 'Instafier is already disabled', message);
+					return await client.reply(from, 'Instafier is already disabled', message);
 				}
 
 				const clients = instafier.closeConnection();
 
 				if (clients.error) {
-					return await client.instance.reply(from, clients.message, message);
+					return await client.reply(from, clients.message, message);
 				}
 
 				instafierState = false;
-				await client.instance.reply(from, clients.message, message);
+				await client.reply(from, clients.message, message);
 				break;
 			}
 			default:
 				if (instafierState) {
-					await client.instance.reply(from, 'The instafier is enabled.', message);
+					await client.reply(from, 'The instafier is enabled.', message);
 				}
 		}
 	}

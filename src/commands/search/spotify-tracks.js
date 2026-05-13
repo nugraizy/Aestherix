@@ -36,7 +36,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
 		query = removeDuplicatesArray(query.split(','));
@@ -45,7 +45,7 @@ export default {
 			const result = regex(querie) ? await spotifier.getTracks(extractId(querie)) : await spotifier.searchTracks(querie);
 
 			if (!result.status) {
-				await client.instance.reply(from, result.message, message);
+				await client.reply(from, result.message, message);
 				continue;
 			}
 
@@ -66,7 +66,7 @@ export default {
 				caption += `Duration : ${durationMs.toTime()}\n\n`;
 			}
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					image: await fetchBUFFER(result?.data?.items?.[0]?.album?.images?.[0]?.url ?? result.tracks[0].album.images[0].url),
@@ -97,7 +97,7 @@ export default {
 				},
 				{ quoted: message }
 			);
-			// 	await client.instance.send(
+			// 	await client.send(
 			// 		from,
 			// 		{
 			// 			buttonText: 'Open List',

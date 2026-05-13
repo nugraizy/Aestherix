@@ -35,10 +35,10 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, prettyNumber }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, 'Please wait...', message);
 
 		let { _: urls } = parser(query);
 
@@ -53,7 +53,7 @@ export default {
 			const regexs = regex(url.trim());
 
 			if (!regexs.status) {
-				await client.instance.reply(from, regexs.message + `\nInvalid : ${url}`, message);
+				await client.reply(from, regexs.message + `\nInvalid : ${url}`, message);
 				error++;
 				continue;
 			}
@@ -61,13 +61,13 @@ export default {
 			const result = await downloadDeviantArt(url);
 
 			if (result?.error) {
-				await client.instance.reply(from, result.error, message);
+				await client.reply(from, result.error, message);
 				loggers.error(`${color('Failed to Download Deviantart File', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
 			}
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					image: { url: result.image },

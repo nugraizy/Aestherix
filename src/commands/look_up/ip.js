@@ -23,18 +23,18 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please specify a IP Address', message);
+			return await client.reply(from, 'Please specify a IP Address', message);
 		}
 
 		let { _: IPs } = parser(query);
 
 		if (IPs.length === 1 && !regex(IPs[0])) {
-			return await client.instance.reply(from, 'Please specify a valid IP Address', message);
+			return await client.reply(from, 'Please specify a valid IP Address', message);
 		}
 
 		for (const IP of IPs) {
 			if (!regex(IP.trim())) {
-				await client.instance.reply(from, 'Please specify a valid IP Address', message);
+				await client.reply(from, 'Please specify a valid IP Address', message);
 
 				continue;
 			}
@@ -42,7 +42,7 @@ export default {
 			const data = await iplookup(IP.trim());
 
 			if (data?.error) {
-				await client.instance.reply(from, `Error while searching IP Address\n\n${data.error}`, message);
+				await client.reply(from, `Error while searching IP Address\n\n${data.error}`, message);
 
 				loggers.error(`${color('Failed to Searching IP Address', 'red')} for ${color(prettyNumber, 'lilac')}`);
 
@@ -98,7 +98,7 @@ export default {
 				capt += `Proxy : ${proxy ? 'Yes' : 'No'}\n`;
 				capt += `Hosting : ${hosting ? 'Yes' : 'No'}`;
 
-				await client.instance.send(from, { text: capt.trim().formatForm() }, { quoted: message });
+				await client.send(from, { text: capt.trim().formatForm() }, { quoted: message });
 			}
 		}
 	}

@@ -29,7 +29,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
 		let queries = query.split(',');
@@ -55,7 +55,7 @@ export default {
 				i++;
 			}
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					image: {

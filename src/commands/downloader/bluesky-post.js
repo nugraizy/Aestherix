@@ -16,10 +16,10 @@ export default {
 	status: 'enable',
 	run: async ({ from, query, message, prettyNumber }, client) => {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, 'Please wait...', message);
 
 		let { _: urls } = parser(query);
 
@@ -36,7 +36,7 @@ export default {
 
 		for (const url of urls) {
 			if (!isURL(url.trim())) {
-				await client.instance.reply(from, 'Please Use a Valid URL.\nInvalid : ' + url, message);
+				await client.reply(from, 'Please Use a Valid URL.\nInvalid : ' + url, message);
 				error++;
 				continue;
 			}
@@ -53,13 +53,13 @@ export default {
 			if (mediaType) {
 				for (const item of media[mediaType]) {
 					if (item.error) {
-						await client.instance.reply(from, item.error, message);
+						await client.reply(from, item.error, message);
 						loggers.error(`${color('Failed to Download Bluesky Post', 'red')} for ${color(prettyNumber, 'lilac')}`);
 						error++;
 						break;
 					}
 
-					await client.instance.send(from, { [mediaType.slice(0, -1)]: { url: item }, caption }, { quoted: message });
+					await client.send(from, { [mediaType.slice(0, -1)]: { url: item }, caption }, { quoted: message });
 					caption = '';
 					success++;
 				}

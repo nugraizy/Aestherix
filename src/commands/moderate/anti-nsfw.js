@@ -16,7 +16,7 @@ export default {
 	status: 'enable',
 	async run(message, client) {
 		if (!message.isBotAdmin) {
-			return await client.instance.reply(
+			return await client.reply(
 				message.from,
 				'Bot is not admin, Please promote admin before using moderation commands.',
 				message.message
@@ -24,7 +24,7 @@ export default {
 		}
 
 		if (!message.query) {
-			return await client.instance.reply(
+			return await client.reply(
 				message.from,
 				'Please specify a command\n\nEx: antinsfw <enable/disable>',
 				message.message
@@ -37,7 +37,7 @@ export default {
 			case 'enable':
 			case 'on':
 				if (isEnable) {
-					return await client.instance.reply(message.from, 'You already have this command enabled', message.message);
+					return await client.reply(message.from, 'You already have this command enabled', message.message);
 				}
 
 				message[message.from].antiNSFW = 'enable';
@@ -46,12 +46,12 @@ export default {
 					await updateGroupSetting(prisma, message.from, 'antiNSFW', 'enable');
 				}
 
-				await client.instance.reply(message.from, 'You have successfully enabled anti-nsfw', message.message);
+				await client.reply(message.from, 'You have successfully enabled anti-nsfw', message.message);
 				break;
 			case 'disable':
 			case 'off':
 				if (!isEnable) {
-					return await client.instance.reply(message.from, 'You already have this command disabled', message.message);
+					return await client.reply(message.from, 'You already have this command disabled', message.message);
 				}
 
 				message[message.from].antiNSFW = 'disable';
@@ -60,10 +60,10 @@ export default {
 					await updateGroupSetting(prisma, message.from, 'antiNSFW', 'disable');
 				}
 
-				await client.instance.reply(message.from, 'You have successfully disabled anti-nsfw', message.message);
+				await client.reply(message.from, 'You have successfully disabled anti-nsfw', message.message);
 				break;
 			default:
-				await client.instance.reply(
+				await client.reply(
 					message.from,
 					'Please specify a command\n\nEx: antinsfw <enable/disable>',
 					message.message

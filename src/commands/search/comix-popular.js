@@ -23,7 +23,7 @@ export default {
 	limit: 3,
 	status: 'enable',
 	async run({ from, message }, client) {
-		const wait = await client.instance.waitMessage(from, 'Fetching popular comics...', message);
+		const wait = await client.waitMessage(from, 'Fetching popular comics...', message);
 
 		const result = await comix.getComics({
 			sort: 'views_7d',
@@ -43,7 +43,7 @@ export default {
 		const poster = result.items[0];
 
 		if (poster.poster) {
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					image: { url: poster.poster },
@@ -52,7 +52,7 @@ export default {
 				{ quoted: message }
 			);
 		} else {
-			await client.instance.reply(
+			await client.reply(
 				from,
 				`${'Comix Popular (7 Days)'.formatHeaders()}\n\n${caption.formatForm()}`,
 				message

@@ -49,7 +49,7 @@ const downloadChapterAsPdf = async ({ from, message }, client, wait, chapterId, 
 	const imageUrls = pages.map((page) => page.url);
 	const buffer = await imageToPdf(imageUrls);
 
-	await client.instance.send(
+	await client.send(
 		from,
 		{
 			document: Buffer.from(buffer, 'base64'),
@@ -71,7 +71,7 @@ async function sendBatch(state, from, message, client, ctx) {
 
 	const body = `${'Comix Reader'.formatHeaders()}\n\n${safeName}\nTotal : ${allChapters.length} chapter(s)\nShowing : ${start + 1}–${start + batch.length}\n\nSelect a chapter to download as PDF.`;
 
-	const builder = new client.instance.TemplateBuilder.Native(client);
+	const builder = new client.TemplateBuilder.Native(client);
 
 	builder
 		.destination(from)
@@ -109,7 +109,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, sender, prefix }, client) {
 		if (!query) {
-			return await client.instance.reply(
+			return await client.reply(
 				from,
 				'Please provide a chapter ID, Comix URL, or a search query.\n\nExamples:\n• !cxread 12345\n• !cxread https://comix.to/title/...\n• !cxread Solo Leveling',
 				message
@@ -123,14 +123,14 @@ export default {
 			const cached = readerSessions.get(sessionId);
 
 			if (!cached) {
-				return await client.instance.reply(from, 'Session expired. Please search again.', message);
+				return await client.reply(from, 'Session expired. Please search again.', message);
 			}
 
 			cached.currentBatch++;
 			return await sendBatch(cached, from, message, client, { prefix });
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Processing...', message);
+		const wait = await client.waitMessage(from, 'Processing...', message);
 
 		if (isChapterInput(input)) {
 			return await downloadChapterAsPdf({ from, message }, client, wait, input, `comix-chapter-${input}`);

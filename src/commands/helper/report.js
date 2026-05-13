@@ -16,11 +16,11 @@ export default {
 	status: 'enable',
 	async run({ from, message, query, sender, pushname, prettyNumber, settings, type, isOwner, args, prefix }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please provide a message to report', message);
+			return await client.reply(from, 'Please provide a message to report', message);
 		}
 
 		if (args[1] === 'accept' && isOwner) {
-			await client.instance.reply(
+			await client.reply(
 				args[2],
 				'Your problem has been accepted by the Owner. Please wait for the fix. And for the bonuses you will be given 20 Limit.',
 				JSON.parse(args.slice(4))
@@ -32,13 +32,13 @@ export default {
 		}
 
 		if (query.length < 20 && type !== 'templateButtonReplyMessage') {
-			return await client.instance.reply(from, 'Please describe the problem in detail. Min. 20 characters', message);
+			return await client.reply(from, 'Please describe the problem in detail. Min. 20 characters', message);
 		}
 
 		const capt =
 			'Thanks for reporting!\n\nThis error will be reviewed and fixed as soon as possible.\n\nIf you have any questions, please contact the owner.';
 
-		await client.instance.send(
+		await client.send(
 			from,
 			{
 				text: capt.trim(),
@@ -48,7 +48,7 @@ export default {
 			},
 			{}
 		);
-		await client.instance.send(settings.owner_number, {
+		await client.send(settings.owner_number, {
 			text: query,
 			footer: `Sender Name : ${pushname}
 ID : ${sender}

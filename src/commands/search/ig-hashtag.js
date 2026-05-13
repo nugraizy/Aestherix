@@ -15,7 +15,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, isOwner, prefix }, client) {
 		if (!configuration.isInstagramInitiated) {
-			return await client.instance.reply(
+			return await client.reply(
 				from,
 				`Instagram session is not initialized. ${isOwner ? `Type ${prefix}instagraminit to initialize it.` : `Please ask the owner to initialize it first using the command ${prefix}instagraminit`}`,
 				message
@@ -23,14 +23,14 @@ export default {
 		}
 
 		if (!query) {
-			return client.instance.reply(from, 'You must provide a query.', message);
+			return client.reply(from, 'You must provide a query.', message);
 		}
 
 		const result = await configuration.instagram.search.hashtag(query);
 
 		for (const tag in result) {
 			if (result[tag].error) {
-				await client.instance.reply(from, result[tag].error, message);
+				await client.reply(from, result[tag].error, message);
 				continue;
 			}
 
@@ -45,7 +45,7 @@ export default {
 				capt += `Caption : ${post.caption}\n\n`;
 			}
 
-			const messageToQuoted = await client.instance.send(
+			const messageToQuoted = await client.send(
 				from,
 				{
 					caption: capt.trim().formatForm(),
@@ -54,7 +54,7 @@ export default {
 				{ quoted: message }
 			);
 
-			await client.instance.reply(
+			await client.reply(
 				from,
 				`You can reply this message and type ${prefix}igp <number[1-${result[tag].posts.length}]>`,
 				messageToQuoted

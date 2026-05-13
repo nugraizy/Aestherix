@@ -21,7 +21,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
 		query = removeDuplicatesArray(query.split(','));
@@ -38,14 +38,14 @@ export default {
 				result = await spotifier.getAlbum(id);
 
 				if (!result.status) {
-					await client.instance.reply(from, result.message, message);
+					await client.reply(from, result.message, message);
 					continue;
 				}
 			} else {
 				result = await spotifier.searchAlbum(querie);
 
 				if (!result.status) {
-					await client.instance.reply(from, result.message, message);
+					await client.reply(from, result.message, message);
 					continue;
 				}
 
@@ -84,7 +84,7 @@ export default {
 				// count++;
 			}
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					image: await fetchBUFFER(images),
@@ -119,7 +119,7 @@ export default {
 				},
 				{ quoted: message }
 			);
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					buttonText: 'Open List',

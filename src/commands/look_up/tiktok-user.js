@@ -42,7 +42,7 @@ export default {
 				})
 			);
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					buttonText: 'Open list',
@@ -58,7 +58,7 @@ export default {
 		}
 
 		if (!query) {
-			return await client.instance.reply(from, 'Please specify a query', message);
+			return await client.reply(from, 'Please specify a query', message);
 		}
 
 		let { _: usernames } = parser(query);
@@ -67,7 +67,7 @@ export default {
 
 		for (const data in users) {
 			if (users[data]?.error) {
-				client.instance.reply(from, `Error while searching TikTok user\n\n${users[data].error}`, message);
+				client.reply(from, `Error while searching TikTok user\n\n${users[data].error}`, message);
 
 				loggers.error(`${color('Failed to Search TikTok User', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				continue;
@@ -97,7 +97,7 @@ export default {
 
 			capt += `📝 ${biography}\n`;
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					image: { url: profileHD || profileSD },

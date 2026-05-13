@@ -33,14 +33,14 @@ export default {
 	status: 'enable',
 	run: async ({ query, from, type, message, /*cmd,*/ args, filename }, client) => {
 		if (!query) {
-			return await client.instance.reply(from, 'Please provide some text to convert to speech', message);
+			return await client.reply(from, 'Please provide some text to convert to speech', message);
 		}
 
 		if (type === 'listResponseMessage') {
 			const result = await gttsAI(args.slice(2).join(' '), args[1]);
 
 			if (result?.error) {
-				return await client.instance.reply(from, result.error, message);
+				return await client.reply(from, result.error, message);
 			}
 
 			const audioBuffer = await toOpus('opus', {
@@ -49,7 +49,7 @@ export default {
 				media: result.url.replace('https', 'http')
 			});
 
-			client.instance.send(from, { audio: Buffer.from(audioBuffer, 'base64') }, { quoted: message });
+			client.send(from, { audio: Buffer.from(audioBuffer, 'base64') }, { quoted: message });
 
 			return;
 		}
@@ -103,7 +103,7 @@ export default {
 					.trimEnd();
 			}
 
-			await client.instance.reply(from, caption, message);
+			await client.reply(from, caption, message);
 
 			return;
 		}
@@ -113,7 +113,7 @@ export default {
 		const result = await gttsAI(queries.join(' '), model);
 
 		if (result?.error) {
-			return await client.instance.reply(from, result.error, message);
+			return await client.reply(from, result.error, message);
 		}
 
 		const audioBuffer = await toOpus('opus', {
@@ -122,7 +122,7 @@ export default {
 			media: result.url.replace('https', 'http')
 		});
 
-		await client.instance.send(from, { audio: Buffer.from(audioBuffer, 'base64') }, { quoted: message });
+		await client.send(from, { audio: Buffer.from(audioBuffer, 'base64') }, { quoted: message });
 
 		// const container = {};
 		// const row = [];
@@ -163,7 +163,7 @@ export default {
 		// 	});
 		// }
 
-		// await client.instance.send(
+		// await client.send(
 		// 	from,
 		// 	{
 		// 		title: 'Text-To-Speech A.I'.formatHeaders(),

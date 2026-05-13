@@ -21,9 +21,9 @@ export default {
 		});
 
 		if (wait.timeout) {
-			client.instance.reply(from, 'Timeout! I will just call you ' + pushname, message);
+			client.reply(from, 'Timeout! I will just call you ' + pushname, message);
 		} else {
-			client.instance.reply(from, `Hi ${wait.message}. I'm ${__botName} Bot. Nice to know you!`, {
+			client.reply(from, `Hi ${wait.message}. I'm ${__botName} Bot. Nice to know you!`, {
 				from,
 				quoted: wait.quoted
 			});
@@ -38,12 +38,12 @@ export default {
 		});
 
 		if (wait.timeout) {
-			client.instance.reply(from, 'Timeout! I consider the answer is yes :]', message);
+			client.reply(from, 'Timeout! I consider the answer is yes :]', message);
 		} else {
 			if (['y', 'yes'].includes(wait.message.toLowerCase())) {
-				client.instance.reply(from, 'Thank you for your support!', { from, quoted: wait.quoted });
+				client.reply(from, 'Thank you for your support!', { from, quoted: wait.quoted });
 			} else {
-				client.instance.reply(from, 'Sorry to hear that :[', { from, quoted: wait.quoted });
+				client.reply(from, 'Sorry to hear that :[', { from, quoted: wait.quoted });
 			}
 		}
 
@@ -56,11 +56,11 @@ export default {
 		});
 
 		if (wait.timeout) {
-			return client.instance.reply(from, 'Timeout! I wish i did not speak to a wall. Have a good day.', message);
+			return client.reply(from, 'Timeout! I wish i did not speak to a wall. Have a good day.', message);
 		} else {
-			client.instance.reply(from, 'Thank you for your feedback!', { from, quoted: wait.quoted });
+			client.reply(from, 'Thank you for your feedback!', { from, quoted: wait.quoted });
 		}
 
-		client.instance.reply(from, 'Have a good day!', message);
+		client.reply(from, 'Have a good day!', message);
 	}
 };

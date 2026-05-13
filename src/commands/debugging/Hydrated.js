@@ -25,7 +25,7 @@ export default {
 	limit: 0,
 	status: 'disable',
 	async run({ from }, client) {
-		const image = await client.instance.prepareMedia(await fs.readFile('./src/media/blank.png'), 'imageMessage');
+		const image = await client.prepareMedia(await fs.readFile('./src/media/blank.png'), 'imageMessage');
 		const string1 = randomString('0123456789', 16);
 		const messages = generateWAMessageFromContent(
 			from,
@@ -81,10 +81,10 @@ export default {
 					}
 				}
 			},
-			{ messageId: client.instance.generateMessageID() }
+			{ messageId: client.generateMessageID() }
 		);
 
-		await client.instance.relay(from, messages.message, {
+		await client.relay(from, messages.message, {
 			messageId: messages.key.id
 		});
 	}

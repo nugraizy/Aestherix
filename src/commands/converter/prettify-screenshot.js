@@ -16,24 +16,24 @@ export default {
 	status: 'enable',
 	run: async ({ from, isMediaImage, prettyNumber, mediaData, message }, client) => {
 		if (!isMediaImage) {
-			return client.instance.reply(from, 'Please reply/send image with caption the command.', message);
+			return client.reply(from, 'Please reply/send image with caption the command.', message);
 		}
 
 		loggers.warning(`${color('Prettifying an Image', 'pink')} ${color(prettyNumber, 'lilac')}`);
 
-		let buffer = await client.instance.downloadMediaMessage(mediaData);
+		let buffer = await client.downloadMediaMessage(mediaData);
 
 		const screenshot = await new Prettify().Screenshot(buffer);
 
 		buffer = screenshot.toBuffer();
 
 		if (screenshot?.error) {
-			client.instance.reply(from, screenshot.error, message);
+			client.reply(from, screenshot.error, message);
 			loggers.error(`${color('Failed to Prettify an Image', 'red')} for ${color(prettyNumber, 'lilac')}`);
 			return;
 		}
 
-		await client.instance.send(from, { image: Buffer.from(buffer, 'base64') }, { quoted: message });
+		await client.send(from, { image: Buffer.from(buffer, 'base64') }, { quoted: message });
 		buffer = null;
 
 		loggers.info(`${color('Prettifying an Image Success', 'pink')} ${color(prettyNumber, 'lilac')}`);

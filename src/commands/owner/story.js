@@ -60,7 +60,7 @@ export default {
 		}
 
 		if (tempContainer.size === 0) {
-			return await client.instance.reply(from, 'No story are found.', message);
+			return await client.reply(from, 'No story are found.', message);
 		}
 
 		for (const value of Array.from(tempContainer.entries())) {
@@ -75,7 +75,7 @@ export default {
 			caption += `Videos : ${value[1].stories?.videoMessage?.length ?? 0}\n\n`;
 		}
 
-		await client.instance.send(
+		await client.send(
 			from,
 			{
 				buttonText: 'Open List',

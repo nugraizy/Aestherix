@@ -32,10 +32,10 @@ export default {
 	async run({ from, query, message, sender }, client) {
 		try {
 			if (!query) {
-				return await client.instance.reply(from, 'You must enter text', message);
+				return await client.reply(from, 'You must enter text', message);
 			}
 
-			const getGroups = await client.instance.groupFetchAllParticipating();
+			const getGroups = await client.groupFetchAllParticipating();
 			const groups = Object.entries(getGroups)
 				.slice(0)
 				.map((entry) => entry[1]);
@@ -47,11 +47,11 @@ export default {
 
 			for (const id of chats) {
 				await delay(300);
-				await client.instance.send(id, { text, mentions: [sender] });
+				await client.send(id, { text, mentions: [sender] });
 			}
 		} catch (err) {
 			log(err);
-			await client.instance.reply(from, err.stack, message);
+			await client.reply(from, err.stack, message);
 		}
 	}
 };

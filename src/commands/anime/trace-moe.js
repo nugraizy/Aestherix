@@ -33,13 +33,13 @@ export default {
 		client
 	) {
 		if (!isURL(query) && !isMediaImage) {
-			return await client.instance.reply(from, 'Please send/reply a image to find the similar image', message);
+			return await client.reply(from, 'Please send/reply a image to find the similar image', message);
 		}
 
 		let media = query && isURL(query) ? query : null;
 
 		if (typeMessage === 'listResponseMessage' && args[1] === 'get') {
-			await client.instance.reply(from, 'Searching. Please wait...', message);
+			await client.reply(from, 'Searching. Please wait...', message);
 
 			args = JSON.parse(JSON.parse(JSON.stringify(args.slice(2).join(' '))));
 
@@ -97,7 +97,7 @@ ${
 
 			const buffer = await toMp4(args.video, sender);
 
-			return await client.instance.send(
+			return await client.send(
 				from,
 				{
 					video: new Buffer.from(buffer, 'base64'),
@@ -113,10 +113,10 @@ ${
 			);
 		}
 
-		await client.instance.reply(from, 'Searching. Please wait...', message);
+		await client.reply(from, 'Searching. Please wait...', message);
 
 		if (isMediaImage) {
-			media = await client.instance.downloadAndSaveMediaMessage(
+			media = await client.downloadAndSaveMediaMessage(
 				extractMediaData,
 				path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
 				typeQuoted
@@ -130,7 +130,7 @@ ${
 				fs.unlinkSync(media);
 			}
 
-			return await client.instance.reply(from, result.error, message);
+			return await client.reply(from, result.error, message);
 		}
 
 		if (isMediaImage) {
@@ -189,7 +189,7 @@ ${externalLinks
 
 		const buffer = await toMp4(result[0].video, sender);
 
-		const builder = new client.instance.TemplateBuilder.Native();
+		const builder = new client.TemplateBuilder.Native();
 
 		await builder
 			.destination(from)
@@ -203,7 +203,7 @@ ${externalLinks
 			)
 			.send();
 
-		// await client.instance.send(
+		// await client.send(
 		// 	from,
 		// 	{
 		// 		video: new Buffer.from(buffer, 'base64'),
@@ -239,7 +239,7 @@ ${externalLinks
 		// 	i++;
 		// }
 
-		// await client.instance.send(
+		// await client.send(
 		// 	from,
 		// 	{
 		// 		title: 'Trace Moe'.formatHeaders(),

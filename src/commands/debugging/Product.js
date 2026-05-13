@@ -17,7 +17,7 @@ export default {
 		const messages = await generateWAMessage(
 			from,
 			{ image: await fs.readFile('./src/media/blank.png') },
-			{ upload: client.instance.waUploadToServer }
+			{ upload: client.waUploadToServer }
 		);
 
 		const content = generateWAMessageFromContent(
@@ -46,9 +46,9 @@ export default {
 					footer: 'Nanda is a footer'
 				}
 			},
-			{ messageId: client.instance.generateMessageID() }
+			{ messageId: client.generateMessageID() }
 		);
 
-		await client.instance.relay(from, content.message, { messageId: content.key.id });
+		await client.relay(from, content.message, { messageId: content.key.id });
 	}
 };

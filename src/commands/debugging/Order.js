@@ -30,9 +30,9 @@ export default {
 					totalCurrencyCode: 'IDR'
 				}
 			},
-			{ messageId: client.instance.generateMessageID() }
+			{ messageId: client.generateMessageID() }
 		);
 
-		await client.instance.relay(from, messages.message, { messageId: messages.key.id });
+		await client.relay(from, messages.message, { messageId: messages.key.id });
 	}
 };

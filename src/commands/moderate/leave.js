@@ -13,9 +13,9 @@ export default {
 	restrict: true,
 	status: 'enable',
 	async run({ from, message }, client) {
-		const data = await client.instance.reply(from, 'I will leave.', message);
+		const data = await client.reply(from, 'I will leave.', message);
 
-		await client.instance.groupLeave(from);
-		await client.instance.chatModify({ delete: true, lastMessages: [data] }, from);
+		await client.groupLeave(from);
+		await client.chatModify({ delete: true, lastMessages: [data] }, from);
 	}
 };

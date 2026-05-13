@@ -13,11 +13,11 @@ export default {
 	status: 'enable',
 	async run({ isBotAdmin, query, bodyQuoted, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please input the description.', message);
+			return await client.reply(from, 'Please input the description.', message);
 		}
 
 		if (!isBotAdmin) {
-			return await client.instance.reply(
+			return await client.reply(
 				from,
 				'Bot is not admin, Please promote admin before using moderation commands.',
 				message
@@ -25,11 +25,11 @@ export default {
 		}
 
 		if (query) {
-			return await client.instance.updateGroup(from, 'DESCRIPTION', [], [], { texts: query });
+			return await client.updateGroup(from, 'DESCRIPTION', [], [], { texts: query });
 		}
 
 		if (bodyQuoted) {
-			return await client.instance.updateGroup(from, 'DESCRIPTION', [], [], { texts: bodyQuoted });
+			return await client.updateGroup(from, 'DESCRIPTION', [], [], { texts: bodyQuoted });
 		}
 	}
 };

@@ -6,10 +6,10 @@ type MediaType = 'videoMessage' | 'imageMessage';
 type Media = string | Buffer | undefined | null;
 type Rows = { header: string; title: string; description: string; id: string };
 type Sections = { title: string; highlight_label: string; rows: Rows[] };
-type Cards = { body: string | null; footer: string | null; title: string | null; buttons: Buttons[] } & Partial<{
+export type Cards = { body: string | null; footer: string | null; title: string | null; buttons: Buttons[] } & Partial<{
 	header: string | Buffer;
 }>;
-type Buttons = {
+export type Buttons = {
 	name:
 		| 'cta_copy'
 		| 'quick_reply'
@@ -24,18 +24,18 @@ type Buttons = {
 	buttonParamsJson: string;
 };
 
-declare class InteractiveButtons {
+export declare class InteractiveButtons {
 	button: {
-		copy: (params: { display: string; code: string }) => { name: 'cta_copy'; buttonParamsJson: string };
-		reply: (params: { display: string; id: string }) => { name: 'quick_reply'; buttonParamsJson: string };
-		url: (params: { display: string; url: string }) => { name: 'cta_url'; buttonParamsJson: string };
-		list: (params: { display: string; sections: Sections }) => { name: 'single_select'; buttonParamsJson: string };
-		call: (params: { display: string; phoneNumber: string }) => { name: 'cta_call'; buttonParamsJson: string };
-		setReminder: (params: { display: string }) => { name: 'cta_reminder'; buttonParamsJson: string };
-		cancelReminder: (params: { display: string }) => { name: 'cta_cancel_reminder'; buttonParamsJson: string };
-		address: (params: { display: string }) => { name: 'address_message'; buttonParamsJson: string };
-		location: (params: { display: string }) => { name: 'send_location'; buttonParamsJson: string };
-		webview: (params: { title: string; url: string; inApp: boolean }) => { name: 'open_webview'; buttonParamsJson: string };
+		copy: (params: { display: string; code: string }) => Buttons;
+		reply: (params: { display: string; id: string }) => Buttons;
+		url: (params: { display: string; url: string }) => Buttons;
+		list: (params: { display: string; sections: Sections }) => Buttons;
+		call: (params: { display: string; phoneNumber: string }) => Buttons;
+		setReminder: (params: { display: string }) => Buttons;
+		cancelReminder: (params: { display: string }) => Buttons;
+		address: (params: { display: string }) => Buttons;
+		location: (params: { display: string }) => Buttons;
+		webview: (params: { title: string; url: string; inApp: boolean }) => Buttons;
 	};
 }
 

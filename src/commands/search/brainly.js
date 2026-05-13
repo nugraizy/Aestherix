@@ -17,7 +17,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query', message);
+			return await client.reply(from, 'You must provide a query', message);
 		}
 
 		const parseOptions = yargsParser(query, {
@@ -33,7 +33,7 @@ export default {
 		const brainly = await brainlySearch(query, options);
 
 		if (brainly?.error) {
-			return await client.instance.reply(from, brainly.error, message);
+			return await client.reply(from, brainly.error, message);
 		}
 
 		let capt = 'Brainly'.formatHeaders();
@@ -49,6 +49,6 @@ export default {
 		}
 
 		capt += `\nBrainly by ${__botName}. Powered by Hidden Finder`;
-		await client.instance.reply(from, capt.trim().formatForm(), message);
+		await client.reply(from, capt.trim().formatForm(), message);
 	}
 };

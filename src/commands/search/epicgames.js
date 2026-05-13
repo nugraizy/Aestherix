@@ -32,14 +32,14 @@ export default {
 	status: 'enable',
 	run: async ({ query, message, from }, client) => {
 		if (!query) {
-			return client.instance.reply(from, 'You must provide a query.', message);
+			return client.reply(from, 'You must provide a query.', message);
 		}
 
 		if (query === '--free') {
 			const result = await epicgamesFree();
 
 			if (result?.error) {
-				return await client.instance.reply(from, result.error, message);
+				return await client.reply(from, result.error, message);
 			}
 
 			let caption = `${'Free Epicgames'.formatHeaders()}
@@ -57,7 +57,7 @@ https://store.epicgames.com/p/${v.productSlug}`
 	)
 	.join('\n\n')}`.trim();
 
-			return await client.instance.sendMessage(
+			return await client.sendMessage(
 				from,
 				{ image: { url: result[0].keyImages.find((v) => v.type === 'Thumbnail').url }, caption },
 				{ quoted: message }
@@ -67,7 +67,7 @@ https://store.epicgames.com/p/${v.productSlug}`
 		const result = await epicgames(query);
 
 		if (result?.error) {
-			return await client.instance.reply(from, result.error, message);
+			return await client.reply(from, result.error, message);
 		}
 
 		let caption = `${'Epicgames'.formatHeaders()}
@@ -84,6 +84,6 @@ https://store.epicgames.com/p/${v.urlSlug}`
 	)
 	.join('\n\n')}`.trim();
 
-		await client.instance.sendMessage(from, { image: { url: result[0].keyImages[0].url }, caption }, { quoted: message });
+		await client.sendMessage(from, { image: { url: result[0].keyImages[0].url }, caption }, { quoted: message });
 	}
 };

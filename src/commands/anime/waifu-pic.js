@@ -19,14 +19,14 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, args, prefix }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, 'You must provide a query.', message);
 		}
 
 		if (args[1] === 'next' || args[1] === 'prev') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(5).join(' '))));
 			const index = data.findIndex((v) => v === args[4]);
 
-			const builder = new client.instance.TemplateBuilder.Native();
+			const builder = new client.TemplateBuilder.Native();
 
 			await builder
 				.destination(from)
@@ -77,11 +77,11 @@ export default {
 			const result = await getWaifu(querie.trim(), nsfw ? 'nsfw' : 'sfw');
 
 			if (result?.error) {
-				await client.instance.reply(from, result.error, message);
+				await client.reply(from, result.error, message);
 				continue;
 			}
 
-			const builder = new client.instance.TemplateBuilder.Native();
+			const builder = new client.TemplateBuilder.Native();
 
 			await builder
 				.destination(from)

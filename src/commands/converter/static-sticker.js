@@ -48,18 +48,18 @@ export default {
 
 		if (bodyQuoted) {
 			ttp(prettyNumber, bodyQuoted, colors).then(async (buffer) => {
-				await client.instance.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { quoted: message });
+				await client.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { quoted: message });
 
 				loggers.info(`${color('Sticker is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 			});
 		} else if (query) {
 			ttp(prettyNumber, query, colors).then(async (buffer) => {
-				await client.instance.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { quoted: message });
+				await client.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { quoted: message });
 
 				loggers.info(`${color('Sticker is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 			});
 		} else {
-			await client.instance.reply(from, 'Please enter text to convert to sticker', message);
+			await client.reply(from, 'Please enter text to convert to sticker', message);
 		}
 	}
 };

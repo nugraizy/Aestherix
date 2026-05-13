@@ -15,23 +15,23 @@ export default {
 	status: 'enable',
 	async run({ from, query, message }, client) {
 		let capt = `${__botName} Search\n\n`;
-		const messages = await client.instance.searchMessage(from, query);
+		const messages = await client.searchMessage(from, query);
 
 		if (!messages.length) {
 			capt += 'No message found.';
 		} else {
 			capt += `Found ${messages.length} messages.\n\n`;
 
-			await client.instance.reply(from, capt.trim(), message);
+			await client.reply(from, capt.trim(), message);
 
 			for (const messageElement of messages) {
-				await client.instance.reply(from, 'Found it.', messageElement);
+				await client.reply(from, 'Found it.', messageElement);
 				await delay(200);
 			}
 
 			return;
 		}
 
-		await client.instance.reply(from, capt.trim(), message);
+		await client.reply(from, capt.trim(), message);
 	}
 };

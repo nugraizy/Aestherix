@@ -39,7 +39,7 @@ export default {
 				};
 			});
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					image: { url: data[index].thumbnail },
@@ -69,7 +69,7 @@ export default {
 				},
 				{ quoted: message }
 			);
-			return await client.instance.send(
+			return await client.send(
 				from,
 				{
 					buttonText: 'Open List',
@@ -81,7 +81,7 @@ export default {
 				{}
 			);
 		} else if (args[1] === 'get') {
-			return await client.instance.reply(from, `${'Iflix Search'.formatHeaders()}\n\nURL : ${args[2]}`, message);
+			return await client.reply(from, `${'Iflix Search'.formatHeaders()}\n\nURL : ${args[2]}`, message);
 		}
 
 		query = query.split(',');
@@ -91,7 +91,7 @@ export default {
 			const data = await iflixSearch(querie);
 
 			if (data?.error) {
-				return await client.instance.reply(from, data.error, message);
+				return await client.reply(from, data.error, message);
 			}
 
 			let caption = 'Iflix Search'.formatHeaders();
@@ -113,7 +113,7 @@ export default {
 				};
 			});
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					image: { url: data[0].thumbnail },
@@ -133,7 +133,7 @@ export default {
 				},
 				{ quoted: message }
 			);
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					buttonText: 'Open List',

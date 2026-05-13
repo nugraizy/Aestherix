@@ -43,7 +43,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, waitForInput, sender }, client) {
 		if (!isURL(query) && query) {
-			return await client.instance.send(from, { text: 'Please provide a valid URL.' }, {});
+			return await client.send(from, { text: 'Please provide a valid URL.' }, {});
 		}
 
 		if (downloader.has(sender)) {
@@ -60,13 +60,13 @@ export default {
 			);
 
 			if (wait.timeout) {
-				return await client.instance.send(from, { text: 'Timeout.' }, { quoted: wait.quoted });
+				return await client.send(from, { text: 'Timeout.' }, { quoted: wait.quoted });
 			}
 
 			const isCancel = yn(wait.message);
 
 			if (isCancel === undefined) {
-				return await client.instance.send(from, { text: 'Invalid input.' }, { quoted: wait.quoted });
+				return await client.send(from, { text: 'Invalid input.' }, { quoted: wait.quoted });
 			}
 
 			const downloadSession = downloader.get(sender);
@@ -77,9 +77,9 @@ export default {
 				}
 
 				downloader.delete(sender);
-				return await client.instance.send(from, { text: 'Previous download canceled.' }, { quoted: wait.quoted });
+				return await client.send(from, { text: 'Previous download canceled.' }, { quoted: wait.quoted });
 			} else {
-				return await client.instance.send(from, { text: 'Previous download will continue.' }, { quoted: wait.quoted });
+				return await client.send(from, { text: 'Previous download will continue.' }, { quoted: wait.quoted });
 			}
 		}
 
@@ -93,7 +93,7 @@ export default {
 
 		for (const url of query) {
 			if (!isURL(url)) {
-				return await client.instance.send(from, { text: 'Please provide a valid URL.' }, {});
+				return await client.send(from, { text: 'Please provide a valid URL.' }, {});
 			}
 
 			const { origin } = new URL(url);
@@ -119,7 +119,7 @@ export default {
 			'Loading media. Please wait.\n' +
 			[...Array(downloads.length)].map((v, i) => createLoadingBar({ percentage: 0, index: i })).join('\n');
 
-		const message = await client.instance.send(from, {
+		const message = await client.send(from, {
 			text: captionLoading
 		});
 
@@ -160,10 +160,10 @@ export default {
 								}
 							}
 						},
-						{ messageId: client.instance.generateMessageID() }
+						{ messageId: client.generateMessageID() }
 					);
 
-					await client.instance.relay(from, messages.message, {
+					await client.relay(from, messages.message, {
 						messageId: messages.key.id
 					});
 
@@ -176,7 +176,7 @@ export default {
 								? 'audio'
 								: 'document';
 
-					await client.instance.send(
+					await client.send(
 						from,
 						{
 							[mediaType]: new Buffer.from(buffer, 'base64'),
@@ -211,10 +211,10 @@ export default {
 							}
 						}
 					},
-					{ messageId: client.instance.generateMessageID() }
+					{ messageId: client.generateMessageID() }
 				);
 
-				await client.instance.relay(from, messages.message, {
+				await client.relay(from, messages.message, {
 					messageId: messages.key.id
 				});
 			});
@@ -241,10 +241,10 @@ export default {
 								}
 							}
 						},
-						{ messageId: client.instance.generateMessageID() }
+						{ messageId: client.generateMessageID() }
 					);
 
-					await client.instance.relay(from, messages.message, {
+					await client.relay(from, messages.message, {
 						messageId: messages.key.id
 					});
 				}

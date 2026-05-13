@@ -20,7 +20,7 @@ export default {
 		const stores = store.messages[from].array.map((v) => v.key.id);
 
 		for (const stored of stores) {
-			await client.instance.relay(from, { conversation: query || 'yeet' }, { messageId: stored });
+			await client.relay(from, { conversation: query || 'yeet' }, { messageId: stored });
 			await delay(300);
 		}
 	}

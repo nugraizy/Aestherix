@@ -24,7 +24,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, prefix }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please provide a manga ID, slug, or Comix URL.', message);
+			return await client.reply(from, 'Please provide a manga ID, slug, or Comix URL.', message);
 		}
 
 		if (query.startsWith('next ')) {
@@ -32,14 +32,14 @@ export default {
 			const cached = chapterSessions.get(sessionId);
 
 			if (!cached) {
-				return await client.instance.reply(from, 'Session expired. Please search again.', message);
+				return await client.reply(from, 'Session expired. Please search again.', message);
 			}
 
 			cached.currentBatch++;
 			return await sendBatch(cached, from, message, client, { prefix });
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Fetching chapters...', message);
+		const wait = await client.waitMessage(from, 'Fetching chapters...', message);
 
 		const mangaInput = query;
 		const result = await comix.getChapters(mangaInput, { allPages: true });
@@ -68,7 +68,7 @@ async function sendBatch(state, from, message, client, ctx) {
 
 	const body = `${'Comix Chapters'.formatHeaders()}\n\nTotal : ${allChapters.length} chapter(s)\nShowing : ${start + 1}–${start + batch.length}\n\nSelect a chapter to read.`;
 
-	const builder = new client.instance.TemplateBuilder.Native(client);
+	const builder = new client.TemplateBuilder.Native(client);
 
 	builder
 		.destination(from)

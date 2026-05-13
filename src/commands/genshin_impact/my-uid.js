@@ -21,7 +21,7 @@ export default {
 		const index = data.findIndex((v) => v.user === sender);
 
 		if (index === -1) {
-			return await client.instance.reply(from, 'Your character seems nowhere in the Database.', message);
+			return await client.reply(from, 'Your character seems nowhere in the Database.', message);
 		}
 
 		query = `${data[index].uid} -uid`;

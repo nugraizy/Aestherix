@@ -1,5 +1,6 @@
 import configuration from '../../helper/config/connect.js';
 import { login } from '../../utils/instagram/login.js';
+
 		const { InstagramApi } = await import('../../utils/instagram/instagram.js');
 
 
@@ -17,7 +18,7 @@ export default {
 	status: 'enable',
 	run: async ({ from, message }, client) => {
 		if (configuration.isInstagramInitiated) {
-			return await client.instance.reply(from, 'Instagram session is already initialized.', message);
+			return await client.reply(from, 'Instagram session is already initialized.', message);
 		}
 
 		await login(process.env.INSTAGRAM_USERNAME, process.env.INSTAGRAM_PASSWORD);
@@ -27,6 +28,6 @@ export default {
 
 		configuration.isInstagramInitiated = true;
 
-		return await client.instance.reply(from, 'Instagram session has been initialized successfully.', message);
+		return await client.reply(from, 'Instagram session has been initialized successfully.', message);
 	}
 };

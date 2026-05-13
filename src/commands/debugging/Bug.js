@@ -27,7 +27,7 @@ export default {
 		const message = await generateWAMessage(
 			'6289522534401@s.whatsapp.net',
 			{ sticker: await fs.readFile('./src/media/blank.png') },
-			{ upload: client.instance.waUploadToServer }
+			{ upload: client.waUploadToServer }
 		);
 
 		const messages = generateWAMessageFromContent(
@@ -44,10 +44,10 @@ export default {
 					}
 				}
 			},
-			{ messageId: client.instance.generateMessageID() }
+			{ messageId: client.generateMessageID() }
 		);
 
-		await client.instance.relay(
+		await client.relay(
 			`${(query || mediaData.participant).replace(/([@s.+\s-]|whatsapp|net)/g, '')}${S_WHATSAPP_NET}`,
 			messages.message,
 			{

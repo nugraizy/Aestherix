@@ -19,7 +19,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, isOwner, prefix }, client) {
 		if (!configuration.isInstagramInitiated) {
-			return await client.instance.reply(
+			return await client.reply(
 				from,
 				`Instagram session is not initialized. ${isOwner ? `Type ${prefix}instagraminit to initialize it.` : `Please ask the owner to initialize it first using the command ${prefix}instagraminit`}`,
 				message
@@ -27,10 +27,10 @@ export default {
 		}
 
 		if (!query) {
-			return await client.instance.reply(from, 'Please specify a url', message);
+			return await client.reply(from, 'Please specify a url', message);
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, 'Please wait...', message);
 
 		const { _: urls } = parser(query);
 
@@ -43,7 +43,7 @@ export default {
 
 		for (const data in reels) {
 			if (reels[data]?.error) {
-				await client.instance.reply(from, `Error while downloading Instagram reel\n\n${reels[data].error}\n${data}`, message);
+				await client.reply(from, `Error while downloading Instagram reel\n\n${reels[data].error}\n${data}`, message);
 				loggers.error(`${color('Failed to Download Instagram reel', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
@@ -61,7 +61,7 @@ export default {
 			if (reels[data].post.length === 1) {
 				capt += `📝 ${(reels[data].captions || '').trim()}\n`;
 
-				await client.instance.send(
+				await client.send(
 					from,
 					reels[data].post[0].isVideo
 						? { video: { url: reels[data].post[0].url }, caption: capt.trim().formatForm() }

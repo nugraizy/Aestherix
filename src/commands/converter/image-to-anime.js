@@ -26,10 +26,10 @@ export default {
 		}
 
 		if (!isMediaImage && args[1] !== '-variant') {
-			return await client.instance.reply(from, 'Please send/reply an image to convert to anime', message);
+			return await client.reply(from, 'Please send/reply an image to convert to anime', message);
 		}
 
-		bufferMessage = await client.instance.downloadMediaMessage(mediaData);
+		bufferMessage = await client.downloadMediaMessage(mediaData);
 		buffer = await imageToAnime(bufferMessage, sender, {
 			crop: 'SINGLE',
 			enhance: true,
@@ -39,7 +39,7 @@ export default {
 
 		buffer = Buffer.from(buffer, 'base64');
 
-		await client.instance.send(
+		await client.send(
 			from,
 			{
 				image: buffer,

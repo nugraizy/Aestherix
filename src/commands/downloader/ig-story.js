@@ -18,7 +18,7 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, isOwner, prefix }, client) {
 		if (!configuration.isInstagramInitiated) {
-			return await client.instance.reply(
+			return await client.reply(
 				from,
 				`Instagram session is not initialized. ${isOwner ? `Type ${prefix}instagraminit to initialize it.` : `Please ask the owner to initialize it first using the command ${prefix}instagraminit`}`,
 				message
@@ -26,10 +26,10 @@ export default {
 		}
 
 		if (!query) {
-			return await client.instance.reply(from, 'Please specify a username', message);
+			return await client.reply(from, 'Please specify a username', message);
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, 'Please wait...', message);
 
 		const { _: input } = parser(query);
 
@@ -42,7 +42,7 @@ export default {
 
 		for (const data in stories) {
 			if (stories[data]?.error) {
-				await client.instance.reply(
+				await client.reply(
 					from,
 					`Error while downloading Instagram story\n\n${stories[data].error}\n${data}`,
 					message
@@ -68,10 +68,10 @@ export default {
 			capt += `Total Stories : ${stories[data].stories.length}\n`;
 			capt += `👥 ${formatNumber(stories[data].followers)} 👤 ${formatNumber(stories[data].following)}\n\n`;
 
-			await client.instance.reply(from, capt.trim().formatForm(), message);
+			await client.reply(from, capt.trim().formatForm(), message);
 
 			for (const media of stories[data].stories) {
-				await client.instance.send(from, media.isVideo ? { video: { url: media.url } } : { image: { url: media.url } }, {});
+				await client.send(from, media.isVideo ? { video: { url: media.url } } : { image: { url: media.url } }, {});
 				await delay(300);
 			}
 

@@ -62,7 +62,7 @@ export default {
 				null;
 
 			if (!data) {
-				return await client.instance.reply(from, 'Story not found', message);
+				return await client.reply(from, 'Story not found', message);
 			}
 
 			caption += ` • ${
@@ -73,7 +73,7 @@ export default {
 			caption += `Texts : ${data.stories?.extendedTextMessage?.length ?? 0}\n`;
 			caption += `Images : ${data.stories?.imageMessage?.length ?? 0}\n`;
 			caption += `Videos : ${data.stories?.videoMessage?.length ?? 0}\n\n`;
-			await client.instance.reply(from, caption.trim(), message);
+			await client.reply(from, caption.trim(), message);
 
 			for (const type of Object.keys(data.stories)) {
 				for (const message of data.stories[type]) {
@@ -83,12 +83,12 @@ export default {
 					if (type === 'extendedTextMessage') {
 						const buffer = await textStory(body, message.message.extendedTextMessage.backgroundArgb);
 
-						await client.instance.send(from, { image: buffer, caption: body }, { quoted: message });
+						await client.send(from, { image: buffer, caption: body }, { quoted: message });
 					} else {
 						const messages = generateWAMessageFromContent(
 							from,
 							{ ...message.message },
-							{ messageId: client.instance.generateMessageID() }
+							{ messageId: client.generateMessageID() }
 						);
 
 						messages.message[type].caption = body;
@@ -98,12 +98,12 @@ export default {
 							quotedMessage: message.message,
 							remoteJid: message.key.remoteJid
 						};
-						await client.instance.relay(from, messages.message, {
+						await client.relay(from, messages.message, {
 							messageId: messages.key.id
 						});
 
 						process.nextTick(() => {
-							client.instance;
+							client;
 						});
 					}
 				}

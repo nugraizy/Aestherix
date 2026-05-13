@@ -25,7 +25,7 @@ export default {
 			caption += `Published : ${data[index].published}\n`;
 			caption += `Content : ${data[index].body}\n`;
 
-			return await client.instance.send(
+			return await client.send(
 				from,
 				{
 					...(data[index].image !== undefined ? { image: await fetchBUFFER(data[index].image), caption } : { text: caption }),
@@ -58,13 +58,13 @@ export default {
 		}
 
 		if (!query) {
-			return client.instance.reply(from, 'Please provide queries', message);
+			return client.reply(from, 'Please provide queries', message);
 		}
 
 		const data = await cnninternational(query);
 
 		if (data?.error) {
-			return await client.instance.reply(from, data.error, message);
+			return await client.reply(from, data.error, message);
 		}
 
 		let caption = 'CNN International'.formatHeaders();
@@ -77,7 +77,7 @@ export default {
 			.map(({ title, body, published }) => `Title : ${title}\nPublished : ${published}\nContent : ${body}`)
 			.join('\n\n')}`.trimEnd();
 
-		await client.instance.send(
+		await client.send(
 			from,
 			{
 				...(data[0].image !== undefined

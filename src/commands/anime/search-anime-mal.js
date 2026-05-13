@@ -41,7 +41,7 @@ export default {
 		const result = await mal.anime.search(query);
 
 		if (result?.error) {
-			return await client.instance.reply(from, result.message, message);
+			return await client.reply(from, result.message, message);
 		}
 
 		const incrementedIndex = increment(0, result.data.length - 1);
@@ -60,7 +60,7 @@ export default {
 				}
 			} = result.data[index];
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					image: { url: large },

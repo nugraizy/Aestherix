@@ -16,7 +16,7 @@ export default {
 	async run({ from, message }, client) {
 		const lists = await getListSurah();
 
-		await client.instance.reply(
+		await client.reply(
 			from,
 			lists
 				.map(

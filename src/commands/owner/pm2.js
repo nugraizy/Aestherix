@@ -115,11 +115,11 @@ export default {
 			if (SEND_AS_STRING) {
 				const { captionFull } = renderProcess(processes);
 
-				return client.instance.reply(from, captionFull.trim(), message);
+				return client.reply(from, captionFull.trim(), message);
 			}
 
 			if (device === 'ios') {
-				const builder = new client.instance.TemplateBuilder.Native();
+				const builder = new client.TemplateBuilder.Native();
 				const { captionFull, buttons } = renderProcess(processes, builder);
 
 				await builder
@@ -132,7 +132,7 @@ export default {
 				return;
 			}
 
-			const builder = new client.instance.TemplateBuilder.Carousel();
+			const builder = new client.TemplateBuilder.Carousel();
 			const { carousel } = renderProcess(processes, builder, true);
 
 			await builder.destination(from).body('PM2 Monitor').footer('PM2 Instances').header('Header').cards(carousel).send();
@@ -154,7 +154,7 @@ export default {
 				const processes = await getProcesses();
 				const { captionFull } = renderProcess(processes);
 
-				return client.instance.reply(from, captionFull, message);
+				return client.reply(from, captionFull, message);
 			}
 
 			if (stop) {

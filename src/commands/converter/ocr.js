@@ -18,10 +18,10 @@ export default {
 	status: 'enable',
 	async run({ isMediaImage, from, prettyNumber, message, filename, query, extractMediaData, typeQuoted }, client) {
 		if (!isMediaImage) {
-			return await client.instance.reply(from, 'Please send/reply an image to recognize text', message);
+			return await client.reply(from, 'Please send/reply an image to recognize text', message);
 		}
 
-		const file = await client.instance.downloadAndSaveMediaMessage(
+		const file = await client.downloadAndSaveMediaMessage(
 			extractMediaData,
 			path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
 			typeQuoted
@@ -34,11 +34,11 @@ export default {
 				.join('\n')
 				.trim();
 
-			client.instance.reply(from, `${scanning.error}\n\nAvailable Languages :\n\n${lang}\n\nUse the code only.`, message);
+			client.reply(from, `${scanning.error}\n\nAvailable Languages :\n\n${lang}\n\nUse the code only.`, message);
 			return;
 		}
 
-		await client.instance.send(from, { text: scanning.result.text.trim() }, { quoted: message });
+		await client.send(from, { text: scanning.result.text.trim() }, { quoted: message });
 
 		loggers.info(`${color('Text is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 	}

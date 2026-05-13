@@ -18,7 +18,7 @@ export default {
 			from,
 			{
 				pollCreationMessage: {
-					encKey: client.instance.generateMessageID(),
+					encKey: client.generateMessageID(),
 					name: 'Poll',
 					selectableOptionsCount: 1,
 					options: [
@@ -34,13 +34,13 @@ export default {
 					messageSecret: randomBytes(32)
 				}
 			},
-			{ messageId: client.instance.generateMessageID() }
+			{ messageId: client.generateMessageID() }
 		);
 
-		await client.instance.relay(from, messages.message, { messageId: messages.key.id });
+		await client.relay(from, messages.message, { messageId: messages.key.id });
 
 		process.nextTick(() => {
-			client.instance.processingMutex.mutex(() => client.instance.upsertMessage(messages, 'append'));
+			client.processingMutex.mutex(() => client.upsertMessage(messages, 'append'));
 		});
 	}
 };

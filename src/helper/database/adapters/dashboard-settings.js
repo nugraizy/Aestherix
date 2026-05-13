@@ -36,11 +36,7 @@ const withRetry = async (operation, { retries = 3, baseDelayMs = 60 } = {}) => {
 			attempt += 1;
 
 			if (isRetryablePrismaError(error)) {
-				console.warn('[dashboardKV] retryable write error', {
-					attempt,
-					code: error?.code,
-					message: error?.message
-				});
+				// retryable — silent retry
 			}
 
 			if (attempt > retries || !isRetryablePrismaError(error)) {
@@ -86,9 +82,9 @@ const flushKVWrite = async (key) => {
 	try {
 		await withRetry(() =>
 			entry.db.dashboardKV.upsert({
-				where: { key },
+				where: { key_sessionName: { key, sessionName: 'main' } },
 				update: { value: serialized },
-				create: { key, value: serialized }
+				create: { key, sessionName: 'main', value: serialized }
 			})
 		);
 
@@ -98,7 +94,6 @@ const flushKVWrite = async (key) => {
 			pendingWrites.delete(key);
 		}
 	} catch {
-		console.warn('[dashboardKV] flush failed, will retry', { key });
 		entry.pendingFlush = true;
 	} finally {
 		entry.flushInProgress = false;
@@ -145,8 +140,8 @@ const scheduleKVWrite = (db, key, serialized) => {
 	}
 };
 
-const getKV = async (db, key) => {
-	const row = await db.dashboardKV.findUnique({ where: { key } });
+const getKV = async (db, key, sessionName = 'main') => {
+	const row = await db.dashboardKV.findUnique({ where: { key_sessionName: { key, sessionName } } });
 
 	if (!row) {
 		return null;

@@ -13,9 +13,9 @@ export default {
 	status: 'enable',
 	async run({ from, query, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'You must provide a bio to set', message);
+			return await client.reply(from, 'You must provide a bio to set', message);
 		}
 
-		await client.instance.setStatus(query);
+		await client.setStatus(query);
 	}
 };

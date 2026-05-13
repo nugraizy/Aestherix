@@ -24,7 +24,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, prefix }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please provide a manga slug, ID, or Kiryuu URL.', message);
+			return await client.reply(from, 'Please provide a manga slug, ID, or Kiryuu URL.', message);
 		}
 
 		if (query.startsWith('next ')) {
@@ -32,14 +32,14 @@ export default {
 			const cached = chapterSessions.get(sessionId);
 
 			if (!cached) {
-				return await client.instance.reply(from, 'Session expired. Please search again.', message);
+				return await client.reply(from, 'Session expired. Please search again.', message);
 			}
 
 			cached.currentBatch++;
 			return await sendBatch(cached, from, message, client, { prefix });
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Fetching chapters...', message);
+		const wait = await client.waitMessage(from, 'Fetching chapters...', message);
 
 		try {
 			const manga = await kiryuu.getManga(query);
@@ -72,7 +72,7 @@ async function sendBatch(state, from, message, client, ctx) {
 
 	const body = `${'Kiryuu Chapters'.formatHeaders()}\n\n${mangaTitle || 'Manga'}\nTotal : ${allChapters.length} chapter(s)\nShowing : ${start + 1}–${start + batch.length}\n\nSelect a chapter to read.`;
 
-	const builder = new client.instance.TemplateBuilder.Native(client);
+	const builder = new client.TemplateBuilder.Native(client);
 
 	builder
 		.destination(from)

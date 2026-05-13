@@ -19,10 +19,10 @@ export default {
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
 		if (!query) {
-			return await client.instance.reply(from, 'Please provide a URL', message);
+			return await client.reply(from, 'Please provide a URL', message);
 		}
 
-		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, 'Please wait...', message);
 
 		let { _: urls } = parser(query);
 
@@ -37,13 +37,13 @@ export default {
 
 		for (const data in audios) {
 			if (audios[data]?.error) {
-				await client.instance.reply(from, `Error while downloading TikTok audio\n\n${audios[data].error}\n${data}`, message);
+				await client.reply(from, `Error while downloading TikTok audio\n\n${audios[data].error}\n${data}`, message);
 				loggers.error(`${color('Failed to Download TikTok Audio', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
 			}
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					document: { url: audios[data].urls.images ? audios[data].urls.music : audios[data].urls.withNoWatermark },

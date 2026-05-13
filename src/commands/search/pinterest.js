@@ -22,7 +22,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, sender, waitForInput }, client) {
 		if (!query) {
-			return await client.instance.reply(
+			return await client.reply(
 				from,
 				'You must provide a `quer(y/ies)` or `url(s)`.\nYou can use `commas` as a separator.',
 				message
@@ -37,7 +37,7 @@ export default {
 			if (isURL(query.trim())) {
 				const result = await pinterest.download(query);
 
-				const builder = new client.instance.TemplateBuilder.Native();
+				const builder = new client.TemplateBuilder.Native();
 
 				await builder
 					.destination(from)
@@ -64,7 +64,7 @@ export default {
 			let result = await pinterest.search(query.trim());
 
 			if (result?.error) {
-				await client.instance.reply(from, result.message, message);
+				await client.reply(from, result.message, message);
 			}
 
 			const { results } = result;
@@ -78,7 +78,7 @@ export default {
 					return;
 				}
 
-				await client.instance.send(
+				await client.send(
 					from,
 					{
 						...(results[index].type === 'image'
@@ -132,7 +132,7 @@ Caption : ${results[index].caption}
 			if (url.length) {
 				const promises = url.map(pinterest.download);
 				const results = await Promise.all(promises);
-				const builder = new client.instance.TemplateBuilder.Carousel();
+				const builder = new client.TemplateBuilder.Carousel();
 
 				await builder
 					.destination(from)
@@ -167,7 +167,7 @@ Caption : ${results[index].caption}
 				const errors = results.filter((v) => v.error);
 
 				for (const result of notErrors) {
-					const builder = new client.instance.TemplateBuilder.Carousel();
+					const builder = new client.TemplateBuilder.Carousel();
 
 					await builder
 						.destination(from)
@@ -195,7 +195,7 @@ Caption : ${results[index].caption}
 				}
 
 				if (errors.length) {
-					await client.instance.reply(
+					await client.reply(
 						from,
 						`Could not retrieve these queries :\n\n${errors.map((v, i) => `${i + 1}. ${v.keyword}`).join('\n')}`,
 						message

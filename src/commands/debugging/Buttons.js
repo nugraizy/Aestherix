@@ -37,11 +37,11 @@ export default {
 					headerType: 1
 				}
 			},
-			{ messageId: client.instance.generateMessageID() }
+			{ messageId: client.generateMessageID() }
 		);
 
-		await client.instance.relay(from, button.message, { messageId: button.key.id });
-		await client.instance.send(
+		await client.relay(from, button.message, { messageId: button.key.id });
+		await client.send(
 			from,
 			{
 				text: 'Hi this is a button message',

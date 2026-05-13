@@ -1,103 +1,63 @@
 import type { getDevice, MessageType } from 'baileys';
 import type { GroupMetadata, GroupParticipant } from '../Groups/index';
 import type { MessageGenerated, WAGenericMediaMessage } from '../Messages/index';
-import type { AdvancedClient, MediaDataContext, Store } from '../Socket';
+import type { ClientSocket, Context } from '../Core';
+import type { MediaDataContext } from '../Socket';
 
-interface GroupMetadataParsed {
-	ownerGroup: string;
-	rawParticipants: GroupParticipant[];
-	adminGroups: string[];
-	participantsGroup: string[];
-}
-
-type TypeSticker = 'imageMessage' | 'videoMessage' | 'stickerMessage';
-
+/**
+ * @deprecated Use `Context` from `../Core` instead. This type is kept for backward compatibility.
+ */
 export interface ReassignResult {
 	message: MessageGenerated;
 	isFromMe: boolean;
 	from: string;
 	isGroup: boolean;
 	isBaileys: boolean;
-	isDisappearingChat: boolean;
 	sender: string;
 	prettyNumber: string;
 	timeStamp: number;
 	filename: string;
-	groupMetadata: GroupMetadataParsed & GroupMetadata;
-	groupSettings: Record<string, unknown>;
+	groupMetadata: object;
 	groupName: string;
 	groupId: string;
-	isGroupOwner: boolean;
 	pushname: string;
 	botNumber: string;
-	ownerNumbers: string[];
 	isOwner: boolean;
-	settings: any;
+	settings: object;
 	type: MessageType;
 	typeQuoted: string | undefined;
-	typeSticker: TypeSticker;
+	typeSticker: string[];
 	stickerAble: boolean;
 	isAdmin?: boolean;
-	rawParticipants?: object[] | undefined;
-	adminGroups?: string[] | undefined;
-	participantsGroup?: string[] | undefined;
-	ownerGroups?: string | undefined;
-	isBotAdmin?: boolean | undefined;
+	adminGroups?: string[];
+	participantsGroup?: string[];
+	isBotAdmin?: boolean;
 	body: string;
-	args?: string[] | undefined;
+	args?: string[];
 	cmd: string;
 	isCmd: boolean;
-	prefix: string;
-	query?: string | undefined;
-	isMedia: boolean;
-	isQuotedImage: boolean;
-	isQuotedVideo: boolean;
+	prefix: string | null;
+	query?: string;
 	isQuotedAudio: boolean;
-	isQuotedContact: boolean;
-	isQuotedContactsArray: boolean;
-	isQuotedDocument: boolean;
-	isQuotedLiveLocation: boolean;
-	isQuotedLocation: boolean;
 	isQuotedSticker: boolean;
+	isQuotedDocument: boolean;
 	isMediaVid: boolean;
 	isMediaImage: boolean;
 	isMediaDocument: boolean;
-	isSticker: boolean;
-	isAudio: boolean;
-	isContact: boolean;
-	isContactsArray: boolean;
-	isDocument: boolean;
-	isLocation: boolean;
-	isLiveLocation: boolean;
-	isViewOnce: boolean;
-	isViewOnceImage: boolean;
-	isViewOnceVideo: boolean;
-	isQuotedViewOnce: boolean;
-	isQuotedViewOnceImage: boolean;
-	isQuotedViewOnceVideo: boolean;
-	typeViewOnce: string;
 	mention: string[];
 	mediaData: MediaDataContext;
 	extractMediaData: WAGenericMediaMessage;
 	bodyQuoted: string;
-	waitForInput?: (
-		client: AdvancedClient,
-		data: {
-			expectedType: string[];
-			from: string;
-			sender: string;
-			message?: string;
-			timeInSecond?: number;
-		}
-	) => Promise<
-		Partial<{
-			message: string | MessageGenerated;
-			quoted: MessageGenerated;
-			timeout: boolean;
-			invalid: boolean;
-		}>
-	>;
+	waitForInput?: (data: {
+		expectedType: string[];
+		message?: string;
+		timeInSecond?: number;
+		sendImpl?: () => Promise<void>;
+	}) => Promise<{ message?: string | MessageGenerated; quoted?: MessageGenerated; timeout?: boolean; invalid?: boolean; command?: boolean }>;
 	device: ReturnType<typeof getDevice>;
 }
 
-export type Reconstructuring = (m: MessageGenerated, client: AdvancedClient, store?: Store) => Promise<ReassignResult>;
+/**
+ * @deprecated Use `Context.from()` instead.
+ */
+export type Reconstructuring = (m: MessageGenerated, client: ClientSocket, store?: object) => Promise<ReassignResult>;

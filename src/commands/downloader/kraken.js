@@ -19,14 +19,14 @@ export default {
 	status: 'enable',
 	run: async ({ from, message, query, prettyNumber }, client) => {
 		if (!query) {
-			return client.instance.reply(from, 'You must provide a query.', message);
+			return client.reply(from, 'You must provide a query.', message);
 		}
 
 		const { _: urls } = parser(query);
 
 		urls = removeDuplicatesArray(urls);
 
-		const wait = await client.instance.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, 'Please wait...', message);
 
 		let success = 0;
 		let error = 0;
@@ -35,7 +35,7 @@ export default {
 
 		for (const url of urls) {
 			if (!regex(url)) {
-				await client.instance.reply(from, 'Please specify a valid Kraken url.\nInvalid : ' + url, message);
+				await client.reply(from, 'Please specify a valid Kraken url.\nInvalid : ' + url, message);
 				error++;
 				continue;
 			}
@@ -43,13 +43,13 @@ export default {
 			const result = await kraken(url);
 
 			if (result?.error) {
-				await client.instance.reply(from, result.error, message);
+				await client.reply(from, result.error, message);
 				loggers.error(`${color('Failed to Download Kraken File', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
 			}
 
-			await client.instance.reply(
+			await client.reply(
 				from,
 				`${'Kraken Downloader'.formatHeaders()}
 		
@@ -60,7 +60,7 @@ Uploaded: ${result.uploaded}`.formatForm(),
 				message
 			);
 
-			await client.instance.send(
+			await client.send(
 				from,
 				{
 					[result.filetype]: { url: result.dlLink },

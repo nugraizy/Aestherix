@@ -17,12 +17,12 @@ export default {
 		const aki = await startAkinator(from);
 
 		if (aki?.error) {
-			return await client.instance.reply(from, aki.error, message);
+			return await client.reply(from, aki.error, message);
 		}
 
 		const { question, answers, progress, progressBar, arrow } = aki;
 
-		const messages = await client.instance.reply(
+		const messages = await client.reply(
 			from,
 			`[?] \`${question}\`\n\n${answers
 				.map((v, i) => `${i + 1}. ${v}`)

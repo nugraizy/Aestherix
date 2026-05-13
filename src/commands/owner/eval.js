@@ -1,4 +1,4 @@
-import * as _ from 'baileys'; /* eslint-disable-line */
+import * as _ from 'baileys';  
 import { exec } from 'child_process';
 import fs from 'fs';
 import fsX from 'fs-extra'; /* eslint-disable-line */
@@ -24,7 +24,7 @@ class CustomArray extends Array {
 	}
 }
 
-const print = ({ from, quoted }, ...args) => client.instance.reply(from, format(...args), quoted);
+const print = ({ from, quoted }, ...args) => client.reply(from, format(...args), quoted);
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -114,11 +114,11 @@ export default {
 		} = message;
 
 		if (!isOwner) {
-			return await client.instance.reply(from, 'You are not allowed to use this command', message.message);
+			return await client.reply(from, 'You are not allowed to use this command', message.message);
 		}
 
 		if (!query) {
-			return await client.instance.reply(from, 'Please specify code to evaluate', message.message);
+			return await client.reply(from, 'Please specify code to evaluate', message.message);
 		}
 
 		if (isBaileys) {
@@ -159,7 +159,7 @@ export default {
 				output = await func.call(
 					client,
 					async (...args) => {
-						return await client.instance.reply(format(...args), { from, quoted: message.message });
+						return await client.reply(format(...args), { from, quoted: message.message });
 					},
 					client,
 					message,
@@ -188,22 +188,22 @@ export default {
 
 				output = e;
 			} finally {
-				client.instance.reply(from, syntaxes + format(output), message.message);
+				client.reply(from, syntaxes + format(output), message.message);
 			}
 		} else if (body.startsWith('$> ')) {
 			try {
 				exec(body.slice(3), async (err, stdout) => {
 					if (err) {
-						return await client.instance.reply(from, format(err), message.message);
+						return await client.reply(from, format(err), message.message);
 					}
 
-					await client.instance.reply(from, format(stdout.replace(col, '').trim()), message.message);
+					await client.reply(from, format(stdout.replace(col, '').trim()), message.message);
 				});
 			} catch (err) {
 				let str = `Type : ${err.name}\n`;
 
 				str += `Message : ${err.message}`;
-				return await client.instance.reply(from, `\`ERROR\`\n\n\`\`\`${str}\`\`\``, message.message);
+				return await client.reply(from, `\`ERROR\`\n\n\`\`\`${str}\`\`\``, message.message);
 			}
 		} else if (body.startsWith('=> ')) {
 			try {
@@ -259,7 +259,7 @@ export default {
 					str += `\`\`\`${err}\`\`\`\n\n`;
 				}
 
-				return await client.instance.reply(from, `\`ERROR\` \n\n\`\`\`${str}\`\`\``, message.message);
+				return await client.reply(from, `\`ERROR\` \n\n\`\`\`${str}\`\`\``, message.message);
 			}
 		} else if (body.startsWith('!> ')) {
 			let returning;
@@ -292,7 +292,7 @@ export default {
 							return;
 						}
 
-						return await client.instance.reply(format(...args), { from, quoted: message.message });
+						return await client.reply(format(...args), { from, quoted: message.message });
 					},
 					message,
 					client,
@@ -318,7 +318,7 @@ export default {
 
 				returning = e;
 			} finally {
-				client.instance.reply(from, syntaxes + format(returning), message.message);
+				client.reply(from, syntaxes + format(returning), message.message);
 			}
 		}
 	}
