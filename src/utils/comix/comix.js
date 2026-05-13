@@ -1,5 +1,8 @@
 import { fetch } from 'undici';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+
+puppeteer.use(StealthPlugin());
 
 class ComixUtils {
 	static get API_BASE() {
@@ -536,8 +539,8 @@ class ComixToken {
 
 		try {
 			browser = await puppeteer.launch({
-				headless: 'shell',
-				args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu']
+				headless: true,
+				args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu', '--disable-blink-features=AutomationControlled']
 			});
 
 			const page = await browser.newPage();
@@ -557,7 +560,7 @@ class ComixToken {
 					}
 				}
 
-				if (['image', 'font', 'stylesheet'].includes(request.resourceType())) {
+				if (['image', 'font'].includes(request.resourceType())) {
 					request.abort();
 				} else {
 					request.continue();
@@ -657,6 +660,16 @@ class Comix {
 		this.fetchImpl = fetchImpl || fetch;
 		this.apiBase = apiBase || ComixUtils.API_BASE;
 		this.webBase = webBase || ComixUtils.WEB_BASE;
+		this.mangaCache = new Map();
+		this.chapterCache = new Map();
+	}
+
+	getManga(id) {
+		return this.mangaCache.get(String(id)) || null;
+	}
+
+	getChapterById(id) {
+		return this.chapterCache.get(String(id)) || null;
 	}
 
 	async fetchJSON(url) {
@@ -770,6 +783,10 @@ class Comix {
 		const posterQuality = options.posterQuality || 'large';
 		const mapped = items.map((manga) => ComixUtils.mapManga(manga, posterQuality));
 
+		for (const manga of mapped) {
+			this.mangaCache.set(String(manga.id), manga);
+		}
+
 		return new ComixResponse({
 			comix: this,
 			items: mapped,
@@ -853,8 +870,8 @@ class Comix {
 		return ComixToken.capture(pageUrl, apiPathSuffix);
 	}
 
-	async captureChapterPagesToken(chapterId, mangaSlug) {
-		const pageUrl = `${this.webBase}/title/${mangaSlug || 'unknown'}/${chapterId}-chapter-1`;
+	async captureChapterPagesToken(chapterId, chapterUrl) {
+		const pageUrl = chapterUrl || `${this.webBase}/title/${chapterId}`;
 		const apiPathSuffix = `api/v1/chapters/${chapterId}`;
 
 		return ComixToken.capture(pageUrl, apiPathSuffix);
@@ -879,6 +896,18 @@ class Comix {
 			throw new Error('Missing manga id or slug');
 		}
 
+		let fullSlug = slug || mangaId;
+
+		if (!fullSlug.includes('-')) {
+			const detail = await this.fetchMangaById(mangaId).catch(() => null);
+			const url = detail?.result?.url || '';
+			const extracted = url.replace(/.*\/title\//, '').replace(/^\//, '');
+
+			if (extracted) {
+				fullSlug = extracted;
+			}
+		}
+
 		const limit = options.limit || 100;
 		let page = options.page || 1;
 		const allPages = options.allPages !== false;
@@ -886,18 +915,22 @@ class Comix {
 		const chapters = [];
 		let pageInfo = { page, lastPage: page, hasNext: false };
 
-		const token = await this.captureChaptersToken(mangaId, slug || mangaId);
+		const token = await this.captureChaptersToken(mangaId, fullSlug);
 
 		do {
-			const data = await this.fetchChaptersPage({ mangaId, mangaSlug: slug || mangaId, page, limit, token });
+			const data = await this.fetchChaptersPage({ mangaId, mangaSlug: fullSlug, page, limit, token });
 			const items = data?.result?.items || [];
 
 			pageInfo = ComixUtils.parsePageInfo(data?.result || {});
-			chapters.push(...items.map((chapter) => ComixUtils.mapChapter(chapter, slug || mangaId, this.webBase)));
+			chapters.push(...items.map((chapter) => ComixUtils.mapChapter(chapter, fullSlug, this.webBase)));
 			page += 1;
 		} while (allPages && pageInfo.hasNext);
 
 		const finalChapters = deduplicate ? ComixUtils.deduplicateChapters(chapters) : chapters;
+
+		for (const ch of finalChapters) {
+			this.chapterCache.set(String(ch.id), ch);
+		}
 
 		return new ComixResponse({
 			comix: this,
@@ -913,8 +946,8 @@ class Comix {
 		});
 	}
 
-	async fetchChapterPages(chapterId, mangaSlug) {
-		const token = await this.captureChapterPagesToken(chapterId, mangaSlug);
+	async fetchChapterPages(chapterId, chapterUrl) {
+		const token = await this.captureChapterPagesToken(chapterId, chapterUrl);
 		const url = new URL(`${this.apiBase}/chapters/${chapterId}`);
 
 		url.searchParams.set('_', token);
@@ -928,8 +961,17 @@ class Comix {
 			throw new Error('Missing chapter id or url');
 		}
 
-		const mangaSlug = typeof chapterInput === 'object' ? chapterInput.mangaSlug : undefined;
-		const data = await this.fetchChapterPages(chapterId, mangaSlug);
+		let chapterUrl;
+
+		if (typeof chapterInput === 'object') {
+			chapterUrl = chapterInput.url || chapterInput.chapterUrl;
+
+			if (!chapterUrl && chapterInput.mangaSlug) {
+				chapterUrl = `${this.webBase}/title/${chapterInput.mangaSlug}/${chapterId}-chapter-1`;
+			}
+		}
+
+		const data = await this.fetchChapterPages(chapterId, chapterUrl);
 		const pages = data?.result?.pages || {};
 		const baseUrl = (pages.baseUrl || '').replace(/\/+$/, '');
 		const items = pages.items || [];

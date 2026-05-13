@@ -49,8 +49,10 @@ export default {
 		}
 
 		const allChapters = result.items.reverse();
+		const firstUrl = allChapters[0]?.url || '';
+		const mangaSlug = firstUrl.match(/\/title\/([^/]+)\//)?.[1] || query.trim();
 		const sessionId = randomChar('abcdefghijklmnopqrstuvwxyz0123456789', 8);
-		const state = { allChapters, currentBatch: 0, sessionId };
+		const state = { allChapters, currentBatch: 0, sessionId, mangaSlug };
 
 		chapterSessions.set(sessionId, state);
 
@@ -60,7 +62,7 @@ export default {
 };
 
 async function sendBatch(state, from, message, client, ctx) {
-	const { allChapters, currentBatch, sessionId } = state;
+	const { allChapters, currentBatch, sessionId, mangaSlug } = state;
 	const start = currentBatch * CHAPTERS_PER_BATCH;
 	const batch = allChapters.slice(start, start + CHAPTERS_PER_BATCH);
 	const totalBatches = Math.ceil(allChapters.length / CHAPTERS_PER_BATCH);
@@ -78,7 +80,7 @@ async function sendBatch(state, from, message, client, ctx) {
 	const buttons = batch.map((ch) => {
 		const label = `Ch. ${ch.number} — ${ch.name}`.slice(0, 40);
 
-		return builder.button.reply({ display: label, id: cmdId('cxread', ch.id, ctx) });
+		return builder.button.reply({ display: label, id: cmdId('cxread', `${mangaSlug}:${ch.id}`, ctx) });
 	});
 
 	if (hasMore) {

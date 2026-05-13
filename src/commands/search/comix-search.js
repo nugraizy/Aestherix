@@ -17,8 +17,6 @@ const formatMangaCaption = (manga) => {
 		`Type : ${manga.type || 'n/a'}`,
 		`Status : ${manga.status || 'n/a'}`,
 		`Rating : ${manga.rating ? `⭐ ${manga.rating}` : 'n/a'}`,
-		`Authors : ${manga.authors.length ? manga.authors.join(', ') : 'n/a'}`,
-		`Artists : ${manga.artists.length ? manga.artists.join(', ') : 'n/a'}`,
 		`Genres : ${manga.genres.length ? manga.genres.join(', ') : 'n/a'}`
 	];
 

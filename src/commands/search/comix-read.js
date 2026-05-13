@@ -20,6 +20,10 @@ const isChapterInput = (input) => {
 		return true;
 	}
 
+	if (input.includes(':') && /^[\w-]+:\d+$/.test(input)) {
+		return true;
+	}
+
 	try {
 		const url = new URL(input);
 
@@ -35,10 +39,10 @@ const isChapterInput = (input) => {
  * @param {string} chapterId
  * @param {string} fileName
  */
-const downloadChapterAsPdf = async ({ from, message }, client, wait, chapterId, fileName) => {
+const downloadChapterAsPdf = async ({ from, message }, client, wait, chapterId, chapterUrl, fileName) => {
 	await wait.update('Fetching chapter pages...');
 
-	const pages = await comix.getChapterPages(chapterId);
+	const pages = await comix.getChapterPages({ id: chapterId, chapterId, url: chapterUrl });
 
 	if (!pages.length) {
 		return await wait.update('No pages found for this chapter.');
@@ -133,22 +137,53 @@ export default {
 		const wait = await client.waitMessage(from, 'Processing...', message);
 
 		if (isChapterInput(input)) {
-			return await downloadChapterAsPdf({ from, message }, client, wait, input, `comix-chapter-${input}`);
+			let chapterId = input;
+			let chapterUrl;
+
+			if (input.includes(':')) {
+				const [slug, id] = input.split(':');
+
+				chapterId = id;
+				chapterUrl = `https://comix.to/title/${slug}/${id}-chapter-1`;
+			}
+
+			const cached = comix.getChapterById(chapterId);
+
+			if (cached?.url) {
+				chapterUrl = cached.url;
+			}
+
+			return await downloadChapterAsPdf({ from, message }, client, wait, chapterId, chapterUrl, `comix-chapter-${chapterId}`);
 		}
 
-		await wait.update('Searching...');
+		await wait.update('Fetching chapters...');
 
-		const result = await comix.search(input, { limit: 1, excludeNsfw: true });
+		let manga = null;
+		let chaptersResult = null;
 
-		if (!result.items.length) {
-			return await wait.update('No manga found for that query.');
+		try {
+			chaptersResult = await comix.getChapters(input, { allPages: true });
+
+			if (chaptersResult.items.length) {
+				manga = { title: input, id: input };
+			}
+		} catch {
+			// not a valid manga ID, fall through to search
 		}
 
-		const manga = result.items[0];
+		if (!manga) {
+			await wait.update('Searching...');
 
-		await wait.update(`Found: ${manga.title}\nFetching chapters...`);
+			const result = await comix.search(input, { limit: 1, excludeNsfw: true });
 
-		const chaptersResult = await comix.getChapters(manga, { allPages: true });
+			if (!result.items.length) {
+				return await wait.update('No manga found for that query.');
+			}
+
+			manga = result.items[0];
+			await wait.update(`Found: ${manga.title}\nFetching chapters...`);
+			chaptersResult = await comix.getChapters(manga, { allPages: true });
+		}
 
 		if (!chaptersResult.items.length) {
 			return await wait.update(`No chapters found for "${manga.title}".`);
