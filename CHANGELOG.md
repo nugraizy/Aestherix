@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.3.0」2026-05-14
+
+## Fixed
+- **Comix token capture** — resolve full manga slug from detail API, use puppeteer-extra stealth, stop blocking stylesheets. Chapters and manga results now cached. ([`43545b9`](https://github.com/nugraizy/aestherix/commit/43545b9))
+- **iOS Carousel fallback** — Qobuz and TikTok commands send Native buttons or raw media on iOS devices. ([`31cc4d3`](https://github.com/nugraizy/aestherix/commit/31cc4d3))
+- **Instagram init** — `isInstagramInitiated` checks `INSTAGRAM_USERNAME` and `INSTAGRAM_PASSWORD` env vars instead of OS `USERNAME`. ([`cb58ed7`](https://github.com/nugraizy/aestherix/commit/cb58ed7))
+
+## Refactored
+- **Configuration types** — full `Configuration` class type declaration with `InstagramApi` typed field. ([`cb58ed7`](https://github.com/nugraizy/aestherix/commit/cb58ed7))
+- **Core improvements** — context, message handler, and command minor fixes. ([`d58a723`](https://github.com/nugraizy/aestherix/commit/d58a723))
+
+---
+
 # 「7.2.0」2026-05-13
 
 ## Added
