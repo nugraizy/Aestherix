@@ -1,11 +1,11 @@
-import { getLocale } from '../../helper/i18n/index.js';
-import { EVENTS } from '../../utils/games/werewolf/events.js';
-import { repository } from '../../utils/games/werewolf/state/repository.js';
-import { getAlivePlayers } from '../../utils/games/werewolf/state/session.js';
-import { initScheduler } from '../../utils/games/werewolf/logic/scheduler-singleton.js';
-import { initLobbyTimer } from '../../utils/games/werewolf/logic/lobby-timer-singleton.js';
-import { MIN_PLAYERS } from '../../utils/games/werewolf/config/constants.js';
-import { finalizeStart } from '../../commands/games/werewolf/subcommands/_start-game.js';
+import { getLocale } from '../../../helper/i18n/index.js';
+import { EVENTS } from '../../../utils/games/werewolf/events.js';
+import { repository } from '../../../utils/games/werewolf/state/repository.js';
+import { getAlivePlayers } from '../../../utils/games/werewolf/state/session.js';
+import { initScheduler } from '../../../utils/games/werewolf/logic/scheduler-singleton.js';
+import { initLobbyTimer } from '../../../utils/games/werewolf/logic/lobby-timer-singleton.js';
+import { MIN_PLAYERS } from '../../../utils/games/werewolf/config/constants.js';
+import { finalizeStart } from '../../../commands/games/werewolf/subcommands/_start-game.js';
 import {
 	buildWerewolfPrompt,
 	buildSeerPrompt,
@@ -17,13 +17,13 @@ import {
 	buildLittleGirlPrompt,
 	buildAlphaConvertPrompt,
 	buildVotingPrompt
-} from '../../commands/games/werewolf/ui/prompts.js';
+} from '../../../commands/games/werewolf/ui/prompts.js';
 import {
 	buildMorningReport,
 	buildVotingClosedAnnouncement,
 	buildGameOverSummary,
 	buildNightKickoff
-} from '../../commands/games/werewolf/ui/summaries.js';
+} from '../../../commands/games/werewolf/ui/summaries.js';
 
 const sendButtons = async (clientInstance, jid, prompt) => {
 	if (!prompt) {

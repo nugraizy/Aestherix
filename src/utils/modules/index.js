@@ -1,10 +1,6 @@
 import axios from 'axios';
 import chalk from 'chalk';
 import { load } from 'cheerio';
-import { highlight } from 'cli-highlight';
-import dayjs from 'dayjs';
-import timezone from 'dayjs/plugin/timezone.js';
-import utc from 'dayjs/plugin/utc.js';
 import { fileTypeFromBuffer } from 'file-type';
 import FormData from 'form-data';
 import fs from 'fs-extra';
@@ -14,11 +10,7 @@ import ms from 'parse-ms';
 import progress from 'progress-stream';
 import { Client, fetch, FormData as FormDataUndici } from 'undici';
 
-dayjs.extend(utc);
-dayjs.extend(timezone);
 
-import configuration from '../../helper/config/connect.js';
-import { pushDashboardLog } from '../../helper/connection/dashboard/dashboard-monitor.js';
 import { color } from './color.js';
 
 export { color };
@@ -543,98 +535,11 @@ export const delaySync = (ms) => {
 
 export const delay = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const getLoggerColorInfo = () => ({
-	INF: color.theme?.INF || '#50FA7B',
-	WRN: color.theme?.WRN || '#FFB86C',
-	ERR: color.theme?.ERR || '#FF5555',
-	MISC: color.theme?.MISC || '#E4C1F9',
-	MUTE: color.theme?.MUTE || '#6272A4'
-});
-
-const isFormat = true;
-const isFormatISO = false;
-const TIME_FORMAT_DEFAULT = 'ddd, DD MMM YYYY HH:mm:ss [GMT]Z';
-const TIME_FORMAT = 'HH:mm DD/MM';
-const SEPARATOR_1 = () => color(':', getLoggerColorInfo().MUTE);
-const SEPARATOR_2 = () => color('/', getLoggerColorInfo().MUTE);
-
-const SEPARATOR_3 = (type) => {
-	const colors = getLoggerColorInfo();
-
-	return color(' •', colors[type] || colors.ERR);
-};
-
 export const boldify = (string) => chalk.bold(string);
 
-const coloring = (text, format, err) => {
-	const colors = getLoggerColorInfo();
+import { Logger } from '../../core/logger.js';
 
-	if (!format) {
-		return color(text, err ? colors.ERR : colors.MISC);
-	}
-
-	const [time, date] = text.split(' ');
-
-	const [hour, minute, second] = time.split(':').filter(Boolean);
-	const [day, month] = date.split('/');
-	const [HH, mm, , DD, MM] = [hour, minute, second, day, month].map((x) => color(x, err ? colors.ERR : colors.MISC));
-
-	return `${HH}${SEPARATOR_1()}${mm} ${DD}${SEPARATOR_2()}${MM}`;
-};
-
-const INFOLOG = (...info) => {
-	const isLogs = !configuration.OPTIONS.noLog || false;
-
-	if (isLogs) {
-		const time = isFormat
-			? dayjs.tz().format(TIME_FORMAT)
-			: isFormatISO
-				? dayjs.tz().utc(true).toISOString()
-				: dayjs.tz().format(TIME_FORMAT_DEFAULT);
-
-		const str = `${coloring(time, isFormat)}${SEPARATOR_3(info[0])} ${info.slice(1).join(' ')}`;
-
-		return str;
-	}
-};
-
-const loggersFns = (type, ...info) => {
-	const colors = getLoggerColorInfo();
-	const ignoreIndex = info.findIndex((v) => v?.ignore);
-
-	if (ignoreIndex !== -1) {
-		info.splice(ignoreIndex, 1);
-		const str = `${color('[', 'gray')}${boldify(color(type, colors[type]))}${color(']', 'gray')} ${INFOLOG(type, ...info)}`;
-
-		return str;
-	}
-
-	const str = `${color('[', 'gray')}${boldify(color(type, colors[type]))}${color(']', 'gray')} ${INFOLOG(type, ...info)}`;
-
-	pushDashboardLog(type, str);
-
-	log(str);
-};
-
-export const loggers = {
-	warning: (...info) => loggersFns('WRN', ...info),
-	info: (...info) => loggersFns('INF', ...info),
-	error: (...info) => loggersFns('ERR', ...info),
-	prettyCode: (...args) => {
-		const lastArg = args[args.length - 1];
-		const hasOptions = lastArg && typeof lastArg === 'object' && !isBuffer(lastArg) && !Array.isArray(lastArg);
-		const options = hasOptions ? lastArg : {};
-		const codes = hasOptions ? args.slice(0, -1) : args;
-		const language = options.language;
-		const highlightedBlocks = codes.map((code) => {
-			const source = String(code ?? '');
-
-			return highlight(source, { language, ignoreIllegals: true });
-		});
-
-		return loggersFns('INF', `\n${highlightedBlocks.join('\n')}`);
-	}
-};
+export const loggers = new Logger();
 
 export const isURL = (input) => /^(https?:\/\/)([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(:[0-9]{2,5})?(\/\S*)?$/i.test(input);
 

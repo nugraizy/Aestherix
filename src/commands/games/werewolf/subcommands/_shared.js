@@ -40,7 +40,7 @@ export const loadSession = async (ctx, argIndex = 3) => {
 };
 
 export const replyText = (ctx, client, text) =>
-	client.instance.reply(ctx.from, text, ctx.message);
+	client.reply(ctx.from, text, ctx.message);
 
 export const replyKey = (ctx, client, locale, key, vars) =>
 	replyText(ctx, client, localised(locale, key, vars));

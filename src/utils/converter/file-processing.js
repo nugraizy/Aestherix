@@ -410,7 +410,7 @@ export const pet = (input, sender, opts = {}) =>
 					.toFormat('webp')
 					.webp()
 					.toBuffer();
-				const sticker = await client.instance.prepareSticker(file, 'stickerAnimated', {
+				const sticker = await client.prepareSticker(file, 'stickerAnimated', {
 					author: configuration.author,
 					packname: configuration.packname
 				});

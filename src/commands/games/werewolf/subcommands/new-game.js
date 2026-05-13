@@ -18,7 +18,7 @@ export const run = async (ctx, client) => {
 	if (existing) {
 		const locale = getLocale(existing.roomId);
 
-		return client.instance.reply(ctx.from, localised(locale, 'errors.gameExistsTryingToMakeNewOne'), ctx.message);
+		return client.reply(ctx.from, localised(locale, 'errors.gameExistsTryingToMakeNewOne'), ctx.message);
 	}
 
 	const session = createSession({
@@ -35,7 +35,7 @@ export const run = async (ctx, client) => {
 
 	const locale = session.locale;
 	const prompt = buildLobbyPrompt(session, locale);
-	const builder = new client.instance.TemplateBuilder.Native();
+	const builder = new client.TemplateBuilder.Native();
 
 	await builder
 		.destination(ctx.from)

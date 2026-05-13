@@ -31,7 +31,7 @@ export const run = async (ctx, client) => {
 
 	getLobbyTimer()?.stop(session.roomId);
 
-	await finalizeStart(session, client.instance, locale, { quoted: ctx.message });
+	await finalizeStart(session, client, locale, { quoted: ctx.message });
 
 	return undefined;
 };

@@ -30,7 +30,7 @@ const sendCupidSecondPickPrompt = async (ctx, client, session, firstId, locale) 
 		);
 	}
 
-	const builder = new client.instance.TemplateBuilder.Native();
+	const builder = new client.TemplateBuilder.Native();
 
 	await builder
 		.destination(ctx.from)

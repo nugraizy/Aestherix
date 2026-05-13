@@ -2,7 +2,7 @@
  * Werewolf — button / message builders for the UI layer.
  *
  * These helpers produce pure data (plain objects) that the game handler
- * feeds into `client.instance.TemplateBuilder.Native`. Keeping them pure
+ * feeds into `client.TemplateBuilder.Native`. Keeping them pure
  * lets the unit tests assert the exact button payloads without touching
  * Baileys or the socket.
  *
