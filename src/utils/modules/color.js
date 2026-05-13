@@ -122,7 +122,7 @@ const ICON = color('ᛟ', 'lilac');
 const BANNER_ICON_1 = color('❝', 'red');
 const BANNER_ICON_2 = color('❞', 'red');
 const { version } = await fs.readJSON('./package.json');
-const SPLITTER = ['᠁✦', '✦', '✦', '✦᠁'];
+const SPLITTER = color('●', 'darkGray');
 const AUTHOR = color('nugraizy', 'red');
 
 export const printBanner = () =>
@@ -130,7 +130,7 @@ export const printBanner = () =>
 		boxen(
 			`${BANNER_ICON_1}${chalk.italic.bold.hex(themeManager.palette.purple || '#BD93F9')(__botName)}${BANNER_ICON_2}
 version
-${SPLITTER[0]} ${version.split(/\./g).join(` ${SPLITTER[1]} `)} ${SPLITTER[SPLITTER.length - 1]}`,
+${version.split(/\./g).join(` ${SPLITTER} `)}`,
 			{
 				title: `${ICON} Made by @${AUTHOR} ${ICON}`,
 				textAlignment: 'center',

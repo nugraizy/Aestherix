@@ -99,14 +99,19 @@ const gracefulShutdown = async (signal) => {
 
 	const servers = [...configuration.dashboard.expressInstances.entries()];
 
-	await Promise.all(servers.map(([, server]) => new Promise((resolve) => {
-		if (typeof server.closeAllConnections === 'function') {
-			server.closeAllConnections();
-		}
+	await Promise.all(
+		servers.map(
+			([, server]) =>
+				new Promise((resolve) => {
+					if (typeof server.closeAllConnections === 'function') {
+						server.closeAllConnections();
+					}
 
-		server.close(() => resolve());
-		setTimeout(resolve, 3000);
-	}))).catch(() => {});
+					server.close(() => resolve());
+					setTimeout(resolve, 3000);
+				})
+		)
+	).catch(() => {});
 
 	log.warning(c('Goodbye.', 'lilac'));
 	process.exit(0);
