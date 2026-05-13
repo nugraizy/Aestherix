@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.2.0」2026-05-13
+
+## Added
+- **Atsumaru manga scraper** — search, detail, chapters, and read commands with Typesense-based search API. ([`424c962`](https://github.com/nugraizy/aestherix/commit/424c962))
+- **Shinigami manga scraper** — search, detail, chapters, and read commands with CDN-based page delivery. ([`39a4b4c`](https://github.com/nugraizy/aestherix/commit/39a4b4c))
+
+---
+
 # 「7.1.0」2026-05-13
 
 ## Added
