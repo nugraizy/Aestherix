@@ -82,9 +82,12 @@ export const makeLobbyTimer = ({
 				clearTimeoutFn(existing);
 			}
 
-			const handle = setTimeoutFn(() => {
-				void fire(roomId);
-			}, Math.max(0, delayMs));
+			const handle = setTimeoutFn(
+				() => {
+					void fire(roomId);
+				},
+				Math.max(0, delayMs)
+			);
 
 			timers.set(roomId, handle);
 

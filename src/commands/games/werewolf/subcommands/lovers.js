@@ -37,6 +37,7 @@ const sendCupidSecondPickPrompt = async (ctx, client, session, firstId, locale) 
 		.body(prompt.body)
 		.footer(prompt.footer || '')
 		.buttons(...prompt.buttons.map((b) => builder.button.reply(b)))
+		.mentions(prompt.mentions)
 		.send();
 
 	return undefined;
