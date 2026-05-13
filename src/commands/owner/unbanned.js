@@ -43,8 +43,8 @@ export default {
 					continue;
 				} else {
 				await unbanUser(prisma, mentioned);
-				configuration.cache.bannedlist.splice(indexs(configuration.cache.bannedlist, mentioned), 1);
-				configuration.cache.blocklist.splice(indexs(configuration.cache.blocklist, mentioned), 1);
+				configuration.bannedlist.splice(indexs(configuration.bannedlist, mentioned), 1);
+				configuration.blocklist.splice(indexs(configuration.blocklist, mentioned), 1);
 					unbanned.push(mentioned);
 					await client.updateBlockStatus(mentioned, 'unblock');
 				}
@@ -79,8 +79,8 @@ export default {
 				}
 
 					await unbanUser(prisma, `${number}${S_WHATSAPP_NET}`);
-				configuration.cache.bannedlist.splice(indexs(configuration.cache.bannedlist, `${number}${S_WHATSAPP_NET}`), 1);
-				configuration.cache.blocklist.splice(indexs(configuration.cache.blocklist, `${number}${S_WHATSAPP_NET}`), 1);
+				configuration.bannedlist.splice(indexs(configuration.bannedlist, `${number}${S_WHATSAPP_NET}`), 1);
+				configuration.blocklist.splice(indexs(configuration.blocklist, `${number}${S_WHATSAPP_NET}`), 1);
 				await client.updateBlockStatus(`${number}${S_WHATSAPP_NET}`, 'unblock');
 				await client.send(
 					from,
@@ -100,8 +100,8 @@ export default {
 			const index = userBanned.indexOf(mediaData.participant);
 
 			await unbanUser(prisma, mediaData.participant);
-			configuration.cache.bannedlist.splice(indexs(configuration.cache.bannedlist, mediaData.participant), 1);
-			configuration.cache.blocklist.splice(indexs(configuration.cache.blocklist, mediaData.participant), 1);
+			configuration.bannedlist.splice(indexs(configuration.bannedlist, mediaData.participant), 1);
+			configuration.blocklist.splice(indexs(configuration.blocklist, mediaData.participant), 1);
 			await client.updateBlockStatus(mediaData.participant, 'unblock');
 			await client.send(
 				from,

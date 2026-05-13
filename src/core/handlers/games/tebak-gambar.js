@@ -14,7 +14,7 @@ const handleTebakGambar = async ({ from, isAdmin, isGroup, body, message }, clie
 			const answerLowerCase = answer.toLowerCase();
 
 			if (input === answerLowerCase) {
-				deleteIntervals(configuration.intervals.tebakGambar.get(from), configuration.intervals.tebakGambar, from);
+				deleteIntervals(configuration.timers.tebakGambar.get(from), configuration.timers.tebakGambar, from);
 				configuration.games.tebakGambar.delete(id);
 				await client.send(from, { text: 'Correct!' }, { quoted: message });
 			} else if (similarity.compareTwoStrings(input, answerLowerCase) >= minScore) {
@@ -23,7 +23,7 @@ const handleTebakGambar = async ({ from, isAdmin, isGroup, body, message }, clie
 		}
 	};
 
-	if ((!isGroup || settings[from]?.games === 'enable' || isAdmin) && !configuration.OPTIONS.onlyLogs) {
+	if ((!isGroup || settings[from]?.games === 'enable' || isAdmin) && !configuration.flags.onlyLogs) {
 		await playGame();
 	}
 };

@@ -4,7 +4,7 @@ import { getNewGames } from '../../utils/index.js';
 let games = {};
 
 async function updateGames() {
-	configuration.intervals.freegame = setInterval(
+	configuration.timers.freegame = setInterval(
 		async () => {
 			try {
 				const data = await getNewGames();
@@ -19,11 +19,11 @@ async function updateGames() {
 
 				clientMqttListen?.publish(
 					process.env.MQTT_FREEGAME,
-					JSON.stringify({ data, from: configuration.intervals.from, status: true })
+					JSON.stringify({ data, from: configuration.timers.from, status: true })
 				);
 			} catch {
-				clearInterval(configuration.intervals.freegame);
-				delete configuration.intervals.freegame;
+				clearInterval(configuration.timers.freegame);
+				delete configuration.timers.freegame;
 			}
 		},
 		3 * 60 * 1000
@@ -53,18 +53,18 @@ export default {
 				case 'status':
 				case 'stats':
 					{
-						await client.reply(from, configuration.intervals.from.includes(from) ? 'Enabled' : 'Disabled', message);
+						await client.reply(from, configuration.timers.from.includes(from) ? 'Enabled' : 'Disabled', message);
 					}
 
 					break;
 				case 'disable':
 				case 'off':
 					{
-						if (!configuration.intervals.from.includes(from)) {
+						if (!configuration.timers.from.includes(from)) {
 							return await client.reply(from, 'Already disabled', message);
 						}
 
-						configuration.intervals.from.splice(configuration.intervals.from.indexOf(from), 1);
+						configuration.timers.from.splice(configuration.timers.from.indexOf(from), 1);
 						await client.reply(from, 'Simulate Freegame Disabled', message);
 					}
 
@@ -72,13 +72,13 @@ export default {
 				case 'enable':
 				case 'on':
 					{
-						if (configuration.intervals.from.includes(from)) {
+						if (configuration.timers.from.includes(from)) {
 							return await client.reply(from, 'Already enabled', message);
 						}
 
-						configuration.intervals.from.push(from);
+						configuration.timers.from.push(from);
 
-						if (!configuration.intervals.freegame) {
+						if (!configuration.timers.freegame) {
 							await updateGames();
 						}
 

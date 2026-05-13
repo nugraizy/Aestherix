@@ -91,12 +91,24 @@ export class EventHandler {
 	}
 
 	async handleParticipants(update) {
+		if (update?.id) {
+			this.#configuration.groups.invalidate(update.id);
+		}
+
 		const handler = await this.#load('participants', './handlers/group-participants.js');
 
 		await handler(this.#legacyClient(), update);
 	}
 
 	async handleGroupSettings(update) {
+		const updates = Array.isArray(update) ? update : [update];
+
+		for (const u of updates) {
+			if (u?.id) {
+				this.#configuration.groups.update(u.id, { subject: u.subject, desc: u.desc, announce: u.announce, restrict: u.restrict });
+			}
+		}
+
 		const handler = await this.#load('groupSettings', './handlers/group-settings.js');
 
 		await handler(this.#legacyClient(), update);

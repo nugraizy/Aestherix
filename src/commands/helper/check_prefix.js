@@ -14,7 +14,7 @@ export default {
 	limit: 5,
 	status: 'enable',
 	async run({ from, message }, client) {
-		const config = configuration.cache.prefixConfig;
+		const config = configuration.prefix.config;
 
 		if (!config) {
 			return await client.reply(from, 'Prefix configuration is not available yet.', message);

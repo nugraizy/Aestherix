@@ -133,7 +133,7 @@ export default {
 		// 		}
 		// 	);
 
-		// 	if (configuration.OPTIONS.multiCmd) {
+		// 	if (configuration.flags.multiCmd) {
 		// 		row.push({
 		// 			rows: [{ title: `MP3 & MP4 | ${title}`, rowId: `.yta ${url}|.ytv ${url}` }],
 		// 			title: `${author.name} | 👁️‍🗨️ ${numberWithCommas(views)} | ${timestamp}`

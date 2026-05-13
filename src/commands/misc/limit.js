@@ -20,7 +20,7 @@ export default {
 
 		if (!isExist) {
 			if (!(role === 'OWNER' || role === 'PREMIUM')) {
-				Limit.upsert(sender, configuration.cache.limit, 'USER');
+				Limit.upsert(sender, configuration.defaultLimit, 'USER');
 			}
 		}
 

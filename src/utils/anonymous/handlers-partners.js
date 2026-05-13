@@ -1,6 +1,6 @@
 import configuration from '../../helper/config/connect.js';
 
-const anonCache = () => configuration.anonymous;
+const anonCache = () => configuration.anonymous.sessions;
 
 const findOwnerOf = (jid) => {
 	for (const [key, value] of anonCache().entries()) {

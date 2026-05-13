@@ -3,7 +3,7 @@ import { checkIntervals } from '../misc/index.js';
 import { findOwnerOf, handlers } from './handlers-partners.js';
 import { search } from './search-partners.js';
 
-const anonMap = () => configuration.anonymous;
+const anonMap = () => configuration.anonymous.sessions;
 
 /**
  * Skip current Anonymous session id and find another session.
@@ -24,7 +24,7 @@ export const skip = (key, timer, client, message, isStop) => {
 	if (pair.partner2 === null) {
 		return {
 			status: 'searching',
-			seconds: checkIntervals(configuration.intervals['anonymous'].get(key)).timer
+			seconds: checkIntervals(configuration.timers['anonymous'].get(key)).timer
 		};
 	}
 

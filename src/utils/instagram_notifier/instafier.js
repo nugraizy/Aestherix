@@ -13,7 +13,7 @@ class Instafier {
 	#password = process.env.INSTAGRAM_PASSWORD;
 	#authorId = null;
 	constructor() {
-		if (!configuration.OPTIONS.instaNotifier) {
+		if (!configuration.flags.instaNotifier) {
 			return;
 		}
 
@@ -252,7 +252,7 @@ class Instafier {
 
 		this.Instagram.fbns.on('disconnect', (d) => log('FBNS Disconnected :', d));
 
-		await this.connect().then(() => (!configuration.OPTIONS.noLoad ? log('Instagram Service Connected') : {}));
+		await this.connect().then(() => (!configuration.flags.noLoad ? log('Instagram Service Connected') : {}));
 		return this.Instagram;
 	}
 }

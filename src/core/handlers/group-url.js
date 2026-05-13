@@ -22,7 +22,7 @@ const antiGroupLinkHandler = async (
 	client,
 	settings
 ) => {
-	if (isGroup && settings?.[from]?.antiURL === 'enable' && !isAdmin && isBotAdmin && !configuration.OPTIONS.onlyLogs) {
+	if (isGroup && settings?.[from]?.antiURL === 'enable' && !isAdmin && isBotAdmin && !configuration.flags.onlyLogs) {
 		const bannedMembers = await getBannedMembers(from, settings);
 		const isBanned = bannedMembers.includes(sender);
 

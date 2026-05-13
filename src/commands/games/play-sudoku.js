@@ -32,7 +32,7 @@ export default {
 					const gridSolved = stringifyGrid(solved);
 
 					if (isOwner) {
-						await client.reply(configuration.cache.config.owner_number, gridSolved, message);
+						await client.reply(configuration.settings.owner_number, gridSolved, message);
 					}
 
 					const messages = await client.send(

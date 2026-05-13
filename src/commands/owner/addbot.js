@@ -71,7 +71,7 @@ export default {
 		const sub = new ClientSocket(auth, {
 			role: 'sub',
 			flags,
-			cachedGroupMetadata: (jid) => (isJidGroup(jid) ? configuration.cache.metadata.get(jid) : {})
+			cachedGroupMetadata: (jid) => (isJidGroup(jid) ? configuration.groups.metadata.get(jid) : {})
 		});
 
 		manager.add(sessionName, sub);
@@ -83,6 +83,8 @@ export default {
 
 		sub.on('connection.update', async (conn) => {
 			const { connection, lastDisconnect } = conn;
+
+			console.log(`Connection update for "${sessionName}":`, connection);
 
 			if (connection === 'open' && !paired) {
 				paired = true;
@@ -115,6 +117,8 @@ export default {
 				if (reason === DisconnectReason.loggedOut) {
 					await client.reply(from, `❌ Bot "${sessionName}" logged out.`, message);
 					manager.remove(sessionName);
+					await auth.clearState();
+					await prisma.botInstance.deleteMany({ where: { sessionName } });
 					return;
 				}
 

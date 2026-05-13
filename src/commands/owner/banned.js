@@ -26,8 +26,8 @@ export default {
 
 		if (args[1] === 'report' && isOwner) {
 			await banUser(prisma, args[3]);
-			configuration.cache.bannedlist.push(args[3]);
-			configuration.cache.blocklist.push(args[3]);
+			configuration.bannedlist.push(args[3]);
+			configuration.blocklist.push(args[3]);
 
 			client.updateBlockStatus(args[3], 'block');
 			await client.reply(
@@ -51,8 +51,8 @@ export default {
 				}
 
 				await banUser(prisma, mentioned);
-				configuration.cache.bannedlist.push(mentioned);
-				configuration.cache.blocklist.push(mentioned);
+				configuration.bannedlist.push(mentioned);
+				configuration.blocklist.push(mentioned);
 				banned.push(mentioned);
 				await client.updateBlockStatus(mentioned, 'block');
 			}
@@ -89,8 +89,8 @@ export default {
 				}
 
 				await banUser(prisma, `${number}${S_WHATSAPP_NET}`);
-				configuration.cache.bannedlist.push(`${number}${S_WHATSAPP_NET}`);
-				configuration.cache.blocklist.push(`${number}${S_WHATSAPP_NET}`);
+				configuration.bannedlist.push(`${number}${S_WHATSAPP_NET}`);
+				configuration.blocklist.push(`${number}${S_WHATSAPP_NET}`);
 				await client.updateBlockStatus(`${number}${S_WHATSAPP_NET}`, 'block');
 				await client.send(
 					from,
@@ -108,8 +108,8 @@ export default {
 			}
 
 			await banUser(prisma, mediaData.participant);
-			configuration.cache.bannedlist.push(mediaData.participant);
-			configuration.cache.blocklist.push(mediaData.participant);
+			configuration.bannedlist.push(mediaData.participant);
+			configuration.blocklist.push(mediaData.participant);
 			await client.updateBlockStatus(mediaData.participant, 'block');
 			await client.send(
 				from,

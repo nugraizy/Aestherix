@@ -17,7 +17,7 @@ const handler = async (client, message) => {
 		meJid = client.decodeJid(instance);
 	}
 
-	if (configuration.OPTIONS.autoRead) {
+	if (configuration.flags.autoRead) {
 		await client.readMessages([message.message.key]);
 	}
 

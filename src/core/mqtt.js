@@ -62,9 +62,9 @@ export class MqttBridge {
 			delete configuration.presences.spotify;
 		}
 
-		if (configuration.intervals.freegame) {
-			clearInterval(configuration.intervals.freegame);
-			configuration.intervals.freegame = null;
+		if (configuration.timers.freegame) {
+			clearInterval(configuration.timers.freegame);
+			configuration.timers.freegame = null;
 		}
 
 		this.#client?.reconnect();
@@ -144,8 +144,8 @@ export class MqttBridge {
 			return;
 		}
 
-		const waClient = configuration.intervals.spotifyPlaybacks.get('client');
-		const ids = configuration.intervals.spotifyPlaybacks.get('ids');
+		const waClient = configuration.timers.spotifyPlaybacks.get('client');
+		const ids = configuration.timers.spotifyPlaybacks.get('ids');
 
 		if (!waClient || !ids) {
 			return;

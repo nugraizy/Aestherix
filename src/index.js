@@ -654,15 +654,17 @@ const startAutoProfilePictureChangeService = async (client, state, config) => {
 };
 
 configuration.cli = clis;
-configuration.OPTIONS = configuration.cli.flags;
+configuration.flags = configuration.cli.flags;
+configuration.OPTIONS = configuration.flags;
 
-configuration.cmds.loadPromise = loadCommands(configuration.OPTIONS);
+configuration.cmds.loadPromise = loadCommands(configuration.flags);
 
 void initializeDashboardMonitor(configuration).catch((error) => {
 	loggers.error(color('Dashboard monitor init failed:', 'red'), color(error.message, 'white'));
 });
 
-const { OPTIONS, cli } = configuration;
+const { cli } = configuration;
+const OPTIONS = configuration.flags;
 const sessionName = await resolveSessionName(cli?.input?.[0]);
 
 const regexOption = Object.keys(OPTIONS);
@@ -682,6 +684,7 @@ for (const option of Object.keys(OPTIONS).filter((key) => OPTIONS[key])) {
 		loggers.error(`${color(option, 'red')} ${color('is not a valid option', 'white')}`);
 	}
 }
+configuration.flags.runtime = runtime;
 
 if (!(await fs.exists('./src/media/temporary_files/'))) {
 	await fs.mkdir('./src/media/temporary_files/');

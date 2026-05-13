@@ -76,7 +76,7 @@ export class MessageHandler {
 		}
 
 		const client = this.#getLegacyClient();
-		const state = this.#configuration.OPTIONS?.state;
+		const state = this.#configuration.flags?.state;
 
 		message = await Context.from(message, client, this.#store, state);
 
@@ -330,7 +330,7 @@ export class MessageHandler {
 			return;
 		}
 
-		const state = this.#configuration.OPTIONS?.state;
+		const state = this.#configuration.flags?.state;
 
 		try {
 			await command.run(localMessage, client, this.#store);
@@ -559,7 +559,7 @@ export class MessageHandler {
 			return;
 		}
 
-		const runtime = this.#configuration.OPTIONS?.runtime ?? Date.now();
+		const runtime = this.#configuration.flags?.runtime ?? Date.now();
 		const senderInfo = message.isFromMe
 			? `${color('[', 'gray')}${color('HOST', 'salmon')}${color(']', 'gray')} ${color(global.__botName, 'yellow')} ${color(message.prettyNumber, 'purple')}`
 			: `${color(message.pushname, 'yellow')} ${color(message.prettyNumber, 'purple')}`;

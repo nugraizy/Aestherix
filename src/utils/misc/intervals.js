@@ -30,9 +30,9 @@ export const checkIntervals = (intervaly) => {
 export const checkAllIntervals = () => {
 	const result = [];
 
-	for (const type in configuration.intervals) {
+	for (const type in configuration.timers) {
 		result.push({
-			[type]: Array.from(configuration.intervals[type].entries()).map(([key, value]) => ({
+			[type]: Array.from(configuration.timers[type].entries()).map(([key, value]) => ({
 				[key]: value
 			}))
 		});

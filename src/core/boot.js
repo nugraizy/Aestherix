@@ -26,7 +26,7 @@ const PAIR_NUMBER_ENV = 'PAIR_NUMBER';
 const SETTINGS_PATH = './src/helper/config/settings.json';
 
 function syncPrefixToRouter(router) {
-	const { prefixMode, prefixReg, prf } = configuration.cache;
+	const { mode: prefixMode, regex: prefixReg, default: prf } = configuration.prefix;
 
 	router.updatePrefix({
 		mode: prefixMode || 'single',
@@ -233,7 +233,7 @@ async function onConnected({ clientSocket, commandLoader, router, mqtt, store, w
 	setInterval(() => refreshDashboardCommandCatalog(configuration), DASHBOARD_CATALOG_INTERVAL_MS);
 
 	if (!commandLoader.ready) {
-		await commandLoader.load(configuration.OPTIONS);
+		await commandLoader.load(configuration.flags);
 		router.commands = commandLoader.commands;
 		router.aliases = commandLoader.aliases;
 	}
@@ -250,7 +250,7 @@ async function onConnected({ clientSocket, commandLoader, router, mqtt, store, w
 	initWerewolfHandler(socket, loggers);
 	mqtt.bindMessageHandler();
 
-	if (configuration.OPTIONS.watch) {
+	if (configuration.flags.watch) {
 		commandLoader.watch();
 		commandLoader.on('added', ({ name, file }) =>
 			loggers.info(color('Command added:', 'white'), color(name, 'lilac'), color(file, 'gray'))
@@ -324,7 +324,7 @@ export async function boot({ cli, OPTIONS, store, sessionName }) {
 	const clientSocket = new ClientSocket(auth, {
 		role: 'primary',
 		flags: OPTIONS,
-		cachedGroupMetadata: (jid) => (isJidGroup(jid) ? configuration.cache.metadata.get(jid) : {})
+		cachedGroupMetadata: (jid) => (isJidGroup(jid) ? configuration.groups.metadata.get(jid) : {})
 	});
 
 	await clientSocket.connect({ store });
@@ -343,9 +343,9 @@ export async function boot({ cli, OPTIONS, store, sessionName }) {
 	const router = new Router(clientSocket, {
 		commands: configuration.cmds.commands,
 		aliases: configuration.cmds.aliases,
-		prefix: configuration.cache.prf,
-		prefixMode: configuration.cache.prefixMode,
-		prefixReg: configuration.cache.prefixReg
+		prefix: configuration.prefix.default,
+		prefixMode: configuration.prefix.mode,
+		prefixReg: configuration.prefix.regex
 	});
 
 	const eventHandler = new EventHandler(clientSocket, {

@@ -163,7 +163,7 @@ export class ConnectionHandler {
 		buttons.push(builder.button.reply({ display: 'Ping Bot', id: cmdId('ping') }));
 
 		await builder
-			.destination(this.#configuration.cache.ownerNumbers[0])
+			.destination(this.#configuration.owners[0])
 			.body('Bot is connected to socket.')
 			.footer(caption)
 			.buttons(...buttons)

@@ -153,8 +153,8 @@ const getStatusAndType = (update, id, settingsGroup) => {
 const groupSettingsNotificationHandler = async (client, updates) => {
 	for (const update of updates) {
 		const { id, author } = update;
-		const settingsCache = configuration.cache.settings;
-		const metadataCache = configuration.cache.metadata;
+		const settingsCache = configuration.groups.settings;
+		const metadataCache = configuration.groups.metadata;
 
 		const settingsGroup = settingsCache.get(id);
 		const metadataGroup = metadataCache.get(id);

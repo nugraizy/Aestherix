@@ -226,10 +226,10 @@ const loadDashboardBlocklist = async () => {
 	try {
 		const list = await getDashboardBlocklist(prisma);
 
-		configuration.cache.blocklist = list.map((jid) => normalizePersistedUserJid(jid)).filter(Boolean);
+		configuration.blocklist = list.map((jid) => normalizePersistedUserJid(jid)).filter(Boolean);
 	} catch (error) {
 		loggers.warning(color('Failed loading dashboard blocklist:', 'red'), color(error.message, 'white'));
-		configuration.cache.blocklist = Array.isArray(configuration.cache?.blocklist) ? configuration.cache.blocklist : [];
+		configuration.blocklist = Array.isArray(configuration.blocklist) ? configuration.blocklist : [];
 	}
 };
 
@@ -727,7 +727,7 @@ const getDashboardStatus = async () => {
 	const totalCommands = commands.length;
 	const enabledCommands = commands.filter((command) => command.enabled).length;
 	const disabledCount = Math.max(0, totalCommands - enabledCommands);
-	const flagEntries = Object.entries(configuration.OPTIONS || {}).filter(([, value]) => typeof value === 'boolean');
+	const flagEntries = Object.entries(configuration.flags || {}).filter(([, value]) => typeof value === 'boolean');
 	const enabledFlags = flagEntries.filter(([, value]) => Boolean(value)).length;
 	const spotify = await getSpotifyNowPlaying();
 
@@ -1053,7 +1053,7 @@ const listDashboardUsers = async ({ redactNumbers = false } = {}) => {
 	const allUsers = await getAllUserLimits(prisma);
 	const bannedUsers = await readBannedUsers();
 	const bannedSet = new Set(bannedUsers);
-	const blockSet = new Set(Array.isArray(configuration.cache?.blocklist) ? configuration.cache.blocklist : []);
+	const blockSet = new Set(Array.isArray(configuration.blocklist) ? configuration.blocklist : []);
 
 	return allUsers
 		.map(({ id, limit, role }) => {
@@ -1493,7 +1493,7 @@ const setDashboardUserBanned = async (userId, enabled) => {
 	const next = Array.from(set);
 
 	await writeBannedUsers(next);
-	configuration.cache.bannedlist = next;
+	configuration.bannedlist = next;
 
 	return { ok: true, userId: jid, banned: enabled };
 };
@@ -1513,7 +1513,7 @@ const setDashboardUserBlocked = async (userId, enabled) => {
 		liveApplied = true;
 	}
 
-	const list = Array.isArray(configuration.cache?.blocklist) ? [...configuration.cache.blocklist] : [];
+	const list = Array.isArray(configuration.blocklist) ? [...configuration.blocklist] : [];
 	const set = new Set(list);
 
 	if (enabled) {
@@ -1522,7 +1522,7 @@ const setDashboardUserBlocked = async (userId, enabled) => {
 		set.delete(jid);
 	}
 
-	configuration.cache.blocklist = Array.from(set);
+	configuration.blocklist = Array.from(set);
 	await persistDashboardBlocklist(enabled ? [jid] : [], enabled ? [] : [jid]);
 
 	return {
@@ -2310,10 +2310,10 @@ export const server = async () => {
 		return;
 	}
 
-	configuration.cache.blocklist = Array.isArray(configuration.cache?.blocklist) ? configuration.cache.blocklist : [];
+	configuration.blocklist = Array.isArray(configuration.blocklist) ? configuration.blocklist : [];
 
-	if (!configuration?.OPTIONS || typeof configuration.OPTIONS !== 'object') {
-		configuration.OPTIONS = {};
+	if (!configuration?.OPTIONS || typeof configuration.flags !== 'object') {
+		configuration.flags = {};
 	}
 
 	await loadSessionStore();
@@ -3274,7 +3274,7 @@ export const server = async () => {
 	});
 
 	app.get('/api/dashboard/prefix', requireDashboardAuth, (_req, res) => {
-		const prefixConfig = configuration.cache?.prefixConfig || {};
+		const prefixConfig = configuration.prefix.config || {};
 		const settings = fs.readJSONSync('./src/helper/config/settings.json', { throws: false }) || {};
 		const settingsPrefix = settings.prefix || {};
 
@@ -3306,7 +3306,7 @@ export const server = async () => {
 		let newPrefixConfig;
 		let newPrefixReg = null;
 		let newPrefixValues = [];
-		const currentPrefixConfig = configuration.cache?.prefixConfig || {};
+		const currentPrefixConfig = configuration.prefix.config || {};
 		const currentMode = currentPrefixConfig.multi ? 'multi' : currentPrefixConfig.nopref ? 'nopref' : 'single';
 
 		if (mode === 'multi') {
@@ -3373,11 +3373,11 @@ export const server = async () => {
 			});
 		}
 
-		configuration.cache.prefixConfig = newPrefixConfig;
-		configuration.cache.prefixMode = mode;
-		configuration.cache.prefixReg = newPrefixReg;
-		configuration.cache.prefixValues = newPrefixValues;
-		configuration.cache.prf = mode === 'nopref' ? '' : newPrefixConfig.pref || '.';
+		configuration.prefix.config = newPrefixConfig;
+		configuration.prefix.mode = mode;
+		configuration.prefix.regex = newPrefixReg;
+		configuration.prefix.values = newPrefixValues;
+		configuration.prefix.default = mode === 'nopref' ? '' : newPrefixConfig.pref || '.';
 
 		const settingsPath = './src/helper/config/settings.json';
 		const currentSettings = await fs.readJSON(settingsPath).catch(() => ({}));
@@ -3395,12 +3395,12 @@ export const server = async () => {
 			session,
 			target: 'prefix',
 			before: {
-				mode: configuration.cache.prefixConfig?.multi
+				mode: configuration.prefix.config?.multi
 					? 'multi'
-					: configuration.cache.prefixConfig?.nopref
+					: configuration.prefix.config?.nopref
 						? 'nopref'
 						: 'single',
-				pref: configuration.cache.prefixConfig?.pref
+				pref: configuration.prefix.config?.pref
 			},
 			after: { mode, pref: newPrefixConfig.pref }
 		});
@@ -3945,7 +3945,7 @@ export const server = async () => {
 			const session = req.dashboardSession || null;
 			const normalizedUserId = normalizeUserJid(req.params.userId);
 			const beforeBlocked = normalizedUserId
-				? Array.isArray(configuration.cache?.blocklist) && configuration.cache.blocklist.includes(normalizedUserId)
+				? Array.isArray(configuration.blocklist) && configuration.blocklist.includes(normalizedUserId)
 				: null;
 			const result = await setDashboardUserBlocked(req.params.userId, req.body.enabled);
 

@@ -23,7 +23,7 @@ const handleWordle = async ({ from, isAdmin, isGroup, body, message, sender }, c
 		}
 	};
 
-	if ((!isGroup || settings[from]?.games === 'enable' || isAdmin) && !configuration.OPTIONS.onlyLogs) {
+	if ((!isGroup || settings[from]?.games === 'enable' || isAdmin) && !configuration.flags.onlyLogs) {
 		await playWordle();
 	}
 };

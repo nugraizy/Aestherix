@@ -1,7 +1,6 @@
 import { getContentType, getDevice, normalizeMessageContent } from 'baileys';
 import fs from 'fs-extra';
 import PhoneNumber from 'libphonenumber-js';
-
 import configuration from '../helper/config/connect.js';
 import { getBannedUsers } from '../helper/database/adapters/user.js';
 import prisma from '../helper/database/prisma.js';
@@ -20,7 +19,6 @@ import { Cache } from '../helper/modules/cache.js';
 
 const TYPE_STICKER = ['imageMessage', 'videoMessage', 'stickerMessage'];
 const SETTINGS_PATH = './src/helper/config/settings.json';
-
 const lidMaps = new Cache();
 
 function crawlProperty(obj, propName) {
@@ -40,7 +38,7 @@ function crawlProperty(obj, propName) {
 }
 
 async function ensurePrefixCache(client) {
-	if (!configuration.isFirstConnectionForCache && configuration.cache.prefixValues) {
+	if (!configuration.isFirstConnectionForCache && configuration.prefix.values) {
 		return;
 	}
 
@@ -50,17 +48,15 @@ async function ensurePrefixCache(client) {
 	const myJid = rawJid ? client.decodeJid(rawJid) : '';
 	const dataBlock = await client.fetchBlocklist().catch(() => []);
 
-	configuration.cache.bannedlist = dataBanned;
-	configuration.cache.blocklist = dataBlock;
-
-	const cliPrefixFlag = configuration.OPTIONS?.prefix || '';
+	configuration.bannedlist = dataBanned;
+	configuration.blocklist = dataBlock;
+	const cliPrefixFlag = configuration.flags?.prefix || '';
 	const cliPrefixes = cliPrefixFlag
 		? cliPrefixFlag
 				.split(',')
 				.map((p) => p.trim())
 				.filter(Boolean)
 		: [];
-
 	let prefixMode = 'single';
 	let prefixValues = [];
 
@@ -96,63 +92,41 @@ async function ensurePrefixCache(client) {
 	const escaped = prefixValues.map(escCharClass).join('');
 	const prefixReg = prefixMode === 'multi' ? new RegExp(`^[${escaped}]`) : null;
 
-	configuration.cache = {
-		...configuration.cache,
-		prf: prefixMode === 'nopref' ? '' : prefixValues[0] || '.',
-		prefixMode,
-		prefixReg,
-		prefixValues,
-		botNumber: myJid,
-		ownerNumbers: [settings.owner_number, ...settings.team_number, myJid]
-	};
-
-	configuration.cache.config = settings;
+	configuration.prefix.default = prefixMode === 'nopref' ? '' : prefixValues[0] || '.';
+	configuration.prefix.mode = prefixMode;
+	configuration.prefix.regex = prefixReg;
+	configuration.prefix.values = prefixValues;
+	configuration.botJid = myJid;
+	configuration.owners = [settings.owner_number, ...settings.team_number, myJid];
+	configuration.settings = settings;
 	configuration.isFirstConnectionForCache = false;
 }
 
 async function ensureGroupCache(client, from) {
-	if (configuration.cache.metadata?.has(from)) {
-		return;
-	}
+	await configuration.groups.ensure(client, from);
+} /** @implements {import('../types/Core/index.d.ts').Context} */
 
-	const groupMetadata = await client.groupMetadata(from).catch(() => ({}));
-	const participants = groupMetadata.participants || [];
-
-	configuration.cache.metadata.set(from, {
-		...groupMetadata,
-		adminGroups: participants.filter((v) => v.admin !== null).map((v) => v.phoneNumber),
-		participantsGroup: participants.map((v) => v.phoneNumber),
-		ownerPn: groupMetadata.ownerPn || null
-	});
-}
-
-/** @implements {import('../types/Core/index.d.ts').Context} */
 export class Context {
 	#raw;
 	#client;
 	#store;
 	#state;
 	#cache = {};
-
 	constructor(rawMessage, client, store, state) {
 		this.#raw = rawMessage;
 		this.#client = client;
 		this.#store = store;
 		this.#state = state;
 	}
-
 	get raw() {
 		return this.#raw;
 	}
-
-	/**
-	 * @param {import('../types/Messages').WAMessage} rawMessage
-	 * @param {import('../types/Core/index.d.ts').ClientSocket} client
-	 * @param {import('../types/Core/index.d.ts').Store} [store]
-	 * @param {unknown} [state]
-	 * @returns {Promise<Context | object>}
-	 */
-	static async from(rawMessage, client, store, state) {
+	/**	 * @param {import('../types/Messages').WAMessage} rawMessage	 * @param {import('../types/Core/index.d.ts').ClientSocket} client	 * @param {import('../types/Core/index.d.ts').Store} [store]	 * @param {unknown} [state]	 * @returns {Promise<Context | object>}	 */ static async from(
+		rawMessage,
+		client,
+		store,
+		state
+	) {
 		const m = rawMessage;
 
 		if (m.message?.protocolMessage?.type === 0) {
@@ -160,9 +134,7 @@ export class Context {
 		}
 
 		delete m?.message?.senderKeyDistributionMessage;
-
 		await ensurePrefixCache(client);
-
 		const ctx = new Context(m, client, store, state);
 
 		if (m.message?.pollUpdateMessage) {
@@ -184,77 +156,49 @@ export class Context {
 
 		return ctx;
 	}
-
-	/**
-	 * @param {string} text
-	 * @returns {Promise<import('../types/Messages').MessageGenerated>}
-	 */
-	async reply(text) {
+	/**	 * @param {string} text	 * @returns {Promise<import('../types/Messages').MessageGenerated>}	 */ async reply(text) {
 		return this.#client.send(this.from, { text }, { quoted: this.#raw });
 	}
-
-	/**
-	 * @param {string} emoji
-	 * @returns {Promise<import('../types/Messages').MessageGenerated>}
-	 */
-	async react(emoji) {
+	/**	 * @param {string} emoji	 * @returns {Promise<import('../types/Messages').MessageGenerated>}	 */ async react(emoji) {
 		return this.#client.send(this.from, { react: { text: emoji, key: this.#raw.key } });
 	}
-
-	/**
-	 * @param {import('../types/Messages').MessageSendContent} content
-	 * @param {import('../types/Messages').MessageSendOptions} [options]
-	 * @returns {Promise<import('../types/Messages').MessageGenerated>}
-	 */
-	async send(content, options = {}) {
+	/**	 * @param {import('../types/Messages').MessageSendContent} content	 * @param {import('../types/Messages').MessageSendOptions} [options]	 * @returns {Promise<import('../types/Messages').MessageGenerated>}	 */ async send(
+		content,
+		options = {}
+	) {
 		return this.#client.send(this.from, content, { quoted: this.#raw, ...options });
 	}
-
-	/**
-	 * @param {string} jid
-	 * @param {import('../types/Messages').MessageSendContent} content
-	 * @param {import('../types/Messages').MessageSendOptions} [options]
-	 * @returns {Promise<import('../types/Messages').MessageGenerated>}
-	 */
-	async sendTo(jid, content, options = {}) {
+	/**	 * @param {string} jid	 * @param {import('../types/Messages').MessageSendContent} content	 * @param {import('../types/Messages').MessageSendOptions} [options]	 * @returns {Promise<import('../types/Messages').MessageGenerated>}	 */ async sendTo(
+		jid,
+		content,
+		options = {}
+	) {
 		return this.#client.send(jid, content, options);
 	}
-
-	/**
-	 * @returns {Promise<import('../types/Messages').MessageGenerated>}
-	 */
-	async delete() {
+	/**	 * @returns {Promise<import('../types/Messages').MessageGenerated>}	 */ async delete() {
 		return this.#client.send(this.from, { delete: this.#raw.key });
 	}
-
 	derive(overrides) {
 		const ctx = new Context(this.#raw, this.#client, this.#store, this.#state);
 
 		ctx.#cache = { ...this.#cache, ...overrides };
-
 		return ctx;
 	}
-
 	get message() {
 		return this.#raw;
 	}
-
 	get from() {
 		return this.#memo('from', () => this.#raw?.key?.remoteJidAlt || this.#raw?.key?.remoteJid || this.#raw?.from);
 	}
-
 	get isGroup() {
 		return this.#memo('isGroup', () => this.from.endsWith('@g.us'));
 	}
-
 	get isFromMe() {
 		return this.#memo('isFromMe', () => Boolean(this.#raw?.key?.fromMe));
 	}
-
 	get isBaileys() {
 		return this.#memo('isBaileys', () => this.#raw?.key?.id?.startsWith('BAE5') && this.#raw?.key?.id?.length === 16);
 	}
-
 	get sender() {
 		return this.#memo('sender', () => {
 			const m = this.#raw;
@@ -276,7 +220,6 @@ export class Context {
 			return m?.key?.remoteJidAlt || m?.key?.remoteJid || m?.from;
 		});
 	}
-
 	get type() {
 		return this.#memo('type', () => {
 			let m = this.#raw.message;
@@ -287,7 +230,6 @@ export class Context {
 
 			m = Object.keys(m)[0] === 'ephemeralMessage' ? normalizeMessageContent(this.#raw) : m;
 			this.#raw.message = m;
-
 			let type = getContentType(m);
 
 			if (type === 'extendedTextMessage' && m?.extendedTextMessage?.contextInfo?.mentionedJid?.length) {
@@ -297,15 +239,12 @@ export class Context {
 			return type;
 		});
 	}
-
 	get body() {
 		return this.#memo('body', () => extractBody(this.#raw, this.type));
 	}
-
 	get args() {
 		return this.#memo('args', () => this.body?.split(/ +/g) || []);
 	}
-
 	get cmd() {
 		return this.#memo('cmd', () => {
 			const raw = this.body?.toLowerCase()?.split(' ')[0] || '';
@@ -313,10 +252,9 @@ export class Context {
 			return this.isCmd ? raw : '';
 		});
 	}
-
 	get prefix() {
 		return this.#memo('prefix', () => {
-			const { prf, prefixMode, prefixReg } = configuration.cache;
+			const { default: prf, mode: prefixMode, regex: prefixReg } = configuration.prefix;
 			const raw = this.body?.toLowerCase()?.split(' ')[0] || '';
 
 			if (prefixMode === 'multi' && prefixReg) {
@@ -330,10 +268,9 @@ export class Context {
 			return prf;
 		});
 	}
-
 	get isCmd() {
 		return this.#memo('isCmd', () => {
-			const { prefixMode } = configuration.cache;
+			const prefixMode = configuration.prefix.mode;
 
 			if (prefixMode === 'nopref') {
 				return true;
@@ -342,14 +279,12 @@ export class Context {
 			return this.body != null && this.prefix != null && this.body.startsWith(this.prefix);
 		});
 	}
-
 	get query() {
 		return this.#memo('query', () => this.args?.slice(1)?.join(' ') || '');
 	}
-
 	get pushname() {
 		return this.#memo('pushname', () => {
-			const cached = configuration.cache.users.get(this.sender);
+			const cached = configuration.users.info.get(this.sender);
 
 			return (
 				this.#raw?.pushName?.trim() ||
@@ -360,77 +295,60 @@ export class Context {
 			);
 		});
 	}
-
 	get prettyNumber() {
 		return this.#memo('prettyNumber', () => {
-			const cached = configuration.cache.users.get(this.sender);
+			const cached = configuration.users.info.get(this.sender);
 
 			return (
 				cached?.prettyNumber || PhoneNumber(`+${this.sender?.replace(S_WHATSAPP_NET, '')}`)?.formatInternational() || 'No Data'
 			);
 		});
 	}
-
 	get isOwner() {
-		return this.#memo('isOwner', () => configuration.cache.ownerNumbers?.includes(this.sender));
+		return this.#memo('isOwner', () => configuration.owners?.includes(this.sender));
 	}
-
 	get isBlocked() {
-		return this.#memo('isBlocked', () => configuration.cache.blocklist?.includes(this.sender));
+		return this.#memo('isBlocked', () => configuration.blocklist?.includes(this.sender));
 	}
-
 	get isBanned() {
-		return this.#memo('isBanned', () => configuration.cache.bannedlist?.includes(this.sender));
+		return this.#memo('isBanned', () => configuration.bannedlist?.includes(this.sender));
 	}
-
 	get settings() {
-		return this.#memo('settings', () => configuration.cache.config);
+		return this.#memo('settings', () => configuration.settings);
 	}
-
 	get groupMetadata() {
-		return this.#memo('groupMetadata', () => (this.isGroup ? configuration.cache.metadata.get(this.from) || {} : {}));
+		return this.#memo('groupMetadata', () => (this.isGroup ? configuration.groups.metadata.get(this.from) || {} : {}));
 	}
-
 	get groupName() {
 		return this.#memo('groupName', () => (this.isGroup ? this.groupMetadata?.subject || 'No Data' : 'No Data'));
 	}
-
 	get groupId() {
 		return this.#memo('groupId', () => (this.isGroup ? this.groupMetadata?.id || 'No Data' : 'No Data'));
 	}
-
 	get adminGroups() {
 		return this.#memo('adminGroups', () => this.groupMetadata?.adminGroups || []);
 	}
-
 	get participantsGroup() {
 		return this.#memo('participantsGroup', () => this.groupMetadata?.participantsGroup || []);
 	}
-
 	get isAdmin() {
 		return this.#memo('isAdmin', () => this.adminGroups?.includes(this.sender));
 	}
-
 	get isBotAdmin() {
-		return this.#memo('isBotAdmin', () => this.adminGroups?.includes(configuration.cache.botNumber));
+		return this.#memo('isBotAdmin', () => this.adminGroups?.includes(configuration.botJid));
 	}
-
 	get filename() {
 		return this.#memo('filename', () => this.sender + (this.#raw?.key?.id || Date.now()));
 	}
-
 	get device() {
 		return this.#memo('device', () => getDevice(this.#raw.key.id));
 	}
-
 	get typeQuoted() {
 		return this.#memo('typeQuoted', () => extractTypeQuoted(this.#raw, this.type));
 	}
-
 	get mention() {
 		return this.#memo('mention', () => extractMentionedJid(this.#raw, this.type));
 	}
-
 	get bodyQuoted() {
 		return this.#memo('bodyQuoted', () => {
 			const m = this.#raw;
@@ -438,14 +356,12 @@ export class Context {
 				this.type === 'extendedTextMessage'
 					? JSON.parse(JSON.stringify(m).replace('quotedM', 'm'))?.message?.extendedTextMessage?.contextInfo
 					: m;
-
 			const quotedType =
 				this.type === 'extendedTextMessage' && mMediaData ? firstKey(mMediaData.message || { CLIENT: 'm' }) : 'none';
 
 			return typeMessage.includes(quotedType) ? extractQuotedBody(mMediaData, this.typeQuoted) : '';
 		});
 	}
-
 	get mediaData() {
 		return this.#memo('mediaData', () => {
 			const m = this.#raw;
@@ -453,7 +369,6 @@ export class Context {
 				this.type === 'extendedTextMessage'
 					? JSON.parse(JSON.stringify(m).replace('quotedM', 'm'))?.message?.extendedTextMessage?.contextInfo
 					: m;
-
 			let data =
 				this.type === 'extendedTextMessage' || this.type === 'mentionText'
 					? this.typeQuoted === 'thumbnailMessage'
@@ -465,18 +380,14 @@ export class Context {
 				const messages = this.#store.loadMessage(this.from, data.stanzaId);
 
 				messages.parse = async () => Context.from(messages, this.#client, this.#store, this.#state);
-
 				return messages;
 			};
-
 			return data;
 		});
 	}
-
 	get extractMediaData() {
 		return this.#memo('extractMediaData', () => extractMetadata(this.mediaData, this.type, this.typeQuoted));
 	}
-
 	get isMediaImage() {
 		return this.#memo('isMediaImage', () => {
 			const content = this.type === 'extendedTextMessage' ? JSON.stringify(this.#raw?.message) : '';
@@ -487,7 +398,6 @@ export class Context {
 			);
 		});
 	}
-
 	get isMediaVid() {
 		return this.#memo('isMediaVid', () => {
 			const content = this.type === 'extendedTextMessage' ? JSON.stringify(this.#raw?.message) : '';
@@ -498,7 +408,6 @@ export class Context {
 			);
 		});
 	}
-
 	get isQuotedSticker() {
 		return this.#memo('isQuotedSticker', () => {
 			const content = this.type === 'extendedTextMessage' ? JSON.stringify(this.#raw?.message) : '';
@@ -506,7 +415,6 @@ export class Context {
 			return this.type === 'extendedTextMessage' && content.includes('stickerMessage');
 		});
 	}
-
 	get isQuotedDocument() {
 		return this.#memo('isQuotedDocument', () => {
 			const content = this.type === 'extendedTextMessage' ? JSON.stringify(this.#raw?.message) : '';
@@ -517,7 +425,6 @@ export class Context {
 			);
 		});
 	}
-
 	get isQuotedAudio() {
 		return this.#memo('isQuotedAudio', () => {
 			const content = this.type === 'extendedTextMessage' ? JSON.stringify(this.#raw?.message) : '';
@@ -525,15 +432,12 @@ export class Context {
 			return this.type === 'extendedTextMessage' && content.includes('audioMessage');
 		});
 	}
-
 	get typeSticker() {
 		return TYPE_STICKER;
 	}
-
 	get stickerAble() {
 		return this.#memo('stickerAble', () => TYPE_STICKER.includes(this.typeQuoted));
 	}
-
 	get isMediaDocument() {
 		return this.#memo('isMediaDocument', () => {
 			const content = this.type === 'extendedTextMessage' ? JSON.stringify(this.#raw?.message) : '';
@@ -544,15 +448,12 @@ export class Context {
 			return this.type === 'documentMessage' || this.type === 'documentWithCaptionMessage' || isQuotedDoc;
 		});
 	}
-
 	get timeStamp() {
 		return this.#memo('timeStamp', () => this.#raw?.messageTimestamp || Date.now());
 	}
-
 	get botNumber() {
-		return this.#memo('botNumber', () => configuration.cache.botNumber);
+		return this.#memo('botNumber', () => configuration.botJid);
 	}
-
 	get waitForInput() {
 		return this.#memo('waitForInput', () => {
 			const client = this.#client;
@@ -568,7 +469,6 @@ export class Context {
 
 				return new Promise((resolve) => {
 					const timeoutMs = (data.timeInSecond || 10) * 1000;
-
 					const timer = setTimeout(() => {
 						configuration.input.delete(sender);
 						resolve({ timeout: true });
@@ -586,17 +486,16 @@ export class Context {
 			};
 		});
 	}
-
 	#ensureUserCache() {
 		const sender = this.sender;
 
-		if (configuration.cache.users.has(sender)) {
+		if (configuration.users.info.has(sender)) {
 			return;
 		}
 
 		const prettyNumber = PhoneNumber(`+${sender?.replace(S_WHATSAPP_NET, '')}`)?.formatInternational() || 'No Data';
 
-		configuration.cache.users.set(sender, {
+		configuration.users.info.set(sender, {
 			prettyNumber,
 			name: this.#raw.pushName,
 			ephemeralDuration: this.isGroup
@@ -606,12 +505,11 @@ export class Context {
 				: crawlProperty(this.#raw.message, 'expiration')
 		});
 	}
-
 	async #ensureGroupSettings() {
 		const from = this.from;
 		const m = this.#raw;
 
-		if (!configuration.cache.settings.has(from)) {
+		if (!configuration.groups.settings.has(from)) {
 			let entry = await checkJSON(from);
 
 			if (typeof entry === 'boolean') {
@@ -620,7 +518,7 @@ export class Context {
 			}
 
 			if (entry) {
-				configuration.cache.settings.set(from, entry);
+				configuration.groups.settings.set(from, entry);
 			}
 		} else if ('GROUP_CHANGE_SUBJECT' === m.messageStubType) {
 			await updateSettings('groupName', m.messageStubParameters[0], from);
@@ -628,7 +526,6 @@ export class Context {
 			await updateSettings('groupDescription', m.content, from);
 		}
 	}
-
 	#earlyReturn() {
 		return {
 			message: this.#raw,
@@ -636,7 +533,7 @@ export class Context {
 			isFromMe: this.isFromMe,
 			from: this.from,
 			isGroup: this.isGroup,
-			...configuration.cache.settings.get(this.from),
+			...configuration.groups.settings.get(this.from),
 			isBaileys: this.isBaileys,
 			sender: this.sender,
 			isBlocked: this.isBlocked,
@@ -652,7 +549,6 @@ export class Context {
 			device: this.device
 		};
 	}
-
 	#memo(key, compute) {
 		if (!(key in this.#cache)) {
 			this.#cache[key] = compute();

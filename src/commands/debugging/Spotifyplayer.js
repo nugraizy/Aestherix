@@ -27,7 +27,7 @@ const updateSpotifyTracks = () => {
 	isInitForever = true;
 };
 
-configuration.intervals.spotifyPlaybacks.set('ids', {});
+configuration.timers.spotifyPlaybacks.set('ids', {});
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -59,10 +59,10 @@ export default {
 		/**
 		 * @type {{[_: string]: {message: import('../../types/Messages/index.js').WAMessage, enabled: boolean}}}
 		 */
-		const ids = configuration.intervals.spotifyPlaybacks.get('ids');
+		const ids = configuration.timers.spotifyPlaybacks.get('ids');
 
-		if (!configuration.intervals.spotifyPlaybacks.has('client')) {
-			configuration.intervals.spotifyPlaybacks.set('client', client);
+		if (!configuration.timers.spotifyPlaybacks.has('client')) {
+			configuration.timers.spotifyPlaybacks.set('client', client);
 			updateSpotifyTracks();
 		}
 
@@ -79,7 +79,7 @@ export default {
 				{}
 			);
 
-			configuration.intervals.spotifyPlaybacks.set('ids', { ...ids, [from]: { enabled: true, message: messageReplies } });
+			configuration.timers.spotifyPlaybacks.set('ids', { ...ids, [from]: { enabled: true, message: messageReplies } });
 
 			return;
 		}
@@ -92,7 +92,7 @@ export default {
 			/**
 			 * @type {import('../../types/Messages/index.js').WAMessage}
 			 */
-			const messageToReply = configuration.intervals.spotifyPlaybacks.get('ids')[from].message;
+			const messageToReply = configuration.timers.spotifyPlaybacks.get('ids')[from].message;
 
 			const messageReplies = await client.send(
 				from,
@@ -102,7 +102,7 @@ export default {
 				{ quted: messageToReply }
 			);
 
-			configuration.intervals.spotifyPlaybacks.set('ids', { ...ids, [from]: { enabled: false, message: messageReplies } });
+			configuration.timers.spotifyPlaybacks.set('ids', { ...ids, [from]: { enabled: false, message: messageReplies } });
 
 			return;
 		}

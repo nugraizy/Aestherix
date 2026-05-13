@@ -9,9 +9,9 @@ import utc from 'dayjs/plugin/utc.js';
 import path from 'path';
 import { platform } from 'process';
 
+import { initializeDashboardMonitor } from './src/core/dashboard/monitor.js';
+import { server } from './src/core/dashboard/server.js';
 import configuration from './src/helper/config/connect.js';
-import { initializeDashboardMonitor } from './src/helper/connection/dashboard/dashboard-monitor.js';
-import { server } from './src/helper/connection/dashboard/server.js';
 
 dotenvx.config({
 	quiet: true

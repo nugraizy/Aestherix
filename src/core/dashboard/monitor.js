@@ -52,7 +52,7 @@ const applyPersistedFlags = (configuration, flagStates) => {
 	const cliFlags = configuration?.cli?.flags || {};
 
 	for (const [key, value] of Object.entries(flagStates)) {
-		if (typeof configuration.OPTIONS[key] !== 'boolean') {
+		if (typeof configuration.flags[key] !== 'boolean') {
 			continue;
 		}
 
@@ -60,7 +60,7 @@ const applyPersistedFlags = (configuration, flagStates) => {
 			continue;
 		}
 
-		configuration.OPTIONS[key] = Boolean(value);
+		configuration.flags[key] = Boolean(value);
 	}
 };
 
@@ -133,8 +133,8 @@ export const initializeDashboardMonitor = async (configuration) => {
 	configuration.cmds.disabledCommands = new Set(data.disabledCommands);
 	applyPersistedFlags(configuration, data.flagStates);
 
-	if (!configuration?.OPTIONS || typeof configuration.OPTIONS !== 'object') {
-		configuration.OPTIONS = {};
+	if (!configuration?.OPTIONS || typeof configuration.flags !== 'object') {
+		configuration.flags = {};
 	}
 
 	for (const [key, value] of Object.entries(data.flagStates)) {
@@ -142,8 +142,8 @@ export const initializeDashboardMonitor = async (configuration) => {
 			continue;
 		}
 
-		if (typeof configuration.OPTIONS[key] !== 'boolean') {
-			configuration.OPTIONS[key] = value;
+		if (typeof configuration.flags[key] !== 'boolean') {
+			configuration.flags[key] = value;
 		}
 	}
 
@@ -233,21 +233,21 @@ export const setDashboardCommandState = async (configuration, commandName, enabl
 };
 
 export const setDashboardFlagState = async (configuration, flagName, enabled) => {
-	if (!configuration?.OPTIONS || typeof configuration.OPTIONS !== 'object') {
-		configuration.OPTIONS = {};
+	if (!configuration?.OPTIONS || typeof configuration.flags !== 'object') {
+		configuration.flags = {};
 	}
 
-	if (!Object.prototype.hasOwnProperty.call(configuration.OPTIONS, flagName)) {
-		configuration.OPTIONS[flagName] = Boolean(enabled);
+	if (!Object.prototype.hasOwnProperty.call(configuration.flags, flagName)) {
+		configuration.flags[flagName] = Boolean(enabled);
 		await persist(configuration);
 		return { ok: true, enabled: Boolean(enabled) };
 	}
 
-	if (typeof configuration.OPTIONS[flagName] !== 'boolean') {
+	if (typeof configuration.flags[flagName] !== 'boolean') {
 		return { ok: false, message: 'Only boolean flags can be toggled.' };
 	}
 
-	configuration.OPTIONS[flagName] = Boolean(enabled);
+	configuration.flags[flagName] = Boolean(enabled);
 	await persist(configuration);
 
 	return { ok: true, enabled: Boolean(enabled) };

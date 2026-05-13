@@ -10,7 +10,7 @@ const SETTINGS_PATH = './src/helper/config/settings.json';
 
 const LIMIT = (await fs.readJSON(SETTINGS_PATH).catch(() => ({}))).limit || 100;
 
-configuration.cache.limit = LIMIT;
+configuration.defaultLimit = LIMIT;
 
 try {
 	const rows = await getAllUserLimits(prisma);
@@ -42,7 +42,7 @@ export class Limit {
 	}
 
 	static checkRole(sender) {
-		if (configuration.cache?.ownerNumbers?.includes(sender)) {
+		if (configuration.owners?.includes(sender)) {
 			return { role: 'OWNER' };
 		}
 

@@ -100,11 +100,11 @@ export class SambungKata {
 		const remainings = dayjs(new Date()).add(20, 's').valueOf();
 
 		setIntervals(
-			configuration.intervals.word,
+			configuration.timers.word,
 			this.group,
 			20,
 			(clients = client, group = this.group, remaining = remainings) => {
-				const data = configuration.intervals.word.get(group);
+				const data = configuration.timers.word.get(group);
 
 				if (!data) {
 					return;
@@ -125,7 +125,7 @@ export class SambungKata {
 				}
 
 				if (timer <= 0) {
-					deleteIntervals(data, configuration.intervals.word, group);
+					deleteIntervals(data, configuration.timers.word, group);
 					const winner = dataGame.changeTurn();
 
 					clients.instance.send(group, {
@@ -202,7 +202,7 @@ export class SambungKata {
 	}
 
 	async guess(word, guesser, group, client) {
-		if (!configuration.intervals.word.get(group) && !configuration.games.word.get(group)) {
+		if (!configuration.timers.word.get(group) && !configuration.games.word.get(group)) {
 			return false;
 		}
 
@@ -223,15 +223,15 @@ export class SambungKata {
 		this.changeTurn();
 		this.words = data.value;
 		this.clue = data.clue;
-		deleteIntervals(configuration.intervals.word.get(this.group), configuration.intervals.word, this.group);
+		deleteIntervals(configuration.timers.word.get(this.group), configuration.timers.word, this.group);
 		const remainings = dayjs(new Date()).add(20, 's').valueOf();
 
 		setIntervals(
-			configuration.intervals.word,
+			configuration.timers.word,
 			this.group,
 			20,
 			(clients = client, group = this.group, remaining = remainings) => {
-				const data = configuration.intervals.word.get(group);
+				const data = configuration.timers.word.get(group);
 
 				if (data === undefined) {
 					return;
@@ -252,7 +252,7 @@ export class SambungKata {
 				}
 
 				if (timer <= 0) {
-					deleteIntervals(data, configuration.intervals.word, group);
+					deleteIntervals(data, configuration.timers.word, group);
 					const winner = dataGame.changeTurn();
 
 					clients.instance.send(group, {

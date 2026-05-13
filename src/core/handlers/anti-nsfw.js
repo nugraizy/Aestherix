@@ -10,7 +10,7 @@ import { arq, delay } from '../../utils/index.js';
 const { createReadStream, unlink } = fs;
 
 const isAntiNsfwEnabled = (settings, from) => {
-	return settings?.[from]?.antiNSFW === 'enable' && !configuration.OPTIONS.onlyLogs;
+	return settings?.[from]?.antiNSFW === 'enable' && !configuration.flags.onlyLogs;
 };
 
 const getMediaFilePath = (filename, extractMediaData) => {

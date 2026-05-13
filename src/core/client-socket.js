@@ -208,8 +208,8 @@ export class ClientSocket extends EventEmitter {
 			...(isJidGroup(jid) && { useCachedGroupMetadata: true }),
 			ephemeralExpiration:
 				options?.groupMetadata?.ephemeralDuration ||
-				configuration.cache.metadata?.get(jid)?.ephemeralDuration ||
-				configuration.cache.users?.get(jid)?.ephemeralDuration ||
+				configuration.groups.metadata?.get(jid)?.ephemeralDuration ||
+				configuration.users.info?.get(jid)?.ephemeralDuration ||
 				0,
 			// messageId: this.generateMessageID(),
 			ai: true
@@ -248,7 +248,7 @@ export class ClientSocket extends EventEmitter {
 		return this.send(
 			jid,
 			{ text },
-			{ quoted, ephemeralExpiration: configuration.cache.users?.get(jid)?.ephemeralDuration || null }
+			{ quoted, ephemeralExpiration: configuration.users.info?.get(jid)?.ephemeralDuration || null }
 		);
 	}
 
@@ -262,8 +262,8 @@ export class ClientSocket extends EventEmitter {
 			...(isJidGroup(jid) && { useCachedGroupMetadata: true }),
 			ephemeralExpiration:
 				options?.groupMetadata?.ephemeralDuration ||
-				configuration.cache.metadata?.get(jid)?.ephemeralDuration ||
-				configuration.cache.users?.get(jid)?.ephemeralDuration ||
+				configuration.groups.metadata?.get(jid)?.ephemeralDuration ||
+				configuration.users.info?.get(jid)?.ephemeralDuration ||
 				0,
 			messageId: this.generateMessageID(),
 			AI: true
@@ -379,7 +379,7 @@ export class ClientSocket extends EventEmitter {
 		const { key } = await this.send(
 			jid,
 			{ text: message },
-			{ quoted, ephemeralExpiration: configuration.cache.users?.get(jid)?.ephemeralDuration || null }
+			{ quoted, ephemeralExpiration: configuration.users.info?.get(jid)?.ephemeralDuration || null }
 		);
 		const update = async (text) => {
 			this.send(jid, { edit: key, text });

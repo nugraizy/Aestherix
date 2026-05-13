@@ -1,17 +1,14 @@
-import * as _ from 'baileys';  
+import * as _ from 'baileys';
 import { exec } from 'child_process';
 import fs from 'fs';
-import fsX from 'fs-extra'; /* eslint-disable-line */
 import prettier from 'js-beautify';
 import syntaxerror from 'syntax-error';
-import * as util from 'util'; /* eslint-disable-line */
 import { format } from 'util';
 
-import configuration from '../../helper/config/connect.js';
+import configuration, * as c from '../../helper/config/connect.js';
 import * as a from '../../helper/index.js';
-import * as b from '../../utils/index.js';
-import * as c from '../../helper/config/connect.js';
 import * as d from '../../index.js';
+import * as b from '../../utils/index.js';
 
 const func = { ...a, ...b, ...c, ...d, ...configuration }; /* eslint-disable-line */
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
@@ -24,7 +21,7 @@ class CustomArray extends Array {
 	}
 }
 
-const print = ({ from, quoted }, ...args) => client.reply(from, format(...args), quoted);
+const print = ({ from, quoted, client }, ...args) => client.reply(from, format(...args), quoted);
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -125,8 +122,6 @@ export default {
 			return;
 		}
 
-		global.where = from;
-
 		if (body.startsWith('/> ')) {
 			let types = Function;
 			let output;
@@ -212,7 +207,8 @@ export default {
 					print(
 						{
 							from,
-							quoted: message.message
+							quoted: message.message,
+							client
 						},
 						eval(prettier.js_beautify(query))
 					);
@@ -220,7 +216,8 @@ export default {
 					print(
 						{
 							from,
-							quoted: message.message
+							quoted: message.message,
+							client
 						},
 						await eval(
 							prettier.js_beautify(`(async () => {
@@ -229,7 +226,7 @@ export default {
 							 .catch(err => print({
 								from,
 								quoted: message.message,
-								
+								client
 							}, err))`)
 						)
 					);
@@ -242,6 +239,7 @@ export default {
 						.catch(err => print({
 							from,
 							quoted: message.message,
+							client
 							
 						}, err))`,
 					'Execution Function',

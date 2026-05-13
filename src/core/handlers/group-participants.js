@@ -173,8 +173,8 @@ const sendNotification = async (client, text, id, author, participant, groupName
  * @param {*} update
  */
 const groupParticipantsNotificationHandler = async (client, update) => {
-	const cache = configuration.cache.metadata;
-	const settings = configuration.cache.settings;
+	const cache = configuration.groups.metadata;
+	const settings = configuration.groups.settings;
 	const { action, author, id, participants } = update;
 	let eventName = null;
 	let actionName = null;

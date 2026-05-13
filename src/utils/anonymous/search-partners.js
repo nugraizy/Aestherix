@@ -4,8 +4,8 @@ import configuration from '../../helper/config/connect.js';
 import { checkIntervals, deleteIntervals, setIntervals } from '../misc/index.js';
 import { findOwnerOf } from './handlers-partners.js';
 
-const anonMap = () => configuration.anonymous;
-const intervalsMap = () => configuration.intervals['anonymous'];
+const anonMap = () => configuration.anonymous.sessions;
+const intervalsMap = () => configuration.timers['anonymous'];
 
 /**
  * Search new Anonymous session.

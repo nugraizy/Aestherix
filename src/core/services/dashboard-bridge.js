@@ -93,7 +93,7 @@ const applyRuntimeMutation = async (waClient, type, payload = {}) => {
 			await unbanUser(prisma, jid);
 		}
 
-		configuration.cache.bannedlist = await getBannedUsers(prisma);
+		configuration.bannedlist = await getBannedUsers(prisma);
 
 		return { ok: true, userId: jid };
 	}
@@ -111,7 +111,7 @@ const applyRuntimeMutation = async (waClient, type, payload = {}) => {
 
 		await waClient.updateBlockStatus(jid, Boolean(payload.enabled) ? 'block' : 'unblock');
 
-		const set = new Set(Array.isArray(configuration.cache?.blocklist) ? configuration.cache.blocklist : []);
+		const set = new Set(Array.isArray(configuration.blocklist) ? configuration.blocklist : []);
 
 		if (Boolean(payload.enabled)) {
 			set.add(jid);
@@ -119,7 +119,7 @@ const applyRuntimeMutation = async (waClient, type, payload = {}) => {
 			set.delete(jid);
 		}
 
-		configuration.cache.blocklist = Array.from(set);
+		configuration.blocklist = Array.from(set);
 
 		return { ok: true, userId: jid };
 	}

@@ -18,7 +18,7 @@ const images = await fs.readJSON(path.join(__dirname, 'databases/games/tebak_gam
 const getData = () => randomize(images);
 
 export const startTG = async (client, id, { message, sender }, remainingTime) => {
-	const Data = checkIntervals(configuration.intervals.tebakGambar.get(id));
+	const Data = checkIntervals(configuration.timers.tebakGambar.get(id));
 
 	if (Data !== 0) {
 		const data = configuration.games.tebakGambar.get(id);
@@ -43,26 +43,26 @@ export const startTG = async (client, id, { message, sender }, remainingTime) =>
 
 	loggers.info(`${color(`The Answer is : ${answer.trim()}`, '#FF99C8')}`);
 	setIntervals(
-		configuration.intervals.tebakGambar,
+		configuration.timers.tebakGambar,
 		id,
 		remainingTime + 2,
 		(clients = client, ids = id, answers = answer, messages = message, remainingTimes = remainings) => {
-			if (configuration.intervals.tebakGambar.get(ids) === undefined) {
+			if (configuration.timers.tebakGambar.get(ids) === undefined) {
 				return;
 			}
 
 			const second = Math.floor(((remainingTimes - new Date().getTime()) % (1000 * 60)) / 1000);
 
-			configuration.intervals.tebakGambar.get(ids).timer = second;
+			configuration.timers.tebakGambar.get(ids).timer = second;
 			configuration.games.tebakGambar.get(ids).timer = second;
-			const { timer } = checkIntervals(configuration.intervals.tebakGambar.get(ids));
+			const { timer } = checkIntervals(configuration.timers.tebakGambar.get(ids));
 
 			if (timer === 5) {
 				clients.instance.reply(ids, 'Time is almost over! 5 seconds', messages);
 			}
 
 			if (timer <= 0) {
-				deleteIntervals(configuration.intervals.tebakGambar.get(ids), configuration.intervals.tebakGambar, ids);
+				deleteIntervals(configuration.timers.tebakGambar.get(ids), configuration.timers.tebakGambar, ids);
 				clients.instance.reply(ids, `Time's up! The answer is ${answers}`, messages);
 				configuration.games.tebakGambar.delete(configuration.games.tebakGambar.get(ids).id);
 			}
