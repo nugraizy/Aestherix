@@ -18,7 +18,7 @@ export default {
 	limit: 2,
 	cooldown: 8,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message }, client) {
+	async run({ from, query, prettyNumber, message, device }, client) {
 		if (!query) {
 			return await client.reply(from, 'Please provide a URL', message);
 		}
@@ -95,25 +95,35 @@ export default {
 
 				const images = posts[data].urls.images;
 
-				const builder = new client.TemplateBuilder.Carousel();
+				if (device === 'ios') {
+					await wait.update(`Sending ${images.length} image(s)...`);
 
-				await wait.update(`Preparing TikTok Carousel Message for ${images.length} Images. Please wait...`);
+					await client.send(from, { text: caption.trim() }, { quoted: message });
 
-				await builder
-					.destination(from)
-					.body(caption)
-					.footer('Powered by Hidden Finder')
-					.header('Header')
-					.cards(
-						images.map(({ buffer, index, urlWithWatermark }) => ({
-							body: `Image ${index} of ${images.length}`,
-							footer: '',
-							title: '',
-							header: buffer,
-							buttons: [builder.button.url({ display: `Image ${index}`, url: urlWithWatermark })]
-						}))
-					)
-					.send();
+					for (const { buffer } of images) {
+						await client.send(from, { image: buffer });
+					}
+				} else {
+					const builder = new client.TemplateBuilder.Carousel();
+
+					await wait.update(`Preparing TikTok Carousel Message for ${images.length} Images. Please wait...`);
+
+					await builder
+						.destination(from)
+						.body(caption)
+						.footer('Powered by Hidden Finder')
+						.header('Header')
+						.cards(
+							images.map(({ buffer, index, urlWithWatermark }) => ({
+								body: `Image ${index} of ${images.length}`,
+								footer: '',
+								title: '',
+								header: buffer,
+								buttons: [builder.button.url({ display: `Image ${index}`, url: urlWithWatermark })]
+							}))
+						)
+						.send();
+				}
 
 				success++;
 				continue;

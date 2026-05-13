@@ -2,9 +2,13 @@ import dayjs from 'dayjs';
 import lodash from 'lodash';
 import parser from 'yargs-parser';
 
+import { cmdId } from '../../helper/modules/prefix.js';
 import { color, delay, loggers } from '../../utils/modules/index.js';
 import { metadata, qobuz } from '../../utils/qobuz/index.js';
 
+/**
+ * @type {import('../../types/Commands/index.js').CommandProps}
+ */
 export default {
 	name: 'qobuzdownload',
 	description: 'Download lossless music from Qobuz',
@@ -15,7 +19,7 @@ export default {
 	cooldown: 8,
 	limit: 3,
 	status: 'enable',
-	async run({ from, query, message, prettyNumber, prefix }, client) {
+	async run({ from, query, message, prettyNumber, prefix, device }, client) {
 		let wait = null;
 
 		try {
@@ -72,47 +76,77 @@ export default {
 				}
 
 				const total = results.length;
-				const chunks = lodash.chunk(results, 30);
 
 				await wait.update(`Songs with keyword "${query}" found. Total: ${total}`);
 
-				const builder = new client.TemplateBuilder.Carousel();
-				let caption = 'Qobuz Downloader'.formatHeaders();
-				let watermark = 'Powered by Hidden Finder';
-				let length = 0;
+				if (device === 'ios') {
+					const items = results.slice(0, 10);
+					const container = {
+						text: 'Qobuz Downloader'.formatHeaders() + '\n\n',
+						buttons: []
+					};
 
-				for (const chunk of chunks) {
+					const builder = new client.TemplateBuilder.Native();
+
+					items.forEach((track, idx) => {
+						const artists = track.artists?.map((a) => a.name).join(', ') || track.artist?.name || '';
+						const duration = track.duration ? dayjs(track.duration * 1000).format('mm:ss') : 'N/A';
+
+						container.text += `${idx + 1}. ${artists} - ${track.title} • ${duration}\n> ${prefix}qobuz --id ${track.id}\n`;
+						container.buttons.push(
+							builder.button.reply({
+								display: `${idx + 1}. ${artists} - ${track.title}`.slice(0, 40),
+								id: cmdId('qobuz', `--id ${track.id}`)
+							})
+						);
+					});
+
 					await builder
 						.destination(from)
-						.body(caption)
-						.footer(watermark)
-						.header('Header')
-						.cards(
-							chunk.map((track, idx) => {
-								const songNumber = length + idx + 1;
-								const cover = track.album?.image || '';
-								const artists = track.artists?.map((a) => a.name).join(', ') || track.artist?.name || '';
-								const duration = track.duration ? dayjs(track.duration * 1000).format('mm:ss') : 'N/A';
-
-								return {
-									body: `Title : ${track.title}\nArtist(s) : ${artists}\nDuration : ${duration}\nAlbum : ${track.album?.title || 'N/A'}`,
-									header: cover || Buffer.alloc(10),
-									footer: `Song ${songNumber} of ${total}`,
-									buttons: [
-										...(cover ? [builder.button.url({ display: `Cover ${songNumber}`, url: cover })] : []),
-										builder.button.reply({
-											display: 'Download',
-											id: `${prefix}qobuz --id ${track.id}`
-										})
-									]
-								};
-							})
-						)
+						.body(container.text)
+						.footer('Powered by Hidden Finder')
+						.buttons(...container.buttons)
 						.send();
+				} else {
+					const chunks = lodash.chunk(results, 30);
+					const builder = new client.TemplateBuilder.Carousel();
+					let caption = 'Qobuz Downloader'.formatHeaders();
+					let watermark = 'Powered by Hidden Finder';
+					let length = 0;
 
-					length += chunk.length;
-					caption = '';
-					watermark = '';
+					for (const chunk of chunks) {
+						await builder
+							.destination(from)
+							.body(caption)
+							.footer(watermark)
+							.header('Header')
+							.cards(
+								chunk.map((track, idx) => {
+									const songNumber = length + idx + 1;
+									const cover = track.album?.image || '';
+									const artists = track.artists?.map((a) => a.name).join(', ') || track.artist?.name || '';
+									const duration = track.duration ? dayjs(track.duration * 1000).format('mm:ss') : 'N/A';
+
+									return {
+										body: `Title : ${track.title}\nArtist(s) : ${artists}\nDuration : ${duration}\nAlbum : ${track.album?.title || 'N/A'}`,
+										header: cover || Buffer.alloc(10),
+										footer: `Song ${songNumber} of ${total}`,
+										buttons: [
+											...(cover ? [builder.button.url({ display: `Cover ${songNumber}`, url: cover })] : []),
+											builder.button.reply({
+												display: 'Download',
+												id: `${prefix}qobuz --id ${track.id}`
+											})
+										]
+									};
+								})
+							)
+							.send();
+
+						length += chunk.length;
+						caption = '';
+						watermark = '';
+					}
 				}
 
 				await wait.update('Please press the "Download" button on one of the results below :');
