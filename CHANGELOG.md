@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.1.0」2026-05-13
+
+## Added
+- **Qobuz lossless downloader** — search, carousel UI, download by ID with ffmpeg metadata embedding and cover art. Track cache in utility for button-based flows. ([`be28ce2`](https://github.com/nugraizy/aestherix/commit/be28ce2))
+- **Interactive `mentions()` method** — Native and Carousel builders support mentioning JIDs. ([`b21682e`](https://github.com/nugraizy/aestherix/commit/b21682e))
+- **CLI early exit** — `--help` prints immediately without loading the bot. Unknown flags show "did you mean?" suggestions via string-similarity. ([`24c13d2`](https://github.com/nugraizy/aestherix/commit/24c13d2))
+
+## Fixed
+- **Werewolf lobby timer** — `initWerewolfHandler` now receives `ClientSocket` instead of raw Baileys socket, fixing timer callbacks. ([`e7bfc79`](https://github.com/nugraizy/aestherix/commit/e7bfc79))
+- **Werewolf lobby mentions** — lobby prompts now mention players in the button message. ([`003f8a1`](https://github.com/nugraizy/aestherix/commit/003f8a1))
+
+---
+
 # 「7.0.0」2026-05-13
 
 ## BREAKING CHANGES

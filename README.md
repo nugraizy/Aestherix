@@ -10,7 +10,7 @@
 
 <div align="center">
 
-  <img src="https://img.shields.io/badge/version-7.0.0-purple?style=flat-square" alt="version"/>
+  <img src="https://img.shields.io/badge/version-7.1.0-purple?style=flat-square" alt="version"/>
 
   <a href="https://github.com/nugraizy/aestherix/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" title="MIT License">
     <img src="https://img.shields.io/badge/license-MIT-red?style=flat-square" alt="license"/>
