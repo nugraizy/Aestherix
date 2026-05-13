@@ -53,6 +53,7 @@ declare class Native {
 	footer(text: string): this;
 	header(text: string, media?: string | Buffer | null): this;
 	buttons(...buttons: Buttons[]): this;
+	mentions(jids: string[]): this;
 	render(): Promise<MessageGenerated>;
 	send(): Promise<void>;
 }
@@ -64,6 +65,7 @@ declare class Carousel {
 	footer(text: string): this;
 	header(text: string, media?: string | Buffer | null): this;
 	cards(cards: Cards[]): this;
+	mentions(jids: string[]): this;
 	render(): Promise<MessageGenerated>;
 	send(): Promise<void>;
 }

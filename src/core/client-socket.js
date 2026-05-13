@@ -749,6 +749,14 @@ function createTemplateBuilder(client) {
 			return this;
 		}
 
+		mentions(mentions) {
+			this._buildParams.message.interactiveMessage.contextInfo = {
+				mentionedJid: mentions?.length > 0 ? mentions : []
+			};
+
+			return this;
+		}
+
 		async render() {
 			this._media = !this._media ? { hasMediaAttachment: false } : await prepareMessage(this._media);
 			this._buildParams.message.interactiveMessage.header = {
@@ -819,6 +827,14 @@ function createTemplateBuilder(client) {
 		header(text, media) {
 			this._buildParams.message.interactiveMessage.header.title = text;
 			this._media = media;
+			return this;
+		}
+
+		mentions(mentions) {
+			this._buildParams.message.interactiveMessage.contextInfo = {
+				mentionedJid: mentions?.length > 0 ? mentions : []
+			};
+
 			return this;
 		}
 

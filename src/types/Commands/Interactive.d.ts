@@ -56,6 +56,8 @@ declare class Carousel extends InteractiveButtons {
 
 	cards(cards: Cards): Carousel;
 
+	mentions(jids: string[]): Carousel;
+
 	send(): Promise<void>;
 
 	destination(to: string): Carousel;
@@ -77,6 +79,8 @@ declare class Native extends InteractiveButtons {
 	prepareGif(media: Buffer, messageType: MediaType): MessageGenerated;
 
 	buttons(...buttons: Buttons[]): Native;
+
+	mentions(jids: string[]): Native;
 
 	send(): Promise<void>;
 
