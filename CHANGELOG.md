@@ -33,6 +33,9 @@ All notable changes to this project will be documented in this file.
 - **Pairing flow** — interactive number selection (default → list → manual input). ([`6a58b95`](https://github.com/nugraizy/aestherix/commit/6a58b95))
 - **Comix scraper updated** — dynamic token capture via puppeteer, new `baseUrl` + relative page URLs, deduplication prefers official/group 10702, new filters (content_rating, formats, tags search). ([`5967e21`](https://github.com/nugraizy/aestherix/commit/5967e21))
 - **Logger `.json()` method** — `format` (indentation) and `pretty` (syntax highlighting) as independent options with theme support. ([`5967e21`](https://github.com/nugraizy/aestherix/commit/5967e21))
+- **Qobuz lossless downloader** — search, carousel UI, download by ID with ffmpeg metadata embedding and cover art. Track cache in utility for button-based flows. ([`be28ce2`](https://github.com/nugraizy/aestherix/commit/be28ce2))
+- **Interactive `mentions()` method** — Native and Carousel builders support mentioning JIDs. ([`b21682e`](https://github.com/nugraizy/aestherix/commit/b21682e))
+- **CLI early exit** — `--help` prints immediately without loading the bot. Unknown flags show "did you mean?" suggestions via string-similarity. ([`24c13d2`](https://github.com/nugraizy/aestherix/commit/24c13d2))
 
 ## Performance
 - **Store init non-blocking** — socket connects while store hydrates in background (33s → 6s startup). ([`6a58b95`](https://github.com/nugraizy/aestherix/commit/6a58b95))
@@ -54,6 +57,8 @@ All notable changes to this project will be documented in this file.
 - **MQTT typo** — `waclient` → `waClient`. ([`6a58b95`](https://github.com/nugraizy/aestherix/commit/6a58b95))
 - **`resetSession`** — prefix now matches `fixFileName` format used by auth-state. ([`6a58b95`](https://github.com/nugraizy/aestherix/commit/6a58b95))
 - **Comix chapters button limit** — capped at 19 per batch + 1 navigation button to stay within WhatsApp's 20-button max. ([`5967e21`](https://github.com/nugraizy/aestherix/commit/5967e21))
+- **Werewolf lobby timer** — `initWerewolfHandler` now receives `ClientSocket` instead of raw Baileys socket, fixing timer callbacks. ([`e7bfc79`](https://github.com/nugraizy/aestherix/commit/e7bfc79))
+- **Werewolf lobby mentions** — lobby prompts now mention players in the button message. ([`003f8a1`](https://github.com/nugraizy/aestherix/commit/003f8a1))
 
 ---
 
