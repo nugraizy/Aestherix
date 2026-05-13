@@ -38,6 +38,7 @@ export interface ComixManga {
 	altTitles: string[];
 	synopsis: string;
 	rating: number;
+	year: number | null;
 	originalUrl: string;
 }
 
@@ -48,6 +49,7 @@ export interface ComixChapter {
 	votes: number;
 	createdAt: string;
 	isOfficial: boolean;
+	groupId: number | null;
 	scanlator: string;
 	url: string;
 	chapterSlug: string;
@@ -68,6 +70,11 @@ export interface FiltersGenre {
 	exclude?: string[];
 }
 
+export interface FiltersFormat {
+	include?: string[];
+	exclude?: string[];
+}
+
 export interface FiltersReleaseYear {
 	from?: string | number;
 	to?: string | number;
@@ -76,8 +83,11 @@ export interface FiltersReleaseYear {
 export interface ComixFilters {
 	statuses?: string[];
 	types?: string[];
+	contentRating?: string;
 	demographics?: FiltersDemographic;
 	genres?: FiltersGenre;
+	formats?: FiltersFormat;
+	genresMode?: 'and' | 'or';
 	minChapter?: string | number;
 	releaseYear?: FiltersReleaseYear;
 }
@@ -107,6 +117,7 @@ export interface ComixChaptersOptions {
 	page?: number;
 	limit?: number;
 	allPages?: boolean;
+	deduplicate?: boolean;
 }
 
 export type MangaInput =
@@ -118,7 +129,12 @@ export type MangaInput =
 			posterQuality?: PosterQuality;
 	  };
 
-export type ChapterInput = string | number | { chapterId?: string; id?: string; url?: string };
+export type ChapterInput = string | number | { chapterId?: string; id?: string; url?: string; mangaSlug?: string };
+
+export interface TagSearchResult {
+	id: number;
+	title: string;
+}
 
 export class ComixUtils {
 	static readonly API_BASE: string;
@@ -130,6 +146,8 @@ export class ComixUtils {
 	static readonly TYPE_OPTIONS: Array<{ label: string; value: string }>;
 	static readonly DEMOGRAPHIC_OPTIONS: Array<{ label: string; value: string }>;
 	static readonly GENRE_OPTIONS: Array<{ label: string; value: string }>;
+	static readonly FORMAT_OPTIONS: Array<{ label: string; value: string }>;
+	static readonly CONTENT_RATING_OPTIONS: Array<{ label: string; value: string }>;
 
 	static buildYears(includeOlder: boolean): Array<{ label: string; value: string }>;
 	static appendParam(params: URLSearchParams, key: string, value: unknown): void;
@@ -137,8 +155,11 @@ export class ComixUtils {
 	static getPoster(poster: ComixPoster | null | undefined, quality: PosterQuality): string;
 	static getMangaGenres(manga: {
 		type?: string;
+		genres?: ComixGenre[];
 		genre?: ComixGenre[];
+		tags?: ComixTag[];
 		theme?: ComixTheme[];
+		demographics?: ComixDemographic[];
 		demographic?: ComixDemographic[];
 		contentRating?: string;
 	}): string[];
@@ -148,21 +169,15 @@ export class ComixUtils {
 	static normalizeSlugInput(input: MangaInput): string;
 	static extractMangaId(slug: string): string;
 	static mapChapter(chapter: any, slug: string, webBase: string): ComixChapter;
+	static deduplicateChapters(chapters: ComixChapter[]): ComixChapter[];
 	static normalizeChapterInput(input: ChapterInput): string;
 	static extractIdFromUrl(query: string): string | null;
 }
 
-export class ComixHash {
-	static readonly HASH_KEYS: string[];
-	static getKeyBytes(index: number): number[];
-	static rc4(key: number[], data: number[]): number[];
-	static mutate(data: number[], mutKey: number[], prefKey: number[], prefKeyLimit: number, round: number): number[];
-	static round1(data: number[]): number[];
-	static round2(data: number[]): number[];
-	static round3(data: number[]): number[];
-	static round4(data: number[]): number[];
-	static round5(data: number[]): number[];
-	static generateHash(path: string): string;
+export class ComixToken {
+	static getCached(key: string): string | null;
+	static setCache(key: string, token: string): void;
+	static capture(pageUrl: string, apiPathSuffix: string): Promise<string>;
 }
 
 export class ComixResponse<TItem = ComixManga> {
@@ -191,12 +206,16 @@ export class Comix {
 		types: Array<{ label: string; value: string }>;
 		demographics: Array<{ label: string; value: string }>;
 		genres: Array<{ label: string; value: string }>;
+		formats: Array<{ label: string; value: string }>;
+		contentRatings: Array<{ label: string; value: string }>;
 		releaseYears: {
 			from: Array<{ label: string; value: string }>;
 			to: Array<{ label: string; value: string }>;
 		};
 	};
 
+	searchTags(type: string, query: string): Promise<TagSearchResult[]>;
+	resolveTagIds(type: string, names: string): Promise<string[]>;
 	getComics(options?: ComixListOptions): Promise<ComixResponse<ComixManga>>;
 	search(query: string, options?: ComixSearchOptions): Promise<ComixResponse<ComixManga>>;
 	filter(filters?: ComixFilters, options?: ComixFilterOptions): Promise<ComixResponse<ComixManga>>;

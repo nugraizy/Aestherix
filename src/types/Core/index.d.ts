@@ -1,8 +1,16 @@
-import type { EventEmitter } from 'node:events';
 import type { AuthenticationState, makeWASocket } from 'baileys';
+import type { EventEmitter } from 'node:events';
 import type { Transform } from 'node:stream';
-import type { MessageGenerated, MessageSendContent, MessageSendOptions, WAMessage, WAMessageKey, DownloadableMessage, MessageTypes } from '../Messages';
 import type { Buttons, Cards } from '../Commands/Interactive';
+import type {
+	DownloadableMessage,
+	MessageGenerated,
+	MessageSendContent,
+	MessageSendOptions,
+	MessageTypes,
+	WAMessage,
+	WAMessageKey
+} from '../Messages';
 
 type WASocket = ReturnType<typeof makeWASocket>;
 
@@ -15,7 +23,13 @@ type ExifMetadata = Partial<{
 	author: string;
 }>;
 
-type PrepareableMediaType = 'imageMessage' | 'videoMessage' | 'audioMessage' | 'documentMessage' | 'stickerMessage' | 'locationMessage';
+type PrepareableMediaType =
+	| 'imageMessage'
+	| 'videoMessage'
+	| 'audioMessage'
+	| 'documentMessage'
+	| 'stickerMessage'
+	| 'locationMessage';
 type StickerInputType = 'imageMessage' | 'videoMessage' | 'stickerAnimated';
 type ProfilePictureType = 'no_crop' | 'no_stretch' | undefined;
 
@@ -104,11 +118,37 @@ export declare class ClientSocket extends EventEmitter {
 	decodeJid(jid: string): string;
 	clearType(type: string, mime?: string): string;
 
-	buttonText(jid: string, contentText: string, footerText: string, buttons: object[], options?: object): Promise<MessageGenerated>;
-	buttonDocument(jid: string, contentText: string, footerText: string, buttons: object[], media: Buffer | string, options?: object): Promise<MessageGenerated>;
-	buttonLocation(jid: string, contentText: string, footerText: string, buttons: object[], media?: Buffer | string, options?: object): Promise<MessageGenerated>;
+	buttonText(
+		jid: string,
+		contentText: string,
+		footerText: string,
+		buttons: object[],
+		options?: object
+	): Promise<MessageGenerated>;
+	buttonDocument(
+		jid: string,
+		contentText: string,
+		footerText: string,
+		buttons: object[],
+		media: Buffer | string,
+		options?: object
+	): Promise<MessageGenerated>;
+	buttonLocation(
+		jid: string,
+		contentText: string,
+		footerText: string,
+		buttons: object[],
+		media?: Buffer | string,
+		options?: object
+	): Promise<MessageGenerated>;
 
-	updateGroup(jid: string, update: string, participants: string[], adminGroups: string[], options?: { force?: boolean; message?: WAMessage | null; texts?: string }): Promise<unknown[]>;
+	updateGroup(
+		jid: string,
+		update: string,
+		participants: string[],
+		adminGroups: string[],
+		options?: { force?: boolean; message?: WAMessage | null; texts?: string }
+	): Promise<unknown[]>;
 	searchMessage(jid: string, query: string): Promise<WAMessage[]>;
 	getStoryParticipants(): Promise<string[]>;
 
@@ -203,14 +243,19 @@ export declare class Context {
 }
 
 export declare class Router {
-	constructor(client: ClientSocket, options?: { prefix?: string; prefixMode?: string; prefixReg?: RegExp | null; commands?: object; aliases?: string[] });
+	constructor(
+		client: ClientSocket,
+		options?: { prefix?: string; prefixMode?: string; prefixReg?: RegExp | null; commands?: object; aliases?: string[] }
+	);
 
 	get commands(): import('../../helper/modules/cache').Cache;
 	set commands(value: import('../../helper/modules/cache').Cache);
 	get aliases(): string[];
 	set aliases(value: string[]);
 
-	resolve(body: string): { command: object; args: string[]; cmdName: string; prefix: string; query: string; isEval: boolean } | null;
+	resolve(
+		body: string
+	): { command: object; args: string[]; cmdName: string; prefix: string; query: string; isEval: boolean } | null;
 	isBlocked(command: { name: string; category: string }): boolean;
 	checkCooldown(sender: string, commandName: string, cooldown: number): { onCooldown: boolean; remaining: number };
 	updatePrefix(config: { mode: string; value: string; regex: RegExp | null }): void;
@@ -219,7 +264,10 @@ export declare class Router {
 }
 
 export declare class MessageHandler {
-	constructor(client: ClientSocket, options: { router: Router; store: Store; configuration?: object; options?: { flags?: object } });
+	constructor(
+		client: ClientSocket,
+		options: { router: Router; store: Store; configuration?: object; options?: { flags?: object } }
+	);
 
 	get router(): Router;
 	handle(upsert: { messages: WAMessage[]; type: string }): Promise<void>;
@@ -300,9 +348,11 @@ export declare class Logger {
 	info(...args: unknown[]): string | undefined;
 	warning(...args: unknown[]): string | undefined;
 	error(...args: unknown[]): string | undefined;
+	json(
+		...args: [...objects: unknown[], options?: { format?: boolean; pretty?: boolean; language?: string }]
+	): string | undefined;
 	prettyCode(...args: [...codes: string[], options?: { language?: string }]): string | undefined;
 }
-
 
 export declare function boot(options: {
 	cli: Cli;

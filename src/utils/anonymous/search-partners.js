@@ -83,10 +83,10 @@ export const search = (jid, timer, client, message) => {
 				await clients.instance.edit(
 					id,
 					'Your partner is not found! Try again later!',
-					configuration.anonymousMessages.get(id)
+					configuration.anonymous.messages.get(id)
 				);
 				anonMap().delete(id);
-				configuration.anonymousMessages.delete(id);
+				configuration.anonymous.messages.delete(id);
 				deleteIntervals(interval, intervalsMap(), id);
 			}
 		},

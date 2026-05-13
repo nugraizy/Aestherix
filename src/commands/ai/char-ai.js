@@ -28,11 +28,11 @@ export default {
 		}
 
 		if (args[1] === 'start') {
-			if (configuration.user.charAI.get(from)) {
+			if (configuration.charAI.get(from)) {
 				return await client.reply(from, 'You already chatting with AI', message);
 			}
 
-			configuration.user.charAI.set(
+			configuration.charAI.set(
 				from,
 				new ChatGPTDialogue(pushname, new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }), 'Zero_Two')
 			);
@@ -41,11 +41,11 @@ export default {
 		}
 
 		if (args[1] === 'stop') {
-			if (!configuration.user.charAI.get(from)) {
+			if (!configuration.charAI.get(from)) {
 				return await client.reply(from, 'You not chatting with AI', message);
 			}
 
-			configuration.user.charAI.delete(from);
+			configuration.charAI.delete(from);
 			return await client.reply(from, 'AI chat has been stopped', message);
 		}
 

@@ -28,7 +28,7 @@ const normalizeSet = (value) => {
 };
 
 const extractBooleanFlags = (configuration) => {
-	const options = configuration?.OPTIONS || {};
+	const options = configuration?.flags || {};
 
 	return Object.entries(options)
 		.filter(([, value]) => typeof value === 'boolean')
@@ -45,7 +45,7 @@ const safeRead = async () => {
 };
 
 const applyPersistedFlags = (configuration, flagStates) => {
-	if (!configuration?.OPTIONS || !flagStates || typeof flagStates !== 'object') {
+	if (!configuration?.flags || !flagStates || typeof flagStates !== 'object') {
 		return;
 	}
 
@@ -130,10 +130,10 @@ export const initializeDashboardMonitor = async (configuration) => {
 
 	const data = await safeRead();
 
-	configuration.cmds.disabledCommands = new Set(data.disabledCommands);
+	configuration.registry.disabledCommands = new Set(data.disabledCommands);
 	applyPersistedFlags(configuration, data.flagStates);
 
-	if (!configuration?.OPTIONS || typeof configuration.flags !== 'object') {
+	if (!configuration?.flags || typeof configuration.flags !== 'object') {
 		configuration.flags = {};
 	}
 
@@ -150,7 +150,7 @@ export const initializeDashboardMonitor = async (configuration) => {
 	const raw = await loadCommandUsageFromDB(prisma).catch(() => ({}));
 
 	for (const [name, count] of Object.entries(raw)) {
-		configuration.cmds.commandUsage.set(name, count);
+		configuration.registry.commandUsage.set(name, count);
 	}
 
 	await hydrateCommandsCatalogCache();
@@ -158,7 +158,7 @@ export const initializeDashboardMonitor = async (configuration) => {
 };
 
 export const listDashboardFlags = (configuration) => {
-	return Object.entries(configuration?.OPTIONS || {})
+	return Object.entries(configuration?.flags || {})
 		.filter(([, value]) => typeof value === 'boolean')
 		.map(([name, enabled]) => ({
 			name,
@@ -213,14 +213,14 @@ export const setDashboardCommandState = async (configuration, commandName, enabl
 		return { ok: false, message: 'Command not found.' };
 	}
 
-	if (!configuration.cmds.disabledCommands) {
-		configuration.cmds.disabledCommands = new Set();
+	if (!configuration.registry.disabledCommands) {
+		configuration.registry.disabledCommands = new Set();
 	}
 
 	if (enabled) {
-		configuration.cmds.disabledCommands.delete(commandName);
+		configuration.registry.disabledCommands.delete(commandName);
 	} else {
-		configuration.cmds.disabledCommands.add(commandName);
+		configuration.registry.disabledCommands.add(commandName);
 	}
 
 	await persist(configuration);
@@ -233,7 +233,7 @@ export const setDashboardCommandState = async (configuration, commandName, enabl
 };
 
 export const setDashboardFlagState = async (configuration, flagName, enabled) => {
-	if (!configuration?.OPTIONS || typeof configuration.flags !== 'object') {
+	if (!configuration?.flags || typeof configuration.flags !== 'object') {
 		configuration.flags = {};
 	}
 

@@ -1,29 +1,29 @@
-import { getLocale } from '../../../helper/i18n/index.js';
-import { EVENTS } from '../../../utils/games/werewolf/events.js';
-import { repository } from '../../../utils/games/werewolf/state/repository.js';
-import { getAlivePlayers } from '../../../utils/games/werewolf/state/session.js';
-import { initScheduler } from '../../../utils/games/werewolf/logic/scheduler-singleton.js';
-import { initLobbyTimer } from '../../../utils/games/werewolf/logic/lobby-timer-singleton.js';
-import { MIN_PLAYERS } from '../../../utils/games/werewolf/config/constants.js';
 import { finalizeStart } from '../../../commands/games/werewolf/subcommands/_start-game.js';
 import {
-	buildWerewolfPrompt,
-	buildSeerPrompt,
-	buildGuardPrompt,
-	buildWitchHealPrompt,
-	buildWitchPoisonPrompt,
-	buildHunterRevengePrompt,
-	buildCupidPrompt,
-	buildLittleGirlPrompt,
 	buildAlphaConvertPrompt,
-	buildVotingPrompt
+	buildCupidPrompt,
+	buildGuardPrompt,
+	buildHunterRevengePrompt,
+	buildLittleGirlPrompt,
+	buildSeerPrompt,
+	buildVotingPrompt,
+	buildWerewolfPrompt,
+	buildWitchHealPrompt,
+	buildWitchPoisonPrompt
 } from '../../../commands/games/werewolf/ui/prompts.js';
 import {
-	buildMorningReport,
-	buildVotingClosedAnnouncement,
 	buildGameOverSummary,
-	buildNightKickoff
+	buildMorningReport,
+	buildNightKickoff,
+	buildVotingClosedAnnouncement
 } from '../../../commands/games/werewolf/ui/summaries.js';
+import { getLocale } from '../../../helper/i18n/index.js';
+import { MIN_PLAYERS } from '../../../utils/games/werewolf/config/constants.js';
+import { EVENTS } from '../../../utils/games/werewolf/events.js';
+import { initLobbyTimer } from '../../../utils/games/werewolf/logic/lobby-timer-singleton.js';
+import { initScheduler } from '../../../utils/games/werewolf/logic/scheduler-singleton.js';
+import { repository } from '../../../utils/games/werewolf/state/repository.js';
+import { getAlivePlayers } from '../../../utils/games/werewolf/state/session.js';
 
 const sendButtons = async (clientInstance, jid, prompt) => {
 	if (!prompt) {
@@ -87,9 +87,7 @@ const sendNightPrompts = async (clientInstance, session, locale) => {
 			}
 			case 'hunter': {
 				const text =
-					locale === 'en'
-						? '🏹 You are the Hunter. Wait for daytime.'
-						: '🏹 Kamu adalah Pemburu. Tunggu sampai pagi.';
+					locale === 'en' ? '🏹 You are the Hunter. Wait for daytime.' : '🏹 Kamu adalah Pemburu. Tunggu sampai pagi.';
 
 				await clientInstance.send(player.id, { text });
 				break;
@@ -110,10 +108,7 @@ const sendNightPrompts = async (clientInstance, session, locale) => {
 				break;
 			}
 			case 'villager': {
-				const text =
-					locale === 'en'
-						? '🌙 Night falls. Wait until morning.'
-						: '🌙 Malam tiba. Tunggu sampai pagi.';
+				const text = locale === 'en' ? '🌙 Night falls. Wait until morning.' : '🌙 Malam tiba. Tunggu sampai pagi.';
 
 				await clientInstance.send(player.id, { text });
 				break;
@@ -220,12 +215,7 @@ const handleHunterRevenge = async (clientInstance, payload) => {
 
 const handleGameEnded = async (clientInstance, payload) => {
 	const locale = getLocale(payload.roomId);
-	const summary = buildGameOverSummary(
-		payload.stats,
-		payload.winner,
-		payload.reason,
-		locale
-	);
+	const summary = buildGameOverSummary(payload.stats, payload.winner, payload.reason, locale);
 
 	await clientInstance.send(payload.roomId, {
 		text: summary.body,

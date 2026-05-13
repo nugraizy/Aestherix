@@ -90,8 +90,8 @@ export class ConnectionHandler {
 
 	async #handleOpen(receivedPendingNotifications) {
 		if (!this.#commandsLoaded) {
-			if (this.#configuration.cmds.loadPromise) {
-				await this.#configuration.cmds.loadPromise;
+			if (this.#configuration.registry.loadPromise) {
+				await this.#configuration.registry.loadPromise;
 			}
 
 			this.#commandsLoaded = true;
@@ -182,12 +182,12 @@ export class ConnectionHandler {
 
 		this.#isShuttingDown = true;
 
-		if (this.#configuration.dashboardIO) {
-			this.#configuration.dashboardIO.disconnectSockets(true);
-			this.#configuration.dashboardIO.close();
+		if (this.#configuration.dashboard.io) {
+			this.#configuration.dashboard.io.disconnectSockets(true);
+			this.#configuration.dashboard.io.close();
 		}
 
-		const servers = [...this.#configuration.expressInstances.entries()];
+		const servers = [...this.#configuration.dashboard.expressInstances.entries()];
 
 		await Promise.all(
 			servers.map(([name, server]) => {
@@ -207,7 +207,7 @@ export class ConnectionHandler {
 							return reject(err);
 						}
 
-						this.#configuration.expressInstances.delete(name);
+						this.#configuration.dashboard.expressInstances.delete(name);
 						resolve();
 					});
 				});

@@ -39,7 +39,7 @@ export default {
 			}
 
 			const user = await twitter.getUser(username);
-			const builder = new client.TemplateBuilder.Native(client);
+			const builder = new client.TemplateBuilder.Native();
 
 			if (user?.error) {
 				await client.reply(from, `Error while searching Twitter user\n\n${user.error}\n${username}`, message);

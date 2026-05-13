@@ -1,4 +1,4 @@
-import { reassign } from '../../helper/index.js';
+import { Context } from '../../core/context.js';
 import { convertStickerToMedia } from '../../utils/converter/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 
@@ -17,15 +17,15 @@ export default {
 	status: 'enable',
 	async run({ isQuotedSticker, from, message, mediaData, prettyNumber, waitForInput, sender, shouldSkipCheck }, client) {
 		if (!isQuotedSticker && !shouldSkipCheck) {
-			return await client.instance.reply(from, 'Please reply a sticker to decrypt', message);
+			return await client.reply(from, 'Please reply a sticker to decrypt', message);
 		}
 
 		loggers.info(`${color('Decrypting media', 'pink')} from ${color(prettyNumber, 'lilac')}`);
 
-		const stickerBuffer = await client.instance.downloadMediaMessage(mediaData, 'buffer');
+		const stickerBuffer = await client.downloadMediaMessage(mediaData, 'buffer');
 		const { result, isVideo } = await convertStickerToMedia(stickerBuffer, prettyNumber, mediaData);
 
-		await client.instance.send(
+		await client.send(
 			from,
 			isVideo
 				? {
@@ -45,7 +45,7 @@ export default {
 		});
 
 		if (!wait.timeout) {
-			await this.run({ ...(await reassign(wait.message, client, store)), shouldSkipCheck: true }, client);
+			await this.run({ ...(await Context.from(wait.message, client, store)), shouldSkipCheck: true }, client);
 		}
 
 		loggers.info(`${color('Media is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);

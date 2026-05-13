@@ -2,7 +2,7 @@ import configuration from '../../config/connect.js';
 import { Cache } from '../../modules/cache.js';
 
 export const checkAfk = (participant, groupId) => {
-	const key = configuration.user.afk.get(participant)?.has(groupId);
+	const key = configuration.users.afk.get(participant)?.has(groupId);
 
 	if (!key) {
 		return false;
@@ -13,7 +13,7 @@ export const checkAfk = (participant, groupId) => {
 
 export const getAfk = (participant, groupId) => {
 	if (checkAfk(participant, groupId)) {
-		return configuration.user.afk.get(participant).get(groupId);
+		return configuration.users.afk.get(participant).get(groupId);
 	}
 
 	return false;
@@ -21,7 +21,7 @@ export const getAfk = (participant, groupId) => {
 
 export const deleteAfk = (participant, groupId) => {
 	if (checkAfk(participant, groupId)) {
-		configuration.user.afk.get(participant).delete(groupId);
+		configuration.users.afk.get(participant).delete(groupId);
 		return true;
 	}
 
@@ -30,7 +30,7 @@ export const deleteAfk = (participant, groupId) => {
 
 export const setAfk = (participant, groupId, reason, name) => {
 	if (!getAfk(participant, groupId)) {
-		configuration.user.afk.set(
+		configuration.users.afk.set(
 			participant,
 			new Cache().set(groupId, { since: new Date().getTime(), reasons: !reason ? 'No Reason' : reason, name })
 		);

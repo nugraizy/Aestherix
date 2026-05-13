@@ -42,7 +42,7 @@ export default {
 			query = (await pinId).url;
 		}
 
-		configuration.pinterestId = query;
+		configuration.pinterest.id = query;
 
 		client.reply(from, 'Pinterest intervals has been updated.', message);
 	}

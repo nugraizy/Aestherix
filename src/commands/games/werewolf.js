@@ -60,7 +60,7 @@ export default {
 		if (!module) {
 			const locale = getLocale(ctx.from);
 
-			return client.instance.reply(ctx.from, t(locale, 'werewolf.help'), ctx.message);
+			return client.reply(ctx.from, t(locale, 'werewolf.help'), ctx.message);
 		}
 
 		return module.run(ctx, client);

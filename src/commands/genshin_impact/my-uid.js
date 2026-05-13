@@ -26,6 +26,6 @@ export default {
 
 		query = `${data[index].uid} -uid`;
 
-		await configuration.cmds.commands.get('genshinstalk').run({ sender, query, message, from }, client);
+		await configuration.registry.commands.get('genshinstalk').run({ sender, query, message, from }, client);
 	}
 };

@@ -5,7 +5,7 @@ import { randomChar } from '../../utils/modules/index.js';
 
 const comix = new Comix();
 
-const CHAPTERS_PER_BATCH = 20;
+const CHAPTERS_PER_BATCH = 19;
 
 const chapterSessions = new Cache();
 
@@ -68,7 +68,7 @@ async function sendBatch(state, from, message, client, ctx) {
 
 	const body = `${'Comix Chapters'.formatHeaders()}\n\nTotal : ${allChapters.length} chapter(s)\nShowing : ${start + 1}–${start + batch.length}\n\nSelect a chapter to read.`;
 
-	const builder = new client.TemplateBuilder.Native(client);
+	const builder = new client.TemplateBuilder.Native();
 
 	builder
 		.destination(from)

@@ -16,7 +16,7 @@ export default {
 	async run({ from }, client) {
 		const carousel = async () => {
 			const waifu = (await getWaifu('waifu', 'sfw'))[0];
-			const builder = new client.instance.TemplateBuilder.Carousel();
+			const builder = new client.TemplateBuilder.Carousel();
 
 			await builder
 				.destination(from)
@@ -133,9 +133,9 @@ export default {
 
 		const native = async () => {
 			// const waifu = (await getWaifu('waifu', 'sfw'))[0];
-			const builder = new client.instance.TemplateBuilder.Native();
+			const builder = new client.TemplateBuilder.Native();
 
-			const n = 100;
+			const n = 20;
 
 			const buttons = Array.from({ length: n }, (_, i) =>
 				builder.button.reply({
@@ -143,8 +143,6 @@ export default {
 					id: cmdId(`menu_${i + 1}`)
 				})
 			);
-
-			console.log(buttons);
 
 			await builder
 				.destination(from)

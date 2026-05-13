@@ -59,7 +59,7 @@ export default {
 			const caption = formatDetailCaption(manga);
 			const body = `${'Kiryuu Detail'.formatHeaders()}\n\n${caption.formatForm()}`;
 
-			const builder = new client.TemplateBuilder.Native(client);
+			const builder = new client.TemplateBuilder.Native();
 
 			builder
 				.destination(from)

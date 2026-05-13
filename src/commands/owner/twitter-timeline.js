@@ -96,7 +96,7 @@ const sendTweetBatch = async (tweets, from, message, client) => {
  * Sends the "Next" prompt after a tweet batch.
  */
 const sendNextPrompt = async (sessionId, batchSize, from, client, prefix = '.') => {
-	const builder = new client.TemplateBuilder.Native(client);
+	const builder = new client.TemplateBuilder.Native();
 
 	await builder
 		.destination(from)

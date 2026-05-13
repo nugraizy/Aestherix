@@ -16,13 +16,13 @@ color.setTheme(configuration.logger_theme || 'dracula');
 const cli = new Cli();
 
 configuration.cli = cli.raw;
-configuration.OPTIONS = cli.flags;
+configuration.flags = cli.flags;
 
 void initializeDashboardMonitor(configuration).catch((error) => {
 	loggers.error(color('Dashboard monitor init failed:', 'red'), color(error.message, 'white'));
 });
 
-const OPTIONS = configuration.OPTIONS;
+const OPTIONS = configuration.flags;
 const sessionName = await cli.resolveSessionName();
 
 if (OPTIONS.limitReset) {
@@ -40,7 +40,7 @@ if (OPTIONS.resetOnStart) {
 
 export const runtime = Date.now();
 
-configuration.OPTIONS.runtime = runtime;
+configuration.flags.runtime = runtime;
 
 if (!(await fs.exists('./src/media/temporary_files/'))) {
 	await fs.mkdir('./src/media/temporary_files/');
@@ -92,12 +92,12 @@ const gracefulShutdown = async (signal) => {
 
 	await mgr.disconnectAll().catch(() => {});
 
-	if (configuration.dashboardIO) {
-		configuration.dashboardIO.disconnectSockets(true);
-		configuration.dashboardIO.close();
+	if (configuration.dashboard.io) {
+		configuration.dashboard.io.disconnectSockets(true);
+		configuration.dashboard.io.close();
 	}
 
-	const servers = [...configuration.expressInstances.entries()];
+	const servers = [...configuration.dashboard.expressInstances.entries()];
 
 	await Promise.all(servers.map(([, server]) => new Promise((resolve) => {
 		if (typeof server.closeAllConnections === 'function') {

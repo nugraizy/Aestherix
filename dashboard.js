@@ -29,7 +29,7 @@ global.__dirname = platform === 'win32' ? path.dirname(moduleURL.pathname).slice
 global.__botName = 'Aestherix Dashboard';
 
 configuration.cli = configuration.cli || {};
-configuration.OPTIONS = configuration.OPTIONS || {};
+configuration.flags = configuration.flags || {};
 
 await initializeDashboardMonitor(configuration);
 server();

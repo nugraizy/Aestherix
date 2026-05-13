@@ -1,18 +1,5 @@
 import { fetch } from 'undici';
-
-/**
- * @typedef {import('./types/comix').ComixFilters} ComixFilters
- * @typedef {import('./types/comix').ComixListOptions} ComixListOptions
- * @typedef {import('./types/comix').ComixChaptersOptions} ComixChaptersOptions
- * @typedef {import('./types/comix').MangaInput} MangaInput
- * @typedef {import('./types/comix').ChapterInput} ChapterInput
- * @typedef {import('./types/comix').ComixPoster} ComixPoster
- * @typedef {import('./types/comix').ComixManga} ComixManga
- * @typedef {import('./types/comix').ComixChapter} ComixChapter
- * @typedef {import('./types/comix').ComixPage} ComixPage
- * @typedef {import('./types/comix').PageInfo} PageInfo
- * @typedef {import('./types/comix').PosterQuality} PosterQuality
- */
+import puppeteer from 'puppeteer';
 
 class ComixUtils {
 	static get API_BASE() {
@@ -68,109 +55,87 @@ class ComixUtils {
 
 	static get DEMOGRAPHIC_OPTIONS() {
 		return [
-			{ label: 'Shoujo', value: '1' },
 			{ label: 'Shounen', value: '2' },
-			{ label: 'Josei', value: '3' },
-			{ label: 'Seinen', value: '4' }
+			{ label: 'Shoujo', value: '1' },
+			{ label: 'Seinen', value: '4' },
+			{ label: 'Josei', value: '3' }
 		];
 	}
 
 	static get GENRE_OPTIONS() {
 		return [
-			{ label: 'Action', value: '6' },
-			{ label: 'Adult', value: '87264' },
-			{ label: 'Adventure', value: '7' },
-			{ label: 'Boys Love', value: '8' },
-			{ label: 'Comedy', value: '9' },
-			{ label: 'Crime', value: '10' },
-			{ label: 'Drama', value: '11' },
-			{ label: 'Ecchi', value: '87265' },
-			{ label: 'Fantasy', value: '12' },
-			{ label: 'Girls Love', value: '13' },
-			{ label: 'Hentai', value: '87266' },
-			{ label: 'Historical', value: '14' },
-			{ label: 'Horror', value: '15' },
-			{ label: 'Isekai', value: '16' },
-			{ label: 'Magical Girls', value: '17' },
-			{ label: 'Mature', value: '87267' },
-			{ label: 'Mecha', value: '18' },
-			{ label: 'Medical', value: '19' },
-			{ label: 'Mystery', value: '20' },
-			{ label: 'Philosophical', value: '21' },
-			{ label: 'Psychological', value: '22' },
 			{ label: 'Romance', value: '23' },
-			{ label: 'Sci-Fi', value: '24' },
+			{ label: 'Drama', value: '11' },
+			{ label: 'Comedy', value: '9' },
+			{ label: 'Fantasy', value: '12' },
 			{ label: 'Slice of Life', value: '25' },
+			{ label: 'Action', value: '6' },
+			{ label: 'Boys Love', value: '8' },
+			{ label: 'Adventure', value: '7' },
+			{ label: 'Adult', value: '87264' },
 			{ label: 'Smut', value: '87268' },
-			{ label: 'Sports', value: '26' },
-			{ label: 'Superhero', value: '27' },
-			{ label: 'Thriller', value: '28' },
+			{ label: 'Psychological', value: '22' },
+			{ label: 'Mystery', value: '20' },
+			{ label: 'Historical', value: '14' },
+			{ label: 'Mature', value: '87267' },
 			{ label: 'Tragedy', value: '29' },
+			{ label: 'Sci-Fi', value: '24' },
+			{ label: 'Ecchi', value: '87265' },
+			{ label: 'Horror', value: '15' },
+			{ label: 'Girls Love', value: '13' },
+			{ label: 'Isekai', value: '16' },
+			{ label: 'Hentai', value: '87266' },
+			{ label: 'Thriller', value: '28' },
+			{ label: 'Sports', value: '26' },
+			{ label: 'Crime', value: '10' },
+			{ label: 'Philosophical', value: '21' },
+			{ label: 'Mecha', value: '18' },
 			{ label: 'Wuxia', value: '30' },
-			{ label: 'Aliens', value: '31' },
-			{ label: 'Animals', value: '32' },
-			{ label: 'Cooking', value: '33' },
-			{ label: 'Cross Dressing', value: '34' },
-			{ label: 'Delinquents', value: '35' },
-			{ label: 'Demons', value: '36' },
-			{ label: 'Genderswap', value: '37' },
-			{ label: 'Ghosts', value: '38' },
-			{ label: 'Gyaru', value: '39' },
-			{ label: 'Harem', value: '40' },
-			{ label: 'Incest', value: '41' },
-			{ label: 'Loli', value: '42' },
-			{ label: 'Mafia', value: '43' },
-			{ label: 'Magic', value: '44' },
-			{ label: 'Martial Arts', value: '45' },
-			{ label: 'Military', value: '46' },
-			{ label: 'Monster Girls', value: '47' },
-			{ label: 'Monsters', value: '48' },
-			{ label: 'Music', value: '49' },
-			{ label: 'Ninja', value: '50' },
-			{ label: 'Office Workers', value: '51' },
-			{ label: 'Police', value: '52' },
-			{ label: 'Post-Apocalyptic', value: '53' },
-			{ label: 'Reincarnation', value: '54' },
-			{ label: 'Reverse Harem', value: '55' },
-			{ label: 'Samurai', value: '56' },
-			{ label: 'School Life', value: '57' },
-			{ label: 'Shota', value: '58' },
-			{ label: 'Supernatural', value: '59' },
-			{ label: 'Survival', value: '60' },
-			{ label: 'Time Travel', value: '61' },
-			{ label: 'Traditional Games', value: '62' },
-			{ label: 'Vampires', value: '63' },
-			{ label: 'Video Games', value: '64' },
-			{ label: 'Villainess', value: '65' },
-			{ label: 'Virtual Reality', value: '66' },
-			{ label: 'Zombies', value: '67' }
+			{ label: 'Medical', value: '19' },
+			{ label: 'Superhero', value: '27' },
+			{ label: 'Magical Girls', value: '17' }
 		];
 	}
 
-	/**
-	 * @param {boolean} includeOlder
-	 * @returns {Array<{ label: string, value: string }>}
-	 */
+	static get FORMAT_OPTIONS() {
+		return [
+			{ label: '4-Koma', value: '93164' },
+			{ label: 'Adaptation', value: '93167' },
+			{ label: 'Anthology', value: '93165' },
+			{ label: 'Award Winning', value: '93166' },
+			{ label: 'Doujinshi', value: '93168' },
+			{ label: 'Full Color', value: '93172' },
+			{ label: 'Long Strip', value: '93170' },
+			{ label: 'Oneshot', value: '93169' },
+			{ label: 'Web Comic', value: '93171' }
+		];
+	}
+
+	static get CONTENT_RATING_OPTIONS() {
+		return [
+			{ label: 'Safe only', value: 'safe' },
+			{ label: 'Up to Suggestive', value: 'suggestive' },
+			{ label: 'Up to Erotica', value: 'erotica' },
+			{ label: 'Up to Pornographic', value: 'pornographic' }
+		];
+	}
+
 	static buildYears(includeOlder) {
 		const currentYear = new Date().getFullYear();
+		const newest = currentYear + 1;
 		const years = [];
 
-		for (let year = currentYear; year >= 1990; year -= 1) {
+		for (let year = newest; year >= 1928; year -= 1) {
 			years.push({ label: String(year), value: String(year) });
 		}
 
 		if (includeOlder) {
-			years.push({ label: 'Older', value: 'older' });
+			years.push({ label: 'Any', value: '' });
 		}
 
 		return years;
 	}
 
-	/**
-	 * @param {URLSearchParams} params
-	 * @param {string} key
-	 * @param {unknown} value
-	 */
 	static appendParam(params, key, value) {
 		if (value === undefined || value === null) {
 			return;
@@ -190,11 +155,6 @@ class ComixUtils {
 		params.append(key, stringValue);
 	}
 
-	/**
-	 * @param {URLSearchParams} params
-	 * @param {ComixFilters} filters
-	 * @param {boolean} excludeNsfw
-	 */
 	static applyFilters(params, filters, excludeNsfw) {
 		if (!filters) {
 			return;
@@ -202,6 +162,10 @@ class ComixUtils {
 
 		ComixUtils.appendParam(params, 'statuses[]', filters.statuses);
 		ComixUtils.appendParam(params, 'types[]', filters.types);
+
+		if (filters.contentRating) {
+			params.set('content_rating', filters.contentRating);
+		}
 
 		if (filters.demographics) {
 			ComixUtils.appendParam(params, 'demographics[]', filters.demographics.include);
@@ -217,8 +181,16 @@ class ComixUtils {
 			const excluded = filters.genres.exclude || [];
 
 			if (included.length > 0 || excluded.length > 0) {
-				params.set('genres_mode', 'and');
+				params.set('genres_mode', filters.genresMode || 'and');
 			}
+
+			ComixUtils.appendParam(params, 'genres_in[]', included);
+			ComixUtils.appendParam(params, 'genres_ex[]', excluded);
+		}
+
+		if (filters.formats) {
+			const included = filters.formats.include || [];
+			const excluded = filters.formats.exclude || [];
 
 			ComixUtils.appendParam(params, 'genres_in[]', included);
 			ComixUtils.appendParam(params, 'genres_ex[]', excluded);
@@ -236,24 +208,25 @@ class ComixUtils {
 
 		if (filters.releaseYear) {
 			if (filters.releaseYear.from) {
-				params.set('release_year[from]', String(filters.releaseYear.from));
+				params.set('year_from', String(filters.releaseYear.from));
 			}
 
 			if (filters.releaseYear.to) {
-				params.set('release_year[to]', String(filters.releaseYear.to));
+				params.set('year_to', String(filters.releaseYear.to));
 			}
 		}
 
 		if (excludeNsfw) {
-			ComixUtils.NSFW_GENRE_IDS.forEach((id) => params.append('genres_ex[]', id));
+			const explicitlyIncluded = new Set(filters.genres?.include || []);
+
+			ComixUtils.NSFW_GENRE_IDS.forEach((id) => {
+				if (!explicitlyIncluded.has(id)) {
+					params.append('genres_ex[]', id);
+				}
+			});
 		}
 	}
 
-	/**
-	 * @param {ComixPoster | null | undefined} poster
-	 * @param {PosterQuality} quality
-	 * @returns {string}
-	 */
 	static getPoster(poster, quality) {
 		if (!poster) {
 			return '';
@@ -269,10 +242,6 @@ class ComixUtils {
 		}
 	}
 
-	/**
-	 * @param {{ type?: string, genre?: Array<{ title: string }>, theme?: Array<{ title: string }>, demographic?: Array<{ title: string }>, contentRating?: string }} manga
-	 * @returns {string[]}
-	 */
 	static getMangaGenres(manga) {
 		const values = [];
 
@@ -286,9 +255,13 @@ class ComixUtils {
 			values.push('Other');
 		}
 
-		(manga.genre || []).forEach((genre) => values.push(genre.title));
-		(manga.theme || []).forEach((theme) => values.push(theme.title));
-		(manga.demographic || []).forEach((demographic) => values.push(demographic.title));
+		const genres = manga.genres || manga.genre || [];
+		const tags = manga.tags || manga.theme || [];
+		const demographics = manga.demographics || manga.demographic || [];
+
+		genres.forEach((item) => values.push(item.title));
+		demographics.forEach((item) => values.push(item.title));
+		tags.forEach((item) => values.push(item.title));
 
 		if (manga.contentRating === 'erotica' || manga.contentRating === 'pornographic') {
 			values.push('NSFW');
@@ -297,13 +270,11 @@ class ComixUtils {
 		return [...new Set(values)];
 	}
 
-	/**
-	 * @param {any} manga
-	 * @param {PosterQuality} posterQuality
-	 * @returns {ComixManga}
-	 */
 	static mapManga(manga, posterQuality) {
 		const slug = manga.url ? manga.url.replace('/title', '') : `/${manga.hid}`;
+		const authors = manga.authors || manga.author || [];
+		const artists = manga.artists || manga.artist || [];
+		const altTitles = manga.altTitles || manga.alt_titles || [];
 
 		return {
 			id: manga.hid,
@@ -313,20 +284,17 @@ class ComixUtils {
 			type: manga.type,
 			status: manga.status,
 			contentRating: manga.contentRating,
-			authors: (manga.author || []).map((author) => author.title),
-			artists: (manga.artist || []).map((artist) => artist.title),
+			authors: authors.map((a) => a.title),
+			artists: artists.map((a) => a.title),
 			genres: ComixUtils.getMangaGenres(manga),
-			altTitles: manga.alt_titles || [],
+			altTitles,
 			synopsis: manga.synopsis || '',
 			rating: manga.ratedAvg || 0,
+			year: manga.year || null,
 			originalUrl: manga.url || ''
 		};
 	}
 
-	/**
-	 * @param {any} result
-	 * @returns {PageInfo}
-	 */
 	static parsePageInfo(result) {
 		const meta = result.meta || result.pagination || {};
 		const page = meta.page || 1;
@@ -336,10 +304,6 @@ class ComixUtils {
 		return { page, lastPage, hasNext };
 	}
 
-	/**
-	 * @param {ComixListOptions & { query?: string }} [options]
-	 * @returns {URLSearchParams}
-	 */
 	static buildMangaQuery({
 		page = 1,
 		limit = ComixUtils.DEFAULT_LIMIT,
@@ -365,10 +329,6 @@ class ComixUtils {
 		return params;
 	}
 
-	/**
-	 * @param {MangaInput} input
-	 * @returns {string}
-	 */
 	static normalizeSlugInput(input) {
 		if (typeof input === 'string') {
 			if (input.startsWith('http://') || input.startsWith('https://')) {
@@ -402,10 +362,6 @@ class ComixUtils {
 		return '';
 	}
 
-	/**
-	 * @param {string} slug
-	 * @returns {string}
-	 */
 	static extractMangaId(slug) {
 		if (!slug) {
 			return '';
@@ -417,12 +373,6 @@ class ComixUtils {
 		return parts[0] || cleaned;
 	}
 
-	/**
-	 * @param {any} chapter
-	 * @param {string} slug
-	 * @param {string} webBase
-	 * @returns {ComixChapter}
-	 */
 	static mapChapter(chapter, slug, webBase) {
 		const number = String(chapter.number).replace(/\.0$/, '');
 		const chapterSlug = `${chapter.id}-chapter-${number}`;
@@ -434,27 +384,52 @@ class ComixUtils {
 			votes: chapter.votes || 0,
 			createdAt: chapter.createdAtFormatted || '',
 			isOfficial: chapter.isOfficial || false,
+			groupId: chapter.group?.id || null,
 			scanlator: chapter.group ? chapter.group.name : chapter.isOfficial ? 'Official' : 'Unknown',
 			url: `${webBase}/title/${slug}/${chapterSlug}`,
 			chapterSlug
 		};
 	}
 
-	/**
-	 * @param {ComixChapter[]} chapters
-	 * @returns {ComixChapter[]}
-	 */
-	static mergeChaptersByVotes(chapters) {
+	static deduplicateChapters(chapters) {
 		const byNumber = new Map();
 
-		chapters.forEach((chapter) => {
+		for (const chapter of chapters) {
 			const key = String(chapter.number).replace(/\.0$/, '');
 			const current = byNumber.get(key);
 
-			if (!current || (chapter.votes || 0) > (current.votes || 0)) {
+			if (!current) {
+				byNumber.set(key, chapter);
+				continue;
+			}
+
+			const newIsOfficial = chapter.isOfficial;
+			const currentIsOfficial = current.isOfficial;
+			const newIsGroup10702 = chapter.groupId === 10702;
+			const currentIsGroup10702 = current.groupId === 10702;
+
+			let better = false;
+
+			if (newIsOfficial && !currentIsOfficial) {
+				better = true;
+			} else if (!newIsOfficial && currentIsOfficial) {
+				better = false;
+			} else if (newIsGroup10702 && !currentIsGroup10702) {
+				better = true;
+			} else if (!newIsGroup10702 && currentIsGroup10702) {
+				better = false;
+			} else if ((chapter.votes || 0) > (current.votes || 0)) {
+				better = true;
+			} else if ((chapter.votes || 0) < (current.votes || 0)) {
+				better = false;
+			} else {
+				better = chapter.id > current.id;
+			}
+
+			if (better) {
 				byNumber.set(key, chapter);
 			}
-		});
+		}
 
 		return Array.from(byNumber.values()).sort((a, b) => {
 			const aNum = Number(String(a.number).replace(/\.0$/, ''));
@@ -468,10 +443,6 @@ class ComixUtils {
 		});
 	}
 
-	/**
-	 * @param {ChapterInput} input
-	 * @returns {string}
-	 */
 	static normalizeChapterInput(input) {
 		if (typeof input === 'number') {
 			return String(input);
@@ -504,10 +475,6 @@ class ComixUtils {
 		return '';
 	}
 
-	/**
-	 * @param {string} query
-	 * @returns {string | null}
-	 */
 	static extractIdFromUrl(query) {
 		try {
 			const parsed = new URL(query);
@@ -530,371 +497,97 @@ class ComixUtils {
 	}
 }
 
-class ComixHash {
-	static get HASH_KEYS() {
-		return [
-			'JxTcdyiA5GZxnbrmthXBQfU2IMTKcY1+3nNhbq98Sgo=',
-			'3PordjODbhqla382Cxapmo/1JiABJQcjiJj1+48gTJ4=',
-			'OaKvnI5ARA==',
-			'MHNBHYWA7lvy867fXgvGcJwWDk79KqUJUVFsh3RwnnI=',
-			'8i0Cru/VJBSVB2Y1GcMDVpzx2WepOcfnWdd81yxICl4=',
-			'Fyskubz8VvA=',
-			'B46L1x+UeWP+19cRpQ+OZvdLAK9EHID8g3mSgn57tew=',
-			'DTSTmUt6LpDUw9r1lSQqyb3YlFTzruT8tk8wUGkwehQ=',
-			'vY/meeI=',
-			'7xWfIF5THL5LAnRgAARg+4mjWHPU9n3PQwvzbaMNi+Q=',
-			'bewtiTuV+HJk56xxkf2iCljLgruCpBmN9BgE8i6gc9M=',
-			'/Xcb2zAu8AU=',
-			'WgeCQ3T8R51uTwVSiVa7Zy0dN6JOg6Z5JleMS+HV8Aw=',
-			'yXayUVFrrcW56jQCEfZzuCidjpnWKjTDUNT7XeX9i7k=',
-			'tSLco2w='
-		];
+
+class ComixToken {
+	static #cache = new Map();
+	static #CACHE_TTL_MS = 5 * 60 * 1000;
+
+	static getCached(key) {
+		const entry = ComixToken.#cache.get(key);
+
+		if (!entry) {
+			return null;
+		}
+
+		if (Date.now() > entry.expiresAt) {
+			ComixToken.#cache.delete(key);
+			return null;
+		}
+
+		return entry.token;
 	}
 
-	/**
-	 * @param {number} index
-	 * @returns {number[]}
-	 */
-	static getKeyBytes(index) {
-		const b64 = ComixHash.HASH_KEYS[index];
+	static setCache(key, token) {
+		ComixToken.#cache.set(key, {
+			token,
+			expiresAt: Date.now() + ComixToken.#CACHE_TTL_MS
+		});
+	}
 
-		if (!b64) {
-			return [];
+	static async capture(pageUrl, apiPathSuffix) {
+		const cacheKey = `${pageUrl}::${apiPathSuffix}`;
+		const cached = ComixToken.getCached(cacheKey);
+
+		if (cached) {
+			return cached;
 		}
+
+		let browser = null;
 
 		try {
-			return Array.from(Buffer.from(b64, 'base64')).map((value) => value & 0xff);
-		} catch {
-			return [];
-		}
-	}
+			browser = await puppeteer.launch({
+				headless: 'shell',
+				args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu']
+			});
 
-	/**
-	 * @param {number[]} key
-	 * @param {number[]} data
-	 * @returns {number[]}
-	 */
-	static rc4(key, data) {
-		if (!key.length) {
-			return data;
-		}
+			const page = await browser.newPage();
+			let token = null;
 
-		const s = Array.from({ length: 256 }, (_, index) => index);
-		let j = 0;
+			await page.setRequestInterception(true);
 
-		for (let i = 0; i < 256; i += 1) {
-			j = (j + s[i] + key[i % key.length]) % 256;
-			[s[i], s[j]] = [s[j], s[i]];
-		}
+			page.on('request', (request) => {
+				const url = request.url();
 
-		let i = 0;
+				if (url.includes(apiPathSuffix)) {
+					const parsed = new URL(url);
+					const captured = parsed.searchParams.get('_');
 
-		j = 0;
-		const out = [];
+					if (captured) {
+						token = captured;
+					}
+				}
 
-		for (let k = 0; k < data.length; k += 1) {
-			i = (i + 1) % 256;
-			j = (j + s[i]) % 256;
-			[s[i], s[j]] = [s[j], s[i]];
-			out.push(data[k] ^ s[(s[i] + s[j]) % 256]);
-		}
+				if (['image', 'font', 'stylesheet'].includes(request.resourceType())) {
+					request.abort();
+				} else {
+					request.continue();
+				}
+			});
 
-		return out;
-	}
+			await page.goto(pageUrl, { waitUntil: 'networkidle0', timeout: 30000 });
 
-	static opShiftRight7Left1(value) {
-		return ((value >>> 7) | (value << 1)) & 255;
-	}
-
-	static opShiftLeft1Right7(value) {
-		return ((value << 1) | (value >>> 7)) & 255;
-	}
-
-	static opShiftRight2Left6(value) {
-		return ((value >>> 2) | (value << 6)) & 255;
-	}
-
-	static opShiftLeft4Right4(value) {
-		return ((value << 4) | (value >>> 4)) & 255;
-	}
-
-	static opShiftRight4Left4(value) {
-		return ((value >>> 4) | (value << 4)) & 255;
-	}
-
-	static getMutKey(mutKey, idx) {
-		return mutKey.length && idx % 32 < mutKey.length ? mutKey[idx % 32] : 0;
-	}
-
-	/**
-	 * @param {number[]} data
-	 * @param {number[]} mutKey
-	 * @param {number[]} prefKey
-	 * @param {number} prefKeyLimit
-	 * @param {number} round
-	 * @returns {number[]}
-	 */
-	static mutate(data, mutKey, prefKey, prefKeyLimit, round) {
-		const out = [];
-
-		for (let i = 0; i < data.length; i += 1) {
-			if (i < prefKeyLimit && i < prefKey.length) {
-				out.push(prefKey[i]);
+			if (!token) {
+				await page.waitForFunction(() => true, { timeout: 5000 }).catch(() => {});
 			}
 
-			let value = data[i] ^ ComixHash.getMutKey(mutKey, i);
+			await page.close();
 
-			switch (round) {
-				case 1:
-					switch (i % 10) {
-						case 0:
-							value = ComixHash.opShiftRight7Left1(value);
-							break;
-						case 1:
-							value ^= 37;
-							break;
-						case 2:
-							value ^= 81;
-							break;
-						case 3:
-							value ^= 147;
-							break;
-						case 4:
-							value = ComixHash.opShiftRight2Left6(value);
-							break;
-						case 5:
-						case 8:
-							value = ComixHash.opShiftRight4Left4(value);
-							break;
-						case 6:
-							value ^= 218;
-							break;
-						case 7:
-							value = (value + 159) & 255;
-							break;
-						case 9:
-							value ^= 180;
-							break;
-						default:
-							break;
-					}
-					break;
-				case 2:
-					switch (i % 10) {
-						case 0:
-						case 9:
-							value ^= 180;
-							break;
-						case 1:
-							value = ComixHash.opShiftLeft1Right7(value);
-							break;
-						case 2:
-							value ^= 147;
-							break;
-						case 3:
-							value = ComixHash.opShiftRight7Left1(value);
-							break;
-						case 4:
-							value = ComixHash.opShiftRight2Left6(value);
-							break;
-						case 5:
-							value = ComixHash.opShiftRight4Left4(value);
-							break;
-						case 6:
-						case 8:
-							value = (value + 159) & 255;
-							break;
-						case 7:
-							value = (value + 34) & 255;
-							break;
-						default:
-							break;
-					}
-					break;
-				case 3:
-					switch (i % 10) {
-						case 0:
-							value ^= 81;
-							break;
-						case 1:
-							value = ComixHash.opShiftRight4Left4(value);
-							break;
-						case 2:
-						case 9:
-							value = ComixHash.opShiftLeft4Right4(value);
-							break;
-						case 3:
-							value ^= 37;
-							break;
-						case 4:
-							value = (value + 159) & 255;
-							break;
-						case 5:
-							value = ComixHash.opShiftLeft1Right7(value);
-							break;
-						case 6:
-							value ^= 180;
-							break;
-						case 7:
-							value = (value + 34) & 255;
-							break;
-						case 8:
-							value = ComixHash.opShiftRight2Left6(value);
-							break;
-						default:
-							break;
-					}
-					break;
-				case 4:
-					switch (i % 10) {
-						case 0:
-						case 7:
-							value ^= 218;
-							break;
-						case 1:
-						case 4:
-							value = ComixHash.opShiftLeft1Right7(value);
-							break;
-						case 2:
-							value = ComixHash.opShiftRight7Left1(value);
-							break;
-						case 3:
-							value = (value + 159) & 255;
-							break;
-						case 5:
-						case 8:
-							value ^= 180;
-							break;
-						case 6:
-							value ^= 147;
-							break;
-						case 9:
-							value ^= 37;
-							break;
-						default:
-							break;
-					}
-					break;
-				case 5:
-					switch (i % 10) {
-						case 0:
-							value = ComixHash.opShiftLeft4Right4(value);
-							break;
-						case 1:
-						case 3:
-							value ^= 147;
-							break;
-						case 2:
-							value = (value + 34) & 255;
-							break;
-						case 4:
-						case 9:
-							value ^= 218;
-							break;
-						case 5:
-						case 7:
-							value = ComixHash.opShiftLeft1Right7(value);
-							break;
-						case 6:
-							value ^= 180;
-							break;
-						case 8:
-							value = ComixHash.opShiftRight2Left6(value);
-							break;
-						default:
-							break;
-					}
-					break;
-				default:
-					break;
+			if (!token) {
+				throw new Error(`Failed to capture token from ${pageUrl}`);
 			}
 
-			out.push(value & 255);
+			ComixToken.setCache(cacheKey, token);
+			return token;
+		} finally {
+			if (browser) {
+				await browser.close();
+			}
 		}
-
-		return out;
-	}
-
-	/**
-	 * @param {number[]} data
-	 * @returns {number[]}
-	 */
-	static round1(data) {
-		return ComixHash.rc4(
-			ComixHash.getKeyBytes(0),
-			ComixHash.mutate(data, ComixHash.getKeyBytes(1), ComixHash.getKeyBytes(2), 7, 1)
-		);
-	}
-
-	/**
-	 * @param {number[]} data
-	 * @returns {number[]}
-	 */
-	static round2(data) {
-		return ComixHash.rc4(
-			ComixHash.getKeyBytes(3),
-			ComixHash.mutate(data, ComixHash.getKeyBytes(4), ComixHash.getKeyBytes(5), 8, 2)
-		);
-	}
-
-	/**
-	 * @param {number[]} data
-	 * @returns {number[]}
-	 */
-	static round3(data) {
-		return ComixHash.rc4(
-			ComixHash.getKeyBytes(6),
-			ComixHash.mutate(data, ComixHash.getKeyBytes(7), ComixHash.getKeyBytes(8), 5, 3)
-		);
-	}
-
-	/**
-	 * @param {number[]} data
-	 * @returns {number[]}
-	 */
-	static round4(data) {
-		return ComixHash.rc4(
-			ComixHash.getKeyBytes(9),
-			ComixHash.mutate(data, ComixHash.getKeyBytes(10), ComixHash.getKeyBytes(11), 8, 4)
-		);
-	}
-
-	/**
-	 * @param {number[]} data
-	 * @returns {number[]}
-	 */
-	static round5(data) {
-		return ComixHash.rc4(
-			ComixHash.getKeyBytes(12),
-			ComixHash.mutate(data, ComixHash.getKeyBytes(13), ComixHash.getKeyBytes(14), 5, 5)
-		);
-	}
-
-	/**
-	 * @param {string} path
-	 * @returns {string}
-	 */
-	static generateHash(path) {
-		const encoded = encodeURIComponent(path).replace(/\*/g, '%2A').replace(/%7E/g, '~');
-		const initialBytes = Array.from(Buffer.from(encoded, 'ascii')).map((value) => value & 0xff);
-		const r1 = ComixHash.round1(initialBytes);
-		const r2 = ComixHash.round2(r1);
-		const r3 = ComixHash.round3(r2);
-		const r4 = ComixHash.round4(r3);
-		const r5 = ComixHash.round5(r4);
-		const finalBytes = Buffer.from(Uint8Array.from(r5));
-
-		return finalBytes.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
 	}
 }
 
-/**
- * @template TItem
- */
+
 class ComixResponse {
-	/**
-	 * @param {{ comix: Comix, items?: TItem[], pageInfo?: PageInfo, context?: Record<string, unknown> }} param0
-	 */
 	constructor({ comix, items, pageInfo, context }) {
 		this.comix = comix;
 		this.items = items || [];
@@ -902,12 +595,10 @@ class ComixResponse {
 		this.context = context || {};
 	}
 
-	/** @returns {boolean} */
 	hasNext() {
 		return Boolean(this.pageInfo?.hasNext);
 	}
 
-	/** @returns {Promise<ComixResponse<TItem>>} */
 	nextPage() {
 		if (typeof this.context.nextPage !== 'function') {
 			throw new Error('No next page available');
@@ -916,10 +607,6 @@ class ComixResponse {
 		return this.context.nextPage();
 	}
 
-	/**
-	 * @param {number} [index]
-	 * @returns {Promise<ComixItemResponse>}
-	 */
 	getDetail(index = 0) {
 		if (!this.items.length) {
 			throw new Error('No items available');
@@ -928,11 +615,6 @@ class ComixResponse {
 		return this.comix.getDetail(this.items[index]);
 	}
 
-	/**
-	 * @param {number} [index]
-	 * @param {ComixChaptersOptions} [options]
-	 * @returns {Promise<ComixResponse<ComixChapter>>}
-	 */
 	getChapters(index = 0, options = {}) {
 		if (this.context.type === 'detail' && this.context.item) {
 			return this.comix.getChapters(this.context.item, options);
@@ -945,10 +627,6 @@ class ComixResponse {
 		return this.comix.getChapters(this.items[index], options);
 	}
 
-	/**
-	 * @param {ChapterInput} [chapterInput]
-	 * @returns {Promise<ComixPage[]>}
-	 */
 	getChapterPages(chapterInput) {
 		if (!chapterInput && this.items.length) {
 			return this.comix.getChapterPages(this.items[0]);
@@ -959,9 +637,6 @@ class ComixResponse {
 }
 
 class ComixItemResponse extends ComixResponse {
-	/**
-	 * @param {{ comix: Comix, item: ComixManga }} param0
-	 */
 	constructor({ comix, item }) {
 		super({
 			comix,
@@ -971,60 +646,31 @@ class ComixItemResponse extends ComixResponse {
 		});
 	}
 
-	/** @returns {Promise<ComixItemResponse>} */
 	getDetail() {
 		return Promise.resolve(this);
 	}
 }
 
-/**
- * @typedef {import('./types/comix').FetchLike} FetchLike
- * @typedef {import('./types/comix').ComixListOptions} ComixListOptions
- * @typedef {import('./types/comix').ComixHomeOptions} ComixHomeOptions
- * @typedef {import('./types/comix').ComixFilters} ComixFilters
- * @typedef {import('./types/comix').ComixChaptersOptions} ComixChaptersOptions
- * @typedef {import('./types/comix').MangaInput} MangaInput
- * @typedef {import('./types/comix').ChapterInput} ChapterInput
- * @typedef {import('./types/comix').ComixManga} ComixManga
- * @typedef {import('./types/comix').ComixChapter} ComixChapter
- * @typedef {import('./types/comix').ComixPage} ComixPage
- * @typedef {import('./types/comix').PageInfo} PageInfo
- */
+
 class Comix {
-	/**
-	 * @param {{ fetchImpl?: FetchLike, apiBase?: string, webBase?: string }} [options]
-	 */
 	constructor({ fetchImpl, apiBase, webBase } = {}) {
 		this.fetchImpl = fetchImpl || fetch;
 		this.apiBase = apiBase || ComixUtils.API_BASE;
 		this.webBase = webBase || ComixUtils.WEB_BASE;
 	}
 
-	/**
-	 * @param {string} url
-	 * @returns {Promise<any>}
-	 */
 	async fetchJSON(url) {
 		const response = await this.fetchImpl(url, {
 			headers: {
 				'User-Agent':
-					'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+					'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+				Referer: `${this.webBase}/`
 			}
 		});
 
 		return response.json();
 	}
 
-	/**
-	 * @returns {{
-	 *   sorts: Array<{ label: string, value: string }>,
-	 *   statuses: Array<{ label: string, value: string }>,
-	 *   types: Array<{ label: string, value: string }>,
-	 *   demographics: Array<{ label: string, value: string }>,
-	 *   genres: Array<{ label: string, value: string }>,
-	 *   releaseYears: { from: Array<{ label: string, value: string }>, to: Array<{ label: string, value: string }> }
-	 * }}
-	 */
 	getFilters() {
 		return {
 			sorts: ComixUtils.SORT_OPTIONS,
@@ -1032,6 +678,8 @@ class Comix {
 			types: ComixUtils.TYPE_OPTIONS,
 			demographics: ComixUtils.DEMOGRAPHIC_OPTIONS,
 			genres: ComixUtils.GENRE_OPTIONS,
+			formats: ComixUtils.FORMAT_OPTIONS,
+			contentRatings: ComixUtils.CONTENT_RATING_OPTIONS,
 			releaseYears: {
 				from: ComixUtils.buildYears(true),
 				to: ComixUtils.buildYears(false)
@@ -1039,10 +687,34 @@ class Comix {
 		};
 	}
 
-	/**
-	 * @param {URLSearchParams} params
-	 * @returns {Promise<{ items: any[], pageInfo: PageInfo }>}
-	 */
+	async searchTags(type, query) {
+		const url = new URL(`${this.apiBase}/tags/search`);
+
+		url.searchParams.set('type', type);
+		url.searchParams.set('q', query);
+
+		const data = await this.fetchJSON(url.toString());
+
+		return (data?.result || []).map((item) => ({ id: item.id, title: item.title || item.name || '' }));
+	}
+
+	async resolveTagIds(type, names) {
+		const nameList = String(names)
+			.split(',')
+			.map((n) => n.trim())
+			.filter(Boolean);
+
+		const ids = [];
+
+		for (const name of nameList) {
+			const results = await this.searchTags(type, name);
+
+			ids.push(...results.map((r) => String(r.id)));
+		}
+
+		return ids;
+	}
+
 	async fetchMangaList(params) {
 		const url = new URL(`${this.apiBase}/manga`);
 
@@ -1054,26 +726,12 @@ class Comix {
 		return { items, pageInfo };
 	}
 
-	/**
-	 * @param {string} id
-	 * @returns {Promise<any>}
-	 */
 	fetchMangaById(id) {
 		const url = new URL(`${this.apiBase}/manga/${id}`);
 
-		url.searchParams.append('includes[]', 'demographic');
-		url.searchParams.append('includes[]', 'genre');
-		url.searchParams.append('includes[]', 'theme');
-		url.searchParams.append('includes[]', 'author');
-		url.searchParams.append('includes[]', 'artist');
-		url.searchParams.append('includes[]', 'publisher');
 		return this.fetchJSON(url.toString());
 	}
 
-	/**
-	 * @param {ComixListOptions} [options]
-	 * @returns {Promise<ComixResponse<ComixManga>>}
-	 */
 	async getComics(options = {}) {
 		const params = ComixUtils.buildMangaQuery(options);
 		const { items, pageInfo } = await this.fetchMangaList(params);
@@ -1091,11 +749,6 @@ class Comix {
 		});
 	}
 
-	/**
-	 * @param {string} query
-	 * @param {ComixListOptions} [options]
-	 * @returns {Promise<ComixResponse<ComixManga>>}
-	 */
 	async search(query, options = {}) {
 		const idFromUrl = ComixUtils.extractIdFromUrl(query);
 
@@ -1128,11 +781,6 @@ class Comix {
 		});
 	}
 
-	/**
-	 * @param {ComixFilters} [filters]
-	 * @param {ComixListOptions} [options]
-	 * @returns {Promise<ComixResponse<ComixManga>>}
-	 */
 	async filter(filters = {}, options = {}) {
 		const params = ComixUtils.buildMangaQuery({ ...options, filters });
 		const { items, pageInfo } = await this.fetchMangaList(params);
@@ -1150,10 +798,6 @@ class Comix {
 		});
 	}
 
-	/**
-	 * @param {ComixHomeOptions} [options]
-	 * @returns {Promise<{ popular: ComixResponse<ComixManga>, latest: ComixResponse<ComixManga>, recentlyAdded: ComixResponse<ComixManga>, mostViewed30Days: ComixResponse<ComixManga> }>}
-	 */
 	async getHome(options = {}) {
 		const base = {
 			page: options.page || 1,
@@ -1177,10 +821,6 @@ class Comix {
 		};
 	}
 
-	/**
-	 * @param {MangaInput} mangaInput
-	 * @returns {Promise<ComixItemResponse>}
-	 */
 	async getDetail(mangaInput) {
 		const slug = ComixUtils.normalizeSlugInput(mangaInput);
 		const mangaId = ComixUtils.extractMangaId(slug || mangaInput?.id || mangaInput);
@@ -1206,29 +846,31 @@ class Comix {
 		return new ComixItemResponse({ comix: this, item: manga });
 	}
 
-	/**
-	 * @param {{ mangaId: string, mangaSlug: string, page: number, limit: number }} params
-	 * @returns {Promise<any>}
-	 */
-	async fetchChaptersPage({ mangaId, mangaSlug, page, limit }) {
-		const path = `/manga/${mangaId}/chapters`;
-		const hashToken = ComixHash.generateHash(path);
-		const url = new URL(`${this.apiBase}${path}`);
+	async captureChaptersToken(mangaId, mangaSlug) {
+		const pageUrl = `${this.webBase}/title/${mangaSlug || mangaId}`;
+		const apiPathSuffix = `api/v1/manga/${mangaId}/chapters`;
+
+		return ComixToken.capture(pageUrl, apiPathSuffix);
+	}
+
+	async captureChapterPagesToken(chapterId, mangaSlug) {
+		const pageUrl = `${this.webBase}/title/${mangaSlug || 'unknown'}/${chapterId}-chapter-1`;
+		const apiPathSuffix = `api/v1/chapters/${chapterId}`;
+
+		return ComixToken.capture(pageUrl, apiPathSuffix);
+	}
+
+	async fetchChaptersPage({ mangaId, mangaSlug, page, limit, token }) {
+		const url = new URL(`${this.apiBase}/manga/${mangaId}/chapters`);
 
 		url.searchParams.set('order[number]', 'desc');
 		url.searchParams.set('limit', String(limit));
 		url.searchParams.set('page', String(page));
-		url.searchParams.set('_', hashToken);
-		url.searchParams.set('mangaSlug', mangaSlug || mangaId);
+		url.searchParams.set('_', token);
 
 		return this.fetchJSON(url.toString());
 	}
 
-	/**
-	 * @param {MangaInput} mangaInput
-	 * @param {ComixChaptersOptions} [options]
-	 * @returns {Promise<ComixResponse<ComixChapter>>}
-	 */
 	async getChapters(mangaInput, options = {}) {
 		const slug = ComixUtils.normalizeSlugInput(mangaInput);
 		const mangaId = ComixUtils.extractMangaId(slug || mangaInput?.id || mangaInput);
@@ -1240,11 +882,14 @@ class Comix {
 		const limit = options.limit || 100;
 		let page = options.page || 1;
 		const allPages = options.allPages !== false;
+		const deduplicate = options.deduplicate !== false;
 		const chapters = [];
 		let pageInfo = { page, lastPage: page, hasNext: false };
 
+		const token = await this.captureChaptersToken(mangaId, slug || mangaId);
+
 		do {
-			const data = await this.fetchChaptersPage({ mangaId, mangaSlug: slug || mangaId, page, limit });
+			const data = await this.fetchChaptersPage({ mangaId, mangaSlug: slug || mangaId, page, limit, token });
 			const items = data?.result?.items || [];
 
 			pageInfo = ComixUtils.parsePageInfo(data?.result || {});
@@ -1252,11 +897,11 @@ class Comix {
 			page += 1;
 		} while (allPages && pageInfo.hasNext);
 
-		const mergedChapters = ComixUtils.mergeChaptersByVotes(chapters);
+		const finalChapters = deduplicate ? ComixUtils.deduplicateChapters(chapters) : chapters;
 
 		return new ComixResponse({
 			comix: this,
-			items: mergedChapters,
+			items: finalChapters,
 			pageInfo,
 			context: {
 				type: 'chapters',
@@ -1268,23 +913,14 @@ class Comix {
 		});
 	}
 
-	/**
-	 * @param {string} chapterId
-	 * @returns {Promise<any>}
-	 */
-	async fetchChapterPages(chapterId) {
-		const path = `/chapters/${chapterId}`;
-		const hashToken = ComixHash.generateHash(path);
-		const url = new URL(`${this.apiBase}${path}`);
+	async fetchChapterPages(chapterId, mangaSlug) {
+		const token = await this.captureChapterPagesToken(chapterId, mangaSlug);
+		const url = new URL(`${this.apiBase}/chapters/${chapterId}`);
 
-		url.searchParams.set('_', hashToken);
+		url.searchParams.set('_', token);
 		return this.fetchJSON(url.toString());
 	}
 
-	/**
-	 * @param {ChapterInput} chapterInput
-	 * @returns {Promise<ComixPage[]>}
-	 */
 	async getChapterPages(chapterInput) {
 		const chapterId = ComixUtils.normalizeChapterInput(chapterInput);
 
@@ -1292,14 +928,18 @@ class Comix {
 			throw new Error('Missing chapter id or url');
 		}
 
-		const data = await this.fetchChapterPages(chapterId);
-		const pages = data?.result?.pages || [];
+		const mangaSlug = typeof chapterInput === 'object' ? chapterInput.mangaSlug : undefined;
+		const data = await this.fetchChapterPages(chapterId, mangaSlug);
+		const pages = data?.result?.pages || {};
+		const baseUrl = (pages.baseUrl || '').replace(/\/+$/, '');
+		const items = pages.items || [];
 
-		return pages.map((page, index) => ({
-			index,
-			url: page.url
-		}));
+		return items.map((page, index) => {
+			const url = page.url.startsWith('http') ? page.url : `${baseUrl}/${page.url.replace(/^\/+/, '')}`;
+
+			return { index, url };
+		});
 	}
 }
 
-export { Comix, ComixHash, ComixItemResponse, ComixResponse, ComixUtils };
+export { Comix, ComixItemResponse, ComixResponse, ComixToken, ComixUtils };

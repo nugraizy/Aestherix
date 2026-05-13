@@ -38,7 +38,7 @@ export default {
 	limit: 2,
 	status: 'enable',
 	async run({ from, message }, client) {
-		const pictures = configuration.pinterestImages;
+		const pictures = configuration.pinterest.images;
 
 		if (!pictures.size) {
 			return client.send(from, { text: 'No profile pictures have been saved yet.' }, { quoted: message });
