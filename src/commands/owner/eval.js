@@ -42,7 +42,7 @@ export default {
 			isFromMe,
 			from,
 			isGroup,
-			isBaileys,
+			isBotInstance,
 			sender,
 			prettyNumber,
 			timeStamp,
@@ -118,7 +118,7 @@ export default {
 			return await client.reply(from, 'Please specify code to evaluate', message.message);
 		}
 
-		if (isBaileys) {
+		if (isBotInstance) {
 			return;
 		}
 

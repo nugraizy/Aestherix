@@ -3,6 +3,9 @@ import { Shinigami } from '../../utils/shinigami/index.js';
 
 const shinigami = new Shinigami();
 
+/**
+ * @type {import('../../types/Commands/index.js').CommandProps}
+ */
 export default {
 	name: 'shinigamidetail',
 	minifiedDescription: 'Shinigami Detail',

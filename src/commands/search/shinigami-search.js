@@ -1,7 +1,7 @@
 import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
-import { Shinigami } from '../../utils/shinigami/index.js';
 import { randomChar } from '../../utils/modules/index.js';
+import { Shinigami } from '../../utils/shinigami/index.js';
 
 const shinigami = new Shinigami();
 
@@ -58,6 +58,9 @@ function sendResult(state, from, message, client, ctx) {
 	return builder.send();
 }
 
+/**
+ * @type {import('../../types/Commands/index.js').CommandProps}
+ */
 export default {
 	name: 'shinigamisearch',
 	minifiedDescription: 'Search Shinigami',

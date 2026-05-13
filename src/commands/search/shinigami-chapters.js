@@ -1,7 +1,7 @@
 import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
-import { Shinigami } from '../../utils/shinigami/index.js';
 import { randomChar } from '../../utils/modules/index.js';
+import { Shinigami } from '../../utils/shinigami/index.js';
 
 const shinigami = new Shinigami();
 
@@ -9,6 +9,9 @@ const CHAPTERS_PER_BATCH = 19;
 
 const chapterSessions = new Cache();
 
+/**
+ * @type {import('../../types/Commands/index.js').CommandProps}
+ */
 export default {
 	name: 'shinigamichapters',
 	minifiedDescription: 'Shinigami Chapters',
@@ -47,7 +50,7 @@ export default {
 			}
 
 			const sessionId = randomChar('abcdefghijklmnopqrstuvwxyz0123456789', 8);
-			const state = { allChapters: chapters, currentBatch: 0, sessionId, mangaId: query.trim() };
+			const state = { allChapters: chapters.reverse(), currentBatch: 0, sessionId, mangaId: query.trim() };
 
 			chapterSessions.set(sessionId, state);
 

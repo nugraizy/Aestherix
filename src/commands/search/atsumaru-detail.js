@@ -31,6 +31,9 @@ const formatDetailCaption = (manga) => {
 	return lines.join('\n');
 };
 
+/**
+ * @type {import('../../types/Commands/index.js').CommandProps}
+ */
 export default {
 	name: 'atsumarudetail',
 	minifiedDescription: 'Atsumaru Detail',

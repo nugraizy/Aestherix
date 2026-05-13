@@ -1,8 +1,11 @@
-import { Shinigami } from '../../utils/shinigami/index.js';
 import { imageToPdf, mime } from '../../utils/index.js';
+import { Shinigami } from '../../utils/shinigami/index.js';
 
 const shinigami = new Shinigami();
 
+/**
+ * @type {import('../../types/Commands/index.js').CommandProps}
+ */
 export default {
 	name: 'shinigamiread',
 	minifiedDescription: 'Read Shinigami Chapter',

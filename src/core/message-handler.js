@@ -222,7 +222,7 @@ export class MessageHandler {
 			return 'skip';
 		}
 
-		if (localMessage.isBaileys) {
+		if (localMessage.isBotInstance) {
 			return 'skip';
 		}
 
@@ -483,7 +483,7 @@ export class MessageHandler {
 	}
 
 	#isValidMessage(message) {
-		if (!message || 'error' in message || !message.message || message.isBaileys) {
+		if (!message || 'error' in message || !message.message || message.isBotInstance) {
 			return false;
 		}
 

@@ -196,8 +196,11 @@ export class Context {
 	get isFromMe() {
 		return this.#memo('isFromMe', () => Boolean(this.#raw?.key?.fromMe));
 	}
-	get isBaileys() {
-		return this.#memo('isBaileys', () => this.#raw?.key?.id?.startsWith('BAE5') && this.#raw?.key?.id?.length === 16);
+	get isBotInstance() {
+		return this.#memo(
+			'isBotInstance',
+			() => this.#raw?.key?.id?.startsWith('BAE5') || this.#raw?.key?.id?.startsWith('3EB0') || this.device === 'unknown'
+		);
 	}
 	get sender() {
 		return this.#memo('sender', () => {
@@ -534,7 +537,7 @@ export class Context {
 			from: this.from,
 			isGroup: this.isGroup,
 			...configuration.groups.settings.get(this.from),
-			isBaileys: this.isBaileys,
+			isBotInstance: this.isBotInstance,
 			sender: this.sender,
 			isBlocked: this.isBlocked,
 			prettyNumber: this.prettyNumber,

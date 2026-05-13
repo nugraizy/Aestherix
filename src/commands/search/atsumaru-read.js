@@ -3,6 +3,9 @@ import { imageToPdf, mime } from '../../utils/index.js';
 
 const atsumaru = new Atsumaru();
 
+/**
+ * @type {import('../../types/Commands/index.js').CommandProps}
+ */
 export default {
 	name: 'atsumaruread',
 	minifiedDescription: 'Read Atsumaru Chapter',

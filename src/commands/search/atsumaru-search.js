@@ -58,6 +58,9 @@ function sendResult(state, from, message, client, ctx) {
 	return builder.send();
 }
 
+/**
+ * @type {import('../../types/Commands/index.js').CommandProps}
+ */
 export default {
 	name: 'atsumarusearch',
 	minifiedDescription: 'Search Atsumaru',

@@ -9,6 +9,9 @@ const CHAPTERS_PER_BATCH = 19;
 
 const chapterSessions = new Cache();
 
+/**
+ * @type {import('../../types/Commands/index.js').CommandProps}
+ */
 export default {
 	name: 'atsumaruchapters',
 	minifiedDescription: 'Atsumaru Chapters',
@@ -47,7 +50,7 @@ export default {
 			}
 
 			const sessionId = randomChar('abcdefghijklmnopqrstuvwxyz0123456789', 8);
-			const state = { allChapters: chapters, currentBatch: 0, sessionId, mangaId: query.trim() };
+			const state = { allChapters: chapters.reverse(), currentBatch: 0, sessionId, mangaId: query.trim() };
 
 			chapterSessions.set(sessionId, state);
 

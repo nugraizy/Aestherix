@@ -3,8 +3,8 @@ import fs from 'fs-extra';
 import path from 'path';
 
 import configuration from '../../helper/config/connect.js';
-import { Context } from '../context.js';
 import { getFilesize, getFilesizeFromBytes } from '../../utils/modules/index.js';
+import { Context } from '../context.js';
 
 /**
  * @param {import('../../types/Socket/index.js').AdvancedClient} client
@@ -33,14 +33,14 @@ const deletedHandler = async (client, message, fetches) => {
 			pushname,
 			extractMediaData,
 			filename,
-			isBaileys,
+			isBotInstance,
 			isFromMe,
 			mediaData
 		} = message;
 
 		const messages = message?.message?.message;
 
-		if (!messages || isBaileys || isFromMe || from === 'status@broadcast') {
+		if (!messages || isBotInstance || isFromMe || from === 'status@broadcast') {
 			return;
 		}
 
@@ -85,12 +85,7 @@ const deletedHandler = async (client, message, fetches) => {
 					{
 						const result = await client.downloadMediaMessage(mediaData);
 						const fileSize = getFilesizeFromBytes(Buffer.byteLength(result));
-						const sticker = await prepareAndSendSticker(
-							client,
-							result,
-							filename,
-							mediaData.message.stickerMessage.isAnimated
-						);
+						const sticker = await prepareAndSendSticker(client, result, filename, mediaData.message.stickerMessage.isAnimated);
 						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, `\nSize : ${fileSize}`, quotedMessage);
 
 						await client.send(from, { sticker }, options);
