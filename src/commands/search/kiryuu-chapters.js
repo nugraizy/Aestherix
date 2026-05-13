@@ -5,7 +5,7 @@ import { randomChar } from '../../utils/modules/index.js';
 
 const kiryuu = new Kiryuu();
 
-const CHAPTERS_PER_BATCH = 20;
+const CHAPTERS_PER_BATCH = 19;
 
 const chapterSessions = new Cache();
 
@@ -72,7 +72,7 @@ async function sendBatch(state, from, message, client, ctx) {
 
 	const body = `${'Kiryuu Chapters'.formatHeaders()}\n\n${mangaTitle || 'Manga'}\nTotal : ${allChapters.length} chapter(s)\nShowing : ${start + 1}–${start + batch.length}\n\nSelect a chapter to read.`;
 
-	const builder = new client.TemplateBuilder.Native(client);
+	const builder = new client.TemplateBuilder.Native();
 
 	builder
 		.destination(from)

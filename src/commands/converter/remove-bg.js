@@ -23,7 +23,7 @@ export default {
 		client
 	) => {
 		if (!isMediaImage && !isQuotedSticker) {
-			return client.instance.reply(
+			return client.reply(
 				from,
 				'Please reply/send image with caption the command. This command also accept sticker (reply one with command).',
 				message
@@ -31,7 +31,7 @@ export default {
 		}
 
 		if (isQuotedSticker && extractMediaData.isAnimated) {
-			return client.instance.reply(from, 'The sticker are animated. Please reply static stickers only.', message);
+			return client.reply(from, 'The sticker are animated. Please reply static stickers only.', message);
 		}
 
 		loggers.warning(`${color('Removing Background image', 'pink')} ${color(prettyNumber, 'lilac')}`);
@@ -46,7 +46,7 @@ export default {
 			}
 		});
 
-		const media = await client.instance.downloadAndSaveMediaMessage(
+		const media = await client.downloadAndSaveMediaMessage(
 			extractMediaData,
 			path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
 			typeQuoted
@@ -55,14 +55,14 @@ export default {
 		const resultRemoveBg = await removeBg(media, prettyNumber);
 
 		if (parsed.isStickers) {
-			const prepareSticker = await client.instance.prepareSticker(resultRemoveBg, 'imageMessage', {
+			const prepareSticker = await client.prepareSticker(resultRemoveBg, 'imageMessage', {
 				author: configuration.author,
 				packname: configuration.packname
 			});
 
-			client.instance.send(from, { sticker: prepareSticker }, { quoted: message });
+			client.send(from, { sticker: prepareSticker }, { quoted: message });
 		} else {
-			client.instance.send(from, { image: resultRemoveBg }, { quoted: message });
+			client.send(from, { image: resultRemoveBg }, { quoted: message });
 		}
 	}
 };

@@ -12,8 +12,7 @@ import puppeteer from 'puppeteer';
 import { Server as SocketIOServer } from 'socket.io';
 import { z } from 'zod';
 
-import { color, loggers } from '../../../utils/modules/index.js';
-import configuration from '../../config/connect.js';
+import configuration from '../../helper/config/connect.js';
 import {
 	addToBlocklist,
 	appendAuditLog,
@@ -26,11 +25,11 @@ import {
 	removeFromBlocklist,
 	upsertDashboardSession,
 	upsertOtp
-} from '../../database/adapters/dashboard.js';
+} from '../../helper/database/adapters/dashboard.js';
 import {
 	listPinterestProfilePictures,
 	upsertPinterestProfilePictures
-} from '../../database/adapters/pinterest-profile-pictures.js';
+} from '../../helper/database/adapters/pinterest-profile-pictures.js';
 import {
 	banUser,
 	getAllUserLimits,
@@ -38,9 +37,10 @@ import {
 	getUserLimit,
 	unbanUser,
 	upsertUserLimit
-} from '../../database/adapters/user.js';
-import prisma from '../../database/prisma.js';
-import { cmdId } from '../../modules/prefix.js';
+} from '../../helper/database/adapters/user.js';
+import prisma from '../../helper/database/prisma.js';
+import { cmdId } from '../../helper/modules/prefix.js';
+import { color, loggers } from '../../utils/modules/index.js';
 import {
 	getDashboardLogs,
 	initializeDashboardMonitor,
@@ -48,7 +48,7 @@ import {
 	listDashboardFlags,
 	setDashboardCommandState,
 	setDashboardFlagState
-} from './dashboard-monitor.js';
+} from './monitor.js';
 
 const AUTH_COOKIE_NAME = 'aestherix_dashboard_auth';
 const OTP_TTL_MS = 5 * 60 * 1000;
@@ -252,8 +252,8 @@ const persistDashboardBlocklist = async (addedJids = [], removedJids = []) => {
 };
 
 const hydrateProfilePicturesCache = async () => {
-	if (typeof configuration.pinterestImages?.clear === 'function') {
-		configuration.pinterestImages.clear();
+	if (typeof configuration.pinterest.images?.clear === 'function') {
+		configuration.pinterest.images.clear();
 	}
 
 	try {
@@ -271,7 +271,7 @@ const hydrateProfilePicturesCache = async () => {
 				continue;
 			}
 
-			configuration.pinterestImages.set(timestamp, normalized);
+			configuration.pinterest.images.set(timestamp, normalized);
 		}
 
 		profilePicturesDbState.lastSyncAt = Date.now();
@@ -1022,7 +1022,7 @@ const writeUserLimitState = async (jid, data) => {
 	};
 
 	await upsertUserLimit(prisma, jid, nextState.limit, nextState.role);
-	configuration.user.limit.set(jid, { limit: nextState.limit, role: nextState.role });
+	configuration.userLimit.set(jid, { limit: nextState.limit, role: nextState.role });
 
 	return nextState;
 };
@@ -1324,7 +1324,7 @@ const filterDashboardProfilePicturesByColor = async (pictures, { colorHex, toler
 const listDashboardProfilePictures = async ({ limit = 180 } = {}) => {
 	await refreshProfilePicturesCacheFromDb();
 
-	const entries = Array.isArray(configuration.pinterestImages?.entries?.()) ? configuration.pinterestImages.entries() : [];
+	const entries = Array.isArray(configuration.pinterest.images?.entries?.()) ? configuration.pinterest.images.entries() : [];
 	const safeLimit = Math.max(1, Math.min(500, Number(limit) || 180));
 	const seenUrls = new Set();
 
@@ -1367,7 +1367,7 @@ const getLatestDashboardProfilePicture = async () => {
 
 const persistDashboardProfilePictures = async () => {
 	const seenUrls = new Set();
-	const entries = (Array.isArray(configuration.pinterestImages?.entries?.()) ? configuration.pinterestImages.entries() : [])
+	const entries = (Array.isArray(configuration.pinterest.images?.entries?.()) ? configuration.pinterest.images.entries() : [])
 		.map(([timestamp, value]) => {
 			const normalized = normalizeDashboardPicture(value);
 
@@ -1410,24 +1410,24 @@ const deleteDashboardProfilePicture = async ({ timestamp = '', url = '' } = {}) 
 
 	let deletedCount = 0;
 	const safeUrlKey = safeUrl.toLowerCase();
-	const currentValue = configuration.pinterestImages.get(safeTimestamp);
+	const currentValue = configuration.pinterest.images.get(safeTimestamp);
 	const currentUrl = String(normalizeDashboardPicture(currentValue)?.original?.url || '')
 		.trim()
 		.toLowerCase();
 
 	if (currentUrl && currentUrl === safeUrlKey) {
-		configuration.pinterestImages.delete(safeTimestamp);
+		configuration.pinterest.images.delete(safeTimestamp);
 		deletedPictureTombstones.add(safeTimestamp);
 		deletedCount += 1;
 	}
 
-	for (const [key, value] of configuration.pinterestImages.entries()) {
+	for (const [key, value] of configuration.pinterest.images.entries()) {
 		const parsedUrl = String(normalizeDashboardPicture(value)?.original?.url || '')
 			.trim()
 			.toLowerCase();
 
 		if (parsedUrl && parsedUrl === safeUrlKey) {
-			configuration.pinterestImages.delete(key);
+			configuration.pinterest.images.delete(key);
 			deletedPictureTombstones.add(key);
 			deletedCount += 1;
 		}
@@ -2306,13 +2306,13 @@ async function webmToMp4Buffer(inputBuffer) {
 }
 
 export const server = async () => {
-	if (configuration.expressInstances.has('dashboard')) {
+	if (configuration.dashboard.expressInstances.has('dashboard')) {
 		return;
 	}
 
 	configuration.blocklist = Array.isArray(configuration.blocklist) ? configuration.blocklist : [];
 
-	if (!configuration?.OPTIONS || typeof configuration.flags !== 'object') {
+	if (!configuration?.flags || typeof configuration.flags !== 'object') {
 		configuration.flags = {};
 	}
 
@@ -3395,11 +3395,7 @@ export const server = async () => {
 			session,
 			target: 'prefix',
 			before: {
-				mode: configuration.prefix.config?.multi
-					? 'multi'
-					: configuration.prefix.config?.nopref
-						? 'nopref'
-						: 'single',
+				mode: configuration.prefix.config?.multi ? 'multi' : configuration.prefix.config?.nopref ? 'nopref' : 'single',
 				pref: configuration.prefix.config?.pref
 			},
 			after: { mode, pref: newPrefixConfig.pref }
@@ -4033,7 +4029,7 @@ export const server = async () => {
 		);
 	});
 
-	configuration.expressInstances.set('dashboard', appToStore);
+	configuration.dashboard.expressInstances.set('dashboard', appToStore);
 
-	configuration.dashboardIO = io;
+	configuration.dashboard.io = io;
 };

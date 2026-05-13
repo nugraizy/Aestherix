@@ -26,15 +26,15 @@ export default {
 		});
 
 		if (audio) {
-			await configuration.cmds.commands.get('ytaudio').run(message, client);
+			await configuration.registry.commands.get('ytaudio').run(message, client);
 		}
 
 		if (video) {
-			await configuration.cmds.commands.get('ytvideo').run(message, client);
+			await configuration.registry.commands.get('ytvideo').run(message, client);
 		}
 
 		if (!audio && !video) {
-			await configuration.cmds.commands.get('ytaudio').run(message, client);
+			await configuration.registry.commands.get('ytaudio').run(message, client);
 		}
 	}
 };

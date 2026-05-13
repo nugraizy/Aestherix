@@ -17,7 +17,7 @@ export default {
 	status: 'enable',
 	async run({ from, message }, client) {
 		const capt = `Bot Name : Aestherix
-Total Commands : ${configuration.cmds.commands.size}
+Total Commands : ${configuration.registry.commands.size}
 Bot Version : ${(await fs.readJSON('./package.json')).version}
 Bot Creator : Nanda
 Github Username : nugraizy

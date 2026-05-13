@@ -35,7 +35,7 @@ function sendResult(state, from, message, client, ctx) {
 	const isLast = currentIndex + 1 >= items.length;
 	const body = `${'Kiryuu Search'.formatHeaders()}\n\n${caption.formatForm()}\n\nResult ${currentIndex + 1} of ${items.length}\nSlug : ${manga.slug}`;
 
-	const builder = new client.TemplateBuilder.Native(client);
+	const builder = new client.TemplateBuilder.Native();
 
 	builder
 		.destination(from)

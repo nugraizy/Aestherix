@@ -10,7 +10,7 @@ const handler = async ({ from, type, body, message, mediaData, isFromMe }, clien
 		/**
 		 * @type {import('../../utils/ai/char-ai.js').ChatGPTDialogue}
 		 */
-		const ai = configuration.user.charAI.get(from);
+		const ai = configuration.charAI.get(from);
 
 		if (ai && !isFromMe && (type === 'conversation' || type === 'extendedTextMessage' || type === 'imageMessage')) {
 			body = type === 'imageMessage' ? await client.downloadMediaMessage(mediaData) : body;

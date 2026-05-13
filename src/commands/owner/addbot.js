@@ -98,7 +98,7 @@ export default {
 					create: { sessionName, flags: JSON.stringify(flags), role: 'sub', pairNumber: pairNumber || null, isActive: true }
 				});
 
-				const router = new Router(sub, { commands: configuration.cmds.commands, aliases: configuration.cmds.aliases });
+				const router = new Router(sub, { commands: configuration.registry.commands, aliases: configuration.registry.aliases });
 				const store = sub.store;
 
 				const eventHandler = new EventHandler(sub, { router, store, configuration, options: { flags } });
@@ -138,7 +138,7 @@ export default {
 				}
 			});
 
-			await new Promise((resolve) => setTimeout(resolve, 15000));
+			// await new Promise((resolve) => setTimeout(resolve, 15000));
 
 			const code = await sub.requestPairingCode(String(pairNumber).replace(/[^0-9]/g, ''));
 

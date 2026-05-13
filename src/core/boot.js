@@ -247,16 +247,16 @@ async function onConnected({ clientSocket, commandLoader, router, mqtt, store, w
 	socket.ws.on('CB:notification,type:w:gp2', (update) => parseStubtypeUpdate(socket, update));
 	socket.ws.on('CB:notification,type:picture', async (update) => await emitProfilePictureUpdate(socket, update));
 
-	initWerewolfHandler(socket, loggers);
+	initWerewolfHandler(clientSocket, loggers);
 	mqtt.bindMessageHandler();
 
 	if (configuration.flags.watch) {
 		commandLoader.watch();
 		commandLoader.on('added', ({ name, file }) =>
-			loggers.info(color('Command added:', 'white'), color(name, 'lilac'), color(file, 'gray'))
+			loggers.info(color('Command added:', 'white'), color(name, 'lilac'), color('⇢ ', 'green'), color(file, 'gray'))
 		);
 		commandLoader.on('changed', ({ name, file }) =>
-			loggers.info(color('Command changed:', 'white'), color(name, 'lilac'), color(file, 'gray'))
+			loggers.info(color('Command changed:', 'white'), color(name, 'lilac'), color('⇢ ', 'green'), color(file, 'gray'))
 		);
 		commandLoader.on('removed', ({ name }) => loggers.warning(color('Command removed:', 'white'), color(name, 'lilac')));
 		commandLoader.on('error', ({ file, reason }) => loggers.error(color(file, 'purple'), color(reason, 'red')));
@@ -339,10 +339,10 @@ export async function boot({ cli, OPTIONS, store, sessionName }) {
 	mqtt.connect();
 
 	const webhook = new WebhookServer();
-	const commandLoader = new CommandLoader({ commands: configuration.cmds.commands, aliases: configuration.cmds.aliases });
+	const commandLoader = new CommandLoader({ commands: configuration.registry.commands, aliases: configuration.registry.aliases });
 	const router = new Router(clientSocket, {
-		commands: configuration.cmds.commands,
-		aliases: configuration.cmds.aliases,
+		commands: configuration.registry.commands,
+		aliases: configuration.registry.aliases,
 		prefix: configuration.prefix.default,
 		prefixMode: configuration.prefix.mode,
 		prefixReg: configuration.prefix.regex

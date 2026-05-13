@@ -25,7 +25,7 @@ export class WebhookServer {
 	}
 
 	start() {
-		if (configuration.expressInstances.has('github-webhook')) {
+		if (configuration.dashboard.expressInstances.has('github-webhook')) {
 			return;
 		}
 
@@ -40,13 +40,13 @@ export class WebhookServer {
 			loggers.info(color('GitHub Webhook', 'white'), color('started on port', 'lilac'), color(String(this.#port), 'white'));
 		});
 
-		configuration.expressInstances.set('github-webhook', this.#server);
+		configuration.dashboard.expressInstances.set('github-webhook', this.#server);
 	}
 
 	stop() {
 		if (this.#server) {
 			this.#server.close();
-			configuration.expressInstances.delete('github-webhook');
+			configuration.dashboard.expressInstances.delete('github-webhook');
 			this.#server = null;
 		}
 	}

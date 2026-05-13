@@ -1,10 +1,10 @@
+import chalk from 'chalk';
+import chokidar from 'chokidar';
+import { highlight } from 'cli-highlight';
 import { EventEmitter } from 'node:events';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import chalk from 'chalk';
-import chokidar from 'chokidar';
-import { highlight } from 'cli-highlight';
 import { array, boolean, mixed, number, object, string } from 'yup';
 
 import { Cache } from '../helper/modules/cache.js';
@@ -24,7 +24,24 @@ const COMMAND_SCHEMA = object({
 	minifiedDescription: string().optional().default('This is minified description'),
 	description: string().optional(),
 	category: string()
-		.oneOf(['AI', 'AL-Quran', 'Anime', 'Anonymous', 'Converter', 'Debugging', 'Downloader', 'Games', 'Genshin Impact', 'Helper', 'Look-up', 'Misc', 'Moderation', 'News', 'Owner', 'Search'])
+		.oneOf([
+			'AI',
+			'AL-Quran',
+			'Anime',
+			'Anonymous',
+			'Converter',
+			'Debugging',
+			'Downloader',
+			'Games',
+			'Genshin Impact',
+			'Helper',
+			'Look-up',
+			'Misc',
+			'Moderation',
+			'News',
+			'Owner',
+			'Search'
+		])
 		.required(),
 	usage: string().required(),
 	aliases: array(string()).default([]).optional(),
@@ -33,7 +50,9 @@ const COMMAND_SCHEMA = object({
 	status: string().oneOf(['enable', 'disable']).required(),
 	restrict: boolean().default(false).optional(),
 	premium: boolean().default(false).optional(),
-	run: mixed().test({ test: (value) => typeof value === 'function', message: 'Run must be a function', name: 'run' }).required()
+	run: mixed()
+		.test({ test: (value) => typeof value === 'function', message: 'Run must be a function', name: 'run' })
+		.required()
 });
 
 class ModuleError extends Error {
@@ -325,11 +344,20 @@ export class CommandLoader extends EventEmitter {
 		const currNum = syntaxError.line;
 		const nextNum = syntaxError.line + 1;
 		const pad = (n) => ' '.repeat(Math.max(String(currNum).length - String(n).length + 2, 1));
-		const hl = (code) => highlight(code.replace(/\t/g, ' '), { language: 'js', ignoreIllegals: true, theme: color.getSyntaxTheme() });
+		const hl = (code) =>
+			highlight(code.replace(/\t/g, ' '), { language: 'js', ignoreIllegals: true, theme: color.getSyntaxTheme() });
 		const lavender = chalk.bgHex(color.getHex('lavender'))(' ');
 
-		loggers.error(`${pad(prevNum)}`, color('⇢ ', 'white'), color(displayName, 'purple') + color(':', 'gray') + color(currNum, 'yellow') + color(':', 'gray') + color(syntaxError.column || 0, 'yellow'));
-		loggers.error(`${pad(nextNum)}`, color('⇢ ', 'white'), color(typeError, 'red'));
+		loggers.error(
+			`${pad(prevNum)}`,
+			color('⇢ ', 'green'),
+			color(displayName, 'purple') +
+				color(':', 'gray') +
+				color(currNum, 'yellow') +
+				color(':', 'gray') +
+				color(syntaxError.column || 0, 'yellow')
+		);
+		loggers.error(`${pad(nextNum)}`, color('⇢ ', 'green'), color(typeError, 'red'));
 
 		if (prevNum > 0) {
 			loggers.error(`${lavender} ${color(prevNum, 'gray')}` + hl(prevLine).trimEnd().replace('\n', ''));
@@ -349,20 +377,24 @@ export class CommandLoader extends EventEmitter {
 				column: syntaxError.column || 0,
 				code: codeSnippet,
 				language: AGENT_LANGUAGE
-			}).then((advice) => {
-				if (!advice) {
-					return;
-				}
+			})
+				.then((advice) => {
+					if (!advice) {
+						return;
+					}
 
-				const results = [...advice.matchAll(/```(\w+)?\n([\s\S]*?)```/g)];
+					const results = [...advice.matchAll(/```(\w+)?\n([\s\S]*?)```/g)];
 
-				for (const result of results) {
-					advice = advice.replaceAll(result[0], hl(result[2].trim()));
-				}
+					for (const result of results) {
+						advice = advice.replaceAll(result[0], hl(result[2].trim()));
+					}
 
-				advice = advice.replace(/\n{2,}/g, '\n').trim();
-				loggers.warning(color('💡 Agent Note:', 'cyan'), chalk.hex(color.getHex('lightGray')).italic(advice));
-			}).catch(() => { /* agent failure is non-critical */ });
+					advice = advice.replace(/\n{2,}/g, '\n').trim();
+					loggers.warning(color('💡 Agent Note:', 'cyan'), chalk.hex(color.getHex('lightGray')).italic(advice));
+				})
+				.catch(() => {
+					/* agent failure is non-critical */
+				});
 		}
 	}
 

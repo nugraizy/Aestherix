@@ -5,7 +5,7 @@ import { randomChar } from '../../utils/modules/index.js';
 
 const comix = new Comix();
 
-const CHAPTERS_PER_BATCH = 20;
+const CHAPTERS_PER_BATCH = 19;
 
 const readerSessions = new Cache();
 
@@ -71,7 +71,7 @@ async function sendBatch(state, from, message, client, ctx) {
 
 	const body = `${'Comix Reader'.formatHeaders()}\n\n${safeName}\nTotal : ${allChapters.length} chapter(s)\nShowing : ${start + 1}–${start + batch.length}\n\nSelect a chapter to download as PDF.`;
 
-	const builder = new client.TemplateBuilder.Native(client);
+	const builder = new client.TemplateBuilder.Native();
 
 	builder
 		.destination(from)
@@ -107,7 +107,7 @@ export default {
 	cooldown: 10,
 	limit: 3,
 	status: 'enable',
-	async run({ query, from, message, sender, prefix }, client) {
+	async run({ query, from, message, prefix }, client) {
 		if (!query) {
 			return await client.reply(
 				from,

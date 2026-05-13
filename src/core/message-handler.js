@@ -207,7 +207,7 @@ export class MessageHandler {
 			return 'skip';
 		}
 
-		const disabled = this.#configuration.cmds.disabledCommands;
+		const disabled = this.#configuration.registry.disabledCommands;
 
 		if (disabled?.has(command.name)) {
 			await client.reply(

@@ -3,9 +3,6 @@ import { before, describe, it } from 'node:test';
 
 import '../../../../../src/utils/games/werewolf/i18n/index.js';
 
-import { setPrefix } from '../../../../../src/helper/modules/prefix.js';
-import { buildComposition } from '../../../../../src/utils/games/werewolf/config/balance.js';
-import { addPlayer, createSession, dealRoles, setPhase } from '../../../../../src/utils/games/werewolf/state/session.js';
 import {
 	buildAlphaConvertPrompt,
 	buildCupidPrompt,
@@ -19,6 +16,9 @@ import {
 	buildWitchHealPrompt,
 	buildWitchPoisonPrompt
 } from '../../../../../src/commands/games/werewolf/ui/prompts.js';
+import { setPrefix } from '../../../../../src/helper/modules/prefix.js';
+import { buildComposition } from '../../../../../src/utils/games/werewolf/config/balance.js';
+import { addPlayer, createSession, dealRoles, setPhase } from '../../../../../src/utils/games/werewolf/state/session.js';
 
 const makeTenPlayer = () => {
 	const s = createSession({ roomId: 'room@g', roomMaster: 'p0@s', roomMasterName: 'M', now: () => 0 });

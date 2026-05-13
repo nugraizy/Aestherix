@@ -78,7 +78,40 @@ export class Logger {
 		const codes = hasOptions ? args.slice(0, -1) : args;
 
 		const highlighted = codes
-			.map((code) => highlight(String(code ?? ''), { language: options.language, ignoreIllegals: true }))
+			.map((code) =>
+				highlight(String(code ?? ''), { language: options.language, ignoreIllegals: true, theme: color.getSyntaxTheme() })
+			)
+			.join('\n');
+
+		return this.#log('INF', `\n${highlighted}`);
+	}
+
+	json(...args) {
+		let options = {};
+
+		if (args.length && typeof args[args.length - 1] === 'object' && !Array.isArray(args[args.length - 1])) {
+			options = args.pop();
+		}
+
+		const format = options.format === true;
+		const pretty = options.pretty === true;
+
+		const highlighted = args
+			.map((obj) => {
+				try {
+					const json = format ? JSON.stringify(obj, null, 2) : JSON.stringify(obj);
+
+					return pretty
+						? highlight(json, {
+								language: options.language || 'json',
+								ignoreIllegals: true,
+								theme: color.getSyntaxTheme()
+							})
+						: json;
+				} catch {
+					return String(obj);
+				}
+			})
 			.join('\n');
 
 		return this.#log('INF', `\n${highlighted}`);
@@ -96,7 +129,9 @@ export class Logger {
 		}
 
 		const time = this.#formatTime();
-		const prefix = this.#name ? `${color('[', 'gray')}${chalk.bold(color(this.#name, this.#typeColor(type)))}${color(']', 'gray')} ` : '';
+		const prefix = this.#name
+			? `${color('[', 'gray')}${chalk.bold(color(this.#name, this.#typeColor(type)))}${color(']', 'gray')} `
+			: '';
 		const typeTag = `${color('[', 'gray')}${chalk.bold(color(type, this.#typeColor(type)))}${color(']', 'gray')}`;
 		const separator = color(' •', this.#typeColor(type));
 		const str = `${prefix}${typeTag} ${time}${separator} ${args.join(' ')}`;

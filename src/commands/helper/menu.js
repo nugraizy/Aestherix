@@ -41,25 +41,25 @@ export default {
 	async run({ from, prefix, message, query }, client) {
 		let capt = `\`${__botName} ー ${version}\`\n\n`;
 
-		if (!Object.keys(configuration.cmds.menu).length) {
-			const container = configuration.cmds.commands
+		if (!Object.keys(configuration.registry.menu).length) {
+			const container = configuration.registry.commands
 				.filter((value) => value.name !== '', 'filter')
 				.reduce((acc, value) => {
 					acc[value.category] = (acc[value.category] || []).concat(value);
 					return acc;
 				}, {});
 
-			configuration.cmds.menu = container;
+			configuration.registry.menu = container;
 		}
 
 		let isFound = false;
 
-		for (const category in configuration.cmds.menu) {
+		for (const category in configuration.registry.menu) {
 			if (query && !category.toLowerCase().includes(query.toLowerCase())) {
 				continue;
 			}
 
-			const sortedCommands = configuration.cmds.menu[category]
+			const sortedCommands = configuration.registry.menu[category]
 				.sort((a, b) => a.name.localeCompare(b.name))
 				.map((v) => {
 					const commonPart = isNeedDescription
@@ -89,12 +89,12 @@ export default {
 		}
 
 		capt = `${capt.trim()}\n\nUse : ${prefix}${getRandomCommand(
-			Object.values(configuration.cmds.menu).flat()
+			Object.values(configuration.registry.menu).flat()
 		)} \`-H\`\nー> \`To see the detail of the command.\`\nー> Total Commands : \`${
-			configuration.cmds.commands.size
+			configuration.registry.commands.size
 		}\`\n\nＰｏｗｅｒｅｄ ｂｙ\n> Hidden Finder`;
 
-		configuration.cmds.menuStr = capt;
+		configuration.registry.menuStr = capt;
 
 		await client.send(
 			from,

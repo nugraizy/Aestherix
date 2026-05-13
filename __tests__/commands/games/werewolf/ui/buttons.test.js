@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict';
-import { describe, it, before } from 'node:test';
+import { before, describe, it } from 'node:test';
 
-import { buildTargetActionMessage, buildTargetButtons, buildTargetListBody, buildLobbyButtons } from '../../../../../src/commands/games/werewolf/ui/buttons.js';
+import {
+	buildLobbyButtons,
+	buildTargetActionMessage,
+	buildTargetButtons,
+	buildTargetListBody
+} from '../../../../../src/commands/games/werewolf/ui/buttons.js';
 import '../../../../../src/utils/games/werewolf/i18n/index.js';
 
 const fixtureTargets = () => [
@@ -50,7 +55,10 @@ describe('werewolf ui — buttons', () => {
 		assert.ok(msg.body.startsWith('Choose someone to hang'));
 		assert.ok(msg.body.includes('@p1 Alice'));
 		assert.equal(msg.footer, 'Tap a button');
-		assert.deepEqual(msg.mentions, fixtureTargets().map((t) => t.id));
+		assert.deepEqual(
+			msg.mentions,
+			fixtureTargets().map((t) => t.id)
+		);
 	});
 
 	it('buildTargetActionMessage accepts extraButtons and appends them last', () => {

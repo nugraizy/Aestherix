@@ -34,6 +34,6 @@ export default {
 
 		const messageToConvert = await Context.from(wait.message, client, store);
 
-		await configuration.cmds.commands.get('sticker').run(messageToConvert, client);
+		await configuration.registry.commands.get('sticker').run(messageToConvert, client);
 	}
 };

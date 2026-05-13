@@ -10,7 +10,7 @@ import ms from 'parse-ms';
 import progress from 'progress-stream';
 import { Client, fetch, FormData as FormDataUndici } from 'undici';
 
-
+import { Logger } from '../../core/logger.js';
 import { color } from './color.js';
 
 export { color };
@@ -536,8 +536,6 @@ export const delaySync = (ms) => {
 export const delay = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const boldify = (string) => chalk.bold(string);
-
-import { Logger } from '../../core/logger.js';
 
 export const loggers = new Logger();
 

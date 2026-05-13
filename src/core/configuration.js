@@ -72,6 +72,9 @@ export class Configuration {
 		expressInstances: new Cache()
 	};
 
+	charAI = new Cache();
+	userLimit = new Cache();
+
 	mqtt = null;
 	instagram = null;
 	isInstagramInitiated = false;
@@ -98,137 +101,6 @@ export class Configuration {
 		this.owners = [this.settings.owner_number, ...(this.settings.team_number || [])].filter(Boolean);
 		this.prefix.default = this.settings.prefix?.pref || '.';
 		this.logger_theme = this.settings.logger_theme || 'dracula';
-	}
-
-	get OPTIONS() {
-		return this.flags;
-	}
-
-	set OPTIONS(value) {
-		this.flags = value;
-	}
-
-	get cmds() {
-		return this.registry;
-	}
-
-	set cmds(value) {
-		if (value.commands) {
-			this.registry.commands = value.commands;
-		}
-
-		if (value.aliases) {
-			this.registry.aliases = value.aliases;
-		}
-	}
-
-	#charAI = new Cache();
-	#userLimit = new Cache();
-
-	get user() {
-		return {
-			afk: this.users.afk,
-			cooldown: new Cache(),
-			charAI: this.#charAI,
-			limit: this.#userLimit
-		};
-	}
-
-	get intervals() {
-		return this.timers;
-	}
-
-	get cache() {
-		return {
-			metadata: this.groups.metadata,
-			settings: this.groups.settings,
-			users: this.users.info,
-			interval: new Cache(),
-			ownerNumbers: this.owners,
-			botNumber: this.botJid,
-			prf: this.prefix.default,
-			prefixValues: this.prefix.values,
-			prefixMode: this.prefix.mode,
-			prefixReg: this.prefix.regex,
-			prefixConfig: this.prefix.config || {},
-			blocklist: this.blocklist,
-			bannedlist: this.bannedlist,
-			config: this.settings
-		};
-	}
-
-	set cache(value) {
-		if (value.ownerNumbers) {
-			this.owners = value.ownerNumbers;
-		}
-
-		if (value.botNumber !== undefined) {
-			this.botJid = value.botNumber;
-		}
-
-		if (value.prefixValues) {
-			this.prefix.values = value.prefixValues;
-		}
-
-		if (value.prefixMode) {
-			this.prefix.mode = value.prefixMode;
-		}
-
-		if (value.prefixReg !== undefined) {
-			this.prefix.regex = value.prefixReg;
-		}
-
-		if (value.prf !== undefined) {
-			this.prefix.default = value.prf;
-		}
-
-		if (value.prefixConfig) {
-			this.prefix.config = value.prefixConfig;
-		}
-
-		if (value.blocklist) {
-			this.blocklist = value.blocklist;
-		}
-
-		if (value.bannedlist) {
-			this.bannedlist = value.bannedlist;
-		}
-
-		if (value.config) {
-			this.settings = value.config;
-		}
-	}
-
-	get pinterestId() {
-		return this.pinterest.id;
-	}
-
-	set pinterestId(value) {
-		this.pinterest.id = value;
-	}
-
-	get pinterestImages() {
-		return this.pinterest.images;
-	}
-
-	set pinterestImages(value) {
-		this.pinterest.images = value;
-	}
-
-	get anonymousMessages() {
-		return this.anonymous.messages;
-	}
-
-	get expressInstances() {
-		return this.dashboard.expressInstances;
-	}
-
-	get dashboardIO() {
-		return this.dashboard.io;
-	}
-
-	set dashboardIO(value) {
-		this.dashboard.io = value;
 	}
 }
 

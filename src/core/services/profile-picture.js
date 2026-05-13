@@ -79,14 +79,14 @@ export const hydrateProfilePictureHistory = async (config) => {
 	try {
 		const entries = await listPinterestProfilePictures(prisma, { limit: PROFILE_PICTURE_HISTORY_LIMIT });
 
-		config.pinterestImages.clear();
+		config.pinterest.images.clear();
 
 		for (const entry of entries) {
 			const timestamp = String(entry?.timestamp || '').trim();
 			const normalized = normalizePinterestPictureRecord(entry);
 
 			if (timestamp && normalized) {
-				config.pinterestImages.set(timestamp, normalized);
+				config.pinterest.images.set(timestamp, normalized);
 			}
 		}
 	} catch (error) {
@@ -95,7 +95,7 @@ export const hydrateProfilePictureHistory = async (config) => {
 };
 
 const persistProfilePictureHistory = async (config) => {
-	const entries = (Array.isArray(config.pinterestImages?.entries?.()) ? config.pinterestImages.entries() : [])
+	const entries = (Array.isArray(config.pinterest.images?.entries?.()) ? config.pinterest.images.entries() : [])
 		.map(([timestamp, value]) => {
 			const normalized = normalizePinterestPictureRecord(value);
 
@@ -146,7 +146,7 @@ export const startProfilePictureService = async (client, config) => {
 		isUpdating = true;
 
 		try {
-			const pinterestId = config.pinterestId;
+			const pinterestId = config.pinterest.id;
 
 			if (images.length === 0 && !currentPinterestId) {
 				await fetchImages(pinterestId);
@@ -178,7 +178,7 @@ export const startProfilePictureService = async (client, config) => {
 			const { data: image } = await axios.get(normalizedImage.original.url, { responseType: 'arraybuffer' });
 			const date = dayjs.tz().format('YYYY/MM/DD HH:mm:ss');
 
-			config.pinterestImages.set(date, normalizedImage);
+			config.pinterest.images.set(date, normalizedImage);
 			await persistProfilePictureHistory(config);
 			await client.updateProfilePicture(global.instance, image, PROFILE_PICTURE_NO_CROP);
 

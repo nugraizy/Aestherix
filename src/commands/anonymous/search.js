@@ -21,26 +21,26 @@ export default {
 		if (result === true) {
 			const { key } = await client.reply(from, 'Searching for a partner...', message);
 
-			configuration.anonymousMessages.set(from, key);
+			configuration.anonymous.messages.set(from, key);
 			return;
 		}
 
 		if (result.partner2) {
 			const { key } = await client.reply(result.partner2, 'Searching for a partner...', message);
 
-			configuration.anonymousMessages.set(result.partner2, key);
+			configuration.anonymous.messages.set(result.partner2, key);
 
 			await delay(2_500);
 
 			await client.edit(
 				result.partner1,
 				'Your partner is found!',
-				configuration.anonymousMessages.get(result.partner1)
+				configuration.anonymous.messages.get(result.partner1)
 			);
 			await client.edit(
 				result.partner2,
 				'Your partner is found!',
-				configuration.anonymousMessages.get(result.partner2)
+				configuration.anonymous.messages.get(result.partner2)
 			);
 			return;
 		}

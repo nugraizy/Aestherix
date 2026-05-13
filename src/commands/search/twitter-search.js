@@ -1,9 +1,9 @@
 import dayjs from 'dayjs';
 
 import { Cache } from '../../helper/modules/cache.js';
+import { cmdId } from '../../helper/modules/prefix.js';
 import { color, delay, formatNumber, loggers, randomChar } from '../../utils/modules/index.js';
 import { Twitter } from '../../utils/twitter/index.js';
-import { cmdId } from '../../helper/modules/prefix.js';
 
 const twitter = new Twitter({ cookie: process.env.TWITTER_COOKIE });
 const searchSessions = new Cache();
@@ -96,7 +96,7 @@ const sendTweetBatch = async (tweets, from, message, client) => {
  * Sends the "Next" prompt after a tweet batch.
  */
 const sendNextPrompt = async (sessionId, batchSize, searchQuery, from, client, ctx) => {
-	const builder = new client.TemplateBuilder.Native(client);
+	const builder = new client.TemplateBuilder.Native();
 
 	await builder
 		.destination(from)
