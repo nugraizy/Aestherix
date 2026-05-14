@@ -115,10 +115,9 @@ export class ConnectionHandler {
 
 		if (!this.#bannerPrinted) {
 			loggers.info(color('Socket connected', 'white'), color('Successfully', 'lilac') + color('.', 'white'));
+			await this.#printConnectionMetrics(this.#client);
 			this.#bannerPrinted = true;
 		}
-
-		await this.#printConnectionMetrics(this.#client);
 
 		this.#retryCount = 0;
 		this.#client.emit('connected');
