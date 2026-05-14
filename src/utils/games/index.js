@@ -1,6 +1,4 @@
 export * from './akinator.js';
-export * from './genshin-lookup-characters.js';
-export * from './genshin-lookup-user.js';
 export * from './sambung-kata.js';
 export * from './slot.js';
 export * from './sudoku.js';

@@ -46,8 +46,7 @@
   "author": "nanda",
   "license": "MIT",
   "comments": {
-    "cld:error": "If you happen to occur cld package installation error, install the version 2.8.2 or below.",
-    "colorthief:error": "If you happen to occur colorthief error (while using spotifycover command), try reinstall colorthief."
+    "cld:error": "If you happen to occur cld package installation error, install the version 2.8.2 or below."
   },
   "nodemonConfig": {
     "ignore": [
@@ -63,7 +62,7 @@
     "@atproto/api": "^0.13.32",
     "@dotenvx/dotenvx": "^1.51.1",
     "@inquirer/prompts": "^8.4.2",
-    "@napi-rs/canvas": "^0.1.81",
+    "@napi-rs/canvas": "^1.0.0",
     "@svgdotjs/svg.js": "^3.2.5",
     "@vitalets/google-translate-api": "^9.2.0",
     "archiver": "^7.0.1",
@@ -84,6 +83,7 @@
     "colorthief": "^2.6.0",
     "dayjs": "^1.11.19",
     "emojibase-regex": "^16.0.0",
+    "enka-network-api": "^5.0.15",
     "express": "^5.1.0",
     "express-zod-safe": "^3.1.0",
     "fast-average-color-node": "^3.2.0",
