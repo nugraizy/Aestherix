@@ -611,7 +611,7 @@ const fetchContributorsFromGitHub = async () => {
 };
 
 const loadDashboardContributorsFromGit = async () => {
-	const cached = await prisma.dashboardKV.findUnique({ where: { key: KV_CONTRIBUTORS_KEY } });
+	const cached = await prisma.dashboardKV.findUnique({ where: { key_sessionName: { key: KV_CONTRIBUTORS_KEY, sessionName: 'main' } } });
 	const parsed = cached?.value ? JSON.parse(cached.value) : null;
 	const latestHash = await getLatestCommitHash();
 
@@ -621,9 +621,9 @@ const loadDashboardContributorsFromGit = async () => {
 
 	const contributors = await fetchContributorsFromGitHub();
 
-	await prisma.dashboardKV.deleteMany({ where: { key: KV_CONTRIBUTORS_KEY } });
+	await prisma.dashboardKV.deleteMany({ where: { key: KV_CONTRIBUTORS_KEY, sessionName: 'main' } });
 	await prisma.dashboardKV.create({
-		data: { key: KV_CONTRIBUTORS_KEY, value: JSON.stringify({ commitHash: latestHash, contributors }) }
+		data: { key: KV_CONTRIBUTORS_KEY, sessionName: 'main', value: JSON.stringify({ commitHash: latestHash, contributors }) }
 	});
 
 	return contributors;
@@ -1324,7 +1324,8 @@ const filterDashboardProfilePicturesByColor = async (pictures, { colorHex, toler
 const listDashboardProfilePictures = async ({ limit = 180 } = {}) => {
 	await refreshProfilePicturesCacheFromDb();
 
-	const entries = Array.isArray(configuration.pinterest.images?.entries?.()) ? configuration.pinterest.images.entries() : [];
+	const entriesIter = configuration.pinterest.images?.entries?.();
+	const entries = entriesIter ? Array.from(entriesIter) : [];
 	const safeLimit = Math.max(1, Math.min(500, Number(limit) || 180));
 	const seenUrls = new Set();
 
@@ -3379,6 +3380,14 @@ export const server = async () => {
 		configuration.prefix.values = newPrefixValues;
 		configuration.prefix.default = mode === 'nopref' ? '' : newPrefixConfig.pref || '.';
 
+		if (configuration.router) {
+			configuration.router.updatePrefix({
+				mode,
+				value: configuration.prefix.default,
+				regex: newPrefixReg
+			});
+		}
+
 		const settingsPath = './src/helper/config/settings.json';
 		const currentSettings = await fs.readJSON(settingsPath).catch(() => ({}));
 
@@ -3401,11 +3410,18 @@ export const server = async () => {
 			after: { mode, pref: newPrefixConfig.pref }
 		});
 
+		const displayPref =
+			mode === 'multi'
+				? (newPrefixConfig.cliPrefixes?.length ? newPrefixConfig.cliPrefixes.join('') : '(default)')
+				: mode === 'nopref'
+					? '(none)'
+					: newPrefixConfig.pref;
+
 		loggers.info(
 			color('Dashboard changed prefix:', 'white'),
 			color(mode, 'lilac'),
 			color('pref:', 'white'),
-			color(newPrefixConfig.pref, 'lilac')
+			color(displayPref, 'lilac')
 		);
 
 		res.json({ ok: true, mode, pref: newPrefixConfig.pref, multi: newPrefixConfig.multi, nopref: newPrefixConfig.nopref });

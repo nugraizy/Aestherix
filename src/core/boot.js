@@ -2,6 +2,7 @@ import { delay, isJidGroup } from 'baileys';
 import clip from 'clipboardy';
 import fs from 'fs-extra';
 import PhoneNumber from 'libphonenumber-js';
+import readline from 'readline';
 
 import configuration from '../helper/config/connect.js';
 import prisma from '../helper/database/prisma.js';
@@ -255,9 +256,38 @@ async function onConnected({ clientSocket, commandLoader, router, mqtt, store, w
 		commandLoader.on('added', ({ name, file }) =>
 			loggers.info(color('Command added:', 'white'), color(name, 'lilac'), color('⇢ ', 'green'), color(file, 'gray'))
 		);
-		commandLoader.on('changed', ({ name, file }) =>
-			loggers.info(color('Command changed:', 'white'), color(name, 'lilac'), color('⇢ ', 'green'), color(file, 'gray'))
-		);
+
+		let lastChange = { name: null, file: null, count: 0, marker: null };
+		const origWrite = process.stdout.write.bind(process.stdout);
+		let writeCounter = 0;
+
+		process.stdout.write = (chunk, ...rest) => {
+			writeCounter++;
+			return origWrite(chunk, ...rest);
+		};
+
+		commandLoader.on('changed', ({ name, file }) => {
+			const isContinuation = lastChange.name === name && lastChange.file === file && writeCounter === lastChange.marker;
+
+			if (isContinuation) {
+				lastChange.count++;
+				readline.moveCursor(process.stdout, 0, -1);
+				readline.clearLine(process.stdout, 0);
+				readline.cursorTo(process.stdout, 0);
+				loggers.info(
+					color('Command changed:', 'white'),
+					color(name, 'lilac'),
+					color('⇢ ', 'green'),
+					color(file, 'gray'),
+					color(`(×${lastChange.count})`, 'glowYellow')
+				);
+			} else {
+				lastChange = { name, file, count: 1, marker: 0 };
+				loggers.info(color('Command changed:', 'white'), color(name, 'lilac'), color('⇢ ', 'green'), color(file, 'gray'));
+			}
+
+			lastChange.marker = writeCounter;
+		});
 		commandLoader.on('removed', ({ name }) => loggers.warning(color('Command removed:', 'white'), color(name, 'lilac')));
 		commandLoader.on('error', ({ file, reason }) => loggers.error(color(file, 'purple'), color(reason, 'red')));
 	}
@@ -339,7 +369,10 @@ export async function boot({ cli, OPTIONS, store, sessionName }) {
 	mqtt.connect();
 
 	const webhook = new WebhookServer();
-	const commandLoader = new CommandLoader({ commands: configuration.registry.commands, aliases: configuration.registry.aliases });
+	const commandLoader = new CommandLoader({
+		commands: configuration.registry.commands,
+		aliases: configuration.registry.aliases
+	});
 	const router = new Router(clientSocket, {
 		commands: configuration.registry.commands,
 		aliases: configuration.registry.aliases,
@@ -347,6 +380,8 @@ export async function boot({ cli, OPTIONS, store, sessionName }) {
 		prefixMode: configuration.prefix.mode,
 		prefixReg: configuration.prefix.regex
 	});
+
+	configuration.router = router;
 
 	const eventHandler = new EventHandler(clientSocket, {
 		router,
