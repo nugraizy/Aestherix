@@ -95,7 +95,8 @@ export const hydrateProfilePictureHistory = async (config) => {
 };
 
 const persistProfilePictureHistory = async (config) => {
-	const entries = (Array.isArray(config.pinterest.images?.entries?.()) ? config.pinterest.images.entries() : [])
+	const entriesIter = config.pinterest.images?.entries?.();
+	const entries = (entriesIter ? Array.from(entriesIter) : [])
 		.map(([timestamp, value]) => {
 			const normalized = normalizePinterestPictureRecord(value);
 

@@ -77,11 +77,11 @@ const normalizeEntry = (entry) => {
 export const listPinterestProfilePictures = async (db, { limit } = {}) => {
 	const safeLimit = Number(limit) > 0 ? Math.min(1000, Number(limit)) : undefined;
 	const rows = await db.pinterestProfilePicture.findMany({
-		orderBy: { timestamp: 'asc' },
+		orderBy: { timestamp: 'desc' },
 		...(safeLimit ? { take: safeLimit } : {})
 	});
 
-	return rows.map((row) => ({
+	return rows.reverse().map((row) => ({
 		timestamp: String(row.timestamp),
 		url: String(row.url),
 		thumbnail: String(row.thumbnail || row.url)
