@@ -3,27 +3,28 @@ import { DynamicTextAssets, EnkaClient, TextAssets } from 'enka-network-api';
 import { GenshinCard } from '../../helper/canvas/card-render.js';
 import { parseCharactersData, parseGenshinUser } from '../../helper/canvas/genshin-parser.js';
 import { cmdId } from '../../helper/modules/prefix.js';
+import { loggers } from '../../utils/modules/index.js';
 
-function convertObjectToJson(obj) {
-	if (typeof obj !== 'object' || obj === null || obj === undefined) {
-		return obj;
-	}
-
-	const entries = Object.entries(obj)
-		.filter(([key, value]) => !key.startsWith('_') && !(value instanceof EnkaClient))
-		.map(([key, value]) => [key, convertObjectToJson(value)]);
-
-	if (obj instanceof TextAssets) {
-		entries.push(['text', obj instanceof DynamicTextAssets ? obj.getNullableReplacedText() : obj.getNullable()]);
-	}
-
-	return Object.fromEntries(entries);
-}
-
-const enka = new EnkaClient();
+const enka = new EnkaClient({ showFetchCacheLog: false });
 
 enka.cachedAssetsManager.cacheDirectoryPath = './cache';
 enka.cachedAssetsManager.cacheDirectorySetup();
+
+if (!(await enka.cachedAssetsManager.checkForUpdates())) {
+	await enka.cachedAssetsManager.fetchAllContents();
+}
+
+enka.cachedAssetsManager.activateAutoCacheUpdater({
+	instant: false,
+	timeout: 60 * 60 * 1000,
+	onUpdateStart: async () => {
+		loggers.warning('Starting assets update for genshin database...'.yellow());
+	},
+	onUpdateEnd: async () => {
+		enka.cachedAssetsManager.refreshAllData();
+		loggers.info('Updating Completed!'.purple());
+	}
+});
 
 const cache = new Map();
 const CACHE_TTL = 10 * 60 * 1000;
@@ -90,14 +91,14 @@ export default {
 			parsedUser = cached.parsedUser;
 			parsedCharacters = cached.parsedCharacters;
 		} else {
-			const wait = await client.waitMessage(from, '⏳ Fetching character data...', message);
+			const wait = await client.waitMessage(from, 'Fetching character data...', message);
 
 			let userInfo;
 
 			try {
 				userInfo = await enka.fetchUser(Number(uid));
 			} catch {
-				return await wait.update('❌ Failed to fetch data. Make sure the UID is correct and your showcase is public.');
+				return await wait.update('Failed to fetch data. Make sure the UID is correct and your showcase is public.');
 			}
 
 			const jsonData = convertObjectToJson(userInfo);
@@ -105,11 +106,11 @@ export default {
 			parsedUser = parseGenshinUser(jsonData);
 			parsedCharacters = parseCharactersData(jsonData.characters);
 			setCache(uid, parsedUser, parsedCharacters);
-			await wait.update('✅ Data fetched successfully.');
+			await wait.update('Data fetched successfully.');
 		}
 
 		if (!parsedCharacters.length) {
-			return await client.reply(from, '❌ No characters found in showcase.', message);
+			return await client.reply(from, 'No characters found in showcase.', message);
 		}
 
 		if (charName) {
@@ -118,22 +119,22 @@ export default {
 			if (!found) {
 				const available = parsedCharacters.map((c) => c.name).join(', ');
 
-				return await client.reply(from, `❌ Character "${charName}" not found.\nAvailable: ${available}`, message);
+				return await client.reply(from, `Character "${charName}" not found.\nAvailable: ${available}`, message);
 			}
 
-			const wait = await client.waitMessage(from, `⏳ Generating ${found.name}'s build card...`, message);
+			const wait = await client.waitMessage(from, `Generating ${found.name}'s build card...`, message);
 
 			const card = new GenshinCard(found, parsedUser, { statsChart: useRadar ? 'radar' : 'list' });
 			const result = await card.render();
 			const buffer = await result.toBuffer();
 
-			await wait.delete();
-
-			return await client.send(
+			await client.send(
 				from,
 				{ image: buffer, caption: `${found.name} | Lv.${found.level} | UID: ${uid}` },
 				{ quoted: message }
 			);
+
+			return await wait.update(`Done. ${found.name}'s build card generated.`);
 		}
 
 		const ctx = { prefix };
@@ -156,3 +157,19 @@ export default {
 			.send({ quoted: message });
 	}
 };
+
+function convertObjectToJson(obj) {
+	if (typeof obj !== 'object' || obj === null || obj === undefined) {
+		return obj;
+	}
+
+	const entries = Object.entries(obj)
+		.filter(([key, value]) => !key.startsWith('_') && !(value instanceof EnkaClient))
+		.map(([key, value]) => [key, convertObjectToJson(value)]);
+
+	if (obj instanceof TextAssets) {
+		entries.push(['text', obj instanceof DynamicTextAssets ? obj.getNullableReplacedText() : obj.getNullable()]);
+	}
+
+	return Object.fromEntries(entries);
+}
