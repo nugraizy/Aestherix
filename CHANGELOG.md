@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.4.1」2026-05-15
+
+## Fixed
+- **Genshin build card** — replaced nonexistent `wait.delete()` call in `!genshincard` with `wait.update()` showing a success message after the image is sent, and removed emoji noise from wait messages to match other commands. ([`a50495d`](https://github.com/nugraizy/aestherix/commit/a50495d))
+
+## Added
+- **Prototype types** — `src/types/Prototypes/index.d.ts` documents global `String`, `Array`, and `Number` prototype extensions used across the codebase. ([`a50495d`](https://github.com/nugraizy/aestherix/commit/a50495d))
+
+---
+
 # 「7.4.0」2026-05-14
 
 ## Added
