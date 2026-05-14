@@ -46,12 +46,15 @@ model PinterestProfilePicture {
 }
 
 model UserLimit {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  jid       String   @unique
-  limit     Int      @default(30)
-  role      String   @default("FREE")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  jid         String
+  sessionName String   @default("main")
+  limit       Int      @default(30)
+  role        String   @default("FREE")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([jid, sessionName], name: "jid_sessionName")
 }
 
 model BannedUser {
@@ -61,16 +64,20 @@ model BannedUser {
 }
 
 model Contact {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  jid       String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  jid         String
+  sessionName String   @default("main")
+  name        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([jid, sessionName], name: "jid_sessionName")
 }
 
 model SettingsManager {
   id               String   @id @default(auto()) @map("_id") @db.ObjectId
-  groupId          String   @unique
+  groupId          String
+  sessionName      String   @default("main")
   groupName        String?
   groupDescription String?
   welcome1         String   @default("disable")
@@ -93,6 +100,8 @@ model SettingsManager {
   bannedMembers    String   @default("[]")
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+
+  @@unique([groupId, sessionName], name: "groupId_sessionName")
 }
 
 model DashboardSession {
@@ -155,10 +164,13 @@ model OfflineUser {
 // `key` is a logical name; `value` is a JSON blob.
 
 model DashboardKV {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  key       String   @unique
-  value     String
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  key         String
+  sessionName String   @default("main")
+  value       String
+  updatedAt   DateTime @updatedAt
+
+  @@unique([key, sessionName], name: "key_sessionName")
 }
 
 /// Persisted Werewolf game sessions so in-flight games survive a bot
@@ -170,4 +182,16 @@ model WerewolfSession {
   state     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+/// Persisted sub-bot instances for multi-instance support.
+model BotInstance {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionName String   @unique
+  flags       String   @default("{}")
+  role        String   @default("sub")
+  pairNumber  String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
