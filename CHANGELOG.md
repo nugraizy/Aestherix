@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.4.0」2026-05-14
+
+## Added
+- **Genshin Impact build card** — `!genshincard <uid>` generates an enka.network-style character build card with character splash, weapon, artifacts, stats, and constellations. Supports button-based character selection with 10-minute cache and optional `--radar` flag for hexagonal stats chart. ([`5d795d6`](https://github.com/nugraizy/aestherix/commit/5d795d6))
+
+## Fixed
+- **Prisma schema** — added missing `BotInstance` model and applied `sessionName` scoping with compound unique keys to `UserLimit`, `Contact`, `SettingsManager`, and `DashboardKV` for multi-instance support. ([`baea646`](https://github.com/nugraizy/aestherix/commit/baea646))
+- **Profile picture rotation** — fixed iterator-to-array conversion so rotation history persists to database, and reordered `listPinterestProfilePictures` query to return the latest entries instead of the oldest. ([`638f759`](https://github.com/nugraizy/aestherix/commit/638f759))
+- **Dashboard prefix change** — prefix updates from the dashboard now apply to the running router instead of requiring a restart. Multi-mode log now shows actual user prefixes, and `DashboardKV` queries use the correct compound key format. ([`03e8889`](https://github.com/nugraizy/aestherix/commit/03e8889))
+- **Connection message** — bot only sends the "Bot is connected to socket" message on the first socket open, not on every reconnect. ([`4366bc7`](https://github.com/nugraizy/aestherix/commit/4366bc7))
+
+---
+
 # 「7.3.0」2026-05-14
 
 ## Fixed
