@@ -5,7 +5,7 @@
 - Always use Conventional Commits format.
 - Format:
 
-<type>(<scope>): <short summary>
+\<type>(\<scope>): \<short summary>
 
 Examples:
 

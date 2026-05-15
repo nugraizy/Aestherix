@@ -220,41 +220,21 @@ See [AGENTS.md](./AGENTS.md) for architecture, event flow, command shape, and co
 ---
 
 ## Contributors
-
-<table align="center">
-  <tr>
-    <td align="center">
-      <a href="https://github.com/nugraizy" target="_blank" rel="noopener noreferrer">
-        <img src="https://github.com/nugraizy.png?size=96" width="80" height="80" alt="Nugraizy" style="border-radius:50%;"/><br/>
-        <sub><b>Nugraizy</b></sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/TobyG74" target="_blank" rel="noopener noreferrer">
-        <img src="https://github.com/TobyG74.png?size=96" width="80" height="80" alt="TobyG74" style="border-radius:50%;"/><br/>
-        <sub><b>Tobi Saputra</b></sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/xbnfz01" target="_blank" rel="noopener noreferrer">
-        <img src="https://github.com/xbnfz01.png?size=96" width="80" height="80" alt="xbnfz01" style="border-radius:50%;"/><br/>
-        <sub><b>xbnfz01</b></sub>
-      </a>
-    </td>
-    <td align="center">
-      <a href="https://github.com/Alphanum404" target="_blank" rel="noopener noreferrer">
-        <img src="https://github.com/Alphanum404.png?size=96" width="80" height="80" alt="Alphanum404" style="border-radius:50%;"/><br/>
-        <sub><b>Alphanum404</b></sub>
-      </a>
-    </td>
-  </tr>
-</table>
+<p align="center">
+  <a href="https://github.com/nugraizy/aestherix/graphs/contributors" >
+    <img src="https://contrib.rocks/image?repo=nugraizy/aestherix" />
+  </a>
+</p>
 
 ---
 
 <p align="center">
-  Made with ❤️ by the Hidden Finder Team
+  Made with 💜 by the Hidden Finder Team<br>
   <a href="./CHANGELOG.md">Changelog</a>
+   •
   <a href="./doc/DOC.md">Docs</a>
+   •
+  <a href="https://github.com/nugraizy/aestherix/wiki">Wiki</a>
+   •
   <a href="https://github.com/nugraizy/aestherix/issues">Issues</a>
 </p>
