@@ -8,8 +8,12 @@ import { v4 } from 'uuid';
 
 import { Cache } from '../../helper/modules/cache.js';
 import { cheerioLOAD, randomChar } from '../modules/index.js';
-import { COOKIE } from './cookie.js';
 import { _api as API_BASE_URL, appVersion, checkValid, deviceIds, iids, lastInstall, random } from './util.js';
+
+const COOKIE = {
+	BRAINANS_COOKIE: process.env.COOKIE_BRAINANS_COM,
+	TIKTOK_COOKIE: process.env.COOKIE_TIKTOK_COM
+};
 
 class ResponseParser {
 	/**
@@ -58,7 +62,7 @@ class ResponseParser {
 		bioLink?.link
 			? (container.urls.externalUrls = {
 					url: bioLink.link
-				}) // eslint-disable-line
+				})
 			: null;
 
 		container.urls.posts = dataPosts.aweme_list.map((v) => {
@@ -97,7 +101,7 @@ class ResponseParser {
 									musicUrl: music?.play_url.url_list[0]
 								}
 							}
-						} // eslint-disable-line
+						}
 					: { music: 'copyrighted music' }),
 
 				video: {
@@ -503,18 +507,20 @@ class RequestModule extends ResponseParser {
 			try {
 				username = '@' + username.replace('@', '');
 
-				let data = await axios.get(`https://www.tiktok.com/${username}`, {
-					...this._getRequestConfig(),
-					validateStatus: () => true
+				let data = await fetch(`https://www.tiktok.com/${username}`, {
+					headers: {
+						'User-Agent':
+							'Mozilla/5.0 (Linux; Android 11; SAMSUNG SM-G973U) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/14.2 Chrome/87.0.4280.141 Mobile Safari/537.36'
+					}
 				});
 
 				if (data.status === 404) {
 					return { error: 'User not found' };
 				}
 
-				data = data.data;
+				data = await data.text();
 
-				const rawData = cheerioLOAD(data)('script[id=__UNIVERSAL_DATA_FOR_REHYDRATION__]').html();
+				const rawData = cheerioLOAD(data)('script[id="__UNIVERSAL_DATA_FOR_REHYDRATION__"]').html();
 
 				resolve(JSON.parse(rawData));
 			} catch (error) {
@@ -716,8 +722,8 @@ class RequestModule extends ResponseParser {
 					.join('');
 
 				const mainParams = {
-					app_name: 'musical_ly', // eslint-disable-line
-					manifest_app_version: '2023501030' // eslint-disable-line
+					app_name: 'musical_ly',
+					manifest_app_version: '2023501030'
 				};
 
 				const body = this._buildApiUrl({
@@ -771,7 +777,7 @@ class RequestModule extends ResponseParser {
 						'com.zhiliaoapp.musically/300904 (2018111632; U; Android 10; en_US; Pixel 4; Build/QQ3A.200805.001; Cronet/58.0.2991.0)'
 				};
 
-				delete config.headers.Cookie;
+				// delete config.headers.Cookie;
 
 				const data = await asyncRetry(
 					async () => {
@@ -796,12 +802,18 @@ class RequestModule extends ResponseParser {
 
 						const resultPromises = await Promise.any(container);
 
-						const response = this._mergeMediaResponse(resultPromises, videoId, 'aweme_list', wait);
+						const response = await Promise.race([
+							this._mergeMediaResponse(resultPromises, videoId, 'aweme_list', wait),
+							new Promise((_, reject) => setTimeout(() => reject(new Error('Merge timeout')), 15000))
+						]);
+
+						if (response?.error) {
+							throw new Error(response.error);
+						}
 
 						return response;
 					},
 					{
-						maxRetryTime: 60 * 1000,
 						minTimeout: 0,
 						retries: 20
 					}
