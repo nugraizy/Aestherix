@@ -3,9 +3,17 @@ import { S_WHATSAPP_NET } from '../../helper/index.js';
 import prisma from '../../helper/database/prisma.js';
 import { getBannedUsers, banUser } from '../../helper/database/adapters/user.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
+async function banAndBlock(client, jid) {
+	await banUser(prisma, jid);
+	configuration.bannedlist.push(jid);
+	configuration.blocklist.push(jid);
+	await client.updateBlockStatus(jid, 'block');
+}
+
+function mentionText(jid) {
+	return `@${jid.split('@')[0]}`;
+}
+
 export default {
 	name: 'banned',
 	minifiedDescription: 'Ban User',
@@ -17,50 +25,35 @@ export default {
 	limit: 0,
 	status: 'enable',
 	async run({ from, message, isOwner, args, mediaData, mention, bodyQuoted, query }, client) {
-		if (!query && bodyQuoted) {
+		if (!query && !bodyQuoted) {
 			return await client.reply(from, 'Please provide user to ban', message);
 		}
 
 		const userBanned = await getBannedUsers(prisma);
-		const banned = [];
 
 		if (args[1] === 'report' && isOwner) {
-			await banUser(prisma, args[3]);
-			configuration.bannedlist.push(args[3]);
-			configuration.blocklist.push(args[3]);
-
-			client.updateBlockStatus(args[3], 'block');
-			await client.reply(
-				from,
-				'You are banned from using bot.\n\nReason : Abusing Report command.',
-				JSON.parse(args.slice(4))
-			);
-
+			await banAndBlock(client, args[3]);
+			await client.reply(from, 'You are banned from using bot.\n\nReason : Abusing Report command.', JSON.parse(args.slice(4)));
 			return;
 		}
 
 		if (mention.length) {
-			for (const mentioned of mention) {
-				if (userBanned.includes(mentioned)) {
-					await client.send(
-						from,
-						{ text: `@${mentioned.split('@')[0]} Already banned`, mentions: [mentioned] },
-						{ quoted: message }
-					);
+			const banned = [];
+
+			for (const jid of mention) {
+				if (userBanned.includes(jid)) {
+					await client.send(from, { text: `${mentionText(jid)} Already banned`, mentions: [jid] }, { quoted: message });
 					continue;
 				}
 
-				await banUser(prisma, mentioned);
-				configuration.bannedlist.push(mentioned);
-				configuration.blocklist.push(mentioned);
-				banned.push(mentioned);
-				await client.updateBlockStatus(mentioned, 'block');
+				await banAndBlock(client, jid);
+				banned.push(jid);
 			}
 
 			if (banned.length) {
 				await client.send(
 					from,
-					{ text: `Success banning : ${banned.map((v) => `@${v.split('@')[0]}`).join(', ')}`, mentions: [banned] },
+					{ text: `Success banning : ${banned.map(mentionText).join(', ')}`, mentions: banned },
 					{ quoted: message }
 				);
 			}
@@ -71,51 +64,31 @@ export default {
 		if (query) {
 			const numbers = query.parseNumber();
 
-			for (let user of numbers) {
-				let {
-					number: { number }
-				} = user;
+			for (const user of numbers) {
+				const number = user.number.number.replace(/\+/g, '');
+				const jid = `${number}${S_WHATSAPP_NET}`;
 
-				number = number.replace(/\+/g, '');
-				const isBanned = userBanned.includes(`${number}${S_WHATSAPP_NET}`);
-
-				if (isBanned) {
-					await client.send(
-						from,
-						{ text: `@${number} is already banned`, mentions: [`${number}${S_WHATSAPP_NET}`] },
-						{ quoted: message }
-					);
+				if (userBanned.includes(jid)) {
+					await client.send(from, { text: `${mentionText(jid)} is already banned`, mentions: [jid] }, { quoted: message });
 					continue;
 				}
 
-				await banUser(prisma, `${number}${S_WHATSAPP_NET}`);
-				configuration.bannedlist.push(`${number}${S_WHATSAPP_NET}`);
-				configuration.blocklist.push(`${number}${S_WHATSAPP_NET}`);
-				await client.updateBlockStatus(`${number}${S_WHATSAPP_NET}`, 'block');
-				await client.send(
-					from,
-					{ text: `Success banning : @${number}`, mentions: [`${number}${S_WHATSAPP_NET}`] },
-					{ quoted: message }
-				);
+				await banAndBlock(client, jid);
+				await client.send(from, { text: `Success banning : ${mentionText(jid)}`, mentions: [jid] }, { quoted: message });
 			}
 
 			return;
 		}
 
 		if (bodyQuoted) {
-			if (userBanned.includes(mediaData.participant)) {
+			const jid = mediaData.participant;
+
+			if (userBanned.includes(jid)) {
 				return await client.reply(from, 'Already banned', message);
 			}
 
-			await banUser(prisma, mediaData.participant);
-			configuration.bannedlist.push(mediaData.participant);
-			configuration.blocklist.push(mediaData.participant);
-			await client.updateBlockStatus(mediaData.participant, 'block');
-			await client.send(
-				from,
-				{ text: `Success banning : @${mediaData.participant.split('@')[0]}`, mentions: [mediaData.participant] },
-				{ quoted: message }
-			);
+			await banAndBlock(client, jid);
+			await client.send(from, { text: `Success banning : ${mentionText(jid)}`, mentions: [jid] }, { quoted: message });
 		}
 	}
 };

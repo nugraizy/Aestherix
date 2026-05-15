@@ -3,17 +3,25 @@ import { S_WHATSAPP_NET } from '../../helper/index.js';
 import prisma from '../../helper/database/prisma.js';
 import { getBannedUsers, unbanUser } from '../../helper/database/adapters/user.js';
 
-/**
- *
- * @param {string[]} arr
- * @param {string} id
- * @returns {number}
- */
-const indexs = (arr, id) => arr.findIndex((v) => v === id);
+function removeFromArray(arr, value) {
+	const index = arr.indexOf(value);
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
+	if (index !== -1) {
+		arr.splice(index, 1);
+	}
+}
+
+async function unbanAndUnblock(client, jid) {
+	await unbanUser(prisma, jid);
+	removeFromArray(configuration.bannedlist, jid);
+	removeFromArray(configuration.blocklist, jid);
+	await client.updateBlockStatus(jid, 'unblock');
+}
+
+function mentionText(jid) {
+	return `@${jid.split('@')[0]}`;
+}
+
 export default {
 	name: 'unbanned',
 	minifiedDescription: 'Unban User',
@@ -25,35 +33,29 @@ export default {
 	limit: 0,
 	status: 'enable',
 	async run({ from, message, mediaData, mention, bodyQuoted, query }, client) {
-		if (!query) {
+		if (!query && !bodyQuoted) {
 			return await client.reply(from, 'Please provide user to unban', message);
 		}
 
 		const userBanned = await getBannedUsers(prisma);
-		const unbanned = [];
 
 		if (mention.length) {
-			for (const mentioned of mention) {
-				if (!userBanned.includes(mentioned)) {
-					await client.send(
-						from,
-						{ text: `@${mentioned.split('@')[0]} is not banned`, mentions: [mentioned] },
-						{ quoted: message }
-					);
+			const unbanned = [];
+
+			for (const jid of mention) {
+				if (!userBanned.includes(jid)) {
+					await client.send(from, { text: `${mentionText(jid)} is not banned`, mentions: [jid] }, { quoted: message });
 					continue;
-				} else {
-				await unbanUser(prisma, mentioned);
-				configuration.bannedlist.splice(indexs(configuration.bannedlist, mentioned), 1);
-				configuration.blocklist.splice(indexs(configuration.blocklist, mentioned), 1);
-					unbanned.push(mentioned);
-					await client.updateBlockStatus(mentioned, 'unblock');
 				}
+
+				await unbanAndUnblock(client, jid);
+				unbanned.push(jid);
 			}
 
 			if (unbanned.length) {
 				await client.send(
 					from,
-					{ text: `Success unbanning : ${unbanned.map((v) => `@${v.split('@')[0]}`).join(', ')}`, mentions: [unbanned] },
+					{ text: `Success unbanning : ${unbanned.map(mentionText).join(', ')}`, mentions: unbanned },
 					{ quoted: message }
 				);
 			}
@@ -64,50 +66,31 @@ export default {
 		if (query) {
 			const numbers = query.parseNumber();
 
-			for (let user of numbers) {
-				let {
-					number: { number }
-				} = user;
+			for (const user of numbers) {
+				const number = user.number.number.replace(/\+/g, '');
+				const jid = `${number}${S_WHATSAPP_NET}`;
 
-				number = number.replace(/\+/g, '');
-
-				const isBanned = userBanned.includes(`${number}${S_WHATSAPP_NET}`);
-
-				if (!isBanned) {
-					await client.send(from, { text: `@${number} is not banned`, mentions: [`${number}${S_WHATSAPP_NET}`] }, {});
+				if (!userBanned.includes(jid)) {
+					await client.send(from, { text: `${mentionText(jid)} is not banned`, mentions: [jid] }, { quoted: message });
 					continue;
 				}
 
-					await unbanUser(prisma, `${number}${S_WHATSAPP_NET}`);
-				configuration.bannedlist.splice(indexs(configuration.bannedlist, `${number}${S_WHATSAPP_NET}`), 1);
-				configuration.blocklist.splice(indexs(configuration.blocklist, `${number}${S_WHATSAPP_NET}`), 1);
-				await client.updateBlockStatus(`${number}${S_WHATSAPP_NET}`, 'unblock');
-				await client.send(
-					from,
-					{ text: `Success unbanning : @${number}`, mentions: [`${number}${S_WHATSAPP_NET}`] },
-					{ quoted: message }
-				);
+				await unbanAndUnblock(client, jid);
+				await client.send(from, { text: `Success unbanning : ${mentionText(jid)}`, mentions: [jid] }, { quoted: message });
 			}
 
 			return;
 		}
 
 		if (bodyQuoted) {
-			if (!userBanned.includes(mediaData.participant)) {
-				return await client.reply(from, 'not banned', message);
+			const jid = mediaData.participant;
+
+			if (!userBanned.includes(jid)) {
+				return await client.reply(from, 'Not banned', message);
 			}
 
-			const index = userBanned.indexOf(mediaData.participant);
-
-			await unbanUser(prisma, mediaData.participant);
-			configuration.bannedlist.splice(indexs(configuration.bannedlist, mediaData.participant), 1);
-			configuration.blocklist.splice(indexs(configuration.blocklist, mediaData.participant), 1);
-			await client.updateBlockStatus(mediaData.participant, 'unblock');
-			await client.send(
-				from,
-				{ text: `Success unbanning : @${mediaData.participant.split('@')[0]}`, mentions: [mediaData.participant] },
-				{ quoted: message }
-			);
+			await unbanAndUnblock(client, jid);
+			await client.send(from, { text: `Success unbanning : ${mentionText(jid)}`, mentions: [jid] }, { quoted: message });
 		}
 	}
 };

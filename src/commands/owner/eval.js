@@ -12,8 +12,10 @@ import * as b from '../../utils/index.js';
 
 const func = { ...a, ...b, ...c, ...d, ...configuration }; /* eslint-disable-line */
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
-const col = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
-const WAProto = _.WAProto;
+const ANSI_REGEX = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+const WAProto = _.WAProto; /* eslint-disable-line */
+
+const SYNTAX_OPTIONS = { allowReturnOutsideFunction: true, allowAwaitOutsideFunction: true, sourceType: 'module' };
 
 class CustomArray extends Array {
 	constructor(...args) {
@@ -23,9 +25,96 @@ class CustomArray extends Array {
 
 const print = ({ from, quoted, client }, ...args) => client.reply(from, format(...args), quoted);
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
+function checkSyntax(code) {
+	const err = syntaxerror(code, 'Execution Function', SYNTAX_OPTIONS);
+
+	return err ? `\`\`\`${err}\`\`\`\n\n` : '';
+}
+
+async function evalReturn(ctx) {
+	const { from, query, body, message, extractMediaData, mediaData, type, typeQuoted, adminGroups, participantsGroup, pushname, bodyQuoted, client } = ctx;
+	let output;
+	let syntaxes = '';
+
+	try {
+		const FnType = /await/.test(body) ? AsyncFunction : Function;
+		const code = `return ${query}`;
+		const fn = new FnType('print', 'client', 'message', 'fs', 'from', 'extractMediaData', 'mediaData', 'type', 'typeQuoted', 'body', 'adminGroups', 'participants', 'pushname', 'bodyQuoted', code);
+
+		output = await fn.call(client, (...a) => client.reply(from, format(...a), message.message), client, message, fs, from, extractMediaData, mediaData, type, typeQuoted, body, adminGroups, participantsGroup, pushname, bodyQuoted);
+	} catch (e) {
+		syntaxes = checkSyntax(query);
+		output = e;
+	} finally {
+		client.reply(from, syntaxes + format(output), message.message);
+	}
+}
+
+async function evalShell(ctx) {
+	const { from, body, message, client } = ctx;
+
+	exec(body.slice(3), async (err, stdout) => {
+		if (err) {
+			return await client.reply(from, format(err), message.message);
+		}
+
+		await client.reply(from, format(stdout.replace(ANSI_REGEX, '').trim()), message.message);
+	});
+}
+
+async function evalArrow(ctx) {
+	const { from, query, message, client } = ctx;
+
+	try {
+		if (/\/s$/.test(query)) {
+			const code = query.replace(/\/s$/, '');
+
+			print({ from, quoted: message.message, client }, eval(prettier.js_beautify(code)));
+		} else {
+			const wrapped = prettier.js_beautify(`(async () => { ${query} })().catch(err => print({ from, quoted: message.message, client }, err))`);
+
+			print({ from, quoted: message.message, client }, await eval(wrapped));
+		}
+	} catch (e) {
+		const wrapped = `(async () => { ${query} })().catch(err => print({ from, quoted: message.message, client }, err))`;
+
+		let str = `Type : ${e.name}\nMessage : ${e.message}`;
+		const syntaxes = checkSyntax(wrapped);
+
+		if (syntaxes) {
+			str += syntaxes;
+		}
+
+		await client.reply(from, `\`ERROR\` \n\n\`\`\`${str}\`\`\``, message.message);
+	}
+}
+
+async function evalBang(ctx) {
+	const { from, query, message, groupMetadata, args, client, store } = ctx;
+	let output;
+	let syntaxes = '';
+	const code = `return ${query}`;
+
+	try {
+		let i = 15;
+		const exportsly = { exports: {} };
+		const fn = new AsyncFunction('print', 'message', 'client', 'store', 'Array', 'process', 'args', '', 'exports', 'argument', code);
+
+		output = await fn.call(
+			client,
+			async (...a) => { if (--i < 1) { return; }
+
+ return await client.reply(from, format(...a), message.message); },
+			message, client, store, CustomArray, process, args, groupMetadata, exportsly, exportsly.exports, [client, message]
+		);
+	} catch (e) {
+		syntaxes = checkSyntax(query);
+		output = e;
+	} finally {
+		client.reply(from, syntaxes + format(output), message.message);
+	}
+}
+
 export default {
 	name: 'eval',
 	minifiedDescription: 'Evaluate Code',
@@ -37,78 +126,7 @@ export default {
 	limit: 0,
 	status: 'enable',
 	async run(message, client, store) {
-		let {
-			/* eslint-disable */
-			isFromMe,
-			from,
-			isGroup,
-			isBotInstance,
-			sender,
-			prettyNumber,
-			timeStamp,
-			filename,
-			groupMetadata,
-			groupName,
-			groupId,
-			isGroupOwner,
-			pushname,
-			botNumber,
-			ownerNumbers,
-			isOwner,
-			settings,
-			type,
-			typeQuoted,
-			isAdmin,
-			rawParticipants,
-			adminGroups,
-			participantsGroup,
-			ownerGroups,
-			isBotAdmin,
-			body,
-			args,
-			cmd,
-			isCmd,
-			prefix,
-			query,
-			isMedia,
-			isQuotedImage,
-			isQuotedVideo,
-			isQuotedAudio,
-			isQuotedContact,
-			isQuotedContactsArray,
-			isQuotedDocument,
-			isQuotedLiveLocation,
-			isQuotedLocation,
-			isQuotedSticker,
-			isMediaVid,
-			isMediaImage,
-			isMediaDocument,
-			isLocation,
-			isLiveLocation,
-			isSticker,
-			isAudio,
-			isContact,
-			isContactsArray,
-			isDocument,
-			isViewOnce,
-			isViewOnceImage,
-			isViewOnceVideo,
-			isQuotedViewOnce,
-			isQuotedViewOnceImage,
-			isQuotedViewOnceVideo,
-			typeViewOnce,
-			typeSticker,
-			stickerAble,
-			waitForInput,
-			groupSettings,
-			isDisappearingChat,
-			mention,
-			mediaData,
-			extractMediaData,
-			bodyQuoted,
-			state
-			/* eslint-enable */
-		} = message;
+		const { isOwner, isBotInstance, from, body, query } = message;
 
 		if (!isOwner) {
 			return await client.reply(from, 'You are not allowed to use this command', message.message);
@@ -122,208 +140,29 @@ export default {
 			return;
 		}
 
+		const ctx = { ...message, client, store };
+
 		if (body.startsWith('/> ')) {
-			let types = Function;
-			let output;
-			let syntaxes = '';
+			return evalReturn(ctx);
+		}
 
-			try {
-				if (/await/.test(body)) {
-					types = AsyncFunction;
-				}
+		if (body.startsWith('$> ')) {
+			return evalShell(ctx);
+		}
 
-				query = `return ${query}`;
-				const func = new types(
-					'print',
-					'client',
-					'message',
-					'fs',
-					'from',
-					'extractMediaData',
-					'mediaData',
-					'type',
-					'typeQuoted',
-					'body',
-					'adminGroups',
-					'participants',
-					'pushname',
-					'bodyQuoted',
-					query
-				);
+		if (body.startsWith('=> ')) {
+			return evalArrow(ctx);
+		}
 
-				output = await func.call(
-					client,
-					async (...args) => {
-						return await client.reply(format(...args), { from, quoted: message.message });
-					},
-					client,
-					message,
-					fs,
-					from,
-					extractMediaData,
-					mediaData,
-					type,
-					typeQuoted,
-					body,
-					adminGroups,
-					participantsGroup,
-					pushname,
-					bodyQuoted
-				);
-			} catch (e) {
-				const err = syntaxerror(query, 'Execution Function', {
-					allowReturnOutsideFunction: true,
-					allowAwaitOutsideFunction: true,
-					sourceType: 'module'
-				});
-
-				if (err) {
-					syntaxes = `\`\`\`${err}\`\`\`\n\n`;
-				}
-
-				output = e;
-			} finally {
-				client.reply(from, syntaxes + format(output), message.message);
-			}
-		} else if (body.startsWith('$> ')) {
-			try {
-				exec(body.slice(3), async (err, stdout) => {
-					if (err) {
-						return await client.reply(from, format(err), message.message);
-					}
-
-					await client.reply(from, format(stdout.replace(col, '').trim()), message.message);
-				});
-			} catch (err) {
-				let str = `Type : ${err.name}\n`;
-
-				str += `Message : ${err.message}`;
-				return await client.reply(from, `\`ERROR\`\n\n\`\`\`${str}\`\`\``, message.message);
-			}
-		} else if (body.startsWith('=> ')) {
-			try {
-				if (/\/s$/.test(query)) {
-					query = query.replace(/\/s$/, '');
-					print(
-						{
-							from,
-							quoted: message.message,
-							client
-						},
-						eval(prettier.js_beautify(query))
-					);
-				} else {
-					print(
-						{
-							from,
-							quoted: message.message,
-							client
-						},
-						await eval(
-							prettier.js_beautify(`(async () => {
-						${query}
-								})()
-							 .catch(err => print({
-								from,
-								quoted: message.message,
-								client
-							}, err))`)
-						)
-					);
-				}
-			} catch (e) {
-				const err = syntaxerror(
-					`(async () => {
-					${query}
-						})()
-						.catch(err => print({
-							from,
-							quoted: message.message,
-							client
-							
-						}, err))`,
-					'Execution Function',
-					{
-						allowReturnOutsideFunction: true,
-						allowAwaitOutsideFunction: true,
-						sourceType: 'module'
-					}
-				);
-				let str = `Type : ${e.name}\n`;
-
-				str += `Message : ${e.message}`;
-
-				if (err) {
-					str += `\`\`\`${err}\`\`\`\n\n`;
-				}
-
-				return await client.reply(from, `\`ERROR\` \n\n\`\`\`${str}\`\`\``, message.message);
-			}
-		} else if (body.startsWith('!> ')) {
-			let returning;
-			let syntaxes = '';
-			const queries = `return ${query}`;
-
-			try {
-				let i = 15;
-				const exportsly = {
-					exports: {}
-				};
-				const exec = new (async () => {}).constructor(
-					'print',
-					'message',
-					'client',
-					'store',
-					'Array',
-					'process',
-					'args',
-					'',
-					'exports',
-					'argument',
-					queries
-				);
-
-				returning = await exec.call(
-					client,
-					async (...args) => {
-						if (--i < 1) {
-							return;
-						}
-
-						return await client.reply(format(...args), { from, quoted: message.message });
-					},
-					message,
-					client,
-					store,
-					CustomArray,
-					process,
-					args,
-					groupMetadata,
-					exportsly,
-					exportsly.exports,
-					[client, message]
-				);
-			} catch (e) {
-				const err = syntaxerror(query, 'Execution Function', {
-					allowReturnOutsideFunction: true,
-					allowAwaitOutsideFunction: true,
-					sourceType: 'module'
-				});
-
-				if (err) {
-					syntaxes = `\`\`\`${err}\`\`\`\n\n`;
-				}
-
-				returning = e;
-			} finally {
-				client.reply(from, syntaxes + format(returning), message.message);
-			}
+		if (body.startsWith('!> ')) {
+			return evalBang(ctx);
 		}
 	}
 };
 
 global.prints = print;
-/* eslint-disable-line */ const temp = async (names, func) => {
+
+const temp = async (names, func) => { /* eslint-disable-line */
 	if (!/^[a-z0-9_]+$/i.test(names)) {
 		return new Error('Invalid name.');
 	}
@@ -341,9 +180,7 @@ global.prints = print;
 	}
 
 	func = prettier.js_beautify(func.toString());
-	func = prettier.js_beautify(
-		func.split('\n').insert(1, 'try {').insert(-1, '} catch(e) { print(false, format(e))}').join('\n')
-	);
+	func = prettier.js_beautify(func.split('\n').insert(1, 'try {').insert(-1, '} catch(e) { print(false, format(e))}').join('\n'));
 	global[names] = func.includes('await')
 		? await new AsyncFunction('print', `return ${func}`)()
 		: new Function('print', `return ${func}`)();
@@ -351,7 +188,7 @@ global.prints = print;
 	return func;
 };
 
-/* eslint-disable-line */ const clear = (names) => {
+const clear = (names) => { /* eslint-disable-line */
 	if (typeof names === 'function') {
 		for (const key in global.functions) {
 			if (global.functions[key] === names) {
@@ -376,7 +213,7 @@ global.prints = print;
 	return capt;
 };
 
-/* eslint-disable-line */ const check = (names) => {
+const check = (names) => { /* eslint-disable-line */
 	if (typeof names === 'function') {
 		for (const key in global.functions) {
 			if (global.functions[key] === names) {
