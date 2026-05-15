@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.5.0」2026-05-15
+
+## Added
+- **Multi-command separator change** — multi-command now uses `&&` instead of `|`, freeing `|` for future command piping. ([`7088781`](https://github.com/nugraizy/aestherix/commit/7088781))
+
+## Refactored
+- **Fetch helper rewrite** — removed lodash dependency, replaced with native path resolver, fixed variable shadowing and regex reuse bugs, extracted helpers with proper cleanup. ([`6786d3f`](https://github.com/nugraizy/aestherix/commit/6786d3f))
+- **Instagram notifier removed** — removed instagram notifier module, handler, and owner command. ([`26c6f1d`](https://github.com/nugraizy/aestherix/commit/26c6f1d))
+- **FFmpeg native spawn** — replaced `fluent-ffmpeg` with native `child_process.spawn` in video-to-sticker conversion. ([`1912817`](https://github.com/nugraizy/aestherix/commit/1912817))
+- **Utils rewrite** — rewrote node-gtts, file-processing, and youtube utils; replaced `node-fetch` with `undici`. ([`8e8dd08`](https://github.com/nugraizy/aestherix/commit/8e8dd08))
+- **Command cleanups** — updated comix, audio-book, eval imports; removed unused debugging commands (Bug, Sus). ([`566b65b`](https://github.com/nugraizy/aestherix/commit/566b65b))
+
+## Chores
+- **Dependency cleanup** — removed 20+ unused packages (`fluent-ffmpeg`, `node-fetch`, `instagram-private-api`, `cld`, `jsdom`, `g-i-s`, etc.), resolved peer dependency conflicts so `npm install` works without `--force`. ([`4a3ca1a`](https://github.com/nugraizy/aestherix/commit/4a3ca1a))
+
+---
+
 # 「7.4.1」2026-05-15
 
 ## Fixed
