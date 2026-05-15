@@ -1,6 +1,28 @@
 import configuration from '../../helper/config/connect.js';
 import { ChatGPTDialogue } from '../../utils/index.js';
 
+const LIST_FLAGS = new Set(['--list-char', '--chars', '-c', '-ls']);
+
+const DEFAULT_CHARACTER = 'Zero_Two';
+
+function getCharacterList() {
+	const instance = new ChatGPTDialogue('_', '_', DEFAULT_CHARACTER);
+
+	return instance.getCharacters;
+}
+
+function formatCharacterList(characters, prefix, cmd) {
+	let text = 'Available Characters'.formatHeaders() + '\n\n';
+
+	for (const char of characters) {
+		text += `• ${char.replace(/_/g, ' ')}\n`;
+	}
+
+	text += `\nUsage: ${prefix}${cmd} start <character_name>`;
+	text += `\nExample: ${prefix}${cmd} start Marin_Kitagawa`;
+	return text;
+}
+
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
  */
@@ -9,7 +31,7 @@ export default {
 	minifiedDescription: 'Chat AI',
 	description: 'Chat with AI.',
 	category: 'AI',
-	usage: '!charai `<start/stop>`',
+	usage: '!charai `<start/stop/--chars>` [character]',
 	aliases: ['ai'],
 	cooldown: 3,
 	limit: 5,
@@ -22,9 +44,15 @@ export default {
 		if (!query) {
 			return await client.reply(
 				from,
-				`Please specify a command.\n\nUsage : \n${prefix + cmd} start\n${prefix + cmd} stop`,
+				`Please specify a command.\n\nUsage:\n${prefix + cmd} start [character]\n${prefix + cmd} stop\n${prefix + cmd} --chars`,
 				message
 			);
+		}
+
+		if (LIST_FLAGS.has(args[1])) {
+			const characters = getCharacterList();
+
+			return await client.reply(from, formatCharacterList(characters, prefix, cmd), message);
 		}
 
 		if (args[1] === 'start') {
@@ -32,12 +60,24 @@ export default {
 				return await client.reply(from, 'You already chatting with AI', message);
 			}
 
+			const characters = getCharacterList();
+			const requested = args[2] || DEFAULT_CHARACTER;
+			const character = characters.find((c) => c.toLowerCase() === requested.toLowerCase().replace(/ /g, '_'));
+
+			if (!character) {
+				return await client.reply(
+					from,
+					`Character "${requested}" not found.\n\n${formatCharacterList(characters, prefix, cmd)}`,
+					message
+				);
+			}
+
 			configuration.charAI.set(
 				from,
-				new ChatGPTDialogue(pushname, new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }), 'Zero_Two')
+				new ChatGPTDialogue(pushname, new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }), character)
 			);
 
-			return await client.reply(from, 'AI chat has been started', message);
+			return await client.reply(from, `AI chat started with ${character.replace(/_/g, ' ')}`, message);
 		}
 
 		if (args[1] === 'stop') {
@@ -49,6 +89,10 @@ export default {
 			return await client.reply(from, 'AI chat has been stopped', message);
 		}
 
-		return await client.reply(from, `Invalid command.\n\nUsage : \n${cmd} start\n${cmd} stop`, message);
+		return await client.reply(
+			from,
+			`Invalid command.\n\nUsage:\n${prefix + cmd} start [character]\n${prefix + cmd} stop\n${prefix + cmd} --chars`,
+			message
+		);
 	}
 };
