@@ -109,8 +109,8 @@ export class MessageHandler {
 
 	async #dispatch(message, client) {
 		const useMultiCmd = Boolean(this.#flags.multiCmd);
-		const hasSeparator = useMultiCmd && !EVALY.includes(message.cmd) && message.body.includes('|');
-		const bodies = hasSeparator ? message.body.split('|') : [message.body];
+		const hasSeparator = useMultiCmd && !EVALY.includes(message.cmd) && message.body.includes('&&');
+		const bodies = hasSeparator ? message.body.split('&&') : [message.body];
 
 		for (const body of bodies) {
 			await this.#dispatchSingle(message, body.trim(), client);

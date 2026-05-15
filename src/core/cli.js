@@ -48,7 +48,7 @@ const HELP_TEXT = `
    --no-logs                ${chalk.green('Not showing any logs in the meantime still respond for any commands.')}
    --self-mode, -s          ${chalk.green('Set self mode that only owner and the bot can use.')}
    --debug-mode             ${chalk.green('Show every metadata of any message.')}
-   --multi-cmd, -m          ${chalk.green('Loop every command on your script. Use | to seperate each commands.')}
+   --multi-cmd, -m          ${chalk.green('Loop every command on your script. Use && to separate each commands.')}
    --watch, -w              ${chalk.green('Watch every file on your script and reload it when it changed.')}
    --cool-down, -c          ${chalk.green('Set cool down for every command.')}
    --auto-correct           ${chalk.green('Enable auto correct for every incoming command.')}
