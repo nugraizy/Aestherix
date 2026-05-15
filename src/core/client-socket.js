@@ -11,11 +11,11 @@ import {
 	toBuffer
 } from 'baileys';
 import { fileTypeFromBuffer } from 'file-type';
-import ffmpeg from 'fluent-ffmpeg';
 import fs from 'fs-extra';
 import isBuffer from 'is-buffer';
 import NodeCache from 'node-cache';
 import webpmux from 'node-webpmux';
+import { spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { EventEmitter } from 'node:events';
 import { Readable } from 'node:stream';
@@ -114,9 +114,9 @@ export class ClientSocket extends EventEmitter {
 	get needsPairing() {
 		return Boolean(
 			this.#options.flags.pairMode &&
-				this.#socket &&
-				!this.#socket.authState.creds.registered &&
-				!this.#socket.authState.creds.me?.id
+			this.#socket &&
+			!this.#socket.authState.creds.registered &&
+			!this.#socket.authState.creds.me?.id
 		);
 	}
 
@@ -333,23 +333,39 @@ export class ClientSocket extends EventEmitter {
 
 		if (bufferType === 'video') {
 			media = await new Promise((resolve, reject) => {
-				const output = ffmpeg(Readable.from(media))
-					.videoCodec('libwebp')
-					.outputOptions('-fs 800k')
-					.outputFPS(15)
-					.videoBitrate('500k')
-					.videoFilter(
-						'scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1'
-					)
-					.duration(10)
-					.format('webp')
-					.on('error', reject)
-					.pipe();
+				const args = [
+					'-i',
+					'pipe:0',
+					'-vcodec',
+					'libwebp',
+					'-fs',
+					'800k',
+					'-r',
+					'15',
+					'-b:v',
+					'500k',
+					'-vf',
+					'scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1',
+					'-t',
+					'10',
+					'-f',
+					'webp',
+					'pipe:1'
+				];
+				const ff = spawn('ffmpeg', args, { windowsHide: true });
 				const chunks = [];
 
-				output.on('data', (chunk) => chunks.push(chunk));
-				output.on('end', () => resolve(Buffer.concat(chunks)));
-				output.on('error', reject);
+				ff.stdout.on('data', (chunk) => chunks.push(chunk));
+				ff.stdout.on('end', () => resolve(Buffer.concat(chunks)));
+				ff.on('error', reject);
+				ff.stderr.on('data', () => {});
+				ff.on('close', (code) => {
+					if (code !== 0) {
+						reject(new Error(`ffmpeg exited with code ${code}`));
+					}
+				});
+
+				Readable.from(media).pipe(ff.stdin);
 			});
 		} else if (bufferType === 'sticker') {
 			return await this.applyExif(media, exif);

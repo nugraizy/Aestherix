@@ -10,6 +10,8 @@ import { color, delay, loggers } from '../utils/modules/index.js';
 const MAX_RETRIES = 5;
 const RETRY_INTERVAL_MS = 5000;
 
+let metricsPrinted = false;
+
 export class ConnectionHandler {
 	#client;
 	#configuration;
@@ -18,7 +20,6 @@ export class ConnectionHandler {
 	#startedAt = null;
 	#commandsLoaded = false;
 	#shouldWait = false;
-	#bannerPrinted = false;
 	#isShuttingDown = false;
 
 	constructor(client, { configuration: config, options = {} }) {
@@ -113,10 +114,10 @@ export class ConnectionHandler {
 
 		global.instance = this.#client.user.id;
 
-		if (!this.#bannerPrinted) {
+		if (!metricsPrinted) {
 			loggers.info(color('Socket connected', 'white'), color('Successfully', 'lilac') + color('.', 'white'));
 			await this.#printConnectionMetrics(this.#client);
-			this.#bannerPrinted = true;
+			metricsPrinted = true;
 		}
 
 		this.#retryCount = 0;
