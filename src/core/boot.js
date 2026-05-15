@@ -237,6 +237,8 @@ async function onConnected({ clientSocket, commandLoader, router, mqtt, store, w
 		await commandLoader.load(configuration.flags);
 		router.commands = commandLoader.commands;
 		router.aliases = commandLoader.aliases;
+		configuration.registry.commands = commandLoader.commands;
+		configuration.registry.aliases = commandLoader.aliases;
 	}
 
 	syncPrefixToRouter(router);

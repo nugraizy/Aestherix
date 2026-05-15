@@ -2410,9 +2410,10 @@ export const server = async () => {
 
 	const getSocketSession = (socket) => {
 		const cookie = String(socket?.handshake?.headers?.cookie || '');
+		const queryToken = socket?.handshake?.auth?.token || socket?.handshake?.query?.token || '';
 		const requestLike = {
 			headers: {
-				cookie
+				cookie: queryToken ? `${AUTH_COOKIE_NAME}=${queryToken};${cookie}` : cookie
 			}
 		};
 

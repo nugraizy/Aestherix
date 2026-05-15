@@ -65,7 +65,7 @@ const applyPersistedFlags = (configuration, flagStates) => {
 };
 
 const persist = async (configuration) => {
-	const disabledCommands = Array.from(normalizeSet(configuration?.cmds?.disabledCommands)).sort((a, b) => a.localeCompare(b));
+	const disabledCommands = Array.from(normalizeSet(configuration?.registry?.disabledCommands)).sort((a, b) => a.localeCompare(b));
 	const flagStates = extractBooleanFlags(configuration);
 
 	await saveDashboardState(prisma, { disabledCommands, flagStates }).catch(() => {});
@@ -92,8 +92,8 @@ let _commandsCatalogCache = null;
 
 const writeCommandsCatalog = (configuration) => {
 	try {
-		const disabled = normalizeSet(configuration?.cmds?.disabledCommands);
-		const commandEntries = configuration?.cmds?.commands?.entries?.() || [];
+		const disabled = normalizeSet(configuration?.registry?.disabledCommands);
+		const commandEntries = configuration?.registry?.commands?.entries?.() || [];
 		const commands = commandEntries
 			.filter(([name]) => !name.startsWith('UNKNOWN-'))
 			.map(([, command]) => toCommandPayload(command, disabled))
@@ -168,8 +168,8 @@ export const listDashboardFlags = (configuration) => {
 };
 
 export const listDashboardCommands = (configuration) => {
-	const disabled = normalizeSet(configuration?.cmds?.disabledCommands);
-	const commands = configuration?.cmds?.commands?.entries?.() || [];
+	const disabled = normalizeSet(configuration?.registry?.disabledCommands);
+	const commands = configuration?.registry?.commands?.entries?.() || [];
 
 	if (!commands.length) {
 		const cached = readCommandsCatalogSync();
@@ -187,7 +187,7 @@ export const listDashboardCommands = (configuration) => {
 	return commands
 		.filter(([name]) => !name.startsWith('UNKNOWN-'))
 		.map(([, command]) => {
-			const usageCount = Number(configuration?.cmds?.commandUsage?.get?.(command.name) || 0);
+			const usageCount = Number(configuration?.registry?.commandUsage?.get?.(command.name) || 0);
 			const payload = toCommandPayload(command, disabled);
 
 			return {
@@ -200,14 +200,14 @@ export const listDashboardCommands = (configuration) => {
 };
 
 export const isCommandEnabled = (configuration, commandName) => {
-	const disabled = normalizeSet(configuration?.cmds?.disabledCommands);
+	const disabled = normalizeSet(configuration?.registry?.disabledCommands);
 
 	return !disabled.has(commandName);
 };
 
 export const setDashboardCommandState = async (configuration, commandName, enabled) => {
-	const commandsSize = Number(configuration?.cmds?.commands?.size || 0);
-	const exists = configuration?.cmds?.commands?.has?.(commandName);
+	const commandsSize = Number(configuration?.registry?.commands?.size || 0);
+	const exists = configuration?.registry?.commands?.has?.(commandName);
 
 	if (commandsSize > 0 && !exists) {
 		return { ok: false, message: 'Command not found.' };
