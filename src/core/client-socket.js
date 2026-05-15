@@ -365,6 +365,7 @@ export class ClientSocket extends EventEmitter {
 					}
 				});
 
+				ff.stdin.on('error', () => {});
 				Readable.from(media).pipe(ff.stdin);
 			});
 		} else if (bufferType === 'sticker') {

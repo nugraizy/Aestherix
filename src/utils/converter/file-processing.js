@@ -1,12 +1,12 @@
 import asyncRetry from 'async-retry';
 import axios from 'axios';
-import { exec, spawn } from 'child_process';
+import { exec } from 'child_process';
 import dayjs from 'dayjs';
 import FormData from 'form-data';
 import fs from 'fs-extra';
 import httpsProxyAgent from 'https-proxy-agent';
 import isBuffer from 'is-buffer';
-import { Readable, Writable } from 'node:stream';
+import { Writable } from 'node:stream';
 import path from 'path';
 import PDFDocument from 'pdfkit';
 import petting from 'pet-pet-gif';
@@ -263,43 +263,56 @@ export const convertMediaToSticker = (filePath, sender, output, mimetype) =>
  * @param {*} mediaData
  * @returns {Promise<{result: Buffer, isVideo: boolean}>}
  */
-export const convertStickerToMedia = (input, sender, mediaData) =>
+export const convertStickerToMedia = (input, sender) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			const isInputBuffer = isBuffer(input);
 
-			if (mediaData.isAnimated) {
+			function isAnimatedWebp(buffer) {
+				return buffer.length > 12 && buffer.toString('ascii', 0, 4) === 'RIFF' && buffer.includes(Buffer.from('ANIM'));
+			}
+
+			if (isInputBuffer && isAnimatedWebp(input)) {
 				const buffer = isInputBuffer ? input : await fs.readFile(input);
+				const time = Date.now();
+				const frameDir = `./src/media/temporary_files/${sender}_${time}_frames`;
+				const outputPath = `./src/media/temporary_files/${sender}_${time}.mp4`;
+
+				await fs.ensureDir(frameDir);
+
+				const webpmux = (await import('node-webpmux')).default;
+				const img = new webpmux.Image();
+
+				await img.load(buffer);
+
+				const frameBufs = await img.demux({ buffers: true });
+				const frameCount = frameBufs.length;
+				const totalDuration = img.anim.frames.reduce((sum, f) => sum + (f.delay || 100), 0);
+				const fps = Math.round((frameCount / totalDuration) * 1000) || 15;
+
+				for (let i = 0; i < frameCount; i++) {
+					const png = await sharp(frameBufs[i]).png().toBuffer();
+
+					await fs.writeFile(path.join(frameDir, `frame_${String(i).padStart(4, '0')}.png`), png);
+				}
+
 				const resultBuffer = await new Promise((resolve, reject) => {
-					const args = [
-						'-i',
-						'pipe:0',
-						'-f',
-						'webp_pipe',
-						'-movflags',
-						'faststart',
-						'-pix_fmt',
-						'yuv420p',
-						'-vf',
-						'scale=trunc(iw/2)*2:trunc(ih/2)*2',
-						'-f',
-						'mp4',
-						'pipe:1'
-					];
-					const ff = spawn('ffmpeg', args, { windowsHide: true });
-					const chunks = [];
+					exec(
+						`ffmpeg -framerate ${fps} -i "${frameDir}/frame_%04d.png" -movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" "${outputPath}"`,
+						async (err) => {
+							await fs.remove(frameDir).catch(() => {});
 
-					ff.stdout.on('data', (chunk) => chunks.push(chunk));
-					ff.stdout.on('end', () => resolve(Buffer.concat(chunks)));
-					ff.on('error', reject);
-					ff.stderr.on('data', () => {});
-					ff.on('close', (code) => {
-						if (code !== 0) {
-							reject(new Error(`ffmpeg exited with code ${code}`));
+							if (err) {
+								await fs.unlink(outputPath).catch(() => {});
+								return reject(err);
+							}
+
+							const out = await fs.readFile(outputPath);
+
+							await fs.unlink(outputPath).catch(() => {});
+							resolve(out);
 						}
-					});
-
-					Readable.from(buffer).pipe(ff.stdin);
+					);
 				});
 
 				loggers.info(`${color('Converted Media', 'pink')} for ${color(sender, 'lilac')}`);

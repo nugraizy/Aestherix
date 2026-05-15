@@ -23,7 +23,7 @@ export default {
 		loggers.info(`${color('Decrypting media', 'pink')} from ${color(prettyNumber, 'lilac')}`);
 
 		const stickerBuffer = await client.downloadMediaMessage(mediaData, 'buffer');
-		const { result, isVideo } = await convertStickerToMedia(stickerBuffer, prettyNumber, mediaData);
+		const { result, isVideo } = await convertStickerToMedia(stickerBuffer, prettyNumber);
 
 		await client.send(
 			from,
@@ -37,6 +37,8 @@ export default {
 			{ quoted: message }
 		);
 
+		loggers.info(`${color('Media is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
+
 		const wait = await waitForInput(client, {
 			expectedType: ['stickerMessage'],
 			from,
@@ -47,7 +49,5 @@ export default {
 		if (!wait.timeout) {
 			await this.run({ ...(await Context.from(wait.message, client, store)), shouldSkipCheck: true }, client);
 		}
-
-		loggers.info(`${color('Media is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 	}
 };
