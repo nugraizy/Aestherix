@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.7.1」2026-05-15
+
+## Fixed
+- **Dashboard commands empty** — `monitor.js` was reading from removed `configuration.cmds` path; updated to `configuration.registry` and synced commands from `CommandLoader` to `configuration.registry` in boot. ([`371c4c4`](https://github.com/nugraizy/aestherix/commit/371c4c4))
+
+---
+
 # 「7.7.0」2026-05-15
 
 ## Added
