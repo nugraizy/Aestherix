@@ -1,9 +1,10 @@
-import cld from 'cld';
+import { franc } from 'franc';
+import { iso6393 } from 'iso-639-3';
 import path from 'path';
 
-import { color, loggers } from '../../utils/modules/index.js';
 import { textToSpeech } from '../../utils/converter/index.js';
 import { tesseract } from '../../utils/misc/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}
@@ -29,10 +30,12 @@ export default {
 			typeQuoted
 		);
 		const { result } = await tesseract(file, prettyNumber);
-		const lang = (await cld.detect(result.text)).languages[0].code;
+		const detected = franc(result.text);
+		const entry = iso6393.find((l) => l.iso6393 === detected);
+		const langCode = entry?.iso6391 || 'en';
 		const { buffer } = await textToSpeech(
 			result.text.trim(),
-			lang,
+			langCode,
 			path.join(__dirname, `src/media/temporary_files/${filename}`)
 		);
 

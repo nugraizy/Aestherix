@@ -76,7 +76,7 @@ export default {
 	status: 'enable',
 	async run({ query, from, message, prefix }, client) {
 		if (!query) {
-			return await client.reply(from, 'Please provide a search query.', message);
+			return await client.reply(from, 'Please provide a search query.\n\nTips:\n• author:name — search by author\n• artist:name — search by artist', message);
 		}
 
 		if (query.startsWith('next ')) {
@@ -99,7 +99,40 @@ export default {
 
 		const wait = await client.waitMessage(from, 'Searching...', message);
 
-		const result = await comix.search(query, { limit: 10, excludeNsfw: true });
+		const filters = {};
+		let searchQuery = query;
+
+		const authorMatch = searchQuery.match(/\bauthor:([^\s]+)/i);
+		const artistMatch = searchQuery.match(/\bartist:([^\s]+)/i);
+
+		if (authorMatch) {
+			searchQuery = searchQuery.replace(authorMatch[0], '').trim();
+			const authorIds = await comix.resolveTagIds('author', authorMatch[1].replace(/,/g, ', '));
+
+			if (authorIds.length) {
+				filters.authors = authorIds;
+			}
+		}
+
+		if (artistMatch) {
+			searchQuery = searchQuery.replace(artistMatch[0], '').trim();
+			const artistIds = await comix.resolveTagIds('artist', artistMatch[1].replace(/,/g, ', '));
+
+			if (artistIds.length) {
+				filters.artists = artistIds;
+			}
+		}
+
+		const hasFilters = filters.authors || filters.artists;
+		const options = { limit: 10, excludeNsfw: true };
+
+		if (hasFilters) {
+			options.filters = filters;
+		}
+
+		const result = searchQuery
+			? await comix.search(searchQuery, options)
+			: await comix.getComics(options);
 
 		if (!result.items.length) {
 			return await wait.update('No results found. Try a different query.');

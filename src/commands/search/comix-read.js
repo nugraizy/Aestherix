@@ -153,7 +153,15 @@ export default {
 				chapterUrl = cached.url;
 			}
 
-			return await downloadChapterAsPdf({ from, message }, client, wait, chapterId, chapterUrl, `comix-chapter-${chapterId}`);
+			try {
+				return await downloadChapterAsPdf({ from, message }, client, wait, chapterId, chapterUrl, `comix-chapter-${chapterId}`);
+			} catch (error) {
+				if (error.message?.includes('Outdated chapter URL')) {
+					return await wait.update('Outdated chapter URL. Please search the manga again to get updated chapter links.');
+				}
+
+				throw error;
+			}
 		}
 
 		await wait.update('Fetching chapters...');

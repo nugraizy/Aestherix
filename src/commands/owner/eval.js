@@ -2,8 +2,8 @@ import * as _ from 'baileys';
 import { exec } from 'child_process';
 import fs from 'fs';
 import prettier from 'js-beautify';
+import { format } from 'node:util';
 import syntaxerror from 'syntax-error';
-import { format } from 'util';
 
 import configuration, * as c from '../../helper/config/connect.js';
 import * as a from '../../helper/index.js';

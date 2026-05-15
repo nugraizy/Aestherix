@@ -18,7 +18,11 @@ class ComixUtils {
 	}
 
 	static get NSFW_GENRE_IDS() {
-		return ['87264', '8', '87265', '13', '87266', '87268'];
+		return ['87264', '8', '87265', '13', '87266', '87267', '87268'];
+	}
+
+	static get DEFAULT_CONTENT_RATING() {
+		return 'suggestive';
 	}
 
 	static get SORT_OPTIONS() {
@@ -163,11 +167,15 @@ class ComixUtils {
 			return;
 		}
 
+		ComixUtils.appendParam(params, 'authors[]', filters.authors);
+		ComixUtils.appendParam(params, 'artists[]', filters.artists);
 		ComixUtils.appendParam(params, 'statuses[]', filters.statuses);
 		ComixUtils.appendParam(params, 'types[]', filters.types);
 
 		if (filters.contentRating) {
 			params.set('content_rating', filters.contentRating);
+		} else if (!params.has('content_rating')) {
+			params.set('content_rating', ComixUtils.DEFAULT_CONTENT_RATING);
 		}
 
 		if (filters.demographics) {
@@ -221,8 +229,9 @@ class ComixUtils {
 
 		if (excludeNsfw) {
 			const explicitlyIncluded = new Set(filters.genres?.include || []);
+			const blockedGenres = filters.blockedGenres || ComixUtils.NSFW_GENRE_IDS;
 
-			ComixUtils.NSFW_GENRE_IDS.forEach((id) => {
+			blockedGenres.forEach((id) => {
 				if (!explicitlyIncluded.has(id)) {
 					params.append('genres_ex[]', id);
 				}
@@ -261,9 +270,11 @@ class ComixUtils {
 		const genres = manga.genres || manga.genre || [];
 		const tags = manga.tags || manga.theme || [];
 		const demographics = manga.demographics || manga.demographic || [];
+		const formats = manga.formats || [];
 
 		genres.forEach((item) => values.push(item.title));
 		demographics.forEach((item) => values.push(item.title));
+		formats.forEach((item) => values.push(item.title));
 		tags.forEach((item) => values.push(item.title));
 
 		if (manga.contentRating === 'erotica' || manga.contentRating === 'pornographic') {
@@ -301,8 +312,8 @@ class ComixUtils {
 	static parsePageInfo(result) {
 		const meta = result.meta || result.pagination || {};
 		const page = meta.page || 1;
-		const lastPage = meta.lastPage || meta.last_page || 1;
-		const hasNext = meta.hasNext !== undefined ? meta.hasNext : page < lastPage;
+		const lastPage = Math.max(meta.lastPage || 1, meta.last_page || 1);
+		const hasNext = page < lastPage;
 
 		return { page, lastPage, hasNext };
 	}
@@ -314,7 +325,9 @@ class ComixUtils {
 		order = 'desc',
 		query,
 		filters,
-		excludeNsfw = true
+		excludeNsfw = true,
+		defaultTypes,
+		defaultDemographics
 	} = {}) {
 		const params = new URLSearchParams();
 
@@ -329,6 +342,23 @@ class ComixUtils {
 		}
 
 		ComixUtils.applyFilters(params, filters, excludeNsfw);
+
+		if (!params.has('types[]') && defaultTypes?.length) {
+			const allTypes = ComixUtils.TYPE_OPTIONS.map((t) => t.value);
+
+			if (defaultTypes.length < allTypes.length) {
+				defaultTypes.forEach((t) => params.append('types[]', t));
+			}
+		}
+
+		if (!params.has('demographics[]') && defaultDemographics?.length) {
+			const allDemos = ComixUtils.DEMOGRAPHIC_OPTIONS.map((d) => d.value);
+
+			if (defaultDemographics.length < allDemos.length) {
+				defaultDemographics.forEach((d) => params.append('demographics[]', d));
+			}
+		}
+
 		return params;
 	}
 
@@ -461,12 +491,32 @@ class ComixUtils {
 				}
 
 				const segments = parsed.pathname.split('/').filter(Boolean);
+
+				if (segments.length >= 3 && segments[0] === 'title') {
+					const chapterSegment = segments[2] || '';
+
+					if (!chapterSegment.includes('-')) {
+						throw new Error('Outdated chapter URL. Please refresh the chapter list');
+					}
+				}
+
 				const last = segments[segments.length - 1] || '';
 
 				return last.split('-')[0] || '';
 			}
 
 			const cleaned = input.replace(/^\//, '');
+
+			if (cleaned.includes('/')) {
+				const parts = cleaned.split('/');
+				const chapterSegment = parts[parts.length - 1] || '';
+
+				if (!chapterSegment.includes('-')) {
+					throw new Error('Outdated chapter URL. Please refresh the chapter list');
+				}
+
+				return chapterSegment.split('-')[0] || chapterSegment;
+			}
 
 			return cleaned.split('-')[0] || cleaned;
 		}

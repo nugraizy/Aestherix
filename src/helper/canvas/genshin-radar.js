@@ -1,15 +1,40 @@
 import { createCanvas } from '@napi-rs/canvas';
 
-const RADAR_LABELS = ['Max HP', 'ATK', 'DEF', 'Elemental Mastery', 'CRIT Rate', 'CRIT DMG', 'Energy Recharge'];
-const RADAR_KEYS = ['maxHealth', 'attack', 'defense', 'elementMastery', 'critRate', 'critDamage', 'chargeEfficiency'];
-const RADAR_MAX = [35000, 2500, 2000, 800, 0.75, 2.5, 2.5];
+const DEFAULT_STATS = [
+	{ key: 'maxHealth', label: 'Max HP', max: 35000 },
+	{ key: 'attack', label: 'ATK', max: 2500 },
+	{ key: 'defense', label: 'DEF', max: 2000 },
+	{ key: 'elementMastery', label: 'Elemental Mastery', max: 800 },
+	{ key: 'critRate', label: 'CRIT Rate', max: 0.75 },
+	{ key: 'critDamage', label: 'CRIT DMG', max: 2.5 },
+	{ key: 'chargeEfficiency', label: 'Energy Recharge', max: 2.5 },
+	{ key: 'matchedElementDamage', label: 'DMG Bonus', max: 1.5 }
+];
 
-export function renderRadarChart(statMap, fillColor) {
+function resolveStats(statMap, overrides) {
+	if (overrides?.length) {
+		return overrides;
+	}
+
+	return DEFAULT_STATS.filter((s) => {
+		const stat = statMap[s.key];
+
+		return stat && stat.rawValue > 0;
+	});
+}
+
+export function renderRadarChart(statMap, fillColor, statOverrides) {
+	const stats = resolveStats(statMap, statOverrides);
+	const sides = stats.length;
+
+	if (sides < 3) {
+		return null;
+	}
+
 	const size = 300;
 	const cx = size / 2;
 	const cy = size / 2;
 	const radius = 110;
-	const sides = RADAR_KEYS.length;
 	const angleStep = (Math.PI * 2) / sides;
 	const startAngle = -Math.PI / 2;
 
@@ -50,8 +75,8 @@ export function renderRadarChart(statMap, fillColor) {
 		ctx.stroke();
 	}
 
-	const values = RADAR_KEYS.map((key, i) => {
-		const stat = statMap[key];
+	const values = stats.map((s) => {
+		const stat = statMap[s.key];
 
 		if (!stat) {
 			return 0;
@@ -59,7 +84,7 @@ export function renderRadarChart(statMap, fillColor) {
 
 		const raw = stat.rawValue ?? 0;
 
-		return Math.min(raw / RADAR_MAX[i], 1);
+		return Math.min(raw / s.max, 1);
 	});
 
 	ctx.beginPath();
@@ -106,7 +131,7 @@ export function renderRadarChart(statMap, fillColor) {
 		const lx = cx + (radius + 30) * Math.cos(angle);
 		const ly = cy + (radius + 30) * Math.sin(angle);
 
-		const words = RADAR_LABELS[i].split(' ');
+		const words = stats[i].label.split(' ');
 
 		ctx.font = 'bold 11px sans-serif';
 		ctx.fillStyle = '#ffffff';
@@ -115,10 +140,10 @@ export function renderRadarChart(statMap, fillColor) {
 			ctx.fillText(words[0], lx, ly - 6);
 			ctx.fillText(words.slice(1).join(' '), lx, ly + 6);
 		} else {
-			ctx.fillText(RADAR_LABELS[i], lx, ly);
+			ctx.fillText(stats[i].label, lx, ly);
 		}
 
-		const stat = statMap[RADAR_KEYS[i]];
+		const stat = statMap[stats[i].key];
 
 		if (stat) {
 			const r = radius * values[i];
