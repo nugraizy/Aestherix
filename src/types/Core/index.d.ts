@@ -146,11 +146,25 @@ export declare class ClientSocket extends EventEmitter {
 
 	updateGroup(
 		jid: string,
-		update: string,
-		participants: string[],
-		adminGroups: string[],
-		options?: { force?: boolean; message?: WAMessage | null; texts?: string }
+		options: { action: 'add' | 'remove'; participants: string[]; admins: string[]; force?: boolean; message?: WAMessage | null }
 	): Promise<unknown[]>;
+	updateGroup(
+		jid: string,
+		options: { action: 'promote' | 'demote'; participants: string[]; admins: string[]; message?: WAMessage | null }
+	): Promise<unknown[]>;
+	updateGroup(
+		jid: string,
+		options: { action: 'subject' | 'description'; text: string }
+	): Promise<unknown[]>;
+	updateGroup(
+		jid: string,
+		options: { action: 'announcement' | 'not_announcement' | 'locked' | 'unlocked' }
+	): Promise<unknown[]>;
+	updateGroup(
+		jid: string,
+		options: { action: 'retrieve' | 'revoke' }
+	): Promise<unknown[]>;
+	sendPresenceUpdate(type: 'available' | 'unavailable' | 'composing' | 'recording' | 'paused', jid?: string): Promise<void>;
 	searchMessage(jid: string, query: string): Promise<WAMessage[]>;
 	getStoryParticipants(): Promise<string[]>;
 

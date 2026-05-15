@@ -1,6 +1,3 @@
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
 export default {
 	name: 'description',
 	minifiedDescription: 'Change Description',
@@ -12,24 +9,16 @@ export default {
 	limit: 2,
 	status: 'enable',
 	async run({ isBotAdmin, query, bodyQuoted, from, message }, client) {
-		if (!query) {
+		if (!isBotAdmin) {
+			return await client.reply(from, 'Bot is not admin, Please promote admin before using moderation commands.', message);
+		}
+
+		const text = query || bodyQuoted;
+
+		if (!text) {
 			return await client.reply(from, 'Please input the description.', message);
 		}
 
-		if (!isBotAdmin) {
-			return await client.reply(
-				from,
-				'Bot is not admin, Please promote admin before using moderation commands.',
-				message
-			);
-		}
-
-		if (query) {
-			return await client.updateGroup(from, 'DESCRIPTION', [], [], { texts: query });
-		}
-
-		if (bodyQuoted) {
-			return await client.updateGroup(from, 'DESCRIPTION', [], [], { texts: bodyQuoted });
-		}
+		await client.updateGroup(from, { action: 'description', text });
 	}
 };

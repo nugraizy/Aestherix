@@ -1,6 +1,3 @@
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
 export default {
 	name: 'restrict',
 	minifiedDescription: 'Restrict Group',
@@ -13,17 +10,13 @@ export default {
 	status: 'enable',
 	async run({ isBotAdmin, from, message, groupMetadata }, client) {
 		if (!isBotAdmin) {
-			return await client.reply(
-				from,
-				'Bot is not admin, Please promote admin before using moderation commands.',
-				message
-			);
+			return await client.reply(from, 'Bot is not admin, Please promote admin before using moderation commands.', message);
 		}
 
 		if (groupMetadata.restrict) {
 			return await client.reply(from, 'Group is already restricted.', message);
 		}
 
-		await client.updateGroup(from, 'LOCKED');
+		await client.updateGroup(from, { action: 'locked' });
 	}
 };

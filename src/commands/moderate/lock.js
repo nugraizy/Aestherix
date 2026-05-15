@@ -1,6 +1,3 @@
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
 export default {
 	name: 'lock',
 	minifiedDescription: 'Lock Group',
@@ -13,17 +10,13 @@ export default {
 	status: 'enable',
 	async run({ isBotAdmin, from, message, groupMetadata }, client) {
 		if (!isBotAdmin) {
-			return await client.reply(
-				from,
-				'Bot is not admin, Please promote admin before using moderation commands.',
-				message
-			);
+			return await client.reply(from, 'Bot is not admin, Please promote admin before using moderation commands.', message);
 		}
 
 		if (groupMetadata.announce) {
 			return await client.reply(from, 'Group is already locked.', message);
 		}
 
-		await client.updateGroup(from, 'ANNOUNCEMENT');
+		await client.updateGroup(from, { action: 'announcement' });
 	}
 };

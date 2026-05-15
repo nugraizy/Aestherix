@@ -524,8 +524,128 @@ export class ClientSocket extends EventEmitter {
 		return this.#socket.readMessages(keys);
 	}
 
+	sendPresenceUpdate(type, jid) {
+		return this.#socket.sendPresenceUpdate(type, jid);
+	}
+
 	updateBlockStatus(jid, action) {
 		return this.#socket.updateBlockStatus(jid, action);
+	}
+
+	async updateGroup(jid, { action, participants = [], admins = [], force = false, message = null, text = '' } = {}) {
+		const quoted = message ? { quoted: message } : {};
+
+		if (action === 'add' || action === 'remove' || action === 'demote' || action === 'promote') {
+			return this.#updateGroupParticipants(jid, action, participants, admins, { force, quoted });
+		}
+
+		if (action === 'subject') {
+			return [await this.#socket.groupUpdateSubject(jid, text)];
+		}
+
+		if (action === 'description') {
+			return [await this.#socket.groupUpdateDescription(jid, text)];
+		}
+
+		if (action === 'retrieve') {
+			return [await this.#socket.groupInviteCode(jid)];
+		}
+
+		if (action === 'revoke') {
+			return [await this.#socket.groupRevokeInvite(jid)];
+		}
+
+		return [await this.#socket.groupSettingUpdate(jid, action)];
+	}
+
+	async #updateGroupParticipants(jid, action, participants, admins, { force, quoted }) {
+		const responses = [];
+
+		for (const participant of participants) {
+			const skipReason = this.#getParticipantSkipReason(action, participant, admins, force);
+
+			if (skipReason) {
+				await this.send(jid, { text: skipReason, mentions: [participant] }, quoted);
+				continue;
+			}
+
+			try {
+				const response = await this.#socket.groupParticipantsUpdate(jid, [participant], action);
+
+				if (action === 'add') {
+					await this.#handleAddResponse(jid, participant, response, quoted);
+				}
+
+				responses.push(response);
+			} catch (e) {
+				responses.push({ error: e.message, id: participant });
+
+				if (e?.[0]?.status === '400') {
+					await this.send(jid, { text: `@${participant.split('@')[0]} is not a valid number`, mentions: [participant] }, quoted);
+				}
+			}
+		}
+
+		return responses;
+	}
+
+	#getParticipantSkipReason(action, participant, admins, force) {
+		const tag = `@${participant.split('@')[0]}`;
+		const isAdmin = admins.includes(participant);
+
+		if (action === 'remove' && isAdmin && !force) {
+			return `You can't remove ${tag} because they're a group admin.\nAdd --force flag to force remove.`;
+		}
+
+		if (action === 'promote' && isAdmin) {
+			return `${tag} is already an admin.`;
+		}
+
+		if (action === 'demote' && !isAdmin) {
+			return `${tag} is already a member.`;
+		}
+
+		return null;
+	}
+
+	async #handleAddResponse(jid, participant, response, quoted) {
+		const status = response?.[0]?.status;
+
+		if (status === '500') {
+			await this.send(jid, { text: 'Group is already full' }, quoted);
+		} else if (status === '408') {
+			await this.send(jid, { text: `${participant} just left a while ago` }, quoted);
+		} else if (status === '403') {
+			await this.#sendGroupInvite(jid, participant, response, quoted);
+		} else if (status === '401') {
+			await this.send(jid, { text: `${participant} blocked the bot` }, quoted);
+		}
+	}
+
+	async #sendGroupInvite(jid, participant, response, quoted) {
+		await this.send(jid, { text: `${participant} has privacy settings enabled. Sending invite...` }, quoted);
+
+		const metadata = await this.#socket.groupMetadata(jid);
+		let thumbnail;
+
+		try {
+			thumbnail = await fetchBUFFER(await this.#socket.profilePictureUrl(jid, 'preview'));
+		} catch {
+			thumbnail = undefined;
+		}
+
+		const inviteMsg = generateWAMessageFromContent(jid, {
+			groupInviteMessage: {
+				groupJid: jid,
+				inviteCode: response?.[0]?.code,
+				inviteExpiration: response?.[0]?.expiration,
+				groupName: metadata.subject,
+				caption: 'Invitation to join my WhatsApp group',
+				jpegThumbnail: thumbnail
+			}
+		}, {});
+
+		await this.#socket.relayMessage(participant, inviteMsg.message, { messageId: inviteMsg.key.id });
 	}
 
 	updateCoverPhoto(buffer) {

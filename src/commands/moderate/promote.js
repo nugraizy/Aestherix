@@ -1,6 +1,3 @@
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
 export default {
 	name: 'promote',
 	minifiedDescription: 'Promote User',
@@ -13,32 +10,16 @@ export default {
 	status: 'enable',
 	restrict: true,
 	async run({ isBotAdmin, query, from, bodyQuoted, mediaData, mention, message, adminGroups }, client) {
+		if (!isBotAdmin) {
+			return await client.reply(from, 'Bot is not admin, Please promote admin before using moderation commands.', message);
+		}
+
 		if (!query && !mention.length && !bodyQuoted) {
 			return await client.reply(from, 'Please reply people message or mention people.', message);
 		}
 
-		const myJid = client.decodeJid(instance);
+		const targets = bodyQuoted ? [mediaData.participant] : mention.length ? mention : query.parseNumber();
 
-		if (!isBotAdmin && (mention?.includes(myJid) || mediaData?.id?.includes(myJid))) {
-			return await client.reply(from, 'You can not promote me by myself.', message);
-		}
-
-		if (!isBotAdmin) {
-			return await client.reply(
-				from,
-				'Bot is not admin, Please promote admin before using moderation commands.',
-				message
-			);
-		}
-
-		if (query || mention.length) {
-			await client.updateGroup(from, 'PROMOTE', mention.length ? mention : query.parseNumber(), adminGroups, {
-				message
-			});
-		}
-
-		if (bodyQuoted) {
-			await client.updateGroup(from, 'PROMOTE', [mediaData.participant], adminGroups, { message });
-		}
+		await client.updateGroup(from, { action: 'promote', participants: targets, admins: adminGroups, message });
 	}
 };
