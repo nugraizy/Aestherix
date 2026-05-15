@@ -10,6 +10,8 @@ import { PipelineExecutor } from './pipeline.js';
 
 const EVALY = ['/>', '$>', '=>', '!>'];
 const SEPARATOR = color('⤑', 'green');
+const HEAVY_CATEGORIES = new Set(['Downloader', 'Converter', 'Search', 'AI', 'Anime']);
+const EXECUTION_LOCK_TTL = 60000;
 
 const HANDLER_PATH = {
 	STUBTYPE: './handlers/stub.js',
@@ -33,6 +35,7 @@ export class MessageHandler {
 	#flags;
 	#handlers = new Cache();
 	#retries = new Map();
+	#executionLocks = new Map();
 	#initialized = false;
 	#statsOffline = true;
 
@@ -232,6 +235,19 @@ export class MessageHandler {
 			return 'skip';
 		}
 
+		if (HEAVY_CATEGORIES.has(command.category)) {
+			const lockedBy = this.#checkExecutionLock(localMessage.sender);
+
+			if (lockedBy) {
+				await client.reply(
+					localMessage.from,
+					`Please wait, your previous command (${lockedBy}) is still running.`,
+					localMessage.message
+				);
+				return 'skip';
+			}
+		}
+
 		const disabled = this.#configuration.registry.disabledCommands;
 
 		if (disabled?.has(command.name)) {
@@ -356,13 +372,38 @@ export class MessageHandler {
 		}
 
 		const state = this.#configuration.flags?.state;
+		const sender = localMessage.sender;
+		const isHeavy = HEAVY_CATEGORIES.has(command.category);
+
+		if (isHeavy) {
+			this.#executionLocks.set(sender, { command: command.name, expiry: Date.now() + EXECUTION_LOCK_TTL });
+		}
 
 		try {
 			await command.run(localMessage, client, this.#store);
 			await this.#router.trackUsage(command.name);
 		} catch (err) {
 			await this.#handleError(err, localMessage, client).catch(() => {});
+		} finally {
+			if (isHeavy) {
+				this.#executionLocks.delete(sender);
+			}
 		}
+	}
+
+	#checkExecutionLock(sender) {
+		const lock = this.#executionLocks.get(sender);
+
+		if (!lock) {
+			return null;
+		}
+
+		if (Date.now() > lock.expiry) {
+			this.#executionLocks.delete(sender);
+			return null;
+		}
+
+		return lock.command;
 	}
 
 	#isHelpRequest(localMessage, command) {

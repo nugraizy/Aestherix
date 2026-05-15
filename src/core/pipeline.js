@@ -175,14 +175,14 @@ export class PipelineExecutor {
 			const resolved = this.#router.resolve(body);
 
 			if (!resolved?.command) {
-				await this.#client.reply(this.#ctx.from, `Pipeline failed: command not found in stage ${i + 1}.`, this.#ctx.message);
+				await this.#sendFallback(previousOutput, `Pipeline failed: command not found in stage ${i + 1}.`);
 				return;
 			}
 
 			const inputGuard = this.#validateInput(resolved.command, previousOutput, i);
 
 			if (inputGuard) {
-				await this.#client.reply(this.#ctx.from, inputGuard, this.#ctx.message);
+				await this.#sendFallback(previousOutput, inputGuard);
 				return;
 			}
 
@@ -193,6 +193,7 @@ export class PipelineExecutor {
 			const guardResult = await this.#guard(stageCtx, resolved.command, this.#client);
 
 			if (guardResult === 'skip') {
+				await this.#sendFallback(previousOutput);
 				return;
 			}
 
@@ -208,26 +209,54 @@ export class PipelineExecutor {
 			try {
 				await resolved.command.run(stageCtx, capturingClient, null);
 			} catch (err) {
-				await this.#client.reply(
-					this.#ctx.from,
-					`Pipeline failed at stage ${i + 1} (${resolved.cmdName}): ${err.message}`,
-					this.#ctx.message
-				);
+				await this.#sendFallback(previousOutput, `Pipeline failed at stage ${i + 1} (${resolved.cmdName}): ${err.message}`);
 				return;
 			}
 
 			const output = await extractOutput(capturingClient.captured);
 
 			if (!output) {
-				await this.#client.reply(
-					this.#ctx.from,
-					`Pipeline failed: stage ${i + 1} (${resolved.cmdName}) produced no output.`,
-					this.#ctx.message
+				await this.#sendFallback(
+					previousOutput,
+					`Pipeline failed: stage ${i + 1} (${resolved.cmdName}) produced no output.`
 				);
 				return;
 			}
 
 			previousOutput = output;
+		}
+	}
+
+	async #sendFallback(previousOutput, errorMessage) {
+		if (errorMessage) {
+			await this.#client.reply(this.#ctx.from, errorMessage, this.#ctx.message);
+		}
+
+		if (!previousOutput) {
+			return;
+		}
+
+		if (previousOutput.type === 'text') {
+			await this.#client.send(this.#ctx.from, { text: previousOutput.text }, { quoted: this.#ctx.message });
+			return;
+		}
+
+		const mediaKey = {
+			imageMessage: 'image',
+			videoMessage: 'video',
+			audioMessage: 'audio',
+			stickerMessage: 'sticker',
+			documentMessage: 'document'
+		}[previousOutput.mediaType];
+
+		if (mediaKey) {
+			const content = { [mediaKey]: previousOutput.buffer };
+
+			if (previousOutput.caption) {
+				content.caption = previousOutput.caption;
+			}
+
+			await this.#client.send(this.#ctx.from, content, { quoted: this.#ctx.message });
 		}
 	}
 
