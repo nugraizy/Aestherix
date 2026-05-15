@@ -1,98 +1,115 @@
 import { fileTypeFromBuffer } from 'file-type';
 import fs from 'fs-extra';
-import _ from 'lodash';
 import { fetch } from 'undici';
-import parser from 'yargs-parser';
+import yargsParser from 'yargs-parser';
 
 import { extension, gif2mp4, isURL } from '../../utils/index.js';
 
-const isValidParser = (parser) =>
-	/^(\["[^"]+"\]|\w+|\[(?!0+\d)\d+\])((\.\w+)|(:?\["[^"]+"\])|(?:\['[^']+'\])|\[(?!0+\d)\d+\])*$/g.test(parser);
+const VALID_PARSER_PATTERN =
+	/^(\["[^"]+"\]|\w+|\[(?!0+\d)\d+\])((\.\w+)|(:?\["[^"]+"\])|(?:\['[^']+'\])|\[(?!0+\d)\d+\])*$/g;
 
-const parseObject = (obj, str) => {
+const CONTENT_TYPE_PATTERN = /^[a-z0-9!#$&^_-]+\/[a-z0-9!#$&^_.+-]+$/i;
+
+function getNestedValue(obj, path) {
+	const segments = path.replace(/\[["']?([^"'\]]+)["']?\]/g, '.$1').split('.');
+	let current = obj;
+
+	for (const segment of segments) {
+		if (current == null) {return undefined;}
+
+		current = current[segment];
+	}
+
+	return current;
+}
+
+function parseObject(obj, path) {
 	try {
-		if (!isValidParser(str)) {
+		if (!VALID_PARSER_PATTERN.test(path)) {
 			throw new Error('Invalid parser');
 		}
 
-		const value = _.get(obj, str);
+		VALID_PARSER_PATTERN.lastIndex = 0;
+
+		const value = getNestedValue(obj, path);
 
 		if (value === undefined) {
-			const err = `(reading '${str}')`;
+			const detail = `(reading '${path}')`;
 
-			throw new Error(`Cannot read properties of undefined.\n${err}\n${' '.repeat(err.length)}^^^^`);
+			throw new Error(`Cannot read properties of undefined.\n${detail}\n${' '.repeat(detail.length)}^^^^`);
 		}
 
-		return typeof value === 'object' || Array.isArray(value) ? JSON.stringify(value, null, 2) : value;
+		return typeof value === 'object' ? JSON.stringify(value, null, 2) : value;
 	} catch (error) {
-		return {
-			error: true,
-			message: error.message
-		};
+		return { error: true, message: error.message };
 	}
-};
+}
 
-const fetchData = async (url, { method, headers, body }) => {
-	const response = await fetch(url, {
-		method,
-		headers,
-		body
-	});
+async function fetchData(url, { method, headers, body }) {
+	const response = await fetch(url, { method, headers, body });
 
 	if (!response.ok) {
 		return { error: true, message: response.statusText };
 	}
 
 	return response;
-};
+}
 
-const processJsonResponse = async (response, parser) => {
+async function processJsonResponse(response, pathParser) {
 	let json = await response.json();
 
-	if (parser) {
-		json = parseObject(json, parser);
+	if (!pathParser) {return JSON.stringify(json, null, 2);}
 
-		if (!json || json.error) {
-			return { error: true, message: json.message || 'Cannot parse json' };
-		}
-	} else {
-		json = JSON.stringify(json, null, 2);
-	}
+	const parsed = parseObject(json, pathParser);
 
-	return json;
-};
+	if (parsed?.error) {return { error: true, message: parsed.message || 'Cannot parse json' };}
 
-const processTextResponse = async (response, parser) => {
-	let text = await response.text();
+	return parsed;
+}
+
+async function processTextResponse(response, pathParser) {
+	const text = await response.text();
 
 	try {
 		const json = JSON.parse(text);
 
-		if (parser) {
-			text = parseObject(json, parser);
+		if (!pathParser) {return JSON.stringify(json, null, 2);}
 
-			if (!json || json.error) {
-				return { error: true, message: json.message || 'Cannot parse json' };
-			}
-		} else {
-			text = JSON.stringify(JSON.parse(json), null, 2);
-		}
+		const parsed = parseObject(json, pathParser);
+
+		if (parsed?.error) {return { error: true, message: parsed.message || 'Cannot parse json' };}
+
+		return parsed;
 	} catch {
-		// do nothing
+		return text;
 	}
+}
 
-	return text;
-};
+async function sendGifAsVideo(fileBuffer, from, message, client) {
+	const id = Date.now();
+	const inputPath = `./src/media/temporary_files/input-${id}.gif`;
+	const outputPath = `./src/media/temporary_files/output-${id}.mp4`;
 
-const processBinaryResponse = async (response) => {
-	const buffer = await response.arrayBuffer();
+	try {
+		await fs.writeFile(inputPath, fileBuffer);
+		const { output } = await gif2mp4(inputPath, outputPath);
+		const videoBuffer = await fs.readFile(output);
 
-	return buffer;
-};
+		await client.send(from, { video: videoBuffer, gifPlayback: true }, { quoted: message });
+	} finally {
+		await fs.remove(inputPath).catch(() => {});
+		await fs.remove(outputPath).catch(() => {});
+	}
+}
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
+function resolveMessageType(mime) {
+	if (mime.includes('gif') || mime.includes('video')) {return 'video';}
+
+	if (mime.includes('image')) {return 'image';}
+
+	return 'document';
+}
+
 export default {
 	name: 'fetch',
 	minifiedDescription: 'HTTP Requests',
@@ -112,12 +129,12 @@ export default {
 		let {
 			_: queries,
 			method,
-			headers,
+			headers: rawHeaders,
 			body,
 			parser: queryParser,
 			media,
 			contentType
-		} = parser(query, {
+		} = yargsParser(query, {
 			alias: {
 				method: ['X'],
 				headers: ['H'],
@@ -155,98 +172,61 @@ export default {
 			}
 		}
 
-		if (contentType && !/^[a-z0-9!#$&^_-]+\/[a-z0-9!#$&^_.+-]+$/i.test(contentType)) {
+		if (contentType && !CONTENT_TYPE_PATTERN.test(contentType)) {
 			return await client.reply(from, `Invalid content-type: "${contentType}"`, message);
 		}
 
-		method = method || 'GET';
-		method = Array.isArray(method) ? method[0] : method;
+		method = Array.isArray(method) ? method[0] : method || 'GET';
 
-		headers = headers ? (Array.isArray(headers) ? headers : [headers]) : null;
-		headers = headers
-			? headers.reduce((acc, cur) => {
+		const headers = rawHeaders
+			? [].concat(rawHeaders).reduce((acc, cur) => {
 					if (!/^[^:\s]+:\s?.+$/.test(cur)) {
 						client.reply(from, `Invalid header format: "${cur}" (expected "key: value")`, message);
 						return acc;
 					}
 
 					const [key, ...rest] = cur.split(':');
-
 					const value = rest.join(':').trim();
 
-					if (key.toLowerCase() === 'content-type' && !/^[a-z0-9!#$&^_-]+\/[a-z0-9!#$&^_.+-]+$/i.test(value)) {
-						client.reply(from, `Invalid content-type: "${contentType}"`, message);
+					if (key.toLowerCase() === 'content-type' && !CONTENT_TYPE_PATTERN.test(value)) {
+						client.reply(from, `Invalid content-type: "${value}"`, message);
 						return acc;
 					}
 
-					return {
-						...acc,
-						[key.trim()]: value
-					};
-				}, {}) // eslint-disable-line
+					return { ...acc, [key.trim()]: value };
+				}, {})
 			: {};
 
-		if (method === 'GET') {
-			body = undefined;
-		}
+		if (method === 'GET') {body = undefined;}
 
-		if (body) {
-			headers['content-type'] = 'application/json;charset=UTF-8';
-		}
+		if (body) {headers['content-type'] = 'application/json;charset=UTF-8';}
 
 		try {
 			const response = await fetchData(url, { method, headers, body });
 
 			if (response.error) {
-				return client.reply(from, response.message, message);
+				return await client.reply(from, response.message, message);
 			}
 
-			const responseTypes = response.headers.get('content-type').split(';')[0];
+			const responseType = response.headers.get('content-type').split(';')[0];
 
-			if (responseTypes === 'application/json') {
+			if (responseType === 'application/json') {
 				const data = await processJsonResponse(response, queryParser);
 
-				if (data.error) {
-					return await client.reply(from, data.message, message);
-				}
+				if (data?.error) {return await client.reply(from, data.message, message);}
 
 				if (media && typeof data === 'string' && isURL(data)) {
-					const response = await fetch(data);
-					let fileBuffer = Buffer.from(await response.arrayBuffer());
+					const mediaResponse = await fetch(data);
+					const fileBuffer = Buffer.from(await mediaResponse.arrayBuffer());
 					const { mime, ext } = await fileTypeFromBuffer(fileBuffer);
 
-					const isGif = mime.includes('gif');
-					const messageType = isGif || mime.includes('video') ? 'video' : mime.includes('image') ? 'image' : 'document';
-
-					if (isGif) {
-						const id = Date.now();
-						const filepath = (u) => `./src/media/temporary_files/${u}`;
-
-						const inputPath = filepath(`input-${id}.gif`);
-						const outputPath = filepath(`output-${id}.mp4`);
-
-						fs.writeFileSync(inputPath, fileBuffer);
-
-						const { output } = await gif2mp4(inputPath, outputPath);
-
-						fileBuffer = await fs.readFile(output);
-
-						await client.send(
-							from,
-							{
-								[messageType]: fileBuffer,
-								gifPlayback: true
-							},
-							{ quoted: message }
-						);
-
-						fs.unlinkSync(inputPath);
-						fs.unlinkSync(outputPath);
-
-						return;
+					if (mime.includes('gif')) {
+						return await sendGifAsVideo(fileBuffer, from, message, client);
 					}
 
-					await client.send(
+					const messageType = resolveMessageType(mime);
+
+					return await client.send(
 						from,
 						{
 							[messageType]: fileBuffer,
@@ -254,26 +234,26 @@ export default {
 						},
 						{ quoted: message }
 					);
-					return;
 				}
 
-				await client.reply(from, data, message);
-			} else if (responseTypes.startsWith('text')) {
+				return await client.reply(from, data, message);
+			}
+
+			if (responseType.startsWith('text')) {
 				const data = await processTextResponse(response, queryParser);
 
-				await client.reply(from, data, message);
-			} else {
-				const data = await processBinaryResponse(response);
-
-				const mime = responseTypes.split('/')[0];
-				const messageTypes = mime === 'audio' || mime === 'application' ? 'document' : mime;
-				const fileName = messageTypes === 'document' ? `file_fetched.${extension(responseTypes)}` : undefined;
-
-				await client.send(from, {
-					[messageTypes]: Buffer.from(data),
-					...(fileName ? { fileName, mime: responseTypes } : {})
-				});
+				return await client.reply(from, data, message);
 			}
+
+			const binaryData = Buffer.from(await response.arrayBuffer());
+			const mimeBase = responseType.split('/')[0];
+			const messageType = mimeBase === 'audio' || mimeBase === 'application' ? 'document' : mimeBase;
+			const fileName = messageType === 'document' ? `file_fetched.${extension(responseType)}` : undefined;
+
+			await client.send(from, {
+				[messageType]: binaryData,
+				...(fileName ? { fileName, mime: responseType } : {})
+			});
 		} catch (error) {
 			console.log(error);
 			await client.reply(from, error.message, message);
