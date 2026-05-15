@@ -2,26 +2,139 @@ import asyncRetry from 'async-retry';
 import axios from 'axios';
 import crypto from 'crypto';
 import heic from 'heic-convert';
-import _ from 'lodash';
 import { fetch } from 'undici';
 import { v4 } from 'uuid';
 
-import { Cache } from '../../helper/modules/cache.js';
 import { cheerioLOAD, randomChar } from '../modules/index.js';
 import { _api as API_BASE_URL, appVersion, checkValid, deviceIds, iids, lastInstall, random } from './util.js';
 
-const COOKIE = {
-	BRAINANS_COOKIE: process.env.COOKIE_BRAINANS_COM,
-	TIKTOK_COOKIE: process.env.COOKIE_TIKTOK_COM
+const CACHE_TTL_MS = 10 * 60 * 1000;
+const RETRY_OPTIONS = { minTimeout: 0, retries: 20 };
+const MERGE_TIMEOUT_MS = 15000;
+const PARALLEL_REQUESTS = 200;
+
+const COOKIE = (process.env.COOKIE_TIKTOK_COM || '').replace(/\n/g, '');
+
+const USER_AGENTS = {
+	web: 'Mozilla/5.0 (Linux; Android 11; SAMSUNG SM-G973U) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/14.2 Chrome/87.0.4280.141 Mobile Safari/537.36',
+	android: 'com.ss.android.ugc.trill/260103 (Linux; U; Android 13; en_US; Pixel 7; Build/TD1A.220804.031; Cronet/58.0.2991.0)',
+	musically:
+		'com.zhiliaoapp.musically/300904 (2018111632; U; Android 10; en_US; Pixel 4; Build/QQ3A.200805.001; Cronet/58.0.2991.0)'
 };
 
-class ResponseParser {
-	/**
-	 * @private
-	 */
-	_parseCrawlerResponse(dataPosts, dataUsers) {
-		const container = {};
+class TTLCache {
+	#store = new Map();
 
+	get(key) {
+		const entry = this.#store.get(key);
+
+		if (!entry) {
+			return null;
+		}
+
+		if (Date.now() > entry.expiry) {
+			this.#store.delete(key);
+			return null;
+		}
+
+		return entry.value;
+	}
+
+	set(key, value) {
+		this.#store.set(key, { value, expiry: Date.now() + CACHE_TTL_MS });
+	}
+
+	has(key) {
+		return this.get(key) !== null;
+	}
+}
+
+function generateMsToken() {
+	const timestamp = Date.now().toString();
+	const sha1 = crypto.createHash('sha1').update(timestamp).digest('hex');
+
+	return crypto.createHash('md5').update(sha1).digest('hex');
+}
+
+function buildParams(overrides = {}) {
+	const defaults = {
+		version_name: '30.9.4',
+		version_code: '300904',
+		build_number: '30.9.4',
+		manifest_version_code: '300904',
+		update_version_code: '300904',
+		iid: '7318518857994389254'
+	};
+
+	return new URLSearchParams({ ...defaults, ...overrides }).toString();
+}
+
+function findFirst(arr) {
+	if (!arr) {
+		return null;
+	}
+
+	return arr.find((v) => v) || null;
+}
+
+async function awemeRequest(path, body, method = 'GET') {
+	const response = await fetch(API_BASE_URL + path + body, { method });
+	const json = await response.json().catch(() => '');
+
+	return json;
+}
+
+async function resolveVideoId(url) {
+	url = url.includes('vm.tiktok.com') ? url.replace('vm.tiktok.com', 'vt.tiktok.com') : url;
+
+	if (/((vt|vm|vk)\.tiktok\.com)/g.test(url) || !url.includes('video') || !url.includes('photo')) {
+		const req = (await axios.head(url, { validateStatus: () => true }))?.request.res.responseUrl;
+
+		if (!req) {
+			return { error: 'download failed. either the access is denied, or other error.' };
+		}
+
+		return new URL(req).pathname.split('/').pop();
+	}
+
+	return new URL(url).pathname.split('/').pop();
+}
+
+async function fetchUserDetail(username) {
+	username = '@' + username.replace('@', '');
+
+	const response = await fetch(`https://www.tiktok.com/${username}`, {
+		headers: { 'User-Agent': USER_AGENTS.web }
+	});
+
+	if (response.status === 404) {
+		return { error: 'User not found' };
+	}
+
+	const html = await response.text();
+	const rawData = cheerioLOAD(html)('script[id="__UNIVERSAL_DATA_FOR_REHYDRATION__"]').html();
+
+	return JSON.parse(rawData);
+}
+
+async function convertHeicToJpg(url) {
+	const res = await fetch(url);
+
+	return heic({ buffer: Buffer.from(await res.arrayBuffer()), format: 'JPEG', quality: 100 });
+}
+
+function raceWithTimeout(promise, ms) {
+	return Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error('Merge timeout')), ms))]);
+}
+
+function parallelRace(requestFn, count = PARALLEL_REQUESTS) {
+	const requests = Array.from({ length: count }, () => requestFn());
+
+	return Promise.any(requests);
+}
+
+class ResponseParser {
+	parseCrawlerResponse(dataPosts, dataUsers) {
 		const { avatarLarger, signature, verified, bioLink, privateAccount } =
 			dataUsers.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.user;
 
@@ -30,42 +143,31 @@ class ResponseParser {
 		}
 
 		const { author, author_user_id } = dataPosts.aweme_list[0]; // eslint-disable-line
-
 		const [x, y] = avatarLarger.match(/(\d+)x(\d+)/gi)?.[0]?.split('x') || [0, 0];
 
-		container.author = {
-			id: author_user_id, // eslint-disable-line
-			username: author.unique_id,
-			nickname: author.nickname,
-			...(author.ins_id ? { instagram: author.ins_id } : {}),
-			region: author.region,
-			bio: signature,
-			verified,
-			private: privateAccount,
-			statistics: {
-				follower: author.follower_count,
-				following: author.following_count,
-				favorite: author.total_favorited
+		const result = {
+			author: {
+				id: author_user_id, // eslint-disable-line
+				username: author.unique_id,
+				nickname: author.nickname,
+				...(author.ins_id ? { instagram: author.ins_id } : {}),
+				region: author.region,
+				bio: signature,
+				verified,
+				private: privateAccount,
+				statistics: {
+					follower: author.follower_count,
+					following: author.following_count,
+					favorite: author.total_favorited
+				}
+			},
+			urls: {
+				avatar: { url: avatarLarger, dimension: { x, y } },
+				...(bioLink?.link ? { externalUrls: { url: bioLink.link } } : {})
 			}
 		};
 
-		container.urls = {};
-
-		container.urls.avatar = {
-			url: avatarLarger,
-			dimension: {
-				x,
-				y
-			}
-		};
-
-		bioLink?.link
-			? (container.urls.externalUrls = {
-					url: bioLink.link
-				})
-			: null;
-
-		container.urls.posts = dataPosts.aweme_list.map((v) => {
+		result.urls.posts = dataPosts.aweme_list.map((v) => {
 			const { music, share_url, statistics, status, video, video_control: videoControl } = v; // eslint-disable-line
 
 			return {
@@ -103,7 +205,6 @@ class ResponseParser {
 							}
 						}
 					: { music: 'copyrighted music' }),
-
 				video: {
 					urls: {
 						cover: {
@@ -117,19 +218,14 @@ class ResponseParser {
 						}
 					}
 				},
-				urls: {
-					shareUrl: share_url // eslint-disable-line
-				}
+				urls: { shareUrl: share_url } // eslint-disable-line
 			};
 		});
 
-		return container;
+		return result;
 	}
 
-	/**
-	 * @private
-	 */
-	_extractVideoMetadata(data) {
+	extractVideoMetadata(data) {
 		const {
 			desc: videoDescription,
 			create_time: published,
@@ -162,13 +258,7 @@ class ResponseParser {
 			}
 		} = data;
 
-		let withWatermarkList = [];
-
-		// eslint-disable-next-line
-		if (download_addr) {
-			withWatermarkList = download_addr.url_list; // eslint-disable-line
-		}
-
+		const withWatermarkList = download_addr?.url_list || []; // eslint-disable-line
 		const musicCoverList =
 			data.music[data.music?.cover_hd ? 'cover_hd' : data.music?.cover_large ? 'cover_large' : 'cover_medium'].url_list;
 
@@ -198,93 +288,53 @@ class ResponseParser {
 		};
 
 		if (bitRate?.[0]) {
-			const {
-				fps,
-				play_addr: { width: ratio, url_list: highestNoWatermarkList }
-			} = bitRate[0];
-
-			result.highestNoWatermarkList = highestNoWatermarkList;
-			result.ratio = `${ratio}p`;
-			result.fps = fps;
+			result.highestNoWatermarkList = bitRate[0].play_addr.url_list;
+			result.ratio = `${bitRate[0].play_addr.width}p`;
+			result.fps = bitRate[0].fps;
 		} else if (playAddrByteVC1) {
-			const {
-				play_addr: { width: ratio, url_list: highestNoWatermarkList }
-			} = bitRate[0];
-
-			result.highestNoWatermarkList = highestNoWatermarkList;
-			result.ratio = `${ratio}p`;
+			result.highestNoWatermarkList = bitRate[0].play_addr.url_list;
+			result.ratio = `${bitRate[0].play_addr.width}p`;
 		}
 
 		return result;
 	}
 
-	async _convertHeicToJpg(url) {
-		const res = await fetch(url);
-		const buffer = await heic({ buffer: Buffer.from(await res.arrayBuffer()), format: 'JPEG', quality: 100 });
-
-		return buffer;
-	}
-
-	/**
-	 * @private
-	 */
-	_extractImageMetadata(data) {
-		const images = data?.image_post_info?.images;
-
-		return images
-			? images.map(async (v, i) => ({
-					url: v.display_image.url_list[0],
-					urlWithWatermark: images[i].owner_watermark_image.url_list[0],
-					buffer: await this._convertHeicToJpg(v.display_image.url_list[0]),
-					index: i + 1
-				}))
-			: [];
-	}
-
-	/**
-	 * @private
-	 */
-	async _mapDataToResult(data, type, wait) {
+	async buildMediaResult(data, type, wait) {
 		const {
-			keyword: /* eslint-disable-line*/ aweme_id,
-			author: { /* eslint-disable-line*/ unique_id, uid, signature: biograph, custom_verify: verified, nickname },
-			...videoMetadata
-		} = this._extractVideoMetadata(data);
+			keyword: aweme_id, // eslint-disable-line
+			author: { unique_id, uid, signature: biograph, custom_verify: verified, nickname }, // eslint-disable-line
+			...meta
+		} = this.extractVideoMetadata(data);
 
 		const typeToUse = type || 'video';
 
-		const {
-			avatarList,
-			videoThumbnailList,
-			musicList,
-			musicCoverList,
-			noWatermarkList,
-			withWatermarkList,
-			highestNoWatermarkList
-		} = videoMetadata;
-
-		delete videoMetadata.avatarList;
-		delete videoMetadata.videoThumbnailList;
-		delete videoMetadata.musicList;
-		delete videoMetadata.musicCoverList;
-		delete videoMetadata.noWatermarkList;
-		delete videoMetadata.withWatermarkList;
-		delete videoMetadata.highestNoWatermarkList;
-
 		const result = {
-			keyword: aweme_id /* eslint-disable-line*/,
-			author: unique_id /* eslint-disable-line*/,
+			keyword: aweme_id, // eslint-disable-line
+			author: unique_id, // eslint-disable-line
 			uniqueId: uid,
 			nickname,
 			type: typeToUse,
 			biograph: biograph || 'No bio yet.',
 			verified: verified !== '',
-			...videoMetadata,
+			videoDescription: meta.videoDescription,
+			published: meta.published,
+			liked: meta.liked,
+			shared: meta.shared,
+			comment: meta.comment,
+			view: meta.view,
+			downloaded: meta.downloaded,
+			locationCreated: meta.locationCreated,
+			videoDuration: meta.videoDuration,
+			ratio: meta.ratio,
+			fps: meta.fps,
+			musicTitle: meta.musicTitle,
+			authorMusic: meta.authorMusic,
+			musicDuration: meta.musicDuration,
 			url: {
-				profilePicture: avatarList[0],
-				videoThumbnail: videoThumbnailList[0],
-				music: musicList[0],
-				musicCoverPicture: musicCoverList[0]
+				profilePicture: meta.avatarList[0],
+				videoThumbnail: meta.videoThumbnailList[0],
+				music: meta.musicList[0],
+				musicCoverPicture: meta.musicCoverList[0]
 			}
 		};
 
@@ -292,889 +342,395 @@ class ResponseParser {
 			await wait.update(
 				`Preparing TikTok ${data?.image_post_info?.images.length} Images. Converting HEIC to JPG if needed. Please wait...`
 			);
-			result.url.images = await Promise.all(await this._extractImageMetadata(data));
+
+			const images = data.image_post_info.images;
+
+			result.url.images = await Promise.all(
+				images.map(async (v, i) => ({
+					url: v.display_image.url_list[0],
+					urlWithWatermark: images[i].owner_watermark_image.url_list[0],
+					buffer: await convertHeicToJpg(v.display_image.url_list[0]),
+					index: i + 1
+				}))
+			);
 		} else {
-			result.url.withWatermark = _.find(withWatermarkList, _.identity) || null;
-			result.url.withNoWatermark = _.find(noWatermarkList, _.identity) || null;
-			result.url.withoutWatermarkHighest = _.find(highestNoWatermarkList, _.identity) || null;
+			result.url.withWatermark = findFirst(meta.withWatermarkList);
+			result.url.withNoWatermark = findFirst(meta.noWatermarkList);
+			result.url.withoutWatermarkHighest = findFirst(meta.highestNoWatermarkList);
 		}
 
 		return result;
 	}
 
-	/**
-	 * @private
-	 */
-	_parseMediaResponse(data, type, wait) {
-		return this._mapDataToResult(data, type, wait);
-	}
-
-	/**
-	 * @private
-	 */
-	_parseUserInfo(arr) {
-		const {
-			id: keyword,
-			signature: biography,
-			verified: isVerified,
-			avatarLarger: profileHD,
-			avatarMedium: profileSD,
-			avatarThumb: profileLOW,
-			nickname: fullName,
-			uniqueId: username
-		} = arr.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.user;
-
-		const {
-			followerCount: followers,
-			followingCount: following,
-			heart,
-			videoCount: totalVideo
-		} = arr.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.stats;
+	parseUserInfo(data) {
+		const { user, stats } = data.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo;
 
 		return {
-			keyword,
-			username,
-			fullName,
-			biography,
-			isVerified,
-			profileHD,
-			profileSD,
-			profileLOW,
-			followers,
-			following,
-			heart,
-			totalVideo
+			keyword: user.id,
+			username: user.uniqueId,
+			fullName: user.nickname,
+			biography: user.signature,
+			isVerified: user.verified,
+			profileHD: user.avatarLarger,
+			profileSD: user.avatarMedium,
+			profileLOW: user.avatarThumb,
+			followers: stats.followerCount,
+			following: stats.followingCount,
+			heart: stats.heart,
+			totalVideo: stats.videoCount
 		};
 	}
 
-	/**
-	 * @private
-	 */
-	_parseUsersInfo(dataUsers) {
-		const { user_list: userList } = dataUsers;
-
-		return userList.map(({ user_info: userInfo }) => {
-			const {
-				uid: keyword,
-				nickname: fullName,
-				unique_id: username,
-				signature: biography,
-				enterprise_verify_reason: isVerified,
-				follower_count: followers,
-				following_count: following,
-				total_favorited: heart,
-				aweme_count: totalVideo,
-				avatar_larger: {
-					url_list: [, profileHD]
-				},
-				avatar_medium: {
-					url_list: [, profileSD]
-				},
-				avatar_thumb: {
-					url_list: [, profileLOW]
-				}
-			} = userInfo;
-
-			return {
-				keyword,
-				fullName,
-				username,
-				biography,
-				isVerified: !!isVerified,
-				followers,
-				following,
-				heart,
-				totalVideo,
-				profileHD,
-				profileSD,
-				profileLOW
-			};
-		});
+	parseUsersInfo(dataUsers) {
+		return dataUsers.user_list.map(({ user_info: u }) => ({
+			keyword: u.uid,
+			fullName: u.nickname,
+			username: u.unique_id,
+			biography: u.signature,
+			isVerified: !!u.enterprise_verify_reason,
+			followers: u.follower_count,
+			following: u.following_count,
+			heart: u.total_favorited,
+			totalVideo: u.aweme_count,
+			profileHD: u.avatar_larger.url_list[1],
+			profileSD: u.avatar_medium.url_list[1],
+			profileLOW: u.avatar_thumb.url_list[1]
+		}));
 	}
 }
 
-class RequestModule extends ResponseParser {
-	#cookie = COOKIE.TIKTOK_COOKIE.replace(/\n/g, '');
-	constructor() {
-		super();
+class Tiktok {
+	#cache = new TTLCache();
+	#parser = new ResponseParser();
 
-		this.commonParameters = {
-			WebIdLastTime: Date.now(),
-			aid: '1988',
-			app_language: 'en',
-			app_name: 'tiktok_web',
-			browser_language: 'en-US',
-			browser_name: 'Mozilla',
-			browser_online: true,
-			browser_platform: 'Win32',
-			browser_version:
-				'5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0',
-			channel: 'tiktok_web',
-			cookie_enabled: true,
-			device_id: '7340508178566366722',
-			device_platform: 'web_pc',
-			focus_state: false,
-			history_len: 5,
-			is_fullscreen: false,
-			is_page_visible: true,
-			os: 'windows',
-			priority_region: 'ID',
-			referer: '',
-			region: 'ID',
-			screen_height: 768,
-			screen_width: 1366,
-			tz_name: 'Asia/Jakarta',
-			webcast_language: 'en'
-		};
-	}
-
-	/**
-	 * @private
-	 */
-	_msToken() {
-		const timestamp = Date.now().toString();
-		const sha1 = crypto.createHash('sha1').update(timestamp).digest('hex');
-		const md5 = crypto.createHash('md5').update(sha1).digest('hex');
-
-		return md5;
-	}
-
-	/**
-	 * @private
-	 */
-	_getRequestConfig() {
+	get search() {
 		return {
-			headers: {
-				'User-Agent':
-					'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 YaBrowser/23.1.5.750 (beta) Yowser/2.5 Safari/537.36',
-				Cookie: this.#cookie
-			}
+			users: (...usernames) => this.#batchOperation(usernames.flat(), (u) => this.#fetchSearchUsers(u)),
+			lookup: (...usernames) => this.#batchOperation(usernames.flat(), (u) => this.#fetchUserLookup(u))
 		};
 	}
 
-	/**
-	 * @private
-	 */
-	_buildApiUrl(params) {
-		const queryParams = new URLSearchParams(this._buildRequestParams(params));
-
-		return queryParams.toString();
-	}
-
-	/**
-	 * @private
-	 */
-	_buildRequestParams(params) {
-		const defaultParams = {
-			version_name: '30.9.4',
-			version_code: '300904',
-			build_number: '30.9.4',
-			manifest_version_code: '300904',
-			update_version_code: '300904',
-			iid: '7318518857994389254'
+	get users() {
+		return {
+			posts: (...usernames) => this.#batchOperation(usernames.flat(), (u) => this.#fetchUserPosts(u))
 		};
-
-		return Object.assign(defaultParams, params);
 	}
 
-	/**
-	 * @private
-	 */
-	async _awemeRequest(path, { method, body, config = {} }) {
-		if (method === 'GET') {
-			const data = await fetch(API_BASE_URL + path + body, config);
-			const json = await data.json().catch(() => '');
-
-			return json;
-		} else if (method === 'POST') {
-			const data = await fetch(API_BASE_URL + path + body, { ...config, method: 'POST' });
-			const json = await data.json().catch(() => '');
-
-			return json;
-		} else if (method === 'OPTIONS') {
-			const data = await fetch(API_BASE_URL + path + body, { ...config, method: 'OPTIONS' });
-			const json = await data.json().catch(() => '');
-
-			return json;
-		}
+	get download() {
+		return {
+			post: (urls, wait) => this.#downloadPosts(urls, wait)
+		};
 	}
 
-	/**
-	 * @private
-	 */
-	async _getUserDetail(username) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				username = '@' + username.replace('@', '');
+	async #batchOperation(keys, fetchFn) {
+		const result = {};
 
-				let data = await fetch(`https://www.tiktok.com/${username}`, {
-					headers: {
-						'User-Agent':
-							'Mozilla/5.0 (Linux; Android 11; SAMSUNG SM-G973U) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/14.2 Chrome/87.0.4280.141 Mobile Safari/537.36'
-					}
-				});
-
-				if (data.status === 404) {
-					return { error: 'User not found' };
-				}
-
-				data = await data.text();
-
-				const rawData = cheerioLOAD(data)('script[id="__UNIVERSAL_DATA_FOR_REHYDRATION__"]').html();
-
-				resolve(JSON.parse(rawData));
-			} catch (error) {
-				reject(error);
+		for (const key of keys) {
+			if (result[key]) {
+				continue;
 			}
-		});
-	}
 
-	/**
-	 * @private
-	 */
-	async _fetchUserPostsAttempt(userDetails) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				const body = this._buildApiUrl({
-					version_name: '26.1.3',
-					version_code: '260103',
-					build_number: '26.1.3',
-					manifest_version_code: '260103',
-					update_version_code: '260103',
-					sec_user_id: userDetails.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.user.secUid,
-					count: 30,
-					max_cursor: 0,
-					min_cursor: 0,
-					device_id: Array.from({ length: 19 }, () => Math.floor(Math.random() * 10).toString()).join(''),
-					mas: this._msToken()
-				});
+			const cached = this.#cache.get(key);
 
-				const config = this._getRequestConfig();
-
-				config.headers['User-Agent'] =
-					'com.ss.android.ugc.trill/260103 (Linux; U; Android 13; en_US; Pixel 7; Build/TD1A.220804.031; Cronet/58.0.2991.0)';
-				config.headers['Accept'] = 'application/json';
-				config.headers['Host'] = 'api.tiktokv.com';
-
-				const data = await asyncRetry(
-					async (bail) => {
-						const request = async () => {
-							const bodyFetch = await fetch('https://api.tiktokv.com/aweme/v1/aweme/post/?' + body, {
-								method: 'GET',
-								...config
-							});
-
-							if (!bodyFetch.ok || bodyFetch.status !== 200) {
-								throw new Error(bodyFetch.statusText);
-							}
-
-							try {
-								const json = await bodyFetch.json();
-
-								if (!json) {
-									throw new Error('No data found');
-								}
-
-								return json;
-							} catch {
-								throw new Error('Something went wrong while processing json');
-							}
-						};
-
-						const container = [];
-
-						for (let i = 0; i < 200; i++) {
-							container.push(request());
-						}
-
-						const resultPromises = await Promise.any(container);
-
-						if (resultPromises.status_msg) {
-							bail(new Error('User does not have any post'));
-						}
-
-						return resultPromises;
-					},
-					{
-						maxRetryTime: 60 * 1000,
-						minTimeout: 0,
-						retries: 20
-					}
-				);
-
-				if (data instanceof Error) {
-					resolve({
-						error: data.message
-					});
-				}
-
-				resolve(data);
-			} catch (error) {
-				reject(error);
+			if (cached) {
+				result[key] = cached;
+				continue;
 			}
-		});
-	}
 
-	/**
-	 * @private
-	 */
-	_fetchSearchUserDataAttempt(username) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				const body = this._buildApiUrl({
-					version_name: '10.3.3',
-					version_code: '100303',
-					build_number: '10.3.3',
-					manifest_version_code: '100303',
-					update_version_code: '100303',
-					openudid: randomChar('0123456789abcdef', 16),
-					uuid: randomChar('1234567890', 16),
-					_rticket: Date.now() * 1000,
-					ts: Date.now(),
-					device_brand: 'Google',
-					device_type: 'Pixel 7',
-					device_platform: 'android',
-					resolution: '1080*2400',
-					dpi: 420,
-					os_version: '13',
-					os_api: '29',
-					carrier_region: 'US',
-					sys_region: 'US',
-					region: 'US',
-					app_name: 'trill',
-					app_language: 'en',
-					language: 'en',
-					timezone_name: 'America/New_York',
-					timezone_offset: '-14400',
-					channel: 'googleplay',
-					ac: 'wifi',
-					mcc_mnc: '310260',
-					is_my_cn: 0,
-					aid: 1180,
-					ssmix: 'a',
-					as: 'a1qwert123',
-					cp: 'cbfhckdckkde1',
-					keyword: username,
-					cursor: '0',
-					count: '30',
-					type: '1',
-					hot_search: '0',
-					source: 'discover',
-					mas: this._msToken()
-				});
+			const response = await fetchFn(key);
 
-				const config = this._getRequestConfig();
-
-				const data = await asyncRetry(
-					async () => {
-						const request = async () => {
-							const data = await this._awemeRequest('aweme/v1/discover/search/?', {
-								method: 'OPTIONS',
-								body,
-								config
-							});
-
-							if (data === '') {
-								throw new Error('No data');
-							}
-
-							return data;
-						};
-
-						const container = [];
-
-						for (let i = 0; i < 200; i++) {
-							container.push(request());
-						}
-
-						const resultPromises = await Promise.any(container);
-
-						return resultPromises;
-					},
-					{
-						maxRetryTime: 60 * 1000,
-						minTimeout: 0,
-						retries: 20
-					}
-				);
-
-				if (!data) {
-					resolve({ error: 'User not found. Please try again later.' });
-				}
-
-				resolve(this._parseUsersInfo(data));
-			} catch (error) {
-				reject(error);
-			}
-		});
-	}
-
-	/**
-	 * @private
-	 */
-	async _fetchVideoDataAttempt(videoId, wait) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				const ranVersion = random(appVersion);
-				const versionCode = ranVersion
-					.split('.')
-					.map((v) => String(v).padStart(2, '0'))
-					.join('');
-
-				const mainParams = {
-					app_name: 'musical_ly',
-					manifest_app_version: '2023501030'
-				};
-
-				const body = this._buildApiUrl({
-					aweme_id: videoId,
-					iid: random(iids),
-					device_id: random(deviceIds),
-					channel: 'googleplay',
-					aid: '1233',
-					app_name: mainParams.app_name,
-					version_code: versionCode,
-					version_name: ranVersion,
-					device_platform: 'android',
-					os: 'android',
-					ssmix: 'a',
-					_rticket: Date.now(),
-					cdid: v4(),
-					update_version_code: mainParams.manifest_app_version,
-					ab_version: ranVersion,
-					resolution: '1080*2400',
-					dpi: 420,
-					device_type: 'Pixel 7',
-					device_brand: 'Google',
-					language: 'en',
-					os_api: '29',
-					os_version: '14',
-					ac: 'wifi',
-					is_pad: '0',
-					current_region: 'US',
-					app_type: 'normal',
-					sys_region: 'US',
-					last_install_time: lastInstall(),
-					timezone_name: 'America/New_York',
-					residence: 'US',
-					app_language: 'en',
-					timezone_offset: '-14400',
-					host_abi: 'armeabi-v7a',
-					locale: 'en',
-					ac2: 'wifi5g',
-					uoo: '1',
-					carrier_region: 'US',
-					op_region: 'US',
-					build_number: ranVersion,
-					region: 'US',
-					ts: Math.floor(Date.now() / 1000)
-				});
-
-				const config = this._getRequestConfig();
-
-				config.headers = {
-					'User-Agent':
-						'com.zhiliaoapp.musically/300904 (2018111632; U; Android 10; en_US; Pixel 4; Build/QQ3A.200805.001; Cronet/58.0.2991.0)'
-				};
-
-				// delete config.headers.Cookie;
-
-				const data = await asyncRetry(
-					async () => {
-						const request = async () => {
-							const data = await this._awemeRequest('aweme/v1/feed/?', {
-								method: 'OPTIONS',
-								body,
-								config
-							});
-
-							if (data === '') {
-								throw new Error('No data');
-							}
-
-							return data;
-						};
-						const container = [];
-
-						for (let i = 0; i < 200; i++) {
-							container.push(request());
-						}
-
-						const resultPromises = await Promise.any(container);
-
-						const response = await Promise.race([
-							this._mergeMediaResponse(resultPromises, videoId, 'aweme_list', wait),
-							new Promise((_, reject) => setTimeout(() => reject(new Error('Merge timeout')), 15000))
-						]);
-
-						if (response?.error) {
-							throw new Error(response.error);
-						}
-
-						return response;
-					},
-					{
-						minTimeout: 0,
-						retries: 20
-					}
-				);
-
-				if (!data) {
-					resolve({ error: 'Post not found. Please try again later.' });
-				}
-
-				resolve(data);
-			} catch (error) {
-				reject(error);
-			}
-		});
-	}
-
-	/**
-	 * @private
-	 */
-	async _fetchUserDetailAttempt(username) {
-		const data = await this._getUserDetail(username);
-
-		if (data.error) {
-			return data;
+			result[key] = response;
+			this.#cache.set(key, response);
 		}
 
-		return this._parseUserInfo(data);
+		return result;
 	}
 
-	/**
-	 * @private
-	 */
-	async _getVideoId(url) {
-		url = url.includes('vm.tiktok.com') ? url.replace('vm.tiktok.com', 'vt.tiktok.com') : url;
-		let videoId;
+	async #downloadPosts(urls, wait) {
+		const result = {};
 
-		if (/((vt|vm|vk)\.tiktok\.com)/g.test(url) || !url.includes('video') || !url.includes('photo')) {
-			const req = (
-				await axios.head(url, {
-					validateStatus: () => true
-				})
-			)?.request.res.responseUrl;
+		for (let url of [...urls.flat()]) {
+			const validation = checkValid(url);
 
-			if (!req) {
-				return { error: 'download failed. either the access is denied, or other error.' };
+			if (validation.error) {
+				result[url] = { error: validation.message };
+				continue;
 			}
 
-			const { pathname } = new URL(req);
+			url = new URL(url).origin + new URL(url).pathname;
 
-			videoId = pathname.split('/').slice(-1)[0];
-		} else {
-			const { pathname } = new URL(url);
+			if (result[url]) {
+				continue;
+			}
 
-			videoId = pathname.split('/').slice(-1)[0];
+			const cached = this.#cache.get(url);
+
+			if (cached) {
+				result[url] = cached;
+				continue;
+			}
+
+			const response = await this.#fetchVideoData(url, wait);
+
+			result[url] = response;
+			this.#cache.set(url, response);
 		}
 
-		return videoId;
+		return result;
 	}
 
-	/**
-	 * @private
-	 */
-	async _mergeMediaResponse(dataPosts, videoId, property, wait) {
+	async #fetchVideoData(url, wait) {
+		const videoId = await resolveVideoId(url);
+
+		if (videoId.error) {
+			return videoId;
+		}
+
+		return this.#fetchVideoDataWithRetry(videoId, wait);
+	}
+
+	async #fetchVideoDataWithRetry(videoId, wait) {
+		const ranVersion = random(appVersion);
+		const versionCode = ranVersion
+			.split('.')
+			.map((v) => String(v).padStart(2, '0'))
+			.join('');
+
+		const body = buildParams({
+			aweme_id: videoId,
+			iid: random(iids),
+			device_id: random(deviceIds),
+			channel: 'googleplay',
+			aid: '1233',
+			app_name: 'musical_ly',
+			version_code: versionCode,
+			version_name: ranVersion,
+			device_platform: 'android',
+			os: 'android',
+			ssmix: 'a',
+			_rticket: Date.now(),
+			cdid: v4(),
+			update_version_code: '2023501030',
+			ab_version: ranVersion,
+			resolution: '1080*2400',
+			dpi: 420,
+			device_type: 'Pixel 7',
+			device_brand: 'Google',
+			language: 'en',
+			os_api: '29',
+			os_version: '14',
+			ac: 'wifi',
+			is_pad: '0',
+			current_region: 'US',
+			app_type: 'normal',
+			sys_region: 'US',
+			last_install_time: lastInstall(),
+			timezone_name: 'America/New_York',
+			residence: 'US',
+			app_language: 'en',
+			timezone_offset: '-14400',
+			host_abi: 'armeabi-v7a',
+			locale: 'en',
+			ac2: 'wifi5g',
+			uoo: '1',
+			carrier_region: 'US',
+			op_region: 'US',
+			build_number: ranVersion,
+			region: 'US',
+			ts: Math.floor(Date.now() / 1000)
+		});
+
+		const data = await asyncRetry(async () => {
+			const result = await parallelRace(async () => {
+				const data = await awemeRequest('aweme/v1/feed/?', body, 'OPTIONS');
+
+				if (data === '') {
+					throw new Error('No data');
+				}
+
+				return data;
+			});
+
+			const response = await raceWithTimeout(this.#mergeMediaResponse(result, videoId, 'aweme_list', wait), MERGE_TIMEOUT_MS);
+
+			if (response?.error) {
+				throw new Error(response.error);
+			}
+
+			return response;
+		}, RETRY_OPTIONS);
+
+		return data || { error: 'Post not found. Please try again later.' };
+	}
+
+	async #mergeMediaResponse(dataPosts, videoId, property, wait) {
 		if (dataPosts.status_code !== 0) {
 			return { error: dataPosts.status_msg };
 		}
 
-		dataPosts = dataPosts?.[property]?.find((v) => v.aweme_id === videoId);
+		const post = dataPosts?.[property]?.find((v) => v.aweme_id === videoId);
 
-		if (!dataPosts) {
+		if (!post) {
 			return { error: 'Download failed. either the access is denied, or other error.' };
 		}
 
-		const userData = await this._getUserDetail(dataPosts.author.unique_id);
+		const userData = await fetchUserDetail(post.author.unique_id);
 
 		if (userData.error) {
 			return userData;
 		}
 
-		dataPosts = await this._parseMediaResponse(
-			dataPosts,
-			dataPosts.image_post_info && dataPosts.image_post_info?.images.length ? 'images' : undefined,
-			wait
-		);
+		const type = post.image_post_info?.images?.length ? 'images' : undefined;
+		const mediaResult = await this.#parser.buildMediaResult(post, type, wait);
+		const { url: urls, ...rest } = mediaResult;
+		const userStats = userData.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.stats;
 
-		const dataClone = { ...dataPosts };
-
-		delete dataClone.url;
-
-		Object.assign(dataClone, {
-			following: userData.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.stats.followingCount,
-			followers: userData.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.stats.followerCount,
-			heart: userData.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.stats.heart,
-			totalVideo: userData.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.stats.videoCount,
-			urls: dataPosts.url
-		});
-
-		return dataClone;
-	}
-}
-
-class TiktokUtils extends RequestModule {
-	constructor() {
-		super();
-	}
-
-	/**
-	 * @private
-	 */
-	async _fetchVideoData(url, wait) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				const videoId = await this._getVideoId(url);
-
-				if (videoId.error) {
-					resolve(videoId);
-				}
-
-				resolve(await this._fetchVideoDataAttempt(videoId, wait));
-			} catch (error) {
-				reject(error);
-			}
-		});
-	}
-
-	/**
-	 * @private
-	 */
-	async _fetchSearchUserData(username) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				resolve(await this._fetchSearchUserDataAttempt(username));
-			} catch (error) {
-				reject(error);
-			}
-		});
-	}
-
-	/**
-	 * @private
-	 */
-	async _fetchUserPosts(username) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				const userData = await this._getUserDetail(username);
-
-				if (userData.error) {
-					resolve(userData);
-				}
-
-				const data = await this._fetchUserPostsAttempt(userData);
-
-				if (data.error) {
-					resolve(data);
-				}
-
-				resolve(this._parseCrawlerResponse(data, userData));
-			} catch (error) {
-				reject(error);
-			}
-		});
-	}
-
-	/**
-	 * @private
-	 */
-	async _fetchUserDetail(username) {
-		return new Promise(async (resolve, reject) => {
-			try {
-				if (!username.startsWith('@')) {
-					username = `@${username.replace(/[^a-zA-Z0-9_.]/gi, '')}`;
-				}
-
-				const data = await this._fetchUserDetailAttempt(username);
-
-				if (data.error) {
-					resolve(data);
-				}
-
-				resolve(data);
-			} catch (error) {
-				reject(error);
-			}
-		});
-	}
-}
-
-class Tiktok extends TiktokUtils {
-	/**
-	 * @private
-	 */
-	#cache;
-	constructor() {
-		super();
-
-		/**
-		 * @private
-		 */
-		this.#cache = new Cache();
-
-		this.search = {
-			users: async (...usernames) =>
-				new Promise(async (resolve, reject) => {
-					try {
-						usernames = usernames.flat();
-
-						let result = {};
-
-						for (const username of usernames) {
-							if (result[username]) {
-								continue;
-							}
-
-							if (this._isCacheExist(username)) {
-								result[username] = this._getFromCache(username);
-								continue;
-							}
-
-							const response = await this._fetchSearchUserData(username);
-
-							result[username] = response;
-							this._setToCache(username, response);
-						}
-
-						resolve(result);
-					} catch (error) {
-						reject(error);
-					}
-				}),
-			lookup: async (...usernames) =>
-				new Promise(async (resolve, reject) => {
-					try {
-						usernames = usernames.flat();
-
-						let result = {};
-
-						for (const username of usernames) {
-							if (result[username]) {
-								continue;
-							}
-
-							if (this._isCacheExist(username)) {
-								result[username] = this._getFromCache(username);
-								continue;
-							}
-
-							const response = await this._fetchUserDetail(username);
-
-							result[username] = response;
-							this._setToCache(username, response);
-						}
-
-						resolve(result);
-					} catch (error) {
-						reject(error);
-					}
-				})
-		};
-
-		this.users = {
-			posts: async (...usernames) =>
-				new Promise(async (resolve, reject) => {
-					try {
-						usernames = usernames.flat();
-
-						let result = {};
-
-						for (const username of usernames) {
-							if (result[username]) {
-								continue;
-							}
-
-							if (this._isCacheExist(username)) {
-								result[username] = this._getFromCache(username);
-								continue;
-							}
-
-							const response = await this._fetchUserPosts(username);
-
-							result[username] = response;
-							this._setToCache(username, response);
-						}
-
-						resolve(result);
-					} catch (error) {
-						reject(error);
-					}
-				})
-		};
-
-		this.download = {
-			post: async (urls, wait) =>
-				new Promise(async (resolve, reject) => {
-					try {
-						urls = [...urls.flat()];
-
-						let result = {};
-
-						for (let url of urls) {
-							const isValidURL = checkValid(url);
-
-							if (isValidURL.error) {
-								result[url] = { error: isValidURL.message };
-								continue;
-							}
-
-							url = this._clearUrl(url);
-
-							if (result[url]) {
-								continue;
-							}
-
-							if (this._isCacheExist(url)) {
-								result[url] = this._getFromCache(url);
-
-								continue;
-							}
-
-							const response = await this._fetchVideoData(url, wait);
-
-							result[url] = response;
-							this._setToCache(url, response);
-						}
-
-						resolve(result);
-					} catch (error) {
-						reject(error);
-					}
-				})
+		return {
+			...rest,
+			following: userStats.followingCount,
+			followers: userStats.followerCount,
+			heart: userStats.heart,
+			totalVideo: userStats.videoCount,
+			urls
 		};
 	}
 
-	/**
-	 * @private
-	 */
-	_isCacheExist(input) {
-		return this.#cache.has(input);
+	async #fetchSearchUsers(username) {
+		const body = buildParams({
+			version_name: '10.3.3',
+			version_code: '100303',
+			build_number: '10.3.3',
+			manifest_version_code: '100303',
+			update_version_code: '100303',
+			openudid: randomChar('0123456789abcdef', 16),
+			uuid: randomChar('1234567890', 16),
+			_rticket: Date.now() * 1000,
+			ts: Date.now(),
+			device_brand: 'Google',
+			device_type: 'Pixel 7',
+			device_platform: 'android',
+			resolution: '1080*2400',
+			dpi: 420,
+			os_version: '13',
+			os_api: '29',
+			carrier_region: 'US',
+			sys_region: 'US',
+			region: 'US',
+			app_name: 'trill',
+			app_language: 'en',
+			language: 'en',
+			timezone_name: 'America/New_York',
+			timezone_offset: '-14400',
+			channel: 'googleplay',
+			ac: 'wifi',
+			mcc_mnc: '310260',
+			is_my_cn: 0,
+			aid: 1180,
+			ssmix: 'a',
+			as: 'a1qwert123',
+			cp: 'cbfhckdckkde1',
+			keyword: username,
+			cursor: '0',
+			count: '30',
+			type: '1',
+			hot_search: '0',
+			source: 'discover',
+			mas: generateMsToken()
+		});
+
+		const data = await asyncRetry(async () => {
+			const result = await parallelRace(async () => {
+				const data = await awemeRequest('aweme/v1/discover/search/?', body, 'OPTIONS');
+
+				if (data === '') {
+					throw new Error('No data');
+				}
+
+				return data;
+			});
+
+			return result;
+		}, RETRY_OPTIONS);
+
+		if (!data) {
+			return { error: 'User not found. Please try again later.' };
+		}
+
+		return this.#parser.parseUsersInfo(data);
 	}
 
-	/**
-	 * @private
-	 */
-	_getFromCache(input) {
-		return this.#cache.get(input);
+	async #fetchUserLookup(username) {
+		if (!username.startsWith('@')) {
+			username = `@${username.replace(/[^a-zA-Z0-9_.]/gi, '')}`;
+		}
+
+		const data = await fetchUserDetail(username);
+
+		if (data.error) {
+			return data;
+		}
+
+		return this.#parser.parseUserInfo(data);
 	}
 
-	/**
-	 * @private
-	 */
-	_setToCache(input, data) {
-		return this.#cache.set(input, data);
-	}
+	async #fetchUserPosts(username) {
+		const userData = await fetchUserDetail(username);
 
-	/**
-	 * @private
-	 */
-	_clearUrl(url) {
-		url = new URL(url);
-		url = url.origin + url.pathname;
+		if (userData.error) {
+			return userData;
+		}
 
-		return url;
+		const body = buildParams({
+			version_name: '26.1.3',
+			version_code: '260103',
+			build_number: '26.1.3',
+			manifest_version_code: '260103',
+			update_version_code: '260103',
+			sec_user_id: userData.__DEFAULT_SCOPE__['webapp.user-detail'].userInfo.user.secUid,
+			count: 30,
+			max_cursor: 0,
+			min_cursor: 0,
+			device_id: Array.from({ length: 19 }, () => Math.floor(Math.random() * 10).toString()).join(''),
+			mas: generateMsToken()
+		});
+
+		const data = await asyncRetry(async (bail) => {
+			const result = await parallelRace(async () => {
+				const response = await fetch('https://api.tiktokv.com/aweme/v1/aweme/post/?' + body, {
+					method: 'GET',
+					headers: {
+						'User-Agent': USER_AGENTS.android,
+						Accept: 'application/json',
+						Host: 'api.tiktokv.com',
+						Cookie: COOKIE
+					}
+				});
+
+				if (!response.ok) {
+					throw new Error(response.statusText);
+				}
+
+				const json = await response.json();
+
+				if (!json) {
+					throw new Error('No data found');
+				}
+
+				return json;
+			});
+
+			if (result.status_msg) {
+				bail(new Error('User does not have any post'));
+			}
+
+			return result;
+		}, RETRY_OPTIONS);
+
+		if (data instanceof Error) {
+			return { error: data.message };
+		}
+
+		return this.#parser.parseCrawlerResponse(data, userData);
 	}
 }
 
