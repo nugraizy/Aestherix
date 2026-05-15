@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.7.0」2026-05-15
+
+## Added
+- **Execution lock** — heavy commands (Downloader, Converter, Search, AI, Anime) now acquire a per-user lock; concurrent heavy commands are blocked with a message. Auto-expires after 60s. ([`19a7c1a`](https://github.com/nugraizy/aestherix/commit/19a7c1a))
+- **Pipeline fallback** — when a later pipe stage fails, the previous stage's output is still delivered to the user. ([`19a7c1a`](https://github.com/nugraizy/aestherix/commit/19a7c1a))
+- **Character AI selection** — `!charai start <character>` lets users pick a character; `--chars` lists available characters. ([`35b3e83`](https://github.com/nugraizy/aestherix/commit/35b3e83))
+
+## Fixed
+- **Moderation commands** — restored missing `updateGroup` method on `ClientSocket` with new options object API; fixed broken `title`, `unlock`, `unrestrict` commands. ([`8d341da`](https://github.com/nugraizy/aestherix/commit/8d341da))
+- **Missing `sendPresenceUpdate`** — added the method back to `ClientSocket` so `simulates` command works. ([`8d341da`](https://github.com/nugraizy/aestherix/commit/8d341da))
+
+## Refactored
+- **TikTok utility** — rewrote with 10-min TTL cache, flat class structure, removed lodash dependency, removed 4-level inheritance. ([`2f4c56b`](https://github.com/nugraizy/aestherix/commit/2f4c56b))
+- **Owner commands** — refactored `banned`, `unbanned`, `eval`, `simulates`, `simulate-freegame`, `simulate-spotify-player`. ([`47d2a86`](https://github.com/nugraizy/aestherix/commit/47d2a86))
+- **Moderation commands** — simplified all 11 moderation commands to use the new `updateGroup` options API. ([`8d341da`](https://github.com/nugraizy/aestherix/commit/8d341da))
+
+---
+
 # 「7.6.0」2026-05-15
 
 ## Added
