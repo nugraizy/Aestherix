@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.6.0」2026-05-15
+
+## Added
+- **Command piping** — chain command outputs using the `|` operator (e.g. `.igpost <url> | .sticker`). Supports media and text piping with guards for incompatible input, max depth 3, and per-stage cooldown/limit checks. Enabled via `--pipe` flag. ([`a1b93be`](https://github.com/nugraizy/aestherix/commit/a1b93be))
+
+## Fixed
+- **Animated webp to video** — fixed `convertStickerToMedia` producing empty buffers by using `node-webpmux` demux + sharp PNG frames instead of ffmpeg's broken animated webp decoder. Also added `ff.stdin` error handler to prevent unhandled crash in `prepareSticker`. ([`374b7df`](https://github.com/nugraizy/aestherix/commit/374b7df))
+- **TikTok asyncRetry hang** — added `await` to `_mergeMediaResponse`, added `Promise.race` timeout (15s) to prevent hanging when `_getUserDetail` stalls, throw on soft errors so retry continues, removed invalid `maxRetryTime` option. ([`5ea54cb`](https://github.com/nugraizy/aestherix/commit/5ea54cb))
+
+---
+
 # 「7.5.0」2026-05-15
 
 ## Added
