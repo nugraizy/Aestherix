@@ -203,6 +203,7 @@ Flags are kebab-case on the CLI. The bot reads them via [meow](https://github.co
 | `--pair-number <num>` | | Use this number for pairing without a prompt. |
 | `--test` | | Run connection self-test and exit. |
 | `--print-self` | | Print host's own outgoing messages in the terminal. |
+| `--pipe` | | Enable command piping with `\|` operator (chain command outputs). |
 
 ### Example
 

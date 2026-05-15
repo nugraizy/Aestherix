@@ -493,6 +493,30 @@ For raw Baileys socket access (e.g. `profilePictureUrl`, `groupMetadata`):
 client.socket.profilePictureUrl(jid, 'image');
 ```
 
+### Group management — `client.updateGroup(jid, options)`
+
+```js
+// Participant actions
+client.updateGroup(from, { action: 'add', participants: [...], admins: [...], message })
+client.updateGroup(from, { action: 'remove', participants: [...], admins: [...], force: true, message })
+client.updateGroup(from, { action: 'promote', participants: [...], admins: [...], message })
+client.updateGroup(from, { action: 'demote', participants: [...], admins: [...], message })
+
+// Metadata
+client.updateGroup(from, { action: 'subject', text: 'New Title' })
+client.updateGroup(from, { action: 'description', text: 'New Description' })
+
+// Settings
+client.updateGroup(from, { action: 'announcement' })      // lock
+client.updateGroup(from, { action: 'not_announcement' })  // unlock
+client.updateGroup(from, { action: 'locked' })            // restrict
+client.updateGroup(from, { action: 'unlocked' })          // unrestrict
+
+// Invite
+client.updateGroup(from, { action: 'retrieve' })  // returns [inviteCode]
+client.updateGroup(from, { action: 'revoke' })
+```
+
 ### Key `ctx` properties
 | Property | Description |
 |---|---|
@@ -539,6 +563,33 @@ client.socket.profilePictureUrl(jid, 'image');
    - Auto-correct misspelled commands (if `--autoCorrect` flag)
    - Dispatches to `command.run(ctx, client, store)`
 4. `Router.trackUsage()` persists usage count to DB
+
+### Command piping (`--pipe` flag)
+
+Pipe the output of one command into another using `|`:
+
+```
+.igpost <url> | .sticker
+.ytaudio <url> | .soundremover
+.googleimage cats | .sticker
+```
+
+**Flow:**
+1. `#dispatch()` detects ` | ` in message body → delegates to `PipelineExecutor`
+2. Each stage runs sequentially; intermediate stages use `CapturingClient` to intercept output
+3. Captured output (media or text) feeds into the next stage as input
+4. Final stage sends to the real client
+
+**Guards:**
+- Max 3 stages
+- Eval, Owner, Games, Moderation commands blocked from piping
+- Media-only commands (sticker, removebg) reject text input; text-only commands reject media
+- If a later stage fails, the previous stage's output is still delivered to the user
+
+**Execution lock:**
+- Heavy commands (Downloader, Converter, Search, AI, Anime) acquire a per-user lock
+- If a user tries another heavy command while one is running: "Please wait, your previous command (X) is still running."
+- Lock auto-expires after 60s as a safety net
 
 ### Adding a new command
 1. Create `src/commands/<category>/my-command.js`
@@ -661,6 +712,7 @@ Flag parsing via `meow` in `check-flag.js`. Flags added there are available in `
 | `--offline` | `-f` | Set presence to offline |
 | `--noCall` | `-d` | Reject incoming calls |
 | `--printSelf` | `-v` | Print host's own messages in terminal |
+| `--pipe` | | Enable command piping with `\|` operator |
 | `--test` | | Test connection |
 | `--help` | `-h` | Show help message |
 | `--spin` | | Enable loading spinners |
