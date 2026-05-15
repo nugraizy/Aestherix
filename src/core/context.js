@@ -184,6 +184,27 @@ export class Context {
 		ctx.#cache = { ...this.#cache, ...overrides };
 		return ctx;
 	}
+
+	synthetic({ pipedMedia, ...overrides }) {
+		const mediaTypeMap = {
+			imageMessage: { isMediaImage: true, isMediaVid: false, stickerAble: true },
+			videoMessage: { isMediaImage: false, isMediaVid: true, stickerAble: true },
+			stickerMessage: { isMediaImage: false, isMediaVid: false, stickerAble: true, isQuotedSticker: true },
+			audioMessage: { isMediaImage: false, isMediaVid: false, isQuotedAudio: true },
+			documentMessage: { isMediaImage: false, isMediaVid: false, isMediaDocument: true, isQuotedDocument: true }
+		};
+
+		const mediaFlags = mediaTypeMap[pipedMedia.mediaType] || {};
+		const syntheticMediaData = { message: { [pipedMedia.mediaType]: { __pipedBuffer: pipedMedia.buffer } } };
+
+		return this.derive({
+			...overrides,
+			...mediaFlags,
+			typeQuoted: pipedMedia.mediaType,
+			mediaData: syntheticMediaData,
+			extractMediaData: syntheticMediaData.message[pipedMedia.mediaType]
+		});
+	}
 	get message() {
 		return this.#raw;
 	}

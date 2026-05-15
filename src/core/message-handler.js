@@ -6,6 +6,7 @@ import { Cache } from '../helper/modules/cache.js';
 import { cmdId, setPrefix } from '../helper/modules/prefix.js';
 import { color, getTimeSince, loggers } from '../utils/modules/index.js';
 import { Context } from './context.js';
+import { PipelineExecutor } from './pipeline.js';
 
 const EVALY = ['/>', '$>', '=>', '!>'];
 const SEPARATOR = color('⤑', 'green');
@@ -113,8 +114,32 @@ export class MessageHandler {
 		const bodies = hasSeparator ? message.body.split('&&') : [message.body];
 
 		for (const body of bodies) {
-			await this.#dispatchSingle(message, body.trim(), client);
+			const trimmed = body.trim();
+
+			if (this.#flags.pipe && !EVALY.includes(message.cmd) && /\s+\|\s+/.test(trimmed)) {
+				await this.#dispatchPipeline(message, trimmed, client);
+				continue;
+			}
+
+			await this.#dispatchSingle(message, trimmed, client);
 		}
+	}
+
+	async #dispatchPipeline(message, body, client) {
+		const stages = body.split(/\s+\|\s+/).map((s) => s.trim()).filter(Boolean);
+
+		if (stages.length < 2) {
+			await this.#dispatchSingle(message, body, client);
+			return;
+		}
+
+		const pipeline = new PipelineExecutor(client, message, this.#router, {
+			guard: (ctx, command, cl) => this.#guard(ctx, command, cl),
+			run: (ctx, command, cl) => this.#run(ctx, command, cl),
+			log: (ctx) => !this.#flags.noLogs && this.#logMessage(ctx)
+		});
+
+		await pipeline.execute(stages);
 	}
 
 	async #dispatchSingle(message, body, client) {

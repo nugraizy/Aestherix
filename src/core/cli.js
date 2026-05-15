@@ -32,7 +32,8 @@ const FLAGS = {
 	pairMode: { type: 'boolean' },
 	pairNumber: { type: 'string' },
 	test: { type: 'boolean' },
-	printSelf: { type: 'boolean' }
+	printSelf: { type: 'boolean' },
+	pipe: { type: 'boolean' }
 };
 
 const HELP_TEXT = `
@@ -63,6 +64,7 @@ const HELP_TEXT = `
    --pair-number            ${chalk.green('Use this number for pairing (no prompt).')}
    --test                   ${chalk.green('Test your connection.')}
    --print-self             ${chalk.green('Print every incoming messages from host number in terminal.')}
+   --pipe                   ${chalk.green('Enable command piping with | operator.')}
    --help, -h               ${chalk.green('Show this message.')}
 
  ${chalk.yellow('Examples')}
