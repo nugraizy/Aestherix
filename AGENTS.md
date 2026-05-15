@@ -532,7 +532,7 @@ client.socket.profilePictureUrl(jid, 'image');
 ### Command execution flow
 1. `MessageHandler.handle()` receives message upsert
 2. `Context.from()` parses the raw message (lazy getters, prefix cache, group cache)
-3. `MessageHandler.#dispatch()` loop (multi-cmd `|` support):
+3. `MessageHandler.#dispatch()` loop (multi-cmd `&&` support):
    - `Router.resolve(body)` → command lookup
    - `Router.isBlocked(command)` → sub-bot permission check
    - Guard: disabled (dashboard), isOwner, cooldown, limit, restrict, premium
@@ -648,7 +648,7 @@ Flag parsing via `meow` in `check-flag.js`. Flags added there are available in `
 | `--restrict` | `-e` | Ignore moderator commands (Add, Promote, Demote) |
 | `--selfMode` | `-s` | Only owner and bot can use commands |
 | `--debugMode` | `-g` | Show full message metadata in logs |
-| `--multiCmd` | `-m` | Enable multi-cmd with `\|` separator |
+| `--multiCmd` | `-m` | Enable multi-cmd with `&&` separator |
 | `--watch` | `-w` | Watch files and hot-reload on change |
 | `--coolDown` | `-c` | Enable command cooldowns |
 | `--ai` | `-i` | Handle messages with AI |

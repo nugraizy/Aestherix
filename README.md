@@ -75,7 +75,7 @@ git clone https://github.com/nugraizy/aestherix.git
 cd aestherix
 
 # 2. Install dependencies
-npm install -f
+npm install
 
 # 3. Copy and fill in environment variables
 cp example.env .env   # then edit .env with your values

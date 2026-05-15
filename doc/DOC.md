@@ -179,7 +179,7 @@ Flags are kebab-case on the CLI. The bot reads them via [meow](https://github.co
 | --- | --- | --- |
 | `--prefix <char>` | `-p` | Custom prefix(es). Comma-separated to enable multi mode. |
 | `--self-mode` | `-s` | Only owner and the bot itself can trigger commands. |
-| `--multi-cmd` | `-m` | Run multiple commands per message with `\|` as separator. |
+| `--multi-cmd` | `-m` | Run multiple commands per message with `&&` as separator. |
 | `--watch` | `-w` | Hot-reload command files on change. |
 | `--cool-down` | `-c` | Enforce command cooldowns. |
 | `--limit-reset` | `-l` | Auto-reset per-user limits at `reset_time`. |
