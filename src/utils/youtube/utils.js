@@ -1,7 +1,129 @@
-import getVideoId from 'get-video-id';
+/**
+ * Strip away any remaining parameters following `?` or `/` or '&' for YouTube shortcode strings.
+ *
+ * @note this function is not meant to work with url strings containing a protocol like https://
+ * @param {String} shortcodeString - the parameter string
+ * @returns {String}
+ */
+function stripParameters(shortcodeString) {
+	if (shortcodeString.includes('?')) {
+		shortcodeString = shortcodeString.split('?')[0];
+	}
 
-export const extractVideoId = (url) => {
-	const { id } = getVideoId(url);
+	if (shortcodeString.includes('/')) {
+		shortcodeString = shortcodeString.split('/')[0];
+	}
 
-	return id;
-};
+	if (shortcodeString.includes('&')) {
+		shortcodeString = shortcodeString.split('&')[0];
+	}
+
+	return shortcodeString;
+}
+
+function normalizeYoutubeUrl(url) {
+	let string_ = url;
+
+	string_ = string_.trim();
+	string_ = string_.replace('/www.', '/');
+	return string_;
+}
+
+/**
+ * Get the Youtube Video id.
+ * @param {string} youtubeStr - the url from which you want to extract the id
+ * @returns {string|undefined}
+ */
+export function extractVideoId(youtubeString) {
+	let string_ = normalizeYoutubeUrl(youtubeString);
+
+	string_ = string_.replace('-nocookie', '');
+
+	string_ = string_.replace(/#t=.*$/, '');
+
+	string_ = string_.replace(/^https?:\/\//, '');
+
+	const shortcode = /youtube:\/\/|youtu\.be\/|y2u\.be\//g;
+
+	if (shortcode.test(string_)) {
+		const shortcodeid = string_.split(shortcode)[1];
+
+		return stripParameters(shortcodeid);
+	}
+
+	const shortsUrl = /\/shorts\//g;
+
+	if (shortsUrl.test(string_)) {
+		return stripParameters(string_.split(shortsUrl)[1]);
+	}
+
+	const parameterv = /v=|vi=/g;
+
+	if (parameterv.test(string_)) {
+		const array = string_.split(parameterv);
+
+		return stripParameters(array[1].split('&')[0]);
+	}
+
+	const inlinev = /\/v\/|\/vi\/|\/watch\//g;
+
+	if (inlinev.test(string_)) {
+		const inlineid = string_.split(inlinev)[1];
+
+		return stripParameters(inlineid);
+	}
+
+	const parameterwebp = /\/an_webp\//g;
+
+	if (parameterwebp.test(string_)) {
+		const webp = string_.split(parameterwebp)[1];
+
+		return stripParameters(webp);
+	}
+
+	const eformat = /\/e\//g;
+
+	if (eformat.test(string_)) {
+		const estring = string_.split(eformat)[1];
+
+		return stripParameters(estring);
+	}
+
+	const embedreg = /\/embed\//g;
+
+	if (embedreg.test(string_)) {
+		const embedid = string_.split(embedreg)[1];
+
+		return stripParameters(embedid);
+	}
+
+	const usernamereg = /\/user\/([a-zA-Z\d]*)$/g;
+
+	if (usernamereg.test(string_)) {
+		return undefined;
+	}
+
+	const userreg = /\/user\/(?!.*videos)/g;
+
+	if (userreg.test(string_)) {
+		const elements = string_.split('/');
+
+		return stripParameters(elements.pop());
+	}
+
+	const attrreg = /\/attribution_link\?.*v%3D([^%&]*)(%26|&|$)/;
+
+	if (attrreg.test(string_)) {
+		return stripParameters(string_.match(attrreg)[1]);
+	}
+
+	const livereg = /\/live\//g;
+
+	if (livereg.test(string_)) {
+		const liveid = string_.split(livereg)[1];
+
+		return stripParameters(liveid);
+	}
+
+	return undefined;
+}

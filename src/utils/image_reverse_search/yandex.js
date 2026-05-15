@@ -1,5 +1,5 @@
-import fetch from 'node-fetch';
 import _ from 'lodash';
+import { fetch } from 'undici';
 
 import { cheerioLOAD, fetchTEXT, isURL, uploadToTelegraph } from '../modules/index.js';
 

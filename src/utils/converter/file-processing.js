@@ -1,8 +1,7 @@
 import asyncRetry from 'async-retry';
 import axios from 'axios';
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 import dayjs from 'dayjs';
-import ffmpeg from 'fluent-ffmpeg';
 import FormData from 'form-data';
 import fs from 'fs-extra';
 import httpsProxyAgent from 'https-proxy-agent';
@@ -272,19 +271,35 @@ export const convertStickerToMedia = (input, sender, mediaData) =>
 			if (mediaData.isAnimated) {
 				const buffer = isInputBuffer ? input : await fs.readFile(input);
 				const resultBuffer = await new Promise((resolve, reject) => {
-					const output = ffmpeg(Readable.from(buffer))
-						.inputFormat('webp')
-						.outputOptions(['-movflags faststart', '-pix_fmt yuv420p'])
-						.videoFilters('scale=trunc(iw/2)*2:trunc(ih/2)*2')
-						.format('mp4')
-						.on('error', reject)
-						.pipe();
-
+					const args = [
+						'-i',
+						'pipe:0',
+						'-f',
+						'webp_pipe',
+						'-movflags',
+						'faststart',
+						'-pix_fmt',
+						'yuv420p',
+						'-vf',
+						'scale=trunc(iw/2)*2:trunc(ih/2)*2',
+						'-f',
+						'mp4',
+						'pipe:1'
+					];
+					const ff = spawn('ffmpeg', args, { windowsHide: true });
 					const chunks = [];
 
-					output.on('data', (chunk) => chunks.push(chunk));
-					output.on('end', () => resolve(Buffer.concat(chunks)));
-					output.on('error', reject);
+					ff.stdout.on('data', (chunk) => chunks.push(chunk));
+					ff.stdout.on('end', () => resolve(Buffer.concat(chunks)));
+					ff.on('error', reject);
+					ff.stderr.on('data', () => {});
+					ff.on('close', (code) => {
+						if (code !== 0) {
+							reject(new Error(`ffmpeg exited with code ${code}`));
+						}
+					});
+
+					Readable.from(buffer).pipe(ff.stdin);
 				});
 
 				loggers.info(`${color('Converted Media', 'pink')} for ${color(sender, 'lilac')}`);
