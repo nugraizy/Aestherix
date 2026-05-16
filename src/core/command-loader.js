@@ -76,6 +76,13 @@ export class CommandLoader extends EventEmitter {
 		this.#commands = options.commands ?? new Cache();
 		this.#aliases = options.aliases ?? [];
 		this.#dir = options.dir ?? COMMANDS_DIR;
+		this.on('error', ({ file, reason }) => {
+			loggers.error(
+				color('Command load error:', 'red'),
+				color(file || 'unknown', 'gray'),
+				color(reason || 'unknown', 'white')
+			);
+		});
 	}
 
 	get commands() {

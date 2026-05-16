@@ -141,6 +141,8 @@ export class ClientSocket extends EventEmitter {
 
 		const { version } = await fetchLatestBaileysVersion();
 
+		const cachedGroupMetadata = this.#options.cachedGroupMetadata;
+
 		this.#socket = makeWASocket({
 			auth: this.#auth.state,
 			logger: this.#options.logger,
@@ -153,7 +155,13 @@ export class ClientSocket extends EventEmitter {
 			defaultQueryTimeoutMs: 0,
 			mediaCache: new Cache(),
 			userDevicesCache: new Cache(),
-			cachedGroupMetadata: (jid) => (isJidGroup(jid) ? this.#store?.groupMetadata?.[jid] : {}),
+			cachedGroupMetadata: (jid) => {
+				if (cachedGroupMetadata) {
+					return cachedGroupMetadata(jid);
+				}
+
+				return isJidGroup(jid) ? this.#store?.groupMetadata?.[jid] : {};
+			},
 			emitOwnEvents: false,
 			getMessage: async (key) => {
 				const msg = await this.#store?.loadMessage(key.remoteJid, key.id);
@@ -581,7 +589,11 @@ export class ClientSocket extends EventEmitter {
 				responses.push({ error: e.message, id: participant });
 
 				if (e?.[0]?.status === '400') {
-					await this.send(jid, { text: `@${participant.split('@')[0]} is not a valid number`, mentions: [participant] }, quoted);
+					await this.send(
+						jid,
+						{ text: `@${participant.split('@')[0]} is not a valid number`, mentions: [participant] },
+						quoted
+					);
 				}
 			}
 		}
@@ -634,16 +646,20 @@ export class ClientSocket extends EventEmitter {
 			thumbnail = undefined;
 		}
 
-		const inviteMsg = generateWAMessageFromContent(jid, {
-			groupInviteMessage: {
-				groupJid: jid,
-				inviteCode: response?.[0]?.code,
-				inviteExpiration: response?.[0]?.expiration,
-				groupName: metadata.subject,
-				caption: 'Invitation to join my WhatsApp group',
-				jpegThumbnail: thumbnail
-			}
-		}, {});
+		const inviteMsg = generateWAMessageFromContent(
+			jid,
+			{
+				groupInviteMessage: {
+					groupJid: jid,
+					inviteCode: response?.[0]?.code,
+					inviteExpiration: response?.[0]?.expiration,
+					groupName: metadata.subject,
+					caption: 'Invitation to join my WhatsApp group',
+					jpegThumbnail: thumbnail
+				}
+			},
+			{}
+		);
 
 		await this.#socket.relayMessage(participant, inviteMsg.message, { messageId: inviteMsg.key.id });
 	}
@@ -666,11 +682,7 @@ export class ClientSocket extends EventEmitter {
 				break;
 			}
 
-			const { message, body, isCmd } = await Context.from(
-				JSON.parse(JSON.stringify(messages)),
-				{ instance: this.#socket },
-				this.#store
-			);
+			const { message, body, isCmd } = await Context.from(JSON.parse(JSON.stringify(messages)), this, this.#store);
 
 			if (body.includes(query) && !isCmd) {
 				keys.push(message);
