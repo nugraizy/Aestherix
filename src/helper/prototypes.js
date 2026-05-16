@@ -33,7 +33,7 @@ Object.setPrototypeOf(String.prototype, {
 
 		return `${hours}:${minutes}:${seconds}`;
 	},
-	seperateCamel: function () {
+	separateCamel: function () {
 		return this.replace(/[A-Z]/g, (_) => ` ${_}`);
 	},
 	capitalize: function () {
@@ -206,6 +206,9 @@ Object.setPrototypeOf(Array.prototype, {
 	insert: function (index) {
 		this.splice(...[index, 0].concat(Array.prototype.slice.call(arguments, 1)));
 		return this;
+	},
+	random: function () {
+		return _.sample(this);
 	},
 	sortUnique: function (key) {
 		return [...new Map(this.map((item) => [key ? item[key] : item, item])).values()];

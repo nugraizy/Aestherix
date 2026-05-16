@@ -1,4 +1,4 @@
-import type { getDevice, MessageType } from 'baileys';
+import type { MessageType, getDevice } from 'baileys';
 import type { ClientSocket } from '../Core';
 import type { MessageGenerated, WAGenericMediaMessage } from '../Messages/index';
 import type { MediaDataContext } from '../Socket';
@@ -59,7 +59,7 @@ export interface ReassignResult {
 		invalid?: boolean;
 		command?: boolean;
 	}>;
-	device: ReturnType<typeof getDevice>;
+	device: { name: ReturnType<typeof getDevice>; isIos: boolean; isAndroid: boolean; isWeb: boolean; isDesktop: boolean };
 }
 
 /**

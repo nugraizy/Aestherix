@@ -81,7 +81,7 @@ export declare class ClientSocket extends EventEmitter {
 	get auth(): Auth;
 	get sessionName(): string;
 	get store(): Store | null;
-	get socket(): WASocket;
+	get socket(): WASocket | null;
 	get state(): ClientSocketState;
 	get role(): ClientRole;
 	get options(): ClientSocketOptions;
@@ -89,7 +89,6 @@ export declare class ClientSocket extends EventEmitter {
 	get uptime(): string | null;
 	get needsPairing(): boolean;
 	get ev(): this;
-	get ws(): WebSocket | null;
 	get TemplateBuilder(): TemplateBuilderFactory;
 	get jidNormalizedUser(): (jid: string) => string;
 
@@ -146,24 +145,24 @@ export declare class ClientSocket extends EventEmitter {
 
 	updateGroup(
 		jid: string,
-		options: { action: 'add' | 'remove'; participants: string[]; admins: string[]; force?: boolean; message?: WAMessage | null }
+		options: {
+			action: 'add' | 'remove';
+			participants: string[];
+			admins: string[];
+			force?: boolean;
+			message?: WAMessage | null;
+		}
 	): Promise<unknown[]>;
 	updateGroup(
 		jid: string,
 		options: { action: 'promote' | 'demote'; participants: string[]; admins: string[]; message?: WAMessage | null }
 	): Promise<unknown[]>;
-	updateGroup(
-		jid: string,
-		options: { action: 'subject' | 'description'; text: string }
-	): Promise<unknown[]>;
+	updateGroup(jid: string, options: { action: 'subject' | 'description'; text: string }): Promise<unknown[]>;
 	updateGroup(
 		jid: string,
 		options: { action: 'announcement' | 'not_announcement' | 'locked' | 'unlocked' }
 	): Promise<unknown[]>;
-	updateGroup(
-		jid: string,
-		options: { action: 'retrieve' | 'revoke' }
-	): Promise<unknown[]>;
+	updateGroup(jid: string, options: { action: 'retrieve' | 'revoke' }): Promise<unknown[]>;
 	sendPresenceUpdate(type: 'available' | 'unavailable' | 'composing' | 'recording' | 'paused', jid?: string): Promise<void>;
 	searchMessage(jid: string, query: string): Promise<WAMessage[]>;
 	getStoryParticipants(): Promise<string[]>;
@@ -228,7 +227,11 @@ export declare class Context {
 	get isAdmin(): boolean;
 	get isBotAdmin(): boolean;
 	get filename(): string;
-	get device(): string;
+	get device(): { name: string; isIos: boolean; isAndroid: boolean; isWeb: boolean; isDesktop: boolean };
+	get isIos(): boolean;
+	get isAndroid(): boolean;
+	get isWeb(): boolean;
+	get isDesktop(): boolean;
 	get typeQuoted(): string | undefined;
 	get mention(): string[];
 	get bodyQuoted(): string;

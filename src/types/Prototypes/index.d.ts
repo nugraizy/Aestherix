@@ -39,7 +39,7 @@ declare global {
 		toReadAble(): string;
 
 		/** Inserts a space before each uppercase letter (camelCase → camel Case). */
-		seperateCamel(): string;
+		separateCamel(): string;
 
 		/** Capitalizes the first letter of each word. */
 		capitalize(): string;
@@ -140,6 +140,11 @@ declare global {
 		 * @returns The mutated array.
 		 */
 		insert(index: number, ...items: T[]): T[];
+
+		/**
+		 * Returns a random element from the array.
+		 */
+		random(): T | undefined;
 
 		/**
 		 * Returns a new array with duplicates removed.
