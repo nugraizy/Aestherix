@@ -5,14 +5,21 @@ const MAX_PIPELINE_DEPTH = 3;
 const UNPIPEABLE_CATEGORIES = new Set(['Owner', 'Games', 'Moderation']);
 
 const MEDIA_ONLY_COMMANDS = new Set([
-	'sticker', 'stickers', 'st', 'stk', 's', 'sgif',
-	'removebg', 'trigger', 'pet', 'audiobook',
-	'voiceremover', 'soundremover'
+	'sticker',
+	'stickers',
+	'st',
+	'stk',
+	's',
+	'sgif',
+	'removebg',
+	'trigger',
+	'pet',
+	'audiobook',
+	'voiceremover',
+	'soundremover'
 ]);
 
-const TEXT_ONLY_COMMANDS = new Set([
-	'google', 'brainly', 'translate', 'define'
-]);
+const TEXT_ONLY_COMMANDS = new Set(['google', 'brainly', 'translate', 'define']);
 
 class CapturingClient {
 	#real;
@@ -77,17 +84,21 @@ async function resolveMedia(value) {
 	return null;
 }
 
-async function extractOutput(captured) {
+async function extractOutputs(captured) {
 	if (!captured.length) {
 		return null;
 	}
+
+	const outputs = [];
+	let firstText = null;
 
 	for (const content of captured) {
 		if (content?.image) {
 			const buffer = await resolveMedia(content.image);
 
 			if (buffer) {
-				return { type: 'media', mediaType: 'imageMessage', buffer, caption: content.caption };
+				outputs.push({ type: 'media', mediaType: 'imageMessage', buffer, caption: content.caption });
+				continue;
 			}
 		}
 
@@ -95,7 +106,8 @@ async function extractOutput(captured) {
 			const buffer = await resolveMedia(content.video);
 
 			if (buffer) {
-				return { type: 'media', mediaType: 'videoMessage', buffer, caption: content.caption };
+				outputs.push({ type: 'media', mediaType: 'videoMessage', buffer, caption: content.caption });
+				continue;
 			}
 		}
 
@@ -103,7 +115,8 @@ async function extractOutput(captured) {
 			const buffer = await resolveMedia(content.audio);
 
 			if (buffer) {
-				return { type: 'media', mediaType: 'audioMessage', buffer };
+				outputs.push({ type: 'media', mediaType: 'audioMessage', buffer });
+				continue;
 			}
 		}
 
@@ -111,7 +124,8 @@ async function extractOutput(captured) {
 			const buffer = await resolveMedia(content.sticker);
 
 			if (buffer) {
-				return { type: 'media', mediaType: 'stickerMessage', buffer };
+				outputs.push({ type: 'media', mediaType: 'stickerMessage', buffer });
+				continue;
 			}
 		}
 
@@ -119,15 +133,22 @@ async function extractOutput(captured) {
 			const buffer = await resolveMedia(content.document);
 
 			if (buffer) {
-				return { type: 'media', mediaType: 'documentMessage', buffer, mimetype: content.mimetype };
+				outputs.push({ type: 'media', mediaType: 'documentMessage', buffer, mimetype: content.mimetype });
+				continue;
 			}
+		}
+
+		if (!firstText && content?.text) {
+			firstText = content.text;
 		}
 	}
 
-	const first = captured[0];
+	if (outputs.length) {
+		return outputs;
+	}
 
-	if (first?.text) {
-		return { type: 'text', text: first.text };
+	if (firstText) {
+		return [{ type: 'text', text: firstText }];
 	}
 
 	return null;
@@ -167,7 +188,7 @@ export class PipelineExecutor {
 			return;
 		}
 
-		let previousOutput = null;
+		let currentOutputs = [null];
 
 		for (let i = 0; i < stages.length; i++) {
 			const isLast = i === stages.length - 1;
@@ -175,55 +196,66 @@ export class PipelineExecutor {
 			const resolved = this.#router.resolve(body);
 
 			if (!resolved?.command) {
-				await this.#sendFallback(previousOutput, `Pipeline failed: command not found in stage ${i + 1}.`);
-				return;
-			}
-
-			const inputGuard = this.#validateInput(resolved.command, previousOutput, i);
-
-			if (inputGuard) {
-				await this.#sendFallback(previousOutput, inputGuard);
-				return;
-			}
-
-			const stageCtx = this.#buildStageContext(body, resolved, previousOutput);
-
-			this.#log(stageCtx);
-
-			const guardResult = await this.#guard(stageCtx, resolved.command, this.#client);
-
-			if (guardResult === 'skip') {
-				await this.#sendFallback(previousOutput);
-				return;
-			}
-
-			const stageClient = this.#buildStageClient(isLast, previousOutput);
-
-			if (isLast) {
-				await this.#run(stageCtx, resolved.command, stageClient);
-				return;
-			}
-
-			const capturingClient = new CapturingClient(stageClient);
-
-			try {
-				await resolved.command.run(stageCtx, capturingClient, null);
-			} catch (err) {
-				await this.#sendFallback(previousOutput, `Pipeline failed at stage ${i + 1} (${resolved.cmdName}): ${err.message}`);
-				return;
-			}
-
-			const output = await extractOutput(capturingClient.captured);
-
-			if (!output) {
 				await this.#sendFallback(
-					previousOutput,
-					`Pipeline failed: stage ${i + 1} (${resolved.cmdName}) produced no output.`
+					currentOutputs.find(Boolean) || null,
+					`Pipeline failed: command not found in stage ${i + 1}.`
 				);
 				return;
 			}
 
-			previousOutput = output;
+			const inputGuard = this.#validateInput(resolved.command, currentOutputs[0], i);
+
+			if (inputGuard) {
+				await this.#sendFallback(currentOutputs.find(Boolean) || null, inputGuard);
+				return;
+			}
+
+			const nextOutputs = [];
+
+			for (const previousOutput of currentOutputs) {
+				const stageCtx = this.#buildStageContext(body, resolved, previousOutput);
+
+				this.#log(stageCtx);
+
+				const guardResult = await this.#guard(stageCtx, resolved.command, this.#client);
+
+				if (guardResult === 'skip') {
+					await this.#sendFallback(previousOutput);
+					return;
+				}
+
+				const stageClient = this.#buildStageClient(isLast, previousOutput);
+
+				if (isLast) {
+					await this.#run(stageCtx, resolved.command, stageClient);
+					continue;
+				}
+
+				const capturingClient = new CapturingClient(stageClient);
+
+				try {
+					await resolved.command.run(stageCtx, capturingClient, null);
+				} catch (err) {
+					await this.#sendFallback(previousOutput, `Pipeline failed at stage ${i + 1} (${resolved.cmdName}): ${err.message}`);
+					return;
+				}
+
+				const outputs = await extractOutputs(capturingClient.captured);
+
+				if (!outputs) {
+					await this.#sendFallback(
+						previousOutput,
+						`Pipeline failed: stage ${i + 1} (${resolved.cmdName}) produced no output.`
+					);
+					return;
+				}
+
+				nextOutputs.push(...outputs);
+			}
+
+			if (!isLast) {
+				currentOutputs = nextOutputs;
+			}
 		}
 	}
 

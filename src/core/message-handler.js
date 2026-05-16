@@ -1,3 +1,4 @@
+import readline from 'readline';
 import { findBestMatch } from 'string-similarity';
 
 import configuration from '../helper/config/connect.js';
@@ -12,6 +13,24 @@ const EVALY = ['/>', '$>', '=>', '!>'];
 const SEPARATOR = color('⤑', 'green');
 const HEAVY_CATEGORIES = new Set(['Downloader', 'Converter', 'Search', 'AI', 'Anime']);
 const EXECUTION_LOCK_TTL = 60000;
+
+let stdoutWriteCounter = 0;
+let stdoutWriteTrackingInitialized = false;
+
+function ensureStdoutWriteTracking() {
+	if (stdoutWriteTrackingInitialized) {
+		return;
+	}
+
+	const originalWrite = process.stdout.write.bind(process.stdout);
+
+	process.stdout.write = (chunk, ...rest) => {
+		stdoutWriteCounter++;
+		return originalWrite(chunk, ...rest);
+	};
+
+	stdoutWriteTrackingInitialized = true;
+}
 
 const HANDLER_PATH = {
 	STUBTYPE: './handlers/stub.js',
@@ -36,6 +55,15 @@ export class MessageHandler {
 	#handlers = new Cache();
 	#retries = new Map();
 	#executionLocks = new Map();
+	#lastLog = {
+		kind: null,
+		sender: null,
+		from: null,
+		command: null,
+		signature: null,
+		marker: null,
+		count: 0
+	};
 	#initialized = false;
 	#statsOffline = true;
 
@@ -45,6 +73,7 @@ export class MessageHandler {
 		this.#store = store;
 		this.#configuration = config ?? configuration;
 		this.#flags = options.flags ?? {};
+		ensureStdoutWriteTracking();
 	}
 
 	get router() {
@@ -129,7 +158,10 @@ export class MessageHandler {
 	}
 
 	async #dispatchPipeline(message, body, client) {
-		const stages = body.split(/\s+\|\s+/).map((s) => s.trim()).filter(Boolean);
+		const stages = body
+			.split(/\s+\|\s+/)
+			.map((s) => s.trim())
+			.filter(Boolean);
 
 		if (stages.length < 2) {
 			await this.#dispatchSingle(message, body, client);
@@ -371,7 +403,6 @@ export class MessageHandler {
 			return;
 		}
 
-		const state = this.#configuration.flags?.state;
 		const sender = localMessage.sender;
 		const isHeavy = HEAVY_CATEGORIES.has(command.category);
 
@@ -422,9 +453,10 @@ export class MessageHandler {
 
 	async #handleError(err, localMessage, client) {
 		const builder = new client.TemplateBuilder.Native();
+		const errorLocation = this.#getErrorLocation(err?.stack);
 		let str = !localMessage.isOwner ? 'Please send this error stack to the owner :\n\n' : '\n';
 
-		str += `Type : ${err.name || 'Unknown'}\nMessage : ${err.message || 'Unknown'}\nStack Trace :\n${(localMessage.isOwner ? err?.stack?.substring(0, 70) : err?.stack?.substring(0, 20)) || 'Unknown'}`;
+		str += `Type : ${err.name || 'Unknown'}\nMessage : ${err.message || 'Unknown'}\nFile : ${errorLocation.file}\nLine : ${errorLocation.line}\nStack Trace :\n${(localMessage.isOwner ? err?.stack?.substring(0, 70) : err?.stack?.substring(0, 20)) || 'Unknown'}`;
 
 		await builder
 			.destination(localMessage.from)
@@ -450,7 +482,54 @@ export class MessageHandler {
 			)
 			.send();
 
-		loggers.error(color(err.message, 'white'));
+		loggers.error(color(err.message, 'white'), color(`(${errorLocation.file}:${errorLocation.line})`, 'gray'));
+	}
+
+	#getErrorLocation(stack) {
+		const fallback = { file: 'message-handler.js', line: 'unknown' };
+
+		if (!stack) {
+			return fallback;
+		}
+
+		const stackLines = String(stack).split('\n');
+		const framePattern = /\((?:file:\/\/)?(.+?):(\d+):(\d+)\)|at (?:file:\/\/)?(.+?):(\d+):(\d+)/;
+
+		for (const line of stackLines) {
+			if (!line.includes(' at ')) {
+				continue;
+			}
+
+			if (line.includes('message-handler.js') || line.includes('node:internal') || line.includes('internal/')) {
+				continue;
+			}
+
+			const match = line.match(framePattern);
+
+			if (!match) {
+				continue;
+			}
+
+			const filePath = (match[1] || match[4] || '')
+				.trim()
+				.replace(/\\/g, '/')
+				.replace(/[?#].*$/, '');
+			const lineNumber = match[2] || match[5] || 'unknown';
+
+			if (!filePath) {
+				continue;
+			}
+
+			const srcIndex = filePath.lastIndexOf('/src/');
+			const displayPath = srcIndex !== -1 ? filePath.slice(srcIndex + 1) : filePath.split('/').slice(-2).join('/');
+
+			return {
+				file: displayPath || filePath,
+				line: lineNumber
+			};
+		}
+
+		return fallback;
 	}
 
 	async #handleOffline(client, message) {
@@ -626,13 +705,25 @@ export class MessageHandler {
 		}
 
 		const runtime = this.#configuration.flags?.runtime ?? Date.now();
+		const signature = this.#buildLogSignature(message);
+		const isContinuation = this.#canRewriteLog(message, signature);
+		const repeatCount = isContinuation ? this.#lastLog.count + 1 : 1;
+
+		if (isContinuation) {
+			readline.moveCursor(process.stdout, 0, -1);
+			readline.clearLine(process.stdout, 0);
+			readline.cursorTo(process.stdout, 0);
+		}
+
 		const senderInfo = message.isFromMe
-			? `${color('[', 'gray')}${color('HOST', 'salmon')}${color(']', 'gray')} ${color(global.__botName, 'yellow')} ${color(message.prettyNumber, 'purple')}`
-			: `${color(message.pushname, 'yellow')} ${color(message.prettyNumber, 'purple')}`;
+			? `${color('[', 'gray')}${color('HOST', 'salmon')}${color(']', 'gray')} ${color(global.__botName, 'yellow')}`
+			: `${color(message.pushname, 'yellow')}`;
 
 		const messageBody = color(message.query?.replace(/[\t\n]/g, ' ').substring(0, 35), 'white');
-		const runtimeInfo = `${SEPARATOR}  ${color(((Date.now() - runtime) / 1000).toFixed(0), '#F1FA8C')}${color('s', 'lemon')}`;
-		const messageFrom = `${SEPARATOR}  ${color('in', 'white')} ${color(message.isGroup ? `group ${message.groupName}` : 'private chat', 'lavender')}${(message.isGroup && color(' id ', 'white') + color(message.groupId, 'purple')) || ''}`;
+		const runtimeInfo = `${SEPARATOR} ${color(((Date.now() - runtime) / 1000).toFixed(0), '#F1FA8C')}${color('s', 'lemon')}${
+			repeatCount > 1 ? ` ${color(`(×${repeatCount})`, 'glowYellow')}` : ''
+		}`;
+		const messageFrom = `${SEPARATOR} ${color('in', 'white')} ${color(message.isGroup ? `group ${message.groupName}` : 'private chat', 'lavender')}${(message.isGroup && color(' id ', 'white') + color(message.groupId, 'purple')) || ''}`;
 
 		let fullBody;
 
@@ -652,7 +743,42 @@ export class MessageHandler {
 			fullBody = `${color(isPossiblyCaption && message.body !== 'No Caption' ? 'caption' : 'message', 'softGreen')} ${color(message.body?.substring(0, 20).replace(/[\t\n]/g, ' '), 'white')}`;
 		}
 
-		loggers.info(`${senderInfo} ${SEPARATOR} `, fullBody, messageFrom, runtimeInfo);
+		loggers.info(`${senderInfo} ${SEPARATOR}`, fullBody, messageFrom, runtimeInfo);
+
+		this.#lastLog = {
+			kind: message.isCmd ? 'cmd' : 'message',
+			sender: message.sender,
+			from: message.from,
+			command: message.isCmd ? message.cmd : null,
+			signature,
+			marker: stdoutWriteCounter,
+			count: repeatCount
+		};
+	}
+
+	#canRewriteLog(message, signature) {
+		if (!message.isCmd || this.#lastLog.kind !== 'cmd') {
+			return false;
+		}
+
+		if (stdoutWriteCounter !== this.#lastLog.marker) {
+			return false;
+		}
+
+		return (
+			this.#lastLog.sender === message.sender &&
+			this.#lastLog.from === message.from &&
+			this.#lastLog.command === message.cmd &&
+			this.#lastLog.signature === signature
+		);
+	}
+
+	#buildLogSignature(message) {
+		const commandBody = message.isCmd
+			? `${message.prefix || ''}${message.cmd || ''} ${message.query || ''}`.trim()
+			: message.body || '';
+
+		return `${message.from || ''}|${message.sender || ''}|${commandBody}`;
 	}
 
 	#getLegacyClient() {
