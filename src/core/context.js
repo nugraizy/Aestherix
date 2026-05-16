@@ -37,11 +37,7 @@ function crawlProperty(obj, propName) {
 	}
 }
 
-async function ensurePrefixCache(client) {
-	if (!configuration.isFirstConnectionForCache && configuration.prefix.values) {
-		return;
-	}
-
+async function refreshPrefixCache(client) {
 	const settings = await fs.readJSON(SETTINGS_PATH);
 	const dataBanned = await getBannedUsers(prisma);
 	const rawJid = client.user?.id;
@@ -88,7 +84,7 @@ async function ensurePrefixCache(client) {
 		prefixValues = [settings.prefix.pref || '.'];
 	}
 
-	const escCharClass = (str) => str.replace(/[[\]\\^$]/g, (ch) => `\\${ch}`);
+	const escCharClass = (str) => str.replace(/[\[\]\\^$]/g, (ch) => `\\${ch}`);
 	const escaped = prefixValues.map(escCharClass).join('');
 	const prefixReg = prefixMode === 'multi' ? new RegExp(`^[${escaped}]`) : null;
 
@@ -100,6 +96,23 @@ async function ensurePrefixCache(client) {
 	configuration.owners = [settings.owner_number, ...settings.team_number, myJid];
 	configuration.settings = settings;
 	configuration.isFirstConnectionForCache = false;
+}
+
+async function ensurePrefixCache(client) {
+	if (!configuration.isFirstConnectionForCache && configuration.prefix.values) {
+		if (!configuration.prefix.refreshing) {
+			configuration.prefix.refreshing = true;
+			refreshPrefixCache(client)
+				.catch(() => {})
+				.finally(() => {
+					configuration.prefix.refreshing = false;
+				});
+		}
+
+		return;
+	}
+
+	await refreshPrefixCache(client);
 }
 
 async function ensureGroupCache(client, from) {
@@ -220,7 +233,7 @@ export class Context {
 	get isBotInstance() {
 		return this.#memo(
 			'isBotInstance',
-			() => this.#raw?.key?.id?.startsWith('BAE5') || this.#raw?.key?.id?.startsWith('3EB0') || this.device === 'unknown'
+			() => this.#raw?.key?.id?.startsWith('BAE5') || this.#raw?.key?.id?.startsWith('3EB0') || this.device?.name === 'unknown'
 		);
 	}
 	get sender() {
@@ -365,7 +378,27 @@ export class Context {
 		return this.#memo('filename', () => this.sender + (this.#raw?.key?.id || Date.now()));
 	}
 	get device() {
-		return this.#memo('device', () => getDevice(this.#raw.key.id));
+		return this.#memo('device', () => {
+			const name = getDevice(this.#raw.key.id);
+			const isIos = name === 'ios';
+			const isAndroid = name === 'android';
+			const isWeb = name === 'web';
+			const isDesktop = name === 'desktop';
+
+			return { name, isIos, isAndroid, isWeb, isDesktop };
+		});
+	}
+	get isIos() {
+		return this.#memo('isIos', () => this.device.isIos);
+	}
+	get isAndroid() {
+		return this.#memo('isAndroid', () => this.device.isAndroid);
+	}
+	get isWeb() {
+		return this.#memo('isWeb', () => this.device.isWeb);
+	}
+	get isDesktop() {
+		return this.#memo('isDesktop', () => this.device.isDesktop);
 	}
 	get typeQuoted() {
 		return this.#memo('typeQuoted', () => extractTypeQuoted(this.#raw, this.type));
@@ -400,8 +433,12 @@ export class Context {
 						: { ...mMediaData, ...lidMaps.get(mMediaData?.participant) } || {}
 					: m || {};
 
-			data.extract = () => {
-				const messages = this.#store.loadMessage(this.from, data.stanzaId);
+			data.extract = async () => {
+				const messages = await this.#store.loadMessage(this.from, data.stanzaId);
+
+				if (!messages) {
+					return messages;
+				}
 
 				messages.parse = async () => Context.from(messages, this.#client, this.#store, this.#state);
 				return messages;

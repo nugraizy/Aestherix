@@ -22,7 +22,7 @@ export class GroupCache {
 	has(groupId) {
 		const entry = this.#metadata.get(groupId);
 
-		return entry && (Date.now() - entry._fetchedAt < this.#ttl);
+		return entry && Date.now() - entry._fetchedAt < this.#ttl;
 	}
 
 	get(groupId) {
