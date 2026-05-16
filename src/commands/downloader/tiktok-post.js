@@ -95,7 +95,7 @@ export default {
 
 				const images = posts[data].urls.images;
 
-				if (device === 'ios') {
+				if (device.isIos) {
 					await wait.update(`Sending ${images.length} image(s)...`);
 
 					await client.send(from, { text: caption.trim() }, { quoted: message });

@@ -79,7 +79,7 @@ export default {
 
 				await wait.update(`Songs with keyword "${query}" found. Total: ${total}`);
 
-				if (device === 'ios') {
+				if (device.isIos) {
 					const items = results.slice(0, 10);
 					const container = {
 						text: 'Qobuz Downloader'.formatHeaders() + '\n\n',
