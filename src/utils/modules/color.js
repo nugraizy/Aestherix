@@ -122,7 +122,7 @@ const ICON = color('ᛟ', 'lilac');
 const BANNER_ICON_1 = color('❝', 'red');
 const BANNER_ICON_2 = color('❞', 'red');
 const { version } = await fs.readJSON('./package.json');
-const SPLITTER = color('●', 'darkGray');
+const SPLITTER = color('•', 'darkGray');
 const AUTHOR = color('nugraizy', 'red');
 
 export const printBanner = () =>
