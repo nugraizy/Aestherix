@@ -118,7 +118,7 @@ export default {
 				return client.reply(from, captionFull.trim(), message);
 			}
 
-			if (device === 'ios') {
+			if (device.isIos) {
 				const builder = new client.TemplateBuilder.Native();
 				const { captionFull, buttons } = renderProcess(processes, builder);
 
