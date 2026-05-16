@@ -118,6 +118,9 @@ When updating frontend hash:
 - never use:
   - the version bump commit hash
   - the release commit hash
+- update the hash in public/dashboard/index.html at the hero commit footer link:
+  - <a id="project-commit-value" ...>short-hash</a>
+  - the href points to the full commit URL
 
 Correct flow:
 

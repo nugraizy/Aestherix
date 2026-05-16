@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.7.2」2026-05-16
+
+## Fixed
+- **Pipeline multi-media fan-out** — piping now forwards multiple media outputs and improves error logging around failed stages. ([`586beb1`](https://github.com/nugraizy/aestherix/commit/586beb1))
+- **GitHub graph retry payload** — theme retry now uses the correct parsed username payload. ([`569d7f0`](https://github.com/nugraizy/aestherix/commit/569d7f0))
+- **Context + group cache** — tightened cache resolution and context behavior for group data. ([`d2484d7`](https://github.com/nugraizy/aestherix/commit/d2484d7))
+- **Client socket + command loader** — refined core updates for socket behavior and command loading. ([`40fc2b6`](https://github.com/nugraizy/aestherix/commit/40fc2b6))
+- **Downloader commands** — adjusted downloader behaviors for updated flow. ([`5288936`](https://github.com/nugraizy/aestherix/commit/5288936))
+- **Owner utilities** — updated owner command utilities to match current core expectations. ([`4402bc4`](https://github.com/nugraizy/aestherix/commit/4402bc4))
+
+## Chores
+- **Prototype typings** — synced prototype type definitions across shared surfaces. ([`11148e3`](https://github.com/nugraizy/aestherix/commit/11148e3))
+- **Color utilities** — refreshed shared color helpers and palette handling. ([`9cd69dd`](https://github.com/nugraizy/aestherix/commit/9cd69dd))
+- **Lockfile refresh** — updated dependency lockfile. ([`4906cfb`](https://github.com/nugraizy/aestherix/commit/4906cfb))
+
+---
+
 # 「7.7.1」2026-05-15
 
 ## Fixed
