@@ -15,13 +15,13 @@ export default {
 	status: 'enable',
 	run: async ({ from, message, query }, client) => {
 		if (!query) {
-			return client.reply(from, 'You must provide a query.', { from, quoted: message });
+			return client.reply(from, 'You must provide a query.', message);
 		}
 
 		const result = await _3hentai(query);
 
 		if (result?.error) {
-			return client.reply(from, result.error, { from, quoted: message });
+			return client.reply(from, result.error, message);
 		}
 
 		const { artists, categories, images, language, tags, title, totalPages, uploadDate } = result;
@@ -36,9 +36,9 @@ Language : ${language.join(', ')}
 Categories : ${categories.join(', ')}
 Tot. Pages : ${totalPages}`;
 
-		await client.reply(from, caption.formatForm(), { from, quoted: message });
+		await client.reply(from, caption.formatForm(), message);
 
-		await client.reply(from, 'Processing PDFs', { from, quoted: message });
+		await client.reply(from, 'Processing PDFs', message);
 
 		const buffer = await imageToPdf(images);
 
