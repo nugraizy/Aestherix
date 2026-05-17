@@ -594,40 +594,41 @@ class ComixToken {
 			});
 
 			const page = await browser.newPage();
-			let token = null;
 
 			await page.setRequestInterception(true);
 
-			page.on('request', (request) => {
-				const url = request.url();
+			const tokenPromise = new Promise((resolve, reject) => {
+				const timeout = setTimeout(() => reject(new Error(`Failed to capture token from ${pageUrl}`)), 30000);
 
-				if (url.includes(apiPathSuffix)) {
-					const parsed = new URL(url);
-					const captured = parsed.searchParams.get('_');
+				page.on('request', (request) => {
+					const url = request.url();
 
-					if (captured) {
-						token = captured;
+					if (url.includes(apiPathSuffix)) {
+						const parsed = new URL(url);
+						const captured = parsed.searchParams.get('_');
+
+						if (captured) {
+							clearTimeout(timeout);
+							resolve(captured);
+						}
 					}
-				}
 
-				if (['image', 'font'].includes(request.resourceType())) {
-					request.abort();
-				} else {
-					request.continue();
-				}
+					const resourceType = request.resourceType();
+					const isAllowed = resourceType === 'document' || resourceType === 'script' || (resourceType === 'xhr' && url.includes('comix.to'));
+
+					if (isAllowed) {
+						request.continue();
+					} else {
+						request.abort();
+					}
+				});
 			});
 
-			await page.goto(pageUrl, { waitUntil: 'networkidle0', timeout: 30000 });
+			page.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
 
-			if (!token) {
-				await page.waitForFunction(() => true, { timeout: 5000 }).catch(() => {});
-			}
+			const token = await tokenPromise;
 
 			await page.close();
-
-			if (!token) {
-				throw new Error(`Failed to capture token from ${pageUrl}`);
-			}
 
 			ComixToken.setCache(cacheKey, token);
 			return token;
