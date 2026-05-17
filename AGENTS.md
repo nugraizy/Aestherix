@@ -31,20 +31,29 @@ aestherix/
 │   ├── schema.prisma                # SQL schema
 │   └── schema.mongodb.prisma        # MongoDB schema
 ├── public/
-│   └── dashboard/                   # Dashboard frontend
-│       ├── index.html               # Main UI
-│       ├── home.html / home.js
-│       ├── login.html / login.js
-│       ├── albums.html / albums.js
-│       ├── editor.html
-│       ├── styles.css
-│       ├── app.js                   # Frontend logic (~8140 lines)
-│       ├── app/
-│       │   ├── constants.js
-│       │   ├── dom.js
-│       │   ├── formatters.js
-│       │   └── state.js
-│       └── zen-cursor.js
+│   ├── build/                       # CCapture.all.min.js (used by the gradient renderer)
+│   └── ccapture-workers/
+├── dashboard/                       # Self-contained dashboard subproject
+│   ├── client/                      # Svelte 5 + Vite frontend
+│   │   ├── public/                  # Vite static dir (favicon, etc. — bundled into dist/)
+│   │   ├── src/                     # Svelte source (App.svelte, main.js)
+│   │   ├── components/              # UI components
+│   │   ├── pages/                   # Home, Controls, Settings, Albums, FileEditor
+│   │   ├── lib/                     # stores, socket, theme, toast, spotify, format, colors
+│   │   ├── package.json / vite.config.js
+│   │   └── dist/                    # build output (served by the server below)
+│   └── server/                      # Express + Socket.IO + service factories
+│       ├── index.js                 # createDashboard() / startDashboard()
+│       ├── routes/                  # 13 route files (auth, commands, flags, prefix, …)
+│       ├── services/                # auth, audit, undo, profile-pictures, users, editor,
+│       │                            #   spotify, system, bot-bridge, monitor
+│       ├── middleware/              # auth, no-store, validation
+│       ├── socket/                  # Socket.IO setup + confirmation bridge
+│       ├── lib/                     # images.js, paths.js
+│       └── monitor.js               # dashboard catalog + log buffer
+├── gradient/                        # /render and /gradient (mesh-gradient + puppeteer)
+│   ├── index.js
+│   └── README.md
 └── src/
     ├── index.js                     # Main bot module — CLI, store, profile pictures, dashboard bridge
     ├── core/                        # Class-based connection layer
@@ -65,9 +74,6 @@ aestherix/
     │   ├── store.js                 # Store class (persistent Baileys store)
     │   ├── utils.js                 # Shared utilities (initContact, checkNetwork, etc.)
     │   ├── webhook.js               # WebhookServer class (GitHub webhook)
-    │   ├── dashboard/
-    │   │   ├── server.js            # Dashboard Express + Socket.IO (~4000 lines)
-    │   │   └── monitor.js           # Dashboard state monitor
     │   └── handlers/
     │       ├── anonymous.js
     │       ├── anti-nsfw.js
@@ -358,25 +364,33 @@ boot({ cli, OPTIONS, store, sessionName })
 ### `dashboard.js` — Standalone dashboard (35 lines)
 Runs only the Express + Socket.IO dashboard server without the bot. Used for `npm run start:dashboard`.
 
-### `src/core/dashboard/server.js` — Dashboard server (~4000 lines)
-Express + Socket.IO server on `DASHBOARD_PORT` (default 4000). Handles:
-- REST API under `/api/dashboard/` (prefix, flags, commands, users, profile pictures, file editor)
-- Socket.IO rooms: `dashboard:status`, `dashboard:commands`, `dashboard:users`, `dashboard:logs`, `dashboard:confirmation:*`
-- Owner auth via OTP; admin auth via session cookies
-- Dashboard bridge to embedded bot on port 4010 (`DASHBOARD_BRIDGE_PORT`)
+### `dashboard/server/` — Dashboard backend
+Express + Socket.IO server on `DASHBOARD_PORT` (default 4000). The
+~4000-line monolith was split into:
+- `index.js` — `createDashboard()` / `startDashboard()` factory
+- `routes/` — 13 route files mapping `/api/dashboard/*` to services
+- `services/` — closure-based factories (auth, audit, undo, profile-pictures, users, editor, spotify, system, bot-bridge, monitor)
+- `middleware/` — auth, no-store, validation
+- `socket/` — Socket.IO setup, rooms, confirmation bridge
+- `lib/` — pure helpers (`images.js`, `paths.js`)
+- `monitor.js` — dashboard catalog + log buffer
 
-### `public/dashboard/` — Dashboard frontend
-Static files served by the dashboard server. Key files:
+Owner auth via OTP; admin auth via session cookies. Dashboard bridges
+to the embedded bot on port 4010 (`DASHBOARD_BRIDGE_PORT`) for runtime
+sync, log streaming, and restart.
 
-| File | Purpose |
-|---|---|
-| `index.html` | Main UI with Controls, Status, Audit, Logs, Settings panels |
-| `app.js` (~8140 lines) | All frontend logic — polling, Socket.IO, rendering, event handlers |
-| `app/dom.js` | DOM element references (cached `getElementById` lookups) |
-| `app/state.js` | Reactive state object (commands, flags, users, prefixConfig, etc.) |
-| `app/constants.js` | Storage keys, palette configs, route paths |
-| `app/formatters.js` | Text rendering, markdown, syntax highlighting utilities |
-| `styles.css` | All dashboard styling (~6571 lines) |
+### `dashboard/client/` — Dashboard frontend
+Svelte 5 + Vite. `npm run dashboard:build` produces
+`dashboard/client/dist/` which the server serves at `/dashboard`.
+Components live in `components/`, pages in `pages/`, shared logic in
+`lib/` (stores, socket singleton, theme, toast, spotify, format,
+colors). The legacy vanilla `app.js` and `styles.css` are gone.
+
+### `gradient/` — Mesh gradient renderer
+Standalone module exposing `createGradientRouter()` for `/render` and
+`/gradient`. Uses puppeteer (lazy import) and ffmpeg. The dashboard
+server mounts it by default; standalone deployments without canvas
+needs can opt out via `createDashboard({ mountGradient: false })`.
 
 ---
 
@@ -605,7 +619,7 @@ Pipe the output of one command into another using `|`:
 - Can run standalone via `dashboard.js` without the bot
 - Real-time via Socket.IO; REST API under `/api/dashboard/`
 - Owner-authenticated endpoints via OTP; admin endpoints require dashboard session cookies
-- `public/dashboard/` is served statically
+- `dashboard/client/dist/` is built by Vite and served statically at `/dashboard` by the server
 
 ### REST API (`/api/dashboard/...`)
 | Endpoint | Auth | Description |

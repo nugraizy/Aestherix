@@ -46,12 +46,13 @@ model BaileysStore {
 
 /// Pinterest profile picture history entries.
 model PinterestProfilePicture {
-  id        String   @id @default(cuid())
-  timestamp String   @unique
-  url       String
-  thumbnail String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(cuid())
+  timestamp    String   @unique
+  url          String
+  thumbnail    String
+  colorPalette String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 

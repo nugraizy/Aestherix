@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import P from 'pino';
 
 import { Cli } from './core/cli.js';
-import { initializeDashboardMonitor } from './core/dashboard/monitor.js';
+import { initializeDashboardMonitor } from '../dashboard/server/monitor.js';
 import { startDashboardBridge } from './core/services/dashboard-bridge.js';
 import { hydrateProfilePictureHistory, startProfilePictureService } from './core/services/profile-picture.js';
 import { Store } from './core/store.js';

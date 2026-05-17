@@ -9,8 +9,7 @@ import utc from 'dayjs/plugin/utc.js';
 import path from 'path';
 import { platform } from 'process';
 
-import { initializeDashboardMonitor } from './src/core/dashboard/monitor.js';
-import { server } from './src/core/dashboard/server.js';
+import { startDashboard } from './dashboard/server/index.js';
 import configuration from './src/helper/config/connect.js';
 
 dotenvx.config({
@@ -31,5 +30,4 @@ global.__botName = 'Aestherix Dashboard';
 configuration.cli = configuration.cli || {};
 configuration.flags = configuration.flags || {};
 
-await initializeDashboardMonitor(configuration);
-server();
+await startDashboard();

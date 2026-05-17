@@ -8,7 +8,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 import { color } from '../utils/modules/color.js';
-import { pushDashboardLog } from './dashboard/monitor.js';
+import { pushDashboardLog } from '../../dashboard/server/monitor.js';
 
 const TIME_FORMAT = 'HH:mm DD/MM';
 

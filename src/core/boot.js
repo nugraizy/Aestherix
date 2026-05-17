@@ -7,8 +7,8 @@ import readline from 'readline';
 import configuration from '../helper/config/connect.js';
 import prisma from '../helper/database/prisma.js';
 import { color, loggers } from '../utils/modules/index.js';
-import { refreshDashboardCommandCatalog } from './dashboard/monitor.js';
-import { server as startDashboard } from './dashboard/server.js';
+import { startDashboard } from '../../dashboard/server/index.js';
+import { refreshDashboardCommandCatalog } from '../../dashboard/server/monitor.js';
 import { initWerewolfHandler } from './handlers/games/werewolf.js';
 
 import { Auth } from './auth.js';

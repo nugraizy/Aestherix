@@ -164,6 +164,26 @@ npm run start:bot
 npm run start:dashboard
 ```
 
+### Building the dashboard frontend
+
+The dashboard frontend lives in `dashboard/client/` (Svelte 5 + Vite).
+Install its dependencies and build the production bundle:
+
+```sh
+# one-time, after cloning the repo
+npm run dashboard:install
+
+# rebuild after editing dashboard/client/**
+npm run dashboard:build
+
+# Vite dev server with HMR (proxies /api and /socket.io to the bot)
+npm run dashboard:dev
+```
+
+The build output (`dashboard/client/dist/`) is served by the dashboard
+server at `/dashboard`. `npm run build` is an alias of
+`npm run dashboard:build`.
+
 ### PM2 split runtime
 
 ```sh

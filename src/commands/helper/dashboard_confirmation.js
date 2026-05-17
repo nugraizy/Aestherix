@@ -1,4 +1,4 @@
-import { processDashboardConfirmationAction } from '../../core/dashboard/server.js';
+import { processDashboardConfirmationAction } from '../../../dashboard/server/socket/confirmation.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps}

@@ -13,6 +13,7 @@ databases/users/contacts-backup.json
 .flaskenv*
 !.env.project
 !.env.vault
-public/dashboard/build/
+dashboard/client/dist/
+dashboard/client/node_modules/
 next_release/
 cache/

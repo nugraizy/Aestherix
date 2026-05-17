@@ -5,7 +5,7 @@ import {
 	getDashboardLogs,
 	setDashboardCommandState,
 	setDashboardFlagState
-} from '../dashboard/monitor.js';
+} from '../../../dashboard/server/monitor.js';
 import configuration from '../../helper/config/connect.js';
 import { banUser, getBannedUsers, getUserLimit, unbanUser, upsertUserLimit } from '../../helper/database/adapters/user.js';
 import prisma from '../../helper/database/prisma.js';
@@ -239,6 +239,24 @@ export const startDashboardBridge = (resolveWaClient) => {
 
 		res.json({ ok: true, restarting: true });
 		setTimeout(() => process.exit(0), 220);
+	});
+
+	app.get('/internal/dashboard/ping', (req, res) => {
+		const token = String(req.headers['x-dashboard-bridge-token'] || '');
+
+		if (!token || token !== DASHBOARD_BRIDGE_TOKEN) {
+			return res.status(401).json({ ok: false, message: 'Unauthorized bridge token.' });
+		}
+
+		const waClient = typeof resolveWaClient === 'function' ? resolveWaClient() : null;
+
+		return res.json({
+			ok: true,
+			online: true,
+			waConnected: Boolean(waClient?.send),
+			pid: process.pid,
+			uptimeSeconds: Math.floor(process.uptime())
+		});
 	});
 
 	const port = Number.isFinite(DASHBOARD_BRIDGE_PORT) && DASHBOARD_BRIDGE_PORT > 0 ? DASHBOARD_BRIDGE_PORT : 4010;

@@ -72,7 +72,7 @@ const normalizeEntry = (entry) => {
 /**
  * @param {PrismaClient} db
  * @param {{ limit?: number }} [options]
- * @returns {Promise<Array<{ timestamp: string, url: string, thumbnail: string }>>}
+ * @returns {Promise<Array<{ timestamp: string, url: string, thumbnail: string, colorPalette: string[] }>>}
  */
 export const listPinterestProfilePictures = async (db, { limit } = {}) => {
 	const safeLimit = Number(limit) > 0 ? Math.min(1000, Number(limit)) : undefined;
@@ -84,8 +84,77 @@ export const listPinterestProfilePictures = async (db, { limit } = {}) => {
 	return rows.reverse().map((row) => ({
 		timestamp: String(row.timestamp),
 		url: String(row.url),
-		thumbnail: String(row.thumbnail || row.url)
+		thumbnail: String(row.thumbnail || row.url),
+		colorPalette: parseColorPalette(row.colorPalette)
 	}));
+};
+
+const HEX_PATTERN = /^#[0-9a-fA-F]{6}$/;
+
+function parseColorPalette(raw) {
+	const value = String(raw || '').trim();
+
+	if (!value) {
+		return [];
+	}
+
+	if (value.startsWith('[')) {
+		try {
+			const parsed = JSON.parse(value);
+
+			if (Array.isArray(parsed)) {
+				return parsed.map((item) => String(item || '').toLowerCase()).filter((item) => HEX_PATTERN.test(item));
+			}
+		} catch {
+			return [];
+		}
+	}
+
+	if (HEX_PATTERN.test(value)) {
+		return [value.toLowerCase()];
+	}
+
+	return [];
+}
+
+/**
+ * @param {PrismaClient} db
+ * @param {string} timestamp
+ * @param {string[]} hexes
+ * @returns {Promise<void>}
+ */
+export const setPinterestProfilePictureColorPalette = async (db, timestamp, hexes) => {
+	const safeTimestamp = String(timestamp || '').trim();
+	const safePalette = (Array.isArray(hexes) ? hexes : [])
+		.map((hex) => String(hex || '').toLowerCase())
+		.filter((hex) => HEX_PATTERN.test(hex));
+
+	if (!safeTimestamp || !safePalette.length) {
+		return;
+	}
+
+	const serialized = JSON.stringify(safePalette);
+
+	await enqueueWrite(`pinterestProfilePicture:${safeTimestamp}`, async () => {
+		if (disposed) {
+			return;
+		}
+
+		await withRetry(() =>
+			db.pinterestProfilePicture
+				.update({
+					where: { timestamp: safeTimestamp },
+					data: { colorPalette: serialized }
+				})
+				.catch((error) => {
+					if (error?.code === 'P2025') {
+						return null;
+					}
+
+					throw error;
+				})
+		);
+	});
 };
 
 /**
