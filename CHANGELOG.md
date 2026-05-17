@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.7.3」2026-05-17
+
+## Added
+- **Dashboard rewrite** — `public/dashboard/` (~8k lines) and `src/core/dashboard/server.js` (~4k lines) replaced by a self-contained `dashboard/` workspace with a Svelte 5 + Vite frontend and a modular Express + Socket.IO backend split into routes/services/middleware/socket factories. Adds a 404 page, logout confirmation, animated sun/moon mode toggle, light-mode editor syntax colors, and a split-mode bot online indicator. ([`f9de7c8`](https://github.com/nugraizy/aestherix/commit/f9de7c8))
+- **Bridge ping endpoint** — token-gated `GET /internal/dashboard/ping` on the bot bridge so the dashboard can detect bot-process state in PM2 split mode. ([`f9de7c8`](https://github.com/nugraizy/aestherix/commit/f9de7c8))
+- **Manager-backed embedded client lookup** — `dashboard/server/lib/client.js` uses the v7 `Manager` registry instead of the removed `global.client.instance`, restoring embedded-mode runtime sync, blocking, and confirmation paths. ([`f9de7c8`](https://github.com/nugraizy/aestherix/commit/f9de7c8))
+- **Pinterest color palette** — profile picture entries persist their dominant palette via a new `colorPalette` field on both schemas; `node-vibrant` replaces `fast-average-color-node`. ([`f9de7c8`](https://github.com/nugraizy/aestherix/commit/f9de7c8))
+- **Gradient module** — extracted into `gradient/` with its own README; the dashboard mounts it by default and standalone deployments can opt out via `createDashboard({ mountGradient: false })`. ([`f9de7c8`](https://github.com/nugraizy/aestherix/commit/f9de7c8))
+- **Prisma schema auto-selection** — `prisma.config.js` now resolves the schema file from `DATABASE_PROVIDER`, so `prisma generate` / `db push` / `migrate` / `studio` use `prisma/schema.mongodb.prisma` for `mongodb` and `prisma/schema.prisma` otherwise; the `:mongo` scripts remain as explicit overrides. ([`02bdebb`](https://github.com/nugraizy/aestherix/commit/02bdebb))
+
+## Fixed
+- **3hentai reply argument** — `client.reply` now receives the quoted message directly instead of the obsolete `{ from, quoted }` wrapper that no longer matches the v7 `ClientSocket.reply` signature. ([`830911b`](https://github.com/nugraizy/aestherix/commit/830911b))
+
+---
+
 # 「7.7.2」2026-05-16
 
 ## Fixed
