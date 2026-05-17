@@ -669,6 +669,8 @@ Uses **Prisma** with two separate schemas. Provider is set via `DATABASE_PROVIDE
 
 > **MongoDB note:** `prisma migrate` is NOT supported. Use `prisma db push` instead.
 
+> **Schema auto-selection:** `prisma.config.js` reads `DATABASE_PROVIDER` and routes every Prisma command (`generate`, `db push`, `migrate`, `studio`) to the matching schema — `prisma/schema.mongodb.prisma` for `mongodb`, `prisma/schema.prisma` otherwise. The `:mongo` npm scripts remain as explicit overrides but are no longer required.
+
 ### SQL Schema Models
 | Model | Purpose | Scoped |
 |---|---|---|

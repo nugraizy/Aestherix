@@ -126,12 +126,19 @@ npm run db:migrate
 
 **MongoDB:**
 
-MongoDB does not support `migrate`. Use `db push` with the dedicated schema instead:
+`prisma.config.js` reads `DATABASE_PROVIDER` and switches to
+`prisma/schema.mongodb.prisma` automatically when it equals
+`mongodb`, so the regular scripts already do the right thing:
 
 ```sh
-npm run db:generate:mongo
-npm run db:push:mongo
+npm run db:generate
+npm run db:push
 ```
+
+`prisma migrate` is **not** supported on MongoDB — always use `db push`.
+The `npm run db:generate:mongo` / `db:push:mongo` scripts remain as
+explicit overrides if you want to force the Mongo schema regardless of
+`DATABASE_PROVIDER`.
 
 ### Other database scripts
 

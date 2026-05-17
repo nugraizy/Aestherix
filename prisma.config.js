@@ -1,12 +1,18 @@
 /**
- * Prisma Config — SQL databases (PostgreSQL / MySQL / SQLite)
+ * Prisma Config — auto-selects schema based on DATABASE_PROVIDER.
  *
  * Set DATABASE_PROVIDER and DATABASE_URL in your .env file.
- * Then run:
- *   npm run db:generate      # generate Prisma Client
- *   npm run db:migrate        # create + apply migrations (dev)
- *   npm run db:migrate:deploy # apply pending migrations (prod)
- *   npm run db:push           # push schema without migration history
+ *   - DATABASE_PROVIDER="mongodb"  → prisma/schema.mongodb.prisma
+ *   - any other provider           → prisma/schema.prisma  (postgresql/mysql/sqlite)
+ *
+ * All `prisma ...` commands (generate, db push, migrate, studio) now pick
+ * the right schema automatically, so `npm install` regenerates the correct
+ * client when you switch DATABASE_PROVIDER.
+ *
+ * Usage:
+ *   npm run db:generate       # generate Prisma Client
+ *   npm run db:push           # push schema (works for both SQL and Mongo)
+ *   npm run db:migrate        # SQL only (Mongo does not support migrate)
  *   npm run db:studio         # open Prisma Studio
  *
  * @see https://www.prisma.io/docs/orm/reference/prisma-config-reference
@@ -17,14 +23,20 @@ import { defineConfig } from 'prisma/config';
 
 config({ quiet: true });
 
-export default defineConfig({
-	schema: 'prisma/schema.prisma',
+const provider = String(process.env.DATABASE_PROVIDER || '').toLowerCase();
+const isMongo = provider === 'mongodb' || provider === 'mongo';
 
-	migrations: {
-		path: 'prisma/migrations'
-	},
+const schema = isMongo ? 'prisma/schema.mongodb.prisma' : 'prisma/schema.prisma';
 
+const baseConfig = {
+	schema,
 	datasource: {
 		url: process.env.DATABASE_URL ?? ''
 	}
-});
+};
+
+if (!isMongo) {
+	baseConfig.migrations = { path: 'prisma/migrations' };
+}
+
+export default defineConfig(baseConfig);
