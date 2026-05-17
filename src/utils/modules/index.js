@@ -641,7 +641,7 @@ export const uploadToTelegraph = async (file) => {
 
 		return `https://telegra.ph${data[0].src}`;
 	} catch (error) {
-		log(error);
+		console.log(error);
 	}
 };
 

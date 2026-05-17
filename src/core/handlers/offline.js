@@ -27,7 +27,7 @@ const offlineHandler = async (client, { isGroup, from, sender, message }) => {
 			await client.reply(from, 'The owner is currently offline, please contact another time.', message);
 		}
 	} catch (err) {
-		log(err);
+		console.log(err);
 	}
 };
 

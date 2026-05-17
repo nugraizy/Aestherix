@@ -67,7 +67,7 @@ export const getWeather = (type, ...q) =>
 				emoji: EMOJIS[data.weather[0].icon]
 			});
 		} catch (err) {
-			log(err);
+			console.log(err);
 			reject(err);
 		}
 	});

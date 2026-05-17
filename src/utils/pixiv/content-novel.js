@@ -14,7 +14,7 @@ export const getNovelContent = (input) =>
 
 			resolve({ title, likeCount, userName, viewCount, userId, content, id });
 		} catch (err) {
-			log(err);
+			console.log(err);
 			reject(err);
 		}
 	});

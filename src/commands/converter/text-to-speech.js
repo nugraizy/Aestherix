@@ -45,7 +45,7 @@ export default {
 
 			await client.reply(from, 'Error while converting text to speech', message);
 
-			log(e);
+			console.log(e);
 		}
 	}
 };

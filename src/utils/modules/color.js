@@ -30,7 +30,7 @@ export class LoggerThemeManager {
 
 	apply(...obj) {
 		if (obj.length % 2 !== 0) {
-			log('Invalid Number of arguments. Please pairs of text and color.', obj);
+			console.log('Invalid Number of arguments. Please pairs of text and color.', obj);
 			return;
 		}
 

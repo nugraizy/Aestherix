@@ -36,7 +36,7 @@ export const toMp4 = (input, sender) =>
 						await fs.unlink(input);
 					}
 
-					log(err);
+					console.log(err);
 					reject(err);
 				}
 
@@ -46,7 +46,7 @@ export const toMp4 = (input, sender) =>
 				resolve(buffer);
 			});
 		} catch (err) {
-			log(err);
+			console.log(err);
 			reject(err);
 		}
 	});
@@ -71,7 +71,7 @@ export const gifToMp4 = (input, sender) =>
 							await fs.unlink(input);
 						}
 
-						log(err);
+						console.log(err);
 						reject(err);
 					}
 
@@ -82,7 +82,7 @@ export const gifToMp4 = (input, sender) =>
 				}
 			);
 		} catch (err) {
-			log(err);
+			console.log(err);
 			reject(err);
 		}
 	});
@@ -408,7 +408,7 @@ export const soundRemover = (input, sender) =>
 			loggers.info(`${color('Removed Sound', 'pink')} for ${color(sender, 'lilac')}`);
 			resolve({ result: { vocal, instrumental } });
 		} catch (err) {
-			log(err);
+			console.log(err);
 			loggers.error(`${color('Failed to Remove Sound', 'red')} for ${color(sender, 'lilac')}`);
 			reject(err);
 		}

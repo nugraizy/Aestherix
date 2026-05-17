@@ -46,7 +46,7 @@ export const searchDeviantArt = (keyword) =>
 					})
 			);
 		} catch (err) {
-			log(err);
+			console.log(err);
 			reject(err);
 		}
 	});

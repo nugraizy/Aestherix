@@ -21,7 +21,7 @@ export const downloadManga = (input) =>
 				}
 			});
 		} catch (err) {
-			log(err);
+			console.log(err);
 			reject(err);
 		}
 	});

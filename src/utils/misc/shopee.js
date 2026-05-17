@@ -49,7 +49,7 @@ export const shopeeProduct = (key, total = 5) =>
 			});
 			resolve(container);
 		} catch (err) {
-			log(err);
+			console.log(err);
 			resolve({ error: err });
 		}
 	});

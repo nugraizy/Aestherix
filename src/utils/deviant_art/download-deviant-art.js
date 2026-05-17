@@ -35,7 +35,7 @@ export const downloadDeviantArt = (input) =>
 				image
 			});
 		} catch (err) {
-			log(err);
+			console.log(err);
 			reject(err);
 		}
 	});

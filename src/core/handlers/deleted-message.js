@@ -205,7 +205,7 @@ const deletedHandler = async (client, message, fetches) => {
 			}
 		}
 	} catch (err) {
-		log(err);
+		console.log(err);
 	}
 };
 
