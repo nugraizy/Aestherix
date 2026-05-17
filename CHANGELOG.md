@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.7.4」2026-05-17
+
+## Added
+- **Chapter sort toggle** — atsumaru, comix, kiryuu, and shinigami chapter commands now have ascending/descending sort buttons with iOS button limit (18 per batch). ([`7d7b958`](https://github.com/nugraizy/aestherix/commit/7d7b958))
+
+## Fixed
+- **Global log removal** — replaced removed `log` global with `console.log` across 12 files. ([`12e20fb`](https://github.com/nugraizy/aestherix/commit/12e20fb))
+
+## Performance
+- **Comix token capture** — aggressive resource blocking (only document/script/XHR allowed) and early resolution on token intercept. ([`ffbea3f`](https://github.com/nugraizy/aestherix/commit/ffbea3f))
+
+---
+
 # 「7.7.3」2026-05-17
 
 ## Added
