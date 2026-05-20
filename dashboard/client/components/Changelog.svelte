@@ -1,6 +1,10 @@
 <script>
-	import { changelogOpen } from '../lib/stores.js';
 	import { renderMarkdown } from '../lib/markdown.js';
+	import { changelogOpen } from '../lib/stores.js';
+
+	const commitHashShort = '6badc401';
+	const commitHashFull = '6badc4011e60d8328b21460b237dfaf9ba7c48df';
+	const commitUrl = `https://github.com/nugraizy/aestherix/commit/${commitHashFull}`;
 
 	let html = '';
 	let loading = false;
@@ -70,7 +74,18 @@
 			tabindex="-1"
 		>
 			<header class="modal-head">
-				<h2 id="changelog-title">Changelog</h2>
+				<h2 id="changelog-title">
+					Changelog
+					<a
+						id="project-commit-value"
+						class="commit-link"
+						href={commitUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						({commitHashShort})
+					</a>
+				</h2>
 				<button class="close-btn" type="button" on:click={close} aria-label="Close changelog">×</button>
 			</header>
 			<div class="modal-body">
@@ -126,6 +141,20 @@
 	.modal-head h2 {
 		margin: 0;
 		font-size: var(--fs-md);
+		color: var(--accent);
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+	}
+
+	.commit-link {
+		font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+		font-size: var(--fs-xs);
+		color: var(--muted);
+		text-decoration: none;
+	}
+
+	.commit-link:hover {
 		color: var(--accent);
 	}
 

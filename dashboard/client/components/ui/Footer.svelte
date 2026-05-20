@@ -1,6 +1,6 @@
 <script>
 	import { createEventDispatcher } from 'svelte';
-	import { changelogOpen, status } from '../../lib/stores.js';
+	import { changelogOpen } from '../../lib/stores.js';
 	import Dropdown from './Dropdown.svelte';
 
 	export let palette = '';
@@ -18,9 +18,6 @@
 	<div class="brand">
 		<span class="logo" aria-hidden="true">✦</span>
 		<span class="title">Aestherix Dashboard</span>
-		{#if $status.version}
-			<span class="version">v{$status.version}</span>
-		{/if}
 		{#if paletteList.length}
 			<Dropdown
 				value={palette}
@@ -68,11 +65,6 @@
 	.title {
 		color: var(--text);
 		font-weight: 600;
-	}
-
-	.version {
-		font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
-		color: var(--muted);
 	}
 
 	.meta {
