@@ -91,19 +91,16 @@ model Contact {
 
 /// Feature flags and settings for each WhatsApp group.
 model SettingsManager {
-  id               String   @id @default(cuid())
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
   groupId          String
   sessionName      String   @default("main")
   groupName        String?
   groupDescription String?
-  welcome1         String   @default("disable")
-  welcome1msg      String   @default("Welcome to {groupName}")
-  welcome2         String   @default("disable")
-  welcome2msg      String   @default("Welcome to {groupName}")
-  left1            String   @default("disable")
-  left1msg         String   @default("Bye bye {groupName}")
-  left2            String   @default("disable")
-  left2msg         String   @default("Bye bye {groupName}")
+  welcome          String   @default("disable")
+  welcomeMessage   String   @default("Welcome to {groupName}")
+  leave            String   @default("disable")
+  leaveMessage     String   @default("Bye bye {groupName}")
+  welcomeImage     String   @default("enable")
   antiDelete       String   @default("disable")
   antiGroupURL     String   @default("disable")
   antiURL          String   @default("disable")
