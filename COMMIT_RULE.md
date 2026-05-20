@@ -118,9 +118,10 @@ When updating frontend hash:
 - never use:
   - the version bump commit hash
   - the release commit hash
-- update the hash in public/dashboard/index.html at the hero commit footer link:
-  - <a id="project-commit-value" ...>short-hash</a>
+- update the hash in dashboard/client/components/Changelog.svelte near the Changelog header:
+  - <a id="project-commit-value" ...>(short-hash)</a>
   - the href points to the full commit URL
+  - display short hash, link full hash
 
 Correct flow:
 
