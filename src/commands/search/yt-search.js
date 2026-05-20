@@ -1,6 +1,7 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { youtube } from '../../utils/index.js';
 import { numberWithCommas } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
 const boxen = (text) => {
 	const texts = text.split('\n');
@@ -15,10 +16,7 @@ const boxen = (text) => {
 	return box;
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'ytsearch',
 	minifiedDescription: 'Search YouTube',
 	description: 'Search YouTube',
@@ -153,4 +151,4 @@ export default {
 		// 	{  }
 		// );
 	}
-};
+});

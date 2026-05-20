@@ -1,13 +1,11 @@
 import dayjs from 'dayjs';
 
 import { Cache } from '../../helper/modules/cache.js';
+import { defineCommand } from '../_define.js';
 
 const cache = new Cache();
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'nowhatsapp',
 	minifiedDescription: 'Check WhatsApp Number',
 	description: 'Check if the number is exist or not.',
@@ -84,4 +82,4 @@ ${container
 
 		cache.set(query, container);
 	}
-};
+});

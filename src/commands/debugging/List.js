@@ -1,7 +1,6 @@
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+import { defineCommand } from '../_define.js';
+
+export default defineCommand({
 	name: 'list',
 	description: 'Send list message.',
 	category: 'Debugging',
@@ -29,4 +28,4 @@ export default {
 			sections: row
 		});
 	}
-};
+});

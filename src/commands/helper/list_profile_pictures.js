@@ -1,6 +1,7 @@
 import _ from 'lodash';
 
 import configuration from '../../helper/config/connect.js';
+import { defineCommand } from '../_define.js';
 
 const getDisplayUrl = (value) => {
 	if (typeof value === 'string' && /^https?:\/\//i.test(value.trim())) {
@@ -24,10 +25,7 @@ const getDisplayUrl = (value) => {
 	return '';
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'listpp',
 	minifiedDescription: 'List Profile Pictures',
 	description: 'List every pictures of the profile, started from the project startup.',
@@ -89,4 +87,4 @@ export default {
 			)
 			.send();
 	}
-};
+});

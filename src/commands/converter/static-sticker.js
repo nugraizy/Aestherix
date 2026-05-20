@@ -2,11 +2,9 @@ import rgbcolor from 'rgb-color';
 
 import { ttp } from '../../helper/canvas/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'staticsticker',
 	minifiedDescription: 'Static Text',
 	description: 'Generate static sticker',
@@ -62,4 +60,4 @@ export default {
 			await client.reply(from, 'Please enter text to convert to sticker', message);
 		}
 	}
-};
+});

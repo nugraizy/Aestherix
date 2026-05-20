@@ -1,11 +1,9 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { searchDeviantArt } from '../../utils/deviant_art/index.js';
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'deviantart',
 	minifiedDescription: 'Search Deviant Art',
 	description: 'Search images from Deviant Art',
@@ -105,4 +103,4 @@ Views : ${numberWithCommas(result[index].views)}
 			);
 		}
 	}
-};
+});

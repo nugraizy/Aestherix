@@ -1,10 +1,8 @@
 import { Attachment } from '../../helper/index.js';
 import { fetchBUFFER } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'attachment',
 	minifiedDescription: 'Welcome/Bye Image',
 	description: 'Debugging Welcome/bye message',
@@ -41,4 +39,4 @@ export default {
 
 		await client.send(from, { image: attach.toBuffer() }, {});
 	}
-};
+});

@@ -4,11 +4,9 @@ import parser from 'yargs-parser';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { color, formatNumber, loggers } from '../../utils/modules/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'tikstalk',
 	minifiedDescription: 'Look-up TikTok User',
 	description: 'Look-up TikTok user.',
@@ -107,4 +105,4 @@ export default {
 			);
 		}
 	}
-};
+});

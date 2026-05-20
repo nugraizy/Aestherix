@@ -1,10 +1,9 @@
+import configuration from '../../helper/config/connect.js';
 import { pushDefaultSettings, updateGroupSetting } from '../../helper/database/adapters/group-settings.js';
 import prisma from '../../helper/database/prisma.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'notification',
 	minifiedDescription: 'Enable/Disable Group Notification',
 	aliases: ['eventupd', 'eventupdate', 'notify'],
@@ -31,7 +30,7 @@ export default {
 			);
 		}
 
-		const isEnable = message?.[message?.from]?.notification === 'enable';
+		const isEnable = configuration.groups.settings.get(message.from)?.notification === 'enable';
 
 		switch (message.query.toLowerCase()) {
 			case 'enable':
@@ -40,7 +39,8 @@ export default {
 					return await client.reply(message.from, 'You already have this command enabled', message.message);
 				}
 
-				message[message.from].notification = 'enable';
+				configuration.groups.settings.get(message.from).notification = 'enable';
+
 				if (!(await updateGroupSetting(prisma, message.from, 'notification', 'enable'))) {
 					await pushDefaultSettings(prisma, message.from, message.groupName, message.groupDescription);
 					await updateGroupSetting(prisma, message.from, 'notification', 'enable');
@@ -54,7 +54,8 @@ export default {
 					return await client.reply(message.from, 'You already have this command disabled', message.message);
 				}
 
-				message[message.from].notification = 'disable';
+				configuration.groups.settings.get(message.from).notification = 'disable';
+
 				if (!(await updateGroupSetting(prisma, message.from, 'notification', 'disable'))) {
 					await pushDefaultSettings(prisma, message.from, message.groupName, message.groupDescription);
 					await updateGroupSetting(prisma, message.from, 'notification', 'disable');
@@ -63,11 +64,7 @@ export default {
 				await client.reply(message.from, 'You have successfully disabled group notification', message.message);
 				break;
 			default:
-				await client.reply(
-					message.from,
-					'Please specify a command\n\nEx: notification <enable/disable>',
-					message.message
-				);
+				await client.reply(message.from, 'Please specify a command\n\nEx: notification <enable/disable>', message.message);
 		}
 	}
-};
+});

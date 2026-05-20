@@ -1,15 +1,13 @@
 import { deleteTictactoeSession, getTictactoeSession, TicTacToe } from '../../utils/games/index.js';
 import { delay } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
 const WINNER_SETS = {
 	O: '🚫',
 	X: '❎'
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'playtictactoe',
 	minifiedDescription: 'Play TicTacToe',
 	description: 'Play Tic Tac Toe',
@@ -133,4 +131,4 @@ Powered by Hidden Finder`;
 			}
 		}
 	}
-};
+});

@@ -1,10 +1,8 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { googleImage, removeDuplicatesArray } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'googleimage',
 	minifiedDescription: 'Search Google Images',
 	description: 'Search images from Google.',
@@ -53,4 +51,4 @@ export default {
 			);
 		}
 	}
-};
+});

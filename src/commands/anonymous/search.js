@@ -1,11 +1,9 @@
 import { delay } from '../../utils/modules/index.js';
 import { search } from '../../utils/anonymous/index.js';
 import configuration from '../../helper/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'search',
 	minifiedDescription: 'Anonymous Search',
 	description: 'Search for a partner',
@@ -51,4 +49,4 @@ export default {
 			await client.reply(from, 'You are already searching for a partner!', message);
 		}
 	}
-};
+});

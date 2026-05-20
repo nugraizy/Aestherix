@@ -4,6 +4,7 @@ import { fetch } from 'undici';
 import yargsParser from 'yargs-parser';
 
 import { extension, gif2mp4, isURL } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 const VALID_PARSER_PATTERN =
 	/^(\["[^"]+"\]|\w+|\[(?!0+\d)\d+\])((\.\w+)|(:?\["[^"]+"\])|(?:\['[^']+'\])|\[(?!0+\d)\d+\])*$/g;
@@ -110,7 +111,7 @@ function resolveMessageType(mime) {
 	return 'document';
 }
 
-export default {
+export default defineCommand({
 	name: 'fetch',
 	minifiedDescription: 'HTTP Requests',
 	description: 'Do a HTTP request and send the results.',
@@ -259,4 +260,4 @@ export default {
 			await client.reply(from, error.message, message);
 		}
 	}
-};
+});

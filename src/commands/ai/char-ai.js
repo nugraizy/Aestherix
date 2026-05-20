@@ -1,5 +1,6 @@
 import configuration from '../../helper/config/connect.js';
 import { ChatGPTDialogue } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 const LIST_FLAGS = new Set(['--list-char', '--chars', '-c', '-ls']);
 
@@ -23,10 +24,7 @@ function formatCharacterList(characters, prefix, cmd) {
 	return text;
 }
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'charai',
 	minifiedDescription: 'Chat AI',
 	description: 'Chat with AI.',
@@ -95,4 +93,4 @@ export default {
 			message
 		);
 	}
-};
+});

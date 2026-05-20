@@ -1,10 +1,8 @@
 import configuration from '../../helper/config/connect.js';
 import { color, isURL, loggers } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'sticker',
 	minifiedDescription: 'Media to Sticker',
 	description: 'Convert media to sticker.',
@@ -79,4 +77,4 @@ export default {
 
 		loggers.info(`${color('Sticker is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

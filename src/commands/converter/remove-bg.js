@@ -4,11 +4,9 @@ import parser from 'yargs-parser';
 import configuration from '../../helper/config/connect.js';
 import { removeBg } from '../../utils/converter/file-processing.js';
 import { color, loggers } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'removebg',
 	minifiedDescription: 'Remove Background',
 	description: 'Remove background from image.',
@@ -65,4 +63,4 @@ export default {
 			client.send(from, { image: resultRemoveBg }, { quoted: message });
 		}
 	}
-};
+});

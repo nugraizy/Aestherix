@@ -1,6 +1,7 @@
 import yn from 'yn';
 
 import { Jikan, increment, numberWithCommas } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 const parse = (obj) =>
 	`Full Title : ${obj?.title || 'n/a'}
@@ -22,10 +23,7 @@ Genres : ${obj?.genres?.map(({ name }) => name)?.join(', ') || 'n/a'}
 	
 Synopsis : ${obj?.synopsis || 'n/a'}`.formatForm();
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'malanime',
 	minifiedDescription: 'MAL Search Anime',
 	description: 'Search an anime on MyAnimeList',
@@ -99,4 +97,4 @@ export default {
 
 		await send();
 	}
-};
+});

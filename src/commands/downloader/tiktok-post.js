@@ -3,11 +3,9 @@ import parser from 'yargs-parser';
 
 import { color, formatNumber, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'tiktokpost',
 	minifiedDescription: 'Download TikTok Post',
 	description: 'Downloads TikTok posts.',
@@ -162,4 +160,4 @@ export default {
 
 		loggers.info(`${color('Downloaded TikTok Media', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

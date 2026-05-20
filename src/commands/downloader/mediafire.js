@@ -1,14 +1,12 @@
 import parser from 'yargs-parser';
 
 import { mediafire, isURL, removeDuplicatesArray, loggers, color } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 const regex = (url) =>
 	/^(https?:\/\/)?(www\.)?mediafire\.com\/(file|view|download)\/[a-zA-Z0-9]+(\/[a-zA-Z0-9_\-.~%]+)?(\/file)?.*$/.test(url);
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'mediafire',
 	minifiedDescription: 'Download Mediafire',
 	description: 'Download files from Mediafire',
@@ -84,4 +82,4 @@ Uploaded: ${result.uploaded}`.formatForm(),
 
 		loggers.info(`${color('Downloaded Mediafire File', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

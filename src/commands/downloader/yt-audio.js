@@ -1,5 +1,6 @@
 import { color, isURL, isYoutubeURL, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { youtube } from '../../utils/youtube/index.js';
+import { defineCommand } from '../_define.js';
 
 // const youtube = new YouTubei();
 
@@ -42,10 +43,7 @@ const processAudio = async (url, client, { from, message, prettyNumber }) => {
 	);
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'ytaudio',
 	minifiedDescription: 'Downloads YouTube Audio',
 	description: 'Downloads a YouTube audio',
@@ -155,4 +153,4 @@ export default {
 
 		loggers.info(`${color('Downloaded YouTube Audio', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

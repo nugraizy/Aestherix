@@ -2,11 +2,9 @@ import parser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
 import { color, loggers, numberWithCommas } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'instalk',
 	minifiedDescription: 'Look-up Instagram User',
 	description: 'Look-up Instagram user.',
@@ -68,4 +66,4 @@ export default {
 			);
 		}
 	}
-};
+});

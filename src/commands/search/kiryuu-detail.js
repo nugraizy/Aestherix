@@ -1,5 +1,6 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { Kiryuu } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 const kiryuu = new Kiryuu();
 
@@ -34,10 +35,7 @@ const formatDetailCaption = (manga) => {
 	return lines.join('\n');
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'kiryuudetail',
 	minifiedDescription: 'Kiryuu Detail',
 	description: 'Get detail of a manga/manhwa/manhua on Kiryuu by slug, ID, or URL.',
@@ -80,4 +78,4 @@ export default {
 			return await wait.update(`Error: ${error.message || 'Manga not found.'}`);
 		}
 	}
-};
+});

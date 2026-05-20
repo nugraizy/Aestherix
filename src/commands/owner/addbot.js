@@ -8,6 +8,7 @@ import { Router } from '../../core/router.js';
 import { initContact, updateContact } from '../../core/utils.js';
 import configuration from '../../helper/config/connect.js';
 import prisma from '../../helper/database/prisma.js';
+import { defineCommand } from '../_define.js';
 
 const parseFlags = (args) => {
 	const flags = {};
@@ -33,10 +34,7 @@ const parseFlags = (args) => {
 	return flags;
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'addbot',
 	description: 'Add and connect a new sub-bot instance.',
 	usage: '!addbot <session_name> [--pair-number 628xxx] [--prefix !] [--flags]',
@@ -154,4 +152,4 @@ export default {
 			return client.reply(from, `❌ Failed to start "${sessionName}": ${err.message}`, message);
 		}
 	}
-};
+});

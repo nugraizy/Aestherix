@@ -1,7 +1,6 @@
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+import { defineCommand } from '../_define.js';
+
+export default defineCommand({
 	name: 'revoke',
 	minifiedDescription: 'Revoke Group URL',
 	description: "Revoke group's invitation URL." /* eslint-disable-line */,
@@ -46,4 +45,4 @@ export default {
 			{ quoted: message }
 		);
 	}
-};
+});

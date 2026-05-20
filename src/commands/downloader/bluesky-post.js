@@ -1,11 +1,9 @@
 import parser from 'yargs-parser';
 
 import { bluesky, color, isURL, loggers, removeDuplicatesArray } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'bluesky',
 	description: 'Download media from Bluesky',
 	usage: '!bluesky `<url(s)>` (you can send multiple link using space in between)',
@@ -70,4 +68,4 @@ export default {
 
 		loggers.info(`${color('Downloaded Bluesky Post', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

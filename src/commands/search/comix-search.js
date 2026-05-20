@@ -2,6 +2,7 @@ import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { Comix } from '../../utils/index.js';
 import { randomChar } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
 const comix = new Comix();
 
@@ -61,10 +62,7 @@ function sendResult(state, from, message, client, ctx) {
 	return builder.send();
 }
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'comixsearch',
 	minifiedDescription: 'Search Comix',
 	description: 'Search manga, manhwa, or manhua on Comix.',
@@ -146,4 +144,4 @@ export default {
 		await wait.update(`Found ${result.items.length} result(s).`);
 		await sendResult(state, from, message, client, { prefix });
 	}
-};
+});

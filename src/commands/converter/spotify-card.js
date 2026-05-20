@@ -1,10 +1,8 @@
 import { SpotifyCard } from '../../helper/canvas/index.js';
 import { Timer } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'spotifycard',
 	minifiedDescription: 'Spotify Card',
 	description: 'Make Spotif Card',
@@ -44,4 +42,4 @@ export default {
 		timer.stop();
 		await wait.update('Spotify Card is finished in ' + timer);
 	}
-};
+});

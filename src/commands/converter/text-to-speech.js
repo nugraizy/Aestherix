@@ -1,11 +1,9 @@
 import path from 'path';
 
 import { textToSpeech } from '../../utils/converter/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'text2speech',
 	minifiedDescription: 'TTS V1',
 	description: 'Convert text to speech',
@@ -48,4 +46,4 @@ export default {
 			console.log(e);
 		}
 	}
-};
+});

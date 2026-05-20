@@ -1,10 +1,8 @@
 import configuration from '../../helper/config/connect.js';
 import { line } from '../../utils/stickers/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'linesticker',
 	minifiedDescription: 'Line Sticker',
 	description: 'Find Line stickers.',
@@ -38,4 +36,4 @@ export default {
 			await client.send(from, { sticker }, { quoted: message });
 		}
 	}
-};
+});

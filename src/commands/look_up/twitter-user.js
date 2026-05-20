@@ -4,13 +4,11 @@ import parser from 'yargs-parser';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { color, formatNumber, isURL, loggers } from '../../utils/modules/index.js';
 import { Twitter } from '../../utils/twitter/index.js';
+import { defineCommand } from '../_define.js';
 
 const twitter = new Twitter({ cookie: process.env.TWITTER_COOKIE });
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'twitstalk',
 	minifiedDescription: 'Look-up Twitter User',
 	description: 'Look-up Twitter user.',
@@ -87,4 +85,4 @@ export default {
 				.send();
 		}
 	}
-};
+});

@@ -2,6 +2,7 @@ import parser from 'yargs-parser';
 
 import { fetchBUFFER, removeDuplicatesArray, loggers, color } from '../../utils/modules/index.js';
 import { downloadManga } from '../../utils/pixiv/index.js';
+import { defineCommand } from '../_define.js';
 
 const regex = (input) => {
 	const reg = /^https?:\/\/(www\.|i\.)?(pximg\.net)|(pixiv\.net)/i;
@@ -20,10 +21,7 @@ const regex = (input) => {
 	return { status: false, message: 'This URL is not a valid Pixiv URL. Try another URL.' };
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'pixivmangadl',
 	minifiedDescription: 'Download Pixiv Manga',
 	description: 'Download manga from Pixiv',
@@ -118,4 +116,4 @@ Total Media : ${pageCount}`;
 
 		loggers.info(`${color('Downloaded Pixiv File', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

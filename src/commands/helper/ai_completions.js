@@ -1,12 +1,10 @@
 import OpenAI from 'openai';
+import { defineCommand } from '../_define.js';
 
 const updateApikey = () =>
 	process.env.OPENAI_KEY.split('\n')[Math.floor(Math.random() * process.env.OPENAI_KEY.split('\n').length)];
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'aicompletions',
 	minifiedDescription: 'AI Completions',
 	description: 'Ask A.I to complete your sentence or give A.I any task within texts.',
@@ -31,4 +29,4 @@ export default {
 
 		client.reply(from, completion.choices[0].text.trim(), message);
 	}
-};
+});

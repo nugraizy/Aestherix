@@ -1,11 +1,9 @@
 import fs from 'fs-extra';
 
 import configuration from '../../helper/config/connect.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'about',
 	minifiedDescription: 'Bot Information',
 	description: 'Shows the bot information',
@@ -41,4 +39,4 @@ Powered by Hidden Finder`,
 			message
 		);
 	}
-};
+});

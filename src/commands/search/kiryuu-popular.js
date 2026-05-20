@@ -1,4 +1,5 @@
 import { Kiryuu } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 const kiryuu = new Kiryuu();
 
@@ -9,10 +10,7 @@ const kiryuu = new Kiryuu();
 const formatPopularCaption = (manga, index) =>
 	`${index + 1}. ${manga.title} (${manga.type || '?'}) — ${manga.status || 'n/a'}`;
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'kiryuupopular',
 	minifiedDescription: 'Popular Kiryuu',
 	description: 'Show popular manga/manhwa/manhua on Kiryuu.',
@@ -59,4 +57,4 @@ export default {
 			return await wait.update(`Error: ${error.message || 'Failed to fetch popular comics.'}`);
 		}
 	}
-};
+});

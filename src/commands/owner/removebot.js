@@ -1,10 +1,8 @@
 import { manager } from '../../core/manager.js';
 import prisma from '../../helper/database/prisma.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'removebot',
 	description: 'Disconnect and remove a sub-bot instance.',
 	usage: '!removebot <session_name> [--purge]',
@@ -57,4 +55,4 @@ export default {
 
 		return client.reply(from, `🔌 Bot "${sessionName}" disconnected.`, message);
 	}
-};
+});

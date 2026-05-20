@@ -1,6 +1,7 @@
 import { generateWAMessageFromContent } from 'baileys';
 import fs from 'fs-extra';
 import { cmdId } from '../../helper/modules/prefix.js';
+import { defineCommand } from '../_define.js';
 
 const randomString = (chars, length) => {
 	let strings = '';
@@ -12,10 +13,7 @@ const randomString = (chars, length) => {
 	return strings;
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'hydrated',
 	description: 'Send hydrated image.',
 	category: 'Debugging',
@@ -88,4 +86,4 @@ export default {
 			messageId: messages.key.id
 		});
 	}
-};
+});

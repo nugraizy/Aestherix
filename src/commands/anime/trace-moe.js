@@ -2,11 +2,9 @@ import fs from 'fs';
 import path from 'path';
 
 import { isURL, toMp4, traceMoe } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'tracemoe',
 	minifiedDescription: 'Tracemoe Image Search',
 	description: 'Reverse image anime search',
@@ -251,4 +249,4 @@ ${externalLinks
 		// 	{  }
 		// );
 	}
-};
+});

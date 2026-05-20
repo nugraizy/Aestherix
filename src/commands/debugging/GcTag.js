@@ -1,7 +1,6 @@
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+import { defineCommand } from '../_define.js';
+
+export default defineCommand({
 	name: 'grouptag',
 	description: 'Tag everyone in the group with the new messages protocol',
 	usage: '!grouptag',
@@ -24,4 +23,4 @@ export default {
 			}
 		});
 	}
-};
+});

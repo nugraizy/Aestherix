@@ -1,9 +1,7 @@
 import { manager } from '../../core/manager.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'listbots',
 	description: 'List all active bot instances.',
 	usage: '!listbots',
@@ -37,4 +35,4 @@ export default {
 
 		return client.reply(from, `🤖 *Active bots:*\n\n${lines.join('\n')}`, message);
 	}
-};
+});

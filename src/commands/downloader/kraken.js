@@ -1,13 +1,11 @@
 import parser from 'yargs-parser';
 
 import { kraken, removeDuplicatesArray, loggers, color } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 const regex = (url) => /^(https?:\/\/)?(www\.)?krakenfiles\.com\/(view)\/[a-zA-Z0-9]+(\/[a-zA-Z0-9_\-.~%]+)?\.html$/.test(url);
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'kraken',
 	minifiedDescription: 'Download Kraken',
 	description: 'Download files from Kraken',
@@ -75,4 +73,4 @@ Uploaded: ${result.uploaded}`.formatForm(),
 
 		loggers.info(`${color('Downloaded Kraken File', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

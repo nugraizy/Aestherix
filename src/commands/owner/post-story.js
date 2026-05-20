@@ -1,7 +1,6 @@
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+import { defineCommand } from '../_define.js';
+
+export default defineCommand({
 	name: 'upstory',
 	description: 'upstory',
 	category: 'Owner',
@@ -87,4 +86,4 @@ export default {
 			}
 		);
 	}
-};
+});

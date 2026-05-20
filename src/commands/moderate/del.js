@@ -1,7 +1,6 @@
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+import { defineCommand } from '../_define.js';
+
+export default defineCommand({
 	name: 'delete',
 	minifiedDescription: 'Delete Message',
 	description: 'Delete people messages',
@@ -35,4 +34,4 @@ export default {
 			{}
 		);
 	}
-};
+});

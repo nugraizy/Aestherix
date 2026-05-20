@@ -3,11 +3,9 @@ import path from 'path';
 
 import { pet } from '../../utils/converter/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'petpet',
 	minifiedDescription: 'Pettify Picture',
 	description: 'Pet someone profile picture or send/reply an image to pet.',
@@ -127,4 +125,4 @@ export default {
 			loggers.warning(`${color('Petted', 'pink')} ${color(mentioned, 'lilac')}`);
 		}
 	}
-};
+});

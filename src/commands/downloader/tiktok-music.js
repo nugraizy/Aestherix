@@ -3,11 +3,9 @@ import parser from 'yargs-parser';
 import { color, loggers } from '../../utils/modules/index.js';
 import { mime } from '../../utils/misc/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'tiktokmusic',
 	minifiedDescription: 'Download TikTok Music',
 	description: 'Downloads TikTok music that used in the video.',
@@ -58,4 +56,4 @@ export default {
 
 		loggers.info(`${color('Downloaded TikTok Music', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

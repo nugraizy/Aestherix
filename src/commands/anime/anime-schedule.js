@@ -1,4 +1,5 @@
 import { animeReleases } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 const DAYS = {
 	Sunday: 'Minggu',
@@ -10,10 +11,7 @@ const DAYS = {
 	Saturday: 'Sabtu'
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'animeschedule',
 	minifiedDescription: 'Anime Schedule',
 	description: 'Check Anime schedule.',
@@ -83,4 +81,4 @@ export default {
 			indexDay++;
 		}
 	}
-};
+});

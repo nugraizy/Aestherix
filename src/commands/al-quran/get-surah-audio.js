@@ -1,12 +1,10 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { extension, getAyat, getSurahAudio, getSurahDetail, mime } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 const regex = (input) => /[1-9][0-9]*/.test(input);
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'surahaudio',
 	minifiedDescription: 'Surah Audio',
 	description: 'Get surah audio',
@@ -61,4 +59,4 @@ export default {
 			}
 		);
 	}
-};
+});

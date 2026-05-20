@@ -1,5 +1,6 @@
 import { fetchBUFFER, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { spotifier } from '../../utils/spotifier/index.js';
+import { defineCommand } from '../_define.js';
 
 const regex = (input) =>
 	/(https?:\/\/open.spotify.com\/(track|user|artist|album)\/[a-zA-Z0-9]+(\/playlist\/[a-zA-Z0-9]+|)|spotify:(track|user|artist|album):[a-zA-Z0-9]+(:playlist:[a-zA-Z0-9]+|))/.test(
@@ -21,10 +22,7 @@ const getSpotifyType = (url) => {
 	return match[2];
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'spotifytracks',
 	minifiedDescription: 'Search Spotify Tracks',
 	description: 'Search song on Spotify.',
@@ -110,4 +108,4 @@ export default {
 			// 	);
 		}
 	}
-};
+});

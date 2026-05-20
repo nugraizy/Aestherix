@@ -5,11 +5,9 @@ import parser from 'yargs-parser';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { color, delay, loggers } from '../../utils/modules/index.js';
 import { metadata, qobuz } from '../../utils/qobuz/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'qobuzdownload',
 	description: 'Download lossless music from Qobuz',
 	usage:
@@ -157,7 +155,7 @@ export default {
 			await wait?.update(msg);
 		}
 	}
-};
+});
 
 async function downloadAudio(client, track, { from, message, prettyNumber, wait }) {
 	await wait.update('Downloading Music...');

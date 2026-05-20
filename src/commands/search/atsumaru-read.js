@@ -1,12 +1,10 @@
 import { Atsumaru } from '../../utils/atsumaru/index.js';
 import { imageToPdf, mime } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 const atsumaru = new Atsumaru();
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'atsumaruread',
 	minifiedDescription: 'Read Atsumaru Chapter',
 	description: 'Download chapter pages from Atsumaru as a PDF.',
@@ -57,4 +55,4 @@ export default {
 			return await wait.update(`Error: ${error.message || 'Failed to fetch pages.'}`);
 		}
 	}
-};
+});

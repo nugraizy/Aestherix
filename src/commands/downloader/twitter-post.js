@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 import { color, delay, formatNumber, isURL, loggers } from '../../utils/modules/index.js';
 import { Twitter } from '../../utils/twitter/index.js';
+import { defineCommand } from '../_define.js';
 
 const twitter = new Twitter({ cookie: process.env.TWITTER_COOKIE });
 
@@ -25,10 +26,7 @@ const createPostCaption = (post) => {
 	return capt.trim().formatForm();
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'twitterdl',
 	minifiedDescription: 'Download Twitter post',
 	description: 'Download Twitter post',
@@ -105,4 +103,4 @@ export default {
 
 		loggers.info(`${color('Downloaded Twitter Post', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

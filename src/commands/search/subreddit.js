@@ -1,10 +1,8 @@
 import { removeDuplicatesArray } from '../../utils/modules/index.js';
 import { arq } from '../../utils/arq/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'subreddit',
 	minifiedDescription: 'Search Subreddit',
 	description: 'Search Subreddit.',
@@ -50,4 +48,4 @@ Title : ${result.result.title}`.formatForm()
 			);
 		}
 	}
-};
+});

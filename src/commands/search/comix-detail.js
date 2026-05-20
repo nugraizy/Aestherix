@@ -1,5 +1,6 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { Comix } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 const comix = new Comix();
 
@@ -36,10 +37,7 @@ const formatDetailCaption = (manga) => {
 	return lines.join('\n');
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'comixdetail',
 	minifiedDescription: 'Comix Detail',
 	description: 'Get detail of a manga/manhwa/manhua on Comix by ID, slug, or URL.',
@@ -84,4 +82,4 @@ export default {
 		await builder.send();
 		await wait.update('Detail fetched.');
 	}
-};
+});

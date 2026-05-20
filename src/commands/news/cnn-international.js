@@ -1,10 +1,8 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { cnninternational, fetchBUFFER } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'cnninternational',
 	minifiedDescription: 'CNN-International News',
 	description: 'Showing latest news in International from CNN.',
@@ -100,4 +98,4 @@ export default {
 			{ quoted: message }
 		);
 	}
-};
+});

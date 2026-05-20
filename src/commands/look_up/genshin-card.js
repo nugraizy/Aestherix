@@ -4,6 +4,7 @@ import { GenshinCard } from '../../helper/canvas/card-render.js';
 import { parseCharactersData, parseGenshinUser } from '../../helper/canvas/genshin-parser.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { loggers } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
 const enka = new EnkaClient({ showFetchCacheLog: false });
 
@@ -48,10 +49,7 @@ function setCache(uid, parsedUser, parsedCharacters) {
 	cache.set(uid, { parsedUser, parsedCharacters, timestamp: Date.now() });
 }
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'genshincard',
 	minifiedDescription: 'Genshin Impact Build Card',
 	description: 'Generate a Genshin Impact character build card from your showcase.',
@@ -156,7 +154,7 @@ export default {
 			.buttons(...buttons)
 			.send({ quoted: message });
 	}
-};
+});
 
 function convertObjectToJson(obj) {
 	if (typeof obj !== 'object' || obj === null || obj === undefined) {

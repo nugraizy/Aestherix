@@ -1,9 +1,7 @@
 import parser from 'yargs-parser';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'resend',
 	description: 'Resend message.',
 	usage: '!resend',
@@ -28,4 +26,4 @@ export default {
 
 		return await client.relay(from, mediaData.message, {});
 	}
-};
+});

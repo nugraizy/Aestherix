@@ -1,11 +1,9 @@
 import baileys, { generateWAMessageFromContent } from 'baileys';
+import { defineCommand } from '../_define.js';
 
 const { proto } = baileys;
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'button',
 	description: 'Send bug.',
 	category: 'Debugging',
@@ -55,4 +53,4 @@ export default {
 			{ viewOnce: true }
 		);
 	}
-};
+});

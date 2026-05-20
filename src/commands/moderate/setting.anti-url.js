@@ -1,10 +1,9 @@
+import configuration from '../../helper/config/connect.js';
 import { pushDefaultSettings, updateGroupSetting } from '../../helper/database/adapters/group-settings.js';
 import prisma from '../../helper/database/prisma.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'antiurl',
 	minifiedDescription: 'Anti URL',
 	aliases: ['antilink', 'antitautan'],
@@ -31,7 +30,7 @@ export default {
 			);
 		}
 
-		const isEnable = message?.[message?.from]?.antiURL === 'enable';
+		const isEnable = configuration.groups.settings.get(message.from)?.antiURL === 'enable';
 
 		switch (message.query.toLowerCase()) {
 			case 'enable':
@@ -40,7 +39,8 @@ export default {
 					return await client.reply(message.from, 'You already have this command enabled', message.message);
 				}
 
-				message[message.from].antiURL = 'enable';
+				configuration.groups.settings.get(message.from).antiURL = 'enable';
+
 				if (!(await updateGroupSetting(prisma, message.from, 'antiURL', 'enable'))) {
 					await pushDefaultSettings(prisma, message.from, message.groupName, message.groupDescription);
 					await updateGroupSetting(prisma, message.from, 'antiURL', 'enable');
@@ -54,7 +54,8 @@ export default {
 					return await client.reply(message.from, 'You already have this command disabled', message.message);
 				}
 
-				message[message.from].antiURL = 'disable';
+				configuration.groups.settings.get(message.from).antiURL = 'disable';
+
 				if (!(await updateGroupSetting(prisma, message.from, 'antiURL', 'disable'))) {
 					await pushDefaultSettings(prisma, message.from, message.groupName, message.groupDescription);
 					await updateGroupSetting(prisma, message.from, 'antiURL', 'disable');
@@ -66,4 +67,4 @@ export default {
 				await client.reply(message.from, 'Please specify a command\n\nEx: antiurl <enable/disable>', message.message);
 		}
 	}
-};
+});

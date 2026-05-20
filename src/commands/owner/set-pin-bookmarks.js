@@ -1,4 +1,5 @@
 import configuration from '../../helper/config/connect.js';
+import { defineCommand } from '../_define.js';
 
 const _regex = new RegExp(
 	'https?://(?:[^/]+.)?pinterest.(?:com|fr|de|ch|jp|cl|ca|it|co.uk|nz|ru|com.au|at|pt|co.kr|es|com.mx|dk|ph|th|com.uy|co|nl|info|kr|ie|vn|com.vn|ec|mx|in|pe|co.at|hu|co.in|co.nz|id|com.ec|com.py|tw|be|uk|com.bo|com.pe)'
@@ -18,10 +19,7 @@ const getPinId = (url) => {
 	});
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'setpin',
 	minifiedDescription: 'Set Pinterest Bookmarks',
 	description: 'Set the pinterest bookmarks for profile pictures interval.',
@@ -46,4 +44,4 @@ export default {
 
 		client.reply(from, 'Pinterest intervals has been updated.', message);
 	}
-};
+});

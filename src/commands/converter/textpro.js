@@ -9,14 +9,12 @@ import configuration from '../../helper/config/connect.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { randomize } from '../../utils/modules/index.js';
 import { textpro } from '../../utils/textmaker/textpro.js';
+import { defineCommand } from '../_define.js';
 
 const dataJSON = JSON.parse(fs.readFileSync('./databases/textmaker/textprourl.json'));
 const defaulType = 'image';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'textpro',
 	minifiedDescription: 'Textpro Text Maker',
 	description: 'Image maker using texts',
@@ -148,4 +146,4 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 			}
 		}
 	}
-};
+});

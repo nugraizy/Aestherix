@@ -4,11 +4,9 @@ import parser from 'yargs-parser';
 
 import { hifi, metadata } from '../../utils/hi-fi/index.js';
 import { color, delay, loggers } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'hifidownload',
 	description: 'Download lossless music from Tidal via Hi-Fi API',
 	usage:
@@ -118,7 +116,7 @@ export default {
 			await wait.update('Something went wrong. Please try again.');
 		}
 	}
-};
+});
 
 const downloadAudio = async (client, data, { from, message, prettyNumber, id, index, wait }) => {
 	await wait.update('Downloading Music...');

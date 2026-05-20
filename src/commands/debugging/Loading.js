@@ -4,6 +4,7 @@ import yn from 'yn';
 
 import { Cache } from '../../helper/modules/cache.js';
 import { audioFormat, Fetch, getWaifu, imageFormat, isURL, videoFormat } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 const frames = ['▓', '▒'];
 
@@ -28,10 +29,7 @@ const createLoadingBar = (progress) => {
 
 const downloader = new Cache();
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'loading',
 	minifiedDescription: 'Load a File',
 	description: 'Loading.',
@@ -251,4 +249,4 @@ export default {
 			});
 		});
 	}
-};
+});

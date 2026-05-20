@@ -1,12 +1,10 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { Shinigami } from '../../utils/shinigami/index.js';
+import { defineCommand } from '../_define.js';
 
 const shinigami = new Shinigami();
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'shinigamidetail',
 	minifiedDescription: 'Shinigami Detail',
 	description: 'Get detail of a manga on Shinigami.',
@@ -64,4 +62,4 @@ export default {
 			return await wait.update(`Error: ${error.message || 'Manga not found.'}`);
 		}
 	}
-};
+});

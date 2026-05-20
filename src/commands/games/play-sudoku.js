@@ -2,13 +2,12 @@ import path from 'path';
 import fs from 'fs-extra';
 
 import configuration from '../../helper/config/connect.js';
+import { toUserJid } from '../../helper/misc/wa_data/index.js';
 import { getTimeSince } from '../../utils/modules/index.js';
 import { checkWin, fillGrid, makePuzzle, revealOneElement, solvePuzzle, stringifyGrid } from '../../utils/games/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'sudoku',
 	minifiedDescription: 'Play Sudoku',
 	description: 'Play Sudoku.',
@@ -32,7 +31,7 @@ export default {
 					const gridSolved = stringifyGrid(solved);
 
 					if (isOwner) {
-						await client.reply(configuration.settings.owner_number, gridSolved, message);
+						await client.reply(toUserJid(configuration.settings.owner_number), gridSolved, message);
 					}
 
 					const messages = await client.send(
@@ -235,4 +234,4 @@ export default {
 			console.log(err);
 		}
 	}
-};
+});

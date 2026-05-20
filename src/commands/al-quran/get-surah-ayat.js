@@ -1,11 +1,9 @@
 import { getAyat, getSurahDetail } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 const regex = (input) => /[1-9][0-9]*/.test(input);
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'surahayat',
 	minifiedDescription: 'Surah Ayat',
 	description: 'Get surah ayat',
@@ -39,4 +37,4 @@ export default {
 			message
 		);
 	}
-};
+});

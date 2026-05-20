@@ -1,9 +1,7 @@
 import { startAkinator, setMessages } from '../../utils/games/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'akinator',
 	minifiedDescription: 'Play Akinator',
 	description: 'Play Akinator.',
@@ -32,4 +30,4 @@ export default {
 
 		setMessages(from, { originalMessage: messages });
 	}
-};
+});

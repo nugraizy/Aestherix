@@ -1,11 +1,9 @@
 import { getSurahDetail } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 const regex = (input) => /[1-9][0-9]*/.test(input);
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'surahdetails',
 	minifiedDescription: 'Surah Details',
 	description: 'Get surah details',
@@ -36,4 +34,4 @@ export default {
 			message
 		);
 	}
-};
+});

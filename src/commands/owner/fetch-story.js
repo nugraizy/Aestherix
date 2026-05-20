@@ -2,13 +2,11 @@ import { generateWAMessageFromContent } from 'baileys';
 
 import { textStory } from '../../helper/canvas/index.js';
 import { Cache } from '../../helper/modules/cache.js';
+import { defineCommand } from '../_define.js';
 
 const STATUS = 'status@broadcast';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'fetchstory',
 	minifiedDescription: 'Fetch Story',
 	description: 'Fetch story from host WhatsApp.',
@@ -112,4 +110,4 @@ export default {
 			console.log(err);
 		}
 	}
-};
+});

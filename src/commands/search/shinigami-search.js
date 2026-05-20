@@ -2,6 +2,7 @@ import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { randomChar } from '../../utils/modules/index.js';
 import { Shinigami } from '../../utils/shinigami/index.js';
+import { defineCommand } from '../_define.js';
 
 const shinigami = new Shinigami();
 
@@ -58,10 +59,7 @@ function sendResult(state, from, message, client, ctx) {
 	return builder.send();
 }
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'shinigamisearch',
 	minifiedDescription: 'Search Shinigami',
 	description: 'Search manga/manhwa on Shinigami.',
@@ -112,4 +110,4 @@ export default {
 		await wait.update(`Found ${result.items.length} result(s).`);
 		await sendResult(state, from, message, client, { prefix });
 	}
-};
+});

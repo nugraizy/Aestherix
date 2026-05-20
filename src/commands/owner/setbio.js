@@ -1,7 +1,6 @@
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+import { defineCommand } from '../_define.js';
+
+export default defineCommand({
 	name: 'setbio',
 	minifiedDescription: 'Change Bio',
 	description: "Set the bot's bio" /* eslint-disable-line */,
@@ -18,4 +17,4 @@ export default {
 
 		await client.setStatus(query);
 	}
-};
+});

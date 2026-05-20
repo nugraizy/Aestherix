@@ -1,10 +1,8 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { getSambungkataSession, SambungKata } from '../../utils/games/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'sambungkata',
 	minifiedDescription: 'Play Word Play',
 	description: 'Word Play Game.',
@@ -61,4 +59,4 @@ Turn : @${data.turn.split('@')[0]}`,
 			}
 		}
 	}
-};
+});

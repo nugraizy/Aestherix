@@ -3,11 +3,9 @@ import path from 'path';
 import { color, loggers } from '../../utils/modules/index.js';
 import { soundRemover } from '../../utils/converter/index.js';
 import { extension, audioFormat, videoFormat } from '../../utils/misc/mimetype.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'soundremover',
 	minifiedDescription: 'Remove Voice',
 	description: 'Remove specific sound from audio/video',
@@ -90,4 +88,4 @@ export default {
 
 		loggers.info(`${color('Sound is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

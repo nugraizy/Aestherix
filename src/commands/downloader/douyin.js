@@ -2,13 +2,11 @@ import parser from 'yargs-parser';
 
 import { color, formatNumber, isURL, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { getDouyinInfo } from '../../utils/tiktok/index.js';
+import { defineCommand } from '../_define.js';
 
 const isDouyinUrl = (input) => /^(https?:\/\/)?(www\.)?(douyin\.com|v\.douyin\.com)\//i.test((input || '').trim());
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'douyin',
 	minifiedDescription: 'Download Douyin Post',
 	description: 'Downloads Douyin posts.',
@@ -125,4 +123,4 @@ export default {
 
 		loggers.info(`${color('Downloaded Douyin Media', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

@@ -3,11 +3,9 @@ import parser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
 import { color, loggers, waifu2x } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'waifu2x',
 	minifiedDescription: 'Waifu2x V1',
 	description: 'Enhance image using image processing A.I. called waifu2x.',
@@ -65,4 +63,4 @@ export default {
 
 		loggers.info(`${color('Media is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

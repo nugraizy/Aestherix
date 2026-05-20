@@ -1,12 +1,10 @@
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { pStoreProduct } from '../../utils/p_store/index.js';
+import { defineCommand } from '../_define.js';
 
 const regex = (str1, str2) => new RegExp(`\\b${str1}\\b`).test(str2.toLowerCase());
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'pstore',
 	description: 'Search products from p-store',
 	usage: '!pstore `<query>`',
@@ -86,4 +84,4 @@ Source : ${source}`.formatForm()
 			}
 		}
 	}
-};
+});

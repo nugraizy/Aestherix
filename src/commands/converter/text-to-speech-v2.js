@@ -3,6 +3,7 @@ import path from 'path';
 import parser from 'yargs-parser';
 
 import { gttsAI, toOpus } from '../../utils/converter/index.js';
+import { defineCommand } from '../_define.js';
 
 const voices = await fs.readJSON(path.join(__dirname, 'databases/model/voices.json'));
 const boxen = (text) => {
@@ -18,10 +19,7 @@ const boxen = (text) => {
 	return box;
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'aitts',
 	minifiedDescription: 'TTS V2',
 	description: 'Convert text to speech with real people voice over it',
@@ -175,4 +173,4 @@ export default {
 		// 	{  }
 		// );
 	}
-};
+});

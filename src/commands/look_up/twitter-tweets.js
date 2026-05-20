@@ -4,6 +4,7 @@ import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { color, delay, formatNumber, loggers, randomChar } from '../../utils/modules/index.js';
 import { Twitter } from '../../utils/twitter/index.js';
+import { defineCommand } from '../_define.js';
 
 const twitter = new Twitter({ cookie: process.env.TWITTER_COOKIE });
 const tweetSessions = new Cache();
@@ -111,10 +112,7 @@ const sendNextPrompt = async (sessionId, batchSize, username, from, client, ctx)
 		.send();
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'twttweets',
 	minifiedDescription: 'View user tweets',
 	description: 'View recent tweets from a Twitter/X user with media. Fetches 5 tweets per page.',
@@ -203,4 +201,4 @@ export default {
 			tweetSessions.delete(sessionId);
 		}
 	}
-};
+});

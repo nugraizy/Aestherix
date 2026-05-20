@@ -3,6 +3,7 @@ import parser from 'yargs-parser';
 
 import configuration from '../../helper/index.js';
 import { spotifier } from '../../utils/spotifier/index.js';
+import { defineCommand } from '../_define.js';
 
 let isInitForever = false;
 
@@ -29,10 +30,7 @@ const updateSpotifyTracks = () => {
 
 configuration.timers.spotifyPlaybacks.set('ids', {});
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'spotifyplayerplayback',
 	description: 'Enable/Disable Spotify Player Playback.',
 	category: 'Debugging',
@@ -107,4 +105,4 @@ export default {
 			return;
 		}
 	}
-};
+});

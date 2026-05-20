@@ -1,9 +1,7 @@
 import { setAfk } from '../../helper/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'afk',
 	minifiedDescription: 'AFK Mode',
 	description: 'Going away from keyboard.',
@@ -26,4 +24,4 @@ export default {
 			{ quoted: message }
 		);
 	}
-};
+});

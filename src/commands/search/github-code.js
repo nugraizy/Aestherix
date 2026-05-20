@@ -1,12 +1,10 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { Github } from '../../utils/github/index.js';
+import { defineCommand } from '../_define.js';
 
 const _baseUrl = (input) => `https://github.com/${input}`;
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'githubcode',
 	minifiedDescription: 'Search Github Code',
 	description: 'Search code from Github.',
@@ -116,4 +114,4 @@ ${result[0].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).jo
 			{ quoted: message }
 		);
 	}
-};
+});

@@ -1,11 +1,9 @@
 import { getTafsirSurah } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 const regex = (input) => /[1-9][0-9]*/.test(input);
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'getsurahtafsir',
 	minifiedDescription: 'Surah Tafsir',
 	description: 'Get surah tafsir',
@@ -32,4 +30,4 @@ export default {
 
 		await client.reply(from, tafsir.map((v) => `${v.arab} • \n • ${v.tafsir}`).join('\n\n'), message);
 	}
-};
+});

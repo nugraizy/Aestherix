@@ -3,6 +3,7 @@ import pm2 from 'pm2';
 import yargsParser from 'yargs-parser';
 
 import { getFilesizeFromBytes } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
 const SEND_AS_STRING = false;
 
@@ -94,10 +95,7 @@ const renderProcess = (processes, builder, isCarousel) => {
 	return container;
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'pm2',
 	minifiedDescription: 'Manage PM2 Instance Processes',
 	description: 'Manage PM2 Instance Processes, such as Listing, Stopping, Restarting, and Killing process.',
@@ -166,4 +164,4 @@ export default {
 			}
 		}
 	}
-};
+});

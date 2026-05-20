@@ -1,4 +1,5 @@
 import { cmdId } from '../../helper/modules/prefix.js';
+import { defineCommand } from '../_define.js';
 
 const regex = (input) => {
 	const regex = /^(?:https?:\/\/)?(?:chat\.)?(?:whatsapp\.com)\/([\d\w]{21,23})/;
@@ -16,10 +17,7 @@ const regex = (input) => {
 	return false;
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'join',
 	minifiedDescription: 'Invite Bot',
 	description: 'Ask bot to join your group.',
@@ -86,4 +84,4 @@ export default {
 			);
 		}
 	}
-};
+});

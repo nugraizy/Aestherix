@@ -1,9 +1,7 @@
 import { nickname } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'nickname',
 	minifiedDescription: 'Search Nickname',
 	description: 'Find nickname.',
@@ -32,4 +30,4 @@ ${result.join('\n').trim()}`,
 			message
 		);
 	}
-};
+});

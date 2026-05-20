@@ -1,10 +1,8 @@
 import { color, loggers } from '../../utils/modules/index.js';
 import { startTG } from '../../utils/games/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'tebakgambar',
 	minifiedDescription: 'Play Guess',
 	description: 'Play Guess the image.',
@@ -23,4 +21,4 @@ export default {
 			return await client.reply(message.from, `Your game is already playing!\n${game.remaining}s left`, game.data);
 		}
 	}
-};
+});

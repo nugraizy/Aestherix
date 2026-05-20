@@ -2,6 +2,7 @@ import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { Atsumaru } from '../../utils/atsumaru/index.js';
 import { randomChar } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
 const atsumaru = new Atsumaru();
 
@@ -9,10 +10,7 @@ const CHAPTERS_PER_BATCH = 40;
 
 const chapterSessions = new Cache();
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'atsumaruchapters',
 	minifiedDescription: 'Atsumaru Chapters',
 	description: 'List chapters of a manga on Atsumaru.',
@@ -81,7 +79,7 @@ export default {
 			return await wait.update(`Error: ${error.message || 'Failed to fetch chapters.'}`);
 		}
 	}
-};
+});
 
 async function sendBatch(state, from, message, client, ctx) {
 	const { allChapters, currentBatch, sessionId, mangaId, order } = state;

@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 
 import { epicgames, epicgamesFree } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 const formatDate = (dateString, timeZone = 'Asia/Jakarta') =>
 	`\`${dayjs.utc(dateString).tz(timeZone).format('hh:mm A DD/MM/YYYY')}\``;
@@ -17,10 +18,7 @@ const processPromotion = (data) => {
 	}
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'epicgames',
 	minifiedDescription: 'Search Epicgames',
 	description: 'Search games from Epicgames.',
@@ -86,4 +84,4 @@ https://store.epicgames.com/p/${v.urlSlug}`
 
 		await client.sendMessage(from, { image: { url: result[0].keyImages[0].url }, caption }, { quoted: message });
 	}
-};
+});

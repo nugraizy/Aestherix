@@ -5,6 +5,7 @@ import parser from 'yargs-parser';
 import { hifi, metadata } from '../../utils/hi-fi/index.js';
 import { spotifier } from '../../utils/index.js';
 import { color, delay, isURL, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
 const spotifyRedirectUrlRegex = /https?:\/\/spotify\.link\/([a-zA-Z0-9]+)/;
 const regexUrlLocation = /window\.top\.location = validateProtocol\("([^"]+)"\);/g;
@@ -276,10 +277,7 @@ const processVideo = async (url, type, client, ctx) => {
 	return handleSingleTrack(url, type, client, ctx);
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'spotifydl',
 	minifiedDescription: 'Download Spotify',
 	description: 'Download media from Spotify.',
@@ -403,4 +401,4 @@ export default {
 
 		loggers.info(`${color('Downloaded Spotify Media', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

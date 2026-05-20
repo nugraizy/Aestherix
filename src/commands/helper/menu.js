@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 
 import configuration from '../../helper/config/connect.js';
+import { defineCommand } from '../_define.js';
 
 const { version } = await fs.readJSON('./package.json');
 const getRandomCommand = (cmd) => cmd[Math.floor(Math.random() * cmd.length)].name;
@@ -25,10 +26,7 @@ const format = {
 	Search: 'Ｓｅａｒｃｈ'
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'menu',
 	minifiedDescription: 'Bot Menu',
 	description: 'Shows the menu.',
@@ -65,12 +63,12 @@ export default {
 					const commonPart = isNeedDescription
 						? `╭ ${v.minifiedDescription || v.description}\n├ _${prefix}${v.name}_\n├ ${v.usage}\n╰ ⏳ ${v.cooldown}s | ${
 								v.premium ? 'Premium' : 'Free'
-							} | 🆔 ${v.aliases.join(', ')}` // eslint-disable-line
+							} | 🆔 ${v.aliases.join(', ')}`  
 						: (() => {
 								let capt = `\`${prefix}\` ${v.name}`;
 
 								return capt;
-							})(); // eslint-disable-line
+							})();  
 
 					return commonPart;
 				})
@@ -117,4 +115,4 @@ export default {
 			}
 		);
 	}
-};
+});

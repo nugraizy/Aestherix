@@ -1,10 +1,8 @@
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { shopeeProduct } from '../../utils/misc/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'shopee',
 	minifiedDescription: 'Search Shopee',
 	description: 'Search products from Shopee.',
@@ -87,4 +85,4 @@ Location : ${location}`.formatForm()
 			}
 		}
 	}
-};
+});

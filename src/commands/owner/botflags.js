@@ -1,10 +1,8 @@
 import { manager } from '../../core/manager.js';
 import prisma from '../../helper/database/prisma.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'botflags',
 	description: 'View or modify flags on a sub-bot.',
 	usage: '!botflags <session_name> [--flag value]',
@@ -73,4 +71,4 @@ export default {
 
 		return client.reply(from, `✅ Flags updated for "${sessionName}".`, message);
 	}
-};
+});

@@ -9,6 +9,7 @@ import {
 	mergeVideoWithAudio,
 	removeDuplicatesArray
 } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 const regex = (input) => {
 	const reg = /^https?:\/\/(www\.)?bilibili\.tv\/[a-bA-Z-?]*\/play?\/\d$/gi;
@@ -50,10 +51,7 @@ const processVideo = async (url, client, { from, message, sender, filename, wait
 	);
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'bstationdl',
 	minifiedDescription: 'Download Bilbili/Bstation',
 	description: 'Download videos from Bilibili/Bstation',
@@ -142,4 +140,4 @@ export default {
 
 		loggers.info(`${color('Downloaded Bstation File', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

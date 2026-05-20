@@ -1,10 +1,8 @@
 import { Prettify } from '../../helper/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'carbon',
 	minifiedDescription: 'Carbonify Code',
 	description: 'Prettify code.',
@@ -36,4 +34,4 @@ export default {
 
 		loggers.info(`${color('Carboning Codes Success', 'pink')} ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

@@ -1,11 +1,9 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { trueidSearch } from '../../utils/movies/true-id-search.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'trueid',
 	minifiedDescription: 'Search TrueID',
 	description: 'Search movie on TrueID.',
@@ -177,4 +175,4 @@ export default {
 			}
 		}
 	}
-};
+});

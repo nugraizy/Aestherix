@@ -4,6 +4,7 @@ import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { color, delay, formatNumber, loggers, randomChar } from '../../utils/modules/index.js';
 import { Twitter } from '../../utils/twitter/index.js';
+import { defineCommand } from '../_define.js';
 
 const twitter = new Twitter({ cookie: process.env.TWITTER_COOKIE });
 const searchSessions = new Cache();
@@ -111,10 +112,7 @@ const sendNextPrompt = async (sessionId, batchSize, searchQuery, from, client, c
 		.send();
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'twtsearch',
 	minifiedDescription: 'Search Twitter Tweets',
 	description: 'Search tweets on Twitter/X by keyword. Shows 5 tweets per page with pagination.',
@@ -202,4 +200,4 @@ export default {
 			searchSessions.delete(sessionId);
 		}
 	}
-};
+});

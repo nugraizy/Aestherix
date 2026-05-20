@@ -3,15 +3,13 @@ import path from 'path';
 import parser from 'yargs-parser';
 
 import { getChangelogs, stringifyChangelogs } from '../../utils/github/index.js';
+import { defineCommand } from '../_define.js';
 
 const disable = true;
 let image = null;
 let isCache = false;
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'changelogs',
 	description: 'Get the latest changelogs directly from GitHub',
 	usage: '!changelog -q `<number>` / --quantity `<number>`',
@@ -61,4 +59,4 @@ export default {
 
 		await client.reply(from, caption, message);
 	}
-};
+});

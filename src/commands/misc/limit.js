@@ -1,10 +1,8 @@
 import { Limit } from '../../helper/index.js';
 import configuration from '../../helper/config/connect.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'limit',
 	minifiedDescription: 'Limit User',
 	description: 'Check your daily limit.',
@@ -28,4 +26,4 @@ export default {
 
 		await client.reply(from, `Your limit : ${limit || 0}\nType user : ${role}`, message);
 	}
-};
+});

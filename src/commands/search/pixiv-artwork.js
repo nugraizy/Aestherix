@@ -1,11 +1,9 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { fetchBUFFER, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { downloadArtworks, searchArtwork } from '../../utils/pixiv/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'pixivartwork',
 	minifiedDescription: 'Search Pixiv Art',
 	description: 'Search artworks from Pixiv.',
@@ -102,4 +100,4 @@ Total Media : ${dataImage.pageCount}`.formatForm()
 			);
 		}
 	}
-};
+});

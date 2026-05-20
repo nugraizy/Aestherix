@@ -1,10 +1,8 @@
 import { generateWAMessageFromContent } from 'baileys';
 import fs from 'fs-extra';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'productlist',
 	description: 'Send list product message.',
 	category: 'Debugging',
@@ -57,4 +55,4 @@ export default {
 
 		await client.relay(from, messages.message, { messageId: messages.key.id });
 	}
-};
+});

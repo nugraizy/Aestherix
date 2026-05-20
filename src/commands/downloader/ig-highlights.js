@@ -2,11 +2,9 @@ import parser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
 import { color, loggers, formatNumber, isURL } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'ighighlights',
 	minifiedDescription: 'Download Instagram Highlights',
 	description: 'Downloads the highlights of the user',
@@ -110,4 +108,4 @@ export default {
 
 		loggers.info(`${color('Downloaded Instagram highlights', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

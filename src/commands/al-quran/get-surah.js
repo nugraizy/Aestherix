@@ -1,9 +1,7 @@
 import { getListSurah } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'getsurah',
 	minifiedDescription: 'Surah List',
 	description: 'Get List of Surah from The Quran',
@@ -29,4 +27,4 @@ export default {
 			message
 		);
 	}
-};
+});

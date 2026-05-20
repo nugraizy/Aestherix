@@ -1,11 +1,9 @@
 import { Context } from '../../core/context.js';
 import { convertStickerToMedia } from '../../utils/converter/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'decrypt',
 	minifiedDescription: 'Sticker to Media',
 	description: 'Decrypt a sticker to media',
@@ -50,4 +48,4 @@ export default {
 			await this.run({ ...(await Context.from(wait.message, client, store)), shouldSkipCheck: true }, client);
 		}
 	}
-};
+});

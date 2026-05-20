@@ -1,11 +1,9 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { searchBandcamp } from '../../utils/bandcamp/index.js';
 import { removeDuplicatesArray } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'bandcamp',
 	minifiedDescription: 'Search Bandcamp',
 	description: 'Search Musics from Bandcamp.',
@@ -79,4 +77,4 @@ Album ID : ${albumId || 'n/a'}`;
 			);
 		}
 	}
-};
+});

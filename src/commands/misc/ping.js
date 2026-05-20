@@ -1,7 +1,6 @@
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+import { defineCommand } from '../_define.js';
+
+export default defineCommand({
 	name: 'ping',
 	minifiedDescription: 'Ping Latency',
 	description: 'Ping the bot or Show bot latency.',
@@ -18,4 +17,4 @@ export default {
 
 		await wait.update(`Pong! ${(performance.now() - t).toFixed(1)} ms`);
 	}
-};
+});

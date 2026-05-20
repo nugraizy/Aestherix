@@ -1,4 +1,5 @@
 import { Comix } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 const comix = new Comix();
 
@@ -9,10 +10,7 @@ const comix = new Comix();
 const formatPopularCaption = (manga, index) =>
 	`${index + 1}. ${manga.title} (${manga.type || '?'}) — ⭐ ${manga.rating || 'n/a'} — ${manga.status || 'n/a'}`;
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'comixpopular',
 	minifiedDescription: 'Popular Comix',
 	description: 'Show popular manga/manhwa/manhua on Comix.',
@@ -61,4 +59,4 @@ export default {
 
 		await wait.update('Done.');
 	}
-};
+});

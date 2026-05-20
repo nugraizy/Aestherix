@@ -1,4 +1,6 @@
-export default {
+import { defineCommand } from '../_define.js';
+
+export default defineCommand({
 	name: 'kick',
 	minifiedDescription: 'Kick User',
 	description: 'Kick member from group.',
@@ -23,4 +25,4 @@ export default {
 
 		await client.updateGroup(from, { action: 'remove', participants: targets, admins: adminGroups, force, message });
 	}
-};
+});

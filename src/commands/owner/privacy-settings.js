@@ -1,4 +1,5 @@
 import { getBinaryNodeChild, getBinaryNodeChildren } from 'baileys';
+import { defineCommand } from '../_define.js';
 
 const TYPES = {
 	ALL: ['all', 'contacts', 'contact_blacklist', 'none'],
@@ -63,10 +64,7 @@ const sendQuery = (client, { name, value }) =>
 		]
 	});
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'privacy',
 	description: 'Change the privacy settings of the bot.',
 	usage: '!privacy `<setting>` `<value>`',
@@ -129,4 +127,4 @@ export default {
 			await client.reply(from, 'An error occured while trying to change privacy settings.', message);
 		}
 	}
-};
+});

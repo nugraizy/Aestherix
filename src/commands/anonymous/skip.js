@@ -1,9 +1,7 @@
 import { skip } from '../../utils/anonymous/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'skip',
 	minifiedDescription: 'Anonymous Skip',
 	description: 'Skip a partner',
@@ -28,4 +26,4 @@ export default {
 
 		await client.reply(from, `You are already searching for a partner!\nPlease wait for ${result.seconds}s`, message);
 	}
-};
+});

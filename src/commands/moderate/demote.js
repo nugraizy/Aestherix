@@ -1,4 +1,6 @@
-export default {
+import { defineCommand } from '../_define.js';
+
+export default defineCommand({
 	name: 'demote',
 	minifiedDescription: 'Demote Admin',
 	description: 'Demote admin to member.',
@@ -22,4 +24,4 @@ export default {
 
 		await client.updateGroup(from, { action: 'demote', participants: targets, admins: adminGroups, message });
 	}
-};
+});

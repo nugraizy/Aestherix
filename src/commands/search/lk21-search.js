@@ -1,10 +1,8 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { layarkaca21 } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'layarkaca21',
 	minifiedDescription: 'Search Layarkaca21',
 	description: 'Search movies from Layarkaca21 websites.',
@@ -99,4 +97,4 @@ Translate By : ${result[0].translateBy}
 			{ quoted: message }
 		);
 	}
-};
+});

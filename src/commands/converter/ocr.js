@@ -2,11 +2,9 @@ import path from 'path';
 
 import { color, loggers } from '../../utils/modules/index.js';
 import { tesseract } from '../../utils/misc/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'scanimagetext',
 	minifiedDescription: 'Image to text',
 	description: 'Recognize text from image.',
@@ -42,4 +40,4 @@ export default {
 
 		loggers.info(`${color('Text is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

@@ -1,10 +1,8 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { removeDuplicatesArray, yandexImage } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'yandeximage',
 	minifiedDescription: 'Yandex Images',
 	description: 'Search images from Yandex.',
@@ -92,4 +90,4 @@ Article : ${result[index].url.article}`.formatForm()
 			);
 		}
 	}
-};
+});

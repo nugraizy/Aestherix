@@ -2,6 +2,7 @@ import parser from 'yargs-parser';
 
 import { downloadDeviantArt } from '../../utils/deviant_art/index.js';
 import { color, loggers, numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
 const regex = (input) => {
 	const reg = /^https?:\/\/(www\.)?deviantart\.com\/[0-9a-bA-Z-?]*\/art\/[0-9a-zA-Z-?]*[0-9]*/gi;
@@ -20,10 +21,7 @@ const regex = (input) => {
 	return { status: false, message: 'This URL is not a valid Deviant Art URL. Try another URL.' };
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'deviantartdl',
 	minifiedDescription: 'Download Deviant Art',
 	description: 'Download images from Deviant Art',
@@ -93,4 +91,4 @@ Views : ${numberWithCommas(result.views)}`.formatForm(),
 
 		loggers.info(`${color('Downloaded Deviantart File', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

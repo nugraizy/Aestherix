@@ -1,11 +1,9 @@
 import parser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'ytplay',
 	minifiedDescription: 'Download YouTube Video/Audio',
 	description: 'Instantly Download a YouTube video/audio.',
@@ -37,4 +35,4 @@ export default {
 			await configuration.registry.commands.get('ytaudio').run(message, client);
 		}
 	}
-};
+});

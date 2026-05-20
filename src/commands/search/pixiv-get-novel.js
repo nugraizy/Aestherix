@@ -1,5 +1,6 @@
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { getNovelContent } from '../../utils/pixiv/index.js';
+import { defineCommand } from '../_define.js';
 
 const regex = (input) => {
 	const reg = /^https?:\/\/(www\.|i\.)?(pximg\.net)|(pixiv\.net)/i;
@@ -18,10 +19,7 @@ const regex = (input) => {
 	return { status: false, message: 'This URL is not a valid Pixiv URL. Try another URL.' };
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'pixivnovelget',
 	minifiedDescription: 'Get Novel',
 	description: 'Get novel content from Pixiv.',
@@ -77,4 +75,4 @@ ${content}`;
 			);
 		}
 	}
-};
+});

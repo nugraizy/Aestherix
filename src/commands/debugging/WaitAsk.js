@@ -1,7 +1,6 @@
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+import { defineCommand } from '../_define.js';
+
+export default defineCommand({
 	name: 'waitmessage',
 	minifiedDescription: 'Wait Messages',
 	description: 'Wait for users input then proceed.',
@@ -26,4 +25,4 @@ export default {
 
 		client.reply(from, 'hi there ' + wait.message, wait.quoted);
 	}
-};
+});

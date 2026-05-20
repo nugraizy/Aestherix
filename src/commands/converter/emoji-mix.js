@@ -3,11 +3,9 @@ import _ from 'lodash';
 
 import configuration from '../../helper/config/connect.js';
 import { emojimix } from '../../utils/converter/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'emojimixer',
 	minifiedDescription: 'Mix Emoji',
 	description: 'Mix emoji.',
@@ -55,4 +53,4 @@ export default {
 			await client.send(from, { sticker }, { quoted: message });
 		}
 	}
-};
+});

@@ -2,6 +2,7 @@ import configuration from '../../helper/config/connect.js';
 import { S_WHATSAPP_NET } from '../../helper/index.js';
 import prisma from '../../helper/database/prisma.js';
 import { getBannedUsers, unbanUser } from '../../helper/database/adapters/user.js';
+import { defineCommand } from '../_define.js';
 
 function removeFromArray(arr, value) {
 	const index = arr.indexOf(value);
@@ -22,7 +23,7 @@ function mentionText(jid) {
 	return `@${jid.split('@')[0]}`;
 }
 
-export default {
+export default defineCommand({
 	name: 'unbanned',
 	minifiedDescription: 'Unban User',
 	description: 'Unbanned user.',
@@ -93,4 +94,4 @@ export default {
 			await client.send(from, { text: `Success unbanning : ${mentionText(jid)}`, mentions: [jid] }, { quoted: message });
 		}
 	}
-};
+});

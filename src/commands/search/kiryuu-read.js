@@ -2,6 +2,7 @@ import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { Kiryuu, imageToPdf, mime } from '../../utils/index.js';
 import { randomChar } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
 const kiryuu = new Kiryuu();
 
@@ -87,10 +88,7 @@ async function sendBatch(state, from, message, client, ctx) {
 	await builder.send();
 }
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'kiryuuread',
 	minifiedDescription: 'Read Kiryuu Chapter',
 	description:
@@ -160,4 +158,4 @@ export default {
 		await wait.update(`${allChapters.length} chapter(s) found for "${manga.title}".`);
 		await sendBatch(state, from, message, client, { prefix });
 	}
-};
+});

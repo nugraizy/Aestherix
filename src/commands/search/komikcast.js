@@ -1,10 +1,8 @@
 import { KomikCast, mime } from '../../utils/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'komikcast',
 	minifiedDescription: 'Search Komikcast',
 	description: 'Search comics from Komikcast.net.',
@@ -98,4 +96,4 @@ Tot. Chapters : ${chapters.length}`;
 			{}
 		);
 	}
-};
+});

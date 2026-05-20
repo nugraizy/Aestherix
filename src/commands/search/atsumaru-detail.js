@@ -1,5 +1,6 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { Atsumaru } from '../../utils/atsumaru/index.js';
+import { defineCommand } from '../_define.js';
 
 const atsumaru = new Atsumaru();
 
@@ -31,10 +32,7 @@ const formatDetailCaption = (manga) => {
 	return lines.join('\n');
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'atsumarudetail',
 	minifiedDescription: 'Atsumaru Detail',
 	description: 'Get detail of a manga on Atsumaru.',
@@ -77,4 +75,4 @@ export default {
 			return await wait.update(`Error: ${error.message || 'Manga not found.'}`);
 		}
 	}
-};
+});

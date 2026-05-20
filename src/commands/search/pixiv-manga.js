@@ -1,11 +1,9 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { fetchBUFFER, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { downloadManga, searchManga } from '../../utils/pixiv/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'pixivmanga',
 	minifiedDescription: 'Search Pixiv Manga',
 	description: 'Search manga from Pixiv.',
@@ -100,4 +98,4 @@ Total Media : ${dataImage.pageCount}`.formatForm()
 			);
 		}
 	}
-};
+});

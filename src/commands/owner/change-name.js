@@ -1,7 +1,6 @@
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+import { defineCommand } from '../_define.js';
+
+export default defineCommand({
 	name: 'setname',
 	minifiedDescription: 'Change Name',
 	description: "Set the bot's name." /* eslint-disable-line */,
@@ -26,4 +25,4 @@ export default {
 
 		await client.updateProfileName(query);
 	}
-};
+});

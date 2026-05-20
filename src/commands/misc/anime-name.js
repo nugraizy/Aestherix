@@ -1,11 +1,9 @@
 import { animeName, animeNameOptions as _options } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 const animeNameOptions = Object.keys(_options);
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'animename',
 	minifiedDescription: 'Convert Anime Name',
 	description: 'Find your Nickname in Anime Style.',
@@ -34,4 +32,4 @@ ${result.map((v, i) => `${i + 1}. ${v.name}${v.meaning ? `\n${v.meaning}` : ''}`
 			message
 		);
 	}
-};
+});

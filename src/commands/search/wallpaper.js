@@ -1,11 +1,9 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { arq } from '../../utils/arq/index.js';
 import { removeDuplicatesArray } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'wallpaper',
 	minifiedDescription: 'Search Wallpaper',
 	description: 'Search wallpaper.',
@@ -89,4 +87,4 @@ export default {
 			);
 		}
 	}
-};
+});

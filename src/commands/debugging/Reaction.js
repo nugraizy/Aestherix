@@ -1,11 +1,9 @@
 import { generateWAMessageFromContent } from 'baileys';
 import emojiReg from 'emoji-regex';
 import { ZERO } from '../../helper/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'reaction',
 	description: 'Send reaction to a message.',
 	category: 'Debugging',
@@ -51,4 +49,4 @@ export default {
 			}
 		}
 	}
-};
+});

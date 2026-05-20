@@ -1,11 +1,9 @@
 import yargsParser from 'yargs-parser';
 
 import { brainlySearch } from '../../utils/brainly/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'brainly',
 	minifiedDescription: 'Search Brainly',
 	description: 'Search answers from brainly.',
@@ -51,4 +49,4 @@ export default {
 		capt += `\nBrainly by ${__botName}. Powered by Hidden Finder`;
 		await client.reply(from, capt.trim().formatForm(), message);
 	}
-};
+});

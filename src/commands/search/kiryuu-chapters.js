@@ -2,6 +2,7 @@ import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { Kiryuu } from '../../utils/index.js';
 import { randomChar } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
 const kiryuu = new Kiryuu();
 
@@ -9,10 +10,7 @@ const CHAPTERS_PER_BATCH = 40;
 
 const chapterSessions = new Cache();
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'kiryuuchapters',
 	minifiedDescription: 'Kiryuu Chapters',
 	description: 'List chapters of a manga/manhwa/manhua on Kiryuu.',
@@ -77,7 +75,7 @@ export default {
 			return await wait.update(`Error: ${error.message || 'Failed to fetch chapters.'}`);
 		}
 	}
-};
+});
 
 async function sendBatch(state, from, message, client, ctx) {
 	const { allChapters, currentBatch, sessionId, mangaTitle, order } = state;

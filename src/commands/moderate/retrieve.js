@@ -1,4 +1,6 @@
-export default {
+import { defineCommand } from '../_define.js';
+
+export default defineCommand({
 	name: 'retrieve',
 	minifiedDescription: 'Retrieve Group URL',
 	description: 'Retrieve the group\'s invitation URL.',
@@ -17,4 +19,4 @@ export default {
 
 		await client.send(from, { text: `https://chat.whatsapp.com/${code}` }, { quoted: message });
 	}
-};
+});

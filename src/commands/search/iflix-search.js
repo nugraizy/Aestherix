@@ -1,10 +1,8 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { iflixSearch, removeDuplicatesArray } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'iflix',
 	minifiedDescription: 'Search Iflix',
 	description: 'Search movie on iflix.',
@@ -146,4 +144,4 @@ export default {
 			);
 		}
 	}
-};
+});

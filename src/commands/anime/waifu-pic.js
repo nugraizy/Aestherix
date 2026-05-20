@@ -2,11 +2,9 @@ import parser from 'yargs-parser';
 
 import { cmdId } from '../../helper/modules/prefix.js';
 import { getWaifu, removeDuplicatesArray } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'waifupic',
 	minifiedDescription: 'Random Waifupics',
 	description: 'Search images from waifu pics',
@@ -105,4 +103,4 @@ export default {
 			return;
 		}
 	}
-};
+});

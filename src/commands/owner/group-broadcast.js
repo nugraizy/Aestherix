@@ -1,4 +1,5 @@
 import { delay } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
 const check4Duplicate = (chats) => {
 	if (!Array.isArray(chats)) {
@@ -16,10 +17,7 @@ const check4Duplicate = (chats) => {
 	return newChatIds;
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'groupbc',
 	minifiedDescription: 'Group Broadcast',
 	description: 'Send Broadcast to all groups.',
@@ -54,4 +52,4 @@ export default {
 			await client.reply(from, err.stack, message);
 		}
 	}
-};
+});

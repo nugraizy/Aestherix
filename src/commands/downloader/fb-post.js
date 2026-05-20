@@ -2,13 +2,11 @@ import parser from 'yargs-parser';
 
 import { facebook } from '../../utils/facebook/index.js';
 import { color, delay, fetchBUFFER, isURL, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
 const regex = (input) => /^(https?:\/\/)?((w{3}\.)|(m\.)?)?(facebook|fb)\.(com|watch)\/.*/.test(input);
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'fbpost',
 	minifiedDescription: 'Download Facebook Post',
 	description: 'Downloads a Facebook post',
@@ -82,4 +80,4 @@ export default {
 
 		loggers.info(`${color('Downloaded Facebook Post', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

@@ -1,9 +1,7 @@
 import { imageToPdf, mime, nhentai } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'nhentai',
 	minifiedDescription: 'Search Doujin from NHentai',
 	description: 'Search Doujin from nhentai.net.',
@@ -54,4 +52,4 @@ Uploaded : ${uploaded}
 
 		await wait.update('PDFs successfully processed.');
 	}
-};
+});

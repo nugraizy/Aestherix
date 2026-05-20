@@ -2,11 +2,9 @@ import fs from 'fs';
 import path from 'path';
 
 import { isURL, sauceNao } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'saucenao',
 	minifiedDescription: 'Saucenao Image Search',
 	description: 'Reverse image anime search',
@@ -64,4 +62,4 @@ Powered by sauce.nao`.formatForm();
 			fs.unlinkSync(media);
 		}
 	}
-};
+});

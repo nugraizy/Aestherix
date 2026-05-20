@@ -2,13 +2,11 @@ import { YTNodes } from 'youtubei.js';
 
 import { youtubeLiveComments } from '../../utils/index.js';
 import { Cache } from '../../helper/modules/cache.js';
+import { defineCommand } from '../_define.js';
 
 const lives = new Cache();
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'youtubelive',
 	minifiedDescription: 'Live Stream Events',
 	description: 'Listen to a YouTube live stream.',
@@ -204,4 +202,4 @@ Likes : ${metadata.likes?.default_text} 👍🏻`
 
 		live.start();
 	}
-};
+});

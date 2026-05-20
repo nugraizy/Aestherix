@@ -1,10 +1,8 @@
 import { Prettify } from '../../helper/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'prettify',
 	minifiedDescription: 'Prettify Screenshot',
 	description: 'Prettify image.',
@@ -38,4 +36,4 @@ export default {
 
 		loggers.info(`${color('Prettifying an Image Success', 'pink')} ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

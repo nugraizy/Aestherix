@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 
 import configuration from '../../helper/config/connect.js';
 import { getRuntime } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
 const PRESENCE_TYPES = {
 	available: 'available',
@@ -59,7 +60,7 @@ function handleToggle({ key, from, args, message, client, store, onEnable, onDis
 	}
 }
 
-export default {
+export default defineCommand({
 	name: 'simulates',
 	minifiedDescription: 'Simulates Event',
 	description: 'Simulates an event update.',
@@ -215,4 +216,4 @@ export default {
 
 		await client.reply(from, 'Invalid command', message);
 	}
-};
+});

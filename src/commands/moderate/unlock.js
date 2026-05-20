@@ -1,4 +1,6 @@
-export default {
+import { defineCommand } from '../_define.js';
+
+export default defineCommand({
 	name: 'unlock',
 	minifiedDescription: 'Unlock Group',
 	description: 'Unlock the group.',
@@ -19,4 +21,4 @@ export default {
 
 		await client.updateGroup(from, { action: 'not_announcement' });
 	}
-};
+});

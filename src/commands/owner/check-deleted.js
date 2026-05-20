@@ -1,15 +1,13 @@
 import { Cache } from '../../helper/modules/cache.js';
 import { getTimeSince } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
 const path = {
 	deleted: '../../handlers/messages_event/deleted-message.js'
 };
 const handler = new Cache();
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'checkdeleted',
 	minifiedDescription: 'Check Deleted Messages',
 	description: 'Fetch every deleted messages in chat.',
@@ -62,4 +60,4 @@ export default {
 			{}
 		);
 	}
-};
+});

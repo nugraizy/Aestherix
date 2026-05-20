@@ -2,11 +2,9 @@ import path from 'path';
 import parser from 'yargs-parser';
 
 import { color, downloadBandcamp, isURL, loggers, removeDuplicatesArray, toOpus } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'bandcampdl',
 	minifiedDescription: 'Download Bandcamp',
 	description: 'Download Musics from Bandcamp',
@@ -76,4 +74,4 @@ Title : ${result.title}`.formatForm()
 
 		loggers.info(`${color('Downloaded Bandcamp File', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

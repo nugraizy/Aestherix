@@ -3,6 +3,7 @@ import async from 'async';
 import configuration from '../../helper/config/connect.js';
 import { spotifier } from '../../utils/spotifier/index.js';
 import { delay } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
 function startSpotifyPolling() {
 	async.forever(async (next) => {
@@ -20,7 +21,7 @@ function startSpotifyPolling() {
 	}, () => {});
 }
 
-export default {
+export default defineCommand({
 	name: 'spotifyplayer',
 	minifiedDescription: 'Simulate Spotify',
 	description: 'Simulates a spotify player on bio',
@@ -62,4 +63,4 @@ export default {
 
 		await client.reply(from, 'Usage: !spotifyplayer [enable|disable|status]', message);
 	}
-};
+});

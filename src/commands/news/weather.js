@@ -1,9 +1,10 @@
 import { getWeather } from '../../utils/news/index.js';
+import { defineCommand } from '../_define.js';
 
 /**
  * @type {import('../types.js').Plugins}
  */
-export default {
+export default defineCommand({
 	name: 'weather',
 	minifiedDescription: 'Get Weather',
 	description: 'Get Weather on Your City.',
@@ -53,4 +54,4 @@ Powered by openweathermap.org`;
 			{ quoted: message }
 		);
 	}
-};
+});

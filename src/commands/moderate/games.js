@@ -1,10 +1,9 @@
+import configuration from '../../helper/config/connect.js';
 import { pushDefaultSettings, updateGroupSetting } from '../../helper/database/adapters/group-settings.js';
 import prisma from '../../helper/database/prisma.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'games',
 	minifiedDescription: 'Enable/Disable Games Mode',
 	aliases: ['game'],
@@ -23,7 +22,7 @@ export default {
 			);
 		}
 
-		const isEnable = message?.[message?.from]?.games === 'enable';
+		const isEnable = configuration.groups.settings.get(message.from)?.games === 'enable';
 
 		switch (message.query.toLowerCase()) {
 			case 'enable':
@@ -32,7 +31,8 @@ export default {
 					return await client.reply(message.from, 'You already have this command enabled', message.message);
 				}
 
-				message[message.from].games = 'enable';
+				configuration.groups.settings.get(message.from).games = 'enable';
+
 				if (!(await updateGroupSetting(prisma, message.from, 'games', 'enable'))) {
 					await pushDefaultSettings(prisma, message.from, message.groupName, message.groupDescription);
 					await updateGroupSetting(prisma, message.from, 'games', 'enable');
@@ -46,7 +46,8 @@ export default {
 					return await client.reply(message.from, 'You already have this command disabled', message.message);
 				}
 
-				message[message.from].games = 'disable';
+				configuration.groups.settings.get(message.from).games = 'disable';
+
 				if (!(await updateGroupSetting(prisma, message.from, 'games', 'disable'))) {
 					await pushDefaultSettings(prisma, message.from, message.groupName, message.groupDescription);
 					await updateGroupSetting(prisma, message.from, 'games', 'disable');
@@ -62,4 +63,4 @@ export default {
 				);
 		}
 	}
-};
+});

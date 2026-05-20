@@ -1,13 +1,11 @@
 import parser from 'yargs-parser';
 import { GitHubGraph } from '../../helper/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
+import { defineCommand } from '../_define.js';
 
 let themes = [];
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'githubgraph',
 	minifiedDescription: 'Github Contribution Graph',
 	description: 'Lookup for User Contribution Graph.',
@@ -69,4 +67,4 @@ export default {
 
 		await wait.update('Graph created successfully!');
 	}
-};
+});

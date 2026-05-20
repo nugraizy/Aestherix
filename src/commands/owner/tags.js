@@ -1,9 +1,8 @@
 import { getTimeSince } from '../../utils/modules/index.js';
+import { toUserJid } from '../../helper/misc/wa_data/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'tags',
 	minifiedDescription: 'Fetch Tags',
 	description: 'Fetch every tags',
@@ -55,10 +54,12 @@ Tot. Tags : ${dataMessage.mention.length}`,
 			return await client.reply(from, 'No messages scraped in this chat', message);
 		}
 
+		const ownerJid = toUserJid(settings.owner_number);
+
 		dataMessages = dataMessages.filter(
 			(v) =>
-				(v.mediaData?.participant === settings.owner_number || v.mention.includes(settings.owner_number)) &&
-				v.sender !== settings.owner_number
+				(v.mediaData?.participant === ownerJid || v.mention.includes(ownerJid)) &&
+				v.sender !== ownerJid
 		);
 
 		if (!dataMessages.length) {
@@ -70,11 +71,11 @@ Tot. Tags : ${dataMessage.mention.length}`,
 			message: v.message,
 			sender: v.sender,
 			type:
-				v.mention.includes(settings.owner_number) && (v.type === 'mentionText' || v.type === 'extendedTextMessage')
+				v.mention.includes(ownerJid) && (v.type === 'mentionText' || v.type === 'extendedTextMessage')
 					? 'Tags & Reply'
-					: v.mention.includes(settings.owner_number) && v.mediaData.participant !== settings.owner_number
+					: v.mention.includes(ownerJid) && v.mediaData.participant !== ownerJid
 						? 'Tags'
-						: !v.mention.includes(settings.owner_number) && v.mediaData.participant === settings.owner_number
+						: !v.mention.includes(ownerJid) && v.mediaData.participant === ownerJid
 							? 'Reply'
 							: '',
 			time: getTimeSince(Number(v.timeStamp) * 1000),
@@ -110,4 +111,4 @@ Tot. Tags : ${dataMessage.mention.length}`,
 			{}
 		);
 	}
-};
+});

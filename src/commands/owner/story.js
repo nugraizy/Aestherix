@@ -1,12 +1,10 @@
 import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
+import { defineCommand } from '../_define.js';
 
 const STATUS = 'status@broadcast';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'story',
 	description: 'Fetch story from host WhatsApp.',
 	category: 'Owner',
@@ -88,4 +86,4 @@ export default {
 			{}
 		);
 	}
-};
+});

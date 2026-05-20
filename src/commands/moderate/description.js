@@ -1,4 +1,6 @@
-export default {
+import { defineCommand } from '../_define.js';
+
+export default defineCommand({
 	name: 'description',
 	minifiedDescription: 'Change Description',
 	description: 'Change the description of the group.',
@@ -21,4 +23,4 @@ export default {
 
 		await client.updateGroup(from, { action: 'description', text });
 	}
-};
+});

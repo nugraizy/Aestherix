@@ -1,9 +1,7 @@
 import { getEarthquake } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'gempa',
 	minifiedDescription: 'Latest Earthquake',
 	description: 'Showing latest earthquake in Indonesia.',
@@ -42,4 +40,4 @@ export default {
 			{ quoted: message.message }
 		);
 	}
-};
+});

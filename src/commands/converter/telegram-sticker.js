@@ -1,10 +1,8 @@
 import configuration from '../../helper/config/connect.js';
 import { telegram } from '../../utils/stickers/telegram.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'telegramsticker',
 	minifiedDescription: 'Telegram Sticker',
 	description: 'Find Telegram stickers.',
@@ -42,4 +40,4 @@ export default {
 			await client.send(from, { sticker });
 		}
 	}
-};
+});

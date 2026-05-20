@@ -1,11 +1,9 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { removeDuplicatesArray } from '../../utils/modules/index.js';
 import { stockImagesPexel } from '../../utils/wallpapers/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'stockimages2',
 	minifiedDescription: 'Stock Images V2',
 	description: 'Search stock images.',
@@ -90,4 +88,4 @@ export default {
 			);
 		}
 	}
-};
+});

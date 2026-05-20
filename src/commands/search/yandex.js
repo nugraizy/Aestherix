@@ -3,11 +3,9 @@ import path from 'path';
 
 import { isURL } from '../../utils/modules/index.js';
 import { yandex } from '../../utils/image_reverse_search/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'yandex',
 	minifiedDescription: 'Reverse Image Yandex',
 	description: 'Reverse image search from Yandex.',
@@ -96,4 +94,4 @@ export default {
 			throw err;
 		}
 	}
-};
+});

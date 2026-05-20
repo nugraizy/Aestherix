@@ -1,10 +1,8 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { googleArticle, removeDuplicatesArray } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'googlearticle',
 	minifiedDescription: 'Search Google Articles',
 	description: 'Search articles from Google.',
@@ -91,4 +89,4 @@ ${index + 1}/${data.length}\nPowered by Hidden Finder`
 			);
 		}
 	}
-};
+});

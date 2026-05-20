@@ -2,11 +2,9 @@ import parser from 'yargs-parser';
 
 import { Github } from '../../utils/github/index.js';
 import { isURL, numberWithCommas } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'gitstalk',
 	minifiedDescription: 'Look-up Github User',
 	description: 'Look-up Github user.',
@@ -179,4 +177,4 @@ Biography : ${bio}`;
 			);
 		}
 	}
-};
+});

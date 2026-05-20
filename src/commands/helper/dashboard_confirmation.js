@@ -1,9 +1,7 @@
 import { processDashboardConfirmationAction } from '../../../dashboard/server/socket/confirmation.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'dashconfirm',
 	minifiedDescription: 'Dashboard Confirmation',
 	description: 'Approve or reject dashboard login confirmations via WhatsApp.',
@@ -37,4 +35,4 @@ export default {
 
 		return await client.reply(from, confirmation.message || 'Dashboard confirmation failed.', message);
 	}
-};
+});

@@ -1,10 +1,9 @@
+import configuration from '../../helper/config/connect.js';
 import { pushDefaultSettings, updateGroupSetting } from '../../helper/database/adapters/group-settings.js';
 import prisma from '../../helper/database/prisma.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'antinsfw',
 	minifiedDescription: 'Anti NSFW',
 	aliases: ['antiporn', 'noporn', 'nonsfw'],
@@ -31,7 +30,7 @@ export default {
 			);
 		}
 
-		const isEnable = message?.[message?.from]?.antiNSFW === 'enable';
+		const isEnable = configuration.groups.settings.get(message.from)?.antiNSFW === 'enable';
 
 		switch (message.query.toLowerCase()) {
 			case 'enable':
@@ -40,7 +39,8 @@ export default {
 					return await client.reply(message.from, 'You already have this command enabled', message.message);
 				}
 
-				message[message.from].antiNSFW = 'enable';
+				configuration.groups.settings.get(message.from).antiNSFW = 'enable';
+
 				if (!(await updateGroupSetting(prisma, message.from, 'antiNSFW', 'enable'))) {
 					await pushDefaultSettings(prisma, message.from, message.groupName, message.groupDescription);
 					await updateGroupSetting(prisma, message.from, 'antiNSFW', 'enable');
@@ -54,7 +54,8 @@ export default {
 					return await client.reply(message.from, 'You already have this command disabled', message.message);
 				}
 
-				message[message.from].antiNSFW = 'disable';
+				configuration.groups.settings.get(message.from).antiNSFW = 'disable';
+
 				if (!(await updateGroupSetting(prisma, message.from, 'antiNSFW', 'disable'))) {
 					await pushDefaultSettings(prisma, message.from, message.groupName, message.groupDescription);
 					await updateGroupSetting(prisma, message.from, 'antiNSFW', 'disable');
@@ -70,4 +71,4 @@ export default {
 				);
 		}
 	}
-};
+});

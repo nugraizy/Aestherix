@@ -1,10 +1,8 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { cnnindonesia } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'cnnindonesia',
 	minifiedDescription: 'CNN-Indonesia News',
 	description: 'Showing latest news in Indonesia from CNN.',
@@ -105,4 +103,4 @@ export default {
 			{ quoted: message }
 		);
 	}
-};
+});

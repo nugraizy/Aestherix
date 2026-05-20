@@ -1,12 +1,10 @@
 import { encodeWAMessage } from 'baileys';
 import crypto from 'crypto';
+import { defineCommand } from '../_define.js';
 
 const clearQuery = (query) => query.replace(/[^\d]/g, '');
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'call',
 	description: 'Send call.',
 	category: 'Debugging',
@@ -100,4 +98,4 @@ export default {
 			}
 		}
 	}
-};
+});

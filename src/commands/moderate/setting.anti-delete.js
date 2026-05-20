@@ -1,10 +1,9 @@
+import configuration from '../../helper/config/connect.js';
 import { pushDefaultSettings, updateGroupSetting } from '../../helper/database/adapters/group-settings.js';
 import prisma from '../../helper/database/prisma.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'antidelete',
 	minifiedDescription: 'Anti Delete',
 	aliases: ['antidelet', 'antihapus'],
@@ -23,7 +22,7 @@ export default {
 			);
 		}
 
-		const isEnable = message?.[message?.from]?.antiDelete === 'enable';
+		const isEnable = configuration.groups.settings.get(message.from)?.antiDelete === 'enable';
 
 		switch (message.query.toLowerCase()) {
 			case 'enable':
@@ -32,7 +31,7 @@ export default {
 					return await client.reply(message.from, 'You already have this command enabled', message.message);
 				}
 
-				message[message.from].antiDelete = 'enable';
+				configuration.groups.settings.get(message.from).antiDelete = 'enable';
 
 				if (!(await updateGroupSetting(prisma, message.from, 'antiDelete', 'enable'))) {
 					await pushDefaultSettings(prisma, message.from, message.groupName, message.groupDescription);
@@ -47,7 +46,7 @@ export default {
 					return await client.reply(message.from, 'You already have this command disabled', message.message);
 				}
 
-				message[message.from].antiDelete = 'disable';
+				configuration.groups.settings.get(message.from).antiDelete = 'disable';
 
 				if (!(await updateGroupSetting(prisma, message.from, 'antiDelete', 'disable'))) {
 					await pushDefaultSettings(prisma, message.from, message.groupName, message.groupDescription);
@@ -64,4 +63,4 @@ export default {
 				);
 		}
 	}
-};
+});

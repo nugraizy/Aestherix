@@ -1,9 +1,7 @@
 import { slot as slots } from '../../utils/games/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'slotmachine',
 	minifiedDescription: 'Play Slot',
 	description: 'Play Slot Machine.',
@@ -39,4 +37,4 @@ export default {
 			)
 			.send();
 	}
-};
+});

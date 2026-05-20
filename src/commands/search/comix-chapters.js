@@ -2,6 +2,7 @@ import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { Comix } from '../../utils/index.js';
 import { randomChar } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
 const comix = new Comix();
 
@@ -9,10 +10,7 @@ const CHAPTERS_PER_BATCH = 40;
 
 const chapterSessions = new Cache();
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'comixchapters',
 	minifiedDescription: 'Comix Chapters',
 	description: 'List chapters of a manga/manhwa/manhua on Comix.',
@@ -74,7 +72,7 @@ export default {
 		await wait.update(`${allChapters.length} chapter(s) found.`);
 		await sendBatch(state, from, message, client, { prefix });
 	}
-};
+});
 
 async function sendBatch(state, from, message, client, ctx) {
 	const { allChapters, currentBatch, sessionId, mangaSlug, order } = state;

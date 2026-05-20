@@ -4,15 +4,13 @@ import fs from 'fs-extra';
 
 import { color, loggers } from '../../utils/index.js';
 import { trigger } from '../../helper/index.js';
+import { defineCommand } from '../_define.js';
 
 const defaultOptions = {
 	output: 'sticker'
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'trigger',
 	minifiedDescription: 'Trigger Picture',
 	description: 'Trigger someone profile picture or send/reply an image to trigger',
@@ -121,4 +119,4 @@ export default {
 			loggers.info(`${color('Triggered', 'pink')} ${color(mentioned, 'lilac')}`);
 		}
 	}
-};
+});

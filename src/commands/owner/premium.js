@@ -2,6 +2,7 @@ import configuration from '../../helper/config/connect.js';
 import { S_WHATSAPP_NET, Limit } from '../../helper/index.js';
 import prisma from '../../helper/database/prisma.js';
 import { getUserLimit, updateUserRole } from '../../helper/database/adapters/user.js';
+import { defineCommand } from '../_define.js';
 
 const configureUser = async (client, { mode, user, PREMS_CONTAINER, from, message }) => {
 	const record = await getUserLimit(prisma, user).catch(() => null);
@@ -61,10 +62,7 @@ const configureUser = async (client, { mode, user, PREMS_CONTAINER, from, messag
 	}
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'premium',
 	minifiedDescription: 'Configure Users',
 	description: 'Configure users status.',
@@ -146,4 +144,4 @@ export default {
 			});
 		}
 	}
-};
+});

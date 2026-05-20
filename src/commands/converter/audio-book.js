@@ -5,11 +5,9 @@ import path from 'path';
 import { textToSpeech } from '../../utils/converter/index.js';
 import { tesseract } from '../../utils/misc/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'audiobook',
 	minifiedDescription: 'Audio book',
 	description: 'Take a picture and turn it into an audio book.',
@@ -43,4 +41,4 @@ export default {
 		await client.send(from, { audio: buffer }, { quoted: message });
 		loggers.info(`${color('Text is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

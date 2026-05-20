@@ -2,15 +2,13 @@ import yn from 'yn';
 
 import { increment, isURL, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { pinterest } from '../../utils/pinterest/index.js';
+import { defineCommand } from '../_define.js';
 
 const _regex = new RegExp(
 	'https?://(?:[^/]+.)?(pinterest|pin).(?:com|fr|de|ch|jp|cl|ca|it|co.uk|nz|ru|com.au|at|pt|co.kr|es|com.mx|dk|ph|th|com.uy|co|nl|info|kr|ie|vn|com.vn|ec|mx|in|pe|co.at|hu|co.in|co.nz|id|com.ec|com.py|tw|be|uk|com.bo|com.pe)'
 );
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'pinterest',
 	minifiedDescription: 'Search Pinterest',
 	description: 'Search images from Pinterest.',
@@ -204,4 +202,4 @@ Caption : ${results[index].caption}
 			}
 		}
 	}
-};
+});

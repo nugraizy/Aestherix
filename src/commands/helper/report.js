@@ -1,10 +1,9 @@
 import { Limit } from '../../helper/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
+import { toUserJid } from '../../helper/misc/wa_data/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'report',
 	minifiedDescription: 'Report Bug/Error',
 	description: 'Report bug or error to the owner.',
@@ -48,7 +47,7 @@ export default {
 			},
 			{}
 		);
-		await client.send(settings.owner_number, {
+		await client.send(toUserJid(settings.owner_number), {
 			text: query,
 			footer: `Sender Name : ${pushname}
 ID : ${sender}
@@ -63,4 +62,4 @@ The Problem Occured in : ${from}`,
 			headerType: 1
 		});
 	}
-};
+});

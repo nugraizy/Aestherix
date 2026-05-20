@@ -1,11 +1,9 @@
 import configuration from '../../helper/config/connect.js';
 import { Wordle } from '../../utils/games/index.js';
 import { loggers, color } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'wordle',
 	minifiedDescription: 'Play Wordle',
 	description: 'Play Wordle.',
@@ -65,4 +63,4 @@ Can you find the word in as few attempts as possible?\n\nUsage: !wordle <play/ex
 			);
 		}
 	}
-};
+});

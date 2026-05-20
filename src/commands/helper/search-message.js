@@ -1,9 +1,7 @@
 import { delay } from 'baileys';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'searchmessage',
 	minifiedDescription: 'Search Messages',
 	description: 'Search for a message in the current group',
@@ -34,4 +32,4 @@ export default {
 
 		await client.reply(from, capt.trim(), message);
 	}
-};
+});

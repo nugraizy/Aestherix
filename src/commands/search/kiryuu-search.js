@@ -2,6 +2,7 @@ import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { Kiryuu } from '../../utils/index.js';
 import { randomChar } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
 const kiryuu = new Kiryuu();
 
@@ -62,10 +63,7 @@ function sendResult(state, from, message, client, ctx) {
 	return builder.send();
 }
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'kiryuusearch',
 	minifiedDescription: 'Search Kiryuu',
 	description: 'Search manga, manhwa, or manhua on Kiryuu.',
@@ -114,4 +112,4 @@ export default {
 		await wait.update(`Found ${result.length} result(s).`);
 		await sendResult(state, from, message, client, { prefix });
 	}
-};
+});

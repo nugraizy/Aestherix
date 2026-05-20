@@ -1,9 +1,7 @@
 import { youtubeChannel } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'youtubestalk',
 	minifiedDescription: 'Look-up YouTube Channel',
 	description: 'Look-up YouTube Channel.',
@@ -42,4 +40,4 @@ Channel URL : ${author.channelUrlId}
 Channel URL Username : ${author.channelUrlUsername}`.formatForm()
 		});
 	}
-};
+});

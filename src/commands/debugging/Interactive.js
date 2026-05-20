@@ -1,10 +1,8 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { getWaifu } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'interactive',
 	description: 'Send interactive.',
 	category: 'Debugging',
@@ -155,4 +153,4 @@ export default {
 		// await carousel();
 		await native();
 	}
-};
+});

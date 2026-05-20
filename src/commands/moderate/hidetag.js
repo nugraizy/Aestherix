@@ -1,7 +1,6 @@
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+import { defineCommand } from '../_define.js';
+
+export default defineCommand({
 	name: 'hidetag',
 	minifiedDescription: 'Hide tag',
 	description: 'Hide tag everyone in the group.',
@@ -23,4 +22,4 @@ export default {
 
 		await client.send(from, { text: query || bodyQuoted || ':)', mentions: participantsGroup }, {});
 	}
-};
+});

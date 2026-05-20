@@ -1,10 +1,8 @@
 import { delay } from 'baileys';
 import { createImageBing } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'bingimage',
 	minifiedDescription: 'Create Image',
 	description: 'Create Image from text using Bing AI.',
@@ -31,4 +29,4 @@ export default {
 			await delay(300);
 		}
 	}
-};
+});

@@ -1,12 +1,10 @@
 import { imageToPdf, mime } from '../../utils/index.js';
 import { Shinigami } from '../../utils/shinigami/index.js';
+import { defineCommand } from '../_define.js';
 
 const shinigami = new Shinigami();
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'shinigamiread',
 	minifiedDescription: 'Read Shinigami Chapter',
 	description: 'Download chapter pages from Shinigami as a PDF.',
@@ -59,4 +57,4 @@ export default {
 			return await wait.update(`Error: ${error.message || 'Failed to fetch pages.'}`);
 		}
 	}
-};
+});

@@ -1,11 +1,9 @@
 import { FlickerAPI } from '../../utils/flickr/index.js';
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'flickr',
 	minifiedDescription: 'Search Flickr',
 	description: 'Search images from Flickr.',
@@ -115,4 +113,4 @@ Published : ${result[index].posted}`
 			);
 		}
 	}
-};
+});

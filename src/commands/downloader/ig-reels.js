@@ -3,11 +3,9 @@ import parser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
 import { color, formatNumber, loggers } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'igreel',
 	minifiedDescription: 'Download Instagram Reel',
 	description: 'Downloads the reel of the user',
@@ -80,4 +78,4 @@ export default {
 
 		loggers.info(`${color('Downloaded Instagram reel', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

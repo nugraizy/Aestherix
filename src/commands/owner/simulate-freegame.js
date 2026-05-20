@@ -1,5 +1,6 @@
 import configuration from '../../helper/config/connect.js';
 import { getNewGames } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 let lastGames = {};
 
@@ -24,7 +25,7 @@ function startFreeGamePolling() {
 	}, 3 * 60 * 1000);
 }
 
-export default {
+export default defineCommand({
 	name: 'freegame',
 	minifiedDescription: 'Simulate Freegame',
 	description: 'Fetch freegames from games platform.',
@@ -70,4 +71,4 @@ export default {
 
 		await client.reply(from, 'Usage: !freegame [enable|disable|status]', message);
 	}
-};
+});

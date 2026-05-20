@@ -11,6 +11,7 @@ import { cmdId } from '../../helper/modules/prefix.js';
 import * as d from '../../index.js';
 import { getSyntaxAdvice } from '../../utils/ai/syntax-check-agent.js';
 import * as b from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 const func = { ...a, ...b, ...c, ...d, ...configuration }; /* eslint-disable-line */
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
@@ -218,7 +219,7 @@ async function evalBang(ctx, client, store) {
 	client.reply(from, inspect(output, { showHidden: true, depth: 4 }), quoted);
 }
 
-export default {
+export default defineCommand({
 	name: 'eval',
 	minifiedDescription: 'Evaluate Code',
 	description: 'Evaluates code.',
@@ -282,12 +283,11 @@ export default {
 			return evalBang(message, client, store);
 		}
 	}
-};
+});
 
 global.prints = print;
 
 const temp = async (names, func) => {
-	/* eslint-disable-line */
 	if (!/^[a-z0-9_]+$/i.test(names)) {
 		return new Error('Invalid name.');
 	}
@@ -316,7 +316,6 @@ const temp = async (names, func) => {
 };
 
 const clear = (names) => {
-	/* eslint-disable-line */
 	if (typeof names === 'function') {
 		for (const key in global.functions) {
 			if (global.functions[key] === names) {
@@ -342,7 +341,6 @@ const clear = (names) => {
 };
 
 const check = (names) => {
-	/* eslint-disable-line */
 	if (typeof names === 'function') {
 		for (const key in global.functions) {
 			if (global.functions[key] === names) {

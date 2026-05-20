@@ -1,10 +1,8 @@
 import yargsParser from 'yargs-parser';
 import { jidNormalizedUser } from 'baileys';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'changeprofile',
 	minifiedDescription: 'Profile Picture',
 	description: 'Set the icon group or bot.',
@@ -71,4 +69,4 @@ export default {
 			options.no_crop || options.noCrop ? 'no_crop' : options.no_stretch || options.noStretch ? 'no_stretch' : undefined
 		);
 	}
-};
+});

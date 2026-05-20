@@ -1,11 +1,9 @@
 import { imageToAnime } from '../../utils/converter/file-processing.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { color, loggers } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'toanime',
 	minifiedDescription: 'Animefy Picture',
 	description: 'Change your selfie picture to Anime-like using QQ A.I.',
@@ -63,4 +61,4 @@ export default {
 
 		loggers.info(`${color('Anime-like image is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 	}
-};
+});

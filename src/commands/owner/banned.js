@@ -2,6 +2,7 @@ import configuration from '../../helper/config/connect.js';
 import { S_WHATSAPP_NET } from '../../helper/index.js';
 import prisma from '../../helper/database/prisma.js';
 import { getBannedUsers, banUser } from '../../helper/database/adapters/user.js';
+import { defineCommand } from '../_define.js';
 
 async function banAndBlock(client, jid) {
 	await banUser(prisma, jid);
@@ -14,7 +15,7 @@ function mentionText(jid) {
 	return `@${jid.split('@')[0]}`;
 }
 
-export default {
+export default defineCommand({
 	name: 'banned',
 	minifiedDescription: 'Ban User',
 	description: 'Ban user.',
@@ -91,4 +92,4 @@ export default {
 			await client.send(from, { text: `Success banning : ${mentionText(jid)}`, mentions: [jid] }, { quoted: message });
 		}
 	}
-};
+});

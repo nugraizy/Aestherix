@@ -2,6 +2,7 @@ import _ from 'lodash';
 import os from 'node:os';
 
 import { getFilesizeFromBytes, getRuntime } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
 const getCpus = (func) =>
 	func()
@@ -17,10 +18,7 @@ const getCpus = (func) =>
 		)
 		.join('\n\n');
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'stats',
 	minifiedDescription: 'Bot Status',
 	description: 'Check bot status.',
@@ -73,4 +71,4 @@ export default {
 
 		client.reply(from, caption, message);
 	}
-};
+});

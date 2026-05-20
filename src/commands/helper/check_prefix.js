@@ -1,9 +1,7 @@
 import configuration from '../../helper/config/connect.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'checkprefix',
 	minifiedDescription: 'Check Prefix',
 	description: 'Shows the current bot prefix configuration.',
@@ -31,4 +29,4 @@ Active Prefixes : ${config.nopref ? '(any text triggers commands)' : prefixes.jo
 
 		await client.reply(from, text.trim(), message);
 	}
-};
+});

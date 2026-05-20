@@ -1,10 +1,8 @@
 import configuration from '../../helper/config/connect.js';
 import { Context } from '../../core/context.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'waitsticker',
 	minifiedDescription: 'Wait Sticker',
 	description: 'Wait for users input then proceed.',
@@ -36,4 +34,4 @@ export default {
 
 		await configuration.registry.commands.get('sticker').run(messageToConvert, client);
 	}
-};
+});

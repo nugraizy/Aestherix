@@ -1,5 +1,6 @@
 import { removeDuplicatesArray, numberWithCommas } from '../../utils/modules/index.js';
 import { bilibiliSearchTv } from '../../utils/bilibili/index.js';
+import { defineCommand } from '../_define.js';
 
 const boxen = (text) => {
 	const texts = text.split('\n');
@@ -14,10 +15,7 @@ const boxen = (text) => {
 	return box;
 };
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'bstation',
 	minifiedDescription: 'Search Bilibili/Bstation',
 	description: 'Search videos from Bilibili/Bstation ID Server.',
@@ -69,4 +67,4 @@ export default {
 			);
 		}
 	}
-};
+});

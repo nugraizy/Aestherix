@@ -1,9 +1,7 @@
 import { chords } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'chords',
 	minifiedDescription: 'Search Chords',
 	description: 'Search music chords.',
@@ -34,4 +32,4 @@ ${result.chord.trim()}`.formatForm(),
 			message
 		);
 	}
-};
+});

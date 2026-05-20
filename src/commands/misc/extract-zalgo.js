@@ -1,9 +1,7 @@
 import { extractZalgo } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'extractzalgo',
 	minifiedDescription: 'Unzalgofie Text',
 	description: 'Extract Zalgo text to Text',
@@ -20,4 +18,4 @@ export default {
 
 		await client.reply(from, extractZalgo(query), message);
 	}
-};
+});

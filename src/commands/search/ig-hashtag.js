@@ -1,9 +1,7 @@
 import configuration from '../../helper/config/connect.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'ighashtag',
 	minifiedDescription: 'Search Instagram Hashtag',
 	description: 'Search for hashtag on Instagram.',
@@ -61,4 +59,4 @@ export default {
 			);
 		}
 	}
-};
+});

@@ -1,13 +1,11 @@
 import configuration from '../../helper/config/connect.js';
 import { login } from '../../utils/instagram/login.js';
+import { defineCommand } from '../_define.js';
 
 		const { InstagramApi } = await import('../../utils/instagram/instagram.js');
 
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'instagraminit',
 	description: 'Initialize Instagram session.',
 	usage: '!instagraminit',
@@ -30,4 +28,4 @@ export default {
 
 		return await client.reply(from, 'Instagram session has been initialized successfully.', message);
 	}
-};
+});

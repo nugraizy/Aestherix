@@ -1,10 +1,8 @@
 import { isURL } from '../../utils/modules/index.js';
 import { tiny } from '../../utils/shortener/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'tiny',
 	minifiedDescription: 'Shorten URL',
 	description: 'URL shortener using tinyurl.',
@@ -27,4 +25,4 @@ export default {
 
 		await client.reply(from, urls, message);
 	}
-};
+});

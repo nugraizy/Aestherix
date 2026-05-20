@@ -1,11 +1,9 @@
 import { cmdId } from '../../helper/modules/prefix.js';
 import { arq } from '../../utils/arq/index.js';
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'pornhub',
 	minifiedDescription: 'Search PornHub',
 	description: 'Search pornhub.',
@@ -119,4 +117,4 @@ Tags : ${tags.join(', ')}`;
 			);
 		}
 	}
-};
+});

@@ -1,9 +1,7 @@
 import { createImage } from '../../utils/ai/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'makeimage',
 	minifiedDescription: 'Create Image',
 	description: 'Create an image based on your description',
@@ -26,4 +24,4 @@ export default {
 
 		await client.send(from, { image: { url: result }, caption }, { quoted: message });
 	}
-};
+});

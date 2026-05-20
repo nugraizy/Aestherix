@@ -2,6 +2,7 @@ import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { Comix, imageToPdf, mime } from '../../utils/index.js';
 import { randomChar } from '../../utils/modules/index.js';
+import { defineCommand } from '../_define.js';
 
 const comix = new Comix();
 
@@ -97,10 +98,7 @@ async function sendBatch(state, from, message, client, ctx) {
 	await builder.send();
 }
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'comixread',
 	minifiedDescription: 'Read Comix Chapter',
 	description:
@@ -207,4 +205,4 @@ export default {
 		await wait.update(`${allChapters.length} chapter(s) found for "${manga.title}".`);
 		await sendBatch(state, from, message, client, { prefix });
 	}
-};
+});

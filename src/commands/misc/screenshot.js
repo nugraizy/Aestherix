@@ -1,9 +1,7 @@
 import { isURL, screenshot } from '../../utils/index.js';
+import { defineCommand } from '../_define.js';
 
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+export default defineCommand({
 	name: 'screenshots',
 	minifiedDescription: 'Screenshot Website',
 	description: 'Get a screenshot of a website.',
@@ -30,4 +28,4 @@ export default {
 
 		await client.send(message.from, { image: buffer }, { quoted: message.message });
 	}
-};
+});
