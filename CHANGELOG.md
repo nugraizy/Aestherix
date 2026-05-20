@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.8.0」2026-05-21
+
+## Added
+- **Dashboard admin UI** — new pages and management panels for the Svelte dashboard. ([`8e50d941`](https://github.com/nugraizy/aestherix/commit/8e50d941))
+- **Dashboard APIs** — groups, system, and broadcast endpoints wired into the server. ([`f8fc326e`](https://github.com/nugraizy/aestherix/commit/f8fc326e))
+
+## Refactored
+- **Moderation settings** — split per-setting command handlers for group toggles. ([`3213f50a`](https://github.com/nugraizy/aestherix/commit/3213f50a))
+- **Dashboard bridge** — refreshed core bridge and group settings caches. ([`6badc401`](https://github.com/nugraizy/aestherix/commit/6badc401))
+- **Changelog header hash** — commit link moved into the changelog modal header. ([`78404cc4`](https://github.com/nugraizy/aestherix/commit/78404cc4))
+
+## Chores
+- **Prisma schemas** — aligned SQL and Mongo schema changes. ([`c9d93c96`](https://github.com/nugraizy/aestherix/commit/c9d93c96))
+- **Dependencies** — refreshed package and lint configuration updates. ([`a4e33b8a`](https://github.com/nugraizy/aestherix/commit/a4e33b8a))
+
+---
+
 # 「7.7.4」2026-05-17
 
 ## Added
