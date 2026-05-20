@@ -1,13 +1,37 @@
 <script>
+	import { setUserBanned, setUserBlocked, setUserLimit, setUserPremium } from '../lib/api.js';
+	import { maskJid, unmaskedAvailable } from '../lib/jid.js';
 	import { users } from '../lib/stores.js';
-	import { maskJid } from '../lib/jid.js';
+	import { showError, showUndoToast } from '../lib/toast.js';
+	import NumberInput from './ui/NumberInput.svelte';
 	import Tooltip from './ui/Tooltip.svelte';
+	import SkeletonList from './ui/SkeletonList.svelte';
+
+	export let isViewer = false;
 
 	let search = '';
+	let editingId = null;
+	let editingValue = '';
+	let pending = {};
+	let storeLoaded = false;
 
-	$: filtered = $users.filter((u) =>
-		!search || u.id?.includes(search) || u.role?.toLowerCase().includes(search.toLowerCase())
-	);
+	$: if ($users.length > 0) storeLoaded = true;
+
+	$: filtered = $users.filter((user) => {
+		if (!search) {
+			return true;
+		}
+
+		const term = search.toLowerCase();
+
+		return (
+			user.id?.toLowerCase().includes(term) ||
+			user.role?.toLowerCase().includes(term) ||
+			(user.premium && 'premium'.includes(term)) ||
+			(user.banned && 'banned'.includes(term)) ||
+			(user.blocked && 'blocked'.includes(term))
+		);
+	});
 
 	function roleClass(role) {
 		const r = String(role || '').toUpperCase();
@@ -17,6 +41,159 @@
 
 		return 'role-badge';
 	}
+
+	function actionKey(userId, action) {
+		return `${userId}:${action}`;
+	}
+
+	function isPending(userId, action) {
+		return Boolean(pending[actionKey(userId, action)]);
+	}
+
+	function setPending(userId, action, value) {
+		const key = actionKey(userId, action);
+
+		if (value) {
+			pending = { ...pending, [key]: true };
+		} else {
+			const next = { ...pending };
+
+			delete next[key];
+			pending = next;
+		}
+	}
+
+	function patchUser(userId, patch) {
+		users.update((list) =>
+			list.map((entry) => (entry.id === userId ? { ...entry, ...patch } : entry))
+		);
+	}
+
+	function canEdit(user) {
+		if (isViewer) {
+			return false;
+		}
+
+		return unmaskedAvailable(user?.id || '');
+	}
+
+	async function startEditLimit(user) {
+		if (!canEdit(user)) {
+			return;
+		}
+
+		editingId = user.id;
+		editingValue = String(user.limit ?? 0);
+	}
+
+	function cancelEditLimit() {
+		editingId = null;
+		editingValue = '';
+	}
+
+	async function commitEditLimit(user) {
+		if (editingId !== user.id) {
+			return;
+		}
+
+		const next = Math.max(0, Math.floor(Number(editingValue)));
+
+		if (!Number.isFinite(next)) {
+			cancelEditLimit();
+			return;
+		}
+
+		if (next === Number(user.limit ?? 0)) {
+			cancelEditLimit();
+			return;
+		}
+
+		setPending(user.id, 'limit', true);
+
+		try {
+			const data = await setUserLimit(user.id, next);
+			const applied = Number(data?.user?.limit ?? next);
+
+			patchUser(user.id, { limit: applied });
+
+			if (data?.undo?.token) {
+				showUndoToast({
+					message: `Limit for ${maskJid(user.id)} set to ${applied}.`,
+					undo: data.undo
+				});
+			}
+		} catch (error) {
+			showError(error?.message || 'Failed to update limit.');
+		}
+
+		setPending(user.id, 'limit', false);
+		cancelEditLimit();
+	}
+
+	async function toggleAttribute(user, attribute) {
+		if (!canEdit(user)) {
+			return;
+		}
+
+		if (isPending(user.id, attribute)) {
+			return;
+		}
+
+		const current = Boolean(user[attribute]);
+		const next = !current;
+
+		setPending(user.id, attribute, true);
+
+		try {
+			let response;
+
+			if (attribute === 'premium') {
+				response = await setUserPremium(user.id, next);
+			} else if (attribute === 'banned') {
+				response = await setUserBanned(user.id, next);
+			} else if (attribute === 'blocked') {
+				response = await setUserBlocked(user.id, next);
+			}
+
+			const patch = {};
+
+			if (attribute === 'premium') {
+				patch.premium = Boolean(response?.user?.role === 'PREMIUM' || next);
+				patch.role = response?.user?.role || (next ? 'PREMIUM' : 'FREE');
+			} else if (attribute === 'banned') {
+				patch.banned = Boolean(response?.banned ?? next);
+			} else if (attribute === 'blocked') {
+				patch.blocked = Boolean(response?.blocked ?? next);
+			}
+
+			patchUser(user.id, patch);
+
+			if (response?.undo?.token) {
+				showUndoToast({
+					message: undoMessage(user, attribute, next),
+					undo: response.undo
+				});
+			}
+		} catch (error) {
+			showError(error?.message || `Failed to update ${attribute}.`);
+		}
+
+		setPending(user.id, attribute, false);
+	}
+
+	function undoMessage(user, attribute, next) {
+		const masked = maskJid(user.id);
+
+		if (attribute === 'premium') {
+			return `${masked} is now ${next ? 'PREMIUM' : 'FREE'}.`;
+		}
+
+		if (attribute === 'banned') {
+			return `${masked} ${next ? 'banned' : 'unbanned'}.`;
+		}
+
+		return `${masked} ${next ? 'blocked' : 'unblocked'}.`;
+	}
 </script>
 
 <section class="section user-list">
@@ -25,17 +202,67 @@
 		<input class="input" type="text" placeholder="Search users..." bind:value={search} />
 	</header>
 	<div class="list">
-		{#each filtered as user}
+		{#if !storeLoaded}
+			<SkeletonList rows={10} rowHeight="2.2rem" />
+		{:else}
+		{#each filtered as user (user.id)}
+			{@const editable = canEdit(user)}
+			{@const limitBusy = isPending(user.id, 'limit')}
+			{@const premiumBusy = isPending(user.id, 'premium')}
+			{@const bannedBusy = isPending(user.id, 'banned')}
+			{@const blockedBusy = isPending(user.id, 'blocked')}
 			<div class="row">
 				<Tooltip text={user.id || ''} placement="top">
 					<span class="jid" aria-label="User JID">{maskJid(user.id || '')}</span>
 				</Tooltip>
 				<span class={roleClass(user.role)}>{user.role || 'FREE'}</span>
-				<span class="limit">{user.limit ?? '—'}</span>
+				{#if editable}
+					<NumberInput
+						value={Number(user.limit ?? 0)}
+						min={0}
+						disabled={limitBusy}
+						on:change={(event) => { editingValue = String(event.detail); editingId = user.id; commitEditLimit(user); }}
+					/>
+				{:else}
+					<span class="limit">{user.limit ?? '—'}</span>
+				{/if}
+				<div class="chips" role="group" aria-label="User flags">
+					<button
+						type="button"
+						class="chip premium"
+						class:active={user.premium}
+						disabled={!editable || premiumBusy}
+						aria-pressed={Boolean(user.premium)}
+						on:click={() => toggleAttribute(user, 'premium')}
+					>
+						Premium
+					</button>
+					<button
+						type="button"
+						class="chip danger"
+						class:active={user.banned}
+						disabled={!editable || bannedBusy}
+						aria-pressed={Boolean(user.banned)}
+						on:click={() => toggleAttribute(user, 'banned')}
+					>
+						Banned
+					</button>
+					<button
+						type="button"
+						class="chip danger"
+						class:active={user.blocked}
+						disabled={!editable || blockedBusy}
+						aria-pressed={Boolean(user.blocked)}
+						on:click={() => toggleAttribute(user, 'blocked')}
+					>
+						Blocked
+					</button>
+				</div>
 			</div>
 		{/each}
 		{#if !filtered.length}
 			<p class="empty">No users found.</p>
+		{/if}
 		{/if}
 	</div>
 </section>
@@ -53,7 +280,7 @@
 
 	.row {
 		display: grid;
-		grid-template-columns: 1fr auto auto;
+		grid-template-columns: minmax(0, 1fr) auto auto auto;
 		align-items: center;
 		padding: 0.45rem 0.4rem;
 		gap: var(--space-3);
@@ -79,13 +306,66 @@
 	.limit {
 		color: var(--muted);
 		font-size: var(--fs-xs);
-		min-width: 2rem;
+		min-width: 2.4rem;
 		text-align: right;
 		font-variant-numeric: tabular-nums;
 	}
 
+	.chips {
+		display: inline-flex;
+		gap: 0.3rem;
+		flex-wrap: wrap;
+		justify-content: flex-end;
+	}
+
+	.chip {
+		font-size: var(--fs-xs);
+		font-weight: 600;
+		padding: 0.18rem 0.55rem;
+		border-radius: var(--radius-pill);
+		border: 1px solid var(--border);
+		background: transparent;
+		color: var(--muted);
+		cursor: pointer;
+		transition: background var(--tx-base), color var(--tx-base), border-color var(--tx-base);
+		letter-spacing: 0.02em;
+	}
+
+	.chip:hover:not(:disabled) {
+		border-color: var(--accent);
+		color: var(--accent);
+	}
+
+	.chip:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.chip.premium.active {
+		background: rgba(240, 200, 135, 0.22);
+		color: #f0c887;
+		border-color: rgba(240, 200, 135, 0.4);
+	}
+
+	.chip.danger.active {
+		background: rgba(255, 142, 116, 0.18);
+		color: #ff8e74;
+		border-color: rgba(255, 142, 116, 0.4);
+	}
+
 	.input {
 		max-width: 220px;
+	}
+
+	@media (max-width: 720px) {
+		.row {
+			grid-template-columns: minmax(0, 1fr) auto auto;
+		}
+
+		.chips {
+			grid-column: 1 / -1;
+			justify-content: flex-start;
+		}
 	}
 
 	@media (max-width: 540px) {

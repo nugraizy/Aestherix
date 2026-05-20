@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
-import { status, commands, flags, users, logs } from './stores.js';
 import { MAX_LOGS } from './constants.js';
+import { commands, flags, logs, status, users } from './stores.js';
 
 export const socket = io({
 	autoConnect: false,
@@ -35,6 +35,7 @@ export function connect() {
 
 export function disconnect() {
 	socket.disconnect();
+	bound = false;
 }
 
 export function clearLogs() {
@@ -74,7 +75,8 @@ function applyStatus(payload) {
 		sessions: Number(sessions.activeUsers || 0),
 		botOnline: bot?.online !== undefined ? Boolean(bot.online) : true,
 		botMode: bot?.mode === 'split' ? 'split' : 'embedded',
-		waConnected: Boolean(bot?.waConnected)
+		waConnected: Boolean(bot?.waConnected),
+		pm2: Boolean(payload?.pm2)
 	}));
 }
 
@@ -126,7 +128,9 @@ function bindEvents() {
 				if (data.commands?.length) {
 					commands.set(data.commands);
 				}
-			} catch {}
+			} catch {
+				// Ignore errors - the socket will update when the data is received
+			}
 		}, 1500);
 	});
 

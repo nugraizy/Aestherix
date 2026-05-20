@@ -1,6 +1,7 @@
 <script>
 	import AuditLog from '../components/AuditLog.svelte';
 	import LogViewer from '../components/LogViewer.svelte';
+	import QuickSend from '../components/QuickSend.svelte';
 	import StatusPanel from '../components/StatusPanel.svelte';
 
 	export let isViewer = false;
@@ -12,7 +13,7 @@
 		<p class="page-sub">Real-time bot status, log stream, and audit trail.</p>
 	</header>
 
-	<StatusPanel />
+	<StatusPanel {isViewer} />
 
 	{#if !isViewer}
 		<div class="grid">
@@ -20,6 +21,8 @@
 			<AuditLog />
 		</div>
 	{/if}
+
+	<QuickSend {isViewer} />
 </div>
 
 <style>

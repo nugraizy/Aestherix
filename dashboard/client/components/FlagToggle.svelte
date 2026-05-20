@@ -2,43 +2,22 @@
 	import { post } from '../lib/api.js';
 	import { flags } from '../lib/stores.js';
 	import { showError, showSuccess, showUndoToast } from '../lib/toast.js';
+	import { escapeHtml, escapeRegex, highlight } from '../lib/highlight.js';
 	import Toggle from './ui/Toggle.svelte';
 	import Tooltip from './ui/Tooltip.svelte';
+	import SkeletonList from './ui/SkeletonList.svelte';
 
 	export let isViewer = false;
 
 	let search = '';
 	let pending = new Set();
+	let storeLoaded = false;
+
+	$: if ($flags.length > 0) storeLoaded = true;
 
 	$: entries = $flags.filter((flag) =>
 		!search || flag.name.toLowerCase().includes(search.toLowerCase())
 	);
-
-	function escapeHtml(value) {
-		return String(value)
-			.replace(/&/g, '&amp;')
-			.replace(/</g, '&lt;')
-			.replace(/>/g, '&gt;')
-			.replace(/"/g, '&quot;')
-			.replace(/'/g, '&#39;');
-	}
-
-	function escapeRegex(value) {
-		return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-	}
-
-	function highlight(text, term) {
-		const safe = escapeHtml(text);
-		const trimmed = String(term || '').trim();
-
-		if (!trimmed) {
-			return safe;
-		}
-
-		const pattern = new RegExp(`(${escapeRegex(trimmed)})`, 'gi');
-
-		return safe.replace(pattern, '<mark class="cmd-hl">$1</mark>');
-	}
 
 	async function toggle(flag, next) {
 		if (isViewer) {
@@ -51,12 +30,14 @@
 
 		pending = new Set(pending).add(flag.name);
 
+		const prevEnabled = flag.enabled;
+
+		flags.update((current) =>
+			current.map((entry) => (entry.name === flag.name ? { ...entry, enabled: next } : entry))
+		);
+
 		try {
 			const data = await post(`/flags/${flag.name}`, { enabled: next });
-
-			flags.update((current) =>
-				current.map((entry) => (entry.name === flag.name ? { ...entry, enabled: next } : entry))
-			);
 
 			if (data?.undo?.token) {
 				showUndoToast({
@@ -67,6 +48,9 @@
 				showSuccess(`Flag "${flag.name}" turned ${next ? 'on' : 'off'}.`);
 			}
 		} catch (error) {
+			flags.update((current) =>
+				current.map((entry) => (entry.name === flag.name ? { ...entry, enabled: prevEnabled } : entry))
+			);
 			showError(error?.message || 'Failed to toggle flag.');
 		}
 
@@ -80,6 +64,11 @@
 		<input class="input" type="text" placeholder="Search flags..." bind:value={search} />
 	</header>
 	<div class="list">
+		{#if !storeLoaded}
+			<SkeletonList rows={12} rowHeight="2.4rem" />
+		{:else if !entries.length}
+			<p class="empty">No flags{search ? ' match the search.' : '.'}</p>
+		{:else}
 		{#each entries as flag (flag.name)}
 			<Tooltip text={flag.description || ''} placement="left">
 				<div class="row">
@@ -95,8 +84,6 @@
 				</div>
 			</Tooltip>
 		{/each}
-		{#if !entries.length}
-			<p class="empty">No flags{search ? ' match the search.' : '.'}</p>
 		{/if}
 	</div>
 </section>

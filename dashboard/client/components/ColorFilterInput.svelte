@@ -7,16 +7,79 @@
 
 	let inputEl;
 	let valid = true;
+	let lastApplied = '';
+	let closeHandled = false;
 	const inputId = `coloris-${Math.random().toString(36).slice(2, 9)}`;
+
+	function commit(next) {
+		if (!next || /^#[0-9a-fA-F]{6}$/i.test(next)) {
+			if (next !== lastApplied) {
+				lastApplied = next;
+				onChange(next);
+			}
+		}
+	}
 
 	onMount(async () => {
 		await tick();
 		await bindColoris(`#${inputId}`);
+
+		const handleOpen = () => {
+			closeHandled = false;
+		};
+
+		const handleApplyClick = () => {
+			closeHandled = true;
+			const currentValue = String(inputEl?.value || '').trim();
+			value = currentValue;
+			valid = true;
+			commit(currentValue);
+		};
+
+		const handleClearClick = () => {
+			closeHandled = true;
+			value = '';
+			valid = true;
+			lastApplied = '';
+			commit('');
+			closeHandled = false;
+		};
+
+		const handleClose = (event) => {
+			if (event?.target !== inputEl) {
+				return;
+			}
+
+			if (closeHandled) {
+				closeHandled = false;
+				return;
+			}
+
+			const currentValue = String(inputEl?.value || '').trim();
+			value = currentValue;
+			valid = true;
+			commit(currentValue);
+		};
+
+		const closeBtn = document.getElementById('clr-close');
+		const clearBtn = document.getElementById('clr-clear');
+
+		inputEl?.addEventListener('open', handleOpen);
+		inputEl?.addEventListener('close', handleClose);
+		closeBtn?.addEventListener('click', handleApplyClick);
+		clearBtn?.addEventListener('click', handleClearClick);
+
+		return () => {
+			inputEl?.removeEventListener('open', handleOpen);
+			inputEl?.removeEventListener('close', handleClose);
+			closeBtn?.removeEventListener('click', handleApplyClick);
+			clearBtn?.removeEventListener('click', handleClearClick);
+		};
 	});
 
-	function handleInput(event) {
+	function handleInputChange(event) {
 		const next = event.target.value.trim();
-		const isPartial = !next || /^#?[0-9a-fA-F]{0,6}$/.test(next);
+		const isPartial = /^#?[0-9a-fA-F]{0,6}$/.test(next);
 
 		valid = isPartial;
 
@@ -24,25 +87,19 @@
 			return;
 		}
 
-		const normalized = !next ? '' : next.startsWith('#') ? next : `#${next}`;
-
-		value = normalized;
-
-		if (!normalized || /^#[0-9a-fA-F]{6}$/i.test(normalized)) {
-			onChange(normalized);
-		}
+		value = !next ? '' : next.startsWith('#') ? next : `#${next}`;
 	}
 
-	function handleColorisPick(event) {
-		if (event?.target !== inputEl) {
-			return;
+	function handleKeyDown(event) {
+		if (event.key === 'Enter') {
+			const trimmed = (value || '').trim();
+
+			if (!trimmed || /^#[0-9a-fA-F]{6}$/i.test(trimmed)) {
+				commit(trimmed);
+			}
+
+			event.preventDefault();
 		}
-
-		const next = String(inputEl.value || '').trim();
-
-		valid = true;
-		value = next;
-		onChange(next);
 	}
 
 	function openPicker() {
@@ -54,21 +111,20 @@
 		inputEl.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
 	}
 
-	function clear() {
+	function clear(onAfterClear) {
 		value = '';
 		valid = true;
-		onChange('');
+		lastApplied = '';
 
 		if (inputEl) {
 			inputEl.value = '';
-			inputEl.dispatchEvent(new Event('input', { bubbles: true }));
 		}
+
+		onChange('', onAfterClear);
 	}
 
 	$: hexPreview = /^#[0-9a-fA-F]{6}$/i.test(value) ? value : null;
 </script>
-
-<svelte:window on:coloris:pick={handleColorisPick} />
 
 <div class="color-filter" class:invalid={!valid}>
 	<button type="button" class="swatch" on:click={openPicker} aria-label="Pick color">
@@ -80,8 +136,9 @@
 		class="coloris-input"
 		id={inputId}
 		placeholder="Filter by hex"
-		value={value || ''}
-		on:input={handleInput}
+		bind:value
+		on:input={handleInputChange}
+		on:keydown={handleKeyDown}
 		spellcheck="false"
 		maxlength="7"
 		data-coloris

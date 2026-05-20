@@ -33,7 +33,7 @@ export function watchConfirmation({ phoneNumber, requestId, requestKey, onStatus
 		try {
 			socket.emit('dashboard:confirmation:stop');
 		} catch {
-			// ignore — socket already gone
+			// socket already gone
 		}
 
 		socket.removeAllListeners();

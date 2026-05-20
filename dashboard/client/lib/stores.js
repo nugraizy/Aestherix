@@ -24,7 +24,8 @@ export const status = writable({
 	sessions: 0,
 	botOnline: true,
 	botMode: 'embedded',
-	waConnected: false
+	waConnected: false,
+	pm2: false
 });
 
 export const commands = writable([]);
@@ -40,5 +41,16 @@ export const albums = writable({
 	loaded: false,
 	lastFetchedAt: 0
 });
+
+export const messageLogs = writable({
+	messages: [],
+	search: '',
+	jidFilter: '',
+	loading: false,
+	loaded: false,
+	lastFetchedAt: 0
+});
+
+export const maintenanceMode = writable(false);
 
 export const changelogOpen = writable(false);

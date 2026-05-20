@@ -3,10 +3,14 @@
 
 	const dispatch = createEventDispatcher();
 
+	const BLOCKED_PATHS = ['/dashboard/settings', '/dashboard/editor', '/dashboard/groups', '/dashboard/system', '/dashboard/broadcast'];
+
 	let attemptedPath = '';
+	let isBlocked = false;
 
 	if (typeof window !== 'undefined') {
 		attemptedPath = `${window.location.pathname}${window.location.search}`;
+		isBlocked = BLOCKED_PATHS.some((p) => window.location.pathname.startsWith(p));
 	}
 
 	function goHome() {
@@ -16,11 +20,16 @@
 
 <section class="not-found">
 	<div class="card">
-		<span class="code">404</span>
-		<h2>Page not found</h2>
+		<span class="code">{isBlocked ? '403' : '404'}</span>
+		<h2>{isBlocked ? 'Access denied' : 'Page not found'}</h2>
 		<p class="lead">
-			We could not find <code>{attemptedPath}</code>.
-			It may have been moved, renamed, or never existed.
+			{#if isBlocked}
+				You don't have permission to access <code>{attemptedPath}</code>.
+				This page is restricted to owners only.
+			{:else}
+				We could not find <code>{attemptedPath}</code>.
+				It may have been moved, renamed, or never existed.
+			{/if}
 		</p>
 		<button class="home-btn" type="button" on:click={goHome}>
 			Back to dashboard

@@ -2,6 +2,7 @@
 	import { post } from '../lib/api.js';
 	import { commands } from '../lib/stores.js';
 	import { showError, showSuccess, showUndoToast } from '../lib/toast.js';
+	import { escapeHtml, escapeRegex, highlight } from '../lib/highlight.js';
 	import Toggle from './ui/Toggle.svelte';
 	import Tooltip from './ui/Tooltip.svelte';
 
@@ -10,6 +11,9 @@
 	let search = '';
 	let pending = new Set();
 	let collapsed = new Set();
+	let storeLoaded = false;
+
+	$: if ($commands.length > 0) storeLoaded = true;
 
 	$: filtered = $commands.filter((cmd) => {
 		if (!search) {
@@ -70,12 +74,14 @@
 
 		pending = new Set(pending).add(cmd.name);
 
+		const prevEnabled = cmd.enabled;
+
+		commands.update((list) =>
+			list.map((entry) => (entry.name === cmd.name ? { ...entry, enabled: next } : entry))
+		);
+
 		try {
 			const data = await post(`/commands/${cmd.name}`, { enabled: next });
-
-			commands.update((list) =>
-				list.map((entry) => (entry.name === cmd.name ? { ...entry, enabled: next } : entry))
-			);
 
 			if (data?.undo?.token) {
 				showUndoToast({
@@ -86,6 +92,9 @@
 				showSuccess(`Command "${cmd.name}" ${next ? 'enabled' : 'disabled'}.`);
 			}
 		} catch (error) {
+			commands.update((list) =>
+				list.map((entry) => (entry.name === cmd.name ? { ...entry, enabled: prevEnabled } : entry))
+			);
 			showError(error?.message || 'Failed to toggle command.');
 		}
 
@@ -109,32 +118,6 @@
 
 		return lines.join('\n');
 	}
-
-	function escapeHtml(value) {
-		return String(value)
-			.replace(/&/g, '&amp;')
-			.replace(/</g, '&lt;')
-			.replace(/>/g, '&gt;')
-			.replace(/"/g, '&quot;')
-			.replace(/'/g, '&#39;');
-	}
-
-	function escapeRegex(value) {
-		return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-	}
-
-	function highlight(text, term) {
-		const safe = escapeHtml(text);
-		const trimmed = String(term || '').trim();
-
-		if (!trimmed) {
-			return safe;
-		}
-
-		const pattern = new RegExp(`(${escapeRegex(trimmed)})`, 'gi');
-
-		return safe.replace(pattern, '<mark class="cmd-hl">$1</mark>');
-	}
 </script>
 
 <section class="section command-list">
@@ -142,55 +125,80 @@
 		<h3 class="section-title">Commands <span class="section-count">{filtered.length}</span></h3>
 		<div class="head-actions">
 			<input class="input" type="text" placeholder="Search commands..." bind:value={search} />
-			<button type="button" class="mini" on:click={expandAll} title="Expand all categories">+</button>
-			<button type="button" class="mini" on:click={collapseAll} title="Collapse all categories">−</button>
+			<Tooltip text="Expand all categories" placement="bottom">
+				<button type="button" class="mini" on:click={expandAll} aria-label="Expand all categories">+</button>
+			</Tooltip>
+			<Tooltip text="Collapse all categories" placement="bottom">
+				<button type="button" class="mini" on:click={collapseAll} aria-label="Collapse all categories">−</button>
+			</Tooltip>
 		</div>
 	</header>
 	<div class="list">
-		{#each categories as [category, cmds] (category)}
-			{@const enabledCount = cmds.filter((cmd) => cmd.enabled).length}
-			{@const disabledCount = cmds.length - enabledCount}
-			<div class="category" class:collapsed={collapsedView.has(category)}>
-				<button
-					type="button"
-					class="cat-head"
-					on:click={() => toggleCategory(category)}
-					aria-expanded={!collapsedView.has(category)}
-				>
-					<span class="cat-chevron" aria-hidden="true">
-						<i class="nf nf-fa-chevron_right"></i>
-					</span>
-					<span class="cat-name">{@html highlight(category, search)}</span>
-					<span class="cat-stats">
-						<span class="cat-stat" title="Total commands">total <strong>{cmds.length}</strong></span>
-						<span class="cat-stat on" title="Enabled commands">on <strong>{enabledCount}</strong></span>
-						<span class="cat-stat off" title="Disabled commands">off <strong>{disabledCount}</strong></span>
-					</span>
-				</button>
-				{#if !collapsedView.has(category)}
-					<div class="cat-body">
-						{#each cmds as cmd (cmd.name)}
-							<Tooltip text={tooltipFor(cmd)} placement="left">
-								<div class="row" class:disabled={!cmd.enabled}>
-									<span class="name">{@html highlight(cmd.name, search)}</span>
-									<span class="usage" title="Usage count">{cmd.usageCount ?? 0}</span>
-									<Toggle
-										checked={cmd.enabled}
-										disabled={pending.has(cmd.name)}
-										readonly={isViewer}
-										label="{cmd.name} command"
-										size="sm"
-										on:change={(event) => toggleCommand(cmd, event.detail)}
-									/>
-								</div>
-							</Tooltip>
+	{#if !storeLoaded}
+			<div class="cat-skeleton">
+				{#each Array(10) as _, i}
+					<div class="cat-group" style="animation-delay: {i * 50}ms">
+						<div class="skeleton-cat-head"></div>
+						{#each Array(i < 3 ? 6 : 4) as _, j}
+							<div class="skeleton-row" style="animation-delay: {i * 50 + 30 + j * 25}ms"></div>
 						{/each}
 					</div>
-				{/if}
+				{/each}
 			</div>
-		{/each}
-		{#if !filtered.length}
-			<p class="empty">No commands{search ? ' match the search.' : '.'}</p>
+		{:else}
+			{#each categories as [category, cmds] (category)}
+				{@const enabledCount = cmds.filter((cmd) => cmd.enabled).length}
+				{@const disabledCount = cmds.length - enabledCount}
+				<div class="category" class:collapsed={collapsedView.has(category)}>
+					<button
+						type="button"
+						class="cat-head"
+						on:click={() => toggleCategory(category)}
+						aria-expanded={!collapsedView.has(category)}
+					>
+						<span class="cat-chevron" aria-hidden="true">
+							<i class="nf nf-fa-chevron_right"></i>
+						</span>
+						<span class="cat-name">{@html highlight(category, search)}</span>
+						<span class="cat-stats">
+							<Tooltip text="Total commands" placement="top">
+								<span class="cat-stat">total <strong>{cmds.length}</strong></span>
+							</Tooltip>
+							<Tooltip text="Enabled commands" placement="top">
+								<span class="cat-stat on">on <strong>{enabledCount}</strong></span>
+							</Tooltip>
+							<Tooltip text="Disabled commands" placement="top">
+								<span class="cat-stat off">off <strong>{disabledCount}</strong></span>
+							</Tooltip>
+						</span>
+					</button>
+					{#if !collapsedView.has(category)}
+						<div class="cat-body">
+							{#each cmds as cmd (cmd.name)}
+								<Tooltip text={tooltipFor(cmd)} placement="left">
+									<div class="row" class:disabled={!cmd.enabled}>
+										<span class="name">{@html highlight(cmd.name, search)}</span>
+										<Tooltip text="Total times this command was invoked" placement="top">
+											<span class="usage">{cmd.usageCount ?? 0}</span>
+										</Tooltip>
+										<Toggle
+											checked={cmd.enabled}
+											disabled={pending.has(cmd.name)}
+											readonly={isViewer}
+											label="{cmd.name} command"
+											size="sm"
+											on:change={(event) => toggleCommand(cmd, event.detail)}
+										/>
+									</div>
+								</Tooltip>
+							{/each}
+						</div>
+					{/if}
+				</div>
+			{/each}
+			{#if !filtered.length}
+				<p class="empty">No commands{search ? ' match the search.' : '.'}</p>
+			{/if}
 		{/if}
 	</div>
 </section>
@@ -236,7 +244,7 @@
 		min-height: 0;
 	}
 
-	.list :global(.tooltip-host) {
+	.cat-body > :global(.tooltip-host) {
 		display: block;
 		width: 100%;
 	}
@@ -397,7 +405,58 @@
 	}
 
 	@media (max-width: 540px) {
-		.input {
+.cat-skeleton {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-2);
+		padding: var(--space-2) var(--space-4);
+	}
+
+	.cat-group {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		animation: fadeIn 0.2s ease-out both;
+	}
+
+	.skeleton-cat-head {
+		height: 2.2rem;
+		border-radius: var(--radius-sm);
+		background: linear-gradient(
+			100deg,
+			var(--panel) 0%,
+			color-mix(in srgb, var(--accent) 14%, transparent) 50%,
+			var(--panel) 100%
+		);
+		background-size: 220% 100%;
+		animation: shimmer 1.4s ease-in-out infinite;
+		margin-bottom: 4px;
+	}
+
+	.skeleton-row {
+		height: 2rem;
+		border-radius: 6px;
+		background: linear-gradient(
+			100deg,
+			var(--panel) 0%,
+			color-mix(in srgb, var(--accent) 12%, transparent) 50%,
+			var(--panel) 100%
+		);
+		background-size: 220% 100%;
+		animation: shimmer 1.4s ease-in-out infinite;
+	}
+
+	@keyframes shimmer {
+		0%   { background-position-x: 100%; }
+		100% { background-position-x: -120%; }
+	}
+
+	@keyframes fadeIn {
+		from { opacity: 0; transform: translateY(4px); }
+		to   { opacity: 1; transform: translateY(0); }
+	}
+
+	.input {
 			max-width: 100%;
 			flex: 1;
 		}

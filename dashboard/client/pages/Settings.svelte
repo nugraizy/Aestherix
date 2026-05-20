@@ -1,14 +1,16 @@
 <script>
 	import PrefixConfig from '../components/PrefixConfig.svelte';
+	import SettingsForm from '../components/SettingsForm.svelte';
 	import UserList from '../components/UserList.svelte';
 </script>
 
 <div class="settings">
 	<header class="page-head">
 		<h2>Settings</h2>
-		<p class="page-sub">Prefix configuration and user limits.</p>
+		<p class="page-sub">Bot configuration, prefix, and user limits.</p>
 	</header>
 
+	<SettingsForm />
 	<PrefixConfig />
 	<UserList />
 </div>

@@ -4,6 +4,7 @@
 	import { onMount } from 'svelte';
 	import { showSuccess, showError } from '../lib/toast.js';
 	import Dropdown from './ui/Dropdown.svelte';
+	import SkeletonList from './ui/SkeletonList.svelte';
 
 	const MODE_OPTIONS = [
 		{ value: 'single', label: 'Single', description: 'One prefix character (e.g. .)' },
@@ -69,7 +70,7 @@
 	</header>
 	<div class="body">
 		{#if loading}
-			<p class="empty">Loading...</p>
+			<SkeletonList rows={5} rowHeight="2.4rem" />
 		{:else}
 			<div class="grid">
 				<div class="field">

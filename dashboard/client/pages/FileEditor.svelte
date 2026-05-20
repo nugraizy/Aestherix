@@ -1,13 +1,16 @@
 <script>
-	import { onMount } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { get, post } from '../lib/api.js';
+	import { showConfirm } from '../lib/confirm.js';
 	import { showSuccess, showError } from '../lib/toast.js';
 	import FileTree from '../components/editor/FileTree.svelte';
 	import EditorPane from '../components/editor/EditorPane.svelte';
 
 	const STORAGE_KEY = 'aestherix.dashboard.editor.lastPath';
 	const openFolders = writable(new Set());
+
+	export let active = true;
+	let wasActive = false;
 
 	let root = null;
 	let activePath = '';
@@ -18,15 +21,14 @@
 	let search = '';
 	let editor;
 
-	onMount(async () => {
-		await loadTree();
+	$: if (active && !wasActive) {
+		wasActive = true;
+		void loadTree();
+	}
 
-		const saved = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
-
-		if (saved) {
-			void openFile(saved);
-		}
-	});
+	$: if (!active && wasActive) {
+		wasActive = false;
+	}
 
 	async function loadTree() {
 		try {
@@ -39,6 +41,12 @@
 					set.add(root.path);
 					return set;
 				});
+			}
+
+			const saved = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
+
+			if (saved) {
+				void openFile(saved);
 			}
 		} catch (error) {
 			showError(error?.message || 'Failed to load file tree.');
@@ -78,9 +86,18 @@
 		}
 	}
 
-	function handleSelect(detail) {
-		if (dirty && !confirm('Discard unsaved changes?')) {
-			return;
+	async function handleSelect(detail) {
+		if (dirty) {
+			const ok = await showConfirm({
+				title: 'Discard changes',
+				message: 'You have unsaved changes. Discard them and open a different file?',
+				confirmLabel: 'Discard',
+				danger: true
+			});
+
+			if (!ok) {
+				return;
+			}
 		}
 
 		void openFile(detail.path);

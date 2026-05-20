@@ -1,5 +1,7 @@
 <script>
+	import CommandDailyChart from '../components/CommandDailyChart.svelte';
 	import CommandList from '../components/CommandList.svelte';
+	import CommandUsageChart from '../components/CommandUsageChart.svelte';
 	import FlagToggle from '../components/FlagToggle.svelte';
 
 	export let isViewer = false;
@@ -15,6 +17,9 @@
 		<CommandList {isViewer} />
 		<FlagToggle {isViewer} />
 	</div>
+
+	<CommandUsageChart />
+	<CommandDailyChart />
 </div>
 
 <style>

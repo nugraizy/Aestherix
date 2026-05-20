@@ -5,6 +5,7 @@
 	import ColorFilterInput from '../components/ColorFilterInput.svelte';
 	import Tooltip from '../components/ui/Tooltip.svelte';
 	import { get } from '../lib/api.js';
+	import { showConfirm } from '../lib/confirm.js';
 	import { socket } from '../lib/socket.js';
 	import { albums } from '../lib/stores.js';
 	import { showError, showSuccess, showUndoToast } from '../lib/toast.js';
@@ -19,6 +20,22 @@
 	let pendingImageTs = '';
 
 	export let isViewer = false;
+
+	$: lightboxOpen = lightboxIndex >= 0 && lightboxIndex < pagedPictures.length;
+	$: pictures = $albums.pictures;
+	$: loading = $albums.loading;
+	$: colorFilter = $albums.colorFilter;
+	$: totalPages = Math.max(1, Math.ceil(pictures.length / PAGE_SIZE));
+	$: if (pictures.length > 0 && page > totalPages - 1) {
+		page = Math.max(0, totalPages - 1);
+	}
+	$: pageStart = page * PAGE_SIZE;
+	$: pageEnd = Math.min(pictures.length, pageStart + PAGE_SIZE);
+	$: pagedPictures = pictures.slice(pageStart, pageEnd);
+	$: if (lightboxIndex >= pagedPictures.length) {
+		lightboxIndex = pagedPictures.length ? pagedPictures.length - 1 : -1;
+	}
+	$: canDelete = !isViewer;
 
 	function readUrlState() {
 		if (typeof window === 'undefined') {
@@ -67,22 +84,6 @@
 
 		history.replaceState(history.state, '', next);
 	}
-
-	$: lightboxOpen = lightboxIndex >= 0 && lightboxIndex < pagedPictures.length;
-	$: pictures = $albums.pictures;
-	$: loading = $albums.loading;
-	$: colorFilter = $albums.colorFilter;
-	$: totalPages = Math.max(1, Math.ceil(pictures.length / PAGE_SIZE));
-	$: if (pictures.length > 0 && page > totalPages - 1) {
-		page = Math.max(0, totalPages - 1);
-	}
-	$: pageStart = page * PAGE_SIZE;
-	$: pageEnd = Math.min(pictures.length, pageStart + PAGE_SIZE);
-	$: pagedPictures = pictures.slice(pageStart, pageEnd);
-	$: if (lightboxIndex >= pagedPictures.length) {
-		lightboxIndex = pagedPictures.length ? pagedPictures.length - 1 : -1;
-	}
-	$: canDelete = !isViewer;
 
 	async function load({ force = false } = {}) {
 		const state = $albums;

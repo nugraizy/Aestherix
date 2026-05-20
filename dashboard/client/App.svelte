@@ -1,22 +1,30 @@
 <script>
 	import { onMount } from 'svelte';
 	import Changelog from './components/Changelog.svelte';
+	import ConfirmDialog from './components/ConfirmDialog.svelte';
+	import DebugPanel from './components/DebugPanel.svelte';
+	import HardwareBanner from './components/HardwareBanner.svelte';
 	import Header from './components/Header.svelte';
 	import Login from './components/Login.svelte';
 	import SpotifyWidget from './components/SpotifyWidget.svelte';
 	import Toaster from './components/Toaster.svelte';
 	import Footer from './components/ui/Footer.svelte';
-	import { logout, restartBot } from './lib/api.js';
+	import { logout, restartBot, startBot, stopBot } from './lib/api.js';
+	import { showConfirm } from './lib/confirm.js';
 	import { connect, disconnect } from './lib/socket.js';
 	import { logs, status } from './lib/stores.js';
 	import { applyPalette, currentPalette, PALETTE_NAMES, setPalette, themeMode, toggleMode } from './lib/theme.js';
 	import { showError, showSuccess, showUndoToast } from './lib/toast.js';
 	import Albums from './pages/Albums.svelte';
+	import Broadcast from './pages/Broadcast.svelte';
 	import Controls from './pages/Controls.svelte';
 	import FileEditor from './pages/FileEditor.svelte';
+	import Groups from './pages/Groups.svelte';
 	import Home from './pages/Home.svelte';
+	import MessageLogs from './pages/MessageLogs.svelte';
 	import NotFound from './pages/NotFound.svelte';
 	import Settings from './pages/Settings.svelte';
+	import System from './pages/System.svelte';
 
 	let page = 'home';
 	let authenticated = false;
@@ -25,10 +33,12 @@
 	let renderCount = 0;
 	let logCount = 0;
 	let sessionRole = null;
+	let keepMessages = false;
 
 	$: renderCount++;
 	$: isViewer = sessionRole === 'viewer';
 	$: if (isViewer && debug) debug = false;
+	$: if (page === 'messages') keepMessages = true;
 
 	logs.subscribe((entries) => { logCount = entries.length; });
 
@@ -36,6 +46,10 @@
 		home: Home,
 		controls: Controls,
 		settings: Settings,
+		groups: Groups,
+		broadcast: Broadcast,
+		messages: MessageLogs,
+		system: System,
 		albums: Albums,
 		editor: FileEditor,
 		notfound: NotFound
@@ -83,14 +97,14 @@
 		return `${PAGE_PATH_BASE}/${name}`;
 	}
 
-	const VIEWER_BLOCKED_PAGES = new Set(['settings', 'editor']);
+	const VIEWER_BLOCKED_PAGES = new Set(['settings', 'editor', 'system', 'broadcast', 'messages']);
 
 	function navigate(name, { replace = false } = {}) {
 		const allowed = name === 'notfound' || NAV_PAGES.includes(name);
 		let safe = allowed ? name : 'home';
 
 		if (isViewer && VIEWER_BLOCKED_PAGES.has(safe)) {
-			safe = 'home';
+			safe = 'notfound';
 		}
 
 		page = safe;
@@ -117,7 +131,7 @@
 		const safe = PAGE_NAMES.includes(target) ? target : 'notfound';
 
 		if (isViewer && VIEWER_BLOCKED_PAGES.has(safe)) {
-			page = 'home';
+			page = 'notfound';
 			return;
 		}
 
@@ -157,6 +171,11 @@
 		if (authenticated) {
 			connect();
 			applyPalette($currentPalette);
+
+			if (sessionRole === 'viewer' && VIEWER_BLOCKED_PAGES.has(page)) {
+				page = 'notfound';
+			}
+
 			navigate(page, { replace: true });
 
 			window.addEventListener('popstate', handlePopState);
@@ -179,7 +198,13 @@
 	}
 
 	async function handleLogout() {
-		if (!confirm('Log out of the dashboard?')) {
+		const ok = await showConfirm({
+			title: 'Log out',
+			message: 'Log out of the dashboard?',
+			confirmLabel: 'Log out'
+		});
+
+		if (!ok) {
 			return;
 		}
 
@@ -196,7 +221,14 @@
 	}
 
 	async function handleRestart() {
-		if (!confirm('Restart the bot?')) {
+		const ok = await showConfirm({
+			title: 'Restart bot',
+			message: 'Restart the bot? This will reload the WhatsApp connection.',
+			confirmLabel: 'Restart',
+			danger: true
+		});
+
+		if (!ok) {
 			return;
 		}
 
@@ -210,6 +242,45 @@
 			}
 		} catch (error) {
 			showError(error?.message || 'Restart failed.');
+		}
+	}
+
+	async function handleStart() {
+		const ok = await showConfirm({
+			title: 'Start bot',
+			message: 'Start the bot via PM2?',
+			confirmLabel: 'Start'
+		});
+
+		if (!ok) {
+			return;
+		}
+
+		try {
+			await startBot();
+			showSuccess('Bot start requested.');
+		} catch (error) {
+			showError(error?.message || 'Start failed.');
+		}
+	}
+
+	async function handleStop() {
+		const ok = await showConfirm({
+			title: 'Stop bot',
+			message: 'Stop the bot? The dashboard will stay online.',
+			confirmLabel: 'Stop',
+			danger: true
+		});
+
+		if (!ok) {
+			return;
+		}
+
+		try {
+			await stopBot();
+			showSuccess('Bot stop requested.');
+		} catch (error) {
+			showError(error?.message || 'Stop failed.');
 		}
 	}
 </script>
@@ -227,28 +298,47 @@
 			page={page}
 			mode={$themeMode}
 			isViewer={isViewer}
+			botOnline={$status.botOnline}
+			botMode={$status.botMode}
+			pm2={$status.pm2}
 			on:navigate={(event) => navigate(event.detail)}
 			on:mode={() => toggleMode()}
+			on:start={handleStart}
+			on:stop={handleStop}
 			on:restart={handleRestart}
 			on:logout={handleLogout}
 			on:debug={() => debug = !debug}
 		/>
 		{#if debug}
-			<div class="debug-bar">
-				renders: {renderCount} · logs: {logCount} · socket: {$status.connected ? 'on' : 'off'}
-			</div>
+			<DebugPanel renderCount={renderCount} />
 		{/if}
+		<HardwareBanner />
 		<main class="page" class:has-spotify={page === 'home'} class:wide={page === 'albums'}>
+			{#if keepMessages}
+				<div class="page-cache" class:page-hidden={page !== 'messages'}>
+					<MessageLogs active={page === 'messages'} />
+				</div>
+			{/if}
 			{#if page === 'home'}
 				<Home isViewer={isViewer} />
 			{:else if page === 'albums'}
-				<Albums isViewer={isViewer} />
+				<Albums isViewer={isViewer} active={page === 'albums'} />
+			{:else if page === 'settings'}
+				<Settings isSuperOwner={sessionRole === 'superOwner'} active={page === 'settings'} />
 			{:else if page === 'controls'}
-				<Controls isViewer={isViewer} />
+				<Controls isViewer={isViewer} active={page === 'controls'} />
 			{:else if page === 'notfound'}
 				<NotFound on:navigate={(event) => navigate(event.detail)} />
-			{:else}
-				<svelte:component this={pages[page]} />
+			{:else if page === 'system'}
+				<System isSuperOwner={sessionRole === 'superOwner'} active={page === 'system'} />
+			{:else if page === 'groups'}
+				<Groups active={page === 'groups'} />
+			{:else if page === 'broadcast'}
+				<Broadcast active={page === 'broadcast'} />
+			{:else if page === 'editor'}
+				<FileEditor active={page === 'editor'} />
+			{:else if page === 'messages'}
+				<!-- messages uses keepMessages pattern above -->
 			{/if}
 		</main>
 		{#if page === 'home'}
@@ -263,6 +353,7 @@
 {/if}
 
 <Toaster />
+<ConfirmDialog />
 <Changelog />
 
 <style>
@@ -306,6 +397,12 @@
 		text-rendering: optimizeLegibility;
 	}
 
+	@media (min-width: 1400px) {
+		:global(html) {
+			font-size: 20px;
+		}
+	}
+
 	:global(*) {
 		box-sizing: border-box;
 	}
@@ -347,6 +444,13 @@
 	:global(::-webkit-scrollbar-thumb:hover) {
 		background: color-mix(in srgb, var(--accent) 60%, transparent);
 		background-clip: content-box;
+	}
+
+	@supports (scrollbar-color: auto) {
+		:global(*) {
+			scrollbar-width: auto;
+			scrollbar-color: color-mix(in srgb, var(--muted) 50%, transparent) transparent;
+		}
 	}
 
 	:global(.section) {
@@ -395,6 +499,14 @@
 		flex: 1;
 		overflow: auto;
 		min-height: 0;
+	}
+ 
+	.page-cache {
+		width: 100%;
+	}
+
+	.page-hidden {
+		display: none;
 	}
 
 	:global(.empty) {
@@ -557,15 +669,6 @@
 		border: 3px solid color-mix(in srgb, var(--accent) 24%, transparent);
 		border-top-color: var(--accent);
 		animation: spin 0.9s linear infinite;
-	}
-
-	.debug-bar {
-		background: color-mix(in srgb, var(--bg) 80%, #000);
-		color: #87f0c1;
-		font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
-		font-size: var(--fs-xs);
-		padding: 0.3rem var(--space-5);
-		border-bottom: 1px solid var(--border);
 	}
 
 	@keyframes spin {

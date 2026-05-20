@@ -49,7 +49,7 @@ const baseTheme = EditorView.theme({
 	'&': {
 		height: '100%',
 		fontSize: '0.85rem',
-		fontFamily: "'JetBrains Mono', 'Fira Code', ui-monospace, monospace",
+		fontFamily: '\'JetBrains Mono\', \'Fira Code\', ui-monospace, monospace',
 		backgroundColor: 'transparent',
 		color: 'var(--text)'
 	},

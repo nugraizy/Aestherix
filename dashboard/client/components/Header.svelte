@@ -1,23 +1,38 @@
 <script>
 	import { createEventDispatcher } from 'svelte';
+	import NotificationToggle from './NotificationToggle.svelte';
 	import Tooltip from './ui/Tooltip.svelte';
 
 	export let page = 'home';
 	export let mode = 'dark';
 	export let isViewer = false;
+	export let botOnline = true;
+	export let botMode = 'embedded';
+	export let pm2 = false;
 
 	const dispatch = createEventDispatcher();
 	const navItems = [
 		{ id: 'home', label: 'Home' },
 		{ id: 'controls', label: 'Controls' },
-		{ id: 'settings', label: 'Settings' },
+		{ id: 'groups', label: 'Groups' },
+		{ id: 'messages', label: 'Messages' },
+		{ id: 'broadcast', label: 'Broadcast' },
 		{ id: 'albums', label: 'Albums' },
+		{ id: 'settings', label: 'Settings' },
+		{ id: 'system', label: 'System' },
 		{ id: 'editor', label: 'Editor' }
 	];
 
 	$: visibleNavItems = isViewer
-		? navItems.filter((item) => item.id !== 'settings' && item.id !== 'editor')
+		? navItems.filter((item) => item.id !== 'settings' && item.id !== 'editor' && item.id !== 'system' && item.id !== 'broadcast' && item.id !== 'messages')
 		: navItems;
+
+	$: isSplitMode = botMode === 'split';
+	$: lifecycleLabel = botOnline ? 'Stop' : 'Start';
+	$: lifecycleEvent = botOnline ? 'stop' : 'start';
+	$: lifecycleClass = botOnline ? 'stop' : 'start';
+	$: lifecycleTooltip = botOnline ? 'Stop the bot via PM2' : 'Start the bot via PM2';
+	$: restartDisabled = isSplitMode && !botOnline;
 </script>
 
 <header class="app-header">
@@ -41,6 +56,7 @@
 
 	<div class="actions">
 		{#if !isViewer}
+			<NotificationToggle />
 			<Tooltip text="Toggle debug bar" placement="bottom">
 				<button class="icon-btn" type="button" on:click={() => dispatch('debug')} aria-label="Toggle debug">
 					🐛
@@ -48,12 +64,25 @@
 			</Tooltip>
 		{/if}
 		<div class="action-pill" class:single={isViewer}>
-			{#if !isViewer}
-				<Tooltip text="Restart bot — confirms before reloading" placement="bottom">
+			{#if !isViewer && pm2}
+				<Tooltip text={lifecycleTooltip} placement="bottom">
+					<button
+						class="action-segment {lifecycleClass}"
+						type="button"
+						on:click={() => dispatch(lifecycleEvent)}
+					>
+						{lifecycleLabel}
+					</button>
+				</Tooltip>
+				<Tooltip
+					text={restartDisabled ? 'Start the bot first' : 'Restart bot — confirms before reloading'}
+					placement="bottom"
+				>
 					<button
 						class="action-segment restart"
 						type="button"
 						on:click={() => dispatch('restart')}
+						disabled={restartDisabled}
 					>
 						Restart
 					</button>
@@ -279,8 +308,29 @@
 		color: #ff8e74;
 	}
 
-	.action-segment.restart:hover {
+	.action-segment.restart:hover:not(:disabled) {
 		background: rgba(255, 142, 116, 0.16);
+	}
+
+	.action-segment.start {
+		color: #87f0c1;
+	}
+
+	.action-segment.start:hover:not(:disabled) {
+		background: rgba(135, 240, 193, 0.16);
+	}
+
+	.action-segment.stop {
+		color: #f0c887;
+	}
+
+	.action-segment.stop:hover:not(:disabled) {
+		background: rgba(240, 200, 135, 0.18);
+	}
+
+	.action-segment:disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
 	}
 
 	@media (max-width: 768px) {

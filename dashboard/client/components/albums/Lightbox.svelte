@@ -7,7 +7,18 @@
 
 	const dispatch = createEventDispatcher();
 	let containerEl;
-	let wheelLock = false;
+
+	let velocity = 0;
+	let lastWheelTime = 0;
+	let inertiaFrame = null;
+	let accumulated = 0;
+	let showActions = false;
+
+	const FRICTION = 0.82;
+	const MIN_VELOCITY = 0.2;
+	const STEP_THRESHOLD = 150;
+	const WHEEL_BOOST = 0.5;
+	const MAX_VELOCITY = 50;
 
 	$: total = pictures.length;
 	$: current = pictures[activeIndex] || null;
@@ -59,29 +70,60 @@
 	function handleWheel(event) {
 		event.preventDefault();
 
-		if (wheelLock) {
+		if (total <= 1) {
 			return;
 		}
 
 		const delta = Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
 
-		if (!delta || Math.abs(delta) < 30) {
+		if (!delta) {
 			return;
 		}
 
-		if (total <= 1) {
+		const now = performance.now();
+		const elapsed = now - lastWheelTime;
+
+		lastWheelTime = now;
+
+		if (elapsed > 200) {
+			velocity = 0;
+			accumulated = 0;
+		}
+
+		velocity += delta * WHEEL_BOOST;
+		velocity = Math.max(-MAX_VELOCITY, Math.min(MAX_VELOCITY, velocity));
+		accumulated += Math.abs(delta * WHEEL_BOOST);
+
+		if (!inertiaFrame) {
+			inertiaFrame = requestAnimationFrame(tickInertia);
+		}
+	}
+
+	function tickInertia() {
+		inertiaFrame = null;
+
+		if (Math.abs(velocity) < MIN_VELOCITY && accumulated < STEP_THRESHOLD) {
+			velocity = 0;
+			accumulated = 0;
 			return;
 		}
 
-		const direction = delta > 0 ? 1 : -1;
-		const nextIndex = (activeIndex + direction + total) % total;
+		if (accumulated >= STEP_THRESHOLD) {
+			const direction = velocity > 0 ? 1 : -1;
 
-		activeIndex = nextIndex;
+			activeIndex = (activeIndex + direction + total) % total;
+			accumulated = 0;
+		}
 
-		wheelLock = true;
-		setTimeout(() => {
-			wheelLock = false;
-		}, 160);
+		velocity *= FRICTION;
+
+		if (Math.abs(velocity) >= MIN_VELOCITY) {
+			accumulated += Math.abs(velocity);
+			inertiaFrame = requestAnimationFrame(tickInertia);
+		} else {
+			velocity = 0;
+			accumulated = 0;
+		}
 	}
 
 	const SWIPE_DIST = 48;
@@ -109,6 +151,20 @@
 		touchStartY = touch.clientY;
 		touchStartAt = Date.now();
 		touchActive = true;
+	}
+
+	function handleTouchMove(event) {
+		if (!touchActive || !event.touches || event.touches.length !== 1) {
+			return;
+		}
+
+		const touch = event.touches[0];
+		const deltaX = Math.abs(touch.clientX - touchStartX);
+		const deltaY = Math.abs(touch.clientY - touchStartY);
+
+		if (deltaX > deltaY && deltaX > 10) {
+			event.preventDefault();
+		}
 	}
 
 	function handleTouchEnd(event) {
@@ -184,6 +240,10 @@
 		dispatch('delete', { picture: current });
 	}
 
+	function toggleActions() {
+		showActions = !showActions;
+	}
+
 	function getRelativeClass(offset) {
 		const abs = Math.abs(offset);
 
@@ -221,6 +281,7 @@
 		on:keydown={handleKey}
 		on:wheel|nonpassive|preventDefault={handleWheel}
 		on:touchstart|passive={handleTouchStart}
+		on:touchmove|nonpassive={handleTouchMove}
 		on:touchend={handleTouchEnd}
 		on:touchcancel={() => (touchActive = false)}
 		role="dialog"
@@ -230,7 +291,7 @@
 	>
 		<div class="content">
 			<div class="stage">
-				{#each pictures as pic, i}
+				{#each pictures as pic, i (pic.url + pic.timestamp)}
 					{@const offset = getOffset(i)}
 					{#if Math.abs(offset) <= 2}
 						<div
@@ -246,22 +307,33 @@
 								<div class="image-actions" data-action>
 									<button
 										type="button"
-										class="action-btn action-segment"
-										data-action="download"
-										on:click|stopPropagation={download}
+										class="action-reveal"
+										data-action="reveal"
+										on:click|stopPropagation={toggleActions}
+										aria-label="Toggle actions"
 									>
-										Download
+										<span class="reveal-icon">{showActions ? '×' : '⋯'}</span>
 									</button>
-									{#if canDelete}
+									<div class="actions-slider" class:show={showActions}>
 										<button
 											type="button"
-											class="action-btn action-segment danger"
-											data-action="delete"
-											on:click|stopPropagation={remove}
+											class="action-btn action-segment"
+											data-action="download"
+											on:click|stopPropagation={download}
 										>
-											Delete
+											Download
 										</button>
-									{/if}
+										{#if canDelete}
+											<button
+												type="button"
+												class="action-btn action-segment danger"
+												data-action="delete"
+												on:click|stopPropagation={remove}
+											>
+												Delete
+											</button>
+										{/if}
+									</div>
 								</div>
 								<div class="image-counter" data-action>
 									{activeIndex + 1} / {total}
@@ -292,7 +364,7 @@
 		z-index: 80;
 		background: rgba(2, 8, 11, 0.62);
 		backdrop-filter: blur(10px);
-		touch-action: pan-y;
+		touch-action: none;
 		overscroll-behavior: contain;
 	}
 
@@ -323,7 +395,7 @@
 		overflow: hidden;
 		background: rgba(6, 17, 22, 0.4);
 		cursor: pointer;
-		transition: transform 0.22s ease, opacity 0.22s ease, filter 0.22s ease;
+		transition: transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.32s ease, filter 0.32s ease;
 	}
 
 	.carousel-item:focus-visible {
@@ -389,12 +461,55 @@
 		top: 12px;
 		right: 12px;
 		display: inline-flex;
-		overflow: hidden;
+		align-items: center;
 		border-radius: var(--radius-pill);
 		border: 1px solid rgba(255, 255, 255, 0.22);
 		background: rgba(6, 17, 22, 0.65);
 		backdrop-filter: blur(10px);
 		z-index: 6;
+		overflow: hidden;
+	}
+
+	.action-reveal {
+		background: transparent;
+		border: none;
+		color: #fff;
+		font-size: 1.2rem;
+		font-weight: 600;
+		padding: 0.38rem 0.7rem;
+		cursor: pointer;
+		transition: background var(--tx-base), color var(--tx-base);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+
+	.action-reveal:hover {
+		background: color-mix(in srgb, var(--accent) 26%, rgba(6, 17, 22, 0.72));
+	}
+
+	.reveal-icon {
+		display: block;
+		line-height: 1;
+	}
+
+	.actions-slider {
+		display: inline-flex;
+		align-items: center;
+		max-width: 0;
+		opacity: 0;
+		overflow: hidden;
+		transition: max-width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.25s ease;
+	}
+
+	.actions-slider.show {
+		max-width: 300px;
+		opacity: 1;
+	}
+
+	.actions-slider .action-segment:first-child {
+		border-left: 1px solid rgba(255, 255, 255, 0.18);
 	}
 
 	.image-counter {
