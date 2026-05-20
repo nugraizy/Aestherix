@@ -1,6 +1,7 @@
 import fs from 'fs-extra';
 
 import { Cache } from '../helper/modules/cache.js';
+import { toUserJid } from '../helper/misc/wa_data/index.js';
 import { GroupCache } from './caches/group-cache.js';
 import { UserCache } from './caches/user-cache.js';
 
@@ -100,9 +101,20 @@ export class Configuration {
 			this.settings = {};
 		}
 
-		this.owners = [this.settings.owner_number, ...(this.settings.team_number || [])].filter(Boolean);
+		this.owners = [
+			toUserJid(this.settings.owner_number),
+			...(this.settings.team_number || []).map(toUserJid)
+		].filter(Boolean);
 		this.prefix.default = this.settings.prefix?.pref || '.';
 		this.logger_theme = this.settings.logger_theme || 'dracula';
+
+		if (typeof this.settings.packname === 'string' && this.settings.packname.length > 0) {
+			this.packname = this.settings.packname;
+		}
+
+		if (typeof this.settings.author === 'string' && this.settings.author.length > 0) {
+			this.author = this.settings.author;
+		}
 	}
 }
 

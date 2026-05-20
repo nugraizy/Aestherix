@@ -50,7 +50,8 @@ const deletedHandler = async (client, message, fetches) => {
 			return;
 		}
 
-		const stats = message[from]?.antiDelete === 'enable' ? true : fetches ? true : false;
+		const groupSettings = configuration.groups.settings.get(from);
+		const stats = groupSettings?.antiDelete === 'enable' || fetches;
 
 		if (stats) {
 			const options = {
@@ -64,7 +65,7 @@ const deletedHandler = async (client, message, fetches) => {
 
 			let quotedMessage = '';
 
-			if (messages[type].contextInfo.quotedMessage) {
+			if (messages[type]?.contextInfo?.quotedMessage) {
 				const quotedType = Object.keys(messages[type].contextInfo.quotedMessage)[0];
 				const quotedContent = messages[type].contextInfo.quotedMessage[quotedType];
 
@@ -83,9 +84,9 @@ const deletedHandler = async (client, message, fetches) => {
 					break;
 				case 'stickerMessage':
 					{
-						const result = await client.downloadMediaMessage(mediaData);
+						const result = await client.downloadMediaMessage(message?.message, 'buffer');
 						const fileSize = getFilesizeFromBytes(Buffer.byteLength(result));
-						const sticker = await prepareAndSendSticker(client, result, filename, mediaData.message.stickerMessage.isAnimated);
+						const sticker = await prepareAndSendSticker(client, result, mediaData.message.stickerMessage.isAnimated);
 						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, `\nSize : ${fileSize}`, quotedMessage);
 
 						await client.send(from, { sticker }, options);
@@ -212,25 +213,25 @@ const deletedHandler = async (client, message, fetches) => {
 const buildQuotedMessage = (type, content) => {
 	switch (type) {
 		case 'conversation':
-			return `Message Replied to : ${content.conversation || 'Unknown'}`;
+			return `\n\nReplied to :\nMessage : ${content.conversation || 'Unknown'}`;
 		case 'extendedTextMessage':
-			return `Message Replied to : ${content.text || 'Unknown'}`;
+			return `\n\nReplied to :\nMessage : ${content.text || 'Unknown'}`;
 		case 'documentMessage':
-			return `Filename : ${content.fileName || 'Unknown'}\nMimetype : ${content.mimetype || 'Unknown'}`;
+			return `\n\nReplied to :\nFilename : ${content.fileName || 'Unknown'}\nMimetype : ${content.mimetype || 'Unknown'}`;
 		case 'locationMessage':
-			return `Lat : ${content.degreesLatitude || 'Unknown'}\nLong : ${content.degreesLongitude || 'Unknown'}`;
+			return `\n\nReplied to :\nLat : ${content.degreesLatitude || 'Unknown'}\nLong : ${content.degreesLongitude || 'Unknown'}`;
 		case 'contactMessage':
-			return `Displayname : ${content.displayName || 'Unknown'}`;
+			return `\n\nReplied to :\nDisplayname : ${content.displayName || 'Unknown'}`;
 		case 'contactsArrayMessage':
 			const contacts = content.contacts || [];
 			const contactNames = contacts.map((contact) => contact.displayName || 'Unknown').join('\n');
 
-			return `Total Contact : ${contacts.length || 0}\nList Name :\n${contactNames}`;
+			return `\n\nReplied to :\nTotal Contact : ${contacts.length || 0}\nList Name :\n${contactNames}`;
 		case 'imageMessage':
 		case 'videoMessage':
-			return `Caption : ${content.caption || 'No Caption'}`;
+			return `\n\nReplied to :\n${content.caption || 'No Caption'}`;
 		case 'audioMessage':
-			return content.ptt ? 'Type Audio : Voice Note' : 'Type Audio : Audio File';
+			return content.ptt ? '\n\nReplied to :\nType Audio : Voice Note' : '\n\nReplied to :\nType Audio : Audio File';
 		case 'stickerMessage':
 			return '';
 		default:
@@ -293,9 +294,8 @@ const sendMessageWithMentions = async (client, from, message, options) => {
 	await client.send(from, { text: message, mentions: options.contextInfo.mentionedJid }, options);
 };
 
-const prepareAndSendSticker = async (client, data, filename, isAnimated) => {
-	const result = await client.downloadMediaMessage(data);
-	const sticker = await client.prepareSticker(result, isAnimated ? 'stickerAnimated' : 'imageMessage', {
+const prepareAndSendSticker = async (client, data, isAnimated) => {
+	const sticker = await client.prepareSticker(data, isAnimated ? 'stickerAnimated' : 'imageMessage', {
 		author: configuration.author,
 		packname: configuration.packname
 	});

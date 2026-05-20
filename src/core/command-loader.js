@@ -76,6 +76,7 @@ export class CommandLoader extends EventEmitter {
 		this.#commands = options.commands ?? new Cache();
 		this.#aliases = options.aliases ?? [];
 		this.#dir = options.dir ?? COMMANDS_DIR;
+		this.#ready = this.#commands.size > 0;
 		this.on('error', ({ file, reason }) => {
 			loggers.error(
 				color('Command load error:', 'red'),
@@ -98,6 +99,12 @@ export class CommandLoader extends EventEmitter {
 	}
 
 	async load(flags = {}) {
+		if (this.#ready) {
+			this.emit('loaded', { count: this.#commands.size, skipped: true });
+
+			return this;
+		}
+
 		let files = CommandLoader.#scanFiles(this.#dir).filter((f) => !EXCLUDE_CONTENT.some((v) => f.includes(v)));
 
 		if (flags.test) {

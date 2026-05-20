@@ -4,11 +4,11 @@ import fs from 'fs-extra';
 import PhoneNumber from 'libphonenumber-js';
 import readline from 'readline';
 
+import { startDashboard } from '../../dashboard/server/index.js';
+import { refreshDashboardCommandCatalog } from '../../dashboard/server/monitor.js';
 import configuration from '../helper/config/connect.js';
 import prisma from '../helper/database/prisma.js';
 import { color, loggers } from '../utils/modules/index.js';
-import { startDashboard } from '../../dashboard/server/index.js';
-import { refreshDashboardCommandCatalog } from '../../dashboard/server/monitor.js';
 import { initWerewolfHandler } from './handlers/games/werewolf.js';
 
 import { Auth } from './auth.js';
@@ -68,10 +68,10 @@ async function handlePollUpdate(store, msg) {
 	);
 }
 
-async function parseStubtypeUpdate(Client, update) {
+async function parseStubtypeUpdate(client, update) {
 	const { processSettingsStubtype } = await import('./handlers/notification-utils.js');
 
-	await processSettingsStubtype(update);
+	await processSettingsStubtype(client, update);
 }
 
 async function emitProfilePictureUpdate(socket, update) {

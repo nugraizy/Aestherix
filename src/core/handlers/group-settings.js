@@ -38,7 +38,11 @@ const DURATION_MAP = {
  * @param {string} status - The update status message.
  * @param {string} type - The update event type.
  */
-const sendGroupSettingsNotification = async (id, author, status, type, duration) => {
+const sendGroupSettingsNotification = async (client, id, author, status, type, duration) => {
+	if (!author || !status || !type) {
+		return;
+	}
+
 	await client.send(id, {
 		text: `${'Group Settings Notification'.formatHeaders()}\n
 Event Update : ${typeof EVENT_UPDATE[type] === 'function' ? EVENT_UPDATE[type](duration) : EVENT_UPDATE[type]}
@@ -59,7 +63,7 @@ Event Update : ${typeof EVENT_UPDATE[type] === 'function' ? EVENT_UPDATE[type](d
 const updateMetadataCache = (id, update, settingsGroup, metadataGroup) => {
 	const cacheUpdates = {
 		subject: () => {
-			settingsGroup[id].groupName = update.subject;
+			settingsGroup.groupName = update.subject;
 			Object.assign(metadataGroup, {
 				subject: update.subject,
 				subjectTime: Date.now(),
@@ -95,34 +99,34 @@ const getStatusAndType = (update, id, settingsGroup) => {
 	const eventTypes = {
 		desc: () => {
 			status = update.desc
-				? settingsGroup[id].groupDescription !== undefined
-					? `${EVENT_UPDATE.DESCRIPTION} from ${settingsGroup[id].groupDescription} to ${update.desc}`
-					: `${EVENT_UPDATE.DESCRIPTION} to ${update.desc}`
-				: `${EVENT_UPDATE.DEL_DESCRIPTION} from ${settingsGroup[id].groupDescription}`;
+				? settingsGroup.groupDescription !== undefined
+					? `${EVENT_UPDATE.DESCRIPTION} from \`${settingsGroup.groupDescription}\` to \`${update.desc}\``
+					: `${EVENT_UPDATE.DESCRIPTION} to \`${update.desc}\``
+				: `${EVENT_UPDATE.DEL_DESCRIPTION} from \`${settingsGroup.groupDescription}\``;
 			type = 'GROUP_CHANGE_DESCRIPTION';
 		},
 		subject: () => {
-			status = `${EVENT_UPDATE.SUBJECT} from ${settingsGroup[id].groupName} to ${update.subject}`;
+			status = `${EVENT_UPDATE.SUBJECT} from \`${settingsGroup.groupName}\` to \`${update.subject}\``;
 			type = 'GROUP_CHANGE_SUBJECT';
 		},
 		announce: () => {
-			status = `${EVENT_UPDATE.ANNOUNCE} to ${update.announce ? 'enable' : 'disable'}`;
+			status = `${EVENT_UPDATE.ANNOUNCE} to \`${update.announce ? 'enable' : 'disable'}\``;
 			type = 'GROUP_CHANGE_ANNOUNCE';
 		},
 		restrict: () => {
-			status = `${EVENT_UPDATE.RESTRICT} to ${update.restrict ? 'enable' : 'disable'}`;
+			status = `${EVENT_UPDATE.RESTRICT} to \`${update.restrict ? 'enable' : 'disable'}\``;
 			type = 'GROUP_CHANGE_RESTRICT';
 		},
 		inviteCode: () => {
-			status = `${EVENT_UPDATE.REVOKE_INVITE} to ${update.inviteCode ? 'enable' : 'disable'}`;
+			status = `${EVENT_UPDATE.REVOKE_INVITE} to \`${update.inviteCode ? 'enable' : 'disable'}\``;
 			type = 'GROUP_INVITE_CHANGED';
 		},
 		joinApprovalMode: () => {
-			status = `${EVENT_UPDATE.JOIN_APPROVAL} to ${update.joinApprovalMode ? 'enable' : 'disable'}`;
+			status = `${EVENT_UPDATE.JOIN_APPROVAL} to \`${update.joinApprovalMode ? 'enable' : 'disable'}\``;
 			type = 'JOIN_APPROVAL';
 		},
 		memberAddMode: () => {
-			status = `${EVENT_UPDATE.MEMBER_ADD_MODE} to ${update.memberAddMode ? 'enable' : 'disable'}`;
+			status = `${EVENT_UPDATE.MEMBER_ADD_MODE} to \`${update.memberAddMode ? 'enable' : 'disable'}\``;
 			type = 'GROUP_MEMBERSHIP_JOIN_APPROVAL_MODE';
 		},
 		content: () => {
@@ -163,7 +167,7 @@ const groupSettingsNotificationHandler = async (client, updates) => {
 			return;
 		}
 
-		if (settingsGroup[id]?.notification === 'enable') {
+		if (settingsGroup?.notification === 'enable') {
 			const { status, type } = getStatusAndType(update, id, settingsGroup);
 
 			updateMetadataCache(id, update, settingsGroup, metadataGroup);
@@ -171,6 +175,7 @@ const groupSettingsNotificationHandler = async (client, updates) => {
 			metadataCache.set(id, metadataGroup);
 
 			await sendGroupSettingsNotification(
+				client,
 				id,
 				author,
 				status,

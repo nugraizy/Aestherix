@@ -7,9 +7,28 @@ import _ from 'lodash';
 import { THEMES } from './themes/index.js';
 
 export class LoggerThemeManager {
+	#rainbow = false;
+	#rainbowResolver = null;
+
 	constructor(themes, defaultTheme = 'dracula') {
 		this.themes = themes || {};
 		this.setTheme(defaultTheme);
+	}
+
+	setRainbow(enabled) {
+		this.#rainbow = Boolean(enabled);
+	}
+
+	setRainbowResolver(fn) {
+		this.#rainbowResolver = typeof fn === 'function' ? fn : null;
+	}
+
+	get rainbow() {
+		if (this.#rainbowResolver) {
+			return Boolean(this.#rainbowResolver());
+		}
+
+		return this.#rainbow;
 	}
 
 	setTheme(name) {
@@ -39,6 +58,14 @@ export class LoggerThemeManager {
 		for (let i = 0; i < obj.length; i += 2) {
 			const text = obj[i];
 			const rawColor = obj[i + 1];
+
+			if (this.rainbow) {
+				const schemes = _.sample(['teen', 'passion', 'instagram', 'rainbow', 'cristal', 'mind']);
+
+				str += gradient[schemes](text);
+				continue;
+			}
+
 			const resolved = this.resolveColor(rawColor);
 
 			str +=
@@ -99,6 +126,13 @@ export const color = Object.assign((...obj) => themeManager.apply(...obj), {
 		applyThemeProps(color, themeManager.palette);
 		return themeManager.name;
 	},
+	setRainbow: (enabled) => {
+		themeManager.setRainbow(enabled);
+	},
+	setRainbowResolver: (fn) => {
+		themeManager.setRainbowResolver(fn);
+	},
+	getRainbow: () => themeManager.rainbow,
 	getTheme: () => themeManager.name,
 	getThemes: () => Object.keys(THEMES),
 	getHex: (name) => themeManager.palette[name] || null,

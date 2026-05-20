@@ -1,8 +1,8 @@
 import { isURL } from '../modules/index.js';
 
 export const _api = 'https://api.tiktokv.com/';
-const _apiBase = (input) => `https://www.tiktok.com/${input}`;
-export const _apiBaseVideo = (...input) => _apiBase(`@${input[0]}/video/${input[1]}`); // eslint-disable-line
+export const _apiBase = (input) => `https://www.tiktok.com/${input}`;
+export const _apiBaseVideo = (...input) => _apiBase(`@${input[0]}/video/${input[1]}`);
 export const iids = ['7379691220551141126', '7318518857994389254'];
 export const deviceIds = ['7379690547022071302', '7318517321748022790'];
 export const appVersion = ['35.1.3'];

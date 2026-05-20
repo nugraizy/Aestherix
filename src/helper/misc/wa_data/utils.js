@@ -1,6 +1,39 @@
 import baileys, { aesDecryptGCM, hmacSign } from 'baileys';
 
+import { S_WHATSAPP_NET } from './constants.js';
+
 const { proto } = baileys;
+
+/**
+ * Convert a phone number, JID local-part, or full JID into a WhatsApp user JID.
+ * Accepts:
+ *   "6281234567890"            → "6281234567890@s.whatsapp.net"
+ *   "6281234567890@s.whatsapp.net" → unchanged
+ *   "6281234567890@c.us"       → "6281234567890@s.whatsapp.net"
+ *   "+62 812-3456-7890"        → "6281234567890@s.whatsapp.net"
+ * Returns "" for empty / invalid input.
+ * @param {string | number | null | undefined} value
+ * @returns {string}
+ */
+export const toUserJid = (value) => {
+	const raw = String(value ?? '').trim();
+
+	if (!raw) {
+		return '';
+	}
+
+	if (raw.endsWith(S_WHATSAPP_NET)) {
+		return raw;
+	}
+
+	const digits = raw.split('@')[0].replace(/\D/g, '');
+
+	if (!digits) {
+		return '';
+	}
+
+	return `${digits}${S_WHATSAPP_NET}`;
+};
 
 const MEDIA_TYPE = {
 	_a: ['mentionText', 'extendedTextMessage'],
@@ -44,7 +77,7 @@ export const extractBody = (m, type) => {
 	} else if (MEDIA_TYPE._a.includes(type)) {
 		return m.message.extendedTextMessage.text;
 	} else if (MEDIA_TYPE._b.includes(type)) {
-		return type.seperateCamel().capitalize();
+		return type.separateCamel().capitalize();
 	} else if (type === 'listResponseMessage') {
 		return m.message.listResponseMessage.singleSelectReply.selectedRowId;
 	} else if (type === 'templateButtonReplyMessage' && m.message.templateButtonReplyMessage) {
@@ -87,9 +120,9 @@ export const extractQuotedBody = (m, type) => {
 	} else if (MEDIA_TYPE._a.includes(type)) {
 		return m.message.extendedTextMessage.text;
 	} else if (MEDIA_TYPE._c.includes(type)) {
-		return m.message[type]?.caption || type.seperateCamel().capitalize();
+		return m.message[type]?.caption || type.separateCamel().capitalize();
 	} else if (MEDIA_TYPE._d.includes(type)) {
-		return type.seperateCamel().capitalize();
+		return type.separateCamel().capitalize();
 	} else if (type === 'buttonsResponseMessage') {
 		return `${m.message[type].contentText}\n${m.message[type].footerText}`;
 	} else if (type === 'templateButtonReplyMessage') {

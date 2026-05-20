@@ -1,8 +1,8 @@
 import { checkAfk, deleteAfk, getAfk } from '../helper/index.js';
 import { Cache } from '../helper/modules/cache.js';
 import { getTimeSince } from '../utils/modules/index.js';
-import { MessageHandler } from './message-handler.js';
 import { ConnectionHandler } from './connection-handler.js';
+import { MessageHandler } from './message-handler.js';
 
 export class EventHandler {
 	#client;
@@ -53,11 +53,19 @@ export class EventHandler {
 	}
 
 	async handleDeletedMessage(updates) {
-		if (updates?.[0]?.update?.status === 4 || updates?.[0]?.update?.status === 3) {
+		if (updates?.[0]?.update?.messageStubType !== 1) {
 			return;
 		}
 
-		const message = this.#store?.messages?.[updates[0].key.remoteJid]?.get(updates[0].key.id);
+		const deletedId = this.#store?.messages?.[updates[0].key.remoteJid]
+			?.toJSON()
+			?.filter((m) => m.key.id === updates[0].update.key.id)?.[0]?.message?.protocolMessage?.key?.id;
+
+		if (!deletedId) {
+			return;
+		}
+
+		const message = this.#store?.messages?.[updates[0].key.remoteJid]?.get(deletedId);
 
 		if (!message) {
 			return;
@@ -65,7 +73,7 @@ export class EventHandler {
 
 		const handler = await this.#load('deleted', './handlers/deleted-message.js');
 
-		await handler(this.#legacyClient(), message, false, this.#store);
+		await handler(this.#client, message, false);
 	}
 
 	async handlePresence(presence) {
@@ -97,7 +105,7 @@ export class EventHandler {
 
 		const handler = await this.#load('participants', './handlers/group-participants.js');
 
-		await handler(this.#legacyClient(), update);
+		await handler(this.#client, update);
 	}
 
 	async handleGroupSettings(update) {
@@ -105,13 +113,18 @@ export class EventHandler {
 
 		for (const u of updates) {
 			if (u?.id) {
-				this.#configuration.groups.update(u.id, { subject: u.subject, desc: u.desc, announce: u.announce, restrict: u.restrict });
+				this.#configuration.groups.update(u.id, {
+					subject: u.subject,
+					desc: u.desc,
+					announce: u.announce,
+					restrict: u.restrict
+				});
 			}
 		}
 
 		const handler = await this.#load('groupSettings', './handlers/group-settings.js');
 
-		await handler(this.#legacyClient(), update);
+		await handler(this.#client, update);
 	}
 
 	async handleCall(calls) {
@@ -131,11 +144,13 @@ export class EventHandler {
 		await socket.sendNode({
 			tag: 'call',
 			attrs: { from: meJid, to: from, id: socket.generateMessageTag() },
-			content: [{
-				tag: 'reject',
-				attrs: { 'call-id': id, 'call-creator': from, count: '512202' },
-				content: null
-			}]
+			content: [
+				{
+					tag: 'reject',
+					attrs: { 'call-id': id, 'call-creator': from, count: '512202' },
+					content: null
+				}
+			]
 		});
 
 		await socket.updateBlockStatus(from, 'block');
@@ -151,10 +166,4 @@ export class EventHandler {
 		return this.#lazy.get(key);
 	}
 
-	#legacyClient() {
-		return {
-			instance: this.#client.socket,
-			sessionName: this.#client.sessionName
-		};
-	}
 }

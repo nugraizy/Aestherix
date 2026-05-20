@@ -16,14 +16,11 @@
  * @property {string}   groupId
  * @property {string}   [groupName]
  * @property {string}   [groupDescription]
- * @property {string}   welcome1
- * @property {string}   welcome1msg
- * @property {string}   welcome2
- * @property {string}   welcome2msg
- * @property {string}   left1
- * @property {string}   left1msg
- * @property {string}   left2
- * @property {string}   left2msg
+ * @property {string}   welcome
+ * @property {string}   welcomeMessage
+ * @property {string}   leave
+ * @property {string}   leaveMessage
+ * @property {string}   welcomeImage
  * @property {string}   antiDelete
  * @property {string}   antiGroupURL
  * @property {string}   antiURL
@@ -37,14 +34,11 @@
  */
 
 const DEFAULT_SETTINGS = {
-	welcome1: 'disable',
-	welcome1msg: 'Welcome to {groupName}',
-	welcome2: 'disable',
-	welcome2msg: 'Welcome to {groupName}',
-	left1: 'disable',
-	left1msg: 'Bye bye {groupName}',
-	left2: 'disable',
-	left2msg: 'Bye bye {groupName}',
+	welcome: 'disable',
+	welcomeMessage: 'Welcome to {groupName}',
+	leave: 'disable',
+	leaveMessage: 'Bye bye {groupName}',
+	welcomeImage: 'enable',
 	antiDelete: 'disable',
 	antiGroupURL: 'disable',
 	antiURL: 'disable',
@@ -62,14 +56,11 @@ const rowToData = (row) => ({
 	groupName: row.groupName ?? '',
 	groupDescription: row.groupDescription ?? '',
 	...DEFAULT_SETTINGS,
-	welcome1: row.welcome1,
-	welcome1msg: row.welcome1msg,
-	welcome2: row.welcome2,
-	welcome2msg: row.welcome2msg,
-	left1: row.left1,
-	left1msg: row.left1msg,
-	left2: row.left2,
-	left2msg: row.left2msg,
+	welcome: row.welcome,
+	welcomeMessage: row.welcomeMessage,
+	leave: row.leave,
+	leaveMessage: row.leaveMessage,
+	welcomeImage: row.welcomeImage ?? 'enable',
 	antiDelete: row.antiDelete,
 	antiGroupURL: row.antiGroupURL,
 	antiURL: row.antiURL,

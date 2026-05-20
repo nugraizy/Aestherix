@@ -23,7 +23,7 @@ const handleTebakGambar = async ({ from, isAdmin, isGroup, body, message }, clie
 		}
 	};
 
-	if ((!isGroup || settings[from]?.games === 'enable' || isAdmin) && !configuration.flags.onlyLogs) {
+	if ((!isGroup || settings?.games === 'enable' || isAdmin) && !configuration.flags.onlyLogs) {
 		await playGame();
 	}
 };

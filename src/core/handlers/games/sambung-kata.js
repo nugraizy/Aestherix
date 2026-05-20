@@ -32,7 +32,7 @@ const sambungKataHandler = async ({ from, isGroup, sender, body, message, isAdmi
 		);
 	};
 
-	if (isGroup && (settings[from]?.games === 'enable' || isAdmin) && !configuration.flags.onlyLogs) {
+	if (isGroup && (settings?.games === 'enable' || isAdmin) && !configuration.flags.onlyLogs) {
 		await playGame();
 	}
 };

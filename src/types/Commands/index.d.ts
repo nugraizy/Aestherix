@@ -24,11 +24,11 @@ export type CommandProps = {
 	description?: string;
 	category: Category;
 	usage: string;
-	aliases: string[];
+	aliases?: string[];
 	cooldown?: number;
 	limit?: number;
 	status: 'enable' | 'disable';
 	restrict?: boolean;
 	premium?: boolean;
-	run?: (ctx: Context & { state?: unknown }, client: ClientSocket, store: Store) => Promise<unknown>;
+	run(ctx: Context & { state?: unknown }, client: ClientSocket, store: Store): Promise<unknown> | unknown;
 };

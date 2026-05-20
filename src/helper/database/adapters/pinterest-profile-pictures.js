@@ -159,6 +159,52 @@ export const setPinterestProfilePictureColorPalette = async (db, timestamp, hexe
 
 /**
  * @param {PrismaClient} db
+ * @param {string} timestamp
+ * @returns {Promise<{ ok: boolean }>}
+ */
+export const deletePinterestProfilePicture = async (db, timestamp) => {
+	const safeTimestamp = String(timestamp || '').trim();
+
+	if (!safeTimestamp) {
+		return { ok: false };
+	}
+
+	await withRetry(() =>
+		db.pinterestProfilePicture
+			.delete({ where: { timestamp: safeTimestamp } })
+			.catch((error) => {
+				if (error?.code === 'P2025') {
+					return null;
+				}
+
+				throw error;
+			})
+	);
+
+	return { ok: true };
+};
+
+/**
+ * @param {PrismaClient} db
+ * @param {string} url
+ * @returns {Promise<{ ok: boolean, count: number }>}
+ */
+export const deletePinterestProfilePictureByUrl = async (db, url) => {
+	const safeUrl = String(url || '').trim();
+
+	if (!safeUrl) {
+		return { ok: false, count: 0 };
+	}
+
+	const result = await withRetry(() =>
+		db.pinterestProfilePicture.deleteMany({ where: { url: safeUrl } })
+	);
+
+	return { ok: true, count: result?.count || 0 };
+};
+
+/**
+ * @param {PrismaClient} db
  * @param {Array<{ timestamp: string, url: string, thumbnail: string }>} entries
  * @returns {Promise<void>}
  */

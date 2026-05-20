@@ -6,7 +6,7 @@ const checkURL = (input) =>
 	/(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])/g.test(input);
 
 const getBannedMembers = async (from, settings) => {
-	const cached = settings?.[from]?.banned;
+	const cached = settings?.banned;
 
 	if (Array.isArray(cached)) {
 		return cached;
@@ -22,7 +22,7 @@ const antiGroupLinkHandler = async (
 	client,
 	settings
 ) => {
-	if (isGroup && settings?.[from]?.antiURL === 'enable' && !isAdmin && isBotAdmin && !configuration.flags.onlyLogs) {
+	if (isGroup && settings?.antiURL === 'enable' && !isAdmin && isBotAdmin && !configuration.flags.onlyLogs) {
 		const bannedMembers = await getBannedMembers(from, settings);
 		const isBanned = bannedMembers.includes(sender);
 
@@ -53,8 +53,8 @@ const antiGroupLinkHandler = async (
 			});
 			await banGroupMember(prisma, from, sender);
 
-			if (Array.isArray(settings?.[from]?.banned) && !settings[from].banned.includes(sender)) {
-				settings[from].banned.push(sender);
+			if (Array.isArray(settings?.banned) && !settings.banned.includes(sender)) {
+				settings.banned.push(sender);
 			}
 		} else {
 			await client.reply(

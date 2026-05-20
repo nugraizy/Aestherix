@@ -219,5 +219,63 @@ export class Router {
 
 		this.#usage.set(commandName, current + 1);
 		await incrementInDB(prisma, commandName);
+
+		this.#trackDaily(commandName);
+	}
+
+	#dailyBuffer = {};
+	#dailyFlushTimer = null;
+
+	#trackDaily(commandName) {
+		const today = new Date().toISOString().slice(0, 10);
+		const key = `${today}:${commandName}`;
+
+		this.#dailyBuffer[key] = (this.#dailyBuffer[key] || 0) + 1;
+
+		if (!this.#dailyFlushTimer) {
+			this.#dailyFlushTimer = setTimeout(() => this.#flushDaily(), 30000);
+		}
+	}
+
+	async #flushDaily() {
+		this.#dailyFlushTimer = null;
+
+		const buffer = this.#dailyBuffer;
+
+		this.#dailyBuffer = {};
+
+		try {
+			const row = await prisma.dashboardKV.findUnique({
+				where: { key_sessionName: { key: 'command_usage_daily', sessionName: 'main' } }
+			});
+
+			const existing = row?.value ? JSON.parse(row.value) : {};
+
+			for (const [key, count] of Object.entries(buffer)) {
+				existing[key] = (existing[key] || 0) + count;
+			}
+
+			const keys = Object.keys(existing).sort();
+			const cutoff = new Date();
+
+			cutoff.setDate(cutoff.getDate() - 30);
+
+			const cutoffStr = cutoff.toISOString().slice(0, 10);
+			const pruned = {};
+
+			for (const k of keys) {
+				if (k.slice(0, 10) >= cutoffStr) {
+					pruned[k] = existing[k];
+				}
+			}
+
+			await prisma.dashboardKV.upsert({
+				where: { key_sessionName: { key: 'command_usage_daily', sessionName: 'main' } },
+				update: { value: JSON.stringify(pruned) },
+				create: { key: 'command_usage_daily', sessionName: 'main', value: JSON.stringify(pruned) }
+			});
+		} catch {
+			Object.assign(this.#dailyBuffer, buffer);
+		}
 	}
 }

@@ -1,4 +1,5 @@
 import express from 'express';
+import fs from 'fs-extra';
 import { createServer } from 'http';
 
 import {
@@ -9,10 +10,12 @@ import {
 import configuration from '../../helper/config/connect.js';
 import { banUser, getBannedUsers, getUserLimit, unbanUser, upsertUserLimit } from '../../helper/database/adapters/user.js';
 import prisma from '../../helper/database/prisma.js';
+import { toUserJid } from '../../helper/misc/wa_data/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 
 const DASHBOARD_BRIDGE_PORT = Number(process.env.DASHBOARD_BRIDGE_PORT || 4010);
 const DASHBOARD_BRIDGE_TOKEN = String(process.env.DASHBOARD_BRIDGE_TOKEN || 'aestherix-local-bridge-token');
+const SETTINGS_PATH = './src/helper/config/settings.json';
 const S_WHATSAPP_NET = '@s.whatsapp.net';
 
 let instance = null;
@@ -122,6 +125,37 @@ const applyRuntimeMutation = async (waClient, type, payload = {}) => {
 		configuration.blocklist = Array.from(set);
 
 		return { ok: true, userId: jid };
+	}
+
+	if (type === 'settings.update') {
+		try {
+			const fresh = await fs.readJSON(SETTINGS_PATH);
+
+			configuration.settings = fresh;
+			configuration.owners = [
+				toUserJid(fresh.owner_number),
+				...(fresh.team_number || []).map(toUserJid)
+			].filter(Boolean);
+
+			if (typeof fresh.logger_theme === 'string' && fresh.logger_theme.length > 0) {
+				configuration.logger_theme = fresh.logger_theme;
+				color.setTheme(fresh.logger_theme);
+			}
+
+			if (typeof fresh.packname === 'string' && fresh.packname.length > 0) {
+				configuration.packname = fresh.packname;
+			}
+
+			if (typeof fresh.author === 'string' && fresh.author.length > 0) {
+				configuration.author = fresh.author;
+			}
+
+			return { ok: true };
+		} catch (error) {
+			loggers.warning(color('Settings reload failed:', 'red'), color(error.message, 'white'));
+
+			return { ok: false, status: 500, message: 'Failed to reload settings.' };
+		}
 	}
 
 	return { ok: false, message: 'Unsupported runtime sync action.' };

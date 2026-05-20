@@ -60,7 +60,7 @@ const akinatorHandler = async ({ from, isAdmin, isGroup, body, message }, client
 		}
 	};
 
-	if ((!isGroup || isAdmin || settings[from]?.games === 'enable') && !configuration.flags.onlyLogs) {
+	if ((!isGroup || isAdmin || settings?.games === 'enable') && !configuration.flags.onlyLogs) {
 		await playAkinator();
 	}
 };

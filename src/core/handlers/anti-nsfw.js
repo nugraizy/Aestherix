@@ -9,16 +9,14 @@ import { arq, delay } from '../../utils/index.js';
 
 const { createReadStream, unlink } = fs;
 
-const isAntiNsfwEnabled = (settings, from) => {
-	return settings?.[from]?.antiNSFW === 'enable' && !configuration.flags.onlyLogs;
-};
+const isAntiNsfwEnabled = (settings) => settings?.antiNSFW === 'enable' && !configuration.flags.onlyLogs;
 
 const getMediaFilePath = (filename, extractMediaData) => {
 	return path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`);
 };
 
 const getBannedMembers = async (from, settings) => {
-	const cached = settings?.[from]?.banned;
+	const cached = settings?.banned;
 
 	if (Array.isArray(cached)) {
 		return cached;
@@ -64,8 +62,8 @@ const processNsfwImage = async ({ from, isAdmin, isBotAdmin, message, mediaData,
 			});
 			await banGroupMember(prisma, from, sender);
 
-			if (Array.isArray(settings?.[from]?.banned) && !settings[from].banned.includes(sender)) {
-				settings[from].banned.push(sender);
+			if (Array.isArray(settings?.banned) && !settings.banned.includes(sender)) {
+				settings.banned.push(sender);
 			}
 		} else {
 			await client.reply(
@@ -84,7 +82,7 @@ const antiNSFWHandler = async (
 	client,
 	settings
 ) => {
-	if (isBotAdmin && isMediaImage && isGroup && isAntiNsfwEnabled(settings, from)) {
+	if (isBotAdmin && isMediaImage && isGroup && isAntiNsfwEnabled(settings)) {
 		const filePath = getMediaFilePath(filename, extractMediaData);
 
 		await processNsfwImage({

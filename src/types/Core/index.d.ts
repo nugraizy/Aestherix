@@ -1,6 +1,7 @@
 import type { AuthenticationState, makeWASocket } from 'baileys';
 import type { EventEmitter } from 'node:events';
 import type { Transform } from 'node:stream';
+import type { makeWASocket } from 'baileys';
 import type { Buttons, Cards } from '../Commands/Interactive';
 import type {
 	DownloadableMessage,
@@ -13,6 +14,7 @@ import type {
 } from '../Messages';
 
 type WASocket = ReturnType<typeof makeWASocket>;
+type WASocketMethods = Omit<WASocket, 'ev' | 'ws' | 'end'>;
 
 type ClientSocketState = 'disconnected' | 'connecting' | 'connected';
 type ClientRole = 'primary' | 'sub';
@@ -75,6 +77,7 @@ export interface TemplateBuilderFactory {
 	Carousel: typeof Carousel;
 }
 
+export interface ClientSocket extends WASocketMethods {}
 export declare class ClientSocket extends EventEmitter {
 	constructor(auth: Auth, options?: ClientSocketOptions);
 

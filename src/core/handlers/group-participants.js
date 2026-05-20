@@ -192,19 +192,42 @@ const groupParticipantsNotificationHandler = async (client, update) => {
 		return;
 	}
 
-	const text = `${'Group Participants Notification'.formatHeaders()}
+	const groupSettings = settings.get(id);
+	const isJoin = actionName === 'add' || actionName === 'invite';
+	const isLeave = actionName === 'left' || actionName === 'remove';
+
+	if (isJoin && groupSettings?.welcome !== 'enable') {
+		return;
+	}
+
+	if (isLeave && groupSettings?.leave !== 'enable') {
+		return;
+	}
+
+	const useImage = groupSettings?.welcomeImage !== 'disable';
+
+	const text = isJoin && groupSettings?.welcomeMessage
+		? groupSettings.welcomeMessage
+			.replace(/\{groupName\}/g, cache.get(id)?.subject || '')
+			.replace(/\{participant\}/g, participants.map(parseId).join(', '))
+		: isLeave && groupSettings?.leaveMessage
+			? groupSettings.leaveMessage
+				.replace(/\{groupName\}/g, cache.get(id)?.subject || '')
+				.replace(/\{participant\}/g, participants.map(parseId).join(', '))
+			: `${'Group Participants Notification'.formatHeaders()}
 Event Update : ${eventName}
 ${participants.map((v) => addContextCaption(v, action, update)).join('\n')}`;
 
-	if (participants.length > 1) {
+	if (participants.length > 1 || !useImage) {
 		await client.send(id, {
 			text,
 			mentions
 		});
+		return;
 	}
 
 	const subject =
-		cache.get(id).subject || settings.get(id).groupName || (await client.groupMetadata(id)).subject || '';
+		cache.get(id)?.subject || groupSettings?.groupName || (await client.groupMetadata(id)).subject || '';
 
 	await sendNotification(client, text, id, author, participants[0], subject, actionName);
 };

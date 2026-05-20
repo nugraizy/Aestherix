@@ -108,7 +108,7 @@ export class MessageHandler {
 			return this.#handleStub(message);
 		}
 
-		const client = this.#getLegacyClient();
+		const client = this.#client;
 		const state = this.#configuration.flags?.state;
 
 		message = await Context.from(message, client, this.#store, state);
@@ -286,6 +286,15 @@ export class MessageHandler {
 			await client.reply(
 				localMessage.from,
 				`The command \`${command.name}\` is currently disabled by dashboard.`,
+				localMessage.message
+			);
+			return 'skip';
+		}
+
+		if (this.#configuration.settings?.maintenance && !localMessage.isOwner) {
+			await client.reply(
+				localMessage.from,
+				'🛠️ Bot is currently in maintenance mode. Please try again later.',
 				localMessage.message
 			);
 			return 'skip';
@@ -623,7 +632,7 @@ export class MessageHandler {
 		}
 
 		if (message.messages?.[0]) {
-			this.#handlers.get('STUBTYPE')(this.#getLegacyClient(), message.messages[0], this.#store);
+			this.#handlers.get('STUBTYPE')(this.#client, message.messages[0], this.#store);
 		}
 	}
 
@@ -779,9 +788,5 @@ export class MessageHandler {
 			: message.body || '';
 
 		return `${message.from || ''}|${message.sender || ''}|${commandBody}`;
-	}
-
-	#getLegacyClient() {
-		return this.#client;
 	}
 }

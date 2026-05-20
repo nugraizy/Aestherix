@@ -1,14 +1,13 @@
-// Kiryuu types based on NatsuId multisrc
-
-export type FetchLike = (input: string, init?: { headers?: Record<string, string> }) => Promise<{ json(): Promise<any>; text(): Promise<string> }>;
+export type FetchLike = (
+	input: string,
+	init?: { headers?: Record<string, string> }
+) => Promise<{ json(): Promise<any>; text(): Promise<string> }>;
 
 export interface PageInfo {
 	page: number;
 	lastPage: number;
 	hasNext: boolean;
 }
-
-// --- DTOs from WordPress/WP REST API ---
 
 export interface KiryuuTerm {
 	name: string;
@@ -36,8 +35,6 @@ export interface KiryuuManga {
 	content: KiryuuRendered;
 	_embedded: KiryuuEmbedded;
 }
-
-// --- Parsed domain models ---
 
 export interface KiryuuPoster {
 	small?: string;
@@ -74,8 +71,6 @@ export interface KiryuuPage {
 	url: string;
 }
 
-// --- Filter options ---
-
 export interface KiryuuSortOption {
 	label: string;
 	value: string;
@@ -95,8 +90,6 @@ export interface KiryuuGenreOption {
 	label: string;
 	value: string;
 }
-
-// --- API options ---
 
 export interface KiryuuListOptions {
 	page?: number;
@@ -120,8 +113,6 @@ export interface KiryuuChaptersOptions {
 	page?: number;
 	limit?: number;
 }
-
-// --- Classes ---
 
 export class KiryuuUtils {
 	static readonly WEB_BASE = 'https://v5.kiryuu.to';
@@ -208,7 +199,6 @@ export class KiryuuUtils {
 	}
 }
 
-// Extend KiryuuEmbedded with helper methods
 declare module './kiryuu' {
 	interface KiryuuEmbedded {
 		getTerms(type: string): string[];

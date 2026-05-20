@@ -110,6 +110,10 @@ function makeOrderedDictionary(idGetter) {
 		update,
 		remove,
 		updateAssign: (id, updateValue) => {
+			if (updateValue?.messageStubType === 1 && !updateValue?.message) {
+				return;
+			}
+
 			const item = get(id);
 
 			if (item) {

@@ -176,8 +176,25 @@ export class ClientSocket extends EventEmitter {
 
 		this.#bindEvents();
 		this.#startedAt = Date.now();
+		this.#exposeSocketMethods();
 
 		return this;
+	}
+
+	#exposeSocketMethods() {
+		if (!this.#socket) {
+			return;
+		}
+
+		const skip = new Set(['then', 'catch', 'finally', 'ev', 'ws', 'end']);
+
+		for (const key of Object.keys(this.#socket)) {
+			if (skip.has(key) || typeof this.#socket[key] !== 'function' || key in this) {
+				continue;
+			}
+
+			this[key] = this.#socket[key].bind(this.#socket);
+		}
 	}
 
 	async disconnect() {
@@ -514,30 +531,6 @@ export class ClientSocket extends EventEmitter {
 
 	get authState() {
 		return this.#socket?.authState;
-	}
-
-	profilePictureUrl(jid, type) {
-		return this.#socket.profilePictureUrl(jid, type);
-	}
-
-	groupMetadata(jid) {
-		return this.#socket.groupMetadata(jid);
-	}
-
-	fetchBlocklist() {
-		return this.#socket.fetchBlocklist();
-	}
-
-	readMessages(keys) {
-		return this.#socket.readMessages(keys);
-	}
-
-	sendPresenceUpdate(type, jid) {
-		return this.#socket.sendPresenceUpdate(type, jid);
-	}
-
-	updateBlockStatus(jid, action) {
-		return this.#socket.updateBlockStatus(jid, action);
 	}
 
 	async updateGroup(jid, { action, participants = [], admins = [], force = false, message = null, text = '' } = {}) {

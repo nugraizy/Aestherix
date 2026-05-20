@@ -1,4 +1,4 @@
-export const processSettingsStubtype = async (update) => {
+export const processSettingsStubtype = async (client, update) => {
 	const {
 		attrs: { from: id, participant: author },
 		content: [{ tag, attrs }]

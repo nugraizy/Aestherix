@@ -65,7 +65,7 @@ declare global {
 		toReadAble(): string;
 
 		/** Inserts a space before each uppercase letter (camelCase → camel Case). */
-		seperateCamel(): string;
+		separateCamel(): string;
 
 		/** Capitalizes the first letter of each word. */
 		capitalize(): string;

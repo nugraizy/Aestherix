@@ -17,7 +17,7 @@ class Spotifier {
 	#accessTokenExpiredAt = null;
 	#_api = 'https://api.spotify.com/v1';
 	#_apiAuth = 'https://accounts.spotify.com/api/token';
-	device_id = process.env.SPOTIFY_DEVICE_ID; // eslint-disable-line
+	device_id = process.env.SPOTIFY_DEVICE_ID;
 	constructor() {
 		if (!(this.#clientId || this.#clientSecret)) {
 			throw new Error('Please add CLIENT_ID and CLIENT_SECRET to your .env files');
@@ -33,7 +33,7 @@ class Spotifier {
 				headers: {
 					Authorization: this.#token
 				},
-				body: new URLSearchParams({ grant_type: 'client_credentials' }) // eslint-disable-line
+				body: new URLSearchParams({ grant_type: 'client_credentials' })
 			};
 		};
 
@@ -408,10 +408,10 @@ class Spotifier {
 					album,
 					id: trackId,
 					uri: trackUri,
-					external_urls
+					external_urls // eslint-disable-line camelcase
 				} = data.item || {};
 				const coverUrl = Array.isArray(album?.images) ? album.images[0]?.url || null : null;
-				const trackUrl = external_urls?.spotify || null;
+				const trackUrl = external_urls?.spotify || null; // eslint-disable-line camelcase
 
 				this.#currentlyPlaying = data.item.name;
 
@@ -607,18 +607,18 @@ class Spotifier {
 
 			const body = {
 				uris: [],
-				context_uri: null, // eslint-disable-line
-				position_ms: 0, // eslint-disable-line
+				context_uri: null,
+				position_ms: 0,
 				offset: offset ? { position: offset } : undefined
 			};
 
 			if (trackId) {
 				body.uris.push(`spotify:track:${trackId}`);
 			} else if (albumId) {
-				body.context_uri = `spotify:album:${albumId}`; // eslint-disable-line
+				body.context_uri = `spotify:album:${albumId}`;
 				delete body.uris;
 			} else if (playlistId) {
-				body.context_uri = `spotify:playlist:${playlistId}`; // eslint-disable-line
+				body.context_uri = `spotify:playlist:${playlistId}`;
 				delete body.uris;
 			}
 

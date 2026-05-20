@@ -398,7 +398,6 @@ export class ChatGPTDialogue {
 				return null;
 			}
 
-			// Scale image if needed
 			const processedImage = await this._checkAndScaleImage(imageData, CONFIG.MAX_IMAGE_WIDTH, CONFIG.MAX_IMAGE_HEIGHT);
 
 			const form = new FormData();

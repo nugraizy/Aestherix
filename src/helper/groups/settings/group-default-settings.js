@@ -10,9 +10,9 @@ const toCacheEntry = (groupId, settings) => {
 		return false;
 	}
 
-	const { groupId: id, ...rest } = settings;
+	const { groupId: _id, ...rest } = settings;
 
-	return { [id]: rest };
+	return rest;
 };
 
 export const checkJSON = async (from) => {

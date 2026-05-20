@@ -13,6 +13,7 @@ import {
 	extractTypeQuoted,
 	firstKey,
 	S_WHATSAPP_NET,
+	toUserJid,
 	typeMessage
 } from '../helper/misc/wa_data/index.js';
 import { Cache } from '../helper/modules/cache.js';
@@ -93,7 +94,11 @@ async function refreshPrefixCache(client) {
 	configuration.prefix.regex = prefixReg;
 	configuration.prefix.values = prefixValues;
 	configuration.botJid = myJid;
-	configuration.owners = [settings.owner_number, ...settings.team_number, myJid];
+	configuration.owners = [
+		toUserJid(settings.owner_number),
+		...(settings.team_number || []).map(toUserJid),
+		myJid
+	].filter(Boolean);
 	configuration.settings = settings;
 	configuration.isFirstConnectionForCache = false;
 }
@@ -343,6 +348,9 @@ export class Context {
 	}
 	get isOwner() {
 		return this.#memo('isOwner', () => configuration.owners?.includes(this.sender));
+	}
+	get isSuperOwner() {
+		return this.#memo('isSuperOwner', () => toUserJid(configuration.settings?.owner_number) === this.sender);
 	}
 	get isBlocked() {
 		return this.#memo('isBlocked', () => configuration.blocklist?.includes(this.sender));
@@ -604,6 +612,7 @@ export class Context {
 			pushname: this.pushname,
 			botNumber: this.botNumber,
 			isOwner: this.isOwner,
+			isSuperOwner: this.isSuperOwner,
 			timeStamp: this.timeStamp,
 			filename: this.filename,
 			groupMetadata: this.groupMetadata,
