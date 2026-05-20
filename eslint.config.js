@@ -54,6 +54,6 @@ export default [
 		}
 	},
 	{
-		ignores: ['eslint.config.js', 'todo/*', 'test/*']
+		ignores: ['eslint.config.js', 'todo/*', 'test/*', 'dashboard/**/node_modules/**', 'dashboard/**/dist/**', 'public/**']
 	}
 ];
