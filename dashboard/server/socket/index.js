@@ -35,7 +35,7 @@ async function emitInitialSnapshot(socket, services) {
 	socket.emit('dashboard:commands', { commands: monitor.listCommands() });
 	socket.emit('dashboard:flags', { flags: monitor.listFlags() });
 	socket.emit('dashboard:users', {
-		users: await users.list({ redactNumbers: session.role !== 'owner' })
+		users: await users.list({ redactNumbers: session.role !== 'owner' && session.role !== 'superOwner' })
 	});
 	socket.emit('dashboard:profile-pictures', {
 		picture: await profilePictures.getLatest()
@@ -117,41 +117,40 @@ function startLogsInterval(io, services) {
 }
 
 function startBotLogsInterval(io, services) {
-	let cursor = 0;
-
 	return setInterval(async () => {
-		const sockets = Array.from(io.of('/').sockets.values()).filter(
+		const ownerSockets = Array.from(io.of('/').sockets.values()).filter(
 			(socket) => socket.data?.session?.role === 'owner'
 		);
 
-		if (!sockets.length) {
+		if (!ownerSockets.length) {
 			return;
 		}
 
-		const result = await services.botBridge.fetchBotLogs({ since: cursor, limit: 250 });
+		const cursors = ownerSockets.map((s) => Number(s.data?.lastBotLogId || 0));
+		const since = Math.max(0, ...cursors);
+
+		const result = await services.botBridge.fetchBotLogs({ since, limit: 250 });
 
 		if (!result.ok) {
-			for (const socket of sockets) {
+			for (const socket of ownerSockets) {
 				socket.emit('dashboard:bot-logs', {
 					ok: false,
 					message: result.message || 'Bot log stream is not reachable.',
-					lastId: Number(socket.data?.lastBotLogId || cursor || 0),
+					lastId: since,
 					logs: []
 				});
 			}
+
 			return;
 		}
 
-		const payload = result.data || { lastId: cursor, logs: [] };
+		const payload = result.data || { lastId: since, logs: [] };
 
-		cursor = Number(payload?.lastId || cursor || 0);
+		for (const socket of ownerSockets) {
+			const lastId = Number(socket.data?.lastBotLogId || 0);
 
-		if (!Array.isArray(payload?.logs) || payload.logs.length === 0) {
-			return;
-		}
+			socket.data.lastBotLogId = Number(payload?.lastId || lastId);
 
-		for (const socket of sockets) {
-			socket.data.lastBotLogId = cursor;
 			socket.emit('dashboard:bot-logs', payload);
 		}
 	}, BOT_LOGS_INTERVAL_MS);
@@ -187,6 +186,10 @@ function startAuditInterval(io, services) {
 
 function startMetaInterval(io, services) {
 	let lastPictureKey = '';
+	let lastCommandsSnapshot = null;
+	let lastFlagsSnapshot = null;
+	let lastUserCountOwner = -1;
+	let lastUserCountViewer = -1;
 
 	return setInterval(async () => {
 		if (io.of('/').sockets.size === 0) {
@@ -200,21 +203,42 @@ function startMetaInterval(io, services) {
 		const latestPicture = await services.profilePictures.getLatest();
 		const currentKey = `${latestPicture?.timestamp || ''}|${latestPicture?.url || ''}`;
 
-		io.emit('dashboard:commands', { commands });
-		io.emit('dashboard:flags', { flags });
+		const commandsChanged = JSON.stringify(commands) !== lastCommandsSnapshot;
+		const flagsChanged = JSON.stringify(flags) !== lastFlagsSnapshot;
+
+		if (commandsChanged) {
+			lastCommandsSnapshot = JSON.stringify(commands);
+			io.emit('dashboard:commands', { commands });
+		}
+
+		if (flagsChanged) {
+			lastFlagsSnapshot = JSON.stringify(flags);
+			io.emit('dashboard:flags', { flags });
+		}
 
 		if (currentKey && currentKey !== lastPictureKey) {
 			lastPictureKey = currentKey;
 			io.emit('dashboard:profile-pictures', { picture: latestPicture });
 		}
 
+		const ownerCount = usersForOwner.length;
+		const viewerCount = usersForViewer.length;
+		const usersChanged = ownerCount !== lastUserCountOwner || viewerCount !== lastUserCountViewer;
+
+		if (usersChanged) {
+			lastUserCountOwner = ownerCount;
+			lastUserCountViewer = viewerCount;
+		}
+
 		const sockets = Array.from(io.of('/').sockets.values());
 
 		for (const socket of sockets) {
 			const session = socket.data?.session || null;
-			const list = session?.role === 'owner' ? usersForOwner : usersForViewer;
+			const list = (session?.role === 'owner' || session?.role === 'superOwner') ? usersForOwner : usersForViewer;
 
-			socket.emit('dashboard:users', { users: list });
+			if (usersChanged) {
+				socket.emit('dashboard:users', { users: list });
+			}
 		}
 	}, META_INTERVAL_MS);
 }

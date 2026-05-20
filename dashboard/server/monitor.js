@@ -65,7 +65,9 @@ const applyPersistedFlags = (configuration, flagStates) => {
 };
 
 const persist = async (configuration) => {
-	const disabledCommands = Array.from(normalizeSet(configuration?.registry?.disabledCommands)).sort((a, b) => a.localeCompare(b));
+	const disabledCommands = Array.from(normalizeSet(configuration?.registry?.disabledCommands)).sort((a, b) =>
+		a.localeCompare(b)
+	);
 	const flagStates = extractBooleanFlags(configuration);
 
 	await saveDashboardState(prisma, { disabledCommands, flagStates }).catch(() => {});
@@ -110,7 +112,6 @@ const readCommandsCatalogSync = () => {
 	return _commandsCatalogCache || [];
 };
 
-// Pre-load commands catalog from DB into in-memory cache.
 const hydrateCommandsCatalogCache = async () => {
 	try {
 		const commands = await loadCommandsCatalog(prisma);

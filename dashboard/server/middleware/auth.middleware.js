@@ -18,7 +18,7 @@ export function createAuthMiddleware({ auth }) {
 			return res.status(401).json({ ok: false, message: 'Authentication required.' });
 		}
 
-		if (session.role !== 'owner') {
+		if (session.role !== 'owner' && session.role !== 'superOwner') {
 			return res.status(403).json({ ok: false, message: 'Owner permission required.' });
 		}
 
@@ -26,5 +26,20 @@ export function createAuthMiddleware({ auth }) {
 		return next();
 	};
 
-	return { requireDashboardAuth, requireOwnerAuth };
+	const requireSuperOwnerAuth = (req, res, next) => {
+		const session = auth.getSessionFromRequest(req);
+
+		if (!session) {
+			return res.status(401).json({ ok: false, message: 'Authentication required.' });
+		}
+
+		if (session.role !== 'superOwner') {
+			return res.status(403).json({ ok: false, message: 'Super owner permission required.' });
+		}
+
+		req.dashboardSession = session;
+		return next();
+	};
+
+	return { requireDashboardAuth, requireOwnerAuth, requireSuperOwnerAuth };
 }

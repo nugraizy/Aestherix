@@ -139,5 +139,10 @@ export function createAuditService({ prisma } = {}) {
 		};
 	}
 
-	return { load, push, list, sanitizeRealtimeFilters, MAX_AUDIT_LOGS };
+	function purge() {
+		state.logs = [];
+		state.lastId = 0;
+	}
+
+	return { load, push, list, purge, sanitizeRealtimeFilters, MAX_AUDIT_LOGS };
 }

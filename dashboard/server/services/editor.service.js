@@ -154,7 +154,11 @@ export function createEditorService() {
 		}
 
 		try {
-			const stats = await fs.stat(resolved.resolved);
+			const stats = await fs.lstat(resolved.resolved);
+
+			if (stats.isSymbolicLink()) {
+				return { ok: false, status: 400, message: 'Symbolic links are not allowed.' };
+			}
 
 			if (!stats.isFile()) {
 				return { ok: false, status: 400, message: 'Path is not a file.' };
@@ -186,7 +190,11 @@ export function createEditorService() {
 		}
 
 		try {
-			const stats = await fs.stat(resolved.resolved);
+			const stats = await fs.lstat(resolved.resolved);
+
+			if (stats.isSymbolicLink()) {
+				return { ok: false, status: 400, message: 'Symbolic links are not allowed.' };
+			}
 
 			if (!stats.isFile()) {
 				return { ok: false, status: 400, message: 'Path is not a file.' };

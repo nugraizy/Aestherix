@@ -172,29 +172,9 @@ export function createSystemService({ configuration, prisma, monitor, spotify, a
 	}
 
 	function countActiveSessions() {
-		if (!auth?.getSessionFromRequest) {
-			return 0;
-		}
+		const io = configuration.dashboard?.io;
 
-		auth.cleanExpiredSessions?.();
-
-		// no externally-exposed session iterator; fall back to 0 when auth doesn't expose it
-		const introspect = auth._sessions?.();
-
-		if (!introspect) {
-			return 0;
-		}
-
-		const now = Date.now();
-		let total = 0;
-
-		for (const session of introspect) {
-			if (now - Number(session?.lastSeenAt || 0) <= LIVE_SESSION_WINDOW_MS) {
-				total += 1;
-			}
-		}
-
-		return total;
+		return io?.of('/')?.sockets?.size || 0;
 	}
 
 	async function getStatus() {
@@ -211,6 +191,7 @@ export function createSystemService({ configuration, prisma, monitor, spotify, a
 		return {
 			timestamp: Date.now(),
 			project: { version: projectVersion },
+			pm2: Boolean(process.env.pm_id || process.env.PM2_HOME),
 			system: {
 				platform: process.platform,
 				nodeVersion: process.version,
@@ -285,11 +266,85 @@ export function createSystemService({ configuration, prisma, monitor, spotify, a
 		return contributors;
 	}
 
+	function getHealth() {
+		const mqttConnected = Boolean(configuration.mqtt?.connected);
+		const embeddedMode = isBotEmbeddedHere();
+		const waClient = getEmbeddedWaClient();
+
+		return {
+			database: {
+				provider: process.env.DATABASE_PROVIDER || 'unknown',
+				connected: true
+			},
+			bot: {
+				embedded: embeddedMode,
+				waConnected: Boolean(waClient),
+				sessionName: configuration.core?.sessionName || 'unknown'
+			},
+			mqtt: { connected: mqttConnected },
+			bridge: { configured: Boolean(botBridge?.isConfigured) },
+			profilePictures: {
+				cacheSize: configuration.pinterest?.images?.size || 0
+			}
+		};
+	}
+
+	function getCacheStats() {
+		return {
+			groups: {
+				metadata: configuration.groups?.metadata?.size || 0,
+				settings: configuration.groups?.settings?.size || 0
+			},
+			users: configuration.users?.size || 0,
+			commands: configuration.registry?.commands?.size || 0,
+			commandUsage: configuration.registry?.commandUsage?.size || 0,
+			pinterest: configuration.pinterest?.images?.size || 0,
+			anonymous: {
+				sessions: configuration.anonymous?.sessions?.size || 0,
+				messages: configuration.anonymous?.messages?.size || 0
+			},
+			games: {
+				tebakGambar: configuration.games?.tebakGambar?.size || 0,
+				akinator: configuration.games?.akinator?.size || 0,
+				wordle: configuration.games?.wordle?.size || 0,
+				werewolf: configuration.games?.werewolf?.size || 0
+			}
+		};
+	}
+
+	function getEnvKeyPresence() {
+		const keys = [
+			'DATABASE_URL',
+			'DATABASE_PROVIDER',
+			'DASHBOARD_PORT',
+			'DASHBOARD_EMBEDDED',
+			'DASHBOARD_BRIDGE_PORT',
+			'DASHBOARD_BRIDGE_TOKEN',
+			'DASHBOARD_BOT_BRIDGE_URL',
+			'GITHUB_AUTH_TOKEN',
+			'GITHUB_SECRET_WEBHOOK',
+			'INSTAGRAM_USERNAME',
+			'INSTAGRAM_PASSWORD',
+			'MQTT_URL',
+			'MQTT_SPOTIFY_BIO',
+			'MQTT_FREEGAME',
+			'PAIR_NUMBER',
+			'BOT_PM2_APP_NAME',
+			'SPOTIFY_CLIENT_ID',
+			'SPOTIFY_CLIENT_SECRET'
+		];
+
+		return keys.map((key) => ({ key, set: Boolean(process.env[key]) }));
+	}
+
 	return {
 		projectVersion,
 		sampleSystemCpuPercent,
 		sampleProcessCpuPercent,
 		getStatus,
+		getHealth,
+		getCacheStats,
+		getEnvKeyPresence,
 		getChangelog,
 		getContributors
 	};

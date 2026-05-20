@@ -24,7 +24,7 @@ export function createUsersRouter({ services, configuration }) {
 
 	router.get('/users', middleware.requireDashboardAuth, async (req, res) => {
 		const session = req.dashboardSession || services.auth.getSessionFromRequest(req);
-		const list = await users.list({ redactNumbers: session?.role !== 'owner' });
+		const list = await users.list({ redactNumbers: session?.role !== 'owner' && session?.role !== 'superOwner' });
 
 		res.json({ count: list.length, users: list });
 	});
@@ -159,7 +159,7 @@ export function createUsersRouter({ services, configuration }) {
 
 	router.post(
 		'/users/:userId/banned',
-		middleware.requireOwnerAuth,
+		middleware.requireSuperOwnerAuth,
 		validate({ params: userIdParams, body: userToggleBody }),
 		async (req, res) => {
 			const session = req.dashboardSession;
@@ -223,7 +223,7 @@ export function createUsersRouter({ services, configuration }) {
 
 	router.post(
 		'/users/:userId/blocked',
-		middleware.requireOwnerAuth,
+		middleware.requireSuperOwnerAuth,
 		validate({ params: userIdParams, body: userToggleBody }),
 		async (req, res) => {
 			const session = req.dashboardSession;

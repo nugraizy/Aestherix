@@ -83,7 +83,18 @@ export function normalizeDashboardPicture(value) {
 }
 
 export function normalizePersistedPictureEntry(entry) {
-	return normalizeDashboardPicture(entry);
+	const normalized = normalizeDashboardPicture(entry);
+
+	if (!normalized) {
+		return null;
+	}
+
+	// Attach colorPalette if present in the entry
+	if (entry && entry.colorPalette) {
+		normalized.colorPalette = entry.colorPalette;
+	}
+
+	return normalized;
 }
 
 export function normalizeHexColor(value) {

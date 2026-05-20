@@ -94,8 +94,9 @@ function isBlockedDownloadHost(hostname) {
 		.trim()
 		.toLowerCase();
 
-	if (!safeHost) return true;
-	if (safeHost === 'localhost' || safeHost === '127.0.0.1' || safeHost === '::1') return true;
+	if (!safeHost) {return true;}
+
+	if (safeHost === 'localhost' || safeHost === '127.0.0.1' || safeHost === '::1') {return true;}
 
 	return false;
 }
@@ -204,11 +205,8 @@ export function createProfilePicturesRouter({ services }) {
 				});
 			}
 
-			const latest = await profilePictures.getLatest();
-			const pictures = await profilePictures.list();
-
 			socket?.io?.emit?.(ROOMS.PROFILE_PICTURES, {
-				picture: latest,
+				picture: null,
 				deleted: payload
 			});
 
@@ -219,7 +217,7 @@ export function createProfilePicturesRouter({ services }) {
 				message: 'Owner deleted a profile picture from albums.'
 			});
 
-			res.json({ ok: true, count: pictures.length, pictures });
+			res.json({ ok: true, deletedCount: result.deletedCount });
 		}
 	);
 

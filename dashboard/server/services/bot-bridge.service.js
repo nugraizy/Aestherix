@@ -1,7 +1,18 @@
 const DEFAULT_BRIDGE_URL = String(process.env.DASHBOARD_BOT_BRIDGE_URL || 'http://127.0.0.1:4010').replace(/\/+$/, '');
-const DEFAULT_BRIDGE_TOKEN = String(process.env.DASHBOARD_BRIDGE_TOKEN || 'aestherix-local-bridge-token');
 
-export function createBotBridgeService({ bridgeUrl = DEFAULT_BRIDGE_URL, bridgeToken = DEFAULT_BRIDGE_TOKEN } = {}) {
+const rawBridgeToken = process.env.DASHBOARD_BRIDGE_TOKEN;
+
+if (!rawBridgeToken) {
+	throw new Error(
+		'DASHBOARD_BRIDGE_TOKEN environment variable is not set. '
+		+ 'Generate a strong random token and set it in your .env file:\n'
+		+ '  DASHBOARD_BRIDGE_TOKEN=$(openssl rand -hex 32)'
+	);
+}
+
+const bridgeToken = String(rawBridgeToken);
+
+export function createBotBridgeService({ bridgeUrl = DEFAULT_BRIDGE_URL } = {}) {
 	function bridgeUnavailable() {
 		return { ok: false, status: 503, message: 'Runtime bridge URL is not configured.' };
 	}
@@ -11,29 +22,44 @@ export function createBotBridgeService({ bridgeUrl = DEFAULT_BRIDGE_URL, bridgeT
 			return bridgeUnavailable();
 		}
 
-		try {
-			const response = await fetch(`${bridgeUrl}${path}`, {
-				...init,
-				headers: {
-					'x-dashboard-bridge-token': bridgeToken,
-					...(init.headers || {})
+		const delays = [1000, 2000, 4000];
+		let lastError = null;
+
+		for (let attempt = 0; attempt <= delays.length; attempt++) {
+			try {
+				const response = await fetch(`${bridgeUrl}${path}`, {
+					...init,
+					headers: {
+						'x-dashboard-bridge-token': bridgeToken,
+						...(init.headers || {})
+					}
+				});
+
+				const data = await response.json().catch(() => ({}));
+
+				if (!response.ok) {
+					return {
+						ok: false,
+						status: response.status,
+						message: data?.message || 'Bridge request failed.'
+					};
 				}
-			});
 
-			const data = await response.json().catch(() => ({}));
+				return { ok: true, data };
+			} catch (error) {
+				lastError = error;
 
-			if (!response.ok) {
-				return {
-					ok: false,
-					status: response.status,
-					message: data?.message || 'Bridge request failed.'
-				};
+				if (attempt < delays.length) {
+					await sleep(delays[attempt]);
+				}
 			}
-
-			return { ok: true, data };
-		} catch {
-			return { ok: false, status: 503, message: 'Bridge is not reachable.' };
 		}
+
+		return { ok: false, status: 503, message: lastError?.message || 'Bridge is not reachable.' };
+	}
+
+	function sleep(ms) {
+		return new Promise((resolve) => setTimeout(resolve, ms));
 	}
 
 	async function pingBot({ timeoutMs = 1000 } = {}) {

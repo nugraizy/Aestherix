@@ -55,11 +55,12 @@ function isSessionLive(session) {
 
 async function getOwnerNumbers() {
 	const settings = await fs.readJSON(SETTINGS_PATH);
-	const owners = [settings.owner_number, ...(settings.team_number || [])]
+	const superOwner = normalizePhoneNumber(String(settings.owner_number || '').split('@')[0]);
+	const all = [settings.owner_number, ...(settings.team_number || [])]
 		.filter(Boolean)
 		.map((value) => normalizePhoneNumber(String(value).split('@')[0]));
 
-	return new Set(owners);
+	return { all: new Set(all), superOwner };
 }
 
 function getWhatsAppClient() {
@@ -98,7 +99,7 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 				}
 
 				sessionStore.set(token, {
-					role: item?.role === 'owner' ? 'owner' : 'viewer',
+					role: item?.role === 'superOwner' ? 'superOwner' : item?.role === 'owner' ? 'owner' : 'viewer',
 					phoneNumber: item?.phoneNumber || null,
 					name: item?.name || null,
 					lastSeenAt: Number(item?.lastSeenAt || now),
@@ -286,7 +287,11 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 		return token;
 	}
 
-	async function sendConfirmationButton({ to, approveButtonId, rejectButtonId, phoneNumber }) {
+	async function sendConfirmationButton({ to, approveButtonId, rejectButtonId, phoneNumber, loginRole }) {
+		const isGroupAdmin = loginRole === 'groupAdmin';
+		const bodyText = isGroupAdmin
+			? 'A group manager login request was made for the dashboard. Confirm if this was you.'
+			: 'A dashboard login request was made for your owner account. Confirm if this was you.';
 		const waClient = getWhatsAppClient();
 
 		if (waClient?.send) {
@@ -295,7 +300,7 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 
 				await builder
 					.destination(to)
-					.body('A dashboard login request was made for your owner account. Confirm if this was you.')
+					.body(bodyText)
 					.footer(`Requested number: ${phoneNumber}`)
 					.buttons(
 						builder.button.reply({ display: 'Confirm Login', id: approveButtonId }),
@@ -307,7 +312,7 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 			}
 
 			await waClient.send(to, {
-				text: `Dashboard login request detected.\n\nReply one of these codes:\nConfirm: ${approveButtonId}\nReject: ${rejectButtonId}`
+				text: `${bodyText}\n\nReply one of these codes:\nConfirm: ${approveButtonId}\nReject: ${rejectButtonId}`
 			});
 			return true;
 		}
@@ -326,7 +331,7 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 		return false;
 	}
 
-	async function issueOtp({ phoneNumber: rawPhone }) {
+	async function issueOtp({ phoneNumber: rawPhone, role: loginRole }) {
 		await cleanExpiredOtps();
 
 		const phoneNumber = normalizePhoneNumber(rawPhone);
@@ -337,7 +342,7 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 
 		const owners = await getOwnerNumbers();
 
-		if (!owners.has(phoneNumber)) {
+		if (!owners.all.has(phoneNumber)) {
 			return { ok: false, status: 403, message: 'This number does not have owner permission.' };
 		}
 
@@ -380,7 +385,8 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 			to: recipient,
 			approveButtonId,
 			rejectButtonId,
-			phoneNumber
+			phoneNumber,
+			loginRole
 		});
 
 		if (!sent) {
@@ -411,7 +417,7 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 		const safeRequestKey = String(requestKey || '').trim();
 		const owners = await getOwnerNumbers();
 
-		if (!owners.has(phoneNumber)) {
+		if (!owners.all.has(phoneNumber)) {
 			return { ok: false, status: 403, message: 'This number does not have owner permission.' };
 		}
 
@@ -462,7 +468,9 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 		otpStore.delete(phoneNumber);
 		await persistOtpStore();
 
-		const session = { role: 'owner', phoneNumber, name: 'Owner' };
+		const ownerInfo = await getOwnerNumbers();
+		const isSuperOwner = phoneNumber === ownerInfo.superOwner;
+		const session = { role: isSuperOwner ? 'superOwner' : 'owner', phoneNumber, name: isSuperOwner ? 'Super Owner' : 'Owner' };
 
 		createCookie(res, session);
 
@@ -576,6 +584,33 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 		},
 		cleanExpiredOtps,
 		cleanExpiredSessions,
+		getActiveSessionCount() {
+			cleanExpiredSessions();
+
+			return sessionStore.size;
+		},
+		listSessions() {
+			cleanExpiredSessions();
+
+			return Array.from(sessionStore.entries()).map(([token, session]) => ({
+				id: token.slice(0, 8),
+				role: session.role,
+				phoneNumber: session.phoneNumber || null,
+				name: session.name || null,
+				lastSeenAt: session.lastSeenAt || null
+			}));
+		},
+		revokeSession(shortId) {
+			for (const [token] of sessionStore.entries()) {
+				if (token.startsWith(shortId)) {
+					sessionStore.delete(token);
+
+					return { ok: true };
+				}
+			}
+
+			return { ok: false, message: 'Session not found.' };
+		},
 		hasActiveOwnerSession,
 		getSessionFromRequest,
 		isAuthenticated,
@@ -583,6 +618,32 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 		getConfirmationStatus,
 		finalizeConfirmation,
 		issueViewerSession,
+		createCookieExternal: createCookie,
+		finalizeGroupAdminConfirmation: async ({ requestId, requestKey, res }) => {
+			const phoneNumber = [...otpStore.entries()].find(([, v]) => v.requestId === requestId)?.[0];
+
+			if (!phoneNumber) {
+				return { ok: false, status: 404, message: 'Request not found.' };
+			}
+
+			const otpData = otpStore.get(phoneNumber);
+
+			if (!otpData || otpData.requestId !== requestId) {
+				return { ok: false, status: 404, message: 'Request not found.' };
+			}
+
+			if (otpData.status !== 'approved') {
+				return { ok: false, status: 400, message: 'Request is not approved yet.' };
+			}
+
+			otpStore.delete(phoneNumber);
+
+			const session = { role: 'groupAdmin', phoneNumber, name: `Group Admin (${phoneNumber})` };
+
+			createCookie(res, session);
+
+			return { ok: true };
+		},
 		logout,
 		processConfirmationAction,
 		hashValue,

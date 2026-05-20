@@ -75,7 +75,9 @@ export function createProfilePicturesService({ configuration, prisma } = {}) {
 	}
 
 	function findTimestampForUrl(url) {
-		const target = String(url || '').trim().toLowerCase();
+		const target = String(url || '')
+			.trim()
+			.toLowerCase();
 
 		if (!target) {
 			return '';
@@ -85,7 +87,9 @@ export function createProfilePicturesService({ configuration, prisma } = {}) {
 
 		for (const [timestamp, value] of map.entries()) {
 			const normalized = normalizeDashboardPicture(value);
-			const candidate = String(normalized?.original?.url || '').trim().toLowerCase();
+			const candidate = String(normalized?.original?.url || '')
+				.trim()
+				.toLowerCase();
 
 			if (candidate === target) {
 				return String(timestamp);
@@ -118,9 +122,7 @@ export function createProfilePicturesService({ configuration, prisma } = {}) {
 				map.set(timestamp, normalized);
 
 				const cachedPalette = Array.isArray(entry?.colorPalette) ? entry.colorPalette : [];
-				const cachedRgbs = cachedPalette
-					.map((hex) => hexToRgb(hex))
-					.filter((rgb) => rgb && Number.isFinite(rgb.r));
+				const cachedRgbs = cachedPalette.map((hex) => hexToRgb(hex)).filter((rgb) => rgb && Number.isFinite(rgb.r));
 
 				if (cachedRgbs.length) {
 					const url = normalized?.original?.url;
@@ -255,27 +257,27 @@ export function createProfilePicturesService({ configuration, prisma } = {}) {
 		);
 		const source = Array.isArray(pictures) ? pictures : [];
 
-		const matched = await mapWithConcurrency(source, async (picture) => {
-			const dominant = await getDominantColor(picture?.url);
+		return source.filter((picture) => {
+			const palette =
+				Array.isArray(picture.colorPalette) && picture.colorPalette.length > 0
+					? picture.colorPalette.map((hex) => hexToRgb(hex)).filter((rgb) => rgb && Number.isFinite(rgb.r))
+					: null;
 
-			if (!dominant?.rgb) {
+			if (!palette || !palette.length) {
 				return false;
 			}
 
-			const palette = Array.isArray(dominant.palette) && dominant.palette.length > 0 ? dominant.palette : [dominant.rgb];
-			const closest = palette.reduce((min, swatch) => {
-				const distance = rgbDistance(target, swatch);
+			const closest = palette.reduce((min, rgb) => {
+				const distance = rgbDistance(target, rgb);
 
 				return distance < min ? distance : min;
 			}, Number.POSITIVE_INFINITY);
 
 			return closest <= safeTolerance;
 		});
-
-		return source.filter((_picture, index) => matched[index]);
 	}
 
-	async function list({ limit = 180 } = {}) {
+	async function list({ limit = PROFILE_PICTURE_HISTORY_LIMIT } = {}) {
 		await refreshFromDb();
 
 		const map = ensureMap();
@@ -285,7 +287,7 @@ export function createProfilePicturesService({ configuration, prisma } = {}) {
 
 		return entries
 			.map(([timestamp, value]) => {
-				const normalized = normalizeDashboardPicture(value);
+				const normalized = normalizePersistedPictureEntry(value);
 
 				if (!normalized) {
 					return null;
@@ -294,7 +296,8 @@ export function createProfilePicturesService({ configuration, prisma } = {}) {
 				return {
 					timestamp: String(timestamp || ''),
 					url: normalized.original.url,
-					thumbnail: normalized.thumbnail.url
+					thumbnail: normalized.thumbnail.url,
+					colorPalette: normalized.colorPalette || null
 				};
 			})
 			.filter(Boolean)
@@ -364,7 +367,7 @@ export function createProfilePicturesService({ configuration, prisma } = {}) {
 
 		const map = ensureMap();
 		const safeUrlKey = safeUrl.toLowerCase();
-		let deletedCount = 0;
+		const deletedTimestamps = [];
 		const currentValue = map.get(safeTimestamp);
 		const currentUrl = String(normalizeDashboardPicture(currentValue)?.original?.url || '')
 			.trim()
@@ -373,7 +376,7 @@ export function createProfilePicturesService({ configuration, prisma } = {}) {
 		if (currentUrl && currentUrl === safeUrlKey) {
 			map.delete(safeTimestamp);
 			tombstones.add(safeTimestamp);
-			deletedCount += 1;
+			deletedTimestamps.push(safeTimestamp);
 		}
 
 		for (const [key, value] of map.entries()) {
@@ -384,17 +387,19 @@ export function createProfilePicturesService({ configuration, prisma } = {}) {
 			if (parsedUrl && parsedUrl === safeUrlKey) {
 				map.delete(key);
 				tombstones.add(key);
-				deletedCount += 1;
+				deletedTimestamps.push(key);
 			}
 		}
 
-		if (!deletedCount) {
+		if (!deletedTimestamps.length) {
 			return { ok: false, message: 'Profile picture not found.' };
 		}
 
-		await persist();
+		await Promise.all(
+			deletedTimestamps.map((ts) => prisma.pinterestProfilePicture.delete({ where: { timestamp: ts } }).catch(() => {}))
+		);
 
-		return { ok: true, deletedCount };
+		return { ok: true, deletedCount: deletedTimestamps.length };
 	}
 
 	return {

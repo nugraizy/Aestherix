@@ -3,6 +3,9 @@ import { z } from 'zod';
 
 import { noStoreJson } from '../middleware/no-store.middleware.js';
 import { validate } from '../middleware/validation.middleware.js';
+import { rateLimit } from '../middleware/rate-limit.middleware.js';
+
+const editorRateLimit = rateLimit({ windowMs: 60_000, maxRequests: 20, message: 'Too many editor requests. Slow down.' });
 
 const editorFileQuery = z.object({
 	path: z.string().min(1)
@@ -51,6 +54,7 @@ export function createEditorRouter({ services }) {
 
 	router.post(
 		'/editor/file',
+		editorRateLimit,
 		middleware.requireOwnerAuth,
 		noStoreJson,
 		validate({ body: editorWriteBody }),

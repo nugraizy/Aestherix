@@ -11,7 +11,7 @@ function normalizeRisk(value) {
 	return RISK_LEVELS.has(value) ? value : 'low';
 }
 
-export function createUndoService({ monitor, users } = {}) {
+export function createUndoService({ monitor, users, settings } = {}) {
 	const store = new Map();
 
 	function cleanExpired() {
@@ -157,6 +157,20 @@ export function createUndoService({ monitor, users } = {}) {
 			}
 
 			return { ok: true, kind: entry.kind, target: result.userId, state: { blocked: result.blocked } };
+		}
+
+		if (entry.kind === 'settings.update') {
+			if (!settings) {
+				return { ok: false, status: 503, message: 'Settings service unavailable.' };
+			}
+
+			const result = await settings.restore(entry.before);
+
+			if (!result.ok) {
+				return { ok: false, status: result.status || 400, message: result.message || 'Unable to restore settings.' };
+			}
+
+			return { ok: true, kind: entry.kind, target: 'settings', state: result.settings };
 		}
 
 		return { ok: false, status: 400, message: 'Unsupported undo action.' };
