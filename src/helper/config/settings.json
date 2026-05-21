@@ -11,7 +11,7 @@
     "6289522534401"
   ],
   "main_session": "debug",
-  "maintenance": false,
+  "maintenance": true,
   "max_group": 20,
   "min_members": 20,
   "limit": 30,
