@@ -3,14 +3,28 @@ import { Router } from 'express';
 import { getEmbeddedWaClient } from '../lib/client.js';
 
 export function createMessageLogsRouter({ services }) {
-	const { middleware } = services;
+	const { middleware, botBridge } = services;
 	const router = Router();
 
-	router.get('/messages', middleware.requireOwnerAuth, (req, res) => {
+	router.get('/messages', middleware.requireOwnerAuth, async (req, res) => {
 		const client = getEmbeddedWaClient();
 
 		if (!client?.store) {
-			return res.status(503).json({ ok: false, message: 'Store not available.' });
+			if (!botBridge?.isConfigured) {
+				return res.status(503).json({ ok: false, message: 'Store not available.' });
+			}
+
+			const result = await botBridge.fetchMessages({
+				q: req.query?.q,
+				jid: req.query?.jid,
+				limit: req.query?.limit
+			});
+
+			if (!result.ok) {
+				return res.status(result.status || 503).json({ ok: false, message: result.message || 'Store not available.' });
+			}
+
+			return res.json(result.data);
 		}
 
 		const query = String(req.query?.q || '').trim().toLowerCase();

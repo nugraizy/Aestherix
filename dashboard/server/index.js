@@ -47,9 +47,9 @@ function wireServices({ configuration, prisma }) {
 	const users = createUsersService({ configuration, prisma });
 	const profilePictures = createProfilePicturesService({ configuration, prisma });
 	const editor = createEditorService();
-	const groups = createGroupsService({ configuration });
 	const spotify = createSpotifyService();
 	const botBridge = createBotBridgeService();
+	const groups = createGroupsService({ configuration, botBridge });
 	const broadcast = createBroadcastService({ configuration, botBridge, prisma });
 	const settings = createSettingsService({ configuration, botBridge });
 	const undo = createUndoService({ monitor, users, settings });

@@ -275,6 +275,162 @@ export const startDashboardBridge = (resolveWaClient) => {
 		setTimeout(() => process.exit(0), 220);
 	});
 
+	app.get('/internal/dashboard/messages', (req, res) => {
+		const token = String(req.headers['x-dashboard-bridge-token'] || '');
+
+		if (!token || token !== DASHBOARD_BRIDGE_TOKEN) {
+			return res.status(401).json({ ok: false, message: 'Unauthorized bridge token.' });
+		}
+
+		const waClient = typeof resolveWaClient === 'function' ? resolveWaClient() : null;
+
+		if (!waClient?.store) {
+			return res.status(503).json({ ok: false, message: 'Store not available.' });
+		}
+
+		const query = String(req.query?.q || '').trim().toLowerCase();
+		const jidFilter = String(req.query?.jid || '').trim();
+		const limit = Number(req.query?.limit) || 0;
+		const messages = waClient.store.messages || {};
+		const results = [];
+
+		for (const [jid, list] of Object.entries(messages)) {
+			if (jidFilter && !jid.includes(jidFilter)) {
+				continue;
+			}
+
+			const arr = list?.array || (typeof list?.toJSON === 'function' ? list.toJSON() : []);
+
+			for (let i = arr.length - 1; i >= 0; i--) {
+				if (limit && results.length >= limit) {
+					break;
+				}
+
+				const msg = arr[i];
+				const content = extractMessageText(msg);
+
+				if (query && !content.toLowerCase().includes(query)) {
+					continue;
+				}
+
+				results.push({
+					id: msg.key?.id,
+					jid,
+					sender: resolveMessageSender(msg, jid),
+					fromMe: Boolean(msg.key?.fromMe),
+					timestamp: Number(msg.messageTimestamp || 0),
+					content,
+					type: msg.message ? Object.keys(msg.message).find((k) => k !== 'messageContextInfo' && k !== 'senderKeyDistributionMessage') || 'unknown' : 'empty'
+				});
+			}
+
+			if (limit && results.length >= limit) {
+				break;
+			}
+		}
+
+		results.sort((a, b) => b.timestamp - a.timestamp);
+
+		res.json({ count: results.length, messages: limit ? results.slice(0, limit) : results });
+	});
+
+	app.get('/internal/dashboard/group-info', async (req, res) => {
+		const token = String(req.headers['x-dashboard-bridge-token'] || '');
+
+		if (!token || token !== DASHBOARD_BRIDGE_TOKEN) {
+			return res.status(401).json({ ok: false, message: 'Unauthorized bridge token.' });
+		}
+
+		const waClient = typeof resolveWaClient === 'function' ? resolveWaClient() : null;
+
+		if (!waClient?.groupFetchAllParticipating) {
+			return res.status(503).json({ ok: false, message: 'WhatsApp client not connected.' });
+		}
+
+		const groupId = String(req.query?.groupId || '').trim();
+
+		if (!groupId) {
+			return res.status(400).json({ ok: false, message: 'groupId is required.' });
+		}
+
+		try {
+			const participating = await waClient.groupFetchAllParticipating();
+			const meta = participating?.[groupId];
+
+			if (!meta) {
+				return res.status(404).json({ ok: false, message: 'Group not found.' });
+			}
+
+			const ownerNumber = String(configuration.settings?.owner_number || '');
+			const localContacts = waClient.store?.localContacts || {};
+			const storeContacts = waClient.store?.contacts || {};
+			const userCache = configuration.users?.info;
+			const botPhone = configuration.botJid?.split('@')[0] || waClient.socket?.user?.id?.split(':')[0] || '';
+
+			const participants = (meta.participants || []).map((p) => {
+				const phone = String(p.phoneNumber || '').split('@')[0];
+				const phoneJid = `${phone}@s.whatsapp.net`;
+				const name =
+					p.name ||
+					p.notify ||
+					p.verifiedName ||
+					userCache?.get?.(phoneJid)?.name ||
+					localContacts[phoneJid]?.name ||
+					storeContacts[p.id]?.notify ||
+					'';
+
+				return {
+					id: p.id,
+					phone,
+					name,
+					admin: p.admin || null,
+					isGroupOwner: p.admin === 'superadmin',
+					isBotOwner: phone === ownerNumber,
+					isBot: phone === botPhone
+				};
+			});
+
+			const isBotAdmin = participants.some(
+				(p) => p.phone === botPhone && (p.admin === 'admin' || p.admin === 'superadmin')
+			);
+
+			res.json({
+				ok: true,
+				jid: groupId,
+				subject: meta.subject || '',
+				desc: meta.desc || '',
+				owner: meta.owner || '',
+				size: participants.length,
+				isBotAdmin,
+				participants
+			});
+		} catch (error) {
+			res.status(500).json({ ok: false, message: error?.message || 'Failed to fetch group info.' });
+		}
+	});
+
+	app.get('/internal/dashboard/participating', async (req, res) => {
+		const token = String(req.headers['x-dashboard-bridge-token'] || '');
+
+		if (!token || token !== DASHBOARD_BRIDGE_TOKEN) {
+			return res.status(401).json({ ok: false, message: 'Unauthorized bridge token.' });
+		}
+
+		const waClient = typeof resolveWaClient === 'function' ? resolveWaClient() : null;
+
+		if (!waClient?.groupFetchAllParticipating) {
+			return res.status(503).json({ ok: false, message: 'WhatsApp client not connected.' });
+		}
+
+		try {
+			const participating = await waClient.groupFetchAllParticipating();
+
+			res.json({ ok: true, data: participating });
+		} catch (error) {
+			res.status(500).json({ ok: false, message: error?.message || 'Failed to fetch participating groups.' });
+		}
+	});
+
 	app.get('/internal/dashboard/ping', (req, res) => {
 		const token = String(req.headers['x-dashboard-bridge-token'] || '');
 
@@ -299,3 +455,33 @@ export const startDashboardBridge = (resolveWaClient) => {
 		loggers.info(color('Dashboard bridge', 'white'), color('listening on', 'lilac'), color(String(port), 'white'));
 	});
 };
+
+function resolveMessageSender(msg, jid) {
+	const participant = msg.key?.participant;
+
+	if (participant?.endsWith('@lid')) {
+		return msg.key?.participantAlt || participant;
+	}
+
+	return participant || msg.key?.remoteJidAlt || msg.key?.remoteJid || jid;
+}
+
+function extractMessageText(msg) {
+	const m = msg?.message;
+
+	if (!m) {
+		return '';
+	}
+
+	return (
+		m.conversation ||
+		m.extendedTextMessage?.text ||
+		m.imageMessage?.caption ||
+		m.videoMessage?.caption ||
+		m.documentWithCaptionMessage?.message?.documentMessage?.caption ||
+		m.listResponseMessage?.singleSelectReply?.selectedRowId ||
+		m.buttonsResponseMessage?.selectedButtonId ||
+		m.templateButtonReplyMessage?.selectedId ||
+		''
+	);
+}

@@ -45,7 +45,7 @@ function formatSettings(raw) {
 	return result;
 }
 
-export function createGroupsService({ configuration } = {}) {
+export function createGroupsService({ configuration, botBridge } = {}) {
 	if (!configuration) {
 		throw new Error('groups.service: configuration is required');
 	}
@@ -53,11 +53,17 @@ export function createGroupsService({ configuration } = {}) {
 	async function fetchParticipating() {
 		const client = getEmbeddedWaClient();
 
-		if (!client) {
+		if (client) {
+			return client.groupFetchAllParticipating();
+		}
+
+		if (!botBridge?.isConfigured) {
 			return {};
 		}
 
-		return client.groupFetchAllParticipating();
+		const result = await botBridge.fetchParticipating();
+
+		return result.ok ? (result.data?.data || {}) : {};
 	}
 
 	async function getGroupsForAdmin(phoneNumber) {

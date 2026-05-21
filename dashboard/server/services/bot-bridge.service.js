@@ -148,12 +148,43 @@ export function createBotBridgeService({ bridgeUrl = DEFAULT_BRIDGE_URL } = {}) 
 		});
 	}
 
+	async function fetchMessages({ q, jid, limit } = {}) {
+		const params = new URLSearchParams();
+
+		if (q) {
+			params.set('q', q);
+		}
+
+		if (jid) {
+			params.set('jid', jid);
+		}
+
+		if (limit) {
+			params.set('limit', String(limit));
+		}
+
+		return callBridge(`/internal/dashboard/messages?${params.toString()}`);
+	}
+
+	async function fetchGroupInfo(groupId) {
+		const params = new URLSearchParams({ groupId });
+
+		return callBridge(`/internal/dashboard/group-info?${params.toString()}`);
+	}
+
+	async function fetchParticipating() {
+		return callBridge('/internal/dashboard/participating');
+	}
+
 	return {
 		sendConfirmation,
 		sendRuntimeSync,
 		fetchBotLogs,
 		requestBotRestart,
 		pingBot,
+		fetchMessages,
+		fetchGroupInfo,
+		fetchParticipating,
 		isConfigured: Boolean(bridgeUrl)
 	};
 }

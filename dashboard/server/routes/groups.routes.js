@@ -44,6 +44,22 @@ export function createGroupsRouter({ services, configuration }) {
 		const groupId = decodeURIComponent(req.params.groupId);
 
 		try {
+			const client = (await import('../lib/client.js')).getEmbeddedWaClient();
+
+			if (!client && services.botBridge?.isConfigured) {
+				const result = await services.botBridge.fetchGroupInfo(groupId);
+
+				if (!result.ok) {
+					return res.status(result.status || 503).json({ ok: false, message: result.message || 'Failed to fetch group info.' });
+				}
+
+				const data = result.data;
+
+				delete data.ok;
+
+				return res.json(data);
+			}
+
 			const participating = await groups.fetchParticipating();
 			const meta = participating?.[groupId];
 
@@ -52,7 +68,6 @@ export function createGroupsRouter({ services, configuration }) {
 			}
 
 			const ownerNumber = String(configuration.settings?.owner_number || '');
-			const client = (await import('../lib/client.js')).getEmbeddedWaClient();
 			const localContacts = client?.store?.localContacts || {};
 			const storeContacts = client?.store?.contacts || {};
 			const userCache = configuration.users?.info;
