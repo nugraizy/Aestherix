@@ -3,6 +3,7 @@
 	import { maskJid, unmaskedAvailable } from '../lib/jid.js';
 	import { users } from '../lib/stores.js';
 	import { showError, showUndoToast } from '../lib/toast.js';
+	import ButtonPill from './ui/ButtonPill.svelte';
 	import NumberInput from './ui/NumberInput.svelte';
 	import Tooltip from './ui/Tooltip.svelte';
 	import SkeletonList from './ui/SkeletonList.svelte';
@@ -226,10 +227,9 @@
 				{:else}
 					<span class="limit">{user.limit ?? '—'}</span>
 				{/if}
-				<div class="chips" role="group" aria-label="User flags">
+				<ButtonPill>
 					<button
 						type="button"
-						class="chip premium"
 						class:active={user.premium}
 						disabled={!editable || premiumBusy}
 						aria-pressed={Boolean(user.premium)}
@@ -239,7 +239,7 @@
 					</button>
 					<button
 						type="button"
-						class="chip danger"
+						class="danger"
 						class:active={user.banned}
 						disabled={!editable || bannedBusy}
 						aria-pressed={Boolean(user.banned)}
@@ -249,7 +249,7 @@
 					</button>
 					<button
 						type="button"
-						class="chip danger"
+						class="danger"
 						class:active={user.blocked}
 						disabled={!editable || blockedBusy}
 						aria-pressed={Boolean(user.blocked)}
@@ -257,7 +257,7 @@
 					>
 						Blocked
 					</button>
-				</div>
+				</ButtonPill>
 			</div>
 		{/each}
 		{#if !filtered.length}
@@ -311,46 +311,14 @@
 		font-variant-numeric: tabular-nums;
 	}
 
-	.chips {
-		display: inline-flex;
-		gap: 0.3rem;
-		flex-wrap: wrap;
-		justify-content: flex-end;
+	:global(.pill button.active) {
+		background: rgba(240, 200, 135, 0.22) !important;
+		color: #f0c887 !important;
 	}
 
-	.chip {
-		font-size: var(--fs-xs);
-		font-weight: 600;
-		padding: 0.18rem 0.55rem;
-		border-radius: var(--radius-pill);
-		border: 1px solid var(--border);
-		background: transparent;
-		color: var(--muted);
-		cursor: pointer;
-		transition: background var(--tx-base), color var(--tx-base), border-color var(--tx-base);
-		letter-spacing: 0.02em;
-	}
-
-	.chip:hover:not(:disabled) {
-		border-color: var(--accent);
-		color: var(--accent);
-	}
-
-	.chip:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.chip.premium.active {
-		background: rgba(240, 200, 135, 0.22);
-		color: #f0c887;
-		border-color: rgba(240, 200, 135, 0.4);
-	}
-
-	.chip.danger.active {
-		background: rgba(255, 142, 116, 0.18);
-		color: #ff8e74;
-		border-color: rgba(255, 142, 116, 0.4);
+	:global(.pill button.danger.active) {
+		background: rgba(255, 142, 116, 0.18) !important;
+		color: #ff8e74 !important;
 	}
 
 	.input {

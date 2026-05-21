@@ -2,11 +2,21 @@
 	import { clearSystemCache, getSystemCache, getSystemEnv, getSystemHealth, purgeAuditLog, getSessions, revokeSession } from '../lib/api.js';
 	import { showConfirm } from '../lib/confirm.js';
 	import { showError, showSuccess } from '../lib/toast.js';
+	import { status } from '../lib/stores.js';
+	import ButtonPill from '../components/ui/ButtonPill.svelte';
 	import Tooltip from '../components/ui/Tooltip.svelte';
 	import SkeletonCard from '../components/ui/SkeletonCard.svelte';
 
 	export let isSuperOwner = false;
 	export let active = true;
+	export let debug = false;
+	export let onStart = () => {};
+	export let onStop = () => {};
+	export let onRestart = () => {};
+
+	$: botOnline = $status.botOnline;
+	$: pm2 = $status.pm2;
+	$: restartDisabled = $status.botMode === 'split' && !botOnline;
 	let wasActive = false;
 
 	let health = null;
@@ -266,7 +276,20 @@
 
 		{#if isSuperOwner}
 			<div class="maintenance-bar">
-				<span class="maint-label">Danger zone</span>
+				<span class="maint-label">Tools</span>
+				<ButtonPill>
+					<button type="button" on:click={() => debug = !debug}>
+						🐛 {debug ? 'Hide' : 'Show'} Debug
+					</button>
+					{#if pm2}
+						<button type="button" class={botOnline ? 'stop' : 'start'} on:click={botOnline ? onStop : onStart}>
+							{botOnline ? 'Stop' : 'Start'}
+						</button>
+						<button type="button" class="danger" on:click={onRestart} disabled={restartDisabled}>
+							Restart
+						</button>
+					{/if}
+				</ButtonPill>
 				<button class="btn danger-btn" type="button" on:click={handlePurgeAudit}>
 					Purge Audit Log
 				</button>
@@ -302,7 +325,7 @@
 
 	.grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+		grid-template-columns: 1fr 1fr;
 		gap: var(--space-4);
 	}
 
@@ -468,5 +491,46 @@
 		text-transform: uppercase;
 		letter-spacing: 0.08em;
 		font-weight: 600;
+	}
+
+	.tool-btn {
+		background: color-mix(in srgb, var(--accent) 14%, transparent);
+		color: var(--accent);
+		border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+		padding: 0.45rem 1rem;
+		border-radius: var(--radius-sm);
+		font-size: var(--fs-sm);
+		font-weight: 600;
+		cursor: pointer;
+		transition: background var(--tx-base), border-color var(--tx-base);
+	}
+
+	.tool-btn:hover {
+		background: color-mix(in srgb, var(--accent) 24%, transparent);
+		border-color: var(--accent);
+	}
+
+	.maintenance-bar :global(.pill button.start) {
+		color: #87f0c1;
+	}
+
+	.maintenance-bar :global(.pill button.start:hover:not(:disabled)) {
+		background: rgba(135, 240, 193, 0.16);
+		color: #87f0c1;
+	}
+
+	.maintenance-bar :global(.pill button.stop) {
+		color: #f0c887;
+	}
+
+	.maintenance-bar :global(.pill button.stop:hover:not(:disabled)) {
+		background: rgba(240, 200, 135, 0.18);
+		color: #f0c887;
+	}
+
+	@media (max-width: 700px) {
+		.grid {
+			grid-template-columns: 1fr;
+		}
 	}
 </style>

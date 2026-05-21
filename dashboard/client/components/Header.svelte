@@ -1,14 +1,10 @@
 <script>
 	import { createEventDispatcher } from 'svelte';
-	import NotificationToggle from './NotificationToggle.svelte';
 	import Tooltip from './ui/Tooltip.svelte';
 
 	export let page = 'home';
 	export let mode = 'dark';
 	export let isViewer = false;
-	export let botOnline = true;
-	export let botMode = 'embedded';
-	export let pm2 = false;
 
 	const dispatch = createEventDispatcher();
 	const navItems = [
@@ -26,13 +22,6 @@
 	$: visibleNavItems = isViewer
 		? navItems.filter((item) => item.id !== 'settings' && item.id !== 'editor' && item.id !== 'system' && item.id !== 'broadcast' && item.id !== 'messages')
 		: navItems;
-
-	$: isSplitMode = botMode === 'split';
-	$: lifecycleLabel = botOnline ? 'Stop' : 'Start';
-	$: lifecycleEvent = botOnline ? 'stop' : 'start';
-	$: lifecycleClass = botOnline ? 'stop' : 'start';
-	$: lifecycleTooltip = botOnline ? 'Stop the bot via PM2' : 'Start the bot via PM2';
-	$: restartDisabled = isSplitMode && !botOnline;
 </script>
 
 <header class="app-header">
@@ -55,49 +44,6 @@
 	</nav>
 
 	<div class="actions">
-		{#if !isViewer}
-			<NotificationToggle />
-			<Tooltip text="Toggle debug bar" placement="bottom">
-				<button class="icon-btn" type="button" on:click={() => dispatch('debug')} aria-label="Toggle debug">
-					🐛
-				</button>
-			</Tooltip>
-		{/if}
-		<div class="action-pill" class:single={isViewer}>
-			{#if !isViewer && pm2}
-				<Tooltip text={lifecycleTooltip} placement="bottom">
-					<button
-						class="action-segment {lifecycleClass}"
-						type="button"
-						on:click={() => dispatch(lifecycleEvent)}
-					>
-						{lifecycleLabel}
-					</button>
-				</Tooltip>
-				<Tooltip
-					text={restartDisabled ? 'Start the bot first' : 'Restart bot — confirms before reloading'}
-					placement="bottom"
-				>
-					<button
-						class="action-segment restart"
-						type="button"
-						on:click={() => dispatch('restart')}
-						disabled={restartDisabled}
-					>
-						Restart
-					</button>
-				</Tooltip>
-			{/if}
-			<Tooltip text="End your session" placement="bottom">
-				<button
-					class="action-segment logout"
-					type="button"
-					on:click={() => dispatch('logout')}
-				>
-					Logout
-				</button>
-			</Tooltip>
-		</div>
 		<Tooltip text="Toggle light/dark mode" placement="bottom">
 			<button
 				class="icon-btn mode-toggle"
@@ -269,70 +215,6 @@
 		color: var(--accent);
 	}
 
-	.action-pill {
-		display: inline-flex;
-		align-items: stretch;
-		overflow: hidden;
-		border-radius: var(--radius-pill);
-		border: 1px solid var(--border);
-		background: color-mix(in srgb, var(--panel) 70%, transparent);
-		transition: border-color var(--tx-base);
-	}
-
-	.action-pill > :global(.tooltip-host) {
-		display: inline-flex;
-	}
-
-	.action-pill > :global(.tooltip-host + .tooltip-host) {
-		border-left: 1px solid var(--border);
-	}
-
-	.action-segment {
-		background: transparent;
-		border: none;
-		color: var(--muted);
-		padding: 0.42rem 0.95rem;
-		font-size: var(--fs-sm);
-		font-weight: 600;
-		cursor: pointer;
-		line-height: 1;
-		transition: background var(--tx-base), color var(--tx-base);
-	}
-
-	.action-segment.logout:hover {
-		color: var(--accent);
-		background: color-mix(in srgb, var(--accent) 14%, transparent);
-	}
-
-	.action-segment.restart {
-		color: #ff8e74;
-	}
-
-	.action-segment.restart:hover:not(:disabled) {
-		background: rgba(255, 142, 116, 0.16);
-	}
-
-	.action-segment.start {
-		color: #87f0c1;
-	}
-
-	.action-segment.start:hover:not(:disabled) {
-		background: rgba(135, 240, 193, 0.16);
-	}
-
-	.action-segment.stop {
-		color: #f0c887;
-	}
-
-	.action-segment.stop:hover:not(:disabled) {
-		background: rgba(240, 200, 135, 0.18);
-	}
-
-	.action-segment:disabled {
-		opacity: 0.45;
-		cursor: not-allowed;
-	}
-
 	@media (max-width: 768px) {
 		.app-header {
 			flex-wrap: wrap;
@@ -381,11 +263,6 @@
 
 		.actions :global(.dropdown .label) {
 			display: none;
-		}
-
-		.action-segment {
-			padding: 0.32rem 0.7rem;
-			font-size: var(--fs-xs);
 		}
 	}
 </style>

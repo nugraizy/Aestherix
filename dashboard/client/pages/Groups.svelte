@@ -1,5 +1,6 @@
 <script>
 
+	import ButtonPill from '../components/ui/ButtonPill.svelte';
 	import SkeletonList from '../components/ui/SkeletonList.svelte';
 	import Toggle from '../components/ui/Toggle.svelte';
 	import Tooltip from '../components/ui/Tooltip.svelte';
@@ -451,22 +452,27 @@
 								{#if p.name}
 									<span class="p-pushname">({p.name})</span>
 								{/if}
-								{#if p.isBot || p.isBotOwner || p.isGroupOwner || p.admin || (!p.admin && !p.isGroupOwner && !p.isBotOwner)}
+								{#if p.isBot || p.isBotOwner || p.isGroupOwner || p.admin}
 									<span class="p-role">
-										{#if p.isBot}<span class="role-bot">Bot</span><span class="role-divider" aria-hidden="true">|</span>{/if}
-										{#if p.isBotOwner}<span class="role-owner">Bot Owner</span><span class="role-divider" aria-hidden="true">|</span>{/if}
-										{#if p.isGroupOwner}<span class="role-owner">Group Owner</span><span class="role-divider" aria-hidden="true">|</span>{/if}
-										{#if p.admin === 'admin' || (p.isBotOwner && p.admin)}<span class="role-admin">Admin</span>{/if}
-										{#if !p.admin && !p.isGroupOwner && !p.isBotOwner}<span class="role-member">Member</span>{/if}
+										{#if p.isBot}<Tooltip text="Bot" placement="top"><span class="role-bot"><i class="nf nf-md-robot_angry_outline"></i></span></Tooltip>{/if}
+										{#if p.isBotOwner}<Tooltip text="Bot Owner" placement="top"><span class="role-bot-owner"><i class="nf nf-fa-crown"></i></span></Tooltip>{/if}
+										{#if p.isGroupOwner}<Tooltip text="Group Owner" placement="top"><span class="role-group-owner"><i class="nf nf-fa-shield"></i></span></Tooltip>{/if}
+										{#if p.admin === 'admin' || (p.isBotOwner && p.admin)}<Tooltip text="Admin" placement="top"><span class="role-admin"><i class="nf nf-fa-star"></i></span></Tooltip>{/if}
 									</span>
 								{/if}
 							</span>
 							{#if groupInfo.isBotAdmin && !p.isGroupOwner && !p.isBotOwner}
 								<div class="p-actions">
 									{#if p.admin}
-										<span class="action-btn"><span class="action-demote" role="button" tabindex="0" on:click={() => handleParticipantAction(p.id, 'demote')} on:keydown={(e) => e.key === 'Enter' && handleParticipantAction(p.id, 'demote')}>Demote</span><span class="action-divider-v" aria-hidden="true">|</span><span class="action-kick" role="button" tabindex="0" on:click={() => handleParticipantAction(p.id, 'remove')} on:keydown={(e) => e.key === 'Enter' && handleParticipantAction(p.id, 'remove')}>Kick</span></span>
+										<ButtonPill>
+											<button type="button" on:click={() => handleParticipantAction(p.id, 'demote')}>Demote</button>
+											<button type="button" class="danger" on:click={() => handleParticipantAction(p.id, 'remove')}>Kick</button>
+										</ButtonPill>
 									{:else}
-										<span class="action-btn"><span class="action-promote" role="button" tabindex="0" on:click={() => handleParticipantAction(p.id, 'promote')} on:keydown={(e) => e.key === 'Enter' && handleParticipantAction(p.id, 'promote')}>Promote</span><span class="action-divider-v" aria-hidden="true">|</span><span class="action-kick" role="button" tabindex="0" on:click={() => handleParticipantAction(p.id, 'remove')} on:keydown={(e) => e.key === 'Enter' && handleParticipantAction(p.id, 'remove')}>Kick</span></span>
+										<ButtonPill>
+											<button type="button" on:click={() => handleParticipantAction(p.id, 'promote')}>Promote</button>
+											<button type="button" class="danger" on:click={() => handleParticipantAction(p.id, 'remove')}>Kick</button>
+										</ButtonPill>
 									{/if}
 								</div>
 							{/if}
@@ -788,94 +794,35 @@
 	}
 
 	.p-role {
-		font-size: var(--fs-xs);
-		padding: 0.12rem 0.5rem;
-		border-radius: var(--radius-pill);
-		background: var(--border);
-		color: var(--muted);
-		white-space: nowrap;
-		flex-shrink: 0;
 		display: inline-flex;
 		align-items: center;
-		gap: 0.25rem;
+		gap: 0.35rem;
+		flex-shrink: 0;
 	}
 
 	.role-bot {
-		color: var(--accent);
+		color: #8ef0ff;
+		font-size: 0.85rem;
+	}
+
+	.role-bot-owner {
+		color: #f0c887;
+		font-size: 0.8rem;
+	}
+
+	.role-group-owner {
+		color: #87f0c1;
+		font-size: 0.8rem;
 	}
 
 	.role-admin {
-		color: var(--accent);
-	}
-
-	.role-owner {
-		color: #f0c887;
-	}
-
-	.role-member {
-		color: var(--muted);
-	}
-
-	.role-divider {
-		font-size: var(--fs-xs);
-		padding: 0 0.1rem;
-		opacity: 0.35;
+		color: #c4b5fd;
+		font-size: 0.8rem;
 	}
 
 	.p-actions {
 		display: inline-flex;
 		gap: 0.3rem;
-	}
-
-	.action-btn {
-		font-size: var(--fs-xs);
-		padding: 0.15rem 0.5rem;
-		border-radius: var(--radius-pill);
-		border: 1px solid var(--border);
-		background: transparent;
-		white-space: nowrap;
-		cursor: pointer;
-		transition: border-color var(--tx-base);
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-	}
-
-	.action-btn:hover {
-		border-color: var(--border);
-	}
-
-	.action-divider-v {
-		font-size: var(--fs-xs);
-		opacity: 0.35;
-	}
-
-	.action-promote,
-	.action-demote {
-		color: var(--accent);
-		cursor: pointer;
-		transition: all var(--tx-base);
-		padding: 0.15rem 0.4rem;
-		border-radius: var(--radius-sm);
-	}
-
-	.action-promote:hover,
-	.action-demote:hover {
-		background: color-mix(in srgb, var(--accent) 18%, transparent);
-		color: color-mix(in srgb, var(--accent) 80%, white);
-	}
-
-	.action-kick {
-		color: #ff8e74;
-		cursor: pointer;
-		transition: all var(--tx-base);
-		padding: 0.15rem 0.4rem;
-		border-radius: var(--radius-sm);
-	}
-
-	.action-kick:hover {
-		background: rgba(255, 142, 116, 0.18);
-		color: color-mix(in srgb, #ff8e74 80%, white);
 	}
 
 	@media (max-width: 900px) {
