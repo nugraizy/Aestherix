@@ -1,5 +1,6 @@
 import { Server as SocketIOServer } from 'socket.io';
 
+import { isBotEmbeddedHere } from '../lib/client.js';
 import { AUTH_COOKIE_NAME } from '../services/auth.service.js';
 import { createConfirmationBridge } from './confirmation.js';
 import { ROOMS } from './rooms.js';
@@ -7,7 +8,7 @@ import { ROOMS } from './rooms.js';
 const STATUS_INTERVAL_MS = 1000;
 const LOGS_INTERVAL_MS = 1200;
 const BOT_LOGS_INTERVAL_MS = 1200;
-const AUDIT_INTERVAL_MS = 3000;
+const AUDIT_INTERVAL_MS = 5000;
 const META_INTERVAL_MS = 8000;
 
 function getSocketSession(socket, auth) {
@@ -41,11 +42,19 @@ async function emitInitialSnapshot(socket, services) {
 		picture: await profilePictures.getLatest()
 	});
 
-	if (session.role !== 'owner') {
+	if (session.role !== 'owner' && session.role !== 'superOwner') {
 		return;
 	}
 
-	const logsPayload = monitor.getLogs({ since: 0, limit: 250 });
+	let logsPayload;
+
+	if (isBotEmbeddedHere()) {
+		logsPayload = monitor.getLogs({ since: 0, limit: 250 });
+	} else {
+		const result = await botBridge.fetchBotLogs({ since: 0, limit: 250 });
+
+		logsPayload = result.ok ? (result.data || { lastId: 0, logs: [] }) : { lastId: 0, logs: [] };
+	}
 
 	socket.data.lastLogId = Number(logsPayload?.lastId || 0);
 	socket.emit('dashboard:logs', logsPayload);
@@ -92,7 +101,9 @@ function startStatusInterval(io, services) {
 }
 
 function startLogsInterval(io, services) {
-	return setInterval(() => {
+	const embedded = isBotEmbeddedHere();
+
+	return setInterval(async () => {
 		const sockets = Array.from(io.of('/').sockets.values());
 
 		if (!sockets.length) {
@@ -100,12 +111,20 @@ function startLogsInterval(io, services) {
 		}
 
 		for (const socket of sockets) {
-			if (socket.data?.session?.role !== 'owner') {
+			if (socket.data?.session?.role !== 'owner' && socket.data?.session?.role !== 'superOwner') {
 				continue;
 			}
 
 			const since = Number(socket.data?.lastLogId || 0);
-			const payload = services.monitor.getLogs({ since, limit: 250 });
+			let payload;
+
+			if (embedded) {
+				payload = services.monitor.getLogs({ since, limit: 250 });
+			} else {
+				const result = await services.botBridge.fetchBotLogs({ since, limit: 250 });
+
+				payload = result.ok ? (result.data || { lastId: since, logs: [] }) : { lastId: since, logs: [] };
+			}
 
 			socket.data.lastLogId = Number(payload?.lastId || since || 0);
 
@@ -119,7 +138,7 @@ function startLogsInterval(io, services) {
 function startBotLogsInterval(io, services) {
 	return setInterval(async () => {
 		const ownerSockets = Array.from(io.of('/').sockets.values()).filter(
-			(socket) => socket.data?.session?.role === 'owner'
+			(socket) => socket.data?.session?.role === 'owner' || socket.data?.session?.role === 'superOwner'
 		);
 
 		if (!ownerSockets.length) {
@@ -165,20 +184,25 @@ function startAuditInterval(io, services) {
 		}
 
 		for (const socket of sockets) {
-			if (socket.data?.session?.role !== 'owner') {
+			if (socket.data?.session?.role !== 'owner' && socket.data?.session?.role !== 'superOwner') {
 				continue;
 			}
 
+			const lastId = Number(socket.data?.lastAuditId || 0);
 			const filters = services.audit.sanitizeRealtimeFilters(socket.data?.auditFilters || {});
 			const payload = services.audit.list({
-				since: 0,
+				since: lastId,
 				limit: filters.limit,
 				action: filters.action,
 				role: filters.role,
 				query: filters.query
 			});
 
-			socket.data.lastAuditId = Number(payload?.lastId || socket.data.lastAuditId || 0);
+			if (!payload.logs.length && payload.lastId === lastId) {
+				continue;
+			}
+
+			socket.data.lastAuditId = Number(payload.lastId || lastId);
 			socket.emit('dashboard:audit', payload);
 		}
 	}, AUDIT_INTERVAL_MS);
@@ -186,10 +210,9 @@ function startAuditInterval(io, services) {
 
 function startMetaInterval(io, services) {
 	let lastPictureKey = '';
-	let lastCommandsSnapshot = null;
-	let lastFlagsSnapshot = null;
+	let lastCommandsSnapshot = '';
+	let lastFlagsSnapshot = '';
 	let lastUserCountOwner = -1;
-	let lastUserCountViewer = -1;
 
 	return setInterval(async () => {
 		if (io.of('/').sockets.size === 0) {
@@ -198,21 +221,19 @@ function startMetaInterval(io, services) {
 
 		const commands = services.monitor.listCommands();
 		const flags = services.monitor.listFlags();
-		const usersForOwner = await services.users.list({ redactNumbers: false });
-		const usersForViewer = await services.users.list({ redactNumbers: true });
 		const latestPicture = await services.profilePictures.getLatest();
 		const currentKey = `${latestPicture?.timestamp || ''}|${latestPicture?.url || ''}`;
 
-		const commandsChanged = JSON.stringify(commands) !== lastCommandsSnapshot;
-		const flagsChanged = JSON.stringify(flags) !== lastFlagsSnapshot;
+		const commandsJson = JSON.stringify(commands);
+		const flagsJson = JSON.stringify(flags);
 
-		if (commandsChanged) {
-			lastCommandsSnapshot = JSON.stringify(commands);
+		if (commandsJson !== lastCommandsSnapshot) {
+			lastCommandsSnapshot = commandsJson;
 			io.emit('dashboard:commands', { commands });
 		}
 
-		if (flagsChanged) {
-			lastFlagsSnapshot = JSON.stringify(flags);
+		if (flagsJson !== lastFlagsSnapshot) {
+			lastFlagsSnapshot = flagsJson;
 			io.emit('dashboard:flags', { flags });
 		}
 
@@ -221,22 +242,20 @@ function startMetaInterval(io, services) {
 			io.emit('dashboard:profile-pictures', { picture: latestPicture });
 		}
 
+		const usersForOwner = await services.users.list({ redactNumbers: false });
 		const ownerCount = usersForOwner.length;
-		const viewerCount = usersForViewer.length;
-		const usersChanged = ownerCount !== lastUserCountOwner || viewerCount !== lastUserCountViewer;
 
-		if (usersChanged) {
+		if (ownerCount !== lastUserCountOwner) {
 			lastUserCountOwner = ownerCount;
-			lastUserCountViewer = viewerCount;
-		}
 
-		const sockets = Array.from(io.of('/').sockets.values());
+			const usersForViewer = await services.users.list({ redactNumbers: true });
 
-		for (const socket of sockets) {
-			const session = socket.data?.session || null;
-			const list = (session?.role === 'owner' || session?.role === 'superOwner') ? usersForOwner : usersForViewer;
+			const sockets = Array.from(io.of('/').sockets.values());
 
-			if (usersChanged) {
+			for (const socket of sockets) {
+				const session = socket.data?.session || null;
+				const list = (session?.role === 'owner' || session?.role === 'superOwner') ? usersForOwner : usersForViewer;
+
 				socket.emit('dashboard:users', { users: list });
 			}
 		}
@@ -280,7 +299,7 @@ export function createSocketLayer(httpServer, services) {
 		socket.on('dashboard:audit-filters', (incoming) => {
 			socket.data.auditFilters = services.audit.sanitizeRealtimeFilters(incoming);
 
-			if (socket.data.session?.role !== 'owner') {
+			if (socket.data.session?.role !== 'owner' && socket.data.session?.role !== 'superOwner') {
 				return;
 			}
 

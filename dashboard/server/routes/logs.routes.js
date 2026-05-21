@@ -3,7 +3,7 @@ import { Router } from 'express';
 const REDACTED_PAYLOAD = { lastId: 0, logs: [], redacted: true };
 
 function isOwner(session) {
-	return session?.role === 'owner';
+	return session?.role === 'owner' || session?.role === 'superOwner';
 }
 
 export function createLogsRouter({ services }) {

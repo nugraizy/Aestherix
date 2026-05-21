@@ -261,11 +261,18 @@ export const refreshDashboardCommandCatalog = (configuration) => {
 export const pushDashboardLog = (level, ...info) => {
 	state.lastLogId += 1;
 
+	const raw = info.map((value) => String(value)).join(' ');
+	const bulletIdx = raw.indexOf('•');
+	const lastBracket = raw.lastIndexOf(']', bulletIdx);
+	const message = bulletIdx > 0 && lastBracket >= 0
+		? raw.slice(0, lastBracket + 1) + ' ' + raw.slice(bulletIdx)
+		: raw;
+
 	state.logs.push({
 		id: state.lastLogId,
 		timestamp: Date.now(),
 		level,
-		message: info.map((value) => String(value)).join(' ')
+		message
 	});
 
 	if (state.logs.length > MAX_LOGS) {

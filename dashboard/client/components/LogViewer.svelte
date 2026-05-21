@@ -2,11 +2,25 @@
 	import { logs } from '../lib/stores.js';
 	import { clearLogs } from '../lib/socket.js';
 	import { afterUpdate } from 'svelte';
-	import { stripAnsi } from '../lib/format.js';
+	import { stripAnsi, ansiToHtml } from '../lib/format.js';
 	import Tooltip from './ui/Tooltip.svelte';
 
 	let container;
 	let autoScroll = true;
+
+	function formatTime(entry) {
+		if (entry.time) {
+			return entry.time;
+		}
+
+		if (entry.timestamp) {
+			const d = new Date(entry.timestamp);
+
+			return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+		}
+
+		return '';
+	}
 
 	function handleScroll() {
 		if (!container) {
@@ -49,8 +63,8 @@
 	<div class="log-container" bind:this={container} on:scroll={handleScroll}>
 		{#each $logs as entry, i (i)}
 			<div class="log-entry">
-				<span class="log-time">{stripAnsi(entry.time)}</span>
-				<span class="log-msg">{stripAnsi(entry.message || entry.text || '')}</span>
+				<span class="log-time">{stripAnsi(formatTime(entry))}</span>
+				<span class="log-msg">{@html ansiToHtml(entry.message || entry.text || '')}</span>
 			</div>
 		{/each}
 		{#if !$logs.length}
