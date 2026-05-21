@@ -8,6 +8,7 @@
 	import { showError, showSuccess } from '../lib/toast.js';
 
 	export let isViewer = false;
+	export let onLogout = null;
 
 	let toggling = false;
 	let hydrated = false;
@@ -111,6 +112,9 @@
 				</button>
 			{/if}
 		</div>
+		{#if onLogout}
+			<button class="logout-btn" type="button" on:click={onLogout}>Logout</button>
+		{/if}
 	</header>
 
 	<div class="metrics">
@@ -182,6 +186,24 @@
 		align-items: center;
 		gap: var(--space-3);
 		flex-wrap: wrap;
+	}
+
+	.logout-btn {
+		margin-left: auto;
+		background: transparent;
+		border: 1px solid var(--border);
+		color: var(--muted);
+		font-size: var(--fs-xs);
+		font-weight: 600;
+		padding: 0.3rem 0.7rem;
+		border-radius: var(--radius-pill);
+		cursor: pointer;
+		transition: border-color var(--tx-base), color var(--tx-base);
+	}
+
+	.logout-btn:hover {
+		border-color: var(--accent);
+		color: var(--accent);
 	}
 
 	.indicator-wrap {

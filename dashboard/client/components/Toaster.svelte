@@ -36,7 +36,13 @@
 <div class="toast-host" role="status" aria-live="polite">
 	{#each $toasts as toast (toast.id)}
 		<div class="toast toast-{toast.type}">
-			<span class="toast-text">{toast.message}</span>
+			<span class="toast-text">
+				{#if toast.html}
+					{@html toast.html}
+				{:else}
+					{toast.message}
+				{/if}
+			</span>
 			{#if toast.actionLabel && toast.onAction}
 				<button
 					type="button"

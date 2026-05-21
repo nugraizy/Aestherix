@@ -21,6 +21,7 @@ export function showToast(message, type = 'info', options = {}) {
 	const toast = {
 		id,
 		message: String(message),
+		html: options.html || '',
 		type,
 		actionLabel: options.actionLabel || '',
 		onAction: typeof options.onAction === 'function' ? options.onAction : null,
@@ -58,7 +59,9 @@ async function performUndo(token) {
 	});
 
 	if (!response.ok) {
-		throw new Error(`${response.status} ${response.statusText}`);
+		const body = await response.json().catch(() => null);
+
+		throw new Error(body?.message || `${response.status} ${response.statusText}`);
 	}
 
 	return response.json();

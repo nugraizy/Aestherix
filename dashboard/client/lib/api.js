@@ -8,7 +8,26 @@ async function request(path, options = {}) {
 	});
 
 	if (!response.ok) {
-		throw new Error(`${response.status} ${response.statusText}`);
+		let message = `${response.status} ${response.statusText}`;
+		let retryAfter = null;
+
+		try {
+			const body = await response.json();
+
+			if (body?.message) {
+				message = body.message;
+			}
+
+			if (body?.retryAfter) {
+				retryAfter = body.retryAfter;
+			}
+		} catch {}
+
+		const error = new Error(message);
+
+		error.retryAfter = retryAfter;
+
+		throw error;
 	}
 
 	return response.json();

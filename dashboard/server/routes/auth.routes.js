@@ -35,7 +35,13 @@ export function createAuthRouter({ services }) {
 			const result = await auth.issueOtp({ phoneNumber: req.body.phoneNumber });
 
 			if (!result.ok) {
-				return res.status(result.status || 400).json({ ok: false, message: result.message });
+				const body = { ok: false, message: result.message };
+
+				if (result.retryAfter) {
+					body.retryAfter = result.retryAfter;
+				}
+
+				return res.status(result.status || 400).json(body);
 			}
 
 			res.json({

@@ -67,6 +67,9 @@
 
 <style>
 	.debug-panel {
+		position: sticky;
+		top: 45px;
+		z-index: 29;
 		display: flex;
 		flex-direction: column;
 		gap: 0.4rem;

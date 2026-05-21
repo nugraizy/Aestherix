@@ -357,7 +357,9 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 		const previous = otpStore.get(phoneNumber);
 
 		if (previous && Date.now() - previous.createdAt < OTP_COOLDOWN_MS) {
-			return { ok: false, status: 429, message: 'Please wait before requesting another code.' };
+			const retryAfter = Math.ceil((OTP_COOLDOWN_MS - (Date.now() - previous.createdAt)) / 1000);
+
+			return { ok: false, status: 429, message: 'Please wait before requesting another code.', retryAfter };
 		}
 
 		const requestId = crypto.randomBytes(16).toString('hex');

@@ -305,15 +305,6 @@
 							<img class="carousel-image" src={pic.url} alt="" />
 							{#if i === activeIndex}
 								<div class="image-actions" data-action>
-									<button
-										type="button"
-										class="action-reveal"
-										data-action="reveal"
-										on:click|stopPropagation={toggleActions}
-										aria-label="Toggle actions"
-									>
-										<span class="reveal-icon">{showActions ? '×' : '⋯'}</span>
-									</button>
 									<div class="actions-slider" class:show={showActions}>
 										<button
 											type="button"
@@ -334,6 +325,15 @@
 											</button>
 										{/if}
 									</div>
+									<button
+										type="button"
+										class="action-reveal"
+										data-action="reveal"
+										on:click|stopPropagation={toggleActions}
+										aria-label="Toggle actions"
+									>
+										<span class="reveal-icon">{showActions ? '×' : '⋮'}</span>
+									</button>
 								</div>
 								<div class="image-counter" data-action>
 									{activeIndex + 1} / {total}
@@ -473,6 +473,7 @@
 	.action-reveal {
 		background: transparent;
 		border: none;
+		border-left: 1px solid rgba(255, 255, 255, 0.18);
 		color: #fff;
 		font-size: 1.2rem;
 		font-weight: 600;
@@ -508,8 +509,8 @@
 		opacity: 1;
 	}
 
-	.actions-slider .action-segment:first-child {
-		border-left: 1px solid rgba(255, 255, 255, 0.18);
+	.actions-slider .action-segment:last-child {
+		border-right: none;
 	}
 
 	.image-counter {

@@ -27,7 +27,9 @@
 			const response = await fetch('/api/dashboard/changelog', { credentials: 'include' });
 
 			if (!response.ok) {
-				throw new Error(`${response.status} ${response.statusText}`);
+				const body = await response.json().catch(() => null);
+
+				throw new Error(body?.message || `${response.status} ${response.statusText}`);
 			}
 
 			const text = await response.text();

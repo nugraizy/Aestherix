@@ -259,7 +259,8 @@
 		position: fixed;
 		z-index: 10000;
 		padding: 0.45rem 0.65rem;
-		background: color-mix(in srgb, var(--bg) 88%, #000 24%);
+		background: rgba(10, 14, 20, 0.65);
+		backdrop-filter: blur(10px);
 		color: var(--text);
 		border-radius: var(--radius-sm);
 		border: 1px solid var(--border);

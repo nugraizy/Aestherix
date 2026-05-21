@@ -5,6 +5,7 @@
 	import StatusPanel from '../components/StatusPanel.svelte';
 
 	export let isViewer = false;
+	export let onLogout = null;
 </script>
 
 <div class="home">
@@ -13,7 +14,7 @@
 		<p class="page-sub">Real-time bot status, log stream, and audit trail.</p>
 	</header>
 
-	<StatusPanel {isViewer} />
+	<StatusPanel {isViewer} {onLogout} />
 
 	{#if !isViewer}
 		<div class="grid">

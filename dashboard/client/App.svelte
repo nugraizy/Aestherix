@@ -119,10 +119,12 @@
 			return;
 		}
 
+		const search = window.location.search;
+
 		if (replace) {
-			history.replaceState({ page: safe }, '', target);
+			history.replaceState({ page: safe }, '', target + search);
 		} else {
-			history.pushState({ page: safe }, '', target);
+			history.pushState({ page: safe }, '', target + search);
 		}
 	}
 
@@ -144,6 +146,56 @@
 
 	onMount(async () => {
 		applyPalette($currentPalette);
+
+		if (new URLSearchParams(window.location.search).get('uwu') === 'true') {
+			const pet = document.createElement('img');
+
+			pet.src = '/dashboard/shigure-ui-smol.gif';
+			pet.className = 'uwu-cursor';
+			document.body.appendChild(pet);
+			document.addEventListener('mousemove', (e) => {
+				pet.style.left = `${e.clientX + 12}px`;
+				pet.style.top = `${e.clientY + 12}px`;
+			});
+
+			function hexToFilter(hex) {
+				const r = parseInt(hex.slice(1, 3), 16);
+				const g = parseInt(hex.slice(3, 5), 16);
+				const b = parseInt(hex.slice(5, 7), 16);
+				const max = Math.max(r, g, b) / 255;
+				const min = Math.min(r, g, b) / 255;
+				const l = (max + min) / 2;
+				let h = 0;
+				let s = 0;
+
+				if (max !== min) {
+					const d = max - min;
+
+					s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+					const rf = r / 255, gf = g / 255, bf = b / 255;
+
+					if (max === rf) h = ((gf - bf) / d + (gf < bf ? 6 : 0)) * 60;
+					else if (max === gf) h = ((bf - rf) / d + 2) * 60;
+					else h = ((rf - gf) / d + 4) * 60;
+				}
+
+				return `brightness(0) saturate(100%) invert(${Math.round(l * 100)}%) sepia(100%) saturate(${Math.round(s * 1000)}%) hue-rotate(${Math.round(h)}deg)`;
+			}
+
+			function updatePetColor() {
+				const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+
+				if (accent && accent.startsWith('#')) {
+					pet.style.filter = hexToFilter(accent);
+				}
+			}
+
+			updatePetColor();
+			const observer = new MutationObserver(updatePetColor);
+
+			observer.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
+		}
 
 		try {
 			const controller = new AbortController();
@@ -298,29 +350,21 @@
 			page={page}
 			mode={$themeMode}
 			isViewer={isViewer}
-			botOnline={$status.botOnline}
-			botMode={$status.botMode}
-			pm2={$status.pm2}
 			on:navigate={(event) => navigate(event.detail)}
 			on:mode={() => toggleMode()}
-			on:start={handleStart}
-			on:stop={handleStop}
-			on:restart={handleRestart}
-			on:logout={handleLogout}
-			on:debug={() => debug = !debug}
 		/>
 		{#if debug}
 			<DebugPanel renderCount={renderCount} />
 		{/if}
 		<HardwareBanner />
-		<main class="page" class:has-spotify={page === 'home'} class:wide={page === 'albums'}>
+		<main class="page" class:has-spotify={page === 'home'} class:wide={page === 'albums' || page === 'editor'}>
 			{#if keepMessages}
 				<div class="page-cache" class:page-hidden={page !== 'messages'}>
 					<MessageLogs active={page === 'messages'} />
 				</div>
 			{/if}
 			{#if page === 'home'}
-				<Home isViewer={isViewer} />
+				<Home isViewer={isViewer} onLogout={handleLogout} />
 			{:else if page === 'albums'}
 				<Albums isViewer={isViewer} active={page === 'albums'} />
 			{:else if page === 'settings'}
@@ -330,7 +374,8 @@
 			{:else if page === 'notfound'}
 				<NotFound on:navigate={(event) => navigate(event.detail)} />
 			{:else if page === 'system'}
-				<System isSuperOwner={sessionRole === 'superOwner'} active={page === 'system'} />
+				<System isSuperOwner={sessionRole === 'superOwner'} active={page === 'system'} bind:debug
+					onStart={handleStart} onStop={handleStop} onRestart={handleRestart} />
 			{:else if page === 'groups'}
 				<Groups active={page === 'groups'} />
 			{:else if page === 'broadcast'}
@@ -675,5 +720,13 @@
 		to {
 			transform: rotate(360deg);
 		}
+	}
+	:global(.uwu-cursor) {
+		position: fixed;
+		width: 42px;
+		height: auto;
+		pointer-events: none;
+		z-index: 99999;
+		image-rendering: pixelated;
 	}
 </style>

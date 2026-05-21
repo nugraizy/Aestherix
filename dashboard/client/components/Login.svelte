@@ -18,10 +18,34 @@
 	let cancelWatch = null;
 	let inlineError = '';
 	let statusLabel = '';
+	let cooldownSeconds = 0;
+	let cooldownTimer = null;
+	let errorTimer = null;
 
 	let serverInfo = { version: '', loaded: false };
 	let now = new Date();
 	let clockTimer = null;
+
+	function startCooldown(seconds) {
+		clearCooldown();
+		cooldownSeconds = seconds;
+		cooldownTimer = setInterval(() => {
+			cooldownSeconds -= 1;
+
+			if (cooldownSeconds <= 0) {
+				clearCooldown();
+			}
+		}, 1000);
+	}
+
+	function clearCooldown() {
+		cooldownSeconds = 0;
+
+		if (cooldownTimer) {
+			clearInterval(cooldownTimer);
+			cooldownTimer = null;
+		}
+	}
 
 	function disposeWatch() {
 		if (cancelWatch) {
@@ -50,14 +74,19 @@
 
 	onDestroy(() => {
 		disposeWatch();
+		clearCooldown();
 
 		if (clockTimer) {
 			clearInterval(clockTimer);
 		}
+
+		if (errorTimer) {
+			clearTimeout(errorTimer);
+		}
 	});
 
 	async function requestCode() {
-		if (loading || !phone) {
+		if (loading || phone.length < 10) {
 			return;
 		}
 
@@ -77,6 +106,10 @@
 
 			inlineError = message;
 			showError(message);
+
+			if (error?.retryAfter) {
+				startCooldown(error.retryAfter);
+			}
 		}
 
 		loading = false;
@@ -158,6 +191,10 @@
 
 	$: clockLabel = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 	$: dateLabel = now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+	$: if (inlineError) {
+		if (errorTimer) clearTimeout(errorTimer);
+		errorTimer = setTimeout(() => { inlineError = ''; }, 5000);
+	}
 </script>
 
 <div class="login-shell">
@@ -221,11 +258,16 @@
 								type="text"
 								bind:value={phone}
 								placeholder="628123456789"
+								minlength="10"
 								on:keydown={(event) => event.key === 'Enter' && requestCode()}
 							/>
 						</label>
-						<button class="primary" on:click={requestCode} disabled={loading || !phone}>
-							{loading ? 'Sending...' : 'Send WhatsApp Confirmation'}
+						<button class="primary" on:click={requestCode} disabled={loading || phone.length < 10 || cooldownSeconds > 0}>
+							{#if cooldownSeconds > 0}
+								Retry in {cooldownSeconds}s
+							{:else}
+								{loading ? 'Sending...' : 'Send WhatsApp Confirmation'}
+							{/if}
 						</button>
 						<p class="hint">
 							An approve / reject button will be sent to your WhatsApp.
