@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.8.1」2026-05-21
+
+## Added
+- **Bridge fallback for PM2 split mode** — messages, groups, and logs now work in standalone dashboard mode. ([`2af4a36`](https://github.com/nugraizy/aestherix/commit/2af4a36))
+- **File editor diff panel** — real-time LCS-based diff with syntax highlighting beside the editor. ([`d92e805`](https://github.com/nugraizy/aestherix/commit/d92e805))
+- **Dashboard UX improvements** — human-readable error messages, login cooldown timer, album color palette tooltips, hold-to-preview, lightbox vertical dots, ANSI-colored logs, and easter egg. ([`a29a925`](https://github.com/nugraizy/aestherix/commit/a29a925))
+
+## Fixed
+- **Logs not appearing for superOwner** — role checks now include superOwner, logs use bridge in split mode, datetime stripped from log messages. ([`e0d63df`](https://github.com/nugraizy/aestherix/commit/e0d63df))
+- **Audit log CPU spikes** — polling now only emits when new entries exist, interval increased to 5s. ([`e0d63df`](https://github.com/nugraizy/aestherix/commit/e0d63df))
+
+## Refactored
+- **ButtonPill component** — reusable pill button group used across Header, Editor, Groups, and UserList. ([`7b5b538`](https://github.com/nugraizy/aestherix/commit/7b5b538))
+
+---
+
 # 「7.8.0」2026-05-21
 
 ## Added
