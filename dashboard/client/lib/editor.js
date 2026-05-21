@@ -62,10 +62,18 @@ const baseTheme = EditorView.theme({
 		padding: '12px 0'
 	},
 	'.cm-cursor, .cm-dropCursor': {
-		borderLeftColor: 'var(--accent)'
+		borderLeftColor: 'var(--accent)',
+		borderLeftWidth: '0.55em',
+		marginLeft: '-0.05em'
 	},
-	'&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': {
-		backgroundColor: 'color-mix(in srgb, var(--accent) 24%, transparent)'
+	'&.cm-focused .cm-selectionBackground, .cm-selectionBackground': {
+		backgroundColor: 'color-mix(in srgb, var(--accent) 24%, transparent) !important'
+	},
+	'& .cm-selectionBackground, & ::selection': {
+		backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent) !important'
+	},
+	'&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground': {
+		backgroundColor: 'color-mix(in srgb, var(--accent) 24%, transparent) !important'
 	},
 	'.cm-gutters': {
 		backgroundColor: 'transparent',
@@ -75,6 +83,9 @@ const baseTheme = EditorView.theme({
 	},
 	'.cm-activeLine': {
 		backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)'
+	},
+	'&.cm-focused.cm-has-selection .cm-activeLine': {
+		backgroundColor: 'transparent'
 	},
 	'.cm-activeLineGutter': {
 		backgroundColor: 'color-mix(in srgb, var(--accent) 14%, transparent)',
@@ -87,6 +98,78 @@ const baseTheme = EditorView.theme({
 	},
 	'.cm-selectionMatch': {
 		backgroundColor: 'color-mix(in srgb, var(--accent) 18%, transparent)'
+	},
+	'.cm-panels': {
+		position: 'absolute !important',
+		top: '8px',
+		right: '8px',
+		left: 'auto !important',
+		bottom: 'auto !important',
+		zIndex: '10',
+		background: 'rgba(10, 14, 20, 0.75)',
+		backdropFilter: 'blur(12px)',
+		border: '1px solid rgba(255, 255, 255, 0.12)',
+		borderRadius: '10px',
+		padding: '0',
+		boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+		width: 'auto',
+		maxWidth: '360px',
+		height: 'auto !important'
+	},
+	'.cm-search': {
+		display: 'flex',
+		flexWrap: 'wrap',
+		gap: '6px',
+		padding: '10px 12px',
+		alignItems: 'center'
+	},
+	'.cm-search label': {
+		display: 'inline-flex',
+		alignItems: 'center',
+		gap: '4px',
+		fontSize: '0.75rem',
+		color: 'var(--muted)'
+	},
+	'.cm-search input[type="checkbox"]': {
+		accentColor: 'var(--accent)'
+	},
+	'.cm-searchMatch': {
+		backgroundColor: 'color-mix(in srgb, var(--accent) 30%, transparent)',
+		borderRadius: '2px'
+	},
+	'.cm-searchMatch-selected': {
+		backgroundColor: 'color-mix(in srgb, var(--accent) 50%, transparent)'
+	},
+	'.cm-search input, .cm-search button:not(.cm-button)': {
+		background: 'rgba(255, 255, 255, 0.06)',
+		border: '1px solid rgba(255, 255, 255, 0.15)',
+		borderRadius: '6px',
+		color: 'var(--text)',
+		fontSize: '0.78rem',
+		padding: '4px 8px',
+		outline: 'none'
+	},
+	'.cm-search input:focus': {
+		borderColor: 'var(--accent)',
+		boxShadow: '0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent)'
+	},
+	'.cm-search button, .cm-button': {
+		background: 'rgba(255, 255, 255, 0.08)',
+		border: '1px solid rgba(255, 255, 255, 0.15)',
+		borderRadius: '6px',
+		color: 'var(--text)',
+		fontSize: '0.75rem',
+		fontWeight: '600',
+		padding: '4px 10px',
+		cursor: 'pointer'
+	},
+	'.cm-search button:hover, .cm-button:hover': {
+		background: 'color-mix(in srgb, var(--accent) 18%, transparent)',
+		borderColor: 'var(--accent)',
+		color: 'var(--accent)'
+	},
+	'.cm-panel.cm-search br': {
+		display: 'none'
 	}
 });
 
@@ -139,13 +222,24 @@ export function buildEditor({ parent, content = '', language = null, onChange = 
 			])
 		: null;
 
+	const selectionTracker = EditorView.updateListener.of((update) => {
+		if (!update.selectionSet) {
+			return;
+		}
+
+		const hasSelection = update.state.selection.ranges.some((r) => !r.empty);
+
+		update.view.dom.classList.toggle('cm-has-selection', hasSelection);
+	});
+
 	const extensions = [
 		basicSetup,
 		keymap.of([indentWithTab]),
 		baseTheme,
 		syntaxHighlighting(accentHighlight),
 		languageCompartment.of(language ? [language] : []),
-		updateListener
+		updateListener,
+		selectionTracker
 	];
 
 	if (saveBinding) {

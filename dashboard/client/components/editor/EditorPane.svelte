@@ -1,8 +1,10 @@
 <script>
 	import { createEventDispatcher, onDestroy, onMount, tick } from 'svelte';
+	import ButtonPill from '../ui/ButtonPill.svelte';
 
 	export let activePath = '';
 	export let content = '';
+	export let originalContent = '';
 	export let dirty = false;
 	export let saving = false;
 	export let formatting = false;
@@ -13,6 +15,130 @@
 	let detectLanguage = () => null;
 	let lastSyncedPath = '';
 	let loading = true;
+	let showDiff = true;
+
+	$: diffHtml = dirty ? computeDiff(originalContent, content) : '';
+
+	function computeDiff(oldText, newText) {
+		const oldLines = oldText.replace(/\r\n?/g, '\n').split('\n');
+		const newLines = newText.replace(/\r\n?/g, '\n').split('\n');
+		const ops = myers(oldLines, newLines);
+		const lines = [];
+		let oldLn = 0;
+		let newLn = 0;
+
+		for (const op of ops) {
+			const val = op.value ?? '';
+
+			if (op.type === 'equal') {
+				oldLn++;
+				newLn++;
+				const ln = `<span class="diff-ln">${String(newLn).padStart(3)}</span> `;
+
+				lines.push(`<span class="diff-ctx">${ln} ${highlight(esc(val))}</span>`);
+			} else if (op.type === 'delete') {
+				oldLn++;
+				const ln = `<span class="diff-ln">${String(oldLn).padStart(3)}</span> `;
+
+				lines.push(`<span class="diff-del">${ln}-${highlight(esc(val))}</span>`);
+			} else {
+				newLn++;
+				const ln = `<span class="diff-ln">${String(newLn).padStart(3)}</span> `;
+
+				lines.push(`<span class="diff-add">${ln}+${highlight(esc(val))}</span>`);
+			}
+		}
+
+		return lines.join('\n');
+	}
+
+	function myers(oldArr, newArr) {
+		const N = oldArr.length;
+		const M = newArr.length;
+
+		if (N === 0) {
+			return newArr.map((line) => ({ type: 'insert', value: line }));
+		}
+
+		if (M === 0) {
+			return oldArr.map((line) => ({ type: 'delete', value: line }));
+		}
+
+		const dp = Array.from({ length: N + 1 }, () => new Uint16Array(M + 1));
+
+		for (let i = 1; i <= N; i++) {
+			for (let j = 1; j <= M; j++) {
+				if (oldArr[i - 1] === newArr[j - 1]) {
+					dp[i][j] = dp[i - 1][j - 1] + 1;
+				} else {
+					dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+				}
+			}
+		}
+
+		const ops = [];
+		let i = N;
+		let j = M;
+
+		while (i > 0 && j > 0) {
+			if (oldArr[i - 1] === newArr[j - 1]) {
+				ops.push({ type: 'equal', value: oldArr[i - 1] });
+				i--;
+				j--;
+			} else if (dp[i - 1][j] >= dp[i][j - 1]) {
+				ops.push({ type: 'delete', value: oldArr[i - 1] });
+				i--;
+			} else {
+				ops.push({ type: 'insert', value: newArr[j - 1] });
+				j--;
+			}
+		}
+
+		while (i > 0) {
+			ops.push({ type: 'delete', value: oldArr[--i] });
+		}
+
+		while (j > 0) {
+			ops.push({ type: 'insert', value: newArr[--j] });
+		}
+
+		return ops.reverse();
+	}
+
+	function esc(str) {
+		return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+	}
+
+	function highlight(escaped) {
+		const tokens = [];
+		const PH_START = '\u2060\u200B';
+		const PH_END = '\u200B\u2060';
+
+		const tokenize = (cls, match) => {
+			const idx = tokens.length;
+
+			tokens.push(`<span class="${cls}">${match}</span>`);
+
+			return `${PH_START}T${idx}T${PH_END}`;
+		};
+
+		let result = escaped
+			.replace(/(\/\/.*$)/gm, (m) => tokenize('hl-comment', m))
+			.replace(/('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*`)/g, (m) => tokenize('hl-string', m))
+			.replace(/\b(\d+\.?\d*)\b/g, (m) => tokenize('hl-number', m))
+			.replace(/\b(true|false|null|undefined|NaN|Infinity)\b/g, (m) => tokenize('hl-atom', m))
+			.replace(/\b(await)\b/g, (m) => tokenize('hl-operator', m))
+			.replace(/\b(const|let|var|function|return|if|else|for|while|import|export|from|async|class|new|this|throw|try|catch|default|switch|case|break|continue|typeof|instanceof|of|in)\b/g, (m) => tokenize('hl-keyword', m))
+			.replace(/(\w+)(?=\s*\()/g, (m) => tokenize('hl-function', m))
+			.replace(/(\w+)(?=\s*:)/g, (m) => tokenize('hl-property', m))
+			.replace(/\.(\w+)/g, (_, prop) => `.${tokenize('hl-property', prop)}`)
+			.replace(/(=&gt;|[+\-*/%=!<>&|?]+|\.{3})/g, (m) => tokenize('hl-operator', m))
+			.replace(/([(){}[\]:;,])/g, (m) => tokenize('hl-punctuation', m));
+
+		result = result.replace(/\u2060\u200BT(\d+)T\u200B\u2060/g, (_, idx) => tokens[Number(idx)]);
+
+		return result;
+	}
 
 	function syncFromProp(value) {
 		if (!editor) {
@@ -71,10 +197,16 @@
 				{/if}
 				{activePath}
 			</span>
-			<div class="actions">
+			<ButtonPill>
 				<button
 					type="button"
-					class="action format"
+					class:active={showDiff}
+					on:click={() => showDiff = !showDiff}
+				>
+					Diff
+				</button>
+				<button
+					type="button"
 					on:click={() => dispatch('format')}
 					disabled={formatting || saving || !content}
 				>
@@ -82,28 +214,36 @@
 				</button>
 				<button
 					type="button"
-					class="action save"
+					class="primary"
 					on:click={() => dispatch('save')}
 					disabled={saving || !dirty}
 				>
 					{saving ? 'Saving...' : 'Save'}
 				</button>
-			</div>
+			</ButtonPill>
 		</header>
 	{:else}
 		<header class="editor-header empty">
 			<span class="file-path">No file selected</span>
 		</header>
 	{/if}
-	<div class="editor-host" bind:this={mountEl}></div>
+	<div class="editor-body">
+		<div class="editor-host" bind:this={mountEl}></div>
+		<div class="diff-panel" class:visible={dirty && showDiff}>
+			<pre class="diff-content">{@html diffHtml}</pre>
+		</div>
+	</div>
 	{#if !activePath && !loading}
 		<div class="empty-overlay">
 			<p>Select a file from the tree to begin editing.</p>
 		</div>
 	{:else if loading}
 		<div class="empty-overlay">
-			<div class="spinner" aria-hidden="true"></div>
-			<p>Loading editor...</p>
+			<div class="skeleton-lines">
+				{#each Array(12) as _}
+					<div class="skeleton-line"></div>
+				{/each}
+			</div>
 		</div>
 	{/if}
 </div>
@@ -152,50 +292,18 @@
 		line-height: 1;
 	}
 
-	.actions {
-		display: inline-flex;
-		gap: 6px;
-	}
-
-	.action {
-		padding: 0.32rem 0.75rem;
-		border-radius: 0.45rem;
-		border: 1px solid var(--border);
-		background: var(--bg);
-		color: var(--text);
-		font-size: 0.76rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease, filter 0.15s ease;
-	}
-
-	.action:not(.save):hover:not(:disabled) {
-		border-color: var(--accent);
-		color: var(--accent);
-	}
-
-	.action.save {
-		background: var(--accent);
-		color: var(--bg);
-		border-color: transparent;
-	}
-
-	.action.save:hover:not(:disabled) {
-		filter: brightness(1.08);
-		color: var(--bg);
-		border-color: transparent;
-	}
-
-	.action:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
+	.editor-body {
+		flex: 1;
+		display: flex;
+		min-height: 320px;
+		overflow: hidden;
 	}
 
 	.editor-host {
 		flex: 1;
-		min-height: 320px;
 		display: flex;
 		overflow: hidden;
+		min-width: 0;
 	}
 
 	.editor-host :global(.cm-editor) {
@@ -205,6 +313,94 @@
 
 	.editor-host :global(.cm-editor.cm-focused) {
 		outline: none;
+	}
+
+	.diff-panel {
+		flex: 0;
+		min-width: 0;
+		max-width: 0;
+		border-left: 1px solid var(--border);
+		overflow: hidden;
+		opacity: 0;
+		transition: flex 0.3s ease, max-width 0.3s ease, opacity 0.25s ease;
+	}
+
+	.diff-panel.visible {
+		flex: 1;
+		max-width: 50%;
+		opacity: 1;
+	}
+
+	.editor-header :global(.pill button.active) {
+		background: color-mix(in srgb, var(--accent) 18%, transparent);
+		color: var(--accent);
+	}
+
+	.diff-content {
+		margin: 0;
+		padding: 12px 0.75rem;
+		font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+		font-size: 0.85rem;
+		line-height: 1.55;
+		white-space: pre;
+		color: var(--text);
+	}
+
+	.diff-content :global(.diff-add) {
+		background: rgba(135, 240, 193, 0.15);
+		color: var(--text);
+	}
+
+	.diff-content :global(.diff-del) {
+		background: rgba(255, 142, 116, 0.15);
+		color: var(--text);
+	}
+
+	.diff-content :global(.diff-ctx) {
+		color: var(--text);
+	}
+
+	.diff-content :global(.diff-ln) {
+		color: color-mix(in srgb, var(--muted) 60%, transparent);
+		user-select: none;
+	}
+
+	.diff-content :global(.hl-keyword) {
+		color: var(--code-keyword, #c4b5fd);
+		font-weight: 600;
+	}
+
+	.diff-content :global(.hl-string) {
+		color: var(--code-string, #87f0c1);
+	}
+
+	.diff-content :global(.hl-number) {
+		color: var(--code-number, #f0c887);
+	}
+
+	.diff-content :global(.hl-comment) {
+		color: var(--code-comment, #6c7086);
+		font-style: italic;
+	}
+
+	.diff-content :global(.hl-function) {
+		color: var(--code-function, #8ef0ff);
+	}
+
+	.diff-content :global(.hl-property) {
+		color: var(--code-property, #c4b5fd);
+	}
+
+	.diff-content :global(.hl-operator) {
+		color: var(--code-operator, #8ef0ff);
+	}
+
+	.diff-content :global(.hl-atom) {
+		color: var(--code-atom, #f0c887);
+	}
+
+	.diff-content :global(.hl-punctuation) {
+		color: var(--muted);
 	}
 
 	.empty-overlay {
@@ -223,18 +419,36 @@
 		font-size: 0.85rem;
 	}
 
-	.spinner {
-		width: 26px;
-		height: 26px;
-		border-radius: 50%;
-		border: 3px solid color-mix(in srgb, var(--accent) 24%, transparent);
-		border-top-color: var(--accent);
-		animation: spin 0.9s linear infinite;
+	.skeleton-lines {
+		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
+		width: 80%;
+		max-width: 500px;
 	}
 
-	@keyframes spin {
-		to {
-			transform: rotate(360deg);
-		}
+	.skeleton-line {
+		height: 0.85rem;
+		border-radius: 4px;
+		background: linear-gradient(90deg, color-mix(in srgb, var(--border) 60%, transparent) 25%, color-mix(in srgb, var(--border) 30%, transparent) 50%, color-mix(in srgb, var(--border) 60%, transparent) 75%);
+		background-size: 200% 100%;
+		animation: shimmer 1.5s infinite;
+	}
+
+	.skeleton-line:nth-child(odd) {
+		width: 90%;
+	}
+
+	.skeleton-line:nth-child(even) {
+		width: 65%;
+	}
+
+	.skeleton-line:nth-child(3n) {
+		width: 78%;
+	}
+
+	@keyframes shimmer {
+		0% { background-position: 200% 0; }
+		100% { background-position: -200% 0; }
 	}
 </style>

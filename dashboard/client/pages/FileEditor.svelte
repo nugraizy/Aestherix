@@ -15,6 +15,7 @@
 	let root = null;
 	let activePath = '';
 	let content = '';
+	let originalContent = '';
 	let dirty = false;
 	let saving = false;
 	let formatting = false;
@@ -78,6 +79,7 @@
 
 			activePath = data.path || path;
 			content = data.content || '';
+			originalContent = content;
 			dirty = false;
 			localStorage.setItem(STORAGE_KEY, activePath);
 			editor?.focus?.();
@@ -118,6 +120,7 @@
 		try {
 			await post('/editor/file', { path: activePath, content });
 			dirty = false;
+			originalContent = content;
 			showSuccess('Saved.');
 		} catch (error) {
 			showError(error?.message || 'Failed to save file.');
@@ -169,6 +172,7 @@
 			bind:this={editor}
 			{activePath}
 			{content}
+			{originalContent}
 			{dirty}
 			{saving}
 			{formatting}
@@ -206,7 +210,7 @@
 
 	.editor-layout {
 		display: grid;
-		grid-template-columns: 260px 1fr;
+		grid-template-columns: 220px 1fr;
 		gap: var(--space-3);
 		min-height: calc(100vh - 200px);
 	}
