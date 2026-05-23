@@ -76,6 +76,7 @@
     "cli-highlight": "^2.1.11",
     "clipboardy": "^5.0.0",
     "colorthief": "^2.6.0",
+    "compression": "^1.8.1",
     "dayjs": "^1.11.19",
     "emojibase-regex": "^16.0.0",
     "enka-network-api": "^5.0.15",

@@ -15,16 +15,21 @@
 	import { logs, status } from './lib/stores.js';
 	import { applyPalette, currentPalette, PALETTE_NAMES, setPalette, themeMode, toggleMode } from './lib/theme.js';
 	import { showError, showSuccess, showUndoToast } from './lib/toast.js';
-	import Albums from './pages/Albums.svelte';
-	import Broadcast from './pages/Broadcast.svelte';
 	import Controls from './pages/Controls.svelte';
-	import FileEditor from './pages/FileEditor.svelte';
-	import Groups from './pages/Groups.svelte';
 	import Home from './pages/Home.svelte';
-	import MessageLogs from './pages/MessageLogs.svelte';
 	import NotFound from './pages/NotFound.svelte';
-	import Settings from './pages/Settings.svelte';
-	import System from './pages/System.svelte';
+
+	const lazyPages = {
+		albums: () => import('./pages/Albums.svelte'),
+		broadcast: () => import('./pages/Broadcast.svelte'),
+		groups: () => import('./pages/Groups.svelte'),
+		messages: () => import('./pages/MessageLogs.svelte'),
+		settings: () => import('./pages/Settings.svelte'),
+		system: () => import('./pages/System.svelte'),
+		editor: () => import('./pages/FileEditor.svelte')
+	};
+
+	let loadedPages = {};
 
 	let page = 'home';
 	let authenticated = false;
@@ -45,17 +50,16 @@
 	const pages = {
 		home: Home,
 		controls: Controls,
-		settings: Settings,
-		groups: Groups,
-		broadcast: Broadcast,
-		messages: MessageLogs,
-		system: System,
-		albums: Albums,
-		editor: FileEditor,
 		notfound: NotFound
 	};
 
-	const PAGE_NAMES = Object.keys(pages);
+	const PAGE_NAMES = ['home', 'controls', 'settings', 'groups', 'broadcast', 'messages', 'system', 'albums', 'editor', 'notfound'];
+
+	$: if (page && lazyPages[page] && !loadedPages[page]) {
+		lazyPages[page]().then((mod) => {
+			loadedPages = { ...loadedPages, [page]: mod.default };
+		});
+	}
 	const NAV_PAGES = PAGE_NAMES.filter((name) => name !== 'notfound');
 	const PAGE_PATH_BASE = '/dashboard';
 
@@ -358,30 +362,30 @@
 		{/if}
 		<HardwareBanner />
 		<main class="page" class:has-spotify={page === 'home'} class:wide={page === 'albums' || page === 'editor'}>
-			{#if keepMessages}
+			{#if keepMessages && loadedPages.messages}
 				<div class="page-cache" class:page-hidden={page !== 'messages'}>
-					<MessageLogs active={page === 'messages'} />
+					<svelte:component this={loadedPages.messages} active={page === 'messages'} />
 				</div>
 			{/if}
 			{#if page === 'home'}
 				<Home isViewer={isViewer} onLogout={handleLogout} />
-			{:else if page === 'albums'}
-				<Albums isViewer={isViewer} active={page === 'albums'} />
-			{:else if page === 'settings'}
-				<Settings isSuperOwner={sessionRole === 'superOwner'} active={page === 'settings'} />
 			{:else if page === 'controls'}
 				<Controls isViewer={isViewer} active={page === 'controls'} />
 			{:else if page === 'notfound'}
 				<NotFound on:navigate={(event) => navigate(event.detail)} />
-			{:else if page === 'system'}
-				<System isSuperOwner={sessionRole === 'superOwner'} active={page === 'system'} bind:debug
+			{:else if page === 'albums' && loadedPages.albums}
+				<svelte:component this={loadedPages.albums} isViewer={isViewer} active={page === 'albums'} />
+			{:else if page === 'settings' && loadedPages.settings}
+				<svelte:component this={loadedPages.settings} isSuperOwner={sessionRole === 'superOwner'} active={page === 'settings'} />
+			{:else if page === 'system' && loadedPages.system}
+				<svelte:component this={loadedPages.system} isSuperOwner={sessionRole === 'superOwner'} active={page === 'system'} bind:debug
 					onStart={handleStart} onStop={handleStop} onRestart={handleRestart} />
-			{:else if page === 'groups'}
-				<Groups active={page === 'groups'} />
-			{:else if page === 'broadcast'}
-				<Broadcast active={page === 'broadcast'} />
-			{:else if page === 'editor'}
-				<FileEditor active={page === 'editor'} />
+			{:else if page === 'groups' && loadedPages.groups}
+				<svelte:component this={loadedPages.groups} active={page === 'groups'} />
+			{:else if page === 'broadcast' && loadedPages.broadcast}
+				<svelte:component this={loadedPages.broadcast} active={page === 'broadcast'} />
+			{:else if page === 'editor' && loadedPages.editor}
+				<svelte:component this={loadedPages.editor} active={page === 'editor'} />
 			{:else if page === 'messages'}
 				<!-- messages uses keepMessages pattern above -->
 			{/if}

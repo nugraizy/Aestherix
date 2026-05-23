@@ -1,3 +1,4 @@
+import compression from 'compression';
 import express from 'express';
 import { createServer } from 'http';
 
@@ -78,6 +79,7 @@ function wireServices({ configuration, prisma }) {
 function createApp({ services, configuration, mountGradient = true, port = DEFAULT_PORT }) {
 	const app = express();
 
+	app.use(compression());
 	app.use(express.json());
 	app.set('configuration', configuration);
 

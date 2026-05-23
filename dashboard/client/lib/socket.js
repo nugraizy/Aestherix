@@ -7,7 +7,7 @@ export const socket = io({
 	reconnectionAttempts: 5,
 	reconnectionDelay: 2000,
 	timeout: 5000,
-	transports: ['polling', 'websocket']
+	transports: ['websocket']
 });
 
 let bound = false;

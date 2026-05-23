@@ -1,7 +1,7 @@
 <script>
+	import { cubicOut } from 'svelte/easing';
 	import { writable } from 'svelte/store';
 	import { fly } from 'svelte/transition';
-	import { cubicOut } from 'svelte/easing';
 
 	import { debugState } from '../lib/debug.js';
 	import { status } from '../lib/stores.js';
@@ -32,10 +32,9 @@
 	$: rssPercent = $status.totalMemory > 0
 		? ($status.rss / $status.totalMemory) * 100
 		: 0;
-	$: processCpuPercent = Number($status.processCpu || 0);
 	$: heapLeak = trackHeap($status.heapUsed, heapSamples);
 
-	$: alerts = computeAlerts({ cpuPercent, memoryPercent, rssPercent, processCpuPercent, heapLeak });
+	$: alerts = computeAlerts({ cpuPercent, memoryPercent, rssPercent, heapLeak });
 	$: realLevel = alerts.reduce((max, alert) => Math.max(max, alert.level), 0);
 	$: forcedLevel = Number($debugState.forcedHardwareLevel || 0);
 	$: maxLevel = forcedLevel > 0 ? forcedLevel : realLevel;
@@ -111,7 +110,7 @@
 		return 0;
 	}
 
-	function computeAlerts({ cpuPercent, memoryPercent, rssPercent, processCpuPercent, heapLeak }) {
+	function computeAlerts({ cpuPercent, memoryPercent, rssPercent, heapLeak }) {
 		const list = [];
 		const pushPercent = (name, value) => {
 			const level = classifyPercent(value);
@@ -123,7 +122,6 @@
 
 		pushPercent('CPU', cpuPercent);
 		pushPercent('Memory', memoryPercent);
-		pushPercent('Process', processCpuPercent);
 		pushPercent('Process Mem', rssPercent);
 
 		if (heapLeak.level > 0) {
