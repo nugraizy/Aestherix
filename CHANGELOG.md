@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.8.2」2026-05-24
+
+## Added
+- **Browser compatibility utility** — DNS-over-HTTPS (DoH) resolver and request emulation helper to improve network resiliency. ([`979b0a4`](https://github.com/nugraizy/aestherix/commit/979b0a4699b646cbe8bc4588afaca9f89907579503))
+- **Comix Cloudflare bypass** — interactive Puppeteer stealth-based XHR interceptor and reload-per-page fallback for chapter pagination. ([`979b0a4`](https://github.com/nugraizy/aestherix/commit/979b0a4699b646cbe8bc4588afaca9f89907579503))
+
+## Fixed
+- **Dashboard bridge multi-instance** — resolve the first active client socket dynamically from the manager registry instead of using a hardcoded singleton. ([`c300569`](https://github.com/nugraizy/aestherix/commit/c300569dacdd56a52e53b9d57a3353c55022b0055))
+
+## Performance
+- **Dashboard optimization** — page-level lazy loading (dynamic Svelte page imports), Gzip response compression, static assets cache headers (`maxAge: 7d`), local Nerdfont asset preloading, and optimized websocket-only client transport. ([`1c5600d`](https://github.com/nugraizy/aestherix/commit/1c5600d1331c598a413dc7228b68101e817cebed))
+
+---
+
 # 「7.8.1」2026-05-21
 
 ## Added
