@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import P from 'pino';
 
 import { Cli } from './core/cli.js';
+import { manager } from './core/manager.js';
 import { initializeDashboardMonitor } from '../dashboard/server/monitor.js';
 import { startDashboardBridge } from './core/services/dashboard-bridge.js';
 import { hydrateProfilePictureHistory, startProfilePictureService } from './core/services/profile-picture.js';
@@ -77,7 +78,15 @@ export const start = async () => {
 
 		clientSocket.on('connected', () => {
 			startProfilePictureService(clientSocket, configuration);
-			startDashboardBridge(() => clientSocket);
+			startDashboardBridge(() => {
+				for (const [, client] of manager.clients) {
+					if (client?.state === 'connected') {
+						return client;
+					}
+				}
+
+				return null;
+			});
 		});
 	} catch (error) {
 		console.log(error);
