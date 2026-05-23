@@ -61,7 +61,7 @@ export default defineCommand({
 			return await wait.update('No chapters found for this manga.');
 		}
 
-		const allChapters = result.items.reverse().sortUnique('number');
+		const allChapters = result.items.reverse();
 		const firstUrl = allChapters[0]?.url || '';
 		const mangaSlug = firstUrl.match(/\/title\/([^/]+)\//)?.[1] || query.trim();
 		const sessionId = randomChar('abcdefghijklmnopqrstuvwxyz0123456789', 8);
@@ -70,7 +70,8 @@ export default defineCommand({
 		chapterSessions.set(sessionId, state);
 
 		await wait.update(`${allChapters.length} chapter(s) found.`);
-		await sendBatch(state, from, message, client, { prefix });
+
+		await sendBatch(state, from, message, client, { prefix, device });
 	}
 });
 

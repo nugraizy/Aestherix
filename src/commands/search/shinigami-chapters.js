@@ -64,7 +64,7 @@ export default defineCommand({
 
 			const sessionId = randomChar('abcdefghijklmnopqrstuvwxyz0123456789', 8);
 			const state = {
-				allChapters: chapters.reverse().sortUnique('number'),
+				allChapters: chapters.reverse(),
 				currentBatch: 0,
 				sessionId,
 				mangaId: query.trim(),

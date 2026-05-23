@@ -63,7 +63,7 @@ export default defineCommand({
 				return await wait.update('No chapters found for this manga.');
 			}
 
-			const allChapters = chaptersResult.reverse().sortUnique('number');
+			const allChapters = chaptersResult.reverse();
 			const sessionId = randomChar('abcdefghijklmnopqrstuvwxyz0123456789', 8);
 			const state = { allChapters, currentBatch: 0, sessionId, mangaTitle: manga.title, order: 'asc' };
 

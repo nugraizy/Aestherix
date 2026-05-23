@@ -174,12 +174,6 @@ export class ComixUtils {
 	static extractIdFromUrl(query: string): string | null;
 }
 
-export class ComixToken {
-	static getCached(key: string): string | null;
-	static setCache(key: string, token: string): void;
-	static capture(pageUrl: string, apiPathSuffix: string): Promise<string>;
-}
-
 export class ComixResponse<TItem = ComixManga> {
 	items: TItem[];
 	pageInfo: PageInfo;

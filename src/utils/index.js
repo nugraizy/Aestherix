@@ -6,6 +6,7 @@ export * from './bandcamp/index.js';
 export * from './bilibili/index.js';
 export * from './bluesky/index.js';
 export * from './brainly/index.js';
+export * from './browser/index.js';
 export * from './cnn/index.js';
 export * from './comix/index.js';
 export * from './converter/index.js';
