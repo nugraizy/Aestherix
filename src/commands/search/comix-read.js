@@ -53,8 +53,8 @@ const downloadChapterAsPdf = async ({ from, message }, client, wait, chapterId, 
 
 	await wait.update(`Converting ${pages.length} page(s) to PDF...`);
 
-	const imageUrls = pages.map((page) => page.url);
-	const buffer = await imageToPdf(imageUrls);
+	const imageInputs = pages.map((page) => (page.scrambled && page.buffer ? page.buffer : page.url));
+	const buffer = await imageToPdf(imageInputs);
 
 	await client.send(
 		from,
@@ -154,13 +154,20 @@ export default defineCommand({
 			}
 
 			try {
+				const cached = comix.getChapterById(chapterId);
+				const chapterNum = cached?.number || chapterId;
+				const session = [...readerSessions.entries()].find(([, s]) =>
+					s.allChapters.some((c) => String(c.id) === String(chapterId))
+				);
+				const title = session?.[1]?.safeName || 'comix';
+
 				return await downloadChapterAsPdf(
 					{ from, message },
 					client,
 					wait,
 					chapterId,
 					chapterUrl,
-					`comix-chapter-${chapterId}`
+					`${title}-chapter-${chapterNum}-comix`.replace(/\s+/g, '-').toLowerCase()
 				);
 			} catch (error) {
 				if (error.message?.includes('Outdated chapter URL')) {

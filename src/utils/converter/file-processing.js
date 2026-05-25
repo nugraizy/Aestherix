@@ -722,6 +722,10 @@ export const imageToPdf = (images) =>
 			images = (
 				await Promise.all(
 					images.map((v) => {
+						if (Buffer.isBuffer(v)) {
+							return { data: v };
+						}
+
 						if (isURL(v)) {
 							return axios.get(v, { responseType: 'arraybuffer' });
 						}

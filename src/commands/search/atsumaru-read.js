@@ -29,6 +29,12 @@ export default defineCommand({
 		const wait = await client.waitMessage(from, 'Fetching chapter pages...', message);
 
 		try {
+			const manga = await atsumaru.getManga(mangaId).catch(() => null);
+			const title = (manga?.title || mangaId)
+				.replace(/[^\w\s-]/g, '')
+				.trim()
+				.replace(/\s+/g, '-')
+				.toLowerCase();
 			const pages = await atsumaru.getPages(mangaId, chapterId);
 
 			if (!pages.length) {
@@ -45,7 +51,7 @@ export default defineCommand({
 				{
 					document: Buffer.from(buffer, 'base64'),
 					mimetype: mime('pdf'),
-					fileName: `atsumaru-${mangaId}-${chapterId}.pdf`
+					fileName: `${title}-chapter-${chapterId}-atsumaru.pdf`
 				},
 				{ quoted: message }
 			);

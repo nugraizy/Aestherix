@@ -1,6 +1,7 @@
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { fetch } from 'undici';
+import { Descrambler } from './descrambler.js';
 
 puppeteer.use(StealthPlugin());
 
@@ -1562,11 +1563,30 @@ class Comix {
 		const baseUrl = (pages.baseUrl || '').replace(/\/+$/, '');
 		const items = pages.items || [];
 
-		return items.map((page, index) => {
-			const url = page.url.startsWith('http') ? page.url : `${baseUrl}/${page.url.replace(/^\/+/, '')}`;
+		const results = [];
 
-			return { index, url };
-		});
+		for (const page of items) {
+			let url = page.url.startsWith('http') ? page.url : `${baseUrl}/${page.url.replace(/^\/+/, '')}`;
+			const scrambled = page.s === 1;
+
+			if (scrambled) {
+				url = url.replace(/(\/)(i+)(\/)/, '$1s$2$3');
+			}
+
+			let buffer = null;
+
+			if (scrambled) {
+				const res = await fetch(url);
+				const seed = parseInt(res.headers.get('x-scramble-seed') || '0', 10);
+				const raw = Buffer.from(await res.arrayBuffer());
+
+				buffer = seed ? await Descrambler.descramble(raw, seed) : raw;
+			}
+
+			results.push({ index: results.length, url, scrambled, buffer });
+		}
+
+		return results;
 	}
 }
 

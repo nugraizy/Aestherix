@@ -127,7 +127,12 @@ export default defineCommand({
 		const wait = await client.waitMessage(from, 'Processing...', message);
 
 		if (isChapterInput(input)) {
-			const fileName = input.split('/').filter(Boolean).pop() || 'kiryuu-chapter';
+			const slug = input.split('/').filter(Boolean).pop() || 'kiryuu-chapter';
+			const session = [...readerSessions.entries()].find(([, s]) => s.allChapters.some((c) => c.url === input));
+			const title = session?.[1]?.safeName || slug;
+			const ch = session?.[1]?.allChapters.find((c) => c.url === input);
+			const chNum = ch?.number || slug;
+			const fileName = `${title}-chapter-${chNum}-kiryuu`.replace(/\s+/g, '-').toLowerCase();
 
 			return await downloadChapterAsPdf({ from, message }, client, wait, input, fileName);
 		}

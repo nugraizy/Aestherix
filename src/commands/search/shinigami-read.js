@@ -26,11 +26,18 @@ export default defineCommand({
 			return await client.reply(from, 'Invalid format. Use: mangaId/chapterId', message);
 		}
 
+		const mangaId = input.slice(0, slashIndex);
 		const chapterId = input.slice(slashIndex + 1);
 
 		const wait = await client.waitMessage(from, 'Fetching chapter pages...', message);
 
 		try {
+			const manga = await shinigami.getManga(mangaId).catch(() => null);
+			const title = (manga?.title || mangaId)
+				.replace(/[^\w\s-]/g, '')
+				.trim()
+				.replace(/\s+/g, '-')
+				.toLowerCase();
 			const pages = await shinigami.getPages(chapterId);
 
 			if (!pages.length) {
@@ -47,7 +54,7 @@ export default defineCommand({
 				{
 					document: Buffer.from(buffer, 'base64'),
 					mimetype: mime('pdf'),
-					fileName: `shinigami-${chapterId}.pdf`
+					fileName: `${title}-chapter-${chapterId}-shinigami.pdf`
 				},
 				{ quoted: message }
 			);
