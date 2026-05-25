@@ -197,6 +197,7 @@ Flag parsing via `meow` in `src/core/cli.js`. Flags added there are available in
 | `--test` | | Test connection |
 | `--print-self` | | Print host messages in terminal |
 | `--pipe` | | Enable command piping with `\|` operator |
+| `--profile` | | Log per-message dispatch latency (PROFILE level) |
 | `--help` | `-h` | Show help message |
 | `--rainbow` | `-b` | Rainbow-colored logs |
 | `--trace` | | Show errors |

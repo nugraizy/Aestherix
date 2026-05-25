@@ -29,7 +29,7 @@ export default [
 			'no-empty': 'error',
 			curly: 'error',
 			'no-whitespace-before-property': 'error',
-			quotes: ['error', 'single'],
+			quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: true }],
 			'padding-line-between-statements': [
 				'error',
 				{
