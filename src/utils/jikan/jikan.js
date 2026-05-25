@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { fetchJSON } from '../modules/index.js';
 
 const BASE_URL = (path) => `https://api.jikan.moe/v4${path}`;
 const TYPE = {
@@ -75,14 +75,11 @@ export class Jikan {
 	async request(path, params = {}, method = 'GET') {
 		return new Promise(async (resolve, reject) => {
 			try {
-				const url = BASE_URL(path);
-				const response = await axios({
-					method,
-					url,
-					params
-				});
+				const url = new URL(BASE_URL(path));
+				Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+				const data = await fetchJSON(url.toString(), { method });
 
-				resolve(response.data);
+				resolve(data);
 			} catch (err) {
 				reject(err);
 			}

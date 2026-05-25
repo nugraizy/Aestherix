@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { fetchJSON } from '../modules/index.js';
 
 export class Github {
 	#access = process.env.GITHUB_ACCESS;
@@ -72,9 +72,10 @@ export class Github {
 	}
 
 	async req(path, params, method, access = false) {
-		const { data } = await axios({
-			url: this.#urlBase + path,
-			params,
+		const url = new URL(this.#urlBase + path);
+		Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+
+		const data = await fetchJSON(url.toString(), {
 			method,
 			headers: {
 				Authorization: `Token ${access ? this.#access : this.#personal}`,
@@ -87,25 +88,17 @@ export class Github {
 
 	async extractMetadata(input) {
 		if (Array.isArray(input)) {
-			return (
-				await Promise.all(
-					input.map((v) =>
-						axios({
-							url: `${this.#urlBase}/users/${v.login}`,
-							Authorization: `Token ${this.#access}`,
-							method: 'GET'
-						})
-					)
+			return Promise.all(
+				input.map((v) =>
+					fetchJSON(`${this.#urlBase}/users/${v.login}`, {
+						headers: { Authorization: `Token ${this.#access}` }
+					})
 				)
-			).map(({ data }) => data);
+			);
 		}
 
-		const { data } = await axios({
-			url: `${this.#urlBase}/users/${input}`,
-			Authorization: `Token ${this.#access}`,
-			method: 'GET'
+		return fetchJSON(`${this.#urlBase}/users/${input}`, {
+			headers: { Authorization: `Token ${this.#access}` }
 		});
-
-		return data;
 	}
 }

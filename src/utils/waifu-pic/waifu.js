@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { fetch } from 'undici';
 
 const _api = (type, input) => `https://api.waifu.pics/many/${type}/${input}`;
 
@@ -37,11 +37,13 @@ export const getWaifu = async (input = 'neko', type = 'sfw') => {
 		};
 	}
 
-	const { data } = await axios.post(
-		_api(type, input),
-		{ exclude: [] },
-		{ headers: { 'content-type': 'application/json;charset=UTF-8' } }
-	);
+	const response = await fetch(_api(type, input), {
+		method: 'POST',
+		headers: { 'content-type': 'application/json;charset=UTF-8' },
+		body: JSON.stringify({ exclude: [] })
+	});
+
+	const data = await response.json();
 
 	return data.files;
 };

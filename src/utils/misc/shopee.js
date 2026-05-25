@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-import { color, loggers } from '../modules/index.js';
+import { color, fetchHEADERS, fetchJSON, loggers } from '../modules/index.js';
 
 const COOKIE = '__LOCALE__null=ID; csrftoken=VLT3in1vbv6tm8MLZGg37FG2hLk5hCrE; ';
 const COOKIE_URL = 'https://shopee.co.id/api/v4/pages/is_short_url/?path=search';
@@ -16,10 +14,12 @@ export const shopeeProduct = (key, total = 5) =>
 			const container = {
 				items: []
 			};
-			const { headers } = await axios.get(COOKIE_URL);
-			const { data } = await axios.get(API_URL(key, total), {
+			const headers = await fetchHEADERS(COOKIE_URL);
+			const cookies = headers.get('set-cookie');
+			const cookieStr = (Array.isArray(cookies) ? cookies : [cookies]).map((v) => v.split(';')[0]).join('; ');
+			const data = await fetchJSON(API_URL(key, total), {
 				headers: {
-					cookie: COOKIE + headers['set-cookie'].map((v) => v.split(';')[0]).join('; '),
+					cookie: COOKIE + cookieStr,
 					'user-agent':
 						'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36'
 				}

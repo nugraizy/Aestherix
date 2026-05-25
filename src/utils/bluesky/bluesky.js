@@ -1,7 +1,6 @@
 import { AtpAgent } from '@atproto/api';
-import axios from 'axios';
 
-import { color, loggers } from '../modules/index.js';
+import { color, fetchJSON, loggers } from '../modules/index.js';
 import { extractInfoFromUrl } from './utils.js';
 
 class Bluesky {
@@ -80,9 +79,7 @@ class Bluesky {
 				}
 
 				try {
-					const {
-						data: { service }
-					} = await axios.get(url);
+					const { service } = await fetchJSON(url);
 
 					for (const { type, serviceEndpoint } of service) {
 						if (type === 'AtprotoPersonalDataServer') {

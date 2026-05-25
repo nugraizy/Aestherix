@@ -1,7 +1,6 @@
-import axios from 'axios';
-import { load } from 'cheerio';
 import dayjs from 'dayjs';
 
+import { fetchTEXT, cheerioLOAD } from '../modules/index.js';
 import { createDaysContainer, parseSchedule } from './utils.js';
 
 const YEAR = dayjs().format('YYYY');
@@ -9,8 +8,8 @@ const YEAR = dayjs().format('YYYY');
 export const animeReleases = () =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { data } = await axios.get('https://www.livechart.me/schedule?layout=timetable');
-			const $ = load(data);
+			const data = await fetchTEXT('https://www.livechart.me/schedule?layout=timetable');
+			const $ = cheerioLOAD(data);
 
 			const TODAY_INFO = $('div.lc-timetable > div.lc-timetable-day.lc-today');
 			const RAW_DAY = TODAY_INFO.find('div.lc-timetable-day__heading').text().trim() + ` ${YEAR}`;

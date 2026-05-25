@@ -1,6 +1,6 @@
-import axios from 'axios';
+import { fetch } from 'undici';
 
-import { cheerioLOAD } from '../modules/index.js';
+import { cheerioLOAD, fetchTEXT } from '../modules/index.js';
 
 const _api = 'https://www.fanbolt.com/anime-name-generator/';
 
@@ -16,19 +16,21 @@ export const animeNameOptions = {
 export const animeName = (input, type) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { data: dataSecret } = await axios.get(_api);
+			const dataSecret = await fetchTEXT(_api);
 			let $ = cheerioLOAD(dataSecret);
 			const secret = $('#ug-secret').val();
 
-			const { data } = await axios(_api, {
+			const response = await fetch(_api, {
 				method: 'POST',
-				data: `ug-secret=${secret}&_wp_http_referer=%2Fanime-name-generator%2F&ug-select%5B%5D=${animeNameOptions[type]}&ug-input-name=${input}`,
 				headers: {
 					'user-agent':
 						'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36',
 					'content-type': 'application/x-www-form-urlencoded'
-				}
+				},
+				body: `ug-secret=${secret}&_wp_http_referer=%2Fanime-name-generator%2F&ug-select%5B%5D=${animeNameOptions[type]}&ug-input-name=${input}`
 			});
+
+			const data = await response.text();
 
 			$ = cheerioLOAD(data);
 

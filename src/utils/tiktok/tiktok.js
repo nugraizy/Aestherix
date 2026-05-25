@@ -1,5 +1,4 @@
 import asyncRetry from 'async-retry';
-import axios from 'axios';
 import crypto from 'crypto';
 import heic from 'heic-convert';
 import { fetch } from 'undici';
@@ -88,7 +87,7 @@ async function resolveVideoId(url) {
 	url = url.includes('vm.tiktok.com') ? url.replace('vm.tiktok.com', 'vt.tiktok.com') : url;
 
 	if (/((vt|vm|vk)\.tiktok\.com)/g.test(url) || !url.includes('video') || !url.includes('photo')) {
-		const req = (await axios.head(url, { validateStatus: () => true }))?.request.res.responseUrl;
+		const req = (await fetch(url, { method: 'HEAD', redirect: 'follow' }))?.url;
 
 		if (!req) {
 			return { error: 'download failed. either the access is denied, or other error.' };

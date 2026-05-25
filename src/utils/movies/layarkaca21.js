@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-import { cheerioLOAD } from '../modules/index.js';
+import { cheerioLOAD, fetchTEXT } from '../modules/index.js';
 import { UA } from '../../helper/index.js';
 
 let ua = undefined;
@@ -23,7 +21,7 @@ const findh2 = ($, str) => $(`div > h2:contains(${str})`);
 const getDetailsMovies = (url) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { data } = await axios.get(url, ua);
+			const data = await fetchTEXT(url, ua);
 			const $ = cheerioLOAD(data);
 			const thumbnail = `https:${$('img.img-thumbnail').attr('src')}`;
 			const country = findh2($, 'Negara').next().text();
@@ -68,7 +66,7 @@ export const layarkaca21 = (keyword) =>
 				ua = { headers: { 'user-agent': UA() } };
 			}
 
-			const { data } = await axios.get(`https://lk21official.org/?s=${keyword}#gsc.tab=0`, ua);
+			const data = await fetchTEXT(`https://lk21official.org/?s=${keyword}#gsc.tab=0`, ua);
 
 			const $ = cheerioLOAD(data);
 

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import FormData from 'form-data';
-import { imageToPdf } from '../converter/file-processing.js';
+import { imageToPdf } from '../converter/image.js';
 import { cheerioLOAD } from '../modules/index.js';
 
 const BASE_URL = 'https://v5.kiryuu.to';

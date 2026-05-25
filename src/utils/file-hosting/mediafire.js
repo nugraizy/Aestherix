@@ -1,7 +1,5 @@
-import axios from 'axios';
-
 import { mime, whatFormat } from '../misc/index.js';
-import { cheerioLOAD } from '../modules/index.js';
+import { cheerioLOAD, fetchTEXT } from '../modules/index.js';
 
 /**
  *
@@ -12,7 +10,7 @@ import { cheerioLOAD } from '../modules/index.js';
 export const mediafire = (url) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { data } = await axios.get(url, {
+			const data = await fetchTEXT(url, {
 				headers: {
 					'user-agent': 'Mozilla/5.0 (compatible; NetcraftSurveyAgent/1.0; +info@netcraft.com)'
 				}

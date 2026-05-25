@@ -1,7 +1,5 @@
-import axios from 'axios';
-
-import { imageToPdf } from '../converter/file-processing.js';
-import { cheerioLOAD } from '../modules/index.js';
+import { imageToPdf } from '../converter/image.js';
+import { cheerioLOAD, fetchTEXT } from '../modules/index.js';
 
 export class KomikCast {
 	#base = (input) => `https://komikcast.net${input}`;
@@ -10,7 +8,7 @@ export class KomikCast {
 		this.search = (keyword) =>
 			new Promise(async (resolve, reject) => {
 				try {
-					const { data } = await axios.get(this.#apiSearch(keyword));
+					const data = await fetchTEXT(this.#apiSearch(keyword));
 
 					const $ = cheerioLOAD(data);
 
@@ -37,7 +35,7 @@ export class KomikCast {
 		this.getDetails = async (url) =>
 			new Promise(async (resolve, reject) => {
 				try {
-					const { data } = await axios.get(url);
+					const data = await fetchTEXT(url);
 
 					const $ = cheerioLOAD(data);
 
@@ -71,7 +69,7 @@ export class KomikCast {
 		this.getPanel = async (url) =>
 			new Promise(async (resolve, reject) => {
 				try {
-					const { data } = await axios.get(url);
+					const data = await fetchTEXT(url);
 
 					const $ = cheerioLOAD(data);
 

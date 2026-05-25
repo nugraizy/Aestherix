@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-import { cheerioLOAD } from '../modules/index.js';
+import { cheerioLOAD, fetchTEXT } from '../modules/index.js';
 
 const _api = (query) => `https://nickfinder.com/${query}`;
 
@@ -13,9 +11,7 @@ const _api = (query) => `https://nickfinder.com/${query}`;
 export const nickname = (query) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { data } = await axios.get(_api(query), {
-				validateStatus: () => true
-			});
+			const data = await fetchTEXT(_api(query));
 
 			const $ = cheerioLOAD(data);
 

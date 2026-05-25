@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-import { numberWithCommas } from '../modules/index.js';
+import { fetchJSON, numberWithCommas } from '../modules/index.js';
 
 const _api = 'https://api.p-store.net/api/products';
 const _apiBase = (input) => `https://p-store.net/${input}`;
@@ -23,13 +21,9 @@ const _parse = (arr) =>
 export const pStoreProduct = (keyword) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { data } = await axios({
-				url: _api,
-				method: 'GET',
-				params: {
-					search: keyword
-				}
-			});
+			const url = new URL(_api);
+			url.searchParams.set('search', keyword);
+			const data = await fetchJSON(url.toString());
 
 			resolve(_parse(data.items.data));
 		} catch (err) {

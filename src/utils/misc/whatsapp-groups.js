@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-import { cheerioLOAD } from '../modules/index.js';
+import { cheerioLOAD, fetchTEXT } from '../modules/index.js';
 import { UA } from '../../helper/index.js';
 
 let ua = undefined;
@@ -18,7 +16,7 @@ export const searchWAGroups = (keyword) =>
 				ua = { headers: { 'user-agent': UA() } };
 			}
 
-			const { data } = await axios.get(
+			const data = await fetchTEXT(
 				`http://ngarang.com/link-grup-wa/daftar-link-grup-wa.php?search=${encodeURI(keyword)}&searchby=name`,
 				ua
 			);

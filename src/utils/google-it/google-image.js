@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-import { cheerioLOAD } from '../modules/index.js';
+import { cheerioLOAD, fetchTEXT } from '../modules/index.js';
 
 const _api = (query) => `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(query)}`;
 
@@ -30,7 +28,7 @@ export const googleImage = (query, limit = 10) =>
 
 			limit = Math.round(limit);
 
-			const { data } = await axios.get(_api(query), {
+			const data = await fetchTEXT(_api(query), {
 				headers: {
 					'User-Agent':
 						'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36'

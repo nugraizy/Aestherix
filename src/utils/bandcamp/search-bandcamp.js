@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { fetch } from 'undici';
 
 import { parseCookie, parseSearch } from './utils.js';
 
@@ -24,13 +24,12 @@ const _api = 'https://bandcamp.com/api/bcsearch_public_api/1/autocomplete_elasti
 export const searchBandcamp = (keyword) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { headers } = await axios({ url: 'https://bandcamp.com/', method: 'GET' });
-			const { data } = await axios({
-				url: _api,
+			const cookieResponse = await fetch('https://bandcamp.com/');
+			const cookieHeader = cookieResponse.headers.getSetCookie();
+			const response = await fetch(_api, {
 				method: 'POST',
-				data: { search_text: keyword, search_filter: '', full_page: true, fan_id: null },
 				headers: {
-					Cookie: parseCookie(headers['set-cookie']),
+					Cookie: parseCookie(cookieHeader),
 					'Content-Type': 'application/json; charset=UTF-8',
 					'X-Requested-With': 'XMLHttpRequest',
 					'User-Agent':
@@ -38,8 +37,11 @@ export const searchBandcamp = (keyword) =>
 					Host: 'bandcamp.com',
 					Origin: 'https://bandcamp.com',
 					Referer: 'https://bandcamp.com/'
-				}
+				},
+				body: JSON.stringify({ search_text: keyword, search_filter: '', full_page: true, fan_id: null })
 			});
+
+			const data = await response.json();
 
 			if (!data?.auto?.results?.length) {
 				return resolve({ error: 'Not Found' });

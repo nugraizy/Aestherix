@@ -1,4 +1,4 @@
-import { imageToAnime } from '../../utils/converter/file-processing.js';
+import { imageToAnime } from '../../utils/converter/image.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';

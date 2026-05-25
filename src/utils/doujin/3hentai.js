@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-import { cheerioLOAD } from '../modules/index.js';
+import { cheerioLOAD, fetchTEXT } from '../modules/index.js';
 
 const _api = (input) => `https://3hentai.net/d/${input}`;
 
@@ -17,7 +15,7 @@ const _api = (input) => `https://3hentai.net/d/${input}`;
 export const _3hentai = (code) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { data } = await axios.get(_api(code), {
+			const data = await fetchTEXT(_api(code), {
 				headers: {
 					'user-agent':
 						'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36'

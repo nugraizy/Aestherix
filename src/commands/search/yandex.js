@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 
 import { isURL } from '../../utils/modules/index.js';
-import { yandex } from '../../utils/image_reverse_search/index.js';
+import { yandex } from '../../utils/image-reverse-search/index.js';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({

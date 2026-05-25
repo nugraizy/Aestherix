@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-import { cheerioLOAD } from '../modules/index.js';
+import { cheerioLOAD, fetchTEXT } from '../modules/index.js';
 import { parseDownload } from './utils.js';
 
 /**
@@ -18,7 +16,7 @@ import { parseDownload } from './utils.js';
 export const downloadBandcamp = (url) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const { data } = await axios({ url, method: 'GET' });
+			const data = await fetchTEXT(url);
 			const $ = cheerioLOAD(data);
 			const jsonRaw = JSON.parse(
 				$('script[src="https://s4.bcbits.com/bundle/bundle/1/tralbum_head-65e4aa096458ae9743f9f82d6924e998.js"]').attr(

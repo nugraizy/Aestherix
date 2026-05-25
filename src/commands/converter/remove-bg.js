@@ -2,7 +2,7 @@ import path from 'path';
 import parser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
-import { removeBg } from '../../utils/converter/file-processing.js';
+import { removeBg } from '../../utils/converter/image.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 

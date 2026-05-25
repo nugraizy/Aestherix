@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-import { cheerioLOAD } from '../modules/index.js';
+import { cheerioLOAD, fetchJSON } from '../modules/index.js';
 
 const domain = 'http://app.chordindonesia.com/?json=';
 
@@ -15,13 +13,13 @@ const _api = (query, id) => (id ? `${domain}get_post&id=${id}` : `${domain}get_s
 export const chords = (query) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			let { data } = await axios.get(_api(query));
+			let data = await fetchJSON(_api(query));
 
 			if (data.count_total === 0) {
 				resolve({ error: 'Cannot find the chords that you are looking for.' });
 			}
 
-			data = (await axios.get(_api(undefined, data.posts[0].id))).data;
+			data = await fetchJSON(_api(undefined, data.posts[0].id));
 
 			const { content, url, title } = data.post;
 

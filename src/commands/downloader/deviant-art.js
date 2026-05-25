@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { downloadDeviantArt } from '../../utils/deviant_art/index.js';
+import { downloadDeviantArt } from '../../utils/deviant-art/index.js';
 import { color, loggers, numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 

@@ -1,5 +1,5 @@
 import { cmdId } from '../../helper/modules/prefix.js';
-import { searchDeviantArt } from '../../utils/deviant_art/index.js';
+import { searchDeviantArt } from '../../utils/deviant-art/index.js';
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 

@@ -1,5 +1,5 @@
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
-import { pStoreProduct } from '../../utils/p_store/index.js';
+import { pStoreProduct } from '../../utils/p-store/index.js';
 import { defineCommand } from '../_define.js';
 
 const regex = (str1, str2) => new RegExp(`\\b${str1}\\b`).test(str2.toLowerCase());

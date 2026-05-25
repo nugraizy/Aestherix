@@ -1,6 +1,6 @@
-import axios from 'axios';
 import asyncRetry from 'async-retry';
 
+import { fetchJSON } from '../modules/index.js';
 import { _api, bilibiliParseMetadataTv } from './utils.js';
 
 const headers = {
@@ -15,9 +15,7 @@ export const bilibiliDetailTv = ({ aid }) =>
 			try {
 				data = await asyncRetry(
 					async () => {
-						const { data } = await axios.get(_api.id.file(aid), {
-							headers
-						});
+						const data = await fetchJSON(_api.id.file(aid), { headers });
 
 						return data;
 					},
@@ -57,17 +55,15 @@ export const bilibiliSearchTv = (keyword) =>
 			try {
 				data = await asyncRetry(
 					async () => {
-						const { data } = (
-							await axios.get(_api.id.search(keyword), {
-								headers
-							})
-						).data;
+						const res = await fetchJSON(_api.id.search(keyword), {
+							headers
+						});
 
-						if (!data) {
+						if (!res.data) {
 							throw new Error('Error when getting Bilibili video details.');
 						}
 
-						return data;
+						return res.data;
 					},
 					{
 						retries: 5
