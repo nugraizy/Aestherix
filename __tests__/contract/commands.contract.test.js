@@ -62,6 +62,10 @@ const files = collectCommandFiles();
 
 describe('command contract', () => {
 	before(async () => {
+		const { config } = await import('@dotenvx/dotenvx');
+
+		config({ quiet: true });
+
 		// Pre-warm heavy shared modules so the per-command import budget
 		// reflects per-command cost rather than cold-cache cost.
 		await import('../../src/utils/index.js');
