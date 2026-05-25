@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.8.3」2026-05-25
+
+## Performance
+- **Message dispatch fastpath** — profile flag, fire-and-forget trackUsage, void reject branches, reordered guard chain with owner short-circuit, parallel group cache, pre-warm at connect, stale-while-revalidate for non-command messages, cached keys for auto-correct. ([`6404da7`](https://github.com/nugraizy/aestherix/commit/6404da7))
+
+## Added
+- **Comix image descrambler** — ported LCG tile descrambler from keiyoushi PR #16139, auto-descrambles scrambled pages in getChapterPages. ([`297cf88`](https://github.com/nugraizy/aestherix/commit/297cf88))
+- **Unified PDF filename** — all manga readers now use `{title}-chapter-{id}-{domain}.pdf` template with title lookup. ([`297cf88`](https://github.com/nugraizy/aestherix/commit/297cf88))
+- **CI, tests, and docs scaffolding** — GitHub Actions workflow, test fixtures, contract tests, CONTRIBUTING.md, tsconfig, and documentation index. ([`2b6ca0c`](https://github.com/nugraizy/aestherix/commit/2b6ca0c))
+
+---
+
 # 「7.8.2」2026-05-24
 
 ## Added
