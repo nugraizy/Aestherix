@@ -29,12 +29,17 @@ const broadcastBody = z.object({
 	header: z.string().max(256).optional(),
 	mediaUrl: z.string().url().optional(),
 	mediaType: z.enum(['image', 'video', 'document', 'audio']).optional(),
-	buttons: z.array(z.object({
-		type: z.enum(['reply', 'url']).optional(),
-		label: z.string().min(1).max(60),
-		url: z.string().max(500).optional(),
-		id: z.string().max(100).optional()
-	})).max(3).optional(),
+	buttons: z
+		.array(
+			z.object({
+				type: z.enum(['reply', 'url']).optional(),
+				label: z.string().min(1).max(60),
+				url: z.string().max(500).optional(),
+				id: z.string().max(100).optional()
+			})
+		)
+		.max(3)
+		.optional(),
 	delayMs: z.number().int().min(500).max(10000).optional(),
 	mentionAll: z.boolean().optional(),
 	dryRun: z.boolean().optional()
@@ -44,43 +49,59 @@ export function createBroadcastRouter({ services }) {
 	const { audit, broadcast, middleware } = services;
 	const router = Router();
 
-	router.post('/broadcast', broadcastRateLimit, middleware.requireSuperOwnerAuth, validate({ body: broadcastBody }), async (req, res) => {
-		const session = req.dashboardSession;
+	router.post(
+		'/broadcast',
+		broadcastRateLimit,
+		middleware.requireSuperOwnerAuth,
+		validate({ body: broadcastBody }),
+		async (req, res) => {
+			const session = req.dashboardSession;
 
-		if (broadcast.isRunning()) {
-			return res.status(409).json({ ok: false, message: 'A broadcast is already in progress.' });
-		}
+			if (broadcast.isRunning()) {
+				return res.status(409).json({ ok: false, message: 'A broadcast is already in progress.' });
+			}
 
-		const { targets, message, header, buttons, mediaUrl, mediaType, mentionAll, delayMs, dryRun } = req.body;
-		const result = await broadcast.send({ targets, message, header, buttons, mediaUrl, mediaType, mentionAll, delayMs, dryRun });
+			const { targets, message, header, buttons, mediaUrl, mediaType, mentionAll, delayMs, dryRun } = req.body;
+			const result = await broadcast.send({
+				targets,
+				message,
+				header,
+				buttons,
+				mediaUrl,
+				mediaType,
+				mentionAll,
+				delayMs,
+				dryRun
+			});
 
-		if (!result.ok) {
+			if (!result.ok) {
+				audit.push({
+					action: 'broadcast.send',
+					session,
+					target: `${targets.length} targets`,
+					status: 'failed',
+					message: result.message
+				});
+
+				return res.status(result.status || 400).json(result);
+			}
+
 			audit.push({
 				action: 'broadcast.send',
 				session,
-				target: `${targets.length} targets`,
-				status: 'failed',
-				message: result.message
+				target: `${result.total} targets`,
+				after: { sent: result.sent, failed: result.failed, dryRun: Boolean(dryRun) }
 			});
 
-			return res.status(result.status || 400).json(result);
+			loggers.info(
+				color('Dashboard broadcast:', 'white'),
+				color(`${result.sent}/${result.total} sent`, 'lilac'),
+				dryRun ? color('(dry run)', 'gray') : ''
+			);
+
+			res.json(result);
 		}
-
-		audit.push({
-			action: 'broadcast.send',
-			session,
-			target: `${result.total} targets`,
-			after: { sent: result.sent, failed: result.failed, dryRun: Boolean(dryRun) }
-		});
-
-		loggers.info(
-			color('Dashboard broadcast:', 'white'),
-			color(`${result.sent}/${result.total} sent`, 'lilac'),
-			dryRun ? color('(dry run)', 'gray') : ''
-		);
-
-		res.json(result);
-	});
+	);
 
 	router.get('/broadcast/status', middleware.requireSuperOwnerAuth, (_req, res) => {
 		res.json({
@@ -111,18 +132,28 @@ export function createBroadcastRouter({ services }) {
 		res.json(result);
 	});
 
-	router.post('/broadcast/schedule', middleware.requireSuperOwnerAuth, validate({ body: broadcastBody.extend({ sendAt: z.number() }) }), async (req, res) => {
-		const { sendAt, ...payload } = req.body;
-		const result = broadcast.schedule(payload, sendAt);
+	router.post(
+		'/broadcast/schedule',
+		middleware.requireSuperOwnerAuth,
+		validate({ body: broadcastBody.extend({ sendAt: z.number() }) }),
+		async (req, res) => {
+			const { sendAt, ...payload } = req.body;
+			const result = broadcast.schedule(payload, sendAt);
 
-		if (!result.ok) {
-			return res.status(400).json(result);
+			if (!result.ok) {
+				return res.status(400).json(result);
+			}
+
+			audit.push({
+				action: 'broadcast.schedule',
+				session: req.dashboardSession,
+				target: `${payload.targets.length} targets`,
+				after: { sendAt, id: result.id }
+			});
+
+			res.json(result);
 		}
-
-		audit.push({ action: 'broadcast.schedule', session: req.dashboardSession, target: `${payload.targets.length} targets`, after: { sendAt, id: result.id } });
-
-		res.json(result);
-	});
+	);
 
 	router.post('/broadcast/schedule/:id/cancel', middleware.requireSuperOwnerAuth, (req, res) => {
 		const result = broadcast.cancelSchedule(req.params.id);
@@ -194,12 +225,23 @@ export function createBroadcastRouter({ services }) {
 		});
 
 		if (!result.ok) {
-			audit.push({ action: 'broadcast.send', session, target: `${targets.length} targets`, status: 'failed', message: result.message });
+			audit.push({
+				action: 'broadcast.send',
+				session,
+				target: `${targets.length} targets`,
+				status: 'failed',
+				message: result.message
+			});
 
 			return res.status(result.status || 400).json(result);
 		}
 
-		audit.push({ action: 'broadcast.send', session, target: `${result.total} targets`, after: { sent: result.sent, failed: result.failed, dryRun } });
+		audit.push({
+			action: 'broadcast.send',
+			session,
+			target: `${result.total} targets`,
+			after: { sent: result.sent, failed: result.failed, dryRun }
+		});
 
 		loggers.info(color('Dashboard broadcast (upload):', 'white'), color(`${result.sent}/${result.total} sent`, 'lilac'));
 

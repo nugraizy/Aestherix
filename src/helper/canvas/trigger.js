@@ -30,7 +30,7 @@ const prepareCanvas = async (images) => {
 	};
 };
 
-export const trigger = async (image, sender, opt) =>
+export const trigger = async (image, sender, opt, client) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			let i = 0;

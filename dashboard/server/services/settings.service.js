@@ -50,10 +50,7 @@ function stripProtected(snapshot) {
 
 function applyToConfiguration(configuration, snapshot) {
 	configuration.settings = snapshot;
-	configuration.owners = [
-		toUserJid(snapshot.owner_number),
-		...(snapshot.team_number || []).map(toUserJid)
-	].filter(Boolean);
+	configuration.owners = [toUserJid(snapshot.owner_number), ...(snapshot.team_number || []).map(toUserJid)].filter(Boolean);
 
 	if (typeof snapshot.logger_theme === 'string' && snapshot.logger_theme.length > 0) {
 		configuration.logger_theme = snapshot.logger_theme;
@@ -99,9 +96,7 @@ export function createSettingsService({ configuration, botBridge } = {}) {
 		const result = SettingsPatchSchema.safeParse(patch);
 
 		if (!result.success) {
-			const message = result.error.issues
-				.map((issue) => `${issue.path.join('.') || 'root'}: ${issue.message}`)
-				.join('; ');
+			const message = result.error.issues.map((issue) => `${issue.path.join('.') || 'root'}: ${issue.message}`).join('; ');
 
 			return { ok: false, message };
 		}

@@ -1,7 +1,6 @@
-/**
- * @type {import('../../types/Commands/index.js').CommandProps}
- */
-export default {
+import { defineCommand } from './_define.js';
+
+export default defineCommand({
 	name: '',
 	description: '',
 	usage: '!',
@@ -11,4 +10,4 @@ export default {
 	limit: 0,
 	status: 'enable',
 	run: async (_, client) => {} /* eslint-disable-line */
-};
+});

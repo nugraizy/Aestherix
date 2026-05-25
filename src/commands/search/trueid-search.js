@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import { cmdId } from '../../helper/modules/prefix.js';
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { trueidSearch } from '../../utils/movies/true-id-search.js';
@@ -43,7 +45,7 @@ export default defineCommand({
 										rowId: cmdId(cmd, `get ${v}`, ctx)
 									}
 								],
-								title: `${__botName} | Powered by TrueID`
+								title: `${BOT_NAME} | Powered by TrueID`
 							};
 						})
 					: false;
@@ -133,7 +135,7 @@ export default defineCommand({
 										rowId: cmdId(cmd, `get ${v}`, ctx)
 									}
 								],
-								title: `${__botName} | Powered by TrueID`
+								title: `${BOT_NAME} | Powered by TrueID`
 							};
 						})
 					: false;

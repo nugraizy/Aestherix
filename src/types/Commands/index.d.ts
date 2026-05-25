@@ -1,4 +1,4 @@
-import type { ClientSocket, Context, Store } from '../Core';
+import type { ClientSocket, Context, Store } from '../Core/index.d.ts';
 
 type Category =
 	| 'AI'

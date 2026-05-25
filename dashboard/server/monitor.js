@@ -264,9 +264,7 @@ export const pushDashboardLog = (level, ...info) => {
 	const raw = info.map((value) => String(value)).join(' ');
 	const bulletIdx = raw.indexOf('•');
 	const lastBracket = raw.lastIndexOf(']', bulletIdx);
-	const message = bulletIdx > 0 && lastBracket >= 0
-		? raw.slice(0, lastBracket + 1) + ' ' + raw.slice(bulletIdx)
-		: raw;
+	const message = bulletIdx > 0 && lastBracket >= 0 ? raw.slice(0, lastBracket + 1) + ' ' + raw.slice(bulletIdx) : raw;
 
 	state.logs.push({
 		id: state.lastLogId,

@@ -5,24 +5,27 @@ import { defineCommand } from '../_define.js';
 let lastGames = {};
 
 function startFreeGamePolling() {
-	configuration.timers.freegame = setInterval(async () => {
-		try {
-			const data = await getNewGames();
+	configuration.timers.freegame = setInterval(
+		async () => {
+			try {
+				const data = await getNewGames();
 
-			if (JSON.stringify(data) === JSON.stringify(lastGames)) {
-				return;
+				if (JSON.stringify(data) === JSON.stringify(lastGames)) {
+					return;
+				}
+
+				lastGames = data;
+				configuration.mqtt?.publish(
+					process.env.MQTT_FREEGAME,
+					JSON.stringify({ data, from: configuration.timers.from, status: true })
+				);
+			} catch {
+				clearInterval(configuration.timers.freegame);
+				delete configuration.timers.freegame;
 			}
-
-			lastGames = data;
-			configuration.mqtt?.publish(
-				process.env.MQTT_FREEGAME,
-				JSON.stringify({ data, from: configuration.timers.from, status: true })
-			);
-		} catch {
-			clearInterval(configuration.timers.freegame);
-			delete configuration.timers.freegame;
-		}
-	}, 3 * 60 * 1000);
+		},
+		3 * 60 * 1000
+	);
 }
 
 export default defineCommand({

@@ -43,7 +43,7 @@ export default defineCommand({
 			const chats = store.loadMessages(from).map((v) => v.key);
 
 			for (const chat of chats) {
-				chat.participant = chat.fromMe ? client.decodeJid(instance) : chat.participant;
+				chat.participant = chat.fromMe ? client.decodeJid(client.user.id) : chat.participant;
 
 				await client.relay(from, { reactionMessage: { key: chat, text: emojis[0] } });
 			}

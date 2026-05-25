@@ -1,7 +1,7 @@
 import type { MessageType, getDevice } from 'baileys';
-import type { ClientSocket } from '../Core';
-import type { MessageGenerated, WAGenericMediaMessage } from '../Messages/index';
-import type { MediaDataContext } from '../Socket';
+import type { ClientSocket } from '../Core/index.d.ts';
+import type { MessageGenerated, WAGenericMediaMessage } from '../Messages/index.d.ts';
+import type { MediaDataContext } from '../Socket/index.d.ts';
 
 /**
  * @deprecated Use `Context` from `../Core` instead. This type is kept for backward compatibility.

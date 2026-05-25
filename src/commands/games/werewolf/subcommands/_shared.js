@@ -39,11 +39,9 @@ export const loadSession = async (ctx, argIndex = 3) => {
 	return { session, roomId: session?.roomId ?? roomId };
 };
 
-export const replyText = (ctx, client, text) =>
-	client.reply(ctx.from, text, ctx.message);
+export const replyText = (ctx, client, text) => client.reply(ctx.from, text, ctx.message);
 
-export const replyKey = (ctx, client, locale, key, vars) =>
-	replyText(ctx, client, localised(locale, key, vars));
+export const replyKey = (ctx, client, locale, key, vars) => replyText(ctx, client, localised(locale, key, vars));
 
 export const replyError = (ctx, client, locale, reason, vars) =>
 	replyText(ctx, client, localised(locale, `errors.${reason}`, vars));

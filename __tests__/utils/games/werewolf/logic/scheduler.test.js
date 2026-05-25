@@ -14,7 +14,13 @@ import { describe, it, beforeEach } from 'node:test';
 import { EventEmitter } from 'node:events';
 
 import { Cache } from '../../../../../src/helper/modules/cache.js';
-import { addPlayer, createSession, dealRoles, getPlayer, setPhase } from '../../../../../src/utils/games/werewolf/state/session.js';
+import {
+	addPlayer,
+	createSession,
+	dealRoles,
+	getPlayer,
+	setPhase
+} from '../../../../../src/utils/games/werewolf/state/session.js';
 import { buildComposition } from '../../../../../src/utils/games/werewolf/config/balance.js';
 import { makeRepository } from '../../../../../src/utils/games/werewolf/state/repository.js';
 import { makeScheduler } from '../../../../../src/utils/games/werewolf/logic/scheduler.js';

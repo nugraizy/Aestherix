@@ -40,11 +40,7 @@ export default defineCommand({
 
 		for (const data in stories) {
 			if (stories[data]?.error) {
-				await client.reply(
-					from,
-					`Error while downloading Instagram story\n\n${stories[data].error}\n${data}`,
-					message
-				);
+				await client.reply(from, `Error while downloading Instagram story\n\n${stories[data].error}\n${data}`, message);
 				loggers.error(`${color('Failed to Download Instagram Story', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;

@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import { cmdId } from '../../helper/modules/prefix.js';
 import { Shinigami } from '../../utils/shinigami/index.js';
 import { defineCommand } from '../_define.js';
@@ -46,7 +48,7 @@ export default defineCommand({
 			builder
 				.destination(from)
 				.body(body)
-				.footer('Powered by ' + __botName)
+				.footer('Powered by ' + BOT_NAME)
 				.buttons(
 					builder.button.reply({ display: '📖 Chapters', id: cmdId('sgch', manga.id, { prefix }) }),
 					builder.button.reply({ display: '📕 Read', id: cmdId('sgread', manga.id, { prefix }) })

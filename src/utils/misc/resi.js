@@ -24,9 +24,9 @@ export const resi = (kurir, resi) =>
 					'Accept-Language': 'en-US,en;q=0.9',
 					'User-Agent': 'GoogleBot',
 					cookie,
-					...form.getHeaders(),
+					...form.getHeaders()
 				},
-				data: form.getBuffer(),
+				data: form.getBuffer()
 			});
 
 			resolve(data);

@@ -57,7 +57,7 @@ export default defineCommand({
 
 			options = _.defaults({ filename: path.join(__dirname, `src/media/temporary_files/${filename}`) }, defaultOptions);
 
-			const result = await trigger(profile, sender, options);
+			const result = await trigger(profile, sender, options, client);
 
 			if (options.output === 'sticker') {
 				await client.send(from, { sticker: Buffer.from(result, 'base64') }, {});
@@ -88,7 +88,7 @@ export default defineCommand({
 			loggers.warning(`${color('Triggering', 'pink')} ${color(prettyNumber, 'lilac')}`);
 
 			const buffer = await client.downloadMediaMessage(mediaData);
-			const result = await trigger(buffer, sender, options);
+			const result = await trigger(buffer, sender, options, client);
 
 			if (options.output === 'sticker') {
 				await client.send(from, { sticker: Buffer.from(result, 'base64') }, {});
@@ -108,7 +108,7 @@ export default defineCommand({
 
 			options = _.defaults({ filename: path.join(__dirname, `src/media/temporary_files/${filename}`) }, defaultOptions);
 
-			const result = await trigger(profile, sender, options);
+			const result = await trigger(profile, sender, options, client);
 
 			if (options.output === 'sticker') {
 				await client.send(from, { sticker: Buffer.from(result, 'base64') }, {});

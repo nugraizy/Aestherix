@@ -327,10 +327,7 @@ describe('werewolf full cycle integration', () => {
 			assert.ok(tick > 0, 'driver must perform at least one tick');
 			assert.ok(tick < MAX_TICKS, `driver exhausted its tick budget (N=${N}, ticks=${tick})`);
 
-			assert.ok(
-				lastWinner === null || VALID_WINNERS.has(lastWinner),
-				`unexpected winner "${lastWinner}" for N=${N}`
-			);
+			assert.ok(lastWinner === null || VALID_WINNERS.has(lastWinner), `unexpected winner "${lastWinner}" for N=${N}`);
 
 			const allAssigned = session.playersData.every((p) => typeof p.role === 'string' && p.role.length > 0);
 

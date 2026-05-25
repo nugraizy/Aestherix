@@ -685,12 +685,12 @@ export class Werewolf {
 
 				dataGame.playersKilled = [];
 				dataGame.gameDialogue = message;
-				client.ev.emit('werewolf.cycle', {
+				this.client.ev.emit('werewolf.cycle', {
 					error: false,
 					peopleKilledMention,
 					message,
 					id: dataGame.roomId,
-					...client,
+					...this.client,
 					...dataGame,
 					time: 'day'
 				});
@@ -721,11 +721,11 @@ export class Werewolf {
 					const data = dataGame;
 
 					configuration.games.werewolf.delete(roomId);
-					client.ev.emit('werewolf.cycle', {
+					this.client.ev.emit('werewolf.cycle', {
 						error: true,
 						message,
 						id: dataGame.roomId,
-						...client,
+						...this.client,
 						...data,
 						status: false,
 						time: 'failAfk'
@@ -736,11 +736,11 @@ export class Werewolf {
 				message = WEREWOLF_SCRIPTING.dayTime.voting[Math.floor(Math.random() * WEREWOLF_SCRIPTING.dayTime.voting.length)];
 				dataGame.gameDialogue = message;
 				dataGame.gameTime = 30;
-				client.ev.emit('werewolf.cycle', {
+				this.client.ev.emit('werewolf.cycle', {
 					error: false,
 					message,
 					id: dataGame.roomId,
-					...client,
+					...this.client,
 					...dataGame,
 					time: 'evening',
 					status: false
@@ -778,14 +778,14 @@ export class Werewolf {
 						message = isWerewolf
 							? `${WEREWOLF_SCRIPTING.lynchKillWerewolf[
 									Math.floor(Math.random() * WEREWOLF_SCRIPTING.lynchKillWerewolf.length)
-							  ] /* eslint-disable-line */
+								] /* eslint-disable-line */
 									.replace(/\{0\}/g, `${ids.map((v) => `@${v[0].split('@')[0]}`)}`)
 									.replace('{1}', dataGame.playersData.find((v) => v.id === ids[0][0]).role.capitalize())}\n\n${ids
 									.map((v, i) => `${i + 1}. @${v[0].split('@')[0]}: ${v[1].join(', ')}`)
 									.join('\n')}`
 							: `${WEREWOLF_SCRIPTING.lynchKillNotWerewolf[
 									Math.floor(Math.random() * WEREWOLF_SCRIPTING.lynchKillNotWerewolf.length)
-							  ] /* eslint-disable-line */
+								] /* eslint-disable-line */
 									.replace(/\{0\}/g, `${ids.map((v) => `@${v[0].split('@')[0]}`)}`)
 									.replace('{1}', dataGame.playersData.find((v) => v.id === ids[0][0]).role.capitalize())}\n\n${ids
 									.map((v, i) => `${i + 1}. @${v[0].split('@')[0]}: ${v[1].join(', ')}`)
@@ -805,12 +805,12 @@ export class Werewolf {
 				const isWinning = werewolfs === humans ? 'werewolf' : !werewolfs ? 'villager' : 'none';
 
 				dataGame.gameDialogue = message;
-				client.ev.emit('werewolf.cycle', {
+				this.client.ev.emit('werewolf.cycle', {
 					error: false,
 					voteData,
 					message,
 					id: dataGame.roomId,
-					...client,
+					...this.client,
 					...dataGame,
 					time: 'voting'
 				});
@@ -829,12 +829,12 @@ export class Werewolf {
 								.join('')}\nPihak Jahat:\n${statisticPlayer[0].bad
 								.map((v) => `@${v.id.split('@')[0]} ${v.isAlive ? '😄 Hidup' : '💀 Mati'} - ${v.role.capitalize()}\n`)
 								.join('')}\n\nLama permainan : ${dataGame.timeLength}`;
-						client.ev.emit('werewolf.cycle', {
+						this.client.ev.emit('werewolf.cycle', {
 							error: false,
 							peopleMention: dataGame.playersData.map((v) => v.id),
 							message,
 							id: dataGame.roomId,
-							...client,
+							...this.client,
 							...dataGame,
 							status: false,
 							isWinning,
@@ -857,10 +857,10 @@ export class Werewolf {
 				);
 
 				dataGame.gameDialogue = message;
-				client.ev.emit('werewolf.cycle', {
+				this.client.ev.emit('werewolf.cycle', {
 					error: false,
 					...(dataGame.firstNight ? {} : message),
-					...client,
+					...this.client,
 					id: dataGame.roomId,
 					...dataGame,
 					time: 'dawn'
@@ -874,10 +874,10 @@ export class Werewolf {
 				);
 
 				dataGame.gameDialogue = message;
-				client.ev.emit('werewolf.cycle', {
+				this.client.ev.emit('werewolf.cycle', {
 					error: false,
 					...(dataGame.firstNight ? {} : message),
-					...client,
+					...this.client,
 					id: dataGame.roomId,
 					...dataGame,
 					time: 'night'

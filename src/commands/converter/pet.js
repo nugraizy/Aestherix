@@ -57,7 +57,7 @@ export default defineCommand({
 
 			defaultOptions.filename = path.join(__dirname, `src/media/temporary_files/${filename}`);
 
-			const result = await pet(profile, sender, defaultOptions);
+			const result = await pet(profile, sender, defaultOptions, client);
 
 			if (defaultOptions.output === 'sticker') {
 				await client.send(from, { sticker: Buffer.from(result, 'base64') }, {});
@@ -92,7 +92,7 @@ export default defineCommand({
 				path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
 				typeQuoted
 			);
-			const result = await pet(file, sender, defaultOptions);
+			const result = await pet(file, sender, defaultOptions, client);
 
 			if (defaultOptions.output === 'sticker') {
 				await client.send(from, { sticker: Buffer.from(result, 'base64') }, {});
@@ -114,7 +114,7 @@ export default defineCommand({
 
 			defaultOptions.filename = path.join(__dirname, `src/media/temporary_files/${filename}`);
 
-			const result = await pet(profile, sender, defaultOptions);
+			const result = await pet(profile, sender, defaultOptions, client);
 
 			if (defaultOptions.output === 'sticker') {
 				await client.send(from, { sticker: Buffer.from(result, 'base64') }, {});

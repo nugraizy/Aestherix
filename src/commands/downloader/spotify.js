@@ -18,7 +18,7 @@ const getRedirect = async (shortUrl) => {
 
 		return matches[1] ?? null;
 	} catch {
-		console.error('Error fetching redirect URL:', shortUrl);
+		loggers.error(color('Spotify redirect URL fetch failed:', 'red'), color(shortUrl, 'gray'));
 		return null;
 	}
 };
@@ -288,7 +288,7 @@ export default defineCommand({
 	limit: 5,
 	status: 'enable',
 	run: async ({ query, bodyQuoted, typeQuoted, message, from, mediaData, prettyNumber }, client) => {
-		if (typeQuoted === 'imageMessage' && mediaData.participant?.includes(client.decodeJid(instance))) {
+		if (typeQuoted === 'imageMessage' && mediaData.participant?.includes(client.decodeJid(client.user.id))) {
 			const reg = /✦ Media ID :\s*([^\n]+)/g;
 			const type = /🖼️ Type :\s*([^\n]+)/g;
 

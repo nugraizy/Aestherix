@@ -36,18 +36,14 @@ const sendRoleStickers = async (clientInstance, session, locale) => {
 			const buffer = await fs.readFile(path.join(MEDIA_DIR, file));
 			const roleName = player.role.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 			const caption =
-				locale === 'en'
-					? `🐺 Your role: *${roleName}*\nKeep it secret!`
-					: `🐺 Peranmu: *${roleName}*\nRahasiakan!`;
+				locale === 'en' ? `🐺 Your role: *${roleName}*\nKeep it secret!` : `🐺 Peranmu: *${roleName}*\nRahasiakan!`;
 
 			await clientInstance.send(player.id, { sticker: buffer }, {});
 			await clientInstance.send(player.id, { text: caption });
 		} catch {
 			const roleName = player.role.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 			const caption =
-				locale === 'en'
-					? `🐺 Your role: *${roleName}*\nKeep it secret!`
-					: `🐺 Peranmu: *${roleName}*\nRahasiakan!`;
+				locale === 'en' ? `🐺 Your role: *${roleName}*\nKeep it secret!` : `🐺 Peranmu: *${roleName}*\nRahasiakan!`;
 
 			await clientInstance.send(player.id, { text: caption });
 		}

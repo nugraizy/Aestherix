@@ -20,7 +20,7 @@ Platform.shim.eval = async (data, env) => {
 	return new Function(code)();
 };
 
-const youtube = await Innertube.create({ cache: new UniversalCache(true, './cache'), generate_session_locally: true });  
+const youtube = await Innertube.create({ cache: new UniversalCache(true, './cache'), generate_session_locally: true });
 
 class YoutubeiError extends Error {
 	constructor(message, info) {

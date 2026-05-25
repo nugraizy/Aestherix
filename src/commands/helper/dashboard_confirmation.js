@@ -26,11 +26,7 @@ export default defineCommand({
 		}
 
 		if (confirmation.approved) {
-			return await client.reply(
-				from,
-				'Dashboard login confirmation accepted. You can return to the browser now.',
-				message
-			);
+			return await client.reply(from, 'Dashboard login confirmation accepted. You can return to the browser now.', message);
 		}
 
 		return await client.reply(from, confirmation.message || 'Dashboard confirmation failed.', message);

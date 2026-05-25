@@ -165,5 +165,4 @@ export class EventHandler {
 
 		return this.#lazy.get(key);
 	}
-
 }

@@ -50,7 +50,7 @@ export default defineCommand({
 	limit: 8,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, /*type, args,*/ mediaData, typeQuoted, bodyQuoted }, client) {
-		if (typeQuoted === 'conversation' && mediaData.participant?.includes(client.decodeJid(instance))) {
+		if (typeQuoted === 'conversation' && mediaData.participant?.includes(client.decodeJid(client.user.id))) {
 			const reg = /✦ Video ID :\s*`([^\n]+)`/g;
 
 			const videoIds = [];

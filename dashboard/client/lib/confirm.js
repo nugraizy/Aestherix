@@ -3,13 +3,7 @@ import { writable } from 'svelte/store';
 export const activeConfirm = writable(null);
 
 export function showConfirm(options = {}) {
-	const {
-		title = 'Confirm',
-		message = '',
-		confirmLabel = 'Confirm',
-		cancelLabel = 'Cancel',
-		danger = false
-	} = options;
+	const { title = 'Confirm', message = '', confirmLabel = 'Confirm', cancelLabel = 'Cancel', danger = false } = options;
 
 	return new Promise((resolve) => {
 		const settle = (value) => {

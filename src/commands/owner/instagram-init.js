@@ -2,8 +2,7 @@ import configuration from '../../helper/config/connect.js';
 import { login } from '../../utils/instagram/login.js';
 import { defineCommand } from '../_define.js';
 
-		const { InstagramApi } = await import('../../utils/instagram/instagram.js');
-
+const { InstagramApi } = await import('../../utils/instagram/instagram.js');
 
 export default defineCommand({
 	name: 'instagraminit',
@@ -20,7 +19,6 @@ export default defineCommand({
 		}
 
 		await login(process.env.INSTAGRAM_USERNAME, process.env.INSTAGRAM_PASSWORD);
-
 
 		configuration.instagram = InstagramApi.init();
 

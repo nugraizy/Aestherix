@@ -1,4 +1,4 @@
-import { fetchJSON } from '../modules/index.js';
+import { color, fetchJSON, loggers } from '../modules/index.js';
 import { URL_API_DOWNLOAD_MANGA, URL_API_DOWNLOAD_MANGA_DETAIL } from './index.js';
 
 export const downloadManga = (input) =>
@@ -21,7 +21,7 @@ export const downloadManga = (input) =>
 				}
 			});
 		} catch (err) {
-			console.log(err);
+			loggers.error(color('Pixiv manga download failed:', 'red'), err);
 			reject(err);
 		}
 	});

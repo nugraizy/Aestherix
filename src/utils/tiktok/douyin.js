@@ -85,7 +85,7 @@ const parseDouyinInfo = (data) => {
 
 	const container = {
 		...mediaStats,
-		author_statistics: Object.keys(userInfo)  
+		author_statistics: Object.keys(userInfo)
 			.filter((v) => userInfo[v] !== null)
 			.map((k) => ({ [k]: userInfo[k] }))
 			.reduce((a, b) => ({ ...a, ...b }), {}),

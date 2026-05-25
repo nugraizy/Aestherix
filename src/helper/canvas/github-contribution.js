@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import Canvas from '@napi-rs/canvas';
 import chroma from 'chroma-js';
 import _ from 'lodash';
@@ -5,7 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { Client } from 'undici';
 
-const getCopyright = () => `© 2025 Hidden Finder, Inc | Made by ${global.__botName ?? 'Bot'} using Canvas Module.`;
+const getCopyright = () => `© 2025 Hidden Finder, Inc | Made by ${BOT_NAME ?? 'Bot'} using Canvas Module.`;
 
 const { createCanvas, GlobalFonts, loadImage } = Canvas;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -666,4 +668,3 @@ export class GitHubGraph {
 		return this.#_canvas.toBuffer('image/png');
 	}
 }
-

@@ -1,3 +1,4 @@
+// @ts-check
 import { DEFAULT_CONNECTION_CONFIG, jidDecode, jidNormalizedUser, proto } from 'baileys';
 import { md5, toNumber, updateMessageWithReaction, updateMessageWithReceipt } from 'baileys/lib/Utils/index.js';
 import { createRequire } from 'module';
@@ -279,6 +280,8 @@ export class Store {
 						Object.keys(this.contacts).map(async (id) => {
 							const { user } = jidDecode(id);
 
+							// baileys's md5 is typed as `() => ...` upstream but accepts a Buffer at runtime.
+							// @ts-expect-error -- upstream type missing the Buffer parameter
 							return [id, (await md5(Buffer.from(user + 'WA_ADD_NOTIF', 'utf8'))).toString('base64').slice(0, 3)];
 						})
 					);

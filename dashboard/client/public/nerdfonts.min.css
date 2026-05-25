@@ -1,9 +1,35 @@
-@font-face{font-family:'NerdFontsSymbols Nerd Font';src:url("./nerdfonts-subset.woff2") format("woff2");font-weight:normal;font-style:normal}
-.nf{font-family:'NerdFontsSymbols Nerd Font';font-style:normal;font-weight:normal;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;line-height:1}
-.nf-md-robot_angry_outline:before{content:"\f169e"}
-.nf-fa-crown:before{content:"\edeb"}
-.nf-fa-shield:before{content:"\f132"}
-.nf-fa-star:before{content:"\f005"}
-.nf-fa-chevron_left:before{content:"\f053"}
-.nf-fa-chevron_right:before{content:"\f054"}
-.nf-fa-chevron_down:before{content:"\f078"}
+@font-face {
+	font-family: 'NerdFontsSymbols Nerd Font';
+	src: url('./nerdfonts-subset.woff2') format('woff2');
+	font-weight: normal;
+	font-style: normal;
+}
+.nf {
+	font-family: 'NerdFontsSymbols Nerd Font';
+	font-style: normal;
+	font-weight: normal;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	line-height: 1;
+}
+.nf-md-robot_angry_outline:before {
+	content: '\f169e';
+}
+.nf-fa-crown:before {
+	content: '\edeb';
+}
+.nf-fa-shield:before {
+	content: '\f132';
+}
+.nf-fa-star:before {
+	content: '\f005';
+}
+.nf-fa-chevron_left:before {
+	content: '\f053';
+}
+.nf-fa-chevron_right:before {
+	content: '\f054';
+}
+.nf-fa-chevron_down:before {
+	content: '\f078';
+}

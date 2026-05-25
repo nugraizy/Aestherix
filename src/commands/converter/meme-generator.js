@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import parser from 'yargs-parser';
 
 import { memeGenerator } from '../../helper/canvas/index.js';
@@ -95,13 +97,11 @@ export default defineCommand({
 		} else {
 			await client.send(
 				from,
-				{ image: buffer, caption: `Meme Generator Made by ${__botName} using Canvas. Powered by Hidden Finder` },
+				{ image: buffer, caption: `Meme Generator Made by ${BOT_NAME} using Canvas. Powered by Hidden Finder` },
 				{ quoted: message }
 			);
 		}
 
-		loggers.info(
-			`${color(`${parsed.isStickers ? 'Sticker' : 'Image'} is sent`, 'pink')} to ${color(prettyNumber, 'lilac')}`
-		);
+		loggers.info(`${color(`${parsed.isStickers ? 'Sticker' : 'Image'} is sent`, 'pink')} to ${color(prettyNumber, 'lilac')}`);
 	}
 });

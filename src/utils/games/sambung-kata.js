@@ -99,43 +99,38 @@ export class SambungKata {
 		const data = await this.randomWord();
 		const remainings = dayjs(new Date()).add(20, 's').valueOf();
 
-		setIntervals(
-			configuration.timers.word,
-			this.group,
-			20,
-			(clients = client, group = this.group, remaining = remainings) => {
-				const data = configuration.timers.word.get(group);
+		setIntervals(configuration.timers.word, this.group, 20, (clients = client, group = this.group, remaining = remainings) => {
+			const data = configuration.timers.word.get(group);
 
-				if (!data) {
-					return;
-				}
-
-				const second = Math.floor(((remaining - new Date().getTime()) % (1000 * 60)) / 1000);
-				const dataGame = configuration.games.word.get(group);
-
-				data.timer = second;
-				dataGame.timer = second;
-				const { timer } = checkIntervals(data);
-
-				if (timer === 10) {
-					clients.instance.send(group, {
-						text: `Time's almost over! 10 second @${dataGame.turn.split('@')[0]}`,
-						mentions: [dataGame.turn]
-					});
-				}
-
-				if (timer <= 0) {
-					deleteIntervals(data, configuration.timers.word, group);
-					const winner = dataGame.changeTurn();
-
-					clients.instance.send(group, {
-						text: `Time's up! The winner is : @${winner.split('@')[0]}`,
-						mentions: [winner]
-					});
-					configuration.games.word.delete(configuration.games.word.get(group));
-				}
+			if (!data) {
+				return;
 			}
-		);
+
+			const second = Math.floor(((remaining - new Date().getTime()) % (1000 * 60)) / 1000);
+			const dataGame = configuration.games.word.get(group);
+
+			data.timer = second;
+			dataGame.timer = second;
+			const { timer } = checkIntervals(data);
+
+			if (timer === 10) {
+				clients.instance.send(group, {
+					text: `Time's almost over! 10 second @${dataGame.turn.split('@')[0]}`,
+					mentions: [dataGame.turn]
+				});
+			}
+
+			if (timer <= 0) {
+				deleteIntervals(data, configuration.timers.word, group);
+				const winner = dataGame.changeTurn();
+
+				clients.instance.send(group, {
+					text: `Time's up! The winner is : @${winner.split('@')[0]}`,
+					mentions: [winner]
+				});
+				configuration.games.word.delete(configuration.games.word.get(group));
+			}
+		});
 		return { ...this, ...data };
 	}
 
@@ -226,43 +221,38 @@ export class SambungKata {
 		deleteIntervals(configuration.timers.word.get(this.group), configuration.timers.word, this.group);
 		const remainings = dayjs(new Date()).add(20, 's').valueOf();
 
-		setIntervals(
-			configuration.timers.word,
-			this.group,
-			20,
-			(clients = client, group = this.group, remaining = remainings) => {
-				const data = configuration.timers.word.get(group);
+		setIntervals(configuration.timers.word, this.group, 20, (clients = client, group = this.group, remaining = remainings) => {
+			const data = configuration.timers.word.get(group);
 
-				if (data === undefined) {
-					return;
-				}
-
-				const second = Math.floor(((remaining - new Date().getTime()) % (1000 * 60)) / 1000);
-				const dataGame = configuration.games.word.get(group);
-
-				data.timer = second;
-				dataGame.timer = second;
-				const { timer } = checkIntervals(data);
-
-				if (timer === 10) {
-					clients.instance.send(group, {
-						text: `Time's almost over! 10 second @${dataGame.turn.split('@')[0]}`,
-						mentions: [dataGame.turn]
-					});
-				}
-
-				if (timer <= 0) {
-					deleteIntervals(data, configuration.timers.word, group);
-					const winner = dataGame.changeTurn();
-
-					clients.instance.send(group, {
-						text: `Time's up! The winner is : @${winner.split('@')[0]}`,
-						mentions: [winner]
-					});
-					configuration.games.word.delete(group);
-				}
+			if (data === undefined) {
+				return;
 			}
-		);
+
+			const second = Math.floor(((remaining - new Date().getTime()) % (1000 * 60)) / 1000);
+			const dataGame = configuration.games.word.get(group);
+
+			data.timer = second;
+			dataGame.timer = second;
+			const { timer } = checkIntervals(data);
+
+			if (timer === 10) {
+				clients.instance.send(group, {
+					text: `Time's almost over! 10 second @${dataGame.turn.split('@')[0]}`,
+					mentions: [dataGame.turn]
+				});
+			}
+
+			if (timer <= 0) {
+				deleteIntervals(data, configuration.timers.word, group);
+				const winner = dataGame.changeTurn();
+
+				clients.instance.send(group, {
+					text: `Time's up! The winner is : @${winner.split('@')[0]}`,
+					mentions: [winner]
+				});
+				configuration.games.word.delete(group);
+			}
+		});
 		return this;
 	}
 }

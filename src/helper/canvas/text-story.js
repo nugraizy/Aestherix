@@ -40,4 +40,3 @@ export const textStory = async (texts, color) => {
 
 	return new Buffer.from(canvas.toBuffer('image/png'));
 };
-

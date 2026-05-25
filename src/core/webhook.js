@@ -14,6 +14,7 @@ export class WebhookServer {
 	#port;
 	#secret;
 	#server = null;
+	#client = null;
 
 	constructor(options = {}) {
 		this.#port = options.port || 8080;
@@ -22,6 +23,16 @@ export class WebhookServer {
 
 	get running() {
 		return this.#server !== null;
+	}
+
+	/**
+	 * Inject the active WhatsApp client. Required before
+	 * `handleCommitEvent` and the webhook handler can dispatch.
+	 *
+	 * @param {object} waClient
+	 */
+	setClient(waClient) {
+		this.#client = waClient;
 	}
 
 	start() {
@@ -78,7 +89,7 @@ ${filesSummary.trim()}
 
 *Showing ${commitInfo.filesChanged} changed files with ${commitInfo.additions} additions and ${commitInfo.deletions} deletions.*`;
 
-		await client.send(NOTIFICATION_GROUP, { text: caption });
+		await this.#client?.send(NOTIFICATION_GROUP, { text: caption });
 	}
 
 	#handleWebhook(req, res) {
@@ -105,7 +116,7 @@ ${filesSummary.trim()}
 			const commitInfo = WebhookServer.#parseCommit(commit);
 			const stats = await WebhookServer.#fetchStats(commitInfo.sha);
 
-			client.ev.emit('commit', { ...commitInfo, ...stats });
+			this.#client?.ev.emit('commit', { ...commitInfo, ...stats });
 		});
 
 		res.status(200).send('OK');

@@ -1,3 +1,4 @@
+// @ts-check
 import chalk from 'chalk';
 import chokidar from 'chokidar';
 import { highlight } from 'cli-highlight';
@@ -19,7 +20,7 @@ const IS_WIN32 = os.platform() === 'win32';
 const AGENT_ENABLED = true;
 const AGENT_LANGUAGE = 'id';
 
-const COMMAND_SCHEMA = object({
+export const COMMAND_SCHEMA = object({
 	name: string().required(),
 	minifiedDescription: string().optional().default('This is minified description'),
 	description: string().optional(),
@@ -173,8 +174,7 @@ export class CommandLoader extends EventEmitter {
 
 			const validated = CommandLoader.#validate(module.default);
 
-			validated.absolutePath = file;
-			validated.path = normalize;
+			Object.assign(validated, { absolutePath: file, path: normalize });
 
 			this.#commands.set(validated.name, validated);
 			this.#aliases.push(...(validated.aliases || []));

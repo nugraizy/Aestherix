@@ -1,3 +1,5 @@
+import { BOT_NAME } from './constants.js';
+
 import readline from 'readline';
 import { findBestMatch } from 'string-similarity';
 
@@ -7,12 +9,16 @@ import { Cache } from '../helper/modules/cache.js';
 import { cmdId, setPrefix } from '../helper/modules/prefix.js';
 import { color, getTimeSince, loggers } from '../utils/modules/index.js';
 import { Context } from './context.js';
+import { Logger } from './logger.js';
 import { PipelineExecutor } from './pipeline.js';
 
 const EVALY = ['/>', '$>', '=>', '!>'];
 const SEPARATOR = color('⤑', 'green');
 const HEAVY_CATEGORIES = new Set(['Downloader', 'Converter', 'Search', 'AI', 'Anime']);
 const EXECUTION_LOCK_TTL = 60000;
+const profileLogger = new Logger({ name: 'PROFILE' });
+
+const noop = () => {};
 
 let stdoutWriteCounter = 0;
 let stdoutWriteTrackingInitialized = false;
@@ -86,7 +92,21 @@ export class MessageHandler {
 		}
 	}
 
+	async preInit() {
+		if (this.#initialized) {
+			return;
+		}
+
+		await this.#initHandlers();
+		this.#initialized = true;
+	}
+
 	async #processMessage(message) {
+		const profileEnabled = Boolean(this.#flags.profile);
+		const profileStart = profileEnabled ? performance.now() : 0;
+		let tContextFrom = 0;
+		let tDispatch = 0;
+
 		if (message.key.fromMe && message.status === 0) {
 			this.#retryRelay(message);
 		}
@@ -111,7 +131,13 @@ export class MessageHandler {
 		const client = this.#client;
 		const state = this.#configuration.flags?.state;
 
+		const ctxStart = profileEnabled ? performance.now() : 0;
+
 		message = await Context.from(message, client, this.#store, state);
+
+		if (profileEnabled) {
+			tContextFrom = performance.now() - ctxStart;
+		}
 
 		if (!this.#isValidMessage(message)) {
 			return;
@@ -137,7 +163,25 @@ export class MessageHandler {
 			return;
 		}
 
+		const dispatchStart = profileEnabled ? performance.now() : 0;
+
 		await this.#dispatch(message, client);
+
+		if (profileEnabled) {
+			tDispatch = performance.now() - dispatchStart;
+			const total = performance.now() - profileStart;
+
+			profileLogger.info(
+				color('cmd', 'lilac'),
+				color(message.isCmd ? `${message.prefix || ''}${message.cmd || ''}` : '(non-cmd)', 'powderBlue'),
+				color('total', 'white'),
+				color(`${total.toFixed(1)}ms`, '#F1FA8C'),
+				color('ctx', 'white'),
+				color(`${tContextFrom.toFixed(1)}ms`, '#F1FA8C'),
+				color('dispatch', 'white'),
+				color(`${tDispatch.toFixed(1)}ms`, '#F1FA8C')
+			);
+		}
 	}
 
 	async #dispatch(message, client) {
@@ -239,11 +283,17 @@ export class MessageHandler {
 			return null;
 		}
 
-		const commands = this.#router.commands;
-		const aliases = this.#router.aliases;
 		const tempCmd = localMessage.cmd;
 
-		const cmdMatch = findBestMatch(tempCmd, commands.keys());
+		if (!tempCmd || tempCmd.length < 2 || /[^a-z0-9]/i.test(tempCmd)) {
+			return null;
+		}
+
+		const commands = this.#router.commands;
+		const aliases = this.#router.aliases;
+		const commandKeys = typeof commands.keysOnly === 'function' ? commands.keysOnly() : commands.keys();
+
+		const cmdMatch = findBestMatch(tempCmd, commandKeys);
 
 		if (cmdMatch.bestMatch.rating >= 0.6) {
 			localMessage.cmd = cmdMatch.bestMatch.target;
@@ -267,43 +317,6 @@ export class MessageHandler {
 			return 'skip';
 		}
 
-		if (HEAVY_CATEGORIES.has(command.category)) {
-			const lockedBy = this.#checkExecutionLock(localMessage.sender);
-
-			if (lockedBy) {
-				await client.reply(
-					localMessage.from,
-					`Please wait, your previous command (${lockedBy}) is still running.`,
-					localMessage.message
-				);
-				return 'skip';
-			}
-		}
-
-		const disabled = this.#configuration.registry.disabledCommands;
-
-		if (disabled?.has(command.name)) {
-			await client.reply(
-				localMessage.from,
-				`The command \`${command.name}\` is currently disabled by dashboard.`,
-				localMessage.message
-			);
-			return 'skip';
-		}
-
-		if (this.#configuration.settings?.maintenance && !localMessage.isOwner) {
-			await client.reply(
-				localMessage.from,
-				'🛠️ Bot is currently in maintenance mode. Please try again later.',
-				localMessage.message
-			);
-			return 'skip';
-		}
-
-		if (!localMessage.isOwner && this.#flags.selfMode) {
-			return 'skip';
-		}
-
 		if (localMessage.isBotInstance) {
 			return 'skip';
 		}
@@ -312,22 +325,59 @@ export class MessageHandler {
 			return 'skip';
 		}
 
+		if (!localMessage.isOwner && this.#flags.selfMode) {
+			return 'skip';
+		}
+
+		const disabled = this.#configuration.registry.disabledCommands;
+
+		if (disabled?.has(command.name)) {
+			void client.reply(
+				localMessage.from,
+				`The command \`${command.name}\` is currently disabled by dashboard.`,
+				localMessage.message
+			);
+			return 'skip';
+		}
+
+		if (command.category === 'Owner' && !localMessage.isOwner) {
+			void client.reply(localMessage.from, 'This commands is only for owner.', localMessage.message);
+			return 'skip';
+		}
+
+		if (this.#configuration.settings?.maintenance && !localMessage.isOwner) {
+			void client.reply(
+				localMessage.from,
+				'🛠️ Bot is currently in maintenance mode. Please try again later.',
+				localMessage.message
+			);
+			return 'skip';
+		}
+
+		if (HEAVY_CATEGORIES.has(command.category)) {
+			const lockedBy = this.#checkExecutionLock(localMessage.sender);
+
+			if (lockedBy) {
+				void client.reply(
+					localMessage.from,
+					`Please wait, your previous command (${lockedBy}) is still running.`,
+					localMessage.message
+				);
+				return 'skip';
+			}
+		}
+
 		if (localMessage.isOwner) {
 			return 'pass';
 		}
 
 		if (localMessage.isBanned) {
-			await client.send(localMessage.from, { react: { text: '🖕🏼', key: localMessage.message.key } });
-			return 'skip';
-		}
-
-		if (command.category === 'Owner') {
-			await client.reply(localMessage.from, 'This commands is only for owner.', localMessage.message);
+			void client.send(localMessage.from, { react: { text: '🖕🏼', key: localMessage.message.key } });
 			return 'skip';
 		}
 
 		if (this.#flags.restrict && command.restrict) {
-			await client.reply(
+			void client.reply(
 				localMessage.from,
 				'This command is restricted and currently bot are on restricted mode.',
 				localMessage.message
@@ -341,7 +391,7 @@ export class MessageHandler {
 			!localMessage.isAdmin &&
 			localMessage?.[localMessage?.from]?.games === 'disable'
 		) {
-			await client.reply(
+			void client.reply(
 				localMessage.from,
 				'Game Mode is Disabled. Type !games enable to enable Game Mode',
 				localMessage.message
@@ -351,12 +401,12 @@ export class MessageHandler {
 
 		if (command.category === 'Moderation') {
 			if (!localMessage.isGroup) {
-				await client.reply(localMessage.from, 'This commands for group only', localMessage.message);
+				void client.reply(localMessage.from, 'This commands for group only', localMessage.message);
 				return 'skip';
 			}
 
 			if (!localMessage.isAdmin) {
-				await client.reply(localMessage.from, 'You are not admin. This commands is only for admins.', localMessage.message);
+				void client.reply(localMessage.from, 'You are not admin. This commands is only for admins.', localMessage.message);
 				return 'skip';
 			}
 		}
@@ -369,7 +419,7 @@ export class MessageHandler {
 				return 'skip';
 			}
 
-			await client.reply(localMessage.from, 'This commands is only for premium user.', localMessage.message);
+			void client.reply(localMessage.from, 'This commands is only for premium user.', localMessage.message);
 			return 'skip';
 		}
 
@@ -381,7 +431,7 @@ export class MessageHandler {
 			const limit = Limit.reduceLimit(localMessage.sender, command.limit);
 
 			if (limit.error) {
-				await client.reply(
+				void client.reply(
 					localMessage.from,
 					limit.message.replace('%s', `But this command (${command.name}) need ${command.limit}`),
 					localMessage.message
@@ -394,7 +444,7 @@ export class MessageHandler {
 			const { onCooldown, remaining } = this.#router.checkCooldown(localMessage.sender, command.name, command.cooldown);
 
 			if (onCooldown) {
-				await client.reply(
+				void client.reply(
 					localMessage.from,
 					`Command \`${command.name}\` is still on cooldown for ${remaining} seconds.`,
 					localMessage.message
@@ -421,7 +471,7 @@ export class MessageHandler {
 
 		try {
 			await command.run(localMessage, client, this.#store);
-			await this.#router.trackUsage(command.name);
+			this.#router.trackUsage(command.name).catch(noop);
 		} catch (err) {
 			await this.#handleError(err, localMessage, client).catch(() => {});
 		} finally {
@@ -491,7 +541,7 @@ export class MessageHandler {
 			)
 			.send();
 
-		loggers.error(color(err.message, 'white'), color(`(${errorLocation.file}:${errorLocation.line})`, 'gray'));
+		loggers.error(err);
 	}
 
 	#getErrorLocation(stack) {
@@ -725,7 +775,7 @@ export class MessageHandler {
 		}
 
 		const senderInfo = message.isFromMe
-			? `${color('[', 'gray')}${color('HOST', 'salmon')}${color(']', 'gray')} ${color(global.__botName, 'yellow')}`
+			? `${color('[', 'gray')}${color('HOST', 'salmon')}${color(']', 'gray')} ${color(BOT_NAME, 'yellow')}`
 			: `${color(message.pushname, 'yellow')}`;
 
 		const messageBody = color(message.query?.replace(/[\t\n]/g, ' ').substring(0, 35), 'white');

@@ -45,11 +45,7 @@ export default defineCommand({
 					{ quoted: message }
 				);
 			} else {
-				await client.reply(
-					from,
-					`${'Kiryuu Popular'.formatHeaders()}\n\n${caption.formatForm()}`,
-					message
-				);
+				await client.reply(from, `${'Kiryuu Popular'.formatHeaders()}\n\n${caption.formatForm()}`, message);
 			}
 
 			await wait.update('Done.');

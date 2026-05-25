@@ -1,9 +1,11 @@
+import { BOT_NAME } from '../constants.js';
+
 import dayjs from 'dayjs';
 import fs from 'fs-extra';
 import path from 'path';
 
 import configuration from '../../helper/config/connect.js';
-import { getFilesize, getFilesizeFromBytes } from '../../utils/modules/index.js';
+import { color, getFilesize, getFilesizeFromBytes, loggers } from '../../utils/modules/index.js';
 import { Context } from '../context.js';
 
 /**
@@ -206,7 +208,7 @@ const deletedHandler = async (client, message, fetches) => {
 			}
 		}
 	} catch (err) {
-		console.log(err);
+		loggers.error(color('Deleted message handler failed:', 'red'), err);
 	}
 };
 
@@ -350,7 +352,7 @@ const sendLocationMessage = async (client, from, lat, long, jpegThumbnail, capti
 				degreesLatitude: lat,
 				degreesLongitude: long,
 				jpegThumbnail: jpegThumbnail,
-				name: `Provided by Nanda, ${__botName}. Powered by Hidden Finder`
+				name: `Provided by Nanda, ${BOT_NAME}. Powered by Hidden Finder`
 			}
 		},
 		options

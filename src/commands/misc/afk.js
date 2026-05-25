@@ -18,10 +18,6 @@ export default defineCommand({
 
 		setAfk(sender, from, query, pushname);
 
-		await client.send(
-			from,
-			{ text: `@${sender.split('@')[0]} is now AFK.`, mentions: [sender] },
-			{ quoted: message }
-		);
+		await client.send(from, { text: `@${sender.split('@')[0]} is now AFK.`, mentions: [sender] }, { quoted: message });
 	}
 });

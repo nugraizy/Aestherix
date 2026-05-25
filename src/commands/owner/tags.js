@@ -44,9 +44,7 @@ Tot. Tags : ${dataMessage.mention.length}`,
 
 		for (const message of messages) {
 			dataMessages.push(
-				await (
-					await import('../../core/context.js')
-				).Context.from(JSON.parse(JSON.stringify(message)), client, store, false)
+				await (await import('../../core/context.js')).Context.from(JSON.parse(JSON.stringify(message)), client, store, false)
 			);
 		}
 
@@ -57,9 +55,7 @@ Tot. Tags : ${dataMessage.mention.length}`,
 		const ownerJid = toUserJid(settings.owner_number);
 
 		dataMessages = dataMessages.filter(
-			(v) =>
-				(v.mediaData?.participant === ownerJid || v.mention.includes(ownerJid)) &&
-				v.sender !== ownerJid
+			(v) => (v.mediaData?.participant === ownerJid || v.mention.includes(ownerJid)) && v.sender !== ownerJid
 		);
 
 		if (!dataMessages.length) {

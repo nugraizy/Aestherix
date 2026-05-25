@@ -2,7 +2,11 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import { MAX_PLAYERS, MIN_PLAYERS } from '../../../../../src/utils/games/werewolf/config/constants.js';
-import { buildComposition, summariseComposition, validateComposition } from '../../../../../src/utils/games/werewolf/config/balance.js';
+import {
+	buildComposition,
+	summariseComposition,
+	validateComposition
+} from '../../../../../src/utils/games/werewolf/config/balance.js';
 
 describe('werewolf composition', () => {
 	it('produces the documented N=5 distribution', () => {

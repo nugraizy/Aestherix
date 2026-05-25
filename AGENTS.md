@@ -1,195 +1,22 @@
 # Aestherix Agent Guide
 
 ## Table of Contents
-- [Project Structure](#project-structure)
-- [`src/utils/` — API modules](#srcutils--api-modules)
-- [Entry Points](#entry-points)
-- [Architecture Flow](#architecture-flow)
-- [Prefix Resolution](#prefix-resolution)
-- [Commands System](#commands-system)
-- [Dashboard](#dashboard)
-- [Database](#database)
-- [CLI Flag Reference](#cli-flag-reference)
-- [Session](#session)
-- [Running](#running)
-- [Important Files](#important-files)
+- [AI Instructions](#ai-instructions)
+- [RTK Commands](#rtk-commands)
 - [Code Standards](#code-standards)
 
-## Project Structure
+## AI Instructions
 
-```
-aestherix/
-├── index.js                          # Bot launcher
-├── dashboard.js                      # Standalone dashboard runner
-├── package.json
-├── prisma.config.js                 # Prisma config (SQL)
-├── prisma.config.mongo.js           # Prisma config (MongoDB)
-├── ecosystem.config.cjs              # PM2 config
-├── eslint.config.js
-├── .env / .env.keys / .env.instagram
-├── prisma/
-│   ├── schema.prisma                # SQL schema
-│   └── schema.mongodb.prisma        # MongoDB schema
-├── public/
-│   ├── build/                       # CCapture.all.min.js (used by the gradient renderer)
-│   └── ccapture-workers/
-├── dashboard/                       # Self-contained dashboard subproject
-│   ├── client/                      # Svelte 5 + Vite frontend
-│   │   ├── public/                  # Vite static dir (favicon, etc. — bundled into dist/)
-│   │   ├── src/                     # Svelte source (App.svelte, main.js)
-│   │   ├── components/              # UI components
-│   │   ├── pages/                   # Home, Controls, Settings, Albums, FileEditor
-│   │   ├── lib/                     # stores, socket, theme, toast, spotify, format, colors
-│   │   ├── package.json / vite.config.js
-│   │   └── dist/                    # build output (served by the server below)
-│   └── server/                      # Express + Socket.IO + service factories
-│       ├── index.js                 # createDashboard() / startDashboard()
-│       ├── routes/                  # 13 route files (auth, commands, flags, prefix, …)
-│       ├── services/                # auth, audit, undo, profile-pictures, users, editor,
-│       │                            #   spotify, system, bot-bridge, monitor
-│       ├── middleware/              # auth, no-store, validation
-│       ├── socket/                  # Socket.IO setup + confirmation bridge
-│       ├── lib/                     # images.js, paths.js
-│       └── monitor.js               # dashboard catalog + log buffer
-├── gradient/                        # /render and /gradient (mesh-gradient + puppeteer)
-│   ├── index.js
-│   └── README.md
-└── src/
-    ├── index.js                     # Main bot module — CLI, store, profile pictures, dashboard bridge
-    ├── core/                        # Class-based connection layer
-    │   ├── index.js                 # Barrel exports (15 classes + utils)
-    │   ├── auth.js                  # Auth class (Prisma-backed credentials)
-    │   ├── boot.js                  # Boot orchestrator
-    │   ├── cli.js                   # Cli class (meow wrapper)
-    │   ├── client-socket.js         # ClientSocket class (send, reply, relay, media, templates)
-    │   ├── command-loader.js        # CommandLoader class (load + watch + validate)
-    │   ├── connection-handler.js    # ConnectionHandler class (reconnect, metrics)
-    │   ├── context.js               # Context class (lazy getters + convenience methods)
-    │   ├── event-handler.js         # EventHandler class (binds all Baileys events)
-    │   ├── logger.js                # Logger class
-    │   ├── manager.js               # Manager class (multi-instance)
-    │   ├── message-handler.js       # MessageHandler class (parse → resolve → guard → run)
-    │   ├── mqtt.js                  # MqttBridge class
-    │   ├── router.js                # Router class (prefix resolve, cooldown, sub-bot blocking)
-    │   ├── store.js                 # Store class (persistent Baileys store)
-    │   ├── utils.js                 # Shared utilities (initContact, checkNetwork, etc.)
-    │   ├── webhook.js               # WebhookServer class (GitHub webhook)
-    │   └── handlers/
-    │       ├── anonymous.js
-    │       ├── anti-nsfw.js
-    │       ├── character-ai.js
-    │       ├── check-banned.js
-    │       ├── deleted-message.js
-    │       ├── group-participants.js
-    │       ├── group-settings.js
-    │       ├── group-url.js
-    │       ├── instagram.js
-    │       ├── notification-utils.js
-    │       ├── offline.js
-    │       ├── story.js
-    │       ├── stub.js
-    │       └── games/
-    │           ├── akinator.js
-    │           ├── sambung-kata.js
-    │           ├── tebak-gambar.js
-    │           ├── werewolf.js
-    │           └── wordle.js
-    ├── commands/                     # Command files (auto-loaded)
-    ├── helper/
-    │   ├── canvas/                  # Image generators (meme, spotify-card, trigger, etc.)
-    │   ├── config/                  # connect.js singleton, settings.json
-    │   ├── database/
-    │   │   ├── adapters/            # Prisma model adapters (user, group-settings, etc.)
-    │   │   ├── auth.js
-    │   │   ├── index.js
-    │   │   └── prisma.js
-    │   ├── groups/
-    │   │   ├── afk/
-    │   │   ├── index.js
-    │   │   └── settings/            # group-default-settings.js, limit.js
-    │   ├── index.js
-    │   ├── misc/
-    │   │   ├── index.js
-    │   │   ├── palettes/            # colors.js, palettes.json
-    │   │   ├── user_agent/          # ua.js, ua.json
-    │   │   └── wa_data/             # constants.js, utils.js, web-message-info.js
-    │   ├── modules/
-    │   │   ├── cache.js
-    │   │   ├── index.js
-    │   │   └── prefix.js
-    │   └── prototypes.js
-    ├── media/
-    │   ├── assets/
-    │   ├── background/
-    │   ├── connection_databases/
-    │   ├── fonts/
-    │   ├── screenshots/
-    │   └── temporary_files/
-    └── types/                       # TypeScript definitions
-        ├── Canvas/
-        ├── Commands/
-        ├── Core/                    # Core class types (ClientSocket, Context, Router, etc.)
-        ├── Groups/
-        ├── Messages/
-        ├── Reconstruct/
-        ├── Socket/
-        └── Utils/
-```
+This file is for agent behavior and coding conventions. For codebase flows, architecture, and system overview, see [doc/DOC.md](doc/DOC.md).
 
-### `src/utils/` — API modules
+- Follow existing patterns; prefer small, localized changes.
+- Use `defineCommand()` for commands (no per-file CommandProps imports).
+- Keep doc updates in sync with code changes.
+- Prefer `rtk`-prefixed commands when using the terminal.
 
-```
-src/utils/
-├── index.js                        # Main entry to export every module in one index
-├── ai/
-├── anime/
-├── anonymous/
-├── arq/
-├── bandcamp/
-├── bilibili/
-├── bluesky/
-├── brainly/
-├── cnn/
-├── comix/
-├── converter/
-├── deviant_art/
-├── doujin/
-├── download_uploader/
-├── epicgames/
-├── equran/
-├── facebook/
-├── flickr/
-├── games/
-├── github/
-├── google-it/
-├── hi-fi/
-├── image_reverse_search/
-├── instagram_notifier/
-├── instagram/
-├── jikan/
-├── kiryuu/
-├── komikcast/
-├── mangatoon/
-├── misc/
-├── modules/
-├── movies/
-├── news/
-├── p_store/
-├── pinterest/
-├── pixiv/
-├── shortener/
-├── spotifier/
-├── stickers/
-├── textmaker/
-├── tiktok/
-├── twitter/
-├── waifu_pic/
-├── wallpapers/
-└── youtube/
-```
-
+## RTK Commands
 <!-- rtk-instructions v2 -->
-# RTK (Rust Token Killer) - Token-Optimized Commands
+### RTK (Rust Token Killer) - Token-Optimized Commands
 
 ## Golden Rule
 
@@ -327,369 +154,6 @@ rtk init --global       # Add RTK to ~/.claude/CLAUDE.md
 Overall average: **60-90% token reduction** on common development operations.
 <!-- /rtk-instructions -->
 
-## Entry Points
-
-### `index.js` — Bot launcher (root)
-Loads env, checks internet, prints banner + active flags, then imports `src/index.js`. No business logic here — just setup.
-
-```sh
-node . <session_name> [--flags]
-```
-
-### `src/index.js` — Main bot module
-- Imports `configuration` singleton from `connect.js` — holds all runtime state
-- Sets `configuration.OPTIONS = configuration.cli.flags` (CLI flags accessible everywhere)
-- Calls `boot()` from `src/core/boot.js` which orchestrates the connection
-- Handles profile picture auto-rotation service
-- Handles dashboard bridge for standalone dashboard mode
-
-### `src/core/boot.js` — Boot orchestrator
-Creates and wires all core classes:
-
-```
-boot({ cli, OPTIONS, store, sessionName })
-├── Auth(prisma, sessionName)
-├── ClientSocket(auth, { role: 'primary', flags })
-│   └── clientSocket.connect({ store })
-├── handlePairing(clientSocket, flags)
-├── manager.add(sessionName, clientSocket)
-├── MqttBridge().connect()
-├── WebhookServer()
-├── CommandLoader + Router
-├── EventHandler(clientSocket, { router, store }).bind()
-├── on 'connected': dashboard, webhook, werewolf, watcher
-└── spawnPersistedSubBots() — auto-starts saved sub-bots
-```
-
-### `dashboard.js` — Standalone dashboard (35 lines)
-Runs only the Express + Socket.IO dashboard server without the bot. Used for `npm run start:dashboard`.
-
-### `dashboard/server/` — Dashboard backend
-Express + Socket.IO server on `DASHBOARD_PORT` (default 4000). The
-~4000-line monolith was split into:
-- `index.js` — `createDashboard()` / `startDashboard()` factory
-- `routes/` — 13 route files mapping `/api/dashboard/*` to services
-- `services/` — closure-based factories (auth, audit, undo, profile-pictures, users, editor, spotify, system, bot-bridge, monitor)
-- `middleware/` — auth, no-store, validation
-- `socket/` — Socket.IO setup, rooms, confirmation bridge
-- `lib/` — pure helpers (`images.js`, `paths.js`)
-- `monitor.js` — dashboard catalog + log buffer
-
-Owner auth via OTP; admin auth via session cookies. Dashboard bridges
-to the embedded bot on port 4010 (`DASHBOARD_BRIDGE_PORT`) for runtime
-sync, log streaming, and restart.
-
-### `dashboard/client/` — Dashboard frontend
-Svelte 5 + Vite. `npm run dashboard:build` produces
-`dashboard/client/dist/` which the server serves at `/dashboard`.
-Components live in `components/`, pages in `pages/`, shared logic in
-`lib/` (stores, socket singleton, theme, toast, spotify, format,
-colors). The legacy vanilla `app.js` and `styles.css` are gone.
-
-### `gradient/` — Mesh gradient renderer
-Standalone module exposing `createGradientRouter()` for `/render` and
-`/gradient`. Uses puppeteer (lazy import) and ffmpeg. The dashboard
-server mounts it by default; standalone deployments without canvas
-needs can opt out via `createDashboard({ mountGradient: false })`.
-
----
-
-## Architecture Flow
-
-```
-Baileys WebSocket (ClientSocket.connect())
-        │
-        ▼
-EventHandler.bind() — forwards all Baileys events
-        │
-        ├── connection.update → ConnectionHandler.handle()
-        │                        (reconnect, metrics, banner)
-        │
-        ├── messages.upsert → MessageHandler.handle()
-        │   │
-        │   │  1. Retry relay for fromMe messages
-        │   │  2. Stub message guard
-        │   │  3. Context.from(rawMessage, client, store)
-        │   │     (lazy getters, prefix cache, group cache)
-        │   │  4. Dispatch loop (multi-cmd support)
-        │   ▼
-        │   Router.resolve(body) → command lookup
-        │   │  - Auto-correct misspelled commands
-        │   │  - Sub-bot blocking (router.isBlocked)
-        │   │  - Guard: isOwner, isBanned, cooldowns, limits
-        │   ▼
-        │   command.run(ctx, client, store)
-        │
-        ├── messages.update → deleted-message handler
-        ├── group-participants.update → group-participants handler
-        ├── groups.update → group-settings handler
-        ├── presence.update → AFK handler (inlined)
-        ├── call → call rejection (inlined)
-        ├── contacts.upsert/update → contact cache
-        ├── creds.update → auth.saveCreds()
-        └── poll.update → poll vote decryption
-```
-
-### Supporting flows
-- **Deleted messages:** `MessageHandler.onDeleted()` → lazy-loads `deleted-message.js` → `Context.from()`
-- **Stub messages:** `parseStubtypeUpdate()` → `stub.js` → `Context.from()`
-- **Dashboard real-time:** Socket.IO emits on state changes; embedded bridge on port 4010 syncs between standalone dashboard and bot
-- **Commands loading:** `CommandLoader.load()` reads `src/commands/**/*.js`, validates via Yup schema, registers in `configuration.cmds.commands` (Cache Map)
-- **Multi-instance:** `Manager` holds all `ClientSocket` instances; sub-bots spawned via `!addbot` or auto-loaded from `BotInstance` table on startup
-
----
-
-## Prefix Resolution
-
-CLI `--prefix` flag takes priority over settings.json. Logic order:
-
-1. `--prefix` flag present + `settings.prefix.multi: true` → multi-char base + CLI prefixes combined
-2. `--prefix` flag present + `settings.prefix.multi: false` → CLI prefixes only (single/multi based on count)
-3. No CLI flag + `settings.prefix.multi: true` → multi-char set only
-4. No CLI flag + `settings.prefix.nopref: true` → no prefix (all text triggers commands)
-5. No CLI flag + `settings.prefix.multi` AND `settings.prefix.nopref` both true → logs conflict warning, falls back to multi
-6. No CLI flag + both false → uses `settings.prefix.pref` (default `.`)
-7. All above miss → default to `.`
-
-Cache is initialized on first message per connection. `configuration.cache.prefixValues` must exist or prefix re-resolves.
-
----
-
-## Commands System
-
-Commands live in `src/commands/<category>/<name>.js`. Each is a default-exported object validated by a Yup schema via `isMissingProperty()`.
-
-### Command object shape
-```js
-export default {
-  name: 'ping',                 // unique command name (required)
-  minifiedDescription: '',      // short description for compact menus
-  description: '',              // full description
-  usage: '!ping',               // example usage string
-  aliases: ['pong'],            // alternate names (array of strings)
-  category: 'Misc',             // must be one of the valid categories
-  cooldown: 8,                  // seconds before same user can use again (default: random 0-9)
-  limit: 0,                     // uses per reset window (default: random 0-9)
-  status: 'enable',             // 'enable' | 'disable'
-  restrict: false,              // true = only works when --restrict flag is off
-  premium: false,               // true = FREE role users blocked (owner/PREMIUM allowed)
-  async run(ctx, client) {}     // (required) the command handler
-};
-```
-
-### Valid categories
-`AI` | `AL-Quran` | `Anime` | `Anonymous` | `Converter` | `Debugging` | `Downloader` | `Games` | `Genshin Impact` | `Helper` | `Look-up` | `Misc` | `Moderation` | `News` | `Owner` | `Search`
-
-### Run function signature
-```js
-async run(ctx, client, store) {}
-```
-- `ctx` — `Context` instance from `Context.from()` (lazy getters + convenience methods)
-- `client` — `ClientSocket` instance (call `client.send()`, `client.reply()`, `client.TemplateBuilder`, etc.)
-- `store` — persistent in-memory store (messages, contacts, etc.)
-
-Commands can destructure `ctx` directly:
-```js
-async run({ from, query, message, prettyNumber }, client) {
-    await client.reply(from, 'Hello!', message);
-}
-```
-
-Or use convenience methods:
-```js
-async run(ctx, client) {
-    await ctx.reply('Hello!');
-}
-```
-
-For raw Baileys socket access (e.g. `profilePictureUrl`, `groupMetadata`):
-```js
-client.socket.profilePictureUrl(jid, 'image');
-```
-
-### Group management — `client.updateGroup(jid, options)`
-
-```js
-// Participant actions
-client.updateGroup(from, { action: 'add', participants: [...], admins: [...], message })
-client.updateGroup(from, { action: 'remove', participants: [...], admins: [...], force: true, message })
-client.updateGroup(from, { action: 'promote', participants: [...], admins: [...], message })
-client.updateGroup(from, { action: 'demote', participants: [...], admins: [...], message })
-
-// Metadata
-client.updateGroup(from, { action: 'subject', text: 'New Title' })
-client.updateGroup(from, { action: 'description', text: 'New Description' })
-
-// Settings
-client.updateGroup(from, { action: 'announcement' })      // lock
-client.updateGroup(from, { action: 'not_announcement' })  // unlock
-client.updateGroup(from, { action: 'locked' })            // restrict
-client.updateGroup(from, { action: 'unlocked' })          // unrestrict
-
-// Invite
-client.updateGroup(from, { action: 'retrieve' })  // returns [inviteCode]
-client.updateGroup(from, { action: 'revoke' })
-```
-
-### Key `ctx` properties
-| Property | Description |
-|---|---|
-| `ctx.from` | JID of the chat |
-| `ctx.sender` | JID of the sender |
-| `ctx.body` | Raw message text |
-| `ctx.args` | `['arg1', 'arg2', ...]` split by spaces |
-| `ctx.cmd` | Command name without prefix |
-| `ctx.query` | Everything after the command name |
-| `ctx.prefix` | The prefix character(s) used |
-| `ctx.isOwner` | True if sender is in owner_numbers or team_numbers |
-| `ctx.isGroup` | True if from is a group JID |
-| `ctx.isAdmin` | True if sender is a group admin |
-| `ctx.isBotAdmin` | True if bot is a group admin |
-| `ctx.message` | Raw Baileys WAMessage object |
-| `ctx.raw` | Same as `ctx.message` (alias for eval.js) |
-| `ctx.pushname` | Sender's display name |
-| `ctx.settings` | Global settings from settings.json |
-
-### Context convenience methods
-| Method | Equivalent |
-|---|---|
-| `ctx.reply(text)` | `client.send(ctx.from, { text }, { quoted: ctx.message })` |
-| `ctx.react(emoji)` | `client.send(ctx.from, { react: { text: emoji, key: ctx.message.key } })` |
-| `ctx.send(content, opts)` | `client.send(ctx.from, content, { quoted: ctx.message, ...opts })` |
-| `ctx.sendTo(jid, content)` | `client.send(jid, content)` |
-| `ctx.delete()` | `client.send(ctx.from, { delete: ctx.message.key })` |
-
-### How commands are loaded
-1. `CommandLoader.load()` reads all `.js` files under `src/commands/` (excludes files containing `template` or `d.ts`)
-2. Each file is imported; `isMissingProperty()` validates against the Yup schema
-3. Valid commands → `configuration.cmds.commands` (Cache Map, key = command name)
-4. Aliases → `configuration.cmds.aliases` array
-5. Duplicate names, missing `run`, or validation errors are logged and skip registration
-6. If `--watch` flag: `CommandLoader.watch()` re-imports changed files live
-
-### Command execution flow
-1. `MessageHandler.handle()` receives message upsert
-2. `Context.from()` parses the raw message (lazy getters, prefix cache, group cache)
-3. `MessageHandler.#dispatch()` loop (multi-cmd `&&` support):
-   - `Router.resolve(body)` → command lookup
-   - `Router.isBlocked(command)` → sub-bot permission check
-   - Guard: disabled (dashboard), isOwner, cooldown, limit, restrict, premium
-   - Auto-correct misspelled commands (if `--autoCorrect` flag)
-   - Dispatches to `command.run(ctx, client, store)`
-4. `Router.trackUsage()` persists usage count to DB
-
-### Command piping (`--pipe` flag)
-
-Pipe the output of one command into another using `|`:
-
-```
-.igpost <url> | .sticker
-.ytaudio <url> | .soundremover
-.googleimage cats | .sticker
-```
-
-**Flow:**
-1. `#dispatch()` detects ` | ` in message body → delegates to `PipelineExecutor`
-2. Each stage runs sequentially; intermediate stages use `CapturingClient` to intercept output
-3. Captured output (media or text) feeds into the next stage as input
-4. Final stage sends to the real client
-
-**Guards:**
-- Max 3 stages
-- Eval, Owner, Games, Moderation commands blocked from piping
-- Media-only commands (sticker, removebg) reject text input; text-only commands reject media
-- If a later stage fails, the previous stage's output is still delivered to the user
-
-**Execution lock:**
-- Heavy commands (Downloader, Converter, Search, AI, Anime) acquire a per-user lock
-- If a user tries another heavy command while one is running: "Please wait, your previous command (X) is still running."
-- Lock auto-expires after 60s as a safety net
-
-### Adding a new command
-1. Create `src/commands/<category>/my-command.js`
-2. Export default object with at minimum: `name`, `category`, `usage`, `run`
-3. Run the bot — it auto-loads on startup (or use `--watch` to hot-reload)
-
----
-
-## Dashboard
-
-### Architecture
-- Embedded in bot process (when `DASHBOARD_EMBEDDED=1`), bridge on port 4010 (`DASHBOARD_BRIDGE_PORT`)
-- Can run standalone via `dashboard.js` without the bot
-- Real-time via Socket.IO; REST API under `/api/dashboard/`
-- Owner-authenticated endpoints via OTP; admin endpoints require dashboard session cookies
-- `dashboard/client/dist/` is built by Vite and served statically at `/dashboard` by the server
-
-### REST API (`/api/dashboard/...`)
-| Endpoint | Auth | Description |
-|---|---|---|
-| `GET /prefix` | Dashboard | Get current prefix config |
-| `POST /prefix` | Owner | Update prefix (persists to settings.json) |
-| `GET /flags` | Dashboard | List all boolean flags and states |
-| `POST /flags/:name` | Owner | Toggle a boolean flag |
-| `GET /commands` | Dashboard | List all commands with usage counts |
-| `POST /commands/:name` | Owner | Enable/disable a command |
-| `GET /users` | Dashboard | List users with limits and roles |
-| `POST /users/:jid/limit` | Owner | Set user command limit |
-| `POST /bot/restart` | Owner | Restart the bot |
-| `GET /audit` | Dashboard | Audit log entries |
-
-### Socket.IO rooms
-`dashboard:status` | `dashboard:commands` | `dashboard:users` | `dashboard:logs` | `dashboard:confirmation:*`
-- Real-time bot status, command list, user list, log streaming
-- Confirmation bridge to embedded bot on port 4010
-
-### Dashboard monitor (`dashboard-monitor.js`)
-- `initializeDashboardMonitor(configuration)` — called at startup, loads persisted disabled commands and flag states from DB
-- `applyPersistedFlags()` — CLI flags take priority; DB values fill in the rest
-- `setDashboardCommandState()` — enable/disable commands (persisted to DB)
-- `setDashboardFlagState()` — toggle boolean flags (persisted to DB)
-- `pushDashboardLog()` / `getDashboardLogs()` — in-memory log buffer (max 500 entries)
-
----
-
-## Database
-
-Uses **Prisma** with two separate schemas. Provider is set via `DATABASE_PROVIDER` in `.env`.
-
-### Schemas
-- `prisma/schema.prisma` — SQL (PostgreSQL, MySQL, SQLite)
-- `prisma/schema.mongodb.prisma` — MongoDB
-
-### SQL Providers
-| Provider | `DATABASE_PROVIDER` | `DATABASE_URL` example |
-|---|---|---|
-| PostgreSQL / Supabase / Neon | `postgresql` | `postgresql://user:pass@host:5432/db` |
-| MySQL / MariaDB | `mysql` | `mysql://user:pass@host:3306/db` |
-| SQLite (local dev) | `sqlite` | `file:./databases/local.db` |
-| MongoDB Atlas | `mongodb` | `mongodb+srv://user:pass@cluster.mongodb.net/db` |
-
-> **MySQL note:** the `session` field on the Session model can exceed `varchar(191)`. If you see truncation errors, ALTER TABLE to TEXT after running `prisma migrate dev`.
-
-> **MongoDB note:** `prisma migrate` is NOT supported. Use `prisma db push` instead.
-
-> **Schema auto-selection:** `prisma.config.js` reads `DATABASE_PROVIDER` and routes every Prisma command (`generate`, `db push`, `migrate`, `studio`) to the matching schema — `prisma/schema.mongodb.prisma` for `mongodb`, `prisma/schema.prisma` otherwise. The `:mongo` npm scripts remain as explicit overrides but are no longer required.
-
-### SQL Schema Models
-| Model | Purpose | Scoped |
-|---|---|---|
-| `Session` | Baileys signal-key state and credentials | Per-bot (by sessionId prefix) |
-| `BaileysStore` | Persisted Baileys in-memory store snapshot (per session) | Per-bot |
-| `PinterestProfilePicture` | Profile picture history entries | Shared |
-| `UserLimit` | Per-user command limit and subscription role (`FREE`, `PREMIUM`, `OWNER`) | Per-bot (`sessionName`) |
-| `BannedUser` | Globally banned WhatsApp JIDs | Shared |
-| `Contact` | WhatsApp contact name cache | Per-bot (`sessionName`) |
-| `SettingsManager` | Per-group settings (welcome, anti-link, etc.) | Per-bot (`sessionName`) |
-| `DashboardSession` | Dashboard auth sessions (token/role/phone/expiry) | Shared |
-| `DashboardAuditLog` | All admin actions logged | Shared |
-| `DashboardBlocklist` | Blocked IPs/values | Shared |
-| `DashboardOtp` | One-time passwords for owner login | Shared |
-| `DashboardKV` | Generic key-value store (dashboard state + command catalog) | Per-bot (`sessionName`) |
-| `BotInstance` | Persisted sub-bot instances (flags, role, pairNumber, isActive) | Shared |
-| `CommandUsage` | Cumulative per-command invocation counter | Shared |
-| `WerewolfSession` | Persisted werewolf game sessions | Shared (keyed by group) |
-
 ### Commands
 ```sh
 npm run db:generate        # prisma generate (SQL)
@@ -705,43 +169,43 @@ npm run db:push:mongo     # prisma db push --schema=prisma/schema.mongodb.prisma
 
 ## CLI Flag Reference
 
-Flag parsing via `meow` in `check-flag.js`. Flags added there are available in `configuration.OPTIONS`.
+Flag parsing via `meow` in `src/core/cli.js`. Flags added there are available in `configuration.flags`.
 
 | Flag | Short | Description |
 |---|---|---|
-| `--prefix` | `-p` | Custom prefix(es), comma-separated for multiple |
-| `--readOnly` | `-y` | Bot ignores all commands, reads chat only |
-| `--autoRead` | `-r` | Auto read every incoming message |
-| `--restrict` | `-e` | Ignore moderator commands (Add, Promote, Demote) |
-| `--selfMode` | `-s` | Only owner and bot can use commands |
-| `--debugMode` | `-g` | Show full message metadata in logs |
-| `--multiCmd` | `-m` | Enable multi-cmd with `&&` separator |
-| `--watch` | `-w` | Watch files and hot-reload on change |
-| `--coolDown` | `-c` | Enable command cooldowns |
-| `--ai` | `-i` | Handle messages with AI |
-| `--limitReset` | `-l` | Auto-reset user limits |
-| `--resetOnStart` | `-x` | Reset DB connections on start |
-| `--noLimit` | `-u` | Disable command limits |
-| `--pairMode` | `-z` | Pair number with code |
-| `--pairNumber` | `-j` | Use specific number for pairing |
-| `--story` | `-q` | Auto-download stories |
-| `--offline` | `-f` | Set presence to offline |
-| `--noCall` | `-d` | Reject incoming calls |
-| `--printSelf` | `-v` | Print host's own messages in terminal |
-| `--pipe` | | Enable command piping with `\|` operator |
+| `--prefix` | `-p` | Set custom prefix(es), comma-separated |
+| `--read-only` | | Read only |
+| `--auto-read` | | Auto read every incoming message |
+| `--restrict` | | Restrict moderator commands |
+| `--only-logs` | | Only show logs, ignore messages and commands |
+| `--no-logs` | | Suppress logs while still responding to commands |
+| `--self-mode` | `-s` | Only owner and the bot can use commands |
+| `--debug-mode` | | Show full message metadata |
+| `--multi-cmd` | `-m` | Enable multi-cmd with `&&` separator |
+| `--watch` | `-w` | Watch files and reload on change |
+| `--cool-down` | `-c` | Enable command cooldowns |
+| `--auto-correct` | | Auto-correct command names |
+| `--story` | | Auto-download stories |
+| `--offline` | | Set presence to offline |
+| `--no-call` | | Reject incoming calls |
+| `--ai` | | Handle incoming messages with AI |
+| `--limit-reset` | `-l` | Auto-reset user limits |
+| `--reset-on-start` | | Reset DB connections on start |
+| `--no-limit` | | Disable command limits |
+| `--pair-mode` | | Enable pair mode |
+| `--pair-number` | | Use a specific number for pairing |
 | `--test` | | Test connection |
+| `--print-self` | | Print host messages in terminal |
+| `--pipe` | | Enable command piping with `\|` operator |
 | `--help` | `-h` | Show help message |
-| `--spin` | | Enable loading spinners |
 | `--rainbow` | `-b` | Rainbow-colored logs |
-| `--trace` | `-t` | Show errors |
-| `--onlyLogs` | `-o` | Show logs only, ignore messages |
-| `--noLogs` | `-n` | Suppress logs, still respond |
+| `--trace` | | Show errors |
 
 ---
 
 ## Session
-- Session name resolved from CLI arg or `settings.json.main_session` (default: `Session-debug`)
-- Default session name derived in `check-flag.js:DEFAULT_SESSION_NAME` via sync `fs.readJSONSync`
+- Session name resolved from CLI arg or `settings.json.main_session` (default: `aestherix-bot`)
+- Default session name derived in `src/core/cli.js` (`DEFAULT_SESSION`) via sync `fs.readJSONSync`
 
 ---
 
@@ -767,6 +231,70 @@ Flag parsing via `meow` in `check-flag.js`. Flags added there are available in `
 ---
 
 ## Code Standards
+
+# CLAUDE.md
+
+Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
+
+**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+
+## 1. Think Before Coding
+
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
+
+Before implementing:
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
+
+## 2. Simplicity First
+
+**Minimum code that solves the problem. Nothing speculative.**
+
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
+
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+## 3. Surgical Changes
+
+**Touch only what you must. Clean up only your own mess.**
+
+When editing existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
+
+When your changes create orphans:
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
+
+The test: Every changed line should trace directly to the user's request.
+
+## 4. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan:
+```
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+```
+
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+---
 
 ### Core Philosophy
 - Write code for humans first, machines second.

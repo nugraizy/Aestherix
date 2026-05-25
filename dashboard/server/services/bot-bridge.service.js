@@ -4,9 +4,9 @@ const rawBridgeToken = process.env.DASHBOARD_BRIDGE_TOKEN;
 
 if (!rawBridgeToken) {
 	throw new Error(
-		'DASHBOARD_BRIDGE_TOKEN environment variable is not set. '
-		+ 'Generate a strong random token and set it in your .env file:\n'
-		+ '  DASHBOARD_BRIDGE_TOKEN=$(openssl rand -hex 32)'
+		'DASHBOARD_BRIDGE_TOKEN environment variable is not set. ' +
+			'Generate a strong random token and set it in your .env file:\n' +
+			'  DASHBOARD_BRIDGE_TOKEN=$(openssl rand -hex 32)'
 	);
 }
 

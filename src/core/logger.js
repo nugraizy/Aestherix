@@ -1,3 +1,4 @@
+// @ts-check
 import chalk from 'chalk';
 import { highlight } from 'cli-highlight';
 import dayjs from 'dayjs';
@@ -9,10 +10,13 @@ dayjs.extend(timezone);
 
 import { color } from '../utils/modules/color.js';
 import { pushDashboardLog } from '../../dashboard/server/monitor.js';
+import { redact } from './env.js';
 
 const TIME_FORMAT = 'HH:mm DD/MM';
 
-/** @implements {import('../types/Core/index.d.ts').Logger} */
+/** @typedef {import('../types/Core/index.js').Logger} LoggerType */
+
+/** @implements {LoggerType} */
 export class Logger {
 	#muted = false;
 	#name;
@@ -128,20 +132,137 @@ export class Logger {
 			args.splice(ignoreIndex, 1);
 		}
 
+		let errorStack = null;
+
+		const formattedArgs = args.map((arg) => {
+			const formatted = this.#formatErrorArg(arg);
+
+			if (formatted === null) {
+				return arg;
+			}
+
+			if (!errorStack && type === 'ERR' && typeof arg.stack === 'string') {
+				errorStack = arg.stack;
+			}
+
+			return formatted;
+		});
+
 		const time = this.#formatTime();
 		const prefix = this.#name
 			? `${color('[', 'gray')}${chalk.bold(color(this.#name, this.#typeColor(type)))}${color(']', 'gray')} `
 			: '';
 		const typeTag = `${color('[', 'gray')}${chalk.bold(color(type, this.#typeColor(type)))}${color(']', 'gray')}`;
 		const separator = color(' •', this.#typeColor(type));
-		const str = `${prefix}${typeTag} ${time}${separator} ${args.join(' ')}`;
+		const rawStr = `${prefix}${typeTag} ${time}${separator} ${formattedArgs.join(' ')}`;
+		const str = /** @type {string} */ (redact(rawStr));
 
 		if (ignoreIndex === -1) {
 			pushDashboardLog(type, str);
 			console.log(str);
+
+			if (errorStack) {
+				const trimmed = this.#trimStack(errorStack);
+
+				if (trimmed) {
+					console.log(/** @type {string} */ (redact(trimmed)));
+				}
+			}
 		}
 
 		return str;
+	}
+
+	#isErrorLike(arg) {
+		if (arg instanceof Error) {
+			return true;
+		}
+
+		return Boolean(arg && typeof arg === 'object' && typeof arg.message === 'string' && typeof arg.stack === 'string');
+	}
+
+	#formatErrorArg(arg) {
+		if (!this.#isErrorLike(arg)) {
+			return null;
+		}
+
+		const message = color(String(arg.message || arg), 'white');
+		const location = this.#getErrorLocation(arg.stack);
+
+		if (!location) {
+			return message;
+		}
+
+		return `${message} ${color(`(${location.file}:${location.line})`, 'gray')}`;
+	}
+
+	#getErrorLocation(stack) {
+		if (!stack || typeof stack !== 'string') {
+			return null;
+		}
+
+		const lines = stack.split('\n');
+		const framePattern = /\((?:file:\/\/)?(.+?):(\d+):(\d+)\)|at (?:file:\/\/)?(.+?):(\d+):(\d+)/;
+
+		for (const line of lines) {
+			if (!line.includes(' at ')) {
+				continue;
+			}
+
+			if (line.includes('node:internal') || line.includes('internal/')) {
+				continue;
+			}
+
+			const match = line.match(framePattern);
+
+			if (!match) {
+				continue;
+			}
+
+			const filePath = (match[1] || match[4] || '')
+				.trim()
+				.replace(/\\/g, '/')
+				.replace(/[?#].*$/, '');
+			const lineNumber = match[2] || match[5] || 'unknown';
+
+			if (!filePath) {
+				continue;
+			}
+
+			const srcIndex = filePath.lastIndexOf('/src/');
+			const displayPath = srcIndex !== -1 ? filePath.slice(srcIndex + 1) : filePath.split('/').slice(-2).join('/');
+
+			return { file: displayPath || filePath, line: lineNumber };
+		}
+
+		return null;
+	}
+
+	#trimStack(stack, max = 5) {
+		if (!stack || typeof stack !== 'string') {
+			return '';
+		}
+
+		const frames = stack
+			.split('\n')
+			.slice(1)
+			.filter((line) => {
+				const trimmed = line.trim();
+
+				if (!trimmed.startsWith('at ')) {
+					return false;
+				}
+
+				if (trimmed.includes('node:internal') || trimmed.includes('internal/')) {
+					return false;
+				}
+
+				return true;
+			})
+			.slice(0, max)
+			.map((line) => color(`  ${line.trim()}`, 'gray'));
+
+		return frames.join('\n');
 	}
 
 	#formatTime() {

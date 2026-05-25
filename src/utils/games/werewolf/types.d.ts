@@ -20,14 +20,7 @@ export type RoleId =
 	| 'little-girl'
 	| 'jester';
 
-export type PhaseName =
-	| 'lobby'
-	| 'deal'
-	| 'night'
-	| 'day'
-	| 'voting'
-	| 'hunterShoot'
-	| 'ended';
+export type PhaseName = 'lobby' | 'deal' | 'night' | 'day' | 'voting' | 'hunterShoot' | 'ended';
 
 export interface RoleDescriptor {
 	id: RoleId;

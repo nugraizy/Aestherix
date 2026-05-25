@@ -2,6 +2,7 @@ import { generateWAMessageFromContent } from 'baileys';
 
 import { textStory } from '../../helper/canvas/index.js';
 import { Cache } from '../../helper/modules/cache.js';
+import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
 const STATUS = 'status@broadcast';
@@ -107,7 +108,7 @@ export default defineCommand({
 				}
 			}
 		} catch (err) {
-			console.log(err);
+			loggers.error(color('Fetch story failed:', 'red'), err);
 		}
 	}
 });

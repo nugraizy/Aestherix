@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
@@ -80,7 +82,7 @@ export default defineCommand({
 				.destination(from)
 				.body(capt.trim().formatForm())
 				.header('image', imageProfile)
-				.footer('Powered by ' + __botName)
+				.footer('Powered by ' + BOT_NAME)
 				.buttons(builder.button.reply({ display: 'Get User Tweets', id: cmdId('twttweets', username, { prefix }) }))
 				.send();
 		}

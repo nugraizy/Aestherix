@@ -56,8 +56,18 @@ ID API : wa.me/${sender.split('@')[0]}
 The Problem Occured in : ${from}`,
 			templateButtons: [
 				{ urlButton: { displayText: 'Contact Person', url: `https://wa.me/${sender.split('@')[0]}` } },
-				{ quickReplyButton: { displayText: 'Accept', id: cmdId('report', 'accept ' + from + ' ' + sender + ' ' + JSON.stringify(message), { prefix }) } },
-				{ quickReplyButton: { displayText: 'Banned', id: cmdId('ban', 'report ' + from + ' ' + sender + ' ' + JSON.stringify(message), { prefix }) } }
+				{
+					quickReplyButton: {
+						displayText: 'Accept',
+						id: cmdId('report', 'accept ' + from + ' ' + sender + ' ' + JSON.stringify(message), { prefix })
+					}
+				},
+				{
+					quickReplyButton: {
+						displayText: 'Banned',
+						id: cmdId('ban', 'report ' + from + ' ' + sender + ' ' + JSON.stringify(message), { prefix })
+					}
+				}
 			],
 			headerType: 1
 		});

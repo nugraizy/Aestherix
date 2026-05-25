@@ -53,7 +53,7 @@ async function emitInitialSnapshot(socket, services) {
 	} else {
 		const result = await botBridge.fetchBotLogs({ since: 0, limit: 250 });
 
-		logsPayload = result.ok ? (result.data || { lastId: 0, logs: [] }) : { lastId: 0, logs: [] };
+		logsPayload = result.ok ? result.data || { lastId: 0, logs: [] } : { lastId: 0, logs: [] };
 	}
 
 	socket.data.lastLogId = Number(logsPayload?.lastId || 0);
@@ -123,7 +123,7 @@ function startLogsInterval(io, services) {
 			} else {
 				const result = await services.botBridge.fetchBotLogs({ since, limit: 250 });
 
-				payload = result.ok ? (result.data || { lastId: since, logs: [] }) : { lastId: since, logs: [] };
+				payload = result.ok ? result.data || { lastId: since, logs: [] } : { lastId: since, logs: [] };
 			}
 
 			socket.data.lastLogId = Number(payload?.lastId || since || 0);
@@ -254,7 +254,7 @@ function startMetaInterval(io, services) {
 
 			for (const socket of sockets) {
 				const session = socket.data?.session || null;
-				const list = (session?.role === 'owner' || session?.role === 'superOwner') ? usersForOwner : usersForViewer;
+				const list = session?.role === 'owner' || session?.role === 'superOwner' ? usersForOwner : usersForViewer;
 
 				socket.emit('dashboard:users', { users: list });
 			}

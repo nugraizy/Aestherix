@@ -21,12 +21,8 @@ function sameArray(left, right) {
 
 function buildPrefixConfig(mode, body) {
 	if (mode === 'multi') {
-		const cliPrefixes = Array.isArray(body.prefixes)
-			? body.prefixes.filter((p) => typeof p === 'string' && p.length > 0)
-			: [];
-		const prefixValues = cliPrefixes.length
-			? [...new Set([...BASE_MULTI_CHARS, ...cliPrefixes])]
-			: [...BASE_MULTI_CHARS];
+		const cliPrefixes = Array.isArray(body.prefixes) ? body.prefixes.filter((p) => typeof p === 'string' && p.length > 0) : [];
+		const prefixValues = cliPrefixes.length ? [...new Set([...BASE_MULTI_CHARS, ...cliPrefixes])] : [...BASE_MULTI_CHARS];
 		const escaped = prefixValues.map(escapeCharClass).join('');
 
 		return {
@@ -102,9 +98,7 @@ export function createPrefixRouter({ services, configuration }) {
 				status: 'failed',
 				message: 'Invalid prefix mode. Must be single, multi, or nopref.'
 			});
-			return res
-				.status(400)
-				.json({ ok: false, message: 'Invalid mode. Must be single, multi, or nopref.' });
+			return res.status(400).json({ ok: false, message: 'Invalid mode. Must be single, multi, or nopref.' });
 		}
 
 		const next = buildPrefixConfig(mode, req.body || {});

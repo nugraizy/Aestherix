@@ -1,4 +1,4 @@
-import { delay } from '../../utils/modules/index.js';
+import { color, delay, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
 const check4Duplicate = (chats) => {
@@ -48,7 +48,7 @@ export default defineCommand({
 				await client.send(id, { text, mentions: [sender] });
 			}
 		} catch (err) {
-			log(err);
+			loggers.error(color('Group broadcast failed:', 'red'), err);
 			await client.reply(from, err.stack, message);
 		}
 	}

@@ -29,11 +29,7 @@ export default defineCommand({
 				`${color('Wordle Game Answer : ', 'pink')} ${color(wordle.word, 'white')} to ${color(prettyNumber, 'lilac')}`
 			);
 
-			const data = await client.reply(
-				from,
-				`${wordle.board.join('')}\n\nTot. words : ${wordle.word.length}`,
-				message
-			);
+			const data = await client.reply(from, `${wordle.board.join('')}\n\nTot. words : ${wordle.word.length}`, message);
 
 			wordle.messages = data;
 		} else if (args[1] === 'exit') {

@@ -1,6 +1,6 @@
 import { generateWAMessageFromContent } from 'baileys';
 import type { FileTypeResult } from 'file-type';
-import type { MessageGenerated } from '../Messages';
+import type { MessageGenerated } from '../Messages/index.d.ts';
 
 type MediaType = 'videoMessage' | 'imageMessage';
 type Media = string | Buffer | undefined | null;

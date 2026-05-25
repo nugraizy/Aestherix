@@ -92,7 +92,7 @@ export const gttsAI = (text, uuid) =>
 			const container = await (
 				await fetch(_apiUberduck, {
 					method: 'POST',
-					body: JSON.stringify({ speech: text, voicemodel_uuid: uuid }),  
+					body: JSON.stringify({ speech: text, voicemodel_uuid: uuid }),
 					headers: {
 						accept: 'application/json',
 						authorization: basicAuth,

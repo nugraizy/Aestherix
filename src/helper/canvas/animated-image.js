@@ -132,4 +132,3 @@ export const attp = (sender, texts, colored, fonts) =>
 			resolve(buffers);
 		});
 	});
-

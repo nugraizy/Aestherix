@@ -1,6 +1,7 @@
 import '../../utils/games/werewolf/i18n/index.js';
 
 import { getLocale, t } from '../../helper/i18n/index.js';
+import { defineCommand } from '../_define.js';
 
 import * as convert from './werewolf/subcommands/convert.js';
 import * as deleteCmd from './werewolf/subcommands/delete.js';
@@ -42,7 +43,7 @@ const SUBCOMMANDS = {
 	help
 };
 
-export default {
+export default defineCommand({
 	name: 'werewolf',
 	minifiedDescription: 'Play Werewolf (5–20 players, 10 roles, id/en)',
 	description:
@@ -65,4 +66,4 @@ export default {
 
 		return module.run(ctx, client);
 	}
-};
+});

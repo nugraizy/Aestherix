@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import { cmdId } from '../../helper/modules/prefix.js';
 import { fetchBUFFER, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { spotifier } from '../../utils/spotifier/index.js';
@@ -77,7 +79,7 @@ export default defineCommand({
 								rowId: cmdId('spotifydl', `${name} - ${artists[0].name}`)
 							}
 						],
-						title: `${__botName} | Powered by Spotify`
+						title: `${BOT_NAME} | Powered by Spotify`
 					});
 				}
 

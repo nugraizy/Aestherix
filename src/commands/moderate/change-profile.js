@@ -64,7 +64,7 @@ export default defineCommand({
 		}
 
 		await client.updateProfilePicture(
-			options.self ? jidNormalizedUser(instance) : from,
+			options.self ? jidNormalizedUser(client.user.id) : from,
 			media,
 			options.no_crop || options.noCrop ? 'no_crop' : options.no_stretch || options.noStretch ? 'no_stretch' : undefined
 		);

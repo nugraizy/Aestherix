@@ -272,17 +272,17 @@ class Pinterest {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const context = {
-					source_url: '/',  
+					source_url: '/',
 					data: JSON.stringify({
 						options: {
-							field_set_key: 'hf_grid',  
-							in_nux: false,  
-							in_news_hub: false,  
-							static_feed: false,  
+							field_set_key: 'hf_grid',
+							in_nux: false,
+							in_news_hub: false,
+							static_feed: false,
 							isPrefetch: false,
 							prependPartner: true,
 							prependUserNews: false,
-							page_size: 100,  
+							page_size: 100,
 							bookmarks: []
 						},
 						context: {}
@@ -337,17 +337,17 @@ class Pinterest {
 				}
 
 				const context = {
-					source_url: `/pin/${pinId}/`,  
+					source_url: `/pin/${pinId}/`,
 					data: JSON.stringify({
 						options: {
-							pin_id: pinId,  
-							context_pin_ids: [],  
-							page_size: 50,  
-							search_query: '',  
+							pin_id: pinId,
+							context_pin_ids: [],
+							page_size: 50,
+							search_query: '',
 							source: 'deep_linking',
-							top_level_source: 'deep_linking',  
-							top_level_source_depth: 1,  
-							is_pdp: false,  
+							top_level_source: 'deep_linking',
+							top_level_source_depth: 1,
+							is_pdp: false,
 							bookmarks: bookmarks ? [bookmarks] : []
 						},
 						context: {}

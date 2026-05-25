@@ -18,6 +18,7 @@ import { makeLobbyTimer } from '../../../../src/utils/games/werewolf/logic/lobby
 import { setScheduler } from '../../../../src/utils/games/werewolf/logic/scheduler-singleton.js';
 import { makeRepository, setRepositoryForTest } from '../../../../src/utils/games/werewolf/state/repository.js';
 import { addPlayer, dealRoles, setPhase } from '../../../../src/utils/games/werewolf/state/session.js';
+import { makeFakeClient } from '../../../_fixtures/index.js';
 
 const makeFakePrisma = () => {
 	const table = new Map();
@@ -52,56 +53,6 @@ const makeFakePrisma = () => {
 	};
 
 	return api;
-};
-
-const makeFakeClient = () => {
-	const replies = [];
-	const sends = [];
-
-	return {
-		replies,
-		sends,
-		instance: {
-			TemplateBuilder: {
-				Native: class {
-					constructor() {
-						this.args = { destination: null, body: '', footer: '', buttons: [] };
-						this.button = {
-							reply: ({ display, id }) => ({ display, id })
-						};
-					}
-					destination(d) {
-						this.args.destination = d;
-						return this;
-					}
-					body(b) {
-						this.args.body = b;
-						return this;
-					}
-					footer(f) {
-						this.args.footer = f;
-						return this;
-					}
-					buttons(...bs) {
-						this.args.buttons = bs;
-						return this;
-					}
-					send() {
-						sends.push({ ...this.args });
-						return Promise.resolve();
-					}
-				}
-			},
-			reply(to, text) {
-				replies.push({ to, text });
-				return Promise.resolve();
-			},
-			send(to, payload) {
-				sends.push({ to, ...payload });
-				return Promise.resolve();
-			}
-		}
-	};
 };
 
 const ctx = (overrides) => ({

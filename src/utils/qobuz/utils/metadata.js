@@ -32,23 +32,31 @@ const metadata = async (track, songUrl, coverUrl) =>
 		const result = [];
 		const args = [
 			'-y',
-			'-i', songUrl,
+			'-i',
+			songUrl,
 			...(coverUrl ? ['-i', coverUrl] : []),
-			'-map', '0:a?',
+			'-map',
+			'0:a?',
 			...(coverUrl ? ['-map', '1:v?'] : []),
-			'-c', 'copy',
-			'-f', 'flac',
-			'-metadata', `title=${meta.title}`,
-			'-metadata', `artist=${meta.artist}`,
-			'-metadata', `album=${meta.album}`,
-			'-metadata', `date=${meta.year}`,
-			'-metadata', `track=${meta.trackNumber}`,
-			'-metadata', `genre=${meta.genre}`,
-			...(coverUrl ? [
-				'-metadata:s:v', 'title=Album cover',
-				'-metadata:s:v', 'comment=Cover (front)',
-				'-disposition:v:0', 'attached_pic'
-			] : []),
+			'-c',
+			'copy',
+			'-f',
+			'flac',
+			'-metadata',
+			`title=${meta.title}`,
+			'-metadata',
+			`artist=${meta.artist}`,
+			'-metadata',
+			`album=${meta.album}`,
+			'-metadata',
+			`date=${meta.year}`,
+			'-metadata',
+			`track=${meta.trackNumber}`,
+			'-metadata',
+			`genre=${meta.genre}`,
+			...(coverUrl
+				? ['-metadata:s:v', 'title=Album cover', '-metadata:s:v', 'comment=Cover (front)', '-disposition:v:0', 'attached_pic']
+				: []),
 			'pipe:1'
 		];
 

@@ -96,10 +96,13 @@ export const makeScheduler = ({
 			clearTimeoutFn(existing);
 		}
 
-		const handle = setTimeoutFn(() => {
-			timers.delete(roomId);
-			void tick(roomId);
-		}, Math.max(0, delayMs));
+		const handle = setTimeoutFn(
+			() => {
+				timers.delete(roomId);
+				void tick(roomId);
+			},
+			Math.max(0, delayMs)
+		);
 
 		timers.set(roomId, handle);
 

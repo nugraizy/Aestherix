@@ -14,8 +14,8 @@ export const facebook = (url) =>
 			const { k_token: kToken, k_exp: kExp } = await getTokens();
 
 			const payload = {
-				k_exp: +kExp,  
-				k_token: kToken,  
+				k_exp: +kExp,
+				k_token: kToken,
 				q: url,
 				lang: 'en',
 				web: 'fdownloader.net',

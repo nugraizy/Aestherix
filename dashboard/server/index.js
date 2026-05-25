@@ -103,9 +103,10 @@ function createApp({ services, configuration, mountGradient = true, port = DEFAU
 			};
 
 			if (req.accepts(['html', 'json']) === 'html') {
-				const uptimeStr = data.uptime >= 3600
-					? `${Math.floor(data.uptime / 3600)}h ${Math.floor((data.uptime % 3600) / 60)}m`
-					: `${Math.floor(data.uptime / 60)}m`;
+				const uptimeStr =
+					data.uptime >= 3600
+						? `${Math.floor(data.uptime / 3600)}h ${Math.floor((data.uptime % 3600) / 60)}m`
+						: `${Math.floor(data.uptime / 60)}m`;
 
 				res.type('html').send(`<!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">

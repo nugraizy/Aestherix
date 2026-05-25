@@ -49,7 +49,7 @@ const baseTheme = EditorView.theme({
 	'&': {
 		height: '100%',
 		fontSize: '0.85rem',
-		fontFamily: '\'JetBrains Mono\', \'Fira Code\', ui-monospace, monospace',
+		fontFamily: "'JetBrains Mono', 'Fira Code', ui-monospace, monospace",
 		backgroundColor: 'transparent',
 		color: 'var(--text)'
 	},
@@ -188,7 +188,11 @@ const accentHighlight = HighlightStyle.define([
 	{ tag: [tags.operator, tags.operatorKeyword], color: 'var(--code-operator, #8ef0ff)' },
 	{ tag: tags.punctuation, color: 'var(--muted)' },
 	{ tag: tags.bracket, color: 'var(--muted)' },
-	{ tag: [tags.comment, tags.lineComment, tags.blockComment, tags.docComment], color: 'var(--code-comment, #6c7086)', fontStyle: 'italic' },
+	{
+		tag: [tags.comment, tags.lineComment, tags.blockComment, tags.docComment],
+		color: 'var(--code-comment, #6c7086)',
+		fontStyle: 'italic'
+	},
 	{ tag: tags.heading, color: 'var(--accent)', fontWeight: '600' },
 	{ tag: tags.link, color: 'var(--code-function, #8ef0ff)', textDecoration: 'underline' },
 	{ tag: tags.invalid, color: '#ff8e74', textDecoration: 'underline wavy' }

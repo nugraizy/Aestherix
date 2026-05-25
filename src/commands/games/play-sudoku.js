@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 
 import configuration from '../../helper/config/connect.js';
 import { toUserJid } from '../../helper/misc/wa_data/index.js';
-import { getTimeSince } from '../../utils/modules/index.js';
+import { color, getTimeSince, loggers } from '../../utils/modules/index.js';
 import { checkWin, fillGrid, makePuzzle, revealOneElement, solvePuzzle, stringifyGrid } from '../../utils/games/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -231,7 +231,7 @@ export default defineCommand({
 				return await client.reply(from, 'There is no game to reset!', message);
 			}
 		} catch (err) {
-			console.log(err);
+			loggers.error(color('Sudoku command failed:', 'red'), err);
 		}
 	}
 });

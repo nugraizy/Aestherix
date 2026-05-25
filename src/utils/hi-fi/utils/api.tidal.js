@@ -628,7 +628,7 @@ class TidalApi {
 		return this.tryFetch('artist', {
 			id: artistId,
 			f: releasesArtistIdValidated,
-			skip_tracks: assertBoolean('skip_tracks', skipTracksValue, false)  
+			skip_tracks: assertBoolean('skip_tracks', skipTracksValue, false)
 		});
 	}
 

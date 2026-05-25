@@ -2,11 +2,7 @@ import express from 'express';
 import fs from 'fs-extra';
 import { createServer } from 'http';
 
-import {
-	getDashboardLogs,
-	setDashboardCommandState,
-	setDashboardFlagState
-} from '../../../dashboard/server/monitor.js';
+import { getDashboardLogs, setDashboardCommandState, setDashboardFlagState } from '../../../dashboard/server/monitor.js';
 import configuration from '../../helper/config/connect.js';
 import { banUser, getBannedUsers, getUserLimit, unbanUser, upsertUserLimit } from '../../helper/database/adapters/user.js';
 import prisma from '../../helper/database/prisma.js';
@@ -132,10 +128,7 @@ const applyRuntimeMutation = async (waClient, type, payload = {}) => {
 			const fresh = await fs.readJSON(SETTINGS_PATH);
 
 			configuration.settings = fresh;
-			configuration.owners = [
-				toUserJid(fresh.owner_number),
-				...(fresh.team_number || []).map(toUserJid)
-			].filter(Boolean);
+			configuration.owners = [toUserJid(fresh.owner_number), ...(fresh.team_number || []).map(toUserJid)].filter(Boolean);
 
 			if (typeof fresh.logger_theme === 'string' && fresh.logger_theme.length > 0) {
 				configuration.logger_theme = fresh.logger_theme;
@@ -182,7 +175,9 @@ const sendConfirmationButton = async ({ waClient, to, approveButtonId, rejectBut
 		return;
 	}
 
-	await waClient.send(to, { text: `Dashboard login request detected.\n\nReply one of these codes:\nConfirm: ${approveButtonId}\nReject: ${rejectButtonId}` });
+	await waClient.send(to, {
+		text: `Dashboard login request detected.\n\nReply one of these codes:\nConfirm: ${approveButtonId}\nReject: ${rejectButtonId}`
+	});
 };
 
 export const startDashboardBridge = (resolveWaClient) => {
@@ -288,7 +283,9 @@ export const startDashboardBridge = (resolveWaClient) => {
 			return res.status(503).json({ ok: false, message: 'Store not available.' });
 		}
 
-		const query = String(req.query?.q || '').trim().toLowerCase();
+		const query = String(req.query?.q || '')
+			.trim()
+			.toLowerCase();
 		const jidFilter = String(req.query?.jid || '').trim();
 		const limit = Number(req.query?.limit) || 0;
 		const messages = waClient.store.messages || {};
@@ -320,7 +317,10 @@ export const startDashboardBridge = (resolveWaClient) => {
 					fromMe: Boolean(msg.key?.fromMe),
 					timestamp: Number(msg.messageTimestamp || 0),
 					content,
-					type: msg.message ? Object.keys(msg.message).find((k) => k !== 'messageContextInfo' && k !== 'senderKeyDistributionMessage') || 'unknown' : 'empty'
+					type: msg.message
+						? Object.keys(msg.message).find((k) => k !== 'messageContextInfo' && k !== 'senderKeyDistributionMessage') ||
+							'unknown'
+						: 'empty'
 				});
 			}
 
@@ -390,9 +390,7 @@ export const startDashboardBridge = (resolveWaClient) => {
 				};
 			});
 
-			const isBotAdmin = participants.some(
-				(p) => p.phone === botPhone && (p.admin === 'admin' || p.admin === 'superadmin')
-			);
+			const isBotAdmin = participants.some((p) => p.phone === botPhone && (p.admin === 'admin' || p.admin === 'superadmin'));
 
 			res.json({
 				ok: true,

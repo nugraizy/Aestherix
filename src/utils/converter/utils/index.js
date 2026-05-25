@@ -1,6 +1,6 @@
 import axios from 'axios';
 import fs from 'fs-extra';
-import md5 from 'md5';
+import { createHash } from 'node:crypto';
 import asyncRetry from 'async-retry';
 
 const urlRegex = new RegExp(
@@ -18,7 +18,9 @@ export const streamFile = (file) => fs.createReadStream(file);
 export const signV1 = (obj) => {
 	const str = JSON.stringify(obj);
 
-	return md5('https://h5.tu.qq.com' + (str.length + (encodeURIComponent(str).match(/%[89ABab]/g)?.length || 0)) + 'HQ31X02e');
+	return createHash('md5')
+		.update('https://h5.tu.qq.com' + (str.length + (encodeURIComponent(str).match(/%[89ABab]/g)?.length || 0)) + 'HQ31X02e')
+		.digest('hex');
 };
 
 export const imageToBuffer = async (image, httpsAgent, opts) => {

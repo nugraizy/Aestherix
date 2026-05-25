@@ -6,6 +6,7 @@ import { v4 } from 'uuid';
 
 import configuration from '../../helper/config/connect.js';
 import { Cache } from '../../helper/modules/cache.js';
+import { color, loggers } from '../modules/index.js';
 import { LOGIN_HEADERS, USER_AGENTS, _apiGraphql, _apiUser, _baseApi, _baseUrl, generateDeviceID } from './utils.js';
 
 class ResponseParser {
@@ -1056,7 +1057,7 @@ export class InstagramApi extends InstagramMethods {
 			err = new Error(
 				'`.env.instagram` file not found. Use the constructor to login and create file. ex: `new InstagramApi(username, password).login()`'
 			);
-			console.log(err);
+			loggers.error(color('Instagram fetch failed:', 'red'), err);
 			process.exit(0);
 		}
 
@@ -1065,13 +1066,13 @@ export class InstagramApi extends InstagramMethods {
 
 		if (!USERNAME) {
 			err = new Error('`USERNAME` not found in `.env.instagram`');
-			console.log(err);
+			loggers.error(color('Instagram fetch failed:', 'red'), err);
 			process.exit(0);
 		}
 
 		if (!PASSWORD) {
 			err = new Error('`PASSWORD` not found in `.env.instagram`');
-			console.log(err);
+			loggers.error(color('Instagram fetch failed:', 'red'), err);
 			process.exit(0);
 		}
 

@@ -14,6 +14,7 @@ import { initWerewolfHandler } from './handlers/games/werewolf.js';
 import { Auth } from './auth.js';
 import { ClientSocket } from './client-socket.js';
 import { CommandLoader } from './command-loader.js';
+import { refreshPrefixCache } from './context.js';
 import { EventHandler } from './event-handler.js';
 import { manager } from './manager.js';
 import { MqttBridge } from './mqtt.js';
@@ -36,7 +37,7 @@ function syncPrefixToRouter(router) {
 	});
 }
 
-async function handlePollUpdate(store, msg) {
+async function handlePollUpdate(socket, store, msg) {
 	const { getAggregateVotesInPollMessage, getKeyAuthor, jidNormalizedUser } = await import('baileys');
 	const pollKey = msg?.pollUpdateMessage?.pollCreationMessageKey;
 	const originalPoll = await store.loadMessage(pollKey.remoteJid, pollKey.id);
@@ -45,7 +46,13 @@ async function handlePollUpdate(store, msg) {
 		return;
 	}
 
-	const meIdNormalized = jidNormalizedUser(global.instance);
+	const botJid = socket?.user?.id;
+
+	if (!botJid) {
+		return;
+	}
+
+	const meIdNormalized = jidNormalizedUser(botJid);
 	const pollCreatorJid = getKeyAuthor(pollKey, meIdNormalized);
 	const voterJid = getKeyAuthor(msg.msg.key, meIdNormalized);
 	const pollEncKey = originalPoll.message.messageContextInfo?.messageSecret;
@@ -64,7 +71,7 @@ async function handlePollUpdate(store, msg) {
 			pollUpdates: [{ vote: voteMsg, pollUpdateMessageKey: msg.msg.key, senderTimestampMs: msg.msg.messageTimestamp }],
 			message: originalPoll.message
 		},
-		global.instance
+		botJid
 	);
 }
 
@@ -223,7 +230,8 @@ async function handlePairing(clientSocket, flags) {
 	loggers.warning(color('Waiting for code input', 'white'), color('. . .', 'pink'));
 }
 
-async function onConnected({ clientSocket, commandLoader, router, mqtt, store, webhook }) {
+async function onConnected({ clientSocket, commandLoader, router, mqtt, store, webhook, eventHandler }) {
+	webhook.setClient(clientSocket.socket);
 	webhook.start();
 
 	if (ENABLE_EMBEDDED_DASHBOARD) {
@@ -243,14 +251,24 @@ async function onConnected({ clientSocket, commandLoader, router, mqtt, store, w
 
 	syncPrefixToRouter(router);
 
+	Promise.all([
+		refreshPrefixCache(clientSocket).catch((err) =>
+			loggers.error(color('Pre-warm refreshPrefixCache failed:', 'red'), color(err?.message || err, 'gray'))
+		),
+		eventHandler?.messageHandler
+			?.preInit?.()
+			.catch((err) => loggers.error(color('Pre-warm initHandlers failed:', 'red'), color(err?.message || err, 'gray')))
+	]);
+
 	const socket = clientSocket.socket;
 
 	socket.ev.on('commit', async (commitInfo) => await webhook.handleCommitEvent(commitInfo));
-	socket.ev.on('poll.update', async (msg) => handlePollUpdate(store, msg));
+	socket.ev.on('poll.update', async (msg) => handlePollUpdate(socket, store, msg));
 	socket.ws.on('CB:notification,type:w:gp2', (update) => parseStubtypeUpdate(socket, update));
 	socket.ws.on('CB:notification,type:picture', async (update) => await emitProfilePictureUpdate(socket, update));
 
 	initWerewolfHandler(clientSocket, loggers);
+	mqtt.setClient(socket);
 	mqtt.bindMessageHandler();
 
 	if (configuration.flags.watch) {
@@ -398,7 +416,7 @@ export async function boot({ cli, OPTIONS, store, sessionName }) {
 	eventHandler.bind();
 
 	clientSocket.on('connected', () => {
-		onConnected({ clientSocket, commandLoader, router, mqtt, store, webhook });
+		onConnected({ clientSocket, commandLoader, router, mqtt, store, webhook, eventHandler });
 		spawnPersistedSubBots({ configuration });
 	});
 

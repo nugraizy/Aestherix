@@ -332,4 +332,3 @@ export class Attachment {
 		return this.canvas.toBuffer('image/png');
 	}
 }
-

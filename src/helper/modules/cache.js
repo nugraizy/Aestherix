@@ -22,6 +22,7 @@ export class Cache {
 	#allowOverwrite;
 	#count;
 	#valuesArray;
+	#keysArray;
 
 	constructor({ limit = Infinity, throws = false, allowOverwrite = true } = {}) {
 		/**
@@ -64,6 +65,13 @@ export class Cache {
 		 * @private
 		 */
 		this.#valuesArray = [];
+
+		/**
+		 * Cached keys array for fast access.
+		 * @type {Key[]}
+		 * @private
+		 */
+		this.#keysArray = [];
 	}
 
 	/**
@@ -108,6 +116,14 @@ export class Cache {
 	}
 
 	/**
+	 * Returns cached keys array (rebuilt only on set/delete/clear).
+	 * @returns {Key[]}
+	 */
+	keysOnly() {
+		return this.#keysArray;
+	}
+
+	/**
 	 * Returns an object containing values from the cache and a function to find keys by value.
 	 * @returns {{ values: any[], returns: (value: any) => Key | null }}
 	 */
@@ -136,6 +152,7 @@ export class Cache {
 	 */
 	#rebuildValuesArray() {
 		this.#valuesArray = Object.values(this.cache);
+		this.#keysArray = Object.keys(this.cache);
 	}
 
 	/**
@@ -249,6 +266,17 @@ export class Cache {
 		this.#rebuildValuesArray();
 
 		return this;
+	}
+
+	/**
+	 * Alias for `delete(key)`. Provided so this Cache satisfies baileys's
+	 * `CacheStore` interface (which expects `.del`) and so it can serve as
+	 * a drop-in replacement for `node-cache`.
+	 * @param {Key} key
+	 * @returns {this}
+	 */
+	del(key) {
+		return this.delete(key);
 	}
 
 	/**

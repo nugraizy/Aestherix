@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import yargsParser from 'yargs-parser';
 
 import { brainlySearch } from '../../utils/brainly/index.js';
@@ -46,7 +48,7 @@ export default defineCommand({
 				.trim()}\n\n\n`;
 		}
 
-		capt += `\nBrainly by ${__botName}. Powered by Hidden Finder`;
+		capt += `\nBrainly by ${BOT_NAME}. Powered by Hidden Finder`;
 		await client.reply(from, capt.trim().formatForm(), message);
 	}
 });

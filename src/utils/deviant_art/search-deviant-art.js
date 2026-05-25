@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+import { color, loggers } from '../modules/index.js';
 import { parse } from './utils.js';
 
 const check = (i) => (i === -1 ? undefined : i);
@@ -46,7 +47,7 @@ export const searchDeviantArt = (keyword) =>
 					})
 			);
 		} catch (err) {
-			console.log(err);
+			loggers.error(color('DeviantArt search failed:', 'red'), err);
 			reject(err);
 		}
 	});

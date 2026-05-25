@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import fs from 'fs';
 import _ from 'lodash';
 import path from 'path';
@@ -103,7 +105,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 				from,
 				{
 					text: texts,
-					footer: `Page : ${Number(index) + 1}/${splitData.length}\nPowered by ${__botName}`,
+					footer: `Page : ${Number(index) + 1}/${splitData.length}\nPowered by ${BOT_NAME}`,
 					buttons,
 					headerType: 1
 				},

@@ -15,7 +15,7 @@ export default defineCommand({
 			return await client.reply(from, 'You must reply to a message to delete it.', message);
 		}
 
-		const myJid = client.decodeJid(instance);
+		const myJid = client.decodeJid(client.user.id);
 
 		if (!mediaData.participant.includes(myJid) && !isBotAdmin) {
 			return await client.reply(from, 'You can not ask bot to delete people message when bot is not admin.', message);

@@ -1,17 +1,31 @@
 export function stripAnsi(text) {
-	return String(text || '')
-		.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><~]/g, '');
+	return String(text || '').replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><~]/g, '');
 }
 
 const ANSI_COLORS = {
-	30: '#4b5563', 31: '#ff5555', 32: '#50fa7b', 33: '#f1fa8c',
-	34: '#bd93f9', 35: '#ff79c6', 36: '#8be9fd', 37: '#f8f8f2',
-	90: '#6272a4', 91: '#ff6e6e', 92: '#69ff94', 93: '#ffffa5',
-	94: '#d6acff', 95: '#ff92df', 96: '#a4ffff', 97: '#ffffff'
+	30: '#4b5563',
+	31: '#ff5555',
+	32: '#50fa7b',
+	33: '#f1fa8c',
+	34: '#bd93f9',
+	35: '#ff79c6',
+	36: '#8be9fd',
+	37: '#f8f8f2',
+	90: '#6272a4',
+	91: '#ff6e6e',
+	92: '#69ff94',
+	93: '#ffffa5',
+	94: '#d6acff',
+	95: '#ff92df',
+	96: '#a4ffff',
+	97: '#ffffff'
 };
 
 export function ansiToHtml(text) {
-	const str = String(text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+	const str = String(text || '')
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;');
 	let result = '';
 	let open = false;
 	let i = 0;

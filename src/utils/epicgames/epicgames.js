@@ -1,8 +1,7 @@
 import { fetch } from 'undici';
 import fs from 'fs-extra';
-import path from 'path';
 
-const graphql = await fs.readFile(path.join(__dirname, 'src/utils/epicgames/StoreQuery.graphql'), { encoding: 'utf-8' });
+const graphql = await fs.readFile(new URL('./StoreQuery.graphql', import.meta.url), { encoding: 'utf-8' });
 
 export const epicgamesFree = () =>
 	new Promise(async (resolve, reject) => {

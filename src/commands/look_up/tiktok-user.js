@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import _ from 'lodash';
 import parser from 'yargs-parser';
 
@@ -45,7 +47,7 @@ export default defineCommand({
 				{
 					buttonText: 'Open list',
 					title: 'See List Videos',
-					footer: `Made by ${__botName}. Powered by Hidden Finder`,
+					footer: `Made by ${BOT_NAME}. Powered by Hidden Finder`,
 					text: '\t',
 					sections: row
 				},

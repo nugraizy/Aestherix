@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+import { color, loggers } from '../modules/index.js';
+
 const COOKIE = '__LOCALE__null=ID; csrftoken=VLT3in1vbv6tm8MLZGg37FG2hLk5hCrE; ';
 const COOKIE_URL = 'https://shopee.co.id/api/v4/pages/is_short_url/?path=search';
 
@@ -49,7 +51,7 @@ export const shopeeProduct = (key, total = 5) =>
 			});
 			resolve(container);
 		} catch (err) {
-			console.log(err);
+			loggers.error(color('Shopee fetch failed:', 'red'), err);
 			resolve({ error: err });
 		}
 	});

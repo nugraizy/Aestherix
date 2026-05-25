@@ -38,9 +38,7 @@ export const buildNightKickoff = (session, locale) =>
 	t(locale, `${NS}.nightTime`, [session.gameTime || 40], { rng: Math.random });
 
 export const buildMorningReport = (session, nightResult, locale) => {
-	const killedPlayers = nightResult.killedIds
-		.map((id) => getPlayer(session, id))
-		.filter(Boolean);
+	const killedPlayers = nightResult.killedIds.map((id) => getPlayer(session, id)).filter(Boolean);
 
 	if (killedPlayers.length === 0) {
 		return {
@@ -91,8 +89,7 @@ export const buildGameOverSummary = (session, winner, reason, locale) => {
 	const winnerLine = winner ? t(locale, `${NS}.winner.${winner}`) : t(locale, `${NS}.errors.afk`);
 
 	const splitByTeam = (team) => session.playersData.filter((p) => roleTeam(p.role) === team);
-	const listPlayer = (p) =>
-		`${mention(p.id)} ${p.isAlive ? '😄' : '💀'} — ${p.role}`;
+	const listPlayer = (p) => `${mention(p.id)} ${p.isAlive ? '😄' : '💀'} — ${p.role}`;
 
 	const goodTeam = splitByTeam('village');
 	const wolfTeam = splitByTeam('wolves');
@@ -115,15 +112,10 @@ export const buildGameOverSummary = (session, winner, reason, locale) => {
 	}
 
 	parts.push('');
-	parts.push(
-		locale === 'en'
-			? `Reason: ${reason ?? 'winCondition'}`
-			: `Alasan: ${reason ?? 'kondisiMenang'}`
-	);
+	parts.push(locale === 'en' ? `Reason: ${reason ?? 'winCondition'}` : `Alasan: ${reason ?? 'kondisiMenang'}`);
 
 	return {
 		body: parts.join('\n'),
 		mentions: session.playersData.map((p) => p.id)
 	};
 };
-

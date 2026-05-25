@@ -52,19 +52,19 @@ export default defineCommand({
 			.map((group) =>
 				group
 					.map(([stamp, value]) => {
-					const [date, time] = stamp.split(/[ + ]+/);
-					const url = getDisplayUrl(value);
+						const [date, time] = stamp.split(/[ + ]+/);
+						const url = getDisplayUrl(value);
 
-					if (!url) {
-						return null;
-					}
+						if (!url) {
+							return null;
+						}
 
-					return {
-						timestamp: `${date} ${time}`,
-						url
-					};
-				})
-				.filter(Boolean)
+						return {
+							timestamp: `${date} ${time}`,
+							url
+						};
+					})
+					.filter(Boolean)
 			)
 			.filter((group) => group.length > 0)
 			.reverse();

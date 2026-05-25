@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import dayjs from 'dayjs';
 
 import configuration from '../../helper/config/connect.js';
@@ -36,7 +38,9 @@ async function updateBio(client) {
 	const time = dayjs.tz().format('HH:mm:ss DD/MM');
 	const uptime = getRuntime(process.uptime());
 
-	await client.setStatus(`Made by nanda | ${__botName} Bot Info : UPTIME : ${uptime} | TIME : ${time} | Powered by Hidden Finder`);
+	await client.setStatus(
+		`Made by nanda | ${BOT_NAME} Bot Info : UPTIME : ${uptime} | TIME : ${time} | Powered by Hidden Finder`
+	);
 }
 
 function handleToggle({ key, from, args, message, client, store, onEnable, onDisable, statusLabel, usageHint }) {
@@ -80,7 +84,11 @@ export default defineCommand({
 		if (['online', 'on'].includes(type)) {
 			return handleToggle({
 				key: 'available',
-				from, args, message, client, store,
+				from,
+				args,
+				message,
+				client,
+				store,
 				statusLabel: { on: 'Available', off: 'Unavailable' },
 				usageHint: 'Usage: !presence online [enable|disable|status]',
 				async onEnable() {
@@ -123,7 +131,11 @@ export default defineCommand({
 		if (['writing', 'mengetik', 'composing'].includes(type)) {
 			return handleToggle({
 				key: 'composing',
-				from, args, message, client, store,
+				from,
+				args,
+				message,
+				client,
+				store,
 				statusLabel: { on: 'Composing', off: 'Not composing' },
 				usageHint: 'Usage: !presence composing [enable|disable|status]',
 				async onEnable() {
@@ -155,7 +167,11 @@ export default defineCommand({
 		if (['recording', 'vn'].includes(type)) {
 			return handleToggle({
 				key: 'recording',
-				from, args, message, client, store,
+				from,
+				args,
+				message,
+				client,
+				store,
 				statusLabel: { on: 'Recording', off: 'Not recording' },
 				usageHint: 'Usage: !presence recording [enable|disable|status]',
 				async onEnable() {
@@ -187,7 +203,11 @@ export default defineCommand({
 		if (type === 'bio') {
 			return handleToggle({
 				key: 'bio',
-				from, args, message, client, store,
+				from,
+				args,
+				message,
+				client,
+				store,
 				statusLabel: { on: 'Enabled', off: 'Disabled' },
 				usageHint: 'Usage: !presence bio [enable|disable|status]',
 				async onEnable() {

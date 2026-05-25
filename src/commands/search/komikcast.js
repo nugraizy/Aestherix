@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import { KomikCast, mime } from '../../utils/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { defineCommand } from '../_define.js';
@@ -47,7 +49,7 @@ Tot. Chapters : ${chapters.length}`;
 				{
 					buttonText: 'Open list',
 					title: 'See chapters',
-					footer: `Made by ${__botName}. Powered by Hidden Finder`,
+					footer: `Made by ${BOT_NAME}. Powered by Hidden Finder`,
 					text: '\t',
 					sections: row
 				},
@@ -89,7 +91,7 @@ Tot. Chapters : ${chapters.length}`;
 			{
 				buttonText: 'Open list',
 				title: 'See result',
-				footer: `Made by ${__botName}. Powered by Hidden Finder`,
+				footer: `Made by ${BOT_NAME}. Powered by Hidden Finder`,
 				text: '\t',
 				sections: row
 			},

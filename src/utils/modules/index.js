@@ -4,7 +4,6 @@ import { load } from 'cheerio';
 import { fileTypeFromBuffer } from 'file-type';
 import FormData from 'form-data';
 import fs from 'fs-extra';
-import isBuffer from 'is-buffer';
 import _ from 'lodash';
 import ms from 'parse-ms';
 import progress from 'progress-stream';
@@ -624,7 +623,7 @@ export const uploadToTelegraph = async (file) => {
 	try {
 		const tempFile = file;
 
-		if (isBuffer(file)) {
+		if (Buffer.isBuffer(file)) {
 			file = file.toString('base64');
 		} else if (isFilePath(file)) {
 			file = Buffer.from(fs.readFileSync(file), 'base64');
@@ -641,7 +640,7 @@ export const uploadToTelegraph = async (file) => {
 
 		return `https://telegra.ph${data[0].src}`;
 	} catch (error) {
-		console.log(error);
+		loggers.error(color('Telegraph upload failed:', 'red'), error);
 	}
 };
 
@@ -974,7 +973,7 @@ export class Uploader {
 				let fileData;
 				let fileName = 'file';
 
-				if (isBuffer(this._file)) {
+				if (Buffer.isBuffer(this._file)) {
 					fileData = this._file;
 				} else if (isFilePath(this._file)) {
 					fileData = await fs.readFile(this._file);
@@ -1024,7 +1023,7 @@ export class Uploader {
 	 * @returns {Promise<{success: boolean, ext: string | null, message: string | undefined}>}
 	 */
 	async validateFile() {
-		if (isBuffer(this._file)) {
+		if (Buffer.isBuffer(this._file)) {
 			const types = await fileTypeFromBuffer(this._file);
 
 			if (!types) {

@@ -13,10 +13,10 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const isRetryablePrismaError = (error) => {
 	return Boolean(
 		error &&
-			(error.code === 'P2034' ||
-				error.code === 'P2028' ||
-				/Transaction.*aborted/i.test(error.message || '') ||
-				/write conflict|deadlock/i.test(error.message || ''))
+		(error.code === 'P2034' ||
+			error.code === 'P2028' ||
+			/Transaction.*aborted/i.test(error.message || '') ||
+			/write conflict|deadlock/i.test(error.message || ''))
 	);
 };
 
@@ -170,15 +170,13 @@ export const deletePinterestProfilePicture = async (db, timestamp) => {
 	}
 
 	await withRetry(() =>
-		db.pinterestProfilePicture
-			.delete({ where: { timestamp: safeTimestamp } })
-			.catch((error) => {
-				if (error?.code === 'P2025') {
-					return null;
-				}
+		db.pinterestProfilePicture.delete({ where: { timestamp: safeTimestamp } }).catch((error) => {
+			if (error?.code === 'P2025') {
+				return null;
+			}
 
-				throw error;
-			})
+			throw error;
+		})
 	);
 
 	return { ok: true };
@@ -196,9 +194,7 @@ export const deletePinterestProfilePictureByUrl = async (db, url) => {
 		return { ok: false, count: 0 };
 	}
 
-	const result = await withRetry(() =>
-		db.pinterestProfilePicture.deleteMany({ where: { url: safeUrl } })
-	);
+	const result = await withRetry(() => db.pinterestProfilePicture.deleteMany({ where: { url: safeUrl } }));
 
 	return { ok: true, count: result?.count || 0 };
 };

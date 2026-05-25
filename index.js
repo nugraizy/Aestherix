@@ -32,7 +32,6 @@ dayjs.tz.setDefault('Asia/Jakarta');
 const moduleURL = new URL(import.meta.url);
 
 global.__dirname = platform === 'win32' ? path.dirname(moduleURL.pathname).slice(1) : path.dirname(moduleURL.pathname);
-global.__botName = 'Aestherix';
 
 import { checkNetwork } from './src/core/utils.js';
 import { printBanner } from './src/utils/modules/color.js';

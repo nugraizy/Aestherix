@@ -4,13 +4,9 @@ export default [
 	{
 		languageOptions: {
 			globals: {
-				instance: true,
-				client: true,
-				where: true,
-				log: true,
-				store: true,
+				// All bot-specific globals have been migrated. Bun stays for
+				// runtime detection.
 				Bun: true,
-				__botName: true,
 				...globals.node,
 				...globals.browser
 			}

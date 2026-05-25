@@ -94,9 +94,13 @@ function isBlockedDownloadHost(hostname) {
 		.trim()
 		.toLowerCase();
 
-	if (!safeHost) {return true;}
+	if (!safeHost) {
+		return true;
+	}
 
-	if (safeHost === 'localhost' || safeHost === '127.0.0.1' || safeHost === '::1') {return true;}
+	if (safeHost === 'localhost' || safeHost === '127.0.0.1' || safeHost === '::1') {
+		return true;
+	}
 
 	return false;
 }

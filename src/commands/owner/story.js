@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { defineCommand } from '../_define.js';
@@ -52,7 +54,7 @@ export default defineCommand({
 							rowId: cmdId('fetchstory', message.key.participant, { prefix })
 						}
 					],
-					title: `${__botName} | ${message?.pushName ?? 'No Name'}`
+					title: `${BOT_NAME} | ${message?.pushName ?? 'No Name'}`
 				});
 			}
 		}

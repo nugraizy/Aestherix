@@ -103,7 +103,10 @@ export function normalizeHexColor(value) {
 		.replace(/^#/, '');
 
 	if (/^[0-9a-fA-F]{3}$/.test(normalized)) {
-		const expanded = normalized.split('').map((c) => `${c}${c}`).join('');
+		const expanded = normalized
+			.split('')
+			.map((c) => `${c}${c}`)
+			.join('');
 
 		return `#${expanded.toLowerCase()}`;
 	}

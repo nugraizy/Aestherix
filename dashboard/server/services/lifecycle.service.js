@@ -70,7 +70,8 @@ export function createLifecycleService({ botPm2AppName = DEFAULT_BOT_APP } = {})
 			return {
 				ok: false,
 				status: 409,
-				message: 'Cannot stop the bot from the same PM2 app — that would kill the dashboard. Run dashboard and bot as separate PM2 apps.'
+				message:
+					'Cannot stop the bot from the same PM2 app — that would kill the dashboard. Run dashboard and bot as separate PM2 apps.'
 			};
 		}
 

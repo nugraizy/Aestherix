@@ -1,4 +1,4 @@
-import { cheerioLOAD, fetchTEXT } from '../modules/index.js';
+import { cheerioLOAD, color, fetchTEXT, loggers } from '../modules/index.js';
 import { parse } from './utils.js';
 
 const check = (i) => (i === -1 ? undefined : i);
@@ -35,7 +35,7 @@ export const downloadDeviantArt = (input) =>
 				image
 			});
 		} catch (err) {
-			console.log(err);
+			loggers.error(color('DeviantArt download failed:', 'red'), err);
 			reject(err);
 		}
 	});

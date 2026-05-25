@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import { cmdId } from '../../helper/modules/prefix.js';
 import { getSambungkataSession, SambungKata } from '../../utils/games/index.js';
 import { defineCommand } from '../_define.js';
@@ -29,7 +31,7 @@ export default defineCommand({
 					title: 'Sambung Kata',
 					text: '\t',
 					footer: 'Powered by Hidden Finder',
-					sections: [{ rows: [{ title: 'Play', rowId: cmdId('sambung', 'player 2') }], title: `${__botName} | Word Game` }]
+					sections: [{ rows: [{ title: 'Play', rowId: cmdId('sambung', 'player 2') }], title: `${BOT_NAME} | Word Game` }]
 				},
 				{}
 			);

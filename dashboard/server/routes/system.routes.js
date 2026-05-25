@@ -18,7 +18,9 @@ export function createSystemRouter({ services }) {
 
 	router.get('/commands/analytics', middleware.requireOwnerAuth, async (_req, res) => {
 		try {
-			const row = await (await import('../../../src/helper/database/prisma.js')).default.dashboardKV.findUnique({
+			const row = await (
+				await import('../../../src/helper/database/prisma.js')
+			).default.dashboardKV.findUnique({
 				where: { key_sessionName: { key: 'command_usage_daily', sessionName: 'main' } }
 			});
 

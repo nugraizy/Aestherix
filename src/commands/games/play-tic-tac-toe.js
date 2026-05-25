@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import { deleteTictactoeSession, getTictactoeSession, TicTacToe } from '../../utils/games/index.js';
 import { delay } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
@@ -18,20 +20,20 @@ export default defineCommand({
 	cooldown: 2,
 	status: 'enable',
 	async run({ message, query, from, sender }, client) {
-		const capt = (game, status) => `TicTacToe Games by ${__botName} Bot.
+		const capt = (game, status) => `TicTacToe Games by ${BOT_NAME} Bot.
 	${
 		status
 			? game.status === 'WINNER'
-				? `${game.winner === __botName ? __botName : `@${game.winner.split('@')[0]}`} wins!`
+				? `${game.winner === BOT_NAME ? BOT_NAME : `@${game.winner.split('@')[0]}`} wins!`
 				: game.status === 'DRAW'
 					? 'Game is Draw!'
 					: `${game.PLAYER_TURN === game.PLAYER_1 ? game.PLAYER_1_MODEL : game.PLAYER_2_MODEL} ${
-							game.PLAYER_TURN === __botName ? __botName : `@${game.PLAYER_TURN.split('@')[0]}`
+							game.PLAYER_TURN === BOT_NAME ? BOT_NAME : `@${game.PLAYER_TURN.split('@')[0]}`
 						}'s turn\n\n`
 			: ''
 	}
 	${game.PLAYER_1_MODEL} @${game.PLAYER_1.split('@')[0]} vs ${game.PLAYER_2_MODEL} ${
-		game.PLAYER_2 === __botName ? __botName : `@${game.PLAYER_2.split('@')[0]}`
+		game.PLAYER_2 === BOT_NAME ? BOT_NAME : `@${game.PLAYER_2.split('@')[0]}`
 	}
 	
 ${game.BOARD.map((v, i) => {
@@ -73,11 +75,7 @@ Powered by Hidden Finder`;
 				return await client.reply(from, game.error, message);
 			}
 
-			await client.send(
-				from,
-				{ text: capt(game, false), mentions: [game.PLAYER_1, game.PLAYER_2] },
-				{ quoted: message }
-			);
+			await client.send(from, { text: capt(game, false), mentions: [game.PLAYER_1, game.PLAYER_2] }, { quoted: message });
 		}
 
 		if (/[1-9]/.test(query)) {
@@ -94,24 +92,20 @@ Powered by Hidden Finder`;
 			}
 
 			if (move.status === 'WINNER' || move.status === 'DRAW') {
-				await client.send(
-					from,
-					{ text: capt(move, true), mentions: [game.PLAYER_1, game.PLAYER_2] },
-					{ quoted: message }
-				);
+				await client.send(from, { text: capt(move, true), mentions: [game.PLAYER_1, game.PLAYER_2] }, { quoted: message });
 
 				return deleteTictactoeSession(sender);
 			}
 
 			await client.send(from, { text: capt(move), mentions: [game.PLAYER_1, game.PLAYER_2] }, { quoted: message });
 
-			if (move.PLAYER_TURN === __botName) {
+			if (move.PLAYER_TURN === BOT_NAME) {
 				const botGames = getTictactoeSession(sender);
 
-				await client.reply(from, `${__botName} Bot TURN`, message);
+				await client.reply(from, `${BOT_NAME} Bot TURN`, message);
 				await delay(1000);
 
-				const botMove = botGames.playMove(botGames.displayPlayBoard(), __botName, sender);
+				const botMove = botGames.playMove(botGames.displayPlayBoard(), BOT_NAME, sender);
 
 				if (botMove.status === 'WINNER' || botMove.status === 'DRAW') {
 					await client.send(

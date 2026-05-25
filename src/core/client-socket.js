@@ -12,8 +12,6 @@ import {
 } from 'baileys';
 import { fileTypeFromBuffer } from 'file-type';
 import fs from 'fs-extra';
-import isBuffer from 'is-buffer';
-import NodeCache from 'node-cache';
 import webpmux from 'node-webpmux';
 import { spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
@@ -149,7 +147,7 @@ export class ClientSocket extends EventEmitter {
 			version,
 			browser: this.#options.browser,
 			printQRInTerminal: !this.#options.flags.pairMode,
-			msgRetryCounterCache: new NodeCache(),
+			msgRetryCounterCache: new Cache(),
 			markOnlineOnConnect: true,
 			generateHighQualityLinkPreview: true,
 			defaultQueryTimeoutMs: 0,
@@ -341,7 +339,7 @@ export class ClientSocket extends EventEmitter {
 	}
 
 	async prepareSticker(media, type, exif) {
-		const isMediaURL = isBuffer(media) ? false : isURL(media);
+		const isMediaURL = Buffer.isBuffer(media) ? false : isURL(media);
 
 		media = isMediaURL ? Buffer.from(await (await fetch(media)).arrayBuffer(), 'base64') : media;
 
@@ -435,7 +433,7 @@ export class ClientSocket extends EventEmitter {
 	}
 
 	async generateProfilePicture(mediaUpload, type) {
-		let bufferOrFilePath = isBuffer(mediaUpload)
+		let bufferOrFilePath = Buffer.isBuffer(mediaUpload)
 			? mediaUpload
 			: isURL(mediaUpload)
 				? await fetchBUFFER(mediaUpload)
@@ -827,7 +825,7 @@ function createTemplateBuilder(client) {
 	}
 
 	async function prepareMessage(media) {
-		if (isBuffer(media)) {
+		if (Buffer.isBuffer(media)) {
 			const { mime, messageType } = await getMessageType(media);
 			const preparedMedia =
 				mime === 'image/gif' ? await prepareGif(media, messageType) : await client.prepareMedia(media, messageType);

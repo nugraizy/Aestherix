@@ -142,7 +142,7 @@ export const WebMessageInfoStubType = {
 	GROUP_PARTICIPANT_ACCEPT: 140,
 	GROUP_PARTICIPANT_LINKED_GROUP_JOIN: 141,
 	COMMUNITY_CREATE: 142,
-	EPHEMERAL_KEEP_IN_CHAT: 143,
+	EPHEMERAL_KEEP_IN_CHAT: 143
 };
 
 export const typeMessage = [
@@ -192,5 +192,5 @@ export const typeMessage = [
 	'templateButtonReplyMessage',
 	'templateMessage',
 	'thumbnailMessage',
-	'videoMessage',
+	'videoMessage'
 ];

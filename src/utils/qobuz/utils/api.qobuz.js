@@ -60,7 +60,9 @@ const assertInt = (name, value, constraints = {}) => {
 	const { required = false, min, max } = constraints;
 
 	if (value === undefined || value === null) {
-		if (required) {throw new Error(`Parameter "${name}" is required`);}
+		if (required) {
+			throw new Error(`Parameter "${name}" is required`);
+		}
 
 		return undefined;
 	}
@@ -94,7 +96,9 @@ const assertString = (name, value, constraints = {}) => {
 	const { required = false } = constraints;
 
 	if (value === undefined || value === null) {
-		if (required) {throw new Error(`Parameter "${name}" is required`);}
+		if (required) {
+			throw new Error(`Parameter "${name}" is required`);
+		}
 
 		return undefined;
 	}
@@ -249,7 +253,9 @@ class QobuzApi {
 		const searchParams = new URLSearchParams();
 
 		for (const [key, value] of Object.entries(params)) {
-			if (value === undefined || value === null) {continue;}
+			if (value === undefined || value === null) {
+				continue;
+			}
 
 			searchParams.set(key, String(value));
 		}
@@ -314,7 +320,9 @@ class QobuzApi {
 		const cacheKey = this.buildQuery({ ...params, type });
 		const cached = this.readCache('search', cacheKey);
 
-		if (cached) {return cached;}
+		if (cached) {
+			return cached;
+		}
 
 		const response = await this.fetch('api/get-music', params);
 
@@ -377,7 +385,9 @@ class QobuzApi {
 		const cacheKey = `album:${validatedId}`;
 		const cached = this.readCache('album', cacheKey);
 
-		if (cached) {return cached;}
+		if (cached) {
+			return cached;
+		}
 
 		const response = await this.fetch('api/get-album', { album_id: validatedId });
 

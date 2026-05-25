@@ -56,11 +56,7 @@ export default defineCommand({
 				await client.reply(message.from, 'You have successfully disabled games', message.message);
 				break;
 			default:
-				await client.reply(
-					message.from,
-					`Please specify a command\n\nEx: ${message.cmd} <enable/disable>`,
-					message.message
-				);
+				await client.reply(message.from, `Please specify a command\n\nEx: ${message.cmd} <enable/disable>`, message.message);
 		}
 	}
 });

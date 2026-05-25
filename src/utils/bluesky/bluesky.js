@@ -1,6 +1,7 @@
 import { AtpAgent } from '@atproto/api';
 import axios from 'axios';
 
+import { color, loggers } from '../modules/index.js';
 import { extractInfoFromUrl } from './utils.js';
 
 class Bluesky {
@@ -21,7 +22,7 @@ class Bluesky {
 				})
 				.catch((e) => {
 					if (e.error === 'AuthenticationRequired') {
-						console.log('Bluesky API: Correct Authentication are required. Check your identifier and password and try again.');
+						loggers.error(color('Bluesky authentication failed:', 'red'), e);
 						return {
 							error: 'Correct Authentication are required. Check your identifier and password and try again.'
 						};
@@ -92,9 +93,7 @@ class Bluesky {
 						url = 'https://bsky.social';
 					}
 				} catch {
-					console.log({
-						error: 'Cannot fetch PDS Endpoint.'
-					});
+					loggers.error(color('Bluesky PDS endpoint fetch failed.', 'red'));
 				}
 
 				return {

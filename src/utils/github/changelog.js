@@ -1,6 +1,7 @@
 import { fetch } from 'undici';
 
 import { Cache } from '../../helper/modules/cache.js';
+import { color, loggers } from '../modules/index.js';
 
 const owner = 'nugraizy';
 const repo = 'aestherix';
@@ -90,6 +91,6 @@ export const getChangelogs = async (max, page = 1) => {
 			return [...detailedCommits, ...nextCommits];
 		}
 	} catch (error) {
-		console.log(error);
+		loggers.error(color('GitHub changelog fetch failed:', 'red'), error);
 	}
 };

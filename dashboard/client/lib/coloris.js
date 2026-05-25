@@ -1,15 +1,4 @@
-const PALETTE = [
-	'#1a1a2e',
-	'#16213e',
-	'#c4b5fd',
-	'#87f0c1',
-	'#f0c887',
-	'#ff8e74',
-	'#8ef0ff',
-	'#ff79c6',
-	'#7aa2f7',
-	'#bd93f9'
-];
+const PALETTE = ['#1a1a2e', '#16213e', '#c4b5fd', '#87f0c1', '#f0c887', '#ff8e74', '#8ef0ff', '#ff79c6', '#7aa2f7', '#bd93f9'];
 
 const OPTIONS = {
 	theme: 'pill',

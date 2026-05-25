@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import path from 'path';
 import fs from 'fs-extra';
 
 import configuration from '../../helper/config/connect.js';
@@ -14,7 +13,7 @@ const pushMessageData = (id, data, message) => {
 	return true;
 };
 
-const images = await fs.readJSON(path.join(__dirname, 'databases/games/tebak_gambar/db.json'));
+const images = await fs.readJSON('./databases/games/tebak_gambar/db.json');
 const getData = () => randomize(images);
 
 export const startTG = async (client, id, { message, sender }, remainingTime) => {

@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { Comix } from '../../utils/index.js';
@@ -40,7 +42,7 @@ function sendResult(state, from, message, client, ctx) {
 	builder
 		.destination(from)
 		.body(body)
-		.footer('Powered by ' + __botName);
+		.footer('Powered by ' + BOT_NAME);
 
 	if (manga.poster) {
 		builder.header('image', manga.poster);
@@ -74,7 +76,11 @@ export default defineCommand({
 	status: 'enable',
 	async run({ query, from, message, prefix }, client) {
 		if (!query) {
-			return await client.reply(from, 'Please provide a search query.\n\nTips:\n• author:name — search by author\n• artist:name — search by artist', message);
+			return await client.reply(
+				from,
+				'Please provide a search query.\n\nTips:\n• author:name — search by author\n• artist:name — search by artist',
+				message
+			);
 		}
 
 		if (query.startsWith('next ')) {
@@ -128,9 +134,7 @@ export default defineCommand({
 			options.filters = filters;
 		}
 
-		const result = searchQuery
-			? await comix.search(searchQuery, options)
-			: await comix.getComics(options);
+		const result = searchQuery ? await comix.search(searchQuery, options) : await comix.getComics(options);
 
 		if (!result.items.length) {
 			return await wait.update('No results found. Try a different query.');

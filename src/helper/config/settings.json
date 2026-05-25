@@ -1,28 +1,21 @@
 {
-  "main_host_number": "6287882837264",
-  "backups_host_numbers": [
-    "6289607055246",
-    "16367421471",
-    "6287882837264",
-    "6289522534401"
-  ],
-  "owner_number": "6289607055246",
-  "team_number": [
-    "6289522534401"
-  ],
-  "main_session": "debug",
-  "maintenance": true,
-  "max_group": 20,
-  "min_members": 20,
-  "limit": 30,
-  "prefix": {
-    "multi": true,
-    "nopref": false,
-    "pref": ".",
-    "customPrefixes": []
-  },
-  "logger_theme": "catppuccin",
-  "packname": "Made by Aestherix",
-  "author": "Powered by Hidden Finder",
-  "best_time": 1.638
+	"main_host_number": "6287882837264",
+	"backups_host_numbers": ["6289607055246", "16367421471", "6287882837264", "6289522534401"],
+	"owner_number": "6289607055246",
+	"team_number": ["6289522534401"],
+	"main_session": "debug",
+	"maintenance": true,
+	"max_group": 20,
+	"min_members": 20,
+	"limit": 30,
+	"prefix": {
+		"multi": true,
+		"nopref": false,
+		"pref": ".",
+		"customPrefixes": []
+	},
+	"logger_theme": "catppuccin",
+	"packname": "Made by Aestherix",
+	"author": "Powered by Hidden Finder",
+	"best_time": 1.638
 }

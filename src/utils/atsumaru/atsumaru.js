@@ -84,13 +84,15 @@ function parseAuthors(element) {
 		return [];
 	}
 
-	return element.map((item) => {
-		if (typeof item === 'string') {
-			return { name: item, type: null };
-		}
+	return element
+		.map((item) => {
+			if (typeof item === 'string') {
+				return { name: item, type: null };
+			}
 
-		return { name: item?.name || '', type: item?.type || null };
-	}).filter((a) => a.name);
+			return { name: item?.name || '', type: item?.type || null };
+		})
+		.filter((a) => a.name);
 }
 
 class Atsumaru {
@@ -110,9 +112,7 @@ class Atsumaru {
 	}
 
 	async getPopular(page = 1) {
-		const data = await this.fetchJSON(
-			`${this.baseUrl}/api/infinite/trending?page=${page - 1}&types=Manga,Manwha,Manhua,OEL`
-		);
+		const data = await this.fetchJSON(`${this.baseUrl}/api/infinite/trending?page=${page - 1}&types=Manga,Manwha,Manhua,OEL`);
 
 		return (data?.items || []).map(normalizeManga);
 	}

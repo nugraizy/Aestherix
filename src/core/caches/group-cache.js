@@ -29,14 +29,19 @@ export class GroupCache {
 		return this.#metadata.get(groupId) || {};
 	}
 
-	async ensure(client, groupId) {
-		const cached = this.#metadata.get(groupId);
+	async ensure(client, from, { forceRefresh = true } = {}) {
+		const cached = this.#metadata.get(from);
 
 		if (cached && Date.now() - cached._fetchedAt < this.#ttl) {
 			return cached;
 		}
 
-		return this.#fetch(client, groupId);
+		if (cached && !forceRefresh) {
+			this.#fetch(client, from).catch(() => {});
+			return cached;
+		}
+
+		return this.#fetch(client, from);
 	}
 
 	async #fetch(client, groupId) {
@@ -54,6 +59,35 @@ export class GroupCache {
 		this.#metadata.set(groupId, entry);
 
 		return entry;
+	}
+
+	populate(metaMap) {
+		if (!metaMap || typeof metaMap !== 'object') {
+			return 0;
+		}
+
+		const now = Date.now();
+		let count = 0;
+
+		for (const [groupId, raw] of Object.entries(metaMap)) {
+			if (!groupId || !raw) {
+				continue;
+			}
+
+			const participants = raw.participants || [];
+
+			this.#metadata.set(groupId, {
+				...raw,
+				adminGroups: participants.filter((v) => v.admin !== null).map((v) => v.phoneNumber),
+				participantsGroup: participants.map((v) => v.phoneNumber),
+				ownerPn: raw.ownerPn || null,
+				_fetchedAt: now
+			});
+
+			count++;
+		}
+
+		return count;
 	}
 
 	invalidate(groupId) {

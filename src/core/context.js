@@ -1,3 +1,4 @@
+// @ts-check
 import { getContentType, getDevice, normalizeMessageContent } from 'baileys';
 import fs from 'fs-extra';
 import PhoneNumber from 'libphonenumber-js';
@@ -38,7 +39,7 @@ function crawlProperty(obj, propName) {
 	}
 }
 
-async function refreshPrefixCache(client) {
+export async function refreshPrefixCache(client) {
 	const settings = await fs.readJSON(SETTINGS_PATH);
 	const dataBanned = await getBannedUsers(prisma);
 	const rawJid = client.user?.id;
@@ -94,11 +95,9 @@ async function refreshPrefixCache(client) {
 	configuration.prefix.regex = prefixReg;
 	configuration.prefix.values = prefixValues;
 	configuration.botJid = myJid;
-	configuration.owners = [
-		toUserJid(settings.owner_number),
-		...(settings.team_number || []).map(toUserJid),
-		myJid
-	].filter(Boolean);
+	configuration.owners = [toUserJid(settings.owner_number), ...(settings.team_number || []).map(toUserJid), myJid].filter(
+		Boolean
+	);
 	configuration.settings = settings;
 	configuration.isFirstConnectionForCache = false;
 }
@@ -120,10 +119,13 @@ async function ensurePrefixCache(client) {
 	await refreshPrefixCache(client);
 }
 
-async function ensureGroupCache(client, from) {
-	await configuration.groups.ensure(client, from);
-} /** @implements {import('../types/Core/index.d.ts').Context} */
+async function ensureGroupCache(client, from, options) {
+	await configuration.groups.ensure(client, from, options);
+}
 
+/** @typedef {import('../types/Core/index.js').Context} ContextType */
+
+/** @implements {ContextType} */
 export class Context {
 	#raw;
 	#client;
@@ -139,7 +141,7 @@ export class Context {
 	get raw() {
 		return this.#raw;
 	}
-	/**	 * @param {import('../types/Messages').WAMessage} rawMessage	 * @param {import('../types/Core/index.d.ts').ClientSocket} client	 * @param {import('../types/Core/index.d.ts').Store} [store]	 * @param {unknown} [state]	 * @returns {Promise<Context | object>}	 */ static async from(
+	/**	 * @param {import('../types/Messages/index.js').WAMessage} rawMessage	 * @param {import('../types/Core/index.js').ClientSocket} client	 * @param {import('../types/Core/index.js').Store} [store]	 * @param {unknown} [state]	 * @returns {Promise<Context | object>}	 */ static async from(
 		rawMessage,
 		client,
 		store,
@@ -162,8 +164,11 @@ export class Context {
 		}
 
 		if (ctx.isGroup) {
-			await ensureGroupCache(client, ctx.from);
-			await ctx.#ensureGroupSettings();
+			const body = extractBody(m, ctx.type);
+			const likelyCommand = ctx.#isLikelyCommand(body);
+			const metadataPromise = ensureGroupCache(client, ctx.from, { forceRefresh: likelyCommand });
+
+			await Promise.all([metadataPromise, ctx.#ensureGroupSettings(metadataPromise)]);
 		}
 
 		ctx.#ensureUserCache();
@@ -174,26 +179,28 @@ export class Context {
 
 		return ctx;
 	}
-	/**	 * @param {string} text	 * @returns {Promise<import('../types/Messages').MessageGenerated>}	 */ async reply(text) {
+	/**	 * @param {string} text	 * @returns {Promise<import('../types/Messages/index.js').MessageGenerated>}	 */ async reply(text) {
 		return this.#client.send(this.from, { text }, { quoted: this.#raw });
 	}
-	/**	 * @param {string} emoji	 * @returns {Promise<import('../types/Messages').MessageGenerated>}	 */ async react(emoji) {
+	/**	 * @param {string} emoji	 * @returns {Promise<import('../types/Messages/index.js').MessageGenerated>}	 */ async react(
+		emoji
+	) {
 		return this.#client.send(this.from, { react: { text: emoji, key: this.#raw.key } });
 	}
-	/**	 * @param {import('../types/Messages').MessageSendContent} content	 * @param {import('../types/Messages').MessageSendOptions} [options]	 * @returns {Promise<import('../types/Messages').MessageGenerated>}	 */ async send(
+	/**	 * @param {import('../types/Messages/index.js').MessageSendContent} content	 * @param {import('../types/Messages/index.js').MessageSendOptions} [options]	 * @returns {Promise<import('../types/Messages/index.js').MessageGenerated>}	 */ async send(
 		content,
 		options = {}
 	) {
 		return this.#client.send(this.from, content, { quoted: this.#raw, ...options });
 	}
-	/**	 * @param {string} jid	 * @param {import('../types/Messages').MessageSendContent} content	 * @param {import('../types/Messages').MessageSendOptions} [options]	 * @returns {Promise<import('../types/Messages').MessageGenerated>}	 */ async sendTo(
+	/**	 * @param {string} jid	 * @param {import('../types/Messages/index.js').MessageSendContent} content	 * @param {import('../types/Messages/index.js').MessageSendOptions} [options]	 * @returns {Promise<import('../types/Messages/index.js').MessageGenerated>}	 */ async sendTo(
 		jid,
 		content,
 		options = {}
 	) {
 		return this.#client.send(jid, content, options);
 	}
-	/**	 * @returns {Promise<import('../types/Messages').MessageGenerated>}	 */ async delete() {
+	/**	 * @returns {Promise<import('../types/Messages/index.js').MessageGenerated>}	 */ async delete() {
 		return this.#client.send(this.from, { delete: this.#raw.key });
 	}
 	derive(overrides) {
@@ -272,6 +279,7 @@ export class Context {
 
 			m = Object.keys(m)[0] === 'ephemeralMessage' ? normalizeMessageContent(this.#raw) : m;
 			this.#raw.message = m;
+			/** @type {string | undefined} */
 			let type = getContentType(m);
 
 			if (type === 'extendedTextMessage' && m?.extendedTextMessage?.contextInfo?.mentionedJid?.length) {
@@ -438,7 +446,7 @@ export class Context {
 				this.type === 'extendedTextMessage' || this.type === 'mentionText'
 					? this.typeQuoted === 'thumbnailMessage'
 						? m
-						: { ...mMediaData, ...lidMaps.get(mMediaData?.participant) } || {}
+						: { ...mMediaData, ...lidMaps.get(mMediaData?.participant) }
 					: m || {};
 
 			data.extract = async () => {
@@ -555,6 +563,24 @@ export class Context {
 			};
 		});
 	}
+	#isLikelyCommand(body) {
+		if (!body || typeof body !== 'string') {
+			return false;
+		}
+
+		const { mode, regex, default: prf } = configuration.prefix;
+
+		if (mode === 'nopref') {
+			return true;
+		}
+
+		if (mode === 'multi' && regex) {
+			return regex.test(body);
+		}
+
+		return body.startsWith(prf);
+	}
+
 	#ensureUserCache() {
 		const sender = this.sender;
 
@@ -574,7 +600,7 @@ export class Context {
 				: crawlProperty(this.#raw.message, 'expiration')
 		});
 	}
-	async #ensureGroupSettings() {
+	async #ensureGroupSettings(metadataPromise) {
 		const from = this.from;
 		const m = this.#raw;
 
@@ -582,6 +608,10 @@ export class Context {
 			let entry = await checkJSON(from);
 
 			if (typeof entry === 'boolean') {
+				if (metadataPromise) {
+					await metadataPromise;
+				}
+
 				await pushDefaultSettings(from, this.groupName, this.groupMetadata?.desc?.toString() || '');
 				entry = await checkJSON(from);
 			}

@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import { delay } from 'baileys';
 import { defineCommand } from '../_define.js';
 
@@ -12,7 +14,7 @@ export default defineCommand({
 	limit: 3,
 	status: 'enable',
 	async run({ from, query, message }, client) {
-		let capt = `${__botName} Search\n\n`;
+		let capt = `${BOT_NAME} Search\n\n`;
 		const messages = await client.searchMessage(from, query);
 
 		if (!messages.length) {

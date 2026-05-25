@@ -287,7 +287,7 @@ export const startProfilePictureService = async (client, config) => {
 
 			config.pinterest.images.set(date, normalizedImage);
 			await persistProfilePictureHistory(config);
-			await client.updateProfilePicture(global.instance, image, PROFILE_PICTURE_NO_CROP);
+			await client.updateProfilePicture(client.user.id, image, PROFILE_PICTURE_NO_CROP);
 
 			getColorPalette(normalizedImage.original.url)
 				.then((hexes) => {

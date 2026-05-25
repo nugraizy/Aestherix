@@ -57,11 +57,7 @@ const antiGroupLinkHandler = async (
 				settings.banned.push(sender);
 			}
 		} else {
-			await client.reply(
-				from,
-				'You have been banned from this group for posting URLs. You will be kicked shortly.',
-				message
-			);
+			await client.reply(from, 'You have been banned from this group for posting URLs. You will be kicked shortly.', message);
 			await client.groupParticipantsUpdate(from, [sender], 'remove');
 		}
 	}

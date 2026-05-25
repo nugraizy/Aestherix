@@ -25,7 +25,6 @@ dayjs.tz.setDefault('Asia/Jakarta');
 const moduleURL = new URL(import.meta.url);
 
 global.__dirname = platform === 'win32' ? path.dirname(moduleURL.pathname).slice(1) : path.dirname(moduleURL.pathname);
-global.__botName = 'Aestherix Dashboard';
 
 configuration.cli = configuration.cli || {};
 configuration.flags = configuration.flags || {};

@@ -99,7 +99,9 @@ export function extractCoverPalette(img) {
 			return null;
 		}
 
-		const candidates = Array.from(buckets.values()).sort((a, b) => b.count - a.count).slice(0, 12);
+		const candidates = Array.from(buckets.values())
+			.sort((a, b) => b.count - a.count)
+			.slice(0, 12);
 		const ranked = candidates
 			.map((entry) => ({ ...entry, score: score(entry.rgb) * Math.log2(entry.count + 1) }))
 			.sort((a, b) => b.score - a.score);

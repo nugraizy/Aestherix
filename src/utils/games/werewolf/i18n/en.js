@@ -16,8 +16,7 @@ export default {
 		healed: 'You used your healing potion on {0}. They survive the night.',
 		poisoned: 'You poisoned {0}. They will die tonight.',
 		loversPicked: 'You bound {0} and {1} as lovers.',
-		loverNotice:
-			'Cupid has bound you as a lover of {0}. If one of you dies, the other dies from heartbreak.',
+		loverNotice: 'Cupid has bound you as a lover of {0}. If one of you dies, the other dies from heartbreak.',
 		shotFired: 'With your last breath you shot {0} dead.',
 		peekAttempt: 'You peek at the Werewolf chat tonight.',
 		convertCast: 'You turned {0} into a Werewolf. They are on your side now.',
@@ -40,8 +39,7 @@ export default {
 		alreadyAction: 'You already acted this round. Wait for the next night.',
 		protected:
 			'You tried to kill a guarded player. Your identity might have been exposed — lie convincingly if anyone accuses you!',
-		protectedMessage:
-			'A wolf tried to kill you tonight, but the Guard protected you. You are safe for now — stay alert!',
+		protectedMessage: 'A wolf tried to kill you tonight, but the Guard protected you. You are safe for now — stay alert!',
 		wrongKillProtected:
 			'Werewolf {0} tried to kill you, but since you were being guarded, you survived. Stay alert for the next night.',
 		dead: 'You are dead. Watch the game quietly until it ends.',
@@ -84,7 +82,7 @@ export default {
 		],
 		voting: [
 			'Time to vote. Pick someone to hang! Check your DMs for the voting buttons; the results will be posted here.',
-			'The villagers gather to vote. Use your action now — the bot has DM\'d you the voting buttons.'
+			"The villagers gather to vote. Use your action now — the bot has DM'd you the voting buttons."
 		]
 	},
 	lynchKillNotWerewolf: [
@@ -100,29 +98,24 @@ export default {
 	],
 	lynchDraws: [
 		'The vote ended in a draw — no one is hanged today. Talk it out before voting next time.',
-		'Today\'s vote is tied. Nobody hangs. Coordinate before voting.'
+		"Today's vote is tied. Nobody hangs. Coordinate before voting."
 	],
 	lynchNoOne: ['No one voted. If this happens 3 times in a row the game will end.'],
 	roleDialogue: {
-		villager:
-			'You are a Villager. You have no special action — participate in daytime voting to root out the wolves.',
-		werewolf:
-			'You are a Werewolf. Each night you may kill one non-wolf player. Your fellow wolves are {0}.',
+		villager: 'You are a Villager. You have no special action — participate in daytime voting to root out the wolves.',
+		werewolf: 'You are a Werewolf. Each night you may kill one non-wolf player. Your fellow wolves are {0}.',
 		'alpha-werewolf':
 			'You are the Alpha Werewolf. In addition to hunting with the pack, once per game you may convert a Villager into a Werewolf.',
 		seer: 'You are the Seer. Each night you may inspect one player to learn whether they are a Werewolf.',
 		guard:
 			'You are the Guard. Each night you may protect one player from a Werewolf kill. You cannot guard the same player two nights in a row, and you cannot guard yourself.',
 		witch:
-			'You are the Witch. Once per game you may save the wolves\' victim (heal), and once per game you may poison anyone (poison).',
-		hunter:
-			'You are the Hunter. If you die (either at night or by being lynched), you may shoot one other player as revenge.',
-		cupid:
-			'You are Cupid. On the first night pick two players to bind as lovers. If either dies, the other dies too.',
+			"You are the Witch. Once per game you may save the wolves' victim (heal), and once per game you may poison anyone (poison).",
+		hunter: 'You are the Hunter. If you die (either at night or by being lynched), you may shoot one other player as revenge.',
+		cupid: 'You are Cupid. On the first night pick two players to bind as lovers. If either dies, the other dies too.',
 		'little-girl':
-			'You are the Little Girl. You may peek at the Werewolves\' chat at night, but there is a 25% chance they catch and kill you.',
-		jester:
-			'You are the Jester. You have no night action, but if the village lynches you during voting, you win alone.'
+			"You are the Little Girl. You may peek at the Werewolves' chat at night, but there is a 25% chance they catch and kill you.",
+		jester: 'You are the Jester. You have no night action, but if the village lynches you during voting, you win alone.'
 	},
 	roleAction: {
 		seer: {

@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import { cmdId } from '../../helper/modules/prefix.js';
 import { Atsumaru } from '../../utils/atsumaru/index.js';
 import { defineCommand } from '../_define.js';
@@ -59,7 +61,7 @@ export default defineCommand({
 			builder
 				.destination(from)
 				.body(body)
-				.footer('Powered by ' + __botName)
+				.footer('Powered by ' + BOT_NAME)
 				.buttons(
 					builder.button.reply({ display: '📖 Chapters', id: cmdId('atch', manga.id, { prefix }) }),
 					builder.button.reply({ display: '📕 Read', id: cmdId('atread', manga.id, { prefix }) })

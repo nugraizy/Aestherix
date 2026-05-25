@@ -7,9 +7,18 @@ import prisma from '../../../src/helper/database/prisma.js';
 import { getEmbeddedWaClient, isBotEmbeddedHere } from '../lib/client.js';
 
 const TOGGLE_FIELDS = [
-	'welcome', 'leave', 'welcomeImage',
-	'antiDelete', 'antiGroupURL', 'antiURL', 'antiSpam',
-	'antiVirus', 'autoReader', 'antiNSFW', 'games', 'notification'
+	'welcome',
+	'leave',
+	'welcomeImage',
+	'antiDelete',
+	'antiGroupURL',
+	'antiURL',
+	'antiSpam',
+	'antiVirus',
+	'autoReader',
+	'antiNSFW',
+	'games',
+	'notification'
 ];
 
 const MESSAGE_FIELDS = ['welcomeMessage', 'leaveMessage'];
@@ -63,7 +72,7 @@ export function createGroupsService({ configuration, botBridge } = {}) {
 
 		const result = await botBridge.fetchParticipating();
 
-		return result.ok ? (result.data?.data || {}) : {};
+		return result.ok ? result.data?.data || {} : {};
 	}
 
 	async function getGroupsForAdmin(phoneNumber) {
@@ -75,13 +84,11 @@ export function createGroupsService({ configuration, botBridge } = {}) {
 		const adminGroups = [];
 
 		for (const [groupId, meta] of Object.entries(participating)) {
-			const isAdmin = meta.participants?.some(
-				(p) => {
-					const pPhone = String(p.phoneNumber || '').split('@')[0];
+			const isAdmin = meta.participants?.some((p) => {
+				const pPhone = String(p.phoneNumber || '').split('@')[0];
 
-					return pPhone === phoneNumber && (p.admin === 'admin' || p.admin === 'superadmin');
-				}
-			);
+				return pPhone === phoneNumber && (p.admin === 'admin' || p.admin === 'superadmin');
+			});
 
 			if (isAdmin) {
 				const settings = await getGroupSettings(prisma, groupId);
@@ -100,13 +107,13 @@ export function createGroupsService({ configuration, botBridge } = {}) {
 
 		const meta = participating[groupId];
 
-		return meta.participants?.some(
-			(p) => {
+		return (
+			meta.participants?.some((p) => {
 				const pPhone = String(p.phoneNumber || '').split('@')[0];
 
 				return pPhone === phoneNumber && (p.admin === 'admin' || p.admin === 'superadmin');
-			}
-		) || false;
+			}) || false
+		);
 	}
 
 	async function list() {

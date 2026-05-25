@@ -18,6 +18,7 @@ ${' '.repeat(18)}↻ ◁ || ▷ ↺`;
 
 export class MqttBridge {
 	#client = null;
+	#waClient = null;
 	#topics;
 	#url;
 	#bound = false;
@@ -37,6 +38,16 @@ export class MqttBridge {
 
 	get connected() {
 		return this.#client?.connected ?? false;
+	}
+
+	/**
+	 * Inject the active WhatsApp client. Required before
+	 * `#handleSpotifyBio` and `#handleFreegame` can run.
+	 *
+	 * @param {object} waClient
+	 */
+	setClient(waClient) {
+		this.#waClient = waClient;
 	}
 
 	connect() {
@@ -101,15 +112,20 @@ export class MqttBridge {
 	}
 
 	async #handleSpotifyBio(data) {
-		const content = `Spotify On ${data.isPlaying ? 'Play' : 'Paused'} :                                                       ${data.artists || ''} - ${data.trackTitle || ''}  ( ${data.progressMs?.toTime() || '00'} - ${data?.durationMs?.toTime() || '00'} )`;
-		const myJid = client?.instance?.decodeJid(instance);
-		const myStatus = await client?.instance?.fetchStatus(myJid);
-
-		if (myStatus.status === content) {
+		if (!this.#waClient?.user?.id) {
 			return;
 		}
 
-		await client.query({
+		const content = `Spotify On ${data.isPlaying ? 'Play' : 'Paused'} :                                                       ${data.artists || ''} - ${data.trackTitle || ''}  ( ${data.progressMs?.toTime() || '00'} - ${data?.durationMs?.toTime() || '00'} )`;
+
+		const myJid = this.#waClient.decodeJid(this.#waClient.user.id);
+		const myStatus = await this.#waClient.fetchStatus(myJid);
+
+		if (myStatus?.status === content) {
+			return;
+		}
+
+		await this.#waClient.query({
 			tag: 'iq',
 			attrs: { to: S_WHATSAPP_NET, type: 'set', xmlns: 'status' },
 			content: [{ tag: 'status', attrs: {}, content: Buffer.from(content, 'utf-8') }]
@@ -117,7 +133,7 @@ export class MqttBridge {
 	}
 
 	async #handleFreegame(data) {
-		if (!data.from?.length) {
+		if (!this.#waClient || !data.from?.length) {
 			return;
 		}
 
@@ -126,7 +142,7 @@ export class MqttBridge {
 		for (const destination of data.from) {
 			const caption = `${'Freegames Notifier'.formatHeaders()}\n\n${result.title}`;
 
-			await client?.instance?.send(destination, {
+			await this.#waClient.send(destination, {
 				image: { url: result.preview.images[0].source.url.replace('amp;', '') },
 				caption,
 				footer: 'Powered by Hidden Finder',

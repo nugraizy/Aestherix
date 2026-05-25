@@ -30,16 +30,8 @@ export default defineCommand({
 
 			await delay(2_500);
 
-			await client.edit(
-				result.partner1,
-				'Your partner is found!',
-				configuration.anonymous.messages.get(result.partner1)
-			);
-			await client.edit(
-				result.partner2,
-				'Your partner is found!',
-				configuration.anonymous.messages.get(result.partner2)
-			);
+			await client.edit(result.partner1, 'Your partner is found!', configuration.anonymous.messages.get(result.partner1));
+			await client.edit(result.partner2, 'Your partner is found!', configuration.anonymous.messages.get(result.partner2));
 			return;
 		}
 

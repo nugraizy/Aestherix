@@ -725,4 +725,3 @@ export class SpotifyCard {
 		return min + Math.floor((randomNumber / (Math.pow(2, 32) - 1)) * range);
 	}
 }
-

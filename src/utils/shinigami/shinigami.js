@@ -91,7 +91,10 @@ class Shinigami {
 		return { items: (data.data || []).map(normalizeManga), hasNext };
 	}
 
-	async search(query, { page = 1, sort = '', status = '', format = '', type = '', genreInclude = '', genreExclude = '' } = {}) {
+	async search(
+		query,
+		{ page = 1, sort = '', status = '', format = '', type = '', genreInclude = '', genreExclude = '' } = {}
+	) {
 		const params = new URLSearchParams();
 
 		params.set('page', String(page));
@@ -137,7 +140,11 @@ class Shinigami {
 	async getManga(id) {
 		const data = await this.fetchJSON(`${this.apiUrl}/v1/manga/detail/${id}`);
 		const detail = normalizeMangaDetail(data.data);
-		const browse = normalizeManga({ manga_id: id, title: data.data?.title || id, cover_image_url: data.data?.cover_image_url || '' });
+		const browse = normalizeManga({
+			manga_id: id,
+			title: data.data?.title || id,
+			cover_image_url: data.data?.cover_image_url || ''
+		});
 
 		return { ...browse, ...detail };
 	}

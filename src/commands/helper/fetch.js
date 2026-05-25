@@ -4,10 +4,10 @@ import { fetch } from 'undici';
 import yargsParser from 'yargs-parser';
 
 import { extension, gif2mp4, isURL } from '../../utils/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
-const VALID_PARSER_PATTERN =
-	/^(\["[^"]+"\]|\w+|\[(?!0+\d)\d+\])((\.\w+)|(:?\["[^"]+"\])|(?:\['[^']+'\])|\[(?!0+\d)\d+\])*$/g;
+const VALID_PARSER_PATTERN = /^(\["[^"]+"\]|\w+|\[(?!0+\d)\d+\])((\.\w+)|(:?\["[^"]+"\])|(?:\['[^']+'\])|\[(?!0+\d)\d+\])*$/g;
 
 const CONTENT_TYPE_PATTERN = /^[a-z0-9!#$&^_-]+\/[a-z0-9!#$&^_.+-]+$/i;
 
@@ -16,7 +16,9 @@ function getNestedValue(obj, path) {
 	let current = obj;
 
 	for (const segment of segments) {
-		if (current == null) {return undefined;}
+		if (current == null) {
+			return undefined;
+		}
 
 		current = current[segment];
 	}
@@ -59,11 +61,15 @@ async function fetchData(url, { method, headers, body }) {
 async function processJsonResponse(response, pathParser) {
 	let json = await response.json();
 
-	if (!pathParser) {return JSON.stringify(json, null, 2);}
+	if (!pathParser) {
+		return JSON.stringify(json, null, 2);
+	}
 
 	const parsed = parseObject(json, pathParser);
 
-	if (parsed?.error) {return { error: true, message: parsed.message || 'Cannot parse json' };}
+	if (parsed?.error) {
+		return { error: true, message: parsed.message || 'Cannot parse json' };
+	}
 
 	return parsed;
 }
@@ -74,11 +80,15 @@ async function processTextResponse(response, pathParser) {
 	try {
 		const json = JSON.parse(text);
 
-		if (!pathParser) {return JSON.stringify(json, null, 2);}
+		if (!pathParser) {
+			return JSON.stringify(json, null, 2);
+		}
 
 		const parsed = parseObject(json, pathParser);
 
-		if (parsed?.error) {return { error: true, message: parsed.message || 'Cannot parse json' };}
+		if (parsed?.error) {
+			return { error: true, message: parsed.message || 'Cannot parse json' };
+		}
 
 		return parsed;
 	} catch {
@@ -104,9 +114,13 @@ async function sendGifAsVideo(fileBuffer, from, message, client) {
 }
 
 function resolveMessageType(mime) {
-	if (mime.includes('gif') || mime.includes('video')) {return 'video';}
+	if (mime.includes('gif') || mime.includes('video')) {
+		return 'video';
+	}
 
-	if (mime.includes('image')) {return 'image';}
+	if (mime.includes('image')) {
+		return 'image';
+	}
 
 	return 'document';
 }
@@ -198,9 +212,13 @@ export default defineCommand({
 				}, {})
 			: {};
 
-		if (method === 'GET') {body = undefined;}
+		if (method === 'GET') {
+			body = undefined;
+		}
 
-		if (body) {headers['content-type'] = 'application/json;charset=UTF-8';}
+		if (body) {
+			headers['content-type'] = 'application/json;charset=UTF-8';
+		}
 
 		try {
 			const response = await fetchData(url, { method, headers, body });
@@ -214,7 +232,9 @@ export default defineCommand({
 			if (responseType === 'application/json') {
 				const data = await processJsonResponse(response, queryParser);
 
-				if (data?.error) {return await client.reply(from, data.message, message);}
+				if (data?.error) {
+					return await client.reply(from, data.message, message);
+				}
 
 				if (media && typeof data === 'string' && isURL(data)) {
 					const mediaResponse = await fetch(data);
@@ -256,7 +276,7 @@ export default defineCommand({
 				...(fileName ? { fileName, mime: responseType } : {})
 			});
 		} catch (error) {
-			console.log(error);
+			loggers.error(color('Helper fetch failed:', 'red'), error);
 			await client.reply(from, error.message, message);
 		}
 	}

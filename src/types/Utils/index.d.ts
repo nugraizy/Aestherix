@@ -3,7 +3,7 @@
  * Import from '../Core' instead.
  */
 
-import type { ClientSocket } from '../Core';
+import type { ClientSocket } from '../Core/index.d.ts';
 
 export type PrepareMedia = ClientSocket['prepareMedia'];
 export type AppliedExif = ClientSocket['applyExif'];

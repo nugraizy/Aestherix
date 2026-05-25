@@ -8,7 +8,10 @@ const prisma =
 		datasourceUrl: process.env.DATABASE_URL,
 		log:
 			process.env.NODE_ENV === 'development'
-				? [{ emit: 'stdout', level: 'error' }, { emit: 'stdout', level: 'warn' }]
+				? [
+						{ emit: 'stdout', level: 'error' },
+						{ emit: 'stdout', level: 'warn' }
+					]
 				: [{ emit: 'stdout', level: 'error' }]
 	});
 
@@ -17,4 +20,3 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 export default prisma;
-

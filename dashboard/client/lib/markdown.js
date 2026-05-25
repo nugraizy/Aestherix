@@ -12,7 +12,9 @@ function postProcess(html) {
 	});
 
 	output = output.replace(/<pre><code\s+class="language-([^"]+)">/gi, (_match, lang) => {
-		const safeLang = String(lang || '').trim().toLowerCase();
+		const safeLang = String(lang || '')
+			.trim()
+			.toLowerCase();
 
 		return `<pre data-lang="${safeLang}"><span class="md-code-lang">${safeLang}</span><code class="language-${safeLang}">`;
 	});

@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import { cmdId } from '../../helper/modules/prefix.js';
 import { Kiryuu } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
@@ -62,7 +64,7 @@ export default defineCommand({
 			builder
 				.destination(from)
 				.body(body)
-				.footer('Powered by ' + __botName)
+				.footer('Powered by ' + BOT_NAME)
 				.buttons(
 					builder.button.reply({ display: '📖 Chapters', id: cmdId('kych', manga.slug, { prefix }) }),
 					builder.button.reply({ display: '📕 Read', id: cmdId('kyread', manga.slug, { prefix }) })

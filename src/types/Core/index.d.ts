@@ -1,8 +1,7 @@
 import type { AuthenticationState, makeWASocket } from 'baileys';
 import type { EventEmitter } from 'node:events';
 import type { Transform } from 'node:stream';
-import type { makeWASocket } from 'baileys';
-import type { Buttons, Cards } from '../Commands/Interactive';
+import type { Buttons, Cards } from '../Commands/Interactive.d.ts';
 import type {
 	DownloadableMessage,
 	MessageGenerated,
@@ -11,7 +10,7 @@ import type {
 	MessageTypes,
 	WAMessage,
 	WAMessageKey
-} from '../Messages';
+} from '../Messages/index.d.ts';
 
 type WASocket = ReturnType<typeof makeWASocket>;
 type WASocketMethods = Omit<WASocket, 'ev' | 'ws' | 'end'>;

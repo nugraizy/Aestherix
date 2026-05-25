@@ -1,6 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 
+import { color, loggers } from '../modules/index.js';
+
 const stickerPackID = 'com.snowcorp.stickerly.android.stickercontentprovider b5e7275f-f1de-4137-961f-57becfad34f2'; //not sure what this does
 const googleLink = 'https://play.google.com/store/apps/details?id=com.marsconstd.stickermakerforwhatsapp';
 const appleLink = 'https://itunes.apple.com/app/sticker-maker-studio/id1443326857';
@@ -40,7 +42,8 @@ export const createExif = (packname, author) => {
 
 	fs.writeFile(path.join(__dirname, 'src/media/temporary_files/data.exif'), buffer, function (err) {
 		if (err) {
-			return console.error(err);
+			loggers.error(color('EXIF write failed:', 'red'), err);
+			return;
 		}
 	});
 };

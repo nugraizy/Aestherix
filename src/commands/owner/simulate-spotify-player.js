@@ -6,19 +6,22 @@ import { delay } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
 function startSpotifyPolling() {
-	async.forever(async (next) => {
-		if (configuration.presences?.spotify?.timeout === undefined) {
-			next();
-		}
+	async.forever(
+		async (next) => {
+			if (configuration.presences?.spotify?.timeout === undefined) {
+				next();
+			}
 
-		await delay(5_000);
+			await delay(5_000);
 
-		const data = await spotifier.updateNowPlayingStates();
+			const data = await spotifier.updateNowPlayingStates();
 
-		if (data !== false) {
-			configuration.mqtt?.publish(process.env.MQTT_SPOTIFY_BIO, JSON.stringify({ ...data, status: true }));
-		}
-	}, () => {});
+			if (data !== false) {
+				configuration.mqtt?.publish(process.env.MQTT_SPOTIFY_BIO, JSON.stringify({ ...data, status: true }));
+			}
+		},
+		() => {}
+	);
 }
 
 export default defineCommand({

@@ -60,8 +60,8 @@ export const whatFormat = (input) => {
 	return videoFormat.includes(input)
 		? 'video'
 		: imageFormat.includes(input)
-		? 'image'
-		: audioFormat.includes(input)
-		? 'audio'
-		: 'document';
+			? 'image'
+			: audioFormat.includes(input)
+				? 'audio'
+				: 'document';
 };

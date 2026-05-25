@@ -3,7 +3,7 @@ import { defineCommand } from '../_define.js';
 export default defineCommand({
 	name: 'retrieve',
 	minifiedDescription: 'Retrieve Group URL',
-	description: 'Retrieve the group\'s invitation URL.',
+	description: "Retrieve the group's invitation URL.",
 	usage: '!retrieve',
 	aliases: ['inv', 'link'],
 	category: 'Moderation',

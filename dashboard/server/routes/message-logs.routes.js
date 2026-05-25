@@ -27,7 +27,9 @@ export function createMessageLogsRouter({ services }) {
 			return res.json(result.data);
 		}
 
-		const query = String(req.query?.q || '').trim().toLowerCase();
+		const query = String(req.query?.q || '')
+			.trim()
+			.toLowerCase();
 		const jidFilter = String(req.query?.jid || '').trim();
 		const limit = Number(req.query?.limit) || 0;
 		const messages = client.store.messages || {};
@@ -59,7 +61,10 @@ export function createMessageLogsRouter({ services }) {
 					fromMe: Boolean(msg.key?.fromMe),
 					timestamp: Number(msg.messageTimestamp || 0),
 					content,
-					type: msg.message ? Object.keys(msg.message).find((k) => k !== 'messageContextInfo' && k !== 'senderKeyDistributionMessage') || 'unknown' : 'empty'
+					type: msg.message
+						? Object.keys(msg.message).find((k) => k !== 'messageContextInfo' && k !== 'senderKeyDistributionMessage') ||
+							'unknown'
+						: 'empty'
 				});
 			}
 

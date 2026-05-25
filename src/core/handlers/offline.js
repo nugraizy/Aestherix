@@ -1,6 +1,8 @@
 import dayjs from 'dayjs';
 import fs from 'fs-extra';
 
+import { color, loggers } from '../../utils/modules/index.js';
+
 const OFFLINE_DB_PATH = './databases/offline_db/users.json';
 
 const offlineHandler = async (client, { isGroup, from, sender, message }) => {
@@ -27,7 +29,7 @@ const offlineHandler = async (client, { isGroup, from, sender, message }) => {
 			await client.reply(from, 'The owner is currently offline, please contact another time.', message);
 		}
 	} catch (err) {
-		console.log(err);
+		loggers.error(color('Offline handler failed:', 'red'), err);
 	}
 };
 

@@ -42,7 +42,7 @@ export class ConnectionHandler {
 				await this.#handleOpen(receivedPendingNotifications);
 			}
 		} catch (error) {
-			console.log(error);
+			loggers.error(color('Connection update handler failed:', 'red'), error);
 			this.#reconnect();
 		}
 	}
@@ -111,8 +111,6 @@ export class ConnectionHandler {
 		if (receivedPendingNotifications || this.#shouldWait) {
 			return;
 		}
-
-		global.instance = this.#client.user.id;
 
 		if (!metricsPrinted) {
 			loggers.info(color('Socket connected', 'white'), color('Successfully', 'lilac') + color('.', 'white'));

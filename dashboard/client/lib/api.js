@@ -21,7 +21,9 @@ async function request(path, options = {}) {
 			if (body?.retryAfter) {
 				retryAfter = body.retryAfter;
 			}
-		} catch {}
+		} catch {
+			// Response body is not JSON; fall through with the default status message.
+		}
 
 		const error = new Error(message);
 
@@ -188,11 +190,17 @@ export function quickSend(jid, message) {
 export function getMessageLogs({ q, jid, limit } = {}) {
 	const params = new URLSearchParams();
 
-	if (q) {params.set('q', q);}
+	if (q) {
+		params.set('q', q);
+	}
 
-	if (jid) {params.set('jid', jid);}
+	if (jid) {
+		params.set('jid', jid);
+	}
 
-	if (limit) {params.set('limit', String(limit));}
+	if (limit) {
+		params.set('limit', String(limit));
+	}
 
 	const qs = params.toString();
 

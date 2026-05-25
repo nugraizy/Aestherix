@@ -62,7 +62,7 @@ export default defineCommand({
 	cooldown: 8,
 	status: 'enable',
 	async run({ query, from, message, filename, sender, typeQuoted, mediaData, bodyQuoted, prettyNumber }, client) {
-		if (typeQuoted === 'imageMessage' && mediaData.participant?.includes(client.decodeJid(instance))) {
+		if (typeQuoted === 'imageMessage' && mediaData.participant?.includes(client.decodeJid(client.user.id))) {
 			const reg = /✦ Video ID :\s*([^\n]+)/g;
 
 			const videoIds = [];

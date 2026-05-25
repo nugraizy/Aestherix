@@ -19,10 +19,10 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const isRetryablePrismaError = (error) => {
 	return Boolean(
 		error &&
-			(error.code === 'P2034' ||
-				error.code === 'P2028' ||
-				/Transaction.*aborted/i.test(error.message || '') ||
-				/write conflict|deadlock/i.test(error.message || ''))
+		(error.code === 'P2034' ||
+			error.code === 'P2028' ||
+			/Transaction.*aborted/i.test(error.message || '') ||
+			/write conflict|deadlock/i.test(error.message || ''))
 	);
 };
 

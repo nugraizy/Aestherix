@@ -1,4 +1,7 @@
-/** @implements {import('../types/Core/index.d.ts').Manager} */
+// @ts-check
+/** @typedef {import('../types/Core/index.js').Manager} ManagerType */
+
+/** @implements {ManagerType} */
 export class Manager {
 	#clients = new Map();
 
@@ -46,7 +49,9 @@ export class Manager {
 	 */
 	findByPhone(phone) {
 		for (const [name, client] of this.#clients) {
-			if (client.phone === phone) {return { name, client };}
+			if (client.phone === phone) {
+				return { name, client };
+			}
 		}
 
 		return null;

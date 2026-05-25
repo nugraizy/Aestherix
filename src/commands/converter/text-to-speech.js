@@ -1,6 +1,7 @@
 import path from 'path';
 
 import { textToSpeech } from '../../utils/converter/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -43,7 +44,7 @@ export default defineCommand({
 
 			await client.reply(from, 'Error while converting text to speech', message);
 
-			console.log(e);
+			loggers.error(color('TTS conversion failed:', 'red'), e);
 		}
 	}
 });

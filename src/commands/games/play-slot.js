@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import { slot as slots } from '../../utils/games/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -28,7 +30,7 @@ export default defineCommand({
 		await builder
 			.destination(from)
 			.body(capt)
-			.footer(`Slot Game by ${__botName}`)
+			.footer(`Slot Game by ${BOT_NAME}`)
 			.buttons(
 				builder.button.reply({
 					display: 'Play Again',

@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import dayjs from 'dayjs';
 
 import { Cache } from '../../helper/modules/cache.js';
@@ -102,7 +104,7 @@ const sendNextPrompt = async (sessionId, batchSize, username, from, client, ctx)
 	await builder
 		.destination(from)
 		.body(`Sent ${batchSize} tweet(s) for @${username}.\nPress Next to load more.`)
-		.footer('Powered by ' + __botName)
+		.footer('Powered by ' + BOT_NAME)
 		.buttons(
 			builder.button.reply({
 				display: 'Next',

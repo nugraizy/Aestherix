@@ -4,7 +4,9 @@ import { extractMetadata } from './utils/metadata.js';
 const pickImage = (image) => image?.large || image?.thumbnail || image?.small || null;
 
 function normalizeArtist(artist) {
-	if (!artist) {return null;}
+	if (!artist) {
+		return null;
+	}
 
 	return {
 		id: artist.id ?? null,
@@ -21,7 +23,9 @@ function normalizeArtists(artists) {
 }
 
 function normalizeAlbum(album) {
-	if (!album) {return null;}
+	if (!album) {
+		return null;
+	}
 
 	return {
 		raw: album,
@@ -38,13 +42,13 @@ function normalizeAlbum(album) {
 }
 
 function normalizeTrack(track, albumOverride) {
-	if (!track) {return null;}
+	if (!track) {
+		return null;
+	}
 
 	const albumSource = track.album || albumOverride || null;
 	const artist =
-		normalizeArtist(track.performer) ||
-		normalizeArtist(track.artists?.[0]) ||
-		normalizeArtist(albumSource?.artist);
+		normalizeArtist(track.performer) || normalizeArtist(track.artists?.[0]) || normalizeArtist(albumSource?.artist);
 
 	return {
 		raw: track,
@@ -98,7 +102,9 @@ class Qobuz {
 	}
 
 	async searchTracks(query, offset = 0) {
-		if (!query) {throw new Error('Query is required');}
+		if (!query) {
+			throw new Error('Query is required');
+		}
 
 		try {
 			const payload = await this.api.searchTracks(query, offset);
@@ -115,7 +121,9 @@ class Qobuz {
 	}
 
 	async searchAlbums(query, offset = 0) {
-		if (!query) {throw new Error('Query is required');}
+		if (!query) {
+			throw new Error('Query is required');
+		}
 
 		try {
 			const payload = await this.api.searchAlbums(query, offset);
@@ -127,7 +135,9 @@ class Qobuz {
 	}
 
 	async searchArtists(query, offset = 0) {
-		if (!query) {throw new Error('Query is required');}
+		if (!query) {
+			throw new Error('Query is required');
+		}
 
 		try {
 			const payload = await this.api.searchArtists(query, offset);
@@ -139,7 +149,9 @@ class Qobuz {
 	}
 
 	async download(id, quality = 27) {
-		if (!id) {throw new Error('ID is required');}
+		if (!id) {
+			throw new Error('ID is required');
+		}
 
 		try {
 			const file = await this.api.getTrackDownload(id, quality);
@@ -155,30 +167,47 @@ class Qobuz {
 	}
 
 	async getAlbum(id) {
-		if (!id) {throw new Error('ID is required');}
+		if (!id) {
+			throw new Error('ID is required');
+		}
 
 		try {
 			const response = await this.api.getAlbum(id);
 			const album = normalizeAlbum(response);
-			const tracks = (response?.tracks?.items ?? [])
-				.map((t) => normalizeTrack(t, response))
-				.map((t) => this.#wrapTrack(t));
+			const tracks = (response?.tracks?.items ?? []).map((t) => normalizeTrack(t, response)).map((t) => this.#wrapTrack(t));
 
-			return { ...(album || { id: null, title: '', artist: null, artists: [], image: null, genre: '', releasedAt: null, copyright: '', trackCount: null }), tracks };
+			return {
+				...(album || {
+					id: null,
+					title: '',
+					artist: null,
+					artists: [],
+					image: null,
+					genre: '',
+					releasedAt: null,
+					copyright: '',
+					trackCount: null
+				}),
+				tracks
+			};
 		} catch (error) {
 			return this.#friendlyError(error);
 		}
 	}
 
 	#wrapTrack(track) {
-		if (!track) {return track;}
+		if (!track) {
+			return track;
+		}
 
 		return {
 			...track,
 			download: async (quality = 27) => {
 				const result = await this.download(track.id, quality);
 
-				if (typeof result === 'string') {return result;}
+				if (typeof result === 'string') {
+					return result;
+				}
 
 				return { ...result, track, cover: track.album?.image || track.album?.raw?.image?.large || null };
 			},
@@ -191,7 +220,9 @@ class Qobuz {
 	}
 
 	#wrapAlbum(album) {
-		if (!album) {return album;}
+		if (!album) {
+			return album;
+		}
 
 		return { ...album, download: () => this.getAlbum(album.id) };
 	}

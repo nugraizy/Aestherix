@@ -1,4 +1,4 @@
-import { fetchJSON } from '../modules/index.js';
+import { color, fetchJSON, loggers } from '../modules/index.js';
 import { URL_API_CONTENT_NOVEL } from './index.js';
 
 export const getNovelContent = (input) =>
@@ -14,7 +14,7 @@ export const getNovelContent = (input) =>
 
 			resolve({ title, likeCount, userName, viewCount, userId, content, id });
 		} catch (err) {
-			console.log(err);
+			loggers.error(color('Pixiv novel fetch failed:', 'red'), err);
 			reject(err);
 		}
 	});

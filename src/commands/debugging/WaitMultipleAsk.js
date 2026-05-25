@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -22,7 +24,7 @@ export default defineCommand({
 		if (wait.timeout) {
 			client.reply(from, 'Timeout! I will just call you ' + pushname, message);
 		} else {
-			client.reply(from, `Hi ${wait.message}. I'm ${__botName} Bot. Nice to know you!`, {
+			client.reply(from, `Hi ${wait.message}. I'm ${BOT_NAME} Bot. Nice to know you!`, {
 				from,
 				quoted: wait.quoted
 			});

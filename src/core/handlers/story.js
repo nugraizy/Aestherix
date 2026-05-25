@@ -14,7 +14,7 @@ const SEPERATOR = color('ヽ', 'green');
  */
 const handler = async (client, message) => {
 	if (!meJid) {
-		meJid = client.decodeJid(instance);
+		meJid = client.decodeJid(client.user.id);
 	}
 
 	if (configuration.flags.autoRead) {
@@ -53,7 +53,9 @@ const handler = async (client, message) => {
 
 	loggers.warning(
 		`${color(message.pushname, 'white')} ${SEPERATOR} ${color(message.prettyNumber, 'purple')} ${color(
-			'on', 'powderBlue')} ${color(message.from, 'purple')} ${SEPERATOR} ${color(
+			'on',
+			'powderBlue'
+		)} ${color(message.from, 'purple')} ${SEPERATOR} ${color(
 			message.body === 'Unknown body' ? 'Bug Story' : message.body?.trim()?.replace('\n', '')?.substring(0, 20),
 			'white'
 		)} ${SEPERATOR} ${color('type', 'purple')} ${SEPERATOR} ${color('Story', 'white')}${color('::', 'white')}${color(

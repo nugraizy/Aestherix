@@ -1,7 +1,14 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { addPlayer, createSession, dealRoles, getPlayer, markDead, setPhase } from '../../../../../src/utils/games/werewolf/state/session.js';
+import {
+	addPlayer,
+	createSession,
+	dealRoles,
+	getPlayer,
+	markDead,
+	setPhase
+} from '../../../../../src/utils/games/werewolf/state/session.js';
 import { advancePhase } from '../../../../../src/utils/games/werewolf/logic/phases.js';
 import { buildComposition } from '../../../../../src/utils/games/werewolf/config/balance.js';
 import { EVENTS } from '../../../../../src/utils/games/werewolf/events.js';

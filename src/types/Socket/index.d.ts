@@ -1,6 +1,6 @@
 import type { AuthenticationState, ConnectionState, DisconnectReason, makeWASocket, WAConnectionState } from 'baileys';
 
-import type { ClientSocket, Context, Store } from '../Core';
+import type { ClientSocket, Context, Store } from '../Core/index.d.ts';
 
 type WASocket = ReturnType<typeof makeWASocket>;
 

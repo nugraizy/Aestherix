@@ -50,7 +50,9 @@ export function createGroupsRouter({ services, configuration }) {
 				const result = await services.botBridge.fetchGroupInfo(groupId);
 
 				if (!result.ok) {
-					return res.status(result.status || 503).json({ ok: false, message: result.message || 'Failed to fetch group info.' });
+					return res
+						.status(result.status || 503)
+						.json({ ok: false, message: result.message || 'Failed to fetch group info.' });
 				}
 
 				const data = result.data;
@@ -96,9 +98,7 @@ export function createGroupsRouter({ services, configuration }) {
 				};
 			});
 
-			const isBotAdmin = participants.some(
-				(p) => p.phone === botPhone && (p.admin === 'admin' || p.admin === 'superadmin')
-			);
+			const isBotAdmin = participants.some((p) => p.phone === botPhone && (p.admin === 'admin' || p.admin === 'superadmin'));
 
 			res.json({
 				jid: groupId,

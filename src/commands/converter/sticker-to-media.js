@@ -13,7 +13,11 @@ export default defineCommand({
 	cooldown: 5,
 	limit: 1,
 	status: 'enable',
-	async run({ isQuotedSticker, from, message, mediaData, prettyNumber, waitForInput, sender, shouldSkipCheck }, client) {
+	async run(
+		{ isQuotedSticker, from, message, mediaData, prettyNumber, waitForInput, sender, shouldSkipCheck },
+		client,
+		store
+	) {
 		if (!isQuotedSticker && !shouldSkipCheck) {
 			return await client.reply(from, 'Please reply a sticker to decrypt', message);
 		}
@@ -45,7 +49,7 @@ export default defineCommand({
 		});
 
 		if (!wait.timeout) {
-			await this.run({ ...(await Context.from(wait.message, client, store)), shouldSkipCheck: true }, client);
+			await this.run({ ...(await Context.from(wait.message, client, store)), shouldSkipCheck: true }, client, store);
 		}
 	}
 });

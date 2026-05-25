@@ -40,11 +40,7 @@ export default defineCommand({
 
 		for (const data in highlights) {
 			if (highlights[data]?.error) {
-				await client.reply(
-					from,
-					`Error while downloading Instagram highlights\n\n${highlights.error}\n${data}`,
-					message
-				);
+				await client.reply(from, `Error while downloading Instagram highlights\n\n${highlights.error}\n${data}`, message);
 				loggers.error(`${color('Failed to Download Instagram highlights', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
@@ -74,11 +70,7 @@ export default defineCommand({
 				const highlight = highlights[data].highlights[0].dataHighlight.slice(0, 2);
 
 				for (const media of highlight) {
-					await client.send(
-						from,
-						{ [media.type === 'video' ? 'video' : 'image']: { url: media.url } },
-						{ quoted: message }
-					);
+					await client.send(from, { [media.type === 'video' ? 'video' : 'image']: { url: media.url } }, { quoted: message });
 				}
 			} else {
 				for (const media of highlights[data].highlights) {

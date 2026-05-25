@@ -23,11 +23,7 @@ export default defineCommand({
 		}
 
 		if (!message.query) {
-			return await client.reply(
-				message.from,
-				'Please specify a command\n\nEx: antiurl <enable/disable>',
-				message.message
-			);
+			return await client.reply(message.from, 'Please specify a command\n\nEx: antiurl <enable/disable>', message.message);
 		}
 
 		const isEnable = configuration.groups.settings.get(message.from)?.antiURL === 'enable';

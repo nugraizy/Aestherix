@@ -12,11 +12,7 @@ export default defineCommand({
 	status: 'enable',
 	async run({ isBotAdmin, from, message, sender }, client) {
 		if (!isBotAdmin) {
-			return await client.reply(
-				from,
-				'Bot is not admin, Please promote admin before using moderation commands.',
-				message
-			);
+			return await client.reply(from, 'Bot is not admin, Please promote admin before using moderation commands.', message);
 		}
 
 		const code = (await client.updateGroup(from, 'REVOKE'))[0];
@@ -39,10 +35,6 @@ export default defineCommand({
 			{ quoted: message }
 		);
 
-		await client.send(
-			sender,
-			{ text: `Here's the new URL:\nhttps://chat.whatsapp.com/${code}` },
-			{ quoted: message }
-		);
+		await client.send(sender, { text: `Here's the new URL:\nhttps://chat.whatsapp.com/${code}` }, { quoted: message });
 	}
 });

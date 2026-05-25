@@ -1,6 +1,7 @@
 // import { Aki } from 'aki-api';
 
 import configuration from '../../helper/config/connect.js';
+import { color, loggers } from '../modules/index.js';
 
 const TOTAL_ANSWER = 7;
 const ANSWERS = {
@@ -138,7 +139,7 @@ export const handleAnswer = async (key, answer) => {
 	try {
 		await session.step(answer);
 	} catch (e) {
-		console.log(e);
+		loggers.error(color('Akinator step failed:', 'red'), e);
 		return { status: 'waiting' };
 	}
 

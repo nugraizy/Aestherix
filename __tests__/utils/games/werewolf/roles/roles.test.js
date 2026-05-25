@@ -135,7 +135,10 @@ describe('role: little-girl — peek action', () => {
 		const r = mod.execute({ type: 'peek', actorId: 'p6@s' }, s);
 
 		assert.equal(r.ok, true);
-		assert.equal(s.actionQueue.some((a) => a.type === 'peek' && a.actorId === 'p6@s'), true);
+		assert.equal(
+			s.actionQueue.some((a) => a.type === 'peek' && a.actorId === 'p6@s'),
+			true
+		);
 		assert.equal(getPlayer(s, 'p6@s').isAction, true);
 	});
 });
@@ -179,17 +182,7 @@ describe('role: hunter — shoot during hunterShoot phase', () => {
 });
 
 describe('role: alpha-werewolf — convert is one-shot', () => {
-	const composition = [
-		'alpha-werewolf',
-		'werewolf',
-		'seer',
-		'guard',
-		'witch',
-		'hunter',
-		'cupid',
-		'little-girl',
-		'villager'
-	];
+	const composition = ['alpha-werewolf', 'werewolf', 'seer', 'guard', 'witch', 'hunter', 'cupid', 'little-girl', 'villager'];
 
 	it('rejects convert after alphaConverted is set', () => {
 		const s = makeSession(composition);

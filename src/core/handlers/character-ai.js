@@ -1,6 +1,7 @@
 import { delay } from 'baileys';
 
 import configuration from '../../helper/config/connect.js';
+import { color, loggers } from '../../utils/modules/index.js';
 
 /**
  * @type {import('../../types/Commands/index.js').CommandProps['run']}
@@ -33,7 +34,7 @@ const handler = async ({ from, type, body, message, mediaData, isFromMe }, clien
 			}
 		}
 	} catch (error) {
-		console.log(error);
+		loggers.error(color('Character AI handler failed:', 'red'), error);
 	}
 };
 

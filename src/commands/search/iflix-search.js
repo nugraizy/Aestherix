@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import { cmdId } from '../../helper/modules/prefix.js';
 import { iflixSearch, removeDuplicatesArray } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
@@ -33,7 +35,7 @@ export default defineCommand({
 							rowId: cmdId(cmd, `get ${v}`, ctx)
 						}
 					],
-					title: `${__botName} | Powered by Iflix`
+					title: `${BOT_NAME} | Powered by Iflix`
 				};
 			});
 
@@ -107,7 +109,7 @@ export default defineCommand({
 							rowId: cmdId(cmd, `get ${v}`, ctx)
 						}
 					],
-					title: `${__botName} | Powered by Iflix`
+					title: `${BOT_NAME} | Powered by Iflix`
 				};
 			});
 

@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -33,7 +35,7 @@ export default defineCommand({
 			return client.reply(from, 'Please provide a message or media', message);
 		}
 
-		const ownJid = client.decodeJid(instance);
+		const ownJid = client.decodeJid(client.user.id);
 		const jids = await client.getStoryParticipants(client);
 
 		if (isMediaVid || isMediaImage || isMediaDocument || isQuotedSticker) {
@@ -62,7 +64,7 @@ export default defineCommand({
 				'status@broadcast',
 				{
 					[mediaType]: media,
-					caption: query || `Sent from ${__botName}`
+					caption: query || `Sent from ${BOT_NAME}`
 				},
 				{
 					backgroundColor: '#FFFF',

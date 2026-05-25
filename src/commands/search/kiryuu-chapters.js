@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { Kiryuu } from '../../utils/index.js';
@@ -93,7 +95,7 @@ async function sendBatch(state, from, message, client, ctx) {
 	builder
 		.destination(from)
 		.body(body)
-		.footer('Powered by ' + __botName);
+		.footer('Powered by ' + BOT_NAME);
 
 	const buttons = batch.map((ch) => {
 		const label = `${ch.number}${ch.name === ch.number ? '' : ` — ${ch.name}`}`.slice(0, 40);

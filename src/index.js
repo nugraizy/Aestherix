@@ -89,11 +89,26 @@ export const start = async () => {
 			});
 		});
 	} catch (error) {
-		console.log(error);
+		loggers.error(color('Boot failed:', 'red'), error);
 	}
 };
 
-start().catch(console.log);
+start().catch((error) => {
+	loggers.error(color('Top-level start failed:', 'red'), error);
+});
+
+process.on('unhandledRejection', (reason) => {
+	const err = reason instanceof Error ? reason : new Error(String(reason));
+
+	loggers.error(color('Unhandled promise rejection:', 'red'), err);
+});
+
+process.on('uncaughtException', (error) => {
+	loggers.error(color('Uncaught exception:', 'red'), error);
+	// Process state may be corrupt after an uncaught exception. Exit so the
+	// supervisor (PM2 / nodemon) can restart with a clean slate.
+	process.exit(1);
+});
 
 const gracefulShutdown = async (signal) => {
 	const { loggers: log, color: c } = await import('./utils/modules/index.js');

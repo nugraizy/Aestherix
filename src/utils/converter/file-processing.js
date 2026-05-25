@@ -5,7 +5,6 @@ import dayjs from 'dayjs';
 import FormData from 'form-data';
 import fs from 'fs-extra';
 import httpsProxyAgent from 'https-proxy-agent';
-import isBuffer from 'is-buffer';
 import { Writable } from 'node:stream';
 import path from 'path';
 import PDFDocument from 'pdfkit';
@@ -36,7 +35,7 @@ export const toMp4 = (input, sender) =>
 						await fs.unlink(input);
 					}
 
-					console.log(err);
+					loggers.error(color('File processing failed:', 'red'), err);
 					reject(err);
 				}
 
@@ -46,7 +45,7 @@ export const toMp4 = (input, sender) =>
 				resolve(buffer);
 			});
 		} catch (err) {
-			console.log(err);
+			loggers.error(color('File processing failed:', 'red'), err);
 			reject(err);
 		}
 	});
@@ -71,7 +70,7 @@ export const gifToMp4 = (input, sender) =>
 							await fs.unlink(input);
 						}
 
-						console.log(err);
+						loggers.error(color('File processing failed:', 'red'), err);
 						reject(err);
 					}
 
@@ -82,7 +81,7 @@ export const gifToMp4 = (input, sender) =>
 				}
 			);
 		} catch (err) {
-			console.log(err);
+			loggers.error(color('File processing failed:', 'red'), err);
 			reject(err);
 		}
 	});
@@ -119,7 +118,7 @@ export const toOpus = (ext, opts = {}) =>
 		} else {
 			tmp = `${opts.input}.${ext}`;
 
-			if (isBuffer(opts.media)) {
+			if (Buffer.isBuffer(opts.media)) {
 				await fs.writeFile(tmp, opts.media);
 			}
 
@@ -163,11 +162,11 @@ export const toOpus = (ext, opts = {}) =>
  */
 export const convertMediaToSticker = (filePath, sender, output, mimetype) =>
 	new Promise(async (resolve, reject) => {
-		const pathExif = path.join(__dirname, 'src/media/temporary_files/data.exif');
+		const pathExif = './src/media/temporary_files/data.exif';
 		let pathSticker = filePath;
 
 		if (!(await fs.exists(pathSticker))) {
-			pathSticker = path.join(__dirname, `src/media/temporary_files/${pathSticker}`);
+			pathSticker = `./src/media/temporary_files/${pathSticker}`;
 		}
 
 		loggers.warning(`${color('Converting Media', 'pink')} for ${color(sender, 'lilac')}`);
@@ -266,7 +265,7 @@ export const convertMediaToSticker = (filePath, sender, output, mimetype) =>
 export const convertStickerToMedia = (input, sender) =>
 	new Promise(async (resolve, reject) => {
 		try {
-			const isInputBuffer = isBuffer(input);
+			const isInputBuffer = Buffer.isBuffer(input);
 
 			function isAnimatedWebp(buffer) {
 				return buffer.length > 12 && buffer.toString('ascii', 0, 4) === 'RIFF' && buffer.includes(Buffer.from('ANIM'));
@@ -408,7 +407,7 @@ export const soundRemover = (input, sender) =>
 			loggers.info(`${color('Removed Sound', 'pink')} for ${color(sender, 'lilac')}`);
 			resolve({ result: { vocal, instrumental } });
 		} catch (err) {
-			console.log(err);
+			loggers.error(color('File processing failed:', 'red'), err);
 			loggers.error(`${color('Failed to Remove Sound', 'red')} for ${color(sender, 'lilac')}`);
 			reject(err);
 		}
@@ -422,7 +421,7 @@ export const soundRemover = (input, sender) =>
  * @returns {Promise<{Buffer}>}
  * @throws {Error}
  */
-export const pet = (input, sender, opts = {}) =>
+export const pet = (input, sender, opts = {}, client) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			let petted;
@@ -574,8 +573,8 @@ export const waifu2x = (input, sender) =>
 	new Promise(async (resolve, reject) => {
 		let output;
 
-		if (isBuffer) {
-			output = path.join(__dirname, `src/media/temporary_files/${sender}.png`);
+		if (Buffer.isBuffer(input)) {
+			output = `./src/media/temporary_files/${sender}.png`;
 			await sharp(input).toFormat('png').toFile(output);
 		} else if (await fs.exists(input)) {
 			await sharp(input).toFormat('png').toFile(output);
@@ -628,7 +627,7 @@ export const waifu2x = (input, sender) =>
 					{ retries: 10, factor: 1 }
 				);
 			} catch (err) {
-				console.log(err);
+				loggers.error(color('File processing failed:', 'red'), err);
 			}
 
 			const { data } = await axios.get(_api('/get', 'v2'), {
@@ -687,7 +686,7 @@ export const waifu2xV2 = (input, filename) =>
 
 			resolve(await fetchBUFFER(data.output_url));
 		} catch (err) {
-			console.log(err);
+			loggers.error(color('File processing failed:', 'red'), err);
 		}
 	});
 

@@ -101,10 +101,7 @@ export class Configuration {
 			this.settings = {};
 		}
 
-		this.owners = [
-			toUserJid(this.settings.owner_number),
-			...(this.settings.team_number || []).map(toUserJid)
-		].filter(Boolean);
+		this.owners = [toUserJid(this.settings.owner_number), ...(this.settings.team_number || []).map(toUserJid)].filter(Boolean);
 		this.prefix.default = this.settings.prefix?.pref || '.';
 		this.logger_theme = this.settings.logger_theme || 'dracula';
 

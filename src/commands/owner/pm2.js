@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import dayjs from 'dayjs';
 import pm2 from 'pm2';
 import yargsParser from 'yargs-parser';
@@ -75,7 +77,7 @@ const renderProcess = (processes, builder, isCarousel) => {
 		const restartBtn = builder.button.reply({ display: `Restart ${name}`, id: `!pm2 -r ${name}` });
 		const stopBtn = builder.button.reply({ display: `Stop ${name}`, id: `!pm2 -s ${name}` });
 		const killBtn = builder.button.reply({ display: 'Kill', id: '!pm2 -k' });
-		const separator = builder.button.url({ display: '', url: `Made By ${__botName}` });
+		const separator = builder.button.url({ display: '', url: `Made By ${BOT_NAME}` });
 
 		container.buttons.push(
 			{ caption, button: restartBtn },

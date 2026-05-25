@@ -2,7 +2,7 @@ import axios from 'axios';
 import FormData from 'form-data';
 import sharp from 'sharp';
 
-import { fetchJSON } from '../modules/index.js';
+import { color, fetchJSON, loggers } from '../modules/index.js';
 import { CHARACTER_ROLES, generateDeviceID } from './util.js';
 
 const url = 'https://api.vulcanlabs.co/smith-v2/api';
@@ -194,7 +194,7 @@ export class ChatGPTDialogue {
 					timeout: 60000
 				});
 			} catch (error) {
-				console.log(error);
+				loggers.error(color('Character AI request failed:', 'red'), error);
 			}
 		},
 		fetch: (path, method = 'GET', data = null, headers = {}, newUrl = null) => {
@@ -205,7 +205,7 @@ export class ChatGPTDialogue {
 					body: data
 				});
 			} catch (error) {
-				console.log(error);
+				loggers.error(color('Character AI request failed:', 'red'), error);
 			}
 		}
 	};
@@ -248,7 +248,7 @@ export class ChatGPTDialogue {
 
 			return null;
 		} catch (error) {
-			console.log('Token request error:', error.message);
+			loggers.error(color('Token request failed:', 'red'), error);
 			return null;
 		}
 	}
@@ -379,7 +379,7 @@ export class ChatGPTDialogue {
 
 			return null;
 		} catch (error) {
-			console.log('Text-to-image error:', error.message);
+			loggers.error(color('Text-to-image failed:', 'red'), error);
 			return null;
 		}
 	}
@@ -444,7 +444,7 @@ export class ChatGPTDialogue {
 
 			return null;
 		} catch (error) {
-			console.log('Vision request error:', error.message);
+			loggers.error(color('Vision request failed:', 'red'), error);
 			return null;
 		}
 	}

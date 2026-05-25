@@ -180,10 +180,7 @@ const fmtTime = (ms) => {
 
 const describePlayer = (p) => `${p.name}[${p.role || 'lobby'}]${p.isAlive === false ? '†' : ''}`;
 
-const describeAliveRoster = (session) =>
-	getAlivePlayers(session)
-		.map(describePlayer)
-		.join(', ');
+const describeAliveRoster = (session) => getAlivePlayers(session).map(describePlayer).join(', ');
 
 const describeComposition = (composition) =>
 	Object.entries(summariseComposition(composition))
@@ -589,10 +586,7 @@ describe('werewolf realistic full flow (newgame → join → start → cycle wit
 			assert.equal(lobbyEvents.autoStart, false, 'lobby auto-start must not fire in happy path');
 			assert.equal(lobbyEvents.disband, false, 'lobby disband must not fire in happy path');
 
-			assert.ok(
-				lastWinner === null || VALID_WINNERS.has(lastWinner),
-				`invalid winner "${lastWinner}" for N=${N}`
-			);
+			assert.ok(lastWinner === null || VALID_WINNERS.has(lastWinner), `invalid winner "${lastWinner}" for N=${N}`);
 
 			assert.equal(session.actionQueue.length, 0, 'action queue must be drained when game ends');
 			assert.equal(session.pendingShots.length, 0, 'no hunter shots may dangle when game ends');

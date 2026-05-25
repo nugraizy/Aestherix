@@ -56,9 +56,7 @@ export function createCommandsRouter({ services, configuration }) {
 				});
 
 				if (!runtimeSync.ok) {
-					return res
-						.status(runtimeSync.status || 503)
-						.json({ ok: false, message: runtimeSync.message });
+					return res.status(runtimeSync.status || 503).json({ ok: false, message: runtimeSync.message });
 				}
 			}
 

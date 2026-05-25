@@ -1,11 +1,10 @@
 import fs from 'fs-extra';
-import path from 'path';
 import parser from 'yargs-parser';
 
 import { gttsAI, toOpus } from '../../utils/converter/index.js';
 import { defineCommand } from '../_define.js';
 
-const voices = await fs.readJSON(path.join(__dirname, 'databases/model/voices.json'));
+const voices = await fs.readJSON('./databases/model/voices.json');
 const boxen = (text) => {
 	const texts = text.split('\n');
 	let box = `╭───╌┄ ${texts[0]} ┄┄╌────\n`;
@@ -42,8 +41,8 @@ export default defineCommand({
 			}
 
 			const audioBuffer = await toOpus('opus', {
-				input: path.join(__dirname, `src/media/temporary_files/${filename}`),
-				output: path.join(__dirname, `src/media/temporary_files/${filename}-done`),
+				input: `./src/media/temporary_files/${filename}`,
+				output: `./src/media/temporary_files/${filename}-done`,
 				media: result.url.replace('https', 'http')
 			});
 
@@ -115,8 +114,8 @@ export default defineCommand({
 		}
 
 		const audioBuffer = await toOpus('opus', {
-			input: path.join(__dirname, `src/media/temporary_files/${filename}`),
-			output: path.join(__dirname, `src/media/temporary_files/${filename}-done`),
+			input: `./src/media/temporary_files/${filename}`,
+			output: `./src/media/temporary_files/${filename}-done`,
 			media: result.url.replace('https', 'http')
 		});
 

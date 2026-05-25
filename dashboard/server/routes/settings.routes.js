@@ -110,10 +110,7 @@ export function createSettingsRouter({ services }) {
 			after: { keys: result.changedKeys }
 		});
 
-		loggers.info(
-			color('Dashboard updated settings:', 'white'),
-			color(result.changedKeys.join(', ') || '(no keys)', 'lilac')
-		);
+		loggers.info(color('Dashboard updated settings:', 'white'), color(result.changedKeys.join(', ') || '(no keys)', 'lilac'));
 
 		res.json({ ok: true, settings: result.settings, undo: undoToken });
 	});

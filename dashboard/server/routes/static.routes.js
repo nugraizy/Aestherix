@@ -12,17 +12,22 @@ export function createStaticRouter() {
 	const router = Router();
 	const indexHtmlPath = path.join(CLIENT_DIST_PATH, 'index.html');
 
-	router.use('/dashboard', express.static(CLIENT_DIST_PATH, {
-		index: false,
-		fallthrough: true,
-		maxAge: '7d',
-		immutable: true
-	}));
-	router.use(express.static(PUBLIC_ROOT, {
-		index: false,
-		fallthrough: true,
-		maxAge: '7d'
-	}));
+	router.use(
+		'/dashboard',
+		express.static(CLIENT_DIST_PATH, {
+			index: false,
+			fallthrough: true,
+			maxAge: '7d',
+			immutable: true
+		})
+	);
+	router.use(
+		express.static(PUBLIC_ROOT, {
+			index: false,
+			fallthrough: true,
+			maxAge: '7d'
+		})
+	);
 
 	const sendIndex = async (_req, res, next) => {
 		try {

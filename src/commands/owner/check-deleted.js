@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import { Cache } from '../../helper/modules/cache.js';
 import { getTimeSince } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
@@ -43,7 +45,7 @@ export default defineCommand({
 						rowId: `${cmd} get ${message.message.protocolMessage.key.id}`
 					}
 				],
-				title: `${__botName} | ${message?.pushName ?? 'No Name'}`
+				title: `${BOT_NAME} | ${message?.pushName ?? 'No Name'}`
 			});
 			i++;
 		}

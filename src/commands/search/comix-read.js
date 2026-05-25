@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { Comix, imageToPdf, mime } from '../../utils/index.js';
@@ -81,7 +83,7 @@ async function sendBatch(state, from, message, client, ctx) {
 	builder
 		.destination(from)
 		.body(body)
-		.footer('Powered by ' + __botName);
+		.footer('Powered by ' + BOT_NAME);
 
 	const buttons = batch.map((ch) => {
 		const label = `Ch. ${ch.number} — ${ch.name}`.slice(0, 40);
@@ -152,7 +154,14 @@ export default defineCommand({
 			}
 
 			try {
-				return await downloadChapterAsPdf({ from, message }, client, wait, chapterId, chapterUrl, `comix-chapter-${chapterId}`);
+				return await downloadChapterAsPdf(
+					{ from, message },
+					client,
+					wait,
+					chapterId,
+					chapterUrl,
+					`comix-chapter-${chapterId}`
+				);
 			} catch (error) {
 				if (error.message?.includes('Outdated chapter URL')) {
 					return await wait.update('Outdated chapter URL. Please search the manga again to get updated chapter links.');

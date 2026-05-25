@@ -23,6 +23,4 @@ const DEFAULT_LOBBY_TIMEOUT_MS = 5 * 60 * 1000;
 const parsedLobbyOverride = Number.parseInt(process.env.WEREWOLF_LOBBY_TIMEOUT_MS ?? '', 10);
 
 export const LOBBY_TIMEOUT_MS =
-	Number.isFinite(parsedLobbyOverride) && parsedLobbyOverride > 0
-		? parsedLobbyOverride
-		: DEFAULT_LOBBY_TIMEOUT_MS;
+	Number.isFinite(parsedLobbyOverride) && parsedLobbyOverride > 0 ? parsedLobbyOverride : DEFAULT_LOBBY_TIMEOUT_MS;

@@ -1,6 +1,7 @@
 import { YTNodes } from 'youtubei.js';
 
 import { youtubeLiveComments } from '../../utils/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 import { Cache } from '../../helper/modules/cache.js';
 import { defineCommand } from '../_define.js';
 
@@ -71,7 +72,7 @@ Content : ${pinnedAction?.banner.contents.message.toString()}`,
 					}
 				}
 			} catch (error) {
-				console.log(error);
+				loggers.error(color('YouTube stream failed:', 'red'), error);
 			}
 		});
 
@@ -81,7 +82,7 @@ Content : ${pinnedAction?.banner.contents.message.toString()}`,
 			try {
 				live.stop();
 			} catch (error) {
-				console.log(error);
+				loggers.error(color('YouTube stream failed:', 'red'), error);
 			}
 
 			lives.delete(from);
@@ -94,7 +95,7 @@ Content : ${pinnedAction?.banner.contents.message.toString()}`,
 				live.stop();
 				lives.delete(from);
 			} catch (error) {
-				console.log(error);
+				loggers.error(color('YouTube stream failed:', 'red'), error);
 			}
 		});
 
@@ -179,7 +180,7 @@ Content : ${action.banner?.contents}`
 					);
 				}
 			} catch (error) {
-				console.log(error);
+				loggers.error(color('YouTube stream failed:', 'red'), error);
 			}
 		});
 
@@ -196,7 +197,7 @@ Likes : ${metadata.likes?.default_text} 👍🏻`
 					{}
 				);
 			} catch (error) {
-				console.log(error);
+				loggers.error(color('YouTube stream failed:', 'red'), error);
 			}
 		});
 

@@ -1,4 +1,4 @@
-import { fetchJSON } from '../modules/index.js';
+import { color, fetchJSON, loggers } from '../modules/index.js';
 
 const EMOJIS = {
 	'01d': '☀️',
@@ -67,7 +67,7 @@ export const getWeather = (type, ...q) =>
 				emoji: EMOJIS[data.weather[0].icon]
 			});
 		} catch (err) {
-			console.log(err);
+			loggers.error(color('Weather fetch failed:', 'red'), err);
 			reject(err);
 		}
 	});

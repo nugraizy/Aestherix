@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import boxen from 'boxen';
 import chalk from 'chalk';
 import fs from 'fs-extra';
@@ -112,11 +114,15 @@ const applyThemeProps = (target, palette) => {
  * Applies themed colors to text strings.
  * Accepts pairs of (text, colorName) arguments.
  *
- * @type {((text: string, color: ThemeColorName | (string & {})) => string) & {
+ * @type {((text: string | number, color: ThemeColorName | (string & {})) => string) & {
  *   setTheme: (name: string) => string,
+ *   setRainbow: (enabled: boolean) => void,
+ *   setRainbowResolver: (fn: () => boolean) => void,
+ *   getRainbow: () => boolean,
  *   getTheme: () => string,
  *   getThemes: () => string[],
- *   getHex: (name: ThemeColorName) => string,
+ *   getHex: (name: ThemeColorName) => string | null,
+ *   getSyntaxTheme: () => Record<string, (text: string) => string>,
  *   theme: Record<string, string>
  * }}
  */
@@ -162,7 +168,7 @@ const AUTHOR = color('nugraizy', 'red');
 export const printBanner = () =>
 	console.log(
 		boxen(
-			`${BANNER_ICON_1}${chalk.italic.bold.hex(themeManager.palette.purple || '#BD93F9')(__botName)}${BANNER_ICON_2}
+			`${BANNER_ICON_1}${chalk.italic.bold.hex(themeManager.palette.purple || '#BD93F9')(BOT_NAME)}${BANNER_ICON_2}
 version
 ${version.split(/\./g).join(` ${SPLITTER} `)}`,
 			{

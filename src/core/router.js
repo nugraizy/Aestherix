@@ -1,3 +1,4 @@
+// @ts-check
 import { Cache } from '../helper/modules/cache.js';
 import {
 	incrementCommandUsage as incrementInDB,
@@ -6,13 +7,27 @@ import {
 import prisma from '../helper/database/prisma.js';
 
 const BLOCKED_FOR_SUB = new Set([
-	'eval', 'exec', 'shell', 'terminal',
-	'addbot', 'removebot', 'listbots', 'botflags',
-	'ban', 'unban', 'setlimit', 'setrole',
-	'restart', 'shutdown', 'setprefix', 'settings'
+	'eval',
+	'exec',
+	'shell',
+	'terminal',
+	'addbot',
+	'removebot',
+	'listbots',
+	'botflags',
+	'ban',
+	'unban',
+	'setlimit',
+	'setrole',
+	'restart',
+	'shutdown',
+	'setprefix',
+	'settings'
 ]);
 
-/** @implements {import('../types/Core/index.d.ts').Router} */
+/** @typedef {import('../types/Core/index.js').Router} RouterType */
+
+/** @implements {RouterType} */
 export class Router {
 	#client;
 	#commands;

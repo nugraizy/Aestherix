@@ -92,17 +92,7 @@ describe('werewolf night resolution', () => {
 	});
 
 	it('alpha wolf converts a villager once across the whole game', () => {
-		const s = makeGame([
-			'alpha-werewolf',
-			'werewolf',
-			'seer',
-			'guard',
-			'villager',
-			'witch',
-			'hunter',
-			'cupid',
-			'little-girl'
-		]);
+		const s = makeGame(['alpha-werewolf', 'werewolf', 'seer', 'guard', 'villager', 'witch', 'hunter', 'cupid', 'little-girl']);
 
 		queueAction(s, { type: 'convert', actorId: 'p0@s', targetId: 'p4@s' });
 

@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import fs from 'fs-extra';
 
 import configuration from '../../helper/config/connect.js';
@@ -37,7 +39,7 @@ export default defineCommand({
 	limit: 5,
 	status: 'enable',
 	async run({ from, prefix, message, query }, client) {
-		let capt = `\`${__botName} ー ${version}\`\n\n`;
+		let capt = `\`${BOT_NAME} ー ${version}\`\n\n`;
 
 		if (!Object.keys(configuration.registry.menu).length) {
 			const container = configuration.registry.commands
@@ -63,12 +65,12 @@ export default defineCommand({
 					const commonPart = isNeedDescription
 						? `╭ ${v.minifiedDescription || v.description}\n├ _${prefix}${v.name}_\n├ ${v.usage}\n╰ ⏳ ${v.cooldown}s | ${
 								v.premium ? 'Premium' : 'Free'
-							} | 🆔 ${v.aliases.join(', ')}`  
+							} | 🆔 ${v.aliases.join(', ')}`
 						: (() => {
 								let capt = `\`${prefix}\` ${v.name}`;
 
 								return capt;
-							})();  
+							})();
 
 					return commonPart;
 				})

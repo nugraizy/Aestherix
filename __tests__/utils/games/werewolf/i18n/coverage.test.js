@@ -30,7 +30,11 @@ describe('werewolf i18n coverage', () => {
 		const idKeys = flatten(idTable);
 		const enKeys = flatten(enTable);
 
-		assert.deepEqual(idKeys, enKeys, `keys differ:\n  only in id: ${idKeys.filter((k) => !enKeys.includes(k)).join(', ')}\n  only in en: ${enKeys.filter((k) => !idKeys.includes(k)).join(', ')}`);
+		assert.deepEqual(
+			idKeys,
+			enKeys,
+			`keys differ:\n  only in id: ${idKeys.filter((k) => !enKeys.includes(k)).join(', ')}\n  only in en: ${enKeys.filter((k) => !idKeys.includes(k)).join(', ')}`
+		);
 	});
 
 	it('every string key resolves to a non-empty value in both locales', () => {

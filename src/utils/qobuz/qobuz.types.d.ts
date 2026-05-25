@@ -105,11 +105,17 @@ export declare class Qobuz {
 	searchTracks(query: string, offset?: number): Promise<QobuzWrappedTrack[] | QobuzFriendlyError>;
 	searchAlbums(query: string, offset?: number): Promise<QobuzWrappedAlbum[] | QobuzFriendlyError>;
 	searchArtists(query: string, offset?: number): Promise<QobuzNormalizedArtist[] | QobuzFriendlyError>;
-	download(id: string | number, quality?: TrackQuality): Promise<{ file: QobuzDownloadFile; url: string; domain: string | null } | QobuzFriendlyError>;
+	download(
+		id: string | number,
+		quality?: TrackQuality
+	): Promise<{ file: QobuzDownloadFile; url: string; domain: string | null } | QobuzFriendlyError>;
 	getAlbum(id: string | number): Promise<QobuzAlbumResult | QobuzFriendlyError>;
 }
 
 export declare const qobuz: Qobuz;
 
-export declare function extractMetadata(track: Record<string, unknown>, album?: Record<string, unknown> | null): QobuzTrackMetadata;
+export declare function extractMetadata(
+	track: Record<string, unknown>,
+	album?: Record<string, unknown> | null
+): QobuzTrackMetadata;
 export declare function metadata(track: Record<string, unknown>, songUrl: string, coverUrl?: string | null): Promise<Buffer>;

@@ -23,11 +23,7 @@ export default defineCommand({
 		}
 
 		if (!message.query) {
-			return await client.reply(
-				message.from,
-				'Please specify a command\n\nEx: antinsfw <enable/disable>',
-				message.message
-			);
+			return await client.reply(message.from, 'Please specify a command\n\nEx: antinsfw <enable/disable>', message.message);
 		}
 
 		const isEnable = configuration.groups.settings.get(message.from)?.antiNSFW === 'enable';
@@ -64,11 +60,7 @@ export default defineCommand({
 				await client.reply(message.from, 'You have successfully disabled anti-nsfw', message.message);
 				break;
 			default:
-				await client.reply(
-					message.from,
-					'Please specify a command\n\nEx: antinsfw <enable/disable>',
-					message.message
-				);
+				await client.reply(message.from, 'Please specify a command\n\nEx: antinsfw <enable/disable>', message.message);
 		}
 	}
 });

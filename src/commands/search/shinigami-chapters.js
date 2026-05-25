@@ -1,3 +1,5 @@
+import { BOT_NAME } from '../../core/constants.js';
+
 import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { randomChar } from '../../utils/modules/index.js';
@@ -110,7 +112,7 @@ async function sendBatch(state, from, message, client, ctx) {
 	await builder
 		.destination(from)
 		.body(body)
-		.footer('Powered by ' + __botName)
+		.footer('Powered by ' + BOT_NAME)
 		.buttons(...buttons)
 		.send();
 }

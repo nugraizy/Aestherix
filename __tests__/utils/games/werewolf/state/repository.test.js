@@ -13,7 +13,11 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import { Cache } from '../../../../../src/helper/modules/cache.js';
 import { buildComposition } from '../../../../../src/utils/games/werewolf/config/balance.js';
 import { addPlayer, createSession, dealRoles, setPhase } from '../../../../../src/utils/games/werewolf/state/session.js';
-import { makeRepository, rehydrateSession, serializeSession } from '../../../../../src/utils/games/werewolf/state/repository.js';
+import {
+	makeRepository,
+	rehydrateSession,
+	serializeSession
+} from '../../../../../src/utils/games/werewolf/state/repository.js';
 
 const makeInMemoryPrisma = () => {
 	const table = new Map();

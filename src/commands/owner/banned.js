@@ -34,7 +34,11 @@ export default defineCommand({
 
 		if (args[1] === 'report' && isOwner) {
 			await banAndBlock(client, args[3]);
-			await client.reply(from, 'You are banned from using bot.\n\nReason : Abusing Report command.', JSON.parse(args.slice(4)));
+			await client.reply(
+				from,
+				'You are banned from using bot.\n\nReason : Abusing Report command.',
+				JSON.parse(args.slice(4))
+			);
 			return;
 		}
 

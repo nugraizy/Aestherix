@@ -16,11 +16,7 @@ export default defineCommand({
 	status: 'enable',
 	async run({ query, from, message, extractMediaData, typeQuoted }, client) {
 		if (typeQuoted !== 'locationMessage' && typeQuoted !== 'liveLocationMessage' && !query) {
-			return await client.reply(
-				from,
-				'Please, input city name\nEx:\n*!weather Bekasi* or reply to location message',
-				message
-			);
+			return await client.reply(from, 'Please, input city name\nEx:\n*!weather Bekasi* or reply to location message', message);
 		}
 
 		const info =

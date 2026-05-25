@@ -52,11 +52,7 @@ export default defineCommand({
 		} else if (!isOwner && metadataInvite.size >= 1024) {
 			await client.reply(from, 'Bot cannot join. Reason : Group is full.', message);
 		} else if (!isOwner && metadataInvite.size < settings.min_members) {
-			await client.reply(
-				from,
-				`This group is not big enough to join. Minimum ${settings.min_members} participants.`,
-				message
-			);
+			await client.reply(from, `This group is not big enough to join. Minimum ${settings.min_members} participants.`, message);
 		} else if (
 			!isOwner &&
 			!metadataInvite.participants

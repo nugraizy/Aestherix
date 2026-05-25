@@ -40,11 +40,12 @@
   - [All-in-one](#all-in-one)
   - [Bot & Dashboard separately](#bot--dashboard-separately)
   - [PM2 split runtime](#pm2-split-runtime)
-  - [Available flags](./doc/DOC.md#available-flags)
+  - [Available flags](./doc/OPERATIONS.md#cli-flags)
 - [Dashboard](#dashboard)
 - [Development](#development)
 - [Changelog](./CHANGELOG.md)
-- [Documentation](./doc/DOC.md#documentations)
+- [Documentation index](./doc/INDEX.md)
+- [Contributing](./CONTRIBUTING.md)
 - [Agent Guide](./AGENTS.md)
 - [Contributors](#contributors)
 
@@ -159,7 +160,7 @@ node . <session_name> [--flag]
 ```
 
 Replace `<session_name>` with your WhatsApp session name (e.g. `mybot`).
-See all available flags in [DOC.md](./doc/DOC.md#available-flags).
+See all available flags in [doc/OPERATIONS.md](./doc/OPERATIONS.md#cli-flags).
 
 ### Bot & Dashboard separately
 
@@ -259,7 +260,7 @@ See [AGENTS.md](./AGENTS.md) for architecture, event flow, command shape, and co
   Made with 💜 by the Hidden Finder Team<br>
   <a href="./CHANGELOG.md">Changelog</a>
    •
-  <a href="./doc/DOC.md">Docs</a>
+  <a href="./doc/INDEX.md">Docs</a>
    •
   <a href="https://github.com/nugraizy/aestherix/wiki">Wiki</a>
    •
