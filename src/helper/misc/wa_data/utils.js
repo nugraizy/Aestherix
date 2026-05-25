@@ -67,7 +67,7 @@ const MEDIA_TYPE = {
 
 /**
  * Extract main body of the WhatsApp message.
- * @param {import('baileys').proto.WebMessageInfo} m
+ * @param {import('baileys').WAMessage} m
  * @param {keyof import('baileys').proto.IMessage} type
  * @returns {string | 'Unknown Body'}
  */
@@ -110,7 +110,7 @@ export const extractBody = (m, type) => {
 
 /**
  * Extract quoted body of WhatsApp message.
- * @param {import('baileys').proto.WebMessageInfo} m
+ * @param {import('baileys').WAMessage} m
  * @param {keyof import('baileys').proto.IMessage} type
  * @returns {string}
  */
@@ -143,7 +143,7 @@ export const firstKey = (value) => (value && typeof value === 'object' ? Object.
 
 /**
  * Find type quoted of the WhatsApp message.
- * @param {import('baileys').proto.WebMessageInfo} m
+ * @param {import('baileys').WAMessage} m
  * @param {keyof import('baileys').proto.IMessage} type
  * @returns {keyof import('baileys').proto.IMessage}
  */
@@ -156,7 +156,7 @@ export const extractTypeQuoted = (m, type) => {
 
 /**
  * Extract mentions metadata from WhatsApp message.
- * @param {import('baileys').proto.WebMessageInfo} m
+ * @param {import('baileys').WAMessage} m
  * @param {(keyof import('baileys').proto.IMessage | 'mentionText')} type
  * @returns {string[]}
  */
@@ -172,7 +172,7 @@ export const extractMentionedJid = (m, type) => {
 
 /**
  * Extract metadata WhatsApp message.
- * @param {import('baileys').proto.WebMessageInfo} m
+ * @param {import('baileys').WAMessage} m
  * @param {keyof import('baileys').proto.IMessage} typeM
  * @param {keyof import('baileys').proto.IMessage} typeQ
  * @returns {string[] | null}

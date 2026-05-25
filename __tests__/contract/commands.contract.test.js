@@ -21,7 +21,7 @@ import assert from 'node:assert/strict';
 import { readdirSync, statSync } from 'node:fs';
 import { performance } from 'node:perf_hooks';
 import { join, relative, sep } from 'node:path';
-import { before, describe, it } from 'node:test';
+import { after, before, describe, it } from 'node:test';
 import { pathToFileURL } from 'node:url';
 
 import { COMMAND_SCHEMA } from '../../src/core/command-loader.js';
@@ -67,6 +67,12 @@ describe('command contract', () => {
 		await import('../../src/utils/index.js');
 		await import('../../src/utils/modules/index.js');
 		await import('../../src/helper/index.js');
+	});
+
+	after(async () => {
+		const { default: prisma } = await import('../../src/helper/database/prisma.js');
+
+		await prisma.$disconnect();
 	});
 
 	it('finds at least one command file', () => {
