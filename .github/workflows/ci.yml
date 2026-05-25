@@ -12,10 +12,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  # `prisma generate` requires these vars but does not connect to the DB.
-  # SQLite + a local file path is enough to satisfy schema validation.
-  DATABASE_PROVIDER: sqlite
-  DATABASE_URL: file:./ci.db
+  DATABASE_PROVIDER: mongodb
+  DATABASE_URL: mongodb+srv://ci:ci@localhost/ci
 
 jobs:
   lint:
