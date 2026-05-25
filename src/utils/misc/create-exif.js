@@ -1,5 +1,4 @@
 import fs from 'fs';
-import path from 'path';
 
 import { color, loggers } from '../modules/index.js';
 
@@ -40,7 +39,7 @@ export const createExif = (packname, author) => {
 	const ff = Buffer.from(length, 'hex');
 	const buffer = Buffer.concat([f, ff, fff, ffff]);
 
-	fs.writeFile(path.join(__dirname, 'src/media/temporary_files/data.exif'), buffer, function (err) {
+	fs.writeFile('./src/media/temporary_files/data.exif', buffer, function (err) {
 		if (err) {
 			loggers.error(color('EXIF write failed:', 'red'), err);
 			return;
