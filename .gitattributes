@@ -1,0 +1,33 @@
+# Force LF endings for every text file regardless of the contributor's OS
+# or local `core.autocrlf` setting. Without this, Windows users running
+# `prettier --write` end up with phantom diffs because prettier writes LF
+# but git expects CRLF in the working tree under autocrlf=true.
+* text=auto eol=lf
+
+# Windows-only scripts must keep CRLF or they will not run.
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Treat known binary assets as binary so git never tries to diff them
+# or normalize their line endings.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.mp3 binary
+*.mp4 binary
+*.opus binary
+*.zip binary
+*.gz binary
+*.tgz binary
+*.exe binary
+*.dll binary
+*.node binary
+*.traineddata binary
+*.m4a binary
+*.heic binary
+*.pdf binary
+*.gif binary
