@@ -1,6 +1,29 @@
 import createContext from 'gl';
 import sharp from 'sharp';
 
+import { color as colorFn, loggers } from '../modules/index.js';
+
+let glWarningShown = false;
+
+function createSvgFallback(colors, width, height) {
+	let defs = '';
+	let rects = '';
+
+	colors.forEach((c, i) => {
+		const id = `g${i}`;
+		const cx = (25 + (i * 50) / colors.length) % 100;
+		const cy = (30 + (i * 40) / colors.length) % 100;
+		const r = 40 + (i * 10) % 30;
+
+		defs += `<radialGradient id="${id}" cx="${cx}%" cy="${cy}%" r="${r}%"><stop offset="0%" stop-color="${c}" stop-opacity="1"/><stop offset="100%" stop-color="${c}" stop-opacity="0"/></radialGradient>`;
+		rects += `<rect width="100%" height="100%" fill="url(#${id})"/>`;
+	});
+
+	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><defs>${defs}</defs><rect width="100%" height="100%" fill="${colors[0]}"/>${rects}</svg>`;
+
+	return sharp(Buffer.from(svg)).png().toBuffer();
+}
+
 function hexToNormalized(hex) {
 	hex = hex.replace('#', '');
 
@@ -149,6 +172,19 @@ function compileShader(gl, type, source) {
 
 export async function createMeshGradient({ colors, width = 800, height = 600, seed = 42 }) {
 	const gl = createContext(width, height, { preserveDrawingBuffer: true });
+
+	if (!gl) {
+		if (!glWarningShown) {
+			glWarningShown = true;
+			loggers.warning(
+				colorFn('WebGL context creation failed (no GPU/OpenGL available). Using SVG fallback.', 'yellow') +
+				'\n  To fix: run with xvfb + software rendering. See doc/INSTALL.md or use:\n' +
+				'  LIBGL_ALWAYS_SOFTWARE=1 xvfb-run -a -s "-screen 0 1024x768x24 +extension GLX" node .'
+			);
+		}
+
+		return createSvgFallback(colors, width, height);
+	}
 
 	const rgbColors = colors.map(hexToNormalized);
 	const baseColor = rgbColors[0];

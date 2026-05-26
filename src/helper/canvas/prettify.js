@@ -31,7 +31,9 @@ export class Prettify {
 	 * @returns {Promise<{toBuffer: () => Buffer}>}
 	 */
 	async CarbonNow(code, options) {
-		return this.#screenshotNow(this.#carbonNow(code, options).toBuffer(), true);
+		const canvas = await this.#carbonNow(code, options);
+
+		return this.#screenshotNow(canvas.toBuffer(), false);
 	}
 
 	/**
@@ -57,11 +59,11 @@ export class Prettify {
 		const stats = await color.getPalette(this.#buffer);
 
 		const minDimension = Math.min(imageMetadata.width, imageMetadata.height);
-		const borderThickness = Math.max(5, minDimension * baseBorderThicknessPercentage);
+		const borderThickness = Math.min(60, Math.max(5, minDimension * baseBorderThicknessPercentage));
 
 		const config = {
-			round: 10,
-			scaleSymbol: 0.5,
+			round: Math.max(15, Math.min(30, Math.round(minDimension * 0.02))),
+			scaleSymbol: Math.min(0.5, imageMetadata.width / 2000),
 			scaleImage: 0.8,
 			background: chroma(stats[0][0], stats[0][1], stats[0][2]).darken(0.6),
 			widthCanvas: imageMetadata.width + 2 * borderThickness,
@@ -122,6 +124,20 @@ export class Prettify {
 					dWHSymbol(maximize.width),
 					dWHSymbol(maximize.height)
 				);
+
+				const buttonsEnd = dWHSymbol(maximize.width) * 2 + dWHMultiply(maximize.width) + space * 2 + dWHSymbol(maximize.width) + 20;
+				const watermark = '~/github/nugraizy/aestherix';
+				const wmFontSize = Math.max(14, Math.round(dWHSymbol(close.height) * 1.2));
+
+				tempCtx.font = `${wmFontSize}px JetBrainsMono`;
+				tempCtx.fillStyle = 'rgba(255,255,255,0.4)';
+				tempCtx.textBaseline = 'middle';
+				tempCtx.textAlign = 'left';
+
+				const wmY = dWHMultiply(close.height) + dWHSymbol(close.height) / 2;
+				const wmX = Math.max(buttonsEnd, tempCanvas.width / 2 - tempCtx.measureText(watermark).width / 2);
+
+				tempCtx.fillText(watermark, wmX, wmY);
 			}
 
 			let combinedImage = tempCanvas.toBuffer('image/png');
@@ -165,17 +181,17 @@ export class Prettify {
 		return { image, imageMetadata };
 	}
 
-	#carbonNow(code, options) {
+	async #carbonNow(code, options) {
 		const tabWidth = 3;
 		const opts = Object.assign(this.defaultCarbonOptions, options);
-		const formatCode = prettier.format(code, {
+		const formatCode = await prettier.format(code, {
 			printWidth: 80,
 			singleQuote: true,
 			trailingComma: 'all',
 			parser: 'babel',
 			useTabs: !!tabWidth,
 			tabWidth
-		});
+		}).then((s) => s.trimEnd());
 
 		const palette = colors[opts.palette];
 		const el = this.#highlightCode(formatCode, tabWidth);
@@ -183,16 +199,26 @@ export class Prettify {
 
 		const { ctx: tempCtx } = this.#createCanvas();
 
-		tempCtx.font = '30px JetBrains';
-		const width = this.#calculateWidth(tempCtx, formatCode, tabWidth) + 70;
-		let height = 60;
+		tempCtx.font = '30px JetBrainsMono';
+		const totalLines = formatCode.split('\n').length;
+		const lineNumExtra = tempCtx.measureText(String(totalLines)).width + 30;
+		const codeWidth = this.#calculateWidth(tempCtx, formatCode, tabWidth) + lineNumExtra + 100;
 
 		const { ctx: tempCtx2 } = this.#createCanvas();
 
-		const x = 60;
-		const y = 130;
 		const lineHeight = tempCtx2.measureText(formatCode.split('\n')[0]).emHeightDescent + 2.4;
 		const fontSize = parseInt(tempCtx2.font.match(/\d+/)[0]) || 30;
+
+		const btnSize = Math.max(10, Math.min(18, codeWidth * 0.012));
+		const btnY = 20;
+		const btnSpacing = btnSize * 1.8;
+		const headerHeight = btnY + btnSize + 20;
+
+		const x = 60;
+		const y = headerHeight + 5;
+
+		const width = codeWidth;
+		let height = y;
 
 		height += this.#calculateHeight(y, lineHeight, fontSize, parsed);
 
@@ -200,9 +226,39 @@ export class Prettify {
 
 		ctx.font = '30px JetBrainsMono';
 		ctx.fillStyle = palette.background;
-
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+		const btnColors = ['#FF5F56', '#FFBD2E', '#27C93F'];
+		let btnX = 20;
+
+		for (const c of btnColors) {
+			ctx.beginPath();
+			ctx.arc(btnX + btnSize / 2, btnY + btnSize / 2, btnSize / 2, 0, Math.PI * 2);
+			ctx.fillStyle = c;
+			ctx.fill();
+			btnX += btnSpacing;
+		}
+
+		const wmFontSize = Math.max(12, Math.round(btnSize * 1.1));
+
+		ctx.font = `${wmFontSize}px JetBrainsMono`;
+		ctx.fillStyle = palette.comment || 'rgba(255,255,255,0.4)';
+		ctx.textBaseline = 'middle';
+		ctx.textAlign = 'center';
+		ctx.fillText('~/github/nugraizy/aestherix', canvas.width / 2, btnY + btnSize / 2);
+
 		ctx.save();
+		ctx.font = '30px JetBrainsMono';
+
+		const lineNumWidth = ctx.measureText(String(totalLines)).width + 20;
+
+		ctx.textBaseline = 'top';
+		ctx.textAlign = 'right';
+
+		for (let i = 0; i < totalLines; i++) {
+			ctx.fillStyle = palette.comment || 'rgba(255,255,255,0.3)';
+			ctx.fillText(String(i + 1), x + lineNumWidth - 5, y + i * fontSize * lineHeight);
+		}
 
 		ctx.textBaseline = 'top';
 		ctx.textAlign = 'right';
@@ -211,7 +267,7 @@ export class Prettify {
 			ctx.shadowBlur = typeof opts.glow === 'boolean' ? 5 : opts.glow;
 		}
 
-		this.#fillText(ctx, x, y, fontSize, lineHeight, parsed, palette, opts);
+		this.#fillText(ctx, x + lineNumWidth + 25, y, fontSize, lineHeight, parsed, palette, opts);
 
 		const toBuffer = () => canvas.toBuffer('image/png');
 
@@ -244,10 +300,10 @@ export class Prettify {
 
 		const spaceWidth = ctx.measureText(' ').width;
 
-		code.split(/(?<!["'`])\n(?!["'`])/).forEach((line) => {
+		code.split('\n').forEach((line) => {
 			let lineWidth = 0;
 
-			for (let char of line) {
+			for (const char of line) {
 				if (char === '\t') {
 					lineWidth += spaceWidth * tabWidth;
 				} else {
@@ -260,7 +316,7 @@ export class Prettify {
 			}
 		});
 
-		const padding = 600;
+		const padding = 60;
 
 		return maxWidth + padding;
 	}
@@ -290,7 +346,7 @@ export class Prettify {
 
 		loop(parentNode);
 
-		return height + 50;
+		return height + 20;
 	}
 
 	#fillText(ctx, x, y, fontSize, lineHeight, parentNode, colors, opts) {

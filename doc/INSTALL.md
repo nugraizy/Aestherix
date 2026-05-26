@@ -140,3 +140,31 @@ If `npm install` fails on the `gl` package:
 - On Linux, ensure `libgl1-mesa-dev` is installed (not just `libgl1-mesa-glx`)
 - On Windows, ensure Visual Studio Build Tools are installed with "Desktop development with C++" workload
 - Try `npm install --build-from-source gl` if prebuilt binaries fail
+
+### Headless Servers (VPS / Docker / CI)
+
+If no GPU or display is available, `gl` returns null. The bot will fall back to SVG gradients automatically, but for full WebGL quality:
+
+```sh
+# Install software rendering + virtual display
+sudo apt install xvfb mesa-utils libgl1-mesa-dri
+
+# Option 1: Run directly with xvfb
+./scripts/xvfb-run.sh node . <session_name> [--flags]
+
+# Option 2: PM2 with headless script (starts Xvfb + PM2)
+chmod +x ./scripts/pm2-headless.sh
+./scripts/pm2-headless.sh
+```
+
+The `pm2-headless.sh` script:
+1. Starts Xvfb on display `:99`
+2. Sets `LIBGL_ALWAYS_SOFTWARE=1` for llvmpipe software rendering
+3. Launches PM2 with the ecosystem config
+
+For Docker, add to your Dockerfile:
+```dockerfile
+RUN apt-get update && apt-get install -y xvfb libgl1-mesa-dri
+ENV LIBGL_ALWAYS_SOFTWARE=1 MESA_LOADER_DRIVER_OVERRIDE=llvmpipe DISPLAY=:99
+CMD Xvfb :99 -screen 0 1024x768x24 +extension GLX &>/dev/null & node .
+```
