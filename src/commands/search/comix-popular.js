@@ -1,7 +1,7 @@
-import { Comix } from '../../utils/index.js';
+import { comix } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
-const comix = new Comix();
+
 
 /**
  * @param {import('../../utils/comix/types/comix').ComixManga} manga

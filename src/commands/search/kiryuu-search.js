@@ -2,11 +2,10 @@ import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
-import { Kiryuu } from '../../utils/index.js';
+import { kiryuu } from '../../utils/index.js';
 import { randomChar } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
-const kiryuu = new Kiryuu();
 
 const searchSessions = new Cache();
 

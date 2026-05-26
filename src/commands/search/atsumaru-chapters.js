@@ -2,11 +2,10 @@ import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
-import { Atsumaru } from '../../utils/atsumaru/index.js';
+import { atsumaru } from '../../utils/atsumaru/index.js';
 import { randomChar } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
-const atsumaru = new Atsumaru();
 
 const CHAPTERS_PER_BATCH = 40;
 
@@ -66,7 +65,7 @@ export default defineCommand({
 
 			const sessionId = randomChar('abcdefghijklmnopqrstuvwxyz0123456789', 8);
 			const state = {
-				allChapters: chapters.reverse(),
+				allChapters: [...chapters].reverse(),
 				currentBatch: 0,
 				sessionId,
 				mangaId: query.trim(),
@@ -97,9 +96,11 @@ async function sendBatch(state, from, message, client, ctx) {
 	const builder = new client.TemplateBuilder.Native();
 
 	const buttons = batch.map((ch) => {
-		const label = `Ch. ${ch.number} — ${ch.name}`.replace(/[\n\r\t]/g, ' ').slice(0, 40);
+		const num = String(ch.number).replace(/\.0$/, '');
+		const isRedundant = !ch.name || ch.name === `Chapter ${num}` || ch.name === num;
+		const label = isRedundant ? `Ch. ${num}` : `Ch. ${num}\n${ch.name}`;
 
-		return builder.button.reply({ display: label, id: cmdId('atread', `${mangaId}/${ch.id}`, ctx) });
+		return builder.button.reply({ display: label.replace(/[\r\t]/g, ' ').slice(0, 40), id: cmdId('atread', `${mangaId}/${ch.id}`, ctx) });
 	});
 
 	if (hasMore) {

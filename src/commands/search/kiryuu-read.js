@@ -2,11 +2,11 @@ import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
-import { Kiryuu, imageToPdf, mime } from '../../utils/index.js';
+import { kiryuu, imageToPdf, mime } from '../../utils/index.js';
 import { randomChar } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
-const kiryuu = new Kiryuu();
+
 
 const CHAPTERS_PER_BATCH = 19;
 
@@ -129,9 +129,9 @@ export default defineCommand({
 		if (isChapterInput(input)) {
 			const slug = input.split('/').filter(Boolean).pop() || 'kiryuu-chapter';
 			const session = [...readerSessions.entries()].find(([, s]) => s.allChapters.some((c) => c.url === input));
-			const title = session?.[1]?.safeName || slug;
+			const title = session?.[1]?.safeName || 'kiryuu';
 			const ch = session?.[1]?.allChapters.find((c) => c.url === input);
-			const chNum = ch?.number || slug;
+			const chNum = ch?.number || slug.match(/chapter[- ]?(\d+)/i)?.[1] || slug;
 			const fileName = `${title}-chapter-${chNum}-kiryuu`.replace(/\s+/g, '-').toLowerCase();
 
 			return await downloadChapterAsPdf({ from, message }, client, wait, input, fileName);

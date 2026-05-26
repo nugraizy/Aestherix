@@ -2,11 +2,11 @@ import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
-import { Comix, imageToPdf, mime } from '../../utils/index.js';
+import { comix, imageToPdf, mime } from '../../utils/index.js';
 import { randomChar } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
-const comix = new Comix();
+
 
 const CHAPTERS_PER_BATCH = 19;
 
@@ -139,12 +139,11 @@ export default defineCommand({
 		if (isChapterInput(input)) {
 			let chapterId = input;
 			let chapterUrl;
+			let slug;
 
 			if (input.includes(':')) {
-				const [slug, id] = input.split(':');
-
-				chapterId = id;
-				chapterUrl = `https://comix.to/title/${slug}/${id}-chapter-1`;
+				[slug, chapterId] = input.split(':');
+				chapterUrl = `https://comix.to/title/${slug}/${chapterId}-chapter-1`;
 			}
 
 			const cached = comix.getChapterById(chapterId);
@@ -159,7 +158,7 @@ export default defineCommand({
 				const session = [...readerSessions.entries()].find(([, s]) =>
 					s.allChapters.some((c) => String(c.id) === String(chapterId))
 				);
-				const title = session?.[1]?.safeName || 'comix';
+				const title = session?.[1]?.safeName || slug?.split('-').slice(1).join('-') || 'comix';
 
 				return await downloadChapterAsPdf(
 					{ from, message },

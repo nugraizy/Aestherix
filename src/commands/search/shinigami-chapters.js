@@ -3,10 +3,9 @@ import { BOT_NAME } from '../../core/constants.js';
 import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { randomChar } from '../../utils/modules/index.js';
-import { Shinigami } from '../../utils/shinigami/index.js';
+import { shinigami } from '../../utils/shinigami/index.js';
 import { defineCommand } from '../_define.js';
 
-const shinigami = new Shinigami();
 
 const CHAPTERS_PER_BATCH = 40;
 
@@ -66,7 +65,7 @@ export default defineCommand({
 
 			const sessionId = randomChar('abcdefghijklmnopqrstuvwxyz0123456789', 8);
 			const state = {
-				allChapters: chapters.reverse(),
+				allChapters: [...chapters].reverse(),
 				currentBatch: 0,
 				sessionId,
 				mangaId: query.trim(),
@@ -98,9 +97,10 @@ async function sendBatch(state, from, message, client, ctx) {
 
 	const buttons = batch.map((ch) => {
 		const num = String(ch.number).replace(/\.0$/, '');
-		const label = `Ch. ${num} — ${ch.name}`.replace(/[\n\r\t]/g, ' ').slice(0, 40);
+		const isRedundant = !ch.name || ch.name === `Chapter ${num}` || ch.name === num;
+		const label = isRedundant ? `Ch. ${num}` : `Ch. ${num}\n${ch.name}`;
 
-		return builder.button.reply({ display: label, id: cmdId('sgread', `${mangaId}/${ch.id}`, ctx) });
+		return builder.button.reply({ display: label.replace(/[\r\t]/g, ' ').slice(0, 40), id: cmdId('sgread', `${mangaId}/${ch.id}`, ctx) });
 	});
 
 	if (hasMore) {

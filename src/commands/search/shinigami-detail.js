@@ -1,10 +1,9 @@
 import { BOT_NAME } from '../../core/constants.js';
 
 import { cmdId } from '../../helper/modules/prefix.js';
-import { Shinigami } from '../../utils/shinigami/index.js';
+import { shinigami } from '../../utils/shinigami/index.js';
 import { defineCommand } from '../_define.js';
 
-const shinigami = new Shinigami();
 
 export default defineCommand({
 	name: 'shinigamidetail',

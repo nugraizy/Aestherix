@@ -58,6 +58,9 @@ function normalizeChapter(chapter) {
 }
 
 class Shinigami {
+	#mangaCache = new Map();
+	#chapterCache = new Map();
+
 	constructor({ apiUrl = API_URL, cdnUrl = CDN_URL, baseUrl = BASE_URL, fetchImpl = fetch } = {}) {
 		this.apiUrl = apiUrl;
 		this.cdnUrl = cdnUrl;
@@ -138,6 +141,10 @@ class Shinigami {
 	}
 
 	async getManga(id) {
+		if (this.#mangaCache.has(id)) {
+			return this.#mangaCache.get(id);
+		}
+
 		const data = await this.fetchJSON(`${this.apiUrl}/v1/manga/detail/${id}`);
 		const detail = normalizeMangaDetail(data.data);
 		const browse = normalizeManga({
@@ -146,14 +153,25 @@ class Shinigami {
 			cover_image_url: data.data?.cover_image_url || ''
 		});
 
-		return { ...browse, ...detail };
+		const result = { ...browse, ...detail };
+
+		this.#mangaCache.set(id, result);
+
+		return result;
 	}
 
 	async getChapters(id) {
+		if (this.#chapterCache.has(id)) {
+			return this.#chapterCache.get(id);
+		}
+
 		const data = await this.fetchJSON(`${this.apiUrl}/v1/chapter/${id}/list?page_size=3000`);
 		const chapters = (data.data || []).map(normalizeChapter);
+		const result = chapters.sort((a, b) => b.number - a.number);
 
-		return chapters.sort((a, b) => b.number - a.number);
+		this.#chapterCache.set(id, result);
+
+		return result;
 	}
 
 	async getPages(chapterId) {

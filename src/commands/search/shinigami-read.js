@@ -1,8 +1,7 @@
 import { imageToPdf, mime } from '../../utils/index.js';
-import { Shinigami } from '../../utils/shinigami/index.js';
+import { shinigami } from '../../utils/shinigami/index.js';
 import { defineCommand } from '../_define.js';
 
-const shinigami = new Shinigami();
 
 export default defineCommand({
 	name: 'shinigamiread',

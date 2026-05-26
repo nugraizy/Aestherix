@@ -3,10 +3,9 @@ import { BOT_NAME } from '../../core/constants.js';
 import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { randomChar } from '../../utils/modules/index.js';
-import { Shinigami } from '../../utils/shinigami/index.js';
+import { shinigami } from '../../utils/shinigami/index.js';
 import { defineCommand } from '../_define.js';
 
-const shinigami = new Shinigami();
 
 const searchSessions = new Cache();
 

@@ -96,6 +96,9 @@ function parseAuthors(element) {
 }
 
 class Atsumaru {
+	#mangaCache = new Map();
+	#chapterCache = new Map();
+
 	constructor({ baseUrl = BASE_URL, fetchImpl = fetch } = {}) {
 		this.baseUrl = baseUrl;
 		this.fetchImpl = fetchImpl;
@@ -199,9 +202,16 @@ class Atsumaru {
 			throw new Error('Manga ID is required');
 		}
 
-		const data = await this.fetchJSON(`${this.baseUrl}/api/manga/page?id=${id}`);
+		if (this.#mangaCache.has(id)) {
+			return this.#mangaCache.get(id);
+		}
 
-		return normalizeManga(data?.mangaPage);
+		const data = await this.fetchJSON(`${this.baseUrl}/api/manga/page?id=${id}`);
+		const result = normalizeManga(data?.mangaPage);
+
+		this.#mangaCache.set(id, result);
+
+		return result;
 	}
 
 	async getChapters(input) {
@@ -209,6 +219,10 @@ class Atsumaru {
 
 		if (!id) {
 			throw new Error('Manga ID is required');
+		}
+
+		if (this.#chapterCache.has(id)) {
+			return this.#chapterCache.get(id);
 		}
 
 		const [chaptersData, detailData] = await Promise.all([
@@ -230,7 +244,11 @@ class Atsumaru {
 			return normalizeChapter(ch, id, scanlatorName);
 		});
 
-		return chapters.sort((a, b) => b.number - a.number);
+		const result = chapters.sort((a, b) => b.number - a.number);
+
+		this.#chapterCache.set(id, result);
+
+		return result;
 	}
 
 	async getPages(mangaId, chapterId) {

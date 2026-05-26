@@ -288,6 +288,31 @@ class Comix {
 		});
 	}
 
+	async #fetchWithFallback(url) {
+		const FALLBACK_PATHS = ['/si/', '/i/', '/sii/', '/ii/'];
+		const SCRAMBLE_PATH_REGEX = /\/s?i+\//;
+
+		const res = await fetch(url);
+
+		if (res.status !== 404) {
+			return res;
+		}
+
+		const fallbacks = FALLBACK_PATHS
+			.map((path) => url.replace(SCRAMBLE_PATH_REGEX, path))
+			.filter((u) => u !== url);
+
+		for (const fallbackUrl of fallbacks) {
+			const fallbackRes = await fetch(fallbackUrl);
+
+			if (fallbackRes.status !== 404) {
+				return fallbackRes;
+			}
+		}
+
+		return res;
+	}
+
 	async getChapterPages(chapterInput) {
 		const chapterId = ComixUtils.normalizeChapterInput(chapterInput);
 
@@ -317,12 +342,10 @@ class Comix {
 			let url = page.url.startsWith('http') ? page.url : `${baseUrl}/${page.url.replace(/^\/+/, '')}`;
 			const scrambled = page.s === 1;
 
-			if (scrambled) {url = url.replace(/(\/)(i+)(\/)/, '$1s$2$3');}
-
 			let buffer = null;
 
 			if (scrambled) {
-				const res = await fetch(url);
+				const res = await this.#fetchWithFallback(url);
 				const seed = parseInt(res.headers.get('x-scramble-seed') || '0', 10);
 				const raw = Buffer.from(await res.arrayBuffer());
 
@@ -337,3 +360,5 @@ class Comix {
 }
 
 export { Comix, ComixItemResponse, ComixResponse, ComixUtils };
+
+export const comix = new Comix();

@@ -2,11 +2,10 @@ import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
-import { Kiryuu } from '../../utils/index.js';
+import { kiryuu } from '../../utils/index.js';
 import { randomChar } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
-const kiryuu = new Kiryuu();
 
 const CHAPTERS_PER_BATCH = 40;
 
@@ -65,7 +64,7 @@ export default defineCommand({
 				return await wait.update('No chapters found for this manga.');
 			}
 
-			const allChapters = chaptersResult.reverse();
+			const allChapters = [...chaptersResult].reverse();
 			const sessionId = randomChar('abcdefghijklmnopqrstuvwxyz0123456789', 8);
 			const state = { allChapters, currentBatch: 0, sessionId, mangaTitle: manga.title, order: 'asc' };
 

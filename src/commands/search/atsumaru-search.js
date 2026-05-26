@@ -2,11 +2,10 @@ import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
-import { Atsumaru } from '../../utils/atsumaru/index.js';
+import { atsumaru } from '../../utils/atsumaru/index.js';
 import { randomChar } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
-const atsumaru = new Atsumaru();
 
 const searchSessions = new Cache();
 

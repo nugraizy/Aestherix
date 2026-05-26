@@ -2,11 +2,11 @@ import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
-import { Comix } from '../../utils/index.js';
+import { comix } from '../../utils/index.js';
 import { randomChar } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
-const comix = new Comix();
+
 
 const searchSessions = new Cache();
 

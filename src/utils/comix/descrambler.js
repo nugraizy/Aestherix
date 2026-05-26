@@ -42,7 +42,7 @@ export class Descrambler {
 		const perm = buildOrder(seed, NUM_TILES);
 
 		const raw = await img.ensureAlpha().raw().toBuffer();
-		const output = Buffer.alloc(width * height * 4);
+		const output = Buffer.from(raw);
 
 		for (let srcIdx = 0; srcIdx < NUM_TILES; srcIdx++) {
 			const dstIdx = perm[srcIdx];

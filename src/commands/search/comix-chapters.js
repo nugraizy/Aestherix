@@ -2,11 +2,9 @@ import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
 import { cmdId } from '../../helper/modules/prefix.js';
-import { Comix } from '../../utils/index.js';
+import { comix } from '../../utils/index.js';
 import { randomChar } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
-
-const comix = new Comix();
 
 const CHAPTERS_PER_BATCH = 40;
 
@@ -57,13 +55,13 @@ export default defineCommand({
 		const wait = await client.waitMessage(from, 'Fetching chapters...', message);
 
 		const mangaInput = query;
-		const result = await comix.getChapters(mangaInput, { allPages: true });
+		const result = await comix.getChapters(mangaInput, { allPages: true, deduplicate: false });
 
 		if (!result.items.length) {
 			return await wait.update('No chapters found for this manga.');
 		}
 
-		const allChapters = result.items.reverse();
+		const allChapters = [...result.items].reverse();
 		const firstUrl = allChapters[0]?.url || '';
 		const mangaSlug = firstUrl.match(/\/title\/([^/]+)\//)?.[1] || query.trim();
 		const sessionId = randomChar('abcdefghijklmnopqrstuvwxyz0123456789', 8);
@@ -96,9 +94,12 @@ async function sendBatch(state, from, message, client, ctx) {
 		.footer('Powered by ' + BOT_NAME);
 
 	const buttons = batch.map((ch) => {
-		const label = `Ch. ${ch.number} — ${ch.name}`.slice(0, 40);
+		const num = String(ch.number).replace(/\.0$/, '');
+		const isRedundant = !ch.name || ch.name === `Chapter ${num}` || ch.name === num;
+		const group = ch.scanlator && ch.scanlator !== 'Unknown' ? ` (${ch.scanlator})` : '';
+		const label = isRedundant ? `Ch. ${num}${group}` : `Ch. ${num}${group}\n${ch.name}`;
 
-		return builder.button.reply({ display: label, id: cmdId('cxread', `${mangaSlug}:${ch.id}`, ctx) });
+		return builder.button.reply({ display: label.slice(0, 40), id: cmdId('cxread', `${mangaSlug}:${ch.id}`, ctx) });
 	});
 
 	if (hasMore) {

@@ -1,8 +1,7 @@
-import { Atsumaru } from '../../utils/atsumaru/index.js';
+import { atsumaru } from '../../utils/atsumaru/index.js';
 import { imageToPdf, mime } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
-const atsumaru = new Atsumaru();
 
 export default defineCommand({
 	name: 'atsumaruread',

@@ -138,6 +138,8 @@ export class KiryuuUtils {
 export class Kiryuu {
 	#base = BASE_URL;
 	#nonce = null;
+	#mangaCache = new Map();
+	#chapterCache = new Map();
 	#axios = axios.create({
 		baseURL: this.#base,
 		headers: {
@@ -241,6 +243,10 @@ export class Kiryuu {
 	 * @returns {Promise<import('./types/kiryuu').KiryuuManga>}
 	 */
 	async getManga(slug) {
+		if (this.#mangaCache.has(slug)) {
+			return this.#mangaCache.get(slug);
+		}
+
 		const params = new URLSearchParams();
 
 		params.append('slug[]', slug);
@@ -253,7 +259,11 @@ export class Kiryuu {
 			throw new Error('Manga not found');
 		}
 
-		return KiryuuUtils.mapManga(manga);
+		const result = KiryuuUtils.mapManga(manga);
+
+		this.#mangaCache.set(slug, result);
+
+		return result;
 	}
 
 	/**
@@ -262,6 +272,10 @@ export class Kiryuu {
 	 */
 	async getChapters(manga) {
 		const mangaId = this.#extractMangaId(manga);
+
+		if (this.#chapterCache.has(mangaId)) {
+			return this.#chapterCache.get(mangaId);
+		}
 
 		const { data } = await this.#axios.get(`${this.#base}/wp-admin/admin-ajax.php`, {
 			params: {
@@ -289,7 +303,11 @@ export class Kiryuu {
 			})
 			.get();
 
-		return chapters.map((ch) => KiryuuUtils.mapChapter(ch));
+		const result = chapters.map((ch) => KiryuuUtils.mapChapter(ch));
+
+		this.#chapterCache.set(mangaId, result);
+
+		return result;
 	}
 
 	/**
