@@ -337,21 +337,4 @@ export const imageToPdf = (images) =>
 		}
 	});
 
-export const createMeshGradient = ({ colors, width = 800, height = 600 }) => {
-	let defs = '';
-	let rects = '';
 
-	colors.forEach((color, i) => {
-		const id = `grad${i}`;
-		const cx = Math.random() * 100;
-		const cy = Math.random() * 100;
-		const r = 50 + Math.random() * 50;
-
-		defs += `<radialGradient id="${id}" cx="${cx}%" cy="${cy}%" r="${r}%"><stop offset="0%" stop-color="${color}" stop-opacity="1"/><stop offset="100%" stop-color="${color}" stop-opacity="0"/></radialGradient>`;
-		rects += `<rect width="100%" height="100%" fill="url(#${id})"/>`;
-	});
-
-	const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><defs>${defs}</defs><rect width="100%" height="100%" fill="${colors[0]}"/>${rects}</svg>`;
-
-	return Buffer.from(svg);
-};

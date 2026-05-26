@@ -2,7 +2,7 @@ import compression from 'compression';
 import express from 'express';
 import { createServer } from 'http';
 
-import { createGradientRouter } from '../../gradient/index.js';
+
 import { createAuthMiddleware } from './middleware/auth.middleware.js';
 import { createActionsRouter } from './routes/actions.routes.js';
 import { createAuditRouter } from './routes/audit.routes.js';
@@ -135,7 +135,7 @@ h1{font-size:1.8rem;margin-bottom:1rem}
 	});
 
 	if (mountGradient) {
-		app.use(createGradientRouter({ port }));
+
 	}
 
 	const apiRouters = [
