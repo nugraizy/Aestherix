@@ -2,6 +2,10 @@ import { _baseUrl } from './utils.js';
 
 export class ResponseParser {
 	_parsePost({ data: { xdt_shortcode_media: response } }) {
+		if (!response) {
+			return { error: 'Post not found. Either update your cookies or try again later.' };
+		}
+
 		let { username, full_name: fullName, is_private: isPrivate, is_verified: isVerified } = response.owner;
 		let {
 			edge_media_preview_like: { count: likeCount },
@@ -42,6 +46,10 @@ export class ResponseParser {
 	}
 
 	_parseProfile(response) {
+		if (!response || !response.id) {
+			return { error: 'Profile not found. Either update your cookies or try again later.' };
+		}
+
 		return {
 			id: response.id,
 			biography: response.biography,
@@ -91,6 +99,10 @@ export class ResponseParser {
 	}
 
 	_parseProfiles(response) {
+		if (!response || !response.users) {
+			return { error: 'Profiles not found. Either update your cookies or try again later.' };
+		}
+
 		return response.users.map((v) => ({
 			id: v.pk,
 			fullName: v.full_name === '' ? 'No Fullname' : v.full_name,
@@ -204,9 +216,18 @@ export class ResponseParser {
 							}
 
 							return {
-								username, fullName, avatarUrl, isPrivate, caption, published, code,
+								username,
+								fullName,
+								avatarUrl,
+								isPrivate,
+								caption,
+								published,
+								code,
 								source: `${_baseUrl}/p/${code}`,
-								commentCount, likeCount, media, mediaType
+								commentCount,
+								likeCount,
+								media,
+								mediaType
 							};
 						}
 					);
