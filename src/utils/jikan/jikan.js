@@ -76,6 +76,7 @@ export class Jikan {
 		return new Promise(async (resolve, reject) => {
 			try {
 				const url = new URL(BASE_URL(path));
+
 				Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 				const data = await fetchJSON(url.toString(), { method });
 

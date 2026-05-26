@@ -22,6 +22,7 @@ export const pStoreProduct = (keyword) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			const url = new URL(_api);
+
 			url.searchParams.set('search', keyword);
 			const data = await fetchJSON(url.toString());
 

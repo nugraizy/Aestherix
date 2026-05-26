@@ -13,6 +13,7 @@ export const stockImagesPexel = (query) =>
 	new Promise(async (resolve, reject) => {
 		try {
 			const url = new URL(_apiBase);
+
 			url.searchParams.set('query', query);
 			url.searchParams.set('size', 'large');
 			url.searchParams.set('per_page', '80');

@@ -102,3 +102,41 @@ Invoke-WebRequest -Uri "https://aka.ms/vs/17/release/vs_buildtools.exe" -OutFile
 .\doc\install\install.ps1
 npm i -f
 ```
+
+---
+
+## headless-gl (WebGL for mesh gradients)
+
+The `gl` package provides hardware-accelerated WebGL rendering without a browser. It requires native OpenGL libraries.
+
+### Linux (Ubuntu / Debian)
+
+```sh
+sudo apt install libgl1-mesa-dev libxi-dev libxext-dev
+```
+
+### Arch
+
+```sh
+sudo pacman -S mesa libxi libxext
+```
+
+### Windows
+
+Requires Visual Studio Build Tools with C++ workload (already listed above). No additional packages needed — `gl` uses ANGLE which is bundled.
+
+### macOS
+
+```sh
+xcode-select --install
+```
+
+OpenGL is included in macOS by default.
+
+### Troubleshooting
+
+If `npm install` fails on the `gl` package:
+- Ensure Python 3 and a C++ compiler are installed
+- On Linux, ensure `libgl1-mesa-dev` is installed (not just `libgl1-mesa-glx`)
+- On Windows, ensure Visual Studio Build Tools are installed with "Desktop development with C++" workload
+- Try `npm install --build-from-source gl` if prebuilt binaries fail

@@ -73,6 +73,7 @@ export class Github {
 
 	async req(path, params, method, access = false) {
 		const url = new URL(this.#urlBase + path);
+
 		Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 
 		const data = await fetchJSON(url.toString(), {
