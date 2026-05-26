@@ -1,10 +1,10 @@
 import Canvas from '@napi-rs/canvas';
-import Wrap from 'canvas-text-wrapper';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import { fillText } from './fill-text.js';
+
 const { createCanvas, GlobalFonts } = Canvas;
-const { CanvasTextWrapper } = Wrap;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/coolvetica rg.otf'), 'coolvetica');
@@ -25,18 +25,16 @@ export const textStory = async (texts, color) => {
 	const ctx = canvas.getContext('2d');
 
 	ctx.fillStyle = ARGBtoRGBA(color);
-
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 	ctx.fillStyle = ARGBtoRGBA(4_294_967_295);
 
-	CanvasTextWrapper(canvas, texts, {
+	fillText(canvas, texts, {
 		font: '58px coolvetica',
 		textAlign: 'center',
 		verticalAlign: 'middle',
-		paddingX: 20,
-		paddingY: 20
+		sizeToFill: true
 	});
 
-	return new Buffer.from(canvas.toBuffer('image/png'));
+	return Buffer.from(canvas.toBuffer('image/png'));
 };

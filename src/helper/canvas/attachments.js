@@ -1,6 +1,5 @@
 import Canvas from '@napi-rs/canvas';
 import sharp from 'sharp';
-import Wrap from 'canvas-text-wrapper';
 import * as color from 'colorthief';
 import fs from 'fs-extra';
 import path from 'path';
@@ -10,7 +9,6 @@ import { fetch } from 'undici';
 import { isURL } from '../../utils/modules/index.js';
 
 const { createCanvas, GlobalFonts, loadImage } = Canvas;
-const { CanvasTextWrapper } = Wrap;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const [signature, logo] = await Promise.all([
@@ -110,13 +108,10 @@ export class Attachment {
 
 		this.ctx.fillStyle = participantColor;
 
-		CanvasTextWrapper(this.canvas, `𓆩 ${participant} 𓆪`, {
-			font: `${fontSize}px ${fontName}`,
-			textAlign: 'center',
-			verticalAlign: 'bottom',
-			paddingX: x / 3,
-			paddingY: y / 2
-		});
+		this.ctx.font = `${fontSize}px ${fontName}`;
+		this.ctx.textAlign = 'center';
+		this.ctx.textBaseline = 'bottom';
+		this.ctx.fillText(`𓆩 ${participant} 𓆪`, this.canvas.width / 2, this.canvas.height - y / 2);
 
 		if (shadow) {
 			this.ctx.shadowOffsetX = 1;
@@ -127,13 +122,10 @@ export class Attachment {
 
 		this.ctx.fillStyle = textColor;
 
-		CanvasTextWrapper(this.canvas, text, {
-			font: '30px AbrilText-Bold',
-			textAlign: 'center',
-			verticalAlign: 'bottom',
-			paddingX: x / 5,
-			paddingY: y / 2.84
-		});
+		this.ctx.font = '30px AbrilText-Bold';
+		this.ctx.textAlign = 'center';
+		this.ctx.textBaseline = 'bottom';
+		this.ctx.fillText(text, this.canvas.width / 2, this.canvas.height - y / 2.84);
 
 		if (shadow) {
 			this.ctx.shadowOffsetX = 1;
@@ -144,13 +136,10 @@ export class Attachment {
 
 		this.ctx.fillStyle = groupNameColor;
 
-		CanvasTextWrapper(this.canvas, groupName, {
-			font: '42px AbrilText-Bold',
-			textAlign: 'center',
-			verticalAlign: 'bottom',
-			paddingX: x / 5,
-			paddingY: y / 8.7
-		});
+		this.ctx.font = '42px AbrilText-Bold';
+		this.ctx.textAlign = 'center';
+		this.ctx.textBaseline = 'bottom';
+		this.ctx.fillText(groupName, this.canvas.width / 2, this.canvas.height - y / 8.7);
 
 		return this;
 	}

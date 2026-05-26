@@ -1,108 +1,115 @@
 import Canvas from '@napi-rs/canvas';
-import GIFEncoder from 'gifencoder';
-import sharp from 'sharp';
+import { spawn } from 'child_process';
+import { readFile } from 'fs/promises';
+import WebPMux from 'node-webpmux';
 
 import configuration from '../config/connect.js';
-import { color, isURL, loggers } from '../../utils/modules/index.js';
-import { gif2mp4 } from '../../utils/converter/index.js';
+import { buildExifBuffer } from '../../utils/misc/create-exif.js';
+import { color, loggers } from '../../utils/modules/index.js';
 
-const { readFile, unlink, writeFile } = (await import('fs-extra')).default;
 const { createCanvas, loadImage } = Canvas;
-const { fit } = sharp;
 
-const width = 640;
-const height = 640 + 54;
+const WIDTH = 640;
+const HEIGHT = 640 + 54;
 const BR = 30 * 2.8;
 const LR = 20 * 2.8;
+const FRAME_COUNT = 9;
 
 const TRIGGERED = await readFile('./src/media/triggered.png');
 const base = await loadImage(TRIGGERED);
 
-const prepareCanvas = async (images) => {
-	const image = await loadImage(images);
-
-	const canvas = createCanvas(width, height);
+function renderFrames(img) {
+	const canvas = createCanvas(WIDTH, HEIGHT);
 	const ctx = canvas.getContext('2d');
+	const frames = [];
 
-	return {
-		image,
-		ctx
-	};
-};
+	for (let i = 0; i < FRAME_COUNT; i++) {
+		ctx.clearRect(0, 0, WIDTH, HEIGHT);
+		ctx.drawImage(
+			img,
+			Math.floor(Math.random() * BR) - BR,
+			Math.floor(Math.random() * BR) - BR,
+			WIDTH + BR,
+			HEIGHT - 54 + BR
+		);
 
-export const trigger = async (image, sender, opt, client) =>
-	new Promise(async (resolve, reject) => {
-		try {
-			let i = 0;
+		ctx.fillStyle = '#FF000033';
+		ctx.fillRect(0, 0, WIDTH, HEIGHT);
+		ctx.drawImage(
+			base,
+			Math.floor(Math.random() * LR) - LR,
+			HEIGHT - 54 + Math.floor(Math.random() * LR) - LR,
+			WIDTH + LR,
+			54 + LR
+		);
 
-			const GIF = new GIFEncoder(width, height);
+		frames.push(Buffer.from(canvas.toBuffer('image/webp')));
+	}
 
-			GIF.start();
-			GIF.setRepeat(0);
-			GIF.setDelay(15);
+	return frames;
+}
 
-			const { image: images, ctx } = await prepareCanvas(image);
+async function framesToAnimatedWebp(frameBuffers) {
+	const frames = [];
 
-			while (i < 9) {
-				ctx.clearRect(0, 0, width, height);
-				ctx.drawImage(
-					images,
-					Math.floor(Math.random() * BR) - BR,
-					Math.floor(Math.random() * BR) - BR,
-					width + BR,
-					height - 54 + BR
-				);
+	for (const buf of frameBuffers) {
+		frames.push(await WebPMux.Image.generateFrame({ buffer: buf, delay: 50, x: 0, y: 0, blend: false, dispose: true }));
+	}
 
-				ctx.fillStyle = '#FF000033';
+	const exif = buildExifBuffer(configuration.packname, configuration.author);
 
-				ctx.fillRect(0, 0, width, height);
-				ctx.drawImage(
-					base,
-					Math.floor(Math.random() * LR) - LR,
-					height - 54 + Math.floor(Math.random() * LR) - LR,
-					width + LR,
-					54 + LR
-				);
-				GIF.addFrame(ctx);
-				i++;
-			}
-
-			GIF.finish();
-
-			const buffer = GIF.out.getData();
-
-			if (opt.output === 'sticker') {
-				const file = await sharp(buffer, { animated: true })
-					.resize(width, height - 54, {
-						fit: fit.contain,
-						background: { r: 0, g: 0, b: 0, alpha: 0 }
-					})
-					.webp({ quality: 60 })
-					.toBuffer();
-
-				const results = await client.applyExif(file, {
-					packname: configuration.packname,
-					author: configuration.author
-				});
-
-				resolve(results);
-			} else {
-				await writeFile(`${opt.filename}.gif`, buffer);
-
-				const { output } = await gif2mp4(`${opt.filename}.gif`, `${opt.filename}.mp4`, opt);
-
-				const finalOutput = await readFile(output);
-
-				await unlink(`${opt.filename}.gif`);
-				await unlink(`${opt.filename}.mp4`);
-				await unlink(`${isURL(image) ? `./temporary_files/${sender}` : image}`);
-				await unlink(`${isURL(image) ? `./temporary_files/${sender}` : image}.webp`);
-
-				resolve(finalOutput);
-			}
-		} catch (err) {
-			loggers.error(`${color('Failed to Trigger an image', 'red')} for ${color(sender, 'lilac')}`);
-
-			reject(err);
-		}
+	return WebPMux.Image.save(null, {
+		frames,
+		width: WIDTH,
+		height: HEIGHT,
+		loops: 0,
+		exif: { raw: exif }
 	});
+}
+
+function framesToMp4(frameBuffers) {
+	return new Promise((resolve, reject) => {
+		const ffmpeg = spawn('ffmpeg', [
+			'-framerate', '20',
+			'-f', 'image2pipe',
+			'-vcodec', 'webp',
+			'-i', 'pipe:0',
+			'-pix_fmt', 'yuv420p',
+			'-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2',
+			'-movflags', 'frag_keyframe+empty_moov',
+			'-f', 'mp4',
+			'pipe:1'
+		], { stdio: ['pipe', 'pipe', 'ignore'] });
+
+		const chunks = [];
+
+		ffmpeg.stdout.on('data', (chunk) => chunks.push(chunk));
+		ffmpeg.on('close', (code) => {
+			if (code !== 0) {
+				return reject(new Error(`ffmpeg exited with code ${code}`));
+			}
+
+			resolve(Buffer.concat(chunks));
+		});
+		ffmpeg.on('error', reject);
+
+		for (const frame of frameBuffers) {
+			ffmpeg.stdin.write(frame);
+		}
+
+		ffmpeg.stdin.end();
+	});
+}
+
+export const trigger = async (image, sender, opt) => {
+	loggers.warning(`${color('Generating Triggered Image', 'pink')} for ${color(sender, 'lilac')}`);
+
+	const img = await loadImage(image);
+	const frames = renderFrames(img);
+
+	if (opt.output === 'sticker') {
+		return framesToAnimatedWebp(frames);
+	}
+
+	return framesToMp4(frames);
+};
