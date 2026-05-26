@@ -1,7 +1,7 @@
 import { generateWAMessageFromContent } from 'baileys';
 
 import configuration from '../../helper/config/connect.js';
-import { textStory } from '../../helper/index.js';
+import { TextStory } from '../../helper/canvas/index.js';
 import { runtime } from '../../index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 
@@ -31,7 +31,8 @@ const handler = async (client, message) => {
 
 	if (message.type === 'extendedTextMessage') {
 		caption += `Body : ${message.body}`;
-		const buffer = await textStory(message.body, message.message.message.extendedTextMessage.backgroundArgb);
+		const story = new TextStory();
+		const buffer = await story.render(message.body, message.message.message.extendedTextMessage.backgroundArgb);
 
 		return await client.send(meJid, { image: buffer, caption: caption.trim() });
 	} else if (message.type === 'videoMessage' || message.type === 'imageMessage') {

@@ -1,7 +1,7 @@
 import rgbcolor from 'rgb-color';
 import yargsParser from 'yargs-parser';
 
-import { attp } from '../../helper/canvas/index.js';
+import { AnimatedSticker } from '../../helper/canvas/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -10,14 +10,14 @@ export default defineCommand({
 	minifiedDescription: 'Animated Text',
 	description: 'Generate animated gif sticker',
 	category: 'Converter',
-	usage: '!gittp `<text>` `[--color in hex]`',
+	usage: '!gittp `<text>` `[--color in hex]`  `[--fonts]`',
 	aliases: ['gittp'],
 	cooldown: 5,
 	limit: 1,
 	status: 'enable',
 	async run({ from, query, message, prettyNumber, bodyQuoted }, client) {
 		if (!query && !bodyQuoted) {
-			query = 'Mana text nya?';
+			query = 'Where is the text?';
 		}
 
 		let parseOptions = yargsParser(query, { configuration: { 'short-option-groups': false } });
@@ -50,18 +50,20 @@ export default defineCommand({
 			}
 		}
 
-		if (bodyQuoted) {
-			const { buffer } = await attp(prettyNumber, bodyQuoted, parseOptions.color);
+		const sticker = new AnimatedSticker();
 
-			await client.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { quoted: message });
+		if (bodyQuoted) {
+			const buffer = await sticker.render(bodyQuoted, parseOptions.color);
+
+			await client.send(from, { sticker: buffer }, { quoted: message });
 			loggers.info(`${color('Sticker is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 			return;
 		}
 
 		if (query) {
-			const { buffer } = await attp(prettyNumber, query, parseOptions.color);
+			const buffer = await sticker.render(query, parseOptions.color);
 
-			await client.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { quoted: message });
+			await client.send(from, { sticker: buffer }, { quoted: message });
 			loggers.info(`${color('Sticker is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 			return;
 		}

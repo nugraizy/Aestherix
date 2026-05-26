@@ -1,6 +1,6 @@
 import { generateWAMessageFromContent } from 'baileys';
 
-import { textStory } from '../../helper/canvas/index.js';
+import { TextStory } from '../../helper/canvas/index.js';
 import { Cache } from '../../helper/modules/cache.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
@@ -80,7 +80,8 @@ export default defineCommand({
 						message.message?.['extendedTextMessage']?.text ?? message.message?.[type]?.caption ?? 'Caption or texts N/A';
 
 					if (type === 'extendedTextMessage') {
-						const buffer = await textStory(body, message.message.extendedTextMessage.backgroundArgb);
+						const story = new TextStory();
+						const buffer = await story.render(body, message.message.extendedTextMessage.backgroundArgb);
 
 						await client.send(from, { image: buffer, caption: body }, { quoted: message });
 					} else {

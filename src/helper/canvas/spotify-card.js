@@ -4,10 +4,11 @@ import * as color from 'colorthief';
 import crypto from 'crypto';
 import fs from 'fs-extra';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import sharp from 'sharp';
 import { fetch } from 'undici';
+import { fileURLToPath } from 'url';
 
+import { createMeshGradient } from '../../utils/converter/mesh-gradient.js';
 import { spotifier } from '../../utils/spotifier/index.js';
 
 const { createCanvas, GlobalFonts, loadImage } = Canvas;
@@ -26,9 +27,9 @@ const assets = {
 	model: null
 };
 
-const instagramUsername = 'dizy.prod';
-const githubUsername = 'nugraizy';
-const watermark = 'Spotify Card by Aestherix';
+const instagramUsername = 'dizy.himself';
+const githubUsername = 'nugraizy/aestherix';
+const watermark = 'Spotify Card';
 
 export class SpotifyCard {
 	/**
@@ -262,12 +263,14 @@ export class SpotifyCard {
 			const gradientNumber = this.generateRandomNumber(1, 3);
 
 			if (opts.mesh) {
-				const colors = this.#_colorPalettes.map((rgb) => chroma(rgb).brighten(1).hex().toUpperCase().slice(1)).join(',');
-				const response = await fetch(
-					`http://localhost:4000/gradient?colors=${colors}&dimensions=${this.#_canvas.width}x${this.#_canvas.height}&animate=false`
-				);
-				const meshGradient = await response.arrayBuffer();
-				const image = await loadImage(Buffer.from(meshGradient));
+				const meshColors = this.#_colorPalettes.map((rgb) => chroma(rgb).brighten(1).hex());
+				const meshBuffer = await createMeshGradient({
+					colors: meshColors,
+					width: this.#_canvas.width,
+					height: this.#_canvas.height,
+					seed: Math.floor(Math.random() * 1000)
+				});
+				const image = await loadImage(meshBuffer);
 
 				this.#_ctx.drawImage(image, 0, 0, this.#_canvas.width, this.#_canvas.height);
 
@@ -381,7 +384,7 @@ export class SpotifyCard {
 				opts.round = Math.round(opts.round);
 			}
 
-			const process = new Buffer.from(
+			const process = Buffer.from(
 				`<svg><rect x="0" y="0" width="${this.#_loadedCover.width}" height="${this.#_loadedCover.height}" rx="${
 					opts.round
 				}" ry="${opts.round}"/></svg>`

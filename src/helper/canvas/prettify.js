@@ -8,7 +8,7 @@ import sharp from 'sharp';
 import color from 'colorthief';
 import chroma from 'chroma-js';
 
-import { colors, roundedRectData } from './utils.js';
+import { syntaxThemes as colors, roundedRectData } from './utils/helpers.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const { createCanvas, loadImage, GlobalFonts } = Canvas;
@@ -68,7 +68,7 @@ export class Prettify {
 			heightCanvas: imageMetadata.height + 2 * borderThickness
 		};
 
-		const rounded = new Buffer.from(
+		const rounded = Buffer.from(
 			`<svg><path d="${roundedRectData(imageMetadata.width, imageMetadata.height, config.round)}"/></svg>`
 		);
 

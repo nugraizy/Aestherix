@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs-extra';
 
 import { color, loggers } from '../../utils/index.js';
-import { trigger } from '../../helper/index.js';
+import { TriggerEffect } from '../../helper/canvas/index.js';
 import { defineCommand } from '../_define.js';
 
 const defaultOptions = {
@@ -29,7 +29,7 @@ export default defineCommand({
 			mediaData,
 			filename,
 			prettyNumber,
-			sender,
+			sender, // eslint-disable-line no-unused-vars
 			query,
 			message,
 			stickerAble,
@@ -57,7 +57,8 @@ export default defineCommand({
 
 			options = _.defaults({ filename: path.join(__dirname, `src/media/temporary_files/${filename}`) }, defaultOptions);
 
-			const result = await trigger(profile, sender, options, client);
+			const effect = new TriggerEffect();
+			const result = await effect.render(profile, options);
 
 			if (options.output === 'sticker') {
 				await client.send(from, { sticker: Buffer.from(result, 'base64') }, {});
@@ -88,7 +89,8 @@ export default defineCommand({
 			loggers.warning(`${color('Triggering', 'pink')} ${color(prettyNumber, 'lilac')}`);
 
 			const buffer = await client.downloadMediaMessage(mediaData);
-			const result = await trigger(buffer, sender, options, client);
+			const effect = new TriggerEffect();
+			const result = await effect.render(buffer, options);
 
 			if (options.output === 'sticker') {
 				await client.send(from, { sticker: Buffer.from(result, 'base64') }, {});
@@ -108,7 +110,8 @@ export default defineCommand({
 
 			options = _.defaults({ filename: path.join(__dirname, `src/media/temporary_files/${filename}`) }, defaultOptions);
 
-			const result = await trigger(profile, sender, options, client);
+			const effect = new TriggerEffect();
+			const result = await effect.render(profile, options);
 
 			if (options.output === 'sticker') {
 				await client.send(from, { sticker: Buffer.from(result, 'base64') }, {});

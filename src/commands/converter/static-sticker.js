@@ -1,6 +1,6 @@
 import rgbcolor from 'rgb-color';
 
-import { ttp } from '../../helper/canvas/index.js';
+import { StaticSticker } from '../../helper/canvas/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -16,7 +16,7 @@ export default defineCommand({
 	status: 'enable',
 	async run({ from, query, message, prettyNumber, bodyQuoted }, client) {
 		if (!query) {
-			query = 'Mana text nya?';
+			query = 'Where is the text?';
 		}
 
 		let colors = [];
@@ -44,18 +44,18 @@ export default defineCommand({
 			}
 		}
 
+		const sticker = new StaticSticker();
+
 		if (bodyQuoted) {
-			ttp(prettyNumber, bodyQuoted, colors).then(async (buffer) => {
-				await client.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { quoted: message });
+			const buffer = await sticker.render(bodyQuoted, colors);
 
-				loggers.info(`${color('Sticker is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
-			});
+			await client.send(from, { sticker: buffer }, { quoted: message });
+			loggers.info(`${color('Sticker is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 		} else if (query) {
-			ttp(prettyNumber, query, colors).then(async (buffer) => {
-				await client.send(from, { sticker: new Buffer.from(buffer, 'base64') }, { quoted: message });
+			const buffer = await sticker.render(query, colors);
 
-				loggers.info(`${color('Sticker is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
-			});
+			await client.send(from, { sticker: buffer }, { quoted: message });
+			loggers.info(`${color('Sticker is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 		} else {
 			await client.reply(from, 'Please enter text to convert to sticker', message);
 		}

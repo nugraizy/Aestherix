@@ -1,87 +1,101 @@
 import Canvas from '@napi-rs/canvas';
 import emojiReg from 'emoji-regex';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import WebPMux from 'node-webpmux';
 
-import { color, loggers } from '../../utils/modules/index.js';
 import { buildExifBuffer } from '../../utils/misc/create-exif.js';
-import { scheme } from '../misc/palettes/colors.js';
-import { fillText } from './fill-text.js';
+import { color, loggers } from '../../utils/modules/index.js';
+import { fillText } from './utils/fill-text.js';
+import { DEFAULT_STICKER_FONT, stickerFonts, stickerPalettes } from './utils/themes.js';
+import { registerFonts } from './utils/helpers.js';
 
-const { createCanvas, GlobalFonts } = Canvas;
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const { createCanvas } = Canvas;
 
-GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/Chevin Bold.ttf'), 'chevin');
-GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/texgyreadventor-bold.otf'), 'texgy');
-GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/SourceSansPro-Italic.ttf'), 'sanspro');
-GlobalFonts.registerFromPath(path.join(__dirname, '../../media/fonts/KeepCalm-Medium.ttf'), 'calm');
+registerFonts();
 
-function loadColorsPalette(colored) {
-	const defaultColors = [
-		['047af6', '7401df', '202532', '32fa00', 'ff00d5'],
-		['4db1c3', '046084', '35b07e', 'f0a7aa', 'e74758'],
-		['ffffff', 'f7a9ef', 'f881ec', 'f751e6', 'c400b0'],
-		['ffaf39', 'ee7e1b', 'ef421b', 'cf214b', 'bf1679'],
-		['86ff5d', '34e361', '14d285', '0ebb9b', '0c9ea9'],
-		['e0f4ff', 'cbecff', 'afe2ff', 'afd5ff', 'afc8ff'],
-		['d2dbde', '8debff', '84b7ff', 'b8b8b8', '08e1ff'],
-		['ffef2b', '2f4af4', 'ee1c62', '33ee87', '6cfcff'],
-		['6500ff', 'ffe04e', '8b00ff', 'bd93ed', '7400ff'],
-		scheme().map((v) => v.replace('#', ''))
-	];
+export class AnimatedSticker {
+	#width = 500;
+	#height = 500;
+	#frameDelay = 150;
 
-	return [].concat(...Array(1).fill(colored ?? defaultColors[Math.floor(Math.random() * defaultColors.length)]));
-}
+	constructor({ width = 500, height = 500, frameDelay = 150 } = {}) {
+		this.#width = width;
+		this.#height = height;
+		this.#frameDelay = frameDelay;
+	}
 
-export const attp = async (sender, texts, colored, fonts) => {
-	fonts = fonts !== undefined ? fonts.toLowerCase() : 'chevin';
-	colored = colored.length ? colored : null;
+	#resolveFont(font) {
+		const normalized = font?.toLowerCase();
 
-	loggers.warning(`${color('Generating Animated Image', 'pink')} for ${color(sender, 'lilac')}`);
+		if (normalized && stickerFonts.includes(normalized)) {
+			return normalized;
+		}
 
-	const canvas = createCanvas(500, 500);
-	const ctx = canvas.getContext('2d');
-	const colors = loadColorsPalette(colored);
-	const regex = new RegExp(emojiReg(), 'g');
+		if (font) {
+			loggers.warning(`Font "${font}" not found. Available: ${stickerFonts.join(', ')}. Using "${DEFAULT_STICKER_FONT}".`);
+		}
 
-	texts = texts.trim().replace(regex, '');
+		return DEFAULT_STICKER_FONT;
+	}
 
-	const frameBuffers = [];
+	#getColors(colored) {
+		if (colored?.length) {
+			return colored;
+		}
 
-	for (const colori of colors) {
-		const reassignColor = colori.startsWith('#') ? colori : `#${colori}`;
+		return [...stickerPalettes[Math.floor(Math.random() * stickerPalettes.length)]];
+	}
 
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		ctx.fillStyle = reassignColor;
+	#sanitizeText(text) {
+		return text.trim().replace(new RegExp(emojiReg(), 'g'), '');
+	}
 
-		fillText(canvas, texts, {
-			font: `82px ${fonts}`,
-			textAlign: 'center',
-			verticalAlign: 'middle',
-			sizeToFill: true
+	async render(text, colored = [], font = DEFAULT_STICKER_FONT) {
+		const resolvedFont = this.#resolveFont(font);
+
+		loggers.warning(`${color('Generating animated sticker', 'pink')}`);
+
+		const canvas = createCanvas(this.#width, this.#height);
+		const ctx = canvas.getContext('2d');
+		const colors = this.#getColors(colored);
+		const sanitized = this.#sanitizeText(text);
+		const frameBuffers = [];
+
+		for (const colori of colors) {
+			const fillColor = colori.startsWith('#') ? colori : `#${colori}`;
+
+			ctx.clearRect(0, 0, this.#width, this.#height);
+			ctx.fillStyle = fillColor;
+
+			fillText(canvas, sanitized, {
+				font: `82px ${resolvedFont}`,
+				textAlign: 'center',
+				verticalAlign: 'middle',
+				sizeToFill: true
+			});
+
+			frameBuffers.push(Buffer.from(canvas.toBuffer('image/webp')));
+		}
+
+		const frames = [];
+
+		for (const buf of frameBuffers) {
+			frames.push(await WebPMux.Image.generateFrame({ buffer: buf, delay: this.#frameDelay, x: 0, y: 0, blend: false, dispose: true }));
+		}
+
+		const exif = buildExifBuffer('Made by Nanda', 'Aestherix Animated Sticker using Canvas and WebP');
+
+		const result = await WebPMux.Image.save(null, {
+			frames,
+			width: this.#width,
+			height: this.#height,
+			loops: 0,
+			exif: { raw: exif }
 		});
 
-		frameBuffers.push(Buffer.from(canvas.toBuffer('image/webp')));
+		loggers.info(`${color('Animated sticker generated', 'pink')}`);
+
+		return result;
 	}
+}
 
-	const frames = [];
 
-	for (const buf of frameBuffers) {
-		frames.push(await WebPMux.Image.generateFrame({ buffer: buf, delay: 150, x: 0, y: 0, blend: false, dispose: true }));
-	}
-
-	const exif = buildExifBuffer('Made by Nanda', 'Aestherix Animated Sticker using Canvas and WebP');
-
-	const result = await WebPMux.Image.save(null, {
-		frames,
-		width: 500,
-		height: 500,
-		loops: 0,
-		exif: { raw: exif }
-	});
-
-	loggers.info(`${color('Animated Image is generated', 'pink')} for ${color(sender, 'lilac')}`);
-
-	return result;
-};

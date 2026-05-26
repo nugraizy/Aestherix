@@ -2,7 +2,7 @@ import { BOT_NAME } from '../../core/constants.js';
 
 import parser from 'yargs-parser';
 
-import { memeGenerator } from '../../helper/canvas/index.js';
+import { MemeGenerator } from '../../helper/canvas/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -29,7 +29,7 @@ export default defineCommand({
 			message,
 			mediaData,
 			extractMediaData,
-			sender,
+			sender, // eslint-disable-line no-unused-vars
 			stickerAble,
 			typeQuoted,
 			typeSticker
@@ -78,9 +78,9 @@ export default defineCommand({
 
 		const image = await client.downloadMediaMessage(mediaData);
 
-		const buffer = await memeGenerator(
+		const meme = new MemeGenerator();
+		const buffer = await meme.render(
 			client,
-			sender,
 			image,
 			query.split('&')[0],
 			query.split('&')[1],
