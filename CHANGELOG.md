@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.8.4」2026-05-26
+
+## Performance
+- **Canvas sticker generation 3-6x faster** — replaced exec/disk I/O with in-memory node-webpmux, binary-search text layout replaces CanvasTextWrapper. ([`3cfaab5`](https://github.com/nugraizy/aestherix/commit/3cfaab5))
+- **Trigger effect 3.5x faster** — skip GIF encoding, assemble animated webp directly from canvas frames. ([`55f1b64`](https://github.com/nugraizy/aestherix/commit/55f1b64))
+- **GitHub contribution graph** — batched fillRect by color, cached date calculations, parallel year fetches. ([`39740f0`](https://github.com/nugraizy/aestherix/commit/39740f0))
+
+## Added
+- **WebGL mesh gradient** — Stripe-style gradient renderer using headless-gl with simplex noise shaders, replaces Puppeteer localhost dependency. ([`88653d8`](https://github.com/nugraizy/aestherix/commit/88653d8))
+- **Standalone applyExif utility** — `src/helper/canvas/utils/exif.js` for sticker EXIF injection without client instance. ([`55f1b64`](https://github.com/nugraizy/aestherix/commit/55f1b64))
+- **Font validation** — AnimatedSticker/StaticSticker now validate font names and list available fonts on mismatch. ([`39740f0`](https://github.com/nugraizy/aestherix/commit/39740f0))
+
+## Refactored
+- **src/utils/ restructured** — split modules/index.js into 9 focused files, normalized directory names, split god files (comix, converter, instagram), migrated 25 files from axios to undici. ([`ef86763`](https://github.com/nugraizy/aestherix/commit/ef86763))
+- **Canvas module class-based** — all canvas generators converted to classes (AnimatedSticker, StaticSticker, TriggerEffect, MemeGenerator, TextStory, GitHubAPI), centralized themes and shared utils. ([`39740f0`](https://github.com/nugraizy/aestherix/commit/39740f0))
+- **Removed gradient/ directory** — no longer needed, mesh gradient is in-process. ([`88653d8`](https://github.com/nugraizy/aestherix/commit/88653d8))
+
+## Fixed
+- **Typecheck error** — WAMessage type mismatch in wa_data/utils.js. ([`66c4b01`](https://github.com/nugraizy/aestherix/commit/66c4b01))
+- **Test stalling** — load .env in contract tests so Prisma connects instead of hanging. ([`66c4b01`](https://github.com/nugraizy/aestherix/commit/66c4b01))
+- **Comix image 404** — added fallback chain (/si/, /i/, /sii/, /ii/) matching Tachiyomi extension. ([`e3b4f89`](https://github.com/nugraizy/aestherix/commit/e3b4f89))
+- **Comix descrambler black lines** — draw original image as background before tile rearrangement. ([`e3b4f89`](https://github.com/nugraizy/aestherix/commit/e3b4f89))
+- **Manga reader cache** — shared singleton instances across all command files (comix, kiryuu, atsumaru, shinigami). ([`e3b4f89`](https://github.com/nugraizy/aestherix/commit/e3b4f89))
+- **Chapter sort "Total: 0" bug** — use spread copy to avoid mutating cached arrays on sort toggle. ([`e3b4f89`](https://github.com/nugraizy/aestherix/commit/e3b4f89))
+- **Chapter button labels** — remove redundant "Ch. N — Chapter N", show scanlator group in parentheses. ([`e3b4f89`](https://github.com/nugraizy/aestherix/commit/e3b4f89))
+- **Kiryuu filename** — fix duplicate "chapter-chapter" in PDF filenames. ([`e3b4f89`](https://github.com/nugraizy/aestherix/commit/e3b4f89))
+
+---
+
 # 「7.8.3」2026-05-25
 
 ## Performance
