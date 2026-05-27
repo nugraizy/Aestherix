@@ -2,6 +2,8 @@ import { io } from 'socket.io-client';
 import { MAX_LOGS } from './constants.js';
 import { commands, flags, logs, status, users } from './stores.js';
 
+let logSeq = 0;
+
 export const socket = io({
 	autoConnect: false,
 	reconnectionAttempts: 5,
@@ -111,7 +113,7 @@ function bindEvents() {
 		}
 
 		logs.update((current) => {
-			const merged = [...current, ...payload.logs];
+			const merged = [...current, ...payload.logs.map((entry) => ({ ...entry, _id: ++logSeq }))];
 
 			return merged.slice(-MAX_LOGS);
 		});

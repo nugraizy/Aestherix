@@ -124,7 +124,7 @@
 	<header class="section-head">
 		<h3 class="section-title">Commands <span class="section-count">{filtered.length}</span></h3>
 		<div class="head-actions">
-			<input class="input" type="text" placeholder="Search commands..." bind:value={search} />
+			<input class="input" type="text" placeholder="Search commands..." bind:value={search} aria-label="Search commands" />
 			<Tooltip text="Expand all categories" placement="bottom">
 				<button type="button" class="mini" on:click={expandAll} aria-label="Expand all categories">+</button>
 			</Tooltip>
@@ -459,6 +459,11 @@
 	.input {
 			max-width: 100%;
 			flex: 1;
+		}
+
+		.mini {
+			width: 44px;
+			height: 44px;
 		}
 	}
 </style>

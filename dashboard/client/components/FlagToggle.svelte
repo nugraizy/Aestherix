@@ -61,7 +61,7 @@
 <section class="section flag-list">
 	<header class="section-head">
 		<h3 class="section-title">Flags <span class="section-count">{entries.length}</span></h3>
-		<input class="input" type="text" placeholder="Search flags..." bind:value={search} />
+		<input class="input" type="text" placeholder="Search flags..." bind:value={search} aria-label="Search flags" />
 	</header>
 	<div class="list">
 		{#if !storeLoaded}

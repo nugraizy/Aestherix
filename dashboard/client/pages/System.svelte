@@ -532,5 +532,10 @@
 		.grid {
 			grid-template-columns: 1fr;
 		}
+
+		.clear-btn {
+			min-height: 44px;
+			min-width: 44px;
+		}
 	}
 </style>

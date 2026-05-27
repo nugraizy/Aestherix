@@ -151,10 +151,6 @@
 	}
 
 	function handleOutside(event) {
-		if (!open) {
-			return;
-		}
-
 		if (triggerEl?.contains(event.target) || menuEl?.contains(event.target)) {
 			return;
 		}
@@ -162,15 +158,24 @@
 		close();
 	}
 
+	$: if (typeof window !== 'undefined') {
+		if (open) {
+			window.addEventListener('mousedown', handleOutside);
+		} else {
+			window.removeEventListener('mousedown', handleOutside);
+		}
+	}
+
+	onDestroy(() => {
+		if (typeof window !== 'undefined') {
+			window.removeEventListener('mousedown', handleOutside);
+		}
+	});
+
 	function handleViewport() {
 		if (open) {
 			reposition();
 		}
-	}
-
-	if (typeof window !== 'undefined') {
-		window.addEventListener('mousedown', handleOutside);
-		onDestroy(() => window.removeEventListener('mousedown', handleOutside));
 	}
 </script>
 

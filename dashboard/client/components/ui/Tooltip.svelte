@@ -270,7 +270,7 @@
 		max-width: 400px;
 		pointer-events: none;
 		white-space: normal;
-		word-break: break-all;
+		overflow-wrap: break-word;
 		line-height: 1.4;
 		will-change: transform, opacity;
 	}

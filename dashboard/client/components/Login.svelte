@@ -255,7 +255,7 @@
 						<label class="field">
 							<span class="label">Phone number</span>
 							<input
-								type="text"
+								type="tel"
 								bind:value={phone}
 								placeholder="628123456789"
 								minlength="10"

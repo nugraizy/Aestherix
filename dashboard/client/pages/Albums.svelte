@@ -125,12 +125,6 @@
 		void load({ force: true });
 	}
 
-	function refresh() {
-		page = 0;
-		writeUrlState({ page: 0, img: '' });
-		void load({ force: true });
-	}
-
 	function openAt(detail) {
 		lightboxIndex = detail.index;
 	}
@@ -346,11 +340,6 @@
 		</div>
 		<div class="filter-block">
 			<ColorFilterInput value={colorFilter} onChange={handleColorChange} />
-			<Tooltip text="Force refresh from server" placement="bottom">
-				<button class="refresh-btn" type="button" on:click={refresh} disabled={loading}>
-					{loading ? 'Loading...' : 'Refresh'}
-				</button>
-			</Tooltip>
 		</div>
 	</header>
 
@@ -417,28 +406,6 @@
 		align-items: center;
 		gap: var(--space-3);
 		flex-wrap: wrap;
-	}
-
-	.refresh-btn {
-		background: transparent;
-		border: 1px solid var(--border);
-		color: var(--muted);
-		padding: 0.42rem 0.85rem;
-		border-radius: var(--radius-sm);
-		font-size: var(--fs-sm);
-		font-weight: 600;
-		cursor: pointer;
-		transition: border-color var(--tx-base), color var(--tx-base);
-	}
-
-	.refresh-btn:hover:not(:disabled) {
-		border-color: var(--accent);
-		color: var(--accent);
-	}
-
-	.refresh-btn:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
 	}
 
 	.pager {

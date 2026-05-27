@@ -28,11 +28,42 @@
 		return `${raw}${suffix}`;
 	}
 
+	let jidError = '';
+
+	function validateRecipient() {
+		const raw = recipient.trim();
+
+		if (!raw) {
+			return 'Phone number is required.';
+		}
+
+		const digits = raw.replace(/\D/g, '');
+
+		if (digits.length < 10) {
+			return 'Enter a valid number with country code (min 10 digits).';
+		}
+
+		return '';
+	}
+
 	async function handleSend() {
-		if (!recipient.trim() || !message.trim() || sending || isViewer) {
+		if (sending || isViewer) {
 			return;
 		}
 
+		const error = validateRecipient();
+
+		if (error) {
+			jidError = error;
+			setTimeout(() => { jidError = ''; }, 3000);
+			return;
+		}
+
+		if (!message.trim()) {
+			return;
+		}
+
+		jidError = '';
 		sending = true;
 
 		try {
@@ -69,21 +100,27 @@
 				<div class="qs-input-wrap">
 					<input
 						class="input qs-jid"
+						class:qs-error={jidError}
 						type="text"
 						{placeholder}
 						bind:value={recipient}
+						aria-label="Recipient JID"
 					/>
 					<span class="qs-suffix">{suffix}</span>
 				</div>
 			</div>
+			{#if jidError}
+				<p class="qs-error-msg">{jidError}</p>
+			{/if}
 			<div class="qs-row">
-				<input
+				<textarea
 					class="input qs-msg"
-					type="text"
-					placeholder="Message..."
+					placeholder="Message... (Shift+Enter for new line)"
 					bind:value={message}
 					on:keydown={handleKey}
-				/>
+					aria-label="Message text"
+					rows="1"
+				></textarea>
 				<button
 					class="btn primary"
 					type="button"
@@ -98,10 +135,6 @@
 {/if}
 
 <style>
-	.quick-send {
-		max-width: 600px;
-	}
-
 	.qs-body {
 		display: flex;
 		flex-direction: column;
@@ -143,8 +176,32 @@
 		gap: var(--space-2);
 	}
 
+	.qs-error {
+		border-color: #ff8e74 !important;
+		animation: shake 0.4s ease;
+	}
+
+	.qs-error-msg {
+		margin: 0;
+		font-size: var(--fs-xs);
+		color: #ff8e74;
+	}
+
+	@keyframes shake {
+		0%, 100% { transform: translateX(0); }
+		20% { transform: translateX(-4px); }
+		40% { transform: translateX(4px); }
+		60% { transform: translateX(-3px); }
+		80% { transform: translateX(2px); }
+	}
+
 	.qs-msg {
 		flex: 1;
 		max-width: none;
+		resize: none;
+		min-height: 2.2rem;
+		max-height: 8rem;
+		overflow-y: auto;
+		field-sizing: content;
 	}
 </style>

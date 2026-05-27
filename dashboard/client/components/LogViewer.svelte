@@ -61,7 +61,7 @@
 		</Tooltip>
 	</header>
 	<div class="log-container" bind:this={container} on:scroll={handleScroll}>
-		{#each $logs as entry, i (i)}
+		{#each $logs as entry (entry._id)}
 			<div class="log-entry">
 				<span class="log-time">{stripAnsi(formatTime(entry))}</span>
 				<span class="log-msg">{@html ansiToHtml(entry.message || entry.text || '')}</span>

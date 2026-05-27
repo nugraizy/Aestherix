@@ -1,6 +1,5 @@
 <script>
 	import { createEventDispatcher } from 'svelte';
-	import Tooltip from './ui/Tooltip.svelte';
 
 	export let page = 'home';
 	export let mode = 'dark';
@@ -44,41 +43,29 @@
 	</nav>
 
 	<div class="actions">
-		<Tooltip text="Toggle light/dark mode" placement="bottom">
-			<button
-				class="icon-btn mode-toggle"
-				type="button"
-				on:click={() => dispatch('mode')}
-				aria-pressed={mode === 'light'}
+		<label class="theme-switch">
+			<input
+				class="theme-switch__input"
+				type="checkbox"
+				role="switch"
+				checked={mode === 'dark'}
+				on:change={() => dispatch('mode')}
 				aria-label="Toggle light or dark mode"
-			>
-				<span class="icon-stack" data-mode={mode}>
-					<svg
-						class="icon sun"
-						xmlns="http://www.w3.org/2000/svg"
-						width="16"
-						height="16"
-						fill="currentColor"
-						viewBox="0 0 16 16"
-						aria-hidden="true"
-					>
-						<path d="M12 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708" />
-					</svg>
-					<svg
-						class="icon moon"
-						xmlns="http://www.w3.org/2000/svg"
-						width="16"
-						height="16"
-						fill="currentColor"
-						viewBox="0 0 16 16"
-						aria-hidden="true"
-					>
-						<path d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278" />
-						<path d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.73 1.73 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.73 1.73 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.73 1.73 0 0 0 1.097-1.097zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z" />
-					</svg>
-				</span>
-			</button>
-		</Tooltip>
+			/>
+			<span class="theme-switch__icon" class:dark={mode === 'dark'} aria-hidden="true">
+				<span class="theme-switch__part theme-switch__part--1"></span>
+				<span class="theme-switch__part theme-switch__part--2"></span>
+				<span class="theme-switch__part theme-switch__part--3"></span>
+				<span class="theme-switch__part theme-switch__part--4"></span>
+				<span class="theme-switch__part theme-switch__part--5"></span>
+				<span class="theme-switch__part theme-switch__part--6"></span>
+				<span class="theme-switch__part theme-switch__part--7"></span>
+				<span class="theme-switch__part theme-switch__part--8"></span>
+				<span class="theme-switch__part theme-switch__part--9"></span>
+				<span class="theme-switch__part theme-switch__part--10"></span>
+				<span class="theme-switch__part theme-switch__part--11"></span>
+			</span>
+		</label>
 	</div>
 </header>
 
@@ -148,72 +135,129 @@
 		flex-wrap: wrap;
 	}
 
-	.icon-btn {
-		background: transparent;
-		border: 1px solid var(--border);
-		border-radius: var(--radius-sm);
-		padding: 0.3rem 0.55rem;
-		color: var(--muted);
-		font-size: 0.95rem;
-		cursor: pointer;
-		transition: border-color var(--tx-base), color var(--tx-base);
-	}
-
-	.icon-btn:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.mode-toggle {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 32px;
-		height: 32px;
-		padding: 0;
-		border-radius: 999px;
-		font-size: 0.95rem;
-		line-height: 1;
-		font-family: 'JetBrainsMono Nerd Font', 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
-	}
-
-	.icon-stack {
+	.theme-switch {
 		position: relative;
-		display: inline-flex;
-		width: 16px;
-		height: 16px;
+		display: inline-block;
+		-webkit-tap-highlight-color: transparent;
+		font-size: 14px;
+		width: 2.6em;
+		height: 1.3em;
 	}
 
-	.icon-stack .icon {
+	.theme-switch__input {
+		background-color: color-mix(in srgb, var(--muted) 40%, transparent);
+		border-radius: 0.75em;
+		cursor: pointer;
+		display: block;
+		width: 100%;
+		height: 100%;
+		border: none;
+		margin: 0;
+		padding: 0;
+		transition: background-color 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+		-webkit-appearance: none;
+		appearance: none;
+	}
+
+	.theme-switch__input:checked {
+		background-color: color-mix(in srgb, var(--accent) 35%, transparent);
+	}
+
+	.theme-switch__input:focus-visible {
+		box-shadow: var(--ring);
+	}
+
+	.theme-switch__icon {
 		position: absolute;
-		inset: 0;
-		transition: opacity 0.32s ease, transform 0.32s ease;
+		top: 0.1em;
+		left: 0.1em;
+		width: 1.1em;
+		height: 1.1em;
+		border-radius: 50%;
+		background-color: var(--bg);
+		overflow: hidden;
+		pointer-events: none;
+		transition: transform 0.4s cubic-bezier(0.65, 0, 0.35, 1);
 	}
 
-	.icon-stack[data-mode='light'] .sun {
-		opacity: 1;
-		transform: rotate(0deg) scale(1);
+	.theme-switch__icon.dark {
+		transform: translateX(1.3em);
 	}
 
-	.icon-stack[data-mode='light'] .moon {
-		opacity: 0;
-		transform: rotate(90deg) scale(0.4);
+	.theme-switch__part {
+		display: block;
+		position: absolute;
+		top: 0;
+		left: 0;
+		transition: box-shadow 0.4s cubic-bezier(0.65, 0, 0.35, 1), transform 0.4s cubic-bezier(0.65, 0, 0.35, 1);
 	}
 
-	.icon-stack[data-mode='dark'] .sun {
-		opacity: 0;
-		transform: rotate(-90deg) scale(0.4);
+	.theme-switch__part--1,
+	.theme-switch__part--2,
+	.theme-switch__part--3 {
+		border-radius: 50%;
 	}
 
-	.icon-stack[data-mode='dark'] .moon {
-		opacity: 1;
-		transform: rotate(0deg) scale(1);
+	.theme-switch__part--1 {
+		background-color: var(--bg);
+		top: calc(50% - 0.33em);
+		left: calc(50% - 0.33em);
+		width: 0.66em;
+		height: 0.66em;
 	}
 
-	.icon-btn:hover {
-		border-color: var(--accent);
-		color: var(--accent);
+	.theme-switch__part--2 {
+		background-color: var(--text);
+		top: calc(50% - 0.38em);
+		left: calc(50% - 0.05em);
+		width: 0.44em;
+		height: 0.44em;
+		transform: translate(-0.16em, 0.16em) scale(0.2);
 	}
+
+	.theme-switch__part--3 {
+		box-shadow: 0 0 0 0.55em var(--text) inset;
+		width: 1.1em;
+		height: 1.1em;
+		transform: scale(0.25);
+	}
+
+	.theme-switch__part--3 ~ .theme-switch__part {
+		background-color: var(--text);
+		border-radius: 0.05em;
+		top: 50%;
+		left: 50%;
+		width: 0.11em;
+		height: 0.16em;
+		transform-origin: 50% 0;
+	}
+
+	.theme-switch__part--4 { transform: translateX(-50%) rotate(0deg) translateY(0.22em); }
+	.theme-switch__part--5 { transform: translateX(-50%) rotate(45deg) translateY(0.22em); }
+	.theme-switch__part--6 { transform: translateX(-50%) rotate(90deg) translateY(0.22em); }
+	.theme-switch__part--7 { transform: translateX(-50%) rotate(135deg) translateY(0.22em); }
+	.theme-switch__part--8 { transform: translateX(-50%) rotate(180deg) translateY(0.22em); }
+	.theme-switch__part--9 { transform: translateX(-50%) rotate(225deg) translateY(0.22em); }
+	.theme-switch__part--10 { transform: translateX(-50%) rotate(270deg) translateY(0.22em); }
+	.theme-switch__part--11 { transform: translateX(-50%) rotate(315deg) translateY(0.22em); }
+
+	.theme-switch__icon.dark .theme-switch__part--2 {
+		transform: translate(0, 0) scale(1);
+	}
+
+	.theme-switch__icon.dark .theme-switch__part--3 {
+		box-shadow: 0 0 0 0.22em var(--text) inset;
+		transform: scale(1);
+	}
+
+	.theme-switch__icon.dark .theme-switch__part--4 { transform: translateX(-50%) rotate(0deg) translateY(0.55em) scale(0); }
+	.theme-switch__icon.dark .theme-switch__part--5 { transform: translateX(-50%) rotate(45deg) translateY(0.55em) scale(0); }
+	.theme-switch__icon.dark .theme-switch__part--6 { transform: translateX(-50%) rotate(90deg) translateY(0.55em) scale(0); }
+	.theme-switch__icon.dark .theme-switch__part--7 { transform: translateX(-50%) rotate(135deg) translateY(0.55em) scale(0); }
+	.theme-switch__icon.dark .theme-switch__part--8 { transform: translateX(-50%) rotate(180deg) translateY(0.55em) scale(0); }
+	.theme-switch__icon.dark .theme-switch__part--9 { transform: translateX(-50%) rotate(225deg) translateY(0.55em) scale(0); }
+	.theme-switch__icon.dark .theme-switch__part--10 { transform: translateX(-50%) rotate(270deg) translateY(0.55em) scale(0); }
+	.theme-switch__icon.dark .theme-switch__part--11 { transform: translateX(-50%) rotate(315deg) translateY(0.55em) scale(0); }
 
 	@media (max-width: 768px) {
 		.app-header {

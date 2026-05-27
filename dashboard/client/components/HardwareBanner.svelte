@@ -221,7 +221,6 @@
 	.hw-banner.tone-critical {
 		border-color: color-mix(in srgb, #ff5a5a 70%, var(--border));
 		background: color-mix(in srgb, #ff5a5a 16%, var(--panel));
-		animation: hw-pulse 1.6s ease-in-out infinite;
 	}
 
 	.badge {
@@ -249,6 +248,12 @@
 	.tone-critical .badge {
 		background: rgba(255, 90, 90, 0.28);
 		color: #ff5a5a;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.hw-banner.tone-critical {
+			animation: hw-pulse 1.6s ease-in-out infinite;
+		}
 	}
 
 	.copy {

@@ -1,6 +1,7 @@
 <script>
 	import { createEventDispatcher } from 'svelte';
 	import { showSuccess } from '../../lib/toast.js';
+	import Tooltip from '../ui/Tooltip.svelte';
 
 	export let picture;
 	export let index;
@@ -26,6 +27,15 @@
 	$: isGif = !!picture?.url && /\.gif(\?.*)?$/i.test(picture.url);
 	$: imageSrc = isGif ? picture.url : picture.thumbnail || picture.url;
 	$: palette = Array.isArray(picture?.colorPalette) ? picture.colorPalette : [];
+
+	function isDark(hex) {
+		const c = hex.replace('#', '');
+		const r = parseInt(c.slice(0, 2), 16);
+		const g = parseInt(c.slice(2, 4), 16);
+		const b = parseInt(c.slice(4, 6), 16);
+
+		return (r * 299 + g * 587 + b * 114) / 1000 < 128;
+	}
 
 	function copyColor(color) {
 		navigator.clipboard.writeText(color);
@@ -123,9 +133,11 @@
 		on:error={handleError}
 	/>
 	{#if showTooltip && palette.length}
-		<div class="palette-tooltip" on:click|stopPropagation on:keydown|stopPropagation>
+		<div class="palette-tooltip" role="presentation" on:click|stopPropagation on:keydown|stopPropagation>
 			{#each palette as color}
-				<button type="button" class="swatch" style:background={color} on:click|stopPropagation={() => handleSwatchClick(color)} on:dblclick|stopPropagation={handleSwatchDblClick} aria-label="Copy {color}" title={color}></button>
+				<Tooltip html="<span class='swatch-tip' style='--sw-bg:{color}; --sw-fg:{isDark(color) ? '#fff' : '#000'}'>{color}</span>" placement="top">
+					<button type="button" class="swatch" style:background={color} on:click|stopPropagation={() => handleSwatchClick(color)} on:dblclick|stopPropagation={handleSwatchDblClick} aria-label="Copy {color}"></button>
+				</Tooltip>
 			{/each}
 		</div>
 	{/if}
@@ -230,5 +242,23 @@
 		border-radius: 12px;
 		object-fit: contain;
 		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+	}
+
+	:global(.app-tooltip-bubble:has(.swatch-tip)) {
+		background: none;
+		border: none;
+		padding: 0;
+		box-shadow: var(--shadow-md);
+		backdrop-filter: blur(10px) saturate(1.4);
+	}
+
+	:global(.swatch-tip) {
+		display: block;
+		padding: 0.45rem 0.65rem;
+		border-radius: var(--radius-sm);
+		background: color-mix(in srgb, var(--sw-bg) 72%, transparent);
+		color: var(--sw-fg);
+		font-weight: 600;
+		box-shadow: var(--shadow-sm);
 	}
 </style>
