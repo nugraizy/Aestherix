@@ -156,6 +156,7 @@ The release chore commit should contain only:
 - version bump
 - changelog update
 - frontend hash update
+- README version badge update
 
 Example:
 
