@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.9.1」2026-05-28
+
+## Added
+- **Discord domain verification** — serve `dh=` token at `/.well-known/discord` via a scoped static mount that allows dotfiles only under `.well-known`. ([`84eaf24`](https://github.com/nugraizy/aestherix/commit/84eaf24))
+
+## Fixed
+- **Tab cache preservation** — Home and Controls now sit inside the shared page-cache pattern so visiting them no longer unmounts the lazy-loaded pages. Broadcast, System, FileEditor, and Groups gained a `loaded` guard so reactivation skips refetching and skeleton flashes. ([`e19e25d`](https://github.com/nugraizy/aestherix/commit/e19e25d))
+- **Flags REST fallback** — `socket.js` now also fetches `/api/dashboard/flags` on connect, mirroring the existing commands fallback so FlagToggle's skeleton no longer hangs when the initial socket emit is empty or arrives before subscription. ([`0fddd24`](https://github.com/nugraizy/aestherix/commit/0fddd24))
+- **Albums LRU cap** — profile pictures `list()` now reads directly from the database via the adapter instead of iterating `configuration.pinterest.images`, a 900-cap LRU shared with the bot's rotation. The cap previously limited responses to ~540 unique URLs even with thousands of rows in the DB. Delete also queries the DB so entries beyond the cache window can be removed. ([`e1af99a`](https://github.com/nugraizy/aestherix/commit/e1af99a))
+- **Albums delete confirm** — `deletePicture` now uses the dashboard's `showConfirm` dialog instead of `window.confirm`. ([`17078be`](https://github.com/nugraizy/aestherix/commit/17078be))
+
+## Improved
+- **Lightbox toggle glyph** — replaced the U+22EE vertical ellipsis (which fell back to a tofu square because the bundled font subset lacks it) with three currentColor CSS circles in a fixed 18×18 flex container so the pill keeps a stable height when toggling. ([`59dcbe7`](https://github.com/nugraizy/aestherix/commit/59dcbe7))
+- **Server entry tidy** — alphabetised the settings router/service imports and dropped an empty `mountGradient` guard left behind by an earlier refactor. ([`625cacb`](https://github.com/nugraizy/aestherix/commit/625cacb))
+
 # 「7.9.0」2026-05-27
 
 ## Added
