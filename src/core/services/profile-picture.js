@@ -243,6 +243,19 @@ export const startProfilePictureService = async (client, config) => {
 		}
 	};
 
+	const backfillPalettes = async () => {
+		const entries = await listPinterestProfilePictures(prisma, { limit: 50 });
+		const missing = entries.filter((e) => !e.colorPalette?.length && e.url).slice(0, 3);
+
+		for (const entry of missing) {
+			const hexes = await getColorPalette(entry.url).catch(() => null);
+
+			if (hexes?.length) {
+				await setPinterestProfilePictureColorPalette(prisma, entry.timestamp, hexes).catch(() => {});
+			}
+		}
+	};
+
 	let isUpdating = false;
 
 	const runUpdate = async () => {
@@ -300,6 +313,8 @@ export const startProfilePictureService = async (client, config) => {
 			if (isWABusinessPlatform(client.auth.state.creds.platform)) {
 				await client.updateCoverPhoto(await sharp(image).blur(10).png().toBuffer());
 			}
+
+			await backfillPalettes();
 		} catch (error) {
 			const ignorable = [
 				'not-acceptable',
