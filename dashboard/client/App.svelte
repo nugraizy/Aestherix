@@ -350,6 +350,7 @@
 	<Login onLogin={handleLogin} />
 {:else}
 	<div class="app">
+		<a href="#main" class="skip-link">Skip to content</a>
 		<Header
 			page={page}
 			mode={$themeMode}
@@ -361,7 +362,7 @@
 			<DebugPanel renderCount={renderCount} />
 		{/if}
 		<HardwareBanner />
-		<main class="page" class:has-spotify={page === 'home'} class:wide={page === 'albums' || page === 'editor'}>
+		<main id="main" class="page" class:wide={page === 'albums' || page === 'editor'}>
 			{#if keepMessages && loadedPages.messages}
 				<div class="page-cache" class:page-hidden={page !== 'messages'}>
 					<svelte:component this={loadedPages.messages} active={page === 'messages'} />
@@ -390,9 +391,7 @@
 				<!-- messages uses keepMessages pattern above -->
 			{/if}
 		</main>
-		{#if page === 'home'}
-			<SpotifyWidget />
-		{/if}
+		<SpotifyWidget />
 		<Footer
 			palette={$currentPalette}
 			paletteOptions={PALETTE_NAMES}
@@ -676,6 +675,24 @@
 		flex-direction: column;
 	}
 
+	.skip-link {
+		position: absolute;
+		left: -9999px;
+		top: auto;
+		z-index: 100;
+		padding: 0.5rem 1rem;
+		background: var(--accent);
+		color: var(--bg);
+		font-weight: 600;
+		border-radius: var(--radius-sm);
+		text-decoration: none;
+	}
+
+	.skip-link:focus {
+		left: var(--space-3);
+		top: var(--space-3);
+	}
+
 	.page {
 		padding: var(--space-5);
 		flex: 1;
@@ -686,10 +703,6 @@
 
 	.page.wide {
 		max-width: 1900px;
-	}
-
-	.page.has-spotify {
-		padding-bottom: 200px;
 	}
 
 	@media (max-width: 768px) {

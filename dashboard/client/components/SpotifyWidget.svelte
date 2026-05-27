@@ -1,16 +1,20 @@
 <script>
 	import { onDestroy, onMount } from 'svelte';
+	import { scale } from 'svelte/transition';
+	import { backOut } from 'svelte/easing';
 	import { extractCoverPalette } from '../lib/colors.js';
 	import { formatTrackTime } from '../lib/format.js';
 	import { spotify, startSpotify } from '../lib/spotify.js';
 
 	let coverEl;
 	let widgetEl;
-	let popupOpen = false;
+	let expanded = false;
 	let displayProgress = 0;
 	let lastSync = Date.now();
 	let tickHandle = null;
 	let lastCoverUrl = '';
+	let bars = Array(9).fill(0);
+	let barHandle = null;
 
 	onMount(() => {
 		startSpotify();
@@ -24,13 +28,20 @@
 			} else {
 				displayProgress = $spotify.progressMs;
 			}
-		}, 500);
+		}, 1000);
+
+		barHandle = setInterval(() => {
+			if ($spotify.isPlaying) {
+				bars = bars.map(() => Math.random() * 0.8 + 0.2);
+			} else {
+				bars = bars.map(() => 0.15);
+			}
+		}, 180);
 	});
 
 	onDestroy(() => {
-		if (tickHandle) {
-			clearInterval(tickHandle);
-		}
+		if (tickHandle) clearInterval(tickHandle);
+		if (barHandle) clearInterval(barHandle);
 	});
 
 	$: if ($spotify) {
@@ -39,29 +50,24 @@
 	}
 
 	$: ratio = $spotify.durationMs > 0 ? Math.min(1, Math.max(0, displayProgress / $spotify.durationMs)) : 0;
-	$: progressLabel = `${formatTrackTime(displayProgress)} / ${$spotify.durationMs > 0 ? formatTrackTime($spotify.durationMs) : '--:--'}`;
+	$: currentTime = formatTrackTime(displayProgress);
+	$: totalTime = $spotify.durationMs > 0 ? formatTrackTime($spotify.durationMs) : '--:--';
 	$: linkHref = $spotify.trackUrl || $spotify.trackUri || '';
 	$: visible = $spotify.available;
 
 	function applyPalette() {
-		if (!coverEl || !widgetEl) {
-			return;
-		}
+		if (!coverEl || !widgetEl) return;
 
 		const palette = extractCoverPalette(coverEl);
 
 		if (!palette) {
-			widgetEl.style.removeProperty('--spotify-color-primary');
-			widgetEl.style.removeProperty('--spotify-color-secondary');
+			widgetEl.style.removeProperty('--sp-primary');
+			widgetEl.style.removeProperty('--sp-secondary');
 			return;
 		}
 
-		widgetEl.style.setProperty('--spotify-color-primary', palette.primary);
-		widgetEl.style.setProperty('--spotify-color-secondary', palette.secondary);
-	}
-
-	function onCoverLoad() {
-		applyPalette();
+		widgetEl.style.setProperty('--sp-primary', palette.primary);
+		widgetEl.style.setProperty('--sp-secondary', palette.secondary);
 	}
 
 	$: if (coverEl && $spotify.coverUrl !== lastCoverUrl) {
@@ -73,306 +79,315 @@
 	}
 
 	function openLink() {
-		if (!linkHref) {
-			return;
-		}
+		if (!linkHref) return;
 
-		const fallback = $spotify.trackUrl;
-		const href = linkHref.startsWith('spotify:') && fallback ? fallback : linkHref;
+		const href = linkHref.startsWith('spotify:') && $spotify.trackUrl ? $spotify.trackUrl : linkHref;
 
 		window.open(href, '_blank', 'noopener,noreferrer');
 	}
 
 	function handleKey(event) {
-		if (event.key === 'Escape') {
-			popupOpen = false;
+		if (event.key === 'Escape' && expanded) {
+			expanded = false;
+		}
+	}
+
+	function handleClickOutside(event) {
+		if (!expanded || !widgetEl) return;
+
+		if (!widgetEl.contains(event.target)) {
+			expanded = false;
 		}
 	}
 </script>
 
-<svelte:window on:keydown={handleKey} />
+<svelte:window on:keydown={handleKey} on:mousedown={handleClickOutside} />
 
 {#if visible}
-	<div
-		class="spotify-widget"
-		class:is-playing={$spotify.isPlaying}
-		class:is-idle={!$spotify.isPlaying}
-		bind:this={widgetEl}
-	>
-		<button class="cover-button" type="button" on:click={() => popupOpen = true} aria-label="Show Spotify details">
-			<img
-				bind:this={coverEl}
-				class="cover"
-				src={$spotify.coverUrl || ''}
-				alt={$spotify.trackTitle ? `${$spotify.trackTitle} cover` : ''}
-				crossorigin="anonymous"
-				on:load={onCoverLoad}
-			/>
-		</button>
-		<div class="meta">
-			<div class="label">
-				<button class="link" type="button" on:click={openLink} disabled={!linkHref}>
-					Listening to Spotify
-				</button>
-			</div>
-			<p class="track">{$spotify.trackTitle || $spotify.message || 'Spotify idle'}{#if $spotify.available && !$spotify.isPlaying} (Paused){/if}</p>
-			<p class="artist">{$spotify.artists || '-'}</p>
-			<p class="timestamp">{progressLabel}</p>
-			<div class="progress" title={progressLabel}>
-				<span class="progress-fill" style="width: {Math.round(ratio * 100)}%"></span>
-			</div>
-		</div>
-	</div>
-
-	{#if popupOpen}
-		<div
-			class="popup-backdrop"
-			on:click={() => popupOpen = false}
-			on:keydown={(event) => event.key === 'Escape' && (popupOpen = false)}
-			role="presentation"
+	<div class="island-anchor" bind:this={widgetEl}>
+		<!-- Pill (collapsed) -->
+		<button
+			class="pill"
+			class:playing={$spotify.isPlaying}
+			class:hidden={expanded}
+			type="button"
+			on:click={() => expanded = true}
+			aria-label="Spotify now playing"
 		>
-			<div
-				class="popup"
-				role="dialog"
-				aria-modal="true"
-				aria-label="Spotify details"
-				tabindex="-1"
-				on:click|stopPropagation
-				on:keydown|stopPropagation
-			>
-				<div class="popup-header">
-					<img class="popup-cover" src={$spotify.coverUrl || ''} alt={$spotify.trackTitle ? `${$spotify.trackTitle} cover` : ''} />
-					<div>
-						<p class="popup-label">Listening to Spotify</p>
-						<p class="popup-track">{$spotify.trackTitle || $spotify.message || 'Spotify idle'}</p>
-						<p class="popup-artist">{$spotify.artists || '-'}</p>
+				<img
+					bind:this={coverEl}
+					class="pill-cover"
+					src={$spotify.coverUrl || ''}
+					alt=""
+					crossorigin="anonymous"
+					on:load={applyPalette}
+				/>
+				<div class="pill-content">
+					<div class="cava" aria-hidden="true">
+						{#each bars as h}
+							<span class="cava-bar" style="height:{h * 100}%"></span>
+						{/each}
+					</div>
+					<span class="pill-info"><span class="pill-info-inner">{$spotify.artists || 'Spotify'} - {$spotify.trackTitle || 'idle'}     ·     {$spotify.artists || 'Spotify'} - {$spotify.trackTitle || 'idle'}     ·     </span></span>
+				</div>
+			</button>
+
+		<!-- Expanded modal -->
+		{#if expanded}
+			<div class="modal" in:scale={{ duration: 280, start: 0.6, opacity: 0, easing: backOut }} out:scale={{ duration: 180, start: 0.85, opacity: 0 }}>
+				<a class="modal-head" href={linkHref || '#'} target="_blank" rel="noopener noreferrer" on:click|preventDefault={openLink}>
+					<img
+						class="modal-cover"
+						src={$spotify.coverUrl || ''}
+						alt=""
+					/>
+					<div class="modal-meta">
+						<p class="modal-track" class:marquee={($spotify.trackTitle || '').length > 28}><span>{#if ($spotify.trackTitle || '').length > 28}{$spotify.trackTitle}     ·     {$spotify.trackTitle}     ·     {:else}{$spotify.trackTitle || 'Spotify idle'}{/if}</span></p>
+						<p class="modal-artist" class:marquee={($spotify.artists || '').length > 32}><span>{#if ($spotify.artists || '').length > 32}{$spotify.artists}     ·     {$spotify.artists}     ·     {:else}{$spotify.artists || '-'}{/if}</span></p>
+					</div>
+				</a>
+				<div class="modal-progress">
+					<div class="bar-track">
+						<span class="bar-fill" style="width:{Math.round(ratio * 100)}%"></span>
+					</div>
+					<div class="modal-times">
+						<span>{currentTime}</span>
+						<span>{totalTime}</span>
 					</div>
 				</div>
-				<div class="popup-actions">
-					<button class="popup-link" type="button" on:click={openLink} disabled={!linkHref}>Open in Spotify</button>
-					<span class="popup-time">{progressLabel}</span>
-				</div>
 			</div>
-		</div>
-	{/if}
+		{/if}
+	</div>
 {/if}
 
 <style>
-	.spotify-widget {
+	.island-anchor {
 		position: fixed;
+		bottom: 60px;
 		left: 50%;
-		bottom: 24px;
 		transform: translateX(-50%);
-		z-index: 50;
-		width: min(640px, calc(100vw - 48px));
+		z-index: 25;
+	}
+
+	.pill {
 		display: flex;
 		align-items: center;
 		gap: 14px;
-		padding: 10px 14px;
-		border-radius: 16px;
-		border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
-		background: linear-gradient(
-				135deg,
-				color-mix(in srgb, var(--spotify-color-primary, var(--accent)) 26%, transparent) 0%,
-				color-mix(in srgb, var(--spotify-color-secondary, var(--accent)) 18%, transparent) 100%
-			),
-			color-mix(in srgb, var(--panel) 78%, transparent);
-		backdrop-filter: blur(28px) saturate(1.4);
-		box-shadow: none;
-		color: var(--text);
-	}
-
-	@media (max-width: 720px) {
-		.spotify-widget {
-			left: 16px;
-			right: 16px;
-			bottom: 16px;
-			width: auto;
-			transform: none;
-		}
-	}
-
-	.cover-button {
-		border: none;
-		padding: 0;
-		background: transparent;
+		padding: 4px 14px 4px 4px;
+		border: 1px solid var(--border);
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--panel) 85%, transparent);
+		backdrop-filter: blur(14px) saturate(1.3);
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
 		cursor: pointer;
-		border-radius: 12px;
+		transition: transform 0.2s ease, box-shadow 0.2s ease;
+	}
+
+	.pill.hidden {
+		visibility: hidden;
+		pointer-events: none;
+	}
+
+	.pill:hover {
+		transform: scale(1.04);
+		box-shadow: 0 6px 28px rgba(0, 0, 0, 0.45);
+	}
+
+	.pill:active {
+		transform: scale(0.97);
+	}
+
+	.pill-cover {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		object-fit: cover;
+		background: var(--bg);
 		flex-shrink: 0;
 	}
 
-	.cover {
-		width: 54px;
-		height: 54px;
-		border-radius: 12px;
-		object-fit: cover;
-		display: block;
-		background: var(--bg);
+	.pill.playing .pill-cover {
+		animation: spin-cover 8s linear infinite;
 	}
 
-	.meta {
+	@keyframes spin-cover {
+		to { transform: rotate(360deg); }
+	}
+
+	.pill-content {
+		display: grid;
+		align-items: center;
+		max-width: 54px;
+		overflow: hidden;
+		transition: max-width 0.35s ease;
+	}
+
+	.pill:hover .pill-content {
+		max-width: 150px;
+	}
+
+	.cava {
+		display: flex;
+		align-items: flex-end;
+		gap: 2px;
+		height: 18px;
+		grid-area: 1/1;
+		opacity: 1;
+		transition: opacity 0.3s ease;
+	}
+
+	.pill:hover .cava {
+		opacity: 0;
+	}
+
+	.pill-info {
+		grid-area: 1/1;
+		font-size: 0.72rem;
+		font-weight: 600;
+		color: var(--text);
+		white-space: nowrap;
+		opacity: 0;
+		transition: opacity 0.3s ease;
+	}
+
+	.pill:hover .pill-info {
+		opacity: 1;
+	}
+
+	.pill-info-inner {
+		display: inline-block;
+		padding-right: 2rem;
+		animation: none;
+	}
+
+	.pill:hover .pill-info-inner {
+		animation: marquee 8s linear infinite;
+	}
+
+	@keyframes marquee {
+		0% { transform: translateX(0); }
+		100% { transform: translateX(-50%); }
+	}
+
+	.cava-bar {
+		width: 2.5px;
+		border-radius: 2px;
+		background: var(--accent);
+		box-shadow: 0 0 6px var(--accent);
+		transition: height 0.15s ease;
+		min-height: 3px;
+	}
+
+	.modal {
+		position: absolute;
+		bottom: 0;
+		left: 50%;
+		transform: translateX(-50%);
+		width: 300px;
+		padding: 16px;
+		border-radius: 20px;
+		background: color-mix(in srgb, var(--panel) 85%, transparent);
+		backdrop-filter: blur(14px) saturate(1.3);
+		border: 1px solid var(--border);
+		box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+	}
+
+	.modal-head {
+		display: flex;
+		gap: 12px;
+		align-items: center;
+		text-decoration: none;
+		color: inherit;
+		border-radius: 10px;
+		padding: 4px;
+		margin: -4px;
+		cursor: pointer;
+		transition: background 0.15s ease;
+	}
+
+	.modal-head:hover {
+		background: color-mix(in srgb, var(--accent) 12%, transparent);
+	}
+
+	.modal-cover {
+		width: 48px;
+		height: 48px;
+		border-radius: 10px;
+		object-fit: cover;
+		background: var(--bg);
+		flex-shrink: 0;
+	}
+
+	.modal-meta {
 		flex: 1;
 		min-width: 0;
+		overflow: hidden;
 	}
 
-	.label {
-		font-size: 0.7rem;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-		color: color-mix(in srgb, var(--text) 70%, transparent);
+	.modal-track {
 		margin: 0;
-	}
-
-	.link {
-		background: none;
-		border: none;
-		color: inherit;
-		cursor: pointer;
-		font: inherit;
-		padding: 0;
-		text-transform: inherit;
-		letter-spacing: inherit;
-	}
-
-	.link:hover:not(:disabled) {
-		color: var(--accent);
-	}
-
-	.link:disabled {
-		opacity: 0.6;
-		cursor: not-allowed;
-	}
-
-	.track {
-		margin: 4px 0 0;
-		font-size: 1rem;
-		font-weight: 600;
+		font-size: 0.92rem;
+		font-weight: 650;
+		color: var(--text);
 		white-space: nowrap;
 		overflow: hidden;
-		text-overflow: ellipsis;
 	}
 
-	.artist {
-		margin: 2px 0 0;
-		font-size: 0.85rem;
-		color: color-mix(in srgb, var(--text) 65%, transparent);
+	.modal-artist {
+		margin: 3px 0 0;
+		font-size: 0.78rem;
+		color: var(--muted);
 		white-space: nowrap;
 		overflow: hidden;
-		text-overflow: ellipsis;
 	}
 
-	.timestamp {
-		margin: 6px 0 0;
-		font-size: 0.7rem;
-		color: color-mix(in srgb, var(--text) 65%, transparent);
+	.modal-track span,
+	.modal-artist span {
+		display: inline-block;
 	}
 
-	.progress {
-		margin-top: 6px;
+	.modal-track.marquee span,
+	.modal-artist.marquee span {
+		animation: marquee-modal 10s linear infinite;
+	}
+
+	@keyframes marquee-modal {
+		0% { transform: translateX(0); }
+		100% { transform: translateX(-50%); }
+	}
+
+	.modal-progress {
+		margin-top: 14px;
+	}
+
+	.bar-track {
 		height: 4px;
 		border-radius: 999px;
-		background: color-mix(in srgb, var(--text) 14%, transparent);
+		background: color-mix(in srgb, var(--muted) 25%, transparent);
 		overflow: hidden;
-		position: relative;
 	}
 
-	.progress-fill {
+	.bar-fill {
 		display: block;
 		height: 100%;
 		border-radius: 999px;
-		background: linear-gradient(
-			90deg,
-			var(--spotify-color-primary, var(--accent)),
-			var(--spotify-color-secondary, var(--accent))
-		);
-		transition: width 0.6s linear;
-	}
-
-	.spotify-widget.is-playing .progress-fill {
-		box-shadow: 0 0 12px color-mix(in srgb, var(--spotify-color-primary, var(--accent)) 50%, transparent);
-	}
-
-	.popup-backdrop {
-		position: fixed;
-		inset: 0;
-		background: rgba(2, 8, 11, 0.55);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 16px;
-		z-index: 60;
-		backdrop-filter: blur(6px);
-	}
-
-	.popup {
-		width: min(420px, calc(100vw - 32px));
-		border-radius: 20px;
-		border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
-		background: color-mix(in srgb, var(--panel) 96%, transparent);
-		padding: 18px;
-		box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
-	}
-
-	.popup-header {
-		display: flex;
-		gap: 14px;
-		align-items: center;
-	}
-
-	.popup-cover {
-		width: 72px;
-		height: 72px;
-		border-radius: 16px;
-		object-fit: cover;
-		background: var(--bg);
-	}
-
-	.popup-label {
-		margin: 0;
-		font-size: 0.7rem;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-		color: color-mix(in srgb, var(--text) 65%, transparent);
-	}
-
-	.popup-track {
-		margin: 6px 0 0;
-		font-size: 1.05rem;
-		font-weight: 600;
-	}
-
-	.popup-artist {
-		margin: 2px 0 0;
-		font-size: 0.9rem;
-		color: color-mix(in srgb, var(--text) 65%, transparent);
-	}
-
-	.popup-actions {
-		margin-top: 16px;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 12px;
-	}
-
-	.popup-link {
 		background: var(--accent);
-		color: var(--bg);
-		border: none;
-		padding: 8px 14px;
-		border-radius: 999px;
-		font-weight: 600;
-		font-size: 0.85rem;
-		cursor: pointer;
+		transition: width 1s linear;
+		box-shadow: 0 0 8px var(--accent);
 	}
 
-	.popup-link:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
+	.modal-times {
+		display: flex;
+		justify-content: space-between;
+		margin-top: 6px;
+		font-size: 0.68rem;
+		color: var(--muted);
+		font-variant-numeric: tabular-nums;
 	}
 
-	.popup-time {
-		font-size: 0.78rem;
-		color: color-mix(in srgb, var(--text) 65%, transparent);
+	@media (max-width: 540px) {
+		.modal {
+			width: calc(100vw - 48px);
+		}
 	}
 </style>
