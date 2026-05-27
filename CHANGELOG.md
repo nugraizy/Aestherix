@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.9.0」2026-05-27
+
+## Added
+- **Lottie sticker support** — detect `lottieStickerMessage`, extract animation from ZIP, convert to video via Puppeteer + ffmpeg. ([`1ff3fb5`](https://github.com/nugraizy/aestherix/commit/1ff3fb5))
+- **Spotify floating island** — redesigned widget as bottom-center pill with cava visualizer, hover marquee, and expandable modal. ([`1beaffe`](https://github.com/nugraizy/aestherix/commit/1beaffe))
+- **Profile picture palette backfill** — automatically retry color extraction for entries missing palettes. ([`40098ad`](https://github.com/nugraizy/aestherix/commit/40098ad))
+
+## Fixed
+- **Dashboard auth prefix mismatch** — login confirmation buttons no longer depend on bot prefix; intercepts `dashauth:` responses directly in message handler. ([`a9fe5e5`](https://github.com/nugraizy/aestherix/commit/a9fe5e5))
+
+## Improved
+- **Dashboard audit fixes** — aria-labels, skip-nav link, touch targets 44px on mobile, pinned Coloris CDN v0.25.0 with SRI, LogViewer stable keys, Tooltip overflow-wrap, prefers-reduced-motion guard, Dropdown listener optimization, animated theme switch. ([`6af0851`](https://github.com/nugraizy/aestherix/commit/6af0851))
+
 # 「7.8.4」2026-05-26
 
 ## Performance
