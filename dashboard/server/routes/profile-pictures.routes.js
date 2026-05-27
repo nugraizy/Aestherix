@@ -5,7 +5,6 @@ import { z } from 'zod';
 import { noStoreJson } from '../middleware/no-store.middleware.js';
 import { validate } from '../middleware/validation.middleware.js';
 import {
-	PROFILE_PICTURE_HISTORY_LIMIT,
 	PROFILE_PICTURES_COLOR_TOLERANCE_DEFAULT,
 	PROFILE_PICTURES_COLOR_TOLERANCE_MAX
 } from '../services/profile-pictures.service.js';
@@ -111,7 +110,7 @@ export function createProfilePicturesRouter({ services }) {
 
 	router.get('/profile-pictures', middleware.requireDashboardAuth, noStoreJson, async (req, res) => {
 		const rawLimit = req.query?.limit;
-		const limit = rawLimit === undefined ? PROFILE_PICTURE_HISTORY_LIMIT : Number(rawLimit);
+		const limit = rawLimit === undefined ? undefined : Number(rawLimit);
 		const colorHex = String(req.query?.color || '').trim();
 		const tolerance = Math.max(
 			0,

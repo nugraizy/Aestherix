@@ -105,7 +105,7 @@ export function createProfilePicturesService({ configuration, prisma } = {}) {
 		map.clear?.();
 
 		try {
-			const entries = await listPinterestProfilePictures(prisma, { limit: PROFILE_PICTURE_HISTORY_LIMIT });
+			const entries = await listPinterestProfilePictures(prisma, {});
 
 			for (const entry of entries) {
 				const timestamp = String(entry?.timestamp || '').trim();
@@ -277,24 +277,29 @@ export function createProfilePicturesService({ configuration, prisma } = {}) {
 		});
 	}
 
-	async function list({ limit = PROFILE_PICTURE_HISTORY_LIMIT } = {}) {
-		await refreshFromDb();
-
-		const map = ensureMap();
-		const entries = Array.from(map.entries());
-		const safeLimit = Math.max(1, Math.min(PROFILE_PICTURE_HISTORY_LIMIT, Number(limit) || 180));
+	async function list({ limit } = {}) {
+		const rows = await listPinterestProfilePictures(
+			prisma,
+			Number(limit) > 0 ? { limit: Number(limit) } : {}
+		);
 		const seenUrls = new Set();
 
-		return entries
-			.map(([timestamp, value]) => {
-				const normalized = normalizePersistedPictureEntry(value);
+		return rows
+			.map((row) => {
+				const timestamp = String(row?.timestamp || '').trim();
+
+				if (!timestamp || tombstones.has(timestamp)) {
+					return null;
+				}
+
+				const normalized = normalizePersistedPictureEntry(row);
 
 				if (!normalized) {
 					return null;
 				}
 
 				return {
-					timestamp: String(timestamp || ''),
+					timestamp,
 					url: normalized.original.url,
 					thumbnail: normalized.thumbnail.url,
 					colorPalette: normalized.colorPalette || null
@@ -311,8 +316,7 @@ export function createProfilePicturesService({ configuration, prisma } = {}) {
 
 				seenUrls.add(dedupeKey);
 				return true;
-			})
-			.slice(0, safeLimit);
+			});
 	}
 
 	async function getLatest() {
@@ -365,38 +369,33 @@ export function createProfilePicturesService({ configuration, prisma } = {}) {
 			return { ok: false, message: 'Invalid profile picture payload.' };
 		}
 
-		const map = ensureMap();
 		const safeUrlKey = safeUrl.toLowerCase();
-		const deletedTimestamps = [];
-		const currentValue = map.get(safeTimestamp);
-		const currentUrl = String(normalizeDashboardPicture(currentValue)?.original?.url || '')
-			.trim()
-			.toLowerCase();
-
-		if (currentUrl && currentUrl === safeUrlKey) {
-			map.delete(safeTimestamp);
-			tombstones.add(safeTimestamp);
-			deletedTimestamps.push(safeTimestamp);
-		}
-
-		for (const [key, value] of map.entries()) {
-			const parsedUrl = String(normalizeDashboardPicture(value)?.original?.url || '')
-				.trim()
-				.toLowerCase();
-
-			if (parsedUrl && parsedUrl === safeUrlKey) {
-				map.delete(key);
-				tombstones.add(key);
-				deletedTimestamps.push(key);
+		const rows = await prisma.pinterestProfilePicture.findMany({
+			where: {
+				OR: [{ timestamp: safeTimestamp }, { url: safeUrl }]
 			}
-		}
+		});
 
-		if (!deletedTimestamps.length) {
+		const matching = rows.filter((row) => {
+			return row.timestamp === safeTimestamp || String(row.url).toLowerCase() === safeUrlKey;
+		});
+
+		if (!matching.length) {
 			return { ok: false, message: 'Profile picture not found.' };
 		}
 
+		const map = ensureMap();
+		const deletedTimestamps = matching.map((row) => String(row.timestamp));
+
+		for (const ts of deletedTimestamps) {
+			map.delete?.(ts);
+			tombstones.add(ts);
+		}
+
 		await Promise.all(
-			deletedTimestamps.map((ts) => prisma.pinterestProfilePicture.delete({ where: { timestamp: ts } }).catch(() => {}))
+			deletedTimestamps.map((ts) =>
+				prisma.pinterestProfilePicture.delete({ where: { timestamp: ts } }).catch(() => {})
+			)
 		);
 
 		return { ok: true, deletedCount: deletedTimestamps.length };
