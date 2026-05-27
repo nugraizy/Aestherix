@@ -100,7 +100,9 @@ function bindEvents() {
 	socket.on('dashboard:flags', (payload) => {
 		const valid = (payload?.flags || []).filter((entry) => entry && typeof entry.name === 'string' && entry.name.length > 1);
 
-		flags.set(valid);
+		if (valid.length) {
+			flags.set(valid);
+		}
 	});
 
 	socket.on('dashboard:users', (payload) => {
@@ -124,11 +126,22 @@ function bindEvents() {
 
 		setTimeout(async () => {
 			try {
-				const res = await fetch('/api/dashboard/commands', { credentials: 'include' });
-				const data = await res.json();
+				const [cmdRes, flagRes] = await Promise.all([
+					fetch('/api/dashboard/commands', { credentials: 'include' }),
+					fetch('/api/dashboard/flags', { credentials: 'include' })
+				]);
+				const [cmdData, flagData] = await Promise.all([cmdRes.json(), flagRes.json()]);
 
-				if (data.commands?.length) {
-					commands.set(data.commands);
+				if (cmdData?.commands?.length) {
+					commands.set(cmdData.commands);
+				}
+
+				if (flagData?.flags?.length) {
+					const valid = flagData.flags.filter((entry) => entry && typeof entry.name === 'string' && entry.name.length > 1);
+
+					if (valid.length) {
+						flags.set(valid);
+					}
 				}
 			} catch {
 				// Ignore errors - the socket will update when the data is received
