@@ -12,7 +12,8 @@
 	let wasActive = false;
 
 	let groups = [];
-	let loading = true;
+	let loading = false;
+	let loaded = false;
 	let search = '';
 	let selectedJid = null;
 	let selectedSettings = null;
@@ -40,11 +41,7 @@
 
 	$: if (active && !wasActive) {
 		wasActive = true;
-		void loadGroups();
-	}
-
-	$: if (!active && wasActive) {
-		wasActive = false;
+		if (!loaded) void loadGroups();
 	}
 
 	async function loadGroups() {
@@ -62,6 +59,8 @@
 				const data = await get('/groups/mine');
 				groups = data?.groups || [];
 			}
+
+			loaded = true;
 		} catch (error) {
 			showError(error?.message || 'Failed to load groups.');
 		}

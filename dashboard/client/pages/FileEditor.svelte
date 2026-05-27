@@ -11,6 +11,7 @@
 
 	export let active = true;
 	let wasActive = false;
+	let loaded = false;
 
 	let root = null;
 	let activePath = '';
@@ -24,7 +25,7 @@
 
 	$: if (active && !wasActive) {
 		wasActive = true;
-		void loadTree();
+		if (!loaded) void loadTree();
 	}
 
 	$: if (!active && wasActive) {
@@ -43,6 +44,8 @@
 					return set;
 				});
 			}
+
+			loaded = true;
 
 			const saved = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
 

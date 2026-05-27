@@ -48,8 +48,9 @@
 
 	export let active = true;
 	let wasActive = false;
+	let loaded = false;
 
-	$: if (active && !wasActive) { wasActive = true; void loadBroadcastData(); }
+	$: if (active && !wasActive) { wasActive = true; if (!loaded) void loadBroadcastData(); }
 	$: if (!active && wasActive) { wasActive = false; }
 
 	async function loadBroadcastData() {
@@ -68,6 +69,7 @@
 			lastResult = statusData?.lastResult || null;
 			templates = tplData?.templates || [];
 			schedules = schedData?.schedules || [];
+			loaded = true;
 		} catch (error) {
 			showError(error?.message || 'Failed to load data.');
 		}

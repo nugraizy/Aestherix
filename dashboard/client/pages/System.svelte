@@ -18,6 +18,7 @@
 	$: pm2 = $status.pm2;
 	$: restartDisabled = $status.botMode === 'split' && !botOnline;
 	let wasActive = false;
+	let loaded = false;
 
 	let health = null;
 	let caches = null;
@@ -25,7 +26,7 @@
 	let sessions = [];
 	let loading = true;
 
-	$: if (active && !wasActive) { wasActive = true; void loadHealth(); }
+	$: if (active && !wasActive) { wasActive = true; if (!loaded) void loadHealth(); }
 	$: if (!active && wasActive) { wasActive = false; }
 
 	async function loadHealth() {
@@ -44,6 +45,7 @@
 			caches = c;
 			env = e?.keys || [];
 			sessions = s?.sessions || [];
+			loaded = true;
 		} catch (error) {
 			showError(error?.message || 'Failed to load system info.');
 		}

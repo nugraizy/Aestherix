@@ -38,12 +38,10 @@
 	let renderCount = 0;
 	let logCount = 0;
 	let sessionRole = null;
-	let keepMessages = false;
 
 	$: renderCount++;
 	$: isViewer = sessionRole === 'viewer';
 	$: if (isViewer && debug) debug = false;
-	$: if (page === 'messages') keepMessages = true;
 
 	logs.subscribe((entries) => { logCount = entries.length; });
 
@@ -54,12 +52,6 @@
 	};
 
 	const PAGE_NAMES = ['home', 'controls', 'settings', 'groups', 'broadcast', 'messages', 'system', 'albums', 'editor', 'notfound'];
-
-	$: if (page && lazyPages[page] && !loadedPages[page]) {
-		lazyPages[page]().then((mod) => {
-			loadedPages = { ...loadedPages, [page]: mod.default };
-		});
-	}
 	const NAV_PAGES = PAGE_NAMES.filter((name) => name !== 'notfound');
 	const PAGE_PATH_BASE = '/dashboard';
 
@@ -228,6 +220,12 @@
 			connect();
 			applyPalette($currentPalette);
 
+			Object.entries(lazyPages).forEach(([name, loader]) => {
+				loader().then((mod) => {
+					loadedPages = { ...loadedPages, [name]: mod.default };
+				});
+			});
+
 			if (sessionRole === 'viewer' && VIEWER_BLOCKED_PAGES.has(page)) {
 				page = 'notfound';
 			}
@@ -250,6 +248,11 @@
 		}
 		connect();
 		applyPalette($currentPalette);
+		Object.entries(lazyPages).forEach(([name, loader]) => {
+			loader().then((mod) => {
+				loadedPages = { ...loadedPages, [name]: mod.default };
+			});
+		});
 		showSuccess('Logged in.');
 	}
 
@@ -363,32 +366,50 @@
 		{/if}
 		<HardwareBanner />
 		<main id="main" class="page" class:wide={page === 'albums' || page === 'editor'}>
-			{#if keepMessages && loadedPages.messages}
+			<div class="page-cache" class:page-hidden={page !== 'home'}>
+				<Home isViewer={isViewer} onLogout={handleLogout} />
+			</div>
+			<div class="page-cache" class:page-hidden={page !== 'controls'}>
+				<Controls isViewer={isViewer} active={page === 'controls'} />
+			</div>
+			{#if page === 'notfound'}
+				<NotFound on:navigate={(event) => navigate(event.detail)} />
+			{/if}
+			{#if loadedPages.groups}
+				<div class="page-cache" class:page-hidden={page !== 'groups'}>
+					<svelte:component this={loadedPages.groups} active={page === 'groups'} />
+				</div>
+			{/if}
+			{#if loadedPages.broadcast}
+				<div class="page-cache" class:page-hidden={page !== 'broadcast'}>
+					<svelte:component this={loadedPages.broadcast} active={page === 'broadcast'} />
+				</div>
+			{/if}
+			{#if loadedPages.settings}
+				<div class="page-cache" class:page-hidden={page !== 'settings'}>
+					<svelte:component this={loadedPages.settings} isSuperOwner={sessionRole === 'superOwner'} active={page === 'settings'} />
+				</div>
+			{/if}
+			{#if loadedPages.system}
+				<div class="page-cache" class:page-hidden={page !== 'system'}>
+					<svelte:component this={loadedPages.system} isSuperOwner={sessionRole === 'superOwner'} active={page === 'system'} bind:debug
+						onStart={handleStart} onStop={handleStop} onRestart={handleRestart} />
+				</div>
+			{/if}
+			{#if loadedPages.albums}
+				<div class="page-cache" class:page-hidden={page !== 'albums'}>
+					<svelte:component this={loadedPages.albums} isViewer={isViewer} active={page === 'albums'} />
+				</div>
+			{/if}
+			{#if loadedPages.messages}
 				<div class="page-cache" class:page-hidden={page !== 'messages'}>
 					<svelte:component this={loadedPages.messages} active={page === 'messages'} />
 				</div>
 			{/if}
-			{#if page === 'home'}
-				<Home isViewer={isViewer} onLogout={handleLogout} />
-			{:else if page === 'controls'}
-				<Controls isViewer={isViewer} active={page === 'controls'} />
-			{:else if page === 'notfound'}
-				<NotFound on:navigate={(event) => navigate(event.detail)} />
-			{:else if page === 'albums' && loadedPages.albums}
-				<svelte:component this={loadedPages.albums} isViewer={isViewer} active={page === 'albums'} />
-			{:else if page === 'settings' && loadedPages.settings}
-				<svelte:component this={loadedPages.settings} isSuperOwner={sessionRole === 'superOwner'} active={page === 'settings'} />
-			{:else if page === 'system' && loadedPages.system}
-				<svelte:component this={loadedPages.system} isSuperOwner={sessionRole === 'superOwner'} active={page === 'system'} bind:debug
-					onStart={handleStart} onStop={handleStop} onRestart={handleRestart} />
-			{:else if page === 'groups' && loadedPages.groups}
-				<svelte:component this={loadedPages.groups} active={page === 'groups'} />
-			{:else if page === 'broadcast' && loadedPages.broadcast}
-				<svelte:component this={loadedPages.broadcast} active={page === 'broadcast'} />
-			{:else if page === 'editor' && loadedPages.editor}
-				<svelte:component this={loadedPages.editor} active={page === 'editor'} />
-			{:else if page === 'messages'}
-				<!-- messages uses keepMessages pattern above -->
+			{#if loadedPages.editor}
+				<div class="page-cache" class:page-hidden={page !== 'editor'}>
+					<svelte:component this={loadedPages.editor} active={page === 'editor'} />
+				</div>
 			{/if}
 		</main>
 		<SpotifyWidget />
