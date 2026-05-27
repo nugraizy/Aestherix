@@ -6,6 +6,7 @@ import fs from 'fs-extra';
 import { CLIENT_DIST_PATH, PROJECT_ROOT } from '../lib/paths.js';
 
 const PUBLIC_ROOT = path.join(PROJECT_ROOT, 'public');
+const WELL_KNOWN_ROOT = path.join(PUBLIC_ROOT, '.well-known');
 const SPA_ROUTES = ['/dashboard', '/dashboard/*splat', '/albums', '/albums/*splat'];
 
 export function createStaticRouter() {
@@ -19,6 +20,15 @@ export function createStaticRouter() {
 			fallthrough: true,
 			maxAge: '7d',
 			immutable: true
+		})
+	);
+	router.use(
+		'/.well-known',
+		express.static(WELL_KNOWN_ROOT, {
+			dotfiles: 'allow',
+			index: false,
+			fallthrough: true,
+			maxAge: '1h'
 		})
 	);
 	router.use(
