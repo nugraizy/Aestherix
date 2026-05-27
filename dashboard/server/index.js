@@ -2,7 +2,6 @@ import compression from 'compression';
 import express from 'express';
 import { createServer } from 'http';
 
-
 import { createAuthMiddleware } from './middleware/auth.middleware.js';
 import { createActionsRouter } from './routes/actions.routes.js';
 import { createAuditRouter } from './routes/audit.routes.js';
@@ -17,9 +16,9 @@ import { createMessageLogsRouter } from './routes/message-logs.routes.js';
 import { createPrefixRouter } from './routes/prefix.routes.js';
 import { createProfilePicturesRouter } from './routes/profile-pictures.routes.js';
 import { createQuickActionsRouter } from './routes/quick-actions.routes.js';
+import { createSettingsRouter } from './routes/settings.routes.js';
 import { createSpotifyRouter } from './routes/spotify.routes.js';
 import { createStaticRouter } from './routes/static.routes.js';
-import { createSettingsRouter } from './routes/settings.routes.js';
 import { createStatusRouter } from './routes/status.routes.js';
 import { createSystemRouter } from './routes/system.routes.js';
 import { createUsersRouter } from './routes/users.routes.js';
@@ -32,9 +31,9 @@ import { createGroupsService } from './services/groups.service.js';
 import { createLifecycleService } from './services/lifecycle.service.js';
 import { createMonitorService } from './services/monitor.service.js';
 import { createProfilePicturesService } from './services/profile-pictures.service.js';
+import { createSettingsService } from './services/settings.service.js';
 import { createSpotifyService } from './services/spotify.service.js';
 import { createSystemService } from './services/system.service.js';
-import { createSettingsService } from './services/settings.service.js';
 import { createUndoService } from './services/undo.service.js';
 import { createUsersService } from './services/users.service.js';
 import { createSocketLayer } from './socket/index.js';
@@ -133,10 +132,6 @@ h1{font-size:1.8rem;margin-bottom:1rem}
 			res.json({ status: 'unknown', timestamp: Date.now() });
 		}
 	});
-
-	if (mountGradient) {
-
-	}
 
 	const apiRouters = [
 		createAuthRouter({ services }),
