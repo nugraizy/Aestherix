@@ -332,7 +332,15 @@
 										on:click|stopPropagation={toggleActions}
 										aria-label="Toggle actions"
 									>
-										<span class="reveal-icon">{showActions ? '×' : '⋮'}</span>
+										<span class="reveal-icon">
+											{#if showActions}
+												<span class="reveal-close">×</span>
+											{:else}
+												<span class="dot"></span>
+												<span class="dot"></span>
+												<span class="dot"></span>
+											{/if}
+										</span>
 									</button>
 								</div>
 								<div class="image-counter" data-action>
@@ -491,8 +499,27 @@
 	}
 
 	.reveal-icon {
-		display: block;
+		display: inline-flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 3px;
+		width: 18px;
+		height: 18px;
 		line-height: 1;
+	}
+
+	.reveal-icon .dot {
+		width: 4px;
+		height: 4px;
+		border-radius: 50%;
+		background: currentColor;
+	}
+
+	.reveal-close {
+		font-size: 18px;
+		line-height: 1;
+		font-weight: 600;
 	}
 
 	.actions-slider {
