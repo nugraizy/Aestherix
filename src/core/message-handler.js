@@ -222,6 +222,25 @@ export class MessageHandler {
 	}
 
 	async #dispatchSingle(message, body, client) {
+		if (
+			body.startsWith('dashauth:') &&
+			message.isOwner &&
+			(message.type === 'buttonsResponseMessage' || message.type === 'interactiveResponseMessage')
+		) {
+			const { processDashboardConfirmationAction } = await import('../../dashboard/server/socket/confirmation.js');
+			const result = await processDashboardConfirmationAction({ actionId: body, senderJid: message.sender });
+
+			if (result.handled) {
+				const reply = result.approved
+					? 'Dashboard login confirmed. You can return to the browser now.'
+					: (result.message || 'Dashboard login rejected.');
+
+				await client.reply(message.from, reply, message.raw);
+			}
+
+			return;
+		}
+
 		let localMessage;
 
 		const resolved = this.#router.resolve(body);

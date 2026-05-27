@@ -8,7 +8,6 @@ import {
 	upsertDashboardSession,
 	upsertOtp
 } from '../../../src/helper/database/adapters/dashboard.js';
-import { cmdId } from '../../../src/helper/modules/prefix.js';
 import { color, loggers } from '../../../src/utils/modules/index.js';
 import { getEmbeddedWaClient } from '../lib/client.js';
 
@@ -367,8 +366,8 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 		const actionToken = crypto.randomBytes(24).toString('hex');
 		const approveActionId = `dashauth:confirm:${requestId}:${actionToken}`;
 		const rejectActionId = `dashauth:reject:${requestId}:${actionToken}`;
-		const approveButtonId = cmdId('dashconfirm', approveActionId);
-		const rejectButtonId = cmdId('dashconfirm', rejectActionId);
+		const approveButtonId = approveActionId;
+		const rejectButtonId = rejectActionId;
 		const expiresAt = Date.now() + OTP_TTL_MS;
 
 		otpStore.set(phoneNumber, {
