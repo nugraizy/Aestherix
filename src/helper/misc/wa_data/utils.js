@@ -36,9 +36,10 @@ export const toUserJid = (value) => {
 };
 
 const MEDIA_TYPE = {
-	_a: ['mentionText', 'extendedTextMessage'],
-	_b: [
+	textBased: ['mentionText', 'extendedTextMessage'],
+	labelOnly: [
 		'stickerMessage',
+		'lottieStickerMessage',
 		'audioMessage',
 		'documentMessage',
 		'contactMessage',
@@ -51,9 +52,10 @@ const MEDIA_TYPE = {
 		'templateMessage',
 		'pollUpdateMessage'
 	],
-	_c: ['imageMessage', 'videoMessage', 'documentWithCaptionMessage', 'liveLocationMessage'],
-	_d: [
+	captioned: ['imageMessage', 'videoMessage', 'documentWithCaptionMessage', 'liveLocationMessage'],
+	quotedLabelOnly: [
 		'stickerMessage',
+		'lottieStickerMessage',
 		'audioMessage',
 		'documentMessage',
 		'thumbnailMessage',
@@ -62,7 +64,7 @@ const MEDIA_TYPE = {
 		'groupInviteMessage',
 		'buttonsMessage'
 	],
-	_e: ['imageMessage', 'videoMessage', 'stickerMessage', 'documentMessage', 'conversation']
+	mentionable: ['imageMessage', 'videoMessage', 'stickerMessage', 'documentMessage', 'conversation']
 };
 
 /**
@@ -72,37 +74,56 @@ const MEDIA_TYPE = {
  * @returns {string | 'Unknown Body'}
  */
 export const extractBody = (m, type) => {
+	const msg = m.message;
+
 	if (type === 'conversation') {
-		return m.message.conversation;
-	} else if (MEDIA_TYPE._a.includes(type)) {
-		return m.message.extendedTextMessage.text;
-	} else if (MEDIA_TYPE._b.includes(type)) {
+		return msg.conversation;
+	}
+
+	if (MEDIA_TYPE.textBased.includes(type)) {
+		return msg.extendedTextMessage.text;
+	}
+
+	if (MEDIA_TYPE.labelOnly.includes(type)) {
 		return type.separateCamel().capitalize();
-	} else if (type === 'listResponseMessage') {
-		return m.message.listResponseMessage.singleSelectReply.selectedRowId;
-	} else if (type === 'templateButtonReplyMessage' && m.message.templateButtonReplyMessage) {
-		return m.message.templateButtonReplyMessage.selectedId;
-	} else if (type === 'buttonsMessage') {
-		return m.message.buttonsMessage.contentText;
-	} else if (type === 'buttonsResponseMessage') {
-		return m.message.buttonsResponseMessage.selectedButtonId;
-	} else if (MEDIA_TYPE._c.includes(type)) {
-		return m.message[type].caption || m.message[type]?.message?.documentMessage?.caption || 'No Caption';
-	} else if (
-		type === 'viewOnceMessage' &&
-		(m.message.viewOnceMessage.message.imageMessage || m.message.viewOnceMessage.message.videoMessage)
-	) {
-		return (
-			m.message.viewOnceMessage.message?.imageMessage?.caption ||
-			m.message.viewOnceMessage.message?.videoMessage?.caption ||
-			'No Caption'
-		);
-	} else if (type === 'reactionMessage') {
-		return m.message[type].text;
-	} else if (type === 'pollCreationMessage') {
-		return m.message[type].name;
-	} else if (type === 'interactiveResponseMessage') {
-		return JSON.parse(m.message[type].nativeFlowResponseMessage.paramsJson)?.id;
+	}
+
+	if (type === 'listResponseMessage') {
+		return msg.listResponseMessage.singleSelectReply.selectedRowId;
+	}
+
+	if (type === 'templateButtonReplyMessage') {
+		return msg.templateButtonReplyMessage?.selectedId;
+	}
+
+	if (type === 'buttonsMessage') {
+		return msg.buttonsMessage.contentText;
+	}
+
+	if (type === 'buttonsResponseMessage') {
+		return msg.buttonsResponseMessage.selectedButtonId;
+	}
+
+	if (type === 'reactionMessage') {
+		return msg[type].text;
+	}
+
+	if (type === 'pollCreationMessage') {
+		return msg[type].name;
+	}
+
+	if (MEDIA_TYPE.captioned.includes(type)) {
+		return msg[type].caption || msg[type]?.message?.documentMessage?.caption || 'No Caption';
+	}
+
+	if (type === 'viewOnceMessage') {
+		const inner = msg.viewOnceMessage.message;
+
+		return inner?.imageMessage?.caption || inner?.videoMessage?.caption || 'No Caption';
+	}
+
+	if (type === 'interactiveResponseMessage') {
+		return JSON.parse(msg[type].nativeFlowResponseMessage.paramsJson)?.id;
 	}
 
 	return 'Unknown Body';
@@ -115,25 +136,40 @@ export const extractBody = (m, type) => {
  * @returns {string}
  */
 export const extractQuotedBody = (m, type) => {
+	const msg = m.message;
+
 	if (type === 'conversation') {
-		return m.message[type];
-	} else if (MEDIA_TYPE._a.includes(type)) {
-		return m.message.extendedTextMessage.text;
-	} else if (MEDIA_TYPE._c.includes(type)) {
-		return m.message[type]?.caption || type.separateCamel().capitalize();
-	} else if (MEDIA_TYPE._d.includes(type)) {
+		return msg[type];
+	}
+
+	if (MEDIA_TYPE.textBased.includes(type)) {
+		return msg.extendedTextMessage.text;
+	}
+
+	if (MEDIA_TYPE.captioned.includes(type)) {
+		return msg[type]?.caption || type.separateCamel().capitalize();
+	}
+
+	if (MEDIA_TYPE.quotedLabelOnly.includes(type)) {
 		return type.separateCamel().capitalize();
-	} else if (type === 'buttonsResponseMessage') {
-		return `${m.message[type].contentText}\n${m.message[type].footerText}`;
-	} else if (type === 'templateButtonReplyMessage') {
-		return m.message[type].selectedId;
-	} else if (
-		type === 'viewOnceMessage' &&
-		(m.message.viewOnceMessage.message.imageMessage || m.message.viewOnceMessage.message.videoMessage)
-	) {
-		return m.message[type].message?.imageMessage?.caption || m.message[type].message?.videoMessage?.caption || 'No Caption';
-	} else if (type === 'templateMessage') {
-		return m.message.templateMessage?.hydratedTemplate?.hydratedContentText;
+	}
+
+	if (type === 'buttonsResponseMessage') {
+		return `${msg[type].contentText}\n${msg[type].footerText}`;
+	}
+
+	if (type === 'templateButtonReplyMessage') {
+		return msg[type].selectedId;
+	}
+
+	if (type === 'templateMessage') {
+		return msg.templateMessage?.hydratedTemplate?.hydratedContentText;
+	}
+
+	if (type === 'viewOnceMessage') {
+		const inner = msg.viewOnceMessage.message;
+
+		return inner?.imageMessage?.caption || inner?.videoMessage?.caption || 'No Caption';
 	}
 
 	return '';
@@ -161,9 +197,13 @@ export const extractTypeQuoted = (m, type) => {
  * @returns {string[]}
  */
 export const extractMentionedJid = (m, type) => {
-	if (MEDIA_TYPE._a.includes(type)) {
-		return m.message[type === 'mentionText' ? 'extendedTextMessage' : type]?.contextInfo?.mentionedJid || [];
-	} else if (MEDIA_TYPE._e.includes(type)) {
+	if (MEDIA_TYPE.textBased.includes(type)) {
+		const key = type === 'mentionText' ? 'extendedTextMessage' : type;
+
+		return m.message[key]?.contextInfo?.mentionedJid || [];
+	}
+
+	if (MEDIA_TYPE.mentionable.includes(type)) {
 		return m.message[type]?.contextInfo?.mentionedJid || [];
 	}
 

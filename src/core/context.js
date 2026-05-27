@@ -19,7 +19,7 @@ import {
 } from '../helper/misc/wa_data/index.js';
 import { Cache } from '../helper/modules/cache.js';
 
-const TYPE_STICKER = ['imageMessage', 'videoMessage', 'stickerMessage'];
+const TYPE_STICKER = ['imageMessage', 'videoMessage', 'stickerMessage', 'lottieStickerMessage'];
 const SETTINGS_PATH = './src/helper/config/settings.json';
 const lidMaps = new Cache();
 
@@ -215,6 +215,7 @@ export class Context {
 			imageMessage: { isMediaImage: true, isMediaVid: false, stickerAble: true },
 			videoMessage: { isMediaImage: false, isMediaVid: true, stickerAble: true },
 			stickerMessage: { isMediaImage: false, isMediaVid: false, stickerAble: true, isQuotedSticker: true },
+			lottieStickerMessage: { isMediaImage: false, isMediaVid: false, stickerAble: true, isQuotedSticker: true },
 			audioMessage: { isMediaImage: false, isMediaVid: false, isQuotedAudio: true },
 			documentMessage: { isMediaImage: false, isMediaVid: false, isMediaDocument: true, isQuotedDocument: true }
 		};
@@ -489,7 +490,7 @@ export class Context {
 		return this.#memo('isQuotedSticker', () => {
 			const content = this.type === 'extendedTextMessage' ? JSON.stringify(this.#raw?.message) : '';
 
-			return this.type === 'extendedTextMessage' && content.includes('stickerMessage');
+			return this.type === 'extendedTextMessage' && (content.includes('stickerMessage') || content.includes('lottieStickerMessage'));
 		});
 	}
 	get isQuotedDocument() {
