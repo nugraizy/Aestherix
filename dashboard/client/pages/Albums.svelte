@@ -178,7 +178,14 @@
 			return;
 		}
 
-		if (!confirm('Delete this profile picture from history?')) {
+		const ok = await showConfirm({
+			title: 'Delete profile picture',
+			message: 'Delete this profile picture from history?',
+			confirmLabel: 'Delete',
+			danger: true
+		});
+
+		if (!ok) {
 			return;
 		}
 
