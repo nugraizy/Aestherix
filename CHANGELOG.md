@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.10.0」2026-05-30
+
+## Added
+
+- Tools tab with Comics Reader and utility panels (calculator, color/JSON/timestamp converters, QR generator, downloader) ([`f416d6b`](https://github.com/nugraizy/aestherix/commit/f416d6b))
+- Komikcast comic subcommands and JSON-API scraper rewrite ([`f6e1d30`](https://github.com/nugraizy/aestherix/commit/f6e1d30))
+- Squiggly media slider and standardized custom tooltips on the dashboard ([`f031ced`](https://github.com/nugraizy/aestherix/commit/f031ced))
+- Dashboard backend auth/socket and panel improvements ([`0419e85`](https://github.com/nugraizy/aestherix/commit/0419e85))
+
+## Fixed
+
+- Comics chapter totals now count distinct chapters and source pagination works across sorts ([`37df837`](https://github.com/nugraizy/aestherix/commit/37df837))
+- Lightbox falls back to the thumbnail for HEIC images ([`7ee6fb5`](https://github.com/nugraizy/aestherix/commit/7ee6fb5))
+- Instagram profile/highlights migrated to GraphQL endpoints ([`c8cf1b9`](https://github.com/nugraizy/aestherix/commit/c8cf1b9))
+- Bilibili downloader rewritten with server-side ffmpeg merge ([`d436bcf`](https://github.com/nugraizy/aestherix/commit/d436bcf))
+- Bandcamp, DeviantArt, MediaFire and TikTok scrapers repaired ([`78eec01`](https://github.com/nugraizy/aestherix/commit/78eec01))
+- Core client-socket and message handler updates ([`4cd0617`](https://github.com/nugraizy/aestherix/commit/4cd0617))
+
+## Changed
+
+- Accent-colored scrollbars across the dashboard ([`9318846`](https://github.com/nugraizy/aestherix/commit/9318846))
+
 # 「7.9.1」2026-05-28
 
 ## Added
