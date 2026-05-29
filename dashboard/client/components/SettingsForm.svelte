@@ -9,6 +9,7 @@
 	import NumberInput from './ui/NumberInput.svelte';
 	import TagInput from './ui/TagInput.svelte';
 	import Toggle from './ui/Toggle.svelte';
+	import Tooltip from './ui/Tooltip.svelte';
 	import SkeletonList from './ui/SkeletonList.svelte';
 
 	export let isViewer = false;
@@ -311,7 +312,7 @@
 					<label class="field">
 						<span class="label">
 							Main session
-							<span class="restart-tag" title="Takes effect after a bot restart">restart</span>
+							<Tooltip text="Takes effect after a bot restart"><span class="restart-tag">restart</span></Tooltip>
 						</span>
 						<input class="input" type="text" bind:value={form.main_session} disabled={isViewer} />
 					</label>
@@ -333,7 +334,7 @@
 					<div class="field">
 						<span class="label">
 							Default user limit
-							<span class="restart-tag" title="Takes effect after a bot restart">restart</span>
+							<Tooltip text="Takes effect after a bot restart"><span class="restart-tag">restart</span></Tooltip>
 						</span>
 						<NumberInput
 							bind:value={form.limit}
@@ -386,7 +387,7 @@
 					<label class="field">
 						<span class="label">
 							Main host number
-							<span class="restart-tag" title="Takes effect on next pairing">restart</span>
+							<Tooltip text="Takes effect on next pairing"><span class="restart-tag">restart</span></Tooltip>
 						</span>
 						<input
 							class="input"
@@ -411,7 +412,7 @@
 					<div class="field grow">
 						<span class="label">
 							Backup host numbers
-							<span class="restart-tag" title="Takes effect on next pairing">restart</span>
+							<Tooltip text="Takes effect on next pairing"><span class="restart-tag">restart</span></Tooltip>
 						</span>
 						<TagInput
 							tags={form.backups_host_numbers}

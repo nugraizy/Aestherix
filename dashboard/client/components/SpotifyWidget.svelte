@@ -1,16 +1,20 @@
 <script>
 	import { onDestroy, onMount } from 'svelte';
 	import { scale } from 'svelte/transition';
-	import { backOut } from 'svelte/easing';
+	import { backOut, backIn } from 'svelte/easing';
 	import { extractCoverPalette } from '../lib/colors.js';
 	import { formatTrackTime } from '../lib/format.js';
 	import { spotify, startSpotify } from '../lib/spotify.js';
+	import Slider from './ui/Slider.svelte';
 
 	let coverEl;
 	let widgetEl;
 	let expanded = false;
 	let displayProgress = 0;
-	let lastSync = Date.now();
+	let baseProgress = 0;
+	let baseTime = Date.now();
+	let lastTrackKey = '';
+	let lastPlaying = false;
 	let tickHandle = null;
 	let lastCoverUrl = '';
 	let bars = Array(9).fill(0);
@@ -20,17 +24,26 @@
 		startSpotify();
 
 		tickHandle = setInterval(() => {
-			$spotify;
-			const elapsed = Date.now() - lastSync;
+			if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+				return;
+			}
 
 			if ($spotify.isPlaying) {
-				displayProgress = Math.min($spotify.durationMs || displayProgress + elapsed, $spotify.progressMs + elapsed);
+				const elapsed = Date.now() - baseTime;
+
+				displayProgress = $spotify.durationMs
+					? Math.min($spotify.durationMs, baseProgress + elapsed)
+					: baseProgress + elapsed;
 			} else {
-				displayProgress = $spotify.progressMs;
+				displayProgress = baseProgress;
 			}
-		}, 1000);
+		}, 250);
 
 		barHandle = setInterval(() => {
+			if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+				return;
+			}
+
 			if ($spotify.isPlaying) {
 				bars = bars.map(() => Math.random() * 0.8 + 0.2);
 			} else {
@@ -44,12 +57,31 @@
 		if (barHandle) clearInterval(barHandle);
 	});
 
-	$: if ($spotify) {
-		displayProgress = $spotify.progressMs;
-		lastSync = Date.now();
+	$: syncSpotify($spotify);
+
+	function syncSpotify(s) {
+		if (!s) return;
+
+		const key = s.trackUri || s.trackUrl || s.trackTitle || '';
+		const reported = s.progressMs || 0;
+
+		if (key !== lastTrackKey) {
+			baseProgress = reported;
+			baseTime = Date.now();
+			displayProgress = reported;
+		} else if (s.isPlaying !== lastPlaying) {
+			baseProgress = displayProgress;
+			baseTime = Date.now();
+		} else if (reported - displayProgress > 1500 || displayProgress - reported > 5000) {
+			baseProgress = reported;
+			baseTime = Date.now();
+			displayProgress = reported;
+		}
+
+		lastTrackKey = key;
+		lastPlaying = s.isPlaying;
 	}
 
-	$: ratio = $spotify.durationMs > 0 ? Math.min(1, Math.max(0, displayProgress / $spotify.durationMs)) : 0;
 	$: currentTime = formatTrackTime(displayProgress);
 	$: totalTime = $spotify.durationMs > 0 ? formatTrackTime($spotify.durationMs) : '--:--';
 	$: linkHref = $spotify.trackUrl || $spotify.trackUri || '';
@@ -134,7 +166,7 @@
 
 		<!-- Expanded modal -->
 		{#if expanded}
-			<div class="modal" in:scale={{ duration: 280, start: 0.6, opacity: 0, easing: backOut }} out:scale={{ duration: 180, start: 0.85, opacity: 0 }}>
+			<div class="modal" in:scale={{ duration: 280, start: 0.6, opacity: 0, easing: backOut }} out:scale={{ duration: 240, start: 0.6, opacity: 0, easing: backIn }}>
 				<a class="modal-head" href={linkHref || '#'} target="_blank" rel="noopener noreferrer" on:click|preventDefault={openLink}>
 					<img
 						class="modal-cover"
@@ -147,13 +179,9 @@
 					</div>
 				</a>
 				<div class="modal-progress">
-					<div class="bar-track">
-						<span class="bar-fill" style="width:{Math.round(ratio * 100)}%"></span>
-					</div>
-					<div class="modal-times">
-						<span>{currentTime}</span>
-						<span>{totalTime}</span>
-					</div>
+					<span class="modal-time">{currentTime}</span>
+					<Slider readonly playing={$spotify.isPlaying} value={displayProgress} min={0} max={$spotify.durationMs || 1} />
+					<span class="modal-time">{totalTime}</span>
 				</div>
 			</div>
 		{/if}
@@ -358,36 +386,26 @@
 
 	.modal-progress {
 		margin-top: 14px;
-	}
-
-	.bar-track {
-		height: 4px;
-		border-radius: 999px;
-		background: color-mix(in srgb, var(--muted) 25%, transparent);
-		overflow: hidden;
-	}
-
-	.bar-fill {
-		display: block;
-		height: 100%;
-		border-radius: 999px;
-		background: var(--accent);
-		transition: width 1s linear;
-		box-shadow: 0 0 8px var(--accent);
-	}
-
-	.modal-times {
 		display: flex;
-		justify-content: space-between;
-		margin-top: 6px;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.modal-progress :global(.slider) {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.modal-time {
 		font-size: 0.68rem;
 		color: var(--muted);
 		font-variant-numeric: tabular-nums;
+		flex-shrink: 0;
 	}
 
 	@media (max-width: 540px) {
 		.modal {
-			width: calc(100vw - 48px);
+			width: min(300px, calc(100vw - 24px));
 		}
 	}
 </style>

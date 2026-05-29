@@ -49,9 +49,9 @@
 			Logs
 			<span class="section-count">{$logs.length}</span>
 			{#if autoScroll}
-				<span class="tail" title="Auto-scrolling to latest">live</span>
+				<Tooltip text="Auto-scrolling to latest"><span class="tail">live</span></Tooltip>
 			{:else}
-				<span class="tail paused" title="Scroll to bottom to resume tailing">paused</span>
+				<Tooltip text="Scroll to bottom to resume tailing"><span class="tail paused">paused</span></Tooltip>
 			{/if}
 		</h3>
 		<Tooltip text="Clear the local log buffer. Server logs continue to stream." placement="bottom">

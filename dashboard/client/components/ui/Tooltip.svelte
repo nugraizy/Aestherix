@@ -31,6 +31,11 @@
 	const CURSOR_OFFSET = 16;
 	const EDGE = 8;
 
+	const isCoarsePointer =
+		typeof window !== 'undefined' &&
+		typeof window.matchMedia === 'function' &&
+		window.matchMedia('(hover: none)').matches;
+
 	let triggerEl;
 	let bubbleEl;
 	let visible = false;
@@ -59,6 +64,10 @@
 
 	async function show() {
 		if (!text && !html) {
+			return;
+		}
+
+		if (isCoarsePointer) {
 			return;
 		}
 
@@ -230,6 +239,8 @@
 	on:mouseleave={hide}
 	on:focusin={showFromFocus}
 	on:focusout={hide}
+	on:touchend={hide}
+	on:pointercancel={hide}
 >
 	<slot />
 </span>

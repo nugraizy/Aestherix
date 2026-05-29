@@ -59,11 +59,20 @@
 		--track-pad: 2px;
 		display: inline-flex;
 		align-items: center;
+		justify-content: center;
 		background: none;
 		border: none;
-		padding: 0;
+		padding: 11px;
+		margin: -11px;
 		cursor: pointer;
 		outline: none;
+	}
+
+	@media (hover: hover) and (pointer: fine) {
+		.toggle {
+			padding: 0;
+			margin: 0;
+		}
 	}
 
 	.toggle.size-sm {

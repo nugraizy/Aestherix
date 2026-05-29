@@ -76,7 +76,7 @@
 								></div>
 							</div>
 						</Tooltip>
-						<span class="count" title="{cmd.usage}">{formatCount(cmd.usage)}</span>
+						<Tooltip text={String(cmd.usage)}><span class="count">{formatCount(cmd.usage)}</span></Tooltip>
 					</li>
 				{/each}
 			</ul>
