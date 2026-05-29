@@ -26,7 +26,8 @@
 		messages: () => import('./pages/MessageLogs.svelte'),
 		settings: () => import('./pages/Settings.svelte'),
 		system: () => import('./pages/System.svelte'),
-		editor: () => import('./pages/FileEditor.svelte')
+		editor: () => import('./pages/FileEditor.svelte'),
+		tools: () => import('./pages/Tools.svelte')
 	};
 
 	let loadedPages = {};
@@ -51,7 +52,7 @@
 		notfound: NotFound
 	};
 
-	const PAGE_NAMES = ['home', 'controls', 'settings', 'groups', 'broadcast', 'messages', 'system', 'albums', 'editor', 'notfound'];
+	const PAGE_NAMES = ['home', 'controls', 'settings', 'groups', 'broadcast', 'messages', 'system', 'albums', 'editor', 'tools', 'notfound'];
 	const NAV_PAGES = PAGE_NAMES.filter((name) => name !== 'notfound');
 	const PAGE_PATH_BASE = '/dashboard';
 
@@ -176,7 +177,12 @@
 					else h = ((rf - gf) / d + 4) * 60;
 				}
 
-				return `brightness(0) saturate(100%) invert(${Math.round(l * 100)}%) sepia(100%) saturate(${Math.round(s * 1000)}%) hue-rotate(${Math.round(h)}deg)`;
+				const sepiaHue = 50;
+				const hueRotate = Math.round(h - sepiaHue);
+				const saturate = Math.round(Math.min(s * 100, 100) * 10);
+				const invert = Math.round(l * 100);
+
+				return `brightness(0) saturate(100%) invert(${invert}%) sepia(100%) saturate(${saturate}%) hue-rotate(${hueRotate}deg)`;
 			}
 
 			function updatePetColor() {
@@ -221,6 +227,9 @@
 			applyPalette($currentPalette);
 
 			Object.entries(lazyPages).forEach(([name, loader]) => {
+				if (sessionRole === 'viewer' && VIEWER_BLOCKED_PAGES.has(name)) {
+					return;
+				}
 				loader().then((mod) => {
 					loadedPages = { ...loadedPages, [name]: mod.default };
 				});
@@ -249,6 +258,9 @@
 		connect();
 		applyPalette($currentPalette);
 		Object.entries(lazyPages).forEach(([name, loader]) => {
+			if (sessionRole === 'viewer' && VIEWER_BLOCKED_PAGES.has(name)) {
+				return;
+			}
 			loader().then((mod) => {
 				loadedPages = { ...loadedPages, [name]: mod.default };
 			});
@@ -411,6 +423,11 @@
 					<svelte:component this={loadedPages.editor} active={page === 'editor'} />
 				</div>
 			{/if}
+			{#if loadedPages.tools}
+				<div class="page-cache" class:page-hidden={page !== 'tools'}>
+					<svelte:component this={loadedPages.tools} active={page === 'tools'} isSuperOwner={sessionRole === 'superOwner'} />
+				</div>
+			{/if}
 		</main>
 		<SpotifyWidget />
 		<Footer
@@ -480,6 +497,19 @@
 		font-family: inherit;
 	}
 
+	@media (pointer: coarse) {
+		:global(input),
+		:global(select),
+		:global(textarea) {
+			font-size: 16px;
+		}
+
+		:global(.cm-content),
+		:global(.cm-editor .cm-scroller) {
+			font-size: 16px;
+		}
+	}
+
 	:global(button:focus-visible),
 	:global(input:focus-visible),
 	:global(select:focus-visible),
@@ -504,21 +534,21 @@
 	}
 
 	:global(::-webkit-scrollbar-thumb) {
-		background: color-mix(in srgb, var(--muted) 50%, transparent);
+		background: color-mix(in srgb, var(--accent) 70%, transparent);
 		border-radius: var(--radius-pill);
 		border: 2px solid transparent;
 		background-clip: content-box;
 	}
 
 	:global(::-webkit-scrollbar-thumb:hover) {
-		background: color-mix(in srgb, var(--accent) 60%, transparent);
+		background: var(--accent);
 		background-clip: content-box;
 	}
 
 	@supports (scrollbar-color: auto) {
 		:global(*) {
 			scrollbar-width: auto;
-			scrollbar-color: color-mix(in srgb, var(--muted) 50%, transparent) transparent;
+			scrollbar-color: color-mix(in srgb, var(--accent) 70%, transparent) transparent;
 		}
 	}
 
@@ -647,31 +677,6 @@
 		cursor: not-allowed;
 	}
 
-	:global(.toggle) {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		font-size: var(--fs-xs);
-		font-weight: 700;
-		padding: 0.2rem 0.55rem;
-		border-radius: var(--radius-sm);
-		border: 1px solid transparent;
-		background: rgba(255, 142, 116, 0.16);
-		color: #ff8e74;
-		cursor: pointer;
-		transition: background var(--tx-base), color var(--tx-base);
-	}
-
-	:global(.toggle.on) {
-		background: rgba(135, 240, 193, 0.18);
-		color: #87f0c1;
-	}
-
-	:global(.toggle:disabled) {
-		opacity: 0.55;
-		cursor: not-allowed;
-	}
-
 	:global(.role-badge) {
 		font-size: var(--fs-xs);
 		padding: 0.12rem 0.5rem;
@@ -694,6 +699,45 @@
 		min-height: 100vh;
 		display: flex;
 		flex-direction: column;
+		position: relative;
+		isolation: isolate;
+	}
+
+	.app::before {
+		content: '';
+		position: fixed;
+		inset: 0;
+		background:
+			radial-gradient(ellipse at 0% 0%, color-mix(in srgb, var(--accent) 22%, transparent) 0%, transparent 45%);
+		pointer-events: none;
+		z-index: -1;
+		animation: glow-pulse 8s ease-in-out infinite alternate;
+	}
+
+	.app::after {
+		content: '';
+		position: fixed;
+		top: -10%;
+		left: -5%;
+		width: 50%;
+		height: 50%;
+		background: radial-gradient(ellipse, color-mix(in srgb, var(--accent) 12%, transparent) 0%, transparent 70%);
+		pointer-events: none;
+		z-index: -1;
+		animation: glow-pulse 12s ease-in-out infinite alternate-reverse;
+	}
+
+	@keyframes glow-pulse {
+		from { opacity: 0.6; }
+		to { opacity: 1; }
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.app::before,
+		.app::after {
+			animation: none;
+			opacity: 0.8;
+		}
 	}
 
 	.skip-link {
