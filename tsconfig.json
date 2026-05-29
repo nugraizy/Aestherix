@@ -16,6 +16,6 @@
 		"forceConsistentCasingInFileNames": true,
 		"isolatedModules": false
 	},
-	"include": ["src/**/*.js", "src/**/*.d.ts"],
+	"include": ["src/**/*.js", "src/**/*.d.ts", "dashboard/**/*.js", "dashboard/**/*.d.ts"],
 	"exclude": ["node_modules", "**/*.test.js", "src/.tmp/**", "src/commands/template.example.js"]
 }

@@ -1,5 +1,5 @@
-import yargsParser from 'yargs-parser';
 import { jidNormalizedUser } from 'baileys';
+import yargsParser from 'yargs-parser';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({

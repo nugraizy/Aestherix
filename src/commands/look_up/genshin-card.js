@@ -11,7 +11,7 @@ const enka = new EnkaClient({ showFetchCacheLog: false });
 enka.cachedAssetsManager.cacheDirectoryPath = './cache';
 enka.cachedAssetsManager.cacheDirectorySetup();
 
-if (!(await enka.cachedAssetsManager.checkForUpdates())) {
+if (!(await enka.cachedAssetsManager.checkForUpdates(true))) {
 	await enka.cachedAssetsManager.fetchAllContents();
 }
 
