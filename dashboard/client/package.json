@@ -20,8 +20,10 @@
     "@codemirror/lang-json": "^6.0.2",
     "@codemirror/lang-markdown": "^6.5.0",
     "@lezer/highlight": "^1.2.3",
+    "@mesh-gradient/core": "^2.0.2",
     "codemirror": "^6.0.2",
     "marked": "^18.0.3",
+    "qr-code-styling": "^1.9.2",
     "socket.io-client": "4.8.1"
   }
 }

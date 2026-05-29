@@ -13,6 +13,7 @@
 		{ id: 'messages', label: 'Messages' },
 		{ id: 'broadcast', label: 'Broadcast' },
 		{ id: 'albums', label: 'Albums' },
+		{ id: 'tools', label: 'Tools', badge: 'New!' },
 		{ id: 'settings', label: 'Settings' },
 		{ id: 'system', label: 'System' },
 		{ id: 'editor', label: 'Editor' }
@@ -35,9 +36,13 @@
 				type="button"
 				class="nav-btn"
 				class:active={page === item.id}
+				aria-current={page === item.id ? 'page' : undefined}
 				on:click={() => dispatch('navigate', item.id)}
 			>
 				{item.label}
+				{#if item.badge}
+					<span class="nav-badge">{item.badge}</span>
+				{/if}
 			</button>
 		{/each}
 	</nav>
@@ -126,6 +131,18 @@
 	.nav-btn.active {
 		color: var(--accent);
 		background: color-mix(in srgb, var(--accent) 18%, transparent);
+	}
+
+	.nav-badge {
+		font-size: 0.6rem;
+		font-weight: 700;
+		padding: 1px 5px;
+		border-radius: var(--radius-pill);
+		background: var(--accent);
+		color: var(--bg);
+		margin-left: 4px;
+		vertical-align: top;
+		line-height: 1.4;
 	}
 
 	.actions {
@@ -286,6 +303,8 @@
 			overflow-x: auto;
 			scrollbar-width: none;
 			-ms-overflow-style: none;
+			-webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+			mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
 		}
 
 		.nav::-webkit-scrollbar {

@@ -12,8 +12,14 @@
 	-moz-osx-font-smoothing: grayscale;
 	line-height: 1;
 }
-.nf-md-robot_angry_outline:before {
-	content: '\f169e';
+.nf-fa-chevron_down:before {
+	content: '\f078';
+}
+.nf-fa-chevron_left:before {
+	content: '\f053';
+}
+.nf-fa-chevron_right:before {
+	content: '\f054';
 }
 .nf-fa-crown:before {
 	content: '\edeb';
@@ -24,12 +30,51 @@
 .nf-fa-star:before {
 	content: '\f005';
 }
-.nf-fa-chevron_left:before {
-	content: '\f053';
+.nf-fa-times:before {
+	content: '\f00d';
 }
-.nf-fa-chevron_right:before {
-	content: '\f054';
+.nf-md-book_open_page_variant:before {
+	content: '\f05da';
 }
-.nf-fa-chevron_down:before {
-	content: '\f078';
+.nf-md-calculator:before {
+	content: '\f00ec';
+}
+.nf-md-clock_outline:before {
+	content: '\f0150';
+}
+.nf-md-code_braces:before {
+	content: '\f0169';
+}
+.nf-md-cog:before {
+	content: '\f0493';
+}
+.nf-md-currency_usd:before {
+	content: '\f01c1';
+}
+.nf-md-download_circle:before {
+	content: '\f1464';
+}
+.nf-md-file_pdf_box:before {
+	content: '\f0226';
+}
+.nf-md-filter_variant:before {
+	content: '\f0236';
+}
+.nf-md-palette:before {
+	content: '\f03d8';
+}
+.nf-md-pause:before {
+	content: '\f03e4';
+}
+.nf-md-play:before {
+	content: '\f040a';
+}
+.nf-md-qrcode:before {
+	content: '\f0432';
+}
+.nf-md-robot_angry_outline:before {
+	content: '\f169e';
+}
+.nf-md-swap_horizontal:before {
+	content: '\f04e1';
 }

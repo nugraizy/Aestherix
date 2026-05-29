@@ -53,4 +53,6 @@ export const messageLogs = writable({
 
 export const maintenanceMode = writable(false);
 
+export const toolPanels = writable([]);
+
 export const changelogOpen = writable(false);

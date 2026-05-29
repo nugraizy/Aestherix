@@ -21,11 +21,13 @@ import { createSpotifyRouter } from './routes/spotify.routes.js';
 import { createStaticRouter } from './routes/static.routes.js';
 import { createStatusRouter } from './routes/status.routes.js';
 import { createSystemRouter } from './routes/system.routes.js';
+import { createToolsRouter } from './routes/tools.routes.js';
 import { createUsersRouter } from './routes/users.routes.js';
 import { createAuditService } from './services/audit.service.js';
 import { createAuthService } from './services/auth.service.js';
 import { createBotBridgeService } from './services/bot-bridge.service.js';
 import { createBroadcastService } from './services/broadcast.service.js';
+import { createComicsService } from './services/comics.service.js';
 import { createEditorService } from './services/editor.service.js';
 import { createGroupsService } from './services/groups.service.js';
 import { createLifecycleService } from './services/lifecycle.service.js';
@@ -34,6 +36,7 @@ import { createProfilePicturesService } from './services/profile-pictures.servic
 import { createSettingsService } from './services/settings.service.js';
 import { createSpotifyService } from './services/spotify.service.js';
 import { createSystemService } from './services/system.service.js';
+import { createToolsService } from './services/tools.service.js';
 import { createUndoService } from './services/undo.service.js';
 import { createUsersService } from './services/users.service.js';
 import { createSocketLayer } from './socket/index.js';
@@ -56,6 +59,8 @@ function wireServices({ configuration, prisma }) {
 	const lifecycle = createLifecycleService();
 	const auth = createAuthService({ prisma, audit, botBridge });
 	const system = createSystemService({ configuration, prisma, monitor, spotify, auth, botBridge });
+	const tools = createToolsService({ prisma });
+	const comics = createComicsService();
 
 	return {
 		audit,
@@ -68,6 +73,8 @@ function wireServices({ configuration, prisma }) {
 		broadcast,
 		spotify,
 		system,
+		tools,
+		comics,
 		botBridge,
 		lifecycle,
 		monitor,
@@ -75,11 +82,11 @@ function wireServices({ configuration, prisma }) {
 	};
 }
 
-function createApp({ services, configuration, mountGradient = true, port = DEFAULT_PORT }) {
+function createApp({ services, configuration, port = DEFAULT_PORT }) {
 	const app = express();
 
 	app.use(compression());
-	app.use(express.json());
+	app.use(express.json({ limit: '5mb' }));
 	app.set('configuration', configuration);
 
 	const middleware = createAuthMiddleware({ auth: services.auth });
@@ -151,7 +158,8 @@ h1{font-size:1.8rem;margin-bottom:1rem}
 		createQuickActionsRouter({ services }),
 		createUsersRouter({ services, configuration }),
 		createStatusRouter({ services }),
-		createSystemRouter({ services })
+		createSystemRouter({ services }),
+		createToolsRouter({ services })
 	];
 
 	for (const router of apiRouters) {
@@ -163,7 +171,7 @@ h1{font-size:1.8rem;margin-bottom:1rem}
 	return app;
 }
 
-export async function createDashboard({ configuration, prisma, mountGradient = true, port = DEFAULT_PORT } = {}) {
+export async function createDashboard({ configuration, prisma, port = DEFAULT_PORT } = {}) {
 	if (!configuration) {
 		throw new Error('createDashboard: configuration is required');
 	}
@@ -180,7 +188,7 @@ export async function createDashboard({ configuration, prisma, mountGradient = t
 	await services.profilePictures.hydrate?.();
 	await services.monitor.initialize?.();
 
-	const app = createApp({ services, configuration, mountGradient, port });
+	const app = createApp({ services, configuration, port });
 	const httpServer = createServer(app);
 	const socketLayer = createSocketLayer(httpServer, services);
 
