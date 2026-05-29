@@ -1,8 +1,6 @@
 import axios from 'axios';
-import _ from 'lodash';
-
 import { ResponseParser } from './parsers.js';
-import { LOGIN_HEADERS, USER_AGENTS, _apiGraphql, _apiUser, _baseApi, generateDeviceID } from './utils.js';
+import { LOGIN_HEADERS, USER_AGENTS, _apiGraphql, _baseApi, generateDeviceID } from './utils.js';
 
 export class InstagramMethods extends ResponseParser {
 	#_apiLoginResponse = null;
@@ -92,23 +90,41 @@ export class InstagramMethods extends ResponseParser {
 			username = username.replace('@', '');
 		}
 
-		const {
-			data: {
-				data: { user }
+		const { data } = await axios.get(
+			this._appendParams(_apiGraphql, {
+				doc_id: '26347858941511777',
+				variables: JSON.stringify({ hasQuery: true, query: username })
+			}),
+			{
+				headers: {
+					'User-Agent': USER_AGENTS.LOGIN_MOBILE,
+					Cookie: cookie,
+					'x-ig-app-id': '936619743392459'
+				}
 			}
-		} = await axios.get(_apiUser(username), {
-			headers: {
-				'User-Agent': USER_AGENTS.NON_LOGIN_AGENT,
-				Cookie: cookie,
-				'x-ig-app-id': '936619743392459'
-			}
-		});
+		);
+
+		const users = data?.data?.xdt_api__v1__fbsearch__non_profiled_serp?.users || [];
+		const user = users.find((u) => u.username?.toLowerCase() === username.toLowerCase());
 
 		if (!user) {
 			return { error: `User ${username} not found.` };
 		}
 
-		return this._parseProfile(user);
+		return {
+			id: String(user.pk || user.id),
+			username: user.username,
+			fullName: user.full_name || '',
+			full_name: user.full_name || '',
+			isPrivate: user.is_private || false,
+			is_private: user.is_private || false,
+			isVerified: user.is_verified || false,
+			is_verified: user.is_verified || false,
+			profilePic: user.profile_pic_url || '',
+			profile_pic_url: user.profile_pic_url || '',
+			follower_count: user.follower_count || 0,
+			following_count: user.following_count || 0
+		};
 	}
 
 	async _searchProfile(username, cookie) {
@@ -136,160 +152,90 @@ export class InstagramMethods extends ResponseParser {
 	}
 
 	async _fetchHighlight(id, cookie) {
-		const { data } = await axios.get(
-			this._appendParams(_apiGraphql, {
-				query_hash: '0a85e6ea60a4c99edc58ab2f3d17cfdf',
-				variables: JSON.stringify({
-					reel_ids: [],
-					tag_names: [],
-					location_ids: [],
-					highlight_reel_ids: [id],
-					precomposed_overlay: false,
-					show_story_viewer_list: true,
-					story_viewer_fetch_count: 50,
-					story_viewer_cursor: '',
-					stories_video_dash_manifest: false
-				})
-			}),
-			{
-				method: 'GET',
+		const { data } = await this._requestApi('GET', `/api/v1/feed/reels_media/?reel_ids=highlight:${id}`, {
+			config: {
 				headers: {
 					...Object.assign(LOGIN_HEADERS, { 'User-Agent': USER_AGENTS.LOGIN_MOBILE }),
 					Cookie: cookie,
 					'x-csrf-token': /csrftoken=([^;]+)/.exec(cookie)[1]
 				}
 			}
-		);
+		});
 
 		return this._parseHighlight(data);
 	}
 
 	async _getHighlights(input, cookie) {
-		const defaultPayload = {
-			query_hash: '0a85e6ea60a4c99edc58ab2f3d17cfdf',
-			variables: {
-				reel_ids: [],
-				tag_names: [],
-				location_ids: [],
-				highlight_reel_ids: [],
-				precomposed_overlay: false,
-				show_story_viewer_list: true,
-				story_viewer_fetch_count: 50,
-				story_viewer_cursor: '',
-				stories_video_dash_manifest: false
-			}
-		};
-
 		if (input.startsWith('@')) {
 			input = input.replace('@', '');
 		}
 
 		if (this._isInstagramUrl(input)) {
-			return await this._handleInstagramUrl(input, cookie, defaultPayload);
+			const user = await this._getProfile(input.split('/')[3] || input, cookie);
+
+			return { user, highlights: [] };
 		}
 
 		const user = await this._getProfile(input, cookie);
-		const { data } = await axios.get(
-			this._appendParams(_apiGraphql, {
-				query_hash: 'c9100bf9110dd6361671f113dd02e7d6',
-				variables: JSON.stringify({
-					user_id: user.id,
-					include_chaining: false,
-					include_reel: true,
-					include_suggested_users: false,
-					include_logged_out_extras: false,
-					include_highlight_reels: true,
-					include_live_status: false
-				})
-			}),
-			{
+
+		const { data } = await this._requestApi('GET', `/api/v1/highlights/${user.id}/highlights_tray/`, {
+			config: {
 				headers: {
-					'User-Agent':
-						'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36',
+					...Object.assign(LOGIN_HEADERS, { 'User-Agent': USER_AGENTS.LOGIN_MOBILE }),
 					Cookie: cookie,
-					'X-CSRFToken': /csrftoken=([^;]+)/.exec(cookie)[1],
-					'x-ig-app-id': '936619743392459'
+					'x-csrf-token': /csrftoken=([^;]+)/.exec(cookie)[1]
+				}
+			}
+		});
+
+		const tray = data?.tray || [];
+
+		if (!tray.length) {
+			return { user, highlights: [] };
+		}
+
+		const highlightIds = tray.map((h) => `${h.id}`);
+
+		const { data: reelsData } = await this._requestApi(
+			'GET',
+			`/api/v1/feed/reels_media/?${highlightIds.map((id) => `reel_ids=${id}`).join('&')}`,
+			{
+				config: {
+					headers: {
+						...Object.assign(LOGIN_HEADERS, { 'User-Agent': USER_AGENTS.LOGIN_MOBILE }),
+						Cookie: cookie,
+						'x-csrf-token': /csrftoken=([^;]+)/.exec(cookie)[1]
+					}
 				}
 			}
 		);
 
-		return await this._processHighlightData(data, user, cookie);
-	}
-
-	async _handleInstagramUrl(input, cookie, payload) {
-		const { data: html } = await axios.get(input);
-		const initialHighlightData = /"id":"(\d+)"/.exec(html);
-
-		if (!initialHighlightData) {
-			throw new Error('No highlights present');
-		}
-
-		const { key, mediaId } = this._extractHighlightId(input);
-
-		payload.variables[key].push(initialHighlightData[1]);
-		payload.variables = JSON.stringify(payload.variables);
-
-		const { data } = await axios.get(this._appendParams(_apiGraphql, payload), {
-			method: 'GET',
-			headers: {
-				'User-Agent': USER_AGENTS.LOGIN_MOBILE,
-				Cookie: cookie,
-				'x-csrf-token': /csrftoken=([^;]+)/.exec(cookie)[1]
-			}
-		});
-
-		const user = await this._getProfile(data.data.reels_media[0].owner.username, cookie);
-		const container = { items: data.data.reels_media[0].items.find((v) => v.id === mediaId) };
-		const highlights = this._parseHighlight(data);
-		const highlightsData = highlights.find((v) => v.mediaId === container.items.id);
+		const reels = reelsData?.reels || {};
 
 		return {
 			user,
-			highlights: [{ thumbnail: container.items.display_url, dataHighlight: [highlightsData] }]
-		};
-	}
+			highlights: tray.map((h) => {
+				const reel = reels[`${h.id}`];
+				const items = (reel?.items || []).map((item) => {
+					const isVideo = item.media_type === 2;
 
-	_extractHighlightId(input) {
-		const url = new URL(input);
-		const storyMediaId = url.searchParams.get('story_media_id');
+					return {
+						parentId: `${h.id}`,
+						mediaId: item.pk || item.id,
+						mimetype: isVideo ? 'video/mp4' : 'image/jpeg',
+						takenAt: item.taken_at,
+						type: isVideo ? 'video' : 'image',
+						url: isVideo ? item.video_versions?.[0]?.url : item.image_versions2?.candidates?.[0]?.url,
+						dimensions: { width: item.original_width, height: item.original_height }
+					};
+				});
 
-		if (storyMediaId) {
-			return { mediaId: storyMediaId.split('_')[0], key: 'highlight_reel_ids' };
-		}
-
-		return { key: 'reel_ids', mediaId: url.pathname.split('/')[3] };
-	}
-
-	async _processHighlightData(data, user, cookie) {
-		const container = {
-			items: _.chunk(
-				data.data.user.edge_highlight_reels.edges.map((edge) => ({
-					title: edge.node.title,
-					highlightId: edge.node.id,
-					cover: edge.node.cover_media.thumbnail_src
-				})),
-				7
-			)
-		};
-
-		let highlights = [];
-
-		for (const highlight of container.items) {
-			const fetchedHighlights = await Promise.all(highlight.map((v) => this._fetchHighlight(v.highlightId, cookie)));
-
-			highlights.push(...fetchedHighlights.flat());
-		}
-
-		highlights = highlights.flat();
-		const flatItems = container.items.flat();
-
-		return {
-			user,
-			highlights: flatItems.map((v) => ({
-				title: v.title,
-				thumbnail: v.cover,
-				dataHighlight: highlights.filter((w) => w.parentId === v.highlightId)
-			}))
+				return {
+					title: h.title,
+					thumbnail: h.cover_media?.cropped_image_version?.url || '',
+					dataHighlight: items
+				};
+			})
 		};
 	}
 
@@ -309,8 +255,9 @@ export class InstagramMethods extends ResponseParser {
 			input = input.pathname.split('/');
 		}
 
-		const STORY_ID = isInputURL ? input[3] : input;
+		const STORY_ID = isInputURL ? (input[3] === '' ? null : input[3]) : null;
 		const USERNAME = isInputURL ? input[2] : input;
+
 		const user = await this._getProfile(USERNAME, cookie);
 		const { data } = await this._requestApi('GET', `/api/v1/feed/user/${user.id}/story/`, {
 			config: {

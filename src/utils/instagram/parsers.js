@@ -120,19 +120,45 @@ export class ResponseParser {
 	}
 
 	_parseItemMediaType(data) {
-		const isVideo = data.media_type === 2;
+		const isVideo = data.media_type === 2 || data.is_video;
 
 		if (isVideo) {
-			return { isVideo, duration: data.video_duration, url: data.video_versions[0].url };
+			const url = data.video_versions?.[0]?.url || data.video_url;
+
+			return { isVideo: true, duration: data.video_duration, url };
 		}
 
-		return { isVideo, id: data.pk, url: data.image_versions2.candidates[0].url };
+		const url = data.image_versions2?.candidates?.[0]?.url || data.display_url;
+
+		return { isVideo: false, id: data.pk, url };
 	}
 
 	_parseStory({ user, data, isInputURL, STORY_ID }) {
-		delete user.posts;
+		if (user.posts) {
+			delete user.posts;
+		}
+
 		data = data.reel;
-		const result = { ...user, totalStories: data.media_count, stories: [] };
+		const reelUser = data?.user || {};
+		const result = {
+			...user,
+			username: user.username || reelUser.username,
+			fullName: user.fullName || user.full_name || reelUser.full_name || '',
+			isPrivate: user.isPrivate ?? user.is_private ?? reelUser.is_private ?? false,
+			isVerified: user.isVerified ?? user.is_verified ?? reelUser.is_verified ?? false,
+			profilePic: user.profilePic || user.profile_pic_url || reelUser.profile_pic_url || '',
+			biography: user.biography || '',
+			followers: user.followers || user.follower_count || 0,
+			following: user.following || user.following_count || 0,
+			highlightCount: user.highlightCount || 0,
+			postsCount: user.postsCount || 0,
+			isBusinessAccount: user.isBusinessAccount || false,
+			isRecentUser: user.isRecentUser || false,
+			accountCategory: user.accountCategory || null,
+			linkedFacebookPage: user.linkedFacebookPage || null,
+			totalStories: data.media_count,
+			stories: []
+		};
 
 		if (!result.totalStories && !user.isPrivate) {
 			return { error: `User ${user.username} doesn't have any stories available.` };
@@ -147,7 +173,7 @@ export class ResponseParser {
 			return { error: `User ${user.username} is private. And the bot is not following the user.` };
 		}
 
-		if (isInputURL) {
+		if (isInputURL && STORY_ID) {
 			const item = data.items.find((item) => item.pk === STORY_ID);
 
 			if (!item) {
@@ -166,15 +192,31 @@ export class ResponseParser {
 	}
 
 	_parseHighlight(data) {
-		return data.data.reels_media[0].items.map((edge) => ({
-			parentId: data.data.reels_media[0].id,
-			mediaId: edge.id,
-			mimetype: edge.is_video ? 'video/mp4' : 'image/jpeg',
-			takenAt: edge.taken_at_timestamp,
-			type: edge.is_video ? 'video' : 'image',
-			url: edge.is_video ? edge.video_resources[0].src : edge.display_url,
-			dimensions: edge.dimensions
-		}));
+		const reelsMedia = data?.data?.reels_media?.[0] || null;
+		const reels = data?.reels || null;
+		const reelKey = reels ? Object.keys(reels)[0] : null;
+		const reel = reelsMedia || (reelKey ? reels[reelKey] : null);
+
+		if (!reel || !reel.items?.length) {
+			return [];
+		}
+
+		return reel.items.map((edge) => {
+			const isVideo = edge.is_video || edge.media_type === 2;
+			const url = isVideo
+				? edge.video_resources?.[0]?.src || edge.video_versions?.[0]?.url
+				: edge.display_url || edge.image_versions2?.candidates?.[0]?.url;
+
+			return {
+				parentId: reel.id,
+				mediaId: edge.id || edge.pk,
+				mimetype: isVideo ? 'video/mp4' : 'image/jpeg',
+				takenAt: edge.taken_at_timestamp || edge.taken_at,
+				type: isVideo ? 'video' : 'image',
+				url,
+				dimensions: edge.dimensions || { width: edge.original_width, height: edge.original_height }
+			};
+		});
 	}
 
 	_parseHashtag(data) {

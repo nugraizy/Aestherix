@@ -48,11 +48,11 @@ export class InstagramApi extends InstagramMethods {
 			parseCookie: () => this._parseCookie(),
 
 			writeLoginInfo: () => {
-				set('USERNAME', this.#_username, { encrypt: true, path: '.instagram.env' });
-				set('PASSWORD', this.#_password, { encrypt: true, path: '.instagram.env' });
-				set('COOKIE', this.account.parseCookie(), { encrypt: true, path: '.instagram.env' });
-				set('UUID', this.#_uuid, { encrypt: true, path: '.instagram.env' });
-				set('DEVICE_ID', this.#_deviceId, { encrypt: true, path: '.instagram.env' });
+				set('USERNAME', this.#_username, { encrypt: true, path: '.env.instagram' });
+				set('PASSWORD', this.#_password, { encrypt: true, path: '.env.instagram' });
+				set('COOKIE', this.account.parseCookie(), { encrypt: true, path: '.env.instagram' });
+				set('UUID', this.#_uuid, { encrypt: true, path: '.env.instagram' });
+				set('DEVICE_ID', this.#_deviceId, { encrypt: true, path: '.env.instagram' });
 			}
 		};
 

@@ -1,7 +1,7 @@
 import parser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
-import { color, loggers, formatNumber, isURL } from '../../utils/modules/index.js';
+import { color, formatNumber, isURL, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -46,13 +46,13 @@ export default defineCommand({
 				continue;
 			}
 
+			console.log(highlights[data]);
+
 			let capt = 'Instagram Highlights'.formatHeaders();
 
 			capt += `\n\nUsername  : ${highlights[data].user.username}\n`;
 			capt += `Fullname  : ${highlights[data].user.fullName}\n`;
-			capt += highlights[data].user.biography === '' ? '' : `Biography : ${highlights[data].user.biography}\n`;
 			capt += `Total Highlights : ${formatNumber(highlights[data].highlights.length)}\n`;
-			capt += `👥 ${formatNumber(highlights[data].followers)} 👤 ${formatNumber(highlights[data].following)}\n`;
 
 			if (!isURL(input)) {
 				capt += 'Each Sections of the Higlights will be send 2 media.\n';

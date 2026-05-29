@@ -7,5 +7,5 @@ export const login = async (username, password) => {
 
 	login.account.writeLoginInfo();
 
-	console.log('Saved to .instagram.env');
+	console.log('Saved to .env.instagram');
 };

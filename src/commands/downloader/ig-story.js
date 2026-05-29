@@ -1,7 +1,7 @@
 import parser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
-import { color, delay, loggers, formatNumber } from '../../utils/modules/index.js';
+import { color, delay, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -49,18 +49,10 @@ export default defineCommand({
 			let capt = 'Instagram Story'.formatHeaders();
 
 			capt += `\n\nUsername : ${stories[data].username}\n`;
-			capt += `Fullname : ${stories[data].fullName}\n`;
-			capt += stories[data].biography === '' ? '' : `Biography : ${stories[data].biography}\n`;
-			capt += `Verifies : ${stories[data].isVerified ? 'Verified' : 'Not Verified'}\n`;
+			capt += `Fullname : ${stories[data].fullName || '-'}\n`;
+			capt += `Verified : ${stories[data].isVerified ? 'Verified' : 'Not Verified'}\n`;
 			capt += `Private : ${stories[data].isPrivate ? 'Private' : 'Public'}\n`;
-			capt += `Business : ${stories[data].isBusinessAccount ? 'Yes' : 'No'}\n`;
-			capt += `New User : ${stories[data].isRecentUser ? 'Yes' : 'No'}\n`;
-			capt += `Category : ${stories[data].accountCategory ? stories[data].accountCategory : 'No'}\n`;
-			capt += `Facebook Linked : ${stories[data].linkedFacebookPage ? 'Yes' : 'No'}\n`;
-			capt += `Total Highlights : ${formatNumber(stories[data].highlightCount)}\n`;
-			capt += `Total Posts : ${formatNumber(stories[data].postsCount)}\n`;
 			capt += `Total Stories : ${stories[data].stories.length}\n`;
-			capt += `👥 ${formatNumber(stories[data].followers)} 👤 ${formatNumber(stories[data].following)}\n\n`;
 
 			await client.reply(from, capt.trim().formatForm(), message);
 
