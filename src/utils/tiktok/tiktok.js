@@ -8,9 +8,8 @@ import { cheerioLOAD, randomChar } from '../modules/index.js';
 import { _api as API_BASE_URL, appVersion, checkValid, deviceIds, iids, lastInstall, random } from './util.js';
 
 const CACHE_TTL_MS = 10 * 60 * 1000;
-const RETRY_OPTIONS = { minTimeout: 0, retries: 20 };
-const MERGE_TIMEOUT_MS = 15000;
-const PARALLEL_REQUESTS = 200;
+const RETRY_OPTIONS = { minTimeout: 0, retries: 3 };
+const PARALLEL_REQUESTS = 5;
 
 const COOKIE = (process.env.COOKIE_TIKTOK_COM || '').replace(/\n/g, '');
 
@@ -120,10 +119,6 @@ async function convertHeicToJpg(url) {
 	const res = await fetch(url);
 
 	return heic({ buffer: Buffer.from(await res.arrayBuffer()), format: 'JPEG', quality: 100 });
-}
-
-function raceWithTimeout(promise, ms) {
-	return Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error('Merge timeout')), ms))]);
 }
 
 function parallelRace(requestFn, count = PARALLEL_REQUESTS) {
@@ -338,20 +333,30 @@ class ResponseParser {
 		};
 
 		if (typeToUse === 'images') {
-			await wait.update(
-				`Preparing TikTok ${data?.image_post_info?.images.length} Images. Converting HEIC to JPG if needed. Please wait...`
-			);
+			if (wait?.update) {
+				await wait.update(
+					`Preparing TikTok ${data?.image_post_info?.images.length} Images. Converting HEIC to JPG if needed. Please wait...`
+				);
+			}
 
 			const images = data.image_post_info.images;
 
-			result.url.images = await Promise.all(
-				images.map(async (v, i) => ({
+			if (wait) {
+				result.url.images = await Promise.all(
+					images.map(async (v, i) => ({
+						url: v.display_image.url_list[0],
+						urlWithWatermark: images[i].owner_watermark_image.url_list[0],
+						buffer: await convertHeicToJpg(v.display_image.url_list[0]),
+						index: i + 1
+					}))
+				);
+			} else {
+				result.url.images = images.map((v, i) => ({
 					url: v.display_image.url_list[0],
 					urlWithWatermark: images[i].owner_watermark_image.url_list[0],
-					buffer: await convertHeicToJpg(v.display_image.url_list[0]),
 					index: i + 1
-				}))
-			);
+				}));
+			}
 		} else {
 			result.url.withWatermark = findFirst(meta.withWatermarkList);
 			result.url.withNoWatermark = findFirst(meta.noWatermarkList);
@@ -539,25 +544,40 @@ class Tiktok {
 			ts: Math.floor(Date.now() / 1000)
 		});
 
-		const data = await asyncRetry(async () => {
-			const result = await parallelRace(async () => {
-				const data = await awemeRequest('aweme/v1/feed/?', body, 'OPTIONS');
+		const data = await (async () => {
+			let resolved = false;
 
-				if (data === '') {
-					throw new Error('No data');
+			const attempt = async () => {
+				while (!resolved) {
+					try {
+						const result = await awemeRequest('aweme/v1/feed/?', body, 'OPTIONS');
+
+						if (!result || result === '' || resolved) {
+							continue;
+						}
+
+						resolved = true;
+
+						return result;
+					} catch {
+						if (resolved) {
+							return null;
+						}
+					}
 				}
 
-				return data;
-			});
+				return null;
+			};
 
-			const response = await raceWithTimeout(this.#mergeMediaResponse(result, videoId, 'aweme_list', wait), MERGE_TIMEOUT_MS);
+			const workers = Array.from({ length: 10 }, () => attempt());
+			const first = await Promise.any(workers).catch(() => null);
 
-			if (response?.error) {
-				throw new Error(response.error);
+			if (!first) {
+				return null;
 			}
 
-			return response;
-		}, RETRY_OPTIONS);
+			return this.#mergeMediaResponse(first, videoId, 'aweme_list', wait);
+		})();
 
 		return data || { error: 'Post not found. Please try again later.' };
 	}

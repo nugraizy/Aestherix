@@ -18,11 +18,10 @@ export const mediafire = (url) =>
 
 			const $ = cheerioLOAD(data);
 
-			const detail = $('ul.details');
-
-			const filename = $('.filename').text();
-			const filesize = detail.find('li:first-child > span').text();
-			const uploaded = detail.find('li:last-child > span').text();
+			const filename = $('div.dl-btn-label').attr('title');
+			const filesize = $('a.input.popsok')
+				.text()
+				.match(/(\d+\.?\d*\s*(?:GB|MB|KB|B))/i)?.[0];
 			const dlLink = $('a.input.popsok').attr('href');
 			const filetypes = /[a-zA-Z]+/g.exec($('.filetype > span:last-child').text());
 			const mimetype = mime(filetypes?.[0]?.toLowerCase());
@@ -32,7 +31,7 @@ export const mediafire = (url) =>
 				resolve({ error: 'Cannot find downloadable link. Please check if the url is valid.' });
 			}
 
-			resolve({ filename, filesize, mimetype, filetype: format, uploaded, dlLink });
+			resolve({ filename, filesize, mimetype, filetype: format, dlLink });
 		} catch (error) {
 			reject(error);
 		}

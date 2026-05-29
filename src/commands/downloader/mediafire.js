@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { mediafire, isURL, removeDuplicatesArray, loggers, color } from '../../utils/index.js';
+import { color, isURL, loggers, mediafire, removeDuplicatesArray } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
 const regex = (url) =>
@@ -62,8 +62,7 @@ export default defineCommand({
 		
 Filename: ${result.filename}
 Filesize: ${result.filesize}
-Filetype: ${result.filetype}
-Uploaded: ${result.uploaded}`.formatForm(),
+Filetype: ${result.filetype}`.formatForm(),
 				message
 			);
 

@@ -1,37 +1,50 @@
-import { cheerioLOAD, fetchTEXT } from '../modules/index.js';
-import { parseDownload } from './utils.js';
+import { fetchTEXT } from '../modules/index.js';
 
-/**
- * Parsed result definition.
- * @typedef {Object} ResultsBandcamp
- * @property {(string|null)} ResultsBandcamp.title
- * @property {(string|null)} ResultsBandcamp.mp3
- */
 /**
  * Download bandcamp tracks.
  * @param {string} url valid bandcamp url.
- * @returns {Promise<ResultsBandcamp> & Promise<{error?: string}>}
- * @throws {Promise<Error>}
+ * @returns {Promise<{title?: string, artist?: string, thumbnail?: string, mp3?: string, duration?: number, error?: string}>}
  */
-export const downloadBandcamp = (url) =>
-	new Promise(async (resolve, reject) => {
-		try {
-			const data = await fetchTEXT(url);
-			const $ = cheerioLOAD(data);
-			const jsonRaw = JSON.parse(
-				$('script[src="https://s4.bcbits.com/bundle/bundle/1/tralbum_head-65e4aa096458ae9743f9f82d6924e998.js"]').attr(
-					'data-tralbum'
-				)
-			);
+export const downloadBandcamp = async (url) => {
+	const html = await fetchTEXT(url);
 
-			const jsonParsed = parseDownload(jsonRaw);
+	const match = html.match(/data-tralbum="({.+?})"/s) || html.match(/data-tralbum='({.+?})'/s);
 
-			if (!jsonParsed.mp3) {
-				return resolve({ error: 'No data found' });
-			}
+	if (!match) {
+		return { error: 'Could not find track data on this page.' };
+	}
 
-			resolve(jsonParsed);
-		} catch (err) {
-			reject(err);
-		}
-	});
+	const decoded = match[1]
+		.replace(/&quot;/g, '"')
+		.replace(/&amp;/g, '&')
+		.replace(/&#(\d+);/g, (_, c) => String.fromCharCode(c));
+	const tralbum = JSON.parse(decoded);
+	const trackInfo = tralbum?.trackinfo?.[0];
+
+	if (!trackInfo?.file) {
+		return { error: 'No streamable audio found. Track may require purchase.' };
+	}
+
+	const fileEntries = Object.entries(trackInfo.file);
+	const mp3Entry = fileEntries.find(([k]) => k.includes('mp3')) || fileEntries[0];
+	const mp3Url = mp3Entry?.[1];
+
+	if (!mp3Url) {
+		return { error: 'No audio URL found.' };
+	}
+
+	const artist = tralbum?.artist || '';
+	const title = trackInfo?.title || tralbum?.current?.title || '';
+	const thumbnail =
+		html.match(/<a class="popupImage"[^>]*href="([^"]+)"/)?.[1] ||
+		html.match(/property="og:image"[^>]*content="([^"]+)"/)?.[1] ||
+		null;
+
+	return {
+		title: artist ? `${artist} - ${title}` : title,
+		artist,
+		thumbnail,
+		mp3: mp3Url.startsWith('//') ? `https:${mp3Url}` : mp3Url,
+		duration: trackInfo?.duration || null
+	};
+};
