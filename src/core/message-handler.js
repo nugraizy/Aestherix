@@ -233,7 +233,7 @@ export class MessageHandler {
 			if (result.handled) {
 				const reply = result.approved
 					? 'Dashboard login confirmed. You can return to the browser now.'
-					: (result.message || 'Dashboard login rejected.');
+					: result.message || 'Dashboard login rejected.';
 
 				await client.reply(message.from, reply, message.raw);
 			}

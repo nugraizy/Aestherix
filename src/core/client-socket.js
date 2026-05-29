@@ -507,6 +507,64 @@ export class ClientSocket extends EventEmitter {
 		return user + '@' + server;
 	}
 
+	/**
+	 * Resolve a phone-number / JID / LID to either canonical JID (`<n>@s.whatsapp.net`)
+	 * or LID (`<n>@lid`). When the input is already in the target shape it is returned as-is.
+	 *
+	 * @param {string | number} input - bare digits, JID, or LID.
+	 * @param {'jid' | 'lid'} [target='jid'] - desired output format.
+	 * @returns {Promise<string | null>} resolved identifier or `null` if no mapping is known.
+	 */
+	async resolveJid(input, target = 'jid') {
+		if (target !== 'jid' && target !== 'lid') {
+			throw new TypeError(`resolveJid: target must be 'jid' or 'lid' (got "${target}")`);
+		}
+
+		const raw = String(input ?? '').trim();
+
+		if (!raw) {
+			return null;
+		}
+
+		let normalized;
+
+		if (raw.endsWith('@lid')) {
+			normalized = raw;
+		} else if (raw.includes('@')) {
+			normalized = jidNormalizedUser(raw);
+		} else {
+			const digits = raw.replace(/\D/g, '');
+
+			if (!digits) {
+				return null;
+			}
+
+			normalized = `${digits}${S_WHATSAPP_NET}`;
+		}
+
+		const isLid = normalized.endsWith('@lid');
+
+		if (target === 'lid' && isLid) {
+			return normalized;
+		}
+
+		if (target === 'jid' && !isLid) {
+			return normalized;
+		}
+
+		const lidMapping = this.#socket?.signalRepository?.lidMapping;
+
+		if (!lidMapping) {
+			return null;
+		}
+
+		try {
+			return target === 'lid' ? await lidMapping.getLIDForPN(normalized) : await lidMapping.getPNForLID(normalized);
+		} catch {
+			return null;
+		}
+	}
+
 	clearType(type, mime = '') {
 		if (type === 'imageMessage' || type === 'videoMessage') {
 			return type.replace(/Message/, '');

@@ -119,6 +119,7 @@ export declare class ClientSocket extends EventEmitter {
 	setStatus(status: string): Promise<unknown>;
 
 	decodeJid(jid: string): string;
+	resolveJid(input: string | number, target?: 'jid' | 'lid'): Promise<string | null>;
 	clearType(type: string, mime?: string): string;
 
 	buttonText(
