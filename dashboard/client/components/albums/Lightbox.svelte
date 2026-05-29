@@ -25,6 +25,12 @@
 	$: hasPrev = total > 1;
 	$: hasNext = total > 1;
 
+	const HEIC_RE = /\.(heic|heif)(\?.*)?$/i;
+
+	function imageSrc(pic) {
+		return HEIC_RE.test(pic?.url || '') ? pic.thumbnail || pic.url : pic.url;
+	}
+
 	function close() {
 		dispatch('close');
 	}
@@ -302,7 +308,7 @@
 							on:click={(event) => handleItemClick(event, i)}
 							on:keydown={(event) => handleItemKey(event, i)}
 						>
-							<img class="carousel-image" src={pic.url} alt="" />
+							<img class="carousel-image" src={imageSrc(pic)} alt="" />
 							{#if i === activeIndex}
 								<div class="image-actions" data-action>
 									<div class="actions-slider" class:show={showActions}>
