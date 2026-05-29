@@ -69,7 +69,7 @@ export default defineCommand({
 
 		chapterSessions.set(sessionId, state);
 
-		await wait.update(`${allChapters.length} chapter(s) found.`);
+		await wait.update(`${new Set(allChapters.map((c) => String(c.number))).size} chapter(s) found.`);
 
 		await sendBatch(state, from, message, client, { prefix, device });
 	}
@@ -84,7 +84,8 @@ async function sendBatch(state, from, message, client, ctx) {
 	const totalBatches = Math.ceil(allChapters.length / perBatch);
 	const hasMore = currentBatch + 1 < totalBatches;
 	const sortLabel = order === 'asc' ? '⬇️ Latest First' : '⬆️ Oldest First';
-	const body = `${'Comix Chapters'.formatHeaders()}\n\nTotal : ${allChapters.length} chapter(s)\nShowing : ${start + 1}–${start + batch.length}\nOrder : ${order === 'desc' ? 'Latest → Oldest' : 'Oldest → Latest'}\n\nSelect a chapter to read.`;
+	const total = new Set(allChapters.map((c) => String(c.number))).size;
+	const body = `${'Comix Chapters'.formatHeaders()}\n\nTotal : ${total} chapter(s)\nShowing : ${start + 1}–${start + batch.length}\nOrder : ${order === 'desc' ? 'Latest → Oldest' : 'Oldest → Latest'}\n\nSelect a chapter to read.`;
 
 	const builder = new client.TemplateBuilder.Native();
 

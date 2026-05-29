@@ -6,7 +6,6 @@ import { randomChar } from '../../utils/modules/index.js';
 import { shinigami } from '../../utils/shinigami/index.js';
 import { defineCommand } from '../_define.js';
 
-
 const CHAPTERS_PER_BATCH = 40;
 
 const chapterSessions = new Cache();
@@ -74,7 +73,7 @@ export default defineCommand({
 
 			chapterSessions.set(sessionId, state);
 
-			await wait.update(`${state.allChapters[state.allChapters.length - 1].number} chapter(s) found.`);
+			await wait.update(`${new Set(state.allChapters.map((c) => String(c.number))).size} chapter(s) found.`);
 			await sendBatch(state, from, message, client, { prefix, device });
 		} catch (error) {
 			return await wait.update(`Error: ${error.message || 'Failed to fetch chapters.'}`);
@@ -91,7 +90,8 @@ async function sendBatch(state, from, message, client, ctx) {
 	const totalBatches = Math.ceil(allChapters.length / perBatch);
 	const hasMore = currentBatch + 1 < totalBatches;
 	const sortLabel = order === 'asc' ? '⬇️ Latest First' : '⬆️ Oldest First';
-	const body = `${'Shinigami Chapters'.formatHeaders()}\n\nTotal : ${allChapters[allChapters.length - 1].number} chapter(s)\nShowing : ${batch[0]?.number}–${batch[batch.length - 1]?.number}\nOrder : ${order === 'desc' ? 'Latest → Oldest' : 'Oldest → Latest'}\n\nSelect a chapter to read.`;
+	const total = new Set(allChapters.map((c) => String(c.number))).size;
+	const body = `${'Shinigami Chapters'.formatHeaders()}\n\nTotal : ${total} chapter(s)\nShowing : ${batch[0]?.number}–${batch[batch.length - 1]?.number}\nOrder : ${order === 'desc' ? 'Latest → Oldest' : 'Oldest → Latest'}\n\nSelect a chapter to read.`;
 
 	const builder = new client.TemplateBuilder.Native();
 
@@ -100,7 +100,10 @@ async function sendBatch(state, from, message, client, ctx) {
 		const isRedundant = !ch.name || ch.name === `Chapter ${num}` || ch.name === num;
 		const label = isRedundant ? `Ch. ${num}` : `Ch. ${num}\n${ch.name}`;
 
-		return builder.button.reply({ display: label.replace(/[\r\t]/g, ' ').slice(0, 40), id: cmdId('sgread', `${mangaId}/${ch.id}`, ctx) });
+		return builder.button.reply({
+			display: label.replace(/[\r\t]/g, ' ').slice(0, 40),
+			id: cmdId('sgread', `${mangaId}/${ch.id}`, ctx)
+		});
 	});
 
 	if (hasMore) {

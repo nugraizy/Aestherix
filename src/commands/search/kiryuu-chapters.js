@@ -6,7 +6,6 @@ import { kiryuu } from '../../utils/index.js';
 import { randomChar } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
-
 const CHAPTERS_PER_BATCH = 40;
 
 const chapterSessions = new Cache();
@@ -70,7 +69,7 @@ export default defineCommand({
 
 			chapterSessions.set(sessionId, state);
 
-			await wait.update(`${allChapters[allChapters.length - 1].number} chapter(s) found.`);
+			await wait.update(`${new Set(allChapters.map((c) => String(c.number))).size} chapter(s) found.`);
 			await sendBatch(state, from, message, client, { prefix, device });
 		} catch (error) {
 			return await wait.update(`Error: ${error.message || 'Failed to fetch chapters.'}`);
@@ -87,7 +86,8 @@ async function sendBatch(state, from, message, client, ctx) {
 	const totalBatches = Math.ceil(allChapters.length / perBatch);
 	const hasMore = currentBatch + 1 < totalBatches;
 	const sortLabel = order === 'asc' ? '⬇️ Latest First' : '⬆️ Oldest First';
-	const body = `${'Kiryuu Chapters'.formatHeaders()}\n\n${mangaTitle || 'Manga'}\nTotal : ${allChapters[allChapters.length - 1].number} chapter(s)\nShowing : ${batch[0]?.number}–${batch[batch.length - 1]?.number}\nOrder : ${order === 'desc' ? 'Latest → Oldest' : 'Oldest → Latest'}\n\nSelect a chapter to read.`;
+	const total = new Set(allChapters.map((c) => String(c.number))).size;
+	const body = `${'Kiryuu Chapters'.formatHeaders()}\n\n${mangaTitle || 'Manga'}\nTotal : ${total} chapter(s)\nShowing : ${batch[0]?.number}–${batch[batch.length - 1]?.number}\nOrder : ${order === 'desc' ? 'Latest → Oldest' : 'Oldest → Latest'}\n\nSelect a chapter to read.`;
 
 	const builder = new client.TemplateBuilder.Native();
 

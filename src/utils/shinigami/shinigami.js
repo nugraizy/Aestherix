@@ -81,7 +81,7 @@ class Shinigami {
 	async getPopular(page = 1) {
 		const url = `${this.apiUrl}/v1/manga/list?page=${page}&page_size=30&sort=popularity`;
 		const data = await this.fetchJSON(url);
-		const hasNext = data.meta?.totalPage ? data.meta.page < data.meta.totalPage : false;
+		const hasNext = data.meta?.total_page ? data.meta.page < data.meta.total_page : false;
 
 		return { items: (data.data || []).map(normalizeManga), hasNext };
 	}
@@ -89,7 +89,7 @@ class Shinigami {
 	async getLatest(page = 1) {
 		const url = `${this.apiUrl}/v1/manga/list?page=${page}&page_size=30&sort=latest`;
 		const data = await this.fetchJSON(url);
-		const hasNext = data.meta?.totalPage ? data.meta.page < data.meta.totalPage : false;
+		const hasNext = data.meta?.total_page ? data.meta.page < data.meta.total_page : false;
 
 		return { items: (data.data || []).map(normalizeManga), hasNext };
 	}
@@ -135,7 +135,7 @@ class Shinigami {
 
 		const url = `${this.apiUrl}/v1/manga/list?${params.toString()}`;
 		const data = await this.fetchJSON(url);
-		const hasNext = data.meta?.totalPage ? data.meta.page < data.meta.totalPage : false;
+		const hasNext = data.meta?.total_page ? data.meta.page < data.meta.total_page : false;
 
 		return { items: (data.data || []).map(normalizeManga), hasNext };
 	}

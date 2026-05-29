@@ -2,7 +2,6 @@ import { atsumaru } from '../../utils/atsumaru/index.js';
 import { imageToPdf, mime } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
-
 export default defineCommand({
 	name: 'atsumaruread',
 	minifiedDescription: 'Read Atsumaru Chapter',

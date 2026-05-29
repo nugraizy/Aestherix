@@ -201,8 +201,9 @@ export class Kiryuu {
 	 * @param {string} query
 	 * @returns {Promise<import('./types/kiryuu').KiryuuManga[]>}
 	 */
-	async searchManga(query) {
-		const $ = await this.search(query, 1);
+	async searchManga(query, page = 1) {
+		const pageNum = typeof page === 'number' ? page : (page?.page ?? 1);
+		const $ = await this.search(query, pageNum);
 		const items = $('div > a[href*=/manga/]:has(> img)');
 		const slugs = items
 			.map((_, el) => {

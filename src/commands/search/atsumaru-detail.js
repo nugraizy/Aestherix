@@ -4,7 +4,6 @@ import { cmdId } from '../../helper/modules/prefix.js';
 import { atsumaru } from '../../utils/atsumaru/index.js';
 import { defineCommand } from '../_define.js';
 
-
 const formatDetailCaption = (manga) => {
 	const lines = [
 		`Title : ${manga.title}`,

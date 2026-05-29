@@ -6,7 +6,6 @@ import { atsumaru } from '../../utils/atsumaru/index.js';
 import { randomChar } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
-
 const searchSessions = new Cache();
 
 const formatMangaCaption = (manga) => {
