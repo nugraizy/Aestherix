@@ -1,102 +1,157 @@
+import { fetch } from 'undici';
+
 import { imageToPdf } from '../converter/image.js';
-import { cheerioLOAD, fetchTEXT } from '../modules/index.js';
+
+const BASE_URL = 'https://v2.komikcast.fit';
+const API_URL = 'https://be.komikcast.cc';
+
+const API_HEADERS = {
+	Accept: 'application/json',
+	Referer: `${BASE_URL}/`,
+	Origin: BASE_URL,
+	'Accept-Language': 'en-US,en;q=0.9,id;q=0.8'
+};
+
+const STATUS_MAP = {
+	ongoing: 'Ongoing',
+	'on going': 'Ongoing',
+	completed: 'Completed',
+	complete: 'Completed',
+	hiatus: 'Hiatus',
+	cancelled: 'Cancelled',
+	canceled: 'Cancelled'
+};
+
+function normalizeManga(item) {
+	if (!item) {
+		return null;
+	}
+
+	const data = item.data || {};
+	const slug = data.slug || item.id;
+
+	return {
+		id: String(slug),
+		slug: String(slug),
+		title: data.title || '',
+		poster: data.coverImage || '',
+		status: STATUS_MAP[(data.status || '').toLowerCase()] || 'Unknown',
+		authors: data.author ? [data.author] : [],
+		genres: (data.genres || []).map((g) => g?.data?.name).filter(Boolean),
+		synopsis: data.synopsis || '',
+		url: `${BASE_URL}/series/${slug}`
+	};
+}
+
+function normalizeChapter(item) {
+	const index = item.data?.index ?? item.chapterIndex;
+	const number = Number(index);
+	const title = item.data?.title;
+
+	return {
+		id: String(index),
+		number: Number.isFinite(number) ? number : index,
+		name: title ? `Chapter ${index}: ${title}` : `Chapter ${index}`,
+		createdAt: item.createdAt || item.updatedAt || ''
+	};
+}
 
 export class KomikCast {
-	#base = (input) => `https://komikcast.net${input}`;
-	#apiSearch = (input) => this.#base(`/?s=${encodeURIComponent(input)}`);
-	constructor() {
-		this.search = (keyword) =>
-			new Promise(async (resolve, reject) => {
-				try {
-					const data = await fetchTEXT(this.#apiSearch(keyword));
+	#mangaCache = new Map();
+	#chapterCache = new Map();
 
-					const $ = cheerioLOAD(data);
+	constructor({ apiUrl = API_URL, baseUrl = BASE_URL, fetchImpl = fetch } = {}) {
+		this.apiUrl = apiUrl;
+		this.baseUrl = baseUrl;
+		this.fetchImpl = fetchImpl;
+	}
 
-					if ($('h3.notfound').text() !== '') {
-						resolve({ error: 'Comic not found. Please try another keyword.' });
-					}
+	async fetchJSON(url) {
+		const response = await this.fetchImpl(url, { headers: API_HEADERS });
 
-					const container = $('.film-list')
-						.find('.animepost')
-						.map((i, el) => {
-							const name = $(el).find('.tt').text().trim();
-							const source = $(el).find('a').attr('href');
+		if (!response.ok) {
+			throw new Error(`Komikcast API error: ${response.status}`);
+		}
 
-							return { name, source };
-						})
-						.get();
+		return response.json();
+	}
 
-					resolve(container);
-				} catch (error) {
-					reject(error);
-				}
-			});
+	#listUrl({ page = 1, sort, order = 'desc', query } = {}) {
+		const params = new URLSearchParams();
 
-		this.getDetails = async (url) =>
-			new Promise(async (resolve, reject) => {
-				try {
-					const data = await fetchTEXT(url);
+		params.set('includeMeta', 'true');
+		params.set('take', '24');
+		params.set('page', String(page));
 
-					const $ = cheerioLOAD(data);
+		if (sort) {
+			params.set('sort', sort);
+			params.set('sortOrder', order);
+		}
 
-					const getElement = (input) => $('.spe').find(`span:contains(${input})`).text().split(':')[1].trim();
+		if (query) {
+			params.set('filter', `title=like="${query}",nativeTitle=like="${query}"`);
+		}
 
-					const container = {
-						altTitle: getElement('Judul'),
-						onGoing: getElement('Status') !== 'Tamat',
-						comicType: getElement('Jenis'),
-						releaseDate: getElement('Rilis'),
-						serialize: getElement('Serialisasi'),
-						views: getElement('Jumlah Pembaca'),
-						thumbnail: $('.thumb > img').attr('src'),
-						authorStr: getElement('Author'),
-						artistsStr: getElement('Artis'),
-						authorArr: getElement('Author').split(','),
-						artistsArr: getElement('Artis').split(','),
-						chapters: $('.bxcl.scrolling')
-							.find('ul > li')
-							.map((i, el) => $(el).find('span.dt > a').attr('href'))
-							.get()
-							.reverse()
-					};
+		return `${this.apiUrl}/series?${params.toString()}`;
+	}
 
-					resolve(container);
-				} catch (error) {
-					reject(error);
-				}
-			});
+	async #fetchList(options) {
+		const data = await this.fetchJSON(this.#listUrl(options));
+		const hasNext = data.meta ? (data.meta.page ?? 0) < (data.meta.lastPage ?? 0) : false;
 
-		this.getPanel = async (url) =>
-			new Promise(async (resolve, reject) => {
-				try {
-					const data = await fetchTEXT(url);
+		return { items: (data.data || []).map(normalizeManga), hasNext };
+	}
 
-					const $ = cheerioLOAD(data);
+	list(page = 1, sort = 'popularity', order = 'desc') {
+		return this.#fetchList({ page, sort, order });
+	}
 
-					const images = $('div[id=chimg]')
-						.find('img')
-						.map((i, el) => $(el).attr('src'))
-						.get();
+	getPopular(page = 1) {
+		return this.#fetchList({ page, sort: 'popularity' });
+	}
 
-					resolve(images);
-				} catch (error) {
-					reject(error);
-				}
-			});
+	getLatest(page = 1) {
+		return this.#fetchList({ page, sort: 'latest' });
+	}
 
-		this.toPdf = async (image) =>
-			new Promise(async (resolve, reject) => {
-				try {
-					if (!Array.isArray(image)) {
-						image = [image];
-					}
+	search(query, { page = 1 } = {}) {
+		return this.#fetchList({ page, query });
+	}
 
-					const buffer = await imageToPdf(image);
+	async getManga(slug) {
+		if (this.#mangaCache.has(slug)) {
+			return this.#mangaCache.get(slug);
+		}
 
-					resolve(buffer);
-				} catch (error) {
-					reject(error);
-				}
-			});
+		const data = await this.fetchJSON(`${this.apiUrl}/series/${slug}`);
+		const result = normalizeManga(data.data);
+
+		this.#mangaCache.set(slug, result);
+
+		return result;
+	}
+
+	async getChapters(slug) {
+		if (this.#chapterCache.has(slug)) {
+			return this.#chapterCache.get(slug);
+		}
+
+		const data = await this.fetchJSON(`${this.apiUrl}/series/${slug}/chapters`);
+		const result = (data.data || []).map(normalizeChapter);
+
+		this.#chapterCache.set(slug, result);
+
+		return result;
+	}
+
+	async getPages(slug, chapterIndex) {
+		const data = await this.fetchJSON(`${this.apiUrl}/series/${slug}/chapters/${chapterIndex}`);
+		const images = data.data?.data?.images || [];
+
+		return images.map((url, index) => ({ index, url }));
+	}
+
+	toPdf(imageUrls) {
+		return imageToPdf(imageUrls);
 	}
 }
