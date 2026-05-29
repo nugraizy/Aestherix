@@ -12,11 +12,12 @@ import {
 import { defineCommand } from '../_define.js';
 
 const regex = (input) => {
-	const reg = /^https?:\/\/(www\.)?bilibili\.tv\/[a-bA-Z-?]*\/play?\/\d$/gi;
-	const isBili = reg.test(input) || /\d{5,10}/g.test(input);
+	input = input.replace(/`/g, '').trim();
+	const reg = /^https?:\/\/(www\.)?bilibili\.tv\/[a-zA-Z-]*\/?(?:play|video)?\/?/i;
+	const isBili = reg.test(input) || /\d{5,}/.test(input);
 
 	if (isBili) {
-		const match = input.match(/\d{5,10}/g);
+		const match = input.match(/\d{5,}/);
 
 		if (!match) {
 			return { status: false, message: 'Bstation code not found on your URL. Try another URL or Input a Code.' };
@@ -28,8 +29,8 @@ const regex = (input) => {
 	return { status: false, message: 'This URL is not a valid Bstation URL. Try another URL.' };
 };
 
-const processVideo = async (url, client, { from, message, sender, filename, wait }) => {
-	const video = await bilibiliDetailTv({ aid: url });
+const processVideo = async (aid, client, { from, message, sender, filename, wait }) => {
+	const video = await bilibiliDetailTv({ aid });
 
 	await wait.update(
 		` • Converting videos, this might take a while please wait.\n\nResolution : ${
@@ -41,7 +42,8 @@ const processVideo = async (url, client, { from, message, sender, filename, wait
 		video.video,
 		video.audio,
 		path.join(__dirname, `src/media/temporary_files/${filename}.mp4`),
-		sender
+		sender,
+		'https://www.bilibili.tv/'
 	);
 
 	await client.send(
@@ -62,14 +64,17 @@ export default defineCommand({
 	cooldown: 8,
 	status: 'enable',
 	async run({ query, from, message, filename, sender, typeQuoted, mediaData, bodyQuoted, prettyNumber }, client) {
-		if (typeQuoted === 'imageMessage' && mediaData.participant?.includes(client.decodeJid(client.user.id))) {
+		if (
+			typeQuoted === 'imageMessage' &&
+			client.decodeJid(await client.resolveJid(mediaData.participant, 'jid'))?.includes(client.decodeJid(client.user.id))
+		) {
 			const reg = /✦ Video ID :\s*([^\n]+)/g;
 
 			const videoIds = [];
 			let match;
 
 			while ((match = reg.exec(bodyQuoted)) !== null) {
-				videoIds.push(match[1]);
+				videoIds.push(match[1].replace(/`/g, '').trim());
 			}
 
 			if (!videoIds.length) {
@@ -93,9 +98,9 @@ export default defineCommand({
 				return await client.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
 			}
 
-			await client.reply(from, `Downloading Bstation audio :\n${videoId}\nPlease wait`, message);
+			const wait = await client.waitMessage(from, `Downloading Bstation audio :\n${videoId}\nPlease wait`, message);
 
-			await processVideo(videoId, client, { from, message, prettyNumber });
+			await processVideo(videoId, client, { from, message, prettyNumber, wait });
 
 			return;
 		}

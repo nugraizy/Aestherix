@@ -1,6 +1,5 @@
-import asyncRetry from 'async-retry';
-import dayjs from 'dayjs';
 import { exec } from 'child_process';
+import dayjs from 'dayjs';
 import fs from 'fs-extra';
 
 import { color, isURL, loggers } from '../modules/index.js';
@@ -93,36 +92,54 @@ export const mp42mp3 = (input, output, sender) =>
 
 export const mergeVideoWithAudio = (video, audio, output, sender, referer) =>
 	new Promise(async (resolve, reject) => {
-		let command = 'ffmpeg ';
-
-		if (referer) {
-			command += `-headers "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.81 Safari/537.36"$'\r\n'"Referer: ${referer}"$'\r\n' `;
-		}
-
-		command += `-i "${video}" `;
-		command += `-i "${audio}" -c:v copy -c:a copy "${output}"`;
+		const tmpVideo = `${output}.video.tmp`;
+		const tmpAudio = `${output}.audio.tmp`;
+		const headers = {
+			'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+			...(referer ? { Referer: referer } : {})
+		};
 
 		try {
+			loggers.warning(`${color('Downloading streams for merge', 'pink')}`);
+
+			const [videoRes, audioRes] = await Promise.all([fetch(video, { headers }), fetch(audio, { headers })]);
+
+			if (!videoRes.ok) {
+				throw new Error(`Failed to download video stream (${videoRes.status})`);
+			}
+
+			if (!audioRes.ok) {
+				throw new Error(`Failed to download audio stream (${audioRes.status})`);
+			}
+
+			await Promise.all([
+				fs.writeFile(tmpVideo, Buffer.from(await videoRes.arrayBuffer())),
+				fs.writeFile(tmpAudio, Buffer.from(await audioRes.arrayBuffer()))
+			]);
+
 			loggers.warning(`${color('Merging files', 'pink')}`);
-			asyncRetry(
-				() => {
-					exec(command, async (err) => {
-						if (err) {
-							loggers.error(`${color('Failed to Merge Audio to Video', 'red')}`);
-							reject(err);
-							return;
-						}
 
-						loggers.info(`${color('Completed merging', 'pink')}`);
-						const buffer = await fs.readFile(output);
+			const command = `ffmpeg -y -i "${tmpVideo}" -i "${tmpAudio}" -c:v copy -c:a copy "${output}"`;
 
-						await fs.unlink(output);
-						resolve(buffer);
-					});
-				},
-				{ retries: 5 }
-			);
+			exec(command, async (err) => {
+				await fs.unlink(tmpVideo).catch(() => {});
+				await fs.unlink(tmpAudio).catch(() => {});
+
+				if (err) {
+					loggers.error(`${color('Failed to Merge Audio to Video', 'red')}`);
+					reject(err);
+					return;
+				}
+
+				loggers.info(`${color('Completed merging', 'pink')}`);
+				const buffer = await fs.readFile(output);
+
+				await fs.unlink(output);
+				resolve(buffer);
+			});
 		} catch (err) {
+			await fs.unlink(tmpVideo).catch(() => {});
+			await fs.unlink(tmpAudio).catch(() => {});
 			loggers.error(`${color('Failed to Merge Audio to Video', 'red')} for ${color(sender, 'lilac')}`);
 			reject(err);
 		}
