@@ -9,7 +9,7 @@ export function getCached(tab) {
 }
 
 export function setCached(tab, data) {
-	cache.update(c => ({
+	cache.update((c) => ({
 		...c,
 		[tab]: { data, loadedAt: Date.now(), loading: false, error: null }
 	}));
@@ -17,7 +17,12 @@ export function setCached(tab, data) {
 
 export function clearCached(tab) {
 	if (tab) {
-		cache.update(c => { const next = { ...c }; delete next[tab]; return next; });
+		cache.update((c) => {
+			const next = { ...c };
+
+			delete next[tab];
+			return next;
+		});
 	} else {
 		cache.set({});
 	}
@@ -25,7 +30,11 @@ export function clearCached(tab) {
 
 export function isStale(tab) {
 	const entry = get(cache)[tab];
-	if (!entry) return true;
+
+	if (!entry) {
+		return true;
+	}
+
 	return Date.now() - entry.loadedAt >= STALE_MS;
 }
 

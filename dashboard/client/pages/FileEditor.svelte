@@ -22,6 +22,7 @@
 	let formatting = false;
 	let search = '';
 	let editor;
+	let treeOpen = false;
 
 	$: if (active && !wasActive) {
 		wasActive = true;
@@ -106,6 +107,7 @@
 		}
 
 		void openFile(detail.path);
+		treeOpen = false;
 	}
 
 	function handleInput(detail) {
@@ -160,9 +162,17 @@
 	<header class="page-head">
 		<h2>File Editor</h2>
 		<p class="page-sub">Edit command files with CodeMirror. Ctrl+S to save · Format runs Prettier.</p>
+		<button
+			class="tree-toggle"
+			type="button"
+			aria-expanded={treeOpen}
+			on:click={() => (treeOpen = !treeOpen)}
+		>
+			{treeOpen ? 'Close files' : 'Files'}
+		</button>
 	</header>
 
-	<div class="editor-layout">
+	<div class="editor-layout" class:tree-open={treeOpen}>
 		<FileTree
 			bind:search
 			{root}
@@ -171,6 +181,14 @@
 			on:select={(event) => handleSelect(event.detail)}
 			on:toggle={(event) => toggleFolder(event.detail)}
 		/>
+		{#if treeOpen}
+			<button
+				type="button"
+				class="tree-backdrop"
+				aria-label="Close file tree"
+				on:click={() => (treeOpen = false)}
+			></button>
+		{/if}
 		<EditorPane
 			bind:this={editor}
 			{activePath}
@@ -211,6 +229,24 @@
 		font-size: var(--fs-sm);
 	}
 
+	.tree-toggle {
+		display: none;
+		align-self: flex-start;
+		padding: 0.35rem 0.85rem;
+		background: var(--accent);
+		color: var(--bg);
+		border: none;
+		border-radius: var(--radius-pill);
+		font-size: var(--fs-xs);
+		font-weight: 600;
+		cursor: pointer;
+		line-height: 1.4;
+	}
+
+	.tree-backdrop {
+		display: none;
+	}
+
 	.editor-layout {
 		display: grid;
 		grid-template-columns: 220px 1fr;
@@ -221,6 +257,40 @@
 	@media (max-width: 768px) {
 		.editor-layout {
 			grid-template-columns: 1fr;
+		}
+
+		.tree-toggle {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.editor-layout :global(.file-tree) {
+			position: fixed;
+			top: 0;
+			left: 0;
+			bottom: 0;
+			width: min(82vw, 320px);
+			z-index: 60;
+			transform: translateX(-105%);
+			transition: transform 0.2s ease;
+			border-radius: 0;
+		}
+
+		.editor-layout.tree-open :global(.file-tree) {
+			transform: translateX(0);
+			box-shadow: var(--shadow-lg);
+		}
+
+		.editor-layout.tree-open .tree-backdrop {
+			display: block;
+			position: fixed;
+			inset: 0;
+			z-index: 55;
+			background: rgba(0, 0, 0, 0.4);
+			border: none;
+			padding: 0;
+			cursor: pointer;
 		}
 	}
 </style>

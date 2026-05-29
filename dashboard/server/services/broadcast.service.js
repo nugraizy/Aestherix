@@ -191,7 +191,7 @@ export function createBroadcastService({ configuration, botBridge, prisma } = {}
 	}
 
 	async function getParticipants(jid) {
-		const meta = await resolveGroupMetadata(jid);
+		await resolveGroupMetadata(jid);
 		const cache = configuration?.groups?.metadata;
 		const cached = cache?.get?.(jid);
 

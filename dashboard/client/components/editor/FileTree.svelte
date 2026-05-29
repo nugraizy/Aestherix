@@ -55,6 +55,7 @@
 		display: flex;
 		flex-direction: column;
 		overflow: hidden;
+		min-width: 0;
 	}
 
 	header {
@@ -62,6 +63,7 @@
 		border-bottom: 1px solid var(--border);
 		display: grid;
 		gap: 6px;
+		min-width: 0;
 	}
 
 	h3 {
@@ -78,6 +80,9 @@
 		color: var(--text);
 		font-size: 0.78rem;
 		outline: none;
+		width: 100%;
+		min-width: 0;
+		box-sizing: border-box;
 	}
 
 	.search:focus {

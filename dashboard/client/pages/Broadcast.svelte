@@ -94,7 +94,17 @@
 
 	let now = Date.now();
 
-	const nowInterval = setInterval(() => { now = Date.now(); }, 5000);
+	const nowInterval = setInterval(() => {
+		if (!active) {
+			return;
+		}
+
+		if (typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+			return;
+		}
+
+		now = Date.now();
+	}, 5000);
 	$: estimatedSeconds = selectedCount > 0 ? Math.ceil((selectedCount - 1) * delayMs / 1000) : 0;
 	$: estimatedLabel = estimatedSeconds < 60
 		? `~${estimatedSeconds}s`
@@ -1182,6 +1192,72 @@
 
 		.layout > :global(*) {
 			height: clamp(300px, 50vh, 500px);
+		}
+	}
+
+	@media (max-width: 640px) {
+		.toolbar {
+			gap: var(--space-2);
+		}
+
+		.toolbar-group {
+			flex-wrap: wrap;
+			width: 100%;
+			gap: 0.3rem;
+		}
+
+		.toolbar-group .tb {
+			min-height: 36px;
+			flex: 0 0 auto;
+		}
+
+		.btn-row {
+			display: grid;
+			grid-template-columns: 1fr auto;
+			grid-template-areas:
+				"type remove"
+				"label label"
+				"url url";
+			gap: 0.4rem;
+		}
+
+		.btn-row > :global(.dropdown) {
+			grid-area: type;
+		}
+
+		.btn-row .btn-label {
+			grid-area: label;
+		}
+
+		.btn-row .btn-url,
+		.btn-row .btn-id {
+			grid-area: url;
+		}
+
+		.btn-row .remove-btn {
+			grid-area: remove;
+			min-width: 44px;
+			min-height: 44px;
+		}
+
+		.media-row {
+			flex-wrap: wrap;
+		}
+
+		.media-url {
+			flex: 1 1 100%;
+		}
+
+		.option-row {
+			flex-wrap: wrap;
+		}
+
+		.schedule-row .schedule-input {
+			flex: 1 1 100%;
+		}
+
+		.tb {
+			min-height: 36px;
 		}
 	}
 </style>

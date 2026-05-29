@@ -29,7 +29,8 @@
 		const newEntries = (payload.logs || []).reverse();
 
 		for (const entry of newEntries) {
-			const exists = entries.some((e) => (e.time || e.timestamp) === (entry.time || entry.timestamp));
+			const id = entry.id ?? entry.time ?? entry.timestamp;
+			const exists = entries.some((existing) => (existing.id ?? existing.time ?? existing.timestamp) === id);
 
 			if (!exists) {
 				entries = [entry, ...entries];
@@ -182,5 +183,36 @@
 		font-size: 0.66rem;
 		letter-spacing: 0.06em;
 		white-space: nowrap;
+	}
+
+	@media (max-width: 720px) {
+		.entry {
+			grid-template-columns: auto 1fr;
+			grid-template-areas:
+				"time role"
+				"action action"
+				"detail detail";
+			gap: 0.25rem 0.5rem;
+			padding: 0.5rem 0.4rem;
+		}
+
+		.time {
+			grid-area: time;
+		}
+
+		.role {
+			grid-area: role;
+			justify-self: end;
+		}
+
+		.action {
+			grid-area: action;
+		}
+
+		.detail {
+			grid-area: detail;
+			white-space: normal;
+			text-overflow: clip;
+		}
 	}
 </style>

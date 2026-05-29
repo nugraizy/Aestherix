@@ -481,6 +481,7 @@
 		display: flex;
 		align-items: center;
 		gap: var(--space-3);
+		flex-wrap: wrap;
 		padding: var(--space-2) var(--space-3);
 		border: 1px solid color-mix(in srgb, #ff8e74 30%, var(--border));
 		border-radius: var(--radius-sm);
@@ -534,10 +535,11 @@
 		.grid {
 			grid-template-columns: 1fr;
 		}
+	}
 
+	@media (pointer: coarse) {
 		.clear-btn {
-			min-height: 44px;
-			min-width: 44px;
+			padding: 0.35rem 0.7rem;
 		}
 	}
 </style>

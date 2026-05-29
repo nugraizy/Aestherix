@@ -230,7 +230,7 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 		const target = normalizePhoneNumber(phoneNumber);
 
 		for (const session of sessionStore.values()) {
-			if (session.role !== 'owner') {
+			if (session.role !== 'owner' && session.role !== 'superOwner') {
 				continue;
 			}
 
@@ -279,6 +279,7 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 		res.cookie(AUTH_COOKIE_NAME, token, {
 			httpOnly: true,
 			sameSite: 'lax',
+			secure: process.env.NODE_ENV === 'production',
 			maxAge: SESSION_TTL_MS,
 			path: '/'
 		});
@@ -521,7 +522,11 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 			});
 		}
 
-		res.clearCookie(AUTH_COOKIE_NAME, { path: '/' });
+		res.clearCookie(AUTH_COOKIE_NAME, {
+			path: '/',
+			sameSite: 'lax',
+			secure: process.env.NODE_ENV === 'production'
+		});
 
 		return { ok: true };
 	}

@@ -284,4 +284,48 @@
 		0%, 100% { opacity: 0.5; }
 		50% { opacity: 1; }
 	}
+
+	@media (max-width: 720px) {
+		.msg-row {
+			grid-template-columns: 1fr;
+			grid-auto-rows: auto;
+			gap: 0.2rem;
+			padding: 0.5rem 0.4rem;
+		}
+
+		.msg-time,
+		.msg-jid,
+		.msg-type {
+			font-size: 0.65rem;
+		}
+
+		.msg-jid {
+			max-width: none;
+			justify-self: start;
+		}
+
+		.msg-type {
+			justify-self: start;
+		}
+
+		.msg-content {
+			white-space: normal;
+			text-overflow: clip;
+			overflow: hidden;
+			display: -webkit-box;
+			-webkit-line-clamp: 3;
+			-webkit-box-orient: vertical;
+		}
+
+		.msg-skeleton {
+			grid-template-columns: 1fr;
+			gap: 0.25rem;
+		}
+
+		.skel-time,
+		.skel-jid,
+		.skel-type {
+			width: 40%;
+		}
+	}
 </style>

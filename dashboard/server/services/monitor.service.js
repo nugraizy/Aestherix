@@ -37,8 +37,8 @@ export function createMonitorService({ configuration } = {}) {
 		getLogs(opts) {
 			return getDashboardLogs(opts);
 		},
-		pushLog(entry) {
-			return pushDashboardLog(entry);
+		pushLog(level, ...info) {
+			return pushDashboardLog(level, ...info);
 		},
 		refreshCatalog() {
 			return refreshDashboardCommandCatalog(configuration);

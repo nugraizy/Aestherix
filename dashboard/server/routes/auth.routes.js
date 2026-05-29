@@ -151,7 +151,8 @@ export function createAuthRouter({ services }) {
 			authenticated: Boolean(session),
 			phoneNumber: session?.phoneNumber || null,
 			role: session?.role || null,
-			name: session?.name || null
+			name: session?.name || null,
+			version: services.system?.projectVersion || ''
 		});
 	});
 

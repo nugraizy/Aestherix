@@ -1,4 +1,5 @@
 <script>
+	import { MeshGradient } from '@mesh-gradient/core';
 	import { onDestroy, onMount } from 'svelte';
 	import { post } from '../lib/api.js';
 	import { watchConfirmation } from '../lib/confirmation.js';
@@ -25,6 +26,8 @@
 	let serverInfo = { version: '', loaded: false };
 	let now = new Date();
 	let clockTimer = null;
+	let meshCanvas;
+	let meshGradient = null;
 
 	function startCooldown(seconds) {
 		clearCooldown();
@@ -59,6 +62,22 @@
 			now = new Date();
 		}, 30_000);
 
+		if (meshCanvas) {
+			const style = getComputedStyle(document.documentElement);
+			const bg = style.getPropertyValue('--bg').trim() || '#1a1a2e';
+			const panel = style.getPropertyValue('--panel').trim() || '#16213e';
+			const accent = style.getPropertyValue('--accent').trim() || '#c4b5fd';
+			const muted = style.getPropertyValue('--muted').trim() || '#888';
+
+			meshGradient = new MeshGradient();
+			meshGradient.init(meshCanvas, {
+				colors: [bg, accent, panel, muted],
+				animationSpeed: 1,
+				appearance: 'smooth',
+
+			});
+		}
+
 		try {
 			const response = await fetch('/api/dashboard/auth/session', { credentials: 'include' });
 
@@ -75,6 +94,11 @@
 	onDestroy(() => {
 		disposeWatch();
 		clearCooldown();
+
+		if (meshGradient) {
+			meshGradient.destroy();
+			meshGradient = null;
+		}
 
 		if (clockTimer) {
 			clearInterval(clockTimer);
@@ -200,6 +224,7 @@
 <div class="login-shell">
 	<div class="login-card">
 		<aside class="info-panel">
+			<canvas class="mesh-bg" bind:this={meshCanvas} aria-hidden="true"></canvas>
 			<header class="info-brand">
 				<span class="logo" aria-hidden="true">✦</span>
 				<span class="title">Aestherix</span>
@@ -320,10 +345,26 @@
 		flex-direction: column;
 		justify-content: space-between;
 		padding: 2rem 1rem 0;
+		background: var(--bg);
+		position: relative;
+		isolation: isolate;
+	}
+
+	.login-shell::before {
+		content: '';
+		position: fixed;
+		inset: 0;
 		background:
-			radial-gradient(1200px 600px at 18% -10%, color-mix(in srgb, var(--accent) 22%, transparent), transparent),
-			radial-gradient(900px 500px at 110% 110%, color-mix(in srgb, var(--accent) 18%, transparent), transparent),
-			var(--bg);
+			radial-gradient(ellipse at 18% -10%, color-mix(in srgb, var(--accent) 22%, transparent) 0%, transparent 50%),
+			radial-gradient(ellipse at 110% 110%, color-mix(in srgb, var(--accent) 14%, transparent) 0%, transparent 45%);
+		pointer-events: none;
+		z-index: -1;
+		animation: login-glow 8s ease-in-out infinite alternate;
+	}
+
+	@keyframes login-glow {
+		from { opacity: 0.6; }
+		to { opacity: 1; }
 	}
 
 	.footer-bleed {
@@ -347,15 +388,24 @@
 	}
 
 	.info-panel {
+		position: relative;
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-4);
 		padding: var(--space-6);
-		background:
-			linear-gradient(135deg, color-mix(in srgb, var(--accent) 24%, transparent) 0%, transparent 65%),
-			color-mix(in srgb, var(--bg) 70%, var(--panel));
+		background: color-mix(in srgb, var(--bg) 70%, var(--panel));
 		border-right: 1px solid var(--border);
 		min-height: 100%;
+		overflow: hidden;
+	}
+
+	.mesh-bg {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		opacity: 0.55;
+		pointer-events: none;
 	}
 
 	.info-brand {
@@ -363,6 +413,8 @@
 		align-items: center;
 		gap: 0.5rem;
 		font-size: var(--fs-md);
+		position: relative;
+		z-index: 1;
 	}
 
 	.info-brand .logo {
@@ -380,6 +432,8 @@
 		font-size: var(--fs-md);
 		line-height: 1.55;
 		color: var(--text);
+		position: relative;
+		z-index: 1;
 	}
 
 	.features {
@@ -390,6 +444,8 @@
 		gap: 0.65rem;
 		font-size: var(--fs-sm);
 		color: color-mix(in srgb, var(--text) 85%, transparent);
+		position: relative;
+		z-index: 1;
 	}
 
 	.features li {
@@ -413,6 +469,8 @@
 		flex-wrap: wrap;
 		font-size: var(--fs-xs);
 		color: var(--muted);
+		position: relative;
+		z-index: 1;
 	}
 
 	.badge {

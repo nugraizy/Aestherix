@@ -227,37 +227,39 @@
 				{:else}
 					<span class="limit">{user.limit ?? '—'}</span>
 				{/if}
-				<ButtonPill>
-					<button
-						type="button"
-						class:active={user.premium}
-						disabled={!editable || premiumBusy}
-						aria-pressed={Boolean(user.premium)}
-						on:click={() => toggleAttribute(user, 'premium')}
-					>
-						Premium
-					</button>
-					<button
-						type="button"
-						class="danger"
-						class:active={user.banned}
-						disabled={!editable || bannedBusy}
-						aria-pressed={Boolean(user.banned)}
-						on:click={() => toggleAttribute(user, 'banned')}
-					>
-						Banned
-					</button>
-					<button
-						type="button"
-						class="danger"
-						class:active={user.blocked}
-						disabled={!editable || blockedBusy}
-						aria-pressed={Boolean(user.blocked)}
-						on:click={() => toggleAttribute(user, 'blocked')}
-					>
-						Blocked
-					</button>
-				</ButtonPill>
+				<div class="chips">
+					<ButtonPill>
+						<button
+							type="button"
+							class:active={user.premium}
+							disabled={!editable || premiumBusy}
+							aria-pressed={Boolean(user.premium)}
+							on:click={() => toggleAttribute(user, 'premium')}
+						>
+							Premium
+						</button>
+						<button
+							type="button"
+							class="danger"
+							class:active={user.banned}
+							disabled={!editable || bannedBusy}
+							aria-pressed={Boolean(user.banned)}
+							on:click={() => toggleAttribute(user, 'banned')}
+						>
+							Banned
+						</button>
+						<button
+							type="button"
+							class="danger"
+							class:active={user.blocked}
+							disabled={!editable || blockedBusy}
+							aria-pressed={Boolean(user.blocked)}
+							on:click={() => toggleAttribute(user, 'blocked')}
+						>
+							Blocked
+						</button>
+					</ButtonPill>
+				</div>
 			</div>
 		{/each}
 		{#if !filtered.length}
@@ -286,6 +288,10 @@
 		gap: var(--space-3);
 		border-radius: var(--radius-sm);
 		transition: background var(--tx-base);
+	}
+
+	.chips {
+		display: inline-flex;
 	}
 
 	.row:hover {
@@ -327,12 +333,42 @@
 
 	@media (max-width: 720px) {
 		.row {
-			grid-template-columns: minmax(0, 1fr) auto auto;
+			grid-template-columns: minmax(0, 1fr) auto;
+			grid-template-areas:
+				"jid role"
+				"limit chips";
+			row-gap: 0.4rem;
+			column-gap: var(--space-2);
+			align-items: center;
+		}
+
+		.row > :global(.tooltip-host) {
+			grid-area: jid;
+			min-width: 0;
+		}
+
+		.row :global(.role-badge) {
+			grid-area: role;
+			justify-self: end;
+		}
+
+		.row .limit,
+		.row > :global(.number-input) {
+			grid-area: limit;
+			justify-self: start;
 		}
 
 		.chips {
-			grid-column: 1 / -1;
-			justify-content: flex-start;
+			grid-area: chips;
+			justify-self: end;
+		}
+
+		.chips :global(.pill) {
+			display: flex;
+		}
+
+		.chips :global(.pill button) {
+			flex: 1 1 0;
 		}
 	}
 

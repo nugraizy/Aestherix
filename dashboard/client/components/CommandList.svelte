@@ -404,8 +404,7 @@
 		max-width: 220px;
 	}
 
-	@media (max-width: 540px) {
-.cat-skeleton {
+	.cat-skeleton {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-2);
@@ -456,7 +455,8 @@
 		to   { opacity: 1; transform: translateY(0); }
 	}
 
-	.input {
+	@media (max-width: 540px) {
+		.input {
 			max-width: 100%;
 			flex: 1;
 		}

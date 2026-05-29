@@ -1,5 +1,6 @@
 <script>
 	import { createEventDispatcher, onDestroy, onMount, tick } from 'svelte';
+	import { highlightCode } from '../../lib/code-highlight.js';
 	import ButtonPill from '../ui/ButtonPill.svelte';
 
 	export let activePath = '';
@@ -10,14 +11,39 @@
 	export let formatting = false;
 
 	const dispatch = createEventDispatcher();
+	const DIFF_DEBOUNCE_MS = 250;
 	let mountEl;
 	let editor = null;
 	let detectLanguage = () => null;
 	let lastSyncedPath = '';
 	let loading = true;
 	let showDiff = true;
+	let diffHtml = '';
+	let diffTimer = null;
 
-	$: diffHtml = dirty ? computeDiff(originalContent, content) : '';
+	function scheduleDiff() {
+		if (diffTimer) {
+			clearTimeout(diffTimer);
+		}
+
+		diffTimer = setTimeout(() => {
+			diffTimer = null;
+			diffHtml = computeDiff(originalContent, content);
+		}, DIFF_DEBOUNCE_MS);
+	}
+
+	$: if (dirty && showDiff) {
+		scheduleDiff();
+	} else if (!dirty || !showDiff) {
+		if (diffTimer) {
+			clearTimeout(diffTimer);
+			diffTimer = null;
+		}
+
+		if (!dirty) {
+			diffHtml = '';
+		}
+	}
 
 	function computeDiff(oldText, newText) {
 		const oldLines = oldText.replace(/\r\n?/g, '\n').split('\n');
@@ -35,17 +61,17 @@
 				newLn++;
 				const ln = `<span class="diff-ln">${String(newLn).padStart(3)}</span> `;
 
-				lines.push(`<span class="diff-ctx">${ln} ${highlight(esc(val))}</span>`);
+				lines.push(`<span class="diff-ctx">${ln} ${highlight(val)}</span>`);
 			} else if (op.type === 'delete') {
 				oldLn++;
 				const ln = `<span class="diff-ln">${String(oldLn).padStart(3)}</span> `;
 
-				lines.push(`<span class="diff-del">${ln}-${highlight(esc(val))}</span>`);
+				lines.push(`<span class="diff-del">${ln}-${highlight(val)}</span>`);
 			} else {
 				newLn++;
 				const ln = `<span class="diff-ln">${String(newLn).padStart(3)}</span> `;
 
-				lines.push(`<span class="diff-add">${ln}+${highlight(esc(val))}</span>`);
+				lines.push(`<span class="diff-add">${ln}+${highlight(val)}</span>`);
 			}
 		}
 
@@ -105,39 +131,8 @@
 		return ops.reverse();
 	}
 
-	function esc(str) {
-		return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-	}
-
-	function highlight(escaped) {
-		const tokens = [];
-		const PH_START = '\u2060\u200B';
-		const PH_END = '\u200B\u2060';
-
-		const tokenize = (cls, match) => {
-			const idx = tokens.length;
-
-			tokens.push(`<span class="${cls}">${match}</span>`);
-
-			return `${PH_START}T${idx}T${PH_END}`;
-		};
-
-		let result = escaped
-			.replace(/(\/\/.*$)/gm, (m) => tokenize('hl-comment', m))
-			.replace(/('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*`)/g, (m) => tokenize('hl-string', m))
-			.replace(/\b(\d+\.?\d*)\b/g, (m) => tokenize('hl-number', m))
-			.replace(/\b(true|false|null|undefined|NaN|Infinity)\b/g, (m) => tokenize('hl-atom', m))
-			.replace(/\b(await)\b/g, (m) => tokenize('hl-operator', m))
-			.replace(/\b(const|let|var|function|return|if|else|for|while|import|export|from|async|class|new|this|throw|try|catch|default|switch|case|break|continue|typeof|instanceof|of|in)\b/g, (m) => tokenize('hl-keyword', m))
-			.replace(/(\w+)(?=\s*\()/g, (m) => tokenize('hl-function', m))
-			.replace(/(\w+)(?=\s*:)/g, (m) => tokenize('hl-property', m))
-			.replace(/\.(\w+)/g, (_, prop) => `.${tokenize('hl-property', prop)}`)
-			.replace(/(=&gt;|[+\-*/%=!<>&|?]+|\.{3})/g, (m) => tokenize('hl-operator', m))
-			.replace(/([(){}[\]:;,])/g, (m) => tokenize('hl-punctuation', m));
-
-		result = result.replace(/\u2060\u200BT(\d+)T\u200B\u2060/g, (_, idx) => tokens[Number(idx)]);
-
-		return result;
+	function highlight(raw) {
+		return highlightCode(raw, 'js');
 	}
 
 	function syncFromProp(value) {
@@ -178,6 +173,11 @@
 	});
 
 	onDestroy(() => {
+		if (diffTimer) {
+			clearTimeout(diffTimer);
+			diffTimer = null;
+		}
+
 		editor?.destroy();
 		editor = null;
 	});

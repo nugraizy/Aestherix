@@ -7,8 +7,15 @@ function normalizeStatus(status) {
 	return status === 'failed' ? 'failed' : 'ok';
 }
 
+const ACTOR_ROLE_MAP = {
+	superOwner: 'superOwner',
+	owner: 'owner',
+	viewer: 'viewer',
+	groupAdmin: 'groupAdmin'
+};
+
 function buildEntry({ id, timestamp, action, session, target, status, message, before, after }) {
-	const actorRole = session?.role === 'owner' ? 'owner' : session?.role === 'viewer' ? 'viewer' : 'system';
+	const actorRole = ACTOR_ROLE_MAP[session?.role] || 'system';
 	const actor = session?.phoneNumber || session?.name || null;
 
 	return {

@@ -13,6 +13,8 @@ const initialData = {
 	timestamp: 0
 };
 
+const NOW_PLAYING_TTL_MS = 4000;
+
 export function createSpotifyService() {
 	const cache = {
 		data: { ...initialData },
@@ -63,7 +65,7 @@ export function createSpotifyService() {
 			}
 
 			cache.data = next;
-			cache.expiresAt = Date.now();
+			cache.expiresAt = Date.now() + NOW_PLAYING_TTL_MS;
 			cache.pending = null;
 
 			return next;

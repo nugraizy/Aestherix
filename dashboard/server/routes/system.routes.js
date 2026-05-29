@@ -16,7 +16,7 @@ export function createSystemRouter({ services }) {
 		res.json({ keys: system.getEnvKeyPresence() });
 	});
 
-	router.get('/commands/analytics', middleware.requireOwnerAuth, async (_req, res) => {
+	router.get('/commands/analytics', middleware.requireDashboardAuth, async (_req, res) => {
 		try {
 			const row = await (
 				await import('../../../src/helper/database/prisma.js')

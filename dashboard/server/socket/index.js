@@ -5,7 +5,7 @@ import { AUTH_COOKIE_NAME } from '../services/auth.service.js';
 import { createConfirmationBridge } from './confirmation.js';
 import { ROOMS } from './rooms.js';
 
-const STATUS_INTERVAL_MS = 1000;
+const STATUS_INTERVAL_MS = 2000;
 const LOGS_INTERVAL_MS = 1200;
 const BOT_LOGS_INTERVAL_MS = 1200;
 const AUDIT_INTERVAL_MS = 5000;
@@ -88,14 +88,51 @@ async function emitInitialSnapshot(socket, services) {
 	socket.emit('dashboard:audit', auditPayload);
 }
 
+function statusSignature(status) {
+	if (!status) {
+		return '';
+	}
+
+	const sys = status.system || {};
+	const proc = status.process || {};
+	const cmds = status.commands || {};
+	const flags = status.flags || {};
+	const bot = status.bot || {};
+	const sessions = status.sessions || {};
+
+	return [
+		Math.round(Number(sys.cpuPercent || 0) * 10) / 10,
+		Math.round(Number(proc.cpuPercent || 0) * 10) / 10,
+		Math.round(Number(sys.freeMemory || 0) / (1024 * 1024)),
+		Math.round(Number(proc.rss || 0) / (1024 * 1024)),
+		Math.round(Number(proc.heapUsed || 0) / (1024 * 1024)),
+		Math.floor(Number(proc.uptimeSeconds || 0)),
+		Number(cmds.total || 0),
+		Number(cmds.enabled || 0),
+		Number(flags.enabled || 0),
+		Number(sessions.activeUsers || 0),
+		bot.online ? 1 : 0,
+		bot.waConnected ? 1 : 0,
+		bot.mode || ''
+	].join('|');
+}
+
 function startStatusInterval(io, services) {
+	let lastSig = '';
+
 	return setInterval(async () => {
 		if (io.of('/').sockets.size === 0) {
 			return;
 		}
 
 		const status = await services.system.getStatus();
+		const sig = statusSignature(status);
 
+		if (sig === lastSig) {
+			return;
+		}
+
+		lastSig = sig;
 		io.emit('dashboard:status', status);
 	}, STATUS_INTERVAL_MS);
 }
@@ -145,31 +182,30 @@ function startBotLogsInterval(io, services) {
 			return;
 		}
 
-		const cursors = ownerSockets.map((s) => Number(s.data?.lastBotLogId || 0));
-		const since = Math.max(0, ...cursors);
+		const fetchCache = new Map();
 
-		const result = await services.botBridge.fetchBotLogs({ since, limit: 250 });
+		for (const socket of ownerSockets) {
+			const since = Number(socket.data?.lastBotLogId || 0);
+			let result = fetchCache.get(since);
 
-		if (!result.ok) {
-			for (const socket of ownerSockets) {
+			if (!result) {
+				result = await services.botBridge.fetchBotLogs({ since, limit: 250 });
+				fetchCache.set(since, result);
+			}
+
+			if (!result.ok) {
 				socket.emit('dashboard:bot-logs', {
 					ok: false,
 					message: result.message || 'Bot log stream is not reachable.',
 					lastId: since,
 					logs: []
 				});
+				continue;
 			}
 
-			return;
-		}
+			const payload = result.data || { lastId: since, logs: [] };
 
-		const payload = result.data || { lastId: since, logs: [] };
-
-		for (const socket of ownerSockets) {
-			const lastId = Number(socket.data?.lastBotLogId || 0);
-
-			socket.data.lastBotLogId = Number(payload?.lastId || lastId);
-
+			socket.data.lastBotLogId = Number(payload?.lastId || since);
 			socket.emit('dashboard:bot-logs', payload);
 		}
 	}, BOT_LOGS_INTERVAL_MS);

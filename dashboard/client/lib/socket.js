@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 import { MAX_LOGS } from './constants.js';
-import { commands, flags, logs, status, users } from './stores.js';
+import { commands, flags, logs, status, toolPanels, users } from './stores.js';
 
 let logSeq = 0;
 
@@ -9,7 +9,8 @@ export const socket = io({
 	reconnectionAttempts: 5,
 	reconnectionDelay: 2000,
 	timeout: 5000,
-	transports: ['websocket']
+	transports: ['polling', 'websocket'],
+	upgrade: true
 });
 
 let bound = false;
@@ -90,23 +91,29 @@ function bindEvents() {
 	});
 
 	socket.on('dashboard:commands', (payload) => {
-		const list = payload?.commands || [];
-
-		if (list.length) {
-			commands.set(list);
+		if (Array.isArray(payload?.commands)) {
+			commands.set(payload.commands);
 		}
 	});
 
 	socket.on('dashboard:flags', (payload) => {
-		const valid = (payload?.flags || []).filter((entry) => entry && typeof entry.name === 'string' && entry.name.length > 1);
-
-		if (valid.length) {
-			flags.set(valid);
+		if (!Array.isArray(payload?.flags)) {
+			return;
 		}
+
+		const valid = payload.flags.filter((entry) => entry && typeof entry.name === 'string' && entry.name.length > 1);
+
+		flags.set(valid);
 	});
 
 	socket.on('dashboard:users', (payload) => {
 		users.set(payload?.users || []);
+	});
+
+	socket.on('dashboard:tools', (payload) => {
+		if (Array.isArray(payload?.panels)) {
+			toolPanels.set(payload.panels);
+		}
 	});
 
 	socket.on('dashboard:logs', (payload) => {
@@ -132,16 +139,14 @@ function bindEvents() {
 				]);
 				const [cmdData, flagData] = await Promise.all([cmdRes.json(), flagRes.json()]);
 
-				if (cmdData?.commands?.length) {
+				if (Array.isArray(cmdData?.commands)) {
 					commands.set(cmdData.commands);
 				}
 
-				if (flagData?.flags?.length) {
+				if (Array.isArray(flagData?.flags)) {
 					const valid = flagData.flags.filter((entry) => entry && typeof entry.name === 'string' && entry.name.length > 1);
 
-					if (valid.length) {
-						flags.set(valid);
-					}
+					flags.set(valid);
 				}
 			} catch {
 				// Ignore errors - the socket will update when the data is received

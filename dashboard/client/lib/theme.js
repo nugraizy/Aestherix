@@ -75,6 +75,7 @@ export function applyTheme(name, mode = activeMode) {
 	}
 
 	const root = document.documentElement;
+	const bg = mode === 'light' ? '#ffffff' : p.panel;
 
 	root.style.setProperty('--bg', p.bg);
 	root.style.setProperty('--panel', p.panel);
@@ -89,6 +90,18 @@ export function applyTheme(name, mode = activeMode) {
 		root.style.setProperty('--border', '#d8d9e2');
 		root.style.setProperty('--text', '#1a1c21');
 		root.style.setProperty('--muted', '#5e6372');
+	}
+
+	const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+
+	if (themeColorMeta) {
+		themeColorMeta.setAttribute('content', bg);
+	}
+
+	const themeColorMetas = document.querySelectorAll('meta[name="theme-color"]');
+
+	for (const meta of themeColorMetas) {
+		meta.setAttribute('content', bg);
 	}
 
 	const palette = CODE_COLORS[mode] ?? CODE_COLORS.dark;

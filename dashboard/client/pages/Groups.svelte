@@ -6,6 +6,7 @@
 	import Tooltip from '../components/ui/Tooltip.svelte';
 	import { get, getGroupInfo, getGroupSettings, getGroups, groupParticipantAction, post, updateGroupSetting } from '../lib/api.js';
 	import { showConfirm } from '../lib/confirm.js';
+	import { watchConfirmation } from '../lib/confirmation.js';
 	import { showError, showSuccess } from '../lib/toast.js';
 
 	export let active = true;
