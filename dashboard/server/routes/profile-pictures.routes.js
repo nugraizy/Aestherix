@@ -109,23 +109,40 @@ export function createProfilePicturesRouter({ services }) {
 	const router = Router();
 
 	router.get('/profile-pictures', middleware.requireDashboardAuth, noStoreJson, async (req, res) => {
-		const rawLimit = req.query?.limit;
-		const limit = rawLimit === undefined ? undefined : Number(rawLimit);
 		const colorHex = String(req.query?.color || '').trim();
 		const tolerance = Math.max(
 			0,
 			Math.min(PROFILE_PICTURES_COLOR_TOLERANCE_MAX, Number(req.query?.tolerance || PROFILE_PICTURES_COLOR_TOLERANCE_DEFAULT))
 		);
+		const pageSize = Math.min(100, Math.max(1, Number(req.query?.pageSize) || 50));
+		const img = String(req.query?.img || '').trim();
 
-		let pictures = await profilePictures.list({ limit });
+		let pictures = await profilePictures.list();
 
 		if (colorHex) {
 			pictures = await profilePictures.filterByColor(pictures, { colorHex, tolerance });
 		}
 
+		const total = pictures.length;
+		const lastPage = Math.max(0, Math.ceil(total / pageSize) - 1);
+		let page = Math.min(Math.max(0, Number(req.query?.page) || 0), lastPage);
+		let imgIndex = -1;
+
+		if (img) {
+			const found = pictures.findIndex((p) => String(p.timestamp) === img || String(p.url) === img);
+
+			if (found >= 0) {
+				page = Math.floor(found / pageSize);
+				imgIndex = found - page * pageSize;
+			}
+		}
+
 		res.json({
-			count: pictures.length,
-			pictures,
+			total,
+			page,
+			pageSize,
+			imgIndex,
+			pictures: pictures.slice(page * pageSize, page * pageSize + pageSize),
 			filter: colorHex ? { color: colorHex, tolerance } : null
 		});
 	});

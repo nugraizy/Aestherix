@@ -18,6 +18,7 @@ import {
 
 export const PROFILE_PICTURE_HISTORY_LIMIT = 900;
 export const PROFILE_PICTURES_DB_SYNC_THROTTLE_MS = 1000;
+export const PROFILE_PICTURES_LIST_TTL_MS = 5000;
 export const PROFILE_PICTURES_COLOR_TOLERANCE_DEFAULT = 88;
 export const PROFILE_PICTURES_COLOR_TOLERANCE_MAX = 441;
 export const PROFILE_PICTURES_COLOR_FILTER_CONCURRENCY = Math.min(
@@ -61,6 +62,7 @@ export function createProfilePicturesService({ configuration, prisma } = {}) {
 	const tombstones = new Set();
 	const colorCache = new Map();
 	const colorPending = new Map();
+	const listCache = { data: null, fetchedAt: 0, inFlight: null };
 
 	function ensureMap() {
 		if (!configuration.pinterest) {
@@ -277,11 +279,8 @@ export function createProfilePicturesService({ configuration, prisma } = {}) {
 		});
 	}
 
-	async function list({ limit } = {}) {
-		const rows = await listPinterestProfilePictures(
-			prisma,
-			Number(limit) > 0 ? { limit: Number(limit) } : {}
-		);
+	async function loadList() {
+		const rows = await listPinterestProfilePictures(prisma, {});
 		const seenUrls = new Set();
 
 		return rows
@@ -319,8 +318,56 @@ export function createProfilePicturesService({ configuration, prisma } = {}) {
 			});
 	}
 
+	function refreshList() {
+		if (!listCache.inFlight) {
+			listCache.inFlight = loadList()
+				.then((data) => {
+					listCache.data = data;
+					listCache.fetchedAt = Date.now();
+					return data;
+				})
+				.finally(() => {
+					listCache.inFlight = null;
+				});
+		}
+
+		return listCache.inFlight;
+	}
+
+	function prependCached(picture) {
+		if (!picture?.url || !listCache.data) {
+			return;
+		}
+
+		const key = String(picture.url).toLowerCase();
+
+		if (listCache.data.some((item) => String(item.url).toLowerCase() === key)) {
+			return;
+		}
+
+		listCache.data = [picture, ...listCache.data];
+		listCache.fetchedAt = Date.now();
+	}
+
+	async function list({ limit } = {}) {
+		const isFresh = listCache.data && Date.now() - listCache.fetchedAt < PROFILE_PICTURES_LIST_TTL_MS;
+
+		if (!isFresh) {
+			if (listCache.data) {
+				// Background revalidation: keep serving the cached snapshot if it fails.
+				refreshList().catch(() => {});
+			} else {
+				await refreshList();
+			}
+		}
+
+		const safeLimit = Number(limit) > 0 ? Number(limit) : 0;
+
+		return safeLimit ? listCache.data.slice(0, safeLimit) : listCache.data;
+	}
+
 	async function getLatest() {
-		const [latest] = await list({ limit: 1 });
+		const [latest] = await listPinterestProfilePictures(prisma, { limit: 1 });
 
 		return latest || null;
 	}
@@ -393,10 +440,16 @@ export function createProfilePicturesService({ configuration, prisma } = {}) {
 		}
 
 		await Promise.all(
-			deletedTimestamps.map((ts) =>
-				prisma.pinterestProfilePicture.delete({ where: { timestamp: ts } }).catch(() => {})
-			)
+			deletedTimestamps.map((ts) => prisma.pinterestProfilePicture.delete({ where: { timestamp: ts } }).catch(() => {}))
 		);
+
+		if (listCache.data) {
+			const removed = new Set(deletedTimestamps);
+
+			listCache.data = listCache.data.filter(
+				(picture) => !removed.has(String(picture.timestamp)) && String(picture.url).toLowerCase() !== safeUrlKey
+			);
+		}
 
 		return { ok: true, deletedCount: deletedTimestamps.length };
 	}
@@ -409,6 +462,7 @@ export function createProfilePicturesService({ configuration, prisma } = {}) {
 		getLatest,
 		persist,
 		delete: deletePicture,
-		getDominantColor
+		getDominantColor,
+		prependCached
 	};
 }

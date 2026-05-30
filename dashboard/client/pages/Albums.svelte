@@ -10,28 +10,22 @@
 	import { albums } from '../lib/stores.js';
 	import { showError, showSuccess, showUndoToast } from '../lib/toast.js';
 
-	const STALE_MS = 60_000;
 	const PAGE_SIZE = 50;
 
 	let lightboxIndex = -1;
 	let canDelete = true;
 	let page = 0;
 	let urlReady = false;
-	let pendingImageTs = '';
 
 	export let isViewer = false;
+	export let active = false;
 
-	$: lightboxOpen = lightboxIndex >= 0 && lightboxIndex < pagedPictures.length;
-	$: pictures = $albums.pictures;
+	$: pagedPictures = $albums.pictures;
 	$: loading = $albums.loading;
 	$: colorFilter = $albums.colorFilter;
-	$: totalPages = Math.max(1, Math.ceil(pictures.length / PAGE_SIZE));
-	$: if (pictures.length > 0 && page > totalPages - 1) {
-		page = Math.max(0, totalPages - 1);
-	}
-	$: pageStart = page * PAGE_SIZE;
-	$: pageEnd = Math.min(pictures.length, pageStart + PAGE_SIZE);
-	$: pagedPictures = pictures.slice(pageStart, pageEnd);
+	$: total = $albums.total;
+	$: totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+	$: lightboxOpen = lightboxIndex >= 0 && lightboxIndex < pagedPictures.length;
 	$: if (lightboxIndex >= pagedPictures.length) {
 		lightboxIndex = pagedPictures.length ? pagedPictures.length - 1 : -1;
 	}
@@ -85,44 +79,41 @@
 		history.replaceState(history.state, '', next);
 	}
 
-	async function load({ force = false } = {}) {
-		const state = $albums;
-		const filter = state.colorFilter;
-
-		if (!force && state.loaded && state.pictures.length && Date.now() - state.lastFetchedAt < STALE_MS) {
-			return;
-		}
+	async function load({ page: reqPage = page, img = '' } = {}) {
+		const filter = $albums.colorFilter;
 
 		albums.update((current) => ({ ...current, loading: true }));
 
 		try {
-			const params = new URLSearchParams();
+			const params = new URLSearchParams({ page: String(reqPage), pageSize: String(PAGE_SIZE) });
 
-			if (filter) {
-				params.set('color', filter);
-			}
+			if (filter) params.set('color', filter);
+			if (img) params.set('img', img);
 
-			const suffix = params.toString();
-			const data = await get(`/profile-pictures${suffix ? `?${suffix}` : ''}`);
+			const data = await get(`/profile-pictures?${params.toString()}`);
 
+			page = Number(data.page) || 0;
 			albums.set({
 				pictures: data.pictures || [],
+				total: Number(data.total) || 0,
 				colorFilter: filter,
-				loading: false,
-				loaded: true,
-				lastFetchedAt: Date.now()
+				loading: false
 			});
+
+			return Number(data.imgIndex ?? -1);
 		} catch (error) {
 			albums.update((current) => ({ ...current, loading: false }));
 			showError(error?.message || 'Failed to load pictures.');
+			return -1;
 		}
 	}
 
 	function handleColorChange(value) {
 		albums.update((current) => ({ ...current, colorFilter: value }));
 		page = 0;
+		lightboxIndex = -1;
 		writeUrlState({ page: 0, color: value, img: '' });
-		void load({ force: true });
+		void load({ page: 0 });
 	}
 
 	function openAt(detail) {
@@ -204,27 +195,14 @@
 			}
 
 			const data = await response.json();
-			const removedAt = lightboxIndex;
 
-			albums.update((current) => {
-				const next = current.pictures.filter((p) => !(p.url === picture.url && p.timestamp === picture.timestamp));
-
-				return { ...current, pictures: next, lastFetchedAt: Date.now() };
-			});
-
-			const nextPageStart = page * PAGE_SIZE;
-			const nextPageEnd = Math.min($albums.pictures.length, nextPageStart + PAGE_SIZE);
-			const nextPageSize = Math.max(0, nextPageEnd - nextPageStart);
-
-			if (removedAt >= nextPageSize) {
-				lightboxIndex = nextPageSize ? nextPageSize - 1 : -1;
-			}
+			await load({ page });
 
 			if (data?.undo?.token) {
 				showUndoToast({
 					message: 'Profile picture deleted.',
 					undo: data.undo,
-					onAfterUndo: () => load({ force: true })
+					onAfterUndo: () => load({ page })
 				});
 			} else {
 				showSuccess('Profile picture deleted.');
@@ -235,43 +213,37 @@
 	}
 
 	function handleSocketUpdate(payload) {
-		if (!payload) {
-			return;
-		}
+		if (!payload) return;
+
+		const incoming = payload.picture;
+		const deleted = payload.deleted;
 
 		albums.update((current) => {
 			let next = current.pictures;
+			let total = current.total;
 			let changed = false;
-			const incoming = payload.picture;
-			const deleted = payload.deleted;
 
-			if (deleted && deleted.url) {
-				const filtered = next.filter(
-					(p) => !(p.url === deleted.url && p.timestamp === deleted.timestamp)
-				);
+			if (deleted?.url) {
+				const filtered = next.filter((p) => !(p.url === deleted.url && p.timestamp === deleted.timestamp));
 
 				if (filtered.length !== next.length) {
 					next = filtered;
+					total = Math.max(0, total - 1);
 					changed = true;
 				}
 			}
 
-			if (incoming && incoming.url && !current.colorFilter) {
-				const exists = next.some(
-					(p) => p.url === incoming.url || p.timestamp === incoming.timestamp
-				);
+			if (incoming?.url && page === 0 && !current.colorFilter) {
+				const exists = next.some((p) => p.url === incoming.url || p.timestamp === incoming.timestamp);
 
 				if (!exists) {
-					next = [incoming, ...next];
+					next = [incoming, ...next].slice(0, PAGE_SIZE);
+					total = total + 1;
 					changed = true;
 				}
 			}
 
-			if (!changed) {
-				return current;
-			}
-
-			return { ...current, pictures: next, lastFetchedAt: Date.now() };
+			return changed ? { ...current, pictures: next, total } : current;
 		});
 	}
 
@@ -280,7 +252,9 @@
 
 		if (target !== page) {
 			page = target;
+			lightboxIndex = -1;
 			writeUrlState({ page: target, img: '' });
+			void load({ page: target });
 		}
 	}
 
@@ -289,38 +263,25 @@
 
 		if (target !== page) {
 			page = target;
+			lightboxIndex = -1;
 			writeUrlState({ page: target, img: '' });
+			void load({ page: target });
 		}
 	}
 
 	onMount(async () => {
-		const url = readUrlState();
-		const startColor = url.color || $albums.colorFilter || '';
+		const u = readUrlState();
 
-		page = url.page;
-		pendingImageTs = url.img;
+		albums.update((current) => ({ ...current, colorFilter: u.color }));
+		socket.on('dashboard:profile-pictures', handleSocketUpdate);
 
-		if (startColor !== $albums.colorFilter) {
-			albums.update((current) => ({ ...current, colorFilter: startColor, loaded: false }));
+		const imgIndex = await load({ page: u.page, img: u.img });
+
+		if (imgIndex >= 0) {
+			lightboxIndex = imgIndex;
 		}
 
 		urlReady = true;
-
-		socket.on('dashboard:profile-pictures', handleSocketUpdate);
-		await load({ force: !$albums.loaded || startColor !== $albums.colorFilter });
-
-		if (pendingImageTs && pagedPictures.length) {
-			const idx = pagedPictures.findIndex(
-				(p) => String(p.timestamp) === pendingImageTs || String(p.url) === pendingImageTs
-			);
-
-			if (idx >= 0) {
-				lightboxIndex = idx;
-			}
-
-			pendingImageTs = '';
-		}
-
 		await tick();
 	});
 
@@ -328,13 +289,13 @@
 		socket.off('dashboard:profile-pictures', handleSocketUpdate);
 	});
 
-	$: if (urlReady && lightboxIndex >= 0 && pagedPictures[lightboxIndex]) {
+	$: if (active && urlReady && lightboxIndex >= 0 && pagedPictures[lightboxIndex]) {
 		const ts = pagedPictures[lightboxIndex].timestamp || pagedPictures[lightboxIndex].url || '';
 
 		writeUrlState({ img: String(ts) });
 	}
 
-	$: if (urlReady && lightboxIndex < 0) {
+	$: if (active && urlReady && lightboxIndex < 0) {
 		writeUrlState({ img: '' });
 	}
 </script>
@@ -352,7 +313,7 @@
 
 	<div class="pager">
 		<div class="pager-info">
-			Showing {pictures.length ? pageStart + 1 : 0}-{pageEnd} of {pictures.length}
+			Showing {total ? page * PAGE_SIZE + 1 : 0}-{page * PAGE_SIZE + pagedPictures.length} of {total}
 		</div>
 		<div class="pager-actions">
 			<button class="pager-btn" type="button" on:click={prevPage} disabled={page === 0}>Prev</button>

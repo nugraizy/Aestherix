@@ -36,10 +36,9 @@ export const prefixConfig = writable({ mode: 'single', values: ['.'] });
 
 export const albums = writable({
 	pictures: [],
+	total: 0,
 	colorFilter: '',
-	loading: false,
-	loaded: false,
-	lastFetchedAt: 0
+	loading: false
 });
 
 export const messageLogs = writable({

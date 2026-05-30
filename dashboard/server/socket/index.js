@@ -275,6 +275,7 @@ function startMetaInterval(io, services) {
 
 		if (currentKey && currentKey !== lastPictureKey) {
 			lastPictureKey = currentKey;
+			services.profilePictures.prependCached?.(latestPicture);
 			io.emit('dashboard:profile-pictures', { picture: latestPicture });
 		}
 

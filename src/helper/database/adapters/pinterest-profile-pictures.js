@@ -78,6 +78,7 @@ export const listPinterestProfilePictures = async (db, { limit } = {}) => {
 	const safeLimit = Number(limit) > 0 ? Math.min(1000, Number(limit)) : undefined;
 	const rows = await db.pinterestProfilePicture.findMany({
 		orderBy: { timestamp: 'desc' },
+		select: { timestamp: true, url: true, thumbnail: true, colorPalette: true },
 		...(safeLimit ? { take: safeLimit } : {})
 	});
 
