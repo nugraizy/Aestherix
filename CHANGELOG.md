@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.12.0」2026-05-31
+
+## Added
+
+- Native YouTube downloader: search, playlist, and audio/video downloads with quality/itag flags ([`8385273`](https://github.com/nugraizy/aestherix/commit/8385273))
+- Dashboard YouTube downloader with playlist support in the tools tab ([`35a4629`](https://github.com/nugraizy/aestherix/commit/35a4629))
+
+## Fixed
+
+- Quoted-message participant and type are now resolved correctly ([`36e5a2c`](https://github.com/nugraizy/aestherix/commit/36e5a2c))
+
+## Changed
+
+- Rebuilt the about command with native buttons ([`686f3f5`](https://github.com/nugraizy/aestherix/commit/686f3f5))
+- Removed the waifu2x and image-to-anime converters ([`f24cbe5`](https://github.com/nugraizy/aestherix/commit/f24cbe5))
+- Dropped connect best-time tracking ([`042d68b`](https://github.com/nugraizy/aestherix/commit/042d68b))
+- Renamed commands to kebab-case ([`8d970a7`](https://github.com/nugraizy/aestherix/commit/8d970a7))
+
 # 「7.11.0」2026-05-30
 
 ## Added
