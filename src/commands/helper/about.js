@@ -1,7 +1,10 @@
 import fs from 'fs-extra';
 
+import { BOT_NAME } from '../../core/constants.js';
 import configuration from '../../helper/config/connect.js';
 import { defineCommand } from '../_define.js';
+
+const botVersion = (await fs.readJSON('./package.json')).version;
 
 export default defineCommand({
 	name: 'about',
@@ -13,30 +16,29 @@ export default defineCommand({
 	cooldown: 10,
 	limit: 5,
 	status: 'enable',
-	async run({ from, message }, client) {
-		const capt = `Bot Name : Aestherix
+	async run({ from }, client) {
+		const capt = `Bot Name : ${BOT_NAME}
 Total Commands : ${configuration.registry.commands.size}
-Bot Version : ${(await fs.readJSON('./package.json')).version}
-Bot Creator : Nanda
-Github Username : nugraizy
-Github Repo : Currently not available (private)
+Bot Version : ${botVersion}
 
 Our Motto :
 
 Using less module and try to find every private api from the provider (if they using one).`;
 
-		await client.reply(from, capt.trim().formatForm(), message);
-		await client.reply(
-			from,
-			`Thanks To :
-Aldi a.k.a Alphanum404
-Benni a.k.a Bennz
-Hanif a.k.a Mrhrtz
-Nafiz a.k.a VoIP
-Toby a.k.a Tobz
+		const builder = new client.TemplateBuilder.Native();
 
-Powered by Hidden Finder`,
-			message
-		);
+		await builder
+			.destination(from)
+			.body(capt.formatForm())
+			.footer('Powered by ' + BOT_NAME)
+			.buttons(
+				builder.button.url({ display: 'Nanda', url: 'https://github.com/nugraizy' }),
+				builder.button.url({ display: 'Aldi', url: 'https://github.com/alphanum404' }),
+				builder.button.url({ display: 'Tobi', url: 'https://github.com/alphanum404' }),
+				builder.button.url({ display: 'Aruga', url: 'https://github.com/arugaz' }),
+				builder.button.url({ display: '───────────────', url: '' }),
+				builder.button.url({ display: 'Source', url: 'https://github.com/nugraizy/aestherix' })
+			)
+			.send();
 	}
 });
