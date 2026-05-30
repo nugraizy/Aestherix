@@ -1,9 +1,9 @@
-import axios from 'axios';
-import FormData from 'form-data';
 import { imageToPdf } from '../converter/image.js';
+import { cfFetchJSON, cfFetchText, cfPostForm } from '../modules/cloudflare.js';
 import { cheerioLOAD } from '../modules/index.js';
 
 const BASE_URL = 'https://v5.kiryuu.to';
+const REFERER = { Referer: `${BASE_URL}/` };
 
 export class KiryuuUtils {
 	static get API_SEARCH() {
@@ -140,22 +140,14 @@ export class Kiryuu {
 	#nonce = null;
 	#mangaCache = new Map();
 	#chapterCache = new Map();
-	#axios = axios.create({
-		baseURL: this.#base,
-		headers: {
-			'User-Agent':
-				'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-			Referer: `${this.#base}/`
-		}
-	});
 
 	async #getNonce() {
 		if (this.#nonce) {
 			return this.#nonce;
 		}
 
-		const { data } = await this.#axios.get(KiryuuUtils.API_NONCE);
-		const $ = cheerioLOAD(data);
+		const html = await cfFetchText(KiryuuUtils.API_NONCE, { headers: REFERER });
+		const $ = cheerioLOAD(html);
 		const nonce = $('input[name=search_nonce]').attr('value');
 
 		if (!nonce) {
@@ -173,28 +165,26 @@ export class Kiryuu {
 	 */
 	async search(keyword, page = 1) {
 		const nonce = await this.#getNonce();
-		const formData = new FormData();
+		const fields = {
+			nonce,
+			inclusion: 'OR',
+			exclusion: 'OR',
+			page: String(page),
+			genre: '[]',
+			genre_exclude: '[]',
+			author: '[]',
+			artist: '[]',
+			project: '0',
+			type: '[]',
+			status: '[]',
+			order: 'desc',
+			orderby: 'relevance',
+			query: keyword
+		};
 
-		formData.append('nonce', nonce);
-		formData.append('inclusion', 'OR');
-		formData.append('exclusion', 'OR');
-		formData.append('page', String(page));
-		formData.append('genre', '[]');
-		formData.append('genre_exclude', '[]');
-		formData.append('author', '[]');
-		formData.append('artist', '[]');
-		formData.append('project', '0');
-		formData.append('type', '[]');
-		formData.append('status', '[]');
-		formData.append('order', 'desc');
-		formData.append('orderby', 'relevance');
-		formData.append('query', keyword);
+		const html = await cfPostForm(KiryuuUtils.API_SEARCH, fields, { originUrl: `${BASE_URL}/`, headers: REFERER });
 
-		const { data } = await this.#axios.post(KiryuuUtils.API_SEARCH, formData, {
-			headers: formData.getHeaders()
-		});
-
-		return cheerioLOAD(data);
+		return cheerioLOAD(html);
 	}
 
 	/**
@@ -228,7 +218,7 @@ export class Kiryuu {
 		params.append('per_page', String(slugs.length + 1));
 		params.append('_embed', '');
 
-		const { data } = await this.#axios.get(KiryuuUtils.API_MANGA, { params });
+		const data = await cfFetchJSON(`${KiryuuUtils.API_MANGA}?${params.toString()}`, { headers: REFERER });
 
 		const mangaBySlug = new Map();
 
@@ -237,6 +227,36 @@ export class Kiryuu {
 		}
 
 		return slugs.map((slug) => mangaBySlug.get(slug)).filter(Boolean);
+	}
+
+	/**
+	 * Lightweight list result (slug/title/poster) parsed straight from the search HTML,
+	 * skipping the slow `_embed` wp-json enrich. Use for grids; call getManga() for details.
+	 *
+	 * @param {string} keyword
+	 * @param {number} [page]
+	 * @returns {Promise<Array<{ slug: string, title: string, poster: string }>>}
+	 */
+	async searchBasic(keyword, page = 1) {
+		const $ = await this.search(keyword, page);
+		const seen = new Set();
+
+		return $('a[href*=/manga/]:has(> img)')
+			.map((_, el) => {
+				const $el = $(el);
+				const slug = KiryuuUtils.extractSlugFromHref($el.attr('href') || '');
+
+				if (!slug || seen.has(slug)) {
+					return null;
+				}
+
+				seen.add(slug);
+				const img = $el.find('img').first();
+
+				return { slug, title: img.attr('alt') || slug, poster: (img.attr('src') || '').replace(/^http:/, 'https:') };
+			})
+			.get()
+			.filter(Boolean);
 	}
 
 	/**
@@ -253,7 +273,7 @@ export class Kiryuu {
 		params.append('slug[]', slug);
 		params.append('_embed', '');
 
-		const { data } = await this.#axios.get(KiryuuUtils.API_MANGA, { params });
+		const data = await cfFetchJSON(`${KiryuuUtils.API_MANGA}?${params.toString()}`, { headers: REFERER });
 		const manga = Array.isArray(data) ? data[0] : null;
 
 		if (!manga) {
@@ -278,15 +298,11 @@ export class Kiryuu {
 			return this.#chapterCache.get(mangaId);
 		}
 
-		const { data } = await this.#axios.get(`${this.#base}/wp-admin/admin-ajax.php`, {
-			params: {
-				manga_id: mangaId,
-				page: 1,
-				action: 'chapter_list'
-			}
+		const html = await cfFetchText(`${this.#base}/wp-admin/admin-ajax.php?manga_id=${mangaId}&page=1&action=chapter_list`, {
+			headers: REFERER
 		});
 
-		const $ = cheerioLOAD(data);
+		const $ = cheerioLOAD(html);
 		const chapters = $('div a:has(time)')
 			.map((_, el) => {
 				const link = $(el).attr('href') || '';
@@ -320,8 +336,8 @@ export class Kiryuu {
 			return mangaId;
 		}
 
-		const { data } = await this.#axios.get(`${KiryuuUtils.WEB_MANGA}/${mangaId}/`);
-		const $ = cheerioLOAD(data);
+		const html = await cfFetchText(`${KiryuuUtils.WEB_MANGA}/${mangaId}/`, { headers: REFERER });
+		const $ = cheerioLOAD(html);
 		const galleryList = $('#gallery-list');
 
 		if (galleryList.length) {
@@ -365,8 +381,8 @@ export class Kiryuu {
 	 * @returns {Promise<string[]>}
 	 */
 	async getChapterPages(chapterUrl) {
-		const { data } = await this.#axios.get(chapterUrl);
-		const $ = cheerioLOAD(data);
+		const html = await cfFetchText(chapterUrl, { headers: REFERER });
+		const $ = cheerioLOAD(html);
 		const pages = $('main .relative section > img')
 			.map((_, el) => $(el).attr('src') || $(el).attr('data-src') || '')
 			.get();

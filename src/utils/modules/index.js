@@ -13,6 +13,7 @@ export * from './math.js';
 export * from './time.js';
 export * from './file.js';
 export * from './validation.js';
+export * from './cloudflare.js';
 
 export const boldify = (string) => chalk.bold(string);
 

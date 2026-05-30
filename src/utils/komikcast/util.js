@@ -1,6 +1,7 @@
 import { fetch } from 'undici';
 
 import { imageToPdf } from '../converter/image.js';
+import { cfFetchJSON } from '../modules/cloudflare.js';
 
 const BASE_URL = 'https://v2.komikcast.fit';
 const API_URL = 'https://be.komikcast.cc';
@@ -67,13 +68,7 @@ export class KomikCast {
 	}
 
 	async fetchJSON(url) {
-		const response = await this.fetchImpl(url, { headers: API_HEADERS });
-
-		if (!response.ok) {
-			throw new Error(`Komikcast API error: ${response.status}`);
-		}
-
-		return response.json();
+		return cfFetchJSON(url, { headers: API_HEADERS });
 	}
 
 	#listUrl({ page = 1, sort, order = 'desc', query } = {}) {
