@@ -150,6 +150,23 @@
 		return `/api/dashboard/tools/proxy?url=${encodeURIComponent(url)}`;
 	}
 
+	function formatDur(seconds) {
+		const total = Number(seconds) || 0;
+		const h = Math.floor(total / 3600);
+		const m = Math.floor((total % 3600) / 60);
+		const s = total % 60;
+		const pad = (n) => String(n).padStart(2, '0');
+		return h ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+	}
+
+	function selectPlaylistItem(entryUrl) {
+		url = entryUrl;
+		result = null;
+		error = '';
+		lastFetchedUrl = '';
+		download();
+	}
+
 	async function downloadAll() {
 		const urls = result?.formats?.filter(f => f.url) || [];
 		for (const fmt of urls) {
@@ -254,6 +271,21 @@
 					<span class="dl-title">{result.title}</span>
 				{/if}
 
+				{#if result.playlist?.length}
+					<div class="dl-playlist">
+						<span class="dl-pl-count">{result.playlist.length} videos · click to load</span>
+						{#each result.playlist as v (v.id)}
+							<button class="dl-pl-item" type="button" on:click={() => selectPlaylistItem(v.url)}>
+								{#if v.thumbnail}
+									<img class="dl-pl-thumb" src={proxyUrl(v.thumbnail)} alt="" loading="lazy" />
+								{/if}
+								<span class="dl-pl-title">{v.title}</span>
+								<span class="dl-pl-dur">{formatDur(v.duration)}</span>
+							</button>
+						{/each}
+					</div>
+				{/if}
+
 				{#if result.merge}
 					<div class="dl-merge-section">
 						<button class="btn primary" type="button" disabled={merging} on:click={downloadMerged}>
@@ -315,13 +347,13 @@
 	<div class="dl-supported">
 		<span class="dl-supported-label">Supported</span>
 		<div class="dl-supported-list">
-			{#each SERVICES.filter(s => !['youtube', 'flickr', 'spotify'].includes(s.id)) as s (s.id)}
+			{#each SERVICES.filter(s => !['spotify'].includes(s.id)) as s (s.id)}
 				<span class="dl-supported-item"><span class="dl-supported-dot" style:background={s.color}></span>{s.label}</span>
 			{/each}
 		</div>
 		<span class="dl-supported-label dl-meta-label">Only Metadata</span>
 		<div class="dl-supported-list">
-			{#each SERVICES.filter(s => ['youtube', 'flickr', 'spotify'].includes(s.id)) as s (s.id)}
+			{#each SERVICES.filter(s => ['spotify'].includes(s.id)) as s (s.id)}
 				<span class="dl-supported-item"><span class="dl-supported-dot" style:background={s.color}></span>{s.label}</span>
 			{/each}
 		</div>
@@ -347,6 +379,13 @@
 	.dl-title { font-size: var(--fs-sm); font-weight: 600; color: var(--text); }
 	.dl-bulk-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
 	.dl-media-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-3); }
+	.dl-playlist { display: flex; flex-direction: column; gap: 0.3rem; max-height: 420px; overflow-y: auto; }
+	.dl-pl-count { font-size: var(--fs-xs); color: var(--muted); }
+	.dl-pl-item { display: flex; align-items: center; gap: var(--space-2); width: 100%; padding: 0.35rem 0.5rem; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: var(--fs-sm); text-align: left; cursor: pointer; transition: background var(--tx-base); }
+	.dl-pl-item:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+	.dl-pl-thumb { width: 56px; height: 32px; border-radius: 4px; object-fit: cover; flex-shrink: 0; }
+	.dl-pl-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.dl-pl-dur { font-size: var(--fs-xs); color: var(--muted); flex-shrink: 0; }
 	.dl-media-item { display: flex; flex-direction: column; gap: 0.4rem; padding: var(--space-2); background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-sm); }
 	.dl-media { width: 100%; border-radius: var(--radius-sm); max-height: 360px; object-fit: contain; background: #000; }
 	.dl-audio { width: 100%; border-radius: var(--radius-sm); }

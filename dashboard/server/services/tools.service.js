@@ -176,16 +176,49 @@ export function createToolsService({ prisma } = {}) {
 		const handlers = {
 			async youtube(url) {
 				const { default: youtube } = await import('../../../src/utils/youtube/index.js');
-				const data = await youtube.video(url);
+				const isPlaylist = /[?&]list=/.test(url) && !/[?&]v=/.test(url);
 
-				if (!data) {
-					throw new Error('Video not found');
+				if (isPlaylist) {
+					const playlist = await youtube.playlist(url);
+
+					return {
+						title: playlist.title || 'YouTube Playlist',
+						thumbnail: playlist.videos[0]?.thumbnails?.at(-1)?.url || null,
+						playlist: playlist.videos.map((entry) => ({
+							id: entry.id,
+							title: entry.title,
+							url: `https://youtu.be/${entry.id}`,
+							duration: entry.durationSeconds,
+							thumbnail: entry.thumbnails?.at(-1)?.url || null
+						})),
+						formats: []
+					};
+				}
+
+				const video = await youtube.client.getVideo(url);
+				const formats = video.formats;
+				const muxed = formats
+					.withAudioChannels()
+					.select((format) => format.width > 0)
+					.sort()[0];
+				const bestVideo = formats.type('avc1').sort()[0];
+				const bestAudio = formats.type('audio/mp4').sortByBitrateDesc()[0] || formats.type('audio').sortByBitrateDesc()[0];
+				const out = [];
+
+				if (muxed) {
+					out.push({ url: muxed.url, label: `Video ${muxed.qualityLabel || ''}`.trim() });
+				}
+
+				if (bestAudio) {
+					out.push({ url: bestAudio.url, label: 'Audio' });
 				}
 
 				return {
-					title: data.title || 'YouTube Video',
-					thumbnail: data.thumbnail || null,
-					formats: [{ url: null, label: `Video (use bot command for buffer download)` }]
+					title: video.title || 'YouTube Video',
+					thumbnail: video.thumbnails?.at(-1)?.url || null,
+					merge:
+						bestVideo && bestAudio && bestVideo.audioChannels === 0 ? { video: bestVideo.url, audio: bestAudio.url } : null,
+					formats: out
 				};
 			},
 			async tiktok(url) {
