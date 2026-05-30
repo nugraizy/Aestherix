@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.11.0」2026-05-30
+
+## Added
+
+- Comics reader: chapter bookmarks, page progress scrubber, auto-scroll with click pause, doom-scroll memory windowing, history filter, and shareable chapter URLs ([`c956f87`](https://github.com/nugraizy/aestherix/commit/c956f87))
+- Cloudflare-challenge fallback for Kiryuu and Komikcast comic sources ([`e0126bc`](https://github.com/nugraizy/aestherix/commit/e0126bc))
+- Dashboard preserves each page's URL params across navigation ([`e27f13d`](https://github.com/nugraizy/aestherix/commit/e27f13d))
+- Dashboard auth session lifetime extended to 30 days ([`b962265`](https://github.com/nugraizy/aestherix/commit/b962265))
+
+## Fixed
+
+- Albums: clipboard copy fallback for non-secure origins, reliable tap-to-open on touch, and adjacent lightbox images now stay behind the main image on mobile ([`b957e83`](https://github.com/nugraizy/aestherix/commit/b957e83))
+
+## Changed
+
+- Albums load faster via a server-side profile-picture cache and pagination ([`d06c60c`](https://github.com/nugraizy/aestherix/commit/d06c60c))
+- Light-mode tooltips use a white blurred background; smaller collapse/expand buttons on mobile ([`098e3f5`](https://github.com/nugraizy/aestherix/commit/098e3f5))
+
 # 「7.10.0」2026-05-30
 
 ## Added
