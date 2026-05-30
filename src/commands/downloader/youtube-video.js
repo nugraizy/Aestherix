@@ -1,20 +1,39 @@
+import parser from 'yargs-parser';
+
 import { color, isURL, isYoutubeURL, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { youtube } from '../../utils/youtube/index.js';
 import { defineCommand } from '../_define.js';
 
-// const youtube = new YouTubei();
+const parseFlags = (query) => {
+	const { _, quality, itag, list } = parser(query || '', {
+		configuration: { 'short-option-groups': false },
+		alias: { quality: ['q', 'res', 'resolution'], itag: ['t'], list: ['l', 'formats'] }
+	});
+
+	return { query: _.join(' '), options: { quality, itag }, list: Boolean(list) };
+};
+
+const replyFormats = async (client, from, message, query) => {
+	const info = await youtube.listFormats(query.split(',')[0]);
+	const lines = info.formats
+		.map((f) => `${f.itag} | ${f.quality || '-'} | ${f.type}${f.hasAudio ? ' +audio' : ''}`)
+		.join('\n');
+
+	return client.reply(from, `${info.title}\n\n${lines}`.formatForm(), message);
+};
 
 /**
  *
  * @param {string} url
  * @param {import('../../types/Socket/index.js').AdvancedClient} client
  * @param {{from: string, message: import('../../types/Reconstruct/index.js').ReassignResult['message'], : import('../../types/Reconstruct/index.js').ReassignResult[''], prettyNumber: string}} param2
+ * @param {{quality?: string|number, itag?: number}} options
  * @returns
  */
-const processVideo = async (url, client, { from, message, prettyNumber }) => {
-	const video = await youtube.video(url);
+const processVideo = async (url, client, { from, message, prettyNumber }, options = {}) => {
+	const video = await youtube.video(url, options);
 
-	const { title, description, download } = video;
+	const { title, description, download, format } = video;
 
 	if (!download) {
 		client.reply(from, `Error while downloading YouTube Video\n\n${url}`, message);
@@ -25,6 +44,7 @@ const processVideo = async (url, client, { from, message, prettyNumber }) => {
 	let capt = '';
 
 	capt += `Title : ${title}\n`;
+	capt += `Quality : ${format.qualityLabel || format.quality || '-'} (itag ${format.itag})\n`;
 	capt += `Descriptions : ${description || ''}`;
 
 	await client.send(
@@ -43,14 +63,22 @@ export default defineCommand({
 	name: 'ytvideo',
 	minifiedDescription: 'Downloads YouTube Video',
 	description: 'Downloads a YouTube video',
-	usage: '!ytvideo `<url(s)>` (you can send multiple url using space in between)',
+	usage:
+		'!ytvideo `<url(s)>`\n\nFlags:\n-q, --quality `<360|480|720|1080|best|worst>`\n--itag `<itag>`\n--list (show available formats)',
 	aliases: ['ytv', 'ytmp4'],
 	category: 'Downloader',
 	cooldown: 12,
 	limit: 8,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, /*type, args,*/ mediaData, typeQuoted, bodyQuoted }, client) {
-		if (typeQuoted === 'conversation' && mediaData.participant?.includes(client.decodeJid(client.user.id))) {
+	async run({ from, query, prettyNumber, message, mediaData, typeQuoted, bodyQuoted }, client) {
+		const { query: cleanQuery, options, list } = parseFlags(query);
+
+		query = cleanQuery;
+
+		if (
+			typeQuoted === 'conversation' &&
+			client.decodeJid(await client.resolveJid(mediaData.participant, 'jid'))?.includes(client.decodeJid(client.user.id))
+		) {
 			const reg = /✦ Video ID :\s*`([^\n]+)`/g;
 
 			const videoIds = [];
@@ -81,7 +109,7 @@ export default defineCommand({
 				message
 			);
 
-			const status = await processVideo(`https://youtu.be/${videoId}`, client, { from, message, prettyNumber });
+			const status = await processVideo(`https://youtu.be/${videoId}`, client, { from, message, prettyNumber }, options);
 
 			if (!status) {
 				error++;
@@ -128,6 +156,10 @@ export default defineCommand({
 			return await client.reply(from, 'Please provide a URL', message);
 		}
 
+		if (list) {
+			return await replyFormats(client, from, message, query);
+		}
+
 		let queries = query.split(',');
 
 		queries = removeDuplicatesArray(queries);
@@ -155,7 +187,7 @@ export default defineCommand({
 				continue;
 			}
 
-			const status = await processVideo(Query, client, { from, message, prettyNumber });
+			const status = await processVideo(Query, client, { from, message, prettyNumber }, options);
 
 			if (!status) {
 				error++;

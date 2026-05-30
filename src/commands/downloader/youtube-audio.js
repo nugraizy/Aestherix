@@ -1,20 +1,39 @@
+import parser from 'yargs-parser';
+
 import { color, isURL, isYoutubeURL, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { youtube } from '../../utils/youtube/index.js';
 import { defineCommand } from '../_define.js';
 
-// const youtube = new YouTubei();
+const parseFlags = (query) => {
+	const { _, quality, itag, list } = parser(query || '', {
+		configuration: { 'short-option-groups': false },
+		alias: { quality: ['q', 'res', 'resolution'], itag: ['t'], list: ['l', 'formats'] }
+	});
+
+	return { query: _.join(' '), options: { quality, itag }, list: Boolean(list) };
+};
+
+const replyFormats = async (client, from, message, query) => {
+	const info = await youtube.listFormats(query.split(',')[0]);
+	const lines = info.formats
+		.map((f) => `${f.itag} | ${f.quality || '-'} | ${f.type}${f.hasAudio ? ' +audio' : ''}`)
+		.join('\n');
+
+	return client.reply(from, `${info.title}\n\n${lines}`.formatForm(), message);
+};
 
 /**
  *
  * @param {string} url
  * @param {import('../../types/Socket/index.js').AdvancedClient} client
  * @param {{from: string, message: import('../../types/Reconstruct/index.js').ReassignResult['message'], : import('../../types/Reconstruct/index.js').ReassignResult[''], prettyNumber: string}} param2
+ * @param {{quality?: string|number, itag?: number}} options
  * @returns
  */
-const processAudio = async (url, client, { from, message, prettyNumber }) => {
-	const audio = await youtube.audio(url);
+const processAudio = async (url, client, { from, message, prettyNumber }, options = {}) => {
+	const audio = await youtube.audio(url, options);
 
-	const { title, description, download } = audio;
+	const { title, description, download, format } = audio;
 
 	if (!download) {
 		client.reply(from, `Error while downloading YouTube Audio\n\n${url}`, message);
@@ -23,6 +42,7 @@ const processAudio = async (url, client, { from, message, prettyNumber }) => {
 	}
 
 	const buffer = await download();
+	const extension = format.mimeType.includes('webm') ? 'opus' : 'm4a';
 
 	let capt = '';
 
@@ -33,8 +53,8 @@ const processAudio = async (url, client, { from, message, prettyNumber }) => {
 		from,
 		{
 			document: Buffer.from(buffer),
-			fileName: `${title}.mp3`,
-			mimetype: 'audio/mp3',
+			fileName: `${title}.${extension}`,
+			mimetype: format.mimeType.split(';')[0] || 'audio/mp4',
 			caption: capt.formatForm()
 		},
 		{
@@ -47,14 +67,21 @@ export default defineCommand({
 	name: 'ytaudio',
 	minifiedDescription: 'Downloads YouTube Audio',
 	description: 'Downloads a YouTube audio',
-	usage: '!ytaudio `<url(s)>` (you can send multiple url using space in between)',
+	usage: '!ytaudio `<url(s)/query>`\n\nFlags:\n-q, --quality `<best|worst>`\n--itag `<itag>`\n--list (show available formats)',
 	aliases: ['yta', 'ytmp3'],
 	category: 'Downloader',
 	cooldown: 7,
 	limit: 8,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, /*type, args,*/ mediaData, bodyQuoted, typeQuoted }, client) {
-		if (typeQuoted === 'conversation' && mediaData.participant?.includes(client.decodeJid(client.user.id))) {
+		const { query: cleanQuery, options, list } = parseFlags(query);
+
+		query = cleanQuery;
+
+		if (
+			typeQuoted === 'conversation' &&
+			client.decodeJid(await client.resolveJid(mediaData.participant, 'jid'))?.includes(client.decodeJid(client.user.id))
+		) {
 			const reg = /✦ Video ID :\s*`([^\n]+)`/g;
 
 			const videoIds = [];
@@ -93,7 +120,7 @@ export default defineCommand({
 				message
 			);
 
-			const status = await processAudio(`https://youtu.be/${videoId}`, client, { from, message, prettyNumber });
+			const status = await processAudio(`https://youtu.be/${videoId}`, client, { from, message, prettyNumber }, options);
 
 			if (!status) {
 				error++;
@@ -110,6 +137,10 @@ export default defineCommand({
 
 		if (!query) {
 			return await client.reply(from, 'Please provide a URL or Query.', message);
+		}
+
+		if (list) {
+			return await replyFormats(client, from, message, query);
 		}
 
 		let queries = query.split(',');
@@ -139,7 +170,7 @@ export default defineCommand({
 				continue;
 			}
 
-			const status = await processAudio(Query, client, { from, message, prettyNumber });
+			const status = await processAudio(Query, client, { from, message, prettyNumber }, options);
 
 			if (!status) {
 				error++;
