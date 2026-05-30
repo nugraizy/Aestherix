@@ -634,4 +634,29 @@
 		right: 8px;
 	}
 
+	@media (max-width: 640px) {
+		.carousel-item.is-center {
+			max-width: 82vw;
+		}
+
+		.carousel-item.is-left,
+		.carousel-item.is-right {
+			max-width: 34vw;
+			max-height: 46vh;
+		}
+
+		.carousel-item.is-left {
+			transform: translate(calc(-50% - 30vw), -50%) scale(0.86);
+		}
+
+		.carousel-item.is-right {
+			transform: translate(calc(-50% + 30vw), -50%) scale(0.86);
+		}
+
+		.carousel-item.is-far-left,
+		.carousel-item.is-far-right {
+			display: none;
+		}
+	}
+
 </style>

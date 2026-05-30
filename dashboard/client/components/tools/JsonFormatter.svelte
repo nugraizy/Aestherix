@@ -1,6 +1,7 @@
 <script>
 	import Dropdown from '../ui/Dropdown.svelte';
 	import { highlightCode } from '../../lib/code-highlight.js';
+	import { copyText } from '../../lib/clipboard.js';
 
 	let input = '';
 	let output = '';
@@ -58,7 +59,7 @@
 
 	function copyOutput() {
 		if (!output) return;
-		navigator.clipboard?.writeText(output);
+		copyText(output);
 		copied = true;
 		setTimeout(() => { copied = false; }, 1500);
 	}

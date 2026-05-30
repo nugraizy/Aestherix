@@ -1,5 +1,6 @@
 <script>
 	import { createEventDispatcher } from 'svelte';
+	import { copyText } from '../../lib/clipboard.js';
 	import { showSuccess } from '../../lib/toast.js';
 	import Tooltip from '../ui/Tooltip.svelte';
 
@@ -10,6 +11,7 @@
 	let loaded = false;
 	let errored = false;
 	let showTooltip = false;
+	const hoverable = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(hover: hover)').matches : true;
 
 	function open() {
 		dispatch('open', { index });
@@ -38,7 +40,7 @@
 	}
 
 	function copyColor(color) {
-		navigator.clipboard.writeText(color);
+		copyText(color);
 		showSuccess('copied', { html: `Color ${color} <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};vertical-align:middle"></span> copied to clipboard` });
 	}
 
@@ -67,44 +69,38 @@
 	}
 
 	function copyAllColors() {
-		navigator.clipboard.writeText(palette.join(', '));
+		copyText(palette.join(', '));
 		showSuccess(`${palette.length} colors copied to clipboard`);
 	}
 
 	let holdTimer = null;
 	let previewing = false;
-	let wasPreview = false;
+	let suppressClickUntil = 0;
 
 	function handleMouseDown(event) {
 		if (event.button !== 0) return;
 
-		wasPreview = false;
+		clearTimeout(holdTimer);
 		holdTimer = setTimeout(() => {
 			previewing = true;
-			wasPreview = true;
 			holdTimer = null;
-			window.addEventListener('mouseup', handleGlobalUp, { once: true });
-		}, 300);
+		}, 320);
 
-		window.addEventListener('mouseup', handleEarlyUp, { once: true });
-	}
-
-	function handleEarlyUp() {
-		if (holdTimer) {
-			clearTimeout(holdTimer);
-			holdTimer = null;
-		}
+		window.addEventListener('mouseup', handleGlobalUp, { once: true });
 	}
 
 	function handleGlobalUp() {
-		previewing = false;
+		clearTimeout(holdTimer);
+		holdTimer = null;
+
+		if (previewing) {
+			previewing = false;
+			suppressClickUntil = Date.now() + 150;
+		}
 	}
 
 	function handleClick() {
-		if (wasPreview) {
-			wasPreview = false;
-			return;
-		}
+		if (Date.now() < suppressClickUntil) return;
 
 		open();
 	}
@@ -116,7 +112,7 @@
 	tabindex="0"
 	on:click={handleClick}
 	on:keydown={(e) => e.key === 'Enter' && open()}
-	on:mouseenter={() => showTooltip = true}
+	on:mouseenter={() => hoverable && (showTooltip = true)}
 	on:mouseleave={() => showTooltip = false}
 	on:mousedown={handleMouseDown}
 	aria-label="Open image"
