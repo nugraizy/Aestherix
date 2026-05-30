@@ -143,21 +143,6 @@ export class ConnectionHandler {
 			color('(', 'lilac') + color(`${data.best_time}s`, 'glowYellow') + color(')', '#E4C1F9')
 		);
 
-		if (timeToConnect < data.best_time) {
-			const bestTime = data.best_time;
-
-			data.best_time = timeToConnect;
-			await fs.writeJSON('./src/helper/config/settings.json', data, { spaces: 2 });
-
-			buttons.push(builder.button.url({ display: `Fastest Now ${timeToConnect}s 🎉`, url: 'hello' }));
-			buttons.push(builder.button.url({ display: `Previous Best Time ${bestTime}s`, url: 'hello' }));
-			caption = 'New Best!';
-		} else {
-			buttons.push(builder.button.url({ display: `Time Now ${timeToConnect}s`, url: 'hello' }));
-			buttons.push(builder.button.url({ display: `Best Time ${data.best_time}s`, url: 'hello' }));
-			caption = 'Not the Best.';
-		}
-
 		buttons.push(builder.button.reply({ display: 'Ping Bot', id: cmdId('ping') }));
 
 		await builder
