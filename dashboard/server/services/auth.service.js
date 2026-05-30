@@ -14,7 +14,7 @@ import { getEmbeddedWaClient } from '../lib/client.js';
 export const AUTH_COOKIE_NAME = 'aestherix_dashboard_auth';
 export const OTP_TTL_MS = 5 * 60 * 1000;
 export const OTP_COOLDOWN_MS = 60 * 1000;
-export const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
+export const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 export const LIVE_SESSION_WINDOW_MS = 30 * 1000;
 
 const SETTINGS_PATH = './src/helper/config/settings.json';
