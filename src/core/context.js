@@ -418,7 +418,7 @@ export class Context {
 		return this.#memo('isDesktop', () => this.device.isDesktop);
 	}
 	get typeQuoted() {
-		return this.#memo('typeQuoted', () => extractTypeQuoted(this.#raw, this.type));
+		return this.#memo('typeQuoted', () => extractTypeQuoted(this.#raw));
 	}
 	get mention() {
 		return this.#memo('mention', () => extractMentionedJid(this.#raw, this.type));
@@ -490,7 +490,9 @@ export class Context {
 		return this.#memo('isQuotedSticker', () => {
 			const content = this.type === 'extendedTextMessage' ? JSON.stringify(this.#raw?.message) : '';
 
-			return this.type === 'extendedTextMessage' && (content.includes('stickerMessage') || content.includes('lottieStickerMessage'));
+			return (
+				this.type === 'extendedTextMessage' && (content.includes('stickerMessage') || content.includes('lottieStickerMessage'))
+			);
 		});
 	}
 	get isQuotedDocument() {

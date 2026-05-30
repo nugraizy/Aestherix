@@ -288,7 +288,10 @@ export default defineCommand({
 	limit: 5,
 	status: 'enable',
 	run: async ({ query, bodyQuoted, typeQuoted, message, from, mediaData, prettyNumber }, client) => {
-		if (typeQuoted === 'imageMessage' && mediaData.participant?.includes(client.decodeJid(client.user.id))) {
+		if (
+			typeQuoted === 'imageMessage' &&
+			client.decodeJid(await client.resolveJid(mediaData.participant, 'jid'))?.includes(client.decodeJid(client.user.id))
+		) {
 			const reg = /✦ Media ID :\s*([^\n]+)/g;
 			const type = /🖼️ Type :\s*([^\n]+)/g;
 

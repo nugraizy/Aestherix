@@ -183,11 +183,11 @@ export const firstKey = (value) => (value && typeof value === 'object' ? Object.
  * @param {keyof import('baileys').proto.IMessage} type
  * @returns {keyof import('baileys').proto.IMessage}
  */
-export const extractTypeQuoted = (m, type) => {
+export const extractTypeQuoted = (m) => {
 	const quoted = m.message?.extendedTextMessage?.contextInfo?.quotedMessage;
 	const quotedKey = firstKey(quoted);
 
-	return quotedKey || type;
+	return quotedKey;
 };
 
 /**

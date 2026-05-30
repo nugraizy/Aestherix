@@ -16,8 +16,9 @@ export default defineCommand({
 		}
 
 		const myJid = client.decodeJid(client.user.id);
+		const participantJid = client.decodeJid(await client.resolveJid(mediaData.participant, 'jid'));
 
-		if (!mediaData.participant.includes(myJid) && !isBotAdmin) {
+		if (!participantJid?.includes(myJid) && !isBotAdmin) {
 			return await client.reply(from, 'You can not ask bot to delete people message when bot is not admin.', message);
 		}
 
@@ -28,7 +29,7 @@ export default defineCommand({
 					id: mediaData.stanzaId,
 					participant: mediaData.participant,
 					remoteJid: from,
-					...(mediaData.participant.includes(myJid) ? { fromMe: true } : {})
+					...(participantJid.includes(myJid) ? { fromMe: true } : {})
 				}
 			},
 			{}
