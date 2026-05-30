@@ -1,12 +1,13 @@
 <script>
-	import { tick, onMount } from 'svelte';
+	import { onDestroy, onMount, tick } from 'svelte';
 	import { get } from '../../lib/api.js';
+	import { highlight } from '../../lib/highlight.js';
 	import { showError } from '../../lib/toast.js';
-	import Tooltip from '../ui/Tooltip.svelte';
 	import Dropdown from '../ui/Dropdown.svelte';
-	import Toggle from '../ui/Toggle.svelte';
-	import Slider from '../ui/Slider.svelte';
 	import SkeletonCard from '../ui/SkeletonCard.svelte';
+	import Slider from '../ui/Slider.svelte';
+	import Toggle from '../ui/Toggle.svelte';
+	import Tooltip from '../ui/Tooltip.svelte';
 
 	const API = '/api/dashboard';
 	const SOURCES = [
@@ -20,6 +21,8 @@
 	const READER_SETTINGS_KEY = 'aestherix.tools.comics.reader';
 	const PROGRESS_KEY = 'aestherix.tools.comics.progress';
 	const HISTORY_KEY = 'aestherix.tools.comics.history';
+	const LAST_KEY = 'aestherix.tools.comics.last';
+	const CHAPTER_BOOKMARKS_KEY = 'aestherix.tools.comics.chapter-bookmarks';
 
 	let source = 'shinigami';
 	let query = '';
@@ -29,6 +32,7 @@
 	let homeHasNext = false;
 	let loadingMore = false;
 	let popularFilter = '';
+	let historyFilter = '';
 	let filterDefs = [];
 	let activeFilters = {};
 	let draftFilters = {};
@@ -38,6 +42,10 @@
 	let segments = [];
 	let activeSegIndex = 0;
 	let loadingNext = false;
+	let loadingPrev = false;
+	let adjusting = false;
+	const KEEP_BEHIND = 2;
+	const KEEP_AHEAD = 6;
 	let chapterIndex = -1;
 	let view = 'search';
 	let restored = false;
@@ -48,16 +56,25 @@
 	let dedup = false;
 	let sortAsc = true;
 	let bookmarks = loadBookmarks();
+	let chapterBookmarks = loadChapterBookmarks();
+	let bookmarkOnly = false;
 	let progress = loadProgress();
 	let readHistory = loadHistory();
 	let showHistory = false;
 
 	let readerBody;
 	let autoScroll = false;
+	let autoEnabled = false;
+	let scrubIndex = 0;
+	let scrubTotal = 0;
+	let scrubbing = false;
 	let scrollFrame = null;
 	let showReaderSettings = false;
 	let settingsWrap;
 	let showGoUp = false;
+	let barHidden = false;
+	let barHeight = 0;
+	let lastScrollTop = 0;
 	let pinFrame = null;
 	let clickScrollFrame = null;
 	let pagesCache = {};
@@ -70,15 +87,19 @@
 
 	$: scanlators = [...new Set(chapters.map((c) => c.scanlator).filter(Boolean))];
 	$: groupOptions = [{ value: 'all', label: 'All groups' }, ...scanlators.map((s) => ({ value: s, label: s }))];
-	$: filteredChapters = applyChapterFilters(chapters, groupFilter, dedup, sortAsc);
+	$: bmSet = manga ? chapterBookmarks[bookmarkKey(manga)] || {} : {};
+	$: filteredChapters = applyChapterFilters(chapters, groupFilter, dedup, sortAsc).filter((c) => !bookmarkOnly || bmSet[c.id]);
 	$: currentChapter = segments[activeSegIndex]?.chapter || (chapterIndex >= 0 ? filteredChapters[chapterIndex] : null);
 	$: hasNextChapter = segments.length ? segments[segments.length - 1].chapterIndex < filteredChapters.length - 1 : false;
 	$: mangaProgress = (manga && progress[bookmarkKey(manga)]) || {};
 	$: historyList = Object.values(readHistory).sort((a, b) => (b.time || 0) - (a.time || 0));
+	$: filteredHistory = historyFilter.trim()
+		? historyList.filter((h) => (h.title || '').toLowerCase().includes(historyFilter.trim().toLowerCase()))
+		: historyList;
 	$: displayed = isHome && popularFilter.trim()
 		? results.filter((m) => (m.title || '').toLowerCase().includes(popularFilter.trim().toLowerCase()))
 		: results;
-	$: if (restored) persistUrl(source, view, manga, currentChapter, showHistory, showFilters, activeFilters);
+	$: if (restored) syncUrl(source, view, manga, currentChapter);
 	$: chapterOptions = filteredChapters.map((c, i) => ({ value: i, label: chapterLabel(c) }));
 
 	function chapterLabel(c) {
@@ -110,6 +131,32 @@
 			return JSON.parse(localStorage.getItem(BOOKMARKS_KEY) || '{}');
 		} catch {
 			return {};
+		}
+	}
+
+	function loadChapterBookmarks() {
+		try {
+			return JSON.parse(localStorage.getItem(CHAPTER_BOOKMARKS_KEY) || '{}');
+		} catch {
+			return {};
+		}
+	}
+
+	function toggleChapterBookmark(chapter) {
+		if (!manga) return;
+
+		const key = bookmarkKey(manga);
+		const saved = { ...(chapterBookmarks[key] || {}) };
+
+		if (saved[chapter.id]) delete saved[chapter.id];
+		else saved[chapter.id] = true;
+
+		chapterBookmarks = { ...chapterBookmarks, [key]: saved };
+
+		try {
+			localStorage.setItem(CHAPTER_BOOKMARKS_KEY, JSON.stringify(chapterBookmarks));
+		} catch {
+			// ignore storage failures
 		}
 	}
 
@@ -203,6 +250,7 @@
 
 		if (readerBody.scrollTop + readerBody.clientHeight >= readerBody.scrollHeight - 1) {
 			autoScroll = false;
+			autoEnabled = false;
 			scrollFrame = null;
 			return;
 		}
@@ -210,17 +258,37 @@
 		scrollFrame = requestAnimationFrame(tickScroll);
 	}
 
-	function toggleAutoScroll() {
-		autoScroll = !autoScroll;
+	function startAuto() {
+		autoScroll = true;
+		if (!scrollFrame) scrollFrame = requestAnimationFrame(tickScroll);
+	}
 
-		if (autoScroll && !scrollFrame) {
-			scrollFrame = requestAnimationFrame(tickScroll);
+	function setAutoEnabled(on) {
+		autoEnabled = on;
+		if (on) {
+			showReaderSettings = false;
+			barHidden = true;
+			startAuto();
+		} else {
+			autoScroll = false;
 		}
 	}
 
+	function pauseAutoScroll() {
+		autoScroll = false;
+	}
+
 	function handleReaderClick(e) {
-		if (!clickToScroll || !readerBody || autoScroll) return;
+		if (!readerBody) return;
 		if (e.target.closest('button, a, input')) return;
+
+		if (autoEnabled) {
+			if (autoScroll) autoScroll = false;
+			else startAuto();
+			return;
+		}
+
+		if (!clickToScroll) return;
 
 		cancelPin();
 
@@ -229,6 +297,16 @@
 		const dir = e.clientY - rect.top < h * 0.25 ? -1 : 1;
 
 		animateScrollBy(dir * h * 0.85);
+	}
+
+	function scrubTo(idx) {
+		cancelPin();
+
+		const target = readerBody?.querySelector(`img.page[data-seg="${activeSegIndex}"][data-pi="${idx}"]`);
+
+		if (target) {
+			readerBody.scrollTop += target.getBoundingClientRect().top - readerBody.getBoundingClientRect().top;
+		}
 	}
 
 	function animateScrollBy(delta) {
@@ -425,67 +503,78 @@
 		loadHome();
 	}
 
-	function persistUrl() {
-		const url = new URL(location.href);
+	function readUrlState() {
+		if (typeof window === 'undefined') return {};
 
-		url.searchParams.set('c_src', source);
+		const p = new URLSearchParams(window.location.search);
 
-		if (manga?.id && view !== 'search') {
-			url.searchParams.set('c_id', manga.id);
-		} else {
-			url.searchParams.delete('c_id');
+		return { src: p.get('c_src') || '', id: p.get('c_id') || '', ch: p.get('c_ch') || '' };
+	}
+
+	function loadLast() {
+		try {
+			return JSON.parse(localStorage.getItem(LAST_KEY) || '{}');
+		} catch {
+			return {};
+		}
+	}
+
+	function setParam(url, key, value) {
+		if (value) url.searchParams.set(key, value);
+		else url.searchParams.delete(key);
+	}
+
+	function syncUrl(src, currentView, item, chapter) {
+		const id = currentView !== 'search' && item ? item.id : '';
+		const chId = currentView === 'reader' && chapter ? chapter.id : '';
+
+		if (typeof window !== 'undefined') {
+			const url = new URL(window.location.href);
+
+			setParam(url, 'c_src', src);
+			setParam(url, 'c_id', id);
+			setParam(url, 'c_ch', chId);
+
+			const next = `${url.pathname}${url.search}${url.hash}`;
+
+			if (next !== `${window.location.pathname}${window.location.search}${window.location.hash}`) {
+				history.replaceState(history.state, '', next);
+			}
 		}
 
-		if (view === 'reader' && currentChapter) {
-			url.searchParams.set('c_ch', currentChapter.id);
-		} else {
-			url.searchParams.delete('c_ch');
+		try {
+			localStorage.setItem(LAST_KEY, JSON.stringify({ src, id, ch: chId }));
+		} catch {
+			// ignore storage failures
+		}
+	}
+
+	function stripUrl() {
+		if (typeof window === 'undefined') return;
+
+		const url = new URL(window.location.href);
+		let changed = false;
+
+		for (const key of [...url.searchParams.keys()]) {
+			if (key.startsWith('c_')) {
+				url.searchParams.delete(key);
+				changed = true;
+			}
 		}
 
-		if (view === 'search' && showHistory) {
-			url.searchParams.set('c_hist', '1');
-		} else {
-			url.searchParams.delete('c_hist');
-		}
-
-		if (view === 'search' && showFilters) {
-			url.searchParams.set('c_filt', '1');
-		} else {
-			url.searchParams.delete('c_filt');
-		}
-
-		if (view === 'search' && Object.keys(activeFilters).length) {
-			url.searchParams.set('c_af', JSON.stringify(activeFilters));
-		} else {
-			url.searchParams.delete('c_af');
-		}
-
-		window.history.replaceState(window.history.state, '', url.pathname + url.search);
+		if (changed) history.replaceState(history.state, '', `${url.pathname}${url.search}${url.hash}`);
 	}
 
 	onMount(async () => {
-		const params = new URLSearchParams(location.search);
-		const src = params.get('c_src');
-		const id = params.get('c_id');
-		const ch = params.get('c_ch');
+		const fromUrl = readUrlState();
+		const last = loadLast();
+		const src = fromUrl.src || last.src;
+		const id = fromUrl.id || last.id;
+		const ch = fromUrl.ch || last.ch;
 
 		if (src && SOURCES.some((s) => s.value === src)) source = src;
 
 		await loadFilterDefs();
-
-		const af = params.get('c_af');
-
-		if (af) {
-			try {
-				activeFilters = JSON.parse(af);
-				draftFilters = { ...activeFilters };
-			} catch {
-				// ignore bad filter param
-			}
-		}
-
-		showFilters = params.get('c_filt') === '1';
-		showHistory = params.get('c_hist') === '1';
 
 		if (id) {
 			await openManga({ id });
@@ -503,7 +592,9 @@
 		restored = true;
 	});
 
-	async function openManga(item) {
+	onDestroy(stripUrl);
+
+	async function openManga(item, { refresh = false } = {}) {
 		manga = { ...item };
 		view = 'chapters';
 		loading = true;
@@ -514,7 +605,7 @@
 		pagesCache = {};
 
 		try {
-			const data = await get(`/tools/comics/detail?source=${source}&id=${encodeURIComponent(item.id)}`);
+			const data = await get(`/tools/comics/detail?source=${source}&id=${encodeURIComponent(item.id)}${refresh ? '&refresh=1' : ''}`);
 			manga = mergeManga(item, data?.manga || {});
 			chapters = data?.chapters || [];
 			if (!chapters.length) error = 'No chapters found.';
@@ -527,9 +618,17 @@
 
 	function onReaderScroll() {
 		if (!readerBody) return;
-		showGoUp = readerBody.scrollTop > 500;
 
-		if (pinFrame || !segments.length) return;
+		const st = readerBody.scrollTop;
+		showGoUp = st > 500;
+
+		if (scrubbing) barHidden = false;
+		else if (st < 80) barHidden = false;
+		else if (st > lastScrollTop + 6) barHidden = true;
+		else if (st < lastScrollTop - 6) barHidden = false;
+		lastScrollTop = st;
+
+		if (pinFrame || adjusting || !segments.length) return;
 
 		const imgs = readerBody.querySelectorAll('img.page');
 
@@ -553,12 +652,18 @@
 					saveBookmark(seg.chapter);
 				}
 
+				scrubIndex = pi;
+				scrubTotal = seg.pages.length;
 				updateProgress(seg.chapter.id, pi, seg.pages.length);
 			}
 		}
 
 		if (doomMode && !loadingNext && canLoadNext() && needMore()) {
 			loadNextSegment();
+		}
+
+		if (doomMode && !loadingPrev && canLoadPrev() && st < readerBody.clientHeight) {
+			loadPrevSegment();
 		}
 	}
 
@@ -610,6 +715,115 @@
 		}
 
 		loadingNext = false;
+		trimBehind();
+	}
+
+	function anchorImg() {
+		const bodyTop = readerBody.getBoundingClientRect().top;
+		const imgs = readerBody.querySelectorAll('img.page');
+
+		for (const img of imgs) {
+			if (img.getBoundingClientRect().bottom > bodyTop + 1) return img;
+		}
+
+		return null;
+	}
+
+	async function preserve(mutate, hold = false) {
+		const el = anchorImg();
+		const chapterId = el ? segments[Number(el.dataset.seg)]?.chapter.id : null;
+		const pi = el ? el.dataset.pi : null;
+		const before = el ? el.getBoundingClientRect().top : 0;
+
+		adjusting = true;
+		mutate();
+		await tick();
+
+		const align = () => {
+			if (chapterId == null || !readerBody) return;
+
+			const si = segments.findIndex((s) => s.chapter.id === chapterId);
+			const target = si >= 0 && readerBody.querySelector(`img.page[data-seg="${si}"][data-pi="${pi}"]`);
+
+			if (target) readerBody.scrollTop += target.getBoundingClientRect().top - before;
+		};
+
+		align();
+
+		if (!hold) {
+			adjusting = false;
+			return;
+		}
+
+		cancelPin();
+
+		let frames = 0;
+		const stop = () => {
+			cancelPin();
+			adjusting = false;
+		};
+
+		readerBody.addEventListener('wheel', stop, { once: true, passive: true });
+		readerBody.addEventListener('touchstart', stop, { once: true, passive: true });
+
+		const step = () => {
+			if (!readerBody || view !== 'reader') return stop();
+
+			align();
+			pinFrame = ++frames < 30 ? requestAnimationFrame(step) : null;
+			if (!pinFrame) adjusting = false;
+		};
+
+		pinFrame = requestAnimationFrame(step);
+	}
+
+	function trimBehind() {
+		const start = Math.max(0, activeSegIndex - KEEP_BEHIND);
+
+		if (start <= 0) return;
+
+		preserve(() => {
+			segments = segments.slice(start);
+			activeSegIndex -= start;
+		});
+	}
+
+	function trimAhead() {
+		const end = Math.min(segments.length, activeSegIndex + KEEP_AHEAD + 1);
+
+		if (end < segments.length) segments = segments.slice(0, end);
+	}
+
+	function canLoadPrev() {
+		return !!segments[0] && segments[0].chapterIndex > 0;
+	}
+
+	async function loadPrevSegment() {
+		if (loadingPrev || !canLoadPrev()) return;
+		loadingPrev = true;
+
+		try {
+			const prevIdx = segments[0].chapterIndex - 1;
+			const chapter = filteredChapters[prevIdx];
+			let pgs = pagesCache[chapter.id];
+
+			if (!pgs) {
+				const data = await get(`/tools/comics/pages?source=${source}&ref=${encodeURIComponent(chapter.id)}`);
+				pgs = data?.pages || [];
+				pagesCache[chapter.id] = pgs;
+			}
+
+			await preserve(() => {
+				segments = [{ chapterIndex: prevIdx, chapter, pages: pgs }, ...segments];
+				activeSegIndex += 1;
+			}, true);
+
+			trimAhead();
+		} catch (e) {
+			showError(e.message || 'Failed to load previous chapter.');
+		}
+
+		loadingPrev = false;
 	}
 
 	async function openReader(index) {
@@ -617,6 +831,8 @@
 		const chapter = filteredChapters[index];
 		view = 'reader';
 		showGoUp = false;
+		barHidden = false;
+		lastScrollTop = 0;
 		activeSegIndex = 0;
 
 		if (pagesCache[chapter.id]) {
@@ -699,6 +915,7 @@
 		if (clickScrollFrame) cancelAnimationFrame(clickScrollFrame);
 		clickScrollFrame = null;
 		autoScroll = false;
+		autoEnabled = false;
 		if (scrollFrame) cancelAnimationFrame(scrollFrame);
 		scrollFrame = null;
 		showReaderSettings = false;
@@ -765,7 +982,8 @@
 	}
 </script>
 
-<svelte:window on:keydown={onKey} on:click={handleOutsideSettings} />
+<svelte:window on:keydown={onKey} on:click={handleOutsideSettings} on:blur={pauseAutoScroll} />
+<svelte:document on:visibilitychange={() => document.hidden && pauseAutoScroll()} />
 
 <div class="comics">
 	{#if view === 'search'}
@@ -815,21 +1033,29 @@
 		{#if showHistory}
 			<div class="results-head">
 				<p class="results-label">Reading History</p>
-				<button class="link-btn" type="button" on:click={clearHistory}>Clear</button>
+				<div class="history-actions">
+					<button class="link-btn" type="button" on:click={clearHistory}>Clear</button>
+					{#if historyList.length}
+						<input class="input filter-input" type="text" placeholder="Filter history..." bind:value={historyFilter} />
+					{/if}
+				</div>
 			</div>
 			<div class="grid">
-				{#each historyList as h (h.source + '/' + h.id)}
+				{#each filteredHistory as h (h.source + '/' + h.id)}
 					<button class="result" type="button" on:click={() => openHistory(h)}>
 						{#if h.poster}
 							<img class="poster" src={proxied(h.source, h.poster)} alt="" loading="lazy" on:error={(e) => (e.target.style.visibility = 'hidden')} />
 						{:else}
 							<span class="poster placeholder"><i class="nf nf-md-book_open_page_variant"></i></span>
 						{/if}
-						<span class="result-title">{h.title}</span>
+						<span class="result-title">{@html highlight(h.title, historyFilter)}</span>
 						<span class="result-sub">Ch. {h.number} · {ago(h.time)}</span>
 					</button>
 				{/each}
 			</div>
+			{#if historyFilter.trim() && !filteredHistory.length}
+				<p class="muted">No history matches "{historyFilter}".</p>
+			{/if}
 		{:else if loading && !results.length}
 			<SkeletonCard count={8} minWidth="130px" />
 		{:else if results.length}
@@ -847,7 +1073,7 @@
 						{:else}
 							<span class="poster placeholder"><i class="nf nf-md-book_open_page_variant"></i></span>
 						{/if}
-						<span class="result-title">{item.title}</span>
+						<span class="result-title">{@html highlight(item.title, isHome ? popularFilter : query)}</span>
 					</button>
 				{/each}
 			</div>
@@ -910,6 +1136,16 @@
 									<i class="nf nf-md-filter_variant"></i> Dedup
 								</button>
 							</Tooltip>
+							<Tooltip text="Fetch the newest chapters now (bypasses the 1h cache)">
+								<button class="toggle-btn" type="button" disabled={loading} on:click={() => openManga(manga, { refresh: true })}>
+									<i class="nf nf-md-refresh"></i> Refresh
+								</button>
+							</Tooltip>
+							<Tooltip text="Show only bookmarked chapters">
+								<button class="toggle-btn" class:active={bookmarkOnly} type="button" on:click={() => (bookmarkOnly = !bookmarkOnly)}>
+									<svg class="bm-icon on" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3H7a2 2 0 0 0-2 2v16l7-3 7 3V5a2 2 0 0 0-2-2z" /></svg> Saved
+								</button>
+							</Tooltip>
 						</div>
 
 						<div class="chapter-list">
@@ -925,6 +1161,11 @@
 											<span class="chapter-pct" class:done={chapterDone(mangaProgress[chapter.id])}>{mangaProgress[chapter.id].page + 1}/{mangaProgress[chapter.id].total}</span>
 										{/if}
 									</button>
+									<Tooltip text={bmSet[chapter.id] ? 'Remove bookmark' : 'Bookmark chapter'}>
+										<button class="icon-btn" class:active={bmSet[chapter.id]} type="button" aria-label="Bookmark chapter" on:click={() => toggleChapterBookmark(chapter)}>
+											<svg class="bm-icon" class:on={bmSet[chapter.id]} viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3H7a2 2 0 0 0-2 2v16l7-3 7 3V5a2 2 0 0 0-2-2z" /></svg>
+										</button>
+									</Tooltip>
 									<Tooltip text="Download this chapter as PDF">
 										<button class="icon-btn" type="button" aria-label="Download PDF" disabled={pdfBusy} on:click={() => downloadPdf(chapter)}>
 											<i class="nf nf-md-download_circle"></i>
@@ -942,7 +1183,7 @@
 
 {#if view === 'reader'}
 	<div class="reader">
-		<header class="reader-bar">
+		<header class="reader-bar" class:hidden={barHidden} bind:clientHeight={barHeight}>
 			<button class="link-btn" type="button" on:click={closeReader}><i class="nf nf-fa-chevron_left"></i> Chapters</button>
 			<div class="reader-select">
 				<Dropdown value={chapterIndex} options={chapterOptions} size="sm" on:change={(e) => openReader(e.detail)} />
@@ -954,15 +1195,16 @@
 				<Tooltip text="Next chapter (→)">
 					<button class="icon-btn" type="button" aria-label="Next chapter" disabled={chapterIndex >= filteredChapters.length - 1} on:click={() => changeChapter(1)}><i class="nf nf-fa-chevron_right"></i></button>
 				</Tooltip>
-				<Tooltip text={autoScroll ? 'Pause auto-scroll' : 'Start auto-scroll'}>
-					<button class="icon-btn" class:active={autoScroll} type="button" aria-label="Auto-scroll" on:click={toggleAutoScroll}><i class="nf {autoScroll ? 'nf-md-pause' : 'nf-md-play'}"></i></button>
-				</Tooltip>
 				<div class="settings-wrap" bind:this={settingsWrap}>
 					<Tooltip text="Reader settings">
 						<button class="icon-btn" class:active={showReaderSettings} type="button" aria-label="Reader settings" on:click={() => (showReaderSettings = !showReaderSettings)}><i class="nf nf-md-cog"></i></button>
 					</Tooltip>
 					{#if showReaderSettings}
 						<div class="reader-settings">
+							<div class="setting">
+								<span>Auto-scroll</span>
+								<Toggle checked={autoEnabled} size="sm" on:change={(e) => setAutoEnabled(e.detail)} />
+							</div>
 							<label class="setting">
 								<span>Auto-scroll speed</span>
 								<Slider min={1} max={10} bind:value={autoSpeed} />
@@ -981,13 +1223,25 @@
 				<Tooltip text="Download this chapter as PDF">
 					<button class="icon-btn" type="button" aria-label="Download PDF" disabled={pdfBusy} on:click={() => downloadPdf(currentChapter)}><i class="nf nf-md-download_circle"></i></button>
 				</Tooltip>
-				<Tooltip text="Close reader (Esc)">
-					<button class="icon-btn" type="button" aria-label="Close reader" on:click={closeReader}><i class="nf nf-fa-times"></i></button>
-				</Tooltip>
 			</div>
+			{#if scrubTotal > 1}
+				<div class="reader-scrub">
+					<div class="scrub-wrap">
+						<input class="scrub" type="range" min="0" max={scrubTotal - 1} value={scrubIndex}
+							on:input={(e) => { scrubbing = true; scrubTo(+e.target.value); }}
+							on:change={() => (scrubbing = false)}
+							on:pointerup={() => (scrubbing = false)}
+							aria-label="Page progress" />
+						<div class="scrub-dots" aria-hidden="true">
+							{#each Array(scrubTotal) as _, i (i)}<span class="scrub-dot" class:on={i <= scrubIndex}></span>{/each}
+						</div>
+					</div>
+					<span class="scrub-label">{scrubIndex + 1}/{scrubTotal}</span>
+				</div>
+			{/if}
 		</header>
 		<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
-		<div class="reader-body" bind:this={readerBody} on:click={handleReaderClick} on:scroll={onReaderScroll} role="presentation">
+		<div class="reader-body" bind:this={readerBody} on:click={handleReaderClick} on:scroll={onReaderScroll} style:padding-top="{barHeight}px" role="presentation">
 			{#if loading}
 				<p class="muted reader-loading">Loading pages...</p>
 			{:else}
@@ -1028,6 +1282,7 @@
 	.err { margin: 0; color: #ff8e74; font-size: var(--fs-sm); }
 	.results-label { margin: 0; font-size: var(--fs-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
 	.results-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+	.history-actions { display: flex; align-items: center; gap: var(--space-2); }
 	.filter-btn { display: inline-flex; align-items: center; gap: 0.35rem; }
 	.filter-btn.active { color: var(--accent); border-color: var(--accent); }
 	.filter-count { display: inline-grid; place-items: center; min-width: 1.1rem; height: 1.1rem; padding: 0 0.3rem; border-radius: var(--radius-pill); background: var(--accent); color: var(--bg); font-size: 0.6rem; font-weight: 700; }
@@ -1050,19 +1305,20 @@
 	.poster.placeholder { display: grid; place-items: center; font-size: 2rem; color: var(--muted); }
 	.result:hover .poster { border-color: var(--accent); }
 	.result-title { font-size: var(--fs-xs); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+	.result-title :global(mark.cmd-hl) { background: color-mix(in srgb, var(--accent) 32%, transparent); color: var(--accent); padding: 0 2px; border-radius: 3px; font-weight: 700; }
 	.result-sub { font-size: 0.65rem; color: var(--accent); }
 
 	.chapters-head { display: flex; align-items: center; gap: var(--space-2); }
 	.manga-title { margin: 0; font-size: var(--fs-md); }
 	.link-btn { display: inline-flex; align-items: center; gap: 0.3rem; background: none; border: none; color: var(--muted); font-size: var(--fs-sm); font-weight: 600; cursor: pointer; }
 	.link-btn:hover { color: var(--accent); }
-	.link-btn :global(.nf) { font-size: 0.7em; }
+	.link-btn :global(.nf) { font-size: 0.7em; line-height: 1; }
 
 	.detail-layout { display: flex; gap: var(--space-3); align-items: stretch; }
 	.detail { position: relative; overflow: hidden; flex: 0 0 300px; padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-md); min-height: 340px; }
 	.detail::before { content: ''; position: absolute; inset: -24px; background-image: var(--splash); background-size: cover; background-position: center; filter: blur(14px) brightness(0.5); transform: scale(1.15); z-index: 0; }
 	.detail::after { content: ''; position: absolute; inset: 0; background: radial-gradient(120% 80% at 50% 0%, transparent 0%, rgba(0, 0, 0, 0.55) 100%), linear-gradient(to top, rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 0.3)); z-index: 1; }
-	.detail-info { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 0.45rem; min-width: 0; max-height: 62vh; overflow-y: auto; color: #fff; }
+	.detail-info { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 0.45rem; min-width: 0; max-height: 62vh; overflow-y: auto; color: #fff; margin-right: calc(-1 * var(--space-4)); padding-right: var(--space-4); }
 	.detail-cover { width: 130px; aspect-ratio: 2 / 3; object-fit: cover; border-radius: var(--radius-sm); align-self: center; box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55); }
 	.detail .manga-title { color: #fff; }
 	.detail-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; }
@@ -1084,7 +1340,7 @@
 	.toggle-btn:hover { color: var(--text); }
 	.toggle-btn.active { color: var(--accent); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
 
-	.chapter-list { display: flex; flex-direction: column; gap: 0.25rem; flex: 1; min-height: 0; overflow-y: auto; }
+	.chapter-list { display: flex; flex-direction: column; gap: 0.25rem; flex: 1; min-height: 0; overflow-y: auto; padding-right: var(--space-4); }
 
 	@media (max-width: 720px) {
 		.detail-layout { flex-direction: column; }
@@ -1105,9 +1361,20 @@
 	.icon-btn:disabled { opacity: 0.4; cursor: default; }
 	.chapter-row .icon-btn { background: none; border: none; }
 	.chapter-row .icon-btn i { font-size: 1.2rem; }
+	.bm-icon { width: 1.2rem; height: 1.2rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
+	.bm-icon.on { fill: currentColor; stroke: none; }
+	.toggle-btn .bm-icon { width: 0.95rem; height: 0.95rem; }
 
 	.reader { position: fixed; inset: 0; z-index: 200; background: #0b0b12; display: flex; flex-direction: column; }
-	.reader-bar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: 0.5rem 0.8rem; background: var(--panel); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+	.reader-bar { position: absolute; top: 0; left: 0; right: 0; z-index: 10; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); padding: 0.5rem 0.8rem; background: var(--panel); border-bottom: 1px solid var(--border); transition: transform var(--tx-base); }
+	.reader-bar.hidden { transform: translateY(-100%); }
+	.reader-scrub { flex: 1 0 100%; display: flex; align-items: center; gap: var(--space-2); }
+	.scrub-wrap { position: relative; flex: 1; display: flex; align-items: center; min-width: 0; }
+	.scrub { flex: 1; accent-color: var(--accent); cursor: pointer; min-width: 0; }
+	.scrub-dots { position: absolute; top: 50%; left: 7px; right: 7px; transform: translateY(-50%); display: flex; justify-content: space-between; pointer-events: none; }
+	.scrub-dot { width: 4px; height: 4px; border-radius: 50%; background: color-mix(in srgb, var(--muted) 55%, transparent); }
+	.scrub-dot.on { background: var(--accent); }
+	.scrub-label { font-size: var(--fs-xs); color: var(--muted); white-space: nowrap; }
 	.reader-select { flex: 1; display: flex; justify-content: center; min-width: 0; }
 	.settings-wrap { position: relative; display: inline-flex; }
 	.reader-settings { position: absolute; top: calc(100% + 6px); right: 0; width: 210px; display: flex; flex-direction: column; gap: 0.6rem; padding: 0.7rem; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--shadow-md); z-index: 10; }
@@ -1128,5 +1395,9 @@
 
 	@media (max-width: 640px) {
 		.grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+		.reader-bar { flex-wrap: wrap; padding: 0.4rem 0.5rem; gap: 0.4rem; }
+		.reader-select { order: 3; flex: 1 0 100%; }
+		.reader-nav { gap: 0.15rem; }
+		.reader-nav .icon-btn { width: 30px; height: 30px; }
 	}
 </style>

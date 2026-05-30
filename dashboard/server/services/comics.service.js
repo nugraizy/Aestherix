@@ -3,6 +3,7 @@ import { randomBytes } from 'crypto';
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
 const TOKEN_TTL = 30 * 60 * 1000;
 const HOME_TTL = 60 * 60 * 1000;
+const DETAIL_TTL = 60 * 60 * 1000;
 
 const SOURCES = [
 	{ value: 'shinigami', label: 'Shinigami' },
@@ -167,13 +168,13 @@ const ADAPTERS = {
 	kiryuu: {
 		async search(query) {
 			const { kiryuu } = await import('../../../src/utils/kiryuu/index.js');
-			const items = await kiryuu.searchManga(query);
+			const items = await kiryuu.searchBasic(query);
 
 			return (items || []).map((m) => ({ id: m.slug, title: m.title, poster: m.poster }));
 		},
 		async home(page = 1) {
 			const { kiryuu } = await import('../../../src/utils/kiryuu/index.js');
-			const items = await kiryuu.searchManga('', page);
+			const items = await kiryuu.searchBasic('', page);
 			const mapped = (items || []).map((m) => ({ id: m.slug, title: m.title, poster: m.poster }));
 
 			return { items: mapped, hasNext: mapped.length > 0 };
@@ -327,6 +328,7 @@ function sortAscending(chapters) {
 export function createComicsService() {
 	const tokenCache = new Map();
 	const homeCache = new Map();
+	const detailCache = new Map();
 
 	function pruneTokens() {
 		const now = Date.now();
@@ -391,10 +393,23 @@ export function createComicsService() {
 			return value;
 		},
 
-		async getDetail(source, id) {
-			const { manga, chapters } = await getAdapter(source).detail(id);
+		async getDetail(source, id, { refresh = false } = {}) {
+			const cacheKey = `${source}:${id}`;
 
-			return { manga, chapters: sortAscending(chapters) };
+			if (!refresh) {
+				const cached = detailCache.get(cacheKey);
+
+				if (cached && cached.expires > Date.now()) {
+					return cached.value;
+				}
+			}
+
+			const { manga, chapters } = await getAdapter(source).detail(id);
+			const value = { manga, chapters: sortAscending(chapters) };
+
+			detailCache.set(cacheKey, { value, expires: Date.now() + DETAIL_TTL });
+
+			return value;
 		},
 
 		async getPages(source, ref) {

@@ -324,7 +324,7 @@ export function createToolsRouter({ services }) {
 		}
 
 		try {
-			res.json(await comics.getDetail(source, id));
+			res.json(await comics.getDetail(source, id, { refresh: String(req.query?.refresh || '') === '1' }));
 		} catch (error) {
 			res.status(500).json({ ok: false, message: error?.message || 'Failed to fetch detail.' });
 		}
