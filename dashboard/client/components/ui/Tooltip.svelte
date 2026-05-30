@@ -286,6 +286,10 @@
 		will-change: transform, opacity;
 	}
 
+	:global([data-mode='light'] .app-tooltip-bubble) {
+		background: rgba(255, 255, 255, 0.65);
+	}
+
 	:global(.app-tooltip-bubble.place-top) {
 		transform-origin: 50% 100%;
 	}
