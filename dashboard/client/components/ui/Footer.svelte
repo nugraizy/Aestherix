@@ -23,7 +23,6 @@
 				value={palette}
 				options={paletteList}
 				size="sm"
-				align="left"
 				on:change={(event) => dispatch('palette', event.detail)}
 			/>
 		{/if}

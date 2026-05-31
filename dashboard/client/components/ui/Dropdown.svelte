@@ -7,7 +7,7 @@
 	export let label = '';
 	export let disabled = false;
 	export let size = 'md';
-	export let align = 'left';
+	export let align = 'center';
 
 	const dispatch = createEventDispatcher();
 	const EDGE = 8;
@@ -57,7 +57,16 @@
 		const vh = window.innerHeight;
 		const width = Math.max(tr.width, 160);
 		let top = tr.bottom + 6;
-		let left = align === 'right' ? tr.right - width : tr.left;
+		let left;
+
+		if (align === 'right') {
+			left = tr.right - width;
+		} else if (align === 'center') {
+			left = tr.left + (tr.width - width) / 2;
+		} else {
+			left = tr.left;
+		}
+
 		const menuHeight = menuEl.offsetHeight;
 
 		if (top + menuHeight > vh - EDGE) {
