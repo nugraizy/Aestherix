@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.12.1」2026-06-01
+
+## Added
+
+- Authenticated YouTube innertube requests via cookies ([`5935d99`](https://github.com/nugraizy/aestherix/commit/5935d99))
+
+## Changed
+
+- Comix: reuse a warm browser and parallelize chapter and page fetching ([`c665ba6`](https://github.com/nugraizy/aestherix/commit/c665ba6))
+- Center custom dashboard dropdowns when opened ([`7d32eee`](https://github.com/nugraizy/aestherix/commit/7d32eee))
+
 # 「7.12.0」2026-05-31
 
 ## Added
