@@ -5,10 +5,148 @@ puppeteer.use(StealthPlugin());
 
 export { puppeteer };
 
+const LAUNCH_ARGS = [
+	'--no-sandbox',
+	'--disable-setuid-sandbox',
+	'--disable-gpu',
+	'--disable-blink-features=AutomationControlled'
+];
+const IDLE_MS = 5 * 60 * 1000;
+const DIRECT_TIMEOUT_MS = 8_000;
+
+class ComixBrowserPool {
+	#browser = null;
+	#launching = null;
+	#pages = new Set();
+	#reusable = null;
+	#apiBlocked = false;
+	#idleTimer = null;
+	#lock = null;
+
+	get apiBlocked() {
+		return this.#apiBlocked;
+	}
+
+	get openTabs() {
+		return this.#pages.size;
+	}
+
+	async browser() {
+		if (this.#browser?.connected) {
+			return this.#browser;
+		}
+
+		if (!this.#launching) {
+			this.#launching = puppeteer.launch({ headless: true, args: LAUNCH_ARGS }).then((browser) => {
+				this.#browser = browser;
+				this.#launching = null;
+				browser.on('disconnected', () => {
+					this.#browser = null;
+					this.#reusable = null;
+					this.#pages.clear();
+				});
+
+				return browser;
+			});
+		}
+
+		return this.#launching;
+	}
+
+	#armIdle() {
+		clearTimeout(this.#idleTimer);
+		this.#idleTimer = setTimeout(() => {
+			this.close().catch(() => {});
+		}, IDLE_MS);
+		this.#idleTimer.unref?.();
+	}
+
+	async #reusableTab() {
+		const browser = await this.browser();
+
+		if (this.#reusable && !this.#reusable.page.isClosed()) {
+			return this.#reusable;
+		}
+
+		const page = await browser.newPage();
+
+		await ComixBrowserCapture.configurePage(page);
+
+		const state = { page, resolve: null, reject: null };
+
+		await page.exposeFunction('__COMIX_PAGES__', (payload) => state.resolve?.(payload));
+		await page.evaluateOnNewDocument(ComixBrowserCapture.PAGES_HOOK_SCRIPT);
+		page.on('response', (res) => {
+			const url = res.url();
+
+			if (url.includes('/api/v1/chapters/') && !url.includes('chapter-indexes') && res.status() === 403) {
+				this.#apiBlocked = true;
+				state.reject?.(new Error('Comix API returned 403 (IP blocked)'));
+			}
+		});
+
+		this.#reusable = state;
+		this.#pages.add(page);
+		page.once('close', () => {
+			this.#pages.delete(page);
+
+			if (this.#reusable?.page === page) {
+				this.#reusable = null;
+			}
+		});
+
+		return state;
+	}
+
+	async #captureReusableDirect(pageUrl, timeoutMs) {
+		const state = await this.#reusableTab();
+
+		let timer;
+		const payload = new Promise((resolve, reject) => {
+			timer = setTimeout(() => reject(new Error('Comix direct capture timed out')), DIRECT_TIMEOUT_MS);
+			state.resolve = resolve;
+			state.reject = reject;
+		});
+
+		state.page.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: timeoutMs }).catch(() => {});
+		this.#armIdle();
+
+		try {
+			return await payload;
+		} finally {
+			clearTimeout(timer);
+			state.resolve = null;
+			state.reject = null;
+		}
+	}
+
+	async captureDirect(pageUrl, timeoutMs) {
+		const run = (this.#lock || Promise.resolve()).then(() => this.#captureReusableDirect(pageUrl, timeoutMs));
+
+		this.#lock = run.catch(() => {});
+
+		return run;
+	}
+
+	async close() {
+		clearTimeout(this.#idleTimer);
+
+		const browser = this.#browser;
+
+		this.#browser = null;
+		this.#reusable = null;
+		this.#pages.clear();
+		await browser?.close().catch(() => {});
+	}
+}
+
+export const comixBrowserPool = new ComixBrowserPool();
+
 export class ComixBrowserCapture {
 	static get DEFAULT_HEADERS() {
 		return {
-			'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+			'User-Agent':
+				'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
 			'Accept-Language': 'en-US,en;q=0.9'
 		};
 	}
@@ -20,186 +158,42 @@ export class ComixBrowserCapture {
 	}
 
 	static async captureChapterList({ titleUrl, timeoutMs = 60_000 }) {
-		let browser = null;
+		const browser = await comixBrowserPool.browser();
+		const first = await ComixBrowserCapture._captureOnePage(browser, titleUrl, 1, timeoutMs);
 
-		try {
-			browser = await puppeteer.launch({
-				headless: true,
-				args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu', '--disable-blink-features=AutomationControlled']
-			});
-
-			const page = await browser.newPage();
-
-			await ComixBrowserCapture.configurePage(page);
-
-			let settled = false;
-			let gotFirstPage = false;
-			let firstPageItems = null;
-			let firstPageHasNext = false;
-			let resolveCapture, rejectCapture;
-			const capturePromise = new Promise((resolve, reject) => { resolveCapture = resolve; rejectCapture = reject; });
-
-			const settleCapture = (payload) => {
-				if (settled) {return;}
-
-				settled = true;
-				clearTimeout(timeout);
-				resolveCapture(payload);
-			};
-
-			let timeout = setTimeout(() => rejectCapture(new Error(`Failed to capture decrypted payload from ${titleUrl}`)), timeoutMs);
-
-			const resetTimeout = () => {
-				clearTimeout(timeout);
-				timeout = setTimeout(() => rejectCapture(new Error(`Failed to capture decrypted payload from ${titleUrl}`)), timeoutMs);
-			};
-
-			let fallbackStarted = false;
-
-			page.on('response', (res) => {
-				const url = res.url();
-				const status = res.status();
-
-				if (status === 403 && url.includes('/chapters') && gotFirstPage && !settled && !fallbackStarted) {
-					fallbackStarted = true;
-					page.evaluate(() => { if (typeof window.__comixStopPager === 'function') {window.__comixStopPager();} }).catch(() => {});
-					ComixBrowserCapture._reloadFallback({ browser, titleUrl, firstPageItems, firstPageHasNext, timeoutMs })
-						.then(settleCapture)
-						.catch(() => { if (firstPageItems?.length) {settleCapture(JSON.stringify(firstPageItems));} });
-				}
-			});
-
-			await page.exposeFunction('__COMIX_CHAPTERS__', (payload) => { settleCapture(payload); });
-			await page.exposeFunction('__COMIX_RESET_TIMER__', () => { resetTimeout(); });
-			await page.exposeFunction('__COMIX_GOT_PAGE__', (pageJson) => {
-				gotFirstPage = true;
-
-				if (!firstPageItems) {
-					try { const parsed = JSON.parse(pageJson);
-
- firstPageItems = parsed.items; firstPageHasNext = parsed.hasNext; } catch { /* ignore parse errors */ }
-				}
-			});
-
-			const script = ComixBrowserCapture._CHAPTERS_HOOK_SCRIPT;
-
-			await page.evaluateOnNewDocument(script);
-			page.goto(titleUrl, { waitUntil: 'domcontentloaded', timeout: timeoutMs }).catch(() => {});
-			page.evaluate(script).catch(() => {});
-
-			const result = await capturePromise;
-
-			await page.close();
-			return result;
-		} finally {
-			if (browser) {await browser.close();}
+		if (!first?.items?.length) {
+			throw new Error(`Failed to capture chapter list from ${titleUrl}`);
 		}
-	}
 
-	static get _CHAPTERS_HOOK_SCRIPT() {
-		return `
-			(function(){
-				if (window.__comixInit) return;
-				window.__comixInit = true;
-				var _seen = {};
-				var _IFACE = window.__COMIX_CHAPTERS__;
-				var _RESET = window.__COMIX_RESET_TIMER__;
-				var _GOT_PAGE = window.__COMIX_GOT_PAGE__;
-				var gotFirst = false;
-				var lastHasNext = false;
-				var curPage = 0;
-				var _items = [];
-				var _submitted = false;
-				var _pagerInterval = null;
-				var _p = JSON.parse;
-				function _isChapters(o){
-					if(!(o&&o.result&&o.result.items&&o.result.items.length)) return false;
-					var it = o.result.items[0];
-					return it && ('id' in it) && ('url' in it) && ('number' in it);
-				}
-				function _submit(){
-					if (_submitted) return;
-					_submitted = true;
-					try { _IFACE(JSON.stringify(_items)); } catch (e) {}
-				}
-				window.__comixStopPager = function(){ if (_pagerInterval) { clearInterval(_pagerInterval); _pagerInterval = null; } };
-				function _rewriteUrl(url){
-					if (typeof url === 'string' && url.indexOf('/chapters') !== -1 && /[?&]limit=\\d+/.test(url)) {
-						return url.replace(/([?&]limit=)\\d+/, '$1' + '100');
-					}
-					return url;
-				}
-				function _handle(o){
-					try{
-					if(!_isChapters(o)) return;
-					var m = o.result.meta || o.result.pagination || {};
-					var p = m.page || 1;
-					gotFirst = true;
-					lastHasNext = !!m.hasNext;
-					if (p > curPage) curPage = p;
-					if (_seen[p]) return;
-					_seen[p] = true;
-					for (var i = 0; i < o.result.items.length; i++) _items.push(o.result.items[i]);
-					try { _GOT_PAGE(JSON.stringify({ items: o.result.items, hasNext: !!m.hasNext })); } catch (e) {}
-					if (m && m.hasNext) { try { _RESET(); } catch (e) {} _startPager(); } else { _submit(); }
-					}catch(e){}
-				}
-				JSON.parse = function(){ var r = _p.apply(this, arguments); try{ if (typeof arguments[0] === 'string') _handle(r); }catch(e){} return r; };
-				function _tryText(t){ try{ if (typeof t === 'string') _handle(_p(t)); }catch(e){} }
-				var _f = window.fetch;
-				window.fetch = function(i,d){
-					if (typeof i === 'string') i = _rewriteUrl(i);
-					else if (i && typeof i.url === 'string') { var nu = _rewriteUrl(i.url); if (nu !== i.url) i = new Request(nu, i); }
-					return _f.call(this,i,d).then(function(r){ try{ r.clone().text().then(_tryText); }catch(e){} return r; });
-				};
-				var _x = XMLHttpRequest.prototype.open;
-				XMLHttpRequest.prototype.open = function(m,u){ arguments[1] = _rewriteUrl(u); var s = this; s.addEventListener('load', function(){ _tryText(s.responseText); }); return _x.apply(this, arguments); };
-				var _pagerStarted = false;
-				function _startPager(){
-					if (_pagerStarted) return;
-					_pagerStarted = true;
-					var acted = -1, idle = 0, safety = 0;
-					_pagerInterval = setInterval(function(){
-						if (++safety > 500) { clearInterval(_pagerInterval); return; }
-						if (!gotFirst) return;
-						if (!lastHasNext) { clearInterval(_pagerInterval); return; }
-						if (acted === curPage) { if (++idle > 14) { acted = -1; idle = 0; } return; }
-						var n = document.querySelector('.npager__nav[aria-label="Next page"]');
-						if (n && !n.disabled) { acted = curPage; idle = 0; n.click(); }
-					}, 700);
-				}
-			})();
-		`;
-	}
+		const allItems = [...first.items];
+		const lastPage = Math.min(first.lastPage || 1, 50);
 
-	static async _reloadFallback({ browser, titleUrl, firstPageItems, firstPageHasNext, timeoutMs }) {
-		const allItems = [...(firstPageItems || [])];
-		const MAX_PAGES = 50;
-		const CONCURRENCY = 3;
+		if (lastPage > 1) {
+			const targets = [];
 
-		if (!firstPageHasNext) {return JSON.stringify(allItems);}
-
-		let nextPage = 2;
-		let done = false;
-
-		while (!done && nextPage <= MAX_PAGES) {
-			const batch = [];
-
-			for (let i = 0; i < CONCURRENCY && nextPage + i <= MAX_PAGES; i++) {batch.push(nextPage + i);}
-
-			const results = await Promise.all(batch.map((p) => ComixBrowserCapture._captureOnePage(browser, titleUrl, p, timeoutMs)));
-
-			for (let i = 0; i < results.length; i++) {
-				const pageData = results[i];
-
-				if (!pageData) { done = true; break; }
-
-				allItems.push(...pageData.items);
-
-				if (!pageData.hasNext) { done = true; break; }
+			for (let page = 2; page <= lastPage; page++) {
+				targets.push(page);
 			}
 
-			nextPage += batch.length;
+			const CONCURRENCY = 5;
+			const results = new Array(targets.length);
+			let cursor = 0;
+
+			const worker = async () => {
+				while (cursor < targets.length) {
+					const index = cursor++;
+
+					results[index] = await ComixBrowserCapture._captureOnePage(browser, titleUrl, targets[index], timeoutMs);
+				}
+			};
+
+			await Promise.all(Array.from({ length: Math.min(CONCURRENCY, targets.length) }, worker));
+
+			for (const result of results) {
+				if (result?.items?.length) {
+					allItems.push(...result.items);
+				}
+			}
 		}
 
 		return JSON.stringify(allItems);
@@ -210,12 +204,27 @@ export class ComixBrowserCapture {
 		const page = await context.newPage();
 
 		await ComixBrowserCapture.configurePage(page);
+		await page.setRequestInterception(true);
+		page.on('request', (request) => {
+			const type = request.resourceType();
+
+			if (type === 'image' || type === 'media' || type === 'font' || type === 'stylesheet') {
+				request.abort().catch(() => {});
+			} else {
+				request.continue().catch(() => {});
+			}
+		});
 
 		let result = null;
 		let resolveResult;
-		const resultPromise = new Promise((resolve) => { resolveResult = resolve; });
+		const resultPromise = new Promise((resolve) => {
+			resolveResult = resolve;
+		});
 
-		await page.exposeFunction('__COMIX_PAGE_DATA__', (json) => { result = json; resolveResult(); });
+		await page.exposeFunction('__COMIX_PAGE_DATA__', (json) => {
+			result = json;
+			resolveResult();
+		});
 
 		await page.evaluateOnNewDocument(`
 			(function(){
@@ -238,7 +247,7 @@ export class ComixBrowserCapture {
 							if (it && ('id' in it) && ('url' in it) && ('number' in it)) {
 								captured = true;
 								var m = o.result.meta || o.result.pagination || {};
-								window.__COMIX_PAGE_DATA__(JSON.stringify({ items: o.result.items, hasNext: !!m.hasNext }));
+								window.__COMIX_PAGE_DATA__(JSON.stringify({ items: o.result.items, hasNext: !!m.hasNext, lastPage: m.lastPage || 0 }));
 							}
 						}
 					} catch(e){}
@@ -250,14 +259,20 @@ export class ComixBrowserCapture {
 			})();
 		`);
 
-		try { await page.goto(titleUrl, { waitUntil: 'networkidle2', timeout: timeoutMs }); } catch { /* navigation may fail */ }
+		page.goto(titleUrl, { waitUntil: 'domcontentloaded', timeout: timeoutMs }).catch(() => {});
 
-		await Promise.race([resultPromise, new Promise((r) => setTimeout(r, 8000))]);
+		await Promise.race([resultPromise, new Promise((r) => setTimeout(r, 12_000))]);
 		await context.close();
 
-		if (!result) {return null;}
+		if (!result) {
+			return null;
+		}
 
-		try { return JSON.parse(result); } catch { return null; }
+		try {
+			return JSON.parse(result);
+		} catch {
+			return null;
+		}
 	}
 
 	static get PAGES_HOOK_SCRIPT() {
@@ -278,39 +293,17 @@ export class ComixBrowserCapture {
 	}
 
 	static async captureChapterPages({ pageUrl, timeoutMs = 30_000 }) {
-		let browser = null;
+		const browser = await comixBrowserPool.browser();
+
+		if (comixBrowserPool.apiBlocked) {
+			return ComixBrowserCapture._capturePagesIntercepted(browser, pageUrl, timeoutMs);
+		}
 
 		try {
-			browser = await puppeteer.launch({
-				headless: true,
-				args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu', '--disable-blink-features=AutomationControlled']
-			});
-
-			return await ComixBrowserCapture._capturePagesDirect(browser, pageUrl, timeoutMs).catch(async () => {
-				return ComixBrowserCapture._capturePagesIntercepted(browser, pageUrl, timeoutMs);
-			});
-		} finally {
-			if (browser) {await browser.close();}
+			return await comixBrowserPool.captureDirect(pageUrl, timeoutMs);
+		} catch {
+			return ComixBrowserCapture._capturePagesIntercepted(browser, pageUrl, timeoutMs);
 		}
-	}
-
-	static async _capturePagesDirect(browser, pageUrl, timeoutMs) {
-		const context = await browser.createBrowserContext();
-		const page = await context.newPage();
-
-		await ComixBrowserCapture.configurePage(page);
-
-		let resolveCapture, rejectCapture;
-		const capturePromise = new Promise((resolve, reject) => { resolveCapture = resolve; rejectCapture = reject; });
-		const timeout = setTimeout(() => rejectCapture(new Error(`Failed to capture chapter pages from ${pageUrl}`)), timeoutMs);
-
-		await page.exposeFunction('__COMIX_PAGES__', (payload) => { clearTimeout(timeout); resolveCapture(payload); });
-
-		await page.evaluateOnNewDocument(ComixBrowserCapture.PAGES_HOOK_SCRIPT);
-		page.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: timeoutMs }).catch(() => {});
-		page.evaluate(ComixBrowserCapture.PAGES_HOOK_SCRIPT).catch(() => {});
-
-		try { return await capturePromise; } finally { await context.close(); }
 	}
 
 	static async _capturePagesIntercepted(browser, pageUrl, timeoutMs) {
@@ -320,10 +313,16 @@ export class ComixBrowserCapture {
 		await ComixBrowserCapture.configurePage(page);
 
 		let resolveCapture, rejectCapture;
-		const capturePromise = new Promise((resolve, reject) => { resolveCapture = resolve; rejectCapture = reject; });
+		const capturePromise = new Promise((resolve, reject) => {
+			resolveCapture = resolve;
+			rejectCapture = reject;
+		});
 		const timeout = setTimeout(() => rejectCapture(new Error(`Failed to capture chapter pages from ${pageUrl}`)), timeoutMs);
 
-		await page.exposeFunction('__COMIX_PAGES__', (payload) => { clearTimeout(timeout); resolveCapture(payload); });
+		await page.exposeFunction('__COMIX_PAGES__', (payload) => {
+			clearTimeout(timeout);
+			resolveCapture(payload);
+		});
 		await page.evaluateOnNewDocument(ComixBrowserCapture.PAGES_HOOK_SCRIPT);
 		await page.setRequestInterception(true);
 		const proxied = new Set();
@@ -343,8 +342,15 @@ export class ComixBrowserCapture {
 					const body = await proxyPage.evaluate(() => document.body.innerText);
 
 					await proxyCtx.close();
-					request.respond({ status: 200, contentType: headers['content-type'] || 'application/json', headers: { 'x-enc': headers['x-enc'] || '', 'content-type': headers['content-type'] || 'application/json' }, body });
-				} catch { request.continue(); }
+					request.respond({
+						status: 200,
+						contentType: headers['content-type'] || 'application/json',
+						headers: { 'x-enc': headers['x-enc'] || '', 'content-type': headers['content-type'] || 'application/json' },
+						body
+					});
+				} catch {
+					request.continue();
+				}
 			} else {
 				request.continue();
 			}
@@ -352,6 +358,10 @@ export class ComixBrowserCapture {
 
 		page.goto(pageUrl, { waitUntil: 'domcontentloaded', timeout: timeoutMs }).catch(() => {});
 
-		try { return await capturePromise; } finally { await context.close(); }
+		try {
+			return await capturePromise;
+		} finally {
+			await context.close();
+		}
 	}
 }
