@@ -70,7 +70,7 @@ function collectVideoRenderers(node, out, limit) {
 export class Client extends HttpClient {
 	constructor(options = {}) {
 		super(options);
-		this.client = options.client || DefaultClient;
+		this.client = options.client || (this.cookies ? Clients.Web : DefaultClient);
 		this.chunkSize = options.chunkSize || Size10Mb;
 		this.maxRoutines = options.maxRoutines || 10;
 		this.playerCache = new PlayerCache();
@@ -90,6 +90,7 @@ export class Client extends HttpClient {
 
 	async videoFromID(id) {
 		this.assureClient();
+
 		const body = await this.videoDataByInnertube(id);
 		const video = new Video(id);
 
@@ -118,8 +119,7 @@ export class Client extends HttpClient {
 		}
 
 		if (parseErr instanceof ErrLoginRequired) {
-			this.client = Clients.Embedded;
-			const bodyEmbed = await this.videoDataByInnertube(id);
+			const bodyEmbed = await this.videoDataByInnertube(id, Clients.Embedded);
 
 			video.parseVideoInfo(bodyEmbed);
 			return video;
@@ -128,17 +128,17 @@ export class Client extends HttpClient {
 		throw parseErr;
 	}
 
-	async videoDataByInnertube(id) {
+	async videoDataByInnertube(id, clientInfo = this.client) {
 		const data = {
 			videoId: id,
-			context: prepareInnertubeContext(this.client),
+			context: prepareInnertubeContext(clientInfo),
 			contentCheckOk: true,
 			racyCheckOk: true,
 			playbackContext: { contentPlaybackContext: { html5Preference: 'HTML5_PREF_WANTS' } },
 			params: ''
 		};
 
-		return this.httpPostBody(`https://www.youtube.com/youtubei/v1/player?key=${this.client.key}`, data);
+		return this.httpPostBody(`https://www.youtube.com/youtubei/v1/player?key=${clientInfo.key}`, data);
 	}
 
 	async getPlaylist(url) {

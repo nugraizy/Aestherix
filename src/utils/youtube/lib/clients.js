@@ -3,6 +3,7 @@ import { Utils } from './utils.js';
 export const Clients = {
 	Web: {
 		name: 'WEB',
+		clientId: 1,
 		version: '2.20220801.00.00',
 		key: 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
 		userAgent:
@@ -12,6 +13,7 @@ export const Clients = {
 	},
 	Android: {
 		name: 'ANDROID',
+		clientId: 3,
 		version: '20.10.38',
 		key: 'AIzaSyA8eiZmM1FaDVjRy-df2KTyQ_vz_yYM39w',
 		userAgent: 'com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip',
@@ -20,6 +22,7 @@ export const Clients = {
 	},
 	IOS: {
 		name: 'IOS',
+		clientId: 5,
 		version: '19.45.4',
 		key: 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
 		userAgent: 'com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_0 like Mac OS X;)',
@@ -28,6 +31,7 @@ export const Clients = {
 	},
 	Embedded: {
 		name: 'WEB_EMBEDDED_PLAYER',
+		clientId: 56,
 		version: '1.19700101',
 		key: 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
 		userAgent:
@@ -37,6 +41,7 @@ export const Clients = {
 	},
 	AndroidVR: {
 		name: 'ANDROID_VR',
+		clientId: 28,
 		version: '1.65.10',
 		key: '',
 		userAgent:

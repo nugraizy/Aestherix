@@ -1,7 +1,22 @@
 import axios from 'axios';
+import crypto from 'node:crypto';
 import { ErrUnexpectedStatusCode } from './errors.js';
 
 const VisitorIdMaxAgeMs = 10 * 60 * 60 * 1000;
+
+function buildSapisidHash(cookies) {
+	const match = /(?:^|;\s*)(?:__Secure-3PAPISID|SAPISID)=([^;]+)/.exec(cookies);
+
+	if (!match) {
+		return null;
+	}
+
+	const timestamp = Math.floor(Date.now() / 1000);
+	const origin = 'https://www.youtube.com';
+	const hash = crypto.createHash('sha1').update(`${timestamp} ${match[1]} ${origin}`).digest('hex');
+
+	return `SAPISIDHASH ${timestamp}_${hash}`;
+}
 
 export class HttpClient {
 	constructor(options = {}) {
@@ -9,6 +24,7 @@ export class HttpClient {
 		this.client = options.client || null;
 		this.consentID = '';
 		this.visitorId = { value: '', updated: 0 };
+		this.cookies = options.cookies || process.env.YOUTUBE_COOKIE || '';
 	}
 
 	async httpDo(config) {
@@ -24,7 +40,21 @@ export class HttpClient {
 			this.consentID = String(Math.floor(Math.random() * 899) + 100);
 		}
 
-		headers.Cookie = `CONSENT=YES+cb.20210328-17-p0.en+FX+${this.consentID}`;
+		const userCookies = this.cookies || process.env.YOUTUBE_COOKIE || '';
+		const consentCookie = `CONSENT=YES+cb.20210328-17-p0.en+FX+${this.consentID}`;
+
+		headers.Cookie = userCookies ? `${userCookies}; ${consentCookie}` : consentCookie;
+
+		if (userCookies && config.url.includes('youtube.com')) {
+			const auth = buildSapisidHash(userCookies);
+
+			if (auth) {
+				headers.Origin = 'https://www.youtube.com';
+				headers['X-Origin'] = 'https://www.youtube.com';
+				headers['X-Goog-AuthUser'] = '0';
+				headers.Authorization = auth;
+			}
+		}
 
 		const res = await this.httpClient.request({
 			method: config.method || 'GET',
@@ -56,7 +86,7 @@ export class HttpClient {
 
 	async httpPost(url, body) {
 		const headers = {
-			'X-Youtube-Client-Name': '3',
+			'X-Youtube-Client-Name': String(this.client.clientId || 3),
 			'X-Youtube-Client-Version': this.client.version,
 			'Content-Type': 'application/json',
 			Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
