@@ -12,7 +12,7 @@
 	import { logout, restartBot, startBot, stopBot } from './lib/api.js';
 	import { showConfirm } from './lib/confirm.js';
 	import { connect, disconnect } from './lib/socket.js';
-	import { logs, status } from './lib/stores.js';
+	import { logs } from './lib/stores.js';
 	import { applyPalette, currentPalette, PALETTE_NAMES, setPalette, themeMode, toggleMode } from './lib/theme.js';
 	import { showError, showSuccess, showUndoToast } from './lib/toast.js';
 	import Controls from './pages/Controls.svelte';
@@ -23,6 +23,7 @@
 		albums: () => import('./pages/Albums.svelte'),
 		broadcast: () => import('./pages/Broadcast.svelte'),
 		groups: () => import('./pages/Groups.svelte'),
+		'manual-solve': () => import('./pages/ManualSolve.svelte'),
 		messages: () => import('./pages/MessageLogs.svelte'),
 		settings: () => import('./pages/Settings.svelte'),
 		system: () => import('./pages/System.svelte'),
@@ -52,7 +53,7 @@
 		notfound: NotFound
 	};
 
-	const PAGE_NAMES = ['home', 'controls', 'settings', 'groups', 'broadcast', 'messages', 'system', 'albums', 'editor', 'tools', 'notfound'];
+	const PAGE_NAMES = ['home', 'controls', 'settings', 'groups', 'broadcast', 'messages', 'system', 'albums', 'editor', 'tools', 'manual-solve', 'notfound'];
 	const NAV_PAGES = PAGE_NAMES.filter((name) => name !== 'notfound');
 	const PAGE_PATH_BASE = '/dashboard';
 
@@ -423,6 +424,11 @@
 			{#if loadedPages.messages}
 				<div class="page-cache" class:page-hidden={page !== 'messages'}>
 					<svelte:component this={loadedPages.messages} active={page === 'messages'} />
+				</div>
+			{/if}
+			{#if loadedPages['manual-solve']}
+				<div class="page-cache" class:page-hidden={page !== 'manual-solve'}>
+					<svelte:component this={loadedPages['manual-solve']} active={page === 'manual-solve'} />
 				</div>
 			{/if}
 			{#if loadedPages.editor}

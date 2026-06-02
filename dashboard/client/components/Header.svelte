@@ -14,6 +14,7 @@
 		{ id: 'broadcast', label: 'Broadcast' },
 		{ id: 'albums', label: 'Albums' },
 		{ id: 'tools', label: 'Tools', badge: 'New!' },
+		{ id: 'manual-solve', label: 'CF Solver' },
 		{ id: 'settings', label: 'Settings' },
 		{ id: 'system', label: 'System' },
 		{ id: 'editor', label: 'Editor' }

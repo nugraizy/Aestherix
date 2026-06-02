@@ -14,6 +14,8 @@ export * from './time.js';
 export * from './file.js';
 export * from './validation.js';
 export * from './cloudflare.js';
+export * from './manual-solve-error.js';
+export * from './solver-manager.js';
 
 export const boldify = (string) => chalk.bold(string);
 

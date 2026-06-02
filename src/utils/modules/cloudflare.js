@@ -2,6 +2,9 @@ import { fetch } from 'undici';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
+import { ManualSolveError } from './manual-solve-error.js';
+import { solverManager } from './solver-manager.js';
+
 puppeteer.use(StealthPlugin());
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
@@ -17,6 +20,18 @@ function looksLikeChallenge(status, body) {
 	}
 
 	return typeof body === 'string' && CHALLENGE_RE.test(body.slice(0, 4000));
+}
+
+function isChallengeBody(body) {
+	return typeof body === 'string' && CHALLENGE_RE.test(body.slice(0, 4000));
+}
+
+function cookiesToHeader(cookies) {
+	if (!Array.isArray(cookies)) {
+		return '';
+	}
+
+	return cookies.map((c) => `${c.name}=${c.value}`).join('; ');
 }
 
 async function getBrowser() {
@@ -108,10 +123,31 @@ export async function browserGet(url, { json = false, timeoutMs = DEFAULT_TIMEOU
  * GET text/HTML, falling back to the browser on a Cloudflare challenge.
  *
  * @param {string} url
- * @param {{ headers?: Record<string, string>, timeoutMs?: number }} [options]
+ * @param {{ headers?: Record<string, string>, timeoutMs?: number, service?: string }} [options]
  * @returns {Promise<string>}
  */
-export async function cfFetchText(url, { headers = {}, timeoutMs = DEFAULT_TIMEOUT } = {}) {
+export async function cfFetchText(url, { headers = {}, timeoutMs = DEFAULT_TIMEOUT, service } = {}) {
+	if (service) {
+		const cached = await solverManager.getCachedCookies(service, url);
+
+		if (cached) {
+			const cookieHeader = cookiesToHeader(cached.cookies);
+
+			try {
+				const res = await fetch(url, {
+					headers: { 'User-Agent': UA, Cookie: cookieHeader, ...headers, ...cached.headers }
+				});
+				const text = await res.text();
+
+				if (!looksLikeChallenge(res.status, text)) {
+					return text;
+				}
+			} catch {
+				// fall through
+			}
+		}
+	}
+
 	try {
 		const res = await fetch(url, { headers: { 'User-Agent': UA, ...headers } });
 		const text = await res.text();
@@ -123,17 +159,62 @@ export async function cfFetchText(url, { headers = {}, timeoutMs = DEFAULT_TIMEO
 		// network error → try the browser
 	}
 
-	return browserGet(url, { json: false, timeoutMs });
+	const browserResult = await browserGet(url, { json: false, timeoutMs });
+
+	if (!isChallengeBody(browserResult)) {
+		return browserResult;
+	}
+
+	if (service) {
+		const result = await solverManager.registerChallenge({ url, service, headers });
+
+		if (result.cached) {
+			const cookieHeader = cookiesToHeader(result.cookies);
+			const res = await fetch(url, {
+				headers: { 'User-Agent': UA, Cookie: cookieHeader, ...headers, ...result.headers }
+			});
+
+			return res.text();
+		}
+
+		throw new ManualSolveError({ challengeId: result.id, solveUrl: result.solveUrl, service, url });
+	}
+
+	throw new Error('Cloudflare challenge could not be resolved.');
 }
 
 /**
  * GET JSON, falling back to the browser on a Cloudflare challenge.
  *
  * @param {string} url
- * @param {{ headers?: Record<string, string>, timeoutMs?: number }} [options]
+ * @param {{ headers?: Record<string, string>, timeoutMs?: number, service?: string }} [options]
  * @returns {Promise<any>}
  */
-export async function cfFetchJSON(url, { headers = {}, timeoutMs = DEFAULT_TIMEOUT } = {}) {
+export async function cfFetchJSON(url, { headers = {}, timeoutMs = DEFAULT_TIMEOUT, service } = {}) {
+	if (service) {
+		const cached = await solverManager.getCachedCookies(service, url);
+
+		if (cached) {
+			const cookieHeader = cookiesToHeader(cached.cookies);
+
+			try {
+				const res = await fetch(url, {
+					headers: { Accept: 'application/json', 'User-Agent': UA, Cookie: cookieHeader, ...headers, ...cached.headers }
+				});
+
+				if (!CHALLENGE_STATUS.has(res.status)) {
+					const text = await res.text();
+
+					if (!looksLikeChallenge(res.status, text)) {
+						return JSON.parse(text);
+					}
+				}
+			} catch {
+				// fall through
+			}
+		}
+	}
+
 	try {
 		const res = await fetch(url, { headers: { Accept: 'application/json', 'User-Agent': UA, ...headers } });
 
@@ -148,7 +229,28 @@ export async function cfFetchJSON(url, { headers = {}, timeoutMs = DEFAULT_TIMEO
 		// fall through to browser
 	}
 
-	return JSON.parse(await browserGet(url, { json: true, timeoutMs }));
+	try {
+		return JSON.parse(await browserGet(url, { json: true, timeoutMs }));
+	} catch {
+		// browser returned challenge page
+	}
+
+	if (service) {
+		const result = await solverManager.registerChallenge({ url, service, headers });
+
+		if (result.cached) {
+			const cookieHeader = cookiesToHeader(result.cookies);
+			const res = await fetch(url, {
+				headers: { Accept: 'application/json', 'User-Agent': UA, Cookie: cookieHeader, ...headers, ...result.headers }
+			});
+
+			return JSON.parse(await res.text());
+		}
+
+		throw new ManualSolveError({ challengeId: result.id, solveUrl: result.solveUrl, service, url });
+	}
+
+	throw new Error('Cloudflare challenge could not be resolved.');
 }
 
 /**
@@ -196,10 +298,39 @@ export async function cfBrowserRequest(
  *
  * @param {string} url
  * @param {Record<string, string>} fields
- * @param {{ originUrl?: string, headers?: Record<string, string>, timeoutMs?: number }} [options]
+ * @param {{ originUrl?: string, headers?: Record<string, string>, timeoutMs?: number, service?: string }} [options]
  * @returns {Promise<string>}
  */
-export async function cfPostForm(url, fields, { originUrl, headers = {}, timeoutMs = DEFAULT_TIMEOUT } = {}) {
+export async function cfPostForm(url, fields, { originUrl, headers = {}, timeoutMs = DEFAULT_TIMEOUT, service } = {}) {
+	if (service) {
+		const cached = await solverManager.getCachedCookies(service, url);
+
+		if (cached) {
+			const cookieHeader = cookiesToHeader(cached.cookies);
+
+			try {
+				const form = new FormData();
+
+				for (const [key, value] of Object.entries(fields)) {
+					form.append(key, value);
+				}
+
+				const res = await fetch(url, {
+					method: 'POST',
+					headers: { 'User-Agent': UA, Cookie: cookieHeader, ...headers, ...cached.headers },
+					body: form
+				});
+				const text = await res.text();
+
+				if (!looksLikeChallenge(res.status, text)) {
+					return text;
+				}
+			} catch {
+				// fall through
+			}
+		}
+	}
+
 	try {
 		const form = new FormData();
 
@@ -217,5 +348,34 @@ export async function cfPostForm(url, fields, { originUrl, headers = {}, timeout
 		// fall through to browser
 	}
 
-	return cfBrowserRequest(originUrl || new URL(url).origin, url, { method: 'POST', formFields: fields, timeoutMs });
+	try {
+		return await cfBrowserRequest(originUrl || new URL(url).origin, url, { method: 'POST', formFields: fields, timeoutMs });
+	} catch {
+		// browser returned challenge
+	}
+
+	if (service) {
+		const result = await solverManager.registerChallenge({ url, service, headers });
+
+		if (result.cached) {
+			const cookieHeader = cookiesToHeader(result.cookies);
+			const form = new FormData();
+
+			for (const [key, value] of Object.entries(fields)) {
+				form.append(key, value);
+			}
+
+			const res = await fetch(url, {
+				method: 'POST',
+				headers: { 'User-Agent': UA, Cookie: cookieHeader, ...headers, ...result.headers },
+				body: form
+			});
+
+			return res.text();
+		}
+
+		throw new ManualSolveError({ challengeId: result.id, solveUrl: result.solveUrl, service, url });
+	}
+
+	throw new Error('Cloudflare challenge could not be resolved.');
 }

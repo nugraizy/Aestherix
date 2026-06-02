@@ -1,5 +1,6 @@
 import { Server as SocketIOServer } from 'socket.io';
 
+import { solverManager } from '../../../src/utils/modules/solver-manager.js';
 import { isBotEmbeddedHere } from '../lib/client.js';
 import { AUTH_COOKIE_NAME } from '../services/auth.service.js';
 import { createConfirmationBridge } from './confirmation.js';
@@ -26,7 +27,7 @@ function getSocketSession(socket, auth) {
 async function emitInitialSnapshot(socket, services) {
 	const session = socket?.data?.session || null;
 
-	if (!session) {
+	if (!session || session.anonymous) {
 		return;
 	}
 
@@ -312,11 +313,7 @@ export function createSocketLayer(httpServer, services) {
 	io.use((socket, next) => {
 		const session = getSocketSession(socket, services.auth);
 
-		if (!session) {
-			return next(new Error('Unauthorized'));
-		}
-
-		socket.data.session = session;
+		socket.data.session = session || { role: 'viewer', anonymous: true };
 		socket.data.lastLogId = 0;
 		socket.data.lastBotLogId = 0;
 		socket.data.lastAuditId = 0;
@@ -328,9 +325,98 @@ export function createSocketLayer(httpServer, services) {
 	io.on('connection', (socket) => {
 		const session = socket.data.session;
 
+		socket.data.manualSolveRooms = new Set();
+
 		socket.emit('dashboard:session', {
 			role: session?.role || 'viewer',
 			canEdit: session?.role === 'owner'
+		});
+
+		if (session?.role === 'owner' || session?.role === 'superOwner') {
+			socket.emit('dashboard:manual-solve:sessions', { sessions: services.manualSolve?.listSessions?.() || [] });
+		}
+
+		socket.emit('solver:challenges', { challenges: solverManager.listChallenges() });
+
+		socket.on('solver:claim', async (payload) => {
+			const id = String(payload?.id || '');
+			const userId = String(payload?.userId || socket.id);
+
+			const result = await solverManager.claimChallenge(id, userId);
+
+			socket.emit('solver:claim:result', result);
+		});
+
+		socket.on('dashboard:manual-solve:join', (payload) => {
+			const id = String(payload?.id || '');
+			const manualSolve = services.manualSolve;
+
+			if (!manualSolve?.hasSession?.(id)) {
+				return;
+			}
+
+			const sessionData = manualSolve.getSession(id);
+			const isChallenge = !!sessionData?.challengeId;
+
+			if (!isChallenge && session?.role !== 'owner' && session?.role !== 'superOwner') {
+				return;
+			}
+
+			const room = manualSolve.getRoom(id);
+
+			socket.join(room);
+			socket.data.manualSolveRooms.add(id);
+			manualSolve.addViewer(id);
+		});
+
+		socket.on('dashboard:manual-solve:leave', (payload) => {
+			const id = String(payload?.id || '');
+			const manualSolve = services.manualSolve;
+
+			if (!manualSolve?.hasSession?.(id)) {
+				return;
+			}
+
+			const sessionData = manualSolve.getSession(id);
+			const isChallenge = !!sessionData?.challengeId;
+
+			if (!isChallenge && session?.role !== 'owner' && session?.role !== 'superOwner') {
+				return;
+			}
+
+			const room = manualSolve.getRoom(id);
+
+			socket.leave(room);
+			socket.data.manualSolveRooms.delete(id);
+			manualSolve.removeViewer(id);
+		});
+
+		socket.on('dashboard:manual-solve:input', (payload) => {
+			const id = String(payload?.id || '');
+			const manualSolve = services.manualSolve;
+
+			if (manualSolve?.hasSession?.(id)) {
+				const sessionData = manualSolve.getSession(id);
+				const isChallenge = !!sessionData?.challengeId;
+
+				if (!isChallenge && session?.role !== 'owner' && session?.role !== 'superOwner') {
+					return;
+				}
+			}
+
+			void services.manualSolve?.handleInput?.(id, payload?.input || {});
+		});
+
+		socket.on('disconnect', () => {
+			const manualSolve = services.manualSolve;
+
+			if (!manualSolve) {
+				return;
+			}
+
+			for (const id of socket.data.manualSolveRooms || []) {
+				manualSolve.removeViewer(id);
+			}
 		});
 
 		socket.on('dashboard:audit-filters', (incoming) => {

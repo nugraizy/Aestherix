@@ -42,6 +42,7 @@ const envSchema = z
 		// ── Dashboard ──────────────────────────────────────────────────
 		DASHBOARD_EMBEDDED: z.string().default('1'),
 		DASHBOARD_PORT: optionalNumber,
+		DASHBOARD_URL: optionalString,
 		DASHBOARD_BRIDGE_PORT: z.coerce.number().int().positive().default(4010),
 		DASHBOARD_BRIDGE_TOKEN: z.string().default('aestherix-local-bridge-token'),
 

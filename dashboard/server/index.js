@@ -2,6 +2,7 @@ import compression from 'compression';
 import express from 'express';
 import { createServer } from 'http';
 
+import { solverManager } from '../../src/utils/modules/solver-manager.js';
 import { createAuthMiddleware } from './middleware/auth.middleware.js';
 import { createActionsRouter } from './routes/actions.routes.js';
 import { createAuditRouter } from './routes/audit.routes.js';
@@ -12,6 +13,7 @@ import { createEditorRouter } from './routes/editor.routes.js';
 import { createFlagsRouter } from './routes/flags.routes.js';
 import { createGroupsRouter } from './routes/groups.routes.js';
 import { createLogsRouter } from './routes/logs.routes.js';
+import { createManualSolveRouter } from './routes/manual-solve.routes.js';
 import { createMessageLogsRouter } from './routes/message-logs.routes.js';
 import { createPrefixRouter } from './routes/prefix.routes.js';
 import { createProfilePicturesRouter } from './routes/profile-pictures.routes.js';
@@ -31,9 +33,11 @@ import { createComicsService } from './services/comics.service.js';
 import { createEditorService } from './services/editor.service.js';
 import { createGroupsService } from './services/groups.service.js';
 import { createLifecycleService } from './services/lifecycle.service.js';
+import { createManualSolveService } from './services/manual-solve.service.js';
 import { createMonitorService } from './services/monitor.service.js';
 import { createProfilePicturesService } from './services/profile-pictures.service.js';
 import { createSettingsService } from './services/settings.service.js';
+import { createSolverCacheService } from './services/solver-cache.service.js';
 import { createSpotifyService } from './services/spotify.service.js';
 import { createSystemService } from './services/system.service.js';
 import { createToolsService } from './services/tools.service.js';
@@ -47,6 +51,8 @@ const API_BASE = '/api/dashboard';
 function wireServices({ configuration, prisma }) {
 	const audit = createAuditService({ prisma });
 	const monitor = createMonitorService({ configuration });
+	const manualSolve = createManualSolveService();
+	const solverCache = createSolverCacheService();
 	const users = createUsersService({ configuration, prisma });
 	const profilePictures = createProfilePicturesService({ configuration, prisma });
 	const editor = createEditorService();
@@ -78,6 +84,8 @@ function wireServices({ configuration, prisma }) {
 		botBridge,
 		lifecycle,
 		monitor,
+		manualSolve,
+		solverCache,
 		settings
 	};
 }
@@ -152,6 +160,7 @@ h1{font-size:1.8rem;margin-bottom:1rem}
 		createSettingsRouter({ services }),
 		createAuditRouter({ services }),
 		createLogsRouter({ services }),
+		createManualSolveRouter({ services }),
 		createMessageLogsRouter({ services }),
 		createEditorRouter({ services }),
 		createProfilePicturesRouter({ services }),
@@ -187,12 +196,18 @@ export async function createDashboard({ configuration, prisma, port = DEFAULT_PO
 	await services.users.load?.();
 	await services.profilePictures.hydrate?.();
 	await services.monitor.initialize?.();
+	await services.solverCache.load?.();
 
 	const app = createApp({ services, configuration, port });
 	const httpServer = createServer(app);
 	const socketLayer = createSocketLayer(httpServer, services);
 
 	services.socket = socketLayer;
+	services.manualSolve?.setSocketLayer?.(socketLayer);
+
+	solverManager.setManualSolveService(services.manualSolve);
+	solverManager.setSolverCache(services.solverCache);
+	solverManager.setSocketLayer(socketLayer);
 
 	process.on('SIGTERM', () => {
 		socketLayer.shutdown();
