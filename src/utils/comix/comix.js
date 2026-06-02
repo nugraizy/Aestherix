@@ -85,6 +85,9 @@ class Comix {
 
 	async tryFetchJson(url, fetcher) {
 		try {
+			/**
+			 * @type {import('undici').Response} response
+			 */
 			const response = await fetcher(url, {
 				headers: {
 					'User-Agent':
@@ -95,6 +98,10 @@ class Comix {
 
 			if (response.status === 403) {
 				return { ok: false, status: 403, error: new Error('HTTP 403') };
+			}
+
+			if (!response.headers.get('content-type')?.includes('application/json')) {
+				return { ok: false, error: new Error('Unexpected content type. Received non-JSON response.') };
 			}
 
 			const data = await response.json();
@@ -313,8 +320,16 @@ class Comix {
 
 		const titleUrl = `${this.webBase}/title/${fullSlug}`;
 		const rawPayload = await ComixBrowserCapture.captureChapterList({ titleUrl });
-		const parsed = JSON.parse(rawPayload || '[]');
-		const items = Array.isArray(parsed) ? parsed : [];
+
+		let items;
+
+		try {
+			const parsed = JSON.parse(rawPayload || '[]');
+
+			items = Array.isArray(parsed) ? parsed : [];
+		} catch {
+			throw new Error('Failed to decode chapters payload: non-JSON response');
+		}
 
 		if (!items.length) {
 			throw new Error('Failed to decode chapters payload');
@@ -382,7 +397,15 @@ class Comix {
 		}
 
 		const raw = await ComixBrowserCapture.captureChapterPages({ pageUrl: chapterUrl });
-		const data = JSON.parse(raw || '{}');
+
+		let data;
+
+		try {
+			data = JSON.parse(raw || '{}');
+		} catch {
+			throw new Error('Failed to decode chapter pages: non-JSON response');
+		}
+
 		const payload = data?.payload || data;
 		const pages = payload?.result?.pages || {};
 		const baseUrl = (pages.baseUrl || '').replace(/\/+$/, '');
