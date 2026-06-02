@@ -262,6 +262,182 @@ export function createToolsRouter({ services }) {
 		res.json({ sources: comics.getSources() });
 	});
 
+	let enkaClient = null;
+	let enkaClasses = null;
+
+	async function getEnkaClient() {
+		if (enkaClient) {
+			return enkaClient;
+		}
+
+		const mod = await import('enka-network-api');
+
+		enkaClient = new mod.EnkaClient({ showFetchCacheLog: false });
+		enkaClasses = { TextAssets: mod.TextAssets, DynamicTextAssets: mod.DynamicTextAssets, EnkaClient: mod.EnkaClient };
+		enkaClient.cachedAssetsManager.cacheDirectoryPath = './cache';
+		enkaClient.cachedAssetsManager.cacheDirectorySetup();
+
+		if (!(await enkaClient.cachedAssetsManager.checkForUpdates(true))) {
+			await enkaClient.cachedAssetsManager.fetchAllContents();
+		}
+
+		return enkaClient;
+	}
+
+	function convertGenshinObject(obj) {
+		if (typeof obj !== 'object' || obj === null || obj === undefined) {
+			return obj;
+		}
+
+		if (!enkaClasses) {
+			return obj;
+		}
+
+		const entries = Object.entries(obj)
+			.filter(([key, value]) => !key.startsWith('_') && !(value instanceof enkaClasses.EnkaClient))
+			.map(([key, value]) => [key, convertGenshinObject(value)]);
+
+		if (obj instanceof enkaClasses.TextAssets) {
+			entries.push(['text', obj instanceof enkaClasses.DynamicTextAssets ? obj.getNullableReplacedText() : obj.getNullable()]);
+		}
+
+		return Object.fromEntries(entries);
+	}
+
+	const genshinCache = new Map();
+	const GENSHIN_CACHE_TTL = 10 * 60 * 1000;
+
+	router.get('/tools/genshin/characters', middleware.requireDashboardAuth, async (req, res) => {
+		const uid = String(req.query?.uid || '').trim();
+
+		if (!/^\d{9,10}$/.test(uid)) {
+			return res.status(400).json({ ok: false, message: 'Invalid UID format. Must be 9-10 digits.' });
+		}
+
+		try {
+			const cached = genshinCache.get(uid);
+
+			if (cached && Date.now() - cached.timestamp < GENSHIN_CACHE_TTL) {
+				return res.json({ user: cached.user, characters: cached.characters });
+			}
+
+			const enka = await getEnkaClient();
+			const userInfo = await enka.fetchUser(Number(uid));
+			const jsonData = convertGenshinObject(userInfo);
+
+			const { parseGenshinUser, parseCharactersData } = await import('../../../src/helper/canvas/genshin-parser.js');
+			const user = parseGenshinUser(jsonData);
+			const characters = parseCharactersData(jsonData.characters);
+
+			genshinCache.set(uid, { user, characters, timestamp: Date.now() });
+
+			res.json({ user, characters });
+		} catch (error) {
+			res.status(500).json({
+				ok: false,
+				message: error?.message || 'Failed to fetch data. Make sure the UID is correct and your showcase is public.'
+			});
+		}
+	});
+
+	router.get('/tools/genshin/card', middleware.requireDashboardAuth, async (req, res) => {
+		const uid = String(req.query?.uid || '').trim();
+		const charName = String(req.query?.char || '').trim();
+		const useRadar = String(req.query?.radar || '') === '1';
+
+		if (!/^\d{9,10}$/.test(uid)) {
+			return res.status(400).json({ ok: false, message: 'Invalid UID format.' });
+		}
+
+		if (!charName) {
+			return res.status(400).json({ ok: false, message: 'Provide character name.' });
+		}
+
+		try {
+			let cached = genshinCache.get(uid);
+
+			if (!cached || Date.now() - cached.timestamp >= GENSHIN_CACHE_TTL) {
+				const enka = await getEnkaClient();
+				const userInfo = await enka.fetchUser(Number(uid));
+				const jsonData = convertGenshinObject(userInfo);
+
+				const { parseGenshinUser, parseCharactersData } = await import('../../../src/helper/canvas/genshin-parser.js');
+				const user = parseGenshinUser(jsonData);
+				const characters = parseCharactersData(jsonData.characters);
+
+				genshinCache.set(uid, { user, characters, timestamp: Date.now() });
+				cached = { user, characters };
+			}
+
+			const found = cached.characters.find((c) => c.name.toLowerCase().includes(charName.toLowerCase()));
+
+			if (!found) {
+				const available = cached.characters.map((c) => c.name).join(', ');
+
+				return res.status(404).json({ ok: false, message: `Character "${charName}" not found.`, available });
+			}
+
+			const { GenshinCard } = await import('../../../src/helper/canvas/card-render.js');
+			const card = new GenshinCard(found, cached.user, { statsChart: useRadar ? 'radar' : 'list' });
+			const result = await card.render();
+
+			res.setHeader('Content-Type', 'image/svg+xml');
+			res.send(result.svg);
+		} catch (error) {
+			res.status(500).json({ ok: false, message: error?.message || 'Failed to generate card.' });
+		}
+	});
+
+	router.get('/tools/genshin/card/png', middleware.requireDashboardAuth, async (req, res) => {
+		const uid = String(req.query?.uid || '').trim();
+		const charName = String(req.query?.char || '').trim();
+		const useRadar = String(req.query?.radar || '') === '1';
+
+		if (!/^\d{9,10}$/.test(uid)) {
+			return res.status(400).json({ ok: false, message: 'Invalid UID format.' });
+		}
+
+		if (!charName) {
+			return res.status(400).json({ ok: false, message: 'Provide character name.' });
+		}
+
+		try {
+			let cached = genshinCache.get(uid);
+
+			if (!cached || Date.now() - cached.timestamp >= GENSHIN_CACHE_TTL) {
+				const enka = await getEnkaClient();
+				const userInfo = await enka.fetchUser(Number(uid));
+				const jsonData = convertGenshinObject(userInfo);
+
+				const { parseGenshinUser, parseCharactersData } = await import('../../../src/helper/canvas/genshin-parser.js');
+				const user = parseGenshinUser(jsonData);
+				const characters = parseCharactersData(jsonData.characters);
+
+				genshinCache.set(uid, { user, characters, timestamp: Date.now() });
+				cached = { user, characters };
+			}
+
+			const found = cached.characters.find((c) => c.name.toLowerCase().includes(charName.toLowerCase()));
+
+			if (!found) {
+				const available = cached.characters.map((c) => c.name).join(', ');
+
+				return res.status(404).json({ ok: false, message: `Character "${charName}" not found.`, available });
+			}
+
+			const { GenshinCard } = await import('../../../src/helper/canvas/card-render.js');
+			const card = new GenshinCard(found, cached.user, { statsChart: useRadar ? 'radar' : 'list' });
+			const result = await card.render();
+			const buffer = await result.toBuffer();
+
+			res.setHeader('Content-Type', 'image/png');
+			res.setHeader('Content-Disposition', `inline; filename="genshin-${uid}-${found.name}.png"`);
+			res.send(buffer);
+		} catch (error) {
+			res.status(500).json({ ok: false, message: error?.message || 'Failed to generate card.' });
+		}
+	});
+
 	router.get('/tools/comics/filters', middleware.requireDashboardAuth, async (req, res) => {
 		const source = String(req.query?.source || '').trim();
 

@@ -63,6 +63,14 @@ const DEFAULT_PANELS = [
 		description: 'Convert between Unix timestamps and dates.',
 		icon: 'nf-md-clock_outline',
 		category: 'utility'
+	},
+	{
+		id: 'genshin-card',
+		name: 'Genshin Build Card',
+		description: 'Generate character build cards from Genshin Impact showcase.',
+		icon: 'nf-md-controller',
+		logo: '/dashboard/genshin-logo.svg',
+		category: 'media'
 	}
 ];
 

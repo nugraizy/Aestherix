@@ -3,6 +3,7 @@
 
 	export let title = '';
 	export let icon = '';
+	export let logo = '';
 
 	const dispatch = createEventDispatcher();
 </script>
@@ -12,7 +13,13 @@
 		<button class="back-btn" type="button" on:click={() => dispatch('close')} aria-label="Back to tools">
 			<i class="nf nf-fa-chevron_left"></i> Back
 		</button>
-		<span class="tool-icon"><i class="nf {icon}"></i></span>
+		<span class="tool-icon">
+			{#if logo}
+				<span class="tool-logo" style="mask-image: url({logo}); -webkit-mask-image: url({logo})"></span>
+			{:else}
+				<i class="nf {icon}"></i>
+			{/if}
+		</span>
 		<h3 class="tool-title">{title}</h3>
 	</header>
 	<div class="tool-body">
@@ -67,6 +74,20 @@
 	.tool-icon {
 		font-size: 1.2rem;
 		color: var(--accent);
+		display: flex;
+		align-items: center;
+	}
+
+	.tool-logo {
+		width: 2.2rem;
+		height: 2.2rem;
+		background: currentColor;
+		mask-size: contain;
+		mask-repeat: no-repeat;
+		mask-position: center;
+		-webkit-mask-size: contain;
+		-webkit-mask-repeat: no-repeat;
+		-webkit-mask-position: center;
 	}
 
 	.tool-title {

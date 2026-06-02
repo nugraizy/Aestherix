@@ -120,7 +120,7 @@
 
 <div class="tools-page">
 	{#if activeTool}
-		<ToolPanel title={activeTool.name} icon={activeTool.icon} on:close={closeTool}>
+		<ToolPanel title={activeTool.name} icon={activeTool.icon} logo={activeTool.logo} on:close={closeTool}>
 			{#if activeTool.id === 'calculator'}
 				{#await import('../components/tools/Calculator.svelte') then mod}
 					<svelte:component this={mod.default} />
@@ -147,6 +147,10 @@
 				{/await}
 			{:else if activeTool.id === 'comics-reader'}
 				{#await import('../components/tools/ComicsReader.svelte') then mod}
+					<svelte:component this={mod.default} />
+				{/await}
+			{:else if activeTool.id === 'genshin-card'}
+				{#await import('../components/tools/GenshinCardTool.svelte') then mod}
 					<svelte:component this={mod.default} />
 				{/await}
 			{:else}
@@ -192,7 +196,13 @@
 					tabindex="0"
 				>
 					<div class="card-head">
-						<span class="card-icon"><i class="nf {panel.icon}"></i></span>
+						<span class="card-icon">
+							{#if panel.logo}
+								<span class="card-logo" style="mask-image: url({panel.logo}); -webkit-mask-image: url({panel.logo})"></span>
+							{:else}
+								<i class="nf {panel.icon}"></i>
+							{/if}
+						</span>
 						<span class="card-badge {stateClass(panel.state)}">{stateLabel(panel.state)}</span>
 					</div>
 					<h3 class="card-title">{panel.name}</h3>
@@ -332,6 +342,20 @@
 	.card-icon {
 		font-size: 1.5rem;
 		color: var(--accent);
+		display: flex;
+		align-items: center;
+	}
+
+	.card-logo {
+		width: 2.2rem;
+		height: 2.2rem;
+		background: currentColor;
+		mask-size: contain;
+		mask-repeat: no-repeat;
+		mask-position: center;
+		-webkit-mask-size: contain;
+		-webkit-mask-repeat: no-repeat;
+		-webkit-mask-position: center;
 	}
 
 	.card-badge {
