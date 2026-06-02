@@ -17,3 +17,4 @@ dashboard/client/dist/
 dashboard/client/node_modules/
 next_release/
 cache/
+data/
