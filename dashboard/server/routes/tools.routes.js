@@ -1,7 +1,23 @@
 import { Router } from 'express';
+import multer from 'multer';
 import { z } from 'zod';
 
 import { validate } from '../middleware/validation.middleware.js';
+
+const convertUpload = multer({
+	storage: multer.memoryStorage(),
+	limits: { fileSize: 100 * 1024 * 1024 },
+	fileFilter: (_req, file, cb) => {
+		const allowed = ['image/', 'video/', 'audio/'];
+
+		if (allowed.some((prefix) => file.mimetype.startsWith(prefix))) {
+			cb(null, true);
+			return;
+		}
+
+		cb(new Error(`Unsupported file type: ${file.mimetype}. Allowed: image, video, audio.`));
+	}
+});
 
 const panelStateBody = z.object({
 	state: z.enum(['enabled', 'disabled', 'maintenance'])
@@ -573,6 +589,53 @@ export function createToolsRouter({ services }) {
 				res.status(500).json({ ok: false, message: error?.message || 'PDF generation failed.' });
 			}
 		}
+	});
+
+	router.post('/tools/convert', middleware.requireDashboardAuth, convertUpload.single('file'), async (req, res) => {
+		const file = req.file;
+
+		if (!file) {
+			return res.status(400).json({ ok: false, message: 'Upload a file.' });
+		}
+
+		const outputFormat = String(req.body?.outputFormat || '').toLowerCase().trim();
+
+		if (!outputFormat) {
+			return res.status(400).json({ ok: false, message: 'Provide outputFormat.' });
+		}
+
+		const ext = (file.originalname.split('.').pop() || '').toLowerCase();
+
+		try {
+			const result = await tools.convert(file.buffer, ext, outputFormat);
+
+			if (!result.ok) {
+				return res.status(400).json(result);
+			}
+
+			const baseName = file.originalname.replace(/\.[^.]+$/, '');
+			const filename = `${baseName}.${result.extension}`;
+
+			res.setHeader('Content-Type', result.contentType);
+			res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+			res.send(result.buffer);
+		} catch (error) {
+			if (!res.headersSent) {
+				res.status(500).json({ ok: false, message: error?.message || 'Conversion failed.' });
+			}
+		}
+	});
+
+	router.get('/tools/convert/options', middleware.requireDashboardAuth, (req, res) => {
+		const format = String(req.query?.format || '').toLowerCase().trim();
+
+		if (!format) {
+			return res.status(400).json({ ok: false, message: 'Provide format.' });
+		}
+
+		const options = tools.getConversionOptions(format);
+
+		res.json({ options });
 	});
 
 	return router;
