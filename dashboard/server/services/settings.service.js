@@ -5,7 +5,7 @@ import { toUserJid } from '../../../src/helper/misc/wa_data/index.js';
 import { color } from '../../../src/utils/modules/index.js';
 
 const SETTINGS_PATH = './src/helper/config/settings.json';
-const PROTECTED_FIELDS = ['prefix', 'best_time'];
+const PROTECTED_FIELDS = ['prefix'];
 
 const phoneNumberRegex = /^\d{6,20}$/;
 
@@ -158,8 +158,7 @@ export function createSettingsService({ configuration, botBridge } = {}) {
 		const next = {
 			...current,
 			...snapshot,
-			prefix: current.prefix,
-			best_time: current.best_time
+			prefix: current.prefix
 		};
 
 		try {

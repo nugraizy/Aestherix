@@ -84,7 +84,6 @@ function resolveCache(name, configuration) {
 		'anonymous.sessions': configuration?.anonymous?.sessions,
 		'anonymous.messages': configuration?.anonymous?.messages,
 		'games.tebakGambar': configuration?.games?.tebakGambar,
-		'games.akinator': configuration?.games?.akinator,
 		'games.wordle': configuration?.games?.wordle,
 		'games.werewolf': configuration?.games?.werewolf
 	};

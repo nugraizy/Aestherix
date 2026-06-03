@@ -305,7 +305,6 @@ export function createSystemService({ configuration, prisma, monitor, spotify, a
 			},
 			games: {
 				tebakGambar: configuration.games?.tebakGambar?.size || 0,
-				akinator: configuration.games?.akinator?.size || 0,
 				wordle: configuration.games?.wordle?.size || 0,
 				werewolf: configuration.games?.werewolf?.size || 0
 			}

@@ -236,6 +236,12 @@ async function onConnected({ clientSocket, commandLoader, router, mqtt, store, w
 
 	if (ENABLE_EMBEDDED_DASHBOARD) {
 		startDashboard();
+	} else {
+		const { solverManager } = await import('../utils/modules/solver-manager.js');
+		const dashboardUrl = process.env.DASHBOARD_URL || `http://localhost:${process.env.DASHBOARD_PORT || 4000}`;
+		const bridgeToken = process.env.DASHBOARD_BRIDGE_TOKEN || '';
+
+		solverManager.setRemoteDashboard(dashboardUrl, bridgeToken);
 	}
 
 	refreshDashboardCommandCatalog(configuration);

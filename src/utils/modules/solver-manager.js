@@ -5,6 +5,7 @@ const SOLVED_CLEANUP_MS = 30_000;
 const CLEARANCE_POLL_MS = 1000;
 const CLEARANCE_TIMEOUT_MS = 5 * 60 * 1000;
 const CLEARANCE_RE = /just a moment|attention required|verifying|cloudflare/i;
+const REMOTE_POLL_MS = 2000;
 
 class SolverManager {
 	#challenges = new Map();
@@ -12,6 +13,8 @@ class SolverManager {
 	#manualSolveService = null;
 	#solverCache = null;
 	#io = null;
+	#remoteDashboardUrl = null;
+	#remoteBridgeToken = null;
 
 	setManualSolveService(service) {
 		this.#manualSolveService = service;
@@ -25,7 +28,36 @@ class SolverManager {
 		this.#io = socketLayer?.io || null;
 	}
 
+	setRemoteDashboard(url, token) {
+		this.#remoteDashboardUrl = url ? url.replace(/\/+$/, '') : null;
+		this.#remoteBridgeToken = token || null;
+	}
+
+	get #isRemote() {
+		return Boolean(this.#remoteDashboardUrl);
+	}
+
+	async #remoteFetch(path, options = {}) {
+		const url = `${this.#remoteDashboardUrl}/api/dashboard${path}`;
+		const headers = {
+			'Content-Type': 'application/json',
+			...options.headers
+		};
+
+		if (this.#remoteBridgeToken) {
+			headers['x-dashboard-bridge-token'] = this.#remoteBridgeToken;
+		}
+
+		const res = await fetch(url, { ...options, headers });
+
+		return res.json();
+	}
+
 	async registerChallenge({ url, service, headers = {} }) {
+		if (this.#isRemote) {
+			return this.#remoteRegisterChallenge({ url, service, headers });
+		}
+
 		const existing = this.#findExisting(url, service);
 
 		if (existing) {
@@ -62,6 +94,42 @@ class SolverManager {
 		this.#emit();
 
 		return { cached: false, id, solveUrl: challenge.solveUrl };
+	}
+
+	async #remoteRegisterChallenge({ url, service, headers }) {
+		try {
+			const result = await this.#remoteFetch('/manual-solve/register', {
+				method: 'POST',
+				body: JSON.stringify({ url, service, headers })
+			});
+
+			if (result?.cached) {
+				return { cached: true, cookies: result.cookies, headers: result.headers };
+			}
+
+			if (result?.id) {
+				const challenge = {
+					id: result.id,
+					url,
+					service,
+					requestHeaders: headers,
+					status: 'pending',
+					claimedBy: null,
+					sessionId: null,
+					createdAt: Date.now(),
+					solvedAt: null,
+					cookies: null,
+					headers: null,
+					solveUrl: result.solveUrl || `/manual-solve?challenge=${result.id}`
+				};
+
+				this.#challenges.set(result.id, challenge);
+			}
+
+			return { cached: false, id: result.id, solveUrl: result.solveUrl };
+		} catch {
+			return { cached: false, id: null, solveUrl: null };
+		}
 	}
 
 	async claimChallenge(id, userId) {
@@ -189,6 +257,10 @@ class SolverManager {
 	}
 
 	waitForSolve(id, timeoutMs = DEFAULT_WAIT_TIMEOUT_MS) {
+		if (this.#isRemote) {
+			return this.#remoteWaitForSolve(id, timeoutMs);
+		}
+
 		return new Promise((resolve, reject) => {
 			const challenge = this.#challenges.get(id);
 
@@ -213,6 +285,32 @@ class SolverManager {
 		});
 	}
 
+	async #remoteWaitForSolve(id, timeoutMs) {
+		const deadline = Date.now() + timeoutMs;
+
+		while (Date.now() < deadline) {
+			try {
+				const result = await this.#remoteFetch(`/manual-solve/challenges/${id}`);
+
+				if (result?.challenge?.status === 'solved') {
+					return { cookies: result.challenge.cookies, headers: result.challenge.headers };
+				}
+
+				if (result?.challenge?.status === 'failed') {
+					throw new Error(`Challenge failed: ${result.challenge.failReason || 'unknown'}`);
+				}
+			} catch (error) {
+				if (error.message.startsWith('Challenge failed')) {
+					throw error;
+				}
+			}
+
+			await new Promise((r) => setTimeout(r, REMOTE_POLL_MS));
+		}
+
+		throw new Error('Manual solve timed out.');
+	}
+
 	listChallenges() {
 		return Array.from(this.#challenges.values()).map((c) => ({
 			id: c.id,
@@ -232,6 +330,10 @@ class SolverManager {
 	}
 
 	async getCachedCookies(service, url) {
+		if (this.#isRemote) {
+			return null;
+		}
+
 		if (!this.#solverCache) {
 			return null;
 		}
