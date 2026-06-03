@@ -149,11 +149,23 @@
 				{#await import('../components/tools/ComicsReader.svelte') then mod}
 					<svelte:component this={mod.default} />
 				{/await}
-			{:else if activeTool.id === 'genshin-card'}
-				{#await import('../components/tools/GenshinCardTool.svelte') then mod}
-					<svelte:component this={mod.default} />
-				{/await}
-			{:else}
+		{:else if activeTool.id === 'genshin-card'}
+			{#await import('../components/tools/GenshinCardTool.svelte') then mod}
+				<svelte:component this={mod.default} />
+			{/await}
+		{:else if activeTool.id === 'converter'}
+			{#await import('../components/tools/FileConverter.svelte') then mod}
+				<svelte:component this={mod.default} />
+			{/await}
+		{:else if activeTool.id === 'currency'}
+			{#await import('../components/tools/CurrencyConverter.svelte') then mod}
+				<svelte:component this={mod.default} />
+			{/await}
+		{:else if activeTool.id === 'chat'}
+			{#await import('../components/tools/Chat.svelte') then mod}
+				<svelte:component this={mod.default} />
+			{/await}
+		{:else}
 				<p class="empty">This tool is coming soon.</p>
 			{/if}
 		</ToolPanel>

@@ -37,6 +37,13 @@ const DEFAULT_PANELS = [
 		category: 'utility'
 	},
 	{
+		id: 'chat',
+		name: 'AI Chat',
+		description: 'Chat with AI assistant. Persistent sessions with history.',
+		icon: 'nf-md-robot_angry_outline',
+		category: 'utility'
+	},
+	{
 		id: 'color-converter',
 		name: 'Color Converter',
 		description: 'Convert between hex, RGB, HSL with preview.',
@@ -545,5 +552,150 @@ export function createToolsService({ prisma } = {}) {
 		return handlers[service] || null;
 	}
 
-	return { listPanels, setPanelState, download };
+	const IMAGE_FORMATS = new Set(['jpg', 'jpeg', 'png', 'webp', 'gif', 'tiff', 'avif']);
+	const AUDIO_FORMATS = new Set(['mp3', 'opus', 'aac', 'flac', 'wav', 'ogg']);
+	const VIDEO_FORMATS = new Set(['mp4', 'webm', 'mkv', 'avi', 'mov', 'gif']);
+
+	const FORMAT_MIME = {
+		jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp',
+		gif: 'image/gif', tiff: 'image/tiff', avif: 'image/avif',
+		mp3: 'audio/mpeg', opus: 'audio/opus', aac: 'audio/aac', flac: 'audio/flac',
+		wav: 'audio/wav', ogg: 'audio/ogg',
+		mp4: 'video/mp4', webm: 'video/webm', mkv: 'video/x-matroska',
+		avi: 'video/x-msvideo', mov: 'video/quicktime'
+	};
+
+	function detectCategory(format) {
+		if (IMAGE_FORMATS.has(format)) {
+			return 'image';
+		}
+
+		if (AUDIO_FORMATS.has(format)) {
+			return 'audio';
+		}
+
+		if (VIDEO_FORMATS.has(format)) {
+			return 'video';
+		}
+
+		return null;
+	}
+
+	async function convert(inputBuffer, inputFormat, outputFormat) {
+		const inputCat = detectCategory(inputFormat);
+		const outputCat = detectCategory(outputFormat);
+
+		if (!inputCat || !outputCat) {
+			return { ok: false, message: `Unsupported format: ${inputFormat} or ${outputFormat}.` };
+		}
+
+		if (inputCat !== outputCat && !(inputCat === 'video' && outputFormat === 'gif') && !(inputCat === 'image' && inputFormat === 'gif' && outputCat === 'video')) {
+			return { ok: false, message: `Cannot convert ${inputCat} to ${outputCat}.` };
+		}
+
+		try {
+			let buffer;
+
+			if (inputCat === 'image' && outputCat === 'image') {
+				const sharp = (await import('sharp')).default;
+				let pipeline = sharp(inputBuffer);
+
+				if (outputFormat === 'jpg' || outputFormat === 'jpeg') {
+					buffer = await pipeline.jpeg({ quality: 90 }).toBuffer();
+				} else if (outputFormat === 'png') {
+					buffer = await pipeline.png().toBuffer();
+				} else if (outputFormat === 'webp') {
+					buffer = await pipeline.webp({ quality: 90 }).toBuffer();
+				} else if (outputFormat === 'gif') {
+					buffer = await pipeline.gif().toBuffer();
+				} else if (outputFormat === 'tiff') {
+					buffer = await pipeline.tiff().toBuffer();
+				} else if (outputFormat === 'avif') {
+					buffer = await pipeline.avif({ quality: 80 }).toBuffer();
+				}
+			} else {
+				const { execSync } = await import('child_process');
+				const { randomBytes } = await import('crypto');
+				const fs = await import('fs/promises');
+				const path = await import('path');
+
+				const tmpDir = path.join(process.cwd(), 'src', 'media', 'temporary_files');
+				const id = randomBytes(8).toString('hex');
+				const tmpInput = path.join(tmpDir, `convert-${id}-input.${inputFormat}`);
+				const tmpOutput = path.join(tmpDir, `convert-${id}-output.${outputFormat}`);
+
+				try {
+					await fs.writeFile(tmpInput, inputBuffer);
+
+					let ffmpegArgs;
+
+					if (inputCat === 'image' && outputFormat === 'gif') {
+						ffmpegArgs = `-y -i "${tmpInput}" -vf "split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" "${tmpOutput}"`;
+					} else if (inputFormat === 'gif' && outputCat === 'video') {
+						ffmpegArgs = `-y -i "${tmpInput}" -movflags +faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" "${tmpOutput}"`;
+					} else if (outputCat === 'audio') {
+						const audioArgs = {
+							mp3: '-codec:a libmp3lame -q:a 2',
+							opus: '-codec:a libopus -b:a 128k -vbr on',
+							aac: '-codec:a aac -b:a 192k',
+							flac: '-codec:a flac',
+							wav: '-codec:a pcm_s16le',
+							ogg: '-codec:a libvorbis -q:a 4'
+						};
+
+						ffmpegArgs = `-y -i "${tmpInput}" ${audioArgs[outputFormat] || ''} "${tmpOutput}"`;
+					} else if (outputCat === 'video') {
+						const videoArgs = {
+							mp4: '-c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k -movflags +faststart -pix_fmt yuv420p',
+							webm: '-c:v libvpx-vp9 -crf 30 -b:v 0 -c:a libopus -b:a 128k',
+							mkv: '-c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k',
+							avi: '-c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k',
+							mov: '-c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k -movflags +faststart -pix_fmt yuv420p'
+						};
+
+						ffmpegArgs = `-y -i "${tmpInput}" ${videoArgs[outputFormat] || ''} "${tmpOutput}"`;
+					}
+
+					execSync(`ffmpeg ${ffmpegArgs}`, { timeout: 120000 });
+					buffer = await fs.readFile(tmpOutput);
+				} finally {
+					await fs.unlink(tmpInput).catch(() => {});
+					await fs.unlink(tmpOutput).catch(() => {});
+				}
+			}
+
+			return {
+				ok: true,
+				buffer,
+				contentType: FORMAT_MIME[outputFormat] || 'application/octet-stream',
+				extension: outputFormat
+			};
+		} catch (error) {
+			return { ok: false, message: error?.message || 'Conversion failed.' };
+		}
+	}
+
+	function getConversionOptions(format) {
+		const cat = detectCategory(format);
+
+		if (!cat) {
+			return [];
+		}
+
+		if (cat === 'image') {
+			return [...IMAGE_FORMATS].filter((f) => f !== format);
+		}
+
+		if (cat === 'audio') {
+			return [...AUDIO_FORMATS].filter((f) => f !== format);
+		}
+
+		if (cat === 'video') {
+			return [...VIDEO_FORMATS].filter((f) => f !== format);
+		}
+
+		return [];
+	}
+
+	return { listPanels, setPanelState, download, convert, getConversionOptions };
 }

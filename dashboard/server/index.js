@@ -24,6 +24,7 @@ import { createStaticRouter } from './routes/static.routes.js';
 import { createStatusRouter } from './routes/status.routes.js';
 import { createSystemRouter } from './routes/system.routes.js';
 import { createToolsRouter } from './routes/tools.routes.js';
+import { createChatRouter } from './routes/chat.routes.js';
 import { createUsersRouter } from './routes/users.routes.js';
 import { createAuditService } from './services/audit.service.js';
 import { createAuthService } from './services/auth.service.js';
@@ -41,6 +42,7 @@ import { createSolverCacheService } from './services/solver-cache.service.js';
 import { createSpotifyService } from './services/spotify.service.js';
 import { createSystemService } from './services/system.service.js';
 import { createToolsService } from './services/tools.service.js';
+import { createChatService } from './services/chat.service.js';
 import { createUndoService } from './services/undo.service.js';
 import { createUsersService } from './services/users.service.js';
 import { createSocketLayer } from './socket/index.js';
@@ -66,7 +68,9 @@ function wireServices({ configuration, prisma }) {
 	const auth = createAuthService({ prisma, audit, botBridge });
 	const system = createSystemService({ configuration, prisma, monitor, spotify, auth, botBridge });
 	const tools = createToolsService({ prisma });
+	const chat = createChatService();
 	const comics = createComicsService();
+	const bridgeToken = process.env.DASHBOARD_BRIDGE_TOKEN || '';
 
 	return {
 		audit,
@@ -80,13 +84,15 @@ function wireServices({ configuration, prisma }) {
 		spotify,
 		system,
 		tools,
+		chat,
 		comics,
 		botBridge,
 		lifecycle,
 		monitor,
 		manualSolve,
 		solverCache,
-		settings
+		settings,
+		bridgeToken
 	};
 }
 
@@ -168,7 +174,8 @@ h1{font-size:1.8rem;margin-bottom:1rem}
 		createUsersRouter({ services, configuration }),
 		createStatusRouter({ services }),
 		createSystemRouter({ services }),
-		createToolsRouter({ services })
+		createToolsRouter({ services }),
+		createChatRouter({ services })
 	];
 
 	for (const router of apiRouters) {
@@ -197,6 +204,7 @@ export async function createDashboard({ configuration, prisma, port = DEFAULT_PO
 	await services.profilePictures.hydrate?.();
 	await services.monitor.initialize?.();
 	await services.solverCache.load?.();
+	await services.chat.load?.();
 
 	const app = createApp({ services, configuration, port });
 	const httpServer = createServer(app);
