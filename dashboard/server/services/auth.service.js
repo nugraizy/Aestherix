@@ -266,7 +266,21 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 		return Boolean(getSessionFromRequest(req));
 	}
 
-	function createCookie(res, payload) {
+	function isSecureRequest(req) {
+		if (!req) {
+			return process.env.NODE_ENV === 'production' && process.env.COOKIE_SECURE !== 'false';
+		}
+
+		if (req.secure) {
+			return true;
+		}
+
+		const proto = req.get?.('x-forwarded-proto') || req.protocol || '';
+
+		return proto === 'https';
+	}
+
+	function createCookie(req, res, payload) {
 		const token = crypto.randomBytes(32).toString('hex');
 
 		sessionStore.set(token, {
@@ -279,7 +293,7 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 		res.cookie(AUTH_COOKIE_NAME, token, {
 			httpOnly: true,
 			sameSite: 'lax',
-			secure: process.env.NODE_ENV === 'production',
+			secure: isSecureRequest(req),
 			maxAge: SESSION_TTL_MS,
 			path: '/'
 		});
@@ -442,7 +456,7 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 		return { ok: true, status: otpData.status || 'pending' };
 	}
 
-	async function finalizeConfirmation({ requestId, requestKey, res }) {
+	async function finalizeConfirmation({ requestId, requestKey, req, res }) {
 		await cleanExpiredOtps();
 
 		const entry = Array.from(otpStore.entries()).find(([, value]) => value.requestId === requestId);
@@ -474,7 +488,7 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 		const isSuperOwner = phoneNumber === ownerInfo.superOwner;
 		const session = { role: isSuperOwner ? 'superOwner' : 'owner', phoneNumber, name: isSuperOwner ? 'Super Owner' : 'Owner' };
 
-		createCookie(res, session);
+		createCookie(req, res, session);
 
 		audit?.push({
 			action: 'auth.owner_login',
@@ -488,11 +502,11 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 		return { ok: true };
 	}
 
-	function issueViewerSession({ name, res }) {
+	function issueViewerSession({ name, req, res }) {
 		const safeName = (name || 'Viewer').trim() || 'Viewer';
 		const session = { role: 'viewer', phoneNumber: null, name: safeName };
 
-		createCookie(res, session);
+		createCookie(req, res, session);
 
 		audit?.push({
 			action: 'auth.viewer_login',
@@ -525,7 +539,7 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 		res.clearCookie(AUTH_COOKIE_NAME, {
 			path: '/',
 			sameSite: 'lax',
-			secure: process.env.NODE_ENV === 'production'
+			secure: isSecureRequest(req)
 		});
 
 		return { ok: true };
@@ -625,7 +639,7 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 		finalizeConfirmation,
 		issueViewerSession,
 		createCookieExternal: createCookie,
-		finalizeGroupAdminConfirmation: async ({ requestId, requestKey, res }) => {
+		finalizeGroupAdminConfirmation: async ({ requestId, requestKey, req, res }) => {
 			const phoneNumber = [...otpStore.entries()].find(([, v]) => v.requestId === requestId)?.[0];
 
 			if (!phoneNumber) {
@@ -646,7 +660,7 @@ export function createAuthService({ prisma, audit, botBridge } = {}) {
 
 			const session = { role: 'groupAdmin', phoneNumber, name: `Group Admin (${phoneNumber})` };
 
-			createCookie(res, session);
+			createCookie(req, res, session);
 
 			return { ok: true };
 		},

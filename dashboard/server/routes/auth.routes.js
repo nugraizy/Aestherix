@@ -74,6 +74,7 @@ export function createAuthRouter({ services }) {
 		const result = await auth.finalizeConfirmation({
 			requestId: req.body.requestId,
 			requestKey: req.body.requestKey,
+			req,
 			res
 		});
 
@@ -89,7 +90,7 @@ export function createAuthRouter({ services }) {
 		rateLimit({ windowMs: 60_000, maxRequests: 10, message: 'Too many login attempts. Wait 60 seconds.' }),
 		validate({ body: viewerLoginBody }),
 		(req, res) => {
-			const result = auth.issueViewerSession({ name: req.body?.name, res });
+			const result = auth.issueViewerSession({ name: req.body?.name, req, res });
 
 			res.json(result);
 		}
@@ -132,6 +133,7 @@ export function createAuthRouter({ services }) {
 			const result = await auth.finalizeGroupAdminConfirmation({
 				requestId: req.body.requestId,
 				requestKey: req.body.requestKey,
+				req,
 				res
 			});
 
