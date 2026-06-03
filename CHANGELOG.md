@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.13.0」2026-06-03
+
+## Added
+
+- AI chat tool with image vision support and session persistence ([`5e0f199`](https://github.com/nugraizy/aestherix/commit/5e0f199))
+- File converter and currency converter tools ([`a2b5f6c`](https://github.com/nugraizy/aestherix/commit/a2b5f6c))
+
+## Fixed
+
+- Auth cookie secure flag now detected from request protocol ([`c120e44`](https://github.com/nugraizy/aestherix/commit/c120e44))
+- CF solver cross-process communication in PM2 split mode ([`a855171`](https://github.com/nugraizy/aestherix/commit/a855171))
+
+## Changed
+
+- Redesigned calculator, color converter, QR generator, and timestamp converter ([`b168aa1`](https://github.com/nugraizy/aestherix/commit/b168aa1))
+- Removed akinator game and fixed kiryuu-popular ([`23d164f`](https://github.com/nugraizy/aestherix/commit/23d164f))
+
 # 「7.12.1」2026-06-01
 
 ## Added
