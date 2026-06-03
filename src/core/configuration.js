@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 
-import { Cache } from '../helper/modules/cache.js';
 import { toUserJid } from '../helper/misc/wa_data/index.js';
+import { Cache } from '../helper/modules/cache.js';
 import { GroupCache } from './caches/group-cache.js';
 import { UserCache } from './caches/user-cache.js';
 
@@ -41,7 +41,6 @@ export class Configuration {
 	games = {
 		tebakGambar: new Cache(),
 		sudoku: new Cache(),
-		akinator: new Cache(),
 		tictactoe: new Cache(),
 		word: new Cache(),
 		werewolf: new Cache(),

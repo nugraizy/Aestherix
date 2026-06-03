@@ -435,7 +435,6 @@ export declare class Configuration {
 	games: {
 		tebakGambar: Cache;
 		sudoku: Cache;
-		akinator: Cache;
 		tictactoe: Cache;
 		word: Cache;
 		werewolf: Cache;

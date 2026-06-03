@@ -42,7 +42,6 @@ const HANDLER_PATH = {
 	STUBTYPE: './handlers/stub.js',
 	STORY: './handlers/story.js',
 	OFFLINE: './handlers/offline.js',
-	AKINATOR: './handlers/games/akinator.js',
 	TEBAKGAMBAR: './handlers/games/tebak-gambar.js',
 	SAMBUNGKATA: './handlers/games/sambung-kata.js',
 	WORDLE: './handlers/games/wordle.js',

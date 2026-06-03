@@ -1,7 +1,6 @@
 import { kiryuu } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
-
 /**
  * @param {import('../../utils/kiryuu/types/kiryuu').KiryuuManga} manga
  * @returns {string}
@@ -32,7 +31,7 @@ export default defineCommand({
 			const lines = result.map((manga, i) => formatPopularCaption(manga, i));
 			const caption = lines.join('\n');
 
-			const poster = result.items[0];
+			const poster = result[0];
 
 			if (poster.poster) {
 				await client.send(

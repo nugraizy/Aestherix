@@ -1,4 +1,3 @@
-export * from './akinator.js';
 export * from './sambung-kata.js';
 export * from './slot.js';
 export * from './sudoku.js';

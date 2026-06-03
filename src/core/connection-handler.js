@@ -1,6 +1,5 @@
 import { Boom } from '@hapi/boom';
 import { DisconnectReason } from 'baileys';
-import fs from 'fs-extra';
 
 import configuration from '../helper/config/connect.js';
 import prisma from '../helper/database/prisma.js';
@@ -125,7 +124,6 @@ export class ConnectionHandler {
 	async #printConnectionMetrics(client) {
 		const builder = new client.TemplateBuilder.Native();
 		const timeToConnect = process.uptime();
-		const data = await fs.readJSON('./src/helper/config/settings.json');
 		const buttons = [];
 		let caption = '';
 
@@ -136,12 +134,7 @@ export class ConnectionHandler {
 		};
 
 		loggers.info(color('Device Platform', 'white'), color(getPlatform(client.authState.creds.platform), '#E4C1F9'));
-		loggers.info(
-			color('Connection time', 'white'),
-			color(`${timeToConnect}s`, 'lilac'),
-			color(timeToConnect < data.best_time ? 'is the best time' : 'is not the best time', 'white'),
-			color('(', 'lilac') + color(`${data.best_time}s`, 'glowYellow') + color(')', '#E4C1F9')
-		);
+		loggers.info(color('Connection time', 'white'), color(`${timeToConnect}s`, 'lilac'));
 
 		buttons.push(builder.button.reply({ display: 'Ping Bot', id: cmdId('ping') }));
 
