@@ -21,7 +21,7 @@
 	let topText = '';
 	let bottomText = '';
 
-	const FG_COLORS = ['#000000', '#1a1a2e', '#c4b5fd', '#1db954', '#ff2a6d', '#1da1f2', '#ff5500', '#e60023'];
+	const FG_COLORS = ['#000000', '#1a1a2e', '#6d28d9', '#1db954', '#e60023', '#1da1f2', '#ff5500', '#f59e0b'];
 	const BG_COLORS = ['#ffffff', '#f6f7fb', '#1a1a2e', '#000000', '#fffbe6', '#e8f5e9', '#fce4ec', '#e3f2fd'];
 
 	function handleLogoFile(e) {
@@ -172,117 +172,428 @@
 </script>
 
 <div class="qr-tool">
-	<div class="qr-input-row">
-		<input
-			class="input qr-input"
-			type="text"
-			placeholder="Enter text or URL"
-			bind:value={input}
-			on:keydown={handleKey}
-		/>
-		<button class="btn primary" type="button" on:click={createQR} disabled={!input.trim()}>Generate</button>
-	</div>
+	<div class="qr-layout">
+		<div class="qr-controls">
+			<div class="qr-section">
+				<label class="qr-label">Content</label>
+				<input
+					class="input"
+					type="text"
+					placeholder="Enter text or URL..."
+					bind:value={input}
+					on:keydown={handleKey}
+				/>
+			</div>
 
-	<div class="qr-options">
-		<label class="qr-opt">
-			<span>Preview</span>
-			<Slider min={128} max={512} step={16} bind:value={size} />
-			<span class="qr-opt-val">{size}</span>
-		</label>
-		<label class="qr-opt">
-			<span>Export</span>
-			<Slider min={256} max={2048} step={128} bind:value={exportSize} />
-			<span class="qr-opt-val">{exportSize}</span>
-		</label>
-		<label class="qr-opt">
-			<span>Margin</span>
-			<Slider min={0} max={40} step={5} bind:value={margin} />
-			<span class="qr-opt-val">{margin}</span>
-		</label>
-		<div class="qr-opt">
-			<span>Dots</span>
-			<Dropdown value={dotsType} options={DOT_OPTIONS} size="sm" on:change={(e) => (dotsType = e.detail)} />
-		</div>
-		<div class="qr-opt">
-			<span>Corners</span>
-			<Dropdown value={cornersSquareType} options={CORNER_SQUARE_OPTIONS} size="sm" on:change={(e) => (cornersSquareType = e.detail)} />
-		</div>
-		<div class="qr-opt">
-			<span>Corner Dot</span>
-			<Dropdown value={cornersDotType} options={CORNER_DOT_OPTIONS} size="sm" on:change={(e) => (cornersDotType = e.detail)} />
-		</div>
-		<div class="qr-opt">
-			<span>Color</span>
-			<div class="qr-swatches">
-				{#each FG_COLORS as c}
-					<button class="qr-swatch" class:active={fgColor === c} style:background={c} type="button" on:click={() => (fgColor = c)}></button>
-				{/each}
+			<div class="qr-section">
+				<label class="qr-label">Dot Style</label>
+				<div class="qr-row">
+					<Dropdown value={dotsType} options={DOT_OPTIONS} on:change={(e) => (dotsType = e.detail)} />
+				</div>
+			</div>
+
+			<div class="qr-section">
+				<label class="qr-label">Corners</label>
+				<div class="qr-row cols">
+					<div class="qr-col">
+						<span class="qr-sub">Square</span>
+						<Dropdown value={cornersSquareType} options={CORNER_SQUARE_OPTIONS} size="sm" on:change={(e) => (cornersSquareType = e.detail)} />
+					</div>
+					<div class="qr-col">
+						<span class="qr-sub">Dot</span>
+						<Dropdown value={cornersDotType} options={CORNER_DOT_OPTIONS} size="sm" on:change={(e) => (cornersDotType = e.detail)} />
+					</div>
+				</div>
+			</div>
+
+			<div class="qr-section">
+				<label class="qr-label">Colors</label>
+				<div class="qr-row cols">
+					<div class="qr-col">
+						<span class="qr-sub">Foreground</span>
+						<div class="qr-swatches">
+							{#each FG_COLORS as c}
+								<button
+									class="qr-swatch"
+									class:active={fgColor === c}
+									style:background={c}
+									type="button"
+									on:click={() => (fgColor = c)}
+									aria-label="Color {c}"
+								></button>
+							{/each}
+						</div>
+					</div>
+					<div class="qr-col">
+						<span class="qr-sub">Background</span>
+						<div class="qr-swatches">
+							{#each BG_COLORS as c}
+								<button
+									class="qr-swatch"
+									class:active={bgColor === c}
+									style:background={c}
+									type="button"
+									on:click={() => (bgColor = c)}
+									aria-label="Color {c}"
+								></button>
+							{/each}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="qr-section">
+				<label class="qr-label">Size & Margin</label>
+				<div class="qr-slider-group">
+					<div class="qr-slider-row">
+						<span class="qr-sub">Preview</span>
+						<Slider min={128} max={512} step={16} bind:value={size} />
+						<span class="qr-val">{size}px</span>
+					</div>
+					<div class="qr-slider-row">
+						<span class="qr-sub">Export</span>
+						<Slider min={256} max={2048} step={128} bind:value={exportSize} />
+						<span class="qr-val">{exportSize}px</span>
+					</div>
+					<div class="qr-slider-row">
+						<span class="qr-sub">Margin</span>
+						<Slider min={0} max={40} step={5} bind:value={margin} />
+						<span class="qr-val">{margin}</span>
+					</div>
+				</div>
+			</div>
+
+			<div class="qr-section">
+				<label class="qr-label">Logo</label>
+				<div class="qr-row">
+					{#if logoUrl}
+						<div class="qr-logo-preview">
+							<img src={logoUrl} alt="Logo" />
+							<button class="qr-logo-remove" type="button" on:click={clearLogo}>
+								<i class="nf nf-md-close"></i>
+							</button>
+						</div>
+					{:else}
+						<label class="qr-upload-btn">
+							<i class="nf nf-md-cloud_upload_outline"></i>
+							<span>Upload logo</span>
+							<input type="file" accept="image/*" on:change={handleLogoFile} />
+						</label>
+					{/if}
+				</div>
+			</div>
+
+			<div class="qr-section">
+				<label class="qr-label">Text Overlay</label>
+				<div class="qr-row cols">
+					<div class="qr-col">
+						<span class="qr-sub">Top</span>
+						<input class="input" type="text" placeholder="Optional" bind:value={topText} />
+					</div>
+					<div class="qr-col">
+						<span class="qr-sub">Bottom</span>
+						<input class="input" type="text" placeholder="Optional" bind:value={bottomText} />
+					</div>
+				</div>
 			</div>
 		</div>
-		<div class="qr-opt">
-			<span>Background</span>
-			<div class="qr-swatches">
-				{#each BG_COLORS as c}
-					<button class="qr-swatch" class:active={bgColor === c} style:background={c} type="button" on:click={() => (bgColor = c)}></button>
-				{/each}
-			</div>
-		</div>
-	</div>
 
-	<div class="qr-extras">
-		<div class="qr-opt">
-			<span>Logo</span>
-			<input type="file" accept="image/*" on:change={handleLogoFile} class="qr-file" />
-			{#if logoUrl}
-				<button class="btn" type="button" on:click={clearLogo}>✕</button>
+		<div class="qr-preview-col">
+			<div class="qr-preview-card" class:empty={!generated} style:background={generated ? bgColor : undefined}>
+				{#if topText && generated}
+					<p class="qr-preview-label" style:color={fgColor}>{topText}</p>
+				{/if}
+				<div class="qr-canvas" bind:this={containerEl}></div>
+				{#if bottomText && generated}
+					<p class="qr-preview-label" style:color={fgColor}>{bottomText}</p>
+				{/if}
+				{#if !generated}
+					<div class="qr-placeholder">
+						<i class="nf nf-md-qrcode"></i>
+						<p>Enter content to generate</p>
+					</div>
+				{/if}
+			</div>
+
+			{#if generated}
+				<div class="qr-actions">
+					<button class="qr-dl-btn" type="button" on:click={() => download('png')}>
+						<i class="nf nf-md-download"></i>
+						PNG
+					</button>
+					<button class="qr-dl-btn" type="button" on:click={() => download('svg')}>
+						<i class="nf nf-md-download"></i>
+						SVG
+					</button>
+				</div>
 			{/if}
 		</div>
-		<label class="qr-opt">
-			<span>Top text</span>
-			<input class="input qr-text-input" type="text" placeholder="Optional" bind:value={topText} />
-		</label>
-		<label class="qr-opt">
-			<span>Bottom text</span>
-			<input class="input qr-text-input" type="text" placeholder="Optional" bind:value={bottomText} />
-		</label>
 	</div>
-
-	<div class="qr-preview-wrap" class:hidden={!generated} style:background={bgColor}>
-		{#if topText}
-			<p class="qr-label" style:color={fgColor}>{topText}</p>
-		{/if}
-		<div class="qr-canvas" bind:this={containerEl}></div>
-		{#if bottomText}
-			<p class="qr-label" style:color={fgColor}>{bottomText}</p>
-		{/if}
-	</div>
-
-	{#if generated}
-		<div class="qr-actions">
-			<button class="btn" type="button" on:click={() => download('png')}>↓ PNG</button>
-			<button class="btn" type="button" on:click={() => download('svg')}>↓ SVG</button>
-		</div>
-	{/if}
 </div>
 
 <style>
-	.qr-tool { display: flex; flex-direction: column; gap: var(--space-3); }
-	.qr-input-row { display: flex; gap: var(--space-2); }
-	.qr-input { flex: 1; max-width: none; }
-	.qr-options { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
-	.qr-opt { display: flex; align-items: center; gap: 0.4rem; font-size: var(--fs-xs); color: var(--muted); }
-	.qr-opt :global(.slider) { width: 90px; }
-	.qr-opt-val { font-family: 'JetBrains Mono', ui-monospace, monospace; min-width: 2.5rem; }
-	.qr-swatches { display: flex; gap: 0.25rem; }
-	.qr-swatch { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); cursor: pointer; padding: 0; transition: border-color var(--tx-base), transform 0.1s; }
-	.qr-swatch:hover { transform: scale(1.15); }
-	.qr-swatch.active { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent); }
-	.qr-preview-wrap { display: flex; flex-direction: column; align-items: center; padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); width: fit-content; margin: 0 auto; gap: 0.4rem; }
-	.qr-preview-wrap.hidden { display: none; }
-	.qr-canvas { display: flex; }
-	.qr-extras { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
-	.qr-file { font-size: var(--fs-xs); max-width: 160px; }
-	.qr-text-input { max-width: 140px; font-size: var(--fs-xs); }
-	.qr-label { margin: 0; font-size: var(--fs-sm); font-weight: 600; text-align: center; }
-	.qr-actions { display: flex; gap: var(--space-2); }
+	.qr-tool {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+	}
+
+	.qr-layout {
+		display: flex;
+		gap: var(--space-4);
+		align-items: flex-start;
+	}
+
+	.qr-controls {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+	}
+
+	.qr-section {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+	}
+
+	.qr-label {
+		font-size: var(--fs-xs);
+		font-weight: 700;
+		color: var(--muted);
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+	}
+
+	.qr-sub {
+		font-size: var(--fs-xs);
+		color: var(--muted);
+	}
+
+	.qr-row {
+		display: flex;
+		gap: var(--space-2);
+		align-items: center;
+	}
+
+	.qr-row.cols {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--space-3);
+		align-items: start;
+	}
+
+	.qr-col {
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+	}
+
+	.qr-swatches {
+		display: flex;
+		gap: 0.3rem;
+		flex-wrap: wrap;
+	}
+
+	.qr-swatch {
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		border: 2px solid var(--border);
+		cursor: pointer;
+		padding: 0;
+		transition: border-color var(--tx-base), transform 0.1s;
+	}
+
+	.qr-swatch:hover {
+		transform: scale(1.15);
+	}
+
+	.qr-swatch.active {
+		border-color: var(--accent);
+		box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+	}
+
+	.qr-slider-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+	}
+
+	.qr-slider-row {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+	}
+
+	.qr-slider-row :global(.slider) {
+		flex: 1;
+	}
+
+	.qr-val {
+		font-family: 'JetBrains Mono', ui-monospace, monospace;
+		font-size: var(--fs-xs);
+		min-width: 3.5rem;
+		text-align: right;
+		color: var(--text);
+	}
+
+	.qr-upload-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.5rem 0.75rem;
+		border: 1px dashed var(--border);
+		border-radius: var(--radius-sm);
+		background: transparent;
+		color: var(--muted);
+		font-size: var(--fs-xs);
+		cursor: pointer;
+		transition: all var(--tx-fast);
+	}
+
+	.qr-upload-btn:hover {
+		border-color: var(--accent);
+		color: var(--accent);
+		background: color-mix(in srgb, var(--accent) 6%, transparent);
+	}
+
+	.qr-upload-btn input {
+		display: none;
+	}
+
+	.qr-logo-preview {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		padding: 0.3rem;
+		border: 1px solid var(--border);
+		border-radius: var(--radius-sm);
+		background: var(--panel);
+	}
+
+	.qr-logo-preview img {
+		width: 36px;
+		height: 36px;
+		border-radius: 4px;
+		object-fit: contain;
+	}
+
+	.qr-logo-remove {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 22px;
+		height: 22px;
+		border: none;
+		border-radius: 50%;
+		background: color-mix(in srgb, #ff8e74 18%, transparent);
+		color: #ff8e74;
+		cursor: pointer;
+		font-size: 0.65rem;
+		transition: all var(--tx-fast);
+	}
+
+	.qr-logo-remove:hover {
+		background: color-mix(in srgb, #ff8e74 30%, transparent);
+	}
+
+	.qr-preview-col {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--space-3);
+		min-width: 240px;
+		position: sticky;
+		top: var(--space-4);
+	}
+
+	.qr-preview-card {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: var(--space-3);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-md);
+		width: fit-content;
+		margin: 0 auto;
+		gap: 0.4rem;
+		transition: background var(--tx-base);
+	}
+
+	.qr-preview-card.empty {
+		border-style: dashed;
+	}
+
+	.qr-canvas {
+		display: flex;
+	}
+
+	.qr-placeholder {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--space-2);
+		color: var(--muted);
+		opacity: 0.5;
+	}
+
+	.qr-placeholder i {
+		font-size: 3rem;
+	}
+
+	.qr-placeholder p {
+		margin: 0;
+		font-size: var(--fs-sm);
+	}
+
+	.qr-preview-label {
+		margin: 0;
+		font-size: var(--fs-sm);
+		font-weight: 700;
+		text-align: center;
+	}
+
+	.qr-actions {
+		display: flex;
+		gap: var(--space-2);
+	}
+
+	.qr-dl-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0.45rem 0.85rem;
+		border: 1px solid var(--border);
+		border-radius: var(--radius-sm);
+		background: var(--panel);
+		color: var(--text);
+		font-size: var(--fs-xs);
+		font-weight: 600;
+		cursor: pointer;
+		transition: all var(--tx-fast);
+	}
+
+	.qr-dl-btn:hover {
+		border-color: var(--accent);
+		color: var(--accent);
+		background: color-mix(in srgb, var(--accent) 8%, transparent);
+	}
+
+	@media (max-width: 640px) {
+		.qr-layout {
+			flex-direction: column;
+		}
+
+		.qr-preview-col {
+			position: static;
+			width: 100%;
+		}
+
+		.qr-preview-card {
+			max-width: 100%;
+		}
+	}
 </style>

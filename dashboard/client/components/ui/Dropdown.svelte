@@ -312,6 +312,7 @@
 		text-overflow: ellipsis;
 		white-space: nowrap;
 		text-transform: capitalize;
+		text-align: center;
 	}
 
 	.trigger-text.placeholder {
