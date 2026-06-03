@@ -30,8 +30,14 @@
 .nf-fa-star:before {
 	content: '\f005';
 }
-.nf-fa-times:before {
-	content: '\f00d';
+.nf-md-account:before {
+	content: '\f0004';
+}
+.nf-md-account_cash:before {
+	content: '\f1097';
+}
+.nf-md-backspace_outline:before {
+	content: '\f0b5c';
 }
 .nf-md-book_open_page_variant:before {
 	content: '\f05da';
@@ -39,8 +45,17 @@
 .nf-md-calculator:before {
 	content: '\f00ec';
 }
+.nf-md-check_circle:before {
+	content: '\f05e0';
+}
 .nf-md-clock_outline:before {
 	content: '\f0150';
+}
+.nf-md-close:before {
+	content: '\f0156';
+}
+.nf-md-cloud_upload_outline:before {
+	content: '\f0b7e';
 }
 .nf-md-code_braces:before {
 	content: '\f0169';
@@ -48,33 +63,84 @@
 .nf-md-cog:before {
 	content: '\f0493';
 }
+.nf-md-content_copy:before {
+	content: '\f018f';
+}
 .nf-md-currency_usd:before {
 	content: '\f01c1';
+}
+.nf-md-delete:before {
+	content: '\f01b4';
+}
+.nf-md-division:before {
+	content: '\f01d4';
+}
+.nf-md-download:before {
+	content: '\f01da';
 }
 .nf-md-download_circle:before {
 	content: '\f1464';
 }
-.nf-md-file_pdf_box:before {
-	content: '\f0226';
+.nf-md-file_image:before {
+	content: '\f021f';
+}
+.nf-md-file_music:before {
+	content: '\f0223';
+}
+.nf-md-file_video:before {
+	content: '\f022b';
 }
 .nf-md-filter_variant:before {
 	content: '\f0236';
 }
+.nf-md-flask:before {
+	content: '\f0093';
+}
+.nf-md-menu:before {
+	content: '\f035c';
+}
+.nf-md-message_text_outline:before {
+	content: '\f036a';
+}
+.nf-md-minus:before {
+	content: '\f0374';
+}
+.nf-md-multiplication:before {
+	content: '\f0382';
+}
 .nf-md-palette:before {
 	content: '\f03d8';
 }
-.nf-md-pause:before {
-	content: '\f03e4';
+.nf-md-paperclip:before {
+	content: '\f03e2';
 }
-.nf-md-play:before {
-	content: '\f040a';
+.nf-md-pencil:before {
+	content: '\f03eb';
+}
+.nf-md-percent:before {
+	content: '\f03f0';
+}
+.nf-md-plus:before {
+	content: '\f0415';
 }
 .nf-md-qrcode:before {
 	content: '\f0432';
 }
+.nf-md-refresh:before {
+	content: '\f0450';
+}
 .nf-md-robot_angry_outline:before {
 	content: '\f169e';
 }
+.nf-md-send:before {
+	content: '\f048a';
+}
+.nf-md-square_root:before {
+	content: '\f0784';
+}
 .nf-md-swap_horizontal:before {
 	content: '\f04e1';
+}
+.nf-md-swap_vertical:before {
+	content: '\f04e2';
 }
