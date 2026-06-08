@@ -181,6 +181,10 @@ const sendConfirmationButton = async ({ waClient, to, approveButtonId, rejectBut
 };
 
 export const startDashboardBridge = (resolveWaClient) => {
+	if (process.env.SUB_BOT_PROCESS === '1') {
+		return;
+	}
+
 	if (instance) {
 		return;
 	}

@@ -36,6 +36,10 @@ export class WebhookServer {
 	}
 
 	start() {
+		if (process.env.SUB_BOT_PROCESS === '1') {
+			return;
+		}
+
 		if (configuration.dashboard.expressInstances.has('github-webhook')) {
 			return;
 		}

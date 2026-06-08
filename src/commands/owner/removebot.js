@@ -1,5 +1,6 @@
-import configuration from '../../helper/config/connect.js';
 import { manager } from '../../core/manager.js';
+import { IS_PM2, stopPm2SubBot } from '../../core/pm2-helpers.js';
+import configuration from '../../helper/config/connect.js';
 import prisma from '../../helper/database/prisma.js';
 import { defineCommand } from '../_define.js';
 
@@ -27,14 +28,34 @@ export default defineCommand({
 			return client.reply(from, 'Usage: !removebot <session_name> [--purge]', message);
 		}
 
+		if (IS_PM2) {
+			await stopPm2SubBot(sessionName);
+
+			if (purge) {
+				const { cleanupSession } = await import('../../core/session-cleanup.js');
+
+				await cleanupSession(sessionName);
+				return client.reply(from, `Bot "${sessionName}" PM2 process stopped and credentials purged.`, message);
+			}
+
+			await prisma.botInstance
+				.update({
+					where: { sessionName },
+					data: { isActive: false }
+				})
+				.catch(() => {});
+
+			return client.reply(from, `Bot "${sessionName}" PM2 process stopped.`, message);
+		}
+
 		const sub = manager.get(sessionName);
 
 		if (!sub) {
-			return client.reply(from, `❌ Bot "${sessionName}" not found.`, message);
+			return client.reply(from, `Bot "${sessionName}" not found.`, message);
 		}
 
 		if (sub.role === 'primary') {
-			return client.reply(from, '❌ Cannot remove the primary bot.', message);
+			return client.reply(from, 'Cannot remove the primary bot.', message);
 		}
 
 		await sub.disconnect();
@@ -48,7 +69,7 @@ export default defineCommand({
 			await sub.auth.clearState();
 			await prisma.botInstance.deleteMany({ where: { sessionName } });
 
-			return client.reply(from, `🗑️ Bot "${sessionName}" removed and credentials purged.`, message);
+			return client.reply(from, `Bot "${sessionName}" removed and credentials purged.`, message);
 		}
 
 		await prisma.botInstance
@@ -58,6 +79,6 @@ export default defineCommand({
 			})
 			.catch(() => {});
 
-		return client.reply(from, `🔌 Bot "${sessionName}" disconnected.`, message);
+		return client.reply(from, `Bot "${sessionName}" disconnected.`, message);
 	}
 });

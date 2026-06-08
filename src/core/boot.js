@@ -2,7 +2,6 @@ import { delay, isJidGroup } from 'baileys';
 import clip from 'clipboardy';
 import fs from 'fs-extra';
 import PhoneNumber from 'libphonenumber-js';
-import pm2 from 'pm2';
 import readline from 'readline';
 
 import { startDashboard } from '../../dashboard/server/index.js';
@@ -19,6 +18,7 @@ import { refreshPrefixCache } from './context.js';
 import { EventHandler } from './event-handler.js';
 import { manager } from './manager.js';
 import { MqttBridge } from './mqtt.js';
+import { IS_PM2, startPm2SubBot } from './pm2-helpers.js';
 import { Router } from './router.js';
 import { cleanupSession } from './session-cleanup.js';
 import { initContact, updateContact } from './utils.js';
@@ -28,39 +28,6 @@ const ENABLE_EMBEDDED_DASHBOARD = String(process.env.DASHBOARD_EMBEDDED || '1') 
 const DASHBOARD_CATALOG_INTERVAL_MS = 30_000;
 const PAIR_NUMBER_ENV = 'PAIR_NUMBER';
 const SETTINGS_PATH = './src/helper/config/settings.json';
-const IS_PM2 = Boolean(process.env.pm_id);
-
-function startPm2SubBot(sessionName) {
-	return new Promise((resolve, reject) => {
-		pm2.start(
-			{
-				script: './subbot.js',
-				name: `aestherix-sub-${sessionName}`,
-				args: sessionName,
-				autorestart: false,
-				env: {
-					NODE_ENV: 'production'
-				}
-			},
-			(err) => {
-				if (err) {
-					reject(new Error(`PM2 start failed: ${err.message || err}`));
-					return;
-				}
-
-				resolve();
-			}
-		);
-	});
-}
-
-function stopPm2SubBot(sessionName) {
-	return new Promise((resolve) => {
-		const name = `aestherix-sub-${sessionName}`;
-
-		pm2.delete(name, () => resolve());
-	});
-}
 
 function syncPrefixToRouter(router) {
 	const { mode: prefixMode, regex: prefixReg, default: prf } = configuration.prefix;
@@ -561,5 +528,3 @@ export async function boot({ cli, OPTIONS, store, sessionName }) {
 
 	return { clientSocket, auth, eventHandler, commandLoader, router };
 }
-
-export { IS_PM2, startPm2SubBot, stopPm2SubBot };

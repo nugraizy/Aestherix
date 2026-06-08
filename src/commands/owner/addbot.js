@@ -4,6 +4,7 @@ import { Auth } from '../../core/auth.js';
 import { ClientSocket } from '../../core/client-socket.js';
 import { EventHandler } from '../../core/event-handler.js';
 import { manager } from '../../core/manager.js';
+import { IS_PM2, startPm2SubBot } from '../../core/pm2-helpers.js';
 import { Router } from '../../core/router.js';
 import { cleanupSession } from '../../core/session-cleanup.js';
 import { initContact, updateContact } from '../../core/utils.js';
@@ -86,11 +87,11 @@ export default defineCommand({
 
 		if (existing) {
 			if (existing.state === 'connected') {
-				return client.reply(from, `✅ Bot "${sessionName}" is already online! (${existing.phone})`, message);
+				return client.reply(from, `Bot "${sessionName}" is already online! (${existing.phone})`, message);
 			}
 
 			if (existing.state === 'connecting') {
-				return client.reply(from, `⏳ Bot "${sessionName}" is already connecting...`, message);
+				return client.reply(from, `Bot "${sessionName}" is already connecting...`, message);
 			}
 		}
 
@@ -98,7 +99,7 @@ export default defineCommand({
 		const flags = parseFlags(args.slice(2));
 
 		if (existing && existing.state === 'disconnected') {
-			await client.reply(from, `🔄 Reconnecting "${sessionName}"...`, message);
+			await client.reply(from, `Reconnecting "${sessionName}"...`, message);
 
 			let retryCount = 0;
 
@@ -111,7 +112,7 @@ export default defineCommand({
 					retryCount = 0;
 					const phone = existing.socket.user?.id?.split(':')[0] ?? 'unknown';
 
-					await client.reply(from, `✅ Bot "${sessionName}" reconnected! (${phone})`, message);
+					await client.reply(from, `Bot "${sessionName}" reconnected! (${phone})`, message);
 
 					setupSubBot(existing, { sessionName, configuration, flags });
 				}
@@ -124,14 +125,14 @@ export default defineCommand({
 					if (reason === DisconnectReason.loggedOut || reason === DisconnectReason.badSession) {
 						const label = reason === DisconnectReason.loggedOut ? 'logged out' : 'has a bad session';
 
-						await client.reply(from, `❌ Bot "${sessionName}" ${label}. Session cleaned up.`, message);
+						await client.reply(from, `Bot "${sessionName}" ${label}. Session cleaned up.`, message);
 						manager.remove(sessionName);
 						await cleanupSession(sessionName);
 						return;
 					}
 
 					if (retryCount >= MAX_RETRIES) {
-						await client.reply(from, `⚠️ Bot "${sessionName}" max retries reached. Use !addbot to restart.`, message);
+						await client.reply(from, `Bot "${sessionName}" max retries reached. Use !addbot to restart.`, message);
 						manager.remove(sessionName);
 						return;
 					}
@@ -143,16 +144,28 @@ export default defineCommand({
 
 			await existing.connect({ prisma }).catch((err) => {
 				manager.remove(sessionName);
-				return client.reply(from, `❌ Failed to reconnect "${sessionName}": ${err.message}`, message);
+				return client.reply(from, `Failed to reconnect "${sessionName}": ${err.message}`, message);
 			});
 
 			return;
 		}
 
 		if (dbInstance && dbInstance.isActive) {
-			await client.reply(from, `🔄 Bot "${sessionName}" exists in DB. Reconnecting...`, message);
+			await client.reply(from, `Bot "${sessionName}" exists in DB. Reconnecting...`, message);
 
 			const subFlags = { ...JSON.parse(dbInstance.flags || '{}'), ...flags };
+
+			if (IS_PM2) {
+				try {
+					await startPm2SubBot(sessionName);
+					await client.reply(from, `Bot "${sessionName}" started as PM2 process.`, message);
+				} catch (err) {
+					await client.reply(from, `Failed to start PM2 process for "${sessionName}": ${err.message}`, message);
+				}
+
+				return;
+			}
+
 			const auth = new Auth(prisma, sessionName);
 			const sub = new ClientSocket(auth, {
 				role: 'sub',
@@ -172,7 +185,7 @@ export default defineCommand({
 					retryCount = 0;
 					const phone = sub.socket.user?.id?.split(':')[0] ?? 'unknown';
 
-					await client.reply(from, `✅ Bot "${sessionName}" is online! (${phone})`, message);
+					await client.reply(from, `Bot "${sessionName}" is online! (${phone})`, message);
 					setupSubBot(sub, { sessionName, configuration, flags: subFlags });
 				}
 
@@ -184,14 +197,14 @@ export default defineCommand({
 					if (reason === DisconnectReason.loggedOut || reason === DisconnectReason.badSession) {
 						const label = reason === DisconnectReason.loggedOut ? 'logged out' : 'has a bad session';
 
-						await client.reply(from, `❌ Bot "${sessionName}" ${label}. Session cleaned up.`, message);
+						await client.reply(from, `Bot "${sessionName}" ${label}. Session cleaned up.`, message);
 						manager.remove(sessionName);
 						await cleanupSession(sessionName);
 						return;
 					}
 
 					if (retryCount >= MAX_RETRIES) {
-						await client.reply(from, `⚠️ Bot "${sessionName}" max retries reached. Use !addbot to restart.`, message);
+						await client.reply(from, `Bot "${sessionName}" max retries reached. Use !addbot to restart.`, message);
 						manager.remove(sessionName);
 						return;
 					}
@@ -215,20 +228,20 @@ export default defineCommand({
 
 					await client.reply(
 						from,
-						`🤖 *${sessionName}* pairing code:\n\n\`${code.slice(0, 4)}-${code.slice(4)}\`\n\nEnter this on the target phone within 60s.`,
+						`*${sessionName}* pairing code:\n\n\`${code.slice(0, 4)}-${code.slice(4)}\`\n\nEnter this on the target phone within 60s.`,
 						message
 					);
 				}
 			} catch (err) {
 				await sub.disconnect().catch(() => {});
 				manager.remove(sessionName);
-				await client.reply(from, `❌ Failed to reconnect "${sessionName}": ${err.message}`, message);
+				await client.reply(from, `Failed to reconnect "${sessionName}": ${err.message}`, message);
 			}
 
 			return;
 		}
 
-		await client.reply(from, `⏳ Creating bot "${sessionName}"...`, message);
+		await client.reply(from, `Creating bot "${sessionName}"...`, message);
 
 		const newFlags = { ...flags, pairMode: true };
 		const auth = new Auth(prisma, sessionName);
@@ -252,13 +265,27 @@ export default defineCommand({
 				retryCount = 0;
 				const phone = sub.socket.user?.id?.split(':')[0] ?? 'unknown';
 
-				await client.reply(from, `✅ Bot "${sessionName}" is online! (${phone})`, message);
+				await client.reply(from, `Bot "${sessionName}" is online! (${phone})`, message);
 
 				await prisma.botInstance.upsert({
 					where: { sessionName },
 					update: { flags: JSON.stringify(newFlags), isActive: true },
 					create: { sessionName, flags: JSON.stringify(newFlags), role: 'sub', pairNumber: pairNumber || null, isActive: true }
 				});
+
+				if (IS_PM2) {
+					await sub.disconnect().catch(() => {});
+					manager.remove(sessionName);
+
+					try {
+						await startPm2SubBot(sessionName);
+						await client.reply(from, `Bot "${sessionName}" paired and started as PM2 process.`, message);
+					} catch (err) {
+						await client.reply(from, `Bot "${sessionName}" paired but PM2 start failed: ${err.message}`, message);
+					}
+
+					return;
+				}
 
 				setupSubBot(sub, { sessionName, configuration, flags: newFlags });
 			}
@@ -271,14 +298,14 @@ export default defineCommand({
 				if (reason === DisconnectReason.loggedOut || reason === DisconnectReason.badSession) {
 					const label = reason === DisconnectReason.loggedOut ? 'logged out' : 'has a bad session';
 
-					await client.reply(from, `❌ Bot "${sessionName}" ${label}. Session cleaned up.`, message);
+					await client.reply(from, `Bot "${sessionName}" ${label}. Session cleaned up.`, message);
 					manager.remove(sessionName);
 					await cleanupSession(sessionName);
 					return;
 				}
 
 				if (retryCount >= MAX_RETRIES) {
-					await client.reply(from, `⚠️ Bot "${sessionName}" max retries reached. Use !addbot to restart.`, message);
+					await client.reply(from, `Bot "${sessionName}" max retries reached. Use !addbot to restart.`, message);
 					manager.remove(sessionName);
 					return;
 				}
@@ -305,13 +332,13 @@ export default defineCommand({
 
 			await client.reply(
 				from,
-				`🤖 *${sessionName}* pairing code:\n\n\`${code.slice(0, 4)}-${code.slice(4)}\`\n\nEnter this on the target phone within 60s.`,
+				`*${sessionName}* pairing code:\n\n\`${code.slice(0, 4)}-${code.slice(4)}\`\n\nEnter this on the target phone within 60s.`,
 				message
 			);
 		} catch (err) {
 			await sub.disconnect().catch(() => {});
 			manager.remove(sessionName);
-			return client.reply(from, `❌ Failed to start "${sessionName}": ${err.message}`, message);
+			return client.reply(from, `Failed to start "${sessionName}": ${err.message}`, message);
 		}
 	}
 });
