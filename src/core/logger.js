@@ -20,6 +20,10 @@ const TIME_FORMAT = 'HH:mm DD/MM';
 export class Logger {
 	#muted = false;
 	#name;
+	#sessionBadge = null;
+
+	/** @type {import('./log-multiplexer.js').LogMultiplexer | null} */
+	static multiplexer = null;
 
 	/** @param {{ name?: string; muted?: boolean }} [options] */
 	constructor(options = {}) {
@@ -41,6 +45,10 @@ export class Logger {
 
 	unmute() {
 		this.#muted = false;
+	}
+
+	setSessionBadge(badge) {
+		this.#sessionBadge = badge ?? null;
 	}
 
 	color(text, colorName) {
@@ -149,9 +157,12 @@ export class Logger {
 		});
 
 		const time = this.#formatTime();
-		const prefix = this.#name
-			? `${color('[', 'gray')}${chalk.bold(color(this.#name, this.#typeColor(type)))}${color(']', 'gray')} `
+		const badgePrefix = this.#sessionBadge
+			? `${color('[', 'gray')}${chalk.bold(color(this.#sessionBadge, 'yellow'))}${color(']', 'gray')} `
 			: '';
+		const prefix = this.#name
+			? `${badgePrefix}${color('[', 'gray')}${chalk.bold(color(this.#name, this.#typeColor(type)))}${color(']', 'gray')} `
+			: badgePrefix;
 		const typeTag = `${color('[', 'gray')}${chalk.bold(color(type, this.#typeColor(type)))}${color(']', 'gray')}`;
 		const separator = color(' •', this.#typeColor(type));
 		const rawStr = `${prefix}${typeTag} ${time}${separator} ${formattedArgs.join(' ')}`;
@@ -159,13 +170,21 @@ export class Logger {
 
 		if (ignoreIndex === -1) {
 			pushDashboardLog(type, str);
-			console.log(str);
 
-			if (errorStack) {
-				const trimmed = this.#trimStack(errorStack);
+			if (Logger.multiplexer) {
+				const badge = this.#sessionBadge || 'MAIN';
+				const stackStr = errorStack ? /** @type {string} */ (redact(this.#trimStack(errorStack))) : null;
 
-				if (trimmed) {
-					console.log(/** @type {string} */ (redact(trimmed)));
+				Logger.multiplexer.route(badge, type, str, stackStr);
+			} else {
+				console.log(str);
+
+				if (errorStack) {
+					const trimmed = this.#trimStack(errorStack);
+
+					if (trimmed) {
+						console.log(/** @type {string} */ (redact(trimmed)));
+					}
 				}
 			}
 		}

@@ -2,6 +2,8 @@ import fs from 'fs-extra';
 import P from 'pino';
 
 import { Cli } from './core/cli.js';
+import { LogMultiplexer } from './core/log-multiplexer.js';
+import { Logger } from './core/logger.js';
 import { manager } from './core/manager.js';
 import { initializeDashboardMonitor } from '../dashboard/server/monitor.js';
 import { startDashboardBridge } from './core/services/dashboard-bridge.js';
@@ -56,7 +58,15 @@ const store = new Store(prisma, sessionName, {
 
 store.initialize();
 
+let starting = false;
+
 export const start = async () => {
+	if (starting) {
+		return;
+	}
+
+	starting = true;
+
 	const { boot } = await import('./core/boot.js');
 
 	try {
@@ -76,6 +86,40 @@ export const start = async () => {
 			sessionName
 		});
 
+		if (!OPTIONS.noSub) {
+			const multiplexer = new LogMultiplexer({
+				maxLogSize: configuration.logMaxSize,
+				getBots: () =>
+					manager.list().map(({ name, client }) => ({
+						name,
+						state: client.state,
+						phone: client.phone,
+						uptime: client.uptime
+					})),
+				getFlags: () => {
+					const skip = new Set(['prefix', 'pairNumber', 'help', 'test', 'resetOnStart', 'noSub']);
+					const result = {};
+
+					for (const [key, value] of Object.entries(configuration.flags)) {
+						if (skip.has(key) || typeof value !== 'boolean') {
+							continue;
+						}
+
+						result[key] = value;
+					}
+
+					return result;
+				},
+				setFlag: (flag, value) => {
+					configuration.flags[flag] = value;
+				}
+			});
+
+			Logger.multiplexer = multiplexer;
+			multiplexer.register(clientSocket.logger, 'MAIN');
+			configuration.logMultiplexer = multiplexer;
+		}
+
 		clientSocket.on('connected', () => {
 			startProfilePictureService(clientSocket, configuration);
 			startDashboardBridge(() => {
@@ -90,6 +134,8 @@ export const start = async () => {
 		});
 	} catch (error) {
 		loggers.error(color('Boot failed:', 'red'), error);
+	} finally {
+		starting = false;
 	}
 };
 
@@ -114,6 +160,11 @@ const gracefulShutdown = async (signal) => {
 	const { loggers: log, color: c } = await import('./utils/modules/index.js');
 
 	log.warning(c(`Received ${signal}`, 'white'), c('— shutting down gracefully...', 'lilac'));
+
+	if (configuration.logMultiplexer) {
+		configuration.logMultiplexer.destroy();
+		Logger.multiplexer = null;
+	}
 
 	const { manager: mgr } = await import('./core/manager.js');
 

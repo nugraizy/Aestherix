@@ -4,7 +4,8 @@ import { DisconnectReason } from 'baileys';
 import configuration from '../helper/config/connect.js';
 import prisma from '../helper/database/prisma.js';
 import { cmdId } from '../helper/modules/prefix.js';
-import { color, delay, loggers } from '../utils/modules/index.js';
+import { color, delay } from '../utils/modules/index.js';
+import { cleanupSession } from './session-cleanup.js';
 
 const MAX_RETRIES = 5;
 const RETRY_INTERVAL_MS = 5000;
@@ -27,6 +28,10 @@ export class ConnectionHandler {
 		this.#options = options;
 	}
 
+	get #log() {
+		return this.#client.logger;
+	}
+
 	async handle(update) {
 		const { connection, lastDisconnect, receivedPendingNotifications } = update;
 
@@ -41,7 +46,7 @@ export class ConnectionHandler {
 				await this.#handleOpen(receivedPendingNotifications);
 			}
 		} catch (error) {
-			loggers.error(color('Connection update handler failed:', 'red'), error);
+			this.#log.error(color('Connection update handler failed:', 'red'), error);
 			this.#reconnect();
 		}
 	}
@@ -52,13 +57,23 @@ export class ConnectionHandler {
 		if (reason === DisconnectReason.badSession || reason === DisconnectReason.loggedOut) {
 			const label = reason === DisconnectReason.badSession ? 'Bad session' : 'Logged out';
 
-			loggers.error(color(label, 'white'), color('Please delete your previous session and do a rescan...', 'lilac'));
-			await this.#client.resetSession(prisma);
-			process.exit(0);
+			this.#log.error(color(label, 'white'), color('Cleaning up session...', 'lilac'));
+			await cleanupSession(this.#client.sessionName);
+
+			if (this.#client.role === 'primary') {
+				process.exit(0);
+			}
+
+			if (this.#configuration.logMultiplexer) {
+				this.#configuration.logMultiplexer.unregister(`SUB-${this.#client.sessionName}`);
+			}
+
+			this.#configuration.core?.manager?.remove(this.#client.sessionName);
+			return;
 		}
 
 		if (reason === DisconnectReason.restartRequired) {
-			loggers.warning(color('Restart required', 'white'), color('Restarting your Socket...', 'lilac'));
+			this.#log.warning(color('Restart required', 'white'), color('Restarting your Socket...', 'lilac'));
 		}
 
 		const reconnectable = [
@@ -71,19 +86,19 @@ export class ConnectionHandler {
 
 		if (reconnectable.includes(reason)) {
 			if (this.#retryCount >= MAX_RETRIES) {
-				loggers.error(color('Max retry attempts reached', 'white'), color('Please try again later...', 'lilac'));
+				this.#log.error(color('Max retry attempts reached', 'white'), color('Please try again later...', 'lilac'));
 				await this.#shutdown();
 				return;
 			}
 
-			loggers.warning(
+			this.#log.warning(
 				color(`Reconnect attempt ${this.#retryCount} failed. Retrying in ${RETRY_INTERVAL_MS / 1000} seconds...`, 'white')
 			);
 			await delay(RETRY_INTERVAL_MS);
 			this.#retryCount++;
 			this.#reconnect();
 		} else {
-			loggers.warning(color('Unknown reason', 'white'), color('Quick reconnecting...', 'lilac'));
+			this.#log.warning(color('Unknown reason', 'white'), color('Quick reconnecting...', 'lilac'));
 			this.#reconnect();
 		}
 	}
@@ -112,7 +127,7 @@ export class ConnectionHandler {
 		}
 
 		if (!metricsPrinted) {
-			loggers.info(color('Socket connected', 'white'), color('Successfully', 'lilac') + color('.', 'white'));
+			this.#log.info(color('Socket connected', 'white'), color('Successfully', 'lilac') + color('.', 'white'));
 			await this.#printConnectionMetrics(this.#client);
 			metricsPrinted = true;
 		}
@@ -133,8 +148,8 @@ export class ConnectionHandler {
 			return map[platform] || 'Android Business';
 		};
 
-		loggers.info(color('Device Platform', 'white'), color(getPlatform(client.authState.creds.platform), '#E4C1F9'));
-		loggers.info(color('Connection time', 'white'), color(`${timeToConnect}s`, 'lilac'));
+		this.#log.info(color('Device Platform', 'white'), color(getPlatform(client.authState.creds.platform), '#E4C1F9'));
+		this.#log.info(color('Connection time', 'white'), color(`${timeToConnect}s`, 'lilac'));
 
 		buttons.push(builder.button.reply({ display: 'Ping Bot', id: cmdId('ping') }));
 
@@ -148,7 +163,12 @@ export class ConnectionHandler {
 
 	#reconnect() {
 		this.#startedAt = Date.now();
-		import('../index.js').then((mod) => mod.start());
+
+		const store = this.#client.store;
+
+		this.#client.connect({ store, prisma }).catch((err) => {
+			this.#log.error(color('Reconnect failed:', 'red'), color(err.message, 'white'));
+		});
 	}
 
 	async #shutdown() {
@@ -167,7 +187,7 @@ export class ConnectionHandler {
 
 		await Promise.all(
 			servers.map(([name, server]) => {
-				loggers.warning(color('Shutting down', 'white'), color(name, 'lilac'), color('server...', 'white'));
+				this.#log.warning(color('Shutting down', 'white'), color(name, 'lilac'), color('server...', 'white'));
 
 				if (typeof server.closeAllConnections === 'function') {
 					server.closeAllConnections();

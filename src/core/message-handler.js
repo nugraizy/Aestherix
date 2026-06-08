@@ -7,7 +7,7 @@ import configuration from '../helper/config/connect.js';
 import { Limit, checkAfk, deleteAfk, getAfk } from '../helper/index.js';
 import { Cache } from '../helper/modules/cache.js';
 import { cmdId, setPrefix } from '../helper/modules/prefix.js';
-import { color, getTimeSince, loggers } from '../utils/modules/index.js';
+import { color, getTimeSince } from '../utils/modules/index.js';
 import { Context } from './context.js';
 import { Logger } from './logger.js';
 import { PipelineExecutor } from './pipeline.js';
@@ -83,6 +83,10 @@ export class MessageHandler {
 
 	get router() {
 		return this.#router;
+	}
+
+	get #log() {
+		return this.#client.logger;
 	}
 
 	async handle(upsert) {
@@ -386,6 +390,19 @@ export class MessageHandler {
 		}
 
 		if (localMessage.isOwner) {
+			const isSelf = localMessage.sender === this.#configuration.botJid;
+
+			if (isSelf) {
+				const selfRole = Limit.checkRole(localMessage.sender);
+
+				if (command.premium && selfRole.role !== 'PREMIUM' && selfRole.role !== 'OWNER') {
+					void client.reply(localMessage.from, 'This commands is only for premium user.', localMessage.message);
+					return 'skip';
+				}
+
+				return 'pass';
+			}
+
 			return 'pass';
 		}
 
@@ -559,7 +576,7 @@ export class MessageHandler {
 			)
 			.send();
 
-		loggers.error(err);
+		this.#log.error(err);
 	}
 
 	#getErrorLocation(stack) {
@@ -820,7 +837,7 @@ export class MessageHandler {
 			fullBody = `${color(isPossiblyCaption && message.body !== 'No Caption' ? 'caption' : 'message', 'softGreen')} ${color(message.body?.substring(0, 20).replace(/[\t\n]/g, ' '), 'white')}`;
 		}
 
-		loggers.info(`${senderInfo} ${SEPARATOR}`, fullBody, messageFrom, runtimeInfo);
+		this.#log.info(`${senderInfo} ${SEPARATOR}`, fullBody, messageFrom, runtimeInfo);
 
 		this.#lastLog = {
 			kind: message.isCmd ? 'cmd' : 'message',

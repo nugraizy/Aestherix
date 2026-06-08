@@ -31,6 +31,7 @@ import { gif2mp4 } from '../utils/index.js';
 import { fetchBUFFER, isURL } from '../utils/modules/index.js';
 import { Auth } from './auth.js';
 import { Context } from './context.js';
+import { Logger } from './logger.js';
 import { Store } from './store.js';
 
 export class ClientSocket extends EventEmitter {
@@ -40,6 +41,7 @@ export class ClientSocket extends EventEmitter {
 	#options;
 	#state = 'disconnected';
 	#startedAt = null;
+	#logger = null;
 
 	constructor(auth, options = {}) {
 		super();
@@ -107,6 +109,17 @@ export class ClientSocket extends EventEmitter {
 		const remainingMinutes = minutes % 60;
 
 		return `${hours}h ${remainingMinutes}m`;
+	}
+
+	get logger() {
+		if (!this.#logger) {
+			const badge = this.#options.role === 'primary' ? 'MAIN' : `SUB-${this.sessionName}`;
+
+			this.#logger = new Logger();
+			this.#logger.setSessionBadge(badge);
+		}
+
+		return this.#logger;
 	}
 
 	get needsPairing() {

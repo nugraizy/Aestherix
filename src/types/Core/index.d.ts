@@ -90,6 +90,7 @@ export declare class ClientSocket extends EventEmitter {
 	get phone(): string | null;
 	get uptime(): string | null;
 	get needsPairing(): boolean;
+	get logger(): Logger;
 	get ev(): this;
 	get TemplateBuilder(): TemplateBuilderFactory;
 	get jidNormalizedUser(): (jid: string) => string;
@@ -358,7 +359,21 @@ export declare class Cli {
 	get input(): string[];
 }
 
+export declare class LogMultiplexer {
+	constructor();
+
+	get mode(): 'combined' | 'separated';
+
+	register(logger: Logger, badge: string): void;
+	unregister(badge: string): void;
+	route(badge: string, type: string, formattedStr: string, errorStack?: string | null): void;
+	toggle(): void;
+	destroy(): void;
+}
+
 export declare class Logger {
+	static multiplexer: LogMultiplexer | null;
+
 	constructor(options?: { name?: string; muted?: boolean });
 
 	get name(): string | null;
@@ -366,6 +381,7 @@ export declare class Logger {
 
 	mute(): void;
 	unmute(): void;
+	setSessionBadge(badge: string | null): void;
 	color(text: string, colorName: string): string;
 	info(...args: unknown[]): string | undefined;
 	warning(...args: unknown[]): string | undefined;
@@ -465,6 +481,8 @@ export declare class Configuration {
 		io: unknown;
 		expressInstances: Cache;
 	};
+
+	logMultiplexer: LogMultiplexer | null;
 
 	charAI: Cache;
 	userLimit: Cache;

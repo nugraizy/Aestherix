@@ -86,6 +86,7 @@ export class Configuration {
 	packname = 'Made by Aestherix';
 	author = 'Powered by Hidden Finder';
 	logger_theme = 'dracula';
+	logMaxSize = 5;
 
 	isFirstConnectionForCache = true;
 	isFirstConnection = true;
@@ -103,6 +104,8 @@ export class Configuration {
 		this.owners = [toUserJid(this.settings.owner_number), ...(this.settings.team_number || []).map(toUserJid)].filter(Boolean);
 		this.prefix.default = this.settings.prefix?.pref || '.';
 		this.logger_theme = this.settings.logger_theme || 'dracula';
+		this.logMaxSize =
+			typeof this.settings.log_max_size === 'number' && this.settings.log_max_size > 0 ? this.settings.log_max_size : 5;
 
 		if (typeof this.settings.packname === 'string' && this.settings.packname.length > 0) {
 			this.packname = this.settings.packname;

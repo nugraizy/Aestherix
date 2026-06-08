@@ -15,6 +15,7 @@
 		"customPrefixes": []
 	},
 	"logger_theme": "catppuccin",
+	"log_max_size": 5,
 	"packname": "Made by Aestherix",
 	"author": "Powered by Hidden Finder"
 }

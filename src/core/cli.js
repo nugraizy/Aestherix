@@ -34,7 +34,8 @@ const FLAGS = {
 	test: { type: 'boolean' },
 	printSelf: { type: 'boolean' },
 	pipe: { type: 'boolean' },
-	profile: { type: 'boolean' }
+	profile: { type: 'boolean' },
+	noSub: { type: 'boolean' }
 };
 
 const HELP_TEXT = `
@@ -67,6 +68,7 @@ const HELP_TEXT = `
    --print-self             ${chalk.green('Print every incoming messages from host number in terminal.')}
    --pipe                   ${chalk.green('Enable command piping with | operator.')}
    --profile                ${chalk.green('Log per-message dispatch latency at PROFILE level.')}
+   --no-sub                 ${chalk.green('Do not auto-start persisted sub-bots on connect.')}
    --help, -h               ${chalk.green('Show this message.')}
 
  ${chalk.yellow('Examples')}
