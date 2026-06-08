@@ -135,4 +135,20 @@
 	.fmt-output :global(.hl-number) { color: var(--code-number, #f0c887); }
 	.fmt-output :global(.hl-atom) { color: var(--code-atom, #f0c887); }
 	.fmt-output :global(.hl-comment) { color: var(--code-comment, #6c7086); font-style: italic; }
+
+	@media (max-width: 640px) {
+		.fmt-output {
+			font-size: var(--fs-xs);
+			padding: var(--space-2);
+			padding-right: 2rem;
+			max-height: 300px;
+		}
+
+		.fmt-copy {
+			top: 0.35rem;
+			right: 0.35rem;
+			width: 26px;
+			height: 26px;
+		}
+	}
 </style>

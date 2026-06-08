@@ -4,11 +4,13 @@
 	export let title = '';
 	export let icon = '';
 	export let logo = '';
+	export let hideHeader = false;
 
 	const dispatch = createEventDispatcher();
 </script>
 
 <div class="tool-panel">
+	{#if !hideHeader}
 	<header class="tool-header">
 		<button class="back-btn" type="button" on:click={() => dispatch('close')} aria-label="Back to tools">
 			<i class="nf nf-fa-chevron_left"></i> Back
@@ -22,6 +24,7 @@
 		</span>
 		<h3 class="tool-title">{title}</h3>
 	</header>
+	{/if}
 	<div class="tool-body">
 		<slot />
 	</div>
@@ -51,7 +54,7 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.4rem;
-		padding: 0.4rem 0.85rem;
+		padding: 0.5rem 1rem;
 		border-radius: var(--radius-sm);
 		border: 1px solid var(--border);
 		background: var(--bg);
@@ -60,6 +63,7 @@
 		font-weight: 600;
 		cursor: pointer;
 		transition: border-color var(--tx-base), color var(--tx-base);
+		min-height: 40px;
 	}
 
 	.back-btn :global(.nf) {
@@ -100,5 +104,29 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-3);
+	}
+
+	@media (max-width: 640px) {
+		.tool-header {
+			gap: var(--space-2);
+		}
+
+		.back-btn {
+			padding: 0.4rem 0.75rem;
+			font-size: var(--fs-xs);
+		}
+
+		.tool-icon {
+			font-size: 1rem;
+		}
+
+		.tool-logo {
+			width: 1.8rem;
+			height: 1.8rem;
+		}
+
+		.tool-title {
+			font-size: var(--fs-md);
+		}
 	}
 </style>

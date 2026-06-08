@@ -8,6 +8,7 @@
 	export let disabled = false;
 	export let size = 'md';
 	export let align = 'center';
+	export let menuClass = '';
 
 	const dispatch = createEventDispatcher();
 	const EDGE = 8;
@@ -217,7 +218,7 @@
 	<div
 		use:portal
 		bind:this={menuEl}
-		class="app-dropdown-menu size-{size}"
+		class="app-dropdown-menu size-{size} {menuClass}"
 		role="listbox"
 		tabindex="-1"
 		style:top="{menuPos.top}px"

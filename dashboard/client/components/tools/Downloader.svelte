@@ -406,4 +406,57 @@
 	.dl-supported-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.3rem; max-width: 360px; margin: 0 auto; }
 	.dl-supported-item { white-space: nowrap; padding: 0.1rem 0.45rem; border-radius: var(--radius-pill); background: var(--bg); border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 0.3rem; }
 	.dl-supported-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+	@media (max-width: 640px) {
+		.dl-input-row {
+			flex-direction: column;
+		}
+
+		.dl-url {
+			max-width: 100%;
+		}
+
+		.dl-input-row .btn {
+			width: 100%;
+		}
+
+		.dl-thumb {
+			max-width: 100%;
+		}
+
+		.dl-media-list {
+			grid-template-columns: 1fr;
+		}
+
+		.dl-bulk-actions {
+			flex-direction: column;
+		}
+
+		.dl-bulk-actions .btn {
+			width: 100%;
+		}
+
+		.dl-pl-thumb {
+			width: 48px;
+			height: 28px;
+		}
+
+		.dl-history-item {
+			flex-wrap: wrap;
+		}
+
+		.dl-history-thumb {
+			width: 32px;
+			height: 32px;
+		}
+
+		.dl-history-service {
+			min-width: 50px;
+			font-size: 0.65rem;
+		}
+
+		.dl-supported-list {
+			max-width: 100%;
+		}
+	}
 </style>

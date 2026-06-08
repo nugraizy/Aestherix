@@ -519,4 +519,58 @@
 		-webkit-text-fill-color: #ffd700;
 		margin-left: auto;
 	}
+
+	@media (max-width: 640px) {
+		.input-row {
+			flex-direction: column;
+		}
+
+		.uid-input {
+			max-width: 100%;
+		}
+
+		.input-row .btn {
+			width: 100%;
+		}
+
+		.user-info {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: var(--space-1);
+		}
+
+		.char-grid {
+			grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+			gap: var(--space-2);
+		}
+
+		.char-icon {
+			width: 56px;
+			height: 56px;
+		}
+
+		.char-name {
+			font-size: 0.65rem;
+			max-width: 65px;
+		}
+
+		.card-actions {
+			flex-direction: column;
+			width: 100%;
+		}
+
+		.card-actions .btn {
+			width: 100%;
+			justify-content: center;
+		}
+
+		.history-item {
+			flex-wrap: wrap;
+		}
+
+		.history-icon {
+			width: 24px;
+			height: 24px;
+		}
+	}
 </style>

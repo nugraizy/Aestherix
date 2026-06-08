@@ -423,4 +423,48 @@
 		opacity: 0.5;
 		cursor: not-allowed;
 	}
+
+	@media (max-width: 640px) {
+		.dropzone {
+			padding: var(--space-4) var(--space-3);
+		}
+
+		.dropzone-icon {
+			font-size: 2rem;
+		}
+
+		.dropzone-text {
+			font-size: var(--fs-sm);
+		}
+
+		.file-info {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: var(--space-2);
+		}
+
+		.format-chips {
+			gap: 0.3rem;
+		}
+
+		.chip {
+			padding: 0.25rem 0.6rem;
+			font-size: var(--fs-xs);
+		}
+
+		.action-row {
+			flex-direction: column;
+		}
+
+		.action-row .btn {
+			width: 100%;
+			justify-content: center;
+		}
+
+		.result-card {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: var(--space-2);
+		}
+	}
 </style>
