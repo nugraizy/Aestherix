@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.14.0」2026-06-09
+
+## Added
+
+- LogMultiplexer with session-scoped loggers, terminal separation, and 12 keybindings ([`8e7b1cc2`](https://github.com/nugraizy/aestherix/commit/8e7b1cc2))
+- Bot-status and bot-activate owner commands ([`31f2fa56`](https://github.com/nugraizy/aestherix/commit/31f2fa56))
+- Sub-bot connection handling, session cleanup, and addbot rewrite ([`15d8bb92`](https://github.com/nugraizy/aestherix/commit/15d8bb92))
+- Profile picture sync from main bot to sub-bots ([`6e434651`](https://github.com/nugraizy/aestherix/commit/6e434651))
+- MangaToon class-based utility and search/detail/chapters/read commands ([`617efcfb`](https://github.com/nugraizy/aestherix/commit/617efcfb))
+- Dashboard URL query handling unification with createQueryState and deep-linking ([`074b3572`](https://github.com/nugraizy/aestherix/commit/074b3572))
+
+## Fixed
+
+- stickerAble returning false for direct media with caption ([`d45adc1e`](https://github.com/nugraizy/aestherix/commit/d45adc1e))
+- Dashboard a11y warnings and nerdfonts import ([`7df1bff9`](https://github.com/nugraizy/aestherix/commit/7df1bff9))
+- Comix intercepted fetch response missing headers ([`d1f5da86`](https://github.com/nugraizy/aestherix/commit/d1f5da86))
+
+## Changed
+
+- Qobuz metadata cleanup — removed unused album parameter and pictureUrl ([`2c8e3526`](https://github.com/nugraizy/aestherix/commit/2c8e3526))
+- Dashboard responsive CSS and ToolPanel hideHeader prop ([`e3789c4c`](https://github.com/nugraizy/aestherix/commit/e3789c4c))
+- Removed unused tiktok-crypto vendor files ([`e1f2ef10`](https://github.com/nugraizy/aestherix/commit/e1f2ef10))
+
 # 「7.13.0」2026-06-03
 
 ## Added
