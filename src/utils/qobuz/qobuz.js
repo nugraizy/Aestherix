@@ -93,12 +93,12 @@ class Qobuz {
 		return this.trackCache.get(String(id)) || null;
 	}
 
-	parseMetadata(track, album) {
+	parseMetadata(track) {
 		if (!track) {
-			return { title: '', artist: '', album: '', year: '', trackNumber: '', genre: '', copyright: '', pictureUrl: '' };
+			return { title: '', artist: '', album: '', year: '', trackNumber: '', genre: '', copyright: '' };
 		}
 
-		return extractMetadata(track, album ?? track.album ?? null);
+		return extractMetadata(track);
 	}
 
 	async searchTracks(query, offset = 0) {
@@ -211,10 +211,8 @@ class Qobuz {
 
 				return { ...result, track, cover: track.album?.image || track.album?.raw?.image?.large || null };
 			},
-			metadata: (album) => {
-				const fallback = track.album?.raw ?? track.album ?? track.raw?.album ?? null;
-
-				return this.parseMetadata(track.raw ?? track, album?.raw ?? album ?? fallback);
+			metadata: () => {
+				return this.parseMetadata(track.raw ?? track);
 			}
 		};
 	}

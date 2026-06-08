@@ -10,7 +10,6 @@ export type QobuzTrackMetadata = {
 	trackNumber: string;
 	genre: string;
 	copyright: string;
-	pictureUrl: string;
 };
 
 export type QobuzNormalizedArtist = {
@@ -57,7 +56,7 @@ export type QobuzNormalizedTrack = {
 
 export type QobuzWrappedTrack = QobuzNormalizedTrack & {
 	download: (quality?: TrackQuality) => Promise<QobuzDownloadResult | string>;
-	metadata: (album?: QobuzNormalizedAlbum | null) => QobuzTrackMetadata;
+	metadata: () => QobuzTrackMetadata;
 };
 
 export type QobuzWrappedAlbum = QobuzNormalizedAlbum & {
@@ -101,7 +100,7 @@ export declare class Qobuz {
 	};
 
 	getTrack(id: string | number): QobuzWrappedTrack | null;
-	parseMetadata(track: Record<string, unknown>, album?: Record<string, unknown> | null): QobuzTrackMetadata;
+	parseMetadata(track: Record<string, unknown>): QobuzTrackMetadata;
 	searchTracks(query: string, offset?: number): Promise<QobuzWrappedTrack[] | QobuzFriendlyError>;
 	searchAlbums(query: string, offset?: number): Promise<QobuzWrappedAlbum[] | QobuzFriendlyError>;
 	searchArtists(query: string, offset?: number): Promise<QobuzNormalizedArtist[] | QobuzFriendlyError>;
@@ -114,8 +113,5 @@ export declare class Qobuz {
 
 export declare const qobuz: Qobuz;
 
-export declare function extractMetadata(
-	track: Record<string, unknown>,
-	album?: Record<string, unknown> | null
-): QobuzTrackMetadata;
+export declare function extractMetadata(track: Record<string, unknown>): QobuzTrackMetadata;
 export declare function metadata(track: Record<string, unknown>, songUrl: string, coverUrl?: string | null): Promise<Buffer>;

@@ -3,7 +3,7 @@ import lodash from 'lodash';
 import parser from 'yargs-parser';
 
 import { cmdId } from '../../helper/modules/prefix.js';
-import { color, delay, loggers } from '../../utils/modules/index.js';
+import { color, loggers } from '../../utils/modules/index.js';
 import { metadata, qobuz } from '../../utils/qobuz/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -78,7 +78,7 @@ export default defineCommand({
 				await wait.update(`Songs with keyword "${query}" found. Total: ${total}`);
 
 				if (device.isIos) {
-					const items = results.slice(0, 10);
+					const items = results.slice(0, 20);
 					const container = {
 						text: 'Qobuz Downloader'.formatHeaders() + '\n\n',
 						buttons: []
@@ -181,7 +181,6 @@ async function downloadAudio(client, track, { from, message, prettyNumber, wait 
 	const buffer = await metadata(trackData || track, downloadInfo.url, cover);
 
 	await wait.update('Sending the file...');
-	await delay(1000);
 
 	await client.send(
 		from,

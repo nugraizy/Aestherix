@@ -1,7 +1,7 @@
 import { spawn } from 'child_process';
 
-function extractMetadata(track, album) {
-	const albumSource = album ?? track?.album ?? null;
+function extractMetadata(track) {
+	const albumSource = track?.album ?? null;
 	const rawAlbum = albumSource?.raw ?? albumSource ?? null;
 
 	const artistName =
@@ -21,8 +21,7 @@ function extractMetadata(track, album) {
 		year,
 		trackNumber: (track?.track_number ?? track?.trackNumber ?? '').toString(),
 		genre: rawAlbum?.genre?.name || albumSource?.genre || '',
-		copyright: track?.copyright || rawAlbum?.copyright || '',
-		pictureUrl: (typeof albumSource?.image === 'string' ? albumSource.image : null) || rawAlbum?.image?.large || ''
+		copyright: track?.copyright || rawAlbum?.copyright || ''
 	};
 }
 
