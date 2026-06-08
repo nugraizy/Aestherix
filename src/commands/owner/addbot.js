@@ -5,10 +5,13 @@ import { ClientSocket } from '../../core/client-socket.js';
 import { EventHandler } from '../../core/event-handler.js';
 import { manager } from '../../core/manager.js';
 import { Router } from '../../core/router.js';
+import { cleanupSession } from '../../core/session-cleanup.js';
 import { initContact, updateContact } from '../../core/utils.js';
 import configuration from '../../helper/config/connect.js';
 import prisma from '../../helper/database/prisma.js';
 import { defineCommand } from '../_define.js';
+
+const MAX_RETRIES = 5;
 
 const parseFlags = (args) => {
 	const flags = {};
@@ -34,6 +37,28 @@ const parseFlags = (args) => {
 	return flags;
 };
 
+function setupSubBot(sub, { sessionName, configuration: config, flags }) {
+	const subRouter = new Router(sub, { commands: config.registry.commands, aliases: config.registry.aliases });
+	const subStore = sub.store;
+	const eventHandler = new EventHandler(sub, {
+		router: subRouter,
+		store: subStore,
+		configuration: config,
+		options: { flags }
+	});
+
+	eventHandler.bind();
+
+	sub.on('contacts.upsert', (contacts) => initContact(subStore, contacts));
+	sub.on('contacts.update', (update) => updateContact(subStore, update));
+
+	if (config.logMultiplexer) {
+		const badge = `SUB-${sessionName}`;
+
+		config.logMultiplexer.register(sub.logger, badge);
+	}
+}
+
 export default defineCommand({
 	name: 'addbot',
 	description: 'Add and connect a new sub-bot instance.',
@@ -57,54 +82,185 @@ export default defineCommand({
 			return client.reply(from, 'Usage: !addbot <session_name> [--pair-number 628xxx] [--flags]', message);
 		}
 
-		if (manager.has(sessionName)) {
-			return client.reply(from, `❌ Bot "${sessionName}" already exists.`, message);
+		const existing = manager.get(sessionName);
+
+		if (existing) {
+			if (existing.state === 'connected') {
+				return client.reply(from, `✅ Bot "${sessionName}" is already online! (${existing.phone})`, message);
+			}
+
+			if (existing.state === 'connecting') {
+				return client.reply(from, `⏳ Bot "${sessionName}" is already connecting...`, message);
+			}
 		}
 
+		const dbInstance = await prisma.botInstance.findUnique({ where: { sessionName } });
 		const flags = parseFlags(args.slice(2));
+
+		if (existing && existing.state === 'disconnected') {
+			await client.reply(from, `🔄 Reconnecting "${sessionName}"...`, message);
+
+			let retryCount = 0;
+
+			existing.removeAllListeners('connection.update');
+
+			existing.on('connection.update', async (conn) => {
+				const { connection, lastDisconnect } = conn;
+
+				if (connection === 'open') {
+					retryCount = 0;
+					const phone = existing.socket.user?.id?.split(':')[0] ?? 'unknown';
+
+					await client.reply(from, `✅ Bot "${sessionName}" reconnected! (${phone})`, message);
+
+					setupSubBot(existing, { sessionName, configuration, flags });
+				}
+
+				if (connection === 'close') {
+					const { Boom } = await import('@hapi/boom');
+					const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
+					const { DisconnectReason } = await import('baileys');
+
+					if (reason === DisconnectReason.loggedOut || reason === DisconnectReason.badSession) {
+						const label = reason === DisconnectReason.loggedOut ? 'logged out' : 'has a bad session';
+
+						await client.reply(from, `❌ Bot "${sessionName}" ${label}. Session cleaned up.`, message);
+						manager.remove(sessionName);
+						await cleanupSession(sessionName);
+						return;
+					}
+
+					if (retryCount >= MAX_RETRIES) {
+						await client.reply(from, `⚠️ Bot "${sessionName}" max retries reached. Use !addbot to restart.`, message);
+						manager.remove(sessionName);
+						return;
+					}
+
+					retryCount++;
+					await existing.connect({ prisma }).catch(() => {});
+				}
+			});
+
+			await existing.connect({ prisma }).catch((err) => {
+				manager.remove(sessionName);
+				return client.reply(from, `❌ Failed to reconnect "${sessionName}": ${err.message}`, message);
+			});
+
+			return;
+		}
+
+		if (dbInstance && dbInstance.isActive) {
+			await client.reply(from, `🔄 Bot "${sessionName}" exists in DB. Reconnecting...`, message);
+
+			const subFlags = { ...JSON.parse(dbInstance.flags || '{}'), ...flags };
+			const auth = new Auth(prisma, sessionName);
+			const sub = new ClientSocket(auth, {
+				role: 'sub',
+				flags: subFlags,
+				cachedGroupMetadata: (jid) => (isJidGroup(jid) ? configuration.groups.metadata.get(jid) : {})
+			});
+
+			manager.add(sessionName, sub);
+
+			const pairNumber = dbInstance.pairNumber || flags.pairNumber || sender.replace(/@s\.whatsapp\.net$/, '');
+			let retryCount = 0;
+
+			sub.on('connection.update', async (conn) => {
+				const { connection, lastDisconnect } = conn;
+
+				if (connection === 'open') {
+					retryCount = 0;
+					const phone = sub.socket.user?.id?.split(':')[0] ?? 'unknown';
+
+					await client.reply(from, `✅ Bot "${sessionName}" is online! (${phone})`, message);
+					setupSubBot(sub, { sessionName, configuration, flags: subFlags });
+				}
+
+				if (connection === 'close') {
+					const { Boom } = await import('@hapi/boom');
+					const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
+					const { DisconnectReason } = await import('baileys');
+
+					if (reason === DisconnectReason.loggedOut || reason === DisconnectReason.badSession) {
+						const label = reason === DisconnectReason.loggedOut ? 'logged out' : 'has a bad session';
+
+						await client.reply(from, `❌ Bot "${sessionName}" ${label}. Session cleaned up.`, message);
+						manager.remove(sessionName);
+						await cleanupSession(sessionName);
+						return;
+					}
+
+					if (retryCount >= MAX_RETRIES) {
+						await client.reply(from, `⚠️ Bot "${sessionName}" max retries reached. Use !addbot to restart.`, message);
+						manager.remove(sessionName);
+						return;
+					}
+
+					retryCount++;
+					await sub.connect({ prisma }).catch(() => {});
+				}
+			});
+
+			try {
+				await sub.connect({ prisma });
+
+				if (sub.needsPairing) {
+					await new Promise((resolve) => {
+						sub.once('connection.update', () => resolve());
+					});
+
+					await new Promise((resolve) => setTimeout(resolve, 5000));
+
+					const code = await sub.requestPairingCode(String(pairNumber).replace(/[^0-9]/g, ''));
+
+					await client.reply(
+						from,
+						`🤖 *${sessionName}* pairing code:\n\n\`${code.slice(0, 4)}-${code.slice(4)}\`\n\nEnter this on the target phone within 60s.`,
+						message
+					);
+				}
+			} catch (err) {
+				await sub.disconnect().catch(() => {});
+				manager.remove(sessionName);
+				await client.reply(from, `❌ Failed to reconnect "${sessionName}": ${err.message}`, message);
+			}
+
+			return;
+		}
 
 		await client.reply(from, `⏳ Creating bot "${sessionName}"...`, message);
 
+		const newFlags = { ...flags, pairMode: true };
 		const auth = new Auth(prisma, sessionName);
 		const sub = new ClientSocket(auth, {
 			role: 'sub',
-			flags,
+			flags: newFlags,
 			cachedGroupMetadata: (jid) => (isJidGroup(jid) ? configuration.groups.metadata.get(jid) : {})
 		});
 
 		manager.add(sessionName, sub);
 
 		const pairNumber = flags.pairNumber || flags.pairmode || sender.replace(/@s\.whatsapp\.net$/, '');
-
-		flags.pairMode = true;
 		let paired = false;
+		let retryCount = 0;
 
 		sub.on('connection.update', async (conn) => {
 			const { connection, lastDisconnect } = conn;
 
-			console.log(`Connection update for "${sessionName}":`, connection);
-
 			if (connection === 'open' && !paired) {
 				paired = true;
+				retryCount = 0;
 				const phone = sub.socket.user?.id?.split(':')[0] ?? 'unknown';
 
 				await client.reply(from, `✅ Bot "${sessionName}" is online! (${phone})`, message);
 
 				await prisma.botInstance.upsert({
 					where: { sessionName },
-					update: { flags: JSON.stringify(flags), isActive: true },
-					create: { sessionName, flags: JSON.stringify(flags), role: 'sub', pairNumber: pairNumber || null, isActive: true }
+					update: { flags: JSON.stringify(newFlags), isActive: true },
+					create: { sessionName, flags: JSON.stringify(newFlags), role: 'sub', pairNumber: pairNumber || null, isActive: true }
 				});
 
-				const router = new Router(sub, { commands: configuration.registry.commands, aliases: configuration.registry.aliases });
-				const store = sub.store;
-
-				const eventHandler = new EventHandler(sub, { router, store, configuration, options: { flags } });
-
-				eventHandler.bind();
-
-				sub.on('contacts.upsert', (contacts) => initContact(store, contacts));
-				sub.on('contacts.update', (update) => updateContact(store, update));
+				setupSubBot(sub, { sessionName, configuration, flags: newFlags });
 			}
 
 			if (connection === 'close') {
@@ -112,15 +268,22 @@ export default defineCommand({
 				const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
 				const { DisconnectReason } = await import('baileys');
 
-				if (reason === DisconnectReason.loggedOut) {
-					await client.reply(from, `❌ Bot "${sessionName}" logged out.`, message);
+				if (reason === DisconnectReason.loggedOut || reason === DisconnectReason.badSession) {
+					const label = reason === DisconnectReason.loggedOut ? 'logged out' : 'has a bad session';
+
+					await client.reply(from, `❌ Bot "${sessionName}" ${label}. Session cleaned up.`, message);
 					manager.remove(sessionName);
-					await auth.clearState();
-					await prisma.botInstance.deleteMany({ where: { sessionName } });
+					await cleanupSession(sessionName);
 					return;
 				}
 
-				sub.removeAllListeners();
+				if (retryCount >= MAX_RETRIES) {
+					await client.reply(from, `⚠️ Bot "${sessionName}" max retries reached. Use !addbot to restart.`, message);
+					manager.remove(sessionName);
+					return;
+				}
+
+				retryCount++;
 				await sub.connect({ prisma }).catch(() => {});
 			}
 		});
@@ -136,7 +299,7 @@ export default defineCommand({
 				}
 			});
 
-			// await new Promise((resolve) => setTimeout(resolve, 15000));
+			await new Promise((resolve) => setTimeout(resolve, 5000));
 
 			const code = await sub.requestPairingCode(String(pairNumber).replace(/[^0-9]/g, ''));
 
@@ -146,7 +309,6 @@ export default defineCommand({
 				message
 			);
 		} catch (err) {
-			sub.removeAllListeners();
 			await sub.disconnect().catch(() => {});
 			manager.remove(sessionName);
 			return client.reply(from, `❌ Failed to start "${sessionName}": ${err.message}`, message);

@@ -1,3 +1,4 @@
+import configuration from '../../helper/config/connect.js';
 import { manager } from '../../core/manager.js';
 import prisma from '../../helper/database/prisma.js';
 import { defineCommand } from '../_define.js';
@@ -38,6 +39,10 @@ export default defineCommand({
 
 		await sub.disconnect();
 		manager.remove(sessionName);
+
+		if (configuration.logMultiplexer) {
+			configuration.logMultiplexer.unregister(`SUB-${sessionName}`);
+		}
 
 		if (purge) {
 			await sub.auth.clearState();

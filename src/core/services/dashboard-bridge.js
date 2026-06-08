@@ -451,6 +451,10 @@ export const startDashboardBridge = (resolveWaClient) => {
 
 	instance = createServer(app).listen(port, '127.0.0.1', () => {
 		loggers.info(color('Dashboard bridge', 'white'), color('listening on', 'lilac'), color(String(port), 'white'));
+
+		if (configuration.dashboard?.expressInstances) {
+			configuration.dashboard.expressInstances.set('dashboard-bridge', instance);
+		}
 	});
 };
 

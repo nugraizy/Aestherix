@@ -19,6 +19,7 @@ import { EventHandler } from './event-handler.js';
 import { manager } from './manager.js';
 import { MqttBridge } from './mqtt.js';
 import { Router } from './router.js';
+import { cleanupSession } from './session-cleanup.js';
 import { initContact, updateContact } from './utils.js';
 import { WebhookServer } from './webhook.js';
 
@@ -272,6 +273,20 @@ async function onConnected({ clientSocket, commandLoader, router, mqtt, store, w
 	socket.ev.on('poll.update', async (msg) => handlePollUpdate(socket, store, msg));
 	socket.ws.on('CB:notification,type:w:gp2', (update) => parseStubtypeUpdate(socket, update));
 	socket.ws.on('CB:notification,type:picture', async (update) => await emitProfilePictureUpdate(socket, update));
+	socket.ev.on('profile-picture.sync', async ({ image }) => {
+		for (const { name, client: sub } of manager.list()) {
+			if (sub.state !== 'connected') {
+				continue;
+			}
+
+			try {
+				await sub.updateProfilePicture(sub.user.id, image, 'no_crop');
+				sub.logger.info(color('Profile picture synced to', 'white'), color(name, 'lilac'));
+			} catch (err) {
+				sub.logger.error(color('Profile picture sync failed:', 'red'), color(err.message, 'white'));
+			}
+		}
+	});
 
 	initWerewolfHandler(clientSocket, loggers);
 	mqtt.setClient(socket);
@@ -321,6 +336,7 @@ async function onConnected({ clientSocket, commandLoader, router, mqtt, store, w
 
 async function spawnPersistedSubBots({ configuration: config }) {
 	const instances = await prisma.botInstance.findMany({ where: { isActive: true } }).catch(() => []);
+	const MAX_RETRIES = 5;
 
 	for (const instance of instances) {
 		if (manager.has(instance.sessionName)) {
@@ -337,18 +353,26 @@ async function spawnPersistedSubBots({ configuration: config }) {
 
 		manager.add(instance.sessionName, sub);
 
-		sub.on('connection.update', ({ connection }) => {
-			if (connection === 'open') {
-				const phone = sub.socket.user?.id?.split(':')[0] ?? 'unknown';
+		let retryCount = 0;
 
-				loggers.info(
+		sub.on('connection.update', async ({ connection, lastDisconnect }) => {
+			if (connection === 'open') {
+				retryCount = 0;
+				const phone = sub.socket.user?.id?.split(':')[0] ?? 'unknown';
+				const badge = `SUB-${instance.sessionName}`;
+
+				if (config.logMultiplexer) {
+					config.logMultiplexer.register(sub.logger, badge);
+				}
+
+				sub.logger.info(
 					color('Sub-bot', 'white'),
 					color(instance.sessionName, 'lilac'),
 					color(`(${phone})`, 'purple'),
 					color('connected', 'softGreen')
 				);
 
-				const subRouter = new Router(sub, { commands: config.cmds.commands, aliases: config.cmds.aliases });
+				const subRouter = new Router(sub, { commands: config.registry.commands, aliases: config.registry.aliases });
 				const subStore = sub.store;
 				const eventHandler = new EventHandler(sub, {
 					router: subRouter,
@@ -361,10 +385,57 @@ async function spawnPersistedSubBots({ configuration: config }) {
 				sub.on('contacts.upsert', (contacts) => initContact(subStore, contacts));
 				sub.on('contacts.update', (update) => updateContact(subStore, update));
 			}
+
+			if (connection === 'close') {
+				const { Boom } = await import('@hapi/boom');
+				const { DisconnectReason } = await import('baileys');
+				const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
+
+				if (reason === DisconnectReason.loggedOut || reason === DisconnectReason.badSession) {
+					const label = reason === DisconnectReason.loggedOut ? 'logged out' : 'bad session';
+
+					sub.logger.error(
+						color('Sub-bot', 'white'),
+						color(instance.sessionName, 'lilac'),
+						color(`${label} — cleaning up session`, 'red')
+					);
+
+					if (config.logMultiplexer) {
+						config.logMultiplexer.unregister(`SUB-${instance.sessionName}`);
+					}
+
+					manager.remove(instance.sessionName);
+					await cleanupSession(instance.sessionName);
+					return;
+				}
+
+				if (retryCount >= MAX_RETRIES) {
+					sub.logger.error(
+						color('Sub-bot', 'white'),
+						color(instance.sessionName, 'lilac'),
+						color('max retries reached', 'red')
+					);
+
+					if (config.logMultiplexer) {
+						config.logMultiplexer.unregister(`SUB-${instance.sessionName}`);
+					}
+
+					manager.remove(instance.sessionName);
+					return;
+				}
+
+				retryCount++;
+				await sub.connect({ prisma }).catch(() => {});
+			}
 		});
 
 		sub.connect({ prisma }).catch((err) => {
-			loggers.error(color('Sub-bot', 'white'), color(instance.sessionName, 'lilac'), color(err.message, 'red'));
+			sub.logger.error(color('Sub-bot', 'white'), color(instance.sessionName, 'lilac'), color(err.message, 'red'));
+
+			if (config.logMultiplexer) {
+				config.logMultiplexer.unregister(`SUB-${instance.sessionName}`);
+			}
+
 			manager.remove(instance.sessionName);
 		});
 	}
@@ -423,7 +494,10 @@ export async function boot({ cli, OPTIONS, store, sessionName }) {
 
 	clientSocket.on('connected', () => {
 		onConnected({ clientSocket, commandLoader, router, mqtt, store, webhook, eventHandler });
-		spawnPersistedSubBots({ configuration });
+
+		if (!OPTIONS.noSub) {
+			spawnPersistedSubBots({ configuration });
+		}
 	});
 
 	clientSocket.on('contacts.upsert', (contacts) => initContact(store, contacts));
