@@ -2,6 +2,7 @@ import { delay, isJidGroup } from 'baileys';
 import clip from 'clipboardy';
 import fs from 'fs-extra';
 import PhoneNumber from 'libphonenumber-js';
+import pm2 from 'pm2';
 import readline from 'readline';
 
 import { startDashboard } from '../../dashboard/server/index.js';
@@ -27,6 +28,39 @@ const ENABLE_EMBEDDED_DASHBOARD = String(process.env.DASHBOARD_EMBEDDED || '1') 
 const DASHBOARD_CATALOG_INTERVAL_MS = 30_000;
 const PAIR_NUMBER_ENV = 'PAIR_NUMBER';
 const SETTINGS_PATH = './src/helper/config/settings.json';
+const IS_PM2 = Boolean(process.env.pm_id);
+
+function startPm2SubBot(sessionName) {
+	return new Promise((resolve, reject) => {
+		pm2.start(
+			{
+				script: './subbot.js',
+				name: `aestherix-sub-${sessionName}`,
+				args: sessionName,
+				autorestart: false,
+				env: {
+					NODE_ENV: 'production'
+				}
+			},
+			(err) => {
+				if (err) {
+					reject(new Error(`PM2 start failed: ${err.message || err}`));
+					return;
+				}
+
+				resolve();
+			}
+		);
+	});
+}
+
+function stopPm2SubBot(sessionName) {
+	return new Promise((resolve) => {
+		const name = `aestherix-sub-${sessionName}`;
+
+		pm2.delete(name, () => resolve());
+	});
+}
 
 function syncPrefixToRouter(router) {
 	const { mode: prefixMode, regex: prefixReg, default: prf } = configuration.prefix;
@@ -274,6 +308,10 @@ async function onConnected({ clientSocket, commandLoader, router, mqtt, store, w
 	socket.ws.on('CB:notification,type:w:gp2', (update) => parseStubtypeUpdate(socket, update));
 	socket.ws.on('CB:notification,type:picture', async (update) => await emitProfilePictureUpdate(socket, update));
 	socket.ev.on('profile-picture.sync', async ({ image }) => {
+		if (IS_PM2 && process.send) {
+			process.send({ type: 'profile-picture', image: Buffer.from(image).toString('base64') });
+		}
+
 		for (const { name, client: sub } of manager.list()) {
 			if (sub.state !== 'connected') {
 				continue;
@@ -336,6 +374,24 @@ async function onConnected({ clientSocket, commandLoader, router, mqtt, store, w
 
 async function spawnPersistedSubBots({ configuration: config }) {
 	const instances = await prisma.botInstance.findMany({ where: { isActive: true } }).catch(() => []);
+
+	if (IS_PM2) {
+		for (const instance of instances) {
+			try {
+				await startPm2SubBot(instance.sessionName);
+				loggers.info(
+					color('Sub-bot', 'white'),
+					color(instance.sessionName, 'lilac'),
+					color('started as PM2 process', 'softGreen')
+				);
+			} catch (err) {
+				loggers.error(color('Sub-bot', 'white'), color(instance.sessionName, 'lilac'), color(err.message, 'red'));
+			}
+		}
+
+		return;
+	}
+
 	const MAX_RETRIES = 5;
 
 	for (const instance of instances) {
@@ -505,3 +561,5 @@ export async function boot({ cli, OPTIONS, store, sessionName }) {
 
 	return { clientSocket, auth, eventHandler, commandLoader, router };
 }
+
+export { IS_PM2, startPm2SubBot, stopPm2SubBot };
