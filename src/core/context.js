@@ -516,7 +516,7 @@ export class Context {
 		return TYPE_STICKER;
 	}
 	get stickerAble() {
-		return this.#memo('stickerAble', () => TYPE_STICKER.includes(this.typeQuoted));
+		return this.#memo('stickerAble', () => TYPE_STICKER.includes(this.typeQuoted) || TYPE_STICKER.includes(this.type));
 	}
 	get isMediaDocument() {
 		return this.#memo('isMediaDocument', () => {
