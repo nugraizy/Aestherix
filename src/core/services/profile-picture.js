@@ -301,6 +301,7 @@ export const startProfilePictureService = async (client, config) => {
 			config.pinterest.images.set(date, normalizedImage);
 			await persistProfilePictureHistory(config);
 			await client.updateProfilePicture(client.user.id, image, PROFILE_PICTURE_NO_CROP);
+			client.socket?.ev?.emit('profile-picture.sync', { image, date });
 
 			getColorPalette(normalizedImage.original.url)
 				.then((hexes) => {
