@@ -17,7 +17,7 @@ export const searchMangatoon = (query) =>
 					.map((i, el) => ({
 						title: $(el).find('.recommend-comics-title > span').text(),
 						source: BASE_URL($(el).find('a').attr('href')),
-						imagePoster: `${$(el).find('.comics-image > img').attr('src').split('.jpg')[0]}.jpg`,
+						imagePoster: $(el).find('.comics-image > img').attr('data-src') || $(el).find('.comics-image > img').attr('src'),
 						genreStr: $(el).find('.comics-type > span').text().trim().split('/').join(', '),
 						genreArr: $(el).find('.comics-type > span').text().trim().split('/')
 					}))

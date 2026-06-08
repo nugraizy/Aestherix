@@ -1,3 +1,5 @@
-export * from './detail-mangatoon.js';
-export * from './read-manga.js';
-export * from './search-mangatoon.js';
+export * from './mangatoon.js';
+
+import { MangaToon } from './mangatoon.js';
+
+export const mangatoon = new MangaToon();
