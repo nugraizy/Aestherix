@@ -439,12 +439,12 @@
 							</div>
 							<div class="session-actions">
 								<Tooltip text="Rename">
-									<button class="session-action" type="button" on:click={(e) => startRename(session, e)}>
+									<button class="session-action" type="button" aria-label="Rename session" on:click={(e) => startRename(session, e)}>
 										<i class="nf nf-md-pencil"></i>
 									</button>
 								</Tooltip>
 								<Tooltip text="Delete">
-									<button class="session-action danger" type="button" on:click={(e) => deleteSession(session.id, e)}>
+									<button class="session-action danger" type="button" aria-label="Delete session" on:click={(e) => deleteSession(session.id, e)}>
 										<i class="nf nf-md-delete"></i>
 									</button>
 								</Tooltip>
@@ -461,7 +461,7 @@
 			<header class="chat-header">
 				<div class="chat-header-info">
 				<Tooltip text={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}>
-					<button class="sidebar-toggle" type="button" on:click={() => (sidebarOpen = !sidebarOpen)}>
+					<button class="sidebar-toggle" type="button" aria-label="Toggle sidebar" on:click={() => (sidebarOpen = !sidebarOpen)}>
 						<i class="nf nf-md-menu"></i>
 					</button>
 				</Tooltip>
@@ -540,7 +540,7 @@
 			{#if attachedImagePreview}
 				<div class="attachment-preview">
 					<img src={attachedImagePreview} alt="Attached" />
-					<button class="attachment-remove" type="button" on:click={clearAttachment}>
+					<button class="attachment-remove" type="button" aria-label="Remove attachment" on:click={clearAttachment}>
 						<i class="nf nf-md-close"></i>
 					</button>
 				</div>
@@ -556,13 +556,14 @@
 					disabled={sending}
 				></textarea>
 				<Tooltip text="Attach image">
-					<button class="attach-btn" type="button" on:click={() => fileInputEl?.click()} disabled={sending}>
+					<button class="attach-btn" type="button" aria-label="Attach image" on:click={() => fileInputEl?.click()} disabled={sending}>
 						<i class="nf nf-md-paperclip"></i>
 					</button>
 				</Tooltip>
 				<button
 					class="send-btn"
 					type="button"
+					aria-label="Send message"
 					on:click={sendMessage}
 					disabled={(!input.trim() && !attachedImage) || sending}
 				>
@@ -573,7 +574,7 @@
 		{:else}
 			<div class="no-session">
 				<Tooltip text={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}>
-					<button class="sidebar-toggle" type="button" on:click={() => (sidebarOpen = !sidebarOpen)}>
+					<button class="sidebar-toggle" type="button" aria-label="Toggle sidebar" on:click={() => (sidebarOpen = !sidebarOpen)}>
 						<i class="nf nf-md-menu"></i>
 					</button>
 				</Tooltip>

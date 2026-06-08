@@ -88,7 +88,7 @@
 			</div>
 
 			<div class="ts-section">
-				<label class="ts-label">Unix &rarr; Date</label>
+				<span class="ts-label">Unix &rarr; Date</span>
 				<div class="ts-input-row">
 					<input class="input ts-mono" type="text" placeholder="1716000000" bind:value={unixInput} />
 					<button class="ts-now-btn" type="button" on:click={useNow}>Now</button>
@@ -122,7 +122,7 @@
 
 		<div class="ts-right">
 			<div class="ts-section">
-				<label class="ts-label">Date &rarr; Unix</label>
+				<span class="ts-label">Date &rarr; Unix</span>
 				<input class="input" type="datetime-local" bind:value={dateInput} />
 				{#if fromDate}
 					<div class="ts-results">
@@ -150,7 +150,7 @@
 			</div>
 
 			<div class="ts-section">
-				<label class="ts-label">Quick Reference</label>
+				<span class="ts-label">Quick Reference</span>
 				<div class="ts-ref-grid">
 					{#each [
 						{ label: 'Second', ms: 1000 },

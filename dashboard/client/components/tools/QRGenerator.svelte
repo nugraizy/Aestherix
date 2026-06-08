@@ -175,7 +175,7 @@
 	<div class="qr-layout">
 		<div class="qr-controls">
 			<div class="qr-section">
-				<label class="qr-label">Content</label>
+				<span class="qr-label">Content</span>
 				<input
 					class="input"
 					type="text"
@@ -186,14 +186,14 @@
 			</div>
 
 			<div class="qr-section">
-				<label class="qr-label">Dot Style</label>
+				<span class="qr-label">Dot Style</span>
 				<div class="qr-row">
 					<Dropdown value={dotsType} options={DOT_OPTIONS} on:change={(e) => (dotsType = e.detail)} />
 				</div>
 			</div>
 
 			<div class="qr-section">
-				<label class="qr-label">Corners</label>
+				<span class="qr-label">Corners</span>
 				<div class="qr-row cols">
 					<div class="qr-col">
 						<span class="qr-sub">Square</span>
@@ -207,7 +207,7 @@
 			</div>
 
 			<div class="qr-section">
-				<label class="qr-label">Colors</label>
+				<span class="qr-label">Colors</span>
 				<div class="qr-row cols">
 					<div class="qr-col">
 						<span class="qr-sub">Foreground</span>
@@ -243,7 +243,7 @@
 			</div>
 
 			<div class="qr-section">
-				<label class="qr-label">Size & Margin</label>
+				<span class="qr-label">Size & Margin</span>
 				<div class="qr-slider-group">
 					<div class="qr-slider-row">
 						<span class="qr-sub">Preview</span>
@@ -264,12 +264,12 @@
 			</div>
 
 			<div class="qr-section">
-				<label class="qr-label">Logo</label>
+				<span class="qr-label">Logo</span>
 				<div class="qr-row">
 					{#if logoUrl}
 						<div class="qr-logo-preview">
 							<img src={logoUrl} alt="Logo" />
-							<button class="qr-logo-remove" type="button" on:click={clearLogo}>
+							<button class="qr-logo-remove" type="button" aria-label="Remove logo" on:click={clearLogo}>
 								<i class="nf nf-md-close"></i>
 							</button>
 						</div>
@@ -284,7 +284,7 @@
 			</div>
 
 			<div class="qr-section">
-				<label class="qr-label">Text Overlay</label>
+				<span class="qr-label">Text Overlay</span>
 				<div class="qr-row cols">
 					<div class="qr-col">
 						<span class="qr-sub">Top</span>

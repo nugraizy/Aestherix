@@ -380,7 +380,7 @@
 
 		<div class="row bottom-row">
 			<div class="input-group result-group">
-				<label class="label">Result</label>
+				<span class="label">Result</span>
 				{#if loading}
 					<div class="result-display loading">
 						<span class="spinner"></span>

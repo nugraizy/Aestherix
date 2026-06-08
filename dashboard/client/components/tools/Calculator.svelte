@@ -284,9 +284,9 @@
 					<button class="btn-fn" type="button" on:click={() => appendFn('Math.log')}>ln</button>
 				</div>
 				<div class="sci-row">
-					<button class="btn-fn" type="button" on:click={() => appendFn('Math.sqrt')}>
-						<i class="nf nf-md-square_root"></i>
-					</button>
+				<button class="btn-fn" type="button" aria-label="Square root" on:click={() => appendFn('Math.sqrt')}>
+					<i class="nf nf-md-square_root"></i>
+				</button>
 					<button class="btn-fn" type="button" on:click={() => append('Math.pow(')}>
 						x<sup>y</sup>
 					</button>
@@ -305,39 +305,39 @@
 
 			<div class="keypad">
 				<button class="btn-action" type="button" on:click={clearAll}>AC</button>
-				<button class="btn-action" type="button" on:click={backspace}>
-					<i class="nf nf-md-backspace_outline"></i>
-				</button>
+			<button class="btn-action" type="button" aria-label="Backspace" on:click={backspace}>
+				<i class="nf nf-md-backspace_outline"></i>
+			</button>
 				<button class="btn-op" type="button" on:click={() => append('(')}>(</button>
 				<button class="btn-op" type="button" on:click={() => append(')')}>)</button>
 
 				<button class="btn-num" type="button" on:click={() => append('7')}>7</button>
 				<button class="btn-num" type="button" on:click={() => append('8')}>8</button>
 				<button class="btn-num" type="button" on:click={() => append('9')}>9</button>
-				<button class="btn-op" type="button" on:click={() => append('/')}>
-					<i class="nf nf-md-division"></i>
-				</button>
+			<button class="btn-op" type="button" aria-label="Divide" on:click={() => append('/')}>
+				<i class="nf nf-md-division"></i>
+			</button>
 
 				<button class="btn-num" type="button" on:click={() => append('4')}>4</button>
 				<button class="btn-num" type="button" on:click={() => append('5')}>5</button>
 				<button class="btn-num" type="button" on:click={() => append('6')}>6</button>
-				<button class="btn-op" type="button" on:click={() => append('*')}>
-					<i class="nf nf-md-multiplication"></i>
-				</button>
+			<button class="btn-op" type="button" aria-label="Multiply" on:click={() => append('*')}>
+				<i class="nf nf-md-multiplication"></i>
+			</button>
 
 				<button class="btn-num" type="button" on:click={() => append('1')}>1</button>
 				<button class="btn-num" type="button" on:click={() => append('2')}>2</button>
 				<button class="btn-num" type="button" on:click={() => append('3')}>3</button>
-				<button class="btn-op" type="button" on:click={() => append('-')}>
-					<i class="nf nf-md-minus"></i>
-				</button>
+			<button class="btn-op" type="button" aria-label="Subtract" on:click={() => append('-')}>
+				<i class="nf nf-md-minus"></i>
+			</button>
 
 				<button class="btn-num" type="button" on:click={() => append('0')}>0</button>
 				<button class="btn-num" type="button" on:click={() => append('.')}>.</button>
 				<button class="btn-eval" type="button" on:click={evaluate}>=</button>
-				<button class="btn-op" type="button" on:click={() => append('+')}>
-					<i class="nf nf-md-plus"></i>
-				</button>
+			<button class="btn-op" type="button" aria-label="Add" on:click={() => append('+')}>
+				<i class="nf nf-md-plus"></i>
+			</button>
 			</div>
 
 			{#if history.length}
@@ -454,13 +454,13 @@
 				<label class="field">
 					<span class="field-label">Split between</span>
 					<div class="split-control">
-						<button class="split-btn" type="button" on:click={() => { const v = parseInt(tipSplit, 10); if (v > 1) tipSplit = String(v - 1); }}>
-							<i class="nf nf-md-minus"></i>
-						</button>
+					<button class="split-btn" type="button" aria-label="Decrease split" on:click={() => { const v = parseInt(tipSplit, 10); if (v > 1) tipSplit = String(v - 1); }}>
+						<i class="nf nf-md-minus"></i>
+					</button>
 						<span class="split-value">{tipSplit}</span>
-						<button class="split-btn" type="button" on:click={() => { const v = parseInt(tipSplit, 10); tipSplit = String(v + 1); }}>
-							<i class="nf nf-md-plus"></i>
-						</button>
+					<button class="split-btn" type="button" aria-label="Increase split" on:click={() => { const v = parseInt(tipSplit, 10); tipSplit = String(v + 1); }}>
+						<i class="nf nf-md-plus"></i>
+					</button>
 						<span class="split-label">{parseInt(tipSplit, 10) === 1 ? 'person' : 'people'}</span>
 					</div>
 				</label>
@@ -920,5 +920,94 @@
 
 	.tip-card.primary .tip-card-value {
 		color: var(--accent);
+	}
+
+	@media (max-width: 640px) {
+		.calc-tabs {
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+			scrollbar-width: none;
+		}
+
+		.calc-tabs::-webkit-scrollbar {
+			display: none;
+		}
+
+		.calc-tab {
+			padding: 0.5rem 0.75rem;
+			white-space: nowrap;
+		}
+
+		.display {
+			padding: var(--space-2) var(--space-3);
+			min-height: 3rem;
+		}
+
+		.display-expr {
+			font-size: var(--fs-lg);
+		}
+
+		.sci-row {
+			grid-template-columns: repeat(5, 1fr);
+			gap: 3px;
+		}
+
+		.btn-fn {
+			padding: 0.5rem 0.15rem;
+			font-size: 0.7rem;
+		}
+
+		.keypad {
+			gap: 4px;
+		}
+
+		.keypad button {
+			padding: 0.6rem 0.3rem;
+			font-size: var(--fs-sm);
+			min-height: 2.5rem;
+		}
+
+		.pct-tabs {
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+			scrollbar-width: none;
+		}
+
+		.pct-tabs::-webkit-scrollbar {
+			display: none;
+		}
+
+		.pct-tab {
+			padding: 0.4rem 0.65rem;
+			white-space: nowrap;
+		}
+
+		.tip-pct-btns {
+			gap: 3px;
+		}
+
+		.tip-pct-btn {
+			min-width: 40px;
+			padding: 0.4rem 0.2rem;
+		}
+
+		.tip-custom {
+			min-width: 50px;
+			max-width: 70px;
+		}
+
+		.split-btn {
+			width: 36px;
+			height: 36px;
+		}
+
+		.split-value {
+			font-size: var(--fs-md);
+			min-width: 1.5rem;
+		}
+
+		.tip-results {
+			grid-template-columns: 1fr;
+		}
 	}
 </style>

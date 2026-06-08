@@ -106,7 +106,7 @@
 	<div class="color-layout">
 		<div class="color-left">
 			<div class="color-section">
-				<label class="color-label">Input</label>
+				<span class="color-label">Input</span>
 				<div class="color-input-row">
 					<input
 						id="color-tool-swatch"
@@ -128,14 +128,14 @@
 
 			{#if hex}
 				<div class="color-section">
-					<label class="color-label">Preview</label>
+					<span class="color-label">Preview</span>
 					<div class="color-preview-card" style:background={hex}>
 						<span class="color-preview-text" style:color={hsl.l > 55 ? '#000' : '#fff'}>{hex}</span>
 					</div>
 				</div>
 
 				<div class="color-section">
-					<label class="color-label">Values</label>
+					<span class="color-label">Values</span>
 					<div class="color-values">
 						<button class="color-value-card" type="button" on:click={() => copyValue(hex)}>
 							<span class="cv-label">HEX</span>
@@ -175,53 +175,53 @@
 
 				{#if activeTab === 'harmony'}
 					<div class="color-section">
-						<label class="color-label">Complementary</label>
+						<span class="color-label">Complementary</span>
 						<div class="color-swatches-row">
-							<button class="color-swatch-lg" style:background={hex} type="button" on:click={() => setFromSwatch(hex)}></button>
-							<button class="color-swatch-lg" style:background={complementary} type="button" on:click={() => setFromSwatch(complementary)}></button>
+							<button class="color-swatch-lg" style:background={hex} type="button" aria-label={hex} on:click={() => setFromSwatch(hex)}></button>
+							<button class="color-swatch-lg" style:background={complementary} type="button" aria-label={complementary} on:click={() => setFromSwatch(complementary)}></button>
 						</div>
 					</div>
 
 					<div class="color-section">
-						<label class="color-label">Analogous</label>
+						<span class="color-label">Analogous</span>
 						<div class="color-swatches-row">
 							{#each analogous as color, i (i)}
-								<button class="color-swatch-lg" class:active={i === 2} style:background={color} type="button" on:click={() => setFromSwatch(color)}></button>
+								<button class="color-swatch-lg" class:active={i === 2} style:background={color} type="button" aria-label={color} on:click={() => setFromSwatch(color)}></button>
 							{/each}
 						</div>
 					</div>
 
 					<div class="color-section">
-						<label class="color-label">Triadic</label>
+						<span class="color-label">Triadic</span>
 						<div class="color-swatches-row">
-							<button class="color-swatch-lg" style:background={hex} type="button" on:click={() => setFromSwatch(hex)}></button>
+							<button class="color-swatch-lg" style:background={hex} type="button" aria-label={hex} on:click={() => setFromSwatch(hex)}></button>
 							{#each triadic as color}
-								<button class="color-swatch-lg" style:background={color} type="button" on:click={() => setFromSwatch(color)}></button>
+								<button class="color-swatch-lg" style:background={color} type="button" aria-label={color} on:click={() => setFromSwatch(color)}></button>
 							{/each}
 						</div>
 					</div>
 
 					<div class="color-section">
-						<label class="color-label">Split Complementary</label>
+						<span class="color-label">Split Complementary</span>
 						<div class="color-swatches-row">
 							{#each splitComp as color}
-								<button class="color-swatch-lg" style:background={color} type="button" on:click={() => setFromSwatch(color)}></button>
+								<button class="color-swatch-lg" style:background={color} type="button" aria-label={color} on:click={() => setFromSwatch(color)}></button>
 							{/each}
-							<button class="color-swatch-lg" style:background={hex} type="button" on:click={() => setFromSwatch(hex)}></button>
+							<button class="color-swatch-lg" style:background={hex} type="button" aria-label={hex} on:click={() => setFromSwatch(hex)}></button>
 						</div>
 					</div>
 
 					<div class="color-section">
-						<label class="color-label">Shades</label>
+						<span class="color-label">Shades</span>
 						<div class="color-swatches-row shades">
 							{#each shades as color, i (i)}
-								<button class="color-swatch-sm" style:background={color} type="button" on:click={() => setFromSwatch(color)}></button>
+								<button class="color-swatch-sm" style:background={color} type="button" aria-label={color} on:click={() => setFromSwatch(color)}></button>
 							{/each}
 						</div>
 					</div>
 				{:else if activeTab === 'palette'}
 					<div class="color-section">
-						<label class="color-label">Material Palette</label>
+						<span class="color-label">Material Palette</span>
 						<div class="palette-grid">
 							{#each palette as p (p.name)}
 								<button class="palette-item" type="button" on:click={() => setFromSwatch(p.hex)}>
@@ -234,7 +234,7 @@
 					</div>
 				{:else if activeTab === 'gradient'}
 					<div class="color-section">
-						<label class="color-label">Gradient Builder</label>
+						<span class="color-label">Gradient Builder</span>
 						<div class="grad-preview" style:background={gradient}></div>
 						<div class="grad-controls">
 							<div class="grad-color-row">
@@ -280,6 +280,7 @@
 									class="grad-preset"
 									class:active={gradAngle === angle}
 									type="button"
+									aria-label="{angle} degrees"
 									on:click={() => (gradAngle = angle)}
 									style:background={`linear-gradient(${angle}deg, ${hex}, ${gradHex || '#888'})`}
 									title="{angle}&deg;"

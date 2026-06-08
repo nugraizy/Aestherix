@@ -1,4 +1,3 @@
-import './public/nerdfonts.min.css';
 import { mount } from 'svelte';
 import App from './App.svelte';
 
