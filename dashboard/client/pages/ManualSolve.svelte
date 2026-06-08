@@ -1,10 +1,13 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { get, post } from '../lib/api.js';
 	import { socket, connect as connectSocket } from '../lib/socket.js';
 	import { showError, showSuccess } from '../lib/toast.js';
+	import { createQueryState } from '../lib/urlState.js';
 
 	export let active = true;
+
+	const challengeQuery = createQueryState('', { challenge: { type: 'string', default: '' } });
 
 	let challenges = [];
 	let history = [];
@@ -267,8 +270,7 @@
 			connectSocket();
 		}
 
-		const params = new URLSearchParams(window.location.search);
-		const challengeParam = params.get('challenge');
+		const challengeParam = challengeQuery.read().challenge;
 
 		const handleChallenges = (payload) => {
 			challenges = payload?.challenges || [];
@@ -311,6 +313,8 @@
 			}
 		};
 	});
+
+	onDestroy(() => challengeQuery.strip());
 </script>
 
 <div class="manual-solve">
@@ -416,13 +420,16 @@
 				{:else if !frameSrc}
 					<div class="viewer-placeholder">Waiting for frames...</div>
 				{:else}
-					<div
-						class="viewer"
-						tabindex="0"
-						bind:this={viewerRoot}
-						on:keydown={handleKeyDown}
-						on:keyup={handleKeyUp}
-					>
+				<!-- svelte-ignore a11y_no_noninteractive_tabindex a11y_no_noninteractive_element_interactions -->
+				<div
+					class="viewer"
+					tabindex="0"
+					role="region"
+					aria-label="Manual solve viewer"
+					bind:this={viewerRoot}
+					on:keydown={handleKeyDown}
+					on:keyup={handleKeyUp}
+				>
 						<img
 							class="viewer-frame"
 							src={frameSrc}

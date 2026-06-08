@@ -9,8 +9,14 @@
 	import { socket } from '../lib/socket.js';
 	import { albums } from '../lib/stores.js';
 	import { showError, showSuccess, showUndoToast } from '../lib/toast.js';
+	import { createQueryState } from '../lib/urlState.js';
 
 	const PAGE_SIZE = 50;
+	const albumQuery = createQueryState('', {
+		p:     { type: 'number', default: 0, validate: v => Math.max(0, v) },
+		color: { type: 'string', default: '' },
+		img:   { type: 'string', default: '' }
+	});
 
 	let lightboxIndex = -1;
 	let canDelete = true;
@@ -32,51 +38,17 @@
 	$: canDelete = !isViewer;
 
 	function readUrlState() {
-		if (typeof window === 'undefined') {
-			return { page: 0, color: '', img: '' };
-		}
-
-		const url = new URL(window.location.href);
-		const p = Math.max(0, Number(url.searchParams.get('p') || 0) - 1);
-		const color = url.searchParams.get('color') || '';
-		const img = url.searchParams.get('img') || '';
-
-		return { page: Number.isFinite(p) ? p : 0, color, img };
+		const raw = albumQuery.read();
+		return { page: Math.max(0, raw.p), color: raw.color, img: raw.img };
 	}
 
 	function writeUrlState({ page: nextPage = page, color, img = '' } = {}) {
-		if (typeof window === 'undefined') {
-			return;
-		}
-
 		const filter = color === undefined ? $albums.colorFilter || '' : color;
-		const url = new URL(window.location.href);
-
-		if (nextPage > 0) {
-			url.searchParams.set('p', String(nextPage + 1));
-		} else {
-			url.searchParams.delete('p');
-		}
-
-		if (filter) {
-			url.searchParams.set('color', filter);
-		} else {
-			url.searchParams.delete('color');
-		}
-
-		if (img) {
-			url.searchParams.set('img', img);
-		} else {
-			url.searchParams.delete('img');
-		}
-
-		const next = `${url.pathname}${url.search}${url.hash}`;
-
-		if (next === `${window.location.pathname}${window.location.search}${window.location.hash}`) {
-			return;
-		}
-
-		history.replaceState(history.state, '', next);
+		albumQuery.write({
+			p: nextPage > 0 ? String(nextPage + 1) : '',
+			color: filter,
+			img
+		});
 	}
 
 	async function load({ page: reqPage = page, img = '' } = {}) {
@@ -287,6 +259,7 @@
 
 	onDestroy(() => {
 		socket.off('dashboard:profile-pictures', handleSocketUpdate);
+		albumQuery.strip();
 	});
 
 	$: if (active && urlReady && lightboxIndex >= 0 && pagedPictures[lightboxIndex]) {

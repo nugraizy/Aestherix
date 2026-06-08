@@ -1,12 +1,18 @@
 <script>
+	import { onDestroy } from 'svelte';
 	import { getMessageLogs } from '../lib/api.js';
 	import { messageLogs } from '../lib/stores.js';
 	import { showError } from '../lib/toast.js';
+	import { createQueryState } from '../lib/urlState.js';
 	import Tooltip from '../components/ui/Tooltip.svelte';
 	import { escapeHtml, highlight } from '../lib/highlight.js';
 
 	const STALE_MS = 30_000;
 	const DEFAULT_LIMIT = 300;
+	const logsQuery = createQueryState('', {
+		q:   { type: 'string', default: '' },
+		jid: { type: 'string', default: '' }
+	});
 
 	export let active = true;
 	let searchTimeout;
@@ -14,8 +20,13 @@
 
 	$: if (active && !wasActive) {
 		wasActive = true;
+		const urlState = logsQuery.read();
+		if (urlState.q) messageLogs.update((c) => ({ ...c, search: urlState.q }));
+		if (urlState.jid) messageLogs.update((c) => ({ ...c, jidFilter: urlState.jid }));
 		void load({ force: false });
 	}
+
+	onDestroy(() => logsQuery.strip());
 
 	$: if (!active && wasActive) {
 		wasActive = false;
@@ -59,6 +70,8 @@
 	function handleSearch() {
 		clearTimeout(searchTimeout);
 		searchTimeout = setTimeout(() => {
+			const state = $messageLogs;
+			logsQuery.write({ q: state.search || '', jid: state.jidFilter || '' });
 			messageLogs.update((current) => ({ ...current, search: current.search, jidFilter: current.jidFilter }));
 			void load({ force: true });
 		}, 400);

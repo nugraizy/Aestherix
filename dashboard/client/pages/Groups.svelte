@@ -1,5 +1,5 @@
 <script>
-
+	import { onDestroy } from 'svelte';
 	import ButtonPill from '../components/ui/ButtonPill.svelte';
 	import SkeletonList from '../components/ui/SkeletonList.svelte';
 	import Toggle from '../components/ui/Toggle.svelte';
@@ -8,9 +8,12 @@
 	import { showConfirm } from '../lib/confirm.js';
 	import { watchConfirmation } from '../lib/confirmation.js';
 	import { showError, showSuccess } from '../lib/toast.js';
+	import { createQueryState } from '../lib/urlState.js';
 
 	export let active = true;
 	let wasActive = false;
+
+	const groupQuery = createQueryState('', { group: { type: 'string', default: '' } });
 
 	let groups = [];
 	let loading = false;
@@ -44,6 +47,15 @@
 		wasActive = true;
 		if (!loaded) void loadGroups();
 	}
+
+	$: if (loaded && active && !selectedJid) {
+		const savedGroup = groupQuery.read().group;
+		if (savedGroup && groups.some(g => g.jid === savedGroup)) {
+			void selectGroup(savedGroup);
+		}
+	}
+
+	onDestroy(() => groupQuery.strip());
 
 	async function loadGroups() {
 		loading = true;
@@ -141,6 +153,7 @@
 			selectedJid = null;
 			selectedSettings = null;
 			groupInfo = null;
+			groupQuery.write({ group: '' });
 			return;
 		}
 
@@ -148,6 +161,7 @@
 		selectedSettings = null;
 		groupInfo = null;
 		settingsLoading = true;
+		groupQuery.write({ group: jid });
 
 		try {
 			const [settingsData, infoData] = await Promise.all([

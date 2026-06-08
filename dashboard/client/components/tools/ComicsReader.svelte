@@ -1,7 +1,8 @@
 <script>
-	import { onDestroy, onMount, tick } from 'svelte';
+	import { createEventDispatcher, onDestroy, onMount, tick } from 'svelte';
 	import { get } from '../../lib/api.js';
 	import { highlight } from '../../lib/highlight.js';
+	import { createQueryState, loadLocal, saveLocal } from '../../lib/urlState.js';
 	import { showError } from '../../lib/toast.js';
 	import Dropdown from '../ui/Dropdown.svelte';
 	import SkeletonCard from '../ui/SkeletonCard.svelte';
@@ -10,6 +11,7 @@
 	import Tooltip from '../ui/Tooltip.svelte';
 
 	const API = '/api/dashboard';
+	const dispatch = createEventDispatcher();
 	const SOURCES = [
 		{ value: 'shinigami', label: 'Shinigami' },
 		{ value: 'kiryuu', label: 'Kiryuu' },
@@ -24,7 +26,19 @@
 	const LAST_KEY = 'aestherix.tools.comics.last';
 	const CHAPTER_BOOKMARKS_KEY = 'aestherix.tools.comics.chapter-bookmarks';
 
+	const comicQuery = createQueryState('c_', {
+		src: { type: 'string', default: '' },
+		id:  { type: 'string', default: '' },
+		ch:  { type: 'string', default: '' }
+	});
+
+	const _initUrl = comicQuery.read();
+	const _initLast = loadLocal(LAST_KEY);
+	const _initId = _initUrl.id || _initLast.id || '';
+
 	let source = 'shinigami';
+	let view = _initId && _initUrl.ch ? 'reader' : _initId ? 'chapters' : 'search';
+	let loading = view === 'reader';
 	let query = '';
 	let results = [];
 	let isHome = true;
@@ -47,9 +61,7 @@
 	const KEEP_BEHIND = 2;
 	const KEEP_AHEAD = 6;
 	let chapterIndex = -1;
-	let view = 'search';
 	let restored = false;
-	let loading = false;
 	let error = '';
 	let pdfBusy = false;
 	let groupFilter = 'all';
@@ -71,6 +83,8 @@
 	let scrollFrame = null;
 	let showReaderSettings = false;
 	let settingsWrap;
+	let showReaderFilters = false;
+	let readerFiltersWrap;
 	let showGoUp = false;
 	let barHidden = false;
 	let barHeight = 0;
@@ -503,96 +517,45 @@
 		loadHome();
 	}
 
-	function readUrlState() {
-		if (typeof window === 'undefined') return {};
-
-		const p = new URLSearchParams(window.location.search);
-
-		return { src: p.get('c_src') || '', id: p.get('c_id') || '', ch: p.get('c_ch') || '' };
-	}
-
-	function loadLast() {
-		try {
-			return JSON.parse(localStorage.getItem(LAST_KEY) || '{}');
-		} catch {
-			return {};
-		}
-	}
-
-	function setParam(url, key, value) {
-		if (value) url.searchParams.set(key, value);
-		else url.searchParams.delete(key);
-	}
-
 	function syncUrl(src, currentView, item, chapter) {
 		const id = currentView !== 'search' && item ? item.id : '';
 		const chId = currentView === 'reader' && chapter ? chapter.id : '';
 
-		if (typeof window !== 'undefined') {
-			const url = new URL(window.location.href);
-
-			setParam(url, 'c_src', src);
-			setParam(url, 'c_id', id);
-			setParam(url, 'c_ch', chId);
-
-			const next = `${url.pathname}${url.search}${url.hash}`;
-
-			if (next !== `${window.location.pathname}${window.location.search}${window.location.hash}`) {
-				history.replaceState(history.state, '', next);
-			}
-		}
-
-		try {
-			localStorage.setItem(LAST_KEY, JSON.stringify({ src, id, ch: chId }));
-		} catch {
-			// ignore storage failures
-		}
-	}
-
-	function stripUrl() {
-		if (typeof window === 'undefined') return;
-
-		const url = new URL(window.location.href);
-		let changed = false;
-
-		for (const key of [...url.searchParams.keys()]) {
-			if (key.startsWith('c_')) {
-				url.searchParams.delete(key);
-				changed = true;
-			}
-		}
-
-		if (changed) history.replaceState(history.state, '', `${url.pathname}${url.search}${url.hash}`);
+		comicQuery.write({ src, id, ch: chId });
+		saveLocal(LAST_KEY, { src, id, ch: chId });
 	}
 
 	onMount(async () => {
-		const fromUrl = readUrlState();
-		const last = loadLast();
-		const src = fromUrl.src || last.src;
-		const id = fromUrl.id || last.id;
-		const ch = fromUrl.ch || last.ch;
+		try {
+			const src = _initUrl.src || _initLast.src;
+			const id = _initUrl.id || _initLast.id;
+			const ch = _initUrl.ch || _initLast.ch;
 
-		if (src && SOURCES.some((s) => s.value === src)) source = src;
+			if (src && SOURCES.some((s) => s.value === src)) source = src;
 
-		await loadFilterDefs();
+			await loadFilterDefs();
 
-		if (id) {
-			await openManga({ id });
-			await tick();
+			if (id) {
+				await openManga({ id });
+				await tick();
 
-			if (ch) {
-				const idx = filteredChapters.findIndex((c) => c.id === ch);
+				if (ch) {
+					const idx = filteredChapters.findIndex((c) => c.id === ch);
 
-				if (idx >= 0) await openReader(idx);
+					if (idx >= 0) await openReader(idx);
+				}
+			} else {
+				await loadHome();
 			}
-		} else {
-			await loadHome();
+		} catch {
+			// ensure UI always renders even if init fails
 		}
 
 		restored = true;
+		dispatch('ready');
 	});
 
-	onDestroy(stripUrl);
+	onDestroy(() => comicQuery.strip());
 
 	async function openManga(item, { refresh = false } = {}) {
 		manga = { ...item };
@@ -950,6 +913,12 @@
 		}
 	}
 
+	function handleOutsideFilters(e) {
+		if (showReaderFilters && readerFiltersWrap && !readerFiltersWrap.contains(e.target)) {
+			showReaderFilters = false;
+		}
+	}
+
 	async function downloadPdf(chapter) {
 		pdfBusy = true;
 
@@ -982,9 +951,10 @@
 	}
 </script>
 
-<svelte:window on:keydown={onKey} on:click={handleOutsideSettings} on:blur={pauseAutoScroll} />
+<svelte:window on:keydown={onKey} on:click={(e) => { handleOutsideSettings(e); handleOutsideFilters(e); }} on:blur={pauseAutoScroll} />
 <svelte:document on:visibilitychange={() => document.hidden && pauseAutoScroll()} />
 
+{#if restored}
 <div class="comics">
 	{#if view === 'search'}
 		<div class="search-row">
@@ -1180,13 +1150,14 @@
 		{/if}
 	{/if}
 </div>
+{/if}
 
 {#if view === 'reader'}
-	<div class="reader">
+<div class="reader">
 		<header class="reader-bar" class:hidden={barHidden} bind:clientHeight={barHeight}>
 			<button class="link-btn" type="button" on:click={closeReader}><i class="nf nf-fa-chevron_left"></i> Chapters</button>
 			<div class="reader-select">
-				<Dropdown value={chapterIndex} options={chapterOptions} size="sm" on:change={(e) => openReader(e.detail)} />
+				<Dropdown value={chapterIndex} options={chapterOptions} size="sm" align="center" menuClass="reader-chapter-menu" on:change={(e) => openReader(e.detail)} />
 			</div>
 			<div class="reader-nav">
 				<Tooltip text="Previous chapter (←)">
@@ -1216,6 +1187,40 @@
 							<div class="setting">
 								<span>Doom Scrolling Mode</span>
 								<Toggle checked={doomMode} size="sm" on:change={(e) => (doomMode = e.detail)} />
+							</div>
+						</div>
+					{/if}
+				</div>
+				<div class="reader-filters-wrap" bind:this={readerFiltersWrap}>
+					<Tooltip text="Chapter filters">
+						<button class="icon-btn" class:active={showReaderFilters} type="button" aria-label="Chapter filters" on:click={() => (showReaderFilters = !showReaderFilters)}>
+							<i class="nf nf-md-filter_variant"></i>
+							{#if groupFilter !== 'all' || dedup || !sortAsc || bookmarkOnly}
+								<span class="filter-indicator"></span>
+							{/if}
+						</button>
+					</Tooltip>
+					{#if showReaderFilters}
+						<div class="reader-filters">
+							{#if scanlators.length > 1}
+								<div class="setting">
+									<span>Group</span>
+									<Dropdown value={groupFilter} options={groupOptions} size="sm" on:change={(e) => (groupFilter = e.detail)} />
+								</div>
+							{/if}
+							<div class="setting">
+								<span>Order</span>
+								<button class="toggle-btn" type="button" on:click={() => (sortAsc = !sortAsc)}>
+									<i class="nf nf-fa-chevron_down" style:transform={sortAsc ? 'none' : 'rotate(180deg)'}></i> {sortAsc ? 'Oldest' : 'Latest'}
+								</button>
+							</div>
+							<div class="setting">
+								<span>Dedup</span>
+								<Toggle checked={dedup} size="sm" on:change={(e) => (dedup = e.detail)} />
+							</div>
+							<div class="setting">
+								<span>Bookmarked only</span>
+								<Toggle checked={bookmarkOnly} size="sm" on:change={(e) => (bookmarkOnly = e.detail)} />
 							</div>
 						</div>
 					{/if}
@@ -1271,8 +1276,8 @@
 			<button class="go-up" type="button" aria-label="Scroll to top" on:click={() => readerBody?.scrollTo({ top: 0, behavior: 'smooth' })}>
 				<i class="nf nf-fa-chevron_down"></i>
 			</button>
-		{/if}
-	</div>
+	{/if}
+</div>
 {/if}
 
 <style>
@@ -1366,7 +1371,7 @@
 	.toggle-btn .bm-icon { width: 0.95rem; height: 0.95rem; }
 
 	.reader { position: fixed; inset: 0; z-index: 200; background: #0b0b12; display: flex; flex-direction: column; }
-	.reader-bar { position: absolute; top: 0; left: 0; right: 0; z-index: 10; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); padding: 0.5rem 0.8rem; background: var(--panel); border-bottom: 1px solid var(--border); transition: transform var(--tx-base); }
+	.reader-bar { position: absolute; top: 0; left: 0; right: 0; z-index: 10; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); padding: 0.6rem 1rem; background: var(--panel); border-bottom: 1px solid var(--border); transition: transform var(--tx-base); }
 	.reader-bar.hidden { transform: translateY(-100%); }
 	.reader-scrub { flex: 1 0 100%; display: flex; align-items: center; gap: var(--space-2); }
 	.scrub-wrap { position: relative; flex: 1; display: flex; align-items: center; min-width: 0; }
@@ -1375,9 +1380,19 @@
 	.scrub-dot { width: 4px; height: 4px; border-radius: 50%; background: color-mix(in srgb, var(--muted) 55%, transparent); }
 	.scrub-dot.on { background: var(--accent); }
 	.scrub-label { font-size: var(--fs-xs); color: var(--muted); white-space: nowrap; }
-	.reader-select { flex: 1; display: flex; justify-content: center; min-width: 0; }
+	.reader-select { flex: 1; display: flex; justify-content: center; min-width: 0; max-width: 300px; }
+	.reader-select :global(.dropdown) { width: 100%; }
+	.reader-select :global(.trigger) { width: 100%; text-align: center; }
+	:global(.reader-chapter-menu) { max-width: 300px; }
+	:global(.reader-chapter-menu .app-dropdown-option-label) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.settings-wrap { position: relative; display: inline-flex; }
 	.reader-settings { position: absolute; top: calc(100% + 6px); right: 0; width: 210px; display: flex; flex-direction: column; gap: 0.6rem; padding: 0.7rem; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--shadow-md); z-index: 10; }
+	.reader-filters-wrap { position: relative; display: inline-flex; }
+	.reader-filters { position: absolute; top: calc(100% + 6px); right: 0; width: 220px; display: flex; flex-direction: column; gap: 0.5rem; padding: 0.7rem; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--shadow-md); z-index: 10; }
+	.reader-filters .setting { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; font-size: var(--fs-xs); color: var(--text); }
+	.reader-filters .toggle-btn { font-size: var(--fs-xs); padding: 0.25rem 0.6rem; }
+	.filter-indicator { position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+	.icon-btn { position: relative; }
 	.setting { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; font-size: var(--fs-xs); color: var(--text); }
 	.setting :global(.slider) { flex: 1; max-width: 110px; }
 	.reader-nav { display: flex; align-items: center; gap: 0.3rem; }
@@ -1394,10 +1409,31 @@
 	.go-up .nf { transform: rotate(180deg); font-size: 0.95rem; }
 
 	@media (max-width: 640px) {
-		.grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+		.grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: var(--space-2); }
+		.search-row { flex-direction: column; }
+		.search-row .input[type='text'] { min-width: 100%; }
+		.search-row .btn { width: 100%; }
+		.filter-btn { flex: 1; justify-content: center; }
+		.results-head { flex-direction: column; align-items: flex-start; }
+		.filter-input { max-width: 100%; width: 100%; }
+		.filter-panel { padding: var(--space-2); }
+		.filter-actions { flex-direction: column; }
+		.filter-actions .btn { width: 100%; }
+		.detail-layout { flex-direction: column; }
+		.detail { flex: none; min-height: 0; }
+		.detail-cover { width: 100px; }
+		.chapters-panel { max-height: none; }
+		.filter-bar { flex-direction: column; align-items: flex-start; }
+		.chapter-count { margin-bottom: var(--space-1); }
+		.chapter-row { flex-wrap: wrap; }
+		.chapter-main { flex: 1 1 100%; }
+		.chapter-row .icon-btn { flex-shrink: 0; }
 		.reader-bar { flex-wrap: wrap; padding: 0.4rem 0.5rem; gap: 0.4rem; }
-		.reader-select { order: 3; flex: 1 0 100%; }
+		.reader-select { order: 3; flex: 1 0 100%; max-width: none; }
 		.reader-nav { gap: 0.15rem; }
-		.reader-nav .icon-btn { width: 30px; height: 30px; }
+		.reader-nav .icon-btn { width: 36px; height: 36px; }
+		.reader-settings { width: 180px; right: -40px; }
+		.reader-filters { width: 190px; right: -20px; }
+		.go-up { width: 48px; height: 48px; }
 	}
 </style>

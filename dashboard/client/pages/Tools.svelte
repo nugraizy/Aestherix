@@ -1,8 +1,10 @@
 <script>
+	import { onDestroy } from 'svelte';
 	import { get, patch } from '../lib/api.js';
 	import { toolPanels } from '../lib/stores.js';
 	import { showConfirm } from '../lib/confirm.js';
 	import { showError, showSuccess } from '../lib/toast.js';
+	import { createQueryState } from '../lib/urlState.js';
 	import Tooltip from '../components/ui/Tooltip.svelte';
 	import Dropdown from '../components/ui/Dropdown.svelte';
 	import SkeletonCard from '../components/ui/SkeletonCard.svelte';
@@ -10,6 +12,8 @@
 
 	export let active = true;
 	export let isSuperOwner = false;
+
+	const toolQuery = createQueryState('', { tool: { type: 'string', default: '' } });
 
 	const CATEGORIES = [
 		{ value: 'all', label: 'All' },
@@ -30,7 +34,8 @@
 	let category = 'all';
 	let search = '';
 	let activeTool = null;
-	const pendingTool = readToolFromUrl();
+	let toolReady = false;
+	const pendingTool = toolQuery.read().tool || null;
 
 	$: panels = $toolPanels;
 	$: filtered = panels.filter((p) => {
@@ -41,23 +46,6 @@
 
 	$: if (active && !wasActive) { wasActive = true; if (!loaded) void loadPanels(); }
 
-	function readToolFromUrl() {
-		if (typeof window === 'undefined') return null;
-		const params = new URLSearchParams(window.location.search);
-		return params.get('tool') || null;
-	}
-
-	function writeToolToUrl(toolId) {
-		if (typeof window === 'undefined') return;
-		const url = new URL(window.location.href);
-		if (toolId) {
-			url.searchParams.set('tool', toolId);
-		} else {
-			url.searchParams.delete('tool');
-		}
-		history.replaceState(history.state, '', url.pathname + url.search);
-	}
-
 	async function loadPanels() {
 		loading = true;
 		try {
@@ -65,7 +53,7 @@
 			toolPanels.set(data?.panels || []);
 			loaded = true;
 
-			const savedTool = readToolFromUrl();
+			const savedTool = toolQuery.read().tool;
 			if (savedTool) {
 				const panel = (data?.panels || []).find(p => p.id === savedTool && p.state === 'enabled');
 				if (panel) activeTool = panel;
@@ -75,6 +63,8 @@
 		}
 		loading = false;
 	}
+
+	onDestroy(() => toolQuery.strip());
 
 	async function changeState(panel, newState) {
 		const ok = await showConfirm({
@@ -109,18 +99,20 @@
 	function openTool(panel) {
 		if (panel.state !== 'enabled') return;
 		activeTool = panel;
-		writeToolToUrl(panel.id);
+		toolReady = false;
+		toolQuery.write({ tool: panel.id });
 	}
 
 	function closeTool() {
 		activeTool = null;
-		writeToolToUrl(null);
+		toolReady = false;
+		toolQuery.write({ tool: '' });
 	}
 </script>
 
 <div class="tools-page">
 	{#if activeTool}
-		<ToolPanel title={activeTool.name} icon={activeTool.icon} logo={activeTool.logo} on:close={closeTool}>
+		<ToolPanel title={activeTool.name} icon={activeTool.icon} logo={activeTool.logo} hideHeader={activeTool.id === 'comics-reader' && !toolReady} on:close={closeTool}>
 			{#if activeTool.id === 'calculator'}
 				{#await import('../components/tools/Calculator.svelte') then mod}
 					<svelte:component this={mod.default} />
@@ -147,7 +139,7 @@
 				{/await}
 			{:else if activeTool.id === 'comics-reader'}
 				{#await import('../components/tools/ComicsReader.svelte') then mod}
-					<svelte:component this={mod.default} />
+					<svelte:component this={mod.default} on:ready={() => toolReady = true} />
 				{/await}
 		{:else if activeTool.id === 'genshin-card'}
 			{#await import('../components/tools/GenshinCardTool.svelte') then mod}
@@ -222,8 +214,8 @@
 					<div class="card-foot">
 						<span class="card-cat">{panel.category}</span>
 						{#if isSuperOwner}
-							<!-- svelte-ignore a11y-click-events-have-key-events -->
-							<span class="state-ctrl" on:click|stopPropagation on:keydown|stopPropagation>
+						<!-- svelte-ignore a11y_no_static_element_interactions -->
+						<span class="state-ctrl" role="presentation" on:click|stopPropagation on:keydown|stopPropagation>
 								<Dropdown
 									value={panel.state}
 									options={STATE_OPTIONS}
@@ -337,7 +329,8 @@
 		pointer-events: none;
 	}
 
-	.card.disabled .card-badge {
+	.card.disabled .card-badge,
+	.card.disabled .state-ctrl {
 		pointer-events: auto;
 	}
 
@@ -427,13 +420,71 @@
 	}
 
 	@media (max-width: 640px) {
-		.grid {
-			grid-template-columns: 1fr;
+		.tools-page {
+			gap: var(--space-3);
+		}
+
+		.page-head h2 {
+			font-size: var(--fs-lg);
+		}
+
+		.toolbar {
+			flex-direction: column;
+			align-items: stretch;
+			gap: var(--space-2);
+		}
+
+		.filter-tabs {
+			overflow-x: auto;
+			-webkit-overflow-scrolling: touch;
+			scrollbar-width: none;
+		}
+
+		.filter-tabs::-webkit-scrollbar {
+			display: none;
+		}
+
+		.tab {
+			padding: 0.5rem 0.85rem;
+			white-space: nowrap;
 		}
 
 		.search {
 			max-width: 100%;
-			flex: 1;
+			width: 100%;
+		}
+
+		.grid {
+			grid-template-columns: 1fr;
+			gap: var(--space-2);
+		}
+
+		.card {
+			padding: var(--space-3);
+		}
+
+		.card-icon {
+			font-size: 1.3rem;
+		}
+
+		.card-logo {
+			width: 1.8rem;
+			height: 1.8rem;
+		}
+
+		.card-title {
+			font-size: var(--fs-sm);
+		}
+
+		.card-desc {
+			font-size: var(--fs-xs);
+		}
+	}
+
+	@media (max-width: 400px) {
+		.tab {
+			padding: 0.4rem 0.6rem;
+			font-size: 0.7rem;
 		}
 	}
 </style>

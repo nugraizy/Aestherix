@@ -97,19 +97,12 @@
 
 	const VIEWER_BLOCKED_PAGES = new Set(['settings', 'editor', 'system', 'broadcast', 'messages']);
 
-	const pageParams = {};
-
 	function navigate(name, { replace = false } = {}) {
-		const previous = page;
 		const allowed = name === 'notfound' || NAV_PAGES.includes(name);
 		let safe = allowed ? name : 'home';
 
 		if (isViewer && VIEWER_BLOCKED_PAGES.has(safe)) {
 			safe = 'notfound';
-		}
-
-		if (typeof window !== 'undefined' && previous !== safe) {
-			pageParams[previous] = window.location.search;
 		}
 
 		page = safe;
@@ -124,12 +117,10 @@
 			return;
 		}
 
-		const restored = pageParams[safe] || '';
-
 		if (replace) {
-			history.replaceState({ page: safe }, '', target + restored);
+			history.replaceState({ page: safe }, '', target);
 		} else {
-			history.pushState({ page: safe }, '', target + restored);
+			history.pushState({ page: safe }, '', target);
 		}
 	}
 

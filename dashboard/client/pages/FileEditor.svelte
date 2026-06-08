@@ -1,12 +1,15 @@
 <script>
+	import { onDestroy } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { get, post } from '../lib/api.js';
 	import { showConfirm } from '../lib/confirm.js';
 	import { showSuccess, showError } from '../lib/toast.js';
+	import { createQueryState } from '../lib/urlState.js';
 	import FileTree from '../components/editor/FileTree.svelte';
 	import EditorPane from '../components/editor/EditorPane.svelte';
 
 	const STORAGE_KEY = 'aestherix.dashboard.editor.lastPath';
+	const editorQuery = createQueryState('', { file: { type: 'string', default: '' } });
 	const openFolders = writable(new Set());
 
 	export let active = true;
@@ -48,7 +51,8 @@
 
 			loaded = true;
 
-			const saved = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
+			const urlFile = editorQuery.read().file;
+			const saved = urlFile || (typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null);
 
 			if (saved) {
 				void openFile(saved);
@@ -86,6 +90,7 @@
 			originalContent = content;
 			dirty = false;
 			localStorage.setItem(STORAGE_KEY, activePath);
+			editorQuery.write({ file: activePath });
 			editor?.focus?.();
 		} catch (error) {
 			showError(error?.message || 'Failed to open file.');
@@ -156,6 +161,8 @@
 
 		formatting = false;
 	}
+
+	onDestroy(() => editorQuery.strip());
 </script>
 
 <div class="editor-page">
