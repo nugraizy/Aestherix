@@ -33,9 +33,17 @@ class Comix {
 
 			const response = await page.goto(url, { waitUntil: 'networkidle2', timeout: 60_000 });
 			const status = response?.status() ?? 0;
+			const responseHeaders = response?.headers() || {};
+			const contentType = responseHeaders['content-type'] || 'application/json';
 			const text = await page.evaluate(() => document.body.innerText);
 
-			return { status, json: async () => JSON.parse(text) };
+			return {
+				status,
+				headers: {
+					get: (name) => (name.toLowerCase() === 'content-type' ? contentType : responseHeaders[name.toLowerCase()])
+				},
+				json: async () => JSON.parse(text)
+			};
 		} finally {
 			await context.close().catch(() => {});
 		}
