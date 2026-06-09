@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.14.1」2026-06-09
+
+## Fixed
+
+- Prevent connectionReplaced on PM2 sub-bot startup by filtering owner commands and guarding src/index.js import ([`fe9142b0`](https://github.com/nugraizy/aestherix/commit/fe9142b0))
+- Improve connection retry handling with delay and max retries, add non-primary guards ([`9ece4812`](https://github.com/nugraizy/aestherix/commit/9ece4812))
+- Profile picture sync to PM2 sub-bots via PM2 programmatic API ([`fe9142b0`](https://github.com/nugraizy/aestherix/commit/fe9142b0))
+
+## Changed
+
+- Remove restart keybinding (R) from LogMultiplexer ([`debfffb4`](https://github.com/nugraizy/aestherix/commit/debfffb4))
+- Replace console.log with structured logger in char-ai ([`9b5b5ae8`](https://github.com/nugraizy/aestherix/commit/9b5b5ae8))
+- Remove verbose debug logging from boot and subbot ([`fe9142b0`](https://github.com/nugraizy/aestherix/commit/fe9142b0))
+
 # 「7.14.0」2026-06-09
 
 ## Added
