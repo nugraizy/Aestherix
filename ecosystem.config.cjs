@@ -33,7 +33,7 @@ const botApp = needsXvfb
 	: {
 			name: 'aestherix-bot',
 			script: './index.js',
-			args: 'nugraizy_android --watch --pair-mode --limit-reset --multi-cmd --cool-down',
+			args: 'nugraizy_android --watch --pair-mode --limit-reset --multi-cmd --cool-down --no-sub',
 			env: {
 				NODE_ENV: 'production',
 				DASHBOARD_EMBEDDED: '0',

@@ -1,6 +1,10 @@
 import fs from 'fs-extra';
 import P from 'pino';
 
+if (process.env.SUB_BOT_PROCESS === '1') {
+	process.exit(0);
+}
+
 import { Cli } from './core/cli.js';
 import { LogMultiplexer } from './core/log-multiplexer.js';
 import { Logger } from './core/logger.js';
@@ -44,7 +48,9 @@ if (OPTIONS.resetOnStart) {
 	await tempSocket.resetSession(prisma);
 }
 
-export const runtime = Date.now();
+import { runtime } from './core/runtime.js';
+
+export { runtime };
 
 configuration.flags.runtime = runtime;
 

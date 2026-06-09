@@ -9,6 +9,7 @@ import path from 'node:path';
 import { array, boolean, mixed, number, object, string } from 'yup';
 
 import { Cache } from '../helper/modules/cache.js';
+import configuration from '../helper/config/connect.js';
 import { getSyntaxAdvice } from '../utils/ai/syntax-check-agent.js';
 import { color, loggers } from '../utils/modules/index.js';
 
@@ -107,6 +108,10 @@ export class CommandLoader extends EventEmitter {
 		}
 
 		let files = CommandLoader.#scanFiles(this.#dir).filter((f) => !EXCLUDE_CONTENT.some((v) => f.includes(v)));
+
+		if (configuration.flags?.noSub) {
+			files = files.filter((f) => !f.includes('/owner/'));
+		}
 
 		if (flags.test) {
 			const include = ['menu', 'ping', 'moderate', 'owner'];

@@ -2,6 +2,7 @@ import { delay, isJidGroup } from 'baileys';
 import clip from 'clipboardy';
 import fs from 'fs-extra';
 import PhoneNumber from 'libphonenumber-js';
+import P from 'pino';
 import readline from 'readline';
 
 import { startDashboard } from '../../dashboard/server/index.js';
@@ -18,7 +19,7 @@ import { refreshPrefixCache } from './context.js';
 import { EventHandler } from './event-handler.js';
 import { manager } from './manager.js';
 import { MqttBridge } from './mqtt.js';
-import { IS_PM2, startPm2SubBot } from './pm2-helpers.js';
+import { IS_PM2, sendToPm2SubBots, startPm2SubBot } from './pm2-helpers.js';
 import { Router } from './router.js';
 import { cleanupSession } from './session-cleanup.js';
 import { initContact, updateContact } from './utils.js';
@@ -275,8 +276,11 @@ async function onConnected({ clientSocket, commandLoader, router, mqtt, store, w
 	socket.ws.on('CB:notification,type:w:gp2', (update) => parseStubtypeUpdate(socket, update));
 	socket.ws.on('CB:notification,type:picture', async (update) => await emitProfilePictureUpdate(socket, update));
 	socket.ev.on('profile-picture.sync', async ({ image }) => {
-		if (IS_PM2 && process.send) {
-			process.send({ type: 'profile-picture', image: Buffer.from(image).toString('base64') });
+		if (IS_PM2) {
+			sendToPm2SubBots({
+				topic: 'profile-picture',
+				data: { image: Buffer.from(image).toString('base64') }
+			}).catch(() => {});
 		}
 
 		for (const { name, client: sub } of manager.list()) {
@@ -286,7 +290,6 @@ async function onConnected({ clientSocket, commandLoader, router, mqtt, store, w
 
 			try {
 				await sub.updateProfilePicture(sub.user.id, image, 'no_crop');
-				sub.logger.info(color('Profile picture synced to', 'white'), color(name, 'lilac'));
 			} catch (err) {
 				sub.logger.error(color('Profile picture sync failed:', 'red'), color(err.message, 'white'));
 			}
@@ -371,6 +374,7 @@ async function spawnPersistedSubBots({ configuration: config }) {
 		const sub = new ClientSocket(auth, {
 			role: instance.role || 'sub',
 			flags,
+			browser: ['Mac OS', 'Safari', 'Safari 17.0'],
 			cachedGroupMetadata: (jid) => (isJidGroup(jid) ? config.cache.metadata.get(jid) : {})
 		});
 
@@ -469,11 +473,18 @@ async function spawnPersistedSubBots({ configuration: config }) {
  * @returns {Promise<{ clientSocket: import('../types/Core/index.d.ts').ClientSocket; auth: import('../types/Core/index.d.ts').Auth; eventHandler: import('../types/Core/index.d.ts').EventHandler; commandLoader: import('../types/Core/index.d.ts').CommandLoader; router: import('../types/Core/index.d.ts').Router }>}
  */
 export async function boot({ cli, OPTIONS, store, sessionName }) {
+	if (process.env.SUB_BOT_PROCESS === '1') {
+		return null;
+	}
+
 	const auth = new Auth(prisma, sessionName);
+
+	await auth.initialize({ logger: P({ level: 'fatal' }) });
 
 	const clientSocket = new ClientSocket(auth, {
 		role: 'primary',
 		flags: OPTIONS,
+		browser: ['Mac OS', 'Chrome', 'Chrome 114.0.5735.198'],
 		cachedGroupMetadata: (jid) => (isJidGroup(jid) ? configuration.groups.metadata.get(jid) : {})
 	});
 

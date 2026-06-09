@@ -23,7 +23,8 @@ const moduleURL = new URL(import.meta.url);
 
 global.__dirname = platform === 'win32' ? path.dirname(moduleURL.pathname).slice(1) : path.dirname(moduleURL.pathname);
 
-import { isJidGroup } from 'baileys';
+import { Boom } from '@hapi/boom';
+import { DisconnectReason, isJidGroup } from 'baileys';
 import P from 'pino';
 
 import { Auth } from './src/core/auth.js';
@@ -46,8 +47,6 @@ if (!sessionName) {
 	loggers.error(color('Usage: node subbot.js <session_name>', 'red'));
 	process.exit(1);
 }
-
-loggers.info(color('Starting sub-bot', 'white'), color(sessionName, 'lilac'));
 
 const instance = await prisma.botInstance.findUnique({ where: { sessionName } }).catch(() => null);
 
@@ -72,6 +71,9 @@ const store = new Store(prisma, sessionName, {
 store.initialize();
 
 const auth = new Auth(prisma, sessionName);
+
+await auth.initialize({ logger: P({ level: 'fatal' }) });
+
 const clientSocket = new ClientSocket(auth, {
 	role: 'sub',
 	flags,
@@ -105,8 +107,18 @@ eventHandler.bind();
 clientSocket.on('contacts.upsert', (contacts) => initContact(store, contacts));
 clientSocket.on('contacts.update', (update) => updateContact(store, update));
 
-let retryCount = 0;
 const MAX_RETRIES = 5;
+let retryCount = 0;
+
+const REASON_NAMES = {
+	[DisconnectReason.badSession]: 'badSession',
+	[DisconnectReason.loggedOut]: 'loggedOut',
+	[DisconnectReason.restartRequired]: 'restartRequired',
+	[DisconnectReason.timedOut]: 'timedOut',
+	[DisconnectReason.connectionClosed]: 'connectionClosed',
+	[DisconnectReason.connectionReplaced]: 'connectionReplaced',
+	[DisconnectReason.connectionLost]: 'connectionLost'
+};
 
 clientSocket.on('connection.update', async ({ connection, lastDisconnect }) => {
 	if (connection === 'open') {
@@ -126,57 +138,67 @@ clientSocket.on('connection.update', async ({ connection, lastDisconnect }) => {
 			color(`(${phone})`, 'purple'),
 			color('connected', 'softGreen')
 		);
+
+		clientSocket.emit('connected');
 	}
 
 	if (connection === 'close') {
-		const { Boom } = await import('@hapi/boom');
-		const { DisconnectReason } = await import('baileys');
 		const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
+		const reasonName = REASON_NAMES[reason] || `unknown(${reason})`;
+
+		loggers.warning(
+			color('Sub-bot', 'white'),
+			color(sessionName, 'lilac'),
+			color('disconnected:', 'orange'),
+			color(reasonName, 'white')
+		);
 
 		if (reason === DisconnectReason.loggedOut || reason === DisconnectReason.badSession) {
 			const label = reason === DisconnectReason.loggedOut ? 'logged out' : 'bad session';
 
-			loggers.error(color('Sub-bot', 'white'), color(sessionName, 'lilac'), color(`${label} — exiting`, 'red'));
+			loggers.error(color('Sub-bot', 'white'), color(sessionName, 'lilac'), color(`${label} - exiting`, 'red'));
+			process.exit(1);
+		}
 
+		if (reason === DisconnectReason.connectionReplaced) {
+			loggers.error(color('Sub-bot', 'white'), color(sessionName, 'lilac'), color('connection replaced - exiting', 'red'));
 			process.exit(1);
 		}
 
 		if (retryCount >= MAX_RETRIES) {
-			loggers.error(color('Sub-bot', 'white'), color(sessionName, 'lilac'), color('max retries reached — exiting', 'red'));
-
+			loggers.error(color('Sub-bot', 'white'), color(sessionName, 'lilac'), color('max retries reached - exiting', 'red'));
 			process.exit(1);
 		}
 
 		retryCount++;
-		await clientSocket.connect({ prisma }).catch(() => {});
+		loggers.warning(
+			color('Sub-bot', 'white'),
+			color(sessionName, 'lilac'),
+			color(`reconnect attempt ${retryCount}/${MAX_RETRIES}`, 'white')
+		);
+		await new Promise((r) => setTimeout(r, 5000));
+		await clientSocket.connect({ prisma }).catch((err) => {
+			loggers.error(
+				color('Sub-bot', 'white'),
+				color(sessionName, 'lilac'),
+				color('reconnect failed:', 'red'),
+				color(err.message, 'white')
+			);
+		});
 	}
 });
 
 process.on('message', async (msg) => {
-	if (msg.type === 'profile-picture' && msg.image) {
+	if (msg.topic === 'profile-picture' && msg.data?.image) {
 		try {
-			const buffer = Buffer.from(msg.image, 'base64');
+			const buffer = Buffer.from(msg.data.image, 'base64');
 
 			await clientSocket.updateProfilePicture(clientSocket.user.id, buffer, 'no_crop');
-			loggers.info(color('Profile picture synced from main bot', 'white'));
 		} catch (err) {
 			loggers.error(color('Profile picture sync failed:', 'red'), color(err.message, 'white'));
 		}
 	}
 });
-
-const gracefulShutdown = async (signal) => {
-	loggers.warning(color(`Received ${signal}`, 'white'), color('— shutting down sub-bot...', 'lilac'));
-
-	await clientSocket.disconnect().catch(() => {});
-	await prisma.$disconnect().catch(() => {});
-
-	loggers.warning(color(`Sub-bot ${sessionName} stopped.`, 'lilac'));
-	process.exit(0);
-};
-
-process.once('SIGINT', () => gracefulShutdown('SIGINT'));
-process.once('SIGTERM', () => gracefulShutdown('SIGTERM'));
 
 process.on('unhandledRejection', (reason) => {
 	const err = reason instanceof Error ? reason : new Error(String(reason));

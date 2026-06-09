@@ -2,7 +2,7 @@ import { generateWAMessageFromContent } from 'baileys';
 
 import configuration from '../../helper/config/connect.js';
 import { TextStory } from '../../helper/canvas/index.js';
-import { runtime } from '../../index.js';
+import { runtime } from '../runtime.js';
 import { color, loggers } from '../../utils/modules/index.js';
 
 let meJid = null;

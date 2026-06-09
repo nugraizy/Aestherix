@@ -12,6 +12,7 @@ export { MessageHandler } from './message-handler.js';
 export { MqttBridge } from './mqtt.js';
 export { PipelineExecutor } from './pipeline.js';
 export { Router } from './router.js';
+export { runtime } from './runtime.js';
 export { Store } from './store.js';
 export { WebhookServer } from './webhook.js';
 export { checkNetwork, initContact, patchMessage, updateContact } from './utils.js';
