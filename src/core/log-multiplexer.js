@@ -370,7 +370,6 @@ export class LogMultiplexer {
 		{ key: 'X', description: () => 'Export logs to file' },
 		{ key: 'P', description: () => 'Show/toggle runtime flags' },
 		{ key: 'C', description: () => 'Clear terminal' },
-		{ key: 'R', description: () => 'Restart all bots (main + sub)' },
 		{ key: 'H', description: () => 'Show this help' }
 	];
 
@@ -442,10 +441,6 @@ export class LogMultiplexer {
 
 			if (key.name === 'p' && !key.ctrl && !key.meta) {
 				this.#showFlags().catch(() => {});
-			}
-
-			if (key.name === 'r' && !key.ctrl && !key.meta) {
-				this.#restart();
 			}
 
 			if (key.name === 'c' && !key.ctrl && !key.meta) {
@@ -796,22 +791,6 @@ export class LogMultiplexer {
 		} finally {
 			this.#prompting = false;
 			this.#bindKeypress();
-		}
-	}
-
-	#restart() {
-		const isPM2 = Boolean(process.env.pm_id || process.env.PM2_HOME);
-
-		console.log(color('\n── Restarting all bots... ──', 'lilac'));
-
-		if (isPM2) {
-			console.log(color('PM2 detected — exiting for auto-restart.', 'gray'));
-			this.destroy();
-			setTimeout(() => process.exit(0), 200);
-		} else {
-			console.log(color('No PM2 detected — exiting. Restart manually.', 'gray'));
-			this.destroy();
-			setTimeout(() => process.exit(0), 200);
 		}
 	}
 
