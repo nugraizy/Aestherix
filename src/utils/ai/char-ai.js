@@ -483,7 +483,7 @@ export class ChatGPTDialogue {
 
 			return scaledBuffer;
 		} catch (error) {
-			console.log('Image processing failed:', error.message);
+			loggers.error(color('Image processing failed:', 'red'), error);
 			throw error;
 		}
 	}
