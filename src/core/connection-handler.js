@@ -35,6 +35,10 @@ export class ConnectionHandler {
 	async handle(update) {
 		const { connection, lastDisconnect, receivedPendingNotifications } = update;
 
+		if (this.#client.role !== 'primary') {
+			return;
+		}
+
 		if (!this.#startedAt && connection === 'connecting') {
 			this.#startedAt = Date.now();
 		}
@@ -76,6 +80,11 @@ export class ConnectionHandler {
 			this.#log.warning(color('Restart required', 'white'), color('Restarting your Socket...', 'lilac'));
 		}
 
+		if (this.#client.role !== 'primary') {
+			this.#log.warning(color('Connection closed', 'white'), color(`reason: ${reason}`, 'lilac'));
+			return;
+		}
+
 		const reconnectable = [
 			DisconnectReason.timedOut,
 			DisconnectReason.connectionClosed,
@@ -98,7 +107,15 @@ export class ConnectionHandler {
 			this.#retryCount++;
 			this.#reconnect();
 		} else {
-			this.#log.warning(color('Unknown reason', 'white'), color('Quick reconnecting...', 'lilac'));
+			if (this.#retryCount >= MAX_RETRIES) {
+				this.#log.error(color('Max retry attempts reached', 'white'), color('Please try again later...', 'lilac'));
+				await this.#shutdown();
+				return;
+			}
+
+			this.#log.warning(color('Unknown reason', 'white'), color(`Reconnecting in ${RETRY_INTERVAL_MS / 1000}s...`, 'lilac'));
+			await delay(RETRY_INTERVAL_MS);
+			this.#retryCount++;
 			this.#reconnect();
 		}
 	}

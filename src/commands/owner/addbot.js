@@ -277,6 +277,8 @@ export default defineCommand({
 					await sub.disconnect().catch(() => {});
 					manager.remove(sessionName);
 
+					await new Promise((r) => setTimeout(r, 5000));
+
 					try {
 						await startPm2SubBot(sessionName);
 						await client.reply(from, `Bot "${sessionName}" paired and started as PM2 process.`, message);
@@ -291,6 +293,7 @@ export default defineCommand({
 			}
 
 			if (connection === 'close') {
+
 				const { Boom } = await import('@hapi/boom');
 				const reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
 				const { DisconnectReason } = await import('baileys');
