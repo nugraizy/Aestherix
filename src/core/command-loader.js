@@ -110,7 +110,9 @@ export class CommandLoader extends EventEmitter {
 		let files = CommandLoader.#scanFiles(this.#dir).filter((f) => !EXCLUDE_CONTENT.some((v) => f.includes(v)));
 
 		if (configuration.flags?.noSub) {
-			files = files.filter((f) => !f.includes('/owner/'));
+			const excluded = ['eval.js', 'fetch-story.js', 'pm2.js', 'unbanned.js', 'premium.js', 'botflags.js', 'banned.js'];
+
+			files = files.filter((f) => !excluded.some((name) => f.endsWith(name)));
 		}
 
 		if (flags.test) {

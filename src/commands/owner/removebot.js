@@ -1,3 +1,4 @@
+import fs from 'fs-extra';
 import { manager } from '../../core/manager.js';
 import { IS_PM2, stopPm2SubBot } from '../../core/pm2-helpers.js';
 import configuration from '../../helper/config/connect.js';
@@ -29,6 +30,12 @@ export default defineCommand({
 		}
 
 		if (IS_PM2) {
+			const settings = await fs.readJSON('./src/helper/config/settings.json').catch(() => ({}));
+
+			if (sessionName === (settings.main_session || '').trim()) {
+				return client.reply(from, 'Cannot remove the main bot.', message);
+			}
+
 			await stopPm2SubBot(sessionName);
 
 			if (purge) {
