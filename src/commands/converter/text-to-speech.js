@@ -1,4 +1,3 @@
-import path from 'path';
 
 import { textToSpeech } from '../../utils/converter/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
@@ -28,7 +27,7 @@ export default defineCommand({
 		}
 
 		try {
-			const { buffer } = await textToSpeech(query, language, path.join(__dirname, `src/media/temporary_files/${filename}`));
+			const { buffer } = await textToSpeech(query, language, `./tmp/${filename}`);
 
 			await client.send(from, { audio: buffer }, { quoted: message });
 		} catch (e) {

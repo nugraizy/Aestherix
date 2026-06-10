@@ -1,5 +1,4 @@
 import fs from 'fs';
-import path from 'path';
 
 import { isURL } from '../../utils/modules/index.js';
 import { yandex } from '../../utils/image-reverse-search/index.js';
@@ -28,7 +27,7 @@ export default defineCommand({
 			if (isMediaImage) {
 				media = await client.downloadAndSaveMediaMessage(
 					extractMediaData,
-					path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
+					`./tmp/${filename}.${extractMediaData.mimetype.split('/')[1]}`,
 					typeQuoted
 				);
 			}

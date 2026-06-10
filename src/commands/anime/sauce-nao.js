@@ -1,5 +1,4 @@
 import fs from 'fs';
-import path from 'path';
 
 import { isURL, sauceNao } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
@@ -29,7 +28,7 @@ export default defineCommand({
 		if (isMediaImage) {
 			media = await client.downloadAndSaveMediaMessage(
 				extractMediaData,
-				path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
+				`./tmp/${filename}.${extractMediaData.mimetype.split('/')[1]}`,
 				typeQuoted
 			);
 		}

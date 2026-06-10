@@ -1,4 +1,3 @@
-import path from 'path';
 
 import { color, loggers } from '../../utils/modules/index.js';
 import { soundRemover } from '../../utils/converter/index.js';
@@ -38,7 +37,7 @@ export default defineCommand({
 
 		const file = await client.downloadAndSaveMediaMessage(
 			extractMediaData,
-			path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
+			`./tmp/${filename}.${extractMediaData.mimetype.split('/')[1]}`,
 			typeQuoted
 		);
 

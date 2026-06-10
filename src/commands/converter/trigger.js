@@ -55,7 +55,7 @@ export default defineCommand({
 				.profilePictureUrl(mediaData.participant, 'image')
 				.catch(async () => await fs.readFile(path.join(__dirname, 'src/media/blank.png')));
 
-			options = _.defaults({ filename: path.join(__dirname, `src/media/temporary_files/${filename}`) }, defaultOptions);
+			options = _.defaults({ filename: `./tmp/${filename}` }, defaultOptions);
 
 			const effect = new TriggerEffect();
 			const result = await effect.render(profile, options);
@@ -108,7 +108,7 @@ export default defineCommand({
 				.profilePictureUrl(mentioned, 'image')
 				.catch(async () => await fs.readFile(path.join(__dirname, 'src/media/blank.png')));
 
-			options = _.defaults({ filename: path.join(__dirname, `src/media/temporary_files/${filename}`) }, defaultOptions);
+			options = _.defaults({ filename: `./tmp/${filename}` }, defaultOptions);
 
 			const effect = new TriggerEffect();
 			const result = await effect.render(profile, options);

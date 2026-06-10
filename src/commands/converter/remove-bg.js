@@ -1,4 +1,3 @@
-import path from 'path';
 import parser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
@@ -46,7 +45,7 @@ export default defineCommand({
 
 		const media = await client.downloadAndSaveMediaMessage(
 			extractMediaData,
-			path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
+			`./tmp/${filename}.${extractMediaData.mimetype.split('/')[1]}`,
 			typeQuoted
 		);
 

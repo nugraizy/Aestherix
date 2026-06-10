@@ -82,7 +82,7 @@ export function createToolsRouter({ services }) {
 		const fs = await import('fs/promises');
 		const path = await import('path');
 
-		const tmpDir = path.join(process.cwd(), 'src', 'media', 'temporary_files');
+		const tmpDir = path.join(process.cwd(), 'tmp');
 		const id = randomBytes(8).toString('hex');
 		const tmpVideo = path.join(tmpDir, `merge-${id}-video.mp4`);
 		const tmpAudio = path.join(tmpDir, `merge-${id}-audio.m4a`);

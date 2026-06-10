@@ -55,7 +55,7 @@ export default defineCommand({
 				.profilePictureUrl(mediaData.participant, 'image')
 				.catch(async () => await fs.readFile(path.join(__dirname, 'src/media/blank.png')));
 
-			defaultOptions.filename = path.join(__dirname, `src/media/temporary_files/${filename}`);
+			defaultOptions.filename = `./tmp/${filename}`;
 
 			const result = await pet(profile, sender, defaultOptions, client);
 
@@ -89,7 +89,7 @@ export default defineCommand({
 
 			const file = await client.downloadAndSaveMediaMessage(
 				extractMediaData,
-				path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
+				`./tmp/${filename}.${extractMediaData.mimetype.split('/')[1]}`,
 				typeQuoted
 			);
 			const result = await pet(file, sender, defaultOptions, client);
@@ -112,7 +112,7 @@ export default defineCommand({
 				.profilePictureUrl(mentioned, 'image')
 				.catch(async () => await fs.readFile(path.join(__dirname, 'src/media/blank.png')));
 
-			defaultOptions.filename = path.join(__dirname, `src/media/temporary_files/${filename}`);
+			defaultOptions.filename = `./tmp/${filename}`;
 
 			const result = await pet(profile, sender, defaultOptions, client);
 

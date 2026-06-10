@@ -619,7 +619,7 @@ export function createToolsService({ prisma } = {}) {
 				const fs = await import('fs/promises');
 				const path = await import('path');
 
-				const tmpDir = path.join(process.cwd(), 'src', 'media', 'temporary_files');
+				const tmpDir = path.join(process.cwd(), 'tmp');
 				const id = randomBytes(8).toString('hex');
 				const tmpInput = path.join(tmpDir, `convert-${id}-input.${inputFormat}`);
 				const tmpOutput = path.join(tmpDir, `convert-${id}-output.${outputFormat}`);

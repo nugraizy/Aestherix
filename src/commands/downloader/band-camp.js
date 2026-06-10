@@ -1,4 +1,3 @@
-import path from 'path';
 import parser from 'yargs-parser';
 
 import { color, downloadBandcamp, isURL, loggers, removeDuplicatesArray, toOpus } from '../../utils/index.js';
@@ -54,8 +53,8 @@ export default defineCommand({
 				from,
 				{
 					document: await toOpus('opus', {
-						input: path.join(__dirname, `src/media/temporary_files/${filename}`),
-						output: path.join(__dirname, `src/media/temporary_files/${filename}-done`),
+						input: `./tmp/${filename}`,
+						output: `./tmp/${filename}-done`,
 						media: result.mp3.replace('https', 'http')
 					}),
 					fileName: `${result.title}.opus`,

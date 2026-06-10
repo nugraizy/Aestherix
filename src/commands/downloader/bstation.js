@@ -1,4 +1,3 @@
-import path from 'path';
 import parser from 'yargs-parser';
 
 import {
@@ -41,7 +40,7 @@ const processVideo = async (aid, client, { from, message, sender, filename, wait
 	const merge = await mergeVideoWithAudio(
 		video.video,
 		video.audio,
-		path.join(__dirname, `src/media/temporary_files/${filename}.mp4`),
+		`./tmp/${filename}.mp4`,
 		sender,
 		'https://www.bilibili.tv/'
 	);

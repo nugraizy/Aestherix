@@ -1,6 +1,5 @@
 import { downloadMediaMessage } from 'baileys';
 import fs from 'fs-extra';
-import path from 'path';
 
 import configuration from '../../helper/config/connect.js';
 import { banGroupMember, getGroupSettings } from '../../helper/database/adapters/group-settings.js';
@@ -12,7 +11,7 @@ const { createReadStream, unlink } = fs;
 const isAntiNsfwEnabled = (settings) => settings?.antiNSFW === 'enable' && !configuration.flags.onlyLogs;
 
 const getMediaFilePath = (filename, extractMediaData) => {
-	return path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`);
+	return `./tmp/${filename}.${extractMediaData.mimetype.split('/')[1]}`;
 };
 
 const getBannedMembers = async (from, settings) => {

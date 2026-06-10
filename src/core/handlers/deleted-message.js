@@ -2,7 +2,6 @@ import { BOT_NAME } from '../constants.js';
 
 import dayjs from 'dayjs';
 import fs from 'fs-extra';
-import path from 'path';
 
 import configuration from '../../helper/config/connect.js';
 import { color, getFilesize, getFilesizeFromBytes, loggers } from '../../utils/modules/index.js';
@@ -306,7 +305,7 @@ const prepareAndSendSticker = async (client, data, isAnimated) => {
 };
 
 const downloadAndSaveMediaMessage = async (client, data, filename, messageType) => {
-	const savedPath = path.join(__dirname, `src/media/temporary_files/${filename}.${data.mimetype.split('/')[1]}`);
+	const savedPath = `./tmp/${filename}.${data.mimetype.split('/')[1]}`;
 
 	await client.downloadAndSaveMediaMessage(data, savedPath, messageType);
 

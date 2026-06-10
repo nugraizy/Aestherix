@@ -98,8 +98,8 @@ async function processTextResponse(response, pathParser) {
 
 async function sendGifAsVideo(fileBuffer, from, message, client) {
 	const id = Date.now();
-	const inputPath = `./src/media/temporary_files/input-${id}.gif`;
-	const outputPath = `./src/media/temporary_files/output-${id}.mp4`;
+	const inputPath = `./tmp/input-${id}.gif`;
+	const outputPath = `./tmp/output-${id}.mp4`;
 
 	try {
 		await fs.writeFile(inputPath, fileBuffer);

@@ -8,11 +8,11 @@ import { color, loggers } from '../modules/index.js';
 
 export const convertMediaToSticker = (filePath, sender, output, mimetype) =>
 	new Promise(async (resolve, reject) => {
-		const pathExif = './src/media/temporary_files/data.exif';
+		const pathExif = './tmp/data.exif';
 		let pathSticker = filePath;
 
 		if (!(await fs.exists(pathSticker))) {
-			pathSticker = `./src/media/temporary_files/${pathSticker}`;
+			pathSticker = `./tmp/${pathSticker}`;
 		}
 
 		loggers.warning(`${color('Converting Media', 'pink')} for ${color(sender, 'lilac')}`);
@@ -113,8 +113,8 @@ export const convertStickerToMedia = (input, sender) =>
 			if (isInputBuffer && isAnimatedWebp(input)) {
 				const buffer = isInputBuffer ? input : await fs.readFile(input);
 				const time = Date.now();
-				const frameDir = `./src/media/temporary_files/${sender}_${time}_frames`;
-				const outputPath = `./src/media/temporary_files/${sender}_${time}.mp4`;
+				const frameDir = `./tmp/${sender}_${time}_frames`;
+				const outputPath = `./tmp/${sender}_${time}.mp4`;
 
 				await fs.ensureDir(frameDir);
 

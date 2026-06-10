@@ -41,8 +41,8 @@ export default defineCommand({
 			}
 
 			const audioBuffer = await toOpus('opus', {
-				input: `./src/media/temporary_files/${filename}`,
-				output: `./src/media/temporary_files/${filename}-done`,
+				input: `./tmp/${filename}`,
+				output: `./tmp/${filename}-done`,
 				media: result.url.replace('https', 'http')
 			});
 
@@ -114,8 +114,8 @@ export default defineCommand({
 		}
 
 		const audioBuffer = await toOpus('opus', {
-			input: `./src/media/temporary_files/${filename}`,
-			output: `./src/media/temporary_files/${filename}-done`,
+			input: `./tmp/${filename}`,
+			output: `./tmp/${filename}-done`,
 			media: result.url.replace('https', 'http')
 		});
 

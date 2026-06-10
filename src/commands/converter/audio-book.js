@@ -1,6 +1,5 @@
 import { franc } from 'franc';
 import { iso6393 } from 'iso-639-3';
-import path from 'path';
 
 import { textToSpeech } from '../../utils/converter/index.js';
 import { tesseract } from '../../utils/misc/index.js';
@@ -24,7 +23,7 @@ export default defineCommand({
 
 		const file = await client.downloadAndSaveMediaMessage(
 			extractMediaData,
-			path.join(__dirname, `src/media/temporary_files/${filename}.${extractMediaData.mimetype.split('/')[1]}`),
+			`./tmp/${filename}.${extractMediaData.mimetype.split('/')[1]}`,
 			typeQuoted
 		);
 		const { result } = await tesseract(file, prettyNumber);
@@ -34,7 +33,7 @@ export default defineCommand({
 		const { buffer } = await textToSpeech(
 			result.text.trim(),
 			langCode,
-			path.join(__dirname, `src/media/temporary_files/${filename}`)
+			`./tmp/${filename}`
 		);
 
 		await client.send(from, { text: result.text.trim() }, { quoted: message });

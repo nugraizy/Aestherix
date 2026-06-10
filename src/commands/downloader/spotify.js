@@ -182,7 +182,7 @@ const handleSpotifyCollection = async (url, type, client, { from, message, wait 
 		downloadCaption = caption;
 	}
 
-	const output = `./src/media/temporary_files/${collectionName}.zip`;
+	const output = `./tmp/${collectionName}.zip`;
 
 	const finalCaption = await createZipArchive(hifiDownloads, output, wait, downloadCaption);
 

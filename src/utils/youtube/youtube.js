@@ -8,7 +8,7 @@ import { isURL, isYoutubeURL } from '../modules/index.js';
 import { Client } from './lib/index.js';
 
 const execAsync = promisify(exec);
-const TEMP_DIR = './src/media/temporary_files';
+const TEMP_DIR = './tmp';
 
 class YoutubeError extends Error {
 	constructor(message, info) {

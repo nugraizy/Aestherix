@@ -58,7 +58,7 @@ export const download = async (url, path) => {
 				responseType: 'arraybuffer'
 			});
 
-			path = path || `./temporary_files/${Date.now()}.${(await fileTypeFromBuffer(data)).ext}`;
+			path = path || `./tmp/${Date.now()}.${(await fileTypeFromBuffer(data)).ext}`;
 			await fs.writeFile(path, data);
 			resolve();
 		} catch (err) {

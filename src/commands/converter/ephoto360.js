@@ -2,7 +2,6 @@ import { BOT_NAME } from '../../core/constants.js';
 
 import fs from 'fs';
 import _ from 'lodash';
-import path from 'path';
 import sharp from 'sharp';
 import { fetch } from 'undici';
 import yargsParser from 'yargs-parser';
@@ -125,11 +124,11 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 			if (isMediaImage) {
 				await client.downloadAndSaveMediaMessage(
 					extractMediaData,
-					path.join(__dirname, `src/media/temporary_files/${filename}`),
+					`./tmp/${filename}`,
 					typeQuoted
 				);
 
-				buffers = path.join(__dirname, `src/media/temporary_files/${filename}`);
+				buffers = `./tmp/${filename}`;
 			}
 
 			const result = await ephoto360(model, parsed.slice(1).join(' '), buffers);

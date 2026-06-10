@@ -7,8 +7,8 @@ import { color, loggers } from '../modules/index.js';
 
 export async function convertLottieToVideo(lottieJson, sender) {
 	const time = Date.now();
-	const frameDir = `./src/media/temporary_files/${sender}_${time}_lottie`;
-	const outputPath = `./src/media/temporary_files/${sender}_${time}_lottie.mp4`;
+	const frameDir = `./tmp/${sender}_${time}_lottie`;
+	const outputPath = `./tmp/${sender}_${time}_lottie.mp4`;
 
 	await fs.ensureDir(frameDir);
 

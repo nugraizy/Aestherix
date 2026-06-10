@@ -6,3 +6,6 @@
 
 /** Display name shown in command footers, log banners, copyright text, etc. */
 export const BOT_NAME = 'Aestherix';
+
+/** Temporary files directory (sticker conversion, downloads, etc.) */
+export const TEMP_DIR = './tmp';

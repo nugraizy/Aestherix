@@ -9,7 +9,7 @@ export const toMp4 = (input, sender) =>
 		try {
 			const time = dayjs().unix();
 
-			exec(`ffmpeg -i "${input}" "./src/media/temporary_files/${sender}${time}.mp4"`, async (err) => {
+			exec(`ffmpeg -i "${input}" "./tmp/${sender}${time}.mp4"`, async (err) => {
 				if (err) {
 					if (!isURL(input)) {
 						await fs.unlink(input);
@@ -19,9 +19,9 @@ export const toMp4 = (input, sender) =>
 					reject(err);
 				}
 
-				const buffer = await fs.readFile(`./src/media/temporary_files/${sender}${time}.mp4`);
+				const buffer = await fs.readFile(`./tmp/${sender}${time}.mp4`);
 
-				await fs.unlink(`./src/media/temporary_files/${sender}${time}.mp4`);
+				await fs.unlink(`./tmp/${sender}${time}.mp4`);
 				resolve(buffer);
 			});
 		} catch (err) {
@@ -36,7 +36,7 @@ export const gifToMp4 = (input, sender) =>
 			const time = dayjs().unix();
 
 			exec(
-				`ffmpeg -i "${input}" -movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" "./temporary_files/${sender}${time}.mp4"`,
+				`ffmpeg -i "${input}" -movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" "./tmp/${sender}${time}.mp4"`,
 				async (err) => {
 					if (err) {
 						if (!isURL(input)) {
@@ -47,9 +47,9 @@ export const gifToMp4 = (input, sender) =>
 						reject(err);
 					}
 
-					const buffer = await fs.readFile(`./src/media/temporary_files/${sender}${time}.mp4`);
+					const buffer = await fs.readFile(`./tmp/${sender}${time}.mp4`);
 
-					await fs.unlink(`./src/media/temporary_files/${sender}${time}.mp4`);
+					await fs.unlink(`./tmp/${sender}${time}.mp4`);
 					resolve(buffer);
 				}
 			);

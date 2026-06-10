@@ -6,6 +6,7 @@ if (process.env.SUB_BOT_PROCESS === '1') {
 }
 
 import { Cli } from './core/cli.js';
+import { TEMP_DIR } from './core/constants.js';
 import { LogMultiplexer } from './core/log-multiplexer.js';
 import { Logger } from './core/logger.js';
 import { manager } from './core/manager.js';
@@ -54,8 +55,8 @@ export { runtime };
 
 configuration.flags.runtime = runtime;
 
-if (!(await fs.exists('./src/media/temporary_files/'))) {
-	await fs.mkdir('./src/media/temporary_files/');
+if (!(await fs.exists(TEMP_DIR))) {
+	await fs.mkdir(TEMP_DIR);
 }
 
 const store = new Store(prisma, sessionName, {
