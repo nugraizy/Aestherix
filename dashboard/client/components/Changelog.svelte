@@ -2,8 +2,8 @@
 	import { renderMarkdown } from '../lib/markdown.js';
 	import { changelogOpen } from '../lib/stores.js';
 
-	const commitHashShort = 'fe9142b0';
-	const commitHashFull = 'fe9142b0109da8190a46a2b46a7b82b8551f02f0';
+	const commitHashShort = 'bf34f079';
+	const commitHashFull = 'bf34f079cad1e40b88c0a8395abe97b3113edb54';
 	const commitUrl = `https://github.com/nugraizy/aestherix/commit/${commitHashFull}`;
 
 	let html = '';

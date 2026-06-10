@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.14.2」2026-06-10
+
+## Added
+
+- Retry system with media cache, auto-disable after 3 failures, and owner enable button ([`bf34f079`](https://github.com/nugraizy/aestherix/commit/bf34f079))
+- WebPMUX binary support for sticker EXIF with RIFF size fix and ffmpeg reliability improvements ([`bea35d21`](https://github.com/nugraizy/aestherix/commit/bea35d21))
+
+## Changed
+
+- Consolidate temp directory from src/media/temporary_files to ./tmp/ with TEMP_DIR constant ([`31b48695`](https://github.com/nugraizy/aestherix/commit/31b48695))
+- Enable --pipe flag in production configs ([`2698d576`](https://github.com/nugraizy/aestherix/commit/2698d576))
+
 # 「7.14.1」2026-06-09
 
 ## Fixed
