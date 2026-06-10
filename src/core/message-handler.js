@@ -11,6 +11,7 @@ import { color, getTimeSince } from '../utils/modules/index.js';
 import { Context } from './context.js';
 import { Logger } from './logger.js';
 import { PipelineExecutor } from './pipeline.js';
+import { RetryManager } from './retry-manager.js';
 
 const EVALY = ['/>', '$>', '=>', '!>'];
 const SEPARATOR = color('⤑', 'green');
@@ -60,6 +61,7 @@ export class MessageHandler {
 	#handlers = new Cache();
 	#retries = new Map();
 	#executionLocks = new Map();
+	#retryManager = new RetryManager();
 	#lastLog = {
 		kind: null,
 		sender: null,
@@ -100,7 +102,7 @@ export class MessageHandler {
 			return;
 		}
 
-		await this.#initHandlers();
+		await Promise.all([this.#initHandlers(), this.#retryManager.load()]);
 		this.#initialized = true;
 	}
 
@@ -244,6 +246,88 @@ export class MessageHandler {
 			return;
 		}
 
+		if (body.startsWith('enable:')) {
+			const cmdName = body.slice(7);
+
+			if (!this.#retryManager.isDisabled(cmdName)) {
+				return;
+			}
+
+			this.#retryManager.reEnable(cmdName);
+			await client.reply(message.from, `Command \`${cmdName}\` has been re-enabled.`, message.raw);
+			return;
+		}
+
+		const retryMatch = body.match(/^(.+?) retry:([a-f0-9]{8})$/);
+
+		if (retryMatch) {
+			const [, strippedBody, retryId] = retryMatch;
+			const cached = this.#retryManager.getMedia(retryId);
+
+			if (cached) {
+				const resolved = this.#router.resolve(strippedBody);
+
+				if (resolved?.command) {
+					const localMessage = message.derive({
+						body: strippedBody,
+						args: resolved.args,
+						cmd: resolved.cmdName,
+						prefix: resolved.prefix,
+						isEval: resolved.isEval,
+						isCmd: true,
+						query: resolved.query,
+						isMediaImage: cached.mediaType === 'imageMessage',
+						isMediaVid: cached.mediaType === 'videoMessage',
+						isQuotedSticker: cached.mediaType === 'stickerMessage' || cached.mediaType === 'lottieStickerMessage',
+						isQuotedAudio: cached.mediaType === 'audioMessage',
+						isMediaDocument: cached.mediaType === 'documentMessage',
+						typeQuoted: cached.typeQuoted,
+						mediaData: { message: { [cached.mediaType]: cached.buffer } },
+						extractMediaData: cached.buffer
+					});
+
+					setPrefix(resolved.prefix);
+
+					const guardResult = await this.#guard(localMessage, resolved.command, client);
+
+					if (guardResult === 'skip') {
+						return;
+					}
+
+					const retryClient = this.#wrapRetryClient(client, cached.buffer);
+
+					await this.#run(localMessage, resolved.command, retryClient);
+					return;
+				}
+			}
+
+			const resolved = this.#router.resolve(strippedBody);
+
+			if (resolved) {
+				const localMessage = message.derive({
+					body: strippedBody,
+					args: resolved.args,
+					cmd: resolved.cmdName,
+					prefix: resolved.prefix,
+					isEval: resolved.isEval,
+					isCmd: true,
+					query: resolved.query
+				});
+
+				setPrefix(resolved.prefix);
+
+				const guardResult = await this.#guard(localMessage, resolved.command, client);
+
+				if (guardResult === 'skip') {
+					return;
+				}
+
+				await this.#run(localMessage, resolved.command, client);
+			}
+
+			return;
+		}
+
 		let localMessage;
 
 		const resolved = this.#router.resolve(body);
@@ -359,6 +443,28 @@ export class MessageHandler {
 				`The command \`${command.name}\` is currently disabled by dashboard.`,
 				localMessage.message
 			);
+			return 'skip';
+		}
+
+		if (this.#retryManager.isDisabled(command.name)) {
+			const remaining = this.#retryManager.getDisableRemaining(command.name);
+
+			if (localMessage.isOwner) {
+				const builder = new client.TemplateBuilder.Native();
+
+				await builder
+					.destination(localMessage.from)
+					.body(`Command \`${command.name}\` has been temporarily disabled due to repeated failures (${this.#retryManager.maxRetries} errors). Try again in ${remaining} minute(s).`)
+					.buttons(builder.button.reply({ display: 'Enable', id: `enable:${command.name}` }))
+					.send();
+			} else {
+				void client.reply(
+					localMessage.from,
+					`Command \`${command.name}\` is temporarily disabled due to repeated failures. Try again in ${remaining} minute(s).`,
+					localMessage.message
+				);
+			}
+
 			return 'skip';
 		}
 
@@ -507,8 +613,9 @@ export class MessageHandler {
 		try {
 			await command.run(localMessage, client, this.#store);
 			this.#router.trackUsage(command.name).catch(noop);
+			this.#retryManager.clearCounter(localMessage.sender, command.name);
 		} catch (err) {
-			await this.#handleError(err, localMessage, client).catch(() => {});
+			await this.#handleError(err, localMessage, command, client).catch(() => {});
 		} finally {
 			if (isHeavy) {
 				this.#executionLocks.delete(sender);
@@ -531,6 +638,29 @@ export class MessageHandler {
 		return lock.command;
 	}
 
+	#wrapRetryClient(realClient, buffer) {
+		return new Proxy(realClient, {
+			get(target, prop) {
+				if (prop === 'downloadMediaMessage') {
+					return () => Promise.resolve(buffer);
+				}
+
+				if (prop === 'downloadAndSaveMediaMessage') {
+					return async (_media, filePath) => {
+						const { default: fs } = await import('fs-extra');
+
+						await fs.writeFile(filePath, buffer);
+						return filePath;
+					};
+				}
+
+				const value = target[prop];
+
+				return typeof value === 'function' ? value.bind(target) : value;
+			}
+		});
+	}
+
 	#isHelpRequest(localMessage, command) {
 		return /-{1,2}((help(s)?|info|des(c|k)rip(t|s)i(on)?)|h)$/i.test(localMessage.args[1]) && command.name !== 'eval';
 	}
@@ -545,36 +675,91 @@ export class MessageHandler {
 		await client.reply(localMessage.from, help, localMessage.message);
 	}
 
-	async #handleError(err, localMessage, client) {
+	async #handleError(err, localMessage, command, client) {
 		const builder = new client.TemplateBuilder.Native();
 		const errorLocation = this.#getErrorLocation(err?.stack);
 		let str = !localMessage.isOwner ? 'Please send this error stack to the owner :\n\n' : '\n';
 
 		str += `Type : ${err.name || 'Unknown'}\nMessage : ${err.message || 'Unknown'}\nFile : ${errorLocation.file}\nLine : ${errorLocation.line}\nStack Trace :\n${(localMessage.isOwner ? err?.stack?.substring(0, 70) : err?.stack?.substring(0, 20)) || 'Unknown'}`;
 
-		await builder
-			.destination(localMessage.from)
-			.body(
-				localMessage.isOwner
-					? 'Something went unexpected. Please read below :'
-					: 'This error is from the client. Please report to owner.'
-			)
-			.footer(str)
-			.buttons(
-				...[
+		const failure = this.#retryManager.recordFailure(localMessage.sender, command.name);
+		let retryId = null;
+
+		if (!failure.disabled) {
+			const needsMedia =
+				localMessage.isMediaImage || localMessage.isMediaVid || localMessage.isQuotedSticker ||
+				localMessage.isQuotedAudio || localMessage.isMediaDocument || localMessage.stickerAble;
+
+			if (needsMedia && localMessage.mediaData) {
+				try {
+					const buffer = await client.downloadMediaMessage(localMessage.mediaData);
+
+					if (buffer?.length) {
+						retryId = this.#retryManager.generateId();
+						this.#retryManager.cacheMedia(retryId, {
+							buffer,
+							typeQuoted: localMessage.typeQuoted,
+							mediaType: localMessage.typeQuoted || localMessage.type
+						});
+					}
+				} catch { /* media download failed — retry without cached media */ }
+			}
+
+			const canRetry = !needsMedia || retryId;
+			const retryBody = retryId ? `${localMessage.body} retry:${retryId}` : localMessage.body;
+
+			await builder
+				.destination(localMessage.from)
+				.body(
 					localMessage.isOwner
-						? builder.button.url({
-								display: 'Report to Owner',
-								url: `https://wa.me/${localMessage.settings.owner_number.replace(/[^\d]/g, '')}?text=hi,%20bot%20mengalami%20error${encodeURI(`\n\n${err.stack}`)}`
-							})
-						: null,
+						? 'Something went unexpected. Please read below :'
+						: 'This error is from the client. Please report to owner.'
+				)
+				.footer(str)
+				.buttons(
+					...[
+						localMessage.isOwner
+							? builder.button.url({
+									display: 'Report to Owner',
+									url: `https://wa.me/${localMessage.settings.owner_number.replace(/[^\d]/g, '')}?text=hi,%20bot%20mengalami%20error${encodeURI(`\n\n${err.stack}`)}`
+								})
+							: null,
+						localMessage.isOwner
+							? 						builder.button.reply({ display: 'Report via Bot', id: cmdId('report', err.stack, localMessage) })
+							: null,
+						canRetry
+							? builder.button.reply({ display: `Retry (${this.#retryManager.maxRetries - failure.count} left)`, id: retryBody })
+							: null
+					].filter(Boolean)
+				)
+				.send();
+		} else {
+			await builder
+				.destination(localMessage.from)
+				.body(
 					localMessage.isOwner
-						? builder.button.reply({ display: 'Report via Bot', id: cmdId('report', err.stack, localMessage) })
-						: null,
-					builder.button.reply({ display: 'Retry', id: localMessage.body })
-				].filter(Boolean)
-			)
-			.send();
+						? 'Something went unexpected. Please read below :'
+						: 'This error is from the client. Please report to owner.'
+				)
+				.footer(str)
+				.buttons(
+					...[
+						localMessage.isOwner
+							? builder.button.url({
+									display: 'Report to Owner',
+									url: `https://wa.me/${localMessage.settings.owner_number.replace(/[^\d]/g, '')}?text=hi,%20bot%20mengalami%20error${encodeURI(`\n\n${err.stack}`)}`
+								})
+							: null,
+						localMessage.isOwner
+							? builder.button.reply({ display: 'Report via Bot', id: cmdId('report', err.stack, localMessage) })
+							: null,
+						localMessage.isOwner
+							? builder.button.reply({ display: 'Enable', id: `enable:${command.name}` })
+							: null
+					].filter(Boolean)
+				)
+				.send();
+		}
 
 		this.#log.error(err);
 	}
