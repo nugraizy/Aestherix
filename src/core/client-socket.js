@@ -13,7 +13,7 @@ import {
 import { fileTypeFromBuffer } from 'file-type';
 import fs from 'fs-extra';
 import webpmux from 'node-webpmux';
-import { spawn } from 'node:child_process';
+import { spawn, execFileSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { EventEmitter } from 'node:events';
 import { Readable } from 'node:stream';
@@ -30,11 +30,16 @@ import { Cache } from '../helper/modules/cache.js';
 import { gif2mp4 } from '../utils/index.js';
 import { fetchBUFFER, isURL } from '../utils/modules/index.js';
 import { Auth } from './auth.js';
+import { TEMP_DIR } from './constants.js';
 import { Context } from './context.js';
 import { Logger } from './logger.js';
 import { Store } from './store.js';
 
 export class ClientSocket extends EventEmitter {
+	static #hasWebpmux = null;
+	static #cachedExifPath = null;
+	static #cachedExifMeta = null;
+
 	#auth;
 	#store;
 	#socket = null;
@@ -328,6 +333,74 @@ export class ClientSocket extends EventEmitter {
 			'sticker-pack-name': metadata?.packname || '',
 			'sticker-pack-publisher': metadata?.author || ''
 		};
+
+		if (ClientSocket.#hasWebpmux === null) {
+			try {
+				execFileSync('webpmux', ['-version'], { stdio: 'ignore' });
+				ClientSocket.#hasWebpmux = true;
+			} catch {
+				ClientSocket.#hasWebpmux = false;
+			}
+		}
+
+		if (ClientSocket.#hasWebpmux) {
+			return this.#applyExifBinary(buffer, data);
+		}
+
+		return this.#applyExifNode(buffer, data);
+	}
+
+	async #applyExifBinary(buffer, data) {
+		const tmpDir = TEMP_DIR;
+
+		await fs.ensureDir(tmpDir);
+
+		const metaKey = JSON.stringify(data);
+
+		if (!ClientSocket.#cachedExifPath || ClientSocket.#cachedExifMeta !== metaKey) {
+			const exifPath = `${tmpDir}/data.exif`;
+			const jsonBuf = Buffer.from(JSON.stringify(data), 'utf-8');
+			const exif = Buffer.concat([
+				Buffer.from([
+					0x49, 0x49, 0x2a, 0x00, 0x08, 0x00, 0x00, 0x00, 0x01, 0x00, 0x41, 0x57, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16,
+					0x00, 0x00, 0x00
+				]),
+				jsonBuf
+			]);
+
+			exif.writeUIntLE(jsonBuf.length, 14, 4);
+			await fs.writeFile(exifPath, exif);
+			ClientSocket.#cachedExifPath = exifPath;
+			ClientSocket.#cachedExifMeta = metaKey;
+		}
+
+		const id = randomBytes(4).toString('hex');
+		const tmpIn = `${tmpDir}/exif-${id}-in.webp`;
+		const tmpOut = `${tmpDir}/exif-${id}-out.webp`;
+
+		try {
+			if (
+				buffer[0] === 0x52 &&
+				buffer[1] === 0x49 &&
+				buffer[2] === 0x46 &&
+				buffer[3] === 0x46 &&
+				buffer.readUInt32LE(4) === 0
+			) {
+				buffer = Buffer.from(buffer);
+				buffer.writeUInt32LE(buffer.length - 8, 4);
+			}
+
+			await fs.writeFile(tmpIn, buffer);
+			execFileSync('webpmux', ['-set', 'exif', ClientSocket.#cachedExifPath, tmpIn, '-o', tmpOut], { stdio: 'pipe' });
+
+			return await fs.readFile(tmpOut);
+		} finally {
+			await fs.remove(tmpIn).catch(() => {});
+			await fs.remove(tmpOut).catch(() => {});
+		}
+	}
+
+	async #applyExifNode(buffer, data) {
 		const jsonBuf = Buffer.from(JSON.stringify(data), 'utf-8');
 		const exif = Buffer.concat([
 			Buffer.from([
@@ -354,7 +427,7 @@ export class ClientSocket extends EventEmitter {
 	async prepareSticker(media, type, exif) {
 		const isMediaURL = Buffer.isBuffer(media) ? false : isURL(media);
 
-		media = isMediaURL ? Buffer.from(await (await fetch(media)).arrayBuffer(), 'base64') : media;
+		media = isMediaURL ? Buffer.from(await (await fetch(media)).arrayBuffer()) : media;
 
 		const bufferType =
 			type === 'imageMessage'
@@ -390,15 +463,25 @@ export class ClientSocket extends EventEmitter {
 				];
 				const ff = spawn('ffmpeg', args, { windowsHide: true });
 				const chunks = [];
+				const stderrChunks = [];
 
 				ff.stdout.on('data', (chunk) => chunks.push(chunk));
-				ff.stdout.on('end', () => resolve(Buffer.concat(chunks)));
+				ff.stderr.on('data', (chunk) => stderrChunks.push(chunk));
 				ff.on('error', reject);
-				ff.stderr.on('data', () => {});
 				ff.on('close', (code) => {
+					const buf = Buffer.concat(chunks);
+
 					if (code !== 0) {
-						reject(new Error(`ffmpeg exited with code ${code}`));
+						reject(new Error(`ffmpeg exited with code ${code}: ${Buffer.concat(stderrChunks).toString()}`));
+						return;
 					}
+
+					if (buf.length === 0) {
+						reject(new Error(`ffmpeg produced empty output: ${Buffer.concat(stderrChunks).toString()}`));
+						return;
+					}
+
+					resolve(buf);
 				});
 
 				ff.stdin.on('error', () => {});
@@ -879,8 +962,8 @@ function createTemplateBuilder(client) {
 
 	async function prepareGif(media, messageType) {
 		const id = Date.now();
-		const inputPath = `./src/media/temporary_files/input-${id}.gif`;
-		const outputPath = `./src/media/temporary_files/output-${id}.mp4`;
+		const inputPath = `./tmp/input-${id}.gif`;
+		const outputPath = `./tmp/output-${id}.mp4`;
 
 		await fs.writeFile(inputPath, media);
 
