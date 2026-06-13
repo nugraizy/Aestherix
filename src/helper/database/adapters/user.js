@@ -43,6 +43,10 @@ export const getUserLimit = async (db, jid, defaultLimit = 30, sessionName = 'ma
  * @returns {Promise<void>}
  */
 export const upsertUserLimit = async (db, jid, limit, role, sessionName = 'main') => {
+	if (!jid) {
+		return;
+	}
+
 	await db.userLimit.upsert({
 		where: { jid_sessionName: { jid, sessionName } },
 		update: { limit, role },

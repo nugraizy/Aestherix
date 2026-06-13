@@ -336,6 +336,6 @@ export class Cache {
 
 		const key = this.keys()[index];
 
-		return { key, value: this.cache[this.keys()[index]] };
+		return { key, value: this.cache[key] };
 	}
 }

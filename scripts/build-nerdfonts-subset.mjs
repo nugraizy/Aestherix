@@ -127,7 +127,7 @@ async function main() {
 		const unicodes = resolved.map((r) => `U+${r.codepoint}`).join(',');
 
 		try {
-			execSync(`pyftsubset "${FULL_FONT_PATH}" --unicodes="${unicodes}" --flavor=woff2 --output-file="${SUBSET_FONT_PATH}"`, {
+			execSync(`python -m fontTools.subset "${FULL_FONT_PATH}" --unicodes="${unicodes}" --flavor=woff2 --output-file="${SUBSET_FONT_PATH}"`, {
 				stdio: 'inherit'
 			});
 			console.log(`✓ Subset font written to ${SUBSET_FONT_PATH}`);

@@ -123,7 +123,11 @@ export const extractBody = (m, type) => {
 	}
 
 	if (type === 'interactiveResponseMessage') {
-		return JSON.parse(msg[type].nativeFlowResponseMessage.paramsJson)?.id;
+		try {
+			return JSON.parse(msg[type].nativeFlowResponseMessage.paramsJson)?.id;
+		} catch {
+			return 'Unknown Body';
+		}
 	}
 
 	return 'Unknown Body';

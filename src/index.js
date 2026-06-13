@@ -28,6 +28,7 @@ configuration.flags = cli.flags;
 
 color.setRainbow(Boolean(configuration.flags.rainbow));
 color.setRainbowResolver(() => Boolean(configuration.flags.rainbow));
+loggers.setSessionBadge('MAIN');
 
 void initializeDashboardMonitor(configuration).catch((error) => {
 	loggers.error(color('Dashboard monitor init failed:', 'red'), color(error.message, 'white'));

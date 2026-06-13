@@ -42,6 +42,10 @@ export class Limit {
 	}
 
 	static checkRole(sender) {
+		if (!sender) {
+			return { role: 'FREE' };
+		}
+
 		if (configuration.owners?.includes(sender)) {
 			return { role: 'OWNER' };
 		}

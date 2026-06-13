@@ -48,6 +48,8 @@ if (!sessionName) {
 	process.exit(1);
 }
 
+loggers.setSessionBadge(`SUB-${sessionName}`);
+
 const instance = await prisma.botInstance.findUnique({ where: { sessionName } }).catch(() => null);
 
 if (!instance) {

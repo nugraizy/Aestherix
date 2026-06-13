@@ -114,7 +114,7 @@ Object.setPrototypeOf(String.prototype, {
 		return this.toString();
 	},
 	replaceAll: function (find, replace) {
-		return this.replace(new RegExp(find, 'g'), replace);
+		return this.replace(new RegExp(find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), replace);
 	},
 	parseNumber: function () {
 		return _.sortedUniq(findPhoneNumbersInText(this).map((v) => v.number.number.replace('+', '') + S_WHATSAPP_NET));
