@@ -276,7 +276,7 @@
 <div class="albums">
 	<header class="page-head">
 		<div class="title-block">
-			<h2>Albums</h2>
+			<h2><i class="nf nf-fa-images"></i> Albums</h2>
 			<p class="page-sub">Preservation of the profile pictures. Click image to fullscreen.</p>
 		</div>
 		<div class="filter-block">

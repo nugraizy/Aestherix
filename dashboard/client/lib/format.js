@@ -25,7 +25,9 @@ export function ansiToHtml(text) {
 	const str = String(text || '')
 		.replace(/&/g, '&amp;')
 		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;');
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;');
 	let result = '';
 	let open = false;
 	let i = 0;

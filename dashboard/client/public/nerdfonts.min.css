@@ -12,6 +12,9 @@
 	-moz-osx-font-smoothing: grayscale;
 	line-height: 1;
 }
+.nf-fa-bullhorn:before {
+	content: '\f0a1';
+}
 .nf-fa-chevron_down:before {
 	content: '\f078';
 }
@@ -21,14 +24,41 @@
 .nf-fa-chevron_right:before {
 	content: '\f054';
 }
+.nf-fa-code:before {
+	content: '\f121';
+}
+.nf-fa-comment:before {
+	content: '\f075';
+}
 .nf-fa-crown:before {
 	content: '\edeb';
+}
+.nf-fa-gear:before {
+	content: '\f013';
+}
+.nf-fa-home:before {
+	content: '\f015';
+}
+.nf-fa-images:before {
+	content: '\f00f';
+}
+.nf-fa-server:before {
+	content: '\f233';
 }
 .nf-fa-shield:before {
 	content: '\f132';
 }
+.nf-fa-sliders:before {
+	content: '\f1de';
+}
 .nf-fa-star:before {
 	content: '\f005';
+}
+.nf-fa-users:before {
+	content: '\f0c0';
+}
+.nf-fa-wrench:before {
+	content: '\f0ad';
 }
 .nf-md-account:before {
 	content: '\f0004';
@@ -128,6 +158,9 @@
 }
 .nf-md-refresh:before {
 	content: '\f0450';
+}
+.nf-md-robot:before {
+	content: '\f06a9';
 }
 .nf-md-robot_angry_outline:before {
 	content: '\f169e';

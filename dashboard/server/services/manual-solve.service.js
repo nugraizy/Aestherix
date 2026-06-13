@@ -11,12 +11,16 @@ export function createManualSolveService() {
 	const sessions = new Map();
 	let browserPromise = null;
 	let io = null;
+	let browserIdleTimer = null;
+	const BROWSER_IDLE_TIMEOUT_MS = 5 * 60 * 1000;
 
 	function setSocketLayer(socketLayer) {
 		io = socketLayer?.io || null;
 	}
 
 	async function getBrowser() {
+		clearTimeout(browserIdleTimer);
+
 		if (!browserPromise) {
 			const headful = HEADFUL_ENVS.has(String(process.env.MANUAL_SOLVE_HEADFUL || '').toLowerCase());
 
@@ -254,7 +258,23 @@ export function createManualSolveService() {
 		await session.page?.close().catch(() => {});
 		await session.cdp?.detach?.().catch(() => {});
 
+		if (sessions.size === 0) {
+			scheduleBrowserClose();
+		}
+
 		return { ok: true };
+	}
+
+	function scheduleBrowserClose() {
+		clearTimeout(browserIdleTimer);
+		browserIdleTimer = setTimeout(async () => {
+			if (sessions.size === 0 && browserPromise) {
+				const browser = await browserPromise.catch(() => null);
+
+				await browser?.close().catch(() => {});
+				browserPromise = null;
+			}
+		}, BROWSER_IDLE_TIMEOUT_MS).unref();
 	}
 
 	async function handleInput(id, input = {}) {

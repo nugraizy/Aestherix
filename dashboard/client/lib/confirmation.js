@@ -25,19 +25,25 @@ export function watchConfirmation({ phoneNumber, requestId, requestKey, onStatus
 			fallbackTimer = null;
 		}
 
-		if (!socket.connected) {
-			socket.removeAllListeners();
-			return;
-		}
+	const removeSpecificListeners = () => {
+		socket.off('connect');
+		socket.off('dashboard:confirmation:status');
+		socket.off('dashboard:confirmation:error');
+	};
 
-		try {
-			socket.emit('dashboard:confirmation:stop');
-		} catch {
-			// socket already gone
-		}
+	if (!socket.connected) {
+		removeSpecificListeners();
+		return;
+	}
 
-		socket.removeAllListeners();
-		socket.disconnect();
+	try {
+		socket.emit('dashboard:confirmation:stop');
+	} catch {
+		// socket already gone
+	}
+
+	removeSpecificListeners();
+	socket.disconnect();
 	};
 
 	socket.on('connect', () => {

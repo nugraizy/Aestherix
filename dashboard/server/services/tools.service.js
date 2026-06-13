@@ -614,7 +614,7 @@ export function createToolsService({ prisma } = {}) {
 					buffer = await pipeline.avif({ quality: 80 }).toBuffer();
 				}
 			} else {
-				const { execSync } = await import('child_process');
+				const { execFileSync } = await import('child_process');
 				const { randomBytes } = await import('crypto');
 				const fs = await import('fs/promises');
 				const path = await import('path');
@@ -627,36 +627,37 @@ export function createToolsService({ prisma } = {}) {
 				try {
 					await fs.writeFile(tmpInput, inputBuffer);
 
-					let ffmpegArgs;
+					const ffmpegArgs = ['-y', '-i', tmpInput];
 
 					if (inputCat === 'image' && outputFormat === 'gif') {
-						ffmpegArgs = `-y -i "${tmpInput}" -vf "split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" "${tmpOutput}"`;
+						ffmpegArgs.push('-vf', 'split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse');
 					} else if (inputFormat === 'gif' && outputCat === 'video') {
-						ffmpegArgs = `-y -i "${tmpInput}" -movflags +faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" "${tmpOutput}"`;
+						ffmpegArgs.push('-movflags', '+faststart', '-pix_fmt', 'yuv420p', '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2');
 					} else if (outputCat === 'audio') {
 						const audioArgs = {
-							mp3: '-codec:a libmp3lame -q:a 2',
-							opus: '-codec:a libopus -b:a 128k -vbr on',
-							aac: '-codec:a aac -b:a 192k',
-							flac: '-codec:a flac',
-							wav: '-codec:a pcm_s16le',
-							ogg: '-codec:a libvorbis -q:a 4'
+							mp3: ['-codec:a', 'libmp3lame', '-q:a', '2'],
+							opus: ['-codec:a', 'libopus', '-b:a', '128k', '-vbr', 'on'],
+							aac: ['-codec:a', 'aac', '-b:a', '192k'],
+							flac: ['-codec:a', 'flac'],
+							wav: ['-codec:a', 'pcm_s16le'],
+							ogg: ['-codec:a', 'libvorbis', '-q:a', '4']
 						};
 
-						ffmpegArgs = `-y -i "${tmpInput}" ${audioArgs[outputFormat] || ''} "${tmpOutput}"`;
+						ffmpegArgs.push(...(audioArgs[outputFormat] || []));
 					} else if (outputCat === 'video') {
 						const videoArgs = {
-							mp4: '-c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k -movflags +faststart -pix_fmt yuv420p',
-							webm: '-c:v libvpx-vp9 -crf 30 -b:v 0 -c:a libopus -b:a 128k',
-							mkv: '-c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k',
-							avi: '-c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k',
-							mov: '-c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k -movflags +faststart -pix_fmt yuv420p'
+							mp4: ['-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', '-pix_fmt', 'yuv420p'],
+							webm: ['-c:v', 'libvpx-vp9', '-crf', '30', '-b:v', '0', '-c:a', 'libopus', '-b:a', '128k'],
+							mkv: ['-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-c:a', 'aac', '-b:a', '128k'],
+							avi: ['-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-c:a', 'aac', '-b:a', '128k'],
+							mov: ['-c:v', 'libx264', '-preset', 'fast', '-crf', '23', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', '-pix_fmt', 'yuv420p']
 						};
 
-						ffmpegArgs = `-y -i "${tmpInput}" ${videoArgs[outputFormat] || ''} "${tmpOutput}"`;
+						ffmpegArgs.push(...(videoArgs[outputFormat] || []));
 					}
 
-					execSync(`ffmpeg ${ffmpegArgs}`, { timeout: 120000 });
+					ffmpegArgs.push(tmpOutput);
+					execFileSync('ffmpeg', ffmpegArgs, { timeout: 120000 });
 					buffer = await fs.readFile(tmpOutput);
 				} finally {
 					await fs.unlink(tmpInput).catch(() => {});

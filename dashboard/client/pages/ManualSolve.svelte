@@ -319,7 +319,7 @@
 
 <div class="manual-solve">
 	<header class="page-head">
-		<h2>CF Solver</h2>
+		<h2><i class="nf nf-fa-shield"></i> CF Solver</h2>
 		<p class="page-sub">Solve Cloudflare challenges manually via live Puppeteer sessions.</p>
 	</header>
 

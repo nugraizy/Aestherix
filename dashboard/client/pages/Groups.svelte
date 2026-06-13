@@ -284,7 +284,7 @@
 
 <div class="groups-page">
 	<header class="page-head">
-		<h2>Groups</h2>
+		<h2><i class="nf nf-fa-users"></i> Groups</h2>
 		<p class="page-sub">View and manage per-group settings.</p>
 	</header>
 

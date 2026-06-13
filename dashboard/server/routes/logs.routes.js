@@ -7,7 +7,7 @@ function isOwner(session) {
 }
 
 export function createLogsRouter({ services }) {
-	const { auth, monitor, botBridge, middleware } = services;
+	const { auth, monitor, botBridge, subBots, middleware } = services;
 	const router = Router();
 
 	function ownerOrRedact(req, res, handler) {
@@ -54,6 +54,31 @@ export function createLogsRouter({ services }) {
 			}
 
 			return res.json(result.data || { lastId: since, logs: [] });
+		});
+	});
+
+	router.get('/logs/subbot/:name', middleware.requireDashboardAuth, (req, res) => {
+		ownerOrRedact(req, res, async () => {
+			const name = String(req.params.name || '').trim();
+			const since = Number(req.query?.since || 0);
+			const limit = Number(req.query?.limit || 200);
+
+			if (!name) {
+				return res.status(400).json({ ok: false, message: 'Sub-bot name is required.' });
+			}
+
+			const result = await subBots.getLogs(name, { since, limit });
+
+			if (!result.ok) {
+				return res.status(result.status || 503).json({
+					ok: false,
+					message: result.message || 'Failed loading sub-bot logs.',
+					lastId: since,
+					logs: []
+				});
+			}
+
+			return res.json(result);
 		});
 	});
 

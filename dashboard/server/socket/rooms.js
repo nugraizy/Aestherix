@@ -5,6 +5,7 @@ export const ROOMS = {
 	USERS: 'dashboard:users',
 	LOGS: 'dashboard:logs',
 	PROFILE_PICTURES: 'dashboard:profile-pictures',
+	SUBBOTS: 'dashboard:subbots',
 	CONFIRMATION_REQUEST: 'dashboard:confirmation:request',
 	CONFIRMATION_RESOLVE: 'dashboard:confirmation:resolve'
 };

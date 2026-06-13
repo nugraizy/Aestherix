@@ -102,6 +102,7 @@
 
 		if (clockTimer) {
 			clearInterval(clockTimer);
+			clockTimer = null;
 		}
 
 		if (errorTimer) {

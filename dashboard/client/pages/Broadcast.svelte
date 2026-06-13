@@ -451,7 +451,7 @@
 
 <div class="broadcast-page">
 	<header class="page-head">
-		<h2>Broadcast</h2>
+		<h2><i class="nf nf-fa-bullhorn"></i> Broadcast</h2>
 		<p class="page-sub">Send a message to multiple groups or contacts at once.</p>
 	</header>
 

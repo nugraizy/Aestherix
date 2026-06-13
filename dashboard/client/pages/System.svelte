@@ -141,7 +141,7 @@
 
 <div class="system-page">
 	<header class="page-head">
-		<h2>System</h2>
+		<h2><i class="nf nf-fa-server"></i> System</h2>
 		<p class="page-sub">Health diagnostics, cache stats, and environment.</p>
 	</header>
 

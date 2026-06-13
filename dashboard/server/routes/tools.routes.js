@@ -77,7 +77,7 @@ export function createToolsRouter({ services }) {
 			return res.status(400).json({ ok: false, message: 'Provide video and audio URLs.' });
 		}
 
-		const { execSync } = await import('child_process');
+		const { execFileSync } = await import('child_process');
 		const { randomBytes } = await import('crypto');
 		const fs = await import('fs/promises');
 		const path = await import('path');
@@ -109,7 +109,7 @@ export function createToolsRouter({ services }) {
 				fs.writeFile(tmpAudio, Buffer.from(await audioRes.arrayBuffer()))
 			]);
 
-			execSync(`ffmpeg -y -i "${tmpVideo}" -i "${tmpAudio}" -c:v copy -c:a copy "${tmpOutput}"`, { timeout: 120000 });
+			execFileSync('ffmpeg', ['-y', '-i', tmpVideo, '-i', tmpAudio, '-c:v', 'copy', '-c:a', 'copy', tmpOutput], { timeout: 120000 });
 
 			const stat = await fs.stat(tmpOutput);
 			const filename = `${(title || 'video').replace(/[^a-zA-Z0-9_-]/g, '_')}.mp4`;
@@ -209,6 +209,34 @@ export function createToolsRouter({ services }) {
 		}
 
 		try {
+			const parsed = new URL(url);
+			const { lookup } = await import('node:dns/promises');
+
+			let addr;
+
+			try {
+				addr = await lookup(parsed.hostname);
+			} catch {
+				return res.status(400).json({ ok: false, message: 'DNS lookup failed.' });
+			}
+
+			const ip = addr.address;
+			const isPrivate =
+				/^10\./.test(ip) ||
+				/^172\.(1[6-9]|2\d|3[01])\./.test(ip) ||
+				/^192\.168\./.test(ip) ||
+				/^127\./.test(ip) ||
+				/^169\.254\./.test(ip) ||
+				/^::1$/.test(ip) ||
+				/^fc00:/i.test(ip) ||
+				/^fe80:/i.test(ip) ||
+				ip === '::' ||
+				ip === '0.0.0.0';
+
+			if (isPrivate) {
+				return res.status(403).json({ ok: false, message: 'Access to internal addresses is not allowed.' });
+			}
+
 			const proxyHeaders = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' };
 
 			if (url.includes('deviantart.com/download') && process.env.DEVIANTART_COOKIE) {
@@ -223,7 +251,7 @@ export function createToolsRouter({ services }) {
 				proxyHeaders.Referer = 'https://www.tiktok.com/';
 			}
 
-			const response = await fetch(url, { headers: proxyHeaders });
+			const response = await fetch(url, { headers: proxyHeaders, signal: AbortSignal.timeout(30000) });
 
 			if (!response.ok) {
 				return res.status(response.status).end();
@@ -322,6 +350,27 @@ export function createToolsRouter({ services }) {
 
 	const genshinCache = new Map();
 	const GENSHIN_CACHE_TTL = 10 * 60 * 1000;
+	const GENSHIN_CACHE_MAX = 200;
+
+	function pruneGenshinCache() {
+		if (genshinCache.size <= GENSHIN_CACHE_MAX) {
+			return;
+		}
+
+		const now = Date.now();
+
+		for (const [key, entry] of genshinCache) {
+			if (now - entry.timestamp >= GENSHIN_CACHE_TTL) {
+				genshinCache.delete(key);
+			}
+		}
+
+		if (genshinCache.size > GENSHIN_CACHE_MAX) {
+			const oldest = genshinCache.keys().next().value;
+
+			genshinCache.delete(oldest);
+		}
+	}
 
 	router.get('/tools/genshin/characters', middleware.requireDashboardAuth, async (req, res) => {
 		const uid = String(req.query?.uid || '').trim();
@@ -346,6 +395,7 @@ export function createToolsRouter({ services }) {
 			const characters = parseCharactersData(jsonData.characters);
 
 			genshinCache.set(uid, { user, characters, timestamp: Date.now() });
+			pruneGenshinCache();
 
 			res.json({ user, characters });
 		} catch (error) {
@@ -382,6 +432,7 @@ export function createToolsRouter({ services }) {
 				const characters = parseCharactersData(jsonData.characters);
 
 				genshinCache.set(uid, { user, characters, timestamp: Date.now() });
+			pruneGenshinCache();
 				cached = { user, characters };
 			}
 
@@ -430,6 +481,7 @@ export function createToolsRouter({ services }) {
 				const characters = parseCharactersData(jsonData.characters);
 
 				genshinCache.set(uid, { user, characters, timestamp: Date.now() });
+			pruneGenshinCache();
 				cached = { user, characters };
 			}
 

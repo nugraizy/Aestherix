@@ -22,6 +22,7 @@ import { createSettingsRouter } from './routes/settings.routes.js';
 import { createSpotifyRouter } from './routes/spotify.routes.js';
 import { createStaticRouter } from './routes/static.routes.js';
 import { createStatusRouter } from './routes/status.routes.js';
+import { createSubBotsRouter } from './routes/subbots.routes.js';
 import { createSystemRouter } from './routes/system.routes.js';
 import { createToolsRouter } from './routes/tools.routes.js';
 import { createChatRouter } from './routes/chat.routes.js';
@@ -40,6 +41,7 @@ import { createProfilePicturesService } from './services/profile-pictures.servic
 import { createSettingsService } from './services/settings.service.js';
 import { createSolverCacheService } from './services/solver-cache.service.js';
 import { createSpotifyService } from './services/spotify.service.js';
+import { createSubBotsService } from './services/subbots.service.js';
 import { createSystemService } from './services/system.service.js';
 import { createToolsService } from './services/tools.service.js';
 import { createChatService } from './services/chat.service.js';
@@ -70,6 +72,7 @@ function wireServices({ configuration, prisma }) {
 	const tools = createToolsService({ prisma });
 	const chat = createChatService();
 	const comics = createComicsService();
+	const subBots = createSubBotsService({ botBridge, monitor });
 	const bridgeToken = process.env.DASHBOARD_BRIDGE_TOKEN || '';
 
 	return {
@@ -86,6 +89,7 @@ function wireServices({ configuration, prisma }) {
 		tools,
 		chat,
 		comics,
+		subBots,
 		botBridge,
 		lifecycle,
 		monitor,
@@ -123,6 +127,7 @@ function createApp({ services, configuration, port = DEFAULT_PORT }) {
 			};
 
 			if (req.accepts(['html', 'json']) === 'html') {
+				const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 				const uptimeStr =
 					data.uptime >= 3600
 						? `${Math.floor(data.uptime / 3600)}h ${Math.floor((data.uptime % 3600) / 60)}m`
@@ -142,8 +147,8 @@ h1{font-size:1.8rem;margin-bottom:1rem}
 </style></head><body>
 <div class="card">
 <h1>Aestherix</h1>
-<p class="status"><span class="dot ${data.status}"></span>${data.status === 'online' ? 'Online' : 'Offline'}</p>
-<div class="meta"><span>v${data.version}</span><span>↑ ${uptimeStr}</span><span>${data.commands} cmds</span></div>
+<p class="status"><span class="dot ${esc(data.status)}"></span>${data.status === 'online' ? 'Online' : 'Offline'}</p>
+<div class="meta"><span>v${esc(data.version)}</span><span>↑ ${esc(uptimeStr)}</span><span>${esc(data.commands)} cmds</span></div>
 </div></body></html>`);
 				return;
 			}
@@ -175,7 +180,8 @@ h1{font-size:1.8rem;margin-bottom:1rem}
 		createStatusRouter({ services }),
 		createSystemRouter({ services }),
 		createToolsRouter({ services }),
-		createChatRouter({ services })
+		createChatRouter({ services }),
+		createSubBotsRouter({ services })
 	];
 
 	for (const router of apiRouters) {

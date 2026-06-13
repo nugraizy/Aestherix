@@ -1,4 +1,5 @@
 const ipStore = new Map();
+const MAX_STORE_SIZE = 10_000;
 
 const DEFAULTS = {
 	windowMs: 60_000,
@@ -48,8 +49,17 @@ function cleanup() {
 			ipStore.delete(ip);
 		}
 	}
+
+	if (ipStore.size > MAX_STORE_SIZE) {
+		const entries = [...ipStore.entries()].sort((a, b) => a[1].windowStart - b[1].windowStart);
+		const toRemove = entries.slice(0, entries.length - MAX_STORE_SIZE);
+
+		for (const [ip] of toRemove) {
+			ipStore.delete(ip);
+		}
+	}
 }
 
-setInterval(cleanup, DEFAULTS.windowMs).unref();
+setInterval(cleanup, DEFAULTS.windowMs / 2).unref();
 
 export { rateLimit };

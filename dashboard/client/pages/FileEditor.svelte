@@ -167,7 +167,7 @@
 
 <div class="editor-page">
 	<header class="page-head">
-		<h2>File Editor</h2>
+		<h2><i class="nf nf-fa-code"></i> File Editor</h2>
 		<p class="page-sub">Edit command files with CodeMirror. Ctrl+S to save · Format runs Prettier.</p>
 		<button
 			class="tree-toggle"

@@ -176,6 +176,46 @@ export function createBotBridgeService({ bridgeUrl = DEFAULT_BRIDGE_URL } = {}) 
 		return callBridge('/internal/dashboard/participating');
 	}
 
+	async function listSubBots() {
+		return callBridge('/internal/dashboard/subbots');
+	}
+
+	async function startSubBot(name) {
+		return callBridge(`/internal/dashboard/subbots/${encodeURIComponent(name)}/start`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' }
+		});
+	}
+
+	async function stopSubBot(name) {
+		return callBridge(`/internal/dashboard/subbots/${encodeURIComponent(name)}/stop`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' }
+		});
+	}
+
+	async function updateSubBotFlags(name, flags) {
+		return callBridge(`/internal/dashboard/subbots/${encodeURIComponent(name)}/flags`, {
+			method: 'PATCH',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ flags })
+		});
+	}
+
+	async function removeSubBot(name, { purge = false } = {}) {
+		const qs = purge ? '?purge=1' : '';
+
+		return callBridge(`/internal/dashboard/subbots/${encodeURIComponent(name)}${qs}`, {
+			method: 'DELETE'
+		});
+	}
+
+	async function fetchSubBotLogs(name, { since = 0, limit = 200 } = {}) {
+		const qs = new URLSearchParams({ since: String(since), limit: String(limit) }).toString();
+
+		return callBridge(`/internal/dashboard/subbots/${encodeURIComponent(name)}/logs?${qs}`);
+	}
+
 	return {
 		sendConfirmation,
 		sendRuntimeSync,
@@ -185,6 +225,12 @@ export function createBotBridgeService({ bridgeUrl = DEFAULT_BRIDGE_URL } = {}) 
 		fetchMessages,
 		fetchGroupInfo,
 		fetchParticipating,
+		listSubBots,
+		startSubBot,
+		stopSubBot,
+		updateSubBotFlags,
+		removeSubBot,
+		fetchSubBotLogs,
 		isConfigured: Boolean(bridgeUrl)
 	};
 }

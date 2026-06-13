@@ -1,78 +1,136 @@
 <script>
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount, tick } from 'svelte';
 
 	export let page = 'home';
 	export let mode = 'dark';
 	export let isViewer = false;
 
 	const dispatch = createEventDispatcher();
+
 	const navItems = [
-		{ id: 'home', label: 'Home' },
-		{ id: 'controls', label: 'Controls' },
-		{ id: 'groups', label: 'Groups' },
-		{ id: 'messages', label: 'Messages' },
-		{ id: 'broadcast', label: 'Broadcast' },
-		{ id: 'albums', label: 'Albums' },
-		{ id: 'tools', label: 'Tools', badge: 'New!' },
-		{ id: 'manual-solve', label: 'CF Solver' },
-		{ id: 'settings', label: 'Settings' },
-		{ id: 'system', label: 'System' },
-		{ id: 'editor', label: 'Editor' }
+		{ id: 'home', label: 'Home', icon: 'nf-fa-home' },
+		{ id: 'controls', label: 'Controls', icon: 'nf-fa-sliders' },
+		{ id: 'groups', label: 'Groups', icon: 'nf-fa-users' },
+		{ id: 'subbots', label: 'Sub-Bots', icon: 'nf-md-robot' },
+		{ id: 'messages', label: 'Messages', icon: 'nf-fa-comment' },
+		{ id: 'broadcast', label: 'Broadcast', icon: 'nf-fa-bullhorn' },
+		{ id: 'albums', label: 'Albums', icon: 'nf-fa-images' },
+		{ id: 'tools', label: 'Tools', icon: 'nf-fa-wrench', badge: 'New!' },
+		{ id: 'manual-solve', label: 'Solver', icon: 'nf-fa-shield' },
+		{ id: 'settings', label: 'Settings', icon: 'nf-fa-gear' },
+		{ id: 'system', label: 'System', icon: 'nf-fa-server' },
+		{ id: 'editor', label: 'Editor', icon: 'nf-fa-code' }
 	];
 
-	$: visibleNavItems = isViewer
-		? navItems.filter((item) => item.id !== 'settings' && item.id !== 'editor' && item.id !== 'system' && item.id !== 'broadcast' && item.id !== 'messages')
+	const viewerHidden = new Set(['settings', 'editor', 'system', 'broadcast', 'messages']);
+
+	let scrollEl;
+	let canScrollLeft = false;
+	let canScrollRight = false;
+
+	$: visibleItems = isViewer
+		? navItems.filter((item) => !viewerHidden.has(item.id))
 		: navItems;
+
+	function checkScroll() {
+		if (!scrollEl) return;
+		const { scrollLeft, scrollWidth, clientWidth } = scrollEl;
+		canScrollLeft = scrollLeft > 2;
+		canScrollRight = scrollLeft < scrollWidth - clientWidth - 2;
+	}
+
+	function scrollBy(direction) {
+		if (!scrollEl) return;
+		scrollEl.scrollBy({ left: direction * 200, behavior: 'smooth' });
+	}
+
+	function scrollToActive() {
+		if (!scrollEl) return;
+		const activeEl = scrollEl.querySelector('.pill.active');
+		if (activeEl) {
+			activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+		}
+	}
+
+	onMount(async () => {
+		await tick();
+		checkScroll();
+		scrollToActive();
+	});
+
+	$: if (page && scrollEl) {
+		tick().then(() => {
+			checkScroll();
+			scrollToActive();
+		});
+	}
 </script>
 
 <header class="app-header">
-	<div class="brand">
-		<span class="logo" aria-hidden="true">✦</span>
-		<span class="title">Aestherix</span>
+	<div class="header-row">
+		<div class="brand">
+			<span class="logo" aria-hidden="true">&#x2726;</span>
+			<span class="title">Aestherix</span>
+		</div>
+
+		<div class="actions">
+			<label class="theme-switch">
+				<input
+					class="theme-switch__input"
+					type="checkbox"
+					role="switch"
+					checked={mode === 'dark'}
+					on:change={() => dispatch('mode')}
+					aria-label="Toggle light or dark mode"
+				/>
+				<span class="theme-switch__icon" class:dark={mode === 'dark'} aria-hidden="true">
+					<span class="theme-switch__part theme-switch__part--1"></span>
+					<span class="theme-switch__part theme-switch__part--2"></span>
+					<span class="theme-switch__part theme-switch__part--3"></span>
+					<span class="theme-switch__part theme-switch__part--4"></span>
+					<span class="theme-switch__part theme-switch__part--5"></span>
+					<span class="theme-switch__part theme-switch__part--6"></span>
+					<span class="theme-switch__part theme-switch__part--7"></span>
+					<span class="theme-switch__part theme-switch__part--8"></span>
+					<span class="theme-switch__part theme-switch__part--9"></span>
+					<span class="theme-switch__part theme-switch__part--10"></span>
+					<span class="theme-switch__part theme-switch__part--11"></span>
+				</span>
+			</label>
+		</div>
 	</div>
 
-	<nav class="nav" aria-label="Primary">
-		{#each visibleNavItems as item}
-			<button
-				type="button"
-				class="nav-btn"
-				class:active={page === item.id}
-				aria-current={page === item.id ? 'page' : undefined}
-				on:click={() => dispatch('navigate', item.id)}
-			>
-				{item.label}
-				{#if item.badge}
-					<span class="nav-badge">{item.badge}</span>
-				{/if}
+	<nav class="pill-nav" aria-label="Primary">
+		{#if canScrollLeft}
+			<button type="button" class="scroll-arrow left" on:click={() => scrollBy(-1)} aria-label="Scroll left">
+				<i class="nf nf-fa-chevron_left"></i>
 			</button>
-		{/each}
-	</nav>
+		{/if}
 
-	<div class="actions">
-		<label class="theme-switch">
-			<input
-				class="theme-switch__input"
-				type="checkbox"
-				role="switch"
-				checked={mode === 'dark'}
-				on:change={() => dispatch('mode')}
-				aria-label="Toggle light or dark mode"
-			/>
-			<span class="theme-switch__icon" class:dark={mode === 'dark'} aria-hidden="true">
-				<span class="theme-switch__part theme-switch__part--1"></span>
-				<span class="theme-switch__part theme-switch__part--2"></span>
-				<span class="theme-switch__part theme-switch__part--3"></span>
-				<span class="theme-switch__part theme-switch__part--4"></span>
-				<span class="theme-switch__part theme-switch__part--5"></span>
-				<span class="theme-switch__part theme-switch__part--6"></span>
-				<span class="theme-switch__part theme-switch__part--7"></span>
-				<span class="theme-switch__part theme-switch__part--8"></span>
-				<span class="theme-switch__part theme-switch__part--9"></span>
-				<span class="theme-switch__part theme-switch__part--10"></span>
-				<span class="theme-switch__part theme-switch__part--11"></span>
-			</span>
-		</label>
-	</div>
+		<div class="pill-track" bind:this={scrollEl} on:scroll={checkScroll}>
+			{#each visibleItems as item (item.id)}
+				<button
+					type="button"
+					class="pill"
+					class:active={page === item.id}
+					aria-current={page === item.id ? 'page' : undefined}
+					on:click={() => dispatch('navigate', item.id)}
+				>
+					<i class="nf {item.icon} pill-icon"></i>
+					<span class="pill-label">{item.label}</span>
+					{#if item.badge}
+						<span class="pill-badge">{item.badge}</span>
+					{/if}
+				</button>
+			{/each}
+		</div>
+
+		{#if canScrollRight}
+			<button type="button" class="scroll-arrow right" on:click={() => scrollBy(1)} aria-label="Scroll right">
+				<i class="nf nf-fa-chevron_right"></i>
+			</button>
+		{/if}
+	</nav>
 </header>
 
 <style>
@@ -81,12 +139,18 @@
 		top: 0;
 		z-index: 30;
 		display: flex;
-		align-items: center;
-		gap: var(--space-4);
-		padding: var(--space-3) var(--space-5);
+		flex-direction: column;
+		gap: 0;
 		border-bottom: 1px solid var(--border);
 		background: color-mix(in srgb, var(--panel) 86%, transparent);
 		backdrop-filter: blur(14px) saturate(1.1);
+	}
+
+	.header-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: var(--space-3) var(--space-5) var(--space-2);
 	}
 
 	.brand {
@@ -106,53 +170,124 @@
 		letter-spacing: 0.02em;
 	}
 
-	.nav {
-		display: flex;
-		gap: 0.15rem;
-		flex: 1;
-		flex-wrap: wrap;
+	.actions {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
 	}
 
-	.nav-btn {
+	/* ── Pill nav ── */
+	.pill-nav {
+		position: relative;
+		display: flex;
+		align-items: center;
+		padding: 0 var(--space-5) var(--space-3);
+	}
+
+	.pill-track {
+		display: flex;
+		gap: 0.3rem;
+		overflow-x: auto;
+		scroll-behavior: smooth;
+		scroll-snap-type: x proximity;
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+		padding: 2px 0;
+		flex: 1;
+	}
+
+	.pill-track::-webkit-scrollbar {
+		display: none;
+	}
+
+	.pill {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		padding: 0.4rem 0.75rem;
 		background: transparent;
-		border: none;
+		border: 1px solid transparent;
+		border-radius: var(--radius-pill);
 		color: var(--muted);
 		font-size: var(--fs-sm);
+		font-weight: 500;
 		cursor: pointer;
-		padding: 0.45rem 0.8rem;
-		border-radius: var(--radius-sm);
-		transition: background var(--tx-base), color var(--tx-base);
+		white-space: nowrap;
+		flex-shrink: 0;
+		scroll-snap-align: center;
+		transition:
+			background var(--tx-base),
+			color var(--tx-base),
+			border-color var(--tx-base),
+			box-shadow var(--tx-base);
 	}
 
-	.nav-btn:hover {
+	.pill:hover {
 		color: var(--text);
-		background: color-mix(in srgb, var(--accent) 10%, transparent);
+		background: color-mix(in srgb, var(--accent) 8%, transparent);
+		border-color: color-mix(in srgb, var(--accent) 15%, transparent);
 	}
 
-	.nav-btn.active {
+	.pill.active {
 		color: var(--accent);
-		background: color-mix(in srgb, var(--accent) 18%, transparent);
+		background: color-mix(in srgb, var(--accent) 14%, transparent);
+		border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+		box-shadow: 0 0 8px color-mix(in srgb, var(--accent) 12%, transparent);
 	}
 
-	.nav-badge {
-		font-size: 0.6rem;
+	.pill-icon {
+		font-size: 0.85em;
+		flex-shrink: 0;
+	}
+
+	.pill-label {
+		line-height: 1;
+	}
+
+	.pill-badge {
+		font-size: 0.55rem;
 		font-weight: 700;
 		padding: 1px 5px;
 		border-radius: var(--radius-pill);
 		background: var(--accent);
 		color: var(--bg);
-		margin-left: 4px;
-		vertical-align: top;
+		margin-left: 2px;
 		line-height: 1.4;
 	}
 
-	.actions {
-		display: inline-flex;
+	/* ── Scroll arrows ── */
+	.scroll-arrow {
+		display: flex;
 		align-items: center;
-		gap: 0.4rem;
-		flex-wrap: wrap;
+		justify-content: center;
+		width: 26px;
+		height: 26px;
+		border-radius: 50%;
+		background: var(--panel);
+		border: 1px solid var(--border);
+		color: var(--muted);
+		font-size: 0.65rem;
+		cursor: pointer;
+		flex-shrink: 0;
+		transition: color var(--tx-base), border-color var(--tx-base);
+		z-index: 2;
 	}
 
+	.scroll-arrow:hover {
+		color: var(--text);
+		border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+	}
+
+	.scroll-arrow.left {
+		margin-right: var(--space-1);
+	}
+
+	.scroll-arrow.right {
+		margin-left: var(--space-1);
+	}
+
+	/* ── Theme switch ── */
 	.theme-switch {
 		position: relative;
 		display: inline-block;
@@ -278,55 +413,28 @@
 	.theme-switch__icon.dark .theme-switch__part--11 { transform: translateX(-50%) rotate(315deg) translateY(0.55em) scale(0); }
 
 	@media (max-width: 768px) {
-		.app-header {
-			flex-wrap: wrap;
-			padding: var(--space-2) var(--space-3);
-			gap: var(--space-2);
-			align-items: center;
+		.header-row {
+			padding: var(--space-2) var(--space-3) var(--space-1);
 		}
 
-		.brand {
-			flex: 0 0 auto;
+		.pill-nav {
+			padding: 0 var(--space-3) var(--space-2);
 		}
 
-		.actions {
-			margin-left: auto;
-			flex-wrap: nowrap;
-		}
-
-		.nav {
-			order: 3;
-			flex: 0 0 100%;
-			width: 100%;
-			gap: 0.15rem;
-			justify-content: flex-start;
-			flex-wrap: nowrap;
-			overflow-x: auto;
-			scrollbar-width: none;
-			-ms-overflow-style: none;
-			-webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
-			mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
-		}
-
-		.nav::-webkit-scrollbar {
-			display: none;
-		}
-
-		.nav-btn {
-			padding: 0.4rem 0.7rem;
+		.pill {
+			padding: 0.35rem 0.6rem;
 			font-size: var(--fs-xs);
-			white-space: nowrap;
-			flex-shrink: 0;
-		}
-	}
-
-	@media (max-width: 540px) {
-		.actions {
-			margin-left: auto;
+			gap: 0.3rem;
 		}
 
-		.actions :global(.dropdown .label) {
-			display: none;
+		.pill-icon {
+			font-size: 0.8em;
+		}
+
+		.scroll-arrow {
+			width: 22px;
+			height: 22px;
+			font-size: 0.55rem;
 		}
 	}
 </style>

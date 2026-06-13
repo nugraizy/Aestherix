@@ -9,7 +9,7 @@
 
 <div class="controls">
 	<header class="page-head">
-		<h2>Controls</h2>
+		<h2><i class="nf nf-fa-sliders"></i> Controls</h2>
 		<p class="page-sub">Toggle commands and runtime flags.</p>
 	</header>
 

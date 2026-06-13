@@ -105,7 +105,7 @@
 
 <div class="messages-page">
 	<header class="page-head">
-		<h2>Message Logs</h2>
+		<h2><i class="nf nf-fa-comment"></i> Message Logs</h2>
 		<p class="page-sub">Searchable message history from the bot's store.</p>
 	</header>
 

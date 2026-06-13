@@ -206,3 +206,34 @@ export function getMessageLogs({ q, jid, limit } = {}) {
 
 	return get(`/messages${qs ? `?${qs}` : ''}`);
 }
+
+export function getSubBots() {
+	return get('/subbots');
+}
+
+export function startSubBot(name) {
+	return post(`/subbots/${encodeURIComponent(name)}/start`);
+}
+
+export function stopSubBot(name) {
+	return post(`/subbots/${encodeURIComponent(name)}/stop`);
+}
+
+export function updateSubBotFlags(name, flags) {
+	return request(`/subbots/${encodeURIComponent(name)}/flags`, {
+		method: 'PATCH',
+		body: JSON.stringify({ flags })
+	});
+}
+
+export function removeSubBot(name, purge = false) {
+	const qs = purge ? '?purge=1' : '';
+
+	return request(`/subbots/${encodeURIComponent(name)}${qs}`, { method: 'DELETE' });
+}
+
+export function getSubBotLogs(name, { since = 0, limit = 200 } = {}) {
+	const qs = new URLSearchParams({ since: String(since), limit: String(limit) }).toString();
+
+	return request(`/logs/subbot/${encodeURIComponent(name)}?${qs}`);
+}

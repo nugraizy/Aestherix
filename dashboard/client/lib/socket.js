@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 import { MAX_LOGS } from './constants.js';
-import { commands, flags, logs, status, toolPanels, users } from './stores.js';
+import { commands, flags, logs, status, subBots, toolPanels, users } from './stores.js';
 
 let logSeq = 0;
 
@@ -108,6 +108,12 @@ function bindEvents() {
 
 	socket.on('dashboard:users', (payload) => {
 		users.set(payload?.users || []);
+	});
+
+	socket.on('dashboard:subbots', (payload) => {
+		if (Array.isArray(payload?.subBots)) {
+			subBots.set(payload.subBots);
+		}
 	});
 
 	socket.on('dashboard:tools', (payload) => {

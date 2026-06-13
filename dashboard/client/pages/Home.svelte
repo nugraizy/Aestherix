@@ -10,7 +10,7 @@
 
 <div class="home">
 	<header class="page-head">
-		<h2>Overview</h2>
+		<h2><i class="nf nf-fa-home"></i> Overview</h2>
 		<p class="page-sub">Real-time bot status, log stream, and audit trail.</p>
 	</header>
 

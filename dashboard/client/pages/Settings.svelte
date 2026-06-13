@@ -6,7 +6,7 @@
 
 <div class="settings">
 	<header class="page-head">
-		<h2>Settings</h2>
+		<h2><i class="nf nf-fa-gear"></i> Settings</h2>
 		<p class="page-sub">Bot configuration, prefix, and user limits.</p>
 	</header>
 

@@ -26,6 +26,7 @@
 		'manual-solve': () => import('./pages/ManualSolve.svelte'),
 		messages: () => import('./pages/MessageLogs.svelte'),
 		settings: () => import('./pages/Settings.svelte'),
+		subbots: () => import('./pages/SubBots.svelte'),
 		system: () => import('./pages/System.svelte'),
 		editor: () => import('./pages/FileEditor.svelte'),
 		tools: () => import('./pages/Tools.svelte')
@@ -53,7 +54,7 @@
 		notfound: NotFound
 	};
 
-	const PAGE_NAMES = ['home', 'controls', 'settings', 'groups', 'broadcast', 'messages', 'system', 'albums', 'editor', 'tools', 'manual-solve', 'notfound'];
+	const PAGE_NAMES = ['home', 'controls', 'settings', 'groups', 'broadcast', 'messages', 'system', 'albums', 'editor', 'tools', 'manual-solve', 'subbots', 'notfound'];
 	const NAV_PAGES = PAGE_NAMES.filter((name) => name !== 'notfound');
 	const PAGE_PATH_BASE = '/dashboard';
 
@@ -231,7 +232,7 @@
 				}
 				loader().then((mod) => {
 					loadedPages = { ...loadedPages, [name]: mod.default };
-				});
+				}).catch(() => {});
 			});
 
 			if (sessionRole === 'viewer' && VIEWER_BLOCKED_PAGES.has(page)) {
@@ -262,7 +263,7 @@
 			}
 			loader().then((mod) => {
 				loadedPages = { ...loadedPages, [name]: mod.default };
-			});
+			}).catch(() => {});
 		});
 		showSuccess('Logged in.');
 	}
@@ -432,6 +433,11 @@
 					<svelte:component this={loadedPages.tools} active={page === 'tools'} isSuperOwner={sessionRole === 'superOwner'} />
 				</div>
 			{/if}
+			{#if loadedPages.subbots}
+				<div class="page-cache" class:page-hidden={page !== 'subbots'}>
+					<svelte:component this={loadedPages.subbots} isViewer={isViewer} active={page === 'subbots'} />
+				</div>
+			{/if}
 		</main>
 		<SpotifyWidget />
 		<Footer
@@ -554,6 +560,12 @@
 			scrollbar-width: auto;
 			scrollbar-color: color-mix(in srgb, var(--accent) 70%, transparent) transparent;
 		}
+	}
+
+	:global(.page-head h2 i) {
+		color: var(--accent);
+		font-size: 0.85em;
+		margin-right: 0.35em;
 	}
 
 	:global(.section) {

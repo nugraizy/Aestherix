@@ -55,3 +55,5 @@ export const maintenanceMode = writable(false);
 export const toolPanels = writable([]);
 
 export const changelogOpen = writable(false);
+
+export const subBots = writable([]);

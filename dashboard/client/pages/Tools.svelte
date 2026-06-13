@@ -163,7 +163,7 @@
 		</ToolPanel>
 	{:else if loaded || !pendingTool}
 	<header class="page-head">
-		<h2>Tools</h2>
+		<h2><i class="nf nf-fa-wrench"></i> Tools</h2>
 		<p class="page-sub">Utilities powered by the bot's existing modules. Click a tool to use it.</p>
 	</header>
 

@@ -83,7 +83,7 @@ export function createFlagsRouter({ services }) {
 			loggers.info(
 				color('Dashboard changed flag state:', 'white'),
 				color(flagName, 'lilac'),
-				color('⤑ ', 'white'),
+				color('→', 'white'),
 				color(enabled ? 'enabled' : 'disabled', enabled ? 'green' : 'red')
 			);
 

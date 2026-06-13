@@ -121,7 +121,14 @@ export function createBroadcastRouter({ services }) {
 	});
 
 	router.post('/broadcast/templates', middleware.requireSuperOwnerAuth, async (req, res) => {
-		const result = await broadcast.saveTemplate(req.body);
+		const { name, message, media, buttons, sections } = req.body || {};
+
+		if (!name || typeof name !== 'string' || name.length > 100) {
+			return res.status(400).json({ ok: false, message: 'Invalid template name.' });
+		}
+
+		const template = { name, message, media, buttons, sections };
+		const result = await broadcast.saveTemplate(template);
 
 		res.json(result);
 	});

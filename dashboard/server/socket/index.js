@@ -47,6 +47,12 @@ async function emitInitialSnapshot(socket, services) {
 		return;
 	}
 
+	const subBotsResult = await services.subBots?.list?.();
+
+	if (subBotsResult?.ok) {
+		socket.emit('dashboard:subbots', { subBots: subBotsResult.subBots });
+	}
+
 	let logsPayload;
 
 	if (isBotEmbeddedHere()) {
@@ -122,19 +128,23 @@ function startStatusInterval(io, services) {
 	let lastSig = '';
 
 	return setInterval(async () => {
-		if (io.of('/').sockets.size === 0) {
-			return;
+		try {
+			if (io.of('/').sockets.size === 0) {
+				return;
+			}
+
+			const status = await services.system.getStatus();
+			const sig = statusSignature(status);
+
+			if (sig === lastSig) {
+				return;
+			}
+
+			lastSig = sig;
+			io.emit('dashboard:status', status);
+		} catch {
+			/* ignore polling errors */
 		}
-
-		const status = await services.system.getStatus();
-		const sig = statusSignature(status);
-
-		if (sig === lastSig) {
-			return;
-		}
-
-		lastSig = sig;
-		io.emit('dashboard:status', status);
 	}, STATUS_INTERVAL_MS);
 }
 
@@ -142,72 +152,80 @@ function startLogsInterval(io, services) {
 	const embedded = isBotEmbeddedHere();
 
 	return setInterval(async () => {
-		const sockets = Array.from(io.of('/').sockets.values());
+		try {
+			const sockets = Array.from(io.of('/').sockets.values());
 
-		if (!sockets.length) {
-			return;
-		}
-
-		for (const socket of sockets) {
-			if (socket.data?.session?.role !== 'owner' && socket.data?.session?.role !== 'superOwner') {
-				continue;
+			if (!sockets.length) {
+				return;
 			}
 
-			const since = Number(socket.data?.lastLogId || 0);
-			let payload;
+			for (const socket of sockets) {
+				if (socket.data?.session?.role !== 'owner' && socket.data?.session?.role !== 'superOwner') {
+					continue;
+				}
 
-			if (embedded) {
-				payload = services.monitor.getLogs({ since, limit: 250 });
-			} else {
-				const result = await services.botBridge.fetchBotLogs({ since, limit: 250 });
+				const since = Number(socket.data?.lastLogId || 0);
+				let payload;
 
-				payload = result.ok ? result.data || { lastId: since, logs: [] } : { lastId: since, logs: [] };
+				if (embedded) {
+					payload = services.monitor.getLogs({ since, limit: 250 });
+				} else {
+					const result = await services.botBridge.fetchBotLogs({ since, limit: 250 });
+
+					payload = result.ok ? result.data || { lastId: since, logs: [] } : { lastId: since, logs: [] };
+				}
+
+				socket.data.lastLogId = Number(payload?.lastId || since || 0);
+
+				if (Array.isArray(payload?.logs) && payload.logs.length) {
+					socket.emit('dashboard:logs', payload);
+				}
 			}
-
-			socket.data.lastLogId = Number(payload?.lastId || since || 0);
-
-			if (Array.isArray(payload?.logs) && payload.logs.length) {
-				socket.emit('dashboard:logs', payload);
-			}
+		} catch {
+			/* ignore polling errors */
 		}
 	}, LOGS_INTERVAL_MS);
 }
 
 function startBotLogsInterval(io, services) {
 	return setInterval(async () => {
-		const ownerSockets = Array.from(io.of('/').sockets.values()).filter(
-			(socket) => socket.data?.session?.role === 'owner' || socket.data?.session?.role === 'superOwner'
-		);
+		try {
+			const ownerSockets = Array.from(io.of('/').sockets.values()).filter(
+				(socket) => socket.data?.session?.role === 'owner' || socket.data?.session?.role === 'superOwner'
+			);
 
-		if (!ownerSockets.length) {
-			return;
-		}
-
-		const fetchCache = new Map();
-
-		for (const socket of ownerSockets) {
-			const since = Number(socket.data?.lastBotLogId || 0);
-			let result = fetchCache.get(since);
-
-			if (!result) {
-				result = await services.botBridge.fetchBotLogs({ since, limit: 250 });
-				fetchCache.set(since, result);
+			if (!ownerSockets.length) {
+				return;
 			}
 
-			if (!result.ok) {
-				socket.emit('dashboard:bot-logs', {
-					ok: false,
-					message: result.message || 'Bot log stream is not reachable.',
-					lastId: since,
-					logs: []
-				});
-				continue;
+			const fetchCache = new Map();
+
+			for (const socket of ownerSockets) {
+				const since = Number(socket.data?.lastBotLogId || 0);
+				let result = fetchCache.get(since);
+
+				if (!result) {
+					result = await services.botBridge.fetchBotLogs({ since, limit: 250 });
+					fetchCache.set(since, result);
+				}
+
+				if (!result.ok) {
+					socket.emit('dashboard:bot-logs', {
+						ok: false,
+						message: result.message || 'Bot log stream is not reachable.',
+						lastId: since,
+						logs: []
+					});
+					continue;
+				}
+
+				const payload = result.data || { lastId: since, logs: [] };
+
+				socket.data.lastBotLogId = Number(payload?.lastId || since);
+				socket.emit('dashboard:bot-logs', payload);
 			}
-
-			const payload = result.data || { lastId: since, logs: [] };
-
-			socket.data.lastBotLogId = Number(payload?.lastId || since);
-			socket.emit('dashboard:bot-logs', payload);
+		} catch {
+			/* ignore polling errors */
 		}
 	}, BOT_LOGS_INTERVAL_MS);
 }
@@ -252,52 +270,87 @@ function startMetaInterval(io, services) {
 	let lastUserCountOwner = -1;
 
 	return setInterval(async () => {
-		if (io.of('/').sockets.size === 0) {
-			return;
-		}
-
-		const commands = services.monitor.listCommands();
-		const flags = services.monitor.listFlags();
-		const latestPicture = await services.profilePictures.getLatest();
-		const currentKey = `${latestPicture?.timestamp || ''}|${latestPicture?.url || ''}`;
-
-		const commandsJson = JSON.stringify(commands);
-		const flagsJson = JSON.stringify(flags);
-
-		if (commandsJson !== lastCommandsSnapshot) {
-			lastCommandsSnapshot = commandsJson;
-			io.emit('dashboard:commands', { commands });
-		}
-
-		if (flagsJson !== lastFlagsSnapshot) {
-			lastFlagsSnapshot = flagsJson;
-			io.emit('dashboard:flags', { flags });
-		}
-
-		if (currentKey && currentKey !== lastPictureKey) {
-			lastPictureKey = currentKey;
-			services.profilePictures.prependCached?.(latestPicture);
-			io.emit('dashboard:profile-pictures', { picture: latestPicture });
-		}
-
-		const usersForOwner = await services.users.list({ redactNumbers: false });
-		const ownerCount = usersForOwner.length;
-
-		if (ownerCount !== lastUserCountOwner) {
-			lastUserCountOwner = ownerCount;
-
-			const usersForViewer = await services.users.list({ redactNumbers: true });
-
-			const sockets = Array.from(io.of('/').sockets.values());
-
-			for (const socket of sockets) {
-				const session = socket.data?.session || null;
-				const list = session?.role === 'owner' || session?.role === 'superOwner' ? usersForOwner : usersForViewer;
-
-				socket.emit('dashboard:users', { users: list });
+		try {
+			if (io.of('/').sockets.size === 0) {
+				return;
 			}
+
+			const commands = services.monitor.listCommands();
+			const flags = services.monitor.listFlags();
+			const latestPicture = await services.profilePictures.getLatest();
+			const currentKey = `${latestPicture?.timestamp || ''}|${latestPicture?.url || ''}`;
+
+			const commandsJson = JSON.stringify(commands);
+			const flagsJson = JSON.stringify(flags);
+
+			if (commandsJson !== lastCommandsSnapshot) {
+				lastCommandsSnapshot = commandsJson;
+				io.emit('dashboard:commands', { commands });
+			}
+
+			if (flagsJson !== lastFlagsSnapshot) {
+				lastFlagsSnapshot = flagsJson;
+				io.emit('dashboard:flags', { flags });
+			}
+
+			if (currentKey && currentKey !== lastPictureKey) {
+				lastPictureKey = currentKey;
+				services.profilePictures.prependCached?.(latestPicture);
+				io.emit('dashboard:profile-pictures', { picture: latestPicture });
+			}
+
+			const usersForOwner = await services.users.list({ redactNumbers: false });
+			const ownerCount = usersForOwner.length;
+
+			if (ownerCount !== lastUserCountOwner) {
+				lastUserCountOwner = ownerCount;
+
+				const usersForViewer = await services.users.list({ redactNumbers: true });
+
+				const sockets = Array.from(io.of('/').sockets.values());
+
+				for (const socket of sockets) {
+					const session = socket.data?.session || null;
+					const list = session?.role === 'owner' || session?.role === 'superOwner' ? usersForOwner : usersForViewer;
+
+					socket.emit('dashboard:users', { users: list });
+				}
+			}
+		} catch {
+			/* ignore polling errors */
 		}
 	}, META_INTERVAL_MS);
+}
+
+const SUBBOTS_INTERVAL_MS = 5000;
+
+function startSubBotsInterval(io, services) {
+	let lastSnapshot = '';
+
+	return setInterval(async () => {
+		try {
+			if (io.of('/').sockets.size === 0) {
+				return;
+			}
+
+			const result = await services.subBots?.list?.();
+
+			if (!result?.ok) {
+				return;
+			}
+
+			const snapshot = JSON.stringify(result.subBots);
+
+			if (snapshot === lastSnapshot) {
+				return;
+			}
+
+			lastSnapshot = snapshot;
+			io.emit(ROOMS.SUBBOTS, { subBots: result.subBots });
+		} catch {
+			/* ignore polling errors */
+		}
+	}, SUBBOTS_INTERVAL_MS);
 }
 
 export function createSocketLayer(httpServer, services) {
@@ -395,16 +448,18 @@ export function createSocketLayer(httpServer, services) {
 			const id = String(payload?.id || '');
 			const manualSolve = services.manualSolve;
 
-			if (manualSolve?.hasSession?.(id)) {
-				const sessionData = manualSolve.getSession(id);
-				const isChallenge = !!sessionData?.challengeId;
-
-				if (!isChallenge && session?.role !== 'owner' && session?.role !== 'superOwner') {
-					return;
-				}
+			if (!manualSolve?.hasSession?.(id)) {
+				return;
 			}
 
-			void services.manualSolve?.handleInput?.(id, payload?.input || {});
+			const sessionData = manualSolve.getSession(id);
+			const isChallenge = !!sessionData?.challengeId;
+
+			if (!isChallenge && session?.role !== 'owner' && session?.role !== 'superOwner') {
+				return;
+			}
+
+			void manualSolve.handleInput(id, payload?.input || {});
 		});
 
 		socket.on('disconnect', () => {
@@ -447,7 +502,8 @@ export function createSocketLayer(httpServer, services) {
 		startLogsInterval(io, services),
 		startBotLogsInterval(io, services),
 		startAuditInterval(io, services),
-		startMetaInterval(io, services)
+		startMetaInterval(io, services),
+		startSubBotsInterval(io, services)
 	];
 
 	function shutdown() {
@@ -469,6 +525,7 @@ export function createSocketLayer(httpServer, services) {
 		emitFlags: (payload) => emit(ROOMS.FLAGS, payload),
 		emitUsers: (payload) => emit(ROOMS.USERS, payload),
 		emitLogs: (payload) => emit(ROOMS.LOGS, payload),
-		emitProfilePictures: (payload) => emit(ROOMS.PROFILE_PICTURES, payload)
+		emitProfilePictures: (payload) => emit(ROOMS.PROFILE_PICTURES, payload),
+		emitSubBots: (payload) => emit(ROOMS.SUBBOTS, payload)
 	};
 }

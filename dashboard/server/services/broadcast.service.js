@@ -88,73 +88,75 @@ export function createBroadcastService({ configuration, botBridge, prisma } = {}
 
 		running = true;
 
-		for (let i = 0; i < targets.length; i++) {
-			const jid = String(targets[i] || '').trim();
+		try {
+			for (let i = 0; i < targets.length; i++) {
+				const jid = String(targets[i] || '').trim();
 
-			if (!jid) {
-				results.push({ jid, ok: false, reason: 'empty' });
-				continue;
-			}
-
-			if (dryRun) {
-				results.push({ jid, ok: true, dryRun: true });
-				continue;
-			}
-
-			try {
-				const bodyText = header ? `*${header.trim()}*\n\n${message.trim()}` : message.trim();
-				const resolvedText = await applyPlaceholders(bodyText, jid);
-
-				const mentions = mentionAll ? await getParticipants(jid) : [];
-
-				if (hasButtons && client.TemplateBuilder?.Native) {
-					const builder = new client.TemplateBuilder.Native();
-					const btnArgs = [];
-
-					for (const btn of buttons) {
-						if (btn.type === 'url' && btn.url) {
-							btnArgs.push(builder.button.url({ display: btn.label || 'Link', url: btn.url }));
-						} else if (btn.label) {
-							btnArgs.push(builder.button.reply({ display: btn.label, id: btn.id || btn.label }));
-						}
-					}
-
-					const b = builder
-						.destination(jid)
-						.body(resolvedText)
-						.buttons(...btnArgs);
-
-					if (hasMedia) {
-						const mediaSource = mediaBuffer || mediaUrl;
-
-						b.header('', mediaSource);
-					}
-
-					if (mentions.length) {
-						b.mentions(mentions);
-					}
-
-					await b.send();
-				} else if (hasMedia) {
-					const mediaSource = mediaBuffer || { url: mediaUrl };
-					const content = { [mediaType]: mediaSource, caption: resolvedText, mentions };
-
-					await client.send(jid, content);
-				} else {
-					await client.send(jid, { text: resolvedText, mentions });
+				if (!jid) {
+					results.push({ jid, ok: false, reason: 'empty' });
+					continue;
 				}
 
-				results.push({ jid, ok: true });
-			} catch (error) {
-				results.push({ jid, ok: false, reason: error?.message || 'send failed' });
-			}
+				if (dryRun) {
+					results.push({ jid, ok: true, dryRun: true });
+					continue;
+				}
 
-			if (i < targets.length - 1) {
-				await new Promise((resolve) => setTimeout(resolve, safeDelay));
+				try {
+					const bodyText = header ? `*${header.trim()}*\n\n${message.trim()}` : message.trim();
+					const resolvedText = await applyPlaceholders(bodyText, jid);
+
+					const mentions = mentionAll ? await getParticipants(jid) : [];
+
+					if (hasButtons && client.TemplateBuilder?.Native) {
+						const builder = new client.TemplateBuilder.Native();
+						const btnArgs = [];
+
+						for (const btn of buttons) {
+							if (btn.type === 'url' && btn.url) {
+								btnArgs.push(builder.button.url({ display: btn.label || 'Link', url: btn.url }));
+							} else if (btn.label) {
+								btnArgs.push(builder.button.reply({ display: btn.label, id: btn.id || btn.label }));
+							}
+						}
+
+						const b = builder
+							.destination(jid)
+							.body(resolvedText)
+							.buttons(...btnArgs);
+
+						if (hasMedia) {
+							const mediaSource = mediaBuffer || mediaUrl;
+
+							b.header('', mediaSource);
+						}
+
+						if (mentions.length) {
+							b.mentions(mentions);
+						}
+
+						await b.send();
+					} else if (hasMedia) {
+						const mediaSource = mediaBuffer || { url: mediaUrl };
+						const content = { [mediaType]: mediaSource, caption: resolvedText, mentions };
+
+						await client.send(jid, content);
+					} else {
+						await client.send(jid, { text: resolvedText, mentions });
+					}
+
+					results.push({ jid, ok: true });
+				} catch (error) {
+					results.push({ jid, ok: false, reason: error?.message || 'send failed' });
+				}
+
+				if (i < targets.length - 1) {
+					await new Promise((resolve) => setTimeout(resolve, safeDelay));
+				}
 			}
+		} finally {
+			running = false;
 		}
-
-		running = false;
 
 		const sent = results.filter((r) => r.ok).length;
 		const failed = results.filter((r) => !r.ok).length;

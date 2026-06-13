@@ -15,19 +15,19 @@ const upload = multer({
 
 export function createChatRouter({ services }) {
 	const router = Router();
-	const { chat } = services;
+	const { chat, middleware } = services;
 
-	router.get('/chat/sessions', (_req, res) => {
+	router.get('/chat/sessions', middleware.requireDashboardAuth, (_req, res) => {
 		res.json({ sessions: chat.listSessions() });
 	});
 
-	router.post('/chat/sessions', (_req, res) => {
+	router.post('/chat/sessions', middleware.requireDashboardAuth, (_req, res) => {
 		const session = chat.createSession();
 
 		res.json({ session });
 	});
 
-	router.get('/chat/sessions/:id', (req, res) => {
+	router.get('/chat/sessions/:id', middleware.requireDashboardAuth, (req, res) => {
 		const session = chat.getSession(req.params.id);
 
 		if (!session) {
@@ -37,7 +37,7 @@ export function createChatRouter({ services }) {
 		res.json({ session });
 	});
 
-	router.delete('/chat/sessions/:id', (req, res) => {
+	router.delete('/chat/sessions/:id', middleware.requireDashboardAuth, (req, res) => {
 		const deleted = chat.deleteSession(req.params.id);
 
 		if (!deleted) {
@@ -47,7 +47,7 @@ export function createChatRouter({ services }) {
 		res.json({ ok: true });
 	});
 
-	router.patch('/chat/sessions/:id', (req, res) => {
+	router.patch('/chat/sessions/:id', middleware.requireDashboardAuth, (req, res) => {
 		const { title } = req.body;
 
 		if (!title || typeof title !== 'string') {
@@ -63,7 +63,7 @@ export function createChatRouter({ services }) {
 		res.json({ session });
 	});
 
-	router.post('/chat/sessions/:id/messages', async (req, res) => {
+	router.post('/chat/sessions/:id/messages', middleware.requireDashboardAuth, async (req, res) => {
 		const { content } = req.body;
 
 		if (!content || typeof content !== 'string' || !content.trim()) {
@@ -79,7 +79,7 @@ export function createChatRouter({ services }) {
 		res.json(result);
 	});
 
-	router.post('/chat/sessions/:id/image', async (req, res) => {
+	router.post('/chat/sessions/:id/image', middleware.requireDashboardAuth, async (req, res) => {
 		const { prompt } = req.body;
 
 		if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
@@ -95,7 +95,7 @@ export function createChatRouter({ services }) {
 		res.json(result);
 	});
 
-	router.post('/chat/sessions/:id/vision', upload.single('image'), async (req, res) => {
+	router.post('/chat/sessions/:id/vision', middleware.requireDashboardAuth, upload.single('image'), async (req, res) => {
 		if (!req.file) {
 			return res.status(400).json({ error: 'Image file is required' });
 		}

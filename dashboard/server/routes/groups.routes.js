@@ -122,6 +122,12 @@ export function createGroupsRouter({ services, configuration }) {
 			return res.status(400).json({ ok: false, message: 'Invalid action or participants.' });
 		}
 
+		const validJids = jids.filter((j) => typeof j === 'string' && j.length >= 5 && j.includes('@')).slice(0, 50);
+
+		if (!validJids.length) {
+			return res.status(400).json({ ok: false, message: 'No valid JIDs provided.' });
+		}
+
 		const client = (await import('../lib/client.js')).getEmbeddedWaClient();
 
 		if (!client) {
@@ -129,9 +135,9 @@ export function createGroupsRouter({ services, configuration }) {
 		}
 
 		try {
-			await client.groupParticipantsUpdate(groupId, jids, action);
+			await client.groupParticipantsUpdate(groupId, validJids, action);
 
-			res.json({ ok: true, action, count: jids.length });
+			res.json({ ok: true, action, count: validJids.length });
 		} catch (error) {
 			res.status(500).json({ ok: false, message: error?.message || 'Action failed.' });
 		}
@@ -210,7 +216,7 @@ export function createGroupsRouter({ services, configuration }) {
 				color('Dashboard updated group setting:', 'white'),
 				color(groupId, 'lilac'),
 				color(field, 'white'),
-				color('⤑', 'gray'),
+				color('→', 'gray'),
 				color(String(result.value), 'green')
 			);
 
