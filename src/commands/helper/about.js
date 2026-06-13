@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 
 import { BOT_NAME } from '../../core/constants.js';
 import configuration from '../../helper/config/connect.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 const botVersion = (await fs.readJSON('./package.json')).version;
@@ -17,6 +18,8 @@ export default defineCommand({
 	limit: 5,
 	status: 'enable',
 	async run({ from }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
 		const capt = `Bot Name : ${BOT_NAME}
 Total Commands : ${configuration.registry.commands.size}
 Bot Version : ${botVersion}

@@ -3,6 +3,7 @@ import { BOT_NAME } from '../../core/constants.js';
 import _ from 'lodash';
 import parser from 'yargs-parser';
 
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { color, formatNumber, loggers } from '../../utils/modules/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
@@ -19,6 +20,9 @@ export default defineCommand({
 	limit: 6,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, type, args, prefix }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (type === 'templateButtonReplyMessage' && args[1] === '-crawl') {
 			let data = JSON.parse(args.slice(2).join(' '));
 			let len = '';
@@ -58,7 +62,7 @@ export default defineCommand({
 		}
 
 		if (!query) {
-			return await client.reply(from, 'Please specify a query', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
 		let { _: usernames } = parser(query);

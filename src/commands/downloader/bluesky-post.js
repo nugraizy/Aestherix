@@ -1,5 +1,6 @@
 import parser from 'yargs-parser';
 
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { bluesky, color, isURL, loggers, removeDuplicatesArray } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -13,18 +14,21 @@ export default defineCommand({
 	limit: 4,
 	status: 'enable',
 	run: async ({ from, query, message, prettyNumber }, client) => {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
-		const wait = await client.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, L.success.loading, message);
 
 		let { _: urls } = parser(query);
 
 		urls = removeDuplicatesArray(urls);
 
 		if (urls.length === 1 && !isURL(urls[0])) {
-			return await wait.update('Please specify a valid url.');
+			return await wait.update(L.errors.invalidUrl);
 		}
 
 		let success = 0;
@@ -34,7 +38,7 @@ export default defineCommand({
 
 		for (const url of urls) {
 			if (!isURL(url.trim())) {
-				await client.reply(from, 'Please Use a Valid URL.\nInvalid : ' + url, message);
+				await client.reply(from, t(locale, 'errors.validUrlRequired', [url]), message);
 				error++;
 				continue;
 			}

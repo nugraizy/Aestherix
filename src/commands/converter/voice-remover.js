@@ -3,6 +3,7 @@ import { color, loggers } from '../../utils/modules/index.js';
 import { soundRemover } from '../../utils/converter/index.js';
 import { extension, audioFormat, videoFormat } from '../../utils/misc/mimetype.js';
 import { defineCommand } from '../_define.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 
 export default defineCommand({
 	name: 'soundremover',
@@ -29,8 +30,11 @@ export default defineCommand({
 		},
 		client
 	) {
-		if (!isQuotedAudio && !isQuotedDocument && !isMediaVid) {
-			return await client.reply(from, 'Please send/reply an audio/video to remove voice', message);
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
+		if ((!isQuotedAudio && !isQuotedDocument && !isMediaVid) || !extractMediaData) {
+			return await client.reply(from, L.errors.audioVideoRequired, message);
 		}
 
 		loggers.warning(`${color('Removing Sound', 'pink')} for ${color(prettyNumber, 'lilac')}`);
@@ -46,7 +50,7 @@ export default defineCommand({
 			!audioFormat.includes(extractMediaData.mimetype) &&
 			!videoFormat.includes(extractMediaData.mimetype)
 		) {
-			return await client.reply(from, 'This file is not an audio/video', message);
+			return await client.reply(from, L.errors.audioVideoRequired, message);
 		}
 
 		const { result } = await soundRemover(file, prettyNumber);

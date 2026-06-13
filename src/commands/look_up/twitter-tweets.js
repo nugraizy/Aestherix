@@ -3,6 +3,7 @@ import { BOT_NAME } from '../../core/constants.js';
 import dayjs from 'dayjs';
 
 import { Cache } from '../../helper/modules/cache.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { color, delay, formatNumber, loggers, randomChar } from '../../utils/modules/index.js';
 import { Twitter } from '../../utils/twitter/index.js';
@@ -125,8 +126,11 @@ export default defineCommand({
 	limit: 5,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, prefix }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please specify a Twitter username.', message);
+			return await client.reply(from, L.errors.usernameRequired, message);
 		}
 
 		if (query.startsWith('next ')) {
@@ -134,11 +138,11 @@ export default defineCommand({
 			const cached = tweetSessions.get(sessionId);
 
 			if (!cached) {
-				return await client.reply(from, 'Session expired. Please search again.', message);
+				return await client.reply(from, L.errors.sessionExpired, message);
 			}
 
 			if (!cached.buffer.length && cached.cursor) {
-				const nextWait = await client.waitMessage(from, 'Fetching more tweets...', message);
+				const nextWait = await client.waitMessage(from, L.success.fetchingTweets, message);
 
 				const nextPage = await twitter.getUserTweets(cached.username, { cursor: cached.cursor });
 
@@ -155,7 +159,7 @@ export default defineCommand({
 
 			if (!cached.buffer.length) {
 				tweetSessions.delete(sessionId);
-				return await client.reply(from, 'No more tweets.', message);
+				return await client.reply(from, L.info.noMoreTweets, message);
 			}
 
 			const nextBatch = cached.buffer.splice(0, TWEETS_PER_PAGE);

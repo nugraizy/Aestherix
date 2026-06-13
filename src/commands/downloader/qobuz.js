@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import lodash from 'lodash';
 import parser from 'yargs-parser';
 
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { metadata, qobuz } from '../../utils/qobuz/index.js';
@@ -18,14 +19,17 @@ export default defineCommand({
 	limit: 3,
 	status: 'enable',
 	async run({ from, query, message, prettyNumber, prefix, device }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		let wait = null;
 
 		try {
 			if (!query) {
-				return await client.reply(from, 'You must provide a query.', message);
+				return await client.reply(from, L.errors.noQuery, message);
 			}
 
-			wait = await client.waitMessage(from, 'Please wait...', message);
+			wait = await client.waitMessage(from, L.success.loading, message);
 
 			let { _, index, id } = parser(query, {
 				configuration: { 'short-option-groups': false },

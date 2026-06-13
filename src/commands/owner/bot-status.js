@@ -1,4 +1,5 @@
 import { manager } from '../../core/manager.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import prisma from '../../helper/database/prisma.js';
 import { defineCommand } from '../_define.js';
 
@@ -15,6 +16,9 @@ export default defineCommand({
 	premium: false,
 
 	async run({ from, message, isOwner }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!isOwner) {
 			return;
 		}
@@ -24,7 +28,7 @@ export default defineCommand({
 		const managed = new Map(entries.map((e) => [e.name, e.client]));
 
 		if (instances.length === 0 && entries.length === 0) {
-			return client.reply(from, 'No bot instances configured.', message);
+			return client.reply(from, L.errors.noBotsConfigured, message);
 		}
 
 		const lines = [];

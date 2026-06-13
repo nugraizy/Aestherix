@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { isURL, screenshot } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -12,12 +13,15 @@ export default defineCommand({
 	limit: 2,
 	status: 'enable',
 	async run(message, client) {
+		const locale = await getLocale(message.from);
+		const L = useLocale(locale, 'common');
+
 		if (!message.query) {
-			return await client.reply(message.from, 'Please specify a website URL', message.message);
+			return await client.reply(message.from, L.errors.websiteUrlRequired, message.message);
 		}
 
 		if (!isURL(message.query)) {
-			return await client.reply(message.from, 'Please specify a valid URL', message.message);
+			return await client.reply(message.from, L.errors.invalidUrl, message.message);
 		}
 
 		const { buffer, error } = await screenshot(message.query);

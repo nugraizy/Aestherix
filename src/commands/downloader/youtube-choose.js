@@ -1,5 +1,6 @@
 import { BOT_NAME } from '../../core/constants.js';
 
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { isURL, isYoutubeURL } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
@@ -15,6 +16,9 @@ export default defineCommand({
 	limit: 8,
 	status: 'enable',
 	async run({ from, query, message, prefix, device, type, mediaData }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (
 			type !== 'buttonsResponseMessage' &&
 			!client.decodeJid(await client.resolveJid(mediaData.participant, 'jid'))?.includes(client.decodeJid(client.user.id))
@@ -23,7 +27,7 @@ export default defineCommand({
 		}
 
 		if (!query || !(isURL(query) && isYoutubeURL(query))) {
-			return await client.reply(from, 'Please provide a valid YouTube URL.', message);
+			return await client.reply(from, L.errors.invalidYoutubeUrl, message);
 		}
 
 		const ctx = { prefix, device };

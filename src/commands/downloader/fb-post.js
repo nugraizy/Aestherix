@@ -1,5 +1,6 @@
 import parser from 'yargs-parser';
 
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { facebook } from '../../utils/facebook/index.js';
 import { color, delay, fetchBUFFER, isURL, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
@@ -17,22 +18,25 @@ export default defineCommand({
 	limit: 6,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please provide a URL', message);
+			return await client.reply(from, L.errors.noUrl, message);
 		}
 
-		const wait = await client.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, L.success.loading, message);
 
 		const { _: urls } = parser(query);
 
 		urls = removeDuplicatesArray(urls);
 
 		if (urls.length === 1 && !isURL(urls[0])) {
-			return await wait.update('Please specify a valid url');
+			return await wait.update(L.errors.invalidUrl);
 		}
 
 		if (urls.length === 1 && !regex(urls[0])) {
-			return await wait.update('Please specify a valid Facebook url');
+			return await wait.update(L.errors.fbUrlRequired);
 		}
 
 		let success = 0;
@@ -42,11 +46,11 @@ export default defineCommand({
 
 		for (const url of urls) {
 			if (!isURL(url.trim())) {
-				await client.reply(from, 'Please specify a valid url\nInvalid : ' + url, message);
+				await client.reply(from, t(locale, 'errors.validUrlRequired', [url]), message);
 				error++;
 				continue;
 			} else if (!regex(url.trim())) {
-				await client.reply(from, 'Please specify a valid Facebook url\nInvalid : ' + url, message);
+				await client.reply(from, L.errors.fbUrlRequired, message);
 				error++;
 				continue;
 			}

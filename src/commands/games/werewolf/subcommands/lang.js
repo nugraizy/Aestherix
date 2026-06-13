@@ -10,10 +10,10 @@ export const run = async (ctx, client) => {
 	const target = (ctx.args?.[2] || '').toLowerCase();
 
 	if (!SUPPORTED.has(target)) {
-		return replyError(ctx, client, getLocale(ctx.from), 'unknownLocale');
+		return replyError(ctx, client, await getLocale(ctx.from), 'unknownLocale');
 	}
 
-	setLocale(ctx.from, target);
+	await setLocale(ctx.from, target);
 
 	const session = await repository.load(ctx.from);
 

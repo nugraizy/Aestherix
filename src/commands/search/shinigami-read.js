@@ -1,3 +1,4 @@
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { imageToPdf, mime } from '../../utils/index.js';
 import { shinigami } from '../../utils/shinigami/index.js';
 import { defineCommand } from '../_define.js';
@@ -14,21 +15,24 @@ export default defineCommand({
 	limit: 3,
 	status: 'enable',
 	async run({ query, from, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please provide mangaId/chapterId.', message);
+			return await client.reply(from, L.errors.chaptersRequired, message);
 		}
 
 		const input = query.trim();
 		const slashIndex = input.indexOf('/');
 
 		if (slashIndex === -1) {
-			return await client.reply(from, 'Invalid format. Use: mangaId/chapterId', message);
+			return await client.reply(from, t(locale, 'errors.invalidFormat', ['mangaId/chapterId']), message);
 		}
 
 		const mangaId = input.slice(0, slashIndex);
 		const chapterId = input.slice(slashIndex + 1);
 
-		const wait = await client.waitMessage(from, 'Fetching chapter pages...', message);
+		const wait = await client.waitMessage(from, L.success.fetchingPages, message);
 
 		try {
 			const manga = await shinigami.getManga(mangaId).catch(() => null);

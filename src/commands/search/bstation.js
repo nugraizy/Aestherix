@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { removeDuplicatesArray, numberWithCommas } from '../../utils/modules/index.js';
 import { bilibiliSearchTv } from '../../utils/bilibili/index.js';
 import { defineCommand } from '../_define.js';
@@ -26,8 +27,11 @@ export default defineCommand({
 	cooldown: 7,
 	status: 'enable',
 	async run({ query, from, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
 		let queries = query.split(',');

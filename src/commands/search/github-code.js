@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { Github } from '../../utils/github/index.js';
 import { defineCommand } from '../_define.js';
@@ -15,8 +16,11 @@ export default defineCommand({
 	cooldown: 5,
 	status: 'enable',
 	async run({ query, from, message, args, type }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -74,7 +78,7 @@ ${data[index].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).
 		let result = await git.searchCode(query.trim());
 
 		if (result.total_count === 0) {
-			return await client.reply(from, 'Code not found.', message);
+			return await client.reply(from, L.errors.codeNotFound, message);
 		}
 
 		result = result.items.map((v) => ({

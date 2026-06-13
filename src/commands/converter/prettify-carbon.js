@@ -1,6 +1,7 @@
 import { Prettify } from '../../helper/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 
 export default defineCommand({
 	name: 'carbon',
@@ -13,8 +14,11 @@ export default defineCommand({
 	limit: 4,
 	status: 'enable',
 	run: async ({ from, prettyNumber, message, query }, client) => {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return client.reply(from, 'Please provide a Codes.', message);
+			return client.reply(from, L.errors.noQuery, message);
 		}
 
 		loggers.warning(`${color('Carboning Codes', 'pink')} ${color(prettyNumber, 'lilac')}`);

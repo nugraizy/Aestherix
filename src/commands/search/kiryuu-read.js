@@ -1,3 +1,4 @@
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
@@ -33,8 +34,8 @@ const isChapterInput = (input) => {
  * @param {string} chapterUrl
  * @param {string} fileName
  */
-const downloadChapterAsPdf = async ({ from, message }, client, wait, chapterUrl, fileName) => {
-	await wait.update('Fetching chapter pages...');
+const downloadChapterAsPdf = async ({ from, message }, client, wait, chapterUrl, fileName, locale) => {
+	await wait.update(t(locale, 'common.success.fetchingPages'));
 
 	const pages = await kiryuu.getChapterPages(chapterUrl);
 
@@ -102,6 +103,9 @@ export default defineCommand({
 	limit: 3,
 	status: 'enable',
 	async run({ query, from, message, prefix }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
 			return await client.reply(
 				from,
@@ -117,14 +121,14 @@ export default defineCommand({
 			const cached = readerSessions.get(sessionId);
 
 			if (!cached) {
-				return await client.reply(from, 'Session expired. Please search again.', message);
+				return await client.reply(from, L.errors.sessionExpired, message);
 			}
 
 			cached.currentBatch++;
 			return await sendBatch(cached, from, message, client, { prefix });
 		}
 
-		const wait = await client.waitMessage(from, 'Processing...', message);
+		const wait = await client.waitMessage(from, L.success.processing, message);
 
 		if (isChapterInput(input)) {
 			const slug = input.split('/').filter(Boolean).pop() || 'kiryuu-chapter';
@@ -134,10 +138,10 @@ export default defineCommand({
 			const chNum = ch?.number || slug.match(/chapter[- ]?(\d+)/i)?.[1] || slug;
 			const fileName = `${title}-chapter-${chNum}-kiryuu`.replace(/\s+/g, '-').toLowerCase();
 
-			return await downloadChapterAsPdf({ from, message }, client, wait, input, fileName);
+			return await downloadChapterAsPdf({ from, message }, client, wait, input, fileName, locale);
 		}
 
-		await wait.update('Searching...');
+		await wait.update(L.success.searching);
 
 		const result = await kiryuu.searchManga(input, { limit: 1 });
 

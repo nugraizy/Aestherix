@@ -1,6 +1,7 @@
 import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
+import { getLocale } from '../../helper/i18n/index.js';
 import { getTimeSince } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -20,6 +21,8 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	async run({ from, args, cmd }, client, store) {
+		const locale = await getLocale(from);
+
 		const messages = store.loadMessages(from);
 
 		if (args[1] === 'get') {

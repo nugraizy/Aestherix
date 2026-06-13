@@ -9,7 +9,8 @@ import {
 	registerNamespace,
 	setDefaultLocale,
 	setLocale,
-	t
+	t,
+	useLocale
 } from '../../../src/helper/i18n/index.js';
 
 describe('i18n helper', () => {
@@ -79,14 +80,14 @@ describe('i18n helper', () => {
 		assert.equal(t('id', 'test.errors.kindB'), 'second');
 	});
 
-	it('tracks the locale assigned to a room id', () => {
-		assert.equal(getLocale('room-x'), getDefaultLocale());
+	it('tracks the locale assigned to a room id', async () => {
+		assert.equal(await getLocale('room-x'), getDefaultLocale());
 
-		setLocale('room-x', 'en');
-		assert.equal(getLocale('room-x'), 'en');
+		await setLocale('room-x', 'en');
+		assert.equal(await getLocale('room-x'), 'en');
 
-		setLocale('room-x', null);
-		assert.equal(getLocale('room-x'), getDefaultLocale());
+		await setLocale('room-x', null);
+		assert.equal(await getLocale('room-x'), getDefaultLocale());
 	});
 
 	it('allows changing the default locale', () => {
@@ -99,5 +100,45 @@ describe('i18n helper', () => {
 
 		assert.equal(hasKey('id', 'test.greet'), true);
 		assert.equal(hasKey('en', 'test.greet'), false);
+	});
+
+	describe('useLocale', () => {
+		it('returns string directly via property access', () => {
+			registerNamespace('common', 'id', { errors: { noQuery: 'Masukkan query.' } });
+
+			const L = useLocale('id', 'common');
+
+			assert.equal(L.errors.noQuery, 'Masukkan query.');
+		});
+
+		it('falls back to default locale', () => {
+			registerNamespace('common', 'id', { errors: { noQuery: 'Masukkan query.' } });
+
+			const L = useLocale('en', 'common');
+
+			assert.equal(L.errors.noQuery, 'Masukkan query.');
+		});
+
+		it('returns proxy for missing keys (for chaining)', () => {
+			const L = useLocale('id', 'common');
+
+			assert.equal(typeof L.errors.totallyMissing, 'object');
+		});
+
+		it('works directly in string concatenation', () => {
+			registerNamespace('common', 'id', { success: { loading: 'Memuat...' } });
+
+			const L = useLocale('id', 'common');
+
+			assert.equal('Status: ' + L.success.loading, 'Status: Memuat...');
+		});
+
+		it('returns array for array values', () => {
+			registerNamespace('common', 'id', { afk: ['A', 'B', 'C'] });
+
+			const L = useLocale('id', 'common');
+
+			assert.deepStrictEqual(L.afk, ['A', 'B', 'C']);
+		});
 	});
 });

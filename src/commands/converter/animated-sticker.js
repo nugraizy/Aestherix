@@ -4,6 +4,7 @@ import yargsParser from 'yargs-parser';
 import { AnimatedSticker } from '../../helper/canvas/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 
 export default defineCommand({
 	name: 'animatedsticker',
@@ -16,6 +17,9 @@ export default defineCommand({
 	limit: 1,
 	status: 'enable',
 	async run({ from, query, message, prettyNumber, bodyQuoted }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query && !bodyQuoted) {
 			query = 'Where is the text?';
 		}
@@ -68,6 +72,6 @@ export default defineCommand({
 			return;
 		}
 
-		return await client.reply(from, 'Please enter text to convert to sticker', message);
+		return await client.reply(from, L.errors.textRequired, message);
 	}
 });

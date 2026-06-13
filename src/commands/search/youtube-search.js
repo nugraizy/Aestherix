@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
@@ -57,8 +58,11 @@ export default defineCommand({
 	limit: 5,
 	status: 'enable',
 	async run({ from, query, message, prefix, device }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please specify a query.', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
 		const ctx = { prefix, device };
@@ -67,14 +71,14 @@ export default defineCommand({
 			const cached = searchSessions.get(query.slice(5));
 
 			if (!cached) {
-				return await client.reply(from, 'Session expired. Please search again.', message);
+				return await client.reply(from, L.errors.sessionExpired, message);
 			}
 
 			cached.currentBatch++;
 
 			if (cached.currentBatch * perBatchFor(device) >= cached.items.length) {
 				cached.currentBatch--;
-				return await client.reply(from, 'No more results.', message);
+				return await client.reply(from, L.info.noMoreResults, message);
 			}
 
 			return await sendBatch(cached, from, message, client, ctx);
@@ -84,7 +88,7 @@ export default defineCommand({
 			const cached = searchSessions.get(query.slice(5));
 
 			if (!cached) {
-				return await client.reply(from, 'Session expired. Please search again.', message);
+				return await client.reply(from, L.errors.sessionExpired, message);
 			}
 
 			if (cached.sort === 'views') {
@@ -100,7 +104,7 @@ export default defineCommand({
 			return await sendBatch(cached, from, message, client, ctx);
 		}
 
-		const wait = await client.waitMessage(from, 'Searching...', message);
+		const wait = await client.waitMessage(from, L.success.searching, message);
 
 		const result = (await youtube.search(query, { limit: 40 })).filter((video) => video.type === 'video');
 

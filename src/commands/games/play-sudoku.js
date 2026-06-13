@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'fs-extra';
 
 import configuration from '../../helper/config/connect.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { toUserJid } from '../../helper/misc/wa_data/index.js';
 import { color, getTimeSince, loggers } from '../../utils/modules/index.js';
 import { checkWin, fillGrid, makePuzzle, revealOneElement, solvePuzzle, stringifyGrid } from '../../utils/games/index.js';
@@ -18,6 +19,9 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	async run({ args, sender, from, message, isOwner, cmd }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		try {
 			let data = await fs.readJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'));
 
@@ -56,7 +60,7 @@ export default defineCommand({
 					return await fs.writeJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'), data);
 				}
 
-				await client.reply(from, 'You already have a game in progress.', message);
+				await client.reply(from, L.errors.alreadyPlaying, message);
 			} else if (/([A-Ia-i])[1-9]/.test(args[1])) {
 				if (args[2].length > 2) {
 					return await client.reply(from, `Wrong format!\n\nex : ${cmd} A2 7`, message);
@@ -141,18 +145,20 @@ export default defineCommand({
 
 						if (isWin.status) {
 							const message = Object.assign({}, data[index].messages);
+							const startedAt = data[index].startedAt;
 
 							data.splice(index, 1);
 							await fs.writeJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'), data);
 
 							return await client.send(
+								from,
 								{
 									edit: message.key,
 									text: `${isWin.message}\n${stringifyGrid(reveal.board)}\n\nGame Time : ${getTimeSince(
-										data[index].startedAt
+										startedAt
 									)}\nThis game is still work on progress\nDifficulty is still on try mode.`
 								},
-								message
+								{ quoted: message }
 							);
 						}
 
@@ -174,7 +180,7 @@ export default defineCommand({
 						return await fs.writeJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'), data);
 					}
 
-					return await client.reply(from, 'Clue has run out!', message);
+					return await client.reply(from, L.errors.clueRunOut, message);
 				}
 
 				return await client.send(
@@ -218,17 +224,17 @@ export default defineCommand({
 					data = [];
 					await fs.writeJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'), data);
 
-					return await client.reply(from, 'All games reset!', message);
+					return await client.reply(from, L.info.gamesReset, message);
 				}
 
 				if (index !== -1) {
 					data.splice(index, 1);
 					await fs.writeJSON(path.join(__dirname, 'databases/games/sudoku/sudoku.json'), data);
 
-					return await client.reply(from, 'Game reset!', message);
+					return await client.reply(from, L.info.gameReset, message);
 				}
 
-				return await client.reply(from, 'There is no game to reset!', message);
+				return await client.reply(from, L.errors.noGameToReset, message);
 			}
 		} catch (err) {
 			loggers.error(color('Sudoku command failed:', 'red'), err);

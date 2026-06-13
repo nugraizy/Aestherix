@@ -3,6 +3,7 @@ import { BOT_NAME } from '../../core/constants.js';
 import dayjs from 'dayjs';
 
 import configuration from '../../helper/config/connect.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { getRuntime } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -75,8 +76,11 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	async run({ from, args, message }, client, store) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (args.length === 1) {
-			return await client.reply(from, 'You must provide a status to simulate', message);
+			return await client.reply(from, L.errors.statusRequired, message);
 		}
 
 		const type = args[1]?.toLowerCase();
@@ -93,7 +97,7 @@ export default defineCommand({
 				usageHint: 'Usage: !presence online [enable|disable|status]',
 				async onEnable() {
 					if ('available' in configuration.presences) {
-						return await client.reply(from, 'Already online', message);
+						return await client.reply(from, L.errors.alreadyOnline, message);
 					}
 
 					if ('unavailable' in configuration.presences) {
@@ -103,12 +107,12 @@ export default defineCommand({
 					}
 
 					if (from) {
-						await client.reply(from, 'Simulate Available Presence Enabled', message);
+						await client.reply(from, L.simulate.presenceEnabled, message);
 					}
 				},
 				async onDisable() {
 					if ('unavailable' in configuration.presences) {
-						return await client.reply(from, 'Already offline', message);
+						return await client.reply(from, L.errors.alreadyOffline, message);
 					}
 
 					if ('available' in configuration.presences) {
@@ -122,7 +126,7 @@ export default defineCommand({
 					};
 
 					if (from) {
-						await client.reply(from, 'Simulate Available Presence Disabled', message);
+						await client.reply(from, L.simulate.presenceDisabled, message);
 					}
 				}
 			});
@@ -140,7 +144,7 @@ export default defineCommand({
 				usageHint: 'Usage: !presence composing [enable|disable|status]',
 				async onEnable() {
 					if ('composing' in configuration.presences) {
-						return await client.reply(from, 'Already writing', message);
+						return await client.reply(from, L.errors.alreadyWriting, message);
 					}
 
 					configuration.presences.composing = {
@@ -149,17 +153,17 @@ export default defineCommand({
 						interval: setInterval(() => broadcastPresence(client, store, 'composing'), 8_000)
 					};
 
-					await client.reply(from, 'Simulate Composing Enabled', message);
+					await client.reply(from, L.simulate.composingEnabled, message);
 				},
 				async onDisable() {
 					if (!('composing' in configuration.presences)) {
-						return await client.reply(from, 'Already not writing', message);
+						return await client.reply(from, L.errors.notWriting, message);
 					}
 
 					await pauseAll(client, store);
 					clearInterval(configuration.presences.composing.interval);
 					delete configuration.presences.composing;
-					await client.reply(from, 'Simulate Composing Disabled', message);
+					await client.reply(from, L.simulate.composingDisabled, message);
 				}
 			});
 		}
@@ -176,7 +180,7 @@ export default defineCommand({
 				usageHint: 'Usage: !presence recording [enable|disable|status]',
 				async onEnable() {
 					if ('recording' in configuration.presences) {
-						return await client.reply(from, 'Already recording', message);
+						return await client.reply(from, L.errors.alreadyRecording, message);
 					}
 
 					configuration.presences.recording = {
@@ -185,17 +189,17 @@ export default defineCommand({
 						interval: setInterval(() => broadcastPresence(client, store, 'recording'), 10_000)
 					};
 
-					await client.reply(from, 'Simulate Recording Enabled', message);
+					await client.reply(from, L.simulate.recordingEnabled, message);
 				},
 				async onDisable() {
 					if (!('recording' in configuration.presences)) {
-						return await client.reply(from, 'Already not recording', message);
+						return await client.reply(from, L.errors.notRecording, message);
 					}
 
 					await pauseAll(client, store);
 					clearInterval(configuration.presences.recording.interval);
 					delete configuration.presences.recording;
-					await client.reply(from, 'Simulate Recording Disabled', message);
+					await client.reply(from, L.simulate.recordingDisabled, message);
 				}
 			});
 		}
@@ -212,7 +216,7 @@ export default defineCommand({
 				usageHint: 'Usage: !presence bio [enable|disable|status]',
 				async onEnable() {
 					if ('bio' in configuration.presences) {
-						return await client.reply(from, 'Already enabled', message);
+						return await client.reply(from, L.errors.alreadyEnabled, message);
 					}
 
 					configuration.presences.bio = {
@@ -220,20 +224,20 @@ export default defineCommand({
 						interval: setInterval(() => updateBio(client), 10_000)
 					};
 
-					await client.reply(from, 'Simulate Bio Enabled', message);
+					await client.reply(from, L.simulate.bioEnabled, message);
 				},
 				async onDisable() {
 					if (!('bio' in configuration.presences)) {
-						return await client.reply(from, 'Already disabled', message);
+						return await client.reply(from, L.errors.alreadyDisabled, message);
 					}
 
 					clearInterval(configuration.presences.bio.interval);
 					delete configuration.presences.bio;
-					await client.reply(from, 'Simulate Bio Disabled', message);
+					await client.reply(from, L.simulate.bioDisabled, message);
 				}
 			});
 		}
 
-		await client.reply(from, 'Invalid command', message);
+		await client.reply(from, L.errors.invalidArgs, message);
 	}
 });

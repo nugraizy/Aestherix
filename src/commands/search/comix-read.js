@@ -1,3 +1,4 @@
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
@@ -42,8 +43,8 @@ const isChapterInput = (input) => {
  * @param {string} chapterId
  * @param {string} fileName
  */
-const downloadChapterAsPdf = async ({ from, message }, client, wait, chapterId, chapterUrl, fileName) => {
-	await wait.update('Fetching chapter pages...');
+const downloadChapterAsPdf = async ({ from, message }, client, wait, chapterId, chapterUrl, fileName, locale) => {
+	await wait.update(t(locale, 'common.success.fetchingPages'));
 
 	const pages = await comix.getChapterPages({ id: chapterId, chapterId, url: chapterUrl });
 
@@ -112,6 +113,9 @@ export default defineCommand({
 	limit: 3,
 	status: 'enable',
 	async run({ query, from, message, prefix }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
 			return await client.reply(
 				from,
@@ -127,14 +131,14 @@ export default defineCommand({
 			const cached = readerSessions.get(sessionId);
 
 			if (!cached) {
-				return await client.reply(from, 'Session expired. Please search again.', message);
+				return await client.reply(from, L.errors.sessionExpired, message);
 			}
 
 			cached.currentBatch++;
 			return await sendBatch(cached, from, message, client, { prefix });
 		}
 
-		const wait = await client.waitMessage(from, 'Processing...', message);
+		const wait = await client.waitMessage(from, L.success.processing, message);
 
 		if (isChapterInput(input)) {
 			let chapterId = input;
@@ -166,7 +170,8 @@ export default defineCommand({
 					wait,
 					chapterId,
 					chapterUrl,
-					`${title}-chapter-${chapterNum}-comix`.replace(/\s+/g, '-').toLowerCase()
+					`${title}-chapter-${chapterNum}-comix`.replace(/\s+/g, '-').toLowerCase(),
+					locale
 				);
 			} catch (error) {
 				if (error.message?.includes('Outdated chapter URL')) {
@@ -177,7 +182,7 @@ export default defineCommand({
 			}
 		}
 
-		await wait.update('Fetching chapters...');
+		await wait.update(L.success.fetchingChapters);
 
 		let manga = null;
 		let chaptersResult = null;
@@ -193,7 +198,7 @@ export default defineCommand({
 		}
 
 		if (!manga) {
-			await wait.update('Searching...');
+			await wait.update(L.success.searching);
 
 			const result = await comix.search(input, { limit: 1, excludeNsfw: true });
 

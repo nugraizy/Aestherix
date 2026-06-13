@@ -1,4 +1,5 @@
 import configuration from '../../helper/config/connect.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { ChatGPTDialogue } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -35,8 +36,11 @@ export default defineCommand({
 	limit: 5,
 	status: 'enable',
 	async run({ args, query, from, cmd, message, prefix, pushname }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!configuration.flags.ai) {
-			return await client.reply(from, 'ChatGPT AI is disabled', message);
+			return await client.reply(from, L.errors.aiDisabled, message);
 		}
 
 		if (!query) {
@@ -55,7 +59,7 @@ export default defineCommand({
 
 		if (args[1] === 'start') {
 			if (configuration.charAI.get(from)) {
-				return await client.reply(from, 'You already chatting with AI', message);
+				return await client.reply(from, L.errors.alreadyChattingAi, message);
 			}
 
 			const characters = getCharacterList();
@@ -80,11 +84,11 @@ export default defineCommand({
 
 		if (args[1] === 'stop') {
 			if (!configuration.charAI.get(from)) {
-				return await client.reply(from, 'You not chatting with AI', message);
+				return await client.reply(from, L.errors.notChattingAi, message);
 			}
 
 			configuration.charAI.delete(from);
-			return await client.reply(from, 'AI chat has been stopped', message);
+			return await client.reply(from, L.info.aiChatStopped, message);
 		}
 
 		return await client.reply(

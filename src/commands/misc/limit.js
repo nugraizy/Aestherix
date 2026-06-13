@@ -1,5 +1,6 @@
 import { Limit } from '../../helper/index.js';
 import configuration from '../../helper/config/connect.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -13,6 +14,8 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	async run({ from, sender, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
 		const isExist = Limit.checkExist(sender);
 		let role = Limit.checkRole(sender).role;
 

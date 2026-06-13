@@ -4,6 +4,7 @@ import path from 'path';
 import { pet } from '../../utils/converter/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 
 export default defineCommand({
 	name: 'petpet',
@@ -34,8 +35,11 @@ export default defineCommand({
 		},
 		client
 	) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!mention.length && !isMediaImage && !bodyQuoted) {
-			return await client.reply(from, 'Please mention or send/reply an image to pet', message);
+			return await client.reply(from, L.errors.imageRequired, message);
 		}
 
 		const defaultOptions = {
@@ -70,7 +74,7 @@ export default defineCommand({
 			return;
 		}
 
-		if (isMediaImage) {
+		if (isMediaImage && extractMediaData) {
 			if (!stickerAble || typeQuoted === 'videoMessage') {
 				return await client.reply(
 					from,

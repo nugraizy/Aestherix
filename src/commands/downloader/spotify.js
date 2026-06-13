@@ -2,6 +2,7 @@ import archiver from 'archiver';
 import fs from 'fs-extra';
 import parser from 'yargs-parser';
 
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { hifi, metadata } from '../../utils/hi-fi/index.js';
 import { spotifier } from '../../utils/index.js';
 import { color, delay, isURL, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
@@ -12,7 +13,7 @@ const regexUrlLocation = /window\.top\.location = validateProtocol\("([^"]+)"\);
 
 const getRedirect = async (shortUrl) => {
 	try {
-		const response = await fetch(shortUrl, { redirect: 'follow' });
+		const response = await fetch(shortUrl, { redirect: 'follow', signal: AbortSignal.timeout(15_000) });
 		const text = await response.text();
 		const matches = [...text.matchAll(regexUrlLocation)].map((m) => m[1]);
 
@@ -202,7 +203,7 @@ const handleSpotifyCollection = async (url, type, client, { from, message, wait 
 		}
 	);
 
-	fs.unlinkSync(output);
+	await fs.unlink(output).catch(() => {});
 
 	sendCaption = sendCaption.replace('↻ Sending file...', 'Command finished successfully!');
 	sendCaption = sendCaption.replace('Processing Spotify ' + type, 'Finished processing Spotify');
@@ -226,7 +227,7 @@ const handleSingleTrack = async (url, type, client, { from, message, prettyNumbe
 	const searchResults = await hifi.search(`${tracks[0].artists[0].name} - ${tracks[0].name}`);
 
 	if (searchResults.items.length === 0) {
-		await client.reply(from, 'No results found. Please try a different search query.', message);
+		await client.reply(from, L.errors.noResults, message);
 		loggers.error(`${color('Failed to Download Spotify ' + type, 'red')} for ${color(prettyNumber, 'lilac')}`);
 		return false;
 	}
@@ -288,58 +289,63 @@ export default defineCommand({
 	limit: 5,
 	status: 'enable',
 	run: async ({ query, bodyQuoted, typeQuoted, message, from, mediaData, prettyNumber }, client) => {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (
 			typeQuoted === 'imageMessage' &&
 			client.decodeJid(await client.resolveJid(mediaData.participant, 'jid'))?.includes(client.decodeJid(client.user.id))
 		) {
-			const reg = /✦ Media ID :\s*([^\n]+)/g;
-			const type = /🖼️ Type :\s*([^\n]+)/g;
+			const reg = /✦ Media ID :\s*([^\n]+)\n🖼️ Type :\s*([^\n]+)/g;
 
 			const videoIds = [];
 			let match;
 
 			while ((match = reg.exec(bodyQuoted)) !== null) {
-				videoIds.push([match[1], type.exec(bodyQuoted)[1]]);
+				videoIds.push([match[1], match[2]]);
 			}
 
 			if (!videoIds.length) {
-				return await client.reply(from, 'No id(s) found', message);
+				return await client.reply(from, L.errors.noIdsFound, message);
 			}
 
 			const numberiedQuery = Number(query);
 			const index = numberiedQuery - 1;
 
 			if (!numberiedQuery) {
-				return await client.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
+				return await client.reply(from, t(locale, 'errors.numberRange', [1, videoIds.length]), message);
 			}
 
-			if (index > videoIds.length) {
-				return await client.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
+			if (index >= videoIds.length) {
+				return await client.reply(from, t(locale, 'errors.numberRange', [1, videoIds.length]), message);
 			}
 
 			const videoId = videoIds[index][0];
 			const typeMedia = videoIds[index][1];
 
 			if (!videoId) {
-				return await client.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
+				return await client.reply(from, t(locale, 'errors.numberRange', [1, videoIds.length]), message);
 			}
 
 			await client.reply(from, `Downloading Spotify ${typeMedia} :\n${videoId}\nPlease wait`.formatForm(), message);
 
+			const wait = await client.waitMessage(from, L.success.processing, message);
+
 			await processVideo(`https://open.spotify.com/${typeMedia}/${videoId}`, typeMedia, client, {
 				from,
 				message,
-				prettyNumber
+				prettyNumber,
+				wait
 			});
 
 			return;
 		}
 
 		if (!query) {
-			return await client.reply(from, 'Please provide a URL.', from);
+			return await client.reply(from, L.errors.noUrl, from);
 		}
 
-		const wait = await client.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, L.success.loading, message);
 
 		let { _: urls } = parser(query);
 
@@ -350,7 +356,7 @@ export default defineCommand({
 
 		loggers.warning(`${color('Downloading Spotify Media', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 
-		check: if (urls.length === 1 && isURL(urls) && !isSpotifyURL(urls)) {
+		check: if (urls.length === 1 && isURL(urls[0]) && !isSpotifyURL(urls[0])) {
 			if (spotifyRedirectUrlRegex.test(urls[0])) {
 				const redirectUrl = await getRedirect(urls[0]);
 
@@ -361,7 +367,7 @@ export default defineCommand({
 			}
 
 			loggers.error(`${color('Failed to Download Spotify Media', 'red')} for ${color(prettyNumber, 'lilac')}`);
-			return await wait.update('This is not a valid Spotify URL.');
+			return await wait.update(L.errors.invalidSpotifyUrl);
 		}
 
 		for (let url of urls) {
@@ -375,7 +381,7 @@ export default defineCommand({
 					break check;
 				}
 
-				await client.reply(from, `[ ${url} ] This isn't a valid Spotify URL.`, message);
+				await client.reply(from, `${url} ${L.errors.invalidSpotifyUrl}`, message);
 				loggers.error(`${color('Failed to Download Spotify Media', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;
@@ -384,7 +390,7 @@ export default defineCommand({
 			const typeMedia = getSpotifyType(url);
 
 			if (typeMedia === 'artist') {
-				await client.reply(from, `[ ${url} ] This is an artist link. Please send media URL.`, message);
+				await client.reply(from, `${url} ${L.errors.spotifyArtistUrl}`, message);
 				loggers.error(`${color('Failed to Download Spotify Media', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;

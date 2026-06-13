@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { color, delay, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -28,9 +29,12 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	async run({ from, query, message, sender }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		try {
 			if (!query) {
-				return await client.reply(from, 'You must enter text', message);
+				return await client.reply(from, L.errors.textRequired, message);
 			}
 
 			const getGroups = await client.groupFetchAllParticipating();

@@ -1,6 +1,7 @@
 import configuration from '../../helper/config/connect.js';
 import { line } from '../../utils/stickers/index.js';
 import { defineCommand } from '../_define.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 
 export default defineCommand({
 	name: 'linesticker',
@@ -13,8 +14,11 @@ export default defineCommand({
 	limit: 1,
 	status: 'enable',
 	async run({ query, message, from }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please enter a query', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
 		let result = await line(query);

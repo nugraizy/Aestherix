@@ -1,4 +1,5 @@
 import configuration from '../../helper/config/connect.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 const _regex = new RegExp(
@@ -11,7 +12,7 @@ const getPinId = (url) => {
 	if (_regex.test(url)) {
 		const id = _id.exec(url);
 
-		return `https://id.pinterest.com/pin/${id}/`;
+		return `https://id.pinterest.com/pin/${id[1]}/`;
 	}
 
 	return fetch(url, {
@@ -30,8 +31,11 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	async run({ from, message, query }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return client.reply(from, 'You must provide a query.', message);
+			return client.reply(from, L.errors.noQuery, message);
 		}
 
 		const pinId = getPinId(query);
@@ -42,6 +46,6 @@ export default defineCommand({
 
 		configuration.pinterest.id = query;
 
-		client.reply(from, 'Pinterest intervals has been updated.', message);
+		client.reply(from, L.simulate.pinterestUpdated, message);
 	}
 });

@@ -1,4 +1,5 @@
 import { cmdId } from '../../helper/modules/prefix.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { arq } from '../../utils/arq/index.js';
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
@@ -14,8 +15,11 @@ export default defineCommand({
 	cooldown: 5,
 	status: 'enable',
 	async run({ query, from, message, args, type, prefix }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {

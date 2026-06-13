@@ -1,3 +1,4 @@
+import { getLocale } from '../../helper/i18n/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { startTG } from '../../utils/games/index.js';
 import { defineCommand } from '../_define.js';
@@ -13,6 +14,8 @@ export default defineCommand({
 	limit: 2,
 	status: 'enable',
 	async run(message, client) {
+		const locale = await getLocale(message.from);
+
 		loggers.warning(`${color('Starting Guess The Image Games.', 'pink')}  to ${color(message.prettyNumber, 'lilac')}`);
 
 		const game = await startTG(client, message.from, message, 20);

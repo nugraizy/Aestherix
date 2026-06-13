@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { searchBandcamp } from '../../utils/bandcamp/index.js';
 import { removeDuplicatesArray } from '../../utils/modules/index.js';
@@ -14,8 +15,11 @@ export default defineCommand({
 	limit: 5,
 	status: 'enable',
 	async run({ from, query, message, prefix }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
 		query = query.split(',');

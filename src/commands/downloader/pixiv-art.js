@@ -1,5 +1,6 @@
 import parser from 'yargs-parser';
 
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { fetchBUFFER, removeDuplicatesArray, loggers, color } from '../../utils/modules/index.js';
 import { downloadArtworks } from '../../utils/pixiv/index.js';
 import { defineCommand } from '../_define.js';
@@ -32,11 +33,14 @@ export default defineCommand({
 	cooldown: 7,
 	status: 'enable',
 	async run({ from, query, message, prettyNumber }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
-		const wait = await client.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, L.success.loading, message);
 
 		let { _: urls } = parser(query);
 
@@ -83,7 +87,7 @@ Total Media : ${pageCount}`;
 				await client.send(
 					from,
 					{
-						image: new Buffer.from(images, 'base64'),
+						image: Buffer.from(images, 'base64'),
 						caption: caption + `\nSource : https://www.pixiv.net/en/artworks/${id}`.formatForm()
 					},
 					{ quoted: message }
@@ -101,7 +105,7 @@ Total Media : ${pageCount}`;
 				await client.send(
 					from,
 					{
-						image: new Buffer.from(buffer, 'base64'),
+						image: Buffer.from(buffer, 'base64'),
 						caption
 					},
 					{ quoted: message }

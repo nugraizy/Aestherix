@@ -9,6 +9,7 @@ import { startDashboard } from '../../dashboard/server/index.js';
 import { refreshDashboardCommandCatalog } from '../../dashboard/server/monitor.js';
 import configuration from '../helper/config/connect.js';
 import prisma from '../helper/database/prisma.js';
+import '../i18n/index.js';
 import { color, loggers } from '../utils/modules/index.js';
 import { initWerewolfHandler } from './handlers/games/werewolf.js';
 
@@ -43,6 +44,11 @@ function syncPrefixToRouter(router) {
 async function handlePollUpdate(socket, store, msg) {
 	const { getAggregateVotesInPollMessage, getKeyAuthor, jidNormalizedUser } = await import('baileys');
 	const pollKey = msg?.pollUpdateMessage?.pollCreationMessageKey;
+
+	if (!pollKey?.remoteJid || !pollKey?.id) {
+		return;
+	}
+
 	const originalPoll = await store.loadMessage(pollKey.remoteJid, pollKey.id);
 
 	if (!originalPoll) {
@@ -59,6 +65,10 @@ async function handlePollUpdate(socket, store, msg) {
 	const pollCreatorJid = getKeyAuthor(pollKey, meIdNormalized);
 	const voterJid = getKeyAuthor(msg.msg.key, meIdNormalized);
 	const pollEncKey = originalPoll.message.messageContextInfo?.messageSecret;
+
+	if (!msg.func?.decrypt) {
+		return;
+	}
 
 	const voteMsg = msg.func.decrypt(
 		msg.pollUpdateMessage.vote.encPayload,
@@ -260,7 +270,7 @@ async function onConnected({ clientSocket, commandLoader, router, mqtt, store, w
 
 	syncPrefixToRouter(router);
 
-	Promise.all([
+	await Promise.all([
 		refreshPrefixCache(clientSocket).catch((err) =>
 			loggers.error(color('Pre-warm refreshPrefixCache failed:', 'red'), color(err?.message || err, 'gray'))
 		),
@@ -375,7 +385,7 @@ async function spawnPersistedSubBots({ configuration: config }) {
 			role: instance.role || 'sub',
 			flags,
 			browser: ['Mac OS', 'Safari', 'Safari 17.0'],
-			cachedGroupMetadata: (jid) => (isJidGroup(jid) ? config.cache.metadata.get(jid) : {})
+			cachedGroupMetadata: (jid) => (isJidGroup(jid) ? config.groups.metadata.get(jid) : {})
 		});
 
 		manager.add(instance.sessionName, sub);
@@ -526,7 +536,7 @@ export async function boot({ cli, OPTIONS, store, sessionName }) {
 
 	eventHandler.bind();
 
-	clientSocket.on('connected', () => {
+	clientSocket.once('connected', () => {
 		onConnected({ clientSocket, commandLoader, router, mqtt, store, webhook, eventHandler });
 
 		if (!OPTIONS.noSub) {

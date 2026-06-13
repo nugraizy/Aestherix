@@ -5,6 +5,7 @@ import { textToSpeech } from '../../utils/converter/index.js';
 import { tesseract } from '../../utils/misc/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 
 export default defineCommand({
 	name: 'audiobook',
@@ -17,8 +18,11 @@ export default defineCommand({
 	limit: 1,
 	status: 'enable',
 	async run({ isMediaImage, from, prettyNumber, message, filename, extractMediaData, typeQuoted }, client) {
-		if (!isMediaImage) {
-			return await client.reply(from, 'Please send/reply an image to recognize text', message);
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
+		if (!isMediaImage || !extractMediaData) {
+			return await client.reply(from, L.errors.imageRequired, message);
 		}
 
 		const file = await client.downloadAndSaveMediaMessage(

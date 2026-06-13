@@ -57,10 +57,10 @@ export const runSingleTargetAction = async ({ ctx, client, roleId, actionType })
 	const { session } = await loadSession(ctx);
 
 	if (!session) {
-		return replyError(ctx, client, getLocale(ctx.from), 'noSessionExist');
+		return replyError(ctx, client, await getLocale(ctx.from), 'noSessionExist');
 	}
 
-	const locale = getLocale(session.roomId);
+	const locale = await getLocale(session.roomId);
 
 	const rawIndex = Number.parseInt(ctx.args?.[2] ?? '', 10);
 	const targetId = resolveAliveIndex(session, rawIndex);

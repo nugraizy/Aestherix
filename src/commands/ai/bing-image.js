@@ -1,4 +1,5 @@
 import { delay } from 'baileys';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { createImageBing } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -14,14 +15,17 @@ export default defineCommand({
 	status: 'enable',
 	premium: true,
 	async run({ query, from, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return client.reply(from, 'Please specify a query.', message);
+			return client.reply(from, L.errors.noQuery, message);
 		}
 
 		const images = await createImageBing(query);
 
 		if (!images?.length) {
-			return client.reply(from, 'No images found.', message);
+			return client.reply(from, L.info.noResults, message);
 		}
 
 		for (const image of images) {

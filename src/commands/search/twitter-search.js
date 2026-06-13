@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { BOT_NAME } from '../../core/constants.js';
 
 import dayjs from 'dayjs';
@@ -125,8 +126,11 @@ export default defineCommand({
 	limit: 5,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client, store, ctx) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please specify a search query.', message);
+			return await client.reply(from, L.errors.queryRequired, message);
 		}
 
 		if (query.startsWith('next ')) {
@@ -134,11 +138,11 @@ export default defineCommand({
 			const cached = searchSessions.get(sessionId);
 
 			if (!cached) {
-				return await client.reply(from, 'Session expired. Please search again.', message);
+				return await client.reply(from, L.errors.sessionExpired, message);
 			}
 
 			if (!cached.buffer.length && cached.cursor) {
-				const nextWait = await client.waitMessage(from, 'Fetching more results...', message);
+				const nextWait = await client.waitMessage(from, L.success.fetchingMore, message);
 
 				const nextPage = await twitter.searchTweets(cached.searchQuery, { cursor: cached.cursor });
 
@@ -155,7 +159,7 @@ export default defineCommand({
 
 			if (!cached.buffer.length) {
 				searchSessions.delete(sessionId);
-				return await client.reply(from, 'No more results.', message);
+				return await client.reply(from, L.info.noMoreTweets, message);
 			}
 
 			const nextBatch = cached.buffer.splice(0, TWEETS_PER_PAGE);

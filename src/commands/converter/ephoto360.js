@@ -11,8 +11,15 @@ import { cmdId } from '../../helper/modules/prefix.js';
 import { randomize } from '../../utils/modules/index.js';
 import { ephoto360 } from '../../utils/textmaker/ephoto360.js';
 import { defineCommand } from '../_define.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 
-const dataJSON = JSON.parse(fs.readFileSync('./databases/textmaker/ephoto360url.json'));
+let dataJSON = {};
+
+try {
+	dataJSON = JSON.parse(fs.readFileSync('./databases/textmaker/ephoto360url.json'));
+} catch {
+	/* file may not exist — will be populated at runtime */
+}
 const defaulType = 'image';
 
 export default defineCommand({
@@ -27,8 +34,11 @@ export default defineCommand({
 	limit: 3,
 	status: 'enable',
 	async run({ from, message, query, args, cmd, filename, isMediaImage, extractMediaData, typeQuoted }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please provide a query', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
 		let {
@@ -139,7 +149,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 				continue;
 			}
 
-			const data = Buffer.from(await (await fetch(result.preview)).arrayBuffer(), 'base64');
+			const data = Buffer.from(await (await fetch(result.preview, { signal: AbortSignal.timeout(30_000) })).arrayBuffer(), 'base64');
 
 			const buffer = isStickers
 				? await client.prepareSticker(data, 'imageMessage', {

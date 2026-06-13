@@ -1,3 +1,4 @@
+import { getLocale } from '../../helper/i18n/index.js';
 import { getListSurah } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -12,6 +13,8 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	async run({ from, message }, client) {
+		const locale = await getLocale(from);
+
 		const lists = await getListSurah();
 
 		await client.reply(

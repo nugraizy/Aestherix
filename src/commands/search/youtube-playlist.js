@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
@@ -64,8 +65,11 @@ export default defineCommand({
 	limit: 5,
 	status: 'enable',
 	async run({ from, query, message, prefix, device }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please provide a YouTube playlist URL.', message);
+			return await client.reply(from, L.errors.playlistUrlRequired, message);
 		}
 
 		const ctx = { prefix, device };
@@ -74,20 +78,20 @@ export default defineCommand({
 			const cached = playlistSessions.get(query.slice(5));
 
 			if (!cached) {
-				return await client.reply(from, 'Session expired. Please send the playlist again.', message);
+				return await client.reply(from, L.errors.sessionExpired, message);
 			}
 
 			cached.currentBatch++;
 
 			if (cached.currentBatch * perBatchFor(device) >= cached.items.length) {
 				cached.currentBatch--;
-				return await client.reply(from, 'No more videos.', message);
+				return await client.reply(from, L.info.noMoreResults, message);
 			}
 
 			return await sendBatch(cached, from, message, client, ctx);
 		}
 
-		const wait = await client.waitMessage(from, 'Fetching playlist...', message);
+		const wait = await client.waitMessage(from, L.success.fetchingPlaylist, message);
 
 		let playlist;
 

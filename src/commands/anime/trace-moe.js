@@ -1,5 +1,6 @@
 import fs from 'fs';
 
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { isURL, toMp4, traceMoe } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -29,14 +30,17 @@ export default defineCommand({
 		},
 		client
 	) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!isURL(query) && !isMediaImage) {
-			return await client.reply(from, 'Please send/reply a image to find the similar image', message);
+			return await client.reply(from, L.errors.imageRequired, message);
 		}
 
 		let media = query && isURL(query) ? query : null;
 
 		if (typeMessage === 'listResponseMessage' && args[1] === 'get') {
-			await client.reply(from, 'Searching. Please wait...', message);
+			await client.reply(from, L.success.searching, message);
 
 			args = JSON.parse(JSON.parse(JSON.stringify(args.slice(2).join(' '))));
 
@@ -97,7 +101,7 @@ ${
 			return await client.send(
 				from,
 				{
-					video: new Buffer.from(buffer, 'base64'),
+					video: Buffer.from(buffer, 'base64'),
 					caption: `${'What Anime ?'.formatHeaders()}\n\n${capt.trim().formatForm()}`,
 					templateButtons: [
 						{ urlButton: { displayText: 'Image Source', url: large } },
@@ -110,7 +114,7 @@ ${
 			);
 		}
 
-		await client.reply(from, 'Searching. Please wait...', message);
+		await client.reply(from, L.success.searching, message);
 
 		if (isMediaImage) {
 			media = await client.downloadAndSaveMediaMessage(
@@ -123,15 +127,15 @@ ${
 		const result = await traceMoe(media);
 
 		if (result?.error) {
-			if (isMediaImage) {
-				fs.unlinkSync(media);
+		if (isMediaImage && extractMediaData) {
+				await fs.unlink(media).catch(() => {});
 			}
 
 			return await client.reply(from, result.error, message);
 		}
 
 		if (isMediaImage) {
-			fs.unlinkSync(media);
+			await fs.unlink(media).catch(() => {});
 		}
 
 		const {
@@ -191,7 +195,7 @@ ${externalLinks
 		await builder
 			.destination(from)
 			.footer('Powered by trace.moe')
-			.header('', new Buffer.from(buffer, 'base64'))
+			.header('', Buffer.from(buffer, 'base64'))
 			.body(`${'What Anime ?'.formatHeaders()}\n\n${capt.trim()}`)
 			.buttons(
 				builder.button.url({ display: 'Image Source', url: large }),
@@ -203,7 +207,7 @@ ${externalLinks
 		// await client.send(
 		// 	from,
 		// 	{
-		// 		video: new Buffer.from(buffer, 'base64'),
+		// 		video: Buffer.from(buffer, 'base64'),
 		// 		caption: `${'What Anime ?'.formatHeaders()}\n\n${capt.trim()}`,
 		// 		templateButtons: [
 		// 			{ urlButton: { displayText: 'Image Source', url: large } },

@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { Cache } from '../../helper/modules/cache.js';
 import { defineCommand } from '../_define.js';
 
@@ -16,24 +17,27 @@ export default defineCommand({
 	limit: 5,
 	status: 'enable',
 	run: async ({ query, from, message }, client) => {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'You must provide a number.', message);
+			return await client.reply(from, L.errors.numberRequired, message);
 		}
 
 		if (!/^[0-9xX]*$/.test(query)) {
-			return await client.reply(from, 'You must provide only number.', message);
+			return await client.reply(from, L.errors.numberRequired, message);
 		}
 
 		const regex = /[xX]/g;
 
 		if (!regex.test(query)) {
-			return await client.reply(from, 'You must include "x" in your query.', message);
+			return await client.reply(from, L.errors.xRequired, message);
 		}
 
 		const total = 10 ** query.match(regex).length;
 
 		if (total > 100) {
-			return await client.reply(from, 'Too much "x" in your query.', message);
+			return await client.reply(from, L.errors.tooMuchX, message);
 		}
 
 		const container = cache.get(query) || [];

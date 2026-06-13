@@ -1,5 +1,6 @@
 import { encodeWAMessage } from 'baileys';
 import crypto from 'crypto';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 const clearQuery = (query) => query.replace(/[^\d]/g, '');
@@ -14,6 +15,8 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	async run({ state, from, query, waitForInput, mention, sender }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
 		const wait = await waitForInput(client, {
 			message: 'How many do you want to call?',
 			expectedType: ['conversation', 'extendedTextMessage'],

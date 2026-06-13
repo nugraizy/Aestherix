@@ -3,8 +3,8 @@ import { replyText } from './_shared.js';
 
 export const name = 'help';
 
-export const run = (ctx, client) => {
-	const locale = getLocale(ctx.from);
+export const run = async (ctx, client) => {
+	const locale = await getLocale(ctx.from);
 
 	return replyText(ctx, client, t(locale, 'werewolf.help'));
 };

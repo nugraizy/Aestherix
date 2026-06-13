@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { defineCommand } from '../_define.js';
 
@@ -28,8 +29,11 @@ export default defineCommand({
 	cooldown: 5,
 	status: 'enable',
 	async run({ from, query, message, sender, isOwner, settings, prefix }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'You must provide a url.', message);
+			return await client.reply(from, L.errors.noUrl, message);
 		}
 
 		const groups = await client.groupFetchAllParticipating();
@@ -38,19 +42,23 @@ export default defineCommand({
 		const reg = regex(query);
 
 		if (isGroupMaxed && !isOwner) {
-			return await client.reply(from, 'Bot already maxed the group.', message);
+			return await client.reply(from, L.errors.groupMaxed, message);
 		}
 
 		if (!reg) {
-			return await client.reply(from, 'Invalid url.', message);
+			return await client.reply(from, L.errors.invalidUrl, message);
 		}
 
 		const metadataInvite = await client.groupGetInviteInfo(reg).catch(() => null);
 
+		if (!metadataInvite) {
+			return await client.reply(from, L.errors.invalidInvite, message);
+		}
+
 		if (Object.keys(groups).includes(metadataInvite.id)) {
 			await client.reply(from, 'I am already in this group.', message);
 		} else if (!isOwner && metadataInvite.size >= 1024) {
-			await client.reply(from, 'Bot cannot join. Reason : Group is full.', message);
+			await client.reply(from, L.errors.groupFull, message);
 		} else if (!isOwner && metadataInvite.size < settings.min_members) {
 			await client.reply(from, `This group is not big enough to join. Minimum ${settings.min_members} participants.`, message);
 		} else if (
@@ -60,7 +68,7 @@ export default defineCommand({
 				.map((v) => v.id)
 				?.includes(sender)
 		) {
-			await client.reply(from, 'You must be an admin to invite bot to group.', message);
+			await client.reply(from, L.errors.adminOnly, message);
 		} else if (metadataInvite) {
 			await client.groupAcceptInvite(reg);
 			await client.reply(from, 'I am joining this group.', message);
@@ -71,7 +79,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: 'Click to open menu',
+					text: L.info.clickToOpenMenu,
 					footer: 'Powered by Hidden Finder',
 					buttons: [{ buttonId: cmdId('menu', '', { prefix }), buttonText: { displayText: 'Menu' }, type: 1 }],
 					headerType: 1

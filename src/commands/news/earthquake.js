@@ -1,3 +1,4 @@
+import { getLocale } from '../../helper/i18n/index.js';
 import { getEarthquake } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -12,6 +13,8 @@ export default defineCommand({
 	limit: 1,
 	status: 'enable',
 	async run(message, client) {
+		const locale = await getLocale(message.from);
+
 		const data = await getEarthquake();
 
 		let caption = 'Latest Earthquake'.formatHeaders();

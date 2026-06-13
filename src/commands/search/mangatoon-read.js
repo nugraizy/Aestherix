@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { imageToPdf, mime } from '../../utils/index.js';
 import { mangatoon } from '../../utils/mangatoon/index.js';
 import { defineCommand } from '../_define.js';
@@ -13,17 +14,20 @@ export default defineCommand({
 	limit: 3,
 	status: 'enable',
 	async run({ query, from, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please provide a MangaToon chapter URL.', message);
+			return await client.reply(from, L.errors.mangaUrlRequired, message);
 		}
 
 		const url = query.trim();
 
 		if (!url.includes('mangatoon.mobi')) {
-			return await client.reply(from, 'Please provide a valid MangaToon URL.', message);
+			return await client.reply(from, L.errors.mangaUrlRequired, message);
 		}
 
-		const wait = await client.waitMessage(from, 'Fetching chapter pages...', message);
+		const wait = await client.waitMessage(from, L.success.fetchingPages, message);
 
 		try {
 			const result = await mangatoon.getChapter(url);

@@ -2,6 +2,7 @@ import { BOT_NAME } from '../../core/constants.js';
 
 import { deleteTictactoeSession, getTictactoeSession, TicTacToe } from '../../utils/games/index.js';
 import { delay } from '../../utils/modules/index.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 const WINNER_SETS = {
@@ -20,6 +21,9 @@ export default defineCommand({
 	cooldown: 2,
 	status: 'enable',
 	async run({ message, query, from, sender }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		const capt = (game, status) => `TicTacToe Games by ${BOT_NAME} Bot.
 	${
 		status
@@ -60,12 +64,12 @@ Powered by Hidden Finder`;
 			const status = getTictactoeSession(sender);
 
 			if (!status) {
-				return await client.reply(from, 'You do not have a game', message);
+				return await client.reply(from, L.errors.notPlaying, message);
 			}
 
 			deleteTictactoeSession(sender);
 
-			await client.reply(from, 'Game deleted', message);
+			await client.reply(from, L.info.gameDeleted, message);
 		}
 
 		if (!query) {
@@ -82,7 +86,7 @@ Powered by Hidden Finder`;
 			const game = getTictactoeSession(sender);
 
 			if (!game) {
-				return await client.reply(from, 'You do not have a game', message);
+				return await client.reply(from, L.errors.notPlaying, message);
 			}
 
 			const move = game.playMove(query, sender);

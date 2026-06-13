@@ -1,6 +1,7 @@
 import configuration from '../../helper/config/connect.js';
 import { color, isURL, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 
 export default defineCommand({
 	name: 'sticker',
@@ -30,12 +31,15 @@ export default defineCommand({
 		{ isMediaImage, isMediaVid, from, prettyNumber, message, mediaData, stickerAble, typeQuoted, typeSticker, query },
 		client
 	) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!isMediaImage && !isMediaVid && !query) {
-			return await client.reply(from, 'Please send/reply a media or send a url to convert to sticker', message);
+			return await client.reply(from, L.errors.mediaOrUrlRequired, message);
 		}
 
 		if (query && !isURL(query) && !isMediaImage && !isMediaVid) {
-			return await client.reply(from, 'If you trying to convert sticker from url, please provide a valid url', message);
+			return await client.reply(from, L.errors.stickerUrlInvalid, message);
 		}
 
 		if (!stickerAble && !query) {

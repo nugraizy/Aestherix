@@ -1,4 +1,5 @@
 import configuration from '../../helper/config/connect.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { login } from '../../utils/instagram/login.js';
 import { defineCommand } from '../_define.js';
 
@@ -14,8 +15,11 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	run: async ({ from, message }, client) => {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (configuration.isInstagramInitiated) {
-			return await client.reply(from, 'Instagram session is already initialized.', message);
+			return await client.reply(from, L.errors.instagramAlreadyInit, message);
 		}
 
 		await login(process.env.INSTAGRAM_USERNAME, process.env.INSTAGRAM_PASSWORD);
@@ -24,6 +28,6 @@ export default defineCommand({
 
 		configuration.isInstagramInitiated = true;
 
-		return await client.reply(from, 'Instagram session has been initialized successfully.', message);
+		return await client.reply(from, L.simulate.instaInitSuccess, message);
 	}
 });

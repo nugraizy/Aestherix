@@ -1,6 +1,7 @@
 import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { defineCommand } from '../_define.js';
 
@@ -16,6 +17,9 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	async run({ from, message, prefix }, client, store) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		const messages = store.loadMessages(STATUS);
 		const tempContainer = new Cache();
 		let caption = 'Fetch WhatsApp Story'.formatHeaders();
@@ -60,7 +64,7 @@ export default defineCommand({
 		}
 
 		if (tempContainer.size === 0) {
-			return await client.reply(from, 'No story are found.', message);
+			return await client.reply(from, L.errors.noStory, message);
 		}
 
 		for (const value of Array.from(tempContainer.entries())) {

@@ -1,5 +1,6 @@
 import yn from 'yn';
 
+import { getLocale } from '../../helper/i18n/index.js';
 import { Jikan, increment, numberWithCommas } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -34,6 +35,8 @@ export default defineCommand({
 	cooldown: 2,
 	status: 'enable',
 	async run({ query, from, message, sender, waitForInput }, client) {
+		const locale = await getLocale(from);
+
 		const mal = new Jikan();
 
 		const result = await mal.anime.search(query);

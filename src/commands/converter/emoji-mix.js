@@ -4,6 +4,7 @@ import _ from 'lodash';
 import configuration from '../../helper/config/connect.js';
 import { emojimix } from '../../utils/converter/index.js';
 import { defineCommand } from '../_define.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 
 export default defineCommand({
 	name: 'emojimixer',
@@ -16,18 +17,21 @@ export default defineCommand({
 	limit: 1,
 	status: 'enable',
 	async run({ query, from, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please enter a query', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
 		const regex = query.match(emojiReg());
 
 		if (!regex) {
-			return await client.reply(from, 'Please enter a valid emoji', message);
+			return await client.reply(from, L.errors.emojiRequired, message);
 		}
 
 		if (regex.length < 2) {
-			return await client.reply(from, 'Please enter 2 valid emoji', message);
+			return await client.reply(from, L.errors.emojiTwoRequired, message);
 		}
 
 		const emojis = _.chunk(regex, 2);

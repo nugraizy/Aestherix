@@ -1,5 +1,6 @@
 import configuration from '../../helper/config/connect.js';
 import { S_WHATSAPP_NET } from '../../helper/index.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import prisma from '../../helper/database/prisma.js';
 import { getBannedUsers, banUser } from '../../helper/database/adapters/user.js';
 import { defineCommand } from '../_define.js';
@@ -26,8 +27,11 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	async run({ from, message, isOwner, args, mediaData, mention, bodyQuoted, query }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query && !bodyQuoted) {
-			return await client.reply(from, 'Please provide user to ban', message);
+			return await client.reply(from, L.errors.userToBanRequired, message);
 		}
 
 		const userBanned = await getBannedUsers(prisma);
@@ -89,7 +93,7 @@ export default defineCommand({
 			const jid = mediaData.participant;
 
 			if (userBanned.includes(jid)) {
-				return await client.reply(from, 'Already banned', message);
+				return await client.reply(from, L.errors.alreadyBanned, message);
 			}
 
 			await banAndBlock(client, jid);

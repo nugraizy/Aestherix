@@ -1,5 +1,6 @@
 import { createImage } from '../../utils/ai/index.js';
 import { defineCommand } from '../_define.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 
 export default defineCommand({
 	name: 'makeimage',
@@ -12,11 +13,14 @@ export default defineCommand({
 	cooldown: 5,
 	status: 'disable',
 	async run({ query, from, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
-		await client.reply(from, 'Creating. Please wait...', message);
+		await client.reply(from, L.success.loading, message);
 
 		const result = await createImage(query);
 

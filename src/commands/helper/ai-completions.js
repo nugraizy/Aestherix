@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 const updateApikey = () =>
@@ -15,8 +16,11 @@ export default defineCommand({
 	limit: 7,
 	status: 'enable',
 	run: async ({ query, from, message }, client) => {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
 		const openai = new OpenAI({ apiKey: updateApikey() });

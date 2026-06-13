@@ -1,5 +1,6 @@
 import { BOT_NAME } from '../../core/constants.js';
 
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -31,8 +32,11 @@ export default defineCommand({
 		},
 		client
 	) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query && !bodyQuoted && !isMediaVid && !isMediaImage && !isMediaDocument && !isQuotedSticker) {
-			return client.reply(from, 'Please provide a message or media', message);
+			return client.reply(from, L.errors.messageRequired, message);
 		}
 
 		const ownJid = client.decodeJid(client.user.id);
@@ -48,7 +52,7 @@ export default defineCommand({
 					mediaData.message?.documentWithCaptionMessage?.message?.documentMessage?.mimetype;
 
 				if (!/video|image/g.test(mime)) {
-					return await client.reply(from, 'Media type must be video or image', message);
+					return await client.reply(from, L.simulate.mediaTypeInvalid, message);
 				}
 
 				mime = mime.split('/')[0];

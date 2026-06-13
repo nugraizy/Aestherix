@@ -1,6 +1,7 @@
 import parser from 'yargs-parser';
 
 import { Github } from '../../utils/github/index.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { isURL, numberWithCommas } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -15,8 +16,11 @@ export default defineCommand({
 	limit: 6,
 	status: 'enable',
 	async run({ from, query, message, args, type }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please specify a url', message);
+			return await client.reply(from, L.errors.noUrl, message);
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
@@ -87,12 +91,12 @@ Powered by Hidden Finder`.formatForm()
 		let { _: usernames } = parser(query);
 
 		if (usernames.length == 1 && isURL(usernames[0])) {
-			return await client.reply(from, 'Please specify a valid Github usernames', message);
+			return await client.reply(from, L.errors.gitUsernameRequired, message);
 		}
 
 		for (const user of usernames) {
 			if (isURL(user.trim())) {
-				await client.reply(from, 'Please specify a valid Github username', message);
+				await client.reply(from, L.errors.gitUsernameRequired, message);
 				continue;
 			}
 
@@ -100,7 +104,7 @@ Powered by Hidden Finder`.formatForm()
 			let users = await git.searchUser(user);
 
 			if (users.total_count === 0) {
-				await client.reply(from, 'User not found.', message);
+				await client.reply(from, L.errors.notFound, message);
 				continue;
 			}
 

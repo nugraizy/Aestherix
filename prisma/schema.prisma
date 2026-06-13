@@ -110,6 +110,7 @@ model SettingsManager {
   antiNSFW         String   @default("disable")
   games            String   @default("disable")
   notification     String   @default("disable")
+  locale           String?
   /// JSON-encoded array of banned member JIDs within this group.
   bannedMembers    String   @default("[]")
   createdAt        DateTime @default(now())

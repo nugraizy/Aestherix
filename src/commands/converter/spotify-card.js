@@ -1,6 +1,7 @@
 import { SpotifyCard } from '../../helper/canvas/index.js';
 import { Timer } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 
 export default defineCommand({
 	name: 'spotifycard',
@@ -13,15 +14,18 @@ export default defineCommand({
 	limit: 3,
 	status: 'enable',
 	async run({ from, message, query }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please provide a query', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
 		const timer = new Timer('${s}s (${ms} ms)');
 
 		timer.start();
 
-		const wait = await client.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, L.success.loading, message);
 
 		const cover = new SpotifyCard(query, {
 			background: {
@@ -37,7 +41,7 @@ export default defineCommand({
 
 		const { toBuffer } = await cover.render();
 
-		await client.send(from, { image: new Buffer.from(toBuffer(), 'base64') }, { quoted: message });
+		await client.send(from, { image: Buffer.from(toBuffer(), 'base64') }, { quoted: message });
 
 		timer.stop();
 		await wait.update('Spotify Card is finished in ' + timer);

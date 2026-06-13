@@ -1,4 +1,5 @@
 import configuration from '../../helper/config/connect.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -12,10 +13,12 @@ export default defineCommand({
 	limit: 5,
 	status: 'enable',
 	async run({ from, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
 		const config = configuration.prefix.config;
 
 		if (!config) {
-			return await client.reply(from, 'Prefix configuration is not available yet.', message);
+			return await client.reply(from, L.errors.prefixNotConfigured, message);
 		}
 
 		const mode = config.multi ? 'Multi' : config.nopref ? 'No Prefix' : 'Single';

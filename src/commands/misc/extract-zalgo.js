@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { extractZalgo } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -12,8 +13,11 @@ export default defineCommand({
 	cooldown: 3,
 	status: 'enable',
 	async run({ query, from, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'You need to provide text', message);
+			return await client.reply(from, L.errors.textRequired, message);
 		}
 
 		await client.reply(from, extractZalgo(query), message);

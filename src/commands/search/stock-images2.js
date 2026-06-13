@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { removeDuplicatesArray } from '../../utils/modules/index.js';
 import { stockImagesPexel } from '../../utils/wallpapers/index.js';
@@ -14,8 +15,11 @@ export default defineCommand({
 	cooldown: 5,
 	status: 'enable',
 	async run({ query, from, message, args }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
 		if (args[1] === 'next' || args[1] === 'prev') {

@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
@@ -71,8 +72,11 @@ export default defineCommand({
 	limit: 5,
 	status: 'enable',
 	async run({ query, from, message, prefix }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please provide a search query.', message);
+			return await client.reply(from, L.errors.queryRequired, message);
 		}
 
 		if (query.startsWith('next ')) {
@@ -80,7 +84,7 @@ export default defineCommand({
 			const cached = searchSessions.get(sessionId);
 
 			if (!cached) {
-				return await client.reply(from, 'Session expired. Please search again.', message);
+				return await client.reply(from, L.errors.sessionExpired, message);
 			}
 
 			cached.currentIndex++;
@@ -88,13 +92,13 @@ export default defineCommand({
 			if (cached.currentIndex >= cached.items.length) {
 				searchSessions.delete(sessionId);
 
-				return await client.reply(from, 'No more results.', message);
+				return await client.reply(from, L.info.noMoreResults, message);
 			}
 
 			return await sendResult(cached, from, message, client, { prefix });
 		}
 
-		const wait = await client.waitMessage(from, 'Searching...', message);
+		const wait = await client.waitMessage(from, L.success.searching, message);
 
 		const result = await shinigami.search(query);
 

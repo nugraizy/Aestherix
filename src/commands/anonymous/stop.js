@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { stop } from '../../utils/anonymous/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -12,18 +13,21 @@ export default defineCommand({
 	limit: 1,
 	status: 'enable',
 	async run({ from, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		const result = stop(from, client);
 
 		if (!result) {
-			return await client.reply(from, 'You are not in a search!', message);
+			return await client.reply(from, L.errors.notInSearch, message);
 		}
 
 		if (result.partner2) {
-			await client.reply(from, 'You have stopped the chat!', message);
-			await client.send(result.partner2, { text: 'Your partner stopped the chat!' }, {});
+			await client.reply(from, L.info.stoppedChat, message);
+			await client.send(result.partner2, { text: L.info.partnerStopped }, {});
 			return;
 		}
 
-		await client.reply(from, `You are already searching for a partner!\nPlease wait for ${result.seconds}s`, message);
+		await client.reply(from, `${L.errors.alreadySearching}\nPlease wait for ${result.seconds}s`, message);
 	}
 });

@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { animeReleases } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -22,8 +23,11 @@ export default defineCommand({
 	limit: 5,
 	status: 'enable',
 	run: async ({ from, message, isGroup }, client) => {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (isGroup) {
-			return client.reply(from, 'This command only works in private chat.', message);
+			return client.reply(from, L.errors.privateOnly, message);
 		}
 
 		const text = 'Anime Releases'.formatHeaders();

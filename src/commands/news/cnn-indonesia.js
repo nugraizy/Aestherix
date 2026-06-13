@@ -1,4 +1,5 @@
 import { cmdId } from '../../helper/modules/prefix.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { cnnindonesia } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -13,6 +14,8 @@ export default defineCommand({
 	limit: 1,
 	status: 'enable',
 	async run({ query, from, message, args, cmd, prefix }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
 		const cmdName = cmd.replace(/^[^a-zA-Z]+/, '');
 
 		if (args[1] === 'next' || args[1] === 'prev') {
@@ -58,7 +61,7 @@ export default defineCommand({
 		}
 
 		if (!query) {
-			return client.reply(from, 'Please provide queries', message);
+			return client.reply(from, L.errors.noQuery, message);
 		}
 
 		const data = await cnnindonesia(query);

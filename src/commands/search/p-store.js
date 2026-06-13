@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { pStoreProduct } from '../../utils/p-store/index.js';
 import { defineCommand } from '../_define.js';
@@ -16,8 +17,11 @@ export default defineCommand({
 	premium: false,
 	minifiedDescription: 'Search P-Store Products',
 	async run({ query, from, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
 		let queries = query.split(',');

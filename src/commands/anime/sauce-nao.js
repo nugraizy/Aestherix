@@ -1,5 +1,6 @@
 import fs from 'fs';
 
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { isURL, sauceNao } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -14,8 +15,11 @@ export default defineCommand({
 	cooldown: 2,
 	status: 'enable',
 	async run({ isMediaImage, query, extractMediaData, filename, from, message, typeQuoted }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!isURL(query) && !isMediaImage) {
-			return await client.reply(from, 'Please send/reply a image to find the similar image', {
+			return await client.reply(from, L.errors.imageRequired, {
 				from,
 				quoted: message
 			});
@@ -23,7 +27,7 @@ export default defineCommand({
 
 		let media = query && isURL(query) ? query : null;
 
-		const wait = await client.waitMessage(from, 'Searching. Please wait...', message);
+		const wait = await client.waitMessage(from, L.success.searching, message);
 
 		if (isMediaImage) {
 			media = await client.downloadAndSaveMediaMessage(
@@ -36,8 +40,8 @@ export default defineCommand({
 		const result = await sauceNao(media);
 
 		if (result?.error) {
-			if (isMediaImage) {
-				fs.unlinkSync(media);
+		if (isMediaImage && extractMediaData) {
+				await fs.unlink(media).catch(() => {});
 			}
 
 			return await wait.update(result.error);
@@ -58,7 +62,7 @@ Powered by sauce.nao`.formatForm();
 		await wait.update(capt.trim());
 
 		if (isMediaImage) {
-			fs.unlinkSync(media);
+			await fs.unlink(media).catch(() => {});
 		}
 	}
 });

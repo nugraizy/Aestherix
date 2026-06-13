@@ -7,6 +7,7 @@ import syntaxerror from 'syntax-error';
 
 import configuration, * as c from '../../helper/config/connect.js';
 import * as a from '../../helper/index.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import * as d from '../../index.js';
 import { getSyntaxAdvice } from '../../utils/ai/syntax-check-agent.js';
@@ -125,7 +126,7 @@ async function evalReturn(ctx, client) {
 		return;
 	}
 
-	client.reply(from, inspect(output, { showHidden: true, depth: 4 }), quoted);
+	await client.reply(from, inspect(output, { showHidden: true, depth: 4 }), quoted);
 }
 
 async function evalShell(ctx, client) {
@@ -216,7 +217,7 @@ async function evalBang(ctx, client, store) {
 		return;
 	}
 
-	client.reply(from, inspect(output, { showHidden: true, depth: 4 }), quoted);
+	await client.reply(from, inspect(output, { showHidden: true, depth: 4 }), quoted);
 }
 
 export default defineCommand({
@@ -232,19 +233,22 @@ export default defineCommand({
 	async run(message, client, store) {
 		const { isOwner, isBotInstance, from, body, query, args, cmd } = message;
 
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!isOwner) {
-			return await client.reply(from, 'You are not allowed to use this command', message.message);
+			return await client.reply(from, L.errors.notAllowed, message.message);
 		}
 
 		if (!query) {
-			return await client.reply(from, 'Please specify code to evaluate', message.message);
+			return await client.reply(from, L.errors.evalCodeRequired, message.message);
 		}
 
 		if (args?.[1] === '--advice') {
 			const payload = decodeAdvicePayload(args.slice(2).join(' '));
 
 			if (!payload) {
-				return await client.reply(from, 'Invalid advice payload.', message.message);
+				return await client.reply(from, L.errors.invalidArgs, message.message);
 			}
 
 			const advice = await getSyntaxAdvice({
@@ -257,7 +261,7 @@ export default defineCommand({
 			});
 
 			if (!advice) {
-				return await client.reply(from, 'No advice available.', message.message);
+				return await client.reply(from, L.errors.noAdvice, message.message);
 			}
 
 			return await client.reply(from, advice.trim(), message.message);

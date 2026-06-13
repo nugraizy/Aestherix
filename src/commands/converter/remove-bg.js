@@ -4,6 +4,7 @@ import configuration from '../../helper/config/connect.js';
 import { removeBg } from '../../utils/converter/image.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 
 export default defineCommand({
 	name: 'removebg',
@@ -19,16 +20,23 @@ export default defineCommand({
 		{ from, isMediaImage, isQuotedSticker, prettyNumber, extractMediaData, filename, message, query, typeQuoted },
 		client
 	) => {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!isMediaImage && !isQuotedSticker) {
 			return client.reply(
 				from,
-				'Please reply/send image with caption the command. This command also accept sticker (reply one with command).',
+				L.errors.imageRequired,
 				message
 			);
 		}
 
+		if (!extractMediaData) {
+			return client.reply(from, L.errors.mediaProcessFailed, message);
+		}
+
 		if (isQuotedSticker && extractMediaData.isAnimated) {
-			return client.reply(from, 'The sticker are animated. Please reply static stickers only.', message);
+			return client.reply(from, L.errors.stickerAnimated, message);
 		}
 
 		loggers.warning(`${color('Removing Background image', 'pink')} ${color(prettyNumber, 'lilac')}`);
@@ -57,9 +65,9 @@ export default defineCommand({
 				packname: configuration.packname
 			});
 
-			client.send(from, { sticker: prepareSticker }, { quoted: message });
+			await client.send(from, { sticker: prepareSticker }, { quoted: message });
 		} else {
-			client.send(from, { image: resultRemoveBg }, { quoted: message });
+			await client.send(from, { image: resultRemoveBg }, { quoted: message });
 		}
 	}
 });

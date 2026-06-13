@@ -1,5 +1,6 @@
 import parser from 'yargs-parser';
 
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { iplookup } from '../../utils/misc/index.js';
 import { defineCommand } from '../_define.js';
@@ -20,19 +21,22 @@ export default defineCommand({
 	limit: 3,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please specify a IP Address', message);
+			return await client.reply(from, L.errors.ipRequired, message);
 		}
 
 		let { _: IPs } = parser(query);
 
 		if (IPs.length === 1 && !regex(IPs[0])) {
-			return await client.reply(from, 'Please specify a valid IP Address', message);
+			return await client.reply(from, L.errors.ipInvalid, message);
 		}
 
 		for (const IP of IPs) {
 			if (!regex(IP.trim())) {
-				await client.reply(from, 'Please specify a valid IP Address', message);
+				await client.reply(from, L.errors.ipInvalid, message);
 
 				continue;
 			}

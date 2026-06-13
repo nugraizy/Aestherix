@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
@@ -21,8 +22,11 @@ export default defineCommand({
 	limit: 5,
 	status: 'enable',
 	async run({ query, from, message, prefix, device }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please provide a manga ID.', message);
+			return await client.reply(from, L.errors.mangaIdRequired, message);
 		}
 
 		if (query.startsWith('next ')) {
@@ -30,7 +34,7 @@ export default defineCommand({
 			const cached = chapterSessions.get(sessionId);
 
 			if (!cached) {
-				return await client.reply(from, 'Session expired. Please search again.', message);
+				return await client.reply(from, L.errors.sessionExpired, message);
 			}
 
 			cached.currentBatch++;
@@ -43,7 +47,7 @@ export default defineCommand({
 			const cached = chapterSessions.get(sessionId);
 
 			if (!cached) {
-				return await client.reply(from, 'Session expired. Please search again.', message);
+				return await client.reply(from, L.errors.sessionExpired, message);
 			}
 
 			cached.allChapters.reverse();
@@ -53,7 +57,7 @@ export default defineCommand({
 			return await sendBatch(cached, from, message, client, { prefix, device });
 		}
 
-		const wait = await client.waitMessage(from, 'Fetching chapters...', message);
+		const wait = await client.waitMessage(from, L.success.fetchingChapters, message);
 
 		try {
 			const chapters = await atsumaru.getChapters(query.trim());

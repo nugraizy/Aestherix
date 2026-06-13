@@ -1,4 +1,5 @@
 import { cmdId } from '../../helper/modules/prefix.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { extension, getAyat, getSurahAudio, getSurahDetail, mime } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -15,16 +16,19 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	async run({ query, from, cmd, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please specify a surah number', message);
+			return await client.reply(from, L.errors.surahRequired, message);
 		}
 
 		if (!regex(query)) {
-			return await client.reply(from, 'Please specify a valid surah number', message);
+			return await client.reply(from, L.errors.surahInvalid, message);
 		}
 
 		if (parseInt(query) > 114) {
-			return await client.reply(from, 'Surah number must be less than 114', message);
+			return await client.reply(from, L.errors.surahMax, message);
 		}
 
 		const audio = await getSurahAudio(query);

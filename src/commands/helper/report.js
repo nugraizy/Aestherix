@@ -1,4 +1,5 @@
 import { Limit } from '../../helper/index.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { toUserJid } from '../../helper/misc/wa_data/index.js';
 import { defineCommand } from '../_define.js';
@@ -14,8 +15,11 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	async run({ from, message, query, sender, pushname, prettyNumber, settings, type, isOwner, args, prefix }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please provide a message to report', message);
+			return await client.reply(from, L.errors.messageRequired, message);
 		}
 
 		if (args[1] === 'accept' && isOwner) {
@@ -31,7 +35,7 @@ export default defineCommand({
 		}
 
 		if (query.length < 20 && type !== 'templateButtonReplyMessage') {
-			return await client.reply(from, 'Please describe the problem in detail. Min. 20 characters', message);
+			return await client.reply(from, L.errors.describeProblem, message);
 		}
 
 		const capt =

@@ -1,5 +1,6 @@
 import configuration from '../../helper/config/connect.js';
 import { S_WHATSAPP_NET, Limit } from '../../helper/index.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import prisma from '../../helper/database/prisma.js';
 import { getUserLimit, updateUserRole } from '../../helper/database/adapters/user.js';
 import { defineCommand } from '../_define.js';
@@ -73,8 +74,11 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	async run({ from, message, args, mediaData, mention, bodyQuoted, query }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query && bodyQuoted) {
-			return await client.reply(from, 'Please provide user to ban', message);
+			return await client.reply(from, L.errors.userToBanRequired, message);
 		}
 
 		const PREMS_CONTAINER = {
@@ -85,11 +89,11 @@ export default defineCommand({
 		const configure = args[1];
 
 		if (!configure) {
-			return await client.reply(from, 'Please provide params.\n!prem add/remove [tag/reply]', message);
+			return await client.reply(from, L.errors.premiumParamsRequired, message);
 		}
 
 		if (!['add', 'remove'].includes(configure)) {
-			return await client.reply(from, 'Please provide params.\n!prem add/remove [tag/reply]', message);
+			return await client.reply(from, L.errors.premiumParamsRequired, message);
 		}
 
 		if (mention.length) {
@@ -132,7 +136,7 @@ export default defineCommand({
 			const mentioned = mediaData.participant;
 
 			if (mentioned === configuration.botNumber) {
-				return await client.reply(from, 'Cannot modify bot premium status', message);
+				return await client.reply(from, L.errors.cannotModifyPremium, message);
 			}
 
 			await configureUser(client, {

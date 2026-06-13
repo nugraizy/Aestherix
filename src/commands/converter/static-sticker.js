@@ -3,6 +3,7 @@ import rgbcolor from 'rgb-color';
 import { StaticSticker } from '../../helper/canvas/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 
 export default defineCommand({
 	name: 'staticsticker',
@@ -15,6 +16,9 @@ export default defineCommand({
 	limit: 1,
 	status: 'enable',
 	async run({ from, query, message, prettyNumber, bodyQuoted }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
 			query = 'Where is the text?';
 		}
@@ -57,7 +61,7 @@ export default defineCommand({
 			await client.send(from, { sticker: buffer }, { quoted: message });
 			loggers.info(`${color('Sticker is sent', 'pink')} to ${color(prettyNumber, 'lilac')}`);
 		} else {
-			await client.reply(from, 'Please enter text to convert to sticker', message);
+			await client.reply(from, L.errors.textRequired, message);
 		}
 	}
 });

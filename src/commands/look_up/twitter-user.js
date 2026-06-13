@@ -3,6 +3,7 @@ import { BOT_NAME } from '../../core/constants.js';
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { color, formatNumber, isURL, loggers } from '../../utils/modules/index.js';
 import { Twitter } from '../../utils/twitter/index.js';
@@ -21,19 +22,22 @@ export default defineCommand({
 	limit: 6,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, prefix }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please specify a username.', message);
+			return await client.reply(from, L.errors.usernameRequired, message);
 		}
 
 		let { _: usernames } = parser(query);
 
 		if (usernames.length === 1 && isURL(usernames[0])) {
-			return await client.reply(from, 'Please specify a valid Twitter username, not a URL.', message);
+			return await client.reply(from, L.errors.twitterUsernameRequired, message);
 		}
 
 		for (const username of usernames) {
 			if (isURL(username.trim())) {
-				await client.reply(from, 'Please specify a valid Twitter username, not a URL.', message);
+				await client.reply(from, L.errors.twitterUsernameRequired, message);
 
 				continue;
 			}

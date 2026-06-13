@@ -1,6 +1,7 @@
 import _ from 'lodash';
 
 import configuration from '../../helper/config/connect.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 const getDisplayUrl = (value) => {
@@ -36,10 +37,12 @@ export default defineCommand({
 	limit: 2,
 	status: 'enable',
 	async run({ from, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
 		const pictures = configuration.pinterest.images;
 
 		if (!pictures.size) {
-			return client.send(from, { text: 'No profile pictures have been saved yet.' }, { quoted: message });
+			return client.send(from, { text: L.errors.noProfilePictures }, { quoted: message });
 		}
 
 		let caption = `📌 Total saved sequences: ${pictures.size}\n\n`;

@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { epicgames, epicgamesFree } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -29,8 +30,11 @@ export default defineCommand({
 	limit: 2,
 	status: 'enable',
 	run: async ({ query, message, from }, client) => {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return client.reply(from, 'You must provide a query.', message);
+			return client.reply(from, L.errors.noQuery, message);
 		}
 
 		if (query === '--free') {

@@ -1,4 +1,15 @@
+/**
+ * @module i18n
+ *
+ * @typedef {import('./types.d.ts').LocaleKey} LocaleKey
+ * @typedef {import('./types.d.ts').LocaleProxy} LocaleProxy
+ * @typedef {import('./types.d.ts').LanguageEntry} LanguageEntry
+ * @typedef {import('./types.d.ts').CommonStrings} CommonStrings
+ */
+
 import { Cache } from '../modules/cache.js';
+import prisma from '../database/prisma.js';
+import { updateGroupSetting, getGroupSettings } from '../database/adapters/group-settings.js';
 
 const DEFAULT_FALLBACK_LOCALE = 'id';
 
@@ -74,7 +85,9 @@ const interpolate = (template, vars) => {
 };
 
 /**
- * @param {string} locale
+ * Set the default/fallback locale used when a key is missing in the requested locale.
+ *
+ * @param {string} locale - ISO locale code (e.g. "id", "en")
  */
 export const setDefaultLocale = (locale) => {
 	if (typeof locale !== 'string' || locale.length === 0) {
@@ -85,52 +98,99 @@ export const setDefaultLocale = (locale) => {
 };
 
 /**
- * @returns {string}
+ * Get the current default/fallback locale.
+ *
+ * @returns {string} ISO locale code
  */
 export const getDefaultLocale = () => defaultLocale;
 
 /**
- * @returns {string[]}
+ * List all locales that have at least one registered namespace.
+ *
+ * @returns {string[]} Array of ISO locale codes
  */
 export const listLocales = () => Object.keys(tables);
 
 /**
- * @param {string} roomId
- * @returns {string}
+ * Get the locale assigned to a room (group/chat).
+ * Checks memory cache first, then DB, then falls back to default locale.
+ *
+ * @param {string} roomId - Room/group JID
+ * @returns {Promise<string>} ISO locale code
  */
-export const getLocale = (roomId) => {
+export const getLocale = async (roomId) => {
 	if (!roomId) {
 		return defaultLocale;
 	}
 
-	const stored = localeByRoom.get(roomId);
+	const cached = localeByRoom.get(roomId);
 
-	return stored || defaultLocale;
+	if (cached) {
+		return cached;
+	}
+
+	try {
+		const settings = await getGroupSettings(prisma, roomId);
+
+		if (settings?.locale) {
+			localeByRoom.set(roomId, settings.locale);
+
+			return settings.locale;
+		}
+	} catch {
+		// DB unavailable, fall through to default
+	}
+
+	return defaultLocale;
 };
 
 /**
- * @param {string} roomId
- * @param {string|null|undefined} locale
+ * Set or clear the locale for a room (group/chat).
+ * Persists to DB and updates memory cache.
+ * Pass `null` or `undefined` to reset to the default locale.
+ *
+ * @param {string} roomId - Room/group JID
+ * @param {string|null|undefined} locale - ISO locale code, or null/undefined to reset
+ * @returns {Promise<void>}
  */
-export const setLocale = (roomId, locale) => {
+export const setLocale = async (roomId, locale) => {
 	if (!roomId) {
 		return;
 	}
 
 	if (!locale) {
 		localeByRoom.delete(roomId);
+
+		try {
+			await updateGroupSetting(prisma, roomId, 'locale', null);
+		} catch {
+			// DB unavailable, memory cache is already cleared
+		}
+
 		return;
 	}
 
 	localeByRoom.set(roomId, locale);
+
+	try {
+		await updateGroupSetting(prisma, roomId, 'locale', locale);
+	} catch {
+		// DB unavailable, memory cache is already set
+	}
 };
 
 /**
- * Register or merge a namespace table for a locale.
+ * Register or deep-merge a namespace string table for a locale.
+ * Call this once at boot (or on demand) to make strings available via `t()` or `useLocale()`.
  *
- * @param {string} namespace
- * @param {string} locale
- * @param {Record<string, unknown>} table
+ * @example
+ *   registerNamespace('common', 'id', { errors: { noQuery: 'Masukkan query.' } });
+ *   registerNamespace('common', 'en', { errors: { noQuery: 'Please provide a query.' } });
+ *
+ * @param {string} namespace - Namespace name (e.g. "common", "werewolf")
+ * @param {string} locale - ISO locale code (e.g. "id", "en")
+ * @param {Record<string, unknown>} table - Nested key-value string table
+ * @throws {TypeError} If namespace, locale, or table is invalid
  */
 export const registerNamespace = (namespace, locale, table) => {
 	if (typeof namespace !== 'string' || namespace.length === 0) {
@@ -155,32 +215,31 @@ export const registerNamespace = (namespace, locale, table) => {
 };
 
 /**
- * Translate a dotted key (e.g. `namespace.path.to.key`) with optional vars.
+ * Translate a dotted key with optional variable interpolation.
  *
  * Lookup order:
- *   1. tables[locale][namespace][...path]
- *   2. tables[defaultLocale][namespace][...path]
- *   3. `key` itself (so missing keys are obvious)
+ *   1. `tables[locale][namespace][...path]`
+ *   2. `tables[defaultLocale][namespace][...path]` (fallback)
+ *   3. Returns `key` itself (so missing keys are visible in output)
  *
- * Vars support:
- *   - positional: `{0}`, `{1}` when `vars` is an array
- *   - named:      `{name}` when `vars` is a plain object
+ * @example
+ *   t('id', 'common.errors.noQuery')                        // "Masukkan query."
+ *   t('id', 'common.cooldown', [5])                         // "Tunggu 5 detik..."
+ *   t('id', 'common.errors.missingArgs', ['!help'])         // "Argumen kurang. Contoh: !help"
+ *   t('id', 'common.errors.missingArgs', { 0: '!help' })   // same result
  *
- * If the resolved value is an array, one element is picked at random via the
- * supplied rng (or `Math.random`) so we can rotate flavour text.
- *
- * @param {string} locale
- * @param {string} key dotted path, first segment is the namespace
- * @param {Record<string, unknown> | unknown[]} [vars]
- * @param {{rng?: () => number}} [options]
- * @returns {string}
+ * @param {string} locale - ISO locale code (e.g. "id", "en")
+ * @param {LocaleKey} key - Dotted path, first segment is the namespace (e.g. "common.errors.noQuery")
+ * @param {Record<string, unknown> | unknown[]} [vars] - Variables for `{placeholder}` interpolation
+ * @param {{rng?: () => number}} [options] - Custom RNG for array picks (default: Math.random)
+ * @returns {string} Translated (and interpolated) string, or the key itself if not found
  */
 export const t = (locale, key, vars, options) => {
 	if (typeof key !== 'string' || key.length === 0) {
 		return '';
 	}
 
-	const resolved = resolveKey(locale, key) ?? resolveKey(defaultLocale, key);
+	const resolved = resolveKey(locale, key) ?? resolveKey('en', key) ?? resolveKey(defaultLocale, key);
 
 	const raw = resolved === undefined ? key : resolved;
 
@@ -196,12 +255,90 @@ export const t = (locale, key, vars, options) => {
 };
 
 /**
- * Returns true only if a key is defined in the given locale (no fallback).
+ * Check if a key is directly defined in the given locale (no fallback).
  *
- * @param {string} locale
- * @param {string} key
+ * @param {string} locale - ISO locale code
+ * @param {LocaleKey} key - Dotted path (e.g. "common.errors.noQuery")
+ * @returns {boolean} `true` if the key exists in the locale's table
  */
 export const hasKey = (locale, key) => resolveKey(locale, key) !== undefined;
+
+/**
+ * Returns a proxy for ergonomic property access to translations.
+ *
+ * Leaf nodes (strings) are returned as-is — ready for `client.reply()`, `console.log()`, etc.
+ * Object nodes return a proxy for further chaining.
+ *
+ * @example
+ *   const L = useLocale('id', 'common');
+ *
+ *   // Returns the actual string — no wrapping needed
+ *   client.reply(from, L.errors.groupOnly, message);
+ *   console.log(L.success.loading); // "Memuat..."
+ *
+ *   // For interpolation, use t() or template literals
+ *   t(locale, 'common.cooldown', [5])
+ *   `${L.errors.missingArgs}`.replace('{0}', '!help')
+ *
+ * @param {string} locale - ISO locale code (e.g. "id", "en")
+ * @param {string} namespace - Namespace registered via `registerNamespace`
+ * @returns {LocaleProxy & CommonStrings} Proxy that resolves to strings at leaf nodes
+ */
+export const useLocale = (locale, namespace) => {
+	const buildProxy = (path = '') => {
+		return new Proxy(Object.create(null), {
+			get(_target, prop) {
+				if (typeof prop === 'symbol') {
+					return undefined;
+				}
+
+				const nextPath = path ? `${path}.${prop}` : prop;
+				const key = `${namespace}.${nextPath}`;
+				const resolved = resolveKey(locale, key) ?? resolveKey(defaultLocale, key);
+
+				if (resolved === undefined) {
+					return buildProxy(nextPath);
+				}
+
+				if (typeof resolved === 'string') {
+					return resolved;
+				}
+
+				if (Array.isArray(resolved)) {
+					return resolved;
+				}
+
+				return buildProxy(nextPath);
+			}
+		});
+	};
+
+	return buildProxy();
+};
+
+/**
+ * Warm the locale cache from DB on boot. Call this once at startup.
+ *
+ * @returns {Promise<number>} Number of locales loaded
+ */
+export const loadLocalesFromDB = async () => {
+	try {
+		const rows = await prisma.settingsManager.findMany({
+			where: { locale: { not: null } },
+			select: { groupId: true, locale: true }
+		});
+
+		for (const row of rows) {
+			if (row.locale) {
+				localeByRoom.set(row.groupId, row.locale);
+			}
+		}
+
+		return rows.length;
+	} catch {
+		return 0;
+	}
+};
 
 /**
  * Remove all registered tables. Intended for tests only.

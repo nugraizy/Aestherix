@@ -1,6 +1,7 @@
 import { BOT_NAME } from '../../core/constants.js';
 
 import { delay } from 'baileys';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -14,6 +15,9 @@ export default defineCommand({
 	limit: 3,
 	status: 'enable',
 	async run({ from, query, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		let capt = `${BOT_NAME} Search\n\n`;
 		const messages = await client.searchMessage(from, query);
 
@@ -25,7 +29,7 @@ export default defineCommand({
 			await client.reply(from, capt.trim(), message);
 
 			for (const messageElement of messages) {
-				await client.reply(from, 'Found it.', messageElement);
+				await client.reply(from, L.info.foundIt, messageElement);
 				await delay(200);
 			}
 

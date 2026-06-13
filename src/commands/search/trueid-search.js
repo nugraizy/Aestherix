@@ -1,5 +1,6 @@
 import { BOT_NAME } from '../../core/constants.js';
 
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { trueidSearch } from '../../utils/movies/true-id-search.js';
@@ -16,8 +17,11 @@ export default defineCommand({
 	limit: 5,
 	status: 'enable',
 	async run({ query, from, message, args, cmd, type }, client, store, ctx) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {

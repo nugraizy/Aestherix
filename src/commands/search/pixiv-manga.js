@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { fetchBUFFER, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { downloadManga, searchManga } from '../../utils/pixiv/index.js';
@@ -14,8 +15,11 @@ export default defineCommand({
 	cooldown: 8,
 	status: 'enable',
 	async run({ from, query, message, cmd }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
 		let queries = query.split(',');
@@ -40,7 +44,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					image: new Buffer.from(images, 'base64'),
+					image: Buffer.from(images, 'base64'),
 					caption:
 						'Pixiv Manga Search'.formatHeaders() +
 						`\n\nTitle : ${dataImage.title.capitalize()}
@@ -65,7 +69,7 @@ Total Media : ${dataImage.pageCount}`.formatForm()
 					await client.send(
 						from,
 						{
-							image: new Buffer.from(images, 'base64'),
+							image: Buffer.from(images, 'base64'),
 							caption: '\t',
 							templateButtons: [
 								{ urlButton: { displayText: 'Manga Source', url: `https://www.pixiv.net/en/artworks/${dataImage.id}` } }

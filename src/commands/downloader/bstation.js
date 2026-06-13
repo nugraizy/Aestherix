@@ -1,5 +1,6 @@
 import parser from 'yargs-parser';
 
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import {
 	bilibiliDetailTv,
 	color,
@@ -47,7 +48,7 @@ const processVideo = async (aid, client, { from, message, sender, filename, wait
 
 	await client.send(
 		from,
-		{ video: new Buffer.from(merge, 'base64'), caption: 'Bstation Downloader'.formatHeaders() },
+		{ video: Buffer.from(merge, 'base64'), caption: 'Bstation Downloader'.formatHeaders() },
 		{ quoted: message }
 	);
 };
@@ -63,6 +64,9 @@ export default defineCommand({
 	cooldown: 8,
 	status: 'enable',
 	async run({ query, from, message, filename, sender, typeQuoted, mediaData, bodyQuoted, prettyNumber }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (
 			typeQuoted === 'imageMessage' &&
 			client.decodeJid(await client.resolveJid(mediaData.participant, 'jid'))?.includes(client.decodeJid(client.user.id))
@@ -77,24 +81,24 @@ export default defineCommand({
 			}
 
 			if (!videoIds.length) {
-				return await client.reply(from, 'No id(s) found', message);
+				return await client.reply(from, L.errors.noIdsFound, message);
 			}
 
 			const numberiedQuery = Number(query);
 			const index = numberiedQuery - 1;
 
 			if (!numberiedQuery) {
-				return await client.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
+				return await client.reply(from, t(locale, 'errors.numberRange', [1, videoIds.length]), message);
 			}
 
-			if (index > videoIds.length) {
-				return await client.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
+			if (index >= videoIds.length) {
+				return await client.reply(from, t(locale, 'errors.numberRange', [1, videoIds.length]), message);
 			}
 
 			const videoId = videoIds[index];
 
 			if (!videoId) {
-				return await client.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
+				return await client.reply(from, t(locale, 'errors.numberRange', [1, videoIds.length]), message);
 			}
 
 			const wait = await client.waitMessage(from, `Downloading Bstation audio :\n${videoId}\nPlease wait`, message);
@@ -105,10 +109,10 @@ export default defineCommand({
 		}
 
 		if (!query) {
-			return await client.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
-		const wait = await client.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, L.success.loading, message);
 
 		let { _: urls } = parser(query);
 

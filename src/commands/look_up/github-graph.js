@@ -1,5 +1,7 @@
 import parser from 'yargs-parser';
 import { GitHubGraph } from '../../helper/index.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
+
 import { cmdId } from '../../helper/modules/prefix.js';
 import { defineCommand } from '../_define.js';
 
@@ -16,8 +18,11 @@ export default defineCommand({
 	limit: 3,
 	status: 'enable',
 	async run({ from, query, message, cmd }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please specify a GitHub User', message);
+			return await client.reply(from, L.errors.gitUsernameRequired, message);
 		}
 
 		const { _: username, theme } = parser(query, {
@@ -37,7 +42,7 @@ export default defineCommand({
 		}
 
 		if (!username || username.length === 0) {
-			return await client.reply(from, 'Please specify a GitHub User', message);
+			return await client.reply(from, L.errors.gitUsernameRequired, message);
 		}
 
 		if (theme === true) {
@@ -55,7 +60,7 @@ export default defineCommand({
 				.send();
 		}
 
-		const wait = await client.waitMessage(from, 'Creating graph. Please wait...', message);
+		const wait = await client.waitMessage(from, L.success.searching, message);
 
 		const init = await git.init(username, { round: true, theme: theme.toUpperCase(), backgroundMesh: true });
 
@@ -63,7 +68,7 @@ export default defineCommand({
 
 		const buffer = create.toBuffer();
 
-		await client.send(from, { image: new Buffer.from(buffer) }, { quoted: message });
+		await client.send(from, { image: Buffer.from(buffer) }, { quoted: message });
 
 		await wait.update('Graph created successfully!');
 	}

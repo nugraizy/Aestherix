@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { kiryuu } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -19,7 +20,9 @@ export default defineCommand({
 	limit: 3,
 	status: 'enable',
 	async run({ from, message }, client) {
-		const wait = await client.waitMessage(from, 'Fetching popular comics...', message);
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+		const wait = await client.waitMessage(from, L.success.fetchingPopular, message);
 
 		try {
 			const result = await kiryuu.searchManga('', { limit: 15 });

@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { komikcast, mime } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -12,8 +13,11 @@ export default defineCommand({
 	limit: 3,
 	status: 'enable',
 	async run({ query, from, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please provide a slug/chapterIndex.', message);
+			return await client.reply(from, L.errors.slugRequired, message);
 		}
 
 		const input = query.trim();
@@ -21,7 +25,7 @@ export default defineCommand({
 		const slug = slashIndex === -1 ? input : input.slice(0, slashIndex);
 		let chapterIndex = slashIndex === -1 ? null : input.slice(slashIndex + 1);
 
-		const wait = await client.waitMessage(from, 'Fetching chapter pages...', message);
+		const wait = await client.waitMessage(from, L.success.fetchingPages, message);
 
 		try {
 			const manga = await komikcast.getManga(slug).catch(() => null);

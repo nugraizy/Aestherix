@@ -1,4 +1,5 @@
 import { manager } from '../../core/manager.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import prisma from '../../helper/database/prisma.js';
 import { color } from '../../utils/modules/color.js';
 import { defineCommand } from '../_define.js';
@@ -16,6 +17,9 @@ export default defineCommand({
 	premium: false,
 
 	async run({ from, args, message, isOwner }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!isOwner) {
 			return;
 		}
@@ -26,7 +30,7 @@ export default defineCommand({
 			const instances = await prisma.botInstance.findMany().catch(() => []);
 
 			if (instances.length === 0) {
-				return client.reply(from, 'No bot instances configured.', message);
+				return client.reply(from, L.errors.noBotsConfigured, message);
 			}
 
 			const lines = instances.map((inst, i) => {
@@ -41,7 +45,7 @@ export default defineCommand({
 		}
 
 		if (action !== 'enable' && action !== 'disable') {
-			return client.reply(from, 'Usage: !botactivate <list|enable|disable> <session_name>', message);
+			return client.reply(from, L.errors.missingArgs, message);
 		}
 
 		const sessionName = args[1];

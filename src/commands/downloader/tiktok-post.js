@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { color, formatNumber, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
 import { defineCommand } from '../_define.js';
@@ -17,15 +18,18 @@ export default defineCommand({
 	cooldown: 8,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, device }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please provide a URL', message);
+			return await client.reply(from, L.errors.noUrl, message);
 		}
 
 		if (!tiktok) {
 			tiktok = (await import('../../utils/tiktok/index.js')).tiktok;
 		}
 
-		const wait = await client.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, L.success.loading, message);
 
 		let {
 			_: urls,
@@ -136,7 +140,7 @@ export default defineCommand({
 			const url = (withWatermark ? urls[2] || urls[0] || urls[1] : urls[0] || urls[1] || urls[2]) || null;
 
 			if (!url) {
-				await client.reply(from, 'No download url found, Might check your url and try again.', message);
+				await client.reply(from, L.errors.noDownloadUrl, message);
 				error++;
 			}
 

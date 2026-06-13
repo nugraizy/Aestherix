@@ -1,6 +1,7 @@
 import { delay } from '../../utils/modules/index.js';
 import { search } from '../../utils/anonymous/index.js';
 import configuration from '../../helper/index.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -14,17 +15,20 @@ export default defineCommand({
 	limit: 1,
 	status: 'enable',
 	async run({ from, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		const result = search(from, 20, client, message);
 
 		if (result === true) {
-			const { key } = await client.reply(from, 'Searching for a partner...', message);
+			const { key } = await client.reply(from, L.success.searchingPartner, message);
 
 			configuration.anonymous.messages.set(from, key);
 			return;
 		}
 
 		if (result.partner2) {
-			const { key } = await client.reply(result.partner2, 'Searching for a partner...', message);
+			const { key } = await client.reply(result.partner2, L.success.searchingPartner, message);
 
 			configuration.anonymous.messages.set(result.partner2, key);
 
@@ -36,9 +40,9 @@ export default defineCommand({
 		}
 
 		if (result.status === 'chatting') {
-			await client.reply(from, 'You are already chatting with someone!', message);
+			await client.reply(from, L.errors.alreadyChatting, message);
 		} else {
-			await client.reply(from, 'You are already searching for a partner!', message);
+			await client.reply(from, L.errors.alreadySearching, message);
 		}
 	}
 });

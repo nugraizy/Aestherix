@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { getTimeSince } from '../../utils/modules/index.js';
 import { toUserJid } from '../../helper/misc/wa_data/index.js';
 import { defineCommand } from '../_define.js';
@@ -13,6 +14,9 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	async run({ from, message, args, settings, cmd }, client, store) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		const messages = store.loadMessages(from);
 
 		if (args[1] === 'get') {
@@ -23,7 +27,7 @@ export default defineCommand({
 				await import('../../core/context.js')
 			).Context.from(JSON.parse(JSON.stringify(messages.find((v) => v.key.id === args[2]))), client, store, false);
 
-			await client.reply(dataMessage.from, 'Here.', dataMessage.message);
+			await client.reply(dataMessage.from, L.simulate.here, dataMessage.message);
 			await client.reply(
 				dataMessage?.from,
 				`Message Metadata : 
@@ -49,7 +53,7 @@ Tot. Tags : ${dataMessage.mention.length}`,
 		}
 
 		if (!dataMessages.length) {
-			return await client.reply(from, 'No messages scraped in this chat', message);
+			return await client.reply(from, L.errors.noMessagesScraped, message);
 		}
 
 		const ownerJid = toUserJid(settings.owner_number);

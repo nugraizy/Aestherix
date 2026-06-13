@@ -3,6 +3,7 @@ import { convertStickerToMedia } from '../../utils/converter/index.js';
 import { convertLottieToVideo } from '../../utils/converter/lottie.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 
 import { inflateRawSync } from 'node:zlib';
 
@@ -49,8 +50,11 @@ export default defineCommand({
 		client,
 		store
 	) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!isQuotedSticker && !shouldSkipCheck) {
-			return await client.reply(from, 'Please reply a sticker to decrypt', message);
+			return await client.reply(from, L.errors.stickerRequired, message);
 		}
 
 		loggers.info(`${color('Decrypting media', 'pink')} from ${color(prettyNumber, 'lilac')}`);
@@ -64,7 +68,7 @@ export default defineCommand({
 			const lottieJson = extractLottieFromZip(stickerBuffer);
 
 			if (!lottieJson) {
-				return await client.reply(from, 'Failed to extract Lottie animation data.', message);
+				return await client.reply(from, L.errors.convertFailed, message);
 			}
 
 			const videoBuffer = await convertLottieToVideo(lottieJson, prettyNumber);

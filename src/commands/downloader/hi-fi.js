@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import lodash from 'lodash';
 import parser from 'yargs-parser';
 
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { hifi, metadata } from '../../utils/hi-fi/index.js';
 import { color, delay, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
@@ -17,14 +18,17 @@ export default defineCommand({
 	limit: 3,
 	status: 'enable',
 	run: async ({ from, query, message, prettyNumber, prefix }, client) => {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		let wait = null;
 
 		try {
 			if (!query) {
-				return await client.reply(from, 'You must provide a query.', message);
+				return await client.reply(from, L.errors.noQuery, message);
 			}
 
-			wait = await client.waitMessage(from, 'Please wait...', message);
+			wait = await client.waitMessage(from, L.success.loading, message);
 
 			let { _, index, id } = parser(query, {
 				configuration: { 'short-option-groups': false },

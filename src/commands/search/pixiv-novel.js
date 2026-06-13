@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { getNovelContent, searchNovel } from '../../utils/pixiv/index.js';
@@ -14,8 +15,11 @@ export default defineCommand({
 	cooldown: 8,
 	status: 'enable',
 	async run({ from, query, message, cmd }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'You must provide a query.', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
 		let queries = query.split(',');

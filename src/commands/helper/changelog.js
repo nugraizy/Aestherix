@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import parser from 'yargs-parser';
 
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { getChangelogs, stringifyChangelogs } from '../../utils/github/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -19,6 +20,8 @@ export default defineCommand({
 	limit: 3,
 	status: 'enable',
 	run: async ({ query, from, message }, client) => {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
 		const { quantity, text } = parser(query, {
 			number: 'quantity',
 			boolean: 'text',
@@ -51,7 +54,7 @@ export default defineCommand({
 		}
 
 		if (!quantity) {
-			return await client.reply(from, 'You must provide a quantity.', message);
+			return await client.reply(from, L.errors.quantityRequired, message);
 		}
 
 		const changelog = await getChangelogs(quantity);

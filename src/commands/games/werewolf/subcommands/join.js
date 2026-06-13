@@ -7,16 +7,16 @@ export const name = 'join';
 
 export const run = async (ctx, client) => {
 	if (!ctx.isGroup) {
-		return replyError(ctx, client, getLocale(ctx.from), 'groupOnly');
+		return replyError(ctx, client, await getLocale(ctx.from), 'groupOnly');
 	}
 
 	const session = await repository.load(ctx.from);
 
 	if (!session) {
-		return replyError(ctx, client, getLocale(ctx.from), 'noSessionExist');
+		return replyError(ctx, client, await getLocale(ctx.from), 'noSessionExist');
 	}
 
-	const locale = getLocale(session.roomId);
+	const locale = await getLocale(session.roomId);
 	const result = addPlayer(session, { id: ctx.sender, name: ctx.pushname || '' });
 
 	if (!result.ok) {

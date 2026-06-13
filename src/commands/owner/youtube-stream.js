@@ -3,6 +3,7 @@ import { YTNodes } from 'youtubei.js';
 import { youtubeLiveComments } from '../../utils/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { Cache } from '../../helper/modules/cache.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 const lives = new Cache();
@@ -18,30 +19,33 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	run: async ({ from, message, query, args }, client) => {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return client.reply(from, 'You must provide a query.', message);
+			return client.reply(from, L.errors.noQuery, message);
 		}
 
 		if (args[1] === 'stop') {
 			const live = lives.get(from);
 
 			if (!live) {
-				return client.reply(from, 'No live stream is running.', message);
+				return client.reply(from, L.errors.noLiveStream, message);
 			}
 
 			live.stop();
 
-			return client.reply(from, 'Live stream has been stopped.', message);
+			return client.reply(from, L.info.streamStopped, message);
 		} else if (args[1] === 'start') {
 			const live = lives.get(from);
 
 			if (!live) {
-				return client.reply(from, 'No live stream is running.', message);
+				return client.reply(from, L.errors.noLiveStream, message);
 			}
 
 			live.start();
 
-			return client.reply(from, 'Live stream has been started.', message);
+			return client.reply(from, L.info.streamStarted, message);
 		}
 
 		const live = await youtubeLiveComments(query);
@@ -54,7 +58,7 @@ export default defineCommand({
 
 		live.on('start', async (initialData) => {
 			try {
-				await client.reply(from, 'Success join the live stream.', message);
+				await client.reply(from, L.info.streamJoined, message);
 
 				const pinnedAction = initialData.actions.firstOfType(YTNodes.AddBannerToLiveChatCommand);
 
@@ -77,7 +81,7 @@ Content : ${pinnedAction?.banner.contents.message.toString()}`,
 		});
 
 		live.on('error', async () => {
-			await client.reply(from, 'Something went wrong with the socket.', message);
+			await client.reply(from, L.errors.somethingWentWrong, message);
 
 			try {
 				live.stop();
@@ -90,7 +94,7 @@ Content : ${pinnedAction?.banner.contents.message.toString()}`,
 
 		live.on('end', async () => {
 			try {
-				await client.reply(from, 'The live stream has ended.', message);
+				await client.reply(from, L.info.liveStreamEnded, message);
 
 				live.stop();
 				lives.delete(from);

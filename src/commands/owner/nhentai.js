@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { imageToPdf, mime, nhentai } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -12,8 +13,11 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	run: async ({ from, message, query }, client) => {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return client.reply(from, 'You must provide a query.', message);
+			return client.reply(from, L.errors.noQuery, message);
 		}
 
 		const result = await nhentai(query);
@@ -40,7 +44,7 @@ Uploaded : ${uploaded}
 
 		await client.reply(from, caption.formatForm(), message);
 
-		const wait = await client.waitMessage(from, 'Processing PDFs', message);
+		const wait = await client.waitMessage(from, L.success.processing, message);
 
 		const buffer = await imageToPdf(images.pages);
 

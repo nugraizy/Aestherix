@@ -3,6 +3,7 @@ import fs from 'fs-extra';
 import { fetch } from 'undici';
 import yargsParser from 'yargs-parser';
 
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { extension, gif2mp4, isURL } from '../../utils/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
@@ -49,7 +50,7 @@ function parseObject(obj, path) {
 }
 
 async function fetchData(url, { method, headers, body }) {
-	const response = await fetch(url, { method, headers, body });
+	const response = await fetch(url, { method, headers, body, signal: AbortSignal.timeout(30_000) });
 
 	if (!response.ok) {
 		return { error: true, message: response.statusText };
@@ -137,8 +138,11 @@ export default defineCommand({
 	limit: 3,
 	status: 'enable',
 	async run({ from, message, query }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Fetch expect <url> <?parser>', message);
+			return await client.reply(from, L.errors.fetchExpectUrl, message);
 		}
 
 		let {
@@ -168,11 +172,11 @@ export default defineCommand({
 		const url = queries.find((v) => isURL(v));
 
 		if (!url) {
-			return await client.reply(from, 'Fetch expect <url>', message);
+			return await client.reply(from, L.errors.fetchExpectUrl, message);
 		}
 
 		if (method && !/^(GET|POST)$/i.test(method)) {
-			return await client.reply(from, 'Method must be `GET` or `POST` (case-insensitive).', message);
+			return await client.reply(from, L.errors.invalidMethod, message);
 		}
 
 		if (body && /^GET$/i.test(method)) {
@@ -237,7 +241,7 @@ export default defineCommand({
 				}
 
 				if (media && typeof data === 'string' && isURL(data)) {
-					const mediaResponse = await fetch(data);
+					const mediaResponse = await fetch(data, { signal: AbortSignal.timeout(30_000) });
 					const fileBuffer = Buffer.from(await mediaResponse.arrayBuffer());
 					const { mime, ext } = await fileTypeFromBuffer(fileBuffer);
 

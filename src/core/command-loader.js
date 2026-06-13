@@ -116,7 +116,7 @@ export class CommandLoader extends EventEmitter {
 		}
 
 		if (flags.test) {
-			const include = ['menu', 'ping', 'moderate', 'owner'];
+			const include = ['menu', 'ping', 'moderator', 'owner'];
 
 			files = files.filter((f) => include.some((v) => f.includes(v)));
 		}

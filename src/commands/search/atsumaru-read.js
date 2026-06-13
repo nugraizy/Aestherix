@@ -1,3 +1,4 @@
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { atsumaru } from '../../utils/atsumaru/index.js';
 import { imageToPdf, mime } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
@@ -13,18 +14,21 @@ export default defineCommand({
 	limit: 3,
 	status: 'enable',
 	async run({ query, from, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please provide a manga ID and chapter ID (e.g., mangaId/chapterId).', message);
+			return await client.reply(from, L.errors.mangaIdRequired, message);
 		}
 
 		const input = query.trim();
 		const [mangaId, chapterId] = input.split('/');
 
 		if (!mangaId || !chapterId) {
-			return await client.reply(from, 'Invalid format. Use: mangaId/chapterId', message);
+			return await client.reply(from, t(locale, 'errors.invalidFormat', ['mangaId/chapterId']), message);
 		}
 
-		const wait = await client.waitMessage(from, 'Fetching chapter pages...', message);
+		const wait = await client.waitMessage(from, L.success.fetchingPages, message);
 
 		try {
 			const manga = await atsumaru.getManga(mangaId).catch(() => null);

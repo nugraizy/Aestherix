@@ -1,5 +1,6 @@
 import parser from 'yargs-parser';
 
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { mime } from '../../utils/misc/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
@@ -17,11 +18,14 @@ export default defineCommand({
 	limit: 6,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please provide a URL', message);
+			return await client.reply(from, L.errors.noUrl, message);
 		}
 
-		const wait = await client.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, L.success.loading, message);
 
 		let { _: urls } = parser(query);
 

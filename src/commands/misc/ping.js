@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -11,10 +12,12 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	async run({ from, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
 		const t = performance.now();
 
-		const wait = await client.waitMessage(from, 'Pong!', message);
+		const wait = await client.waitMessage(from, L.info.pong, message);
 
-		await wait.update(`Pong! ${(performance.now() - t).toFixed(1)} ms`);
+		await wait.update(`${L.info.pong} ${(performance.now() - t).toFixed(1)} ms`);
 	}
 });

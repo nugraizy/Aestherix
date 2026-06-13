@@ -2,6 +2,7 @@
 import { textToSpeech } from '../../utils/converter/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 
 export default defineCommand({
 	name: 'text2speech',
@@ -14,8 +15,11 @@ export default defineCommand({
 	limit: 1,
 	status: 'enable',
 	async run({ query, from, filename, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please provide some text to convert to speech', message);
+			return await client.reply(from, L.errors.ttsTextRequired, message);
 		}
 
 		let language = 'id';
@@ -41,7 +45,7 @@ export default defineCommand({
 				);
 			}
 
-			await client.reply(from, 'Error while converting text to speech', message);
+			await client.reply(from, L.errors.error, message);
 
 			loggers.error(color('TTS conversion failed:', 'red'), e);
 		}

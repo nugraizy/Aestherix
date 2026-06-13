@@ -1,6 +1,7 @@
 import parser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { color, loggers, numberWithCommas } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -15,6 +16,9 @@ export default defineCommand({
 	limit: 6,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, isOwner, prefix }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!configuration.isInstagramInitiated) {
 			return await client.reply(
 				from,
@@ -24,7 +28,7 @@ export default defineCommand({
 		}
 
 		if (!query) {
-			return await client.reply(from, 'Please specify a url', message);
+			return await client.reply(from, L.errors.noUrl, message);
 		}
 
 		let { _: usernames } = parser(query);

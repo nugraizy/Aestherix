@@ -1,4 +1,5 @@
 import { manager } from '../../core/manager.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import prisma from '../../helper/database/prisma.js';
 import { defineCommand } from '../_define.js';
 
@@ -15,6 +16,9 @@ export default defineCommand({
 	premium: false,
 
 	async run({ from, args, message, isOwner }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!isOwner) {
 			return;
 		}
@@ -22,7 +26,7 @@ export default defineCommand({
 		const sessionName = args[1];
 
 		if (!sessionName) {
-			return client.reply(from, 'Usage: !botflags <session_name> [--flag value]', message);
+			return client.reply(from, L.errors.missingArgs, message);
 		}
 
 		const sub = manager.get(sessionName);

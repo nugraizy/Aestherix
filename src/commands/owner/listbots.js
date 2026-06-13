@@ -1,4 +1,5 @@
 import { manager } from '../../core/manager.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -14,6 +15,9 @@ export default defineCommand({
 	premium: false,
 
 	async run({ from, message, isOwner }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!isOwner) {
 			return;
 		}
@@ -21,7 +25,7 @@ export default defineCommand({
 		const entries = manager.list();
 
 		if (entries.length === 0) {
-			return client.reply(from, 'No bots running.', message);
+			return client.reply(from, L.errors.noBotsRunning, message);
 		}
 
 		const lines = entries.map((entry, i) => {

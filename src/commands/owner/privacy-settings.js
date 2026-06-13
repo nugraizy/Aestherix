@@ -1,4 +1,5 @@
 import { getBinaryNodeChild, getBinaryNodeChildren } from 'baileys';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 const TYPES = {
@@ -74,6 +75,9 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	run: async ({ query, from, message }, client) => {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		try {
 			const node = await client.query({
 				tag: 'iq',
@@ -122,9 +126,9 @@ export default defineCommand({
 
 			await sendQuery(client, { name, query });
 
-			await client.reply(from, 'Succesfully changed privacy settings.', message);
+			await client.reply(from, L.simulate.privacySuccess, message);
 		} catch {
-			await client.reply(from, 'An error occured while trying to change privacy settings.', message);
+			await client.reply(from, L.errors.error, message);
 		}
 	}
 });

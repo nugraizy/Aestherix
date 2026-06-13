@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { isURL } from '../../utils/modules/index.js';
 import { tiny } from '../../utils/shortener/index.js';
 import { defineCommand } from '../_define.js';
@@ -13,12 +14,15 @@ export default defineCommand({
 	cooldown: 3,
 	status: 'enable',
 	async run({ query, from, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'You must provide a URL', message);
+			return await client.reply(from, L.errors.noUrl, message);
 		}
 
 		if (!isURL(query)) {
-			return await client.reply(from, 'Please specify a valid URL', message);
+			return await client.reply(from, L.errors.invalidUrl, message);
 		}
 
 		const urls = await tiny(query);

@@ -1,5 +1,6 @@
 import { BOT_NAME } from '../../core/constants.js';
 import { env } from '../../core/env.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { cfFetchText } from '../../utils/modules/cloudflare.js';
 import { ManualSolveError } from '../../utils/modules/manual-solve-error.js';
 import { solverManager } from '../../utils/modules/solver-manager.js';
@@ -28,7 +29,9 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	async run({ from, message }, client) {
-		const wait = await client.waitMessage(from, 'Fetching demo page...', message);
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+		const wait = await client.waitMessage(from, L.success.fetchingDemo, message);
 
 		try {
 			const text = await cfFetchText(DEMO_URL, { service: 'testsolve', timeoutMs: 30_000 });
@@ -61,7 +64,7 @@ export default defineCommand({
 			try {
 				await solverManager.waitForSolve(error.challengeId, SOLVE_TIMEOUT_MS);
 
-				const retryWait = await client.waitMessage(from, 'Challenge solved! Fetching again...', message);
+				const retryWait = await client.waitMessage(from, L.success.challengeSolved, message);
 				const text = await cfFetchText(DEMO_URL, { service: 'testsolve', timeoutMs: 30_000 });
 				const preview = text
 					.replace(/<[^>]+>/g, ' ')

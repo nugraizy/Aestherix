@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { color, formatNumber, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -16,6 +17,9 @@ export default defineCommand({
 	limit: 9,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, bodyQuoted, isOwner, prefix }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!configuration.isInstagramInitiated) {
 			return await client.reply(
 				from,
@@ -35,14 +39,14 @@ export default defineCommand({
 			}
 
 			if (!videoIds.length) {
-				return await client.reply(from, 'No id(s) found', message);
+				return await client.reply(from, L.errors.noIdsFound, message);
 			}
 
 			const numberiedQuery = Number(query);
 			const index = numberiedQuery - 1;
 
-			if (!numberiedQuery || index > videoIds.length) {
-				return await client.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
+			if (!numberiedQuery || index >= videoIds.length) {
+				return await client.reply(from, t(locale, 'errors.numberRange', [1, videoIds.length]), message);
 			}
 
 			const videoId = videoIds[index];
@@ -53,10 +57,10 @@ export default defineCommand({
 		}
 
 		if (!query) {
-			return await client.reply(from, 'Please specify a url', message);
+			return await client.reply(from, L.errors.noUrl, message);
 		}
 
-		const wait = await client.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, L.success.loading, message);
 
 		const { _: urls } = parser(query);
 

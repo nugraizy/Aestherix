@@ -1,6 +1,7 @@
 import configuration from '../../helper/config/connect.js';
 import { telegram } from '../../utils/stickers/telegram.js';
 import { defineCommand } from '../_define.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 
 export default defineCommand({
 	name: 'telegramsticker',
@@ -13,11 +14,14 @@ export default defineCommand({
 	limit: 4,
 	status: 'enable',
 	async run({ query, message, from }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please enter a query', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
-		const wait = await client.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, L.success.loading, message);
 
 		const result = await telegram(query);
 

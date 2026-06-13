@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { youtubeChannel } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -12,8 +13,11 @@ export default defineCommand({
 	limit: 6,
 	status: 'enable',
 	run: async ({ from, query, message }, client) => {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please specify a query', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
 		const channel = await youtubeChannel(query);

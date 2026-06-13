@@ -37,7 +37,8 @@
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset",
     "db:push:mongo": "prisma db push --schema=prisma/schema.mongodb.prisma",
-    "db:generate:mongo": "prisma generate --schema=prisma/schema.mongodb.prisma"
+    "db:generate:mongo": "prisma generate --schema=prisma/schema.mongodb.prisma",
+    "i18n:generate": "node src/cli/i18n-generate.js"
   },
   "keywords": [
     "whatsapp",

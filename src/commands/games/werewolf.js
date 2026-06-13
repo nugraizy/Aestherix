@@ -59,7 +59,7 @@ export default defineCommand({
 		const module = sub ? SUBCOMMANDS[sub] : null;
 
 		if (!module) {
-			const locale = getLocale(ctx.from);
+			const locale = await getLocale(ctx.from);
 
 			return client.reply(ctx.from, t(locale, 'werewolf.help'), ctx.message);
 		}

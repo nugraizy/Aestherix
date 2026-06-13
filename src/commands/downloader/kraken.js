@@ -1,5 +1,6 @@
 import parser from 'yargs-parser';
 
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { kraken, removeDuplicatesArray, loggers, color } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -16,15 +17,18 @@ export default defineCommand({
 	limit: 7,
 	status: 'enable',
 	run: async ({ from, message, query, prettyNumber }, client) => {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return client.reply(from, 'You must provide a query.', message);
+			return client.reply(from, L.errors.noQuery, message);
 		}
 
 		const { _: urls } = parser(query);
 
 		urls = removeDuplicatesArray(urls);
 
-		const wait = await client.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, L.success.loading, message);
 
 		let success = 0;
 		let error = 0;
@@ -33,7 +37,7 @@ export default defineCommand({
 
 		for (const url of urls) {
 			if (!regex(url)) {
-				await client.reply(from, 'Please specify a valid Kraken url.\nInvalid : ' + url, message);
+				await client.reply(from, L.errors.krakenUrlRequired, message);
 				error++;
 				continue;
 			}

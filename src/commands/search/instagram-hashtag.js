@@ -1,4 +1,5 @@
 import configuration from '../../helper/config/connect.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -12,6 +13,9 @@ export default defineCommand({
 	limit: 4,
 	status: 'enable',
 	async run({ query, from, message, isOwner, prefix }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!configuration.isInstagramInitiated) {
 			return await client.reply(
 				from,
@@ -21,7 +25,7 @@ export default defineCommand({
 		}
 
 		if (!query) {
-			return client.reply(from, 'You must provide a query.', message);
+			return client.reply(from, L.errors.noQuery, message);
 		}
 
 		const result = await configuration.instagram.search.hashtag(query);

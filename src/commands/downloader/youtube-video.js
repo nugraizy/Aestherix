@@ -1,5 +1,6 @@
 import parser from 'yargs-parser';
 
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { color, isURL, isYoutubeURL, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { youtube } from '../../utils/youtube/index.js';
 import { defineCommand } from '../_define.js';
@@ -71,6 +72,9 @@ export default defineCommand({
 	limit: 8,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message, mediaData, typeQuoted, bodyQuoted }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		const { query: cleanQuery, options, list } = parseFlags(query);
 
 		query = cleanQuery;
@@ -91,21 +95,21 @@ export default defineCommand({
 			}
 
 			if (!videoIds.length) {
-				return await client.reply(from, 'No id(s) found', message);
+				return await client.reply(from, L.errors.noIdsFound, message);
 			}
 
 			const numberiedQuery = Number(query);
 			const index = numberiedQuery - 1;
 
-			if (!numberiedQuery || index > videoIds.length) {
-				return await client.reply(from, `Please specify a number beteen 1 - ${videoIds.length}`, message);
+			if (!numberiedQuery || index >= videoIds.length) {
+				return await client.reply(from, t(locale, 'errors.numberRange', [1, videoIds.length]), message);
 			}
 
 			const videoId = videoIds[index];
 
 			const wait = await client.waitMessage(
 				from,
-				`Please wait...\nDownloading YouTube audio :\n${videoId}`.formatForm(),
+				`${L.success.loading}\nDownloading YouTube audio :\n${videoId}`.formatForm(),
 				message
 			);
 
@@ -153,7 +157,7 @@ export default defineCommand({
 		// }
 
 		if (!query) {
-			return await client.reply(from, 'Please provide a URL', message);
+			return await client.reply(from, L.errors.noUrl, message);
 		}
 
 		if (list) {
@@ -164,13 +168,13 @@ export default defineCommand({
 
 		queries = removeDuplicatesArray(queries);
 
-		if (queries.length === 1 && isURL(queries) && !isYoutubeURL(queries)) {
-			return await client.reply(from, 'This is not a valid YouTube URL.', message);
+		if (queries.length === 1 && isURL(queries[0]) && !isYoutubeURL(queries[0])) {
+			return await client.reply(from, L.errors.invalidYoutubeUrl, message);
 		}
 
 		const wait = await client.waitMessage(
 			from,
-			`Please wait...\nDownloading YouTube video(s) :\n${queries.join('\n')}`.formatForm(),
+			`${L.success.loading}\nDownloading YouTube video(s) :\n${queries.join('\n')}`.formatForm(),
 			message
 		);
 
@@ -181,7 +185,7 @@ export default defineCommand({
 
 		for (const Query of queries) {
 			if (isURL(Query) && !isYoutubeURL(Query)) {
-				await client.reply(from, `[ ${Query} ] This isn't a valid YouTube URL.`, message);
+				await client.reply(from, `${Query} ${L.errors.invalidYoutubeUrl}`, message);
 				loggers.error(`${color('Failed to Download YouTube Video', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;

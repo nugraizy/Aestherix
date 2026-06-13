@@ -1,5 +1,6 @@
 import parser from 'yargs-parser';
 
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { color, formatNumber, isURL, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { getDouyinInfo } from '../../utils/tiktok/index.js';
 import { defineCommand } from '../_define.js';
@@ -17,22 +18,25 @@ export default defineCommand({
 	limit: 4,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please provide a URL', message);
+			return await client.reply(from, L.errors.noUrl, message);
 		}
 
-		const wait = await client.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, L.success.loading, message);
 
 		let { _: urls } = parser(query);
 
 		urls = removeDuplicatesArray(urls);
 
 		if (urls.length === 1 && !isURL(urls[0])) {
-			return await wait.update('Please specify a valid url');
+			return await wait.update(L.errors.invalidUrl);
 		}
 
 		if (urls.length === 1 && isURL(urls[0]) && !isDouyinUrl(urls[0])) {
-			return await wait.update('Please specify a valid Douyin url');
+			return await wait.update(L.errors.douyinUrlRequired);
 		}
 
 		let success = 0;
@@ -42,11 +46,11 @@ export default defineCommand({
 
 		for (const url of urls) {
 			if (!isURL(url)) {
-				await client.reply(from, `Please specify a valid url\nInvalid : ${url}`, message);
+				await client.reply(from, t(locale, 'errors.validUrlRequired', [url]), message);
 				error++;
 				continue;
 			} else if (!isDouyinUrl(url)) {
-				await client.reply(from, `Please specify a valid Douyin url\nInvalid : ${url}`, message);
+				await client.reply(from, L.errors.douyinUrlRequired, message);
 				error++;
 				continue;
 			}
@@ -102,7 +106,7 @@ export default defineCommand({
 			}
 
 			if (!info.video) {
-				await client.reply(from, 'No download url found, Might check your url and try again.', message);
+				await client.reply(from, L.errors.noDownloadUrl, message);
 				error++;
 				continue;
 			}

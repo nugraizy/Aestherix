@@ -5,6 +5,7 @@ import parser from 'yargs-parser';
 import { MemeGenerator } from '../../helper/canvas/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 
 const DEFAULT_TYPE = 'image';
 
@@ -36,8 +37,11 @@ export default defineCommand({
 		},
 		client
 	) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!isMediaImage && !(isQuotedSticker || isSticker)) {
-			return await client.reply(from, 'Please send/reply a media to convert to sticker', message);
+			return await client.reply(from, L.errors.stickerMediaRequired, message);
 		}
 
 		if (!stickerAble) {
@@ -55,7 +59,7 @@ export default defineCommand({
 		}
 
 		if (!query) {
-			return await client.reply(from, 'Please provide a query, use & to split top/bottom text', message);
+			return await client.reply(from, L.errors.memeTextRequired, message);
 		}
 
 		const parsed = parser(query.toLowerCase(), {
@@ -73,7 +77,7 @@ export default defineCommand({
 		query = query.replace(regexs, '');
 
 		if (isQuotedSticker && extractMediaData.isAnimated) {
-			return client.reply(from, 'Cannot use animated sticker.', message);
+			return client.reply(from, L.errors.noAnimatedSticker, message);
 		}
 
 		const image = await client.downloadMediaMessage(mediaData);

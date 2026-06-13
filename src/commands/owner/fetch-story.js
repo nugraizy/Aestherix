@@ -2,6 +2,7 @@ import { generateWAMessageFromContent } from 'baileys';
 
 import { TextStory } from '../../helper/canvas/index.js';
 import { Cache } from '../../helper/modules/cache.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -18,6 +19,9 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	async run({ from, message, query }, client, store) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		try {
 			const messages = store.loadMessages(STATUS);
 			const tempContainer = new Cache();
@@ -61,7 +65,7 @@ export default defineCommand({
 				null;
 
 			if (!data) {
-				return await client.reply(from, 'Story not found', message);
+				return await client.reply(from, L.errors.noStory, message);
 			}
 
 			caption += ` • ${

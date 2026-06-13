@@ -1,5 +1,6 @@
 import parser from 'yargs-parser';
 
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { color, isURL, loggers, mediafire, removeDuplicatesArray } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -17,8 +18,11 @@ export default defineCommand({
 	limit: 7,
 	status: 'enable',
 	run: async ({ from, message, query, prettyNumber }, client) => {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return client.reply(from, 'You must provide a query.', message);
+			return client.reply(from, L.errors.noQuery, message);
 		}
 
 		let { _: urls } = parser(query);
@@ -26,14 +30,14 @@ export default defineCommand({
 		urls = removeDuplicatesArray(urls);
 
 		if (urls.length === 1 && !isURL(urls[0])) {
-			return await client.reply(from, 'Please specify a valid url.', message);
+			return await client.reply(from, L.errors.invalidUrl, message);
 		}
 
 		if (urls.length === 1 && !regex(urls[0])) {
-			return await client.reply(from, 'Please specify a valid Mediafire url.', message);
+			return await client.reply(from, L.errors.mediafireUrlRequired, message);
 		}
 
-		const wait = await client.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, L.success.loading, message);
 
 		let success = 0;
 		let error = 0;
@@ -42,7 +46,7 @@ export default defineCommand({
 
 		for (const url of urls) {
 			if (!regex(url)) {
-				await client.reply(from, 'Please specify a valid Mediafire url.\nInvalid : ' + url, message);
+				await client.reply(from, L.errors.mediafireUrlRequired, message);
 				error++;
 				continue;
 			}

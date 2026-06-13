@@ -1,4 +1,5 @@
 import configuration from '../../helper/config/connect.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { getNewGames } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -39,28 +40,31 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	async run({ from, args, message, query }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'You must provide a status to simulate', message);
+			return await client.reply(from, L.errors.statusRequired, message);
 		}
 
 		const action = args[1]?.toLowerCase();
 
 		if (['status', 'stats'].includes(action)) {
-			return await client.reply(from, configuration.timers.from.includes(from) ? 'Enabled' : 'Disabled', message);
+			return await client.reply(from, configuration.timers.from.includes(from) ? L.success.enabled : L.success.disabled, message);
 		}
 
 		if (['disable', 'off'].includes(action)) {
 			if (!configuration.timers.from.includes(from)) {
-				return await client.reply(from, 'Already disabled', message);
+				return await client.reply(from, L.errors.alreadyDisabled, message);
 			}
 
 			configuration.timers.from.splice(configuration.timers.from.indexOf(from), 1);
-			return await client.reply(from, 'Simulate Freegame Disabled', message);
+			return await client.reply(from, L.simulate.freegameDisabled, message);
 		}
 
 		if (['enable', 'on'].includes(action)) {
 			if (configuration.timers.from.includes(from)) {
-				return await client.reply(from, 'Already enabled', message);
+				return await client.reply(from, L.errors.alreadyEnabled, message);
 			}
 
 			configuration.timers.from.push(from);
@@ -69,9 +73,9 @@ export default defineCommand({
 				startFreeGamePolling();
 			}
 
-			return await client.reply(from, 'Simulate Freegame Enabled', message);
+			return await client.reply(from, L.simulate.freegameEnabled, message);
 		}
 
-		await client.reply(from, 'Usage: !freegame [enable|disable|status]', message);
+		await client.reply(from, L.simulate.freegameUsage, message);
 	}
 });

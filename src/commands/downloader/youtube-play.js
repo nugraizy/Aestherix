@@ -1,6 +1,7 @@
 import parser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -14,8 +15,11 @@ export default defineCommand({
 	limit: 4,
 	status: 'enable',
 	async run(message, client) {
+		const locale = await getLocale(message.from);
+		const L = useLocale(locale, 'common');
+
 		if (!message.query) {
-			return await client.reply(message.from, 'Please enter a query', message.message);
+			return await client.reply(message.from, L.errors.noQuery, message.message);
 		}
 
 		let { audio, video } = parser(message.query.toLowerCase(), {

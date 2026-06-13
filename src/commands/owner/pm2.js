@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import pm2 from 'pm2';
 import yargsParser from 'yargs-parser';
 
+import { getLocale } from '../../helper/i18n/index.js';
 import { getFilesizeFromBytes } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -109,6 +110,8 @@ export default defineCommand({
 	status: 'enable',
 
 	async run({ from, message, query, device, type }, client) {
+		const locale = await getLocale(from);
+
 		if (!query) {
 			const processes = await getProcesses();
 

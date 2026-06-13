@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { BOT_NAME } from '../../core/constants.js';
 
 import { cmdId } from '../../helper/modules/prefix.js';
@@ -16,11 +17,14 @@ export default defineCommand({
 	limit: 5,
 	status: 'enable',
 	async run({ query, from, message, prefix }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please provide a manga ID.', message);
+			return await client.reply(from, L.errors.mangaIdRequired, message);
 		}
 
-		const wait = await client.waitMessage(from, 'Fetching detail...', message);
+		const wait = await client.waitMessage(from, L.success.fetchingDetail, message);
 
 		try {
 			const manga = await shinigami.getManga(query.trim());

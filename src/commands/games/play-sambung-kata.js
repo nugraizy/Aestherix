@@ -1,6 +1,7 @@
 import { BOT_NAME } from '../../core/constants.js';
 
 import { cmdId } from '../../helper/modules/prefix.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { getSambungkataSession, SambungKata } from '../../utils/games/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -15,8 +16,11 @@ export default defineCommand({
 	limit: 2,
 	status: 'enable',
 	async run({ isGroup, message, from, sender, query }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!isGroup) {
-			return await client.reply(from, 'This feature only for groups', message);
+			return await client.reply(from, L.errors.groupOnly, message);
 		}
 
 		const statusGame = getSambungkataSession(from);

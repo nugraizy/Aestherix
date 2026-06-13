@@ -10,13 +10,13 @@ export const name = 'newGame';
 
 export const run = async (ctx, client) => {
 	if (!ctx.isGroup) {
-		return replyError(ctx, client, getLocale(ctx.from), 'groupOnly');
+		return replyError(ctx, client, await getLocale(ctx.from), 'groupOnly');
 	}
 
 	const existing = await repository.load(ctx.from);
 
 	if (existing) {
-		const locale = getLocale(existing.roomId);
+		const locale = await getLocale(existing.roomId);
 
 		return client.reply(ctx.from, localised(locale, 'errors.gameExistsTryingToMakeNewOne'), ctx.message);
 	}
@@ -25,11 +25,11 @@ export const run = async (ctx, client) => {
 		roomId: ctx.from,
 		roomMaster: ctx.sender,
 		roomMasterName: ctx.pushname,
-		locale: getLocale(ctx.from)
+		locale: await getLocale(ctx.from)
 	});
 
 	repository.save(session);
-	setLocale(ctx.from, session.locale);
+	await setLocale(ctx.from, session.locale);
 
 	getLobbyTimer()?.start(session.roomId, LOBBY_TIMEOUT_MS);
 

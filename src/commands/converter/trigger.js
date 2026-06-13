@@ -5,6 +5,7 @@ import fs from 'fs-extra';
 import { color, loggers } from '../../utils/index.js';
 import { TriggerEffect } from '../../helper/canvas/index.js';
 import { defineCommand } from '../_define.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 
 const defaultOptions = {
 	output: 'sticker'
@@ -38,8 +39,11 @@ export default defineCommand({
 		},
 		client
 	) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!mention.length && !isMediaImage) {
-			return await client.reply(from, 'Please mention or send/reply an image to pet', message);
+			return await client.reply(from, L.errors.imageRequired, message);
 		}
 
 		let options = {};

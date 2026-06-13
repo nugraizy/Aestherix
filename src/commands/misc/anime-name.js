@@ -1,3 +1,4 @@
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { animeName, animeNameOptions as _options } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -16,8 +17,11 @@ export default defineCommand({
 	limit: 2,
 	status: 'enable',
 	run: async ({ query, from, message }, client) => {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'You need to provide query.', message);
+			return await client.reply(from, L.errors.noQuery, message);
 		}
 
 		const options = !/[1-6]/.test(query) ? 0 : query.match(/[1-6]$/)?.[0] - 1 === undefined ? 0 : query.match(/[1-6]$/)[0] - 1;

@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import os from 'node:os';
 
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { getFilesizeFromBytes, getRuntime } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -29,6 +30,8 @@ export default defineCommand({
 	limit: 0,
 	status: 'enable',
 	run: async ({ from, message }, client) => {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
 		let caption = '';
 
 		const {

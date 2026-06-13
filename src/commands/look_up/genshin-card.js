@@ -2,6 +2,7 @@ import { DynamicTextAssets, EnkaClient, TextAssets } from 'enka-network-api';
 
 import { GenshinCard } from '../../helper/canvas/card-render.js';
 import { parseCharactersData, parseGenshinUser } from '../../helper/canvas/genshin-parser.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
@@ -60,15 +61,18 @@ export default defineCommand({
 	limit: 5,
 	status: 'enable',
 	async run({ from, query, message, args, prefix }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please provide a UID.\nUsage: !genshincard <uid> [--char <name>] [--radar]', message);
+			return await client.reply(from, L.errors.uidRequired, message);
 		}
 
 		const uid = args[1];
 		const useRadar = args.includes('--radar');
 
 		if (!/^\d{9,10}$/.test(uid)) {
-			return await client.reply(from, 'Invalid UID format. Must be 9-10 digits.', message);
+			return await client.reply(from, L.errors.invalidArgs, message);
 		}
 
 		const charFlag = args.indexOf('--char');
@@ -89,7 +93,7 @@ export default defineCommand({
 			parsedUser = cached.parsedUser;
 			parsedCharacters = cached.parsedCharacters;
 		} else {
-			const wait = await client.waitMessage(from, 'Fetching character data...', message);
+			const wait = await client.waitMessage(from, L.success.fetchingCharacter, message);
 
 			let userInfo;
 
@@ -108,7 +112,7 @@ export default defineCommand({
 		}
 
 		if (!parsedCharacters.length) {
-			return await client.reply(from, 'No characters found in showcase.', message);
+			return await client.reply(from, L.info.noResults, message);
 		}
 
 		if (charName) {

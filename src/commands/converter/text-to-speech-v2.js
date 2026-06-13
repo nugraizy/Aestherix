@@ -3,6 +3,7 @@ import parser from 'yargs-parser';
 
 import { gttsAI, toOpus } from '../../utils/converter/index.js';
 import { defineCommand } from '../_define.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 
 const voices = await fs.readJSON('./databases/model/voices.json');
 const boxen = (text) => {
@@ -29,8 +30,11 @@ export default defineCommand({
 	limit: 1,
 	status: 'enable',
 	run: async ({ query, from, type, message, /*cmd,*/ args, filename }, client) => {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please provide some text to convert to speech', message);
+			return await client.reply(from, L.errors.ttsTextRequired, message);
 		}
 
 		if (type === 'listResponseMessage') {

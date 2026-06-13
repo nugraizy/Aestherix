@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { color, delay, formatNumber, isURL, loggers } from '../../utils/modules/index.js';
 import { Twitter } from '../../utils/twitter/index.js';
 import { defineCommand } from '../_define.js';
@@ -37,17 +38,20 @@ export default defineCommand({
 	limit: 9,
 	status: 'enable',
 	async run({ from, query, prettyNumber, message }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (!query) {
-			return await client.reply(from, 'Please specify a url', message);
+			return await client.reply(from, L.errors.noUrl, message);
 		}
 
 		let { _: urls } = parser(query);
 
 		if (urls.length === 1 && !isURL(urls[0])) {
-			return await client.reply(from, 'Please specify a valid url', message);
+			return await client.reply(from, L.errors.invalidUrl, message);
 		}
 
-		const wait = await client.waitMessage(from, 'Please wait...', message);
+		const wait = await client.waitMessage(from, L.success.loading, message);
 
 		let success = 0;
 		let error = 0;
@@ -56,7 +60,7 @@ export default defineCommand({
 
 		for (const url of urls) {
 			if (!isURL(url.trim())) {
-				await client.reply(from, 'Please specify a valid url\nInvalid : ' + url, message);
+				await client.reply(from, t(locale, 'errors.validUrlRequired', [url]), message);
 				loggers.error(`${color('Failed to Download Twitter Post', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;

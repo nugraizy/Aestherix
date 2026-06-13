@@ -1,4 +1,5 @@
 import { cmdId } from '../../helper/modules/prefix.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { cnninternational, fetchBUFFER } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -13,6 +14,9 @@ export default defineCommand({
 	limit: 3,
 	status: 'enable',
 	async run({ query, from, message, args, cmd }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		if (args[1] === 'next' || args[1] === 'prev') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.image === args[2] || v.link === args[2]);
@@ -56,7 +60,7 @@ export default defineCommand({
 		}
 
 		if (!query) {
-			return client.reply(from, 'Please provide queries', message);
+			return client.reply(from, L.errors.noQuery, message);
 		}
 
 		const data = await cnninternational(query);

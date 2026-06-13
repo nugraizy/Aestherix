@@ -48,10 +48,10 @@ export const run = async (ctx, client) => {
 	const session = await repository.load(roomId);
 
 	if (!session) {
-		return replyError(ctx, client, getLocale(ctx.from), 'noSessionExist');
+		return replyError(ctx, client, await getLocale(ctx.from), 'noSessionExist');
 	}
 
-	const locale = getLocale(session.roomId);
+	const locale = await getLocale(session.roomId);
 
 	const cupid = session.playersData.find((p) => p.id === ctx.sender && p.role === 'cupid');
 

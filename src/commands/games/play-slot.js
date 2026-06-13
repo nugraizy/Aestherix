@@ -1,5 +1,6 @@
 import { BOT_NAME } from '../../core/constants.js';
 
+import { getLocale } from '../../helper/i18n/index.js';
 import { slot as slots } from '../../utils/games/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -14,6 +15,8 @@ export default defineCommand({
 	limit: 2,
 	status: 'enable',
 	async run({ from, query, prefix }, client) {
+		const locale = await getLocale(from);
+
 		let capt;
 		const slot = slots(query);
 

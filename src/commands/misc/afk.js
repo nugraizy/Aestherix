@@ -1,4 +1,5 @@
 import { setAfk } from '../../helper/index.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -13,11 +14,21 @@ export default defineCommand({
 	status: 'enable',
 	async run({ message, from, query, isGroup, sender, pushname }, client) {
 		if (!isGroup) {
-			return await client.reply(from, 'This command is only available in group chat.', message);
+			const locale = await getLocale(from);
+			const L = useLocale(locale, 'common');
+
+			return await client.reply(from, L.errors.groupOnly, message);
 		}
 
 		setAfk(sender, from, query, pushname);
 
-		await client.send(from, { text: `@${sender.split('@')[0]} is now AFK.`, mentions: [sender] }, { quoted: message });
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
+		await client.send(
+			from,
+			{ text: `@${sender.split('@')[0]} ${L.info.afk || 'is now AFK.'}`, mentions: [sender] },
+			{ quoted: message }
+		);
 	}
 });

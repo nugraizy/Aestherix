@@ -30,6 +30,7 @@
  * @property {string}   antiNSFW
  * @property {string}   games
  * @property {string}   notification
+ * @property {string|null} locale
  * @property {string[]} banned
  */
 
@@ -70,6 +71,7 @@ const rowToData = (row) => ({
 	antiNSFW: row.antiNSFW,
 	games: row.games,
 	notification: row.notification,
+	locale: row.locale ?? null,
 	banned: JSON.parse(row.bannedMembers || '[]')
 });
 
