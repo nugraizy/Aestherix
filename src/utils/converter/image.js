@@ -13,7 +13,13 @@ import { gif2mp4 } from './video.js';
 
 export const removeBg = (input, sender) =>
 	new Promise(async (resolve, reject) => {
-		const apiKeys = process.env.REMOVEBG_KEY.split('\n');
+		const apiKeys = (process.env.REMOVEBG_KEY || '').split('\n').filter(Boolean);
+
+		if (!apiKeys.length) {
+			reject(new Error('REMOVEBG_KEY environment variable is not set'));
+			return;
+		}
+
 		const apiKey = apiKeys[Math.floor(Math.random() * apiKeys.length)];
 		const output = input.replace(input.slice(input.lastIndexOf('.'), input.length), '.png');
 

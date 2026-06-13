@@ -14,17 +14,11 @@ export const buildExifBuffer = (packname, author) => {
 	let { length } = JSON.stringify(json);
 	const header = Buffer.from([0x49, 0x49, 0x2a, 0x00, 0x08, 0x00, 0x00, 0x00, 0x01, 0x00, 0x41, 0x57, 0x07, 0x00]);
 	const code = [0x00, 0x00, 0x16, 0x00, 0x00, 0x00];
+	const lenBuf = Buffer.alloc(2);
 
-	if (length > 256) {
-		length -= 256;
-		code.unshift(0x01);
-	} else {
-		code.unshift(0x00);
-	}
+	lenBuf.writeUInt16LE(length, 0);
 
-	const lenHex = length < 16 ? `0${length.toString(16)}` : length.toString(16);
-
-	return Buffer.concat([header, Buffer.from(lenHex, 'hex'), Buffer.from(code), Buffer.from(JSON.stringify(json))]);
+	return Buffer.concat([header, lenBuf, Buffer.from(code), Buffer.from(JSON.stringify(json))]);
 };
 
 export const createExif = buildExifBuffer;

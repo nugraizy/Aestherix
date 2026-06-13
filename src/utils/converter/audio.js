@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import FormData from 'form-data';
 import fs from 'fs-extra';
 
@@ -12,9 +12,9 @@ export const toOpus = (ext, opts = {}) =>
 		if (typeof opts.media === 'string' && isURL(opts.media)) {
 			tmp = `${opts.input}.${ext}`;
 			container = [
-				'-y', '-i', `"${opts.media}"`, '-vn', '-c:a', 'libopus',
+				'-y', '-i', opts.media, '-vn', '-c:a', 'libopus',
 				'-b:a', '128k', '-vbr', 'on', '-compression_level', '10',
-				`"${opts.output}.${ext}"`
+				`${opts.output}.${ext}`
 			];
 		} else {
 			tmp = `${opts.input}.${ext}`;
@@ -24,21 +24,21 @@ export const toOpus = (ext, opts = {}) =>
 			}
 
 			container = [
-				'-y', '-i', `"${tmp}"`, '-vn', '-c:a', 'libopus',
+				'-y', '-i', tmp, '-vn', '-c:a', 'libopus',
 				'-b:a', '128k', '-vbr', 'on', '-compression_level', '10',
-				`"${opts.output}.${ext}"`
+				`${opts.output}.${ext}`
 			];
 		}
 
-		exec(`ffmpeg ${container.join(' ')}`, async (err) => {
+		execFile('ffmpeg', container, async (err) => {
 			if (err) {
 				loggers.error(`${color('Failed to Convert Audio OPUS Codec', 'red')}`);
-				await fs.unlink(tmp);
-				reject(err);
+				await fs.unlink(tmp).catch(() => {});
+				return reject(err);
 			}
 
 			resolve(await fs.readFile(`${opts.output}.${ext}`));
-			await fs.unlink(`${opts.output}.${ext}`);
+			await fs.unlink(`${opts.output}.${ext}`).catch(() => {});
 		});
 	});
 
@@ -53,11 +53,12 @@ export const soundRemover = (input, sender) =>
 				body: bodyForm,
 				headers: { 'Content-Type': `multipart/form-data; boundary=${bodyForm._boundary}` }
 			});
+			const apiKey = process.env.VOCAL_REMOVER_KEY || 'X9QXlU9PaCqGWpnP1Q4IzgXoKinMsKvMuMn3RYXnKHFqju8VfScRmLnIGQsJBnbZFdcKyzeCDOcnJ3StBmtT9nDEXJn';
 			const { vocal_path: vocal, instrumental_path: instrumental } = await fetchJSON(
 				'https://aivocalremover.com/api/v2/ProcessFile',
 				{
 					method: 'post',
-					body: `file_name=${data.file_name}&action=watermark_video&key=X9QXlU9PaCqGWpnP1Q4IzgXoKinMsKvMuMn3RYXnKHFqju8VfScRmLnIGQsJBnbZFdcKyzeCDOcnJ3StBmtT9nDEXJn&web=web`,
+					body: `file_name=${data.file_name}&action=watermark_video&key=${apiKey}&web=web`,
 					headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' }
 				}
 			);

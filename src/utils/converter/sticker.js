@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import fs from 'fs-extra';
 import path from 'path';
 import sharp from 'sharp';
@@ -18,44 +18,45 @@ export const convertMediaToSticker = (filePath, sender, output, mimetype) =>
 		loggers.warning(`${color('Converting Media', 'pink')} for ${color(sender, 'lilac')}`);
 
 		if (filePath.endsWith('webp') && (await fs.exists(filePath))) {
-			exec(`webpmux -set exif "${pathExif}" "${pathSticker}" -o "${pathSticker}-done.webp"`, async (err, stdout, stderr) => {
+			execFile('webpmux', ['-set', 'exif', pathExif, pathSticker, '-o', `${pathSticker}-done.webp`], async (err, stdout, stderr) => {
 				if (err) {
 					loggers.error(`${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, 'lilac')}`);
-					await fs.unlink(pathSticker);
-					reject(stderr);
+					await fs.unlink(pathSticker).catch(() => {});
+					return reject(stderr);
 				}
 
 				const buffer = await fs.readFile(`${pathSticker}-done.webp`);
 
-				await fs.unlink(`${pathSticker}-done.webp`);
-				await fs.unlink(pathSticker);
+				await fs.unlink(`${pathSticker}-done.webp`).catch(() => {});
+				await fs.unlink(pathSticker).catch(() => {});
 				loggers.info(`${color('Converted Media', 'pink')} for ${color(sender, 'lilac')}`);
 				resolve(buffer);
 			});
 		} else if (filePath.endsWith('jpeg')) {
-			exec(
-				`ffmpeg -i "${pathSticker}" -vcodec libwebp -vf "scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1,fps=fps=30" -lossless 0 -an -vsync 0 -s 512:512 "${pathSticker}.webp"`,
+			execFile(
+				'ffmpeg',
+				['-i', pathSticker, '-vcodec', 'libwebp', '-vf', 'scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1,fps=fps=30', '-lossless', '0', '-an', '-vsync', '0', '-s', '512:512', `${pathSticker}.webp`],
 				async (err) => {
 					if (err) {
 						loggers.error(`${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, 'lilac')}`);
-						await fs.unlink(pathSticker);
-						reject(err);
+						await fs.unlink(pathSticker).catch(() => {});
+						return reject(err);
 					}
 
-					exec(`webpmux -set exif "${pathExif}" "${pathSticker}.webp" -o "${pathSticker}-done.webp"`, async (err) => {
+					execFile('webpmux', ['-set', 'exif', pathExif, `${pathSticker}.webp`, '-o', `${pathSticker}-done.webp`], async (err) => {
 						if (err) {
 							loggers.error(`${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, 'lilac')}`);
-							await fs.unlink(`${pathSticker}-done.webp`);
-							await fs.unlink(pathSticker);
-							await fs.unlink(`${pathSticker}.webp`);
-							reject(err);
+							await fs.unlink(`${pathSticker}-done.webp`).catch(() => {});
+							await fs.unlink(pathSticker).catch(() => {});
+							await fs.unlink(`${pathSticker}.webp`).catch(() => {});
+							return reject(err);
 						}
 
 						const buffer = await fs.readFile(`${pathSticker}-done.webp`);
 
-						await fs.unlink(`${pathSticker}-done.webp`);
-						await fs.unlink(pathSticker);
-						await fs.unlink(`${pathSticker}.webp`);
+						await fs.unlink(`${pathSticker}-done.webp`).catch(() => {});
+						await fs.unlink(pathSticker).catch(() => {});
+						await fs.unlink(`${pathSticker}.webp`).catch(() => {});
 						loggers.info(`${color('Converted Media', 'pink')} for ${color(sender, 'lilac')}`);
 						resolve(buffer);
 					});
@@ -63,39 +64,42 @@ export const convertMediaToSticker = (filePath, sender, output, mimetype) =>
 			);
 		} else {
 			pathSticker = output ? output : pathSticker;
-			exec(
-				`ffmpeg -i "${filePath}" ${
-					!pathSticker.includes('.webp')
-						? '-vcodec libwebp -vf "scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1,fps=fps=10" -lossless 0 -preset default -ss 00:00:00 -t 00:00:10 -an -vsync 0 -s 512:512'
-						: ''
-				} "${mimetype && VIDEO_MIMETYPE.includes(mimetype) ? `${pathSticker}.webp` : pathSticker}"`,
-				async (er) => {
+			const ffmpegArgs = ['-i', filePath];
+
+			if (!pathSticker.includes('.webp')) {
+				ffmpegArgs.push(
+					'-vcodec', 'libwebp', '-vf',
+					'scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1,fps=fps=10',
+					'-lossless', '0', '-preset', 'default', '-ss', '00:00:00', '-t', '00:00:10', '-an', '-vsync', '0', '-s', '512:512'
+				);
+			}
+
+			ffmpegArgs.push(mimetype && VIDEO_MIMETYPE.includes(mimetype) ? `${pathSticker}.webp` : pathSticker);
+
+			execFile('ffmpeg', ffmpegArgs, async (er) => {
 					if (er) {
 						loggers.error(`${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, 'lilac')}`);
-						await fs.unlink(pathSticker);
-						reject(er);
+						await fs.unlink(pathSticker).catch(() => {});
+						return reject(er);
 					}
 
-					exec(
-						`webpmux -set exif "${pathExif}" "${
-							VIDEO_MIMETYPE.includes(mimetype) ? `${pathSticker}.webp` : pathSticker
-						}" -o "${pathSticker}-done.webp"`,
-						async (err) => {
-							if (err) {
-								loggers.error(`${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, 'lilac')}`);
-								await fs.unlink(pathSticker);
-								reject(err);
-							}
+					const webpPath = VIDEO_MIMETYPE.includes(mimetype) ? `${pathSticker}.webp` : pathSticker;
 
-							const buffer = await fs.readFile(`${pathSticker}-done.webp`);
-
-							await fs.unlink(`${pathSticker}-done.webp`);
-							await fs.unlink(pathSticker);
-							await fs.unlink(`${pathSticker}.webp`);
-							loggers.info(`${color('Converted Media', 'pink')} for ${color(sender, 'lilac')}`);
-							resolve(buffer);
+					execFile('webpmux', ['-set', 'exif', pathExif, webpPath, '-o', `${pathSticker}-done.webp`], async (err) => {
+						if (err) {
+							loggers.error(`${color('Failed to Convert Media to Sticker', 'red')} for ${color(sender, 'lilac')}`);
+							await fs.unlink(pathSticker).catch(() => {});
+							return reject(err);
 						}
-					);
+
+						const buffer = await fs.readFile(`${pathSticker}-done.webp`);
+
+						await fs.unlink(`${pathSticker}-done.webp`).catch(() => {});
+						await fs.unlink(pathSticker).catch(() => {});
+						await fs.unlink(`${pathSticker}.webp`).catch(() => {});
+						loggers.info(`${color('Converted Media', 'pink')} for ${color(sender, 'lilac')}`);
+						resolve(buffer);
+					});
 				}
 			);
 		}
@@ -135,8 +139,9 @@ export const convertStickerToMedia = (input, sender) =>
 				}
 
 				const resultBuffer = await new Promise((resolve, reject) => {
-					exec(
-						`ffmpeg -framerate ${fps} -i "${frameDir}/frame_%04d.png" -movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" "${outputPath}"`,
+					execFile(
+						'ffmpeg',
+						['-framerate', String(fps), '-i', `${frameDir}/frame_%04d.png`, '-movflags', 'faststart', '-pix_fmt', 'yuv420p', '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2', outputPath],
 						async (err) => {
 							await fs.remove(frameDir).catch(() => {});
 

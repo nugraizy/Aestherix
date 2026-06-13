@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import dayjs from 'dayjs';
 import fs from 'fs-extra';
 
@@ -9,19 +9,19 @@ export const toMp4 = (input, sender) =>
 		try {
 			const time = dayjs().unix();
 
-			exec(`ffmpeg -i "${input}" "./tmp/${sender}${time}.mp4"`, async (err) => {
+			execFile('ffmpeg', ['-i', input, `./tmp/${sender}${time}.mp4`], async (err) => {
 				if (err) {
 					if (!isURL(input)) {
-						await fs.unlink(input);
+						await fs.unlink(input).catch(() => {});
 					}
 
 					loggers.error(color('File processing failed:', 'red'), err);
-					reject(err);
+					return reject(err);
 				}
 
 				const buffer = await fs.readFile(`./tmp/${sender}${time}.mp4`);
 
-				await fs.unlink(`./tmp/${sender}${time}.mp4`);
+				await fs.unlink(`./tmp/${sender}${time}.mp4`).catch(() => {});
 				resolve(buffer);
 			});
 		} catch (err) {
@@ -35,21 +35,22 @@ export const gifToMp4 = (input, sender) =>
 		try {
 			const time = dayjs().unix();
 
-			exec(
-				`ffmpeg -i "${input}" -movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" "./tmp/${sender}${time}.mp4"`,
+			execFile(
+				'ffmpeg',
+				['-i', input, '-movflags', 'faststart', '-pix_fmt', 'yuv420p', '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2', `./tmp/${sender}${time}.mp4`],
 				async (err) => {
 					if (err) {
 						if (!isURL(input)) {
-							await fs.unlink(input);
+							await fs.unlink(input).catch(() => {});
 						}
 
 						loggers.error(color('File processing failed:', 'red'), err);
-						reject(err);
+						return reject(err);
 					}
 
 					const buffer = await fs.readFile(`./tmp/${sender}${time}.mp4`);
 
-					await fs.unlink(`./tmp/${sender}${time}.mp4`);
+					await fs.unlink(`./tmp/${sender}${time}.mp4`).catch(() => {});
 					resolve(buffer);
 				}
 			);
@@ -61,13 +62,13 @@ export const gifToMp4 = (input, sender) =>
 
 export const gif2mp4 = (input, output) =>
 	new Promise((resolve, reject) => {
-		exec(
-			`ffmpeg -i "${input}" -movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" "${output}"`,
+		execFile(
+			'ffmpeg',
+			['-i', input, '-movflags', 'faststart', '-pix_fmt', 'yuv420p', '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2', output],
 			(err) => {
 				if (err) {
 					loggers.error(`${color('Failed to Convert Gif to Video', 'red')}`);
-					reject(err);
-					return;
+					return reject(err);
 				}
 
 				loggers.info(`${color('Converted Media', 'pink')}`);
@@ -78,15 +79,16 @@ export const gif2mp4 = (input, output) =>
 
 export const mp42mp3 = (input, output, sender) =>
 	new Promise(async (resolve, reject) => {
-		exec(`ffmpeg -i "${input}" "${output.slice(-3) !== 'mp3' ? `${output}.mp3` : output}"`, (err) => {
+		const outputFile = output.slice(-3) !== 'mp3' ? `${output}.mp3` : output;
+
+		execFile('ffmpeg', ['-i', input, outputFile], (err) => {
 			if (err) {
 				loggers.error(`${color('Failed to Convert Video to Audio', 'red')} for ${color(sender, 'lilac')}`);
-				reject(err);
-				return;
+				return reject(err);
 			}
 
 			loggers.info(`${color('Converted Media', 'pink')} for ${color(sender, 'lilac')}`);
-			resolve({ output: output.slice(-3) !== 'mp3' ? `${output}.mp3` : output });
+			resolve({ output: outputFile });
 		});
 	});
 
@@ -119,9 +121,7 @@ export const mergeVideoWithAudio = (video, audio, output, sender, referer) =>
 
 			loggers.warning(`${color('Merging files', 'pink')}`);
 
-			const command = `ffmpeg -y -i "${tmpVideo}" -i "${tmpAudio}" -c:v copy -c:a copy "${output}"`;
-
-			exec(command, async (err) => {
+			execFile('ffmpeg', ['-y', '-i', tmpVideo, '-i', tmpAudio, '-c:v', 'copy', '-c:a', 'copy', output], async (err) => {
 				await fs.unlink(tmpVideo).catch(() => {});
 				await fs.unlink(tmpAudio).catch(() => {});
 

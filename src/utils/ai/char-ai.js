@@ -13,9 +13,9 @@ const CONFIG = {
 	MAX_IMAGE_HEIGHT: 2000,
 	VULCAN_APPLICATION_ID: 'com.smartwidgetlabs.chatgpt',
 	USER_AGENT: 'Chat Smith Android, Version 3.9.9(696)',
-	DEVICE_ID: 'C8DC43F3FBE1ADB9',
+	DEVICE_ID: process.env.CHAR_AI_DEVICE_ID || 'C8DC43F3FBE1ADB9',
 	X_AUTH_TOKEN:
-		'DaiExBn7Ib03PWRtbQu4HQGUEGQKfA8GtrLN1oA8n4nOy9CdRu71OjKBwUZazZQxIgtCVQFCZtoBKgjuLVJpJTenTRjimRkaQUqZwtbXWjckIo3LeXut/Wslmkysgm9G0+lVxx38r0Eifu95+rIk5FMcZrQfZ+ubR0JkItOebU='
+		process.env.CHAR_AI_AUTH_TOKEN || 'DaiExBn7Ib03PWRtbQu4HQGUEGQKfA8GtrLN1oA8n4nOy9CdRu71OjKBwUZazZQxIgtCVQFCZtoBKgjuLVJpJTenTRjimRkaQUqZwtbXWjckIo3LeXut/Wslmkysgm9G0+lVxx38r0Eifu95+rIk5FMcZrQfZ+ubR0JkItOebU='
 };
 
 /**
@@ -172,7 +172,7 @@ export class ChatGPTDialogue {
 	 * @returns {string[]}
 	 */
 	get getCharacters() {
-		return this._roleManager.getCharacters();
+		return this._roleManager?.getCharacters() ?? [];
 	}
 
 	/**
@@ -317,7 +317,11 @@ export class ChatGPTDialogue {
 								'Sesi chat kamu dengan Rias telah melampaui batas! Rias akan melakukan cloning diri untuk melayani master! Sebentar ya :3',
 							error: true
 						});
+						return;
 					}
+
+					resolve({ message: data.error.message || 'Unknown error', error: true });
+					return;
 				}
 
 				const assistantContent = data.choices[0].Message?.content || data.choices[0].message?.content;
