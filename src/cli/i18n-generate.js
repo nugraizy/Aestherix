@@ -4,7 +4,8 @@ import { select, checkbox, confirm, input } from '@inquirer/prompts';
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { GoogleTranslate } from '../../translate.js';
+
+import { GoogleTranslate } from './translate.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const I18N_DIR = path.resolve(__dirname, '../i18n');
@@ -292,7 +293,9 @@ const translateNamespace = async (translator, namespace, fromLocale, toLocale) =
 		} catch (err) {
 			failed.push({ key, error: err.message });
 
-			console.log(`  \x1b[31m[${i + 1}/${toTranslate.length}]\x1b[0m ${key}  ${truncate(value)} \u2192 \x1b[31m${err.message}\x1b[0m`);
+			console.log(
+				`  \x1b[31m[${i + 1}/${toTranslate.length}]\x1b[0m ${key}  ${truncate(value)} \u2192 \x1b[31m${err.message}\x1b[0m`
+			);
 		}
 	}
 
@@ -459,7 +462,9 @@ const main = async () => {
 		console.log(`\nCoverage for "${namespace}" (base: ${baseLocale}):\n`);
 
 		for (const lang of languages) {
-			if (lang.iso === baseLocale) {continue;}
+			if (lang.iso === baseLocale) {
+				continue;
+			}
 
 			const data = loadNamespace(namespace, lang.iso);
 
