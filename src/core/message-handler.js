@@ -14,7 +14,7 @@ import { PipelineExecutor } from './pipeline.js';
 import { RetryManager } from './retry-manager.js';
 
 const EVALY = ['/>', '$>', '=>', '!>'];
-const SEPARATOR = color('⤑', 'green');
+const SEPARATOR = color('→', 'green');
 const HEAVY_CATEGORIES = new Set(['Downloader', 'Converter', 'Search', 'AI', 'Anime']);
 const EXECUTION_LOCK_TTL = 60000;
 const profileLogger = new Logger({ name: 'PROFILE' });
@@ -81,6 +81,10 @@ export class MessageHandler {
 		this.#configuration = config ?? configuration;
 		this.#flags = options.flags ?? {};
 		ensureStdoutWriteTracking();
+
+		const cleanupTimer = setInterval(() => this.#sweepStaleEntries(), 120_000);
+
+		cleanupTimer.unref();
 	}
 
 	get router() {
@@ -149,7 +153,13 @@ export class MessageHandler {
 		}
 
 		if (message.message.key?.remoteJid === 'status@broadcast' && this.#flags.story) {
-			return this.#handlers.get('STORY')(client, message);
+			const storyHandler = this.#handlers.get('STORY');
+
+			if (storyHandler) {
+				return storyHandler(client, message);
+			}
+
+			return;
 		}
 
 		if (this.#flags.offline) {
@@ -366,7 +376,12 @@ export class MessageHandler {
 		}
 
 		if (!command && !localMessage.isGroup && this.#flags.ai) {
-			await this.#handlers.get('AI')(localMessage, client);
+			const aiHandler = this.#handlers.get('AI');
+
+			if (aiHandler) {
+				await aiHandler(localMessage, client);
+			}
+
 			return;
 		}
 
@@ -454,7 +469,9 @@ export class MessageHandler {
 
 				await builder
 					.destination(localMessage.from)
-					.body(`Command \`${command.name}\` has been temporarily disabled due to repeated failures (${this.#retryManager.maxRetries} errors). Try again in ${remaining} minute(s).`)
+					.body(
+						`Command \`${command.name}\` has been temporarily disabled due to repeated failures (${this.#retryManager.maxRetries} errors). Try again in ${remaining} minute(s).`
+					)
 					.buttons(builder.button.reply({ display: 'Enable', id: `enable:${command.name}` }))
 					.send();
 			} else {
@@ -687,8 +704,12 @@ export class MessageHandler {
 
 		if (!failure.disabled) {
 			const needsMedia =
-				localMessage.isMediaImage || localMessage.isMediaVid || localMessage.isQuotedSticker ||
-				localMessage.isQuotedAudio || localMessage.isMediaDocument || localMessage.stickerAble;
+				localMessage.isMediaImage ||
+				localMessage.isMediaVid ||
+				localMessage.isQuotedSticker ||
+				localMessage.isQuotedAudio ||
+				localMessage.isMediaDocument ||
+				localMessage.stickerAble;
 
 			if (needsMedia && localMessage.mediaData) {
 				try {
@@ -702,7 +723,9 @@ export class MessageHandler {
 							mediaType: localMessage.typeQuoted || localMessage.type
 						});
 					}
-				} catch { /* media download failed — retry without cached media */ }
+				} catch {
+					/* media download failed — retry without cached media */
+				}
 			}
 
 			const canRetry = !needsMedia || retryId;
@@ -725,10 +748,13 @@ export class MessageHandler {
 								})
 							: null,
 						localMessage.isOwner
-							? 						builder.button.reply({ display: 'Report via Bot', id: cmdId('report', err.stack, localMessage) })
+							? builder.button.reply({ display: 'Report via Bot', id: cmdId('report', err.stack, localMessage) })
 							: null,
 						canRetry
-							? builder.button.reply({ display: `Retry (${this.#retryManager.maxRetries - failure.count} left)`, id: retryBody })
+							? builder.button.reply({
+									display: `Retry (${this.#retryManager.maxRetries - failure.count} left)`,
+									id: retryBody
+								})
 							: null
 					].filter(Boolean)
 				)
@@ -753,9 +779,7 @@ export class MessageHandler {
 						localMessage.isOwner
 							? builder.button.reply({ display: 'Report via Bot', id: cmdId('report', err.stack, localMessage) })
 							: null,
-						localMessage.isOwner
-							? builder.button.reply({ display: 'Enable', id: `enable:${command.name}` })
-							: null
+						localMessage.isOwner ? builder.button.reply({ display: 'Enable', id: `enable:${command.name}` }) : null
 					].filter(Boolean)
 				)
 				.send();
@@ -823,7 +847,11 @@ export class MessageHandler {
 			this.#statsOffline = false;
 		}
 
-		return this.#handlers.get('OFFLINE')(client, message);
+		const offlineHandler = this.#handlers.get('OFFLINE');
+
+		if (offlineHandler) {
+			return offlineHandler(client, message);
+		}
 	}
 
 	#handleAfk(client, message) {
@@ -842,7 +870,7 @@ export class MessageHandler {
 			deleteAfk(message.sender, message.from);
 		}
 
-		if (message.bodyQuoted && checkAfk(message.mediaData.participant, message.from)) {
+		if (message.bodyQuoted && message.mediaData?.participant && checkAfk(message.mediaData.participant, message.from)) {
 			const { reasons, since, name } = getAfk(message.mediaData.participant);
 			const time = getTimeSince(since);
 
@@ -880,7 +908,13 @@ export class MessageHandler {
 	async #handleGames(message, client) {
 		const gameKeys = Array.from(this.#handlers.keys()).filter((v) => !['STUBTYPE', 'STORY', 'OFFLINE', 'AI'].includes(v));
 
-		await Promise.all(gameKeys.map((v) => this.#handlers.get(v)(message, client, message)));
+		await Promise.allSettled(
+			gameKeys.map((v) => {
+				const handler = this.#handlers.get(v);
+
+				return handler ? handler(client, message, this.#store) : Promise.resolve();
+			})
+		);
 	}
 
 	#isStubMessage(message) {
@@ -902,7 +936,11 @@ export class MessageHandler {
 		}
 
 		if (message.messages?.[0]) {
-			this.#handlers.get('STUBTYPE')(this.#client, message.messages[0], this.#store);
+			const stubHandler = this.#handlers.get('STUBTYPE');
+
+			if (stubHandler) {
+				stubHandler(this.#client, message.messages[0], this.#store);
+			}
 		}
 	}
 
@@ -968,6 +1006,20 @@ export class MessageHandler {
 		});
 	}
 
+	#sweepStaleEntries() {
+		const now = Date.now();
+
+		for (const [sender, lock] of this.#executionLocks) {
+			if (now > lock.expiry) {
+				this.#executionLocks.delete(sender);
+			}
+		}
+
+		if (this.#retries.size > 1000) {
+			this.#retries.clear();
+		}
+	}
+
 	async #initHandlers() {
 		await Promise.all(
 			Object.entries(HANDLER_PATH).map(async ([key, modulePath]) => {
@@ -980,6 +1032,10 @@ export class MessageHandler {
 
 	#logMessage(message) {
 		if (message.isFromMe && !this.#flags.printSelf) {
+			return;
+		}
+
+		if (this.#client.role === 'sub' && message.isGroup && !message.isCmd) {
 			return;
 		}
 
@@ -1002,7 +1058,7 @@ export class MessageHandler {
 		const runtimeInfo = `${SEPARATOR} ${color(((Date.now() - runtime) / 1000).toFixed(0), '#F1FA8C')}${color('s', 'lemon')}${
 			repeatCount > 1 ? ` ${color(`(×${repeatCount})`, 'glowYellow')}` : ''
 		}`;
-		const messageFrom = `${SEPARATOR} ${color('in', 'white')} ${color(message.isGroup ? `group ${message.groupName}` : 'private chat', 'lavender')}${(message.isGroup && color(' id ', 'white') + color(message.groupId, 'purple')) || ''}`;
+		const messageFrom = `${SEPARATOR} ${color('in', 'white')} ${color(message.isGroup ? `${message.groupName}` : 'private', 'lavender')}${(message.isGroup && color(' id ', 'white') + color(message.groupId, 'purple')) || ''}`;
 
 		let fullBody;
 

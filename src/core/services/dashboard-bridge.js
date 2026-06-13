@@ -7,6 +7,8 @@ import configuration from '../../helper/config/connect.js';
 import { banUser, getBannedUsers, getUserLimit, unbanUser, upsertUserLimit } from '../../helper/database/adapters/user.js';
 import prisma from '../../helper/database/prisma.js';
 import { toUserJid } from '../../helper/misc/wa_data/index.js';
+import { manager } from '../manager.js';
+import { getPm2SubBotLogs, getPm2SubBotStatuses, isPm2SubBotRunning, startPm2SubBot, stopPm2SubBot } from '../pm2-helpers.js';
 import { color, loggers } from '../../utils/modules/index.js';
 
 const DASHBOARD_BRIDGE_PORT = Number(process.env.DASHBOARD_BRIDGE_PORT || 4010);
@@ -431,6 +433,193 @@ export const startDashboardBridge = (resolveWaClient) => {
 		} catch (error) {
 			res.status(500).json({ ok: false, message: error?.message || 'Failed to fetch participating groups.' });
 		}
+	});
+
+	app.get('/internal/dashboard/subbots', async (req, res) => {
+		const token = String(req.headers['x-dashboard-bridge-token'] || '');
+
+		if (!token || token !== DASHBOARD_BRIDGE_TOKEN) {
+			return res.status(401).json({ ok: false, message: 'Unauthorized bridge token.' });
+		}
+
+		try {
+			const rows = await prisma.botInstance.findMany({ orderBy: { createdAt: 'asc' } });
+			const pm2Statuses = await getPm2SubBotStatuses();
+			const subBots = rows.map((row) => {
+				const inMemory = manager.get(row.sessionName);
+				const flags = JSON.parse(row.flags || '{}');
+				const pm2 = pm2Statuses.get(row.sessionName);
+
+				return {
+					id: row.id,
+					sessionName: row.sessionName,
+					flags,
+					role: row.role,
+					pairNumber: row.pairNumber,
+					isActive: row.isActive,
+					connected: Boolean(inMemory?.state === 'connected' || pm2?.running),
+					phone: inMemory?.phone || null,
+					createdAt: row.createdAt,
+					updatedAt: row.updatedAt
+				};
+			});
+
+			res.json({ ok: true, subBots });
+		} catch (error) {
+			res.status(500).json({ ok: false, message: error?.message || 'Failed to list sub-bots.' });
+		}
+	});
+
+	app.post('/internal/dashboard/subbots/:name/start', async (req, res) => {
+		const token = String(req.headers['x-dashboard-bridge-token'] || '');
+
+		if (!token || token !== DASHBOARD_BRIDGE_TOKEN) {
+			return res.status(401).json({ ok: false, message: 'Unauthorized bridge token.' });
+		}
+
+		const name = String(req.params.name || '').trim();
+
+		if (!name) {
+			return res.status(400).json({ ok: false, message: 'Sub-bot name is required.' });
+		}
+
+		try {
+			const row = await prisma.botInstance.findUnique({ where: { sessionName: name } });
+
+			if (!row) {
+				return res.status(404).json({ ok: false, message: `Sub-bot "${name}" not found.` });
+			}
+
+			await prisma.botInstance.update({ where: { sessionName: name }, data: { isActive: true } });
+			await startPm2SubBot(name);
+
+			res.json({ ok: true, sessionName: name });
+		} catch (error) {
+			res.status(500).json({ ok: false, message: error?.message || 'Failed to start sub-bot.' });
+		}
+	});
+
+	app.post('/internal/dashboard/subbots/:name/stop', async (req, res) => {
+		const token = String(req.headers['x-dashboard-bridge-token'] || '');
+
+		if (!token || token !== DASHBOARD_BRIDGE_TOKEN) {
+			return res.status(401).json({ ok: false, message: 'Unauthorized bridge token.' });
+		}
+
+		const name = String(req.params.name || '').trim();
+
+		if (!name) {
+			return res.status(400).json({ ok: false, message: 'Sub-bot name is required.' });
+		}
+
+		try {
+			const row = await prisma.botInstance.findUnique({ where: { sessionName: name } });
+
+			if (!row) {
+				return res.status(404).json({ ok: false, message: `Sub-bot "${name}" not found.` });
+			}
+
+			manager.remove(name);
+			await stopPm2SubBot(name);
+
+			res.json({ ok: true, sessionName: name });
+		} catch (error) {
+			res.status(500).json({ ok: false, message: error?.message || 'Failed to stop sub-bot.' });
+		}
+	});
+
+	app.patch('/internal/dashboard/subbots/:name/flags', async (req, res) => {
+		const token = String(req.headers['x-dashboard-bridge-token'] || '');
+
+		if (!token || token !== DASHBOARD_BRIDGE_TOKEN) {
+			return res.status(401).json({ ok: false, message: 'Unauthorized bridge token.' });
+		}
+
+		const name = String(req.params.name || '').trim();
+
+		if (!name) {
+			return res.status(400).json({ ok: false, message: 'Sub-bot name is required.' });
+		}
+
+		const flags = req.body?.flags;
+
+		if (!flags || typeof flags !== 'object') {
+			return res.status(400).json({ ok: false, message: 'Flags object is required.' });
+		}
+
+		try {
+			const row = await prisma.botInstance.findUnique({ where: { sessionName: name } });
+
+			if (!row) {
+				return res.status(404).json({ ok: false, message: `Sub-bot "${name}" not found.` });
+			}
+
+			await prisma.botInstance.update({
+				where: { sessionName: name },
+				data: { flags: JSON.stringify(flags) }
+			});
+
+			res.json({ ok: true, sessionName: name, flags });
+		} catch (error) {
+			res.status(500).json({ ok: false, message: error?.message || 'Failed to update flags.' });
+		}
+	});
+
+	app.delete('/internal/dashboard/subbots/:name', async (req, res) => {
+		const token = String(req.headers['x-dashboard-bridge-token'] || '');
+
+		if (!token || token !== DASHBOARD_BRIDGE_TOKEN) {
+			return res.status(401).json({ ok: false, message: 'Unauthorized bridge token.' });
+		}
+
+		const name = String(req.params.name || '').trim();
+		const purge = req.query?.purge === '1' || req.query?.purge === 'true';
+
+		if (!name) {
+			return res.status(400).json({ ok: false, message: 'Sub-bot name is required.' });
+		}
+
+		try {
+			const row = await prisma.botInstance.findUnique({ where: { sessionName: name } });
+
+			if (!row) {
+				return res.status(404).json({ ok: false, message: `Sub-bot "${name}" not found.` });
+			}
+
+			manager.remove(name);
+			await stopPm2SubBot(name).catch(() => {});
+
+			if (purge) {
+				await prisma.botInstance.delete({ where: { sessionName: name } });
+			} else {
+				await prisma.botInstance.update({ where: { sessionName: name }, data: { isActive: false } });
+			}
+
+			res.json({ ok: true, sessionName: name, purged: purge });
+		} catch (error) {
+			res.status(500).json({ ok: false, message: error?.message || 'Failed to remove sub-bot.' });
+		}
+	});
+
+	app.get('/internal/dashboard/subbots/:name/logs', async (req, res) => {
+		const token = String(req.headers['x-dashboard-bridge-token'] || '');
+
+		if (!token || token !== DASHBOARD_BRIDGE_TOKEN) {
+			return res.status(401).json({ ok: false, message: 'Unauthorized bridge token.' });
+		}
+
+		const name = String(req.params.name || '').trim();
+
+		if (!name) {
+			return res.status(400).json({ ok: false, message: 'Sub-bot name is required.' });
+		}
+
+		const since = Number(req.query?.since) || 0;
+		const limit = Number(req.query?.limit) || 200;
+
+		const result = await getPm2SubBotLogs(name, { since, limit });
+
+		res.json(result);
 	});
 
 	app.get('/internal/dashboard/ping', (req, res) => {

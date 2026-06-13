@@ -10,14 +10,13 @@ import { cleanupSession } from './session-cleanup.js';
 const MAX_RETRIES = 5;
 const RETRY_INTERVAL_MS = 5000;
 
-let metricsPrinted = false;
-
 export class ConnectionHandler {
 	#client;
 	#configuration;
 	#options;
 	#retryCount = 0;
 	#startedAt = null;
+	#metricsPrinted = false;
 	#commandsLoaded = false;
 	#shouldWait = false;
 	#isShuttingDown = false;
@@ -100,11 +99,11 @@ export class ConnectionHandler {
 				return;
 			}
 
+			this.#retryCount++;
 			this.#log.warning(
 				color(`Reconnect attempt ${this.#retryCount} failed. Retrying in ${RETRY_INTERVAL_MS / 1000} seconds...`, 'white')
 			);
 			await delay(RETRY_INTERVAL_MS);
-			this.#retryCount++;
 			this.#reconnect();
 		} else {
 			if (this.#retryCount >= MAX_RETRIES) {
@@ -143,10 +142,10 @@ export class ConnectionHandler {
 			return;
 		}
 
-		if (!metricsPrinted) {
+		if (!this.#metricsPrinted) {
 			this.#log.info(color('Socket connected', 'white'), color('Successfully', 'lilac') + color('.', 'white'));
 			await this.#printConnectionMetrics(this.#client);
-			metricsPrinted = true;
+			this.#metricsPrinted = true;
 		}
 
 		this.#retryCount = 0;

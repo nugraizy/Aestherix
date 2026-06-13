@@ -50,8 +50,8 @@ export class GroupCache {
 
 		const entry = {
 			...raw,
-			adminGroups: participants.filter((v) => v.admin !== null).map((v) => v.phoneNumber),
-			participantsGroup: participants.map((v) => v.phoneNumber),
+			adminGroups: participants.filter((v) => v.admin !== null).map((v) => v.id),
+			participantsGroup: participants.map((v) => v.id),
 			ownerPn: raw.ownerPn || null,
 			_fetchedAt: Date.now()
 		};
@@ -78,8 +78,8 @@ export class GroupCache {
 
 			this.#metadata.set(groupId, {
 				...raw,
-				adminGroups: participants.filter((v) => v.admin !== null).map((v) => v.phoneNumber),
-				participantsGroup: participants.map((v) => v.phoneNumber),
+				adminGroups: participants.filter((v) => v.admin !== null).map((v) => v.id),
+				participantsGroup: participants.map((v) => v.id),
 				ownerPn: raw.ownerPn || null,
 				_fetchedAt: now
 			});

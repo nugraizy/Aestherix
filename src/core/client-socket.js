@@ -137,7 +137,7 @@ export class ClientSocket extends EventEmitter {
 	}
 
 	async connect({ prisma: db, store } = {}) {
-		if (this.#state === 'connected') {
+		if (this.#state === 'connected' || this.#state === 'connecting') {
 			return this;
 		}
 
@@ -155,7 +155,13 @@ export class ClientSocket extends EventEmitter {
 			await this.#store.initialize();
 		}
 
-		const { version } = await fetchLatestBaileysVersion();
+		let version;
+
+		try {
+			({ version } = await fetchLatestBaileysVersion());
+		} catch {
+			version = [2, 3000, 0];
+		}
 
 		const cachedGroupMetadata = this.#options.cachedGroupMetadata;
 
@@ -252,7 +258,6 @@ export class ClientSocket extends EventEmitter {
 				configuration.groups.metadata?.get(jid)?.ephemeralDuration ||
 				configuration.users.info?.get(jid)?.ephemeralDuration ||
 				0,
-			// messageId: this.generateMessageID(),
 			ai: true
 		};
 
@@ -289,7 +294,7 @@ export class ClientSocket extends EventEmitter {
 		return this.send(
 			jid,
 			{ text },
-			{ quoted, ephemeralExpiration: configuration.users.info?.get(jid)?.ephemeralDuration || null }
+			{ quoted, ephemeralExpiration: configuration.users.info?.get(jid)?.ephemeralDuration || 0 }
 		);
 	}
 
@@ -484,7 +489,11 @@ export class ClientSocket extends EventEmitter {
 					resolve(buf);
 				});
 
-				ff.stdin.on('error', () => {});
+				ff.stdin.on('error', (err) => {
+					if (err.code !== 'EPIPE') {
+						try { ff.kill(); } catch { /* process may have already exited */ }
+					}
+				});
 				Readable.from(media).pipe(ff.stdin);
 			});
 		} else if (bufferType === 'sticker') {
@@ -515,7 +524,7 @@ export class ClientSocket extends EventEmitter {
 		const { key } = await this.send(
 			jid,
 			{ text: message },
-			{ quoted, ephemeralExpiration: configuration.users.info?.get(jid)?.ephemeralDuration || null }
+			{ quoted, ephemeralExpiration: configuration.users.info?.get(jid)?.ephemeralDuration || 0 }
 		);
 		const update = async (text) => {
 			this.send(jid, { edit: key, text });
@@ -827,7 +836,7 @@ export class ClientSocket extends EventEmitter {
 				break;
 			}
 
-			const { message, body, isCmd } = await Context.from(JSON.parse(JSON.stringify(messages)), this, this.#store);
+			const { message, body, isCmd } = await Context.from(structuredClone(messages), this, this.#store);
 
 			if (body.includes(query) && !isCmd) {
 				keys.push(message);

@@ -69,6 +69,7 @@ function makeOrderedDictionary(idGetter) {
 		if (idx >= 0) {
 			array[idx] = item;
 			dict[id] = item;
+			return true;
 		}
 
 		return false;
@@ -278,11 +279,15 @@ export class Store {
 				if (!contact) {
 					const hashes = await Promise.all(
 						Object.keys(this.contacts).map(async (id) => {
-							const { user } = jidDecode(id);
+							const decoded = jidDecode(id);
+
+							if (!decoded?.user || !/^\d+$/.test(decoded.user)) {
+								return [id, ''];
+							}
 
 							// baileys's md5 is typed as `() => ...` upstream but accepts a Buffer at runtime.
 							// @ts-expect-error -- upstream type missing the Buffer parameter
-							return [id, (await md5(Buffer.from(user + 'WA_ADD_NOTIF', 'utf8'))).toString('base64').slice(0, 3)];
+							return [id, (await md5(Buffer.from(decoded.user + 'WA_ADD_NOTIF', 'utf8'))).toString('base64').slice(0, 3)];
 						})
 					);
 
@@ -293,7 +298,7 @@ export class Store {
 					continue;
 				}
 
-				Object.assign(this.contacts[contact.id], contact);
+				Object.assign(this.contacts[contact.id], update);
 			}
 
 			this.#scheduleFlush();

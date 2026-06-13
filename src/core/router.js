@@ -290,7 +290,9 @@ export class Router {
 				create: { key: 'command_usage_daily', sessionName: 'main', value: JSON.stringify(pruned) }
 			});
 		} catch {
-			Object.assign(this.#dailyBuffer, buffer);
+			for (const [k, v] of Object.entries(buffer)) {
+				this.#dailyBuffer[k] = (this.#dailyBuffer[k] || 0) + v;
+			}
 		}
 	}
 }

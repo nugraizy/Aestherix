@@ -23,14 +23,25 @@ const TYPE_STICKER = ['imageMessage', 'videoMessage', 'stickerMessage', 'lottieS
 const SETTINGS_PATH = './src/helper/config/settings.json';
 const lidMaps = new Cache();
 
-function crawlProperty(obj, propName) {
+function renameQuotedMessage(obj) {
+	if (!obj || typeof obj !== 'object') {
+		return obj;
+	}
+
+	const str = JSON.stringify(obj);
+
+	return JSON.parse(str.replace(/"quotedMessage"/g, '"message"'));
+}
+
+function crawlProperty(obj, propName, visited = new Set()) {
 	for (const key in obj) {
 		if (key === propName) {
 			return obj[key];
 		}
 
-		if (typeof obj[key] === 'object') {
-			const found = crawlProperty(obj[key], propName);
+		if (typeof obj[key] === 'object' && obj[key] !== null && !visited.has(obj[key])) {
+			visited.add(obj[key]);
+			const found = crawlProperty(obj[key], propName, visited);
 
 			if (found !== undefined) {
 				return found;
@@ -428,7 +439,7 @@ export class Context {
 			const m = this.#raw;
 			const mMediaData =
 				this.type === 'extendedTextMessage'
-					? JSON.parse(JSON.stringify(m).replace('quotedM', 'm'))?.message?.extendedTextMessage?.contextInfo
+					? renameQuotedMessage(m)?.message?.extendedTextMessage?.contextInfo
 					: m;
 			const quotedType =
 				this.type === 'extendedTextMessage' && mMediaData ? firstKey(mMediaData.message || { CLIENT: 'm' }) : 'none';
@@ -441,7 +452,7 @@ export class Context {
 			const m = this.#raw;
 			const mMediaData =
 				this.type === 'extendedTextMessage'
-					? JSON.parse(JSON.stringify(m).replace('quotedM', 'm'))?.message?.extendedTextMessage?.contextInfo
+					? renameQuotedMessage(m)?.message?.extendedTextMessage?.contextInfo
 					: m;
 			let data =
 				this.type === 'extendedTextMessage' || this.type === 'mentionText'
@@ -625,7 +636,7 @@ export class Context {
 		} else if ('GROUP_CHANGE_SUBJECT' === m.messageStubType) {
 			await updateSettings('groupName', m.messageStubParameters[0], from);
 		} else if ('GROUP_CHANGE_DESCRIPTION' === m.messageStubType) {
-			await updateSettings('groupDescription', m.content, from);
+			await updateSettings('groupDescription', m.messageStubParameters?.[0] || '', from);
 		}
 	}
 	#earlyReturn() {

@@ -77,6 +77,10 @@ export class EventHandler {
 	}
 
 	async handlePresence(presence) {
+		if (!presence?.presences) {
+			return;
+		}
+
 		const from = presence.id;
 		const participant = Object.keys(presence.presences)[0];
 		const state = presence.presences[participant].lastKnownPresence;
@@ -129,6 +133,10 @@ export class EventHandler {
 
 	async handleCall(calls) {
 		if (!this.#options.flags?.noCall) {
+			return;
+		}
+
+		if (!calls?.length) {
 			return;
 		}
 

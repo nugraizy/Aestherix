@@ -16,6 +16,9 @@ export class RetryManager {
 	/** @type {Map<string, number>} key = cmdName, value = disabledUntil timestamp */
 	#disabledCommands = new Map();
 
+	/** @type {NodeJS.Timeout|null} */
+	#evictTimer = null;
+
 	get maxRetries() {
 		return MAX_RETRIES;
 	}
@@ -127,6 +130,27 @@ export class RetryManager {
 				this.#mediaCache.delete(id);
 			}
 		}
+
+		for (const [key, entry] of this.#retryCounters) {
+			if (entry.disabledUntil && now > entry.disabledUntil) {
+				this.#retryCounters.delete(key);
+			}
+		}
+
+		for (const [cmd, until] of this.#disabledCommands) {
+			if (now > until) {
+				this.#disabledCommands.delete(cmd);
+			}
+		}
+	}
+
+	#startEviction() {
+		if (this.#evictTimer) {
+			return;
+		}
+
+		this.#evictTimer = setInterval(() => this.#evictExpired(), 60_000);
+		this.#evictTimer.unref();
 	}
 
 	async persist() {
@@ -143,6 +167,7 @@ export class RetryManager {
 	async load() {
 		try {
 			if (!(await fs.pathExists(PERSIST_PATH))) {
+				this.#startEviction();
 				return;
 			}
 
@@ -169,5 +194,7 @@ export class RetryManager {
 				}
 			}
 		} catch { /* load failure is non-critical */ }
+
+		this.#startEviction();
 	}
 }

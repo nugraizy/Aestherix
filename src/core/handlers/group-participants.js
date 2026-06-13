@@ -101,7 +101,11 @@ const writeCache = (groupId, author, participant, action, cache) => {
 	};
 };
 
-const parseId = (id) => `@${id.split('@')[0]}`;
+const parseId = (id) => {
+	const raw = typeof id === 'string' ? id : id?.id || '';
+
+	return `@${raw.split('@')[0]}`;
+};
 
 const addContextCaption = (participant, action, data) => {
 	participant = parseId(participant);
@@ -175,7 +179,8 @@ const sendNotification = async (client, text, id, author, participant, groupName
 const groupParticipantsNotificationHandler = async (client, update) => {
 	const cache = configuration.groups.metadata;
 	const settings = configuration.groups.settings;
-	const { action, author, id, participants } = update;
+	const { action, author, id } = update;
+	const participants = (update.participants || []).map((p) => (typeof p === 'string' ? p : p?.id || ''));
 	let eventName = null;
 	let actionName = null;
 	const mentions = [];
@@ -184,6 +189,7 @@ const groupParticipantsNotificationHandler = async (client, update) => {
 		const { actionNames, eventNames } = writeCache(id, author, participant, action, cache);
 
 		mentions.push(participant);
+		mentions.push(author);
 		eventName = eventNames;
 		actionName = actionNames;
 	});

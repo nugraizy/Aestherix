@@ -133,7 +133,7 @@ const handlePhaseChanged = async (clientInstance, payload) => {
 		return;
 	}
 
-	const locale = getLocale(session.roomId);
+	const locale = await getLocale(session.roomId);
 
 	if (payload.phase === 'night') {
 		const nightText = buildNightKickoff(session, locale);
@@ -156,7 +156,7 @@ const handleMorningReport = async (clientInstance, payload) => {
 		return;
 	}
 
-	const locale = getLocale(session.roomId);
+	const locale = await getLocale(session.roomId);
 	const report = buildMorningReport(session, payload, locale);
 
 	await clientInstance.send(session.roomId, {
@@ -172,7 +172,7 @@ const handleVotingOpened = async (clientInstance, payload) => {
 		return;
 	}
 
-	const locale = getLocale(session.roomId);
+	const locale = await getLocale(session.roomId);
 	const alive = getAlivePlayers(session);
 
 	for (const player of alive) {
@@ -189,7 +189,7 @@ const handleVotingClosed = async (clientInstance, payload) => {
 		return;
 	}
 
-	const locale = getLocale(session.roomId);
+	const locale = await getLocale(session.roomId);
 	const announcement = buildVotingClosedAnnouncement(session, payload, locale);
 
 	if (announcement.body) {
@@ -207,14 +207,14 @@ const handleHunterRevenge = async (clientInstance, payload) => {
 		return;
 	}
 
-	const locale = getLocale(session.roomId);
+	const locale = await getLocale(session.roomId);
 	const prompt = buildHunterRevengePrompt(session, payload.actorId, locale);
 
 	await sendButtons(clientInstance, payload.actorId, prompt);
 };
 
 const handleGameEnded = async (clientInstance, payload) => {
-	const locale = getLocale(payload.roomId);
+	const locale = await getLocale(payload.roomId);
 	const summary = buildGameOverSummary(payload.stats, payload.winner, payload.reason, locale);
 
 	await clientInstance.send(payload.roomId, {
@@ -224,7 +224,7 @@ const handleGameEnded = async (clientInstance, payload) => {
 };
 
 const handleWarning = async (clientInstance, payload) => {
-	const locale = getLocale(payload.roomId);
+	const locale = await getLocale(payload.roomId);
 	const text =
 		locale === 'en'
 			? '⚠️ No night actions received. Phase will advance soon.'
@@ -264,7 +264,7 @@ export const initWerewolfHandler = (clientInstance, logger) => {
 
 	initLobbyTimer({
 		onAutoStart: async (session) => {
-			const locale = getLocale(session.roomId);
+			const locale = await getLocale(session.roomId);
 			const text =
 				locale === 'en'
 					? '⏰ Lobby time is up! Starting the game automatically…'
@@ -274,7 +274,7 @@ export const initWerewolfHandler = (clientInstance, logger) => {
 			await finalizeStart(session, clientInstance, locale);
 		},
 		onDisband: async (session) => {
-			const locale = getLocale(session.roomId);
+			const locale = await getLocale(session.roomId);
 			const text =
 				locale === 'en'
 					? `⏰ Lobby disbanded — not enough players (need ≥ ${MIN_PLAYERS}).`
