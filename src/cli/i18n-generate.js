@@ -164,10 +164,10 @@ const loadNamespace = (namespace, locale) => {
 
 	try {
 		const content = fs.readFileSync(filePath, 'utf8');
-		const match = content.match(/export\s+default\s+(\{[\s\S]*\})\s*;?\s*$/);
+		const match = content.match(/export\s+default\s+(?:\/\*\*[^*]*\*\/\s*)?(\([\s\S]*\)|\{[\s\S]*\})\s*;?\s*$/);
 
 		if (match) {
-			return eval(`(${match[1]})`);
+			return eval(match[1]);
 		}
 	} catch {
 		return null;
