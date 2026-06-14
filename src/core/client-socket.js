@@ -16,7 +16,6 @@ import webpmux from 'node-webpmux';
 import { spawn, execFileSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { EventEmitter } from 'node:events';
-import { Readable } from 'node:stream';
 import { TextEncoder } from 'node:util';
 import P from 'pino';
 import sharp from 'sharp';
@@ -446,56 +445,55 @@ export class ClientSocket extends EventEmitter {
 							: 'image';
 
 		if (bufferType === 'video') {
-			media = await new Promise((resolve, reject) => {
-				const args = [
-					'-i',
-					'pipe:0',
-					'-vcodec',
-					'libwebp',
-					'-fs',
-					'800k',
-					'-r',
-					'15',
-					'-b:v',
-					'500k',
-					'-vf',
-					'scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1',
-					'-t',
-					'10',
-					'-f',
-					'webp',
-					'pipe:1'
-				];
-				const ff = spawn('ffmpeg', args, { windowsHide: true });
-				const chunks = [];
-				const stderrChunks = [];
+			const id = randomBytes(4).toString('hex');
+			const tmpIn = `${TEMP_DIR}/${id}-in.bin`;
+			const tmpOut = `${TEMP_DIR}/${id}-out.webp`;
 
-				ff.stdout.on('data', (chunk) => chunks.push(chunk));
-				ff.stderr.on('data', (chunk) => stderrChunks.push(chunk));
-				ff.on('error', reject);
-				ff.on('close', (code) => {
-					const buf = Buffer.concat(chunks);
+			await fs.ensureDir(TEMP_DIR);
+			await fs.writeFile(tmpIn, media);
 
-					if (code !== 0) {
-						reject(new Error(`ffmpeg exited with code ${code}: ${Buffer.concat(stderrChunks).toString()}`));
-						return;
-					}
+			try {
+				await new Promise((resolve, reject) => {
+					const args = [
+						'-i',
+						tmpIn,
+						'-vcodec',
+						'libwebp',
+						'-fs',
+						'800k',
+						'-r',
+						'15',
+						'-b:v',
+						'500k',
+						'-vf',
+						'scale=512:512:flags=lanczos:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=#00000000,setsar=1',
+						'-t',
+						'10',
+						'-f',
+						'webp',
+						'-y',
+						tmpOut
+					];
+					const ff = spawn('ffmpeg', args, { windowsHide: true });
+					const stderrChunks = [];
 
-					if (buf.length === 0) {
-						reject(new Error(`ffmpeg produced empty output: ${Buffer.concat(stderrChunks).toString()}`));
-						return;
-					}
+					ff.stderr.on('data', (chunk) => stderrChunks.push(chunk));
+					ff.on('error', reject);
+					ff.on('close', (code) => {
+						if (code !== 0) {
+							reject(new Error(`ffmpeg exited with code ${code}: ${Buffer.concat(stderrChunks).toString()}`));
+							return;
+						}
 
-					resolve(buf);
+						resolve();
+					});
 				});
 
-				ff.stdin.on('error', (err) => {
-					if (err.code !== 'EPIPE') {
-						try { ff.kill(); } catch { /* process may have already exited */ }
-					}
-				});
-				Readable.from(media).pipe(ff.stdin);
-			});
+				media = await fs.readFile(tmpOut);
+			} finally {
+				await fs.remove(tmpIn).catch(() => {});
+				await fs.remove(tmpOut).catch(() => {});
+			}
 		} else if (bufferType === 'sticker') {
 			return await this.applyExif(media, exif);
 		} else {
