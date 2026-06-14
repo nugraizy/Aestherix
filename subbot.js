@@ -1,6 +1,7 @@
 import dotenvx from '@dotenvx/dotenvx';
 import 'dayjs/locale/id.js';
 import './src/helper/prototypes.js';
+import './src/i18n/index.js';
 
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
