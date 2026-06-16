@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.15.0」2026-06-17
+
+## Added
+
+- Connect Four game with AI opponent using minimax algorithm ([`0c1dee3e`](https://github.com/nugraizy/aestherix/commit/0c1dee3e))
+- Trivia/Quiz game with i18n questions and button UI ([`0c1dee3e`](https://github.com/nugraizy/aestherix/commit/0c1dee3e))
+- UNO card game (group only) with button hand display ([`0c1dee3e`](https://github.com/nugraizy/aestherix/commit/0c1dee3e))
+- Minesweeper classic puzzle game with 3 difficulty levels ([`0c1dee3e`](https://github.com/nugraizy/aestherix/commit/0c1dee3e))
+- Hangman word guessing game ([`0c1dee3e`](https://github.com/nugraizy/aestherix/commit/0c1dee3e))
+- i18n generator: concurrent translation, progress saving, preview toggle ([`8e02d69d`](https://github.com/nugraizy/aestherix/commit/8e02d69d))
+
+## Fixed
+
+- Hangman trailing spaces in word database ([`0c1dee3e`](https://github.com/nugraizy/aestherix/commit/0c1dee3e))
+- Trivia questions not loading from i18n ([`0c1dee3e`](https://github.com/nugraizy/aestherix/commit/0c1dee3e))
+- Connect Four AI not responding ([`0c1dee3e`](https://github.com/nugraizy/aestherix/commit/0c1dee3e))
+- i18n generator not handling arrays ([`8e02d69d`](https://github.com/nugraizy/aestherix/commit/8e02d69d))
+
+## Changed
+
+- Moved werewolf and hangman i18n to centralized location ([`5a9ac522`](https://github.com/nugraizy/aestherix/commit/5a9ac522))
+- Reduced game cooldowns to 1s and removed usage limits ([`0c1dee3e`](https://github.com/nugraizy/aestherix/commit/0c1dee3e))
+
 # 「7.14.2」2026-06-10
 
 ## Added
