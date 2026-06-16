@@ -1,8 +1,6 @@
 import assert from 'node:assert/strict';
 import { before, describe, it } from 'node:test';
 
-import '../../../../../src/utils/games/werewolf/i18n/index.js';
-
 import {
 	buildAlphaConvertPrompt,
 	buildCupidPrompt,

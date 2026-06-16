@@ -7,7 +7,6 @@ import {
 	buildTargetButtons,
 	buildTargetListBody
 } from '../../../../../src/commands/games/werewolf/ui/buttons.js';
-import '../../../../../src/utils/games/werewolf/i18n/index.js';
 
 const fixtureTargets = () => [
 	{ id: 'p1@s.whatsapp.net', name: 'Alice' },

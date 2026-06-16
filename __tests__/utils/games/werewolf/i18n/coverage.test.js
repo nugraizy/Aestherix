@@ -6,8 +6,8 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import enTable from '../../../../../src/utils/games/werewolf/i18n/en.js';
-import idTable from '../../../../../src/utils/games/werewolf/i18n/id.js';
+import enTable from '../../../../../src/i18n/werewolf/en.js';
+import idTable from '../../../../../src/i18n/werewolf/id.js';
 
 const flatten = (obj, prefix = '') => {
 	const out = [];
