@@ -167,7 +167,13 @@ const loadNamespace = (namespace, locale) => {
 		const match = content.match(/export\s+default\s+(?:\/\*\*[^*]*\*\/\s*)?(\([\s\S]*\)|\{[\s\S]*\})\s*;?\s*$/);
 
 		if (match) {
-			return eval(match[1]);
+			let code = match[1];
+
+			if (code.startsWith('{')) {
+				code = `(${code})`;
+			}
+
+			return eval(code);
 		}
 	} catch {
 		return null;
@@ -180,7 +186,7 @@ const saveNamespace = (namespace, locale, data) => {
 	fs.ensureDirSync(dir);
 
 	const filePath = path.join(dir, `${locale}.js`);
-	const content = `export default ${JSON.stringify(data, null, '\t')};\n`;
+	const content = `export default /** @type {const} */ (${JSON.stringify(data, null, '\t')});\n`;
 
 	fs.writeFileSync(filePath, content, 'utf8');
 };
@@ -191,7 +197,18 @@ const flattenKeys = (obj, prefix = '') => {
 	for (const [key, value] of Object.entries(obj)) {
 		const fullKey = prefix ? `${prefix}.${key}` : key;
 
-		if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
+		if (Array.isArray(value)) {
+			for (let i = 0; i < value.length; i++) {
+				const item = value[i];
+				const itemKey = `${fullKey}.${i}`;
+
+				if (typeof item === 'object' && item !== null) {
+					keys.push(...flattenKeys(item, itemKey));
+				} else {
+					keys.push({ key: itemKey, value: item });
+				}
+			}
+		} else if (typeof value === 'object' && value !== null) {
 			keys.push(...flattenKeys(value, fullKey));
 		} else {
 			keys.push({ key: fullKey, value });
@@ -209,14 +226,23 @@ const unflattenKeys = (flat) => {
 		let current = result;
 
 		for (let i = 0; i < parts.length - 1; i++) {
+			const nextPart = parts[i + 1];
+			const isNextArray = /^\d+$/.test(nextPart);
+
 			if (!current[parts[i]]) {
-				current[parts[i]] = {};
+				current[parts[i]] = isNextArray ? [] : {};
 			}
 
 			current = current[parts[i]];
 		}
 
-		current[parts[parts.length - 1]] = value;
+		const lastPart = parts[parts.length - 1];
+
+		if (Array.isArray(current) && /^\d+$/.test(lastPart)) {
+			current[parseInt(lastPart, 10)] = value;
+		} else {
+			current[lastPart] = value;
+		}
 	}
 
 	return result;
@@ -261,18 +287,45 @@ const translateNamespace = async (translator, namespace, fromLocale, toLocale) =
 	const flatExisting = flattenKeys(existing);
 	const existingKeys = new Set(flatExisting.map((f) => f.key));
 
-	const toTranslate = flatSource.filter((f) => !existingKeys.has(f.key));
+	const progressFile = path.join(I18N_DIR, namespace, `.${toLocale}.progress.json`);
 
-	if (toTranslate.length === 0) {
-		console.log(`All keys already translated for "${namespace}" → ${toLocale}.`);
-		return existing;
+	let savedProgress = {};
+
+	try {
+		if (fs.existsSync(progressFile)) {
+			savedProgress = JSON.parse(fs.readFileSync(progressFile, 'utf8'));
+			console.log(`  \x1b[33mFound saved progress (${Object.keys(savedProgress).length} keys). Resuming...\x1b[0m`);
+		}
+	} catch {
+		savedProgress = {};
 	}
 
-	console.log(`\nTranslating ${toTranslate.length} new keys for "${namespace}" → ${toLocale}...\n`);
+	const toTranslate = flatSource.filter((f) => !existingKeys.has(f.key) && !savedProgress[f.key]);
 
 	const translated = [];
 	const succeeded = [];
 	const failed = [];
+
+	for (const [key, value] of Object.entries(savedProgress)) {
+		translated.push({ key, value });
+		succeeded.push(key);
+	}
+
+	if (toTranslate.length === 0 && Object.keys(savedProgress).length === 0) {
+		console.log(`All keys already translated for "${namespace}" → ${toLocale}.`);
+		return existing;
+	}
+
+	if (toTranslate.length === 0 && Object.keys(savedProgress).length > 0) {
+		console.log(`  \x1b[32m✓ All remaining keys loaded from saved progress.\x1b[0m`);
+
+		const merged = unflattenKeys([...flatExisting, ...translated]);
+
+		fs.removeSync(progressFile);
+		return merged;
+	}
+
+	console.log(`\nTranslating ${toTranslate.length} new keys for "${namespace}" → ${toLocale}...\n`);
 
 	const truncate = (str, max = 40) => {
 		const flat = typeof str === 'string' ? str.replace(/\n/g, ' ') : String(str);
@@ -280,36 +333,207 @@ const translateNamespace = async (translator, namespace, fromLocale, toLocale) =
 		return flat.length > max ? `${flat.slice(0, max)}…` : flat;
 	};
 
-	for (let i = 0; i < toTranslate.length; i++) {
-		const { key, value } = toTranslate[i];
+	const SKIP_TRANSLATION_KEYS = new Set(['category', 'correct']);
+
+	const translateItem = async (item, index) => {
+		const { key, value } = item;
+		const lastKey = key.split('.').pop();
+
+		if (SKIP_TRANSLATION_KEYS.has(lastKey)) {
+			return { key, value, result: value, skipped: true, index };
+		}
 
 		try {
 			const result = await translateValue(translator, value, fromLocale, toLocale);
 
-			translated.push({ key, value: result });
-			succeeded.push(key);
-
-			console.log(`  \x1b[32m[${i + 1}/${toTranslate.length}]\x1b[0m ${key}  ${truncate(value)} \u2192 ${truncate(result)}`);
+			return { key, value, result, skipped: false, index };
 		} catch (err) {
-			failed.push({ key, error: err.message });
+			return { key, value, error: err.message, skipped: false, index };
+		}
+	};
 
-			console.log(
-				`  \x1b[31m[${i + 1}/${toTranslate.length}]\x1b[0m ${key}  ${truncate(value)} \u2192 \x1b[31m${err.message}\x1b[0m`
-			);
+	const concurrency = 5;
+	const chunks = [];
+
+	for (let i = 0; i < toTranslate.length; i += concurrency) {
+		chunks.push(toTranslate.slice(i, i + concurrency));
+	}
+
+	let completed = 0;
+	const skippedItems = [];
+	const failedItems = [];
+	const successItems = [];
+	const startTime = Date.now();
+	const previewLines = 5;
+	let showPreview = false;
+	let latestItems = [];
+	let interrupted = false;
+
+	const formatTime = (ms) => {
+		const seconds = Math.floor(ms / 1000);
+
+		if (seconds < 60) {
+			return `${seconds}s`;
+		}
+
+		const minutes = Math.floor(seconds / 60);
+		const remainingSeconds = seconds % 60;
+
+		return `${minutes}m ${remainingSeconds}s`;
+	};
+
+	const clearLines = (count) => {
+		for (let i = 0; i < count; i++) {
+			process.stdout.write('\x1b[1A\x1b[2K');
+		}
+	};
+
+	const printStatus = (completed, total, startTime) => {
+		const elapsed = Date.now() - startTime;
+		const avgTime = elapsed / completed;
+		const remaining = avgTime * (total - completed);
+
+		console.log(`  \x1b[90mTranslating... ${completed}/${total} | Elapsed: ${formatTime(elapsed)} | Est. remaining: ${formatTime(remaining)} | Press 'p' to ${showPreview ? 'hide' : 'show'} preview\x1b[0m`);
+	};
+
+	const printPreviewItems = (items) => {
+		for (const item of items) {
+			if (item.error) {
+				console.log(`  \x1b[31m${item.key}\x1b[0m  ${truncate(item.value)} \u2192 \x1b[31m${item.error}\x1b[0m`);
+			} else if (item.skipped) {
+				console.log(`  \x1b[36m${item.key}\x1b[0m  ${truncate(item.value)} \u2192 skipped`);
+			} else {
+				console.log(`  ${item.key}  ${truncate(item.value)} \u2192 ${truncate(item.result)}`);
+			}
+		}
+	};
+
+	const saveProgress = () => {
+		const progressData = { ...savedProgress };
+
+		for (const item of successItems) {
+			progressData[item.key] = item.result;
+		}
+
+		for (const item of skippedItems) {
+			progressData[item.key] = item.value;
+		}
+
+		if (Object.keys(progressData).length > 0) {
+			fs.writeJsonSync(progressFile, progressData, { spaces: '\t' });
+			console.log(`\n  \x1b[33m✓ Progress saved (${Object.keys(progressData).length} keys). Run again to resume.\x1b[0m`);
+		}
+	};
+
+	if (process.stdin.isTTY) {
+		process.stdin.setRawMode(true);
+		process.stdin.resume();
+		process.stdin.setEncoding('utf8');
+
+		process.stdin.on('data', (key) => {
+			if (key === 'p' || key === 'P') {
+				clearLines(1);
+
+				if (showPreview) {
+					clearLines(latestItems.length);
+					showPreview = false;
+				} else {
+					showPreview = true;
+					printPreviewItems(latestItems);
+				}
+
+				printStatus(completed, toTranslate.length, startTime);
+			}
+
+			if (key === '\u0003') {
+				interrupted = true;
+			}
+		});
+	}
+
+	printStatus(0, toTranslate.length, startTime);
+
+	for (const chunk of chunks) {
+		if (interrupted) {
+			break;
+		}
+
+		const results = await Promise.all(chunk.map((item, idx) => translateItem(item, completed + idx)));
+
+		for (const result of results) {
+			completed++;
+
+			if (result.skipped) {
+				skippedItems.push(result);
+				translated.push({ key: result.key, value: result.value });
+				succeeded.push(result.key);
+			} else if (result.error) {
+				failedItems.push(result);
+				failed.push({ key: result.key, error: result.error });
+			} else {
+				successItems.push(result);
+				translated.push({ key: result.key, value: result.result });
+				succeeded.push(result.key);
+			}
+		}
+
+		latestItems = results.slice(-previewLines);
+
+		if (showPreview) {
+			clearLines(latestItems.length + 1);
+			printPreviewItems(latestItems);
+		} else {
+			clearLines(1);
+		}
+
+		printStatus(completed, toTranslate.length, startTime);
+	}
+
+	if (process.stdin.isTTY) {
+		process.stdin.setRawMode(false);
+		process.stdin.pause();
+	}
+
+	if (interrupted) {
+		saveProgress();
+		process.exit(0);
+	}
+
+	console.log('\n');
+
+	if (failedItems.length > 0) {
+		console.log(`\x1b[31m✗ ${failedItems.length} failed:\x1b[0m`);
+
+		for (const item of failedItems) {
+			console.log(`  \x1b[31m${item.key}\x1b[0m  ${truncate(item.value)} \u2192 \x1b[31m${item.error}\x1b[0m`);
+		}
+
+		console.log();
+	}
+
+	if (skippedItems.length > 0) {
+		console.log(`\x1b[36m⊘ ${skippedItems.length} skipped (metadata):\x1b[0m`);
+
+		for (const item of skippedItems) {
+			console.log(`  \x1b[36m${item.key}\x1b[0m  ${truncate(item.value)}`);
+		}
+
+		console.log();
+	}
+
+	if (successItems.length > 0) {
+		console.log(`\x1b[32m✓ ${successItems.length} translated:\x1b[0m`);
+
+		for (const item of successItems) {
+			console.log(`  ${item.key}  ${truncate(item.value)} \u2192 ${truncate(item.result)}`);
 		}
 	}
 
-	console.log();
-
-	if (succeeded.length > 0) {
-		console.log(`  \x1b[32m✓ ${succeeded.length} translated\x1b[0m`);
-	}
-
-	if (failed.length > 0) {
-		console.log(`  \x1b[31m✗ ${failed.length} failed (will retry next run)\x1b[0m`);
-	}
-
 	const merged = unflattenKeys([...flatExisting, ...translated]);
+
+	if (fs.existsSync(progressFile)) {
+		fs.removeSync(progressFile);
+	}
 
 	return merged;
 };
