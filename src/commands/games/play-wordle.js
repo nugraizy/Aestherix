@@ -11,8 +11,8 @@ export default defineCommand({
 	usage: '!wordle `<play/exit/info>`',
 	category: 'Games',
 	aliases: ['wordl'],
-	cooldown: 2,
-	limit: 2,
+	cooldown: 1,
+	limit: 0,
 	status: 'enable',
 	async run({ from, message, query, args, sender, prettyNumber }, client) {
 		const locale = await getLocale(from);

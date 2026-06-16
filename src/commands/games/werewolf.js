@@ -1,5 +1,3 @@
-import '../../utils/games/werewolf/i18n/index.js';
-
 import { getLocale, t } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -51,7 +49,7 @@ export default defineCommand({
 	usage: '!ww <subcommand> [args]',
 	category: 'Games',
 	aliases: ['ww'],
-	cooldown: 0,
+	cooldown: 1,
 	limit: 0,
 	status: 'enable',
 	async run(ctx, client) {

@@ -39,9 +39,14 @@ export class Configuration {
 	bannedlist = [];
 
 	games = {
+		connectFour: new Cache(),
+		hangman: new Cache(),
+		minesweeper: new Cache(),
 		tebakGambar: new Cache(),
 		sudoku: new Cache(),
 		tictactoe: new Cache(),
+		trivia: new Cache(),
+		uno: new Cache(),
 		word: new Cache(),
 		werewolf: new Cache(),
 		wordle: new Cache()

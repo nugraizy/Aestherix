@@ -15,7 +15,7 @@ export default defineCommand({
 	usage: '!sudoku',
 	aliases: ['sd'],
 	category: 'Games',
-	cooldown: 2,
+	cooldown: 1,
 	limit: 0,
 	status: 'enable',
 	async run({ args, sender, from, message, isOwner, cmd }, client) {

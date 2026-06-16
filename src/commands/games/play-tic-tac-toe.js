@@ -17,8 +17,8 @@ export default defineCommand({
 	usage: '!playtictactoe',
 	category: 'Games',
 	aliases: ['ttt'],
-	limit: 2,
-	cooldown: 2,
+	limit: 0,
+	cooldown: 1,
 	status: 'enable',
 	async run({ message, query, from, sender }, client) {
 		const locale = await getLocale(from);

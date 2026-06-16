@@ -12,8 +12,8 @@ export default defineCommand({
 	usage: '!sambungkata',
 	aliases: ['sambung'],
 	category: 'Games',
-	cooldown: 2,
-	limit: 2,
+	cooldown: 1,
+	limit: 0,
 	status: 'enable',
 	async run({ isGroup, message, from, sender, query }, client) {
 		const locale = await getLocale(from);

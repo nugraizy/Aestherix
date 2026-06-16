@@ -10,8 +10,8 @@ export default defineCommand({
 	usage: '!tebakgambar',
 	aliases: ['tg', 'tebak'],
 	category: 'Games',
-	cooldown: 2,
-	limit: 2,
+	cooldown: 1,
+	limit: 0,
 	status: 'enable',
 	async run(message, client) {
 		const locale = await getLocale(message.from);

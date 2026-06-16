@@ -11,8 +11,8 @@ export default defineCommand({
 	usage: '!slot `<bet>`',
 	category: 'Games',
 	aliases: ['slot'],
-	cooldown: 2,
-	limit: 2,
+	cooldown: 1,
+	limit: 0,
 	status: 'enable',
 	async run({ from, query, prefix }, client) {
 		const locale = await getLocale(from);
