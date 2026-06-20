@@ -48,9 +48,25 @@ export class GroupCache {
 		const raw = await client.groupMetadata(groupId).catch(() => ({}));
 		const participants = raw.participants || [];
 
+		const adminJids = [];
+
+		for (const p of participants) {
+			if (p.admin !== null) {
+				adminJids.push(p.id);
+
+				if (p.lid) {
+					adminJids.push(p.lid);
+				}
+
+				if (p.phoneNumber) {
+					adminJids.push(p.phoneNumber);
+				}
+			}
+		}
+
 		const entry = {
 			...raw,
-			adminGroups: participants.filter((v) => v.admin !== null).map((v) => v.id),
+			adminGroups: [...new Set(adminJids)],
 			participantsGroup: participants.map((v) => v.id),
 			ownerPn: raw.ownerPn || null,
 			_fetchedAt: Date.now()
@@ -76,9 +92,25 @@ export class GroupCache {
 
 			const participants = raw.participants || [];
 
+			const adminJids = [];
+
+			for (const p of participants) {
+				if (p.admin !== null) {
+					adminJids.push(p.id);
+
+					if (p.lid) {
+						adminJids.push(p.lid);
+					}
+
+					if (p.phoneNumber) {
+						adminJids.push(p.phoneNumber);
+					}
+				}
+			}
+
 			this.#metadata.set(groupId, {
 				...raw,
-				adminGroups: participants.filter((v) => v.admin !== null).map((v) => v.id),
+				adminGroups: [...new Set(adminJids)],
 				participantsGroup: participants.map((v) => v.id),
 				ownerPn: raw.ownerPn || null,
 				_fetchedAt: now

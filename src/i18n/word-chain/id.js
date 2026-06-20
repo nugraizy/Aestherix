@@ -1,0 +1,52 @@
+export default /** @type {const} */ ({
+	errors: {
+		invalidArgs: 'Argumen tidak valid.',
+		noActiveGame: 'Tidak ada game word chain aktif. Buat dengan *{prefix}wc new*',
+		alreadyJoined: 'Sudah bergabung.',
+		needPlayers: 'Butuh minimal 2 pemain untuk memulai.',
+		provideWord: 'Masukkan kata.',
+		onlyHostStart: 'Hanya host yang bisa memulai game.',
+		onlyHostEnd: 'Hanya host yang bisa mengakhiri game.',
+		onlyHostDelete: 'Hanya host yang bisa menghapus game.'
+	},
+	game: {
+		title: '*WORD CHAIN*',
+		created: '{0} membuat game word chain!',
+		joined: '{0} bergabung!',
+		players: 'Pemain',
+		joinPrompt: 'Ketik *{prefix}wc join* untuk bergabung!',
+		startPrompt: 'Ketik *{prefix}wc start* untuk memulai!',
+		started: 'Game dimulai!',
+		firstWord: 'Ketik kata apa saja untuk memulai!',
+		turn: 'Giliran {0}.',
+		skipped: '{0} melewati giliran.',
+		wordAccepted: '✅ {0}',
+		nextLetter: 'Huruf berikutnya',
+		score: 'Skor',
+		totalWords: 'Total kata',
+		recentWords: 'Kata terakhir',
+		currentLetter: 'Huruf saat ini',
+		noWords: 'Belum ada',
+		ended: '*WORD CHAIN - HASIL*',
+		duration: '⏱️ Durasi: {0}',
+		gameDeleted: 'Game word chain dihapus.'
+	},
+	info: {
+		title: '*WORD CHAIN*',
+		description: 'Ketik kata yang dimulai dengan huruf terakhir dari kata sebelumnya! Skor berdasarkan panjang kata.',
+		commands: '*Perintah:*',
+		newGame: '• *{prefix}wc new* — Buat game baru',
+		joinGame: '• *{prefix}wc join* — Gabung game',
+		startGame: '• *{prefix}wc start* — Mulai game (host saja)',
+		skip: '• *{prefix}wc skip* — Lewati giliran',
+		status: '• *{prefix}wc status* — Tampilkan status game',
+		endGame: '• *{prefix}wc end* — Akhiri game dan tampilkan hasil (host saja)',
+		deleteGame: '• *{prefix}wc del* — Hapus game (host saja)',
+		howToPlay: '*Cara bermain:*',
+		step1: '1. Buat game: *{prefix}wc new*',
+		step2: '2. Yang lain gabung: *{prefix}wc join*',
+		step3: '3. Host mulai: *{prefix}wc start*',
+		step4: '4. Ketik kata yang dimulai dengan huruf terakhir',
+		step5: '5. Skor = panjang kata. Poin terbanyak menang!'
+	}
+});

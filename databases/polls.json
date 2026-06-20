@@ -1,0 +1,1132 @@
+{
+	"3EB0323E5123801B2F8304": {
+		"messageId": "3EB0323E5123801B2F8304",
+		"chatId": "120363428087858887@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @9406699823283?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_9406699823283@lid_1781723537256",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "9406699823283@lid"
+			}
+		],
+		"triggeredActions": [],
+		"messageSecret": {
+			"type": "Buffer",
+			"data": [
+				140,
+				86,
+				103,
+				129,
+				92,
+				153,
+				238,
+				8,
+				173,
+				220,
+				55,
+				132,
+				152,
+				139,
+				252,
+				32,
+				186,
+				189,
+				187,
+				203,
+				230,
+				37,
+				56,
+				71,
+				136,
+				68,
+				20,
+				35,
+				215,
+				118,
+				163,
+				159
+			]
+		},
+		"createdAt": 1781723537745
+	},
+	"3EB059358C2E00F41AE4EF": {
+		"messageId": "3EB059358C2E00F41AE4EF",
+		"chatId": "120363428087858887@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @9406699823283?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_9406699823283@lid_1781723537786",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "9406699823283@lid"
+			}
+		],
+		"triggeredActions": [],
+		"messageSecret": {
+			"type": "Buffer",
+			"data": [
+				105,
+				67,
+				65,
+				127,
+				201,
+				211,
+				136,
+				21,
+				22,
+				201,
+				212,
+				163,
+				154,
+				238,
+				132,
+				221,
+				93,
+				187,
+				95,
+				116,
+				97,
+				214,
+				197,
+				42,
+				18,
+				185,
+				253,
+				27,
+				166,
+				65,
+				199,
+				56
+			]
+		},
+		"createdAt": 1781723538203
+	},
+	"3EB0340094D01EE2680894": {
+		"messageId": "3EB0340094D01EE2680894",
+		"chatId": "120363428087858887@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @9406699823283?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_9406699823283@lid_1781723556406",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "9406699823283@lid"
+			}
+		],
+		"triggeredActions": [],
+		"messageSecret": {
+			"type": "Buffer",
+			"data": [
+				6,
+				89,
+				30,
+				180,
+				54,
+				98,
+				96,
+				236,
+				180,
+				145,
+				16,
+				224,
+				176,
+				199,
+				124,
+				242,
+				180,
+				225,
+				175,
+				167,
+				226,
+				104,
+				68,
+				52,
+				171,
+				8,
+				115,
+				124,
+				97,
+				255,
+				170,
+				218
+			]
+		},
+		"createdAt": 1781723556440
+	},
+	"3EB02BA665E239B614D09B": {
+		"messageId": "3EB02BA665E239B614D09B",
+		"chatId": "120363428087858887@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @9406699823283?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_9406699823283@lid_1781723556348",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "9406699823283@lid"
+			}
+		],
+		"triggeredActions": [],
+		"messageSecret": {
+			"type": "Buffer",
+			"data": [
+				207,
+				230,
+				93,
+				240,
+				152,
+				77,
+				246,
+				12,
+				151,
+				0,
+				92,
+				225,
+				238,
+				203,
+				171,
+				192,
+				18,
+				123,
+				8,
+				143,
+				92,
+				156,
+				14,
+				223,
+				91,
+				196,
+				18,
+				225,
+				19,
+				141,
+				135,
+				75
+			]
+		},
+		"createdAt": 1781723556770
+	},
+	"3EB0BA0F14E72144B3D54E": {
+		"messageId": "3EB0BA0F14E72144B3D54E",
+		"chatId": "120363428087858887@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @9406699823283?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_9406699823283@lid_1781723640915",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "9406699823283@lid"
+			}
+		],
+		"triggeredActions": [],
+		"messageSecret": {
+			"type": "Buffer",
+			"data": [
+				171,
+				244,
+				15,
+				137,
+				192,
+				44,
+				156,
+				12,
+				168,
+				87,
+				108,
+				4,
+				201,
+				132,
+				214,
+				138,
+				208,
+				78,
+				148,
+				150,
+				144,
+				24,
+				159,
+				112,
+				138,
+				177,
+				44,
+				235,
+				49,
+				62,
+				208,
+				48
+			]
+		},
+		"createdAt": 1781723641360
+	},
+	"3EB0C769A8C9861C4460FD": {
+		"messageId": "3EB0C769A8C9861C4460FD",
+		"chatId": "120363428087858887@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @9406699823283?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {
+			"6289607055246@s.whatsapp.net": [
+				{
+					"type": "Buffer",
+					"data": [
+						133,
+						163,
+						154,
+						179,
+						69,
+						214,
+						114,
+						255,
+						140,
+						169,
+						185,
+						198,
+						135,
+						111,
+						58,
+						220,
+						172,
+						244,
+						94,
+						231,
+						193,
+						226,
+						219,
+						210,
+						64,
+						143,
+						211,
+						56,
+						189,
+						85,
+						224,
+						126
+					]
+				}
+			],
+			"6287882837264:10@s.whatsapp.net": [
+				{
+					"type": "Buffer",
+					"data": [
+						133,
+						163,
+						154,
+						179,
+						69,
+						214,
+						114,
+						255,
+						140,
+						169,
+						185,
+						198,
+						135,
+						111,
+						58,
+						220,
+						172,
+						244,
+						94,
+						231,
+						193,
+						226,
+						219,
+						210,
+						64,
+						143,
+						211,
+						56,
+						189,
+						85,
+						224,
+						126
+					]
+				}
+			]
+		},
+		"totalVotes": 2,
+		"actions": [
+			{
+				"id": "kick_9406699823283@lid_1781723641035",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "9406699823283@lid"
+			}
+		],
+		"triggeredActions": [],
+		"messageSecret": {
+			"type": "Buffer",
+			"data": [
+				188,
+				112,
+				122,
+				200,
+				193,
+				220,
+				67,
+				210,
+				36,
+				58,
+				179,
+				42,
+				27,
+				192,
+				196,
+				100,
+				204,
+				113,
+				206,
+				142,
+				88,
+				86,
+				185,
+				84,
+				0,
+				3,
+				134,
+				195,
+				105,
+				212,
+				255,
+				16
+			]
+		},
+		"createdAt": 1781723641502
+	},
+	"3EB07ADB50EFC62D401F8C": {
+		"messageId": "3EB07ADB50EFC62D401F8C",
+		"chatId": "120363428087858887@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @9406699823283?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_9406699823283@lid_1781723759629",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "9406699823283@lid"
+			}
+		],
+		"triggeredActions": [],
+		"messageSecret": {
+			"type": "Buffer",
+			"data": [
+				160,
+				67,
+				23,
+				12,
+				141,
+				76,
+				53,
+				23,
+				138,
+				89,
+				111,
+				212,
+				127,
+				112,
+				190,
+				61,
+				206,
+				154,
+				171,
+				28,
+				119,
+				121,
+				108,
+				86,
+				230,
+				164,
+				2,
+				204,
+				191,
+				201,
+				36,
+				237
+			]
+		},
+		"createdAt": 1781723760371
+	},
+	"3EB0D6CF5904A5BD9E965A": {
+		"messageId": "3EB0D6CF5904A5BD9E965A",
+		"chatId": "120363428087858887@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @9406699823283?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_9406699823283@lid_1781723759593",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "9406699823283@lid"
+			}
+		],
+		"triggeredActions": [],
+		"messageSecret": {
+			"type": "Buffer",
+			"data": [
+				206,
+				170,
+				126,
+				168,
+				191,
+				237,
+				54,
+				70,
+				1,
+				96,
+				45,
+				76,
+				217,
+				248,
+				142,
+				13,
+				25,
+				9,
+				84,
+				130,
+				172,
+				217,
+				109,
+				43,
+				171,
+				158,
+				196,
+				133,
+				0,
+				253,
+				97,
+				93
+			]
+		},
+		"createdAt": 1781723760424
+	},
+	"3EB0E532E8B5E99277ABBB": {
+		"messageId": "3EB0E532E8B5E99277ABBB",
+		"chatId": "120363428087858887@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @9406699823283?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_9406699823283@lid_1781723775502",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "9406699823283@lid"
+			}
+		],
+		"triggeredActions": [],
+		"messageSecret": {
+			"type": "Buffer",
+			"data": [
+				52,
+				28,
+				17,
+				187,
+				175,
+				210,
+				57,
+				2,
+				88,
+				114,
+				86,
+				172,
+				74,
+				37,
+				9,
+				1,
+				195,
+				1,
+				95,
+				62,
+				200,
+				221,
+				75,
+				159,
+				47,
+				28,
+				167,
+				93,
+				204,
+				4,
+				82,
+				239
+			]
+		},
+		"createdAt": 1781723775551
+	},
+	"3EB0251591B4F1D1C6F458": {
+		"messageId": "3EB0251591B4F1D1C6F458",
+		"chatId": "120363428087858887@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @9406699823283?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {
+			"6289607055246@s.whatsapp.net": [
+				{
+					"type": "Buffer",
+					"data": [
+						133,
+						163,
+						154,
+						179,
+						69,
+						214,
+						114,
+						255,
+						140,
+						169,
+						185,
+						198,
+						135,
+						111,
+						58,
+						220,
+						172,
+						244,
+						94,
+						231,
+						193,
+						226,
+						219,
+						210,
+						64,
+						143,
+						211,
+						56,
+						189,
+						85,
+						224,
+						126
+					]
+				}
+			]
+		},
+		"totalVotes": 1,
+		"actions": [
+			{
+				"id": "kick_9406699823283@lid_1781723775552",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "9406699823283@lid"
+			}
+		],
+		"triggeredActions": [],
+		"messageSecret": {
+			"type": "Buffer",
+			"data": [
+				98,
+				162,
+				242,
+				233,
+				244,
+				5,
+				100,
+				177,
+				9,
+				223,
+				170,
+				249,
+				150,
+				40,
+				112,
+				227,
+				86,
+				108,
+				226,
+				184,
+				64,
+				124,
+				6,
+				241,
+				90,
+				21,
+				149,
+				70,
+				184,
+				106,
+				13,
+				17
+			]
+		},
+		"createdAt": 1781723775838
+	},
+	"3EB01C0798551692BD3A43": {
+		"messageId": "3EB01C0798551692BD3A43",
+		"chatId": "120363428087858887@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @9406699823283?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_9406699823283@lid_1781723882233",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "9406699823283@lid"
+			}
+		],
+		"triggeredActions": [],
+		"messageSecret": {
+			"type": "Buffer",
+			"data": [
+				97,
+				91,
+				183,
+				140,
+				173,
+				229,
+				219,
+				236,
+				245,
+				124,
+				236,
+				199,
+				135,
+				117,
+				64,
+				163,
+				195,
+				76,
+				235,
+				99,
+				225,
+				184,
+				240,
+				245,
+				218,
+				189,
+				131,
+				51,
+				29,
+				192,
+				100,
+				150
+			]
+		},
+		"createdAt": 1781723883044
+	},
+	"3EB09606A0E3AFE3399D9D": {
+		"messageId": "3EB09606A0E3AFE3399D9D",
+		"chatId": "120363428087858887@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @9406699823283?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_9406699823283@lid_1781724443549",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "9406699823283@lid"
+			}
+		],
+		"triggeredActions": [],
+		"createdAt": 1781724443589
+	},
+	"3EB053AA9AEB6D47AEEC2D": {
+		"messageId": "3EB053AA9AEB6D47AEEC2D",
+		"chatId": "120363428087858887@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @9406699823283?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {
+			"6289607055246@s.whatsapp.net": [
+				"Yes"
+			]
+		},
+		"totalVotes": 1,
+		"actions": [
+			{
+				"id": "kick_9406699823283@lid_1781724443630",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "9406699823283@lid"
+			}
+		],
+		"triggeredActions": [
+			"kick_9406699823283@lid_1781724443630"
+		],
+		"createdAt": 1781724443645
+	},
+	"3EB0C83A29180D3A7F45CA": {
+		"messageId": "3EB0C83A29180D3A7F45CA",
+		"chatId": "120363428087858887@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @9406699823283?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_9406699823283@lid_1781724547037",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "9406699823283@lid"
+			}
+		],
+		"triggeredActions": [],
+		"createdAt": 1781724547887
+	},
+	"3EB0AAFDC27CF563D1F448": {
+		"messageId": "3EB0AAFDC27CF563D1F448",
+		"chatId": "120363428211983710@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @40785730912275?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_40785730912275@lid_1781763190141",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "40785730912275@lid"
+			}
+		],
+		"triggeredActions": [],
+		"createdAt": 1781763190518
+	},
+	"3EB0FFBF83658546929062": {
+		"messageId": "3EB0FFBF83658546929062",
+		"chatId": "120363428211983710@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @123545304731684?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_123545304731684@lid_1781772157985",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "123545304731684@lid"
+			}
+		],
+		"triggeredActions": [],
+		"createdAt": 1781772158005
+	},
+	"3EB082F54D7636BCA62CEF": {
+		"messageId": "3EB082F54D7636BCA62CEF",
+		"chatId": "120363428211983710@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @123545304731684?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_123545304731684@lid_1781772409159",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "123545304731684@lid"
+			}
+		],
+		"triggeredActions": [],
+		"createdAt": 1781772409793
+	},
+	"3EB0C9DCB8588F55F18B64": {
+		"messageId": "3EB0C9DCB8588F55F18B64",
+		"chatId": "120363428211983710@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @123545304731684?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_123545304731684@lid_1781772452343",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "123545304731684@lid"
+			}
+		],
+		"triggeredActions": [],
+		"createdAt": 1781772452493
+	},
+	"3EB086039110DFF7E481E5": {
+		"messageId": "3EB086039110DFF7E481E5",
+		"chatId": "120363428211983710@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @123545304731684?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_123545304731684@lid_1781772453117",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "123545304731684@lid"
+			}
+		],
+		"triggeredActions": [],
+		"createdAt": 1781772453193
+	},
+	"3EB068CEEC5D2F9DC07484": {
+		"messageId": "3EB068CEEC5D2F9DC07484",
+		"chatId": "120363428211983710@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @123545304731684?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_123545304731684@lid_1781772488614",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "123545304731684@lid"
+			}
+		],
+		"triggeredActions": [],
+		"createdAt": 1781772489028
+	},
+	"3EB0D6F9084DFB1261199D": {
+		"messageId": "3EB0D6F9084DFB1261199D",
+		"chatId": "120363428211983710@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @123545304731684?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_123545304731684@lid_1781772488848",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "123545304731684@lid"
+			}
+		],
+		"triggeredActions": [],
+		"createdAt": 1781772489553
+	},
+	"3EB0C55C9B0F5F9FBF6BBD": {
+		"messageId": "3EB0C55C9B0F5F9FBF6BBD",
+		"chatId": "120363428211983710@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @123545304731684?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_123545304731684@lid_1781772505415",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "123545304731684@lid"
+			}
+		],
+		"triggeredActions": [],
+		"createdAt": 1781772505427
+	},
+	"3EB022BE7320AC768B0E1C": {
+		"messageId": "3EB022BE7320AC768B0E1C",
+		"chatId": "120363428211983710@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @123545304731684?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_123545304731684@lid_1781773232960",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "123545304731684@lid"
+			}
+		],
+		"triggeredActions": [],
+		"createdAt": 1781773232971
+	},
+	"3EB0CCA86607FF117106AD": {
+		"messageId": "3EB0CCA86607FF117106AD",
+		"chatId": "120363428211983710@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @123545304731684?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_123545304731684@lid_1781773233021",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "123545304731684@lid"
+			}
+		],
+		"triggeredActions": [],
+		"createdAt": 1781773233030
+	},
+	"3EB0B08B872BD41BC61124": {
+		"messageId": "3EB0B08B872BD41BC61124",
+		"chatId": "120363428211983710@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @123545304731684?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_123545304731684@lid_1781774134225",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "123545304731684@lid"
+			}
+		],
+		"triggeredActions": [],
+		"createdAt": 1781774134607
+	},
+	"3EB0DC230560E1F214BE86": {
+		"messageId": "3EB0DC230560E1F214BE86",
+		"chatId": "120363428211983710@g.us",
+		"sender": "6289607055246@s.whatsapp.net",
+		"question": "Should we kick @123545304731684?",
+		"options": [
+			"Yes",
+			"No"
+		],
+		"votes": {},
+		"totalVotes": 0,
+		"actions": [
+			{
+				"id": "kick_123545304731684@lid_1781774509386",
+				"type": "kick_vote",
+				"minVotes": 1,
+				"type_action": "kick",
+				"targetJid": "123545304731684@lid"
+			}
+		],
+		"triggeredActions": [],
+		"createdAt": 1781774509731
+	}
+}

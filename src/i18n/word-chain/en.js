@@ -1,0 +1,52 @@
+export default /** @type {const} */ ({
+	errors: {
+		invalidArgs: 'Invalid arguments.',
+		noActiveGame: 'No word chain game active. Create one with *{prefix}wc new*',
+		alreadyJoined: 'Already joined.',
+		needPlayers: 'Need at least 2 players to start.',
+		provideWord: 'Please provide a word.',
+		onlyHostStart: 'Only the host can start the game.',
+		onlyHostEnd: 'Only the host can end the game.',
+		onlyHostDelete: 'Only the host can delete the game.'
+	},
+	game: {
+		title: '*WORD CHAIN*',
+		created: '{0} created a word chain game!',
+		joined: '{0} joined!',
+		players: 'Players',
+		joinPrompt: 'Type *{prefix}wc join* to join!',
+		startPrompt: 'Type *{prefix}wc start* to begin!',
+		started: 'Game started!',
+		firstWord: 'Type any word to begin!',
+		turn: "{0}'s turn.",
+		skipped: '{0} skipped their turn.',
+		wordAccepted: '✅ {0}',
+		nextLetter: 'Next letter',
+		score: 'Score',
+		totalWords: 'Total words',
+		recentWords: 'Recent words',
+		currentLetter: 'Current letter',
+		noWords: 'None yet',
+		ended: '*WORD CHAIN - RESULTS*',
+		duration: '⏱️ Duration: {0}',
+		gameDeleted: 'Word chain game deleted.'
+	},
+	info: {
+		title: '*WORD CHAIN*',
+		description: 'Type words that start with the last letter of the previous word! Score points based on word length.',
+		commands: '*Commands:*',
+		newGame: '• *{prefix}wc new* — Create a new game',
+		joinGame: '• *{prefix}wc join* — Join the game',
+		startGame: '• *{prefix}wc start* — Start the game (host only)',
+		skip: '• *{prefix}wc skip* — Skip your turn',
+		status: '• *{prefix}wc status* — Show game status',
+		endGame: '• *{prefix}wc end* — End game and show results (host only)',
+		deleteGame: '• *{prefix}wc del* — Delete game (host only)',
+		howToPlay: '*How to play:*',
+		step1: '1. Create game: *{prefix}wc new*',
+		step2: '2. Others join: *{prefix}wc join*',
+		step3: '3. Host starts: *{prefix}wc start*',
+		step4: '4. Type words starting with the last letter',
+		step5: '5. Score = word length. Most points wins!'
+	}
+});

@@ -465,6 +465,12 @@ export class Store {
 		return this.messages[jid]?.get(id);
 	}
 
+	storeMessage(jid, message) {
+		const list = this.#assertMessageList(jid);
+
+		list.upsert(message, 'append');
+	}
+
 	loadMessages(jid, count, cursor) {
 		const list = this.#assertMessageList(jid);
 		const mode = !cursor || 'before' in cursor ? 'before' : 'after';

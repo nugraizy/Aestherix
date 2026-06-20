@@ -16,6 +16,7 @@ export class Cache {
 	 * @param {number} [options.limit=Infinity] - The maximum number of items in the cache.
 	 * @param {boolean} [options.throws=false] - Whether to throw errors on certain operations.
 	 * @param {boolean} [options.allowOverwrite=true] - Allowing to overwrite the value. If allowOverwrite=false while throws=true and tried to overwrite it will throws error.
+	 * @param {number} [options.maxAge] - TTL in ms. Entries older than this are evicted on get().
 	 */
 	#limit;
 	#throws;
@@ -23,8 +24,10 @@ export class Cache {
 	#count;
 	#valuesArray;
 	#keysArray;
+	#maxAge;
+	#timestamps;
 
-	constructor({ limit = Infinity, throws = false, allowOverwrite = true } = {}) {
+	constructor({ limit = Infinity, throws = false, allowOverwrite = true, maxAge } = {}) {
 		/**
 		 * The maximum number of items in the cache.
 		 * @type {number}
@@ -72,6 +75,9 @@ export class Cache {
 		 * @private
 		 */
 		this.#keysArray = [];
+
+		this.#maxAge = maxAge || 0;
+		this.#timestamps = maxAge ? new Map() : null;
 	}
 
 	/**
@@ -213,6 +219,16 @@ export class Cache {
 			return null;
 		}
 
+		if (this.#maxAge && this.#timestamps) {
+			const ts = this.#timestamps.get(key);
+
+			if (ts && Date.now() - ts > this.#maxAge) {
+				this.delete(key);
+
+				return this.#throws ? null : null;
+			}
+		}
+
 		return this.cache[key];
 	}
 
@@ -242,6 +258,11 @@ export class Cache {
 		}
 
 		this.cache[key] = value;
+
+		if (this.#timestamps) {
+			this.#timestamps.set(key, Date.now());
+		}
+
 		this.#rebuildValuesArray();
 
 		return this;
@@ -263,6 +284,11 @@ export class Cache {
 
 		delete this.cache[key];
 		this.#count--;
+
+		if (this.#timestamps) {
+			this.#timestamps.delete(key);
+		}
+
 		this.#rebuildValuesArray();
 
 		return this;
@@ -286,6 +312,11 @@ export class Cache {
 	clear() {
 		this.cache = Object.create(null);
 		this.#count = 0;
+
+		if (this.#timestamps) {
+			this.#timestamps.clear();
+		}
+
 		this.#rebuildValuesArray();
 		return this;
 	}
