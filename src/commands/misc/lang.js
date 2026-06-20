@@ -1,5 +1,5 @@
 import languages from '../../i18n/languages.js';
-import { getLocale, setLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, setLocale, setUserLocale, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 const validIsos = new Set(languages.map((l) => l.iso));
@@ -7,21 +7,16 @@ const validIsos = new Set(languages.map((l) => l.iso));
 export default defineCommand({
 	name: 'lang',
 	minifiedDescription: 'Change bot language',
-	description: 'Change or view the bot language for this group.',
+	description: 'Change or view the bot language. In groups: per-group. In DM: per-user.',
 	category: 'Misc',
 	usage: '!lang `<iso>` or !lang list',
 	aliases: ['language', 'bahasa'],
 	limit: 0,
 	cooldown: 3,
 	status: 'enable',
-	restrict: true,
-	async run({ message, from, isGroup, args }, client) {
+	async run({ message, from, isGroup, args, sender }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
-
-		if (!isGroup) {
-			return await client.reply(from, L.info.langGroupOnly, message);
-		}
 
 		const sub = args?.[1]?.toLowerCase();
 
@@ -49,7 +44,13 @@ export default defineCommand({
 			return await client.reply(from, L.info.langInvalid.replace('{0}', valid), message);
 		}
 
-		await setLocale(from, target);
+		if (isGroup) {
+			await setLocale(from, target);
+		} else {
+			const userId = sender ?? from;
+
+			await setUserLocale(userId, target);
+		}
 
 		const newL = useLocale(target, 'common');
 		const lang = languages.find((l) => l.iso === target);

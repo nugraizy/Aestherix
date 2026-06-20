@@ -1,5 +1,6 @@
 import configuration from '../../helper/config/connect.js';
 import { banGroupMember, getGroupSettings } from '../../helper/database/adapters/group-settings.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import prisma from '../../helper/database/prisma.js';
 
 const checkURL = (input) =>
@@ -35,13 +36,17 @@ const antiGroupLinkHandler = async (
 		}
 
 		if (!isBotAdmin) {
-			return await client.reply(from, 'Anti-URL is enabled, but I am not an admin, so I cannot kick you.', message);
+			const locale = await getLocale(from);
+			const L = useLocale(locale, 'common');
+			return await client.reply(from, L.core.errors.antiUrlNotAdmin, message);
 		}
 
 		if (!isBanned) {
+			const locale = await getLocale(from);
+			const L = useLocale(locale, 'common');
 			await client.reply(
 				from,
-				'Anti-URL is enabled in this group. You will be kicked if you continue to do this one more time.',
+				L.core.errors.antiUrlBanned,
 				message
 			);
 			await client.send(from, {
@@ -57,7 +62,9 @@ const antiGroupLinkHandler = async (
 				settings.banned.push(sender);
 			}
 		} else {
-			await client.reply(from, 'You have been banned from this group for posting URLs. You will be kicked shortly.', message);
+			const locale = await getLocale(from);
+			const L = useLocale(locale, 'common');
+			await client.reply(from, L.core.errors.antiUrlBanned, message);
 			await client.groupParticipantsUpdate(from, [sender], 'remove');
 		}
 	}

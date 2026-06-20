@@ -175,7 +175,7 @@ export default defineCommand({
 			return;
 		}
 
-		const wait = await client.waitMessage(from, `Searching tweets for "${query}"...`, message);
+		const wait = await client.waitMessage(from, L.success.searchingTweets, message);
 
 		loggers.warning(`${color('Searching Twitter Tweets', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 

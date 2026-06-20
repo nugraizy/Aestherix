@@ -3,6 +3,7 @@ import fs from 'fs-extra';
 
 import configuration from '../../helper/config/connect.js';
 import { banGroupMember, getGroupSettings } from '../../helper/database/adapters/group-settings.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import prisma from '../../helper/database/prisma.js';
 import { arq, delay } from '../../utils/index.js';
 
@@ -43,15 +44,17 @@ const processNsfwImage = async ({ from, isAdmin, isBotAdmin, message, mediaData,
 
 	if ((check.ok && (check.result.hentai > 65 || check.result.porn > 65)) || check.reesult.is_nsfw) {
 		if (!isBotAdmin) {
-			return await client.reply(from, 'Anti-NSFW is enabled, but I am not an admin, so I cannot kick you.', message);
+			const locale = await getLocale(from);
+			const L = useLocale(locale, 'common');
+
+			return await client.reply(from, L.core.errors.antiNsfwNotAdmin, message);
 		}
 
 		if (!isBanned) {
-			await client.reply(
-				from,
-				'Any kind of NSFW Images is Prohibited. This is a warning, you will be kicked if you continue to do this one more time.',
-				message
-			);
+			const locale = await getLocale(from);
+			const L = useLocale(locale, 'common');
+
+			await client.reply(from, L.core.errors.antiNsfwWarning, message);
 			await client.send(from, {
 				delete: {
 					remoteJid: from,
@@ -65,11 +68,9 @@ const processNsfwImage = async ({ from, isAdmin, isBotAdmin, message, mediaData,
 				settings.banned.push(sender);
 			}
 		} else {
-			await client.reply(
-				from,
-				'You have been banned from this group for NSFW Images. And you will be kicked in any second.',
-				message
-			);
+			const locale = await getLocale(from);
+			const L = useLocale(locale, 'common');
+			await client.reply(from, L.core.errors.antiNsfwBanned, message);
 			await delay(350);
 			await client.groupParticipantsUpdate(from, [sender], 'remove');
 		}

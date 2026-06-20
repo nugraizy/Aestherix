@@ -71,7 +71,7 @@ export default defineCommand({
 
 		for (const data in users) {
 			if (users[data]?.error) {
-				client.reply(from, `Error while searching TikTok user\n\n${users[data].error}`, message);
+				client.reply(from, `${L.errors.failedSearch}\n\n${users[data].error}`, message);
 
 				loggers.error(`${color('Failed to Search TikTok User', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				continue;

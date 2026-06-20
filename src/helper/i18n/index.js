@@ -5,6 +5,7 @@
  * @typedef {import('./types.d.ts').LocaleProxy} LocaleProxy
  * @typedef {import('./types.d.ts').LanguageEntry} LanguageEntry
  * @typedef {import('./types.d.ts').CommonStrings} CommonStrings
+ * @typedef {import('./types.d.ts').NamespaceMap} NamespaceMap
  */
 
 import { Cache } from '../modules/cache.js';
@@ -16,6 +17,7 @@ const DEFAULT_FALLBACK_LOCALE = 'id';
 const tables = Object.create(null);
 
 const localeByRoom = new Cache();
+const localeByUser = new Cache();
 
 let defaultLocale = DEFAULT_FALLBACK_LOCALE;
 
@@ -118,27 +120,45 @@ export const listLocales = () => Object.keys(tables);
  * @param {string} roomId - Room/group JID
  * @returns {Promise<string>} ISO locale code
  */
-export const getLocale = async (roomId) => {
-	if (!roomId) {
+export const getLocale = async (roomId, userId) => {
+	if (!roomId && !userId) {
 		return defaultLocale;
 	}
 
-	const cached = localeByRoom.get(roomId);
+	if (roomId) {
+		const roomCached = localeByRoom.get(roomId);
 
-	if (cached) {
-		return cached;
+		if (roomCached) {
+			return roomCached;
+		}
+
+		try {
+			const settings = await getGroupSettings(prisma, roomId);
+
+			if (settings?.locale) {
+				localeByRoom.set(roomId, settings.locale);
+				return settings.locale;
+			}
+		} catch { /* DB unavailable */ }
 	}
 
-	try {
-		const settings = await getGroupSettings(prisma, roomId);
+	const effectiveUserId = userId || roomId;
 
-		if (settings?.locale) {
-			localeByRoom.set(roomId, settings.locale);
+	if (effectiveUserId) {
+		const userCached = localeByUser.get(effectiveUserId);
 
-			return settings.locale;
+		if (userCached) {
+			return userCached;
 		}
-	} catch {
-		// DB unavailable, fall through to default
+
+		try {
+			const data = await prisma.userLocale.findUnique({ where: { jid: effectiveUserId } });
+
+			if (data?.locale) {
+				localeByUser.set(effectiveUserId, data.locale);
+				return data.locale;
+			}
+		} catch { /* DB unavailable */ }
 	}
 
 	return defaultLocale;
@@ -177,6 +197,32 @@ export const setLocale = async (roomId, locale) => {
 	} catch {
 		// DB unavailable, memory cache is already set
 	}
+};
+
+export const setUserLocale = async (userId, locale) => {
+	if (!userId) {
+		return;
+	}
+
+	if (!locale) {
+		localeByUser.delete(userId);
+
+		try {
+			await prisma.userLocale.delete({ where: { jid: userId } }).catch(() => {});
+		} catch { /* DB unavailable */ }
+
+		return;
+	}
+
+	localeByUser.set(userId, locale);
+
+	try {
+		await prisma.userLocale.upsert({
+			where: { jid: userId },
+			update: { locale },
+			create: { jid: userId, locale }
+		});
+	} catch { /* DB unavailable, memory cache is already set */ }
 };
 
 /**
@@ -280,11 +326,13 @@ export const hasKey = (locale, key) => resolveKey(locale, key) !== undefined;
  *   t(locale, 'common.cooldown', [5])
  *   `${L.errors.missingArgs}`.replace('{0}', '!help')
  *
+ * @template {keyof NamespaceMap} N
  * @param {string} locale - ISO locale code (e.g. "id", "en")
- * @param {string} namespace - Namespace registered via `registerNamespace`
- * @returns {LocaleProxy & CommonStrings} Proxy that resolves to strings at leaf nodes
+ * @param {N} namespace - Namespace registered via `registerNamespace`
+ * @param {Record<string, unknown> | unknown[]} [vars] - Variables for `{placeholder}` interpolation on all leaf strings
+ * @returns {LocaleProxy & NamespaceMap[N]} Proxy that resolves to strings at leaf nodes
  */
-export const useLocale = (locale, namespace) => {
+export const useLocale = (locale, namespace, vars) => {
 	const buildProxy = (path = '') => {
 		return new Proxy(Object.create(null), {
 			get(_target, prop) {
@@ -301,7 +349,7 @@ export const useLocale = (locale, namespace) => {
 				}
 
 				if (typeof resolved === 'string') {
-					return resolved;
+					return vars ? interpolate(resolved, vars) : resolved;
 				}
 
 				if (Array.isArray(resolved)) {

@@ -1,28 +1,5 @@
 import configuration from '../../helper/config/connect.js';
-
-const EVENT_UPDATE = {
-	GROUP_CHANGE_SUBJECT: 'Subject Changed',
-	GROUP_CHANGE_DESCRIPTION: 'Description Changed',
-	GROUP_CHANGE_RESTRICT: 'Restrictions Changed',
-	GROUP_CHANGE_ANNOUNCE: 'Announcement Changed',
-	GROUP_CHANGE_ICON: 'Icon Changed',
-	GROUP_INVITE_CHANGED: 'Invite Changed',
-	GROUP_MEMBERSHIP_JOIN_APPROVAL_MODE: 'Membership Join Approval Mode Changed',
-	GROUP_MEMBER_ADD_MODE: 'Member Add Mode Changed',
-	CHANGE_EPHEMERAL_SETTING: (duration) => 'Ephemeral Mode Changed ' + duration,
-	SUBJECT: 'changing subject',
-	ICON: 'changing icons',
-	DESCRIPTION: 'changing description',
-	DEL_DESCRIPTION: 'deletes description',
-	DEL_ICON: 'deletes icons',
-	RESTRICT: 'changing mode restrictions',
-	ANNOUNCE: 'changing mode announcement',
-	REVOKE_INVITE: 'revokes invitation URL',
-	JOIN_APPROVAL: 'changing mode join approval',
-	MEMBER_ADD_MODE: 'changing member add mode',
-	EPHEMERAL_OFF: 'turning off the ephemeral mode',
-	EPHEMERAL_ON: 'turning on the ephemeral mode'
-};
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 
 const DURATION_MAP = {
 	[String(86400)]: '24h',
@@ -30,36 +7,29 @@ const DURATION_MAP = {
 	[String(7776000)]: '90d'
 };
 
-/**
- * Sends a notification with formatted event details.
- *
- * @param {string} id - The group ID.
- * @param {string} author - The author of the update.
- * @param {string} status - The update status message.
- * @param {string} type - The update event type.
- */
-const sendGroupSettingsNotification = async (client, id, author, status, type, duration) => {
+const sendGroupSettingsNotification = async (client, id, author, status, type, duration, L) => {
 	if (!author || !status || !type) {
 		return;
 	}
 
-	await client.send(id, {
-		text: `${'Group Settings Notification'.formatHeaders()}\n
-Event Update : ${typeof EVENT_UPDATE[type] === 'function' ? EVENT_UPDATE[type](duration) : EVENT_UPDATE[type]}
+	const typeMap = {
+		GROUP_CHANGE_SUBJECT: L.core.settings.subjectChanged,
+		GROUP_CHANGE_DESCRIPTION: L.core.settings.descriptionChanged,
+		GROUP_CHANGE_RESTRICT: L.core.settings.restrictionsChanged,
+		GROUP_CHANGE_ANNOUNCE: L.core.settings.announcementChanged,
+		GROUP_CHANGE_ICON: L.core.settings.iconChanged,
+		GROUP_INVITE_CHANGED: L.core.settings.inviteChanged,
+		GROUP_MEMBERSHIP_JOIN_APPROVAL_MODE: L.core.settings.joinApprovalChanged,
+		GROUP_MEMBER_ADD_MODE: L.core.settings.memberAddModeChanged,
+		CHANGE_EPHEMERAL_SETTING: L.core.settings.ephemeralChanged.replace('{0}', duration)
+	};
 
-@${author.split('@')[0]} ${status}`,
+	await client.send(id, {
+		text: `${'Group Settings Notification'.formatHeaders()}\nEvent Update : ${typeMap[type] || type}\n\n@${author.split('@')[0]} ${status}`,
 		mentions: [author]
 	});
 };
 
-/**
- * Updates metadata cache based on the group settings update.
- *
- * @param {string} id - The group ID.
- * @param {object} update - The group update data.
- * @param {object} settingsGroup - The settings group cache object.
- * @param {object} metadataGroup - The metadata group cache object.
- */
 const updateMetadataCache = (id, update, settingsGroup, metadataGroup) => {
 	const cacheUpdates = {
 		subject: () => {
@@ -86,13 +56,7 @@ const updateMetadataCache = (id, update, settingsGroup, metadataGroup) => {
 	}
 };
 
-/**
- * Constructs a status message and type based on update fields and settings.
- * @param {object} update - The group update data.
- * @param {object} settingsGroup - The settings group cache object.
- * @returns {object} - Contains the status message and event type.
- */
-const getStatusAndType = (update, id, settingsGroup) => {
+const getStatusAndType = (update, id, settingsGroup, L) => {
 	let status = '',
 		type = '';
 
@@ -100,41 +64,41 @@ const getStatusAndType = (update, id, settingsGroup) => {
 		desc: () => {
 			status = update.desc
 				? settingsGroup.groupDescription !== undefined
-					? `${EVENT_UPDATE.DESCRIPTION} from \`${settingsGroup.groupDescription}\` to \`${update.desc}\``
-					: `${EVENT_UPDATE.DESCRIPTION} to \`${update.desc}\``
-				: `${EVENT_UPDATE.DEL_DESCRIPTION} from \`${settingsGroup.groupDescription}\``;
+					? `${L.core.settings.changingDescription} from \`${settingsGroup.groupDescription}\` to \`${update.desc}\``
+					: `${L.core.settings.changingDescription} to \`${update.desc}\``
+				: `${L.core.settings.deletesDescription} from \`${settingsGroup.groupDescription}\``;
 			type = 'GROUP_CHANGE_DESCRIPTION';
 		},
 		subject: () => {
-			status = `${EVENT_UPDATE.SUBJECT} from \`${settingsGroup.groupName}\` to \`${update.subject}\``;
+			status = `${L.core.settings.changingSubject} from \`${settingsGroup.groupName}\` to \`${update.subject}\``;
 			type = 'GROUP_CHANGE_SUBJECT';
 		},
 		announce: () => {
-			status = `${EVENT_UPDATE.ANNOUNCE} to \`${update.announce ? 'enable' : 'disable'}\``;
+			status = `${L.core.settings.changingAnnouncement} to \`${update.announce ? 'enable' : 'disable'}\``;
 			type = 'GROUP_CHANGE_ANNOUNCE';
 		},
 		restrict: () => {
-			status = `${EVENT_UPDATE.RESTRICT} to \`${update.restrict ? 'enable' : 'disable'}\``;
+			status = `${L.core.settings.changingRestrictions} to \`${update.restrict ? 'enable' : 'disable'}\``;
 			type = 'GROUP_CHANGE_RESTRICT';
 		},
 		inviteCode: () => {
-			status = `${EVENT_UPDATE.REVOKE_INVITE} to \`${update.inviteCode ? 'enable' : 'disable'}\``;
+			status = `${L.core.settings.revokesInvite} to \`${update.inviteCode ? 'enable' : 'disable'}\``;
 			type = 'GROUP_INVITE_CHANGED';
 		},
 		joinApprovalMode: () => {
-			status = `${EVENT_UPDATE.JOIN_APPROVAL} to \`${update.joinApprovalMode ? 'enable' : 'disable'}\``;
+			status = `${L.core.settings.changingJoinApproval} to \`${update.joinApprovalMode ? 'enable' : 'disable'}\``;
 			type = 'JOIN_APPROVAL';
 		},
 		memberAddMode: () => {
-			status = `${EVENT_UPDATE.MEMBER_ADD_MODE} to \`${update.memberAddMode ? 'enable' : 'disable'}\``;
+			status = `${L.core.settings.changingMemberAddMode} to \`${update.memberAddMode ? 'enable' : 'disable'}\``;
 			type = 'GROUP_MEMBERSHIP_JOIN_APPROVAL_MODE';
 		},
 		content: () => {
-			status = update.content ? EVENT_UPDATE.ICON : EVENT_UPDATE.DEL_ICON;
+			status = update.content ? L.core.settings.changingIcons : L.core.settings.deletesIcons;
 			type = 'GROUP_CHANGE_ICON';
 		},
 		ephemeral: () => {
-			status = update.ephemeral ? EVENT_UPDATE.EPHEMERAL_ON : EVENT_UPDATE.EPHEMERAL_OFF;
+			status = update.ephemeral ? L.core.settings.ephemeralOn : L.core.settings.ephemeralOff;
 			type = 'CHANGE_EPHEMERAL_SETTING';
 		}
 	};
@@ -148,12 +112,6 @@ const getStatusAndType = (update, id, settingsGroup) => {
 	return { status, type };
 };
 
-/**
- * Main handler for group settings notifications.
- *
- * @param {typeof client} client
- * @param {unknown[]} updates - The group update data.
- */
 const groupSettingsNotificationHandler = async (client, updates) => {
 	for (const update of updates) {
 		const { id, author } = update;
@@ -167,8 +125,11 @@ const groupSettingsNotificationHandler = async (client, updates) => {
 			return;
 		}
 
+		const locale = await getLocale(id);
+		const L = useLocale(locale, 'common');
+
 		if (settingsGroup?.notification === 'enable') {
-			const { status, type } = getStatusAndType(update, id, settingsGroup);
+			const { status, type } = getStatusAndType(update, id, settingsGroup, L);
 
 			updateMetadataCache(id, update, settingsGroup, metadataGroup);
 			settingsCache.set(id, settingsGroup);
@@ -180,7 +141,8 @@ const groupSettingsNotificationHandler = async (client, updates) => {
 				author,
 				status,
 				type,
-				(update.ephemeral && DURATION_MAP[String(update.ephemeral)]) || 'Off'
+				(update.ephemeral && DURATION_MAP[String(update.ephemeral)]) || 'Off',
+				L
 			);
 		} else {
 			updateMetadataCache(id, update, settingsGroup, metadataGroup);

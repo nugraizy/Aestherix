@@ -52,7 +52,7 @@ export default defineCommand({
 			const data = await getNovelContent(regexs.message);
 
 			if (data?.errors) {
-				await client.reply(from, `Failed while looking for Pixiv novel content\n\n${data.error}\n${querie}`, message);
+				await client.reply(from, `${L.errors.failedSearch}\n\n${data.error}\n${querie}`, message);
 				continue;
 			}
 

@@ -52,12 +52,7 @@ export default defineCommand({
 				await client.send(
 					from,
 					{
-						text: `This is Word Play Game.
-
-Guess the word for given clue :
-Word : ${data.value}
-Clue : ${data.clue}
-Turn : @${data.turn.split('@')[0]}`,
+						text: `${L.core.games.wordPlayPrompt}${data.value}\n\nClue : ${data.clue}\nTurn : @${data.turn.split('@')[0]}`,
 						mentions: [data.turn]
 					},
 					{}

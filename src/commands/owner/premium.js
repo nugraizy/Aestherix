@@ -3,9 +3,10 @@ import { S_WHATSAPP_NET, Limit } from '../../helper/index.js';
 import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import prisma from '../../helper/database/prisma.js';
 import { getUserLimit, updateUserRole } from '../../helper/database/adapters/user.js';
+import { getPrefix } from '../../helper/modules/prefix.js';
 import { defineCommand } from '../_define.js';
 
-const configureUser = async (client, { mode, user, PREMS_CONTAINER, from, message }) => {
+const configureUser = async (client, { mode, user, PREMS_CONTAINER, from, message, L }) => {
 	const record = await getUserLimit(prisma, user).catch(() => null);
 
 	if (!record) {
@@ -48,11 +49,11 @@ const configureUser = async (client, { mode, user, PREMS_CONTAINER, from, messag
 		let capt = '';
 
 		if (PREMS_CONTAINER.adding.length) {
-			capt += `Success adding premium : ${PREMS_CONTAINER.adding.map((v) => `@${v.split('@')[0]}`).join(', ')}\n`;
+			capt += `${L.owner.success.premiumAdded.replace('{0}', PREMS_CONTAINER.adding.map((v) => `@${v.split('@')[0]}`).join(', '))}\n`;
 		}
 
 		if (PREMS_CONTAINER.removing.length) {
-			capt += `Success removing premium : ${PREMS_CONTAINER.removing.map((v) => `@${v.split('@')[0]}`).join(', ')}`;
+			capt += `${L.owner.success.premiumRemoved.replace('{0}', PREMS_CONTAINER.removing.map((v) => `@${v.split('@')[0]}`).join(', '))}`;
 		}
 
 		await client.send(
@@ -75,7 +76,8 @@ export default defineCommand({
 	status: 'enable',
 	async run({ from, message, args, mediaData, mention, bodyQuoted, query }, client) {
 		const locale = await getLocale(from);
-		const L = useLocale(locale, 'common');
+		const prefix = getPrefix();
+		const L = useLocale(locale, 'common', { prefix });
 
 		if (!query && bodyQuoted) {
 			return await client.reply(from, L.errors.userToBanRequired, message);
@@ -103,7 +105,8 @@ export default defineCommand({
 					user: mentioned,
 					PREMS_CONTAINER,
 					from,
-					message
+					message,
+					L
 				});
 			}
 
@@ -125,7 +128,8 @@ export default defineCommand({
 					user: `${number}@${S_WHATSAPP_NET}`,
 					PREMS_CONTAINER,
 					from,
-					message
+					message,
+					L
 				});
 			}
 
@@ -144,7 +148,8 @@ export default defineCommand({
 				user: mentioned,
 				PREMS_CONTAINER,
 				from,
-				message
+				message,
+				L
 			});
 		}
 	}

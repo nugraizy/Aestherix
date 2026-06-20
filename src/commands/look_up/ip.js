@@ -44,7 +44,7 @@ export default defineCommand({
 			const data = await iplookup(IP.trim());
 
 			if (data?.error) {
-				await client.reply(from, `Error while searching IP Address\n\n${data.error}`, message);
+				await client.reply(from, `${L.errors.failedSearch}\n\n${data.error}`, message);
 
 				loggers.error(`${color('Failed to Searching IP Address', 'red')} for ${color(prettyNumber, 'lilac')}`);
 

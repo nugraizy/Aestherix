@@ -57,15 +57,15 @@ export default defineCommand({
 		const instance = await prisma.botInstance.findUnique({ where: { sessionName } }).catch(() => null);
 
 		if (!instance) {
-			return client.reply(from, `Bot "${sessionName}" not found in database.`, message);
+			return client.reply(from, L.owner.errors.botNotFound.replace('{0}', sessionName), message);
 		}
 
 		const isActive = action === 'enable';
 
 		if (instance.isActive === isActive) {
-			const label = isActive ? 'already active' : 'already disabled';
+			const label = isActive ? L.owner.errors.alreadyActive.replace('{0}', sessionName) : L.owner.errors.alreadyDisabled.replace('{0}', sessionName);
 
-			return client.reply(from, `Bot "${sessionName}" is ${label}.`, message);
+			return client.reply(from, label, message);
 		}
 
 		await prisma.botInstance.update({
@@ -81,12 +81,12 @@ export default defineCommand({
 				manager.remove(sessionName);
 			}
 
-			return client.reply(from, `✅ Bot "${sessionName}" disabled and disconnected.`, message);
+			return client.reply(from, L.owner.success.botDisabled.replace('{0}', sessionName), message);
 		}
 
 		return client.reply(
 			from,
-			`✅ Bot "${sessionName}" enabled. Use ${color(`!addbot ${sessionName}`, 'lilac')} to connect it.`,
+			L.owner.success.botEnabled.replace('{0}', sessionName).replace('{1}', color(`!addbot ${sessionName}`, 'lilac')),
 			message
 		);
 	}

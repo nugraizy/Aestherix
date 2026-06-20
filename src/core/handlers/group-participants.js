@@ -1,4 +1,5 @@
 import configuration from '../../helper/config/connect.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { Attachment } from '../../helper/index.js';
 import { fetchBUFFER } from '../../utils/modules/index.js';
 
@@ -37,25 +38,25 @@ const removeParticipant = (participant, groupMetadataCache) => {
 	groupMetadataCache.participants.splice(getIndex(groupMetadataCache.participants, participant, true), 1);
 };
 
-const EVENT_MAP = {
-	add: 'Joined',
-	invite: 'Invited',
-	remove: 'Removed',
-	left: 'Left',
-	promote: 'Promoted',
-	demote: 'Demoted'
-};
+const getEventMap = (L) => ({
+	add: L.core.participants.joined,
+	invite: L.core.participants.invited,
+	remove: L.core.participants.removed,
+	left: L.core.participants.left,
+	promote: L.core.participants.promoted,
+	demote: L.core.participants.demoted
+});
 
-const EVENT_UPDATE = {
-	left: 'Member Left',
-	invite: 'Invited Member',
-	remove: 'Removed Member',
-	add: 'Added Member',
-	promote: 'Promoted Member',
-	demote: 'Demoted Admin'
-};
+const getEventUpdate = (L) => ({
+	left: L.core.participants.memberLeft,
+	invite: L.core.participants.invitedMember,
+	remove: L.core.participants.removedMember,
+	add: L.core.participants.addedMember,
+	promote: L.core.participants.promotedMember,
+	demote: L.core.participants.demotedAdmin
+});
 
-const writeCache = (groupId, author, participant, action, cache) => {
+const writeCache = (groupId, author, participant, action, cache, L) => {
 	const groupMetadataCache = cache.get(groupId) || {
 		participantsGroup: [],
 		rawParticipants: [],
@@ -95,8 +96,10 @@ const writeCache = (groupId, author, participant, action, cache) => {
 
 	cache.set(groupId, groupMetadataCache);
 
+	const eventUpdate = getEventUpdate(L);
+
 	return {
-		eventNames: EVENT_UPDATE[action],
+		eventNames: eventUpdate[action],
 		actionNames: action
 	};
 };
@@ -107,24 +110,16 @@ const parseId = (id) => {
 	return `@${raw.split('@')[0]}`;
 };
 
-const addContextCaption = (participant, action, data) => {
+const addContextCaption = (participant, action, data, L) => {
 	participant = parseId(participant);
+	const eventMap = getEventMap(L);
 
 	return action === 'left' || action === 'add'
-		? `${participant} ${EVENT_MAP[action]}`
-		: `${parseId(data.author)} ${EVENT_MAP[action]} ${participant}`;
+		? `${participant} ${eventMap[action]}`
+		: `${parseId(data.author)} ${eventMap[action]} ${participant}`;
 };
 
-/**
- *
- * @param {import('./types/Socket/').AdvancedClient} client
- * @param {string} text
- * @param {string} id
- * @param {string} author
- * @param {string} participant
- * @param {string} groupName
- */
-const sendNotification = async (client, text, id, author, participant, groupName, action) => {
+const sendNotification = async (client, text, id, author, participant, groupName, action, L) => {
 	if (!['left', 'remove', 'invite', 'add'].includes(action)) {
 		return client.send(id, {
 			text,
@@ -146,7 +141,7 @@ const sendNotification = async (client, text, id, author, participant, groupName
 	await attach.appendImage({ roundedRadius: radi });
 	await attach
 		.appendText(
-			action === 'left' ? 'Leaving the group' : action === 'remove' ? 'Kicked from the group' : 'Welcome to',
+			action === 'left' ? L.core.participants.leaving : action === 'remove' ? L.core.participants.kicked : L.core.participants.welcome,
 			participant.split('@')[0],
 			groupName,
 			attach.canvas.width / 2,
@@ -171,11 +166,6 @@ const sendNotification = async (client, text, id, author, participant, groupName
 	});
 };
 
-/**
- *
- * @param {import('./types/Socket').AdvancedClient} client
- * @param {*} update
- */
 const groupParticipantsNotificationHandler = async (client, update) => {
 	const cache = configuration.groups.metadata;
 	const settings = configuration.groups.settings;
@@ -185,8 +175,11 @@ const groupParticipantsNotificationHandler = async (client, update) => {
 	let actionName = null;
 	const mentions = [];
 
+	const locale = await getLocale(id);
+	const L = useLocale(locale, 'common');
+
 	participants.forEach((participant) => {
-		const { actionNames, eventNames } = writeCache(id, author, participant, action, cache);
+		const { actionNames, eventNames } = writeCache(id, author, participant, action, cache, L);
 
 		mentions.push(participant);
 		mentions.push(author);
@@ -223,7 +216,7 @@ const groupParticipantsNotificationHandler = async (client, update) => {
 						.replace(/\{participant\}/g, participants.map(parseId).join(', '))
 				: `${'Group Participants Notification'.formatHeaders()}
 Event Update : ${eventName}
-${participants.map((v) => addContextCaption(v, action, update)).join('\n')}`;
+${participants.map((v) => addContextCaption(v, action, update, L)).join('\n')}`;
 
 	if (participants.length > 1 || !useImage) {
 		await client.send(id, {
@@ -235,7 +228,7 @@ ${participants.map((v) => addContextCaption(v, action, update)).join('\n')}`;
 
 	const subject = cache.get(id)?.subject || groupSettings?.groupName || (await client.groupMetadata(id)).subject || '';
 
-	await sendNotification(client, text, id, author, participants[0], subject, actionName);
+	await sendNotification(client, text, id, author, participants[0], subject, actionName, L);
 };
 
 export default groupParticipantsNotificationHandler;

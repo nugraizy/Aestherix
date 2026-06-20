@@ -31,7 +31,7 @@ export default defineCommand({
 			const dataImage = await downloadArtworks(data[0].id);
 
 			if (data?.error) {
-				await client.reply(from, `Failed while searching Pixiv artworks\n\n${data.error}\n${querie}`, message);
+				await client.reply(from, `${L.errors.failedSearch}\n\n${data.error}\n${querie}`, message);
 				continue;
 			}
 

@@ -23,7 +23,7 @@ export default defineCommand({
 		const channel = await youtubeChannel(query);
 
 		if (channel?.error) {
-			return await client.reply(from, `Error while searching YouTube Channel\n\n${channel.error}`, message);
+			return await client.reply(from, `${L.errors.failedSearch}\n\n${channel.error}`, message);
 		}
 
 		const { author, avatar } = channel;

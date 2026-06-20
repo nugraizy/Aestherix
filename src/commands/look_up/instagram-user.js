@@ -15,16 +15,12 @@ export default defineCommand({
 	cooldown: 6,
 	limit: 6,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, isOwner, prefix }, client) {
+	async run({ from, query, prettyNumber, message }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
 
 		if (!configuration.isInstagramInitiated) {
-			return await client.reply(
-				from,
-				`Instagram session is not initialized. ${isOwner ? `Type ${prefix}instagraminit to initialize it.` : `Please ask the owner to initialize it first using the command ${prefix}instagraminit`}`,
-				message
-			);
+			return await client.reply(from, L.errors.instagramNotInit, message);
 		}
 
 		if (!query) {
@@ -39,7 +35,7 @@ export default defineCommand({
 
 		for (const data in users) {
 			if (users[data]?.error) {
-				await client.reply(from, `Error while searching Instagram user\n\n${users[data].error}\n${data}`, message);
+				await client.reply(from, `${L.errors.failedSearch}\n\n${users[data].error}\n${data}`, message);
 				loggers.error(`${color('Failed to Searching Instagram User', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				continue;
 			}

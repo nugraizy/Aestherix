@@ -13,7 +13,7 @@ import {
 import { fileTypeFromBuffer } from 'file-type';
 import fs from 'fs-extra';
 import webpmux from 'node-webpmux';
-import { spawn, execFileSync } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { EventEmitter } from 'node:events';
 import { TextEncoder } from 'node:util';
@@ -310,8 +310,8 @@ export class ClientSocket extends EventEmitter {
 				configuration.groups.metadata?.get(jid)?.ephemeralDuration ||
 				configuration.users.info?.get(jid)?.ephemeralDuration ||
 				0,
-			messageId: this.generateMessageID(),
-			AI: true
+			messageId: options.messageId || this.generateMessageID(),
+			ai: true
 		};
 
 		return this.#socket.relayMessage(jid, message, options);
@@ -693,10 +693,38 @@ export class ClientSocket extends EventEmitter {
 	}
 
 	async updateGroup(jid, { action, participants = [], admins = [], force = false, message = null, text = '' } = {}) {
+		const { getLocale } = await import('../helper/i18n/index.js');
+		const locale = await getLocale(jid);
 		const quoted = message ? { quoted: message } : {};
 
 		if (action === 'add' || action === 'remove' || action === 'demote' || action === 'promote') {
-			return this.#updateGroupParticipants(jid, action, participants, admins, { force, quoted });
+			let validParticipants = participants.filter((p) => p != null);
+
+			if (action === 'add') {
+				const lidMapping = this.#socket?.signalRepository?.lidMapping;
+
+				if (lidMapping) {
+					const converted = [];
+
+					for (const p of validParticipants) {
+						if (p && p.endsWith('@lid')) {
+							try {
+								const pn = await lidMapping.getPNForLID(p);
+
+								converted.push(pn || p);
+							} catch {
+								converted.push(p);
+							}
+						} else {
+							converted.push(p);
+						}
+					}
+
+					validParticipants = converted;
+				}
+			}
+
+			return this.#updateGroupParticipants(jid, action, validParticipants, admins, { force, quoted, locale });
 		}
 
 		if (action === 'subject') {
@@ -718,11 +746,27 @@ export class ClientSocket extends EventEmitter {
 		return [await this.#socket.groupSettingUpdate(jid, action)];
 	}
 
-	async #updateGroupParticipants(jid, action, participants, admins, { force, quoted }) {
+	async groupRequestParticipantsList(jid) {
+		return this.#socket.groupRequestParticipantsList(jid);
+	}
+
+	async groupRequestParticipantsUpdate(jid, participants, action) {
+		return this.#socket.groupRequestParticipantsUpdate(jid, participants, action);
+	}
+
+	async groupToggleEphemeral(jid, duration) {
+		return this.#socket.groupToggleEphemeral(jid, duration);
+	}
+
+	async groupMemberAddMode(jid, mode) {
+		return this.#socket.groupMemberAddMode(jid, mode);
+	}
+
+	async #updateGroupParticipants(jid, action, participants, admins, { force, quoted, locale = 'en' }) {
 		const responses = [];
 
 		for (const participant of participants) {
-			const skipReason = this.#getParticipantSkipReason(action, participant, admins, force);
+			const skipReason = await this.#getParticipantSkipReason(action, participant, admins, force, locale);
 
 			if (skipReason) {
 				await this.send(jid, { text: skipReason, mentions: [participant] }, quoted);
@@ -733,17 +777,17 @@ export class ClientSocket extends EventEmitter {
 				const response = await this.#socket.groupParticipantsUpdate(jid, [participant], action);
 
 				if (action === 'add') {
-					await this.#handleAddResponse(jid, participant, response, quoted);
+					await this.#handleAddResponse(jid, participant, response, quoted, locale);
 				}
 
 				responses.push(response);
 			} catch (e) {
 				responses.push({ error: e.message, id: participant });
 
-				if (e?.[0]?.status === '400') {
+				if (e?.status === '400') {
 					await this.send(
 						jid,
-						{ text: `@${participant.split('@')[0]} is not a valid number`, mentions: [participant] },
+						{ text: L.core.errors.invalidNumber.replace('{0}', participant.split('@')[0]), mentions: [participant] },
 						quoted
 					);
 				}
@@ -753,41 +797,49 @@ export class ClientSocket extends EventEmitter {
 		return responses;
 	}
 
-	#getParticipantSkipReason(action, participant, admins, force) {
+	async #getParticipantSkipReason(action, participant, admins, force, locale = 'en') {
+		const { useLocale } = await import('../helper/i18n/index.js');
+		const L = useLocale(locale, 'common');
 		const tag = `@${participant.split('@')[0]}`;
 		const isAdmin = admins.includes(participant);
 
 		if (action === 'remove' && isAdmin && !force) {
-			return `You can't remove ${tag} because they're a group admin.\nAdd --force flag to force remove.`;
+			return L.errors.cannotRemoveAdmin.replace('{0}', tag);
 		}
 
 		if (action === 'promote' && isAdmin) {
-			return `${tag} is already an admin.`;
+			return L.errors.alreadyAdmin.replace('{0}', tag);
 		}
 
 		if (action === 'demote' && !isAdmin) {
-			return `${tag} is already a member.`;
+			return L.errors.alreadyMember.replace('{0}', tag);
 		}
 
 		return null;
 	}
 
-	async #handleAddResponse(jid, participant, response, quoted) {
+	async #handleAddResponse(jid, participant, response, quoted, locale = 'en') {
+		const { useLocale } = await import('../helper/i18n/index.js');
+		const L = useLocale(locale, 'common');
 		const status = response?.[0]?.status;
 
 		if (status === '500') {
-			await this.send(jid, { text: 'Group is already full' }, quoted);
+			await this.send(jid, { text: L.errors.groupFull }, quoted);
 		} else if (status === '408') {
-			await this.send(jid, { text: `${participant} just left a while ago` }, quoted);
+			await this.send(jid, { text: L.errors.justLeft.replace('{0}', participant) }, quoted);
 		} else if (status === '403') {
 			await this.#sendGroupInvite(jid, participant, response, quoted);
 		} else if (status === '401') {
-			await this.send(jid, { text: `${participant} blocked the bot` }, quoted);
+			await this.send(jid, { text: L.errors.blockedBot.replace('{0}', participant) }, quoted);
 		}
 	}
 
 	async #sendGroupInvite(jid, participant, response, quoted) {
-		await this.send(jid, { text: `${participant} has privacy settings enabled. Sending invite...` }, quoted);
+		const { getLocale, useLocale } = await import('../helper/i18n/index.js');
+		const locale = await getLocale(jid);
+		const L = useLocale(locale, 'common');
+
+		await this.send(jid, { text: L.core.info.privacyInvite.replace('{0}', participant) }, quoted);
 
 		const metadata = await this.#socket.groupMetadata(jid);
 		let thumbnail;
@@ -801,12 +853,12 @@ export class ClientSocket extends EventEmitter {
 		const inviteMsg = generateWAMessageFromContent(
 			jid,
 			{
-				groupInviteMessage: {
+			groupInviteMessage: {
 					groupJid: jid,
 					inviteCode: response?.[0]?.code,
 					inviteExpiration: response?.[0]?.expiration,
 					groupName: metadata.subject,
-					caption: 'Invitation to join my WhatsApp group',
+					caption: L.core.info.groupInviteCaption,
 					jpegThumbnail: thumbnail
 				}
 			},

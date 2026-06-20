@@ -192,7 +192,7 @@ export default defineCommand({
 		}
 
 		if (contentType && !CONTENT_TYPE_PATTERN.test(contentType)) {
-			return await client.reply(from, `Invalid content-type: "${contentType}"`, message);
+			return await client.reply(from, L.errors.invalidContentType.replace('{0}', contentType), message);
 		}
 
 		method = Array.isArray(method) ? method[0] : method || 'GET';
@@ -200,7 +200,7 @@ export default defineCommand({
 		const headers = rawHeaders
 			? [].concat(rawHeaders).reduce((acc, cur) => {
 					if (!/^[^:\s]+:\s?.+$/.test(cur)) {
-						client.reply(from, `Invalid header format: "${cur}" (expected "key: value")`, message);
+						client.reply(from, L.errors.invalidHeader.replace('{0}', cur), message);
 						return acc;
 					}
 
@@ -208,7 +208,7 @@ export default defineCommand({
 					const value = rest.join(':').trim();
 
 					if (key.toLowerCase() === 'content-type' && !CONTENT_TYPE_PATTERN.test(value)) {
-						client.reply(from, `Invalid content-type: "${value}"`, message);
+						client.reply(from, L.errors.invalidContentType.replace('{0}', value), message);
 						return acc;
 					}
 

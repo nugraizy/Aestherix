@@ -46,7 +46,7 @@ export default defineCommand({
 			const builder = new client.TemplateBuilder.Native();
 
 			if (user?.error) {
-				await client.reply(from, `Error while searching Twitter user\n\n${user.error}\n${username}`, message);
+				await client.reply(from, `${L.errors.failedSearch}\n\n${user.error}\n${username}`, message);
 
 				loggers.error(`${color('Failed to Searching Twitter User', 'red')} for ${color(prettyNumber, 'lilac')}`);
 

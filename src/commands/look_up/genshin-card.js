@@ -2,7 +2,7 @@ import { DynamicTextAssets, EnkaClient, TextAssets } from 'enka-network-api';
 
 import { GenshinCard } from '../../helper/canvas/card-render.js';
 import { parseCharactersData, parseGenshinUser } from '../../helper/canvas/genshin-parser.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
@@ -121,10 +121,10 @@ export default defineCommand({
 			if (!found) {
 				const available = parsedCharacters.map((c) => c.name).join(', ');
 
-				return await client.reply(from, `Character "${charName}" not found.\nAvailable: ${available}`, message);
+				return await client.reply(from, t(locale, 'common.errors.characterNotFound', [charName, available]), message);
 			}
 
-			const wait = await client.waitMessage(from, `Generating ${found.name}'s build card...`, message);
+			const wait = await client.waitMessage(from, L.success.generating, message);
 
 			const card = new GenshinCard(found, parsedUser, { statsChart: useRadar ? 'radar' : 'list' });
 			const result = await card.render();
@@ -152,7 +152,7 @@ export default defineCommand({
 		await builder
 			.destination(from)
 			.body(
-				`🎮 *Genshin Showcase* — UID: ${uid}\n\n${parsedUser.nickname || 'Unknown'} | AR ${parsedUser.level}\n\nSelect a character:`
+				`🎮 *Genshin Showcase* — UID: ${uid}\n\n${parsedUser.nickname || L.info.unknown} | AR ${parsedUser.level}\n\nSelect a character:`
 			)
 			.footer('Data cached for 10 minutes')
 			.buttons(...buttons)

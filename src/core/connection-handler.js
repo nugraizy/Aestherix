@@ -2,6 +2,7 @@ import { Boom } from '@hapi/boom';
 import { DisconnectReason } from 'baileys';
 
 import configuration from '../helper/config/connect.js';
+import { getLocale, useLocale } from '../helper/i18n/index.js';
 import prisma from '../helper/database/prisma.js';
 import { cmdId } from '../helper/modules/prefix.js';
 import { color, delay } from '../utils/modules/index.js';
@@ -155,7 +156,6 @@ export class ConnectionHandler {
 	async #printConnectionMetrics(client) {
 		const builder = new client.TemplateBuilder.Native();
 		const timeToConnect = process.uptime();
-		const buttons = [];
 		let caption = '';
 
 		const getPlatform = (platform) => {
@@ -167,13 +167,23 @@ export class ConnectionHandler {
 		this.#log.info(color('Device Platform', 'white'), color(getPlatform(client.authState.creds.platform), '#E4C1F9'));
 		this.#log.info(color('Connection time', 'white'), color(`${timeToConnect}s`, 'lilac'));
 
-		buttons.push(builder.button.reply({ display: 'Ping Bot', id: cmdId('ping') }));
+		const locale = await getLocale(this.#configuration.owners[0]);
+		const L = useLocale(locale, 'common');
+
+		const ownerNumber = this.#configuration.owners[0];
+
+		if (!ownerNumber || (!/^\d{10,15}$/.test(ownerNumber) && !/^\d{10,15}@\w+/.test(ownerNumber))) {
+			this.#log.warning(
+				color('"owner_number" in settings.json is not set, bot will not respond to any owner commands for anyone.', 'orange')
+			);
+			return;
+		}
 
 		await builder
-			.destination(this.#configuration.owners[0])
-			.body('Bot is connected to socket.')
+			.destination(ownerNumber)
+			.body(L.core.info.botConnected)
 			.footer(caption)
-			.buttons(...buttons)
+			.buttons(builder.button.reply({ display: L.core.success.pingBot, id: cmdId('ping') }))
 			.send();
 	}
 

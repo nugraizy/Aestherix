@@ -4,6 +4,7 @@ import { createServer } from 'http';
 
 import { getDashboardLogs, setDashboardCommandState, setDashboardFlagState } from '../../../dashboard/server/monitor.js';
 import configuration from '../../helper/config/connect.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { banUser, getBannedUsers, getUserLimit, unbanUser, upsertUserLimit } from '../../helper/database/adapters/user.js';
 import prisma from '../../helper/database/prisma.js';
 import { toUserJid } from '../../helper/misc/wa_data/index.js';
@@ -161,16 +162,19 @@ const sendConfirmationButton = async ({ waClient, to, approveButtonId, rejectBut
 		throw new Error('WhatsApp client is not ready.');
 	}
 
+	const locale = await getLocale();
+	const L = useLocale(locale, 'common');
+
 	if (waClient.TemplateBuilder?.Native) {
 		const builder = new waClient.TemplateBuilder.Native();
 
 		await builder
 			.destination(to)
-			.body('A dashboard login request was made for your owner account. Confirm if this was you.')
-			.footer(`Requested number: ${phoneNumber}`)
+			.body(L.core.dashboard.loginRequest)
+			.footer(L.core.dashboard.requestedNumber.replace('{0}', phoneNumber))
 			.buttons(
-				builder.button.reply({ display: 'Confirm Login', id: approveButtonId }),
-				builder.button.reply({ display: 'Reject Login', id: rejectButtonId })
+				builder.button.reply({ display: L.core.success.confirmLogin, id: approveButtonId }),
+				builder.button.reply({ display: L.core.success.rejectLogin, id: rejectButtonId })
 			)
 			.send();
 
@@ -178,7 +182,7 @@ const sendConfirmationButton = async ({ waClient, to, approveButtonId, rejectBut
 	}
 
 	await waClient.send(to, {
-		text: `Dashboard login request detected.\n\nReply one of these codes:\nConfirm: ${approveButtonId}\nReject: ${rejectButtonId}`
+		text: L.core.dashboard.loginDetected.replace('{0}', approveButtonId).replace('{1}', rejectButtonId)
 	});
 };
 

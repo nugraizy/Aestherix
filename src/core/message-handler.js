@@ -3,13 +3,17 @@ import { BOT_NAME } from './constants.js';
 import readline from 'readline';
 import { findBestMatch } from 'string-similarity';
 
+import { autoReplyManager } from '../helper/auto-reply.js';
 import configuration from '../helper/config/connect.js';
 import { Limit, checkAfk, deleteAfk, getAfk } from '../helper/index.js';
 import { Cache } from '../helper/modules/cache.js';
+import { getLocale, useLocale } from '../helper/i18n/index.js';
 import { cmdId, setPrefix } from '../helper/modules/prefix.js';
+import { slowModeManager } from '../helper/slowmode.js';
 import { color, getTimeSince } from '../utils/modules/index.js';
 import { Context } from './context.js';
 import { Logger } from './logger.js';
+import { getAutomodRules, getCustomAliases } from '../helper/groups/settings/group-settings.js';
 import { PipelineExecutor } from './pipeline.js';
 import { RetryManager } from './retry-manager.js';
 
@@ -62,6 +66,8 @@ export class MessageHandler {
 	#retries = new Map();
 	#executionLocks = new Map();
 	#retryManager = new RetryManager();
+	#automodCounters = new Map();
+	#replyChains = new Cache({ maxAge: 300_000, limit: 500 });
 	#lastLog = {
 		kind: null,
 		sender: null,
@@ -170,12 +176,39 @@ export class MessageHandler {
 			this.#client.readMessages([message.message.key]);
 		}
 
+		if (message.isViewOnce && message.viewOnceMedia) {
+			if (!message.isGroup || (await this.#shouldAutoDecryptViewOnce(message.from))) {
+				this.#autoDecryptViewOnce(message, client);
+			}
+		}
+
 		if (message.isGroup) {
 			this.#handleAfk(client, message);
 		}
 
 		if (this.#resolveInputState(message)) {
 			return;
+		}
+
+		if (message.isGroup && !message.isCmd) {
+			const slowCheck = slowModeManager.check(message.from, message.sender, message.isAdmin);
+
+			if (!slowCheck.allowed) {
+				await client.reply(message.from, `⏳ Slow mode active. Please wait ${slowCheck.remaining} seconds.`, message);
+				return;
+			}
+		}
+
+		if (message.isGroup && !message.isCmd) {
+			await this.#checkAutomod(message, client);
+		}
+
+		if (!message.isCmd && message.body) {
+			const autoReplies = autoReplyManager.check(message.from, message.body);
+
+			for (const reply of autoReplies) {
+				await client.reply(message.from, reply.response, message);
+			}
 		}
 
 		const dispatchStart = profileEnabled ? performance.now() : 0;
@@ -230,7 +263,7 @@ export class MessageHandler {
 		const pipeline = new PipelineExecutor(client, message, this.#router, {
 			guard: (ctx, command, cl) => this.#guard(ctx, command, cl),
 			run: (ctx, command, cl) => this.#run(ctx, command, cl),
-			log: (ctx) => !this.#flags.noLogs && this.#logMessage(ctx)
+			log: (ctx) => !this.#flags.silent && this.#logMessage(ctx)
 		});
 
 		await pipeline.execute(stages);
@@ -340,6 +373,18 @@ export class MessageHandler {
 
 		let localMessage;
 
+		if (message.isGroup) {
+			const sessionName = this.#configuration.settings?.main_session || 'aestherix-bot';
+
+			try {
+				this.#router.groupAliases = await getCustomAliases(message.from, sessionName);
+			} catch {
+				this.#router.groupAliases = {};
+			}
+		} else {
+			this.#router.groupAliases = {};
+		}
+
 		const resolved = this.#router.resolve(body);
 
 		if (resolved) {
@@ -371,7 +416,7 @@ export class MessageHandler {
 			command = this.#autoCorrect(localMessage);
 		}
 
-		if (!this.#flags.noLogs) {
+		if (!this.#flags.silent) {
 			this.#logMessage(localMessage);
 		}
 
@@ -463,21 +508,20 @@ export class MessageHandler {
 
 		if (this.#retryManager.isDisabled(command.name)) {
 			const remaining = this.#retryManager.getDisableRemaining(command.name);
+			const L = useLocale(localMessage.locale ?? 'id', 'common');
 
 			if (localMessage.isOwner) {
 				const builder = new client.TemplateBuilder.Native();
 
 				await builder
 					.destination(localMessage.from)
-					.body(
-						`Command \`${command.name}\` has been temporarily disabled due to repeated failures (${this.#retryManager.maxRetries} errors). Try again in ${remaining} minute(s).`
-					)
-					.buttons(builder.button.reply({ display: 'Enable', id: `enable:${command.name}` }))
+					.body(L.core.errors.commandDisabled.replace('{0}', command.name).replace('{1}', remaining))
+					.buttons(builder.button.reply({ display: L.core.success.enable, id: `enable:${command.name}` }))
 					.send();
 			} else {
 				void client.reply(
 					localMessage.from,
-					`Command \`${command.name}\` is temporarily disabled due to repeated failures. Try again in ${remaining} minute(s).`,
+					L.core.errors.commandDisabled.replace('{0}', command.name).replace('{1}', remaining),
 					localMessage.message
 				);
 			}
@@ -486,16 +530,14 @@ export class MessageHandler {
 		}
 
 		if (command.category === 'Owner' && !localMessage.isOwner) {
-			void client.reply(localMessage.from, 'This commands is only for owner.', localMessage.message);
+			const L = useLocale(localMessage.locale ?? 'id', 'common');
+			void client.reply(localMessage.from, L.core.errors.ownerOnly, localMessage.message);
 			return 'skip';
 		}
 
 		if (this.#configuration.settings?.maintenance && !localMessage.isOwner) {
-			void client.reply(
-				localMessage.from,
-				'🛠️ Bot is currently in maintenance mode. Please try again later.',
-				localMessage.message
-			);
+			const L = useLocale(localMessage.locale ?? 'id', 'common');
+			void client.reply(localMessage.from, L.core.errors.maintenance, localMessage.message);
 			return 'skip';
 		}
 
@@ -503,11 +545,8 @@ export class MessageHandler {
 			const lockedBy = this.#checkExecutionLock(localMessage.sender);
 
 			if (lockedBy) {
-				void client.reply(
-					localMessage.from,
-					`Please wait, your previous command (${lockedBy}) is still running.`,
-					localMessage.message
-				);
+				const L = useLocale(localMessage.locale ?? 'id', 'common');
+				void client.reply(localMessage.from, L.core.errors.executionLocked.replace('{0}', lockedBy), localMessage.message);
 				return 'skip';
 			}
 		}
@@ -519,7 +558,8 @@ export class MessageHandler {
 				const selfRole = Limit.checkRole(localMessage.sender);
 
 				if (command.premium && selfRole.role !== 'PREMIUM' && selfRole.role !== 'OWNER') {
-					void client.reply(localMessage.from, 'This commands is only for premium user.', localMessage.message);
+					const L = useLocale(localMessage.locale ?? 'id', 'common');
+					void client.reply(localMessage.from, L.core.errors.premiumOnly, localMessage.message);
 					return 'skip';
 				}
 
@@ -535,11 +575,8 @@ export class MessageHandler {
 		}
 
 		if (this.#flags.restrict && command.restrict) {
-			void client.reply(
-				localMessage.from,
-				'This command is restricted and currently bot are on restricted mode.',
-				localMessage.message
-			);
+			const L = useLocale(localMessage.locale ?? 'id', 'common');
+			void client.reply(localMessage.from, L.core.errors.restricted, localMessage.message);
 			return 'skip';
 		}
 
@@ -559,12 +596,14 @@ export class MessageHandler {
 
 		if (command.category === 'Moderation') {
 			if (!localMessage.isGroup) {
-				void client.reply(localMessage.from, 'This commands for group only', localMessage.message);
+				const L = useLocale(localMessage.locale ?? 'id', 'common');
+				void client.reply(localMessage.from, L.core.errors.groupOnly, localMessage.message);
 				return 'skip';
 			}
 
 			if (!localMessage.isAdmin) {
-				void client.reply(localMessage.from, 'You are not admin. This commands is only for admins.', localMessage.message);
+				const L = useLocale(localMessage.locale ?? 'id', 'common');
+				void client.reply(localMessage.from, L.core.errors.adminOnly, localMessage.message);
 				return 'skip';
 			}
 		}
@@ -577,11 +616,12 @@ export class MessageHandler {
 				return 'skip';
 			}
 
-			void client.reply(localMessage.from, 'This commands is only for premium user.', localMessage.message);
+			const L = useLocale(localMessage.locale ?? 'id', 'common');
+			void client.reply(localMessage.from, L.core.errors.premiumOnly, localMessage.message);
 			return 'skip';
 		}
 
-		if (!this.#flags.noLimit) {
+		if (!this.#flags.unlimited) {
 			if (!Limit.checkExist(localMessage.sender) && userRole.role !== 'OWNER' && userRole.role !== 'PREMIUM') {
 				Limit.upsert(localMessage.sender, 0, userRole.role);
 			}
@@ -620,6 +660,22 @@ export class MessageHandler {
 			return;
 		}
 
+		if (command.replyChain?.enabled && !localMessage.isGroup) {
+			const chainKey = `${localMessage.sender}:${command.name}`;
+			const chain = this.#replyChains.get(chainKey) || [];
+
+			chain.push({ role: 'user', content: localMessage.body, timestamp: Date.now() });
+
+			const max = command.replyChain.maxMessages || 5;
+
+			while (chain.length > max * 2) {
+				chain.shift();
+			}
+
+			this.#replyChains.set(chainKey, chain);
+			localMessage.chainHistory = chain;
+		}
+
 		const sender = localMessage.sender;
 		const isHeavy = HEAVY_CATEGORIES.has(command.category);
 
@@ -627,12 +683,45 @@ export class MessageHandler {
 			this.#executionLocks.set(sender, { command: command.name, expiry: Date.now() + EXECUTION_LOCK_TTL });
 		}
 
+		const timeoutMs = command.timeout ?? 30000;
+		const ownerNoTimeout = localMessage.isOwner && command.category === 'Owner';
+
 		try {
-			await command.run(localMessage, client, this.#store);
+			if (ownerNoTimeout || !timeoutMs) {
+				await command.run(localMessage, client, this.#store);
+			} else {
+				let timedOut = false;
+				const timeoutPromise = new Promise((_, reject) =>
+					setTimeout(() => {
+						timedOut = true;
+						reject(new Error(`Command "${command.name}" timed out after ${Math.round(timeoutMs / 1000)}s`));
+					}, timeoutMs)
+				);
+
+				const firewall = new Proxy(client, {
+					get(target, prop) {
+						if (timedOut && typeof prop !== 'symbol') {
+							return typeof target[prop] === 'function' ? () => Promise.resolve() : undefined;
+						}
+
+						const value = target[prop];
+						return typeof value === 'function' ? value.bind(target) : value;
+					}
+				});
+
+				await Promise.race([command.run(localMessage, firewall, this.#store), timeoutPromise]);
+			}
+
 			this.#router.trackUsage(command.name).catch(noop);
 			this.#retryManager.clearCounter(localMessage.sender, command.name);
 		} catch (err) {
-			await this.#handleError(err, localMessage, command, client).catch(() => {});
+			const isTimeout = err?.message?.startsWith('Command "') && err?.message?.includes('timed out');
+
+			if (isTimeout) {
+				void client.reply(localMessage.from, `⏱️ ${err.message}`, localMessage.message);
+			} else {
+				await this.#handleError(err, localMessage, command, client).catch(() => {});
+			}
 		} finally {
 			if (isHeavy) {
 				this.#executionLocks.delete(sender);
@@ -693,9 +782,10 @@ export class MessageHandler {
 	}
 
 	async #handleError(err, localMessage, command, client) {
+		const L = useLocale(localMessage.locale ?? 'id', 'common');
 		const builder = new client.TemplateBuilder.Native();
 		const errorLocation = this.#getErrorLocation(err?.stack);
-		let str = !localMessage.isOwner ? 'Please send this error stack to the owner :\n\n' : '\n';
+		let str = !localMessage.isOwner ? L.core.info.reportToOwner : '\n';
 
 		str += `Type : ${err.name || 'Unknown'}\nMessage : ${err.message || 'Unknown'}\nFile : ${errorLocation.file}\nLine : ${errorLocation.line}\nStack Trace :\n${(localMessage.isOwner ? err?.stack?.substring(0, 70) : err?.stack?.substring(0, 20)) || 'Unknown'}`;
 
@@ -733,26 +823,22 @@ export class MessageHandler {
 
 			await builder
 				.destination(localMessage.from)
-				.body(
-					localMessage.isOwner
-						? 'Something went unexpected. Please read below :'
-						: 'This error is from the client. Please report to owner.'
-				)
+				.body(localMessage.isOwner ? L.core.info.unexpectedError : L.core.info.clientError)
 				.footer(str)
 				.buttons(
 					...[
 						localMessage.isOwner
 							? builder.button.url({
-									display: 'Report to Owner',
+									display: L.core.success.reportToOwner,
 									url: `https://wa.me/${localMessage.settings.owner_number.replace(/[^\d]/g, '')}?text=hi,%20bot%20mengalami%20error${encodeURI(`\n\n${err.stack}`)}`
 								})
 							: null,
 						localMessage.isOwner
-							? builder.button.reply({ display: 'Report via Bot', id: cmdId('report', err.stack, localMessage) })
+							? builder.button.reply({ display: L.core.success.reportViaBot, id: cmdId('report', err.stack, localMessage) })
 							: null,
 						canRetry
 							? builder.button.reply({
-									display: `Retry (${this.#retryManager.maxRetries - failure.count} left)`,
+									display: L.core.success.retry.replace('{0}', `${this.#retryManager.maxRetries - failure.count} left`),
 									id: retryBody
 								})
 							: null
@@ -762,24 +848,22 @@ export class MessageHandler {
 		} else {
 			await builder
 				.destination(localMessage.from)
-				.body(
-					localMessage.isOwner
-						? 'Something went unexpected. Please read below :'
-						: 'This error is from the client. Please report to owner.'
-				)
+				.body(localMessage.isOwner ? L.core.info.unexpectedError : L.core.info.clientError)
 				.footer(str)
 				.buttons(
 					...[
 						localMessage.isOwner
 							? builder.button.url({
-									display: 'Report to Owner',
+									display: L.core.success.reportToOwner,
 									url: `https://wa.me/${localMessage.settings.owner_number.replace(/[^\d]/g, '')}?text=hi,%20bot%20mengalami%20error${encodeURI(`\n\n${err.stack}`)}`
 								})
 							: null,
 						localMessage.isOwner
-							? builder.button.reply({ display: 'Report via Bot', id: cmdId('report', err.stack, localMessage) })
+							? builder.button.reply({ display: L.core.success.reportViaBot, id: cmdId('report', err.stack, localMessage) })
 							: null,
-						localMessage.isOwner ? builder.button.reply({ display: 'Enable', id: `enable:${command.name}` }) : null
+						localMessage.isOwner
+							? builder.button.reply({ display: L.core.success.enable, id: `enable:${command.name}` })
+							: null
 					].filter(Boolean)
 				)
 				.send();
@@ -855,6 +939,8 @@ export class MessageHandler {
 	}
 
 	#handleAfk(client, message) {
+		const L = useLocale(message.locale ?? 'id', 'common');
+
 		if (checkAfk(message.sender, message.from)) {
 			const { reasons, since } = getAfk(message.sender, message.from);
 			const time = getTimeSince(since);
@@ -862,7 +948,7 @@ export class MessageHandler {
 			client.send(
 				message.from,
 				{
-					text: `@${message.sender.split('@')[0]} is AFK since ${time} ago. Now they are out from AFK. Reason: ${reasons}`,
+					text: L.core.afk.unsetAuto.replace('{0}', message.sender.split('@')[0]).replace('{1}', time).replace('{2}', reasons),
 					mentions: [message.sender]
 				},
 				{ quoted: message.message }
@@ -874,7 +960,11 @@ export class MessageHandler {
 			const { reasons, since, name } = getAfk(message.mediaData.participant);
 			const time = getTimeSince(since);
 
-			client.reply(message.from, `${name} is AFK since ${time} ago. Reason: ${reasons}`, message.message);
+			client.reply(
+				message.from,
+				L.core.afk.isAfk.replace('{0}', name).replace('{1}', time).replace('{2}', reasons),
+				message.message
+			);
 		}
 
 		if (message.mention?.length) {
@@ -887,7 +977,8 @@ export class MessageHandler {
 			return;
 		}
 
-		let caption = 'You are Tagging People That Are AFK.'.formatHeaders() + '\n\n';
+		const L = useLocale(message.locale ?? 'id', 'common');
+		let caption = L.core.afk.taggingWarning + '\n\n';
 		const container = [];
 
 		for (const mention of message.mention) {
@@ -895,7 +986,7 @@ export class MessageHandler {
 				const { reasons, since, name } = getAfk(mention, message.from);
 				const time = getTimeSince(since);
 
-				caption += `${name}\nSince : ${time} ago.\nReason : ${reasons}\n\n`;
+				caption += L.core.afk.afkDetail.replace('{0}', name).replace('{1}', time).replace('{2}', reasons);
 				container.push(mention);
 			}
 		}
@@ -991,6 +1082,98 @@ export class MessageHandler {
 		return true;
 	}
 
+	async #checkAutomod(ctx, client) {
+		if (!ctx.isGroup || ctx.isCmd || !ctx.body) {
+			return;
+		}
+
+		try {
+			const rules = await getAutomodRules(ctx.from);
+			const enabledRules = rules.filter((r) => r.enabled);
+
+			if (!enabledRules.length) {
+				return;
+			}
+
+			const sender = ctx.sender;
+			const groupId = ctx.from;
+			const body = ctx.body;
+			const now = Date.now();
+
+			for (const rule of enabledRules) {
+				let violated = false;
+
+				if (rule.type === 'caps') {
+					const letters = body.replace(/[^a-zA-Z]/g, '');
+
+					if (letters.length > 0) {
+						const upperCount = letters.replace(/[^A-Z]/g, '').length;
+						const pct = (upperCount / letters.length) * 100;
+
+						violated = pct > rule.threshold;
+					}
+				}
+
+				if (rule.type === 'links') {
+					const urlPattern = /https?:\/\/[^\s]+|www\.[^\s]+/i;
+
+					violated = urlPattern.test(body);
+				}
+
+				if (rule.type === 'spam' || rule.type === 'flood') {
+					const counterKey = `${groupId}:${sender}:${rule.id}`;
+					const counter = this.#automodCounters.get(counterKey) || { timestamps: [] };
+
+					counter.timestamps.push(now);
+					counter.timestamps = counter.timestamps.filter((t) => now - t <= rule.duration * 1000);
+
+					this.#automodCounters.set(counterKey, counter);
+
+					violated = counter.timestamps.length >= rule.threshold;
+
+					if (violated) {
+						counter.timestamps = [];
+					}
+				}
+
+				if (!violated) {
+					continue;
+				}
+
+				const { action } = rule;
+				const locale = await getLocale(groupId);
+				const L = useLocale(locale, 'common');
+
+				if (action === 'warn') {
+					await client.reply(groupId, L.core.automod.warn.replace('{0}', rule.type), ctx.message);
+				} else if (action === 'kick') {
+					try {
+						await client.updateGroup(groupId, { action: 'remove', participants: [sender], admins: [], message: ctx.message });
+						await client.send(
+							groupId,
+							{ text: L.core.automod.kicked.replace('{0}', `@${sender.split('@')[0]}`).replace('{1}', rule.type), mentions: [sender] },
+							{ quoted: ctx.message }
+						);
+					} catch {
+						await client.send(
+							groupId,
+							{ text: L.core.automod.kickFailed.replace('{0}', `@${sender.split('@')[0]}`), mentions: [sender] },
+							{ quoted: ctx.message }
+						);
+					}
+				} else if (action === 'delete') {
+					try {
+						await client.sendMessage(groupId, { delete: ctx.message.key });
+					} catch {
+						/* message already deleted */
+					}
+				}
+			}
+		} catch (err) {
+			process.stderr.write(`[AUTOMOD] check error: ${err.message}\n`);
+		}
+	}
+
 	#retryRelay(msg) {
 		const id = msg.key.id;
 		const count = this.#retries.get(id) || 0;
@@ -1017,6 +1200,10 @@ export class MessageHandler {
 
 		if (this.#retries.size > 1000) {
 			this.#retries.clear();
+		}
+
+		if (this.#automodCounters.size > 5000) {
+			this.#automodCounters.clear();
 		}
 	}
 
@@ -1114,5 +1301,54 @@ export class MessageHandler {
 			: message.body || '';
 
 		return `${message.from || ''}|${message.sender || ''}|${commandBody}`;
+	}
+
+	async #shouldAutoDecryptViewOnce(from) {
+		const cached = configuration.groups.settings.get(from);
+
+		return cached?.viewonce === 'enable';
+	}
+
+	async #autoDecryptViewOnce(message, client) {
+		try {
+			const { downloadMediaMessage } = await import('baileys');
+			const vo = message.viewOnceMedia;
+
+			if (!vo?.message) {
+				return;
+			}
+
+			const locale = await getLocale(message.from);
+			const L = useLocale(locale, 'common');
+			const buffer = await downloadMediaMessage(message.mediaData, 'buffer', {});
+			const mediaKey = vo.message?.imageMessage ? 'image' : vo.message?.videoMessage ? 'video' : 'audio';
+
+			const rawCaption =
+				vo.caption ||
+				vo.message?.imageMessage?.caption ||
+				vo.message?.videoMessage?.caption ||
+				vo.message?.audioMessage?.caption ||
+				'';
+
+			const viewOnceLabel = L.info.viewOnceDecrypted;
+
+			const caption = rawCaption ? `\n\n${rawCaption}` : '';
+
+			if (!buffer || !Buffer.isBuffer(buffer)) {
+				return;
+			}
+
+			await client.send(
+				message.from,
+				{
+					[mediaKey]: buffer,
+					caption: `${viewOnceLabel}${caption}`
+				},
+				{ quoted: message.message }
+			);
+		} catch (err) {
+			console.log(err);
+			this.#log?.error?.('viewonce auto-decrypt failed:', err.message);
+		}
 	}
 }

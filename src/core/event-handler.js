@@ -1,4 +1,5 @@
 import { checkAfk, deleteAfk, getAfk } from '../helper/index.js';
+import { getLocale, useLocale } from '../helper/i18n/index.js';
 import { Cache } from '../helper/modules/cache.js';
 import { getTimeSince } from '../utils/modules/index.js';
 import { ConnectionHandler } from './connection-handler.js';
@@ -96,7 +97,9 @@ export class EventHandler {
 		}
 
 		const timeSinceAfk = getTimeSince(afkContainer.since);
-		const text = `@${participant.split('@')[0]} detected writing. AFK since ${timeSinceAfk} ago. Now they are out from AFK. Reason : ${afkContainer.reasons}`;
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+		const text = L.core.afk.unsetAuto.replace('{0}', participant.split('@')[0]).replace('{1}', timeSinceAfk).replace('{2}', afkContainer.reasons);
 
 		await this.#client.send(from, { text, mentions: [participant] });
 		deleteAfk(participant, from);
@@ -132,7 +135,7 @@ export class EventHandler {
 	}
 
 	async handleCall(calls) {
-		if (!this.#options.flags?.noCall) {
+		if (!this.#options.flags?.rejectCalls) {
 			return;
 		}
 

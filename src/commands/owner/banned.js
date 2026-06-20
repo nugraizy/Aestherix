@@ -51,7 +51,7 @@ export default defineCommand({
 
 			for (const jid of mention) {
 				if (userBanned.includes(jid)) {
-					await client.send(from, { text: `${mentionText(jid)} Already banned`, mentions: [jid] }, { quoted: message });
+					await client.send(from, { text: L.owner.errors.alreadyBanned.replace('{0}', mentionText(jid)), mentions: [jid] }, { quoted: message });
 					continue;
 				}
 
@@ -62,7 +62,7 @@ export default defineCommand({
 			if (banned.length) {
 				await client.send(
 					from,
-					{ text: `Success banning : ${banned.map(mentionText).join(', ')}`, mentions: banned },
+					{ text: L.owner.success.banned.replace('{0}', banned.map(mentionText).join(', ')), mentions: banned },
 					{ quoted: message }
 				);
 			}
@@ -78,12 +78,12 @@ export default defineCommand({
 				const jid = `${number}${S_WHATSAPP_NET}`;
 
 				if (userBanned.includes(jid)) {
-					await client.send(from, { text: `${mentionText(jid)} is already banned`, mentions: [jid] }, { quoted: message });
+					await client.send(from, { text: L.owner.errors.alreadyBanned.replace('{0}', mentionText(jid)), mentions: [jid] }, { quoted: message });
 					continue;
 				}
 
 				await banAndBlock(client, jid);
-				await client.send(from, { text: `Success banning : ${mentionText(jid)}`, mentions: [jid] }, { quoted: message });
+				await client.send(from, { text: L.owner.success.banned.replace('{0}', mentionText(jid)), mentions: [jid] }, { quoted: message });
 			}
 
 			return;
@@ -93,11 +93,11 @@ export default defineCommand({
 			const jid = mediaData.participant;
 
 			if (userBanned.includes(jid)) {
-				return await client.reply(from, L.errors.alreadyBanned, message);
+				return await client.reply(from, L.owner.errors.alreadyBanned.replace('{0}', mentionText(jid)), message);
 			}
 
 			await banAndBlock(client, jid);
-			await client.send(from, { text: `Success banning : ${mentionText(jid)}`, mentions: [jid] }, { quoted: message });
+			await client.send(from, { text: L.owner.success.banned.replace('{0}', mentionText(jid)), mentions: [jid] }, { quoted: message });
 		}
 	}
 });

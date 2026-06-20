@@ -1,6 +1,7 @@
 import mqtt from 'mqtt';
 
 import configuration from '../helper/config/connect.js';
+import { getLocale, useLocale } from '../helper/i18n/index.js';
 import { S_WHATSAPP_NET } from '../helper/misc/wa_data/index.js';
 import { delay } from '../utils/modules/index.js';
 
@@ -138,17 +139,19 @@ export class MqttBridge {
 		}
 
 		const { data: result } = data;
+		const locale = await getLocale();
+		const L = useLocale(locale, 'common');
 
 		for (const destination of data.from) {
-			const caption = `${'Freegames Notifier'.formatHeaders()}\n\n${result.title}`;
+			const caption = `${L.core.mqtt.freegamesNotifier.formatHeaders()}\n\n${result.title}`;
 
 			await this.#waClient.send(destination, {
 				image: { url: result.preview.images[0].source.url.replace('amp;', '') },
 				caption,
-				footer: 'Powered by Hidden Finder',
+				footer: L.core.dashboard.poweredBy,
 				templateButtons: [
-					{ urlButton: { displayText: 'Open Platform', url: result.url_overridden_by_dest } },
-					{ urlButton: { displayText: 'Image Source', url: result.preview.images[0].source.url.replace('amp;', '') } }
+					{ urlButton: { displayText: L.core.mqtt.openPlatform, url: result.url_overridden_by_dest } },
+					{ urlButton: { displayText: L.core.mqtt.imageSource, url: result.preview.images[0].source.url.replace('amp;', '') } }
 				]
 			});
 			await delay(300);

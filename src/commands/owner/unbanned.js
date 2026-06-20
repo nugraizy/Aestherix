@@ -49,7 +49,7 @@ export default defineCommand({
 
 			for (const jid of mention) {
 				if (!userBanned.includes(jid)) {
-					await client.send(from, { text: `${mentionText(jid)} is not banned`, mentions: [jid] }, { quoted: message });
+					await client.send(from, { text: L.owner.errors.notBanned.replace('{0}', mentionText(jid)), mentions: [jid] }, { quoted: message });
 					continue;
 				}
 
@@ -60,7 +60,7 @@ export default defineCommand({
 			if (unbanned.length) {
 				await client.send(
 					from,
-					{ text: `Success unbanning : ${unbanned.map(mentionText).join(', ')}`, mentions: unbanned },
+					{ text: L.owner.success.unbanned.replace('{0}', unbanned.map(mentionText).join(', ')), mentions: unbanned },
 					{ quoted: message }
 				);
 			}
@@ -76,12 +76,12 @@ export default defineCommand({
 				const jid = `${number}${S_WHATSAPP_NET}`;
 
 				if (!userBanned.includes(jid)) {
-					await client.send(from, { text: `${mentionText(jid)} is not banned`, mentions: [jid] }, { quoted: message });
+					await client.send(from, { text: L.owner.errors.notBanned.replace('{0}', mentionText(jid)), mentions: [jid] }, { quoted: message });
 					continue;
 				}
 
 				await unbanAndUnblock(client, jid);
-				await client.send(from, { text: `Success unbanning : ${mentionText(jid)}`, mentions: [jid] }, { quoted: message });
+				await client.send(from, { text: L.owner.success.unbanned.replace('{0}', mentionText(jid)), mentions: [jid] }, { quoted: message });
 			}
 
 			return;
@@ -91,11 +91,11 @@ export default defineCommand({
 			const jid = mediaData.participant;
 
 			if (!userBanned.includes(jid)) {
-				return await client.reply(from, L.errors.notBanned, message);
+				return await client.reply(from, L.owner.errors.notBanned.replace('{0}', mentionText(jid)), message);
 			}
 
 			await unbanAndUnblock(client, jid);
-			await client.send(from, { text: `Success unbanning : ${mentionText(jid)}`, mentions: [jid] }, { quoted: message });
+			await client.send(from, { text: L.owner.success.unbanned.replace('{0}', mentionText(jid)), mentions: [jid] }, { quoted: message });
 		}
 	}
 });

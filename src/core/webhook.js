@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import express from 'express';
 
 import configuration from '../helper/config/connect.js';
+import { getLocale, useLocale } from '../helper/i18n/index.js';
 import { color, fetchJSON, loggers } from '../utils/modules/index.js';
 
 const GITHUB_API = (sha) => `https://api.github.com/repos/nugraizy/Aestherix/commits/${sha}`;
@@ -82,16 +83,19 @@ export class WebhookServer {
 			filesSummary += files.modified.map((v) => `± ${v}`).join('\n');
 		}
 
-		const caption = `${'GitHub Notif'.formatHeaders()}
+		const locale = await getLocale();
+		const L = useLocale(locale, 'common');
+
+		const caption = `${L.core.webhook.githubNotif.formatHeaders()}
 
 ${commitInfo.message}
 
-Author-by : @${commitInfo.author.name}
-Committed At : ${commitInfo.timestamp}
+${L.core.webhook.authorBy}@${commitInfo.author.name}
+${L.core.webhook.committedAt}${commitInfo.timestamp}
 
 ${filesSummary.trim()}
 
-*Showing ${commitInfo.filesChanged} changed files with ${commitInfo.additions} additions and ${commitInfo.deletions} deletions.*`;
+*${L.core.webhook.commitSummary.replace('{0}', commitInfo.filesChanged).replace('{1}', commitInfo.additions).replace('{2}', commitInfo.deletions)}*`;
 
 		await this.#client?.send(NOTIFICATION_GROUP, { text: caption });
 	}

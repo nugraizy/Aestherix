@@ -12,16 +12,12 @@ export default defineCommand({
 	cooldown: 8,
 	limit: 4,
 	status: 'enable',
-	async run({ query, from, message, isOwner, prefix }, client) {
+	async run({ query, from, message, prefix }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
 
 		if (!configuration.isInstagramInitiated) {
-			return await client.reply(
-				from,
-				`Instagram session is not initialized. ${isOwner ? `Type ${prefix}instagraminit to initialize it.` : `Please ask the owner to initialize it first using the command ${prefix}instagraminit`}`,
-				message
-			);
+			return await client.reply(from, L.errors.instagramNotInit, message);
 		}
 
 		if (!query) {

@@ -148,6 +148,7 @@ export class Context {
 		this.#client = client;
 		this.#store = store;
 		this.#state = state;
+		this._chainHistory = null;
 	}
 	get raw() {
 		return this.#raw;
@@ -259,6 +260,9 @@ export class Context {
 			'isBotInstance',
 			() => this.#raw?.key?.id?.startsWith('BAE5') || this.#raw?.key?.id?.startsWith('3EB0') || this.device?.name === 'unknown'
 		);
+	}
+	get locale() {
+		return this.#memo('locale', () => this.from?.split('@')[0] ?? 'id');
 	}
 	get sender() {
 		return this.#memo('sender', () => {
@@ -399,9 +403,21 @@ export class Context {
 	get isAdmin() {
 		return this.#memo('isAdmin', () => this.adminGroups?.includes(this.sender));
 	}
+
 	get isBotAdmin() {
-		return this.#memo('isBotAdmin', () => this.adminGroups?.includes(configuration.botJid));
+		return this.#memo('isBotAdmin', () => {
+			const botJid = this.#client.user?.id;
+
+			if (!botJid) {
+				return false;
+			}
+
+			const botUser = botJid.split(':')[0];
+
+			return this.adminGroups?.some((adminJid) => adminJid.split('@')[0] === botUser);
+		});
 	}
+
 	get filename() {
 		return this.#memo('filename', () => this.sender + (this.#raw?.key?.id || Date.now()));
 	}
@@ -438,9 +454,7 @@ export class Context {
 		return this.#memo('bodyQuoted', () => {
 			const m = this.#raw;
 			const mMediaData =
-				this.type === 'extendedTextMessage'
-					? renameQuotedMessage(m)?.message?.extendedTextMessage?.contextInfo
-					: m;
+				this.type === 'extendedTextMessage' ? renameQuotedMessage(m)?.message?.extendedTextMessage?.contextInfo : m;
 			const quotedType =
 				this.type === 'extendedTextMessage' && mMediaData ? firstKey(mMediaData.message || { CLIENT: 'm' }) : 'none';
 
@@ -451,9 +465,7 @@ export class Context {
 		return this.#memo('mediaData', () => {
 			const m = this.#raw;
 			const mMediaData =
-				this.type === 'extendedTextMessage'
-					? renameQuotedMessage(m)?.message?.extendedTextMessage?.contextInfo
-					: m;
+				this.type === 'extendedTextMessage' ? renameQuotedMessage(m)?.message?.extendedTextMessage?.contextInfo : m;
 			let data =
 				this.type === 'extendedTextMessage' || this.type === 'mentionText'
 					? this.typeQuoted === 'thumbnailMessage'
@@ -485,6 +497,33 @@ export class Context {
 				this.type === 'imageMessage' ||
 				(this.type === 'extendedTextMessage' && !content.includes('viewOnceMessage') && content.includes('imageMessage'))
 			);
+		});
+	}
+
+	get isViewOnce() {
+		return this.#memo('isViewOnce', () => {
+			const inner = this.#raw?.message?.viewOnceMessage?.message || this.#raw?.message;
+			const media = inner?.videoMessage || inner?.imageMessage || inner?.audioMessage;
+
+			return !!media?.viewOnce;
+		});
+	}
+
+	get viewOnceMedia() {
+		return this.#memo('viewOnceMedia', () => {
+			const inner = this.#raw?.message;
+
+			if (!inner) {
+				return null;
+			}
+
+			const isVideo = !!inner.videoMessage;
+
+			return {
+				isVideo,
+				caption: inner.imageMessage?.caption || inner.videoMessage?.caption || inner.audioMessage?.caption || '',
+				message: inner
+			};
 		});
 	}
 	get isMediaVid() {
@@ -576,6 +615,12 @@ export class Context {
 				});
 			};
 		});
+	}
+	set chainHistory(value) {
+		this._chainHistory = value;
+	}
+	get chainHistory() {
+		return this._chainHistory || null;
 	}
 	#isLikelyCommand(body) {
 		if (!body || typeof body !== 'string') {
