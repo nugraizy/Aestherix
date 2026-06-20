@@ -113,6 +113,10 @@ model SettingsManager {
   locale           String?
   /// JSON-encoded array of banned member JIDs within this group.
   bannedMembers    String   @default("[]")
+  /// JSON-encoded auto-moderation rules for this group.
+  automodRules    String   @default("[]")
+  /// JSON-encoded custom command aliases for this group.
+  customAliases  String   @default("{}")
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
@@ -218,4 +222,12 @@ model BotInstance {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model UserLocale {
+  id        String   @id @default(cuid())
+  jid       String   @unique
+  locale    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

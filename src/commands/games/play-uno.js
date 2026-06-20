@@ -1,5 +1,5 @@
 import { getLocale, useLocale } from '../../helper/i18n/index.js';
-import { cmdId } from '../../helper/modules/prefix.js';
+import { cmdId, getPrefix } from '../../helper/modules/prefix.js';
 import { Uno } from '../../utils/games/index.js';
 import { loggers, color } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
@@ -16,8 +16,9 @@ export default defineCommand({
 	status: 'enable',
 	async run({ from, message, query, args, sender, pushname, isGroup }, client) {
 		const locale = await getLocale(from);
-		const L = useLocale(locale, 'common');
-		const U = useLocale(locale, 'uno');
+		const prefix = getPrefix();
+		const L = useLocale(locale, 'common', { prefix });
+		const U = useLocale(locale, 'uno', { prefix });
 
 		if (!isGroup) {
 			return await client.reply(from, L.errors.groupOnly, message);

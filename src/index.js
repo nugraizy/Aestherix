@@ -94,39 +94,38 @@ export const start = async () => {
 			sessionName
 		});
 
-		if (!OPTIONS.noSub) {
-			const multiplexer = new LogMultiplexer({
-				maxLogSize: configuration.logMaxSize,
-				getBots: () =>
-					manager.list().map(({ name, client }) => ({
-						name,
-						state: client.state,
-						phone: client.phone,
-						uptime: client.uptime
-					})),
-				getFlags: () => {
-					const skip = new Set(['prefix', 'pairNumber', 'help', 'test', 'resetOnStart', 'noSub']);
-					const result = {};
+		const multiplexer = new LogMultiplexer({
+			maxLogSize: configuration.logMaxSize,
+			skipSub: Boolean(OPTIONS.skipSub),
+			getBots: () =>
+				manager.list().map(({ name, client }) => ({
+					name,
+					state: client.state,
+					phone: client.phone,
+					uptime: client.uptime
+				})),
+			getFlags: () => {
+				const skip = new Set(['prefix', 'pairNumber', 'help', 'test', 'resetOnStart', 'skipSub']);
+				const result = {};
 
-					for (const [key, value] of Object.entries(configuration.flags)) {
-						if (skip.has(key) || typeof value !== 'boolean') {
-							continue;
-						}
-
-						result[key] = value;
+				for (const [key, value] of Object.entries(configuration.flags)) {
+					if (skip.has(key) || typeof value !== 'boolean') {
+						continue;
 					}
 
-					return result;
-				},
-				setFlag: (flag, value) => {
-					configuration.flags[flag] = value;
+					result[key] = value;
 				}
-			});
 
-			Logger.multiplexer = multiplexer;
-			multiplexer.register(clientSocket.logger, 'MAIN');
-			configuration.logMultiplexer = multiplexer;
-		}
+				return result;
+			},
+			setFlag: (flag, value) => {
+				configuration.flags[flag] = value;
+			}
+		});
+
+		Logger.multiplexer = multiplexer;
+		multiplexer.register(clientSocket.logger, 'MAIN');
+		configuration.logMultiplexer = multiplexer;
 
 		clientSocket.on('connected', () => {
 			startProfilePictureService(clientSocket, configuration);

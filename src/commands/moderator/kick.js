@@ -1,4 +1,5 @@
 import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { moderationAudit } from '../../helper/moderation-audit.js';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -12,7 +13,7 @@ export default defineCommand({
 	limit: 6,
 	status: 'enable',
 	restrict: true,
-	async run({ isBotAdmin, message, from, mention, query, bodyQuoted, mediaData, adminGroups, isGroup }, client) {
+	async run({ isBotAdmin, message, from, sender, mention, query, bodyQuoted, mediaData, adminGroups, isGroup }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
 
@@ -30,6 +31,14 @@ export default defineCommand({
 
 		const force = /--?(force|F)/.test(query);
 		const targets = bodyQuoted ? [mediaData.participant] : mention.length ? mention : query.parseNumber();
+
+		moderationAudit.log({
+			group: from,
+			moderator: sender,
+			action: 'kick',
+			target: targets.join(', '),
+			reason: force ? 'force' : ''
+		});
 
 		await client.updateGroup(from, { action: 'remove', participants: targets, admins: adminGroups, force, message });
 	}

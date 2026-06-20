@@ -32,7 +32,7 @@ export default defineCommand({
 			return await client.reply(from, L.errors.mentionOrNumberRequired, message);
 		}
 
-		const targets = bodyQuoted ? [mediaData.id] : query.parseNumber();
+		const targets = bodyQuoted ? [mediaData.participant] : query.parseNumber();
 
 		await client.updateGroup(from, { action: 'add', participants: targets, admins: adminGroups, message });
 	}

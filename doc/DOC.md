@@ -506,7 +506,7 @@ Flags are kebab-case on the CLI. The bot reads them via [meow](https://github.co
 | `--auto-read`      |        | Auto read every incoming message                 |
 | `--restrict`       |        | Restrict moderator commands                      |
 | `--only-logs`      |        | Only show logs, ignore messages and commands     |
-| `--no-logs`        |        | Suppress logs while still responding to commands |
+| `--silent`        |        | Suppress logs while still responding to commands |
 | `--self-mode`      | `-s` | Only owner and the bot can use commands          |
 | `--debug-mode`     |        | Show full message metadata                       |
 | `--multi-cmd`      | `-m` | Enable multi-cmd with `&&` separator           |
@@ -515,11 +515,11 @@ Flags are kebab-case on the CLI. The bot reads them via [meow](https://github.co
 | `--auto-correct`   |        | Auto-correct command names                       |
 | `--story`          |        | Auto-download stories                            |
 | `--offline`        |        | Set presence to offline                          |
-| `--no-call`        |        | Reject incoming calls                            |
+| `--reject-calls`        |        | Reject incoming calls                            |
 | `--ai`             |        | Handle incoming messages with AI                 |
 | `--limit-reset`    | `-l` | Auto-reset user limits                           |
 | `--reset-on-start` |        | Reset DB connections on start                    |
-| `--no-limit`       |        | Disable command limits                           |
+| `--unlimited`       |        | Disable command limits                           |
 | `--pair-mode`      |        | Enable pair mode                                 |
 | `--pair-number`    |        | Use a specific number for pairing                |
 | `--test`           |        | Test connection                                  |
@@ -533,7 +533,7 @@ Flags are kebab-case on the CLI. The bot reads them via [meow](https://github.co
 
 ```sh
 # multi-prefix bot with watch + cooldowns + no-logs, session name "mybot"
-node . mybot --prefix "!,#,." --watch --cool-down --no-logs
+node . mybot --prefix "!,#,." --watch --cool-down --silent
 ```
 
 <div align='center'>

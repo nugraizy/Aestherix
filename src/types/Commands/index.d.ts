@@ -26,6 +26,7 @@ export type CommandProps = {
 	usage: string;
 	aliases?: string[];
 	cooldown?: number;
+	timeout?: number;
 	limit?: number;
 	status: 'enable' | 'disable';
 	restrict?: boolean;

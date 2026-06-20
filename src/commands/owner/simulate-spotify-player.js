@@ -4,6 +4,7 @@ import configuration from '../../helper/config/connect.js';
 import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { spotifier } from '../../utils/spotifier/index.js';
 import { delay } from '../../utils/modules/index.js';
+import { getPrefix } from '../../helper/modules/prefix.js';
 import { defineCommand } from '../_define.js';
 
 function startSpotifyPolling() {
@@ -37,7 +38,8 @@ export default defineCommand({
 	status: 'enable',
 	async run({ from, args, message, query }, client) {
 		const locale = await getLocale(from);
-		const L = useLocale(locale, 'common');
+		const prefix = getPrefix();
+		const L = useLocale(locale, 'common', { prefix });
 
 		if (!query) {
 			return await client.reply(from, L.errors.statusRequired, message);

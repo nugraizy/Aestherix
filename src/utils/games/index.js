@@ -1,5 +1,8 @@
+export * from './blackjack/index.js';
+export * from './chess/index.js';
 export * from './connect-four.js';
 export * from './hangman/index.js';
+export * from './memory-match/index.js';
 export * from './minesweeper/index.js';
 export * from './sambung-kata.js';
 export * from './slot.js';
@@ -9,4 +12,5 @@ export * from './tic-tac-toe.js';
 export * from './trivia/index.js';
 export * from './uno/index.js';
 export * from './werewolf.js';
+export * from './word-chain/index.js';
 export * from './wordle.js';

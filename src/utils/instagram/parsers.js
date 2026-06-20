@@ -19,6 +19,8 @@ export class ResponseParser {
 
 		let result = { username, fullName, isPrivate, isVerified, likeCount, takenAt, commentCount, captions, post: [] };
 
+		const resolveVideoUrl = (item) => item.video_url || item.video_versions?.[0]?.url || null;
+
 		if (type === 'slide') {
 			let { edges: posts } = response.edge_sidecar_to_children;
 
@@ -27,7 +29,7 @@ export class ResponseParser {
 
 				result.post.push({
 					isVideo: isVideo,
-					url: isVideo ? post.video_url : post.display_resources[post.display_resources.length - 1].src,
+					url: isVideo ? resolveVideoUrl(post) : post.display_resources[post.display_resources.length - 1].src,
 					urlPost: `https://instagram/p/${post.shortcode}`
 				});
 			}
@@ -37,7 +39,7 @@ export class ResponseParser {
 			result.post.push({
 				isVideo: isVideo,
 				...(isVideo && { duration: response.video_duration }),
-				url: isVideo ? response.video_url : response.display_resources[response.display_resources.length - 1].src,
+				url: isVideo ? resolveVideoUrl(response) : response.display_resources[response.display_resources.length - 1].src,
 				urlPost: `https://instagram/p/${response.shortcode}`
 			});
 		}

@@ -36,6 +36,7 @@ export class Router {
 	#prefixConfig;
 	#usage;
 	#usageLoaded = false;
+	#groupAliases = {};
 
 	/**
 	 * @param {import('../types/Core/index.d.ts').ClientSocket} client
@@ -68,6 +69,14 @@ export class Router {
 
 	set aliases(value) {
 		this.#aliases = value;
+	}
+
+	get groupAliases() {
+		return this.#groupAliases;
+	}
+
+	set groupAliases(value) {
+		this.#groupAliases = value ?? {};
 	}
 
 	get cooldowns() {
@@ -122,7 +131,7 @@ export class Router {
 			command: command || null,
 			args,
 			prefix: prefix ?? '',
-			cmdName,
+			cmdName: command?.name ?? cmdName,
 			isEval,
 			query: args.slice(1).join(' ').trim()
 		};
@@ -159,6 +168,21 @@ export class Router {
 
 		if (aliasMatch) {
 			return this.#commands.filter((_key, cmd) => cmd.aliases?.includes(aliasMatch), 'find') || null;
+		}
+
+		if (this.#groupAliases && this.#groupAliases[cmdName]) {
+			const resolved = this.#groupAliases[cmdName];
+			const command = this.#commands.get(resolved);
+
+			if (command) {
+				return command;
+			}
+
+			const byAlias = this.#commands.filter((_key, cmd) => cmd.aliases?.includes(resolved), 'find');
+
+			if (byAlias) {
+				return byAlias;
+			}
 		}
 
 		return null;

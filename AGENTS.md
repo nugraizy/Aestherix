@@ -6,6 +6,7 @@
 - Prefer `rtk`-prefixed commands when using the terminal.
 - For codebase architecture, see [doc/DOC.md](doc/DOC.md).
 - For coding standards, see `~/.claude/CLAUDE.md`.
+- Agent language follows `settings.json` `locale` field (default: `id`/Indonesian). Use the configured locale for AI-generated responses, syntax advice, and user-facing messages.
 
 ## Code Standards
 
@@ -116,4 +117,4 @@ npm run db:push:mongo      # prisma db push --schema=prisma/schema.mongodb.prism
 
 ## CLI Flags
 
-Parsed via `meow` in `src/core/cli.js`. Key flags: `--prefix/-p`, `--self-mode/-s`, `--multi-cmd/-m`, `--watch/-w`, `--ai`, `--pipe`, `--debug-mode`, `--no-logs`, `--profile`.
+Parsed via `meow` in `src/core/cli.js`. Key flags: `--prefix/-p`, `--self-mode/-s`, `--multi-cmd/-m`, `--watch/-w`, `--ai`, `--pipe`, `--debug-mode`, `--silent`, `--profile`.

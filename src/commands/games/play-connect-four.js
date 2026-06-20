@@ -1,6 +1,7 @@
 import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { ConnectFour } from '../../utils/games/index.js';
 import { loggers, color } from '../../utils/modules/index.js';
+import { getPrefix } from '../../helper/modules/prefix.js';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -15,8 +16,9 @@ export default defineCommand({
 	status: 'enable',
 	async run({ from, message, query, args, sender, pushname }, client) {
 		const locale = await getLocale(from);
-		const L = useLocale(locale, 'common');
-		const C = useLocale(locale, 'connect-four');
+		const prefix = getPrefix();
+		const L = useLocale(locale, 'common', { prefix });
+		const C = useLocale(locale, 'connect-four', { prefix });
 
 		const playerMention = (jid) => `@${jid.split('@')[0]}`;
 

@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import fs from 'fs-extra';
 
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 
 const OFFLINE_DB_PATH = './databases/offline_db/users.json';
@@ -26,7 +27,9 @@ const offlineHandler = async (client, { isGroup, from, sender, message }) => {
 			dataUser ? (dataUser.date = dateNow) : data.push({ participant: sender, date: dateNow });
 
 			await fs.writeJSON(OFFLINE_DB_PATH, data, { spaces: 2 });
-			await client.reply(from, 'The owner is currently offline, please contact another time.', message);
+			const locale = await getLocale(from);
+			const L = useLocale(locale, 'common');
+			await client.reply(from, L.core.errors.ownerOffline, message);
 		}
 	} catch (err) {
 		loggers.error(color('Offline handler failed:', 'red'), err);

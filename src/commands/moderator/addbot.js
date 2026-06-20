@@ -11,6 +11,7 @@ import { initContact, updateContact } from '../../core/utils.js';
 import configuration from '../../helper/config/connect.js';
 import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import prisma from '../../helper/database/prisma.js';
+import { getPrefix } from '../../helper/modules/prefix.js';
 import { defineCommand } from '../_define.js';
 
 const MAX_RETRIES = 5;
@@ -75,7 +76,8 @@ export default defineCommand({
 
 	async run({ from, args, message, isGroup, sender }, client) {
 		const locale = await getLocale(from);
-		const L = useLocale(locale, 'common');
+		const prefix = getPrefix();
+		const L = useLocale(locale, 'common', { prefix });
 
 		if (!isGroup) {
 			return await client.reply(from, L.errors.groupOnly, message);
@@ -136,7 +138,7 @@ export default defineCommand({
 					}
 
 					if (retryCount >= MAX_RETRIES) {
-						await client.reply(from, t(locale, 'bot.maxRetries', [sessionName]), message);
+						await client.reply(from, t(locale, 'bot.maxRetries', { prefix, name: sessionName }), message);
 						manager.remove(sessionName);
 						return;
 					}
@@ -208,7 +210,7 @@ export default defineCommand({
 					}
 
 					if (retryCount >= MAX_RETRIES) {
-						await client.reply(from, t(locale, 'bot.maxRetries', [sessionName]), message);
+						await client.reply(from, t(locale, 'bot.maxRetries', { prefix, name: sessionName }), message);
 						manager.remove(sessionName);
 						return;
 					}
@@ -308,7 +310,7 @@ export default defineCommand({
 				}
 
 				if (retryCount >= MAX_RETRIES) {
-					await client.reply(from, t(locale, 'bot.maxRetries', [sessionName]), message);
+					await client.reply(from, t(locale, 'bot.maxRetries', { prefix, name: sessionName }), message);
 					manager.remove(sessionName);
 					return;
 				}

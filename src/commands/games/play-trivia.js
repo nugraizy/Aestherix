@@ -1,5 +1,5 @@
 import { getLocale, useLocale } from '../../helper/i18n/index.js';
-import { cmdId } from '../../helper/modules/prefix.js';
+import { cmdId, getPrefix } from '../../helper/modules/prefix.js';
 import { Trivia } from '../../utils/games/index.js';
 import { loggers, color } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
@@ -18,8 +18,9 @@ export default defineCommand({
 	status: 'enable',
 	async run({ from, message, query, args, sender, pushname }, client) {
 		const locale = await getLocale(from);
-		const L = useLocale(locale, 'common');
-		const T = useLocale(locale, 'trivia');
+		const prefix = getPrefix();
+		const L = useLocale(locale, 'common', { prefix });
+		const T = useLocale(locale, 'trivia', { prefix });
 
 		const playerMention = (jid) => `@${jid.split('@')[0]}`;
 

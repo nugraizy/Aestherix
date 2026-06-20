@@ -16,8 +16,14 @@ export default defineCommand({
 		const L = useLocale(locale, 'common');
 		const t = performance.now();
 
-		const wait = await client.waitMessage(from, L.info.pong, message);
+		const msgTimestamp = message?.messageTimestamp;
 
-		await wait.update(`${L.info.pong} ${(performance.now() - t).toFixed(1)} ms`);
+		const wait = await client.waitMessage(from, L.info.pong, message);
+		const processTime = (performance.now() - t).toFixed(1);
+
+		const latencyMs = msgTimestamp ? (Date.now() / 1000 - msgTimestamp).toFixed(1) : null;
+		const latencyLine = latencyMs ? `\nLatency: ${latencyMs} s` : '';
+
+		await wait.update(`${L.info.pong} ${processTime} ms${latencyLine}`);
 	}
 });

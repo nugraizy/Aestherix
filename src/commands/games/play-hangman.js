@@ -2,6 +2,7 @@ import configuration from '../../helper/config/connect.js';
 import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { Hangman } from '../../utils/games/index.js';
 import { loggers, color } from '../../utils/modules/index.js';
+import { getPrefix } from '../../helper/modules/prefix.js';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -16,8 +17,9 @@ export default defineCommand({
 	status: 'enable',
 	async run({ from, message, query, args, sender, prettyNumber }, client) {
 		const locale = await getLocale(from);
-		const L = useLocale(locale, 'common');
-		const H = useLocale(locale, 'hangman');
+		const prefix = getPrefix();
+		const L = useLocale(locale, 'common', { prefix });
+		const H = useLocale(locale, 'hangman', { prefix });
 
 		if (!query) {
 			return await client.reply(from, L.errors.invalidArgs, message);

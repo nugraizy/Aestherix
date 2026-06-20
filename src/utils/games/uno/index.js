@@ -193,6 +193,7 @@ export class Uno {
 				winner: playerId,
 				winnerName: player.name,
 				card,
+				effect,
 				duration: this.getGameDuration()
 			};
 		}

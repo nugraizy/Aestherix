@@ -127,7 +127,8 @@ function createApp({ services, configuration, port = DEFAULT_PORT }) {
 			};
 
 			if (req.accepts(['html', 'json']) === 'html') {
-				const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+				const esc = (s) =>
+					String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 				const uptimeStr =
 					data.uptime >= 3600
 						? `${Math.floor(data.uptime / 3600)}h ${Math.floor((data.uptime % 3600) / 60)}m`

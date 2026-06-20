@@ -1,5 +1,5 @@
 import { getLocale, useLocale } from '../../helper/i18n/index.js';
-import { cmdId } from '../../helper/modules/prefix.js';
+import { cmdId, getPrefix } from '../../helper/modules/prefix.js';
 import { Minesweeper } from '../../utils/games/index.js';
 import { loggers, color } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
@@ -16,10 +16,9 @@ export default defineCommand({
 	status: 'enable',
 	async run({ from, message, query, args, sender, pushname }, client) {
 		const locale = await getLocale(from);
-		const L = useLocale(locale, 'common');
-		const M = useLocale(locale, 'minesweeper');
-
-		const getPrefix = () => args[0]?.charAt(0) || '.';
+		const prefix = getPrefix();
+		const L = useLocale(locale, 'common', { prefix });
+		const M = useLocale(locale, 'minesweeper', { prefix });
 
 		const parseCell = (input) => {
 			if (!input) {

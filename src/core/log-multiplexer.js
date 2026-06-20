@@ -57,12 +57,16 @@ export class LogMultiplexer {
 	/** @type {((flag: string, value: boolean) => void) | null} */
 	#setFlag = null;
 
-	/** @param {{ maxLogSize?: number; getBots?: () => Array<{ name: string; state: string; phone?: string; uptime?: string }>; getFlags?: () => Record<string, boolean>; setFlag?: (flag: string, value: boolean) => void }} [options] */
+	/** @type {boolean} */
+	#skipSub = false;
+
+	/** @param {{ maxLogSize?: number; skipSub?: boolean; getBots?: () => Array<{ name: string; state: string; phone?: string; uptime?: string }>; getFlags?: () => Record<string, boolean>; setFlag?: (flag: string, value: boolean) => void }} [options] */
 	constructor(options = {}) {
 		const mb = typeof options.maxLogSize === 'number' && options.maxLogSize > 0 ? options.maxLogSize : DEFAULT_MAX_LOG_SIZE;
 
 		this.#maxLogBytes = mb * 1024 * 1024;
-		this.#getBots = options.getBots ?? null;
+		this.#skipSub = Boolean(options.skipSub);
+		this.#getBots = this.#skipSub ? null : (options.getBots ?? null);
 		this.#getFlags = options.getFlags ?? null;
 		this.#setFlag = options.setFlag ?? null;
 		fs.ensureDirSync(LOG_DIR);
@@ -364,9 +368,9 @@ export class LogMultiplexer {
 		{ key: 'L', description: () => 'Load history logs' },
 		{ key: 'F', description: () => (this.#following ? 'Stop following logs' : 'Follow logs in real-time') },
 		{ key: 'S', description: () => 'Show stats' },
-		{ key: 'B', description: () => 'Show bot list' },
+		{ key: 'B', description: () => this.#skipSub ? 'Show bot list (unavailable with --skip-sub)' : 'Show bot list' },
 		{ key: 'M', description: () => 'Show memory usage' },
-		{ key: 'D', description: () => 'Dump sub-bot logs' },
+		{ key: 'D', description: () => this.#skipSub ? 'Dump sub-bot logs (unavailable with --skip-sub)' : 'Dump sub-bot logs' },
 		{ key: 'X', description: () => 'Export logs to file' },
 		{ key: 'P', description: () => 'Show/toggle runtime flags' },
 		{ key: 'C', description: () => 'Clear terminal' },
@@ -424,7 +428,11 @@ export class LogMultiplexer {
 			}
 
 			if (key.name === 'b' && !key.ctrl && !key.meta) {
-				this.#showBots();
+				if (this.#skipSub) {
+					console.log(color('Sub-bots disabled. B skipped.', 'gray'));
+				} else {
+					this.#showBots();
+				}
 			}
 
 			if (key.name === 'm' && !key.ctrl && !key.meta) {
@@ -432,7 +440,11 @@ export class LogMultiplexer {
 			}
 
 			if (key.name === 'd' && !key.ctrl && !key.meta) {
-				this.#dumpSubLogs();
+				if (this.#skipSub) {
+					console.log(color('Sub-bots disabled. D skipped.', 'gray'));
+				} else {
+					this.#dumpSubLogs();
+				}
 			}
 
 			if (key.name === 'x' && !key.ctrl && !key.meta) {

@@ -9,7 +9,6 @@ import path from 'node:path';
 import { array, boolean, mixed, number, object, string } from 'yup';
 
 import { Cache } from '../helper/modules/cache.js';
-import configuration from '../helper/config/connect.js';
 import { getSyntaxAdvice } from '../utils/ai/syntax-check-agent.js';
 import { color, loggers } from '../utils/modules/index.js';
 
@@ -19,7 +18,16 @@ const EXCLUDE_FILE = /(template|\.d\.ts$)/;
 const EXCLUDE_CONTENT = ['template', 'd.ts', '__tests__', '/subcommands/', '/ui/', '/_'];
 const IS_WIN32 = os.platform() === 'win32';
 const AGENT_ENABLED = true;
-const AGENT_LANGUAGE = 'id';
+
+const getAgentLanguage = () => {
+	try {
+		const settings = JSON.parse(require('fs').readFileSync('./src/helper/config/settings.json', 'utf8'));
+
+		return settings.locale || 'id';
+	} catch {
+		return 'id';
+	}
+};
 
 export const COMMAND_SCHEMA = object({
 	name: string().required(),
@@ -50,8 +58,17 @@ export const COMMAND_SCHEMA = object({
 	cooldown: number().integer().min(0).required(),
 	limit: number().integer().min(0).required(),
 	status: string().oneOf(['enable', 'disable']).required(),
+	timeout: number().integer().min(0).default(30000).optional(),
 	restrict: boolean().default(false).optional(),
 	premium: boolean().default(false).optional(),
+	replyChain: object()
+		.shape({
+			enabled: boolean().default(false).optional(),
+			ttl: number().integer().min(60).max(3600).default(300).optional(),
+			maxMessages: number().integer().min(1).max(20).default(5).optional()
+		})
+		.default(undefined)
+		.optional(),
 	run: mixed()
 		.test({ test: (value) => typeof value === 'function', message: 'Run must be a function', name: 'run' })
 		.required()
@@ -109,7 +126,7 @@ export class CommandLoader extends EventEmitter {
 
 		let files = CommandLoader.#scanFiles(this.#dir).filter((f) => !EXCLUDE_CONTENT.some((v) => f.includes(v)));
 
-		if (configuration.flags?.noSub) {
+		if (process.env.SUB_BOT_PROCESS === '1') {
 			const excluded = ['eval.js', 'fetch-story.js', 'pm2.js', 'unbanned.js', 'premium.js', 'botflags.js', 'banned.js'];
 
 			files = files.filter((f) => !excluded.some((name) => f.endsWith(name)));
@@ -166,6 +183,12 @@ export class CommandLoader extends EventEmitter {
 		const normalize = path.normalize(filename);
 
 		try {
+			const stat = fs.statSync(filename);
+
+			if (stat.size === 0) {
+				return;
+			}
+
 			const module = await import(file);
 
 			if (!module?.default) {
@@ -220,6 +243,10 @@ export class CommandLoader extends EventEmitter {
 			const module = await CommandLoader.#nocache(file);
 
 			if (!module?.default?.name) {
+				if (fs.statSync(resolved).size === 0) {
+					return;
+				}
+
 				this.emit('error', { file: displayName, reason: 'no default export or missing name' });
 				return;
 			}
@@ -397,7 +424,7 @@ export class CommandLoader extends EventEmitter {
 				line: currNum,
 				column: syntaxError.column || 0,
 				code: codeSnippet,
-				language: AGENT_LANGUAGE
+				language: getAgentLanguage()
 			})
 				.then((advice) => {
 					if (!advice) {

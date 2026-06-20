@@ -327,7 +327,7 @@ export const startProfilePictureService = async (client, config) => {
 				'403'
 			];
 
-			if (!ignorable.some((msg) => error?.message.includes(msg))) {
+			if (!ignorable.some((msg) => error?.message?.includes(msg))) {
 				loggers.error('Profile picture update failed:', error?.message);
 			}
 		} finally {
