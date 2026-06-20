@@ -2,6 +2,52 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.16.0」2026-06-21
+
+## Added
+
+- WhatsApp voice calling via WASM stack with InfiniteAPI signaling bridge ([`e057f76d`](https://github.com/nugraizy/aestherix/commit/e057f76d))
+- `!call` command with audio control (pause/resume/audio source/remove) and call link join ([`e057f76d`](https://github.com/nugraizy/aestherix/commit/e057f76d))
+- Per-user locale support via DMs with cache-first lookup ([`4d39c6cf`](https://github.com/nugraizy/aestherix/commit/4d39c6cf))
+- Auto-moderation with warn/kick/delete actions ([`b825cfc2`](https://github.com/nugraizy/aestherix/commit/b825cfc2))
+- Per-group custom aliases ([`b825cfc2`](https://github.com/nugraizy/aestherix/commit/b825cfc2))
+- Moderation audit trail ([`b825cfc2`](https://github.com/nugraizy/aestherix/commit/b825cfc2))
+- Slow mode manager ([`b825cfc2`](https://github.com/nugraizy/aestherix/commit/b825cfc2))
+- Poll system with vote handler ([`b825cfc2`](https://github.com/nugraizy/aestherix/commit/b825cfc2))
+- Reminder and scheduler systems ([`b825cfc2`](https://github.com/nugraizy/aestherix/commit/b825cfc2))
+- Auto-reply manager ([`b825cfc2`](https://github.com/nugraizy/aestherix/commit/b825cfc2))
+- View-once auto-decrypt with group setting toggle ([`b825cfc2`](https://github.com/nugraizy/aestherix/commit/b825cfc2))
+- Command timeout (30s default) with Proxy firewall ([`b825cfc2`](https://github.com/nugraizy/aestherix/commit/b825cfc2))
+- Circuit breaker for external API calls ([`b825cfc2`](https://github.com/nugraizy/aestherix/commit/b825cfc2))
+- Reply chains with TTL ([`b825cfc2`](https://github.com/nugraizy/aestherix/commit/b825cfc2))
+- `--enable-voip` flag to make VoIP opt-in ([`e057f76d`](https://github.com/nugraizy/aestherix/commit/e057f76d))
+- Localized 50+ hardcoded strings across core, handlers, and commands ([`4d39c6cf`](https://github.com/nugraizy/aestherix/commit/4d39c6cf))
+- `UserLocale` Prisma model for per-user language preference ([`4d39c6cf`](https://github.com/nugraizy/aestherix/commit/4d39c6cf))
+
+## Fixed
+
+- VoIP call rejection not clearing active call state ([`e057f76d`](https://github.com/nugraizy/aestherix/commit/e057f76d))
+- Emscripten "Blocking on the main thread" warning suppression ([`e057f76d`](https://github.com/nugraizy/aestherix/commit/e057f76d))
+- Command loader excluding eval on main bot when --skip-sub used ([`d244b61d`](https://github.com/nugraizy/aestherix/commit/d244b61d))
+- Connection handler owner number validation for JID format ([`d244b61d`](https://github.com/nugraizy/aestherix/commit/d244b61d))
+- Context isBotAdmin check for LID accounts ([`d244b61d`](https://github.com/nugraizy/aestherix/commit/d244b61d))
+- Viewonce auto-decrypt proxy toString error ([`d244b61d`](https://github.com/nugraizy/aestherix/commit/d244b61d))
+- Audio feeder choppy resume ([`e057f76d`](https://github.com/nugraizy/aestherix/commit/e057f76d))
+- Log multiplexer skipSub key handling ([`d244b61d`](https://github.com/nugraizy/aestherix/commit/d244b61d))
+- Empty file guard in command loader ([`d244b61d`](https://github.com/nugraizy/aestherix/commit/d244b61d))
+- Ping command messageTimestamp latency ([`d244b61d`](https://github.com/nugraizy/aestherix/commit/d244b61d))
+- Instagram post parser video_url fallback ([`d244b61d`](https://github.com/nugraizy/aestherix/commit/d244b61d))
+
+## Changed
+
+- VoIP init gated by `--enable-voip` flag ([`e057f76d`](https://github.com/nugraizy/aestherix/commit/e057f76d))
+- `settings.json` default to placeholder phone numbers ([`360e7e17`](https://github.com/nugraizy/aestherix/commit/360e7e17))
+- `example.env` defaults to SQLite ([`360e7e17`](https://github.com/nugraizy/aestherix/commit/360e7e17))
+- Package scripts session name changed to `aestherix` ([`360e7e17`](https://github.com/nugraizy/aestherix/commit/360e7e17))
+- Dashboard embedded mode logs connection ([`360e7e17`](https://github.com/nugraizy/aestherix/commit/360e7e17))
+- Auto-moderation now enforces warn/kick/delete actions ([`b825cfc2`](https://github.com/nugraizy/aestherix/commit/b825cfc2))
+- AFK locale strings corrected ([`4d39c6cf`](https://github.com/nugraizy/aestherix/commit/4d39c6cf))
+
 # 「7.15.0」2026-06-17
 
 ## Added
