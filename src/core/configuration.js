@@ -39,8 +39,11 @@ export class Configuration {
 	bannedlist = [];
 
 	games = {
+		blackjack: new Cache(),
+		chess: new Cache(),
 		connectFour: new Cache(),
 		hangman: new Cache(),
+		memoryMatch: new Cache(),
 		minesweeper: new Cache(),
 		tebakGambar: new Cache(),
 		sudoku: new Cache(),
@@ -48,6 +51,7 @@ export class Configuration {
 		trivia: new Cache(),
 		uno: new Cache(),
 		word: new Cache(),
+		wordChain: new Cache(),
 		werewolf: new Cache(),
 		wordle: new Cache()
 	};
@@ -81,6 +85,9 @@ export class Configuration {
 	userLimit = new Cache();
 
 	mqtt = null;
+
+	/** @type {import('../utils/voip/index.js').VoipClient | null} */
+	voip = null;
 
 	/** @type {import('../utils/instagram/instagram.js').InstagramApi | null} */
 	instagram = null;

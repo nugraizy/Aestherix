@@ -1,4 +1,4 @@
-import { delay, isJidGroup } from 'baileys';
+import { Browsers, delay, isJidGroup } from 'baileys';
 import clip from 'clipboardy';
 import fs from 'fs-extra';
 import PhoneNumber from 'libphonenumber-js';
@@ -11,7 +11,16 @@ import configuration from '../helper/config/connect.js';
 import prisma from '../helper/database/prisma.js';
 import '../i18n/index.js';
 import { color, loggers } from '../utils/modules/index.js';
+import { autoReplyManager } from '../helper/auto-reply.js';
+import { pollManager } from '../helper/poll-manager.js';
+import { createPollVoteHandler } from '../helper/poll-vote-handler.js';
+import { reminderManager } from '../helper/reminder.js';
+import { schedulerManager } from '../helper/scheduler.js';
+import { moderationAudit } from '../helper/moderation-audit.js';
+import { slowModeManager } from '../helper/slowmode.js';
+import { templateManager } from '../helper/template.js';
 import { initWerewolfHandler } from './handlers/games/werewolf.js';
+import { VoipClient } from '../utils/voip/index.js';
 
 import { Auth } from './auth.js';
 import { ClientSocket } from './client-socket.js';
@@ -39,53 +48,6 @@ function syncPrefixToRouter(router) {
 		value: prf || '.',
 		regex: prefixReg || null
 	});
-}
-
-async function handlePollUpdate(socket, store, msg) {
-	const { getAggregateVotesInPollMessage, getKeyAuthor, jidNormalizedUser } = await import('baileys');
-	const pollKey = msg?.pollUpdateMessage?.pollCreationMessageKey;
-
-	if (!pollKey?.remoteJid || !pollKey?.id) {
-		return;
-	}
-
-	const originalPoll = await store.loadMessage(pollKey.remoteJid, pollKey.id);
-
-	if (!originalPoll) {
-		return;
-	}
-
-	const botJid = socket?.user?.id;
-
-	if (!botJid) {
-		return;
-	}
-
-	const meIdNormalized = jidNormalizedUser(botJid);
-	const pollCreatorJid = getKeyAuthor(pollKey, meIdNormalized);
-	const voterJid = getKeyAuthor(msg.msg.key, meIdNormalized);
-	const pollEncKey = originalPoll.message.messageContextInfo?.messageSecret;
-
-	if (!msg.func?.decrypt) {
-		return;
-	}
-
-	const voteMsg = msg.func.decrypt(
-		msg.pollUpdateMessage.vote.encPayload,
-		msg.pollUpdateMessage.vote.encIv,
-		pollEncKey,
-		pollCreatorJid,
-		pollKey.id,
-		voterJid
-	);
-
-	getAggregateVotesInPollMessage(
-		{
-			pollUpdates: [{ vote: voteMsg, pollUpdateMessageKey: msg.msg.key, senderTimestampMs: msg.msg.messageTimestamp }],
-			message: originalPoll.message
-		},
-		botJid
-	);
 }
 
 async function parseStubtypeUpdate(client, update) {
@@ -244,6 +206,31 @@ async function handlePairing(clientSocket, flags) {
 }
 
 async function onConnected({ clientSocket, commandLoader, router, mqtt, store, webhook, eventHandler }) {
+	const settingsPath = SETTINGS_PATH;
+
+	if (!(await fs.pathExists(settingsPath))) {
+		const defaultSettings = {
+			main_host_number: '',
+			backups_host_numbers: [],
+			owner_number: '',
+			team_number: [],
+			main_session: 'aestherix',
+			locale: 'id',
+			maintenance: false,
+			max_group: 20,
+			min_members: 20,
+			limit: 30,
+			prefix: { multi: true, nopref: false, pref: '.', customPrefixes: [] },
+			logger_theme: 'catppuccin',
+			log_max_size: 5,
+			packname: 'Made by Aestherix',
+			author: 'Powered by Hidden Finder'
+		};
+
+		await fs.writeJSON(settingsPath, defaultSettings, { spaces: '\t' });
+		loggers.info(color('Created default settings.json', 'white'));
+	}
+
 	webhook.setClient(clientSocket.socket);
 	webhook.start();
 
@@ -281,8 +268,12 @@ async function onConnected({ clientSocket, commandLoader, router, mqtt, store, w
 
 	const socket = clientSocket.socket;
 
+	const pollVoteHandler = createPollVoteHandler(socket, store);
+
 	socket.ev.on('commit', async (commitInfo) => await webhook.handleCommitEvent(commitInfo));
-	socket.ev.on('poll.update', async (msg) => handlePollUpdate(socket, store, msg));
+	clientSocket.ev.on('poll.update', async (msg) => pollVoteHandler.handlePollUpdate(msg));
+	clientSocket.ev.on('messages.update', async (updates) => pollVoteHandler.handleMessagesUpdate(updates));
+
 	socket.ws.on('CB:notification,type:w:gp2', (update) => parseStubtypeUpdate(socket, update));
 	socket.ws.on('CB:notification,type:picture', async (update) => await emitProfilePictureUpdate(socket, update));
 	socket.ev.on('profile-picture.sync', async ({ image }) => {
@@ -307,8 +298,25 @@ async function onConnected({ clientSocket, commandLoader, router, mqtt, store, w
 	});
 
 	initWerewolfHandler(clientSocket, loggers);
+	pollManager.init(clientSocket);
+	reminderManager.init(clientSocket);
+	schedulerManager.init(clientSocket);
+	autoReplyManager.init();
+	slowModeManager.init();
+	moderationAudit.init();
+	templateManager.init();
 	mqtt.setClient(socket);
 	mqtt.bindMessageHandler();
+
+	if (!configuration.voip && configuration.flags.enableVoip) {
+		try {
+			configuration.voip = new VoipClient({ sock: socket });
+			await configuration.voip.init();
+			loggers.info(color('VoIP stack initialized', 'white'));
+		} catch (err) {
+			loggers.warning(color('VoIP init failed:', 'red'), color(err?.message || err, 'gray'));
+		}
+	}
 
 	if (configuration.flags.watch) {
 		commandLoader.watch();
@@ -384,7 +392,7 @@ async function spawnPersistedSubBots({ configuration: config }) {
 		const sub = new ClientSocket(auth, {
 			role: instance.role || 'sub',
 			flags,
-			browser: ['Mac OS', 'Safari', 'Safari 17.0'],
+			browser: Browsers.android('14'),
 			cachedGroupMetadata: (jid) => (isJidGroup(jid) ? config.groups.metadata.get(jid) : {})
 		});
 
@@ -494,7 +502,7 @@ export async function boot({ cli, OPTIONS, store, sessionName }) {
 	const clientSocket = new ClientSocket(auth, {
 		role: 'primary',
 		flags: OPTIONS,
-		browser: ['Mac OS', 'Chrome', 'Chrome 114.0.5735.198'],
+		browser: Browsers.android('14'),
 		cachedGroupMetadata: (jid) => (isJidGroup(jid) ? configuration.groups.metadata.get(jid) : {})
 	});
 
@@ -539,7 +547,7 @@ export async function boot({ cli, OPTIONS, store, sessionName }) {
 	clientSocket.once('connected', () => {
 		onConnected({ clientSocket, commandLoader, router, mqtt, store, webhook, eventHandler });
 
-		if (!OPTIONS.noSub) {
+		if (!OPTIONS.skipSub) {
 			spawnPersistedSubBots({ configuration });
 		}
 	});
