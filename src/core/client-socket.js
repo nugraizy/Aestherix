@@ -55,10 +55,13 @@ export class ClientSocket extends EventEmitter {
 		}
 
 		this.#auth = auth;
+
+		const pinoLevel = options.flags?.debugMode ? 'debug' : 'fatal';
+
 		this.#options = {
 			role: 'primary',
 			flags: {},
-			logger: P({ level: 'fatal' }),
+			logger: P({ level: pinoLevel }),
 			browser: ['Mac OS', 'Chrome', 'Chrome 114.0.5735.198'],
 			...options
 		};
@@ -226,6 +229,10 @@ export class ClientSocket extends EventEmitter {
 		this.#state = 'disconnected';
 		this.#startedAt = null;
 		this.removeAllListeners();
+	}
+
+	setBrowser(browser) {
+		this.#options.browser = browser;
 	}
 
 	async resetSession(db) {
@@ -763,6 +770,8 @@ export class ClientSocket extends EventEmitter {
 	}
 
 	async #updateGroupParticipants(jid, action, participants, admins, { force, quoted, locale = 'en' }) {
+		const { useLocale } = await import('../helper/i18n/index.js');
+		const L = useLocale(locale, 'common');
 		const responses = [];
 
 		for (const participant of participants) {
@@ -853,7 +862,7 @@ export class ClientSocket extends EventEmitter {
 		const inviteMsg = generateWAMessageFromContent(
 			jid,
 			{
-			groupInviteMessage: {
+				groupInviteMessage: {
 					groupJid: jid,
 					inviteCode: response?.[0]?.code,
 					inviteExpiration: response?.[0]?.expiration,

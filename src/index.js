@@ -61,7 +61,7 @@ if (!(await fs.exists(TEMP_DIR))) {
 }
 
 const store = new Store(prisma, sessionName, {
-	logger: P().child({ level: 'fatal', stream: 'store' })
+	logger: P().child({ level: OPTIONS.debugMode ? 'debug' : 'fatal', stream: 'store' })
 });
 
 store.initialize();

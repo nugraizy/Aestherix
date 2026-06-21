@@ -1,4 +1,5 @@
-import { isJidGroup } from 'baileys';
+import { Browsers, isJidGroup } from 'baileys';
+import P from 'pino';
 
 import { Auth } from '../../core/auth.js';
 import { ClientSocket } from '../../core/client-socket.js';
@@ -176,6 +177,7 @@ export default defineCommand({
 			const sub = new ClientSocket(auth, {
 				role: 'sub',
 				flags: subFlags,
+				browser: Browsers.android('14'),
 				cachedGroupMetadata: (jid) => (isJidGroup(jid) ? configuration.groups.metadata.get(jid) : {})
 			});
 
@@ -247,9 +249,16 @@ export default defineCommand({
 
 		const newFlags = { ...flags, pairMode: true };
 		const auth = new Auth(prisma, sessionName);
+
+		await auth.initialize({ logger: P({ level: newFlags.debugMode ? 'debug' : 'fatal' }) });
+
+		const needsPairing = newFlags.pairMode && !auth.creds.registered && !auth.creds.me?.id;
+		const browser = needsPairing ? ['Mac OS', 'Safari', 'Safari 17.0'] : Browsers.android('14');
+
 		const sub = new ClientSocket(auth, {
 			role: 'sub',
 			flags: newFlags,
+			browser,
 			cachedGroupMetadata: (jid) => (isJidGroup(jid) ? configuration.groups.metadata.get(jid) : {})
 		});
 
@@ -336,6 +345,44 @@ export default defineCommand({
 			const code = await sub.requestPairingCode(String(pairNumber).replace(/[^0-9]/g, ''));
 
 			await client.reply(from, t(locale, 'bot.pairingCode', [sessionName, `${code.slice(0, 4)}-${code.slice(4)}`]), message);
+
+			if (needsPairing) {
+				const paired = await new Promise((resolve) => {
+					let timeout;
+
+					const onCreds = () => {
+						clearTimeout(timeout);
+						sub.removeListener('creds.update', onCreds);
+
+						const onClose = (update) => {
+							if (update.connection === 'close') {
+								sub.removeListener('connection.update', onClose);
+								resolve(true);
+							}
+						};
+
+						sub.on('connection.update', onClose);
+
+						setTimeout(() => {
+							sub.removeListener('connection.update', onClose);
+							resolve(true);
+						}, 10_000);
+					};
+
+					timeout = setTimeout(() => {
+						sub.removeListener('creds.update', onCreds);
+						resolve(false);
+					}, 120_000);
+
+					sub.once('creds.update', onCreds);
+				});
+
+				if (paired) {
+					sub.setBrowser(Browsers.android('14'));
+					await sub.disconnect();
+					await sub.connect({ prisma });
+				}
+			}
 		} catch (err) {
 			await sub.disconnect().catch(() => {});
 			manager.remove(sessionName);

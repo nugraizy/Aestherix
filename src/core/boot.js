@@ -111,15 +111,32 @@ async function handlePairing(clientSocket, flags) {
 	if (!phoneNumber && !process.stdin?.isTTY) {
 		phoneNumber = normalizePairNumber(settings?.main_host_number) || '';
 
-		if (phoneNumber) {
-			await delay(2000);
-		} else {
+		if (!phoneNumber) {
+			const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+
+			phoneNumber = await new Promise((resolve) => {
+				const timer = setTimeout(() => {
+					rl.close();
+					resolve('');
+				}, 60000);
+
+				rl.question(color('Enter your phone number: ', 'lilac'), (answer) => {
+					clearTimeout(timer);
+					rl.close();
+					resolve(normalizePairNumber(answer) || '');
+				});
+			});
+		}
+
+		if (!phoneNumber) {
 			loggers.error(
-				color('Pairing requires a TTY.', 'red'),
-				color('Use --pair_number, set PAIR_NUMBER, or configure main_host_number.', 'white')
+				color('No valid phone number provided.', 'red'),
+				color('Use --pair_number, set PAIR_NUMBER, or configure main_host_number in settings.json.', 'white')
 			);
 			return;
 		}
+
+		await delay(2000);
 	}
 
 	if (!phoneNumber) {
@@ -127,7 +144,9 @@ async function handlePairing(clientSocket, flags) {
 		const settings2 = await fs.readJSON(SETTINGS_PATH);
 		const defaultNumber = settings2.main_host_number;
 
-		if (defaultNumber) {
+		const validDefault = normalizePairNumber(defaultNumber);
+
+		if (validDefault) {
 			const useDefault = await confirm(
 				{
 					message: loggers.info(color(`Use default number (${defaultNumber})?`, 'lilac'), { ignore: true }).trim(),
@@ -140,13 +159,13 @@ async function handlePairing(clientSocket, flags) {
 			});
 
 			if (useDefault) {
-				phoneNumber = normalizePairNumber(defaultNumber) || '';
+				phoneNumber = validDefault;
 			}
 		}
 
 		if (!phoneNumber) {
 			const candidates = [defaultNumber, ...(settings2.team_number || []), ...(settings2.backups_host_numbers || [])].filter(
-				Boolean
+				(n) => normalizePairNumber(n)
 			);
 
 			if (candidates.length) {
@@ -203,6 +222,44 @@ async function handlePairing(clientSocket, flags) {
 		.catch(() => loggers.error(color('SSH detected.', 'red'), color('Could not copy the code.', 'gray')));
 	await delay(200);
 	loggers.warning(color('Waiting for code input', 'white'), color('. . .', 'pink'));
+
+	const paired = await new Promise((resolve) => {
+		let timeout;
+
+		const onCreds = () => {
+			clearTimeout(timeout);
+			clientSocket.removeListener('creds.update', onCreds);
+
+			const onClose = (update) => {
+				if (update.connection === 'close') {
+					clientSocket.removeListener('connection.update', onClose);
+					resolve(true);
+				}
+			};
+
+			clientSocket.on('connection.update', onClose);
+
+			setTimeout(() => {
+				clientSocket.removeListener('connection.update', onClose);
+				resolve(true);
+			}, 10_000);
+		};
+
+		timeout = setTimeout(() => {
+			clientSocket.removeListener('creds.update', onCreds);
+			resolve(false);
+		}, 120_000);
+
+		clientSocket.once('creds.update', onCreds);
+	});
+
+	if (paired) {
+		loggers.info(color('Pairing successful, restarting with Android browser...', 'white'));
+
+		clientSocket.setBrowser(Browsers.android('14'));
+		await clientSocket.disconnect();
+		await clientSocket.connect();
+	}
 }
 
 async function onConnected({ clientSocket, commandLoader, router, mqtt, store, webhook, eventHandler }) {
@@ -497,12 +554,12 @@ export async function boot({ cli, OPTIONS, store, sessionName }) {
 
 	const auth = new Auth(prisma, sessionName);
 
-	await auth.initialize({ logger: P({ level: 'fatal' }) });
+	await auth.initialize({ logger: P({ level: OPTIONS.debugMode ? 'debug' : 'fatal' }) });
 
 	const clientSocket = new ClientSocket(auth, {
 		role: 'primary',
 		flags: OPTIONS,
-		browser: Browsers.android('14'),
+		browser: ['Mac OS', 'Safari', 'Safari 17.0'],
 		cachedGroupMetadata: (jid) => (isJidGroup(jid) ? configuration.groups.metadata.get(jid) : {})
 	});
 
