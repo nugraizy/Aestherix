@@ -107,6 +107,7 @@ model SettingsManager {
   antiSpam         String   @default("disable")
   antiVirus        String   @default("disable")
   autoReader       String   @default("disable")
+  viewonce         String   @default("disable")
   antiNSFW         String   @default("disable")
   games            String   @default("disable")
   notification     String   @default("disable")

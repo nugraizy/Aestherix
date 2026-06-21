@@ -46,6 +46,7 @@ const DEFAULT_SETTINGS = {
 	antiSpam: 'disable',
 	antiVirus: 'disable',
 	autoReader: 'disable',
+	viewonce: 'disable',
 	antiNSFW: 'disable',
 	games: 'disable',
 	notification: 'disable'
@@ -68,6 +69,7 @@ const rowToData = (row) => ({
 	antiSpam: row.antiSpam,
 	antiVirus: row.antiVirus,
 	autoReader: row.autoReader,
+	viewonce: row.viewonce,
 	antiNSFW: row.antiNSFW,
 	games: row.games,
 	notification: row.notification,
