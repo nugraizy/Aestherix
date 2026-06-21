@@ -556,10 +556,13 @@ export async function boot({ cli, OPTIONS, store, sessionName }) {
 
 	await auth.initialize({ logger: P({ level: OPTIONS.debugMode ? 'debug' : 'fatal' }) });
 
+	const needsPairing = OPTIONS.pairMode && !auth.creds.registered && !auth.creds.me?.id;
+	const browser = needsPairing ? ['Mac OS', 'Safari', 'Safari 17.0'] : Browsers.android('14');
+
 	const clientSocket = new ClientSocket(auth, {
 		role: 'primary',
 		flags: OPTIONS,
-		browser: ['Mac OS', 'Safari', 'Safari 17.0'],
+		browser,
 		cachedGroupMetadata: (jid) => (isJidGroup(jid) ? configuration.groups.metadata.get(jid) : {})
 	});
 
