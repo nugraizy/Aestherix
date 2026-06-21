@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.16.2」2026-06-21
+
+## Fixed
+
+- PM2 xvfb-run.sh using wrong session name causing repeated pairing prompt ([`6d076e95`](https://github.com/nugraizy/aestherix/commit/6d076e95))
+- Dynamic browser selection in boot() restored after revert ([`6d076e95`](https://github.com/nugraizy/aestherix/commit/6d076e95))
+- View-once media check using optional chaining for safer property access ([`9600e808`](https://github.com/nugraizy/aestherix/commit/9600e808))
+- PM2 non-xvfb args no longer includes --no-sub flag ([`816b95b5`](https://github.com/nugraizy/aestherix/commit/816b95b5))
+- Add missing viewonce field to group settings schema ([`01ad20f9`](https://github.com/nugraizy/aestherix/commit/01ad20f9))
+
 # 「7.16.1」2026-06-21
 
 ## Added
