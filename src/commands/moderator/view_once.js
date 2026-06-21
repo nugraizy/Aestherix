@@ -40,7 +40,7 @@ export default defineCommand({
 			return await client.reply(from, `View-once auto-decrypt: ${next}`, message);
 		}
 
-		if (!mediaData.message.imageMessage && !mediaData.message.videoMessage && !mediaData.message.audioMessage) {
+		if (!mediaData.message?.imageMessage && !mediaData.message?.videoMessage && !mediaData.message?.audioMessage) {
 			return await client.reply(from, L.errors.mediaRequired, message);
 		}
 
