@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.16.1」2026-06-21
+
+## Added
+
+- Dynamic browser selection for WhatsApp pairing (Safari) and normal operation (Android) ([`78964dba`](https://github.com/nugraizy/aestherix/commit/78964dba))
+- Sub-bot pairing follows same browser selection flow ([`78964dba`](https://github.com/nugraizy/aestherix/commit/78964dba))
+- Dynamic pino log level based on `--debug-mode` flag ([`78964dba`](https://github.com/nugraizy/aestherix/commit/78964dba))
+- Stdin readline fallback for non-TTY pairing environments ([`78964dba`](https://github.com/nugraizy/aestherix/commit/78964dba))
+
+## Fixed
+
+- Filter placeholder phone numbers from pairing selection lists ([`78964dba`](https://github.com/nugraizy/aestherix/commit/78964dba))
+- Undefined locale variable in group participant handler ([`78964dba`](https://github.com/nugraizy/aestherix/commit/78964dba))
+
 # 「7.16.0」2026-06-21
 
 ## Added
