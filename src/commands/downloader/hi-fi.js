@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import lodash from 'lodash';
 import parser from 'yargs-parser';
 
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { hifi, metadata } from '../../utils/hi-fi/index.js';
 import { color, delay, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
@@ -17,9 +17,10 @@ export default defineCommand({
 	cooldown: 8,
 	limit: 3,
 	status: 'enable',
-	run: async ({ from, query, message, prettyNumber, prefix }, client) => {
-		const locale = await getLocale(from);
+	run: async ({ from, query, message, prettyNumber, prefix, sender }, client) => {
+		const locale = await getLocale(from, sender);
 		const L = useLocale(locale, 'common');
+		const DL = useLocale(locale, 'downloader');
 
 		let wait = null;
 
@@ -37,36 +38,36 @@ export default defineCommand({
 
 			query = _.join(' ');
 
-			let caption = 'Hi-Fi Downloader'.formatHeaders();
-			let watermark = 'Powered by Hidden Finder';
+			let caption = DL.titles.hiFi.formatHeaders();
+			let watermark = t(locale, 'common.core.footer.poweredBy', ['Hidden Finder']);
 
 			if (typeof index === 'number') {
 				const searchResults = await hifi.search(query);
 
 				if (searchResults.items.length === 0) {
-					return await wait.update('No results found for your query. Try again with another keyword.');
+					return await wait.update(L.core.errors.noResultsForQuery);
 				}
 
 				if (index > searchResults.length - 1) {
 					return await wait.update(
-						'Index are not match with the response length. Response length : ' + searchResults.length - 1
+						t(locale, 'common.core.errors.numberRange', [0, searchResults.length - 1])
 					);
 				}
 
-				await downloadAudio(client, searchResults, { index, from, message, prettyNumber, wait });
+				await downloadAudio(client, searchResults, { index, from, message, prettyNumber, wait, locale, L });
 			} else if (id) {
-				await downloadAudio(client, null, { id, from, message, prettyNumber, wait });
+				await downloadAudio(client, null, { id, from, message, prettyNumber, wait, locale, L });
 			} else {
 				const searchResults = await hifi.search(query);
 
 				if (searchResults.items.length === 0) {
-					return await wait.update('No results found for your query. Try again with another keyword.');
+					return await wait.update(L.core.errors.noResultsForQuery);
 				}
 
 				const total = searchResults.items.length;
 				const searchResultsChunk = lodash.chunk(searchResults.items, 30);
 
-				await wait.update(`Songs with keyword ${query} found. Total Response : ${total}`);
+				await wait.update(t(locale, 'common.core.progress.songsFound', [query, total]));
 
 				const builder = new client.TemplateBuilder.Carousel();
 
@@ -94,13 +95,13 @@ export default defineCommand({
 								cover = hifi.stringToCover(cover);
 
 								return {
-									body: `Title : ${title}\nArtist(s) : ${artists.map((v) => v.name).join(', ')}\nDuration : ${dayjs(duration * 1000).format('HH:mm:ss')}\nReleased : ${dayjs(streamStartDate).format('DD/MM/YYYY')}`,
+									body: `${L.core.caption.title} : ${title}\n${L.core.caption.artists} : ${artists.map((v) => v.name).join(', ')}\n${L.core.caption.duration} : ${dayjs(duration * 1000).format('HH:mm:ss')}\n${L.core.labels.released} : ${dayjs(streamStartDate).format('DD/MM/YYYY')}`,
 									header: cover,
 									footer: `Song ${songNumber} of ${total}`,
 									buttons: [
 										builder.button.url({ display: `Cover ${songNumber}`, url: cover }),
 										builder.button.reply({
-											display: 'Download',
+											display: L.core.buttons.download,
 											id: `${prefix}hifidownload --id ${id}`
 										})
 									]
@@ -114,16 +115,16 @@ export default defineCommand({
 					watermark = '';
 				}
 
-				await wait.update('Please press the "Download" button on one of the results below :');
+				await wait.update(L.core.progress.pleasePressDownload);
 			}
 		} catch (error) {
-			await wait.update('Something went wrong. Please try again.');
+			await wait.update(L.core.errors.somethingWentWrong);
 		}
 	}
 });
 
-const downloadAudio = async (client, data, { from, message, prettyNumber, id, index, wait }) => {
-	await wait.update('Downloading Music...');
+const downloadAudio = async (client, data, { from, message, prettyNumber, id, index, wait, locale, L }) => {
+	await wait.update(L.core.progress.downloadingMusic);
 
 	const downloadInfo = await hifi.download(id ? id : data.items[index].id);
 
@@ -132,16 +133,16 @@ const downloadAudio = async (client, data, { from, message, prettyNumber, id, in
 	);
 
 	if (downloadInfo?.error) {
-		return await wait.update(`Error while downloading music.\n\n${downloadInfo.error}`);
+		return await wait.update(t(locale, 'common.core.errors.downloadErrorMusic', [downloadInfo.error]));
 	}
 
-	await wait.update('Writing metadata to the file...');
+	await wait.update(L.core.progress.writingMetadata);
 
 	const buffer = await metadata(downloadInfo.track, downloadInfo.url, downloadInfo.cover);
 
-	await wait.update('Writing metadata to the file success.');
+	await wait.update(L.core.progress.writingMetadataSuccess);
 	await delay(2000);
-	await wait.update('Sending the file...');
+	await wait.update(L.core.progress.sendingFile);
 
 	await client.send(
 		from,
@@ -153,7 +154,7 @@ const downloadAudio = async (client, data, { from, message, prettyNumber, id, in
 		{ quoted: message }
 	);
 
-	await wait.update('Command Finished. With total 1 Success.');
+	await wait.update(t(locale, 'common.core.progress.commandFinishedSingle'));
 
 	loggers.warning(
 		`${color('Downloaded Hi-Fi Audio from', 'pink')} ${color(downloadInfo.domain, 'orange')} for ${color(prettyNumber, 'lilac')}`

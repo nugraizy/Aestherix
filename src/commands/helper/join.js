@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { defineCommand } from '../_define.js';
 
@@ -31,6 +31,7 @@ export default defineCommand({
 	async run({ from, query, message, sender, isOwner, settings, prefix }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lh = useLocale(locale, 'helper');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noUrl, message);
@@ -56,11 +57,11 @@ export default defineCommand({
 		}
 
 		if (Object.keys(groups).includes(metadataInvite.id)) {
-			await client.reply(from, 'I am already in this group.', message);
+			await client.reply(from, Lh.labels.alreadyInGroup, message);
 		} else if (!isOwner && metadataInvite.size >= 1024) {
 			await client.reply(from, L.errors.groupFull, message);
 		} else if (!isOwner && metadataInvite.size < settings.min_members) {
-			await client.reply(from, `This group is not big enough to join. Minimum ${settings.min_members} participants.`, message);
+			await client.reply(from, t(locale, 'owner.labels.groupNotBigEnough', [settings.min_members]), message);
 		} else if (
 			!isOwner &&
 			!metadataInvite.participants
@@ -71,17 +72,17 @@ export default defineCommand({
 			await client.reply(from, L.errors.adminOnly, message);
 		} else if (metadataInvite) {
 			await client.groupAcceptInvite(reg);
-			await client.reply(from, 'I am joining this group.', message);
+			await client.reply(from, Lh.labels.joiningGroup, message);
 			await client.send(metadataInvite.id, {
-				text: `@${sender.split('@')[0]} has invited me to the group. Tysm.`,
+				text: t(locale, 'owner.labels.invitedToGroup', [sender.split('@')[0]]),
 				mentions: [sender]
 			});
 			await client.send(
 				from,
 				{
 					text: L.info.clickToOpenMenu,
-					footer: 'Powered by Hidden Finder',
-					buttons: [{ buttonId: cmdId('menu', '', { prefix }), buttonText: { displayText: 'Menu' }, type: 1 }],
+					footer: Lh.labels.poweredBy,
+					buttons: [{ buttonId: cmdId('menu', '', { prefix }), buttonText: { displayText: Lh.labels.menu }, type: 1 }],
 					headerType: 1
 				},
 				{}

@@ -23,7 +23,8 @@ function sendResult(state, from, message, client, ctx) {
 	const { items, currentIndex, sessionId } = state;
 	const manga = items[currentIndex];
 	const isLast = currentIndex + 1 >= items.length;
-	const body = `${'MangaToon Search'.formatHeaders()}\n\n${formatMangaCaption(manga).formatForm()}\n\nResult ${currentIndex + 1} of ${items.length}\nID : ${manga.id}`;
+	const Ls = useLocale(ctx.locale, 'search');
+	const body = `${Ls.titles.mangatoonSearch.formatHeaders()}\n\n${formatMangaCaption(manga).formatForm()}\n\n${Ls.labels.resultOf.replace('{0}', currentIndex + 1).replace('{1}', items.length)}\nID : ${manga.id}`;
 
 	const builder = new client.TemplateBuilder.Native();
 
@@ -38,14 +39,14 @@ function sendResult(state, from, message, client, ctx) {
 
 	if (!isLast) {
 		builder.buttons(
-			builder.button.reply({ display: '📋 Detail', id: cmdId('mtdetail', manga.id, ctx) }),
-			builder.button.reply({ display: '📖 Chapters', id: cmdId('mtch', manga.id, ctx) }),
+			builder.button.reply({ display: Ls.buttons.detail, id: cmdId('mtdetail', manga.id, ctx) }),
+			builder.button.reply({ display: Ls.buttons.chapters, id: cmdId('mtch', manga.id, ctx) }),
 			builder.button.reply({ display: 'Next', id: cmdId('mt', 'next ' + sessionId, ctx) })
 		);
 	} else {
 		builder.buttons(
-			builder.button.reply({ display: '📋 Detail', id: cmdId('mtdetail', manga.id, ctx) }),
-			builder.button.reply({ display: '📖 Chapters', id: cmdId('mtch', manga.id, ctx) })
+			builder.button.reply({ display: Ls.buttons.detail, id: cmdId('mtdetail', manga.id, ctx) }),
+			builder.button.reply({ display: Ls.buttons.chapters, id: cmdId('mtch', manga.id, ctx) })
 		);
 	}
 
@@ -65,6 +66,7 @@ export default defineCommand({
 	async run({ query, from, message, prefix }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.queryRequired, message);
@@ -86,7 +88,7 @@ export default defineCommand({
 				return await client.reply(from, L.info.noMoreResults, message);
 			}
 
-			return await sendResult(cached, from, message, client, { prefix });
+			return await sendResult(cached, from, message, client, { prefix, locale });
 		}
 
 		const wait = await client.waitMessage(from, L.success.searching, message);
@@ -98,7 +100,7 @@ export default defineCommand({
 		}
 
 		if (!result.items.length) {
-			return await wait.update('No results found. Try a different query.');
+			return await wait.update(Ls.labels.noResults);
 		}
 
 		const sessionId = randomChar('abcdefghijklmnopqrstuvwxyz0123456789', 8);
@@ -107,7 +109,7 @@ export default defineCommand({
 
 		searchSessions.set(sessionId, state);
 
-		await wait.update(`Found ${result.items.length} result(s).`);
-		await sendResult(state, from, message, client, { prefix });
+		await wait.update(Ls.labels.foundResults.replace('{0}', result.items.length));
+		await sendResult(state, from, message, client, { prefix, locale });
 	}
 });

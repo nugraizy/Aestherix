@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
@@ -32,14 +32,15 @@ function sendResult(state, from, message, client, ctx) {
 	const { items, currentIndex, sessionId } = state;
 	const manga = items[currentIndex];
 	const isLast = currentIndex + 1 >= items.length;
-	const body = `${'Shinigami Search'.formatHeaders()}\n\n${formatMangaCaption(manga).formatForm()}\n\nResult ${currentIndex + 1} of ${items.length}\nID : ${manga.id}`;
+	const Ls = useLocale(ctx.locale, 'search');
+	const body = `${Ls.titles.shinigamiSearch.formatHeaders()}\n\n${formatMangaCaption(manga).formatForm()}\n\n${t(ctx.locale, 'search.labels.resultOf', [currentIndex + 1, items.length])}\nID : ${manga.id}`;
 
 	const builder = new client.TemplateBuilder.Native();
 
 	builder
 		.destination(from)
 		.body(body)
-		.footer('Powered by ' + BOT_NAME);
+		.footer(t(ctx.locale, 'common.core.footer.poweredBy', [BOT_NAME]));
 
 	if (manga.poster) {
 		builder.header('image', manga.poster);
@@ -47,14 +48,14 @@ function sendResult(state, from, message, client, ctx) {
 
 	if (!isLast) {
 		builder.buttons(
-			builder.button.reply({ display: '📖 Chapters', id: cmdId('sgch', manga.id, ctx) }),
-			builder.button.reply({ display: '📋 Detail', id: cmdId('sgdetail', manga.id, ctx) }),
+			builder.button.reply({ display: Ls.buttons.chapters, id: cmdId('sgch', manga.id, ctx) }),
+			builder.button.reply({ display: Ls.buttons.detail, id: cmdId('sgdetail', manga.id, ctx) }),
 			builder.button.reply({ display: 'Next', id: cmdId('sg', 'next ' + sessionId, ctx) })
 		);
 	} else {
 		builder.buttons(
-			builder.button.reply({ display: '📖 Chapters', id: cmdId('sgch', manga.id, ctx) }),
-			builder.button.reply({ display: '📋 Detail', id: cmdId('sgdetail', manga.id, ctx) })
+			builder.button.reply({ display: Ls.buttons.chapters, id: cmdId('sgch', manga.id, ctx) }),
+			builder.button.reply({ display: Ls.buttons.detail, id: cmdId('sgdetail', manga.id, ctx) })
 		);
 	}
 
@@ -95,7 +96,7 @@ export default defineCommand({
 				return await client.reply(from, L.info.noMoreResults, message);
 			}
 
-			return await sendResult(cached, from, message, client, { prefix });
+			return await sendResult(cached, from, message, client, { prefix, locale });
 		}
 
 		const wait = await client.waitMessage(from, L.success.searching, message);
@@ -103,7 +104,7 @@ export default defineCommand({
 		const result = await shinigami.search(query);
 
 		if (!result.items.length) {
-			return await wait.update('No results found. Try a different query.');
+			return await wait.update(L.core.errors.noResultsTryDifferent);
 		}
 
 		const sessionId = randomChar('abcdefghijklmnopqrstuvwxyz0123456789', 8);
@@ -112,7 +113,7 @@ export default defineCommand({
 
 		searchSessions.set(sessionId, state);
 
-		await wait.update(`Found ${result.items.length} result(s).`);
-		await sendResult(state, from, message, client, { prefix });
+		await wait.update(t(locale, 'common.core.progress.foundResults', [result.items.length]));
+		await sendResult(state, from, message, client, { prefix, locale });
 	}
 });

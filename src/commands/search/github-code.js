@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { Github } from '../../utils/github/index.js';
 import { defineCommand } from '../_define.js';
@@ -18,6 +18,7 @@ export default defineCommand({
 	async run({ query, from, message, args, type }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -30,31 +31,31 @@ export default defineCommand({
 			return await client.send(
 				from,
 				{
-					text: `${'Github Code'.formatHeaders()}
+					text: `${Ls.titles.githubCode.formatHeaders()}
 Username : ${data[index].owner.ownerUsername}
-Repository : ${data[index].repository.name}
-Filename : ${data[index].fileName}
-Filepath : ${data[index].filePath}
-Code Matches : 
+${Ls.labels.repository} : ${data[index].repository.name}
+${Ls.labels.filename} : ${data[index].fileName}
+${Ls.labels.filepath} : ${data[index].filePath}
+${Ls.labels.codeMatches}
 ${data[index].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).join('\n')}`,
 					templateButtons: [
 						{
 							urlButton: {
-								displayText: 'User Avatar Source',
+								displayText: Ls.labels.userAvatarSource,
 								url: args[1] === 'next' ? data[index].owner.ownerPicture : data[index].owner.ownerPicture
 							}
 						},
 						{
 							urlButton: {
-								displayText: 'Repository Source',
+								displayText: Ls.labels.repositorySource,
 								url: args[1] === 'next' ? data[index].repository.url : data[index].repository.url
 							}
 						},
-						{ urlButton: { displayText: 'Code Source', url: args[1] === 'next' ? data[index].source : data[index].source } },
+						{ urlButton: { displayText: Ls.labels.codeSource, url: args[1] === 'next' ? data[index].source : data[index].source } },
 						index + 1 !== data.length
 							? {
 									quickReplyButton: {
-										displayText: 'Next Code',
+										displayText: Ls.buttons.nextCode,
 										id: cmdId('githubcode', `next ${data[index + 1].source} ${JSON.stringify(data)}`)
 									}
 								}
@@ -62,7 +63,7 @@ ${data[index].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).
 						index !== 0
 							? {
 									quickReplyButton: {
-										displayText: 'Previous Code',
+										displayText: Ls.buttons.previousCode,
 										id: cmdId('githubcode', `prev ${data[index - 1].source} ${JSON.stringify(data)}`)
 									}
 								}
@@ -93,21 +94,21 @@ ${data[index].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).
 		await client.send(
 			from,
 			{
-				text: `${'Github Code'.formatHeaders()}
+				text: `${Ls.titles.githubCode.formatHeaders()}
 Username : ${result[0].owner.ownerUsername}
-Repository : ${result[0].repository.name}
-Filename : ${result[0].fileName}
-Filepath : ${result[0].filePath}
-Code Matches : 
+${Ls.labels.repository} : ${result[0].repository.name}
+${Ls.labels.filename} : ${result[0].fileName}
+${Ls.labels.filepath} : ${result[0].filePath}
+${Ls.labels.codeMatches}
 ${result[0].textMatches.map((v) => `_${v.texts}_\n\`\`\`${v.fragment}\`\`\``).join('\n')}`,
 				templateButtons: [
-					{ urlButton: { displayText: 'User Avatar Source', url: result[0].owner.ownerPicture } },
-					{ urlButton: { displayText: 'Repository Source', url: result[0].repository.url } },
-					{ urlButton: { displayText: 'Code Source', url: result[0].source } },
+					{ urlButton: { displayText: Ls.labels.userAvatarSource, url: result[0].owner.ownerPicture } },
+					{ urlButton: { displayText: Ls.labels.repositorySource, url: result[0].repository.url } },
+					{ urlButton: { displayText: Ls.labels.codeSource, url: result[0].source } },
 					result.length !== 1
 						? {
 								quickReplyButton: {
-									displayText: 'Next Code',
+									displayText: Ls.buttons.nextCode,
 									id: cmdId('githubcode', `next ${result[1].source} ${JSON.stringify(result).replace(/\|/g, '')}`)
 								}
 							}

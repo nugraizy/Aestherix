@@ -1,5 +1,5 @@
 import { manager } from '../../core/manager.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import prisma from '../../helper/database/prisma.js';
 import { defineCommand } from '../_define.js';
 
@@ -18,6 +18,7 @@ export default defineCommand({
 	async run({ from, args, message, isOwner }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lo = useLocale(locale, 'owner');
 
 		if (!isOwner) {
 			return;
@@ -32,7 +33,7 @@ export default defineCommand({
 		const sub = manager.get(sessionName);
 
 		if (!sub) {
-			return client.reply(from, `❌ Bot "${sessionName}" not found.`, message);
+			return client.reply(from, Lo.labels.botNotFound.replace('{0}', sessionName), message);
 		}
 
 		if (args.length <= 2) {
@@ -41,7 +42,7 @@ export default defineCommand({
 				.map(([k, v]) => `  --${k}${v === true ? '' : ` ${v}`}`)
 				.join('\n');
 
-			return client.reply(from, `🏷️ *${sessionName}* flags:\n\n${flags || '  (none)'}`, message);
+			return client.reply(from, t(locale, 'owner.labels.botFlags', [sessionName]) + `\n\n${flags || '  (none)'}`, message);
 		}
 
 		const newFlags = {};
@@ -73,6 +74,6 @@ export default defineCommand({
 			})
 			.catch(() => {});
 
-		return client.reply(from, `✅ Flags updated for "${sessionName}".`, message);
+		return client.reply(from, Lo.labels.flagsUpdated.replace('{0}', sessionName), message);
 	}
 });

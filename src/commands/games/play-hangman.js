@@ -1,5 +1,5 @@
 import configuration from '../../helper/config/connect.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { Hangman } from '../../utils/games/index.js';
 import { loggers, color } from '../../utils/modules/index.js';
 import { getPrefix } from '../../helper/modules/prefix.js';
@@ -65,7 +65,7 @@ export default defineCommand({
 			}
 
 			if (result.status === 'already_guessed') {
-				return await client.reply(from, H.errors.alreadyGuessed.replace('{letter}', letter.toUpperCase()), message);
+				return await client.reply(from, t(locale, 'hangman.errors.alreadyGuessed', { prefix, letter: letter.toUpperCase() }), message);
 			}
 
 			if (result.status === 'win') {

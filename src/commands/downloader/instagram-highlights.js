@@ -1,7 +1,7 @@
 import parser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { color, formatNumber, isURL, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -15,9 +15,10 @@ export default defineCommand({
 	cooldown: 13,
 	limit: 9,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, isOwner, prefix }, client) {
+	async run({ from, query, prettyNumber, message, sender, isOwner, prefix }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const DL = useLocale(locale, 'downloader');
 
 		if (!configuration.isInstagramInitiated) {
 			return await client.reply(
@@ -52,16 +53,16 @@ export default defineCommand({
 
 			console.log(highlights[data]);
 
-			let capt = 'Instagram Highlights'.formatHeaders();
+		let capt = DL.titles.igHighlights.formatHeaders();
 
-			capt += `\n\nUsername  : ${highlights[data].user.username}\n`;
-			capt += `Fullname  : ${highlights[data].user.fullName}\n`;
-			capt += `Total Highlights : ${formatNumber(highlights[data].highlights.length)}\n`;
+		capt += `\n\n${L.core.caption.username} : ${highlights[data].user.username}\n`;
+		capt += `${L.core.caption.fullname} : ${highlights[data].user.fullName}\n`;
+		capt += `${DL.labels.totalHighlights} : ${formatNumber(highlights[data].highlights.length)}\n`;
 
 			if (!isURL(input)) {
-				capt += 'Each Sections of the Higlights will be send 2 media.\n';
-				capt += `Total Sections : ${highlights[data].highlights.length}\n`;
-				capt += `Total Estimated media per Section : ${formatNumber(
+				capt += DL.labels.highlightsNote;
+				capt += `${DL.labels.totalSections} : ${highlights[data].highlights.length}\n`;
+				capt += `${DL.labels.totalEstimatedMedia} : ${formatNumber(
 					highlights[data].highlights.length >= 2 ? 2 : highlights[data].highlights.length
 				)}\n\n`;
 			}
@@ -100,7 +101,7 @@ export default defineCommand({
 			success++;
 		}
 
-		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
+		await wait.update(t(locale, 'common.core.commands.downloadBatchFinished', [success, error]));
 
 		loggers.info(`${color('Downloaded Instagram highlights', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}

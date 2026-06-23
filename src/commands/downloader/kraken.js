@@ -19,6 +19,7 @@ export default defineCommand({
 	run: async ({ from, message, query, prettyNumber }, client) => {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const DL = useLocale(locale, 'downloader');
 
 		if (!query) {
 			return client.reply(from, L.errors.noQuery, message);
@@ -53,12 +54,12 @@ export default defineCommand({
 
 			await client.reply(
 				from,
-				`${'Kraken Downloader'.formatHeaders()}
+				`${DL.titles.kraken.formatHeaders()}
 		
-Filename: ${result.filename}
-Filesize: ${result.filesize}
-Filetype: ${result.filetype}
-Uploaded: ${result.uploaded}`.formatForm(),
+${L.core.labels.fileName} : ${result.filename}
+${L.core.labels.fileSize} : ${result.filesize}
+${L.core.labels.fileType} : ${result.filetype}
+${L.core.labels.uploaded} : ${result.uploaded}`.formatForm(),
 				message
 			);
 

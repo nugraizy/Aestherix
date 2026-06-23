@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { searchWAGroups } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -15,6 +15,7 @@ export default defineCommand({
 	run: async ({ query, message, from }, client) => {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -28,7 +29,7 @@ export default defineCommand({
 
 		await client.reply(
 			from,
-			`${'WhatsApp Public Groups'.formatHeaders()}
+			`${Ls.titles.waGroups.formatHeaders()}
 
 ${result
 	.map((v) => `Title : ${v.title}\nURL : ${v.url}`)

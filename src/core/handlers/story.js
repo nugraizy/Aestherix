@@ -2,6 +2,7 @@ import { generateWAMessageFromContent } from 'baileys';
 
 import configuration from '../../helper/config/connect.js';
 import { TextStory } from '../../helper/canvas/index.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { runtime } from '../runtime.js';
 import { color, loggers } from '../../utils/modules/index.js';
 
@@ -21,22 +22,24 @@ const handler = async (client, message) => {
 		await client.readMessages([message.message.key]);
 	}
 
+	const locale = await getLocale(message.from);
+	const L = useLocale(locale, 'common');
 	const runtimes = ((Date.now() - runtime) / 1000).toFixed(0);
-	let caption = '```Auto Fetch WhatsApp Story```\n\n';
+	let caption = `\`\`\`${L.core.story.autoFetch}\`\`\`\n\n`;
 	let messages;
 
-	caption += `Name : ${message.pushname}\n`;
-	caption += `Number : ${message.prettyNumber}\n`;
-	caption += `Type : ${message.type}\n`;
+	caption += `${L.core.story.name}${message.pushname}\n`;
+	caption += `${L.core.story.number}${message.prettyNumber}\n`;
+	caption += `${L.core.story.type}${message.type}\n`;
 
 	if (message.type === 'extendedTextMessage') {
-		caption += `Body : ${message.body}`;
+		caption += `${L.core.story.body}${message.body}`;
 		const story = new TextStory();
 		const buffer = await story.render(message.body, message.message.message.extendedTextMessage.backgroundArgb);
 
 		return await client.send(meJid, { image: buffer, caption: caption.trim() });
 	} else if (message.type === 'videoMessage' || message.type === 'imageMessage') {
-		caption += `Caption : ${message.body}`;
+		caption += `${L.core.story.caption}${message.body}`;
 		messages = generateWAMessageFromContent(
 			meJid,
 			{ ...JSON.parse(JSON.stringify(message.message.message)) },

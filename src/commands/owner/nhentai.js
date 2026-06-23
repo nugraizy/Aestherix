@@ -15,6 +15,7 @@ export default defineCommand({
 	run: async ({ from, message, query }, client) => {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lo = useLocale(locale, 'owner');
 
 		if (!query) {
 			return client.reply(from, L.errors.noQuery, message);
@@ -28,18 +29,18 @@ export default defineCommand({
 
 		const { artists, categories, images, languages, tags, titles, uploaded, groups, pages, parodies, totalFavorites } = result;
 
-		const caption = `${'NHentai'.formatHeaders()}
+		const caption = `${Lo.titles.nhentai.formatHeaders()}
         
 *${titles.english}*
 #${query}
-Parodies : ${parodies || 'N/A'}
-Tags : ${tags.join(', ')}
-Artists : ${artists.join(', ')}
-Groups : ${groups.join(', ')}
-Languages : ${languages.join(', ')}
-Categories : ${categories.join(', ')}
-Pages : ${pages}
-Uploaded : ${uploaded}
+${Lo.labels.parodies} : ${parodies || 'N/A'}
+${Lo.labels.tags} : ${tags.join(', ')}
+${Lo.labels.artists} : ${artists.join(', ')}
+${Lo.labels.groups} : ${groups.join(', ')}
+${Lo.labels.languages} : ${languages.join(', ')}
+${Lo.labels.categories} : ${categories.join(', ')}
+${Lo.labels.pages} : ${pages}
+${Lo.labels.uploadDate} : ${uploaded}
 ❤️ : ${totalFavorites}`;
 
 		await client.reply(from, caption.formatForm(), message);
@@ -54,6 +55,6 @@ Uploaded : ${uploaded}
 			fileName: titles.pretty + '.pdf'
 		});
 
-		await wait.update('PDFs successfully processed.');
+		await wait.update(Lo.labels.pdfsProcessed);
 	}
 });

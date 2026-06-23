@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { Chess } from '../../utils/games/index.js';
 import { COLORS } from '../../utils/games/chess/board.js';
 import { loggers, color } from '../../utils/modules/index.js';
@@ -47,7 +47,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${C.game.title}\n\n${game.getBoard(COLORS.WHITE)}\n\n${C.game.created.replace('{0}', playerMention(sender))}\n\n${C.game.joinPrompt}`,
+					text: `${C.game.title}\n\n${game.getBoard(COLORS.WHITE)}\n\n${t(locale, 'chess.game.created', { prefix, 0: playerMention(sender) })}\n\n${C.game.joinPrompt}`,
 					mentions: [sender]
 				},
 				{ quoted: message }
@@ -74,7 +74,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${C.game.title}\n\n${game.getBoard(COLORS.WHITE)}\n\n${C.game.started}\n\n⚪ ${playerMention(game.whitePlayer)} vs ⚫ ${playerMention(game.blackPlayer)}\n\n${C.game.turn.replace('{0}', playerMention(game.getCurrentPlayer()))}`,
+					text: `${C.game.title}\n\n${game.getBoard(COLORS.WHITE)}\n\n${C.game.started}\n\n⚪ ${playerMention(game.whitePlayer)} vs ⚫ ${playerMention(game.blackPlayer)}\n\n${t(locale, 'chess.game.turn', { prefix, 0: playerMention(game.getCurrentPlayer()) })}`,
 					mentions: [game.whitePlayer, game.blackPlayer]
 				},
 				{ quoted: message }
@@ -110,7 +110,7 @@ export default defineCommand({
 				await client.send(
 					from,
 					{
-						text: `${C.game.title}\n\n${result.board}\n\n${C.game.checkmate.replace('{0}', playerMention(result.winnerId))}\n${C.game.duration.replace('{0}', result.duration)}`,
+						text: `${C.game.title}\n\n${result.board}\n\n${t(locale, 'chess.game.checkmate', { prefix, 0: playerMention(result.winnerId) })}\n${t(locale, 'chess.game.duration', { prefix, 0: result.duration })}`,
 						mentions: [result.winnerId]
 					}
 				);
@@ -120,7 +120,7 @@ export default defineCommand({
 				await client.send(
 					from,
 					{
-						text: `${C.game.title}\n\n${result.board}\n\n${C.game.stalemate}\n${C.game.duration.replace('{0}', result.duration)}`
+						text: `${C.game.title}\n\n${result.board}\n\n${C.game.stalemate}\n${t(locale, 'chess.game.duration', { prefix, 0: result.duration })}`
 					}
 				);
 			} else {
@@ -129,7 +129,7 @@ export default defineCommand({
 				await client.send(
 					from,
 					{
-						text: `${C.game.title}\n\n${result.board}\n\n${result.notation}${checkText}\n${C.game.turn.replace('{0}', playerMention(result.nextPlayer))}`,
+						text: `${C.game.title}\n\n${result.board}\n\n${result.notation}${checkText}\n${t(locale, 'chess.game.turn', { prefix, 0: playerMention(result.nextPlayer) })}`,
 						mentions: [game.whitePlayer, game.blackPlayer]
 					}
 				);
@@ -169,7 +169,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${C.game.title}\n\n${C.game.resigned.replace('{0}', playerMention(sender)).replace('{1}', playerMention(result.winnerId))}\n${C.game.duration.replace('{0}', result.duration)}`,
+					text: `${C.game.title}\n\n${t(locale, 'chess.game.resigned', { prefix, 0: playerMention(sender), 1: playerMention(result.winnerId) })}\n${t(locale, 'chess.game.duration', { prefix, 0: result.duration })}`,
 					mentions: [sender, result.winnerId]
 				}
 			);
@@ -192,7 +192,7 @@ export default defineCommand({
 				await client.send(
 					from,
 					{
-						text: `${C.game.title}\n\n${C.game.drawAccepted}\n${C.game.duration.replace('{0}', result.duration)}`,
+						text: `${C.game.title}\n\n${C.game.drawAccepted}\n${t(locale, 'chess.game.duration', { prefix, 0: result.duration })}`,
 						mentions: [game.whitePlayer, game.blackPlayer]
 					}
 				);
@@ -202,7 +202,7 @@ export default defineCommand({
 				await client.send(
 					from,
 					{
-						text: `${C.game.drawOffered.replace('{0}', playerMention(sender))}\n${C.game.drawAcceptPrompt}`,
+						text: `${t(locale, 'chess.game.drawOffered', { prefix, 0: playerMention(sender) })}\n${C.game.drawAcceptPrompt}`,
 						mentions: [sender, opponent]
 					}
 				);

@@ -1,5 +1,5 @@
 import parser from 'yargs-parser';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -13,7 +13,6 @@ export default defineCommand({
 	status: 'enable',
 	run: async ({ from, query, mediaData, bodyQuoted }, client) => {
 		const locale = await getLocale(from);
-		const L = useLocale(locale, 'common');
 		const { quoted } = parser(query.toLowerCase(), {
 			configuration: {
 				'short-option-groups': false

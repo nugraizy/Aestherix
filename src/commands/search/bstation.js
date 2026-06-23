@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { removeDuplicatesArray, numberWithCommas } from '../../utils/modules/index.js';
 import { bilibiliSearchTv } from '../../utils/bilibili/index.js';
 import { defineCommand } from '../_define.js';
@@ -29,6 +29,7 @@ export default defineCommand({
 	async run({ query, from, message }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -41,16 +42,16 @@ export default defineCommand({
 		for (const querie of queries) {
 			const videos = await bilibiliSearchTv(querie.trim());
 
-			let capt = 'Bstation Search'.formatHeaders() + '\n\n';
+			let capt = Ls.titles.bstationSearch.formatHeaders() + '\n\n';
 			let i = 0;
 
 			for (const { title, aid, author, views, duration } of videos) {
 				const caption = boxen(`NO. ${i + 1}
-✦ Video ID : ${aid}
-📕 Title : ${title}
-👀 Views : ${numberWithCommas(views)}
-📡 Author Channel : ${author}
-⏳ Duration : ${duration ?? 'No Data'}`);
+✦ ${Ls.labels.videoId} : ${aid}
+📕 ${Ls.labels.title} : ${title}
+👀 ${Ls.labels.views} : ${numberWithCommas(views)}
+📡 ${Ls.labels.authorChannel} : ${author}
+⏳ ${Ls.labels.duration} : ${duration ?? 'No Data'}`);
 
 				capt += `${caption}\n\n`;
 

@@ -1,5 +1,6 @@
 import { BOT_NAME } from '../../core/constants.js';
 
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { iflixSearch, removeDuplicatesArray } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
@@ -15,16 +16,20 @@ export default defineCommand({
 	limit: 4,
 	status: 'enable',
 	async run({ query, from, message, args, cmd, type }, client, store, ctx) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
+
 		if ((args[1] === 'next' || args[1] === 'prev') && type === 'templateButtonReplyMessage') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.thumbnail === args[2]);
-			let caption = 'Iflix Search'.formatHeaders();
+			let caption = Ls.titles.iflixSearch.formatHeaders();
 
 			caption += `\n\nTitle : ${data[index].title}\n`;
-			caption += `Actress : ${data[index].actressStr}\n`;
-			caption += `Director : ${data[index].director}\n`;
-			caption += `Status : ${data[index].status}\n`;
-			caption += `Tot. Eps : ${data[index].totEpisode}`;
+			caption += `${Ls.labels.actress} : ${data[index].actressStr}\n`;
+			caption += `${Ls.labels.director} : ${data[index].director}\n`;
+			caption += `${Ls.labels.status} : ${data[index].status}\n`;
+			caption += `${Ls.labels.totEps} : ${data[index].totEpisode}`;
 			let count = 0;
 			const rows = data[index].episodes.map((v) => {
 				count += 1;
@@ -35,7 +40,7 @@ export default defineCommand({
 							rowId: cmdId(cmd, `get ${v}`, ctx)
 						}
 					],
-					title: `${BOT_NAME} | Powered by Iflix`
+					title: t(locale, 'search.labels.poweredByTrueId', [BOT_NAME])
 				};
 			});
 
@@ -46,12 +51,12 @@ export default defineCommand({
 					caption,
 					templateButtons: [
 						{
-							urlButton: { displayText: 'Image Source', url: args[1] === 'next' ? data[index].image : data[index].thumbnail }
+							urlButton: { displayText: Ls.buttons.imageSource, url: args[1] === 'next' ? data[index].image : data[index].thumbnail }
 						},
 						index + 1 !== data.length
 							? {
 									quickReplyButton: {
-										displayText: 'Next Series',
+										displayText: Ls.buttons.nextSeries,
 										id: cmdId(cmd, `next ${data[index + 1].thumbnail} ${JSON.stringify(data)}`, ctx)
 									}
 								}
@@ -59,7 +64,7 @@ export default defineCommand({
 						index !== 0
 							? {
 									quickReplyButton: {
-										displayText: 'Previous Series',
+										displayText: Ls.buttons.previousSeries,
 										id: cmdId(cmd, `prev ${data[index - 1].thumbnail} ${JSON.stringify(data)}`, ctx)
 									}
 								}
@@ -72,16 +77,16 @@ export default defineCommand({
 			return await client.send(
 				from,
 				{
-					buttonText: 'Open List',
+					buttonText: Ls.buttons.openList,
 					text: '\t',
-					footer: '```Looking for the streaming URL? Choose between these options.```',
-					title: 'Iflix'.formatHeaders(),
+					footer: Ls.labels.lookingForStreaming,
+					title: Ls.titles.iflix.formatHeaders(),
 					sections: rows
 				},
 				{}
 			);
 		} else if (args[1] === 'get') {
-			return await client.reply(from, `${'Iflix Search'.formatHeaders()}\n\nURL : ${args[2]}`, message);
+			return await client.reply(from, `${Ls.titles.iflixSearch.formatHeaders()}\n\nURL : ${args[2]}`, message);
 		}
 
 		query = query.split(',');
@@ -94,13 +99,13 @@ export default defineCommand({
 				return await client.reply(from, data.error, message);
 			}
 
-			let caption = 'Iflix Search'.formatHeaders();
+			let caption = Ls.titles.iflixSearch.formatHeaders();
 
 			caption += `\n\nTitle : ${data[0].title}\n`;
-			caption += `Actress : ${data[0].actressStr}\n`;
-			caption += `Director : ${data[0].director}\n`;
-			caption += `Status : ${data[0].status}\n`;
-			caption += `Tot. Eps : ${data[0].totEpisode}`;
+			caption += `${Ls.labels.actress} : ${data[0].actressStr}\n`;
+			caption += `${Ls.labels.director} : ${data[0].director}\n`;
+			caption += `${Ls.labels.status} : ${data[0].status}\n`;
+			caption += `${Ls.labels.totEps} : ${data[0].totEpisode}`;
 			const rows = data[0].episodes.map((v, i) => {
 				return {
 					rows: [
@@ -109,7 +114,7 @@ export default defineCommand({
 							rowId: cmdId(cmd, `get ${v}`, ctx)
 						}
 					],
-					title: `${BOT_NAME} | Powered by Iflix`
+					title: t(locale, 'search.labels.poweredByTrueId', [BOT_NAME])
 				};
 			});
 
@@ -119,11 +124,11 @@ export default defineCommand({
 					image: { url: data[0].thumbnail },
 					caption: caption.formatForm(),
 					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: data[0].thumbnail } },
+						{ urlButton: { displayText: Ls.buttons.imageSource, url: data[0].thumbnail } },
 						data.length !== 1
 							? {
 									quickReplyButton: {
-										displayText: 'Next Series',
+										displayText: Ls.buttons.nextSeries,
 										id: cmdId(cmd, `next ${data[1].thumbnail} ${JSON.stringify(data)}`, ctx)
 									}
 								}
@@ -136,10 +141,10 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					buttonText: 'Open List',
+					buttonText: Ls.buttons.openList,
 					text: '\t',
-					footer: '```Looking for the streaming URL? Choose between these options.```',
-					title: 'Iflix'.formatHeaders(),
+					footer: Ls.labels.lookingForStreaming,
+					title: Ls.titles.iflix.formatHeaders(),
 					sections: rows
 				},
 				{}

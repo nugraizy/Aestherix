@@ -29,13 +29,11 @@ const regex = (input) => {
 	return { status: false, message: 'This URL is not a valid Bstation URL. Try another URL.' };
 };
 
-const processVideo = async (aid, client, { from, message, sender, filename, wait }) => {
+const processVideo = async (aid, client, { from, message, sender, filename, wait, locale, L }) => {
 	const video = await bilibiliDetailTv({ aid });
 
 	await wait.update(
-		` • Converting videos, this might take a while please wait.\n\nResolution : ${
-			video.resolution
-		}\nSize : ${getFilesizeFromBytes(video.size)}`.formatForm()
+		`${t(locale, 'common.core.progress.downloadingService', ['Bstation video', `${video.resolution}\n${L.core.labels.size} : ${getFilesizeFromBytes(video.size)}`])}`.formatForm()
 	);
 
 	const merge = await mergeVideoWithAudio(
@@ -48,7 +46,7 @@ const processVideo = async (aid, client, { from, message, sender, filename, wait
 
 	await client.send(
 		from,
-		{ video: Buffer.from(merge, 'base64'), caption: 'Bstation Downloader'.formatHeaders() },
+		{ video: Buffer.from(merge, 'base64'), caption: t(locale, 'downloader.titles.bstation').formatHeaders() },
 		{ quoted: message }
 	);
 };
@@ -101,9 +99,9 @@ export default defineCommand({
 				return await client.reply(from, t(locale, 'errors.numberRange', [1, videoIds.length]), message);
 			}
 
-			const wait = await client.waitMessage(from, `Downloading Bstation audio :\n${videoId}\nPlease wait`, message);
+			const wait = await client.waitMessage(from, t(locale, 'common.core.progress.downloadingServiceAudio', ['Bstation', videoId]), message);
 
-			await processVideo(videoId, client, { from, message, prettyNumber, wait });
+			await processVideo(videoId, client, { from, message, prettyNumber, wait, locale, L });
 
 			return;
 		}
@@ -138,13 +136,13 @@ export default defineCommand({
 				continue;
 			}
 
-			await wait.update(`Downloading Bstation video :\n${regexs.message}\nPlease wait`);
+			await wait.update(t(locale, 'common.core.progress.downloadingServiceVideo', ['Bstation', regexs.message]));
 
-			await processVideo(regexs.message.trim(), client, { from, message, sender, filename, wait });
+			await processVideo(regexs.message.trim(), client, { from, message, sender, filename, wait, locale, L });
 			success++;
 		}
 
-		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
+		await wait.update(t(locale, 'common.core.progress.commandFinished', [success, error]));
 
 		loggers.info(`${color('Downloaded Bstation File', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}

@@ -16,6 +16,7 @@ export default defineCommand({
 	async run({ from, message, args, settings, cmd }, client, store) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lo = useLocale(locale, 'owner');
 
 		const messages = store.loadMessages(from);
 
@@ -30,11 +31,11 @@ export default defineCommand({
 			await client.reply(dataMessage.from, L.simulate.here, dataMessage.message);
 			await client.reply(
 				dataMessage?.from,
-				`Message Metadata : 
+				`${Lo.labels.messageMetadata} 
 
-Possibly Hidetag : ${dataMessage.mention.length && !dataMessage.body.match(/@[0-9]+/g) ? 'Yup' : 'Nope'}
-Type Message : ${dataMessage.type}
-Tot. Tags : ${dataMessage.mention.length}`,
+${Lo.labels.possiblyHidetag} : ${dataMessage.mention.length && !dataMessage.body.match(/@[0-9]+/g) ? Lo.labels.yup : Lo.labels.nope}
+${Lo.labels.typeMessage} : ${dataMessage.type}
+${Lo.labels.totTags} : ${dataMessage.mention.length}`,
 				dataMessage.message
 			);
 
@@ -102,9 +103,9 @@ Tot. Tags : ${dataMessage.mention.length}`,
 		await client.send(
 			from,
 			{
-				buttonText: 'Open List',
-				title: 'choosse one to fetch the metadata message',
-				footer: 'and bot will send the message',
+				buttonText: Lo.labels.openList,
+				title: Lo.labels.choosseOne,
+				footer: Lo.labels.andBotWillSend,
 				text: '\t',
 				sections: row
 			},

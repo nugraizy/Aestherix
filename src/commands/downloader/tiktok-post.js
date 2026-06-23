@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { color, formatNumber, loggers, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { tiktok } from '../../utils/tiktok/index.js';
 import { defineCommand } from '../_define.js';
@@ -20,6 +20,7 @@ export default defineCommand({
 	async run({ from, query, prettyNumber, message, device }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const DL = useLocale(locale, 'downloader');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noUrl, message);
@@ -69,20 +70,20 @@ export default defineCommand({
 			}
 
 			const date = dayjs(posts[data].published * 1000).format('HH:mm:ss DD/MM/YYYY');
-			let caption = `TikTok ${posts[data].type === 'images' ? 'Slide' : 'Video'}`.formatHeaders();
+			let caption = t(locale, 'downloader.titles.tiktok', [posts[data].type === 'images' ? 'Slide' : 'Video']).formatHeaders();
 
 			caption += `\n\nAuthor : ${posts[data].author}\n`;
 			caption += `Username : ${posts[data].nickname}\n`;
-			caption += `Verifies : ${posts[data].verified ? 'Verified' : 'Not Verified'}\n`;
-			caption += `Published : ${date}\n`;
+			caption += `${DL.labels.verifies} : ${posts[data].verified ? 'Verified' : 'Not Verified'}\n`;
+			caption += `${DL.labels.published} : ${date}\n`;
 
 			if (posts[data].type !== 'images') {
-				caption += `Ratio : ${posts[data].ratioHighest || posts[data].ratio}\n`;
-				posts[data].fps && posts[data].ratioHighest && (caption += `Frame Rates : ${posts[data].fps}\n`);
-				caption += `Duration : ${posts[data].videoDuration}\n`;
+				caption += `${DL.labels.ratio} : ${posts[data].ratioHighest || posts[data].ratio}\n`;
+				posts[data].fps && posts[data].ratioHighest && (caption += `${DL.labels.frameRates} : ${posts[data].fps}\n`);
+				caption += `${DL.labels.duration} : ${posts[data].videoDuration}\n`;
 			}
 
-			caption += `Music : ${posts[data].musicTitle}\n`;
+			caption += `${DL.labels.music} : ${posts[data].musicTitle}\n`;
 
 			caption += `👥 ${formatNumber(posts[data].followers)} 👤 ${formatNumber(posts[data].following)}\n`;
 			caption += `👍 ${formatNumber(posts[data].liked)} 🔄 ${formatNumber(posts[data].shared)} 💬 ${formatNumber(
@@ -93,12 +94,12 @@ export default defineCommand({
 			caption += `📝 ${posts[data].videoDescription}\n`;
 
 			if (posts[data].type === 'images') {
-				caption += `Total Images : ${posts[data].urls.images.length}\n`;
+				caption += `${DL.labels.totalImages} : ${posts[data].urls.images.length}\n`;
 
 				const images = posts[data].urls.images;
 
 				if (device.isIos) {
-					await wait.update(`Sending ${images.length} image(s)...`);
+					await wait.update(t(locale, 'downloader.labels.sendingImages', [images.length]));
 
 					await client.send(from, { text: caption.trim() }, { quoted: message });
 
@@ -108,20 +109,20 @@ export default defineCommand({
 				} else {
 					const builder = new client.TemplateBuilder.Carousel();
 
-					await wait.update(`Preparing TikTok Carousel Message for ${images.length} Images. Please wait...`);
+					await wait.update(t(locale, 'downloader.labels.preparingCarousel', [images.length]));
 
 					await builder
 						.destination(from)
 						.body(caption)
-						.footer('Powered by Hidden Finder')
-						.header('Header')
+						.footer(t(locale, 'common.core.footer.poweredBy', ['Hidden Finder']))
+						.header(DL.labels.header || 'Header')
 						.cards(
 							images.map(({ buffer, index, urlWithWatermark }) => ({
-								body: `Image ${index} of ${images.length}`,
+								body: t(locale, 'downloader.labels.imageOf', [index, images.length]),
 								footer: '',
 								title: '',
 								header: buffer,
-								buttons: [builder.button.url({ display: `Image ${index}`, url: urlWithWatermark })]
+								buttons: [builder.button.url({ display: t(locale, 'downloader.labels.image', [index]), url: urlWithWatermark })]
 							}))
 						)
 						.send();

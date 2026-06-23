@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { arq } from '../../utils/arq/index.js';
 import { removeDuplicatesArray } from '../../utils/modules/index.js';
@@ -17,6 +17,7 @@ export default defineCommand({
 	async run({ query, from, message, args, type }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -30,13 +31,13 @@ export default defineCommand({
 				from,
 				{
 					image: { url: data[index] },
-					caption: 'Wallpaper'.formatHeaders(),
+					caption: Ls.titles.wallpaper.formatHeaders(),
 					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: args[1] === 'next' ? data[index] : data[index] } },
+						{ urlButton: { displayText: Ls.buttons.imageSource, url: args[1] === 'next' ? data[index] : data[index] } },
 						index + 1 !== data.length
 							? {
 									quickReplyButton: {
-										displayText: 'Next Image',
+										displayText: Ls.buttons.nextImage,
 										id: cmdId('wallpaper', `next ${data[index + 1]} ${JSON.stringify(data)}`)
 									}
 								}
@@ -44,7 +45,7 @@ export default defineCommand({
 						index !== 0
 							? {
 									quickReplyButton: {
-										displayText: 'Previous Image',
+										displayText: Ls.buttons.previousImage,
 										id: cmdId('wallpaper', `prev ${data[index - 1]} ${JSON.stringify(data)}`)
 									}
 								}
@@ -73,13 +74,13 @@ export default defineCommand({
 				from,
 				{
 					image: { url: result[0] },
-					caption: 'Wallpaper'.formatHeaders(),
+					caption: Ls.titles.wallpaper.formatHeaders(),
 					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: result[0] } },
+						{ urlButton: { displayText: Ls.buttons.imageSource, url: result[0] } },
 						result.length !== 1
 							? {
 									quickReplyButton: {
-										displayText: 'Next Image',
+										displayText: Ls.buttons.nextImage,
 										id: cmdId('wallpaper', `next ${result[1]} ${JSON.stringify(result)}`)
 									}
 								}

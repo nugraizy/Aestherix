@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
@@ -39,7 +39,7 @@ export default defineCommand({
 
 			cached.currentBatch++;
 
-			return await sendBatch(cached, from, message, client, { prefix, device });
+			return await sendBatch(cached, from, message, client, { prefix, device, locale });
 		}
 
 		if (query.startsWith('sort ')) {
@@ -54,7 +54,7 @@ export default defineCommand({
 			cached.order = cached.order === 'asc' ? 'desc' : 'asc';
 			cached.currentBatch = 0;
 
-			return await sendBatch(cached, from, message, client, { prefix, device });
+			return await sendBatch(cached, from, message, client, { prefix, device, locale });
 		}
 
 		const wait = await client.waitMessage(from, L.success.fetchingChapters, message);
@@ -63,7 +63,7 @@ export default defineCommand({
 			const chapters = await shinigami.getChapters(query.trim());
 
 			if (!chapters.length) {
-				return await wait.update('No chapters found for this manga.');
+				return await wait.update(t(locale, 'common.core.errors.noChaptersFound', ['manga']));
 			}
 
 			const sessionId = randomChar('abcdefghijklmnopqrstuvwxyz0123456789', 8);
@@ -77,8 +77,10 @@ export default defineCommand({
 
 			chapterSessions.set(sessionId, state);
 
-			await wait.update(`${new Set(state.allChapters.map((c) => String(c.number))).size} chapter(s) found.`);
-			await sendBatch(state, from, message, client, { prefix, device });
+			const chapterCount = new Set(state.allChapters.map((c) => String(c.number))).size;
+
+			await wait.update(t(locale, 'common.core.progress.chaptersFound', [chapterCount]));
+			await sendBatch(state, from, message, client, { prefix, device, locale });
 		} catch (error) {
 			return await wait.update(`Error: ${error.message || 'Failed to fetch chapters.'}`);
 		}
@@ -93,9 +95,10 @@ async function sendBatch(state, from, message, client, ctx) {
 	const batch = allChapters.slice(start, start + perBatch);
 	const totalBatches = Math.ceil(allChapters.length / perBatch);
 	const hasMore = currentBatch + 1 < totalBatches;
-	const sortLabel = order === 'asc' ? '⬇️ Latest First' : '⬆️ Oldest First';
+	const Ls = useLocale(ctx.locale, 'search');
+	const sortLabel = order === 'asc' ? Ls.buttons.sortLatest : Ls.buttons.sortOldest;
 	const total = new Set(allChapters.map((c) => String(c.number))).size;
-	const body = `${'Shinigami Chapters'.formatHeaders()}\n\nTotal : ${total} chapter(s)\nShowing : ${batch[0]?.number}–${batch[batch.length - 1]?.number}\nOrder : ${order === 'desc' ? 'Latest → Oldest' : 'Oldest → Latest'}\n\nSelect a chapter to read.`;
+	const body = `${Ls.titles.shinigamiChapters.formatHeaders()}\n\n${Ls.labels.chapterTotal.replace('{0}', total)}\nShowing : ${batch[0]?.number}–${batch[batch.length - 1]?.number}\nOrder : ${order === 'desc' ? 'Latest → Oldest' : 'Oldest → Latest'}\n\nSelect a chapter to read.`;
 
 	const builder = new client.TemplateBuilder.Native();
 
@@ -111,7 +114,7 @@ async function sendBatch(state, from, message, client, ctx) {
 	});
 
 	if (hasMore) {
-		buttons.push(builder.button.reply({ display: '➡️ More Chapters', id: cmdId('sgch', 'next ' + sessionId, ctx) }));
+		buttons.push(builder.button.reply({ display: Ls.buttons.moreChapters, id: cmdId('sgch', 'next ' + sessionId, ctx) }));
 	}
 
 	buttons.push(builder.button.reply({ display: sortLabel, id: cmdId('sgch', 'sort ' + sessionId, ctx) }));
@@ -119,7 +122,7 @@ async function sendBatch(state, from, message, client, ctx) {
 	await builder
 		.destination(from)
 		.body(body)
-		.footer('Powered by ' + BOT_NAME)
+		.footer(t(ctx.locale, 'common.core.footer.poweredBy', [BOT_NAME]))
 		.buttons(...buttons)
 		.send();
 }

@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { isURL, toMp4, traceMoe } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -32,6 +32,7 @@ export default defineCommand({
 	) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const La = useLocale(locale, 'anime');
 
 		if (!isURL(query) && !isMediaImage) {
 			return await client.reply(from, L.errors.imageRequired, message);
@@ -64,33 +65,33 @@ export default defineCommand({
 				}
 			} = args;
 
-			const capt = `\`\`\`• Tracking Information\`\`\`\n
-Title : ${native} (${romaji})
-Similarity : ${args.similarity}%
-Ep : ${args.episode}
-from : ${String(args.from).toReadAble()}
-To : ${String(args.to).toReadAble()}
+			const capt = `\`\`\`${La.labels.trackingInformation}\`\`\`\n
+${La.labels.fullTitle} : ${native} (${romaji})
+${La.labels.similarity} : ${args.similarity}%
+${La.labels.ep} : ${args.episode}
+${La.labels.from} : ${String(args.from).toReadAble()}
+${La.labels.to} : ${String(args.to).toReadAble()}
     
-\`\`\`• Anime Information\`\`\`\n
-Type : ${type.toLowerCase().capitalize()} (${format})
-Source : ${source.toLowerCase().capitalize()}
-Status : ${status.toLowerCase().capitalize()}
-Tot. Ep : ${episodes}
-Ep Duration : ${duration}
-Starts Airing : ${sDay} ${sMonth} ${sYear}
-Ends Airing : ${eDay} ${eMonth} ${eYear}
-Genres : ${genres.join(', ')}
-+18? : ${isAdult ? 'Yes' : 'No'}
-Studios : ${studios.edges
+\`\`\`${La.labels.animeInformation}\`\`\`\n
+${La.labels.type} : ${type.toLowerCase().capitalize()} (${format})
+${La.labels.source} : ${source.toLowerCase().capitalize()}
+${La.labels.status} : ${status.toLowerCase().capitalize()}
+${La.labels.totEp} : ${episodes}
+${La.labels.epDuration} : ${duration}
+${La.labels.startsAiring} : ${sDay} ${sMonth} ${sYear}
+${La.labels.endsAiring} : ${eDay} ${eMonth} ${eYear}
+${La.labels.genres} : ${genres.join(', ')}
+${La.labels.isAdult} : ${isAdult ? t(locale, 'common.labels.yes') : t(locale, 'common.labels.no')}
+${La.labels.studios} : ${studios.edges
 				.map((v) => {
 					return v.node.name;
 				})
 				.join(', ')}
 ${
 	externalLinks.length !== 0
-		? `\n\nExt Links : \n\n${externalLinks
+		? `\n\n${La.labels.extLinks}\n\n${externalLinks
 				.map((v) => {
-					return `Site: ${v.site}\nURL : ${v.url}\n`;
+					return `${La.labels.site} : ${v.site}\n${La.labels.url} : ${v.url}\n`;
 				})
 				.join('\n')}`
 		: ''
@@ -102,13 +103,13 @@ ${
 				from,
 				{
 					video: Buffer.from(buffer, 'base64'),
-					caption: `${'What Anime ?'.formatHeaders()}\n\n${capt.trim().formatForm()}`,
+					caption: `${La.titles.whatAnime.formatHeaders()}\n\n${capt.trim().formatForm()}`,
 					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: large } },
-						{ urlButton: { displayText: 'Video Source', url: args.video } },
-						{ urlButton: { displayText: 'Anilist Source', url: siteUrl } }
+						{ urlButton: { displayText: La.buttons.imageSource, url: large } },
+						{ urlButton: { displayText: La.buttons.videoSource, url: args.video } },
+						{ urlButton: { displayText: La.buttons.anilistSource, url: siteUrl } }
 					],
-					footer: 'Powered by trace.moe'
+					footer: La.buttons.poweredByTraceMoe
 				},
 				{ quoted: message }
 			);
@@ -157,34 +158,34 @@ ${
 				studios
 			}
 		} = result[0];
-		const capt = `\`\`\`• Tracking Information\`\`\`\n
-Title : ${native} (${romaji})
-Similarity : ${result[0].similarity}%
-Ep : ${result[0].episode}
-from : ${String(result[0].from).toReadAble()}
-To : ${String(result[0].to).toReadAble()}
+		const capt = `\`\`\`${La.labels.trackingInformation}\`\`\`\n
+${La.labels.fullTitle} : ${native} (${romaji})
+${La.labels.similarity} : ${result[0].similarity}%
+${La.labels.ep} : ${result[0].episode}
+${La.labels.from} : ${String(result[0].from).toReadAble()}
+${La.labels.to} : ${String(result[0].to).toReadAble()}
 
-\`\`\`• Anime Information\`\`\`\n
-Type : ${type.toLowerCase().capitalize()} (${format})
-Source : ${source.toLowerCase().capitalize()}
-Status : ${status.toLowerCase().capitalize()}
-Tot. Ep : ${episodes}
-Ep Duration : ${duration}
-Starts Airing : ${sDay} ${sMonth} ${sYear}
-Ends Airing : ${eDay} ${eMonth} ${eYear}
-Genres : ${genres.join(', ')}
-+18? : ${isAdult ? 'Yes' : 'No'}
-Studios : ${studios.edges
+\`\`\`${La.labels.animeInformation}\`\`\`\n
+${La.labels.type} : ${type.toLowerCase().capitalize()} (${format})
+${La.labels.source} : ${source.toLowerCase().capitalize()}
+${La.labels.status} : ${status.toLowerCase().capitalize()}
+${La.labels.totEp} : ${episodes}
+${La.labels.epDuration} : ${duration}
+${La.labels.startsAiring} : ${sDay} ${sMonth} ${sYear}
+${La.labels.endsAiring} : ${eDay} ${eMonth} ${eYear}
+${La.labels.genres} : ${genres.join(', ')}
+${La.labels.isAdult} : ${isAdult ? t(locale, 'common.labels.yes') : t(locale, 'common.labels.no')}
+${La.labels.studios} : ${studios.edges
 			.map((v) => {
 				return v.node.name;
 			})
 			.join(', ')}
 
-Ext Links :
+${La.labels.extLinks}
 
 ${externalLinks
 	.map((v) => {
-		return `Site: ${v.site}\nURL : ${v.url}\n`;
+		return `${La.labels.site} : ${v.site}\n${La.labels.url} : ${v.url}\n`;
 	})
 	.join('\n')}`;
 
@@ -194,13 +195,13 @@ ${externalLinks
 
 		await builder
 			.destination(from)
-			.footer('Powered by trace.moe')
+			.footer(La.buttons.poweredByTraceMoe)
 			.header('', Buffer.from(buffer, 'base64'))
-			.body(`${'What Anime ?'.formatHeaders()}\n\n${capt.trim()}`)
+			.body(`${La.titles.whatAnime.formatHeaders()}\n\n${capt.trim()}`)
 			.buttons(
-				builder.button.url({ display: 'Image Source', url: large }),
-				builder.button.url({ display: 'Video Source', url: result[0].video }),
-				builder.button.url({ display: 'Anilist Source', url: siteUrl })
+				builder.button.url({ display: La.buttons.imageSource, url: large }),
+				builder.button.url({ display: La.buttons.videoSource, url: result[0].video }),
+				builder.button.url({ display: La.buttons.anilistSource, url: siteUrl })
 			)
 			.send();
 

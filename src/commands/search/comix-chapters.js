@@ -24,6 +24,7 @@ export default defineCommand({
 	async run({ query, from, message, prefix, device }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.mangaSlugRequired, message);
@@ -38,7 +39,7 @@ export default defineCommand({
 			}
 
 			cached.currentBatch++;
-			return await sendBatch(cached, from, message, client, { prefix, device });
+			return await sendBatch(cached, from, message, client, { prefix, device, locale });
 		}
 
 		if (query.startsWith('sort ')) {
@@ -53,7 +54,7 @@ export default defineCommand({
 			cached.order = cached.order === 'asc' ? 'desc' : 'asc';
 			cached.currentBatch = 0;
 
-			return await sendBatch(cached, from, message, client, { prefix, device });
+			return await sendBatch(cached, from, message, client, { prefix, device, locale });
 		}
 
 		const wait = await client.waitMessage(from, L.success.fetchingChapters, message);
@@ -62,7 +63,7 @@ export default defineCommand({
 		const result = await comix.getChapters(mangaInput, { allPages: true, deduplicate: false });
 
 		if (!result.items.length) {
-			return await wait.update('No chapters found for this manga.');
+			return await wait.update(Ls.labels.noChaptersFound || 'No chapters found for this manga.');
 		}
 
 		const allChapters = [...result.items].reverse();
@@ -73,9 +74,9 @@ export default defineCommand({
 
 		chapterSessions.set(sessionId, state);
 
-		await wait.update(`${new Set(allChapters.map((c) => String(c.number))).size} chapter(s) found.`);
+		await wait.update(Ls.labels.chaptersFound.replace('{0}', new Set(allChapters.map((c) => String(c.number))).size));
 
-		await sendBatch(state, from, message, client, { prefix, device });
+		await sendBatch(state, from, message, client, { prefix, device, locale });
 	}
 });
 
@@ -87,9 +88,11 @@ async function sendBatch(state, from, message, client, ctx) {
 	const batch = allChapters.slice(start, start + perBatch);
 	const totalBatches = Math.ceil(allChapters.length / perBatch);
 	const hasMore = currentBatch + 1 < totalBatches;
-	const sortLabel = order === 'asc' ? '⬇️ Latest First' : '⬆️ Oldest First';
+	const Ls = useLocale(ctx.locale, 'search');
+	const sortLabel = order === 'asc' ? Ls.buttons.sortLatest : Ls.buttons.sortOldest;
 	const total = new Set(allChapters.map((c) => String(c.number))).size;
-	const body = `${'Comix Chapters'.formatHeaders()}\n\nTotal : ${total} chapter(s)\nShowing : ${start + 1}–${start + batch.length}\nOrder : ${order === 'desc' ? 'Latest → Oldest' : 'Oldest → Latest'}\n\nSelect a chapter to read.`;
+	const orderLabel = order === 'desc' ? Ls.labels.orderLatest : Ls.labels.orderOldest;
+	const body = `${Ls.titles.comixChapters.formatHeaders()}\n\n${Ls.labels.chapterTotal.replace('{0}', total)}\n${Ls.labels.showing.replace('{0}', start + 1).replace('{1}', start + batch.length)}\n${Ls.labels.order.replace('{0}', orderLabel)}\n\n${Ls.labels.selectManga}`;
 
 	const builder = new client.TemplateBuilder.Native();
 
@@ -108,7 +111,7 @@ async function sendBatch(state, from, message, client, ctx) {
 	});
 
 	if (hasMore) {
-		buttons.push(builder.button.reply({ display: '➡️ More Chapters', id: cmdId('cxch', 'next ' + sessionId, ctx) }));
+		buttons.push(builder.button.reply({ display: Ls.buttons.moreChapters, id: cmdId('cxch', 'next ' + sessionId, ctx) }));
 	}
 
 	buttons.push(builder.button.reply({ display: sortLabel, id: cmdId('cxch', 'sort ' + sessionId, ctx) }));

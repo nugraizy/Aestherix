@@ -1,7 +1,7 @@
 import parser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { color, delay, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -15,9 +15,10 @@ export default defineCommand({
 	cooldown: 10,
 	limit: 9,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, isOwner, prefix }, client) {
+	async run({ from, query, prettyNumber, message, sender, isOwner, prefix }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const DL = useLocale(locale, 'downloader');
 
 		if (!configuration.isInstagramInitiated) {
 			return await client.reply(
@@ -50,13 +51,13 @@ export default defineCommand({
 				continue;
 			}
 
-			let capt = 'Instagram Story'.formatHeaders();
+		let capt = DL.titles.igStory.formatHeaders();
 
-			capt += `\n\nUsername : ${stories[data].username}\n`;
-			capt += `Fullname : ${stories[data].fullName || '-'}\n`;
-			capt += `Verified : ${stories[data].isVerified ? 'Verified' : 'Not Verified'}\n`;
-			capt += `Private : ${stories[data].isPrivate ? 'Private' : 'Public'}\n`;
-			capt += `Total Stories : ${stories[data].stories.length}\n`;
+		capt += `\n\nUsername : ${stories[data].username}\n`;
+		capt += `Fullname : ${stories[data].fullName || '-'}\n`;
+		capt += `${DL.labels.verified} : ${stories[data].isVerified ? 'Verified' : 'Not Verified'}\n`;
+		capt += `${DL.labels.private} : ${stories[data].isPrivate ? 'Private' : 'Public'}\n`;
+		capt += `${DL.labels.totalStories} : ${stories[data].stories.length}\n`;
 
 			await client.reply(from, capt.trim().formatForm(), message);
 
@@ -68,7 +69,7 @@ export default defineCommand({
 			success++;
 		}
 
-		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
+		await wait.update(t(locale, 'common.core.commands.downloadBatchFinished', [success, error]));
 
 		loggers.info(`${color('Downloaded Instagram Story', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}

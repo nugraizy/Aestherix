@@ -4,6 +4,7 @@ import dayjs from 'dayjs';
 import fs from 'fs-extra';
 
 import configuration from '../../helper/config/connect.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { color, getFilesize, getFilesizeFromBytes, loggers } from '../../utils/modules/index.js';
 import { Context } from '../context.js';
 
@@ -39,6 +40,9 @@ const deletedHandler = async (client, message, fetches) => {
 			mediaData
 		} = message;
 
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+
 		const messages = message?.message?.message;
 
 		if (!messages || isBotInstance || isFromMe || from === 'status@broadcast') {
@@ -70,14 +74,14 @@ const deletedHandler = async (client, message, fetches) => {
 				const quotedType = Object.keys(messages[type].contextInfo.quotedMessage)[0];
 				const quotedContent = messages[type].contextInfo.quotedMessage[quotedType];
 
-				quotedMessage = buildQuotedMessage(quotedType, quotedContent); // eslint-disable-line
+				quotedMessage = buildQuotedMessage(quotedType, quotedContent, L); // eslint-disable-line
 			}
 
 			switch (type) {
 				case 'extendedTextMessage':
 				case 'conversation':
 					{
-						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, body || 'Unknown', quotedMessage); // eslint-disable-line
+						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, body || L.core.deleted.unknown, quotedMessage, L); // eslint-disable-line
 
 						await sendMessageWithMentions(client, from, stringDeleted, options); // eslint-disable-line
 					}
@@ -88,7 +92,7 @@ const deletedHandler = async (client, message, fetches) => {
 						const result = await client.downloadMediaMessage(message?.message, 'buffer');
 						const fileSize = getFilesizeFromBytes(Buffer.byteLength(result));
 						const sticker = await prepareAndSendSticker(client, result, mediaData.message.stickerMessage.isAnimated);
-						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, `\nSize : ${fileSize}`, quotedMessage);
+						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, `\n${L.core.deleted.size}${fileSize}`, quotedMessage, L);
 
 						await client.send(from, { sticker }, options);
 						await sendMessageWithMentions(client, from, stringDeleted, options); // eslint-disable-line
@@ -99,7 +103,7 @@ const deletedHandler = async (client, message, fetches) => {
 					{
 						const image = await downloadAndSaveMediaMessage(client, extractMediaData, filename, 'imageMessage'); // eslint-disable-line
 						const fileSize = getFilesize(image);
-						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, `\nSize : ${fileSize}`, quotedMessage); // eslint-disable-line
+						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, `\n${L.core.deleted.size}${fileSize}`, quotedMessage, L); // eslint-disable-line
 
 						await sendImageMessageWithCaption(client, from, image, stringDeleted, options); // eslint-disable-line
 						await fs.unlink(image);
@@ -110,7 +114,7 @@ const deletedHandler = async (client, message, fetches) => {
 					{
 						const video = await downloadAndSaveMediaMessage(client, extractMediaData, filename, 'videoMessage'); // eslint-disable-line
 						const fileSize = getFilesize(video);
-						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, `\nSize : ${fileSize}`, quotedMessage); // eslint-disable-line
+						const stringDeleted = buildDeletedTextMessage(pushname, type, timeStamp, `\n${L.core.deleted.size}${fileSize}`, quotedMessage, L); // eslint-disable-line
 
 						await sendVideoMessageWithCaption(client, from, video, stringDeleted, options); // eslint-disable-line
 						await fs.unlink(video);
@@ -121,7 +125,7 @@ const deletedHandler = async (client, message, fetches) => {
 					{
 						const audio = await downloadAndSaveMediaMessage(client, extractMediaData, filename, 'audioMessage'); // eslint-disable-line
 						const fileSize = getFilesize(audio);
-						const audioType = extractMediaData.ptt ? 'Voice Note' : 'Audio File';
+						const audioType = extractMediaData.ptt ? L.core.deleted.voiceNote : L.core.deleted.audioFile;
 						const mimeType = extractMediaData.mimetype;
 						const stringDeleted = buildAudioDeletedTextMessage(
 							pushname,
@@ -129,8 +133,9 @@ const deletedHandler = async (client, message, fetches) => {
 							timeStamp,
 							audioType,
 							mimeType,
-							`Size : ${fileSize}`,
-							quotedMessage
+							`${L.core.deleted.size}${fileSize}`,
+							quotedMessage,
+							L
 						);
 
 						await sendAudioMessageWithCaption(client, from, audio, stringDeleted, options); // eslint-disable-line
@@ -145,7 +150,8 @@ const deletedHandler = async (client, message, fetches) => {
 							type,
 							timeStamp,
 							extractMediaData.displayName,
-							quotedMessage
+							quotedMessage,
+							L
 						);
 
 						await sendContactMessage(
@@ -166,7 +172,8 @@ const deletedHandler = async (client, message, fetches) => {
 							type,
 							timeStamp,
 							extractMediaData.contacts,
-							quotedMessage
+							quotedMessage,
+							L
 						);
 
 						await sendContactsArrayMessage(
@@ -189,7 +196,8 @@ const deletedHandler = async (client, message, fetches) => {
 							timeStamp,
 							extractMediaData.degreesLatitude,
 							extractMediaData.degreesLongitude,
-							quotedMessage
+							quotedMessage,
+							L
 						);
 
 						await sendLocationMessage(
@@ -211,28 +219,28 @@ const deletedHandler = async (client, message, fetches) => {
 	}
 };
 
-const buildQuotedMessage = (type, content) => {
+const buildQuotedMessage = (type, content, L) => {
 	switch (type) {
 		case 'conversation':
-			return `\n\nReplied to :\nMessage : ${content.conversation || 'Unknown'}`;
+			return `\n\n${L.core.deleted.repliedTo}${content.conversation || L.core.deleted.unknown}`;
 		case 'extendedTextMessage':
-			return `\n\nReplied to :\nMessage : ${content.text || 'Unknown'}`;
+			return `\n\n${L.core.deleted.repliedTo}${content.text || L.core.deleted.unknown}`;
 		case 'documentMessage':
-			return `\n\nReplied to :\nFilename : ${content.fileName || 'Unknown'}\nMimetype : ${content.mimetype || 'Unknown'}`;
+			return `\n\nReplied to :\nFilename : ${content.fileName || L.core.deleted.unknown}\nMimetype : ${content.mimetype || L.core.deleted.unknown}`;
 		case 'locationMessage':
-			return `\n\nReplied to :\nLat : ${content.degreesLatitude || 'Unknown'}\nLong : ${content.degreesLongitude || 'Unknown'}`;
+			return `\n\nReplied to :\nLat : ${content.degreesLatitude || L.core.deleted.unknown}\nLong : ${content.degreesLongitude || L.core.deleted.unknown}`;
 		case 'contactMessage':
-			return `\n\nReplied to :\nDisplayname : ${content.displayName || 'Unknown'}`;
+			return `\n\nReplied to :\nDisplayname : ${content.displayName || L.core.deleted.unknown}`;
 		case 'contactsArrayMessage':
 			const contacts = content.contacts || [];
-			const contactNames = contacts.map((contact) => contact.displayName || 'Unknown').join('\n');
+			const contactNames = contacts.map((contact) => contact.displayName || L.core.deleted.unknown).join('\n');
 
 			return `\n\nReplied to :\nTotal Contact : ${contacts.length || 0}\nList Name :\n${contactNames}`;
 		case 'imageMessage':
 		case 'videoMessage':
-			return `\n\nReplied to :\n${content.caption || 'No Caption'}`;
+			return `\n\n${L.core.deleted.repliedTo}${content.caption || L.core.deleted.noCaption}`;
 		case 'audioMessage':
-			return content.ptt ? '\n\nReplied to :\nType Audio : Voice Note' : '\n\nReplied to :\nType Audio : Audio File';
+			return content.ptt ? `\n\n${L.core.deleted.repliedAudio}${L.core.deleted.voiceNote}` : `\n\n${L.core.deleted.repliedAudio}${L.core.deleted.audioFile}`;
 		case 'stickerMessage':
 			return '';
 		default:
@@ -240,54 +248,54 @@ const buildQuotedMessage = (type, content) => {
 	}
 };
 
-const buildDeletedTextMessage = (pushname, type, timeStamp, body, quotedMessage) => {
-	return `\`\`\`Message Deleted\n\`\`\`
-Name : ${pushname}
-Type : ${type}
-Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
-Message : ${body}${quotedMessage}
+const buildDeletedTextMessage = (pushname, type, timeStamp, body, quotedMessage, L) => {
+	return `${'```' + L.core.deleted.messageDeleted + '```'}
+${L.core.deleted.name}${pushname}
+${L.core.deleted.type}${type}
+${L.core.deleted.time}${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
+${L.core.deleted.message}${body}${quotedMessage}
 `.trim();
 };
 
-const buildAudioDeletedTextMessage = (pushname, type, timeStamp, audioType, mimeType, fileSize, quotedMessage) => {
-	return `\`\`\`Message Deleted\n\`\`\`
-Name : ${pushname}
-Type : ${type}
-Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
-Audio Type : ${audioType}
-Mimetype : ${mimeType}
-Size : ${fileSize}${quotedMessage}
+const buildAudioDeletedTextMessage = (pushname, type, timeStamp, audioType, mimeType, fileSize, quotedMessage, L) => {
+	return `${'```' + L.core.deleted.messageDeleted + '```'}
+${L.core.deleted.name}${pushname}
+${L.core.deleted.type}${type}
+${L.core.deleted.time}${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
+${L.core.deleted.audioType || 'Audio Type : '}${audioType}
+${L.core.deleted.mimetype}${mimeType}
+${L.core.deleted.size}${fileSize}${quotedMessage}
 `.trim();
 };
 
-const buildContactDeletedTextMessage = (pushname, type, timeStamp, displayName, quotedMessage) => {
-	return `\`\`\`Message Deleted\n\`\`\`
-Name : ${pushname}
-Type : ${type}
-Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
-Displayname : ${displayName}${quotedMessage}
+const buildContactDeletedTextMessage = (pushname, type, timeStamp, displayName, quotedMessage, L) => {
+	return `${'```' + L.core.deleted.messageDeleted + '```'}
+${L.core.deleted.name}${pushname}
+${L.core.deleted.type}${type}
+${L.core.deleted.time}${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
+${L.core.deleted.displayname}${displayName}${quotedMessage}
 `.trim();
 };
 
-const buildContactsArrayDeletedTextMessage = (pushname, type, timeStamp, contacts, quotedMessage) => {
-	const contactNames = contacts.map((contact, index) => `${index + 1}. ${contact.displayName || 'Unknown'}`).join('\n');
+const buildContactsArrayDeletedTextMessage = (pushname, type, timeStamp, contacts, quotedMessage, L) => {
+	const contactNames = contacts.map((contact, index) => `${index + 1}. ${contact.displayName || L.core.deleted.unknown}`).join('\n');
 
-	return `\`\`\`Message Deleted\n\`\`\`
-Name : ${pushname}
-Type : ${type}
-Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
-Displayname :
+	return `${'```' + L.core.deleted.messageDeleted + '```'}
+${L.core.deleted.name}${pushname}
+${L.core.deleted.type}${type}
+${L.core.deleted.time}${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
+${L.core.deleted.displayname}
 ${contactNames}${quotedMessage}
 `.trim();
 };
 
-const buildLocationDeletedTextMessage = (pushname, type, timeStamp, lat, long, quotedMessage) => {
-	return `\`\`\`Message Deleted\n\`\`\`
-Name : ${pushname}
-Type : ${type}
-Time : ${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
-Lat : ${lat}
-Long : ${long}${quotedMessage}
+const buildLocationDeletedTextMessage = (pushname, type, timeStamp, lat, long, quotedMessage, L) => {
+	return `${'```' + L.core.deleted.messageDeleted + '```'}
+${L.core.deleted.name}${pushname}
+${L.core.deleted.type}${type}
+${L.core.deleted.time}${dayjs.unix(timeStamp).format('HH:mm:ss DD/MM/YYYY')}
+${L.core.deleted.lat}${lat}
+${L.core.deleted.long}${long}${quotedMessage}
 `.trim();
 };
 

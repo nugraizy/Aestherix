@@ -3,7 +3,7 @@ import { BOT_NAME } from '../../core/constants.js';
 import dayjs from 'dayjs';
 
 import configuration from '../../helper/config/connect.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { getRuntime } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -78,6 +78,7 @@ export default defineCommand({
 	async run({ from, args, message }, client, store) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lo = useLocale(locale, 'owner');
 
 		if (args.length === 1) {
 			return await client.reply(from, L.errors.statusRequired, message);
@@ -93,8 +94,8 @@ export default defineCommand({
 				message,
 				client,
 				store,
-				statusLabel: { on: 'Available', off: 'Unavailable' },
-				usageHint: 'Usage: !presence online [enable|disable|status]',
+				statusLabel: { on: Lo.labels.presenceAvailable, off: Lo.labels.presenceUnavailable },
+				usageHint: t(locale, 'owner.labels.usage', ['!presence online [enable|disable|status]']),
 				async onEnable() {
 					if ('available' in configuration.presences) {
 						return await client.reply(from, L.errors.alreadyOnline, message);
@@ -140,8 +141,8 @@ export default defineCommand({
 				message,
 				client,
 				store,
-				statusLabel: { on: 'Composing', off: 'Not composing' },
-				usageHint: 'Usage: !presence composing [enable|disable|status]',
+				statusLabel: { on: Lo.labels.composing, off: Lo.labels.notComposing },
+				usageHint: t(locale, 'owner.labels.usage', ['!presence composing [enable|disable|status]']),
 				async onEnable() {
 					if ('composing' in configuration.presences) {
 						return await client.reply(from, L.errors.alreadyWriting, message);
@@ -176,8 +177,8 @@ export default defineCommand({
 				message,
 				client,
 				store,
-				statusLabel: { on: 'Recording', off: 'Not recording' },
-				usageHint: 'Usage: !presence recording [enable|disable|status]',
+				statusLabel: { on: Lo.labels.recording, off: Lo.labels.notRecording },
+				usageHint: t(locale, 'owner.labels.usage', ['!presence recording [enable|disable|status]']),
 				async onEnable() {
 					if ('recording' in configuration.presences) {
 						return await client.reply(from, L.errors.alreadyRecording, message);
@@ -212,8 +213,8 @@ export default defineCommand({
 				message,
 				client,
 				store,
-				statusLabel: { on: 'Enabled', off: 'Disabled' },
-				usageHint: 'Usage: !presence bio [enable|disable|status]',
+				statusLabel: { on: Lo.labels.enabled, off: Lo.labels.disabled },
+				usageHint: t(locale, 'owner.labels.usage', ['!presence bio [enable|disable|status]']),
 				async onEnable() {
 					if ('bio' in configuration.presences) {
 						return await client.reply(from, L.errors.alreadyEnabled, message);

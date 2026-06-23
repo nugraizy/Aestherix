@@ -32,6 +32,7 @@ export default defineCommand({
 	run: async ({ query, from, type, message, /*cmd,*/ args, filename }, client) => {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lc = useLocale(locale, 'converter');
 
 		if (!query) {
 			return await client.reply(from, L.errors.ttsTextRequired, message);
@@ -87,7 +88,7 @@ export default defineCommand({
 				}
 			});
 
-			let caption = 'AI Text-To-Speech Models'.formatHeaders();
+			let caption = Lc.titles.aiTextToSpeech.formatHeaders();
 
 			for (const key in container) {
 				caption += `\n\n${key.formatHeaders()}\n`;

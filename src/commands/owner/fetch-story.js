@@ -21,11 +21,12 @@ export default defineCommand({
 	async run({ from, message, query }, client, store) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lo = useLocale(locale, 'owner');
 
 		try {
 			const messages = store.loadMessages(STATUS);
 			const tempContainer = new Cache();
-			let caption = 'Fetch WhatsApp Story'.formatHeaders();
+			let caption = Lo.titles.fetchStory.formatHeaders();
 			let i = 0;
 
 			caption += '\n\n';
@@ -73,9 +74,9 @@ export default defineCommand({
 				data.stories?.imageMessage?.[0].pushName ??
 				data.stories?.videoMessage?.[0].pushName
 			}\n`;
-			caption += `Texts : ${data.stories?.extendedTextMessage?.length ?? 0}\n`;
-			caption += `Images : ${data.stories?.imageMessage?.length ?? 0}\n`;
-			caption += `Videos : ${data.stories?.videoMessage?.length ?? 0}\n\n`;
+			caption += `${Lo.labels.texts} : ${data.stories?.extendedTextMessage?.length ?? 0}\n`;
+			caption += `${Lo.labels.images} : ${data.stories?.imageMessage?.length ?? 0}\n`;
+			caption += `${Lo.labels.videos} : ${data.stories?.videoMessage?.length ?? 0}\n\n`;
 			await client.reply(from, caption.trim(), message);
 
 			for (const type of Object.keys(data.stories)) {

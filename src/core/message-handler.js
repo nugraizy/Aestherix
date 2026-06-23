@@ -7,7 +7,7 @@ import { autoReplyManager } from '../helper/auto-reply.js';
 import configuration from '../helper/config/connect.js';
 import { Limit, checkAfk, deleteAfk, getAfk } from '../helper/index.js';
 import { Cache } from '../helper/modules/cache.js';
-import { getLocale, useLocale } from '../helper/i18n/index.js';
+import { getLocale, useLocale, t } from '../helper/i18n/index.js';
 import { cmdId, setPrefix } from '../helper/modules/prefix.js';
 import { slowModeManager } from '../helper/slowmode.js';
 import { color, getTimeSince } from '../utils/modules/index.js';
@@ -194,7 +194,8 @@ export class MessageHandler {
 			const slowCheck = slowModeManager.check(message.from, message.sender, message.isAdmin);
 
 			if (!slowCheck.allowed) {
-				await client.reply(message.from, `⏳ Slow mode active. Please wait ${slowCheck.remaining} seconds.`, message);
+				await client.reply(message.from, t(message.locale ?? 'id', 'common.core.errors.slowModeActive', [slowCheck.remaining]), message);
+
 				return;
 			}
 		}
@@ -279,9 +280,10 @@ export class MessageHandler {
 			const result = await processDashboardConfirmationAction({ actionId: body, senderJid: message.sender });
 
 			if (result.handled) {
+				const L = useLocale(localMessage.locale ?? 'id', 'common');
 				const reply = result.approved
-					? 'Dashboard login confirmed. You can return to the browser now.'
-					: result.message || 'Dashboard login rejected.';
+					? L.core.errors.dashboardLoginConfirmed
+					: result.message || L.core.errors.dashboardLoginRejected;
 
 				await client.reply(message.from, reply, message.raw);
 			}
@@ -297,7 +299,8 @@ export class MessageHandler {
 			}
 
 			this.#retryManager.reEnable(cmdName);
-			await client.reply(message.from, `Command \`${cmdName}\` has been re-enabled.`, message.raw);
+			await client.reply(message.from, t(localMessage.locale ?? 'id', 'common.core.errors.commandReenabled', [cmdName]), message.raw);
+
 			return;
 		}
 
@@ -500,9 +503,10 @@ export class MessageHandler {
 		if (disabled?.has(command.name)) {
 			void client.reply(
 				localMessage.from,
-				`The command \`${command.name}\` is currently disabled by dashboard.`,
+				t(localMessage.locale ?? 'id', 'common.core.errors.commandDisabledDashboard', [command.name]),
 				localMessage.message
 			);
+
 			return 'skip';
 		}
 
@@ -515,13 +519,13 @@ export class MessageHandler {
 
 				await builder
 					.destination(localMessage.from)
-					.body(L.core.errors.commandDisabled.replace('{0}', command.name).replace('{1}', remaining))
+					.body(t(localMessage.locale ?? 'id', 'common.core.errors.commandDisabled', [command.name, remaining]))
 					.buttons(builder.button.reply({ display: L.core.success.enable, id: `enable:${command.name}` }))
 					.send();
 			} else {
 				void client.reply(
 					localMessage.from,
-					L.core.errors.commandDisabled.replace('{0}', command.name).replace('{1}', remaining),
+					t(localMessage.locale ?? 'id', 'common.core.errors.commandDisabled', [command.name, remaining]),
 					localMessage.message
 				);
 			}
@@ -531,12 +535,14 @@ export class MessageHandler {
 
 		if (command.category === 'Owner' && !localMessage.isOwner) {
 			const L = useLocale(localMessage.locale ?? 'id', 'common');
+
 			void client.reply(localMessage.from, L.core.errors.ownerOnly, localMessage.message);
 			return 'skip';
 		}
 
 		if (this.#configuration.settings?.maintenance && !localMessage.isOwner) {
 			const L = useLocale(localMessage.locale ?? 'id', 'common');
+
 			void client.reply(localMessage.from, L.core.errors.maintenance, localMessage.message);
 			return 'skip';
 		}
@@ -545,8 +551,7 @@ export class MessageHandler {
 			const lockedBy = this.#checkExecutionLock(localMessage.sender);
 
 			if (lockedBy) {
-				const L = useLocale(localMessage.locale ?? 'id', 'common');
-				void client.reply(localMessage.from, L.core.errors.executionLocked.replace('{0}', lockedBy), localMessage.message);
+				void client.reply(localMessage.from, t(localMessage.locale ?? 'id', 'common.core.errors.executionLocked', [lockedBy]), localMessage.message);
 				return 'skip';
 			}
 		}
@@ -559,6 +564,7 @@ export class MessageHandler {
 
 				if (command.premium && selfRole.role !== 'PREMIUM' && selfRole.role !== 'OWNER') {
 					const L = useLocale(localMessage.locale ?? 'id', 'common');
+
 					void client.reply(localMessage.from, L.core.errors.premiumOnly, localMessage.message);
 					return 'skip';
 				}
@@ -576,6 +582,7 @@ export class MessageHandler {
 
 		if (this.#flags.restrict && command.restrict) {
 			const L = useLocale(localMessage.locale ?? 'id', 'common');
+
 			void client.reply(localMessage.from, L.core.errors.restricted, localMessage.message);
 			return 'skip';
 		}
@@ -586,23 +593,28 @@ export class MessageHandler {
 			!localMessage.isAdmin &&
 			localMessage?.[localMessage?.from]?.games === 'disable'
 		) {
+			const L = useLocale(localMessage.locale ?? 'id', 'common');
+
 			void client.reply(
 				localMessage.from,
-				'Game Mode is Disabled. Type !games enable to enable Game Mode',
+				L.core.errors.gameModeDisabled,
 				localMessage.message
 			);
+
 			return 'skip';
 		}
 
 		if (command.category === 'Moderation') {
 			if (!localMessage.isGroup) {
 				const L = useLocale(localMessage.locale ?? 'id', 'common');
+
 				void client.reply(localMessage.from, L.core.errors.groupOnly, localMessage.message);
 				return 'skip';
 			}
 
 			if (!localMessage.isAdmin) {
 				const L = useLocale(localMessage.locale ?? 'id', 'common');
+
 				void client.reply(localMessage.from, L.core.errors.adminOnly, localMessage.message);
 				return 'skip';
 			}
@@ -617,6 +629,7 @@ export class MessageHandler {
 			}
 
 			const L = useLocale(localMessage.locale ?? 'id', 'common');
+
 			void client.reply(localMessage.from, L.core.errors.premiumOnly, localMessage.message);
 			return 'skip';
 		}
@@ -628,14 +641,15 @@ export class MessageHandler {
 
 			const limit = Limit.reduceLimit(localMessage.sender, command.limit);
 
-			if (limit.error) {
-				void client.reply(
-					localMessage.from,
-					limit.message.replace('%s', `But this command (${command.name}) need ${command.limit}`),
-					localMessage.message
-				);
-				return 'skip';
-			}
+		if (limit.error) {
+			void client.reply(
+				localMessage.from,
+				t(localMessage.locale ?? 'id', 'common.core.errors.commandLimitExceeded', [command.name, command.limit]),
+				localMessage.message
+			);
+
+			return 'skip';
+		}
 		}
 
 		if (this.#flags.coolDown) {
@@ -644,9 +658,10 @@ export class MessageHandler {
 			if (onCooldown) {
 				void client.reply(
 					localMessage.from,
-					`Command \`${command.name}\` is still on cooldown for ${remaining} seconds.`,
+					t(localMessage.locale ?? 'id', 'common.core.errors.commandOnCooldown', [command.name, remaining]),
 					localMessage.message
 				);
+
 				return 'skip';
 			}
 		}
@@ -685,16 +700,16 @@ export class MessageHandler {
 
 		const timeoutMs = command.timeout ?? 30000;
 		const ownerNoTimeout = localMessage.isOwner && command.category === 'Owner';
+		let timedOut = false;
 
 		try {
 			if (ownerNoTimeout || !timeoutMs) {
 				await command.run(localMessage, client, this.#store);
 			} else {
-				let timedOut = false;
 				const timeoutPromise = new Promise((_, reject) =>
 					setTimeout(() => {
 						timedOut = true;
-						reject(new Error(`Command "${command.name}" timed out after ${Math.round(timeoutMs / 1000)}s`));
+						reject(new Error(t(localMessage.locale ?? 'id', 'common.core.errors.commandTimedOut', [command.name, Math.round(timeoutMs / 1000)])));
 					}, timeoutMs)
 				);
 
@@ -705,6 +720,7 @@ export class MessageHandler {
 						}
 
 						const value = target[prop];
+
 						return typeof value === 'function' ? value.bind(target) : value;
 					}
 				});
@@ -715,9 +731,7 @@ export class MessageHandler {
 			this.#router.trackUsage(command.name).catch(noop);
 			this.#retryManager.clearCounter(localMessage.sender, command.name);
 		} catch (err) {
-			const isTimeout = err?.message?.startsWith('Command "') && err?.message?.includes('timed out');
-
-			if (isTimeout) {
+			if (timedOut) {
 				void client.reply(localMessage.from, `⏱️ ${err.message}`, localMessage.message);
 			} else {
 				await this.#handleError(err, localMessage, command, client).catch(() => {});
@@ -772,10 +786,11 @@ export class MessageHandler {
 	}
 
 	async #sendHelp(client, localMessage, command, isPremiumNote = false) {
-		let help = `Description : ${command.description}\nUsage : ${command.usage}\nCooldown : ${command.cooldown}s\nAliases : ${command.aliases.map((v) => `!${v}`).join(', ')}.`;
+		const L = useLocale(localMessage.locale ?? 'id', 'common');
+		let help = `${t(localMessage.locale ?? 'id', 'common.core.help.description', [command.description])}\n${t(localMessage.locale ?? 'id', 'common.core.help.usage', [command.usage])}\n${t(localMessage.locale ?? 'id', 'common.core.help.cooldown', [command.cooldown])}\n${t(localMessage.locale ?? 'id', 'common.core.help.aliases', [command.aliases.map((v) => `!${v}`).join(', ')])}.`;
 
 		if (isPremiumNote) {
-			help += '\nThis Features Only for Premium users.';
+			help += `\n${L.core.errors.premiumOnlyNote}`;
 		}
 
 		await client.reply(localMessage.from, help, localMessage.message);
@@ -787,7 +802,7 @@ export class MessageHandler {
 		const errorLocation = this.#getErrorLocation(err?.stack);
 		let str = !localMessage.isOwner ? L.core.info.reportToOwner : '\n';
 
-		str += `Type : ${err.name || 'Unknown'}\nMessage : ${err.message || 'Unknown'}\nFile : ${errorLocation.file}\nLine : ${errorLocation.line}\nStack Trace :\n${(localMessage.isOwner ? err?.stack?.substring(0, 70) : err?.stack?.substring(0, 20)) || 'Unknown'}`;
+		str += `${t(localMessage.locale ?? 'id', 'common.core.error.type', [err.name || 'Unknown'])}\n${t(localMessage.locale ?? 'id', 'common.core.error.message', [err.message || 'Unknown'])}\n${t(localMessage.locale ?? 'id', 'common.core.error.file', [errorLocation.file])}\n${t(localMessage.locale ?? 'id', 'common.core.error.line', [errorLocation.line])}\n${L.core.errorReport.stackTrace}\n${(localMessage.isOwner ? err?.stack?.substring(0, 70) : err?.stack?.substring(0, 20)) || 'Unknown'}`;
 
 		const failure = this.#retryManager.recordFailure(localMessage.sender, command.name);
 		let retryId = null;
@@ -830,7 +845,7 @@ export class MessageHandler {
 						localMessage.isOwner
 							? builder.button.url({
 									display: L.core.success.reportToOwner,
-									url: `https://wa.me/${localMessage.settings.owner_number.replace(/[^\d]/g, '')}?text=hi,%20bot%20mengalami%20error${encodeURI(`\n\n${err.stack}`)}`
+									url: `https://wa.me/${localMessage.settings.owner_number.replace(/[^\d]/g, '')}?text=${L.core.errorReport.reportUrl}${encodeURI(`\n\n${err.stack}`)}`
 								})
 							: null,
 						localMessage.isOwner
@@ -838,7 +853,7 @@ export class MessageHandler {
 							: null,
 						canRetry
 							? builder.button.reply({
-									display: L.core.success.retry.replace('{0}', `${this.#retryManager.maxRetries - failure.count} left`),
+									display: t(localMessage.locale ?? 'id', 'common.core.error.left', [this.#retryManager.maxRetries - failure.count]),
 									id: retryBody
 								})
 							: null
@@ -855,7 +870,7 @@ export class MessageHandler {
 						localMessage.isOwner
 							? builder.button.url({
 									display: L.core.success.reportToOwner,
-									url: `https://wa.me/${localMessage.settings.owner_number.replace(/[^\d]/g, '')}?text=hi,%20bot%20mengalami%20error${encodeURI(`\n\n${err.stack}`)}`
+									url: `https://wa.me/${localMessage.settings.owner_number.replace(/[^\d]/g, '')}?text=${L.core.errorReport.reportUrl}${encodeURI(`\n\n${err.stack}`)}`
 								})
 							: null,
 						localMessage.isOwner
@@ -939,8 +954,6 @@ export class MessageHandler {
 	}
 
 	#handleAfk(client, message) {
-		const L = useLocale(message.locale ?? 'id', 'common');
-
 		if (checkAfk(message.sender, message.from)) {
 			const { reasons, since } = getAfk(message.sender, message.from);
 			const time = getTimeSince(since);
@@ -948,7 +961,7 @@ export class MessageHandler {
 			client.send(
 				message.from,
 				{
-					text: L.core.afk.unsetAuto.replace('{0}', message.sender.split('@')[0]).replace('{1}', time).replace('{2}', reasons),
+					text: t(message.locale ?? 'id', 'common.core.afk.unsetAuto', [message.sender.split('@')[0], time, reasons]),
 					mentions: [message.sender]
 				},
 				{ quoted: message.message }
@@ -962,7 +975,7 @@ export class MessageHandler {
 
 			client.reply(
 				message.from,
-				L.core.afk.isAfk.replace('{0}', name).replace('{1}', time).replace('{2}', reasons),
+				t(message.locale ?? 'id', 'common.core.afk.isAfk', [name, time, reasons]),
 				message.message
 			);
 		}
@@ -986,7 +999,7 @@ export class MessageHandler {
 				const { reasons, since, name } = getAfk(mention, message.from);
 				const time = getTimeSince(since);
 
-				caption += L.core.afk.afkDetail.replace('{0}', name).replace('{1}', time).replace('{2}', reasons);
+				caption += t(message.locale ?? 'id', 'common.core.afk.afkDetail', [name, time, reasons]);
 				container.push(mention);
 			}
 		}
@@ -1142,22 +1155,24 @@ export class MessageHandler {
 
 				const { action } = rule;
 				const locale = await getLocale(groupId);
-				const L = useLocale(locale, 'common');
 
 				if (action === 'warn') {
-					await client.reply(groupId, L.core.automod.warn.replace('{0}', rule.type), ctx.message);
+					await client.reply(groupId, t(locale, 'common.core.automod.warn', [rule.type]), ctx.message);
 				} else if (action === 'kick') {
 					try {
 						await client.updateGroup(groupId, { action: 'remove', participants: [sender], admins: [], message: ctx.message });
 						await client.send(
 							groupId,
-							{ text: L.core.automod.kicked.replace('{0}', `@${sender.split('@')[0]}`).replace('{1}', rule.type), mentions: [sender] },
+							{
+								text: t(locale, 'common.core.automod.kicked', [`@${sender.split('@')[0]}`, rule.type]),
+								mentions: [sender]
+							},
 							{ quoted: ctx.message }
 						);
 					} catch {
 						await client.send(
 							groupId,
-							{ text: L.core.automod.kickFailed.replace('{0}', `@${sender.split('@')[0]}`), mentions: [sender] },
+							{ text: t(locale, 'common.core.automod.kickFailed', [`@${sender.split('@')[0]}`]), mentions: [sender] },
 							{ quoted: ctx.message }
 						);
 					}
@@ -1170,7 +1185,7 @@ export class MessageHandler {
 				}
 			}
 		} catch (err) {
-			process.stderr.write(`[AUTOMOD] check error: ${err.message}\n`);
+			this.#log?.error?.('automod check error:', err.message);
 		}
 	}
 

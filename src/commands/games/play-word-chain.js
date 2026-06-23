@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { WordChain } from '../../utils/games/index.js';
 import { getPrefix } from '../../helper/modules/prefix.js';
 import { loggers, color } from '../../utils/modules/index.js';
@@ -47,7 +47,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${W.game.title}\n\n${W.game.created.replace('{0}', playerMention(sender))}\n\n${W.game.players}: 1\n\n${W.game.joinPrompt}\n${W.game.startPrompt}`,
+					text: `${W.game.title}\n\n${t(locale, 'word-chain.game.created', { prefix, 0: playerMention(sender) })}\n\n${W.game.players}: 1\n\n${W.game.joinPrompt}\n${W.game.startPrompt}`,
 					mentions: [sender]
 				},
 				{ quoted: message }
@@ -71,7 +71,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${W.game.title}\n\n${W.game.joined.replace('{0}', playerMention(sender))}\n\n${W.game.players}: ${game.players.size}\n${playerList}\n\n${W.game.joinPrompt}\n${W.game.startPrompt}`,
+					text: `${W.game.title}\n\n${t(locale, 'word-chain.game.joined', { prefix, 0: playerMention(sender) })}\n\n${W.game.players}: ${game.players.size}\n${playerList}\n\n${W.game.joinPrompt}\n${W.game.startPrompt}`,
 					mentions
 				},
 				{ quoted: message }
@@ -96,7 +96,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${W.game.title}\n\n${W.game.started}\n\n${W.game.turn.replace('{0}', playerMention(result.currentPlayer))}\n\n${W.game.firstWord}`,
+					text: `${W.game.title}\n\n${W.game.started}\n\n${t(locale, 'word-chain.game.turn', { prefix, 0: playerMention(result.currentPlayer) })}\n\n${W.game.firstWord}`,
 					mentions: [result.currentPlayer]
 				}
 			);
@@ -116,7 +116,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${W.game.skipped.replace('{0}', playerMention(sender))}\n\n${W.game.turn.replace('{0}', playerMention(result.nextPlayer))}`,
+					text: `${t(locale, 'word-chain.game.skipped', { prefix, 0: playerMention(sender) })}\n\n${t(locale, 'word-chain.game.turn', { prefix, 0: playerMention(result.nextPlayer) })}`,
 					mentions: [sender, result.nextPlayer]
 				}
 			);
@@ -132,7 +132,7 @@ export default defineCommand({
 
 			await client.reply(
 				from,
-				`${W.game.title}\n\n${W.game.currentLetter}: ${status.currentLetter ? status.currentLetter.toUpperCase() : '-'}\n${W.game.totalWords}: ${status.totalWords}\n${W.game.recentWords}: ${recentWords}\n\n${W.game.turn.replace('{0}', playerMention(status.currentPlayer))}`,
+				`${W.game.title}\n\n${W.game.currentLetter}: ${status.currentLetter ? status.currentLetter.toUpperCase() : '-'}\n${W.game.totalWords}: ${status.totalWords}\n${W.game.recentWords}: ${recentWords}\n\n${t(locale, 'word-chain.game.turn', { prefix, 0: playerMention(status.currentPlayer) })}`,
 				message
 			);
 		} else if (args[1] === 'end') {
@@ -159,7 +159,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${W.game.ended}\n\n${leaderboard}\n\n${W.game.totalWords}: ${result.totalWords}\n${W.game.duration.replace('{0}', result.duration)}`
+					text: `${W.game.ended}\n\n${leaderboard}\n\n${W.game.totalWords}: ${result.totalWords}\n${t(locale, 'word-chain.game.duration', { prefix, 0: result.duration })}`
 				},
 				{ quoted: message }
 			);
@@ -205,7 +205,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${W.game.wordAccepted.replace('{0}', result.word.toUpperCase())}\n\n${W.game.nextLetter}: ${result.currentLetter.toUpperCase()}\n${W.game.score}: ${result.score}\n\n${W.game.turn.replace('{0}', playerMention(result.nextPlayer))}`,
+					text: `${t(locale, 'word-chain.game.wordAccepted', { prefix, 0: result.word.toUpperCase() })}\n\n${W.game.nextLetter}: ${result.currentLetter.toUpperCase()}\n${W.game.score}: ${result.score}\n\n${t(locale, 'word-chain.game.turn', { prefix, 0: playerMention(result.nextPlayer) })}`,
 					mentions: [result.nextPlayer]
 				}
 			);

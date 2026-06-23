@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import parser from 'yargs-parser';
 
 import configuration from '../../helper/config/connect.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { color, formatNumber, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -16,9 +16,10 @@ export default defineCommand({
 	cooldown: 10,
 	limit: 9,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, isOwner, prefix }, client) {
+	async run({ from, query, prettyNumber, message, sender, isOwner, prefix }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const DL = useLocale(locale, 'downloader');
 
 		if (!configuration.isInstagramInitiated) {
 			return await client.reply(
@@ -51,12 +52,12 @@ export default defineCommand({
 				continue;
 			}
 
-			let capt = 'Instagram reel'.formatHeaders();
+		let capt = DL.titles.igReel.formatHeaders();
 
-			capt += `\n\nUsername : ${reels[data].username}\n`;
-			capt += `Fullname : ${reels[data].fullName}\n`;
-			capt += `Privacy : ${reels[data].isPrivate ? 'Private' : 'Public'}\n`;
-			capt += `Verifies : ${reels[data].isVerified ? 'Verified' : 'Not Verified'}\n`;
+		capt += `\n\nUsername : ${reels[data].username}\n`;
+		capt += `Fullname : ${reels[data].fullName}\n`;
+		capt += `${DL.labels.privacy} : ${reels[data].isPrivate ? 'Private' : 'Public'}\n`;
+		capt += `${DL.labels.verifies} : ${reels[data].isVerified ? 'Verified' : 'Not Verified'}\n`;
 			capt += `📅 ${dayjs(reels[data].takenAt * 1000).format('HH:mm:ss DD/MM/YYYY')}\n`;
 			capt += `👍 ${formatNumber(reels[data].likeCount)} 💬 ${formatNumber(reels[data].commentCount)}\n\n`;
 
@@ -78,7 +79,7 @@ export default defineCommand({
 			success++;
 		}
 
-		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
+		await wait.update(t(locale, 'common.core.commands.downloadBatchFinished', [success, error]));
 
 		loggers.info(`${color('Downloaded Instagram reel', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}

@@ -22,6 +22,7 @@ export default defineCommand({
 	async run({ from, query, prettyNumber, message, type, args, prefix }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ll = useLocale(locale, 'look_up');
 
 		if (type === 'templateButtonReplyMessage' && args[1] === '-crawl') {
 			let data = JSON.parse(args.slice(2).join(' '));
@@ -49,9 +50,9 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					buttonText: 'Open list',
-					title: 'See List Videos',
-					footer: `Made by ${BOT_NAME}. Powered by Hidden Finder`,
+					buttonText: Ll.buttons.openList,
+					title: Ll.buttons.seeListVideos,
+					footer: `Made by ${BOT_NAME}. ${Ll.labels.poweredByHiddenFinder}`,
 					text: '\t',
 					sections: row
 				},
@@ -91,11 +92,11 @@ export default defineCommand({
 				totalVideo
 			} = users[data];
 
-			let capt = `Username : ${username}\n`;
+			let capt = `${L.core.caption.username} : ${username}\n`;
 
-			capt += `Author : ${fullName}\n`;
-			capt += `Verifies : ${isVerified ? 'Verified' : 'Not Verified'}\n`;
-			capt += `ID Profile : ${keyword}\n`;
+			capt += `${Ll.labels.author} : ${fullName}\n`;
+			capt += `${Ll.labels.verifies} : ${isVerified ? L.core.caption.verified : L.core.caption.notVerified}\n`;
+			capt += `${Ll.labels.idProfile} : ${keyword}\n`;
 			capt += `👥 ${formatNumber(followers)} 👤 ${formatNumber(following)} ❤️ ${formatNumber(heart)}\n`;
 			capt += `🎞️ ${formatNumber(totalVideo)}\n\n`;
 
@@ -105,7 +106,7 @@ export default defineCommand({
 				from,
 				{
 					image: { url: profileHD || profileSD },
-					caption: 'TikTok User Lookup'.formatHeaders() + `\n\n${capt.trim().formatForm()}`.trimEnd()
+					caption: Ll.titles.tiktokUser.formatHeaders() + `\n\n${capt.trim().formatForm()}`.trimEnd()
 				},
 				{ quoted: message }
 			);

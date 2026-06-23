@@ -212,7 +212,7 @@ const handleSpotifyCollection = async (url, type, client, { from, message, wait 
 	return { status: true, caption: sendCaption };
 };
 
-const handleSingleTrack = async (url, type, client, { from, message, prettyNumber, wait }) => {
+const handleSingleTrack = async (url, type, client, { from, message, prettyNumber, wait, L, locale }) => {
 	await wait.update(`Downloading Spotify ${type}...`);
 	const { tracks, status, message: respMessage } = await spotifier.getTracks(extractId(url));
 
@@ -396,7 +396,7 @@ export default defineCommand({
 				continue;
 			}
 
-			const status = await processVideo(url, typeMedia, client, { from, message, prettyNumber, wait });
+			const status = await processVideo(url, typeMedia, client, { from, message, prettyNumber, wait, L, locale });
 
 			if (!status) {
 				error++;

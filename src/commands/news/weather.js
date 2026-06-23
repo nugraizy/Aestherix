@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { getWeather } from '../../utils/news/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -18,6 +18,7 @@ export default defineCommand({
 	async run({ query, from, message, extractMediaData, typeQuoted }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ln = useLocale(locale, 'news');
 
 		if (typeQuoted !== 'locationMessage' && typeQuoted !== 'liveLocationMessage' && !query) {
 			return await client.reply(from, L.errors.queryRequired, message);
@@ -33,19 +34,19 @@ export default defineCommand({
 		}
 
 		const text = ` ~> ${info.name}\n
-Description : ${info.desc.capitalize()}
-Temperature : ${info.temp}
-Feels like : ${info.feels}
-Pressure : ${info.press}
-Humidity : ${info.humi}
-Visibility : ${info.visible}
-Wind Speed : ${info.wind}\n
-Powered by openweathermap.org`;
+${Ln.labels.description} : ${info.desc.capitalize()}
+${Ln.labels.temperature} : ${info.temp}
+${Ln.labels.feelsLike} : ${info.feels}
+${Ln.labels.pressure} : ${info.press}
+${Ln.labels.humidity} : ${info.humi}
+${Ln.labels.visibility} : ${info.visible}
+${Ln.labels.windSpeed} : ${info.wind}\n
+${Ln.labels.poweredByOwm}`;
 
 		await client.send(
 			from,
 			{
-				text: `${info.emoji} Weather Report ${info.emoji}`.formatHeaders() + `\n\n${text.trim().formatForm()}`
+				text: `${t(locale, 'news.titles.weatherReport', [info.emoji, info.emoji])}`.formatHeaders() + `\n\n${text.trim().formatForm()}`
 				// templateButtons: [
 				// 	{ urlButton: { displayText: 'More Info', url: `More info https://openweathermap.org/city/${info.id}` } }
 				// ],

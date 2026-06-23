@@ -19,6 +19,7 @@ export default defineCommand({
 	async run({ from, args, message, isOwner }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lo = useLocale(locale, 'owner');
 
 		if (!isOwner) {
 			return;
@@ -34,14 +35,14 @@ export default defineCommand({
 			}
 
 			const lines = instances.map((inst, i) => {
-				const status = inst.isActive ? '✅ Active' : '❌ Disabled';
+				const status = inst.isActive ? Lo.labels.activeStatus : Lo.labels.disabledStatus;
 				const live = manager.has(inst.sessionName);
 				const runtime = live ? ' (running)' : '';
 
 				return `${i + 1}. *${inst.sessionName}* — ${status}${runtime}`;
 			});
 
-			return client.reply(from, `🤖 *Bot Instances*\n\n${lines.join('\n')}`, message);
+			return client.reply(from, `${Lo.titles.botInstances}\n\n${lines.join('\n')}`, message);
 		}
 
 		if (action !== 'enable' && action !== 'disable') {

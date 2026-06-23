@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { cmdId, getPrefix } from '../../helper/modules/prefix.js';
 import { Trivia } from '../../utils/games/index.js';
 import { loggers, color } from '../../utils/modules/index.js';
@@ -30,11 +30,7 @@ export default defineCommand({
 			return standings
 				.map(
 					(p, i) =>
-						`${medals[i] || '▫️'} ${T.game.leaderboardEntry
-							.replace('{0}', playerMention(p.id))
-							.replace('{1}', String(p.score))
-							.replace('{2}', String(p.correct))
-							.replace('{3}', String(p.correct + p.wrong))}`
+						`${medals[i] || '▫️'} ${t(locale, 'trivia.game.leaderboardEntry', { prefix, 0: playerMention(p.id), 1: String(p.score), 2: String(p.correct), 3: String(p.correct + p.wrong) })}`
 				)
 				.join('\n');
 		};
@@ -46,9 +42,7 @@ export default defineCommand({
 			}));
 
 			return {
-				body: `${T.game.title}\n\n${T.game.questionHeader
-					.replace('{0}', String(number))
-					.replace('{1}', String(total))}\n📂 ${q.categoryName}\n\n${q.question}`,
+				body: `${t(locale, 'trivia.game.title', { prefix })}\n\n${t(locale, 'trivia.game.questionHeader', { prefix, 0: String(number), 1: String(total) })}\n📂 ${q.categoryName}\n\n${q.question}`,
 				footer: `⏱️ ${timeLimit}s | ${T.game.questionHint}`,
 				buttons
 			};
@@ -91,7 +85,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${T.game.title}\n\n${T.game.created.replace('{0}', playerMention(sender))}\n\n${T.game.players.replace('{0}', '1')}\n${T.game.questions.replace('{0}', String(game.totalQuestions))}\n\n${T.game.joinPrompt}\n${T.game.startPrompt}\n\n${T.game.categories}\n${categoryList}\n\n${T.game.startCategory}\n*!trivia start <category>*`,
+					text: `${t(locale, 'trivia.game.title', { prefix })}\n\n${t(locale, 'trivia.game.created', { prefix, 0: playerMention(sender) })}\n\n${t(locale, 'trivia.game.players', { prefix, 0: '1' })}\n${t(locale, 'trivia.game.questions', { prefix, 0: String(game.totalQuestions) })}\n\n${T.game.joinPrompt}\n${T.game.startPrompt}\n\n${T.game.categories}\n${categoryList}\n\n${T.game.startCategory}\n*!trivia start <category>*`,
 					mentions: [sender]
 				},
 				{ quoted: message }
@@ -115,7 +109,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${T.game.title}\n\n${T.game.joined.replace('{0}', playerMention(sender))}\n\n${T.game.players.replace('{0}', String(game.players.size))}\n${playerList}\n\n${T.game.joinPrompt}\n${T.game.startPrompt}`,
+					text: `${t(locale, 'trivia.game.title', { prefix })}\n\n${t(locale, 'trivia.game.joined', { prefix, 0: playerMention(sender) })}\n\n${t(locale, 'trivia.game.players', { prefix, 0: String(game.players.size) })}\n${playerList}\n\n${T.game.joinPrompt}\n${T.game.startPrompt}`,
 					mentions
 				},
 				{ quoted: message }
@@ -157,7 +151,7 @@ export default defineCommand({
 				return await client.send(
 					from,
 					{
-						text: `${T.game.results}\n\n${formatLeaderboard(result.standings)}\n\n${T.game.duration.replace('{0}', result.duration)}`,
+						text: `${T.game.results}\n\n${formatLeaderboard(result.standings)}\n\n${t(locale, 'trivia.game.duration', { prefix, 0: result.duration })}`,
 						mentions: result.standings.map((p) => p.id)
 					}
 				);
@@ -175,7 +169,7 @@ export default defineCommand({
 						const correctAnswer = q.options[q.correct];
 						const next = game.nextQuestion();
 
-						await client.send(from, { text: T.game.timeUp.replace('{0}', correctAnswer) });
+						await client.send(from, { text: t(locale, 'trivia.game.timeUp', { prefix, 0: correctAnswer }) });
 
 						if (next.status === 'question') {
 							await sendQuestion(from, next.question, next.number, next.total, next.timeLimit, next.questionId, ctx);
@@ -183,7 +177,7 @@ export default defineCommand({
 							Trivia.deleteSession(from);
 
 							await client.send(from, {
-								text: `${T.game.results}\n\n${formatLeaderboard(next.standings)}\n\n${T.game.duration.replace('{0}', next.duration)}`,
+								text: `${T.game.results}\n\n${formatLeaderboard(next.standings)}\n\n${t(locale, 'trivia.game.duration', { prefix, 0: next.duration })}`,
 								mentions: next.standings.map((p) => p.id)
 							});
 						}
@@ -243,17 +237,17 @@ export default defineCommand({
 			}
 
 			if (result.status === 'correct') {
-				let response = T.game.correct.replace('{0}', String(result.points));
+				let response = t(locale, 'trivia.game.correct', { prefix, 0: String(result.points) });
 
 				if (result.streak > 1) {
-					response += ` ${T.game.streak.replace('{0}', String(result.streak))}`;
+					response += ` ${t(locale, 'trivia.game.streak', { prefix, 0: String(result.streak) })}`;
 				}
 
-				response += `\n${T.game.time.replace('{0}', result.timeTaken)}`;
+				response += `\n${t(locale, 'trivia.game.time', { prefix, 0: result.timeTaken })}`;
 
 				await client.reply(from, response, message);
 			} else {
-				await client.reply(from, T.game.wrong.replace('{0}', result.correctAnswer), message);
+				await client.reply(from, t(locale, 'trivia.game.wrong', { prefix, 0: result.correctAnswer }), message);
 			}
 
 			if (game.getAllAnswered()) {
@@ -273,7 +267,7 @@ export default defineCommand({
 							const correctAnswer = next.question.options[next.question.correct];
 							const nextQ = game.nextQuestion();
 
-							await client.send(from, { text: T.game.timeUp.replace('{0}', correctAnswer) });
+					await client.send(from, { text: t(locale, 'trivia.game.timeUp', { prefix, 0: correctAnswer }) });
 
 							if (nextQ.status === 'question') {
 								await sendQuestion(from, nextQ.question, nextQ.number, nextQ.total, nextQ.timeLimit, nextQ.questionId, ctx);
@@ -281,7 +275,7 @@ export default defineCommand({
 								Trivia.deleteSession(from);
 
 								await client.send(from, {
-									text: `${T.game.results}\n\n${formatLeaderboard(nextQ.standings)}\n\n${T.game.duration.replace('{0}', nextQ.duration)}`,
+									text: `${T.game.results}\n\n${formatLeaderboard(nextQ.standings)}\n\n${t(locale, 'trivia.game.duration', { prefix, 0: nextQ.duration })}`,
 									mentions: nextQ.standings.map((p) => p.id)
 								});
 							}
@@ -291,7 +285,7 @@ export default defineCommand({
 					Trivia.deleteSession(from);
 
 					await client.send(from, {
-						text: `${T.game.results}\n\n${formatLeaderboard(next.standings)}\n\n${T.game.duration.replace('{0}', next.duration)}`,
+						text: `${T.game.results}\n\n${formatLeaderboard(next.standings)}\n\n${t(locale, 'trivia.game.duration', { prefix, 0: next.duration })}`,
 						mentions: next.standings.map((p) => p.id)
 					});
 				}
@@ -334,7 +328,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${T.game.gameEnded}\n\n${formatLeaderboard(standings)}\n\n${T.game.duration.replace('{0}', game.getGameDuration())}`
+					text: `${T.game.gameEnded}\n\n${formatLeaderboard(standings)}\n\n${t(locale, 'trivia.game.duration', { prefix, 0: game.getGameDuration() })}`
 				},
 				{ quoted: message }
 			);
@@ -359,7 +353,7 @@ export default defineCommand({
 		} else if (args[1] === 'categories') {
 			const categories = Trivia.getCategories(locale);
 			const categoryList = Object.entries(categories)
-				.map(([key, name]) => `• ${name} (${T.game.questionsCount.replace('{0}', String(Trivia.getCategoryQuestionsCount(locale, key)))})`)
+				.map(([key, name]) => `• ${name} (${t(locale, 'trivia.game.questionsCount', { prefix, 0: String(Trivia.getCategoryQuestionsCount(locale, key)) })})`)
 				.join('\n');
 
 			await client.reply(from, `${T.game.categoriesTitle}\n\n${categoryList}`, message);

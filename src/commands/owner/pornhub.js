@@ -17,6 +17,7 @@ export default defineCommand({
 	async run({ query, from, message, args, type, prefix }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lo = useLocale(locale, 'owner');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -30,19 +31,19 @@ export default defineCommand({
 				from,
 				{
 					image: { url: data[index].mainThumb },
-					caption: 'Pornhub'.formatHeaders(),
+					caption: Lo.titles.pornhub.formatHeaders(),
 					templateButtons: [
 						{
 							urlButton: {
-								displayText: 'Image Source',
+								displayText: Lo.labels.imageSource,
 								url: args[1] === 'next' ? data[index].mainThumb : data[index].mainThumb
 							}
 						},
-						{ urlButton: { displayText: 'PHub Source', url: args[1] === 'next' ? data[index].url : data[index].url } },
+						{ urlButton: { displayText: Lo.labels.phubSource, url: args[1] === 'next' ? data[index].url : data[index].url } },
 						index + 1 !== data.length
 							? {
 									quickReplyButton: {
-										displayText: 'Next Post',
+										displayText: Lo.labels.nextPost,
 										id: cmdId('phub', `next ${data[index + 1].mainThumb} ${JSON.stringify(data)}`, { prefix })
 									}
 								}
@@ -50,7 +51,7 @@ export default defineCommand({
 						index !== 0
 							? {
 									quickReplyButton: {
-										displayText: 'Previous Post',
+										displayText: Lo.labels.prevPost,
 										id: cmdId('phub', `prev ${data[index - 1].mainThumb} ${JSON.stringify(data)}`, { prefix })
 									}
 								}
@@ -65,7 +66,7 @@ Uploaded : ${data[index].uploaded}
 Type : ${data[index].type}
 Category : ${data[index].categories.join(', ')}
 Tags : ${data[index].tags.join(', ')}
-${index + 1}/${data.length}\nPowered by Hidden Finder`
+${index + 1}/${data.length}\n${Lo.labels.poweredBy}`
 				},
 				{ quoted: message }
 			);
@@ -88,7 +89,7 @@ ${index + 1}/${data.length}\nPowered by Hidden Finder`
 				{
 					image: { url: result.result[0].mainThumb },
 					caption:
-						'Pornhub'.formatHeaders() +
+						Lo.titles.pornhub.formatHeaders() +
 						`\n\n${result.result
 							.map(({ title, pornstars, duration, views, rating, uploaded, type, categories, tags }) => {
 								return `Title : ${title}

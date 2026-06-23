@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { isURL } from '../../utils/modules/index.js';
 import { yandex } from '../../utils/image-reverse-search/index.js';
 import { defineCommand } from '../_define.js';
@@ -18,6 +18,7 @@ export default defineCommand({
 	async run({ isMediaImage, query, extractMediaData, filename, from, message, typeQuoted }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!isURL(query) && !isMediaImage) {
 			return await client.reply(from, L.errors.imageRequired, message);
@@ -57,8 +58,8 @@ export default defineCommand({
 
 			for (const item of result.information) {
 				if (i === 1) {
-					capt += 'Reverse Image Search'.formatHeaders();
-					capt += '\nWill sending a few similar or the actual images itself. Please wait...\n\n';
+					capt += Ls.titles.reverseImageSearch.formatHeaders();
+					capt += `\n${Ls.labels.willSending}\n\n`;
 				}
 
 				if (i === 6) {
@@ -66,8 +67,8 @@ export default defineCommand({
 				}
 
 				capt += `Title : ${item.title}\n`;
-				capt += `Description : ${item.description}\n`;
-				capt += `Domain : ${item.domain}`;
+				capt += `${Ls.labels.description} : ${item.description}\n`;
+				capt += `${Ls.labels.domain} : ${item.domain}`;
 
 				await client.send(
 					from,
@@ -75,8 +76,8 @@ export default defineCommand({
 						image: { url: item.images.preview[0].url },
 						caption: capt.trim().formatForm(),
 						templateButtons: [
-							{ urlButton: { displayText: 'Image Source', url: item.images.original } },
-							{ urlButton: { displayText: 'Content Source', url: item.source } }
+							{ urlButton: { displayText: Ls.buttons.imageSource, url: item.images.original } },
+							{ urlButton: { displayText: Ls.buttons.contentSource, url: item.source } }
 						]
 					},
 					{ quoted: message }

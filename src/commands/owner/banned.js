@@ -1,6 +1,6 @@
 import configuration from '../../helper/config/connect.js';
 import { S_WHATSAPP_NET } from '../../helper/index.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import prisma from '../../helper/database/prisma.js';
 import { getBannedUsers, banUser } from '../../helper/database/adapters/user.js';
 import { defineCommand } from '../_define.js';
@@ -40,7 +40,7 @@ export default defineCommand({
 			await banAndBlock(client, args[3]);
 			await client.reply(
 				from,
-				'You are banned from using bot.\n\nReason : Abusing Report command.',
+				t(locale, 'owner.errors.userBanned', ['Abusing Report command.']),
 				JSON.parse(args.slice(4))
 			);
 			return;

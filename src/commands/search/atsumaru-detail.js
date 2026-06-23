@@ -46,6 +46,7 @@ export default defineCommand({
 	async run({ query, from, message, prefix }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.mangaIdRequired, message);
@@ -56,7 +57,7 @@ export default defineCommand({
 		try {
 			const manga = await atsumaru.getManga(query.trim());
 			const caption = formatDetailCaption(manga);
-			const body = `${'Atsumaru Detail'.formatHeaders()}\n\n${caption.formatForm()}`;
+			const body = `${Ls.titles.atsumaruDetail.formatHeaders()}\n\n${caption.formatForm()}`;
 
 			const builder = new client.TemplateBuilder.Native();
 
@@ -65,8 +66,8 @@ export default defineCommand({
 				.body(body)
 				.footer('Powered by ' + BOT_NAME)
 				.buttons(
-					builder.button.reply({ display: '📖 Chapters', id: cmdId('atch', manga.id, { prefix }) }),
-					builder.button.reply({ display: '📕 Read', id: cmdId('atread', manga.id, { prefix }) })
+					builder.button.reply({ display: Ls.buttons.chapters, id: cmdId('atch', manga.id, { prefix }) }),
+					builder.button.reply({ display: Ls.buttons.read, id: cmdId('atread', manga.id, { prefix }) })
 				);
 
 			if (manga.poster) {
@@ -74,9 +75,9 @@ export default defineCommand({
 			}
 
 			await builder.send();
-			await wait.update('Detail fetched.');
+			await wait.update(Ls.labels.detailFetched);
 		} catch (error) {
-			return await wait.update(`Error: ${error.message || 'Manga not found.'}`);
+			return await wait.update(`Error: ${error.message || Ls.labels.mangaNotFound || 'Manga not found.'}`);
 		}
 	}
 });

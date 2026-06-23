@@ -1,6 +1,6 @@
 import { BOT_NAME } from '../../core/constants.js';
 
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -34,6 +34,7 @@ export default defineCommand({
 	) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lo = useLocale(locale, 'owner');
 
 		if (!query && !bodyQuoted && !isMediaVid && !isMediaImage && !isMediaDocument && !isQuotedSticker) {
 			return client.reply(from, L.errors.messageRequired, message);
@@ -68,7 +69,7 @@ export default defineCommand({
 				'status@broadcast',
 				{
 					[mediaType]: media,
-					caption: query || `Sent from ${BOT_NAME}`
+					caption: query || t(locale, 'owner.labels.sentFrom', [BOT_NAME])
 				},
 				{
 					backgroundColor: '#FFFF',

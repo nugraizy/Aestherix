@@ -3,7 +3,7 @@ import { YTNodes } from 'youtubei.js';
 import { youtubeLiveComments } from '../../utils/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { Cache } from '../../helper/modules/cache.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 const lives = new Cache();
@@ -21,6 +21,7 @@ export default defineCommand({
 	run: async ({ from, message, query, args }, client) => {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lo = useLocale(locale, 'owner');
 
 		if (!query) {
 			return client.reply(from, L.errors.noQuery, message);
@@ -66,11 +67,11 @@ export default defineCommand({
 					if (pinnedAction.banner?.contents?.is(YTNodes.LiveChatTextMessage)) {
 						await client.reply(
 							from,
-							`${'Live Stream Info'.formatHeaders()}
+							`${Lo.titles.liveStreamInfo.formatHeaders()}
 
-Info : Pinned Message
-From : ${pinnedAction.banner.contents.author?.name.toString()}
-Content : ${pinnedAction?.banner.contents.message.toString()}`,
+${Lo.labels.info} : Pinned Message
+${Lo.labels.from} : ${pinnedAction.banner.contents.author?.name.toString()}
+${Lo.labels.content} : ${pinnedAction?.banner.contents.message.toString()}`,
 							message
 						);
 					}
@@ -126,12 +127,12 @@ Content : ${pinnedAction?.banner.contents.message.toString()}`,
 							await client.send(
 								from,
 								{
-									text: `${'Live Stream Message Info'.formatHeaders()}
+									text: `${Lo.titles.liveStreamMessageInfo.formatHeaders()}
 
 [${hours}] : ${item.as(YTNodes.LiveChatTextMessage).author?.is_moderator ? '[MOD] ' : ''}\`\`\`${item
 										.as(YTNodes.LiveChatTextMessage)
 										.author.name.toString()}\`\`\`
-MSG ~> ${item.as(YTNodes.LiveChatTextMessage).message.toString()}`.trim()
+${Lo.labels.msg} : ${item.as(YTNodes.LiveChatTextMessage).message.toString()}`.trim()
 								},
 								{}
 							);
@@ -140,13 +141,13 @@ MSG ~> ${item.as(YTNodes.LiveChatTextMessage).message.toString()}`.trim()
 							await client.send(
 								from,
 								{
-									text: `${'Live Stream Donation Info'.formatHeaders()}
+									text: `${Lo.titles.liveStreamDonationInfo.formatHeaders()}
 
 [${hours}] : ${item.as(YTNodes.LiveChatPaidMessage).author?.is_moderator ? '[MOD] ' : ''}\`\`\`${item
 										.as(YTNodes.LiveChatPaidMessage)
 										.author.name.toString()}\`\`\`
 (${item.as(YTNodes.LiveChatPaidMessage).purchase_amount})
-MSG ~> ${item.as(YTNodes.LiveChatPaidMessage).message.toString()}`.trim()
+${Lo.labels.msg} : ${item.as(YTNodes.LiveChatPaidMessage).message.toString()}`.trim()
 								},
 								{}
 							);
@@ -156,7 +157,7 @@ MSG ~> ${item.as(YTNodes.LiveChatPaidMessage).message.toString()}`.trim()
 								from,
 
 								{
-									text: `${'Live Stream Donation Info'.formatHeaders()}
+									text: `${Lo.titles.liveStreamDonationInfo.formatHeaders()}
 
 [${hours}] : ${item.as(YTNodes.LiveChatPaidSticker).author?.is_moderator ? '[MOD]' : ''}\`\`\`${item
 										.as(YTNodes.LiveChatPaidSticker)
@@ -175,10 +176,10 @@ MSG ~> ${item.as(YTNodes.LiveChatPaidMessage).message.toString()}`.trim()
 					await client.send(
 						from,
 						{
-							text: `${'Live Stream Info'.formatHeaders()}
+							text: `${Lo.titles.liveStreamInfo.formatHeaders()}
 
-Info : Message Just Got Pinned
-Content : ${action.banner?.contents}`
+${Lo.labels.info} : Message Just Got Pinned
+${Lo.labels.content} : ${action.banner?.contents}`
 						},
 						{}
 					);
@@ -193,10 +194,10 @@ Content : ${action.banner?.contents}`
 				await client.send(
 					from,
 					{
-						text: `${'Live Stream Metadata'.formatHeaders()}
+						text: `${Lo.titles.liveStreamMetadata.formatHeaders()}
 
-Views : ${metadata.views?.view_count.toString()} 👀
-Likes : ${metadata.likes?.default_text} 👍🏻`
+${Lo.labels.views} : ${metadata.views?.view_count.toString()} 👀
+${Lo.labels.likes} : ${metadata.likes?.default_text} 👍🏻`
 					},
 					{}
 				);

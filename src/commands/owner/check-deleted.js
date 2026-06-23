@@ -1,7 +1,7 @@
 import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
-import { getLocale } from '../../helper/i18n/index.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { getTimeSince } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -22,6 +22,7 @@ export default defineCommand({
 	status: 'enable',
 	async run({ from, args, cmd }, client, store) {
 		const locale = await getLocale(from);
+		const Lo = useLocale(locale, 'owner');
 
 		const messages = store.loadMessages(from);
 
@@ -48,7 +49,7 @@ export default defineCommand({
 						rowId: `${cmd} get ${message.message.protocolMessage.key.id}`
 					}
 				],
-				title: `${BOT_NAME} | ${message?.pushName ?? 'No Name'}`
+				title: `${BOT_NAME} | ${message?.pushName ?? Lo.labels.noName}`
 			});
 			i++;
 		}
@@ -56,9 +57,9 @@ export default defineCommand({
 		await client.send(
 			from,
 			{
-				buttonText: 'Open List',
-				title: 'choosse one to fetch the metadata message',
-				footer: 'and bot will send the message',
+				buttonText: Lo.labels.openList,
+				title: Lo.labels.choosseOne,
+				footer: Lo.labels.andBotWillSend,
 				text: '\t',
 				sections: row
 			},

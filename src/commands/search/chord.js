@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { chords } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -15,6 +15,7 @@ export default defineCommand({
 	run: async ({ query, message, from }, client) => {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return client.reply(from, L.errors.noQuery, message);
@@ -28,7 +29,7 @@ export default defineCommand({
 
 		return await client.reply(
 			from,
-			`${'Chords'.formatHeaders()}
+			`${Ls.titles.chords.formatHeaders()}
 
 Title : ${result.title}
 

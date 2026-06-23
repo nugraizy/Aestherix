@@ -63,6 +63,7 @@ export default defineCommand({
 	async run({ from, query, message, args, prefix }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ll = useLocale(locale, 'look_up');
 
 		if (!query) {
 			return await client.reply(from, L.errors.uidRequired, message);
@@ -108,7 +109,7 @@ export default defineCommand({
 			parsedUser = parseGenshinUser(jsonData);
 			parsedCharacters = parseCharactersData(jsonData.characters);
 			setCache(uid, parsedUser, parsedCharacters);
-			await wait.update('Data fetched successfully.');
+			await wait.update(Ll.labels.dataFetched);
 		}
 
 		if (!parsedCharacters.length) {
@@ -132,11 +133,11 @@ export default defineCommand({
 
 			await client.send(
 				from,
-				{ image: buffer, caption: `${found.name} | Lv.${found.level} | UID: ${uid}` },
+				{ image: buffer, caption: t(locale, 'look_up.labels.captionNameLevelUid', [found.name, found.level, uid]) },
 				{ quoted: message }
 			);
 
-			return await wait.update(`Done. ${found.name}'s build card generated.`);
+			return await wait.update(t(locale, 'look_up.labels.doneBuildCard', [found.name]));
 		}
 
 		const ctx = { prefix };
@@ -152,9 +153,9 @@ export default defineCommand({
 		await builder
 			.destination(from)
 			.body(
-				`🎮 *Genshin Showcase* — UID: ${uid}\n\n${parsedUser.nickname || L.info.unknown} | AR ${parsedUser.level}\n\nSelect a character:`
+				t(locale, 'look_up.labels.genshinShowcase', [uid, parsedUser.nickname || L.info.unknown, parsedUser.level])
 			)
-			.footer('Data cached for 10 minutes')
+			.footer(Ll.labels.dataCached)
 			.buttons(...buttons)
 			.send({ quoted: message });
 	}

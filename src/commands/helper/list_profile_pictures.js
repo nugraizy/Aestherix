@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 import configuration from '../../helper/config/connect.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 const getDisplayUrl = (value) => {
@@ -39,13 +39,14 @@ export default defineCommand({
 	async run({ from, message }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lh = useLocale(locale, 'helper');
 		const pictures = configuration.pinterest.images;
 
 		if (!pictures.size) {
 			return client.send(from, { text: L.errors.noProfilePictures }, { quoted: message });
 		}
 
-		let caption = `📌 Total saved sequences: ${pictures.size}\n\n`;
+		let caption = t(locale, 'owner.labels.totalSavedSequences', [pictures.size]);
 
 		const builder = new client.TemplateBuilder.Carousel();
 
@@ -75,13 +76,13 @@ export default defineCommand({
 		await builder
 			.destination(from)
 			.body(caption)
-			.footer('Powered by Hidden Finder')
+			.footer(Lh.labels.poweredBy)
 			.header('Header')
 			.cards(
 				parsedEntries
 					.map((data) => ({
-						body: `Sequence from ${data[0].timestamp.split(' ')[1]} to ${data[data.length - 1].timestamp.split(' ')[1]}`,
-						footer: `Total Pictures: ${data.length}`,
+						body: t(locale, 'owner.labels.sequenceFrom', [data[0].timestamp.split(' ')[1], data[data.length - 1].timestamp.split(' ')[1]]),
+						footer: t(locale, 'owner.labels.totalPictures', [data.length]),
 						title: '',
 						header: data[0].url,
 						buttons: data.map((v) => builder.button.url({ display: v.timestamp, url: v.url }))

@@ -1,5 +1,5 @@
 import { getBinaryNodeChild, getBinaryNodeChildren } from 'baileys';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 const TYPES = {
@@ -74,9 +74,10 @@ export default defineCommand({
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	run: async ({ query, from, message }, client) => {
+	run: async ({ query, from, message, prefix }, client) => {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lo = useLocale(locale, 'owner');
 
 		try {
 			const node = await client.query({
@@ -101,9 +102,9 @@ export default defineCommand({
 			if (!query) {
 				return await client.reply(
 					from,
-					`Privacy settings:\n${result
-						.map((setting) => `${setting.attrs.name}: ${setting.attrs.value}`)
-						.join('\n')}\n\nUsage: !privacy <setting> <value>\nValid Settings with Values: \n${Object.entries(
+				`${Lo.labels.privacySettings} : ${result
+					.map((setting) => `${setting.attrs.name}: ${setting.attrs.value}`)
+					.join('\n')}${t(locale, 'owner.labels.privacyUsage', [`${prefix || '.'}privacy`])} \n${Object.entries(
 						PRIVACY_SETTINGS_TOGGLE
 					)
 						.map(([setting, values]) => `${setting}: ${values.join(', ')}`)
@@ -119,7 +120,7 @@ export default defineCommand({
 			if (!validValue) {
 				return await client.reply(
 					from,
-					`Invalid value for ${name}. Valid values: ${PRIVACY_SETTINGS_TOGGLE[name].join(', ')}`,
+					t(locale, 'owner.labels.invalidValue', [name, PRIVACY_SETTINGS_TOGGLE[name].join(', ')]),
 					message
 				);
 			}

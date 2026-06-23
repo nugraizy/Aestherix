@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { isURL, sauceNao } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -17,6 +17,7 @@ export default defineCommand({
 	async run({ isMediaImage, query, extractMediaData, filename, from, message, typeQuoted }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const La = useLocale(locale, 'anime');
 
 		if (!isURL(query) && !isMediaImage) {
 			return await client.reply(from, L.errors.imageRequired, {
@@ -48,16 +49,16 @@ export default defineCommand({
 		}
 
 		if (result.title === '') {
-			return await wait.update('Can not discover what anime is this. Try moe instead.');
+			return await wait.update(La.labels.cannotDiscover);
 		}
 
-		const capt = `${'What Anime ?'.formatHeaders()}
+		const capt = `${La.titles.sauceNao.formatHeaders()}
 
-Title : ${result.title}
-Description : ${result.description}
-Similarity : ${result.similarity}%
+${La.labels.fullTitle} : ${result.title}
+${La.labels.description} : ${result.description}
+${La.labels.similarity} : ${result.similarity}%
 
-Powered by sauce.nao`.formatForm();
+${La.buttons.poweredBySauceNao}`.formatForm();
 
 		await wait.update(capt.trim());
 

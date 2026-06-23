@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { ConnectFour } from '../../utils/games/index.js';
 import { loggers, color } from '../../utils/modules/index.js';
 import { getPrefix } from '../../helper/modules/prefix.js';
@@ -42,7 +42,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${C.game.title}\n\n${game.renderBoard()}\n\n🔴 ${C.game.waitingForOpponent.replace('{0}', playerMention(sender))}\n\n${C.game.joinPrompt}`,
+					text: `${C.game.title}\n\n${game.renderBoard()}\n\n🔴 ${t(locale, 'connect-four.game.waitingForOpponent', { prefix, 0: playerMention(sender) })}\n\n${C.game.joinPrompt}`,
 					mentions: [sender]
 				},
 				{ quoted: message }
@@ -64,7 +64,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${C.game.title}\n\n${game.renderBoard()}\n\n🔴 ${playerMention(sender)} vs 🟡 ${C.game.bot}\n\n${C.game.turn.replace('{0}', `🔴 ${playerMention(sender)}`)}`,
+					text: `${C.game.title}\n\n${game.renderBoard()}\n\n🔴 ${playerMention(sender)} vs 🟡 ${C.game.bot}\n\n${t(locale, 'connect-four.game.turn', { prefix, 0: `🔴 ${playerMention(sender)}` })}`,
 					mentions: [sender]
 				},
 				{ quoted: message }
@@ -99,7 +99,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${C.game.title}\n\n${session.renderBoard()}\n\n🔴 ${playerMention(session.player1)} ${C.game.vs} 🟡 ${playerMention(session.player2)}\n\n${C.game.turn.replace('{0}', `🔴 ${playerMention(session.player1)}`)}`,
+					text: `${C.game.title}\n\n${session.renderBoard()}\n\n🔴 ${playerMention(session.player1)} ${C.game.vs} 🟡 ${playerMention(session.player2)}\n\n${t(locale, 'connect-four.game.turn', { prefix, 0: `🔴 ${playerMention(session.player1)}` })}`,
 					mentions: [session.player1, session.player2]
 				},
 				{ quoted: message }
@@ -152,12 +152,12 @@ export default defineCommand({
 			if (result.status === 'win') {
 				ConnectFour.deleteSession(sender);
 
-				const winnerText = result.winner === sender ? C.game.wins.replace('{0}', playerMention(result.winner)) : C.game.aiWins;
+				const winnerText = result.winner === sender ? t(locale, 'connect-four.game.wins', { prefix, 0: playerMention(result.winner) }) : C.game.aiWins;
 
 				await client.send(
 					from,
 					{
-						text: `${C.game.title}\n\n${result.board}\n\n${winnerText}\n${C.game.duration.replace('{0}', result.duration)}`,
+						text: `${C.game.title}\n\n${result.board}\n\n${winnerText}\n${t(locale, 'connect-four.game.duration', { prefix, 0: result.duration })}`,
 						mentions: [sender]
 					},
 					{ quoted: message }
@@ -168,7 +168,7 @@ export default defineCommand({
 				await client.send(
 					from,
 					{
-						text: `${C.game.title}\n\n${result.board}\n\n${C.game.draw}\n${C.game.duration.replace('{0}', result.duration)}`,
+						text: `${C.game.title}\n\n${result.board}\n\n${C.game.draw}\n${t(locale, 'connect-four.game.duration', { prefix, 0: result.duration })}`,
 						mentions: [sender]
 					},
 					{ quoted: message }
@@ -178,7 +178,7 @@ export default defineCommand({
 				const turnText =
 					session.vsAI && session.turn === '🟡'
 						? `🟡 ${C.game.botThinking}`
-						: C.game.turn.replace('{0}', `${turnEmoji} ${playerMention(result.turn)}`);
+						: t(locale, 'connect-four.game.turn', { prefix, 0: `${turnEmoji} ${playerMention(result.turn)}` });
 
 				await client.send(
 					from,
@@ -196,19 +196,19 @@ export default defineCommand({
 						ConnectFour.deleteSession(sender);
 
 						await client.send(from, {
-							text: `${C.game.title}\n\n${aiResult.board}\n\n${C.game.aiWins}\n${C.game.duration.replace('{0}', aiResult.duration)}`,
+							text: `${C.game.title}\n\n${aiResult.board}\n\n${C.game.aiWins}\n${t(locale, 'connect-four.game.duration', { prefix, 0: aiResult.duration })}`,
 							mentions: [sender]
 						});
 					} else if (aiResult.status === 'draw') {
 						ConnectFour.deleteSession(sender);
 
 						await client.send(from, {
-							text: `${C.game.title}\n\n${aiResult.board}\n\n${C.game.draw}\n${C.game.duration.replace('{0}', aiResult.duration)}`,
+							text: `${C.game.title}\n\n${aiResult.board}\n\n${C.game.draw}\n${t(locale, 'connect-four.game.duration', { prefix, 0: aiResult.duration })}`,
 							mentions: [sender]
 						});
 					} else {
 						await client.send(from, {
-							text: `${C.game.title}\n\n${aiResult.board}\n\n${C.game.turn.replace('{0}', `🔴 ${playerMention(sender)}`)}`,
+							text: `${C.game.title}\n\n${aiResult.board}\n\n${t(locale, 'connect-four.game.turn', { prefix, 0: `🔴 ${playerMention(sender)}` })}`,
 							mentions: [sender]
 						});
 					}

@@ -15,6 +15,7 @@ export default defineCommand({
 	async run({ query, from, message }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lc = useLocale(locale, 'converter');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -24,7 +25,7 @@ export default defineCommand({
 
 		const result = await createImage(query);
 
-		const caption = `${'A.I Image Generator'.formatHeaders()}\n\nPowered by deepai.org`;
+		const caption = `${Lc.titles.aiImageGenerator.formatHeaders()}\n\n${Lc.labels.poweredByDeepai}`;
 
 		await client.send(from, { image: { url: result }, caption }, { quoted: message });
 	}

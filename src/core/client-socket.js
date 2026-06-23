@@ -770,8 +770,6 @@ export class ClientSocket extends EventEmitter {
 	}
 
 	async #updateGroupParticipants(jid, action, participants, admins, { force, quoted, locale = 'en' }) {
-		const { useLocale } = await import('../helper/i18n/index.js');
-		const L = useLocale(locale, 'common');
 		const responses = [];
 
 		for (const participant of participants) {
@@ -794,9 +792,11 @@ export class ClientSocket extends EventEmitter {
 				responses.push({ error: e.message, id: participant });
 
 				if (e?.status === '400') {
+					const { t } = await import('../helper/i18n/index.js');
+
 					await this.send(
 						jid,
-						{ text: L.core.errors.invalidNumber.replace('{0}', participant.split('@')[0]), mentions: [participant] },
+						{ text: t(locale, 'common.core.errors.invalidNumber', [participant.split('@')[0]]), mentions: [participant] },
 						quoted
 					);
 				}

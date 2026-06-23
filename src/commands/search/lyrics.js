@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { arq } from '../../utils/arq/index.js';
 import { removeDuplicatesArray } from '../../utils/modules/index.js';
@@ -17,6 +17,7 @@ export default defineCommand({
 	async run({ query, from, message, args, type }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -29,16 +30,16 @@ export default defineCommand({
 			return await client.send(
 				from,
 				{
-					text: `${'Lyrics'.formatHeaders()}
+					text: `${Ls.titles.lyrics.formatHeaders()}
                     
-Artist : ${data[index].artist}
-Song : ${data[index].song}
+${Ls.labels.artist} : ${data[index].artist}
+${Ls.labels.song} : ${data[index].song}
 \n${data[index].lyrics}`.formatForm(),
 					templateButtons: [
 						index + 1 !== data.length
 							? {
 									quickReplyButton: {
-										displayText: 'Next Lyrics',
+										displayText: Ls.buttons.nextLyrics,
 										id: cmdId('lyrics', `next ${data[index + 1].index} ${JSON.stringify(data)}`)
 									}
 								}
@@ -46,7 +47,7 @@ Song : ${data[index].song}
 						index !== 0
 							? {
 									quickReplyButton: {
-										displayText: 'Previous Lyrics',
+										displayText: Ls.buttons.previousLyrics,
 										id: cmdId('lyrics', `prev ${data[index - 1].index} ${JSON.stringify(data)}`)
 									}
 								}
@@ -75,16 +76,16 @@ Song : ${data[index].song}
 			await client.send(
 				from,
 				{
-					text: `${'Lyrics'.formatHeaders()}
+					text: `${Ls.titles.lyrics.formatHeaders()}
                     
-Artist : ${result.result[0].artist}
-Song : ${result.result[0].song}
+${Ls.labels.artist} : ${result.result[0].artist}
+${Ls.labels.song} : ${result.result[0].song}
 \n${result.result[0].lyrics}`,
 					templateButtons: [
 						result.result.length !== 1
 							? {
 									quickReplyButton: {
-										displayText: 'Next Lyrics',
+										displayText: Ls.buttons.nextLyrics,
 										id: cmdId('lyrics', `next ${result.result[1].index} ${JSON.stringify(result.result)}`)
 									}
 								}

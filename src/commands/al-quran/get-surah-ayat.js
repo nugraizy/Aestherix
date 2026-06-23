@@ -14,9 +14,10 @@ export default defineCommand({
 	cooldown: 0,
 	limit: 0,
 	status: 'enable',
-	async run({ query, from, message }, client) {
-		const locale = await getLocale(from);
+	async run({ query, from, message, sender }, client) {
+		const locale = await getLocale(from, sender);
 		const L = useLocale(locale, 'common');
+		const Lq = useLocale(locale, 'al-quran');
 
 		if (!query) {
 			return await client.reply(from, L.errors.surahRequired, message);
@@ -35,9 +36,9 @@ export default defineCommand({
 
 		await client.reply(
 			from,
-			`Surah ${detail.nomor} (${detail.namaArab}) (${detail.namaLatin})\n\nTotal Ayat : ${detail.totAyat}\nTempat Turun : ${
+			`Surah ${detail.nomor} (${detail.namaArab}) (${detail.namaLatin})\n\n${Lq.labels.totalAyat} : ${detail.totAyat}\n${Lq.labels.revealedAt} : ${
 				detail.turun
-			}\nArti : ${detail.arti}\n\n${ayat.map((v) => ` • ${v.arab}\n؜ • ${v.latin}\n؜ • ${v.indonesia}`).join('\n\n')}`,
+			}\n${Lq.labels.meaning} : ${detail.arti}\n\n${ayat.map((v) => ` • ${v.arab}\n؜ • ${v.latin}\n؜ • ${v.indonesia}`).join('\n\n')}`,
 			message
 		);
 	}

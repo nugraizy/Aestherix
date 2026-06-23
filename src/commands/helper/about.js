@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 
 import { BOT_NAME } from '../../core/constants.js';
 import configuration from '../../helper/config/connect.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 const botVersion = (await fs.readJSON('./package.json')).version;
@@ -19,21 +19,21 @@ export default defineCommand({
 	status: 'enable',
 	async run({ from }, client) {
 		const locale = await getLocale(from);
-		const L = useLocale(locale, 'common');
-		const capt = `Bot Name : ${BOT_NAME}
-Total Commands : ${configuration.registry.commands.size}
-Bot Version : ${botVersion}
+		const Lh = useLocale(locale, 'helper');
+		const capt = `${Lh.labels.botName} : ${BOT_NAME}
+${Lh.labels.totalCommands} : ${configuration.registry.commands.size}
+${Lh.labels.botVersion} : ${botVersion}
 
-Our Motto :
+${Lh.labels.ourMotto}
 
-Using less module and try to find every private api from the provider (if they using one).`;
+${Lh.labels.usingLessModule}`;
 
 		const builder = new client.TemplateBuilder.Native();
 
 		await builder
 			.destination(from)
 			.body(capt.formatForm())
-			.footer('Powered by ' + BOT_NAME)
+			.footer(t(locale, 'owner.labels.poweredBy', [BOT_NAME]))
 			.buttons(
 				builder.button.url({ display: 'Nanda', url: 'https://github.com/nugraizy' }),
 				builder.button.url({ display: 'Aldi', url: 'https://github.com/alphanum404' }),

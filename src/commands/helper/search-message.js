@@ -1,7 +1,7 @@
 import { BOT_NAME } from '../../core/constants.js';
 
 import { delay } from 'baileys';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -17,14 +17,15 @@ export default defineCommand({
 	async run({ from, query, message }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lh = useLocale(locale, 'helper');
 
-		let capt = `${BOT_NAME} Search\n\n`;
+		let capt = t(locale, 'helper.labels.searchTitle', [BOT_NAME]);
 		const messages = await client.searchMessage(from, query);
 
 		if (!messages.length) {
-			capt += 'No message found.';
+			capt += Lh.labels.noMessageFound;
 		} else {
-			capt += `Found ${messages.length} messages.\n\n`;
+			capt += t(locale, 'helper.labels.foundMessages', [messages.length]);
 
 			await client.reply(from, capt.trim(), message);
 

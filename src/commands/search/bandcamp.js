@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { searchBandcamp } from '../../utils/bandcamp/index.js';
 import { removeDuplicatesArray } from '../../utils/modules/index.js';
@@ -17,6 +17,7 @@ export default defineCommand({
 	async run({ from, query, message, prefix }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -40,14 +41,14 @@ export default defineCommand({
 				{
 					image: { url: result[0].thumbnailUrl },
 					caption:
-						'Bandcamp'.formatHeaders() +
+						Ls.titles.bandcamp.formatHeaders() +
 						`\n\n${result
 							.map(({ bandName, bandId, title, albumName, albumId }) => {
-								return `Band Name : ${bandName}
-Band ID : ${bandId}
+								return `${Ls.labels.bandName} : ${bandName}
+${Ls.labels.bandId} : ${bandId}
 Title : ${title}
 Album : ${albumName || 'n/a'}
-Album ID : ${albumId || 'n/a'}`;
+${Ls.labels.albumId} : ${albumId || 'n/a'}`;
 							})
 							.join('\n\n')}`
 							.trimEnd()
@@ -68,10 +69,10 @@ Album ID : ${albumId || 'n/a'}`;
 			await client.send(
 				from,
 				{
-					buttonText: 'Open List',
+					buttonText: Ls.buttons.openList,
 					text: '\t',
-					footer: '```Looking for some more? Choose between these options.```',
-					title: 'Bandcamp Tracks'.formatHeaders(),
+					footer: Ls.labels.lookingForMore,
+					title: Ls.titles.bandcampTracks.formatHeaders(),
 					sections: result.slice(1).map((v) => ({
 						rows: [{ title: `MP3 | ${v.title}`, rowId: cmdId('bandcampdl', v.urlBase, { prefix }) }],
 						title: `${v.bandName} - ${v.title}`

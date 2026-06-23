@@ -1,5 +1,3 @@
-import { BOT_NAME } from '../../core/constants.js';
-
 import fs from 'fs';
 import _ from 'lodash';
 import sharp from 'sharp';
@@ -11,7 +9,7 @@ import { cmdId } from '../../helper/modules/prefix.js';
 import { randomize } from '../../utils/modules/index.js';
 import { ephoto360 } from '../../utils/textmaker/ephoto360.js';
 import { defineCommand } from '../_define.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 
 let dataJSON = {};
 
@@ -36,6 +34,7 @@ export default defineCommand({
 	async run({ from, message, query, args, cmd, filename, isMediaImage, extractMediaData, typeQuoted }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lc = useLocale(locale, 'converter');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -78,24 +77,23 @@ export default defineCommand({
 			const data = splitData[index];
 			const isParam = /\d/.test(args[2]);
 
-			const texts = `Available Model
-[ index ]     [ title ]
+			const texts = `${Lc.labels.availableModel}
 ${data.join('\n')}
 
-Use ${cmd} ${randomize(numbers)} Texts Here.`;
+${t(locale, 'converter.labels.useModel', [cmd, randomize(numbers)])}`;
 
 			let buttons = [];
 
 			if (!isParam) {
 				buttons.push({
 					buttonId: cmdId(cmd, 'next ' + (index + 1) + ' -model'),
-					buttonText: { displayText: 'Next' },
+					buttonText: { displayText: t(locale, 'common.core.buttons.next') },
 					type: 1
 				});
 			} else if (isParam && splitData[index + 1] !== undefined) {
 				buttons.push({
 					buttonId: cmdId(cmd, 'next ' + (index + 1) + ' -model'),
-					buttonText: { displayText: 'Next' },
+					buttonText: { displayText: t(locale, 'common.core.buttons.next') },
 					type: 1
 				});
 			}
@@ -103,7 +101,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 			if (isParam && index !== 0) {
 				buttons.push({
 					buttonId: cmdId(cmd, 'prev ' + (index - 1) + ' -model'),
-					buttonText: { displayText: 'Previous' },
+					buttonText: { displayText: t(locale, 'common.core.buttons.previous') },
 					type: 1
 				});
 			}
@@ -114,7 +112,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 				from,
 				{
 					text: texts,
-					footer: `Page : ${Number(index) + 1}/${splitData.length}\nPowered by ${BOT_NAME}`,
+					footer: `Page : ${Number(index) + 1}/${splitData.length}\n${Lc.labels.poweredByHiddenFinder}`,
 					buttons,
 					headerType: 1
 				},
@@ -125,7 +123,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 		models = !_.isNumber(parsed[0]) ? [randomize(dataJSON).url] : [_.get(dataJSON, parsed[0] - 1)?.url].filter(Boolean);
 
 		if (models?.length === 0) {
-			return await client.reply(from, `Model ${models[0]} not found\n Type : !${this.name} -type`, message);
+			return await client.reply(from, t(locale, 'converter.labels.notFound', [models[0], `Type : !${this.name} -type`]), message);
 		}
 
 		for (const model of models) {
@@ -144,7 +142,7 @@ Use ${cmd} ${randomize(numbers)} Texts Here.`;
 			const result = await ephoto360(model, parsed.slice(1).join(' '), buffers);
 
 			if (result?.error) {
-				await client.reply(from, `something went wrong:\n\n${result.error}`, message);
+				await client.reply(from, t(locale, 'converter.labels.somethingWentWrong', [result.error]), message);
 
 				continue;
 			}

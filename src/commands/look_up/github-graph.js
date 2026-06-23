@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 import { GitHubGraph } from '../../helper/index.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 
 import { cmdId } from '../../helper/modules/prefix.js';
 import { defineCommand } from '../_define.js';
@@ -20,6 +20,7 @@ export default defineCommand({
 	async run({ from, query, message, cmd }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ll = useLocale(locale, 'look_up');
 
 		if (!query) {
 			return await client.reply(from, L.errors.gitUsernameRequired, message);
@@ -46,7 +47,7 @@ export default defineCommand({
 		}
 
 		if (theme === true) {
-			return await client.reply(from, `List of themes:\n\n${themes.join(', ')}`, message);
+			return await client.reply(from, `${Ll.labels.listOfThemes}\n${themes.join(', ')}`, message);
 		}
 
 		if (!themes.includes(theme?.toLowerCase())) {
@@ -54,9 +55,9 @@ export default defineCommand({
 
 			return await builder
 				.destination(from)
-				.footer(`Use ${cmd} ${query} --theme ${themes.random()} to create graph with specific theme.`)
-				.body(`Please specify a valid themes, this is a list of available themes:\n\n${themes.join(', ')}`)
-				.buttons(builder.button.reply({ display: 'Create Default Graph', id: cmdId(cmd, `${usernameQuery} --theme default`) }))
+				.footer(t(locale, 'look_up.labels.useTheme', [cmd, query, themes.random()]))
+				.body(t(locale, 'look_up.labels.specifyTheme', [themes.join(', ')]))
+				.buttons(builder.button.reply({ display: Ll.labels.createDefaultGraph, id: cmdId(cmd, `${usernameQuery} --theme default`) }))
 				.send();
 		}
 
@@ -70,6 +71,6 @@ export default defineCommand({
 
 		await client.send(from, { image: Buffer.from(buffer) }, { quoted: message });
 
-		await wait.update('Graph created successfully!');
+		await wait.update(Ll.labels.graphCreated);
 	}
 });

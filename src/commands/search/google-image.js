@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { googleImage, removeDuplicatesArray } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
@@ -16,6 +16,7 @@ export default defineCommand({
 	run: async ({ query, message, from }, client) => {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -37,13 +38,13 @@ export default defineCommand({
 				from,
 				{
 					image: { url: result[0] },
-					caption: 'Google-it Images'.formatHeaders(),
+					caption: Ls.titles.googleImages.formatHeaders(),
 					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: result[0] } },
+						{ urlButton: { displayText: Ls.buttons.imageSource, url: result[0] } },
 						result.length !== 1
 							? {
 									quickReplyButton: {
-										displayText: 'Next Image',
+										displayText: Ls.buttons.nextImage,
 										id: cmdId('googleimage', `next ${result[1]} ${JSON.stringify(result).replace(/\|/g, '')}`)
 									}
 								}

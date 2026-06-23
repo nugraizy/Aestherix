@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import lodash from 'lodash';
 import parser from 'yargs-parser';
 
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { metadata, qobuz } from '../../utils/qobuz/index.js';
@@ -18,9 +18,10 @@ export default defineCommand({
 	cooldown: 8,
 	limit: 3,
 	status: 'enable',
-	async run({ from, query, message, prettyNumber, prefix, device }, client) {
+	async run({ from, query, message, prettyNumber, prefix, device, sender }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const DL = useLocale(locale, 'downloader');
 
 		let wait = null;
 
@@ -46,14 +47,14 @@ export default defineCommand({
 				}
 
 				if (!results.length) {
-					return await wait.update('No results found for your query. Try again with another keyword.');
+					return await wait.update(L.core.errors.noResultsForQuery);
 				}
 
 				if (index > results.length - 1) {
 					return await wait.update('Index does not match the response length. Max index: ' + (results.length - 1));
 				}
 
-				await downloadAudio(client, results[index], { from, message, prettyNumber, wait });
+				await downloadAudio(client, results[index], { from, message, prettyNumber, wait, L, locale });
 			} else if (id) {
 				let cached = qobuz.getTrack(String(id));
 
@@ -65,7 +66,7 @@ export default defineCommand({
 					}
 				}
 
-				await downloadAudio(client, cached || { id }, { from, message, prettyNumber, wait });
+				await downloadAudio(client, cached || { id }, { from, message, prettyNumber, wait, L, locale });
 			} else {
 				const results = await qobuz.searchTracks(query);
 
@@ -74,17 +75,17 @@ export default defineCommand({
 				}
 
 				if (!results.length) {
-					return await wait.update('No results found for your query. Try again with another keyword.');
+					return await wait.update(L.core.errors.noResultsForQuery);
 				}
 
 				const total = results.length;
 
-				await wait.update(`Songs with keyword "${query}" found. Total: ${total}`);
+				await wait.update(t(locale, 'common.core.progress.songsFound', [query, total]));
 
 				if (device.isIos) {
 					const items = results.slice(0, 20);
 					const container = {
-						text: 'Qobuz Downloader'.formatHeaders() + '\n\n',
+						text: DL.titles.qobuz.formatHeaders() + '\n\n',
 						buttons: []
 					};
 
@@ -92,7 +93,7 @@ export default defineCommand({
 
 					items.forEach((track, idx) => {
 						const artists = track.artists?.map((a) => a.name).join(', ') || track.artist?.name || '';
-						const duration = track.duration ? dayjs(track.duration * 1000).format('mm:ss') : 'N/A';
+						const duration = track.duration ? dayjs(track.duration * 1000).format('mm:ss') : L.core.labels.nA;
 
 						container.text += `${idx + 1}. ${artists} - ${track.title} • ${duration}\n> ${prefix}qobuz --id ${track.id}\n`;
 						container.buttons.push(
@@ -106,14 +107,14 @@ export default defineCommand({
 					await builder
 						.destination(from)
 						.body(container.text)
-						.footer('Powered by Hidden Finder')
+						.footer(t(locale, 'common.core.footer.poweredBy', ['Hidden Finder']))
 						.buttons(...container.buttons)
 						.send();
 				} else {
 					const chunks = lodash.chunk(results, 30);
 					const builder = new client.TemplateBuilder.Carousel();
-					let caption = 'Qobuz Downloader'.formatHeaders();
-					let watermark = 'Powered by Hidden Finder';
+					let caption = DL.titles.qobuz.formatHeaders();
+					let watermark = t(locale, 'common.core.footer.poweredBy', ['Hidden Finder']);
 					let length = 0;
 
 					for (const chunk of chunks) {
@@ -121,22 +122,22 @@ export default defineCommand({
 							.destination(from)
 							.body(caption)
 							.footer(watermark)
-							.header('Header')
+							.header(DL.labels.header)
 							.cards(
 								chunk.map((track, idx) => {
 									const songNumber = length + idx + 1;
 									const cover = track.album?.image || '';
 									const artists = track.artists?.map((a) => a.name).join(', ') || track.artist?.name || '';
-									const duration = track.duration ? dayjs(track.duration * 1000).format('mm:ss') : 'N/A';
+									const duration = track.duration ? dayjs(track.duration * 1000).format('mm:ss') : L.core.labels.nA;
 
 									return {
-										body: `Title : ${track.title}\nArtist(s) : ${artists}\nDuration : ${duration}\nAlbum : ${track.album?.title || 'N/A'}`,
+										body: `${L.core.caption.title} : ${track.title}\n${L.core.caption.artists} : ${artists}\n${L.core.caption.duration} : ${duration}\n${L.core.caption.album} : ${track.album?.title || L.core.labels.nA}`,
 										header: cover || Buffer.alloc(10),
-										footer: `Song ${songNumber} of ${total}`,
+										footer: `${L.core.labels.song} ${songNumber} ${L.core.labels.of} ${total}`,
 										buttons: [
-											...(cover ? [builder.button.url({ display: `Cover ${songNumber}`, url: cover })] : []),
+											...(cover ? [builder.button.url({ display: `${L.core.labels.cover} ${songNumber}`, url: cover })] : []),
 											builder.button.reply({
-												display: 'Download',
+												display: L.core.buttons.download,
 												id: `${prefix}qobuz --id ${track.id}`
 											})
 										]
@@ -151,17 +152,17 @@ export default defineCommand({
 					}
 				}
 
-				await wait.update('Please press the "Download" button on one of the results below :');
+				await wait.update(L.core.progress.pleasePressDownload);
 			}
 		} catch (error) {
-			const msg = error?.message || 'Something went wrong. Please try again.';
+			const msg = error?.message || L.core.errors.somethingWentWrong;
 
 			await wait?.update(msg);
 		}
 	}
 });
 
-async function downloadAudio(client, track, { from, message, prettyNumber, wait }) {
+async function downloadAudio(client, track, { from, message, prettyNumber, wait, L, locale }) {
 	await wait.update('Downloading Music...');
 
 	const downloadInfo = await qobuz.download(track.id);
@@ -173,8 +174,8 @@ async function downloadAudio(client, track, { from, message, prettyNumber, wait 
 	const trackData = downloadInfo.track;
 	const cover = downloadInfo.cover || track?.album?.image || track?.album?.raw?.image?.large || null;
 
-	const artistName = trackData?.artist?.name || track?.artist?.name || track?.artists?.[0]?.name || 'Unknown';
-	const title = trackData?.title || track?.title || 'Unknown';
+	const artistName = trackData?.artist?.name || track?.artist?.name || track?.artists?.[0]?.name || L.info.unknown;
+	const title = trackData?.title || track?.title || L.info.unknown;
 
 	loggers.warning(
 		`${color('Downloading Qobuz Audio from', 'pink')} ${color(downloadInfo.domain || 'qobuz', 'orange')} for ${color(prettyNumber, 'lilac')}`
@@ -196,7 +197,7 @@ async function downloadAudio(client, track, { from, message, prettyNumber, wait 
 		{ quoted: message }
 	);
 
-	await wait.update('Command Finished. With total 1 Success.');
+	await wait.update(t(locale, 'common.core.progress.commandFinishedSingle'));
 
 	loggers.warning(
 		`${color('Downloaded Qobuz Audio from', 'pink')} ${color(downloadInfo.domain || 'qobuz', 'orange')} for ${color(prettyNumber, 'lilac')}`

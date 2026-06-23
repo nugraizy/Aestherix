@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { getWaifu, removeDuplicatesArray } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
@@ -19,6 +19,7 @@ export default defineCommand({
 	async run({ query, from, message, args, prefix }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const La = useLocale(locale, 'anime');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -32,27 +33,27 @@ export default defineCommand({
 
 			await builder
 				.destination(from)
-				.body('Waifu Pics'.formatHeaders())
-				.footer(`Provided by waifu.pics\n${index + 1}/${data.length}`)
+				.body(La.titles.waifuPics.formatHeaders())
+				.footer(`${La.labels.providedBy}\n${index + 1}/${data.length}`)
 				.header('Header', data[index])
 				.buttons(
 					...[
 						builder.button.url({
-							display: 'Original Source',
+							display: La.buttons.originalSource,
 							url: data[index]
 						}),
 						index + 1 !== data.length
 							? builder.button.reply({
-									display: 'Next Image',
+									display: La.buttons.nextImage,
 									id: cmdId('waifupic', `next ${args[2]} ${args[3]} ${data[index + 1]} ${JSON.stringify(data)}`, { prefix })
 								})
 							: builder.button.reply({
-									display: `Search More ${args[2].capitalize()}`,
+									display: t(locale, 'anime.labels.searchMore', [args[2].capitalize()]),
 									id: cmdId('waifupic', `${args[2]} -${args[3]}`, { prefix })
 								}),
 						index !== 0
 							? builder.button.reply({
-									display: 'Previous Image',
+									display: La.buttons.previousImage,
 									id: cmdId('waifupic', `prev ${args[2]} ${args[3]} ${data[index - 1]} ${JSON.stringify(data)}`, { prefix })
 								})
 							: null
@@ -87,17 +88,17 @@ export default defineCommand({
 
 			await builder
 				.destination(from)
-				.body('Waifu Pics'.formatHeaders())
-				.footer(`Provided by waifu.pics\n1/${result.length}`)
+				.body(La.titles.waifuPics.formatHeaders())
+				.footer(`${La.labels.providedBy}\n1/${result.length}`)
 				.header('Header', result[0])
 				.buttons(
 					...[
 						builder.button.url({
-							display: 'Original Source',
+							display: La.buttons.originalSource,
 							url: result[0]
 						}),
 						builder.button.reply({
-							display: 'Next Image',
+							display: La.buttons.nextImage,
 							id: cmdId('waifupic', `next ${querie} ${nsfw ? 'nsfw' : 'sfw'} ${result[1]} ${JSON.stringify(result)}`)
 						})
 					]

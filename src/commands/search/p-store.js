@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { pStoreProduct } from '../../utils/p-store/index.js';
 import { defineCommand } from '../_define.js';
@@ -19,6 +19,7 @@ export default defineCommand({
 	async run({ query, from, message }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -56,17 +57,17 @@ export default defineCommand({
 					from,
 					{
 						image: { url: thumbnail },
-						caption:
-							'P-Store'.formatHeaders() +
-							`\n\nName : ${name}
-Seller Name : ${sellerUsername}
-ID Product : ${idProduct}
-Estimations : ${estimations}
-Stock : ${numberWithCommas(stock || 0)}
-Max Order : ${numberWithCommas(maxOrder)}
-Price : ${priceFormatted}
-Ratings : ${ratings.toFixed(2)}
-Source : ${source}`.formatForm()
+					caption:
+						Ls.titles.pStore.formatHeaders() +
+						`\n\n${Ls.labels.name} : ${name}
+${Ls.labels.sellerName} : ${sellerUsername}
+${Ls.labels.idProduct} : ${idProduct}
+${Ls.labels.estimations} : ${estimations}
+${Ls.labels.stock} : ${numberWithCommas(stock || 0)}
+${Ls.labels.maxOrder} : ${numberWithCommas(maxOrder)}
+${Ls.labels.price} : ${priceFormatted}
+${Ls.labels.ratings} : ${ratings.toFixed(2)}
+${Ls.labels.url} : ${source}`.formatForm()
 						// templateButtons: [
 						// 	{
 						// 		urlButton: {

@@ -24,6 +24,7 @@ export default defineCommand({
 	async run({ from, message }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 		const wait = await client.waitMessage(from, L.success.fetchingPopular, message);
 
 		const result = await comix.getComics({
@@ -35,7 +36,7 @@ export default defineCommand({
 		});
 
 		if (!result.items.length) {
-			return await wait.update('No results found.');
+			return await wait.update(Ls.labels.noResults);
 		}
 
 		const lines = result.items.map((manga, i) => formatPopularCaption(manga, i));
@@ -48,14 +49,14 @@ export default defineCommand({
 				from,
 				{
 					image: { url: poster.poster },
-					caption: `${'Comix Popular (7 Days)'.formatHeaders()}\n\n${caption.formatForm()}`
+					caption: `${Ls.titles.comixPopular.formatHeaders()}\n\n${caption.formatForm()}`
 				},
 				{ quoted: message }
 			);
 		} else {
-			await client.reply(from, `${'Comix Popular (7 Days)'.formatHeaders()}\n\n${caption.formatForm()}`, message);
+			await client.reply(from, `${Ls.titles.comixPopular.formatHeaders()}\n\n${caption.formatForm()}`, message);
 		}
 
-		await wait.update('Done.');
+		await wait.update(Ls.labels.done || 'Done.');
 	}
 });

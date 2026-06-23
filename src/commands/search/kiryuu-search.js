@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
@@ -36,7 +36,8 @@ function sendResult(state, from, message, client, ctx) {
 	const manga = items[currentIndex];
 	const caption = formatMangaCaption(manga);
 	const isLast = currentIndex + 1 >= items.length;
-	const body = `${'Kiryuu Search'.formatHeaders()}\n\n${caption.formatForm()}\n\nResult ${currentIndex + 1} of ${items.length}\nSlug : ${manga.slug}`;
+	const Ls = useLocale(ctx.locale, 'search');
+	const body = `${Ls.titles.kiryuuSearch.formatHeaders()}\n\n${caption.formatForm()}\n\n${Ls.labels.resultOf.replace('{0}', currentIndex + 1).replace('{1}', items.length)}\nSlug : ${manga.slug}`;
 
 	const builder = new client.TemplateBuilder.Native();
 
@@ -49,16 +50,16 @@ function sendResult(state, from, message, client, ctx) {
 		builder.header('image', manga.poster);
 	}
 
-	if (!isLast) {
+		if (!isLast) {
 		builder.buttons(
-			builder.button.reply({ display: '📖 Chapters', id: cmdId('kych', manga.slug, ctx) }),
-			builder.button.reply({ display: '📋 Detail', id: cmdId('kydetail', manga.slug, ctx) }),
-			builder.button.reply({ display: 'Next', id: cmdId('ky', 'next ' + sessionId, ctx) })
+			builder.button.reply({ display: Ls.buttons.chapters, id: cmdId('kych', manga.slug, ctx) }),
+			builder.button.reply({ display: Ls.buttons.detail, id: cmdId('kydetail', manga.slug, ctx) }),
+			builder.button.reply({ display: Ls.buttons.moreChapters || 'Next', id: cmdId('ky', 'next ' + sessionId, ctx) })
 		);
 	} else {
 		builder.buttons(
-			builder.button.reply({ display: '📖 Chapters', id: cmdId('kych', manga.slug, ctx) }),
-			builder.button.reply({ display: '📋 Detail', id: cmdId('kydetail', manga.slug, ctx) })
+			builder.button.reply({ display: Ls.buttons.chapters, id: cmdId('kych', manga.slug, ctx) }),
+			builder.button.reply({ display: Ls.buttons.detail, id: cmdId('kydetail', manga.slug, ctx) })
 		);
 	}
 
@@ -78,6 +79,7 @@ export default defineCommand({
 	async run({ query, from, message, prefix }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.queryRequired, message);
@@ -98,7 +100,7 @@ export default defineCommand({
 				return await client.reply(from, L.info.noMoreResults, message);
 			}
 
-			return await sendResult(cached, from, message, client, { prefix });
+			return await sendResult(cached, from, message, client, { prefix, locale });
 		}
 
 		const wait = await client.waitMessage(from, L.success.searching, message);
@@ -106,7 +108,7 @@ export default defineCommand({
 		const result = await kiryuu.searchManga(query, { limit: 10 });
 
 		if (!result?.length) {
-			return await wait.update('No results found. Try a different query.');
+			return await wait.update(Ls.labels.noResults);
 		}
 
 		const sessionId = randomChar('abcdefghijklmnopqrstuvwxyz0123456789', 8);
@@ -114,7 +116,7 @@ export default defineCommand({
 
 		searchSessions.set(sessionId, state);
 
-		await wait.update(`Found ${result.length} result(s).`);
-		await sendResult(state, from, message, client, { prefix });
+		await wait.update(Ls.labels.foundResults.replace('{0}', result.length));
+		await sendResult(state, from, message, client, { prefix, locale });
 	}
 });

@@ -67,6 +67,15 @@ export type TriviaStrings = typeof import('../../i18n/trivia/en.js').default;
 export type UnoStrings = typeof import('../../i18n/uno/en.js').default;
 export type WerewolfStrings = typeof import('../../i18n/werewolf/en.js').default;
 export type WordChainStrings = typeof import('../../i18n/word-chain/en.js').default;
+export type DownloaderStrings = typeof import('../../i18n/downloader/en.js').default;
+export type SearchStrings = typeof import('../../i18n/search/en.js').default;
+export type AnimeStrings = typeof import('../../i18n/anime/en.js').default;
+export type ConverterStrings = typeof import('../../i18n/converter/en.js').default;
+export type LookUpStrings = typeof import('../../i18n/look_up/en.js').default;
+export type NewsStrings = typeof import('../../i18n/news/en.js').default;
+export type OwnerStrings = typeof import('../../i18n/owner/en.js').default;
+export type HelperStrings = typeof import('../../i18n/helper/en.js').default;
+export type AlQuranStrings = typeof import('../../i18n/al-quran/en.js').default;
 
 /**
  * Maps namespace name to its string table type.
@@ -90,4 +99,13 @@ export interface NamespaceMap {
 	uno: UnoStrings;
 	werewolf: WerewolfStrings;
 	'word-chain': WordChainStrings;
+	downloader: DownloaderStrings;
+	search: SearchStrings;
+	anime: AnimeStrings;
+	converter: ConverterStrings;
+	look_up: LookUpStrings;
+	news: NewsStrings;
+	owner: OwnerStrings;
+	helper: HelperStrings;
+	'al-quran': AlQuranStrings;
 }

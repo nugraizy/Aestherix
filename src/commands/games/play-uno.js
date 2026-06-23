@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { cmdId, getPrefix } from '../../helper/modules/prefix.js';
 import { Uno } from '../../utils/games/index.js';
 import { loggers, color } from '../../utils/modules/index.js';
@@ -111,7 +111,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${U.game.title}\n\n${U.game.created.replace('{0}', playerMention(sender))}\n\n${U.game.players}: 1\n\n${U.game.joinPrompt}\n${U.game.startPrompt}`,
+					text: `${U.game.title}\n\n${t(locale, 'uno.game.created', { prefix, 0: playerMention(sender) })}\n\n${U.game.players}: 1\n\n${U.game.joinPrompt}\n${U.game.startPrompt}`,
 					mentions: [sender]
 				},
 				{ quoted: message }
@@ -135,7 +135,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${U.game.title}\n\n${U.game.joined.replace('{0}', playerMention(sender))}\n\n${U.game.players}: ${game.players.size}\n${playerList}\n\n${U.game.joinPrompt}\n${U.game.startPrompt}`,
+					text: `${U.game.title}\n\n${t(locale, 'uno.game.joined', { prefix, 0: playerMention(sender) })}\n\n${U.game.players}: ${game.players.size}\n${playerList}\n\n${U.game.joinPrompt}\n${U.game.startPrompt}`,
 					mentions
 				},
 				{ quoted: message }
@@ -222,7 +222,7 @@ export default defineCommand({
 				await client.send(
 					from,
 					{
-						text: `${U.game.title}\n\n${U.game.winner.replace('{0}', playerMention(result.winner))}\n\n${U.game.lastCard}: ${result.card.display}\n${U.game.duration}: ${result.duration}`,
+						text: `${U.game.title}\n\n${t(locale, 'uno.game.winner', { prefix, 0: playerMention(result.winner) })}\n\n${U.game.lastCard}: ${result.card.display}\n${U.game.duration}: ${result.duration}`,
 						mentions: [result.winner]
 					}
 				);
@@ -233,19 +233,19 @@ export default defineCommand({
 			let effectText = '';
 
 			if (result.effect.type === 'skip') {
-				effectText = `\n${U.game.effects.skip.replace('{0}', playerMention(result.nextPlayer))}`;
+				effectText = `\n${t(locale, 'uno.game.effects.skip', { prefix, 0: playerMention(result.nextPlayer) })}`;
 			} else if (result.effect.type === 'reverse') {
 				effectText = `\n${U.game.effects.reverse}`;
 			} else if (result.effect.type === 'draw') {
-				effectText = `\n${U.game.effects.draw.replace('{0}', playerMention(result.nextPlayer)).replace('{1}', String(result.drawAmount))}`;
+				effectText = `\n${t(locale, 'uno.game.effects.draw', { prefix, 0: playerMention(result.nextPlayer), 1: String(result.drawAmount) })}`;
 			} else if (result.effect.type === 'wild_draw') {
-				effectText = `\n${U.game.effects.wildDraw.replace('{0}', playerMention(result.nextPlayer)).replace('{1}', String(result.drawAmount))}`;
+				effectText = `\n${t(locale, 'uno.game.effects.wildDraw', { prefix, 0: playerMention(result.nextPlayer), 1: String(result.drawAmount) })}`;
 			}
 
 			await client.send(
 				from,
 				{
-					text: `${U.game.title}\n\n${U.game.played.replace('{0}', playerMention(sender)).replace('{1}', result.card.display)}${result.chosenColor ? `\n${U.game.chosenColor}: ${result.chosenColor}` : ''}\n${effectText}\n\n${U.game.nextTurn}: ${playerMention(result.nextPlayer)}`,
+					text: `${U.game.title}\n\n${t(locale, 'uno.game.played', { prefix, 0: playerMention(sender), 1: result.card.display })}${result.chosenColor ? `\n${U.game.chosenColor}: ${result.chosenColor}` : ''}\n${effectText}\n\n${U.game.nextTurn}: ${playerMention(result.nextPlayer)}`,
 					mentions: [sender, result.nextPlayer]
 				}
 			);
@@ -253,7 +253,7 @@ export default defineCommand({
 			if (result.handSize === 1) {
 				await client.send(
 					from,
-					`${U.game.unoWarning.replace('{0}', playerMention(sender))}`,
+					`${t(locale, 'uno.game.unoWarning', { prefix, 0: playerMention(sender) })}`,
 					{ mentions: [sender] }
 				);
 			}
@@ -274,7 +274,7 @@ export default defineCommand({
 
 			await client.reply(
 				from,
-				`${U.game.drew.replace('{0}', result.card.display)}${result.canPlay ? `\n${U.game.canPlay}` : ''}`,
+				`${t(locale, 'uno.game.drew', { prefix, 0: result.card.display })}${result.canPlay ? `\n${U.game.canPlay}` : ''}`,
 				message
 			);
 
@@ -304,7 +304,7 @@ export default defineCommand({
 
 			await client.send(
 				from,
-				`${U.game.unoCalled.replace('{0}', playerMention(sender))}`,
+				`${t(locale, 'uno.game.unoCalled', { prefix, 0: playerMention(sender) })}`,
 				{ mentions: [sender] }
 			);
 		} else if (args[1] === 'catch') {
@@ -331,7 +331,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${U.game.caught.replace('{0}', playerMention(result.caughtPlayer)).replace('{1}', playerMention(sender))}`,
+					text: `${t(locale, 'uno.game.caught', { prefix, 0: playerMention(result.caughtPlayer), 1: playerMention(sender) })}`,
 					mentions: [result.caughtPlayer, sender]
 				}
 			);

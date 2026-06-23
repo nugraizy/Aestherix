@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { imageToPdf, mime } from '../../utils/index.js';
 import { mangatoon } from '../../utils/mangatoon/index.js';
 import { defineCommand } from '../_define.js';
@@ -16,6 +16,7 @@ export default defineCommand({
 	async run({ query, from, message }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.mangaUrlRequired, message);
@@ -36,7 +37,7 @@ export default defineCommand({
 				return await wait.update(result.error);
 			}
 
-			await wait.update(`Converting ${result.pages.length} page(s) to PDF...`);
+			await wait.update(t(locale, 'common.core.progress.convertingToPdf', [result.pages.length]));
 
 			const buffer = await imageToPdf(result.pages);
 
@@ -50,9 +51,9 @@ export default defineCommand({
 				{ quoted: message }
 			);
 
-			await wait.update(`Done. ${result.pages.length} page(s) sent as PDF.`);
+			await wait.update(t(locale, 'common.core.progress.doneSentPdf', [result.pages.length]));
 		} catch (error) {
-			return await wait.update(`Error: ${error.message || 'Failed to fetch pages.'}`);
+			return await wait.update(`Error: ${error.message || Ls.labels.fetchFailed || 'Failed to fetch pages.'}`);
 		}
 	}
 });

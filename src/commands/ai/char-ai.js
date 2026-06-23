@@ -1,5 +1,5 @@
 import configuration from '../../helper/config/connect.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { ChatGPTDialogue } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -13,15 +13,15 @@ function getCharacterList() {
 	return instance.getCharacters;
 }
 
-function formatCharacterList(characters, prefix, cmd) {
-	let text = 'Available Characters'.formatHeaders() + '\n\n';
+function formatCharacterList(characters, prefix, cmd, locale) {
+	let text = t(locale, 'look_up.labels.availableCharacters').formatHeaders() + '\n\n';
 
 	for (const char of characters) {
 		text += `• ${char.replace(/_/g, ' ')}\n`;
 	}
 
-	text += `\nUsage: ${prefix}${cmd} start <character_name>`;
-	text += `\nExample: ${prefix}${cmd} start Marin_Kitagawa`;
+	text += `\n${t(locale, 'common.core.help.usage', [`${prefix + cmd} start <character_name>`])}`;
+	text += `\n${t(locale, 'common.core.help.example', [`${prefix + cmd} start Marin_Kitagawa`])}`;
 	return text;
 }
 
@@ -35,8 +35,8 @@ export default defineCommand({
 	cooldown: 3,
 	limit: 5,
 	status: 'enable',
-	async run({ args, query, from, cmd, message, prefix, pushname }, client) {
-		const locale = await getLocale(from);
+	async run({ args, query, from, cmd, message, prefix, pushname, sender }, client) {
+		const locale = await getLocale(from, sender);
 		const L = useLocale(locale, 'common');
 
 		if (!configuration.flags.ai) {
@@ -46,7 +46,7 @@ export default defineCommand({
 		if (!query) {
 			return await client.reply(
 				from,
-				`Please specify a command.\n\nUsage:\n${prefix + cmd} start [character]\n${prefix + cmd} stop\n${prefix + cmd} --chars`,
+				t(locale, 'common.errors.missingArgs', [`${prefix + cmd} start [character]\n${prefix + cmd} stop\n${prefix + cmd} --chars`]),
 				message
 			);
 		}
@@ -54,7 +54,7 @@ export default defineCommand({
 		if (LIST_FLAGS.has(args[1])) {
 			const characters = getCharacterList();
 
-			return await client.reply(from, formatCharacterList(characters, prefix, cmd), message);
+			return await client.reply(from, formatCharacterList(characters, prefix, cmd, locale), message);
 		}
 
 		if (args[1] === 'start') {
@@ -69,7 +69,7 @@ export default defineCommand({
 			if (!character) {
 				return await client.reply(
 					from,
-					`Character "${requested}" not found.\n\n${formatCharacterList(characters, prefix, cmd)}`,
+					t(locale, 'common.errors.characterNotFound', [requested, formatCharacterList(characters, prefix, cmd, locale)]),
 					message
 				);
 			}
@@ -79,7 +79,7 @@ export default defineCommand({
 				new ChatGPTDialogue(pushname, new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }), character)
 			);
 
-			return await client.reply(from, `AI chat started with ${character.replace(/_/g, ' ')}`, message);
+			return await client.reply(from, t(locale, 'common.info.aiChatStarted', [character.replace(/_/g, ' ')]), message);
 		}
 
 		if (args[1] === 'stop') {
@@ -93,7 +93,7 @@ export default defineCommand({
 
 		return await client.reply(
 			from,
-			`Invalid command.\n\nUsage:\n${prefix + cmd} start [character]\n${prefix + cmd} stop\n${prefix + cmd} --chars`,
+			L.errors.invalidArgs,
 			message
 		);
 	}

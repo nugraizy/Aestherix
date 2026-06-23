@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { fetchBUFFER, removeDuplicatesArray, loggers, color } from '../../utils/modules/index.js';
 import { downloadManga } from '../../utils/pixiv/index.js';
 import { defineCommand } from '../_define.js';
@@ -35,6 +35,7 @@ export default defineCommand({
 	async run({ from, query, message, prettyNumber }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const DL = useLocale(locale, 'downloader');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -71,13 +72,13 @@ export default defineCommand({
 
 			let i = 0;
 			const { id, title, userId, userName, pageCount, url: content } = data;
-			let caption = `${'Pixiv Manga Downloader'.formatHeaders()}
+			let caption = `${DL.titles.pixivManga.formatHeaders()}
 			
 Title : ${title.capitalize()}
 Author : ${userName}
-ID Artwork : ${id}
+${DL.labels.idArtwork} : ${id}
 ID Author : ${userId}
-Total Media : ${pageCount}`;
+${L.core.labels.totalMedia} : ${pageCount}`;
 
 			if (content.original.length === 1) {
 				const images = await fetchBUFFER(content.original[0], {
@@ -88,7 +89,7 @@ Total Media : ${pageCount}`;
 					from,
 					{
 						image: Buffer.from(images, 'base64'),
-						caption: caption + `\nSource : https://www.pixiv.net/en/artworks/${id}`.formatForm()
+						caption: caption + `\n${L.core.labels.source} : https://www.pixiv.net/en/artworks/${id}`.formatForm()
 					},
 					{ quoted: message }
 				);
@@ -116,7 +117,7 @@ Total Media : ${pageCount}`;
 			success++;
 		}
 
-		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
+		await wait.update(t(locale, 'common.core.progress.commandFinished', [success, error]));
 
 		loggers.info(`${color('Downloaded Pixiv File', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}

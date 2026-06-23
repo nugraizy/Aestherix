@@ -1,4 +1,4 @@
-import { getLocale } from '../../helper/i18n/index.js';
+import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { getEarthquake } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -14,26 +14,27 @@ export default defineCommand({
 	status: 'enable',
 	async run(message, client) {
 		const locale = await getLocale(message.from);
+		const Ln = useLocale(locale, 'news');
 
 		const data = await getEarthquake();
 
-		let caption = 'Latest Earthquake'.formatHeaders();
+		let caption = Ln.titles.latestEarthquake.formatHeaders();
 
 		for (const res of data) {
-			caption += `\n\nTanggal : ${res.date}\n`;
-			caption += `Jam : ${res.time}\n`;
-			caption += `Koordinat : ${res.coordinates}\n`;
-			caption += `Lintang : ${res.latitude}\n`;
-			caption += `Bujur : ${res.longitude}\n`;
-			caption += `Magnitude : ${res.magnitude}\n`;
-			caption += `Kedalaman : ${res.depth}\n`;
-			caption += `Wilayah : ${res.region}\n`;
+			caption += `\n\n${Ln.labels.tanggal} : ${res.date}\n`;
+			caption += `${Ln.labels.jam} : ${res.time}\n`;
+			caption += `${Ln.labels.koordinat} : ${res.coordinates}\n`;
+			caption += `${Ln.labels.lintang} : ${res.latitude}\n`;
+			caption += `${Ln.labels.bujur} : ${res.longitude}\n`;
+			caption += `${Ln.labels.magnitude} : ${res.magnitude}\n`;
+			caption += `${Ln.labels.kedalaman} : ${res.depth}\n`;
+			caption += `${Ln.labels.wilayah} : ${res.region}\n`;
 
 			if (res.feel) {
-				caption += `Potensi : ${res.potency}\n`;
-				caption += `Dirasakan : ${res.feel}\n\n`;
+				caption += `${Ln.labels.potensi} : ${res.potency}\n`;
+				caption += `${Ln.labels.dirasakan} : ${res.feel}\n\n`;
 			} else {
-				caption += `Potensi : ${res.potency}\n\n`;
+				caption += `${Ln.labels.potensi} : ${res.potency}\n\n`;
 			}
 		}
 

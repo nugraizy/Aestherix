@@ -15,6 +15,7 @@ export default defineCommand({
 	run: async ({ from, message, query }, client) => {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lo = useLocale(locale, 'owner');
 
 		if (!query) {
 			return client.reply(from, L.errors.noQuery, message);
@@ -28,15 +29,15 @@ export default defineCommand({
 
 		const { artists, categories, images, language, tags, title, totalPages, uploadDate } = result;
 
-		const caption = `${'3Hentai'.formatHeaders()}
+		const caption = `${Lo.titles.thentai.formatHeaders()}
         
-Title : ${title}
-Upload Date: ${uploadDate}
-Tags : ${tags.join(', ')}
-Artists : ${artists.join(', ')}
-Language : ${language.join(', ')}
-Categories : ${categories.join(', ')}
-Tot. Pages : ${totalPages}`;
+${Lo.labels.title} : ${title}
+${Lo.labels.uploadDate} : ${uploadDate}
+${Lo.labels.tags} : ${tags.join(', ')}
+${Lo.labels.artists} : ${artists.join(', ')}
+${Lo.labels.languages} : ${language.join(', ')}
+${Lo.labels.categories} : ${categories.join(', ')}
+${Lo.labels.pages} : ${totalPages}`;
 
 		await client.reply(from, caption.formatForm(), message);
 

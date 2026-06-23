@@ -1,5 +1,5 @@
 import { Limit } from '../../helper/index.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { toUserJid } from '../../helper/misc/wa_data/index.js';
 import { defineCommand } from '../_define.js';
@@ -17,6 +17,7 @@ export default defineCommand({
 	async run({ from, message, query, sender, pushname, prettyNumber, settings, type, isOwner, args, prefix }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lh = useLocale(locale, 'helper');
 
 		if (!query) {
 			return await client.reply(from, L.errors.messageRequired, message);
@@ -25,7 +26,7 @@ export default defineCommand({
 		if (args[1] === 'accept' && isOwner) {
 			await client.reply(
 				args[2],
-				'Your problem has been accepted by the Owner. Please wait for the fix. And for the bonuses you will be given 20 Limit.',
+				Lh.labels.reportAccepted,
 				JSON.parse(args.slice(4))
 			);
 
@@ -38,14 +39,13 @@ export default defineCommand({
 			return await client.reply(from, L.errors.describeProblem, message);
 		}
 
-		const capt =
-			'Thanks for reporting!\n\nThis error will be reviewed and fixed as soon as possible.\n\nIf you have any questions, please contact the owner.';
+		const capt = Lh.labels.thanksReporting;
 
 		await client.send(
 			from,
 			{
 				text: capt.trim(),
-				footer: 'Powered by Hidden Finder',
+				footer: Lh.labels.poweredBy,
 				templateButtons: [],
 				headerType: 1
 			},
@@ -53,22 +53,22 @@ export default defineCommand({
 		);
 		await client.send(toUserJid(settings.owner_number), {
 			text: query,
-			footer: `Sender Name : ${pushname}
-ID : ${sender}
-ID Formatter : ${prettyNumber}
-ID API : wa.me/${sender.split('@')[0]}
-The Problem Occured in : ${from}`,
+			footer: `${Lh.labels.senderName} : ${pushname}
+${Lh.labels.id} : ${sender}
+${Lh.labels.idFormatter} : ${prettyNumber}
+${Lh.labels.idApi} : wa.me/${sender.split('@')[0]}
+${Lh.labels.problemOccured} : ${from}`,
 			templateButtons: [
-				{ urlButton: { displayText: 'Contact Person', url: `https://wa.me/${sender.split('@')[0]}` } },
+				{ urlButton: { displayText: Lh.labels.contactPerson, url: `https://wa.me/${sender.split('@')[0]}` } },
 				{
 					quickReplyButton: {
-						displayText: 'Accept',
+						displayText: Lh.labels.accept,
 						id: cmdId('report', 'accept ' + from + ' ' + sender + ' ' + JSON.stringify(message), { prefix })
 					}
 				},
 				{
 					quickReplyButton: {
-						displayText: 'Banned',
+						displayText: Lh.labels.banned,
 						id: cmdId('ban', 'report ' + from + ' ' + sender + ' ' + JSON.stringify(message), { prefix })
 					}
 				}

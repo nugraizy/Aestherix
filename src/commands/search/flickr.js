@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { FlickerAPI } from '../../utils/flickr/index.js';
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
@@ -17,6 +17,7 @@ export default defineCommand({
 	async run({ query, from, message, args, type }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -31,14 +32,14 @@ export default defineCommand({
 				{
 					image: { url: data[index].download },
 					caption:
-						'Flickr'.formatHeaders() +
+						Ls.titles.flickr.formatHeaders() +
 						`\n\nAuthor : ${data[index].userName}
 Author Fullname : ${data[index].fullName}
-Views : ${numberWithCommas(data[index].views)}
+${Ls.labels.views} : ${numberWithCommas(data[index].views)}
 Title : ${data[index].title}
-Description : ${data[index].description}
-Tags : ${data[index].tags || 'n/a'}
-Published : ${data[index].posted}
+${Ls.labels.description} : ${data[index].description}
+${Ls.labels.tags} : ${data[index].tags || 'n/a'}
+${Ls.labels.published} : ${data[index].posted}
 
 Powered by Hidden Finder`.formatForm()
 					// templateButtons: [
@@ -91,14 +92,14 @@ Powered by Hidden Finder`.formatForm()
 				{
 					image: { url: result[index].download },
 					caption:
-						'Flickr'.formatHeaders() +
+						Ls.titles.flickr.formatHeaders() +
 						`\n\nAuthor : ${result[index].userName}
 Author Fullname : ${result[index].fullName}
-Views : ${numberWithCommas(result[index].views)}
+${Ls.labels.views} : ${numberWithCommas(result[index].views)}
 Title : ${result[index].title}
-Description : ${result[index].description}
-Tags : ${result[index].tags || 'n/a'}
-Published : ${result[index].posted}`
+${Ls.labels.description} : ${result[index].description}
+${Ls.labels.tags} : ${result[index].tags || 'n/a'}
+${Ls.labels.published} : ${result[index].posted}`
 					// 					templateButtons: [
 					// 						{ urlButton: { displayText: 'Flickr Source', url: result[0].source } },
 					// 						result.length !== 1

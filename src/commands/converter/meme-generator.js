@@ -5,7 +5,7 @@ import parser from 'yargs-parser';
 import { MemeGenerator } from '../../helper/canvas/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 
 const DEFAULT_TYPE = 'image';
 
@@ -39,6 +39,7 @@ export default defineCommand({
 	) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lc = useLocale(locale, 'converter');
 
 		if (!isMediaImage && !(isQuotedSticker || isSticker)) {
 			return await client.reply(from, L.errors.stickerMediaRequired, message);
@@ -47,13 +48,17 @@ export default defineCommand({
 		if (!stickerAble) {
 			return await client.reply(
 				from,
-				`Please send/reply a regular media to be meme'd. Can't convert ${typeQuoted}, only : ${typeSticker
+				t(locale, 'converter.labels.pleaseSendMedia', [
+					"meme'd",
+					typeQuoted,
+					typeSticker
 					.slice(
 						typeSticker.findIndex((v) => v === 'videoMessage'),
 						1
 					)
 					.join(', ')
-					.capitalize()}`,
+					.capitalize()
+				]),
 				message
 			);
 		}
@@ -101,7 +106,7 @@ export default defineCommand({
 		} else {
 			await client.send(
 				from,
-				{ image: buffer, caption: `Meme Generator Made by ${BOT_NAME} using Canvas. Powered by Hidden Finder` },
+				{ image: buffer, caption: t(locale, 'converter.labels.memeGeneratorCaption', [BOT_NAME]) },
 				{ quoted: message }
 			);
 		}

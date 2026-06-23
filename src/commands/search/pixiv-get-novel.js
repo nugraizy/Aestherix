@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { getNovelContent } from '../../utils/pixiv/index.js';
 import { defineCommand } from '../_define.js';
@@ -33,6 +33,7 @@ export default defineCommand({
 	async run({ from, query, message }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -57,12 +58,12 @@ export default defineCommand({
 			}
 
 			const { title, likeCount, userName, viewCount, userId, content } = data;
-			const caption = `Title : ${title.capitalize()}
-Author : ${userName}
-ID Artwork : ${regexs.message}
-ID Author : ${userId}
-Tot. Like : ${numberWithCommas(likeCount)}
-Tot. View : ${numberWithCommas(viewCount)}
+			const caption = `${Ls.labels.title} : ${title.capitalize()}
+${Ls.labels.author} : ${userName}
+${Ls.labels.idArtwork} : ${regexs.message}
+${t(locale, 'search.labels.idAuthor', ['Author'])} : ${userId}
+${Ls.labels.totLike} : ${numberWithCommas(likeCount)}
+${Ls.labels.totView} : ${numberWithCommas(viewCount)}
 
 ${content}`;
 
@@ -71,9 +72,9 @@ ${content}`;
 				{
 					text: caption.formatForm(),
 					templateButtons: [
-						{ urlButton: { displayText: 'Novel Source', url: `https://www.pixiv.net/novel/show.php?id=${regexs.message}` } }
+						{ urlButton: { displayText: Ls.labels.novelSource, url: `https://www.pixiv.net/novel/show.php?id=${regexs.message}` } }
 					],
-					footer: ' • Pixiv Novel Content'
+					footer: ` • ${Ls.titles.pixivNovelSearch}`
 				},
 				{ quoted: message }
 			);

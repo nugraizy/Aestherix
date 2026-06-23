@@ -3,7 +3,7 @@ import { BOT_NAME } from '../../core/constants.js';
 import fs from 'fs-extra';
 
 import configuration from '../../helper/config/connect.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 const { version } = await fs.readJSON('./package.json');
@@ -41,7 +41,7 @@ export default defineCommand({
 	status: 'enable',
 	async run({ from, prefix, message, query }, client) {
 		const locale = await getLocale(from);
-		const L = useLocale(locale, 'common');
+		const Lh = useLocale(locale, 'helper');
 		let capt = `\`${BOT_NAME} ー ${version}\`\n\n`;
 
 		if (!Object.keys(configuration.registry.menu).length) {
@@ -88,14 +88,12 @@ export default defineCommand({
 		}
 
 		if (!isFound && query) {
-			capt += `Could not find any category with the name "\`${query}\`"\n\n`;
+			capt += t(locale, 'helper.labels.noCategoryFound', [query]);
 		}
 
-		capt = `${capt.trim()}\n\nUse : ${prefix}${getRandomCommand(
+		capt = `${capt.trim()}\n\n${Lh.labels.use} : ${prefix}${getRandomCommand(
 			Object.values(configuration.registry.menu).flat()
-		)} \`-H\`\nー> \`To see the detail of the command.\`\nー> Total Commands : \`${
-			configuration.registry.commands.size
-		}\`\n\nＰｏｗｅｒｅｄ ｂｙ\n> Hidden Finder`;
+		)} \`${'-H'}\`\n${Lh.labels.arrow} \`${Lh.labels.toSeeDetail}\`\n${Lh.labels.totalCommandsFooter} : \`${configuration.registry.commands.size}\`\n\n${Lh.labels.poweredBy}\n${Lh.labels.greaterThan}`;
 
 		configuration.registry.menuStr = capt;
 

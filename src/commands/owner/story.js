@@ -19,10 +19,11 @@ export default defineCommand({
 	async run({ from, message, prefix }, client, store) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lo = useLocale(locale, 'owner');
 
 		const messages = store.loadMessages(STATUS);
 		const tempContainer = new Cache();
-		let caption = 'Fetch WhatsApp Story'.formatHeaders();
+		let caption = Lo.titles.fetchStory.formatHeaders();
 
 		caption += '\n\n';
 		const rows = [];
@@ -54,11 +55,11 @@ export default defineCommand({
 				rows.push({
 					rows: [
 						{
-							title: 'Download',
-							rowId: cmdId('fetchstory', message.key.participant, { prefix })
-						}
-					],
-					title: `${BOT_NAME} | ${message?.pushName ?? 'No Name'}`
+					title: 'Download',
+						rowId: cmdId('fetchstory', message.key.participant, { prefix })
+					}
+				],
+				title: `${BOT_NAME} | ${message?.pushName ?? Lo.labels.noName}`
 				});
 			}
 		}
@@ -72,20 +73,19 @@ export default defineCommand({
 				value[1].stories?.extendedTextMessage?.[0].pushName ??
 				value[1].stories?.imageMessage?.[0].pushName ??
 				value[1].stories?.videoMessage?.[0].pushName ??
-				'No Name'
+				Lo.labels.noName
 			}\n`;
-			caption += `Texts : ${value[1].stories?.extendedTextMessage?.length ?? 0}\n`;
-			caption += `Images : ${value[1].stories?.imageMessage?.length ?? 0}\n`;
-			caption += `Videos : ${value[1].stories?.videoMessage?.length ?? 0}\n\n`;
+			caption += `${Lo.labels.texts} : ${value[1].stories?.extendedTextMessage?.length ?? 0}\n`;
+			caption += `${Lo.labels.images} : ${value[1].stories?.imageMessage?.length ?? 0}\n`;
+			caption += `${Lo.labels.videos} : ${value[1].stories?.videoMessage?.length ?? 0}\n\n`;
 		}
 
 		await client.send(
 			from,
 			{
-				buttonText: 'Open List',
+				buttonText: Lo.labels.openList,
 				title: caption.trim(),
-				footer:
-					'if you cannot click "read more" : click it first then reply the list, then click on the "x" mark on your reply.',
+				footer: Lo.labels.ifCannotClick,
 				text: '\t',
 				sections: rows
 			},

@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { BOT_NAME } from '../../core/constants.js';
 
 import { cmdId } from '../../helper/modules/prefix.js';
@@ -26,35 +26,37 @@ export default defineCommand({
 
 		const wait = await client.waitMessage(from, L.success.fetchingDetail, message);
 
+		const Ls = useLocale(locale, 'search');
+
 		try {
 			const manga = await shinigami.getManga(query.trim());
 
 			const lines = [
 				`Title : ${manga.title}`,
 				`Status : ${manga.status || 'n/a'}`,
-				`Authors : ${manga.authors?.length ? manga.authors.join(', ') : 'n/a'}`,
+				`${Ls.labels.authors} : ${manga.authors?.length ? manga.authors.join(', ') : 'n/a'}`,
 				`Artists : ${manga.artists?.length ? manga.artists.join(', ') : 'n/a'}`,
-				`Genres : ${manga.genres?.length ? manga.genres.join(', ') : 'n/a'}`
+				`${Ls.labels.genres} : ${manga.genres?.length ? manga.genres.join(', ') : 'n/a'}`
 			];
 
 			if (manga.description) {
 				const trimmed = manga.description.length > 500 ? manga.description.slice(0, 500) + '...' : manga.description;
 
-				lines.push('', `Synopsis :\n${trimmed}`);
+				lines.push('', `${Ls.labels.synopsis} :\n${trimmed}`);
 			}
 
-			lines.push(`\nURL : ${manga.url}`);
+			lines.push(`\n${Ls.labels.url} : ${manga.url}`);
 
-			const body = `${'Shinigami Detail'.formatHeaders()}\n\n${lines.join('\n').formatForm()}`;
+			const body = `${Ls.titles.shinigamiDetail.formatHeaders()}\n\n${lines.join('\n').formatForm()}`;
 			const builder = new client.TemplateBuilder.Native();
 
 			builder
 				.destination(from)
 				.body(body)
-				.footer('Powered by ' + BOT_NAME)
+				.footer(t(locale, 'common.core.footer.poweredBy', [BOT_NAME]))
 				.buttons(
-					builder.button.reply({ display: '📖 Chapters', id: cmdId('sgch', manga.id, { prefix }) }),
-					builder.button.reply({ display: '📕 Read', id: cmdId('sgread', manga.id, { prefix }) })
+					builder.button.reply({ display: Ls.buttons.chapters, id: cmdId('sgch', manga.id, { prefix }) }),
+					builder.button.reply({ display: Ls.buttons.read, id: cmdId('sgread', manga.id, { prefix }) })
 				);
 
 			if (manga.poster) {
@@ -62,9 +64,9 @@ export default defineCommand({
 			}
 
 			await builder.send();
-			await wait.update('Detail fetched.');
+			await wait.update(L.core.errors.detailFetched);
 		} catch (error) {
-			return await wait.update(`Error: ${error.message || 'Manga not found.'}`);
+			return await wait.update(`Error: ${error.message || L.core.errors.mangaNotFound}`);
 		}
 	}
 });

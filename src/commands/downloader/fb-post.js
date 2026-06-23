@@ -20,6 +20,7 @@ export default defineCommand({
 	async run({ from, query, prettyNumber, message }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const DL = useLocale(locale, 'downloader');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noUrl, message);
@@ -72,7 +73,7 @@ export default defineCommand({
 				from,
 				{
 					video: await fetchBUFFER(urlFilter.url),
-					caption: `${'Facebook Video Downloader'.formatHeaders()}\n\nResolution : ${urlFilter.quality}`.formatForm()
+					caption: `${DL.titles.facebook.formatHeaders()}\n\n${L.core.labels.resolution} : ${urlFilter.quality}`.formatForm()
 				},
 				{}
 			);

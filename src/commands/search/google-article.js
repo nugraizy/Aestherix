@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { googleArticle, removeDuplicatesArray } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
@@ -16,6 +16,7 @@ export default defineCommand({
 	run: async ({ query, message, from, type, args }, client) => {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -29,13 +30,13 @@ export default defineCommand({
 				from,
 				{
 					text: data[index].title,
-					caption: 'Google-it Articles'.formatHeaders(),
+					caption: Ls.titles.googleArticles.formatHeaders(),
 					templateButtons: [
-						{ urlButton: { displayText: 'Article Source', url: data[index].url } },
+						{ urlButton: { displayText: Ls.buttons.articleSource, url: data[index].url } },
 						index + 1 !== data.length
 							? {
 									quickReplyButton: {
-										displayText: 'Next Article',
+										displayText: Ls.buttons.nextArticle,
 										id: cmdId('googlearticle', `next ${data[index + 1].url} ${JSON.stringify(data)}`)
 									}
 								}
@@ -43,7 +44,7 @@ export default defineCommand({
 						index !== 0
 							? {
 									quickReplyButton: {
-										displayText: 'Previous Image',
+										displayText: Ls.buttons.previousArticle,
 										id: cmdId('googlearticle', `prev ${data[index - 1].url} ${JSON.stringify(data)}`)
 									}
 								}
@@ -73,13 +74,13 @@ ${index + 1}/${data.length}\nPowered by Hidden Finder`
 				from,
 				{
 					text: result[0].title,
-					caption: 'Google-it Articles'.formatHeaders(),
+					caption: Ls.titles.googleArticles.formatHeaders(),
 					templateButtons: [
-						{ urlButton: { displayText: 'Article Source', url: result[0].url } },
+						{ urlButton: { displayText: Ls.buttons.articleSource, url: result[0].url } },
 						result.length !== 1
 							? {
 									quickReplyButton: {
-										displayText: 'Next Article',
+										displayText: Ls.buttons.nextArticle,
 										id: cmdId('googlearticle', `next ${result[1].url} ${JSON.stringify(result).replace(/\|/g, '')}`)
 									}
 								}

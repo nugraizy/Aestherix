@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { MemoryMatch } from '../../utils/games/index.js';
 import { getPrefix } from '../../helper/modules/prefix.js';
 import { loggers, color } from '../../utils/modules/index.js';
@@ -126,7 +126,7 @@ export default defineCommand({
 				await client.send(
 					from,
 					{
-						text: `${M.game.title}\n\n${result.board}\n\n${M.game.won}\n${M.game.moves}: ${result.moves}\n${M.game.duration.replace('{0}', result.duration)}`
+						text: `${M.game.title}\n\n${result.board}\n\n${M.game.won}\n${M.game.moves}: ${result.moves}\n${t(locale, 'memory-match.game.duration', { prefix, 0: result.duration })}`
 					}
 				);
 			} else if (result.status === 'match') {
@@ -173,7 +173,7 @@ export default defineCommand({
 
 			await client.reply(
 				from,
-				`${M.game.title}\n\n${M.game.difficulty}: ${status.difficulty}\n${M.game.size}: ${status.rows}x${status.cols}\n${M.game.pairs}: ${status.matchedPairs}/${status.totalPairs}\n${M.game.moves}: ${status.moves}\n${M.game.duration.replace('{0}', status.duration)}`,
+				`${M.game.title}\n\n${M.game.difficulty}: ${status.difficulty}\n${M.game.size}: ${status.rows}x${status.cols}\n${M.game.pairs}: ${status.matchedPairs}/${status.totalPairs}\n${M.game.moves}: ${status.moves}\n${t(locale, 'memory-match.game.duration', { prefix, 0: status.duration })}`,
 				message
 			);
 		} else if (args[1] === 'del' || args[1] === 'delete') {

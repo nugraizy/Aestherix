@@ -17,6 +17,7 @@ export default defineCommand({
 	async run({ query, from, message, filename, prettyNumber }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const DL = useLocale(locale, 'downloader');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -63,7 +64,7 @@ export default defineCommand({
 					}),
 					fileName: `${result.title}.opus`,
 					mimetype: 'audio/opus',
-					caption: `${'Bandcamp'.formatHeaders()}
+					caption: `${DL.titles.bandcamp.formatHeaders()}
 
 Title : ${result.title}`.formatForm()
 				},
@@ -73,7 +74,7 @@ Title : ${result.title}`.formatForm()
 			success++;
 		}
 
-		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
+		await wait.update(t(locale, 'common.core.progress.commandFinished', [success, error]));
 
 		loggers.info(`${color('Downloaded Bandcamp File', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}

@@ -1,6 +1,6 @@
 import { getGroupSettings } from '../../helper/database/adapters/group-settings.js';
 import prisma from '../../helper/database/prisma.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 
 export const checkBan = async (client, { from, isBotAdmin, isGroup, messageStubParameters, prefix }) => {
@@ -23,7 +23,7 @@ export const checkBan = async (client, { from, isBotAdmin, isGroup, messageStubP
 
 				const messageOptions = {
 					text: kickMessage,
-					footer: L.core.dashboard.poweredBy,
+					footer: t(locale, 'common.core.dashboard.poweredBy', ['Hidden Finder']),
 					buttons,
 					headerType: 1,
 					mentions: [participant]

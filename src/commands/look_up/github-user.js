@@ -18,6 +18,7 @@ export default defineCommand({
 	async run({ from, query, message, args, type }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ll = useLocale(locale, 'look_up');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noUrl, message);
@@ -43,19 +44,19 @@ export default defineCommand({
 				from,
 				{
 					image: { url: avatarUrl },
-					caption: `${'Github User Lookup'.formatHeaders()}
+					caption: `${Ll.titles.githubUser.formatHeaders()}
 
-Fullname : ${name}
-Username : ${login}
-Type : ${typeGit}
-Tot. Public Repo : ${numberWithCommas(pubRepos)}
-Tot. Followers : ${numberWithCommas(followers)}
-Tot. Following : ${numberWithCommas(following)}
-Created : ${createdAt}
-Updated : ${updatedAt}
-Biography : ${bio}
+${L.core.caption.fullname} : ${name}
+${L.core.caption.username} : ${login}
+${L.core.caption.type} : ${typeGit}
+${Ll.labels.totPublicRepo} : ${numberWithCommas(pubRepos)}
+${Ll.labels.totFollowers} : ${numberWithCommas(followers)}
+${Ll.labels.totFollowing} : ${numberWithCommas(following)}
+${Ll.labels.created} : ${createdAt}
+${Ll.labels.updated} : ${updatedAt}
+${Ll.labels.biography} : ${bio}
                     
-Powered by Hidden Finder`.formatForm()
+${Ll.labels.poweredByHiddenFinder}`.formatForm()
 					// templateButtons: [
 					// 	{
 					// 		urlButton: {
@@ -122,15 +123,15 @@ Powered by Hidden Finder`.formatForm()
 						created_at: createdAt,
 						updated_at: updatedAt
 					}) => {
-						return `Fullname : ${name}
-Username : ${login}
-Type : ${typeGit}
-Tot. Public Repo : ${numberWithCommas(pubRepos)}
-Tot. Followers : ${numberWithCommas(followers)}
-Tot. Following : ${numberWithCommas(following)}
-Created : ${createdAt}
-Updated : ${updatedAt}
-Biography : ${bio}`;
+						return `${L.core.caption.fullname} : ${name}
+${L.core.caption.username} : ${login}
+${L.core.caption.type} : ${typeGit}
+${Ll.labels.totPublicRepo} : ${numberWithCommas(pubRepos)}
+${Ll.labels.totFollowers} : ${numberWithCommas(followers)}
+${Ll.labels.totFollowing} : ${numberWithCommas(following)}
+${Ll.labels.created} : ${createdAt}
+${Ll.labels.updated} : ${updatedAt}
+${Ll.labels.biography} : ${bio}`;
 					}
 				)
 				.join('\n\n');
@@ -152,7 +153,7 @@ Biography : ${bio}`;
 				from,
 				{
 					image: { url: users[0].avatar_url },
-					caption: 'Github User Lookup'.formatHeaders() + `\n\n${caption.trim()}`
+					caption: Ll.titles.githubUser.formatHeaders() + `\n\n${caption.trim()}`
 					// templateButtons: [
 					// 	{ urlButton: { displayText: 'Image Source', url: avatarUrl } },
 					// 	{ urlButton: { displayText: 'User Source', url: htmlUrl } },

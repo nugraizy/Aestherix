@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { color, delay, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -31,6 +31,7 @@ export default defineCommand({
 	async run({ from, query, message, sender }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lo = useLocale(locale, 'owner');
 
 		try {
 			if (!query) {
@@ -42,10 +43,10 @@ export default defineCommand({
 				.slice(0)
 				.map((entry) => entry[1]);
 			const chats = check4Duplicate(groups.map((v) => v.id));
-			let text = 'Group Broadcast'.formatHeaders();
+			let text = Lo.titles.groupBroadcast.formatHeaders();
 
 			text += `\n\n${query.trim()}\n\n`;
-			text += `\`\`\`Broadcast by @${sender.split('@')[0]}\`\`\``;
+			text += `\`\`\`${t(locale, 'owner.labels.broadcastBy', [sender.split('@')[0]])}\`\`\``;
 
 			for (const id of chats) {
 				await delay(300);

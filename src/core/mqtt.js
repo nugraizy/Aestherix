@@ -1,7 +1,7 @@
 import mqtt from 'mqtt';
 
 import configuration from '../helper/config/connect.js';
-import { getLocale, useLocale } from '../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../helper/i18n/index.js';
 import { S_WHATSAPP_NET } from '../helper/misc/wa_data/index.js';
 import { delay } from '../utils/modules/index.js';
 
@@ -148,7 +148,7 @@ export class MqttBridge {
 			await this.#waClient.send(destination, {
 				image: { url: result.preview.images[0].source.url.replace('amp;', '') },
 				caption,
-				footer: L.core.dashboard.poweredBy,
+				footer: t(locale, 'common.core.dashboard.poweredBy', ['Hidden Finder']),
 				templateButtons: [
 					{ urlButton: { displayText: L.core.mqtt.openPlatform, url: result.url_overridden_by_dest } },
 					{ urlButton: { displayText: L.core.mqtt.imageSource, url: result.preview.images[0].source.url.replace('amp;', '') } }

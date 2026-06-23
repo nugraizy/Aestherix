@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { layarkaca21 } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
@@ -16,6 +16,7 @@ export default defineCommand({
 	run: async ({ query, message, from, args, type }, client) => {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return client.reply(from, L.errors.noQuery, message);
@@ -30,23 +31,23 @@ export default defineCommand({
 				{
 					image: { url: data[index].thumbnail },
 					caption:
-						'Layarkaca21'.formatHeaders() +
+						Ls.titles.lk21.formatHeaders() +
 						`\n\n${data[index].title}
-Quality : ${data[index].quality}
-Country : ${data[index].country}
-Cast : ${data[index].castArr.join(', ')}
-Director : ${data[index].director}
-Genre : ${data[index].genreArr.join(', ')}
+${Ls.labels.quality} : ${data[index].quality}
+${Ls.labels.country} : ${data[index].country}
+${Ls.labels.cast} : ${data[index].castArr.join(', ')}
+${Ls.labels.director} : ${data[index].director}
+${Ls.labels.genres} : ${data[index].genreArr.join(', ')}
 IMDb : ${data[index].ratings}
-Release Date : ${data[index].released}
-Translate By : ${data[index].translateBy}
+${Ls.labels.releaseDate} : ${data[index].released}
+${Ls.labels.translateBy} : ${data[index].translateBy}
 					
 Powered by Hidden Finder`.formatForm(),
 					templateButtons: [
 						index + 1 !== data.length
 							? {
 									quickReplyButton: {
-										displayText: 'Next Movie',
+										displayText: Ls.buttons.nextMovie,
 										id: cmdId('layarkaca21', `next ${data[index + 1].source} ${JSON.stringify(data)}`)
 									}
 								}
@@ -54,7 +55,7 @@ Powered by Hidden Finder`.formatForm(),
 						index !== 0
 							? {
 									quickReplyButton: {
-										displayText: 'Previous Movie',
+										displayText: Ls.buttons.previousMovie,
 										id: cmdId('layarkaca21', `prev ${data[index - 1].source} ${JSON.stringify(data)}`)
 									}
 								}
@@ -75,23 +76,23 @@ Powered by Hidden Finder`.formatForm(),
 			from,
 			{
 				image: { url: result[0].thumbnail },
-				caption: 'Layarkaca21'.formatHeaders(),
+				caption: Ls.titles.lk21.formatHeaders(),
 				footer: `${result[0].title}
-Quality : ${result[0].quality}
-Country : ${result[0].country}
-Cast : ${result[0].castStr(', ')}
-Director : ${result[0].director}
-Genre : ${result[0].genreStr(', ')}
+${Ls.labels.quality} : ${result[0].quality}
+${Ls.labels.country} : ${result[0].country}
+${Ls.labels.cast} : ${result[0].castStr(', ')}
+${Ls.labels.director} : ${result[0].director}
+${Ls.labels.genres} : ${result[0].genreStr(', ')}
 IMDb : ${result[0].ratings}
-Release Date : ${result[0].released}
-Translate By : ${result[0].translateBy}
+${Ls.labels.releaseDate} : ${result[0].released}
+${Ls.labels.translateBy} : ${result[0].translateBy}
 
 1/${result.length}\nPowered by Hidden Finder`,
 				templateButtons: [
 					result.length !== 1
 						? {
 								quickReplyButton: {
-									displayText: 'Next Movie',
+									displayText: Ls.buttons.nextMovie,
 									id: cmdId('layarkaca21', `next ${result[1].source} ${JSON.stringify(result)}`)
 								}
 							}

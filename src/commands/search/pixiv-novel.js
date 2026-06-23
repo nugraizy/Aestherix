@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { getNovelContent, searchNovel } from '../../utils/pixiv/index.js';
@@ -17,6 +17,7 @@ export default defineCommand({
 	async run({ from, query, message, cmd }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -40,18 +41,18 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `Title : ${data[0].title.capitalize()}
-Author : ${userName}
-ID Artwork : ${id}
-ID Author : ${userId}
-Tot. Like : ${numberWithCommas(likeCount)}
-Tot. View : ${numberWithCommas(viewCount)}
+					text: `${Ls.labels.title} : ${data[0].title.capitalize()}
+${Ls.labels.author} : ${userName}
+${Ls.labels.idArtwork} : ${id}
+${t(locale, 'search.labels.idAuthor', ['Author'])} : ${userId}
+${Ls.labels.totLike} : ${numberWithCommas(likeCount)}
+${Ls.labels.totView} : ${numberWithCommas(viewCount)}
 						
 ${content}`.formatForm(),
 					templateButtons: [
-						{ urlButton: { displayText: 'Novel Source', url: `https://www.pixiv.net/novel/show.php?id=${data[0].id}` } }
+						{ urlButton: { displayText: Ls.labels.novelSource, url: `https://www.pixiv.net/novel/show.php?id=${data[0].id}` } }
 					],
-					footer: ' • Pixiv Novel Content'
+					footer: ` • ${Ls.titles.pixivNovelSearch}`
 				},
 				{ quoted: message }
 			);
@@ -71,10 +72,10 @@ ${content}`.formatForm(),
 			await client.send(
 				from,
 				{
-					title: 'Pixiv Novel Search'.formatHeaders(),
+					title: Ls.titles.pixivNovelSearch.formatHeaders(),
 					text: '\t',
-					footer: 'choose one of the novel inside of the list to read.',
-					buttonText: 'Open List',
+					footer: Ls.labels.chooseOneRead,
+					buttonText: Ls.buttons.openList,
 					sections: container
 				},
 				{}

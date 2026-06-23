@@ -20,6 +20,7 @@ export default defineCommand({
 	async run({ from, query, prettyNumber, message }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const DL = useLocale(locale, 'downloader');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noUrl, message);
@@ -72,7 +73,7 @@ export default defineCommand({
 			const bio = author.signature || '';
 			const isImages = Array.isArray(info.images) && info.images.length > 0;
 
-			let caption = `Douyin ${isImages ? 'Slide' : 'Video'}`.formatHeaders();
+			let caption = t(locale, 'downloader.titles.douyin', [isImages ? 'Slide' : 'Video']).formatHeaders();
 
 			caption += `\n\nAuthor : ${nickname}\n`;
 
@@ -81,7 +82,7 @@ export default defineCommand({
 			}
 
 			if (bio) {
-				caption += `Bio : ${bio}\n`;
+				caption += `${DL.labels.bio} : ${bio}\n`;
 			}
 
 			if (author.follower_count || author.following_count) {
@@ -93,7 +94,7 @@ export default defineCommand({
 			)} 👀 ${formatNumber(info.play_count || 0)}\n`;
 
 			if (isImages) {
-				caption += `Total Images : ${info.images.length}\n`;
+				caption += `${DL.labels.totalImages} : ${info.images.length}\n`;
 
 				await client.send(from, { text: caption.trim().formatForm() }, { quoted: message });
 

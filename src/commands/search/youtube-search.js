@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
@@ -19,16 +19,17 @@ function sendBatch(state, from, message, client, ctx) {
 	const start = currentBatch * perBatch;
 	const batch = items.slice(start, start + perBatch);
 	const hasMore = start + batch.length < items.length;
-	const sortLabel = sort === 'views' ? '🔀 Sort : Relevance' : '🔀 Sort : Most Viewed';
-	const info = `Query : ${query}\nResults : ${items.length}\nShowing : ${start + 1}–${start + batch.length}\nSorted by : ${sort === 'views' ? 'Most Viewed' : 'Relevance'}`;
-	const body = `${'YouTube Search'.formatHeaders()}\n\n${info.formatForm()}\n\nSelect a video to download.`;
+	const Ls = useLocale(ctx.locale, 'search');
+	const sortLabel = t(ctx.locale, 'search.labels.sort', [sort === 'views' ? Ls.labels.mostViewed : Ls.labels.relevance]);
+	const info = `${Ls.labels.query} : ${query}\n${Ls.labels.results} : ${items.length}\n${t(ctx.locale, 'search.labels.showing', [start + 1, start + batch.length])}\n${t(ctx.locale, 'search.labels.sort', [sort === 'views' ? Ls.labels.mostViewed : Ls.labels.relevance])}`;
+	const body = `${Ls.titles.youtubeSearch.formatHeaders()}\n\n${info.formatForm()}\n\n${Ls.labels.selectVideo}`;
 
 	const builder = new client.TemplateBuilder.Native();
 
 	builder
 		.destination(from)
 		.body(body)
-		.footer('Powered by ' + BOT_NAME);
+		.footer(t(ctx.locale, 'core.footer.poweredBy', [BOT_NAME]));
 
 	const buttons = batch.map((video, index) => {
 		const label = `${start + index + 1}. ${video.title.slice(0, 100)} ${video.duration || 'N/A'}`;
@@ -37,7 +38,7 @@ function sendBatch(state, from, message, client, ctx) {
 	});
 
 	if (hasMore) {
-		buttons.push(builder.button.reply({ display: '➡️ Next', id: cmdId('yts', 'next ' + sessionId, ctx) }));
+		buttons.push(builder.button.reply({ display: Ls.buttons.nextImage, id: cmdId('yts', 'next ' + sessionId, ctx) }));
 	}
 
 	buttons.push(builder.button.reply({ display: sortLabel, id: cmdId('yts', 'sort ' + sessionId, ctx) }));
@@ -60,12 +61,13 @@ export default defineCommand({
 	async run({ from, query, message, prefix, device }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
 		}
 
-		const ctx = { prefix, device };
+		const ctx = { prefix, device, locale };
 
 		if (query.startsWith('next ')) {
 			const cached = searchSessions.get(query.slice(5));
@@ -109,7 +111,7 @@ export default defineCommand({
 		const result = (await youtube.search(query, { limit: 40 })).filter((video) => video.type === 'video');
 
 		if (!result.length) {
-			return await wait.update('No results found. Try a different query.');
+			return await wait.update(Ls.labels.noResults);
 		}
 
 		const sessionId = randomChar('abcdefghijklmnopqrstuvwxyz0123456789', 8);
@@ -117,7 +119,7 @@ export default defineCommand({
 
 		searchSessions.set(sessionId, state);
 
-		await wait.update(`Found ${result.length} result(s).`);
+		await wait.update(t(locale, 'search.labels.foundResults', [result.length]));
 
 		await sendBatch(state, from, message, client, ctx);
 	}

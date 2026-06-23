@@ -15,6 +15,7 @@ export default defineCommand({
 	async run({ from, message }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lh = useLocale(locale, 'helper');
 		const config = configuration.prefix.config;
 
 		if (!config) {
@@ -24,11 +25,11 @@ export default defineCommand({
 		const mode = config.multi ? 'Multi' : config.nopref ? 'No Prefix' : 'Single';
 		const prefixes = config.prefixValues || [config.pref || '.'];
 
-		const text = `${'Prefix Configuration'.formatHeaders()}
+		const text = `${Lh.titles.prefixConfig.formatHeaders()}
 
-Mode : ${mode}
-Default Prefix : ${config.pref || '.'}
-Active Prefixes : ${config.nopref ? '(any text triggers commands)' : prefixes.join(' ')}`;
+${Lh.labels.mode} : ${mode}
+${Lh.labels.defaultPrefix} : ${config.pref || '.'}
+${Lh.labels.activePrefixes} : ${config.nopref ? Lh.labels.anyTextTriggers : prefixes.join(' ')}`;
 
 		await client.reply(from, text.trim(), message);
 	}

@@ -3,7 +3,7 @@ import { BOT_NAME } from '../../core/constants.js';
 import yargsParser from 'yargs-parser';
 
 import { brainlySearch } from '../../utils/brainly/index.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 export default defineCommand({
@@ -19,6 +19,7 @@ export default defineCommand({
 	async run({ query, from, message }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -40,13 +41,13 @@ export default defineCommand({
 			return await client.reply(from, brainly.error, message);
 		}
 
-		let capt = 'Brainly'.formatHeaders();
+		let capt = Ls.titles.brainly.formatHeaders();
 
 		capt += '\n\n';
 
 		for (const { pertanyaan, jawaban } of brainly) {
-			capt += `Pertanyaan : ${pertanyaan.replace(/[\n\t\r]/g, '')}\n`;
-			capt += `Jawaban : ${jawaban
+			capt += `${Ls.labels.pertanyaan} : ${pertanyaan.replace(/[\n\t\r]/g, '')}\n`;
+			capt += `${Ls.labels.jawaban} : ${jawaban
 				.map((item, index) => `\n${index + 1}. ${item.replace(/[\n\t\r]/g, '')}\n`)
 				.join('')
 				.trim()}\n\n\n`;

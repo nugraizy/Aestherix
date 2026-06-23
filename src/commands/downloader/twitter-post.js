@@ -7,13 +7,13 @@ import { defineCommand } from '../_define.js';
 
 const twitter = new Twitter({ cookie: process.env.TWITTER_COOKIE });
 
-const createPostCaption = (post) => {
-	let capt = 'Twitter Post'.formatHeaders();
+const createPostCaption = (post, DL) => {
+	let capt = DL.titles.twitterPost.formatHeaders();
 
 	capt += `\n\nUsername : ${post.username}\n`;
 	capt += `Fullname : ${post.author}\n`;
-	capt += `Verified : ${post.isVerified ? 'Verified' : 'Not Verified'}\n`;
-	capt += `Blue Verified : ${post.isBlueVerified ? 'Verified' : 'Not Verified'}\n`;
+	capt += `${DL.labels.verified} : ${post.isVerified ? 'Verified' : 'Not Verified'}\n`;
+	capt += `${DL.labels.blueVerified} : ${post.isBlueVerified ? 'Verified' : 'Not Verified'}\n`;
 
 	capt += ` 💭 : ${post.caption.trim()}\n`;
 
@@ -37,9 +37,10 @@ export default defineCommand({
 	cooldown: 10,
 	limit: 9,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message }, client) {
+	async run({ from, query, prettyNumber, message, sender }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const DL = useLocale(locale, 'downloader');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noUrl, message);
@@ -75,7 +76,7 @@ export default defineCommand({
 				continue;
 			}
 
-			const caption = createPostCaption(post);
+			const caption = createPostCaption(post, DL);
 
 			if (post.medias.length > 1) {
 				await client.send(from, { text: caption }, { quoted: message });
@@ -103,7 +104,7 @@ export default defineCommand({
 			success++;
 		}
 
-		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
+		await wait.update(t(locale, 'common.core.commands.downloadBatchFinished', [success, error]));
 
 		loggers.info(`${color('Downloaded Twitter Post', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}

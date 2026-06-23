@@ -17,6 +17,7 @@ export default defineCommand({
 	async run({ from, message, isOwner }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lo = useLocale(locale, 'owner');
 
 		if (!isOwner) {
 			return;
@@ -30,13 +31,13 @@ export default defineCommand({
 
 		const lines = entries.map((entry, i) => {
 			const status = entry.client.state === 'connected' ? '🟢' : '🔴';
-			const phone = entry.client.phone ?? 'not paired';
+			const phone = entry.client.phone ?? Lo.labels.notPaired;
 			const role = entry.client.role === 'primary' ? '👑' : '🤖';
 			const uptime = entry.client.uptime ?? '-';
 
 			return `${i + 1}. ${status} ${role} *${entry.name}* (${phone}) · ${uptime}`;
 		});
 
-		return client.reply(from, `🤖 *Active bots:*\n\n${lines.join('\n')}`, message);
+		return client.reply(from, `${Lo.labels.activeBots}\n${lines.join('\n')}`, message);
 	}
 });

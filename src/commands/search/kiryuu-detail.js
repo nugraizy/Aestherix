@@ -50,6 +50,7 @@ export default defineCommand({
 	async run({ query, from, message, prefix }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.mangaSlugRequired, message);
@@ -60,7 +61,7 @@ export default defineCommand({
 		try {
 			const manga = await kiryuu.getManga(query.trim());
 			const caption = formatDetailCaption(manga);
-			const body = `${'Kiryuu Detail'.formatHeaders()}\n\n${caption.formatForm()}`;
+			const body = `${Ls.titles.kiryuuDetail.formatHeaders()}\n\n${caption.formatForm()}`;
 
 			const builder = new client.TemplateBuilder.Native();
 
@@ -69,8 +70,8 @@ export default defineCommand({
 				.body(body)
 				.footer('Powered by ' + BOT_NAME)
 				.buttons(
-					builder.button.reply({ display: '📖 Chapters', id: cmdId('kych', manga.slug, { prefix }) }),
-					builder.button.reply({ display: '📕 Read', id: cmdId('kyread', manga.slug, { prefix }) })
+					builder.button.reply({ display: Ls.buttons.chapters, id: cmdId('kych', manga.slug, { prefix }) }),
+					builder.button.reply({ display: Ls.buttons.read, id: cmdId('kyread', manga.slug, { prefix }) })
 				);
 
 			if (manga.poster) {
@@ -78,9 +79,9 @@ export default defineCommand({
 			}
 
 			await builder.send();
-			await wait.update('Detail fetched.');
+			await wait.update(Ls.labels.detailFetched);
 		} catch (error) {
-			return await wait.update(`Error: ${error.message || 'Manga not found.'}`);
+			return await wait.update(`Error: ${error.message || Ls.labels.mangaNotFound || 'Manga not found.'}`);
 		}
 	}
 });

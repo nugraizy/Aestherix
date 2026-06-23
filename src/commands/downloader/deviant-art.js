@@ -1,6 +1,6 @@
 import parser from 'yargs-parser';
 
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { downloadDeviantArt } from '../../utils/deviant-art/index.js';
 import { color, loggers, numberWithCommas, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
@@ -32,9 +32,10 @@ export default defineCommand({
 	limit: 4,
 	cooldown: 8,
 	status: 'enable',
-	async run({ query, from, message, prettyNumber }, client) {
+	async run({ query, from, message, sender, prettyNumber }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const DL = useLocale(locale, 'downloader');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -74,14 +75,14 @@ export default defineCommand({
 				{
 					image: { url: result.image },
 					caption:
-						'Deviant Art'.formatHeaders() +
+						DL.titles.deviantArt.formatHeaders() +
 						`\n\nTitle : ${result.author.capitalize()}
 Author : ${result.author}
-Favourites : ${numberWithCommas(result.favourites)}
-Views : ${numberWithCommas(result.views)}`.formatForm(),
+${L.core.labels.favourites} : ${numberWithCommas(result.favourites)}
+${L.core.caption.views} : ${numberWithCommas(result.views)}`.formatForm(),
 					templateButtons: [
-						{ urlButton: { displayText: 'Image Source', url: result.image } },
-						{ urlButton: { displayText: 'Deviant Art Source', url: result.source } }
+						{ urlButton: { displayText: L.core.buttons.imageSource, url: result.image } },
+						{ urlButton: { displayText: L.core.buttons.articleSource, url: result.source } }
 					],
 					footer: ''
 				},
@@ -91,7 +92,7 @@ Views : ${numberWithCommas(result.views)}`.formatForm(),
 			success++;
 		}
 
-		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
+		await wait.update(t(locale, 'common.core.commands.downloadBatchFinished', [success, error]));
 
 		loggers.info(`${color('Downloaded Deviantart File', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}

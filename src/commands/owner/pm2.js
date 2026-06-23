@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import pm2 from 'pm2';
 import yargsParser from 'yargs-parser';
 
-import { getLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { getFilesizeFromBytes } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -42,9 +42,9 @@ const pm2Operation = (operation, param = null) =>
 		}
 	});
 
-const renderProcess = (processes, builder, isCarousel) => {
+const renderProcess = (processes, builder, isCarousel, Lo, locale) => {
 	const container = { captionFull: '', buttons: [], carousel: [] };
-	let captionFull = 'PM2 Processes\n\n';
+	let captionFull = Lo.titles.pm2Processes;
 
 	for (const proc of processes) {
 		const {
@@ -55,17 +55,17 @@ const renderProcess = (processes, builder, isCarousel) => {
 			monit: { cpu, memory }
 		} = proc;
 
-		let caption = `ID : ${pmId}\nPID : ${pid}\nName : ${name}\n`;
+		let caption = `${Lo.labels.id} : ${pmId}\n${Lo.labels.pid} : ${pid}\n${Lo.labels.name} : ${name}\n`;
 
 		if (npmScript) {
-			caption += `Command : ${npmScript}\n`;
+			caption += `${Lo.labels.command} : ${npmScript}\n`;
 		}
 
-		caption += `Restarted : ${restartTime}\n`;
-		caption += `Time Started : ${dayjs(createdAt).format('dddd, D MMMM YYYY - HH:mm:ss')}\n`;
+		caption += `${Lo.labels.restarted} : ${restartTime}\n`;
+		caption += `${Lo.labels.timeStarted} : ${dayjs(createdAt).format('dddd, D MMMM YYYY - HH:mm:ss')}\n`;
 
 		if (!isCarousel) {
-			caption += `{CPU ${cpu}%  MEMORY ${getFilesizeFromBytes(memory)}}\n\n`;
+			caption += `{${t(locale, 'owner.labels.cpuMemory', [cpu, getFilesizeFromBytes(memory)])}}\n\n`;
 		}
 
 		captionFull += caption;
@@ -77,7 +77,7 @@ const renderProcess = (processes, builder, isCarousel) => {
 
 		const restartBtn = builder.button.reply({ display: `Restart ${name}`, id: `!pm2 -r ${name}` });
 		const stopBtn = builder.button.reply({ display: `Stop ${name}`, id: `!pm2 -s ${name}` });
-		const killBtn = builder.button.reply({ display: 'Kill', id: '!pm2 -k' });
+		const killBtn = builder.button.reply({ display: Lo.labels.kill, id: '!pm2 -k' });
 		const separator = builder.button.url({ display: '', url: `Made By ${BOT_NAME}` });
 
 		container.buttons.push(
@@ -89,7 +89,7 @@ const renderProcess = (processes, builder, isCarousel) => {
 
 		container.carousel.push({
 			body: caption.trim(),
-			footer: `{CPU ${cpu}%  MEMORY ${getFilesizeFromBytes(memory)}}`,
+			footer: `{${t(locale, 'owner.labels.cpuMemory', [cpu, getFilesizeFromBytes(memory)])}}`,
 			header: Buffer.alloc(10),
 			buttons: [restartBtn, stopBtn, killBtn]
 		});
@@ -111,24 +111,25 @@ export default defineCommand({
 
 	async run({ from, message, query, device, type }, client) {
 		const locale = await getLocale(from);
+		const Lo = useLocale(locale, 'owner');
 
 		if (!query) {
 			const processes = await getProcesses();
 
 			if (SEND_AS_STRING) {
-				const { captionFull } = renderProcess(processes);
+				const { captionFull } = renderProcess(processes, undefined, undefined, Lo, locale);
 
 				return client.reply(from, captionFull.trim(), message);
 			}
 
 			if (device.isIos) {
 				const builder = new client.TemplateBuilder.Native();
-				const { captionFull, buttons } = renderProcess(processes, builder);
+				const { captionFull, buttons } = renderProcess(processes, builder, undefined, Lo, locale);
 
 				await builder
 					.destination(from)
 					.body(captionFull.trim())
-					.footer('PM2 Instances')
+					.footer(Lo.titles.pm2Instances)
 					.buttons(...buttons.map((v) => v.buttonUrl || v.button))
 					.send();
 
@@ -136,9 +137,9 @@ export default defineCommand({
 			}
 
 			const builder = new client.TemplateBuilder.Carousel();
-			const { carousel } = renderProcess(processes, builder, true);
+			const { carousel } = renderProcess(processes, builder, true, Lo, locale);
 
-			await builder.destination(from).body('PM2 Monitor').footer('PM2 Instances').header('Header').cards(carousel).send();
+			await builder.destination(from).body(Lo.titles.pm2Monitor).footer(Lo.titles.pm2Instances).header('Header').cards(carousel).send();
 
 			return;
 		}
@@ -155,7 +156,7 @@ export default defineCommand({
 
 			if (list) {
 				const processes = await getProcesses();
-				const { captionFull } = renderProcess(processes);
+				const { captionFull } = renderProcess(processes, undefined, undefined, Lo, locale);
 
 				return client.reply(from, captionFull, message);
 			}

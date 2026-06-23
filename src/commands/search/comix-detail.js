@@ -53,6 +53,7 @@ export default defineCommand({
 	async run({ query, from, message, prefix }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.mangaSlugRequired, message);
@@ -64,11 +65,11 @@ export default defineCommand({
 		const manga = result.items[0];
 
 		if (!manga) {
-			return await wait.update('Manga not found. Please check the ID or URL.');
+			return await wait.update(Ls.labels.noComicFound);
 		}
 
 		const caption = formatDetailCaption(manga);
-		const body = `${'Comix Detail'.formatHeaders()}\n\n${caption.formatForm()}`;
+		const body = `${Ls.titles.comixDetail.formatHeaders()}\n\n${caption.formatForm()}`;
 
 		const builder = new client.TemplateBuilder.Native();
 
@@ -77,8 +78,8 @@ export default defineCommand({
 			.body(body)
 			.footer('Powered by ' + BOT_NAME)
 			.buttons(
-				builder.button.reply({ display: '📖 Chapters', id: cmdId('cxch', manga.id, { prefix }) }),
-				builder.button.reply({ display: '📕 Read', id: cmdId('cxread', manga.id, { prefix }) })
+				builder.button.reply({ display: Ls.buttons.chapters, id: cmdId('cxch', manga.id, { prefix }) }),
+				builder.button.reply({ display: Ls.buttons.read, id: cmdId('cxread', manga.id, { prefix }) })
 			);
 
 		if (manga.poster) {
@@ -86,6 +87,6 @@ export default defineCommand({
 		}
 
 		await builder.send();
-		await wait.update('Detail fetched.');
+		await wait.update(Ls.labels.detailFetched);
 	}
 });

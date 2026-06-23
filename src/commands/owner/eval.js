@@ -41,6 +41,8 @@ const decodeAdvicePayload = (payload) => {
 };
 
 async function sendEvalErrorWithAdvice(ctx, client, error, code, syntaxes = '') {
+	const locale = await getLocale(ctx.from);
+	const Lo = useLocale(locale, 'owner');
 	const builder = new client.TemplateBuilder.Native();
 	const payload = encodeAdvicePayload({
 		errorName: error?.name || 'Error',
@@ -49,13 +51,13 @@ async function sendEvalErrorWithAdvice(ctx, client, error, code, syntaxes = '') 
 		syntax: String(syntaxes || '')
 	});
 	const button = builder.button.reply({
-		display: 'Get advice from Agent',
+		display: Lo.labels.getAdvice,
 		id: cmdId(ctx.cmd, `--advice ${payload}`, ctx)
 	});
 	const summary = `\`ERROR\`\n\nType : ${error?.name || 'Error'}\nMessage : ${error?.message || String(error)}`;
 	const body = syntaxes ? `${summary}\n\n${syntaxes.trim()}` : summary;
 
-	await builder.destination(ctx.from).body(body).footer('Eval error').buttons(button).send();
+	await builder.destination(ctx.from).body(body).footer(Lo.labels.evalError).buttons(button).send();
 }
 
 function checkSyntax(code) {
@@ -235,6 +237,7 @@ export default defineCommand({
 
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lo = useLocale(locale, 'owner');
 
 		if (!isOwner) {
 			return await client.reply(from, L.errors.notAllowed, message.message);

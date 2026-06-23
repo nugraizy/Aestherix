@@ -22,6 +22,7 @@ export default defineCommand({
 	run: async ({ query, from, message }, client) => {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lh = useLocale(locale, 'helper');
 		const { quantity, text } = parser(query, {
 			number: 'quantity',
 			boolean: 'text',
@@ -46,7 +47,7 @@ export default defineCommand({
 				from,
 				text
 					? { text: await fs.readFile(path.join(__dirname, 'CHANGELOG.md'), { encoding: 'utf-8' }) }
-					: { image, caption: (isCache && 'cached image.') || '' },
+					: { image, caption: (isCache && Lh.labels.cachedImage) || '' },
 				{ quoted: message }
 			);
 

@@ -1,6 +1,6 @@
 import { BOT_NAME } from '../../core/constants.js';
 
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { fetchBUFFER, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { spotifier } from '../../utils/spotifier/index.js';
@@ -24,6 +24,7 @@ export default defineCommand({
 	async run({ query, from, message }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -67,7 +68,7 @@ export default defineCommand({
 			for (const { artists, name, duration_ms: durationMs } of tracks.data.tracks) {
 				if (count === 0) {
 					caption += `Title : ${name}\n`;
-					caption += `Artists : ${artists
+					caption += `${Ls.labels.artists} : ${artists
 						.map((v) => v.name)
 						.map((v, i) => (artists.length !== 1 && i + 1 === artists.length ? `and ${v}` : v))
 						.join(', ')}\n`;
@@ -94,7 +95,7 @@ export default defineCommand({
 				from,
 				{
 					image: await fetchBUFFER(images),
-					caption: 'Spotify Artist'.formatHeaders() + `\n\n${caption.formatForm()}`
+					caption: Ls.titles.spotifyArtist.formatHeaders() + `\n\n${caption.formatForm()}`
 					// templateButtons: [
 					// 	{
 					// 		urlButton: {
@@ -128,10 +129,10 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					buttonText: 'Open List',
+					buttonText: Ls.buttons.openList,
 					text: '\t',
-					footer: '```Looking for some more? Choose between these options.```',
-					title: 'Spotify Artist'.formatHeaders(),
+					footer: Ls.labels.lookingForMore,
+					title: Ls.titles.spotifyArtist.formatHeaders(),
 					sections: rows
 				},
 				{}

@@ -1,28 +1,28 @@
 import yn from 'yn';
 
-import { getLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { Jikan, increment, numberWithCommas } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
-const parse = (obj) =>
-	`Full Title : ${obj?.title || 'n/a'}
-EN : ${obj?.title_english || 'n/a'}
-JP : ${obj?.title_japanese || 'n/a'}
-ID : ${obj?.mal_id || 'n/a'}
+const parse = (obj, La) =>
+	`${La.labels.fullTitle} : ${obj?.title || 'n/a'}
+${La.labels.enTitle} : ${obj?.title_english || 'n/a'}
+${La.labels.jpTitle} : ${obj?.title_japanese || 'n/a'}
+${La.labels.idTitle} : ${obj?.mal_id || 'n/a'}
 
-Rank : ${obj?.rank || 'n/a'}
-Score : ${obj?.score || 'n/a'}
-Popularity : ${obj?.popularity || 'n/a'}
-Type : ${obj?.type || 'n/a'}
-Status : ${obj?.status || 'n/a'}
-Tot. Listed Users : ${numberWithCommas(obj?.members || 0) || 'n/a'}
-Tot. Scoring Users : ${numberWithCommas(obj?.scored_by || 0) || 'n/a'}
-Tot. Episodes : ${numberWithCommas(obj?.episodes || 0) || 'n/a'}
-Start Broadcasting : ${obj?.aired?.string || 'n/a'}
-Rating : ${obj?.rating || 'n/a'}
-Genres : ${obj?.genres?.map(({ name }) => name)?.join(', ') || 'n/a'}
+${La.labels.rank} : ${obj?.rank || 'n/a'}
+${La.labels.score} : ${obj?.score || 'n/a'}
+${La.labels.popularity} : ${obj?.popularity || 'n/a'}
+${La.labels.type} : ${obj?.type || 'n/a'}
+${La.labels.status} : ${obj?.status || 'n/a'}
+${La.labels.totListedUsers} : ${numberWithCommas(obj?.members || 0) || 'n/a'}
+${La.labels.totScoringUsers} : ${numberWithCommas(obj?.scored_by || 0) || 'n/a'}
+${La.labels.totEpisodes} : ${numberWithCommas(obj?.episodes || 0) || 'n/a'}
+${La.labels.startBroadcasting} : ${obj?.aired?.string || 'n/a'}
+${La.labels.rating} : ${obj?.rating || 'n/a'}
+${La.labels.genres} : ${obj?.genres?.map(({ name }) => name)?.join(', ') || 'n/a'}
 	
-Synopsis : ${obj?.synopsis || 'n/a'}`.formatForm();
+${La.labels.synopsis} : ${obj?.synopsis || 'n/a'}`.formatForm();
 
 export default defineCommand({
 	name: 'malanimeranking',
@@ -36,6 +36,7 @@ export default defineCommand({
 	status: 'enable',
 	async run({ query, from, message, sender, waitForInput }, client) {
 		const locale = await getLocale(from);
+		const La = useLocale(locale, 'anime');
 
 		const mal = new Jikan();
 
@@ -54,7 +55,7 @@ export default defineCommand({
 				return;
 			}
 
-			const caption = parse(result.data[index]);
+			const caption = parse(result.data[index], La);
 			const {
 				images: {
 					jpg: { large_image_url: large }
@@ -65,8 +66,8 @@ export default defineCommand({
 				from,
 				{
 					image: { url: large },
-					caption: `${'Myanimelist Ranking [ Anime ]'.formatHeaders()}\n\n${caption.trim()}
-\nAnime ${index + 1} of ${result.data.length}`
+					caption: `${La.titles.animeRankingMal.formatHeaders()}\n\n${caption.trim()}
+${t(locale, 'anime.labels.mangaOf', ['Anime', index + 1, result.data.length])}`
 				},
 				{ quoted: message }
 			);
@@ -76,7 +77,7 @@ export default defineCommand({
 			}
 
 			const wait = await waitForInput(client, {
-				message: 'Do you want to get more anime? [y/n]',
+				message: t(locale, 'anime.labels.doYouWantMore', ['anime']),
 				expectedType: ['conversation', 'extendedTextMessage'],
 				from,
 				sender,

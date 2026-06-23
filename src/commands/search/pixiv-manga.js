@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { fetchBUFFER, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { downloadManga, searchManga } from '../../utils/pixiv/index.js';
@@ -17,6 +17,7 @@ export default defineCommand({
 	async run({ from, query, message, cmd }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -46,12 +47,12 @@ export default defineCommand({
 				{
 					image: Buffer.from(images, 'base64'),
 					caption:
-						'Pixiv Manga Search'.formatHeaders() +
-						`\n\nTitle : ${dataImage.title.capitalize()}
-Author : ${dataImage.userName}
-ID Artwork : ${dataImage.id}
-ID Author : ${dataImage.userId}
-Total Media : ${dataImage.pageCount}`.formatForm()
+						Ls.titles.pixivMangaSearch.formatHeaders() +
+						`\n\n${Ls.labels.title} : ${dataImage.title.capitalize()}
+${Ls.labels.author} : ${dataImage.userName}
+${Ls.labels.idArtwork} : ${dataImage.id}
+${t(locale, 'search.labels.idAuthor', ['Author'])} : ${dataImage.userId}
+${Ls.labels.totalMedia} : ${dataImage.pageCount}`.formatForm()
 					// templateButtons: [
 					// 	{ urlButton: { displayText: 'Manga Source', url: `https://www.pixiv.net/en/artworks/${dataImage.id}` } }
 					// ],
@@ -71,9 +72,9 @@ Total Media : ${dataImage.pageCount}`.formatForm()
 						{
 							image: Buffer.from(images, 'base64'),
 							caption: '\t',
-							templateButtons: [
-								{ urlButton: { displayText: 'Manga Source', url: `https://www.pixiv.net/en/artworks/${dataImage.id}` } }
-							],
+						templateButtons: [
+							{ urlButton: { displayText: Ls.labels.mangaSource, url: `https://www.pixiv.net/en/artworks/${dataImage.id}` } }
+						],
 							footer: '\t'
 						},
 						{ quoted: message }
@@ -92,10 +93,10 @@ Total Media : ${dataImage.pageCount}`.formatForm()
 			await client.send(
 				from,
 				{
-					title: 'Pixiv Manga Search'.formatHeaders(),
+					title: Ls.titles.pixivMangaSearch.formatHeaders(),
 					text: '\t',
-					footer: 'choose one of the manga inside of the list to download.',
-					buttonText: 'Open List',
+					footer: Ls.labels.chooseOne,
+					buttonText: Ls.buttons.openList,
 					sections: container
 				},
 				{}

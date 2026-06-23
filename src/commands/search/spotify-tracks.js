@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { fetchBUFFER, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { spotifier } from '../../utils/spotifier/index.js';
 import { defineCommand } from '../_define.js';
@@ -36,6 +36,7 @@ export default defineCommand({
 	async run({ query, from, message }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -59,9 +60,9 @@ export default defineCommand({
 				duration_ms: durationMs,
 				external_urls: { spotify }
 			} of result?.data?.items ?? result.tracks) {
-				caption += `✦ Media ID : ${extractId(spotify)}\n🖼️ Type : ${getSpotifyType(
+				caption += `✦ ${Ls.labels.mediaId} : ${extractId(spotify)}\n🖼️ Type : ${getSpotifyType(
 					spotify
-				)}\n📕 Title : ${name}\n📡 Artists : ${artists
+				)}\n📕 Title : ${name}\n📡 ${Ls.labels.artists} : ${artists
 					.map((v) => v.name)
 					.map((v, i) => (artists.length !== 1 && i + 1 === artists.length ? `and ${v}` : v))
 					.join(', ')}\n`;
@@ -72,7 +73,7 @@ export default defineCommand({
 				from,
 				{
 					image: await fetchBUFFER(result?.data?.items?.[0]?.album?.images?.[0]?.url ?? result.tracks[0].album.images[0].url),
-					caption: 'Spotify Tracks'.formatHeaders() + `\n\n${caption.formatForm()}`
+					caption: Ls.titles.spotifyTracks.formatHeaders() + `\n\n${caption.formatForm()}`
 					// templateButtons: [
 					// 	{
 					// 		urlButton: {

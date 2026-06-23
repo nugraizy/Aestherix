@@ -49,10 +49,10 @@ const downloadChapterAsPdf = async ({ from, message }, client, wait, chapterId, 
 	const pages = await comix.getChapterPages({ id: chapterId, chapterId, url: chapterUrl });
 
 	if (!pages.length) {
-		return await wait.update('No pages found for this chapter.');
+		return await wait.update(t(locale, 'common.core.errors.noPagesFound'));
 	}
 
-	await wait.update(`Converting ${pages.length} page(s) to PDF...`);
+	await wait.update(t(locale, 'common.core.progress.convertingToPdf', [pages.length]));
 
 	const imageInputs = pages.map((page) => (page.scrambled && page.buffer ? page.buffer : page.url));
 	const buffer = await imageToPdf(imageInputs);
@@ -67,7 +67,7 @@ const downloadChapterAsPdf = async ({ from, message }, client, wait, chapterId, 
 		{ quoted: message }
 	);
 
-	await wait.update(`Done. ${pages.length} page(s) sent as PDF.`);
+	await wait.update(t(locale, 'common.core.progress.doneSentPdf', [pages.length]));
 };
 
 async function sendBatch(state, from, message, client, ctx) {
@@ -76,8 +76,9 @@ async function sendBatch(state, from, message, client, ctx) {
 	const batch = allChapters.slice(start, start + CHAPTERS_PER_BATCH);
 	const totalBatches = Math.ceil(allChapters.length / CHAPTERS_PER_BATCH);
 	const hasMore = currentBatch + 1 < totalBatches;
+	const Ls = useLocale(ctx.locale, 'search');
 
-	const body = `${'Comix Reader'.formatHeaders()}\n\n${safeName}\nTotal : ${allChapters.length} chapter(s)\nShowing : ${start + 1}–${start + batch.length}\n\nSelect a chapter to download as PDF.`;
+	const body = `${Ls.titles.comixReader.formatHeaders()}\n\n${safeName}\n${Ls.labels.chapterTotal.replace('{0}', allChapters.length)}\n${Ls.labels.showing.replace('{0}', start + 1).replace('{1}', start + batch.length)}\n\n${Ls.labels.selectChapter}`;
 
 	const builder = new client.TemplateBuilder.Native();
 
@@ -93,7 +94,7 @@ async function sendBatch(state, from, message, client, ctx) {
 	});
 
 	if (hasMore) {
-		buttons.push(builder.button.reply({ display: '➡️ More Chapters', id: cmdId('cxread', 'next ' + sessionId, ctx) }));
+		buttons.push(builder.button.reply({ display: Ls.buttons.moreChapters, id: cmdId('cxread', 'next ' + sessionId, ctx) }));
 	}
 
 	builder.buttons(...buttons);
@@ -115,13 +116,10 @@ export default defineCommand({
 	async run({ query, from, message, prefix }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
-			return await client.reply(
-				from,
-				'Please provide a chapter ID, Comix URL, or a search query.\n\nExamples:\n• !cxread 12345\n• !cxread https://comix.to/title/...\n• !cxread Solo Leveling',
-				message
-			);
+			return await client.reply(from, Ls.labels.comixReadHelp.replace('{0}', `${prefix}cxread`), message);
 		}
 
 		const input = query.trim();
@@ -135,7 +133,7 @@ export default defineCommand({
 			}
 
 			cached.currentBatch++;
-			return await sendBatch(cached, from, message, client, { prefix });
+			return await sendBatch(cached, from, message, client, { prefix, locale });
 		}
 
 		const wait = await client.waitMessage(from, L.success.processing, message);
@@ -175,7 +173,7 @@ export default defineCommand({
 				);
 			} catch (error) {
 				if (error.message?.includes('Outdated chapter URL')) {
-					return await wait.update('Outdated chapter URL. Please search the manga again to get updated chapter links.');
+					return await wait.update(Ls.labels.outdatedChapter);
 				}
 
 				throw error;
@@ -203,16 +201,16 @@ export default defineCommand({
 			const result = await comix.search(input, { limit: 1, excludeNsfw: true });
 
 			if (!result.items.length) {
-				return await wait.update('No manga found for that query.');
+				return await wait.update(Ls.labels.noMangaFound);
 			}
 
 			manga = result.items[0];
-			await wait.update(`Found: ${manga.title}\nFetching chapters...`);
+			await wait.update(Ls.labels.foundFetchingChapters.replace('{0}', manga.title));
 			chaptersResult = await comix.getChapters(manga, { allPages: true });
 		}
 
 		if (!chaptersResult.items.length) {
-			return await wait.update(`No chapters found for "${manga.title}".`);
+			return await wait.update(Ls.labels.noChaptersForTitle.replace('{0}', manga.title));
 		}
 
 		const allChapters = chaptersResult.items.reverse();
@@ -222,7 +220,7 @@ export default defineCommand({
 
 		readerSessions.set(sessionId, state);
 
-		await wait.update(`${allChapters.length} chapter(s) found for "${manga.title}".`);
-		await sendBatch(state, from, message, client, { prefix });
+		await wait.update(Ls.labels.chaptersFoundFor.replace('{0}', allChapters.length).replace('{1}', manga.title));
+		await sendBatch(state, from, message, client, { prefix, locale });
 	}
 });

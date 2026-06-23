@@ -18,6 +18,7 @@ export default defineCommand({
 	async run({ query, from, message, prefix }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.mangaIdRequired, message);
@@ -52,25 +53,25 @@ export default defineCommand({
 
 			lines.push(`\nURL : ${manga.url}`);
 
-			const body = `${'MangaToon Detail'.formatHeaders()}\n\n${lines.join('\n').formatForm()}`;
+			const body = `${Ls.titles.mangatoonDetail.formatHeaders()}\n\n${lines.join('\n').formatForm()}`;
 			const builder = new client.TemplateBuilder.Native();
 
 			builder
 				.destination(from)
 				.body(body)
 				.footer('Powered by ' + BOT_NAME)
-				.buttons(builder.button.reply({ display: '📖 Chapters', id: cmdId('mtch', manga.id, { prefix }) }));
+				.buttons(builder.button.reply({ display: Ls.buttons.chapters, id: cmdId('mtch', manga.id, { prefix }) }));
 
 			if (manga.episodes?.[0]?.url) {
 				builder.buttons(
-					builder.button.reply({ display: '📕 Read Ch.1', id: cmdId('mtread', manga.episodes[0].url, { prefix }) })
+					builder.button.reply({ display: Ls.buttons.readCh1, id: cmdId('mtread', manga.episodes[0].url, { prefix }) })
 				);
 			}
 
 			await builder.send();
-			await wait.update('Detail fetched.');
+			await wait.update(Ls.labels.detailFetched);
 		} catch (error) {
-			return await wait.update(`Error: ${error.message || 'Manga not found.'}`);
+			return await wait.update(`Error: ${error.message || Ls.labels.mangaNotFound || 'Manga not found.'}`);
 		}
 	}
 });

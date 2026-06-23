@@ -23,6 +23,7 @@ export default defineCommand({
 	async run({ from, query, prettyNumber, message }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ll = useLocale(locale, 'look_up');
 
 		if (!query) {
 			return await client.reply(from, L.errors.ipRequired, message);
@@ -75,30 +76,30 @@ export default defineCommand({
 					hosting
 				} = data;
 
-				let capt = 'IP Address Lookup'.formatHeaders();
+				let capt = Ll.titles.ipLookup.formatHeaders();
 
-				capt += `\n\nContinent : ${continent}\n`;
-				capt += `Continent Code : ${continentCode}\n`;
-				capt += `Country : ${country}\n`;
-				capt += `Country Code : ${countryCode}\n`;
-				capt += `Region : ${region}\n`;
-				capt += `Region Name : ${regionName}\n`;
-				capt += `City : ${city}\n`;
-				capt += `District : ${district}\n`;
-				capt += `ZIP Code : ${zip}\n`;
-				capt += `Latitude : ${lat}\n`;
-				capt += `Longitude : ${lon}\n`;
-				capt += `Timezone : ${timezone}\n`;
-				capt += `Offset : ${offset}\n`;
-				capt += `Currency : ${currency}\n`;
-				capt += `ISP : ${isp}\n`;
-				capt += `Organization : ${org}\n`;
-				capt += `AS number & Organization : ${as}\n`;
-				capt += `AS name : ${asname}\n`;
-				capt += `Reverse DNS : ${reverse}\n`;
-				capt += `Mobile Connection : ${mobile ? 'Yes' : 'No'}\n`;
-				capt += `Proxy : ${proxy ? 'Yes' : 'No'}\n`;
-				capt += `Hosting : ${hosting ? 'Yes' : 'No'}`;
+				capt += `\n\n${Ll.labels.continent} : ${continent}\n`;
+				capt += `${Ll.labels.continentCode} : ${continentCode}\n`;
+				capt += `${Ll.labels.country} : ${country}\n`;
+				capt += `${Ll.labels.countryCode} : ${countryCode}\n`;
+				capt += `${Ll.labels.region} : ${region}\n`;
+				capt += `${Ll.labels.regionName} : ${regionName}\n`;
+				capt += `${Ll.labels.city} : ${city}\n`;
+				capt += `${Ll.labels.district} : ${district}\n`;
+				capt += `${Ll.labels.zipCode} : ${zip}\n`;
+				capt += `${Ll.labels.latitude} : ${lat}\n`;
+				capt += `${Ll.labels.longitude} : ${lon}\n`;
+				capt += `${Ll.labels.timezone} : ${timezone}\n`;
+				capt += `${Ll.labels.offset} : ${offset}\n`;
+				capt += `${Ll.labels.currency} : ${currency}\n`;
+				capt += `${Ll.labels.isp} : ${isp}\n`;
+				capt += `${Ll.labels.organization} : ${org}\n`;
+				capt += `${Ll.labels.asNumber} : ${as}\n`;
+				capt += `${Ll.labels.asName} : ${asname}\n`;
+				capt += `${Ll.labels.reverseDns} : ${reverse}\n`;
+				capt += `${Ll.labels.mobileConnection} : ${mobile ? L.core.labels.yes : L.core.labels.no}\n`;
+				capt += `${Ll.labels.proxy} : ${proxy ? L.core.labels.yes : L.core.labels.no}\n`;
+				capt += `${Ll.labels.hosting} : ${hosting ? L.core.labels.yes : L.core.labels.no}`;
 
 				await client.send(from, { text: capt.trim().formatForm() }, { quoted: message });
 			}

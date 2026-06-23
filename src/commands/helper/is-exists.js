@@ -19,6 +19,7 @@ export default defineCommand({
 	run: async ({ query, from, message }, client) => {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lh = useLocale(locale, 'helper');
 
 		if (!query) {
 			return await client.reply(from, L.errors.numberRequired, message);
@@ -59,9 +60,9 @@ export default defineCommand({
 		}
 
 		const existedNumber = container.filter((v) => v.isExists);
-		let text = `${'WhatsApp Number Checker'.formatHeaders()}\n\n`;
+		let text = `${Lh.titles.whatsappChecker.formatHeaders()}\n\n`;
 
-		text += `${'Registered'.formatHeaders()}
+		text += `${Lh.labels.registered.formatHeaders()}
 
 ${
 	existedNumber?.length
@@ -73,9 +74,9 @@ ${
 						}`
 				)
 				.join('\n\n')
-		: 'No Data'
+		: Lh.labels.noData
 }`;
-		text += `\n\n${'Unregistered'.formatHeaders()}
+		text += `\n\n${Lh.labels.unregistered.formatHeaders()}
 
 ${container
 	.filter((v) => !v.isExists)

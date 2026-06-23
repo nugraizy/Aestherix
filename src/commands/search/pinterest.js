@@ -1,5 +1,6 @@
 import yn from 'yn';
 
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { increment, isURL, removeDuplicatesArray } from '../../utils/modules/index.js';
 import { pinterest } from '../../utils/pinterest/index.js';
 import { defineCommand } from '../_define.js';
@@ -19,6 +20,10 @@ export default defineCommand({
 	cooldown: 5,
 	status: 'enable',
 	async run({ query, from, message, sender, waitForInput }, client) {
+		const locale = await getLocale(from);
+		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
+
 		if (!query) {
 			return await client.reply(
 				from,
@@ -39,18 +44,18 @@ export default defineCommand({
 
 				await builder
 					.destination(from)
-					.body('Pinterest Downloader')
+					.body(Ls.titles.pinterest)
 					.footer(
-						`Username : ${result.authorUsername}\nFullname : ${result.authorFullname}\nFollowers : ${result.follower}\n\nPowered by Hidden Finder`
+						`${Ls.labels.username}${result.authorUsername}\n${Ls.labels.authorFullname}${result.authorFullname}\n${Ls.labels.followers}${result.follower}\n\nPowered by Hidden Finder`
 					)
 					.header('Header', result.url)
 					.buttons(
 						builder.button.url({
-							display: 'Original Source',
+							display: Ls.buttons.originalSource,
 							url: result.pinSource
 						}),
 						builder.button.url({
-							display: 'Original Media',
+							display: Ls.buttons.originalMedia,
 							url: result.url
 						})
 					)
@@ -82,13 +87,13 @@ export default defineCommand({
 						...(results[index].type === 'image'
 							? { image: { url: results[index].url } }
 							: { video: { url: results[index].url }, gifPlayback: results[index].type === 'gif' }),
-						caption:
-							'Pinterest'.formatHeaders() +
-							`\n\nAuthor : ${results[index].authorUsername}
-Author Fullname : ${results[index].authorFullname}
-Followers : ${results[index].follower}
-Caption : ${results[index].caption}
-\nMedia ${index + 1} of ${results.length}`.formatForm()
+					caption:
+						Ls.titles.pinterest.formatHeaders() +
+						`\n\n${Ls.labels.username}${results[index].authorUsername}
+${Ls.labels.authorFullname}${results[index].authorFullname}
+${Ls.labels.followers}${results[index].follower}
+${Ls.labels.caption}${results[index].caption}
+\n${t(locale, 'search.labels.media', [index + 1, results.length])}`.formatForm()
 					},
 					{ quoted: message }
 				);
@@ -98,7 +103,7 @@ Caption : ${results[index].caption}
 				}
 
 				const wait = await waitForInput(client, {
-					message: 'Do you want to get more image? [y/n]',
+					message: Ls.labels.yourQuery,
 					expectedType: ['conversation', 'extendedTextMessage'],
 					from,
 					sender,
@@ -134,21 +139,21 @@ Caption : ${results[index].caption}
 
 				await builder
 					.destination(from)
-					.body('Pinterest Downloader')
+					.body(Ls.titles.pinterest)
 					.footer(`Total Media : ${results.length}`)
 					.cards(
 						results.map(({ authorUsername, authorFullname, follower, caption, url, pinSource }) => ({
-							body: `Username : ${authorUsername}\nFullname : ${authorFullname}\nFollowers : ${follower}`,
+							body: `${Ls.labels.username}${authorUsername}\n${Ls.labels.authorFullname}${authorFullname}\n${Ls.labels.followers}${follower}`,
 							footer: 'Powered by Hidden Finder',
-							title: caption === 'No caption' ? 'Title is n/a' : caption,
+							title: caption === 'No caption' ? Ls.labels.titleIsNA : caption,
 							header: url,
 							buttons: [
 								builder.button.url({
-									display: 'Original Source',
+									display: Ls.buttons.originalSource,
 									url: pinSource
 								}),
 								builder.button.url({
-									display: 'Original Media',
+									display: Ls.buttons.originalMedia,
 									url
 								})
 							]
@@ -169,21 +174,21 @@ Caption : ${results[index].caption}
 
 					await builder
 						.destination(from)
-						.body('Pinterest Downloader')
-						.footer(`Keyword : ${result.keyword}\nTotal Media : ${result.results.length}`)
+						.body(Ls.titles.pinterest)
+						.footer(`${Ls.labels.keyword}${result.keyword}\nTotal Media : ${result.results.length}`)
 						.cards(
 							result.results.map(({ authorUsername, authorFullname, follower, caption, url, pinSource }) => ({
-								body: `Username : ${authorUsername}\nFullname : ${authorFullname}\nFollowers : ${follower}`,
+								body: `${Ls.labels.username}${authorUsername}\n${Ls.labels.authorFullname}${authorFullname}\n${Ls.labels.followers}${follower}`,
 								footer: 'Powered by Hidden Finder',
-								title: caption === 'No caption' ? 'Title is n/a' : caption,
+								title: caption === 'No caption' ? Ls.labels.titleIsNA : caption,
 								header: url,
 								buttons: [
 									builder.button.url({
-										display: 'Original Source',
+										display: Ls.buttons.originalSource,
 										url: pinSource
 									}),
 									builder.button.url({
-										display: 'Original Media',
+										display: Ls.buttons.originalMedia,
 										url
 									})
 								]

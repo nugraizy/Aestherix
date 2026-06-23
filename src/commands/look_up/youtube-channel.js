@@ -15,6 +15,7 @@ export default defineCommand({
 	run: async ({ from, query, message }, client) => {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ll = useLocale(locale, 'look_up');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -32,16 +33,16 @@ export default defineCommand({
 			image: {
 				url: avatar.url
 			},
-			caption: `${'YouTube Channel Lookup'.formatHeaders()}
+			caption: `${Ll.titles.youtubeChannel.formatHeaders()}
 
-Channel Name : ${author.name}
-Username : ${author.username}
-Subscribers : ${author.subsCount}
-Videos : ${author.vidsCount}
-Verified : ${author.isVerified ? 'Yes' : 'No'}
-Artist Verified : ${author.isVerifiedArtist ? 'Yes' : 'No'}
-Channel URL : ${author.channelUrlId}
-Channel URL Username : ${author.channelUrlUsername}`.formatForm()
+${Ll.labels.channelName} : ${author.name}
+${Ll.labels.username} : ${author.username}
+${Ll.labels.subscribers} : ${author.subsCount}
+${Ll.labels.totalVideos} : ${author.vidsCount}
+${Ll.labels.verified} : ${author.isVerified ? L.core.labels.yes : L.core.labels.no}
+${Ll.labels.artistVerified} : ${author.isVerifiedArtist ? L.core.labels.yes : L.core.labels.no}
+${Ll.labels.channelUrl} : ${author.channelUrlId}
+${Ll.labels.channelUrlUsername} : ${author.channelUrlUsername}`.formatForm()
 		});
 	}
 });

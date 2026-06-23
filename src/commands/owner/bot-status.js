@@ -18,6 +18,7 @@ export default defineCommand({
 	async run({ from, message, isOwner }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lo = useLocale(locale, 'owner');
 
 		if (!isOwner) {
 			return;
@@ -38,11 +39,11 @@ export default defineCommand({
 			let status;
 
 			if (live) {
-				status = live.state === 'connected' ? '🟢 Online' : live.state === 'connecting' ? '🟡 Connecting' : '🔴 Disconnected';
+				status = live.state === 'connected' ? Lo.labels.online : live.state === 'connecting' ? Lo.labels.connecting : Lo.labels.disconnected;
 			} else if (instance.isActive) {
-				status = '⚪ Registered (not running)';
+				status = Lo.labels.registeredNotRunning;
 			} else {
-				status = '⚫ Disabled';
+				status = Lo.labels.disabledBot;
 			}
 
 			const phone = live?.phone ?? instance.pairNumber ?? '-';
@@ -59,7 +60,7 @@ export default defineCommand({
 				continue;
 			}
 
-			const status = entry.client.state === 'connected' ? '🟢 Online' : '🔴 Disconnected';
+			const status = entry.client.state === 'connected' ? Lo.labels.online : Lo.labels.disconnected;
 			const phone = entry.client.phone ?? '-';
 			const uptime = entry.client.uptime ?? '-';
 
@@ -68,6 +69,6 @@ export default defineCommand({
 			);
 		}
 
-		return client.reply(from, `🤖 *Bot Status*\n\n${lines.join('\n\n')}`, message);
+		return client.reply(from, `${Lo.labels.botStatusHeader}\n${lines.join('\n\n')}`, message);
 	}
 });

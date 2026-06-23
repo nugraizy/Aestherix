@@ -20,6 +20,7 @@ export default defineCommand({
 	run: async ({ from, message, query, prettyNumber }, client) => {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const DL = useLocale(locale, 'downloader');
 
 		if (!query) {
 			return client.reply(from, L.errors.noQuery, message);
@@ -62,11 +63,11 @@ export default defineCommand({
 
 			await client.reply(
 				from,
-				`${'Mediafire Downloader'.formatHeaders()}
+				`${DL.titles.mediafire.formatHeaders()}
 		
-Filename: ${result.filename}
-Filesize: ${result.filesize}
-Filetype: ${result.filetype}`.formatForm(),
+${L.core.labels.fileName} : ${result.filename}
+${L.core.labels.fileSize} : ${result.filesize}
+${L.core.labels.fileType} : ${result.filetype}`.formatForm(),
 				message
 			);
 

@@ -2,16 +2,6 @@ import { getLocale, useLocale } from '../../helper/i18n/index.js';
 import { animeReleases } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
-const DAYS = {
-	Sunday: 'Minggu',
-	Monday: 'Senin',
-	Tuesday: 'Selasa',
-	Wednesday: 'Rabu',
-	Thursday: 'Kamis',
-	Friday: 'Jumat',
-	Saturday: 'Sabtu'
-};
-
 export default defineCommand({
 	name: 'animeschedule',
 	minifiedDescription: 'Anime Schedule',
@@ -22,27 +12,28 @@ export default defineCommand({
 	cooldown: 4,
 	limit: 5,
 	status: 'enable',
-	run: async ({ from, message, isGroup }, client) => {
-		const locale = await getLocale(from);
+	run: async ({ from, message, isGroup, sender }, client) => {
+		const locale = await getLocale(from, sender);
 		const L = useLocale(locale, 'common');
+		const La = useLocale(locale, 'anime');
 
 		if (isGroup) {
 			return client.reply(from, L.errors.privateOnly, message);
 		}
 
-		const text = 'Anime Releases'.formatHeaders();
+		const text = La.titles.animeReleases.formatHeaders();
 		const result = await animeReleases();
 
 		let index = 0;
 		let indexDay = 0;
 
-		const translatedText = Object.keys(result).map((v) => v.replace(v, DAYS[v]));
+		const translatedText = Object.keys(result).map((v) => La.labels.days[v] || v);
 
 		let capt = '';
 
 		for (const day in result) {
 			index === 0 ? (capt += `${text}\n\n`) : (capt += '\n\n');
-			capt += `> 📅 ${translatedText[indexDay]}${index === 0 ? ' (today 🌐)' : ''}\n\n`;
+			capt += `> 📅 ${translatedText[indexDay]}${index === 0 ? La.labels.today : ''}\n\n`;
 
 			for (let i = 0, anime = result[day]; i < result[day].length; i++) {
 				const time = Object.keys(anime[i])[0];
@@ -52,12 +43,12 @@ export default defineCommand({
 				for (const data of anime[i][time]) {
 					let tempCapt = '';
 
-					tempCapt += `Title : ${data.title}\n`;
-					tempCapt += 'note' in data ? `📌 Note : ${data.note}\n` : `Episode : ${data.episode}\n`;
-					tempCapt += `URL : ${data.link}\n`;
+					tempCapt += `${La.labels.fullTitle} : ${data.title}\n`;
+					tempCapt += 'note' in data ? `📌 ${La.labels.note} : ${data.note}\n` : `${La.labels.episode} : ${data.episode}\n`;
+					tempCapt += `${La.labels.url} : ${data.link}\n`;
 
 					if ('source' in data) {
-						tempCapt += `Source : ${data.source}\n`;
+						tempCapt += `${La.labels.source} : ${data.source}\n`;
 					}
 
 					capt += tempCapt.formatForm();

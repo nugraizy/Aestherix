@@ -3,7 +3,7 @@ import { BOT_NAME } from '../../core/constants.js';
 import dayjs from 'dayjs';
 
 import { Cache } from '../../helper/modules/cache.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { cmdId } from '../../helper/modules/prefix.js';
 import { color, delay, formatNumber, loggers, randomChar } from '../../utils/modules/index.js';
 import { Twitter } from '../../utils/twitter/index.js';
@@ -99,13 +99,13 @@ const sendTweetBatch = async (tweets, from, message, client) => {
 /**
  * Sends the "Next" prompt after a tweet batch.
  */
-const sendNextPrompt = async (sessionId, batchSize, from, client, prefix = '.') => {
+const sendNextPrompt = async (sessionId, batchSize, from, client, prefix = '.', locale, Lo) => {
 	const builder = new client.TemplateBuilder.Native();
 
 	await builder
 		.destination(from)
-		.body(`Sent ${batchSize} tweet(s) from your timeline.\nPress Next to load more.`)
-		.footer('Powered by ' + BOT_NAME)
+		.body(t(locale, 'owner.labels.sentBatch', [batchSize]))
+		.footer(t(locale, 'owner.labels.poweredBy', [BOT_NAME]))
 		.buttons(
 			builder.button.reply({
 				display: 'Next',
@@ -129,6 +129,7 @@ export default defineCommand({
 	async run({ from, query, prettyNumber, message, prefix }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Lo = useLocale(locale, 'owner');
 
 		if (query?.startsWith('next ')) {
 			const sessionId = query.slice(5);
@@ -164,7 +165,7 @@ export default defineCommand({
 			await sendTweetBatch(nextBatch, from, message, client);
 
 			if (cached.buffer.length || cached.cursor) {
-				await sendNextPrompt(sessionId, nextBatch.length, from, client, prefix);
+				await sendNextPrompt(sessionId, nextBatch.length, from, client, prefix, locale, Lo);
 			} else {
 				timelineSessions.delete(sessionId);
 			}
@@ -201,7 +202,7 @@ export default defineCommand({
 		await sendTweetBatch(batch, from, message, client);
 
 		if (cached.buffer.length || cached.cursor) {
-			await sendNextPrompt(sessionId, batch.length, from, client, prefix);
+			await sendNextPrompt(sessionId, batch.length, from, client, prefix, locale, Lo);
 		} else {
 			timelineSessions.delete(sessionId);
 		}

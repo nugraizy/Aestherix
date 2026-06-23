@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { removeDuplicatesArray } from '../../utils/modules/index.js';
 import { arq } from '../../utils/arq/index.js';
 import { defineCommand } from '../_define.js';
@@ -16,6 +16,7 @@ export default defineCommand({
 	async run({ query, from, message }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -38,7 +39,7 @@ export default defineCommand({
 				{
 					image: { url: result.result.url },
 					caption:
-						'Reddit'.formatHeaders() +
+						Ls.titles.reddit.formatHeaders() +
 						`\n\nAuthor : ${result.result.author}
 Title : ${result.result.title}`.formatForm()
 					// templateButtons: [

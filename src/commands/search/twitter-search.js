@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { BOT_NAME } from '../../core/constants.js';
 
 import dayjs from 'dayjs';
@@ -100,15 +100,16 @@ const sendTweetBatch = async (tweets, from, message, client) => {
  * Sends the "Next" prompt after a tweet batch.
  */
 const sendNextPrompt = async (sessionId, batchSize, searchQuery, from, client, ctx) => {
+	const Ls = useLocale(ctx.locale, 'search');
 	const builder = new client.TemplateBuilder.Native();
 
 	await builder
 		.destination(from)
-		.body(`Sent ${batchSize} result(s) for "${searchQuery}".\nPress Next to load more.`)
-		.footer('Powered by ' + BOT_NAME)
+		.body(t(ctx.locale, 'search.labels.sentResults', [batchSize, searchQuery]))
+		.footer(t(ctx.locale, 'core.footer.poweredBy', [BOT_NAME]))
 		.buttons(
 			builder.button.reply({
-				display: 'Next',
+				display: Ls.buttons.nextImage,
 				id: cmdId('twtsearch', `next ${sessionId}`, ctx)
 			})
 		)
@@ -128,6 +129,8 @@ export default defineCommand({
 	async run({ from, query, prettyNumber, message }, client, store, ctx) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
+		const searchCtx = { ...ctx, locale };
 
 		if (!query) {
 			return await client.reply(from, L.errors.queryRequired, message);
@@ -154,7 +157,7 @@ export default defineCommand({
 				cached.buffer.push(...nextPage.tweets);
 				cached.cursor = nextPage.cursor;
 
-				await nextWait.update(`Fetched ${nextPage.tweets.length} result(s).`);
+				await nextWait.update(t(locale, 'search.labels.fetchedResults', [nextPage.tweets.length]));
 			}
 
 			if (!cached.buffer.length) {
@@ -167,7 +170,7 @@ export default defineCommand({
 			await sendTweetBatch(nextBatch, from, message, client);
 
 			if (cached.buffer.length || cached.cursor) {
-				await sendNextPrompt(sessionId, nextBatch.length, cached.searchQuery, from, client, ctx);
+				await sendNextPrompt(sessionId, nextBatch.length, cached.searchQuery, from, client, searchCtx);
 			} else {
 				searchSessions.delete(sessionId);
 			}
@@ -182,11 +185,11 @@ export default defineCommand({
 		const result = await twitter.searchTweets(query, twitter.SearchFilter.Top);
 
 		if (result?.error) {
-			return await wait.update(`Error: ${result.error}`);
+			return await wait.update(t(locale, 'search.labels.errorPrefix', [result.error]));
 		}
 
 		if (!result.tweets.length) {
-			return await wait.update(`No tweets found for "${query}".`);
+			return await wait.update(t(locale, 'search.labels.noResults'));
 		}
 
 		const sessionId = randomChar('abcdefghijklmnopqrstuvwxyz0123456789', 8);
@@ -194,14 +197,14 @@ export default defineCommand({
 
 		searchSessions.set(sessionId, cached);
 
-		await wait.update(`Found ${cached.buffer.length} result(s) for "${query}".`);
+		await wait.update(t(locale, 'search.labels.foundResults', [cached.buffer.length]));
 
 		const batch = cached.buffer.splice(0, TWEETS_PER_PAGE);
 
 		await sendTweetBatch(batch, from, message, client);
 
 		if (cached.buffer.length || cached.cursor) {
-			await sendNextPrompt(sessionId, batch.length, query, from, client, ctx);
+			await sendNextPrompt(sessionId, batch.length, query, from, client, searchCtx);
 		} else {
 			searchSessions.delete(sessionId);
 		}

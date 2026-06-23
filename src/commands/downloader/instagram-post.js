@@ -16,9 +16,10 @@ export default defineCommand({
 	cooldown: 10,
 	limit: 9,
 	status: 'enable',
-	async run({ from, query, prettyNumber, message, bodyQuoted, isOwner, prefix }, client) {
+	async run({ from, query, prettyNumber, message, sender, bodyQuoted, isOwner, prefix }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const DL = useLocale(locale, 'downloader');
 
 		if (!configuration.isInstagramInitiated) {
 			return await client.reply(
@@ -79,12 +80,12 @@ export default defineCommand({
 				continue;
 			}
 
-			let capt = 'Instagram Post'.formatHeaders();
+		let capt = DL.titles.igPost.formatHeaders();
 
-			capt += `\n\nUsername : ${posts[data].username}\n`;
-			capt += `Fullname : ${posts[data].fullName}\n`;
-			capt += `Privacy : ${posts[data].isPrivate ? 'Private' : 'Public'}\n`;
-			capt += `Verifies : ${posts[data].isVerified ? 'Verified' : 'Not Verified'}\n`;
+		capt += `\n\nUsername : ${posts[data].username}\n`;
+		capt += `Fullname : ${posts[data].fullName}\n`;
+		capt += `${DL.labels.privacy} : ${posts[data].isPrivate ? 'Private' : 'Public'}\n`;
+		capt += `${DL.labels.verifies} : ${posts[data].isVerified ? 'Verified' : 'Not Verified'}\n`;
 			capt += `📅 ${dayjs(posts[data].takenAt * 1000).format('HH:mm:ss DD/MM/YYYY')}\n`;
 			capt += `👍 ${formatNumber(posts[data].likeCount)} 💬 ${formatNumber(posts[data].commentCount)}\n\n`;
 
@@ -113,7 +114,7 @@ export default defineCommand({
 			success++;
 		}
 
-		await wait.update(`Command Finished. With total ${success} success, and ${error} fail.`);
+		await wait.update(t(locale, 'common.core.commands.downloadBatchFinished', [success, error]));
 
 		loggers.info(`${color('Downloaded Instagram Post', 'pink')} for ${color(prettyNumber, 'lilac')}`);
 	}

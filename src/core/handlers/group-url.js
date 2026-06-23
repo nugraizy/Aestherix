@@ -38,17 +38,15 @@ const antiGroupLinkHandler = async (
 		if (!isBotAdmin) {
 			const locale = await getLocale(from);
 			const L = useLocale(locale, 'common');
+
 			return await client.reply(from, L.core.errors.antiUrlNotAdmin, message);
 		}
 
 		if (!isBanned) {
 			const locale = await getLocale(from);
 			const L = useLocale(locale, 'common');
-			await client.reply(
-				from,
-				L.core.errors.antiUrlBanned,
-				message
-			);
+
+			await client.reply(from, L.core.errors.antiUrlBanned, message);
 			await client.send(from, {
 				delete: {
 					remoteJid: from,
@@ -64,6 +62,7 @@ const antiGroupLinkHandler = async (
 		} else {
 			const locale = await getLocale(from);
 			const L = useLocale(locale, 'common');
+
 			await client.reply(from, L.core.errors.antiUrlBanned, message);
 			await client.groupParticipantsUpdate(from, [sender], 'remove');
 		}

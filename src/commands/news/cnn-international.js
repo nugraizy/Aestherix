@@ -1,5 +1,5 @@
 import { cmdId } from '../../helper/modules/prefix.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { cnninternational, fetchBUFFER } from '../../utils/index.js';
 import { defineCommand } from '../_define.js';
 
@@ -16,16 +16,17 @@ export default defineCommand({
 	async run({ query, from, message, args, cmd }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ln = useLocale(locale, 'news');
 
 		if (args[1] === 'next' || args[1] === 'prev') {
 			const data = JSON.parse(JSON.parse(JSON.stringify(args.slice(3).join(' '))));
 			const index = data.findIndex((v) => v.image === args[2] || v.link === args[2]);
 
-			let caption = 'CNN International'.formatHeaders();
+			let caption = Ln.titles.cnnInternational.formatHeaders();
 
-			caption += `\n\nTitle : ${data[index].title}\n`;
-			caption += `Published : ${data[index].published}\n`;
-			caption += `Content : ${data[index].body}\n`;
+			caption += `\n\n${L.core.caption.title} : ${data[index].title}\n`;
+			caption += `${Ln.labels.published} : ${data[index].published}\n`;
+			caption += `${Ln.labels.content} : ${data[index].body}\n`;
 
 			return await client.send(
 				from,
@@ -33,13 +34,13 @@ export default defineCommand({
 					...(data[index].image !== undefined ? { image: await fetchBUFFER(data[index].image), caption } : { text: caption }),
 					templateButtons: [
 						data[index].image !== undefined
-							? { urlButton: { displayText: 'Image Source', url: args[1] === 'next' ? data[index].image : data[index].image } }
+							? { urlButton: { displayText: Ln.labels.imageSource, url: args[1] === 'next' ? data[index].image : data[index].image } }
 							: {},
-						{ urlButton: { displayText: 'Article Source', url: args[1] === 'next' ? data[index].link : data[index].link } },
+						{ urlButton: { displayText: Ln.labels.articleSource, url: args[1] === 'next' ? data[index].link : data[index].link } },
 						index + 1 !== data.length
 							? {
 									quickReplyButton: {
-										displayText: 'Next Article',
+										displayText: Ln.labels.nextArticle,
 										id: cmdId(cmd, `next ${data[index + 1].image ?? data[index + 1].link} ${JSON.stringify(data)}`)
 									}
 								}
@@ -47,13 +48,13 @@ export default defineCommand({
 						index !== 0
 							? {
 									quickReplyButton: {
-										displayText: 'Previous Article',
+										displayText: Ln.labels.previousArticle,
 										id: cmdId(cmd, `prev ${data[index - 1].image ?? data[index + 1].link} ${JSON.stringify(data)}`)
 									}
 								}
 							: {}
 					],
-					footer: `${index + 1}/${data.length}\nPowered by Hidden Finder`
+					footer: t(locale, 'news.footer.pageCounter', [index + 1, data.length])
 				},
 				{ quoted: message }
 			);
@@ -69,14 +70,14 @@ export default defineCommand({
 			return await client.reply(from, data.error, message);
 		}
 
-		let caption = 'CNN International'.formatHeaders();
+		let caption = Ln.titles.cnnInternational.formatHeaders();
 
-		caption += `\n\nTitle : ${data[0].title}\n`;
-		caption += `Published : ${data[0].published}\n`;
-		caption += `Content : ${data[0].body}\n`;
+		caption += `\n\n${L.core.caption.title} : ${data[0].title}\n`;
+		caption += `${Ln.labels.published} : ${data[0].published}\n`;
+		caption += `${Ln.labels.content} : ${data[0].body}\n`;
 
 		caption += `\n${data
-			.map(({ title, body, published }) => `Title : ${title}\nPublished : ${published}\nContent : ${body}`)
+			.map(({ title, body, published }) => `${L.core.caption.title} : ${title}\n${Ln.labels.published} : ${published}\n${Ln.labels.content} : ${body}`)
 			.join('\n\n')}`.trimEnd();
 
 		await client.send(
@@ -86,18 +87,18 @@ export default defineCommand({
 					? { image: await fetchBUFFER(data[0].image), caption: caption.formatForm() }
 					: { text: caption.formatForm() }),
 				templateButtons: [
-					data[0].image !== undefined ? { urlButton: { displayText: 'Image Source', url: data[0].image } } : {},
-					{ urlButton: { displayText: 'Article Source', url: data[0].link } },
+					data[0].image !== undefined ? { urlButton: { displayText: Ln.labels.imageSource, url: data[0].image } } : {},
+					{ urlButton: { displayText: Ln.labels.articleSource, url: data[0].link } },
 					data.length !== 1
 						? {
 								quickReplyButton: {
-									displayText: 'Next Article',
+									displayText: Ln.labels.nextArticle,
 									id: cmdId(cmd, `next ${data[1].image ?? data[1].link} ${JSON.stringify(data)}`)
 								}
 							}
 						: {}
 				],
-				footer: `1/${data.length}\nPowered by Hidden Finder`
+				footer: t(locale, 'news.footer.pageCounter', [1, data.length])
 			},
 			{ quoted: message }
 		);

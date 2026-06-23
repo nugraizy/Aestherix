@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
@@ -29,15 +29,16 @@ function sendBatch(state, from, message, client, ctx) {
 	const start = currentBatch * perBatch;
 	const batch = items.slice(start, start + perBatch);
 	const hasMore = start + batch.length < items.length;
-	const info = `Playlist : ${title}\nVideos : ${items.length}\nShowing : ${start + 1}–${start + batch.length}`;
-	const body = `${'YouTube Playlist'.formatHeaders()}\n\n${info.formatForm()}\n\nSelect a video to download.`;
+	const Ls = useLocale(ctx.locale, 'search');
+	const info = `${Ls.labels.playlist} : ${title}\n${Ls.labels.videos} : ${items.length}\n${t(ctx.locale, 'search.labels.showing', [start + 1, start + batch.length])}`;
+	const body = `${Ls.titles.youtubePlaylist.formatHeaders()}\n\n${info.formatForm()}\n\n${Ls.labels.selectVideo}`;
 
 	const builder = new client.TemplateBuilder.Native();
 
 	builder
 		.destination(from)
 		.body(body)
-		.footer('Powered by ' + BOT_NAME);
+		.footer(t(ctx.locale, 'core.footer.poweredBy', [BOT_NAME]));
 
 	const buttons = batch.map((entry, index) => {
 		const label = `${start + index + 1}. ${entry.title.slice(0, 100)}  ${formatDuration(entry.durationSeconds)}`;
@@ -46,7 +47,7 @@ function sendBatch(state, from, message, client, ctx) {
 	});
 
 	if (hasMore) {
-		buttons.push(builder.button.reply({ display: '➡️ Next', id: cmdId('ytpl', 'next ' + sessionId, ctx) }));
+		buttons.push(builder.button.reply({ display: Ls.buttons.nextImage, id: cmdId('ytpl', 'next ' + sessionId, ctx) }));
 	}
 
 	builder.buttons(...buttons);
@@ -67,12 +68,13 @@ export default defineCommand({
 	async run({ from, query, message, prefix, device }, client) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const Ls = useLocale(locale, 'search');
 
 		if (!query) {
 			return await client.reply(from, L.errors.playlistUrlRequired, message);
 		}
 
-		const ctx = { prefix, device };
+		const ctx = { prefix, device, locale };
 
 		if (query.startsWith('next ')) {
 			const cached = playlistSessions.get(query.slice(5));
@@ -98,11 +100,11 @@ export default defineCommand({
 		try {
 			playlist = await youtube.playlist(query);
 		} catch {
-			return await wait.update('Invalid playlist URL or playlist not found.');
+			return await wait.update(Ls.labels.invalidPlaylist);
 		}
 
 		if (!playlist.videos.length) {
-			return await wait.update('No videos found in this playlist.');
+			return await wait.update(Ls.labels.noVideos);
 		}
 
 		const sessionId = randomChar('abcdefghijklmnopqrstuvwxyz0123456789', 8);
@@ -110,12 +112,12 @@ export default defineCommand({
 			items: playlist.videos,
 			currentBatch: 0,
 			sessionId,
-			title: playlist.title || 'YouTube Playlist'
+			title: playlist.title || Ls.titles.youtubePlaylist
 		};
 
 		playlistSessions.set(sessionId, state);
 
-		await wait.update(`Found ${playlist.videos.length} video(s).`);
+		await wait.update(t(locale, 'search.labels.foundVideos', [playlist.videos.length]));
 
 		await sendBatch(state, from, message, client, ctx);
 	}

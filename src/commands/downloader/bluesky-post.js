@@ -16,6 +16,7 @@ export default defineCommand({
 	run: async ({ from, query, message, prettyNumber }, client) => {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
+		const DL = useLocale(locale, 'downloader');
 
 		if (!query) {
 			return await client.reply(from, L.errors.noQuery, message);
@@ -45,7 +46,7 @@ export default defineCommand({
 
 			const media = await bluesky.getPost(url);
 
-			let caption = 'Bluesky Downloader'.formatHeaders() + '\n\n';
+			let caption = DL.titles.bluesky.formatHeaders() + '\n\n';
 
 			caption += `Fullname : ${media.author.displayName}\n`;
 			caption += `Username : ${media.author.username}`;

@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { Blackjack } from '../../utils/games/index.js';
 import { loggers, color } from '../../utils/modules/index.js';
 import { getPrefix } from '../../helper/modules/prefix.js';
@@ -47,7 +47,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${B.game.title}\n\n${B.game.created.replace('{0}', playerMention(sender))}\n\n${B.game.players}: 1\n\n${B.game.joinPrompt}\n${B.game.startPrompt}`,
+					text: `${B.game.title}\n\n${t(locale, 'blackjack.game.created', { prefix, 0: playerMention(sender) })}\n\n${B.game.players}: 1\n\n${B.game.joinPrompt}\n${B.game.startPrompt}`,
 					mentions: [sender]
 				},
 				{ quoted: message }
@@ -71,7 +71,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${B.game.title}\n\n${B.game.joined.replace('{0}', playerMention(sender))}\n\n${B.game.players}: ${game.players.size}\n${playerList}\n\n${B.game.joinPrompt}\n${B.game.startPrompt}`,
+					text: `${B.game.title}\n\n${t(locale, 'blackjack.game.joined', { prefix, 0: playerMention(sender) })}\n\n${B.game.players}: ${game.players.size}\n${playerList}\n\n${B.game.joinPrompt}\n${B.game.startPrompt}`,
 					mentions
 				},
 				{ quoted: message }
@@ -98,7 +98,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${B.game.title}\n\n${B.game.dealerHand}: ${dealerCard} ?\n\n${B.game.turn.replace('{0}', playerMention(result.currentPlayer))}`,
+					text: `${B.game.title}\n\n${B.game.dealerHand}: ${dealerCard} ?\n\n${t(locale, 'blackjack.game.turn', { prefix, 0: playerMention(result.currentPlayer) })}`,
 					mentions: [result.currentPlayer]
 				}
 			);
@@ -119,7 +119,7 @@ export default defineCommand({
 				await client.send(
 					from,
 					{
-						text: `${B.game.bust}\n\n${B.game.yourHand}: ${result.hand}\n${B.game.value}: ${result.value}\n\n${B.game.turn.replace('{0}', playerMention(result.nextPlayer))}`,
+						text: `${B.game.bust}\n\n${B.game.yourHand}: ${result.hand}\n${B.game.value}: ${result.value}\n\n${t(locale, 'blackjack.game.turn', { prefix, 0: playerMention(result.nextPlayer) })}`,
 						mentions: [result.nextPlayer]
 					}
 				);
@@ -127,7 +127,7 @@ export default defineCommand({
 				await client.send(
 					from,
 					{
-						text: `${B.game.blackjack}\n\n${B.game.yourHand}: ${result.hand}\n${B.game.value}: ${result.value}\n\n${B.game.turn.replace('{0}', playerMention(result.nextPlayer))}`,
+						text: `${B.game.blackjack}\n\n${B.game.yourHand}: ${result.hand}\n${B.game.value}: ${result.value}\n\n${t(locale, 'blackjack.game.turn', { prefix, 0: playerMention(result.nextPlayer) })}`,
 						mentions: [result.nextPlayer]
 					}
 				);
@@ -151,7 +151,7 @@ export default defineCommand({
 				await client.send(
 					from,
 					{
-						text: `${B.game.title}\n\n${B.game.dealerHand}: ${endResult.dealerHand} (${endResult.dealerValue})\n\n${resultsText}\n\n${B.game.duration.replace('{0}', endResult.duration)}`
+						text: `${B.game.title}\n\n${B.game.dealerHand}: ${endResult.dealerHand} (${endResult.dealerValue})\n\n${resultsText}\n\n${t(locale, 'blackjack.game.duration', { prefix, 0: endResult.duration })}`
 					}
 				);
 			}
@@ -171,7 +171,7 @@ export default defineCommand({
 			await client.send(
 				from,
 				{
-					text: `${B.game.stand}\n\n${B.game.yourHand}: ${result.hand}\n${B.game.value}: ${result.value}\n\n${B.game.turn.replace('{0}', playerMention(result.nextPlayer))}`,
+					text: `${B.game.stand}\n\n${B.game.yourHand}: ${result.hand}\n${B.game.value}: ${result.value}\n\n${t(locale, 'blackjack.game.turn', { prefix, 0: playerMention(result.nextPlayer) })}`,
 					mentions: [result.nextPlayer]
 				}
 			);
@@ -188,7 +188,7 @@ export default defineCommand({
 				await client.send(
 					from,
 					{
-						text: `${B.game.title}\n\n${B.game.dealerHand}: ${endResult.dealerHand} (${endResult.dealerValue})\n\n${resultsText}\n\n${B.game.duration.replace('{0}', endResult.duration)}`
+						text: `${B.game.title}\n\n${B.game.dealerHand}: ${endResult.dealerHand} (${endResult.dealerValue})\n\n${resultsText}\n\n${t(locale, 'blackjack.game.duration', { prefix, 0: endResult.duration })}`
 					}
 				);
 			}
