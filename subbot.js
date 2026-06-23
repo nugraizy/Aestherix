@@ -25,7 +25,7 @@ const moduleURL = new URL(import.meta.url);
 global.__dirname = platform === 'win32' ? path.dirname(moduleURL.pathname).slice(1) : path.dirname(moduleURL.pathname);
 
 import { Boom } from '@hapi/boom';
-import { DisconnectReason, isJidGroup } from 'baileys';
+import { Browsers, DisconnectReason, isJidGroup } from 'baileys';
 import P from 'pino';
 
 import { Auth } from './src/core/auth.js';
@@ -80,6 +80,7 @@ await auth.initialize({ logger: P({ level: 'fatal' }) });
 const clientSocket = new ClientSocket(auth, {
 	role: 'sub',
 	flags,
+	browser: Browsers.android('14'),
 	cachedGroupMetadata: (jid) => (isJidGroup(jid) ? configuration.groups.metadata.get(jid) : {})
 });
 
