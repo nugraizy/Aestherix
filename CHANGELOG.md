@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.17.0」2026-06-23
+
+## Added
+
+- i18n namespaces for downloader, search, anime, converter, look_up, news, owner, helper, al-quran with en/id locale files ([`a42e77fc`](https://github.com/nugraizy/aestherix/commit/a42e77fc))
+- Shared locale keys for buttons, footer, labels across all commands ([`a42e77fc`](https://github.com/nugraizy/aestherix/commit/a42e77fc))
+- TypeScript types for all new i18n namespaces in `types.d.ts` ([`a42e77fc`](https://github.com/nugraizy/aestherix/commit/a42e77fc))
+- `partnerFound` key for anonymous search per-partner locale ([`a42e77fc`](https://github.com/nugraizy/aestherix/commit/a42e77fc))
+- `aiChatStarted` and `aiChatStopped` keys for char-ai command ([`a42e77fc`](https://github.com/nugraizy/aestherix/commit/a42e77fc))
+- `example` key in `core.help` section ([`a42e77fc`](https://github.com/nugraizy/aestherix/commit/a42e77fc))
+- Anime locale keys for `type`, `status`, `note`, `trackingInformation`, `animeInformation`, `days` ([`a42e77fc`](https://github.com/nugraizy/aestherix/commit/a42e77fc))
+
+## Changed
+
+- Refactor ~140 command files to use i18n locale keys instead of hardcoded strings ([`a42e77fc`](https://github.com/nugraizy/aestherix/commit/a42e77fc))
+- Use `t()` with `{N}` interpolation for parametrized strings, `L.xxx` for static strings ([`a42e77fc`](https://github.com/nugraizy/aestherix/commit/a42e77fc))
+- Move ` : ` separator from locale values to usage sites for cleaner labels ([`a42e77fc`](https://github.com/nugraizy/aestherix/commit/a42e77fc))
+- Game files use `t()` instead of `L.game.xxx.replace('{0}', ...)` ([`a42e77fc`](https://github.com/nugraizy/aestherix/commit/a42e77fc))
+- `core.dashboard.poweredBy` and `core.deleted.providedBy` now use `{0}` interpolation ([`a42e77fc`](https://github.com/nugraizy/aestherix/commit/a42e77fc))
+- Anonymous search uses per-partner locale for "partner found" message ([`a42e77fc`](https://github.com/nugraizy/aestherix/commit/a42e77fc))
+- Remove hardcoded `DAYS` constant from anime-schedule, use locale `days` object ([`a42e77fc`](https://github.com/nugraizy/aestherix/commit/a42e77fc))
+
+## Fixed
+
+- Sub-bot missing browser config causing view-once issues ([`63d42d60`](https://github.com/nugraizy/aestherix/commit/63d42d60))
+- VoIP lint warnings in index.js and wasm-engine.js ([`f754d3f0`](https://github.com/nugraizy/aestherix/commit/f754d3f0))
+- VoIP relay.js lint errors ([`a4e7abf6`](https://github.com/nugraizy/aestherix/commit/a4e7abf6))
+- Anonymous skip/stop using hardcoded duplicate wait message ([`a42e77fc`](https://github.com/nugraizy/aestherix/commit/a42e77fc))
+
+## Removed
+
+- VoIP backup files (superseded by active voip stack) ([`a4e7abf6`](https://github.com/nugraizy/aestherix/commit/a4e7abf6))
+
 # 「7.16.2」2026-06-21
 
 ## Fixed
