@@ -29,6 +29,7 @@ const offlineHandler = async (client, { isGroup, from, sender, message }) => {
 			await fs.writeJSON(OFFLINE_DB_PATH, data, { spaces: 2 });
 			const locale = await getLocale(from);
 			const L = useLocale(locale, 'common');
+
 			await client.reply(from, L.core.errors.ownerOffline, message);
 		}
 	} catch (err) {

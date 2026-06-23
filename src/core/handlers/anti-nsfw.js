@@ -70,6 +70,7 @@ const processNsfwImage = async ({ from, isAdmin, isBotAdmin, message, mediaData,
 		} else {
 			const locale = await getLocale(from);
 			const L = useLocale(locale, 'common');
+
 			await client.reply(from, L.core.errors.antiNsfwBanned, message);
 			await delay(350);
 			await client.groupParticipantsUpdate(from, [sender], 'remove');
