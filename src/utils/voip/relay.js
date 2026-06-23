@@ -959,8 +959,8 @@ export class RelayTransport {
 				typeof selectedPair?.currentRoundTripTime === 'number'
 					? selectedPair.currentRoundTripTime
 					: typeof selectedPair?.totalRoundTripTime === 'number' &&
-						  typeof selectedPair?.responsesReceived === 'number' &&
-						  selectedPair.responsesReceived > 0
+						  typeof selectedPair?.responsesReceived === 'number' && // eslint-disable-line
+						  selectedPair.responsesReceived > 0 // eslint-disable-line
 						? selectedPair.totalRoundTripTime / selectedPair.responsesReceived
 						: null;
 
