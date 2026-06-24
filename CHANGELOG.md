@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.17.1」2026-06-25
+
+## Added
+
+- Plugin system with schema validation and lifecycle hooks (beforeCommand, afterCommand, onError) ([`1c716615`](https://github.com/nugraizy/aestherix/commit/1c716615))
+- MiddlewareChain class for sequential middleware execution ([`1c716615`](https://github.com/nugraizy/aestherix/commit/1c716615))
+- Command description locale files for all commands (en/id) ([`1843bb3c`](https://github.com/nugraizy/aestherix/commit/1843bb3c))
+- Missing locale keys: `core.labels.song/of/cover`, `downloader.labels.header`, `search.labels.foundFetchingChapters/noChaptersForTitle/chaptersFoundFor` ([`1843bb3c`](https://github.com/nugraizy/aestherix/commit/1843bb3c))
+
+## Changed
+
+- Extract middleware into `src/middleware/` module ([`1c716615`](https://github.com/nugraizy/aestherix/commit/1c716615))
+- Convert `.replace('{0}', ...)` chains to `t()` with interpolation arrays across 32 files ([`1843bb3c`](https://github.com/nugraizy/aestherix/commit/1843bb3c))
+- Convert `t()` calls with no interpolation to `useLocale` proxy access across 11 files ([`1843bb3c`](https://github.com/nugraizy/aestherix/commit/1843bb3c))
+- Protect werewolf help command names from translation via `{N}` placeholders ([`1843bb3c`](https://github.com/nugraizy/aestherix/commit/1843bb3c))
+
+## Fixed
+
+- `handleError` locale keys using wrong path (`common.core.error.*` → `common.core.errorReport.*`) ([`1843bb3c`](https://github.com/nugraizy/aestherix/commit/1843bb3c))
+- Command timeout falsely firing during `waitForInput` by making timeout aware of pending input ([`1843bb3c`](https://github.com/nugraizy/aestherix/commit/1843bb3c))
+- Duplicate `core.errors` block in common locale files overwriting framework error keys ([`1843bb3c`](https://github.com/nugraizy/aestherix/commit/1843bb3c))
+- `common.labels.yes/no` → `common.core.labels.yes/no` in trace-moe command ([`1843bb3c`](https://github.com/nugraizy/aestherix/commit/1843bb3c))
+
 # 「7.17.0」2026-06-23
 
 ## Added
