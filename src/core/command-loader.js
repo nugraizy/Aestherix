@@ -31,8 +31,16 @@ const getAgentLanguage = () => {
 
 export const COMMAND_SCHEMA = object({
 	name: string().required(),
+	/**
+	 * @deprecated Use i18n `commands.<name>.minified` instead. Kept as fallback.
+	 */
 	minifiedDescription: string().optional().default('This is minified description'),
+	/**
+	 * @deprecated Use i18n `commands.<name>.description` instead. Kept as fallback.
+	 */
 	description: string().optional(),
+	descriptionKey: string().optional(),
+	descriptionArgs: array(string()).default([]).optional(),
 	category: string()
 		.oneOf([
 			'AI',

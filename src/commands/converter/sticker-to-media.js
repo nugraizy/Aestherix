@@ -46,9 +46,10 @@ export default defineCommand({
 	limit: 1,
 	status: 'enable',
 	async run(
-		{ isQuotedSticker, from, message, mediaData, prettyNumber, waitForInput, sender, shouldSkipCheck },
+		{ isQuotedSticker, from, message, mediaData, prettyNumber, waitForInput, sender },
 		client,
-		store
+		store,
+		shouldSkipCheck
 	) {
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
@@ -102,8 +103,10 @@ export default defineCommand({
 			timeInSecond: 10
 		});
 
-		if (!wait.timeout) {
-			await this.run({ ...(await Context.from(wait.message, client, store)), shouldSkipCheck: true }, client, store);
+		if (!wait.timeout && wait.message) {
+			const ctx = await Context.from(wait.message, client, store);
+
+			await this.run(ctx, client, store, true);
 		}
 	}
 });

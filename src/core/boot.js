@@ -10,6 +10,7 @@ import { refreshDashboardCommandCatalog } from '../../dashboard/server/monitor.j
 import configuration from '../helper/config/connect.js';
 import prisma from '../helper/database/prisma.js';
 import '../i18n/index.js';
+import { loadLocalesFromDB } from '../helper/i18n/index.js';
 import { color, loggers } from '../utils/modules/index.js';
 import { autoReplyManager } from '../helper/auto-reply.js';
 import { pollManager } from '../helper/poll-manager.js';
@@ -28,6 +29,7 @@ import { CommandLoader } from './command-loader.js';
 import { refreshPrefixCache } from './context.js';
 import { EventHandler } from './event-handler.js';
 import { manager } from './manager.js';
+import { PluginLoader } from './plugin-loader.js';
 import { MqttBridge } from './mqtt.js';
 import { IS_PM2, sendToPm2SubBots, startPm2SubBot } from './pm2-helpers.js';
 import { Router } from './router.js';
@@ -312,6 +314,12 @@ async function onConnected({ clientSocket, commandLoader, router, mqtt, store, w
 		configuration.registry.aliases = commandLoader.aliases;
 	}
 
+	const pluginLoader = new PluginLoader(configuration);
+
+	await pluginLoader.load();
+	router.commands = configuration.registry.commands;
+	router.aliases = configuration.registry.aliases;
+
 	syncPrefixToRouter(router);
 
 	await Promise.all([
@@ -362,6 +370,7 @@ async function onConnected({ clientSocket, commandLoader, router, mqtt, store, w
 	slowModeManager.init();
 	moderationAudit.init();
 	templateManager.init();
+	loadLocalesFromDB().catch(() => {});
 	mqtt.setClient(socket);
 	mqtt.bindMessageHandler();
 

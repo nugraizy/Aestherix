@@ -6,6 +6,7 @@ import configuration from '../helper/config/connect.js';
 import { getBannedUsers } from '../helper/database/adapters/user.js';
 import prisma from '../helper/database/prisma.js';
 import { checkJSON, pushDefaultSettings, updateSettings } from '../helper/groups/settings/index.js';
+import { getLocaleSync } from '../helper/i18n/index.js';
 import {
 	extractBody,
 	extractMentionedJid,
@@ -250,7 +251,7 @@ export class Context {
 		return this.#memo('from', () => this.#raw?.key?.remoteJidAlt || this.#raw?.key?.remoteJid || this.#raw?.from);
 	}
 	get isGroup() {
-		return this.#memo('isGroup', () => this.from.endsWith('@g.us'));
+		return this.#memo('isGroup', () => this.from?.endsWith('@g.us') ?? false);
 	}
 	get isFromMe() {
 		return this.#memo('isFromMe', () => Boolean(this.#raw?.key?.fromMe));
@@ -262,7 +263,7 @@ export class Context {
 		);
 	}
 	get locale() {
-		return this.#memo('locale', () => this.from?.split('@')[0] ?? 'id');
+		return this.#memo('locale', () => getLocaleSync(this.from, this.sender) || configuration.settings?.locale || 'id');
 	}
 	get sender() {
 		return this.#memo('sender', () => {

@@ -20,8 +20,12 @@ type Category =
 
 export type CommandProps = {
 	name: string;
+	/** @deprecated Use i18n `commands.<name>.minified` instead. Kept as fallback. */
 	minifiedDescription?: string;
+	/** @deprecated Use i18n `commands.<name>.description` instead. Kept as fallback. */
 	description?: string;
+	descriptionKey?: string;
+	descriptionArgs?: string[];
 	category: Category;
 	usage: string;
 	aliases?: string[];

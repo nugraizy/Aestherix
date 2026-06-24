@@ -365,11 +365,43 @@ export const useLocale = (locale, namespace, vars) => {
 };
 
 /**
+ * Synchronous locale lookup — checks memory caches only, no DB.
+ * Returns `null` if not cached (caller should fall back to default).
+ *
+ * @param {string} roomId - Room/group JID
+ * @param {string} [userId] - User JID
+ * @returns {string|null} ISO locale code, or null if not cached
+ */
+export const getLocaleSync = (roomId, userId) => {
+	if (roomId) {
+		const roomCached = localeByRoom.get(roomId);
+
+		if (roomCached) {
+			return roomCached;
+		}
+	}
+
+	const effectiveUserId = userId || roomId;
+
+	if (effectiveUserId) {
+		const userCached = localeByUser.get(effectiveUserId);
+
+		if (userCached) {
+			return userCached;
+		}
+	}
+
+	return null;
+};
+
+/**
  * Warm the locale cache from DB on boot. Call this once at startup.
  *
  * @returns {Promise<number>} Number of locales loaded
  */
 export const loadLocalesFromDB = async () => {
+	let count = 0;
+
 	try {
 		const rows = await prisma.settingsManager.findMany({
 			where: { locale: { not: null } },
@@ -382,10 +414,25 @@ export const loadLocalesFromDB = async () => {
 			}
 		}
 
-		return rows.length;
-	} catch {
-		return 0;
-	}
+		count += rows.length;
+	} catch { /* DB unavailable */ }
+
+	try {
+		const userRows = await prisma.userLocale.findMany({
+			where: { locale: { not: null } },
+			select: { jid: true, locale: true }
+		});
+
+		for (const row of userRows) {
+			if (row.locale) {
+				localeByUser.set(row.jid, row.locale);
+			}
+		}
+
+		count += userRows.length;
+	} catch { /* DB unavailable */ }
+
+	return count;
 };
 
 /**

@@ -84,6 +84,14 @@ export class Configuration {
 	charAI = new Cache();
 	userLimit = new Cache();
 
+	plugins = new Map();
+	pluginHooks = {
+		beforeCommand: [],
+		afterCommand: [],
+		onError: []
+	};
+	middlewareChain = null;
+
 	mqtt = null;
 
 	/** @type {import('../utils/voip/index.js').VoipClient | null} */
