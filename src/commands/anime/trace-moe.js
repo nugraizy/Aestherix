@@ -71,7 +71,7 @@ ${La.labels.similarity} : ${args.similarity}%
 ${La.labels.ep} : ${args.episode}
 ${La.labels.from} : ${String(args.from).toReadAble()}
 ${La.labels.to} : ${String(args.to).toReadAble()}
-    
+
 \`\`\`${La.labels.animeInformation}\`\`\`\n
 ${La.labels.type} : ${type.toLowerCase().capitalize()} (${format})
 ${La.labels.source} : ${source.toLowerCase().capitalize()}
@@ -81,7 +81,7 @@ ${La.labels.epDuration} : ${duration}
 ${La.labels.startsAiring} : ${sDay} ${sMonth} ${sYear}
 ${La.labels.endsAiring} : ${eDay} ${eMonth} ${eYear}
 ${La.labels.genres} : ${genres.join(', ')}
-${La.labels.isAdult} : ${isAdult ? t(locale, 'common.labels.yes') : t(locale, 'common.labels.no')}
+${La.labels.isAdult} : ${isAdult ? L.core.labels.yes : L.core.labels.no}
 ${La.labels.studios} : ${studios.edges
 				.map((v) => {
 					return v.node.name;
@@ -128,7 +128,7 @@ ${
 		const result = await traceMoe(media);
 
 		if (result?.error) {
-		if (isMediaImage && extractMediaData) {
+			if (isMediaImage && extractMediaData) {
 				await fs.unlink(media).catch(() => {});
 			}
 
@@ -174,7 +174,7 @@ ${La.labels.epDuration} : ${duration}
 ${La.labels.startsAiring} : ${sDay} ${sMonth} ${sYear}
 ${La.labels.endsAiring} : ${eDay} ${eMonth} ${eYear}
 ${La.labels.genres} : ${genres.join(', ')}
-${La.labels.isAdult} : ${isAdult ? t(locale, 'common.labels.yes') : t(locale, 'common.labels.no')}
+${La.labels.isAdult} : ${isAdult ? L.core.labels.yes : L.core.labels.no}
 ${La.labels.studios} : ${studios.edges
 			.map((v) => {
 				return v.node.name;

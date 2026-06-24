@@ -1,5 +1,5 @@
 import { getAutomodRules, setAutomodRules } from '../../helper/groups/settings/group-settings.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { getPrefix } from '../../helper/modules/prefix.js';
 import { defineCommand } from '../_define.js';
 
@@ -144,7 +144,7 @@ export default defineCommand({
 			rule.enabled = !rule.enabled;
 			await setAutomodRules(from, rules);
 
-			return await client.reply(from, rule.enabled ? L.moderation.enabled.replace('{0}', id) : L.moderation.disabled.replace('{0}', id), message);
+			return await client.reply(from, rule.enabled ? t(locale, 'common.moderation.enabled', [id]) : t(locale, 'common.moderation.disabled', [id]), message);
 		}
 
 		await client.reply(from, `Unknown subcommand: ${sub}. Use "help" for usage.`, message);

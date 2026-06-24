@@ -87,13 +87,13 @@ ${t(locale, 'converter.labels.useModel', [cmd, randomize(numbers)])}`;
 			if (!isParam) {
 				buttons.push({
 					buttonId: cmdId(cmd, 'next ' + (index + 1) + ' -model'),
-					buttonText: { displayText: t(locale, 'common.core.buttons.next') },
+					buttonText: { displayText: L.core.buttons.next },
 					type: 1
 				});
 			} else if (isParam && splitData[index + 1] !== undefined) {
 				buttons.push({
 					buttonId: cmdId(cmd, 'next ' + (index + 1) + ' -model'),
-					buttonText: { displayText: t(locale, 'common.core.buttons.next') },
+					buttonText: { displayText: L.core.buttons.next },
 					type: 1
 				});
 			}
@@ -101,7 +101,7 @@ ${t(locale, 'converter.labels.useModel', [cmd, randomize(numbers)])}`;
 			if (isParam && index !== 0) {
 				buttons.push({
 					buttonId: cmdId(cmd, 'prev ' + (index - 1) + ' -model'),
-					buttonText: { displayText: t(locale, 'common.core.buttons.previous') },
+					buttonText: { displayText: L.core.buttons.previous },
 					type: 1
 				});
 			}

@@ -22,6 +22,7 @@ export default /** @type {const} */ ({
 		deviantArt: 'Deviant Art'
 	},
 	labels: {
+		header: 'List',
 		verified: 'Verified',
 		blueVerified: 'Blue Verified',
 		published: 'Published',

@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { autoReplyManager } from '../../helper/auto-reply.js';
 import { defineCommand } from '../_define.js';
 import { getPrefix } from '../../helper/modules/prefix.js';
@@ -32,15 +32,9 @@ export default defineCommand({
 			const list = replies
 				.map((r, i) => {
 					const typeStr = r.isRegex ? A.autoreply.regex : '';
-					const cdStr = r.cooldown > 0 ? A.autoreply.cooldown.replace('{0}', String(r.cooldown)) : '';
+				const cdStr = r.cooldown > 0 ? t(locale, 'autoreply.autoreply.cooldown', [String(r.cooldown)]) : '';
 
-					return A.autoreply.listItem
-						.replace('{0}', String(i + 1))
-						.replace('{1}', r.pattern)
-						.replace('{2}', r.response)
-						.replace('{3}', typeStr)
-						.replace('{4}', cdStr)
-						.replace('{5}', r.id);
+					return t(locale, 'autoreply.autoreply.listItem', [String(i + 1), r.pattern, r.response, typeStr, cdStr, r.id]);
 				})
 				.join('\n');
 
@@ -62,7 +56,7 @@ export default defineCommand({
 		} else if (args[1] === 'removeall') {
 			const count = autoReplyManager.removeAll(from);
 
-			await client.reply(from, A.autoreply.removedAll.replace('{0}', String(count)), message);
+			await client.reply(from, t(locale, 'autoreply.autoreply.removedAll', [String(count)]), message);
 		} else if (args[1] === 'add') {
 			const patternMatch = query.match(/add\s+"([^"]+)"/);
 			const responseMatch = query.match(/"([^"]+)"\s+"([^"]+)"/);
@@ -88,16 +82,11 @@ export default defineCommand({
 			});
 
 			const typeStr = isRegex ? A.autoreply.regex : '';
-			const cdStr = cooldown > 0 ? A.autoreply.cooldown.replace('{0}', String(cooldown)) : '';
+			const cdStr = cooldown > 0 ? t(locale, 'autoreply.autoreply.cooldown', [String(cooldown)]) : '';
 
 			await client.reply(
 				from,
-				A.autoreply.added
-					.replace('{0}', pattern)
-					.replace('{1}', typeStr)
-					.replace('{2}', response)
-					.replace('{3}', cdStr)
-					.replace('{4}', reply.id),
+				t(locale, 'autoreply.autoreply.added', [pattern, typeStr, response, cdStr, reply.id]),
 				message
 			);
 		} else {

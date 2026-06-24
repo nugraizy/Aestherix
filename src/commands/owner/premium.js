@@ -1,12 +1,12 @@
 import configuration from '../../helper/config/connect.js';
 import { S_WHATSAPP_NET, Limit } from '../../helper/index.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import prisma from '../../helper/database/prisma.js';
 import { getUserLimit, updateUserRole } from '../../helper/database/adapters/user.js';
 import { getPrefix } from '../../helper/modules/prefix.js';
 import { defineCommand } from '../_define.js';
 
-const configureUser = async (client, { mode, user, PREMS_CONTAINER, from, message, L }) => {
+const configureUser = async (client, { mode, user, PREMS_CONTAINER, from, message, locale }) => {
 	const record = await getUserLimit(prisma, user).catch(() => null);
 
 	if (!record) {
@@ -49,11 +49,11 @@ const configureUser = async (client, { mode, user, PREMS_CONTAINER, from, messag
 		let capt = '';
 
 		if (PREMS_CONTAINER.adding.length) {
-			capt += `${L.owner.success.premiumAdded.replace('{0}', PREMS_CONTAINER.adding.map((v) => `@${v.split('@')[0]}`).join(', '))}\n`;
+			capt += `${t(locale, 'common.owner.success.premiumAdded', [PREMS_CONTAINER.adding.map((v) => `@${v.split('@')[0]}`).join(', ')])}\n`;
 		}
 
 		if (PREMS_CONTAINER.removing.length) {
-			capt += `${L.owner.success.premiumRemoved.replace('{0}', PREMS_CONTAINER.removing.map((v) => `@${v.split('@')[0]}`).join(', '))}`;
+			capt += `${t(locale, 'common.owner.success.premiumRemoved', [PREMS_CONTAINER.removing.map((v) => `@${v.split('@')[0]}`).join(', ')])}`;
 		}
 
 		await client.send(
@@ -106,7 +106,7 @@ export default defineCommand({
 					PREMS_CONTAINER,
 					from,
 					message,
-					L
+					locale
 				});
 			}
 
@@ -129,7 +129,7 @@ export default defineCommand({
 					PREMS_CONTAINER,
 					from,
 					message,
-					L
+					locale
 				});
 			}
 
@@ -149,7 +149,7 @@ export default defineCommand({
 				PREMS_CONTAINER,
 				from,
 				message,
-				L
+				locale
 			});
 		}
 	}

@@ -51,18 +51,18 @@ export default defineCommand({
 
 			for (const jid of mention) {
 				if (userBanned.includes(jid)) {
-					await client.send(from, { text: L.owner.errors.alreadyBanned.replace('{0}', mentionText(jid)), mentions: [jid] }, { quoted: message });
-					continue;
-				}
-
-				await banAndBlock(client, jid);
-				banned.push(jid);
+				await client.send(from, { text: t(locale, 'common.owner.errors.alreadyBanned', [mentionText(jid)]), mentions: [jid] }, { quoted: message });
+				continue;
 			}
 
-			if (banned.length) {
-				await client.send(
-					from,
-					{ text: L.owner.success.banned.replace('{0}', banned.map(mentionText).join(', ')), mentions: banned },
+			await banAndBlock(client, jid);
+			banned.push(jid);
+		}
+
+		if (banned.length) {
+			await client.send(
+				from,
+				{ text: t(locale, 'common.owner.success.banned', [banned.map(mentionText).join(', ')]), mentions: banned },
 					{ quoted: message }
 				);
 			}
@@ -77,27 +77,27 @@ export default defineCommand({
 				const number = user.number.number.replace(/\+/g, '');
 				const jid = `${number}${S_WHATSAPP_NET}`;
 
-				if (userBanned.includes(jid)) {
-					await client.send(from, { text: L.owner.errors.alreadyBanned.replace('{0}', mentionText(jid)), mentions: [jid] }, { quoted: message });
-					continue;
-				}
-
-				await banAndBlock(client, jid);
-				await client.send(from, { text: L.owner.success.banned.replace('{0}', mentionText(jid)), mentions: [jid] }, { quoted: message });
-			}
-
-			return;
-		}
-
-		if (bodyQuoted) {
-			const jid = mediaData.participant;
-
 			if (userBanned.includes(jid)) {
-				return await client.reply(from, L.owner.errors.alreadyBanned.replace('{0}', mentionText(jid)), message);
+				await client.send(from, { text: t(locale, 'common.owner.errors.alreadyBanned', [mentionText(jid)]), mentions: [jid] }, { quoted: message });
+				continue;
 			}
 
 			await banAndBlock(client, jid);
-			await client.send(from, { text: L.owner.success.banned.replace('{0}', mentionText(jid)), mentions: [jid] }, { quoted: message });
+			await client.send(from, { text: t(locale, 'common.owner.success.banned', [mentionText(jid)]), mentions: [jid] }, { quoted: message });
+		}
+
+		return;
+	}
+
+	if (bodyQuoted) {
+		const jid = mediaData.participant;
+
+		if (userBanned.includes(jid)) {
+			return await client.reply(from, t(locale, 'common.owner.errors.alreadyBanned', [mentionText(jid)]), message);
+		}
+
+		await banAndBlock(client, jid);
+		await client.send(from, { text: t(locale, 'common.owner.success.banned', [mentionText(jid)]), mentions: [jid] }, { quoted: message });
 		}
 	}
 });

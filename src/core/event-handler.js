@@ -1,5 +1,5 @@
 import { checkAfk, deleteAfk, getAfk } from '../helper/index.js';
-import { getLocale, useLocale } from '../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../helper/i18n/index.js';
 import { Cache } from '../helper/modules/cache.js';
 import { getTimeSince } from '../utils/modules/index.js';
 import { ConnectionHandler } from './connection-handler.js';
@@ -99,7 +99,7 @@ export class EventHandler {
 		const timeSinceAfk = getTimeSince(afkContainer.since);
 		const locale = await getLocale(from);
 		const L = useLocale(locale, 'common');
-		const text = L.core.afk.unsetAuto.replace('{0}', participant.split('@')[0]).replace('{1}', timeSinceAfk).replace('{2}', afkContainer.reasons);
+		const text = t(locale, 'common.core.afk.unsetAuto', [participant.split('@')[0], timeSinceAfk, afkContainer.reasons]);
 
 		await this.#client.send(from, { text, mentions: [participant] });
 		deleteAfk(participant, from);

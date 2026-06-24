@@ -619,23 +619,6 @@ export default /** @type {const} */ ({
 			premiumAdded: 'Premium ditambahkan: {0}',
 			premiumRemoved: 'Premium dihapus: {0}'
 		},
-		errors: {
-			noResultsTryDifferent: 'Hasil tidak ditemukan. Coba query lain.',
-			noResults: 'Hasil tidak ditemukan.',
-			noResultsForQuery: 'Hasil tidak ditemukan untuk query Anda. Coba dengan kata kunci lain.',
-			noChaptersFound: 'Tidak ada chapter ditemukan untuk {0} ini.',
-			noChaptersForTitle: 'Tidak ada chapter ditemukan untuk "{0}".',
-			noPagesFound: 'Tidak ada halaman ditemukan untuk chapter ini.',
-			noMangaFound: 'Tidak ada manga ditemukan untuk query tersebut.',
-			detailFetched: 'Detail berhasil diambil.',
-			mangaNotFound: 'Manga tidak ditemukan. Periksa ID atau URL.',
-			comicNotFound: 'Komik tidak ditemukan. Periksa ID atau URL.',
-			outdatedChapterUrl: 'URL chapter sudah usang. Cari manga lagi untuk mendapatkan link chapter terbaru.',
-			errorWithFallback: 'Error: {0}',
-			somethingWentWrong: 'Terjadi kesalahan. Silakan coba lagi.',
-			modelNotFound: 'Model {0} tidak ditemukan. Ketik: !{1} -type',
-			downloadErrorMusic: 'Gagal mengunduh musik.\n\n{0}'
-		},
 		progress: {
 			commandFinished: 'Command Selesai. Total {0} berhasil, dan {1} gagal.',
 			commandFinishedSingle: 'Command Selesai. Total 1 Berhasil.',
@@ -753,7 +736,10 @@ export default /** @type {const} */ ({
 			fileType: 'Tipe File',
 			yes: 'Ya',
 			no: 'Tidak',
-			nA: 'T/A'
+			nA: 'T/A',
+			song: 'Lagu',
+			of: 'dari',
+			cover: 'Sampul'
 		}
 	}
 });

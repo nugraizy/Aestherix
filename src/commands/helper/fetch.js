@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import { fetch } from 'undici';
 import yargsParser from 'yargs-parser';
 
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { extension, gif2mp4, isURL } from '../../utils/index.js';
 import { color, loggers } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
@@ -192,7 +192,7 @@ export default defineCommand({
 		}
 
 		if (contentType && !CONTENT_TYPE_PATTERN.test(contentType)) {
-			return await client.reply(from, L.errors.invalidContentType.replace('{0}', contentType), message);
+			return await client.reply(from, t(locale, 'common.errors.invalidContentType', [contentType]), message);
 		}
 
 		method = Array.isArray(method) ? method[0] : method || 'GET';
@@ -200,7 +200,7 @@ export default defineCommand({
 		const headers = rawHeaders
 			? [].concat(rawHeaders).reduce((acc, cur) => {
 					if (!/^[^:\s]+:\s?.+$/.test(cur)) {
-						client.reply(from, L.errors.invalidHeader.replace('{0}', cur), message);
+						client.reply(from, t(locale, 'common.errors.invalidHeader', [cur]), message);
 						return acc;
 					}
 
@@ -208,7 +208,7 @@ export default defineCommand({
 					const value = rest.join(':').trim();
 
 					if (key.toLowerCase() === 'content-type' && !CONTENT_TYPE_PATTERN.test(value)) {
-						client.reply(from, L.errors.invalidContentType.replace('{0}', value), message);
+						client.reply(from, t(locale, 'common.errors.invalidContentType', [value]), message);
 						return acc;
 					}
 

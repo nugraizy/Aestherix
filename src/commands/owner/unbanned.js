@@ -1,6 +1,6 @@
 import configuration from '../../helper/config/connect.js';
 import { S_WHATSAPP_NET } from '../../helper/index.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import prisma from '../../helper/database/prisma.js';
 import { getBannedUsers, unbanUser } from '../../helper/database/adapters/user.js';
 import { defineCommand } from '../_define.js';
@@ -47,20 +47,20 @@ export default defineCommand({
 		if (mention.length) {
 			const unbanned = [];
 
-			for (const jid of mention) {
-				if (!userBanned.includes(jid)) {
-					await client.send(from, { text: L.owner.errors.notBanned.replace('{0}', mentionText(jid)), mentions: [jid] }, { quoted: message });
-					continue;
-				}
-
-				await unbanAndUnblock(client, jid);
-				unbanned.push(jid);
+		for (const jid of mention) {
+			if (!userBanned.includes(jid)) {
+				await client.send(from, { text: t(locale, 'common.owner.errors.notBanned', [mentionText(jid)]), mentions: [jid] }, { quoted: message });
+				continue;
 			}
 
-			if (unbanned.length) {
-				await client.send(
-					from,
-					{ text: L.owner.success.unbanned.replace('{0}', unbanned.map(mentionText).join(', ')), mentions: unbanned },
+			await unbanAndUnblock(client, jid);
+			unbanned.push(jid);
+		}
+
+		if (unbanned.length) {
+			await client.send(
+				from,
+				{ text: t(locale, 'common.owner.success.unbanned', [unbanned.map(mentionText).join(', ')]), mentions: unbanned },
 					{ quoted: message }
 				);
 			}
@@ -75,27 +75,27 @@ export default defineCommand({
 				const number = user.number.number.replace(/\+/g, '');
 				const jid = `${number}${S_WHATSAPP_NET}`;
 
-				if (!userBanned.includes(jid)) {
-					await client.send(from, { text: L.owner.errors.notBanned.replace('{0}', mentionText(jid)), mentions: [jid] }, { quoted: message });
-					continue;
-				}
-
-				await unbanAndUnblock(client, jid);
-				await client.send(from, { text: L.owner.success.unbanned.replace('{0}', mentionText(jid)), mentions: [jid] }, { quoted: message });
-			}
-
-			return;
-		}
-
-		if (bodyQuoted) {
-			const jid = mediaData.participant;
-
 			if (!userBanned.includes(jid)) {
-				return await client.reply(from, L.owner.errors.notBanned.replace('{0}', mentionText(jid)), message);
+				await client.send(from, { text: t(locale, 'common.owner.errors.notBanned', [mentionText(jid)]), mentions: [jid] }, { quoted: message });
+				continue;
 			}
 
 			await unbanAndUnblock(client, jid);
-			await client.send(from, { text: L.owner.success.unbanned.replace('{0}', mentionText(jid)), mentions: [jid] }, { quoted: message });
+			await client.send(from, { text: t(locale, 'common.owner.success.unbanned', [mentionText(jid)]), mentions: [jid] }, { quoted: message });
+		}
+
+		return;
+	}
+
+	if (bodyQuoted) {
+		const jid = mediaData.participant;
+
+		if (!userBanned.includes(jid)) {
+			return await client.reply(from, t(locale, 'common.owner.errors.notBanned', [mentionText(jid)]), message);
+		}
+
+		await unbanAndUnblock(client, jid);
+		await client.send(from, { text: t(locale, 'common.owner.success.unbanned', [mentionText(jid)]), mentions: [jid] }, { quoted: message });
 		}
 	}
 });

@@ -14,7 +14,8 @@ function getCharacterList() {
 }
 
 function formatCharacterList(characters, prefix, cmd, locale) {
-	let text = t(locale, 'look_up.labels.availableCharacters').formatHeaders() + '\n\n';
+	const Ll = useLocale(locale, 'look_up');
+	let text = Ll.labels.availableCharacters.formatHeaders() + '\n\n';
 
 	for (const char of characters) {
 		text += `• ${char.replace(/_/g, ' ')}\n`;

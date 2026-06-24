@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { templateManager } from '../../helper/template.js';
 import { defineCommand } from '../_define.js';
 import { getPrefix } from '../../helper/modules/prefix.js';
@@ -30,12 +30,8 @@ export default defineCommand({
 			}
 
 			const list = templateList
-				.map((t, i) =>
-					T.template.listItem
-						.replace('{0}', String(i + 1))
-						.replace('{1}', t.name)
-						.replace('{2}', String(t.useCount))
-						.replace('{3}', t.id)
+				.map((tpl, i) =>
+					t(locale, 'template.template.listItem', [String(i + 1), tpl.name, String(tpl.useCount), tpl.id])
 				)
 				.join('\n');
 
@@ -51,9 +47,9 @@ export default defineCommand({
 			const success = templateManager.removeByName(from, name);
 
 			if (success) {
-				await client.reply(from, T.template.removed.replace('{0}', name), message);
+				await client.reply(from, t(locale, 'template.template.removed', [name]), message);
 			} else {
-				await client.reply(from, T.errors.notFound.replace('{0}', name), message);
+				await client.reply(from, t(locale, 'template.errors.notFound', [name]), message);
 			}
 		} else if (args[1] === 'save') {
 			const match = query.match(/save\s+"([^"]+)"\s+"([^"]+)"/);
@@ -69,10 +65,10 @@ export default defineCommand({
 
 			if (existing) {
 				existing.content = content;
-				await client.reply(from, T.template.updated.replace('{0}', name), message);
+				await client.reply(from, t(locale, 'template.template.updated', [name]), message);
 			} else {
 				templateManager.add(from, sender, name, content);
-				await client.reply(from, T.template.saved.replace('{0}', name), message);
+				await client.reply(from, t(locale, 'template.template.saved', [name]), message);
 			}
 		} else if (args[1] === 'use') {
 			const nameMatch = query.match(/use\s+"([^"]+)"/);
@@ -97,7 +93,7 @@ export default defineCommand({
 			if (content) {
 				await client.reply(from, content, message);
 			} else {
-				await client.reply(from, T.errors.notFound.replace('{0}', name), message);
+				await client.reply(from, t(locale, 'template.errors.notFound', [name]), message);
 			}
 		} else {
 			await client.reply(from, T.errors.invalidArgs, message);

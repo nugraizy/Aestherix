@@ -1,5 +1,5 @@
 import configuration from '../../helper/config/connect.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 
 const DURATION_MAP = {
 	[String(86400)]: '24h',
@@ -7,10 +7,12 @@ const DURATION_MAP = {
 	[String(7776000)]: '90d'
 };
 
-const sendGroupSettingsNotification = async (client, id, author, status, type, duration, L) => {
+const sendGroupSettingsNotification = async (client, id, author, status, type, duration, locale) => {
 	if (!author || !status || !type) {
 		return;
 	}
+
+	const L = useLocale(locale, 'common');
 
 	const typeMap = {
 		GROUP_CHANGE_SUBJECT: L.core.settings.subjectChanged,
@@ -21,7 +23,7 @@ const sendGroupSettingsNotification = async (client, id, author, status, type, d
 		GROUP_INVITE_CHANGED: L.core.settings.inviteChanged,
 		GROUP_MEMBERSHIP_JOIN_APPROVAL_MODE: L.core.settings.joinApprovalChanged,
 		GROUP_MEMBER_ADD_MODE: L.core.settings.memberAddModeChanged,
-		CHANGE_EPHEMERAL_SETTING: L.core.settings.ephemeralChanged.replace('{0}', duration)
+		CHANGE_EPHEMERAL_SETTING: t(locale, 'common.core.settings.ephemeralChanged', [duration])
 	};
 
 	await client.send(id, {
@@ -142,7 +144,7 @@ const groupSettingsNotificationHandler = async (client, updates) => {
 				status,
 				type,
 				(update.ephemeral && DURATION_MAP[String(update.ephemeral)]) || 'Off',
-				L
+				locale
 			);
 		} else {
 			updateMetadataCache(id, update, settingsGroup, metadataGroup);

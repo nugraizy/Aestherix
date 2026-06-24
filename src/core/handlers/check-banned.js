@@ -15,7 +15,7 @@ export const checkBan = async (client, { from, isBotAdmin, isGroup, messageStubP
 			if (isBanned && isBotAdmin) {
 				const locale = await getLocale(from);
 				const L = useLocale(locale, 'common');
-				const kickMessage = L.core.errors.bannedAddWarning.replace('{0}', bannedUserName);
+				const kickMessage = t(locale, 'common.core.errors.bannedAddWarning', [bannedUserName]);
 				const buttons = [
 					{ buttonId: cmdId('kick', bannedUserName, { prefix }), buttonText: { displayText: L.core.success.kick }, type: 1 },
 					{ buttonId: 'ID', buttonText: { displayText: L.core.success.dontKick }, type: 1 }

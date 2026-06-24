@@ -33,7 +33,7 @@ export default defineCommand({
 		const sub = manager.get(sessionName);
 
 		if (!sub) {
-			return client.reply(from, Lo.labels.botNotFound.replace('{0}', sessionName), message);
+			return client.reply(from, t(locale, 'owner.labels.botNotFound', [sessionName]), message);
 		}
 
 		if (args.length <= 2) {
@@ -74,6 +74,6 @@ export default defineCommand({
 			})
 			.catch(() => {});
 
-		return client.reply(from, Lo.labels.flagsUpdated.replace('{0}', sessionName), message);
+		return client.reply(from, t(locale, 'owner.labels.flagsUpdated', [sessionName]), message);
 	}
 });

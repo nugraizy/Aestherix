@@ -612,28 +612,12 @@ export default /** @type {const} */ ({
 			addmodeUsage: 'Usage: !addmode `<all/admin>`\n\nOptions:\n• all - All members can add\n• admin - Only admins can add',
 			addmodeAllCanAdd: 'All members can now add new members.',
 			addmodeAdminOnly: 'Only admins can now add new members.',
-			ephemeralUsage: 'Usage: !ephemeral `<off/24h/7d/90d>`\n\nOptions:\n• off - Disable ephemeral\n• 24h - 24 hours\n• 7d - 7 days\n• 90d - 90 days',
+			ephemeralUsage:
+				'Usage: !ephemeral `<off/24h/7d/90d>`\n\nOptions:\n• off - Disable ephemeral\n• 24h - 24 hours\n• 7d - 7 days\n• 90d - 90 days',
 			ephemeralDisabled: 'Ephemeral messages disabled.',
 			ephemeralSet: 'Ephemeral messages set to {0}.',
 			premiumAdded: 'Premium added: {0}',
 			premiumRemoved: 'Premium removed: {0}'
-		},
-		errors: {
-			noResultsTryDifferent: 'No results found. Try a different query.',
-			noResults: 'No results found.',
-			noResultsForQuery: 'No results found for your query. Try again with another keyword.',
-			noChaptersFound: 'No chapters found for this {0}.',
-			noChaptersForTitle: 'No chapters found for "{0}".',
-			noPagesFound: 'No pages found for this chapter.',
-			noMangaFound: 'No manga found for that query.',
-			detailFetched: 'Detail fetched.',
-			mangaNotFound: 'Manga not found. Please check the ID or URL.',
-			comicNotFound: 'Comic not found. Please check the ID or URL.',
-			outdatedChapterUrl: 'Outdated chapter URL. Please search the manga again to get updated chapter links.',
-			errorWithFallback: 'Error: {0}',
-			somethingWentWrong: 'Something went wrong. Please try again.',
-			modelNotFound: 'Model {0} not found. Type: !{1} -type',
-			downloadErrorMusic: 'Error while downloading music.\n\n{0}'
 		},
 		progress: {
 			commandFinished: 'Command Finished. With total {0} success, and {1} fail.',
@@ -752,7 +736,10 @@ export default /** @type {const} */ ({
 			fileType: 'Filetype',
 			yes: 'Yes',
 			no: 'No',
-			nA: 'N/A'
+			nA: 'N/A',
+			song: 'Song',
+			of: 'of',
+			cover: 'Cover'
 		}
 	}
 });

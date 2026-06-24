@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { schedulerManager } from '../../helper/scheduler.js';
 import { defineCommand } from '../_define.js';
 import { getPrefix } from '../../helper/modules/prefix.js';
@@ -30,13 +30,7 @@ export default defineCommand({
 			}
 
 			const list = schedules
-				.map((s, i) =>
-					S.schedule.listItem
-						.replace('{0}', String(i + 1))
-						.replace('{1}', s.message)
-						.replace('{2}', s.cron)
-						.replace('{3}', s.id)
-				)
+				.map((s, i) => t(locale, 'schedule.schedule.listItem', [String(i + 1), s.message, s.cron, s.id]))
 				.join('\n');
 
 			await client.reply(from, `${S.schedule.listTitle}\n\n${list}`, message);
@@ -57,7 +51,7 @@ export default defineCommand({
 		} else if (args[1] === 'cancelall') {
 			const count = schedulerManager.cancelAll(from);
 
-			await client.reply(from, S.schedule.cancelledAll.replace('{0}', String(count)), message);
+			await client.reply(from, t(locale, 'schedule.schedule.cancelledAll', [String(count)]), message);
 		} else if (args[1] === 'add') {
 			const timeStr = args[2];
 			const msgMatch = query.match(/add\s+\S+\s+"([^"]+)"/);
@@ -78,11 +72,7 @@ export default defineCommand({
 			if (schedule) {
 				await client.reply(
 					from,
-					S.schedule.created
-						.replace('{0}', scheduledMessage)
-						.replace('{1}', timeStr)
-						.replace('{2}', cronExpression)
-						.replace('{3}', schedule.id),
+					t(locale, 'schedule.schedule.created', [scheduledMessage, timeStr, cronExpression, schedule.id]),
 					message
 				);
 			} else {

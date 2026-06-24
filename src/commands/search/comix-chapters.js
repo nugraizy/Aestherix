@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
@@ -74,7 +74,7 @@ export default defineCommand({
 
 		chapterSessions.set(sessionId, state);
 
-		await wait.update(Ls.labels.chaptersFound.replace('{0}', new Set(allChapters.map((c) => String(c.number))).size));
+		await wait.update(t(locale, 'search.labels.chaptersFound', [new Set(allChapters.map((c) => String(c.number))).size]));
 
 		await sendBatch(state, from, message, client, { prefix, device, locale });
 	}
@@ -92,7 +92,7 @@ async function sendBatch(state, from, message, client, ctx) {
 	const sortLabel = order === 'asc' ? Ls.buttons.sortLatest : Ls.buttons.sortOldest;
 	const total = new Set(allChapters.map((c) => String(c.number))).size;
 	const orderLabel = order === 'desc' ? Ls.labels.orderLatest : Ls.labels.orderOldest;
-	const body = `${Ls.titles.comixChapters.formatHeaders()}\n\n${Ls.labels.chapterTotal.replace('{0}', total)}\n${Ls.labels.showing.replace('{0}', start + 1).replace('{1}', start + batch.length)}\n${Ls.labels.order.replace('{0}', orderLabel)}\n\n${Ls.labels.selectManga}`;
+	const body = `${Ls.titles.comixChapters.formatHeaders()}\n\n${t(ctx.locale, 'search.labels.chapterTotal', [total])}\n${t(ctx.locale, 'search.labels.showing', [start + 1, start + batch.length])}\n${t(ctx.locale, 'search.labels.order', [orderLabel])}\n\n${Ls.labels.selectManga}`;
 
 	const builder = new client.TemplateBuilder.Native();
 

@@ -186,7 +186,10 @@ export default /** @type {const} */ ({
 		country: 'Negara',
 		cast: 'Pemeran',
 		releaseDate: 'Tanggal Rilis',
-		translateBy: 'Diterjemahkan Oleh'
+		translateBy: 'Diterjemahkan Oleh',
+		foundFetchingChapters: 'Ditemukan: {0}\nMengambil chapter...',
+		noChaptersForTitle: 'Tidak ada chapter ditemukan untuk "{0}".',
+		chaptersFoundFor: '{0} chapter ditemukan untuk "{1}".'
 	},
 	buttons: {
 		chapters: '📖 Chapter',

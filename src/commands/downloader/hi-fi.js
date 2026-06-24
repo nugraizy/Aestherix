@@ -154,7 +154,7 @@ const downloadAudio = async (client, data, { from, message, prettyNumber, id, in
 		{ quoted: message }
 	);
 
-	await wait.update(t(locale, 'common.core.progress.commandFinishedSingle'));
+	await wait.update(L.core.progress.commandFinishedSingle);
 
 	loggers.warning(
 		`${color('Downloaded Hi-Fi Audio from', 'pink')} ${color(downloadInfo.domain, 'orange')} for ${color(prettyNumber, 'lilac')}`

@@ -4,7 +4,7 @@ import { createServer } from 'http';
 
 import { getDashboardLogs, setDashboardCommandState, setDashboardFlagState } from '../../../dashboard/server/monitor.js';
 import configuration from '../../helper/config/connect.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { banUser, getBannedUsers, getUserLimit, unbanUser, upsertUserLimit } from '../../helper/database/adapters/user.js';
 import prisma from '../../helper/database/prisma.js';
 import { toUserJid } from '../../helper/misc/wa_data/index.js';
@@ -171,7 +171,7 @@ const sendConfirmationButton = async ({ waClient, to, approveButtonId, rejectBut
 		await builder
 			.destination(to)
 			.body(L.core.dashboard.loginRequest)
-			.footer(L.core.dashboard.requestedNumber.replace('{0}', phoneNumber))
+			.footer(t(locale, 'common.core.dashboard.requestedNumber', [phoneNumber]))
 			.buttons(
 				builder.button.reply({ display: L.core.success.confirmLogin, id: approveButtonId }),
 				builder.button.reply({ display: L.core.success.rejectLogin, id: rejectButtonId })
@@ -182,7 +182,7 @@ const sendConfirmationButton = async ({ waClient, to, approveButtonId, rejectBut
 	}
 
 	await waClient.send(to, {
-		text: L.core.dashboard.loginDetected.replace('{0}', approveButtonId).replace('{1}', rejectButtonId)
+		text: t(locale, 'common.core.dashboard.loginDetected', [approveButtonId, rejectButtonId])
 	});
 };
 

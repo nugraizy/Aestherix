@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { getLocale, useLocale } from './i18n/index.js';
+import { getLocale, t, useLocale } from './i18n/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REMINDERS_FILE = path.join(__dirname, '../../databases/reminders.json');
@@ -92,7 +92,7 @@ const triggerReminder = async (reminder) => {
 		await clientInstance.send(
 			reminder.chatId,
 			{
-				text: `⏰ ${L.core.reminder.header.replace('{0}', reminder.message).replace('{1}', mention)}`,
+				text: `⏰ ${t(locale, 'common.core.reminder.header', [reminder.message, mention])}`,
 				mentions: [reminder.sender]
 			}
 		);

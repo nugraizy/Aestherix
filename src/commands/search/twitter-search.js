@@ -189,7 +189,7 @@ export default defineCommand({
 		}
 
 		if (!result.tweets.length) {
-			return await wait.update(t(locale, 'search.labels.noResults'));
+			return await wait.update(Ls.labels.noResults);
 		}
 
 		const sessionId = randomChar('abcdefghijklmnopqrstuvwxyz0123456789', 8);

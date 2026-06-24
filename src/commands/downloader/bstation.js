@@ -30,6 +30,7 @@ const regex = (input) => {
 };
 
 const processVideo = async (aid, client, { from, message, sender, filename, wait, locale, L }) => {
+	const DL = useLocale(locale, 'downloader');
 	const video = await bilibiliDetailTv({ aid });
 
 	await wait.update(
@@ -46,7 +47,7 @@ const processVideo = async (aid, client, { from, message, sender, filename, wait
 
 	await client.send(
 		from,
-		{ video: Buffer.from(merge, 'base64'), caption: t(locale, 'downloader.titles.bstation').formatHeaders() },
+		{ video: Buffer.from(merge, 'base64'), caption: DL.titles.bstation.formatHeaders() },
 		{ quoted: message }
 	);
 };

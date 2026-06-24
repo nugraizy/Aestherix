@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { reminderManager } from '../../helper/reminder.js';
 import { defineCommand } from '../_define.js';
 import { getPrefix } from '../../helper/modules/prefix.js';
@@ -34,11 +34,7 @@ export default defineCommand({
 					const timeLeft = r.triggerAt - Date.now();
 					const timeStr = timeLeft > 0 ? reminderManager.formatTime(timeLeft) : R.reminder.dueNow;
 
-					return R.reminder.listItem
-						.replace('{0}', String(i + 1))
-						.replace('{1}', r.message)
-						.replace('{2}', timeStr)
-						.replace('{3}', r.id);
+				return t(locale, 'reminder.reminder.listItem', [String(i + 1), r.message, timeStr, r.id]);
 				})
 				.join('\n');
 
@@ -60,7 +56,7 @@ export default defineCommand({
 		} else if (args[1] === 'cancelall') {
 			const count = reminderManager.cancelAll(sender);
 
-			await client.reply(from, R.reminder.cancelledAll.replace('{0}', String(count)), message);
+			await client.reply(from, t(locale, 'reminder.reminder.cancelledAll', [String(count)]), message);
 		} else {
 			const timeStr = args[1];
 			const reminderMessage = args.slice(2).join(' ');
@@ -88,10 +84,7 @@ export default defineCommand({
 
 			await client.reply(
 				from,
-				R.reminder.set
-					.replace('{0}', reminderMessage)
-					.replace('{1}', timeFormatted)
-					.replace('{2}', reminder.id),
+				t(locale, 'reminder.reminder.set', [reminderMessage, timeFormatted, reminder.id]),
 				message
 			);
 		}

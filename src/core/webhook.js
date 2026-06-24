@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import express from 'express';
 
 import configuration from '../helper/config/connect.js';
-import { getLocale, useLocale } from '../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../helper/i18n/index.js';
 import { color, fetchJSON, loggers } from '../utils/modules/index.js';
 
 const GITHUB_API = (sha) => `https://api.github.com/repos/nugraizy/Aestherix/commits/${sha}`;
@@ -95,7 +95,7 @@ ${L.core.webhook.committedAt}${commitInfo.timestamp}
 
 ${filesSummary.trim()}
 
-*${L.core.webhook.commitSummary.replace('{0}', commitInfo.filesChanged).replace('{1}', commitInfo.additions).replace('{2}', commitInfo.deletions)}*`;
+*${t(locale, 'common.core.webhook.commitSummary', [commitInfo.filesChanged, commitInfo.additions, commitInfo.deletions])}*`;
 
 		await this.#client?.send(NOTIFICATION_GROUP, { text: caption });
 	}

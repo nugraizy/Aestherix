@@ -157,5 +157,5 @@ export default /** @type {const} */ ({
 	warning: {
 		nightIdle: 'No one acted tonight. Please stay engaged or the game will crawl.'
 	},
-	help: 'How to play Werewolf:\n• .ww newGame — create the lobby\n• .ww join — join the lobby\n• .ww start — start the game (room master only)\n• .ww exit — leave (lobby only)\n• .ww delete — delete the session (lobby only)\n• .ww kill <n> — werewolf kill\n• .ww seer <n> — seer inspection\n• .ww guard <n> — guard protection\n• .ww heal <n> / .ww poison <n> — witch actions\n• .ww shoot <n> — hunter revenge\n• .ww lovers <n1> <n2> — cupid binds lovers\n• .ww peek — little girl peeks\n• .ww convert <n> — alpha converts\n• .ww vote <n> — vote to lynch\n• .ww lang <id|en> — switch language'
+	help: 'How to play Werewolf:\n• {0} {1} — create the lobby\n• {0} {2} — join the lobby\n• {0} {3} — start the game (room master only)\n• {0} {4} — leave (lobby only)\n• {0} {5} — delete the session (lobby only)\n• {0} {6} <n> — werewolf kill\n• {0} {7} <n> — seer inspection\n• {0} {8} <n> — guard protection\n• {0} {9} <n> / {0} {10} <n> — witch actions\n• {0} {11} <n> — hunter revenge\n• {0} {12} <n1> <n2> — cupid binds lovers\n• {0} {13} — little girl peeks\n• {0} {14} <n> — alpha converts\n• {0} {15} <n> — vote to lynch\n• {0} {16} <id|en> — switch language'
 });

@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { slowModeManager } from '../../helper/slowmode.js';
 import { defineCommand } from '../_define.js';
 import { getPrefix } from '../../helper/modules/prefix.js';
@@ -39,7 +39,7 @@ export default defineCommand({
 
 			slowModeManager.set(from, duration);
 
-			await client.reply(from, S.slowmode.enabled.replace('{0}', String(duration)), message);
+			await client.reply(from, t(locale, 'slowmode.slowmode.enabled', [String(duration)]), message);
 		} else if (args[1] === 'off') {
 			const success = slowModeManager.disable(from);
 
@@ -76,10 +76,7 @@ export default defineCommand({
 
 			await client.reply(
 				from,
-				`${S.slowmode.statusTitle}\n\n${S.slowmode.status
-					.replace('{0}', status)
-					.replace('{1}', String(settings.duration))
-					.replace('{2}', adminsExcluded)}`,
+				`${S.slowmode.statusTitle}\n\n${t(locale, 'slowmode.slowmode.status', [status, String(settings.duration), adminsExcluded])}`,
 				message
 			);
 		} else {

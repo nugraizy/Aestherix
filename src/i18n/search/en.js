@@ -186,7 +186,10 @@ export default /** @type {const} */ ({
 		country: 'Country',
 		cast: 'Cast',
 		releaseDate: 'Release Date',
-		translateBy: 'Translate By'
+		translateBy: 'Translate By',
+		foundFetchingChapters: 'Found: {0}\nFetching chapters...',
+		noChaptersForTitle: 'No chapters found for "{0}".',
+		chaptersFoundFor: '{0} chapter(s) found for "{1}".'
 	},
 	buttons: {
 		chapters: '📖 Chapters',

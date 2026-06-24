@@ -98,7 +98,7 @@ async function sendBatch(state, from, message, client, ctx) {
 	const Ls = useLocale(ctx.locale, 'search');
 	const sortLabel = order === 'asc' ? Ls.buttons.sortLatest : Ls.buttons.sortOldest;
 	const total = new Set(allChapters.map((c) => String(c.number))).size;
-	const body = `${Ls.titles.shinigamiChapters.formatHeaders()}\n\n${Ls.labels.chapterTotal.replace('{0}', total)}\nShowing : ${batch[0]?.number}–${batch[batch.length - 1]?.number}\nOrder : ${order === 'desc' ? 'Latest → Oldest' : 'Oldest → Latest'}\n\nSelect a chapter to read.`;
+	const body = `${Ls.titles.shinigamiChapters.formatHeaders()}\n\n${t(ctx.locale, 'search.labels.chapterTotal', [total])}\nShowing : ${batch[0]?.number}–${batch[batch.length - 1]?.number}\nOrder : ${order === 'desc' ? 'Latest → Oldest' : 'Oldest → Latest'}\n\nSelect a chapter to read.`;
 
 	const builder = new client.TemplateBuilder.Native();
 

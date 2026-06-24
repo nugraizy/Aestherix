@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
@@ -82,7 +82,7 @@ export default defineCommand({
 
 			chapterSessions.set(sessionId, state);
 
-			await wait.update(Ls.labels.chaptersFound.replace('{0}', detail.episodes.length));
+			await wait.update(t(locale, 'search.labels.chaptersFound', [detail.episodes.length]));
 			await sendBatch(state, from, message, client, { prefix, device, locale });
 		} catch (error) {
 			return await wait.update(`Error: ${error.message || Ls.labels.fetchFailed || 'Failed to fetch chapters.'}`);
@@ -101,7 +101,7 @@ async function sendBatch(state, from, message, client, ctx) {
 	const Ls = useLocale(ctx.locale, 'search');
 	const sortLabel = order === 'asc' ? Ls.buttons.sortLatest : Ls.buttons.sortOldest;
 	const orderLabel = order === 'desc' ? Ls.labels.orderLatest : Ls.labels.orderOldest;
-	const body = `${Ls.titles.mangatoonChapters.formatHeaders()}\n\n${mangaTitle || ''}\n${Ls.labels.chapterTotal.replace('{0}', allChapters.length)}\n${Ls.labels.showing.replace('{0}', batch[0]?.number).replace('{1}', batch[batch.length - 1]?.number)}\n${Ls.labels.order.replace('{0}', orderLabel)}\n\n${Ls.labels.selectManga}`;
+	const body = `${Ls.titles.mangatoonChapters.formatHeaders()}\n\n${mangaTitle || ''}\n${t(ctx.locale, 'search.labels.chapterTotal', [allChapters.length])}\n${t(ctx.locale, 'search.labels.showing', [batch[0]?.number, batch[batch.length - 1]?.number])}\n${t(ctx.locale, 'search.labels.order', [orderLabel])}\n\n${Ls.labels.selectManga}`;
 
 	const builder = new client.TemplateBuilder.Native();
 

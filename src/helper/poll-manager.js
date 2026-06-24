@@ -170,7 +170,7 @@ export class PollManager {
 		}
 
 		try {
-			const { useLocale } = await import('./i18n/index.js');
+			const { t, useLocale } = await import('./i18n/index.js');
 
 			const locale = 'en';
 			const T = useLocale(locale, 'poll');
@@ -180,14 +180,11 @@ export class PollManager {
 				const resultsText = results.map((r) => `${r.option}: ${r.votes} votes (${r.percentage}%)`).join('\n');
 
 				await this.#client.send(poll.chatId, {
-					text: T.poll.results
-						.replace('{0}', poll.question)
-						.replace('{1}', resultsText)
-						.replace('{2}', String(poll.totalVotes))
+					text: t(locale, 'poll.poll.results', [poll.question, resultsText, String(poll.totalVotes)])
 				});
 			} else if (action.type_action === 'close') {
 				await this.#client.send(poll.chatId, {
-					text: T.poll.closed.replace('{0}', poll.question).replace('{1}', String(poll.totalVotes))
+					text: t(locale, 'poll.poll.closed', [poll.question, String(poll.totalVotes)])
 				});
 
 				this.remove(poll.messageId);
@@ -204,14 +201,10 @@ export class PollManager {
 				const noVotes = optionVotes[noOption] || 0;
 
 				const mention = targetJid.split('@')[0];
-				const resultText = yesVotes > noVotes ? T.poll.kicked.replace('{0}', mention) : T.poll.stays;
+				const resultText = yesVotes > noVotes ? t(locale, 'poll.poll.kicked', [mention]) : T.poll.stays;
 
 				await this.#client.send(poll.chatId, {
-					text: T.poll.kickResults
-						.replace('{0}', poll.question)
-						.replace('{1}', String(yesVotes))
-						.replace('{2}', String(noVotes))
-						.replace('{3}', resultText),
+					text: t(locale, 'poll.poll.kickResults', [poll.question, String(yesVotes), String(noVotes), resultText]),
 					mentions: [targetJid]
 				});
 
@@ -220,7 +213,7 @@ export class PollManager {
 						await this.#client.groupParticipantsUpdate(poll.chatId, [targetJid], 'remove');
 					} catch (error) {
 						await this.#client.send(poll.chatId, {
-							text: T.poll.failedKick.replace('{0}', error.message)
+							text: t(locale, 'poll.poll.failedKick', [error.message])
 						});
 					}
 				}

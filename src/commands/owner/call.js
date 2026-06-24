@@ -1,23 +1,23 @@
 import configuration from '../../helper/config/connect.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 import { getPrefix } from '../../helper/modules/prefix.js';
 
-const attachCallEvents = (call, from, client, L) => {
+const attachCallEvents = (call, from, client, locale) => {
 	call.on('ringing', () => {
-		client.reply(from, L.voip.info.ringing, null).catch(() => {});
+		client.reply(from, t(locale, 'common.voip.info.ringing'), null).catch(() => {});
 	});
 
 	call.on('connected', () => {
-		client.reply(from, L.voip.info.connected, null).catch(() => {});
+		client.reply(from, t(locale, 'common.voip.info.connected'), null).catch(() => {});
 	});
 
 	call.on('ended', (reason) => {
-		client.reply(from, `${L.voip.info.ended}`.replace('{0}', reason), null).catch(() => {});
+		client.reply(from, t(locale, 'common.voip.info.ended', [reason]), null).catch(() => {});
 	});
 
 	call.on('error', (err) => {
-		client.reply(from, `${L.voip.errors.callFailed}`.replace('{0}', err?.message || err), null).catch(() => {});
+		client.reply(from, t(locale, 'common.voip.errors.callFailed', [err?.message || err]), null).catch(() => {});
 	});
 };
 
@@ -89,7 +89,7 @@ export default defineCommand({
 
 			voip.activeCall.setAudioSource(source);
 
-			return await client.reply(from, L.voip.success.audioChanged.replace('{0}', source), null);
+			return await client.reply(from, t(locale, 'common.voip.success.audioChanged', [source]), null);
 		}
 
 		if (action && !/^\d+$/.test(action)) {
@@ -112,20 +112,20 @@ export default defineCommand({
 			}
 
 			try {
-				await client.reply(from, L.voip.success.groupCalling.replace('{0}', participants.length), null);
+				await client.reply(from, t(locale, 'common.voip.success.groupCalling', [participants.length]), null);
 
 				const call = await voip.groupCall(participants, {
 					groupJid: groupId,
 					chatName: groupName
 				});
 
-				attachCallEvents(call, from, client, L);
+				attachCallEvents(call, from, client, locale);
 
 				const ended = await call.waitForEnd();
 
-				await client.reply(from, L.voip.success.groupFinished.replace('{0}', ended), null);
+				await client.reply(from, t(locale, 'common.voip.success.groupFinished', [ended]), null);
 			} catch (err) {
-				await client.reply(from, L.voip.errors.groupFailed.replace('{0}', err.message), null);
+				await client.reply(from, t(locale, 'common.voip.errors.groupFailed', [err.message]), null);
 			}
 
 			return;
@@ -139,17 +139,17 @@ export default defineCommand({
 			const audioSource = args[2] || 'silence';
 
 			try {
-				await client.reply(from, L.voip.success.calling.replace('{0}', phoneNumber), null);
+				await client.reply(from, t(locale, 'common.voip.success.calling', [phoneNumber]), null);
 
 				const call = await voip.call(phoneNumber, { audioSource });
 
-				attachCallEvents(call, from, client, L);
+				attachCallEvents(call, from, client, locale);
 
 				const ended = await call.waitForEnd();
 
-				await client.reply(from, L.voip.success.callFinished.replace('{0}', ended), null);
+				await client.reply(from, t(locale, 'common.voip.success.callFinished', [ended]), null);
 			} catch (err) {
-				await client.reply(from, L.voip.errors.callFailed.replace('{0}', err.message), null);
+				await client.reply(from, t(locale, 'common.voip.errors.callFailed', [err.message]), null);
 			}
 
 			return;
@@ -161,18 +161,18 @@ export default defineCommand({
 			return await client.reply(from, L.voip.errors.couldNotResolve, null);
 		}
 
-		try {
-			await client.reply(from, L.voip.success.calling.replace('{0}', targetNumber), null);
+	try {
+		await client.reply(from, t(locale, 'common.voip.success.calling', [targetNumber]), null);
 
-			const call = await voip.call(targetNumber);
+		const call = await voip.call(targetNumber);
 
-			attachCallEvents(call, from, client, L);
+		attachCallEvents(call, from, client, locale);
 
-			const ended = await call.waitForEnd();
+		const ended = await call.waitForEnd();
 
-			await client.reply(from, L.voip.success.callFinished.replace('{0}', ended), null);
-		} catch (err) {
-			await client.reply(from, L.voip.errors.callFailed.replace('{0}', err.message), null);
-		}
+		await client.reply(from, t(locale, 'common.voip.success.callFinished', [ended]), null);
+	} catch (err) {
+		await client.reply(from, t(locale, 'common.voip.errors.callFailed', [err.message]), null);
+	}
 	}
 });

@@ -1,5 +1,5 @@
 import languages from '../../i18n/languages.js';
-import { getLocale, setLocale, setUserLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, setLocale, setUserLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { defineCommand } from '../_define.js';
 
 const validIsos = new Set(languages.map((l) => l.iso));
@@ -31,7 +31,7 @@ export default defineCommand({
 
 			return await client.reply(
 				from,
-				L.info.langChanged.replace('{0}', current ? `${current.lang} (${current.iso})` : locale),
+				t(locale, 'common.info.langChanged', [current ? `${current.lang} (${current.iso})` : locale]),
 				message
 			);
 		}
@@ -41,7 +41,7 @@ export default defineCommand({
 		if (!validIsos.has(target)) {
 			const valid = languages.map((l) => l.iso).join(', ');
 
-			return await client.reply(from, L.info.langInvalid.replace('{0}', valid), message);
+			return await client.reply(from, t(locale, 'common.info.langInvalid', [valid]), message);
 		}
 
 		if (isGroup) {
@@ -55,6 +55,6 @@ export default defineCommand({
 		const newL = useLocale(target, 'common');
 		const lang = languages.find((l) => l.iso === target);
 
-		await client.reply(from, newL.info.langChanged.replace('{0}', lang ? `${lang.lang} (${lang.iso})` : target), message);
+		await client.reply(from, t(target, 'common.info.langChanged', [lang ? `${lang.lang} (${lang.iso})` : target]), message);
 	}
 });

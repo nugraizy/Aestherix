@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { pollManager } from '../../helper/poll-manager.js';
 import { defineCommand } from '../_define.js';
 import { getPrefix } from '../../helper/modules/prefix.js';
@@ -39,7 +39,7 @@ export default defineCommand({
 
 			const targetJid = mention[0];
 			const questionMatch = query.match(/kick\s+@\S+\s+"([^"]+)"/);
-			const question = questionMatch ? questionMatch[1] : P.poll.kickQuestion.replace('{0}', targetJid.split('@')[0]);
+			const question = questionMatch ? questionMatch[1] : t(locale, 'poll.poll.kickQuestion', [targetJid.split('@')[0]]);
 
 			const minVotesMatch = query.match(/--votes\s+(\d+)/);
 			const minVotes = minVotesMatch ? parseInt(minVotesMatch[1], 10) : 3;
@@ -78,17 +78,14 @@ export default defineCommand({
 					await client.send(
 						from,
 						{
-							text: P.poll.kickCreated
-								.replace('{0}', targetJid.split('@')[0])
-								.replace('{1}', question)
-								.replace('{2}', String(minVotes)),
+							text: t(locale, 'poll.poll.kickCreated', [targetJid.split('@')[0], question, String(minVotes)]),
 							mentions: [targetJid]
 						},
 						{ quoted: message }
 					);
 				}
 			} catch (error) {
-				await client.reply(from, P.errors.failedCreate.replace('{0}', error.message), message);
+				await client.reply(from, t(locale, 'poll.errors.failedCreate', [error.message]), message);
 			}
 		} else {
 			const matches = query.match(/"([^"]+)"/g);
@@ -155,11 +152,11 @@ export default defineCommand({
 					const actionsText = actions
 						.map((a) => {
 							if (a.type_action === 'announce') {
-								return P.poll.announceAction.replace('{0}', String(a.threshold));
+								return t(locale, 'poll.poll.announceAction', [String(a.threshold)]);
 							} else if (a.type_action === 'close') {
-								return P.poll.closeAction.replace('{0}', String(a.threshold));
+								return t(locale, 'poll.poll.closeAction', [String(a.threshold)]);
 							} else if (a.type_action === 'message') {
-								return P.poll.messageAction.replace('{0}', String(a.threshold)).replace('{1}', a.message);
+								return t(locale, 'poll.poll.messageAction', [String(a.threshold), a.message]);
 							}
 
 							return '';
@@ -167,10 +164,10 @@ export default defineCommand({
 						.filter(Boolean)
 						.join('\n');
 
-					await client.reply(from, P.poll.createdWithActions.replace('{0}', actionsText), message);
+					await client.reply(from, t(locale, 'poll.poll.createdWithActions', [actionsText]), message);
 				}
 			} catch (error) {
-				await client.reply(from, P.errors.failedCreate.replace('{0}', error.message), message);
+				await client.reply(from, t(locale, 'poll.errors.failedCreate', [error.message]), message);
 			}
 		}
 	}

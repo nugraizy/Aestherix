@@ -1,5 +1,5 @@
 import { manager } from '../../core/manager.js';
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import prisma from '../../helper/database/prisma.js';
 import { color } from '../../utils/modules/color.js';
 import { defineCommand } from '../_define.js';
@@ -58,13 +58,13 @@ export default defineCommand({
 		const instance = await prisma.botInstance.findUnique({ where: { sessionName } }).catch(() => null);
 
 		if (!instance) {
-			return client.reply(from, L.owner.errors.botNotFound.replace('{0}', sessionName), message);
+			return client.reply(from, t(locale, 'common.owner.errors.botNotFound', [sessionName]), message);
 		}
 
 		const isActive = action === 'enable';
 
 		if (instance.isActive === isActive) {
-			const label = isActive ? L.owner.errors.alreadyActive.replace('{0}', sessionName) : L.owner.errors.alreadyDisabled.replace('{0}', sessionName);
+			const label = isActive ? t(locale, 'common.owner.errors.alreadyActive', [sessionName]) : t(locale, 'common.owner.errors.alreadyDisabled', [sessionName]);
 
 			return client.reply(from, label, message);
 		}
@@ -82,12 +82,12 @@ export default defineCommand({
 				manager.remove(sessionName);
 			}
 
-			return client.reply(from, L.owner.success.botDisabled.replace('{0}', sessionName), message);
+			return client.reply(from, t(locale, 'common.owner.success.botDisabled', [sessionName]), message);
 		}
 
 		return client.reply(
 			from,
-			L.owner.success.botEnabled.replace('{0}', sessionName).replace('{1}', color(`!addbot ${sessionName}`, 'lilac')),
+			t(locale, 'common.owner.success.botEnabled', [sessionName, color(`!addbot ${sessionName}`, 'lilac')]),
 			message
 		);
 	}

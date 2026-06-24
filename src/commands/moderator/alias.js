@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, t, useLocale } from '../../helper/i18n/index.js';
 import { getCustomAliases, setCustomAliases } from '../../helper/groups/settings/group-settings.js';
 import configuration from '../../helper/config/connect.js';
 import { defineCommand } from '../_define.js';
@@ -38,7 +38,7 @@ export default defineCommand({
 			}
 
 			if (Object.keys(aliases).length >= MAX_ALIASES) {
-				return await client.reply(from, L.alias.errors.maxReached.replace('{0}', MAX_ALIASES), message);
+				return await client.reply(from, t(locale, 'common.alias.errors.maxReached', [MAX_ALIASES]), message);
 			}
 
 			const { commands, aliases: globalAliases } = configuration.registry;
@@ -51,7 +51,7 @@ export default defineCommand({
 			aliases[shortName] = targetCmd;
 			await setCustomAliases(from, aliases, sessionName);
 
-			return await client.reply(from, L.alias.success.added.replace('{0}', shortName).replace('{1}', targetCmd), message);
+			return await client.reply(from, t(locale, 'common.alias.success.added', [shortName, targetCmd]), message);
 		}
 
 		if (sub === 'remove') {
@@ -62,13 +62,13 @@ export default defineCommand({
 			}
 
 			if (!aliases[shortName]) {
-				return await client.reply(from, L.alias.errors.notFound.replace('{0}', shortName), message);
+				return await client.reply(from, t(locale, 'common.alias.errors.notFound', [shortName]), message);
 			}
 
 			delete aliases[shortName];
 			await setCustomAliases(from, aliases, sessionName);
 
-			return await client.reply(from, L.alias.success.removed.replace('{0}', shortName), message);
+			return await client.reply(from, t(locale, 'common.alias.success.removed', [shortName]), message);
 		}
 
 		if (sub === 'list') {

@@ -1,4 +1,5 @@
 import { getLocale, t } from '../../helper/i18n/index.js';
+import { getPrefix } from '../../helper/modules/prefix.js';
 import { defineCommand } from '../_define.js';
 
 import * as convert from './werewolf/subcommands/convert.js';
@@ -41,6 +42,12 @@ const SUBCOMMANDS = {
 	help
 };
 
+const WW_COMMANDS = [
+	'newGame', 'join', 'start', 'exit', 'delete',
+	'kill', 'seer', 'guard', 'heal', 'poison',
+	'shoot', 'lovers', 'peek', 'convert', 'vote', 'lang'
+];
+
 export default defineCommand({
 	name: 'werewolf',
 	minifiedDescription: 'Play Werewolf (5–20 players, 10 roles, id/en)',
@@ -58,8 +65,9 @@ export default defineCommand({
 
 		if (!module) {
 			const locale = await getLocale(ctx.from);
+			const prefix = getPrefix(ctx) + 'ww';
 
-			return client.reply(ctx.from, t(locale, 'werewolf.help'), ctx.message);
+			return client.reply(ctx.from, t(locale, 'werewolf.help', [prefix, ...WW_COMMANDS]), ctx.message);
 		}
 
 		return module.run(ctx, client);

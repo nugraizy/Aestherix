@@ -807,48 +807,48 @@ export class ClientSocket extends EventEmitter {
 	}
 
 	async #getParticipantSkipReason(action, participant, admins, force, locale = 'en') {
-		const { useLocale } = await import('../helper/i18n/index.js');
+		const { t, useLocale } = await import('../helper/i18n/index.js');
 		const L = useLocale(locale, 'common');
 		const tag = `@${participant.split('@')[0]}`;
 		const isAdmin = admins.includes(participant);
 
 		if (action === 'remove' && isAdmin && !force) {
-			return L.errors.cannotRemoveAdmin.replace('{0}', tag);
+			return t(locale, 'common.errors.cannotRemoveAdmin', [tag]);
 		}
 
 		if (action === 'promote' && isAdmin) {
-			return L.errors.alreadyAdmin.replace('{0}', tag);
+			return t(locale, 'common.errors.alreadyAdmin', [tag]);
 		}
 
 		if (action === 'demote' && !isAdmin) {
-			return L.errors.alreadyMember.replace('{0}', tag);
+			return t(locale, 'common.errors.alreadyMember', [tag]);
 		}
 
 		return null;
 	}
 
 	async #handleAddResponse(jid, participant, response, quoted, locale = 'en') {
-		const { useLocale } = await import('../helper/i18n/index.js');
+		const { t, useLocale } = await import('../helper/i18n/index.js');
 		const L = useLocale(locale, 'common');
 		const status = response?.[0]?.status;
 
 		if (status === '500') {
 			await this.send(jid, { text: L.errors.groupFull }, quoted);
 		} else if (status === '408') {
-			await this.send(jid, { text: L.errors.justLeft.replace('{0}', participant) }, quoted);
+			await this.send(jid, { text: t(locale, 'common.errors.justLeft', [participant]) }, quoted);
 		} else if (status === '403') {
 			await this.#sendGroupInvite(jid, participant, response, quoted);
 		} else if (status === '401') {
-			await this.send(jid, { text: L.errors.blockedBot.replace('{0}', participant) }, quoted);
+			await this.send(jid, { text: t(locale, 'common.errors.blockedBot', [participant]) }, quoted);
 		}
 	}
 
 	async #sendGroupInvite(jid, participant, response, quoted) {
-		const { getLocale, useLocale } = await import('../helper/i18n/index.js');
+		const { getLocale, t, useLocale } = await import('../helper/i18n/index.js');
 		const locale = await getLocale(jid);
 		const L = useLocale(locale, 'common');
 
-		await this.send(jid, { text: L.core.info.privacyInvite.replace('{0}', participant) }, quoted);
+		await this.send(jid, { text: t(locale, 'common.core.info.privacyInvite', [participant]) }, quoted);
 
 		const metadata = await this.#socket.groupMetadata(jid);
 		let thumbnail;

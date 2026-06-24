@@ -5,7 +5,7 @@ import { findBestMatch } from 'string-similarity';
 
 import { autoReplyManager } from '../helper/auto-reply.js';
 import configuration from '../helper/config/connect.js';
-import { Limit, checkAfk, deleteAfk, getAfk } from '../helper/index.js';
+import { checkAfk, deleteAfk, getAfk } from '../helper/index.js';
 import { Cache } from '../helper/modules/cache.js';
 import { getLocale, useLocale, t } from '../helper/i18n/index.js';
 import { cmdId, setPrefix } from '../helper/modules/prefix.js';
@@ -16,6 +16,18 @@ import { Logger } from './logger.js';
 import { getAutomodRules, getCustomAliases } from '../helper/groups/settings/group-settings.js';
 import { PipelineExecutor } from './pipeline.js';
 import { RetryManager } from './retry-manager.js';
+import { MiddlewareChain } from './middleware-chain.js';
+import {
+	banned,
+	cooldown,
+	disabledCommand,
+	executionLock,
+	gamesDisabled,
+	maintenance,
+	restricted,
+	roleCheck,
+	usageLimit
+} from '../middleware/index.js';
 
 const EVALY = ['/>', '$>', '=>', '!>'];
 const SEPARATOR = color('→', 'green');
@@ -68,6 +80,7 @@ export class MessageHandler {
 	#retryManager = new RetryManager();
 	#automodCounters = new Map();
 	#replyChains = new Cache({ maxAge: 300_000, limit: 500 });
+	#middlewareChain = new MiddlewareChain();
 	#lastLog = {
 		kind: null,
 		sender: null,
@@ -88,13 +101,33 @@ export class MessageHandler {
 		this.#flags = options.flags ?? {};
 		ensureStdoutWriteTracking();
 
+		this.#initMiddleware();
+
+		this.#configuration.middlewareChain = this.#middlewareChain;
+
 		const cleanupTimer = setInterval(() => this.#sweepStaleEntries(), 120_000);
 
 		cleanupTimer.unref();
 	}
 
+	#initMiddleware() {
+		this.#middlewareChain.use(disabledCommand(this.#configuration, this.#retryManager));
+		this.#middlewareChain.use(executionLock(this.#executionLocks));
+		this.#middlewareChain.use(maintenance(this.#configuration));
+		this.#middlewareChain.use(banned());
+		this.#middlewareChain.use(restricted(this.#flags));
+		this.#middlewareChain.use(gamesDisabled());
+		this.#middlewareChain.use(roleCheck(this.#configuration));
+		this.#middlewareChain.use(usageLimit(this.#flags));
+		this.#middlewareChain.use(cooldown(this.#router, this.#flags));
+	}
+
 	get router() {
 		return this.#router;
+	}
+
+	get middlewareChain() {
+		return this.#middlewareChain;
 	}
 
 	get #log() {
@@ -194,7 +227,13 @@ export class MessageHandler {
 			const slowCheck = slowModeManager.check(message.from, message.sender, message.isAdmin);
 
 			if (!slowCheck.allowed) {
-				await client.reply(message.from, t(message.locale ?? 'id', 'common.core.errors.slowModeActive', [slowCheck.remaining]), message);
+				const locale = await getLocale(message.from);
+
+				await client.reply(
+					message.from,
+					t(locale, 'common.core.errors.slowModeActive', [slowCheck.remaining]),
+					message
+				);
 
 				return;
 			}
@@ -280,7 +319,8 @@ export class MessageHandler {
 			const result = await processDashboardConfirmationAction({ actionId: body, senderJid: message.sender });
 
 			if (result.handled) {
-				const L = useLocale(localMessage.locale ?? 'id', 'common');
+				const locale = await getLocale(message.from);
+				const L = useLocale(locale, 'common');
 				const reply = result.approved
 					? L.core.errors.dashboardLoginConfirmed
 					: result.message || L.core.errors.dashboardLoginRejected;
@@ -299,7 +339,13 @@ export class MessageHandler {
 			}
 
 			this.#retryManager.reEnable(cmdName);
-			await client.reply(message.from, t(localMessage.locale ?? 'id', 'common.core.errors.commandReenabled', [cmdName]), message.raw);
+			const locale = await getLocale(message.from);
+
+			await client.reply(
+				message.from,
+				t(locale, 'common.core.errors.commandReenabled', [cmdName]),
+				message.raw
+			);
 
 			return;
 		}
@@ -498,175 +544,20 @@ export class MessageHandler {
 			return 'skip';
 		}
 
-		const disabled = this.#configuration.registry.disabledCommands;
+		const ctx = {
+			...localMessage,
+			command,
+			client,
+			isOwner: localMessage.isOwner,
+			isGroup: localMessage.isGroup,
+			isAdmin: localMessage.isAdmin,
+			sender: localMessage.sender,
+			from: localMessage.from,
+			message: localMessage.message,
+			locale: localMessage.locale
+		};
 
-		if (disabled?.has(command.name)) {
-			void client.reply(
-				localMessage.from,
-				t(localMessage.locale ?? 'id', 'common.core.errors.commandDisabledDashboard', [command.name]),
-				localMessage.message
-			);
-
-			return 'skip';
-		}
-
-		if (this.#retryManager.isDisabled(command.name)) {
-			const remaining = this.#retryManager.getDisableRemaining(command.name);
-			const L = useLocale(localMessage.locale ?? 'id', 'common');
-
-			if (localMessage.isOwner) {
-				const builder = new client.TemplateBuilder.Native();
-
-				await builder
-					.destination(localMessage.from)
-					.body(t(localMessage.locale ?? 'id', 'common.core.errors.commandDisabled', [command.name, remaining]))
-					.buttons(builder.button.reply({ display: L.core.success.enable, id: `enable:${command.name}` }))
-					.send();
-			} else {
-				void client.reply(
-					localMessage.from,
-					t(localMessage.locale ?? 'id', 'common.core.errors.commandDisabled', [command.name, remaining]),
-					localMessage.message
-				);
-			}
-
-			return 'skip';
-		}
-
-		if (command.category === 'Owner' && !localMessage.isOwner) {
-			const L = useLocale(localMessage.locale ?? 'id', 'common');
-
-			void client.reply(localMessage.from, L.core.errors.ownerOnly, localMessage.message);
-			return 'skip';
-		}
-
-		if (this.#configuration.settings?.maintenance && !localMessage.isOwner) {
-			const L = useLocale(localMessage.locale ?? 'id', 'common');
-
-			void client.reply(localMessage.from, L.core.errors.maintenance, localMessage.message);
-			return 'skip';
-		}
-
-		if (HEAVY_CATEGORIES.has(command.category)) {
-			const lockedBy = this.#checkExecutionLock(localMessage.sender);
-
-			if (lockedBy) {
-				void client.reply(localMessage.from, t(localMessage.locale ?? 'id', 'common.core.errors.executionLocked', [lockedBy]), localMessage.message);
-				return 'skip';
-			}
-		}
-
-		if (localMessage.isOwner) {
-			const isSelf = localMessage.sender === this.#configuration.botJid;
-
-			if (isSelf) {
-				const selfRole = Limit.checkRole(localMessage.sender);
-
-				if (command.premium && selfRole.role !== 'PREMIUM' && selfRole.role !== 'OWNER') {
-					const L = useLocale(localMessage.locale ?? 'id', 'common');
-
-					void client.reply(localMessage.from, L.core.errors.premiumOnly, localMessage.message);
-					return 'skip';
-				}
-
-				return 'pass';
-			}
-
-			return 'pass';
-		}
-
-		if (localMessage.isBanned) {
-			void client.send(localMessage.from, { react: { text: '🖕🏼', key: localMessage.message.key } });
-			return 'skip';
-		}
-
-		if (this.#flags.restrict && command.restrict) {
-			const L = useLocale(localMessage.locale ?? 'id', 'common');
-
-			void client.reply(localMessage.from, L.core.errors.restricted, localMessage.message);
-			return 'skip';
-		}
-
-		if (
-			command.category === 'Games' &&
-			localMessage.isGroup &&
-			!localMessage.isAdmin &&
-			localMessage?.[localMessage?.from]?.games === 'disable'
-		) {
-			const L = useLocale(localMessage.locale ?? 'id', 'common');
-
-			void client.reply(
-				localMessage.from,
-				L.core.errors.gameModeDisabled,
-				localMessage.message
-			);
-
-			return 'skip';
-		}
-
-		if (command.category === 'Moderation') {
-			if (!localMessage.isGroup) {
-				const L = useLocale(localMessage.locale ?? 'id', 'common');
-
-				void client.reply(localMessage.from, L.core.errors.groupOnly, localMessage.message);
-				return 'skip';
-			}
-
-			if (!localMessage.isAdmin) {
-				const L = useLocale(localMessage.locale ?? 'id', 'common');
-
-				void client.reply(localMessage.from, L.core.errors.adminOnly, localMessage.message);
-				return 'skip';
-			}
-		}
-
-		const userRole = Limit.checkRole(localMessage.sender);
-
-		if (command.premium && userRole.role !== 'PREMIUM' && userRole.role !== 'OWNER') {
-			if (this.#isHelpRequest(localMessage, command)) {
-				await this.#sendHelp(client, localMessage, command, true);
-				return 'skip';
-			}
-
-			const L = useLocale(localMessage.locale ?? 'id', 'common');
-
-			void client.reply(localMessage.from, L.core.errors.premiumOnly, localMessage.message);
-			return 'skip';
-		}
-
-		if (!this.#flags.unlimited) {
-			if (!Limit.checkExist(localMessage.sender) && userRole.role !== 'OWNER' && userRole.role !== 'PREMIUM') {
-				Limit.upsert(localMessage.sender, 0, userRole.role);
-			}
-
-			const limit = Limit.reduceLimit(localMessage.sender, command.limit);
-
-		if (limit.error) {
-			void client.reply(
-				localMessage.from,
-				t(localMessage.locale ?? 'id', 'common.core.errors.commandLimitExceeded', [command.name, command.limit]),
-				localMessage.message
-			);
-
-			return 'skip';
-		}
-		}
-
-		if (this.#flags.coolDown) {
-			const { onCooldown, remaining } = this.#router.checkCooldown(localMessage.sender, command.name, command.cooldown);
-
-			if (onCooldown) {
-				void client.reply(
-					localMessage.from,
-					t(localMessage.locale ?? 'id', 'common.core.errors.commandOnCooldown', [command.name, remaining]),
-					localMessage.message
-				);
-
-				return 'skip';
-			}
-		}
-
-		return 'pass';
+		return this.#middlewareChain.execute(ctx);
 	}
 
 	async #run(localMessage, command, client) {
@@ -691,6 +582,20 @@ export class MessageHandler {
 			localMessage.chainHistory = chain;
 		}
 
+		const beforeHooks = this.#configuration.pluginHooks.beforeCommand;
+
+		for (const hook of beforeHooks) {
+			try {
+				const result = await hook(localMessage, command, client);
+
+				if (result === false) {
+					return;
+				}
+			} catch (hookErr) {
+				void this.#log?.error?.('Plugin beforeCommand hook error:', hookErr.message);
+			}
+		}
+
 		const sender = localMessage.sender;
 		const isHeavy = HEAVY_CATEGORIES.has(command.category);
 
@@ -706,12 +611,32 @@ export class MessageHandler {
 			if (ownerNoTimeout || !timeoutMs) {
 				await command.run(localMessage, client, this.#store);
 			} else {
-				const timeoutPromise = new Promise((_, reject) =>
-					setTimeout(() => {
-						timedOut = true;
-						reject(new Error(t(localMessage.locale ?? 'id', 'common.core.errors.commandTimedOut', [command.name, Math.round(timeoutMs / 1000)])));
-					}, timeoutMs)
-				);
+				const configuration = this.#configuration;
+				let interval;
+				const timeoutPromise = new Promise((_, reject) => {
+					let elapsed = 0;
+
+					interval = setInterval(() => {
+						if (configuration.input.has(sender)) {
+							return;
+						}
+
+						elapsed += 1000;
+
+						if (elapsed >= timeoutMs) {
+							clearInterval(interval);
+							timedOut = true;
+							reject(
+								new Error(
+									t(localMessage.locale ?? 'id', 'common.core.errors.commandTimedOut', [
+										command.name,
+										Math.round(timeoutMs / 1000)
+									])
+								)
+							);
+						}
+					}, 1000);
+				});
 
 				const firewall = new Proxy(client, {
 					get(target, prop) {
@@ -725,15 +650,37 @@ export class MessageHandler {
 					}
 				});
 
-				await Promise.race([command.run(localMessage, firewall, this.#store), timeoutPromise]);
+				await Promise.race([command.run(localMessage, firewall, this.#store), timeoutPromise]).finally(
+					() => clearInterval(interval)
+				);
 			}
 
 			this.#router.trackUsage(command.name).catch(noop);
 			this.#retryManager.clearCounter(localMessage.sender, command.name);
+
+			const afterHooks = this.#configuration.pluginHooks.afterCommand;
+
+			for (const hook of afterHooks) {
+				try {
+					await hook(localMessage, command, client);
+				} catch (hookErr) {
+					void this.#log?.error?.('Plugin afterCommand hook error:', hookErr.message);
+				}
+			}
 		} catch (err) {
 			if (timedOut) {
 				void client.reply(localMessage.from, `⏱️ ${err.message}`, localMessage.message);
 			} else {
+				const errorHooks = this.#configuration.pluginHooks.onError;
+
+				for (const hook of errorHooks) {
+					try {
+						await hook(localMessage, command, client, err);
+					} catch (hookErr) {
+						void this.#log?.error?.('Plugin onError hook error:', hookErr.message);
+					}
+				}
+
 				await this.#handleError(err, localMessage, command, client).catch(() => {});
 			}
 		} finally {
@@ -786,8 +733,11 @@ export class MessageHandler {
 	}
 
 	async #sendHelp(client, localMessage, command, isPremiumNote = false) {
-		const L = useLocale(localMessage.locale ?? 'id', 'common');
-		let help = `${t(localMessage.locale ?? 'id', 'common.core.help.description', [command.description])}\n${t(localMessage.locale ?? 'id', 'common.core.help.usage', [command.usage])}\n${t(localMessage.locale ?? 'id', 'common.core.help.cooldown', [command.cooldown])}\n${t(localMessage.locale ?? 'id', 'common.core.help.aliases', [command.aliases.map((v) => `!${v}`).join(', ')])}.`;
+		const locale = await getLocale(localMessage.from);
+		const L = useLocale(locale, 'common');
+		const resolvedDesc =
+			t(locale, `commands.${command.name}.description`, command.descriptionArgs ?? []) || command.description;
+		let help = `${t(locale, 'common.core.help.description', [resolvedDesc])}\n${t(locale, 'common.core.help.usage', [command.usage])}\n${t(locale, 'common.core.help.cooldown', [command.cooldown])}\n${t(locale, 'common.core.help.aliases', [command.aliases.map((v) => `!${v}`).join(', ')])}.`;
 
 		if (isPremiumNote) {
 			help += `\n${L.core.errors.premiumOnlyNote}`;
@@ -797,12 +747,13 @@ export class MessageHandler {
 	}
 
 	async #handleError(err, localMessage, command, client) {
-		const L = useLocale(localMessage.locale ?? 'id', 'common');
+		const locale = await getLocale(localMessage.from);
+		const L = useLocale(locale, 'common');
 		const builder = new client.TemplateBuilder.Native();
 		const errorLocation = this.#getErrorLocation(err?.stack);
 		let str = !localMessage.isOwner ? L.core.info.reportToOwner : '\n';
 
-		str += `${t(localMessage.locale ?? 'id', 'common.core.error.type', [err.name || 'Unknown'])}\n${t(localMessage.locale ?? 'id', 'common.core.error.message', [err.message || 'Unknown'])}\n${t(localMessage.locale ?? 'id', 'common.core.error.file', [errorLocation.file])}\n${t(localMessage.locale ?? 'id', 'common.core.error.line', [errorLocation.line])}\n${L.core.errorReport.stackTrace}\n${(localMessage.isOwner ? err?.stack?.substring(0, 70) : err?.stack?.substring(0, 20)) || 'Unknown'}`;
+		str += `${t(locale, 'common.core.errorReport.type', [err.name || 'Unknown'])}\n${t(locale, 'common.core.errorReport.message', [err.message || 'Unknown'])}\n${t(locale, 'common.core.errorReport.file', [errorLocation.file])}\n${t(locale, 'common.core.errorReport.line', [errorLocation.line])}\n${L.core.errorReport.stackTrace}\n${(localMessage.isOwner ? err?.stack?.substring(0, 70) : err?.stack?.substring(0, 20)) || 'Unknown'}`;
 
 		const failure = this.#retryManager.recordFailure(localMessage.sender, command.name);
 		let retryId = null;
@@ -853,7 +804,9 @@ export class MessageHandler {
 							: null,
 						canRetry
 							? builder.button.reply({
-									display: t(localMessage.locale ?? 'id', 'common.core.error.left', [this.#retryManager.maxRetries - failure.count]),
+									display: t(localMessage.locale ?? 'id', 'common.core.errorReport.left', [
+										this.#retryManager.maxRetries - failure.count
+									]),
 									id: retryBody
 								})
 							: null
@@ -973,11 +926,7 @@ export class MessageHandler {
 			const { reasons, since, name } = getAfk(message.mediaData.participant);
 			const time = getTimeSince(since);
 
-			client.reply(
-				message.from,
-				t(message.locale ?? 'id', 'common.core.afk.isAfk', [name, time, reasons]),
-				message.message
-			);
+			client.reply(message.from, t(message.locale ?? 'id', 'common.core.afk.isAfk', [name, time, reasons]), message.message);
 		}
 
 		if (message.mention?.length) {
@@ -1067,6 +1016,7 @@ export class MessageHandler {
 			return false;
 		}
 
+		const expectedType = inputState.expectedType;
 		const textLikeTypes = [
 			'conversation',
 			'extendedTextMessage',
@@ -1075,8 +1025,10 @@ export class MessageHandler {
 			'buttonsResponseMessage',
 			'listResponseMessage'
 		];
+		const isTextExpected = !expectedType || !Array.isArray(expectedType) || expectedType.length === 0 ||
+			expectedType.some((v) => textLikeTypes.includes(v));
 
-		if (inputState.expectedType.some((v) => textLikeTypes.includes(v)) && textLikeTypes.includes(message.type)) {
+		if (isTextExpected && textLikeTypes.includes(message.type)) {
 			if (message.isCmd) {
 				inputState.resolve({ message: message.body, quoted: message.message, invalid: false, command: true });
 				return false;
@@ -1086,7 +1038,7 @@ export class MessageHandler {
 			return true;
 		}
 
-		if (inputState.expectedType.includes(message.type)) {
+		if (!expectedType || expectedType.includes(message.type)) {
 			inputState.resolve({ message: message.message, quoted: message.message, invalid: false });
 			return true;
 		}

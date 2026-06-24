@@ -1,4 +1,4 @@
-import { getLocale, useLocale } from '../../helper/i18n/index.js';
+import { getLocale, useLocale, t } from '../../helper/i18n/index.js';
 import { BOT_NAME } from '../../core/constants.js';
 
 import { Cache } from '../../helper/modules/cache.js';
@@ -37,7 +37,7 @@ function sendResult(state, from, message, client, ctx) {
 	const caption = formatMangaCaption(manga);
 	const isLast = currentIndex + 1 >= items.length;
 	const Ls = useLocale(ctx.locale, 'search');
-	const body = `${Ls.titles.comixSearch.formatHeaders()}\n\n${caption.formatForm()}\n\n${Ls.labels.resultOf.replace('{0}', currentIndex + 1).replace('{1}', items.length)}\nID : ${manga.id}`;
+	const body = `${Ls.titles.comixSearch.formatHeaders()}\n\n${caption.formatForm()}\n\n${t(ctx.locale, 'search.labels.resultOf', [currentIndex + 1, items.length])}\nID : ${manga.id}`;
 
 	const builder = new client.TemplateBuilder.Native();
 
@@ -147,7 +147,7 @@ export default defineCommand({
 
 		searchSessions.set(sessionId, state);
 
-		await wait.update(Ls.labels.foundResults.replace('{0}', result.items.length));
+		await wait.update(t(locale, 'search.labels.foundResults', [result.items.length]));
 		await sendResult(state, from, message, client, { prefix, locale });
 	}
 });

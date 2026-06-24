@@ -197,7 +197,7 @@ async function downloadAudio(client, track, { from, message, prettyNumber, wait,
 		{ quoted: message }
 	);
 
-	await wait.update(t(locale, 'common.core.progress.commandFinishedSingle'));
+	await wait.update(L.core.progress.commandFinishedSingle);
 
 	loggers.warning(
 		`${color('Downloaded Qobuz Audio from', 'pink')} ${color(downloadInfo.domain || 'qobuz', 'orange')} for ${color(prettyNumber, 'lilac')}`

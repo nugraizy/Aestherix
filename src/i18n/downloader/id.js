@@ -22,6 +22,7 @@ export default /** @type {const} */ ({
 		deviantArt: 'Deviant Art'
 	},
 	labels: {
+		header: 'Daftar',
 		verified: 'Terverifikasi',
 		blueVerified: 'Terverifikasi Biru',
 		published: 'Terbit',
