@@ -93,9 +93,6 @@ class Comix {
 
 	async tryFetchJson(url, fetcher) {
 		try {
-			/**
-			 * @type {import('undici').Response} response
-			 */
 			const response = await fetcher(url, {
 				headers: {
 					'User-Agent':
@@ -160,31 +157,36 @@ class Comix {
 		return ids;
 	}
 
-	async fetchMangaList(params) {
-		const url = new URL(`${this.apiBase}/manga`);
+	async fetchMangaListViaBrowse(browseUrl, posterQuality) {
+		const data = await ComixBrowserCapture.captureBrowseList({ browseUrl });
 
-		url.search = params.toString();
+		if (!data?.result?.items) {
+			return { items: [], pageInfo: { page: 1, lastPage: 1, hasNext: false } };
+		}
 
-		const data = await this.fetchJSON(url.toString());
-		const items = data?.result?.items || [];
-		const pageInfo = ComixUtils.parsePageInfo(data?.result || {});
+		const items = data.result.items;
+		const pageInfo = ComixUtils.parsePageInfo(data.result);
+		const mapped = items.map((manga) => ComixUtils.mapManga(manga, posterQuality));
 
-		return { items, pageInfo };
+		return { items: mapped, pageInfo };
 	}
 
-	fetchMangaById(id) {
-		return this.fetchJSON(new URL(`${this.apiBase}/manga/${id}`).toString());
+	async fetchMangaById(id) {
+		const slug = typeof id === 'string' && id.includes('-') ? id : id;
+		const detailUrl = `${this.webBase}/title/${slug}`;
+
+		return ComixBrowserCapture.captureDetail({ detailUrl });
 	}
 
 	async getComics(options = {}) {
-		const params = ComixUtils.buildMangaQuery(options);
-		const { items, pageInfo } = await this.fetchMangaList(params);
 		const posterQuality = options.posterQuality || 'large';
-		const mapped = items.map((manga) => ComixUtils.mapManga(manga, posterQuality));
+		const params = ComixUtils.buildMangaQuery(options);
+		const browseUrl = `${this.webBase}/browse?${params.toString()}`;
+		const { items, pageInfo } = await this.fetchMangaListViaBrowse(browseUrl, posterQuality);
 
 		return new ComixResponse({
 			comix: this,
-			items: mapped,
+			items,
 			pageInfo,
 			context: {
 				type: 'list',
@@ -197,30 +199,54 @@ class Comix {
 		const idFromUrl = ComixUtils.extractIdFromUrl(query);
 
 		if (idFromUrl) {
-			const data = await this.fetchMangaById(idFromUrl);
+			const slug = ComixUtils.normalizeSlugInput(query);
 			const posterQuality = options.posterQuality || 'large';
-			const manga = ComixUtils.mapManga(data.result, posterQuality);
 
-			return new ComixResponse({
-				comix: this,
-				items: [manga],
-				pageInfo: { page: 1, lastPage: 1, hasNext: false },
-				context: { type: 'search', nextPage: null }
-			});
+			try {
+				const data = await this.fetchMangaById(slug);
+
+				if (data?.result?.hid) {
+					const manga = ComixUtils.mapManga(data.result, posterQuality);
+
+					return new ComixResponse({
+						comix: this,
+						items: [manga],
+						pageInfo: { page: 1, lastPage: 1, hasNext: false },
+						context: { type: 'search', nextPage: null }
+					});
+				}
+			} catch {
+				// Fallback to title search below
+			}
+
+			const titleFromSlug = slug.replace(/-\d+$/, '').replace(/-/g, ' ');
+
+			if (titleFromSlug) {
+				const params = ComixUtils.buildMangaQuery({ ...options, query: titleFromSlug });
+				const browseUrl = `${this.webBase}/browse?${params.toString()}`;
+				const { items, pageInfo } = await this.fetchMangaListViaBrowse(browseUrl, posterQuality);
+
+				return new ComixResponse({
+					comix: this,
+					items,
+					pageInfo,
+					context: { type: 'search', nextPage: null }
+				});
+			}
 		}
 
-		const params = ComixUtils.buildMangaQuery({ ...options, query });
-		const { items, pageInfo } = await this.fetchMangaList(params);
 		const posterQuality = options.posterQuality || 'large';
-		const mapped = items.map((manga) => ComixUtils.mapManga(manga, posterQuality));
+		const params = ComixUtils.buildMangaQuery({ ...options, query });
+		const browseUrl = `${this.webBase}/browse?${params.toString()}`;
+		const { items, pageInfo } = await this.fetchMangaListViaBrowse(browseUrl, posterQuality);
 
-		for (const manga of mapped) {
+		for (const manga of items) {
 			this.mangaCache.set(String(manga.id), manga);
 		}
 
 		return new ComixResponse({
 			comix: this,
-			items: mapped,
+			items,
 			pageInfo,
 			context: {
 				type: 'search',
@@ -230,14 +256,14 @@ class Comix {
 	}
 
 	async filter(filters = {}, options = {}) {
-		const params = ComixUtils.buildMangaQuery({ ...options, filters });
-		const { items, pageInfo } = await this.fetchMangaList(params);
 		const posterQuality = options.posterQuality || 'large';
-		const mapped = items.map((manga) => ComixUtils.mapManga(manga, posterQuality));
+		const params = ComixUtils.buildMangaQuery({ ...options, filters });
+		const browseUrl = `${this.webBase}/browse?${params.toString()}`;
+		const { items, pageInfo } = await this.fetchMangaListViaBrowse(browseUrl, posterQuality);
 
 		return new ComixResponse({
 			comix: this,
-			items: mapped,
+			items,
 			pageInfo,
 			context: {
 				type: 'filter',
@@ -275,8 +301,9 @@ class Comix {
 		const data = await this.fetchMangaById(mangaId);
 		const posterQuality = mangaInput?.posterQuality || 'large';
 		const mappedInput = mangaInput && typeof mangaInput === 'object' && mangaInput.id && mangaInput.title ? mangaInput : null;
+		const manga = data?.result || (data?.hid ? data : null);
 
-		if (!data?.result) {
+		if (!manga) {
 			if (mappedInput) {
 				return new ComixItemResponse({ comix: this, item: mappedInput });
 			}
@@ -284,7 +311,7 @@ class Comix {
 			throw new Error('Comix detail not found');
 		}
 
-		return new ComixItemResponse({ comix: this, item: ComixUtils.mapManga(data.result, posterQuality) });
+		return new ComixItemResponse({ comix: this, item: ComixUtils.mapManga(manga, posterQuality) });
 	}
 
 	async getChapters(mangaInput, options = {}) {
@@ -299,12 +326,17 @@ class Comix {
 
 		if (!fullSlug.includes('-')) {
 			const detail = await this.fetchMangaById(mangaId).catch(() => null);
-			const url = detail?.result?.url || '';
+			const manga = detail?.result || (detail?.hid ? detail : null);
+			const url = manga?.url || '';
 			const extracted = url.replace(/.*\/title\//, '').replace(/^\//, '');
 
 			if (extracted) {
 				fullSlug = extracted;
 			}
+		}
+
+		if (options.pages) {
+			return this.getChaptersPage(fullSlug, 1, options);
 		}
 
 		const deduplicate = options.deduplicate !== false;
@@ -357,6 +389,64 @@ class Comix {
 			items: finalChapters,
 			pageInfo: { page: 1, lastPage: 1, hasNext: false },
 			context: { type: 'chapters', item: mangaInput }
+		});
+	}
+
+	async getChaptersPage(fullSlug, page = 1, options = {}) {
+		const deduplicate = options.deduplicate !== false;
+		const cacheKey = `${fullSlug}:page:${page}`;
+		const cached = this.chaptersListCache.get(cacheKey);
+
+		if (cached && Date.now() - cached.timestamp < Comix.CHAPTERS_CACHE_TTL) {
+			const chapters = cached.items.map((chapter) => ComixUtils.mapChapter(chapter, fullSlug, this.webBase));
+			const finalChapters = deduplicate ? ComixUtils.deduplicateChapters(chapters) : chapters;
+
+			for (const ch of finalChapters) {
+				this.chapterCache.set(String(ch.id), ch);
+			}
+
+			return new ComixResponse({
+				comix: this,
+				items: finalChapters,
+				pageInfo: cached.pageInfo,
+				context: {
+					type: 'chapters',
+					item: fullSlug,
+					nextPage: cached.pageInfo.hasNext ? () => this.getChaptersPage(fullSlug, page + 1, options) : null,
+					prevPage: page > 1 ? () => this.getChaptersPage(fullSlug, page - 1, options) : null
+				}
+			});
+		}
+
+		const titleUrl = `${this.webBase}/title/${fullSlug}`;
+		const result = await ComixBrowserCapture.captureChapterPage({ titleUrl, page });
+
+		const items = (result?.items || []).map((chapter) => ComixUtils.mapChapter(chapter, fullSlug, this.webBase));
+		const finalItems = deduplicate ? ComixUtils.deduplicateChapters(items) : items;
+
+		for (const ch of finalItems) {
+			this.chapterCache.set(String(ch.id), ch);
+		}
+
+		const pageInfo = {
+			page,
+			lastPage: result?.lastPage || 1,
+			hasNext: result?.hasNext ?? page < (result?.lastPage || 1),
+			hasPrev: page > 1
+		};
+
+		this.chaptersListCache.set(cacheKey, { items: result?.items || [], pageInfo, timestamp: Date.now() });
+
+		return new ComixResponse({
+			comix: this,
+			items: finalItems,
+			pageInfo,
+			context: {
+				type: 'chapters',
+				item: fullSlug,
+				nextPage: pageInfo.hasNext ? () => this.getChaptersPage(fullSlug, page + 1, options) : null,
+				prevPage: pageInfo.hasPrev ? () => this.getChaptersPage(fullSlug, page - 1, options) : null
+			}
 		});
 	}
 
@@ -437,10 +527,26 @@ class Comix {
 
 				if (task.scrambled) {
 					const res = await this.#fetchWithFallback(task.url);
-					const seed = parseInt(res.headers.get('x-scramble-seed') || '0', 10);
-					const raw = Buffer.from(await res.arrayBuffer());
+					const headers = {};
+					const rawHeaders = res.headers;
 
-					buffer = seed ? await Descrambler.descramble(raw, seed) : raw;
+					if (rawHeaders.entries) {
+						for (const [key, value] of rawHeaders.entries()) {
+							headers[key.toLowerCase()] = value;
+						}
+					} else if (rawHeaders.get) {
+						for (const key of ['x-scramble-seed', 'x-scramble-grid', 'x-scramble-algo', 'x-scramble-hash', 'x-enc-seed', 'x-enc-algo', 'x-enc-len']) {
+							headers[key] = rawHeaders.get(key) || '';
+						}
+					}
+
+					const rawBuf = Buffer.from(await res.arrayBuffer());
+
+					buffer = await Descrambler.processPage(rawBuf, headers);
+				} else {
+					const res = await fetch(task.url);
+
+					buffer = Buffer.from(await res.arrayBuffer());
 				}
 
 				results[task.index] = { index: task.index, url: task.url, scrambled: task.scrambled, buffer };

@@ -159,14 +159,16 @@ export class ComixBrowserCapture {
 
 	static async captureChapterList({ titleUrl, timeoutMs = 60_000 }) {
 		const browser = await comixBrowserPool.browser();
-		const first = await ComixBrowserCapture._captureOnePage(browser, titleUrl, 1, timeoutMs);
+		const context = await browser.createBrowserContext();
+		const first = await ComixBrowserCapture._captureChapterPage(context, titleUrl, 1, timeoutMs);
 
 		if (!first?.items?.length) {
+			await context.close().catch(() => {});
 			throw new Error(`Failed to capture chapter list from ${titleUrl}`);
 		}
 
 		const allItems = [...first.items];
-		const lastPage = Math.min(first.lastPage || 1, 50);
+		const lastPage = first.lastPage || 1;
 
 		if (lastPage > 1) {
 			const targets = [];
@@ -175,7 +177,7 @@ export class ComixBrowserCapture {
 				targets.push(page);
 			}
 
-			const CONCURRENCY = 5;
+			const CONCURRENCY = Math.min(targets.length, 20);
 			const results = new Array(targets.length);
 			let cursor = 0;
 
@@ -183,7 +185,7 @@ export class ComixBrowserCapture {
 				while (cursor < targets.length) {
 					const index = cursor++;
 
-					results[index] = await ComixBrowserCapture._captureOnePage(browser, titleUrl, targets[index], timeoutMs);
+					results[index] = await ComixBrowserCapture._captureChapterPage(context, titleUrl, targets[index], timeoutMs);
 				}
 			};
 
@@ -196,11 +198,12 @@ export class ComixBrowserCapture {
 			}
 		}
 
+		await context.close().catch(() => {});
+
 		return JSON.stringify(allItems);
 	}
 
-	static async _captureOnePage(browser, titleUrl, targetPage, timeoutMs) {
-		const context = await browser.createBrowserContext();
+	static async _captureChapterPage(context, titleUrl, targetPage, timeoutMs) {
 		const page = await context.newPage();
 
 		await ComixBrowserCapture.configurePage(page);
@@ -215,63 +218,65 @@ export class ComixBrowserCapture {
 			}
 		});
 
-		let result = null;
-		let resolveResult;
-		const resultPromise = new Promise((resolve) => {
-			resolveResult = resolve;
-		});
+		let captured = null;
+		let resolveCapture;
 
-		await page.exposeFunction('__COMIX_PAGE_DATA__', (json) => {
-			result = json;
-			resolveResult();
+		await page.exposeFunction('__COMIX_CH__', (json) => {
+			if (!captured) {
+				captured = json;
+				resolveCapture?.();
+			}
 		});
 
 		await page.evaluateOnNewDocument(`
 			(function(){
-				var TARGET_PAGE = ${targetPage};
 				var _p = JSON.parse;
-				var captured = false;
-				function _rewriteUrl(url){
-					if (typeof url === 'string' && url.indexOf('/chapters') !== -1 && /[?&]page=/.test(url)) {
-						url = url.replace(/([?&]page=)\\d+/, '$1' + TARGET_PAGE);
-						url = url.replace(/([?&]limit=)\\d+/, '$1100');
-					}
-					return url;
-				}
-				function _tryCapture(text){
-					if (captured) return;
+				JSON.parse = function() {
+					var r = _p.apply(this, arguments);
 					try {
-						var o = _p(text);
-						if (o && o.result && o.result.items && o.result.items.length) {
-							var it = o.result.items[0];
-							if (it && ('id' in it) && ('url' in it) && ('number' in it)) {
-								captured = true;
-								var m = o.result.meta || o.result.pagination || {};
-								window.__COMIX_PAGE_DATA__(JSON.stringify({ items: o.result.items, hasNext: !!m.hasNext, lastPage: m.lastPage || 0 }));
+						if (r && r.result && Array.isArray(r.result.items)) {
+							var first = r.result.items[0];
+							if (first && ('number' in first) && ('id' in first)) {
+								var m = r.result.meta || r.result.pagination || {};
+								window.__COMIX_CH__(JSON.stringify({ items: r.result.items, hasNext: !!m.hasNext, lastPage: m.lastPage || m.last_page || 0 }));
 							}
 						}
-					} catch(e){}
-				}
-				JSON.parse = function(){ var r = _p.apply(this, arguments); try { if (typeof arguments[0] === 'string') _tryCapture(arguments[0]); } catch(e){} return r; };
-				window.fetch = (function(_f){ return function(i,d){ if (typeof i === 'string') i = _rewriteUrl(i); return _f.call(this,i,d).then(function(r){ try{ r.clone().text().then(function(t){ _tryCapture(t); }); }catch(e){} return r; }); }; })(window.fetch);
-				var _x = XMLHttpRequest.prototype.open;
-				XMLHttpRequest.prototype.open = function(m,u){ arguments[1] = _rewriteUrl(u); var s = this; s.addEventListener('load', function(){ _tryCapture(s.responseText); }); return _x.apply(this, arguments); };
+					} catch(e) {}
+					return r;
+				};
 			})();
 		`);
 
-		page.goto(titleUrl, { waitUntil: 'domcontentloaded', timeout: timeoutMs }).catch(() => {});
+		page.goto(`${titleUrl}?page=${targetPage}`, { waitUntil: 'domcontentloaded', timeout: timeoutMs }).catch(() => {});
 
-		await Promise.race([resultPromise, new Promise((r) => setTimeout(r, 12_000))]);
-		await context.close();
+		await new Promise((resolve) => {
+			resolveCapture = resolve;
+			setTimeout(resolve, 5_000);
+		});
 
-		if (!result) {
+		await page.close().catch(() => {});
+
+		if (!captured) {
 			return null;
 		}
 
 		try {
-			return JSON.parse(result);
+			return JSON.parse(captured);
 		} catch {
 			return null;
+		}
+	}
+
+	static async captureChapterPage({ titleUrl, page = 1, timeoutMs = 30_000 }) {
+		const browser = await comixBrowserPool.browser();
+		const context = await browser.createBrowserContext();
+
+		try {
+			const result = await ComixBrowserCapture._captureChapterPage(context, titleUrl, page, timeoutMs);
+
+			return result || { items: [], lastPage: 0, hasNext: false };
+		} finally {
+			await context.close().catch(() => {});
 		}
 	}
 
@@ -363,5 +368,149 @@ export class ComixBrowserCapture {
 		} finally {
 			await context.close();
 		}
+	}
+
+	static async captureBrowseList({ browseUrl, timeoutMs = 30_000 }) {
+		const browser = await comixBrowserPool.browser();
+		const context = await browser.createBrowserContext();
+		const page = await context.newPage();
+
+		// Extract the search query from the URL to match against API responses
+		const urlObj = new URL(browseUrl);
+		const searchQuery = urlObj.searchParams.get('q') || urlObj.searchParams.get('keyword') || '';
+
+		await ComixBrowserCapture.configurePage(page);
+		await page.setRequestInterception(true);
+		page.on('request', (request) => {
+			const type = request.resourceType();
+
+			if (type === 'image' || type === 'media' || type === 'font' || type === 'stylesheet') {
+				request.abort().catch(() => {});
+			} else {
+				request.continue().catch(() => {});
+			}
+		});
+
+		let captured = null;
+		let resolveCapture;
+		const capturePromise = new Promise((resolve) => {
+			resolveCapture = resolve;
+		});
+
+		await page.exposeFunction('__COMIX_BROWSE_DATA__', (json) => {
+			if (!captured) {
+				captured = json;
+				resolveCapture();
+			}
+		});
+
+		await page.evaluateOnNewDocument(`
+			(function(){
+				if (window.__comixBrowseCaptureV2) return;
+				window.__comixBrowseCaptureV2 = true;
+				var _IFACE = window.__COMIX_BROWSE_DATA__;
+				var _SEARCH_QUERY = ${JSON.stringify(searchQuery)};
+				var _p = JSON.parse;
+				function _tryCapture(text){
+					try {
+						var o = _p(text);
+						if (o && o.result && Array.isArray(o.result.items) && o.result.items.length > 0) {
+							var first = o.result.items[0];
+							if (first && first.hid && first.title) {
+								_IFACE(JSON.stringify(o));
+								return true;
+							}
+						}
+					} catch(e){}
+					return false;
+				}
+				JSON.parse = function(){
+					var r = _p.apply(this, arguments);
+					try { if (typeof arguments[0] === 'string') _tryCapture(arguments[0]); } catch(e){}
+					return r;
+				};
+				var _f = window.fetch;
+				window.fetch = function(){
+					return _f.apply(this, arguments).then(function(r){
+						try { r.clone().text().then(_tryCapture); } catch(e){}
+						return r;
+					});
+				};
+				var _x = XMLHttpRequest.prototype.open;
+				var _s = XMLHttpRequest.prototype.send;
+				XMLHttpRequest.prototype.open = function(m,u){ this.__url = u; return _x.apply(this, arguments); };
+				XMLHttpRequest.prototype.send = function(){
+					var s = this;
+					s.addEventListener('load', function(){ try { _tryCapture(s.responseText); } catch(e){} });
+					return _s.apply(this, arguments);
+				};
+			})();
+		`);
+
+		page.goto(browseUrl, { waitUntil: 'domcontentloaded', timeout: timeoutMs }).catch(() => {});
+
+		try {
+			await Promise.race([capturePromise, new Promise((r) => setTimeout(r, 20_000))]);
+
+			if (!captured) {
+				return null;
+			}
+
+			return JSON.parse(captured);
+		} catch {
+			return null;
+		} finally {
+			await context.close().catch(() => {});
+		}
+	}
+
+	static async captureDetail({ detailUrl, timeoutMs = 15_000 }) {
+		const browser = await comixBrowserPool.browser();
+		const context = await browser.createBrowserContext();
+		const page = await context.newPage();
+
+		await ComixBrowserCapture.configurePage(page);
+		await page.setRequestInterception(true);
+		page.on('request', (request) => {
+			const type = request.resourceType();
+
+			if (type === 'image' || type === 'media' || type === 'font' || type === 'stylesheet') {
+				request.abort().catch(() => {});
+			} else {
+				request.continue().catch(() => {});
+			}
+		});
+
+		page.goto(detailUrl, { waitUntil: 'domcontentloaded', timeout: timeoutMs }).catch(() => {});
+
+		await new Promise((r) => setTimeout(r, 2_000));
+
+		const manga = await page.evaluate(() => {
+			const script = document.querySelector('script#initial-data');
+			if (!script) return null;
+			try {
+				const data = JSON.parse(script.textContent);
+				const queries = data?.queries;
+				if (!queries) return null;
+				for (const [key, value] of Object.entries(queries)) {
+					if (key.includes('"detail"') && value?.hid && value?.title) {
+						return value;
+					}
+				}
+				for (const value of Object.values(queries)) {
+					if (value?.hid && value?.title && value?.status !== undefined) {
+						return value;
+					}
+				}
+				return null;
+			} catch {
+				return null;
+			}
+		});
+
+		await page.close().catch(() => {});
+		await context.close().catch(() => {});
+
+		return manga || null;
 	}
 }

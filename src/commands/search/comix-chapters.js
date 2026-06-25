@@ -7,8 +7,6 @@ import { comix } from '../../utils/index.js';
 import { randomChar } from '../../utils/modules/index.js';
 import { defineCommand } from '../_define.js';
 
-const CHAPTERS_PER_BATCH = 40;
-
 const chapterSessions = new Cache();
 
 export default defineCommand({
@@ -38,8 +36,27 @@ export default defineCommand({
 				return await client.reply(from, L.errors.sessionExpired, message);
 			}
 
-			cached.currentBatch++;
-			return await sendBatch(cached, from, message, client, { prefix, device, locale });
+			const next = await cached.result.nextPage();
+
+			cached.result = next;
+			cached.order = cached.order === 'asc' ? 'asc' : 'desc';
+
+			return await sendPage(cached, from, message, client, { prefix, device, locale });
+		}
+
+		if (query.startsWith('prev ')) {
+			const sessionId = query.slice(5);
+			const cached = chapterSessions.get(sessionId);
+
+			if (!cached) {
+				return await client.reply(from, L.errors.sessionExpired, message);
+			}
+
+			const prev = await cached.result.prevPage();
+
+			cached.result = prev;
+
+			return await sendPage(cached, from, message, client, { prefix, device, locale });
 		}
 
 		if (query.startsWith('sort ')) {
@@ -50,49 +67,46 @@ export default defineCommand({
 				return await client.reply(from, L.errors.sessionExpired, message);
 			}
 
-			cached.allChapters.reverse();
+			cached.result.items.reverse();
 			cached.order = cached.order === 'asc' ? 'desc' : 'asc';
-			cached.currentBatch = 0;
 
-			return await sendBatch(cached, from, message, client, { prefix, device, locale });
+			return await sendPage(cached, from, message, client, { prefix, device, locale });
 		}
 
 		const wait = await client.waitMessage(from, L.success.fetchingChapters, message);
 
 		const mangaInput = query;
-		const result = await comix.getChapters(mangaInput, { allPages: true, deduplicate: false });
+		const result = await comix.getChapters(mangaInput, { pages: 1, deduplicate: false });
 
 		if (!result.items.length) {
-			return await wait.update(Ls.labels.noChaptersFound || 'No chapters found for this manga.');
+			return await wait.update(t(locale, 'common.core.errors.noChaptersFound', [mangaInput]));
 		}
 
-		const allChapters = [...result.items].reverse();
-		const firstUrl = allChapters[0]?.url || '';
-		const mangaSlug = firstUrl.match(/\/title\/([^/]+)\//)?.[1] || query.trim();
 		const sessionId = randomChar('abcdefghijklmnopqrstuvwxyz0123456789', 8);
-		const state = { allChapters, currentBatch: 0, sessionId, mangaSlug, order: 'asc' };
+		const state = { result, sessionId, mangaInput, order: 'asc' };
 
 		chapterSessions.set(sessionId, state);
 
-		await wait.update(t(locale, 'search.labels.chaptersFound', [new Set(allChapters.map((c) => String(c.number))).size]));
+		const totalPages = result.pageInfo.lastPage;
+		const totalUnique = new Set(result.items.map((c) => String(c.number))).size;
 
-		await sendBatch(state, from, message, client, { prefix, device, locale });
+		await wait.update(
+			t(locale, 'common.core.progress.chaptersFound', [totalUnique]) + ` (${result.pageInfo.page}/${totalPages})`
+		);
+
+		await sendPage(state, from, message, client, { prefix, device, locale });
 	}
 });
 
-async function sendBatch(state, from, message, client, ctx) {
-	const { allChapters, currentBatch, sessionId, mangaSlug, order } = state;
+async function sendPage(state, from, message, client, ctx) {
+	const { result, sessionId, order } = state;
+	const chapters = result.items;
+	const { page, lastPage } = result.pageInfo;
 	const isIos = ctx.device?.isIos;
-	const perBatch = isIos ? 18 : CHAPTERS_PER_BATCH;
-	const start = currentBatch * perBatch;
-	const batch = allChapters.slice(start, start + perBatch);
-	const totalBatches = Math.ceil(allChapters.length / perBatch);
-	const hasMore = currentBatch + 1 < totalBatches;
 	const Ls = useLocale(ctx.locale, 'search');
 	const sortLabel = order === 'asc' ? Ls.buttons.sortLatest : Ls.buttons.sortOldest;
-	const total = new Set(allChapters.map((c) => String(c.number))).size;
 	const orderLabel = order === 'desc' ? Ls.labels.orderLatest : Ls.labels.orderOldest;
-	const body = `${Ls.titles.comixChapters.formatHeaders()}\n\n${t(ctx.locale, 'search.labels.chapterTotal', [total])}\n${t(ctx.locale, 'search.labels.showing', [start + 1, start + batch.length])}\n${t(ctx.locale, 'search.labels.order', [orderLabel])}\n\n${Ls.labels.selectManga}`;
+	const body = `${Ls.titles.comixChapters.formatHeaders()}\n\n${t(ctx.locale, 'search.labels.showing', [(page - 1) * 20 + 1, (page - 1) * 20 + chapters.length])}\n${t(ctx.locale, 'search.labels.order', [orderLabel])}\nPage ${page}/${lastPage}\n\n${Ls.labels.selectManga}`;
 
 	const builder = new client.TemplateBuilder.Native();
 
@@ -101,16 +115,24 @@ async function sendBatch(state, from, message, client, ctx) {
 		.body(body)
 		.footer('Powered by ' + BOT_NAME);
 
-	const buttons = batch.map((ch) => {
+	const navCount = (result.hasPrev() ? 1 : 0) + (result.hasNext() ? 1 : 0) + 1;
+	const maxChapterButtons = isIos ? Math.max(20 - navCount, 10) : chapters.length;
+	const displayChapters = chapters.slice(0, maxChapterButtons);
+
+	const buttons = displayChapters.map((ch) => {
 		const num = String(ch.number).replace(/\.0$/, '');
 		const isRedundant = !ch.name || ch.name === `Chapter ${num}` || ch.name === num;
 		const group = ch.scanlator && ch.scanlator !== 'Unknown' ? ` (${ch.scanlator})` : '';
 		const label = isRedundant ? `Ch. ${num}${group}` : `Ch. ${num}${group}\n${ch.name}`;
 
-		return builder.button.reply({ display: label.slice(0, 40), id: cmdId('cxread', `${mangaSlug}:${ch.id}`, ctx) });
+		return builder.button.reply({ display: label.slice(0, 40), id: cmdId('cxread', `${sessionId}:${ch.id}`, ctx) });
 	});
 
-	if (hasMore) {
+	if (result.hasPrev()) {
+		buttons.push(builder.button.reply({ display: 'Previous', id: cmdId('cxch', 'prev ' + sessionId, ctx) }));
+	}
+
+	if (result.hasNext()) {
 		buttons.push(builder.button.reply({ display: Ls.buttons.moreChapters, id: cmdId('cxch', 'next ' + sessionId, ctx) }));
 	}
 

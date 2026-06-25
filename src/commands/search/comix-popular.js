@@ -57,6 +57,6 @@ export default defineCommand({
 			await client.reply(from, `${Ls.titles.comixPopular.formatHeaders()}\n\n${caption.formatForm()}`, message);
 		}
 
-		await wait.update(Ls.labels.done || 'Done.');
+		await wait.update(L.core.progress.done || 'Done.');
 	}
 });

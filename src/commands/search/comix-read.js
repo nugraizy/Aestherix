@@ -147,6 +147,15 @@ export default defineCommand({
 
 			if (input.includes(':')) {
 				[slug, chapterId] = input.split(':');
+			}
+
+			// Try cache first (works for both direct IDs and session-based IDs)
+			const cachedChapter = comix.getChapterById(chapterId);
+
+			if (cachedChapter?.url) {
+				chapterUrl = cachedChapter.url;
+				slug = cachedChapter.url.match(/\/title\/([^/]+)\//)?.[1] || slug;
+			} else if (slug && !chapterUrl) {
 				chapterUrl = `https://comix.to/title/${slug}/${chapterId}-chapter-1`;
 			}
 

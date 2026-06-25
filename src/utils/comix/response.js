@@ -18,6 +18,18 @@ export class ComixResponse {
 		return this.context.nextPage();
 	}
 
+	hasPrev() {
+		return Boolean(this.pageInfo?.hasPrev);
+	}
+
+	prevPage() {
+		if (typeof this.context.prevPage !== 'function') {
+			throw new Error('No previous page available');
+		}
+
+		return this.context.prevPage();
+	}
+
 	getDetail(index = 0) {
 		if (!this.items.length) {throw new Error('No items available');}
 

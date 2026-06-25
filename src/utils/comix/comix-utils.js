@@ -61,36 +61,37 @@ export class ComixUtils {
 
 	static get GENRE_OPTIONS() {
 		return [
-			{ label: 'Romance', value: '23' },
-			{ label: 'Drama', value: '11' },
-			{ label: 'Comedy', value: '9' },
-			{ label: 'Fantasy', value: '12' },
-			{ label: 'Slice of Life', value: '25' },
 			{ label: 'Action', value: '6' },
-			{ label: 'Boys Love', value: '8' },
-			{ label: 'Adventure', value: '7' },
 			{ label: 'Adult', value: '87264' },
-			{ label: 'Smut', value: '87268' },
-			{ label: 'Psychological', value: '22' },
-			{ label: 'Mystery', value: '20' },
-			{ label: 'Historical', value: '14' },
-			{ label: 'Mature', value: '87267' },
-			{ label: 'Tragedy', value: '29' },
-			{ label: 'Sci-Fi', value: '24' },
-			{ label: 'Ecchi', value: '87265' },
-			{ label: 'Horror', value: '15' },
-			{ label: 'Girls Love', value: '13' },
-			{ label: 'Isekai', value: '16' },
-			{ label: 'Hentai', value: '87266' },
-			{ label: 'Thriller', value: '28' },
-			{ label: 'Sports', value: '26' },
+			{ label: 'Adventure', value: '7' },
+			{ label: 'Boys Love', value: '8' },
+			{ label: 'Comedy', value: '9' },
 			{ label: 'Crime', value: '10' },
-			{ label: 'Philosophical', value: '21' },
+			{ label: 'Drama', value: '11' },
+			{ label: 'Ecchi', value: '87265' },
+			{ label: 'Fantasy', value: '12' },
+			{ label: 'Girls Love', value: '13' },
+			{ label: 'Harem', value: '40' },
+			{ label: 'Hentai', value: '87266' },
+			{ label: 'Historical', value: '14' },
+			{ label: 'Horror', value: '15' },
+			{ label: 'Isekai', value: '16' },
+			{ label: 'Magical Girls', value: '17' },
+			{ label: 'Mature', value: '87267' },
 			{ label: 'Mecha', value: '18' },
-			{ label: 'Wuxia', value: '30' },
 			{ label: 'Medical', value: '19' },
+			{ label: 'Mystery', value: '20' },
+			{ label: 'Philosophical', value: '21' },
+			{ label: 'Psychological', value: '22' },
+			{ label: 'Romance', value: '23' },
+			{ label: 'Sci-Fi', value: '24' },
+			{ label: 'Slice of Life', value: '25' },
+			{ label: 'Smut', value: '87268' },
+			{ label: 'Sports', value: '26' },
 			{ label: 'Superhero', value: '27' },
-			{ label: 'Magical Girls', value: '17' }
+			{ label: 'Thriller', value: '28' },
+			{ label: 'Tragedy', value: '29' },
+			{ label: 'Wuxia', value: '30' }
 		];
 	}
 
@@ -324,8 +325,8 @@ export class ComixUtils {
 		params.set('page', String(page));
 
 		if (query) {
-			params.set('keyword', query);
-			params.set('order[relevance]', 'desc');
+			params.set('q', query);
+			params.set('sort', 'relevance:desc');
 		} else if (sort) {
 			params.set(`order[${sort}]`, order === 'asc' ? 'asc' : 'desc');
 		}
