@@ -20,7 +20,7 @@ export default defineCommand({
 		if (!message.query) {
 			return await client.reply(
 				message.from,
-				t(locale, 'moderation.specifyCommand', ['antigroupurl']),
+				t(locale, 'common.moderation.specifyCommand', ['antigroupurl']),
 				message.message
 			);
 		}
@@ -31,7 +31,7 @@ export default defineCommand({
 			case 'enable':
 			case 'on':
 				if (isEnable) {
-					return await client.reply(message.from, t(locale, 'moderation.alreadyEnabled', ['Anti group URL']), message.message);
+					return await client.reply(message.from, t(locale, 'common.moderation.alreadyEnabled', ['Anti group URL']), message.message);
 				}
 
 				configuration.groups.settings.get(message.from).antiGroupURL = 'enable';
@@ -41,12 +41,12 @@ export default defineCommand({
 					await updateGroupSetting(prisma, message.from, 'antiGroupURL', 'enable');
 				}
 
-				await client.reply(message.from, t(locale, 'moderation.enabled', ['Anti group URL']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.enabled', ['Anti group URL']), message.message);
 				break;
 			case 'disable':
 			case 'off':
 				if (!isEnable) {
-					return await client.reply(message.from, t(locale, 'moderation.alreadyDisabled', ['Anti group URL']), message.message);
+					return await client.reply(message.from, t(locale, 'common.moderation.alreadyDisabled', ['Anti group URL']), message.message);
 				}
 
 				configuration.groups.settings.get(message.from).antiGroupURL = 'disable';
@@ -56,10 +56,10 @@ export default defineCommand({
 					await updateGroupSetting(prisma, message.from, 'antiGroupURL', 'disable');
 				}
 
-				await client.reply(message.from, t(locale, 'moderation.disabled', ['Anti group URL']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.disabled', ['Anti group URL']), message.message);
 				break;
 			default:
-				await client.reply(message.from, t(locale, 'moderation.specifyCommand', ['antigroupurl']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.specifyCommand', ['antigroupurl']), message.message);
 		}
 	}
 });

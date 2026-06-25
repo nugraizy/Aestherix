@@ -18,7 +18,7 @@ export default defineCommand({
 		const locale = await getLocale(message.from);
 
 		if (!message.query) {
-			return await client.reply(message.from, t(locale, 'moderation.specifyCommand', ['antivirus']), message.message);
+			return await client.reply(message.from, t(locale, 'common.moderation.specifyCommand', ['antivirus']), message.message);
 		}
 
 		const isEnable = configuration.groups.settings.get(message.from)?.antiVirus === 'enable';
@@ -27,7 +27,7 @@ export default defineCommand({
 			case 'enable':
 			case 'on':
 				if (isEnable) {
-					return await client.reply(message.from, t(locale, 'moderation.alreadyEnabled', ['Anti virus']), message.message);
+					return await client.reply(message.from, t(locale, 'common.moderation.alreadyEnabled', ['Anti virus']), message.message);
 				}
 
 				configuration.groups.settings.get(message.from).antiVirus = 'enable';
@@ -37,12 +37,12 @@ export default defineCommand({
 					await updateGroupSetting(prisma, message.from, 'antiVirus', 'enable');
 				}
 
-				await client.reply(message.from, t(locale, 'moderation.enabled', ['Anti virus']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.enabled', ['Anti virus']), message.message);
 				break;
 			case 'disable':
 			case 'off':
 				if (!isEnable) {
-					return await client.reply(message.from, t(locale, 'moderation.alreadyDisabled', ['Anti virus']), message.message);
+					return await client.reply(message.from, t(locale, 'common.moderation.alreadyDisabled', ['Anti virus']), message.message);
 				}
 
 				configuration.groups.settings.get(message.from).antiVirus = 'disable';
@@ -52,10 +52,10 @@ export default defineCommand({
 					await updateGroupSetting(prisma, message.from, 'antiVirus', 'disable');
 				}
 
-				await client.reply(message.from, t(locale, 'moderation.disabled', ['Anti virus']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.disabled', ['Anti virus']), message.message);
 				break;
 			default:
-				await client.reply(message.from, t(locale, 'moderation.specifyCommand', ['antivirus']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.specifyCommand', ['antivirus']), message.message);
 		}
 	}
 });

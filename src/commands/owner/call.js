@@ -84,7 +84,7 @@ export default defineCommand({
 			const source = args[2];
 
 			if (!source) {
-				return await client.reply(from, L.voip.errors.invalidArgs, null);
+				return await client.reply(from, L.errors.invalidArgs, null);
 			}
 
 			voip.activeCall.setAudioSource(source);

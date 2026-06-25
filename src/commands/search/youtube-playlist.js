@@ -38,7 +38,7 @@ function sendBatch(state, from, message, client, ctx) {
 	builder
 		.destination(from)
 		.body(body)
-		.footer(t(ctx.locale, 'core.footer.poweredBy', [BOT_NAME]));
+		.footer(t(ctx.locale, 'common.core.footer.poweredBy', [BOT_NAME]));
 
 	const buttons = batch.map((entry, index) => {
 		const label = `${start + index + 1}. ${entry.title.slice(0, 100)}  ${formatDuration(entry.durationSeconds)}`;

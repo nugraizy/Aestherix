@@ -20,7 +20,7 @@ export default defineCommand({
 		if (!message.query) {
 			return await client.reply(
 				message.from,
-				t(locale, 'moderation.templateRequired', ['leavemsg', 'Goodbye {participant} from {groupName}!...']),
+				t(locale, 'common.moderation.templateRequired', ['leavemsg', 'Goodbye {participant} from {groupName}!...']),
 				message.message
 			);
 		}
@@ -32,6 +32,6 @@ export default defineCommand({
 
 		configuration.groups.settings.get(message.from).leaveMessage = message.query;
 
-		await client.reply(message.from, t(locale, 'moderation.leaveMsgUpdated', [message.query]), message.message);
+		await client.reply(message.from, t(locale, 'common.moderation.leaveMsgUpdated', [message.query]), message.message);
 	}
 });

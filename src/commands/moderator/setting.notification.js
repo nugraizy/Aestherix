@@ -29,7 +29,7 @@ export default defineCommand({
 		if (!message.query) {
 			return await client.reply(
 				message.from,
-				t(locale, 'moderation.specifyCommand', ['notification']),
+				t(locale, 'common.moderation.specifyCommand', ['notification']),
 				message.message
 			);
 		}
@@ -50,7 +50,7 @@ export default defineCommand({
 					await updateGroupSetting(prisma, message.from, 'notification', 'enable');
 				}
 
-				await client.reply(message.from, t(locale, 'moderation.enabled', ['group notification']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.enabled', ['group notification']), message.message);
 				break;
 			case 'disable':
 			case 'off':
@@ -65,10 +65,10 @@ export default defineCommand({
 					await updateGroupSetting(prisma, message.from, 'notification', 'disable');
 				}
 
-				await client.reply(message.from, t(locale, 'moderation.disabled', ['group notification']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.disabled', ['group notification']), message.message);
 				break;
 			default:
-				await client.reply(message.from, t(locale, 'moderation.specifyCommand', ['notification']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.specifyCommand', ['notification']), message.message);
 		}
 	}
 });

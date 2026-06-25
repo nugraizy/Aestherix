@@ -95,7 +95,7 @@ ${Lo.labels.content} : ${pinnedAction?.banner.contents.message.toString()}`,
 
 		live.on('end', async () => {
 			try {
-				await client.reply(from, L.info.liveStreamEnded, message);
+				await client.reply(from, L.errors.liveStreamEnded, message);
 
 				live.stop();
 				lives.delete(from);

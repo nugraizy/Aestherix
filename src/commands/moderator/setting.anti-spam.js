@@ -18,7 +18,7 @@ export default defineCommand({
 		const locale = await getLocale(message.from);
 
 		if (!message.query) {
-			return await client.reply(message.from, t(locale, 'moderation.specifyCommand', ['antispam']), message.message);
+			return await client.reply(message.from, t(locale, 'common.moderation.specifyCommand', ['antispam']), message.message);
 		}
 
 		const isEnable = configuration.groups.settings.get(message.from)?.antiSpam === 'enable';
@@ -27,7 +27,7 @@ export default defineCommand({
 			case 'enable':
 			case 'on':
 				if (isEnable) {
-					return await client.reply(message.from, t(locale, 'moderation.alreadyEnabled', ['Anti spam']), message.message);
+					return await client.reply(message.from, t(locale, 'common.moderation.alreadyEnabled', ['Anti spam']), message.message);
 				}
 
 				configuration.groups.settings.get(message.from).antiSpam = 'enable';
@@ -37,12 +37,12 @@ export default defineCommand({
 					await updateGroupSetting(prisma, message.from, 'antiSpam', 'enable');
 				}
 
-				await client.reply(message.from, t(locale, 'moderation.enabled', ['Anti spam']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.enabled', ['Anti spam']), message.message);
 				break;
 			case 'disable':
 			case 'off':
 				if (!isEnable) {
-					return await client.reply(message.from, t(locale, 'moderation.alreadyDisabled', ['Anti spam']), message.message);
+					return await client.reply(message.from, t(locale, 'common.moderation.alreadyDisabled', ['Anti spam']), message.message);
 				}
 
 				configuration.groups.settings.get(message.from).antiSpam = 'disable';
@@ -52,10 +52,10 @@ export default defineCommand({
 					await updateGroupSetting(prisma, message.from, 'antiSpam', 'disable');
 				}
 
-				await client.reply(message.from, t(locale, 'moderation.disabled', ['Anti spam']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.disabled', ['Anti spam']), message.message);
 				break;
 			default:
-				await client.reply(message.from, t(locale, 'moderation.specifyCommand', ['antispam']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.specifyCommand', ['antispam']), message.message);
 		}
 	}
 });

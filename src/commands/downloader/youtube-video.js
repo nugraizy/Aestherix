@@ -102,7 +102,7 @@ export default defineCommand({
 			const index = numberiedQuery - 1;
 
 			if (!numberiedQuery || index >= videoIds.length) {
-				return await client.reply(from, t(locale, 'errors.numberRange', [1, videoIds.length]), message);
+				return await client.reply(from, t(locale, 'common.errors.numberRange', [1, videoIds.length]), message);
 			}
 
 			const videoId = videoIds[index];

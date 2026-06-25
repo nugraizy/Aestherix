@@ -27,7 +27,7 @@ export default defineCommand({
 		}
 
 		if (!message.query) {
-			return await client.reply(message.from, t(locale, 'moderation.specifyCommand', ['antinsfw']), message.message);
+			return await client.reply(message.from, t(locale, 'common.moderation.specifyCommand', ['antinsfw']), message.message);
 		}
 
 		const isEnable = configuration.groups.settings.get(message.from)?.antiNSFW === 'enable';
@@ -46,7 +46,7 @@ export default defineCommand({
 					await updateGroupSetting(prisma, message.from, 'antiNSFW', 'enable');
 				}
 
-				await client.reply(message.from, t(locale, 'moderation.enabled', ['anti-nsfw']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.enabled', ['anti-nsfw']), message.message);
 				break;
 			case 'disable':
 			case 'off':
@@ -61,10 +61,10 @@ export default defineCommand({
 					await updateGroupSetting(prisma, message.from, 'antiNSFW', 'disable');
 				}
 
-				await client.reply(message.from, t(locale, 'moderation.disabled', ['anti-nsfw']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.disabled', ['anti-nsfw']), message.message);
 				break;
 			default:
-				await client.reply(message.from, t(locale, 'moderation.specifyCommand', ['antinsfw']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.specifyCommand', ['antinsfw']), message.message);
 		}
 	}
 });

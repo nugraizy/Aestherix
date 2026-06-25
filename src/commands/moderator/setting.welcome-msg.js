@@ -20,7 +20,7 @@ export default defineCommand({
 		if (!message.query) {
 			return await client.reply(
 				message.from,
-				t(locale, 'moderation.templateRequired', ['welcomemsg', 'Welcome {participant} to {groupName}!...']),
+				t(locale, 'common.moderation.templateRequired', ['welcomemsg', 'Welcome {participant} to {groupName}!...']),
 				message.message
 			);
 		}
@@ -32,6 +32,6 @@ export default defineCommand({
 
 		configuration.groups.settings.get(message.from).welcomeMessage = message.query;
 
-		await client.reply(message.from, t(locale, 'moderation.welcomeMsgUpdated', [message.query]), message.message);
+		await client.reply(message.from, t(locale, 'common.moderation.welcomeMsgUpdated', [message.query]), message.message);
 	}
 });

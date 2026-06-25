@@ -189,7 +189,12 @@ export default /** @type {const} */ ({
 		translateBy: 'Diterjemahkan Oleh',
 		foundFetchingChapters: 'Ditemukan: {0}\nMengambil chapter...',
 		noChaptersForTitle: 'Tidak ada chapter ditemukan untuk "{0}".',
-		chaptersFoundFor: '{0} chapter ditemukan untuk "{1}".'
+		chaptersFoundFor: '{0} chapter ditemukan untuk "{1}".',
+		noChaptersFound: 'Tidak ada chapter ditemukan untuk {0}.',
+		fetchFailed: 'Gagal mengambil data.',
+		chaptersFound: '{0} chapter ditemukan.',
+		mangaNotFound: 'Manga tidak ditemukan.',
+		done: 'Selesai.'
 	},
 	buttons: {
 		chapters: '📖 Chapter',
@@ -224,6 +229,8 @@ export default /** @type {const} */ ({
 		createDefaultGraph: 'Buat Grafik Default',
 		accept: 'Terima',
 		banned: 'Banned',
-		contactPerson: 'Kontak'
+		contactPerson: 'Kontak',
+		articleSource: 'Sumber Artikel',
+		readCh: 'Baca Ch.'
 	}
 });

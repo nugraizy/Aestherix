@@ -26,7 +26,7 @@ export default defineCommand({
 		const slashIndex = input.indexOf('/');
 
 		if (slashIndex === -1) {
-			return await client.reply(from, t(locale, 'errors.invalidFormat', ['mangaId/chapterId']), message);
+			return await client.reply(from, t(locale, 'common.errors.invalidFormat', ['mangaId/chapterId']), message);
 		}
 
 		const mangaId = input.slice(0, slashIndex);

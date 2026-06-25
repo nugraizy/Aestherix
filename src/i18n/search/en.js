@@ -189,7 +189,12 @@ export default /** @type {const} */ ({
 		translateBy: 'Translate By',
 		foundFetchingChapters: 'Found: {0}\nFetching chapters...',
 		noChaptersForTitle: 'No chapters found for "{0}".',
-		chaptersFoundFor: '{0} chapter(s) found for "{1}".'
+		chaptersFoundFor: '{0} chapter(s) found for "{1}".',
+		noChaptersFound: 'No chapters found for this {0}.',
+		fetchFailed: 'Failed to fetch data.',
+		chaptersFound: '{0} chapter(s) found.',
+		mangaNotFound: 'Manga not found.',
+		done: 'Done.'
 	},
 	buttons: {
 		chapters: '📖 Chapters',
@@ -224,6 +229,8 @@ export default /** @type {const} */ ({
 		createDefaultGraph: 'Create Default Graph',
 		accept: 'Accept',
 		banned: 'Banned',
-		contactPerson: 'Contact Person'
+		contactPerson: 'Contact Person',
+		articleSource: 'Article Source',
+		readCh: 'Read Ch.'
 	}
 });

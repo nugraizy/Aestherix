@@ -42,7 +42,7 @@ export default defineCommand({
 				.map(([k, v]) => `  --${k}${v === true ? '' : ` ${v}`}`)
 				.join('\n');
 
-			return client.reply(from, t(locale, 'owner.labels.botFlags', [sessionName]) + `\n\n${flags || '  (none)'}`, message);
+			return client.reply(from, t(locale, 'owner.titles.botFlags', [sessionName]) + `\n\n${flags || '  (none)'}`, message);
 		}
 
 		const newFlags = {};

@@ -78,7 +78,9 @@ export default defineCommand({
 
 			chapterSessions.set(sessionId, state);
 
-			await wait.update(t(locale, 'search.labels.chaptersFound', [new Set(state.allChapters.map((c) => String(c.number))).size]));
+			await wait.update(
+				t(locale, 'search.labels.chaptersFound', [new Set(state.allChapters.map((c) => String(c.number))).size])
+			);
 			await sendBatch(state, from, message, client, { prefix, device, locale });
 		} catch (error) {
 			return await wait.update(`Error: ${error.message || Ls.labels.fetchFailed || 'Failed to fetch chapters.'}`);

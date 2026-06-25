@@ -20,7 +20,7 @@ export default defineCommand({
 		if (!message.query) {
 			return await client.reply(
 				message.from,
-				t(locale, 'moderation.specifyCommand', ['welcomeimage']),
+				t(locale, 'common.moderation.specifyCommand', ['welcomeimage']),
 				message.message
 			);
 		}
@@ -31,7 +31,7 @@ export default defineCommand({
 			case 'enable':
 			case 'on':
 				if (isEnable) {
-					return await client.reply(message.from, t(locale, 'moderation.alreadyEnabled', ['Welcome image card']), message.message);
+					return await client.reply(message.from, t(locale, 'common.moderation.alreadyEnabled', ['Welcome image card']), message.message);
 				}
 
 				configuration.groups.settings.get(message.from).welcomeImage = 'enable';
@@ -41,12 +41,12 @@ export default defineCommand({
 					await updateGroupSetting(prisma, message.from, 'welcomeImage', 'enable');
 				}
 
-				await client.reply(message.from, t(locale, 'moderation.enabled', ['Welcome image card']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.enabled', ['Welcome image card']), message.message);
 				break;
 			case 'disable':
 			case 'off':
 				if (!isEnable) {
-					return await client.reply(message.from, t(locale, 'moderation.alreadyDisabled', ['Welcome image card']), message.message);
+					return await client.reply(message.from, t(locale, 'common.moderation.alreadyDisabled', ['Welcome image card']), message.message);
 				}
 
 				configuration.groups.settings.get(message.from).welcomeImage = 'disable';
@@ -56,10 +56,10 @@ export default defineCommand({
 					await updateGroupSetting(prisma, message.from, 'welcomeImage', 'disable');
 				}
 
-				await client.reply(message.from, t(locale, 'moderation.disabled', ['Welcome image card']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.disabled', ['Welcome image card']), message.message);
 				break;
 			default:
-				await client.reply(message.from, t(locale, 'moderation.specifyCommand', ['welcomeimage']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.specifyCommand', ['welcomeimage']), message.message);
 		}
 	}
 });

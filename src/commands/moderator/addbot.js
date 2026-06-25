@@ -94,11 +94,11 @@ export default defineCommand({
 
 		if (existing) {
 			if (existing.state === 'connected') {
-				return client.reply(from, t(locale, 'bot.alreadyOnline', [sessionName, existing.phone]), message);
+				return client.reply(from, t(locale, 'common.bot.alreadyOnline', [sessionName, existing.phone]), message);
 			}
 
 			if (existing.state === 'connecting') {
-				return client.reply(from, t(locale, 'bot.alreadyConnecting', [sessionName]), message);
+				return client.reply(from, t(locale, 'common.bot.alreadyConnecting', [sessionName]), message);
 			}
 		}
 
@@ -106,7 +106,7 @@ export default defineCommand({
 		const flags = parseFlags(args.slice(2));
 
 		if (existing && existing.state === 'disconnected') {
-			await client.reply(from, t(locale, 'bot.reconnecting', [sessionName]), message);
+			await client.reply(from, t(locale, 'common.bot.reconnecting', [sessionName]), message);
 
 			let retryCount = 0;
 
@@ -119,7 +119,7 @@ export default defineCommand({
 					retryCount = 0;
 					const phone = existing.socket.user?.id?.split(':')[0] ?? 'unknown';
 
-					await client.reply(from, t(locale, 'bot.reconnected', [sessionName, phone]), message);
+					await client.reply(from, t(locale, 'common.bot.reconnected', [sessionName, phone]), message);
 
 					setupSubBot(existing, { sessionName, configuration, flags });
 				}
@@ -132,14 +132,14 @@ export default defineCommand({
 					if (reason === DisconnectReason.loggedOut || reason === DisconnectReason.badSession) {
 						const label = reason === DisconnectReason.loggedOut ? L.bot.loggedOut : L.bot.badSession;
 
-						await client.reply(from, t(locale, 'bot.sessionCleaned', [sessionName, label]), message);
+						await client.reply(from, t(locale, 'common.bot.sessionCleaned', [sessionName, label]), message);
 						manager.remove(sessionName);
 						await cleanupSession(sessionName);
 						return;
 					}
 
 					if (retryCount >= MAX_RETRIES) {
-						await client.reply(from, t(locale, 'bot.maxRetries', { prefix, name: sessionName }), message);
+						await client.reply(from, t(locale, 'common.bot.maxRetries', { prefix, name: sessionName }), message);
 						manager.remove(sessionName);
 						return;
 					}
@@ -151,23 +151,23 @@ export default defineCommand({
 
 			await existing.connect({ prisma }).catch((err) => {
 				manager.remove(sessionName);
-				return client.reply(from, t(locale, 'bot.failedReconnect', [sessionName, err.message]), message);
+				return client.reply(from, t(locale, 'common.bot.failedReconnect', [sessionName, err.message]), message);
 			});
 
 			return;
 		}
 
 		if (dbInstance && dbInstance.isActive) {
-			await client.reply(from, t(locale, 'bot.existsInDb', [sessionName]), message);
+			await client.reply(from, t(locale, 'common.bot.existsInDb', [sessionName]), message);
 
 			const subFlags = { ...JSON.parse(dbInstance.flags || '{}'), ...flags };
 
 			if (IS_PM2) {
 				try {
 					await startPm2SubBot(sessionName);
-					await client.reply(from, t(locale, 'bot.pm2Started', [sessionName]), message);
+					await client.reply(from, t(locale, 'common.bot.pm2Started', [sessionName]), message);
 				} catch (err) {
-					await client.reply(from, t(locale, 'bot.failedPm2Start', [sessionName, err.message]), message);
+					await client.reply(from, t(locale, 'common.bot.failedPm2Start', [sessionName, err.message]), message);
 				}
 
 				return;
@@ -193,7 +193,7 @@ export default defineCommand({
 					retryCount = 0;
 					const phone = sub.socket.user?.id?.split(':')[0] ?? 'unknown';
 
-					await client.reply(from, t(locale, 'bot.online', [sessionName, phone]), message);
+					await client.reply(from, t(locale, 'common.bot.online', [sessionName, phone]), message);
 					setupSubBot(sub, { sessionName, configuration, flags: subFlags });
 				}
 
@@ -205,14 +205,14 @@ export default defineCommand({
 					if (reason === DisconnectReason.loggedOut || reason === DisconnectReason.badSession) {
 						const label = reason === DisconnectReason.loggedOut ? L.bot.loggedOut : L.bot.badSession;
 
-						await client.reply(from, t(locale, 'bot.sessionCleaned', [sessionName, label]), message);
+						await client.reply(from, t(locale, 'common.bot.sessionCleaned', [sessionName, label]), message);
 						manager.remove(sessionName);
 						await cleanupSession(sessionName);
 						return;
 					}
 
 					if (retryCount >= MAX_RETRIES) {
-						await client.reply(from, t(locale, 'bot.maxRetries', { prefix, name: sessionName }), message);
+						await client.reply(from, t(locale, 'common.bot.maxRetries', { prefix, name: sessionName }), message);
 						manager.remove(sessionName);
 						return;
 					}
@@ -234,18 +234,18 @@ export default defineCommand({
 
 					const code = await sub.requestPairingCode(String(pairNumber).replace(/[^0-9]/g, ''));
 
-					await client.reply(from, t(locale, 'bot.pairingCode', [sessionName, `${code.slice(0, 4)}-${code.slice(4)}`]), message);
+					await client.reply(from, t(locale, 'common.bot.pairingCode', [sessionName, `${code.slice(0, 4)}-${code.slice(4)}`]), message);
 				}
 			} catch (err) {
 				await sub.disconnect().catch(() => {});
 				manager.remove(sessionName);
-				await client.reply(from, t(locale, 'bot.failedReconnect', [sessionName, err.message]), message);
+				await client.reply(from, t(locale, 'common.bot.failedReconnect', [sessionName, err.message]), message);
 			}
 
 			return;
 		}
 
-		await client.reply(from, t(locale, 'bot.creating', [sessionName]), message);
+		await client.reply(from, t(locale, 'common.bot.creating', [sessionName]), message);
 
 		const newFlags = { ...flags, pairMode: true };
 		const auth = new Auth(prisma, sessionName);
@@ -276,7 +276,7 @@ export default defineCommand({
 				retryCount = 0;
 				const phone = sub.socket.user?.id?.split(':')[0] ?? 'unknown';
 
-				await client.reply(from, t(locale, 'bot.online', [sessionName, phone]), message);
+				await client.reply(from, t(locale, 'common.bot.online', [sessionName, phone]), message);
 
 				await prisma.botInstance.upsert({
 					where: { sessionName },
@@ -292,9 +292,9 @@ export default defineCommand({
 
 					try {
 						await startPm2SubBot(sessionName);
-						await client.reply(from, t(locale, 'bot.pm2Paired', [sessionName]), message);
+						await client.reply(from, t(locale, 'common.bot.pm2Paired', [sessionName]), message);
 					} catch (err) {
-						await client.reply(from, t(locale, 'bot.pm2PairFailed', [sessionName, err.message]), message);
+						await client.reply(from, t(locale, 'common.bot.pm2PairFailed', [sessionName, err.message]), message);
 					}
 
 					return;
@@ -312,14 +312,14 @@ export default defineCommand({
 				if (reason === DisconnectReason.loggedOut || reason === DisconnectReason.badSession) {
 					const label = reason === DisconnectReason.loggedOut ? L.bot.loggedOut : L.bot.badSession;
 
-					await client.reply(from, t(locale, 'bot.sessionCleaned', [sessionName, label]), message);
+					await client.reply(from, t(locale, 'common.bot.sessionCleaned', [sessionName, label]), message);
 					manager.remove(sessionName);
 					await cleanupSession(sessionName);
 					return;
 				}
 
 				if (retryCount >= MAX_RETRIES) {
-					await client.reply(from, t(locale, 'bot.maxRetries', { prefix, name: sessionName }), message);
+					await client.reply(from, t(locale, 'common.bot.maxRetries', { prefix, name: sessionName }), message);
 					manager.remove(sessionName);
 					return;
 				}
@@ -344,7 +344,7 @@ export default defineCommand({
 
 			const code = await sub.requestPairingCode(String(pairNumber).replace(/[^0-9]/g, ''));
 
-			await client.reply(from, t(locale, 'bot.pairingCode', [sessionName, `${code.slice(0, 4)}-${code.slice(4)}`]), message);
+			await client.reply(from, t(locale, 'common.bot.pairingCode', [sessionName, `${code.slice(0, 4)}-${code.slice(4)}`]), message);
 
 			if (needsPairing) {
 				const paired = await new Promise((resolve) => {
@@ -386,7 +386,7 @@ export default defineCommand({
 		} catch (err) {
 			await sub.disconnect().catch(() => {});
 			manager.remove(sessionName);
-			return client.reply(from, t(locale, 'bot.failedStart', [sessionName, err.message]), message);
+			return client.reply(from, t(locale, 'common.bot.failedStart', [sessionName, err.message]), message);
 		}
 	}
 });

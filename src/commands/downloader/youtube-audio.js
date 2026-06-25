@@ -105,17 +105,17 @@ export default defineCommand({
 			const index = numberiedQuery - 1;
 
 			if (!numberiedQuery) {
-				return await client.reply(from, t(locale, 'errors.numberRange', [1, videoIds.length]), message);
+				return await client.reply(from, t(locale, 'common.errors.numberRange', [1, videoIds.length]), message);
 			}
 
 			if (index >= videoIds.length) {
-				return await client.reply(from, t(locale, 'errors.numberRange', [1, videoIds.length]), message);
+				return await client.reply(from, t(locale, 'common.errors.numberRange', [1, videoIds.length]), message);
 			}
 
 			const videoId = videoIds[index];
 
 			if (!videoId) {
-				return await client.reply(from, t(locale, 'errors.numberRange', [1, videoIds.length]), message);
+				return await client.reply(from, t(locale, 'common.errors.numberRange', [1, videoIds.length]), message);
 			}
 
 			const wait = await client.waitMessage(

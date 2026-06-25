@@ -61,7 +61,7 @@ export default defineCommand({
 
 		for (const url of urls) {
 			if (!isURL(url.trim())) {
-				await client.reply(from, t(locale, 'errors.validUrlRequired', [url]), message);
+				await client.reply(from, t(locale, 'common.errors.validUrlRequired', [url]), message);
 				loggers.error(`${color('Failed to Download Twitter Post', 'red')} for ${color(prettyNumber, 'lilac')}`);
 				error++;
 				continue;

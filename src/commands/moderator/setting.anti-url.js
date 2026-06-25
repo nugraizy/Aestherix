@@ -27,7 +27,7 @@ export default defineCommand({
 		}
 
 		if (!message.query) {
-			return await client.reply(message.from, t(locale, 'moderation.specifyCommand', ['antiurl']), message.message);
+			return await client.reply(message.from, t(locale, 'common.moderation.specifyCommand', ['antiurl']), message.message);
 		}
 
 		const isEnable = configuration.groups.settings.get(message.from)?.antiURL === 'enable';
@@ -46,7 +46,7 @@ export default defineCommand({
 					await updateGroupSetting(prisma, message.from, 'antiURL', 'enable');
 				}
 
-				await client.reply(message.from, t(locale, 'moderation.enabled', ['anti-url']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.enabled', ['anti-url']), message.message);
 				break;
 			case 'disable':
 			case 'off':
@@ -61,10 +61,10 @@ export default defineCommand({
 					await updateGroupSetting(prisma, message.from, 'antiURL', 'disable');
 				}
 
-				await client.reply(message.from, t(locale, 'moderation.disabled', ['anti-url']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.disabled', ['anti-url']), message.message);
 				break;
 			default:
-				await client.reply(message.from, t(locale, 'moderation.specifyCommand', ['antiurl']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.specifyCommand', ['antiurl']), message.message);
 		}
 	}
 });

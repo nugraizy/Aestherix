@@ -106,7 +106,7 @@ const sendNextPrompt = async (sessionId, batchSize, searchQuery, from, client, c
 	await builder
 		.destination(from)
 		.body(t(ctx.locale, 'search.labels.sentResults', [batchSize, searchQuery]))
-		.footer(t(ctx.locale, 'core.footer.poweredBy', [BOT_NAME]))
+		.footer(t(ctx.locale, 'common.core.footer.poweredBy', [BOT_NAME]))
 		.buttons(
 			builder.button.reply({
 				display: Ls.buttons.nextImage,

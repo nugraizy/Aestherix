@@ -34,7 +34,7 @@ const processVideo = async (aid, client, { from, message, sender, filename, wait
 	const video = await bilibiliDetailTv({ aid });
 
 	await wait.update(
-		`${t(locale, 'common.core.progress.downloadingService', ['Bstation video', `${video.resolution}\n${L.core.labels.size} : ${getFilesizeFromBytes(video.size)}`])}`.formatForm()
+		`${t(locale, 'common.core.progress.downloadingService', ['Bstation video', `${video.resolution}\n${L.core.deleted.size} : ${getFilesizeFromBytes(video.size)}`])}`.formatForm()
 	);
 
 	const merge = await mergeVideoWithAudio(
@@ -87,17 +87,17 @@ export default defineCommand({
 			const index = numberiedQuery - 1;
 
 			if (!numberiedQuery) {
-				return await client.reply(from, t(locale, 'errors.numberRange', [1, videoIds.length]), message);
+				return await client.reply(from, t(locale, 'common.errors.numberRange', [1, videoIds.length]), message);
 			}
 
 			if (index >= videoIds.length) {
-				return await client.reply(from, t(locale, 'errors.numberRange', [1, videoIds.length]), message);
+				return await client.reply(from, t(locale, 'common.errors.numberRange', [1, videoIds.length]), message);
 			}
 
 			const videoId = videoIds[index];
 
 			if (!videoId) {
-				return await client.reply(from, t(locale, 'errors.numberRange', [1, videoIds.length]), message);
+				return await client.reply(from, t(locale, 'common.errors.numberRange', [1, videoIds.length]), message);
 			}
 
 			const wait = await client.waitMessage(from, t(locale, 'common.core.progress.downloadingServiceAudio', ['Bstation', videoId]), message);

@@ -38,7 +38,7 @@ export default defineCommand({
 				const { cleanupSession } = await import('../../core/session-cleanup.js');
 
 				await cleanupSession(sessionName);
-				return client.reply(from, t(locale, 'bot.pm2Purged', [sessionName]), message);
+				return client.reply(from, t(locale, 'common.bot.pm2Purged', [sessionName]), message);
 			}
 
 			await prisma.botInstance
@@ -48,13 +48,13 @@ export default defineCommand({
 				})
 				.catch(() => {});
 
-			return client.reply(from, t(locale, 'bot.pm2Stopped', [sessionName]), message);
+			return client.reply(from, t(locale, 'common.bot.pm2Stopped', [sessionName]), message);
 		}
 
 		const sub = manager.get(sessionName);
 
 		if (!sub) {
-			return client.reply(from, t(locale, 'bot.notFound', [sessionName]), message);
+			return client.reply(from, t(locale, 'common.bot.notFound', [sessionName]), message);
 		}
 
 		await sub.disconnect();
@@ -68,7 +68,7 @@ export default defineCommand({
 			await sub.auth.clearState();
 			await prisma.botInstance.deleteMany({ where: { sessionName } });
 
-			return client.reply(from, t(locale, 'bot.removed', [sessionName]), message);
+			return client.reply(from, t(locale, 'common.bot.removed', [sessionName]), message);
 		}
 
 		await prisma.botInstance
@@ -78,6 +78,6 @@ export default defineCommand({
 			})
 			.catch(() => {});
 
-		return client.reply(from, t(locale, 'bot.disconnected', [sessionName]), message);
+		return client.reply(from, t(locale, 'common.bot.disconnected', [sessionName]), message);
 	}
 });

@@ -18,7 +18,7 @@ export default defineCommand({
 		const locale = await getLocale(message.from);
 
 		if (!message.query) {
-			return await client.reply(message.from, t(locale, 'moderation.specifyCommand', ['setleave']), message.message);
+			return await client.reply(message.from, t(locale, 'common.moderation.specifyCommand', ['setleave']), message.message);
 		}
 
 		const isEnable = configuration.groups.settings.get(message.from)?.leave === 'enable';
@@ -27,7 +27,7 @@ export default defineCommand({
 			case 'enable':
 			case 'on':
 				if (isEnable) {
-					return await client.reply(message.from, t(locale, 'moderation.alreadyEnabled', ['Leave message']), message.message);
+					return await client.reply(message.from, t(locale, 'common.moderation.alreadyEnabled', ['Leave message']), message.message);
 				}
 
 				configuration.groups.settings.get(message.from).leave = 'enable';
@@ -37,12 +37,12 @@ export default defineCommand({
 					await updateGroupSetting(prisma, message.from, 'leave', 'enable');
 				}
 
-				await client.reply(message.from, t(locale, 'moderation.enabled', ['Leave message']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.enabled', ['Leave message']), message.message);
 				break;
 			case 'disable':
 			case 'off':
 				if (!isEnable) {
-					return await client.reply(message.from, t(locale, 'moderation.alreadyDisabled', ['Leave message']), message.message);
+					return await client.reply(message.from, t(locale, 'common.moderation.alreadyDisabled', ['Leave message']), message.message);
 				}
 
 				configuration.groups.settings.get(message.from).leave = 'disable';
@@ -52,10 +52,10 @@ export default defineCommand({
 					await updateGroupSetting(prisma, message.from, 'leave', 'disable');
 				}
 
-				await client.reply(message.from, t(locale, 'moderation.disabled', ['Leave message']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.disabled', ['Leave message']), message.message);
 				break;
 			default:
-				await client.reply(message.from, t(locale, 'moderation.specifyCommand', ['setleave']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.specifyCommand', ['setleave']), message.message);
 		}
 	}
 });

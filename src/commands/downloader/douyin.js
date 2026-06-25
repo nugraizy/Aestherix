@@ -47,7 +47,7 @@ export default defineCommand({
 
 		for (const url of urls) {
 			if (!isURL(url)) {
-				await client.reply(from, t(locale, 'errors.validUrlRequired', [url]), message);
+				await client.reply(from, t(locale, 'common.errors.validUrlRequired', [url]), message);
 				error++;
 				continue;
 			} else if (!isDouyinUrl(url)) {

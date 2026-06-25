@@ -19,7 +19,7 @@ export default defineCommand({
 		const L = useLocale(locale, 'common');
 
 		if (!message.query) {
-			return await client.reply(message.from, t(locale, 'moderation.specifyCommand', ['antidelete']), message.message);
+			return await client.reply(message.from, t(locale, 'common.moderation.specifyCommand', ['antidelete']), message.message);
 		}
 
 		const isEnable = configuration.groups.settings.get(message.from)?.antiDelete === 'enable';
@@ -38,7 +38,7 @@ export default defineCommand({
 					await updateGroupSetting(prisma, message.from, 'antiDelete', 'enable');
 				}
 
-				await client.reply(message.from, t(locale, 'moderation.enabled', ['anti-delete']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.enabled', ['anti-delete']), message.message);
 				break;
 			case 'disable':
 			case 'off':
@@ -53,10 +53,10 @@ export default defineCommand({
 					await updateGroupSetting(prisma, message.from, 'antiDelete', 'disable');
 				}
 
-				await client.reply(message.from, t(locale, 'moderation.disabled', ['anti-delete']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.disabled', ['anti-delete']), message.message);
 				break;
 			default:
-				await client.reply(message.from, t(locale, 'moderation.specifyCommand', ['antidelete']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.specifyCommand', ['antidelete']), message.message);
 		}
 	}
 });

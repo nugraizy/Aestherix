@@ -21,7 +21,7 @@ export default defineCommand({
 		if (!message.query) {
 			return await client.reply(
 				message.from,
-				t(locale, 'moderation.specifyCommand', [message.cmd]),
+				t(locale, 'common.moderation.specifyCommand', [message.cmd]),
 				message.message
 			);
 		}
@@ -42,7 +42,7 @@ export default defineCommand({
 					await updateGroupSetting(prisma, message.from, 'games', 'enable');
 				}
 
-				await client.reply(message.from, t(locale, 'moderation.enabled', ['games']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.enabled', ['games']), message.message);
 				break;
 			case 'disable':
 			case 'off':
@@ -57,10 +57,10 @@ export default defineCommand({
 					await updateGroupSetting(prisma, message.from, 'games', 'disable');
 				}
 
-				await client.reply(message.from, t(locale, 'moderation.disabled', ['games']), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.disabled', ['games']), message.message);
 				break;
 			default:
-				await client.reply(message.from, t(locale, 'moderation.specifyCommand', [message.cmd]), message.message);
+				await client.reply(message.from, t(locale, 'common.moderation.specifyCommand', [message.cmd]), message.message);
 		}
 	}
 });

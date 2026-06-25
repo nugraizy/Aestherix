@@ -270,7 +270,7 @@ export const registerNamespace = (namespace, locale, table) => {
  *
  * @example
  *   t('id', 'common.errors.noQuery')                        // "Masukkan query."
- *   t('id', 'common.cooldown', [5])                         // "Tunggu 5 detik..."
+ *   t('id', 'common.errors.cooldown', [5])                     // "Tunggu 5 detik..."
  *   t('id', 'common.errors.missingArgs', ['!help'])         // "Argumen kurang. Contoh: !help"
  *   t('id', 'common.errors.missingArgs', { 0: '!help' })   // same result
  *
@@ -323,7 +323,7 @@ export const hasKey = (locale, key) => resolveKey(locale, key) !== undefined;
  *   console.log(L.success.loading); // "Memuat..."
  *
  *   // For interpolation, use t() or template literals
- *   t(locale, 'common.cooldown', [5])
+ *   t(locale, 'common.errors.cooldown', [5])
  *   `${L.errors.missingArgs}`.replace('{0}', '!help')
  *
  * @template {keyof NamespaceMap} N

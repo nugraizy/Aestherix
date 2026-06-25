@@ -50,7 +50,7 @@ export default defineCommand({
 
 				if (index > searchResults.length - 1) {
 					return await wait.update(
-						t(locale, 'common.core.errors.numberRange', [0, searchResults.length - 1])
+						t(locale, 'common.errors.numberRange', [0, searchResults.length - 1])
 					);
 				}
 

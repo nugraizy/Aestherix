@@ -25,7 +25,7 @@ export default defineCommand({
 		const [mangaId, chapterId] = input.split('/');
 
 		if (!mangaId || !chapterId) {
-			return await client.reply(from, t(locale, 'errors.invalidFormat', ['mangaId/chapterId']), message);
+			return await client.reply(from, t(locale, 'common.errors.invalidFormat', ['mangaId/chapterId']), message);
 		}
 
 		const wait = await client.waitMessage(from, L.success.fetchingPages, message);
