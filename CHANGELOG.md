@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.17.2」2026-06-26
+
+## Added
+
+- Paginated chapter fetching with `getChaptersPage()` and per-page caching ([`be3a82e9`](https://github.com/nugraizy/aestherix/commit/be3a82e9))
+- `hasPrev()` and `prevPage()` methods to ComixResponse ([`be3a82e9`](https://github.com/nugraizy/aestherix/commit/be3a82e9))
+- `captureBrowseList()` and `captureDetail()` methods to ComixBrowserCapture ([`be3a82e9`](https://github.com/nugraizy/aestherix/commit/be3a82e9))
+- XOR-shift algorithm, byte-XOR decoding, and scramble hash to descrambler ([`be3a82e9`](https://github.com/nugraizy/aestherix/commit/be3a82e9))
+- Harem genre to Comix GENRE_OPTIONS ([`be3a82e9`](https://github.com/nugraizy/aestherix/commit/be3a82e9))
+- Missing search locale keys: `noChaptersFound`, `fetchFailed`, `done`, `mangaNotFound`, `articleSource`, `readCh` ([`814c544e`](https://github.com/nugraizy/aestherix/commit/814c544e))
+
+## Changed
+
+- Switch Comix search/detail/chapters from direct API to browser-based capture ([`be3a82e9`](https://github.com/nugraizy/aestherix/commit/be3a82e9))
+- Increase chapter capture concurrency to 20 with 5s timeout ([`be3a82e9`](https://github.com/nugraizy/aestherix/commit/be3a82e9))
+- Add `common.` prefix to 115 `t()` calls across 31 files ([`814c544e`](https://github.com/nugraizy/aestherix/commit/814c544e))
+
+## Fixed
+
+- Comix search timeout caused by direct API returning "Missing token" ([`be3a82e9`](https://github.com/nugraizy/aestherix/commit/be3a82e9))
+- `buildMangaQuery` using wrong query params for search (`keyword` → `q`, `order[relevance]` → `sort=relevance:desc`) ([`be3a82e9`](https://github.com/nugraizy/aestherix/commit/be3a82e9))
+- Comix detail capture failing due to wrong `initial-data` parsing ([`be3a82e9`](https://github.com/nugraizy/aestherix/commit/be3a82e9))
+- Missing namespace prefixes in `t()` calls causing raw key display ([`814c544e`](https://github.com/nugraizy/aestherix/commit/814c544e))
+- Incorrect locale key paths (`core.labels.size`, `voip.errors.invalidArgs`, `info.liveStreamEnded`, etc.) ([`814c544e`](https://github.com/nugraizy/aestherix/commit/814c544e))
+
 # 「7.17.1」2026-06-25
 
 ## Added
