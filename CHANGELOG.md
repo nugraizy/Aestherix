@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+# 「7.18.0」2026-06-29
+
+## Added
+
+- Colored session indicators: purple `•` for main, deterministic random colors for sub-bots ([`f5fe5df7`](https://github.com/nugraizy/aestherix/commit/f5fe5df7))
+- `U` keybinding to show session indicators in log multiplexer ([`f5fe5df7`](https://github.com/nugraizy/aestherix/commit/f5fe5df7))
+- `i5` path support to comix descrambler and fallback paths ([`04d0c1f2`](https://github.com/nugraizy/aestherix/commit/04d0c1f2))
+- Scramble hash `02900` to descrambler ([`04d0c1f2`](https://github.com/nugraizy/aestherix/commit/04d0c1f2))
+- `isConfigured` getter and `#assertConfigured` guard to Spotify ([`665b4c44`](https://github.com/nugraizy/aestherix/commit/665b4c44))
+
+## Changed
+
+- Skip sub-bot command logs when primary bot is connected in same group ([`d8c62dec`](https://github.com/nugraizy/aestherix/commit/d8c62dec))
+- Fetch all comix chapters at once and paginate client-side ([`d8c81c3a`](https://github.com/nugraizy/aestherix/commit/d8c81c3a))
+- Allow bot to start without optional environment variables ([`665b4c44`](https://github.com/nugraizy/aestherix/commit/665b4c44))
+- Change `optionalString` env validation to allow empty strings ([`665b4c44`](https://github.com/nugraizy/aestherix/commit/665b4c44))
+
+## Fixed
+
+- Comix descrambler using wrong permutation direction and bitwise operator ([`04d0c1f2`](https://github.com/nugraizy/aestherix/commit/04d0c1f2))
+- SQLite compatibility: remove MongoDB-specific `@db.ObjectId` from Prisma schema ([`665b4c44`](https://github.com/nugraizy/aestherix/commit/665b4c44))
+- SQLite compatibility: remove `not: null` filter in i18n locale loading ([`665b4c44`](https://github.com/nugraizy/aestherix/commit/665b4c44))
+- Spotify throwing on startup when credentials are empty ([`665b4c44`](https://github.com/nugraizy/aestherix/commit/665b4c44))
+- Genshin card command failing when cache download fails ([`665b4c44`](https://github.com/nugraizy/aestherix/commit/665b4c44))
+- Profile picture update running when `PINTEREST_COOKIE` is empty ([`665b4c44`](https://github.com/nugraizy/aestherix/commit/665b4c44))
+
 # 「7.17.2」2026-06-26
 
 ## Added
