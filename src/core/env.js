@@ -17,7 +17,7 @@
 
 import { z } from 'zod';
 
-const optionalString = z.string().min(1).optional();
+const optionalString = z.string().default('');
 const optionalNumber = z.coerce.number().int().positive().optional();
 
 const envSchema = z

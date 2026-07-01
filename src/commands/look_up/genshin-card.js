@@ -1,3 +1,5 @@
+import fs from 'fs-extra';
+
 import { DynamicTextAssets, EnkaClient, TextAssets } from 'enka-network-api';
 
 import { GenshinCard } from '../../helper/canvas/card-render.js';
@@ -12,21 +14,49 @@ const enka = new EnkaClient({ showFetchCacheLog: false });
 enka.cachedAssetsManager.cacheDirectoryPath = './cache';
 enka.cachedAssetsManager.cacheDirectorySetup();
 
-if (!(await enka.cachedAssetsManager.checkForUpdates(true))) {
-	await enka.cachedAssetsManager.fetchAllContents();
+let isInitializing = false;
+
+async function ensureCache() {
+	if (isInitializing) {
+		return;
+	}
+
+	const cacheDir = enka.cachedAssetsManager.cacheDirectoryPath;
+
+	if (fs.existsSync(cacheDir) && fs.readdirSync(cacheDir).length > 0) {
+		return;
+	}
+
+	try {
+		isInitializing = true;
+
+		if (!(await enka.cachedAssetsManager.checkForUpdates(true))) {
+			await enka.cachedAssetsManager.fetchAllContents();
+		}
+	} catch (error) {
+		loggers.warning('Failed to download genshin data:', error.message);
+	} finally {
+		isInitializing = false;
+	}
 }
 
-enka.cachedAssetsManager.activateAutoCacheUpdater({
-	instant: false,
-	timeout: 60 * 60 * 1000,
-	onUpdateStart: async () => {
-		loggers.warning('Starting assets update for genshin database...'.yellow());
-	},
-	onUpdateEnd: async () => {
-		enka.cachedAssetsManager.refreshAllData();
-		loggers.info('Updating Completed!'.purple());
-	}
-});
+await ensureCache();
+
+try {
+	enka.cachedAssetsManager.activateAutoCacheUpdater({
+		instant: false,
+		timeout: 60 * 60 * 1000,
+		onUpdateStart: async () => {
+			loggers.warning('Starting assets update for genshin database...'.yellow());
+		},
+		onUpdateEnd: async () => {
+			enka.cachedAssetsManager.refreshAllData();
+			loggers.info('Updating Completed!'.purple());
+		}
+	});
+} catch {
+	// auto-updater setup failed (usually 400 error)
+}
 
 const cache = new Map();
 const CACHE_TTL = 10 * 60 * 1000;
@@ -152,9 +182,7 @@ export default defineCommand({
 
 		await builder
 			.destination(from)
-			.body(
-				t(locale, 'look_up.labels.genshinShowcase', [uid, parsedUser.nickname || L.info.unknown, parsedUser.level])
-			)
+			.body(t(locale, 'look_up.labels.genshinShowcase', [uid, parsedUser.nickname || L.info.unknown, parsedUser.level]))
 			.footer(Ll.labels.dataCached)
 			.buttons(...buttons)
 			.send({ quoted: message });

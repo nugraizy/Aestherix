@@ -263,6 +263,10 @@ export const startProfilePictureService = async (client, config) => {
 			return;
 		}
 
+		if (!process.env.PINTEREST_COOKIE) {
+			return;
+		}
+
 		isUpdating = true;
 
 		try {

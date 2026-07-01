@@ -91,7 +91,7 @@ model Contact {
 
 /// Feature flags and settings for each WhatsApp group.
 model SettingsManager {
-  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  id               String   @id @default(cuid())
   groupId          String
   sessionName      String   @default("main")
   groupName        String?

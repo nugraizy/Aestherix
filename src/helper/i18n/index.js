@@ -419,7 +419,6 @@ export const loadLocalesFromDB = async () => {
 
 	try {
 		const userRows = await prisma.userLocale.findMany({
-			where: { locale: { not: null } },
 			select: { jid: true, locale: true }
 		});
 

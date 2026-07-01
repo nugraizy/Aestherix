@@ -10,7 +10,9 @@ class Spotifier {
 	#accessToken = process.env.SPOTIFY_ACCESS_TOKEN;
 	#refreshToken = process.env.SPOTIFY_REFRESH_TOKEN;
 	#credentialToken = process.env.SPOTIFY_ACCESS_CREDENTIAL_TOKEN;
-	#token = `Basic ${new Buffer.from(`${this.#clientId}:${this.#clientSecret}`).toString('base64')}`;
+	#token = this.#clientId && this.#clientSecret
+		? `Basic ${new Buffer.from(`${this.#clientId}:${this.#clientSecret}`).toString('base64')}`
+		: null;
 	#bearerToken = null;
 	#currentlyPlaying = null;
 	#bearerTokenExpiredAt = null;
@@ -18,15 +20,24 @@ class Spotifier {
 	#_api = 'https://api.spotify.com/v1';
 	#_apiAuth = 'https://accounts.spotify.com/api/token';
 	device_id = process.env.SPOTIFY_DEVICE_ID;
-	constructor() {
-		if (!(this.#clientId || this.#clientSecret)) {
-			throw new Error('Please add CLIENT_ID and CLIENT_SECRET to your .env files');
+
+	#assertConfigured() {
+		if (!this.#clientId || !this.#clientSecret) {
+			throw new Error('Spotify is not configured. Add SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET to your .env file.');
 		}
+	}
+
+	get isConfigured() {
+		return Boolean(this.#clientId && this.#clientSecret);
+	}
+
+	constructor() {
 
 		/**
 		 * @private
 		 */
 		this._tokenize = () => {
+			this.#assertConfigured();
 			return {
 				url: this.#_apiAuth,
 				method: 'POST',
@@ -41,6 +52,7 @@ class Spotifier {
 		 * @private
 		 */
 		this._req = async (path, method, opts) => {
+			this.#assertConfigured();
 			try {
 				if (this.#bearerToken === null) {
 					await this._refreshToken();
@@ -105,6 +117,7 @@ class Spotifier {
 		 * @private
 		 */
 		this._getAccessTokenFromRefreshToken = async () => {
+			this.#assertConfigured();
 			if (this.#accessTokenExpiredAt && Date.now() < this.#accessTokenExpiredAt) {
 				return;
 			}
