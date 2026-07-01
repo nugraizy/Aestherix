@@ -20,3 +20,4 @@ cache/
 data/
 logs/
 tmp/
+prisma/*.db
