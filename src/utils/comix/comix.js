@@ -451,8 +451,8 @@ class Comix {
 	}
 
 	async #fetchWithFallback(url) {
-		const FALLBACK_PATHS = ['/si/', '/i/', '/sii/', '/ii/'];
-		const SCRAMBLE_PATH_REGEX = /\/s?i+\//;
+		const FALLBACK_PATHS = ['/i5/', '/si/', '/i/', '/sii/', '/ii/'];
+		const SCRAMBLE_PATH_REGEX = /\/(?:i5|s?i+)\//;
 
 		const res = await fetch(url);
 

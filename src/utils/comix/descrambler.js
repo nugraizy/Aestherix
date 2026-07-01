@@ -8,7 +8,8 @@ const LCG_MULTIPLIER = 1664525;
 const LCG_INCREMENT = 1013904223;
 
 const SCRAMBLE_HASH_MAP = {
-	'03632': 58414
+	'03632': 58414,
+	'02900': 117532
 };
 
 function buildOrderLcg(seed, n) {
@@ -24,7 +25,7 @@ function buildOrderLcg(seed, n) {
 		arr[j] = tmp;
 	}
 
-	return arr;
+	return buildInverse(arr);
 }
 
 function nextXorshiftState(state) {
@@ -38,7 +39,7 @@ function nextXorshiftState(state) {
 
 function buildOrderXorshift(seed, n) {
 	const arr = Array.from({ length: n }, (_, i) => i);
-	let state = (seed | 0) || 1;
+	let state = seed | 1;
 
 	for (let i = n - 1; i >= 1; i--) {
 		state = nextXorshiftState(state);
@@ -49,7 +50,7 @@ function buildOrderXorshift(seed, n) {
 		arr[j] = tmp;
 	}
 
-	return arr;
+	return buildInverse(arr);
 }
 
 function buildInverse(order) {
@@ -152,15 +153,13 @@ export class Descrambler {
 		const tileW = Math.floor(width / GRID_COLS);
 		const tileH = Math.floor(height / GRID_ROWS);
 
-		const order = algo === '3' ? buildOrderXorshift(seed, NUM_TILES) : buildOrderLcg(seed, NUM_TILES);
-
-		const perm = buildInverse(order);
+		const perm = algo === '3' ? buildOrderXorshift(seed, NUM_TILES) : buildOrderLcg(seed, NUM_TILES);
 
 		const raw = await img.ensureAlpha().raw().toBuffer();
 		const output = Buffer.from(raw);
 
-		for (let srcIdx = 0; srcIdx < NUM_TILES; srcIdx++) {
-			const dstIdx = perm[srcIdx];
+		for (let dstIdx = 0; dstIdx < NUM_TILES; dstIdx++) {
+			const srcIdx = perm[dstIdx];
 			const srcCol = srcIdx % GRID_COLS;
 			const srcRow = Math.floor(srcIdx / GRID_COLS);
 			const dstCol = dstIdx % GRID_COLS;
@@ -219,10 +218,10 @@ export class Descrambler {
 	}
 
 	static isScrambledUrl(url) {
-		return /\/(i+)\//.test(url);
+		return /\/(?:i5|i+)\//.test(url);
 	}
 
 	static toScrambledUrl(url) {
-		return url.replace(/(\/)(i+)(\/)/g, '$1s$2$3');
+		return url.replace(/(\/)(i5|i+)(\/)/g, '$1s$2$3');
 	}
 }
