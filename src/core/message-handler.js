@@ -1193,6 +1193,16 @@ export class MessageHandler {
 			return;
 		}
 
+		if (this.#client.role === 'sub' && message.isGroup && message.isCmd) {
+			const manager = this.#configuration.core?.manager;
+			if (manager) {
+				const primary = [...manager.clients.values()].find((c) => c.role === 'primary');
+				if (primary && primary.state === 'connected') {
+					return;
+				}
+			}
+		}
+
 		const runtime = this.#configuration.flags?.runtime ?? Date.now();
 		const signature = this.#buildLogSignature(message);
 		const isContinuation = this.#canRewriteLog(message, signature);

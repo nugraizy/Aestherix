@@ -459,7 +459,10 @@ async function spawnPersistedSubBots({ configuration: config }) {
 			role: instance.role || 'sub',
 			flags,
 			browser: Browsers.android('14'),
-			cachedGroupMetadata: (jid) => (isJidGroup(jid) ? config.groups.metadata.get(jid) : {})
+			cachedGroupMetadata: (jid) => (isJidGroup(jid) ? config.groups.metadata.get(jid) : {}),
+			syncFullHistory: true,
+			enableAutoSessionRecreation: false,
+			enableRecentMessageCache: true
 		});
 
 		manager.add(instance.sessionName, sub);
@@ -572,7 +575,10 @@ export async function boot({ cli, OPTIONS, store, sessionName }) {
 		role: 'primary',
 		flags: OPTIONS,
 		browser,
-		cachedGroupMetadata: (jid) => (isJidGroup(jid) ? configuration.groups.metadata.get(jid) : {})
+		cachedGroupMetadata: (jid) => (isJidGroup(jid) ? configuration.groups.metadata.get(jid) : {}),
+		syncFullHistory: true,
+		enableAutoSessionRecreation: true,
+		enableRecentMessageCache: true
 	});
 
 	await clientSocket.connect({ store });
