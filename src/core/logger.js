@@ -158,7 +158,7 @@ export class Logger {
 
 		const time = this.#formatTime();
 		const badgePrefix = this.#sessionBadge
-			? `${color('[', 'gray')}${chalk.bold(color(this.#sessionBadge, 'yellow'))}${color(']', 'gray')} `
+			? `${color('•', this.#badgeColor(this.#sessionBadge))} `
 			: '';
 		const prefix = this.#name
 			? `${badgePrefix}${color('[', 'gray')}${chalk.bold(color(this.#name, this.#typeColor(type)))}${color(']', 'gray')} `
@@ -304,5 +304,22 @@ export class Logger {
 		};
 
 		return colors[type] || colors.ERR;
+	}
+
+	/** @param {string} badge */
+	#badgeColor(badge) {
+		if (badge === 'MAIN') {
+			return 'purple';
+		}
+
+		const palette = ['cyan', 'green', 'pink', 'salmon', 'amber', 'teal', 'mint', 'coral', 'lime', 'sky'];
+		let hash = 0;
+
+		for (const char of badge) {
+			hash = ((hash << 5) - hash) + char.charCodeAt(0);
+			hash |= 0;
+		}
+
+		return palette[Math.abs(hash) % palette.length];
 	}
 }

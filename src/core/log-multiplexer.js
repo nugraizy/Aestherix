@@ -368,11 +368,12 @@ export class LogMultiplexer {
 		{ key: 'L', description: () => 'Load history logs' },
 		{ key: 'F', description: () => (this.#following ? 'Stop following logs' : 'Follow logs in real-time') },
 		{ key: 'S', description: () => 'Show stats' },
-		{ key: 'B', description: () => this.#skipSub ? 'Show bot list (unavailable with --skip-sub)' : 'Show bot list' },
+		{ key: 'B', description: () => (this.#skipSub ? 'Show bot list (unavailable with --skip-sub)' : 'Show bot list') },
 		{ key: 'M', description: () => 'Show memory usage' },
-		{ key: 'D', description: () => this.#skipSub ? 'Dump sub-bot logs (unavailable with --skip-sub)' : 'Dump sub-bot logs' },
+		{ key: 'D', description: () => (this.#skipSub ? 'Dump sub-bot logs (unavailable with --skip-sub)' : 'Dump sub-bot logs') },
 		{ key: 'X', description: () => 'Export logs to file' },
 		{ key: 'P', description: () => 'Show/toggle runtime flags' },
+		{ key: 'U', description: () => 'Show session indicators' },
 		{ key: 'C', description: () => 'Clear terminal' },
 		{ key: 'H', description: () => 'Show this help' }
 	];
@@ -455,6 +456,10 @@ export class LogMultiplexer {
 				this.#showFlags().catch(() => {});
 			}
 
+			if (key.name === 'u' && !key.ctrl && !key.meta) {
+				this.#showIndicators();
+			}
+
 			if (key.name === 'c' && !key.ctrl && !key.meta) {
 				console.clear();
 			}
@@ -476,6 +481,36 @@ export class LogMultiplexer {
 		console.log(color('\n── Keybindings ──', 'lilac'));
 		console.log(lines.join('\n'));
 		console.log(color('──────────────────\n', 'lilac'));
+	}
+
+	#showIndicators() {
+		if (this.#loggers.size === 0) {
+			console.log(color('No sessions registered.', 'gray'));
+			return;
+		}
+
+		console.log(color('\n── Session Indicators ──', 'lilac'));
+
+		for (const badge of this.#loggers.keys()) {
+			const indicator = badge === 'MAIN' ? 'purple' : this.#subColor(badge);
+
+			console.log(`  ${color('•', indicator)}  ${color(badge, 'white')}`);
+		}
+
+		console.log(color('────────────────────────\n', 'lilac'));
+	}
+
+	/** @param {string} badge */
+	#subColor(badge) {
+		const palette = ['cyan', 'green', 'pink', 'salmon', 'amber', 'teal', 'mint', 'coral', 'lime', 'sky'];
+		let hash = 0;
+
+		for (const char of badge) {
+			hash = (hash << 5) - hash + char.charCodeAt(0);
+			hash |= 0;
+		}
+
+		return palette[Math.abs(hash) % palette.length];
 	}
 
 	/** @param {string} badge */
